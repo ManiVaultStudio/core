@@ -4,7 +4,6 @@
 
 #include <CoreInterface.h>
 #include <util/Exception.h>
-#include <actions/DataRemoveAction.h>
 
 #include <QDebug>
 #include <QTemporaryDir>
@@ -52,16 +51,18 @@ void HdpsApplication::loadProject(QString projectFilePath /*= ""*/)
             if (Application::current()->getSetting("ConfirmDataRemoval", true).toBool()) {
 
                 // Ask for confirmation dialog
-                DataRemoveAction::ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, "Data model will reset", loadedDatasets);
+                //DataRemoveAction::ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, "Data model will reset", loadedDatasets);
 
                 // Show the confirm data removal dialog
-                confirmDataRemoveDialog.exec();
+                //confirmDataRemoveDialog.exec();
 
                 // Remove dataset and children from the core if accepted
-                if (confirmDataRemoveDialog.result() == 1)
-                    Application::core()->removeAllDatasets();
-                else
-                    return;
+                //if (confirmDataRemoveDialog.result() == 1)
+                //    Application::core()->removeAllDatasets();
+                //else
+                //    return;
+
+                Application::core()->removeAllDatasets();
             }
         }
 

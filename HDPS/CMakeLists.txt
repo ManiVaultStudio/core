@@ -71,39 +71,110 @@ set( MAIN_SOURCES
     res/styles/default.qss
 )
 
-set(PRIVATE_HEADERS
-    ui/MainWindow.ui
-    src/Logger.h
-    src/LogItemModel.h
-    src/LogDockWidget.h
-    src/MainWindow.h
-    src/PluginManager.h
+set(PRIVATE_CORE_HEADERS
     src/Core.h
+)
+
+set(PRIVATE_CORE_SOURCES
+    src/Core.cpp
+)
+
+set(PRIVATE_CORE_FILES
+    ${PRIVATE_CORE_HEADERS}
+    ${PRIVATE_CORE_SOURCES}
+)
+
+set(PRIVATE_MANAGERS_HEADERS
+    src/PluginManager.h
     src/DataManager.h
-    src/Archiver.h
+    #src/Logger.h
+    #src/LogItemModel.h
+    #src/LogDockWidget.h
+)
+
+set(PRIVATE_MANAGERS_SOURCES
+    src/PluginManager.cpp
+    src/DataManager.cpp
+    #src/Logger.cpp
+    #src/LogItemModel.cpp
+    #src/LogDockWidget.cpp
+)
+
+set(PRIVATE_MANAGERS_FILES
+    ${PRIVATE_MANAGERS_HEADERS}
+    ${PRIVATE_MANAGERS_SOURCES}
+)
+
+set(PRIVATE_APPLICATION_HEADERS
     src/HdpsApplication.h
+    src/MainWindow.h
+    ui/MainWindow.ui
+)
+
+set(PRIVATE_APPLICATION_SOURCES
+    src/HdpsApplication.cpp
+    src/MainWindow.cpp
+)
+
+set(PRIVATE_APPLICATION_FILES
+    ${PRIVATE_APPLICATION_HEADERS}
+    ${PRIVATE_APPLICATION_SOURCES}
+)
+
+set(PRIVATE_START_PAGE_HEADERS
     src/StartPageWidget.h
     src/ProjectBarWidget.h
     src/LogoWidget.h
-    src/GroupDataDialog.h
 )
 
-set(PRIVATE_SOURCES
-    src/Logger.cpp
-    src/LogItemModel.cpp
-    src/LogDockWidget.cpp
-    src/MainWindow.cpp
-    src/PluginManager.cpp
-    src/Core.cpp
-    src/DataManager.cpp
-    src/Archiver.cpp
-    src/HdpsApplication.cpp
+set(PRIVATE_START_PAGE_SOURCES
     src/StartPageWidget.cpp
     src/ProjectBarWidget.cpp
     src/LogoWidget.cpp
+)
+
+set(PRIVATE_START_PAGE_FILES
+    ${PRIVATE_START_PAGE_HEADERS}
+    ${PRIVATE_START_PAGE_SOURCES}
+)
+
+set(PRIVATE_MISCELLANEOUS_HEADERS
+    src/Archiver.h
+    src/GroupDataDialog.h
+)
+
+set(PRIVATE_MISCELLANEOUS_SOURCES
+    src/Archiver.cpp
     src/GroupDataDialog.cpp
+)
+
+set(PRIVATE_MISCELLANEOUS_FILES
+    ${PRIVATE_MISCELLANEOUS_HEADERS}
+    ${PRIVATE_MISCELLANEOUS_SOURCES}
+)
+
+set(PRIVATE_HEADERS
+    ${PRIVATE_CORE_HEADERS}
+    ${PRIVATE_MANAGERS_HEADERS}
+    ${PRIVATE_APPLICATION_HEADERS}
+    ${PRIVATE_START_PAGE_HEADERS}
+    ${PRIVATE_MISCELLANEOUS_HEADERS}
+)
+
+set(PRIVATE_SOURCES
+    ${PRIVATE_CORE_SOURCES}
+    ${PRIVATE_MANAGERS_SOURCES}
+    ${PRIVATE_APPLICATION_SOURCES}
+    ${PRIVATE_START_PAGE_SOURCES}
+    ${PRIVATE_MISCELLANEOUS_SOURCES}
     ${PRIVATE_HEADERS}
 )
+
+source_group(Private\\Core FILES ${PRIVATE_CORE_FILES})
+source_group(Private\\Application FILES ${PRIVATE_APPLICATION_FILES})
+source_group(Private\\Managers FILES ${PRIVATE_MANAGERS_FILES})
+source_group(Private\\StartPage FILES ${PRIVATE_START_PAGE_FILES})
+source_group(Private\\Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
 
 set(PUBLIC_CORE_INTERFACE_HEADERS
     src/CoreInterface.h
@@ -575,9 +646,6 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 QT6_WRAP_UI(UI_HEADERS ${UI_FILES})
 QT6_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
-
-source_group( GUI FILES ${PRIVATE_SOURCES})
-source_group( Private FILES ${PRIVATE_SOURCES})
 
 source_group(Public\\CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
 source_group(Public\\Event FILES ${PUBLIC_EVENT_FILES})

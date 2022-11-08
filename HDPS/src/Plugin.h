@@ -147,6 +147,7 @@ public: // Action getters
     gui::StringAction& getGuiNameAction();
 
 protected:
+    CoreInterface*              _core;              /** Pointer to the core interface */
     const PluginFactory*        _factory;           /** Pointer to plugin factory */
     const QString               _name;              /** Unique plugin name */
     QMap<QString, QVariant>     _properties;        /** Properties map */

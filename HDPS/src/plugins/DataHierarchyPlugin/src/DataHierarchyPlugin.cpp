@@ -6,7 +6,7 @@ using namespace hdps;
 
 DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
-    _dataHierarchyWidget(nullptr, *this)
+    _dataHierarchyWidget(&getWidget())
 {
     const_cast<PluginFactory*>(factory)->setMaximumNumberOfInstances(1);
 

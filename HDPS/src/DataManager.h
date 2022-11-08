@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Set.h"
-#include "CoreInterface.h"
 
-#include <actions/WidgetAction.h>
+#include <AbstractDataManager.h>
 
 #include <QObject> // To support signals
 #include <QString>
@@ -34,7 +33,7 @@ namespace plugin {
     class RawData;
 }
 
-class DataManager : public hdps::gui::WidgetAction
+class DataManager : public hdps::AbstractDataManager
 {
     Q_OBJECT
 
@@ -44,9 +43,8 @@ public:
      * Constructor
      * @param core Pointer to the core
      */
-    DataManager(CoreInterface* core) :
-        WidgetAction(),
-        _core(core)
+    DataManager() :
+        AbstractDataManager()
     {
         setText("Data manager");
         setObjectName("Datasets");
@@ -56,49 +54,49 @@ public:
      * Add raw data to the data manager
      * @param rawData Pointer to the raw data
      */
-    void addRawData(plugin::RawData* rawData);
+    void addRawData(plugin::RawData* rawData) override;
 
     /**
      * Add data set to the data manager
      * @param dataset Smart pointer to the dataset
      */
-    void addSet(const Dataset<DatasetImpl>& dataset);
+    void addSet(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Add selection to the data manager
      * @param dataName Name of the raw data
      * @param selection Smart pointer to selection dataset
      */
-    void addSelection(const QString& dataName, Dataset<DatasetImpl> selection);
+    void addSelection(const QString& dataName, Dataset<DatasetImpl> selection) override;
 
     /**
      * Removes a Dataset, other datasets derived from this dataset are converted to non-derived data (notifies listeners)
      * @param dataset Smart pointer to dataset to remove
      */
-    void removeDataset(Dataset<DatasetImpl> dataset);
+    void removeDataset(Dataset<DatasetImpl> dataset) override;
 
     /**
      * Get raw data by name
      * @param name Name of the raw data
      */
-    plugin::RawData& getRawData(const QString& name);
+    plugin::RawData& getRawData(const QString& name) override;
 
     /**
      * Get dataset by dataset GUID
      * @param datasetGuid GUID of the dataset
      * @return Smart pointer to the dataset
      */
-    Dataset<DatasetImpl> getSet(const QString& datasetGuid);
+    Dataset<DatasetImpl> getSet(const QString& datasetGuid) override;
 
     /**
      * Get selection by data name
      * @param dataName Name of the data
      * @return Smart pointer to the selection dataset
      */
-    Dataset<DatasetImpl> getSelection(const QString& dataName);
+    Dataset<DatasetImpl> getSelection(const QString& dataName) override;
 
     /** Get all sets from the data manager */
-    const QVector<Dataset<DatasetImpl>>& allSets() const;
+    const QVector<Dataset<DatasetImpl>>& allSets() const override;
 
 public: // Serialization
 

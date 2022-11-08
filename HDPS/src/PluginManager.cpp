@@ -1,39 +1,37 @@
 #include "PluginManager.h"
 
-#include <QApplication>
-#include <QMenuBar>
-#include <QDebug>
-#include <QPluginLoader>
-#include <QSignalMapper>
-#include <QMessageBox>
-
-#include <assert.h>
+#include <Application.h>
+#include <PluginFactory.h>
+#include <LoaderPlugin.h>
+#include <WriterPlugin.h>
+#include <ViewPlugin.h>
+#include <AnalysisPlugin.h>
+#include <TransformationPlugin.h>
+#include <RawData.h>
+#include <PluginType.h>
+#include <util/Serialization.h>
 
 #include "MainWindow.h"
-#include "PluginFactory.h"
-#include "AnalysisPlugin.h"
-#include "RawData.h"
-#include "LoaderPlugin.h"
-#include "WriterPlugin.h"
-#include "ViewPlugin.h"
-#include "TransformationPlugin.h"
-#include "PluginType.h"
 
-#include <Serialization.h>
-
+#include <QDebug>
+#include <QPluginLoader>
+#include <QMessageBox>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
 
 #include <stdexcept>
+#include <assert.h>
+
+
 
 namespace hdps {
 
-namespace plugin {
+using namespace util;
+using namespace plugin;
 
-PluginManager::PluginManager(Core& core) :
-    WidgetAction(),
-    _core(core)
+PluginManager::PluginManager() :
+    AbstractPluginManager()
 {
     setText("Plugin manager");
     setObjectName("Plugins");
@@ -41,7 +39,6 @@ PluginManager::PluginManager(Core& core) :
 
 PluginManager::~PluginManager(void)
 {
-    
 }
 
 void PluginManager::loadPlugins()
@@ -63,8 +60,6 @@ void PluginManager::loadPlugins()
     
     _pluginFactories.clear();
 
-    QSignalMapper* signalMapper = new QSignalMapper(this);
-    
     // List of filenames of dependency resolved plugins
     const QStringList resolvedPlugins = resolveDependencies(pluginDir);
 
@@ -73,8 +68,7 @@ void PluginManager::loadPlugins()
     {
         // Dynamic loader of plugin shared library
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
-        gui::MainWindow& gui = _core.gui();
-
+        
         // Get metadata about plugin from the accompanying .json file compiled in the shared library
         QString pluginKind      = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
         QString menuName        = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
@@ -96,7 +90,7 @@ void PluginManager::loadPlugins()
         _pluginFactories[pluginKind]->setVersion(version);
 
         if (pluginFactory->hasHelp())
-            gui.addPluginTriggerHelpAction(&pluginFactory->getTriggerHelpAction());
+            emit addPluginTriggerHelpAction(pluginFactory->getTriggerHelpAction());
 
         const auto getProducePluginTriggerAction = [&](const QString& guiName) -> TriggerAction& {
             pluginFactory->setGuiName(guiName);
@@ -121,14 +115,14 @@ void PluginManager::loadPlugins()
         }
         else if (qobject_cast<LoaderPluginFactory*>(pluginFactory))
         {
-            gui.addImportOption(&getProducePluginTriggerAction(menuName));
+            emit addImportPluginTriggerAction(getProducePluginTriggerAction(menuName));
         }
         else if (qobject_cast<WriterPluginFactory*>(pluginFactory))
         {
         }
         else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
         {
-            gui.addViewMenuAction(&getProducePluginTriggerAction(pluginKind));
+            emit addViewPluginTriggerAction(getProducePluginTriggerAction(pluginKind));
         }
         else if (qobject_cast<TransformationPluginFactory*>(pluginFactory))
         {
@@ -238,7 +232,7 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
     return resolvedOrderedPluginNames;
 }
 
-Plugin* PluginManager::createPlugin(const QString& kind, const Datasets& datasets /*= Datasets()*/)
+plugin::Plugin* PluginManager::createPlugin(const QString& kind, const Datasets& datasets /*= Datasets()*/)
 {
     try
     {
@@ -268,12 +262,12 @@ Plugin* PluginManager::createPlugin(const QString& kind, const Datasets& dataset
                 break;
         }
 
-        _core.addPlugin(pluginInstance);
+        dynamic_cast<Core*>(Application::core())->addPlugin(pluginInstance);
 
         auto viewPlugin = dynamic_cast<ViewPlugin*>(pluginInstance);
 
         if (viewPlugin)
-            _core.gui().addLoadedViewPluginAction(&viewPlugin->getVisibleAction());
+            dynamic_cast<MainWindow*>(qApp->activeWindow())->addLoadedViewPluginAction(&viewPlugin->getVisibleAction());
 
         qDebug() << "Added plugin" << pluginInstance->getKind() << "with version" << pluginInstance->getVersion();
 
@@ -410,8 +404,6 @@ QVariantMap PluginManager::toVariantMap() const
     return {
         { "UsedPlugins", usedPluginsList }
     };
-}
-
 }
 
 }

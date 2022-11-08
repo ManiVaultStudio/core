@@ -1,36 +1,29 @@
 #pragma once
 
-#include "Core.h"
+#include <AbstractPluginManager.h>
+#include <PluginFactory.h>
 
-#include "PluginFactory.h"
+#include <actions/TriggerAction.h>
 
-#include <actions/WidgetAction.h>
+namespace hdps {
 
-#include <QObject>
-#include <QString>
-#include <QStringList>
-#include <QHash>
-#include <QDir>
+using namespace plugin;
+using namespace gui;
 
-namespace Ui
-{
-    class MainWindow;
-}
-
-namespace hdps
-{
-namespace plugin
+class PluginManager : public AbstractPluginManager
 {
 
-class PluginManager : public WidgetAction
-{
+    Q_OBJECT
+
 public:
-    PluginManager(Core& core);
-    ~PluginManager(void) override;
+
+    /** Default constructor */
+    PluginManager();
+
+    /** Default destructor */
+    ~PluginManager() override;
     
-    /**
-    * Loads all plugin factories from the plugin directory and adds them as menu items.
-    */
+    /** Loads all plugin factories from the plugin directory and adds them as menu items */
     void loadPlugins();
 
     /**
@@ -39,7 +32,7 @@ public:
     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
     * @return Pointer to created plugin
     */
-    Plugin* createPlugin(const QString& kind, const Datasets& datasets = Datasets());
+    plugin::Plugin* createPlugin(const QString& kind, const Datasets& datasets = Datasets());
     
     /**
      * Create a plugin of \p kind
@@ -126,18 +119,37 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-private:
+protected:
 
     /**
-    * Resolves plugin dependencies, returns list of resolved plugin filenames.
-    */
+     * Resolves plugin dependencies, returns list of resolved plugin filenames
+     * @param pluginDir Plugin scan directory
+     * @return List of resolved plugin filenames
+     */
     QStringList resolveDependencies(QDir pluginDir) const;
 
-    Core& _core;
+signals:
 
+    /**
+     * Signals that an action has become available that triggers plugin help
+     * @param pluginTriggerHelpAction Action that triggers plugin help
+     */
+    void addPluginTriggerHelpAction(TriggerAction& pluginTriggerHelpAction);
+
+    /**
+     * Signals that a trigger action has become available that triggers an import plugin
+     * @param pluginTriggerHelpAction Action that triggers the import plugin
+     */
+    void addImportPluginTriggerAction(TriggerAction& pluginTriggerAction);
+
+    /**
+     * Signals that a trigger action has become available that triggers a view plugin
+     * @param pluginTriggerHelpAction Action that triggers the view plugin
+     */
+    void addViewPluginTriggerAction(TriggerAction& pluginTriggerAction);
+
+private:
     QHash<QString, PluginFactory*> _pluginFactories;
 };
-
-}
 
 }

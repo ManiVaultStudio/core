@@ -8,7 +8,7 @@
 
 #include "Application.h"
 
-#include <Serialization.h>
+#include <util/Serialization.h>
 
 #include <QtCore>
 #include <QtDebug>
@@ -34,7 +34,7 @@ void ClusterData::init()
 
 Dataset<DatasetImpl> ClusterData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return Dataset<DatasetImpl>(new Clusters(_core, getName(), guid));
+    return Dataset<DatasetImpl>(new Clusters(Application::core(), getName(), guid));
 }
 
 QVector<Cluster>& ClusterData::getClusters()
@@ -168,7 +168,7 @@ void Clusters::init()
 
     addAction(*_infoAction.get());
 
-    _eventListener.setEventCore(_core);
+    _eventListener.setEventCore(Application::core());
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
     _eventListener.registerDataEventByType(ClusterType, [this](DataEvent* dataEvent) {
 
@@ -181,7 +181,7 @@ void Clusters::init()
             return;
 
         // Only synchronize when our own group index is non-negative
-        if (!_core->isDatasetGroupingEnabled() || getGroupIndex() < 0)
+        if (!Application::core()->isDatasetGroupingEnabled() || getGroupIndex() < 0)
             return;
 
         if (dataEvent->getDataset()->getGroupIndex() == getGroupIndex() && dataEvent->getDataset()->getDataType() == ClusterType) {
@@ -246,7 +246,7 @@ void Clusters::fromVariantMap(const QVariantMap& variantMap)
 
     getRawData<ClusterData>().fromVariantMap(variantMap);
 
-    _core->notifyDatasetChanged(this);
+    Application::core()->notifyDatasetChanged(this);
 }
 
 QVariantMap Clusters::toVariantMap() const
@@ -269,7 +269,7 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
     getSelection<Clusters>()->indices = indices;
 
     // Notify others that the cluster selection has changed
-    _core->notifyDatasetSelectionChanged(this);
+    Application::core()->notifyDatasetSelectionChanged(this);
 
     // Get reference to input dataset
     auto points             = getDataHierarchyItem().getParent().getDataset<Points>();
@@ -295,7 +295,7 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 
     points->setSelectionIndices(selectionIndices);
 
-    _core->notifyDatasetSelectionChanged(points);
+    Application::core()->notifyDatasetSelectionChanged(points);
 }
 
 QStringList Clusters::getSelectionNames() const
@@ -363,7 +363,7 @@ void Clusters::selectAll()
     std::iota(selectionIndices.begin(), selectionIndices.end(), 0);
 
     // Notify others that the selection changed
-    _core->notifyDatasetSelectionChanged(this);
+    Application::core()->notifyDatasetSelectionChanged(this);
 }
 
 void Clusters::selectNone()
@@ -372,7 +372,7 @@ void Clusters::selectNone()
     getSelectionIndices().clear();
 
     // Notify others that the selection changed
-    _core->notifyDatasetSelectionChanged(this);
+    Application::core()->notifyDatasetSelectionChanged(this);
 }
 
 void Clusters::selectInvert()
@@ -397,7 +397,7 @@ void Clusters::selectInvert()
     }
 
     // Notify others that the selection changed
-    _core->notifyDatasetSelectionChanged(this);
+    Application::core()->notifyDatasetSelectionChanged(this);
 }
 
 QIcon ClusterDataFactory::getIcon(const QColor& color /*= Qt::black*/) const

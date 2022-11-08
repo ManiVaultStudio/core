@@ -1,10 +1,11 @@
-#ifndef HDPS_CORE_H
-#define HDPS_CORE_H
+#pragma once
 
 #include "CoreInterface.h"
 #include "PluginType.h"
 #include "DataType.h"
+
 #include "DataManager.h"
+#include "PluginManager.h"
 #include "DataHierarchyManager.h"
 
 #include <event/EventListener.h>
@@ -13,26 +14,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace hdps
-{
-
-namespace plugin
-{
-    class PluginManager;
-    class Plugin;
-    class DataConsumer;
-}
-
-namespace gui
-{
-    class MainWindow;
-}
-
-namespace util
-{
-    template<typename DatasetType>
-    class Dataset;
-}
+using namespace hdps;
 
 struct AnalysisNotFoundException : public std::exception
 {
@@ -50,6 +32,8 @@ private:
     std::string message;
 };
 
+namespace hdps {
+
 class Core : public CoreInterface
 {
 public:
@@ -60,13 +44,10 @@ public:
 
 public:
 
-    /**
-     * Constructor
-     * @param mainWindow Reference to the main window
-     */
-    Core(gui::MainWindow& mainWindow);
+    /** Default constructor */
+    Core();
 
-    /** Destructor */
+    /** Default destructor */
     ~Core();
 
 public: // Data access
@@ -134,12 +115,6 @@ public: // Data access
      * @return Vector of references to datasets
      */
     QVector<Dataset<DatasetImpl>> requestAllDataSets(const QVector<DataType>& dataTypes = QVector<DataType>()) override;
-
-    /**
-     * Get data manager
-     * @return Reference to the data manager
-     */
-    const DataManager& getDataManager() const;
 
 protected: // Data access
 
@@ -316,9 +291,6 @@ public: // Events & notifications
 
 public:
 
-    /** Returns a reference to the main window for adding widgets to it */
-    gui::MainWindow& gui() const;
-
     /** Initializes the core; loads all plugins from the designated plugin directory */
     void init();
 
@@ -342,7 +314,6 @@ public: // Managers
     AbstractActionsManager* getActionsManager() override;
 
 private:
-    gui::MainWindow&                                                        _mainWindow;                /** Reference to the main window */
     PluginManager                                                           _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core. */
     DataManager                                                             _dataManager;               /** Data manager responsible for storing data sets and data selections */
     std::unique_ptr<DataHierarchyManager>                                   _dataHierarchyManager;      /** Internal hierarchical data tree */
@@ -352,6 +323,4 @@ private:
     friend class DataHierarchyManager;
 };
 
-} // namespace hdps
-
-#endif // HDPS_CORE_H
+}

@@ -2,32 +2,30 @@
 
 #include "MainWindow.h"
 #include "PluginManager.h"
-
-#include "event/Event.h"
-#include "util/Exception.h"
-
-#include "AnalysisPlugin.h"
-#include "LoaderPlugin.h"
-#include "WriterPlugin.h"
-#include "ViewPlugin.h"
-#include "RawData.h"
-#include "Set.h"
-#include "PluginFactory.h"
 #include "GroupDataDialog.h"
+
+#include <LoaderPlugin.h>
+#include <WriterPlugin.h>
+#include <ViewPlugin.h>
+#include <AnalysisPlugin.h>
+#include <RawData.h>
+#include <Set.h>
+#include <PluginFactory.h>
+#include <event/Event.h>
+#include <util/Exception.h>
 
 #include <algorithm>
 
 //#define CORE_VERBOSE
 
+using namespace hdps;
 using namespace hdps::util;
 using namespace hdps::plugin;
 using namespace hdps::gui;
 
-namespace hdps
-{
+namespace hdps {
 
-Core::Core(gui::MainWindow& mainWindow) :
-    _mainWindow(mainWindow),
+Core::Core() :
     _pluginManager(),
     _dataManager(),
     _dataHierarchyManager(),
@@ -53,35 +51,24 @@ Core::~Core()
 
 void Core::init()
 {
-    _pluginManager          = std::make_unique<plugin::PluginManager>(*this);
-    _dataManager            = std::make_unique<DataManager>(this);
-    _dataHierarchyManager   = std::make_unique<DataHierarchyManager>(&_mainWindow);
-
-    _pluginManager->loadPlugins();
-}
-
-hdps::DataHierarchyManager& Core::getDataHierarchyManager()
-{
-    return *_dataHierarchyManager;
+    _pluginManager.loadPlugins();
 }
 
 void Core::addPlugin(plugin::Plugin* plugin)
 {
-    plugin->setCore(this);
-
     switch (plugin->getType())
     {
         // If the plugin is RawData, then add it to the data manager
         case plugin::Type::DATA:
         {
-            _dataManager->addRawData(dynamic_cast<plugin::RawData*>(plugin));
+            _dataManager.addRawData(dynamic_cast<plugin::RawData*>(plugin));
             break;
         }
 
         // If it is a view plugin then it should be added to the main window
         case plugin::Type::VIEW:
         {
-            _mainWindow.addPlugin(plugin);
+            dynamic_cast<MainWindow*>(qApp->activeWindow())->addPlugin(plugin);
         }
 
         // Otherwise add the plugin to a list of plug-ins of the same type
@@ -100,7 +87,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
         {
             auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
 
-            _mainWindow.addPlugin(plugin);
+            dynamic_cast<MainWindow*>(qApp->activeWindow())->addPlugin(plugin);
 
             auto outputDataset = analysisPlugin->getOutputDataset();
 
@@ -138,7 +125,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
 Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& guid /*= ""*/)
 {
     // Create a new plugin of the given kind
-    QString rawDataName = _pluginManager->createPlugin(kind)->getName();
+    QString rawDataName = _pluginManager.createPlugin(kind)->getName();
 
     // Request it from the core
     const plugin::RawData& rawData = requestRawData(rawDataName);
@@ -155,9 +142,9 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     fullSet->_fullDataset = fullSet;
 
     // Add them to the data manager
-    _dataManager->addSet(fullSet);
+    _dataManager.addSet(fullSet);
 
-    _dataManager->addSelection(rawDataName, selection);
+    _dataManager.addSelection(rawDataName, selection);
 
     // Add the dataset to the hierarchy manager and select the dataset
     _dataHierarchyManager->addItem(fullSet, const_cast<Dataset<DatasetImpl>&>(parentDataset));
@@ -198,7 +185,7 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
 
             notifyDatasetAboutToBeRemoved(datasetToRemove);
             {
-                _dataManager->removeDataset(datasetToRemove);
+                _dataManager.removeDataset(datasetToRemove);
             }
             notifyDatasetRemoved(guid, type);
         }
@@ -264,7 +251,7 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
     const auto dataType = sourceDataset->getDataType();
 
     // Create a new plugin of the given kind
-    QString pluginName = _pluginManager->createPlugin(dataType._type)->getName();
+    QString pluginName = _pluginManager.createPlugin(dataType._type)->getName();
 
     // Request it from the core
     plugin::RawData& rawData = requestRawData(pluginName);
@@ -280,7 +267,7 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
     derivedDataset->setAll(true);
     
     // Add them to the data manager
-    _dataManager->addSet(*derivedDataset);
+    _dataManager.addSet(*derivedDataset);
 
     // Add the dataset to the hierarchy manager
     _dataHierarchyManager->addItem(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
@@ -308,7 +295,7 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
         subset->_fullDataset = sourceDataset->isFull() ? sourceDataset : sourceDataset->_fullDataset;
 
         // Add the set the core and publish the name of the set to all plug-ins
-        _dataManager->addSet(*subset);
+        _dataManager.addSet(*subset);
 
         // Add the dataset to the hierarchy manager
         _dataHierarchyManager->addItem(subset, const_cast<Dataset<DatasetImpl>&>(parentDataset), visible);
@@ -336,7 +323,7 @@ plugin::RawData& Core::requestRawData(const QString& name)
 {
     try
     {
-        return _dataManager->getRawData(name);
+        return _dataManager.getRawData(name);
     }
     catch (std::exception& e)
     {
@@ -351,7 +338,7 @@ Dataset<DatasetImpl> Core::requestDataset(const QString& dataSetId)
 {
     try
     {
-        return Dataset<DatasetImpl>(_dataManager->getSet(dataSetId));
+        return Dataset<DatasetImpl>(_dataManager.getSet(dataSetId));
     }
     catch (std::exception& e)
     {
@@ -370,7 +357,7 @@ QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& 
 
     try
     {
-        const auto& datasets = _dataManager->allSets();
+        const auto& datasets = _dataManager.allSets();
 
         for (const auto dataset : datasets) {
             if (dataTypes.isEmpty()) {
@@ -394,22 +381,27 @@ QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& 
     return allDataSets;
 }
 
-hdps::AbstractDataManager* Core::getDataManager()
+AbstractDataManager* Core::getDataManager()
 {
     return &_dataManager;
 }
 
-PluginManager* Core::getPluginManager()
+AbstractPluginManager* Core::getPluginManager()
 {
     return &_pluginManager;
 }
 
-hdps::AbstractActionsManager* Core::getActionsManager()
+AbstractActionsManager* Core::getActionsManager()
 {
     return nullptr;
 }
 
-hdps::DataHierarchyItem& Core::getDataHierarchyItem(const QString& dataSetId)
+DataHierarchyManager& Core::getDataHierarchyManager()
+{
+    return *_dataHierarchyManager;
+}
+
+DataHierarchyItem& Core::getDataHierarchyItem(const QString& dataSetId)
 {
     return _dataHierarchyManager->getItem(dataSetId);
 }
@@ -466,7 +458,7 @@ Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString
 hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, const Datasets& datasets /*= Datasets()*/)
 {
     try {
-        return _pluginManager->createPlugin(kind, datasets);
+        return _pluginManager.createPlugin(kind, datasets);
     }
     catch (std::exception& e)
     {
@@ -481,32 +473,32 @@ hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, const Datasets& d
 
 QStringList Core::getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const
 {
-    return _pluginManager->getPluginKindsByPluginTypes(pluginTypes);
+    return _pluginManager.getPluginKindsByPluginTypes(pluginTypes);
 }
 
 PluginTriggerActions Core::getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const
 {
-    return _pluginManager->getPluginTriggerActions(pluginType, datasets);
+    return _pluginManager.getPluginTriggerActions(pluginType, datasets);
 }
 
 PluginTriggerActions Core::getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const
 {
-    return _pluginManager->getPluginTriggerActions(pluginType, dataTypes);
+    return _pluginManager.getPluginTriggerActions(pluginType, dataTypes);
 }
 
 PluginTriggerActions Core::getPluginTriggerActions(const QString& pluginKind, const Datasets& datasets) const
 {
-    return _pluginManager->getPluginTriggerActions(pluginKind, datasets);
+    return _pluginManager.getPluginTriggerActions(pluginKind, datasets);
 }
 
 PluginTriggerActions Core::getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const
 {
-    return _pluginManager->getPluginTriggerActions(pluginKind, dataTypes);
+    return _pluginManager.getPluginTriggerActions(pluginKind, dataTypes);
 }
 
 Dataset<DatasetImpl> Core::requestSelection(const QString& name)
 {
-    return Dataset<DatasetImpl>(_dataManager->getSelection(name));
+    return Dataset<DatasetImpl>(_dataManager.getSelection(name));
 }
 
 void Core::registerEventListener(EventListener* eventListener)
@@ -521,12 +513,12 @@ void Core::unregisterEventListener(EventListener* eventListener)
 
 QString Core::getPluginGuiName(const QString& pluginKind) const
 {
-    return _pluginManager->getPluginGuiName(pluginKind);
+    return _pluginManager.getPluginGuiName(pluginKind);
 }
 
 QIcon Core::getPluginIcon(const QString& pluginKind) const
 {
-    return _pluginManager->getPluginIcon(pluginKind);
+    return _pluginManager.getPluginIcon(pluginKind);
 }
 
 void Core::notifyDatasetAdded(const Dataset<DatasetImpl>& dataset)
@@ -793,10 +785,6 @@ void Core::notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset)
     }
 }
 
-gui::MainWindow& Core::gui() const {
-    return _mainWindow;
-}
-
 /** Destroys all plug-ins kept by the core */
 void Core::destroyPlugins()
 {
@@ -820,4 +808,4 @@ void Core::setDatasetGroupingEnabled(const bool& datasetGroupingEnabled)
     Application::current()->setSetting("Core/DatasetGroupingEnabled", _datasetGroupingEnabled);
 }
 
-} // namespace hdps
+}

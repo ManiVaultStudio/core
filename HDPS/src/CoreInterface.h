@@ -376,7 +376,7 @@ public: // Managers
 protected:
     bool    _datasetGroupingEnabled;        /** Whether datasets can be grouped or not */
 
-    friend class RawData;
+    friend class plugin::RawData;
     friend class DatasetImpl;
     friend class EventListener;
 };

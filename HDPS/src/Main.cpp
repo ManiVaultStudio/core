@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
     hdpsApplication.setWindowIcon(appIcon);
 
-    hdps::gui::MainWindow mainWindow;
+    MainWindow mainWindow;
 
     mainWindow.show();
 

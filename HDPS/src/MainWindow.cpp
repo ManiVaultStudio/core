@@ -32,14 +32,9 @@
 
 using namespace ads;
 
-namespace hdps
-{
-
-namespace gui
-{
-
 MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     QMainWindow(parent),
+    _core(),
     _startPageWidget(nullptr),
     _dockManager(new CDockManager(this)),
     _centralDockArea(nullptr),
@@ -53,11 +48,9 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 {
     setupUi(this);
 
-    _core = QSharedPointer<Core>::create(*this);
+    dynamic_cast<Application*>(qApp)->setCore(&_core);
 
-    dynamic_cast<Application*>(qApp)->setCore(_core.get());
-
-    _core->init();
+    
 
     _startPageWidget        = new StartPageWidget(this);
 
@@ -71,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     restoreWindowGeometryFromSettings();
 
-    Logger::Initialize();
+    //Logger::Initialize();
 
     // Delay execution till the event loop has started, otherwise we cannot quit the application
     QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
@@ -85,6 +78,8 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     menuHelp->addMenu(&_pluginsHelpMenu);
 
     _loadedViewPluginsMenu.setEnabled(false);
+
+    _core.init();
 }
 
 void MainWindow::addImportOption(QAction* action)
@@ -353,7 +348,7 @@ void MainWindow::updateCentralWidget()
 
         // Show the start page dock widget and set the mode
         _startPageDockWidget->toggleView(true);
-        _startPageWidget->setMode(_core->requestAllDataSets().size() == 0 ? StartPageWidget::Mode::ProjectBar : StartPageWidget::Mode::LogoOnly);
+        _startPageWidget->setMode(_core.requestAllDataSets().size() == 0 ? StartPageWidget::Mode::ProjectBar : StartPageWidget::Mode::LogoOnly);
     }
     else {
 
@@ -423,7 +418,7 @@ void MainWindow::setupFileMenu()
     connect(clearDatasetsAction, &QAction::triggered, this, [this]() -> void {
 
         // Get all loaded datasets (irrespective of the data type)
-        const auto loadedDatasets = _core->requestAllDataSets();
+        const auto loadedDatasets = _core.requestAllDataSets();
 
         // The project needs to be cleared if there are one or more datasets loaded
         if (!loadedDatasets.empty()) {
@@ -431,15 +426,17 @@ void MainWindow::setupFileMenu()
             // Check in the settings if the user has to be prompted with a question whether to automatically remove all datasets
             if (Application::current()->getSetting("ConfirmDataRemoval", true).toBool()) {
 
-                // Ask for confirmation dialog
-                DataRemoveAction::ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, "Remove all datasets", loadedDatasets);
+                Application::core()->removeAllDatasets();
 
-                // Show the confirm data removal dialog
-                confirmDataRemoveDialog.exec();
+                //// Ask for confirmation dialog
+                //DataRemoveAction::ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, "Remove all datasets", loadedDatasets);
 
-                // Remove dataset and children from the core if accepted
-                if (confirmDataRemoveDialog.result() == 1)
-                    Application::core()->removeAllDatasets();
+                //// Show the confirm data removal dialog
+                //confirmDataRemoveDialog.exec();
+
+                //// Remove dataset and children from the core if accepted
+                //if (confirmDataRemoveDialog.result() == 1)
+                //    Application::core()->removeAllDatasets();
             }
         }
     });
@@ -447,6 +444,7 @@ void MainWindow::setupFileMenu()
     // Close the main window then the exit action is triggered
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
 
+    /*
     QObject::connect(findLogFileAction, &QAction::triggered, [this](bool) {
         const auto filePath = Logger::GetFilePathName();
 
@@ -468,12 +466,13 @@ void MainWindow::setupFileMenu()
             _loggingDockArea->hide();
         }
     });
+    */
 
     // Update read-only status of various actions when the main file menu is opened
     connect(fileMenu, &QMenu::aboutToShow, this, [this]() -> void {
 
         // Establish whether there are any loaded datasets
-        const auto hasDatasets = _core->requestAllDataSets().size();
+        const auto hasDatasets = _core.requestAllDataSets().size();
 
         // Update read-only status
         saveProjectAction->setEnabled(!Application::current()->getCurrentProjectFilePath().isEmpty());
@@ -543,7 +542,4 @@ void MainWindow::populateRecentProjectsMenu()
         // Add recent project action to the menu
         recentProjectsMenu->addAction(recentProjectAction);
     }
-}
-
-}
 }

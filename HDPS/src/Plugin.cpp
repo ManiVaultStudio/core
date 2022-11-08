@@ -12,6 +12,7 @@ QMap<QString, std::int32_t> hdps::plugin::Plugin::noInstances = QMap<QString, st
 
 Plugin::Plugin(const PluginFactory* factory) :
     WidgetAction(nullptr),
+    _core(Application::core()),
     _factory(factory),
     _name(getKind() + QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _properties(),

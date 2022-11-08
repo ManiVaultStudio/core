@@ -131,7 +131,7 @@ public:
      */
     Dataset<DatasetImpl> copy() const override
     {
-        auto clusters = new Clusters(_core, getRawDataName());
+        auto clusters = new Clusters(Application::core(), getRawDataName());
 
         clusters->setGuiName(getGuiName());
         clusters->indices = indices;
@@ -148,7 +148,7 @@ public:
      */
     Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const  override
     {
-        return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
+        return Application::core()->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
 
     /**

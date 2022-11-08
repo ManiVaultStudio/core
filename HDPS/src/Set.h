@@ -545,6 +545,7 @@ private:
     Dataset<DatasetImpl>        _smartPointer;              /** Smart pointer to own dataset */
 
     friend class CoreInterface;
+    friend class Core;
     friend class DataManager;
     friend class EventListener;
 

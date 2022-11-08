@@ -14,6 +14,7 @@
 #include <QVBoxLayout>
 #include <QMenu>
 #include <QLabel>
+#include <QStyledItemDelegate>
 #include <QStyleOptionViewItem>
 
 #include <stdexcept>
@@ -51,11 +52,11 @@ protected:
     }
 };
 
-DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, DataHierarchyPlugin& dataHierarchyPlugin) :
+DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     QWidget(parent),
     _model(this),
     _filterModel(this),
-    _hierarchyWidget(&dataHierarchyPlugin, "Dataset", _model, &_filterModel),
+    _hierarchyWidget(this, "Dataset", _model, &_filterModel),
     _groupingAction(this, "Selection grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled())
 {
     auto layout = new QVBoxLayout();

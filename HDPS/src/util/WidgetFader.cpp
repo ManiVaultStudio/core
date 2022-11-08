@@ -35,7 +35,7 @@ void WidgetFader::fadeIn()
     qDebug() << __FUNCTION__;
 #endif
 
-    if (_opacityAnimation.state() == QPropertyAnimation::Running);
+    if (_opacityAnimation.state() == QPropertyAnimation::Running)
         _opacityAnimation.stop();
     
     _opacityAnimation.setDuration(_fadeInDuration);
@@ -50,7 +50,7 @@ void WidgetFader::fadeOut()
     qDebug() << __FUNCTION__;
 #endif
 
-    if (_opacityAnimation.state() == QPropertyAnimation::Running);
+    if (_opacityAnimation.state() == QPropertyAnimation::Running)
         _opacityAnimation.stop();
 
     _opacityAnimation.setDuration(_fadeOutDuration);

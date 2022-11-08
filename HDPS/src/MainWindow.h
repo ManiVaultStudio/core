@@ -2,7 +2,6 @@
 
 #include "ui_MainWindow.h"
 #include "Core.h"
-#include "LogDockWidget.h"
 
 #include <QMainWindow>
 #include <QAction>
@@ -19,21 +18,6 @@ namespace Ui
 }
 
 class StartPageWidget;
-
-namespace hdps
-{
-
-namespace plugin
-{
-    class PluginManager;
-    class ViewPlugin;
-    enum class Type;
-}
-
-namespace gui
-{
-
-class LogDockWidget;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -66,12 +50,6 @@ public:
     */
     void addPluginTriggerHelpAction(QAction* action);
 
-    /**
-    * Allows access to the core, which is created by this MainWindow. Useful for
-    * unit tests that may need to call addData and requestData.
-    */
-    CoreInterface& getCore() { return *_core;  }
-    
     /**
      * Callback invoked when the window shows
      * @param closeEvent Close event
@@ -160,10 +138,8 @@ protected: // Menu
     void populateRecentProjectsMenu();
 
 private:
-    QSharedPointer<Core>        _core;                          /** HDPS core */
+    Core                        _core;                          /** Instance of the core */
     StartPageWidget*            _startPageWidget;               /** Pointer to the start page widget */
-
-private: // Docking
     ads::CDockManager*          _dockManager;                   /** Manager for docking */
     ads::CDockAreaWidget*       _centralDockArea;               /** Docking area for view plugins */
     ads::CDockAreaWidget*       _lastDockAreaWidget;            /** Last docking area widget (if any) */
@@ -172,8 +148,5 @@ private: // Docking
     ads::CDockWidget*           _startPageDockWidget;           /** Dock widget for the start page */
     ads::CDockWidget*           _loggingDockWidget;             /** Dock widget for logging */
     QMenu                       _loadedViewPluginsMenu;         /** Menu for loaded view plugins */
-    QMenu                       _pluginsHelpMenu;         /** Menu for loaded plugins help */
+    QMenu                       _pluginsHelpMenu;               /** Menu for loaded plugins help */
 };
-
-}
-}

@@ -86,7 +86,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
     const auto numberOfBlocks = static_cast<std::uint64_t>(ceilf(numberOfBytes / static_cast<float>(maxBlockSize)));
 
     // Offset in number of bytes
-    std::int64_t offset = 0;
+    std::uint64_t offset = 0;
 
     QVariantList blocks;
 

@@ -1,13 +1,15 @@
 #include "Set.h"
+
 #include "DataHierarchyItem.h"
 #include "AnalysisPlugin.h"
-
-#include <Serialization.h>
-#include <util/Icon.h>
+#include "util/Serialization.h"
+#include "util/Icon.h"
+#include "util/Exception.h"
 
 #include <QPainter>
 
 using namespace hdps::gui;
+using namespace hdps::util;
 
 namespace hdps
 {
@@ -290,7 +292,6 @@ DatasetImpl::DatasetImpl(CoreInterface* core, const QString& rawDataName, const 
     _locked(false),
     _smartPointer(this)
 {
-
 }
 
 DatasetImpl::~DatasetImpl()

@@ -33,9 +33,8 @@ public:
     /**
      * Constructor
      * @param parent Parent widget
-     * @param dataHiewrarchyPlugin Reference to data hierarchy plugin
      */
-    DataHierarchyWidget(QWidget* parent, DataHierarchyPlugin& dataHierarchyPlugin);
+    DataHierarchyWidget(QWidget* parent);
 
 protected:
 
