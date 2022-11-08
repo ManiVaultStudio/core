@@ -269,6 +269,32 @@ QVariant ActionHierarchyModel::headerData(int section, Qt::Orientation orientati
                 break;
             }
 
+            case Qt::EditRole:
+            {
+                switch (static_cast<ActionHierarchyModelItem::Column>(section))
+                {
+                    case ActionHierarchyModelItem::Column::Name:
+                        return "Name";
+
+                    case ActionHierarchyModelItem::Column::Visible:
+                        return "Visible";
+
+                    case ActionHierarchyModelItem::Column::MayPublish:
+                        return "May publish";
+
+                    case ActionHierarchyModelItem::Column::MayConnect:
+                        return "May connect";
+
+                    case ActionHierarchyModelItem::Column::MayDisconnect:
+                        return "May disconnect";
+
+                    default:
+                        break;
+                }
+
+                break;
+            }
+
             case Qt::ToolTipRole:
             {
                 switch (static_cast<ActionHierarchyModelItem::Column>(section))

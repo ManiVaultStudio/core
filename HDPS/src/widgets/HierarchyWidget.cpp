@@ -70,12 +70,13 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _selectionGroupAction << _selectAllAction;
     _selectionGroupAction << _selectNoneAction;
 
-    _columnsAction.setText("Columns");
+    _columnsAction.setText("Edit column visibility");
     _columnsAction.setToolTip(QString("Edit which %1s hierarchy columns should be visible").arg(_itemTypeName.toLower()));
     _columnsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("columns"));
+    _columnsAction.setShowLabels(false);
 
     for (std::int32_t columnIndex = 0; columnIndex < _model.columnCount(); columnIndex++) {
-        auto columnVisibilityAction = new ToggleAction(this, _model.headerData(columnIndex, Qt::Horizontal, Qt::DisplayRole).toString());
+        auto columnVisibilityAction = new ToggleAction(this, _model.headerData(columnIndex, Qt::Horizontal, Qt::EditRole).toString(), true, true);
 
         columnVisibilityAction->setConnectionPermissionsToNone();
 

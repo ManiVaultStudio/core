@@ -180,15 +180,46 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
                         return "Info";
 
                     case DataHierarchyModelItem::Column::Progress:
+                    case DataHierarchyModelItem::Column::GroupIndex:
+                    case DataHierarchyModelItem::Column::IsGroup:
+                    case DataHierarchyModelItem::Column::IsAnalyzing:
+                    case DataHierarchyModelItem::Column::IsLocked:
                         return "";
+
+                    default:
+                        break;
+                }
+
+                break;
+            }
+
+            case Qt::EditRole:
+            {
+                switch (static_cast<DataHierarchyModelItem::Column>(section))
+                {
+                    case DataHierarchyModelItem::Column::Name:
+                        return "Name";
+
+                    case DataHierarchyModelItem::Column::GUID:
+                        return "ID";
+
+                    case DataHierarchyModelItem::Column::Info:
+                        return "Info";
+
+                    case DataHierarchyModelItem::Column::Progress:
+                        return "Progress";
 
                     case DataHierarchyModelItem::Column::GroupIndex:
                         return "Group ID";
 
                     case DataHierarchyModelItem::Column::IsGroup:
+                        return "Is group";
+
                     case DataHierarchyModelItem::Column::IsAnalyzing:
+                        return "Is analyzing";
+
                     case DataHierarchyModelItem::Column::IsLocked:
-                        return "";
+                        return "Is locked";
 
                     default:
                         break;

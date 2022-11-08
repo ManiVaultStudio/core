@@ -150,6 +150,10 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
                 dockWidget->setFeature(CDockWidget::DockWidgetFloatable, toggled);
             });
 
+            connect(&viewPlugin->getMayMoveAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
+                dockWidget->setFeature(CDockWidget::DockWidgetMovable, toggled);
+            });
+
             const auto connectToViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
                 connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
                     dockWidget->toggleView(toggled);
