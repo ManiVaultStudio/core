@@ -40,7 +40,7 @@ public:
         VisibleInMenu       = 0x00001,      /** Whether the action may show itself in (context) menus */
         InternalUseOnly     = 0x00002,      /** Action is only for internal use, it is not part of the graphical user interface */
 
-        Default = VisibleInMenu | InternalUseOnly
+        Default = 0
     };
 
     ///** Describes the connection context options */

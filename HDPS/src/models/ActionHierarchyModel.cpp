@@ -189,10 +189,8 @@ Qt::ItemFlags ActionHierarchyModel::flags(const QModelIndex& index) const
 
     auto action = static_cast<ActionHierarchyModelItem*>(index.internalPointer())->getAction();
 
-    qDebug() << action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::InternalUseOnly);
-
     if (!action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::VisibleInMenu))
-        itemFlags |= Qt::ItemIsSelectable;
+        itemFlags &= ~Qt::ItemIsEnabled;
 
     switch (index.column())
     {
@@ -200,37 +198,11 @@ Qt::ItemFlags ActionHierarchyModel::flags(const QModelIndex& index) const
             itemFlags |= Qt::ItemIsUserCheckable;
             break;
 
-        //case ActionHierarchyModelItem::Column::Visible:
-        //{
-        //    if (!action->isVisible())
-        //        itemFlags |= Qt::ItemIsSelectable;
-        //    
-        //    break;
-        //}
-
-        //case ActionHierarchyModelItem::Column::MayPublish:
-        //{
-        //    if (!action->mayPublish(WidgetAction::Gui))
-        //        itemFlags |= Qt::ItemIsSelectable;
-
-        //    break;
-        //}
-
-        //case ActionHierarchyModelItem::Column::MayConnect:
-        //{
-        //    if (!action->mayConnect(WidgetAction::Gui))
-        //        itemFlags |= Qt::ItemIsSelectable;
-
-        //    break;
-        //}
-
-        //case ActionHierarchyModelItem::Column::MayDisconnect:
-        //{
-        //    if (!action->mayDisconnect(WidgetAction::Gui))
-        //        itemFlags |= Qt::ItemIsSelectable;
-
-        //    break;
-        //}
+        case ActionHierarchyModelItem::Column::Visible:
+        case ActionHierarchyModelItem::Column::MayPublish:
+        case ActionHierarchyModelItem::Column::MayConnect:
+        case ActionHierarchyModelItem::Column::MayDisconnect:
+            break;
 
         default:
             break;

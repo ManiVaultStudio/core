@@ -98,13 +98,12 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     treeView.setItemDelegate(new ItemDelegate(this));
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::entered, this, [this](const QModelIndex& index) -> void {
-        return;
-        setActionHighlighted(_hierarchyWidget.toSourceModelIndex(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), true);
+        //setActionHighlighted(_hierarchyWidget.toSourceModelIndex(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), true);
 
-        if (_lastHoverModelIndex.isValid())
-            setActionHighlighted(_hierarchyWidget.toSourceModelIndex(_lastHoverModelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), false);
+        //if (_lastHoverModelIndex.isValid())
+        //    setActionHighlighted(_hierarchyWidget.toSourceModelIndex(_lastHoverModelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), false);
 
-        _lastHoverModelIndex = index;
+        //_lastHoverModelIndex = index;
     });
 
     const auto numberOfRowsChanged = [this]() -> void {
@@ -128,6 +127,7 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
 
+    filterGroupAction << _filterModel.getHideInternalUseAction();
     filterGroupAction << _filterModel.getFilterEnabledAction();
     filterGroupAction << _filterModel.getFilterVisibilityAction();
     filterGroupAction << _filterModel.getFilterMayPublishAction();
@@ -136,8 +136,6 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     filterGroupAction << _filterModel.getRemoveFiltersAction();
 
     filterGroupAction.setPopupSizeHint(QSize(300, 0));
-
-    //connect(this, QWidget::clo)
 }
 
 ActionHierarchyWidget::~ActionHierarchyWidget()

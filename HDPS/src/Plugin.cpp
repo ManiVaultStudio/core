@@ -24,7 +24,7 @@ Plugin::Plugin(const PluginFactory* factory) :
     _eventListener.setEventCore(Application::core());
 
     _guiNameAction.setConnectionPermissionsToNone();
-    _guiNameAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
+    _guiNameAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
     _guiNameAction.setPlaceHolderString("Enter plugin name here...");
 }
 

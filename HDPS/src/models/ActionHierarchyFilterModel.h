@@ -1,5 +1,6 @@
 #pragma once
 
+#include "actions/ToggleAction.h"
 #include "actions/OptionsAction.h"
 #include "actions/TriggerAction.h"
 
@@ -32,6 +33,7 @@ public:
 
 public: // Action getters
 
+    OptionsAction& getHideInternalUseAction() { return _filterInternalUseAction; }
     OptionsAction& getFilterEnabledAction() { return _filterEnabledAction; }
     OptionsAction& getFilterVisibilityAction() { return _filterVisibilityAction; }
     OptionsAction& getFilterMayPublishAction() { return _filterMayPublishAction; }
@@ -40,6 +42,7 @@ public: // Action getters
     TriggerAction& getRemoveFiltersAction() { return _removeFiltersAction; }
 
 private:
+    OptionsAction   _filterInternalUseAction;       /** Filter internal use action */
     OptionsAction   _filterEnabledAction;           /** Filter enabled action */
     OptionsAction   _filterVisibilityAction;        /** Filter visibility action */
     OptionsAction   _filterMayPublishAction;        /** Filter may publish action */

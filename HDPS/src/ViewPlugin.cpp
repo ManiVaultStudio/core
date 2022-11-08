@@ -38,34 +38,34 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
     _editActionsAction.setShortcut(tr("F12"));
     _editActionsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, true);
-    _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, true);
+    _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
     _mayCloseAction.setToolTip("Determines whether this view plugin may be closed or not");
     _mayCloseAction.setConnectionPermissionsToNone();
-    _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, true);
-    _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, true);
+    _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
     _mayFloatAction.setToolTip("Determines whether this view plugin may float or not");
     _mayFloatAction.setConnectionPermissionsToNone();
-    _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, true);
-    _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, true);
+    _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
     _mayMoveAction.setToolTip("Determines whether this view plugin may be moved or not");
     _mayMoveAction.setConnectionPermissionsToNone();
-    _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, true);
-    _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, true);
+    _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
     _visibleAction.setToolTip("Determines whether the view plugin is visible in the user interface or not");
     _visibleAction.setConnectionPermissionsToNone();
-    _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, true);
-    _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, true);
+    _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
     _allowedDockingAreasAction.setToolTip("Determines the allowed docking areas for the view plugin");
     _allowedDockingAreasAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     _allowedDockingAreasAction.setConnectionPermissionsToNone();
-    _allowedDockingAreasAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, true);
-    _allowedDockingAreasAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, true);
+    _allowedDockingAreasAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false, true);
+    _allowedDockingAreasAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false, true);
 
     _triggerHelpAction.setShortcut(tr("F1"));
     _triggerHelpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);

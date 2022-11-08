@@ -103,10 +103,8 @@ void DataHierarchyManager::removeItem(DataHierarchyItem& dataHierarchyItem)
 
 void DataHierarchyManager::removeAllItems()
 {
-    // Cache the data hierarchy items vector as we are modifying the member on-the-fly
     const auto dataHierarchyItems = _items;
 
-    // Remove all top-level items (and their children recursively)
     for (auto dataHierarchyItem : dataHierarchyItems)
         if (!dataHierarchyItem->hasParent())
             removeItem(*dataHierarchyItem);
@@ -143,7 +141,6 @@ hdps::DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem& da
 {
     auto children = dataHierarchyItem.getChildren();
 
-    // Get children recursively
     if (recursive)
         for (auto child : children)
             children << getChildren(*child, recursive);
