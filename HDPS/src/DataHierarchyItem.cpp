@@ -154,14 +154,11 @@ bool DataHierarchyItem::isSelected() const
 
 void DataHierarchyItem::setSelected(const bool& selected)
 {
-    // Prevent unnecessary updates
     if (selected == _selected)
         return;
 
-    // Assign selected status
     _selected = selected;
 
-    // Notify others that the selection status changed
     emit selectionChanged(_selected);
 }
 
@@ -179,16 +176,13 @@ QString DataHierarchyItem::getFullPathName() const
 {
     DataHierarchyItems parents;
 
-    // Walk up the tree and fetch all parents
     DataHierarchyItem::getParents(*const_cast<DataHierarchyItem*>(this), parents);
 
     QStringList dataHierarchyItemNames;
 
-    // Add GUI names of the parents to the string list
     for (const auto& parent : parents)
         dataHierarchyItemNames << parent->getDataset()->getGuiName();
 
-    // Add name of this data hierarchy item
     dataHierarchyItemNames << _dataset->getGuiName();
 
     return dataHierarchyItemNames.join("/");
@@ -221,10 +215,8 @@ DataType DataHierarchyItem::getDataType() const
 
 void DataHierarchyItem::addAction(WidgetAction& widgetAction)
 {
-    // Add action to the vector
     _actions << &widgetAction;
 
-    // Notify others that an action was added
     emit actionAdded(widgetAction);
 }
 
@@ -235,16 +227,11 @@ WidgetActions DataHierarchyItem::getActions() const
 
 QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
 {
-    // Create new context menu
     auto menu = new QMenu(parent);
 
-    // Loop over all actions and ad their context menu (if there is one)
     for (auto action : _actions) {
-
-        // Get pointer to action context menu
         auto contextMenu = action->getContextMenu();
 
-        // Add context menu when it is valid
         if (contextMenu)
             menu->addMenu(contextMenu);
     }
@@ -263,9 +250,6 @@ QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
 void DataHierarchyItem::populateContextMenu(QMenu* contextMenu)
 {
     for (auto action : _actions) {
-        if (!action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::VisibleInMenu))
-            continue;
-
         auto actionContextMenu = action->getContextMenu();
 
         if (actionContextMenu)
@@ -289,7 +273,7 @@ bool DataHierarchyItem::isExpanded() const
     return _expanded;
 }
 
-void DataHierarchyItem::setExpanded(const bool& expanded)
+void DataHierarchyItem::setExpanded(bool expanded)
 {
     _expanded = expanded;
 
@@ -303,11 +287,9 @@ QString DataHierarchyItem::getTaskName() const
 
 void DataHierarchyItem::setTaskName(const QString& taskName)
 {
-    // Prevent unnecessary updates
     if (taskName == _taskName)
         return;
 
-    // Assign the task name
     _taskName = taskName;
 }
 
@@ -323,14 +305,11 @@ bool DataHierarchyItem::isIdle() const
 
 void DataHierarchyItem::setTaskDescription(const QString& taskDescription)
 {
-    // Prevent unnecessary updates
     if (taskDescription == _taskDescription)
         return;
 
-    // Assign new task description
     _taskDescription = taskDescription;
 
-    // Start the task description timer if it is not already active
     if (!_taskDescriptionTimer.isActive())
         _taskDescriptionTimer.start(TASK_UPDATE_TIMER_INTERVAL);
 }
@@ -343,31 +322,27 @@ float DataHierarchyItem::getTaskProgress() const
     return _taskProgress;
 }
 
-void DataHierarchyItem::setTaskProgress(const float& taskProgress)
+void DataHierarchyItem::setTaskProgress(float taskProgress)
 {
     if (taskProgress == _taskProgress)
         return;
 
-    // Assign the new task progress
     _taskProgress = taskProgress;
 
-    // Start the task progress timer if it is not already active
     if (!_taskProgressTimer.isActive())
         _taskProgressTimer.start(TASK_UPDATE_TIMER_INTERVAL);
 }
 
-void DataHierarchyItem::setNumberOfSubTasks(const float& numberOfSubTasks)
+void DataHierarchyItem::setNumberOfSubTasks(float numberOfSubTasks)
 {
     _subTasks.resize(numberOfSubTasks);
 }
 
-void DataHierarchyItem::setSubTaskFinished(const float& subTaskIndex)
+void DataHierarchyItem::setSubTaskFinished(float subTaskIndex)
 {
     try {
-        // Flag sub task as finished
         _subTasks.setBit(subTaskIndex, true);
 
-        // Start the task progress timer if it is not already active
         if (!_taskProgressTimer.isActive())
             _taskProgressTimer.start(TASK_UPDATE_TIMER_INTERVAL);
 
@@ -395,62 +370,48 @@ bool DataHierarchyItem::isAborted() const
 
 void DataHierarchyItem::setTaskIdle()
 {
-    // Set task status to idle
     _taskStatus = TaskStatus::Idle;
 }
 
 void DataHierarchyItem::setTaskRunning()
 {
-    // Set task status to running
     _taskStatus = TaskStatus::Running;
 
-    // lock the item
     setLocked(true);
 }
 
 void DataHierarchyItem::setTaskFinished()
 {
-    // Do not proceed if already aborted
     if (_taskStatus == TaskStatus::Aborted)
         return;
 
-    // Set task status to finished
     _taskStatus = TaskStatus::Finished;
 
-    // Reset sub tasks (if any)
     _subTasks.fill(false);
 
-    // Adjust the task description
     setTaskDescription(QString("%1 finished").arg(_taskName));
 
-    // Reset the progress and task description after a while
     QTimer::singleShot(MESSAGE_DISAPPEAR_INTERVAL, [this]() {
         setTaskProgress(0.0f);
         setTaskDescription("");
     });
 
-    // Unlock the item
     setLocked(false);
 }
 
 void DataHierarchyItem::setTaskAborted()
 {
-    // Set task status to aborted
     _taskStatus = TaskStatus::Aborted;
 
-    // Reset sub tasks (if any)
     _subTasks.fill(false);
 
-    // Set task description to aborted
     setTaskDescription(QString("%1 aborted").arg(_taskName));
 
-    // Reset the progress and task description after a while
     QTimer::singleShot(MESSAGE_DISAPPEAR_INTERVAL, [this]() {
         setTaskProgress(0.0f);
         setTaskDescription("");
     });
 
-    // Unlock the item
     setLocked(false);
 }
 
@@ -483,18 +444,13 @@ QVariantMap DataHierarchyItem::toVariantMap() const
 
     QVariantMap variantMap, children;
 
-    // Child items sort index
     std::uint32_t childSortIndex = 0;
 
     for (auto child : getChildren()) {
-
-        // Get map of data hierarchy item
         auto dataHierarchyItemMap = child->toVariantMap();
 
-        // Add sort index
         dataHierarchyItemMap["SortIndex"] = childSortIndex;
 
-        // Assign child data hierarchy item map
         children[child->getDataset()->getGuid()] = dataHierarchyItemMap;
 
         childSortIndex++;

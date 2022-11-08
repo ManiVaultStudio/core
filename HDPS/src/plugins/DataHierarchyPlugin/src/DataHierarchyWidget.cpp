@@ -51,11 +51,11 @@ protected:
     }
 };
 
-DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
+DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, DataHierarchyPlugin& dataHierarchyPlugin) :
     QWidget(parent),
     _model(this),
     _filterModel(this),
-    _hierarchyWidget(this, "Dataset", _model, &_filterModel),
+    _hierarchyWidget(&dataHierarchyPlugin, "Dataset", _model, &_filterModel),
     _groupingAction(this, "Selection grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled())
 {
     auto layout = new QVBoxLayout();
@@ -118,6 +118,26 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         _model.removeDataHierarchyModelItem(getModelIndexByDataset(dataset));
     });
 
+    connect(&_model, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
+        for (std::int32_t rowIndex = first; rowIndex < last; rowIndex++) {
+            auto childIndex = _model.index(rowIndex, 0, parent);
+            auto dataHierarchyItem = static_cast<DataHierarchyItem*>(childIndex.internalPointer());
+
+            qDebug() << __FUNCTION__ << parent << first << last;
+            
+            Application::processEvents();
+            _hierarchyWidget.getTreeView().expand(parent);
+
+            //_hierarchyWidget.getTreeView().expand(childIndex);
+            //if (dataHierarchyItem->isExpanded())
+            //    _hierarchyWidget.getTreeView().expand(_filterModel.mapFromSource(parent));
+            //else
+            //    _hierarchyWidget.getTreeView().collapse(_filterModel.mapFromSource(parent));
+
+             Application::processEvents();
+        }
+    }, Qt::QueuedConnection);
+
     connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
         DataHierarchyItems dataHierarchyItems;
 
@@ -148,8 +168,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
 void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem)
 {
-    qDebug() << __FUNCTION__ << dataHierarchyItem.getDataset<DatasetImpl>()->getGuiName();
-
     auto dataset = dataHierarchyItem.getDataset();
 
     try {
@@ -195,20 +213,24 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
             emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name));
         });
 
+        /*
         const auto setModelItemExpansion = [this](const QModelIndex& modelIndex, bool expanded) -> void {
-            if (!modelIndex.isValid() || (expanded == _hierarchyWidget.getTreeView().isExpanded(modelIndex)))
-                return;
+            //if (!modelIndex.isValid() || (expanded == _hierarchyWidget.getTreeView().isExpanded(modelIndex)))
+            //    return;
 
-            _hierarchyWidget.getTreeView().setExpanded(modelIndex, true);
+            _hierarchyWidget.getTreeView().expand(modelIndex);
+
+            QCoreApplication::processEvents();
         };
 
         connect(&dataHierarchyItem, &DataHierarchyItem::expandedChanged, this, [this, dataset, setModelItemExpansion](bool expanded) {
             setModelItemExpansion(getModelIndexByDataset(dataset), expanded);
         });
 
-        QCoreApplication::processEvents();
-
         setModelItemExpansion(getModelIndexByDataset(dataset), dataHierarchyItem.isExpanded());
+
+        _hierarchyWidget.getTreeView().expand(getModelIndexByDataset(dataset));
+        */
     }
     catch (std::exception& e)
     {

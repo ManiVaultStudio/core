@@ -1,14 +1,10 @@
-#ifndef HDPS_VIEWPLUGIN_H
-#define HDPS_VIEWPLUGIN_H
-/**
-* View.h
-*
-* Base plugin class for plugins that visualize data.
-*/
+#pragma once
 
 #include "widgets/DockableWidget.h"
 #include "actions/TriggerAction.h"
 #include "actions/ToggleAction.h"
+#include "actions/OptionsAction.h"
+
 #include "Plugin.h"
 
 #include <QWidget>
@@ -25,6 +21,11 @@ class ViewPlugin : public Plugin
 {
     Q_OBJECT
     
+public:
+
+    /** Maps dock widget area to dock widget area flag */
+    static QMap<QString, std::uint32_t> dockWidgetAreaMap;
+
 public:
     ViewPlugin(const PluginFactory* factory);
 
@@ -57,14 +58,16 @@ public: // Action getters
     gui::ToggleAction& getMayCloseAction() { return _mayCloseAction; }
     gui::ToggleAction& getMayFloatAction() { return _mayFloatAction; }
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
+    gui::OptionsAction& getAllowedDockingAreasAction() { return _allowedDockingAreasAction; }
 
 private:
-    QWidget                 _widget;                /** Widget representation of the plugin */
-    gui::TriggerAction      _editActionsAction;     /** Trigger action to start editing the view plugin action hierarchy */
-    gui::ToggleAction       _mayCloseAction;        /** Action for toggling whether a view plugin may be closed */
-    gui::ToggleAction       _mayFloatAction;        /** Action for toggling whether a view plugin may float */
-    gui::ToggleAction       _visibleAction;         /** Action which determines whether the view plugin is visible or not */
-    gui::TriggerAction      _triggerHelpAction;     /** Action which shows help (internal use only) */
+    QWidget                 _widget;                        /** Widget representation of the plugin */
+    gui::TriggerAction      _editActionsAction;             /** Trigger action to start editing the view plugin action hierarchy */
+    gui::ToggleAction       _mayCloseAction;                /** Action for toggling whether a view plugin may be closed */
+    gui::ToggleAction       _mayFloatAction;                /** Action for toggling whether a view plugin may float */
+    gui::ToggleAction       _visibleAction;                 /** Action which determines whether the view plugin is visible or not */
+    gui::OptionsAction      _allowedDockingAreasAction;     /** Action which determines the allowed docking areas */
+    gui::TriggerAction      _triggerHelpAction;             /** Action which shows help (internal use only) */
 };
 
 class ViewPluginFactory : public PluginFactory
@@ -89,10 +92,8 @@ public:
     ViewPlugin* produce() override = 0;
 };
 
-} // namespace plugin
+}
 
-} // namespace hdps
+}
 
 Q_DECLARE_INTERFACE(hdps::plugin::ViewPluginFactory, "hdps.ViewPluginFactory")
-
-#endif // HDPS_VIEWPLUGIN_H

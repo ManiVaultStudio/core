@@ -214,7 +214,7 @@ public: // Expanded
      * Set expanded status
      * @param expanded Whether the dataset is expanded
      */
-    void setExpanded(const bool& expanded);
+    void setExpanded(bool expanded);
 
 public: // Tasks
 
@@ -246,19 +246,19 @@ public: // Tasks
      * Sets the task progress
      * @param taskProgress Task progress
      */
-    void setTaskProgress(const float& taskProgress);
+    void setTaskProgress(float taskProgress);
 
     /**
      * Set the number of sub tasks
      * @param numberOfSubTasks Number of sub tasks
      */
-    void setNumberOfSubTasks(const float& numberOfSubTasks);
+    void setNumberOfSubTasks(float numberOfSubTasks);
 
     /**
      * Flag sub task as finished
      * @param subTaskIndex Index of the sub task
      */
-    void setSubTaskFinished(const float& subTaskIndex);
+    void setSubTaskFinished(float subTaskIndex);
 
     /** Convenience functions for status checking */
     bool isIdle() const;

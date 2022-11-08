@@ -37,9 +37,9 @@ public:
     /** Describes the configuration options */
     enum class ConfigurationFlag {
         VisibleInMenu       = 0x00001,      /** Whether the action may show itself in (context) menus */
-        VisibleInHierarchy  = 0x00002,      /** Whether the action may be edited in the actions hierarchy */
+        InternalUseOnly     = 0x00002,      /** Action is only for internal use, it is not part of the graphical user interface */
 
-        Default = VisibleInMenu | VisibleInHierarchy
+        Default = VisibleInMenu | InternalUseOnly
     };
 
     ///** Describes the connection context options */
@@ -258,17 +258,22 @@ public: // Linking
      * Set connection permissions flag
      * @param connectionPermissionsFlag Connection permissions flag to set
      * @param unset Whether to unset the connection permissions flag
+     * @param recursive Whether to recursively set child connection permissions
      */
-    virtual void setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset = false) final;
+    virtual void setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset = false, bool recursive = false) final;
 
     /**
      * Set connection permissions
      * @param connectionPermissions Connection permissions value
+     * @param recursive Whether to recursively set child connection permissions
      */
-    virtual void setConnectionPermissions(std::int32_t connectionPermissions) final;
+    virtual void setConnectionPermissions(std::int32_t connectionPermissions, bool recursive = false) final;
 
-    /** Reset connection permissions to ConnectionPermissionFlag::None */
-    virtual void setConnectionPermissionsToNone() final;
+    /**
+     * Reset connection permissions to none
+     * @param recursive Whether to recursively set child connection permissions
+     */
+    virtual void setConnectionPermissionsToNone(bool recursive = false) final;
 
 protected: // Linking
 
@@ -329,7 +334,7 @@ public: // Settings
      * @return Found vector of pointers to widget action(s)
      */
     QVector<WidgetAction*> findChildren(const QString& searchString, bool recursive = true) const;
-
+    
 public: // Popups
 
     /**
@@ -363,14 +368,16 @@ public: // Configuration flags
      * Set configuration flag
      * @param configurationFlag Configuration flag to set
      * @param unset Whether to unset the \p configurationFlag flag
+     * @param recursive Whether to recursively set child child configuration flag
      */
-    virtual void setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset = false) final;
+    virtual void setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset = false, bool recursive = false) final;
 
     /**
      * Set configuration
      * @param configuration Configuration value
+     * @param recursive Whether to recursively set child child configuration flag
      */
-    virtual void setConfiguration(std::int32_t configuration) final;
+    virtual void setConfiguration(std::int32_t configuration, bool recursive = false) final;
 
 protected:
 
@@ -380,6 +387,14 @@ protected:
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
     virtual QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags);
+
+public:
+
+    /**
+     * Get child actions
+     * @return Vector of pointers to child actions
+     */
+    QVector<WidgetAction*> getChildActions();
 
 signals:
 

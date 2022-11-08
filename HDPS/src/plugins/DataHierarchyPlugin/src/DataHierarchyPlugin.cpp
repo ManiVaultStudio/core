@@ -6,9 +6,11 @@ using namespace hdps;
 
 DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
-    _dataHierarchyWidget(nullptr)
+    _dataHierarchyWidget(nullptr, *this)
 {
     const_cast<PluginFactory*>(factory)->setMaximumNumberOfInstances(1);
+
+    getAllowedDockingAreasAction().initialize({ "Left", "Right" }, { "Left", "Right" });
 }
 
 void DataHierarchyPlugin::init()

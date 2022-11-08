@@ -386,6 +386,20 @@ QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     return new QWidget();
 }
 
+QVector<WidgetAction*> WidgetAction::getChildActions()
+{
+    QVector<WidgetAction*> childActions;
+
+    for (auto child : children()) {
+        auto childAction = dynamic_cast<WidgetAction*>(child);
+
+        if (childAction)
+            childActions << childAction;
+    }
+
+    return childActions;
+}
+
 bool WidgetAction::mayConnect(ConnectionContextFlag connectionContextFlags) const
 {
     switch (connectionContextFlags)
@@ -436,7 +450,7 @@ bool WidgetAction::isConnectionPermissionFlagSet(ConnectionPermissionFlag connec
     return _connectionPermissions & static_cast<std::int32_t>(connectionPermissionsFlag);
 }
 
-void WidgetAction::setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset /*= false*/)
+void WidgetAction::setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset /*= false*/, bool recursive /*= false*/)
 {
     if (unset)
         _connectionPermissions = _connectionPermissions & ~static_cast<std::int32_t>(connectionPermissionsFlag);
@@ -444,18 +458,28 @@ void WidgetAction::setConnectionPermissionsFlag(ConnectionPermissionFlag connect
         _connectionPermissions |= static_cast<std::int32_t>(connectionPermissionsFlag);
 
     emit connectionPermissionsChanged(_connectionPermissions);
+
+    if (recursive) {
+        for (auto childAction : getChildActions())
+            childAction->setConnectionPermissionsFlag(connectionPermissionsFlag, unset, recursive);
+    }
 }
 
-void WidgetAction::setConnectionPermissions(std::int32_t connectionPermissions)
+void WidgetAction::setConnectionPermissions(std::int32_t connectionPermissions, bool recursive /*= false*/)
 {
     _connectionPermissions = connectionPermissions;
 
     emit connectionPermissionsChanged(_connectionPermissions);
+
+    if (recursive) {
+        for (auto childAction : getChildActions())
+            childAction->setConnectionPermissions(connectionPermissions, recursive);
+    }
 }
 
-void WidgetAction::setConnectionPermissionsToNone()
+void WidgetAction::setConnectionPermissionsToNone(bool recursive /*= false*/)
 {
-    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None));
+    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None), recursive);
 }
 
 bool WidgetAction::isResettable()
@@ -473,7 +497,7 @@ bool WidgetAction::isConfigurationFlagSet(ConfigurationFlag configurationFlag)
     return _configuration & static_cast<std::int32_t>(configurationFlag);
 }
 
-void WidgetAction::setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset /*= false*/)
+void WidgetAction::setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset /*= false*/, bool recursive /*= false*/)
 {
     if (unset)
         _configuration = _configuration & ~static_cast<std::int32_t>(configurationFlag);
@@ -481,13 +505,23 @@ void WidgetAction::setConfigurationFlag(ConfigurationFlag configurationFlag, boo
         _configuration |= static_cast<std::int32_t>(configurationFlag);
 
     emit configurationChanged(_configuration);
+
+    if (recursive) {
+        for (auto childAction : getChildActions())
+            childAction->setConfigurationFlag(configurationFlag, unset, recursive);
+    }
 }
 
-void WidgetAction::setConfiguration(std::int32_t configuration)
+void WidgetAction::setConfiguration(std::int32_t configuration, bool recursive /*= false*/)
 {
     _configuration = configuration;
 
     emit configurationChanged(_configuration);
+
+    if (recursive) {
+        for (auto childAction : getChildActions())
+            childAction->setConfiguration(configuration, recursive);
+    }
 }
 
 }

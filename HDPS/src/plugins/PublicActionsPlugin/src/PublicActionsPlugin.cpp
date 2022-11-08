@@ -9,6 +9,8 @@ PublicActionsPlugin::PublicActionsPlugin(const PluginFactory* factory) :
     _publicActionsWidget(nullptr)
 {
     const_cast<PluginFactory*>(factory)->setMaximumNumberOfInstances(1);
+
+    getAllowedDockingAreasAction().initialize({ "Left", "Right" }, { "Left", "Right" });
 }
 
 void PublicActionsPlugin::init()

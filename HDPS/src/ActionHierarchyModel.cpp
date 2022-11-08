@@ -187,6 +187,11 @@ Qt::ItemFlags ActionHierarchyModel::flags(const QModelIndex& index) const
 
     auto action = static_cast<ActionHierarchyModelItem*>(index.internalPointer())->getAction();
 
+    qDebug() << action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::InternalUseOnly);
+
+    if (!action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::VisibleInMenu))
+        itemFlags |= Qt::ItemIsSelectable;
+
     switch (index.column())
     {
         case ActionHierarchyModelItem::Column::Name:

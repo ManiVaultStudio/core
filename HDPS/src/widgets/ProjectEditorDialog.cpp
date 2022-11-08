@@ -13,7 +13,8 @@ using namespace hdps::plugin;
 ProjectEditorDialog::ProjectEditorDialog(QWidget* parent, ViewPlugin* viewPlugin) :
     QDialog(parent),
     _groupsAction(this),
-    _menusGroupAction(&_groupsAction)
+    _menusGroupAction(&_groupsAction),
+    _actionHierarchyWidget(this, viewPlugin)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);
@@ -24,11 +25,12 @@ ProjectEditorDialog::ProjectEditorDialog(QWidget* parent, ViewPlugin* viewPlugin
 
     auto layout = new QVBoxLayout();
 
-    //layout->addWidget(&_actionHierarchyWidget);
+    layout->addWidget(&_actionHierarchyWidget);
+    layout->addWidget(viewPlugin->getAllowedDockingAreasAction().createWidget(this));
     //layout->addWidget(_viewPlugin->getMayCloseAction().createWidget(this));
     //layout->addWidget(_viewPlugin->getMayFloatAction().createWidget(this));
     //layout->addWidget(_viewPlugin->getGuiNameAction().createWidget(this));
-    layout->addWidget(_groupsAction.createWidget(this));
+    //layout->addWidget(_groupsAction.createWidget(this));
 
     setLayout(layout);
 

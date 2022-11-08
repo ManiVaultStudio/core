@@ -17,6 +17,8 @@ namespace hdps {
     class DataHierarchyItem;
 }
 
+class DataHierarchyPlugin;
+
 /**
  * Widget for displaying the data hierarchy
  * 
@@ -31,8 +33,9 @@ public:
     /**
      * Constructor
      * @param parent Parent widget
+     * @param dataHiewrarchyPlugin Reference to data hierarchy plugin
      */
-    DataHierarchyWidget(QWidget* parent);
+    DataHierarchyWidget(QWidget* parent, DataHierarchyPlugin& dataHierarchyPlugin);
 
 protected:
 

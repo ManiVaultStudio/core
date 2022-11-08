@@ -46,4 +46,5 @@ public:
 private:
     GroupsAction    _groupsAction;          /** Groups action */
     GroupAction     _menusGroupAction;      /** Group action */
+    ActionHierarchyWidget   _actionHierarchyWidget;
 };

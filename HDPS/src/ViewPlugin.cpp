@@ -10,6 +10,14 @@ namespace hdps
 namespace plugin
 {
 
+QMap<QString, std::uint32_t> ViewPlugin::dockWidgetAreaMap({
+    { "Left", 0x01 },
+    { "Right", 0x02 },
+    { "Top", 0x04 },
+    { "Bottom", 0x08 },
+    { "Center", 0x10 }
+});
+
 ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
     _widget(),
@@ -17,6 +25,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _mayCloseAction(this, "May close", true, true),
     _mayFloatAction(this, "May float", true, true),
     _visibleAction(this, "Visible", true, true),
+    _allowedDockingAreasAction(this, "Allowed docking areas", ViewPlugin::dockWidgetAreaMap.keys(), ViewPlugin::dockWidgetAreaMap.keys()),
     _triggerHelpAction(this, "Trigger help")
 {
     setText(getGuiName());
@@ -29,27 +38,33 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _editActionsAction.setShortcut(tr("F12"));
     _editActionsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
-    _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInHierarchy, false);
+    _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
 
     _mayCloseAction.setToolTip("Determines whether this view plugin may be closed or not");
     _mayCloseAction.setConnectionPermissionsToNone();
     _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
-    _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInHierarchy, false);
+    _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
 
     _mayFloatAction.setToolTip("Determines whether this view plugin may float or not");
     _mayFloatAction.setConnectionPermissionsToNone();
     _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
-    _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInHierarchy, false);
+    _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
 
     _visibleAction.setToolTip("Determines whether the view plugin is visible in the user interface or not");
     _visibleAction.setConnectionPermissionsToNone();
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
-    _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInHierarchy, false);
+    _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
+
+    _allowedDockingAreasAction.setToolTip("Determines the allowed docking areas for the view plugin");
+    _allowedDockingAreasAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    _allowedDockingAreasAction.setConnectionPermissionsToNone();
+    _allowedDockingAreasAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
+    _allowedDockingAreasAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
 
     _triggerHelpAction.setShortcut(tr("F1"));
     _triggerHelpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _triggerHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
-    _triggerHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInHierarchy, false);
+    _triggerHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
     
     connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
         ProjectEditorDialog viewPluginEditorDialog(nullptr, this);

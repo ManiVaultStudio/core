@@ -106,7 +106,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     }
 
     _treeView.setAutoFillBackground(true);
-    _treeView.setAutoExpandDelay(300);
+    //_treeView.setAutoExpandDelay(300);
     _treeView.setContextMenuPolicy(Qt::CustomContextMenu);
     _treeView.setSelectionModel(&_selectionModel);
     _treeView.setDragEnabled(true);
@@ -116,6 +116,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _treeView.setRootIsDecorated(true);
     _treeView.setItemsExpandable(true);
     _treeView.setIconSize(QSize(14, 14));
+    _treeView.setAnimated(true);
     
     auto header = _treeView.header();
 
@@ -302,10 +303,7 @@ bool HierarchyWidget::mayExpandAll() const
 
 void HierarchyWidget::expandAll()
 {
-    const auto allFilterModelIndices = fetchFilterModelIndices();
-
-    for (const auto& filterModelIndex : allFilterModelIndices)
-        _treeView.setExpanded(filterModelIndex, true);
+    _treeView.expandAll();
 }
 
 bool HierarchyWidget::mayCollapseAll() const
@@ -324,10 +322,7 @@ bool HierarchyWidget::mayCollapseAll() const
 
 void HierarchyWidget::collapseAll()
 {
-    const auto allFilterModelIndices = fetchFilterModelIndices();
-
-    for (const auto& filterModelIndex : allFilterModelIndices)
-        _treeView.setExpanded(filterModelIndex, false);
+    _treeView.collapseAll();
 }
 
 bool HierarchyWidget::maySelectAll() const

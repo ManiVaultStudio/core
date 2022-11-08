@@ -9,6 +9,8 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     _dataPropertiesWidget(nullptr)
 {
     const_cast<PluginFactory*>(factory)->setMaximumNumberOfInstances(1);
+
+    getAllowedDockingAreasAction().initialize({ "Left", "Right" }, { "Left", "Right" });
 }
 
 void DataPropertiesPlugin::init()

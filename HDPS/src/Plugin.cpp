@@ -20,9 +20,9 @@ Plugin::Plugin(const PluginFactory* factory) :
 {
     noInstances[getKind()]++;
 
-    //_guiNameAction.setConnectionPermissionsToNone();
+    _guiNameAction.setConnectionPermissionsToNone();
     _guiNameAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
-    //_guiNameAction.setPlaceHolderString("Enter plugin name here...");
+    _guiNameAction.setPlaceHolderString("Enter plugin name here...");
 }
 
 bool Plugin::hasHelp()
