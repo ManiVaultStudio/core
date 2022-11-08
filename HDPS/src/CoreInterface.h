@@ -3,11 +3,6 @@
 #include "PluginType.h"
 #include "Dataset.h"
 
-// Abstract managers
-#include "AbstractDataManager.h"
-#include "AbstractPluginManager.h"
-#include "AbstractActionsManager.h"
-
 #include <actions/WidgetAction.h>
 
 #include <QString>
@@ -21,8 +16,12 @@ namespace hdps
     class DatasetImpl;
     class DataType;
     class EventListener;
-    class DataHierarchyManager;
     class DataHierarchyItem;
+
+    class AbstractDataManager;
+    class AbstractPluginManager;
+    class AbstractActionsManager;
+    class AbstractDataHierarchyManager;
 
     namespace plugin
     {
@@ -279,9 +278,6 @@ public: // Plugin queries
 
 public: // Data hierarchy
 
-    /** Get a reference to the data hierarchy manager */
-    virtual DataHierarchyManager& getDataHierarchyManager() = 0;
-
     /**
      * Get data hierarchy item by dataset GUID
      * @param datasetGuid Globally unique identifier of the dataset
@@ -364,14 +360,17 @@ public: // Events & notifications
 
 public: // Managers
 
-    /** Get a pointer to the data manager */
-    virtual AbstractDataManager* getDataManager() = 0;
+    /** Get a reference to the data manager */
+    virtual AbstractDataManager& getDataManager() = 0;
 
-    /** Get a pointer to the plugin manager */
-    virtual AbstractPluginManager* getPluginManager() = 0;
+    /** Get a reference to the plugin manager */
+    virtual AbstractPluginManager& getPluginManager() = 0;
 
-    /** Get a pointer to the actions manager */
-    virtual AbstractActionsManager* getActionsManager() = 0;
+    /** Get a reference to the actions manager */
+    virtual AbstractActionsManager& getActionsManager() = 0;
+
+    /** Get a reference to the data hierarchy manager */
+    virtual AbstractDataHierarchyManager& getDataHierarchyManager() = 0;
     
 protected:
     bool    _datasetGroupingEnabled;        /** Whether datasets can be grouped or not */

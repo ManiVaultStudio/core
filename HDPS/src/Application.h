@@ -58,14 +58,6 @@ public: // Static resource access functions
      */
     static const IconFont& getIconFont(const QString& name, const std::int32_t& majorVersion = -1, const std::int32_t& minorVersion = -1);
 
-public: // Actions manager
-
-    /**
-     * Get the actions manager
-     * @return Actions manager
-     */
-    static ActionsManager& getActionsManager();
-
 public: // Settings API
 
     /**
@@ -143,7 +135,6 @@ protected:
     QString             _currentProjectFilePath;                /** File path of the current project */
     QString             _serializationTemporaryDirectory;       /** Temporary directory for serialization */
     bool                _serializationAborted;                  /** Whether (de)serialization was aborted */
-    ActionsManager      _actionsManager;                        /** Actions manager */
 };
 
 }

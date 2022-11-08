@@ -6,6 +6,7 @@
 #include <Application.h>
 #include <Dataset.h>
 #include <PluginFactory.h>
+#include <AbstractDataHierarchyManager.h>
 #include <widgets/Divider.h>
 #include <actions/PluginTriggerAction.h>
 
@@ -109,11 +110,11 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     connect(&_groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::onGroupingActionToggled);
 
-    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemAdded, this, [this](DataHierarchyItem& dataHierarchyItem) -> void {
+    connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemAdded, this, [this](DataHierarchyItem& dataHierarchyItem) -> void {
         addDataHierarchyItem(dataHierarchyItem);
     });
 
-    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemAboutToBeRemoved, this, [this](const Dataset<DatasetImpl>& dataset) {
+    connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemAboutToBeRemoved, this, [this](const Dataset<DatasetImpl>& dataset) {
         _hierarchyWidget.getSelectionModel().clear();
 
         _model.removeDataHierarchyModelItem(getModelIndexByDataset(dataset));

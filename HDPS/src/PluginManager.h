@@ -3,19 +3,12 @@
 #include <AbstractPluginManager.h>
 #include <PluginFactory.h>
 
-#include <actions/TriggerAction.h>
-#include <actions/ToggleAction.h>
-
 namespace hdps {
 
 using namespace plugin;
-using namespace gui;
 
 class PluginManager : public AbstractPluginManager
 {
-
-    Q_OBJECT
-
 public:
 
     /** Default constructor */
@@ -128,32 +121,6 @@ protected:
      * @return List of resolved plugin filenames
      */
     QStringList resolveDependencies(QDir pluginDir) const;
-
-signals:
-
-    /**
-     * Signals that an action has become available that triggers plugin help
-     * @param pluginTriggerHelpAction Action that triggers plugin help
-     */
-    void addPluginTriggerHelpAction(TriggerAction& pluginTriggerHelpAction);
-
-    /**
-     * Signals that a trigger action has become available that triggers an import plugin
-     * @param pluginTriggerHelpAction Action that triggers the import plugin
-     */
-    void addImportPluginTriggerAction(TriggerAction& pluginTriggerAction);
-
-    /**
-     * Signals that a trigger action has become available that triggers a view plugin
-     * @param pluginTriggerHelpAction Action that triggers the view plugin
-     */
-    void addViewPluginTriggerAction(TriggerAction& pluginTriggerAction);
-
-    /**
-     * Signals that a toggle action has become available that toggles view plugin visibility
-     * @param viewPluginVisibleAction Action that toggles the view plugin visibility
-     */
-    void addViewPluginVisibleAction(ToggleAction& viewPluginVisibleAction);
 
 private:
     QHash<QString, PluginFactory*> _pluginFactories;

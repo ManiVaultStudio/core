@@ -57,6 +57,7 @@ public: // Action getters
     gui::TriggerAction& getEditActionsAction() { return _editActionsAction; }
     gui::ToggleAction& getMayCloseAction() { return _mayCloseAction; }
     gui::ToggleAction& getMayFloatAction() { return _mayFloatAction; }
+    gui::ToggleAction& getMayMoveAction() { return _mayMoveAction; }
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
     gui::OptionsAction& getAllowedDockingAreasAction() { return _allowedDockingAreasAction; }
 
@@ -65,6 +66,7 @@ private:
     gui::TriggerAction      _editActionsAction;             /** Trigger action to start editing the view plugin action hierarchy */
     gui::ToggleAction       _mayCloseAction;                /** Action for toggling whether a view plugin may be closed */
     gui::ToggleAction       _mayFloatAction;                /** Action for toggling whether a view plugin may float */
+    gui::ToggleAction       _mayMoveAction;                 /** Action for toggling whether a view plugin may be moved */
     gui::ToggleAction       _visibleAction;                 /** Action which determines whether the view plugin is visible or not */
     gui::OptionsAction      _allowedDockingAreasAction;     /** Action which determines the allowed docking areas */
     gui::TriggerAction      _triggerHelpAction;             /** Action which shows help (internal use only) */

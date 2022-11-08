@@ -5,28 +5,18 @@
 #include <actions/WidgetAction.h>
 
 #include <QObject>
-#include <QMap>
 #include <QString>
-#include <QDebug>
 
 using namespace hdps::gui;
 
 namespace hdps
 {
 
-class DataManager;
-
-class DataHierarchyManager : public WidgetAction
+class AbstractDataHierarchyManager : public WidgetAction
 {
     Q_OBJECT
 
 public:
-
-    /**
-     * Constructor
-     * @param parent Pointer to parent object
-     */
-    DataHierarchyManager(QObject* parent = nullptr);
 
     /**
      * Add a dataset to the hierarchy
@@ -34,30 +24,30 @@ public:
      * @param parentDataset Smart pointer to parent dataset (if any)
      * @param visible Whether the dataset is visible in the gui
      */
-    void addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true);
+    virtual void addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true) = 0;
 
     /**
      * Removes a data hierarchy item (and its children recursively) from the data hierarchy
      * @param dataHierarchyItem Reference to data hierarchy item
      */
-    void removeItem(DataHierarchyItem& dataHierarchyItem);
+    virtual void removeItem(DataHierarchyItem& dataHierarchyItem) = 0;
 
     /** Removes all items from the data hierarchy manager in a top-down manner */
-    void removeAllItems();
+    virtual void removeAllItems() = 0;
 
     /**
      * Get hierarchy item by dataset globally unique identifier
      * @param datasetGuid Dataset GUID
      * @return Reference to data hierarchy item
      */
-    const DataHierarchyItem& getItem(const QString& datasetGuid) const;
+    virtual const DataHierarchyItem& getItem(const QString& datasetGuid) const = 0;
 
     /**
      * Get hierarchy item by dataset globally unique identifier
      * @param datasetGuid Dataset GUID
      * @return Reference to data hierarchy item
      */
-    DataHierarchyItem& getItem(const QString& datasetGuid);
+    virtual DataHierarchyItem& getItem(const QString& datasetGuid) = 0;
 
     /**
      * Get dataset children
@@ -65,19 +55,19 @@ public:
      * @param recursive Whether to get all children in a recursive manner
      * @return Children
      */
-    DataHierarchyItems getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive = true);
+    virtual DataHierarchyItems getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive = true) = 0;
 
     /**
      * Get top-level items
      * @return Top-level items
      */
-    DataHierarchyItems getTopLevelItems();
+    virtual DataHierarchyItems getTopLevelItems() = 0;
 
     /**
      * Set selected data hierarchy items
      * @param selectedItems Pointers to selected data hierarchy items
      */
-    void selectItems(DataHierarchyItems& selectedItems);
+    virtual void selectItems(DataHierarchyItems& selectedItems) = 0;
 
 public: // Serialization
 
@@ -85,13 +75,13 @@ public: // Serialization
      * Load widget action from variant
      * @param Variant representation of the widget action
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    virtual void fromVariantMap(const QVariantMap& variantMap) override = 0;
 
     /**
      * Save widget action to variant
      * @return Variant representation of the widget action
      */
-    QVariantMap toVariantMap() const override;
+    virtual QVariantMap toVariantMap() const override = 0;
 
 signals:
 
@@ -142,9 +132,6 @@ signals:
      * @param selectedItems Pointers to selected data hierarchy items
      */
     void selectedItemsChanged(DataHierarchyItems selectedItems);
-
-private:
-    DataHierarchyItems    _items;           /** Shared pointers to data hierarchy items */
 };
 
 }

@@ -117,17 +117,17 @@ bool WidgetAction::isHighlighted() const
 
 bool WidgetAction::isPublic() const
 {
-    return Application::getActionsManager().isActionPublic(this);
+    return Application::core()->getActionsManager().isActionPublic(this);
 }
 
 bool WidgetAction::isPublished() const
 {
-    return Application::getActionsManager().isActionPublished(this);
+    return Application::core()->getActionsManager().isActionPublished(this);
 }
 
 bool WidgetAction::isConnected() const
 {
-    return Application::getActionsManager().isActionConnected(this);
+    return Application::core()->getActionsManager().isActionConnected(this);
 }
 
 void WidgetAction::publish(const QString& name /*= ""*/)
@@ -178,7 +178,7 @@ void WidgetAction::publish(const QString& name /*= ""*/)
                 publish(lineEdit->text());
         }
         else {
-            if (Application::getActionsManager().isActionPublished(this))
+            if (Application::core()->getActionsManager().isActionPublished(this))
                 throw std::runtime_error("Action is already published");
 
             auto publicCopy = getPublicCopy();
@@ -190,10 +190,10 @@ void WidgetAction::publish(const QString& name /*= ""*/)
 
             connectToPublicAction(publicCopy);
 
-            Application::getActionsManager().addAction(publicCopy);
+            Application::core()->getActionsManager().addAction(publicCopy);
 
-            emit isPublishedChanged(Application::getActionsManager().isActionPublished(this));
-            emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
+            emit isPublishedChanged(Application::core()->getActionsManager().isActionPublished(this));
+            emit isConnectedChanged(Application::core()->getActionsManager().isActionConnected(this));
         }
     }
     catch (std::exception& e)
@@ -214,7 +214,7 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
 
     _publicAction->connectPrivateAction(this);
 
-    emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
+    emit isConnectedChanged(Application::core()->getActionsManager().isActionConnected(this));
 }
 
 void WidgetAction::disconnectFromPublicAction()
@@ -223,7 +223,7 @@ void WidgetAction::disconnectFromPublicAction()
 
     _publicAction->disconnectPrivateAction(this);
 
-    emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
+    emit isConnectedChanged(Application::core()->getActionsManager().isActionConnected(this));
 }
 
 void WidgetAction::connectPrivateAction(WidgetAction* privateAction)

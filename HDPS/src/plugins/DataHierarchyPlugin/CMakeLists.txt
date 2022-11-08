@@ -19,11 +19,6 @@ file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 
 find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
-set(ACTIONS
-    src/DataHierarchyFilterAction.h
-    src/DataHierarchyFilterAction.cpp
-)
-
 set(MODEL
     src/DataHierarchyFilterModel.h
     src/DataHierarchyFilterModel.cpp
@@ -50,14 +45,12 @@ set(AUX
 )
 
 set(SOURCES
-    ${ACTIONS}
     ${MODEL}
 	${PLUGIN}
 	${WIDGETS}
 	${AUX}
 )
 
-source_group(Actions FILES ${ACTIONS})
 source_group(Model FILES ${MODEL})
 source_group(Plugin FILES ${PLUGIN})
 source_group(Widgets FILES ${WIDGETS})

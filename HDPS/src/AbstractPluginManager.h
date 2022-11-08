@@ -2,6 +2,8 @@
 
 #include <actions/WidgetAction.h>
 #include <actions/PluginTriggerAction.h>
+#include <actions/TriggerAction.h>
+#include <actions/ToggleAction.h>
 
 #include <QObject>
 #include <QString>
@@ -11,8 +13,13 @@
 namespace hdps
 {
 
+using namespace plugin;
+using namespace gui;
+
 class AbstractPluginManager : public gui::WidgetAction
 {
+    Q_OBJECT
+
 public:
     
     /** Loads all plugin factories from the plugin directory and adds them as menu items */
@@ -105,6 +112,32 @@ protected:
      * @return List of resolved plugin filenames
      */
     virtual QStringList resolveDependencies(QDir pluginDir) const = 0;
+
+signals:
+
+    /**
+     * Signals that an action has become available that triggers plugin help
+     * @param pluginTriggerHelpAction Action that triggers plugin help
+     */
+    void addPluginTriggerHelpAction(TriggerAction& pluginTriggerHelpAction);
+
+    /**
+     * Signals that a trigger action has become available that triggers an import plugin
+     * @param pluginTriggerHelpAction Action that triggers the import plugin
+     */
+    void addImportPluginTriggerAction(TriggerAction& pluginTriggerAction);
+
+    /**
+     * Signals that a trigger action has become available that triggers a view plugin
+     * @param pluginTriggerHelpAction Action that triggers the view plugin
+     */
+    void addViewPluginTriggerAction(TriggerAction& pluginTriggerAction);
+
+    /**
+     * Signals that a toggle action has become available that toggles view plugin visibility
+     * @param viewPluginVisibleAction Action that toggles the view plugin visibility
+     */
+    void addViewPluginVisibleAction(ToggleAction& viewPluginVisibleAction);
 };
 
 }

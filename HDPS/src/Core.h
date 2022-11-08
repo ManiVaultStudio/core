@@ -7,6 +7,7 @@
 #include "DataManager.h"
 #include "PluginManager.h"
 #include "DataHierarchyManager.h"
+#include "ActionsManager.h"
 
 #include <event/EventListener.h>
 
@@ -206,9 +207,6 @@ public: // Plugin queries
 
 public: // Data hierarchy
 
-    /** Get a reference to the data hierarchy manager */
-    DataHierarchyManager& getDataHierarchyManager() override;
-
     /**
      * Get data hierarchy item by dataset GUI
      * @param datasetGuid Globally unique identifier of the dataset
@@ -304,19 +302,23 @@ private:
 
 public: // Managers
 
-    /** Get a pointer to the data manager */
-    AbstractDataManager* getDataManager() override;
+    /** Get a reference to the data manager */
+    AbstractDataManager& getDataManager() override;
 
-    /** Get a pointer to the plugin manager */
-    AbstractPluginManager* getPluginManager() override;
+    /** Get a reference to the plugin manager */
+    AbstractPluginManager& getPluginManager() override;
 
-    /** Get a pointer to the actions manager */
-    AbstractActionsManager* getActionsManager() override;
+    /** Get a reference to the actions manager */
+    AbstractActionsManager& getActionsManager() override;
+
+    /** Get a reference to the actions manager */
+    AbstractDataHierarchyManager& getDataHierarchyManager() override;
 
 private:
-    PluginManager                                                           _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core. */
+    PluginManager                                                           _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core */
     DataManager                                                             _dataManager;               /** Data manager responsible for storing data sets and data selections */
-    std::unique_ptr<DataHierarchyManager>                                   _dataHierarchyManager;      /** Internal hierarchical data tree */
+    DataHierarchyManager                                                    _dataHierarchyManager;      /** Data hierarchy manager for providing a hierarchical dataset structure */
+    ActionsManager                                                          _actionsManager;            /** Actions manager for storing actions */
     std::unordered_map<plugin::Type, UniquePtrsPlugin, plugin::TypeHash>    _plugins;                   /** List of plugin instances currently present in the application. Instances are stored by type. */
     std::vector<EventListener*>                                             _eventListeners;            /** List of classes listening for core events */
 

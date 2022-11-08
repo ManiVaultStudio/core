@@ -84,25 +84,56 @@ set(PRIVATE_CORE_FILES
     ${PRIVATE_CORE_SOURCES}
 )
 
-set(PRIVATE_MANAGERS_HEADERS
+set(PRIVATE_PLUGIN_MANAGER_HEADERS
     src/PluginManager.h
-    src/DataManager.h
-    #src/Logger.h
-    #src/LogItemModel.h
-    #src/LogDockWidget.h
 )
 
-set(PRIVATE_MANAGERS_SOURCES
+set(PRIVATE_PLUGIN_MANAGER_SOURCES
     src/PluginManager.cpp
-    src/DataManager.cpp
-    #src/Logger.cpp
-    #src/LogItemModel.cpp
-    #src/LogDockWidget.cpp
 )
 
-set(PRIVATE_MANAGERS_FILES
-    ${PRIVATE_MANAGERS_HEADERS}
-    ${PRIVATE_MANAGERS_SOURCES}
+set(PRIVATE_PLUGIN_MANAGER_FILES
+    ${PRIVATE_PLUGIN_MANAGER_HEADERS}
+    ${PRIVATE_PLUGIN_MANAGER_SOURCES}
+)
+
+set(PRIVATE_DATA_MANAGER_HEADERS
+    src/DataManager.h
+)
+
+set(PRIVATE_DATA_MANAGER_SOURCES
+    src/DataManager.cpp
+)
+
+set(PRIVATE_DATA_MANAGER_FILES
+    ${PRIVATE_DATA_MANAGER_HEADERS}
+    ${PRIVATE_DATA_MANAGER_SOURCES}
+)
+
+set(PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS
+    src/DataHierarchyManager.h
+)
+
+set(PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES
+    src/DataHierarchyManager.cpp
+)
+
+set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
+    ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
+    ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
+)
+
+set(PRIVATE_ACTIONS_MANAGER_HEADERS
+    src/ActionsManager.h
+)
+
+set(PRIVATE_ACTIONS_MANAGER_SOURCES
+    src/ActionsManager.cpp
+)
+
+set(PRIVATE_ACTIONS_MANAGER_FILES
+    ${PRIVATE_ACTIONS_MANAGER_HEADERS}
+    ${PRIVATE_ACTIONS_MANAGER_SOURCES}
 )
 
 set(PRIVATE_APPLICATION_HEADERS
@@ -155,7 +186,10 @@ set(PRIVATE_MISCELLANEOUS_FILES
 
 set(PRIVATE_HEADERS
     ${PRIVATE_CORE_HEADERS}
-    ${PRIVATE_MANAGERS_HEADERS}
+    ${PRIVATE_PLUGIN_MANAGER_HEADERS}
+    ${PRIVATE_DATA_MANAGER_HEADERS}
+    ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
+    ${PRIVATE_ACTIONS_MANAGER_HEADERS}
     ${PRIVATE_APPLICATION_HEADERS}
     ${PRIVATE_START_PAGE_HEADERS}
     ${PRIVATE_MISCELLANEOUS_HEADERS}
@@ -163,7 +197,10 @@ set(PRIVATE_HEADERS
 
 set(PRIVATE_SOURCES
     ${PRIVATE_CORE_SOURCES}
-    ${PRIVATE_MANAGERS_SOURCES}
+    ${PRIVATE_PLUGIN_MANAGER_SOURCES}
+    ${PRIVATE_DATA_MANAGER_SOURCES}
+    ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
+    ${PRIVATE_ACTIONS_MANAGER_SOURCES}
     ${PRIVATE_APPLICATION_SOURCES}
     ${PRIVATE_START_PAGE_SOURCES}
     ${PRIVATE_MISCELLANEOUS_SOURCES}
@@ -172,7 +209,10 @@ set(PRIVATE_SOURCES
 
 source_group(Private\\Core FILES ${PRIVATE_CORE_FILES})
 source_group(Private\\Application FILES ${PRIVATE_APPLICATION_FILES})
-source_group(Private\\Managers FILES ${PRIVATE_MANAGERS_FILES})
+source_group(Private\\Managers\\Plugin FILES ${PRIVATE_PLUGIN_MANAGER_FILES})
+source_group(Private\\Managers\\Data FILES ${PRIVATE_DATA_MANAGER_FILES})
+source_group(Private\\Managers\\DataHierarchy FILES ${PRIVATE_DATA_HIERARCHY_MANAGER_FILES})
+source_group(Private\\Managers\\Actions FILES ${PRIVATE_ACTIONS_MANAGER_FILES})
 source_group(Private\\StartPage FILES ${PRIVATE_START_PAGE_FILES})
 source_group(Private\\Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
 
@@ -181,6 +221,8 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractDataManager.h
     src/AbstractPluginManager.h
     src/AbstractActionsManager.h
+    src/AbstractDataHierarchyManager.h
+    src/AbstractLayoutManager.h
 )
 
 set(PUBLIC_CORE_INTERFACE_FILES
@@ -312,25 +354,6 @@ set(PUBLIC_ACTIONS_FILES
     ${PUBLIC_ACTIONS_SOURCES}
 )
 
-set(PUBLIC_ACTION_HIERARCHY_HEADERS
-    src/ActionHierarchyWidget.h
-    src/ActionHierarchyModelItem.h
-    src/ActionHierarchyModel.h
-    src/ActionHierarchyFilterModel.h
-)
-
-set(PUBLIC_ACTION_HIERARCHY_SOURCES
-    src/ActionHierarchyWidget.cpp
-    src/ActionHierarchyModelItem.cpp
-    src/ActionHierarchyModel.cpp
-    src/ActionHierarchyFilterModel.cpp
-)
-
-set(PUBLIC_ACTION_HIERARCHY_FILES
-    ${PUBLIC_ACTION_HIERARCHY_HEADERS}
-    ${PUBLIC_ACTION_HIERARCHY_SOURCES}
-)
-
 set(PUBLIC_WIDGET_HEADERS
     src/widgets/WebWidget.h
     src/widgets/DockableWidget.h
@@ -339,6 +362,7 @@ set(PUBLIC_WIDGET_HEADERS
     src/widgets/HierarchyWidget.h
     src/widgets/OverlayWidget.h
     src/widgets/ProjectEditorDialog.h
+    src/widgets/ActionHierarchyWidget.h
 )
 
 set(PUBLIC_WIDGET_SOURCES
@@ -349,6 +373,7 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/HierarchyWidget.cpp
     src/widgets/OverlayWidget.cpp
     src/widgets/ProjectEditorDialog.cpp
+    src/widgets/ActionHierarchyWidget.cpp
     ${ACTION_HIERARCHY_SOURCES}
 )
 
@@ -475,49 +500,6 @@ set(PUBLIC_APPLICATION_FILES
     ${PUBLIC_APPLICATION_SOURCES}
 )
 
-set(PUBLIC_LAYOUT_MANAGER_HEADERS
-    src/LayoutManager.h
-)
-
-set(PUBLIC_LAYOUT_MANAGER_SOURCES
-    src/LayoutManager.cpp
-)
-
-set(PUBLIC_LAYOUT_MANAGER_FILES
-    ${PUBLIC_LAYOUT_MANAGER_HEADERS}
-    ${PUBLIC_LAYOUT_MANAGER_SOURCES}
-)
-
-set(PUBLIC_ACTIONS_MANAGER_HEADERS
-    src/ActionsModel.h
-    src/ActionsFilterModel.h
-    src/ActionsManager.h
-)
-
-set(PUBLIC_ACTIONS_MANAGER_SOURCES
-    src/ActionsModel.cpp
-    src/ActionsFilterModel.cpp
-    src/ActionsManager.cpp
-)
-
-set(PUBLIC_ACTIONS_MANAGER_FILES
-    ${PUBLIC_ACTIONS_MANAGER_HEADERS}
-    ${PUBLIC_ACTIONS_MANAGER_SOURCES}
-)
-
-set(PUBLIC_LAYOUT_MANAGER_HEADERS
-    src/LayoutManager.h
-)
-
-set(PUBLIC_LAYOUT_MANAGER_SOURCES
-    src/LayoutManager.cpp
-)
-
-set(PUBLIC_LAYOUT_MANAGER_FILES
-    ${PUBLIC_LAYOUT_MANAGER_HEADERS}
-    ${PUBLIC_LAYOUT_MANAGER_SOURCES}
-)
-
 set(PUBLIC_DATASET_HEADERS
     src/DataType.h
     src/RawData.h
@@ -566,12 +548,10 @@ list(APPEND PUBLIC_PLUGIN_FILES
 )
 
 set(PUBLIC_DATA_HIERARCHY_HEADERS
-    src/DataHierarchyManager.h
     src/DataHierarchyItem.h
 )
 
 set(PUBLIC_DATA_HIERARCHY_SOURCES
-    src/DataHierarchyManager.cpp
     src/DataHierarchyItem.cpp
 )
 
@@ -593,6 +573,55 @@ list(APPEND PUBLIC_PROJECT_FILES
     ${PUBLIC_PROJECT_SOURCES}
 )
 
+set(PUBLIC_ACTIONS_MODEL_HEADERS
+    src/models/ActionsModel.h
+    src/models/ActionsFilterModel.h
+)
+
+set(PUBLIC_ACTIONS_MODEL_SOURCES
+    src/models/ActionsModel.cpp
+    src/models/ActionsFilterModel.cpp
+)
+
+set(PUBLIC_ACTIONS_MODEL_FILES
+    ${PUBLIC_ACTIONS_MODEL_HEADERS}
+    ${PUBLIC_ACTIONS_MODEL_SOURCES}
+)
+
+set(PUBLIC_ACTION_HIERARCHY_MODEL_HEADERS
+    src/models/ActionHierarchyModelItem.h
+    src/models/ActionHierarchyModel.h
+    src/models/ActionHierarchyFilterModel.h
+)
+
+set(PUBLIC_ACTION_HIERARCHY_MODEL_SOURCES
+    src/models/ActionHierarchyModelItem.cpp
+    src/models/ActionHierarchyModel.cpp
+    src/models/ActionHierarchyFilterModel.cpp
+)
+
+set(PUBLIC_ACTION_HIERARCHY_MODEL_FILES
+    ${PUBLIC_ACTION_HIERARCHY_MODEL_HEADERS}
+    ${PUBLIC_ACTION_HIERARCHY_MODEL_SOURCES}
+)
+
+set(PUBLIC_DATA_HIERARCHY_MODEL_HEADERS
+    src/models/ActionHierarchyModelItem.h
+    src/models/ActionHierarchyModel.h
+    src/models/ActionHierarchyFilterModel.h
+)
+
+set(PUBLIC_DATA_HIERARCHY_MODEL_SOURCES
+    src/models/ActionHierarchyModelItem.cpp
+    src/models/ActionHierarchyModel.cpp
+    src/models/ActionHierarchyFilterModel.cpp
+)
+
+set(PUBLIC_DATA_HIERARCHY_MODEL_FILES
+    ${PUBLIC_DATA_HIERARCHY_MODEL_HEADERS}
+    ${PUBLIC_DATA_HIERARCHY_MODEL_SOURCES}
+)
+
 set(PUBLIC_HEADERS
     ${PUBLIC_CORE_INTERFACE_HEADERS}
     ${PUBLIC_EVENT_HEADERS}
@@ -609,6 +638,9 @@ set(PUBLIC_HEADERS
     ${PUBLIC_PLUGIN_HEADERS}
     ${PUBLIC_PROJECT_HEADERS}
     ${PUBLIC_DATA_HIERARCHY_HEADERS}
+    ${PUBLIC_ACTIONS_MODEL_HEADERS}
+    ${PUBLIC_ACTION_HIERARCHY_MODEL_HEADERS}
+    ${PUBLIC_DATA_HIERARCHY_MODEL_HEADERS}
 )
 
 set(PUBLIC_SOURCES
@@ -626,6 +658,9 @@ set(PUBLIC_SOURCES
     ${PUBLIC_PLUGIN_SOURCES}
     ${PUBLIC_DATA_HIERARCHY_SOURCES}
     ${PUBLIC_PROJECT_SOURCES}
+    ${PUBLIC_ACTIONS_MODEL_SOURCES}
+    ${PUBLIC_ACTION_HIERARCHY_MODEL_SOURCES}
+    ${PUBLIC_DATA_HIERARCHY_MODEL_SOURCES}
     ${PUBLIC_HEADERS}
 )
 
@@ -655,13 +690,13 @@ source_group(Public\\Renderers FILES ${PUBLIC_RENDERERS_FILES})
 source_group(Public\\Graphics FILES ${PUBLIC_GRAPHICS_FILES})
 source_group(Public\\Util FILES ${PUBLIC_UTIL_FILES})
 source_group(Public\\Application FILES ${PUBLIC_APPLICATION_FILES})
-source_group(Public\\Managers\\Actions FILES ${PUBLIC_ACTIONS_MANAGER_FILES})
-source_group(Public\\Managers\\Layout FILES ${PUBLIC_LAYOUT_MANAGER_FILES})
-source_group(Public\\Managers\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_FILES})
-source_group(Public\\Managers\\ActionHierarchy FILES ${PUBLIC_ACTION_HIERARCHY_FILES})
+source_group(Public\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_FILES})
 source_group(Public\\Dataset FILES ${PUBLIC_DATASET_FILES})
 source_group(Public\\Plugin FILES ${PUBLIC_PLUGIN_FILES})
 source_group(Public\\Project FILES ${PUBLIC_PROJECT_FILES})
+source_group(Public\\Model\\Actions FILES ${PUBLIC_ACTIONS_MODEL_FILES})
+source_group(Public\\Model\\ActionHierarchy FILES ${PUBLIC_ACTION_HIERARCHY_MODEL_FILES})
+source_group(Public\\Model\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
 
 source_group( Resources FILES res/resources.qrc)
 source_group( Resources FILES ${UI_FILES})

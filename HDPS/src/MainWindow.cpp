@@ -77,19 +77,19 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     _loadedViewPluginsMenu.setEnabled(false);
 
-    connect(dynamic_cast<PluginManager*>(Application::core()->getPluginManager()), &PluginManager::addPluginTriggerHelpAction, this, [this](TriggerAction& pluginTriggerHelpAction) -> void {
+    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::addPluginTriggerHelpAction, this, [this](TriggerAction& pluginTriggerHelpAction) -> void {
         _pluginsHelpMenu.addAction(&pluginTriggerHelpAction);
     });
 
-    connect(dynamic_cast<PluginManager*>(Application::core()->getPluginManager()), &PluginManager::addImportPluginTriggerAction, this, [this](TriggerAction& pluginTriggerAction) -> void {
+    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::addImportPluginTriggerAction, this, [this](TriggerAction& pluginTriggerAction) -> void {
         importDataMenu->addAction(&pluginTriggerAction);
     });
 
-    connect(dynamic_cast<PluginManager*>(Application::core()->getPluginManager()), &PluginManager::addViewPluginTriggerAction, this, [this](TriggerAction& pluginTriggerAction) -> void {
+    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::addViewPluginTriggerAction, this, [this](TriggerAction& pluginTriggerAction) -> void {
         menuVisualization->insertAction(0, &pluginTriggerAction);
     });
 
-    connect(dynamic_cast<PluginManager*>(Application::core()->getPluginManager()), &PluginManager::addViewPluginVisibleAction, this, [this](ToggleAction& viewPluginVisibleAction) -> void {
+    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::addViewPluginVisibleAction, this, [this](ToggleAction& viewPluginVisibleAction) -> void {
         _loadedViewPluginsMenu.addAction(&viewPluginVisibleAction);
         _loadedViewPluginsMenu.setEnabled(true);
     });

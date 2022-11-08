@@ -13,7 +13,7 @@ namespace hdps
 {
 
 DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
-    WidgetAction(parent),
+    AbstractDataHierarchyManager(),
     _items()
 {
     setText("Data hierarchy");

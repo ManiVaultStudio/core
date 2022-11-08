@@ -5,13 +5,13 @@
 #include <QObject>
 #include <QAbstractItemModel>
 
+class QSortFilterProxyModel;
+
 namespace hdps
 {
 
 class AbstractActionsManager : public gui::WidgetAction
 {
-    Q_OBJECT
-
 public:
 
     /**

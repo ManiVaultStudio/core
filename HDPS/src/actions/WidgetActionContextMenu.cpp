@@ -2,6 +2,7 @@
 #include "WidgetAction.h"
 #include "ActionsFilterModel.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include <QDebug>
 
@@ -55,7 +56,6 @@ void WidgetActionContextMenu::initialize()
 
         auto actionsFilterModel = new ActionsFilterModel(this);
 
-        actionsFilterModel->setSourceModel(const_cast<ActionsModel*>(&Application::getActionsManager().getActionsModel()));
         actionsFilterModel->setScopeFilter(ActionsFilterModel::Public);
         actionsFilterModel->setTypeFilter(_widgetAction->getTypeString());
 

@@ -147,7 +147,7 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     _dataManager.addSelection(rawDataName, selection);
 
     // Add the dataset to the hierarchy manager and select the dataset
-    _dataHierarchyManager->addItem(fullSet, const_cast<Dataset<DatasetImpl>&>(parentDataset));
+    _dataHierarchyManager.addItem(fullSet, const_cast<Dataset<DatasetImpl>&>(parentDataset));
     //_dataHierarchyManager->selectItems(DataHierarchyItems({ &fullSet->getDataHierarchyItem() }));
 
     // Initialize the dataset (e.g. setup default actions for info)
@@ -171,7 +171,7 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
         Datasets datasetsToRemove{ dataset };
 
         // Get children in a top-down manner
-        for (auto child : _dataHierarchyManager->getChildren(dataset->getDataHierarchyItem()))
+        for (auto child : _dataHierarchyManager.getChildren(dataset->getDataHierarchyItem()))
             datasetsToRemove << child->getDataset();
 
         // Remove datasets bottom-up (this prevents issues with the data hierarchy manager)
@@ -205,7 +205,7 @@ void Core::removeAllDatasets()
     qDebug() << "Removing all datasets from the core";
 #endif
 
-    for (auto topLevelItem : _dataHierarchyManager->getTopLevelItems())
+    for (auto topLevelItem : _dataHierarchyManager.getTopLevelItems())
         removeDataset(topLevelItem->getDataset());
 
     Application::current()->setCurrentProjectFilePath("");
@@ -229,7 +229,7 @@ Dataset<DatasetImpl> Core::copyDataset(const Dataset<DatasetImpl>& dataset, cons
         auto parent = parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(parentDataset) : (dataset->getDataHierarchyItem().hasParent() ? dataset->getParent() : Dataset<DatasetImpl>());
 
         // Add to the data hierarchy manager
-        _dataHierarchyManager->addItem(const_cast<Dataset<DatasetImpl>&>(datasetCopy), parent);
+        _dataHierarchyManager.addItem(const_cast<Dataset<DatasetImpl>&>(datasetCopy), parent);
 
         // Notify others that data was added
         notifyDatasetAdded(dataset);
@@ -270,7 +270,7 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
     _dataManager.addSet(*derivedDataset);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager->addItem(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
+    _dataHierarchyManager.addItem(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
 
     // Initialize the dataset (e.g. setup default actions for info)
     derivedDataset->init();
@@ -298,7 +298,7 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
         _dataManager.addSet(*subset);
 
         // Add the dataset to the hierarchy manager
-        _dataHierarchyManager->addItem(subset, const_cast<Dataset<DatasetImpl>&>(parentDataset), visible);
+        _dataHierarchyManager.addItem(subset, const_cast<Dataset<DatasetImpl>&>(parentDataset), visible);
 
         // Notify listeners that data was added
         notifyDatasetAdded(*subset);
@@ -381,29 +381,29 @@ QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& 
     return allDataSets;
 }
 
-AbstractDataManager* Core::getDataManager()
+AbstractDataManager& Core::getDataManager()
 {
-    return &_dataManager;
+    return _dataManager;
 }
 
-AbstractPluginManager* Core::getPluginManager()
+AbstractPluginManager& Core::getPluginManager()
 {
-    return &_pluginManager;
+    return _pluginManager;
 }
 
-AbstractActionsManager* Core::getActionsManager()
+AbstractActionsManager& Core::getActionsManager()
 {
-    return nullptr;
+    return _actionsManager;
 }
 
-DataHierarchyManager& Core::getDataHierarchyManager()
+AbstractDataHierarchyManager& Core::getDataHierarchyManager()
 {
-    return *_dataHierarchyManager;
+    return _dataHierarchyManager;
 }
 
 DataHierarchyItem& Core::getDataHierarchyItem(const QString& dataSetId)
 {
-    return _dataHierarchyManager->getItem(dataSetId);
+    return _dataHierarchyManager.getItem(dataSetId);
 }
 
 bool Core::isDatasetGroupingEnabled() const

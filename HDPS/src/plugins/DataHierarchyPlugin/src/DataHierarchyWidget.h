@@ -1,13 +1,12 @@
 #pragma once
 
-#include "widgets/HierarchyWidget.h"
-#include "DataHierarchyModel.h"
-#include "DataHierarchyFilterModel.h"
-#include "DataHierarchyFilterAction.h"
-#include "Dataset.h"
-#include "actions/StringAction.h"
-#include "actions/TriggerAction.h"
-#include "actions/ToggleAction.h"
+#include <Dataset.h>
+#include <model/DataHierarchyModel.h>
+#include <model/DataHierarchyFilterModel.h>
+#include <actions/StringAction.h>
+#include <actions/TriggerAction.h>
+#include <actions/ToggleAction.h>
+#include <widgets/HierarchyWidget.h>
 
 #include <QWidget>
 #include <QTreeView>

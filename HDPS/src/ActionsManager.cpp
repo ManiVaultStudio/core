@@ -1,4 +1,5 @@
 #include "ActionsManager.h"
+#include "ActionsFilterModel.h"
 
 #include "actions/WidgetAction.h"
 #include "util/Exception.h"
@@ -10,8 +11,8 @@ namespace hdps
 {
 
 ActionsManager::ActionsManager(QObject* parent /*= nullptr*/) :
-    QObject(parent),
-    _actionsModel()
+    AbstractActionsManager(),
+    _model()
 {
 }
 
@@ -22,7 +23,7 @@ void ActionsManager::addAction(WidgetAction* action)
         if (action == nullptr)
             throw std::runtime_error("Action is not valid");
 
-        _actionsModel.addPublicAction(action);
+        _model.addPublicAction(action);
     }
     catch (std::exception& e)
     {
@@ -41,7 +42,7 @@ void ActionsManager::removeAction(WidgetAction* action)
         if (action == nullptr)
             throw std::runtime_error("Action is not valid");
 
-        _actionsModel.removePublicAction(action);
+        _model.removePublicAction(action);
     }
     catch (std::exception& e)
     {
@@ -53,19 +54,19 @@ void ActionsManager::removeAction(WidgetAction* action)
     }
 }
 
-const ActionsModel& ActionsManager::getActionsModel() const
+const QAbstractItemModel& ActionsManager::getModel() const
 {
-    return _actionsModel;
+    return _model;
 }
 
 bool ActionsManager::isActionPublic(const WidgetAction* action) const
 {
-    return _actionsModel._publicActions.contains(const_cast<WidgetAction*>(action));
+    return _model._publicActions.contains(const_cast<WidgetAction*>(action));
 }
 
 bool ActionsManager::isActionPublished(const WidgetAction* action) const
 {
-    for (const auto publicAction : _actionsModel._publicActions)
+    for (const auto publicAction : _model._publicActions)
         if (publicAction->getConnectedActions().first() == action)
             return true;
 
@@ -74,7 +75,7 @@ bool ActionsManager::isActionPublished(const WidgetAction* action) const
 
 bool ActionsManager::isActionConnected(const WidgetAction* action) const
 {
-    for (const auto publicAction : _actionsModel._publicActions)
+    for (const auto publicAction : _model._publicActions)
         if (publicAction->getConnectedActions().contains(const_cast<WidgetAction*>(action)))
             return true;
 
