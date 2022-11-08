@@ -4,6 +4,9 @@
 
 namespace hdps
 {
+
+using namespace gui;
+
 namespace plugin
 {
 

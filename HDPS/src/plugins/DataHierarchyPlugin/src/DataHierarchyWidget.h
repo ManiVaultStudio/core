@@ -1,22 +1,19 @@
 #pragma once
 
-#include <Dataset.h>
-#include <model/DataHierarchyModel.h>
-#include <model/DataHierarchyFilterModel.h>
+#include <models/DataHierarchyModel.h>
+#include <models/DataHierarchyFilterModel.h>
 #include <actions/StringAction.h>
 #include <actions/TriggerAction.h>
 #include <actions/ToggleAction.h>
 #include <widgets/HierarchyWidget.h>
+#include <DataHierarchyItem.h>
+#include <Dataset.h>
 
 #include <QWidget>
-#include <QTreeView>
-#include <QGraphicsOpacityEffect>
-
-namespace hdps {
-    class DataHierarchyItem;
-}
 
 class DataHierarchyPlugin;
+
+using namespace hdps::gui;
 
 /**
  * Widget for displaying the data hierarchy

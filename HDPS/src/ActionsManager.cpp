@@ -1,8 +1,8 @@
 #include "ActionsManager.h"
-#include "ActionsFilterModel.h"
 
-#include "actions/WidgetAction.h"
-#include "util/Exception.h"
+#include <models/ActionsFilterModel.h>
+#include <actions/WidgetAction.h>
+#include <util/Exception.h>
 
 using namespace hdps::gui;
 using namespace hdps::util;

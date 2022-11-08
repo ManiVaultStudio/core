@@ -249,6 +249,7 @@ private:
     TriggerAction               _selectAllAction;                   /** Select all action */
     TriggerAction               _selectNoneAction;                  /** Select none action */
     GroupAction                 _selectionGroupAction;              /** Selection group action */
+    GroupAction                 _columnsAction;                     /** Column visibility action */
     GroupAction                 _settingsGroupAction;               /** Settings group action */
 };
 

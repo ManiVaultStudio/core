@@ -13,9 +13,6 @@
 namespace hdps
 {
 
-using namespace plugin;
-using namespace gui;
-
 class AbstractPluginManager : public gui::WidgetAction
 {
     Q_OBJECT
@@ -119,25 +116,25 @@ signals:
      * Signals that an action has become available that triggers plugin help
      * @param pluginTriggerHelpAction Action that triggers plugin help
      */
-    void addPluginTriggerHelpAction(TriggerAction& pluginTriggerHelpAction);
+    void addPluginTriggerHelpAction(gui::TriggerAction& pluginTriggerHelpAction);
 
     /**
      * Signals that a trigger action has become available that triggers an import plugin
      * @param pluginTriggerHelpAction Action that triggers the import plugin
      */
-    void addImportPluginTriggerAction(TriggerAction& pluginTriggerAction);
+    void addImportPluginTriggerAction(gui::TriggerAction& pluginTriggerAction);
 
     /**
      * Signals that a trigger action has become available that triggers a view plugin
      * @param pluginTriggerHelpAction Action that triggers the view plugin
      */
-    void addViewPluginTriggerAction(TriggerAction& pluginTriggerAction);
+    void addViewPluginTriggerAction(gui::TriggerAction& pluginTriggerAction);
 
     /**
      * Signals that a toggle action has become available that toggles view plugin visibility
      * @param viewPluginVisibleAction Action that toggles the view plugin visibility
      */
-    void addViewPluginVisibleAction(ToggleAction& viewPluginVisibleAction);
+    void addViewPluginVisibleAction(gui::ToggleAction& viewPluginVisibleAction);
 };
 
 }

@@ -1,6 +1,8 @@
 #include "ActionHierarchyWidget.h"
-#include "ActionHierarchyModelItem.h"
-#include "Application.h"
+
+#include <models/ActionHierarchyModelItem.h>
+
+#include <Application.h>
 
 #include <QDebug>
 #include <QVBoxLayout>

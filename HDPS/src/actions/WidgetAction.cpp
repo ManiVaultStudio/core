@@ -6,6 +6,7 @@
 #include "DataHierarchyItem.h"
 #include "Plugin.h"
 #include "util/Exception.h"
+#include "AbstractActionsManager.h"
 
 #include <QDebug>
 #include <QMenu>

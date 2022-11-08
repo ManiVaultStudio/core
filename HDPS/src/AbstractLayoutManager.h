@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QObject>
+#include <actions/WidgetAction.h>
 
 namespace hdps
 {
@@ -8,17 +8,11 @@ namespace hdps
 namespace gui
 {
 
-class LayoutManager : public QObject
+class AbstractLayoutManager : public gui::WidgetAction
 {
     Q_OBJECT
 
 public:
-
-    /**
-     * Constructor
-     * @param parent Pointer to parent object
-     */
-    LayoutManager(QObject* parent = nullptr);
 };
 
 }

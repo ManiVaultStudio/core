@@ -1,6 +1,6 @@
 #include "WidgetActionLabel.h"
 #include "WidgetAction.h"
-#include "ActionsFilterModel.h"
+#include "models/ActionsFilterModel.h"
 #include "Application.h"
 
 #include <QDebug>

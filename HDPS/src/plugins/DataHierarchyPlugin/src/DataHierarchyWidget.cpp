@@ -1,8 +1,8 @@
 #include "DataHierarchyWidget.h"
-#include "DataHierarchyModel.h"
-#include "DataHierarchyModelItem.h"
-#include "DatasetsContextMenu.h"
+#include "DataHierarchyWidgetContextMenu.h"
 
+#include <models/DataHierarchyModel.h>
+#include <models/DataHierarchyModelItem.h>
 #include <Application.h>
 #include <Dataset.h>
 #include <PluginFactory.h>
@@ -157,7 +157,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         for (const auto& selectedRow : selectedRows)
             datasets << _model.getItem(selectedRow, Qt::DisplayRole)->getDataHierarchyItem()->getDataset();
 
-        auto datasetsContextMenu = new DatasetsContextMenu(this, datasets);
+        auto datasetsContextMenu = new DataHierarchyWidgetContextMenu(this, datasets);
 
         datasetsContextMenu->exec(_hierarchyWidget.getTreeView().viewport()->mapToGlobal(position));
     });

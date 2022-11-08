@@ -12,7 +12,7 @@
     #define SERIALIZABLE_VERBOSE
 #endif
 
-using namespace hdps::util;
+using namespace hdps::gui;
 
 namespace hdps {
 

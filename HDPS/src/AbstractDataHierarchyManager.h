@@ -7,12 +7,10 @@
 #include <QObject>
 #include <QString>
 
-using namespace hdps::gui;
-
 namespace hdps
 {
 
-class AbstractDataHierarchyManager : public WidgetAction
+class AbstractDataHierarchyManager : public gui::WidgetAction
 {
     Q_OBJECT
 

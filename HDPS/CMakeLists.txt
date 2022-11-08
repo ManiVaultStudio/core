@@ -606,15 +606,15 @@ set(PUBLIC_ACTION_HIERARCHY_MODEL_FILES
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_HEADERS
-    src/models/ActionHierarchyModelItem.h
-    src/models/ActionHierarchyModel.h
-    src/models/ActionHierarchyFilterModel.h
+    src/models/DataHierarchyModelItem.h
+    src/models/DataHierarchyModel.h
+    src/models/DataHierarchyFilterModel.h
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_SOURCES
-    src/models/ActionHierarchyModelItem.cpp
-    src/models/ActionHierarchyModel.cpp
-    src/models/ActionHierarchyFilterModel.cpp
+    src/models/DataHierarchyModelItem.cpp
+    src/models/DataHierarchyModel.cpp
+    src/models/DataHierarchyFilterModel.cpp
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_FILES

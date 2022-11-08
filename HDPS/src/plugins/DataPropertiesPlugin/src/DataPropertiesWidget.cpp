@@ -1,6 +1,7 @@
 #include "DataPropertiesWidget.h"
 
 #include <Application.h>
+#include <AbstractDataHierarchyManager.h>
 #include <DataHierarchyItem.h>
 
 #include <actions/GroupAction.h>
@@ -25,7 +26,7 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
     _layout.addWidget(_groupsActionWidget);
 
-    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::selectedItemsChanged);
+    connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::selectedItemsChanged);
 
     connect(&_dataset, &Dataset<DatasetImpl>::dataRemoved, this, [this]() -> void {
         _groupsAction.setGroupActions({});

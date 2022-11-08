@@ -11,13 +11,13 @@ using namespace hdps;
 using namespace hdps::plugin;
 
 /**
- * Datasets context menu
+ * Data hierarchy widget context menu
  * 
- * Constructs a data hierarchy context menu based on the current datasets selection
+ * Constructs a data hierarchy widget context menu based on the current datasets selection
  * 
  * @author Thomas Kroes
  */
-class DatasetsContextMenu : public QMenu
+class DataHierarchyWidgetContextMenu : public QMenu
 {
     Q_OBJECT
 
@@ -28,7 +28,7 @@ public:
      * @param parent Parent widget
      * @param selectedDatasets Selected datasets in the data hierarchy widget
      */
-    DatasetsContextMenu(QWidget* parent, Datasets datasets);
+    DataHierarchyWidgetContextMenu(QWidget* parent, Datasets datasets);
 
 private:
 

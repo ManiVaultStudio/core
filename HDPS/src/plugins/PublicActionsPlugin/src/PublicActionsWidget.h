@@ -2,7 +2,7 @@
 
 #include <widgets/HierarchyWidget.h>
 
-#include <ActionsFilterModel.h>
+#include <models/ActionsFilterModel.h>
 
 #include <QWidget>
 

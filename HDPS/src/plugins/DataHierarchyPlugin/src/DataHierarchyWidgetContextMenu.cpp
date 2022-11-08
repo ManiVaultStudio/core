@@ -1,4 +1,4 @@
-#include "DatasetsContextMenu.h"
+#include "DataHierarchyWidgetContextMenu.h"
 
 #include <Application.h>
 #include <CoreInterface.h>
@@ -16,7 +16,7 @@ using namespace hdps;
 using namespace hdps::util;
 using namespace hdps::plugin;
 
-DatasetsContextMenu::DatasetsContextMenu(QWidget* parent, Datasets datasets) :
+DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, Datasets datasets) :
     QMenu(parent),
     _datasets(datasets)
 {
@@ -43,7 +43,7 @@ DatasetsContextMenu::DatasetsContextMenu(QWidget* parent, Datasets datasets) :
     }
 }
 
-void DatasetsContextMenu::addMenusForPluginType(plugin::Type pluginType)
+void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginType)
 {
     QMap<QString, QMenu*> menus;
 
@@ -144,7 +144,7 @@ void DatasetsContextMenu::addMenusForPluginType(plugin::Type pluginType)
     }
 }
 
-QAction* DatasetsContextMenu::getGroupAction()
+QAction* DataHierarchyWidgetContextMenu::getGroupAction()
 {
     auto groupDataAction = new QAction("Group...");
 
@@ -158,7 +158,7 @@ QAction* DatasetsContextMenu::getGroupAction()
     return groupDataAction;
 }
 
-QMenu* DatasetsContextMenu::getLockMenu()
+QMenu* DataHierarchyWidgetContextMenu::getLockMenu()
 {
     auto lockMenu = new QMenu("Lock");
 
@@ -198,7 +198,7 @@ QMenu* DatasetsContextMenu::getLockMenu()
     return lockMenu;
 }
 
-QMenu* DatasetsContextMenu::getUnlockMenu()
+QMenu* DataHierarchyWidgetContextMenu::getUnlockMenu()
 {
     auto unlockMenu = new QMenu("Unlock");
 

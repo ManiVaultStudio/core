@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ActionsManager.h"
-
 #include <util/IconFonts.h>
 
 #include <QApplication>

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "AbstractActionsManager.h"
-#include "ActionsModel.h"
+
+#include <models/ActionsModel.h>
 
 namespace hdps
 {

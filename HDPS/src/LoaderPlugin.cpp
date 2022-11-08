@@ -6,6 +6,8 @@
 #include <QSettings>
 #include <QString>
 
+using namespace hdps::gui;
+
 namespace hdps {
 
 namespace plugin {

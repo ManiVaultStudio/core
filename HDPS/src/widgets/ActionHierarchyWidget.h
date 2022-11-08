@@ -1,9 +1,8 @@
 #pragma once
 
-#include "ActionHierarchyModel.h"
-#include "ActionHierarchyFilterModel.h"
-
-#include "widgets/HierarchyWidget.h"
+#include <models/ActionHierarchyModel.h>
+#include <models/ActionHierarchyFilterModel.h>
+#include <widgets/HierarchyWidget.h>
 
 #include <QWidget>
 #include <QTreeView>

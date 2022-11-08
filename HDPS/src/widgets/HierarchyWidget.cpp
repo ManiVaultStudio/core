@@ -34,6 +34,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _selectAllAction(this, "Select all"),
     _selectNoneAction(this, "Select none"),
     _selectionGroupAction(this),
+    _columnsAction(this),
     _settingsGroupAction(this)
 {
     _filterNameAction.setSearchMode(true);
@@ -69,6 +70,22 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _selectionGroupAction << _selectAllAction;
     _selectionGroupAction << _selectNoneAction;
 
+    _columnsAction.setText("Columns");
+    _columnsAction.setToolTip(QString("Edit which %1s hierarchy columns should be visible").arg(_itemTypeName.toLower()));
+    _columnsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("columns"));
+
+    for (std::int32_t columnIndex = 0; columnIndex < _model.columnCount(); columnIndex++) {
+        auto columnVisibilityAction = new ToggleAction(this, _model.headerData(columnIndex, Qt::Horizontal, Qt::DisplayRole).toString());
+
+        columnVisibilityAction->setConnectionPermissionsToNone();
+
+        connect(columnVisibilityAction, &ToggleAction::toggled, this, [this, columnIndex](bool toggled) -> void {
+            _treeView.setColumnHidden(columnIndex, !toggled);
+        });
+
+        _columnsAction << *columnVisibilityAction;
+    }
+
     _settingsGroupAction.setText("Settings");
     _settingsGroupAction.setToolTip(QString("Edit %1s hierarchy settings").arg(_itemTypeName.toLower()));
     _settingsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
@@ -88,6 +105,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
         toolbarLayout->addWidget(_expandAllAction.createWidget(this));
         toolbarLayout->addWidget(_collapseAllAction.createWidget(this));
         toolbarLayout->addWidget(_selectionGroupAction.createCollapsedWidget(this));
+        toolbarLayout->addWidget(_columnsAction.createCollapsedWidget(this));
         toolbarLayout->addWidget(_settingsGroupAction.createCollapsedWidget(this));
 
         layout->addLayout(toolbarLayout);
@@ -129,8 +147,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
         _filterNameAction.setEnabled(_model.rowCount() >= 1);
         _filterGroupAction.setEnabled(_model.rowCount() >= 1);
         _selectionGroupAction.setEnabled(hasItems);
+        _columnsAction.setEnabled(hasItems);
 
-        //_treeView.setEnabled(hasItems);
         _treeView.setHeaderHidden(!hasItems);
         
         updateExpandCollapseActionsReadOnly();

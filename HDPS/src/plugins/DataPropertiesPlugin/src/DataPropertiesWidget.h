@@ -1,7 +1,6 @@
 #pragma once
 
-#include "DataHierarchyManager.h"
-
+#include <DataHierarchyItem.h>
 #include <Dataset.h>
 
 #include <actions/GroupsAction.h>
@@ -10,6 +9,7 @@
 
 using namespace hdps;
 using namespace hdps::util;
+using namespace hdps::gui;
 
 /**
  * Data properties widget class

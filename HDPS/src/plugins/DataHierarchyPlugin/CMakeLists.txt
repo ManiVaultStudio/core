@@ -19,15 +19,6 @@ file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 
 find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
-set(MODEL
-    src/DataHierarchyFilterModel.h
-    src/DataHierarchyFilterModel.cpp
-	src/DataHierarchyModel.h
-    src/DataHierarchyModel.cpp
-	src/DataHierarchyModelItem.h
-    src/DataHierarchyModelItem.cpp
-)
-
 set(PLUGIN
 	src/DataHierarchyPlugin.h
     src/DataHierarchyPlugin.cpp
@@ -36,8 +27,8 @@ set(PLUGIN
 set(WIDGETS
     src/DataHierarchyWidget.h
     src/DataHierarchyWidget.cpp
-    src/DatasetsContextMenu.h
-    src/DatasetsContextMenu.cpp
+    src/DataHierarchyWidgetContextMenu.h
+    src/DataHierarchyWidgetContextMenu.cpp
 )
 
 set(AUX
@@ -45,13 +36,11 @@ set(AUX
 )
 
 set(SOURCES
-    ${MODEL}
 	${PLUGIN}
 	${WIDGETS}
 	${AUX}
 )
 
-source_group(Model FILES ${MODEL})
 source_group(Plugin FILES ${PLUGIN})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
