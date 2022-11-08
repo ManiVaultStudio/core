@@ -4,6 +4,7 @@
 #include <PluginFactory.h>
 
 #include <actions/TriggerAction.h>
+#include <actions/ToggleAction.h>
 
 namespace hdps {
 
@@ -147,6 +148,12 @@ signals:
      * @param pluginTriggerHelpAction Action that triggers the view plugin
      */
     void addViewPluginTriggerAction(TriggerAction& pluginTriggerAction);
+
+    /**
+     * Signals that a toggle action has become available that toggles view plugin visibility
+     * @param viewPluginVisibleAction Action that toggles the view plugin visibility
+     */
+    void addViewPluginVisibleAction(ToggleAction& viewPluginVisibleAction);
 
 private:
     QHash<QString, PluginFactory*> _pluginFactories;

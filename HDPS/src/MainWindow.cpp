@@ -50,8 +50,6 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     dynamic_cast<Application*>(qApp)->setCore(&_core);
 
-    
-
     _startPageWidget        = new StartPageWidget(this);
 
     // Change the window title when the current project file changed
@@ -79,32 +77,24 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     _loadedViewPluginsMenu.setEnabled(false);
 
+    connect(dynamic_cast<PluginManager*>(Application::core()->getPluginManager()), &PluginManager::addPluginTriggerHelpAction, this, [this](TriggerAction& pluginTriggerHelpAction) -> void {
+        _pluginsHelpMenu.addAction(&pluginTriggerHelpAction);
+    });
+
+    connect(dynamic_cast<PluginManager*>(Application::core()->getPluginManager()), &PluginManager::addImportPluginTriggerAction, this, [this](TriggerAction& pluginTriggerAction) -> void {
+        importDataMenu->addAction(&pluginTriggerAction);
+    });
+
+    connect(dynamic_cast<PluginManager*>(Application::core()->getPluginManager()), &PluginManager::addViewPluginTriggerAction, this, [this](TriggerAction& pluginTriggerAction) -> void {
+        menuVisualization->insertAction(0, &pluginTriggerAction);
+    });
+
+    connect(dynamic_cast<PluginManager*>(Application::core()->getPluginManager()), &PluginManager::addViewPluginVisibleAction, this, [this](ToggleAction& viewPluginVisibleAction) -> void {
+        _loadedViewPluginsMenu.addAction(&viewPluginVisibleAction);
+        _loadedViewPluginsMenu.setEnabled(true);
+    });
+
     _core.init();
-}
-
-void MainWindow::addImportOption(QAction* action)
-{
-    importDataMenu->addAction(action);
-}
-
-void MainWindow::addViewMenuAction(QAction* action)
-{
-    menuVisualization->insertAction(0, action);
-
-    //if (menuVisualization->actions().count() == 2)
-    //    menuVisualization->insertAction(1, &_loadedViewPluginsMenu);
-}
-
-void MainWindow::addLoadedViewPluginAction(QAction* action)
-{
-    _loadedViewPluginsMenu.addAction(action);
-
-    _loadedViewPluginsMenu.setEnabled(true);
-}
-
-void MainWindow::addPluginTriggerHelpAction(QAction* action)
-{
-    _pluginsHelpMenu.addAction(action);
 }
 
 void MainWindow::showEvent(QShowEvent* showEvent)

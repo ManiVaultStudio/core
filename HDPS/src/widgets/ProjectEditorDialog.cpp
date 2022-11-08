@@ -27,9 +27,9 @@ ProjectEditorDialog::ProjectEditorDialog(QWidget* parent, ViewPlugin* viewPlugin
 
     layout->addWidget(&_actionHierarchyWidget);
     layout->addWidget(viewPlugin->getAllowedDockingAreasAction().createWidget(this));
-    //layout->addWidget(_viewPlugin->getMayCloseAction().createWidget(this));
-    //layout->addWidget(_viewPlugin->getMayFloatAction().createWidget(this));
-    //layout->addWidget(_viewPlugin->getGuiNameAction().createWidget(this));
+    layout->addWidget(viewPlugin->getMayCloseAction().createWidget(this));
+    layout->addWidget(viewPlugin->getMayFloatAction().createWidget(this));
+    layout->addWidget(viewPlugin->getGuiNameAction().createWidget(this));
     //layout->addWidget(_groupsAction.createWidget(this));
 
     setLayout(layout);

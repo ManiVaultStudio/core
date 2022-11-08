@@ -27,30 +27,6 @@ public:
     MainWindow(QWidget *parent = nullptr);
 
     /**
-     * Adds an import plugin trigger action to the visualize menu
-     * @param action Pointer to action to add
-     */
-    void addImportOption(QAction* action);
-
-    /**
-    * Adds a view plugin trigger action to the visualize menu
-    * @param action Pointer to action to add
-    */
-    void addViewMenuAction(QAction* action);
-
-    /**
-    * Adds a loaded view plugin action to the visualize menu
-    * @param action Pointer to action to add
-    */
-    void addLoadedViewPluginAction(QAction* action);
-
-    /**
-    * Adds a loaded plugin show help action to the help menu
-    * @param action Pointer to action to add
-    */
-    void addPluginTriggerHelpAction(QAction* action);
-
-    /**
      * Callback invoked when the window shows
      * @param closeEvent Close event
      */
