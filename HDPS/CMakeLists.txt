@@ -84,56 +84,25 @@ set(PRIVATE_CORE_FILES
     ${PRIVATE_CORE_SOURCES}
 )
 
-set(PRIVATE_PLUGIN_MANAGER_HEADERS
+set(PRIVATE_MANAGER_HEADERS
     src/private/PluginManager.h
-)
-
-set(PRIVATE_PLUGIN_MANAGER_SOURCES
-    src/private/PluginManager.cpp
-)
-
-set(PRIVATE_PLUGIN_MANAGER_FILES
-    ${PRIVATE_PLUGIN_MANAGER_HEADERS}
-    ${PRIVATE_PLUGIN_MANAGER_SOURCES}
-)
-
-set(PRIVATE_DATA_MANAGER_HEADERS
     src/private/DataManager.h
-)
-
-set(PRIVATE_DATA_MANAGER_SOURCES
-    src/private/DataManager.cpp
-)
-
-set(PRIVATE_DATA_MANAGER_FILES
-    ${PRIVATE_DATA_MANAGER_HEADERS}
-    ${PRIVATE_DATA_MANAGER_SOURCES}
-)
-
-set(PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS
     src/private/DataHierarchyManager.h
-)
-
-set(PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES
-    src/private/DataHierarchyManager.cpp
-)
-
-set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
-    ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
-    ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
-)
-
-set(PRIVATE_ACTIONS_MANAGER_HEADERS
     src/private/ActionsManager.h
+    src/private/LayoutManager.h
 )
 
-set(PRIVATE_ACTIONS_MANAGER_SOURCES
+set(PRIVATE_MANAGER_SOURCES
+    src/private/PluginManager.cpp
+    src/private/DataManager.cpp
+    src/private/DataHierarchyManager.cpp
     src/private/ActionsManager.cpp
+    src/private/LayoutManager.cpp
 )
 
-set(PRIVATE_ACTIONS_MANAGER_FILES
-    ${PRIVATE_ACTIONS_MANAGER_HEADERS}
-    ${PRIVATE_ACTIONS_MANAGER_SOURCES}
+set(PRIVATE_MANAGER_FILES
+    ${PRIVATE_MANAGER_HEADERS}
+    ${PRIVATE_MANAGER_SOURCES}
 )
 
 set(PRIVATE_APPLICATION_HEADERS
@@ -186,10 +155,7 @@ set(PRIVATE_MISCELLANEOUS_FILES
 
 set(PRIVATE_HEADERS
     ${PRIVATE_CORE_HEADERS}
-    ${PRIVATE_PLUGIN_MANAGER_HEADERS}
-    ${PRIVATE_DATA_MANAGER_HEADERS}
-    ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
-    ${PRIVATE_ACTIONS_MANAGER_HEADERS}
+    ${PRIVATE_MANAGER_HEADERS}
     ${PRIVATE_APPLICATION_HEADERS}
     ${PRIVATE_START_PAGE_HEADERS}
     ${PRIVATE_MISCELLANEOUS_HEADERS}
@@ -197,10 +163,7 @@ set(PRIVATE_HEADERS
 
 set(PRIVATE_SOURCES
     ${PRIVATE_CORE_SOURCES}
-    ${PRIVATE_PLUGIN_MANAGER_SOURCES}
-    ${PRIVATE_DATA_MANAGER_SOURCES}
-    ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
-    ${PRIVATE_ACTIONS_MANAGER_SOURCES}
+    ${PRIVATE_MANAGER_SOURCES}
     ${PRIVATE_APPLICATION_SOURCES}
     ${PRIVATE_START_PAGE_SOURCES}
     ${PRIVATE_MISCELLANEOUS_SOURCES}
@@ -209,10 +172,7 @@ set(PRIVATE_SOURCES
 
 source_group(Private\\Core FILES ${PRIVATE_CORE_FILES})
 source_group(Private\\Application FILES ${PRIVATE_APPLICATION_FILES})
-source_group(Private\\Managers\\Plugin FILES ${PRIVATE_PLUGIN_MANAGER_FILES})
-source_group(Private\\Managers\\Data FILES ${PRIVATE_DATA_MANAGER_FILES})
-source_group(Private\\Managers\\DataHierarchy FILES ${PRIVATE_DATA_HIERARCHY_MANAGER_FILES})
-source_group(Private\\Managers\\Actions FILES ${PRIVATE_ACTIONS_MANAGER_FILES})
+source_group(Private\\Managers FILES ${PRIVATE_MANAGER_FILES})
 source_group(Private\\StartPage FILES ${PRIVATE_START_PAGE_FILES})
 source_group(Private\\Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
 
@@ -956,24 +916,16 @@ add_custom_command(
     #     --verbose
 )
 
-# Point Data
+# System plugins
 add_subdirectory(src/plugins/PointData)
-
-# Color Data
 add_subdirectory(src/plugins/ColorData)
-
-# Text Data
 add_subdirectory(src/plugins/TextData)
-
-# Cluster Data
 add_subdirectory(src/plugins/ClusterData)
-
-# Image Data
 add_subdirectory(src/plugins/ImageData)
-
 add_subdirectory(src/plugins/DataHierarchyPlugin)
 add_subdirectory(src/plugins/DataPropertiesPlugin)
 add_subdirectory(src/plugins/PublicActionsPlugin)
+add_subdirectory(src/plugins/LogPlugin)
 
 # Qt Advanced docking system
 set(VERSION_SHORT 3.7.0)

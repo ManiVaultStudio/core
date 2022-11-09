@@ -2,7 +2,7 @@
 
 #include <Set.h>
 #include <Application.h>
-#include <DataHierarchyManager.h>
+#include <DataHierarchyItem.h>
 
 #include <QDebug>
 #include <QPainter>

@@ -1,11 +1,10 @@
-#include "MainWindow.h"
+#include "private/MainWindow.h"
+#include "private/HdpsApplication.h"
 
 #include <QSurfaceFormat>
 #include <QStyleFactory>
 #include <QProxyStyle>
 #include <QQuickWindow>
-
-#include <HdpsApplication.h>
 
 class NoFocusProxyStyle : public QProxyStyle {
 public:

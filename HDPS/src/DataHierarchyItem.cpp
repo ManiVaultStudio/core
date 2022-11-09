@@ -1,5 +1,4 @@
 #include "DataHierarchyItem.h"
-#include "DataManager.h"
 #include "Set.h"
 #include "Dataset.h"
 

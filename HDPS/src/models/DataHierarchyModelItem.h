@@ -1,7 +1,5 @@
 #pragma once
 
-#include "DataHierarchyManager.h"
-
 #include <QObject>
 #include <QVector>
 
