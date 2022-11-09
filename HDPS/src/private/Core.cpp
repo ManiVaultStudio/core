@@ -401,6 +401,11 @@ AbstractDataHierarchyManager& Core::getDataHierarchyManager()
     return _dataHierarchyManager;
 }
 
+AbstractLayoutManager& Core::getLayoutManager()
+{
+    return _layoutManager;
+}
+
 DataHierarchyItem& Core::getDataHierarchyItem(const QString& dataSetId)
 {
     return _dataHierarchyManager.getItem(dataSetId);

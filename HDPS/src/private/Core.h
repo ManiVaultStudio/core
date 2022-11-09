@@ -6,8 +6,9 @@
 
 #include "DataManager.h"
 #include "PluginManager.h"
-#include "DataHierarchyManager.h"
 #include "ActionsManager.h"
+#include "DataHierarchyManager.h"
+#include "LayoutManager.h"
 
 #include <event/EventListener.h>
 
@@ -314,11 +315,15 @@ public: // Managers
     /** Get a reference to the actions manager */
     AbstractDataHierarchyManager& getDataHierarchyManager() override;
 
+    /** Get a reference to the layout manager */
+    AbstractLayoutManager& getLayoutManager() override;
+
 private:
     PluginManager                                                           _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core */
     DataManager                                                             _dataManager;               /** Data manager responsible for storing data sets and data selections */
     DataHierarchyManager                                                    _dataHierarchyManager;      /** Data hierarchy manager for providing a hierarchical dataset structure */
     ActionsManager                                                          _actionsManager;            /** Actions manager for storing actions */
+    LayoutManager                                                           _layoutManager;             /** Layout manager for controlling widgets layout */
     std::unordered_map<plugin::Type, UniquePtrsPlugin, plugin::TypeHash>    _plugins;                   /** List of plugin instances currently present in the application. Instances are stored by type. */
     std::vector<EventListener*>                                             _eventListeners;            /** List of classes listening for core events */
 

@@ -39,6 +39,8 @@ namespace hdps
         class PluginTriggerAction;
 
         using PluginTriggerActions = QVector<PluginTriggerAction*>;
+
+        class AbstractLayoutManager;
     }
 
 class CoreInterface : public hdps::gui::WidgetAction
@@ -371,6 +373,9 @@ public: // Managers
 
     /** Get a reference to the data hierarchy manager */
     virtual AbstractDataHierarchyManager& getDataHierarchyManager() = 0;
+
+    /** Get a reference to the layout manager */
+    virtual gui::AbstractLayoutManager& getLayoutManager() = 0;
     
 protected:
     bool    _datasetGroupingEnabled;        /** Whether datasets can be grouped or not */
