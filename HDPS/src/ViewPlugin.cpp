@@ -18,6 +18,18 @@ QMap<QString, std::uint32_t> ViewPlugin::dockWidgetAreaMap({
     { "Center", 0x10 }
 });
 
+std::int32_t ViewPlugin::getDockWidgetAreas(const QStringList& dockWidgetAreas)
+{
+    std::int32_t dockAreas;
+
+    for (const auto& dockWidgetArea : dockWidgetAreas) {
+        if (dockWidgetAreaMap.contains(dockWidgetArea))
+            dockAreas |= dockWidgetAreaMap[dockWidgetArea];
+    }
+
+    return dockAreas;
+}
+
 ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
     _widget(),

@@ -72,11 +72,11 @@ set( MAIN_SOURCES
 )
 
 set(PRIVATE_CORE_HEADERS
-    src/Core.h
+    src/private/Core.h
 )
 
 set(PRIVATE_CORE_SOURCES
-    src/Core.cpp
+    src/private/Core.cpp
 )
 
 set(PRIVATE_CORE_FILES
@@ -85,11 +85,11 @@ set(PRIVATE_CORE_FILES
 )
 
 set(PRIVATE_PLUGIN_MANAGER_HEADERS
-    src/PluginManager.h
+    src/private/PluginManager.h
 )
 
 set(PRIVATE_PLUGIN_MANAGER_SOURCES
-    src/PluginManager.cpp
+    src/private/PluginManager.cpp
 )
 
 set(PRIVATE_PLUGIN_MANAGER_FILES
@@ -98,11 +98,11 @@ set(PRIVATE_PLUGIN_MANAGER_FILES
 )
 
 set(PRIVATE_DATA_MANAGER_HEADERS
-    src/DataManager.h
+    src/private/DataManager.h
 )
 
 set(PRIVATE_DATA_MANAGER_SOURCES
-    src/DataManager.cpp
+    src/private/DataManager.cpp
 )
 
 set(PRIVATE_DATA_MANAGER_FILES
@@ -111,11 +111,11 @@ set(PRIVATE_DATA_MANAGER_FILES
 )
 
 set(PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS
-    src/DataHierarchyManager.h
+    src/private/DataHierarchyManager.h
 )
 
 set(PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES
-    src/DataHierarchyManager.cpp
+    src/private/DataHierarchyManager.cpp
 )
 
 set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
@@ -124,11 +124,11 @@ set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
 )
 
 set(PRIVATE_ACTIONS_MANAGER_HEADERS
-    src/ActionsManager.h
+    src/private/ActionsManager.h
 )
 
 set(PRIVATE_ACTIONS_MANAGER_SOURCES
-    src/ActionsManager.cpp
+    src/private/ActionsManager.cpp
 )
 
 set(PRIVATE_ACTIONS_MANAGER_FILES
@@ -137,14 +137,14 @@ set(PRIVATE_ACTIONS_MANAGER_FILES
 )
 
 set(PRIVATE_APPLICATION_HEADERS
-    src/HdpsApplication.h
-    src/MainWindow.h
+    src/private/HdpsApplication.h
+    src/private/MainWindow.h
     ui/MainWindow.ui
 )
 
 set(PRIVATE_APPLICATION_SOURCES
-    src/HdpsApplication.cpp
-    src/MainWindow.cpp
+    src/private/HdpsApplication.cpp
+    src/private/MainWindow.cpp
 )
 
 set(PRIVATE_APPLICATION_FILES
@@ -153,15 +153,15 @@ set(PRIVATE_APPLICATION_FILES
 )
 
 set(PRIVATE_START_PAGE_HEADERS
-    src/StartPageWidget.h
-    src/ProjectBarWidget.h
-    src/LogoWidget.h
+    src/private/StartPageWidget.h
+    src/private/ProjectBarWidget.h
+    src/private/LogoWidget.h
 )
 
 set(PRIVATE_START_PAGE_SOURCES
-    src/StartPageWidget.cpp
-    src/ProjectBarWidget.cpp
-    src/LogoWidget.cpp
+    src/private/StartPageWidget.cpp
+    src/private/ProjectBarWidget.cpp
+    src/private/LogoWidget.cpp
 )
 
 set(PRIVATE_START_PAGE_FILES
@@ -170,13 +170,13 @@ set(PRIVATE_START_PAGE_FILES
 )
 
 set(PRIVATE_MISCELLANEOUS_HEADERS
-    src/Archiver.h
-    src/GroupDataDialog.h
+    src/private/Archiver.h
+    src/private/GroupDataDialog.h
 )
 
 set(PRIVATE_MISCELLANEOUS_SOURCES
-    src/Archiver.cpp
-    src/GroupDataDialog.cpp
+    src/private/Archiver.cpp
+    src/private/GroupDataDialog.cpp
 )
 
 set(PRIVATE_MISCELLANEOUS_FILES

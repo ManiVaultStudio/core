@@ -152,6 +152,10 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
                 dockWidget->setFeature(CDockWidget::DockWidgetMovable, toggled);
             });
 
+            connect(&viewPlugin->getAllowedDockingAreasAction(), &OptionsAction::selectedOptionsChanged, this, [this, dockWidget](const QStringList& selectedOptions) {
+                dockWidget->dockAreaWidget()->setAllowedAreas(static_cast<DockWidgetAreas>(ViewPlugin::getDockWidgetAreas(selectedOptions)));
+            });
+
             const auto connectToViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
                 connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
                     dockWidget->toggleView(toggled);

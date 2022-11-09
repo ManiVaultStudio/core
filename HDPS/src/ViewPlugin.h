@@ -26,6 +26,13 @@ public:
     /** Maps dock widget area to dock widget area flag */
     static QMap<QString, std::uint32_t> dockWidgetAreaMap;
 
+    /**
+     * Get dock widget areas
+     * @param dockWidgetAreas List of dock area strings
+     * @return Dock areas
+     */
+    static std::int32_t getDockWidgetAreas(const QStringList& dockWidgetAreas);
+
 public:
     ViewPlugin(const PluginFactory* factory);
 
