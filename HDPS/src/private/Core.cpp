@@ -29,6 +29,8 @@ Core::Core() :
     _pluginManager(),
     _dataManager(),
     _dataHierarchyManager(),
+    _layoutManager(),
+    _actionsManager(),
     _plugins(),
     _eventListeners()
 {

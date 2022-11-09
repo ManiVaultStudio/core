@@ -8,10 +8,6 @@
 #include <QSharedPointer>
 #include <QLabel>
 
-// Advanced docking system
-#include "DockManager.h"
-#include "DockAreaWidget.h"
-
 namespace Ui
 {
     class MainWindow;
@@ -113,11 +109,6 @@ protected: // Menu
 private:
     Core                        _core;                          /** Instance of the core */
     StartPageWidget*            _startPageWidget;               /** Pointer to the start page widget */
-    ads::CDockManager*          _dockManager;                   /** Manager for docking */
-    ads::CDockAreaWidget*       _centralDockArea;               /** Docking area for view plugins */
-    ads::CDockAreaWidget*       _lastDockAreaWidget;            /** Last docking area widget (if any) */
-    ads::CDockWidget*           _centralDockWidget;             /** Dock widget for view plugins */
-    ads::CDockWidget*           _startPageDockWidget;           /** Dock widget for the start page */
     QMenu                       _loadedViewPluginsMenu;         /** Menu for loaded view plugins */
     QMenu                       _pluginsHelpMenu;               /** Menu for loaded plugins help */
 };

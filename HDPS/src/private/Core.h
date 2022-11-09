@@ -301,7 +301,7 @@ private:
     /** Destroys all plug-ins kept by the core */
     void destroyPlugins();
 
-    public: // Serialization
+public: // Serialization
 
     /**
      * Load widget action from variant
