@@ -169,6 +169,11 @@ void GroupAction::setActions(const WidgetActions& widgetActions /*= WidgetAction
     emit actionsChanged(_widgetActions);
 }
 
+hdps::gui::WidgetActions GroupAction::getActions()
+{
+    return _widgetActions;
+}
+
 WidgetActions GroupAction::getSortedWidgetActions() const
 {
     auto sortedActions = _widgetActions;

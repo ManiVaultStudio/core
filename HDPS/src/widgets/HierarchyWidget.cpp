@@ -70,22 +70,47 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _selectionGroupAction << _selectAllAction;
     _selectionGroupAction << _selectNoneAction;
 
-    _columnsAction.setText("Edit column visibility");
+    _columnsAction.setText("Columns");
     _columnsAction.setToolTip(QString("Edit which %1s hierarchy columns should be visible").arg(_itemTypeName.toLower()));
     _columnsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("columns"));
     _columnsAction.setShowLabels(false);
+
+    auto selectAllCollumns = new TriggerAction(this, "Select all");
+
+    const auto updateSelectAllCollumnsReadOnly = [this, selectAllCollumns]() -> void {
+        auto readOnly = true;
+
+        for (std::int32_t columnIndex = 0; columnIndex < _model.columnCount(); columnIndex++) {
+            if (_treeView.isColumnHidden(columnIndex)) {
+                readOnly = false;
+                break;
+            }
+        }
+                
+        selectAllCollumns->setEnabled(!readOnly);
+    };
+
+    connect(selectAllCollumns, &TriggerAction::triggered, this, [this]() -> void {
+        for (std::int32_t columnIndex = 0; columnIndex < _model.columnCount(); columnIndex++)
+            _columnsAction.getActions()[columnIndex]->setChecked(true);
+    });
 
     for (std::int32_t columnIndex = 0; columnIndex < _model.columnCount(); columnIndex++) {
         auto columnVisibilityAction = new ToggleAction(this, _model.headerData(columnIndex, Qt::Horizontal, Qt::EditRole).toString(), true, true);
 
         columnVisibilityAction->setConnectionPermissionsToNone();
 
-        connect(columnVisibilityAction, &ToggleAction::toggled, this, [this, columnIndex](bool toggled) -> void {
+        connect(columnVisibilityAction, &ToggleAction::toggled, this, [this, columnIndex, updateSelectAllCollumnsReadOnly](bool toggled) -> void {
             _treeView.setColumnHidden(columnIndex, !toggled);
+            updateSelectAllCollumnsReadOnly();
         });
 
         _columnsAction << *columnVisibilityAction;
     }
+
+    _columnsAction << *selectAllCollumns;
+
+    updateSelectAllCollumnsReadOnly();
 
     _settingsGroupAction.setText("Settings");
     _settingsGroupAction.setToolTip(QString("Edit %1s hierarchy settings").arg(_itemTypeName.toLower()));
@@ -142,7 +167,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     header->setMinimumSectionSize(18);
     header->setIconSize(QSize(4, 10));
 
-    const auto numberOfRowsChanged = [this]() -> void {
+    const auto modelLayoutChanged = [this]() -> void {
         const auto hasItems = _filterModel != nullptr ? _filterModel->rowCount() >= 1 : _model.rowCount() >= 1;
 
         _filterNameAction.setEnabled(_model.rowCount() >= 1);
@@ -223,12 +248,10 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     });
 
     if (_filterModel) {
-        connect(_filterModel, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
-        connect(_filterModel, &QAbstractItemModel::rowsRemoved, this, numberOfRowsChanged);
+        connect(_filterModel, &QAbstractItemModel::layoutChanged, this, modelLayoutChanged);
     }
     else {
-        connect(&_model, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
-        connect(&_model, &QAbstractItemModel::rowsRemoved, this, numberOfRowsChanged);
+        connect(&_model, &QAbstractItemModel::layoutChanged, this, modelLayoutChanged);
     }
 
     connect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
@@ -244,7 +267,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     connect(&_selectAllAction, &TriggerAction::triggered, this, &HierarchyWidget::selectAll);
     connect(&_selectNoneAction, &TriggerAction::triggered, this, &HierarchyWidget::selectNone);
 
-    numberOfRowsChanged();
+    modelLayoutChanged();
     selectionChanged();
     updateFilterModel();
 }

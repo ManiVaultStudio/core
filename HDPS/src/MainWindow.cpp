@@ -39,10 +39,8 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _dockManager(new CDockManager(this)),
     _centralDockArea(nullptr),
     _lastDockAreaWidget(nullptr),
-    _loggingDockArea(nullptr),
     _centralDockWidget(new CDockWidget("Views")),
     _startPageDockWidget(new CDockWidget("Start page")),
-    _loggingDockWidget(new CDockWidget("Logging")),
     _loadedViewPluginsMenu("Loaded views"),
     _pluginsHelpMenu("Plugins")
 {
@@ -297,7 +295,6 @@ void MainWindow::initializeDocking()
     CDockManager::setConfigFlag(CDockManager::DockAreaHasUndockButton, true);
 
     initializeCentralDockingArea();
-    initializeLoggingDockingArea();
 
     connect(_dockManager, &CDockManager::dockAreasAdded, this, &MainWindow::updateCentralWidget);
     connect(_dockManager, &CDockManager::dockAreasRemoved, this, &MainWindow::updateCentralWidget);
@@ -313,18 +310,6 @@ void MainWindow::initializeCentralDockingArea()
     _startPageDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
     _startPageDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
     _startPageDockWidget->setFeature(CDockWidget::DockWidgetMovable, false);
-}
-
-void MainWindow::initializeLoggingDockingArea()
-{
-    _loggingDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("scroll"));
-
-    _loggingDockArea = _dockManager->addDockWidget(DockWidgetArea::BottomDockWidgetArea, _loggingDockWidget, _centralDockArea);
-
-    _loggingDockArea->hide();
-    _loggingDockArea->setMinimumHeight(100);
-    _loggingDockArea->setMaximumHeight(300);
-    _loggingDockArea->resize(QSize(0, 150));
 }
 
 void MainWindow::updateCentralWidget()

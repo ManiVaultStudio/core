@@ -89,9 +89,6 @@ private: // Docking
     /** Sets up the docking area for view plugins (central widget) */
     void initializeCentralDockingArea();
 
-    /** Sets up the docking area for logging */
-    void initializeLoggingDockingArea();
-    
     /** Updates the visibility of the central dock widget (depending on its content) */
     void updateCentralWidget();
 
@@ -119,10 +116,8 @@ private:
     ads::CDockManager*          _dockManager;                   /** Manager for docking */
     ads::CDockAreaWidget*       _centralDockArea;               /** Docking area for view plugins */
     ads::CDockAreaWidget*       _lastDockAreaWidget;            /** Last docking area widget (if any) */
-    ads::CDockAreaWidget*       _loggingDockArea;               /** Docking area for logging */
     ads::CDockWidget*           _centralDockWidget;             /** Dock widget for view plugins */
     ads::CDockWidget*           _startPageDockWidget;           /** Dock widget for the start page */
-    ads::CDockWidget*           _loggingDockWidget;             /** Dock widget for logging */
     QMenu                       _loadedViewPluginsMenu;         /** Menu for loaded view plugins */
     QMenu                       _pluginsHelpMenu;               /** Menu for loaded plugins help */
 };
