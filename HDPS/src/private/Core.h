@@ -301,16 +301,27 @@ private:
     /** Destroys all plug-ins kept by the core */
     void destroyPlugins();
 
-public: // Managers
+    public: // Serialization
 
-    /** Get a reference to the data manager */
-    AbstractDataManager& getDataManager() override;
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
+public: // Managers
 
     /** Get a reference to the plugin manager */
     AbstractPluginManager& getPluginManager() override;
 
-    /** Get a reference to the actions manager */
-    AbstractActionsManager& getActionsManager() override;
+    /** Get a reference to the data manager */
+    AbstractDataManager& getDataManager() override;
 
     /** Get a reference to the actions manager */
     AbstractDataHierarchyManager& getDataHierarchyManager() override;
@@ -318,12 +329,15 @@ public: // Managers
     /** Get a reference to the layout manager */
     AbstractLayoutManager& getLayoutManager() override;
 
+    /** Get a reference to the actions manager */
+    AbstractActionsManager& getActionsManager() override;
+
 private:
     PluginManager                                                           _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core */
     DataManager                                                             _dataManager;               /** Data manager responsible for storing data sets and data selections */
     DataHierarchyManager                                                    _dataHierarchyManager;      /** Data hierarchy manager for providing a hierarchical dataset structure */
-    ActionsManager                                                          _actionsManager;            /** Actions manager for storing actions */
     LayoutManager                                                           _layoutManager;             /** Layout manager for controlling widgets layout */
+    ActionsManager                                                          _actionsManager;            /** Actions manager for storing actions */
     std::unordered_map<plugin::Type, UniquePtrsPlugin, plugin::TypeHash>    _plugins;                   /** List of plugin instances currently present in the application. Instances are stored by type. */
     std::vector<EventListener*>                                             _eventListeners;            /** List of classes listening for core events */
 

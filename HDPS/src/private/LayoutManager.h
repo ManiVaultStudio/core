@@ -11,6 +11,11 @@ class LayoutManager : public AbstractLayoutManager
 
 public:
 
+    /** Default constructor */
+    LayoutManager();
+
+    /** Default destructor */
+    ~LayoutManager() override;
 };
 
 }

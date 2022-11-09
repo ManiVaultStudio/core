@@ -18,10 +18,10 @@ namespace hdps
     class EventListener;
     class DataHierarchyItem;
 
-    class AbstractDataManager;
     class AbstractPluginManager;
-    class AbstractActionsManager;
+    class AbstractDataManager;
     class AbstractDataHierarchyManager;
+    class AbstractActionsManager;
 
     namespace plugin
     {
@@ -362,20 +362,20 @@ public: // Events & notifications
 
 public: // Managers
 
-    /** Get a reference to the data manager */
-    virtual AbstractDataManager& getDataManager() = 0;
-
     /** Get a reference to the plugin manager */
     virtual AbstractPluginManager& getPluginManager() = 0;
 
-    /** Get a reference to the actions manager */
-    virtual AbstractActionsManager& getActionsManager() = 0;
+    /** Get a reference to the data manager */
+    virtual AbstractDataManager& getDataManager() = 0;
 
     /** Get a reference to the data hierarchy manager */
     virtual AbstractDataHierarchyManager& getDataHierarchyManager() = 0;
 
     /** Get a reference to the layout manager */
     virtual gui::AbstractLayoutManager& getLayoutManager() = 0;
+
+    /** Get a reference to the actions manager */
+    virtual AbstractActionsManager& getActionsManager() = 0;
     
 protected:
     bool    _datasetGroupingEnabled;        /** Whether datasets can be grouped or not */

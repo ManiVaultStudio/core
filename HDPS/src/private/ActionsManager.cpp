@@ -10,9 +10,15 @@ using namespace hdps::util;
 namespace hdps
 {
 
-ActionsManager::ActionsManager(QObject* parent /*= nullptr*/) :
+ActionsManager::ActionsManager() :
     AbstractActionsManager(),
     _model()
+{
+    setText("Actions manager");
+    setObjectName("Actions");
+}
+
+ActionsManager::~ActionsManager()
 {
 }
 

@@ -15,11 +15,11 @@ class ActionsManager : public AbstractActionsManager
 
 public:
 
-    /**
-     * Constructor
-     * @param parent Pointer to parent object
-     */
-    ActionsManager(QObject* parent = nullptr);
+    /** Default constructor */
+    ActionsManager();
+
+    /** Default destructor */
+    ~ActionsManager() override;
 
     /**
      * Add action to the model
