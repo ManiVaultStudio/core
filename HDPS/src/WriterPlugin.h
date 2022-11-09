@@ -33,12 +33,12 @@ public:
      * Set input dataset smart pointer
      * @param inputDataset Smart pointer to input dataset
      */
-    void setInputDataset(Dataset<DatasetImpl>& inputDataset);
+    void setInputDataset(Dataset<DatasetImpl> inputDataset);
 
     /** Get input dataset smart pointer */
-    template<typename DatasetType>
-    Dataset<DatasetType>& getInputDataset() {
-        return Dataset<DatasetType>(*_input);
+    template<typename DatasetType = DatasetImpl>
+    Dataset<DatasetType> getInputDataset() {
+        return Dataset<DatasetType>(_input.get<DatasetType>());
     }
 
 protected:
