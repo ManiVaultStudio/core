@@ -51,11 +51,40 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    QSharedPointer<ads::CDockManager>   _dockManager;           /** Manager for docking */
-    //ads::CDockAreaWidget    _centralDockArea;           /** Docking area for view plugins */
-    //ads::CDockAreaWidget*   _lastDockAreaWidget;        /** Last docking area widget (if any) */
-    //ads::CDockWidget        _centralDockWidget;         /** Dock widget for view plugins */
-    //ads::CDockWidget        _startPageDockWidget;       /** Dock widget for the start page */
+
+    /**
+     * Convert dock widget to variant map
+     * @param dockWidget Pointer to dock widget
+     * @return Dock widget variant map
+     */
+    QVariantMap dockWidgetToVariant(ads::CDockWidget* dockWidget) const;
+
+    /**
+     * Convert dock area widget to variant map
+     * @param dockAreaWidget Pointer to dock area widget
+     * @return Dock area widget variant map
+     */
+    QVariantMap dockAreaWidgetToVariant(ads::CDockAreaWidget* dockAreaWidget) const;
+
+    /**
+     * Convert dock container widget to variant map
+     * @param dockContainerWidget Pointer to dock container widget
+     * @return Dock container widget variant map
+     */
+    QVariantMap dockContainerWidgetToVariant(ads::CDockContainerWidget* dockContainerWidget) const;
+
+private:
+    QSharedPointer<ads::CDockManager>   _dockManager;               /** Manager for docking */
+    ads::CDockAreaWidget*               _centralDockArea;           /** Docking area for view plugins */
+    ads::CDockAreaWidget*               _lastDockAreaWidget;        /** Last docking area widget (if any) */
+    ads::CDockAreaWidget*               _leftDockAreaWidget;        /** Last docking area widget (if any) */
+    ads::CDockAreaWidget*               _rightDockAreaWidget;        /** Last docking area widget (if any) */
+    ads::CDockWidget                    _leftDockWidget;            /** Dock widget for view plugins */
+    ads::CDockWidget                    _centralDockWidget;         /** Dock widget for view plugins */
+    ads::CDockWidget                    _rightDockWidget;           /** Dock widget for view plugins */
+    ads::CDockWidget                    _startPageDockWidget;       /** Dock widget for the start page 
+*/
+    //StartPageWidget* _startPageWidget;           /** Pointer to the start page widget */
 };
 
 }

@@ -29,7 +29,6 @@
 MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     QMainWindow(parent),
     _core(),
-    _startPageWidget(nullptr),
     _loadedViewPluginsMenu("Loaded views"),
     _pluginsHelpMenu("Plugins")
 {
@@ -37,15 +36,12 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     dynamic_cast<Application*>(qApp)->setCore(&_core);
 
-    _startPageWidget = new StartPageWidget(this);
-
     // Change the window title when the current project file changed
     connect(Application::current(), &Application::currentProjectFilePathChanged, [this](const QString& currentProjectFilePath) {
         setWindowTitle(currentProjectFilePath + (currentProjectFilePath.isEmpty() ? " HDPS" : " - HDPS"));
     });
 
     setupFileMenu();
-    setupViewMenu();
 
     restoreWindowGeometryFromSettings();
 
@@ -88,7 +84,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 {
     QMainWindow::showEvent(showEvent);
 
-    initializeDocking();
+    Application::core()->getLayoutManager().initialize(this);
 }
 
 void MainWindow::closeEvent(QCloseEvent* closeEvent)
@@ -270,6 +266,8 @@ void MainWindow::setupFileMenu()
 
         // Populate the recent projects menu
         populateRecentProjectsMenu();
+
+        saveProjectAsAction->setEnabled(true);
     });
 }
 

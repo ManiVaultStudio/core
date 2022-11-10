@@ -4,6 +4,7 @@
 #include "actions/TriggerAction.h"
 #include "actions/ToggleAction.h"
 #include "actions/OptionsAction.h"
+#include "actions/OptionAction.h"
 
 #include "Plugin.h"
 
@@ -38,6 +39,9 @@ public:
 
     ~ViewPlugin() override {};
 
+    /** Perform startup initialization */
+    void init() override;
+
     /**
      * Set name of the object
      * @param name Name of the object
@@ -66,7 +70,9 @@ public: // Action getters
     gui::ToggleAction& getMayFloatAction() { return _mayFloatAction; }
     gui::ToggleAction& getMayMoveAction() { return _mayMoveAction; }
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
+    gui::ToggleAction& getCentralDockingAction() { return _centralDockingAction; }
     gui::OptionsAction& getAllowedDockingAreasAction() { return _allowedDockingAreasAction; }
+    gui::OptionAction& getPreferredDockingAreaAction() { return _preferredDockingAreaAction; }
 
 private:
     QWidget                 _widget;                        /** Widget representation of the plugin */
@@ -75,7 +81,9 @@ private:
     gui::ToggleAction       _mayFloatAction;                /** Action for toggling whether a view plugin may float */
     gui::ToggleAction       _mayMoveAction;                 /** Action for toggling whether a view plugin may be moved */
     gui::ToggleAction       _visibleAction;                 /** Action which determines whether the view plugin is visible or not */
+    gui::ToggleAction       _centralDockingAction;          /** Action which determines whether the view plugin should be docked in the central area */
     gui::OptionsAction      _allowedDockingAreasAction;     /** Action which determines the allowed docking areas */
+    gui::OptionAction       _preferredDockingAreaAction;    /** Action which determines the preferred docking area */
     gui::TriggerAction      _triggerHelpAction;             /** Action which shows help (internal use only) */
 };
 

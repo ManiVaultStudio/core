@@ -11,6 +11,7 @@ PublicActionsPlugin::PublicActionsPlugin(const PluginFactory* factory) :
     const_cast<PluginFactory*>(factory)->setMaximumNumberOfInstances(1);
 
     getAllowedDockingAreasAction().initialize({ "Left", "Right" }, { "Left", "Right" });
+    getPreferredDockingAreaAction().setCurrentText("Right");
 }
 
 void PublicActionsPlugin::init()

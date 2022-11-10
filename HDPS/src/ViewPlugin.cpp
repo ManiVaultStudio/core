@@ -2,6 +2,9 @@
 
 #include "widgets/ProjectEditorDialog.h"
 
+#include "Application.h"
+#include "AbstractLayoutManager.h"
+
 #include <QWidget>
 
 namespace hdps
@@ -20,7 +23,7 @@ QMap<QString, std::uint32_t> ViewPlugin::dockWidgetAreaMap({
 
 std::int32_t ViewPlugin::getDockWidgetAreas(const QStringList& dockWidgetAreas)
 {
-    std::int32_t dockAreas;
+    std::int32_t dockAreas = 0;
 
     for (const auto& dockWidgetArea : dockWidgetAreas) {
         if (dockWidgetAreaMap.contains(dockWidgetArea))
@@ -38,7 +41,9 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _mayFloatAction(this, "May float", true, true),
     _mayMoveAction(this, "May move", true, true),
     _visibleAction(this, "Visible", true, true),
+    _centralDockingAction(this, "Central docking", true, true),
     _allowedDockingAreasAction(this, "Allowed docking areas", ViewPlugin::dockWidgetAreaMap.keys(), ViewPlugin::dockWidgetAreaMap.keys()),
+    _preferredDockingAreaAction(this, "Preferred docking area", ViewPlugin::dockWidgetAreaMap.keys(), "Bottom"),
     _triggerHelpAction(this, "Trigger help")
 {
     setText(getGuiName());
@@ -73,11 +78,21 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
+    _centralDockingAction.setToolTip("Determines whether the view plugin should be docked in the central area");
+    _centralDockingAction.setConnectionPermissionsToNone();
+    _centralDockingAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _centralDockingAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+
     _allowedDockingAreasAction.setToolTip("Determines the allowed docking areas for the view plugin");
     _allowedDockingAreasAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     _allowedDockingAreasAction.setConnectionPermissionsToNone();
     _allowedDockingAreasAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false, true);
     _allowedDockingAreasAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false, true);
+
+    _preferredDockingAreaAction.setToolTip("Determines the preferred docking area for the view plugin");
+    _preferredDockingAreaAction.setConnectionPermissionsToNone();
+    _preferredDockingAreaAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false, true);
+    _preferredDockingAreaAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false, true);
 
     _triggerHelpAction.setShortcut(tr("F1"));
     _triggerHelpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
@@ -106,6 +121,10 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction.setText(getGuiName());
 
     updateVisibleAction();
+}
+
+void ViewPlugin::init()
+{
 }
 
 void ViewPlugin::setObjectName(const QString& name)

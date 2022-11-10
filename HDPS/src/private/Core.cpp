@@ -67,11 +67,8 @@ void Core::addPlugin(plugin::Plugin* plugin)
             break;
         }
 
-        // If it is a view plugin then it should be added to the main window
         case plugin::Type::VIEW:
-        {
-            dynamic_cast<MainWindow*>(qApp->activeWindow())->addPlugin(plugin);
-        }
+            break;
 
         // Otherwise add the plugin to a list of plug-ins of the same type
         default:
@@ -89,11 +86,8 @@ void Core::addPlugin(plugin::Plugin* plugin)
         {
             auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
 
-            dynamic_cast<MainWindow*>(qApp->activeWindow())->addPlugin(plugin);
-
-            auto outputDataset = analysisPlugin->getOutputDataset();
-
-            notifyDatasetAdded(outputDataset);
+            if (analysisPlugin)
+                notifyDatasetAdded(analysisPlugin->getOutputDataset());
 
             break;
         }

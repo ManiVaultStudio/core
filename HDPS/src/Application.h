@@ -1,13 +1,12 @@
 #pragma once
 
-#include <util/IconFonts.h>
+#include "CoreInterface.h"
+#include "util/IconFonts.h"
 
 #include <QApplication>
 #include <QSettings>
 
 namespace hdps {
-
-class CoreInterface;
 
 /**
  * HDPS application class

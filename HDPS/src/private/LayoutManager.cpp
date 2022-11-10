@@ -10,11 +10,16 @@ namespace hdps::gui
 
 LayoutManager::LayoutManager() :
     AbstractLayoutManager(),
-    _dockManager()
-    //_centralDockArea(),
-    //_lastDockAreaWidget(nullptr),
-    //_centralDockWidget("Views"),
-    //_startPageDockWidget(new CDockWidget("Start page"))
+    _dockManager(),
+    _centralDockArea(nullptr),
+    _lastDockAreaWidget(nullptr),
+    _leftDockAreaWidget(nullptr),
+    _rightDockAreaWidget(nullptr),
+    _leftDockWidget("Left"),
+    _centralDockWidget("Views"),
+    _rightDockWidget("Right"),
+    _startPageDockWidget("Start page")
+    //_startPageWidget(nullptr),
 {
     setText("Layout manager");
     setObjectName("Layout");
@@ -27,6 +32,20 @@ LayoutManager::~LayoutManager()
 void LayoutManager::initialize(QMainWindow* mainWindow)
 {
     _dockManager = QSharedPointer<ads::CDockManager>::create(mainWindow);
+
+    _centralDockArea = _dockManager->setCentralWidget(&_centralDockWidget);
+    
+    _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
+
+    //_leftDockAreaWidget = _dockManager->addDockWidget(LeftDockWidgetArea, &_leftDockWidget, _centralDockArea);
+    //_rightDockAreaWidget = _dockManager->addDockWidget(RightDockWidgetArea, &_rightDockWidget, _centralDockArea);
+    
+
+    //_dockManager->topLevelDockArea()->setAllowedAreas(DockWidgetAreas::LeftDockWidgetArea | DockWidgetAreas::RightDockWidgetArea);
+
+    //_dockManager->setCentralWidget(&_centralDockWidget);
+
+    //_centralDockArea = _dockManager->addDockWidget(DockWidgetArea::CenterDockWidgetArea, &_startPageDockWidget);
 }
 
 void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
@@ -35,21 +54,16 @@ void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap LayoutManager::toVariantMap() const
 {
-    QVariantMap variantMap;
-
-    return variantMap;
+    return dockContainerWidgetToVariant(_dockManager.get());
 }
 
 void LayoutManager::addViewPlugin(ViewPlugin* viewPlugin)
 {
-    //auto dockWidget = new CDockWidget(plugin->getGuiName());
+    auto dockWidget = new CDockWidget(viewPlugin->getGuiName());
 
-    //dockWidget->setIcon(plugin->getIcon());
-
-    //auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(plugin);
+    dockWidget->setIcon(viewPlugin->getIcon());
 
     //dockWidget->setWidget(&viewPlugin->getWidget(), CDockWidget::ForceNoScrollArea);
-    //dockWidget->setProperty("PluginType", "View");
 
     //connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, this, [this, dockWidget](const QString& title) {
     //    dockWidget->setWindowTitle(title);
@@ -87,19 +101,25 @@ void LayoutManager::addViewPlugin(ViewPlugin* viewPlugin)
     //        viewPlugin->getVisibleAction().setChecked(false);
     //    }
     //    connectToViewPluginVisibleAction(dockWidget);
+    //});
 
-    //    updateCentralWidget();
-    //    });
+    auto dockWidgetArea = RightDockWidgetArea;
 
-    //connectToViewPluginVisibleAction(dockWidget);
+    const auto preferredDockWidgetArea = viewPlugin->getPreferredDockingAreaAction().getCurrentText();
 
-    //auto dockWidgetArea = RightDockWidgetArea;
+    //if (ViewPlugin::dockWidgetAreaMap.contains(preferredDockWidgetArea))
+    //    dockWidgetArea = static_cast<DockWidgetArea>(ViewPlugin::dockWidgetAreaMap[preferredDockWidgetArea]);
+    
+    //if (viewPlugin->getCentralDockingAction().isChecked())
+    _dockManager->addDockWidget(dockWidgetArea, dockWidget, _rightDockAreaWidget);
+    //else
+    //    _dockManager->addDockWidget(dockWidgetArea, dockWidget);
 
     //if (getViewPluginDockWidgets().isEmpty())
     //    dockWidgetArea = CenterDockWidgetArea;
 
     //if (_lastDockAreaWidget == nullptr)
-    //    _lastDockAreaWidget = _dockManager->addDockWidget(dockWidgetArea, dockWidget, _centralDockArea);
+    //    _lastDockAreaWidget = _dockManager->addDockWidget(dockWidgetArea, dockWidget);
     //else
     //    _lastDockAreaWidget = _dockManager->addDockWidget(dockWidgetArea, dockWidget, _lastDockAreaWidget);
 
@@ -113,6 +133,60 @@ void LayoutManager::addViewPlugin(ViewPlugin* viewPlugin)
 
     //updateCentralWidget();
 }
+
+QVariantMap LayoutManager::dockWidgetToVariant(ads::CDockWidget* dockWidget) const
+{
+    Q_ASSERT(dockWidget != nullptr);
+
+    auto dockWidgetVariant = QVariantMap();
+
+    dockWidgetVariant["Title"] = dockWidget->windowTitle();
+
+    return dockWidgetVariant;
+}
+
+QVariantMap LayoutManager::dockAreaWidgetToVariant(CDockAreaWidget* dockAreaWidget) const
+{
+    Q_ASSERT(dockAreaWidget != nullptr);
+
+    auto dockAreaWidgetMap = QVariantMap();
+
+    dockAreaWidgetMap["DockArea"] = "DockArea";
+
+    auto dockContainer = dockAreaWidget->dockContainer();
+
+    auto dockWidgetsList = QVariantList();
+
+    for (std::int32_t dockWidgetIndex = 0; dockWidgetIndex < dockAreaWidget->dockWidgetsCount(); ++dockWidgetIndex)
+        dockWidgetsList.push_back(dockWidgetToVariant(dockAreaWidget->dockWidget(dockWidgetIndex)));
+
+    dockAreaWidgetMap["DockWidgets"] = dockWidgetsList;
+
+    QVariantList splitterSizes;
+
+    for (auto splitterSize : _dockManager->splitterSizes(dockAreaWidget))
+        splitterSizes.push_back(splitterSize);
+
+    dockAreaWidgetMap["SplitterSizes"] = splitterSizes;
+
+    return dockAreaWidgetMap;
+}
+
+QVariantMap LayoutManager::dockContainerWidgetToVariant(CDockContainerWidget* dockContainerWidget) const
+{
+    Q_ASSERT(dockContainerWidget != nullptr);
+
+    QVariantList dockAreas;
+
+    for (std::int32_t dockAreaIndex = 0; dockAreaIndex < _dockManager->dockAreaCount(); ++dockAreaIndex)
+        dockAreas.push_back(dockAreaWidgetToVariant(_dockManager->dockArea(dockAreaIndex)));
+
+    return QVariantMap({
+        { "DockAreas", dockAreas }
+        });
+}
+
+
 
 }
 

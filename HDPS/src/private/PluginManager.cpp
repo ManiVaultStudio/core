@@ -277,7 +277,11 @@ plugin::Plugin* PluginManager::createPlugin(const QString& kind, const Datasets&
         auto viewPlugin = dynamic_cast<ViewPlugin*>(pluginInstance);
 
         if (viewPlugin)
+        {
             emit addViewPluginVisibleAction(viewPlugin->getVisibleAction());
+            Application::core()->getLayoutManager().addViewPlugin(dynamic_cast<plugin::ViewPlugin*>(viewPlugin));
+        }
+            
 
         qDebug() << "Added plugin" << pluginInstance->getKind() << "with version" << pluginInstance->getVersion();
 
