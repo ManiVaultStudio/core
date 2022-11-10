@@ -916,6 +916,16 @@ public:
     hdps::Dataset<hdps::DatasetImpl> createSubsetFromSelection(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
 
     /**
+     * Create subset from the current selection and specify where the subset will be placed in the data hierarchy.
+     * The subset points computed from the current selection are limited to the ones also contained in the parent data.
+     * @param guiName Name of the subset in the GUI
+     * @param parentDataSet Smart pointer to parent dataset in the data hierarchy (default is below the set)
+     * @param visible Whether the subset will be visible in the UI
+     * @return Smart pointer to the created subset
+     */
+    hdps::Dataset<hdps::DatasetImpl> createSubsetFromVisibleSelection(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const;
+
+    /**
      * Get set icon
      * @param color Global icon color (for font icons)
      * @return Icon
