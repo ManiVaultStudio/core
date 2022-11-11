@@ -319,7 +319,7 @@ void DimensionsPickerAction::selectDimensions(const QVector<std::int32_t>& dimen
     if (dimensionIndices == getSelectedDimensions())
         return;
 
-    const auto numberOfDimensions = _holder.getNumberOfDimensions();
+    const auto numberOfDimensions = static_cast<std::int32_t>(_holder.getNumberOfDimensions());
 
     if (clearExisiting)
         for (int dimensionIndex = 0; dimensionIndex < numberOfDimensions; ++dimensionIndex)

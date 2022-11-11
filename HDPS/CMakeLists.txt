@@ -925,7 +925,7 @@ add_subdirectory(src/plugins/ImageData)
 add_subdirectory(src/plugins/DataHierarchyPlugin)
 add_subdirectory(src/plugins/DataPropertiesPlugin)
 add_subdirectory(src/plugins/PublicActionsPlugin)
-add_subdirectory(src/plugins/LogPlugin)
+add_subdirectory(src/plugins/LoggingPlugin)
 
 # Qt Advanced docking system
 set(VERSION_SHORT 3.7.0)

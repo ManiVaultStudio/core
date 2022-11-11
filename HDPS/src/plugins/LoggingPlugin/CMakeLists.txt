@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-set(PROJECT "LogPlugin")
+set(PROJECT "LoggingPlugin")
 
 PROJECT(${PROJECT})
 
@@ -21,17 +21,17 @@ file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 set(PLUGIN
-    src/LogPlugin.h
-    src/LogPlugin.cpp
+    src/LoggingPlugin.h
+    src/LoggingPlugin.cpp
 )
 
 set(WIDGETS
-    src/LogWidget.h
-    src/LogWidget.cpp
+    src/LoggingWidget.h
+    src/LoggingWidget.cpp
 )
 
 set(AUX
-    src/LogPlugin.json
+    src/LoggingPlugin.json
 )
 
 set(SOURCES

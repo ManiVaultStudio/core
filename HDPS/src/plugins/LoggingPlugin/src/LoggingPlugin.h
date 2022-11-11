@@ -1,36 +1,36 @@
 #pragma once
 
-#include "DataPropertiesWidget.h"
+#include "LoggingWidget.h"
 
 #include <ViewPlugin.h>
 
 using namespace hdps::plugin;
 
 /**
- * Data properties plugin
+ * Logging view plugin
  *
- * This plugin provides a user interface for viewing/configuring a dataset and its associated actions.
+ * This plugin provides a user interface inspecting HDPS logs
  *
  * @author Thomas Kroes
  */
-class DataPropertiesPlugin : public ViewPlugin
+class LoggingPlugin : public ViewPlugin
 {
     Q_OBJECT
     
 public:
-    DataPropertiesPlugin(const PluginFactory* factory);
+    LoggingPlugin(const PluginFactory* factory);
     
     void init() override;
 
 private:
-    DataPropertiesWidget    _dataPropertiesWidget;      /** Data properties widget */
+    LoggingWidget    _loggingWidget;      /** Loggin widget */
 };
 
-class DataPropertiesPluginFactory : public ViewPluginFactory
+class LoggingPluginFactory : public ViewPluginFactory
 {
     Q_INTERFACES(hdps::plugin::ViewPluginFactory hdps::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "nl.BioVault.DataPropertiesPlugin" FILE "DataPropertiesPlugin.json")
+    Q_PLUGIN_METADATA(IID "nl.BioVault.LoggingPlugin" FILE "LoggingPlugin.json")
     
 public:
 
