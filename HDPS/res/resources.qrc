@@ -57,5 +57,6 @@
         <file>colormaps/2D/example_b.png</file>
         <file>colormaps/2D/example_c.png</file>
         <file>colormaps/2D/example_d.png</file>
+		<file>colormaps/2D/random.png</file>
     </qresource>
 </RCC>
