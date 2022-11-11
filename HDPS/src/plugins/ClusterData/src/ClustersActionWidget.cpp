@@ -175,8 +175,7 @@ void ClustersActionWidget::setupSelectionSynchronization()
         for (auto selectedIndex : selectedRows) {
             auto cluster = static_cast<Cluster*>(_filterModel.mapToSource(selectedIndex).internalPointer());
 
-            // Add selected index
-            selectedClustersIndices.push_back(selectedIndex.row());
+            selectedClustersIndices.push_back(_filterModel.mapToSource(selectedIndex).row());
         }
 
         // Select clusters
