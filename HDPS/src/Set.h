@@ -1,7 +1,6 @@
 #ifndef HDPS_DATASET_H
 #define HDPS_DATASET_H
 
-#include "CoreInterface.h"
 #include "RawData.h"
 #include "Dataset.h"
 #include "LinkedData.h"
@@ -20,6 +19,8 @@
 
 namespace hdps
 {
+
+class CoreInterface;
 
 namespace plugin {
     class AnalysisPlugin;
@@ -524,6 +525,9 @@ public: // Operators
 
         return *this;
     }
+
+protected:
+    CoreInterface*              _core;                      /** Pointer to core interface */
 
 private:
     mutable plugin::RawData*    _rawData;                   /** Pointer to the raw data referenced in this set */

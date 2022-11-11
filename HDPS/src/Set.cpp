@@ -1,5 +1,6 @@
 #include "Set.h"
 
+#include "CoreInterface.h"
 #include "DataHierarchyItem.h"
 #include "AnalysisPlugin.h"
 #include "util/Serialization.h"
@@ -276,6 +277,7 @@ void DatasetImpl::addLinkedData(const hdps::Dataset<DatasetImpl>& targetDataSet,
 
 DatasetImpl::DatasetImpl(CoreInterface* core, const QString& rawDataName, const QString& guid /*= ""*/) :
     WidgetAction(nullptr),
+    _core(core),
     _storageType(StorageType::Owner),
     _rawData(nullptr),
     _guid(guid.isEmpty() ? QUuid::createUuid().toString(QUuid::WithoutBraces) : guid),
