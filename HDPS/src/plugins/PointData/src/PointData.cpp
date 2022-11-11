@@ -584,6 +584,35 @@ Dataset<DatasetImpl> Points::createSubsetFromSelection(const QString& guiName, c
     return Application::core()->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
 }
 
+Dataset<DatasetImpl> Points::createSubsetFromVisibleSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const bool& visible /*= true*/) const
+{
+    Dataset<Points> subsetSelection = getSelection()->copy();
+    std::vector<uint32_t>& selectionIndices = subsetSelection->getSelectionIndices();
+
+    // Get the global indices of the parent dataset
+    std::vector<uint32_t> globalIndices;
+    getGlobalIndices(globalIndices);
+
+    // Find the intersection of points that are selected, and the given indices
+    std::vector<uint32_t>& smallVector = (globalIndices.size() < selectionIndices.size()) ? globalIndices : selectionIndices;
+    std::vector<uint32_t>& largeVector = (globalIndices.size() < selectionIndices.size()) ? selectionIndices : globalIndices;
+    
+    // Sort the smallest vector
+    sort(smallVector.begin(), smallVector.end());
+
+    // Loop over large vector and binary search which values are in the smaller vector
+    std::vector<uint32_t> intersection;
+    std::copy_if(largeVector.begin(), largeVector.end(), std::back_inserter(intersection), [smallVector](uint32_t x)
+    {
+        return std::binary_search(smallVector.begin(), smallVector.end(), x);
+    });
+
+    // Set the intersection indices in temporary selection object used for creating the subset
+    subsetSelection->indices = intersection;
+
+    return _core->createSubsetFromSelection(subsetSelection, toSmartPointer(), guiName, parentDataSet, visible);
+}
+
 QIcon Points::getIcon(const QColor& color /*= Qt::black*/) const
 {
     return hdps::Application::getIconFont("FontAwesome").getIcon("database", color);

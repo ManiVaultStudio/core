@@ -178,7 +178,7 @@ QImage ColorMapAction::getColorMapImage() const
                         const auto rangeEndY    = rangeStartY + sourceStepSizeY;
 
                         // Create channel for RGB color components
-                        QVector<QVector<float>> channels(3);
+                        QVector<QVector<float>> channels(4);
 
                         // Sum the pixel colors so that we can average them later
                         for (int pixelY = rangeStartY; pixelY < rangeEndY; pixelY++) {
