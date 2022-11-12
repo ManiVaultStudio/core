@@ -66,6 +66,8 @@ void Application::setCore(CoreInterface* core)
     Q_ASSERT(_core != nullptr);
 
     _core = core;
+
+    emit coreSet(_core);
 }
 
 hdps::CoreInterface* Application::core()

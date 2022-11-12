@@ -90,6 +90,8 @@ set(PRIVATE_MANAGER_HEADERS
     src/private/DataHierarchyManager.h
     src/private/ActionsManager.h
     src/private/LayoutManager.h
+    src/private/DockManager.h
+    src/private/CentralWidget.h
 )
 
 set(PRIVATE_MANAGER_SOURCES
@@ -98,6 +100,8 @@ set(PRIVATE_MANAGER_SOURCES
     src/private/DataHierarchyManager.cpp
     src/private/ActionsManager.cpp
     src/private/LayoutManager.cpp
+    src/private/DockManager.cpp
+    src/private/CentralWidget.cpp
 )
 
 set(PRIVATE_MANAGER_FILES
@@ -108,12 +112,19 @@ set(PRIVATE_MANAGER_FILES
 set(PRIVATE_APPLICATION_HEADERS
     src/private/HdpsApplication.h
     src/private/MainWindow.h
-    ui/MainWindow.ui
+    src/private/FileMenu.h
+    src/private/RecentProjectsMenu.h
+    src/private/ImportDataMenu.h
+    src/private/ViewMenu.h
 )
 
 set(PRIVATE_APPLICATION_SOURCES
     src/private/HdpsApplication.cpp
     src/private/MainWindow.cpp
+    src/private/FileMenu.cpp
+    src/private/RecentProjectsMenu.cpp
+    src/private/ImportDataMenu.cpp
+    src/private/ViewMenu.cpp
 )
 
 set(PRIVATE_APPLICATION_FILES
@@ -633,13 +644,8 @@ if(APPLE)
     set_source_files_properties(res/icons/AppIcon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif(APPLE)
 
-set(UI_FILES
-    ui/MainWindow.ui
-)
-
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
-QT6_WRAP_UI(UI_HEADERS ${UI_FILES})
 QT6_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
 
 source_group(Public\\CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
@@ -658,10 +664,9 @@ source_group(Public\\Model\\Actions FILES ${PUBLIC_ACTIONS_MODEL_FILES})
 source_group(Public\\Model\\ActionHierarchy FILES ${PUBLIC_ACTION_HIERARCHY_MODEL_FILES})
 source_group(Public\\Model\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
 
-source_group( Resources FILES res/resources.qrc)
-source_group( Resources FILES ${UI_FILES})
-source_group( Resources FILES win/hdps.rc)
-source_group( Resources\\generated FILES ${UI_HEADERS})
+source_group(Resources FILES res/resources.qrc)
+source_group(Resources FILES win/hdps.rc)
+source_group(Resources\\generated FILES ${UI_HEADERS})
 
 set(LINK_TYPE SHARED)
 if(APPLE)
@@ -709,7 +714,6 @@ add_executable(${HDPS_EXE} MACOSX_BUNDLE WIN32
     src/.editorconfig
     ${MAIN_SOURCES}
     ${UI_HEADERS}
-    ${UI_FILES}
     ${RESOURCE_FILES}
 )
 

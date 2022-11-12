@@ -34,6 +34,9 @@ class DataHierarchyPluginFactory : public ViewPluginFactory
     
 public:
 
+    /** Constructor */
+    DataHierarchyPluginFactory();
+
     /**
      * Get plugin icon
      * @param color Icon color for flat (font) icons

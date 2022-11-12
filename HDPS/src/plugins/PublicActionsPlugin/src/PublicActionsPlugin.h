@@ -34,6 +34,9 @@ class PublicActionsPluginFactory : public ViewPluginFactory
     
 public:
 
+    /** Constructor */
+    PublicActionsPluginFactory();
+
     /**
      * Get plugin icon
      * @param color Icon color for flat (font) icons

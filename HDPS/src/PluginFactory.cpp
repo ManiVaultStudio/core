@@ -17,7 +17,7 @@ PluginFactory::PluginFactory(Type type) :
     _version(),
     _numberOfInstances(0),
     _maximumNumberOfInstances(-1),
-    _producePluginTriggerAction(this, ""),
+    _producePluginTriggerAction(this, this, "Plugin trigger"),
     _triggerHelpAction(nullptr, "Trigger plugin help")
 {
 }
@@ -30,6 +30,8 @@ QString PluginFactory::getKind() const
 void PluginFactory::setKind(const QString& kind)
 {
     _kind = kind;
+
+    //_producePluginTriggerAction.setPluginKind(_kind);
 }
 
 hdps::plugin::Type PluginFactory::getType() const
@@ -80,7 +82,7 @@ bool PluginFactory::mayProduce() const
     return _numberOfInstances < _maximumNumberOfInstances;
 }
 
-hdps::gui::TriggerAction& PluginFactory::getProducePluginTriggerAction()
+hdps::gui::PluginTriggerAction& PluginFactory::getProducePluginTriggerAction()
 {
     return _producePluginTriggerAction;
 }
@@ -139,7 +141,7 @@ std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets
 
 PluginTriggerAction* PluginFactory::createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets) const
 {
-    auto action = new PluginTriggerAction(nullptr, title, _type, _kind, datasets);
+    auto action = new PluginTriggerAction(nullptr, this, title, datasets);
 
     action->setToolTip(description);
     action->setIcon(getIcon());
@@ -149,7 +151,7 @@ PluginTriggerAction* PluginFactory::createPluginTriggerAction(const QString& tit
 
 PluginTriggerAction* PluginFactory::createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QString& iconName) const
 {
-    auto action = new PluginTriggerAction(nullptr, title, _type, _kind, datasets);
+    auto action = new PluginTriggerAction(nullptr, this, title, datasets);
 
     action->setToolTip(description);
     action->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon(iconName));
@@ -159,7 +161,7 @@ PluginTriggerAction* PluginFactory::createPluginTriggerAction(const QString& tit
 
 PluginTriggerAction* PluginFactory::createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QIcon& icon) const
 {
-    auto action = new PluginTriggerAction(nullptr, title, _type, _kind, datasets);
+    auto action = new PluginTriggerAction(nullptr, this, title, datasets);
 
     action->setToolTip(description);
     action->setIcon(icon);

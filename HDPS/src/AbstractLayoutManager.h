@@ -22,6 +22,11 @@ public:
     virtual void initialize(QMainWindow* mainWindow) = 0;
 
     /**
+     * Resets the docking layout to defaults
+     */
+    virtual void reset() = 0;
+
+    /**
      * Add a view plugin to the layout
      * @param viewPlugin Pointer to view plugin
      */

@@ -1,22 +1,22 @@
 #include "PluginTriggerAction.h"
 
+#include "pluginFactory.h"
+
 #include <QCryptographicHash>
 
 namespace hdps {
 
 namespace gui {
 
-PluginTriggerAction::PluginTriggerAction(QObject* parent, const QString& title, const plugin::Type& pluginType, const QString& pluginKind, const Datasets& datasets) :
+PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const Datasets& datasets /*= Datasets()*/) :
     TriggerAction(parent),
+    _pluginFactory(pluginFactory),
     _title(title),
-    _sha(QString(QCryptographicHash::hash(QString("%1_%2").arg(pluginKind, title).toUtf8(), QCryptographicHash::Sha1).toHex())),
-    _pluginType(pluginType),
-    _pluginKind(pluginKind),
+    _sha(QString(QCryptographicHash::hash(QString("%1_%2").arg(pluginFactory->getKind(), title).toUtf8(), QCryptographicHash::Sha1).toHex())),
     _datasets(datasets),
     _configurationAction(nullptr)
 {
-    // Prefix the title with the plugin type string
-    switch (_pluginType)
+    switch (_pluginFactory->getType())
     {
         case plugin::Type::ANALYSIS:
             _title.insert(0, "Analyze/");
@@ -49,24 +49,24 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const QString& title, 
     setText(_title.split("/").last());
 }
 
+const hdps::plugin::PluginFactory* PluginTriggerAction::getPluginFactory() const
+{
+    return _pluginFactory;
+}
+
 QString PluginTriggerAction::getTitle() const
 {
     return _title;
 }
 
+void PluginTriggerAction::setTitle(const QString& title)
+{
+    _title = title;
+}
+
 QString PluginTriggerAction::getSha() const
 {
     return _sha;
-}
-
-plugin::Type PluginTriggerAction::getPluginType() const
-{
-    return _pluginType;
-}
-
-QString PluginTriggerAction::getPluginKind() const
-{
-    return _pluginKind;
 }
 
 Datasets PluginTriggerAction::getDatasets() const

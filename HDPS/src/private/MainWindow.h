@@ -1,21 +1,13 @@
 #pragma once
 
-#include "ui_MainWindow.h"
 #include "Core.h"
 
+#include "FileMenu.h"
+#include "ViewMenu.h"
+
 #include <QMainWindow>
-#include <QAction>
-#include <QSharedPointer>
-#include <QLabel>
 
-namespace Ui
-{
-    class MainWindow;
-}
-
-class StartPageWidget;
-
-class MainWindow : public QMainWindow, private Ui::MainWindow
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
@@ -62,16 +54,8 @@ private: // Window geometry persistence
 
     void checkGraphicsCapabilities();
 
-protected: // Menu
-
-    /** Setup file menu */
-    void setupFileMenu();
-
-    /** Fill the recent projects menu with entries */
-    void populateRecentProjectsMenu();
-
 private:
-    Core        _core;                      /** Instance of the core */
-    QMenu       _loadedViewPluginsMenu;     /** Menu for loaded view plugins */
-    QMenu       _pluginsHelpMenu;           /** Menu for loaded plugins help */
+    Core        _core;          /** Instance of the core */
+    FileMenu    _fileMenu;      /** File menu */
+    ViewMenu    _viewMenu;      /** View menu */
 };

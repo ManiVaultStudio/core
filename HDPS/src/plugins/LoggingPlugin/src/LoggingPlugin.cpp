@@ -8,9 +8,6 @@ LoggingPlugin::LoggingPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _loggingWidget(nullptr)
 {
-    const_cast<PluginFactory*>(factory)->setMaximumNumberOfInstances(1);
-
-    getAllowedDockingAreasAction().initialize({ "Left", "Right" }, { "Left", "Right" });
 }
 
 void LoggingPlugin::init()
@@ -24,6 +21,11 @@ void LoggingPlugin::init()
     getWidget().setLayout(layout);
 
     getWidget().setWindowTitle("Logging");
+}
+
+LoggingPluginFactory::LoggingPluginFactory() :
+    ViewPluginFactory(true)
+{
 }
 
 QIcon LoggingPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const

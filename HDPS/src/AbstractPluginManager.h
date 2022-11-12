@@ -3,6 +3,7 @@
 #include <actions/WidgetAction.h>
 #include <actions/PluginTriggerAction.h>
 #include <actions/TriggerAction.h>
+#include <actions/PluginTriggerAction.h>
 #include <actions/ToggleAction.h>
 
 #include <QObject>
@@ -113,28 +114,34 @@ protected:
 signals:
 
     /**
-     * Signals that an action has become available that triggers plugin help
-     * @param pluginTriggerHelpAction Action that triggers plugin help
+     * Signals that a trigger action has become available that triggers a view plugin
+     * @param pluginTriggerAction Action that triggers the loading of the view plugin
      */
-    void addPluginTriggerHelpAction(gui::TriggerAction& pluginTriggerHelpAction);
+    void addLoadViewPluginTriggerAction(gui::PluginTriggerAction& pluginTriggerAction);
+
+    /**
+     * Signals that a trigger action has become available that triggers a standard view plugin
+     * @param pluginTriggerAction Action that triggers the loading of a standard system plugin
+     */
+    void addLoadStandardViewPluginTriggerAction(gui::PluginTriggerAction& pluginTriggerAction);
 
     /**
      * Signals that a trigger action has become available that triggers an import plugin
-     * @param pluginTriggerHelpAction Action that triggers the import plugin
+     * @param pluginTriggerAction Action that triggers the loading of the import plugin
      */
-    void addImportPluginTriggerAction(gui::TriggerAction& pluginTriggerAction);
-
-    /**
-     * Signals that a trigger action has become available that triggers a view plugin
-     * @param pluginTriggerHelpAction Action that triggers the view plugin
-     */
-    void addViewPluginTriggerAction(gui::TriggerAction& pluginTriggerAction);
+    void addLoadImportPluginTriggerAction(gui::PluginTriggerAction& pluginTriggerAction);
 
     /**
      * Signals that a toggle action has become available that toggles view plugin visibility
      * @param viewPluginVisibleAction Action that toggles the view plugin visibility
      */
     void addViewPluginVisibleAction(gui::ToggleAction& viewPluginVisibleAction);
+
+    /**
+     * Signals that an action has become available that triggers plugin help
+     * @param pluginTriggerHelpAction Action that triggers plugin help
+     */
+    void addPluginTriggerHelpAction(gui::TriggerAction& pluginTriggerHelpAction);
 };
 
 }

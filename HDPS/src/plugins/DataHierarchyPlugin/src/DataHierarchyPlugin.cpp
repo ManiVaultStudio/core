@@ -8,10 +8,6 @@ DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _dataHierarchyWidget(&getWidget())
 {
-    const_cast<PluginFactory*>(factory)->setMaximumNumberOfInstances(1);
-
-    getAllowedDockingAreasAction().initialize({ "Left", "Right" }, { "Left", "Right" });
-    getPreferredDockingAreaAction().setCurrentText("Right");
 }
 
 void DataHierarchyPlugin::init()
@@ -23,6 +19,11 @@ void DataHierarchyPlugin::init()
     layout->addWidget(&_dataHierarchyWidget);
 
     getWidget().setLayout(layout);
+}
+
+DataHierarchyPluginFactory::DataHierarchyPluginFactory() :
+    ViewPluginFactory(true)
+{
 }
 
 QIcon DataHierarchyPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const

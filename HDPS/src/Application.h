@@ -125,6 +125,9 @@ signals:
      */
     void currentProjectFilePathChanged(const QString& currentProjectFilePath);
 
+    /** Signals that the core has been become available */
+    void coreSet(CoreInterface* core);
+
 protected:
     CoreInterface*      _core;                                  /** Shared pointer to HDPS core */
     IconFonts           _iconFonts;                             /** Icon fonts resource */

@@ -34,6 +34,9 @@ class LoggingPluginFactory : public ViewPluginFactory
     
 public:
 
+    /** Constructor */
+    LoggingPluginFactory();
+
     /**
      * Get plugin icon
      * @param color Icon color for flat (font) icons

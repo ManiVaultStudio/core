@@ -1,9 +1,12 @@
 #include "LayoutManager.h"
 
+#include "util/Serialization.h"
+
 #include <QMainWindow>
 
 using namespace ads;
 using namespace hdps::plugin;
+using namespace hdps::util;
 
 namespace hdps::gui
 {
@@ -13,13 +16,8 @@ LayoutManager::LayoutManager() :
     _dockManager(),
     _centralDockArea(nullptr),
     _lastDockAreaWidget(nullptr),
-    _leftDockAreaWidget(nullptr),
-    _rightDockAreaWidget(nullptr),
-    _leftDockWidget("Left"),
     _centralDockWidget("Views"),
-    _rightDockWidget("Right"),
-    _startPageDockWidget("Start page")
-    //_startPageWidget(nullptr),
+    _centralWidget()
 {
     setText("Layout manager");
     setObjectName("Layout");
@@ -31,30 +29,34 @@ LayoutManager::~LayoutManager()
 
 void LayoutManager::initialize(QMainWindow* mainWindow)
 {
-    _dockManager = QSharedPointer<ads::CDockManager>::create(mainWindow);
+    _dockManager = QSharedPointer<DockManager>::create(mainWindow);
+
+    _centralDockWidget.setWidget(&_centralWidget);
 
     _centralDockArea = _dockManager->setCentralWidget(&_centralDockWidget);
-    
-    _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
+    //_centralDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
-    //_leftDockAreaWidget = _dockManager->addDockWidget(LeftDockWidgetArea, &_leftDockWidget, _centralDockArea);
-    //_rightDockAreaWidget = _dockManager->addDockWidget(RightDockWidgetArea, &_rightDockWidget, _centralDockArea);
-    
 
     //_dockManager->topLevelDockArea()->setAllowedAreas(DockWidgetAreas::LeftDockWidgetArea | DockWidgetAreas::RightDockWidgetArea);
 
-    //_dockManager->setCentralWidget(&_centralDockWidget);
+    connect(_dockManager.get(), &DockManager::dockAreasAdded, this, &LayoutManager::updateCentralWidget);
+    connect(_dockManager.get(), &DockManager::dockAreasRemoved, this, &LayoutManager::updateCentralWidget);
 
-    //_centralDockArea = _dockManager->addDockWidget(DockWidgetArea::CenterDockWidgetArea, &_startPageDockWidget);
+    _dockManager->initialize();
 }
 
 void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
 {
+    variantMapMustContain(variantMap, "DockManager");
+
+    _dockManager->fromVariantMap(variantMap["DockManager"].toMap());
 }
 
 QVariantMap LayoutManager::toVariantMap() const
 {
-    return dockContainerWidgetToVariant(_dockManager.get());
+    return {
+        { "DockManager", _dockManager->toVariantMap() }
+    };
 }
 
 void LayoutManager::addViewPlugin(ViewPlugin* viewPlugin)
@@ -65,73 +67,68 @@ void LayoutManager::addViewPlugin(ViewPlugin* viewPlugin)
 
     //dockWidget->setWidget(&viewPlugin->getWidget(), CDockWidget::ForceNoScrollArea);
 
-    //connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, this, [this, dockWidget](const QString& title) {
-    //    dockWidget->setWindowTitle(title);
-    //    });
+    connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, this, [this, dockWidget](const QString& title) {
+        dockWidget->setWindowTitle(title);
+    });
 
-    //connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
-    //    dockWidget->setFeature(CDockWidget::DockWidgetClosable, toggled);
-    //    });
+    connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
+        dockWidget->setFeature(CDockWidget::DockWidgetClosable, toggled);
+    });
 
-    //connect(&viewPlugin->getMayFloatAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
-    //    dockWidget->setFeature(CDockWidget::DockWidgetFloatable, toggled);
-    //    });
+    connect(&viewPlugin->getMayFloatAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
+        dockWidget->setFeature(CDockWidget::DockWidgetFloatable, toggled);
+    });
 
-    //connect(&viewPlugin->getMayMoveAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
-    //    dockWidget->setFeature(CDockWidget::DockWidgetMovable, toggled);
-    //    });
+    connect(&viewPlugin->getMayMoveAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
+        dockWidget->setFeature(CDockWidget::DockWidgetMovable, toggled);
+    });
 
-    //connect(&viewPlugin->getAllowedDockingAreasAction(), &OptionsAction::selectedOptionsChanged, this, [this, dockWidget](const QStringList& selectedOptions) {
-    //    dockWidget->dockAreaWidget()->setAllowedAreas(static_cast<DockWidgetAreas>(ViewPlugin::getDockWidgetAreas(selectedOptions)));
-    //    });
+    connect(&viewPlugin->getAllowedDockingAreasAction(), &OptionsAction::selectedOptionsChanged, this, [this, dockWidget](const QStringList& selectedOptions) {
+        dockWidget->dockAreaWidget()->setAllowedAreas(static_cast<DockWidgetAreas>(ViewPlugin::getDockWidgetAreas(selectedOptions)));
+    });
 
-    //const auto connectToViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
-    //    connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
-    //        dockWidget->toggleView(toggled);
-    //        });
-    //};
+    const auto connectToViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
+        connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
+            qDebug() << toggled;
+            dockWidget->toggleView(toggled);
+        });
+    };
 
-    //const auto disconnectFromViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
-    //    disconnect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, nullptr);
-    //};
+    const auto disconnectFromViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
+        disconnect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, nullptr);
+    };
 
-    //QObject::connect(dockWidget, &CDockWidget::closed, this, [this, viewPlugin, dockWidget, connectToViewPluginVisibleAction, disconnectFromViewPluginVisibleAction]() {
-    //    disconnectFromViewPluginVisibleAction(dockWidget);
-    //    {
-    //        viewPlugin->getVisibleAction().setChecked(false);
-    //    }
-    //    connectToViewPluginVisibleAction(dockWidget);
-    //});
+    QObject::connect(dockWidget, &CDockWidget::closed, this, [this, viewPlugin, dockWidget, connectToViewPluginVisibleAction, disconnectFromViewPluginVisibleAction]() {
+        disconnectFromViewPluginVisibleAction(dockWidget);
+        {
+            viewPlugin->getVisibleAction().setChecked(false);
+        }
+        connectToViewPluginVisibleAction(dockWidget);
+    });
 
-    auto dockWidgetArea = RightDockWidgetArea;
+    if (viewPlugin->isStandardView()) {
+        _dockManager->addDockWidget(RightDockWidgetArea, dockWidget);
+    }
+    else {
+        if (_lastDockAreaWidget == nullptr)
+            _lastDockAreaWidget = _dockManager->addDockWidget(CenterDockWidgetArea, dockWidget);
+        else
+            _lastDockAreaWidget = _dockManager->addDockWidget(RightDockWidgetArea, dockWidget, _lastDockAreaWidget);
+    }
 
-    const auto preferredDockWidgetArea = viewPlugin->getPreferredDockingAreaAction().getCurrentText();
+    connect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {
+        updateCentralWidget();
+    });
 
-    //if (ViewPlugin::dockWidgetAreaMap.contains(preferredDockWidgetArea))
-    //    dockWidgetArea = static_cast<DockWidgetArea>(ViewPlugin::dockWidgetAreaMap[preferredDockWidgetArea]);
-    
-    //if (viewPlugin->getCentralDockingAction().isChecked())
-    _dockManager->addDockWidget(dockWidgetArea, dockWidget, _rightDockAreaWidget);
-    //else
-    //    _dockManager->addDockWidget(dockWidgetArea, dockWidget);
+    connect(dockWidget, &CDockWidget::closed, [this, dockWidget]() {
+        updateCentralWidget();
+    });
 
-    //if (getViewPluginDockWidgets().isEmpty())
-    //    dockWidgetArea = CenterDockWidgetArea;
+    connect(dockWidget, &CDockWidget::topLevelChanged, [this, dockWidget](bool topLevel) {
+        updateCentralWidget();
+    });
 
-    //if (_lastDockAreaWidget == nullptr)
-    //    _lastDockAreaWidget = _dockManager->addDockWidget(dockWidgetArea, dockWidget);
-    //else
-    //    _lastDockAreaWidget = _dockManager->addDockWidget(dockWidgetArea, dockWidget, _lastDockAreaWidget);
-
-    //QObject::connect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {
-    //    updateCentralWidget();
-    //    });
-
-    //QObject::connect(dockWidget, &CDockWidget::topLevelChanged, [this, dockWidget](bool topLevel) {
-    //    updateCentralWidget();
-    //    });
-
-    //updateCentralWidget();
+    updateCentralWidget();
 }
 
 QVariantMap LayoutManager::dockWidgetToVariant(ads::CDockWidget* dockWidget) const
@@ -141,6 +138,8 @@ QVariantMap LayoutManager::dockWidgetToVariant(ads::CDockWidget* dockWidget) con
     auto dockWidgetVariant = QVariantMap();
 
     dockWidgetVariant["Title"] = dockWidget->windowTitle();
+
+    qDebug() << dockWidget->dockContainer();
 
     return dockWidgetVariant;
 }
@@ -182,92 +181,33 @@ QVariantMap LayoutManager::dockContainerWidgetToVariant(CDockContainerWidget* do
         dockAreas.push_back(dockAreaWidgetToVariant(_dockManager->dockArea(dockAreaIndex)));
 
     return QVariantMap({
-        { "DockAreas", dockAreas }
-        });
+        { "DockAreas", dockAreas }//,
+        //{ "State", QVariant::fromValue(_dockManager->saveState().toBase64()) }
+    });
 }
 
-
-
+void LayoutManager::reset()
+{
+    _dockManager.reset();
 }
 
-//void MainWindow::initializeDocking()
-//{
-//    CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
-//    CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
-//    CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
-//    CDockManager::setConfigFlag(CDockManager::DragPreviewHasWindowFrame, true);
-//    CDockManager::setConfigFlag(CDockManager::OpaqueSplitterResize, false);
-//    CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
-//    CDockManager::setConfigFlag(CDockManager::EqualSplitOnInsertion, true);
-//    CDockManager::setConfigFlag(CDockManager::DockAreaHasUndockButton, true);
-//
-//    initializeCentralDockingArea();
-//
-//    connect(_dockManager, &CDockManager::dockAreasAdded, this, &MainWindow::updateCentralWidget);
-//    connect(_dockManager, &CDockManager::dockAreasRemoved, this, &MainWindow::updateCentralWidget);
-//}
-//void MainWindow::initializeCentralDockingArea()
-//{
-//    _startPageDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("door-open"));
-//    _startPageDockWidget->setWidget(_startPageWidget, CDockWidget::ForceNoScrollArea);
-//
-//    _centralDockArea = _dockManager->addDockWidget(DockWidgetArea::CenterDockWidgetArea, _startPageDockWidget);
-//
-//    _startPageDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-//    _startPageDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
-//    _startPageDockWidget->setFeature(CDockWidget::DockWidgetMovable, false);
-//}
-//
-//void MainWindow::updateCentralWidget()
-//{
-//#ifdef MAIN_WINDOW_VERBOSE
-//    qDebug().noquote() << "Update central widget with" << getViewPluginDockWidgets().count() << "view plugins";
-//#endif
-//
-//    if (getViewPluginDockWidgets().count() == 0) {
-//
-//        // The only valid docking area is in the center when there is only one view plugin loaded
-//        _centralDockArea->setAllowedAreas(DockWidgetArea::CenterDockWidgetArea);
-//
-//        _centralDockArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-//
-//        // Show the start page dock widget and set the mode
-//        _startPageDockWidget->toggleView(true);
-//        _startPageWidget->setMode(_core.requestAllDataSets().size() == 0 ? StartPageWidget::Mode::ProjectBar : StartPageWidget::Mode::LogoOnly);
-//    }
-//    else {
-//
-//        // Docking may occur anywhere
-//        _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
-//
-//        // Hide the start page dock widget
-//        _startPageDockWidget->toggleView(false);
-//    }
-//}
-//
-//QList<ads::CDockWidget*> MainWindow::getViewPluginDockWidgets(const bool& openOnly /*= true*/)
-//{
-//    QList<ads::CDockWidget*> viewPluginDockWidgets;
-//
-//    for (auto viewPluginDockWidget : _dockManager->dockWidgetsMap().values()) {
-//        if (viewPluginDockWidget->property("PluginType").toString() != "View")
-//            continue;
-//
-//        if (openOnly) {
-//            if (!viewPluginDockWidget->isClosed() && !viewPluginDockWidget->isFloating())
-//                viewPluginDockWidgets << viewPluginDockWidget;
-//        }
-//        else {
-//            viewPluginDockWidgets << viewPluginDockWidget;
-//        }
-//    }
-//
-//    return viewPluginDockWidgets;
-//}
+void LayoutManager::updateCentralWidget()
+{
+    if (_centralDockArea->dockWidgetsCount() == 0) {
+        _centralDockArea->setAllowedAreas(DockWidgetArea::CenterDockWidgetArea);
+        //_centralDockArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        _centralDockWidget.toggleView(true);
+    }
+    else {
+        _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
+        _centralDockWidget.toggleView(false);
+    }
 
-//void MainWindow::addDockWidget(QWidget* widget, const QString& windowTitle, const DockWidgetArea& dockWidgetArea, CDockAreaWidget* dockAreaWidget)
-//{
-//    auto dockWidget = new CDockWidget(windowTitle);
-//
-//    _dockManager->addDockWidget(dockWidgetArea, dockWidget, dockAreaWidget);
-//}
+    /*
+    qDebug() << _dockManager->dockAreaCount();
+    for (int i = 0; i < _dockManager->dockAreaCount(); i++)
+        _dockManager->dockArea(i)->setAllowedAreas(DockWidgetAreas(LeftDockWidgetArea | RightDockWidgetArea));
+    */
+}
+
+}

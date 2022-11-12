@@ -8,10 +8,6 @@ PublicActionsPlugin::PublicActionsPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _publicActionsWidget(nullptr)
 {
-    const_cast<PluginFactory*>(factory)->setMaximumNumberOfInstances(1);
-
-    getAllowedDockingAreasAction().initialize({ "Left", "Right" }, { "Left", "Right" });
-    getPreferredDockingAreaAction().setCurrentText("Right");
 }
 
 void PublicActionsPlugin::init()
@@ -23,6 +19,11 @@ void PublicActionsPlugin::init()
     layout->addWidget(&_publicActionsWidget);
 
     getWidget().setLayout(layout);
+}
+
+PublicActionsPluginFactory::PublicActionsPluginFactory() :
+    ViewPluginFactory(true)
+{
 }
 
 QIcon PublicActionsPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const

@@ -6,9 +6,11 @@
 #include "PluginType.h"
 #include "Dataset.h"
 
-namespace hdps {
+namespace hdps::plugin {
+    class PluginFactory;
+}
 
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Plugin trigger action class
@@ -26,12 +28,17 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param pluginFactory Pointer to plugin factory
      * @param title Plugin trigger title (if title is in path format, the trigger will be added to the data hierarchy context menu in a hierarchical fashion)
-     * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param pluginKind Kind of plugin
      * @param datasets Input datasets
      */
-    PluginTriggerAction(QObject* parent, const QString& title, const plugin::Type& pluginType, const QString& pluginKind, const Datasets& datasets);
+    PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const Datasets& datasets = Datasets());
+
+    /**
+     * Get the plugin factory
+     * @return Pointer to the plugin factory
+     */
+    const plugin::PluginFactory* getPluginFactory() const;
 
     /**
      * Get title
@@ -40,22 +47,16 @@ public:
     QString getTitle() const;
 
     /**
+     * Set title
+     * @param title Title
+     */
+    void setTitle(const QString& title);
+
+    /**
      * Get sha of plugin kind + trigger title
      * @return Sha
      */
     QString getSha() const;
-
-    /**
-     * Get type of plugin
-     * @return Type of plugin
-     */
-    plugin::Type getPluginType() const;
-
-    /**
-     * Get kind of plugin
-     * @return Kind of plugin in string format
-     */
-    QString getPluginKind() const;
 
     /**
      * Get input datasets
@@ -82,15 +83,13 @@ public:
     void setConfigurationAction(WidgetAction* configurationAction);
 
 private:
-    QString             _title;                 /** Plugin trigger title (if title is in path format, the trigger will be added to the data hierarchy context menu in a hierarchical fashion) */
-    const QString       _sha;                   /** Cryptographic hash of the plugin kind and trigger title */
-    const plugin::Type  _pluginType;            /** Type of plugin e.g. analysis, exporter */
-    const QString       _pluginKind;            /** Kind of plugin */
-    Datasets            _datasets;              /** Input datasets */
-    WidgetAction*       _configurationAction;   /** Action for configuring the plugin creation */
+    const plugin::PluginFactory*    _pluginFactory;         /** Pointer to plugin factory */
+    QString                         _title;                 /** Plugin trigger title (if title is in path format, the trigger will be added to the data hierarchy context menu in a hierarchical fashion) */
+    const QString                   _sha;                   /** Cryptographic hash of the plugin kind and trigger title */
+    Datasets                        _datasets;              /** Input datasets */
+    WidgetAction*                   _configurationAction;   /** Action for configuring the plugin creation */
 };
 
 using PluginTriggerActions = QVector<PluginTriggerAction*>;
 
-}
 }

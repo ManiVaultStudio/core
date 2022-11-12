@@ -41,7 +41,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _mayFloatAction(this, "May float", true, true),
     _mayMoveAction(this, "May move", true, true),
     _visibleAction(this, "Visible", true, true),
-    _centralDockingAction(this, "Central docking", true, true),
     _allowedDockingAreasAction(this, "Allowed docking areas", ViewPlugin::dockWidgetAreaMap.keys(), ViewPlugin::dockWidgetAreaMap.keys()),
     _preferredDockingAreaAction(this, "Preferred docking area", ViewPlugin::dockWidgetAreaMap.keys(), "Bottom"),
     _triggerHelpAction(this, "Trigger help")
@@ -77,11 +76,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction.setConnectionPermissionsToNone();
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
-
-    _centralDockingAction.setToolTip("Determines whether the view plugin should be docked in the central area");
-    _centralDockingAction.setConnectionPermissionsToNone();
-    _centralDockingAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _centralDockingAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
     _allowedDockingAreasAction.setToolTip("Determines the allowed docking areas for the view plugin");
     _allowedDockingAreasAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
@@ -137,14 +131,32 @@ void ViewPlugin::loadData(const Datasets& datasets)
     qDebug() << "Load function not implemented in view plugin implementation";
 }
 
-ViewPluginFactory::ViewPluginFactory() :
-    PluginFactory(Type::VIEW)
+QWidget& ViewPlugin::getWidget()
 {
+    return _widget;
+}
+
+bool ViewPlugin::isStandardView() const
+{
+    return dynamic_cast<const ViewPluginFactory*>(_factory)->isStandardView();
+}
+
+ViewPluginFactory::ViewPluginFactory(bool isStandardView /*= false*/) :
+    PluginFactory(Type::VIEW),
+    _isStandardView(isStandardView)
+{
+    if (_isStandardView)
+        setMaximumNumberOfInstances(1);
 }
 
 QIcon ViewPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
     return Application::getIconFont("FontAwesome").getIcon("eye", color);
+}
+
+bool ViewPluginFactory::isStandardView() const
+{
+    return _isStandardView;
 }
 
 }

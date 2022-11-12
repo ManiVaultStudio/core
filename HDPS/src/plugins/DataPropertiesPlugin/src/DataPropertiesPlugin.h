@@ -34,6 +34,9 @@ class DataPropertiesPluginFactory : public ViewPluginFactory
     
 public:
 
+    /** Constructor */
+    DataPropertiesPluginFactory();
+
     /**
      * Get plugin icon
      * @param color Icon color for flat (font) icons

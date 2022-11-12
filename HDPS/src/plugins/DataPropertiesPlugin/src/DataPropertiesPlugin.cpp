@@ -10,10 +10,6 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _dataPropertiesWidget(nullptr)
 {
-    const_cast<PluginFactory*>(factory)->setMaximumNumberOfInstances(1);
-
-    getAllowedDockingAreasAction().initialize({ "Left", "Right" }, { "Left", "Right" });
-    getPreferredDockingAreaAction().setCurrentText("Bottom");
 }
 
 void DataPropertiesPlugin::init()
@@ -34,6 +30,11 @@ void DataPropertiesPlugin::init()
     });
 
     getWidget().setWindowTitle("Data properties");
+}
+
+DataPropertiesPluginFactory::DataPropertiesPluginFactory() :
+    ViewPluginFactory(true)
+{
 }
 
 QIcon DataPropertiesPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const

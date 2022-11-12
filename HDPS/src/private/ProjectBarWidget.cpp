@@ -218,7 +218,7 @@ void ProjectBarWidget::ProjectsWidget::createRightColumn()
     // Add header and widget for import data
     _rightColumnLayout.addWidget(createHeaderLabel("Import data", "Import data into HDPS"));
     _rightColumnLayout.addSpacerItem(new QSpacerItem(0, 10));
-    _rightColumnLayout.addWidget(new ImportDataWidget());
+    //_rightColumnLayout.addWidget(new ImportDataWidget());
 }
 
 QLabel* ProjectBarWidget::ProjectsWidget::createHeaderLabel(const QString& title, const QString& tooltip)

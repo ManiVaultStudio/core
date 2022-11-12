@@ -92,7 +92,7 @@ void PluginManager::loadPlugins()
         if (pluginFactory->hasHelp())
             emit addPluginTriggerHelpAction(pluginFactory->getTriggerHelpAction());
 
-        const auto getProducePluginTriggerAction = [&](const QString& guiName) -> TriggerAction& {
+        const auto getProducePluginTriggerAction = [&](const QString& guiName) -> PluginTriggerAction& {
             pluginFactory->setGuiName(guiName);
 
             auto& producePluginTriggerAction = pluginFactory->getProducePluginTriggerAction();
@@ -100,7 +100,7 @@ void PluginManager::loadPlugins()
             producePluginTriggerAction.setIcon(pluginFactory->getIcon());
             pluginFactory->getTriggerHelpAction().setIcon(pluginFactory->getIcon());
 
-            connect(&producePluginTriggerAction, &TriggerAction::triggered, this, [this, pluginFactory]() -> void {
+            connect(&producePluginTriggerAction, &PluginTriggerAction::triggered, this, [this, pluginFactory]() -> void {
                 createPlugin(pluginFactory->getKind());
             });
 
@@ -115,14 +115,17 @@ void PluginManager::loadPlugins()
         }
         else if (qobject_cast<LoaderPluginFactory*>(pluginFactory))
         {
-            emit addImportPluginTriggerAction(getProducePluginTriggerAction(menuName));
+            emit addLoadImportPluginTriggerAction(getProducePluginTriggerAction(menuName));
         }
         else if (qobject_cast<WriterPluginFactory*>(pluginFactory))
         {
         }
         else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
         {
-            emit addViewPluginTriggerAction(getProducePluginTriggerAction(pluginKind));
+            if (qobject_cast<ViewPluginFactory*>(pluginFactory)->isStandardView())
+                emit addLoadStandardViewPluginTriggerAction(getProducePluginTriggerAction(pluginKind));
+            else
+                emit addLoadViewPluginTriggerAction(getProducePluginTriggerAction(pluginKind));
         }
         else if (qobject_cast<TransformationPluginFactory*>(pluginFactory))
         {

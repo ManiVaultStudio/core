@@ -5,7 +5,9 @@
 #include <QSharedPointer>
 
 #include "DockManager.h"
-#include "DockAreaWidget.h"
+#include "CentralWidget.h"
+
+#include <DockAreaWidget.h>
 
 class QMainWindow;
 
@@ -29,6 +31,11 @@ public:
      * @param mainWindow Pointer to main window to apply the layout manager to
      */
     void initialize(QMainWindow* mainWindow) override;
+
+    /**
+     * Resets the layout to defaults
+     */
+    void reset() override;
 
     /**
      * Add a view plugin to the layout
@@ -73,18 +80,17 @@ private:
      */
     QVariantMap dockContainerWidgetToVariant(ads::CDockContainerWidget* dockContainerWidget) const;
 
+    /**
+     * Updates the central widget in response to changes in docking and dock widgets visibility
+     */
+    void updateCentralWidget();
+
 private:
-    QSharedPointer<ads::CDockManager>   _dockManager;               /** Manager for docking */
-    ads::CDockAreaWidget*               _centralDockArea;           /** Docking area for view plugins */
-    ads::CDockAreaWidget*               _lastDockAreaWidget;        /** Last docking area widget (if any) */
-    ads::CDockAreaWidget*               _leftDockAreaWidget;        /** Last docking area widget (if any) */
-    ads::CDockAreaWidget*               _rightDockAreaWidget;        /** Last docking area widget (if any) */
-    ads::CDockWidget                    _leftDockWidget;            /** Dock widget for view plugins */
-    ads::CDockWidget                    _centralDockWidget;         /** Dock widget for view plugins */
-    ads::CDockWidget                    _rightDockWidget;           /** Dock widget for view plugins */
-    ads::CDockWidget                    _startPageDockWidget;       /** Dock widget for the start page 
-*/
-    //StartPageWidget* _startPageWidget;           /** Pointer to the start page widget */
+    QSharedPointer<DockManager>     _dockManager;               /** ADS inherited dock manager */
+    ads::CDockAreaWidget*           _centralDockArea;           /** Docking area for view plugins */
+    ads::CDockAreaWidget*           _lastDockAreaWidget;        /** Last docking area widget (if any) */
+    ads::CDockWidget                _centralDockWidget;         /** Central dock widget */
+    CentralWidget                   _centralWidget;             /** Central widget which is loaded into the central dock widget */
 };
 
 }
