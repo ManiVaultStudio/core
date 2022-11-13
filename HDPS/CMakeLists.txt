@@ -84,24 +84,90 @@ set(PRIVATE_CORE_FILES
     ${PRIVATE_CORE_SOURCES}
 )
 
-set(PRIVATE_MANAGER_HEADERS
-    src/private/PluginManager.h
-    src/private/DataManager.h
-    src/private/DataHierarchyManager.h
-    src/private/ActionsManager.h
+set(PRIVATE_LAYOUT_MANAGER_HEADERS
     src/private/LayoutManager.h
     src/private/DockManager.h
     src/private/VisualizationDockWidget.h
 )
 
-set(PRIVATE_MANAGER_SOURCES
-    src/private/PluginManager.cpp
-    src/private/DataManager.cpp
-    src/private/DataHierarchyManager.cpp
-    src/private/ActionsManager.cpp
+set(PRIVATE_LAYOUT_MANAGER_SOURCES
     src/private/LayoutManager.cpp
     src/private/DockManager.cpp
     src/private/VisualizationDockWidget.cpp
+)
+
+set(PRIVATE_LAYOUT_MANAGER_FILES
+    ${PRIVATE_LAYOUT_MANAGER_HEADERS}
+    ${PRIVATE_LAYOUT_MANAGER_SOURCES}
+)
+
+set(PRIVATE_PLUGIN_MANAGER_HEADERS
+    src/private/PluginManager.h
+)
+
+set(PRIVATE_PLUGIN_MANAGER_SOURCES
+    src/private/PluginManager.cpp
+)
+
+set(PRIVATE_PLUGIN_MANAGER_FILES
+    ${PRIVATE_PLUGIN_MANAGER_HEADERS}
+    ${PRIVATE_PLUGIN_MANAGER_SOURCES}
+)
+
+set(PRIVATE_DATA_MANAGER_HEADERS
+    src/private/DataManager.h
+)
+
+set(PRIVATE_DATA_MANAGER_SOURCES
+    src/private/DataManager.cpp
+)
+
+set(PRIVATE_DATA_MANAGER_FILES
+    ${PRIVATE_DATA_MANAGER_HEADERS}
+    ${PRIVATE_DATA_MANAGER_SOURCES}
+)
+
+set(PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS
+    src/private/DataHierarchyManager.h
+)
+
+set(PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES
+    src/private/DataHierarchyManager.cpp
+)
+
+set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
+    ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
+    ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
+)
+
+set(PRIVATE_ACTIONS_MANAGER_HEADERS
+    src/private/ActionsManager.h
+)
+
+set(PRIVATE_ACTIONS_MANAGER_SOURCES
+    src/private/ActionsManager.cpp
+)
+
+set(PRIVATE_ACTIONS_MANAGER_FILES
+    ${PRIVATE_ACTIONS_MANAGER_HEADERS}
+    ${PRIVATE_ACTIONS_MANAGER_SOURCES}
+)
+
+set(PRIVATE_MANAGER_HEADERS
+    ${PRIVATE_LAYOUT_MANAGER_HEADERS}
+    ${PRIVATE_PLUGIN_MANAGER_HEADERS}
+    ${PRIVATE_DATA_MANAGER_HEADERS}
+    ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
+    ${PRIVATE_ACTIONS_MANAGER_HEADERS}
+)
+
+set(PRIVATE_MANAGER_SOURCES
+    ${PRIVATE_LAYOUT_MANAGER_SOURCES}
+    ${PRIVATE_PLUGIN_MANAGER_SOURCES}
+    ${PRIVATE_DATA_MANAGER_SOURCES}
+    ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
+    ${PRIVATE_ACTIONS_MANAGER_SOURCES}
+    ${PRIVATE_MANAGER_HEADERS}
 )
 
 set(PRIVATE_MANAGER_FILES
@@ -185,7 +251,11 @@ set(PRIVATE_SOURCES
 
 source_group(Private\\Core FILES ${PRIVATE_CORE_FILES})
 source_group(Private\\Application FILES ${PRIVATE_APPLICATION_FILES})
-source_group(Private\\Managers FILES ${PRIVATE_MANAGER_FILES})
+source_group(Private\\Managers\\Layout FILES ${PRIVATE_LAYOUT_MANAGER_FILES})
+source_group(Private\\Managers\\Plugin FILES ${PRIVATE_PLUGIN_MANAGER_FILES})
+source_group(Private\\Managers\\Data FILES ${PRIVATE_DATA_MANAGER_FILES})
+source_group(Private\\Managers\\DataHierarchy FILES ${PRIVATE_DATA_HIERARCHY_MANAGER_FILES})
+source_group(Private\\Managers\\Actions FILES ${PRIVATE_ACTIONS_MANAGER_FILES})
 source_group(Private\\StartPage FILES ${PRIVATE_START_PAGE_FILES})
 source_group(Private\\Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
 
