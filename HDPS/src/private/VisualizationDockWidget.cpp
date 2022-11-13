@@ -6,6 +6,10 @@
 
 #include "DockAreaWidget.h"
 
+#ifdef _DEBUG
+    #define VISUALIZATION_DOCK_WIDGET_VERBOSE
+#endif
+
 using namespace ads;
 
 using namespace hdps::plugin;
@@ -68,16 +72,17 @@ void VisualizationDockWidget::updateCentralWidget()
 {
     Q_ASSERT(_centralDockArea != nullptr);
 
-    bool hasOpenViewPluginDockWidgets = false;
+    std::int32_t numberOfOpenViewPluginDockWidgets = 0;
 
-    for (auto viewPluginDockWidget : _viewPluginDockWidgets) {
-        if (!viewPluginDockWidget->isClosed()) {
-            hasOpenViewPluginDockWidgets = true;
-            break;
-        }
-    }
+    for (auto viewPluginDockWidget : _viewPluginDockWidgets)
+        if (!viewPluginDockWidget->isClosed())
+            numberOfOpenViewPluginDockWidgets++;
 
-    if (!hasOpenViewPluginDockWidgets) {
+#ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__ << numberOfOpenViewPluginDockWidgets;
+#endif
+    
+    if (numberOfOpenViewPluginDockWidgets == 0) {
         _centralDockArea->setAllowedAreas(DockWidgetArea::CenterDockWidgetArea);
         _centralDockWidget.toggleView(true);
     }
