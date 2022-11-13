@@ -76,6 +76,8 @@ void Core::addPlugin(plugin::Plugin* plugin)
             _plugins[plugin->getType()].push_back(std::unique_ptr<plugin::Plugin>(plugin));
         }
     }
+
+    _plugins[plugin->getType()].push_back(std::unique_ptr<plugin::Plugin>(plugin));
     
     // Initialize the plugin after it has been added to the core
     plugin->init();
@@ -470,6 +472,17 @@ hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, const Datasets& d
         exceptionMessageBox("Unable to request plugin from the core");
         return nullptr;
     }
+}
+
+QVector<hdps::plugin::Plugin*> Core::getPluginsByType(const plugin::Types& pluginTypes) const
+{
+    QVector<hdps::plugin::Plugin*> plugins;
+
+    for (auto pluginType : pluginTypes)
+        for (auto& plugin : const_cast<Core*>(this)->_plugins[pluginType])
+            plugins << plugin.get();
+
+    return plugins;
 }
 
 QStringList Core::getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const

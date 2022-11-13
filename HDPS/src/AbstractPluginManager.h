@@ -50,6 +50,13 @@ public:
     virtual QStringList getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const = 0;
 
     /**
+     * Get plugin trigger actions by \p pluginType
+     * @param pluginType Type of plugin e.g. analysis, exporter
+     * @return Vector of plugin trigger actions
+     */
+    virtual gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType) const = 0;
+
+    /**
      * Get plugin trigger actions by \p pluginType and \p datasets
      * @param pluginType Type of plugin e.g. analysis, exporter
      * @param datasets Vector of input datasets

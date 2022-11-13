@@ -226,6 +226,13 @@ public: // Plugin creation
 public: // Plugin queries
 
     /**
+     * Get plugins by plugin type(s)
+     * @param pluginTypes Plugin type(s)
+     * @return Pointers to plugins
+     */
+    virtual QVector<plugin::Plugin*> getPluginsByType(const plugin::Types& pluginTypes) const = 0;
+
+    /**
      * Get plugin kinds by plugin type(s)
      * @param pluginTypes Plugin type(s)
      * @return Plugin kinds

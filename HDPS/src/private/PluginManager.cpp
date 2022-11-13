@@ -310,6 +310,17 @@ QStringList PluginManager::getPluginKindsByPluginTypes(const plugin::Types& plug
     return pluginKinds;
 }
 
+hdps::gui::PluginTriggerActions PluginManager::getPluginTriggerActions(const plugin::Type& pluginType) const
+{
+    PluginTriggerActions pluginProducerActions;
+
+    for (auto pluginFactory : _pluginFactories)
+        if (pluginFactory->getType() == pluginType && pluginFactory->mayProduce())
+            pluginProducerActions << &pluginFactory->getProducePluginTriggerAction();
+
+    return pluginProducerActions;
+}
+
 PluginTriggerActions PluginManager::getPluginTriggerActions(const Type& pluginType, const Datasets& datasets) const
 {
     PluginTriggerActions pluginProducerActions;

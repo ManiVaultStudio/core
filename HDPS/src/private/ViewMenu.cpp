@@ -2,15 +2,19 @@
 #include "PluginManager.h"
 
 #include <Application.h>
+#include <ViewPlugin.h>
 #include <actions/PluginTriggerAction.h>
 
 using namespace hdps;
 using namespace hdps::gui;
 
-ViewMenu::ViewMenu(QWidget* parent /*= nullptr*/, bool standardViews /*= true*/, bool loadedViews /*= true*/) :
+ViewMenu::ViewMenu(QWidget* parent /*= nullptr*/, const Options& options /*= Option::Default*/) :
     QMenu(parent),
+    _options(options),
     _standardViewsMenu(this),
-    _loadedViewsMenu(this)
+    _loadedViewsMenu(this),
+    _loadViewsMenuSeparator(nullptr),
+    _loadedViewsMenuSeparator(nullptr)
 {
     setTitle("View");
     setToolTip("Manage view plugins");
@@ -21,38 +25,55 @@ ViewMenu::ViewMenu(QWidget* parent /*= nullptr*/, bool standardViews /*= true*/,
     _standardViewsMenu.setEnabled(false);
     _loadedViewsMenu.setEnabled(false);
 
-    auto standardViewsMenuSeparator = addSeparator();
-
-    standardViewsMenuSeparator->setVisible(false);
-
-    if (standardViews)
+    if (options.testFlag(LoadStandardViewSubMenu))
         addMenu(&_standardViewsMenu);
 
-    auto loadedViewsMenuSeparator = addSeparator();
+    _loadViewsMenuSeparator = addSeparator();
 
-    addMenu(&_loadedViewsMenu);
+    _loadViewsMenuSeparator->setVisible(false);
 
-    connect(Application::current(), &Application::coreSet, this, [this, standardViewsMenuSeparator, loadedViewsMenuSeparator, standardViews, loadedViews]() -> void {
-        connect(&Application::core()->getPluginManager(), &AbstractPluginManager::addLoadViewPluginTriggerAction, this, [this, standardViewsMenuSeparator, loadedViewsMenuSeparator](PluginTriggerAction& pluginTriggerAction) -> void {
-            standardViewsMenuSeparator->setVisible(true);
-            insertAction(standardViewsMenuSeparator, &pluginTriggerAction);
-        });
+    _loadedViewsMenuSeparator = addSeparator();
 
-        if (standardViews) {
-            connect(&Application::core()->getPluginManager(), &AbstractPluginManager::addLoadStandardViewPluginTriggerAction, this, [&](PluginTriggerAction& pluginTriggerAction) -> void {
-                _standardViewsMenu.addAction(&pluginTriggerAction);
+    if (options.testFlag(LoadedViewsSubMenu))
+        addMenu(&_loadedViewsMenu);
+}
+
+void ViewMenu::showEvent(QShowEvent* showEvent)
+{
+    const auto pluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::VIEW);
+
+    for (const auto& pluginTriggerAction : pluginTriggerActions) {
+        auto viewPluginFactorty = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
+
+        if (viewPluginFactorty == nullptr)
+            continue;
+
+        if (viewPluginFactorty->isStandardView()) {
+            if (_options.testFlag(LoadStandardViewSubMenu)) {
+                _standardViewsMenu.addAction(pluginTriggerAction);
                 _standardViewsMenu.setEnabled(true);
-            });
+            }
         }
-
-        loadedViewsMenuSeparator->setVisible(loadedViews);
-
-        if (loadedViews) {
-            connect(&Application::core()->getPluginManager(), &AbstractPluginManager::addViewPluginVisibleAction, this, [this](ToggleAction& viewPluginVisibleAction) -> void {
-                _loadedViewsMenu.addAction(&viewPluginVisibleAction);
-                _loadedViewsMenu.setEnabled(true);
-            });
+        else {
+            if (_options.testFlag(LoadView)) {
+                _loadViewsMenuSeparator->setVisible(!pluginTriggerActions.isEmpty());
+                insertAction(_loadedViewsMenuSeparator, pluginTriggerAction);
+            }
         }
-    });
-    
+    }
+
+    if (_options.testFlag(LoadedViewsSubMenu)) {
+        const auto viewPlugins = Application::core()->getPluginsByType({ plugin::Type::VIEW });
+
+        _loadedViewsMenu.setEnabled(!viewPlugins.isEmpty());
+
+        for (auto plugin : viewPlugins) {
+            auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
+
+            if (viewPlugin == nullptr)
+                continue;
+
+            _loadedViewsMenu.addAction(&viewPlugin->getVisibleAction());
+        }
+    }
 }

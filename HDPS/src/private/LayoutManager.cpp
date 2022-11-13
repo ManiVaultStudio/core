@@ -1,5 +1,7 @@
 #include "LayoutManager.h"
 
+#include "ViewMenu.h"
+
 #include "util/Serialization.h"
 
 #include <DockComponentsFactory.h>
@@ -27,7 +29,10 @@ public:
         addViewPluginToolButton->setToolTip(QObject::tr("Help"));
         addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
         addViewPluginToolButton->setAutoRaise(true);
+        addViewPluginToolButton->setPopupMode(QToolButton::MenuButtonPopup);
         
+        addViewPluginToolButton->setMenu(new ViewMenu(nullptr, ViewMenu::LoadView));
+
         int Index = TitleBar->indexOf(TitleBar->button(ads::TitleBarButtonTabsMenu));
         TitleBar->insertWidget(Index - 1, addViewPluginToolButton);
         return TitleBar;
