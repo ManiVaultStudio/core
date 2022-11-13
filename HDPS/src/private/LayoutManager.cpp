@@ -14,10 +14,8 @@ namespace hdps::gui
 LayoutManager::LayoutManager() :
     AbstractLayoutManager(),
     _dockManager(),
-    _centralDockArea(nullptr),
-    _lastDockAreaWidget(nullptr),
-    _centralDockWidget("Views"),
-    _visualizationWidget()
+    _visualizationDockArea(nullptr),
+    _visualizationDockWidget()
 {
     setText("Layout manager");
     setObjectName("Layout");
@@ -31,19 +29,9 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
 {
     _dockManager = QSharedPointer<DockManager>::create(mainWindow);
 
-    _centralDockWidget.setWidget(&_visualizationWidget);
-
-    _centralDockArea = _dockManager->setCentralWidget(&_centralDockWidget);
+    _visualizationDockArea = _dockManager->setCentralWidget(&_visualizationDockWidget);
     
-    _centralDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
-
-    //_dockManager->addDockWidget(CenterDockWidgetArea, &_centralDockWidget);
-    //_dockManager->topLevelDockArea()->setAllowedAreas(DockWidgetAreas::LeftDockWidgetArea | DockWidgetAreas::RightDockWidgetArea);
-
-    connect(_dockManager.get(), &DockManager::dockAreasAdded, this, &LayoutManager::updateCentralWidget);
-    connect(_dockManager.get(), &DockManager::dockAreasRemoved, this, &LayoutManager::updateCentralWidget);
-
-    _dockManager->initialize();
+    _visualizationDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 }
 
 void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
@@ -62,35 +50,32 @@ QVariantMap LayoutManager::toVariantMap() const
 
 void LayoutManager::addViewPlugin(ViewPlugin* viewPlugin)
 {
-    auto dockWidget = new CDockWidget(viewPlugin->getGuiName());
+    auto viewPluginDockWidget = new CDockWidget(viewPlugin->getGuiName());
 
-    dockWidget->setIcon(viewPlugin->getIcon());
+    viewPluginDockWidget->setIcon(viewPlugin->getIcon());
 
-    //dockWidget->setWidget(&viewPlugin->getWidget(), CDockWidget::ForceNoScrollArea);
-
-    connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, this, [this, dockWidget](const QString& title) {
-        dockWidget->setWindowTitle(title);
+    connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, this, [this, viewPluginDockWidget](const QString& title) {
+        viewPluginDockWidget->setWindowTitle(title);
     });
 
-    connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
-        dockWidget->setFeature(CDockWidget::DockWidgetClosable, toggled);
+    connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, this, [this, viewPluginDockWidget](bool toggled) {
+        viewPluginDockWidget->setFeature(CDockWidget::DockWidgetClosable, toggled);
     });
 
-    connect(&viewPlugin->getMayFloatAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
-        dockWidget->setFeature(CDockWidget::DockWidgetFloatable, toggled);
+    connect(&viewPlugin->getMayFloatAction(), &ToggleAction::toggled, this, [this, viewPluginDockWidget](bool toggled) {
+        viewPluginDockWidget->setFeature(CDockWidget::DockWidgetFloatable, toggled);
     });
 
-    connect(&viewPlugin->getMayMoveAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
-        dockWidget->setFeature(CDockWidget::DockWidgetMovable, toggled);
+    connect(&viewPlugin->getMayMoveAction(), &ToggleAction::toggled, this, [this, viewPluginDockWidget](bool toggled) {
+        viewPluginDockWidget->setFeature(CDockWidget::DockWidgetMovable, toggled);
     });
 
-    connect(&viewPlugin->getAllowedDockingAreasAction(), &OptionsAction::selectedOptionsChanged, this, [this, dockWidget](const QStringList& selectedOptions) {
-        dockWidget->dockAreaWidget()->setAllowedAreas(static_cast<DockWidgetAreas>(ViewPlugin::getDockWidgetAreas(selectedOptions)));
+    connect(&viewPlugin->getAllowedDockingAreasAction(), &OptionsAction::selectedOptionsChanged, this, [this, viewPluginDockWidget](const QStringList& selectedOptions) {
+        viewPluginDockWidget->dockAreaWidget()->setAllowedAreas(static_cast<DockWidgetAreas>(ViewPlugin::getDockWidgetAreas(selectedOptions)));
     });
 
     const auto connectToViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
         connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
-            qDebug() << toggled;
             dockWidget->toggleView(toggled);
         });
     };
@@ -99,39 +84,20 @@ void LayoutManager::addViewPlugin(ViewPlugin* viewPlugin)
         disconnect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, nullptr);
     };
 
-    QObject::connect(dockWidget, &CDockWidget::closed, this, [this, viewPlugin, dockWidget, connectToViewPluginVisibleAction, disconnectFromViewPluginVisibleAction]() {
-        disconnectFromViewPluginVisibleAction(dockWidget);
+    QObject::connect(viewPluginDockWidget, &CDockWidget::closed, this, [this, viewPlugin, viewPluginDockWidget, connectToViewPluginVisibleAction, disconnectFromViewPluginVisibleAction]() {
+        disconnectFromViewPluginVisibleAction(viewPluginDockWidget);
         {
             viewPlugin->getVisibleAction().setChecked(false);
         }
-        connectToViewPluginVisibleAction(dockWidget);
+        connectToViewPluginVisibleAction(viewPluginDockWidget);
     });
 
-    if (viewPlugin->isStandardView()) {
-        _dockManager->addDockWidget(RightDockWidgetArea, dockWidget);
-    }
-    else {
-        auto& centralWidgetDockManager = _visualizationWidget.getDockManager();
+    connectToViewPluginVisibleAction(viewPluginDockWidget);
 
-        if (_lastDockAreaWidget == nullptr)
-            _lastDockAreaWidget = centralWidgetDockManager.addDockWidget(CenterDockWidgetArea, dockWidget);
-        else
-            _lastDockAreaWidget = centralWidgetDockManager.addDockWidget(RightDockWidgetArea, dockWidget, _lastDockAreaWidget);
-    }
-
-    connect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {
-        updateCentralWidget();
-    });
-
-    connect(dockWidget, &CDockWidget::viewToggled, [this, dockWidget](bool toggled) {
-        updateCentralWidget();
-    });
-
-    connect(dockWidget, &CDockWidget::topLevelChanged, [this, dockWidget](bool topLevel) {
-        updateCentralWidget();
-    });
-
-    updateCentralWidget();
+    if (viewPlugin->isStandardView())
+        _dockManager->addDockWidget(RightDockWidgetArea, viewPluginDockWidget);
+    else
+        _visualizationDockWidget.addViewPlugin(viewPluginDockWidget);
 }
 
 QVariantMap LayoutManager::dockWidgetToVariant(ads::CDockWidget* dockWidget) const
@@ -184,38 +150,13 @@ QVariantMap LayoutManager::dockContainerWidgetToVariant(CDockContainerWidget* do
         dockAreas.push_back(dockAreaWidgetToVariant(_dockManager->dockArea(dockAreaIndex)));
 
     return QVariantMap({
-        { "DockAreas", dockAreas }//,
-        //{ "State", QVariant::fromValue(_dockManager->saveState().toBase64()) }
+        { "DockAreas", dockAreas },
     });
 }
 
 void LayoutManager::reset()
 {
     _dockManager.reset();
-}
-
-void LayoutManager::updateCentralWidget()
-{
-    return;
-    qDebug() << __FUNCTION__ << _centralDockArea->dockWidgetsCount();
-    
-    if (_centralDockArea->openDockWidgetsCount() == 0) {
-        _centralDockArea->setAllowedAreas(DockWidgetArea::CenterDockWidgetArea);
-        //_centralDockArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-        //if (_centralDockWidget.isClosed())
-        //_centralDockWidget.toggleView(true);
-    }
-    else {
-        _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
-        _centralDockWidget.toggleView(false);
-    }
-
-    /*
-    qDebug() << _dockManager->dockAreaCount();
-    for (int i = 0; i < _dockManager->dockAreaCount(); i++)
-        _dockManager->dockArea(i)->setAllowedAreas(DockWidgetAreas(LeftDockWidgetArea | RightDockWidgetArea));
-    */
 }
 
 }

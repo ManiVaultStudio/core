@@ -25,11 +25,6 @@ public:
      */
     DockManager(QWidget* parent = nullptr);
 
-    /**
-     * Initializes the dock manager
-     */
-    void initialize();
-
 public: // Serialization
 
     /**

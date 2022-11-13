@@ -5,7 +5,7 @@
 #include <QSharedPointer>
 
 #include "DockManager.h"
-#include "VisualizationWidget.h"
+#include "VisualizationDockWidget.h"
 
 #include <DockAreaWidget.h>
 
@@ -80,17 +80,10 @@ private:
      */
     QVariantMap dockContainerWidgetToVariant(ads::CDockContainerWidget* dockContainerWidget) const;
 
-    /**
-     * Updates the central widget in response to changes in docking and dock widgets visibility
-     */
-    void updateCentralWidget();
-
 private:
-    QSharedPointer<DockManager>     _dockManager;               /** ADS inherited dock manager */
-    ads::CDockAreaWidget*           _centralDockArea;           /** Docking area for view plugins */
-    ads::CDockAreaWidget*           _lastDockAreaWidget;        /** Last docking area widget (if any) */
-    ads::CDockWidget                _centralDockWidget;         /** Central dock widget */
-    VisualizationWidget             _visualizationWidget;       /** Visualization widget which is loaded into the central dock widget */
+    QSharedPointer<DockManager>     _dockManager;                   /** ADS inherited dock manager */
+    ads::CDockAreaWidget*           _visualizationDockArea;         /** Visualization docking area for view plugins (non-standard) */
+    VisualizationDockWidget         _visualizationDockWidget;       /** Visualization dock widget for view plugins (non-standard) */
 };
 
 }

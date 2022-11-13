@@ -15,12 +15,14 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     setToolTip("HDPS help");
 
     _pluginsHelpMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+    _pluginsHelpMenu.setEnabled(false);
 
     addMenu(&_pluginsHelpMenu);
 
     connect(Application::current(), &Application::coreSet, this, [this]() -> void {
         connect(&Application::core()->getPluginManager(), &AbstractPluginManager::addPluginTriggerHelpAction, this, [this](TriggerAction& pluginTriggerHelpAction) -> void {
             _pluginsHelpMenu.addAction(&pluginTriggerHelpAction);
+            _pluginsHelpMenu.setEnabled(true);
         });
     });
 }

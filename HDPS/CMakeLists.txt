@@ -91,7 +91,7 @@ set(PRIVATE_MANAGER_HEADERS
     src/private/ActionsManager.h
     src/private/LayoutManager.h
     src/private/DockManager.h
-    src/private/VisualizationWidget.h
+    src/private/VisualizationDockWidget.h
 )
 
 set(PRIVATE_MANAGER_SOURCES
@@ -101,7 +101,7 @@ set(PRIVATE_MANAGER_SOURCES
     src/private/ActionsManager.cpp
     src/private/LayoutManager.cpp
     src/private/DockManager.cpp
-    src/private/VisualizationWidget.cpp
+    src/private/VisualizationDockWidget.cpp
 )
 
 set(PRIVATE_MANAGER_FILES

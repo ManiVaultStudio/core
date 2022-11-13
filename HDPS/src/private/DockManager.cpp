@@ -35,11 +35,6 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager::setConfigFlag(CDockManager::DockAreaDynamicTabsMenuButtonVisibility, false);
 }
 
-void DockManager::initialize()
-{
-    //topLevelDockArea()->setAllowedAreas(RightDockWidgetArea);
-}
-
 void DockManager::fromVariantMap(const QVariantMap& variantMap)
 {
 #ifdef DOCK_MANAGER_VERBOSE
