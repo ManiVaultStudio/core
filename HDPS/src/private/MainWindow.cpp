@@ -2,7 +2,6 @@
 #include "PluginManager.h"
 
 #include <Application.h>
-#include <util/FileUtil.h>
 
 #include <QMessageBox>
 #include <QScreen>
@@ -14,7 +13,6 @@
 #include <QOffscreenSurface>
 #include <QMessageBox>
 #include <QTimer>
-#include <QLabel>
 
 #define MAIN_WINDOW_VERBOSE
 
@@ -22,12 +20,14 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     QMainWindow(parent),
     _core(),
     _fileMenu(),
-    _viewMenu()
+    _viewMenu(),
+    _helpMenu()
 {
     dynamic_cast<Application*>(qApp)->setCore(&_core);
 
     menuBar()->addMenu(&_fileMenu);
     menuBar()->addMenu(&_viewMenu);
+    menuBar()->addMenu(&_helpMenu);
 
     connect(Application::current(), &Application::currentProjectFilePathChanged, [this](const QString& currentProjectFilePath) {
         setWindowTitle(currentProjectFilePath + (currentProjectFilePath.isEmpty() ? " HDPS" : " - HDPS"));
@@ -39,20 +39,6 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
 
     // Delay execution till the event loop has started, otherwise we cannot quit the application
     QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
-
-    //menuVisualization->setText("View");
-    //menuVisualization->addSection("Loaded");
-    //menuVisualization->addMenu(&_loadedViewPluginsMenu);
-    //menuVisualization->addMenu(&_standardViewPluginsMenu);
-
-    //_pluginsHelpMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
-
-    //menuHelp->addSeparator();
-    //menuHelp->addMenu(&_pluginsHelpMenu);
-
-    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::addPluginTriggerHelpAction, this, [this](TriggerAction& pluginTriggerHelpAction) -> void {
-        //_pluginsHelpMenu.addAction(&pluginTriggerHelpAction);
-    });
 
     _core.init();
 }

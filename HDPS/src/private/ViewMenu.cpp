@@ -21,8 +21,6 @@ ViewMenu::ViewMenu(QWidget* parent /*= nullptr*/) :
     _standardViewsMenu.setEnabled(false);
     _loadedViewsMenu.setEnabled(false);
 
-    
-
     auto separator1 = addSeparator();
 
     separator1->setVisible(false);

@@ -4,6 +4,7 @@
 
 #include "FileMenu.h"
 #include "ViewMenu.h"
+#include "HelpMenu.h"
 
 #include <QMainWindow>
 
@@ -58,4 +59,5 @@ private:
     Core        _core;          /** Instance of the core */
     FileMenu    _fileMenu;      /** File menu */
     ViewMenu    _viewMenu;      /** View menu */
+    HelpMenu    _helpMenu;      /** Help menu */
 };

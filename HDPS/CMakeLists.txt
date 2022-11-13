@@ -116,6 +116,7 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/RecentProjectsMenu.h
     src/private/ImportDataMenu.h
     src/private/ViewMenu.h
+    src/private/HelpMenu.h
 )
 
 set(PRIVATE_APPLICATION_SOURCES
@@ -125,6 +126,7 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/RecentProjectsMenu.cpp
     src/private/ImportDataMenu.cpp
     src/private/ViewMenu.cpp
+    src/private/HelpMenu.cpp
 )
 
 set(PRIVATE_APPLICATION_FILES
