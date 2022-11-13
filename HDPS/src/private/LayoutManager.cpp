@@ -17,7 +17,7 @@ LayoutManager::LayoutManager() :
     _centralDockArea(nullptr),
     _lastDockAreaWidget(nullptr),
     _centralDockWidget("Views"),
-    _centralWidget()
+    _visualizationWidget()
 {
     setText("Layout manager");
     setObjectName("Layout");
@@ -31,10 +31,11 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
 {
     _dockManager = QSharedPointer<DockManager>::create(mainWindow);
 
-    _centralDockWidget.setWidget(&_centralWidget);
+    _centralDockWidget.setWidget(&_visualizationWidget);
 
     _centralDockArea = _dockManager->setCentralWidget(&_centralDockWidget);
-    //_centralDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
+    
+    _centralDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
     //_dockManager->addDockWidget(CenterDockWidgetArea, &_centralDockWidget);
     //_dockManager->topLevelDockArea()->setAllowedAreas(DockWidgetAreas::LeftDockWidgetArea | DockWidgetAreas::RightDockWidgetArea);
@@ -110,10 +111,12 @@ void LayoutManager::addViewPlugin(ViewPlugin* viewPlugin)
         _dockManager->addDockWidget(RightDockWidgetArea, dockWidget);
     }
     else {
+        auto& centralWidgetDockManager = _visualizationWidget.getDockManager();
+
         if (_lastDockAreaWidget == nullptr)
-            _lastDockAreaWidget = _centralWidget.getDockManager()->addDockWidget(CenterDockWidgetArea, dockWidget);
+            _lastDockAreaWidget = centralWidgetDockManager.addDockWidget(CenterDockWidgetArea, dockWidget);
         else
-            _lastDockAreaWidget = _centralWidget.getDockManager()->addDockWidget(RightDockWidgetArea, dockWidget, _lastDockAreaWidget);
+            _lastDockAreaWidget = centralWidgetDockManager.addDockWidget(RightDockWidgetArea, dockWidget, _lastDockAreaWidget);
     }
 
     connect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {

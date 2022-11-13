@@ -5,7 +5,7 @@
 #include <QSharedPointer>
 
 #include "DockManager.h"
-#include "CentralWidget.h"
+#include "VisualizationWidget.h"
 
 #include <DockAreaWidget.h>
 
@@ -90,7 +90,7 @@ private:
     ads::CDockAreaWidget*           _centralDockArea;           /** Docking area for view plugins */
     ads::CDockAreaWidget*           _lastDockAreaWidget;        /** Last docking area widget (if any) */
     ads::CDockWidget                _centralDockWidget;         /** Central dock widget */
-    CentralWidget                   _centralWidget;             /** Central widget which is loaded into the central dock widget */
+    VisualizationWidget             _visualizationWidget;       /** Visualization widget which is loaded into the central dock widget */
 };
 
 }
