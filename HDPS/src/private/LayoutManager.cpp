@@ -36,7 +36,7 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
     _centralDockArea = _dockManager->setCentralWidget(&_centralDockWidget);
     //_centralDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
-
+    //_dockManager->addDockWidget(CenterDockWidgetArea, &_centralDockWidget);
     //_dockManager->topLevelDockArea()->setAllowedAreas(DockWidgetAreas::LeftDockWidgetArea | DockWidgetAreas::RightDockWidgetArea);
 
     connect(_dockManager.get(), &DockManager::dockAreasAdded, this, &LayoutManager::updateCentralWidget);
@@ -111,16 +111,16 @@ void LayoutManager::addViewPlugin(ViewPlugin* viewPlugin)
     }
     else {
         if (_lastDockAreaWidget == nullptr)
-            _lastDockAreaWidget = _dockManager->addDockWidget(CenterDockWidgetArea, dockWidget);
+            _lastDockAreaWidget = _centralWidget.getDockManager()->addDockWidget(CenterDockWidgetArea, dockWidget);
         else
-            _lastDockAreaWidget = _dockManager->addDockWidget(RightDockWidgetArea, dockWidget, _lastDockAreaWidget);
+            _lastDockAreaWidget = _centralWidget.getDockManager()->addDockWidget(RightDockWidgetArea, dockWidget, _lastDockAreaWidget);
     }
 
     connect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {
         updateCentralWidget();
     });
 
-    connect(dockWidget, &CDockWidget::closed, [this, dockWidget]() {
+    connect(dockWidget, &CDockWidget::viewToggled, [this, dockWidget](bool toggled) {
         updateCentralWidget();
     });
 
@@ -193,10 +193,15 @@ void LayoutManager::reset()
 
 void LayoutManager::updateCentralWidget()
 {
-    if (_centralDockArea->dockWidgetsCount() == 0) {
+    return;
+    qDebug() << __FUNCTION__ << _centralDockArea->dockWidgetsCount();
+    
+    if (_centralDockArea->openDockWidgetsCount() == 0) {
         _centralDockArea->setAllowedAreas(DockWidgetArea::CenterDockWidgetArea);
         //_centralDockArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        _centralDockWidget.toggleView(true);
+
+        //if (_centralDockWidget.isClosed())
+        //_centralDockWidget.toggleView(true);
     }
     else {
         _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);

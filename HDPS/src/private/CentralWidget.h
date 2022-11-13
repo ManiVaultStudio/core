@@ -2,6 +2,8 @@
 
 #include "LogoWidget.h"
 
+#include <DockManager.h>
+
 #include <QWidget>
 
 /**
@@ -21,6 +23,10 @@ public:
      */
     CentralWidget(QWidget* parent = nullptr);
 
+    QSharedPointer<ads::CDockManager> getDockManager();
+
 private:
-    LogoWidget      _logoWidget;        /** Logo widget */
+    QWidget                         _widget;            
+    QSharedPointer<ads::CDockManager>     _dockManager;       /** ADS inherited dock manager */
+    //LogoWidget                      _logoWidget;        /** Logo widget */
 };
