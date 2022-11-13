@@ -48,7 +48,7 @@ void VisualizationDockWidget::addViewPlugin(ads::CDockWidget* viewPluginDockWidg
 
     _viewPluginDockWidgets << viewPluginDockWidget;
 
-    if (_lastDockAreaWidget == nullptr)
+    if (_lastDockAreaWidget == nullptr || getNumberOfOpenViewPluginDockWidgets() == 0)
         _lastDockAreaWidget = _dockManager.addDockWidget(CenterDockWidgetArea, viewPluginDockWidget);
     else
         _lastDockAreaWidget = _dockManager.addDockWidget(RightDockWidgetArea, viewPluginDockWidget, _lastDockAreaWidget);
@@ -72,22 +72,27 @@ void VisualizationDockWidget::updateCentralWidget()
 {
     Q_ASSERT(_centralDockArea != nullptr);
 
-    std::int32_t numberOfOpenViewPluginDockWidgets = 0;
-
-    for (auto viewPluginDockWidget : _viewPluginDockWidgets)
-        if (!viewPluginDockWidget->isClosed())
-            numberOfOpenViewPluginDockWidgets++;
-
 #ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
-    qDebug() << __FUNCTION__ << numberOfOpenViewPluginDockWidgets;
+    qDebug() << __FUNCTION__ << getNumberOfOpenViewPluginDockWidgets();
 #endif
     
-    if (numberOfOpenViewPluginDockWidgets == 0) {
-        _centralDockArea->setAllowedAreas(DockWidgetArea::CenterDockWidgetArea);
+    if (getNumberOfOpenViewPluginDockWidgets() == 0) {
+        _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
         _centralDockWidget.toggleView(true);
     }
     else {
         _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
         _centralDockWidget.toggleView(false);
     }
+}
+
+std::int32_t VisualizationDockWidget::getNumberOfOpenViewPluginDockWidgets() const
+{
+    std::int32_t numberOfOpenViewPluginDockWidgets = 0;
+
+    for (auto viewPluginDockWidget : _viewPluginDockWidgets)
+        if (!viewPluginDockWidget->isClosed())
+            numberOfOpenViewPluginDockWidgets++;
+
+    return numberOfOpenViewPluginDockWidgets;
 }

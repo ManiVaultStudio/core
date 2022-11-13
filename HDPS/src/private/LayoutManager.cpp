@@ -2,11 +2,47 @@
 
 #include "util/Serialization.h"
 
+#include <DockComponentsFactory.h>
+#include <DockAreaTitleBar.h>
+#include <DockAreaTabBar.h>
+
 #include <QMainWindow>
+#include <QToolButton>
 
 using namespace ads;
+
+using namespace hdps;
 using namespace hdps::plugin;
 using namespace hdps::util;
+
+class CCustomComponentsFactory : public ads::CDockComponentsFactory
+{
+public:
+    using Super = ads::CDockComponentsFactory;
+    CDockAreaTitleBar* createDockAreaTitleBar(ads::CDockAreaWidget* DockArea) const override
+    {
+        auto TitleBar = new ads::CDockAreaTitleBar(DockArea);
+        auto addViewPluginToolButton = new QToolButton(DockArea);
+
+        addViewPluginToolButton->setToolTip(QObject::tr("Help"));
+        addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
+        addViewPluginToolButton->setAutoRaise(true);
+        
+        int Index = TitleBar->indexOf(TitleBar->button(ads::TitleBarButtonTabsMenu));
+        TitleBar->insertWidget(Index - 1, addViewPluginToolButton);
+        return TitleBar;
+    }
+
+    //CDockAreaTabBar* createDockAreaTabBar(CDockAreaWidget* DockArea) const override {
+    //    auto dockAreaTabBar = new ads::CDockAreaTabBar(DockArea);
+
+    //    auto CustomButton = new QToolButton(DockArea);
+    //    CustomButton->setToolTip(QObject::tr("Help"));
+
+    //    
+    //    return dockAreaTabBar;
+    //}
+};
 
 namespace hdps::gui
 {
@@ -19,6 +55,8 @@ LayoutManager::LayoutManager() :
 {
     setText("Layout manager");
     setObjectName("Layout");
+
+    ads::CDockComponentsFactory::setFactory(new CCustomComponentsFactory());
 }
 
 LayoutManager::~LayoutManager()

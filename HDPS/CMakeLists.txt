@@ -87,12 +87,14 @@ set(PRIVATE_CORE_FILES
 set(PRIVATE_LAYOUT_MANAGER_HEADERS
     src/private/LayoutManager.h
     src/private/DockManager.h
+    src/private/DockComponentsFactory.h
     src/private/VisualizationDockWidget.h
 )
 
 set(PRIVATE_LAYOUT_MANAGER_SOURCES
     src/private/LayoutManager.cpp
     src/private/DockManager.cpp
+    src/private/DockComponentsFactory.cpp
     src/private/VisualizationDockWidget.cpp
 )
 

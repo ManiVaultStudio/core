@@ -41,6 +41,12 @@ private:
     /** Updates the central widget in response to changes in docking and dock widgets visibility */
     void updateCentralWidget();
 
+    /**
+     * Get number of open view plugin dock widgets
+     * @return Number of open view plugin dock widgets
+     */
+    std::int32_t getNumberOfOpenViewPluginDockWidgets() const;
+
 private:
     QWidget                         _widget;
     ads::CDockManager               _dockManager;               /** Dock manager */

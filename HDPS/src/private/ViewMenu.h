@@ -16,8 +16,10 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent widget
+     * @param standardViews Whether to include the menu for creating standard views
+     * @param loadedViews Whether to include the menu for toggling loaded views
      */
-    ViewMenu(QWidget *parent = nullptr);
+    ViewMenu(QWidget *parent = nullptr, bool standardViews = true, bool loadedViews = true);
 
 private:
     QMenu   _standardViewsMenu;     /** Menu for loading standard views */
