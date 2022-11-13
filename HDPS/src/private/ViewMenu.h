@@ -40,9 +40,8 @@ public:
     void showEvent(QShowEvent* showEvent) override;
 
 private:
-    Options     _options;                       /** Menu options */
-    QMenu       _standardViewsMenu;             /** Menu for loading standard views */
-    QMenu       _loadedViewsMenu;               /** Menu for toggling loaded views */
-    QAction*    _loadViewsMenuSeparator;        /** Separator */
-    QAction*    _loadedViewsMenuSeparator;      /** Separator */
+    Options     _options;               /** Menu options */
+    QMenu       _standardViewsMenu;     /** Menu for loading standard views */
+    QMenu       _loadedViewsMenu;       /** Menu for toggling loaded views */
+    QAction*    _separator;             /** Separator */
 };

@@ -13,8 +13,7 @@ ViewMenu::ViewMenu(QWidget* parent /*= nullptr*/, const Options& options /*= Opt
     _options(options),
     _standardViewsMenu(this),
     _loadedViewsMenu(this),
-    _loadViewsMenuSeparator(nullptr),
-    _loadedViewsMenuSeparator(nullptr)
+    _separator(nullptr)
 {
     setTitle("View");
     setToolTip("Manage view plugins");
@@ -25,14 +24,12 @@ ViewMenu::ViewMenu(QWidget* parent /*= nullptr*/, const Options& options /*= Opt
     _standardViewsMenu.setEnabled(false);
     _loadedViewsMenu.setEnabled(false);
 
+    _separator = addSeparator();
+
+    _separator->setVisible(false);
+
     if (options.testFlag(LoadStandardViewSubMenu))
         addMenu(&_standardViewsMenu);
-
-    _loadViewsMenuSeparator = addSeparator();
-
-    _loadViewsMenuSeparator->setVisible(false);
-
-    _loadedViewsMenuSeparator = addSeparator();
 
     if (options.testFlag(LoadedViewsSubMenu))
         addMenu(&_loadedViewsMenu);
@@ -55,10 +52,8 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
             }
         }
         else {
-            if (_options.testFlag(LoadView)) {
-                _loadViewsMenuSeparator->setVisible(!pluginTriggerActions.isEmpty());
-                insertAction(_loadedViewsMenuSeparator, pluginTriggerAction);
-            }
+            if (_options.testFlag(LoadView))
+                insertAction(_separator, pluginTriggerAction);
         }
     }
 
@@ -76,4 +71,6 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
             _loadedViewsMenu.addAction(&viewPlugin->getVisibleAction());
         }
     }
+
+    _separator->setVisible(!pluginTriggerActions.isEmpty() && (_options.testFlag(LoadStandardViewSubMenu) || _options.testFlag(LoadedViewsSubMenu)));
 }
