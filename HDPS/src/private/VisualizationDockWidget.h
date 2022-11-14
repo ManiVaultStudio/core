@@ -1,11 +1,10 @@
 #pragma once
 
+#include "DockWidget.h"
 #include "LogoWidget.h"
-
-#include <DockWidget.h>
-#include <DockManager.h>
-
-#include <QWidget>
+#include "DockManager.h"
+#include "DockWidget.h"
+#include "ViewPluginDockWidget.h"
 
 /**
  * Visualization widget class
@@ -14,7 +13,7 @@
  *
  * @author Thomas Kroes
  */
-class VisualizationDockWidget : public ads::CDockWidget
+class VisualizationDockWidget : public DockWidget
 {
 public:
 
@@ -28,13 +27,27 @@ public:
      * Get dock manager
      * @return Reference to dock manager
      */
-    ads::CDockManager& getDockManager();
+    DockManager& getDockManager();
 
     /**
      * Add view plugin
      * @param viewPluginDockWidget Pointer to view plugin dock widget
      */
-    void addViewPlugin(ads::CDockWidget* viewPluginDockWidget);
+    void addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget);
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
 
 private:
 
@@ -48,11 +61,11 @@ private:
     std::int32_t getNumberOfOpenViewPluginDockWidgets() const;
 
 private:
-    QWidget                         _widget;
-    ads::CDockManager               _dockManager;               /** Dock manager */
-    ads::CDockAreaWidget*           _centralDockArea;           /** Pointer to central dock area widget */
-    ads::CDockWidget                _centralDockWidget;         /** Logo dock widget (dock manager central widget, visible when no other dock widgets are visible) */
-    LogoWidget                      _logoWidget;                /** Logo widget for logo dock widget */
-    ads::CDockAreaWidget*           _lastDockAreaWidget;        /** Last docking area widget (if any) */
-    QVector<ads::CDockWidget*>      _viewPluginDockWidgets;     /** Added view plugin dock widgets */
+    QWidget                     _widget;                    /** Widget for display in the dock widget */
+    DockManager                 _dockManager;               /** Dock manager */
+    ads::CDockAreaWidget*       _centralDockArea;           /** Pointer to central dock area widget */
+    DockWidget                  _centralDockWidget;         /** Logo dock widget (dock manager central widget, visible when no other dock widgets are visible) */
+    LogoWidget                  _logoWidget;                /** Logo widget for logo dock widget */
+    ads::CDockAreaWidget*       _lastDockAreaWidget;        /** Last docking area widget (if any) */
+    ViewPluginDockWidgets       _viewPluginDockWidgets;     /** Added view plugin dock widgets */
 };

@@ -1,8 +1,8 @@
 #include "LayoutManager.h"
-
+#include "ViewPluginDockWidget.h"
 #include "ViewMenu.h"
 
-#include "util/Serialization.h"
+#include <util/Serialization.h>
 
 #include <DockComponentsFactory.h>
 #include <DockAreaTitleBar.h>
@@ -80,21 +80,21 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
 
 void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    variantMapMustContain(variantMap, "DockManager");
+    variantMapMustContain(variantMap, "Docking");
 
-    _dockManager->fromVariantMap(variantMap["DockManager"].toMap());
+    _dockManager->fromVariantMap(variantMap["Docking"].toMap());
 }
 
 QVariantMap LayoutManager::toVariantMap() const
 {
     return {
-        { "DockManager", _dockManager->toVariantMap() }
+        { "Docking", _dockManager->toVariantMap() }
     };
 }
 
 void LayoutManager::addViewPlugin(ViewPlugin* viewPlugin)
 {
-    auto viewPluginDockWidget = new CDockWidget(viewPlugin->getGuiName());
+    auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName());
 
     viewPluginDockWidget->setIcon(viewPlugin->getIcon());
 
@@ -142,60 +142,6 @@ void LayoutManager::addViewPlugin(ViewPlugin* viewPlugin)
         _dockManager->addDockWidget(RightDockWidgetArea, viewPluginDockWidget);
     else
         _visualizationDockWidget.addViewPlugin(viewPluginDockWidget);
-}
-
-QVariantMap LayoutManager::dockWidgetToVariant(ads::CDockWidget* dockWidget) const
-{
-    Q_ASSERT(dockWidget != nullptr);
-
-    auto dockWidgetVariant = QVariantMap();
-
-    dockWidgetVariant["Title"] = dockWidget->windowTitle();
-
-    qDebug() << dockWidget->dockContainer();
-
-    return dockWidgetVariant;
-}
-
-QVariantMap LayoutManager::dockAreaWidgetToVariant(CDockAreaWidget* dockAreaWidget) const
-{
-    Q_ASSERT(dockAreaWidget != nullptr);
-
-    auto dockAreaWidgetMap = QVariantMap();
-
-    dockAreaWidgetMap["DockArea"] = "DockArea";
-
-    auto dockContainer = dockAreaWidget->dockContainer();
-
-    auto dockWidgetsList = QVariantList();
-
-    for (std::int32_t dockWidgetIndex = 0; dockWidgetIndex < dockAreaWidget->dockWidgetsCount(); ++dockWidgetIndex)
-        dockWidgetsList.push_back(dockWidgetToVariant(dockAreaWidget->dockWidget(dockWidgetIndex)));
-
-    dockAreaWidgetMap["DockWidgets"] = dockWidgetsList;
-
-    QVariantList splitterSizes;
-
-    for (auto splitterSize : _dockManager->splitterSizes(dockAreaWidget))
-        splitterSizes.push_back(splitterSize);
-
-    dockAreaWidgetMap["SplitterSizes"] = splitterSizes;
-
-    return dockAreaWidgetMap;
-}
-
-QVariantMap LayoutManager::dockContainerWidgetToVariant(CDockContainerWidget* dockContainerWidget) const
-{
-    Q_ASSERT(dockContainerWidget != nullptr);
-
-    QVariantList dockAreas;
-
-    for (std::int32_t dockAreaIndex = 0; dockAreaIndex < _dockManager->dockAreaCount(); ++dockAreaIndex)
-        dockAreas.push_back(dockAreaWidgetToVariant(_dockManager->dockArea(dockAreaIndex)));
-
-    return QVariantMap({
-        { "DockAreas", dockAreas },
-    });
 }
 
 void LayoutManager::reset()

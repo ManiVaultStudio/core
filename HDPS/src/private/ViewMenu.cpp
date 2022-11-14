@@ -5,6 +5,10 @@
 #include <ViewPlugin.h>
 #include <actions/PluginTriggerAction.h>
 
+#include <algorithm>
+
+using namespace std;
+
 using namespace hdps;
 using namespace hdps::gui;
 
@@ -39,6 +43,8 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
 {
     const auto pluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::VIEW);
 
+    QVector<QAction*> loadStandardViewActions, loadViewActions;
+
     for (const auto& pluginTriggerAction : pluginTriggerActions) {
         auto viewPluginFactorty = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
 
@@ -47,15 +53,31 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
 
         if (viewPluginFactorty->isStandardView()) {
             if (_options.testFlag(LoadStandardViewSubMenu)) {
-                _standardViewsMenu.addAction(pluginTriggerAction);
+                loadStandardViewActions << pluginTriggerAction;
                 _standardViewsMenu.setEnabled(true);
             }
         }
         else {
             if (_options.testFlag(LoadView))
-                insertAction(_separator, pluginTriggerAction);
+                loadViewActions << pluginTriggerAction;
+                
         }
     }
+
+    auto sortActions = [](QVector<QAction*>& actions) -> void {
+        sort(actions.begin(), actions.end(), [](auto actionA, auto actionB) {
+            return actionA->text() < actionB->text();
+            });
+    };
+
+    sortActions(loadStandardViewActions);
+    sortActions(loadViewActions);
+
+    for (auto loadStandardViewAction : loadStandardViewActions)
+        _standardViewsMenu.addAction(loadStandardViewAction);
+
+    for (auto loadViewAction : loadViewActions)
+        insertAction(_separator, loadViewAction);
 
     if (_options.testFlag(LoadedViewsSubMenu)) {
         const auto viewPlugins = Application::core()->getPluginsByType({ plugin::Type::VIEW });

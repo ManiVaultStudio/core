@@ -89,6 +89,8 @@ set(PRIVATE_LAYOUT_MANAGER_HEADERS
     src/private/DockManager.h
     src/private/DockComponentsFactory.h
     src/private/VisualizationDockWidget.h
+    src/private/ViewPluginDockWidget.h
+    src/private/DockWidget.h
 )
 
 set(PRIVATE_LAYOUT_MANAGER_SOURCES
@@ -96,6 +98,8 @@ set(PRIVATE_LAYOUT_MANAGER_SOURCES
     src/private/DockManager.cpp
     src/private/DockComponentsFactory.cpp
     src/private/VisualizationDockWidget.cpp
+    src/private/ViewPluginDockWidget.cpp
+    src/private/DockWidget.cpp
 )
 
 set(PRIVATE_LAYOUT_MANAGER_FILES

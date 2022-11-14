@@ -2,12 +2,12 @@
 
 #include <AbstractLayoutManager.h>
 
-#include <QSharedPointer>
-
 #include "DockManager.h"
 #include "VisualizationDockWidget.h"
 
 #include <DockAreaWidget.h>
+
+#include <QSharedPointer>
 
 class QMainWindow;
 
@@ -58,30 +58,7 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-
-    /**
-     * Convert dock widget to variant map
-     * @param dockWidget Pointer to dock widget
-     * @return Dock widget variant map
-     */
-    QVariantMap dockWidgetToVariant(ads::CDockWidget* dockWidget) const;
-
-    /**
-     * Convert dock area widget to variant map
-     * @param dockAreaWidget Pointer to dock area widget
-     * @return Dock area widget variant map
-     */
-    QVariantMap dockAreaWidgetToVariant(ads::CDockAreaWidget* dockAreaWidget) const;
-
-    /**
-     * Convert dock container widget to variant map
-     * @param dockContainerWidget Pointer to dock container widget
-     * @return Dock container widget variant map
-     */
-    QVariantMap dockContainerWidgetToVariant(ads::CDockContainerWidget* dockContainerWidget) const;
-
-private:
-    QSharedPointer<DockManager>     _dockManager;                   /** ADS inherited dock manager */
+    QSharedPointer<DockManager>     _dockManager;                   /** Dock manager (inherited  from ADS) */
     ads::CDockAreaWidget*           _visualizationDockArea;         /** Visualization docking area for view plugins (non-standard) */
     VisualizationDockWidget         _visualizationDockWidget;       /** Visualization dock widget for view plugins (non-standard) */
 };

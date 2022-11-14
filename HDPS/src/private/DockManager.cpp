@@ -1,4 +1,5 @@
 #include "DockManager.h"
+#include "DockWidget.h"
 
 #include <ViewPlugin.h>
 
@@ -126,22 +127,23 @@ QVariantMap DockManager::toVariantMap(QWidget* widget) const
         if (!dockAreaWidget)
             return variantMap;
 
-        variantMap["IsCentralWidgetArea"] = dockAreaWidget->isCentralWidgetArea();
-
         QVariantList dockWidgetsList;
 
-        for (auto dockWidget : dockAreaWidget->dockWidgets()) {
-            QVariantMap dockWidgetMap;
+        for (auto dockWidget : dockAreaWidget->dockWidgets())
+            if (dynamic_cast<DockWidget*>(dockWidget))
+                dockWidgetsList.push_back(dynamic_cast<DockWidget*>(dockWidget)->toVariantMap());
 
-            dockWidgetMap["Title"] = dockWidget->windowTitle();
+            //QVariantMap dockWidgetMap;
 
-            auto viewPluginWidget = dynamic_cast<ViewPlugin*>(dockWidget->widget());
+            //dockWidgetMap["Title"] = dockWidget->windowTitle();
 
-            if (viewPluginWidget)
-                dockWidgetMap["ViewPlugin"] = viewPluginWidget->toVariantMap();
-            
-            dockWidgetsList.push_back(dockWidgetMap);
-        }
+            //auto viewPluginWidget = dynamic_cast<ViewPlugin*>(dockWidget->widget());
+
+            //if (viewPluginWidget)
+            //    dockWidgetMap["ViewPlugin"] = viewPluginWidget->toVariantMap();
+            //
+            //dockWidgetsList.push_back(dockWidgetMap);
+        //}
         
         variantMap["DockWidgets"] = dockWidgetsList;
     }

@@ -1,10 +1,11 @@
 #include "VisualizationDockWidget.h"
 
 #include <ViewPlugin.h>
-
-#include <QVBoxLayout>
+#include <util/Serialization.h>
 
 #include "DockAreaWidget.h"
+
+#include <QVBoxLayout>
 
 #ifdef _DEBUG
     #define VISUALIZATION_DOCK_WIDGET_VERBOSE
@@ -13,13 +14,14 @@
 using namespace ads;
 
 using namespace hdps::plugin;
+using namespace hdps::util;
 
 VisualizationDockWidget::VisualizationDockWidget(QWidget* parent /*= nullptr*/) :
-    ads::CDockWidget("Visualization", parent),
+    DockWidget("Visualization", parent),
     _widget(),
-    _dockManager(new CDockManager(&_widget)),
+    _dockManager(&_widget),
     _centralDockArea(nullptr),
-    _centralDockWidget(""),
+    _centralDockWidget("CentralDockWidget"),
     _logoWidget(),
     _lastDockAreaWidget(nullptr)
 {
@@ -37,12 +39,12 @@ VisualizationDockWidget::VisualizationDockWidget(QWidget* parent /*= nullptr*/) 
     connect(&_dockManager, &CDockManager::dockAreasRemoved, this, &VisualizationDockWidget::updateCentralWidget);
 }
 
-ads::CDockManager& VisualizationDockWidget::getDockManager()
+DockManager& VisualizationDockWidget::getDockManager()
 {
     return _dockManager;
 }
 
-void VisualizationDockWidget::addViewPlugin(ads::CDockWidget* viewPluginDockWidget)
+void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget)
 {
     Q_ASSERT(viewPluginDockWidget != nullptr);
 
@@ -66,6 +68,22 @@ void VisualizationDockWidget::addViewPlugin(ads::CDockWidget* viewPluginDockWidg
     });
 
     updateCentralWidget();
+}
+
+void VisualizationDockWidget::fromVariantMap(const QVariantMap& variantMap)
+{
+    variantMapMustContain(variantMap, "DockManager");
+
+    _dockManager.fromVariantMap(variantMap["DockManager"].toMap());
+}
+
+QVariantMap VisualizationDockWidget::toVariantMap() const
+{
+    QVariantMap variantMap = DockWidget::toVariantMap();
+
+    variantMap["Docking"] = _dockManager.toVariantMap();
+
+    return variantMap;
 }
 
 void VisualizationDockWidget::updateCentralWidget()
