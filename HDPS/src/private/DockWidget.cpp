@@ -2,6 +2,10 @@
 
 #include <ViewPlugin.h>
 
+#include <DockWidgetTab.h>
+
+#include <QToolButton>
+
 #ifdef _DEBUG
     #define DOCK_WIDGET_VERBOSE
 #endif
@@ -15,6 +19,7 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     CDockWidget(title, parent),
     Serializable(title)
 {
+    //tabWidget()->layout()->addWidget(new QToolButton("Do it!"));
 }
 
 void DockWidget::fromVariantMap(const QVariantMap& variantMap)
@@ -24,12 +29,7 @@ void DockWidget::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap DockWidget::toVariantMap() const
 {
-    QVariantMap variantMap;
-
-    auto viewPluginWidget = dynamic_cast<ViewPlugin*>(widget());
-
     return {
-        { "Title", windowTitle() },
-        { "ViewPlugin", viewPluginWidget ? viewPluginWidget->toVariantMap() : QVariantMap() }
+        { "Title", windowTitle() }
     };
 }

@@ -80,21 +80,19 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
 
 void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    variantMapMustContain(variantMap, "Docking");
-
-    _dockManager->fromVariantMap(variantMap["Docking"].toMap());
+    _visualizationDockWidget.fromVariantMap(variantMap["Visualization"].toMap());
 }
 
 QVariantMap LayoutManager::toVariantMap() const
 {
     return {
-        { "Docking", _dockManager->toVariantMap() }
+        { "Visualization", _visualizationDockWidget.toVariantMap() }
     };
 }
 
 void LayoutManager::addViewPlugin(ViewPlugin* viewPlugin)
 {
-    auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName());
+    auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
     viewPluginDockWidget->setIcon(viewPlugin->getIcon());
 

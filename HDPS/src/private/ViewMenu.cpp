@@ -67,7 +67,7 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
     auto sortActions = [](QVector<QAction*>& actions) -> void {
         sort(actions.begin(), actions.end(), [](auto actionA, auto actionB) {
             return actionA->text() < actionB->text();
-            });
+        });
     };
 
     sortActions(loadStandardViewActions);

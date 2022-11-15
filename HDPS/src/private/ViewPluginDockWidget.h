@@ -2,6 +2,8 @@
 
 #include "DockWidget.h"
 
+#include <ViewPlugin.h>
+
 /**
  * Visualization widget class
  *
@@ -16,9 +18,10 @@ public:
     /**
      * Constructor
      * @param title Title of the dock widget
+     * @param viewPlugin Pointer to view plugin
      * @param parent Pointer to parent widget
      */
-    ViewPluginDockWidget(const QString& title, QWidget* parent = nullptr);
+    ViewPluginDockWidget(const QString& title, hdps::plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
 
 public: // Serialization
 
@@ -33,6 +36,17 @@ public: // Serialization
      * @return Variant representation of the widget action
      */
     QVariantMap toVariantMap() const override;
+
+private:
+
+    /**
+     * Get the view plugin
+     * @return Pointer to view plugin (might be nullptr)
+     */
+    hdps::plugin::ViewPlugin* getViewPlugin();
+
+private:
+    hdps::plugin::ViewPlugin*     _viewPlugin;    /** Pointer to view plugin */
 };
 
 using ViewPluginDockWidgets = QVector<ViewPluginDockWidget*>;

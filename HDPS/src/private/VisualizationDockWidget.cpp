@@ -44,6 +44,11 @@ DockManager& VisualizationDockWidget::getDockManager()
     return _dockManager;
 }
 
+const DockManager& VisualizationDockWidget::getDockManager() const
+{
+    return const_cast<VisualizationDockWidget*>(this)->_dockManager;
+}
+
 void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget)
 {
     Q_ASSERT(viewPluginDockWidget != nullptr);
@@ -54,6 +59,13 @@ void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDock
         _lastDockAreaWidget = _dockManager.addDockWidget(CenterDockWidgetArea, viewPluginDockWidget);
     else
         _lastDockAreaWidget = _dockManager.addDockWidget(RightDockWidgetArea, viewPluginDockWidget, _lastDockAreaWidget);
+
+    const auto lastDockAreaWidget = _lastDockAreaWidget;
+
+    connect(_lastDockAreaWidget, &CDockAreaWidget::destroyed, this, [this, lastDockAreaWidget]() -> void {
+        if (lastDockAreaWidget == _lastDockAreaWidget)
+            _lastDockAreaWidget = nullptr;
+    });
 
     connect(viewPluginDockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {
         updateCentralWidget();
@@ -72,9 +84,9 @@ void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDock
 
 void VisualizationDockWidget::fromVariantMap(const QVariantMap& variantMap)
 {
-    variantMapMustContain(variantMap, "DockManager");
+    _dockManager.fromVariantMap(variantMap["Docking"].toMap());
 
-    _dockManager.fromVariantMap(variantMap["DockManager"].toMap());
+    updateCentralWidget();
 }
 
 QVariantMap VisualizationDockWidget::toVariantMap() const
@@ -90,22 +102,26 @@ void VisualizationDockWidget::updateCentralWidget()
 {
     Q_ASSERT(_centralDockArea != nullptr);
 
-#ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
-    qDebug() << __FUNCTION__ << getNumberOfOpenViewPluginDockWidgets();
-#endif
+//#ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
+//    qDebug() << __FUNCTION__ << getNumberOfOpenViewPluginDockWidgets();
+//#endif
     
-    if (getNumberOfOpenViewPluginDockWidgets() == 0) {
-        _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
-        _centralDockWidget.toggleView(true);
-    }
-    else {
-        _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
-        _centralDockWidget.toggleView(false);
-    }
+    //if (getNumberOfOpenViewPluginDockWidgets() == 0) {
+    //    _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
+    //    _centralDockWidget.toggleView(true);
+    //}
+    //else {
+    //    _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
+    //    _centralDockWidget.toggleView(false);
+    //}
 }
 
 std::int32_t VisualizationDockWidget::getNumberOfOpenViewPluginDockWidgets() const
 {
+//#ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
+//    qDebug() << __FUNCTION__ << _viewPluginDockWidgets;
+//#endif
+
     std::int32_t numberOfOpenViewPluginDockWidgets = 0;
 
     for (auto viewPluginDockWidget : _viewPluginDockWidgets)
@@ -113,4 +129,18 @@ std::int32_t VisualizationDockWidget::getNumberOfOpenViewPluginDockWidgets() con
             numberOfOpenViewPluginDockWidgets++;
 
     return numberOfOpenViewPluginDockWidgets;
+}
+
+void VisualizationDockWidget::reset()
+{
+//#ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
+//    qDebug() << __FUNCTION__;
+//#endif
+
+    for (auto viewPluginDockWidget : _viewPluginDockWidgets)
+        _dockManager.removeDockWidget(viewPluginDockWidget);
+
+    _viewPluginDockWidgets.clear();
+
+    updateCentralWidget();
 }

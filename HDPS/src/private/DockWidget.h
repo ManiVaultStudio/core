@@ -36,3 +36,5 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 };
+
+using DockWidgets = QVector<DockWidget*>;
