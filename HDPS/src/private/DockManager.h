@@ -12,7 +12,7 @@
 /**
  * Dock manager class
  *
- * Class for managing docking parameters
+ * ADS inherited dock manager class, primary purpose it to support layout serialization
  *
  * @author Thomas Kroes
  */
@@ -26,74 +26,87 @@ public:
 
     using DockAreas = QVector<DockArea>;
 
+    /**
+     * Dock area class
+     *
+     * During de-serialization of the layout, a hierarchy of dock areas is created.
+     * This hierarchy is the used to re-create the layout in the project. 
+     *
+     * @author Thomas Kroes
+     */
     class DockArea
     {
     public:
-        DockArea(std::uint32_t depth = 0) :
-            _parent(nullptr),
-            _depth(depth),
-            _orientation(),
-            _children(),
-            _dockWidgets()
-        {
-        }
 
-        DockArea* getParent() {
-            return _parent;
-        }
+        /**
+         * Constructor
+         */
+        DockArea(DockManager* dockManager, std::uint32_t depth = 0);
 
-        void setParent(DockArea* parent) {
-            _parent = parent;
-        }
+        /** Copy constructor */
+        DockArea(const DockArea& other);
 
-        std::uint32_t getDepth() const {
-            return _depth;
-        }
+        DockArea* getParent();
 
-        void setDepth(std::uint32_t depth) {
-            _depth = depth;
-        }
+        void setParent(DockArea* parent);
 
-        Qt::Orientation getOrientation() const {
-            return _orientation;
-        }
+        std::uint32_t getDepth() const;
 
-        void setOrientation(Qt::Orientation orientation) {
-            _orientation = orientation;
-        }
+        void setDepth(std::uint32_t depth);
 
-        DockAreas getChildren() const {
-            return _children;
-        }
+        Qt::Orientation getOrientation() const;
 
-        void setChildren(DockAreas children) {
-            _children = children;
+        void setOrientation(Qt::Orientation orientation);
 
-            for (auto& child : _children) {
-                child.setParent(this);
-                child.setDepth(_depth + 1);
-            }
-        }
+        DockAreas getChildren() const;
 
-        DockWidgets getDockWidgets() const {
-            return _dockWidgets;
-        }
+        void setChildren(DockAreas children);
 
-        void setDockWidgets(DockWidgets dockWidgets) {
-            _dockWidgets = dockWidgets;
+        DockWidgets getDockWidgets() const;
+
+        void setDockWidgets(DockWidgets dockWidgets);
+
+        ads::CDockAreaWidget* getLastDockAreaWidget();
+        void setLastDockAreaWidget(ads::CDockAreaWidget* lastDockAreaWidget);
+
+        bool hasLastDockAreaWidget() const;
+
+        void createPlaceHolders(int depth);
+        void applyDocking(int depth);
+        void applyDocking();
+        void sanitizeHierarchy();
+        DockWidget* getFirstDockWidget();
+
+        /**
+         * Assignment operator
+         * @param other Reference to assign from
+         */
+        DockArea& operator=(const DockArea& other) {
+            _dockManager            = other._dockManager;
+            _parent                 = other._parent;
+            _depth                  = other._depth;
+            _orientation            = other._orientation;
+            _children               = other._children;
+            _dockWidgets            = other._dockWidgets;
+            _lastDockAreaWidget     = other._lastDockAreaWidget;
+
+            return *this;
         }
 
     private:
-        DockArea*           _parent;
-        std::uint32_t       _depth;
-        Qt::Orientation     _orientation;
-        DockAreas           _children;
-        DockWidgets         _dockWidgets;
+        DockManager*            _dockManager;
+        DockArea*               _parent;
+        std::uint32_t           _depth;
+        Qt::Orientation         _orientation;
+        DockAreas               _children;
+        DockWidgets             _dockWidgets;
+        ads::CDockAreaWidget*   _lastDockAreaWidget;     /** Pointer to last dock area widget */
     };
 
 public:
 
     static QMap<ads::DockWidgetArea, QString> dockWidgetAreaStrings;
+    static QMap<Qt::Orientation, QString> orientationStrings;
 
 public:
 
@@ -141,31 +154,50 @@ private:
     QVariantMap widgetToVariantMap(QWidget* widget) const;
 
 private:
-    ads::CDockAreaWidget*      _lastDockAreaWidget;     /** Pointer to last dock area widget */
-    ads::DockWidgetArea         _dockWidgetArea;
-    ads::DockWidgetArea         _laggingDockWidgetArea;
-    DockArea                    _rootDockArea;
 };
 
 /**
- * Print dock area (and its children) to the console (indented)
- * @param debug Debug
+ * Print dock area (and its children) to the console (for debugging purposes)
+ * @param debug Debug to print to
  * @param dockArea Reference to dock area to print
  */
 inline QDebug operator << (QDebug debug, const DockManager::DockArea& dockArea)
 {
-    QString indent;
+    auto outputDebug = debug.noquote().nospace();
 
-    for (int i = 0; i < dockArea.getDepth() * 4; i++)
-        indent += " ";
+    const auto getIndentation = [](std::uint16_t depth) -> QString {
+        QString indentation;
 
-    qDebug().noquote() << indent << "Dock area" << QString("[depth=%1, orientation=%2]").arg(QString::number(dockArea.getDepth()), QString::number(dockArea.getOrientation()));
+        for (int i = 0; i < depth * 3; i++)
+            indentation += " ";
 
-    for (auto dockWidget : dockArea.getDockWidgets())
-        qDebug().noquote() << indent << dockWidget->windowTitle();;
+        return indentation;
+    };
+
+    QStringList propertiesString;
+
+    const auto addProperty = [&](const QString& name, const QString& value) -> void {
+        propertiesString << QString("%1=%2").arg(name, value);
+    };
+
+    addProperty("depth", QString::number(dockArea.getDepth()));
+
+    if (dockArea.getOrientation() >= 1)
+        addProperty("orientation", DockManager::orientationStrings.value(dockArea.getOrientation()));
+
+    outputDebug << getIndentation(dockArea.getDepth()) << "Dock area " << QString("(%1)").arg(propertiesString.join(", ")) << "\n";
+
+    if (!dockArea.getDockWidgets().isEmpty()) {
+        auto dockWidgetString = QStringList();
+
+        for (auto dockWidget : dockArea.getDockWidgets())
+            dockWidgetString << dockWidget->windowTitle();
+
+        outputDebug << getIndentation(dockArea.getDepth() + 1) << QString("Dock widgets: [%1]").arg(dockWidgetString.join(", ")) << "\n";
+    }
 
     for (auto child : dockArea.getChildren())
-        qDebug().noquote() << child;
+        outputDebug << child;
 
-    return debug.space();
+    return outputDebug;
 }
