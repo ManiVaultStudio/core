@@ -142,34 +142,29 @@ void DockManager::DockArea::createPlaceHolders(std::uint32_t depth)
         }
 
         //if (_dockWidgets.count() == 1) {
-            dockWidgetArea = getParent()->hasLastDockAreaWidget() ? dockWidgetArea : CenterDockWidgetArea;
+        dockWidgetArea = getParent()->hasLastDockAreaWidget() ? dockWidgetArea : CenterDockWidgetArea;
 
-            auto dockWidget = new DockWidget("Dock widget");
-            auto targetDockWidgetArea = getParent()->getCurrentDockAreaWidget();
+        auto dockWidget             = _dockWidgets.count() == 0 ? new DockWidget("Dock widget") : _dockWidgets.first();
+        auto targetDockWidgetArea   = getParent()->getCurrentDockAreaWidget();
 
-            if (dockWidgetArea)
-                getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, targetDockWidgetArea));
-            else
-                getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget));
+        if (dockWidgetArea)
+            getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, targetDockWidgetArea));
+        else
+            getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget));
 
-            setCurrentDockAreaWidget(getParent()->getCurrentDockAreaWidget());
+        setCurrentDockAreaWidget(getParent()->getCurrentDockAreaWidget());
 
-            if (_dockWidgets.isEmpty())
-                _placeholderDockWidget = dockWidget;
+        if (_dockWidgets.isEmpty())
+            _placeholderDockWidget = dockWidget;
 
-        //}
-        //else {
-        //    dockWidgetArea = CenterDockWidgetArea;
+        if (_dockWidgets.count() >= 2) {
+            for (auto dockWidget : _dockWidgets) {
+                if (dockWidget == _dockWidgets.first())
+                    continue;
 
-        //    for (auto dockWidget : _dockWidgets) {
-        //        auto targetDockWidgetArea = getParent()->getCurrentDockAreaWidget();
-
-        //        if (dockWidgetArea)
-        //            setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, targetDockWidgetArea));
-        //        else
-        //            setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget));
-        //    }
-        //}
+                setCurrentDockAreaWidget(_dockManager->addDockWidget(CenterDockWidgetArea, dockWidget, getCurrentDockAreaWidget()));
+            }
+        }
     }
 }
 
@@ -187,8 +182,6 @@ void DockManager::DockArea::removePlaceHolders()
 void DockManager::DockArea::applyDocking()
 {
     sanitizeHierarchy();
-
-    qDebug() << getMaxDepth();
 
     for (std::uint32_t depth = 1; depth <= getMaxDepth(); depth++)
         createPlaceHolders(depth);
@@ -289,37 +282,9 @@ DockManager::DockArea DockManager::areaFromVariantMap(const QVariantMap& areaMap
     qDebug() << "Adding dock area";
 #endif
 
-    //const auto hasSplitter = areaMap["HasSplitter"].toBool();
-    //const auto splitterOrientation = static_cast<Qt::Orientation>(areaMap["Orientation"].toInt());
-
-    //if (hasSplitter) {
-    //    auto dockWidgetArea = CenterDockWidgetArea;
-
-    //    switch (splitterOrientation)
-    //    {
-    //    case Qt::Horizontal:
-    //        dockWidgetArea = RightDockWidgetArea;
-    //        break;
-
-    //    case Qt::Vertical:
-    //        dockWidgetArea = BottomDockWidgetArea;
-    //        break;
-
-    //    default:
-    //        break;
-    //    }
-
-    //    _dockWidgetArea = dockWidgetArea;
-    //}
-
-    
-
     DockArea dockArea(this, depth);
 
     dockArea.setOrientation(static_cast<Qt::Orientation>(areaMap["Orientation"].toInt()));
-
-    //if (_laggingDockWidgetArea == NoDockWidgetArea)
-    //    _laggingDockWidgetArea = _dockWidgetArea;
 
     if (areaMap.contains("Areas"))
         dockArea.setChildren(areasFromVariantMap(areaMap["Areas"].toList(), depth));
