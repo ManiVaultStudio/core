@@ -24,14 +24,20 @@ DockManager::DockArea::DockArea(DockManager* dockManager, std::uint32_t depth /*
     _depth(depth),
     _orientation(),
     _children(),
+    _placeholderDockWidget(nullptr),
     _dockWidgets(),
-    _lastDockAreaWidget(nullptr)
+    _currentDockAreaWidget(nullptr)
 {
 }
 
 DockManager::DockArea::DockArea(const DockArea& other)
 {
     *this = other;
+}
+
+QString DockManager::DockArea::getId() const
+{
+    return _id;
 }
 
 DockManager::DockArea* DockManager::DockArea::getParent()
@@ -79,6 +85,11 @@ void DockManager::DockArea::setChildren(DockAreas children)
     }
 }
 
+std::uint32_t DockManager::DockArea::getChildIndex(const DockArea& child) const
+{
+    return _children.indexOf(child);
+}
+
 DockWidgets DockManager::DockArea::getDockWidgets() const
 {
     return _dockWidgets;
@@ -89,22 +100,22 @@ void DockManager::DockArea::setDockWidgets(DockWidgets dockWidgets)
     _dockWidgets = dockWidgets;
 }
 
-ads::CDockAreaWidget* DockManager::DockArea::getLastDockAreaWidget()
+ads::CDockAreaWidget* DockManager::DockArea::getCurrentDockAreaWidget()
 {
-    return _lastDockAreaWidget;
+    return _currentDockAreaWidget;
 }
 
-void DockManager::DockArea::setLastDockAreaWidget(ads::CDockAreaWidget* lastDockAreaWidget)
+void DockManager::DockArea::setCurrentDockAreaWidget(ads::CDockAreaWidget* lastDockAreaWidget)
 {
-    _lastDockAreaWidget = lastDockAreaWidget;
+    _currentDockAreaWidget = lastDockAreaWidget;
 }
 
 bool DockManager::DockArea::hasLastDockAreaWidget() const
 {
-    return _lastDockAreaWidget != nullptr;
+    return _currentDockAreaWidget != nullptr;
 }
 
-void DockManager::DockArea::createPlaceHolders(int depth)
+void DockManager::DockArea::createPlaceHolders(std::uint32_t depth)
 {
     qDebug() << __FUNCTION__;
 
@@ -130,85 +141,59 @@ void DockManager::DockArea::createPlaceHolders(int depth)
                 break;
         }
 
-        dockWidgetArea = getParent()->hasLastDockAreaWidget() ? dockWidgetArea : CenterDockWidgetArea;
+        //if (_dockWidgets.count() == 1) {
+            dockWidgetArea = getParent()->hasLastDockAreaWidget() ? dockWidgetArea : CenterDockWidgetArea;
 
-        auto dockWidget             = new DockWidget("Dock widget");
-        auto parentLastDockWidget   = getParent()->getLastDockAreaWidget();
+            auto dockWidget = new DockWidget("Dock widget");
+            auto targetDockWidgetArea = getParent()->getCurrentDockAreaWidget();
 
-        if (parentLastDockWidget)
-            getParent()->setLastDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, parentLastDockWidget));
-        else
-            getParent()->setLastDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget));
+            if (dockWidgetArea)
+                getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, targetDockWidgetArea));
+            else
+                getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget));
 
-        setLastDockAreaWidget(getParent()->getLastDockAreaWidget());
+            setCurrentDockAreaWidget(getParent()->getCurrentDockAreaWidget());
+
+            if (_dockWidgets.isEmpty())
+                _placeholderDockWidget = dockWidget;
+
+        //}
+        //else {
+        //    dockWidgetArea = CenterDockWidgetArea;
+
+        //    for (auto dockWidget : _dockWidgets) {
+        //        auto targetDockWidgetArea = getParent()->getCurrentDockAreaWidget();
+
+        //        if (dockWidgetArea)
+        //            setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, targetDockWidgetArea));
+        //        else
+        //            setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget));
+        //    }
+        //}
     }
 }
 
-void DockManager::DockArea::applyDocking(int depth)
+void DockManager::DockArea::removePlaceHolders()
 {
-    //if (_depth < depth) {
-    //    for (auto child : _children)
-    //        child.applyDocking(depth);
-    //}
+    for (auto& child : _children)
+        child.removePlaceHolders();
 
-    //if (_depth == depth) {
-    //    if (getParent() == nullptr)
-    //        return;
+    if (_placeholderDockWidget)
+        _dockManager->removeDockWidget(_placeholderDockWidget);
 
-    //    auto dockWidgetArea = CenterDockWidgetArea;
-
-    //    switch (getParent()->getOrientation())
-    //    {
-    //        case Qt::Horizontal:
-    //            dockWidgetArea = RightDockWidgetArea;
-    //            break;
-
-    //        case Qt::Vertical:
-    //            dockWidgetArea = BottomDockWidgetArea;
-    //            break;
-
-    //        default:
-    //            break;
-    //    }
-    //    
-    //    dockWidgetArea = getParent()->hasLastDockAreaWidget() ? dockWidgetArea : CenterDockWidgetArea;
-
-    //    auto dockWidget = new DockWidget("Dock widget");
-    //    auto parentLastDockWidget = getParent()->getLastDockAreaWidget();
-
-    //    if (parentLastDockWidget)
-    //        getParent()->setLastDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, parentLastDockWidget));
-    //    else
-    //        getParent()->setLastDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget));
-    //}
+    delete _placeholderDockWidget;
 }
 
 void DockManager::DockArea::applyDocking()
 {
     sanitizeHierarchy();
-    createPlaceHolders(1);
-    createPlaceHolders(2);
-    createPlaceHolders(3);
-    /*
-    if (!_children.isEmpty()) {
-        for (auto child : _children)
-            child.applyDocking();
-    }
-    else {
-        
-    }
 
+    qDebug() << getMaxDepth();
+
+    for (std::uint32_t depth = 1; depth <= getMaxDepth(); depth++)
+        createPlaceHolders(depth);
     
-    if (_depth < depth) {
-        for (auto child : _children)
-            child.applyDocking(depth);
-    }
-    else if (_depth == depth) {
-        
-
-        _lastDockAreaWidget = _dockManager->addDockWidget(dockWidgetArea, new DockWidget("Dock widget"), _lastDockAreaWidget);
-    }
-    */
+    removePlaceHolders();
 }
 
 void DockManager::DockArea::sanitizeHierarchy()
@@ -232,6 +217,20 @@ DockWidget* DockManager::DockArea::getFirstDockWidget()
     }
 
     return nullptr;
+}
+
+std::uint32_t DockManager::DockArea::getMaxDepth() const
+{
+    std::uint32_t maxDepth = _depth;
+
+    for (auto& child : _children) {
+        const auto childMaxDepth = child.getMaxDepth();
+
+        if (childMaxDepth > maxDepth)
+            maxDepth = childMaxDepth;
+    }
+        
+    return maxDepth;
 }
 
 QMap<DockWidgetArea, QString> DockManager::dockWidgetAreaStrings = {

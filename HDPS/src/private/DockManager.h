@@ -8,6 +8,7 @@
 
 #include <QString>
 #include <QVector>
+#include <QUuid>
 
 /**
  * Dock manager class
@@ -46,6 +47,8 @@ public:
         /** Copy constructor */
         DockArea(const DockArea& other);
 
+        QString getId() const;
+
         DockArea* getParent();
 
         void setParent(DockArea* parent);
@@ -62,20 +65,27 @@ public:
 
         void setChildren(DockAreas children);
 
+        std::uint32_t getChildIndex(const DockArea& child) const;
+
         DockWidgets getDockWidgets() const;
 
         void setDockWidgets(DockWidgets dockWidgets);
 
-        ads::CDockAreaWidget* getLastDockAreaWidget();
-        void setLastDockAreaWidget(ads::CDockAreaWidget* lastDockAreaWidget);
+        ads::CDockAreaWidget* getCurrentDockAreaWidget();
+        void setCurrentDockAreaWidget(ads::CDockAreaWidget* lastDockAreaWidget);
 
         bool hasLastDockAreaWidget() const;
 
-        void createPlaceHolders(int depth);
-        void applyDocking(int depth);
+        void createPlaceHolders(std::uint32_t depth);
+        void removePlaceHolders();
         void applyDocking();
         void sanitizeHierarchy();
         DockWidget* getFirstDockWidget();
+
+    private:
+        std::uint32_t getMaxDepth() const;
+
+    public:
 
         /**
          * Assignment operator
@@ -87,20 +97,31 @@ public:
             _depth                  = other._depth;
             _orientation            = other._orientation;
             _children               = other._children;
+            _placeholderDockWidget  = other._placeholderDockWidget;
             _dockWidgets            = other._dockWidgets;
-            _lastDockAreaWidget     = other._lastDockAreaWidget;
+            _currentDockAreaWidget  = other._currentDockAreaWidget;
 
             return *this;
         }
 
+        /**
+         * Equality operator (which compares the identifier of two dock areas)
+         * @param other Other dock area to compare with
+         */
+        bool operator == (const DockArea& other) {
+            return other.getId() == _id;
+        }
+
     private:
+        QString                 _id;                        /** Unique identifier for the dock area (for comparison operatorF) */
         DockManager*            _dockManager;
         DockArea*               _parent;
         std::uint32_t           _depth;
         Qt::Orientation         _orientation;
         DockAreas               _children;
+        DockWidget*             _placeholderDockWidget;
         DockWidgets             _dockWidgets;
-        ads::CDockAreaWidget*   _lastDockAreaWidget;     /** Pointer to last dock area widget */
+        ads::CDockAreaWidget*   _currentDockAreaWidget;     /** Pointer to last dock area widget */
     };
 
 public:
@@ -155,6 +176,17 @@ private:
 
 private:
 };
+
+/**
+ * Compares two dock areas for equality
+ * @param lhs Left-hand-side dock area
+ * @param rhs Right-hand-side dock area
+ * @return Whether lhs and rhs are equal
+ */
+inline bool operator == (const DockManager::DockArea& lhs, const DockManager::DockArea& rhs)
+{
+    return lhs.getId() == rhs.getId();
+}
 
 /**
  * Print dock area (and its children) to the console (for debugging purposes)
