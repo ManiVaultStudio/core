@@ -1,6 +1,7 @@
 #pragma once
 
 #include <util/Serializable.h>
+#include <widgets/OverlayWidget.h>
 
 #include <DockWidget.h>
 
@@ -22,6 +23,19 @@ public:
      */
     DockWidget(const QString& title, QWidget* parent = nullptr);
 
+    /**
+     * Get overlay widget (for showing docking information)
+     * @return Reference to overlay widget
+     */
+    hdps::gui::OverlayWidget& getOverlayWidget();
+
+    /**
+     * Override ADS dock widget
+     * @param widget Pointer to widget
+     * @param insertMode Insert modus
+     */
+    void setWidget(QWidget* widget, eInsertMode insertMode = AutoScrollArea);
+
 public: // Serialization
 
     /**
@@ -35,6 +49,9 @@ public: // Serialization
      * @return Variant representation of the widget action
      */
     QVariantMap toVariantMap() const override;
+
+private:
+    hdps::gui::OverlayWidget    _overlayWidget;     /** Overlay widget for showing loading information */
 };
 
 using DockWidgets = QVector<DockWidget*>;

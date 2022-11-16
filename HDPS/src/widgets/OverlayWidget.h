@@ -66,6 +66,12 @@ public:
     /** Override the hide member to fade the opacity over time */
     void hide();
 
+    /**
+     * Get widget fader
+     * @return Reference to widget fader
+     */
+    util::WidgetFader& getWidgetFader();
+
 private:
 
     /** Setups the layout etc. */

@@ -59,6 +59,58 @@ void WidgetFader::fadeOut()
     _opacityAnimation.start();
 }
 
+float WidgetFader::getMinimumOpacity() const
+{
+    return _minimumOpacity;
+}
+
+float WidgetFader::getMaximumOpacity() const
+{
+    return _maximumOpacity;
+}
+
+void WidgetFader::setMinimumOpacity(float minimumOpacity)
+{
+    if (minimumOpacity == _minimumOpacity)
+        return;
+
+    _minimumOpacity = minimumOpacity;
+}
+
+void WidgetFader::setMaximumOpacity(float maximumOpacity)
+{
+    if (maximumOpacity == _maximumOpacity)
+        return;
+
+    _maximumOpacity = maximumOpacity;
+}
+
+std::int32_t WidgetFader::getFadeInDuration() const
+{
+    return _fadeInDuration;
+}
+
+std::int32_t WidgetFader::getFadeOutDuration() const
+{
+    return _fadeOutDuration;
+}
+
+void WidgetFader::setFadeInDuration(std::int32_t fadeInDuration)
+{
+    if (fadeInDuration == _fadeInDuration)
+        return;
+
+    _fadeInDuration = fadeInDuration;
+}
+
+void WidgetFader::setFadeOutDuration(std::int32_t fadeOutDuration)
+{
+    if (fadeOutDuration == _fadeOutDuration)
+        return;
+
+    _fadeOutDuration = fadeOutDuration;
+}
+
 }
 
 }

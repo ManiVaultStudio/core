@@ -209,7 +209,7 @@ public: // Plugin creation
      * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
      * @return Pointer to created plugin
      */
-    virtual plugin::Plugin* requestPlugin(const QString& kind, const Datasets& datasets = Datasets()) = 0;
+    virtual plugin::Plugin* requestPlugin(const QString& kind, Datasets datasets = Datasets()) = 0;
 
     /**
      * Create a plugin of \p kind
@@ -218,7 +218,7 @@ public: // Plugin creation
      * @return Pointer to created plugin
      */
     template<typename PluginType>
-    PluginType* requestPlugin(const QString& kind, const Datasets& datasets)
+    PluginType* requestPlugin(const QString& kind, Datasets datasets = Datasets())
     {
         return dynamic_cast<PluginType*>(requestPlugin(kind, datasets));
     }

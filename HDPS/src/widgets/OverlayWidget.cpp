@@ -36,6 +36,7 @@ OverlayWidget::OverlayWidget(QWidget* parent, const QIcon& icon, const QString& 
     _backgroundColor(),
     _textColor()
 {
+    set(icon, title, description);
     setColors(backgroundColor, textColor);
     initialize();
 }
@@ -92,6 +93,11 @@ void OverlayWidget::hide()
 #endif
 
     _widgetFader.fadeOut();
+}
+
+hdps::util::WidgetFader& OverlayWidget::getWidgetFader()
+{
+    return _widgetFader;
 }
 
 void OverlayWidget::initialize()

@@ -37,6 +37,42 @@ public:
     /** Fade out the \p _targetWidget */
     void fadeOut();
 
+    /** Get minimum opacity */
+    float getMinimumOpacity() const;
+
+    /** Get maximum opacity */
+    float getMaximumOpacity() const;
+
+    /**
+     * Set minimum opacity
+     * @param minimumOpacity Minimum opacity
+     */
+    void setMinimumOpacity(float minimumOpacity);
+
+    /**
+     * Set maximum opacity
+     * @param maximumOpacity Maximum opacity
+     */
+    void setMaximumOpacity(float maximumOpacity);
+
+    /** Get fade-in duration */
+    std::int32_t getFadeInDuration() const;
+
+    /** Get fade-out duration */
+    std::int32_t getFadeOutDuration() const;
+
+    /**
+     * Set fade-in duration
+     * @param fadeInDuration Fade-in duration in milliseconds
+     */
+    void setFadeInDuration(std::int32_t fadeInDuration);
+
+    /**
+     * Set fade-out duration
+     * @param fadeOutDuration Fade-out duration in milliseconds
+     */
+    void setFadeOutDuration(std::int32_t fadeOutDuration);
+
 private:
     QWidget*                _targetWidget;          /** Pointer to target widget to fade */
     float                   _minimumOpacity;        /** Target fade out opacity */

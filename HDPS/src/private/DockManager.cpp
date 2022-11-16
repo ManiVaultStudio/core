@@ -1,5 +1,6 @@
 #include "DockManager.h"
 #include "DockWidget.h"
+#include "ViewPluginDockWidget.h"
 
 #include <ViewPlugin.h>
 
@@ -15,13 +16,33 @@
 
 using namespace ads;
 
+using namespace hdps;
 using namespace hdps::plugin;
 using namespace hdps::util;
+
+template <class WidgetClass>
+WidgetClass* findParent(const QWidget* widget)
+{
+    QWidget* parentWidget = widget->parentWidget();
+
+    while (parentWidget)
+    {
+        auto parentImpl = qobject_cast<WidgetClass*>(parentWidget);
+
+        if (parentImpl)
+            return parentImpl;
+        
+        parentWidget = parentWidget->parentWidget();
+    }
+
+    return 0;
+}
 
 DockManager::DockArea::DockArea(DockManager* dockManager, std::uint32_t depth /*= 0*/) :
     _dockManager(dockManager),
     _parent(nullptr),
     _depth(depth),
+    _splitterSizes(),
     _orientation(),
     _children(),
     _placeholderDockWidget(nullptr),
@@ -58,6 +79,16 @@ std::uint32_t DockManager::DockArea::getDepth() const
 void DockManager::DockArea::setDepth(std::uint32_t depth)
 {
     _depth = depth;
+}
+
+DockManager::DockArea::SplitterSizes DockManager::DockArea::getSplitterSizes() const
+{
+    return _splitterSizes;
+}
+
+void DockManager::DockArea::setSplitterSizes(const SplitterSizes& splitterSizes)
+{
+    _splitterSizes = splitterSizes;
 }
 
 Qt::Orientation DockManager::DockArea::getOrientation() const
@@ -141,10 +172,9 @@ void DockManager::DockArea::createPlaceHolders(std::uint32_t depth)
                 break;
         }
 
-        //if (_dockWidgets.count() == 1) {
         dockWidgetArea = getParent()->hasLastDockAreaWidget() ? dockWidgetArea : CenterDockWidgetArea;
 
-        auto dockWidget             = _dockWidgets.count() == 0 ? new DockWidget("Dock widget") : _dockWidgets.first();
+        auto dockWidget             = _dockWidgets.count() == 0 ? new DockWidget("Placeholder dock widget") : _dockWidgets.first();
         auto targetDockWidgetArea   = getParent()->getCurrentDockAreaWidget();
 
         if (dockWidgetArea)
@@ -186,7 +216,14 @@ void DockManager::DockArea::applyDocking()
     for (std::uint32_t depth = 1; depth <= getMaxDepth(); depth++)
         createPlaceHolders(depth);
     
+    Application::processEvents();
+
     removePlaceHolders();
+
+    Application::processEvents();
+
+    setSplitterSizes();
+    loadViewPluginDockWidgets();
 }
 
 void DockManager::DockArea::sanitizeHierarchy()
@@ -212,6 +249,21 @@ DockWidget* DockManager::DockArea::getFirstDockWidget()
     return nullptr;
 }
 
+void DockManager::DockArea::loadViewPluginDockWidgets()
+{
+    for (auto& child : _children)
+        child.loadViewPluginDockWidgets();
+
+    for (auto& dockWidget : _dockWidgets) {
+        auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget);
+
+        if (!viewPluginDockWidget)
+            continue;
+
+        viewPluginDockWidget->loadViewPlugin();
+    }
+}
+
 std::uint32_t DockManager::DockArea::getMaxDepth() const
 {
     std::uint32_t maxDepth = _depth;
@@ -224,6 +276,24 @@ std::uint32_t DockManager::DockArea::getMaxDepth() const
     }
         
     return maxDepth;
+}
+
+void DockManager::DockArea::setSplitterSizes()
+{
+    if (_currentDockAreaWidget) {
+        //if (_depth == 0)
+        //    _dockManager->rootSplitter()->setSizes(getSplitterSizes());
+        //else
+        //    _dockManager->setSplitterSizes(_currentDockAreaWidget, getSplitterSizes());
+        /*auto parentSplitter = findParent<QSplitter>(_currentDockAreaWidget);
+
+        if (parentSplitter)
+            
+            parentSplitter->setSizes(getSplitterSizes());*/
+    }
+
+    for (auto child : _children)
+        child.setSplitterSizes();
 }
 
 QMap<DockWidgetArea, QString> DockManager::dockWidgetAreaStrings = {
@@ -269,7 +339,6 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
     auto rootDockArea = areaFromVariantMap(variantMap["Area"].toMap());
 
     rootDockArea.applyDocking();
-    //rootDockArea.applyDocking(2);
 
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << rootDockArea;
@@ -285,6 +354,13 @@ DockManager::DockArea DockManager::areaFromVariantMap(const QVariantMap& areaMap
     DockArea dockArea(this, depth);
 
     dockArea.setOrientation(static_cast<Qt::Orientation>(areaMap["Orientation"].toInt()));
+
+    QVector<std::int32_t> splitterSizes;
+
+    for (const auto& splitterSize : areaMap["SplitterSizes"].toList())
+        splitterSizes << splitterSize.toInt();
+
+    dockArea.setSplitterSizes(splitterSizes);
 
     if (areaMap.contains("Areas"))
         dockArea.setChildren(areasFromVariantMap(areaMap["Areas"].toList(), depth));
@@ -313,8 +389,16 @@ DockWidgets DockManager::dockWidgetsFromVariantList(const QVariantList& dockWidg
 {
     DockWidgets dockWidgets;
 
-    for (const auto& dockWidget : dockWidgetsList)
-        dockWidgets << new DockWidget(dockWidget.toMap()["Title"].toString());
+    for (const auto& dockWidget : dockWidgetsList) { 
+        const auto dockWidgetMap = dockWidget.toMap();
+
+        if (dockWidgetMap.contains("ViewPlugin"))
+            dockWidgets << new ViewPluginDockWidget(dockWidget.toMap()["Title"].toString());
+        else
+            dockWidgets << new DockWidget(dockWidget.toMap()["Title"].toString());
+
+        dockWidgets.last()->fromVariantMap(dockWidgetMap);
+    }
 
     return dockWidgets;
 }
@@ -340,21 +424,20 @@ QVariantMap DockManager::widgetToVariantMap(QWidget* widget) const
 
     auto splitter = qobject_cast<QSplitter*>(widget);
 
-    widgetMap["HasSplitter"]    = splitter != nullptr;
     widgetMap["Orientation"]    = 0;
-    widgetMap["Sizes"]          = QVariantList();
+    widgetMap["SplitterSizes"]  = QVariant::fromValue(QVector<std::int32_t>());
 
     if (splitter)
     {
         QVariantList areasList, sizesList;
 
         for (int i = 0; i < splitter->count(); ++i) {
-            areasList.push_back(widgetToVariantMap(splitter->widget(i)));
-            sizesList.push_back(splitter->sizes()[i]);
+            areasList << widgetToVariantMap(splitter->widget(i));
+            sizesList << splitter->sizes()[i];
         }
             
         widgetMap["Orientation"]    = static_cast<std::int32_t>(splitter->orientation());
-        widgetMap["Sizes"]          = sizesList;
+        widgetMap["SplitterSizes"]  = sizesList;
         widgetMap["Areas"]          = areasList;
     }
     else {

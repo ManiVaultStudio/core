@@ -149,7 +149,7 @@ public: // Plugin creation
      * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
      * @return Pointer to created plugin
      */
-    plugin::Plugin* requestPlugin(const QString& kind, const Datasets& datasets = Datasets()) override;
+    plugin::Plugin* requestPlugin(const QString& kind, Datasets datasets = Datasets()) override;
 
 public: // Plugin queries
 

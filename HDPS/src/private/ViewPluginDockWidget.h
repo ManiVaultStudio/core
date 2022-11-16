@@ -18,10 +18,20 @@ public:
     /**
      * Constructor
      * @param title Title of the dock widget
+     * @param parent Pointer to parent widget
+     */
+    ViewPluginDockWidget(const QString& title, QWidget* parent = nullptr);
+
+    /**
+     * Constructor
+     * @param title Title of the dock widget
      * @param viewPlugin Pointer to view plugin
      * @param parent Pointer to parent widget
      */
     ViewPluginDockWidget(const QString& title, hdps::plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
+
+    /** Load view plugin */
+    void loadViewPlugin();
 
 public: // Serialization
 
@@ -46,7 +56,9 @@ private:
     hdps::plugin::ViewPlugin* getViewPlugin();
 
 private:
-    hdps::plugin::ViewPlugin*     _viewPlugin;    /** Pointer to view plugin */
+    hdps::plugin::ViewPlugin*   _viewPlugin;        /** Pointer to view plugin */
+    QString                     _viewPluginKind;    /** Kind of (view) plugin */
+    QVariantMap                 _viewPluginMap;     /** View plugin cached map for deferred loading */
 };
 
 using ViewPluginDockWidgets = QVector<ViewPluginDockWidget*>;

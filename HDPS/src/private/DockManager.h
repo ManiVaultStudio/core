@@ -38,6 +38,9 @@ public:
     class DockArea
     {
     public:
+        using SplitterSizes = QVector<std::int32_t>;
+
+    public:
 
         /**
          * Constructor
@@ -56,6 +59,10 @@ public:
         std::uint32_t getDepth() const;
 
         void setDepth(std::uint32_t depth);
+
+        SplitterSizes getSplitterSizes() const;
+
+        void setSplitterSizes(const SplitterSizes& splitterSizes);
 
         Qt::Orientation getOrientation() const;
 
@@ -82,8 +89,12 @@ public:
         void sanitizeHierarchy();
         DockWidget* getFirstDockWidget();
 
+        void loadViewPluginDockWidgets();
+
     private:
         std::uint32_t getMaxDepth() const;
+
+        void setSplitterSizes();
 
     public:
 
@@ -95,6 +106,7 @@ public:
             _dockManager            = other._dockManager;
             _parent                 = other._parent;
             _depth                  = other._depth;
+            _splitterSizes          = other._splitterSizes;
             _orientation            = other._orientation;
             _children               = other._children;
             _placeholderDockWidget  = other._placeholderDockWidget;
@@ -118,6 +130,7 @@ public:
         DockArea*               _parent;
         std::uint32_t           _depth;
         Qt::Orientation         _orientation;
+        SplitterSizes           _splitterSizes;
         DockAreas               _children;
         DockWidget*             _placeholderDockWidget;
         DockWidgets             _dockWidgets;
@@ -216,6 +229,14 @@ inline QDebug operator << (QDebug debug, const DockManager::DockArea& dockArea)
 
     if (dockArea.getOrientation() >= 1)
         addProperty("orientation", DockManager::orientationStrings.value(dockArea.getOrientation()));
+
+    QStringList splitterSizesString;
+
+    for (const auto& splitterSize : dockArea.getSplitterSizes())
+        splitterSizesString << QString::number(splitterSize);
+
+    if (!splitterSizesString.isEmpty())
+        addProperty("splitter_sizes", splitterSizesString.join(", "));
 
     outputDebug << getIndentation(dockArea.getDepth()) << "Dock area " << QString("(%1)").arg(propertiesString.join(", ")) << "\n";
 

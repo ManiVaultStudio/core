@@ -458,7 +458,7 @@ Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString
     return Dataset<DatasetImpl>();
 }
 
-hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, const Datasets& datasets /*= Datasets()*/)
+hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, Datasets datasets /*= Datasets()*/)
 {
     try {
         return _pluginManager.createPlugin(kind, datasets);
