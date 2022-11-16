@@ -138,6 +138,11 @@ void PluginManager::loadPlugins()
     }
 }
 
+bool PluginManager::isPluginLoaded(const QString& kind) const
+{
+    return _pluginFactories.keys().contains(kind);
+}
+
 QStringList PluginManager::resolveDependencies(QDir pluginDir) const
 {
     // Map keeping track of the list of plugin kinds on which a plugin is dependent

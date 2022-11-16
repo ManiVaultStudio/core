@@ -151,7 +151,24 @@ public: // Plugin creation
      */
     plugin::Plugin* requestPlugin(const QString& kind, Datasets datasets = Datasets()) override;
 
+    /**
+     * Create a view plugin of \p kind and dock in the \p dockArea of \p dockToViewPlugin
+     * @param kind Kind of plugin (name of the plugin)
+     * @param dockToViewPlugin The other plugin to which the newly created view plugin will be docked
+     * @param dockArea The docking area (w.r.t. the \p dockToViewPlugin) in which the newly created view plugin will be docked
+     * @param datasets Zero or more input dataset(s) for the view plugin
+     * @return Pointer to created view plugin
+     */
+    plugin::ViewPlugin* requestPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin, std::uint32_t dockArea, Datasets datasets = Datasets()) override;
+
 public: // Plugin queries
+
+    /**
+     * Determine whether a plugin of \p kind is loaded
+     * @param kind Plugin kind
+     * @return Boolean determining whether a plugin of \p kind is loaded
+     */
+    bool isPluginLoaded(const QString& kind) const override;
 
     /**
      * Get plugins by plugin type(s)

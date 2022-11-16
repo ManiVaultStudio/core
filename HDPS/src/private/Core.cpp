@@ -474,6 +474,27 @@ hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, Datasets datasets
     }
 }
 
+hdps::plugin::ViewPlugin* Core::requestPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin, std::uint32_t dockArea, Datasets datasets /*= Datasets()*/)
+{
+    try {
+        return dynamic_cast<ViewPlugin*>(_pluginManager.createPlugin(kind, datasets));
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to request plugin from the core", e);
+        return nullptr;
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to request plugin from the core");
+        return nullptr;
+    }
+}
+
+bool Core::isPluginLoaded(const QString& kind) const
+{
+
+}
+
 QVector<hdps::plugin::Plugin*> Core::getPluginsByType(const plugin::Types& pluginTypes) const
 {
     QVector<hdps::plugin::Plugin*> plugins;

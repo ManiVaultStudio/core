@@ -21,6 +21,13 @@ public:
     void loadPlugins();
 
     /**
+     * Determine whether a plugin of \p kind is loaded
+     * @param kind Plugin kind
+     * @return Boolean determining whether a plugin of \p kind is loaded
+     */
+    bool isPluginLoaded(const QString& kind) const override;
+
+    /**
     * Creates a new plugin instance of the given kind and adds it to the core
     * @param kind Kind of plugin
     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
