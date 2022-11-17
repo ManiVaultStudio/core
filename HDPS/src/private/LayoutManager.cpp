@@ -57,7 +57,9 @@ LayoutManager::LayoutManager() :
     AbstractLayoutManager(),
     _dockManager(),
     _visualizationDockArea(nullptr),
-    _visualizationDockWidget()
+    _visualizationDockWidget(),
+    _dockViewPlugin(nullptr),
+    _dockArea(ViewPlugin::DockArea::Left)
 {
     setText("Layout manager");
     setObjectName("Layout");
@@ -78,6 +80,11 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
     _visualizationDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 }
 
+void LayoutManager::reset()
+{
+    _dockManager.reset();
+}
+
 void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
 {
     _visualizationDockWidget.fromVariantMap(variantMap["Visualization"].toMap());
@@ -90,7 +97,12 @@ QVariantMap LayoutManager::toVariantMap() const
     };
 }
 
-void LayoutManager::addViewPlugin(ViewPlugin* viewPlugin)
+void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin)
+{
+    addViewPlugin(viewPlugin, nullptr, ViewPlugin::DockArea::Right);
+}
+
+void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, ViewPlugin* dockToViewPlugin, ViewPlugin::DockArea dockArea)
 {
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
@@ -142,9 +154,24 @@ void LayoutManager::addViewPlugin(ViewPlugin* viewPlugin)
         _visualizationDockWidget.addViewPlugin(viewPluginDockWidget);
 }
 
-void LayoutManager::reset()
+ViewPlugin* LayoutManager::getDockViewPlugin() const
 {
-    _dockManager.reset();
+    return _dockViewPlugin;
+}
+
+void LayoutManager::setDockViewPlugin(ViewPlugin* dockViewPlugin)
+{
+    _dockViewPlugin = dockViewPlugin;
+}
+
+ViewPlugin::DockArea LayoutManager::getDockArea() const
+{
+    return _dockArea;
+}
+
+void LayoutManager::setDockArea(ViewPlugin::DockArea dockArea)
+{
+    _dockArea = dockArea;
 }
 
 }

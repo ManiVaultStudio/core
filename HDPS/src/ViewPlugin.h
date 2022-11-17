@@ -22,6 +22,22 @@ class ViewPlugin : public Plugin
     
 public:
 
+    /** Dock area flags */
+    enum class DockArea {
+        None    = 0x00,     /** No docking area */
+        Left    = 0x01,     /** Left docking area */
+        Right   = 0x02,     /** Right docking area */
+        Top     = 0x04,     /** Top docking area */
+        Bottom  = 0x08,     /** Bottom docking area */
+        Center  = 0x10,     /** Center docking area */
+
+        InvalidDockWidgetArea   = None,
+        OuterDockAreas          = Top | Left | Right | Bottom,
+        AllDockAreas            = OuterDockAreas | Center
+    };
+
+    Q_DECLARE_FLAGS(DockAreas, DockArea)
+
     /** Maps dock widget area to dock widget area flag */
     static QMap<QString, std::uint32_t> dockWidgetAreaMap;
 
@@ -126,7 +142,7 @@ public:
     bool isStandardView() const;
 
 private:
-    const bool      _isStandardView;        /** Whether this factory generates standard (system) view plugins or not */
+    const bool      _isStandardView;    /** Whether this factory generates standard (system) view plugins or not */
 };
 
 }

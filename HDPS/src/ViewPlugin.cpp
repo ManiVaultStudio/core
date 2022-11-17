@@ -14,11 +14,11 @@ namespace plugin
 {
 
 QMap<QString, std::uint32_t> ViewPlugin::dockWidgetAreaMap({
-    { "Left", 0x01 },
-    { "Right", 0x02 },
-    { "Top", 0x04 },
-    { "Bottom", 0x08 },
-    { "Center", 0x10 }
+    { "Left", static_cast<std::int32_t>(DockArea::Left) },
+    { "Right", static_cast<std::int32_t>(DockArea::Right) },
+    { "Top", static_cast<std::int32_t>(DockArea::Top) },
+    { "Bottom", static_cast<std::int32_t>(DockArea::Bottom) },
+    { "Center", static_cast<std::int32_t>(DockArea::Center) }
 });
 
 std::int32_t ViewPlugin::getDockWidgetAreas(const QStringList& dockWidgetAreas)
