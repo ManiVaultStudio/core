@@ -407,7 +407,7 @@ namespace hdps
             // Point size uniforms
             bool absoluteRendering = _pointSettings._scalingMode == PointScaling::Absolute;
             _shader.uniform1f("pointSize", _pointSettings._pointSize);
-            _shader.uniform1f("pointSizeScale", absoluteRendering ? 1.0f / size : 1.0f);
+            _shader.uniform1f("pointSizeScale", absoluteRendering ? (1.0 / size) : 1.0f / size);
 
             _shader.uniformMatrix3f("orthoM", _orthoM);
             _shader.uniform1f("pointOpacity", _pointSettings._alpha);
