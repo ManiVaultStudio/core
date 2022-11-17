@@ -91,6 +91,7 @@ set(PRIVATE_LAYOUT_MANAGER_HEADERS
     src/private/VisualizationDockWidget.h
     src/private/ViewPluginDockWidget.h
     src/private/DockWidget.h
+    src/private/DockArea.h
 )
 
 set(PRIVATE_LAYOUT_MANAGER_SOURCES
@@ -100,6 +101,7 @@ set(PRIVATE_LAYOUT_MANAGER_SOURCES
     src/private/VisualizationDockWidget.cpp
     src/private/ViewPluginDockWidget.cpp
     src/private/DockWidget.cpp
+    src/private/DockArea.cpp
 )
 
 set(PRIVATE_LAYOUT_MANAGER_FILES

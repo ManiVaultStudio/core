@@ -47,6 +47,12 @@ public:
     void set(const QIcon& icon, const QString& title, const QString& description = "");
 
     /**
+     * Set color
+     * @param color Color of the widget
+     */
+    void setColor(const QColor color);
+
+    /**
      * Set overlay colors
      * @param backgroundColor Background color of the widget
      * @param textColor Text color of the widget

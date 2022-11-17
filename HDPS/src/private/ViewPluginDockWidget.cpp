@@ -42,18 +42,19 @@ void ViewPluginDockWidget::loadViewPlugin()
     qDebug() << __FUNCTION__;
 #endif
 
-    _viewPlugin = Application::core()->requestPlugin<ViewPlugin>(_viewPluginKind);
+    if (Application::core()->isPluginLoaded(_viewPluginKind)) {
+        _viewPlugin = Application::core()->requestPlugin<ViewPlugin>(_viewPluginKind);
 
-    if (_viewPlugin) {
-        _viewPlugin->fromVariantMap(_viewPluginMap);
+        if (_viewPlugin) {
+            _viewPlugin->fromVariantMap(_viewPluginMap);
 
-        setWidget(&_viewPlugin->getWidget());
-    }
-    else {
+            setWidget(&_viewPlugin->getWidget());
+        }
+    } else {
         auto& overlayWidget = getOverlayWidget();
 
-        overlayWidget.setColors(QColor(1, 0, 0, 1), QColor(1, 0, 0, 1));
-        overlayWidget.set(Application::getIconFont("FontAwesome").getIcon("exclamation-triangle"), "Error", QString("Unable to load %1 view plugin").arg(_viewPluginKind));
+        overlayWidget.setColor(QColor(1, 0, 0));
+        overlayWidget.set(Application::getIconFont("FontAwesome").getIcon("exclamation-triangle"), "Error loading view", QString("%1 plugin is not loaded").arg(_viewPluginKind));
     }
 }
 

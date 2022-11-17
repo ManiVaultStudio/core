@@ -492,7 +492,7 @@ hdps::plugin::ViewPlugin* Core::requestPlugin(const QString& kind, plugin::ViewP
 
 bool Core::isPluginLoaded(const QString& kind) const
 {
-
+    return _pluginManager.isPluginLoaded(kind);
 }
 
 QVector<hdps::plugin::Plugin*> Core::getPluginsByType(const plugin::Types& pluginTypes) const

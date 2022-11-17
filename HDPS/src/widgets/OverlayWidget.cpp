@@ -48,6 +48,16 @@ void OverlayWidget::set(const QIcon& icon, const QString& title, const QString& 
     _descriptionLabel.setText(description);
 }
 
+void OverlayWidget::setColor(const QColor color)
+{
+    _backgroundColor    = color;
+    _textColor          = color;
+
+    _backgroundColor.setAlphaF(0.1f);
+
+    setStyleSheet(QString("QWidget#OverlayWidget { background-color: %1; } QWidget#OverlayWidget > QLabel { color: %2; }").arg(_backgroundColor.name(), _textColor.name()));
+}
+
 void OverlayWidget::setColors(const QColor backgroundColor, const QColor textColor)
 {
     _backgroundColor    = backgroundColor;
