@@ -23,19 +23,31 @@ class CCustomComponentsFactory : public ads::CDockComponentsFactory
 public:
     using Super = ads::CDockComponentsFactory;
 
-    CDockAreaTitleBar* createDockAreaTitleBar(ads::CDockAreaWidget* DockArea) const override
+    CDockAreaTitleBar* createDockAreaTitleBar(ads::CDockAreaWidget* dockArea) const override
     {
-        auto dockAreaTitleBar           = new ads::CDockAreaTitleBar(DockArea);
-        auto addViewPluginToolButton    = new QToolButton(DockArea);
+        auto dockAreaTitleBar = new ads::CDockAreaTitleBar(dockArea);
 
-        addViewPluginToolButton->setToolTip(QObject::tr("Help"));
-        addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
-        addViewPluginToolButton->setAutoRaise(true);
-        addViewPluginToolButton->setPopupMode(QToolButton::InstantPopup);
-        addViewPluginToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
-        addViewPluginToolButton->setMenu(new ViewMenu(nullptr, ViewMenu::LoadViewPlugins));
+        if (dockArea->isCentralWidgetArea())
+            return dockAreaTitleBar;
 
-        dockAreaTitleBar->insertWidget(dockAreaTitleBar->indexOf(dockAreaTitleBar->button(ads::TitleBarButtonTabsMenu)) - 1, addViewPluginToolButton);
+        if (dockArea->dockWidgetsCount() >= 1) {
+            auto dockWidgets = dockArea->dockWidgets();
+
+            auto firstViewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockArea->dockWidgets().first());
+
+            if (firstViewPluginDockWidget) {
+                auto addViewPluginToolButton = new QToolButton(dockArea);
+
+                addViewPluginToolButton->setToolTip(QObject::tr("Help"));
+                addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
+                addViewPluginToolButton->setAutoRaise(true);
+                addViewPluginToolButton->setPopupMode(QToolButton::InstantPopup);
+                addViewPluginToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
+                addViewPluginToolButton->setMenu(new ViewMenu(nullptr, ViewMenu::LoadViewPlugins, firstViewPluginDockWidget->getViewPlugin()));
+
+                dockAreaTitleBar->insertWidget(dockAreaTitleBar->indexOf(dockAreaTitleBar->button(ads::TitleBarButtonTabsMenu)) - 1, addViewPluginToolButton);
+            }
+        }
 
         return dockAreaTitleBar;
     }

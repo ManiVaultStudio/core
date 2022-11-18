@@ -33,6 +33,12 @@ public:
     /** Load view plugin */
     void loadViewPlugin();
 
+    /**
+     * Get the view plugin
+     * @return Pointer to view plugin (might be nullptr)
+     */
+    hdps::plugin::ViewPlugin* getViewPlugin();
+
 public: // Serialization
 
     /**
@@ -46,14 +52,6 @@ public: // Serialization
      * @return Variant representation of the widget action
      */
     QVariantMap toVariantMap() const override;
-
-private:
-
-    /**
-     * Get the view plugin
-     * @return Pointer to view plugin (might be nullptr)
-     */
-    hdps::plugin::ViewPlugin* getViewPlugin();
 
 private:
     hdps::plugin::ViewPlugin*   _viewPlugin;        /** Pointer to view plugin */

@@ -58,6 +58,11 @@ void ViewPluginDockWidget::loadViewPlugin()
     }
 }
 
+ViewPlugin* ViewPluginDockWidget::getViewPlugin()
+{
+    return _viewPlugin;
+}
+
 void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
 {
     variantMapMustContain(variantMap, "ViewPlugin");
@@ -80,9 +85,4 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
     variantMap["ViewPlugin"] = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin()->toVariantMap();
 
     return variantMap;
-}
-
-ViewPlugin* ViewPluginDockWidget::getViewPlugin()
-{
-    return _viewPlugin;
 }
