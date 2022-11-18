@@ -223,16 +223,6 @@ public: // Plugin creation
         return dynamic_cast<PluginType*>(requestPlugin(kind, datasets));
     }
 
-    /**
-     * Create a view plugin of \p kind and dock in the \p dockArea of \p dockToViewPlugin
-     * @param kind Kind of plugin (name of the plugin)
-     * @param dockToViewPlugin The other plugin to which the newly created view plugin will be docked
-     * @param dockArea The docking area (w.r.t. the \p dockToViewPlugin) in which the newly created view plugin will be docked
-     * @param datasets Zero or more input dataset(s) for the view plugin
-     * @return Pointer to created view plugin
-     */
-    virtual plugin::ViewPlugin* requestPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin, gui::DockAreaFlag dockArea, Datasets datasets = Datasets()) = 0;
-
 public: // Plugin queries
 
     /**

@@ -49,7 +49,7 @@ const DockManager& VisualizationDockWidget::getDockManager() const
     return const_cast<VisualizationDockWidget*>(this)->_dockManager;
 }
 
-void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget, ViewPlugin* dockViewPlugin, DockAreaFlag dockArea)
+void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget, hdps::plugin::ViewPlugin* dockToViewPlugin, hdps::gui::DockAreaFlag dockArea)
 {
     Q_ASSERT(viewPluginDockWidget != nullptr);
 
@@ -60,7 +60,9 @@ void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDock
     //else
     //    _lastDockAreaWidget = _dockManager.addDockWidget(RightDockWidgetArea, viewPluginDockWidget, _lastDockAreaWidget);
 
-    _lastDockAreaWidget = _dockManager.addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget);
+    auto dockAreaWidget = findDockAreaWidget(dockToViewPlugin);
+
+    _lastDockAreaWidget = _dockManager.addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockAreaWidget);
 
     const auto lastDockAreaWidget = _lastDockAreaWidget;
 
@@ -145,4 +147,9 @@ void VisualizationDockWidget::reset()
     _viewPluginDockWidgets.clear();
 
     updateCentralWidget();
+}
+
+ads::CDockAreaWidget* VisualizationDockWidget::findDockAreaWidget(ViewPlugin* viewPlugin)
+{
+    return _dockManager.findDockAreaWidget(&viewPlugin->getWidget());
 }

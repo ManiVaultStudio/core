@@ -23,31 +23,19 @@ class CCustomComponentsFactory : public ads::CDockComponentsFactory
 public:
     using Super = ads::CDockComponentsFactory;
 
-    CDockAreaTitleBar* createDockAreaTitleBar(ads::CDockAreaWidget* dockArea) const override
+    CDockAreaTitleBar* createDockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) const override
     {
-        auto dockAreaTitleBar = new ads::CDockAreaTitleBar(dockArea);
+        auto dockAreaTitleBar           = new ads::CDockAreaTitleBar(dockAreaWidget);
+        auto addViewPluginToolButton    = new QToolButton(dockAreaWidget);
 
-        if (dockArea->isCentralWidgetArea())
-            return dockAreaTitleBar;
+        addViewPluginToolButton->setToolTip(QObject::tr("Help"));
+        addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
+        addViewPluginToolButton->setAutoRaise(true);
+        addViewPluginToolButton->setPopupMode(QToolButton::InstantPopup);
+        addViewPluginToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
+        addViewPluginToolButton->setMenu(new ViewMenu(nullptr, ViewMenu::LoadViewPlugins, dockAreaWidget));
 
-        if (dockArea->dockWidgetsCount() >= 1) {
-            auto dockWidgets = dockArea->dockWidgets();
-
-            auto firstViewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockArea->dockWidgets().first());
-
-            if (firstViewPluginDockWidget) {
-                auto addViewPluginToolButton = new QToolButton(dockArea);
-
-                addViewPluginToolButton->setToolTip(QObject::tr("Help"));
-                addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
-                addViewPluginToolButton->setAutoRaise(true);
-                addViewPluginToolButton->setPopupMode(QToolButton::InstantPopup);
-                addViewPluginToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
-                addViewPluginToolButton->setMenu(new ViewMenu(nullptr, ViewMenu::LoadViewPlugins, firstViewPluginDockWidget->getViewPlugin()));
-
-                dockAreaTitleBar->insertWidget(dockAreaTitleBar->indexOf(dockAreaTitleBar->button(ads::TitleBarButtonTabsMenu)) - 1, addViewPluginToolButton);
-            }
-        }
+        dockAreaTitleBar->insertWidget(dockAreaTitleBar->indexOf(dockAreaTitleBar->button(ads::TitleBarButtonTabsMenu)) - 1, addViewPluginToolButton);
 
         return dockAreaTitleBar;
     }
@@ -108,12 +96,7 @@ QVariantMap LayoutManager::toVariantMap() const
     };
 }
 
-void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin)
-{
-    addViewPlugin(viewPlugin, nullptr, DockAreaFlag::Right);
-}
-
-void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPlugin* dockToViewPlugin, DockAreaFlag dockArea)
+void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, DockAreaFlag dockArea /*= DockAreaFlag::Right*/)
 {
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
@@ -151,7 +134,7 @@ void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPl
             viewPlugin->getVisibleAction().setChecked(false);
         }
         connectToViewPluginVisibleAction(viewPluginDockWidget);
-        });
+    });
 
     connectToViewPluginVisibleAction(viewPluginDockWidget);
 

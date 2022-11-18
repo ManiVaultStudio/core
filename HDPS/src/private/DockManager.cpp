@@ -64,6 +64,15 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager::setConfigFlag(CDockManager::DockAreaDynamicTabsMenuButtonVisibility, false);
 }
 
+ads::CDockAreaWidget* DockManager::findDockAreaWidget(QWidget* widget)
+{
+    for (auto dockWidget : dockWidgets())
+        if (dockWidget->widget() == widget)
+            return dockWidget->dockAreaWidget();
+
+    return nullptr;
+}
+
 void DockManager::fromVariantMap(const QVariantMap& variantMap)
 {
 #ifdef DOCK_MANAGER_VERBOSE

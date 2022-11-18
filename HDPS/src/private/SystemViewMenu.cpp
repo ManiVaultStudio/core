@@ -26,25 +26,39 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
     QMenu(parent),
     _dockAreaWidget(dockAreaWidget),
     _options(options),
+    _systemViewsMenu(this),
     _loadedViewsMenu(this),
     _separator(nullptr)
 {
     setTitle("View");
     setToolTip("Manage view plugins");
+
+    _systemViewsMenu.setTitle("Standard");
+    _loadedViewsMenu.setTitle("Loaded");
+
+    _systemViewsMenu.setEnabled(false);
+    _loadedViewsMenu.setEnabled(false);
+
+    _separator = addSeparator();
+
+    _separator->setVisible(false);
+
+    if (options.testFlag(LoadSystemViewPlugins))
+        addMenu(&_systemViewsMenu);
+
+    if (options.testFlag(LoadedViewsSubMenu))
+        addMenu(&_loadedViewsMenu);
 }
 
 void ViewMenu::showEvent(QShowEvent* showEvent)
 {
-    clear();
-
-    _loadedViewsMenu.setTitle("Loaded");
-    _loadedViewsMenu.setEnabled(false);
+    const auto pluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::VIEW);
 
     if (_dockAreaWidget) {
         const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
-            QMenu* loadViewsDockedMenu = new QMenu(gui::dockAreaMap.key(dockArea));
+            QMenu* loadViewsDockedMenu = new QMenu(gui::dockAreaMap.key(static_cast<std::uint32_t>(dockArea)));
 
-            for (auto action : getLoadViewsActions(dockArea))
+            for (auto action : getLoadViewsActions(pluginTriggerActions, dockArea))
                 loadViewsDockedMenu->addAction(action);
 
             return loadViewsDockedMenu;
@@ -58,30 +72,31 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
     }
     else {
         if (_options.testFlag(LoadViewPlugins)) {
-            const auto actions = getLoadViewsActions(gui::DockAreaFlag::None);
+            const auto actions = getLoadViewsActions(pluginTriggerActions, gui::DockAreaFlag::None);
 
             for (auto action : actions)
                 insertAction(_separator, action);
         }
+            
+        if (_options.testFlag(LoadSystemViewPlugins)) {
+            const auto actions = getLoadSystemViewsActions(pluginTriggerActions, gui::DockAreaFlag::None);
+
+            for (auto action : actions)
+                _systemViewsMenu.addAction(action);
+
+            _systemViewsMenu.setEnabled(!actions.isEmpty());
+        }
     }
 
-    if (_options.testFlag(LoadedViewsSubMenu)) {
-        _separator = addSeparator();
-        
-        _separator->setVisible(false);
-
-        addMenu(&_loadedViewsMenu);
-    }
+    //_separator->setVisible(!pluginTriggerActions.isEmpty() && (_options.testFlag(LoadStandardViewSubMenu) || _options.testFlag(LoadedViewsSubMenu)));
 }
 
-QVector<QAction*> ViewMenu::getLoadViewsActions(gui::DockAreaFlag dockArea)
+QVector<QAction*> ViewMenu::getLoadViewsActions(const hdps::gui::PluginTriggerActions& pluginTriggerActions, gui::DockAreaFlag dockArea)
 {
     QVector<QAction*> actions;
 
-    auto loadViewPluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::VIEW);
-
-    for (auto loadViewPluginTriggerAction : loadViewPluginTriggerActions) {
-        auto viewPluginTriggerAction    = dynamic_cast<ViewPluginTriggerAction*>(loadViewPluginTriggerAction);
+    for (auto pluginTriggerAction : pluginTriggerActions) {
+        auto viewPluginTriggerAction    = dynamic_cast<ViewPluginTriggerAction*>(pluginTriggerAction);
         auto viewPluginFactory          = dynamic_cast<const ViewPluginFactory*>(viewPluginTriggerAction->getPluginFactory());
 
         if (_dockAreaWidget && _dockAreaWidget->dockWidgetsCount() >= 1) {
@@ -91,15 +106,33 @@ QVector<QAction*> ViewMenu::getLoadViewsActions(gui::DockAreaFlag dockArea)
 
             viewPluginTriggerAction->setDockToViewPlugin(firstViewPluginDockWidget->getViewPlugin());
             viewPluginTriggerAction->setDockArea(dockArea);
-
-            qDebug() << dockAreaMap.key(viewPluginTriggerAction->getDockArea());
         }
+    
 
         if (viewPluginFactory == nullptr)
             continue;
 
         if (!viewPluginFactory->producesSystemViewPlugins())
-            actions << loadViewPluginTriggerAction;
+            actions << pluginTriggerAction;
+    }
+
+    sortActions(actions);
+
+    return actions;
+}
+
+QVector<QAction*> ViewMenu::getLoadSystemViewsActions(const hdps::gui::PluginTriggerActions& pluginTriggerActions, gui::DockAreaFlag dockArea)
+{
+    QVector<QAction*> actions;
+
+    for (const auto& pluginTriggerAction : pluginTriggerActions) {
+        auto viewPluginFactory = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
+
+        if (viewPluginFactory == nullptr)
+            continue;
+
+        if (viewPluginFactory->producesSystemViewPlugins())
+            actions << pluginTriggerAction;
     }
 
     sortActions(actions);

@@ -48,12 +48,13 @@ public:
 
 private:
 
-    QVector<QAction*> getLoadViewsActions(hdps::gui::DockAreaFlag dockArea);
-    //QVector<QAction*> getLoadSystemViewsActions(hdps::gui::DockAreaFlag dockArea);
+    QVector<QAction*> getLoadViewsActions(const hdps::gui::PluginTriggerActions& pluginTriggerActions, hdps::gui::DockAreaFlag dockArea);
+    QVector<QAction*> getLoadSystemViewsActions(const hdps::gui::PluginTriggerActions& pluginTriggerActions, hdps::gui::DockAreaFlag dockArea);
 
 private:
-    ads::CDockAreaWidget*   _dockAreaWidget;        /** Pointer to dock area widget to which new view plugins are docked (new view plugins will be docked top-level if nullptr) */
-    Options                 _options;               /** Menu options */
-    QMenu                   _loadedViewsMenu;       /** Menu for toggling loaded views */
-    QAction*                _separator;             /** Separator */
+    ads::CDockAreaWidget*       _dockAreaWidget;        /** Pointer to dock area widget to which new view plugins are docked (new view plugins will be docked top-level if nullptr) */
+    Options                     _options;               /** Menu options */
+    QMenu                       _systemViewsMenu;       /** Menu for loading system views */
+    QMenu                       _loadedViewsMenu;       /** Menu for toggling loaded views */
+    QAction*                    _separator;             /** Separator */
 };

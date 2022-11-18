@@ -31,6 +31,13 @@ public:
      */
     DockManager(QWidget* parent = nullptr);
 
+    /**
+     * Find the dock area widget where \p widget resides
+     * @param widget Pointer to widget to look for
+     * @return Pointer to ADS dock widget area (if found, otherwise nullptr)
+     */
+    ads::CDockAreaWidget* findDockAreaWidget(QWidget* widget);
+
 public: // Serialization
 
     /**

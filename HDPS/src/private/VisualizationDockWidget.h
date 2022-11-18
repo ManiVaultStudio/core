@@ -43,7 +43,7 @@ public:
      * @param dockViewPlugin Pointer to view plugin to which new view plugins are docked (new view plugins be docked top-level if nullptr)
      * @param dockArea Dock area in which new view plugins will be docked
      */
-    void addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget, hdps::plugin::ViewPlugin* dockViewPlugin, hdps::gui::DockAreaFlag dockArea);
+    void addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget, hdps::plugin::ViewPlugin* dockToViewPlugin, hdps::gui::DockAreaFlag dockArea);
 
 public: // Serialization
 
@@ -72,6 +72,13 @@ private:
 
     /** Resets the visualization dock manager, it removes all view plugin dock widgets */
     void reset();
+
+    /**
+     * Find the dock area widget where the widget of \p viewPlugin resides
+     * @param viewPlugin Pointer to view plugin that holds the widget
+     * @return Pointer to ADS dock widget area (if found, otherwise nullptr)
+     */
+    ads::CDockAreaWidget* findDockAreaWidget(hdps::plugin::ViewPlugin* viewPlugin);
 
 private:
     QWidget                         _widget;                    /** Widget for display in the dock widget */

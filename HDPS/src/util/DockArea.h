@@ -23,13 +23,13 @@ enum class DockAreaFlag {
 Q_DECLARE_FLAGS(DockAreaFlags, DockAreaFlag)
 
 /** Maps dock area string to dock area flag */
-static QMap<QString, std::uint32_t> dockAreaMap({
-    { "None", static_cast<std::int32_t>(DockAreaFlag::None) },
-    { "Left", static_cast<std::int32_t>(DockAreaFlag::Left) },
-    { "Right", static_cast<std::int32_t>(DockAreaFlag::Right) },
-    { "Top", static_cast<std::int32_t>(DockAreaFlag::Top) },
-    { "Bottom", static_cast<std::int32_t>(DockAreaFlag::Bottom) },
-    { "Center", static_cast<std::int32_t>(DockAreaFlag::Center) }
+static QMap<QString, DockAreaFlag> dockAreaMap({
+    { "None", static_cast<DockAreaFlag>(DockAreaFlag::None) },
+    { "Left", static_cast<DockAreaFlag>(DockAreaFlag::Left) },
+    { "Right", static_cast<DockAreaFlag>(DockAreaFlag::Right) },
+    { "Top", static_cast<DockAreaFlag>(DockAreaFlag::Top) },
+    { "Bottom", static_cast<DockAreaFlag>(DockAreaFlag::Bottom) },
+    { "Center", static_cast<DockAreaFlag>(DockAreaFlag::Center) }
 });
 
 }

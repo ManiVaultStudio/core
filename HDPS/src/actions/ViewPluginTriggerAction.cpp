@@ -47,11 +47,11 @@ void ViewPluginTriggerAction::initialize()
     setText(getPluginFactory()->getKind());
 
     connect(this, &PluginTriggerAction::triggered, this, [this]() -> void {
-        qDebug() << getPluginFactory()->getKind() << "triggered";
+        auto viewPlugin = Application::core()->requestPlugin(getPluginFactory()->getKind());
 
-        auto viewPlugin = Application::core()->requestPlugin(getPluginFactory()->getKind(), _dockToViewPlugin, _dockArea);
+        qDebug() << "View plugin triggered" << getPluginFactory()->getKind() << gui::dockAreaMap.key(_dockArea);
 
-        Application::core()->getLayoutManager().addViewPlugin(dynamic_cast<ViewPlugin*>(viewPlugin));
+        Application::core()->getLayoutManager().addViewPlugin(dynamic_cast<ViewPlugin*>(viewPlugin), _dockToViewPlugin, _dockArea);
     });
 }
 

@@ -18,9 +18,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _mayFloatAction(this, "May float", true, true),
     _mayMoveAction(this, "May move", true, true),
     _visibleAction(this, "Visible", true, true),
-    _triggerHelpAction(this, "Trigger help"),
-    _dockToViewPlugin(nullptr),
-    _dockArea(DockAreaFlag::Right)
+    _triggerHelpAction(this, "Trigger help")
 {
     setText(getGuiName());
 
@@ -105,26 +103,6 @@ QWidget& ViewPlugin::getWidget()
 bool ViewPlugin::isSystemViewPlugin() const
 {
     return dynamic_cast<const ViewPluginFactory*>(_factory)->producesSystemViewPlugins();
-}
-
-const ViewPlugin* ViewPlugin::getDockToViewPlugin() const
-{
-    return _dockToViewPlugin;
-}
-
-void ViewPlugin::setDockToViewPlugin(const ViewPlugin* dockToViewPlugin)
-{
-    _dockToViewPlugin = const_cast<ViewPlugin*>(dockToViewPlugin);
-}
-
-gui::DockAreaFlag ViewPlugin::getDockArea() const
-{
-    return _dockArea;
-}
-
-void ViewPlugin::setDockArea(DockAreaFlag dockArea)
-{
-    _dockArea = dockArea;
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :

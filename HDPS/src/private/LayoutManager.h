@@ -36,18 +36,12 @@ public:
     void reset() override;
 
     /**
-     * Add a view plugin to the top-level layout
-     * @param viewPlugin Pointer to view plugin
-     */
-    void addViewPlugin(plugin::ViewPlugin* viewPlugin) override;
-
-    /**
      * Add a view plugin to the \p dockArea of \p dockViewPlugin
      * @param viewPlugin Pointer to view plugin
      * @param dockToViewPlugin Pointer to view plugin to which new view plugins are docked (new view plugins be docked top-level if nullptr)
      * @param dockArea Dock area in which new view plugins will be docked
      */
-    void addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPlugin* dockToViewPlugin, gui::DockAreaFlag dockArea) override;
+    void addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right) override;
 
 public: // Serialization
 
