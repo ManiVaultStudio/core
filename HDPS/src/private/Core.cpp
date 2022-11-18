@@ -474,10 +474,15 @@ hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, Datasets datasets
     }
 }
 
-hdps::plugin::ViewPlugin* Core::requestPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin, std::uint32_t dockArea, Datasets datasets /*= Datasets()*/)
+hdps::plugin::ViewPlugin* Core::requestPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin, DockAreaFlag dockArea, Datasets datasets /*= Datasets()*/)
 {
     try {
-        return dynamic_cast<ViewPlugin*>(_pluginManager.createPlugin(kind, datasets));
+        auto viewPlugin = dynamic_cast<ViewPlugin*>(_pluginManager.createPlugin(kind, datasets));
+
+        viewPlugin->setDockToViewPlugin(dockToViewPlugin);
+        viewPlugin->setDockArea(dockArea);
+
+        return viewPlugin;
     }
     catch (std::exception& e)
     {

@@ -1,52 +1,33 @@
 #include "PluginTriggerAction.h"
+#include "Application.h"
+#include "AbstractPluginManager.h"
 
 #include "pluginFactory.h"
 
 #include <QCryptographicHash>
 
-namespace hdps {
+namespace hdps::gui {
 
-namespace gui {
-
-PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const Datasets& datasets /*= Datasets()*/) :
+PluginTriggerAction::PluginTriggerAction(QObject* parent, const QString pluginKind, const QString& title, const Datasets& datasets /*= Datasets()*/) :
     TriggerAction(parent),
-    _pluginFactory(pluginFactory),
+    _pluginKind(pluginKind),
+    _pluginFactory(nullptr),
     _title(title),
-    _sha(QString(QCryptographicHash::hash(QString("%1_%2").arg(pluginFactory->getKind(), title).toUtf8(), QCryptographicHash::Sha1).toHex())),
+    _sha(),
     _datasets(datasets),
     _configurationAction(nullptr)
 {
-    switch (_pluginFactory->getType())
-    {
-        case plugin::Type::ANALYSIS:
-            _title.insert(0, "Analyze/");
-    	    break;
+}
 
-        case plugin::Type::DATA:
-            _title.insert(0, "Data/");
-            break;
-
-        case plugin::Type::LOADER:
-            _title.insert(0, "Import/");
-            break;
-
-        case plugin::Type::TRANSFORMATION:
-            _title.insert(0, "Transform/");
-            break;
-
-        case plugin::Type::VIEW:
-            _title.insert(0, "View/");
-            break;
-
-        case plugin::Type::WRITER:
-            _title.insert(0, "Export/");
-            break;
-
-        default:
-            break;
-    }
-
-    setText(_title.split("/").last());
+PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const Datasets& datasets /*= Datasets()*/) :
+    TriggerAction(parent),
+    _pluginKind(),
+    _pluginFactory(pluginFactory),
+    _title(title),
+    _sha(),
+    _datasets(datasets),
+    _configurationAction(nullptr)
+{
 }
 
 const hdps::plugin::PluginFactory* PluginTriggerAction::getPluginFactory() const
@@ -89,5 +70,45 @@ void PluginTriggerAction::setConfigurationAction(WidgetAction* configurationActi
     _configurationAction = configurationAction;
 }
 
+void PluginTriggerAction::initialize()
+{
+    if (_pluginFactory == nullptr)
+        Application::core()->getPluginManager().getPluginFactory(_pluginKind);
+
+    _sha = QString(QCryptographicHash::hash(QString("%1_%2").arg(_pluginFactory->getKind(), getTitle()).toUtf8(), QCryptographicHash::Sha1).toHex());
+
+    switch (_pluginFactory->getType())
+    {
+        case plugin::Type::ANALYSIS:
+            _title.insert(0, "Analyze/");
+            break;
+
+        case plugin::Type::DATA:
+            _title.insert(0, "Data/");
+            break;
+
+        case plugin::Type::LOADER:
+            _title.insert(0, "Import/");
+            break;
+
+        case plugin::Type::TRANSFORMATION:
+            _title.insert(0, "Transform/");
+            break;
+
+        case plugin::Type::VIEW:
+            _title.insert(0, "View/");
+            break;
+
+        case plugin::Type::WRITER:
+            _title.insert(0, "Export/");
+            break;
+
+        default:
+            break;
+    }
+
+    setText(_title.split("/").last());
+    setIcon(_pluginFactory->getIcon());
 }
+
 }

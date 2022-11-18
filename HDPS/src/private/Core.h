@@ -144,7 +144,7 @@ public: // Data grouping
 public: // Plugin creation
 
     /**
-     * Create a plugin of \p kind
+     * Create a plugin of \p kind with \p inputDatasets
      * @param kind Kind of plugin (name of the plugin)
      * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
      * @return Pointer to created plugin
@@ -159,7 +159,7 @@ public: // Plugin creation
      * @param datasets Zero or more input dataset(s) for the view plugin
      * @return Pointer to created view plugin
      */
-    plugin::ViewPlugin* requestPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin, std::uint32_t dockArea, Datasets datasets = Datasets()) override;
+    plugin::ViewPlugin* requestPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin, DockAreaFlag dockArea, Datasets datasets = Datasets()) override;
 
 public: // Plugin queries
 

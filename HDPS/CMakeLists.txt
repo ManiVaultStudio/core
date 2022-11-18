@@ -330,6 +330,7 @@ set(PUBLIC_ACTIONS_HEADERS
     src/actions/PixelSelectionAction.h
     src/actions/PluginTriggerPickerAction.h
     src/actions/PluginTriggerAction.h
+    src/actions/ViewPluginTriggerAction.h
     src/actions/TriggerAction.h
     src/actions/TriggersAction.h
     src/actions/ToggleAction.h
@@ -382,6 +383,7 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/PixelSelectionAction.cpp
     src/actions/PluginTriggerPickerAction.cpp
     src/actions/PluginTriggerAction.cpp
+    src/actions/ViewPluginTriggerAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/TriggersAction.cpp
     src/actions/ToggleAction.cpp
@@ -407,7 +409,6 @@ set(PUBLIC_ACTIONS_FILES
 
 set(PUBLIC_WIDGET_HEADERS
     src/widgets/WebWidget.h
-    src/widgets/DockableWidget.h
     src/widgets/DropWidget.h
     src/widgets/Divider.h
     src/widgets/HierarchyWidget.h
@@ -418,7 +419,6 @@ set(PUBLIC_WIDGET_HEADERS
 
 set(PUBLIC_WIDGET_SOURCES
     src/widgets/WebWidget.cpp
-    src/widgets/DockableWidget.cpp
     src/widgets/DropWidget.cpp
     src/widgets/Divider.cpp
     src/widgets/HierarchyWidget.cpp
@@ -504,6 +504,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/WidgetFader.h
     src/util/Serialization.h
     src/util/Serializable.h
+    src/util/DockArea.h
 )
 
 set(PUBLIC_UTIL_SOURCES
@@ -531,6 +532,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/WidgetFader.cpp
     src/util/Serialization.cpp
     src/util/Serializable.cpp
+    src/util/DockArea.cpp
 )
 
 set(PUBLIC_UTIL_FILES

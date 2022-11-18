@@ -55,10 +55,12 @@ void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDock
 
     _viewPluginDockWidgets << viewPluginDockWidget;
 
-    if (_lastDockAreaWidget == nullptr || getNumberOfOpenViewPluginDockWidgets() == 0)
-        _lastDockAreaWidget = _dockManager.addDockWidget(CenterDockWidgetArea, viewPluginDockWidget);
-    else
-        _lastDockAreaWidget = _dockManager.addDockWidget(RightDockWidgetArea, viewPluginDockWidget, _lastDockAreaWidget);
+    //if (_lastDockAreaWidget == nullptr || getNumberOfOpenViewPluginDockWidgets() == 0)
+    //    _lastDockAreaWidget = _dockManager.addDockWidget(CenterDockWidgetArea, viewPluginDockWidget);
+    //else
+    //    _lastDockAreaWidget = _dockManager.addDockWidget(RightDockWidgetArea, viewPluginDockWidget, _lastDockAreaWidget);
+
+    _lastDockAreaWidget = _dockManager.addDockWidget(LeftDockWidgetArea, viewPluginDockWidget);
 
     const auto lastDockAreaWidget = _lastDockAreaWidget;
 

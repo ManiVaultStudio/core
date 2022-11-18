@@ -17,7 +17,7 @@ PluginFactory::PluginFactory(Type type) :
     _version(),
     _numberOfInstances(0),
     _maximumNumberOfInstances(-1),
-    _producePluginTriggerAction(this, this, "Plugin trigger"),
+    _pluginTriggerAction(this, this, "Plugin trigger"),
     _triggerHelpAction(nullptr, "Trigger plugin help")
 {
 }
@@ -30,13 +30,20 @@ QString PluginFactory::getKind() const
 void PluginFactory::setKind(const QString& kind)
 {
     _kind = kind;
-
-    //_producePluginTriggerAction.setPluginKind(_kind);
 }
 
 hdps::plugin::Type PluginFactory::getType() const
 {
     return _type;
+}
+
+void PluginFactory::initialize()
+{
+    _pluginTriggerAction.setText(_kind);
+    _pluginTriggerAction.setIcon(getIcon());
+
+    _triggerHelpAction.setText(_kind);
+    _triggerHelpAction.setIcon(getIcon());
 }
 
 bool PluginFactory::hasHelp()
@@ -57,9 +64,6 @@ QString PluginFactory::getGuiName() const
 void PluginFactory::setGuiName(const QString& guiName)
 {
     _guiName = guiName;
-
-    _producePluginTriggerAction.setText(_guiName);
-    _triggerHelpAction.setText(_guiName);
 }
 
 QString PluginFactory::getVersion() const
@@ -82,9 +86,9 @@ bool PluginFactory::mayProduce() const
     return _numberOfInstances < _maximumNumberOfInstances;
 }
 
-hdps::gui::PluginTriggerAction& PluginFactory::getProducePluginTriggerAction()
+hdps::gui::PluginTriggerAction& PluginFactory::getPluginTriggerAction()
 {
-    return _producePluginTriggerAction;
+    return _pluginTriggerAction;
 }
 
 std::uint32_t PluginFactory::getNumberOfInstances() const
@@ -96,7 +100,7 @@ void PluginFactory::setNumberOfInstances(std::uint32_t numberOfInstances)
 {
     _numberOfInstances = numberOfInstances;
 
-    _producePluginTriggerAction.setEnabled(mayProduce());
+    _pluginTriggerAction.setEnabled(mayProduce());
 }
 
 std::uint32_t PluginFactory::getMaximumNumberOfInstances() const

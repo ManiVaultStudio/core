@@ -26,7 +26,6 @@ ProjectEditorDialog::ProjectEditorDialog(QWidget* parent, ViewPlugin* viewPlugin
     auto layout = new QVBoxLayout();
 
     layout->addWidget(&_actionHierarchyWidget);
-    layout->addWidget(viewPlugin->getAllowedDockingAreasAction().createWidget(this));
     layout->addWidget(viewPlugin->getMayCloseAction().createWidget(this));
     layout->addWidget(viewPlugin->getMayFloatAction().createWidget(this));
     layout->addWidget(viewPlugin->getMayMoveAction().createWidget(this));

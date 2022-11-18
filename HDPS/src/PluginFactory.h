@@ -57,6 +57,9 @@ public:
      */
     Type getType() const;
 
+    /** Perform post-construction initialization */
+    virtual void initialize();
+
 public: // Help
 
     /**
@@ -124,9 +127,9 @@ public:
 
     /**
      * Get the trigger action that produces an instance of the plugin
-     * @return Reference to the trigger action that produces an instance of the plugin
+     * @return Reference to a trigger action that produces an instance of the plugin
      */
-    gui::PluginTriggerAction& getProducePluginTriggerAction();
+    virtual gui::PluginTriggerAction& getPluginTriggerAction();
 
     /**
      * Get plugin trigger actions given \p datasets
@@ -224,7 +227,7 @@ private:
     Type                        _type;                          /** Type of plugin (e.g. analysis, data, loader, writer & view) */
     QString                     _guiName;                       /** Name of the plugin in the GUI */
     QString                     _version;                       /** Plugin version */
-    gui::PluginTriggerAction    _producePluginTriggerAction;    /** Trigger action that produces an instance of the plugin (respects the maximum number of allowed instances) */
+    gui::PluginTriggerAction    _pluginTriggerAction;           /** Standard plugin trigger action that produces an instance of the plugin without any special behavior (respects the maximum number of allowed instances) */
     std::uint32_t               _numberOfInstances;             /** Number of plugin instances */
     std::uint32_t               _maximumNumberOfInstances;      /** Maximum number of plugin instances (unlimited when -1) */
     gui::TriggerAction          _triggerHelpAction;             /** Trigger action that triggers help (icon and text are already set) */

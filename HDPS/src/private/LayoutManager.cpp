@@ -32,7 +32,7 @@ public:
         addViewPluginToolButton->setAutoRaise(true);
         addViewPluginToolButton->setPopupMode(QToolButton::InstantPopup);
         addViewPluginToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
-        addViewPluginToolButton->setMenu(new ViewMenu(nullptr, ViewMenu::LoadView));
+        addViewPluginToolButton->setMenu(new ViewMenu(nullptr, ViewMenu::LoadViewPlugins));
 
         dockAreaTitleBar->insertWidget(dockAreaTitleBar->indexOf(dockAreaTitleBar->button(ads::TitleBarButtonTabsMenu)) - 1, addViewPluginToolButton);
 
@@ -57,9 +57,7 @@ LayoutManager::LayoutManager() :
     AbstractLayoutManager(),
     _dockManager(),
     _visualizationDockArea(nullptr),
-    _visualizationDockWidget(),
-    _dockViewPlugin(nullptr),
-    _dockArea(ViewPlugin::DockArea::Left)
+    _visualizationDockWidget()
 {
     setText("Layout manager");
     setObjectName("Layout");
@@ -99,11 +97,6 @@ QVariantMap LayoutManager::toVariantMap() const
 
 void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin)
 {
-    addViewPlugin(viewPlugin, nullptr, ViewPlugin::DockArea::Right);
-}
-
-void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, ViewPlugin* dockToViewPlugin, ViewPlugin::DockArea dockArea)
-{
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
     viewPluginDockWidget->setIcon(viewPlugin->getIcon());
@@ -122,10 +115,6 @@ void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, ViewPlugin* do
 
     connect(&viewPlugin->getMayMoveAction(), &ToggleAction::toggled, this, [this, viewPluginDockWidget](bool toggled) {
         viewPluginDockWidget->setFeature(CDockWidget::DockWidgetMovable, toggled);
-    });
-
-    connect(&viewPlugin->getAllowedDockingAreasAction(), &OptionsAction::selectedOptionsChanged, this, [this, viewPluginDockWidget](const QStringList& selectedOptions) {
-        viewPluginDockWidget->dockAreaWidget()->setAllowedAreas(static_cast<DockWidgetAreas>(ViewPlugin::getDockWidgetAreas(selectedOptions)));
     });
 
     const auto connectToViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
@@ -148,30 +137,10 @@ void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, ViewPlugin* do
 
     connectToViewPluginVisibleAction(viewPluginDockWidget);
 
-    if (viewPlugin->isStandardView())
+    if (viewPlugin->isSystemViewPlugin())
         _dockManager->addDockWidget(RightDockWidgetArea, viewPluginDockWidget);
     else
         _visualizationDockWidget.addViewPlugin(viewPluginDockWidget);
-}
-
-ViewPlugin* LayoutManager::getDockViewPlugin() const
-{
-    return _dockViewPlugin;
-}
-
-void LayoutManager::setDockViewPlugin(ViewPlugin* dockViewPlugin)
-{
-    _dockViewPlugin = dockViewPlugin;
-}
-
-ViewPlugin::DockArea LayoutManager::getDockArea() const
-{
-    return _dockArea;
-}
-
-void LayoutManager::setDockArea(ViewPlugin::DockArea dockArea)
-{
-    _dockArea = dockArea;
 }
 
 }

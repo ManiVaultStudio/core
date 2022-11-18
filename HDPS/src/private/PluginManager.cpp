@@ -88,24 +88,7 @@ void PluginManager::loadPlugins()
         _pluginFactories[pluginKind] = pluginFactory;
         _pluginFactories[pluginKind]->setKind(pluginKind);
         _pluginFactories[pluginKind]->setVersion(version);
-
-        if (pluginFactory->hasHelp())
-            emit addPluginTriggerHelpAction(pluginFactory->getTriggerHelpAction());
-
-        const auto getProducePluginTriggerAction = [&](const QString& guiName) -> PluginTriggerAction& {
-            pluginFactory->setGuiName(guiName);
-
-            auto& producePluginTriggerAction = pluginFactory->getProducePluginTriggerAction();
-
-            producePluginTriggerAction.setIcon(pluginFactory->getIcon());
-            pluginFactory->getTriggerHelpAction().setIcon(pluginFactory->getIcon());
-
-            connect(&producePluginTriggerAction, &PluginTriggerAction::triggered, this, [this, pluginFactory]() -> void {
-                createPlugin(pluginFactory->getKind());
-            });
-
-            return producePluginTriggerAction;
-        };
+        _pluginFactories[pluginKind]->initialize();
 
         if (qobject_cast<AnalysisPluginFactory*>(pluginFactory))
         {
@@ -115,17 +98,12 @@ void PluginManager::loadPlugins()
         }
         else if (qobject_cast<LoaderPluginFactory*>(pluginFactory))
         {
-            emit addLoadImportPluginTriggerAction(getProducePluginTriggerAction(menuName));
         }
         else if (qobject_cast<WriterPluginFactory*>(pluginFactory))
         {
         }
         else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
         {
-            if (qobject_cast<ViewPluginFactory*>(pluginFactory)->isStandardView())
-                emit addLoadStandardViewPluginTriggerAction(getProducePluginTriggerAction(pluginKind));
-            else
-                emit addLoadViewPluginTriggerAction(getProducePluginTriggerAction(pluginKind));
         }
         else if (qobject_cast<TransformationPluginFactory*>(pluginFactory))
         {
@@ -141,6 +119,14 @@ void PluginManager::loadPlugins()
 bool PluginManager::isPluginLoaded(const QString& kind) const
 {
     return _pluginFactories.keys().contains(kind);
+}
+
+hdps::plugin::PluginFactory* PluginManager::getPluginFactory(const QString& pluginKind) const
+{
+    if (!isPluginLoaded(pluginKind))
+        return nullptr;
+
+    return _pluginFactories[pluginKind];
 }
 
 QStringList PluginManager::resolveDependencies(QDir pluginDir) const
@@ -282,14 +268,6 @@ plugin::Plugin* PluginManager::createPlugin(const QString& kind, const Datasets&
 
         dynamic_cast<Core*>(Application::core())->addPlugin(pluginInstance);
 
-        auto viewPlugin = dynamic_cast<ViewPlugin*>(pluginInstance);
-
-        if (viewPlugin)
-        {
-            emit addViewPluginVisibleAction(viewPlugin->getVisibleAction());
-            Application::core()->getLayoutManager().addViewPlugin(dynamic_cast<plugin::ViewPlugin*>(viewPlugin));
-        }
-
         qDebug() << "Added plugin" << pluginInstance->getKind() << "with version" << pluginInstance->getVersion();
 
         return pluginInstance;
@@ -320,7 +298,7 @@ hdps::gui::PluginTriggerActions PluginManager::getPluginTriggerActions(const plu
 
     for (auto pluginFactory : _pluginFactories)
         if (pluginFactory->getType() == pluginType && pluginFactory->mayProduce())
-            pluginProducerActions << &pluginFactory->getProducePluginTriggerAction();
+            pluginProducerActions << &pluginFactory->getPluginTriggerAction();
 
     return pluginProducerActions;
 }

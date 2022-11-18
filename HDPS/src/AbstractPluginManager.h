@@ -14,6 +14,10 @@
 namespace hdps
 {
 
+namespace plugin {
+    class PluginFactory;
+}
+
 class AbstractPluginManager : public gui::WidgetAction
 {
     Q_OBJECT
@@ -116,6 +120,15 @@ public:
      */
     virtual QIcon getPluginIcon(const QString& pluginKind) const = 0;
 
+protected: // Factory
+
+    /**
+     * Get plugin factory from \p pluginKind
+     * @param pluginKind Kind of plugin
+     * @return Plugin factory of \p pluginKind, nullptr if not found
+     */
+    virtual plugin::PluginFactory* getPluginFactory(const QString& pluginKind) const = 0;
+
 protected:
 
     /**
@@ -125,37 +138,7 @@ protected:
      */
     virtual QStringList resolveDependencies(QDir pluginDir) const = 0;
 
-signals:
-
-    /**
-     * Signals that a trigger action has become available that triggers a view plugin
-     * @param pluginTriggerAction Action that triggers the loading of the view plugin
-     */
-    void addLoadViewPluginTriggerAction(gui::PluginTriggerAction& pluginTriggerAction);
-
-    /**
-     * Signals that a trigger action has become available that triggers a standard view plugin
-     * @param pluginTriggerAction Action that triggers the loading of a standard system plugin
-     */
-    void addLoadStandardViewPluginTriggerAction(gui::PluginTriggerAction& pluginTriggerAction);
-
-    /**
-     * Signals that a trigger action has become available that triggers an import plugin
-     * @param pluginTriggerAction Action that triggers the loading of the import plugin
-     */
-    void addLoadImportPluginTriggerAction(gui::PluginTriggerAction& pluginTriggerAction);
-
-    /**
-     * Signals that a toggle action has become available that toggles view plugin visibility
-     * @param viewPluginVisibleAction Action that toggles the view plugin visibility
-     */
-    void addViewPluginVisibleAction(gui::ToggleAction& viewPluginVisibleAction);
-
-    /**
-     * Signals that an action has become available that triggers plugin help
-     * @param pluginTriggerHelpAction Action that triggers plugin help
-     */
-    void addPluginTriggerHelpAction(gui::TriggerAction& pluginTriggerHelpAction);
+    friend class gui::PluginTriggerAction;
 };
 
 }

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "widgets/DockableWidget.h"
+#include "util/DockArea.h"
+
 #include "actions/TriggerAction.h"
 #include "actions/ToggleAction.h"
 #include "actions/OptionsAction.h"
@@ -8,46 +9,17 @@
 
 #include "Plugin.h"
 
-#include <QWidget>
-#include <QGridLayout>
+namespace hdps::gui {
+    class ViewPluginTriggerAction;
+}
 
-namespace hdps
-{
-namespace plugin
+namespace hdps::plugin
 {
 
 class ViewPlugin : public Plugin
 {
     Q_OBJECT
     
-public:
-
-    /** Dock area flags */
-    enum class DockArea {
-        None    = 0x00,     /** No docking area */
-        Left    = 0x01,     /** Left docking area */
-        Right   = 0x02,     /** Right docking area */
-        Top     = 0x04,     /** Top docking area */
-        Bottom  = 0x08,     /** Bottom docking area */
-        Center  = 0x10,     /** Center docking area */
-
-        InvalidDockWidgetArea   = None,
-        OuterDockAreas          = Top | Left | Right | Bottom,
-        AllDockAreas            = OuterDockAreas | Center
-    };
-
-    Q_DECLARE_FLAGS(DockAreas, DockArea)
-
-    /** Maps dock widget area to dock widget area flag */
-    static QMap<QString, std::uint32_t> dockWidgetAreaMap;
-
-    /**
-     * Get dock widget areas
-     * @param dockWidgetAreas List of dock area strings
-     * @return Dock areas
-     */
-    static std::int32_t getDockWidgetAreas(const QStringList& dockWidgetAreas);
-
 public:
 
     /**
@@ -81,10 +53,36 @@ public:
     QWidget& getWidget();
 
     /**
-     * Get whether this plugin is a standard (system) view plugin or not
-     * @return Boolean determining whether this plugin is a standard (system) view plugin or not
+     * Get whether this plugin is a system view plugin or not
+     * @return Boolean determining whether this plugin is a system view plugin or not
      */
-    virtual bool isStandardView() const final;
+    virtual bool isSystemViewPlugin() const final;
+
+public: // Docking
+
+    /**
+     * Get dock to view plugin
+     * @return Pointer to other view plugin to which this view plugin should be docked (will be docked top-level right if nullptr)
+     */
+    const ViewPlugin* getDockToViewPlugin() const;
+
+    /**
+     * Set dock to view plugin to \p dockToViewPlugin
+     * @param dockToViewPlugin Pointer to other view plugin to which this view plugin should be docked (will be docked top-level right if nullptr)
+     */
+    void setDockToViewPlugin(const ViewPlugin* dockToViewPlugin);
+
+    /**
+     * Get dock area
+     * @return Dock area w.r.t. \p _dockToViewPlugin (will be docked top-level right when \p _dockToViewPlugin is nullptr)
+     */
+    gui::DockAreaFlag getDockArea() const;
+
+    /**
+     * Set dock area to \p dockArea
+     * @param dockArea Dock area w.r.t. \p _dockToViewPlugin (will be docked top-level right when \p _dockToViewPlugin is nullptr)
+     */
+    void setDockArea(gui::DockAreaFlag dockArea);
 
 public: // Action getters
 
@@ -93,19 +91,17 @@ public: // Action getters
     gui::ToggleAction& getMayFloatAction() { return _mayFloatAction; }
     gui::ToggleAction& getMayMoveAction() { return _mayMoveAction; }
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
-    gui::OptionsAction& getAllowedDockingAreasAction() { return _allowedDockingAreasAction; }
-    gui::OptionAction& getPreferredDockingAreaAction() { return _preferredDockingAreaAction; }
 
 private:
-    QWidget                 _widget;                        /** Widget representation of the plugin */
-    gui::TriggerAction      _editActionsAction;             /** Trigger action to start editing the view plugin action hierarchy */
-    gui::ToggleAction       _mayCloseAction;                /** Action for toggling whether a view plugin may be closed */
-    gui::ToggleAction       _mayFloatAction;                /** Action for toggling whether a view plugin may float */
-    gui::ToggleAction       _mayMoveAction;                 /** Action for toggling whether a view plugin may be moved */
-    gui::ToggleAction       _visibleAction;                 /** Action which determines whether the view plugin is visible or not */
-    gui::OptionsAction      _allowedDockingAreasAction;     /** Action which determines the allowed docking areas */
-    gui::OptionAction       _preferredDockingAreaAction;    /** Action which determines the preferred docking area */
-    gui::TriggerAction      _triggerHelpAction;             /** Action which shows help (internal use only) */
+    QWidget                 _widget;                /** Widget representation of the plugin */
+    gui::TriggerAction      _editActionsAction;     /** Trigger action to start editing the view plugin action hierarchy */
+    gui::ToggleAction       _mayCloseAction;        /** Action for toggling whether a view plugin may be closed */
+    gui::ToggleAction       _mayFloatAction;        /** Action for toggling whether a view plugin may float */
+    gui::ToggleAction       _mayMoveAction;         /** Action for toggling whether a view plugin may be moved */
+    gui::ToggleAction       _visibleAction;         /** Action which determines whether the view plugin is visible or not */
+    gui::TriggerAction      _triggerHelpAction;     /** Action which shows help (internal use only) */
+    ViewPlugin*             _dockToViewPlugin;      /** Pointer to other view plugin to which this view plugin should be docked (will be docked top-level right if nullptr) */
+    gui::DockAreaFlag           _dockArea;              /** Dock area w.r.t. \p _dockToViewPlugin (will be docked top-level right when \p _dockToViewPlugin is nullptr) */
 };
 
 class ViewPluginFactory : public PluginFactory
@@ -116,9 +112,9 @@ public:
 
     /**
      * Constructor
-     * @param isStandardView Whether this factory generates standard (system) view plugins or not
+     * @param producesSystemViewPlugins Whether this factory generates system view plugins or not
      */
-    ViewPluginFactory(bool isStandardView = false);
+    ViewPluginFactory(bool producesSystemViewPlugins = false);
 
     /** Destructor */
     ~ViewPluginFactory() = default;
@@ -131,21 +127,27 @@ public:
     QIcon getIcon(const QColor& color = Qt::black) const override;
 
     /**
-     * Produces an instance of a view plugin. This function gets called by the plugin manager.
+     * Produces the plugin
+     * @return Pointer to the produced plugin
      */
     ViewPlugin* produce() override = 0;
 
     /**
-     * Get whether this factory generates standard (system) view plugins or not
-     * @return Boolean determining whether this factory generates standard (system) view plugins or not
+     * Get the trigger action that produces an instance of the plugin
+     * @return Reference to a trigger action that produces an instance of the plugin
      */
-    bool isStandardView() const;
+    gui::PluginTriggerAction& getPluginTriggerAction() override;
+
+    /**
+     * Get whether this factory produces system view plugins or not
+     * @return Boolean determining whether this factory produces system view plugins or not
+     */
+    bool producesSystemViewPlugins() const;
 
 private:
-    const bool      _isStandardView;    /** Whether this factory generates standard (system) view plugins or not */
+    const bool                      _producesSystemViewPlugins;     /** Whether this factory produces system view plugins or not */
+    gui::ViewPluginTriggerAction*   _viewPluginTriggerAction;       /** View plugin trigger action that creates the plugin and configures the view plugin docking */
 };
-
-}
 
 }
 

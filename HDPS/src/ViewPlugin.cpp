@@ -1,37 +1,14 @@
 #include "ViewPlugin.h"
 
 #include "widgets/ProjectEditorDialog.h"
-
+#include "actions/ViewPluginTriggerAction.h"
 #include "Application.h"
 #include "AbstractLayoutManager.h"
 
 #include <QWidget>
 
-namespace hdps
+namespace hdps::plugin
 {
-
-namespace plugin
-{
-
-QMap<QString, std::uint32_t> ViewPlugin::dockWidgetAreaMap({
-    { "Left", static_cast<std::int32_t>(DockArea::Left) },
-    { "Right", static_cast<std::int32_t>(DockArea::Right) },
-    { "Top", static_cast<std::int32_t>(DockArea::Top) },
-    { "Bottom", static_cast<std::int32_t>(DockArea::Bottom) },
-    { "Center", static_cast<std::int32_t>(DockArea::Center) }
-});
-
-std::int32_t ViewPlugin::getDockWidgetAreas(const QStringList& dockWidgetAreas)
-{
-    std::int32_t dockAreas = 0;
-
-    for (const auto& dockWidgetArea : dockWidgetAreas) {
-        if (dockWidgetAreaMap.contains(dockWidgetArea))
-            dockAreas |= dockWidgetAreaMap[dockWidgetArea];
-    }
-
-    return dockAreas;
-}
 
 ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
@@ -41,9 +18,9 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _mayFloatAction(this, "May float", true, true),
     _mayMoveAction(this, "May move", true, true),
     _visibleAction(this, "Visible", true, true),
-    _allowedDockingAreasAction(this, "Allowed docking areas", ViewPlugin::dockWidgetAreaMap.keys(), ViewPlugin::dockWidgetAreaMap.keys()),
-    _preferredDockingAreaAction(this, "Preferred docking area", ViewPlugin::dockWidgetAreaMap.keys(), "Bottom"),
-    _triggerHelpAction(this, "Trigger help")
+    _triggerHelpAction(this, "Trigger help"),
+    _dockToViewPlugin(nullptr),
+    _dockArea(DockAreaFlag::Right)
 {
     setText(getGuiName());
 
@@ -76,17 +53,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction.setConnectionPermissionsToNone();
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
-
-    _allowedDockingAreasAction.setToolTip("Determines the allowed docking areas for the view plugin");
-    _allowedDockingAreasAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
-    _allowedDockingAreasAction.setConnectionPermissionsToNone();
-    _allowedDockingAreasAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false, true);
-    _allowedDockingAreasAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false, true);
-
-    _preferredDockingAreaAction.setToolTip("Determines the preferred docking area for the view plugin");
-    _preferredDockingAreaAction.setConnectionPermissionsToNone();
-    _preferredDockingAreaAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false, true);
-    _preferredDockingAreaAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false, true);
 
     _triggerHelpAction.setShortcut(tr("F1"));
     _triggerHelpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
@@ -136,16 +102,37 @@ QWidget& ViewPlugin::getWidget()
     return _widget;
 }
 
-bool ViewPlugin::isStandardView() const
+bool ViewPlugin::isSystemViewPlugin() const
 {
-    return dynamic_cast<const ViewPluginFactory*>(_factory)->isStandardView();
+    return dynamic_cast<const ViewPluginFactory*>(_factory)->producesSystemViewPlugins();
 }
 
-ViewPluginFactory::ViewPluginFactory(bool isStandardView /*= false*/) :
-    PluginFactory(Type::VIEW),
-    _isStandardView(isStandardView)
+const ViewPlugin* ViewPlugin::getDockToViewPlugin() const
 {
-    if (_isStandardView)
+    return _dockToViewPlugin;
+}
+
+void ViewPlugin::setDockToViewPlugin(const ViewPlugin* dockToViewPlugin)
+{
+    _dockToViewPlugin = const_cast<ViewPlugin*>(dockToViewPlugin);
+}
+
+gui::DockAreaFlag ViewPlugin::getDockArea() const
+{
+    return _dockArea;
+}
+
+void ViewPlugin::setDockArea(DockAreaFlag dockArea)
+{
+    _dockArea = dockArea;
+}
+
+ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :
+    PluginFactory(Type::VIEW),
+    _producesSystemViewPlugins(producesSystemViewPlugins),
+    _viewPluginTriggerAction(new ViewPluginTriggerAction(this, getKind()))
+{
+    if (_producesSystemViewPlugins)
         setMaximumNumberOfInstances(1);
 }
 
@@ -154,11 +141,14 @@ QIcon ViewPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
     return Application::getIconFont("FontAwesome").getIcon("eye", color);
 }
 
-bool ViewPluginFactory::isStandardView() const
+bool ViewPluginFactory::producesSystemViewPlugins() const
 {
-    return _isStandardView;
+    return _producesSystemViewPlugins;
 }
 
+hdps::gui::PluginTriggerAction& ViewPluginFactory::getPluginTriggerAction()
+{
+    return *_viewPluginTriggerAction;
 }
 
 }

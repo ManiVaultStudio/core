@@ -41,7 +41,7 @@ public:
      * @return Pointer to created plugin
      */
     template<typename PluginType>
-    PluginType* requestPlugin(const QString& kind, const Datasets& datasets)
+    PluginType* createPlugin(const QString& kind, const Datasets& datasets)
     {
         return dynamic_cast<PluginType*>(createPlugin(kind, datasets));
     }
@@ -126,6 +126,15 @@ public: // Serialization
      * @return Variant representation of the widget action
      */
     QVariantMap toVariantMap() const override;
+
+protected: // Factory
+
+    /**
+     * Get plugin factory from \p pluginKind
+     * @param pluginKind Kind of plugin
+     * @return Plugin factory of \p pluginKind, nullptr if not found
+     */
+    plugin::PluginFactory* getPluginFactory(const QString& pluginKind) const override;
 
 protected:
 

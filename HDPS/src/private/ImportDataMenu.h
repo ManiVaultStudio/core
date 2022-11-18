@@ -21,6 +21,12 @@ public:
      */
     ImportDataMenu(QWidget *parent = nullptr);
 
+    /**
+     * Invoked when the menu is shown
+     * @param showEvent Pointer to the show event
+     */
+    void showEvent(QShowEvent* showEvent) override;
+
 private:
     QAction                 _openProjectAction;         /** Action for opening a project */
     QAction                 _saveProjectAction;         /** Action for saving a project */

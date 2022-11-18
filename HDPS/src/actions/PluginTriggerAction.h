@@ -28,6 +28,15 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param pluginKind Kind of plugin
+     * @param title Plugin trigger title (if title is in path format, the trigger will be added to the data hierarchy context menu in a hierarchical fashion)
+     * @param datasets Input datasets
+     */
+    PluginTriggerAction(QObject* parent, const QString pluginKind, const QString& title, const Datasets& datasets = Datasets());
+
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
      * @param pluginFactory Pointer to plugin factory
      * @param title Plugin trigger title (if title is in path format, the trigger will be added to the data hierarchy context menu in a hierarchical fashion)
      * @param datasets Input datasets
@@ -82,10 +91,24 @@ public:
      */
     void setConfigurationAction(WidgetAction* configurationAction);
 
+protected:
+
+    /** Sets up the trigger action */
+    virtual void initialize();
+
+signals:
+
+    /**
+     * Signals that a plugin is produced
+     * @param plugin Pointer to produced plugin
+     */
+    void pluginProduced(plugin::Plugin* plugin);
+
 private:
+    const QString                   _pluginKind;            /** Kind of plugin */
     const plugin::PluginFactory*    _pluginFactory;         /** Pointer to plugin factory */
     QString                         _title;                 /** Plugin trigger title (if title is in path format, the trigger will be added to the data hierarchy context menu in a hierarchical fashion) */
-    const QString                   _sha;                   /** Cryptographic hash of the plugin kind and trigger title */
+    QString                         _sha;                   /** Cryptographic hash of the plugin kind and trigger title */
     Datasets                        _datasets;              /** Input datasets */
     WidgetAction*                   _configurationAction;   /** Action for configuring the plugin creation */
 };

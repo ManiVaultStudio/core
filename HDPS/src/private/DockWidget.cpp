@@ -28,7 +28,7 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
 
     auto& widgetFader = _overlayWidget.getWidgetFader();
 
-    widgetFader.setMaximumOpacity(1);
+    widgetFader.setMaximumOpacity(0.6f);
     widgetFader.setFadeInDuration(250);
     widgetFader.setFadeOutDuration(800);
 }
