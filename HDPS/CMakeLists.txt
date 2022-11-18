@@ -190,6 +190,8 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/RecentProjectsMenu.h
     src/private/ImportDataMenu.h
     src/private/ViewMenu.h
+    src/private/LoadSystemViewMenu.h
+    src/private/LoadedViewsMenu.h
     src/private/HelpMenu.h
 )
 
@@ -200,6 +202,8 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/RecentProjectsMenu.cpp
     src/private/ImportDataMenu.cpp
     src/private/ViewMenu.cpp
+    src/private/LoadSystemViewMenu.cpp
+    src/private/LoadedViewsMenu.cpp
     src/private/HelpMenu.cpp
 )
 

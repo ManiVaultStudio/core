@@ -1,4 +1,6 @@
 #include "ViewMenu.h"
+#include "LoadSystemViewMenu.h"
+#include "LoadedViewsMenu.h"
 #include "PluginManager.h"
 #include "ViewPluginDockWidget.h"
 
@@ -26,7 +28,6 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
     QMenu(parent),
     _dockAreaWidget(dockAreaWidget),
     _options(options),
-    _loadedViewsMenu(this),
     _separator(nullptr)
 {
     setTitle("View");
@@ -37,8 +38,10 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
 {
     clear();
 
-    _loadedViewsMenu.setTitle("Loaded");
-    _loadedViewsMenu.setEnabled(false);
+    if (_options.testFlag(LoadSystemViewPlugins))
+        addMenu(new LoadSystemViewMenu());
+
+    _separator = addSeparator();
 
     if (_dockAreaWidget) {
         const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
@@ -65,24 +68,25 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
         }
     }
 
-    if (_options.testFlag(LoadedViewsSubMenu)) {
-        _separator = addSeparator();
-        
-        _separator->setVisible(false);
+    addSeparator();
 
-        addMenu(&_loadedViewsMenu);
-    }
+    if (_options.testFlag(LoadedViewsSubMenu))
+        addMenu(new LoadedViewsMenu());
 }
 
 QVector<QAction*> ViewMenu::getLoadViewsActions(gui::DockAreaFlag dockArea)
 {
     QVector<QAction*> actions;
 
-    auto loadViewPluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::VIEW);
+    auto pluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::VIEW);
 
-    for (auto loadViewPluginTriggerAction : loadViewPluginTriggerActions) {
-        auto viewPluginFactory          = dynamic_cast<const ViewPluginFactory*>(loadViewPluginTriggerAction->getPluginFactory());
-        auto action                     = new QAction(loadViewPluginTriggerAction->icon(), viewPluginFactory->getKind(), this);
+    for (auto pluginTriggerAction : pluginTriggerActions) {
+        auto viewPluginFactory = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
+
+        if (viewPluginFactory->producesSystemViewPlugins())
+            continue;
+
+        auto action = new QAction(pluginTriggerAction->icon(), viewPluginFactory->getKind(), this);
 
         ViewPlugin* dockToViewPlugin = nullptr;
 
@@ -95,16 +99,12 @@ QVector<QAction*> ViewMenu::getLoadViewsActions(gui::DockAreaFlag dockArea)
                 dockToViewPlugin = firstViewPluginDockWidget->getViewPlugin();
         }
 
-        connect(action, &QAction::triggered, this, [loadViewPluginTriggerAction, dockToViewPlugin, dockArea]() -> void {
-            auto viewPlugin = Application::core()->requestPlugin(loadViewPluginTriggerAction->getPluginFactory()->getKind());
+        connect(action, &QAction::triggered, this, [pluginTriggerAction, dockToViewPlugin, dockArea]() -> void {
+            auto viewPlugin = Application::core()->requestPlugin(pluginTriggerAction->getPluginFactory()->getKind());
             Application::core()->getLayoutManager().addViewPlugin(dynamic_cast<ViewPlugin*>(viewPlugin), dockToViewPlugin, dockArea);
         });
 
-        if (viewPluginFactory == nullptr)
-            continue;
-
-        if (!viewPluginFactory->producesSystemViewPlugins())
-            actions << action;
+        actions << action;
     }
 
     sortActions(actions);

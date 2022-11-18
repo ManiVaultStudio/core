@@ -2,8 +2,6 @@
 
 #include <ViewPlugin.h>
 
-#include <actions/PluginTriggerAction.h>
-
 #include <DockAreaWidget.h>
 
 #include <QMenu>
@@ -48,12 +46,15 @@ public:
 
 private:
 
+    /**
+     * Get actions for loading views
+     * @param dockArea Dock area to dock to
+     * @return Vector of actions
+     */
     QVector<QAction*> getLoadViewsActions(hdps::gui::DockAreaFlag dockArea);
-    //QVector<QAction*> getLoadSystemViewsActions(hdps::gui::DockAreaFlag dockArea);
 
 private:
     ads::CDockAreaWidget*   _dockAreaWidget;        /** Pointer to dock area widget to which new view plugins are docked (new view plugins will be docked top-level if nullptr) */
     Options                 _options;               /** Menu options */
-    QMenu                   _loadedViewsMenu;       /** Menu for toggling loaded views */
     QAction*                _separator;             /** Separator */
 };
