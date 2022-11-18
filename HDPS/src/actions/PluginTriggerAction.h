@@ -111,6 +111,8 @@ private:
     QString                         _sha;                   /** Cryptographic hash of the plugin kind and trigger title */
     Datasets                        _datasets;              /** Input datasets */
     WidgetAction*                   _configurationAction;   /** Action for configuring the plugin creation */
+
+    friend class plugin::PluginFactory;
 };
 
 using PluginTriggerActions = QVector<PluginTriggerAction*>;

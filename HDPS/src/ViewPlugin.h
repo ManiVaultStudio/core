@@ -101,7 +101,7 @@ private:
     gui::ToggleAction       _visibleAction;         /** Action which determines whether the view plugin is visible or not */
     gui::TriggerAction      _triggerHelpAction;     /** Action which shows help (internal use only) */
     ViewPlugin*             _dockToViewPlugin;      /** Pointer to other view plugin to which this view plugin should be docked (will be docked top-level right if nullptr) */
-    gui::DockAreaFlag           _dockArea;              /** Dock area w.r.t. \p _dockToViewPlugin (will be docked top-level right when \p _dockToViewPlugin is nullptr) */
+    gui::DockAreaFlag       _dockArea;              /** Dock area w.r.t. \p _dockToViewPlugin (will be docked top-level right when \p _dockToViewPlugin is nullptr) */
 };
 
 class ViewPluginFactory : public PluginFactory

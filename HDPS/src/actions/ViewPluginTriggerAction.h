@@ -19,9 +19,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param viewPluginKind Kind of view plugin
+     * @param viewPluginFactory Pointer to view plugin factory
      */
-    ViewPluginTriggerAction(QObject* parent, const QString viewPluginKind);
+    ViewPluginTriggerAction(QObject* parent, const plugin::ViewPluginFactory* viewPluginFactory);
 
     /**
      * Constructor
@@ -59,11 +59,11 @@ public:
 protected:
 
     /** Sets up the trigger action */
-    virtual void initialize() override;
+    void initialize() override;
 
 private:
     plugin::ViewPlugin*     _dockToViewPlugin;      /** Pointer to view plugin to which new view plugins are docked (new view plugins be docked top-level if nullptr) */
-    gui::DockAreaFlag           _dockArea;              /** Dock area in which new view plugins will be docked */
+    gui::DockAreaFlag       _dockArea;              /** Dock area in which new view plugins will be docked */
 };
 
 using ViewPluginTriggerActions = QVector<ViewPluginTriggerAction*>;

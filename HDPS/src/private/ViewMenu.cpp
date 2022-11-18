@@ -51,8 +51,6 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
 {
     const auto pluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::VIEW);
 
-    QVector<QAction*> loadStandardViewActions, loadViewActions;
-
     if (_dockToViewPlugin) {
         const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
             QMenu* loadViewsDockedMenu = new QMenu(gui::dockAreaMap.key(static_cast<std::uint32_t>(dockArea)));

@@ -130,7 +130,7 @@ void ViewPlugin::setDockArea(DockAreaFlag dockArea)
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :
     PluginFactory(Type::VIEW),
     _producesSystemViewPlugins(producesSystemViewPlugins),
-    _viewPluginTriggerAction(new ViewPluginTriggerAction(this, getKind()))
+    _viewPluginTriggerAction(new ViewPluginTriggerAction(this, this))
 {
     if (_producesSystemViewPlugins)
         setMaximumNumberOfInstances(1);

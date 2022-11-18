@@ -73,7 +73,7 @@ void PluginTriggerAction::setConfigurationAction(WidgetAction* configurationActi
 void PluginTriggerAction::initialize()
 {
     if (_pluginFactory == nullptr)
-        Application::core()->getPluginManager().getPluginFactory(_pluginKind);
+        _pluginFactory = Application::core()->getPluginManager().getPluginFactory(_pluginKind);
 
     _sha = QString(QCryptographicHash::hash(QString("%1_%2").arg(_pluginFactory->getKind(), getTitle()).toUtf8(), QCryptographicHash::Sha1).toHex());
 

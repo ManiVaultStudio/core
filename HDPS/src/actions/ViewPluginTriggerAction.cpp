@@ -6,8 +6,8 @@ using namespace hdps::gui;
 
 namespace hdps::gui {
 
-ViewPluginTriggerAction::ViewPluginTriggerAction(QObject* parent, const QString viewPluginKind) :
-    PluginTriggerAction(parent, viewPluginKind, "View plugin trigger"),
+ViewPluginTriggerAction::ViewPluginTriggerAction(QObject* parent, const ViewPluginFactory* viewPluginFactory) :
+    PluginTriggerAction(parent, viewPluginFactory, "View plugin trigger"),
     _dockToViewPlugin(nullptr),
     _dockArea(gui::DockAreaFlag::Right)
 {

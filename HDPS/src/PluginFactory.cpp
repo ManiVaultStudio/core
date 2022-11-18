@@ -39,8 +39,7 @@ hdps::plugin::Type PluginFactory::getType() const
 
 void PluginFactory::initialize()
 {
-    _pluginTriggerAction.setText(_kind);
-    _pluginTriggerAction.setIcon(getIcon());
+    getPluginTriggerAction().initialize();
 
     _triggerHelpAction.setText(_kind);
     _triggerHelpAction.setIcon(getIcon());
