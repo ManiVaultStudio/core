@@ -53,14 +53,13 @@ void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDock
 {
     Q_ASSERT(viewPluginDockWidget != nullptr);
 
-    _viewPluginDockWidgets << viewPluginDockWidget;
-
-    //if (_lastDockAreaWidget == nullptr || getNumberOfOpenViewPluginDockWidgets() == 0)
-    //    _lastDockAreaWidget = _dockManager.addDockWidget(CenterDockWidgetArea, viewPluginDockWidget);
-    //else
-    //    _lastDockAreaWidget = _dockManager.addDockWidget(RightDockWidgetArea, viewPluginDockWidget, _lastDockAreaWidget);
-
     auto dockAreaWidget = findDockAreaWidget(dockToViewPlugin);
+
+#ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__ << dockAreaWidget << dockAreaMap.key(dockArea);
+#endif
+
+    _viewPluginDockWidgets << viewPluginDockWidget;
 
     _lastDockAreaWidget = _dockManager.addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockAreaWidget);
 

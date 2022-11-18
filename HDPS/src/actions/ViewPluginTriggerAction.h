@@ -32,6 +32,8 @@ public:
      */
     ViewPluginTriggerAction(QObject* parent, const QString viewPluginKind, plugin::ViewPlugin* dockViewPlugin, gui::DockAreaFlag dockArea);
 
+    void trigger(plugin::ViewPlugin* dockViewPlugin, gui::DockAreaFlag dockArea);
+
     /**
      * Get dock to view plugin
      * @return Pointer to view plugin to which new view plugins are docked (new view plugins be docked top-level if nullptr)

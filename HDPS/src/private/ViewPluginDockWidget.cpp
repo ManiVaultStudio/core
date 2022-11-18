@@ -31,9 +31,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
 {
     Q_ASSERT(_viewPlugin != nullptr);
 
-    //setWidget(&_viewPlugin->getWidget());
-
-    getOverlayWidget().show();
+    setWidget(&_viewPlugin->getWidget());
 }
 
 void ViewPluginDockWidget::loadViewPlugin()

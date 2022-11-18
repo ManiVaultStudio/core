@@ -108,7 +108,7 @@ public:
      * Get the trigger action that produces an instance of the plugin
      * @return Reference to a trigger action that produces an instance of the plugin
      */
-    gui::PluginTriggerAction& getPluginTriggerAction() override;
+    //gui::PluginTriggerAction& getPluginTriggerAction() override;
 
     /**
      * Get whether this factory produces system view plugins or not

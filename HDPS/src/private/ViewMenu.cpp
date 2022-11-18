@@ -42,7 +42,7 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
 
     if (_dockAreaWidget) {
         const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
-            QMenu* loadViewsDockedMenu = new QMenu(gui::dockAreaMap.key(dockArea));
+            auto loadViewsDockedMenu = new QMenu(gui::dockAreaMap.key(dockArea));
 
             for (auto action : getLoadViewsActions(dockArea))
                 loadViewsDockedMenu->addAction(action);
@@ -81,25 +81,30 @@ QVector<QAction*> ViewMenu::getLoadViewsActions(gui::DockAreaFlag dockArea)
     auto loadViewPluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::VIEW);
 
     for (auto loadViewPluginTriggerAction : loadViewPluginTriggerActions) {
-        auto viewPluginTriggerAction    = dynamic_cast<ViewPluginTriggerAction*>(loadViewPluginTriggerAction);
-        auto viewPluginFactory          = dynamic_cast<const ViewPluginFactory*>(viewPluginTriggerAction->getPluginFactory());
+        auto viewPluginFactory          = dynamic_cast<const ViewPluginFactory*>(loadViewPluginTriggerAction->getPluginFactory());
+        auto action                     = new QAction(loadViewPluginTriggerAction->icon(), viewPluginFactory->getKind(), this);
+
+        ViewPlugin* dockToViewPlugin = nullptr;
 
         if (_dockAreaWidget && _dockAreaWidget->dockWidgetsCount() >= 1) {
             auto dockWidgets = _dockAreaWidget->dockWidgets();
 
             auto firstViewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(_dockAreaWidget->dockWidgets().first());
 
-            viewPluginTriggerAction->setDockToViewPlugin(firstViewPluginDockWidget->getViewPlugin());
-            viewPluginTriggerAction->setDockArea(dockArea);
-
-            qDebug() << dockAreaMap.key(viewPluginTriggerAction->getDockArea());
+            if (firstViewPluginDockWidget)
+                dockToViewPlugin = firstViewPluginDockWidget->getViewPlugin();
         }
+
+        connect(action, &QAction::triggered, this, [loadViewPluginTriggerAction, dockToViewPlugin, dockArea]() -> void {
+            auto viewPlugin = Application::core()->requestPlugin(loadViewPluginTriggerAction->getPluginFactory()->getKind());
+            Application::core()->getLayoutManager().addViewPlugin(dynamic_cast<ViewPlugin*>(viewPlugin), dockToViewPlugin, dockArea);
+        });
 
         if (viewPluginFactory == nullptr)
             continue;
 
         if (!viewPluginFactory->producesSystemViewPlugins())
-            actions << loadViewPluginTriggerAction;
+            actions << action;
     }
 
     sortActions(actions);

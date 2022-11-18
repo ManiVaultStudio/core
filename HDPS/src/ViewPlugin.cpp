@@ -124,9 +124,9 @@ bool ViewPluginFactory::producesSystemViewPlugins() const
     return _producesSystemViewPlugins;
 }
 
-hdps::gui::PluginTriggerAction& ViewPluginFactory::getPluginTriggerAction()
-{
-    return *_viewPluginTriggerAction;
-}
+//hdps::gui::PluginTriggerAction& ViewPluginFactory::getPluginTriggerAction()
+//{
+//    return *_viewPluginTriggerAction;
+//}
 
 }

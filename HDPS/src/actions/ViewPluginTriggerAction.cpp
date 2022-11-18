@@ -47,12 +47,18 @@ void ViewPluginTriggerAction::initialize()
     setText(getPluginFactory()->getKind());
 
     connect(this, &PluginTriggerAction::triggered, this, [this]() -> void {
-        auto viewPlugin = Application::core()->requestPlugin(getPluginFactory()->getKind());
+        
 
         qDebug() << "View plugin triggered" << getPluginFactory()->getKind() << gui::dockAreaMap.key(_dockArea);
 
-        Application::core()->getLayoutManager().addViewPlugin(dynamic_cast<ViewPlugin*>(viewPlugin), _dockToViewPlugin, _dockArea);
+        
     });
+}
+
+void ViewPluginTriggerAction::trigger(plugin::ViewPlugin* dockViewPlugin, gui::DockAreaFlag dockArea)
+{
+    auto viewPlugin = Application::core()->requestPlugin(getPluginFactory()->getKind());
+    Application::core()->getLayoutManager().addViewPlugin(dynamic_cast<ViewPlugin*>(viewPlugin), _dockToViewPlugin, _dockArea);
 }
 
 }

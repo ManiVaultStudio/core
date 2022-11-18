@@ -66,6 +66,10 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
 
 ads::CDockAreaWidget* DockManager::findDockAreaWidget(QWidget* widget)
 {
+#ifdef DOCK_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     for (auto dockWidget : dockWidgets())
         if (dockWidget->widget() == widget)
             return dockWidget->dockAreaWidget();
