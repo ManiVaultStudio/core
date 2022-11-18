@@ -16,6 +16,7 @@ using namespace ads;
 using namespace hdps;
 using namespace hdps::plugin;
 using namespace hdps::util;
+using namespace hdps::gui;
 
 class CCustomComponentsFactory : public ads::CDockComponentsFactory
 {
@@ -97,30 +98,35 @@ QVariantMap LayoutManager::toVariantMap() const
 
 void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin)
 {
+    addViewPlugin(viewPlugin, nullptr, DockAreaFlag::Right);
+}
+
+void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPlugin* dockToViewPlugin, DockAreaFlag dockArea)
+{
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
     viewPluginDockWidget->setIcon(viewPlugin->getIcon());
 
     connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, this, [this, viewPluginDockWidget](const QString& title) {
         viewPluginDockWidget->setWindowTitle(title);
-    });
+        });
 
     connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, this, [this, viewPluginDockWidget](bool toggled) {
         viewPluginDockWidget->setFeature(CDockWidget::DockWidgetClosable, toggled);
-    });
+        });
 
     connect(&viewPlugin->getMayFloatAction(), &ToggleAction::toggled, this, [this, viewPluginDockWidget](bool toggled) {
         viewPluginDockWidget->setFeature(CDockWidget::DockWidgetFloatable, toggled);
-    });
+        });
 
     connect(&viewPlugin->getMayMoveAction(), &ToggleAction::toggled, this, [this, viewPluginDockWidget](bool toggled) {
         viewPluginDockWidget->setFeature(CDockWidget::DockWidgetMovable, toggled);
-    });
+        });
 
     const auto connectToViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
         connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
             dockWidget->toggleView(toggled);
-        });
+            });
     };
 
     const auto disconnectFromViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
@@ -133,14 +139,14 @@ void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin)
             viewPlugin->getVisibleAction().setChecked(false);
         }
         connectToViewPluginVisibleAction(viewPluginDockWidget);
-    });
+        });
 
     connectToViewPluginVisibleAction(viewPluginDockWidget);
 
     if (viewPlugin->isSystemViewPlugin())
         _dockManager->addDockWidget(RightDockWidgetArea, viewPluginDockWidget);
     else
-        _visualizationDockWidget.addViewPlugin(viewPluginDockWidget);
+        _visualizationDockWidget.addViewPlugin(viewPluginDockWidget, dockToViewPlugin, dockArea);
 }
 
 }

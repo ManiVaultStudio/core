@@ -29,6 +29,14 @@ public:
      * @param viewPlugin Pointer to view plugin
      */
     virtual void addViewPlugin(plugin::ViewPlugin* viewPlugin) = 0;
+
+    /**
+     * Add a view plugin to the \p dockArea of \p dockViewPlugin
+     * @param viewPlugin Pointer to view plugin
+     * @param dockToViewPlugin Pointer to view plugin to which new view plugins are docked (new view plugins be docked top-level if nullptr)
+     * @param dockArea Dock area in which new view plugins will be docked
+     */
+    virtual void addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPlugin* dockToViewPlugin, gui::DockAreaFlag dockArea) = 0;
 };
 
 }

@@ -18,33 +18,7 @@ ViewPluginTriggerAction::ViewPluginTriggerAction(QObject* parent, const QString 
     _dockToViewPlugin(dockViewPlugin),
     _dockArea(dockArea)
 {
-
 }
-
-//ViewPluginTriggerAction::ViewPluginTriggerAction(QObject* parent, const QString& viewPluginKind, ViewPlugin* dockViewPlugin, ViewPlugin::DockArea dockArea) :
-//    PluginTriggerAction(parent, viewPluginKind, "View plugin trigger"),
-//    _dockViewPlugin(),
-//    _dockArea()
-//{
-//    //
-//
-
-//
-//    //const auto getProducePluginTriggerAction = [&](const QString& guiName) -> PluginTriggerAction& {
-//    //    pluginFactory->setGuiName(guiName);
-//
-//    //    auto& producePluginTriggerAction = pluginFactory->getProducePluginTriggerAction();
-//
-//    //    producePluginTriggerAction.setIcon(pluginFactory->getIcon());
-//    //    pluginFactory->getTriggerHelpAction().setIcon(pluginFactory->getIcon());
-//
-//    //    connect(&producePluginTriggerAction, &PluginTriggerAction::triggered, this, [this, pluginFactory]() -> void {
-//    //        createPlugin(pluginFactory->getKind());
-//    //        });
-//
-//    //    return producePluginTriggerAction;
-//    //};
-//}
 
 ViewPlugin* ViewPluginTriggerAction::getDockToViewPlugin() const
 {

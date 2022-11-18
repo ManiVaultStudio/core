@@ -1,6 +1,5 @@
 #include "VisualizationDockWidget.h"
 
-#include <ViewPlugin.h>
 #include <util/Serialization.h>
 
 #include "DockAreaWidget.h"
@@ -15,6 +14,7 @@ using namespace ads;
 
 using namespace hdps::plugin;
 using namespace hdps::util;
+using namespace hdps::gui;
 
 VisualizationDockWidget::VisualizationDockWidget(QWidget* parent /*= nullptr*/) :
     DockWidget("Visualization", parent),
@@ -49,7 +49,7 @@ const DockManager& VisualizationDockWidget::getDockManager() const
     return const_cast<VisualizationDockWidget*>(this)->_dockManager;
 }
 
-void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget)
+void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget, ViewPlugin* dockViewPlugin, DockAreaFlag dockArea)
 {
     Q_ASSERT(viewPluginDockWidget != nullptr);
 
@@ -60,7 +60,7 @@ void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDock
     //else
     //    _lastDockAreaWidget = _dockManager.addDockWidget(RightDockWidgetArea, viewPluginDockWidget, _lastDockAreaWidget);
 
-    _lastDockAreaWidget = _dockManager.addDockWidget(LeftDockWidgetArea, viewPluginDockWidget);
+    _lastDockAreaWidget = _dockManager.addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget);
 
     const auto lastDockAreaWidget = _lastDockAreaWidget;
 

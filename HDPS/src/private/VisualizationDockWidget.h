@@ -6,6 +6,8 @@
 #include "DockWidget.h"
 #include "ViewPluginDockWidget.h"
 
+#include <ViewPlugin.h>
+
 /**
  * Visualization widget class
  *
@@ -38,8 +40,10 @@ public:
     /**
      * Add view plugin
      * @param viewPluginDockWidget Pointer to view plugin dock widget
+     * @param dockViewPlugin Pointer to view plugin to which new view plugins are docked (new view plugins be docked top-level if nullptr)
+     * @param dockArea Dock area in which new view plugins will be docked
      */
-    void addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget);
+    void addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget, hdps::plugin::ViewPlugin* dockViewPlugin, hdps::gui::DockAreaFlag dockArea);
 
 public: // Serialization
 
