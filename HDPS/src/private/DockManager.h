@@ -38,6 +38,25 @@ public:
      */
     ads::CDockAreaWidget* findDockAreaWidget(QWidget* widget);
 
+    /**
+     * Set central widget
+     * @param Pointer to central widget
+     * @return Pointer to central dock area widget
+     */
+    ads::CDockAreaWidget* setCentralWidget(QWidget* centralWidget);
+
+    /**
+     * Get central dock area widget
+     * @return Pointer to central dock area widget
+     */
+    ads::CDockAreaWidget* getCentralDockAreaWidget();
+
+    /**
+     * Get central dock widget
+     * @return Pointer to central dock widget
+     */
+    DockWidget* getCentralDockWidget();
+
 public: // Serialization
 
     /**
@@ -84,4 +103,8 @@ private:
 
     /** Resets the docking layout to defaults */
     void reset();
+
+private:
+    ads::CDockAreaWidget*   _centralDockAreaWidget;     /** Pointer to central dock area widget */
+    DockWidget              _centralDockWidget;         /** Default central dock widget */
 };

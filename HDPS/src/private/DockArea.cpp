@@ -158,6 +158,7 @@ void DockArea::createPlaceHolders(std::uint32_t depth)
         auto dockWidget             = _dockWidgets.count() == 0 ? new DockWidget("Placeholder dock widget") : _dockWidgets.first();
         auto targetDockWidgetArea   = getParent()->getCurrentDockAreaWidget();
 
+        //qDebug() << __FUNCTION__ << getDockWidgets()
         if (dockWidgetArea)
             getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, targetDockWidgetArea));
         else

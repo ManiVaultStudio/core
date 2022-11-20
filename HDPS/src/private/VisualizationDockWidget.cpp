@@ -19,22 +19,18 @@ using namespace hdps::gui;
 VisualizationDockWidget::VisualizationDockWidget(QWidget* parent /*= nullptr*/) :
     DockWidget("Visualization", parent),
     _widget(),
-    _dockManager(&_widget),
-    _centralDockArea(nullptr),
-    _centralDockWidget("CentralDockWidget"),
-    _logoWidget(),
-    _lastDockAreaWidget(nullptr)
+    _dockManager(&_widget),   
+    _logoWidget()
 {
     _dockManager.setConfigFlag(CDockManager::FocusHighlighting, false);
     _dockManager.setObjectName("Visualization");
+    _dockManager.setCentralWidget(&_logoWidget);
 
     setObjectName("VisualizationDockWidget");
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setWidget(&_dockManager, eInsertMode::ForceNoScrollArea);
 
-    _centralDockWidget.setWidget(&_logoWidget);
-
-    _centralDockArea = _dockManager.setCentralWidget(&_centralDockWidget);
+    reset();
 
     connect(&_dockManager, &CDockManager::dockAreasAdded, this, &VisualizationDockWidget::updateCentralWidget);
     connect(&_dockManager, &CDockManager::dockAreasRemoved, this, &VisualizationDockWidget::updateCentralWidget);
@@ -62,14 +58,7 @@ void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDock
 
     _viewPluginDockWidgets << viewPluginDockWidget;
 
-    _lastDockAreaWidget = _dockManager.addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockAreaWidget);
-
-    const auto lastDockAreaWidget = _lastDockAreaWidget;
-
-    connect(_lastDockAreaWidget, &CDockAreaWidget::destroyed, this, [this, lastDockAreaWidget]() -> void {
-        if (lastDockAreaWidget == _lastDockAreaWidget)
-            _lastDockAreaWidget = nullptr;
-    });
+    _dockManager.addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockAreaWidget);
 
     connect(viewPluginDockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {
         updateCentralWidget();
@@ -88,6 +77,10 @@ void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDock
 
 void VisualizationDockWidget::fromVariantMap(const QVariantMap& variantMap)
 {
+    _dockManager.setCentralWidget(nullptr);
+
+    reset();
+
     _dockManager.fromVariantMap(variantMap["Docking"].toMap());
 
     updateCentralWidget();
@@ -104,28 +97,25 @@ QVariantMap VisualizationDockWidget::toVariantMap() const
 
 void VisualizationDockWidget::updateCentralWidget()
 {
-    Q_ASSERT(_centralDockArea != nullptr);
+    if (!_dockManager.getCentralDockAreaWidget());
+        return;
 
 #ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
     qDebug() << __FUNCTION__ << getNumberOfOpenViewPluginDockWidgets();
 #endif
     
     if (getNumberOfOpenViewPluginDockWidgets() == 0) {
-        _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
-        _centralDockWidget.toggleView(true);
+        _dockManager.getCentralDockAreaWidget()->setAllowedAreas(DockWidgetArea::AllDockAreas);
+        _dockManager.getCentralDockWidget()->toggleView(true);
     }
     else {
-        _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
-        _centralDockWidget.toggleView(false);
+        _dockManager.getCentralDockAreaWidget()->setAllowedAreas(DockWidgetArea::AllDockAreas);
+        _dockManager.getCentralDockWidget()->toggleView(false);
     }
 }
 
 std::int32_t VisualizationDockWidget::getNumberOfOpenViewPluginDockWidgets() const
 {
-//#ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
-//    qDebug() << __FUNCTION__ << _viewPluginDockWidgets;
-//#endif
-
     std::int32_t numberOfOpenViewPluginDockWidgets = 0;
 
     for (auto viewPluginDockWidget : _viewPluginDockWidgets)
@@ -137,16 +127,22 @@ std::int32_t VisualizationDockWidget::getNumberOfOpenViewPluginDockWidgets() con
 
 void VisualizationDockWidget::reset()
 {
-//#ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
-//    qDebug() << __FUNCTION__;
-//#endif
+#ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 
-    for (auto viewPluginDockWidget : _viewPluginDockWidgets)
+    //_dockManager.reset();
+    /*
+    for (auto viewPluginDockWidget : _viewPluginDockWidgets) {
         _dockManager.removeDockWidget(viewPluginDockWidget);
+
+        qDebug() << viewPluginDockWidget->windowTitle();
+    }
+    */  
 
     _viewPluginDockWidgets.clear();
 
-    updateCentralWidget();
+    //updateCentralWidget();
 }
 
 ads::CDockAreaWidget* VisualizationDockWidget::findDockAreaWidget(ViewPlugin* viewPlugin)

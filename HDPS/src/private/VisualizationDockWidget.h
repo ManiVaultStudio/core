@@ -81,11 +81,8 @@ private:
     ads::CDockAreaWidget* findDockAreaWidget(hdps::plugin::ViewPlugin* viewPlugin);
 
 private:
-    QWidget                         _widget;                    /** Widget for display in the dock widget */
-    DockManager                     _dockManager;               /** Dock manager */
-    ads::CDockAreaWidget*           _centralDockArea;           /** Pointer to central dock area widget */
-    DockWidget                      _centralDockWidget;         /** Logo dock widget (dock manager central widget, visible when no other dock widgets are visible) */
-    LogoWidget                      _logoWidget;                /** Logo widget for logo dock widget */
-    ads::CDockAreaWidget*           _lastDockAreaWidget;        /** Last docking area widget (if any) */
-    ViewPluginDockWidgets           _viewPluginDockWidgets;     /** Added view plugin dock widgets */
+    QWidget                     _widget;                    /** Widget for display in the dock widget */
+    DockManager                 _dockManager;               /** Dock manager */
+    LogoWidget                  _logoWidget;                /** Logo widget for logo dock widget */
+    ViewPluginDockWidgets       _viewPluginDockWidgets;     /** Added view plugin dock widgets */
 };

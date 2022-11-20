@@ -22,7 +22,7 @@ using namespace hdps::util;
 template <class WidgetClass>
 WidgetClass* findParent(const QWidget* widget)
 {
-    QWidget* parentWidget = widget->parentWidget();
+    auto parentWidget = widget->parentWidget();
 
     while (parentWidget)
     {
@@ -48,7 +48,9 @@ QMap<DockWidgetArea, QString> DockManager::dockWidgetAreaStrings = {
 
 DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
-    Serializable("Dock manager")
+    Serializable("Dock manager"),
+    _centralDockAreaWidget(nullptr),
+    _centralDockWidget("CentralDockWidget")
 {
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
@@ -77,6 +79,25 @@ ads::CDockAreaWidget* DockManager::findDockAreaWidget(QWidget* widget)
     return nullptr;
 }
 
+ads::CDockAreaWidget* DockManager::setCentralWidget(QWidget* centralWidget)
+{
+    _centralDockWidget.setWidget(centralWidget);
+
+    _centralDockAreaWidget = CDockManager::setCentralWidget(&_centralDockWidget);
+
+    return _centralDockAreaWidget;
+}
+
+ads::CDockAreaWidget* DockManager::getCentralDockAreaWidget()
+{
+    return _centralDockAreaWidget;
+}
+
+DockWidget* DockManager::getCentralDockWidget()
+{
+    return &_centralDockWidget;
+}
+
 void DockManager::fromVariantMap(const QVariantMap& variantMap)
 {
 #ifdef DOCK_MANAGER_VERBOSE
@@ -88,6 +109,9 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
     auto rootDockArea = dockAreaFromVariantMap(variantMap["Area"].toMap());
 
     rootDockArea.applyDocking();
+
+    //removeDockWidget(rootDockArea.getChildren()[0].getDockWidgets()[0]);
+    //setCentralWidget(nullptr);
 
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << rootDockArea;
@@ -154,8 +178,12 @@ DockWidgets DockManager::dockWidgetsFromVariantList(const QVariantList& dockWidg
 
         if (dockWidgetMap.contains("ViewPlugin"))
             dockWidgets << new ViewPluginDockWidget(dockWidget.toMap()["Title"].toString());
-        else
-            dockWidgets << new DockWidget(dockWidget.toMap()["Title"].toString());
+        else {
+            if (dockWidget.toMap()["Title"] == "CentralDockWidget")
+                dockWidgets << &_centralDockWidget;
+            else
+                dockWidgets << new DockWidget(dockWidget.toMap()["Title"].toString());
+        }
 
         dockWidgets.last()->fromVariantMap(dockWidgetMap);
     }
@@ -215,4 +243,6 @@ void DockManager::reset()
 
     for (auto dockWidget : dockWidgetsMap().values())
         removeDockWidget(dockWidget);
+
+    setCentralWidget(&_centralDockWidget);
 }
