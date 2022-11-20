@@ -24,4 +24,13 @@ public:
      * @param showEvent Pointer to the show event
      */
     void showEvent(QShowEvent* showEvent) override;
+
+private:
+
+    /**
+     * Get actions for loaded views
+     * @param systemView Whether to include system views or normal views
+     * @return Vector of actions
+     */
+    QVector<QAction*> getLoadedViewsActions(bool systemView);
 };

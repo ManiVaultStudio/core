@@ -30,6 +30,12 @@ public:
      */
     void showEvent(QShowEvent* showEvent) override;
 
+    /**
+     * Get whether the menu has any enabled menu items that produce a plugin
+     * return Boolean determining whether the menu has any enabled menu items that produce a plugin
+     */
+    bool mayProducePlugins() const;
+
 private:
 
     /**

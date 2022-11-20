@@ -20,6 +20,8 @@ LoadSystemViewMenu::LoadSystemViewMenu(QWidget *parent /*= nullptr*/, ads::CDock
 {
     setTitle("System views");
     setToolTip("Manage system view plugins");
+    setEnabled(mayProducePlugins());
+    setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
 }
 
 void LoadSystemViewMenu::showEvent(QShowEvent* showEvent)
@@ -50,6 +52,21 @@ void LoadSystemViewMenu::showEvent(QShowEvent* showEvent)
         for (auto action : actions)
             addAction(action);
     }
+}
+
+bool LoadSystemViewMenu::mayProducePlugins() const
+{
+    for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(Type::VIEW)) {
+        auto viewPluginFactory = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
+
+        if (!viewPluginFactory->producesSystemViewPlugins())
+            continue;
+
+        if (pluginTriggerAction->isEnabled())
+            return true;
+    }
+
+    return false;
 }
 
 QVector<QAction*> LoadSystemViewMenu::getLoadSystemViewsActions(hdps::gui::DockAreaFlag dockArea)

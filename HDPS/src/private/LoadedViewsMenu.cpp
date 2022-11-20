@@ -15,21 +15,55 @@ LoadedViewsMenu::LoadedViewsMenu(QWidget *parent /*= nullptr*/) :
 {
     setTitle("Loaded");
     setToolTip("Manage loaded view plugins");
+    setEnabled(!Application::core()->getPluginsByType({ plugin::Type::VIEW }).isEmpty());
 }
 
 void LoadedViewsMenu::showEvent(QShowEvent* showEvent)
 {
     clear();
 
+    for (auto action : getLoadedViewsActions(false))
+        addAction(action);
+
+    if (!actions().isEmpty())
+        addSeparator();
+
+    const auto loadedViewActions = getLoadedViewsActions(true);
+
+    if (!loadedViewActions.isEmpty()) {
+        auto loadedSystemViewsMenu = new QMenu("System");
+
+        for (auto loadedSystemViewAction : loadedViewActions)
+            loadedSystemViewsMenu->addAction(loadedSystemViewAction);
+
+        loadedSystemViewsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+
+        addMenu(loadedSystemViewsMenu);
+    }
+}
+
+QVector<QAction*> LoadedViewsMenu::getLoadedViewsActions(bool systemView)
+{
     QVector<QAction*> actions;
 
     const auto plugins = Application::core()->getPluginsByType({ plugin::Type::VIEW });
 
-    for (auto plugin : plugins)
-        actions << &dynamic_cast<ViewPlugin*>(plugin)->getVisibleAction();
+    for (auto plugin : plugins) {
+        auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
+
+        if (systemView) {
+            if (!viewPlugin->isSystemViewPlugin())
+                continue;
+        }
+        else {
+            if (viewPlugin->isSystemViewPlugin())
+                continue;
+        }
+
+        actions << &viewPlugin->getVisibleAction();
+    }
 
     sortActions(actions);
 
-    for (auto action : actions)
-        addAction(action);
+    return actions;
 }

@@ -19,17 +19,15 @@ using namespace hdps::plugin;
 using namespace hdps::util;
 using namespace hdps::gui;
 
-class CCustomComponentsFactory : public ads::CDockComponentsFactory
+class DockAreaTitleBar : public CDockAreaTitleBar
 {
 public:
-    using Super = ads::CDockComponentsFactory;
-
-    CDockAreaTitleBar* createDockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) const override
+    DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
+        CDockAreaTitleBar(dockAreaWidget)
     {
-        auto dockAreaTitleBar           = new ads::CDockAreaTitleBar(dockAreaWidget);
-        auto addViewPluginToolButton    = new QToolButton(dockAreaWidget);
+        auto addViewPluginToolButton = new QToolButton(dockAreaWidget);
 
-        addViewPluginToolButton->setToolTip(QObject::tr("Help"));
+        addViewPluginToolButton->setToolTip(QObject::tr("Add views"));
         addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
         addViewPluginToolButton->setAutoRaise(true);
         addViewPluginToolButton->setPopupMode(QToolButton::InstantPopup);
@@ -37,17 +35,50 @@ public:
 
         auto dockManager = dockAreaWidget->dockManager();
 
-        if (dockManager->objectName() == "Main")
-            addViewPluginToolButton->setMenu(new LoadSystemViewMenu(nullptr, dockAreaWidget));
+        QMenu* menu = nullptr;
 
-        if (dockManager->objectName() == "Visualization")
-            addViewPluginToolButton->setMenu(new ViewMenu(nullptr, ViewMenu::LoadViewPlugins, dockAreaWidget));
+        if (dockManager->objectName() == "Main") {
+            auto loadSystemViewMenu = new LoadSystemViewMenu(nullptr, dockAreaWidget);
 
-        dockAreaTitleBar->insertWidget(dockAreaTitleBar->indexOf(dockAreaTitleBar->button(ads::TitleBarButtonTabsMenu)) - 1, addViewPluginToolButton);
+            const auto updateToolButtonReadOnly = [addViewPluginToolButton, loadSystemViewMenu]() -> void {
+                addViewPluginToolButton->setEnabled(loadSystemViewMenu->mayProducePlugins());
+            };
 
-        //dockAreaWidget->dockManager()->objectName();
+            connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetAdded, this, updateToolButtonReadOnly);
+            connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetRemoved, this, updateToolButtonReadOnly);
 
-        return dockAreaTitleBar;
+            addViewPluginToolButton->setMenu(loadSystemViewMenu);
+
+            updateToolButtonReadOnly();
+        }
+
+        if (dockManager->objectName() == "Visualization") {
+            auto loadViewMenu = new ViewMenu(nullptr, ViewMenu::LoadViewPlugins, dockAreaWidget);
+
+            const auto updateToolButtonReadOnly = [addViewPluginToolButton, loadViewMenu]() -> void {
+                addViewPluginToolButton->setEnabled(loadViewMenu->mayProducePlugins());
+            };
+
+            connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetAdded, this, updateToolButtonReadOnly);
+            connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetRemoved, this, updateToolButtonReadOnly);
+
+            addViewPluginToolButton->setMenu(loadViewMenu);
+
+            updateToolButtonReadOnly();
+        }
+
+        insertWidget(indexOf(button(ads::TitleBarButtonTabsMenu)) - 1, addViewPluginToolButton);
+    }
+};
+
+class CustomComponentsFactory : public ads::CDockComponentsFactory, public QObject
+{
+public:
+    using Super = ads::CDockComponentsFactory;
+
+    CDockAreaTitleBar* createDockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) const override
+    {
+        return new DockAreaTitleBar(dockAreaWidget);
     }
 
     //CDockAreaTabBar* createDockAreaTabBar(CDockAreaWidget* DockArea) const override {
@@ -73,7 +104,7 @@ LayoutManager::LayoutManager() :
     setText("Layout manager");
     setObjectName("Layout");
 
-    ads::CDockComponentsFactory::setFactory(new CCustomComponentsFactory());
+    ads::CDockComponentsFactory::setFactory(new CustomComponentsFactory());
 }
 
 LayoutManager::~LayoutManager()

@@ -28,10 +28,10 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
 {
     clear();
 
-    if (_options.testFlag(LoadSystemViewPlugins))
+    if (_options.testFlag(LoadSystemViewPlugins)) 
         addMenu(new LoadSystemViewMenu());
 
-    _separator = addSeparator();
+    auto separator = addSeparator();
 
     if (_dockAreaWidget) {
         const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
@@ -60,10 +60,25 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
         }
     }
 
-    addSeparator();
+    _separator = addSeparator();
 
     if (_options.testFlag(LoadedViewsSubMenu))
         addMenu(new LoadedViewsMenu());
+}
+
+bool ViewMenu::mayProducePlugins() const
+{
+    for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(Type::VIEW)) {
+        auto viewPluginFactory = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
+
+        if (viewPluginFactory->producesSystemViewPlugins())
+            continue;
+
+        if (pluginTriggerAction->isEnabled())
+            return true;
+    }
+
+    return false;
 }
 
 QVector<QAction*> ViewMenu::getLoadViewsActions(gui::DockAreaFlag dockArea)
