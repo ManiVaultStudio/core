@@ -53,7 +53,7 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
     }
     else {
         if (_options.testFlag(LoadViewPlugins)) {
-            const auto actions = getLoadViewsActions(gui::DockAreaFlag::None);
+            const auto actions = getLoadViewsActions(gui::DockAreaFlag::Right);
 
             for (auto action : actions)
                 insertAction(_separator, action);
