@@ -193,6 +193,7 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/LoadSystemViewMenu.h
     src/private/LoadedViewsMenu.h
     src/private/HelpMenu.h
+    src/private/PluginHelpMenu.h
 )
 
 set(PRIVATE_APPLICATION_SOURCES
@@ -205,6 +206,7 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/LoadSystemViewMenu.cpp
     src/private/LoadedViewsMenu.cpp
     src/private/HelpMenu.cpp
+    src/private/PluginHelpMenu.cpp
 )
 
 set(PRIVATE_APPLICATION_FILES
@@ -334,7 +336,6 @@ set(PUBLIC_ACTIONS_HEADERS
     src/actions/PixelSelectionAction.h
     src/actions/PluginTriggerPickerAction.h
     src/actions/PluginTriggerAction.h
-    src/actions/ViewPluginTriggerAction.h
     src/actions/TriggerAction.h
     src/actions/TriggersAction.h
     src/actions/ToggleAction.h
@@ -387,7 +388,6 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/PixelSelectionAction.cpp
     src/actions/PluginTriggerPickerAction.cpp
     src/actions/PluginTriggerAction.cpp
-    src/actions/ViewPluginTriggerAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/TriggersAction.cpp
     src/actions/ToggleAction.cpp

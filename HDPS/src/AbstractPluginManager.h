@@ -138,6 +138,20 @@ protected:
      */
     virtual QStringList resolveDependencies(QDir pluginDir) const = 0;
 
+signals:
+
+    /**
+     * Signals that a plugin factory was loaded
+     * @param pluginFactory Pointer to plugin factory that was loaded
+     */
+    void pluginFactoryLoaded(plugin::PluginFactory* pluginFactory);
+
+    /**
+     * Signals that a plugin instance is added to the plugin manager
+     * @param plugin Pointer to plugin that was added
+     */
+    void pluginAdded(plugin::Plugin* plugin);
+
     friend class gui::PluginTriggerAction;
 };
 

@@ -1,10 +1,11 @@
 #pragma once
 
 #include <QString>
+#include <QVector>
 
-namespace hdps
-{
-namespace util
+class QAction;
+
+namespace hdps::util
 {
 
 /**
@@ -21,5 +22,10 @@ QString getIntegerCountHumanReadable(const float& count);
  */
 QString getNoBytesHumanReadable(float noBytes);
 
-}
+/**
+ * Sort action based on their text
+ * @param actions Actions to sort
+ */
+void sortActions(QVector<QAction*>& actions);
+
 }

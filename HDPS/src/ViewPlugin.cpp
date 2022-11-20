@@ -1,7 +1,6 @@
 #include "ViewPlugin.h"
 
 #include "widgets/ProjectEditorDialog.h"
-#include "actions/ViewPluginTriggerAction.h"
 #include "Application.h"
 #include "AbstractLayoutManager.h"
 
@@ -107,8 +106,7 @@ bool ViewPlugin::isSystemViewPlugin() const
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :
     PluginFactory(Type::VIEW),
-    _producesSystemViewPlugins(producesSystemViewPlugins),
-    _viewPluginTriggerAction(new ViewPluginTriggerAction(this, this))
+    _producesSystemViewPlugins(producesSystemViewPlugins)
 {
     if (_producesSystemViewPlugins)
         setMaximumNumberOfInstances(1);
@@ -123,10 +121,5 @@ bool ViewPluginFactory::producesSystemViewPlugins() const
 {
     return _producesSystemViewPlugins;
 }
-
-//hdps::gui::PluginTriggerAction& ViewPluginFactory::getPluginTriggerAction()
-//{
-//    return *_viewPluginTriggerAction;
-//}
 
 }

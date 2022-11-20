@@ -113,6 +113,8 @@ void PluginManager::loadPlugins()
             qDebug() << "Plugin " << fileName << " does not implement any of the possible interfaces!";
             return;
         }
+
+        emit pluginFactoryLoaded(_pluginFactories[pluginKind]);
     }
 }
 
@@ -270,6 +272,8 @@ plugin::Plugin* PluginManager::createPlugin(const QString& kind, const Datasets&
 
         qDebug() << "Added plugin" << pluginInstance->getKind() << "with version" << pluginInstance->getVersion();
 
+        emit pluginAdded(pluginInstance);
+
         return pluginInstance;
     }
     catch (std::exception& e)
@@ -297,7 +301,7 @@ hdps::gui::PluginTriggerActions PluginManager::getPluginTriggerActions(const plu
     PluginTriggerActions pluginProducerActions;
 
     for (auto pluginFactory : _pluginFactories)
-        if (pluginFactory->getType() == pluginType && pluginFactory->mayProduce())
+        if (pluginFactory->getType() == pluginType)
             pluginProducerActions << &pluginFactory->getPluginTriggerAction();
 
     return pluginProducerActions;
@@ -308,7 +312,7 @@ PluginTriggerActions PluginManager::getPluginTriggerActions(const Type& pluginTy
     PluginTriggerActions pluginProducerActions;
 
     for (auto pluginFactory : _pluginFactories)
-        if (pluginFactory->getType() == pluginType && pluginFactory->mayProduce())
+        if (pluginFactory->getType() == pluginType)
             pluginProducerActions << pluginFactory->getPluginTriggerActions(datasets);
 
     return pluginProducerActions;

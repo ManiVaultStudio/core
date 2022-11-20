@@ -18,13 +18,4 @@ public:
      * @param parent Pointer to parent widget
      */
     HelpMenu(QWidget *parent = nullptr);
-
-    /**
-     * Invoked when the menu is shown
-     * @param showEvent Pointer to the show event
-     */
-    void showEvent(QShowEvent* showEvent) override;
-
-private:
-    QMenu   _pluginsHelpMenu;   /** Menu for plugins help */
 };

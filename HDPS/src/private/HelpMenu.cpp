@@ -1,31 +1,15 @@
 #include "HelpMenu.h"
 #include "PluginManager.h"
-
-#include <Application.h>
-#include <actions/PluginTriggerAction.h>
+#include "PluginHelpMenu.h"
 
 using namespace hdps;
-using namespace hdps::gui;
 
 HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
-    QMenu(parent),
-    _pluginsHelpMenu("Plugins")
+    QMenu(parent)
 {
     setTitle("Help");
     setToolTip("HDPS help");
 
-    _pluginsHelpMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
-    _pluginsHelpMenu.setEnabled(false);
-
-    addMenu(&_pluginsHelpMenu);
+    addMenu(new PluginHelpMenu());
 }
 
-void HelpMenu::showEvent(QShowEvent* showEvent)
-{
-    //connect(Application::current(), &Application::coreSet, this, [this]() -> void {
-    //    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::addPluginTriggerHelpAction, this, [this](TriggerAction& pluginTriggerHelpAction) -> void {
-    //        _pluginsHelpMenu.addAction(&pluginTriggerHelpAction);
-    //        _pluginsHelpMenu.setEnabled(true);
-    //    });
-    //});
-}

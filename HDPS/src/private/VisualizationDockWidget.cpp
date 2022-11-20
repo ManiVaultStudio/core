@@ -26,6 +26,7 @@ VisualizationDockWidget::VisualizationDockWidget(QWidget* parent /*= nullptr*/) 
     _lastDockAreaWidget(nullptr)
 {
     _dockManager.setConfigFlag(CDockManager::FocusHighlighting, false);
+    _dockManager.setObjectName("Visualization");
 
     setObjectName("VisualizationDockWidget");
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -105,18 +106,18 @@ void VisualizationDockWidget::updateCentralWidget()
 {
     Q_ASSERT(_centralDockArea != nullptr);
 
-//#ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
-//    qDebug() << __FUNCTION__ << getNumberOfOpenViewPluginDockWidgets();
-//#endif
+#ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__ << getNumberOfOpenViewPluginDockWidgets();
+#endif
     
-    //if (getNumberOfOpenViewPluginDockWidgets() == 0) {
-    //    _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
-    //    _centralDockWidget.toggleView(true);
-    //}
-    //else {
-    //    _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
-    //    _centralDockWidget.toggleView(false);
-    //}
+    if (getNumberOfOpenViewPluginDockWidgets() == 0) {
+        _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
+        _centralDockWidget.toggleView(true);
+    }
+    else {
+        _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
+        _centralDockWidget.toggleView(false);
+    }
 }
 
 std::int32_t VisualizationDockWidget::getNumberOfOpenViewPluginDockWidgets() const

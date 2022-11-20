@@ -1,6 +1,7 @@
 #include "LayoutManager.h"
 #include "ViewPluginDockWidget.h"
 #include "ViewMenu.h"
+#include "LoadSystemViewMenu.h"
 
 #include <util/Serialization.h>
 
@@ -33,9 +34,18 @@ public:
         addViewPluginToolButton->setAutoRaise(true);
         addViewPluginToolButton->setPopupMode(QToolButton::InstantPopup);
         addViewPluginToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
-        addViewPluginToolButton->setMenu(new ViewMenu(nullptr, ViewMenu::LoadViewPlugins, dockAreaWidget));
+
+        auto dockManager = dockAreaWidget->dockManager();
+
+        if (dockManager->objectName() == "Main")
+            addViewPluginToolButton->setMenu(new LoadSystemViewMenu(nullptr, dockAreaWidget));
+
+        if (dockManager->objectName() == "Visualization")
+            addViewPluginToolButton->setMenu(new ViewMenu(nullptr, ViewMenu::LoadViewPlugins, dockAreaWidget));
 
         dockAreaTitleBar->insertWidget(dockAreaTitleBar->indexOf(dockAreaTitleBar->button(ads::TitleBarButtonTabsMenu)) - 1, addViewPluginToolButton);
+
+        //dockAreaWidget->dockManager()->objectName();
 
         return dockAreaTitleBar;
     }
@@ -74,6 +84,8 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
 {
     _dockManager = QSharedPointer<DockManager>::create(mainWindow);
 
+    _dockManager->setObjectName("Main");
+
     _visualizationDockArea = _dockManager->setCentralWidget(&_visualizationDockWidget);
     
     _visualizationDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
@@ -104,24 +116,24 @@ void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPl
 
     connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, this, [this, viewPluginDockWidget](const QString& title) {
         viewPluginDockWidget->setWindowTitle(title);
-        });
+    });
 
     connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, this, [this, viewPluginDockWidget](bool toggled) {
         viewPluginDockWidget->setFeature(CDockWidget::DockWidgetClosable, toggled);
-        });
+    });
 
     connect(&viewPlugin->getMayFloatAction(), &ToggleAction::toggled, this, [this, viewPluginDockWidget](bool toggled) {
         viewPluginDockWidget->setFeature(CDockWidget::DockWidgetFloatable, toggled);
-        });
+    });
 
     connect(&viewPlugin->getMayMoveAction(), &ToggleAction::toggled, this, [this, viewPluginDockWidget](bool toggled) {
         viewPluginDockWidget->setFeature(CDockWidget::DockWidgetMovable, toggled);
-        });
+    });
 
     const auto connectToViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
         connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
             dockWidget->toggleView(toggled);
-            });
+        });
     };
 
     const auto disconnectFromViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
@@ -139,7 +151,7 @@ void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPl
     connectToViewPluginVisibleAction(viewPluginDockWidget);
 
     if (viewPlugin->isSystemViewPlugin())
-        _dockManager->addDockWidget(RightDockWidgetArea, viewPluginDockWidget);
+        _dockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _dockManager->findDockAreaWidget(&dockToViewPlugin->getWidget()));
     else
         _visualizationDockWidget.addViewPlugin(viewPluginDockWidget, dockToViewPlugin, dockArea);
 }

@@ -1,8 +1,13 @@
-#include <QStringList>
+#include "Miscellaneous.h"
 
-namespace hdps
-{
-namespace util
+#include <QStringList>
+#include <QAction>
+
+#include <algorithm>
+
+using namespace std;
+
+namespace hdps::util
 {
 
 QString getIntegerCountHumanReadable(const float& count)
@@ -35,6 +40,11 @@ QString getNoBytesHumanReadable(float noBytes)
     return QString::number(noBytes, 'f', 2) + " " + unit;
 }
 
+void sortActions(QVector<QAction*>& actions)
+{
+    sort(actions.begin(), actions.end(), [](auto actionA, auto actionB) {
+        return actionA->text() < actionB->text();
+    });
 }
 
 }

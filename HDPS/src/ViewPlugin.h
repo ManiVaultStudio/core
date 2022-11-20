@@ -105,20 +105,13 @@ public:
     ViewPlugin* produce() override = 0;
 
     /**
-     * Get the trigger action that produces an instance of the plugin
-     * @return Reference to a trigger action that produces an instance of the plugin
-     */
-    //gui::PluginTriggerAction& getPluginTriggerAction() override;
-
-    /**
      * Get whether this factory produces system view plugins or not
      * @return Boolean determining whether this factory produces system view plugins or not
      */
     bool producesSystemViewPlugins() const;
 
 private:
-    const bool                      _producesSystemViewPlugins;     /** Whether this factory produces system view plugins or not */
-    gui::ViewPluginTriggerAction*   _viewPluginTriggerAction;       /** View plugin trigger action that creates the plugin and configures the view plugin docking */
+    const bool  _producesSystemViewPlugins;     /** Whether this factory produces system view plugins or not */
 };
 
 }

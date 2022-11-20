@@ -2,6 +2,7 @@
 
 #include <QMap>
 #include <QString>
+#include <QIcon>
 
 namespace hdps::gui
 {
@@ -31,5 +32,7 @@ static QMap<QString, DockAreaFlag> dockAreaMap({
     { "Bottom", static_cast<DockAreaFlag>(DockAreaFlag::Bottom) },
     { "Center", static_cast<DockAreaFlag>(DockAreaFlag::Center) }
 });
+
+QIcon getDockAreaIcon(DockAreaFlag dockArea);
 
 }

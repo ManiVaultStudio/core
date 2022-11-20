@@ -7,22 +7,12 @@
 #include <Application.h>
 #include <AbstractLayoutManager.h>
 
-#include <actions/PluginTriggerAction.h>
-#include <actions/ViewPluginTriggerAction.h>
-
-#include <algorithm>
-
-using namespace std;
+#include <util/Miscellaneous.h>
 
 using namespace hdps;
 using namespace hdps::plugin;
 using namespace hdps::gui;
-
-auto sortActions = [](QVector<QAction*>& actions) -> void {
-    sort(actions.begin(), actions.end(), [](auto actionA, auto actionB) {
-        return actionA->text() < actionB->text();
-    });
-};
+using namespace hdps::util;
 
 ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Option::Default*/, ads::CDockAreaWidget* dockAreaWidget /*= nullptr*/) :
     QMenu(parent),
@@ -46,6 +36,8 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
     if (_dockAreaWidget) {
         const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
             auto loadViewsDockedMenu = new QMenu(gui::dockAreaMap.key(dockArea));
+
+            loadViewsDockedMenu->setIcon(getDockAreaIcon(dockArea));
 
             for (auto action : getLoadViewsActions(dockArea))
                 loadViewsDockedMenu->addAction(action);
