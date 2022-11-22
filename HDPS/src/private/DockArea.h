@@ -2,6 +2,8 @@
 
 #include "DockWidget.h"
 
+#include <util/Serializable.h>
+
 #include <QString>
 #include <QVector>
 #include <QUuid>
@@ -19,7 +21,7 @@ using DockAreas = QVector<DockArea>;
  *
  * @author Thomas Kroes
  */
-class DockArea
+class DockArea : public hdps::util::Serializable
 {
 public:
     using SplitterSizes = QVector<std::int32_t>;
@@ -79,10 +81,26 @@ public:
 
     void loadViewPluginDockWidgets();
 
+    void buildTreeFromDocking(QWidget* widget);
+
 private:
     std::uint32_t getMaxDepth() const;
 
     void setSplitterSizes();
+
+public: // Serialization
+
+    /**
+     * Load dock area from variant map
+     * @param variantMap Variant map representation of the dock area 
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save dock area to variant map
+     * @return Variant map representation of the dock area 
+     */
+    QVariantMap toVariantMap() const override;
 
 public:
 

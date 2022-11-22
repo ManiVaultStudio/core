@@ -3,10 +3,12 @@
 #include "ViewPluginDockWidget.h"
 
 #include <util/Miscellaneous.h>
+#include <util/Serialization.h>
 
 #include <DockAreaWidget.h>
 
 #include <QSplitter>
+#include <QUuid>
 
 #ifdef _DEBUG
     #define DOCK_AREA_VERBOSE
@@ -24,6 +26,7 @@ QMap<Qt::Orientation, QString> DockArea::orientationStrings = {
 };
 
 DockArea::DockArea(DockManager* dockManager, std::uint32_t depth /*= 0*/) :
+    _id(QUuid::createUuid().toString()),
     _dockManager(dockManager),
     _parent(nullptr),
     _depth(depth),
@@ -74,6 +77,87 @@ DockArea::SplitterSizes DockArea::getSplitterSizes() const
 void DockArea::setSplitterSizes(const SplitterSizes& splitterSizes)
 {
     _splitterSizes = splitterSizes;
+}
+
+void DockArea::fromVariantMap(const QVariantMap& variantMap)
+{
+    if (variantMap.contains("Children")) {
+
+        variantMapMustContain(variantMap, "Orientation");
+        variantMapMustContain(variantMap, "SplitterSizes");
+
+        setOrientation(static_cast<Qt::Orientation>(variantMap["Orientation"].toInt()));
+        
+        QVector<std::int32_t> splitterSizes;
+
+        for (const auto& splitterSize : variantMap["SplitterSizes"].toList())
+            splitterSizes << splitterSize.toInt();
+
+        setSplitterSizes(splitterSizes);
+
+        DockAreas children;
+
+        for (auto child : variantMap["Children"].toList()) {
+            DockArea childDockArea(_dockManager);
+
+            childDockArea.fromVariantMap(child.toMap());
+
+            children << childDockArea;
+        }
+        
+        setChildren(children);
+    }
+    else {
+        variantMapMustContain(variantMap, "DockWidgets");
+
+        DockWidgets dockWidgets;
+
+        for (const auto& dockWidget : variantMap["DockWidgets"].toList()) {
+            const auto dockWidgetMap = dockWidget.toMap();
+
+            if (dockWidgetMap.contains("ViewPlugin"))
+                _dockWidgets << new ViewPluginDockWidget(dockWidget.toMap()["Title"].toString());
+            else {
+                if (dockWidget.toMap()["Title"] == "CentralDockWidget")
+                    _dockWidgets << _dockManager->getCentralDockWidget();
+                else
+                    _dockWidgets << new DockWidget(dockWidget.toMap()["Title"].toString());
+            }
+
+            _dockWidgets.last()->fromVariantMap(dockWidgetMap);
+        }
+    }
+}
+
+QVariantMap DockArea::toVariantMap() const
+{
+    QVariantMap variantMap;
+
+    if (!_children.isEmpty()) {
+        QVariantList childrenList, splitterSizesList;
+
+        const auto splitterSizes = getSplitterSizes();
+
+        for (auto& child : _children) {
+            childrenList << child.toVariantMap();
+            splitterSizesList << splitterSizes[_children.indexOf(child)];
+        }
+
+        variantMap["Orientation"]   = static_cast<std::int32_t>(getOrientation());
+        variantMap["SplitterSizes"] = splitterSizesList;
+        variantMap["Children"]      = childrenList;
+    }
+    else {
+        QVariantList dockWidgetsList;
+
+        for (auto dockWidget : _dockWidgets)
+            if (dynamic_cast<DockWidget*>(dockWidget))
+                dockWidgetsList.push_back(dynamic_cast<DockWidget*>(dockWidget)->toVariantMap());
+
+        variantMap["DockWidgets"] = dockWidgetsList;
+    }
+
+    return variantMap;
 }
 
 Qt::Orientation DockArea::getOrientation() const
@@ -245,6 +329,41 @@ void DockArea::loadViewPluginDockWidgets()
             continue;
 
         viewPluginDockWidget->loadViewPlugin();
+    }
+}
+
+void DockArea::buildTreeFromDocking(QWidget* widget)
+{
+    auto splitter = qobject_cast<QSplitter*>(widget);
+
+    if (splitter) {
+        setOrientation(splitter->orientation());
+        setSplitterSizes(splitter->sizes());
+
+        DockAreas children;
+
+        for (int i = 0; i < splitter->count(); ++i) {
+            DockArea childDockArea(_dockManager, _depth + 1);
+
+            childDockArea.buildTreeFromDocking(splitter->widget(i));
+
+            children << childDockArea;
+        }
+
+        setChildren(children);
+    }
+    else {
+        auto dockAreaWidget = qobject_cast<CDockAreaWidget*>(widget);
+
+        if (!dockAreaWidget)
+            return;
+
+        for (auto adsDockWidget : dockAreaWidget->dockWidgets()) {
+            auto dockWidget = dynamic_cast<DockWidget*>(adsDockWidget);
+
+            if (dockWidget)
+                _dockWidgets << dockWidget;
+        }
     }
 }
 

@@ -89,7 +89,10 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
     reset();
 
-    auto rootDockArea = dockAreaFromVariantMap(variantMap["Area"].toMap());
+    DockArea rootDockArea(this);
+
+    rootDockArea.fromVariantMap(variantMap["RootArea"].toMap());
+    //auto rootDockArea = dockAreaFromVariantMap(variantMap["Area"].toMap());
 
     rootDockArea.applyDocking();
 
@@ -107,8 +110,12 @@ QVariantMap DockManager::toVariantMap() const
     qDebug() << __FUNCTION__;
 #endif
 
+    DockArea rootDockArea(const_cast<DockManager*>(this), 0);
+
+    rootDockArea.buildTreeFromDocking(rootSplitter());
+
     return {
-        { "Area", widgetToVariantMap(rootSplitter()) }
+        { "RootArea", rootDockArea.toVariantMap() }
     };
 }
 
