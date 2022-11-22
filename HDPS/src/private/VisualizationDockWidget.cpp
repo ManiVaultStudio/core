@@ -97,21 +97,14 @@ QVariantMap VisualizationDockWidget::toVariantMap() const
 
 void VisualizationDockWidget::updateCentralWidget()
 {
-    if (!_dockManager.getCentralDockAreaWidget());
+    if (_dockManager.getCentralDockAreaWidget() == nullptr)
         return;
 
 #ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
     qDebug() << __FUNCTION__ << getNumberOfOpenViewPluginDockWidgets();
 #endif
     
-    if (getNumberOfOpenViewPluginDockWidgets() == 0) {
-        _dockManager.getCentralDockAreaWidget()->setAllowedAreas(DockWidgetArea::AllDockAreas);
-        _dockManager.getCentralDockWidget()->toggleView(true);
-    }
-    else {
-        _dockManager.getCentralDockAreaWidget()->setAllowedAreas(DockWidgetArea::AllDockAreas);
-        _dockManager.getCentralDockWidget()->toggleView(false);
-    }
+    _dockManager.getCentralDockWidget()->toggleView(getNumberOfOpenViewPluginDockWidgets() == 0);
 }
 
 std::int32_t VisualizationDockWidget::getNumberOfOpenViewPluginDockWidgets() const
