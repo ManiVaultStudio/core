@@ -2,6 +2,8 @@
 #include "DockManager.h"
 #include "ViewPluginDockWidget.h"
 
+#include <util/Miscellaneous.h>
+
 #include <DockAreaWidget.h>
 
 #include <QSplitter>
@@ -129,11 +131,11 @@ bool DockArea::hasLastDockAreaWidget() const
     return _currentDockAreaWidget != nullptr;
 }
 
-void DockArea::createPlaceHolders(std::uint32_t depth)
+void DockArea::createDockWidgets(std::uint32_t depth)
 {
     if (_depth < depth) {
         for (auto& child : _children)
-            child.createPlaceHolders(depth);
+            child.createDockWidgets(depth);
     }
 
     if (_depth == depth) {
@@ -180,10 +182,10 @@ void DockArea::createPlaceHolders(std::uint32_t depth)
     }
 }
 
-void DockArea::removePlaceHolders()
+void DockArea::removePlaceHolderDockWidgets()
 {
     for (auto& child : _children)
-        child.removePlaceHolders();
+        child.removePlaceHolderDockWidgets();
 
     if (_placeholderDockWidget)
         _dockManager->removeDockWidget(_placeholderDockWidget);
@@ -196,11 +198,11 @@ void DockArea::applyDocking()
     sanitizeHierarchy();
 
     for (std::uint32_t depth = 1; depth <= getMaxDepth(); depth++)
-        createPlaceHolders(depth);
+        createDockWidgets(depth);
     
     Application::processEvents();
 
-    removePlaceHolders();
+    removePlaceHolderDockWidgets();
 
     Application::processEvents();
 
@@ -262,18 +264,13 @@ std::uint32_t DockArea::getMaxDepth() const
 
 void DockArea::setSplitterSizes()
 {
-    if (_currentDockAreaWidget) {
-        //if (_depth == 0)
-        //    _dockManager->rootSplitter()->setSizes(getSplitterSizes());
-        //else
-        //    _dockManager->setSplitterSizes(_currentDockAreaWidget, getSplitterSizes());
-        /*auto parentSplitter = findParent<QSplitter>(_currentDockAreaWidget);
+    if (_children.count() >= 2) {
+        auto parentSplitter = findParent<QSplitter>(_currentDockAreaWidget);
 
         if (parentSplitter)
-            
-            parentSplitter->setSizes(getSplitterSizes());*/
-    }
+            parentSplitter->setSizes(getSplitterSizes());
 
-    for (auto child : _children)
-        child.setSplitterSizes();
+        for (auto child : _children)
+            child.setSplitterSizes();
+    }
 }

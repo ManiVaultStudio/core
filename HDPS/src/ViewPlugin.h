@@ -58,6 +58,12 @@ public:
      */
     virtual bool isSystemViewPlugin() const final;
 
+    /**
+     * Create screenshot from the view plugin
+     * Base implementation grabs the widget and saves it in a user-chosen location
+     */
+    virtual void createScreenshot();
+
 public: // Action getters
 
     gui::TriggerAction& getEditActionsAction() { return _editActionsAction; }

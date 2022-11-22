@@ -99,7 +99,8 @@ LayoutManager::LayoutManager() :
     AbstractLayoutManager(),
     _dockManager(),
     _visualizationDockArea(nullptr),
-    _visualizationDockWidget()
+    _visualizationDockWidget(),
+    _initialized(false)
 {
     setText("Layout manager");
     setObjectName("Layout");
@@ -113,6 +114,9 @@ LayoutManager::~LayoutManager()
 
 void LayoutManager::initialize(QMainWindow* mainWindow)
 {
+    if (_initialized)
+        return;
+
     _dockManager = QSharedPointer<DockManager>::create(mainWindow);
 
     _dockManager->setObjectName("Main");
@@ -120,6 +124,8 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
     _visualizationDockArea = _dockManager->setCentralWidget(&_visualizationDockWidget);
     
     _visualizationDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
+
+    _initialized = true;
 }
 
 void LayoutManager::reset()

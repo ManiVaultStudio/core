@@ -107,4 +107,6 @@ private:
 private:
     ads::CDockAreaWidget*   _centralDockAreaWidget;     /** Pointer to central dock area widget */
     DockWidget              _centralDockWidget;         /** Default central dock widget */
+
+    friend class VisualizationDockWidget;
 };

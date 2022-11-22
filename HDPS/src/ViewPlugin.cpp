@@ -70,24 +70,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     });
 
     connect(&_screenshotAction, &TriggerAction::triggered, this, [this]() -> void {
-        QFileDialog fileDialog;
-
-        fileDialog.setWindowTitle("Save screenshot to image file");
-        fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
-        fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-        fileDialog.setFileMode(QFileDialog::ExistingFile);
-        fileDialog.setNameFilters({ "Image files (*.png)" });
-        fileDialog.setDefaultSuffix(".png");
-
-        if (fileDialog.exec() == 0)
-            return;
-
-        if (fileDialog.selectedFiles().count() != 1)
-            throw std::runtime_error("Only one file may be selected");
-        
-        auto widgetPixmap = getWidget().grab();
-
-        widgetPixmap.toImage().save(fileDialog.selectedFiles().first());
+        createScreenshot();
     });
 
     connect(&_triggerHelpAction, &TriggerAction::triggered, this, [this]() -> void {
@@ -131,6 +114,29 @@ QWidget& ViewPlugin::getWidget()
 bool ViewPlugin::isSystemViewPlugin() const
 {
     return dynamic_cast<const ViewPluginFactory*>(_factory)->producesSystemViewPlugins();
+}
+
+void ViewPlugin::createScreenshot()
+{
+    QFileDialog fileDialog;
+
+    fileDialog.setWindowTitle("Save screenshot to image file");
+    fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
+    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    fileDialog.setFileMode(QFileDialog::ExistingFile);
+    fileDialog.setNameFilters({ "Image files (*.png)" });
+    fileDialog.setDefaultSuffix(".png");
+
+    if (fileDialog.exec() == 0)
+        return;
+
+    if (fileDialog.selectedFiles().count() != 1)
+        throw std::runtime_error("Only one file may be selected");
+
+    auto widgetPixmap = getWidget().grab();
+
+    widgetPixmap.toImage().save(fileDialog.selectedFiles().first());
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :

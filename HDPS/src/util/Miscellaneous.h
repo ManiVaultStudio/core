@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QVector>
+#include <QWidget>
 
 class QAction;
 
@@ -27,5 +28,28 @@ QString getNoBytesHumanReadable(float noBytes);
  * @param actions Actions to sort
  */
 void sortActions(QVector<QAction*>& actions);
+
+/**
+ * Find parent of type \p WidgetClass
+ * @param widget Pointer to widget to search for
+ * @return Pointer to parent widget of type \p WidgetClass, otherwise a nullptr
+ */
+template <class WidgetClass>
+WidgetClass* findParent(const QWidget* widget)
+{
+    auto parentWidget = widget->parentWidget();
+
+    while (parentWidget)
+    {
+        auto parentImpl = qobject_cast<WidgetClass*>(parentWidget);
+
+        if (parentImpl)
+            return parentImpl;
+
+        parentWidget = parentWidget->parentWidget();
+    }
+
+    return 0;
+}
 
 }

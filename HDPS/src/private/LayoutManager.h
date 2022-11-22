@@ -59,6 +59,7 @@ public: // Serialization
 
 private:
     QSharedPointer<DockManager>     _dockManager;                   /** Dock manager (inherited  from ADS) */
+    bool                            _initialized;                   /** Whether the layout manager is initialized or not */
     ads::CDockAreaWidget*           _visualizationDockArea;         /** Visualization docking area for view plugins (non-standard) */
     VisualizationDockWidget         _visualizationDockWidget;       /** Visualization dock widget for view plugins (non-standard) */
 };

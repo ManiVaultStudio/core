@@ -30,8 +30,6 @@ VisualizationDockWidget::VisualizationDockWidget(QWidget* parent /*= nullptr*/) 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setWidget(&_dockManager, eInsertMode::ForceNoScrollArea);
 
-    reset();
-
     connect(&_dockManager, &CDockManager::dockAreasAdded, this, &VisualizationDockWidget::updateCentralWidget);
     connect(&_dockManager, &CDockManager::dockAreasRemoved, this, &VisualizationDockWidget::updateCentralWidget);
 }
@@ -56,8 +54,6 @@ void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDock
     qDebug() << __FUNCTION__ << dockAreaWidget << dockAreaMap.key(dockArea);
 #endif
 
-    _viewPluginDockWidgets << viewPluginDockWidget;
-
     _dockManager.addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockAreaWidget);
 
     connect(viewPluginDockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {
@@ -77,10 +73,6 @@ void VisualizationDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDock
 
 void VisualizationDockWidget::fromVariantMap(const QVariantMap& variantMap)
 {
-    _dockManager.setCentralWidget(nullptr);
-
-    reset();
-
     _dockManager.fromVariantMap(variantMap["Docking"].toMap());
 
     updateCentralWidget();
@@ -110,32 +102,12 @@ void VisualizationDockWidget::updateCentralWidget()
 std::int32_t VisualizationDockWidget::getNumberOfOpenViewPluginDockWidgets() const
 {
     std::int32_t numberOfOpenViewPluginDockWidgets = 0;
-
-    for (auto viewPluginDockWidget : _viewPluginDockWidgets)
-        if (!viewPluginDockWidget->isClosed())
+    
+    for (auto dockWidget : _dockManager.dockWidgets())
+        if (dynamic_cast<ViewPluginDockWidget*>(dockWidget) && !dockWidget->isClosed())
             numberOfOpenViewPluginDockWidgets++;
 
     return numberOfOpenViewPluginDockWidgets;
-}
-
-void VisualizationDockWidget::reset()
-{
-#ifdef VISUALIZATION_DOCK_WIDGET_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    //_dockManager.reset();
-    /*
-    for (auto viewPluginDockWidget : _viewPluginDockWidgets) {
-        _dockManager.removeDockWidget(viewPluginDockWidget);
-
-        qDebug() << viewPluginDockWidget->windowTitle();
-    }
-    */  
-
-    _viewPluginDockWidgets.clear();
-
-    //updateCentralWidget();
 }
 
 ads::CDockAreaWidget* VisualizationDockWidget::findDockAreaWidget(ViewPlugin* viewPlugin)

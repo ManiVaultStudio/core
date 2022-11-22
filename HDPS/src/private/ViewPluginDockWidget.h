@@ -71,6 +71,7 @@ private:
     QString                     _viewPluginKind;    /** Kind of (view) plugin */
     QVariantMap                 _viewPluginMap;     /** View plugin cached map for deferred loading */
     QMenu                       _settingsMenu;      /** Menu for view plugin settings */
+    hdps::gui::TriggerAction    _helpAction;        /** Action for triggering help */
 };
 
 using ViewPluginDockWidgets = QVector<ViewPluginDockWidget*>;

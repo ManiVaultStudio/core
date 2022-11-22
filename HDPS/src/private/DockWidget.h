@@ -5,8 +5,9 @@
 
 #include <DockWidget.h>
 
-#include <QToolButton>
 #include <QMenu>
+
+class QToolButton;
 
 /**
  * Dock widget class
@@ -39,12 +40,6 @@ public:
     hdps::gui::OverlayWidget& getOverlayWidget();
 
     /**
-     * Get settings tool button (located in the dock widget tab bar)
-     * @return Reference to settings tool button
-     */
-    QToolButton& getSettingsToolButton();
-
-    /**
      * Get settings menu (when derived dock widgets return a valid menu, a tool button will in the tab bar that shows this menu)
      * @return Pointer to settings menu
      */
@@ -73,7 +68,7 @@ public: // Serialization
 
 private:
     hdps::gui::OverlayWidget    _overlayWidget;         /** Overlay widget for showing loading information */
-    QToolButton                 _settingsToolButton;    /** Settings tool button (located in the dock widget tab bar) */
+    QToolButton*                _settingsToolButton;    /** Pointer to settings tool button (located in the dock widget tab bar) */
     QMenu                       _settingsMenu;          /** Settings menu for settings tool button */
 };
 

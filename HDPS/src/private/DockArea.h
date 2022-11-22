@@ -71,8 +71,8 @@ public:
 
     bool hasLastDockAreaWidget() const;
 
-    void createPlaceHolders(std::uint32_t depth);
-    void removePlaceHolders();
+    void createDockWidgets(std::uint32_t depth);
+    void removePlaceHolderDockWidgets();
     void applyDocking();
     void sanitizeHierarchy();
     DockWidget* getFirstDockWidget();

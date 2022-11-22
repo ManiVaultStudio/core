@@ -1,5 +1,7 @@
 #include "ViewPluginDockWidget.h"
 
+#include <actions/WidgetAction.h>
+
 #include <ViewPlugin.h>
 
 #include <util/Serialization.h>
@@ -13,14 +15,26 @@ using namespace ads;
 using namespace hdps;
 using namespace hdps::plugin;
 using namespace hdps::util;
+using namespace hdps::gui;
 
 ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     DockWidget(title, parent),
     _viewPlugin(nullptr),
     _viewPluginKind(),
     _viewPluginMap(),
-    _settingsMenu()
+    _settingsMenu(),
+    _helpAction(this, "Help")
 {
+    _helpAction.setIcon(Application::getIconFont("FontAwesome").getIcon("question"));
+    _helpAction.setShortcut(tr("F1"));
+    _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+
+    connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
+        _viewPlugin->getTriggerHelpAction().trigger();
+    });
+
     getOverlayWidget().show();
 }
 
@@ -28,7 +42,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
     DockWidget(title, parent),
     _viewPlugin(viewPlugin),
     _viewPluginKind(),
-    _viewPluginMap()
+    _viewPluginMap(),
+    _helpAction(this, "Help")
 {
     Q_ASSERT(_viewPlugin != nullptr);
 
@@ -95,6 +110,12 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
 
 void ViewPluginDockWidget::initializeSettingsMenu()
 {
-    _settingsMenu.addAction(&_viewPlugin->getEditActionsAction());
+    if (_viewPlugin->hasHelp())
+        _settingsMenu.addAction(&_helpAction);
+
     _settingsMenu.addAction(&_viewPlugin->getScreenshotAction());
+
+    _settingsMenu.addSeparator();
+
+    _settingsMenu.addAction(&_viewPlugin->getEditActionsAction());
 }

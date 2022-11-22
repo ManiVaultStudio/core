@@ -19,24 +19,6 @@ using namespace hdps;
 using namespace hdps::plugin;
 using namespace hdps::util;
 
-template <class WidgetClass>
-WidgetClass* findParent(const QWidget* widget)
-{
-    auto parentWidget = widget->parentWidget();
-
-    while (parentWidget)
-    {
-        auto parentImpl = qobject_cast<WidgetClass*>(parentWidget);
-
-        if (parentImpl)
-            return parentImpl;
-        
-        parentWidget = parentWidget->parentWidget();
-    }
-
-    return 0;
-}
-
 QMap<DockWidgetArea, QString> DockManager::dockWidgetAreaStrings = {
     { NoDockWidgetArea, "None" },
     { LeftDockWidgetArea, "Left" },
@@ -64,6 +46,7 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager::setConfigFlag(CDockManager::DockAreaHasUndockButton, false);
     CDockManager::setConfigFlag(CDockManager::DockAreaHasTabsMenuButton, true);
     CDockManager::setConfigFlag(CDockManager::DockAreaDynamicTabsMenuButtonVisibility, false);
+    CDockManager::setConfigFlag(CDockManager::AllTabsHaveCloseButton, true);
 }
 
 ads::CDockAreaWidget* DockManager::findDockAreaWidget(QWidget* widget)
@@ -242,7 +225,8 @@ void DockManager::reset()
 #endif
 
     for (auto dockWidget : dockWidgetsMap().values())
-        removeDockWidget(dockWidget);
+        if (dockWidget != &_centralDockWidget)
+            removeDockWidget(dockWidget);
 
-    setCentralWidget(&_centralDockWidget);
+    //setCentralWidget(&_centralDockWidget);
 }

@@ -7,7 +7,8 @@
 
 #include <DockWidgetTab.h>
 
-#include <QLayout>
+#include <QBoxLayout>
+#include <QToolButton>
 
 #ifdef _DEBUG
     #define DOCK_WIDGET_VERBOSE
@@ -23,7 +24,7 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     CDockWidget(title, parent),
     Serializable(title),
     _overlayWidget(this, Application::getIconFont("FontAwesome").getIcon("hourglass-half"), "Loading", QString("Waiting for %1 to load...").arg(title)),
-    _settingsToolButton()
+    _settingsToolButton(nullptr)
 {
     auto& widgetFader = _overlayWidget.getWidgetFader();
 
@@ -36,28 +37,30 @@ void DockWidget::showEvent(QShowEvent* showEvent)
 {
     auto settingsMenu = this->getSettingsMenu();
 
-    if (settingsMenu) {
-        auto toolButton = new QToolButton();
+    if (_settingsToolButton == nullptr) {
+        _settingsToolButton = new QToolButton();
 
-        toolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("bars"));
-        toolButton->setToolTip("Adjust view settings");
-        toolButton->setAutoRaise(true);
-        toolButton->setPopupMode(QToolButton::InstantPopup);
-        toolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
-        toolButton->setMenu(settingsMenu);
+        _settingsToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("bars"));
+        _settingsToolButton->setToolTip("Adjust view settings");
+        _settingsToolButton->setAutoRaise(true);
+        _settingsToolButton->setPopupMode(QToolButton::InstantPopup);
+        _settingsToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
 
-        tabWidget()->layout()->addWidget(toolButton);
+        //auto closeButton = dynamic_cast<QToolButton*>(tabWidget()->layout()->itemAt(1)->widget());
+
+        //if (closeButton)
+        //    closeButton->setIcon(Application::getIconFont("FontAwesome").getIcon("bars"));
+
+        dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertWidget(3, _settingsToolButton);
     }
+
+    if (settingsMenu)
+        _settingsToolButton->setMenu(settingsMenu);
 }
 
 hdps::gui::OverlayWidget& DockWidget::getOverlayWidget()
 {
     return _overlayWidget;
-}
-
-QToolButton& DockWidget::getSettingsToolButton()
-{
-    return _settingsToolButton;
 }
 
 QMenu* DockWidget::getSettingsMenu()

@@ -70,9 +70,6 @@ private:
      */
     std::int32_t getNumberOfOpenViewPluginDockWidgets() const;
 
-    /** Resets the visualization dock manager, it removes all view plugin dock widgets */
-    void reset();
-
     /**
      * Find the dock area widget where the widget of \p viewPlugin resides
      * @param viewPlugin Pointer to view plugin that holds the widget
@@ -81,8 +78,7 @@ private:
     ads::CDockAreaWidget* findDockAreaWidget(hdps::plugin::ViewPlugin* viewPlugin);
 
 private:
-    QWidget                     _widget;                    /** Widget for display in the dock widget */
-    DockManager                 _dockManager;               /** Dock manager */
-    LogoWidget                  _logoWidget;                /** Logo widget for logo dock widget */
-    ViewPluginDockWidgets       _viewPluginDockWidgets;     /** Added view plugin dock widgets */
+    QWidget         _widget;            /** Widget for display in the dock widget */
+    DockManager     _dockManager;       /** Dock manager */
+    LogoWidget      _logoWidget;        /** Logo widget for logo dock widget */
 };
