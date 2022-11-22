@@ -18,7 +18,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, QWidget* parent
     DockWidget(title, parent),
     _viewPlugin(nullptr),
     _viewPluginKind(),
-    _viewPluginMap()
+    _viewPluginMap(),
+    _settingsMenu()
 {
     getOverlayWidget().show();
 }
@@ -32,6 +33,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
     Q_ASSERT(_viewPlugin != nullptr);
 
     setWidget(&_viewPlugin->getWidget());
+    initializeSettingsMenu();
 }
 
 void ViewPluginDockWidget::loadViewPlugin()
@@ -47,6 +49,7 @@ void ViewPluginDockWidget::loadViewPlugin()
             _viewPlugin->fromVariantMap(_viewPluginMap);
 
             setWidget(&_viewPlugin->getWidget());
+            initializeSettingsMenu();
         }
     } else {
         auto& overlayWidget = getOverlayWidget();
@@ -59,6 +62,11 @@ void ViewPluginDockWidget::loadViewPlugin()
 ViewPlugin* ViewPluginDockWidget::getViewPlugin()
 {
     return _viewPlugin;
+}
+
+QMenu* ViewPluginDockWidget::getSettingsMenu()
+{
+    return &_settingsMenu;
 }
 
 void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
@@ -83,4 +91,10 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
     variantMap["ViewPlugin"] = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin()->toVariantMap();
 
     return variantMap;
+}
+
+void ViewPluginDockWidget::initializeSettingsMenu()
+{
+    _settingsMenu.addAction(&_viewPlugin->getEditActionsAction());
+    _settingsMenu.addAction(&_viewPlugin->getScreenshotAction());
 }

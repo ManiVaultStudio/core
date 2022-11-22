@@ -4,6 +4,8 @@
 
 #include <ViewPlugin.h>
 
+#include <QMenu>
+
 /**
  * Visualization widget class
  *
@@ -39,6 +41,12 @@ public:
      */
     hdps::plugin::ViewPlugin* getViewPlugin();
 
+    /**
+     * Get settings menu for view plugin dock widget (edit view, create screenshot etc.)
+     * @return Pointer to settings menu
+     */
+    QMenu* getSettingsMenu() override;
+
 public: // Serialization
 
     /**
@@ -54,9 +62,15 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
+
+    /** Populates the settings menu with actions from the view plugin */
+    void initializeSettingsMenu();
+
+private:
     hdps::plugin::ViewPlugin*   _viewPlugin;        /** Pointer to view plugin */
     QString                     _viewPluginKind;    /** Kind of (view) plugin */
     QVariantMap                 _viewPluginMap;     /** View plugin cached map for deferred loading */
+    QMenu                       _settingsMenu;      /** Menu for view plugin settings */
 };
 
 using ViewPluginDockWidgets = QVector<ViewPluginDockWidget*>;

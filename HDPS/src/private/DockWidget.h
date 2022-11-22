@@ -5,6 +5,9 @@
 
 #include <DockWidget.h>
 
+#include <QToolButton>
+#include <QMenu>
+
 /**
  * Dock widget class
  *
@@ -24,10 +27,28 @@ public:
     DockWidget(const QString& title, QWidget* parent = nullptr);
 
     /**
+     * Invoked when the menu is shown
+     * @param showEvent Pointer to the show event
+     */
+    void showEvent(QShowEvent* showEvent) override;
+
+    /**
      * Get overlay widget (for showing docking information)
      * @return Reference to overlay widget
      */
     hdps::gui::OverlayWidget& getOverlayWidget();
+
+    /**
+     * Get settings tool button (located in the dock widget tab bar)
+     * @return Reference to settings tool button
+     */
+    QToolButton& getSettingsToolButton();
+
+    /**
+     * Get settings menu (when derived dock widgets return a valid menu, a tool button will in the tab bar that shows this menu)
+     * @return Pointer to settings menu
+     */
+    virtual QMenu* getSettingsMenu();
 
     /**
      * Override ADS dock widget
@@ -51,7 +72,9 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    hdps::gui::OverlayWidget    _overlayWidget;     /** Overlay widget for showing loading information */
+    hdps::gui::OverlayWidget    _overlayWidget;         /** Overlay widget for showing loading information */
+    QToolButton                 _settingsToolButton;    /** Settings tool button (located in the dock widget tab bar) */
+    QMenu                       _settingsMenu;          /** Settings menu for settings tool button */
 };
 
 using DockWidgets = QVector<DockWidget*>;

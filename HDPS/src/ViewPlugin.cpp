@@ -5,6 +5,7 @@
 #include "AbstractLayoutManager.h"
 
 #include <QWidget>
+#include <QFileDialog>
 
 namespace hdps::plugin
 {
@@ -12,7 +13,8 @@ namespace hdps::plugin
 ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
     _widget(),
-    _editActionsAction(&_widget, "Edit view plugin actions"),
+    _editActionsAction(&_widget, "Edit..."),
+    _screenshotAction(&_widget, "Create screenshot..."),
     _mayCloseAction(this, "May close", true, true),
     _mayFloatAction(this, "May float", true, true),
     _mayMoveAction(this, "May move", true, true),
@@ -26,10 +28,16 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _widget.addAction(&_editActionsAction);
     _widget.addAction(&_triggerHelpAction);
 
+    _editActionsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     _editActionsAction.setShortcut(tr("F12"));
     _editActionsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+
+    _screenshotAction.setIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
+    _screenshotAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
     _mayCloseAction.setToolTip("Determines whether this view plugin may be closed or not");
     _mayCloseAction.setConnectionPermissionsToNone();
@@ -59,6 +67,27 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
         ProjectEditorDialog viewPluginEditorDialog(nullptr, this);
         viewPluginEditorDialog.exec();
+    });
+
+    connect(&_screenshotAction, &TriggerAction::triggered, this, [this]() -> void {
+        QFileDialog fileDialog;
+
+        fileDialog.setWindowTitle("Save screenshot to image file");
+        fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
+        fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+        fileDialog.setFileMode(QFileDialog::ExistingFile);
+        fileDialog.setNameFilters({ "Image files (*.png)" });
+        fileDialog.setDefaultSuffix(".png");
+
+        if (fileDialog.exec() == 0)
+            return;
+
+        if (fileDialog.selectedFiles().count() != 1)
+            throw std::runtime_error("Only one file may be selected");
+        
+        auto widgetPixmap = getWidget().grab();
+
+        widgetPixmap.toImage().save(fileDialog.selectedFiles().first());
     });
 
     connect(&_triggerHelpAction, &TriggerAction::triggered, this, [this]() -> void {

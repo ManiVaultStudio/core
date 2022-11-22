@@ -7,7 +7,7 @@
 
 #include <DockWidgetTab.h>
 
-#include <QToolButton>
+#include <QLayout>
 
 #ifdef _DEBUG
     #define DOCK_WIDGET_VERBOSE
@@ -22,10 +22,9 @@ using namespace hdps::plugin;
 DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     CDockWidget(title, parent),
     Serializable(title),
-    _overlayWidget(this, Application::getIconFont("FontAwesome").getIcon("hourglass-half"), "Loading", QString("Waiting for %1 to load...").arg(title))
+    _overlayWidget(this, Application::getIconFont("FontAwesome").getIcon("hourglass-half"), "Loading", QString("Waiting for %1 to load...").arg(title)),
+    _settingsToolButton()
 {
-    //tabWidget()->layout()->addWidget(new QToolButton("Do it!"));
-
     auto& widgetFader = _overlayWidget.getWidgetFader();
 
     widgetFader.setMaximumOpacity(0.6f);
@@ -33,9 +32,37 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     widgetFader.setFadeOutDuration(800);
 }
 
+void DockWidget::showEvent(QShowEvent* showEvent)
+{
+    auto settingsMenu = this->getSettingsMenu();
+
+    if (settingsMenu) {
+        auto toolButton = new QToolButton();
+
+        toolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("bars"));
+        toolButton->setToolTip("Adjust view settings");
+        toolButton->setAutoRaise(true);
+        toolButton->setPopupMode(QToolButton::InstantPopup);
+        toolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
+        toolButton->setMenu(settingsMenu);
+
+        tabWidget()->layout()->addWidget(toolButton);
+    }
+}
+
 hdps::gui::OverlayWidget& DockWidget::getOverlayWidget()
 {
     return _overlayWidget;
+}
+
+QToolButton& DockWidget::getSettingsToolButton()
+{
+    return _settingsToolButton;
+}
+
+QMenu* DockWidget::getSettingsMenu()
+{
+    return nullptr;
 }
 
 void DockWidget::setWidget(QWidget* widget, eInsertMode insertMode /*= AutoScrollArea*/)
