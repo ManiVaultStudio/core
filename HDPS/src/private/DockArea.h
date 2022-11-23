@@ -192,7 +192,7 @@ inline QDebug operator << (QDebug debug, const DockArea& dockArea)
         splitterSizesString << QString::number(splitterSize);
 
     if (!splitterSizesString.isEmpty())
-        addProperty("splitter_sizes", splitterSizesString.join(", "));
+        addProperty("splitter_sizes", QString("[%1]").arg(splitterSizesString.join(", ")));
 
     outputDebug << getIndentation(dockArea.getDepth()) << "Dock area " << QString("(%1)").arg(propertiesString.join(", ")) << "\n";
 

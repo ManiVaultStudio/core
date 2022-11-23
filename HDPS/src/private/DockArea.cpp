@@ -98,7 +98,7 @@ void DockArea::fromVariantMap(const QVariantMap& variantMap)
         DockAreas children;
 
         for (auto child : variantMap["Children"].toList()) {
-            DockArea childDockArea(_dockManager);
+            DockArea childDockArea(_dockManager, _depth + 1);
 
             childDockArea.fromVariantMap(child.toMap());
 
@@ -179,10 +179,8 @@ void DockArea::setChildren(DockAreas children)
 {
     _children = children;
 
-    for (auto& child : _children) {
+    for (auto& child : _children)
         child.setParent(this);
-        child.setDepth(_depth + 1);
-    }
 }
 
 std::uint32_t DockArea::getChildIndex(const DockArea& child) const

@@ -73,34 +73,6 @@ public: // Serialization
 
 private:
 
-    /**
-     * Load dock areas from variant map
-     * @param dockAreasList Dock areas variant list
-     * @param depth Tree depth
-     */
-    QVector<DockArea> dockAreasFromVariantMap(const QVariantList& dockAreasList, std::uint32_t depth = 0);
-
-    /**
-     * Load dock area from variant map
-     * @param dockAreaMap Dock area variant map
-     * @param depth Tree depth
-     */
-    DockArea dockAreaFromVariantMap(const QVariantMap& dockAreaMap, std::uint32_t depth = 0);
-
-    /**
-     * Load dock widgets from variant list
-     * @param dockWidgetsList Dock widgets variant list
-     * @return Dock widgets
-     */
-    DockWidgets dockWidgetsFromVariantList(const QVariantList& dockWidgetsList);
-
-    /**
-     * Save widget to variant map
-     * @param widget Pointer to widget
-     * @return Variant map representation of the widget
-     */
-    QVariantMap widgetToVariantMap(QWidget* widget) const;
-
     /** Resets the docking layout to defaults */
     void reset();
 

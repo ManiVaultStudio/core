@@ -14,7 +14,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
     _widget(),
     _editActionsAction(&_widget, "Edit..."),
-    _screenshotAction(&_widget, "Create screenshot..."),
+    _screenshotAction(&_widget, "Screenshot..."),
     _mayCloseAction(this, "May close", true, true),
     _mayFloatAction(this, "May float", true, true),
     _mayMoveAction(this, "May move", true, true),

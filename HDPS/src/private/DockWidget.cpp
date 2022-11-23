@@ -29,8 +29,8 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     auto& widgetFader = _overlayWidget.getWidgetFader();
 
     widgetFader.setMaximumOpacity(0.6f);
-    widgetFader.setFadeInDuration(250);
-    widgetFader.setFadeOutDuration(800);
+    widgetFader.setFadeInDuration(0);
+    widgetFader.setFadeOutDuration(0);
 }
 
 void DockWidget::showEvent(QShowEvent* showEvent)
@@ -45,11 +45,6 @@ void DockWidget::showEvent(QShowEvent* showEvent)
         _settingsToolButton->setAutoRaise(true);
         _settingsToolButton->setPopupMode(QToolButton::InstantPopup);
         _settingsToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
-
-        //auto closeButton = dynamic_cast<QToolButton*>(tabWidget()->layout()->itemAt(1)->widget());
-
-        //if (closeButton)
-        //    closeButton->setIcon(Application::getIconFont("FontAwesome").getIcon("bars"));
 
         dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertWidget(3, _settingsToolButton);
     }
