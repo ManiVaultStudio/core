@@ -135,19 +135,29 @@ void LayoutManager::reset()
 
 void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    variantMapMustContain(variantMap, "Docking");
-    variantMapMustContain(variantMap, "Visualization");
-        
-    _dockManager->fromVariantMap(variantMap["Docking"].toMap());
+    variantMapMustContain(variantMap, "DockingManagers");
 
-    _viewPluginsDockWidget.fromVariantMap(variantMap["Visualization"].toMap());
+    const auto dockingManagersMap = variantMap["DockingManagers"].toMap();
+
+    variantMapMustContain(dockingManagersMap, "Main");
+    variantMapMustContain(dockingManagersMap, "ViewPlugins");
+        
+    _dockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
+    _viewPluginsDockWidget.getDockManager().fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
 }
 
 QVariantMap LayoutManager::toVariantMap() const
 {
+    const auto mainDockingManager           = _dockManager->toVariantMap();
+    const auto viewPluginsDockingManager    = _viewPluginsDockWidget.getDockManager().toVariantMap();
+
+    const QVariantMap dockingManagers = {
+        { "Main", mainDockingManager },
+        { "ViewPlugins", viewPluginsDockingManager }
+    };
+
     return {
-        { "Docking", _dockManager->toVariantMap() },
-        { "Visualization", _viewPluginsDockWidget.toVariantMap() }
+        { "DockingManagers", dockingManagers }
     };
 }
 

@@ -12,7 +12,7 @@
  * View plugins dock widget class
  *
  * This dock widget is placed in the center of the main docking manager.
- * All created (non-system view plugins) are dock in the docking manager of this dock widget.
+ * All created (non-system view plugins) are docked in the docking manager of this dock widget.
  *
  * @author Thomas Kroes
  */
@@ -51,20 +51,6 @@ public:
      * @param dockArea Dock area in which new view plugins will be docked
      */
     void addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget, hdps::plugin::ViewPlugin* dockToViewPlugin, hdps::gui::DockAreaFlag dockArea);
-
-public: // Serialization
-
-    /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
-
-    /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
-     */
-    QVariantMap toVariantMap() const override;
 
 private:
 

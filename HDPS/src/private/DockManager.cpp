@@ -109,6 +109,8 @@ QVariantMap DockManager::toVariantMap() const
 
     DockArea rootDockArea(const_cast<DockManager*>(this), 0);
 
+    qDebug() << rootSplitter();
+
     rootDockArea.buildTreeFromDocking(rootSplitter());
 
     return {

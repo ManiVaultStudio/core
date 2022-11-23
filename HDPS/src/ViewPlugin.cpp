@@ -15,6 +15,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _widget(),
     _editActionsAction(&_widget, "Edit..."),
     _screenshotAction(&_widget, "Screenshot..."),
+    _isolateAction(&_widget, "Isolate"),
     _mayCloseAction(this, "May close", true, true),
     _mayFloatAction(this, "May float", true, true),
     _mayMoveAction(this, "May move", true, true),
@@ -38,6 +39,12 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _screenshotAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+
+    _isolateAction.setIcon(Application::getIconFont("FontAwesome").getIcon("crosshairs"));
+    _isolateAction.setShortcut(tr("F2"));
+    _isolateAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _isolateAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _isolateAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
     _mayCloseAction.setToolTip("Determines whether this view plugin may be closed or not");
     _mayCloseAction.setConnectionPermissionsToNone();

@@ -76,22 +76,6 @@ void ViewPluginsDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDockWi
     updateCentralWidget();
 }
 
-void ViewPluginsDockWidget::fromVariantMap(const QVariantMap& variantMap)
-{
-    _dockManager.fromVariantMap(variantMap["Docking"].toMap());
-
-    updateCentralWidget();
-}
-
-QVariantMap ViewPluginsDockWidget::toVariantMap() const
-{
-    QVariantMap variantMap = DockWidget::toVariantMap();
-
-    variantMap["Docking"] = _dockManager.toVariantMap();
-
-    return variantMap;
-}
-
 void ViewPluginsDockWidget::updateCentralWidget()
 {
     if (_dockManager.getCentralDockAreaWidget() == nullptr)

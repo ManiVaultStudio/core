@@ -68,6 +68,7 @@ public: // Action getters
 
     gui::TriggerAction& getEditActionsAction() { return _editActionsAction; }
     gui::TriggerAction& getScreenshotAction() { return _screenshotAction; }
+    gui::TriggerAction& getIsolateAction() { return _isolateAction; }
     gui::ToggleAction& getMayCloseAction() { return _mayCloseAction; }
     gui::ToggleAction& getMayFloatAction() { return _mayFloatAction; }
     gui::ToggleAction& getMayMoveAction() { return _mayMoveAction; }
@@ -77,6 +78,7 @@ private:
     QWidget                 _widget;                /** Widget representation of the plugin */
     gui::TriggerAction      _editActionsAction;     /** Trigger action to start editing the view plugin action hierarchy */
     gui::TriggerAction      _screenshotAction;      /** Trigger action to create a screenshot */
+    gui::TriggerAction      _isolateAction;         /** Trigger action to isolate the view plugins from the other view plugins */
     gui::ToggleAction       _mayCloseAction;        /** Action for toggling whether a view plugin may be closed */
     gui::ToggleAction       _mayFloatAction;        /** Action for toggling whether a view plugin may float */
     gui::ToggleAction       _mayMoveAction;         /** Action for toggling whether a view plugin may be moved */

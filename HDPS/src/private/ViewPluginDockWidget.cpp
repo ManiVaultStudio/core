@@ -121,6 +121,7 @@ void ViewPluginDockWidget::initializeSettingsMenu()
         _settingsMenu.addAction(&_helpAction);
 
     _settingsMenu.addAction(&_viewPlugin->getScreenshotAction());
+    _settingsMenu.addAction(&_viewPlugin->getIsolateAction());
 
     _settingsMenu.addSeparator();
 

@@ -123,11 +123,6 @@ void DockArea::fromVariantMap(const QVariantMap& variantMap)
             else {
                 if (!ignoreTypes.contains(dockWidgetType))
                     _dockWidgets << new DockWidget(dockWidget.toMap()["Title"].toString());
-
-                //if (!ignoreTypes.contains(dockWidgetType))
-                //    _dockWidgets << _dockManager->getCentralDockWidget();
-                //else
-                //    _dockWidgets << new DockWidget(dockWidget.toMap()["Title"].toString());
             }
 
             if (!_dockWidgets.isEmpty())

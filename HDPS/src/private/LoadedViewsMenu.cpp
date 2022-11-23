@@ -13,9 +13,10 @@ using namespace hdps::util;
 LoadedViewsMenu::LoadedViewsMenu(QWidget *parent /*= nullptr*/) :
     QMenu(parent)
 {
-    setTitle("Loaded");
-    setToolTip("Manage loaded view plugins");
+    setTitle("Toggle");
+    setToolTip("Toggle loaded view plugin visibility");
     setEnabled(!Application::core()->getPluginsByType({ plugin::Type::VIEW }).isEmpty());
+    setIcon(Application::getIconFont("FontAwesome").getIcon("low-vision"));
 }
 
 void LoadedViewsMenu::showEvent(QShowEvent* showEvent)
