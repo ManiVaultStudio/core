@@ -26,11 +26,22 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     _overlayWidget(this, Application::getIconFont("FontAwesome").getIcon("hourglass-half"), "Loading", QString("Waiting for %1 to load...").arg(title)),
     _settingsToolButton(nullptr)
 {
+#ifdef DOCK_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__ << title;
+#endif
+
+    setObjectName("DockWidget");
+
     auto& widgetFader = _overlayWidget.getWidgetFader();
 
     widgetFader.setMaximumOpacity(0.6f);
     widgetFader.setFadeInDuration(0);
     widgetFader.setFadeOutDuration(0);
+}
+
+QString DockWidget::getTypeString() const
+{
+    return "DockWidget";
 }
 
 void DockWidget::showEvent(QShowEvent* showEvent)
@@ -90,6 +101,7 @@ QVariantMap DockWidget::toVariantMap() const
 {
     return {
         { "Title", windowTitle() },
+        { "Type", this->getTypeString() },
         { "Closed", isClosed() },
         { "Closable", features().testFlag(CDockWidget::DockWidgetClosable) },
         { "Movable", features().testFlag(CDockWidget::DockWidgetMovable) },

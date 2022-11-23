@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DockArea.h"
+#include "CentralDockWidget.h"
 
 #include <util/Serializable.h>
 
@@ -78,7 +79,7 @@ private:
 
 private:
     ads::CDockAreaWidget*   _centralDockAreaWidget;     /** Pointer to central dock area widget */
-    DockWidget              _centralDockWidget;         /** Default central dock widget */
+    CentralDockWidget       _centralDockWidget;         /** Default central dock widget */
 
     friend class ViewPluginsDockWidget;
 };

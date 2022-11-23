@@ -112,19 +112,26 @@ void DockArea::fromVariantMap(const QVariantMap& variantMap)
 
         DockWidgets dockWidgets;
 
-        for (const auto& dockWidget : variantMap["DockWidgets"].toList()) {
-            const auto dockWidgetMap = dockWidget.toMap();
+        const QStringList ignoreTypes{ "CentralDockWidget", "ViewPluginsDockWidget" };
 
-            if (dockWidgetMap.contains("ViewPlugin"))
+        for (const auto& dockWidget : variantMap["DockWidgets"].toList()) {
+            const auto dockWidgetMap    = dockWidget.toMap();
+            const auto dockWidgetType   = dockWidgetMap["Type"].toString();
+
+            if (dockWidgetType == "ViewPluginDockWidget")
                 _dockWidgets << new ViewPluginDockWidget(dockWidget.toMap()["Title"].toString());
             else {
-                if (dockWidget.toMap()["Title"] == "CentralDockWidget")
-                    _dockWidgets << _dockManager->getCentralDockWidget();
-                else
+                if (!ignoreTypes.contains(dockWidgetType))
                     _dockWidgets << new DockWidget(dockWidget.toMap()["Title"].toString());
+
+                //if (!ignoreTypes.contains(dockWidgetType))
+                //    _dockWidgets << _dockManager->getCentralDockWidget();
+                //else
+                //    _dockWidgets << new DockWidget(dockWidget.toMap()["Title"].toString());
             }
 
-            _dockWidgets.last()->fromVariantMap(dockWidgetMap);
+            if (!_dockWidgets.isEmpty())
+                _dockWidgets.last()->fromVariantMap(dockWidgetMap);
         }
     }
 }
@@ -242,7 +249,6 @@ void DockArea::createDockWidgets(std::uint32_t depth)
         auto dockWidget             = _dockWidgets.count() == 0 ? new DockWidget("Placeholder dock widget") : _dockWidgets.first();
         auto targetDockWidgetArea   = getParent()->getCurrentDockAreaWidget();
 
-        //qDebug() << __FUNCTION__ << getDockWidgets()
         if (dockWidgetArea)
             getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, targetDockWidgetArea));
         else

@@ -28,6 +28,12 @@ public:
     DockWidget(const QString& title, QWidget* parent = nullptr);
 
     /**
+     * Get string that describes the dock widget type
+     * @return Type string
+     */
+    virtual QString getTypeString() const;
+
+    /**
      * Invoked when the menu is shown
      * @param showEvent Pointer to the show event
      */

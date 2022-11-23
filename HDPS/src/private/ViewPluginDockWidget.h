@@ -32,6 +32,12 @@ public:
      */
     ViewPluginDockWidget(const QString& title, hdps::plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
 
+    /**
+     * Get string that describes the dock widget type
+     * @return Type string
+     */
+    QString getTypeString() const override;
+
     /** Load view plugin */
     void loadViewPlugin();
 

@@ -17,7 +17,7 @@ using namespace hdps::util;
 using namespace hdps::gui;
 
 ViewPluginsDockWidget::ViewPluginsDockWidget(QWidget* parent /*= nullptr*/) :
-    DockWidget("Visualization", parent),
+    CentralDockWidget(parent),
     _widget(),
     _dockManager(&_widget),   
     _logoWidget()
@@ -32,6 +32,11 @@ ViewPluginsDockWidget::ViewPluginsDockWidget(QWidget* parent /*= nullptr*/) :
 
     connect(&_dockManager, &CDockManager::dockAreasAdded, this, &ViewPluginsDockWidget::updateCentralWidget);
     connect(&_dockManager, &CDockManager::dockAreasRemoved, this, &ViewPluginsDockWidget::updateCentralWidget);
+}
+
+QString ViewPluginsDockWidget::getTypeString() const
+{
+    return "ViewPluginsDockWidget";
 }
 
 DockManager& ViewPluginsDockWidget::getDockManager()

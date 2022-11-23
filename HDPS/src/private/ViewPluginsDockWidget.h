@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DockWidget.h"
+#include "CentralDockWidget.h"
 #include "LogoWidget.h"
 #include "DockManager.h"
 #include "DockWidget.h"
@@ -16,7 +16,7 @@
  *
  * @author Thomas Kroes
  */
-class ViewPluginsDockWidget : public DockWidget
+class ViewPluginsDockWidget : public CentralDockWidget
 {
 public:
 
@@ -25,6 +25,12 @@ public:
      * @param parent Pointer to parent widget
      */
     ViewPluginsDockWidget(QWidget* parent = nullptr);
+
+    /**
+     * Get string that describes the dock widget type
+     * @return Type string
+     */
+    QString getTypeString() const override;
 
     /**
      * Get dock manager

@@ -32,8 +32,10 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
     Serializable("Dock manager"),
     _centralDockAreaWidget(nullptr),
-    _centralDockWidget("CentralDockWidget")
+    _centralDockWidget(this)
 {
+    _centralDockWidget.setObjectName("CentralDockWidget");
+
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);

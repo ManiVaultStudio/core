@@ -25,6 +25,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, QWidget* parent
     _settingsMenu(),
     _helpAction(this, "Help")
 {
+    setObjectName("ViewPluginDockWidget");
+
     _helpAction.setIcon(Application::getIconFont("FontAwesome").getIcon("question"));
     _helpAction.setShortcut(tr("F1"));
     _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
@@ -49,6 +51,11 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
 
     setWidget(&_viewPlugin->getWidget());
     initializeSettingsMenu();
+}
+
+QString ViewPluginDockWidget::getTypeString() const
+{
+    return "ViewPluginDockWidget";
 }
 
 void ViewPluginDockWidget::loadViewPlugin()
