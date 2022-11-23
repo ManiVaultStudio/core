@@ -135,12 +135,18 @@ void LayoutManager::reset()
 
 void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
 {
+    variantMapMustContain(variantMap, "Docking");
+    variantMapMustContain(variantMap, "Visualization");
+        
+    _dockManager->fromVariantMap(variantMap["Docking"].toMap());
+
     _visualizationDockWidget.fromVariantMap(variantMap["Visualization"].toMap());
 }
 
 QVariantMap LayoutManager::toVariantMap() const
 {
     return {
+        { "Docking", _dockManager->toVariantMap() },
         { "Visualization", _visualizationDockWidget.toVariantMap() }
     };
 }
