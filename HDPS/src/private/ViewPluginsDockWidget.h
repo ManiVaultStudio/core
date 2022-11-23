@@ -9,13 +9,14 @@
 #include <ViewPlugin.h>
 
 /**
- * Visualization widget class
+ * View plugins dock widget class
  *
- * Widget class which contains a docking manager for docking view plugins (non-standard)
+ * This dock widget is placed in the center of the main docking manager.
+ * All created (non-system view plugins) are dock in the docking manager of this dock widget.
  *
  * @author Thomas Kroes
  */
-class VisualizationDockWidget : public DockWidget
+class ViewPluginsDockWidget : public DockWidget
 {
 public:
 
@@ -23,7 +24,7 @@ public:
      * Constructor
      * @param parent Pointer to parent widget
      */
-    VisualizationDockWidget(QWidget* parent = nullptr);
+    ViewPluginsDockWidget(QWidget* parent = nullptr);
 
     /**
      * Get dock manager

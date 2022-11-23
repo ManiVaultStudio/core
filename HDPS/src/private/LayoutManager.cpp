@@ -37,7 +37,7 @@ public:
 
         QMenu* menu = nullptr;
 
-        if (dockManager->objectName() == "Main") {
+        if (dockManager->objectName() == "MainDockManager") {
             auto loadSystemViewMenu = new LoadSystemViewMenu(nullptr, dockAreaWidget);
 
             const auto updateToolButtonReadOnly = [addViewPluginToolButton, loadSystemViewMenu]() -> void {
@@ -52,7 +52,7 @@ public:
             updateToolButtonReadOnly();
         }
 
-        if (dockManager->objectName() == "Visualization") {
+        if (dockManager->objectName() == "ViewPluginsDockManager") {
             auto loadViewMenu = new ViewMenu(nullptr, ViewMenu::LoadViewPlugins, dockAreaWidget);
 
             const auto updateToolButtonReadOnly = [addViewPluginToolButton, loadViewMenu]() -> void {
@@ -98,12 +98,12 @@ namespace hdps::gui
 LayoutManager::LayoutManager() :
     AbstractLayoutManager(),
     _dockManager(),
-    _visualizationDockArea(nullptr),
-    _visualizationDockWidget(),
+    _viewPluginsDockArea(nullptr),
+    _viewPluginsDockWidget(),
     _initialized(false)
 {
     setText("Layout manager");
-    setObjectName("Layout");
+    setObjectName("LayoutManager");
 
     ads::CDockComponentsFactory::setFactory(new CustomComponentsFactory());
 }
@@ -119,11 +119,11 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
 
     _dockManager = QSharedPointer<DockManager>::create(mainWindow);
 
-    _dockManager->setObjectName("Main");
+    _dockManager->setObjectName("MainDockManager");
 
-    _visualizationDockArea = _dockManager->setCentralWidget(&_visualizationDockWidget);
+    _viewPluginsDockArea = _dockManager->setCentralWidget(&_viewPluginsDockWidget);
     
-    _visualizationDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
+    _viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
     _initialized = true;
 }
@@ -140,14 +140,14 @@ void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
         
     _dockManager->fromVariantMap(variantMap["Docking"].toMap());
 
-    _visualizationDockWidget.fromVariantMap(variantMap["Visualization"].toMap());
+    _viewPluginsDockWidget.fromVariantMap(variantMap["Visualization"].toMap());
 }
 
 QVariantMap LayoutManager::toVariantMap() const
 {
     return {
         { "Docking", _dockManager->toVariantMap() },
-        { "Visualization", _visualizationDockWidget.toVariantMap() }
+        { "Visualization", _viewPluginsDockWidget.toVariantMap() }
     };
 }
 
@@ -196,7 +196,7 @@ void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPl
     if (viewPlugin->isSystemViewPlugin())
         _dockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _dockManager->findDockAreaWidget(&dockToViewPlugin->getWidget()));
     else
-        _visualizationDockWidget.addViewPlugin(viewPluginDockWidget, dockToViewPlugin, dockArea);
+        _viewPluginsDockWidget.addViewPlugin(viewPluginDockWidget, dockToViewPlugin, dockArea);
 }
 
 }

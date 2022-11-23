@@ -88,7 +88,7 @@ set(PRIVATE_LAYOUT_MANAGER_HEADERS
     src/private/LayoutManager.h
     src/private/DockManager.h
     src/private/DockComponentsFactory.h
-    src/private/VisualizationDockWidget.h
+    src/private/ViewPluginsDockWidget.h
     src/private/ViewPluginDockWidget.h
     src/private/DockWidget.h
     src/private/DockArea.h
@@ -98,7 +98,7 @@ set(PRIVATE_LAYOUT_MANAGER_SOURCES
     src/private/LayoutManager.cpp
     src/private/DockManager.cpp
     src/private/DockComponentsFactory.cpp
-    src/private/VisualizationDockWidget.cpp
+    src/private/ViewPluginsDockWidget.cpp
     src/private/ViewPluginDockWidget.cpp
     src/private/DockWidget.cpp
     src/private/DockArea.cpp
