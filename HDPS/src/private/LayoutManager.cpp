@@ -105,7 +105,6 @@ LayoutManager::LayoutManager() :
     _viewPluginsDockArea(nullptr),
     _viewPluginsDockWidget(),
     _initialized(false),
-    _viewPluginDockWidgets(),
     _cachedDockWidgetsVisibility()
 {
     setText("Layout manager");
@@ -136,14 +135,10 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
 
 void LayoutManager::reset()
 {
-    _dockManager.reset();
-    _viewPluginDockWidgets.clear();
 }
 
 void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    _viewPluginDockWidgets.clear();
-
     variantMapMustContain(variantMap, "DockingManagers");
 
     const auto dockingManagersMap = variantMap["DockingManagers"].toMap();
@@ -153,12 +148,6 @@ void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
         
     _dockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
     _viewPluginsDockWidget.getDockManager().fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
-
-    qDebug() << _dockManager->getDockWidgetsOfType<ViewPluginDockWidget>().count();
-    qDebug() << _viewPluginsDockWidget.getDockManager().getDockWidgetsOfType<ViewPluginDockWidget>().count();
-
-    _viewPluginDockWidgets.append(_dockManager->getDockWidgetsOfType<ViewPluginDockWidget>());
-    _viewPluginDockWidgets.append(_viewPluginsDockWidget.getDockManager().getDockWidgetsOfType<ViewPluginDockWidget>());
 }
 
 QVariantMap LayoutManager::toVariantMap() const
@@ -180,7 +169,7 @@ void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPl
 {
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
-    _viewPluginDockWidgets << viewPluginDockWidget;
+    //_viewPluginDockWidgets << viewPluginDockWidget;
 
     if (viewPlugin->isSystemViewPlugin())
         _dockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _dockManager->findDockAreaWidget(&dockToViewPlugin->getWidget()));
@@ -194,22 +183,22 @@ void LayoutManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isola
     qDebug() << __FUNCTION__ << viewPlugin->getGuiName() << isolate;
 #endif
 
-    if (isolate) {
-        for (auto viewPluginDockWidget : _viewPluginDockWidgets) {
-            if (viewPlugin == viewPluginDockWidget->getViewPlugin())
-                continue;
+    //if (isolate) {
+    //    for (auto viewPluginDockWidget : _viewPluginDockWidgets) {
+    //        if (viewPlugin == viewPluginDockWidget->getViewPlugin())
+    //            continue;
 
-            _cachedDockWidgetsVisibility[viewPluginDockWidget] = !viewPluginDockWidget->isClosed();
+    //        _cachedDockWidgetsVisibility[viewPluginDockWidget] = !viewPluginDockWidget->isClosed();
 
-            viewPluginDockWidget->toggleView(false);
-        }
-    }
-    else {
-        for (auto dockWidget : _cachedDockWidgetsVisibility.keys())
-            dockWidget->toggleView(_cachedDockWidgetsVisibility[dockWidget]);
+    //        viewPluginDockWidget->toggleView(false);
+    //    }
+    //}
+    //else {
+    //    for (auto dockWidget : _cachedDockWidgetsVisibility.keys())
+    //        dockWidget->toggleView(_cachedDockWidgetsVisibility[dockWidget]);
 
-        _cachedDockWidgetsVisibility.clear();
-    }
+    //    _cachedDockWidgetsVisibility.clear();
+    //}
 }
 
 }

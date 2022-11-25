@@ -69,7 +69,6 @@ private:
     bool                            _initialized;                   /** Whether the layout manager is initialized or not */
     ads::CDockAreaWidget*           _viewPluginsDockArea;           /** Docking area for view plugins */
     ViewPluginsDockWidget           _viewPluginsDockWidget;         /** Dock widget for view plugins */
-    ViewPluginDockWidgets           _viewPluginDockWidgets;         /** Keeps track of all created view plugin dock widgets */
     QMap<DockWidget*, bool>         _cachedDockWidgetsVisibility;   /** Cached dock widgets visibility for view plugin isolation */
 };
 

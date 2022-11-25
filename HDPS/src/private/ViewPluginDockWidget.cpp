@@ -47,10 +47,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
     _viewPluginMap(),
     _helpAction(this, "Help")
 {
-    Q_ASSERT(_viewPlugin != nullptr);
-
     setViewPlugin(viewPlugin);
-
     initializeSettingsMenu();
 }
 

@@ -2,12 +2,14 @@
 
 #include "DockArea.h"
 #include "CentralDockWidget.h"
+#include "ViewPluginDockWidget.h"
 
 #include <ViewPlugin.h>
 
 #include <util/Serializable.h>
 
 #include <DockManager.h>
+#include <DockAreaWidget.h>
 
 #include <QString>
 
@@ -100,9 +102,62 @@ private:
     /** Resets the docking layout to defaults */
     void reset();
 
+    /**
+     * Invoked when a dock widget is added
+     * @param dockWidget Pointer to added dock widget
+     */
+    void dockWidgetAdded(ads::CDockWidget* dockWidget);
+
+    /**
+     * Invoked when a dock widget is about to be removed
+     * @param dockWidget Pointer to about to be removed dock widget
+     */
+    void dockWidgetAboutToBeRemoved(ads::CDockWidget* dockWidget);
+
 private:
     ads::CDockAreaWidget*   _centralDockAreaWidget;     /** Pointer to central dock area widget */
     CentralDockWidget       _centralDockWidget;         /** Default central dock widget */
+    ViewPluginDockWidgets   _viewPluginDockWidgets;     /** Keeps track of all created view plugin dock widgets */
 
     friend class ViewPluginsDockWidget;
 };
+
+/**
+ * Print dock manager to the console (for debugging purposes)
+ * @param debug Debug to print to
+ * @param dockArea Reference to dock manager to print
+ */
+inline QDebug operator << (QDebug debug, const DockManager& dockManager)
+{
+    auto outputDebug = debug.noquote().nospace();
+
+    const auto getIndentation = [](std::uint16_t depth) -> QString {
+        QString indentation;
+
+        for (int i = 0; i < depth * 3; i++)
+            indentation += " ";
+
+        return indentation;
+    };
+
+    const auto addProperty = [&](QStringList& propertiesString, const QString& name, const QString& value) -> void {
+        propertiesString << QString("%1=%2").arg(name, value);
+    };
+
+    QStringList dockManagerPropertiesString;
+
+    addProperty(dockManagerPropertiesString, "name", dockManager.objectName());
+
+    outputDebug << getIndentation(0) << "Dock manager" << QString("(%1)").arg(dockManagerPropertiesString.join(", ")) << "\n";
+
+    for (auto dockWidget : dockManager.dockWidgetsMap()) {
+        QStringList dockWidgetsPropertiesString;
+
+        addProperty(dockWidgetsPropertiesString, "title", dockWidget->windowTitle());
+        addProperty(dockWidgetsPropertiesString, "central_widget", dockWidget->dockAreaWidget()->isCentralWidgetArea() ? "true" : "false");
+
+        outputDebug << getIndentation(1) << "Dock widget " << QString("(%1)").arg(dockWidgetsPropertiesString.join(", ")) << "\n";
+    }
+
+    return outputDebug;
+}

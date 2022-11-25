@@ -33,7 +33,7 @@ ViewPluginsDockWidget::ViewPluginsDockWidget(QWidget* parent /*= nullptr*/) :
     connect(&_dockManager, &CDockManager::dockAreasAdded, this, &ViewPluginsDockWidget::updateCentralWidget);
     connect(&_dockManager, &CDockManager::dockAreasRemoved, this, &ViewPluginsDockWidget::updateCentralWidget);
     connect(&_dockManager, &CDockManager::dockWidgetAdded, this, &ViewPluginsDockWidget::dockWidgetAdded);
-    connect(&_dockManager, &CDockManager::dockWidgetRemoved, this, &ViewPluginsDockWidget::dockWidgetRemoved);
+    connect(&_dockManager, &CDockManager::dockWidgetAboutToBeRemoved, this, &ViewPluginsDockWidget::dockWidgetAboutToBeRemoved);
     connect(&_dockManager, &CDockManager::focusedDockWidgetChanged, this, &ViewPluginsDockWidget::updateCentralWidget);
 }
 
@@ -99,6 +99,9 @@ void ViewPluginsDockWidget::dockWidgetAdded(ads::CDockWidget* dockWidget)
 {
     Q_ASSERT(dockWidget != nullptr);
 
+    if (!dockWidget)
+        return;
+
     connect(dockWidget, &CDockWidget::viewToggled, this, [this](bool toggled) {
         updateCentralWidget();
     });
@@ -112,8 +115,13 @@ void ViewPluginsDockWidget::dockWidgetAdded(ads::CDockWidget* dockWidget)
     });
 }
 
-void ViewPluginsDockWidget::dockWidgetRemoved(ads::CDockWidget* dockWidget)
+void ViewPluginsDockWidget::dockWidgetAboutToBeRemoved(ads::CDockWidget* dockWidget)
 {
+    Q_ASSERT(dockWidget != nullptr);
+
+    if (!dockWidget)
+        return;
+
     disconnect(dockWidget, &CDockWidget::viewToggled, this, nullptr);
     disconnect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, this, nullptr);
     disconnect(dockWidget, &CDockWidget::topLevelChanged, this, nullptr);

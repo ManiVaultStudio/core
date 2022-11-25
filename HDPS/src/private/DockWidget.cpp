@@ -11,7 +11,7 @@
 #include <QToolButton>
 
 #ifdef _DEBUG
-    #define DOCK_WIDGET_VERBOSE
+    //#define DOCK_WIDGET_VERBOSE
 #endif
 
 using namespace ads;

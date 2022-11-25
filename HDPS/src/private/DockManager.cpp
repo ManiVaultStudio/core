@@ -32,7 +32,8 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
     Serializable("Dock manager"),
     _centralDockAreaWidget(nullptr),
-    _centralDockWidget(this)
+    _centralDockWidget(this),
+    _viewPluginDockWidgets()
 {
     _centralDockWidget.setObjectName("CentralDockWidget");
 
@@ -49,6 +50,9 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager::setConfigFlag(CDockManager::DockAreaHasTabsMenuButton, true);
     CDockManager::setConfigFlag(CDockManager::DockAreaDynamicTabsMenuButtonVisibility, false);
     CDockManager::setConfigFlag(CDockManager::AllTabsHaveCloseButton, true);
+
+    connect(this, &CDockManager::dockWidgetAdded, this, &DockManager::dockWidgetAdded);
+    connect(this, &CDockManager::dockWidgetAboutToBeRemoved, this, &DockManager::dockWidgetAboutToBeRemoved);
 }
 
 QSplitter* DockManager::getRootSplitter() const
@@ -111,7 +115,31 @@ QVariantMap DockManager::toVariantMap() const
 
 void DockManager::reset()
 {
-    for (auto dockWidget : dockWidgetsMap().values())
-        if (dockWidget != &_centralDockWidget)
-            removeDockWidget(dockWidget);
+    for (auto viewPluginDockWidget : _viewPluginDockWidgets)
+        removeDockWidget(viewPluginDockWidget);
+}
+
+void DockManager::dockWidgetAdded(ads::CDockWidget* dockWidget)
+{
+    Q_ASSERT(dockWidget != nullptr);
+
+    auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget);
+
+    if (viewPluginDockWidget == nullptr)
+        return;
+
+    _viewPluginDockWidgets << viewPluginDockWidget;
+}
+
+void DockManager::dockWidgetAboutToBeRemoved(ads::CDockWidget* dockWidget)
+{
+    Q_ASSERT(dockWidget != nullptr);
+
+    auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget);
+
+    if (viewPluginDockWidget == nullptr)
+        return;
+
+    if (_viewPluginDockWidgets.contains(viewPluginDockWidget))
+        _viewPluginDockWidgets.removeOne(viewPluginDockWidget);
 }

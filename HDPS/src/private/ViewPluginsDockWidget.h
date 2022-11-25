@@ -77,10 +77,10 @@ private:
     void dockWidgetAdded(ads::CDockWidget* dockWidget);
 
     /**
-     * Invoked when a dock widget is removed
-     * @param dockWidget Pointer to removed dock widget
+     * Invoked when a dock widget is about to be removed
+     * @param dockWidget Pointer to about to be removed dock widget
      */
-    void dockWidgetRemoved(ads::CDockWidget* dockWidget);
+    void dockWidgetAboutToBeRemoved(ads::CDockWidget* dockWidget);
 
 private:
     QWidget         _widget;            /** Widget for display in the dock widget */
