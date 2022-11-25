@@ -19,15 +19,6 @@ using namespace hdps;
 using namespace hdps::plugin;
 using namespace hdps::util;
 
-QMap<DockWidgetArea, QString> DockManager::dockWidgetAreaStrings = {
-    { NoDockWidgetArea, "None" },
-    { LeftDockWidgetArea, "Left" },
-    { RightDockWidgetArea, "Right" },
-    { TopDockWidgetArea, "Top" },
-    { BottomDockWidgetArea, "Bottom" },
-    { CenterDockWidgetArea, "Center" }
-};
-
 DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
     Serializable("Dock manager"),
@@ -95,6 +86,10 @@ DockWidget* DockManager::getCentralDockWidget()
 
 void DockManager::fromVariantMap(const QVariantMap& variantMap)
 {
+#ifdef DOCK_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << objectName();
+#endif
+
     reset();
 
     DockArea rootDockArea(this);
@@ -109,6 +104,10 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap DockManager::toVariantMap() const
 {
+#ifdef DOCK_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << objectName();
+#endif
+
     DockArea rootDockArea(const_cast<DockManager*>(this), 0);
 
     rootDockArea.buildTreeFromDocking(rootSplitter());
@@ -120,6 +119,10 @@ QVariantMap DockManager::toVariantMap() const
 
 void DockManager::reset()
 {
+#ifdef DOCK_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << objectName();
+#endif
+
     for (auto viewPluginDockWidget : _viewPluginDockWidgets)
         removeDockWidget(viewPluginDockWidget);
 }

@@ -34,21 +34,21 @@ public:
 
     /**
      * Get dock manager
-     * @return Shared pointer to dock manager
+     * @return Reference to the dock manager
      */
     DockManager& getDockManager();
 
     /**
      * Get dock manager
-     * @return Shared pointer to dock manager
+     * @return Reference to the dock manager
      */
     const DockManager& getDockManager() const;
 
     /**
      * Add view plugin
      * @param viewPluginDockWidget Pointer to view plugin dock widget
-     * @param dockViewPlugin Pointer to view plugin to which new view plugins are docked (new view plugins be docked top-level if nullptr)
-     * @param dockArea Dock area in which new view plugins will be docked
+     * @param dockViewPlugin Pointer to view plugin to which the dock widget will be docked (docked top-level if nullptr)
+     * @param dockArea Dock area in which the dock widget will be docked
      */
     void addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget, hdps::plugin::ViewPlugin* dockToViewPlugin, hdps::gui::DockAreaFlag dockArea);
 

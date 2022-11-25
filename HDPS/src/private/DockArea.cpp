@@ -259,6 +259,8 @@ void DockArea::createDockWidgets(std::uint32_t depth)
         auto dockWidget             = _dockWidgets.count() == 0 ? new DockWidget("Placeholder dock widget") : _dockWidgets.first();
         auto targetDockWidgetArea   = getParent()->getCurrentDockAreaWidget();
 
+        qDebug() << dockWidget->windowTitle() << dockWidgetArea;
+
         if (dockWidgetArea)
             getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, targetDockWidgetArea));
         else
@@ -293,6 +295,10 @@ void DockArea::removePlaceHolderDockWidgets()
 
 void DockArea::applyDocking()
 {
+#ifdef DOCK_AREA_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     sanitizeHierarchy();
 
     for (std::uint32_t depth = 1; depth <= getMaxDepth(); depth++)

@@ -26,10 +26,6 @@ class DockManager : public ads::CDockManager, public hdps::util::Serializable
 
 public:
 
-    static QMap<ads::DockWidgetArea, QString> dockWidgetAreaStrings;
-
-public:
-
     /**
      * Constructs a dock manager derived from the advanced docking system
      * @param parent Pointer to parent widget
@@ -67,24 +63,6 @@ public:
      * @return Pointer to central dock widget
      */
     DockWidget* getCentralDockWidget();
-
-    /**
-     * Get dock widgets of \p DockWidgetType
-     * @return Vector of dock widgets of \p DockWidgetType
-     */
-    template<class DockWidgetType>
-    QVector<DockWidgetType*> getDockWidgetsOfType() {
-        QVector<DockWidgetType*> dockWidgets;
-        
-        for (auto dockWidget : dockWidgetsMap().values()) {
-            auto dockWidgetOfType = dynamic_cast<DockWidgetType*>(dockWidget);
-
-            if (dockWidgetOfType)
-                dockWidgets << dockWidgetOfType;
-        }
-        
-        return dockWidgets;
-    }
 
 public: // Serialization
 

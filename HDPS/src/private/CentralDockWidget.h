@@ -5,7 +5,7 @@
 /**
  * Central dock widget class
  *
- * Widget class which is placed in the central area of the docking manager.
+ * Widget class which is placed in the central area of a docking manager.
  *
  * @author Thomas Kroes
  */

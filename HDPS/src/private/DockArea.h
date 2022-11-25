@@ -198,7 +198,7 @@ inline QDebug operator << (QDebug debug, const DockArea& dockArea)
     if (!splitterSizesString.isEmpty())
         addProperty("splitter_sizes", QString("[%1]").arg(splitterSizesString.join(", ")));
 
-    outputDebug << getIndentation(dockArea.getDepth()) << "Dock area " << QString("(%1)").arg(propertiesString.join(", ")) << "\n";
+    outputDebug << getIndentation(dockArea.getDepth() + 1) << "Dock area " << QString("(%1)").arg(propertiesString.join(", ")) << "\n";
 
     if (!dockArea.getDockWidgets().isEmpty()) {
         auto dockWidgetString = QStringList();
@@ -206,7 +206,7 @@ inline QDebug operator << (QDebug debug, const DockArea& dockArea)
         for (auto dockWidget : dockArea.getDockWidgets())
             dockWidgetString << dockWidget->windowTitle();
 
-        outputDebug << getIndentation(dockArea.getDepth() + 1) << QString("Dock widgets: [%1]").arg(dockWidgetString.join(", ")) << "\n";
+        outputDebug << getIndentation(dockArea.getDepth() + 2) << QString("Dock widgets: [%1]").arg(dockWidgetString.join(", ")) << "\n";
     }
 
     for (const auto& child : dockArea.getChildren())

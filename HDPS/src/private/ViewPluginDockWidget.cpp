@@ -7,7 +7,7 @@
 #include <util/Serialization.h>
 
 #ifdef _DEBUG
-    #define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
+    //#define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
 #endif
 
 using namespace ads;
@@ -87,6 +87,10 @@ QMenu* ViewPluginDockWidget::getSettingsMenu()
 
 void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
 {
+#ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     variantMapMustContain(variantMap, "ViewPlugin");
 
     _viewPluginMap = variantMap["ViewPlugin"].toMap();
@@ -102,6 +106,10 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap ViewPluginDockWidget::toVariantMap() const
 {
+#ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     QVariantMap variantMap = DockWidget::toVariantMap();
 
     variantMap["ViewPlugin"] = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin()->toVariantMap();
@@ -124,6 +132,10 @@ void ViewPluginDockWidget::initializeSettingsMenu()
 
 void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 {
+#ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     Q_ASSERT(viewPlugin != nullptr);
 
     if (!viewPlugin)

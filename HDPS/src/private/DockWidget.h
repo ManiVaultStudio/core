@@ -12,7 +12,10 @@ class QToolButton;
 /**
  * Dock widget class
  *
- * ADS dock widget class extended with serialization
+ * ADS dock widget class enhanced with:
+ * - Serialization
+ * - Widget overlay for display of additional information
+ * - Ability to choose additional settings from tool button in tab bar
  *
  * @author Thomas Kroes
  */
