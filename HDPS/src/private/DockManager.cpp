@@ -55,6 +55,11 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     connect(this, &CDockManager::dockWidgetAboutToBeRemoved, this, &DockManager::dockWidgetAboutToBeRemoved);
 }
 
+ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
+{
+    return _viewPluginDockWidgets;
+}
+
 QSplitter* DockManager::getRootSplitter() const
 {
     return CDockManager::rootSplitter();

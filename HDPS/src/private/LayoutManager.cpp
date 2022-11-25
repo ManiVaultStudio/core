@@ -13,7 +13,7 @@
 #include <QToolButton>
 
 #ifdef _DEBUG
-#define LAYOUT_MANAGER_VERBOSE
+    #define LAYOUT_MANAGER_VERBOSE
 #endif
 
 using namespace ads;
@@ -169,8 +169,6 @@ void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPl
 {
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
-    //_viewPluginDockWidgets << viewPluginDockWidget;
-
     if (viewPlugin->isSystemViewPlugin())
         _dockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _dockManager->findDockAreaWidget(&dockToViewPlugin->getWidget()));
     else
@@ -183,22 +181,27 @@ void LayoutManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isola
     qDebug() << __FUNCTION__ << viewPlugin->getGuiName() << isolate;
 #endif
 
-    //if (isolate) {
-    //    for (auto viewPluginDockWidget : _viewPluginDockWidgets) {
-    //        if (viewPlugin == viewPluginDockWidget->getViewPlugin())
-    //            continue;
+    if (isolate) {
+        for (auto viewPluginDockWidget : getViewPluginDockWidgets()) {
+            if (viewPlugin == viewPluginDockWidget->getViewPlugin())
+                continue;
 
-    //        _cachedDockWidgetsVisibility[viewPluginDockWidget] = !viewPluginDockWidget->isClosed();
+            _cachedDockWidgetsVisibility[viewPluginDockWidget] = !viewPluginDockWidget->isClosed();
 
-    //        viewPluginDockWidget->toggleView(false);
-    //    }
-    //}
-    //else {
-    //    for (auto dockWidget : _cachedDockWidgetsVisibility.keys())
-    //        dockWidget->toggleView(_cachedDockWidgetsVisibility[dockWidget]);
+            viewPluginDockWidget->toggleView(false);
+        }
+    }
+    else {
+        for (auto dockWidget : _cachedDockWidgetsVisibility.keys())
+            dockWidget->toggleView(_cachedDockWidgetsVisibility[dockWidget]);
 
-    //    _cachedDockWidgetsVisibility.clear();
-    //}
+        _cachedDockWidgetsVisibility.clear();
+    }
+}
+
+ViewPluginDockWidgets LayoutManager::getViewPluginDockWidgets()
+{
+    return _dockManager->getViewPluginDockWidgets() << _viewPluginsDockWidget.getDockManager().getViewPluginDockWidgets();
 }
 
 }

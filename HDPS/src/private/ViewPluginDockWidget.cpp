@@ -163,10 +163,10 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
         disconnect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, nullptr);
     };
 
-    QObject::connect(this, &CDockWidget::closed, this, [this, viewPlugin, connectToViewPluginVisibleAction, disconnectFromViewPluginVisibleAction]() {
+    QObject::connect(this, &CDockWidget::viewToggled, this, [this, viewPlugin, connectToViewPluginVisibleAction, disconnectFromViewPluginVisibleAction](bool toggled) {
         disconnectFromViewPluginVisibleAction(this);
         {
-            viewPlugin->getVisibleAction().setChecked(false);
+            viewPlugin->getVisibleAction().setChecked(toggled);
         }
         connectToViewPluginVisibleAction(this);
     });

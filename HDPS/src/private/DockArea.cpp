@@ -400,9 +400,8 @@ std::uint32_t DockArea::getMaxDepth() const
 
 void DockArea::setSplitterWidgetSizes()
 {
-    if (hasParent()) {// && getParent()->getChildIndex(*this) == 0) {
+    if (hasParent()) {
         if (hasDockWidgets()) {
-            //auto parentSplitter = getParent()->isRoot() ? _dockManager->getRootSplitter() : findParent<QSplitter>(_currentDockAreaWidget);
             auto parentSplitter = findParent<QSplitter>(getDockWidgets().first()->dockAreaWidget());
 
             if (parentSplitter) {
@@ -424,8 +423,6 @@ void DockArea::setSplitterWidgetSizes()
                     splitterRatios << size * splitterRatio;
 
                 parentSplitter->setSizes(splitterRatios);
-
-                qDebug() << _dockManager->getRootSplitter() << parentSplitter << _currentDockAreaWidget << getParent()->getSplitterRatios() << splitterRatios;
             }
         }
     }

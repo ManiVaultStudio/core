@@ -38,7 +38,7 @@ public:
     /**
      * Add a view plugin to the \p dockArea of \p dockViewPlugin
      * @param viewPlugin Pointer to view plugin to add to layout
-     * @param dockToViewPlugin Pointer to view plugin to which new view plugins are docked (new view plugins be docked top-level if nullptr)
+     * @param dockToViewPlugin Pointer to view plugin to which the view plugin will be docked (docked top-level if nullptr)
      * @param dockArea Dock area in which \p dockToViewPlugin will be docked
      */
     void addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right) override;
@@ -63,6 +63,9 @@ public: // Serialization
      * @return Variant representation of the layout
      */
     QVariantMap toVariantMap() const override;
+
+    /** Get all view plugin dock widgets, both from the main ánd the view plugins dock widget dock managers */
+    ViewPluginDockWidgets getViewPluginDockWidgets();
 
 private:
     QSharedPointer<DockManager>     _dockManager;                   /** Dock manager (inherited  from ADS) */

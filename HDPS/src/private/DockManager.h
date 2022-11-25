@@ -36,6 +36,9 @@ public:
      */
     DockManager(QWidget* parent = nullptr);
 
+    /** Get view plugin dock widgets currently loaded */
+    ViewPluginDockWidgets getViewPluginDockWidgets() const;
+
     /** Get the root splitter of the top-level docking */
     QSplitter* getRootSplitter() const;
 
