@@ -102,7 +102,6 @@ namespace hdps::gui
 LayoutManager::LayoutManager() :
     AbstractLayoutManager(),
     _dockManager(),
-    _viewPluginsDockArea(nullptr),
     _viewPluginsDockWidget(),
     _initialized(false),
     _cachedDockWidgetsVisibility()
@@ -126,9 +125,9 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
 
     _dockManager->setObjectName("MainDockManager");
 
-    _viewPluginsDockArea = _dockManager->setCentralWidget(&_viewPluginsDockWidget);
+    auto viewPluginsDockArea = _dockManager->setCentralWidget(&_viewPluginsDockWidget);
     
-    _viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
+    viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
     _initialized = true;
 }

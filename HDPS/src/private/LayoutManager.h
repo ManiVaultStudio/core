@@ -84,9 +84,8 @@ public: // Serialization
     ViewPluginDockWidgets getViewPluginDockWidgets();
 
 private:
-    QSharedPointer<DockManager>     _dockManager;                   /** Dock manager (inherited  from ADS) */
+    QSharedPointer<DockManager>     _dockManager;                   /** Main dock manager (inherited  from ADS) */
     bool                            _initialized;                   /** Whether the layout manager is initialized or not */
-    ads::CDockAreaWidget*           _viewPluginsDockArea;           /** Docking area for view plugins */
     ViewPluginsDockWidget           _viewPluginsDockWidget;         /** Dock widget for view plugins */
     QMap<DockWidget*, bool>         _cachedDockWidgetsVisibility;   /** Cached dock widgets visibility for view plugin isolation */
 };
