@@ -14,6 +14,22 @@ class QMainWindow;
 namespace hdps::gui
 {
 
+/**
+ * Layout manager class
+ *
+ * Manages the placement of view plugins on the screen using the Advanced Dock System (ADS) for Qt
+ * 
+ * It distinguishes between built-in (system) view plugins (data hierarchy, data properties etc.) and other view plugins (scatter plot, image viewer etc.).
+ * 
+ * It has a central area where non-system view plugins are docked, and areas around it (left, right, top and bottom) where
+ * system view plugins are docked.
+ * 
+ * It uses two ADS dock managers:
+ * - One for the main layout (\p _dockManager) 
+ * - One for the docking of non-system view plugins in the central area dock widget (\p _viewPluginsDockWidget)
+ * 
+ * @author Thomas Kroes
+ */
 class LayoutManager : public AbstractLayoutManager
 {
     Q_OBJECT
