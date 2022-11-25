@@ -43,6 +43,13 @@ public:
      */
     void addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right) override;
 
+    /**
+     * Set whether \p viewPlugin is isolated or not (closes all other view plugins when isolated)
+     * @param viewPlugin Pointer to view plugin to add to layout
+     * @param isolate Whether to isolate \p viewPlugin or to reset the view layout prior to isolation
+     */
+    void isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate) override;
+
 public: // Serialization
 
     /**
@@ -58,10 +65,12 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    QSharedPointer<DockManager>     _dockManager;               /** Dock manager (inherited  from ADS) */
-    bool                            _initialized;               /** Whether the layout manager is initialized or not */
-    ads::CDockAreaWidget*           _viewPluginsDockArea;       /** Docking area for view plugins */
-    ViewPluginsDockWidget         _viewPluginsDockWidget;     /** Dock widget for view plugins */
+    QSharedPointer<DockManager>     _dockManager;                   /** Dock manager (inherited  from ADS) */
+    bool                            _initialized;                   /** Whether the layout manager is initialized or not */
+    ads::CDockAreaWidget*           _viewPluginsDockArea;           /** Docking area for view plugins */
+    ViewPluginsDockWidget           _viewPluginsDockWidget;         /** Dock widget for view plugins */
+    ViewPluginDockWidgets           _viewPluginDockWidgets;         /** Keeps track of all created view plugin dock widgets */
+    QMap<DockWidget*, bool>         _cachedDockWidgetsVisibility;   /** Cached dock widgets visibility for view plugin isolation */
 };
 
 }

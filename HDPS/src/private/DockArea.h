@@ -24,7 +24,7 @@ using DockAreas = QVector<DockArea>;
 class DockArea : public hdps::util::Serializable
 {
 public:
-    using SplitterSizes = QVector<std::int32_t>;
+    using SplitterRatios = QVector<float>;
 
     static QMap<Qt::Orientation, QString> orientationStrings;
 
@@ -42,17 +42,21 @@ public:
 
     QString getId() const;
 
+    bool hasParent() const;
+
     DockArea* getParent();
 
     void setParent(DockArea* parent);
+
+    bool isRoot() const;
 
     std::uint32_t getDepth() const;
 
     void setDepth(std::uint32_t depth);
 
-    SplitterSizes getSplitterSizes() const;
+    SplitterRatios getSplitterRatios() const;
 
-    void setSplitterSizes(const SplitterSizes& splitterSizes);
+    void setSplitterRatios(const SplitterRatios& splitterRatios);
 
     Qt::Orientation getOrientation() const;
 
@@ -64,6 +68,7 @@ public:
 
     std::uint32_t getChildIndex(const DockArea& child) const;
 
+    bool hasDockWidgets() const;
     DockWidgets getDockWidgets() const;
 
     void setDockWidgets(DockWidgets dockWidgets);
@@ -77,7 +82,6 @@ public:
     void removePlaceHolderDockWidgets();
     void applyDocking();
     void sanitizeHierarchy();
-    DockWidget* getFirstDockWidget();
 
     void loadViewPluginDockWidgets();
 
@@ -86,7 +90,7 @@ public:
 private:
     std::uint32_t getMaxDepth() const;
 
-    void setSplitterSizes();
+    void setSplitterWidgetSizes();
 
 public: // Serialization
 
@@ -113,7 +117,7 @@ public:
         _dockManager            = other._dockManager;
         _parent                 = other._parent;
         _depth                  = other._depth;
-        _splitterSizes          = other._splitterSizes;
+        _splitterRatios         = other._splitterRatios;
         _orientation            = other._orientation;
         _children               = other._children;
         _placeholderDockWidget  = other._placeholderDockWidget;
@@ -137,7 +141,7 @@ private:
     DockArea*               _parent;
     std::uint32_t           _depth;
     Qt::Orientation         _orientation;
-    SplitterSizes           _splitterSizes;
+    SplitterRatios          _splitterRatios;
     DockAreas               _children;
     DockWidget*             _placeholderDockWidget;
     DockWidgets             _dockWidgets;
@@ -188,8 +192,8 @@ inline QDebug operator << (QDebug debug, const DockArea& dockArea)
 
     QStringList splitterSizesString;
 
-    for (const auto& splitterSize : dockArea.getSplitterSizes())
-        splitterSizesString << QString::number(splitterSize);
+    for (const auto& splitterRatio : dockArea.getSplitterRatios())
+        splitterSizesString << QString::number(splitterRatio);
 
     if (!splitterSizesString.isEmpty())
         addProperty("splitter_sizes", QString("[%1]").arg(splitterSizesString.join(", ")));

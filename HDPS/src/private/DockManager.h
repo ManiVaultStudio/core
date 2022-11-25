@@ -3,6 +3,8 @@
 #include "DockArea.h"
 #include "CentralDockWidget.h"
 
+#include <ViewPlugin.h>
+
 #include <util/Serializable.h>
 
 #include <DockManager.h>
@@ -32,6 +34,9 @@ public:
      */
     DockManager(QWidget* parent = nullptr);
 
+    /** Get the root splitter of the top-level docking */
+    QSplitter* getRootSplitter() const;
+
     /**
      * Find the dock area widget where \p widget resides
      * @param widget Pointer to widget to look for
@@ -57,6 +62,24 @@ public:
      * @return Pointer to central dock widget
      */
     DockWidget* getCentralDockWidget();
+
+    /**
+     * Get dock widgets of \p DockWidgetType
+     * @return Vector of dock widgets of \p DockWidgetType
+     */
+    template<class DockWidgetType>
+    QVector<DockWidgetType*> getDockWidgetsOfType() {
+        QVector<DockWidgetType*> dockWidgets;
+        
+        for (auto dockWidget : dockWidgetsMap().values()) {
+            auto dockWidgetOfType = dynamic_cast<DockWidgetType*>(dockWidget);
+
+            if (dockWidgetOfType)
+                dockWidgets << dockWidgetOfType;
+        }
+        
+        return dockWidgets;
+    }
 
 public: // Serialization
 

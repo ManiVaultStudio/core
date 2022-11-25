@@ -70,6 +70,18 @@ private:
      */
     ads::CDockAreaWidget* findDockAreaWidget(hdps::plugin::ViewPlugin* viewPlugin);
 
+    /**
+     * Invoked when a dock widget is added
+     * @param dockWidget Pointer to added dock widget
+     */
+    void dockWidgetAdded(ads::CDockWidget* dockWidget);
+
+    /**
+     * Invoked when a dock widget is removed
+     * @param dockWidget Pointer to removed dock widget
+     */
+    void dockWidgetRemoved(ads::CDockWidget* dockWidget);
+
 private:
     QWidget         _widget;            /** Widget for display in the dock widget */
     DockManager     _dockManager;       /** Dock manager */

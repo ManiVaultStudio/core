@@ -27,6 +27,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _widget.setAutoFillBackground(true);
 
     _widget.addAction(&_editActionsAction);
+    _widget.addAction(&_screenshotAction);
+    _widget.addAction(&_isolateAction);
     _widget.addAction(&_triggerHelpAction);
 
     _editActionsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
@@ -36,12 +38,13 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
     _screenshotAction.setIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
+    _screenshotAction.setShortcut(tr("F2"));
     _screenshotAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
     _isolateAction.setIcon(Application::getIconFont("FontAwesome").getIcon("crosshairs"));
-    _isolateAction.setShortcut(tr("F2"));
+    _isolateAction.setShortcut(tr("F3"));
     _isolateAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _isolateAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _isolateAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
@@ -62,6 +65,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
     _visibleAction.setToolTip("Determines whether the view plugin is visible in the user interface or not");
+    _visibleAction.setIcon(getIcon());
     _visibleAction.setConnectionPermissionsToNone();
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
@@ -78,6 +82,10 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
     connect(&_screenshotAction, &TriggerAction::triggered, this, [this]() -> void {
         createScreenshot();
+    });
+
+    connect(&_isolateAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        Application::core()->getLayoutManager().isolateViewPlugin(this, toggled);
     });
 
     connect(&_triggerHelpAction, &TriggerAction::triggered, this, [this]() -> void {

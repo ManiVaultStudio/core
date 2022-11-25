@@ -31,6 +31,13 @@ public:
      * @param dockArea Dock area in which \p dockToViewPlugin will be docked
      */
     virtual void addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right) = 0;
+
+    /**
+     * Set whether \p viewPlugin is isolated or not (closes all other view plugins when isolated)
+     * @param viewPlugin Pointer to view plugin to add to layout
+     * @param isolate Whether to isolate \p viewPlugin or to reset the view layout prior to isolation
+     */
+    virtual void isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate) = 0;
 };
 
 }

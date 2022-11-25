@@ -42,14 +42,15 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, QWidget* parent
 
 ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* viewPlugin, QWidget* parent /*= nullptr*/) :
     DockWidget(title, parent),
-    _viewPlugin(viewPlugin),
+    _viewPlugin(nullptr),
     _viewPluginKind(),
     _viewPluginMap(),
     _helpAction(this, "Help")
 {
     Q_ASSERT(_viewPlugin != nullptr);
 
-    setWidget(&_viewPlugin->getWidget());
+    setViewPlugin(viewPlugin);
+
     initializeSettingsMenu();
 }
 
@@ -65,14 +66,10 @@ void ViewPluginDockWidget::loadViewPlugin()
 #endif
 
     if (Application::core()->isPluginLoaded(_viewPluginKind)) {
-        _viewPlugin = Application::core()->requestPlugin<ViewPlugin>(_viewPluginKind);
+        auto viewPlugin = Application::core()->requestPlugin<ViewPlugin>(_viewPluginKind);
 
-        if (_viewPlugin) {
-            _viewPlugin->fromVariantMap(_viewPluginMap);
-
-            setWidget(&_viewPlugin->getWidget());
-            initializeSettingsMenu();
-        }
+        if (viewPlugin)
+            setViewPlugin(viewPlugin);
     } else {
         auto& overlayWidget = getOverlayWidget();
 
@@ -126,4 +123,58 @@ void ViewPluginDockWidget::initializeSettingsMenu()
     _settingsMenu.addSeparator();
 
     _settingsMenu.addAction(&_viewPlugin->getEditActionsAction());
+}
+
+void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
+{
+    Q_ASSERT(viewPlugin != nullptr);
+
+    if (!viewPlugin)
+        return;
+
+    _viewPlugin = viewPlugin;
+
+    _viewPlugin->fromVariantMap(_viewPluginMap);
+
+    setIcon(viewPlugin->getIcon());
+
+    setWidget(&_viewPlugin->getWidget());
+
+    connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, this, [this](const QString& title) {
+        setWindowTitle(title);
+    });
+
+    connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, this, [this](bool toggled) {
+        setFeature(CDockWidget::DockWidgetClosable, toggled);
+    });
+
+    connect(&viewPlugin->getMayFloatAction(), &ToggleAction::toggled, this, [this](bool toggled) {
+        setFeature(CDockWidget::DockWidgetFloatable, toggled);
+    });
+
+    connect(&viewPlugin->getMayMoveAction(), &ToggleAction::toggled, this, [this](bool toggled) {
+        setFeature(CDockWidget::DockWidgetMovable, toggled);
+    });
+
+    const auto connectToViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
+        connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
+            dockWidget->toggleView(toggled);
+        });
+    };
+
+    const auto disconnectFromViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
+        disconnect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, nullptr);
+    };
+
+    QObject::connect(this, &CDockWidget::closed, this, [this, viewPlugin, connectToViewPluginVisibleAction, disconnectFromViewPluginVisibleAction]() {
+        disconnectFromViewPluginVisibleAction(this);
+        {
+            viewPlugin->getVisibleAction().setChecked(false);
+        }
+        connectToViewPluginVisibleAction(this);
+    });
+
+    connectToViewPluginVisibleAction(this);
+
+    initializeSettingsMenu();
 }

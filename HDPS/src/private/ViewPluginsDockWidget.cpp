@@ -32,6 +32,9 @@ ViewPluginsDockWidget::ViewPluginsDockWidget(QWidget* parent /*= nullptr*/) :
 
     connect(&_dockManager, &CDockManager::dockAreasAdded, this, &ViewPluginsDockWidget::updateCentralWidget);
     connect(&_dockManager, &CDockManager::dockAreasRemoved, this, &ViewPluginsDockWidget::updateCentralWidget);
+    connect(&_dockManager, &CDockManager::dockWidgetAdded, this, &ViewPluginsDockWidget::dockWidgetAdded);
+    connect(&_dockManager, &CDockManager::dockWidgetRemoved, this, &ViewPluginsDockWidget::dockWidgetRemoved);
+    connect(&_dockManager, &CDockManager::focusedDockWidgetChanged, this, &ViewPluginsDockWidget::updateCentralWidget);
 }
 
 QString ViewPluginsDockWidget::getTypeString() const
@@ -60,18 +63,6 @@ void ViewPluginsDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDockWi
 #endif
 
     _dockManager.addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockAreaWidget);
-
-    connect(viewPluginDockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {
-        updateCentralWidget();
-    });
-
-    connect(viewPluginDockWidget, &CDockWidget::viewToggled, [this, viewPluginDockWidget](bool toggled) {
-        updateCentralWidget();
-    });
-
-    connect(viewPluginDockWidget, &CDockWidget::topLevelChanged, [this, viewPluginDockWidget](bool topLevel) {
-        updateCentralWidget();
-    });
 
     updateCentralWidget();
 }
@@ -102,4 +93,28 @@ std::int32_t ViewPluginsDockWidget::getNumberOfOpenViewPluginDockWidgets() const
 ads::CDockAreaWidget* ViewPluginsDockWidget::findDockAreaWidget(ViewPlugin* viewPlugin)
 {
     return _dockManager.findDockAreaWidget(&viewPlugin->getWidget());
+}
+
+void ViewPluginsDockWidget::dockWidgetAdded(ads::CDockWidget* dockWidget)
+{
+    Q_ASSERT(dockWidget != nullptr);
+
+    connect(dockWidget, &CDockWidget::viewToggled, this, [this](bool toggled) {
+        updateCentralWidget();
+    });
+
+    connect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, this, [this](int index) {
+        updateCentralWidget();
+    });
+
+    connect(dockWidget, &CDockWidget::topLevelChanged, this, [this](bool topLevel) {
+        updateCentralWidget();
+    });
+}
+
+void ViewPluginsDockWidget::dockWidgetRemoved(ads::CDockWidget* dockWidget)
+{
+    disconnect(dockWidget, &CDockWidget::viewToggled, this, nullptr);
+    disconnect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, this, nullptr);
+    disconnect(dockWidget, &CDockWidget::topLevelChanged, this, nullptr);
 }

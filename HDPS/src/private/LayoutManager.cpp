@@ -12,6 +12,10 @@
 #include <QMainWindow>
 #include <QToolButton>
 
+#ifdef _DEBUG
+#define LAYOUT_MANAGER_VERBOSE
+#endif
+
 using namespace ads;
 
 using namespace hdps;
@@ -100,7 +104,9 @@ LayoutManager::LayoutManager() :
     _dockManager(),
     _viewPluginsDockArea(nullptr),
     _viewPluginsDockWidget(),
-    _initialized(false)
+    _initialized(false),
+    _viewPluginDockWidgets(),
+    _cachedDockWidgetsVisibility()
 {
     setText("Layout manager");
     setObjectName("LayoutManager");
@@ -131,10 +137,13 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
 void LayoutManager::reset()
 {
     _dockManager.reset();
+    _viewPluginDockWidgets.clear();
 }
 
 void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
 {
+    _viewPluginDockWidgets.clear();
+
     variantMapMustContain(variantMap, "DockingManagers");
 
     const auto dockingManagersMap = variantMap["DockingManagers"].toMap();
@@ -144,6 +153,12 @@ void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
         
     _dockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
     _viewPluginsDockWidget.getDockManager().fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
+
+    qDebug() << _dockManager->getDockWidgetsOfType<ViewPluginDockWidget>().count();
+    qDebug() << _viewPluginsDockWidget.getDockManager().getDockWidgetsOfType<ViewPluginDockWidget>().count();
+
+    _viewPluginDockWidgets.append(_dockManager->getDockWidgetsOfType<ViewPluginDockWidget>());
+    _viewPluginDockWidgets.append(_viewPluginsDockWidget.getDockManager().getDockWidgetsOfType<ViewPluginDockWidget>());
 }
 
 QVariantMap LayoutManager::toVariantMap() const
@@ -165,48 +180,36 @@ void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPl
 {
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
-    viewPluginDockWidget->setIcon(viewPlugin->getIcon());
-
-    connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, this, [this, viewPluginDockWidget](const QString& title) {
-        viewPluginDockWidget->setWindowTitle(title);
-    });
-
-    connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, this, [this, viewPluginDockWidget](bool toggled) {
-        viewPluginDockWidget->setFeature(CDockWidget::DockWidgetClosable, toggled);
-    });
-
-    connect(&viewPlugin->getMayFloatAction(), &ToggleAction::toggled, this, [this, viewPluginDockWidget](bool toggled) {
-        viewPluginDockWidget->setFeature(CDockWidget::DockWidgetFloatable, toggled);
-    });
-
-    connect(&viewPlugin->getMayMoveAction(), &ToggleAction::toggled, this, [this, viewPluginDockWidget](bool toggled) {
-        viewPluginDockWidget->setFeature(CDockWidget::DockWidgetMovable, toggled);
-    });
-
-    const auto connectToViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
-        connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
-            dockWidget->toggleView(toggled);
-        });
-    };
-
-    const auto disconnectFromViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
-        disconnect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, nullptr);
-    };
-
-    QObject::connect(viewPluginDockWidget, &CDockWidget::closed, this, [this, viewPlugin, viewPluginDockWidget, connectToViewPluginVisibleAction, disconnectFromViewPluginVisibleAction]() {
-        disconnectFromViewPluginVisibleAction(viewPluginDockWidget);
-        {
-            viewPlugin->getVisibleAction().setChecked(false);
-        }
-        connectToViewPluginVisibleAction(viewPluginDockWidget);
-    });
-
-    connectToViewPluginVisibleAction(viewPluginDockWidget);
+    _viewPluginDockWidgets << viewPluginDockWidget;
 
     if (viewPlugin->isSystemViewPlugin())
         _dockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _dockManager->findDockAreaWidget(&dockToViewPlugin->getWidget()));
     else
         _viewPluginsDockWidget.addViewPlugin(viewPluginDockWidget, dockToViewPlugin, dockArea);
+}
+
+void LayoutManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate)
+{
+#ifdef LAYOUT_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << viewPlugin->getGuiName() << isolate;
+#endif
+
+    if (isolate) {
+        for (auto viewPluginDockWidget : _viewPluginDockWidgets) {
+            if (viewPlugin == viewPluginDockWidget->getViewPlugin())
+                continue;
+
+            _cachedDockWidgetsVisibility[viewPluginDockWidget] = !viewPluginDockWidget->isClosed();
+
+            viewPluginDockWidget->toggleView(false);
+        }
+    }
+    else {
+        for (auto dockWidget : _cachedDockWidgetsVisibility.keys())
+            dockWidget->toggleView(_cachedDockWidgetsVisibility[dockWidget]);
+
+        _cachedDockWidgetsVisibility.clear();
+    }
 }
 
 }

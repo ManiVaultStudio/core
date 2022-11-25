@@ -72,6 +72,12 @@ private:
     /** Populates the settings menu with actions from the view plugin */
     void initializeSettingsMenu();
 
+    /**
+     * Assign \p viewPlugin to dock widget (configures the dock widget properties and sets the dock widget widget)
+     * @param viewPlugin Pointer to view plugin
+     */
+    void setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin);
+
 private:
     hdps::plugin::ViewPlugin*   _viewPlugin;        /** Pointer to view plugin */
     QString                     _viewPluginKind;    /** Kind of (view) plugin */

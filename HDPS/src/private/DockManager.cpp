@@ -51,12 +51,13 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager::setConfigFlag(CDockManager::AllTabsHaveCloseButton, true);
 }
 
+QSplitter* DockManager::getRootSplitter() const
+{
+    return CDockManager::rootSplitter();
+}
+
 ads::CDockAreaWidget* DockManager::findDockAreaWidget(QWidget* widget)
 {
-#ifdef DOCK_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
     for (auto dockWidget : dockWidgets())
         if (dockWidget->widget() == widget)
             return dockWidget->dockAreaWidget();
@@ -85,10 +86,6 @@ DockWidget* DockManager::getCentralDockWidget()
 
 void DockManager::fromVariantMap(const QVariantMap& variantMap)
 {
-#ifdef DOCK_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
     reset();
 
     DockArea rootDockArea(this);
@@ -103,13 +100,7 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap DockManager::toVariantMap() const
 {
-#ifdef DOCK_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
     DockArea rootDockArea(const_cast<DockManager*>(this), 0);
-
-    qDebug() << rootSplitter();
 
     rootDockArea.buildTreeFromDocking(rootSplitter());
 
@@ -120,10 +111,6 @@ QVariantMap DockManager::toVariantMap() const
 
 void DockManager::reset()
 {
-#ifdef DOCK_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
     for (auto dockWidget : dockWidgetsMap().values())
         if (dockWidget != &_centralDockWidget)
             removeDockWidget(dockWidget);
