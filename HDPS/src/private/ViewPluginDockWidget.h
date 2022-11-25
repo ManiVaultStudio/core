@@ -7,9 +7,9 @@
 #include <QMenu>
 
 /**
- * Visualization widget class
+ * View plugin dock widget class
  *
- * Widget class which contains a docking manager for docking view plugins (non-standard)
+ * Dock widget which shows the contents of an HDPS view plugin
  *
  * @author Thomas Kroes
  */
@@ -56,14 +56,14 @@ public:
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
+     * Load view plugin dock widget from variant
+     * @param Variant representation of the view plugin dock widget
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
+     * Save view plugin dock widget to variant
+     * @return Variant representation of the view plugin dock widget
      */
     QVariantMap toVariantMap() const override;
 
