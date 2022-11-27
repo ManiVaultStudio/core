@@ -434,7 +434,7 @@ void DockArea::setSplitterWidgetSizes(QWidget* widget)
 
         QVector<std::int32_t> splitterRatios;
 
-        for (const auto& splitterRatio : splitter->widget(0)->property("SplitterRatios").toList())
+        for (const auto& splitterRatio : splitter->widget(1)->property("SplitterRatios").toList())
             splitterRatios << size * splitterRatio.toFloat();
 
         splitter->setSizes(splitterRatios);
