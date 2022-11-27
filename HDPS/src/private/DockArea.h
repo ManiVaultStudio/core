@@ -76,7 +76,7 @@ public:
     ads::CDockAreaWidget* getCurrentDockAreaWidget();
     void setCurrentDockAreaWidget(ads::CDockAreaWidget* lastDockAreaWidget);
 
-    bool hasLastDockAreaWidget() const;
+    bool hasCurrentDockAreaWidget() const;
 
     void createDockWidgets(std::uint32_t depth);
     void removePlaceHolderDockWidgets();
@@ -90,7 +90,7 @@ public:
 private:
     std::uint32_t getMaxDepth() const;
 
-    void setSplitterWidgetSizes();
+    static void setSplitterWidgetSizes(QWidget* widget);
 
 public: // Serialization
 

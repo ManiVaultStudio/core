@@ -225,7 +225,7 @@ void DockArea::setCurrentDockAreaWidget(ads::CDockAreaWidget* lastDockAreaWidget
     _currentDockAreaWidget = lastDockAreaWidget;
 }
 
-bool DockArea::hasLastDockAreaWidget() const
+bool DockArea::hasCurrentDockAreaWidget() const
 {
     return _currentDockAreaWidget != nullptr;
 }
@@ -254,7 +254,7 @@ void DockArea::createDockWidgets(std::uint32_t depth)
                 break;
         }
 
-        dockWidgetArea = getParent()->hasLastDockAreaWidget() ? dockWidgetArea : CenterDockWidgetArea;
+        dockWidgetArea = getParent()->hasCurrentDockAreaWidget() ? dockWidgetArea : CenterDockWidgetArea;
 
         auto dockWidget             = _dockWidgets.count() == 0 ? new DockWidget("Placeholder dock widget") : _dockWidgets.first();
         auto targetDockWidgetArea   = getParent()->getCurrentDockAreaWidget();
@@ -267,6 +267,13 @@ void DockArea::createDockWidgets(std::uint32_t depth)
             getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget));
 
         setCurrentDockAreaWidget(getParent()->getCurrentDockAreaWidget());
+
+        QVariantList splitterRatios;
+
+        for (const auto& splitterRatio : getParent()->getSplitterRatios())
+            splitterRatios << splitterRatio;
+
+        getCurrentDockAreaWidget()->setProperty("SplitterRatios", splitterRatios);
 
         if (_dockWidgets.isEmpty())
             _placeholderDockWidget = dockWidget;
@@ -310,7 +317,8 @@ void DockArea::applyDocking()
 
     Application::processEvents();
 
-    setSplitterWidgetSizes();
+    setSplitterWidgetSizes(_dockManager->getRootSplitter());
+
     loadViewPluginDockWidgets();
 }
 
@@ -404,35 +412,34 @@ std::uint32_t DockArea::getMaxDepth() const
     return maxDepth;
 }
 
-void DockArea::setSplitterWidgetSizes()
+void DockArea::setSplitterWidgetSizes(QWidget* widget)
 {
-    if (hasParent()) {
-        if (hasDockWidgets()) {
-            auto parentSplitter = findParent<QSplitter>(getDockWidgets().first()->dockAreaWidget());
+    auto splitter = qobject_cast<QSplitter*>(widget);
 
-            if (parentSplitter) {
-                float size = 0.f;
+    if (splitter) {
+        if (splitter->count() < 2)
+            return;
 
-                switch (parentSplitter->orientation()) {
-                case Qt::Horizontal:
-                    size = static_cast<float>(parentSplitter->parentWidget()->width());
-                    break;
+        float size = 0.f;
 
-                case Qt::Vertical:
-                    size = static_cast<float>(parentSplitter->parentWidget()->height());
-                    break;
-                }
+        switch (splitter->orientation()) {
+            case Qt::Horizontal:
+                size = static_cast<float>(splitter->width());
+                break;
 
-                QVector<std::int32_t> splitterRatios;
-
-                for (const auto& splitterRatio : getParent()->getSplitterRatios())
-                    splitterRatios << size * splitterRatio;
-
-                parentSplitter->setSizes(splitterRatios);
-            }
+            case Qt::Vertical:
+                size = static_cast<float>(splitter->height());
+                break;
         }
-    }
 
-    for (auto child : _children)
-        child.setSplitterWidgetSizes();
+        QVector<std::int32_t> splitterRatios;
+
+        for (const auto& splitterRatio : splitter->widget(0)->property("SplitterRatios").toList())
+            splitterRatios << size * splitterRatio.toFloat();
+
+        splitter->setSizes(splitterRatios);
+
+        for (int i = 0; i < splitter->count(); ++i)
+            setSplitterWidgetSizes(splitter->widget(i));
+    }
 }
