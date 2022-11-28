@@ -90,6 +90,13 @@ public:
 private:
     std::uint32_t getMaxDepth() const;
 
+    /**
+     * Set splitter sizes recursively
+     * Visits the widget hierarchy from \p widget downwards and sets the splitter sizes for each encountered splitter.
+     * Splitter sizes are established by multiplying splitter ratios (attached to the widget as a property) by 
+     * either the width or the height of the splitter respectively.
+     * @param widget Pointer to root widget to descendant downward from
+     */
     static void setSplitterWidgetSizes(QWidget* widget);
 
 public: // Serialization
