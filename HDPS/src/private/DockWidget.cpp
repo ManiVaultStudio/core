@@ -37,6 +37,19 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     widgetFader.setMaximumOpacity(0.6f);
     widgetFader.setFadeInDuration(0);
     widgetFader.setFadeOutDuration(0);
+
+    _settingsToolButton = new QToolButton();
+
+    _settingsToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("ellipsis-h"));
+    _settingsToolButton->setToolTip("Adjust view settings");
+    _settingsToolButton->setAutoRaise(true);
+    _settingsToolButton->setIconSize(QSize(16, 16));
+    _settingsToolButton->setFixedSize(QSize(16, 16));
+    _settingsToolButton->setPopupMode(QToolButton::InstantPopup);
+    _settingsToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
+    _settingsToolButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    dynamic_cast<QBoxLayout*>(tabWidget()->layout())->addWidget(_settingsToolButton);
 }
 
 QString DockWidget::getTypeString() const
@@ -46,23 +59,12 @@ QString DockWidget::getTypeString() const
 
 void DockWidget::showEvent(QShowEvent* showEvent)
 {
-    auto settingsMenu = this->getSettingsMenu();
+    if (_settingsToolButton != nullptr) {
+        auto settingsMenu = this->getSettingsMenu();
 
-    if (_settingsToolButton == nullptr) {
-        _settingsToolButton = new QToolButton();
-
-        _settingsToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("bars"));
-        _settingsToolButton->setToolTip("Adjust view settings");
-        _settingsToolButton->setAutoRaise(true);
-        _settingsToolButton->setIconSize(QSize(16, 16));
-        _settingsToolButton->setPopupMode(QToolButton::InstantPopup);
-        _settingsToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
-
-        dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertWidget(3, _settingsToolButton);
+        if (settingsMenu)
+            _settingsToolButton->setMenu(settingsMenu);
     }
-
-    if (settingsMenu)
-        _settingsToolButton->setMenu(settingsMenu);
 }
 
 hdps::gui::OverlayWidget& DockWidget::getOverlayWidget()
