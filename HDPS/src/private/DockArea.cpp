@@ -446,8 +446,6 @@ void DockArea::setSplitterWidgetSizes(QWidget* widget)
 
             if (!splitterSizes.isEmpty())
                 splitter->setSizes(splitterSizes);
-
-            qDebug() << splitter->sizes() << splitterSizes;
         }
             
         for (int i = 0; i < splitter->count(); ++i)
