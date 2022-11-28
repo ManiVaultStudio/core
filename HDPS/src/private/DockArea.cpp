@@ -259,8 +259,6 @@ void DockArea::createDockWidgets(std::uint32_t depth)
         auto dockWidget             = _dockWidgets.count() == 0 ? new DockWidget("Placeholder dock widget") : _dockWidgets.first();
         auto targetDockWidgetArea   = getParent()->getCurrentDockAreaWidget();
 
-        //qDebug() << dockWidget->windowTitle() << dockWidgetArea;
-
         if (dockWidgetArea)
             getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, targetDockWidgetArea));
         else
@@ -274,14 +272,11 @@ void DockArea::createDockWidgets(std::uint32_t depth)
             splitterRatios << splitterRatio;
 
         getCurrentDockAreaWidget()->setProperty("SplitterRatios", splitterRatios);
-        //getParent()->getCurrentDockAreaWidget()->setProperty("SplitterRatios", splitterRatios);
 
         auto parentSplitter = dynamic_cast<QSplitter*>(getCurrentDockAreaWidget()->parentWidget());
 
-        if (parentSplitter) {
-            qDebug() << "Has splitter!!!";
+        if (parentSplitter)
             parentSplitter->setProperty("SplitterRatios", splitterRatios);
-        }
 
         if (_dockWidgets.isEmpty())
             _placeholderDockWidget = dockWidget;
