@@ -147,7 +147,7 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 
     setIcon(viewPlugin->getIcon());
 
-    setWidget(&_viewPlugin->getWidget());
+    setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
 
     connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, this, [this](const QString& title) {
         setWindowTitle(title);
