@@ -189,8 +189,8 @@ Qt::ItemFlags ActionHierarchyModel::flags(const QModelIndex& index) const
 
     auto action = static_cast<ActionHierarchyModelItem*>(index.internalPointer())->getAction();
 
-    if (!action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::VisibleInMenu))
-        itemFlags &= ~Qt::ItemIsEnabled;
+    //if (!action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::VisibleInMenu))
+    //    itemFlags &= ~Qt::ItemIsEnabled;
 
     switch (index.column())
     {
