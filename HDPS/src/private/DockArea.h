@@ -93,7 +93,7 @@ private:
     /**
      * Set splitter sizes recursively
      * Visits the widget hierarchy from \p widget downwards and sets the splitter sizes for each encountered splitter.
-     * Splitter sizes are established by multiplying splitter ratios (attached to the widget as a property) by 
+     * Splitter sizes are established by multiplying splitter ratios (attached to the widget prior as a property) by 
      * either the width or the height of the splitter respectively.
      * @param widget Pointer to root widget to descendant downward from
      */

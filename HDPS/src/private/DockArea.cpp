@@ -274,6 +274,14 @@ void DockArea::createDockWidgets(std::uint32_t depth)
             splitterRatios << splitterRatio;
 
         getCurrentDockAreaWidget()->setProperty("SplitterRatios", splitterRatios);
+        //getParent()->getCurrentDockAreaWidget()->setProperty("SplitterRatios", splitterRatios);
+
+        auto parentSplitter = dynamic_cast<QSplitter*>(getCurrentDockAreaWidget()->parentWidget());
+
+        if (parentSplitter) {
+            qDebug() << "Has splitter!!!";
+            parentSplitter->setProperty("SplitterRatios", splitterRatios);
+        }
 
         if (_dockWidgets.isEmpty())
             _placeholderDockWidget = dockWidget;
@@ -317,7 +325,7 @@ void DockArea::applyDocking()
 
     Application::processEvents();
 
-    setSplitterWidgetSizes(_dockManager->getRootSplitter());
+    DockArea::setSplitterWidgetSizes(_dockManager->getRootSplitter());
 
     loadViewPluginDockWidgets();
 }
@@ -434,15 +442,8 @@ void DockArea::setSplitterWidgetSizes(QWidget* widget)
 
             QVector<std::int32_t> splitterSizes;
 
-            for (int i = 0; i < splitter->count(); ++i) {
-                const auto splitterRatios = splitter->widget(i)->property("SplitterRatios").toList();
-
-                if (splitterRatios.isEmpty())
-                    continue;
-
-                for (const auto& splitterRatio : splitterRatios)
-                    splitterSizes << size * splitterRatio.toFloat();
-            }
+            for (const auto& splitterRatio : splitter->property("SplitterRatios").toList())
+                splitterSizes << size * splitterRatio.toFloat();
 
             if (!splitterSizes.isEmpty())
                 splitter->setSizes(splitterSizes);
