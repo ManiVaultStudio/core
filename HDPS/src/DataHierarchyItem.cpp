@@ -19,6 +19,7 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _dataset(dataset),
     _parent(),
     _children(),
+    _fullPathName(),
     _selected(false),
     _expanded(true),
     _taskDescription(""),
@@ -50,6 +51,7 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     });
 
     setVisible(visible);
+    computeFullPathName();
 }
 
 QString DataHierarchyItem::getGuiName() const
@@ -171,7 +173,7 @@ void DataHierarchyItem::deselect()
     setSelected(false);
 }
 
-QString DataHierarchyItem::getFullPathName() const
+void DataHierarchyItem::computeFullPathName()
 {
     DataHierarchyItems parents;
 
@@ -184,7 +186,12 @@ QString DataHierarchyItem::getFullPathName() const
 
     dataHierarchyItemNames << _dataset->getGuiName();
 
-    return dataHierarchyItemNames.join("/");
+    _fullPathName = dataHierarchyItemNames.join("/");
+}
+
+QString DataHierarchyItem::getFullPathName() const
+{
+    return _fullPathName;
 }
 
 void DataHierarchyItem::addChild(DataHierarchyItem& child)

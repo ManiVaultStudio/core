@@ -139,15 +139,20 @@ void ViewPlugin::createScreenshot()
     fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
     fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setFileMode(QFileDialog::ExistingFile);
     fileDialog.setNameFilters({ "Image files (*.png)" });
     fileDialog.setDefaultSuffix(".png");
+
+    const auto cachedDirectory = QFileInfo(Application::current()->getSetting("ScreenShot/ViewPlugin/Directory", ".").toString()).dir();
+
+    fileDialog.setDirectory(cachedDirectory);
 
     if (fileDialog.exec() == 0)
         return;
 
     if (fileDialog.selectedFiles().count() != 1)
         throw std::runtime_error("Only one file may be selected");
+
+    Application::current()->setSetting("ScreenShot/ViewPlugin/Directory", fileDialog.selectedFiles().first());
 
     auto widgetPixmap = getWidget().grab();
 

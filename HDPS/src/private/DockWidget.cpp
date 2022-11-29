@@ -35,21 +35,22 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     auto& widgetFader = _overlayWidget.getWidgetFader();
 
     widgetFader.setMaximumOpacity(0.6f);
-    widgetFader.setFadeInDuration(0);
-    widgetFader.setFadeOutDuration(0);
+    widgetFader.setFadeInDuration(150);
+    widgetFader.setFadeOutDuration(150);
 
     _settingsToolButton = new QToolButton();
 
-    _settingsToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("ellipsis-h"));
+    _settingsToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("bars"));
     _settingsToolButton->setToolTip("Adjust view settings");
     _settingsToolButton->setAutoRaise(true);
-    _settingsToolButton->setIconSize(QSize(16, 16));
-    _settingsToolButton->setFixedSize(QSize(16, 16));
+    _settingsToolButton->setIconSize(QSize(14, 14));
+    _settingsToolButton->setFixedSize(QSize(14, 14));
     _settingsToolButton->setPopupMode(QToolButton::InstantPopup);
     _settingsToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
     _settingsToolButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-    dynamic_cast<QBoxLayout*>(tabWidget()->layout())->addWidget(_settingsToolButton);
+    dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertSpacing(1, 5);
+    dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertWidget(2, _settingsToolButton, Qt::AlignCenter);
 }
 
 QString DockWidget::getTypeString() const

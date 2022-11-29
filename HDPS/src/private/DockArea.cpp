@@ -33,6 +33,7 @@ DockArea::DockArea(DockManager* dockManager, std::uint32_t depth /*= 0*/) :
     _splitterRatios(),
     _orientation(),
     _children(),
+    _isCentral(false),
     _placeholderDockWidget(nullptr),
     _dockWidgets(),
     _currentDockAreaWidget(nullptr)
@@ -91,6 +92,10 @@ void DockArea::setSplitterRatios(const SplitterRatios& splitterRatios)
 
 void DockArea::fromVariantMap(const QVariantMap& variantMap)
 {
+    variantMapMustContain(variantMap, "IsCentral");
+
+    setCentral(variantMap["IsCentral"].toBool());
+
     if (variantMap.contains("Children")) {
 
         variantMapMustContain(variantMap, "Orientation");
@@ -169,6 +174,8 @@ QVariantMap DockArea::toVariantMap() const
         variantMap["DockWidgets"] = dockWidgetsList;
     }
 
+    variantMap["IsCentral"] = QVariant::fromValue(isCentral());
+
     return variantMap;
 }
 
@@ -193,6 +200,16 @@ void DockArea::setChildren(DockAreas children)
 
     for (auto& child : _children)
         child.setParent(this);
+}
+
+bool DockArea::isCentral() const
+{
+    return _isCentral;
+}
+
+void DockArea::setCentral(bool central)
+{
+    _isCentral = central;
 }
 
 std::uint32_t DockArea::getChildIndex(const DockArea& child) const
@@ -232,6 +249,8 @@ bool DockArea::hasCurrentDockAreaWidget() const
 
 void DockArea::createDockWidgets(std::uint32_t depth)
 {
+    const auto childIndex = hasParent() ? getParent()->getChildIndex(*this) : -1;
+
     if (_depth < depth) {
         for (auto& child : _children)
             child.createDockWidgets(depth);
@@ -258,25 +277,70 @@ void DockArea::createDockWidgets(std::uint32_t depth)
 
         auto dockWidget             = _dockWidgets.count() == 0 ? new DockWidget("Placeholder dock widget") : _dockWidgets.first();
         auto targetDockWidgetArea   = getParent()->getCurrentDockAreaWidget();
+        
+        if (_dockManager->objectName() == "MainDockManager") {
+            std::int32_t centralWidgetIndex = -1;
 
-        if (dockWidgetArea)
-            getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, targetDockWidgetArea));
-        else
-            getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget));
+            if (hasParent()) {
+                for (auto child : getParent()->getChildren())
+                    if (child.isCentral())
+                        centralWidgetIndex = getParent()->getChildIndex(child);
+            }
+
+            if (centralWidgetIndex >= 0) {
+                if (childIndex == 0) {
+                    switch (getParent()->getOrientation())
+                    {
+                        case Qt::Horizontal:
+                            dockWidgetArea = LeftDockWidgetArea;
+                            break;
+
+                        case Qt::Vertical:
+                            dockWidgetArea = TopDockWidgetArea;
+                            break;
+                    }
+
+                    getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, _dockManager->getCentralDockAreaWidget()));
+                }
+
+                if (childIndex > 0 && childIndex < centralWidgetIndex) {
+                    getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, getParent()->getCurrentDockAreaWidget()));
+                }
+
+                if (childIndex == centralWidgetIndex) {
+                    getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, _dockManager->getCentralDockAreaWidget()));
+                }
+
+                if (childIndex > centralWidgetIndex) {
+                    getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, getParent()->getCurrentDockAreaWidget()));
+                }
+            }
+            else {
+                getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, getParent()->getCurrentDockAreaWidget()));
+            }
+        }
+        
+        if (_dockManager->objectName() == "ViewPluginsDockManager") {
+            if (targetDockWidgetArea)
+                getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, targetDockWidgetArea));
+            else
+                getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget));
+        }
 
         setCurrentDockAreaWidget(getParent()->getCurrentDockAreaWidget());
 
-        QVariantList splitterRatios;
-
-        for (const auto& splitterRatio : getParent()->getSplitterRatios())
-            splitterRatios << splitterRatio;
-
-        getCurrentDockAreaWidget()->setProperty("SplitterRatios", splitterRatios);
-
         auto parentSplitter = dynamic_cast<QSplitter*>(getCurrentDockAreaWidget()->parentWidget());
 
-        if (parentSplitter)
+        if (parentSplitter) {
+            QVariantList splitterRatios;
+
+            for (const auto& splitterRatio : getParent()->getSplitterRatios())
+                splitterRatios << splitterRatio;
+
+            getCurrentDockAreaWidget()->setProperty("SplitterRatios", splitterRatios);
+
             parentSplitter->setProperty("SplitterRatios", splitterRatios);
+        }
 
         if (_dockWidgets.isEmpty())
             _placeholderDockWidget = dockWidget;
@@ -391,6 +455,8 @@ void DockArea::buildTreeFromDocking(QWidget* widget)
 
         if (!dockAreaWidget)
             return;
+
+        setCentral(dockAreaWidget->isCentralWidgetArea());
 
         for (auto adsDockWidget : dockAreaWidget->dockWidgets()) {
             auto dockWidget = dynamic_cast<DockWidget*>(adsDockWidget);
