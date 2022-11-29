@@ -589,26 +589,37 @@ Dataset<DatasetImpl> Points::createSubsetFromVisibleSelection(const QString& gui
     Dataset<Points> subsetSelection = getSelection()->copy();
     std::vector<uint32_t>& selectionIndices = subsetSelection->getSelectionIndices();
 
-    // Get the global indices of the parent dataset
-    std::vector<uint32_t> globalIndices;
-    getGlobalIndices(globalIndices);
+    //// Get the global indices of the parent dataset
+    //std::vector<uint32_t> globalIndices;
+    //getGlobalIndices(globalIndices);
 
-    // Find the intersection of points that are selected, and the given indices
-    std::vector<uint32_t>& smallVector = (globalIndices.size() < selectionIndices.size()) ? globalIndices : selectionIndices;
-    std::vector<uint32_t>& largeVector = (globalIndices.size() < selectionIndices.size()) ? selectionIndices : globalIndices;
-    
-    // Sort the smallest vector
-    sort(smallVector.begin(), smallVector.end());
+    //// Find the intersection of points that are selected, and the given indices
+    //std::vector<uint32_t>& smallVector = (globalIndices.size() < selectionIndices.size()) ? globalIndices : selectionIndices;
+    //std::vector<uint32_t>& largeVector = (globalIndices.size() < selectionIndices.size()) ? selectionIndices : globalIndices;
+    //
+    //// Sort the smallest vector
+    //sort(smallVector.begin(), smallVector.end());
 
-    // Loop over large vector and binary search which values are in the smaller vector
-    std::vector<uint32_t> intersection;
-    std::copy_if(largeVector.begin(), largeVector.end(), std::back_inserter(intersection), [smallVector](uint32_t x)
+    //// Loop over large vector and binary search which values are in the smaller vector
+    //std::vector<uint32_t> intersection;
+    //std::copy_if(largeVector.begin(), largeVector.end(), std::back_inserter(intersection), [smallVector](uint32_t x)
+    //{
+    //    return std::binary_search(smallVector.begin(), smallVector.end(), x);
+    //});
+
+    // Compute the indices that are selected in this local dataset
+    std::vector<uint32_t> localSelectionIndices;
+    getLocalSelectionIndices(localSelectionIndices);
+
+    // If we make a subset from a subset, take the locally selected points from the previous subset
+    if (!isFull())
     {
-        return std::binary_search(smallVector.begin(), smallVector.end(), x);
-    });
+        for (uint32_t& localIndex : localSelectionIndices)
+            localIndex = indices[localIndex];
+    }
+    // If the data is full, then the locally selected points are the new subset
 
-    // Set the intersection indices in temporary selection object used for creating the subset
-    subsetSelection->indices = intersection;
+    subsetSelection->indices = localSelectionIndices;
 
     return _core->createSubsetFromSelection(subsetSelection, toSmartPointer(), guiName, parentDataSet, visible);
 }
