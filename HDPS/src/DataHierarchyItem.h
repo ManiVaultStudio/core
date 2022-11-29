@@ -122,6 +122,9 @@ public:
     /** De-selects the hierarchy item */
     void deselect();
 
+    /** Compute the full path name of the data hierarchy item (separated by forward slashes) */
+    void computeFullPathName();
+
     /** Get the full path name of the data hierarchy item (separated by forward slashes) */
     QString getFullPathName() const;
 
@@ -366,6 +369,7 @@ protected:
     Dataset<DatasetImpl>        _dataset;               /** Smart pointer to dataset */
     DataHierarchyItem*          _parent;                /** Pointer to parent data hierarchy item */
     DataHierarchyItems          _children;              /** Pointers to child items (if any) */
+    QString                     _fullPathName;          /** The full hierarchy path name of the data hiearchy item */
     bool                        _selected;              /** Whether the hierarchy item is selected */
     bool                        _expanded;              /** Whether the item is expanded or not (when it has children) */
     QString                     _taskDescription;       /** Task description */

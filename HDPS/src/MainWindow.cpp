@@ -31,7 +31,9 @@
 #include <QTimer>
 #include <QLabel>
 
-#define MAIN_WINDOW_VERBOSE
+#ifdef _DEBUG
+    #define MAIN_WINDOW_VERBOSE
+#endif
 
 using namespace ads;
 

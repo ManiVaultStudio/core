@@ -22,7 +22,7 @@ DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
 
 void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/)
 {
-    qDebug() << "Adding" << dataset->getGuiName() << "to the data hierarchy";
+    //qDebug() << "Adding" << dataset->getGuiName() << "to the data hierarchy";
 
     try {
 
@@ -124,7 +124,7 @@ DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid)
         Q_ASSERT(!datasetGuid.isEmpty());
 
         for (auto dataHierarchyItem : _items)
-            if (dataHierarchyItem->getDataset().getDatasetGuid() == datasetGuid)
+            if (dataHierarchyItem->getDatasetReference().getDatasetGuid() == datasetGuid)
                 return *dataHierarchyItem;
 
         QString errorMessage = QString("Failed to find data hierarchy item with guid: %1").arg(datasetGuid);
