@@ -14,10 +14,7 @@
 
 using namespace hdps::util;
 
-namespace hdps
-{
-
-namespace gui
+namespace hdps::gui
 {
 
 HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, QAbstractItemModel& model, QSortFilterProxyModel* filterModel /*= nullptr*/, bool showToolbar /*= true*/, bool showOverlay /*= true*/) :
@@ -100,7 +97,9 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     });
 
     for (std::int32_t columnIndex = 0; columnIndex < _model.columnCount(); columnIndex++) {
-        auto columnVisibilityAction = new ToggleAction(this, _model.headerData(columnIndex, Qt::Horizontal, Qt::EditRole).toString(), true, true);
+        const auto columnVisible = !_treeView.isColumnHidden(columnIndex);
+
+        auto columnVisibilityAction = new ToggleAction(this, _model.headerData(columnIndex, Qt::Horizontal, Qt::EditRole).toString(), columnVisible, columnVisible);
 
         columnVisibilityAction->setConnectionPermissionsToNone();
 
@@ -114,8 +113,11 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
 
     _columnsAction << *selectAllCollumns;
 
-    connect(&_treeView, &TreeView::columnHidden, this, [this](int column, bool hide) -> void {
-        _columnsAction.getActions()[column]->setChecked(hide);
+    connect(&_treeView, &HierarchyWidgetTreeView::columnHidden, this, [this](int column, bool hide) -> void {
+        auto columnAction = _columnsAction.getActions()[column];
+
+        if (columnAction->isChecked() == hide)
+            columnAction->setChecked(!hide);
     });
 
     updateSelectAllCollumnsReadOnly();
@@ -463,5 +465,4 @@ void HierarchyWidget::updateExpandCollapseActionsReadOnly()
     _collapseAllAction.setEnabled(hasItems && mayCollapseAll());
 }
 
-}
 }

@@ -38,6 +38,7 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
 
     treeView.setSortingEnabled(true);
 
+    treeView.setColumnHidden(static_cast<int>(LoggingModel::Column::Number), true);
     treeView.setColumnHidden(static_cast<int>(LoggingModel::Column::Category), true);
     treeView.setColumnHidden(static_cast<int>(LoggingModel::Column::FileAndLine), true);
 

@@ -13,11 +13,48 @@
 
 class QSortFilterProxyModel;
 
-namespace hdps
+namespace hdps::gui
 {
 
-namespace gui
+class HierarchyWidget;
+
+/**
+ * Custom tree view class
+ * Tree view does not emit signals when column visibility changes (needed to update visible columns popup), this class solved this problem.
+ */
+class HierarchyWidgetTreeView : public QTreeView
 {
+    Q_OBJECT
+
+protected:
+    
+    /** No need for a custom constructor */
+    using QTreeView::QTreeView;
+
+public:
+
+    /**
+     * Set column hidden (overridden to emit custom signal)
+     * @param column Column to hide/show
+     * @param hide Hide or show column
+     */
+    void setColumnHidden(int column, bool hide) {
+        QTreeView::setColumnHidden(column, hide);
+
+        emit columnHidden(column, hide);
+    }
+
+signals:
+
+    /**
+     * Signals that the visibility of \p columns has changed
+     * @param column Index of the column of which the visibility changed
+     * @param hide Whether the column has become hidden or visible
+     */
+    void columnHidden(int column, bool hide);
+
+    friend class HierarchyWidget;
+};
 
 /**
  * Base widget for displaying a hierarchical model in a tree view
@@ -40,31 +77,6 @@ namespace gui
 class HierarchyWidget : public QWidget
 {
     Q_OBJECT
-
-public:
-
-    /**
-     * Custom tree view class
-     * Tree view does not emit signals when column visibility changes (needed to update visible columns popup), this class solved this problem.
-     */
-    class TreeView : public QTreeView
-    {
-        Q_OBJECT
-    public:
-
-        /**
-         * Set column hidden (overridden to emit custom signal)
-         * @param column Column to hide/show
-         * @param hide Hide or show column
-         */
-        void setColumnHidden(int column, bool hide) {
-            QTreeView::setColumnHidden(column, hide);
-            emit columnHidden(column, hide);
-        }
-
-    signals:
-        void columnHidden(int column, bool hide);
-    };
 
 public:
 
@@ -119,7 +131,7 @@ public:
      * Get tree view widget
      * @return Reference to tree view widget
      */
-    QTreeView& getTreeView() {
+    HierarchyWidgetTreeView& getTreeView() {
         return _treeView;
     }
 
@@ -262,7 +274,7 @@ private:
     QAbstractItemModel&         _model;                             /** Model containing data to be displayed in the hierarchy */
     QSortFilterProxyModel*      _filterModel;                       /** Pointer to filter model (maybe nullptr) */
     QItemSelectionModel         _selectionModel;                    /** Selection model */
-    TreeView                    _treeView;                          /** Tree view that contains the data hierarchy */
+    HierarchyWidgetTreeView     _treeView;                          /** Tree view that contains the data hierarchy */
     OverlayWidget               _overlayWidget;                     /** Overlay widget that show information when there are no items in the model */
     QString                     _noItemsDescription;                /** Overlay widget description when no items are loaded */
     StringAction                _filterNameAction;                  /** String action for filtering by name */
@@ -278,5 +290,4 @@ private:
     GroupAction                 _settingsGroupAction;               /** Settings group action */
 };
 
-}
 }
