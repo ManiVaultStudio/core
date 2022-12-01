@@ -512,6 +512,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Serializable.h
     src/util/DockArea.h
     src/util/Logger.h
+    src/util/AbstractItemModelTester.h
 )
 
 set(PUBLIC_UTIL_SOURCES
@@ -541,6 +542,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Serializable.cpp
     src/util/DockArea.cpp
     src/util/Logger.cpp
+    src/util/AbstractItemModelTester.cpp
 )
 
 set(PUBLIC_UTIL_FILES

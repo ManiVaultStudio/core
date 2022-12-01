@@ -44,6 +44,31 @@ class HierarchyWidget : public QWidget
 public:
 
     /**
+     * Custom tree view class
+     * Tree view does not emit signals when column visibility changes (needed to update visible columns popup), this class solved this problem.
+     */
+    class TreeView : public QTreeView
+    {
+        Q_OBJECT
+    public:
+
+        /**
+         * Set column hidden (overridden to emit custom signal)
+         * @param column Column to hide/show
+         * @param hide Hide or show column
+         */
+        void setColumnHidden(int column, bool hide) {
+            QTreeView::setColumnHidden(column, hide);
+            emit columnHidden(column, hide);
+        }
+
+    signals:
+        void columnHidden(int column, bool hide);
+    };
+
+public:
+
+    /**
      * Constructor
      * @param parent Parent widget
      * @param itemTypeName Type name of the item (e.g. dataset or action)
@@ -237,7 +262,7 @@ private:
     QAbstractItemModel&         _model;                             /** Model containing data to be displayed in the hierarchy */
     QSortFilterProxyModel*      _filterModel;                       /** Pointer to filter model (maybe nullptr) */
     QItemSelectionModel         _selectionModel;                    /** Selection model */
-    QTreeView                   _treeView;                          /** Tree view that contains the data hierarchy */
+    TreeView                    _treeView;                          /** Tree view that contains the data hierarchy */
     OverlayWidget               _overlayWidget;                     /** Overlay widget that show information when there are no items in the model */
     QString                     _noItemsDescription;                /** Overlay widget description when no items are loaded */
     StringAction                _filterNameAction;                  /** String action for filtering by name */

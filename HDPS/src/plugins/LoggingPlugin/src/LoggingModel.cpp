@@ -3,6 +3,7 @@
 #include <Application.h>
 
 #include <util/Logger.h>
+#include <util/AbstractItemModelTester.h>
 
 #include <QBrush>
 #include <QDateTime>
@@ -23,42 +24,44 @@ QMap<LoggingModel::Column, QString> LoggingModel::columnNames = {
     { Column::Number, "Number" },
     { Column::Category, "Category" },
     { Column::Type, "Type" },
-    { Column::FileAndLine, "FileAndLine" },
+    { Column::FileAndLine, "File and line" },
     { Column::Function, "Function" },
     { Column::Message, "Message" },
-    { Column::Count, "NumberOfColumns" }
+    { Column::Count, "Number of columns" }
 };
 
 LoggingModel::LoggingModel(QObject* parent /*= nullptr*/) :
     QAbstractItemModel(parent)
 {
+    new AbstractItemModelTester(this, this);
+
     synchronizeLogRecords();
 }
 
 LoggingModel::~LoggingModel() = default;
 
-int LoggingModel::rowCount(const QModelIndex& modelIndex) const
+int LoggingModel::rowCount(const QModelIndex& parent) const
 {
-    if (!modelIndex.isValid())
+    if (!parent.isValid())
         return static_cast<int>(_messageRecords.size());
 
     return 0;
 }
 
-int LoggingModel::columnCount(const QModelIndex &) const
+int LoggingModel::columnCount(const QModelIndex& parent) const
 {
     return static_cast<int>(Column::Count);
 }
 
 QModelIndex LoggingModel::index(const int row, const int column, const QModelIndex& parent) const
 {
-    if (!hasIndex(row, column, parent))
+    if (row < 0 || row >= rowCount(parent))
         return QModelIndex();
 
-    if (!parent.isValid())
+    if (column < 0 || column >= columnCount(parent))
         return QModelIndex();
 
-    return createIndex(row, column, static_cast<const void*>(_messageRecords.at(row)));
+    return createIndex(row, column, _messageRecords[row]);
 }
 
 QVariant LoggingModel::data(const QModelIndex& modelIndex, const int role) const
@@ -72,9 +75,15 @@ QVariant LoggingModel::data(const QModelIndex& modelIndex, const int role) const
             {
                 case Column::Number:
                     return QVariant::fromValue(QString::number(data(modelIndex, Qt::EditRole).toULongLong()));
+
+                case Column::Type:
+                case Column::Message:
+                case Column::FileAndLine:
+                case Column::Function:
+                case Column::Category:
+                    return QVariant::fromValue(data(modelIndex, Qt::EditRole).toString());
             }
 
-            return "===";
             break;
         }
 
@@ -83,45 +92,37 @@ QVariant LoggingModel::data(const QModelIndex& modelIndex, const int role) const
             switch (static_cast<Column>(modelIndex.column()))
             {
                 case Column::Number:
-                    return qulonglong{ messageRecord->number };
-
+                    return QVariant::fromValue(qulonglong{ messageRecord->number });
                 
-                case Column::Category:
-                    return messageRecord->category;
-                
-                    /*
                 case Column::Type:
-                {
-                    return hdps::Logger::MsgTypeToString(messageRecord.type);
-                }
+                    return QVariant::fromValue(Logger::getMessageTypeName(messageRecord->type));
+
+                case Column::Message:
+                    return QVariant::fromValue(QString(messageRecord->message));
 
                 case Column::FileAndLine:
                 {
-                    return (messageRecord.file == nullptr) && (messageRecord.line == 0) ?
-                        QString{} :
-                        (QString("%1(%2)")
-                            .arg(messageRecord.file)
-                            .arg(messageRecord.line));
+                    if (messageRecord->file == nullptr)
+                        break;
+
+                    return QVariant::fromValue(QString("%1(%2)").arg(messageRecord->file).arg(messageRecord->line));
                 }
 
-                case Column::function:
-                {
-                    return messageRecord.function;
-                }
+                case Column::Function:
+                    return QVariant::fromValue(QString(messageRecord->function));
 
-                case Column::Message:
-                {
-                    return messageRecord.message;
-                }*/
+                case Column::Category:
+                    return QVariant::fromValue(QString(messageRecord->category));
             }
 
             break;
         }
+
+        case Qt::ToolTipRole:
+            return QVariant::fromValue(data(modelIndex, Qt::DisplayRole).toString());
     }
 
-    return "TEST";
-
-    return QVariant{};
+    return QVariant();
 }
 
 
@@ -145,39 +146,33 @@ QVariant LoggingModel::headerData(const int section, const Qt::Orientation orien
 
 void LoggingModel::synchronizeLogRecords()
 {
-#ifdef LOGGING_MODEL_VERBOSE
-    //qDebug() << __FUNCTION__;
-#endif
+    auto& logger = Application::current()->getLogger();
 
     const auto previousNumberOfMessages = _messageRecords.size();
-
-    Application::current()->getLogger().updateMessageRecords(_messageRecords);
-
-    const auto numberOfAddedMessages = _messageRecords.size() - previousNumberOfMessages;
+    const auto numberOfAddedMessages    = logger.getMessageRecords().size() - previousNumberOfMessages;
 
     if (numberOfAddedMessages >= 1) {
-        //qDebug() << numberOfMessages << numberOfAddedMessages;
+        const auto startRowIndex = rowCount(QModelIndex());
 
-        //layoutAboutToBeChanged();
-        beginInsertRows(QModelIndex(), 0, numberOfAddedMessages - 1);
+        beginInsertRows(QModelIndex(), startRowIndex, startRowIndex + numberOfAddedMessages-1);
         {
+            logger.updateMessageRecords(_messageRecords);
         }
         endInsertRows();
-
-        //emit layoutChanged();
-
-        //emit dataChanged(QModelIndex(), QModelIndex());
-        //beginLayout
     }
-
-    //Application::processEvents();
 }
 
 QModelIndex LoggingModel::parent(const QModelIndex& index) const
 {
     return QModelIndex();
-    //if (!index.isValid())
-        
+}
 
-    return createIndex(index.row(), 0);
+Qt::ItemFlags LoggingModel::flags(const QModelIndex& index) const
+{
+    if (!index.isValid())
+        return Qt::NoItemFlags;
+
+    auto itemFlags = Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
+
+    return itemFlags;
 }

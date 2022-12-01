@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <QMap>
 
 // Standard C++ header files:
 #include <cstddef>
@@ -29,11 +30,14 @@ namespace hdps
 
     class Logger
     {
+    public:
+        static QMap<QtMsgType, QString> messageTypeNames;
+
     protected:
         Logger() {};
 
     public:
-        static QString MsgTypeToString(QtMsgType);
+        static QString getMessageTypeName(QtMsgType);
         
         static QString GetFilePathName();
         static QString ExceptionToText(const std::exception& stdException);

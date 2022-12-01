@@ -8,6 +8,10 @@
 
 #include <stdexcept>
 
+#ifdef _DEBUG
+    #define HIERARCHY_WIDGET_VERBOSE
+#endif
+
 using namespace hdps::util;
 
 namespace hdps
@@ -61,8 +65,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _collapseAllAction.setToolTip(QString("Collapse all %1s in the hierarchy").arg(_itemTypeName.toLower()));
     _collapseAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
-    _selectAllAction.setToolTip(QString("Select all %1s in the hierarchy").arg(_itemTypeName.toLower()));
-    _selectNoneAction.setToolTip(QString("De-select all %1s in the hierarchy").arg(_itemTypeName.toLower()));
+    _selectAllAction.setToolTip(QString("Select all %1s").arg(_itemTypeName.toLower()));
+    _selectNoneAction.setToolTip(QString("De-select all %1s").arg(_itemTypeName.toLower()));
 
     _selectionGroupAction.setText("Selection");
     _selectionGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
@@ -109,6 +113,10 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     }
 
     _columnsAction << *selectAllCollumns;
+
+    connect(&_treeView, &TreeView::columnHidden, this, [this](int column, bool hide) -> void {
+        _columnsAction.getActions()[column]->setChecked(hide);
+    });
 
     updateSelectAllCollumnsReadOnly();
 
@@ -185,10 +193,11 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
         if (_filterModel == nullptr)
             return;
 
-        const auto caseSensitivity = _filterCaseSensitiveAction.isChecked() ? "case-sensitive" : "case-insensitive";
+        const auto caseSensitivity  = _filterCaseSensitiveAction.isChecked() ? "case-sensitive" : "case-insensitive";
+        const auto itemTypeName     = _itemTypeName.toLower();
 
         if (_filterRegularExpressionAction.isChecked()) {
-            _filterNameAction.setPlaceHolderString(QString("Search for %1 by regular expression (%2)").arg(_itemTypeName.toLower(), caseSensitivity));
+            _filterNameAction.setPlaceHolderString(QString("Search for %1 by regular expression (%2)").arg(itemTypeName, caseSensitivity));
 
             auto regularExpression = QRegularExpression(_filterNameAction.getString());
 
@@ -199,7 +208,9 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
                 _filterModel->setFilterRegularExpression(regularExpression);
         }
         else {
-            _filterNameAction.setPlaceHolderString(QString("Search for %1 by name (%2)").arg(_itemTypeName.toLower(), caseSensitivity));
+            const auto filterColumn = _model.headerData(_filterModel->filterKeyColumn(), Qt::Horizontal).toString().toLower();
+
+            _filterNameAction.setPlaceHolderString(QString("Search for %1 by %2 (%3)").arg(itemTypeName, filterColumn, caseSensitivity));
             _filterModel->setFilterFixedString(_filterNameAction.getString());
         }
             
@@ -345,6 +356,10 @@ bool HierarchyWidget::mayExpandAll() const
 
 void HierarchyWidget::expandAll()
 {
+#ifdef HIERARCHY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     _treeView.expandAll();
 }
 
@@ -364,6 +379,10 @@ bool HierarchyWidget::mayCollapseAll() const
 
 void HierarchyWidget::collapseAll()
 {
+#ifdef HIERARCHY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     _treeView.collapseAll();
 }
 
@@ -377,6 +396,10 @@ bool HierarchyWidget::maySelectAll() const
 
 void HierarchyWidget::selectAll()
 {
+#ifdef HIERARCHY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     _treeView.setFocus(Qt::NoFocusReason);
 
     for (const auto& filterModelIndex : fetchFilterModelIndices())
@@ -396,6 +419,10 @@ bool HierarchyWidget::maySelectNone() const
 
 void HierarchyWidget::selectNone()
 {
+#ifdef HIERARCHY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     for (const auto& filterModelIndex : fetchFilterModelIndices())
         _selectionModel.select(filterModelIndex, QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
 }

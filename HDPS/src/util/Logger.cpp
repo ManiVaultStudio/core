@@ -24,24 +24,18 @@
 
 using namespace hdps;
 
+QMap<QtMsgType, QString> Logger::messageTypeNames = {
+    { QtDebugMsg, "Debug" },
+    { QtWarningMsg, "Warning" },
+    { QtCriticalMsg, "Critical" },
+    { QtFatalMsg, "Fatal" },
+    { QtInfoMsg, "Info" }
+};
+
 namespace
 {
 
     constexpr auto separator = '\t';
-
-
-    std::string MsgTypeToAsciiString(const QtMsgType msgType)
-    {
-        switch (msgType)
-        {
-        case QtDebugMsg: return "debug";
-        case QtWarningMsg: return "warning";
-        case QtCriticalMsg: return "critical";
-        case QtFatalMsg: return "fatal";
-        case QtInfoMsg: return "info";
-        }
-        return std::to_string(msgType);
-    }
 
 
     auto ConvertToQString(const char* const utf8Chars)
@@ -253,7 +247,7 @@ namespace
                 logFile.GetOutputStream()
                     << messageNumber
                     << separator << MakeNullPrintable(context.category, "<category>")
-                    << separator << MsgTypeToAsciiString(type)
+                    << separator << Logger::getMessageTypeName(type).toStdString()
                     << separator << context.version
                     << separator << MakeNullPrintable(context.file, "<file>")
                     << separator << context.line
@@ -268,9 +262,9 @@ namespace
 
 namespace hdps {
 
-QString hdps::Logger::MsgTypeToString(const QtMsgType msgType)
+QString Logger::getMessageTypeName(const QtMsgType msgType)
 {
-    return QString::fromLatin1(MsgTypeToAsciiString(msgType).c_str());
+    return Logger::messageTypeNames[msgType];
 }
 
 void hdps::Logger::initialize()
@@ -284,7 +278,6 @@ QString hdps::Logger::GetFilePathName()
 {
     return ConvertToQString(::GetFilePathName().c_str());
 }
-
 
 QString hdps::Logger::ExceptionToText(const std::exception& stdException)
 {

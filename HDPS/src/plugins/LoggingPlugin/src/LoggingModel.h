@@ -11,15 +11,15 @@ struct MessageRecord;
 
 class LoggingModel final : public QAbstractItemModel
 {
-private:
+public:
     enum class Column
     {
         Number,
-        Category,
         Type,
+        Message,
         FileAndLine,
         Function,
-        Message,
+        Category,
         Count
     };
 
@@ -38,8 +38,8 @@ public:
     void synchronizeLogRecords();
 
 private:
-    int rowCount(const QModelIndex &) const override;
-    int columnCount(const QModelIndex &) const override;
+    int rowCount(const QModelIndex& parent) const override;
+    int columnCount(const QModelIndex& parent) const override;
     QModelIndex index(int, int, const QModelIndex &) const  override;
 
     /**
@@ -50,6 +50,13 @@ private:
 
     QVariant data(const QModelIndex &, int) const override;
     QVariant headerData(int, Qt::Orientation, int) const override;
+
+    /**
+     * Get model item flags
+     * @param index Model index
+     * @return Model item flags
+     */
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
 private:
     std::deque<const hdps::MessageRecord*> _messageRecords;

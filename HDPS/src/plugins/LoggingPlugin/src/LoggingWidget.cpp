@@ -36,7 +36,12 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
 
     _idleUpdateConnection = connect(QAbstractEventDispatcher::instance(), &QAbstractEventDispatcher::awake, &_model, &LoggingModel::synchronizeLogRecords);
 
-    //treeView.setRootIsDecorated(false);
+    treeView.setSortingEnabled(true);
+
+    treeView.setColumnHidden(static_cast<int>(LoggingModel::Column::Category), true);
+    treeView.setColumnHidden(static_cast<int>(LoggingModel::Column::FileAndLine), true);
+
+    _filterModel.setFilterKeyColumn(static_cast<int>(LoggingModel::Column::Message));
 
     //qDebug() << "Row count: " << _model.rowCount();
     //_hierarchyWidget.setNoItemsDescription("Right-click > Import to load data into HDPS");
@@ -45,8 +50,6 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
     //_treeView.setContextMenuPolicy(Qt::CustomContextMenu);
     //_treeView.setModel(&_model);
 
-    //_treeView.header()->setSortIndicator(-1, Qt::AscendingOrder);
-    //
     //connect(&_treeView, &QTreeView::customContextMenuRequested, [this](const QPoint&)
     //    {
     //        const auto selectedRows = _treeView.selectionModel()->selectedRows();
