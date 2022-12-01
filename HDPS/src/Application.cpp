@@ -23,12 +23,17 @@ namespace hdps {
 
 hdps::Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
+    _core(nullptr),
     _iconFonts(),
     _settings(),
     _currentProjectFilePath(),
-    _serializationTemporaryDirectory()
+    _serializationTemporaryDirectory(),
+    _serializationAborted(false),
+    _logger()
 {
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));
+    
+    _logger.initialize();
 }
 
 hdps::Application* hdps::Application::current()
@@ -63,7 +68,7 @@ hdps::CoreInterface* Application::getCore()
 
 void Application::setCore(CoreInterface* core)
 {
-    Q_ASSERT(_core != nullptr);
+    Q_ASSERT(core != nullptr);
 
     _core = core;
 
@@ -97,31 +102,30 @@ void Application::setCurrentProjectFilePath(const QString& currentProjectFilePat
 
     _currentProjectFilePath = currentProjectFilePath;
 
-    // Notify others that the current project file path changed
     emit currentProjectFilePathChanged(_currentProjectFilePath);
 }
 
 void Application::addRecentProjectFilePath(const QString& recentProjectFilePath)
 {
-    // Get recent projects from settings
     auto recentProjects = getSetting("Projects/Recent", QVariantList()).toList();
 
-    // Create recent project map
     QVariantMap recentProject{
         { "FilePath", recentProjectFilePath },
         { "DateTime", QDateTime::currentDateTime() }
     };
 
-    // Add to recent projects if not already in there
     for (auto recentProject : recentProjects)
         if (recentProject.toMap()["FilePath"].toString() == recentProjectFilePath)
             recentProjects.removeOne(recentProject);
 
-    // Insert the entry at the beginning
     recentProjects.insert(0, recentProject);
 
-    // Save settings
     setSetting("Projects/Recent", recentProjects);
+}
+
+Logger& Application::getLogger()
+{
+    return current()->_logger;
 }
 
 QString Application::getSerializationTemporaryDirectory()

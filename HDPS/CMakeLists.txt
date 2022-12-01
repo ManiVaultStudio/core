@@ -511,6 +511,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Serialization.h
     src/util/Serializable.h
     src/util/DockArea.h
+    src/util/Logger.h
 )
 
 set(PUBLIC_UTIL_SOURCES
@@ -539,6 +540,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Serialization.cpp
     src/util/Serializable.cpp
     src/util/DockArea.cpp
+    src/util/Logger.cpp
 )
 
 set(PUBLIC_UTIL_FILES

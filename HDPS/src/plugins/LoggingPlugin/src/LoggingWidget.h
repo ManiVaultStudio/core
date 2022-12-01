@@ -1,17 +1,16 @@
 #pragma once
 
-#include <actions/GroupsAction.h>
+#include "LoggingModel.h"
+#include "LoggingFilterModel.h"
+
+#include <widgets/HierarchyWidget.h>
 
 #include <QWidget>
-
-using namespace hdps;
-using namespace hdps::util;
-using namespace hdps::gui;
 
 /**
  * Logging widget class
  *
- * Widget class for inspecting HDPS logs
+ * Widget class for inspecting real-time logging information
  *
  * @author Thomas Kroes
  */
@@ -27,5 +26,15 @@ public:
      */
     LoggingWidget(QWidget* parent);
 
+    /**
+     * Get preferred size of the widget
+     * @return Preferred size of the widget
+     */
+    QSize sizeHint() const override;
+
 private:
+    LoggingModel                _model;                     /** Logging model for keeping track of log records */
+    LoggingFilterModel          _filterModel;               /** Filter model for logging (source is the logging model) */
+    hdps::gui::HierarchyWidget  _hierarchyWidget;           /** Widget for displaying hierarchy */
+    QMetaObject::Connection     _idleUpdateConnection;      /** Update the hierarchy widget when idle */
 };

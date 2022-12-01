@@ -9,7 +9,7 @@ using namespace hdps::plugin;
 /**
  * Logging view plugin
  *
- * This plugin provides a user interface inspecting HDPS logs
+ * This plugin provides a user interface for inspecting HDPS logs
  *
  * @author Thomas Kroes
  */

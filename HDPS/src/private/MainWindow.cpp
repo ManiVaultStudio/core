@@ -35,8 +35,6 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
 
     restoreWindowGeometryFromSettings();
 
-    //Logger::Initialize();
-
     // Delay execution till the event loop has started, otherwise we cannot quit the application
     QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
 

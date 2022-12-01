@@ -1,5 +1,7 @@
 #include "LoggingPlugin.h"
 
+#include <QVBoxLayout>
+
 Q_PLUGIN_METADATA(IID "nl.BioVault.LoggingWidget")
 
 using namespace hdps;
