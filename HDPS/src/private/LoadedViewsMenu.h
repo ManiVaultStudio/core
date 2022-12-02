@@ -1,5 +1,7 @@
 #pragma once
 
+#include <actions/ToggleAction.h>
+
 #include <QMenu>
 
 /**
@@ -32,5 +34,5 @@ private:
      * @param systemView Whether to include system views or normal views
      * @return Vector of actions
      */
-    QVector<QAction*> getLoadedViewsActions(bool systemView);
+    QVector<QPointer<hdps::gui::ToggleAction>> getLoadedViewsActions(bool systemView);
 };

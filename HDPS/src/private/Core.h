@@ -147,9 +147,19 @@ public: // Plugin creation
      * Create a plugin of \p kind with \p inputDatasets
      * @param kind Kind of plugin (name of the plugin)
      * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-     * @return Pointer to created plugin
+     * @return Pointer to created plugin (nullptr if creation failed)
      */
     plugin::Plugin* requestPlugin(const QString& kind, Datasets datasets = Datasets()) override;
+
+    /**
+     * Create a view plugin plugin of \p kind with \p inputDatasets and dock it to \p dockToViewPlugin at \p dockArea
+     * @param kind Kind of plugin (name of the plugin)
+     * @param dockToViewPlugin View plugin instance to dock to
+     * @param dockArea Dock area to dock in
+     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+     * @return Pointer to created view plugin (nullptr if creation failed)
+     */
+    plugin::ViewPlugin* requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, Datasets datasets = Datasets()) override;
 
 public: // Plugin queries
 

@@ -63,7 +63,7 @@ void ViewPluginDockWidget::loadViewPlugin()
 #endif
 
     if (Application::core()->isPluginLoaded(_viewPluginKind)) {
-        auto viewPlugin = Application::core()->requestPlugin<ViewPlugin>(_viewPluginKind);
+        auto viewPlugin = dynamic_cast<ViewPlugin*>(Application::core()->requestPlugin(_viewPluginKind));
 
         if (viewPlugin)
             setViewPlugin(viewPlugin);

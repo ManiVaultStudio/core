@@ -6,7 +6,7 @@
 #include "actions/WidgetAction.h"
 
 #include <QString>
-#include <QSharedPointer>
+#include <QPointer>
 
 #include <vector>
 #include <functional>
@@ -38,7 +38,7 @@ namespace hdps
     {
         class PluginTriggerAction;
 
-        using PluginTriggerActions = QVector<PluginTriggerAction*>;
+        using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
 
         class AbstractLayoutManager;
     }
@@ -207,9 +207,19 @@ public: // Plugin creation
      * Create a plugin of \p kind with \p inputDatasets
      * @param kind Kind of plugin (name of the plugin)
      * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-     * @return Pointer to created plugin
+     * @return Pointer to created plugin (nullptr if creation failed)
      */
     virtual plugin::Plugin* requestPlugin(const QString& kind, Datasets datasets = Datasets()) = 0;
+
+    /**
+     * Create a view plugin plugin of \p kind with \p inputDatasets and dock it to \p dockToViewPlugin at \p dockArea
+     * @param kind Kind of plugin (name of the plugin)
+     * @param dockToViewPlugin View plugin instance to dock to
+     * @param dockArea Dock area to dock in
+     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+     * @return Pointer to created view plugin (nullptr if creation failed)
+     */
+    virtual plugin::ViewPlugin* requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, Datasets datasets = Datasets()) = 0;
 
     /**
      * Create a plugin of \p kind with \p inputDatasets

@@ -110,7 +110,7 @@ public: // Project IO
      * Get application-wide logger instance
      * @return Reference to logger instance
      */
-    static Logger& getLogger();
+    static util::Logger& getLogger();
 
 public: // Serialization
 
@@ -143,7 +143,7 @@ protected:
     QString         _currentProjectFilePath;                /** File path of the current project */
     QString         _serializationTemporaryDirectory;       /** Temporary directory for serialization */
     bool            _serializationAborted;                  /** Whether (de)serialization was aborted */
-    Logger          _logger;                                /** Logger instance */
+    util::Logger    _logger;                                /** Logger instance */
 };
 
 }

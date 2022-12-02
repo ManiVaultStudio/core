@@ -12,22 +12,24 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const QString pluginKi
     TriggerAction(parent),
     _pluginKind(pluginKind),
     _pluginFactory(nullptr),
-    _title(title),
+    _location(),
     _sha(),
     _datasets(datasets),
     _configurationAction(nullptr)
 {
+    setText(title);
 }
 
 PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const Datasets& datasets /*= Datasets()*/) :
     TriggerAction(parent),
     _pluginKind(),
     _pluginFactory(pluginFactory),
-    _title(title),
+    _location(),
     _sha(),
     _datasets(datasets),
     _configurationAction(nullptr)
 {
+    setText(title);
 }
 
 const hdps::plugin::PluginFactory* PluginTriggerAction::getPluginFactory() const
@@ -35,14 +37,14 @@ const hdps::plugin::PluginFactory* PluginTriggerAction::getPluginFactory() const
     return _pluginFactory;
 }
 
-QString PluginTriggerAction::getTitle() const
+QString PluginTriggerAction::getLocation() const
 {
-    return _title;
+    return _location;
 }
 
-void PluginTriggerAction::setTitle(const QString& title)
+void PluginTriggerAction::setLocation(const QString& location)
 {
-    _title = title;
+    _location = location;
 }
 
 QString PluginTriggerAction::getSha() const
@@ -75,40 +77,47 @@ void PluginTriggerAction::initialize()
     if (_pluginFactory == nullptr)
         _pluginFactory = Application::core()->getPluginManager().getPluginFactory(_pluginKind);
 
-    _sha = QString(QCryptographicHash::hash(QString("%1_%2").arg(_pluginFactory->getKind(), getTitle()).toUtf8(), QCryptographicHash::Sha1).toHex());
+    _sha = QString(QCryptographicHash::hash(QString("%1_%2").arg(_pluginFactory->getKind(), getLocation()).toUtf8(), QCryptographicHash::Sha1).toHex());
+
+    setIcon(_pluginFactory->getIcon());
+}
+
+void PluginTriggerAction::setText(const QString& text)
+{
+    QAction::setText(text);
 
     switch (_pluginFactory->getType())
     {
         case plugin::Type::ANALYSIS:
-            _title.insert(0, "Analyze/");
+            _location = "Analyze";
             break;
 
         case plugin::Type::DATA:
-            _title.insert(0, "Data/");
+            _location = "Data";
             break;
 
         case plugin::Type::LOADER:
-            _title.insert(0, "Import/");
+            _location = "Import";
             break;
 
         case plugin::Type::TRANSFORMATION:
-            _title.insert(0, "Transform/");
+            _location = "Transform";
             break;
 
         case plugin::Type::VIEW:
-            _title.insert(0, "View/");
+            _location = "View";
             break;
 
         case plugin::Type::WRITER:
-            _title.insert(0, "Export/");
+            _location = "Export";
             break;
 
         default:
             break;
     }
 
-    setText(_title.split("/").last());
-    setIcon(_pluginFactory->getIcon());
+    _location.append("/");
+    _location.append(this->text());
 }
 
 }

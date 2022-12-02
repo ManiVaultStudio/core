@@ -3,6 +3,9 @@
 #include <QString>
 #include <QVector>
 #include <QWidget>
+#include <QPointer>
+
+#include <algorithm>
 
 class QAction;
 
@@ -27,7 +30,13 @@ QString getNoBytesHumanReadable(float noBytes);
  * Sort action based on their text
  * @param actions Actions to sort
  */
-void sortActions(QVector<QAction*>& actions);
+template<typename ActionType>
+void sortActions(QVector<QPointer<ActionType>>& actions)
+{
+    std::sort(actions.begin(), actions.end(), [](auto actionA, auto actionB) {
+        return actionA->text() < actionB->text();
+    });
+}
 
 /**
  * Find parent of type \p WidgetClass

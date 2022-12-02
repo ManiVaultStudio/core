@@ -81,9 +81,9 @@ bool ViewMenu::mayProducePlugins() const
     return false;
 }
 
-QVector<QAction*> ViewMenu::getLoadViewsActions(gui::DockAreaFlag dockArea)
+QVector<QPointer<TriggerAction>> ViewMenu::getLoadViewsActions(gui::DockAreaFlag dockArea)
 {
-    QVector<QAction*> actions;
+    QVector<QPointer<TriggerAction>> actions;
 
     auto pluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::VIEW);
 
@@ -93,7 +93,9 @@ QVector<QAction*> ViewMenu::getLoadViewsActions(gui::DockAreaFlag dockArea)
         if (viewPluginFactory->producesSystemViewPlugins())
             continue;
 
-        auto action = new QAction(pluginTriggerAction->icon(), viewPluginFactory->getKind(), this);
+        auto action = new TriggerAction(this, viewPluginFactory->getKind());
+
+        action->setIcon(pluginTriggerAction->icon());
 
         ViewPlugin* dockToViewPlugin = nullptr;
 
@@ -107,8 +109,7 @@ QVector<QAction*> ViewMenu::getLoadViewsActions(gui::DockAreaFlag dockArea)
         }
 
         connect(action, &QAction::triggered, this, [pluginTriggerAction, dockToViewPlugin, dockArea]() -> void {
-            auto viewPlugin = Application::core()->requestPlugin(pluginTriggerAction->getPluginFactory()->getKind());
-            Application::core()->getLayoutManager().addViewPlugin(dynamic_cast<ViewPlugin*>(viewPlugin), dockToViewPlugin, dockArea);
+            Application::core()->requestViewPlugin(pluginTriggerAction->getPluginFactory()->getKind(), dockToViewPlugin, dockArea);
         });
 
         actions << action;

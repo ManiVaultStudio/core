@@ -1,11 +1,23 @@
 #include "LoggingFilterModel.h"
 #include "LoggingModel.h"
 
+#include <util/Logger.h>
+
 #include <QDebug>
 
+using namespace hdps::util;
+using namespace hdps::gui;
+
 LoggingFilterModel::LoggingFilterModel(QObject* parent /*= nullptr*/) :
-    QSortFilterProxyModel(parent)
+    QSortFilterProxyModel(parent),
+    _filterTypeAction(this, "Filter type", Logger::messageTypeNames.values(), Logger::messageTypeNames.values())
 {
+    setFilterKeyColumn(static_cast<int>(LoggingModel::Column::Message));
+
+    _filterTypeAction.setConnectionPermissionsToNone();
+    _filterTypeAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+
+    connect(&_filterTypeAction, &OptionsAction::selectedOptionsChanged, this, &LoggingFilterModel::invalidate);
 }
 
 bool LoggingFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -15,12 +27,64 @@ bool LoggingFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
     if (!index.isValid())
         return true;
 
+    const auto* messageRecord = static_cast<MessageRecord*>(index.internalPointer());
+
     if (filterRegularExpression().isValid()) {
-        const auto key = sourceModel()->data(index.siblingAtColumn(static_cast<std::int32_t>(LoggingModel::Column::Message)), filterRole()).toString();
-        return key.contains(filterRegularExpression());
+        const auto key = sourceModel()->data(index.siblingAtColumn(filterKeyColumn()), filterRole()).toString();
+
+        if (!key.contains(filterRegularExpression()))
+            return false;
     }
 
-    return false;
+    const auto selectedFilterTypeOptions = _filterTypeAction.getSelectedOptions();
+
+    switch (messageRecord->type)
+    {
+        case QtMsgType::QtDebugMsg:
+        {
+            if (!selectedFilterTypeOptions.contains("Debug"))
+                return false;
+
+            break;
+        }
+
+        case QtMsgType::QtWarningMsg:
+        {
+            if (!selectedFilterTypeOptions.contains("Warning"))
+                return false;
+
+            break;
+        }
+
+        case QtMsgType::QtCriticalMsg:
+        {
+            if (!selectedFilterTypeOptions.contains("Critical"))
+                return false;
+
+            break;
+        }
+
+        case QtMsgType::QtFatalMsg:
+        {
+            if (!selectedFilterTypeOptions.contains("Fatal"))
+                return false;
+
+            break;
+        }
+
+        case QtMsgType::QtInfoMsg:
+        {
+            if (!selectedFilterTypeOptions.contains("Info"))
+                return false;
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return true;
 }
 
 bool LoggingFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const

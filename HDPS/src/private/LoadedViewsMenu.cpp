@@ -9,6 +9,7 @@
 using namespace hdps;
 using namespace hdps::plugin;
 using namespace hdps::util;
+using namespace hdps::gui;
 
 LoadedViewsMenu::LoadedViewsMenu(QWidget *parent /*= nullptr*/) :
     QMenu(parent)
@@ -43,9 +44,9 @@ void LoadedViewsMenu::showEvent(QShowEvent* showEvent)
     }
 }
 
-QVector<QAction*> LoadedViewsMenu::getLoadedViewsActions(bool systemView)
+QVector<QPointer<ToggleAction>> LoadedViewsMenu::getLoadedViewsActions(bool systemView)
 {
-    QVector<QAction*> actions;
+    QVector<QPointer<ToggleAction>> actions;
 
     const auto plugins = Application::core()->getPluginsByType({ plugin::Type::VIEW });
 

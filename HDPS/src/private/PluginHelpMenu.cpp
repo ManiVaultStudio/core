@@ -4,10 +4,13 @@
 #include <Application.h>
 #include <Plugin.h>
 
+#include <actions/TriggerAction.h>
+
 #include <util/Miscellaneous.h>
 
 using namespace hdps;
 using namespace hdps::util;
+using namespace hdps::gui;
 
 PluginHelpMenu::PluginHelpMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent)
@@ -22,7 +25,7 @@ void PluginHelpMenu::showEvent(QShowEvent* showEvent)
 {
     clear();
 
-    QVector<QAction*> actions;
+    QVector<QPointer<TriggerAction>> actions;
 
     const auto plugins = Application::core()->getPluginsByType({ Type::ANALYSIS, Type::DATA, Type::LOADER, Type::WRITER, Type::TRANSFORMATION, Type::VIEW });
 

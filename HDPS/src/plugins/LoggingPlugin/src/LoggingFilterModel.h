@@ -1,7 +1,16 @@
 #pragma once
 
+#include <actions/OptionsAction.h>
+
 #include <QSortFilterProxyModel>
 
+/**
+ * Logging filter model
+ *
+ * Provides a sorting and filtering model for the logging model
+ *
+ * @author Thomas Kroes
+ */
 class LoggingFilterModel : public QSortFilterProxyModel
 {
 public:
@@ -25,4 +34,10 @@ public:
      * @param rhs Right cluster
      */
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
+
+public:
+    hdps::gui::OptionsAction& getFilterTypeAction() { return _filterTypeAction; }
+
+private:
+    hdps::gui::OptionsAction    _filterTypeAction;          /** Options action for filtering log record item type */
 };

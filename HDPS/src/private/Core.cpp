@@ -11,6 +11,7 @@
 #include <RawData.h>
 #include <Set.h>
 #include <PluginFactory.h>
+#include <ViewPlugin.h>
 #include <event/Event.h>
 #include <util/Exception.h>
 
@@ -462,6 +463,7 @@ hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, Datasets datasets
 {
     try {
         return _pluginManager.createPlugin(kind, datasets);
+
     }
     catch (std::exception& e)
     {
@@ -472,6 +474,16 @@ hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, Datasets datasets
         exceptionMessageBox("Unable to request plugin from the core");
         return nullptr;
     }
+}
+
+hdps::plugin::ViewPlugin* Core::requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, Datasets datasets /*= Datasets()*/)
+{
+    auto viewPlugin = dynamic_cast<hdps::plugin::ViewPlugin*>(_pluginManager.createPlugin(kind, datasets));
+
+    if (viewPlugin)
+        Application::core()->getLayoutManager().addViewPlugin(viewPlugin, dockToViewPlugin, dockArea);
+
+    return viewPlugin;
 }
 
 bool Core::isPluginLoaded(const QString& kind) const

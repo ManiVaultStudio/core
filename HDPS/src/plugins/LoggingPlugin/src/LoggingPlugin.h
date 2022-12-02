@@ -18,14 +18,25 @@ class LoggingPlugin : public ViewPlugin
     Q_OBJECT
     
 public:
+
+    /**
+     * Constructor
+     * @param factory Pointer to plugin factory
+     */
     LoggingPlugin(const PluginFactory* factory);
     
+    /** Perform plugin initialization */
     void init() override;
 
 private:
-    LoggingWidget    _loggingWidget;      /** Loggin widget */
+    LoggingWidget    _loggingWidget;      /** Logging widget */
 };
 
+/**
+ * Logging view plugin factory
+ *
+ * @author Thomas Kroes
+ */
 class LoggingPluginFactory : public ViewPluginFactory
 {
     Q_INTERFACES(hdps::plugin::ViewPluginFactory hdps::plugin::PluginFactory)

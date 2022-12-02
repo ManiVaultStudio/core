@@ -304,6 +304,8 @@ hdps::gui::PluginTriggerActions PluginManager::getPluginTriggerActions(const plu
         if (pluginFactory->getType() == pluginType)
             pluginProducerActions << &pluginFactory->getPluginTriggerAction();
 
+    sortActions(pluginProducerActions);
+
     return pluginProducerActions;
 }
 
@@ -314,6 +316,8 @@ PluginTriggerActions PluginManager::getPluginTriggerActions(const Type& pluginTy
     for (auto pluginFactory : _pluginFactories)
         if (pluginFactory->getType() == pluginType)
             pluginProducerActions << pluginFactory->getPluginTriggerActions(datasets);
+
+    sortActions(pluginProducerActions);
 
     return pluginProducerActions;
 }
@@ -326,6 +330,8 @@ PluginTriggerActions PluginManager::getPluginTriggerActions(const plugin::Type& 
         if (pluginFactory->getType() == pluginType)
             pluginProducerActions << pluginFactory->getPluginTriggerActions(dataTypes);
 
+    sortActions(pluginProducerActions);
+
     return pluginProducerActions;
 }
 
@@ -337,6 +343,8 @@ PluginTriggerActions PluginManager::getPluginTriggerActions(const QString& plugi
         if (pluginFactory->getKind() == pluginKind)
             pluginProducerActions << pluginFactory->getPluginTriggerActions(datasets);
 
+    sortActions(pluginProducerActions);
+
     return pluginProducerActions;
 }
 
@@ -347,6 +355,8 @@ PluginTriggerActions PluginManager::getPluginTriggerActions(const QString& plugi
     for (auto pluginFactory : _pluginFactories) 
         if (pluginFactory->getKind() == pluginKind)
             pluginProducerActions << pluginFactory->getPluginTriggerActions(dataTypes);
+
+    sortActions(pluginProducerActions);
 
     return pluginProducerActions;
 }

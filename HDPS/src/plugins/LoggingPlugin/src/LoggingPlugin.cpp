@@ -2,7 +2,7 @@
 
 #include <QVBoxLayout>
 
-Q_PLUGIN_METADATA(IID "nl.BioVault.LoggingWidget")
+Q_PLUGIN_METADATA(IID "nl.BioVault.LoggingPlugin")
 
 using namespace hdps;
 

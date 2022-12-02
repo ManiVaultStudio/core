@@ -3,58 +3,64 @@
 #include <QString>
 #include <QMap>
 
-// Standard C++ header files:
 #include <cstddef>
 #include <deque>
 #include <exception>
 #include <mutex>
 
-namespace hdps
-{
+namespace hdps {
     class Application;
+}
 
-    struct MessageRecord
-    {
-        std::size_t number;
-        QtMsgType type;
-        int version;
-        int line;
-        const char* file;
-        const char* function;
-        const char* category;
-        QString message;
-    };
+namespace hdps::util
+{
 
-    using MessageRecordPointers = std::deque<const MessageRecord*>;
-    using MessageRecords = std::deque<MessageRecord>;
+struct MessageRecord
+{
+    std::size_t number;
+    QtMsgType type;
+    int version;
+    int line;
+    const char* file;
+    const char* function;
+    const char* category;
+    QString message;
 
-    class Logger
-    {
-    public:
-        static QMap<QtMsgType, QString> messageTypeNames;
+    QString toString() const;
+};
 
-    protected:
-        Logger() {};
+using MessageRecordPointers = std::deque<const MessageRecord*>;
+using MessageRecords = std::deque<MessageRecord>;
 
-    public:
-        static QString getMessageTypeName(QtMsgType);
+/**
+ * Global application logger
+ *
+ * Class for recording log messages
+ *
+ * @author Niels Dekker (original design) and Thomas Kroes (re-design and refactor)
+ */
+class Logger
+{
+public:
+    static QMap<QtMsgType, QString> messageTypeNames;
+
+public:
+    static QString getMessageTypeName(QtMsgType);
+    static QString GetFilePathName();
+    static QString ExceptionToText(const std::exception& stdException);
         
-        static QString GetFilePathName();
-        static QString ExceptionToText(const std::exception& stdException);
-        
-        void initialize();
-        MessageRecords& getMessageRecords();
-        void updateMessageRecords(MessageRecordPointers& messageRecordPointers);
-        std::mutex& getMutex();
+    void initialize();
+    MessageRecords& getMessageRecords();
+    void updateMessageRecords(MessageRecordPointers& messageRecordPointers);
+    std::mutex& getMutex();
 
-    private:
-        MessageRecords  _messageRecords;    /** Messages recorded since the instantiation of the logger */
-        std::mutex      _mutex;             /** Prevent race conditions */
+private:
+    MessageRecords  _messageRecords;    /** Messages recorded since the instantiation of the logger */
+    std::mutex      _mutex;             /** Prevent race conditions */
 
-        friend class Application;
-    };
+    friend class hdps::Application;
+};
 
 }
 
-#define HDPS_LOG_EXCEPTION(stdException) qCritical().noquote() << \
-  ::hdps::Logger::ExceptionToText(stdException)
+#define HDPS_LOG_EXCEPTION(stdException) qCritical().noquote() << ::hdps::Logger::ExceptionToText(stdException)

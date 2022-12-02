@@ -6,9 +6,11 @@
 #include <QHeaderView>
 #include <QMenu>
 #include <QGuiApplication>
+#include <QClipboard>
 #include <QAbstractEventDispatcher>
 
 using namespace hdps;
+using namespace hdps::util;
 
 LoggingWidget::LoggingWidget(QWidget* parent) :
     QWidget(parent),
@@ -29,58 +31,58 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
 
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("scroll"));
 
-    //_hierarchyWidget.getCollapseAllAction().setVisible(false);
-    //_hierarchyWidget.getExpandAllAction().setVisible(false);
+    _hierarchyWidget.getCollapseAllAction().setVisible(false);
+    _hierarchyWidget.getExpandAllAction().setVisible(false);
+
+    auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
+
+    filterGroupAction.setLabelWidthFixed(60);
+    filterGroupAction.setPopupSizeHint(QSize(340, 10));
+
+    filterGroupAction << _filterModel.getFilterTypeAction();
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
     _idleUpdateConnection = connect(QAbstractEventDispatcher::instance(), &QAbstractEventDispatcher::awake, &_model, &LoggingModel::synchronizeLogRecords);
 
     treeView.setSortingEnabled(true);
-
-    treeView.setColumnHidden(static_cast<int>(LoggingModel::Column::Number), true);
+    treeView.setRootIsDecorated(false);
     treeView.setColumnHidden(static_cast<int>(LoggingModel::Column::Category), true);
     treeView.setColumnHidden(static_cast<int>(LoggingModel::Column::FileAndLine), true);
+    treeView.setColumnHidden(static_cast<int>(LoggingModel::Column::Function), true);
 
-    _filterModel.setFilterKeyColumn(static_cast<int>(LoggingModel::Column::Message));
+    auto treeViewHeader = treeView.header();
 
-    //qDebug() << "Row count: " << _model.rowCount();
-    //_hierarchyWidget.setNoItemsDescription("Right-click > Import to load data into HDPS");
+    treeViewHeader->resizeSection(static_cast<int>(LoggingModel::Column::Number), 50);
+    treeViewHeader->resizeSection(static_cast<int>(LoggingModel::Column::Type), 60);
 
-    //_treeView.setSortingEnabled(true);
-    //_treeView.setContextMenuPolicy(Qt::CustomContextMenu);
-    //_treeView.setModel(&_model);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(LoggingModel::Column::Number), QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(LoggingModel::Column::Type), QHeaderView::Fixed);
 
-    //connect(&_treeView, &QTreeView::customContextMenuRequested, [this](const QPoint&)
-    //    {
-    //        const auto selectedRows = _treeView.selectionModel()->selectedRows();
+    connect(&treeView, &QTreeView::customContextMenuRequested, [this, &treeView](const QPoint& point)
+    {
+        const auto selectedRows = treeView.selectionModel()->selectedRows();
 
-    //        if (selectedRows.isEmpty())
-    //            return;
+        if (selectedRows.isEmpty())
+            return;
 
-    //        //const auto* const messageRecord = (row < 0) ? nullptr : _itemModel.GetMessageRecordAtRow(row);
+        QMenu contextMenu;
 
-    //        //QMenu contextMenu;
+        auto* const copyAction = contextMenu.addAction(tr("&Copy"), [this, selectedRows] {
+            QStringList messageRecordsString;
 
-    //        //auto* const copyAction = contextMenu.addAction(tr("&Copy"), [this, messageRecord]
-    //        //    {
-    //        //        if (messageRecord != nullptr)
-    //        //        {
-    //        //            QString text;
+            for (const auto& selectedRow : selectedRows) {
+                const auto index            = _filterModel.mapToSource(selectedRows.first());
+                const auto messageRecord    = static_cast<MessageRecord*>(index.internalPointer());
 
-    //        //            for (unsigned column{}; column < LogItemModel::numberOfColumns; ++column)
-    //        //            {
-    //        //                text.append(_itemModel.GetDataValueAtColumn(*messageRecord, column).toString())
-    //        //                    .append(QLatin1Char('\t'));
-    //        //            }
-    //        //            text.back() = QLatin1Char('\n');
-
-    //        //            QGuiApplication::clipboard()->setText(text);
-    //        //        }
-    //        //    });
-    //        //copyAction->setEnabled(messageRecord != nullptr);
-    //        //contextMenu.exec(QCursor::pos());
-    //    });
+                messageRecordsString << messageRecord->toString();
+            }
+            
+            QGuiApplication::clipboard()->setText(messageRecordsString.join("\n"));
+        });
+        
+        contextMenu.exec(QCursor::pos());
+    });
 }
 
 QSize LoggingWidget::sizeHint() const

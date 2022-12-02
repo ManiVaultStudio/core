@@ -7,11 +7,22 @@
 #include <deque>
 #include <cstdint>
 
-struct MessageRecord;
+namespace hdps::util {
+    struct MessageRecord;
+}
 
+/**
+ * Logging model
+ *
+ * Model item class for log items
+ *
+ * @author Thomas Kroes
+ */
 class LoggingModel final : public QAbstractItemModel
 {
 public:
+
+    /** Columns */
     enum class Column
     {
         Number,
@@ -25,39 +36,72 @@ public:
 
     static QMap<Column, QString> columnNames;
 
-    
-
 public:
-    LoggingModel(QObject* parent = nullptr);
-    LoggingModel(const LoggingModel&) = delete;
-    ~LoggingModel() override;
 
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     */
+    LoggingModel(QObject* parent = nullptr);
+
+    /** No need for copy constructor */
+    LoggingModel(const LoggingModel&) = delete;
+    
+    /** No need for destructor */
+    ~LoggingModel() override = default;
+
+    /** No need for assignment operator */
     LoggingModel& operator=(const LoggingModel&) = delete;
 
     /** Synchronizes the model with the log records from the core logger */
     void synchronizeLogRecords();
 
 private:
-    int rowCount(const QModelIndex& parent) const override;
-    int columnCount(const QModelIndex& parent) const override;
-    QModelIndex index(int, int, const QModelIndex &) const  override;
 
     /**
-     * Mandatory override for QAbstractItemModel. Returns the index of the parent
-     * of this item. If this item is not a child, an invalid index is returned.
+     * Get the number of rows for \p parent
+     * @return Number of children for \parent
+     */
+    int rowCount(const QModelIndex& parent) const override;
+
+    /**
+     * Get the number of columns for \p parent
+     * @return Number of columns for \p parent
+     */
+    int columnCount(const QModelIndex& parent) const override;
+
+    /**
+     * Get model index for \p row and \p column and \p parent
+     * @return Model index for \p row and \p column and \p parent
+     */
+    QModelIndex index(int row, int column, const QModelIndex& parent) const  override;
+
+    /**
+     * Get parent model index of \p index
+     * @param index Index to get the parent for
+     * @return Parent model index
      */
     QModelIndex parent(const QModelIndex& index) const override;
 
+    /**
+     * Get data for \p index and \p role
+     * @return Variant representation of the data
+     */
     QVariant data(const QModelIndex &, int) const override;
-    QVariant headerData(int, Qt::Orientation, int) const override;
 
     /**
-     * Get model item flags
+     * Get header data for \p index, \p orientation and \p role
+     * @return Variant representation of the data
+     */
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+
+    /**
+     * Get model item flags for \p index
      * @param index Model index
      * @return Model item flags
      */
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
 private:
-    std::deque<const hdps::MessageRecord*> _messageRecords;
+    std::deque<const hdps::util::MessageRecord*>    _messageRecords;    /** Logged message records */
 };

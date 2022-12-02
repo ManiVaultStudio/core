@@ -60,7 +60,7 @@ void PluginTriggerPickerAction::initialize(const QString& pluginKind, const Data
     emit pluginTriggerActionsChanged(_pluginTriggerActions);
 }
 
-PluginTriggerAction* PluginTriggerPickerAction::getPluginTriggerAction(const QString& sha)
+QPointer<PluginTriggerAction> PluginTriggerPickerAction::getPluginTriggerAction(const QString& sha)
 {
     for (const auto& pluginTriggerAction : _pluginTriggerActions)
         if (pluginTriggerAction->getSha() == sha)
@@ -74,7 +74,7 @@ PluginTriggerActions PluginTriggerPickerAction::getPluginTriggerActions()
     return _pluginTriggerActions;
 }
 
-PluginTriggerAction* PluginTriggerPickerAction::getCurrentPluginTriggerAction()
+QPointer<PluginTriggerAction> PluginTriggerPickerAction::getCurrentPluginTriggerAction()
 {
     if (!_selectTriggerAction.hasSelection())
         return nullptr;
@@ -94,7 +94,7 @@ void PluginTriggerPickerAction::setCurrentPluginTriggerAction(const QString& sha
     reset();
 }
 
-void PluginTriggerPickerAction::setCurrentPluginTriggerAction(PluginTriggerAction* pluginTriggerAction)
+void PluginTriggerPickerAction::setCurrentPluginTriggerAction(QPointer<PluginTriggerAction> pluginTriggerAction)
 {
     if (_pluginTriggerActions.contains(pluginTriggerAction))
         _selectTriggerAction.setCurrentIndex(_pluginTriggerActions.indexOf(pluginTriggerAction) + 1);

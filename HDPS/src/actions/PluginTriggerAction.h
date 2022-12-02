@@ -50,16 +50,16 @@ public:
     const plugin::PluginFactory* getPluginFactory() const;
 
     /**
-     * Get title
-     * @return Title
+     * Get location of the plugin trigger action
+     * @return Location of the plugin trigger action
      */
-    QString getTitle() const;
+    QString getLocation() const;
 
     /**
-     * Set title
-     * @param title Title
+     * Set location of the plugin trigger action
+     * @param location Location of the plugin trigger action
      */
-    void setTitle(const QString& title);
+    void setLocation(const QString& location);
 
     /**
      * Get sha of plugin kind + trigger title
@@ -91,6 +91,12 @@ public:
      */
     void setConfigurationAction(WidgetAction* configurationAction);
 
+    /**
+     * Override base class to also update location
+     * @param text Action text
+     */
+    void setText(const QString& text);
+
 protected:
 
     /** Sets up the trigger action */
@@ -107,7 +113,7 @@ signals:
 private:
     const QString                   _pluginKind;            /** Kind of plugin */
     const plugin::PluginFactory*    _pluginFactory;         /** Pointer to plugin factory */
-    QString                         _title;                 /** Plugin trigger title (if title is in path format, the trigger will be added to the data hierarchy context menu in a hierarchical fashion) */
+    QString                         _location;              /** Determines where the plugin trigger action resides w.r.t. other plugin trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images */
     QString                         _sha;                   /** Cryptographic hash of the plugin kind and trigger title */
     Datasets                        _datasets;              /** Input datasets */
     WidgetAction*                   _configurationAction;   /** Action for configuring the plugin creation */
@@ -115,6 +121,6 @@ private:
     friend class plugin::PluginFactory;
 };
 
-using PluginTriggerActions = QVector<PluginTriggerAction*>;
+using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
 
 }

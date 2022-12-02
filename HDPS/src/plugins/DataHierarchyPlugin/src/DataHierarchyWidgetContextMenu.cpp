@@ -48,7 +48,7 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
     QMap<QString, QMenu*> menus;
 
     for (auto pluginTriggerAction : Application::core()->getPluginTriggerActions(pluginType, _datasets)) {
-        const auto titleSegments = pluginTriggerAction->getTitle().split("/");
+        const auto titleSegments = pluginTriggerAction->getLocation().split("/");
 
         QString menuPath, previousMenuPath = titleSegments.first();
 

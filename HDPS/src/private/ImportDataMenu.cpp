@@ -6,6 +6,7 @@
 
 using namespace hdps;
 using namespace hdps::gui;
+using namespace hdps::util;
 
 ImportDataMenu::ImportDataMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent)
@@ -16,9 +17,10 @@ ImportDataMenu::ImportDataMenu(QWidget* parent /*= nullptr*/) :
 
 void ImportDataMenu::showEvent(QShowEvent* showEvent)
 {
-    //connect(Application::current(), &Application::coreSet, this, [this]() -> void {
-    //    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::addLoadImportPluginTriggerAction, this, [this](PluginTriggerAction& pluginTriggerAction) -> void {
-    //        addAction(&pluginTriggerAction);
-    //    });
-    //});
+    clear();
+
+    for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::LOADER)) {
+        addAction(pluginTriggerAction);
+    }
+        
 }

@@ -24,14 +24,6 @@
 
 using namespace hdps;
 
-QMap<QtMsgType, QString> Logger::messageTypeNames = {
-    { QtDebugMsg, "Debug" },
-    { QtWarningMsg, "Warning" },
-    { QtCriticalMsg, "Critical" },
-    { QtFatalMsg, "Fatal" },
-    { QtInfoMsg, "Info" }
-};
-
 namespace
 {
 
@@ -247,7 +239,7 @@ namespace
                 logFile.GetOutputStream()
                     << messageNumber
                     << separator << MakeNullPrintable(context.category, "<category>")
-                    << separator << Logger::getMessageTypeName(type).toStdString()
+                    << separator << hdps::util::Logger::getMessageTypeName(type).toStdString()
                     << separator << context.version
                     << separator << MakeNullPrintable(context.file, "<file>")
                     << separator << context.line
@@ -260,33 +252,41 @@ namespace
 
 }   // namespace
 
-namespace hdps {
+namespace hdps::util {
+
+QMap<QtMsgType, QString> Logger::messageTypeNames = {
+    { QtDebugMsg, "Debug" },
+    { QtWarningMsg, "Warning" },
+    { QtCriticalMsg, "Critical" },
+    { QtFatalMsg, "Fatal" },
+    { QtInfoMsg, "Info" }
+};
 
 QString Logger::getMessageTypeName(const QtMsgType msgType)
 {
     return Logger::messageTypeNames[msgType];
 }
 
-void hdps::Logger::initialize()
+void Logger::initialize()
 {
     QDir{}.mkpath(GetLogDirectoryPathName());
     (void)GetPreviousMessageHandler(qInstallMessageHandler(&MessageHandler));
 }
 
 
-QString hdps::Logger::GetFilePathName()
+QString Logger::GetFilePathName()
 {
     return ConvertToQString(::GetFilePathName().c_str());
 }
 
-QString hdps::Logger::ExceptionToText(const std::exception& stdException)
+QString Logger::ExceptionToText(const std::exception& stdException)
 {
     return QObject::tr("Caught exception: \"%1\". Type: %2")
         .arg(stdException.what())
         .arg(typeid(stdException).name());
 }
 
-hdps::MessageRecords& Logger::getMessageRecords()
+MessageRecords& Logger::getMessageRecords()
 {
     return _messageRecords;
 }
@@ -320,6 +320,21 @@ void Logger::updateMessageRecords(MessageRecordPointers& messageRecordPointers)
 std::mutex& Logger::getMutex()
 {
     return _mutex;
+}
+
+QString MessageRecord::toString() const
+{
+	QStringList items;
+
+	items << QString::number(number);
+	items << Logger::getMessageTypeName(type);
+	items << QString(file);
+	items << QString::number(line);
+	items << QString(function);
+	items << QString(category);
+	items << message;
+
+	return items.join("\t");
 }
 
 }

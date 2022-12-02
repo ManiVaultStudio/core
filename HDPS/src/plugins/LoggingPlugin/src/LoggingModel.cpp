@@ -3,7 +3,6 @@
 #include <Application.h>
 
 #include <util/Logger.h>
-#include <util/AbstractItemModelTester.h>
 
 #include <QBrush>
 #include <QDateTime>
@@ -19,6 +18,7 @@
 #endif
 
 using namespace hdps;
+using namespace hdps::util;
 
 QMap<LoggingModel::Column, QString> LoggingModel::columnNames = {
     { Column::Number, "Number" },
@@ -33,12 +33,8 @@ QMap<LoggingModel::Column, QString> LoggingModel::columnNames = {
 LoggingModel::LoggingModel(QObject* parent /*= nullptr*/) :
     QAbstractItemModel(parent)
 {
-    new AbstractItemModelTester(this, this);
-
     synchronizeLogRecords();
 }
-
-LoggingModel::~LoggingModel() = default;
 
 int LoggingModel::rowCount(const QModelIndex& parent) const
 {
@@ -64,24 +60,24 @@ QModelIndex LoggingModel::index(const int row, const int column, const QModelInd
     return createIndex(row, column, _messageRecords[row]);
 }
 
-QVariant LoggingModel::data(const QModelIndex& modelIndex, const int role) const
+QVariant LoggingModel::data(const QModelIndex& index, const int role) const
 {
-    const auto* messageRecord = static_cast<hdps::MessageRecord*>(modelIndex.internalPointer());
+    const auto* messageRecord = static_cast<MessageRecord*>(index.internalPointer());
 
     switch (role) {
         case Qt::DisplayRole:
         {
-            switch (static_cast<Column>(modelIndex.column()))
+            switch (static_cast<Column>(index.column()))
             {
                 case Column::Number:
-                    return QVariant::fromValue(QString::number(data(modelIndex, Qt::EditRole).toULongLong()));
+                    return QVariant::fromValue(QString::number(data(index, Qt::EditRole).toULongLong()));
 
                 case Column::Type:
                 case Column::Message:
                 case Column::FileAndLine:
                 case Column::Function:
                 case Column::Category:
-                    return QVariant::fromValue(data(modelIndex, Qt::EditRole).toString());
+                    return QVariant::fromValue(data(index, Qt::EditRole).toString());
             }
 
             break;
@@ -89,7 +85,7 @@ QVariant LoggingModel::data(const QModelIndex& modelIndex, const int role) const
 
         case Qt::EditRole:
         {
-            switch (static_cast<Column>(modelIndex.column()))
+            switch (static_cast<Column>(index.column()))
             {
                 case Column::Number:
                     return QVariant::fromValue(qulonglong{ messageRecord->number });
@@ -119,7 +115,15 @@ QVariant LoggingModel::data(const QModelIndex& modelIndex, const int role) const
         }
 
         case Qt::ToolTipRole:
-            return QVariant::fromValue(data(modelIndex, Qt::DisplayRole).toString());
+            return QVariant::fromValue(data(index, Qt::DisplayRole).toString());
+
+        case Qt::TextAlignmentRole:
+        {
+            if (index.column() == static_cast<std::int32_t>(Column::Number))
+                return Qt::AlignLeft;
+
+            break;
+        }
     }
 
     return QVariant();
@@ -131,7 +135,25 @@ QVariant LoggingModel::headerData(const int section, const Qt::Orientation orien
     if (orientation == Qt::Horizontal) {
         switch (role) {
             case Qt::DisplayRole:
+            {
+                if (section == static_cast<std::int32_t>(Column::Number))
+                    return "#";
+
+                if (section < static_cast<std::int32_t>(Column::Count))
+                    return columnNames[static_cast<Column>(section)];
+
+                break;
+            }
+
             case Qt::EditRole:
+            {
+                if (section < static_cast<std::int32_t>(Column::Count))
+                    return columnNames[static_cast<Column>(section)];
+
+                break;
+            }
+
+            case Qt::ToolTipRole:
             {
                 if (section < static_cast<std::int32_t>(Column::Count))
                     return columnNames[static_cast<Column>(section)];
@@ -154,7 +176,7 @@ void LoggingModel::synchronizeLogRecords()
     if (numberOfAddedMessages >= 1) {
         const auto startRowIndex = rowCount(QModelIndex());
 
-        beginInsertRows(QModelIndex(), startRowIndex, startRowIndex + numberOfAddedMessages-1);
+        beginInsertRows(QModelIndex(), startRowIndex, startRowIndex + static_cast<int>(numberOfAddedMessages) - 1);
         {
             logger.updateMessageRecords(_messageRecords);
         }

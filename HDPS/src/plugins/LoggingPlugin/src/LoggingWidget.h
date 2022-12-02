@@ -36,5 +36,5 @@ private:
     LoggingModel                _model;                     /** Logging model for keeping track of log records */
     LoggingFilterModel          _filterModel;               /** Filter model for logging (source is the logging model) */
     hdps::gui::HierarchyWidget  _hierarchyWidget;           /** Widget for displaying hierarchy */
-    QMetaObject::Connection     _idleUpdateConnection;      /** Update the hierarchy widget when idle */
+    QMetaObject::Connection     _idleUpdateConnection;      /** Update the logging widget when idle */
 };

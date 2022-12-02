@@ -10,6 +10,7 @@
 #include <QIcon>
 #include <QVariant>
 #include <QAction>
+#include <QPointer>
 
 namespace hdps
 {
@@ -19,7 +20,7 @@ namespace hdps
     {
         class PluginTriggerAction;
 
-        using PluginTriggerActions = QVector<PluginTriggerAction*>;
+        using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
     }
 
 namespace plugin
@@ -200,7 +201,7 @@ protected:
      * @param datasets Input datasets
      * @return Pointer to plugin trigger action
      */
-    gui::PluginTriggerAction* createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets) const;
+    QPointer<gui::PluginTriggerAction> createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets) const;
 
     /**
      * Convenience function for generating a plugin trigger action
@@ -210,7 +211,7 @@ protected:
      * @param iconName Name of the icon
      * @return Pointer to plugin trigger action
      */
-    gui::PluginTriggerAction* createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QString& iconName) const;
+    QPointer<gui::PluginTriggerAction> createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QString& iconName) const;
 
     /**
      * Convenience function for generating a plugin trigger action
@@ -220,7 +221,7 @@ protected:
      * @param icon Icon
      * @return Pointer to plugin trigger action
      */
-    gui::PluginTriggerAction* createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QIcon& icon) const;
+    QPointer<gui::PluginTriggerAction> createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QIcon& icon) const;
 
 private:
     QString                     _kind;                          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
