@@ -22,52 +22,51 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
 {
     setTitle("View");
     setToolTip("Manage view plugins");
-}
 
-void ViewMenu::showEvent(QShowEvent* showEvent)
-{
-    clear();
+    connect(this, &QMenu::aboutToShow, this, [this]() -> void {
+        clear();
 
-    if (_options.testFlag(LoadSystemViewPlugins)) 
-        addMenu(new LoadSystemViewMenu());
+        if (_options.testFlag(LoadSystemViewPlugins))
+            addMenu(new LoadSystemViewMenu());
 
-    Application::processEvents();
+        Application::processEvents();
 
-    auto separator = addSeparator();
+        auto separator = addSeparator();
 
-    Application::processEvents();
+        Application::processEvents();
 
-    if (_dockAreaWidget) {
-        const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
-            auto loadViewsDockedMenu = new QMenu(gui::dockAreaMap.key(dockArea));
+        if (_dockAreaWidget) {
+            const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
+                auto loadViewsDockedMenu = new QMenu(gui::dockAreaMap.key(dockArea));
 
-            loadViewsDockedMenu->setIcon(getDockAreaIcon(dockArea));
+                loadViewsDockedMenu->setIcon(getDockAreaIcon(dockArea));
 
-            for (auto action : getLoadViewsActions(dockArea))
-                loadViewsDockedMenu->addAction(action);
+                for (auto action : getLoadViewsActions(dockArea))
+                    loadViewsDockedMenu->addAction(action);
 
-            return loadViewsDockedMenu;
-        };
+                return loadViewsDockedMenu;
+            };
 
-        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Left));
-        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Right));
-        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Top));
-        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Bottom));
-        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Center));
-    }
-    else {
-        if (_options.testFlag(LoadViewPlugins)) {
-            const auto actions = getLoadViewsActions(gui::DockAreaFlag::Right);
-
-            for (auto action : actions)
-                insertAction(_separator, action);
+            insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Left));
+            insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Right));
+            insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Top));
+            insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Bottom));
+            insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Center));
         }
-    }
+        else {
+            if (_options.testFlag(LoadViewPlugins)) {
+                const auto actions = getLoadViewsActions(gui::DockAreaFlag::Right);
 
-    _separator = addSeparator();
+                for (auto action : actions)
+                    insertAction(_separator, action);
+            }
+        }
 
-    if (_options.testFlag(LoadedViewsSubMenu))
-        addMenu(new LoadedViewsMenu());
+        _separator = addSeparator();
+
+        if (_options.testFlag(LoadedViewsSubMenu))
+            addMenu(new LoadedViewsMenu());
+    });
 }
 
 bool ViewMenu::mayProducePlugins() const

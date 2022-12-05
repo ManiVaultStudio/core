@@ -18,19 +18,25 @@ class ViewPluginDockWidget : public DockWidget
 public:
 
     /**
-     * Constructor
+     * Construct view plugin dock from \p title and \p parent widget
      * @param title Title of the dock widget
      * @param parent Pointer to parent widget
      */
-    ViewPluginDockWidget(const QString& title, QWidget* parent = nullptr);
+    ViewPluginDockWidget(const QString& title = "", QWidget* parent = nullptr);
 
     /**
-     * Constructor
+     * Construct view plugin dock from \p title, \p viewPlugin and \p parent widget
      * @param title Title of the dock widget
      * @param viewPlugin Pointer to view plugin
      * @param parent Pointer to parent widget
      */
     ViewPluginDockWidget(const QString& title, hdps::plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
+
+    /**
+     * Construct view plugin dock from \p variantMap
+     * @param variantMap View plugin variant map
+     */
+    ViewPluginDockWidget(const QVariantMap& variantMap);
 
     /**
      * Get string that describes the dock widget type

@@ -26,8 +26,6 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     _centralDockWidget(this),
     _viewPluginDockWidgets()
 {
-    _centralDockWidget.setObjectName("CentralDockWidget");
-
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
@@ -90,16 +88,28 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
-    reset();
+    variantMapMustContain(variantMap, "State");
+    variantMapMustContain(variantMap, "ViewPluginDockWidgets");
 
-    DockArea rootDockArea(this);
+    hide();
+    {
+        for (auto viewPluginDockWidget : _viewPluginDockWidgets)
+            removeDockWidget(viewPluginDockWidget);
 
-    rootDockArea.fromVariantMap(variantMap["RootArea"].toMap());
-    rootDockArea.applyDocking();
+        _viewPluginDockWidgets.clear();
 
-#ifdef DOCK_MANAGER_VERBOSE
-    qDebug() << rootDockArea;
-#endif
+        for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList()) {
+            auto viewPluginDockWidget = new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap());
+
+            addDockWidget(RightDockWidgetArea, viewPluginDockWidget);
+
+            _viewPluginDockWidgets << viewPluginDockWidget;
+        }
+
+        if (!restoreState(QByteArray::fromBase64(variantMap["State"].toString().toUtf8()), variantMap["Version"].toInt()))
+            qCritical() << "Unable to restore state from" << objectName();
+    }
+    show();
 }
 
 QVariantMap DockManager::toVariantMap() const
@@ -112,8 +122,14 @@ QVariantMap DockManager::toVariantMap() const
 
     rootDockArea.buildTreeFromDocking(rootSplitter());
 
+    QVariantList viewPluginDockWidgetsList;
+
+    for (auto viewPluginDockWidget : _viewPluginDockWidgets)
+        viewPluginDockWidgetsList << viewPluginDockWidget->toVariantMap();
+
     return {
-        { "RootArea", rootDockArea.toVariantMap() }
+        { "State", QVariant::fromValue(saveState().toBase64()) },
+        { "ViewPluginDockWidgets", viewPluginDockWidgetsList }
     };
 }
 

@@ -17,7 +17,7 @@ using namespace hdps::plugin;
 using namespace hdps::util;
 using namespace hdps::gui;
 
-ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
+ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidget* parent /*= nullptr*/) :
     DockWidget(title, parent),
     _viewPlugin(nullptr),
     _viewPluginKind(),
@@ -25,7 +25,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, QWidget* parent
     _settingsMenu(),
     _helpAction(this, "Help")
 {
-    setObjectName("ViewPluginDockWidget");
+    //setFeature(CDockWidget::DockWidgetDeleteOnClose, true);
 
     _helpAction.setIcon(Application::getIconFont("FontAwesome").getIcon("question"));
     _helpAction.setShortcut(tr("F1"));
@@ -49,6 +49,16 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
 {
     setViewPlugin(viewPlugin);
     initializeSettingsMenu();
+}
+
+ViewPluginDockWidget::ViewPluginDockWidget(const QVariantMap& variantMap) :
+    DockWidget(""),
+    _viewPlugin(nullptr),
+    _viewPluginKind(),
+    _viewPluginMap(),
+    _helpAction(this, "Help")
+{
+    fromVariantMap(variantMap);
 }
 
 QString ViewPluginDockWidget::getTypeString() const
@@ -91,6 +101,8 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
     qDebug() << __FUNCTION__;
 #endif
 
+    DockWidget::fromVariantMap(variantMap);
+
     variantMapMustContain(variantMap, "ViewPlugin");
 
     _viewPluginMap = variantMap["ViewPlugin"].toMap();
@@ -102,6 +114,8 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(pluginMap, "Kind");
 
     _viewPluginKind = pluginMap["Kind"].toString();
+
+    loadViewPlugin();
 }
 
 QVariantMap ViewPluginDockWidget::toVariantMap() const

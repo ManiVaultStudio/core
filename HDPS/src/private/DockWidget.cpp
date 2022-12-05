@@ -23,6 +23,7 @@ using namespace hdps::plugin;
 DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     CDockWidget(title, parent),
     Serializable(title),
+    _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _overlayWidget(this, Application::getIconFont("FontAwesome").getIcon("hourglass-half"), "Loading", QString("Waiting for %1 to load...").arg(title)),
     _settingsToolButton(nullptr)
 {
@@ -30,7 +31,7 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     qDebug() << __FUNCTION__ << title;
 #endif
 
-    setObjectName("DockWidget");
+    setObjectName(_id);
 
     auto& widgetFader = _overlayWidget.getWidgetFader();
 
@@ -88,12 +89,16 @@ void DockWidget::setWidget(QWidget* widget, eInsertMode insertMode /*= AutoScrol
 
 void DockWidget::fromVariantMap(const QVariantMap& variantMap)
 {
+    variantMapMustContain(variantMap, "ID");
     variantMapMustContain(variantMap, "Title");
     variantMapMustContain(variantMap, "Closed");
     variantMapMustContain(variantMap, "Closable");
     variantMapMustContain(variantMap, "Movable");
     variantMapMustContain(variantMap, "Floatable");
 
+    _id = variantMap["ID"].toString();
+
+    setObjectName(_id);
     setWindowTitle(variantMap["Title"].toString());
     //toggleView(variantMap["Closed"].toBool());
     setFeature(CDockWidget::DockWidgetClosable, variantMap["Closable"].toBool());
@@ -104,11 +109,12 @@ void DockWidget::fromVariantMap(const QVariantMap& variantMap)
 QVariantMap DockWidget::toVariantMap() const
 {
     return {
-        { "Title", windowTitle() },
-        { "Type", this->getTypeString() },
-        { "Closed", isClosed() },
-        { "Closable", features().testFlag(CDockWidget::DockWidgetClosable) },
-        { "Movable", features().testFlag(CDockWidget::DockWidgetMovable) },
-        { "Floatable", features().testFlag(CDockWidget::DockWidgetFloatable) }
+        { "ID", QVariant::fromValue(_id) },
+        { "Title", QVariant::fromValue(windowTitle()) },
+        { "Type", QVariant::fromValue(this->getTypeString()) },
+        { "Closed", QVariant::fromValue(isClosed()) },
+        { "Closable", QVariant::fromValue(features().testFlag(CDockWidget::DockWidgetClosable)) },
+        { "Movable", QVariant::fromValue(features().testFlag(CDockWidget::DockWidgetMovable)) },
+        { "Floatable", QVariant::fromValue(features().testFlag(CDockWidget::DockWidgetFloatable)) }
     };
 }
