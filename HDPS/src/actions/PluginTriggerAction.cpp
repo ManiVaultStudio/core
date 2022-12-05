@@ -8,28 +8,53 @@
 
 namespace hdps::gui {
 
-PluginTriggerAction::PluginTriggerAction(QObject* parent, const QString pluginKind, const QString& title, const Datasets& datasets /*= Datasets()*/) :
+PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon) :
     TriggerAction(parent),
-    _pluginKind(pluginKind),
-    _pluginFactory(nullptr),
-    _location(),
-    _sha(),
-    _datasets(datasets),
-    _configurationAction(nullptr)
-{
-    setText(title);
-}
-
-PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const Datasets& datasets /*= Datasets()*/) :
-    TriggerAction(parent),
-    _pluginKind(),
     _pluginFactory(pluginFactory),
     _location(),
     _sha(),
-    _datasets(datasets),
-    _configurationAction(nullptr)
+    _configurationAction(nullptr),
+    _requestPluginCallback()
 {
     setText(title);
+    setToolTip(tooltip);
+    setIcon(icon);
+
+    connect(this, &TriggerAction::triggered, this, &PluginTriggerAction::requestPlugin);
+
+    setRequestPluginCallback([this](PluginTriggerAction& pluginTriggerAction) -> void {
+        Application::core()->requestPlugin(_pluginFactory->getKind());
+    });
+}
+
+PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon, RequestPluginCallback requestPluginCallback) :
+    TriggerAction(parent),
+    _pluginFactory(pluginFactory),
+    _location(),
+    _sha(),
+    _configurationAction(nullptr),
+    _requestPluginCallback(requestPluginCallback)
+{
+    setText(title);
+    setToolTip(tooltip);
+    setIcon(icon);
+
+    connect(this, &TriggerAction::triggered, this, &PluginTriggerAction::requestPlugin);
+}
+
+PluginTriggerAction::PluginTriggerAction(const PluginTriggerAction& pluginTriggerAction) :
+    TriggerAction(pluginTriggerAction.parent()),
+    _pluginFactory(pluginTriggerAction.getPluginFactory()),
+    _location(),
+    _sha(),
+    _configurationAction(nullptr),
+    _requestPluginCallback()
+{
+    setText(pluginTriggerAction.text());
+    setToolTip(pluginTriggerAction.toolTip());
+    setIcon(pluginTriggerAction.icon());
+
+    connect(this, &TriggerAction::triggered, this, &PluginTriggerAction::requestPlugin);
 }
 
 const hdps::plugin::PluginFactory* PluginTriggerAction::getPluginFactory() const
@@ -52,16 +77,6 @@ QString PluginTriggerAction::getSha() const
     return _sha;
 }
 
-Datasets PluginTriggerAction::getDatasets() const
-{
-    return _datasets;
-}
-
-void PluginTriggerAction::setDatasets(const Datasets& datasets)
-{
-    _datasets = datasets;
-}
-
 WidgetAction* PluginTriggerAction::getConfigurationAction()
 {
     return _configurationAction;
@@ -74,9 +89,6 @@ void PluginTriggerAction::setConfigurationAction(WidgetAction* configurationActi
 
 void PluginTriggerAction::initialize()
 {
-    if (_pluginFactory == nullptr)
-        _pluginFactory = Application::core()->getPluginManager().getPluginFactory(_pluginKind);
-
     _sha = QString(QCryptographicHash::hash(QString("%1_%2").arg(_pluginFactory->getKind(), getLocation()).toUtf8(), QCryptographicHash::Sha1).toHex());
 
     setIcon(_pluginFactory->getIcon());
@@ -118,6 +130,17 @@ void PluginTriggerAction::setText(const QString& text)
 
     _location.append("/");
     _location.append(this->text());
+}
+
+void PluginTriggerAction::setRequestPluginCallback(RequestPluginCallback requestPluginCallback)
+{
+    _requestPluginCallback = requestPluginCallback;
+}
+
+void PluginTriggerAction::requestPlugin()
+{
+    if (_requestPluginCallback)
+        _requestPluginCallback(*this);
 }
 
 }

@@ -15,33 +15,48 @@ namespace hdps::gui {
 /**
  * Plugin trigger action class
  *
- * Action class for triggering the creation of plugins (and possible configuration)
+ * Action class for triggering the creation of plugins.
+ * 
+ * By default, a plugin is automatically created when the trigger action is triggered.
+ * Custom plugin creation is possible by setting a creation handler function, see setCreatePluginFunction()
  *
  * @author Thomas Kroes
  */
 class PluginTriggerAction : public TriggerAction
 {
     Q_OBJECT
+    
+        /** Request plugin callback function (invoked when the trigger action is triggered) */
+    using RequestPluginCallback = std::function<void(PluginTriggerAction&)>;
 
 public:
 
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param pluginKind Kind of plugin
-     * @param title Plugin trigger title (if title is in path format, the trigger will be added to the data hierarchy context menu in a hierarchical fashion)
-     * @param datasets Input datasets
+     * @param pluginFactory Pointer to plugin factory
+     * @param title Title of the plugin trigger action
+     * @param icon Icon
+     * @param tooltip Tooltip of the plugin trigger action
      */
-    PluginTriggerAction(QObject* parent, const QString pluginKind, const QString& title, const Datasets& datasets = Datasets());
+    PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon);
 
     /**
      * Constructor
      * @param parent Pointer to parent object
      * @param pluginFactory Pointer to plugin factory
-     * @param title Plugin trigger title (if title is in path format, the trigger will be added to the data hierarchy context menu in a hierarchical fashion)
-     * @param datasets Input datasets
+     * @param title Title of the plugin trigger action
+     * @param tooltip Tooltip of the plugin trigger action
+     * @param icon Icon
+     * @param requestPluginCallback Callback which is invoked when the trigger action is triggered
      */
-    PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const Datasets& datasets = Datasets());
+    PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon, RequestPluginCallback requestPluginCallback);
+
+    /**
+     * Copy constructor
+     * @param pluginTriggerAction Reference to other plugin trigger action
+     */
+    PluginTriggerAction(const PluginTriggerAction& pluginTriggerAction);
 
     /**
      * Get the plugin factory
@@ -68,18 +83,6 @@ public:
     QString getSha() const;
 
     /**
-     * Get input datasets
-     * @return Vector of input datasets
-     */
-    Datasets getDatasets() const;
-
-    /**
-     * Set input datasets
-     * @param Vector of input datasets
-     */
-    void setDatasets(const Datasets& datasets);
-
-    /**
      * Get configuration action
      * @return Action for configuring the plugin creation (if available)
      */
@@ -97,26 +100,28 @@ public:
      */
     void setText(const QString& text);
 
+    /**
+     * Set the callback function which is invoked when the trigger action is triggered
+     * @param requestPluginCallback Request plugin callback function (invoked when the trigger action is triggered)
+     */
+    void setRequestPluginCallback(RequestPluginCallback requestPluginCallback);
+
 protected:
 
     /** Sets up the trigger action */
     virtual void initialize();
 
-signals:
+private:
 
-    /**
-     * Signals that a plugin is produced
-     * @param plugin Pointer to produced plugin
-     */
-    void pluginProduced(plugin::Plugin* plugin);
+    /** Request a plugin by calling the request plugin callback (invoked when the trigger action is triggered) */
+    void requestPlugin();
 
 private:
-    const QString                   _pluginKind;            /** Kind of plugin */
-    const plugin::PluginFactory*    _pluginFactory;         /** Pointer to plugin factory */
-    QString                         _location;              /** Determines where the plugin trigger action resides w.r.t. other plugin trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images */
-    QString                         _sha;                   /** Cryptographic hash of the plugin kind and trigger title */
-    Datasets                        _datasets;              /** Input datasets */
-    WidgetAction*                   _configurationAction;   /** Action for configuring the plugin creation */
+    const plugin::PluginFactory*    _pluginFactory;             /** Pointer to plugin factory */
+    QString                         _location;                  /** Determines where the plugin trigger action resides w.r.t. other plugin trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images */
+    QString                         _sha;                       /** Cryptographic hash of the plugin kind and trigger title */
+    WidgetAction*                   _configurationAction;       /** Action for configuring the plugin creation */
+    RequestPluginCallback           _requestPluginCallback;     /** Request plugin callback function which should create the plugin (invoked when the trigger action is triggered) */
 
     friend class plugin::PluginFactory;
 };

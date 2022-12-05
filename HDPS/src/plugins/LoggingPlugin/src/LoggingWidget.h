@@ -4,6 +4,7 @@
 #include "LoggingFilterModel.h"
 
 #include <widgets/HierarchyWidget.h>
+#include <actions/ToggleAction.h>
 
 #include <QWidget>
 

@@ -181,6 +181,9 @@ void LayoutManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isola
     qDebug() << __FUNCTION__ << viewPlugin->getGuiName() << isolate;
 #endif
 
+    if (viewPlugin->isSystemViewPlugin())
+        return;
+
     if (isolate) {
         for (auto viewPluginDockWidget : getViewPluginDockWidgets()) {
             if (viewPlugin == viewPluginDockWidget->getViewPlugin())

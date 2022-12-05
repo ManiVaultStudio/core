@@ -113,7 +113,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
 
     _columnsAction << *selectAllCollumns;
 
-    connect(&_treeView, &HierarchyWidgetTreeView::columnHidden, this, [this](int column, bool hide) -> void {
+    connect(&_treeView, &HierarchyWidgetTreeView::columnHiddenChanged, this, [this](int column, bool hide) -> void {
         auto columnAction = _columnsAction.getActions()[column];
 
         if (columnAction->isChecked() == hide)
@@ -144,6 +144,16 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
         toolbarLayout->addWidget(_columnsAction.createCollapsedWidget(this));
         toolbarLayout->addWidget(_settingsGroupAction.createCollapsedWidget(this));
 
+        //auto testTriggerAction = new TriggerAction(this, "test");
+
+        //connect(testTriggerAction, &TriggerAction::triggered, this, []() -> void {
+        //    qDebug() << "TriggerAction::triggered()";
+        //});
+
+        //toolbarLayout->addWidget(testTriggerAction->createWidget(this));
+
+        //testTriggerAction->trigger();
+
         layout->addLayout(toolbarLayout);
     }
     
@@ -171,6 +181,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _treeView.setItemsExpandable(true);
     _treeView.setIconSize(QSize(14, 14));
     _treeView.setAnimated(true);
+    //_treeView.setUniformRowHeights(true);
     
     auto header = _treeView.header();
 

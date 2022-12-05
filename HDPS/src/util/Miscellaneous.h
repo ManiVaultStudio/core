@@ -4,6 +4,7 @@
 #include <QVector>
 #include <QWidget>
 #include <QPointer>
+#include <QDebug>
 
 #include <algorithm>
 
@@ -59,6 +60,25 @@ WidgetClass* findParent(const QWidget* widget)
     }
 
     return 0;
+}
+
+/**
+ * Get tabbed (indented) message
+ * @param message Message to prefix with tab indentation
+ * @param tabIndex Number of tabs to prefix with
+ * @return Message indented with tabs
+ */
+inline QString getTabIndentedMessage(QString message, const std::uint32_t& tabIndex) {
+    static const std::uint32_t tabSize = 4;
+
+    QString indentation;
+
+    for (std::uint32_t i = 0; i < tabIndex * tabSize; i++)
+        indentation += " ";
+
+    message.insert(0, indentation);
+
+    return message;
 }
 
 }

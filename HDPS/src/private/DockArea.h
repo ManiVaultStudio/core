@@ -3,6 +3,7 @@
 #include "DockWidget.h"
 
 #include <util/Serializable.h>
+#include <util/Miscellaneous.h>
 
 #include <QString>
 #include <QVector>
@@ -255,15 +256,6 @@ inline QDebug operator << (QDebug debug, const DockArea& dockArea)
 {
     auto outputDebug = debug.noquote().nospace();
 
-    const auto getIndentation = [](std::uint16_t depth) -> QString {
-        QString indentation;
-
-        for (int i = 0; i < depth * 3; i++)
-            indentation += " ";
-
-        return indentation;
-    };
-
     QStringList propertiesString;
 
     const auto addProperty = [&](const QString& name, const QString& value) -> void {
@@ -284,7 +276,7 @@ inline QDebug operator << (QDebug debug, const DockArea& dockArea)
     if (!splitterSizesString.isEmpty())
         addProperty("splitter_sizes", QString("[%1]").arg(splitterSizesString.join(", ")));
 
-    outputDebug << getIndentation(dockArea.getDepth() + 1) << "Dock area " << QString("(%1)").arg(propertiesString.join(", ")) << "\n";
+    outputDebug << hdps::util::getTabIndentedMessage(QString("Dock area (%1)\n").arg(propertiesString.join(", ")), dockArea.getDepth());
 
     if (!dockArea.getDockWidgets().isEmpty()) {
         auto dockWidgetString = QStringList();
@@ -292,7 +284,7 @@ inline QDebug operator << (QDebug debug, const DockArea& dockArea)
         for (auto dockWidget : dockArea.getDockWidgets())
             dockWidgetString << dockWidget->windowTitle();
 
-        outputDebug << getIndentation(dockArea.getDepth() + 2) << QString("Dock widgets: [%1]").arg(dockWidgetString.join(", ")) << "\n";
+        outputDebug << hdps::util::getTabIndentedMessage(QString("Dock widgets: [%1]").arg(dockWidgetString.join(", ")), dockArea.getDepth());
     }
 
     for (const auto& child : dockArea.getChildren())

@@ -160,6 +160,8 @@ protected:
     friend class PluginFactory;
 };
 
+using Plugins = QVector<QPointer<plugin::Plugin*>>;
+
 }
 
 }

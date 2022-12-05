@@ -20,7 +20,7 @@ class HierarchyWidget;
 
 /**
  * Custom tree view class
- * Tree view does not emit signals when column visibility changes (needed to update visible columns popup), this class solved this problem.
+ * Tree view does not emit signals when column visibility changes (needed to update visible columns popup), this class solves this problem.
  */
 class HierarchyWidgetTreeView : public QTreeView
 {
@@ -41,17 +41,17 @@ public:
     void setColumnHidden(int column, bool hide) {
         QTreeView::setColumnHidden(column, hide);
 
-        emit columnHidden(column, hide);
+        emit columnHiddenChanged(column, hide);
     }
 
 signals:
 
     /**
-     * Signals that the visibility of \p columns has changed
+     * Signals that the column hidden parameter changed
      * @param column Index of the column of which the visibility changed
      * @param hide Whether the column has become hidden or visible
      */
-    void columnHidden(int column, bool hide);
+    void columnHiddenChanged(int column, bool hide);
 
     friend class HierarchyWidget;
 };

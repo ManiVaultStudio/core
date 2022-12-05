@@ -2,6 +2,8 @@
 
 #include <util/Logger.h>
 
+#include <actions/ToggleAction.h>
+
 #include <QAbstractItemModel>
 
 #include <deque>
@@ -56,25 +58,29 @@ public:
     /** Synchronizes the model with the log records from the core logger */
     void synchronizeLogRecords();
 
+public: // Action getters
+
+    hdps::gui::ToggleAction& getWordWrapAction() { return _wordWrapAction; }
+
 private:
 
     /**
      * Get the number of rows for \p parent
      * @return Number of children for \parent
      */
-    int rowCount(const QModelIndex& parent) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
     /**
      * Get the number of columns for \p parent
      * @return Number of columns for \p parent
      */
-    int columnCount(const QModelIndex& parent) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
     /**
      * Get model index for \p row and \p column and \p parent
      * @return Model index for \p row and \p column and \p parent
      */
-    QModelIndex index(int row, int column, const QModelIndex& parent) const  override;
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
 
     /**
      * Get parent model index of \p index
@@ -104,4 +110,5 @@ private:
 
 private:
     std::deque<const hdps::util::MessageRecord*>    _messageRecords;    /** Logged message records */
+    hdps::gui::ToggleAction                         _wordWrapAction;    /** Action for toggling word wrap */
 };

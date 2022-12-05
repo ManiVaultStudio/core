@@ -31,7 +31,11 @@ void ViewMenu::showEvent(QShowEvent* showEvent)
     if (_options.testFlag(LoadSystemViewPlugins)) 
         addMenu(new LoadSystemViewMenu());
 
+    Application::processEvents();
+
     auto separator = addSeparator();
+
+    Application::processEvents();
 
     if (_dockAreaWidget) {
         const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
@@ -81,21 +85,17 @@ bool ViewMenu::mayProducePlugins() const
     return false;
 }
 
-QVector<QPointer<TriggerAction>> ViewMenu::getLoadViewsActions(gui::DockAreaFlag dockArea)
+QVector<QPointer<PluginTriggerAction>> ViewMenu::getLoadViewsActions(gui::DockAreaFlag dockArea)
 {
-    QVector<QPointer<TriggerAction>> actions;
+    PluginTriggerActions pluginTriggerActions;
 
-    auto pluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::VIEW);
-
-    for (auto pluginTriggerAction : pluginTriggerActions) {
+    for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::VIEW)) {
         auto viewPluginFactory = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
 
         if (viewPluginFactory->producesSystemViewPlugins())
             continue;
-
-        auto action = new TriggerAction(this, viewPluginFactory->getKind());
-
-        action->setIcon(pluginTriggerAction->icon());
+            
+        pluginTriggerActions << new PluginTriggerAction(*pluginTriggerAction);
 
         ViewPlugin* dockToViewPlugin = nullptr;
 
@@ -108,14 +108,12 @@ QVector<QPointer<TriggerAction>> ViewMenu::getLoadViewsActions(gui::DockAreaFlag
                 dockToViewPlugin = firstViewPluginDockWidget->getViewPlugin();
         }
 
-        connect(action, &QAction::triggered, this, [pluginTriggerAction, dockToViewPlugin, dockArea]() -> void {
-            Application::core()->requestViewPlugin(pluginTriggerAction->getPluginFactory()->getKind(), dockToViewPlugin, dockArea);
+        pluginTriggerActions.last()->setRequestPluginCallback([dockToViewPlugin, dockArea](PluginTriggerAction& pluginTriggerAction) -> void {
+            Application::core()->requestViewPlugin(pluginTriggerAction.getPluginFactory()->getKind(), dockToViewPlugin, dockArea);
         });
-
-        actions << action;
     }
 
-    sortActions(actions);
+    sortActions(pluginTriggerActions);
 
-    return actions;
+    return pluginTriggerActions;
 }

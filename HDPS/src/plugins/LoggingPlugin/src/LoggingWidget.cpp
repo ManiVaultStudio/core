@@ -33,6 +33,12 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
 
     _hierarchyWidget.getCollapseAllAction().setVisible(false);
     _hierarchyWidget.getExpandAllAction().setVisible(false);
+    
+    auto& settingsGroupAction = _hierarchyWidget.getSettingsGroupAction();
+
+    settingsGroupAction.setVisible(true);
+
+    settingsGroupAction << _model.getWordWrapAction();
 
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
 

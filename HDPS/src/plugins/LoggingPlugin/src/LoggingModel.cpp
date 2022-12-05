@@ -19,6 +19,7 @@
 
 using namespace hdps;
 using namespace hdps::util;
+using namespace hdps::gui;
 
 QMap<LoggingModel::Column, QString> LoggingModel::columnNames = {
     { Column::Number, "Number" },
@@ -31,12 +32,21 @@ QMap<LoggingModel::Column, QString> LoggingModel::columnNames = {
 };
 
 LoggingModel::LoggingModel(QObject* parent /*= nullptr*/) :
-    QAbstractItemModel(parent)
+    QAbstractItemModel(parent),
+    _messageRecords(),
+    _wordWrapAction(this, "Word wrap", true, true)
 {
+    _wordWrapAction.setToolTip("Enables/disables word wrapping");
+    _wordWrapAction.setConnectionPermissionsToNone();
+
     synchronizeLogRecords();
+
+    connect(&_wordWrapAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+    });
 }
 
-int LoggingModel::rowCount(const QModelIndex& parent) const
+int LoggingModel::rowCount(const QModelIndex& parent /*= QModelIndex()*/) const
 {
     if (!parent.isValid())
         return static_cast<int>(_messageRecords.size());
@@ -44,12 +54,12 @@ int LoggingModel::rowCount(const QModelIndex& parent) const
     return 0;
 }
 
-int LoggingModel::columnCount(const QModelIndex& parent) const
+int LoggingModel::columnCount(const QModelIndex& parent /*= QModelIndex()*/) const
 {
     return static_cast<int>(Column::Count);
 }
 
-QModelIndex LoggingModel::index(const int row, const int column, const QModelIndex& parent) const
+QModelIndex LoggingModel::index(int row, int column, const QModelIndex& parent /*= QModelIndex()*/) const
 {
     if (row < 0 || row >= rowCount(parent))
         return QModelIndex();
@@ -94,7 +104,12 @@ QVariant LoggingModel::data(const QModelIndex& index, const int role) const
                     return QVariant::fromValue(Logger::getMessageTypeName(messageRecord->type));
 
                 case Column::Message:
-                    return QVariant::fromValue(QString(messageRecord->message));
+                {
+                    if (_wordWrapAction.isChecked())
+                        return QVariant::fromValue(QString(messageRecord->message).split("\n").first());
+                    else
+                        return QVariant::fromValue(QString(messageRecord->message));
+                }
 
                 case Column::FileAndLine:
                 {
@@ -119,8 +134,35 @@ QVariant LoggingModel::data(const QModelIndex& index, const int role) const
 
         case Qt::TextAlignmentRole:
         {
-            if (index.column() == static_cast<std::int32_t>(Column::Number))
-                return Qt::AlignLeft;
+            switch (static_cast<Column>(index.column()))
+            {
+                case Column::Number:
+                case Column::Type:
+                    return Qt::AlignLeft;
+
+                case Column::Message:
+                case Column::FileAndLine:
+                case Column::Function:
+                case Column::Category:
+                    break;
+            }
+
+            break;
+        }
+
+        case Qt::ForegroundRole:
+        {
+            switch (messageRecord->type)
+            {
+                case QtDebugMsg:
+                case QtWarningMsg:
+                case QtInfoMsg:
+                    break;
+
+                case QtCriticalMsg:
+                case QtFatalMsg:
+                    return QBrush(Qt::red);
+            }
 
             break;
         }

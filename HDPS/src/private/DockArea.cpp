@@ -157,6 +157,12 @@ QVariantMap DockArea::toVariantMap() const
 
         for (auto& child : _children) {
             childrenList << child.toVariantMap();
+
+            auto currentDockAreaWidget = const_cast<DockArea&>(child).getCurrentDockAreaWidget();
+
+            if (currentDockAreaWidget && !currentDockAreaWidget->isVisible())
+                continue;
+
             splitterRatiosList << splitterRatios[_children.indexOf(child)];
         }
 
@@ -303,15 +309,15 @@ void DockArea::createDockWidgets(std::uint32_t depth)
                     getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, _dockManager->getCentralDockAreaWidget()));
                 }
 
-                if (childIndex > 0 && childIndex < centralWidgetIndex) {
+                if (childIndex > 0 && childIndex < static_cast<std::uint32_t>(centralWidgetIndex)) {
                     getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, getParent()->getCurrentDockAreaWidget()));
                 }
 
-                if (childIndex == centralWidgetIndex) {
+                if (childIndex == static_cast<std::uint32_t>(centralWidgetIndex)) {
                     getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, _dockManager->getCentralDockAreaWidget()));
                 }
 
-                if (childIndex > centralWidgetIndex) {
+                if (childIndex > static_cast<std::uint32_t>(centralWidgetIndex)) {
                     getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, getParent()->getCurrentDockAreaWidget()));
                 }
             }
@@ -503,11 +509,18 @@ void DockArea::setSplitterWidgetSizes(QWidget* widget)
 
             QVector<std::int32_t> splitterSizes;
 
+            //qDebug() << splitter->orientation() << splitter->sizes() << splitter->property("SplitterRatios").toList() << splitter->count();
+
             for (const auto& splitterRatio : splitter->property("SplitterRatios").toList())
                 splitterSizes << size * splitterRatio.toFloat();
 
-            if (!splitterSizes.isEmpty())
-                splitter->setSizes(splitterSizes);
+            if (splitterSizes.count() == splitter->count()) {
+                if (!splitterSizes.isEmpty())
+                    splitter->setSizes(splitterSizes);
+            }
+            else {
+                qCritical() << "Unable to set dock area splitter size(s), there is a mismatch between the number of sizes recorded and the splitter count.";
+            }
         }
             
         for (int i = 0; i < splitter->count(); ++i)

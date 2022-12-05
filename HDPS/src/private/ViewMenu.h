@@ -2,7 +2,7 @@
 
 #include <util/DockArea.h>
 
-#include <actions/TriggerAction.h>
+#include <actions/PluginTriggerAction.h>
 
 #include <DockAreaWidget.h>
 
@@ -59,7 +59,7 @@ private:
      * @param dockArea Dock area to dock to
      * @return Vector of actions
      */
-    QVector<QPointer<hdps::gui::TriggerAction>> getLoadViewsActions(hdps::gui::DockAreaFlag dockArea);
+    QVector<QPointer<hdps::gui::PluginTriggerAction>> getLoadViewsActions(hdps::gui::DockAreaFlag dockArea);
 
 private:
     ads::CDockAreaWidget*   _dockAreaWidget;        /** Pointer to dock area widget to which new view plugins are docked (new view plugins will be docked top-level if nullptr) */

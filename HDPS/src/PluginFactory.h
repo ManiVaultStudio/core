@@ -194,35 +194,6 @@ protected:
      */
     static std::uint16_t getNumberOfDatasetsForType(const Datasets& datasets, const DataType& dataType);
 
-    /**
-     * Convenience function for generating a plugin trigger action (icon from the plugin factory)
-     * @param title Title of the plugin trigger action
-     * @param description Description of the plugin trigger action
-     * @param datasets Input datasets
-     * @return Pointer to plugin trigger action
-     */
-    QPointer<gui::PluginTriggerAction> createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets) const;
-
-    /**
-     * Convenience function for generating a plugin trigger action
-     * @param title Title of the plugin trigger action
-     * @param description Description of the plugin trigger action
-     * @param datasets Input datasets
-     * @param iconName Name of the icon
-     * @return Pointer to plugin trigger action
-     */
-    QPointer<gui::PluginTriggerAction> createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QString& iconName) const;
-
-    /**
-     * Convenience function for generating a plugin trigger action
-     * @param title Title of the plugin trigger action
-     * @param description Description of the plugin trigger action
-     * @param datasets Input datasets
-     * @param icon Icon
-     * @return Pointer to plugin trigger action
-     */
-    QPointer<gui::PluginTriggerAction> createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QIcon& icon) const;
-
 private:
     QString                     _kind;                          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
     Type                        _type;                          /** Type of plugin (e.g. analysis, data, loader, writer & view) */
