@@ -22,6 +22,8 @@ class QToolButton;
  */
 class DockWidget : public ads::CDockWidget, public hdps::util::Serializable
 {
+    Q_OBJECT
+
 public:
 
     /**
@@ -30,6 +32,9 @@ public:
      * @param parent Pointer to parent widget
      */
     DockWidget(const QString& title, QWidget* parent = nullptr);
+
+    /** Destructor */
+    ~DockWidget();
 
     /**
      * Get string that describes the dock widget type

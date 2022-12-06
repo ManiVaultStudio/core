@@ -15,6 +15,8 @@
  */
 class ViewPluginDockWidget : public DockWidget
 {
+    Q_OBJECT
+
 public:
 
     /**
@@ -92,4 +94,4 @@ private:
     hdps::gui::TriggerAction    _helpAction;        /** Action for triggering help */
 };
 
-using ViewPluginDockWidgets = QVector<ViewPluginDockWidget*>;
+using ViewPluginDockWidgets = QVector<QPointer<ViewPluginDockWidget>>;

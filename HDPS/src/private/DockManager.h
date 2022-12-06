@@ -32,8 +32,20 @@ public:
      */
     DockManager(QWidget* parent = nullptr);
 
-    /** Get view plugin dock widgets currently loaded */
-    ViewPluginDockWidgets getViewPluginDockWidgets() const;
+    /** Destructor */
+    ~DockManager();
+
+    /**
+     * Get view plugin dock widgets
+     * @return Vector of pointers to plugin dock widgets
+     */
+    ViewPluginDockWidgets getViewPluginDockWidgets();
+
+    /**
+     * Get view plugin dock widgets
+     * @return Vector of pointers to plugin dock widgets
+     */
+    const ViewPluginDockWidgets getViewPluginDockWidgets() const;
 
     /** Get the root splitter of the top-level docking */
     QSplitter* getRootSplitter() const;
@@ -45,12 +57,12 @@ public:
      */
     ads::CDockAreaWidget* findDockAreaWidget(QWidget* widget);
 
-    /**
-     * Set central widget
-     * @param Pointer to central widget
-     * @return Pointer to central dock area widget
-     */
-    ads::CDockAreaWidget* setCentralWidget(QWidget* centralWidget);
+    ///**
+    // * Set central widget
+    // * @param Pointer to central widget
+    // * @return Pointer to central dock area widget
+    // */
+    //ads::CDockAreaWidget* setCentralWidget(QWidget* centralWidget);
 
     /**
      * Get central dock area widget
@@ -83,22 +95,9 @@ private:
     /** Resets the docking layout to defaults */
     void reset();
 
-    /**
-     * Invoked when a dock widget is added
-     * @param dockWidget Pointer to added dock widget
-     */
-    void dockWidgetAdded(ads::CDockWidget* dockWidget);
-
-    /**
-     * Invoked when a dock widget is about to be removed
-     * @param dockWidget Pointer to about to be removed dock widget
-     */
-    void dockWidgetAboutToBeRemoved(ads::CDockWidget* dockWidget);
-
 private:
     ads::CDockAreaWidget*   _centralDockAreaWidget;     /** Pointer to central dock area widget */
     CentralDockWidget       _centralDockWidget;         /** Default central dock widget */
-    ViewPluginDockWidgets   _viewPluginDockWidgets;     /** Keeps track of all created view plugin dock widgets */
 
     friend class ViewPluginsDockWidget;
 };

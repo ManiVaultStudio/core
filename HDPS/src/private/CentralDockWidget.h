@@ -11,6 +11,8 @@
  */
 class CentralDockWidget : public DockWidget
 {
+    Q_OBJECT
+
 public:
 
     /**

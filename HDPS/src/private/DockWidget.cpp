@@ -11,7 +11,7 @@
 #include <QToolButton>
 
 #ifdef _DEBUG
-    //#define DOCK_WIDGET_VERBOSE
+    #define DOCK_WIDGET_VERBOSE
 #endif
 
 using namespace ads;
@@ -52,6 +52,13 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
 
     dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertSpacing(1, 5);
     dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertWidget(2, _settingsToolButton, Qt::AlignCenter);
+}
+
+DockWidget::~DockWidget()
+{
+#ifdef DOCK_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__ << getSerializationName();
+#endif
 }
 
 QString DockWidget::getTypeString() const

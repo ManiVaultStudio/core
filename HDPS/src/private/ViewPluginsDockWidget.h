@@ -16,8 +16,10 @@
  *
  * @author Thomas Kroes
  */
-class ViewPluginsDockWidget : public CentralDockWidget
+class ViewPluginsDockWidget : public QWidget
 {
+    Q_OBJECT
+
 public:
 
     /**
@@ -25,12 +27,6 @@ public:
      * @param parent Pointer to parent widget
      */
     ViewPluginsDockWidget(QWidget* parent = nullptr);
-
-    /**
-     * Get string that describes the dock widget type
-     * @return Type string
-     */
-    QString getTypeString() const override;
 
     /**
      * Get dock manager

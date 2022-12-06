@@ -23,8 +23,7 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
     Serializable("Dock manager"),
     _centralDockAreaWidget(nullptr),
-    _centralDockWidget(this),
-    _viewPluginDockWidgets()
+    _centralDockWidget(this)
 {
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
@@ -39,14 +38,34 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager::setConfigFlag(CDockManager::DockAreaHasTabsMenuButton, true);
     CDockManager::setConfigFlag(CDockManager::DockAreaDynamicTabsMenuButtonVisibility, false);
     CDockManager::setConfigFlag(CDockManager::AllTabsHaveCloseButton, true);
-
-    connect(this, &CDockManager::dockWidgetAdded, this, &DockManager::dockWidgetAdded);
-    connect(this, &CDockManager::dockWidgetAboutToBeRemoved, this, &DockManager::dockWidgetAboutToBeRemoved);
 }
 
-ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
+DockManager::~DockManager()
 {
-    return _viewPluginDockWidgets;
+#ifdef DOCK_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << objectName();
+#endif
+}
+
+ViewPluginDockWidgets DockManager::getViewPluginDockWidgets()
+{
+    ViewPluginDockWidgets viewPluginDockWidgets;
+
+    for (auto dockWidget : dockWidgets()) {
+        auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget);
+
+        if (viewPluginDockWidget == nullptr)
+            continue;
+
+        viewPluginDockWidgets << viewPluginDockWidget;
+    }
+
+    return viewPluginDockWidgets;
+}
+
+const ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
+{
+    return const_cast<DockManager*>(this)->getViewPluginDockWidgets();
 }
 
 QSplitter* DockManager::getRootSplitter() const
@@ -62,15 +81,15 @@ ads::CDockAreaWidget* DockManager::findDockAreaWidget(QWidget* widget)
 
     return nullptr;
 }
-
-ads::CDockAreaWidget* DockManager::setCentralWidget(QWidget* centralWidget)
-{
-    _centralDockWidget.setWidget(centralWidget);
-
-    _centralDockAreaWidget = CDockManager::setCentralWidget(&_centralDockWidget);
-
-    return _centralDockAreaWidget;
-}
+//
+//ads::CDockAreaWidget* DockManager::setCentralWidget(QWidget* centralWidget)
+//{
+//    _centralDockWidget.setWidget(centralWidget);
+//
+//    _centralDockAreaWidget = CDockManager::setCentralWidget(&_centralDockWidget);
+//
+//    return _centralDockAreaWidget;
+//}
 
 ads::CDockAreaWidget* DockManager::getCentralDockAreaWidget()
 {
@@ -93,18 +112,13 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
     hide();
     {
-        for (auto viewPluginDockWidget : _viewPluginDockWidgets)
-            removeDockWidget(viewPluginDockWidget);
+        //for (auto viewPluginDockWidget : _viewPluginDockWidgets)
+        //    removeDockWidget(viewPluginDockWidget);
 
-        _viewPluginDockWidgets.clear();
+//        _viewPluginDockWidgets.clear();
 
-        for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList()) {
-            auto viewPluginDockWidget = new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap());
-
-            addDockWidget(RightDockWidgetArea, viewPluginDockWidget);
-
-            _viewPluginDockWidgets << viewPluginDockWidget;
-        }
+        for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList())
+            addDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));
 
         if (!restoreState(QByteArray::fromBase64(variantMap["State"].toString().toUtf8()), variantMap["Version"].toInt()))
             qCritical() << "Unable to restore state from" << objectName();
@@ -124,7 +138,7 @@ QVariantMap DockManager::toVariantMap() const
 
     QVariantList viewPluginDockWidgetsList;
 
-    for (auto viewPluginDockWidget : _viewPluginDockWidgets)
+    for (auto viewPluginDockWidget : getViewPluginDockWidgets())
         viewPluginDockWidgetsList << viewPluginDockWidget->toVariantMap();
 
     return {
@@ -139,31 +153,6 @@ void DockManager::reset()
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
-    for (auto viewPluginDockWidget : _viewPluginDockWidgets)
+    for (auto viewPluginDockWidget : getViewPluginDockWidgets())
         removeDockWidget(viewPluginDockWidget);
-}
-
-void DockManager::dockWidgetAdded(ads::CDockWidget* dockWidget)
-{
-    Q_ASSERT(dockWidget != nullptr);
-
-    auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget);
-
-    if (viewPluginDockWidget == nullptr)
-        return;
-
-    _viewPluginDockWidgets << viewPluginDockWidget;
-}
-
-void DockManager::dockWidgetAboutToBeRemoved(ads::CDockWidget* dockWidget)
-{
-    Q_ASSERT(dockWidget != nullptr);
-
-    auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget);
-
-    if (viewPluginDockWidget == nullptr)
-        return;
-
-    if (_viewPluginDockWidgets.contains(viewPluginDockWidget))
-        _viewPluginDockWidgets.removeOne(viewPluginDockWidget);
 }

@@ -13,6 +13,8 @@
  */
 class LogoWidget : public QWidget
 {
+    Q_OBJECT
+
 public:
 
     /**

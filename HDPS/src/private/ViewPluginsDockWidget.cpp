@@ -17,29 +17,24 @@ using namespace hdps::util;
 using namespace hdps::gui;
 
 ViewPluginsDockWidget::ViewPluginsDockWidget(QWidget* parent /*= nullptr*/) :
-    CentralDockWidget(parent),
+    QWidget(parent),
     _widget(),
-    _dockManager(&_widget),   
+    _dockManager(this),   
     _logoWidget()
 {
     _dockManager.setConfigFlag(CDockManager::FocusHighlighting, false);
     _dockManager.setObjectName("ViewPluginsDockManager");
-    _dockManager.setCentralWidget(&_logoWidget);
+    //_dockManager.setCentralWidget(&_logoWidget);
 
-    setObjectName("ViewPluginsDockWidget");
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    setWidget(&_dockManager, eInsertMode::ForceNoScrollArea);
+    //setObjectName("ViewPluginsDockWidget");
+    //setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    //setWidget(&_dockManager, eInsertMode::ForceNoScrollArea);
 
     connect(&_dockManager, &CDockManager::dockAreasAdded, this, &ViewPluginsDockWidget::updateCentralWidget);
     connect(&_dockManager, &CDockManager::dockAreasRemoved, this, &ViewPluginsDockWidget::updateCentralWidget);
     connect(&_dockManager, &CDockManager::dockWidgetAdded, this, &ViewPluginsDockWidget::dockWidgetAdded);
     connect(&_dockManager, &CDockManager::dockWidgetAboutToBeRemoved, this, &ViewPluginsDockWidget::dockWidgetAboutToBeRemoved);
     connect(&_dockManager, &CDockManager::focusedDockWidgetChanged, this, &ViewPluginsDockWidget::updateCentralWidget);
-}
-
-QString ViewPluginsDockWidget::getTypeString() const
-{
-    return "ViewPluginsDockWidget";
 }
 
 DockManager& ViewPluginsDockWidget::getDockManager()
@@ -104,15 +99,15 @@ void ViewPluginsDockWidget::dockWidgetAdded(ads::CDockWidget* dockWidget)
 
     connect(dockWidget, &CDockWidget::viewToggled, this, [this](bool toggled) {
         updateCentralWidget();
-    });
+        });
 
     connect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, this, [this](int index) {
         updateCentralWidget();
-    });
+        });
 
     connect(dockWidget, &CDockWidget::topLevelChanged, this, [this](bool topLevel) {
         updateCentralWidget();
-    });
+        });
 }
 
 void ViewPluginsDockWidget::dockWidgetAboutToBeRemoved(ads::CDockWidget* dockWidget)

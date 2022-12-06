@@ -126,8 +126,12 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
 
     _dockManager->setObjectName("MainDockManager");
 
-    auto viewPluginsDockArea = _dockManager->setCentralWidget(&_viewPluginsDockWidget);
-    
+    auto dw = new CDockWidget("asdasd");
+
+    dw->setWidget(&_viewPluginsDockWidget);
+
+    auto viewPluginsDockArea = _dockManager->setCentralWidget(dw);
+
     viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
     _initialized = true;
@@ -147,17 +151,17 @@ void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(dockingManagersMap, "ViewPlugins");
         
     _dockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
-    _viewPluginsDockWidget.getDockManager().fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
+    //_viewPluginsDockWidget.getDockManager().fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
 }
 
 QVariantMap LayoutManager::toVariantMap() const
 {
     const auto mainDockingManager           = _dockManager->toVariantMap();
-    const auto viewPluginsDockingManager    = _viewPluginsDockWidget.getDockManager().toVariantMap();
+    //const auto viewPluginsDockingManager    = _viewPluginsDockWidget.getDockManager().toVariantMap();
 
     const QVariantMap dockingManagers = {
         { "Main", mainDockingManager },
-        { "ViewPlugins", viewPluginsDockingManager }
+        //{ "ViewPlugins", viewPluginsDockingManager }
     };
 
     return {
@@ -204,7 +208,7 @@ void LayoutManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isola
 
 ViewPluginDockWidgets LayoutManager::getViewPluginDockWidgets()
 {
-    return _dockManager->getViewPluginDockWidgets() << _viewPluginsDockWidget.getDockManager().getViewPluginDockWidgets();
+    return _dockManager->getViewPluginDockWidgets();// << _viewPluginsDockWidget.getDockManager().getViewPluginDockWidgets();
 }
 
 }
