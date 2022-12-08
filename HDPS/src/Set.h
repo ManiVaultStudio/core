@@ -4,8 +4,7 @@
 #include "RawData.h"
 #include "Dataset.h"
 #include "LinkedData.h"
-#include "Application.h"
-
+#include "CoreInterface.h"
 #include "actions/WidgetAction.h"
 #include "util/Miscellaneous.h"
 
@@ -160,7 +159,7 @@ public:
      */
     template<typename DatasetType>
     Dataset<DatasetType> getSelection() const {
-        return Application::core()->requestSelection<DatasetType>(getSourceDataset<DatasetImpl>()->getRawDataName());
+        return _core->requestSelection<DatasetType>(getSourceDataset<DatasetImpl>()->getRawDataName());
     }
 
     /**

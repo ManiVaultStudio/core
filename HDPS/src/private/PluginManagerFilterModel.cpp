@@ -1,19 +1,23 @@
-#include "LoadedPluginsFilterModel.h"
-#include "LoadedPluginsModel.h"
+#include "PluginManagerFilterModel.h"
+#include "PluginManagerModel.h"
 
 #include <QDebug>
 
-LoadedPluginsFilterModel::LoadedPluginsFilterModel(QObject* parent /*= nullptr*/) :
+#ifdef _DEBUG
+    #define PLUGIN_MANAGER_FILTER_MODEL_VERBOSE
+#endif
+
+PluginManagerFilterModel::PluginManagerFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent)
 {
 }
 
-bool LoadedPluginsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
+bool PluginManagerFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
     return true;
 }
 
-bool LoadedPluginsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
+bool PluginManagerFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
 {
     return false;
 }

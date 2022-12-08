@@ -1,5 +1,5 @@
 #include "ViewPlugin.h"
-
+#include "CoreInterface.h"
 #include "widgets/ProjectEditorDialog.h"
 #include "Application.h"
 #include "AbstractLayoutManager.h"

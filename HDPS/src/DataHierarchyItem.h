@@ -1,10 +1,8 @@
 #pragma once
 
 #include "DataType.h"
-#include "CoreInterface.h"
 #include "actions/WidgetAction.h"
 #include "event/Event.h"
-#include "Set.h"
 
 #include <QObject>
 #include <QMap>
@@ -13,6 +11,7 @@
 #include <QIcon>
 #include <QTimer>
 #include <QBitArray>
+#include <QVector>
 
 namespace hdps
 {
@@ -367,7 +366,7 @@ protected:
     Dataset<DatasetImpl>        _dataset;               /** Smart pointer to dataset */
     DataHierarchyItem*          _parent;                /** Pointer to parent data hierarchy item */
     DataHierarchyItems          _children;              /** Pointers to child items (if any) */
-    QString                     _fullPathName;          /** The full hierarchy path name of the data hiearchy item */
+    QString                     _fullPathName;          /** The full hierarchy path name of the data hierarchy item */
     bool                        _selected;              /** Whether the hierarchy item is selected */
     bool                        _expanded;              /** Whether the item is expanded or not (when it has children) */
     QString                     _taskDescription;       /** Task description */

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <actions/WidgetAction.h>
+#include "AbstractManager.h"
 
 #include <ViewPlugin.h>
 
@@ -9,20 +9,20 @@ class QMainWindow;
 namespace hdps::gui
 {
 
-class AbstractLayoutManager : public gui::WidgetAction
+class AbstractLayoutManager : public AbstractManager
 {
     Q_OBJECT
 
 public:
+
+    /** Resets the contents of the layout manager */
+    virtual void reset() = 0;
 
     /**
      * Initializes the layout manager to work with the main window
      * @param mainWindow Pointer to main window to apply the layout manager to
      */
     virtual void initialize(QMainWindow* mainWindow) = 0;
-
-    /** Resets the docking layout to defaults */
-    virtual void reset() = 0;
 
     /**
      * Add a view plugin to the \p dockArea of \p dockViewPlugin

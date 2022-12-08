@@ -1,4 +1,4 @@
-#include "LoadedPluginsDialog.h"
+#include "PluginManagerDialog.h"
 
 #include <Application.h>
 
@@ -8,7 +8,11 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-LoadedPluginsDialog::LoadedPluginsDialog(QWidget* parent /*= nullptr*/) :
+#ifdef _DEBUG
+    #define PLUGIN_MANAGER_DIALOG_VERBOSE
+#endif
+
+PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _model(this),
     _filterModel(this),
@@ -18,7 +22,7 @@ LoadedPluginsDialog::LoadedPluginsDialog(QWidget* parent /*= nullptr*/) :
 
     setWindowIcon(pluginIcon);
     setModal(true);
-    setWindowTitle("Loaded plugins");
+    setWindowTitle("Plugin manager");
     
     auto layout = new QVBoxLayout();
 

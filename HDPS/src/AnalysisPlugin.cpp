@@ -1,4 +1,5 @@
 #include "AnalysisPlugin.h"
+#include "Application.h"
 
 namespace hdps
 {

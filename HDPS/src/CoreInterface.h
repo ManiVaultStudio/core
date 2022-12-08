@@ -2,11 +2,17 @@
 
 #include "PluginType.h"
 #include "Dataset.h"
+
 #include "util/DockArea.h"
-#include "actions/WidgetAction.h"
+#include "util/Serializable.h"
+
+#include "AbstractPluginManager.h"
+#include "AbstractDataManager.h"
+#include "AbstractDataHierarchyManager.h"
+#include "AbstractLayoutManager.h"
+#include "AbstractActionsManager.h"
 
 #include <QString>
-#include <QPointer>
 
 #include <vector>
 #include <functional>
@@ -17,11 +23,6 @@ namespace hdps
     class DataType;
     class EventListener;
     class DataHierarchyItem;
-
-    class AbstractPluginManager;
-    class AbstractDataManager;
-    class AbstractDataHierarchyManager;
-    class AbstractActionsManager;
 
     namespace plugin
     {
@@ -39,11 +40,9 @@ namespace hdps
         class PluginTriggerAction;
 
         using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
-
-        class AbstractLayoutManager;
     }
 
-class CoreInterface : public hdps::gui::WidgetAction
+class CoreInterface : public hdps::util::Serializable
 {
 public:
     //CoreInterface() = delete;
@@ -232,75 +231,6 @@ public: // Plugin creation
     {
         return dynamic_cast<PluginType*>(requestPlugin(kind, datasets));
     }
-
-public: // Plugin queries
-
-    /**
-     * Determine whether a plugin of \p kind is loaded
-     * @param kind Plugin kind
-     * @return Boolean determining whether a plugin of \p kind is loaded
-     */
-    virtual bool isPluginLoaded(const QString& kind) const = 0;
-
-    /**
-     * Get plugins by plugin type(s)
-     * @param pluginTypes Plugin type(s)
-     * @return Pointers to plugins
-     */
-    virtual QVector<plugin::Plugin*> getPluginsByType(const plugin::Types& pluginTypes) const = 0;
-
-    /**
-     * Get plugin kinds by plugin type(s)
-     * @param pluginTypes Plugin type(s)
-     * @return Plugin kinds
-     */
-    virtual QStringList getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const = 0;
-
-    /**
-     * Get plugin trigger actions by \p pluginType and \p datasets
-     * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param datasets Vector of input datasets
-     * @return Vector of plugin trigger actions
-     */
-    virtual gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const = 0;
-
-    /**
-     * Get plugin trigger actions by \p pluginType and \p dataTypes
-     * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param dataTypes Vector of input data types
-     * @return Vector of plugin trigger actions
-     */
-    virtual gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const = 0;
-
-    /**
-     * Get plugin trigger actions by \p pluginKind and \p datasets
-     * @param pluginKind Kind of plugin
-     * @param datasets Vector of input datasets
-     * @return Vector of plugin trigger actions
-     */
-    virtual gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const Datasets& datasets) const = 0;
-
-    /**
-     * Get plugin trigger actions by \p pluginKind and \p dataTypes
-     * @param pluginKind Kind of plugin
-     * @param dataTypes Vector of input data types
-     * @return Vector of plugin trigger actions
-     */
-    virtual gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const = 0;
-
-    /**
-     * Get plugin GUI name from plugin kind
-     * @param pluginKind Kind of plugin
-     * @return GUI name of the plugin, empty if the plugin kind was not found
-     */
-    virtual QString getPluginGuiName(const QString& pluginKind) const = 0;
-
-    /**
-     * Get plugin icon from plugin kind
-     * @param pluginKind Kind of plugin
-     * @return Plugin icon name of the plugin, null icon if the plugin kind was not found
-     */
-    virtual QIcon getPluginIcon(const QString& pluginKind) const = 0;
 
 public: // Data hierarchy
 

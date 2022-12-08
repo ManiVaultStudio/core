@@ -1,6 +1,7 @@
 #include "DataHierarchyItem.h"
 #include "Set.h"
 #include "Dataset.h"
+#include "Application.h"
 
 #include "util/Serialization.h"
 

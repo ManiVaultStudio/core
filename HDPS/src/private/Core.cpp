@@ -32,7 +32,6 @@ Core::Core() :
     _dataHierarchyManager(),
     _layoutManager(),
     _actionsManager(),
-    _plugins(),
     _eventListeners()
 {
     setText("HDPS Application");
@@ -486,47 +485,6 @@ hdps::plugin::ViewPlugin* Core::requestViewPlugin(const QString& kind, plugin::V
     return viewPlugin;
 }
 
-bool Core::isPluginLoaded(const QString& kind) const
-{
-    return _pluginManager.isPluginLoaded(kind);
-}
-
-QVector<hdps::plugin::Plugin*> Core::getPluginsByType(const plugin::Types& pluginTypes) const
-{
-    QVector<hdps::plugin::Plugin*> plugins;
-
-    for (auto pluginType : pluginTypes)
-        for (auto& plugin : const_cast<Core*>(this)->_plugins[pluginType])
-            plugins << plugin.get();
-
-    return plugins;
-}
-
-QStringList Core::getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const
-{
-    return _pluginManager.getPluginKindsByPluginTypes(pluginTypes);
-}
-
-PluginTriggerActions Core::getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const
-{
-    return _pluginManager.getPluginTriggerActions(pluginType, datasets);
-}
-
-PluginTriggerActions Core::getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const
-{
-    return _pluginManager.getPluginTriggerActions(pluginType, dataTypes);
-}
-
-PluginTriggerActions Core::getPluginTriggerActions(const QString& pluginKind, const Datasets& datasets) const
-{
-    return _pluginManager.getPluginTriggerActions(pluginKind, datasets);
-}
-
-PluginTriggerActions Core::getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const
-{
-    return _pluginManager.getPluginTriggerActions(pluginKind, dataTypes);
-}
-
 Dataset<DatasetImpl> Core::requestSelection(const QString& name)
 {
     return Dataset<DatasetImpl>(_dataManager.getSelection(name));
@@ -540,16 +498,6 @@ void Core::registerEventListener(EventListener* eventListener)
 void Core::unregisterEventListener(EventListener* eventListener)
 {
     _eventListeners.erase(std::remove(_eventListeners.begin(), _eventListeners.end(), eventListener), _eventListeners.end());
-}
-
-QString Core::getPluginGuiName(const QString& pluginKind) const
-{
-    return _pluginManager.getPluginGuiName(pluginKind);
-}
-
-QIcon Core::getPluginIcon(const QString& pluginKind) const
-{
-    return _pluginManager.getPluginIcon(pluginKind);
 }
 
 void Core::notifyDatasetAdded(const Dataset<DatasetImpl>& dataset)

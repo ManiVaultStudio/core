@@ -1,5 +1,5 @@
 #include "DatasetPrivate.h"
-
+#include "CoreInterface.h"
 #include "event/Event.h"
 #include "Application.h"
 #include "Set.h"

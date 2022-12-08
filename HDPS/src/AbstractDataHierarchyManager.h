@@ -1,8 +1,8 @@
 #pragma once
 
-#include "DataHierarchyItem.h"
+#include "AbstractManager.h"
 
-#include <actions/WidgetAction.h>
+#include "DataHierarchyItem.h"
 
 #include <QObject>
 #include <QString>
@@ -10,11 +10,14 @@
 namespace hdps
 {
 
-class AbstractDataHierarchyManager : public gui::WidgetAction
+class AbstractDataHierarchyManager : public AbstractManager
 {
     Q_OBJECT
 
 public:
+
+    /** Resets the contents of the data hierarchy manager */
+    //virtual void reset() = 0;
 
     /**
      * Add a dataset to the hierarchy

@@ -88,7 +88,7 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     //});
 
     connect(&_viewLoadedPluginsAction, &TriggerAction::triggered, this, [this]() -> void {
-        LoadedPluginsDialog loadedPluginsDialog;
+        PluginManagerDialog loadedPluginsDialog;
         loadedPluginsDialog.exec();
     });
 

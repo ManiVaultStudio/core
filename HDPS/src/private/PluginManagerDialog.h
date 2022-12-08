@@ -1,29 +1,30 @@
 #pragma once
 
-#include "LoadedPluginsModel.h"
-#include "LoadedPluginsFilterModel.h"
+#include "PluginManagerModel.h"
+#include "PluginManagerFilterModel.h"
 
 #include <widgets/HierarchyWidget.h>
 
 #include <QDialog>
 
 /**
- * Loaded plugins dialog class
+ * Plugin manager dialog class
  * 
- * Dialog class for inspecting the loaded plugins and the created plugin instances
+ * Dialog class for inspecting the loaded plugins and the created plugin instances.
+ * It shows the plugin factories at the top level and the plugin instances below it.
  *
  * @author Thomas Kroes
  */
-class LoadedPluginsDialog : public QDialog
+class PluginManagerDialog : public QDialog
 {
 public:
 
     /**
-     * Construct from \p parent
+     * Construct a plugin manager dialog with \p parent
      * @param parent Pointer to parent widget
      * @param datasets Datasets for grouping
      */
-    LoadedPluginsDialog(QWidget* parent = nullptr);
+    PluginManagerDialog(QWidget* parent = nullptr);
 
     /** Get preferred size */
     QSize sizeHint() const override {
@@ -36,7 +37,7 @@ public:
     }
 
 protected:
-    LoadedPluginsModel          _model;                 /** Model for loaded plugins (interfaces with a plugin manager) */
-    LoadedPluginsFilterModel    _filterModel;           /** Sorting and filtering model the loaded plugins model */
+    PluginManagerModel          _model;                 /** Plugin manager model (interfaces with a plugin manager) */
+    PluginManagerFilterModel    _filterModel;           /** Sorting and filtering model for the plugin manager model */
     hdps::gui::HierarchyWidget  _hierarchyWidget;       /** Widget for displaying the loaded plugins */
 };

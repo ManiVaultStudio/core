@@ -284,6 +284,21 @@ plugin::Plugin* PluginManager::createPlugin(const QString& kind, const Datasets&
     }
 }
 
+AbstractPluginManager::PluginPtrs PluginManager::getPluginsByType(const plugin::Type& pluginType) const
+{
+    AbstractPluginManager::PluginPtrs plugins;
+
+    //QVector<hdps::plugin::Plugin*> plugins;
+
+    //for (auto pluginType : pluginTypes)
+    //    for (auto& plugin : const_cast<Core*>(this)->_plugins[pluginType])
+    //        plugins << plugin.get();
+
+    //return plugins;
+
+    return plugins;
+}
+
 QStringList PluginManager::getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const
 {
     QStringList pluginKinds;

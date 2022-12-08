@@ -113,10 +113,16 @@ set(PRIVATE_LAYOUT_MANAGER_FILES
 
 set(PRIVATE_PLUGIN_MANAGER_HEADERS
     src/private/PluginManager.h
+    src/private/PluginManagerModel.h
+    src/private/PluginManagerFilterModel.h
+    src/private/PluginManagerDialog.h
 )
 
 set(PRIVATE_PLUGIN_MANAGER_SOURCES
     src/private/PluginManager.cpp
+    src/private/PluginManagerModel.cpp
+    src/private/PluginManagerFilterModel.cpp
+    src/private/PluginManagerDialog.cpp
 )
 
 set(PRIVATE_PLUGIN_MANAGER_FILES
@@ -197,9 +203,6 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/HelpMenu.h
     src/private/PluginHelpMenu.h
     src/private/ResetMenu.h
-    src/private/PluginManagerModel.h
-    src/private/PluginManagerFilterModel.h
-    src/private/PluginManagerDialog.h
 )
 
 set(PRIVATE_APPLICATION_SOURCES
@@ -214,9 +217,6 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/HelpMenu.cpp
     src/private/PluginHelpMenu.cpp
     src/private/ResetMenu.cpp
-    src/private/PluginManagerModel.cpp
-    src/private/PluginManagerFilterModel.cpp
-    src/private/PluginManagerDialog.cpp
 )
 
 set(PRIVATE_APPLICATION_FILES
@@ -285,6 +285,7 @@ source_group(Private\\Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
 
 set(PUBLIC_CORE_INTERFACE_HEADERS
     src/CoreInterface.h
+    src/AbstractManager.h
     src/AbstractDataManager.h
     src/AbstractPluginManager.h
     src/AbstractActionsManager.h

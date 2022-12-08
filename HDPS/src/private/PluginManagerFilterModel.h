@@ -3,21 +3,21 @@
 #include <QSortFilterProxyModel>
 
 /**
- * Loaded plugins filter model class
+ * Plugin manager filter model class
  *
- * Sorting and filtering model for loaded plugins
+ * Sorting and filtering model for the plugin manager model
  *
  * @author Thomas Kroes
  */
-class LoadedPluginsFilterModel : public QSortFilterProxyModel
+class PluginManagerFilterModel : public QSortFilterProxyModel
 {
 public:
 
     /** 
-     * Construct from \p parent
+     * Construct the filter model with \p parent
      * @param parent Pointer to parent object
     */
-    LoadedPluginsFilterModel(QObject* parent = nullptr);
+    PluginManagerFilterModel(QObject* parent = nullptr);
 
     /**
      * Returns whether \p row with \p parent is filtered out (false) or in (true)

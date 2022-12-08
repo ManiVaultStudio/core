@@ -40,12 +40,6 @@ class Core : public CoreInterface
 {
 public:
 
-    /** Aliases */
-    using UniquePtrPlugin   = std::unique_ptr<plugin::Plugin>;
-    using UniquePtrsPlugin  = std::vector<UniquePtrPlugin>;
-
-public:
-
     /** Default constructor */
     Core();
 
@@ -160,75 +154,6 @@ public: // Plugin creation
      * @return Pointer to created view plugin (nullptr if creation failed)
      */
     plugin::ViewPlugin* requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, Datasets datasets = Datasets()) override;
-
-public: // Plugin queries
-
-    /**
-     * Determine whether a plugin of \p kind is loaded
-     * @param kind Plugin kind
-     * @return Boolean determining whether a plugin of \p kind is loaded
-     */
-    bool isPluginLoaded(const QString& kind) const override;
-
-    /**
-     * Get plugins by plugin type(s)
-     * @param pluginTypes Plugin type(s)
-     * @return Pointers to plugins
-     */
-    QVector<plugin::Plugin*> getPluginsByType(const plugin::Types& pluginTypes) const override;
-
-    /**
-     * Get plugin kinds by plugin type(s)
-     * @param pluginTypes Plugin type(s)
-     * @return Plugin kinds
-     */
-    QStringList getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const override;
-
-    /**
-     * Get plugin trigger actions by \p pluginType and \p datasets
-     * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param datasets Vector of input datasets
-     * @return Vector of plugin trigger actions
-     */
-    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const override;
-
-    /**
-     * Get plugin trigger actions by \p pluginType and \p dataTypes
-     * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param dataTypes Vector of input data types
-     * @return Vector of plugin trigger actions
-     */
-    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const override;
-
-    /**
-     * Get plugin trigger actions by \p pluginKind and \p datasets
-     * @param pluginKind Kind of plugin
-     * @param datasets Vector of input datasets
-     * @return Vector of plugin trigger actions
-     */
-    gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const Datasets& datasets) const override;
-
-    /**
-     * Get plugin trigger actions by \p pluginKind and \p dataTypes
-     * @param pluginKind Kind of plugin
-     * @param dataTypes Vector of input data types
-     * @return Vector of plugin trigger actions
-     */
-    gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const override;
-
-    /**
-     * Get plugin GUI name from plugin kind
-     * @param pluginKind Kind of plugin
-     * @return GUI name of the plugin, empty if the plugin kind was not found
-     */
-    QString getPluginGuiName(const QString& pluginKind) const override;
-
-    /**
-     * Get plugin icon from plugin kind
-     * @param pluginKind Kind of plugin
-     * @return Plugin icon name of the plugin, null icon the plugin kind was not found
-     */
-    QIcon getPluginIcon(const QString& pluginKind) const override;
 
 public: // Data hierarchy
 
@@ -357,13 +282,12 @@ public: // Managers
     AbstractActionsManager& getActionsManager() override;
 
 private:
-    PluginManager                                                           _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core */
-    DataManager                                                             _dataManager;               /** Data manager responsible for storing data sets and data selections */
-    DataHierarchyManager                                                    _dataHierarchyManager;      /** Data hierarchy manager for providing a hierarchical dataset structure */
-    LayoutManager                                                           _layoutManager;             /** Layout manager for controlling widgets layout */
-    ActionsManager                                                          _actionsManager;            /** Actions manager for storing actions */
-    std::unordered_map<plugin::Type, UniquePtrsPlugin, plugin::TypeHash>    _plugins;                   /** List of plugin instances currently present in the application. Instances are stored by type. */
-    std::vector<EventListener*>                                             _eventListeners;            /** List of classes listening for core events */
+    PluginManager                   _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core */
+    DataManager                     _dataManager;               /** Data manager responsible for storing data sets and data selections */
+    DataHierarchyManager            _dataHierarchyManager;      /** Data hierarchy manager for providing a hierarchical dataset structure */
+    LayoutManager                   _layoutManager;             /** Layout manager for controlling widgets layout */
+    ActionsManager                  _actionsManager;            /** Actions manager for storing actions */
+    std::vector<EventListener*>     _eventListeners;            /** List of classes listening for core events */
 
     friend class DataHierarchyManager;
 };

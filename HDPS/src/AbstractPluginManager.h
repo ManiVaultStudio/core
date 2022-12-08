@@ -1,10 +1,8 @@
 #pragma once
 
-#include <actions/WidgetAction.h>
-#include <actions/PluginTriggerAction.h>
-#include <actions/TriggerAction.h>
-#include <actions/PluginTriggerAction.h>
-#include <actions/ToggleAction.h>
+#include "AbstractManager.h"
+
+#include "actions/PluginTriggerAction.h"
 
 #include <QObject>
 #include <QString>
@@ -18,9 +16,16 @@ namespace plugin {
     class PluginFactory;
 }
 
-class AbstractPluginManager : public gui::WidgetAction
+class AbstractPluginManager : public AbstractManager
 {
     Q_OBJECT
+
+public:
+
+    /** Aliases */
+    using UniquePtrPlugin   = std::unique_ptr<plugin::Plugin>;
+    using UniquePtrsPlugin  = std::vector<UniquePtrPlugin>;
+    using PluginPtrs        = std::vector<plugin::Plugin*>;
 
 public:
     
@@ -52,6 +57,13 @@ public:
     {
         return dynamic_cast<PluginType*>(createPlugin(kind, datasets));
     }
+
+    /**
+     * Get plugin instances for \p pluginType
+     * @param pluginType Plugin type
+     * @return Vector of pointers to plugin instances
+     */
+    virtual PluginPtrs getPluginsByType(const plugin::Type& pluginType) const = 0;
 
     /**
      * Get plugin kinds by plugin type(s)

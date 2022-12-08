@@ -1,4 +1,4 @@
-#include "LoadedPluginsModel.h"
+#include "PluginManagerModel.h"
 
 #include <Application.h>
 #include <AbstractPluginManager.h>
@@ -8,32 +8,36 @@
 using namespace hdps;
 using namespace hdps::util;
 
-LoadedPluginsModel::LoadedPluginsModel(QObject* parent /*= nullptr*/) :
+#ifdef _DEBUG
+    #define PLUGIN_MANAGER_MODEL_VERBOSE
+#endif
+
+PluginManagerModel::PluginManagerModel(QObject* parent /*= nullptr*/) :
     QAbstractItemModel(parent)
 {
 }
 
-int LoadedPluginsModel::rowCount(const QModelIndex& parent /*= QModelIndex()*/) const
+int PluginManagerModel::rowCount(const QModelIndex& parent /*= QModelIndex()*/) const
 {
     return 0;
 }
 
-int LoadedPluginsModel::columnCount(const QModelIndex& parent /*= QModelIndex()*/) const
+int PluginManagerModel::columnCount(const QModelIndex& parent /*= QModelIndex()*/) const
 {
     return static_cast<int>(Column::Count);
 }
 
-QModelIndex LoadedPluginsModel::index(int row, int column, const QModelIndex& parent /*= QModelIndex()*/) const
+QModelIndex PluginManagerModel::index(int row, int column, const QModelIndex& parent /*= QModelIndex()*/) const
 {
     return createIndex(row, column, static_cast<void*>(nullptr));
 }
 
-QModelIndex LoadedPluginsModel::parent(const QModelIndex& index) const
+QModelIndex PluginManagerModel::parent(const QModelIndex& index) const
 {
     return QModelIndex();
 }
 
-QVariant LoadedPluginsModel::data(const QModelIndex& index, int role) const
+QVariant PluginManagerModel::data(const QModelIndex& index, int role) const
 {
     const auto row      = index.row();
     const auto column   = index.column();
@@ -123,7 +127,7 @@ QVariant LoadedPluginsModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-bool LoadedPluginsModel::setData(const QModelIndex& index, const QVariant& value, int role /*= Qt::EditRole*/)
+bool PluginManagerModel::setData(const QModelIndex& index, const QVariant& value, int role /*= Qt::EditRole*/)
 {
     //const auto row      = index.row();
     //const auto column   = index.column();
@@ -159,7 +163,7 @@ bool LoadedPluginsModel::setData(const QModelIndex& index, const QVariant& value
     return true;
 }
 
-QVariant LoadedPluginsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+QVariant PluginManagerModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
 {
     if (orientation == Qt::Horizontal) {
         switch (role)
@@ -224,7 +228,7 @@ QVariant LoadedPluginsModel::headerData(int section, Qt::Orientation orientation
     return QVariant();
 }
 
-Qt::ItemFlags LoadedPluginsModel::flags(const QModelIndex& index) const
+Qt::ItemFlags PluginManagerModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
@@ -232,4 +236,11 @@ Qt::ItemFlags LoadedPluginsModel::flags(const QModelIndex& index) const
     auto itemFlags = Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
 
     return itemFlags;
+}
+
+void PluginManagerModel::initializeFromPluginManager()
+{
+#ifdef PLUGIN_MANAGER_MODEL_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 }

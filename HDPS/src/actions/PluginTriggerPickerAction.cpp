@@ -34,28 +34,28 @@ QWidget* PluginTriggerPickerAction::getWidget(QWidget* parent, const std::int32_
 
 void PluginTriggerPickerAction::initialize(const plugin::Type& pluginType, const Datasets& datasets)
 {
-    _pluginTriggerActions = Application::core()->getPluginTriggerActions(pluginType, datasets);
+    _pluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(pluginType, datasets);
 
     emit pluginTriggerActionsChanged(_pluginTriggerActions);
 }
 
 void PluginTriggerPickerAction::initialize(const plugin::Type& pluginType, const DataTypes& dataTypes)
 {
-    _pluginTriggerActions = Application::core()->getPluginTriggerActions(pluginType, dataTypes);
+    _pluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(pluginType, dataTypes);
 
     emit pluginTriggerActionsChanged(_pluginTriggerActions);
 }
 
 void PluginTriggerPickerAction::initialize(const QString& pluginKind, const Datasets& datasets)
 {
-    _pluginTriggerActions = Application::core()->getPluginTriggerActions(pluginKind, datasets);
+    _pluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(pluginKind, datasets);
 
     emit pluginTriggerActionsChanged(_pluginTriggerActions);
 }
 
 void PluginTriggerPickerAction::initialize(const QString& pluginKind, const DataTypes& dataTypes)
 {
-    _pluginTriggerActions = Application::core()->getPluginTriggerActions(pluginKind, dataTypes);
+    _pluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(pluginKind, dataTypes);
 
     emit pluginTriggerActionsChanged(_pluginTriggerActions);
 }

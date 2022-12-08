@@ -2,7 +2,6 @@
 
 #include "PluginFactory.h"
 #include "PluginType.h"
-#include "Application.h"
 
 #include "event/EventListener.h"
 #include "actions/WidgetAction.h"

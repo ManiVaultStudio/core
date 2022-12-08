@@ -47,6 +47,13 @@ public:
     }
 
     /**
+     * Get plugin instances for \p pluginType
+     * @param pluginType Plugin type
+     * @return Vector of pointers to plugin instances
+     */
+    PluginPtrs getPluginsByType(const plugin::Type& pluginType) const override;
+
+    /**
      * Get plugin kinds by plugin type(s)
      * @param pluginTypes Plugin type(s)
      * @return Plugin kinds
@@ -146,7 +153,8 @@ protected:
     QStringList resolveDependencies(QDir pluginDir) const;
 
 private:
-    QHash<QString, PluginFactory*> _pluginFactories;
+    QHash<QString, PluginFactory*>                                          _pluginFactories;
+    std::unordered_map<plugin::Type, UniquePtrsPlugin, plugin::TypeHash>    _plugins;                   /** List of plugin instances currently present in the application. Instances are stored by type. */
 };
 
 }

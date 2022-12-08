@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Set.h"
-
-#include <actions/WidgetAction.h>
+#include "AbstractManager.h"
 
 #include <QObject>
 #include <QString>
@@ -23,14 +21,20 @@ namespace std {
 namespace hdps
 {
 
+class DatasetImpl;
+
 namespace plugin {
     class RawData;
 }
 
-class AbstractDataManager : public gui::WidgetAction
+class AbstractDataManager : public AbstractManager
 {
+    Q_OBJECT
 
 public:
+
+    /** Resets the contents of the data manager */
+    virtual void reset() = 0;
 
     /**
      * Add raw data to the data manager

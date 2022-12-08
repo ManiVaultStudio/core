@@ -6,17 +6,17 @@
 #include <QAbstractItemModel>
 
 /**
- * Loaded plugins model class
+ * Plugin manager model class
  *
- * Model implementation for loaded plugins
+ * Model implementation for the plugin manager
  *
  * @author Thomas Kroes
  */
-class LoadedPluginsModel : public QAbstractItemModel
+class PluginManagerModel : public QAbstractItemModel
 {
 public:
 
-    /** Loaded plugin (instance) columns */
+    /** Plugin manager columns */
     enum class Column {
         Name,               /** Name of the loaded plugin (instance) */
         Type,               /** Type of plugin */
@@ -30,19 +30,19 @@ public:
 public:
 
     /**
-     * Construct from \p parent
+     * Construct plugin manager model with \p parent
      * @param parent Pointer to parent object
      */
-    LoadedPluginsModel(QObject* parent = nullptr);
+    PluginManagerModel(QObject* parent = nullptr);
 
     /** No need for copy constructor */
-    LoadedPluginsModel(const LoadedPluginsModel& loadedPluginsModel) = delete;
+    PluginManagerModel(const PluginManagerModel& loadedPluginsModel) = delete;
 
     /** No need for destructor */
-    ~LoadedPluginsModel() override = default;
+    ~PluginManagerModel() override = default;
 
     /** No need for assignment operator */
-    LoadedPluginsModel& operator=(const LoadedPluginsModel& loadedPluginsModel) = delete;
+    PluginManagerModel& operator=(const PluginManagerModel& loadedPluginsModel) = delete;
 
     /**
      * Returns the number of rows for the \p parent model index
@@ -109,10 +109,8 @@ public:
 
 private:
 
-    /** Synchronizes the internal data with the  */
-    //void synchronizeWithPluginManager();
-
-    //void addPlugin
+    /** Initializes the model from the contents of the plugin manager */
+    void initializeFromPluginManager();
 
     QMap<hdps::plugin::PluginFactory*, hdps::plugin::Plugin*>   _pluginFactories;
 };

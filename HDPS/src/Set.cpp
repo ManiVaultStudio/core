@@ -3,9 +3,12 @@
 #include "CoreInterface.h"
 #include "DataHierarchyItem.h"
 #include "AnalysisPlugin.h"
+
 #include "util/Serialization.h"
 #include "util/Icon.h"
 #include "util/Exception.h"
+
+#include "Application.h"
 
 #include <QPainter>
 
