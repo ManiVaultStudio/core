@@ -21,9 +21,7 @@ using namespace hdps::util;
 
 DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
-    Serializable("Dock manager"),
-    _centralDockAreaWidget(nullptr),
-    _centralDockWidget(this)
+    Serializable("Dock manager")
 {
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
@@ -68,11 +66,6 @@ const ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
     return const_cast<DockManager*>(this)->getViewPluginDockWidgets();
 }
 
-QSplitter* DockManager::getRootSplitter() const
-{
-    return CDockManager::rootSplitter();
-}
-
 ads::CDockAreaWidget* DockManager::findDockAreaWidget(QWidget* widget)
 {
     for (auto dockWidget : dockWidgets())
@@ -80,25 +73,6 @@ ads::CDockAreaWidget* DockManager::findDockAreaWidget(QWidget* widget)
             return dockWidget->dockAreaWidget();
 
     return nullptr;
-}
-//
-//ads::CDockAreaWidget* DockManager::setCentralWidget(QWidget* centralWidget)
-//{
-//    _centralDockWidget.setWidget(centralWidget);
-//
-//    _centralDockAreaWidget = CDockManager::setCentralWidget(&_centralDockWidget);
-//
-//    return _centralDockAreaWidget;
-//}
-
-ads::CDockAreaWidget* DockManager::getCentralDockAreaWidget()
-{
-    return _centralDockAreaWidget;
-}
-
-DockWidget* DockManager::getCentralDockWidget()
-{
-    return &_centralDockWidget;
 }
 
 void DockManager::fromVariantMap(const QVariantMap& variantMap)

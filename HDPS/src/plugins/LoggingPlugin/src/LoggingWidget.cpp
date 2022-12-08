@@ -2,6 +2,8 @@
 
 #include <Application.h>
 
+#include <util/FileUtil.h>
+
 #include <QDebug>
 #include <QHeaderView>
 #include <QMenu>
@@ -17,7 +19,8 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
     _model(),
     _filterModel(nullptr),
     _hierarchyWidget(this, "Log record", _model, &_filterModel),
-    _idleUpdateConnection()
+    _idleUpdateConnection(),
+    _findLogFileAction(this, "Find log file")
 {
     setAutoFillBackground(true);
 
@@ -39,6 +42,7 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
     settingsGroupAction.setVisible(true);
 
     settingsGroupAction << _model.getWordWrapAction();
+    settingsGroupAction << _findLogFileAction;
 
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
 
@@ -46,6 +50,8 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
     filterGroupAction.setPopupSizeHint(QSize(340, 10));
 
     filterGroupAction << _filterModel.getFilterTypeAction();
+    
+    _findLogFileAction.setToolTip("Find the location where the log file resides");
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
@@ -89,6 +95,13 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
         
         contextMenu.exec(QCursor::pos());
     });
+
+    connect(&_findLogFileAction, &QAction::triggered, [this](bool) {
+        const auto filePath = Logger::GetFilePathName();
+
+        if (!hdps::util::ShowFileInFolder(filePath))
+            QMessageBox::information(this, QObject::tr("Log file not found"), QObject::tr("The log file is not found:\n%1").arg(filePath));
+        });
 }
 
 QSize LoggingWidget::sizeHint() const

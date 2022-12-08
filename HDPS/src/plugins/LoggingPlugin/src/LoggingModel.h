@@ -41,7 +41,7 @@ public:
 public:
 
     /**
-     * Constructor
+     * Construct from \p parent
      * @param parent Pointer to parent object
      */
     LoggingModel(QObject* parent = nullptr);

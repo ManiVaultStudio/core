@@ -4,7 +4,7 @@
 #include "LoggingFilterModel.h"
 
 #include <widgets/HierarchyWidget.h>
-#include <actions/ToggleAction.h>
+#include <actions/TriggerAction.h>
 
 #include <QWidget>
 
@@ -38,4 +38,5 @@ private:
     LoggingFilterModel          _filterModel;               /** Filter model for logging (source is the logging model) */
     hdps::gui::HierarchyWidget  _hierarchyWidget;           /** Widget for displaying hierarchy */
     QMetaObject::Connection     _idleUpdateConnection;      /** Update the logging widget when idle */
+    hdps::gui::TriggerAction    _findLogFileAction;         /** Action for finding the log file */
 };

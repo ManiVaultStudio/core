@@ -143,6 +143,7 @@ void ViewPluginDockWidget::initializeSettingsMenu()
 
     _settingsMenu.addSeparator();
 
+    _settingsMenu.addAction(&_viewPlugin->getRemoveAction());
     _settingsMenu.addAction(&_viewPlugin->getEditActionsAction());
 }
 

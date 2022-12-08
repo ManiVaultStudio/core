@@ -20,7 +20,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _mayFloatAction(this, "May float", true, true),
     _mayMoveAction(this, "May move", true, true),
     _visibleAction(this, "Visible", true, true),
-    _triggerHelpAction(this, "Trigger help")
+    _helpAction(this, "Trigger help"),
+    _removeAction(this, "Remove")
 {
     setText(getGuiName());
 
@@ -29,52 +30,66 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _widget.addAction(&_editActionsAction);
     _widget.addAction(&_screenshotAction);
     _widget.addAction(&_isolateAction);
-    _widget.addAction(&_triggerHelpAction);
+    _widget.addAction(&_helpAction);
 
     _editActionsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     _editActionsAction.setShortcut(tr("F12"));
     _editActionsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _editActionsAction.setConnectionPermissionsToNone();
 
     _screenshotAction.setIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
     _screenshotAction.setShortcut(tr("F2"));
     _screenshotAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _screenshotAction.setConnectionPermissionsToNone();
 
     _isolateAction.setIcon(Application::getIconFont("FontAwesome").getIcon("crosshairs"));
     _isolateAction.setShortcut(tr("F3"));
     _isolateAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _isolateAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _isolateAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _isolateAction.setConnectionPermissionsToNone();
 
     _mayCloseAction.setToolTip("Determines whether this view plugin may be closed or not");
     _mayCloseAction.setConnectionPermissionsToNone();
     _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _mayCloseAction.setConnectionPermissionsToNone();
 
     _mayFloatAction.setToolTip("Determines whether this view plugin may float or not");
     _mayFloatAction.setConnectionPermissionsToNone();
     _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _mayFloatAction.setConnectionPermissionsToNone();
 
     _mayMoveAction.setToolTip("Determines whether this view plugin may be moved or not");
     _mayMoveAction.setConnectionPermissionsToNone();
     _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _mayMoveAction.setConnectionPermissionsToNone();
 
     _visibleAction.setToolTip("Determines whether the view plugin is visible in the user interface or not");
     _visibleAction.setIcon(getIcon());
     _visibleAction.setConnectionPermissionsToNone();
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _visibleAction.setConnectionPermissionsToNone();
 
-    _triggerHelpAction.setShortcut(tr("F1"));
-    _triggerHelpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _triggerHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
-    _triggerHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
+    _helpAction.setToolTip(QString("Shows %1 documentation").arg(factory->getKind()));
+    _helpAction.setShortcut(tr("F1"));
+    _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
+    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
+    _helpAction.setConnectionPermissionsToNone();
     
+    _removeAction.setToolTip(QString("Remove %1").arg(getGuiName()));
+    _removeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
+    _removeAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _removeAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _removeAction.setConnectionPermissionsToNone();
+
     connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
         ProjectEditorDialog viewPluginEditorDialog(nullptr, this);
         viewPluginEditorDialog.exec();
@@ -88,8 +103,12 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
         Application::core()->getLayoutManager().isolateViewPlugin(this, toggled);
     });
 
-    connect(&_triggerHelpAction, &TriggerAction::triggered, this, [this]() -> void {
+    connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
         getTriggerHelpAction().trigger();
+    });
+
+    connect(&_removeAction, &TriggerAction::triggered, this, [this]() -> void {
+        qDebug() << "Remove" << getGuiName();
     });
 
     connect(&getGuiNameAction(), &StringAction::stringChanged, this, [this](const QString& guiName) -> void {

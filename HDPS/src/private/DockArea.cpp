@@ -283,48 +283,7 @@ void DockArea::createDockWidgets(std::uint32_t depth)
 
         auto dockWidget             = _dockWidgets.count() == 0 ? new DockWidget("Placeholder dock widget") : _dockWidgets.first();
         auto targetDockWidgetArea   = getParent()->getCurrentDockAreaWidget();
-        
-        if (_dockManager->objectName() == "MainDockManager") {
-            std::int32_t centralWidgetIndex = -1;
 
-            if (hasParent()) {
-                for (auto child : getParent()->getChildren())
-                    if (child.isCentral())
-                        centralWidgetIndex = getParent()->getChildIndex(child);
-            }
-
-            if (centralWidgetIndex >= 0) {
-                if (childIndex == 0) {
-                    switch (getParent()->getOrientation())
-                    {
-                        case Qt::Horizontal:
-                            dockWidgetArea = LeftDockWidgetArea;
-                            break;
-
-                        case Qt::Vertical:
-                            dockWidgetArea = TopDockWidgetArea;
-                            break;
-                    }
-
-                    getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, _dockManager->getCentralDockAreaWidget()));
-                }
-
-                if (childIndex > 0 && childIndex < static_cast<std::uint32_t>(centralWidgetIndex)) {
-                    getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, getParent()->getCurrentDockAreaWidget()));
-                }
-
-                if (childIndex == static_cast<std::uint32_t>(centralWidgetIndex)) {
-                    getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, _dockManager->getCentralDockAreaWidget()));
-                }
-
-                if (childIndex > static_cast<std::uint32_t>(centralWidgetIndex)) {
-                    getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, getParent()->getCurrentDockAreaWidget()));
-                }
-            }
-            else {
-                getParent()->setCurrentDockAreaWidget(_dockManager->addDockWidget(dockWidgetArea, dockWidget, getParent()->getCurrentDockAreaWidget()));
-            }
-        }
         
         if (_dockManager->objectName() == "ViewPluginsDockManager") {
             if (targetDockWidgetArea)
@@ -389,8 +348,6 @@ void DockArea::applyDocking()
     removePlaceHolderDockWidgets();
 
     Application::processEvents();
-
-    DockArea::setSplitterWidgetSizes(_dockManager->getRootSplitter());
 
     loadViewPluginDockWidgets();
 }

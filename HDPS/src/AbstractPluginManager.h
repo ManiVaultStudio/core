@@ -147,10 +147,16 @@ signals:
     void pluginFactoryLoaded(plugin::PluginFactory* pluginFactory);
 
     /**
-     * Signals that a plugin instance is added to the plugin manager
-     * @param plugin Pointer to plugin that was added
+     * Signals that \p plugin instance is added to the plugin manager
+     * @param plugin Pointer to the plugin that was added
      */
     void pluginAdded(plugin::Plugin* plugin);
+
+    /**
+     * Signals that \p plugin instance is about to be removed from the plugin manager
+     * @param plugin Pointer to the plugin that is about to be removed
+     */
+    void pluginAboutToBeRemoved(plugin::Plugin* plugin);
 
     friend class gui::PluginTriggerAction;
 };

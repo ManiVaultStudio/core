@@ -196,6 +196,10 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/LoadedViewsMenu.h
     src/private/HelpMenu.h
     src/private/PluginHelpMenu.h
+    src/private/ResetMenu.h
+    src/private/LoadedPluginsModel.h
+    src/private/LoadedPluginsFilterModel.h
+    src/private/LoadedPluginsDialog.h
 )
 
 set(PRIVATE_APPLICATION_SOURCES
@@ -209,6 +213,10 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/LoadedViewsMenu.cpp
     src/private/HelpMenu.cpp
     src/private/PluginHelpMenu.cpp
+    src/private/ResetMenu.cpp
+    src/private/LoadedPluginsModel.cpp
+    src/private/LoadedPluginsFilterModel.cpp
+    src/private/LoadedPluginsDialog.cpp
 )
 
 set(PRIVATE_APPLICATION_FILES

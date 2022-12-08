@@ -13,8 +13,6 @@
 
 class DataHierarchyPlugin;
 
-using namespace hdps::gui;
-
 /**
  * Widget for displaying the data hierarchy
  * 
@@ -61,6 +59,6 @@ protected:
 private:
     DataHierarchyModel          _model;                 /** Model containing data to be displayed in the hierarchy */
     DataHierarchyFilterModel    _filterModel;           /** Data hierarchy filter model */
-    HierarchyWidget             _hierarchyWidget;       /** Widget for displaying hierarchy */
-    ToggleAction                _groupingAction;        /** Data grouping action */
+    hdps::gui::HierarchyWidget  _hierarchyWidget;       /** Widget for displaying hierarchy */
+    hdps::gui::ToggleAction     _groupingAction;        /** Data grouping action */
 };

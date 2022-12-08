@@ -47,34 +47,12 @@ public:
      */
     const ViewPluginDockWidgets getViewPluginDockWidgets() const;
 
-    /** Get the root splitter of the top-level docking */
-    QSplitter* getRootSplitter() const;
-
     /**
      * Find the dock area widget where \p widget resides
      * @param widget Pointer to widget to look for
      * @return Pointer to ADS dock widget area (if found, otherwise nullptr)
      */
     ads::CDockAreaWidget* findDockAreaWidget(QWidget* widget);
-
-    ///**
-    // * Set central widget
-    // * @param Pointer to central widget
-    // * @return Pointer to central dock area widget
-    // */
-    //ads::CDockAreaWidget* setCentralWidget(QWidget* centralWidget);
-
-    /**
-     * Get central dock area widget
-     * @return Pointer to central dock area widget
-     */
-    ads::CDockAreaWidget* getCentralDockAreaWidget();
-
-    /**
-     * Get central dock widget
-     * @return Pointer to central dock widget
-     */
-    DockWidget* getCentralDockWidget();
 
 public: // Serialization
 
@@ -94,10 +72,6 @@ private:
 
     /** Resets the docking layout to defaults */
     void reset();
-
-private:
-    ads::CDockAreaWidget*   _centralDockAreaWidget;     /** Pointer to central dock area widget */
-    CentralDockWidget       _centralDockWidget;         /** Default central dock widget */
 
     friend class ViewPluginsDockWidget;
 };

@@ -79,7 +79,7 @@ private:
     void dockWidgetAboutToBeRemoved(ads::CDockWidget* dockWidget);
 
 private:
-    QWidget         _widget;            /** Widget for display in the dock widget */
-    DockManager     _dockManager;       /** Dock manager */
-    LogoWidget      _logoWidget;        /** Logo widget for logo dock widget */
+    DockManager         _dockManager;           /** Dock manager for docking of view plugins */
+    ads::CDockWidget    _centralDockWidget;     /** Central dock widget (show when no view plugins are visible) */
+    LogoWidget          _logoWidget;            /** Logo widget for logo dock widget */
 };

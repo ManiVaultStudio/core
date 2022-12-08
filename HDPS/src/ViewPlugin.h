@@ -73,6 +73,7 @@ public: // Action getters
     gui::ToggleAction& getMayFloatAction() { return _mayFloatAction; }
     gui::ToggleAction& getMayMoveAction() { return _mayMoveAction; }
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
+    gui::TriggerAction& getRemoveAction() { return _removeAction; }
 
 private:
     QWidget                 _widget;                /** Widget representation of the plugin */
@@ -83,7 +84,8 @@ private:
     gui::ToggleAction       _mayFloatAction;        /** Action for toggling whether a view plugin may float */
     gui::ToggleAction       _mayMoveAction;         /** Action for toggling whether a view plugin may be moved */
     gui::ToggleAction       _visibleAction;         /** Action which determines whether the view plugin is visible or not */
-    gui::TriggerAction      _triggerHelpAction;     /** Action which shows help (internal use only) */
+    gui::TriggerAction      _helpAction;            /** Action which triggers documentation */
+    gui::TriggerAction      _removeAction;          /** Action for removing (not closing) the view plugin */
 };
 
 class ViewPluginFactory : public PluginFactory

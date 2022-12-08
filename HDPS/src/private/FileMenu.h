@@ -2,6 +2,9 @@
 
 #include "RecentProjectsMenu.h"
 #include "ImportDataMenu.h"
+#include "ResetMenu.h"
+
+#include <actions/TriggerAction.h>
 
 #include <QMenu>
 
@@ -23,11 +26,13 @@ public:
     FileMenu(QWidget *parent = nullptr);
 
 private:
-    QAction                 _openProjectAction;         /** Action for opening a project */
-    QAction                 _saveProjectAction;         /** Action for saving a project */
-    QAction                 _saveProjectAsAction;       /** Action for saving a project under a new name */
-    RecentProjectsMenu      _recentProjectsMenu;        /** Menu for loading recent projects */
-    QAction                 _clearDatasetsAction;       /** Action for clearing all datasets */
-    ImportDataMenu          _importDataMenu;            /** Menu for importing data */
-    QAction                 _exitAction;                /** Action for exiting the application */
+    hdps::gui::TriggerAction    _openProjectAction;         /** Action for opening a project */
+    hdps::gui::TriggerAction    _saveProjectAction;         /** Action for saving a project */
+    hdps::gui::TriggerAction    _saveProjectAsAction;       /** Action for saving a project under a new name */
+    RecentProjectsMenu          _recentProjectsMenu;        /** Menu for loading recent projects */
+    ResetMenu                   _resetMenu;                 /** Menu for resetting the project (or parts of it) */
+    ImportDataMenu              _importDataMenu;            /** Menu for importing data */
+    hdps::gui::TriggerAction    _viewLoadedPluginsAction;   /** Action for showing the loaded plugins dialog */
+    hdps::gui::TriggerAction    _publishAction;             /** Action for publishing the project to an end-user */
+    hdps::gui::TriggerAction    _exitAction;                /** Action for exiting the application */
 };

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <AbstractLayoutManager.h>
-
 #include "DockManager.h"
 #include "ViewPluginsDockWidget.h"
+
+#include <AbstractLayoutManager.h>
 
 #include <DockAreaWidget.h>
 
@@ -84,10 +84,10 @@ public: // Serialization
     ViewPluginDockWidgets getViewPluginDockWidgets();
 
 private:
-    QSharedPointer<DockManager>     _dockManager;                   /** Main dock manager (inherited  from ADS) */
-    bool                            _initialized;                   /** Whether the layout manager is initialized or not */
-    ViewPluginsDockWidget           _viewPluginsDockWidget;         /** Dock widget in which non-system view plugins are docked */
-    QMap<DockWidget*, bool>         _cachedDockWidgetsVisibility;   /** Cached dock widgets visibility for view plugin isolation */
+    QPointer<DockManager>               _dockManager;                   /** Main dock manager for docking system plugins */
+    QPointer<ViewPluginsDockWidget>     _viewPluginsWidget;         /** Pointer to view plugins widget in which non-system view plugins are docked */
+    bool                                _initialized;                   /** Whether the layout manager is initialized or not */
+    QMap<DockWidget*, bool>             _cachedDockWidgetsVisibility;   /** Cached dock widgets visibility for view plugin isolation */
 };
 
 }

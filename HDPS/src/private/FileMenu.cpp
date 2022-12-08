@@ -1,18 +1,22 @@
 #include "FileMenu.h"
+#include "LoadedPluginsDialog.h"
 
 #include <Application.h>
 
 using namespace hdps;
+using namespace hdps::gui;
 
 FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
-    _openProjectAction("Open", this),
-    _saveProjectAction("Save project", this),
-    _saveProjectAsAction("Save project as", this),
+    _openProjectAction(this, "Open"),
+    _saveProjectAction(this, "Save project"),
+    _saveProjectAsAction(this, "Save project as"),
     _recentProjectsMenu(this),
-    _clearDatasetsAction("Clear datasets", this),
+    _resetMenu(this),
     _importDataMenu(this),
-    _exitAction("Exit", this)
+    _viewLoadedPluginsAction(this, "View plugins"),
+    _publishAction(this, "Publish"),
+    _exitAction(this, "Exit")
 {
     setTitle("File");
     setToolTip("File operations");
@@ -23,22 +27,31 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     addSeparator();
     addMenu(&_recentProjectsMenu);
     addSeparator();
-    addAction(&_clearDatasetsAction);
+    addMenu(&_resetMenu);
     addMenu(&_importDataMenu);
     addSeparator();
+    addAction(&_viewLoadedPluginsAction);
+    addAction(&_publishAction);
     addAction(&_exitAction);
 
     _openProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-    _saveProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-    _saveProjectAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-    _clearDatasetsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
-    _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
-    _exitAction.setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
-
     _openProjectAction.setToolTip("Open project from disk");
+
+    _saveProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveProjectAction.setToolTip("Save project to disk");
+
+    _saveProjectAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveProjectAsAction.setToolTip("Save project to disk in a chosen location");
-    _clearDatasetsAction.setToolTip("Reset the data model");
+
+    _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    
+    _viewLoadedPluginsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+    _viewLoadedPluginsAction.setToolTip("View loaded plugins");
+
+    _publishAction.setIcon(Application::getIconFont("FontAwesome").getIcon("share"));
+    _publishAction.setToolTip("Publish the HDPS application");
+
+    _exitAction.setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
     _exitAction.setToolTip("Exit the HDPS application");
 
     connect(&_openProjectAction, &QAction::triggered, this, []() -> void {
@@ -53,50 +66,35 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
         Application::current()->saveProject();
     });
 
-    connect(&_clearDatasetsAction, &QAction::triggered, this, [this]() -> void {
-        const auto loadedDatasets = Application::core()->requestAllDataSets();
+    //connect(&_clearDatasetsAction, &QAction::triggered, this, [this]() -> void {
+    //    const auto loadedDatasets = Application::core()->requestAllDataSets();
 
-        if (!loadedDatasets.empty()) {
+    //    if (!loadedDatasets.empty()) {
 
-            if (Application::current()->getSetting("ConfirmDataRemoval", true).toBool()) {
-                Application::core()->removeAllDatasets();
+    //        if (Application::current()->getSetting("ConfirmDataRemoval", true).toBool()) {
+    //            Application::core()->removeAllDatasets();
 
-                //// Ask for confirmation dialog
-                //DataRemoveAction::ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, "Remove all datasets", loadedDatasets);
+    //            //// Ask for confirmation dialog
+    //            //DataRemoveAction::ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, "Remove all datasets", loadedDatasets);
 
-                //// Show the confirm data removal dialog
-                //confirmDataRemoveDialog.exec();
+    //            //// Show the confirm data removal dialog
+    //            //confirmDataRemoveDialog.exec();
 
-                //// Remove dataset and children from the core if accepted
-                //if (confirmDataRemoveDialog.result() == 1)
-                //    Application::core()->removeAllDatasets();
-            }
-        }
+    //            //// Remove dataset and children from the core if accepted
+    //            //if (confirmDataRemoveDialog.result() == 1)
+    //            //    Application::core()->removeAllDatasets();
+    //        }
+    //    }
+    //});
+
+    connect(&_viewLoadedPluginsAction, &TriggerAction::triggered, this, [this]() -> void {
+        LoadedPluginsDialog loadedPluginsDialog;
+        loadedPluginsDialog.exec();
     });
 
     connect(&_exitAction, SIGNAL(triggered()), this, SLOT(close()));
 
-    //QObject::connect(findLogFileAction, &QAction::triggered, [this](bool) {
-    //    const auto filePath = Logger::GetFilePathName();
-
-    //    if (!hdps::util::ShowFileInFolder(filePath))
-    //    {
-    //        QMessageBox::information(this,
-    //            QObject::tr("Log file not found"),
-    //            QObject::tr("The log file is not found:\n%1").arg(filePath));
-    //    }
-    //});
-
-    //QObject::connect(logViewAction, &QAction::triggered, [this](const bool checked) {
-    //    if (checked) {
-    //        _loggingDockWidget->setWidget(new LogDockWidget(*this));
-    //        _loggingDockArea->show();
-    //    }
-    //    else {
-    //        delete _loggingDockWidget->takeWidget();
-    //        _loggingDockArea->hide();
-    //    }
-    //});
+    
 
     // Update read-only status of various actions when the main file menu is opened
     connect(this, &QMenu::aboutToShow, this, [this]() -> void {
@@ -104,7 +102,7 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
 
         _saveProjectAction.setEnabled(!Application::current()->getCurrentProjectFilePath().isEmpty());
         _saveProjectAsAction.setEnabled(hasDatasets);
-        _clearDatasetsAction.setEnabled(hasDatasets);
+        _resetMenu.setEnabled(hasDatasets);
 
         _recentProjectsMenu.updateActions();
 

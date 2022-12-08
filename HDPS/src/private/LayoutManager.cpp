@@ -103,7 +103,7 @@ namespace hdps::gui
 LayoutManager::LayoutManager() :
     AbstractLayoutManager(),
     _dockManager(),
-    _viewPluginsDockWidget(),
+    _viewPluginsWidget(),
     _initialized(false),
     _cachedDockWidgetsVisibility()
 {
@@ -122,17 +122,19 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
     if (_initialized)
         return;
 
-    _dockManager = QSharedPointer<DockManager>::create(mainWindow);
+    _dockManager        = new DockManager(mainWindow);
+    _viewPluginsWidget  = new ViewPluginsDockWidget(_dockManager);
 
     _dockManager->setObjectName("MainDockManager");
 
-    auto dw = new CDockWidget("asdasd");
+    auto dw = new CDockWidget("View plugins central dock widget");
 
-    dw->setWidget(&_viewPluginsDockWidget);
+    
+    dw->setWidget(_viewPluginsWidget);
 
     auto viewPluginsDockArea = _dockManager->setCentralWidget(dw);
 
-    viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
+    //viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
     _initialized = true;
 }
@@ -176,7 +178,7 @@ void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPl
     if (viewPlugin->isSystemViewPlugin())
         _dockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _dockManager->findDockAreaWidget(&dockToViewPlugin->getWidget()));
     else
-        _viewPluginsDockWidget.addViewPlugin(viewPluginDockWidget, dockToViewPlugin, dockArea);
+        _viewPluginsWidget->addViewPlugin(viewPluginDockWidget, dockToViewPlugin, dockArea);
 }
 
 void LayoutManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate)
