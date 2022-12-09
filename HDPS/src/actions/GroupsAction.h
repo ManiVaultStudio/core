@@ -156,6 +156,8 @@ public:
      */
     GroupsAction(QObject* parent = nullptr);
 
+    ~GroupsAction();
+
 public: // Adding/removing group action(s)
 
     /**

@@ -19,8 +19,10 @@ public:
      */
     PluginManagerModel(QObject* parent = nullptr);
 
+    void removeItem(const QModelIndex& index);
+
 private:
 
     /** Initializes the model from the contents of the plugin manager */
-    void initializeFromPluginManager();
+    void synchronizeWithPluginManager();
 };

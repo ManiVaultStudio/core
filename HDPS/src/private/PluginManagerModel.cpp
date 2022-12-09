@@ -14,15 +14,20 @@ Q_DECLARE_METATYPE(hdps::plugin::Plugin*);
 PluginManagerModel::PluginManagerModel(QObject* parent /*= nullptr*/) :
     QStandardItemModel(parent)
 {
-    initializeFromPluginManager();
+    synchronizeWithPluginManager();
 
     setHeaderData(0, Qt::Horizontal, "Name");
-    setHeaderData(1, Qt::Horizontal, "Plugin category");
+    setHeaderData(1, Qt::Horizontal, "Category");
 
     setColumnCount(2);
 }
 
-void PluginManagerModel::initializeFromPluginManager()
+void PluginManagerModel::removeItem(const QModelIndex& index)
+{
+    beginRemoveRows(index.parent(), index.row(), index.row());
+}
+
+void PluginManagerModel::synchronizeWithPluginManager()
 {
 #ifdef PLUGIN_MANAGER_MODEL_VERBOSE
     qDebug() << __FUNCTION__;

@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QMenu>
+#include <QHeaderView>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -37,9 +38,21 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
 
     _hierarchyWidget.getFilterGroupAction() << _filterModel.getShowOnlyLoadedAction();
 
-    _hierarchyWidget.getTreeView().setColumnHidden(1, true);
+    auto& treeView = _hierarchyWidget.getTreeView();
 
-    connect(&_hierarchyWidget.getTreeView(), &QTreeView::customContextMenuRequested, [this](const QPoint& point)
+    treeView.setColumnHidden(1, true);
+
+    auto treeViewHeader = treeView.header();
+
+    treeViewHeader->setStretchLastSection(false);
+
+    treeViewHeader->resizeSection(static_cast<int>(0), 300);
+    treeViewHeader->resizeSection(static_cast<int>(1), 100);
+
+    treeViewHeader->setSectionResizeMode(0, QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(1, QHeaderView::Fixed);
+
+    connect(&treeView, &QTreeView::customContextMenuRequested, [this](const QPoint& point)
         {
             const auto selectedRows = _hierarchyWidget.getTreeView().selectionModel()->selectedRows();
 
@@ -48,7 +61,7 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
 
             auto mayDestroyPlugins = true;
 
-            for (auto selectedRow : selectedRows) {
+            for (const auto& selectedRow : selectedRows) {
                 if (selectedRow.siblingAtColumn(1).data().toString() != "Instance") {
                     mayDestroyPlugins = false;
                     break;
@@ -61,8 +74,11 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
             QMenu contextMenu;
 
             contextMenu.addAction(QString("Destroy %1 plugins").arg(QString::number(selectedRows.count())), [this, selectedRows] {
-                for (const auto& selectedRow : selectedRows)
+                for (const auto& selectedRow : selectedRows) {
                     Application::core()->getPluginManager().destroyPlugin(selectedRow.data(Qt::UserRole + 1).value<plugin::Plugin*>());
+
+                    _model.removeItem(_filterModel.mapToSource(selectedRow));
+                }
             });
 
             contextMenu.exec(QCursor::pos());
