@@ -11,13 +11,14 @@ using namespace hdps::gui;
 
 PluginManagerFilterModel::PluginManagerFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
-    _showOnlyLoadedAction(this, "Show only loaded plugins", false, false)
+    _instantiatedPluginsOnlyAction(this, "Show only instantiated plugins", false, false)
 {
-    _showOnlyLoadedAction.setConnectionPermissionsToNone();
+    _instantiatedPluginsOnlyAction.setConnectionPermissionsToNone();
+    _instantiatedPluginsOnlyAction.setToolTip("Show only instantiated plugins are all available plugins");
 
     setRecursiveFilteringEnabled(true);
 
-    connect(&_showOnlyLoadedAction, &ToggleAction::toggled, this, &PluginManagerFilterModel::invalidate);
+    connect(&_instantiatedPluginsOnlyAction, &ToggleAction::toggled, this, &PluginManagerFilterModel::invalidate);
 }
 
 bool PluginManagerFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -27,7 +28,7 @@ bool PluginManagerFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
     if (!index.isValid())
         return true;
 
-    if (_showOnlyLoadedAction.isChecked()) {
+    if (_instantiatedPluginsOnlyAction.isChecked()) {
         if (!index.parent().isValid()) {
             if (!hasPluginInstances(index))
                 return false;

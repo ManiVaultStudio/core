@@ -23,7 +23,7 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
     _layout.setContentsMargins(0, 0, 0, 0);
 
-    _groupsActionWidget = dynamic_cast<GroupsAction::Widget*>(_groupsAction.createWidget(parent));
+    _groupsActionWidget = dynamic_cast<GroupsAction::Widget*>(_groupsAction.createWidget(this));
 
     _layout.addWidget(_groupsActionWidget);
 

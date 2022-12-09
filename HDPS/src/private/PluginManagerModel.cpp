@@ -46,6 +46,7 @@ void PluginManagerModel::synchronizeWithPluginManager()
         auto pluginTypeRow = new QStandardItem(getPluginTypeIcon(pluginType), QString("%1 plugins").arg(getPluginTypeName(pluginType)));
         
         pluginTypeRow->setEnabled(false);
+        pluginTypeRow->setEditable(false);
 
         appendRow({ pluginTypeRow, new QStandardItem("Type") });
 
@@ -53,6 +54,7 @@ void PluginManagerModel::synchronizeWithPluginManager()
             auto pluginFactoryRow = new QStandardItem(pluginFactory->getIcon(), pluginFactory->getKind());
 
             pluginFactoryRow->setEnabled(false);
+            pluginFactoryRow->setEditable(false);
 
             pluginTypeRow->appendRow({ pluginFactoryRow, new QStandardItem("Factory") });
 
@@ -60,6 +62,7 @@ void PluginManagerModel::synchronizeWithPluginManager()
                 auto pluginRow = new QStandardItem(plugin->getGuiName());
                 
                 pluginRow->setData(QVariant::fromValue(plugin));
+                pluginRow->setEditable(false);
 
                 pluginFactoryRow->appendRow({ pluginRow, new QStandardItem("Instance") });
 

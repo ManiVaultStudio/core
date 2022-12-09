@@ -5,6 +5,8 @@
 
 #include <widgets/HierarchyWidget.h>
 
+#include <actions/TriggerAction.h>
+
 #include <QDialog>
 
 /**
@@ -28,7 +30,7 @@ public:
 
     /** Get preferred size */
     QSize sizeHint() const override {
-        return QSize(800, 600);
+        return QSize(640, 320);
     }
 
     /** Get minimum size hint*/
@@ -40,4 +42,6 @@ protected:
     PluginManagerModel          _model;                 /** Plugin manager model (interfaces with a plugin manager) */
     PluginManagerFilterModel    _filterModel;           /** Sorting and filtering model for the plugin manager model */
     hdps::gui::HierarchyWidget  _hierarchyWidget;       /** Widget for displaying the loaded plugins */
+    hdps::gui::TriggerAction    _okAction;              /** Action for exiting the dialog */
+
 };
