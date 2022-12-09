@@ -1,5 +1,7 @@
 #pragma once
 
+#include <actions/ToggleAction.h>
+
 #include <QSortFilterProxyModel>
 
 /**
@@ -33,4 +35,13 @@ public:
      * @param rhs Right-hand model index
      */
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
+
+public:
+    hdps::gui::ToggleAction& getShowOnlyLoadedAction() { return _showOnlyLoadedAction; }
+
+private:
+    bool hasPluginInstances(const QModelIndex& index, int level = 0) const;
+
+private:
+    hdps::gui::ToggleAction     _showOnlyLoadedAction;      /** Show only loaded plugins */
 };

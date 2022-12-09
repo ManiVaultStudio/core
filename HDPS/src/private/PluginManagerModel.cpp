@@ -9,12 +9,17 @@ using namespace hdps;
     #define PLUGIN_MANAGER_MODEL_VERBOSE
 #endif
 
+Q_DECLARE_METATYPE(hdps::plugin::Plugin*);
+
 PluginManagerModel::PluginManagerModel(QObject* parent /*= nullptr*/) :
     QStandardItemModel(parent)
 {
     initializeFromPluginManager();
 
     setHeaderData(0, Qt::Horizontal, "Name");
+    setHeaderData(1, Qt::Horizontal, "Plugin category");
+
+    setColumnCount(2);
 }
 
 void PluginManagerModel::initializeFromPluginManager()
@@ -35,17 +40,26 @@ void PluginManagerModel::initializeFromPluginManager()
     for (auto pluginType : pluginTypes) {
         auto pluginTypeRow = new QStandardItem(getPluginTypeIcon(pluginType), QString("%1 plugins").arg(getPluginTypeName(pluginType)));
         
-        appendRow(pluginTypeRow);
+        pluginTypeRow->setEnabled(false);
+
+        appendRow({ pluginTypeRow, new QStandardItem("Type") });
 
         for (auto pluginFactory : Application::core()->getPluginManager().getPluginFactoriesByType(pluginType)) {
             auto pluginFactoryRow = new QStandardItem(pluginFactory->getIcon(), pluginFactory->getKind());
 
-            pluginTypeRow->appendRow(pluginFactoryRow);
+            pluginFactoryRow->setEnabled(false);
+
+            pluginTypeRow->appendRow({ pluginFactoryRow, new QStandardItem("Factory") });
 
             for (auto plugin : Application::core()->getPluginManager().getPluginsByFactory(pluginFactory)) {
                 auto pluginRow = new QStandardItem(plugin->getGuiName());
+                
+                pluginRow->setData(QVariant::fromValue(plugin));
 
-                pluginFactoryRow->appendRow(pluginRow);
+                pluginFactoryRow->appendRow({ pluginRow, new QStandardItem("Instance") });
+
+                pluginTypeRow->setEnabled(true);
+                pluginFactoryRow->setEnabled(true);
             }
         }
     }
