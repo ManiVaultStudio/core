@@ -65,9 +65,11 @@ bool ActionsManager::isActionPublic(const WidgetAction* action) const
 
 bool ActionsManager::isActionPublished(const WidgetAction* action) const
 {
-    for (const auto publicAction : _actionsModel._publicActions)
-        if (publicAction->getConnectedActions().first() == action)
+    for (const auto publicAction : _actionsModel._publicActions) {
+        const auto connectedActions = publicAction->getConnectedActions();
+        if (!connectedActions.isEmpty() && connectedActions.first() == action)
             return true;
+    }
 
     return false;
 }
