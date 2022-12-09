@@ -96,6 +96,11 @@ public:
      * @param title Title of the action
      */
     TriggerAction(QObject* parent, const QString& title = "");
+
+private:
+
+    /** Invoked when this trigger action is triggered (needed to prevent circular calls of trigger()) */
+    void selfTriggered();
 };
 
 }
