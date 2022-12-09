@@ -3,7 +3,9 @@
 #include "clusterdata_export.h"
 
 #include "Cluster.h"
-#include "event/EventListener.h"
+
+#include <event/EventListener.h>
+#include <Application.h>
 
 #include <RawData.h>
 #include <Set.h>

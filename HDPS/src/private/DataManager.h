@@ -33,7 +33,7 @@ namespace plugin {
     class RawData;
 }
 
-class DataManager : public hdps::AbstractDataManager
+class DataManager final : public hdps::AbstractDataManager
 {
     Q_OBJECT
 
@@ -43,12 +43,12 @@ public:
      * Constructor
      * @param core Pointer to the core
      */
-    DataManager() :
-        AbstractDataManager()
-    {
-        setText("Data manager");
-        setObjectName("Datasets");
-    }
+    DataManager();
+
+    ~DataManager();
+
+    /** Resets the contents of the data manager */
+    void reset() override;
 
     /**
      * Add raw data to the data manager

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "AbstractManager.h"
+#include "Plugin.h"
+#include "PluginFactory.h"
 
 #include "actions/PluginTriggerAction.h"
 
@@ -21,13 +23,6 @@ class AbstractPluginManager : public AbstractManager
     Q_OBJECT
 
 public:
-
-    /** Aliases */
-    using UniquePtrPlugin   = std::unique_ptr<plugin::Plugin>;
-    using UniquePtrsPlugin  = std::vector<UniquePtrPlugin>;
-    using PluginPtrs        = std::vector<plugin::Plugin*>;
-
-public:
     
     /** Loads all plugin factories from the plugin directory and adds them as menu items */
     virtual void loadPlugins() = 0;
@@ -46,6 +41,12 @@ public:
     * @return Pointer to created plugin
     */
     virtual plugin::Plugin* createPlugin(const QString& kind, const Datasets& datasets = Datasets()) = 0;
+
+    /**
+     * Destroy \p plugin
+     * @param plugin Pointer to the plugin that is to be destroyed
+     */
+    virtual void destroyPlugin(plugin::Plugin* plugin) = 0;
     
     /**
      * Create a plugin of \p kind
@@ -59,11 +60,39 @@ public:
     }
 
     /**
+     * Get plugin factories for \p pluginType
+     * @param pluginType Plugin type
+     * @return Vector of pointers to plugin factories
+     */
+    virtual plugin::PluginFactoryPtrs getPluginFactoriesByType(const plugin::Type& pluginType) const = 0;
+
+    /**
+     * Get plugin factories for \p pluginTypes (by default it gets all plugins factories for all types)
+     * @param pluginTypes Plugin types
+     * @return Vector of pointers to plugin factories of \p pluginTypes
+     */
+    virtual plugin::PluginFactoryPtrs getPluginFactoriesByTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const = 0;
+
+    /**
+     * Get plugin instances for \p pluginFactory
+     * @param pluginFactory Pointer to plugin factory
+     * @return Vector of pointers to plugin instances
+     */
+    virtual plugin::PluginPtrs getPluginsByFactory(const plugin::PluginFactory* pluginFactory) const = 0;
+
+    /**
      * Get plugin instances for \p pluginType
      * @param pluginType Plugin type
      * @return Vector of pointers to plugin instances
      */
-    virtual PluginPtrs getPluginsByType(const plugin::Type& pluginType) const = 0;
+    virtual plugin::PluginPtrs getPluginsByType(const plugin::Type& pluginType) const = 0;
+
+    /**
+     * Get plugin instances for \p pluginTypes (by default it gets all plugins for all types)
+     * @param pluginTypes Plugin types
+     * @return Vector of pointers to plugin instances of \p pluginTypes
+     */
+    virtual plugin::PluginPtrs getPluginsByTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const = 0;
 
     /**
      * Get plugin kinds by plugin type(s)
@@ -119,13 +148,6 @@ public:
     virtual QString getPluginGuiName(const QString& pluginKind) const = 0;
 
     /**
-     * Get a list of plugin kinds (names) given a plugin type
-     * @param pluginType Type of plugin e.g. analysis, exporter
-     * @return List of compatible plugin kinds that can handle the data type
-     */
-    virtual QStringList requestPluginKindsByPluginType(const plugin::Type& pluginType) = 0;
-
-    /**
      * Get plugin icon from plugin kind
      * @param pluginKind Kind of plugin
      * @return Plugin icon name of the plugin, null icon if the plugin kind was not found
@@ -153,22 +175,22 @@ protected:
 signals:
 
     /**
-     * Signals that a plugin factory was loaded
-     * @param pluginFactory Pointer to plugin factory that was loaded
-     */
-    void pluginFactoryLoaded(plugin::PluginFactory* pluginFactory);
-
-    /**
      * Signals that \p plugin instance is added to the plugin manager
      * @param plugin Pointer to the plugin that was added
      */
     void pluginAdded(plugin::Plugin* plugin);
 
     /**
-     * Signals that \p plugin instance is about to be removed from the plugin manager
-     * @param plugin Pointer to the plugin that is about to be removed
+     * Signals that \p plugin is about to be destroyed by the plugin manager
+     * @param plugin Pointer to the plugin that is about to be destroyed
      */
-    void pluginAboutToBeRemoved(plugin::Plugin* plugin);
+    void pluginAboutToBeDestroyed(plugin::Plugin* plugin);
+
+    /**
+     * Signals that plugin with \p id is destroyed by the plugin manager
+     * @param id Globally unique ID of the destroyed plugin
+     */
+    void pluginDestroyed(const QString& id);
 
     friend class gui::PluginTriggerAction;
 };

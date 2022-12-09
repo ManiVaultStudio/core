@@ -324,11 +324,11 @@ void ProjectBarWidget::ImportDataWidget::createContainerWidget()
     _containerWidget.setAutoFillBackground(true);
     _containerLayout.setContentsMargins(0, 0, 0, 0);
 
-    const auto loaderPluginKinds = Application::core()->getPluginKindsByPluginTypes({ plugin::Type::LOADER });
+    const auto loaderPluginKinds = Application::core()->getPluginManager().getPluginKindsByPluginTypes({ plugin::Type::LOADER });
 
     for (const auto& pluginKind : loaderPluginKinds) {
 
-        const auto title        = Application::core()->getPluginGuiName(pluginKind);
+        const auto title        = Application::core()->getPluginManager().getPluginGuiName(pluginKind);
         const auto description  = "Import data";
         const auto tooltip      = "Import data into HDPS with the " + pluginKind;
 

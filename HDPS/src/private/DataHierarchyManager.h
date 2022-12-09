@@ -13,7 +13,7 @@ using namespace hdps::gui;
 namespace hdps
 {
 
-class DataHierarchyManager : public AbstractDataHierarchyManager
+class DataHierarchyManager final : public AbstractDataHierarchyManager
 {
 public:
 
@@ -22,6 +22,11 @@ public:
      * @param parent Pointer to parent object
      */
     DataHierarchyManager(QObject* parent = nullptr);
+
+    ~DataHierarchyManager() override;
+
+    /** Resets the contents of the data hierarchy manager */
+    void reset() override;
 
     /**
      * Add a dataset to the hierarchy

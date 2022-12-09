@@ -3,6 +3,7 @@
 #include "ViewMenu.h"
 #include "LoadSystemViewMenu.h"
 
+#include <Application.h>
 #include <util/Serialization.h>
 
 #include <DockComponentsFactory.h>
@@ -107,7 +108,6 @@ LayoutManager::LayoutManager() :
     _initialized(false),
     _cachedDockWidgetsVisibility()
 {
-    setText("Layout manager");
     setObjectName("LayoutManager");
 
     ads::CDockComponentsFactory::setFactory(new CustomComponentsFactory());
@@ -115,6 +115,14 @@ LayoutManager::LayoutManager() :
 
 LayoutManager::~LayoutManager()
 {
+    reset();
+} 
+
+void LayoutManager::reset()
+{
+#ifdef LAYOUT_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 }
 
 void LayoutManager::initialize(QMainWindow* mainWindow)
@@ -136,11 +144,19 @@ void LayoutManager::initialize(QMainWindow* mainWindow)
 
     //viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
-    _initialized = true;
-}
+    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
+        const auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
 
-void LayoutManager::reset()
-{
+        if (!viewPlugin)
+            return;
+
+        if (viewPlugin->isSystemViewPlugin())
+            _dockManager->removeViewPluginDockWidget(viewPlugin);
+        else
+            _viewPluginsWidget->getDockManager().removeViewPluginDockWidget(viewPlugin);
+    });
+
+    _initialized = true;
 }
 
 void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
@@ -176,7 +192,7 @@ void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPl
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
     if (viewPlugin->isSystemViewPlugin())
-        _dockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _dockManager->findDockAreaWidget(&dockToViewPlugin->getWidget()));
+        _dockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _dockManager->findDockAreaWidget(dockToViewPlugin ? &dockToViewPlugin->getWidget() : nullptr));
     else
         _viewPluginsWidget->addViewPlugin(viewPluginDockWidget, dockToViewPlugin, dockArea);
 }

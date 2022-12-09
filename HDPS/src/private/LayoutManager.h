@@ -42,14 +42,14 @@ public:
     /** Default destructor */
     ~LayoutManager() override;
 
+    /** Resets the contents of the layout manager */
+    void reset() override;
+
     /**
      * Initializes the layout manager to work with the main window
      * @param mainWindow Pointer to main window to apply the layout manager to
      */
     void initialize(QMainWindow* mainWindow) override;
-
-    /** Resets the layout to defaults */
-    void reset() override;
 
     /**
      * Add a view plugin to the \p dockArea of \p dockViewPlugin
@@ -80,12 +80,12 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-    /** Get all view plugin dock widgets, both from the main ánd the view plugins dock widget dock managers */
+    /** Get all view plugin dock widgets, both from the main and the view plugins dock widget dock managers */
     ViewPluginDockWidgets getViewPluginDockWidgets();
 
 private:
     QPointer<DockManager>               _dockManager;                   /** Main dock manager for docking system plugins */
-    QPointer<ViewPluginsDockWidget>     _viewPluginsWidget;         /** Pointer to view plugins widget in which non-system view plugins are docked */
+    QPointer<ViewPluginsDockWidget>     _viewPluginsWidget;             /** Pointer to view plugins widget in which non-system view plugins are docked */
     bool                                _initialized;                   /** Whether the layout manager is initialized or not */
     QMap<DockWidget*, bool>             _cachedDockWidgetsVisibility;   /** Cached dock widgets visibility for view plugin isolation */
 };

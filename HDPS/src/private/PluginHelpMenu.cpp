@@ -27,7 +27,7 @@ void PluginHelpMenu::showEvent(QShowEvent* showEvent)
 
     QVector<QPointer<TriggerAction>> actions;
 
-    const auto plugins = Application::core()->getPluginsByType({ Type::ANALYSIS, Type::DATA, Type::LOADER, Type::WRITER, Type::TRANSFORMATION, Type::VIEW });
+    const auto plugins = Application::core()->getPluginManager().getPluginsByTypes({ Type::ANALYSIS, Type::DATA, Type::LOADER, Type::WRITER, Type::TRANSFORMATION, Type::VIEW });
 
     for (auto plugin : plugins)
         actions << &plugin->getTriggerHelpAction();

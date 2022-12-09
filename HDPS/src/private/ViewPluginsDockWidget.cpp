@@ -90,6 +90,9 @@ std::int32_t ViewPluginsDockWidget::getNumberOfOpenViewPluginDockWidgets() const
 
 ads::CDockAreaWidget* ViewPluginsDockWidget::findDockAreaWidget(ViewPlugin* viewPlugin)
 {
+    if (viewPlugin == nullptr)
+        return nullptr;
+
     return _dockManager.findDockAreaWidget(&viewPlugin->getWidget());
 }
 

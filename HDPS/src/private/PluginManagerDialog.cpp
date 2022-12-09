@@ -31,4 +31,5 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
     setLayout(layout);
 
     _hierarchyWidget.setWindowIcon(pluginIcon);
+    _hierarchyWidget.getTreeView().setRootIsDecorated(true);
 }

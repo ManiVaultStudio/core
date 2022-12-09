@@ -1,5 +1,5 @@
 #include "FileMenu.h"
-#include "LoadedPluginsDialog.h"
+#include "PluginManagerDialog.h"
 
 #include <Application.h>
 
@@ -14,7 +14,7 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     _recentProjectsMenu(this),
     _resetMenu(this),
     _importDataMenu(this),
-    _viewLoadedPluginsAction(this, "View plugins"),
+    _pluginManagerAction(this, "Plugin manager"),
     _publishAction(this, "Publish"),
     _exitAction(this, "Exit")
 {
@@ -27,10 +27,18 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     addSeparator();
     addMenu(&_recentProjectsMenu);
     addSeparator();
-    addMenu(&_resetMenu);
+
+#ifdef _DEBUG
+    addSeparator();
+    {
+        addMenu(&_resetMenu);
+    }
+    addSeparator();
+#endif
+    
     addMenu(&_importDataMenu);
     addSeparator();
-    addAction(&_viewLoadedPluginsAction);
+    addAction(&_pluginManagerAction);
     addAction(&_publishAction);
     addAction(&_exitAction);
 
@@ -45,8 +53,8 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
 
     _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
     
-    _viewLoadedPluginsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
-    _viewLoadedPluginsAction.setToolTip("View loaded plugins");
+    _pluginManagerAction.setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+    _pluginManagerAction.setToolTip("View loaded plugins");
 
     _publishAction.setIcon(Application::getIconFont("FontAwesome").getIcon("share"));
     _publishAction.setToolTip("Publish the HDPS application");
@@ -87,7 +95,7 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     //    }
     //});
 
-    connect(&_viewLoadedPluginsAction, &TriggerAction::triggered, this, [this]() -> void {
+    connect(&_pluginManagerAction, &TriggerAction::triggered, this, [this]() -> void {
         PluginManagerDialog loadedPluginsDialog;
         loadedPluginsDialog.exec();
     });
@@ -102,7 +110,7 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
 
         _saveProjectAction.setEnabled(!Application::current()->getCurrentProjectFilePath().isEmpty());
         _saveProjectAsAction.setEnabled(hasDatasets);
-        _resetMenu.setEnabled(hasDatasets);
+        //_resetMenu.setEnabled(hasDatasets);
 
         _recentProjectsMenu.updateActions();
 

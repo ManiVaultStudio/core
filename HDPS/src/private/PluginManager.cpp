@@ -23,7 +23,9 @@
 #include <stdexcept>
 #include <assert.h>
 
-
+#ifdef _DEBUG
+    #define PLUGIN_MANAGER_VERBOSE
+#endif
 
 namespace hdps {
 
@@ -33,12 +35,24 @@ using namespace plugin;
 PluginManager::PluginManager() :
     AbstractPluginManager()
 {
-    setText("Plugin manager");
     setObjectName("Plugins");
 }
 
 PluginManager::~PluginManager(void)
 {
+    reset();
+}
+
+void PluginManager::reset()
+{
+#ifdef PLUGIN_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    for (auto& pluginPtr : _plugins)
+        destroyPlugin(pluginPtr);
+
+    _plugins.clear();
 }
 
 void PluginManager::loadPlugins()
@@ -113,8 +127,6 @@ void PluginManager::loadPlugins()
             qDebug() << "Plugin " << fileName << " does not implement any of the possible interfaces!";
             return;
         }
-
-        emit pluginFactoryLoaded(_pluginFactories[pluginKind]);
     }
 }
 
@@ -272,6 +284,8 @@ plugin::Plugin* PluginManager::createPlugin(const QString& kind, const Datasets&
 
         qDebug() << "Added plugin" << pluginInstance->getKind() << "with version" << pluginInstance->getVersion();
 
+        _plugins << pluginInstance;
+
         emit pluginAdded(pluginInstance);
 
         return pluginInstance;
@@ -284,18 +298,95 @@ plugin::Plugin* PluginManager::createPlugin(const QString& kind, const Datasets&
     }
 }
 
-AbstractPluginManager::PluginPtrs PluginManager::getPluginsByType(const plugin::Type& pluginType) const
+void PluginManager::destroyPlugin(plugin::Plugin* plugin)
 {
-    AbstractPluginManager::PluginPtrs plugins;
+    Q_ASSERT(plugin != nullptr);
 
-    //QVector<hdps::plugin::Plugin*> plugins;
+#ifdef PLUGIN_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << plugin->getGuiName();
+#endif
 
-    //for (auto pluginType : pluginTypes)
-    //    for (auto& plugin : const_cast<Core*>(this)->_plugins[pluginType])
-    //        plugins << plugin.get();
+    try
+    {
+        const auto pluginId = plugin->getId();
 
-    //return plugins;
+        emit pluginAboutToBeDestroyed(plugin);
+        {
+            auto pluginFactory = _pluginFactories[plugin->getKind()];
 
+            pluginFactory->setNumberOfInstances(pluginFactory->getNumberOfInstances() - 1);
+
+            delete plugin;
+
+            _plugins.removeOne(plugin);
+        }
+        emit pluginDestroyed(pluginId);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to destroy plugin", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to destroy plugin");
+    }
+}
+
+PluginFactoryPtrs PluginManager::getPluginFactoriesByType(const plugin::Type& pluginType) const
+{
+    PluginFactoryPtrs pluginFactories;
+
+    for (auto pluginFactory : _pluginFactories)
+        if (pluginFactory->getType() == pluginType)
+            pluginFactories.push_back(pluginFactory);
+
+    return pluginFactories;
+}
+
+PluginFactoryPtrs PluginManager::getPluginFactoriesByTypes(const plugin::Types& pluginTypes /*= plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }*/) const
+{
+    PluginFactoryPtrs pluginFactories;
+
+    for (auto pluginType : pluginTypes) {
+        const auto pluginFactoriesForType = getPluginFactoriesByType(pluginType);
+
+        pluginFactories.insert(pluginFactories.end(), pluginFactoriesForType.begin(), pluginFactoriesForType.end());
+    }
+
+    return pluginFactories;
+}
+
+PluginPtrs PluginManager::getPluginsByFactory(const plugin::PluginFactory* pluginFactory) const
+{
+    PluginPtrs plugins;
+
+    for (auto& plugin : getPluginsByTypes())
+        if (pluginFactory == plugin->getFactory())
+            plugins.push_back(plugin);
+
+    return plugins;
+}
+
+PluginPtrs PluginManager::getPluginsByType(const plugin::Type& pluginType) const
+{
+    PluginPtrs plugins;
+
+    for (auto& plugin : const_cast<PluginManager*>(this)->_plugins)
+        if (pluginType == plugin->getType())
+            plugins.push_back(plugin);
+
+    return plugins;
+}
+
+PluginPtrs PluginManager::getPluginsByTypes(const plugin::Types& pluginTypes /*= plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }*/) const
+{
+    PluginPtrs plugins;
+
+    for (auto pluginType : pluginTypes) {
+        const auto pluginsForType = getPluginsByType(pluginType);
+
+        plugins.insert(plugins.end(), pluginsForType.begin(), pluginsForType.end());
+    }
+        
     return plugins;
 }
 
@@ -382,22 +473,6 @@ QString PluginManager::getPluginGuiName(const QString& pluginKind) const
         return "";
 
     return _pluginFactories[pluginKind]->getGuiName();
-}
-
-QStringList PluginManager::requestPluginKindsByPluginType(const plugin::Type& pluginType)
-{
-    QStringList pluginKinds;
-
-    for (auto pluginFactory : _pluginFactories) {
-        if (pluginFactory->getType() != pluginType)
-            continue;
-
-        pluginKinds << pluginFactory->getKind();
-    }
-
-    pluginKinds.sort();
-
-    return pluginKinds;
 }
 
 QIcon PluginManager::getPluginIcon(const QString& pluginKind) const

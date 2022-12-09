@@ -51,7 +51,7 @@ public:
      */
     Dataset<DatasetImpl> copy() const override
     {
-        auto colors = new Colors(Application::core(), getRawDataName());
+        auto colors = new Colors(_core, getRawDataName());
         colors->setGuiName(getGuiName());
         colors->indices = indices;
 
@@ -66,7 +66,7 @@ public:
      * @return Smart pointer to the created subset
      */
     Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const override {
-        return Application::core()->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
+        return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
 
     /**

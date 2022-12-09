@@ -7,7 +7,7 @@ namespace hdps {
 
 using namespace plugin;
 
-class PluginManager : public AbstractPluginManager
+class PluginManager final : public AbstractPluginManager
 {
 public:
 
@@ -17,6 +17,9 @@ public:
     /** Default destructor */
     ~PluginManager() override;
     
+    /** Resets the contents of the plugin manager */
+    void reset() override;
+
     /** Loads all plugin factories from the plugin directory and adds them as menu items */
     void loadPlugins();
 
@@ -47,11 +50,45 @@ public:
     }
 
     /**
-     * Get plugin instances for \p pluginType
+     * Destroy \p plugin
+     * @param plugin Pointer to the plugin that is to be destroyed
+     */
+    void destroyPlugin(plugin::Plugin* plugin) override;
+
+    /**
+     * Get plugin factories for \p pluginType
+     * @param pluginType Plugin type
+     * @return Vector of pointers to plugin factories
+     */
+    PluginFactoryPtrs getPluginFactoriesByType(const plugin::Type& pluginType) const override;
+
+    /**
+     * Get plugin factories for \p pluginTypes (by default it gets all plugins factories for all types)
+     * @param pluginTypes Plugin types
+     * @return Vector of pointers to plugin factories of \p pluginTypes
+     */
+    PluginFactoryPtrs getPluginFactoriesByTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const override;
+
+    /**
+     * Get plugin instances for \p pluginFactory
+     * @param pluginFactory Pointer to plugin factory
+     * @return Vector of pointers to plugin instances
+     */
+    PluginPtrs getPluginsByFactory(const plugin::PluginFactory* pluginFactory) const override;
+
+    /**
+     * Get plugin instances for \p pluginType (by default it gets all plugins for all types)
      * @param pluginType Plugin type
      * @return Vector of pointers to plugin instances
      */
     PluginPtrs getPluginsByType(const plugin::Type& pluginType) const override;
+
+    /**
+     * Get plugin instances for \p pluginTypes
+     * @param pluginTypes Plugin types
+     * @return Vector of pointers to plugin instances of \p pluginTypes
+     */
+    PluginPtrs getPluginsByTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const override;
 
     /**
      * Get plugin kinds by plugin type(s)
@@ -107,13 +144,6 @@ public:
     QString getPluginGuiName(const QString& pluginKind) const;
 
     /**
-     * Get a list of plugin kinds (names) given a plugin type
-     * @param pluginType Type of plugin e.g. analysis, exporter
-     * @return List of compatible plugin kinds that can handle the data type
-     */
-    QStringList requestPluginKindsByPluginType(const plugin::Type& pluginType);
-
-    /**
      * Get plugin icon from plugin kind
      * @param pluginKind Kind of plugin
      * @return Plugin icon name of the plugin, null icon the plugin kind was not found
@@ -153,8 +183,8 @@ protected:
     QStringList resolveDependencies(QDir pluginDir) const;
 
 private:
-    QHash<QString, PluginFactory*>                                          _pluginFactories;
-    std::unordered_map<plugin::Type, UniquePtrsPlugin, plugin::TypeHash>    _plugins;                   /** List of plugin instances currently present in the application. Instances are stored by type. */
+    QHash<QString, PluginFactory*>  _pluginFactories;   /**  */
+    QList<plugin::Plugin*>          _plugins;           /** List of plugin instances currently present in the application. Instances are stored by type. */
 };
 
 }

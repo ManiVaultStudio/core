@@ -11,8 +11,18 @@
 
 using namespace hdps::util;
 
+#ifdef _DEBUG
+    #define DATA_MANAGER_VERBOSE
+#endif
+
 namespace hdps
 {
+
+	DataManager::DataManager() :
+		AbstractDataManager()
+	{
+		setObjectName("Datasets");
+	}
 
 void DataManager::addRawData(plugin::RawData* rawData)
 {
@@ -169,6 +179,18 @@ QVariantMap DataManager::toVariantMap() const
         variantMap[dataset->getGuid()] = dataset->toVariantMap();
 
     return variantMap;
+}
+
+void DataManager::reset()
+{
+#ifdef DATA_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+}
+
+DataManager::~DataManager()
+{
+    reset();
 }
 
 } // namespace hdps

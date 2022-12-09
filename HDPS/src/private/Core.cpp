@@ -34,9 +34,6 @@ Core::Core() :
     _actionsManager(),
     _eventListeners()
 {
-    setText("HDPS Application");
-    setObjectName("HDPS Application");
-
     _datasetGroupingEnabled = Application::current()->getSetting("Core/DatasetGroupingEnabled", false).toBool();
 }
 
@@ -47,8 +44,6 @@ Core::~Core()
 
     // Delete the plugin manager
     _pluginManager.reset();
-
-    destroyPlugins();
 }
 
 void Core::init()
@@ -69,16 +64,8 @@ void Core::addPlugin(plugin::Plugin* plugin)
 
         case plugin::Type::VIEW:
             break;
-
-        // Otherwise add the plugin to a list of plug-ins of the same type
-        default:
-        {
-            _plugins[plugin->getType()].push_back(std::unique_ptr<plugin::Plugin>(plugin));
-        }
     }
 
-    _plugins[plugin->getType()].push_back(std::unique_ptr<plugin::Plugin>(plugin));
-    
     // Initialize the plugin after it has been added to the core
     plugin->init();
 
@@ -761,18 +748,6 @@ void Core::notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset)
     }
     catch (...) {
         exceptionMessageBox("Unable to notify that a data was unlocked");
-    }
-}
-
-/** Destroys all plug-ins kept by the core */
-void Core::destroyPlugins()
-{
-    for (auto& kv : _plugins)
-    {
-        for (int i = 0; i < kv.second.size(); ++i)
-        {
-            kv.second[i].reset();
-        }
     }
 }
 

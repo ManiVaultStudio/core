@@ -16,9 +16,6 @@ class AbstractDataHierarchyManager : public AbstractManager
 
 public:
 
-    /** Resets the contents of the data hierarchy manager */
-    //virtual void reset() = 0;
-
     /**
      * Add a dataset to the hierarchy
      * @param dataset Smart pointer to dataset

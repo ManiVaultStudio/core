@@ -32,6 +32,11 @@ Plugin::~Plugin()
 {
 }
 
+const hdps::plugin::PluginFactory* Plugin::getFactory() const
+{
+    return _factory;
+}
+
 QString Plugin::getName() const
 {
     return _name;

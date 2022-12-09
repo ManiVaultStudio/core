@@ -75,6 +75,25 @@ ads::CDockAreaWidget* DockManager::findDockAreaWidget(QWidget* widget)
     return nullptr;
 }
 
+void DockManager::removeViewPluginDockWidget(ViewPlugin* viewPlugin)
+{
+#ifdef DOCK_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << viewPlugin->getGuiName();
+#endif
+
+    Q_ASSERT(viewPlugin != nullptr);
+
+    for (auto dockWidget : dockWidgets()) {
+        auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget);
+
+        if (viewPluginDockWidget == nullptr)
+            continue;
+
+        if (viewPlugin == viewPluginDockWidget->getViewPlugin())
+            removeDockWidget(viewPluginDockWidget);
+    }
+}
+
 void DockManager::fromVariantMap(const QVariantMap& variantMap)
 {
 #ifdef DOCK_MANAGER_VERBOSE

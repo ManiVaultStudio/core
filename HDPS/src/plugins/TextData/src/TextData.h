@@ -50,7 +50,7 @@ public:
 
     Dataset<DatasetImpl> copy() const override
     {
-        auto text = new Text(Application::core(), getRawDataName());
+        auto text = new Text(_core, getRawDataName());
         text->setGuiName(getGuiName());
         text->indices = indices;
         
@@ -66,7 +66,7 @@ public:
      */
     Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const override
     {
-        return Application::core()->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
+        return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
 
     /**

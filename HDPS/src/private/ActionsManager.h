@@ -9,7 +9,7 @@ namespace hdps
 
 using namespace gui;
 
-class ActionsManager : public AbstractActionsManager
+class ActionsManager final : public AbstractActionsManager
 {
     Q_OBJECT
 
@@ -20,6 +20,9 @@ public:
 
     /** Default destructor */
     ~ActionsManager() override;
+
+    /** Resets the contents of the actions manager */
+    void reset() override;
 
     /**
      * Add action to the model

@@ -205,6 +205,8 @@ private:
     gui::TriggerAction          _triggerHelpAction;             /** Trigger action that triggers help (icon and text are already set) */
 };
 
+using PluginFactoryPtrs = std::vector<plugin::PluginFactory*>;
+
 } // namespace plugin
 
 } // namespace hdps

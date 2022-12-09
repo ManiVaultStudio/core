@@ -1,5 +1,7 @@
 #include "PublicActionsPlugin.h"
 
+#include <Application.h>
+
 Q_PLUGIN_METADATA(IID "nl.BioVault.PublicActionsPlugin")
 
 using namespace hdps;

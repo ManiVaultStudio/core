@@ -10,8 +10,6 @@
 #include <QString>
 #include <QMap>
 #include <QVariant>
-#include <QUuid>
-#include <QVariant>
 #include <QIcon>
 
 class QMenu;
@@ -33,6 +31,12 @@ public:
      * This function gets called when the plugin is first instantiated.
      */
     virtual void init() = 0;
+
+    /**
+     * Get the plugin factory for the plugin
+     * @return Pointer to plugin factory
+     */
+    virtual const PluginFactory* getFactory() const final;
 
     /** Returns the unique name of this plugin */
     QString getName() const;
@@ -160,6 +164,9 @@ protected:
 };
 
 using Plugins = QVector<QPointer<plugin::Plugin*>>;
+using UniquePtrPlugin = std::unique_ptr<plugin::Plugin>;
+using UniquePtrsPlugin = std::vector<UniquePtrPlugin>;
+using PluginPtrs = std::vector<plugin::Plugin*>;
 
 }
 

@@ -2,12 +2,17 @@
 #include "DataManager.h"
 
 #include <util/Exception.h>
+#include <Application.h>
 
 #include <QMessageBox>
 
 #include <stdexcept>
 
 using namespace hdps::util;
+
+#ifdef _DEBUG
+    #define DATA_HIERARCHY_MANAGER_VERBOSE
+#endif
 
 namespace hdps
 {
@@ -16,8 +21,12 @@ DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
     AbstractDataHierarchyManager(),
     _items()
 {
-    setText("Data hierarchy");
     setObjectName("Hierarchy");
+}
+
+DataHierarchyManager::~DataHierarchyManager()
+{
+    reset();
 }
 
 void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/)
@@ -236,6 +245,13 @@ QVariantMap DataHierarchyManager::toVariantMap() const
     }
 
     return variantMap;
+}
+
+void DataHierarchyManager::reset()
+{
+#ifdef DATA_HIERARCHY_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 }
 
 }

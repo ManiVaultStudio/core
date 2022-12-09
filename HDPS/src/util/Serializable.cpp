@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QJsonArray>
+#include <QUuid>
 
 #ifdef _DEBUG
     #define SERIALIZABLE_VERBOSE
@@ -19,8 +20,14 @@ namespace hdps {
 namespace util {
 
 Serializable::Serializable(const QString& name /*= ""*/) :
+    _id(QUuid::createUuid().toString()),
     _name(name)
 {
+}
+
+QString Serializable::getId() const
+{
+    return _id;
 }
 
 QString Serializable::getSerializationName() const

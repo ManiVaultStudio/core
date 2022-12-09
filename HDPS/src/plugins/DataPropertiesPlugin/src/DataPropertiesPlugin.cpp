@@ -1,5 +1,6 @@
 #include "DataPropertiesPlugin.h"
 
+#include <Application.h>
 #include <AbstractDataHierarchyManager.h>
 
 Q_PLUGIN_METADATA(IID "nl.BioVault.DataPropertiesPlugin")

@@ -54,6 +54,12 @@ public:
      */
     ads::CDockAreaWidget* findDockAreaWidget(QWidget* widget);
 
+    /**
+     * Remove \p viewPlugin from the dock manager
+     * @param viewPlugin Pointer to the view plugin to remove
+     */
+    void removeViewPluginDockWidget(hdps::plugin::ViewPlugin * viewPlugin);
+
 public: // Serialization
 
     /**

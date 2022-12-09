@@ -33,9 +33,6 @@ class AbstractDataManager : public AbstractManager
 
 public:
 
-    /** Resets the contents of the data manager */
-    virtual void reset() = 0;
-
     /**
      * Add raw data to the data manager
      * @param rawData Pointer to the raw data

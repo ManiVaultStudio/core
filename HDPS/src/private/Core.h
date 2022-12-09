@@ -245,11 +245,6 @@ public:
     /** Adds the given plugin to the list of plugins kept by the core */
     void addPlugin(plugin::Plugin* plugin);
 
-private:
-
-    /** Destroys all plug-ins kept by the core */
-    void destroyPlugins();
-
 public: // Serialization
 
     /**

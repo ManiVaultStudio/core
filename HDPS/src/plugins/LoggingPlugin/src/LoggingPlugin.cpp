@@ -1,5 +1,7 @@
 #include "LoggingPlugin.h"
 
+#include <Application.h>
+
 #include <QVBoxLayout>
 
 Q_PLUGIN_METADATA(IID "nl.BioVault.LoggingPlugin")

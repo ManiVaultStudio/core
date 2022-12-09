@@ -487,7 +487,7 @@ protected:
     template <class DataType>
     DataType& getRawData() const {
         if (_rawData == nullptr)
-            _rawData = &dynamic_cast<DataType&>(Application::core()->requestRawData(getRawDataName()));
+            _rawData = &dynamic_cast<DataType&>(_core->requestRawData(getRawDataName()));
 
         return *static_cast<DataType*>(_rawData);
     }

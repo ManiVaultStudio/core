@@ -1,5 +1,7 @@
 #include "DataHierarchyPlugin.h"
 
+#include <Application.h>
+
 Q_PLUGIN_METADATA(IID "nl.BioVault.DataHierarchyPlugin")
 
 using namespace hdps;

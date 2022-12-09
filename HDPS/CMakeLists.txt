@@ -606,6 +606,7 @@ set(PUBLIC_PLUGIN_HEADERS
 
 set(PUBLIC_PLUGIN_SOURCES
     src/Plugin.cpp
+    src/PluginType.cpp
     src/PluginFactory.cpp
     src/LoaderPlugin.cpp
     src/WriterPlugin.cpp

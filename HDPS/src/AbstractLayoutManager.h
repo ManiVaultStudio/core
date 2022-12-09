@@ -15,9 +15,6 @@ class AbstractLayoutManager : public AbstractManager
 
 public:
 
-    /** Resets the contents of the layout manager */
-    virtual void reset() = 0;
-
     /**
      * Initializes the layout manager to work with the main window
      * @param mainWindow Pointer to main window to apply the layout manager to

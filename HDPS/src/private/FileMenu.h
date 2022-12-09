@@ -32,7 +32,7 @@ private:
     RecentProjectsMenu          _recentProjectsMenu;        /** Menu for loading recent projects */
     ResetMenu                   _resetMenu;                 /** Menu for resetting the project (or parts of it) */
     ImportDataMenu              _importDataMenu;            /** Menu for importing data */
-    hdps::gui::TriggerAction    _viewLoadedPluginsAction;   /** Action for showing the loaded plugins dialog */
+    hdps::gui::TriggerAction    _pluginManagerAction;   /** Action for showing the loaded plugins dialog */
     hdps::gui::TriggerAction    _publishAction;             /** Action for publishing the project to an end-user */
     hdps::gui::TriggerAction    _exitAction;                /** Action for exiting the application */
 };

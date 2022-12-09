@@ -7,6 +7,10 @@
 using namespace hdps::gui;
 using namespace hdps::util;
 
+#ifdef _DEBUG
+    #define ACTIONS_MANAGER_VERBOSE
+#endif
+
 namespace hdps
 {
 
@@ -14,12 +18,12 @@ ActionsManager::ActionsManager() :
     AbstractActionsManager(),
     _model()
 {
-    setText("Actions manager");
     setObjectName("Actions");
 }
 
 ActionsManager::~ActionsManager()
 {
+    reset();
 }
 
 void ActionsManager::addAction(WidgetAction* action)
@@ -86,6 +90,13 @@ bool ActionsManager::isActionConnected(const WidgetAction* action) const
             return true;
 
     return false;
+}
+
+void ActionsManager::reset()
+{
+#ifdef ACTIONS_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 }
 
 }

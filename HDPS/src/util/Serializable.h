@@ -23,6 +23,12 @@ public:
     Serializable(const QString& name = "");
 
     /**
+     * Get id
+     * @return Globally unique identifier of the serializable object
+     */
+    virtual QString getId() const;
+
+    /**
      * Get serialization name
      * @return Serialization name
      */
@@ -81,6 +87,7 @@ protected:
     static QVariantMap toVariantMap(const Serializable* serializable);
 
 private:
+    QString     _id;        /** Globally unique identifier of the serializable object */
     QString     _name;      /** Serialization name */
 };
 

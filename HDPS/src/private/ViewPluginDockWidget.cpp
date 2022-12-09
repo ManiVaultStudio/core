@@ -1,5 +1,7 @@
 #include "ViewPluginDockWidget.h"
 
+#include <Application.h>
+
 #include <actions/WidgetAction.h>
 
 #include <ViewPlugin.h>
@@ -25,7 +27,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
     _settingsMenu(),
     _helpAction(this, "Help")
 {
-    //setFeature(CDockWidget::DockWidgetDeleteOnClose, true);
+    setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
 
     _helpAction.setIcon(Application::getIconFont("FontAwesome").getIcon("question"));
     _helpAction.setShortcut(tr("F1"));
@@ -72,7 +74,7 @@ void ViewPluginDockWidget::loadViewPlugin()
     qDebug() << __FUNCTION__;
 #endif
 
-    if (Application::core()->isPluginLoaded(_viewPluginKind)) {
+    if (Application::core()->getPluginManager().isPluginLoaded(_viewPluginKind)) {
         auto viewPlugin = dynamic_cast<ViewPlugin*>(Application::core()->requestPlugin(_viewPluginKind));
 
         if (viewPlugin)
@@ -143,7 +145,10 @@ void ViewPluginDockWidget::initializeSettingsMenu()
 
     _settingsMenu.addSeparator();
 
+#ifdef _DEBUG
     _settingsMenu.addAction(&_viewPlugin->getRemoveAction());
+#endif
+    
     _settingsMenu.addAction(&_viewPlugin->getEditActionsAction());
 }
 

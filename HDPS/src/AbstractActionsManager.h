@@ -18,9 +18,6 @@ class AbstractActionsManager : public AbstractManager
 
 public:
 
-    /** Resets the contents of the actions manager */
-    //virtual void reset() = 0;
-
     /**
      * Add action to the manager
      * @param action Pointer to action

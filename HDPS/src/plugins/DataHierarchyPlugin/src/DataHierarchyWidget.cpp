@@ -4,6 +4,7 @@
 #include <models/DataHierarchyModel.h>
 #include <models/DataHierarchyModelItem.h>
 #include <Application.h>
+#include <Set.h>
 #include <Dataset.h>
 #include <PluginFactory.h>
 #include <AbstractDataHierarchyManager.h>
@@ -23,6 +24,7 @@
 using namespace hdps;
 using namespace hdps::util;
 using namespace hdps::plugin;
+using namespace hdps::gui;
 
 /**
  * Tree view item delegate class
