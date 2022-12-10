@@ -8,19 +8,23 @@ using namespace hdps::gui;
 
 FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
-    _openProjectAction(this, "Open"),
-    _saveProjectAction(this, "Save project"),
-    _saveProjectAsAction(this, "Save project as"),
+    _newProjectAction(this, "&New Project"),
+    _openProjectAction(this, "&Open Project"),
+    _saveProjectAction(this, "&Save Project"),
+    _saveProjectAsAction(this, "Save Project &As..."),
     _recentProjectsMenu(this),
     _resetMenu(this),
     _importDataMenu(this),
-    _pluginManagerAction(this, "Plugin manager"),
-    _publishAction(this, "Publish"),
-    _exitAction(this, "Exit")
+    _publishAction(this, "&Publish"),
+    _pluginManagerAction(this, "Plugin Manager"),
+    _globalSettingsAction(this, "Global &Settings..."),
+    _startPageAction(this, "Start page"),
+    _exitAction(this, "&Exit")
 {
     setTitle("File");
     setToolTip("File operations");
 
+    addAction(&_newProjectAction);
     addAction(&_openProjectAction);
     addAction(&_saveProjectAction);
     addAction(&_saveProjectAsAction);
@@ -38,13 +42,24 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     
     addMenu(&_importDataMenu);
     addSeparator();
-    addAction(&_pluginManagerAction);
     addAction(&_publishAction);
+    addSeparator();
+    addAction(&_pluginManagerAction); 
+    addSeparator();
+    addAction(&_globalSettingsAction);
+    addSeparator();
+    addAction(&_startPageAction);
     addAction(&_exitAction);
 
+    _newProjectAction.setShortcut(QKeySequence("Ctrl+N"));
+    _newProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+    _newProjectAction.setToolTip("Open project from disk");
+
+    _openProjectAction.setShortcut(QKeySequence("Ctrl+O"));
     _openProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
     _openProjectAction.setToolTip("Open project from disk");
 
+    _saveProjectAction.setShortcut(QKeySequence("Ctrl+S"));
     _saveProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveProjectAction.setToolTip("Save project to disk");
 
@@ -53,12 +68,23 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
 
     _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
     
-    _pluginManagerAction.setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
-    _pluginManagerAction.setToolTip("View loaded plugins");
-
+    _publishAction.setShortcut(QKeySequence("Ctrl+P"));
     _publishAction.setIcon(Application::getIconFont("FontAwesome").getIcon("share"));
     _publishAction.setToolTip("Publish the HDPS application");
 
+    _pluginManagerAction.setShortcut(QKeySequence("Ctrl+M"));
+    _pluginManagerAction.setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+    _pluginManagerAction.setToolTip("View loaded plugins");
+
+    _globalSettingsAction.setShortcut(QKeySequence("Ctrl+E"));
+    _globalSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+    _globalSettingsAction.setToolTip("Modify global HDPS settings");
+
+    _startPageAction.setShortcut(QKeySequence("Alt+W"));
+    _startPageAction.setIcon(Application::getIconFont("FontAwesome").getIcon("door-open"));
+    _startPageAction.setToolTip("Show the HDPS start page");
+
+    _exitAction.setShortcut(QKeySequence("Alt+F4"));
     _exitAction.setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
     _exitAction.setToolTip("Exit the HDPS application");
 
@@ -74,46 +100,19 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
         Application::current()->saveProject();
     });
 
-    //connect(&_clearDatasetsAction, &QAction::triggered, this, [this]() -> void {
-    //    const auto loadedDatasets = Application::core()->requestAllDataSets();
-
-    //    if (!loadedDatasets.empty()) {
-
-    //        if (Application::current()->getSetting("ConfirmDataRemoval", true).toBool()) {
-    //            Application::core()->removeAllDatasets();
-
-    //            //// Ask for confirmation dialog
-    //            //DataRemoveAction::ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, "Remove all datasets", loadedDatasets);
-
-    //            //// Show the confirm data removal dialog
-    //            //confirmDataRemoveDialog.exec();
-
-    //            //// Remove dataset and children from the core if accepted
-    //            //if (confirmDataRemoveDialog.result() == 1)
-    //            //    Application::core()->removeAllDatasets();
-    //        }
-    //    }
-    //});
-
     connect(&_pluginManagerAction, &TriggerAction::triggered, this, [this]() -> void {
         PluginManagerDialog loadedPluginsDialog;
         loadedPluginsDialog.exec();
     });
 
-    connect(&_exitAction, SIGNAL(triggered()), this, SLOT(close()));
+    connect(&_exitAction, &TriggerAction::triggered, Application::current(), &Application::quit);
 
-    
-
-    // Update read-only status of various actions when the main file menu is opened
     connect(this, &QMenu::aboutToShow, this, [this]() -> void {
         const auto hasDatasets = Application::core()->requestAllDataSets().size();
 
         _saveProjectAction.setEnabled(!Application::current()->getCurrentProjectFilePath().isEmpty());
         _saveProjectAsAction.setEnabled(hasDatasets);
-        //_resetMenu.setEnabled(hasDatasets);
-
         _recentProjectsMenu.updateActions();
-
         _saveProjectAsAction.setEnabled(true);
     });
 }

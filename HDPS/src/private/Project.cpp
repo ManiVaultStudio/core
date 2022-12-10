@@ -1,9 +1,8 @@
 #include "Project.h"
 
-#include "Application.h"
-#include "CoreInterface.h"
+#include <Application.h>
 
-namespace hdps {
+using namespace hdps;
 
 void Project::fromVariantMap(const QVariantMap& variantMap)
 {
@@ -21,6 +20,4 @@ QVariantMap Project::toVariantMap() const
     //variantMap[_dataHierarchyManager->getSerializationName()] = _dataHierarchyManager->toVariantMap();
 
     return variantMap;
-}
-
 }

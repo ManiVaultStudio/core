@@ -169,12 +169,26 @@ set(PRIVATE_ACTIONS_MANAGER_FILES
     ${PRIVATE_ACTIONS_MANAGER_SOURCES}
 )
 
+set(PRIVATE_ACTIONS_HEADERS
+    src/private/GlobalSettingsAction.h
+)
+
+set(PRIVATE_ACTIONS_SOURCES
+    src/private/GlobalSettingsAction.cpp
+)
+
+set(PRIVATE_ACTIONS_FILES
+    ${PRIVATE_ACTIONS_HEADERS}
+    ${PRIVATE_ACTIONS_SOURCES}
+)
+
 set(PRIVATE_MANAGER_HEADERS
     ${PRIVATE_LAYOUT_MANAGER_HEADERS}
     ${PRIVATE_PLUGIN_MANAGER_HEADERS}
     ${PRIVATE_DATA_MANAGER_HEADERS}
     ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
     ${PRIVATE_ACTIONS_MANAGER_HEADERS}
+    ${PRIVATE_ACTIONS_HEADERS}
 )
 
 set(PRIVATE_MANAGER_SOURCES
@@ -183,6 +197,7 @@ set(PRIVATE_MANAGER_SOURCES
     ${PRIVATE_DATA_MANAGER_SOURCES}
     ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
     ${PRIVATE_ACTIONS_MANAGER_SOURCES}
+    ${PRIVATE_ACTIONS_SOURCES}
     ${PRIVATE_MANAGER_HEADERS}
 )
 
@@ -203,6 +218,7 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/HelpMenu.h
     src/private/PluginHelpMenu.h
     src/private/ResetMenu.h
+    src/private/GlobalSettingsDialog.h
 )
 
 set(PRIVATE_APPLICATION_SOURCES
@@ -217,6 +233,7 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/HelpMenu.cpp
     src/private/PluginHelpMenu.cpp
     src/private/ResetMenu.cpp
+    src/private/GlobalSettingsDialog.cpp
 )
 
 set(PRIVATE_APPLICATION_FILES
@@ -256,12 +273,28 @@ set(PRIVATE_MISCELLANEOUS_FILES
     ${PRIVATE_MISCELLANEOUS_SOURCES}
 )
 
+set(PRIVATE_PROJECT_HEADERS
+    src/private/Project.h
+    src/private/ProjectWidget.h
+)
+
+set(PRIVATE_PROJECT_SOURCES
+    src/private/Project.cpp
+    src/private/ProjectWidget.cpp
+)
+
+list(APPEND PRIVATE_PROJECT_FILES
+    ${PRIVATE_PROJECT_HEADERS}
+    ${PRIVATE_PROJECT_SOURCES}
+)
+
 set(PRIVATE_HEADERS
     ${PRIVATE_CORE_HEADERS}
     ${PRIVATE_MANAGER_HEADERS}
     ${PRIVATE_APPLICATION_HEADERS}
     ${PRIVATE_START_PAGE_HEADERS}
     ${PRIVATE_MISCELLANEOUS_HEADERS}
+    ${PRIVATE_PROJECT_HEADERS}
 )
 
 set(PRIVATE_SOURCES
@@ -270,18 +303,21 @@ set(PRIVATE_SOURCES
     ${PRIVATE_APPLICATION_SOURCES}
     ${PRIVATE_START_PAGE_SOURCES}
     ${PRIVATE_MISCELLANEOUS_SOURCES}
+    ${PRIVATE_PROJECT_SOURCES}
     ${PRIVATE_HEADERS}
 )
 
-source_group(Private\\Core FILES ${PRIVATE_CORE_FILES})
-source_group(Private\\Application FILES ${PRIVATE_APPLICATION_FILES})
-source_group(Private\\Managers\\Layout FILES ${PRIVATE_LAYOUT_MANAGER_FILES})
-source_group(Private\\Managers\\Plugin FILES ${PRIVATE_PLUGIN_MANAGER_FILES})
-source_group(Private\\Managers\\Data FILES ${PRIVATE_DATA_MANAGER_FILES})
-source_group(Private\\Managers\\DataHierarchy FILES ${PRIVATE_DATA_HIERARCHY_MANAGER_FILES})
-source_group(Private\\Managers\\Actions FILES ${PRIVATE_ACTIONS_MANAGER_FILES})
-source_group(Private\\StartPage FILES ${PRIVATE_START_PAGE_FILES})
-source_group(Private\\Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
+source_group(Core FILES ${PRIVATE_CORE_FILES})
+source_group(Application FILES ${PRIVATE_APPLICATION_FILES})
+source_group(Managers\\Layout FILES ${PRIVATE_LAYOUT_MANAGER_FILES})
+source_group(Managers\\Plugin FILES ${PRIVATE_PLUGIN_MANAGER_FILES})
+source_group(Managers\\Data FILES ${PRIVATE_DATA_MANAGER_FILES})
+source_group(Managers\\DataHierarchy FILES ${PRIVATE_DATA_HIERARCHY_MANAGER_FILES})
+source_group(Managers\\Actions FILES ${PRIVATE_ACTIONS_MANAGER_FILES})
+source_group(StartPage FILES ${PRIVATE_START_PAGE_FILES})
+source_group(Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
+source_group(Project FILES ${PRIVATE_PROJECT_FILES})
+source_group(Actions FILES ${PRIVATE_ACTIONS_FILES})
 
 set(PUBLIC_CORE_INTERFACE_HEADERS
     src/CoreInterface.h
@@ -633,19 +669,6 @@ list(APPEND PUBLIC_DATA_HIERARCHY_FILES
     ${PUBLIC_DATA_HIERARCHY_SOURCES}
 )
 
-set(PUBLIC_PROJECT_HEADERS
-    src/Project.h
-)
-
-set(PUBLIC_PROJECT_SOURCES
-    src/Project.cpp
-)
-
-list(APPEND PUBLIC_PROJECT_FILES
-    ${PUBLIC_PROJECT_HEADERS}
-    ${PUBLIC_PROJECT_SOURCES}
-)
-
 set(PUBLIC_ACTIONS_MODEL_HEADERS
     src/models/ActionsModel.h
     src/models/ActionsFilterModel.h
@@ -750,21 +773,21 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 QT6_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
 
-source_group(Public\\CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
-source_group(Public\\Event FILES ${PUBLIC_EVENT_FILES})
-source_group(Public\\Actions FILES ${PUBLIC_ACTIONS_FILES})
-source_group(Public\\Widgets FILES ${PUBLIC_WIDGET_FILES})
-source_group(Public\\Renderers FILES ${PUBLIC_RENDERERS_FILES})
-source_group(Public\\Graphics FILES ${PUBLIC_GRAPHICS_FILES})
-source_group(Public\\Util FILES ${PUBLIC_UTIL_FILES})
-source_group(Public\\Application FILES ${PUBLIC_APPLICATION_FILES})
-source_group(Public\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_FILES})
-source_group(Public\\Dataset FILES ${PUBLIC_DATASET_FILES})
-source_group(Public\\Plugin FILES ${PUBLIC_PLUGIN_FILES})
-source_group(Public\\Project FILES ${PUBLIC_PROJECT_FILES})
-source_group(Public\\Model\\Actions FILES ${PUBLIC_ACTIONS_MODEL_FILES})
-source_group(Public\\Model\\ActionHierarchy FILES ${PUBLIC_ACTION_HIERARCHY_MODEL_FILES})
-source_group(Public\\Model\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
+source_group(CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
+source_group(Event FILES ${PUBLIC_EVENT_FILES})
+source_group(Actions FILES ${PUBLIC_ACTIONS_FILES})
+source_group(Widgets FILES ${PUBLIC_WIDGET_FILES})
+source_group(Renderers FILES ${PUBLIC_RENDERERS_FILES})
+source_group(Graphics FILES ${PUBLIC_GRAPHICS_FILES})
+source_group(Util FILES ${PUBLIC_UTIL_FILES})
+source_group(Application FILES ${PUBLIC_APPLICATION_FILES})
+source_group(DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_FILES})
+source_group(Dataset FILES ${PUBLIC_DATASET_FILES})
+source_group(Plugin FILES ${PUBLIC_PLUGIN_FILES})
+source_group(Project FILES ${PUBLIC_PROJECT_FILES})
+source_group(Model\\Actions FILES ${PUBLIC_ACTIONS_MODEL_FILES})
+source_group(Model\\ActionHierarchy FILES ${PUBLIC_ACTION_HIERARCHY_MODEL_FILES})
+source_group(Model\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
 
 source_group(Resources FILES res/resources.qrc)
 source_group(Resources FILES win/hdps.rc)

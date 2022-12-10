@@ -4,6 +4,8 @@
 
 #include <QProgressDialog>
 
+#include "GlobalSettingsAction.h"
+
 namespace hdps {
 
 /**
@@ -72,6 +74,10 @@ public: // Construction
      */
     HdpsApplication(int& argc, char** argv);
 
+public: // Action getters
+
+    static GlobalSettingsAction& getGlobalSettingsAction();
+
 public: // Project IO
 
     /**
@@ -85,6 +91,9 @@ public: // Project IO
      * @param projectFilePath File path of the project (if empty, the user will  select a file location by hand)
      */
     void saveProject(QString projectFilePath = "") override final;
+
+private:
+    GlobalSettingsAction    _globalSettingsAction;      /** Action for modifying global settings */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

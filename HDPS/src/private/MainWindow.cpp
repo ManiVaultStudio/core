@@ -3,12 +3,10 @@
 
 #include <Application.h>
 
+#include <QDebug>
 #include <QMessageBox>
 #include <QScreen>
-#include <QDebug>
 #include <QMenuBar>
-
-// Graphics capability checking
 #include <QOpenGLFunctions>
 #include <QOffscreenSurface>
 #include <QMessageBox>
@@ -21,7 +19,10 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     _core(),
     _fileMenu(),
     _viewMenu(),
-    _helpMenu()
+    _helpMenu(),
+    _stackedWidget(),
+    _startPageWidget(),
+    _projectWidget()
 {
     dynamic_cast<Application*>(qApp)->setCore(&_core);
 
@@ -39,13 +40,18 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
 
     _core.init();
+
+    _stackedWidget.addWidget(&_startPageWidget);
+    _stackedWidget.addWidget(&_projectWidget);
+
+    setCentralWidget(&_stackedWidget);
 }
 
 void MainWindow::showEvent(QShowEvent* showEvent)
 {
     QMainWindow::showEvent(showEvent);
 
-    Application::core()->getLayoutManager().initialize(this);
+    //Application::core()->getLayoutManager().initialize(this);
 }
 
 void MainWindow::closeEvent(QCloseEvent* closeEvent)

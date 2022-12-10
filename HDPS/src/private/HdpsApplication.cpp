@@ -29,8 +29,14 @@ namespace hdps {
 #endif
 
 HdpsApplication::HdpsApplication(int& argc, char** argv) :
-    Application(argc, argv)
+    Application(argc, argv),
+    _globalSettingsAction(this)
 {
+}
+
+GlobalSettingsAction& HdpsApplication::getGlobalSettingsAction()
+{
+    return dynamic_cast<HdpsApplication*>(HdpsApplication::current())->_globalSettingsAction;
 }
 
 void HdpsApplication::loadProject(QString projectFilePath /*= ""*/)

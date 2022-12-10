@@ -24,7 +24,6 @@ public:
     /**
      * Construct a plugin manager dialog with \p parent
      * @param parent Pointer to parent widget
-     * @param datasets Datasets for grouping
      */
     PluginManagerDialog(QWidget* parent = nullptr);
 
@@ -38,7 +37,7 @@ public:
         return sizeHint();
     }
 
-protected:
+private:
     PluginManagerModel          _model;                 /** Plugin manager model (interfaces with a plugin manager) */
     PluginManagerFilterModel    _filterModel;           /** Sorting and filtering model for the plugin manager model */
     hdps::gui::HierarchyWidget  _hierarchyWidget;       /** Widget for displaying the loaded plugins */

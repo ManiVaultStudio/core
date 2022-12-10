@@ -1,8 +1,6 @@
 #pragma once
 
-#include "actions/WidgetAction.h"
-
-namespace hdps {
+#include <util/Serializable.h>
 
 /**
  * Project class
@@ -11,10 +9,8 @@ namespace hdps {
  *
  * @author Thomas Kroes
  */
-class Project : public gui::WidgetAction
+class Project : public hdps::util::Serializable
 {
-    Q_OBJECT
-
 public: // Serialization
 
     /**
@@ -29,5 +25,3 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 };
-
-}
