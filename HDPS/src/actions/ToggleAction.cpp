@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QEvent>
 
 namespace hdps {
 
@@ -127,7 +128,12 @@ ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* togg
 
     layout->setContentsMargins(18, 0, 0, 0);
     layout->setSizeConstraint(QLayout::SetMinimumSize);
-    layout->addWidget(toggleAction->createLabelWidget(this, 0));
+
+    auto labelWidget = toggleAction->createLabelWidget(this, 0);
+    
+    labelWidget->installEventFilter(this);
+
+    layout->addWidget(labelWidget);
     layout->addStretch(1);
 
     setLayout(layout);
@@ -167,6 +173,21 @@ ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* togg
 
     update();
     updateToggle();
+}
+
+bool ToggleAction::CheckBoxWidget::eventFilter(QObject* target, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::MouseButtonPress:
+            _toggleAction->toggle();
+            break;
+
+        default:
+            break;
+    }
+
+    return QCheckBox::eventFilter(target, event);
 }
 
 ToggleAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ToggleAction* toggleAction, const std::int32_t& widgetFlags) :

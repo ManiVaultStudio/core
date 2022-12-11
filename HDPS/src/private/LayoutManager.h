@@ -46,10 +46,10 @@ public:
     void reset() override;
 
     /**
-     * Initializes the layout manager to work with the main window
-     * @param mainWindow Pointer to main window to apply the layout manager to
+     * Initializes the layout manager to work with the \p widget
+     * @param widget Pointer to the widget to apply the layout manager to
      */
-    void initialize(QMainWindow* mainWindow) override;
+    void initialize(QWidget* widget) override;
 
     /**
      * Add a view plugin to the \p dockArea of \p dockViewPlugin

@@ -195,6 +195,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
         _filterGroupAction.setEnabled(_model.rowCount() >= 1);
         _selectionGroupAction.setEnabled(hasItems);
         _columnsAction.setEnabled(hasItems);
+        _settingsGroupAction.setEnabled(hasItems);
 
         _treeView.setHeaderHidden(!hasItems);
         

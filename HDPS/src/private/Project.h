@@ -9,7 +9,7 @@
  *
  * @author Thomas Kroes
  */
-class Project : public hdps::util::Serializable
+class Project final : public QObject, public hdps::util::Serializable
 {
 public: // Serialization
 

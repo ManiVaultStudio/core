@@ -1,5 +1,5 @@
-#include "PublicActionsFilterModel.h"
-#include "PublicActionsModel.h"
+#include "ActionsFilterModel.h"
+#include "ActionsModel.h"
 
 #include <QDebug>
 

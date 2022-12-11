@@ -54,6 +54,13 @@ public:
          */
         CheckBoxWidget(QWidget* parent, ToggleAction* toggleAction);
 
+        /**
+         * Respond to \p target \p event
+         * @param target Object of which an event occurred
+         * @param event The event that took place
+         */
+        bool eventFilter(QObject* target, QEvent* event) override;
+
     protected:
         ToggleAction*   _toggleAction;      /** Pointer to toggle action */
 

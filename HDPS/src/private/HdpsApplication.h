@@ -1,10 +1,11 @@
 #pragma once
 
+#include "GlobalSettingsAction.h"
+#include "ProjectManager.h"
+
 #include <Application.h>
 
 #include <QProgressDialog>
-
-#include "GlobalSettingsAction.h"
 
 namespace hdps {
 
@@ -93,6 +94,7 @@ public: // Project IO
     void saveProject(QString projectFilePath = "") override final;
 
 private:
+    ProjectManager          _projectManager;            /** Project manager for creating/loading/saving projects */
     GlobalSettingsAction    _globalSettingsAction;      /** Action for modifying global settings */
 
 protected:

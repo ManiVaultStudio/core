@@ -16,10 +16,10 @@ class AbstractLayoutManager : public AbstractManager
 public:
 
     /**
-     * Initializes the layout manager to work with the main window
-     * @param mainWindow Pointer to main window to apply the layout manager to
+     * Initializes the layout manager to work with the \p widget
+     * @param widget Pointer to the widget to apply the layout manager to
      */
-    virtual void initialize(QMainWindow* mainWindow) = 0;
+    virtual void initialize(QWidget* widget) = 0;
 
     /**
      * Add a view plugin to the \p dockArea of \p dockViewPlugin

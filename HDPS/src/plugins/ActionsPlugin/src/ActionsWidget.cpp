@@ -1,4 +1,4 @@
-#include "PublicActionsWidget.h"
+#include "ActionsWidget.h"
 
 #include <CoreInterface.h>
 #include <AbstractActionsManager.h>
@@ -8,7 +8,7 @@
 
 using namespace hdps;
 
-PublicActionsWidget::PublicActionsWidget(QWidget* parent) :
+ActionsWidget::ActionsWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _filterModel(this),
     _hierarchyWidget(this, "Public action", const_cast<QAbstractItemModel&>(Application::core()->getActionsManager().getModel()), &_filterModel)

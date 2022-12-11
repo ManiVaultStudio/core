@@ -125,12 +125,12 @@ void LayoutManager::reset()
 #endif
 }
 
-void LayoutManager::initialize(QMainWindow* mainWindow)
+void LayoutManager::initialize(QWidget* widget)
 {
     if (_initialized)
         return;
 
-    _dockManager        = new DockManager(mainWindow);
+    _dockManager        = new DockManager(widget);
     _viewPluginsWidget  = new ViewPluginsDockWidget(_dockManager);
 
     _dockManager->setObjectName("MainDockManager");

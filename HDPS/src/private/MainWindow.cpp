@@ -44,6 +44,8 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     _stackedWidget.addWidget(&_startPageWidget);
     _stackedWidget.addWidget(&_projectWidget);
 
+    _stackedWidget.setCurrentWidget(&_projectWidget);
+
     setCentralWidget(&_stackedWidget);
 }
 
@@ -51,7 +53,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 {
     QMainWindow::showEvent(showEvent);
 
-    //Application::core()->getLayoutManager().initialize(this);
+    Application::core()->getLayoutManager().initialize(this);
 }
 
 void MainWindow::closeEvent(QCloseEvent* closeEvent)

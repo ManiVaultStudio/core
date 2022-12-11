@@ -1,4 +1,4 @@
-#include "PublicActionsModel.h"
+#include "ActionsModel.h"
 
 #include <util/Exception.h>
 

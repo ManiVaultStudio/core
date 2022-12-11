@@ -275,11 +275,13 @@ set(PRIVATE_MISCELLANEOUS_FILES
 
 set(PRIVATE_PROJECT_HEADERS
     src/private/Project.h
+    src/private/ProjectManager.h
     src/private/ProjectWidget.h
 )
 
 set(PRIVATE_PROJECT_SOURCES
     src/private/Project.cpp
+    src/private/ProjectManager.cpp
     src/private/ProjectWidget.cpp
 )
 
@@ -1053,7 +1055,7 @@ add_subdirectory(src/plugins/ClusterData)
 add_subdirectory(src/plugins/ImageData)
 add_subdirectory(src/plugins/DataHierarchyPlugin)
 add_subdirectory(src/plugins/DataPropertiesPlugin)
-add_subdirectory(src/plugins/PublicActionsPlugin)
+add_subdirectory(src/plugins/ActionsPlugin)
 add_subdirectory(src/plugins/LoggingPlugin)
 
 # Qt Advanced docking system
