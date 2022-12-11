@@ -42,27 +42,6 @@ public:
      */
     const QAbstractItemModel& getModel() const override;
 
-    /**
-     * Establish whether an action is public
-     * @param action Action to test
-     * @return Boolean indicating whether an action is public or not
-     */
-    bool isActionPublic(const WidgetAction* action) const override;
-
-    /**
-     * Establish whether an action is published as a public action
-     * @param action Action to test
-     * @return Boolean indicating whether an action is published as a public action or not
-     */
-    bool isActionPublished(const WidgetAction* action) const override;
-
-    /**
-     * Establish whether an action is connected to a public action
-     * @param action Action to test
-     * @return Boolean indicating whether an action is connected to a public action or not
-     */
-    bool isActionConnected(const WidgetAction* action) const override;
-
 private:
     ActionsModel        _model;         /** List model for actions */
 };

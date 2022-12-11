@@ -45,7 +45,7 @@ void IntegralRectangleAction::connectToPublicAction(WidgetAction* publicAction)
 
 void IntegralRectangleAction::disconnectFromPublicAction()
 {
-    auto publicIntegralRectangleAction = dynamic_cast<IntegralRectangleAction*>(_publicAction);
+    auto publicIntegralRectangleAction = dynamic_cast<IntegralRectangleAction*>(getPublicAction());
 
     Q_ASSERT(publicIntegralRectangleAction != nullptr);
 

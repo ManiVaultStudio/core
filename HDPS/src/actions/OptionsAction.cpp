@@ -184,7 +184,7 @@ void OptionsAction::connectToPublicAction(WidgetAction* publicAction)
 
 void OptionsAction::disconnectFromPublicAction()
 {
-    auto publicOptionsAction = dynamic_cast<OptionsAction*>(_publicAction);
+    auto publicOptionsAction = dynamic_cast<OptionsAction*>(getPublicAction());
 
     Q_ASSERT(publicOptionsAction != nullptr);
 

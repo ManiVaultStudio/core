@@ -85,7 +85,7 @@ void TriggerAction::connectToPublicAction(WidgetAction* publicAction)
 
 void TriggerAction::disconnectFromPublicAction()
 {
-    auto publicTriggerAction = dynamic_cast<TriggerAction*>(_publicAction);
+    auto publicTriggerAction = dynamic_cast<TriggerAction*>(getPublicAction());
 
     Q_ASSERT(publicTriggerAction != nullptr);
 

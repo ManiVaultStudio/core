@@ -101,7 +101,7 @@ void ToggleAction::connectToPublicAction(WidgetAction* publicAction)
 
 void ToggleAction::disconnectFromPublicAction()
 {
-    auto publicToggleAction = dynamic_cast<ToggleAction*>(_publicAction);
+    auto publicToggleAction = dynamic_cast<ToggleAction*>(getPublicAction());
 
     Q_ASSERT(publicToggleAction != nullptr);
 

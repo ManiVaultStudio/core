@@ -65,7 +65,7 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
 
 void IntegralAction::disconnectFromPublicAction()
 {
-    auto publicIntegralAction = dynamic_cast<IntegralAction*>(_publicAction);
+    auto publicIntegralAction = dynamic_cast<IntegralAction*>(getPublicAction());
 
     Q_ASSERT(publicIntegralAction != nullptr);
 

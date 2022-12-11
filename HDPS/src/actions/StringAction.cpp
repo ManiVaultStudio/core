@@ -176,7 +176,7 @@ void StringAction::connectToPublicAction(WidgetAction* publicAction)
 
 void StringAction::disconnectFromPublicAction()
 {
-    auto publicStringAction = dynamic_cast<StringAction*>(_publicAction);
+    auto publicStringAction = dynamic_cast<StringAction*>(getPublicAction());
 
     Q_ASSERT(publicStringAction != nullptr);
 

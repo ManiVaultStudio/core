@@ -109,7 +109,7 @@ void DatasetPickerAction::setDatasets(Datasets datasets)
         connect(&dataset, &Dataset<DatasetImpl>::dataGuiNameChanged, &_datasetsModel, &DatasetsModel::updateData);
     }
 
-    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(_publicAction);
+    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
     if (publicDatasetPickerAction)
         setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
@@ -176,7 +176,7 @@ void DatasetPickerAction::populateDatasetsFromCore()
     for (auto& dataset : datasets)
         connect(&dataset, &Dataset<DatasetImpl>::dataGuiNameChanged, &_datasetsModel, &DatasetsModel::updateData);
 
-    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(_publicAction);
+    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
     if (publicDatasetPickerAction)
         setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
@@ -198,7 +198,7 @@ void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction)
 
 void DatasetPickerAction::disconnectFromPublicAction()
 {
-    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(_publicAction);
+    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
     Q_ASSERT(publicDatasetPickerAction != nullptr);
 

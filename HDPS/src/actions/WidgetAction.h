@@ -165,28 +165,28 @@ public: // Highlighting
 public: // Linking
 
     /**
-     * Get whether the action is public (visible to other actions)
-     * @return Boolean indicating whether the action is public (visible to other actions)
+     * Get whether this action is a public (shared) action or not
+     * @return Boolean determining whether this action is a public (shared) action or not
      */
-    virtual bool isPublic() const;
+    virtual bool isPublic() const final;
 
     /**
      * Get whether the action is published
      * @return Boolean indicating whether the action is published
      */
-    virtual bool isPublished() const;
+    virtual bool isPublished() const final;
 
     /**
      * Get whether the action is connect to a public action
      * @return Boolean indicating whether the action is connect to a public action
      */
-    virtual bool isConnected() const;
+    virtual bool isConnected() const final;
 
     /**
      * Publish this action so that other actions can connect to it
      * @param text Name of the published widget action (if empty, a configuration dialog will popup)
      */
-    virtual void publish(const QString& name = "");
+    virtual void publish(const QString& name = "") final;
 
     /**
      * Connect this action to a public action
@@ -441,10 +441,11 @@ signals:
      */
     void configurationChanged(std::int32_t configuration);
 
-protected:
+private:
     std::int32_t                _defaultWidgetFlags;        /** Default widget flags which are used to configure newly created widget action widgets */
     std::int32_t                _sortIndex;                 /** Sort index (used in the group action to sort actions) */
     std::int32_t                _connectionPermissions;     /** Allowed connection options flags */
+    bool                        _isPublic;                  /** Determines whether this action is a public (shared) action or not */
     WidgetAction*               _publicAction;              /** Public action to which this action might be connected */
     QVector<WidgetAction*>      _connectedActions;          /** Pointers to widget action that are connected to this action */
     QString                     _settingsPrefix;            /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */

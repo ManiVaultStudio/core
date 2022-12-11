@@ -78,7 +78,7 @@ void ColorAction::connectToPublicAction(WidgetAction* publicAction)
 
 void ColorAction::disconnectFromPublicAction()
 {
-    auto publicColorAction = dynamic_cast<ColorAction*>(_publicAction);
+    auto publicColorAction = dynamic_cast<ColorAction*>(getPublicAction());
 
     Q_ASSERT(publicColorAction != nullptr);
 

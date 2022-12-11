@@ -87,7 +87,7 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
 
 void DecimalAction::disconnectFromPublicAction()
 {
-    auto publicDecimalAction = dynamic_cast<DecimalAction*>(_publicAction);
+    auto publicDecimalAction = dynamic_cast<DecimalAction*>(getPublicAction());
 
     Q_ASSERT(publicDecimalAction != nullptr);
 

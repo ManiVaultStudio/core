@@ -71,7 +71,7 @@ void ColorPickerAction::connectToPublicAction(WidgetAction* publicAction)
 
 void ColorPickerAction::disconnectFromPublicAction()
 {
-    auto publicColorPickerAction = dynamic_cast<ColorPickerAction*>(_publicAction);
+    auto publicColorPickerAction = dynamic_cast<ColorPickerAction*>(getPublicAction());
 
     Q_ASSERT(publicColorPickerAction != nullptr);
 

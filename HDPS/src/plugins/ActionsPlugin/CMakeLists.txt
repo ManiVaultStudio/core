@@ -20,13 +20,6 @@ file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 
 find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
-set(MODEL
-    src/ActionsModel.h
-    src/ActionsModel.cpp
-	src/ActionsFilterModel.h
-    src/ActionsFilterModel.cpp
-)
-
 set(PLUGIN
     src/ActionsPlugin.h
     src/ActionsPlugin.cpp
@@ -42,13 +35,11 @@ set(AUX
 )
 
 set(SOURCES
-	${MODEL}
 	${PLUGIN}
 	${WIDGETS}
 	${AUX}
 )
 
-source_group(Model FILES ${MODEL})
 source_group(Plugin FILES ${PLUGIN})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})

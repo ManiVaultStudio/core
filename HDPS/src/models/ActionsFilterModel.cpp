@@ -36,8 +36,8 @@ bool ActionsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs
         case ActionsModel::Column::IsPublic:
             return lhsData.toBool() < rhsData.toBool();
 
-        case ActionsModel::Column::NumberOfConnections:
-            return lhsData.toInt() < rhsData.toInt();
+        //case ActionsModel::Column::NumberOfConnections:
+        //    return lhsData.toInt() < rhsData.toInt();
 
         default:
             break;

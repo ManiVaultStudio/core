@@ -28,68 +28,37 @@ ActionsManager::~ActionsManager()
 
 void ActionsManager::addAction(WidgetAction* action)
 {
-    try
-    {
-        if (action == nullptr)
-            throw std::runtime_error("Action is not valid");
+    Q_ASSERT(action != nullptr);
 
-        _model.addPublicAction(action);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to add public action ", e);
-    }
-    catch (...)
-    {
-        exceptionMessageBox("Unable to add public action ");
-    }
+#ifdef ACTIONS_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << action->text();
+#endif
+
+    _model.addAction(action);
+
+    emit actionAdded(action);
 }
 
 void ActionsManager::removeAction(WidgetAction* action)
 {
-    try
-    {
-        if (action == nullptr)
-            throw std::runtime_error("Action is not valid");
+    Q_ASSERT(action != nullptr);
 
-        _model.removePublicAction(action);
-    }
-    catch (std::exception& e)
+#ifdef ACTIONS_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << action->text();
+#endif
+
+    const auto actionId = action->getId();
+
+    emit actionAboutToBeRemoved(action);
     {
-        exceptionMessageBox("Unable to remove public action ", e);
+        _model.removeAction(action);
     }
-    catch (...)
-    {
-        exceptionMessageBox("Unable to remove public action ");
-    }
+    emit actionRemoved(actionId);
 }
 
 const QAbstractItemModel& ActionsManager::getModel() const
 {
     return _model;
-}
-
-bool ActionsManager::isActionPublic(const WidgetAction* action) const
-{
-    return _model._publicActions.contains(const_cast<WidgetAction*>(action));
-}
-
-bool ActionsManager::isActionPublished(const WidgetAction* action) const
-{
-    for (const auto publicAction : _model._publicActions)
-        if (publicAction->getConnectedActions().first() == action)
-            return true;
-
-    return false;
-}
-
-bool ActionsManager::isActionConnected(const WidgetAction* action) const
-{
-    for (const auto publicAction : _model._publicActions)
-        if (publicAction->getConnectedActions().contains(const_cast<WidgetAction*>(action)))
-            return true;
-
-    return false;
 }
 
 void ActionsManager::reset()

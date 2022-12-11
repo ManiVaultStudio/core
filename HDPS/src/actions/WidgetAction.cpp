@@ -30,6 +30,7 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     _defaultWidgetFlags(),
     _sortIndex(-1),
     _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::Default)),
+    _isPublic(false),
     _publicAction(nullptr),
     _connectedActions(),
     _settingsPrefix(),
@@ -41,6 +42,7 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
 
 WidgetAction::~WidgetAction()
 {
+    Application::core()->getActionsManager().addAction(this);
 }
 
 QString WidgetAction::getTypeString() const
@@ -118,17 +120,24 @@ bool WidgetAction::isHighlighted() const
 
 bool WidgetAction::isPublic() const
 {
-    return Application::core()->getActionsManager().isActionPublic(this);
+    return _isPublic;
 }
 
 bool WidgetAction::isPublished() const
 {
-    return Application::core()->getActionsManager().isActionPublished(this);
+    if (_publicAction == nullptr)
+        return false;
+
+    for (const auto connectedAction : _publicAction->getConnectedActions())
+        if (connectedAction == this)
+            return true;
+
+    return false;
 }
 
 bool WidgetAction::isConnected() const
 {
-    return Application::core()->getActionsManager().isActionConnected(this);
+    return _publicAction != nullptr;
 }
 
 void WidgetAction::publish(const QString& name /*= ""*/)
@@ -179,10 +188,12 @@ void WidgetAction::publish(const QString& name /*= ""*/)
                 publish(lineEdit->text());
         }
         else {
-            if (Application::core()->getActionsManager().isActionPublished(this))
+            if (isPublished())
                 throw std::runtime_error("Action is already published");
 
             auto publicCopy = getPublicCopy();
+
+            publicCopy->_isPublic = true;
 
             if (publicCopy == nullptr)
                 throw std::runtime_error("Public copy not created");
@@ -193,8 +204,8 @@ void WidgetAction::publish(const QString& name /*= ""*/)
 
             Application::core()->getActionsManager().addAction(publicCopy);
 
-            emit isPublishedChanged(Application::core()->getActionsManager().isActionPublished(this));
-            emit isConnectedChanged(Application::core()->getActionsManager().isActionConnected(this));
+            emit isPublishedChanged(isPublished());
+            emit isConnectedChanged(isConnected());
         }
     }
     catch (std::exception& e)
@@ -215,7 +226,7 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
 
     _publicAction->connectPrivateAction(this);
 
-    emit isConnectedChanged(Application::core()->getActionsManager().isActionConnected(this));
+    emit isConnectedChanged(isConnected());
 }
 
 void WidgetAction::disconnectFromPublicAction()
@@ -224,7 +235,7 @@ void WidgetAction::disconnectFromPublicAction()
 
     _publicAction->disconnectPrivateAction(this);
 
-    emit isConnectedChanged(Application::core()->getActionsManager().isActionConnected(this));
+    emit isConnectedChanged(isConnected());
 }
 
 void WidgetAction::connectPrivateAction(WidgetAction* privateAction)
@@ -263,17 +274,17 @@ bool WidgetAction::mayPublish(ConnectionContextFlag connectionContextFlags) cons
 {
     switch (connectionContextFlags)
     {
-    case WidgetAction::Api:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::PublishViaApi);
+        case WidgetAction::Api:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::PublishViaApi);
 
-    case WidgetAction::Gui:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::PublishViaGui);
+        case WidgetAction::Gui:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::PublishViaGui);
 
-    case WidgetAction::ApiAndGui:
-        break;
+        case WidgetAction::ApiAndGui:
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return false;
@@ -407,17 +418,17 @@ bool WidgetAction::mayConnect(ConnectionContextFlag connectionContextFlags) cons
 {
     switch (connectionContextFlags)
     {
-    case WidgetAction::Api:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaApi);
+        case WidgetAction::Api:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaApi);
 
-    case WidgetAction::Gui:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaGui);
+        case WidgetAction::Gui:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaGui);
 
-    case WidgetAction::ApiAndGui:
-        break;
+        case WidgetAction::ApiAndGui:
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return false;
@@ -427,17 +438,17 @@ bool WidgetAction::mayDisconnect(ConnectionContextFlag connectionContextFlags) c
 {
     switch (connectionContextFlags)
     {
-    case hdps::gui::WidgetAction::Api:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi);
+        case hdps::gui::WidgetAction::Api:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi);
 
-    case hdps::gui::WidgetAction::Gui:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaGui);
+        case hdps::gui::WidgetAction::Gui:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaGui);
 
-    case hdps::gui::WidgetAction::ApiAndGui:
-        break;
+        case hdps::gui::WidgetAction::ApiAndGui:
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return false;
