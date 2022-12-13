@@ -178,6 +178,7 @@ set(PUBLIC_ACTIONS_HEADERS
     src/actions/DataGroupingAction.h
     src/actions/DirectoryPickerAction.h
     src/actions/FilePickerAction.h
+    src/actions/VariantAction.h
     src/actions/StatusAction.h
     src/actions/GroupSectionTreeItem.h
     src/actions/GroupWidgetTreeItem.h
@@ -233,6 +234,7 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/DataGroupingAction.cpp
     src/actions/DirectoryPickerAction.cpp
     src/actions/FilePickerAction.cpp
+    src/actions/VariantAction.cpp
     src/actions/StatusAction.cpp
     src/actions/GroupSectionTreeItem.cpp
     src/actions/GroupWidgetTreeItem.cpp
