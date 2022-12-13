@@ -12,16 +12,22 @@ class ActionsModel : public QStandardItemModel
 public:
 
     /** Action columns */
-    enum Column {
-        Name,                   /** Name of the public action */
-        ID,                     /** Globally unique identifier of the action */
-        Type,                   /** Action type string */
-        IsPublic,               /** Whether the action is public or private */
+    enum class Column {
+        Name,       /** Name of the action */
+        ID,         /** Globally unique identifier of the action */
+        Type,       /** Action type string */
+        Scope,      /** Scope of the action (whether the action is public or private) */
 
         Count
     };
 
 public:
+
+    /**
+     * Construct with \p parent object
+     * @param parent Pointer to parent object
+     */
+    ActionsModel(QObject* parent = nullptr);
 
     /**
      * Add \p action to the model

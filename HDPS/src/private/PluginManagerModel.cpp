@@ -25,6 +25,7 @@ PluginManagerModel::PluginManagerModel(QObject* parent /*= nullptr*/) :
 void PluginManagerModel::removeItem(const QModelIndex& index)
 {
     beginRemoveRows(index.parent(), index.row(), index.row());
+    endRemoveRows();
 }
 
 void PluginManagerModel::synchronizeWithPluginManager()

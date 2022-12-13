@@ -517,7 +517,7 @@ void DimensionsPickerAction::connectToPublicAction(WidgetAction* publicAction)
 
 void DimensionsPickerAction::disconnectFromPublicAction()
 {
-    auto publicDimensionsPickerAction = dynamic_cast<DimensionsPickerAction*>(_publicAction);
+    auto publicDimensionsPickerAction = dynamic_cast<DimensionsPickerAction*>(getPublicAction());
 
     Q_ASSERT(publicDimensionsPickerAction != nullptr);
 

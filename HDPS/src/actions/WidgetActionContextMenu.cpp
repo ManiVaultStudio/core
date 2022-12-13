@@ -56,8 +56,8 @@ void WidgetActionContextMenu::initialize()
 
         auto actionsFilterModel = new ActionsFilterModel(this);
 
-        actionsFilterModel->setScopeFilter(ActionsFilterModel::Public);
-        actionsFilterModel->setTypeFilter(_widgetAction->getTypeString());
+        actionsFilterModel->getScopeFilterAction().setSelectedOptions({ "Public" });
+        actionsFilterModel->getTypeFilterAction().setString(_widgetAction->getTypeString());
 
         const auto numberOfRows = actionsFilterModel->rowCount();
 

@@ -168,7 +168,7 @@ public: // Linking
      * Get whether this action is a public (shared) action or not
      * @return Boolean determining whether this action is a public (shared) action or not
      */
-    virtual bool isPublic() const final;
+    virtual bool isPublic() const;
 
     /**
      * Get whether the action is published
@@ -186,7 +186,7 @@ public: // Linking
      * Publish this action so that other actions can connect to it
      * @param text Name of the published widget action (if empty, a configuration dialog will popup)
      */
-    virtual void publish(const QString& name = "") final;
+    virtual void publish(const QString& name = "");
 
     /**
      * Connect this action to a public action

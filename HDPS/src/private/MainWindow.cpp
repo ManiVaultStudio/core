@@ -17,43 +17,44 @@
 MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     QMainWindow(parent),
     _core(),
-    _fileMenu(),
-    _viewMenu(),
-    _helpMenu(),
-    _stackedWidget(),
-    _startPageWidget(),
-    _projectWidget()
+    _stackedWidget(nullptr),
+    _startPageWidget(nullptr),
+    _projectWidget(nullptr)
 {
     dynamic_cast<Application*>(qApp)->setCore(&_core);
-
-    menuBar()->addMenu(&_fileMenu);
-    menuBar()->addMenu(&_viewMenu);
-    menuBar()->addMenu(&_helpMenu);
-
-    connect(Application::current(), &Application::currentProjectFilePathChanged, [this](const QString& currentProjectFilePath) {
-        setWindowTitle(currentProjectFilePath + (currentProjectFilePath.isEmpty() ? " HDPS" : " - HDPS"));
-    });
-
-    restoreWindowGeometryFromSettings();
 
     // Delay execution till the event loop has started, otherwise we cannot quit the application
     QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
 
-    _core.init();
-
-    _stackedWidget.addWidget(&_startPageWidget);
-    _stackedWidget.addWidget(&_projectWidget);
-
-    _stackedWidget.setCurrentWidget(&_projectWidget);
-
-    setCentralWidget(&_stackedWidget);
+    restoreWindowGeometryFromSettings();
 }
 
 void MainWindow::showEvent(QShowEvent* showEvent)
 {
     QMainWindow::showEvent(showEvent);
 
+    menuBar()->addMenu(new FileMenu());
+    menuBar()->addMenu(new ViewMenu());
+    menuBar()->addMenu(new HelpMenu());
+
+    _stackedWidget      = new QStackedWidget();
+    _startPageWidget    = new StartPageWidget();
+    _projectWidget      = new ProjectWidget();
+
+    _stackedWidget->addWidget(_startPageWidget);
+    _stackedWidget->addWidget(_projectWidget);
+
+    _stackedWidget->setCurrentWidget(_projectWidget);
+
+    setCentralWidget(_stackedWidget);
+
+    connect(Application::current(), &Application::currentProjectFilePathChanged, [this](const QString& currentProjectFilePath) {
+        setWindowTitle(currentProjectFilePath + (currentProjectFilePath.isEmpty() ? " HDPS" : " - HDPS"));
+    });
+
     Application::core()->getLayoutManager().initialize(this);
+
+    _core.init();
 }
 
 void MainWindow::closeEvent(QCloseEvent* closeEvent)

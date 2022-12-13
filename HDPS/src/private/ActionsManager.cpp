@@ -1,5 +1,6 @@
 #include "ActionsManager.h"
 
+#include <Application.h>
 #include <models/ActionsFilterModel.h>
 #include <actions/WidgetAction.h>
 #include <util/Exception.h>
@@ -16,6 +17,7 @@ namespace hdps
 
 ActionsManager::ActionsManager() :
     AbstractActionsManager(),
+    _actions(),
     _model()
 {
     setObjectName("Actions");
@@ -26,6 +28,20 @@ ActionsManager::~ActionsManager()
     reset();
 }
 
+void ActionsManager::initalize()
+{
+#ifdef ACTIONS_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+}
+
+void ActionsManager::reset()
+{
+#ifdef ACTIONS_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+}
+
 void ActionsManager::addAction(WidgetAction* action)
 {
     Q_ASSERT(action != nullptr);
@@ -34,7 +50,7 @@ void ActionsManager::addAction(WidgetAction* action)
     qDebug() << __FUNCTION__ << action->text();
 #endif
 
-    _model.addAction(action);
+    _actions << action;
 
     emit actionAdded(action);
 }
@@ -51,7 +67,8 @@ void ActionsManager::removeAction(WidgetAction* action)
 
     emit actionAboutToBeRemoved(action);
     {
-        _model.removeAction(action);
+        if (_actions.contains(action))
+            _actions.removeOne(action);
     }
     emit actionRemoved(actionId);
 }
@@ -59,13 +76,6 @@ void ActionsManager::removeAction(WidgetAction* action)
 const QAbstractItemModel& ActionsManager::getModel() const
 {
     return _model;
-}
-
-void ActionsManager::reset()
-{
-#ifdef ACTIONS_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
 }
 
 }

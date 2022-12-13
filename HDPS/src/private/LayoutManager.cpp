@@ -118,6 +118,13 @@ LayoutManager::~LayoutManager()
     reset();
 } 
 
+void LayoutManager::initalize()
+{
+#ifdef LAYOUT_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+}
+
 void LayoutManager::reset()
 {
 #ifdef LAYOUT_MANAGER_VERBOSE

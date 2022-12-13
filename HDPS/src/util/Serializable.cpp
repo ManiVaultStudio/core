@@ -20,7 +20,7 @@ namespace hdps {
 namespace util {
 
 Serializable::Serializable(const QString& name /*= ""*/) :
-    _id(QUuid::createUuid().toString()),
+    _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _name(name)
 {
 }

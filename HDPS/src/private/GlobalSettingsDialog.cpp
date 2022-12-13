@@ -19,7 +19,5 @@ GlobalSettingsDialog::GlobalSettingsDialog(QWidget* parent /*= nullptr*/) :
 
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(HdpsApplication::getGlobalSettingsAction().createWidget(this));
-
     setLayout(layout);
 }

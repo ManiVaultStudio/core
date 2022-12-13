@@ -188,6 +188,13 @@ void DataManager::reset()
 #endif
 }
 
+void DataManager::initalize()
+{
+#ifdef DATA_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+}
+
 DataManager::~DataManager()
 {
     reset();

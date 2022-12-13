@@ -1,6 +1,5 @@
 #pragma once
 
-#include "GlobalSettingsAction.h"
 #include "ProjectManager.h"
 
 #include <Application.h>
@@ -75,10 +74,6 @@ public: // Construction
      */
     HdpsApplication(int& argc, char** argv);
 
-public: // Action getters
-
-    static GlobalSettingsAction& getGlobalSettingsAction();
-
 public: // Project IO
 
     /**
@@ -95,7 +90,6 @@ public: // Project IO
 
 private:
     ProjectManager          _projectManager;            /** Project manager for creating/loading/saving projects */
-    GlobalSettingsAction    _globalSettingsAction;      /** Action for modifying global settings */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

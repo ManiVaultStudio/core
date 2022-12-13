@@ -31,8 +31,8 @@ public:
     virtual void removeAction(gui::WidgetAction* action) = 0;
 
     /**
-     * Get actions model
-     * @return List model for actions
+     * Get model which is associated with the manager
+     * @return Reference to an abstract item model inherited model class
      */
     virtual const QAbstractItemModel& getModel() const = 0;
 

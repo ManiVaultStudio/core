@@ -210,6 +210,7 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/HdpsApplication.h
     src/private/MainWindow.h
     src/private/FileMenu.h
+    src/private/WorkspaceMenu.h
     src/private/RecentProjectsMenu.h
     src/private/ImportDataMenu.h
     src/private/ViewMenu.h
@@ -225,6 +226,7 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/HdpsApplication.cpp
     src/private/MainWindow.cpp
     src/private/FileMenu.cpp
+    src/private/WorkspaceMenu.cpp
     src/private/RecentProjectsMenu.cpp
     src/private/ImportDataMenu.cpp
     src/private/ViewMenu.cpp
@@ -288,6 +290,23 @@ set(PRIVATE_PROJECT_SOURCES
 list(APPEND PRIVATE_PROJECT_FILES
     ${PRIVATE_PROJECT_HEADERS}
     ${PRIVATE_PROJECT_SOURCES}
+)
+
+set(PRIVATE_WORKSPACE_HEADERS
+    src/private/Workspace.h
+    src/private/WorkspaceManager.h
+    src/private/WorkspaceWidget.h
+)
+
+set(PRIVATE_WORKSPACE_SOURCES
+    src/private/Workspace.cpp
+    src/private/WorkspaceManager.cpp
+    src/private/WorkspaceWidget.cpp
+)
+
+list(APPEND PRIVATE_WORKSPACE_FILES
+    ${PRIVATE_WORKSPACE_HEADERS}
+    ${PRIVATE_WORKSPACE_SOURCES}
 )
 
 set(PRIVATE_HEADERS

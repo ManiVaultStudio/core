@@ -108,7 +108,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     });
 
     connect(&_removeAction, &TriggerAction::triggered, this, [this]() -> void {
-        qDebug() << "Remove" << getGuiName();
+        Application::core()->getPluginManager().destroyPlugin(this);
     });
 
     connect(&getGuiNameAction(), &StringAction::stringChanged, this, [this](const QString& guiName) -> void {

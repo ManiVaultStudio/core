@@ -8,18 +8,19 @@ using namespace hdps::gui;
 
 FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
-    _newProjectAction(this, "&New Project"),
-    _openProjectAction(this, "&Open Project"),
-    _saveProjectAction(this, "&Save Project"),
-    _saveProjectAsAction(this, "Save Project &As..."),
+    _newProjectAction(this, "New Project"),
+    _openProjectAction(this, "Open Project"),
+    _saveProjectAction(this, "Save Project"),
+    _saveProjectAsAction(this, "Save Project As..."),
     _recentProjectsMenu(this),
+    _workspaceMenu(this),
     _resetMenu(this),
     _importDataMenu(this),
-    _publishAction(this, "&Publish"),
+    _publishAction(this, "Publish"),
     _pluginManagerAction(this, "Plugin Manager"),
     _globalSettingsAction(this, "Global &Settings..."),
     _startPageAction(this, "Start page"),
-    _exitAction(this, "&Exit")
+    _exitAction(this, "Exit")
 {
     setTitle("File");
     setToolTip("File operations");
@@ -28,8 +29,15 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     addAction(&_openProjectAction);
     addAction(&_saveProjectAction);
     addAction(&_saveProjectAsAction);
+
     addSeparator();
+
+    addMenu(&_workspaceMenu);
+    
+    addSeparator();
+    
     addMenu(&_recentProjectsMenu);
+    
     addSeparator();
 
 #ifdef _DEBUG

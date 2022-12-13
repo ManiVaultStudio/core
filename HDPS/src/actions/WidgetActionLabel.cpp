@@ -18,17 +18,12 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     _flags(flags),
     _widgetAction(widgetAction),
     _nameLabel(),
-    _elide(false),
-    _publishAction(this, "Publish..."),
-    _disconnectAction(this, "Disconnect...")
+    _elide(false)
 {
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     connect(_widgetAction, &WidgetAction::isConnectedChanged, this, &WidgetActionLabel::updateNameLabel);
     connect(_widgetAction, &WidgetAction::connectionPermissionsChanged, this, &WidgetActionLabel::updateNameLabel);
-
-    _publishAction.setIcon(fontAwesome.getIcon("cloud-upload-alt"));
-    _disconnectAction.setIcon(fontAwesome.getIcon("unlink"));
 
     auto layout = new QHBoxLayout();
 

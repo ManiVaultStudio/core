@@ -47,6 +47,9 @@ public:
 
     ~DataManager();
 
+    /** Perform manager startup initialization */
+    void initalize() override;
+
     /** Resets the contents of the data manager */
     void reset() override;
 

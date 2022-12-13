@@ -1,10 +1,11 @@
 #include "ActionsModel.h"
+#include "AbstractActionsManager.h"
 
-#include "actions/WidgetAction.h"
-#include "util/Exception.h"
+#include <actions/WidgetAction.h>
+
+#include <Application.h>
 
 using namespace hdps::gui;
-using namespace hdps::util;
 
 #ifdef _DEBUG
     #define ACTIONS_MODEL_VERBOSE
@@ -13,66 +14,74 @@ using namespace hdps::util;
 namespace hdps
 {
 
+ActionsModel::ActionsModel(QObject* parent /*= nullptr*/) :
+    QStandardItemModel(parent)
+{
+    setColumnCount(static_cast<int>(Column::Count));
+
+    setHeaderData(static_cast<int>(Column::Name), Qt::Horizontal, "Name");
+    setHeaderData(static_cast<int>(Column::ID), Qt::Horizontal, "ID");
+    setHeaderData(static_cast<int>(Column::Type), Qt::Horizontal, "Type");
+    setHeaderData(static_cast<int>(Column::Scope), Qt::Horizontal, "Scope");
+
+    setHeaderData(static_cast<int>(Column::Name), Qt::Horizontal, "Name of the parameter", Qt::ToolTipRole);
+    setHeaderData(static_cast<int>(Column::ID), Qt::Horizontal, "Globally unique identifier of the parameter", Qt::ToolTipRole);
+    setHeaderData(static_cast<int>(Column::Type), Qt::Horizontal, "Type of parameter", Qt::ToolTipRole);
+    setHeaderData(static_cast<int>(Column::Scope), Qt::Horizontal, "Whether the parameter is public or private", Qt::ToolTipRole);
+}
+
 void ActionsModel::addAction(WidgetAction* action)
 {
 #ifdef ACTIONS_MODEL_VERBOSE
     qDebug() << __FUNCTION__ << action->text();
 #endif
 
-    //try
-    //{
-    //    // Insert the layer action at the beginning
-    //    beginInsertRows(QModelIndex(), 0, 0);
-    //    {
-    //        _publicActions.insert(0, action);
+    connect(action, &WidgetAction::changed, this, [this, action]() -> void {
+        const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::DisplayRole, action->getId(), -1, Qt::MatchFlag::MatchRecursive);
+            
+        if (matches.count() != 1)
+            return;
 
-    //        const auto updateNumberOfConnectionsColumn = [this, action]() -> void {
-    //            const auto changedCell = index(_publicActions.indexOf(action), Column::NumberOfConnections);
-    //            emit dataChanged(changedCell, changedCell);
-    //        };
+        setData(matches.first().siblingAtColumn(static_cast<int>(Column::Name)), QVariant::fromValue(action->text()), Qt::EditRole);
+    });
 
-    //        connect(action, &WidgetAction::actionConnected, this, updateNumberOfConnectionsColumn);
-    //        connect(action, &WidgetAction::actionDisconnected, this, updateNumberOfConnectionsColumn);
-    //    }
-    //    endInsertRows();
-    //}
-    //catch (std::exception& e)
-    //{
-    //    exceptionMessageBox("Unable to add action to the public actions model", e);
-    //}
-    //catch (...) {
-    //    exceptionMessageBox("Unable to add action to the public actions model");
-    //}
+    const auto createRow = [this, action]() -> QList<QStandardItem*> {
+        const QList<QStandardItem*> standardItems {
+            new QStandardItem(action->text()),
+            new QStandardItem(action->getId()),
+            new QStandardItem(action->getTypeString()),
+            new QStandardItem(action->isPublic() ? "Public" : "Private")
+        };
+
+        
+
+        //for (auto standardItem : standardItems)
+        //    standardItem->setEditable(false);
+
+        return standardItems;
+    };
+    
+    if (action->isPublic()) {
+
+    }
+    else {
+        appendRow(createRow());
+    }
 }
 
 void ActionsModel::removeAction(WidgetAction* action)
 {
 #ifdef ACTIONS_MODEL_VERBOSE
-    qDebug() << __FUNCTION__ << action->text();
+    qDebug() << __FUNCTION__ << action->getId();
 #endif
 
-    //try
-    //{
-    //    if (!_publicActions.contains(action))
-    //        throw std::runtime_error("Action does not exist");
+    const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::DisplayRole, action->getId(), -1, Qt::MatchFlag::MatchRecursive);
 
-    //    const auto row = _publicActions.indexOf(action);
+    if (matches.isEmpty())
+        return;
 
-    //    beginRemoveRows(QModelIndex(), row, row);
-    //    {
-    //        _publicActions.removeAt(row);
-
-    //        delete action;
-    //    }
-    //    endRemoveRows();
-    //}
-    //catch (std::exception& e)
-    //{
-    //    exceptionMessageBox("Unable to remove action from the public actions model", e);
-    //}
-    //catch (...) {
-    //    exceptionMessageBox("Unable to remove action from the public actions model");
-    //}
+    //for (const auto& match : matches)
+    //    removeRow(match.row(), match.parent());
 }
 
 }

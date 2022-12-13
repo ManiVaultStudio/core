@@ -2,7 +2,6 @@
 
 #include <widgets/HierarchyWidget.h>
 
-#include <models/ActionsModel.h>
 #include <models/ActionsFilterModel.h>
 
 #include <QWidget>
@@ -30,7 +29,6 @@ public:
     ActionsWidget(QWidget* parent = nullptr);
 
 private:
-    ActionsModel            _model;                 /** Actions model */
     ActionsFilterModel      _filterModel;           /** Actions filter model for actions model */
-    HierarchyWidget         _hierarchyWidget;       /** Hierarchy widget */
+    HierarchyWidget         _hierarchyWidget;       /** Hierarchy widget for displaying the actions */
 };

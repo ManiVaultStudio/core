@@ -1,7 +1,5 @@
 #pragma once
 
-#include "actions/TriggerAction.h"
-
 #include <QWidget>
 #include <QLabel>
 
@@ -14,8 +12,8 @@ class WidgetAction;
 /**
  * Widget action label class
  *
- * Creates an interactive widget action based label 
- * Linkable actions provide a left-lick context menu that provides linking commands:
+ * Creates a custom label widget for a widget action
+ * Provides linking commands:
  * - Publish an action (create a public shared action)
  * - Connect to a shared action
  * - Disconnect from a shared action
@@ -82,8 +80,6 @@ protected:
     WidgetAction*       _widgetAction;          /** Pointer to widget action */
     QLabel              _nameLabel;             /** Action name label */
     bool                _elide;                 /** Whether to enable label elide (e.g. whether to truncate text and show an ellipsis when there is insufficient space for the text) */
-    TriggerAction       _publishAction;         /** Publish action (so that other actions can connect) */
-    TriggerAction       _disconnectAction;      /** Disconnect from public action */
 };
 
 }

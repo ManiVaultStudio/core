@@ -24,8 +24,11 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
     setToolTip("Manage view plugins");
 
     connect(this, &QMenu::aboutToShow, this, [this]() -> void {
-        clear();
+        for (auto action : actions())
+            delete action;
 
+        clear();
+        
         if (_options.testFlag(LoadSystemViewPlugins))
             addMenu(new LoadSystemViewMenu());
 

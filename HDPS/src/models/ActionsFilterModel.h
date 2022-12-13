@@ -1,5 +1,8 @@
 #pragma once
 
+#include "actions/StringAction.h"
+#include "actions/OptionsAction.h"
+
 #include <QSortFilterProxyModel>
 
 namespace hdps
@@ -18,13 +21,13 @@ public:
 
 public:
 
-    /** Constructor
+    /** Construct with parent \p parent object
      * @param parent Pointer to parent object
     */
     ActionsFilterModel(QObject* parent = nullptr);
 
     /**
-     * Returns whether a give row with give parent is filtered out (false) or in (true)
+     * Returns whether \p row with \p parent is filtered out (false) or in (true)
      * @param row Row index
      * @param parent Parent index
      * @return Boolean indicating whether the item is filtered in or out
@@ -38,56 +41,14 @@ public:
      */
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
 
-    /**
-     * Get action type filter string
-     * @return Action type filter string
-     */
-    QString getTypeFilter() const;
+public: // Action getters
 
-    /**
-     * Set action type filter string
-     * @param typeFilter Action type filter string
-     */
-    void setTypeFilter(const QString& typeFilter);
-
-    /**
-     * Get scope filter
-     * @return Action scope filter
-     */
-    ScopeFilter getScopeFilter() const;
-
-    /**
-     * Set scope filter
-     * @param scopeFilter Scope filter
-     */
-    void setScopeFilter(const ScopeFilter& scopeFilter);
-
-protected:
-
-    /**
-     * Filter by action name
-     * @param index Model index for the action name column
-     * @return Whether the action name passes the filter
-     */
-    bool filterName(const QModelIndex& index) const;
-
-    /**
-     * Filter by action type
-     * @param index Model index for the action type column
-     * @return Whether the action type passes the filter
-     */
-    bool filterType(const QModelIndex& index) const;
-
-    /**
-     * Filter by action scope (private/public)
-     * @param index Model index for the action scope column
-     * @return Whether the action scope passes the filter
-     */
-    bool filterScope(const QModelIndex& index) const;
+    gui::StringAction& getTypeFilterAction() { return _typeFilterAction; }
+    gui::OptionsAction& getScopeFilterAction() { return _scopeFilterAction; }
 
 private:
-    QString         _typeFilter;        /** Action type filter */
-    ScopeFilter     _scopeFilter;       /** Action scope filter */
+    gui::StringAction   _typeFilterAction;      /** Action for filtering by action type */
+    gui::OptionsAction  _scopeFilterAction;     /** Action for filtering based on action scope */
 };
 
 }

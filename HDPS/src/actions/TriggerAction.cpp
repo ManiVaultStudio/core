@@ -14,6 +14,20 @@ TriggerAction::TriggerAction(QObject* parent, const QString& title /*= ""*/) :
     setDefaultWidgetFlags(WidgetFlag::Text);
 }
 
+void TriggerAction::selfTriggered()
+{
+    auto publicTriggerAction = dynamic_cast<TriggerAction*>(_publicAction);
+
+    if (publicTriggerAction == nullptr)
+        return;
+
+    disconnect(publicTriggerAction, &TriggerAction::triggered, this, &TriggerAction::trigger);
+    {
+        publicTriggerAction->trigger();
+    }
+    connect(publicTriggerAction, &TriggerAction::triggered, this, &TriggerAction::trigger);
+}
+
 TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction* triggerAction, const std::int32_t& widgetFlags) :
     QPushButton(parent),
     _triggersAction(triggerAction)
@@ -53,6 +67,14 @@ QString TriggerAction::getTypeString() const
     return "Trigger";
 }
 
+//void TriggerAction::trigger(TriggerAction* sender /*= nullptr*/)
+//{
+//    if (sender == this)
+//        return;
+//
+//    QAction::trigger();
+//}
+
 QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     if (dynamic_cast<QMenu*>(parent))
@@ -77,7 +99,7 @@ void TriggerAction::connectToPublicAction(WidgetAction* publicAction)
 
     Q_ASSERT(publicTriggerAction != nullptr);
 
-    connect(this, &TriggerAction::triggered, publicTriggerAction, &TriggerAction::trigger);
+    connect(this, &TriggerAction::triggered, this, &TriggerAction::selfTriggered);
     connect(publicTriggerAction, &TriggerAction::triggered, this, &TriggerAction::trigger);
 
     WidgetAction::connectToPublicAction(publicAction);
@@ -89,7 +111,7 @@ void TriggerAction::disconnectFromPublicAction()
 
     Q_ASSERT(publicTriggerAction != nullptr);
 
-    disconnect(this, &TriggerAction::triggered, publicTriggerAction, &TriggerAction::trigger);
+    disconnect(this, &TriggerAction::triggered, this, &TriggerAction::selfTriggered);
     disconnect(publicTriggerAction, &TriggerAction::triggered, this, &TriggerAction::trigger);
 
     WidgetAction::disconnectFromPublicAction();

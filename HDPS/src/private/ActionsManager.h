@@ -4,10 +4,10 @@
 
 #include <models/ActionsModel.h>
 
+#include <QList>
+
 namespace hdps
 {
-
-using namespace gui;
 
 class ActionsManager final : public AbstractActionsManager
 {
@@ -21,6 +21,9 @@ public:
     /** Default destructor */
     ~ActionsManager() override;
 
+    /** Perform manager startup initialization */
+    void initalize() override;
+
     /** Resets the contents of the actions manager */
     void reset() override;
 
@@ -28,22 +31,23 @@ public:
      * Add action to the model
      * @param action Pointer to action
      */
-    void addAction(WidgetAction* action) override;
+    void addAction(gui::WidgetAction* action) override;
 
     /**
      * Remove action from the model
      * @param action Pointer to action
      */
-    void removeAction(WidgetAction* action) override;
+    void removeAction(gui::WidgetAction* action) override;
 
     /**
-     * Get actions model
-     * @return List model for actions
+     * Get model which is associated with the manager
+     * @return Reference to an abstract item model inherited model class
      */
     const QAbstractItemModel& getModel() const override;
 
 private:
-    ActionsModel        _model;         /** List model for actions */
+    gui::WidgetActions  _actions;   /** Keep track of allocated actions */
+    ActionsModel        _model;     /** Actions model */
 };
 
 }

@@ -30,7 +30,7 @@ namespace hdps::gui
  * 
  * @author Thomas Kroes
  */
-class LayoutManager : public AbstractLayoutManager
+class LayoutManager final : public AbstractLayoutManager
 {
     Q_OBJECT
 
@@ -41,6 +41,9 @@ public:
 
     /** Default destructor */
     ~LayoutManager() override;
+
+    /** Perform manager startup initialization */
+    void initalize() override;
 
     /** Resets the contents of the layout manager */
     void reset() override;

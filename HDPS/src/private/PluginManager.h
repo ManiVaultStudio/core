@@ -17,6 +17,9 @@ public:
     /** Default destructor */
     ~PluginManager() override;
     
+    /** Perform manager startup initialization */
+    void initalize() override;
+
     /** Resets the contents of the plugin manager */
     void reset() override;
 

@@ -29,6 +29,20 @@ DataHierarchyManager::~DataHierarchyManager()
     reset();
 }
 
+void DataHierarchyManager::initalize()
+{
+#ifdef DATA_HIERARCHY_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+}
+
+void DataHierarchyManager::reset()
+{
+#ifdef DATA_HIERARCHY_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+}
+
 void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/)
 {
     //qDebug() << "Adding" << dataset->getGuiName() << "to the data hierarchy";
@@ -245,13 +259,6 @@ QVariantMap DataHierarchyManager::toVariantMap() const
     }
 
     return variantMap;
-}
-
-void DataHierarchyManager::reset()
-{
-#ifdef DATA_HIERARCHY_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
 }
 
 }
