@@ -2,7 +2,7 @@
 #include "CoreInterface.h"
 #include "widgets/ProjectEditorDialog.h"
 #include "Application.h"
-#include "AbstractLayoutManager.h"
+#include "AbstractWorkspaceManager.h"
 
 #include <QWidget>
 #include <QFileDialog>
@@ -100,7 +100,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     });
 
     connect(&_isolateAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
-        Application::core()->getLayoutManager().isolateViewPlugin(this, toggled);
+        Application::core()->getWorkspaceManager().isolateViewPlugin(this, toggled);
     });
 
     connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {

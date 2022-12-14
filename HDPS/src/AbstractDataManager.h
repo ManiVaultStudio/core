@@ -27,6 +27,13 @@ namespace plugin {
     class RawData;
 }
 
+/**
+ * Abstract data manager
+ *
+ * Base abstract data manager class for managing datasets.
+ *
+ * @author Thomas Kroes
+ */
 class AbstractDataManager : public AbstractManager
 {
     Q_OBJECT

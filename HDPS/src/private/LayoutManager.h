@@ -3,7 +3,7 @@
 #include "DockManager.h"
 #include "ViewPluginsDockWidget.h"
 
-#include <AbstractLayoutManager.h>
+#include <AbstractWorkspaceManager.h>
 
 #include <DockAreaWidget.h>
 
@@ -30,7 +30,7 @@ namespace hdps::gui
  * 
  * @author Thomas Kroes
  */
-class LayoutManager final : public AbstractLayoutManager
+class LayoutManager final : public AbstractWorkspaceManager
 {
     Q_OBJECT
 
@@ -100,8 +100,63 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+public: // Miscellaneous
+
     /** Get all view plugin dock widgets, both from the main and the view plugins dock widget dock managers */
     ViewPluginDockWidgets getViewPluginDockWidgets();
+
+    /**
+     * Get workspace menu
+     * @param menu Pointer to parent menu
+     * @return Pointer to created menu
+     */
+    QMenu* getMenu(QWidget* parent = nullptr);
+
+private:
+
+    /** Create custom icon for the manager */
+    void createIcon();
+
+    /** Creates a new workspace and assigns it to the current workspace */
+    void createWorkspace();
+
+signals:
+
+    /**
+     * Signals that \p workspace is about to be loaded
+     * @param workspace Reference to the workspace that is about to be loaded
+     */
+    void workspaceAboutToBeLoaded(const Workspace& workspace);
+
+    /**
+     * Signals that \p workspace is loaded
+     * @param workspace Reference to the workspace that is loaded
+     */
+    void workspaceLoaded(const Workspace& workspace);
+
+    /**
+     * Signals that \p workspace is saved
+     * @param workspace Reference to the saved workspace
+     */
+    void workspaceSaved(const Workspace& workspace);
+
+    /**
+     * Signals that a workspace is created
+     * @param workspace Reference to the newly created workspace
+     */
+    void workspaceCreated(const Workspace& workspace);
+
+    /**
+     * Signals that a workspace is about to be destroyed
+     * @param workspace Reference to the workspace that is about to be destroyed
+     */
+    void workspaceAboutToBeDestroyed(const Workspace& workspace);
+
+    /**
+     * Signals that a workspace is destroyed
+     * @param workspaceId Globally unique identifier of the workspace that is destroyed
+     */
+    void workspaceDestroyed(const QString& workspaceId);
 
 private:
     QPointer<DockManager>               _dockManager;                   /** Main dock manager for docking system plugins */

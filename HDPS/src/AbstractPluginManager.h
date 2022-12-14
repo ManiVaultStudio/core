@@ -18,6 +18,13 @@ namespace plugin {
     class PluginFactory;
 }
 
+/**
+ * Abstract plugin manager
+ *
+ * Base abstract plugin manager class for managing plugin instances.
+ *
+ * @author Thomas Kroes
+ */
 class AbstractPluginManager : public AbstractManager
 {
     Q_OBJECT

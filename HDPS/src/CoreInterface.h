@@ -9,7 +9,7 @@
 #include "AbstractPluginManager.h"
 #include "AbstractDataManager.h"
 #include "AbstractDataHierarchyManager.h"
-#include "AbstractLayoutManager.h"
+#include "AbstractWorkspaceManager.h"
 #include "AbstractActionsManager.h"
 #include "AbstractProjectManager.h"
 
@@ -314,8 +314,8 @@ public: // Managers
     /** Get a reference to the data hierarchy manager */
     virtual AbstractDataHierarchyManager& getDataHierarchyManager() = 0;
 
-    /** Get a reference to the layout manager */
-    virtual gui::AbstractLayoutManager& getLayoutManager() = 0;
+    /** Get a reference to the workspace manager */
+    virtual gui::AbstractWorkspaceManager& getWorkspaceManager() = 0;
 
     /** Get a reference to the actions manager */
     virtual AbstractActionsManager& getActionsManager() = 0;

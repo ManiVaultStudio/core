@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AbstractManager.h"
+#include "Workspace.h"
 
 #include <ViewPlugin.h>
 
@@ -9,7 +10,14 @@ class QMainWindow;
 namespace hdps::gui
 {
 
-class AbstractLayoutManager : public AbstractManager
+/**
+ * Abstract workspace manager class
+ *
+ * Base abstract workspace manager class for managing workspaces and layout.
+ *
+ * @author Thomas Kroes
+ */
+class AbstractWorkspaceManager : public AbstractManager
 {
     Q_OBJECT
 

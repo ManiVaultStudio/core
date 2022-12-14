@@ -340,9 +340,8 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractPluginManager.h
     src/AbstractActionsManager.h
     src/AbstractDataHierarchyManager.h
-    src/AbstractLayoutManager.h
-    src/AbstractProjectManager.h
     src/AbstractWorkspaceManager.h
+    src/AbstractProjectManager.h
 )
 
 set(PUBLIC_CORE_INTERFACE_FILES

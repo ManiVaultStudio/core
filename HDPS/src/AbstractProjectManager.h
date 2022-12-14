@@ -9,7 +9,7 @@ namespace hdps {
 /**
  * Abstract project manager class
  *
- * Abstract base class for managing projects.
+ * Base abstract plugin manager class for managing projects.
  *
  * @author Thomas Kroes
  */

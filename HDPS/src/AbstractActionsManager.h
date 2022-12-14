@@ -12,6 +12,13 @@ namespace gui {
     class WidgetAction;
 }
 
+/**
+ * Abstract actions manager
+ *
+ * Base abstract actions manager class for managing widget actions.
+ *
+ * @author Thomas Kroes
+ */
 class AbstractActionsManager : public AbstractManager
 {
     Q_OBJECT

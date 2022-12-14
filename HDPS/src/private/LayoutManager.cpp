@@ -4,7 +4,9 @@
 #include "LoadSystemViewMenu.h"
 
 #include <Application.h>
+
 #include <util/Serialization.h>
+#include <util/Icon.h>
 
 #include <DockComponentsFactory.h>
 #include <DockAreaTitleBar.h>
@@ -12,9 +14,10 @@
 
 #include <QMainWindow>
 #include <QToolButton>
+#include <QPainter>
 
 #ifdef _DEBUG
-    #define LAYOUT_MANAGER_VERBOSE
+    #define WORKSPACE_MANAGER_VERBOSE
 #endif
 
 using namespace ads;
@@ -102,15 +105,45 @@ namespace hdps::gui
 {
 
 LayoutManager::LayoutManager() :
-    AbstractLayoutManager(),
+    AbstractWorkspaceManager(),
     _dockManager(),
     _viewPluginsWidget(),
     _initialized(false),
-    _cachedDockWidgetsVisibility()
+    _cachedDockWidgetsVisibility(),
+    _workspace(),
+    _loadWorkspaceAction(this, "Load"),
+    _saveWorkspaceAction(this, "Save"),
+    _saveWorkspaceAsAction(this, "Save As..."),
+    _icon()
 {
-    setObjectName("LayoutManager");
+    setObjectName("WorkspaceManager");
 
     ads::CDockComponentsFactory::setFactory(new CustomComponentsFactory());
+
+    _loadWorkspaceAction.setShortcut(QKeySequence("Ctrl+Shift+O"));
+    _loadWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+    _loadWorkspaceAction.setToolTip("Open workspace from disk");
+
+    _saveWorkspaceAction.setShortcut(QKeySequence("Ctrl+Shift+S"));
+    _saveWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+    _saveWorkspaceAction.setToolTip("Save workspace to disk");
+
+    _saveWorkspaceAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+    _saveWorkspaceAsAction.setToolTip("Save workspace under a new file to disk");
+
+    connect(&_loadWorkspaceAction, &QAction::triggered, [this](bool) {
+        loadWorkspace();
+    });
+
+    connect(&_saveWorkspaceAction, &QAction::triggered, [this](bool) {
+        saveWorkspace(_workspace->getFilePath());
+    });
+
+    connect(&_saveWorkspaceAsAction, &QAction::triggered, [this](bool) {
+        saveWorkspaceAs();
+    });
+
+    createIcon();
 }
 
 LayoutManager::~LayoutManager()
@@ -120,14 +153,14 @@ LayoutManager::~LayoutManager()
 
 void LayoutManager::initalize()
 {
-#ifdef LAYOUT_MANAGER_VERBOSE
+#ifdef WORKSPACE_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 }
 
 void LayoutManager::reset()
 {
-#ifdef LAYOUT_MANAGER_VERBOSE
+#ifdef WORKSPACE_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 }
@@ -164,6 +197,71 @@ void LayoutManager::initialize(QWidget* widget)
     });
 
     _initialized = true;
+}
+
+void LayoutManager::loadWorkspace(QString filePath /*= ""*/)
+{
+    try
+    {
+#ifdef WORKSPACE_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__ << filePath;
+#endif
+
+        emit workspaceAboutToBeLoaded(*(_workspace.get()));
+        {
+            if (!_workspace.isNull()) {
+                const auto workspaceId = _workspace->getId();
+
+                emit workspaceAboutToBeDestroyed(*(_workspace.get()));
+                {
+                    createWorkspace();
+                }
+                emit workspaceDestroyed(workspaceId);
+            }
+            else {
+                createWorkspace();
+            }
+        }
+        emit workspaceLoaded(*(_workspace.get()));
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to load workspace", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to load workspace");
+    }
+}
+
+void LayoutManager::saveWorkspace(QString filePath)
+{
+    try
+    {
+#ifdef WORKSPACE_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__ << filePath;
+#endif
+
+        emit workspaceSaved(*(_workspace.get()));
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to save workspace", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to save workspace");
+    }
+}
+
+void LayoutManager::saveWorkspaceAs()
+{
+#ifdef WORKSPACE_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    if (_workspace.isNull())
+        return;
 }
 
 void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
@@ -206,7 +304,7 @@ void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPl
 
 void LayoutManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate)
 {
-#ifdef LAYOUT_MANAGER_VERBOSE
+#ifdef WORKSPACE_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << viewPlugin->getGuiName() << isolate;
 #endif
 
@@ -234,6 +332,58 @@ void LayoutManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isola
 ViewPluginDockWidgets LayoutManager::getViewPluginDockWidgets()
 {
     return _dockManager->getViewPluginDockWidgets();// << _viewPluginsDockWidget.getDockManager().getViewPluginDockWidgets();
+}
+
+QMenu* LayoutManager::getMenu(QWidget* parent /*= nullptr*/)
+{
+    auto menu = new QMenu("Workspace", parent);
+
+    menu->setTitle("Workspace");
+    menu->setIcon(_icon);
+    menu->setToolTip("Workspace operations");
+
+    menu->addAction(&_loadWorkspaceAction);
+    menu->addAction(&_saveWorkspaceAction);
+    menu->addAction(&_saveWorkspaceAsAction);
+
+    return menu;
+}
+
+void LayoutManager::createIcon()
+{
+    const auto size             = 128;
+    const auto halfSize         = size / 2;
+    const auto margin           = 12;
+    const auto spacing          = 14;
+    const auto halfSpacing      = spacing / 2;
+    const auto lineThickness    = 7.0;
+
+    QPixmap pixmap(size, size);
+
+    pixmap.fill(Qt::transparent);
+
+    QPainter painter(&pixmap);
+
+    painter.setWindow(0, 0, size, size);
+
+    const auto drawWindow = [&](QRectF rectangle) -> void {
+        painter.setBrush(Qt::black);
+        painter.setPen(Qt::NoPen);
+        painter.drawRect(rectangle);
+    };
+
+    drawWindow(QRectF(QPointF(margin, margin), QPointF(halfSize - halfSpacing, size - margin)));
+    drawWindow(QRectF(QPointF(halfSize + halfSpacing, margin), QPointF(size - margin, halfSize - halfSpacing)));
+    drawWindow(QRectF(QPointF(halfSize + halfSpacing, halfSize + halfSpacing), QPointF(size - margin, size - margin)));
+
+    _icon = hdps::gui::createIcon(pixmap);
+}
+
+void LayoutManager::createWorkspace()
+{
+    _workspace.reset(new Workspace(this));
+
+    emit workspaceCreated(*(_workspace.get()));
 }
 
 }

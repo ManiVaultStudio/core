@@ -10,6 +10,13 @@
 namespace hdps
 {
 
+/**
+ * Abstract data hierarchy manager
+ *
+ * Base abstract data hierarchy manager class for organizing the dataset hierarchy.
+ *
+ * @author Thomas Kroes
+ */
 class AbstractDataHierarchyManager : public AbstractManager
 {
     Q_OBJECT
