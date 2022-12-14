@@ -14,8 +14,7 @@
 using namespace hdps;
 using namespace hdps::util;
 
-ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
-    QObject(parent)
+ProjectManager::ProjectManager(QObject* parent /*= nullptr*/)
 {
 }
 

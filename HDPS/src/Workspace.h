@@ -4,6 +4,8 @@
 
 #include <QObject>
 
+namespace hdps {
+
 /**
  * Workspace class
  *
@@ -11,7 +13,7 @@
  * 
  * @author Thomas Kroes
  */
-class Workspace final : public QObject, public hdps::util::Serializable
+class Workspace final : public QObject, public util::Serializable
 {
     Q_OBJECT
 
@@ -60,3 +62,5 @@ signals:
 private:
     QString     _filePath;      /** Location on disk where the workspace resides */
 };
+
+}

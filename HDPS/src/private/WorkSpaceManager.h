@@ -26,20 +26,7 @@ public:
      */
     WorkspaceManager(QObject* parent = nullptr);
 
-    /**
-     * Load a workspace from disk
-     * @param filePath File path of the existing workspace (choose file path with dialog when empty)
-     */
-    void loadWorkspace(QString filePath = "");
-
-    /**
-     * Save a workspace to disk
-     * @param filePath File path of the existing workspace (choose file path with dialog when empty)
-     */
-    void saveWorkspace(QString filePath);
-
-    /** Save a workspace to disk on a different location */
-    void saveWorkspaceAs();
+    
 
     /**
      * Get workspace menu
@@ -94,10 +81,5 @@ signals:
      */
     void workspaceDestroyed(const QString& workspaceId);
 
-private:
-    QScopedPointer<Workspace>   _workspace;                 /** Current workspace */
-    hdps::gui::TriggerAction    _loadWorkspaceAction;       /** Action for loading a workspace from file */
-    hdps::gui::TriggerAction    _saveWorkspaceAction;       /** Action for saving the current workspace to file */
-    hdps::gui::TriggerAction    _saveWorkspaceAsAction;     /** Action for saving the current workspace to file with a different path */
-    QIcon                       _icon;                      /** Manager icon */
+
 };

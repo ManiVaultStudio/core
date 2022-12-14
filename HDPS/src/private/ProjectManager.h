@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Project.h"
+#include <AbstractProjectManager.h>
 
 #include <QObject>
 #include <QPointer>
@@ -12,7 +12,7 @@
  *
  * @author Thomas Kroes
  */
-class ProjectManager final : public QObject
+class ProjectManager final : public hdps::AbstractProjectManager
 {
     Q_OBJECT
 
@@ -45,40 +45,40 @@ signals:
      * Signals that a new project is created
      * @param project Reference to the created project
      */
-    void projectCreated(const Project& project);
+    void projectCreated(const hdps::Project& project);
 
     /**
      * Signals that a project is destroyed
      * @param projectId Globally unique identifier of the project that is destroyed
      */
-    void projectDestroyed(const QString& projectId);
+    void projectDestroyed(const hdps::QString& projectId);
 
     /**
      * Signals that a project is about to be loaded
      * @param project Reference to the project that is about to be loaded
      */
-    void projectAboutToBeLoaded(const Project& project);
+    void projectAboutToBeLoaded(const hdps::Project& project);
 
     /**
      * Signals that a project is loaded
      * @param project Reference to the project that is loaded
      */
-    void projectLoaded(const Project& project);
+    void projectLoaded(const hdps::Project& project);
 
     /**
      * Signals that a project is saved
      * @param project Reference to the saved project
      */
-    void projectSaved(const Project& project);
+    void projectSaved(const hdps::Project& project);
 
     /**
      * Signals that a project is about to be destroyed
      * @param project Reference to the project that is about to be destroyed
      */
-    void projectAboutToBeDestroyed(const Project& project);
+    void projectAboutToBeDestroyed(const hdps::Project& project);
 
 private:
-    QPointer<Project>   _project;       /** Current project */
+    QPointer<hdps::Project>   _project;       /** Current project */
     //QString         _currentProjectFilePath;                /** File path of the current project */
     //QString         _serializationTemporaryDirectory;       /** Temporary directory for serialization */
     //bool            _serializationAborted;                  /** Whether (de)serialization was aborted */

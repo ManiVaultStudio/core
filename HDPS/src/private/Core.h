@@ -9,6 +9,8 @@
 #include "ActionsManager.h"
 #include "DataHierarchyManager.h"
 #include "LayoutManager.h"
+#include "ProjectManager.h"
+#include "WorkspaceManager.h"
 
 #include <event/EventListener.h>
 
@@ -264,12 +266,16 @@ public: // Managers
     /** Get a reference to the actions manager */
     AbstractActionsManager& getActionsManager() override;
 
+    /** Get a reference to the project manager */
+    AbstractProjectManager& getProjectManager();
+
 private:
     PluginManager                   _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core */
     DataManager                     _dataManager;               /** Data manager responsible for storing data sets and data selections */
     DataHierarchyManager            _dataHierarchyManager;      /** Data hierarchy manager for providing a hierarchical dataset structure */
     LayoutManager                   _layoutManager;             /** Layout manager for controlling widgets layout */
     ActionsManager                  _actionsManager;            /** Actions manager for storing actions */
+    ProjectManager                  _projectManager;            /** Manager for loading/saving projects */
     std::vector<EventListener*>     _eventListeners;            /** List of classes listening for core events */
 
     friend class DataHierarchyManager;

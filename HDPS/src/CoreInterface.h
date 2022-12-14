@@ -11,6 +11,7 @@
 #include "AbstractDataHierarchyManager.h"
 #include "AbstractLayoutManager.h"
 #include "AbstractActionsManager.h"
+#include "AbstractProjectManager.h"
 
 #include <QString>
 
@@ -318,7 +319,10 @@ public: // Managers
 
     /** Get a reference to the actions manager */
     virtual AbstractActionsManager& getActionsManager() = 0;
-    
+
+    /** Get a reference to the project manager */
+    virtual AbstractProjectManager& getProjectManager() = 0;
+
 protected:
     bool    _datasetGroupingEnabled;        /** Whether datasets can be grouped or not */
 

@@ -35,6 +35,68 @@ public:
      * @param isolate Whether to isolate \p viewPlugin or to reset the view layout prior to isolation
      */
     virtual void isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate) = 0;
+
+    /**
+     * Get workspace menu
+     * @param menu Pointer to parent menu
+     * @return Pointer to created menu
+     */
+    virtual QMenu* getMenu(QWidget* parent = nullptr) = 0;
+
+public: // IO
+
+    /**
+     * Load a workspace from disk
+     * @param filePath File path of the existing workspace (choose file path with dialog when empty)
+     */
+    virtual void loadWorkspace(QString filePath = "") = 0;
+
+    /**
+     * Save a workspace to disk
+     * @param filePath File path of the existing workspace (choose file path with dialog when empty)
+     */
+    virtual void saveWorkspace(QString filePath) = 0;
+
+    /** Save a workspace to disk on a different location */
+    virtual void saveWorkspaceAs() = 0;
+
+signals:
+
+    /**
+     * Signals that \p workspace is about to be loaded
+     * @param workspace Reference to the workspace that is about to be loaded
+     */
+    void workspaceAboutToBeLoaded(const Workspace& workspace);
+
+    /**
+     * Signals that \p workspace is loaded
+     * @param workspace Reference to the workspace that is loaded
+     */
+    void workspaceLoaded(const Workspace& workspace);
+
+    /**
+     * Signals that \p workspace is saved
+     * @param workspace Reference to the saved workspace
+     */
+    void workspaceSaved(const Workspace& workspace);
+
+    /**
+     * Signals that a workspace is created
+     * @param workspace Reference to the newly created workspace
+     */
+    void workspaceCreated(const Workspace& workspace);
+
+    /**
+     * Signals that a workspace is about to be destroyed
+     * @param workspace Reference to the workspace that is about to be destroyed
+     */
+    void workspaceAboutToBeDestroyed(const Workspace& workspace);
+
+    /**
+     * Signals that a workspace is destroyed
+     * @param workspaceId Globally unique identifier of the workspace that is destroyed
+     */
+    void workspaceDestroyed(const QString& workspaceId);
 };
 
 }

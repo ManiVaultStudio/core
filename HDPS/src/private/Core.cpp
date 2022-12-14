@@ -335,6 +335,11 @@ AbstractActionsManager& Core::getActionsManager()
     return _actionsManager;
 }
 
+AbstractProjectManager& Core::getProjectManager()
+{
+    return _projectManager;
+}
+
 AbstractDataHierarchyManager& Core::getDataHierarchyManager()
 {
     return _dataHierarchyManager;

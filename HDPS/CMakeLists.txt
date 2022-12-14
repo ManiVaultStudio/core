@@ -183,13 +183,11 @@ set(PRIVATE_ACTIONS_FILES
 )
 
 set(PRIVATE_PROJECT_MANAGER_HEADERS
-    src/private/Project.h
     src/private/ProjectManager.h
     src/private/ProjectWidget.h
 )
 
 set(PRIVATE_PROJECT_MANAGER_SOURCES
-    src/private/Project.cpp
     src/private/ProjectManager.cpp
     src/private/ProjectWidget.cpp
 )
@@ -200,12 +198,10 @@ set(PRIVATE_PROJECT_MANAGER_FILES
 )
 
 set(PRIVATE_WORKSPACE_MANAGER_HEADERS
-    src/private/Workspace.h
     src/private/WorkspaceManager.h
 )
 
 set(PRIVATE_WORKSPACE_MANAGER_SOURCES
-    src/private/Workspace.cpp
     src/private/WorkspaceManager.cpp
 )
 
@@ -617,10 +613,14 @@ set(PUBLIC_UTIL_FILES
 
 set(PUBLIC_APPLICATION_HEADERS
     src/Application.h
+    src/Project.h
+    src/Workspace.h
 )
 
 set(PUBLIC_APPLICATION_SOURCES
     src/Application.cpp
+    src/Project.cpp
+    src/Workspace.cpp
 )
 
 set(PUBLIC_APPLICATION_FILES

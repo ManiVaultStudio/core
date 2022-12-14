@@ -16,6 +16,11 @@ public:
 
     /** Resets the contents of the manager */
     virtual void reset() = 0;
+
+    /**
+     * Get icon representing the manager
+     */
+    virtual QIcon getIcon() const = 0;
 };
 
 }

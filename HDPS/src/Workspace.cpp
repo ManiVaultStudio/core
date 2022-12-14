@@ -2,10 +2,11 @@
 
 #include <Application.h>
 
-using namespace hdps;
+namespace hdps {
 
 Workspace::Workspace(QObject* parent /*= nullptr*/) :
-    QObject(parent)
+    QObject(parent),
+    Serializable("Workspace")
 {
 }
 
@@ -28,4 +29,6 @@ void Workspace::setFilePath(const QString& filePath)
     _filePath = filePath;
 
     emit filePathChanged(_filePath);
+}
+
 }

@@ -69,6 +69,23 @@ public:
      */
     void isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate) override;
 
+public: // IO
+
+    /**
+     * Load a workspace from disk
+     * @param filePath File path of the existing workspace (choose file path with dialog when empty)
+     */
+    void loadWorkspace(QString filePath = "") override;
+
+    /**
+     * Save a workspace to disk
+     * @param filePath File path of the existing workspace (choose file path with dialog when empty)
+     */
+    void saveWorkspace(QString filePath) override;
+
+    /** Save a workspace to disk on a different location */
+    void saveWorkspaceAs() override;
+
 public: // Serialization
 
     /**
@@ -91,6 +108,11 @@ private:
     QPointer<ViewPluginsDockWidget>     _viewPluginsWidget;             /** Pointer to view plugins widget in which non-system view plugins are docked */
     bool                                _initialized;                   /** Whether the layout manager is initialized or not */
     QMap<DockWidget*, bool>             _cachedDockWidgetsVisibility;   /** Cached dock widgets visibility for view plugin isolation */
+    QScopedPointer<Workspace>           _workspace;                     /** Current workspace */
+    hdps::gui::TriggerAction            _loadWorkspaceAction;           /** Action for loading a workspace from file */
+    hdps::gui::TriggerAction            _saveWorkspaceAction;           /** Action for saving the current workspace to file */
+    hdps::gui::TriggerAction            _saveWorkspaceAsAction;         /** Action for saving the current workspace to file with a different path */
+    QIcon                               _icon;                          /** Manager icon */
 };
 
 }

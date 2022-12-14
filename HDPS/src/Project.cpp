@@ -2,7 +2,25 @@
 
 #include <Application.h>
 
-using namespace hdps;
+namespace hdps {
+
+Project::Project(QObject* parent /*= nullptr*/) :
+    QObject(parent),
+    Serializable("Project")
+{
+}
+
+QString Project::getFilePath() const
+{
+    return _filePath;
+}
+
+void Project::setFilePath(const QString& filePath)
+{
+    _filePath = filePath;
+
+    emit filePathChanged(_filePath);
+}
 
 void Project::fromVariantMap(const QVariantMap& variantMap)
 {
@@ -20,4 +38,6 @@ QVariantMap Project::toVariantMap() const
     //variantMap[_dataHierarchyManager->getSerializationName()] = _dataHierarchyManager->toVariantMap();
 
     return variantMap;
+}
+
 }

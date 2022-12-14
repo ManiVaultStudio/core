@@ -3,7 +3,8 @@
 #include "Project.h"
 
 #include <QObject>
-#include <QPointer>
+
+namespace hdps {
 
 /**
  * Abstract project manager class
@@ -12,32 +13,26 @@
  *
  * @author Thomas Kroes
  */
-class AbstractProjectManager final : public QObject
+class AbstractProjectManager : public QObject
 {
     Q_OBJECT
 
 public:
 
-    /**
-     * Creates a new project manager from with \p parent object
-     * @param parent Pointer to parent object
-     */
-    ProjectManager(QObject* parent = nullptr);
-
     /** Creates a new project */
-    void newProject();
+    virtual void newProject() = 0;
 
     /**
      * Load a project from disk
      * @param projectFilePath File path of the existing project (choose file path when empty)
      */
-    void loadProject(QString projectFilePath /*= ""*/);
+    virtual void loadProject(QString projectFilePath /*= ""*/) = 0;
 
     /**
      * Save a project to disk
      * @param projectFilePath File path of the existing project (choose file path when empty)
      */
-    void saveProject(QString projectFilePath /*= ""*/);
+    virtual void saveProject(QString projectFilePath /*= ""*/) = 0;
 
 signals:
 
@@ -76,13 +71,9 @@ signals:
      * @param project Reference to the project that is about to be destroyed
      */
     void projectAboutToBeDestroyed(const Project& project);
-
-private:
-    QPointer<Project>   _project;       /** Current project */
-    //QString         _currentProjectFilePath;                /** File path of the current project */
-    //QString         _serializationTemporaryDirectory;       /** Temporary directory for serialization */
-    //bool            _serializationAborted;                  /** Whether (de)serialization was aborted */
 };
+
+}
 
 
 ///**
