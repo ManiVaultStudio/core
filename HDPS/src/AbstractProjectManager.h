@@ -6,13 +6,13 @@
 #include <QPointer>
 
 /**
- * Project class
+ * Abstract project manager class
  *
- * Class for managing the creation/loading/saving of projects and contains a single project instance.
+ * Abstract base class for managing projects.
  *
  * @author Thomas Kroes
  */
-class ProjectManager final : public QObject
+class AbstractProjectManager final : public QObject
 {
     Q_OBJECT
 

@@ -65,18 +65,6 @@ public: // Data access
      */
     void removeDataset(Dataset<DatasetImpl> dataset) override final;
 
-    /** Removes all currently loaded datasets */
-    void removeAllDatasets() override final;
-
-    /**
-     * Copies a dataset and adds it to the data hierarchy
-     * @param dataset Smart pointer to dataset to copy
-     * @param datasetGuiName Name of the added dataset in the GUI
-     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (root if not valid)
-     * @return Smart pointer to the copied dataset
-     */
-    Dataset<DatasetImpl> copyDataset(const Dataset<DatasetImpl>& dataset, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) override;
-
     /**
      * Creates a dataset derived from a source dataset.
      * @param guiName GUI name for the new dataset from the core

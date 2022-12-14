@@ -87,61 +87,8 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
         }
     }
             
-    switch (pluginType)
-    {
-        case plugin::Type::ANALYSIS:
-        {
-            if (!menus.contains("Analyze"))
-                break;
-
-            menus["Analyze"]->setTitle("Analyze");
-            menus["Analyze"]->setIcon(Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
-            break;
-        }
-
-        case plugin::Type::LOADER:
-        {
-            if (!menus.contains("Import"))
-                break;
-
-            menus["Import"]->setTitle("Import");
-            menus["Import"]->setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
-            break;
-        }
-
-        case plugin::Type::WRITER:
-        {
-            if (!menus.contains("Export"))
-                break;
-
-            menus["Export"]->setTitle("Export");
-            menus["Export"]->setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
-            break;
-        }
-
-        case plugin::Type::TRANSFORMATION:
-        {
-            if (!menus.contains("Transform"))
-                break;
-
-            menus["Transform"]->setTitle("Transform");
-            menus["Transform"]->setIcon(Application::getIconFont("FontAwesome").getIcon("random"));
-            break;
-        }
-
-        case plugin::Type::VIEW:
-        {
-            if (!menus.contains("View"))
-                break;
-
-            menus["View"]->setTitle("View");
-            menus["View"]->setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
-            break;
-        }
-
-        default:
-            break;
-    }
+    menus["Analyze"]->setTitle(hdps::plugin::getPluginTypeName(pluginType));
+    menus["Analyze"]->setIcon(hdps::plugin::getPluginTypeIcon(pluginType));
 }
 
 QAction* DataHierarchyWidgetContextMenu::getGroupAction()

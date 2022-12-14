@@ -76,37 +76,7 @@ public: // Settings API
      */
     void setSetting(const QString& path, const QVariant& value);
 
-public: // Project IO
-
-    /**
-     * Load project from disk
-     * @param projectFilePath File path of the project (if empty, the user will  select a file location by hand)
-     */
-    virtual void loadProject(QString projectFilePath = "") = 0;
-
-    /**
-     * Save project to disk
-     * @param projectFilePath File path of the project (if empty, the user will  select a file location by hand)
-     */
-    virtual void saveProject(QString projectFilePath = "") = 0;
-
-    /**
-     * Get current project file path
-     * @return File path of the current project
-     */
-    virtual QString getCurrentProjectFilePath() const final;
-
-    /**
-     * Set current project file path
-     * @param currentProjectFilePath Current project file path
-     */
-    virtual void setCurrentProjectFilePath(const QString& currentProjectFilePath) final;
-
-    /**
-     * Add recent project file path (adds the path to the settings so that users can select the project from a recent list)
-     * @param recentProjectFilePath File path of the recent project
-     */
-    virtual void addRecentProjectFilePath(const QString& recentProjectFilePath) final;
+public: // Logging
 
     /**
      * Get application-wide logger instance
@@ -142,7 +112,6 @@ protected:
     CoreInterface*  _core;                                  /** Shared pointer to HDPS core */
     IconFonts       _iconFonts;                             /** Icon fonts resource */
     QSettings       _settings;                              /** Settings */
-    QString         _currentProjectFilePath;                /** File path of the current project */
     QString         _serializationTemporaryDirectory;       /** Temporary directory for serialization */
     bool            _serializationAborted;                  /** Whether (de)serialization was aborted */
     util::Logger    _logger;                                /** Logger instance */

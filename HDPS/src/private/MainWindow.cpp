@@ -48,9 +48,9 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
     setCentralWidget(_stackedWidget);
 
-    connect(Application::current(), &Application::currentProjectFilePathChanged, [this](const QString& currentProjectFilePath) {
-        setWindowTitle(currentProjectFilePath + (currentProjectFilePath.isEmpty() ? " HDPS" : " - HDPS"));
-    });
+    //connect(Application::current(), &Application::currentProjectFilePathChanged, [this](const QString& currentProjectFilePath) {
+    //    setWindowTitle(currentProjectFilePath + (currentProjectFilePath.isEmpty() ? " HDPS" : " - HDPS"));
+    //});
 
     Application::core()->getLayoutManager().initialize(this);
 

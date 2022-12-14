@@ -1,18 +1,8 @@
 #include "HdpsApplication.h"
-#include "Archiver.h"
-#include "DataHierarchyManager.h"
 
 #include <CoreInterface.h>
 
 #include <QDebug>
-#include <QTemporaryDir>
-#include <QFileDialog>
-#include <QDir>
-#include <QGridLayout>
-#include <QCheckBox>
-#include <QLabel>
-#include <QSpinBox>
-#include <QLineEdit>
 
 #define _VERBOSE
 
@@ -27,18 +17,19 @@ namespace hdps {
 
 HdpsApplication::HdpsApplication(int& argc, char** argv) :
     Application(argc, argv),
-    _projectManager()
+    _projectManager(this),
+    _workspaceManager(this)
 {
 }
 
-void HdpsApplication::loadProject(QString projectFilePath /*= ""*/)
+ProjectManager& HdpsApplication::getProjectManager()
 {
-    
+    return _projectManager;
 }
 
-void HdpsApplication::saveProject(QString projectFilePath /*= ""*/)
+WorkspaceManager& HdpsApplication::getWorkspaceManager()
 {
-    
+    return _workspaceManager;
 }
 
 HdpsApplication::TaskProgressDialog::TaskProgressDialog(QWidget* parent, const QStringList& tasks, const QString& title, const QIcon& icon) :

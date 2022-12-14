@@ -184,52 +184,6 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
     }
 }
 
-void Core::removeAllDatasets()
-{
-#ifdef CORE_VERBOSE
-    qDebug() << "Removing all datasets from the core";
-#endif
-
-    for (auto topLevelItem : _dataHierarchyManager.getTopLevelItems())
-        removeDataset(topLevelItem->getDataset());
-
-    Application::current()->setCurrentProjectFilePath("");
-}
-
-Dataset<DatasetImpl> Core::copyDataset(const Dataset<DatasetImpl>& dataset, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)
-{
-    try
-    {
-        // Except if the source dataset is invalid
-        if (!dataset.isValid())
-            throw std::runtime_error("Source dataset is invalid");
-
-        // Copy the dataset
-        auto datasetCopy = dataset->copy();
-
-        // Adjust GUI name
-        datasetCopy->setGuiName(dataSetGuiName);
-
-        // Establish parent
-        auto parent = parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(parentDataset) : (dataset->getDataHierarchyItem().hasParent() ? dataset->getParent() : Dataset<DatasetImpl>());
-
-        // Add to the data hierarchy manager
-        _dataHierarchyManager.addItem(const_cast<Dataset<DatasetImpl>&>(datasetCopy), parent);
-
-        // Notify others that data was added
-        notifyDatasetAdded(dataset);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to copy dataset", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to copy dataset");
-    }
-
-    return Dataset<DatasetImpl>();
-}
-
 Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)
 {
     // Get the data type of the source dataset

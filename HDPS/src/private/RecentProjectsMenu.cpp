@@ -11,11 +11,6 @@ RecentProjectsMenu::RecentProjectsMenu(QWidget* parent /*= nullptr*/) :
     setToolTip("Recently opened HDPS projects");
     setIcon(Application::getIconFont("FontAwesome").getIcon("clock"));
 
-    updateActions();
-}
-
-void RecentProjectsMenu::updateActions()
-{
     clear();
 
     const auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();

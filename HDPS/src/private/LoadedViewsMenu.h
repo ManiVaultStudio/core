@@ -21,12 +21,6 @@ public:
      */
     LoadedViewsMenu(QWidget *parent = nullptr);
 
-    /**
-     * Invoked when the menu is shown
-     * @param showEvent Pointer to the show event
-     */
-    void showEvent(QShowEvent* showEvent) override;
-
 private:
 
     /**

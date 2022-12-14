@@ -182,13 +182,46 @@ set(PRIVATE_ACTIONS_FILES
     ${PRIVATE_ACTIONS_SOURCES}
 )
 
+set(PRIVATE_PROJECT_MANAGER_HEADERS
+    src/private/Project.h
+    src/private/ProjectManager.h
+    src/private/ProjectWidget.h
+)
+
+set(PRIVATE_PROJECT_MANAGER_SOURCES
+    src/private/Project.cpp
+    src/private/ProjectManager.cpp
+    src/private/ProjectWidget.cpp
+)
+
+set(PRIVATE_PROJECT_MANAGER_FILES
+    ${PRIVATE_PROJECT_MANAGER_HEADERS}
+    ${PRIVATE_PROJECT_MANAGER_SOURCES}
+)
+
+set(PRIVATE_WORKSPACE_MANAGER_HEADERS
+    src/private/Workspace.h
+    src/private/WorkspaceManager.h
+)
+
+set(PRIVATE_WORKSPACE_MANAGER_SOURCES
+    src/private/Workspace.cpp
+    src/private/WorkspaceManager.cpp
+)
+
+set(PRIVATE_WORKSPACE_MANAGER_FILES
+    ${PRIVATE_WORKSPACE_MANAGER_HEADERS}
+    ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
+)
+
 set(PRIVATE_MANAGER_HEADERS
     ${PRIVATE_LAYOUT_MANAGER_HEADERS}
     ${PRIVATE_PLUGIN_MANAGER_HEADERS}
     ${PRIVATE_DATA_MANAGER_HEADERS}
     ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
     ${PRIVATE_ACTIONS_MANAGER_HEADERS}
-    ${PRIVATE_ACTIONS_HEADERS}
+    ${PRIVATE_PROJECT_MANAGER_HEADERS}
+    ${PRIVATE_WORKSPACE_MANAGER_HEADERS}
 )
 
 set(PRIVATE_MANAGER_SOURCES
@@ -197,7 +230,8 @@ set(PRIVATE_MANAGER_SOURCES
     ${PRIVATE_DATA_MANAGER_SOURCES}
     ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
     ${PRIVATE_ACTIONS_MANAGER_SOURCES}
-    ${PRIVATE_ACTIONS_SOURCES}
+    ${PRIVATE_PROJECT_MANAGER_SOURCES}
+    ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
     ${PRIVATE_MANAGER_HEADERS}
 )
 
@@ -210,7 +244,6 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/HdpsApplication.h
     src/private/MainWindow.h
     src/private/FileMenu.h
-    src/private/WorkspaceMenu.h
     src/private/RecentProjectsMenu.h
     src/private/ImportDataMenu.h
     src/private/ViewMenu.h
@@ -226,7 +259,6 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/HdpsApplication.cpp
     src/private/MainWindow.cpp
     src/private/FileMenu.cpp
-    src/private/WorkspaceMenu.cpp
     src/private/RecentProjectsMenu.cpp
     src/private/ImportDataMenu.cpp
     src/private/ViewMenu.cpp
@@ -275,47 +307,12 @@ set(PRIVATE_MISCELLANEOUS_FILES
     ${PRIVATE_MISCELLANEOUS_SOURCES}
 )
 
-set(PRIVATE_PROJECT_HEADERS
-    src/private/Project.h
-    src/private/ProjectManager.h
-    src/private/ProjectWidget.h
-)
-
-set(PRIVATE_PROJECT_SOURCES
-    src/private/Project.cpp
-    src/private/ProjectManager.cpp
-    src/private/ProjectWidget.cpp
-)
-
-list(APPEND PRIVATE_PROJECT_FILES
-    ${PRIVATE_PROJECT_HEADERS}
-    ${PRIVATE_PROJECT_SOURCES}
-)
-
-set(PRIVATE_WORKSPACE_HEADERS
-    src/private/Workspace.h
-    src/private/WorkspaceManager.h
-    src/private/WorkspaceWidget.h
-)
-
-set(PRIVATE_WORKSPACE_SOURCES
-    src/private/Workspace.cpp
-    src/private/WorkspaceManager.cpp
-    src/private/WorkspaceWidget.cpp
-)
-
-list(APPEND PRIVATE_WORKSPACE_FILES
-    ${PRIVATE_WORKSPACE_HEADERS}
-    ${PRIVATE_WORKSPACE_SOURCES}
-)
-
 set(PRIVATE_HEADERS
     ${PRIVATE_CORE_HEADERS}
     ${PRIVATE_MANAGER_HEADERS}
     ${PRIVATE_APPLICATION_HEADERS}
     ${PRIVATE_START_PAGE_HEADERS}
     ${PRIVATE_MISCELLANEOUS_HEADERS}
-    ${PRIVATE_PROJECT_HEADERS}
 )
 
 set(PRIVATE_SOURCES
@@ -324,7 +321,6 @@ set(PRIVATE_SOURCES
     ${PRIVATE_APPLICATION_SOURCES}
     ${PRIVATE_START_PAGE_SOURCES}
     ${PRIVATE_MISCELLANEOUS_SOURCES}
-    ${PRIVATE_PROJECT_SOURCES}
     ${PRIVATE_HEADERS}
 )
 
@@ -335,9 +331,10 @@ source_group(Managers\\Plugin FILES ${PRIVATE_PLUGIN_MANAGER_FILES})
 source_group(Managers\\Data FILES ${PRIVATE_DATA_MANAGER_FILES})
 source_group(Managers\\DataHierarchy FILES ${PRIVATE_DATA_HIERARCHY_MANAGER_FILES})
 source_group(Managers\\Actions FILES ${PRIVATE_ACTIONS_MANAGER_FILES})
+source_group(Managers\\Project FILES ${PRIVATE_PROJECT_MANAGER_FILES})
+source_group(Managers\\Workspace FILES ${PRIVATE_WORKSPACE_MANAGER_FILES})
 source_group(StartPage FILES ${PRIVATE_START_PAGE_FILES})
 source_group(Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
-source_group(Project FILES ${PRIVATE_PROJECT_FILES})
 source_group(Actions FILES ${PRIVATE_ACTIONS_FILES})
 
 set(PUBLIC_CORE_INTERFACE_HEADERS
@@ -348,6 +345,8 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractActionsManager.h
     src/AbstractDataHierarchyManager.h
     src/AbstractLayoutManager.h
+    src/AbstractProjectManager.h
+    src/AbstractWorkspaceManager.h
 )
 
 set(PUBLIC_CORE_INTERFACE_FILES

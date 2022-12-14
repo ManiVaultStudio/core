@@ -1,5 +1,6 @@
 #include "FileMenu.h"
 #include "PluginManagerDialog.h"
+#include "HdpsApplication.h"
 
 #include <Application.h>
 
@@ -13,7 +14,6 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     _saveProjectAction(this, "Save Project"),
     _saveProjectAsAction(this, "Save Project As..."),
     _recentProjectsMenu(this),
-    _workspaceMenu(this),
     _resetMenu(this),
     _importDataMenu(this),
     _publishAction(this, "Publish"),
@@ -25,102 +25,106 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     setTitle("File");
     setToolTip("File operations");
 
-    addAction(&_newProjectAction);
-    addAction(&_openProjectAction);
-    addAction(&_saveProjectAction);
-    addAction(&_saveProjectAsAction);
+    connect(this, &QMenu::aboutToShow, this, [this]() -> void {
+        clear();
 
-    addSeparator();
+        addAction(&_newProjectAction);
+        addAction(&_openProjectAction);
+        addAction(&_saveProjectAction);
+        addAction(&_saveProjectAsAction);
 
-    addMenu(&_workspaceMenu);
-    
-    addSeparator();
-    
-    addMenu(&_recentProjectsMenu);
-    
-    addSeparator();
+        addSeparator();
+
+        addMenu(dynamic_cast<HdpsApplication*>(Application::current())->getWorkspaceManager().getMenu());
+
+        addSeparator();
+
+        addMenu(&_recentProjectsMenu);
+
+        addSeparator();
 
 #ifdef _DEBUG
-    addSeparator();
-    {
-        addMenu(&_resetMenu);
-    }
-    addSeparator();
+        addSeparator();
+        {
+            addMenu(&_resetMenu);
+        }
+        addSeparator();
 #endif
-    
-    addMenu(&_importDataMenu);
-    addSeparator();
-    addAction(&_publishAction);
-    addSeparator();
-    addAction(&_pluginManagerAction); 
-    addSeparator();
-    addAction(&_globalSettingsAction);
-    addSeparator();
-    addAction(&_startPageAction);
-    addAction(&_exitAction);
 
-    _newProjectAction.setShortcut(QKeySequence("Ctrl+N"));
-    _newProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
-    _newProjectAction.setToolTip("Open project from disk");
+        addMenu(&_importDataMenu);
+        addSeparator();
+        addAction(&_publishAction);
+        addSeparator();
+        addAction(&_pluginManagerAction);
+        addSeparator();
+        addAction(&_globalSettingsAction);
+        addSeparator();
+        addAction(&_startPageAction);
+        addAction(&_exitAction);
 
-    _openProjectAction.setShortcut(QKeySequence("Ctrl+O"));
-    _openProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-    _openProjectAction.setToolTip("Open project from disk");
+        _newProjectAction.setShortcut(QKeySequence("Ctrl+N"));
+        _newProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+        _newProjectAction.setToolTip("Open project from disk");
 
-    _saveProjectAction.setShortcut(QKeySequence("Ctrl+S"));
-    _saveProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-    _saveProjectAction.setToolTip("Save project to disk");
+        _openProjectAction.setShortcut(QKeySequence("Ctrl+O"));
+        _openProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+        _openProjectAction.setToolTip("Open project from disk");
 
-    _saveProjectAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-    _saveProjectAsAction.setToolTip("Save project to disk in a chosen location");
+        _saveProjectAction.setShortcut(QKeySequence("Ctrl+S"));
+        _saveProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+        _saveProjectAction.setToolTip("Save project to disk");
 
-    _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
-    
-    _publishAction.setShortcut(QKeySequence("Ctrl+P"));
-    _publishAction.setIcon(Application::getIconFont("FontAwesome").getIcon("share"));
-    _publishAction.setToolTip("Publish the HDPS application");
+        _saveProjectAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+        _saveProjectAsAction.setToolTip("Save project to disk in a chosen location");
 
-    _pluginManagerAction.setShortcut(QKeySequence("Ctrl+M"));
-    _pluginManagerAction.setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
-    _pluginManagerAction.setToolTip("View loaded plugins");
+        _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
 
-    _globalSettingsAction.setShortcut(QKeySequence("Ctrl+E"));
-    _globalSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
-    _globalSettingsAction.setToolTip("Modify global HDPS settings");
+        _publishAction.setShortcut(QKeySequence("Ctrl+P"));
+        _publishAction.setIcon(Application::getIconFont("FontAwesome").getIcon("share"));
+        _publishAction.setToolTip("Publish the HDPS application");
 
-    _startPageAction.setShortcut(QKeySequence("Alt+W"));
-    _startPageAction.setIcon(Application::getIconFont("FontAwesome").getIcon("door-open"));
-    _startPageAction.setToolTip("Show the HDPS start page");
+        _pluginManagerAction.setShortcut(QKeySequence("Ctrl+M"));
+        _pluginManagerAction.setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+        _pluginManagerAction.setToolTip("View loaded plugins");
 
-    _exitAction.setShortcut(QKeySequence("Alt+F4"));
-    _exitAction.setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
-    _exitAction.setToolTip("Exit the HDPS application");
+        _globalSettingsAction.setShortcut(QKeySequence("Ctrl+E"));
+        _globalSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+        _globalSettingsAction.setToolTip("Modify global HDPS settings");
 
-    connect(&_openProjectAction, &QAction::triggered, this, []() -> void {
-        Application::current()->loadProject();
-    });
+        _startPageAction.setShortcut(QKeySequence("Alt+W"));
+        _startPageAction.setIcon(Application::getIconFont("FontAwesome").getIcon("door-open"));
+        _startPageAction.setToolTip("Show the HDPS start page");
 
-    connect(&_saveProjectAction, &QAction::triggered, [this](bool) {
-        Application::current()->saveProject(Application::current()->getCurrentProjectFilePath());
-    });
+        _exitAction.setShortcut(QKeySequence("Alt+F4"));
+        _exitAction.setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
+        _exitAction.setToolTip("Exit the HDPS application");
 
-    connect(&_saveProjectAsAction, &QAction::triggered, [this](bool) {
-        Application::current()->saveProject();
-    });
+        connect(&_openProjectAction, &QAction::triggered, this, []() -> void {
+            //Application::current()->loadProject();
+            });
 
-    connect(&_pluginManagerAction, &TriggerAction::triggered, this, [this]() -> void {
-        PluginManagerDialog loadedPluginsDialog;
-        loadedPluginsDialog.exec();
-    });
+        connect(&_saveProjectAction, &QAction::triggered, [this](bool) {
+            //Application::current()->saveProject(Application::current()->getCurrentProjectFilePath());
+            });
 
-    connect(&_exitAction, &TriggerAction::triggered, Application::current(), &Application::quit);
+        connect(&_saveProjectAsAction, &QAction::triggered, [this](bool) {
+            //Application::current()->saveProject();
+            });
 
-    connect(this, &QMenu::aboutToShow, this, [this]() -> void {
-        const auto hasDatasets = Application::core()->requestAllDataSets().size();
+        connect(&_pluginManagerAction, &TriggerAction::triggered, this, [this]() -> void {
+            PluginManagerDialog loadedPluginsDialog;
+            loadedPluginsDialog.exec();
+            });
 
-        _saveProjectAction.setEnabled(!Application::current()->getCurrentProjectFilePath().isEmpty());
-        _saveProjectAsAction.setEnabled(hasDatasets);
-        _recentProjectsMenu.updateActions();
-        _saveProjectAsAction.setEnabled(true);
+        connect(&_exitAction, &TriggerAction::triggered, Application::current(), &Application::quit);
+
+        connect(this, &QMenu::aboutToShow, this, [this]() -> void {
+            const auto hasDatasets = Application::core()->requestAllDataSets().size();
+
+            //_saveProjectAction.setEnabled(!Application::current()->getCurrentProjectFilePath().isEmpty());
+            _saveProjectAsAction.setEnabled(hasDatasets);
+            _recentProjectsMenu.updateActions();
+            _saveProjectAsAction.setEnabled(true);
+            });
     });
 }

@@ -19,21 +19,20 @@ PluginHelpMenu::PluginHelpMenu(QWidget* parent /*= nullptr*/) :
     setToolTip("HDPS plugin documentation");
     setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
     setEnabled(false);
-}
 
-void PluginHelpMenu::showEvent(QShowEvent* showEvent)
-{
-    clear();
+    connect(this, &QMenu::aboutToShow, this, [this]() -> void {
+        clear();
 
-    QVector<QPointer<TriggerAction>> actions;
+        QVector<QPointer<TriggerAction>> actions;
 
-    const auto plugins = Application::core()->getPluginManager().getPluginsByTypes({ Type::ANALYSIS, Type::DATA, Type::LOADER, Type::WRITER, Type::TRANSFORMATION, Type::VIEW });
+        const auto plugins = Application::core()->getPluginManager().getPluginsByTypes({ Type::ANALYSIS, Type::DATA, Type::LOADER, Type::WRITER, Type::TRANSFORMATION, Type::VIEW });
 
-    for (auto plugin : plugins)
-        actions << &plugin->getTriggerHelpAction();
+        for (auto plugin : plugins)
+            actions << &plugin->getTriggerHelpAction();
 
-    sortActions(actions);
+        sortActions(actions);
 
-    for (auto action : actions)
-        addAction(action);
+        for (auto action : actions)
+            addAction(action);
+    });
 }

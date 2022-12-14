@@ -26,7 +26,6 @@ hdps::Application::Application(int& argc, char** argv) :
     _core(nullptr),
     _iconFonts(),
     _settings(),
-    _currentProjectFilePath(),
     _serializationTemporaryDirectory(),
     _serializationAborted(false),
     _logger()
@@ -88,39 +87,6 @@ QVariant Application::getSetting(const QString& path, const QVariant& defaultVal
 void Application::setSetting(const QString& path, const QVariant& value)
 {
     _settings.setValue(path, value);
-}
-
-QString Application::getCurrentProjectFilePath() const
-{
-    return _currentProjectFilePath;
-}
-
-void Application::setCurrentProjectFilePath(const QString& currentProjectFilePath)
-{
-    if (currentProjectFilePath == _currentProjectFilePath)
-        return;
-
-    _currentProjectFilePath = currentProjectFilePath;
-
-    emit currentProjectFilePathChanged(_currentProjectFilePath);
-}
-
-void Application::addRecentProjectFilePath(const QString& recentProjectFilePath)
-{
-    auto recentProjects = getSetting("Projects/Recent", QVariantList()).toList();
-
-    QVariantMap recentProject{
-        { "FilePath", recentProjectFilePath },
-        { "DateTime", QDateTime::currentDateTime() }
-    };
-
-    for (auto recentProject : recentProjects)
-        if (recentProject.toMap()["FilePath"].toString() == recentProjectFilePath)
-            recentProjects.removeOne(recentProject);
-
-    recentProjects.insert(0, recentProject);
-
-    setSetting("Projects/Recent", recentProjects);
 }
 
 Logger& Application::getLogger()

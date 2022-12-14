@@ -13,14 +13,11 @@ ImportDataMenu::ImportDataMenu(QWidget* parent /*= nullptr*/) :
 {
     setTitle("Import data...");
     setToolTip("Import data into HDPS");
-}
 
-void ImportDataMenu::showEvent(QShowEvent* showEvent)
-{
-    clear();
+    connect(this, &QMenu::aboutToShow, this, [this]() -> void {
+        clear();
 
-    for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::LOADER)) {
-        addAction(pluginTriggerAction);
-    }
-        
+        for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::LOADER))
+            addAction(pluginTriggerAction);
+    });
 }

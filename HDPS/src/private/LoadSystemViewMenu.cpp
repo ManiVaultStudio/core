@@ -22,36 +22,35 @@ LoadSystemViewMenu::LoadSystemViewMenu(QWidget *parent /*= nullptr*/, ads::CDock
     setToolTip("Manage system view plugins");
     setEnabled(mayProducePlugins());
     setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
-}
 
-void LoadSystemViewMenu::showEvent(QShowEvent* showEvent)
-{
-    clear();
+    connect(this, &QMenu::aboutToShow, this, [this]() -> void {
+        clear();
 
-    if (_dockAreaWidget) {
-        const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
-            auto loadViewsDockedMenu = new QMenu(gui::dockAreaMap.key(dockArea));
+        if (_dockAreaWidget) {
+            const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
+                auto loadViewsDockedMenu = new QMenu(gui::dockAreaMap.key(dockArea));
 
-            loadViewsDockedMenu->setIcon(getDockAreaIcon(dockArea));
+                loadViewsDockedMenu->setIcon(getDockAreaIcon(dockArea));
 
-            for (auto action : getLoadSystemViewsActions(dockArea))
-                loadViewsDockedMenu->addAction(action);
+                for (auto action : getLoadSystemViewsActions(dockArea))
+                    loadViewsDockedMenu->addAction(action);
 
-            return loadViewsDockedMenu;
-        };
+                return loadViewsDockedMenu;
+            };
 
-        addMenu(addLoadViewsDocked(gui::DockAreaFlag::Left));
-        addMenu(addLoadViewsDocked(gui::DockAreaFlag::Right));
-        addMenu(addLoadViewsDocked(gui::DockAreaFlag::Top));
-        addMenu(addLoadViewsDocked(gui::DockAreaFlag::Bottom));
-        addMenu(addLoadViewsDocked(gui::DockAreaFlag::Center));
-    }
-    else {
-        const auto actions = getLoadSystemViewsActions(gui::DockAreaFlag::Right);
+            addMenu(addLoadViewsDocked(gui::DockAreaFlag::Left));
+            addMenu(addLoadViewsDocked(gui::DockAreaFlag::Right));
+            addMenu(addLoadViewsDocked(gui::DockAreaFlag::Top));
+            addMenu(addLoadViewsDocked(gui::DockAreaFlag::Bottom));
+            addMenu(addLoadViewsDocked(gui::DockAreaFlag::Center));
+        }
+        else {
+            const auto actions = getLoadSystemViewsActions(gui::DockAreaFlag::Right);
 
-        for (auto action : actions)
-            addAction(action);
-    }
+            for (auto action : actions)
+                addAction(action);
+        }
+    });
 }
 
 bool LoadSystemViewMenu::mayProducePlugins() const

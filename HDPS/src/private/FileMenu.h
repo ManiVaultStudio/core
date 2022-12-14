@@ -1,7 +1,6 @@
 #pragma once
 
 #include "RecentProjectsMenu.h"
-#include "WorkspaceMenu.h"
 #include "ImportDataMenu.h"
 #include "ResetMenu.h"
 
@@ -32,7 +31,6 @@ private:
     hdps::gui::TriggerAction    _saveProjectAction;         /** Action for saving a project */
     hdps::gui::TriggerAction    _saveProjectAsAction;       /** Action for saving a project under a new name */
     RecentProjectsMenu          _recentProjectsMenu;        /** Menu for loading recent projects */
-    WorkspaceMenu               _workspaceMenu;             /** Menu for loading/saving workspaces */
     ResetMenu                   _resetMenu;                 /** Menu for resetting the project (or parts of it) */
     ImportDataMenu              _importDataMenu;            /** Menu for importing data */
     hdps::gui::TriggerAction    _publishAction;             /** Action for publishing the project to an end-user */

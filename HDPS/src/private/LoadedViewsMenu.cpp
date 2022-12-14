@@ -19,30 +19,29 @@ LoadedViewsMenu::LoadedViewsMenu(QWidget *parent /*= nullptr*/) :
     setToolTip("Toggle loaded view plugin visibility");
     setEnabled(!Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW).empty());
     setIcon(Application::getIconFont("FontAwesome").getIcon("low-vision"));
-}
 
-void LoadedViewsMenu::showEvent(QShowEvent* showEvent)
-{
-    clear();
+    connect(this, &QMenu::aboutToShow, this, [this]() -> void {
+        clear();
 
-    for (auto action : getLoadedViewsActions(false))
-        addAction(action);
+        for (auto action : getLoadedViewsActions(false))
+            addAction(action);
 
-    if (!actions().isEmpty())
-        addSeparator();
+        if (!actions().isEmpty())
+            addSeparator();
 
-    const auto loadedViewActions = getLoadedViewsActions(true);
+        const auto loadedViewActions = getLoadedViewsActions(true);
 
-    if (!loadedViewActions.isEmpty()) {
-        auto loadedSystemViewsMenu = new QMenu("System");
+        if (!loadedViewActions.isEmpty()) {
+            auto loadedSystemViewsMenu = new QMenu("System");
 
-        for (auto loadedSystemViewAction : loadedViewActions)
-            loadedSystemViewsMenu->addAction(loadedSystemViewAction);
+            for (auto loadedSystemViewAction : loadedViewActions)
+                loadedSystemViewsMenu->addAction(loadedSystemViewAction);
 
-        loadedSystemViewsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+            loadedSystemViewsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
 
-        addMenu(loadedSystemViewsMenu);
-    }
+            addMenu(loadedSystemViewsMenu);
+        }
+    });
 }
 
 QVector<QPointer<ToggleAction>> LoadedViewsMenu::getLoadedViewsActions(bool systemView)

@@ -27,12 +27,6 @@ public:
     LoadSystemViewMenu(QWidget *parent = nullptr, ads::CDockAreaWidget* dockAreaWidget = nullptr);
 
     /**
-     * Invoked when the menu is shown
-     * @param showEvent Pointer to the show event
-     */
-    void showEvent(QShowEvent* showEvent) override;
-
-    /**
      * Get whether the menu has any enabled menu items that produce a plugin
      * return Boolean determining whether the menu has any enabled menu items that produce a plugin
      */

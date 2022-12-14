@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ProjectManager.h"
+#include "WorkSpaceManager.h"
 
 #include <Application.h>
 
@@ -74,22 +75,12 @@ public: // Construction
      */
     HdpsApplication(int& argc, char** argv);
 
-public: // Project IO
-
-    /**
-     * Load project from disk
-     * @param projectFilePath File path of the project (if empty, the user will  select a file location by hand)
-     */
-    void loadProject(QString projectFilePath = "") override final;
-
-    /**
-     * Save project to disk
-     * @param projectFilePath File path of the project (if empty, the user will  select a file location by hand)
-     */
-    void saveProject(QString projectFilePath = "") override final;
+    ProjectManager& getProjectManager();
+    WorkspaceManager& getWorkspaceManager();
 
 private:
-    ProjectManager          _projectManager;            /** Project manager for creating/loading/saving projects */
+    ProjectManager      _projectManager;        /** Project manager for creating/loading/saving projects */
+    WorkspaceManager    _workspaceManager;      /** Workspace manager for loading/saving workspaces */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
