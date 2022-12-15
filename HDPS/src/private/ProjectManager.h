@@ -49,10 +49,16 @@ public:
     void saveProjectAs() override;
 
     /**
-     * Get current project
-     * @return Pointer to current project (nullptr if no project is loaded)
+     * Get whether a project exists
+     * @return Boolean determining whether a project exists
      */
-    hdps::Project* getCurrentProject() override;
+    bool hasProject() const override;
+
+    /**
+     * Get current project
+     * @return Pointer to project (nullptr if no project is loaded)
+     */
+    const hdps::Project* getProject() const override;
 
 public: // Serialization
 
@@ -90,8 +96,11 @@ private:
     /** Update the contents of the recent projects menu */
     void updateRecentProjectsMenu();
 
-    /** Add loaded project to recent projects in the settings */
-    void addRecentProjectFilePath(const QString& filePath);
+    /**
+     * Add loaded project \p filePath to settings
+     * @param filePath File path of the added project
+     */
+    void addRecentProject(const QString& filePath);
 
 public: // Action getters
 

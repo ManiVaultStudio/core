@@ -54,7 +54,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _saveProjectAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveProjectAsAction.setToolTip("Save project to disk in a chosen location");
 
-    _recentProjectsMenu.setTitle("Recent projects...");
+    _recentProjectsMenu.setTitle("Recent Projects...");
     _recentProjectsMenu.setToolTip("Recently opened HDPS projects");
     _recentProjectsMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("clock"));
 
@@ -249,7 +249,7 @@ void ProjectManager::loadProject(QString filePath /*= ""*/)
 
             taskProgressDialog.setTaskFinished("Import data model");
 
-            addRecentProjectFilePath(filePath);
+            addRecentProject(filePath);
 
             _project->setFilePath(filePath);
 
@@ -403,7 +403,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
             archiver.compressDirectory(temporaryDirectoryPath, filePath, true, enableCompression ? compressionLevel : 0, "");
 
-            addRecentProjectFilePath(filePath);
+            addRecentProject(filePath);
 
             Application::current()->setSetting(getSettingsPrefix(filePath) + "EnableCompression", enableCompression);
             Application::current()->setSetting(getSettingsPrefix(filePath) + "CompressionLevel", compressionLevel);
@@ -479,11 +479,11 @@ void ProjectManager::createProject()
     _showStartPageAction.setChecked(false);
 }
 
-void ProjectManager::addRecentProjectFilePath(const QString& filePath)
+void ProjectManager::addRecentProject(const QString& filePath)
 {
     auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();
 
-    QVariantMap recentProject{
+    QVariantMap recentProject {
         { "FilePath", filePath },
         { "DateTime", QDateTime::currentDateTime() }
     };
@@ -497,7 +497,12 @@ void ProjectManager::addRecentProjectFilePath(const QString& filePath)
     Application::current()->setSetting("Projects/Recent", recentProjects);
 }
 
-hdps::Project* ProjectManager::getCurrentProject()
+bool ProjectManager::hasProject() const
+{
+    return getProject() != nullptr;
+}
+
+const hdps::Project* ProjectManager::getProject() const
 {
     return _project.get();
 }

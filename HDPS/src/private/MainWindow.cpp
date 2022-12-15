@@ -51,13 +51,11 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     auto& projectManager = Application::core()->getProjectManager();
 
     const auto updateWindowTitle = [&]() -> void {
-        auto project = projectManager.getCurrentProject();
-
-        if (!project) {
+        if (!projectManager.hasProject()) {
             setWindowTitle("HDPS");
         }
         else {
-            const auto projectFilePath = project->getFilePath();
+            const auto projectFilePath = projectManager.getProject()->getFilePath();
 
             if (projectFilePath.isEmpty())
                 setWindowTitle("Unsaved - HDPS");

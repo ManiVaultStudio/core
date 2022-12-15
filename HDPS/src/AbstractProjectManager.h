@@ -43,10 +43,16 @@ public:
     virtual void saveProjectAs() = 0;
 
     /**
-     * Get current project
-     * @return Pointer to current project (nullptr if no project is loaded)
+     * Get whether a project exists
+     * @return Boolean determining whether a project exists
      */
-    virtual Project* getCurrentProject() = 0;
+    virtual bool hasProject() const = 0;
+
+    /**
+     * Get current project
+     * @return Pointer to project (nullptr if no project is loaded)
+     */
+    virtual const Project* getProject() const = 0;
 
 public: // Menus
 

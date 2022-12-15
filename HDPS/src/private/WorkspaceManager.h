@@ -81,7 +81,7 @@ public: // IO
      * Save a workspace to disk
      * @param filePath File path of the existing workspace (choose file path with dialog when empty)
      */
-    void saveWorkspace(QString filePath) override;
+    void saveWorkspace(QString filePath = "") override;
 
     /** Save a workspace to disk on a different location */
     void saveWorkspaceAs() override;
@@ -105,6 +105,8 @@ public: // Miscellaneous
     /** Get all view plugin dock widgets, both from the main and the view plugins dock widget dock managers */
     ViewPluginDockWidgets getViewPluginDockWidgets();
 
+public: // Menus
+
     /**
      * Get workspace menu
      * @param menu Pointer to parent menu
@@ -117,57 +119,26 @@ private:
     /** Create custom icon for the manager */
     void createIcon();
 
-    /** Creates a new workspace and assigns it to the current workspace */
-    void createWorkspace();
-
-signals:
+    /** Update the contents of the recent workspaces menu */
+    void updateRecentWorkspacesMenu();
 
     /**
-     * Signals that \p workspace is about to be loaded
-     * @param workspace Reference to the workspace that is about to be loaded
+     * Add loaded workspace \p filePath to settings
+     * @param filePath File path of the added workspace
      */
-    void workspaceAboutToBeLoaded(const Workspace& workspace);
-
-    /**
-     * Signals that \p workspace is loaded
-     * @param workspace Reference to the workspace that is loaded
-     */
-    void workspaceLoaded(const Workspace& workspace);
-
-    /**
-     * Signals that \p workspace is saved
-     * @param workspace Reference to the saved workspace
-     */
-    void workspaceSaved(const Workspace& workspace);
-
-    /**
-     * Signals that a workspace is created
-     * @param workspace Reference to the newly created workspace
-     */
-    void workspaceCreated(const Workspace& workspace);
-
-    /**
-     * Signals that a workspace is about to be destroyed
-     * @param workspace Reference to the workspace that is about to be destroyed
-     */
-    void workspaceAboutToBeDestroyed(const Workspace& workspace);
-
-    /**
-     * Signals that a workspace is destroyed
-     * @param workspaceId Globally unique identifier of the workspace that is destroyed
-     */
-    void workspaceDestroyed(const QString& workspaceId);
+    void addRecentWorkspace(const QString& filePath);
 
 private:
     QPointer<DockManager>               _dockManager;                   /** Main dock manager for docking system plugins */
     QPointer<ViewPluginsDockWidget>     _viewPluginsWidget;             /** Pointer to view plugins widget in which non-system view plugins are docked */
     bool                                _initialized;                   /** Whether the layout manager is initialized or not */
     QMap<DockWidget*, bool>             _cachedDockWidgetsVisibility;   /** Cached dock widgets visibility for view plugin isolation */
-    QScopedPointer<Workspace>           _workspace;                     /** Current workspace */
     hdps::gui::TriggerAction            _loadWorkspaceAction;           /** Action for loading a workspace from file */
     hdps::gui::TriggerAction            _saveWorkspaceAction;           /** Action for saving the current workspace to file */
     hdps::gui::TriggerAction            _saveWorkspaceAsAction;         /** Action for saving the current workspace to file with a different path */
+    QMenu                               _recentWorkspacesMenu;          /** Menu for loading recent workspaces */
     QIcon                               _icon;                          /** Manager icon */
+    QString                             _filePath;                      /** File path of the current workspace */
 };
 
 }

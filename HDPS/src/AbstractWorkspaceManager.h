@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AbstractManager.h"
-#include "Workspace.h"
 
 #include <ViewPlugin.h>
 
@@ -63,7 +62,7 @@ public: // IO
      * Save a workspace to disk
      * @param filePath File path of the existing workspace (choose file path with dialog when empty)
      */
-    virtual void saveWorkspace(QString filePath) = 0;
+    virtual void saveWorkspace(QString filePath = "") = 0;
 
     /** Save a workspace to disk on a different location */
     virtual void saveWorkspaceAs() = 0;
@@ -71,40 +70,22 @@ public: // IO
 signals:
 
     /**
-     * Signals that \p workspace is about to be loaded
-     * @param workspace Reference to the workspace that is about to be loaded
+     * Signals that a workspace is about to be loaded from \p filePath
+     * @param filePath File path of the workspace
      */
-    void workspaceAboutToBeLoaded(const Workspace& workspace);
+    void workspaceAboutToBeLoaded(const QString& filepath);
 
     /**
-     * Signals that \p workspace is loaded
-     * @param workspace Reference to the workspace that is loaded
+     * Signals that a workspace is loaded from \p filePath
+     * @param filePath File path of the workspace
      */
-    void workspaceLoaded(const Workspace& workspace);
+    void workspaceLoaded(const QString& filepath);
 
     /**
-     * Signals that \p workspace is saved
-     * @param workspace Reference to the saved workspace
+     * Signals that a workspace is saved to \p filePath
+     * @param filePath File path of the workspace
      */
-    void workspaceSaved(const Workspace& workspace);
-
-    /**
-     * Signals that a workspace is created
-     * @param workspace Reference to the newly created workspace
-     */
-    void workspaceCreated(const Workspace& workspace);
-
-    /**
-     * Signals that a workspace is about to be destroyed
-     * @param workspace Reference to the workspace that is about to be destroyed
-     */
-    void workspaceAboutToBeDestroyed(const Workspace& workspace);
-
-    /**
-     * Signals that a workspace is destroyed
-     * @param workspaceId Globally unique identifier of the workspace that is destroyed
-     */
-    void workspaceDestroyed(const QString& workspaceId);
+    void workspaceSaved(const QString& filepath);
 };
 
 }

@@ -110,11 +110,12 @@ WorkspaceManager::WorkspaceManager() :
     _viewPluginsWidget(),
     _initialized(false),
     _cachedDockWidgetsVisibility(),
-    _workspace(),
     _loadWorkspaceAction(this, "Load"),
     _saveWorkspaceAction(this, "Save"),
     _saveWorkspaceAsAction(this, "Save As..."),
-    _icon()
+    _recentWorkspacesMenu(),
+    _icon(),
+    _filePath()
 {
     setObjectName("WorkspaceManager");
 
@@ -131,12 +132,22 @@ WorkspaceManager::WorkspaceManager() :
     _saveWorkspaceAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveWorkspaceAsAction.setToolTip("Save workspace under a new file to disk");
 
+    _recentWorkspacesMenu.setTitle("Recent...");
+    _recentWorkspacesMenu.setToolTip("Recently opened workspaces");
+    _recentWorkspacesMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("clock"));
+
+    auto mainWindow = Application::topLevelWidgets().first();
+
+    mainWindow->addAction(&_loadWorkspaceAction);
+    mainWindow->addAction(&_saveWorkspaceAction);
+    mainWindow->addAction(&_saveWorkspaceAsAction);
+
     connect(&_loadWorkspaceAction, &QAction::triggered, [this](bool) {
         loadWorkspace();
     });
 
     connect(&_saveWorkspaceAction, &QAction::triggered, [this](bool) {
-        saveWorkspace(_workspace->getFilePath());
+        saveWorkspace(_filePath);
     });
 
     connect(&_saveWorkspaceAsAction, &QAction::triggered, [this](bool) {
@@ -144,6 +155,7 @@ WorkspaceManager::WorkspaceManager() :
     });
 
     createIcon();
+    updateRecentWorkspacesMenu();
 }
 
 WorkspaceManager::~WorkspaceManager()
@@ -212,22 +224,11 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/)
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
-        emit workspaceAboutToBeLoaded(*(_workspace.get()));
+        emit workspaceAboutToBeLoaded(filePath);
         {
-            if (!_workspace.isNull()) {
-                const auto workspaceId = _workspace->getId();
-
-                emit workspaceAboutToBeDestroyed(*(_workspace.get()));
-                {
-                    createWorkspace();
-                }
-                emit workspaceDestroyed(workspaceId);
-            }
-            else {
-                createWorkspace();
-            }
+            _filePath = filePath;
         }
-        emit workspaceLoaded(*(_workspace.get()));
+        emit workspaceLoaded(filePath);
     }
     catch (std::exception& e)
     {
@@ -239,15 +240,18 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/)
     }
 }
 
-void WorkspaceManager::saveWorkspace(QString filePath)
+void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
 {
     try
     {
 #ifdef WORKSPACE_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << filePath;
 #endif
+        _filePath = filePath;
 
-        emit workspaceSaved(*(_workspace.get()));
+        addRecentWorkspace(_filePath);
+
+        emit workspaceSaved(filePath);
     }
     catch (std::exception& e)
     {
@@ -265,8 +269,7 @@ void WorkspaceManager::saveWorkspaceAs()
     qDebug() << __FUNCTION__;
 #endif
 
-    if (_workspace.isNull())
-        return;
+    saveWorkspace();
 }
 
 void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
@@ -346,10 +349,13 @@ QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)
     menu->setTitle("Workspace");
     menu->setIcon(_icon);
     menu->setToolTip("Workspace operations");
+    menu->setEnabled(Application::core()->getProjectManager().hasProject());
 
     menu->addAction(&_loadWorkspaceAction);
     menu->addAction(&_saveWorkspaceAction);
     menu->addAction(&_saveWorkspaceAsAction);
+    menu->addSeparator();
+    menu->addMenu(&_recentWorkspacesMenu);
 
     return menu;
 }
@@ -384,11 +390,49 @@ void WorkspaceManager::createIcon()
     _icon = hdps::gui::createIcon(pixmap);
 }
 
-void WorkspaceManager::createWorkspace()
+void WorkspaceManager::updateRecentWorkspacesMenu()
 {
-    _workspace.reset(new Workspace(this));
+    _recentWorkspacesMenu.clear();
 
-    emit workspaceCreated(*(_workspace.get()));
+    const auto recentWorkspaces = Application::current()->getSetting("Workspaces/Recent", QVariantList()).toList();
+
+    _recentWorkspacesMenu.setEnabled(!recentWorkspaces.isEmpty());
+
+    for (const auto& recentWorkspace : recentWorkspaces) {
+        const auto recentWorkspaceFilePath = recentWorkspace.toMap()["FilePath"].toString();
+
+        if (!QFileInfo(recentWorkspaceFilePath).exists())
+            continue;
+
+        auto recentProjectAction = new QAction(recentWorkspaceFilePath);
+
+        recentProjectAction->setIcon(_icon);
+        recentProjectAction->setToolTip("Load " + recentWorkspaceFilePath + "(last opened on " + recentWorkspace.toMap()["DateTime"].toDate().toString() + ")");
+
+        connect(recentProjectAction, &QAction::triggered, this, [recentWorkspaceFilePath]() -> void {
+            Application::core()->getWorkspaceManager().loadWorkspace(recentWorkspaceFilePath);
+        });
+
+        _recentWorkspacesMenu.addAction(recentProjectAction);
+    }
+}
+
+void WorkspaceManager::addRecentWorkspace(const QString& filePath)
+{
+    auto recentWorkspaces = Application::current()->getSetting("Workspaces/Recent", QVariantList()).toList();
+
+    QVariantMap recentWorkspace {
+        { "FilePath", filePath },
+        { "DateTime", QDateTime::currentDateTime() }
+    };
+
+    for (auto recentWorkspace : recentWorkspaces)
+        if (recentWorkspace.toMap()["FilePath"].toString() == filePath)
+            recentWorkspaces.removeOne(recentWorkspace);
+
+    recentWorkspaces.insert(0, recentWorkspace);
+
+    Application::current()->setSetting("Workspaces/Recent", recentWorkspaces);
 }
 
 }
