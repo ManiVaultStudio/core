@@ -6,13 +6,13 @@
 #include <QScrollArea>
 
 /**
- * Project bar widget class
+ * Start page widget class
  *
- * Widget class for the project bar
+ * Widget class which show various project-related operations.
  *
  * @author Thomas Kroes
  */
-class ProjectBarWidget : public QWidget
+class StartPageWidget : public QWidget
 {
 public:
 
@@ -226,7 +226,7 @@ public:
      * Constructor
      * @param parent Pointer to parent widget
      */
-    ProjectBarWidget(QWidget* parent = nullptr);
+    StartPageWidget(QWidget* parent = nullptr);
 
     void paintEvent(QPaintEvent* paintEvent);
 

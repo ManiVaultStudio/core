@@ -48,13 +48,20 @@ public:
      */
     virtual Project* getCurrentProject() = 0;
 
-public: // Recent projects
+public: // Menus
 
     /**
      * Get recent projects menu
      * @return Pointer to recent projects menu
      */
     virtual QMenu* getRecentProjectsMenu() = 0;
+
+    /**
+     * Get import data menu
+     * @return Pointer to import data menu
+     */
+    virtual QMenu* getImportDataMenu() = 0;
+
 
 public: // Action getters
 

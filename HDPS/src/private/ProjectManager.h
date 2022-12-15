@@ -54,13 +54,19 @@ public:
      */
     hdps::Project* getCurrentProject() override;
 
-public: // Recent projects
+public: // Menus
 
     /**
      * Get recent projects menu
      * @return Pointer to recent projects menu
      */
     QMenu* getRecentProjectsMenu() override;
+
+    /**
+     * Get import data menu
+     * @return Pointer to import data menu
+     */
+    QMenu* getImportDataMenu() override;
 
 private:
 
@@ -88,6 +94,7 @@ private:
     hdps::gui::TriggerAction        _saveProjectAction;         /** Action for saving a project */
     hdps::gui::TriggerAction        _saveProjectAsAction;       /** Action for saving a project under a new name */
     QMenu                           _recentProjectsMenu;        /** Menu for loading recent projects */
+    QMenu                           _importDataMenu;            /** Menu for importing data */
     hdps::gui::ToggleAction         _showStartPageAction;       /** Action for toggling the start page */
 
     QString         _serializationTemporaryDirectory;       /** Temporary directory for serialization */

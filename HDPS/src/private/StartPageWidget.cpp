@@ -1,4 +1,4 @@
-#include "ProjectBarWidget.h"
+#include "StartPageWidget.h"
 
 #include <Application.h>
 #include <CoreInterface.h>
@@ -15,7 +15,7 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-ProjectBarWidget::ProjectBarWidget(QWidget* parent /*= nullptr*/) :
+StartPageWidget::StartPageWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _layout(),
     _barLayout(),
@@ -36,7 +36,7 @@ ProjectBarWidget::ProjectBarWidget(QWidget* parent /*= nullptr*/) :
     _barLayout.addWidget(new ProjectsWidget());
 }
 
-void ProjectBarWidget::paintEvent(QPaintEvent* paintEvent)
+void StartPageWidget::paintEvent(QPaintEvent* paintEvent)
 {
     QPainter painter(this);
 
@@ -52,7 +52,7 @@ void ProjectBarWidget::paintEvent(QPaintEvent* paintEvent)
     painter.drawPixmap(pixmapRectangle.topLeft(), QPixmap(backgroundImage));
 }
 
-void ProjectBarWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPalette::ColorRole& colorRole)
+void StartPageWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPalette::ColorRole& colorRole)
 {
     Q_ASSERT(widget != nullptr);
 
@@ -72,7 +72,7 @@ void ProjectBarWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPale
     widget->setPalette(palette);
 }
 
-ProjectBarWidget::HeaderWidget::HeaderWidget(QWidget* parent /*= nullptr*/) :
+StartPageWidget::HeaderWidget::HeaderWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _layout(),
     _headerLabel()
@@ -97,10 +97,10 @@ ProjectBarWidget::HeaderWidget::HeaderWidget(QWidget* parent /*= nullptr*/) :
     _layout.addWidget(&_headerLabel);
 
     // Change the background color
-    ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
 
-ProjectBarWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, const QString& title, const QString& description, const QString& tooltip, const ActionCallBack& actionCallback, QWidget* parent /*= nullptr*/) :
+StartPageWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, const QString& title, const QString& description, const QString& tooltip, const ActionCallBack& actionCallback, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _layout(),
     _fileLayout(),
@@ -137,31 +137,31 @@ ProjectBarWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, co
     setLayout(&_layout);
 
     // Change the background color
-    ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
 
-void ProjectBarWidget::ProjectActionWidget::enterEvent(QEnterEvent* event)
+void StartPageWidget::ProjectActionWidget::enterEvent(QEnterEvent* event)
 {
     // Change the background color
-    ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Dark);
+    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Dark);
 
     event->ignore();
 }
 
-void ProjectBarWidget::ProjectActionWidget::leaveEvent(QEvent* event)
+void StartPageWidget::ProjectActionWidget::leaveEvent(QEvent* event)
 {
     // Change the background color
-    ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 
     event->ignore();
 }
 
-void ProjectBarWidget::ProjectActionWidget::mousePressEvent(QMouseEvent* mouseEvent)
+void StartPageWidget::ProjectActionWidget::mousePressEvent(QMouseEvent* mouseEvent)
 {
     _actionCallback();
 }
 
-ProjectBarWidget::ProjectsWidget::ProjectsWidget(QWidget* parent /*= nullptr*/) :
+StartPageWidget::ProjectsWidget::ProjectsWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _layout(),
     _leftColumnLayout(),
@@ -170,7 +170,7 @@ ProjectBarWidget::ProjectsWidget::ProjectsWidget(QWidget* parent /*= nullptr*/) 
     setAutoFillBackground(true);
 
     // Change the background color
-    ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 
     _layout.setContentsMargins(35, 35, 35, 35);
     //_layout.setSpacing(30);
@@ -189,7 +189,7 @@ ProjectBarWidget::ProjectsWidget::ProjectsWidget(QWidget* parent /*= nullptr*/) 
     setLayout(&_layout);
 }
 
-void ProjectBarWidget::ProjectsWidget::createLeftColumn()
+void StartPageWidget::ProjectsWidget::createLeftColumn()
 {
     // Add header and widget for recent projects
     _leftColumnLayout.addWidget(createHeaderLabel("Recent", "Recently opened HDPS projects"));
@@ -197,7 +197,7 @@ void ProjectBarWidget::ProjectsWidget::createLeftColumn()
     _leftColumnLayout.addWidget(new RecentProjectsWidget());
 }
 
-void ProjectBarWidget::ProjectsWidget::createRightColumn()
+void StartPageWidget::ProjectsWidget::createRightColumn()
 {
     // Add header
     _rightColumnLayout.addWidget(createHeaderLabel("Open", "Project open options"));
@@ -221,7 +221,7 @@ void ProjectBarWidget::ProjectsWidget::createRightColumn()
     //_rightColumnLayout.addWidget(new ImportDataWidget());
 }
 
-QLabel* ProjectBarWidget::ProjectsWidget::createHeaderLabel(const QString& title, const QString& tooltip)
+QLabel* StartPageWidget::ProjectsWidget::createHeaderLabel(const QString& title, const QString& tooltip)
 {
     auto label = new QLabel(title);
 
@@ -232,29 +232,29 @@ QLabel* ProjectBarWidget::ProjectsWidget::createHeaderLabel(const QString& title
     return label;
 }
 
-ProjectBarWidget::ScrollArea::ScrollArea(QWidget* parent /*= nullptr*/) :
+StartPageWidget::ScrollArea::ScrollArea(QWidget* parent /*= nullptr*/) :
     QScrollArea(parent)
 {
 }
 
-void ProjectBarWidget::ScrollArea::enterEvent(QEvent* event)
+void StartPageWidget::ScrollArea::enterEvent(QEvent* event)
 {
     verticalScrollBar()->show();
 }
 
-void ProjectBarWidget::ScrollArea::leaveEvent(QEvent* event)
+void StartPageWidget::ScrollArea::leaveEvent(QEvent* event)
 {
     verticalScrollBar()->hide();
 }
 
-void ProjectBarWidget::ScrollArea::resizeEvent(QResizeEvent* resizeEvent)
+void StartPageWidget::ScrollArea::resizeEvent(QResizeEvent* resizeEvent)
 {
     QScrollArea::resizeEvent(resizeEvent);
 
     widget()->setFixedWidth(resizeEvent->size().width());
 }
 
-ProjectBarWidget::RecentProjectsWidget::RecentProjectsWidget(QWidget* parent /*= nullptr*/) :
+StartPageWidget::RecentProjectsWidget::RecentProjectsWidget(QWidget* parent /*= nullptr*/) :
     ScrollArea(parent),
     _containerWidget(this),
     _containerLayout()
@@ -266,12 +266,12 @@ ProjectBarWidget::RecentProjectsWidget::RecentProjectsWidget(QWidget* parent /*=
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setWidget(&_containerWidget);
 
-    ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
 
-void ProjectBarWidget::RecentProjectsWidget::createContainerWidget()
+void StartPageWidget::RecentProjectsWidget::createContainerWidget()
 {
-    ProjectBarWidget::setWidgetBackgroundColorRole(&_containerWidget, QPalette::Midlight);
+    StartPageWidget::setWidgetBackgroundColorRole(&_containerWidget, QPalette::Midlight);
 
     _containerWidget.setAutoFillBackground(true);
     _containerLayout.setContentsMargins(0, 0, 0, 0);
@@ -302,7 +302,7 @@ void ProjectBarWidget::RecentProjectsWidget::createContainerWidget()
     _containerWidget.setVisible(!recentProjects.isEmpty());
 }
 
-ProjectBarWidget::ImportDataWidget::ImportDataWidget(QWidget* parent /*= nullptr*/) :
+StartPageWidget::ImportDataWidget::ImportDataWidget(QWidget* parent /*= nullptr*/) :
     ScrollArea(parent),
     _containerWidget(this),
     _containerLayout()
@@ -314,12 +314,12 @@ ProjectBarWidget::ImportDataWidget::ImportDataWidget(QWidget* parent /*= nullptr
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setWidget(&_containerWidget);
 
-    ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
 
-void ProjectBarWidget::ImportDataWidget::createContainerWidget()
+void StartPageWidget::ImportDataWidget::createContainerWidget()
 {
-    ProjectBarWidget::setWidgetBackgroundColorRole(&_containerWidget, QPalette::Midlight);
+    StartPageWidget::setWidgetBackgroundColorRole(&_containerWidget, QPalette::Midlight);
 
     _containerWidget.setAutoFillBackground(true);
     _containerLayout.setContentsMargins(0, 0, 0, 0);

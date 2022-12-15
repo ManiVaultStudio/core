@@ -33,7 +33,8 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _saveProjectAction(this, "Save Project"),
     _saveProjectAsAction(this, "Save Project As..."),
     _recentProjectsMenu(),
-    _showStartPageAction(this, "Start Page...")
+    _importDataMenu(),
+    _showStartPageAction(this, "Start Page...", true, true)
 {
     _newProjectAction.setShortcut(QKeySequence("Ctrl+N"));
     _newProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
@@ -66,6 +67,17 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     mainWindow->addAction(&_showStartPageAction);
 
     updateRecentProjectsMenu();
+
+    _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    _importDataMenu.setTitle("Import data...");
+    _importDataMenu.setToolTip("Import data into HDPS");
+
+    connect(&_importDataMenu, &QMenu::aboutToShow, this, [this]() -> void {
+        _importDataMenu.clear();
+
+        for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::LOADER))
+            _importDataMenu.addAction(pluginTriggerAction);
+    });
 
     connect(&_newProjectAction, &QAction::triggered, this, [this]() -> void {
         newProject();
@@ -411,6 +423,11 @@ QMenu* ProjectManager::getRecentProjectsMenu()
     return &_recentProjectsMenu;
 }
 
+QMenu* ProjectManager::getImportDataMenu()
+{
+    return &_importDataMenu;
+}
+
 void ProjectManager::updateRecentProjectsMenu()
 {
     _recentProjectsMenu.clear();
@@ -445,6 +462,8 @@ void ProjectManager::createProject()
     _project.reset(new Project());
 
     emit projectCreated(*(_project.get()));
+
+    _showStartPageAction.setChecked(false);
 }
 
 void ProjectManager::addRecentProjectFilePath(const QString& filePath)

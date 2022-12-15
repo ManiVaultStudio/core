@@ -8,7 +8,6 @@ using namespace hdps::gui;
 
 FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
-    _importDataMenu(this),
     _publishAction(this, "Publish"),
     _pluginManagerAction(this, "Plugin Manager"),
     _globalSettingsAction(this, "Global &Settings..."),
@@ -16,8 +15,6 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
 {
     setTitle("File");
     setToolTip("File operations");
-
-    _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
 
     _publishAction.setShortcut(QKeySequence("Ctrl+P"));
     _publishAction.setIcon(Application::getIconFont("FontAwesome").getIcon("share"));
@@ -52,29 +49,16 @@ void FileMenu::showEvent(QShowEvent* showEvent)
     addAction(&projectManager.getOpenProjectAction());
     addAction(&projectManager.getSaveProjectAction());
     addAction(&projectManager.getSaveProjectAsAction());
-    
     addMenu(projectManager.getRecentProjectsMenu());
-
     addSeparator();
-
     addMenu(Application::core()->getWorkspaceManager().getMenu());
-
     addSeparator();
-    
+    addMenu( projectManager.getImportDataMenu());
+    addSeparator();
+    //addAction(&_pluginManagerAction);
+    addSeparator();
+    //addAction(&_globalSettingsAction);
+    addSeparator();
     addAction(&projectManager.getShowStartPageAction());
-
-//
-//    addSeparator();
-//
-//
-//    addMenu(&_importDataMenu);
-//    addSeparator();
-//    addAction(&_publishAction);
-//    addSeparator();
-//    addAction(&_pluginManagerAction);
-//    addSeparator();
-//    addAction(&_globalSettingsAction);
-//    addSeparator();
-//    addAction(&_startPageAction);
-//    addAction(&_exitAction);
+    //addAction(&_exitAction);
 }

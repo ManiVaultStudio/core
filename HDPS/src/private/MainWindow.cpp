@@ -66,8 +66,6 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         }
     };
 
-    _stackedWidget->setCurrentWidget(_startPageWidget);
-
     connect(&projectManager, &ProjectManager::projectCreated, this, updateWindowTitle);
     connect(&projectManager, &ProjectManager::projectDestroyed, this, updateWindowTitle);
     connect(&projectManager, &ProjectManager::projectLoaded, this, updateWindowTitle);
@@ -75,14 +73,14 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
     const auto toggleStartPage = [&](bool toggled) -> void {
         if (toggled)
-            _stackedWidget->setCurrentWidget(_startPageWidget.get());
+            _stackedWidget->setCurrentWidget(_startPageWidget);
         else
-            _stackedWidget->setCurrentWidget(_projectWidget.get());
+            _stackedWidget->setCurrentWidget(_projectWidget);
     };
 
     connect(&projectManager.getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
 
-    Application::core()->getWorkspaceManager().initialize(this);
+    Application::core()->getWorkspaceManager().initialize(_projectWidget);
 }
 
 void MainWindow::closeEvent(QCloseEvent* closeEvent)
