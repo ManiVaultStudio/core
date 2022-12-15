@@ -4,6 +4,7 @@
 #include "Project.h"
 
 #include "actions/TriggerAction.h"
+#include "actions/ToggleAction.h"
 
 #include <QObject>
 #include <QMenu>
@@ -61,6 +62,7 @@ public: // Action getters
     virtual hdps::gui::TriggerAction& getOpenProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getSaveProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getSaveProjectAsAction() = 0;
+    virtual hdps::gui::ToggleAction& getShowStartPageAction() = 0;
 
 signals:
 
@@ -109,26 +111,6 @@ signals:
 
 }
 
-
-///**
-// * Get current project file path
-// * @return File path of the current project
-// */
-//virtual QString getCurrentProjectFilePath() const final;
-//
-///**
-// * Set current project file path
-// * @param currentProjectFilePath Current project file path
-// */
-//virtual void setCurrentProjectFilePath(const QString& currentProjectFilePath) final;
-//
-///**
-// * Add recent project file path (adds the path to the settings so that users can select the project from a recent list)
-// * @param recentProjectFilePath File path of the recent project
-// */
-//virtual void addRecentProjectFilePath(const QString& recentProjectFilePath) final;
-
-///**
 //     * Get serialization temporary directory
 //     * @return Serialization temporary directory
 //     */

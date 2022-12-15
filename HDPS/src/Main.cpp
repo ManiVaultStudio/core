@@ -1,5 +1,6 @@
 #include "private/MainWindow.h"
-#include "private/HdpsApplication.h"
+
+#include <Application.h>
 
 #include <QSurfaceFormat>
 #include <QStyleFactory>
@@ -41,9 +42,9 @@ int main(int argc, char *argv[])
 
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 
-    hdps::HdpsApplication hdpsApplication(argc, argv);
+    hdps::Application application(argc, argv);
 
-    hdpsApplication.setStyle(new NoFocusProxyStyle);
+    application.setStyle(new NoFocusProxyStyle);
 
     QFile styleSheetFile(":/styles/default.qss");
 
@@ -62,11 +63,11 @@ int main(int argc, char *argv[])
     appIcon.addFile(":/Icons/AppIcon512");
     appIcon.addFile(":/Icons/AppIcon1024");
 
-    hdpsApplication.setWindowIcon(appIcon);
+    application.setWindowIcon(appIcon);
 
     MainWindow mainWindow;
 
     mainWindow.show();
 
-    return hdpsApplication.exec();
+    return application.exec();
 }

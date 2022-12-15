@@ -222,7 +222,6 @@ set(PRIVATE_MANAGER_FILES
 )
 
 set(PRIVATE_APPLICATION_HEADERS
-    src/private/HdpsApplication.h
     src/private/MainWindow.h
     src/private/FileMenu.h
     src/private/ImportDataMenu.h
@@ -235,7 +234,6 @@ set(PRIVATE_APPLICATION_HEADERS
 )
 
 set(PRIVATE_APPLICATION_SOURCES
-    src/private/HdpsApplication.cpp
     src/private/MainWindow.cpp
     src/private/FileMenu.cpp
     src/private/ImportDataMenu.cpp
@@ -253,13 +251,11 @@ set(PRIVATE_APPLICATION_FILES
 )
 
 set(PRIVATE_START_PAGE_HEADERS
-    src/private/StartPageWidget.h
     src/private/ProjectBarWidget.h
     src/private/LogoWidget.h
 )
 
 set(PRIVATE_START_PAGE_SOURCES
-    src/private/StartPageWidget.cpp
     src/private/ProjectBarWidget.cpp
     src/private/LogoWidget.cpp
 )

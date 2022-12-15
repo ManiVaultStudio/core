@@ -1,6 +1,5 @@
 #include "FileMenu.h"
 #include "PluginManagerDialog.h"
-#include "HdpsApplication.h"
 
 #include <Application.h>
 
@@ -13,7 +12,6 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     _publishAction(this, "Publish"),
     _pluginManagerAction(this, "Plugin Manager"),
     _globalSettingsAction(this, "Global &Settings..."),
-    _startPageAction(this, "Start page"),
     _exitAction(this, "Exit")
 {
     setTitle("File");
@@ -32,10 +30,6 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     _globalSettingsAction.setShortcut(QKeySequence("Ctrl+E"));
     _globalSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
     _globalSettingsAction.setToolTip("Modify global HDPS settings");
-
-    _startPageAction.setShortcut(QKeySequence("Alt+W"));
-    _startPageAction.setIcon(Application::getIconFont("FontAwesome").getIcon("door-open"));
-    _startPageAction.setToolTip("Show the HDPS start page");
 
     _exitAction.setShortcut(QKeySequence("Alt+F4"));
     _exitAction.setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
@@ -67,6 +61,8 @@ void FileMenu::showEvent(QShowEvent* showEvent)
 
     addSeparator();
     
+    addAction(&projectManager.getShowStartPageAction());
+
 //
 //    addSeparator();
 //

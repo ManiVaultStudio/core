@@ -79,6 +79,7 @@ public: // Action getters
     hdps::gui::TriggerAction& getOpenProjectAction() override { return _openProjectAction; }
     hdps::gui::TriggerAction& getSaveProjectAction() override { return _saveProjectAction; }
     hdps::gui::TriggerAction& getSaveProjectAsAction() override { return _saveProjectAsAction; }
+    hdps::gui::ToggleAction& getShowStartPageAction() override { return _showStartPageAction; }
 
 private:
     QScopedPointer<hdps::Project>   _project;                   /** Current project */
@@ -87,6 +88,7 @@ private:
     hdps::gui::TriggerAction        _saveProjectAction;         /** Action for saving a project */
     hdps::gui::TriggerAction        _saveProjectAsAction;       /** Action for saving a project under a new name */
     QMenu                           _recentProjectsMenu;        /** Menu for loading recent projects */
+    hdps::gui::ToggleAction         _showStartPageAction;       /** Action for toggling the start page */
 
     QString         _serializationTemporaryDirectory;       /** Temporary directory for serialization */
     bool            _serializationAborted;                  /** Whether (de)serialization was aborted */

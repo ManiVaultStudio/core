@@ -32,7 +32,8 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _openProjectAction(this, "Open Project"),
     _saveProjectAction(this, "Save Project"),
     _saveProjectAsAction(this, "Save Project As..."),
-    _recentProjectsMenu()
+    _recentProjectsMenu(),
+    _showStartPageAction(this, "Start Page...")
 {
     _newProjectAction.setShortcut(QKeySequence("Ctrl+N"));
     _newProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
@@ -53,11 +54,16 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _recentProjectsMenu.setToolTip("Recently opened HDPS projects");
     _recentProjectsMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("clock"));
 
+    _showStartPageAction.setShortcut(QKeySequence("Alt+W"));
+    _showStartPageAction.setIcon(Application::getIconFont("FontAwesome").getIcon("door-open"));
+    _showStartPageAction.setToolTip("Show the HDPS start page");
+
     auto mainWindow = Application::topLevelWidgets().first();
 
     mainWindow->addAction(&_newProjectAction);
     mainWindow->addAction(&_openProjectAction);
     mainWindow->addAction(&_saveProjectAction);
+    mainWindow->addAction(&_showStartPageAction);
 
     updateRecentProjectsMenu();
 

@@ -46,12 +46,12 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     _stackedWidget->addWidget(_startPageWidget);
     _stackedWidget->addWidget(_projectWidget);
 
-    _stackedWidget->setCurrentWidget(_projectWidget);
-
     setCentralWidget(_stackedWidget);
 
-    const auto updateWindowTitle = [this]() -> void {
-        auto project = Application::core()->getProjectManager().getCurrentProject();
+    auto& projectManager = Application::core()->getProjectManager();
+
+    const auto updateWindowTitle = [&]() -> void {
+        auto project = projectManager.getCurrentProject();
 
         if (!project) {
             setWindowTitle("HDPS");
@@ -66,12 +66,21 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         }
     };
 
-    auto& projectManager = Application::core()->getProjectManager();
+    _stackedWidget->setCurrentWidget(_startPageWidget);
 
     connect(&projectManager, &ProjectManager::projectCreated, this, updateWindowTitle);
     connect(&projectManager, &ProjectManager::projectDestroyed, this, updateWindowTitle);
     connect(&projectManager, &ProjectManager::projectLoaded, this, updateWindowTitle);
     connect(&projectManager, &ProjectManager::projectSaved, this, updateWindowTitle);
+
+    const auto toggleStartPage = [&](bool toggled) -> void {
+        if (toggled)
+            _stackedWidget->setCurrentWidget(_startPageWidget.get());
+        else
+            _stackedWidget->setCurrentWidget(_projectWidget.get());
+    };
+
+    connect(&projectManager.getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
 
     Application::core()->getWorkspaceManager().initialize(this);
 }

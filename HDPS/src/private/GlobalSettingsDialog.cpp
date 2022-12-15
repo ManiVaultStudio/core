@@ -1,6 +1,6 @@
 #include "GlobalSettingsDialog.h"
 
-#include "HdpsApplication.h"
+#include <Application.h>
 
 #include <QVBoxLayout>
 
