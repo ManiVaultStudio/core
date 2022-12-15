@@ -210,7 +210,7 @@ void ProjectBarWidget::ProjectsWidget::createRightColumn()
 
     // Add file action for opening a project from a picked location
     _rightColumnLayout.addWidget(new ProjectActionWidget(Application::getIconFont("FontAwesome").getIcon("folder-open"), title, description, tooltip, []() {
-        Application::current()->loadProject();
+        Application::core()->getProjectManager().loadProject();
     }));
 
     _rightColumnLayout.addSpacerItem(new QSpacerItem(0, 40));
@@ -294,7 +294,7 @@ void ProjectBarWidget::RecentProjectsWidget::createContainerWidget()
 
         // Create recent project widget and add it to the layout
         _containerLayout.addWidget(new ProjectActionWidget(Application::getIconFont("FontAwesome").getIcon("file"), title, description, tooltip, [filePath]() {
-            Application::current()->loadProject(filePath);
+            Application::core()->getProjectManager().loadProject(filePath);
         }));
     }
 
@@ -333,7 +333,7 @@ void ProjectBarWidget::ImportDataWidget::createContainerWidget()
         const auto tooltip      = "Import data into HDPS with the " + pluginKind;
 
         _containerLayout.addWidget(new ProjectActionWidget(QIcon(), title, description, tooltip, [pluginKind]() {
-            Application::core()->requestPlugin(pluginKind);
+            Application::core()->getPluginManager().requestPlugin(pluginKind);
         }));
     }
 

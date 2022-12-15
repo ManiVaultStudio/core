@@ -84,8 +84,8 @@ set(PRIVATE_CORE_FILES
     ${PRIVATE_CORE_SOURCES}
 )
 
-set(PRIVATE_LAYOUT_MANAGER_HEADERS
-    src/private/LayoutManager.h
+set(PRIVATE_WORKSPACE_MANAGER_HEADERS
+    src/private/WorkspaceManager.h
     src/private/DockManager.h
     src/private/DockComponentsFactory.h
     src/private/ViewPluginsDockWidget.h
@@ -95,8 +95,8 @@ set(PRIVATE_LAYOUT_MANAGER_HEADERS
     src/private/DockArea.h
 )
 
-set(PRIVATE_LAYOUT_MANAGER_SOURCES
-    src/private/LayoutManager.cpp
+set(PRIVATE_WORKSPACE_MANAGER_SOURCES
+    src/private/WorkspaceManager.cpp
     src/private/DockManager.cpp
     src/private/DockComponentsFactory.cpp
     src/private/ViewPluginsDockWidget.cpp
@@ -106,9 +106,9 @@ set(PRIVATE_LAYOUT_MANAGER_SOURCES
     src/private/DockArea.cpp
 )
 
-set(PRIVATE_LAYOUT_MANAGER_FILES
-    ${PRIVATE_LAYOUT_MANAGER_HEADERS}
-    ${PRIVATE_LAYOUT_MANAGER_SOURCES}
+set(PRIVATE_WORKSPACE_MANAGER_FILES
+    ${PRIVATE_WORKSPACE_MANAGER_HEADERS}
+    ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
 )
 
 set(PRIVATE_PLUGIN_MANAGER_HEADERS
@@ -197,38 +197,23 @@ set(PRIVATE_PROJECT_MANAGER_FILES
     ${PRIVATE_PROJECT_MANAGER_SOURCES}
 )
 
-set(PRIVATE_WORKSPACE_MANAGER_HEADERS
-    src/private/WorkspaceManager.h
-)
-
-set(PRIVATE_WORKSPACE_MANAGER_SOURCES
-    src/private/WorkspaceManager.cpp
-)
-
-set(PRIVATE_WORKSPACE_MANAGER_FILES
-    ${PRIVATE_WORKSPACE_MANAGER_HEADERS}
-    ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
-)
-
 set(PRIVATE_MANAGER_HEADERS
-    ${PRIVATE_LAYOUT_MANAGER_HEADERS}
+    ${PRIVATE_WORKSPACE_MANAGER_HEADERS}
     ${PRIVATE_PLUGIN_MANAGER_HEADERS}
     ${PRIVATE_DATA_MANAGER_HEADERS}
     ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
     ${PRIVATE_ACTIONS_MANAGER_HEADERS}
     ${PRIVATE_PROJECT_MANAGER_HEADERS}
-    ${PRIVATE_WORKSPACE_MANAGER_HEADERS}
 )
 
 set(PRIVATE_MANAGER_SOURCES
-    ${PRIVATE_LAYOUT_MANAGER_SOURCES}
+    ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
     ${PRIVATE_PLUGIN_MANAGER_SOURCES}
     ${PRIVATE_DATA_MANAGER_SOURCES}
     ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
     ${PRIVATE_ACTIONS_MANAGER_SOURCES}
     ${PRIVATE_PROJECT_MANAGER_SOURCES}
     ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
-    ${PRIVATE_MANAGER_HEADERS}
 )
 
 set(PRIVATE_MANAGER_FILES
@@ -240,14 +225,12 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/HdpsApplication.h
     src/private/MainWindow.h
     src/private/FileMenu.h
-    src/private/RecentProjectsMenu.h
     src/private/ImportDataMenu.h
     src/private/ViewMenu.h
     src/private/LoadSystemViewMenu.h
     src/private/LoadedViewsMenu.h
     src/private/HelpMenu.h
     src/private/PluginHelpMenu.h
-    src/private/ResetMenu.h
     src/private/GlobalSettingsDialog.h
 )
 
@@ -255,14 +238,12 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/HdpsApplication.cpp
     src/private/MainWindow.cpp
     src/private/FileMenu.cpp
-    src/private/RecentProjectsMenu.cpp
     src/private/ImportDataMenu.cpp
     src/private/ViewMenu.cpp
     src/private/LoadSystemViewMenu.cpp
     src/private/LoadedViewsMenu.cpp
     src/private/HelpMenu.cpp
     src/private/PluginHelpMenu.cpp
-    src/private/ResetMenu.cpp
     src/private/GlobalSettingsDialog.cpp
 )
 
@@ -481,6 +462,7 @@ set(PUBLIC_WIDGET_HEADERS
     src/widgets/OverlayWidget.h
     src/widgets/ProjectEditorDialog.h
     src/widgets/ActionHierarchyWidget.h
+    src/widgets/TaskProgressDialog.h
 )
 
 set(PUBLIC_WIDGET_SOURCES
@@ -491,6 +473,7 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/OverlayWidget.cpp
     src/widgets/ProjectEditorDialog.cpp
     src/widgets/ActionHierarchyWidget.cpp
+    src/widgets/TaskProgressDialog.cpp
     ${ACTION_HIERARCHY_SOURCES}
 )
 
@@ -747,8 +730,6 @@ set(PUBLIC_HEADERS
     ${PUBLIC_GRAPHICS_HEADERS}
     ${PUBLIC_UTIL_HEADERS}
     ${PUBLIC_APPLICATION_HEADERS}
-    ${PUBLIC_ACTIONS_MANAGER_HEADERS}
-    ${PUBLIC_LAYOUT_MANAGER_HEADERS}
     ${PUBLIC_DATASET_HEADERS}
     ${PUBLIC_PLUGIN_HEADERS}
     ${PUBLIC_PROJECT_HEADERS}
@@ -767,8 +748,6 @@ set(PUBLIC_SOURCES
     ${PUBLIC_GRAPHICS_SOURCES}
     ${PUBLIC_UTIL_SOURCES}
     ${PUBLIC_APPLICATION_SOURCES}
-    ${PUBLIC_ACTIONS_MANAGER_SOURCES}
-    ${PUBLIC_LAYOUT_MANAGER_SOURCES}
     ${PUBLIC_DATASET_SOURCES}
     ${PUBLIC_PLUGIN_SOURCES}
     ${PUBLIC_DATA_HIERARCHY_SOURCES}

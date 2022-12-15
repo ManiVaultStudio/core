@@ -23,7 +23,7 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFa
     connect(this, &TriggerAction::triggered, this, &PluginTriggerAction::requestPlugin);
 
     setRequestPluginCallback([this](PluginTriggerAction& pluginTriggerAction) -> void {
-        Application::core()->requestPlugin(_pluginFactory->getKind());
+        Application::core()->getPluginManager().requestPlugin(_pluginFactory->getKind());
     });
 }
 

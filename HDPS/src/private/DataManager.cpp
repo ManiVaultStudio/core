@@ -186,6 +186,11 @@ void DataManager::reset()
 #ifdef DATA_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    beginReset();
+    {
+    }
+    endReset();
 }
 
 void DataManager::initalize()

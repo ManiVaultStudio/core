@@ -40,6 +40,11 @@ void ActionsManager::reset()
 #ifdef ACTIONS_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    beginReset();
+    {
+    }
+    endReset();
 }
 
 void ActionsManager::addAction(WidgetAction* action)

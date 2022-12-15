@@ -41,6 +41,11 @@ void DataHierarchyManager::reset()
 #ifdef DATA_HIERARCHY_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    beginReset();
+    {
+    }
+    endReset();
 }
 
 void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/)

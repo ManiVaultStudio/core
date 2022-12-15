@@ -27,11 +27,11 @@ using namespace hdps::gui;
 namespace hdps {
 
 Core::Core() :
+    _actionsManager(),
     _pluginManager(),
     _dataManager(),
     _dataHierarchyManager(),
-    _layoutManager(),
-    _actionsManager(),
+    _workspaceManager(),
     _eventListeners()
 {
     _datasetGroupingEnabled = Application::current()->getSetting("Core/DatasetGroupingEnabled", false).toBool();
@@ -39,16 +39,19 @@ Core::Core() :
 
 Core::~Core()
 {
-    // Remove all existing dataset
-    removeAllDatasets();
-
-    // Delete the plugin manager
     _pluginManager.reset();
 }
 
 void Core::init()
 {
-    _pluginManager.loadPlugins();
+    _actionsManager.reset(new ActionsManager());
+    _pluginManager.reset(new PluginManager());
+    _dataManager.reset(new DataManager());
+    _dataHierarchyManager.reset(new DataHierarchyManager());
+    _workspaceManager.reset(new WorkspaceManager());
+    _projectManager.reset(new ProjectManager());
+
+    _pluginManager->loadPlugins();
 }
 
 void Core::addPlugin(plugin::Plugin* plugin)
@@ -58,7 +61,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
         // If the plugin is RawData, then add it to the data manager
         case plugin::Type::DATA:
         {
-            _dataManager.addRawData(dynamic_cast<plugin::RawData*>(plugin));
+            _dataManager->addRawData(dynamic_cast<plugin::RawData*>(plugin));
             break;
         }
 
@@ -110,7 +113,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
 Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& guid /*= ""*/)
 {
     // Create a new plugin of the given kind
-    QString rawDataName = _pluginManager.createPlugin(kind)->getName();
+    QString rawDataName = _pluginManager->requestPlugin(kind)->getName();
 
     // Request it from the core
     const plugin::RawData& rawData = requestRawData(rawDataName);
@@ -127,12 +130,12 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     fullSet->_fullDataset = fullSet;
 
     // Add them to the data manager
-    _dataManager.addSet(fullSet);
+    _dataManager->addSet(fullSet);
 
-    _dataManager.addSelection(rawDataName, selection);
+    _dataManager->addSelection(rawDataName, selection);
 
     // Add the dataset to the hierarchy manager and select the dataset
-    _dataHierarchyManager.addItem(fullSet, const_cast<Dataset<DatasetImpl>&>(parentDataset));
+    _dataHierarchyManager->addItem(fullSet, const_cast<Dataset<DatasetImpl>&>(parentDataset));
     //_dataHierarchyManager->selectItems(DataHierarchyItems({ &fullSet->getDataHierarchyItem() }));
 
     // Initialize the dataset (e.g. setup default actions for info)
@@ -156,7 +159,7 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
         Datasets datasetsToRemove{ dataset };
 
         // Get children in a top-down manner
-        for (auto child : _dataHierarchyManager.getChildren(dataset->getDataHierarchyItem()))
+        for (auto child : _dataHierarchyManager->getChildren(dataset->getDataHierarchyItem()))
             datasetsToRemove << child->getDataset();
 
         // Remove datasets bottom-up (this prevents issues with the data hierarchy manager)
@@ -170,7 +173,7 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
 
             notifyDatasetAboutToBeRemoved(datasetToRemove);
             {
-                _dataManager.removeDataset(datasetToRemove);
+                _dataManager->removeDataset(datasetToRemove);
             }
             notifyDatasetRemoved(guid, type);
         }
@@ -190,7 +193,7 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
     const auto dataType = sourceDataset->getDataType();
 
     // Create a new plugin of the given kind
-    QString pluginName = _pluginManager.createPlugin(dataType._type)->getName();
+    QString pluginName = _pluginManager->requestPlugin(dataType._type)->getName();
 
     // Request it from the core
     plugin::RawData& rawData = requestRawData(pluginName);
@@ -206,10 +209,10 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
     derivedDataset->setAll(true);
     
     // Add them to the data manager
-    _dataManager.addSet(*derivedDataset);
+    _dataManager->addSet(*derivedDataset);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager.addItem(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
+    _dataHierarchyManager->addItem(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
 
     // Initialize the dataset (e.g. setup default actions for info)
     derivedDataset->init();
@@ -234,10 +237,10 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
         subset->_fullDataset = sourceDataset->isFull() ? sourceDataset : sourceDataset->_fullDataset;
 
         // Add the set the core and publish the name of the set to all plug-ins
-        _dataManager.addSet(*subset);
+        _dataManager->addSet(*subset);
 
         // Add the dataset to the hierarchy manager
-        _dataHierarchyManager.addItem(subset, const_cast<Dataset<DatasetImpl>&>(parentDataset), visible);
+        _dataHierarchyManager->addItem(subset, const_cast<Dataset<DatasetImpl>&>(parentDataset), visible);
 
         // Notify listeners that data was added
         notifyDatasetAdded(*subset);
@@ -262,7 +265,7 @@ plugin::RawData& Core::requestRawData(const QString& name)
 {
     try
     {
-        return _dataManager.getRawData(name);
+        return _dataManager->getRawData(name);
     }
     catch (std::exception& e)
     {
@@ -277,7 +280,7 @@ Dataset<DatasetImpl> Core::requestDataset(const QString& dataSetId)
 {
     try
     {
-        return Dataset<DatasetImpl>(_dataManager.getSet(dataSetId));
+        return Dataset<DatasetImpl>(_dataManager->getSet(dataSetId));
     }
     catch (std::exception& e)
     {
@@ -296,7 +299,7 @@ QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& 
 
     try
     {
-        const auto& datasets = _dataManager.allSets();
+        const auto& datasets = _dataManager->allSets();
 
         for (const auto dataset : datasets) {
             if (dataTypes.isEmpty()) {
@@ -322,37 +325,37 @@ QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& 
 
 AbstractDataManager& Core::getDataManager()
 {
-    return _dataManager;
+    return *_dataManager;
 }
 
 AbstractPluginManager& Core::getPluginManager()
 {
-    return _pluginManager;
+    return *_pluginManager;
 }
 
 AbstractActionsManager& Core::getActionsManager()
 {
-    return _actionsManager;
+    return *_actionsManager;
 }
 
 AbstractProjectManager& Core::getProjectManager()
 {
-    return _projectManager;
+    return *_projectManager;
 }
 
 AbstractDataHierarchyManager& Core::getDataHierarchyManager()
 {
-    return _dataHierarchyManager;
+    return *_dataHierarchyManager;
 }
 
-AbstractLayoutManager& Core::getLayoutManager()
+AbstractWorkspaceManager& Core::getWorkspaceManager()
 {
-    return _layoutManager;
+    return *_workspaceManager;
 }
 
 DataHierarchyItem& Core::getDataHierarchyItem(const QString& dataSetId)
 {
-    return _dataHierarchyManager.getItem(dataSetId);
+    return _dataHierarchyManager->getItem(dataSetId);
 }
 
 bool Core::isDatasetGroupingEnabled() const
@@ -404,36 +407,9 @@ Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString
     return Dataset<DatasetImpl>();
 }
 
-hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, Datasets datasets /*= Datasets()*/)
-{
-    try {
-        return _pluginManager.createPlugin(kind, datasets);
-
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to request plugin from the core", e);
-        return nullptr;
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to request plugin from the core");
-        return nullptr;
-    }
-}
-
-hdps::plugin::ViewPlugin* Core::requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, Datasets datasets /*= Datasets()*/)
-{
-    auto viewPlugin = dynamic_cast<hdps::plugin::ViewPlugin*>(_pluginManager.createPlugin(kind, datasets));
-
-    if (viewPlugin)
-        Application::core()->getLayoutManager().addViewPlugin(viewPlugin, dockToViewPlugin, dockArea);
-
-    return viewPlugin;
-}
-
 Dataset<DatasetImpl> Core::requestSelection(const QString& name)
 {
-    return Dataset<DatasetImpl>(_dataManager.getSelection(name));
+    return Dataset<DatasetImpl>(_dataManager->getSelection(name));
 }
 
 void Core::registerEventListener(EventListener* eventListener)
@@ -723,20 +699,20 @@ void Core::setDatasetGroupingEnabled(const bool& datasetGroupingEnabled)
 
 void Core::fromVariantMap(const QVariantMap& variantMap)
 {
-    _pluginManager.fromVariantMap(variantMap[_pluginManager.getSerializationName()].toMap());
-    _dataHierarchyManager.fromVariantMap(variantMap[_dataHierarchyManager.getSerializationName()].toMap());
-    _layoutManager.fromVariantMap(variantMap[_layoutManager.getSerializationName()].toMap());
-    _actionsManager.fromVariantMap(variantMap[_actionsManager.getSerializationName()].toMap());
+    _pluginManager->fromVariantMap(variantMap[_pluginManager->getSerializationName()].toMap());
+    _dataHierarchyManager->fromVariantMap(variantMap[_dataHierarchyManager->getSerializationName()].toMap());
+    _workspaceManager->fromVariantMap(variantMap[_workspaceManager->getSerializationName()].toMap());
+    _actionsManager->fromVariantMap(variantMap[_actionsManager->getSerializationName()].toMap());
 }
 
 QVariantMap Core::toVariantMap() const
 {
     QVariantMap variantMap;
 
-    variantMap[_pluginManager.getSerializationName()]           = _pluginManager.toVariantMap();
-    variantMap[_dataHierarchyManager.getSerializationName()]    = _dataHierarchyManager.toVariantMap();
-    variantMap[_layoutManager.getSerializationName()]           = _layoutManager.toVariantMap();
-    variantMap[_actionsManager.getSerializationName()]          = _actionsManager.toVariantMap();
+    variantMap[_pluginManager->getSerializationName()]           = _pluginManager->toVariantMap();
+    variantMap[_dataHierarchyManager->getSerializationName()]    = _dataHierarchyManager->toVariantMap();
+    variantMap[_workspaceManager->getSerializationName()]        = _workspaceManager->toVariantMap();
+    variantMap[_actionsManager->getSerializationName()]          = _actionsManager->toVariantMap();
 
     return variantMap;
 }

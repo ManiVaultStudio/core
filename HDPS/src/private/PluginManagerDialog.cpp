@@ -97,3 +97,10 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
 
     connect(&_okAction, &TriggerAction::triggered, this, &PluginManagerDialog::accept);
 }
+
+void PluginManagerDialog::managePlugins()
+{
+    PluginManagerDialog loadedPluginsDialog;
+
+    loadedPluginsDialog.exec();
+}

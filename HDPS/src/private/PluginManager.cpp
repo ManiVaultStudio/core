@@ -56,10 +56,14 @@ void PluginManager::reset()
     qDebug() << __FUNCTION__;
 #endif
 
-    for (auto& pluginPtr : _plugins)
-        destroyPlugin(pluginPtr);
+    beginReset();
+    {
+        for (auto& pluginPtr : _plugins)
+            destroyPlugin(pluginPtr);
 
-    _plugins.clear();
+        _plugins.clear();
+    }
+    endReset();
 }
 
 void PluginManager::loadPlugins()
@@ -247,7 +251,7 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
     return resolvedOrderedPluginNames;
 }
 
-plugin::Plugin* PluginManager::createPlugin(const QString& kind, const Datasets& datasets /*= Datasets()*/)
+plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets datasets /*= Datasets()*/)
 {
     try
     {
@@ -303,6 +307,16 @@ plugin::Plugin* PluginManager::createPlugin(const QString& kind, const Datasets&
 
         return nullptr;
     }
+}
+
+hdps::plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, Datasets datasets /*= Datasets()*/)
+{
+    auto viewPlugin = dynamic_cast<hdps::plugin::ViewPlugin*>(requestPlugin(kind, datasets));
+
+    if (viewPlugin)
+        Application::core()->getWorkspaceManager().addViewPlugin(viewPlugin, dockToViewPlugin, dockArea);
+
+    return viewPlugin;
 }
 
 void PluginManager::destroyPlugin(plugin::Plugin* plugin)

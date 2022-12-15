@@ -33,30 +33,51 @@ public:
      */
     bool isPluginLoaded(const QString& kind) const override;
 
+public: // Plugin creation/destruction
+
     /**
-    * Creates a new plugin instance of the given kind and adds it to the core
-    * @param kind Kind of plugin
-    * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-    * @return Pointer to created plugin
-    */
-    plugin::Plugin* createPlugin(const QString& kind, const Datasets& datasets = Datasets());
+     * Create a plugin of \p kind with input \p datasets
+     * @param kind Kind of plugin (name of the plugin)
+     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+     * @return Pointer to created plugin (nullptr if creation failed)
+     */
+    plugin::Plugin* requestPlugin(const QString& kind, Datasets datasets = Datasets()) override;
     
     /**
-     * Create a plugin of \p kind
+     * Create a plugin of \p kind with \p inputDatasets
      * @param kind Kind of plugin (name of the plugin)
-     * @return Pointer to created plugin
+     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+     * @return Pointer to created plugin of plugin type (nullptr if creation failed)
      */
     template<typename PluginType>
-    PluginType* createPlugin(const QString& kind, const Datasets& datasets)
+    PluginType* requestPlugin(const QString& kind, const Datasets& datasets)
     {
-        return dynamic_cast<PluginType*>(createPlugin(kind, datasets));
+        return dynamic_cast<PluginType*>(requestPlugin(kind, datasets));
     }
+
+    /**
+     * Create a view plugin plugin of \p kind and dock it to \p dockToViewPlugin at \p dockArea
+     * @param kind Kind of plugin (name of the plugin)
+     * @param dockToViewPlugin View plugin instance to dock to
+     * @param dockArea Dock area to dock in
+     * @return Pointer to created view plugin (nullptr if creation failed)
+     */
+    plugin::ViewPlugin* requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, Datasets datasets = Datasets()) override;
 
     /**
      * Destroy \p plugin
      * @param plugin Pointer to the plugin that is to be destroyed
      */
     void destroyPlugin(plugin::Plugin* plugin) override;
+
+public: // Plugin factories getters
+
+    /**
+     * Get plugin factory from \p pluginKind
+     * @param pluginKind Kind of plugin
+     * @return Plugin factory of \p pluginKind, nullptr if not found
+     */
+    plugin::PluginFactory* getPluginFactory(const QString& pluginKind) const override;
 
     /**
      * Get plugin factories for \p pluginType
@@ -79,6 +100,8 @@ public:
      */
     PluginPtrs getPluginsByFactory(const plugin::PluginFactory* pluginFactory) const override;
 
+public: // Plugin getters
+
     /**
      * Get plugin instances for \p pluginType (by default it gets all plugins for all types)
      * @param pluginType Plugin type
@@ -99,6 +122,8 @@ public:
      * @return Plugin kinds
      */
     QStringList getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const;
+
+public: // Plugin trigger actions
 
     /**
      * Get plugin trigger actions by \p pluginType
@@ -139,6 +164,8 @@ public:
      */
     gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const;
 
+public: // Plugin query
+
     /**
      * Get plugin GUI name from plugin kind
      * @param pluginKind Kind of plugin
@@ -166,15 +193,6 @@ public: // Serialization
      * @return Variant representation of the widget action
      */
     QVariantMap toVariantMap() const override;
-
-protected: // Factory
-
-    /**
-     * Get plugin factory from \p pluginKind
-     * @param pluginKind Kind of plugin
-     * @return Plugin factory of \p pluginKind, nullptr if not found
-     */
-    plugin::PluginFactory* getPluginFactory(const QString& pluginKind) const override;
 
 protected:
 

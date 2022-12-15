@@ -3,6 +3,7 @@
 #include "AbstractManager.h"
 #include "Plugin.h"
 #include "PluginFactory.h"
+#include "ViewPlugin.h"
 
 #include "actions/PluginTriggerAction.h"
 
@@ -41,13 +42,36 @@ public:
      */
     virtual bool isPluginLoaded(const QString& kind) const = 0;
 
+public: // Plugin creation/destruction
+
     /**
-    * Creates a new plugin instance of the given kind and adds it to the core
-    * @param kind Kind of plugin
-    * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-    * @return Pointer to created plugin
-    */
-    virtual plugin::Plugin* createPlugin(const QString& kind, const Datasets& datasets = Datasets()) = 0;
+     * Create a plugin of \p kind with input \p datasets
+     * @param kind Kind of plugin (name of the plugin)
+     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+     * @return Pointer to created plugin (nullptr if creation failed)
+     */
+    virtual plugin::Plugin* requestPlugin(const QString& kind, Datasets datasets = Datasets()) = 0;
+
+    /**
+     * Create a plugin of \p kind with \p inputDatasets
+     * @param kind Kind of plugin (name of the plugin)
+     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+     * @return Pointer to created plugin of plugin type (nullptr if creation failed)
+     */
+    template<typename PluginType>
+    PluginType* requestPlugin(const QString& kind, Datasets datasets = Datasets())
+    {
+        return dynamic_cast<PluginType*>(requestPlugin(kind, datasets));
+    }
+
+    /**
+     * Create a view plugin plugin of \p kind and dock it to \p dockToViewPlugin at \p dockArea
+     * @param kind Kind of plugin (name of the plugin)
+     * @param dockToViewPlugin View plugin instance to dock to
+     * @param dockArea Dock area to dock in
+     * @return Pointer to created view plugin (nullptr if creation failed)
+     */
+    virtual plugin::ViewPlugin* requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, Datasets datasets = Datasets()) = 0;
 
     /**
      * Destroy \p plugin
@@ -55,16 +79,14 @@ public:
      */
     virtual void destroyPlugin(plugin::Plugin* plugin) = 0;
     
+public: // Plugin factories getters
+
     /**
-     * Create a plugin of \p kind
-     * @param kind Kind of plugin (name of the plugin)
-     * @return Pointer to created plugin
+     * Get plugin factory from \p pluginKind
+     * @param pluginKind Kind of plugin
+     * @return Plugin factory of \p pluginKind, nullptr if not found
      */
-    template<typename PluginType>
-    PluginType* requestPlugin(const QString& kind, const Datasets& datasets)
-    {
-        return dynamic_cast<PluginType*>(createPlugin(kind, datasets));
-    }
+    virtual plugin::PluginFactory* getPluginFactory(const QString& pluginKind) const = 0;
 
     /**
      * Get plugin factories for \p pluginType
@@ -87,6 +109,8 @@ public:
      */
     virtual plugin::PluginPtrs getPluginsByFactory(const plugin::PluginFactory* pluginFactory) const = 0;
 
+public: // Plugin getters
+
     /**
      * Get plugin instances for \p pluginType
      * @param pluginType Plugin type
@@ -107,6 +131,8 @@ public:
      * @return Plugin kinds
      */
     virtual QStringList getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const = 0;
+
+public: // Plugin trigger actions
 
     /**
      * Get plugin trigger actions by \p pluginType
@@ -147,6 +173,8 @@ public:
      */
     virtual gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const = 0;
 
+public: // Plugin query
+
     /**
      * Get plugin GUI name from plugin kind
      * @param pluginKind Kind of plugin
@@ -160,15 +188,6 @@ public:
      * @return Plugin icon name of the plugin, null icon if the plugin kind was not found
      */
     virtual QIcon getPluginIcon(const QString& pluginKind) const = 0;
-
-protected: // Factory
-
-    /**
-     * Get plugin factory from \p pluginKind
-     * @param pluginKind Kind of plugin
-     * @return Plugin factory of \p pluginKind, nullptr if not found
-     */
-    virtual plugin::PluginFactory* getPluginFactory(const QString& pluginKind) const = 0;
 
 protected:
 

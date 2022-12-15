@@ -1,8 +1,12 @@
 #pragma once
 
+#include "AbstractManager.h"
 #include "Project.h"
 
+#include "actions/TriggerAction.h"
+
 #include <QObject>
+#include <QMenu>
 
 namespace hdps {
 
@@ -13,7 +17,7 @@ namespace hdps {
  *
  * @author Thomas Kroes
  */
-class AbstractProjectManager : public QObject
+class AbstractProjectManager : public AbstractManager
 {
     Q_OBJECT
 
@@ -26,51 +30,81 @@ public:
      * Load a project from disk
      * @param projectFilePath File path of the existing project (choose file path when empty)
      */
-    virtual void loadProject(QString projectFilePath /*= ""*/) = 0;
+    virtual void loadProject(QString projectFilePath = "") = 0;
 
     /**
      * Save a project to disk
      * @param projectFilePath File path of the existing project (choose file path when empty)
      */
-    virtual void saveProject(QString projectFilePath /*= ""*/) = 0;
+    virtual void saveProject(QString projectFilePath = "") = 0;
+
+    /** Save project to different file (use is prompted to choose the file location) */
+    virtual void saveProjectAs() = 0;
+
+    /**
+     * Get current project
+     * @return Pointer to current project (nullptr if no project is loaded)
+     */
+    virtual Project* getCurrentProject() = 0;
+
+public: // Recent projects
+
+    /**
+     * Get recent projects menu
+     * @return Pointer to recent projects menu
+     */
+    virtual QMenu* getRecentProjectsMenu() = 0;
+
+public: // Action getters
+
+    virtual hdps::gui::TriggerAction& getNewProjectAction() = 0;
+    virtual hdps::gui::TriggerAction& getOpenProjectAction() = 0;
+    virtual hdps::gui::TriggerAction& getSaveProjectAction() = 0;
+    virtual hdps::gui::TriggerAction& getSaveProjectAsAction() = 0;
 
 signals:
 
     /**
-     * Signals that a new project is created
+     * Signals that \p project is created
      * @param project Reference to the created project
      */
-    void projectCreated(const Project& project);
+    void projectCreated(const hdps::Project& project);
 
     /**
-     * Signals that a project is destroyed
+     * Signals that project with \p projectId is destroyed
      * @param projectId Globally unique identifier of the project that is destroyed
      */
     void projectDestroyed(const QString& projectId);
 
     /**
-     * Signals that a project is about to be loaded
+     * Signals that \p project is about to be loaded
      * @param project Reference to the project that is about to be loaded
      */
-    void projectAboutToBeLoaded(const Project& project);
+    void projectAboutToBeLoaded(const hdps::Project& project);
 
     /**
-     * Signals that a project is loaded
+     * Signals that \p project is loaded
      * @param project Reference to the project that is loaded
      */
-    void projectLoaded(const Project& project);
+    void projectLoaded(const hdps::Project& project);
 
     /**
-     * Signals that a project is saved
+     * Signals that \p project is about to be saved
+     * @param project Reference to the project that is about to be saved
+     */
+    void projectAboutToBeSaved(const hdps::Project& project);
+
+    /**
+     * Signals that \p project is saved
      * @param project Reference to the saved project
      */
-    void projectSaved(const Project& project);
+    void projectSaved(const hdps::Project& project);
 
     /**
-     * Signals that a project is about to be destroyed
+     * Signals that \p project is about to be destroyed
      * @param project Reference to the project that is about to be destroyed
      */
-    void projectAboutToBeDestroyed(const Project& project);
+    void projectAboutToBeDestroyed(const hdps::Project& project);
 };
 
 }

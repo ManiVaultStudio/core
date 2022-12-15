@@ -11,11 +11,11 @@
 
 class QMainWindow;
 
-namespace hdps::gui
+namespace hdps
 {
 
 /**
- * Layout manager class
+ * Workspace manager class
  *
  * Manages the placement of view plugins on the screen using the Advanced Dock System (ADS) for Qt
  * 
@@ -30,17 +30,17 @@ namespace hdps::gui
  * 
  * @author Thomas Kroes
  */
-class LayoutManager final : public AbstractWorkspaceManager
+class WorkspaceManager final : public AbstractWorkspaceManager
 {
     Q_OBJECT
 
 public:
 
     /** Default constructor */
-    LayoutManager();
+    WorkspaceManager();
 
     /** Default destructor */
-    ~LayoutManager() override;
+    ~WorkspaceManager() override;
 
     /** Perform manager startup initialization */
     void initalize() override;

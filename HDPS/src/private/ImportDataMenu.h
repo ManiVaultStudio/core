@@ -1,7 +1,5 @@
 #pragma once
 
-#include "RecentProjectsMenu.h"
-
 #include <QMenu>
 
 /**

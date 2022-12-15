@@ -24,64 +24,76 @@ public:
      */
     ProjectManager(QObject* parent = nullptr);
 
+    /** Perform manager startup initialization */
+    void initalize() override;
+
+    /** Resets the contents of the project manager */
+    void reset() override;
+
     /** Creates a new project */
-    void newProject();
+    void newProject() override;
 
     /**
-     * Load a project from disk
-     * @param projectFilePath File path of the existing project (choose file path when empty)
+     * Load project from \p filePath
+     * @param filePath File path of the existing project (choose file path when empty)
      */
-    void loadProject(QString projectFilePath /*= ""*/);
+    void loadProject(QString filePath = "") override;
 
     /**
-     * Save a project to disk
-     * @param projectFilePath File path of the existing project (choose file path when empty)
+     * Save project to \p filePath (uses file path of loaded project when empty)
+     * @param filePath File path of the existing project (choose file path when empty)
      */
-    void saveProject(QString projectFilePath /*= ""*/);
+    void saveProject(QString filePath = "") override;
 
-signals:
-
-    /**
-     * Signals that a new project is created
-     * @param project Reference to the created project
-     */
-    void projectCreated(const hdps::Project& project);
+    /** Save project to different file (use is prompted to choose the file location) */
+    void saveProjectAs() override;
 
     /**
-     * Signals that a project is destroyed
-     * @param projectId Globally unique identifier of the project that is destroyed
+     * Get current project
+     * @return Pointer to current project (nullptr if no project is loaded)
      */
-    void projectDestroyed(const hdps::QString& projectId);
+    hdps::Project* getCurrentProject() override;
+
+public: // Recent projects
 
     /**
-     * Signals that a project is about to be loaded
-     * @param project Reference to the project that is about to be loaded
+     * Get recent projects menu
+     * @return Pointer to recent projects menu
      */
-    void projectAboutToBeLoaded(const hdps::Project& project);
-
-    /**
-     * Signals that a project is loaded
-     * @param project Reference to the project that is loaded
-     */
-    void projectLoaded(const hdps::Project& project);
-
-    /**
-     * Signals that a project is saved
-     * @param project Reference to the saved project
-     */
-    void projectSaved(const hdps::Project& project);
-
-    /**
-     * Signals that a project is about to be destroyed
-     * @param project Reference to the project that is about to be destroyed
-     */
-    void projectAboutToBeDestroyed(const hdps::Project& project);
+    QMenu* getRecentProjectsMenu() override;
 
 private:
-    QPointer<hdps::Project>   _project;       /** Current project */
-    //QString         _currentProjectFilePath;                /** File path of the current project */
-    //QString         _serializationTemporaryDirectory;       /** Temporary directory for serialization */
-    //bool            _serializationAborted;                  /** Whether (de)serialization was aborted */
+
+    /** Resets the core and creates a new project */
+    void createProject();
+
+    /** Update the contents of the recent projects menu */
+    void updateRecentProjectsMenu();
+
+    /** Add loaded project to recent projects in the settings */
+    void addRecentProjectFilePath(const QString& filePath);
+
+public: // Action getters
+
+    hdps::gui::TriggerAction& getNewProjectAction() override { return _newProjectAction; }
+    hdps::gui::TriggerAction& getOpenProjectAction() override { return _openProjectAction; }
+    hdps::gui::TriggerAction& getSaveProjectAction() override { return _saveProjectAction; }
+    hdps::gui::TriggerAction& getSaveProjectAsAction() override { return _saveProjectAsAction; }
+
+private:
+    QScopedPointer<hdps::Project>   _project;                   /** Current project */
+    hdps::gui::TriggerAction        _newProjectAction;          /** Action for creating a new project */
+    hdps::gui::TriggerAction        _openProjectAction;         /** Action for opening a project */
+    hdps::gui::TriggerAction        _saveProjectAction;         /** Action for saving a project */
+    hdps::gui::TriggerAction        _saveProjectAsAction;       /** Action for saving a project under a new name */
+    QMenu                           _recentProjectsMenu;        /** Menu for loading recent projects */
+
+    QString         _serializationTemporaryDirectory;       /** Temporary directory for serialization */
+    bool            _serializationAborted;                  /** Whether (de)serialization was aborted */
+
+protected:
+    static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
+    static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL   = 2;        /** Default compression level*/
 };
 
 
@@ -122,43 +134,6 @@ private:
 //     */
 //    void currentProjectFilePathChanged(const QString& currentProjectFilePath);
 
-//QString Application::getCurrentProjectFilePath() const
-//{
-//    return _currentProjectFilePath;
-//}
-//
-//void Application::setCurrentProjectFilePath(const QString& currentProjectFilePath)
-//{
-//    if (currentProjectFilePath == _currentProjectFilePath)
-//        return;
-//
-//    _currentProjectFilePath = currentProjectFilePath;
-//
-//    emit currentProjectFilePathChanged(_currentProjectFilePath);
-//}
-//
-//void Application::addRecentProjectFilePath(const QString& recentProjectFilePath)
-//{
-//    auto recentProjects = getSetting("Projects/Recent", QVariantList()).toList();
-//
-//    QVariantMap recentProject{
-//        { "FilePath", recentProjectFilePath },
-//        { "DateTime", QDateTime::currentDateTime() }
-//    };
-//
-//    for (auto recentProject : recentProjects)
-//        if (recentProject.toMap()["FilePath"].toString() == recentProjectFilePath)
-//            recentProjects.removeOne(recentProject);
-//
-//    recentProjects.insert(0, recentProject);
-//
-//    setSetting("Projects/Recent", recentProjects);
-//}
-//
-//Logger& Application::getLogger()
-//{
-//    return current()->_logger;
-//}
 //
 //QString Application::getSerializationTemporaryDirectory()
 //{

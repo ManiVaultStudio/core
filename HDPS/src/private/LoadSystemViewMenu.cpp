@@ -3,7 +3,7 @@
 #include "ViewPluginDockWidget.h"
 
 #include <Application.h>
-#include <AbstractLayoutManager.h>
+#include <AbstractWorkspaceManager.h>
 
 #include <actions/PluginTriggerAction.h>
 
@@ -97,7 +97,7 @@ QVector<QPointer<TriggerAction>> LoadSystemViewMenu::getLoadSystemViewsActions(h
         }
 
         connect(action, &QAction::triggered, this, [pluginTriggerAction, dockToViewPlugin, dockArea]() -> void {
-            Application::core()->requestViewPlugin(pluginTriggerAction->getPluginFactory()->getKind(), dockToViewPlugin, dockArea);
+            Application::core()->getPluginManager().requestViewPlugin(pluginTriggerAction->getPluginFactory()->getKind(), dockToViewPlugin, dockArea);
         });
 
         actions << action;

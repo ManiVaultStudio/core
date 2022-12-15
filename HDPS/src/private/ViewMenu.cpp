@@ -5,7 +5,7 @@
 #include "ViewPluginDockWidget.h"
 
 #include <Application.h>
-#include <AbstractLayoutManager.h>
+#include <AbstractWorkspaceManager.h>
 
 #include <util/Miscellaneous.h>
 
@@ -111,7 +111,7 @@ QVector<QPointer<PluginTriggerAction>> ViewMenu::getLoadViewsActions(gui::DockAr
         }
 
         pluginTriggerActions.last()->setRequestPluginCallback([dockToViewPlugin, dockArea](PluginTriggerAction& pluginTriggerAction) -> void {
-            Application::core()->requestViewPlugin(pluginTriggerAction.getPluginFactory()->getKind(), dockToViewPlugin, dockArea);
+            Application::core()->getPluginManager().requestViewPlugin(pluginTriggerAction.getPluginFactory()->getKind(), dockToViewPlugin, dockArea);
         });
     }
 

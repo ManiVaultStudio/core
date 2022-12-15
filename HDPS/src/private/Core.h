@@ -8,9 +8,8 @@
 #include "PluginManager.h"
 #include "ActionsManager.h"
 #include "DataHierarchyManager.h"
-#include "LayoutManager.h"
-#include "ProjectManager.h"
 #include "WorkspaceManager.h"
+#include "ProjectManager.h"
 
 #include <event/EventListener.h>
 
@@ -19,22 +18,6 @@
 #include <vector>
 
 using namespace hdps;
-
-struct AnalysisNotFoundException : public std::exception
-{
-public:
-    AnalysisNotFoundException(QString analysisName) :
-        message((QString("Failed to find an analysis with name: ") + analysisName).toStdString())
-    { }
-
-    const char* what() const throw () override
-    {
-        return message.c_str();
-    }
-
-private:
-    std::string message;
-};
 
 namespace hdps {
 
@@ -124,26 +107,6 @@ public: // Data grouping
      * @return Smart pointer to created group dataset
      */
     Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "");
-
-public: // Plugin creation
-
-    /**
-     * Create a plugin of \p kind with \p inputDatasets
-     * @param kind Kind of plugin (name of the plugin)
-     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-     * @return Pointer to created plugin (nullptr if creation failed)
-     */
-    plugin::Plugin* requestPlugin(const QString& kind, Datasets datasets = Datasets()) override;
-
-    /**
-     * Create a view plugin plugin of \p kind with \p inputDatasets and dock it to \p dockToViewPlugin at \p dockArea
-     * @param kind Kind of plugin (name of the plugin)
-     * @param dockToViewPlugin View plugin instance to dock to
-     * @param dockArea Dock area to dock in
-     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-     * @return Pointer to created view plugin (nullptr if creation failed)
-     */
-    plugin::ViewPlugin* requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, Datasets datasets = Datasets()) override;
 
 public: // Data hierarchy
 
@@ -250,33 +213,22 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 public: // Managers
-
-    /** Get a reference to the plugin manager */
-    AbstractPluginManager& getPluginManager() override;
-
-    /** Get a reference to the data manager */
-    AbstractDataManager& getDataManager() override;
-
-    /** Get a reference to the actions manager */
-    AbstractDataHierarchyManager& getDataHierarchyManager() override;
-
-    /** Get a reference to the layout manager */
-    AbstractLayoutManager& getLayoutManager() override;
-
-    /** Get a reference to the actions manager */
+    
     AbstractActionsManager& getActionsManager() override;
-
-    /** Get a reference to the project manager */
+    AbstractPluginManager& getPluginManager() override;
+    AbstractDataManager& getDataManager() override;
+    AbstractDataHierarchyManager& getDataHierarchyManager() override;
+    AbstractWorkspaceManager& getWorkspaceManager() override;
     AbstractProjectManager& getProjectManager();
 
 private:
-    PluginManager                   _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core */
-    DataManager                     _dataManager;               /** Data manager responsible for storing data sets and data selections */
-    DataHierarchyManager            _dataHierarchyManager;      /** Data hierarchy manager for providing a hierarchical dataset structure */
-    LayoutManager                   _layoutManager;             /** Layout manager for controlling widgets layout */
-    ActionsManager                  _actionsManager;            /** Actions manager for storing actions */
-    ProjectManager                  _projectManager;            /** Manager for loading/saving projects */
-    std::vector<EventListener*>     _eventListeners;            /** List of classes listening for core events */
+    QScopedPointer<ActionsManager>          _actionsManager;            /** Actions manager for storing actions */
+    QScopedPointer<PluginManager>           _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core */
+    QScopedPointer<DataManager>             _dataManager;               /** Data manager responsible for storing data sets and data selections */
+    QScopedPointer<DataHierarchyManager>    _dataHierarchyManager;      /** Data hierarchy manager for providing a hierarchical dataset structure */
+    QScopedPointer<WorkspaceManager>        _workspaceManager;          /** Workspace manager for controlling widgets layout */
+    QScopedPointer<ProjectManager>          _projectManager;            /** Manager for loading/saving projects */
+    std::vector<EventListener*>             _eventListeners;            /** List of classes listening for core events */
 
     friend class DataHierarchyManager;
 };

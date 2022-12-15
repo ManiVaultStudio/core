@@ -7,7 +7,7 @@
 
 class QMainWindow;
 
-namespace hdps::gui
+namespace hdps
 {
 
 /**

@@ -33,6 +33,8 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 {
     QMainWindow::showEvent(showEvent);
 
+    _core.init();
+
     menuBar()->addMenu(new FileMenu());
     menuBar()->addMenu(new ViewMenu());
     menuBar()->addMenu(new HelpMenu());
@@ -48,13 +50,30 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
     setCentralWidget(_stackedWidget);
 
-    //connect(Application::current(), &Application::currentProjectFilePathChanged, [this](const QString& currentProjectFilePath) {
-    //    setWindowTitle(currentProjectFilePath + (currentProjectFilePath.isEmpty() ? " HDPS" : " - HDPS"));
-    //});
+    const auto updateWindowTitle = [this]() -> void {
+        auto project = Application::core()->getProjectManager().getCurrentProject();
 
-    Application::core()->getLayoutManager().initialize(this);
+        if (!project) {
+            setWindowTitle("HDPS");
+        }
+        else {
+            const auto projectFilePath = project->getFilePath();
 
-    _core.init();
+            if (projectFilePath.isEmpty())
+                setWindowTitle("Unsaved - HDPS");
+            else
+                setWindowTitle(QString("%1 - HDPS").arg(projectFilePath));
+        }
+    };
+
+    auto& projectManager = Application::core()->getProjectManager();
+
+    connect(&projectManager, &ProjectManager::projectCreated, this, updateWindowTitle);
+    connect(&projectManager, &ProjectManager::projectDestroyed, this, updateWindowTitle);
+    connect(&projectManager, &ProjectManager::projectLoaded, this, updateWindowTitle);
+    connect(&projectManager, &ProjectManager::projectSaved, this, updateWindowTitle);
+
+    Application::core()->getWorkspaceManager().initialize(this);
 }
 
 void MainWindow::closeEvent(QCloseEvent* closeEvent)

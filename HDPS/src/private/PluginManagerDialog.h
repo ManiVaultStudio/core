@@ -37,6 +37,9 @@ public:
         return sizeHint();
     }
 
+    /** Show the plugin manager dialog modally */
+    static void managePlugins();
+
 private:
     PluginManagerModel          _model;                 /** Plugin manager model (interfaces with a plugin manager) */
     PluginManagerFilterModel    _filterModel;           /** Sorting and filtering model for the plugin manager model */

@@ -6,11 +6,11 @@
 #include "util/DockArea.h"
 #include "util/Serializable.h"
 
+#include "AbstractActionsManager.h"
 #include "AbstractPluginManager.h"
 #include "AbstractDataManager.h"
 #include "AbstractDataHierarchyManager.h"
 #include "AbstractWorkspaceManager.h"
-#include "AbstractActionsManager.h"
 #include "AbstractProjectManager.h"
 
 #include <QString>
@@ -189,38 +189,6 @@ public: // Data grouping
      */
     virtual Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") = 0;
 
-public: // Plugin creation
-
-    /**
-     * Create a plugin of \p kind with \p inputDatasets
-     * @param kind Kind of plugin (name of the plugin)
-     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-     * @return Pointer to created plugin (nullptr if creation failed)
-     */
-    virtual plugin::Plugin* requestPlugin(const QString& kind, Datasets datasets = Datasets()) = 0;
-
-    /**
-     * Create a view plugin plugin of \p kind with \p inputDatasets and dock it to \p dockToViewPlugin at \p dockArea
-     * @param kind Kind of plugin (name of the plugin)
-     * @param dockToViewPlugin View plugin instance to dock to
-     * @param dockArea Dock area to dock in
-     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-     * @return Pointer to created view plugin (nullptr if creation failed)
-     */
-    virtual plugin::ViewPlugin* requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, Datasets datasets = Datasets()) = 0;
-
-    /**
-     * Create a plugin of \p kind with \p inputDatasets
-     * @param kind Kind of plugin (name of the plugin)
-     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-     * @return Pointer to created plugin
-     */
-    template<typename PluginType>
-    PluginType* requestPlugin(const QString& kind, Datasets datasets = Datasets())
-    {
-        return dynamic_cast<PluginType*>(requestPlugin(kind, datasets));
-    }
-
 public: // Data hierarchy
 
     /**
@@ -304,23 +272,12 @@ public: // Events & notifications
     virtual void unregisterEventListener(EventListener* eventListener) = 0;
 
 public: // Managers
-
-    /** Get a reference to the plugin manager */
-    virtual AbstractPluginManager& getPluginManager() = 0;
-
-    /** Get a reference to the data manager */
-    virtual AbstractDataManager& getDataManager() = 0;
-
-    /** Get a reference to the data hierarchy manager */
-    virtual AbstractDataHierarchyManager& getDataHierarchyManager() = 0;
-
-    /** Get a reference to the workspace manager */
-    virtual gui::AbstractWorkspaceManager& getWorkspaceManager() = 0;
-
-    /** Get a reference to the actions manager */
+    
     virtual AbstractActionsManager& getActionsManager() = 0;
-
-    /** Get a reference to the project manager */
+    virtual AbstractPluginManager& getPluginManager() = 0;
+    virtual AbstractDataManager& getDataManager() = 0;
+    virtual AbstractDataHierarchyManager& getDataHierarchyManager() = 0;
+    virtual AbstractWorkspaceManager& getWorkspaceManager() = 0;
     virtual AbstractProjectManager& getProjectManager() = 0;
 
 protected:

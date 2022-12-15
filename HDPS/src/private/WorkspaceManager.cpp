@@ -1,4 +1,4 @@
-#include "LayoutManager.h"
+#include "WorkspaceManager.h"
 #include "ViewPluginDockWidget.h"
 #include "ViewMenu.h"
 #include "LoadSystemViewMenu.h"
@@ -101,10 +101,10 @@ public:
     //}
 };
 
-namespace hdps::gui
+namespace hdps
 {
 
-LayoutManager::LayoutManager() :
+WorkspaceManager::WorkspaceManager() :
     AbstractWorkspaceManager(),
     _dockManager(),
     _viewPluginsWidget(),
@@ -146,26 +146,31 @@ LayoutManager::LayoutManager() :
     createIcon();
 }
 
-LayoutManager::~LayoutManager()
+WorkspaceManager::~WorkspaceManager()
 {
     reset();
 } 
 
-void LayoutManager::initalize()
+void WorkspaceManager::initalize()
 {
 #ifdef WORKSPACE_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 }
 
-void LayoutManager::reset()
+void WorkspaceManager::reset()
 {
 #ifdef WORKSPACE_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    beginReset();
+    {
+    }
+    endReset();
 }
 
-void LayoutManager::initialize(QWidget* widget)
+void WorkspaceManager::initialize(QWidget* widget)
 {
     if (_initialized)
         return;
@@ -199,7 +204,7 @@ void LayoutManager::initialize(QWidget* widget)
     _initialized = true;
 }
 
-void LayoutManager::loadWorkspace(QString filePath /*= ""*/)
+void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/)
 {
     try
     {
@@ -234,7 +239,7 @@ void LayoutManager::loadWorkspace(QString filePath /*= ""*/)
     }
 }
 
-void LayoutManager::saveWorkspace(QString filePath)
+void WorkspaceManager::saveWorkspace(QString filePath)
 {
     try
     {
@@ -254,7 +259,7 @@ void LayoutManager::saveWorkspace(QString filePath)
     }
 }
 
-void LayoutManager::saveWorkspaceAs()
+void WorkspaceManager::saveWorkspaceAs()
 {
 #ifdef WORKSPACE_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
@@ -264,7 +269,7 @@ void LayoutManager::saveWorkspaceAs()
         return;
 }
 
-void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
+void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 {
     variantMapMustContain(variantMap, "DockingManagers");
 
@@ -277,7 +282,7 @@ void LayoutManager::fromVariantMap(const QVariantMap& variantMap)
     //_viewPluginsDockWidget.getDockManager().fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
 }
 
-QVariantMap LayoutManager::toVariantMap() const
+QVariantMap WorkspaceManager::toVariantMap() const
 {
     const auto mainDockingManager           = _dockManager->toVariantMap();
     //const auto viewPluginsDockingManager    = _viewPluginsDockWidget.getDockManager().toVariantMap();
@@ -292,7 +297,7 @@ QVariantMap LayoutManager::toVariantMap() const
     };
 }
 
-void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, DockAreaFlag dockArea /*= DockAreaFlag::Right*/)
+void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, DockAreaFlag dockArea /*= DockAreaFlag::Right*/)
 {
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
@@ -302,7 +307,7 @@ void LayoutManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPl
         _viewPluginsWidget->addViewPlugin(viewPluginDockWidget, dockToViewPlugin, dockArea);
 }
 
-void LayoutManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate)
+void WorkspaceManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate)
 {
 #ifdef WORKSPACE_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << viewPlugin->getGuiName() << isolate;
@@ -329,12 +334,12 @@ void LayoutManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isola
     }
 }
 
-ViewPluginDockWidgets LayoutManager::getViewPluginDockWidgets()
+ViewPluginDockWidgets WorkspaceManager::getViewPluginDockWidgets()
 {
     return _dockManager->getViewPluginDockWidgets();// << _viewPluginsDockWidget.getDockManager().getViewPluginDockWidgets();
 }
 
-QMenu* LayoutManager::getMenu(QWidget* parent /*= nullptr*/)
+QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)
 {
     auto menu = new QMenu("Workspace", parent);
 
@@ -349,7 +354,7 @@ QMenu* LayoutManager::getMenu(QWidget* parent /*= nullptr*/)
     return menu;
 }
 
-void LayoutManager::createIcon()
+void WorkspaceManager::createIcon()
 {
     const auto size             = 128;
     const auto halfSize         = size / 2;
@@ -379,7 +384,7 @@ void LayoutManager::createIcon()
     _icon = hdps::gui::createIcon(pixmap);
 }
 
-void LayoutManager::createWorkspace()
+void WorkspaceManager::createWorkspace()
 {
     _workspace.reset(new Workspace(this));
 
