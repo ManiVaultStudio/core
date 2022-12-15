@@ -62,13 +62,14 @@ public: // Menus
      */
     virtual QMenu* getImportDataMenu() = 0;
 
-
 public: // Action getters
 
     virtual hdps::gui::TriggerAction& getNewProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getOpenProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getSaveProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getSaveProjectAsAction() = 0;
+    virtual hdps::gui::TriggerAction& getPublishAction() = 0;
+    virtual hdps::gui::TriggerAction& getPluginManagerAction() = 0;
     virtual hdps::gui::ToggleAction& getShowStartPageAction() = 0;
 
 signals:
@@ -117,69 +118,3 @@ signals:
 };
 
 }
-
-//     * Get serialization temporary directory
-//     * @return Serialization temporary directory
-//     */
-//static QString getSerializationTemporaryDirectory();
-//
-///**
-// * Get whether (de)serialization was aborted
-// * @return Boolean indicating whether (de)serialization was aborted
-// */
-//static bool isSerializationAborted();
-
-//signals:
-//
-//    /**
-//     * Signals that the current project file changed
-//     */
-//    void currentProjectFilePathChanged(const QString& currentProjectFilePath);
-
-//QString Application::getCurrentProjectFilePath() const
-//{
-//    return _currentProjectFilePath;
-//}
-//
-//void Application::setCurrentProjectFilePath(const QString& currentProjectFilePath)
-//{
-//    if (currentProjectFilePath == _currentProjectFilePath)
-//        return;
-//
-//    _currentProjectFilePath = currentProjectFilePath;
-//
-//    emit currentProjectFilePathChanged(_currentProjectFilePath);
-//}
-//
-//void Application::addRecentProjectFilePath(const QString& recentProjectFilePath)
-//{
-//    auto recentProjects = getSetting("Projects/Recent", QVariantList()).toList();
-//
-//    QVariantMap recentProject{
-//        { "FilePath", recentProjectFilePath },
-//        { "DateTime", QDateTime::currentDateTime() }
-//    };
-//
-//    for (auto recentProject : recentProjects)
-//        if (recentProject.toMap()["FilePath"].toString() == recentProjectFilePath)
-//            recentProjects.removeOne(recentProject);
-//
-//    recentProjects.insert(0, recentProject);
-//
-//    setSetting("Projects/Recent", recentProjects);
-//}
-//
-//Logger& Application::getLogger()
-//{
-//    return current()->_logger;
-//}
-//
-//QString Application::getSerializationTemporaryDirectory()
-//{
-//    return current()->_serializationTemporaryDirectory;
-//}
-//
-//bool Application::isSerializationAborted()
-//{
-//    return current()->_serializationAborted;
-//}

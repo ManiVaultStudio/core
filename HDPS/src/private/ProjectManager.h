@@ -54,6 +54,20 @@ public:
      */
     hdps::Project* getCurrentProject() override;
 
+public: // Serialization
+
+    /**
+     * Get serialization temporary directory
+     * @return Serialization temporary directory
+     */
+    QString getSerializationTemporaryDirectory();
+
+    /**
+     * Get whether (de)serialization was aborted
+     * @return Boolean indicating whether (de)serialization was aborted
+     */
+    bool isSerializationAborted();
+
 public: // Menus
 
     /**
@@ -85,71 +99,23 @@ public: // Action getters
     hdps::gui::TriggerAction& getOpenProjectAction() override { return _openProjectAction; }
     hdps::gui::TriggerAction& getSaveProjectAction() override { return _saveProjectAction; }
     hdps::gui::TriggerAction& getSaveProjectAsAction() override { return _saveProjectAsAction; }
+    hdps::gui::TriggerAction& getPublishAction() override { return _publishAction; }
+    hdps::gui::TriggerAction& getPluginManagerAction() override { return _pluginManagerAction; }
     hdps::gui::ToggleAction& getShowStartPageAction() override { return _showStartPageAction; }
 
 private:
-    QScopedPointer<hdps::Project>   _project;                   /** Current project */
-    hdps::gui::TriggerAction        _newProjectAction;          /** Action for creating a new project */
-    hdps::gui::TriggerAction        _openProjectAction;         /** Action for opening a project */
-    hdps::gui::TriggerAction        _saveProjectAction;         /** Action for saving a project */
-    hdps::gui::TriggerAction        _saveProjectAsAction;       /** Action for saving a project under a new name */
-    QMenu                           _recentProjectsMenu;        /** Menu for loading recent projects */
-    QMenu                           _importDataMenu;            /** Menu for importing data */
-    hdps::gui::ToggleAction         _showStartPageAction;       /** Action for toggling the start page */
-
-    QString         _serializationTemporaryDirectory;       /** Temporary directory for serialization */
-    bool            _serializationAborted;                  /** Whether (de)serialization was aborted */
+    QScopedPointer<hdps::Project>   _project;                               /** Current project */
+    hdps::gui::TriggerAction        _newProjectAction;                      /** Action for creating a new project */
+    hdps::gui::TriggerAction        _openProjectAction;                     /** Action for opening a project */
+    hdps::gui::TriggerAction        _saveProjectAction;                     /** Action for saving a project */
+    hdps::gui::TriggerAction        _saveProjectAsAction;                   /** Action for saving a project under a new name */
+    QMenu                           _recentProjectsMenu;                    /** Menu for loading recent projects */
+    QMenu                           _importDataMenu;                        /** Menu for importing data */
+    hdps::gui::TriggerAction        _publishAction;                         /** Action for publishing the project to an end-user */
+    hdps::gui::TriggerAction        _pluginManagerAction;                   /** Action for showing the loaded plugins dialog */
+    hdps::gui::ToggleAction         _showStartPageAction;                   /** Action for toggling the start page */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
     static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL   = 2;        /** Default compression level*/
 };
-
-
-///**
-// * Get current project file path
-// * @return File path of the current project
-// */
-//virtual QString getCurrentProjectFilePath() const final;
-//
-///**
-// * Set current project file path
-// * @param currentProjectFilePath Current project file path
-// */
-//virtual void setCurrentProjectFilePath(const QString& currentProjectFilePath) final;
-//
-///**
-// * Add recent project file path (adds the path to the settings so that users can select the project from a recent list)
-// * @param recentProjectFilePath File path of the recent project
-// */
-//virtual void addRecentProjectFilePath(const QString& recentProjectFilePath) final;
-
-///**
-//     * Get serialization temporary directory
-//     * @return Serialization temporary directory
-//     */
-//static QString getSerializationTemporaryDirectory();
-//
-///**
-// * Get whether (de)serialization was aborted
-// * @return Boolean indicating whether (de)serialization was aborted
-// */
-//static bool isSerializationAborted();
-
-//signals:
-//
-//    /**
-//     * Signals that the current project file changed
-//     */
-//    void currentProjectFilePathChanged(const QString& currentProjectFilePath);
-
-//
-//QString Application::getSerializationTemporaryDirectory()
-//{
-//    return current()->_serializationTemporaryDirectory;
-//}
-//
-//bool Application::isSerializationAborted()
-//{
-//    return current()->_serializationAborted;
-//}

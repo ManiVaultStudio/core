@@ -3,6 +3,8 @@
 #include "util/IconFonts.h"
 #include "util/Logger.h"
 
+#include "actions/TriggerAction.h"
+
 #include "CoreInterface.h"
 
 #include <QApplication>
@@ -49,6 +51,18 @@ public: // Miscellaneous
     /** Get pointer to the core */
     static CoreInterface* core();
 
+    /**
+     * Get action for accessing global settings
+     * @return Reference to global settings action
+     */
+    gui::TriggerAction& getGlobalSettingsAction();
+
+    /**
+     * Get action for closing the application
+     * @return Reference to exit trigger action
+     */
+    gui::TriggerAction& getExitAction();
+
 public: // Static resource access functions
 
     /**
@@ -93,28 +107,37 @@ public: // Serialization
     static QString getSerializationTemporaryDirectory();
 
     /**
-     * Get whether (de)serialization was aborted
-     * @return Boolean indicating whether (de)serialization was aborted
+     * Set serialization temporary directory to \p serializationTemporaryDirectory
+     * @param serializationTemporaryDirectory Serialization temporary directory
+     */
+    static void setSerializationTemporaryDirectory(const QString& serializationTemporaryDirectory);
+
+    /**
+     * Get whether serialization was aborted
+     * @return Boolean indicating whether serialization was aborted
      */
     static bool isSerializationAborted();
 
-signals:
-
     /**
-     * Signals that the current project file changed
+     * Set whether serialization was aborted
+     * @param serializationAborted Boolean indicating whether serialization was aborted
      */
-    void currentProjectFilePathChanged(const QString& currentProjectFilePath);
+    static void setSerializationAborted(bool serializationAborted);
+
+signals:
 
     /** Signals that the core has been become available */
     void coreSet(CoreInterface* core);
 
 protected:
-    CoreInterface*  _core;                                  /** Shared pointer to HDPS core */
-    IconFonts       _iconFonts;                             /** Icon fonts resource */
-    QSettings       _settings;                              /** Settings */
-    QString         _serializationTemporaryDirectory;       /** Temporary directory for serialization */
-    bool            _serializationAborted;                  /** Whether (de)serialization was aborted */
-    util::Logger    _logger;                                /** Logger instance */
+    CoreInterface*              _core;                                  /** Pointer to HDPS core */
+    IconFonts                   _iconFonts;                             /** Icon fonts resource */
+    QSettings                   _settings;                              /** Settings */
+    QString                     _serializationTemporaryDirectory;       /** Temporary directory for serialization */
+    bool                        _serializationAborted;                  /** Whether serialization was aborted */
+    util::Logger                _logger;                                /** Logger instance */
+    hdps::gui::TriggerAction*   _globalSettingsAction;                  /** Action for modifying global settings */
+    hdps::gui::TriggerAction*   _exitAction;                            /** Action for exiting the application */
 };
 
 }

@@ -21,11 +21,9 @@ public:
      */
     FileMenu(QWidget *parent = nullptr);
 
+    /**
+     * Invoked when the menu is show on the screen
+     * @param showEvent Pointer to show event
+     */
     void showEvent(QShowEvent* showEvent) override;
-
-private:
-    hdps::gui::TriggerAction    _publishAction;             /** Action for publishing the project to an end-user */
-    hdps::gui::TriggerAction    _pluginManagerAction;       /** Action for showing the loaded plugins dialog */
-    hdps::gui::TriggerAction    _globalSettingsAction;      /** Action for modifying global settings */
-    hdps::gui::TriggerAction    _exitAction;                /** Action for exiting the application */
 };

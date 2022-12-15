@@ -1,5 +1,6 @@
 #include "ProjectManager.h"
 #include "Archiver.h"
+#include "PluginManagerDialog.h"
 
 #include <Application.h>
 
@@ -34,6 +35,8 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _saveProjectAsAction(this, "Save Project As..."),
     _recentProjectsMenu(),
     _importDataMenu(),
+    _publishAction(this, "Publish"),
+    _pluginManagerAction(this, "Plugin Manager"),
     _showStartPageAction(this, "Start Page...", true, true)
 {
     _newProjectAction.setShortcut(QKeySequence("Ctrl+N"));
@@ -54,6 +57,14 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _recentProjectsMenu.setTitle("Recent projects...");
     _recentProjectsMenu.setToolTip("Recently opened HDPS projects");
     _recentProjectsMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("clock"));
+
+    _publishAction.setShortcut(QKeySequence("Ctrl+P"));
+    _publishAction.setIcon(Application::getIconFont("FontAwesome").getIcon("share"));
+    _publishAction.setToolTip("Publish the HDPS application");
+
+    _pluginManagerAction.setShortcut(QKeySequence("Ctrl+M"));
+    _pluginManagerAction.setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+    _pluginManagerAction.setToolTip("View loaded plugins");
 
     _showStartPageAction.setShortcut(QKeySequence("Alt+W"));
     _showStartPageAction.setIcon(Application::getIconFont("FontAwesome").getIcon("door-open"));
@@ -99,6 +110,10 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
             return;
 
         saveProjectAs();
+    });
+
+    connect(&_pluginManagerAction, &TriggerAction::triggered, this, [this]() -> void {
+        PluginManagerDialog::managePlugins();
     });
 
     const auto updateActionsReadOnly = [this]() -> void {
@@ -178,9 +193,8 @@ void ProjectManager::loadProject(QString filePath /*= ""*/)
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
 
-            _serializationTemporaryDirectory = temporaryDirectoryPath;
-
-            _serializationAborted = false;
+            Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
+            Application::setSerializationAborted(false);
 
             if (filePath.isEmpty()) {
                 QFileDialog fileDialog;
@@ -213,7 +227,7 @@ void ProjectManager::loadProject(QString filePath /*= ""*/)
             TaskProgressDialog taskProgressDialog(nullptr, tasks, "Loading HDPS project from " + filePath, Application::getIconFont("FontAwesome").getIcon("folder-open"));
 
             connect(&taskProgressDialog, &TaskProgressDialog::canceled, this, [this]() -> void {
-                _serializationAborted = true;
+                Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was loaded");
             });
@@ -364,16 +378,15 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
             taskProgressDialog.setCurrentTask("Export data model");
 
             connect(&taskProgressDialog, &TaskProgressDialog::canceled, this, [this]() -> void {
-                _serializationAborted = true;
+                Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was saved");
-                });
+            });
 
             QFileInfo jsonFileInfo(temporaryDirectoryPath, "project.json");
 
-            _serializationTemporaryDirectory = temporaryDirectoryPath;
-
-            _serializationAborted = false;
+            Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
+            Application::setSerializationAborted(false);
 
             connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaving, this, [&taskProgressDialog](DataHierarchyItem& savingItem) {
                 taskProgressDialog.setCurrentTask("Exporting dataset: " + savingItem.getFullPathName());
