@@ -25,6 +25,17 @@ class AbstractManager : public QObject, public util::Serializable
 
 public:
 
+    /**
+     * Construct manager with \p parent object and \p name
+     * @param parent Pointer to parent object
+     * @param name Manager name (serialization name)
+     */
+    AbstractManager(QObject* parent = nullptr, const QString& name = "") :
+        QObject(parent),
+        Serializable(name)
+    {
+    }
+
     /** Perform manager startup initialization */
     virtual void initalize() = 0;
 

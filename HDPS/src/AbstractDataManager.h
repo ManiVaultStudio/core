@@ -41,6 +41,15 @@ class AbstractDataManager : public AbstractManager
 public:
 
     /**
+     * Construct data manager with \p parent object
+     * @param parent Pointer to parent object
+     */
+    AbstractDataManager(QObject* parent = nullptr) :
+        AbstractManager(parent, "Data")
+    {
+    }
+
+    /**
      * Add raw data to the data manager
      * @param rawData Pointer to the raw data
      */

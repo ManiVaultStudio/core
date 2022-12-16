@@ -63,16 +63,16 @@ public:
 public: // Serialization
 
     /**
-     * Get serialization temporary directory
-     * @return Serialization temporary directory
+     * Load widget action from variant
+     * @param Variant representation of the widget action
      */
-    QString getSerializationTemporaryDirectory();
+    void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-     * Get whether (de)serialization was aborted
-     * @return Boolean indicating whether (de)serialization was aborted
+     * Save widget action to variant
+     * @return Variant representation of the widget action
      */
-    bool isSerializationAborted();
+    QVariantMap toVariantMap() const override;
 
 public: // Menus
 

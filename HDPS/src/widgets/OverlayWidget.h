@@ -3,24 +3,22 @@
 #include "util/WidgetFader.h"
 
 #include <QWidget>
-#include <QLabel>
 
-namespace hdps
-{
-
-namespace gui
+namespace hdps::gui
 {
 
 /**
  * Overlay widget class
  *
  * Overlays the parent widget with a widget and synchronizes with the parent widget geometry.
- * It contains an icon, a title and a description.
+ * It also animates the overlay opacity with a widget fader.
  *  
  * @author Thomas Kroes
  */
 class OverlayWidget : public QWidget
 {
+    Q_OBJECT
+
 public:
 
     /**
@@ -28,36 +26,6 @@ public:
      * @param parent Pointer to parent widget
      */
     OverlayWidget(QWidget* parent);
-
-    /**
-     * Constructor
-     * @param parent Pointer to parent widget
-     * @param icon Icon
-     * @param title Title of the overlay
-     * @param description Overlay description
-     */
-    OverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description = "", const QColor backgroundColor = Qt::lightGray, const QColor textColor = Qt::black);
-    
-    /**
-     * Set overlay parameters
-     * @param icon Icon
-     * @param title Title of the overlay
-     * @param description Overlay description
-     */
-    void set(const QIcon& icon, const QString& title, const QString& description = "");
-
-    /**
-     * Set color
-     * @param color Color of the widget
-     */
-    void setColor(const QColor color);
-
-    /**
-     * Set overlay colors
-     * @param backgroundColor Background color of the widget
-     * @param textColor Text color of the widget
-     */
-    void setColors(const QColor backgroundColor, const QColor textColor);
 
     /**
      * Respond to \p target events
@@ -78,19 +46,21 @@ public:
      */
     util::WidgetFader& getWidgetFader();
 
-private:
+protected:
 
     /** Setups the layout etc. */
-    void initialize();
+    virtual void initialize();
+
+signals:
+
+    /** Signals that the widget has become visible (after fading in) */
+    void shown();
+
+    /** Signals that the widget has become (partially) hidden (after fading out) */
+    void hidden();
 
 private:
-    util::WidgetFader   _widgetFader;           /** Widget fader for the overlay widget */
-    QLabel              _iconLabel;             /** Label for displaying the icon */
-    QLabel              _titleLabel;            /** Label for displaying the title */
-    QLabel              _descriptionLabel;      /** Label for displaying the description */
-    QColor              _backgroundColor;       /** Background color of the widget */
-    QColor              _textColor;             /** Text color of the widget */
+    util::WidgetFader   _widgetFader;   /** Widget fader for animating the widget opacity */
 };
 
-}
 }

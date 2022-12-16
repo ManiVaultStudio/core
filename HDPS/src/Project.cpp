@@ -26,16 +26,28 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
 {
     auto core = Application::core();
 
-    //core->getPluginManager()->fromVariantMap(variantMap[core->getPluginManager()->getSerializationName()].toMap());
-    //_dataHierarchyManager->fromVariantMap(variantMap[_dataHierarchyManager->getSerializationName()].toMap());
+    auto& pluginManager         = core->getPluginManager();
+    auto& dataHierarchyManager  = core->getDataHierarchyManager();
+    auto& actionsManager        = core->getActionsManager();
+
+    pluginManager.fromVariantMap(variantMap[pluginManager.getSerializationName()].toMap());
+    dataHierarchyManager.fromVariantMap(variantMap[dataHierarchyManager.getSerializationName()].toMap());
+    actionsManager.fromVariantMap(variantMap[actionsManager.getSerializationName()].toMap());
 }
 
 QVariantMap Project::toVariantMap() const
 {
     QVariantMap variantMap;
 
-    //variantMap[_pluginManager->getSerializationName()] = _pluginManager->toVariantMap();
-    //variantMap[_dataHierarchyManager->getSerializationName()] = _dataHierarchyManager->toVariantMap();
+    auto core = Application::core();
+
+    auto& pluginManager         = core->getPluginManager();
+    auto& dataHierarchyManager  = core->getDataHierarchyManager();
+    auto& actionsManager        = core->getActionsManager();
+
+    variantMap[pluginManager.getSerializationName()]        = pluginManager.toVariantMap();
+    variantMap[dataHierarchyManager.getSerializationName()] = dataHierarchyManager.toVariantMap();
+    variantMap[actionsManager.getSerializationName()]       = actionsManager.toVariantMap();
 
     return variantMap;
 }

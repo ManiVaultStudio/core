@@ -26,6 +26,15 @@ class AbstractActionsManager : public AbstractManager
 public:
 
     /**
+     * Construct actions manager with \p parent object
+     * @param parent Pointer to parent object
+     */
+    AbstractActionsManager(QObject* parent = nullptr) :
+        AbstractManager(parent, "Actions")
+    {
+    }
+
+    /**
      * Add action to the manager
      * @param action Pointer to action
      */

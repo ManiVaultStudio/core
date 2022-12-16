@@ -24,6 +24,15 @@ class AbstractProjectManager : public AbstractManager
 
 public:
 
+    /**
+     * Construct project manager with \p parent object
+     * @param parent Pointer to parent object
+     */
+    AbstractProjectManager(QObject* parent = nullptr) :
+        AbstractManager(parent, "Project")
+    {
+    }
+
     /** Creates a new project */
     virtual void newProject() = 0;
 

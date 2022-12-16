@@ -24,7 +24,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _filterModel(filterModel),
     _selectionModel(_filterModel != nullptr ? _filterModel : &_model),
     _treeView(this),
-    _overlayWidget(&_treeView),
+    _infoOverlayWidget(&_treeView),
     _noItemsDescription(""),
     _filterNameAction(this, "Name filter"),
     _filterGroupAction(this),
@@ -445,26 +445,26 @@ void HierarchyWidget::updateOverlayWidget()
 {
     if (_filterModel == nullptr) {
         if (_model.rowCount() == 0) {
-            _overlayWidget.set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
-            _overlayWidget.show();
+            _infoOverlayWidget.set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
+            _infoOverlayWidget.show();
         }
         else {
-            _overlayWidget.hide();
+            _infoOverlayWidget.hide();
         }
     }
     else {
         if (_model.rowCount() >= 1) {
             if (_filterModel->rowCount() == 0) {
-                _overlayWidget.set(windowIcon(), QString("No %1s found").arg(_itemTypeName.toLower()), "Try changing the filter parameters...");
-                _overlayWidget.show();
+                _infoOverlayWidget.set(windowIcon(), QString("No %1s found").arg(_itemTypeName.toLower()), "Try changing the filter parameters...");
+                _infoOverlayWidget.show();
             }
             else {
-                _overlayWidget.hide();
+                _infoOverlayWidget.hide();
             }
         }
         else {
-            _overlayWidget.set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
-            _overlayWidget.show();
+            _infoOverlayWidget.set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
+            _infoOverlayWidget.show();
         }
     }
 }

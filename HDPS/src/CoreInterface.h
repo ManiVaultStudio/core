@@ -4,7 +4,6 @@
 #include "Dataset.h"
 
 #include "util/DockArea.h"
-#include "util/Serializable.h"
 
 #include "AbstractActionsManager.h"
 #include "AbstractPluginManager.h"
@@ -43,7 +42,7 @@ namespace hdps
         using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
     }
 
-class CoreInterface : public hdps::util::Serializable
+class CoreInterface
 {
 public:
     //CoreInterface() = delete;

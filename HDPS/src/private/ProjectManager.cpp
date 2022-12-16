@@ -5,6 +5,7 @@
 #include <Application.h>
 
 #include <util/Exception.h>
+#include <util/Serialization.h>
 
 #include <widgets/TaskProgressDialog.h>
 
@@ -29,15 +30,15 @@ using namespace hdps::gui;
 
 ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _project(),
-    _newProjectAction(this, "New Project"),
-    _openProjectAction(this, "Open Project"),
-    _saveProjectAction(this, "Save Project"),
-    _saveProjectAsAction(this, "Save Project As..."),
+    _newProjectAction(nullptr, "New Project"),
+    _openProjectAction(nullptr, "Open Project"),
+    _saveProjectAction(nullptr, "Save Project"),
+    _saveProjectAsAction(nullptr, "Save Project As..."),
     _recentProjectsMenu(),
     _importDataMenu(),
-    _publishAction(this, "Publish"),
-    _pluginManagerAction(this, "Plugin Manager"),
-    _showStartPageAction(this, "Start Page...", true, true)
+    _publishAction(nullptr, "Publish"),
+    _pluginManagerAction(nullptr, "Plugin Manager"),
+    _showStartPageAction(nullptr, "Start Page...", true, true)
 {
     _newProjectAction.setShortcut(QKeySequence("Ctrl+N"));
     _newProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
@@ -119,7 +120,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     const auto updateActionsReadOnly = [this]() -> void {
         _saveProjectAction.setEnabled(!_project.isNull());
         _saveProjectAsAction.setEnabled(!_project.isNull());
-        _saveProjectAsAction.setEnabled(!_project.isNull());
+        _saveProjectAsAction.setEnabled(!_project.isNull() && !_project->getFilePath().isEmpty());
     };
 
     connect(this, &ProjectManager::projectCreated, this, updateActionsReadOnly);
@@ -245,7 +246,7 @@ void ProjectManager::loadProject(QString filePath /*= ""*/)
 
             QFileInfo inputJsonFileInfo(temporaryDirectoryPath, "project.json");
 
-            Application::core()->fromJsonFile(inputJsonFileInfo.absoluteFilePath());
+            Application::core()->getProjectManager().fromJsonFile(inputJsonFileInfo.absoluteFilePath());
 
             taskProgressDialog.setTaskFinished("Import data model");
 
@@ -390,9 +391,9 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
             connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaving, this, [&taskProgressDialog](DataHierarchyItem& savingItem) {
                 taskProgressDialog.setCurrentTask("Exporting dataset: " + savingItem.getFullPathName());
-                });
+            });
 
-            Application::core()->toJsonFile(jsonFileInfo.absoluteFilePath());
+            Application::core()->getProjectManager().toJsonFile(jsonFileInfo.absoluteFilePath());
 
             taskProgressDialog.setTaskFinished("Export data model");
             taskProgressDialog.addTasks(archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath));
@@ -505,4 +506,19 @@ bool ProjectManager::hasProject() const
 const hdps::Project* ProjectManager::getProject() const
 {
     return _project.get();
+}
+
+void ProjectManager::fromVariantMap(const QVariantMap& variantMap)
+{
+    createProject();
+
+    _project->fromVariantMap(variantMap);
+}
+
+QVariantMap ProjectManager::toVariantMap() const
+{
+    if (hasProject())
+        return _project->toVariantMap();
+
+    return QVariantMap();
 }

@@ -3,11 +3,11 @@
 #include <QDebug>
 #include <QWidget>
 
-//#define WIDGET_FADER_VERBOSE
+#ifdef _DEBUG
+#define WIDGET_FADER_VERBOSE
+#endif
 
-namespace hdps {
-
-namespace util {
+namespace hdps::util {
 
 WidgetFader::WidgetFader(QObject* parent, QWidget* targetWidget, float opacity /*= 0.0f*/, float minimumOpacity /*= 0.0f*/, float maximumOpacity /*= 1.0f*/, std::int32_t fadeInDuration /*= 150*/, std::int32_t fadeOutDuration /*= 150*/) :
     QObject(parent),
@@ -27,6 +27,14 @@ WidgetFader::WidgetFader(QObject* parent, QWidget* targetWidget, float opacity /
 
     _opacityAnimation.setTargetObject(&_opacityEffect);
     _opacityAnimation.setPropertyName("opacity");
+
+    connect(&_opacityAnimation, &QPropertyAnimation::finished, this, [this]() -> void {
+        if (_opacityEffect.opacity() == _maximumOpacity)
+            emit fadedIn();
+
+        if (_opacityEffect.opacity() == _minimumOpacity)
+            emit fadedOut();
+    });
 }
 
 void WidgetFader::fadeIn()
@@ -109,8 +117,6 @@ void WidgetFader::setFadeOutDuration(std::int32_t fadeOutDuration)
         return;
 
     _fadeOutDuration = fadeOutDuration;
-}
-
 }
 
 }

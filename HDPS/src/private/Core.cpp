@@ -695,23 +695,4 @@ void Core::setDatasetGroupingEnabled(const bool& datasetGroupingEnabled)
     Application::current()->setSetting("Core/DatasetGroupingEnabled", _datasetGroupingEnabled);
 }
 
-void Core::fromVariantMap(const QVariantMap& variantMap)
-{
-    _pluginManager->fromVariantMap(variantMap[_pluginManager->getSerializationName()].toMap());
-    _dataHierarchyManager->fromVariantMap(variantMap[_dataHierarchyManager->getSerializationName()].toMap());
-    _workspaceManager->fromVariantMap(variantMap[_workspaceManager->getSerializationName()].toMap());
-    _actionsManager->fromVariantMap(variantMap[_actionsManager->getSerializationName()].toMap());
-}
-
-QVariantMap Core::toVariantMap() const
-{
-    QVariantMap variantMap;
-
-    variantMap[_pluginManager->getSerializationName()]           = _pluginManager->toVariantMap();
-    variantMap[_dataHierarchyManager->getSerializationName()]    = _dataHierarchyManager->toVariantMap();
-    variantMap[_workspaceManager->getSerializationName()]        = _workspaceManager->toVariantMap();
-    variantMap[_actionsManager->getSerializationName()]          = _actionsManager->toVariantMap();
-
-    return variantMap;
-}
 }

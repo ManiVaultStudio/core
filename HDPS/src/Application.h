@@ -51,18 +51,6 @@ public: // Miscellaneous
     /** Get pointer to the core */
     static CoreInterface* core();
 
-    /**
-     * Get action for accessing global settings
-     * @return Reference to global settings action
-     */
-    gui::TriggerAction& getGlobalSettingsAction();
-
-    /**
-     * Get action for closing the application
-     * @return Reference to exit trigger action
-     */
-    gui::TriggerAction& getExitAction();
-
 public: // Static resource access functions
 
     /**
@@ -136,7 +124,6 @@ protected:
     QString                     _serializationTemporaryDirectory;       /** Temporary directory for serialization */
     bool                        _serializationAborted;                  /** Whether serialization was aborted */
     util::Logger                _logger;                                /** Logger instance */
-    hdps::gui::TriggerAction*   _globalSettingsAction;                  /** Action for modifying global settings */
     hdps::gui::TriggerAction*   _exitAction;                            /** Action for exiting the application */
 };
 

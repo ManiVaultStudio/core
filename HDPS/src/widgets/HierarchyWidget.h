@@ -5,7 +5,7 @@
 #include "actions/GroupAction.h"
 #include "actions/ToggleAction.h"
 
-#include "OverlayWidget.h"
+#include "InfoOverlayWidget.h"
 
 #include <QWidget>
 #include <QTreeView>
@@ -275,7 +275,7 @@ private:
     QSortFilterProxyModel*      _filterModel;                       /** Pointer to filter model (maybe nullptr) */
     QItemSelectionModel         _selectionModel;                    /** Selection model */
     HierarchyWidgetTreeView     _treeView;                          /** Tree view that contains the data hierarchy */
-    OverlayWidget               _overlayWidget;                     /** Overlay widget that show information when there are no items in the model */
+    InfoOverlayWidget           _infoOverlayWidget;                 /** Overlay widget that show information when there are no items in the model */
     QString                     _noItemsDescription;                /** Overlay widget description when no items are loaded */
     StringAction                _filterNameAction;                  /** String action for filtering by name */
     GroupAction                 _filterGroupAction;                 /** Filter group action */

@@ -92,7 +92,6 @@ set(PRIVATE_WORKSPACE_MANAGER_HEADERS
     src/private/ViewPluginDockWidget.h
     src/private/CentralDockWidget.h
     src/private/DockWidget.h
-    src/private/DockArea.h
 )
 
 set(PRIVATE_WORKSPACE_MANAGER_SOURCES
@@ -103,7 +102,6 @@ set(PRIVATE_WORKSPACE_MANAGER_SOURCES
     src/private/ViewPluginDockWidget.cpp
     src/private/CentralDockWidget.cpp
     src/private/DockWidget.cpp
-    src/private/DockArea.cpp
 )
 
 set(PRIVATE_WORKSPACE_MANAGER_FILES
@@ -284,6 +282,7 @@ set(PRIVATE_HEADERS
     ${PRIVATE_APPLICATION_HEADERS}
     ${PRIVATE_START_PAGE_HEADERS}
     ${PRIVATE_MISCELLANEOUS_HEADERS}
+    ${PRIVATE_ACTIONS_HEADERS}
 )
 
 set(PRIVATE_SOURCES
@@ -292,6 +291,7 @@ set(PRIVATE_SOURCES
     ${PRIVATE_APPLICATION_SOURCES}
     ${PRIVATE_START_PAGE_SOURCES}
     ${PRIVATE_MISCELLANEOUS_SOURCES}
+    ${PRIVATE_ACTIONS_SOURCES}
     ${PRIVATE_HEADERS}
 )
 
@@ -454,6 +454,7 @@ set(PUBLIC_WIDGET_HEADERS
     src/widgets/Divider.h
     src/widgets/HierarchyWidget.h
     src/widgets/OverlayWidget.h
+    src/widgets/InfoOverlayWidget.h
     src/widgets/ProjectEditorDialog.h
     src/widgets/ActionHierarchyWidget.h
     src/widgets/TaskProgressDialog.h
@@ -465,6 +466,7 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/Divider.cpp
     src/widgets/HierarchyWidget.cpp
     src/widgets/OverlayWidget.cpp
+    src/widgets/InfoOverlayWidget.cpp
     src/widgets/ProjectEditorDialog.cpp
     src/widgets/ActionHierarchyWidget.cpp
     src/widgets/TaskProgressDialog.cpp

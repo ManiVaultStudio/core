@@ -24,7 +24,7 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     CDockWidget(title, parent),
     Serializable(title),
     _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
-    _overlayWidget(this, Application::getIconFont("FontAwesome").getIcon("hourglass-half"), "Loading", QString("Waiting for %1 to load...").arg(title)),
+    _infoOverlayWidget(this, Application::getIconFont("FontAwesome").getIcon("hourglass-half"), "Loading", QString("Waiting for %1 to load...").arg(title)),
     _settingsToolButton(nullptr)
 {
 #ifdef DOCK_WIDGET_VERBOSE
@@ -33,7 +33,7 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
 
     setObjectName(_id);
 
-    auto& widgetFader = _overlayWidget.getWidgetFader();
+    auto& widgetFader = _infoOverlayWidget.getWidgetFader();
 
     widgetFader.setMaximumOpacity(0.6f);
     widgetFader.setFadeInDuration(150);
@@ -76,9 +76,9 @@ void DockWidget::showEvent(QShowEvent* showEvent)
     }
 }
 
-hdps::gui::OverlayWidget& DockWidget::getOverlayWidget()
+hdps::gui::InfoOverlayWidget& DockWidget::getInfoOverlayWidget()
 {
-    return _overlayWidget;
+    return _infoOverlayWidget;
 }
 
 QMenu* DockWidget::getSettingsMenu()
@@ -90,8 +90,8 @@ void DockWidget::setWidget(QWidget* widget, eInsertMode insertMode /*= AutoScrol
 {
     CDockWidget::setWidget(widget, insertMode);
 
-    _overlayWidget.raise();
-    _overlayWidget.hide();
+    _infoOverlayWidget.raise();
+    _infoOverlayWidget.hide();
 }
 
 void DockWidget::fromVariantMap(const QVariantMap& variantMap)

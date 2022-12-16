@@ -61,11 +61,5 @@ private: // Window geometry persistence
     void checkGraphicsCapabilities();
 
 private:
-    Core                        _core;                  /** Instance of the core */
-    QPointer<FileMenu>          _fileMenu;              /** File menu */
-    QPointer<ViewMenu>          _viewMenu;              /** View menu */
-    QPointer<HelpMenu>          _helpMenu;              /** Help menu */
-    QPointer<QStackedWidget>    _stackedWidget;         /** Stacked widgets (0: start page widget, 1: workspace widget) */
-    QPointer<StartPageWidget>   _startPageWidget;       /** Start page widget which resides in the stacked widget */
-    QPointer<ProjectWidget>     _projectWidget;         /** Project widget which resides in the stacked widget */
+    Core    _core;      /** Instance of the core */
 };

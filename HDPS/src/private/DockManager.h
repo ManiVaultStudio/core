@@ -1,6 +1,5 @@
 #pragma once
 
-#include "DockArea.h"
 #include "CentralDockWidget.h"
 #include "ViewPluginDockWidget.h"
 

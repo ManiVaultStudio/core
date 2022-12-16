@@ -23,6 +23,15 @@ class AbstractWorkspaceManager : public AbstractManager
 public:
 
     /**
+     * Construct workspace manager with \p parent object
+     * @param parent Pointer to parent object
+     */
+    AbstractWorkspaceManager(QObject* parent = nullptr) :
+        AbstractManager(parent, "Workspace")
+    {
+    }
+
+    /**
      * Initializes the layout manager to work with the \p widget
      * @param widget Pointer to the widget to apply the layout manager to
      */

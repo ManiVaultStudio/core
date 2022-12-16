@@ -1,6 +1,7 @@
 #pragma once
 
-#include <QWidget>
+#include <widgets/OverlayWidget.h>
+
 #include <QGridLayout>
 #include <QLabel>
 #include <QScrollArea>
@@ -12,7 +13,7 @@
  *
  * @author Thomas Kroes
  */
-class StartPageWidget : public QWidget
+class StartPageWidget : public hdps::gui::OverlayWidget
 {
 public:
 
@@ -133,7 +134,7 @@ public:
     /**
      * Scroll area class
      *
-     * Slightly modified scroll area to show automaticaly show vertical scrollbar when in mouse focus
+     * Slightly modified scroll area to show automatically show vertical scrollbar when in mouse focus
      *
      * @author Thomas Kroes
      */

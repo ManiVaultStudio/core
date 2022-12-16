@@ -31,6 +31,15 @@ class AbstractPluginManager : public AbstractManager
     Q_OBJECT
 
 public:
+
+    /**
+     * Construct plugin manager with \p parent object
+     * @param parent Pointer to parent object
+     */
+    AbstractPluginManager(QObject* parent = nullptr) :
+        AbstractManager(parent, "Plugins")
+    {
+    }
     
     /** Loads all plugin factories from the plugin directory and adds them as menu items */
     virtual void loadPlugins() = 0;

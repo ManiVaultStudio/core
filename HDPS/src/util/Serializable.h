@@ -10,6 +10,10 @@ namespace hdps {
 namespace util {
 
 /**
+ * Serializable class
+ * 
+ * Serialize objects using Qt variants.
+ * 
  * @author Thomas Kroes
  */
 class Serializable
@@ -17,7 +21,7 @@ class Serializable
 public:
 
     /**
-     * Constructor
+     * Construct with serialization name
      * @param name Serialization key
      */
     Serializable(const QString& name = "");

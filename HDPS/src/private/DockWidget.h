@@ -1,7 +1,8 @@
 #pragma once
 
 #include <util/Serializable.h>
-#include <widgets/OverlayWidget.h>
+
+#include <widgets/InfoOverlayWidget.h>
 
 #include <DockWidget.h>
 
@@ -49,10 +50,10 @@ public:
     void showEvent(QShowEvent* showEvent) override;
 
     /**
-     * Get overlay widget (for showing docking information)
-     * @return Reference to overlay widget
+     * Get info overlay widget (for showing docking information)
+     * @return Reference to info overlay widget
      */
-    hdps::gui::OverlayWidget& getOverlayWidget();
+    hdps::gui::InfoOverlayWidget& getInfoOverlayWidget();
 
     /**
      * Get settings menu (when derived dock widgets return a valid menu, a tool button will in the tab bar that shows this menu)
@@ -82,10 +83,10 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    QString                     _id;                    /** Unique identifier by which to identify the dock widget */
-    hdps::gui::OverlayWidget    _overlayWidget;         /** Overlay widget for showing loading information */
-    QToolButton*                _settingsToolButton;    /** Pointer to settings tool button (located in the dock widget tab bar) */
-    QMenu                       _settingsMenu;          /** Settings menu for settings tool button */
+    QString                         _id;                    /** Unique identifier by which to identify the dock widget */
+    hdps::gui::InfoOverlayWidget    _infoOverlayWidget;     /** Info overlay widget for showing loading information */
+    QToolButton*                    _settingsToolButton;    /** Pointer to settings tool button (located in the dock widget tab bar) */
+    QMenu                           _settingsMenu;          /** Settings menu for settings tool button */
 };
 
 using DockWidgets = QVector<DockWidget*>;

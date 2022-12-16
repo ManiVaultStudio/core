@@ -4,9 +4,7 @@
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
 
-namespace hdps {
-
-namespace util {
+namespace hdps::util {
 
 /**
  * Widget fader utility class
@@ -17,6 +15,8 @@ namespace util {
  */
 class WidgetFader : public QObject
 {
+    Q_OBJECT
+
 public:
 
     /**
@@ -31,10 +31,10 @@ public:
      */
     WidgetFader(QObject* parent, QWidget* targetWidget, float opacity = 0.0f, float minimumOpacity = 0.0f, float maximumOpacity = 1.0f, std::int32_t fadeInDuration = 150, std::int32_t fadeOutDuration = 150);
 
-    /** Fade in the \p _targetWidget */
+    /** Fade in the target widget */
     void fadeIn();
 
-    /** Fade out the \p _targetWidget */
+    /** Fade out the target widget */
     void fadeOut();
 
     /** Get minimum opacity */
@@ -73,6 +73,14 @@ public:
      */
     void setFadeOutDuration(std::int32_t fadeOutDuration);
 
+signals:
+
+    /** Signals that the animation has faded in */
+    void fadedIn();
+
+    /** Signals that the animation has faded out */
+    void fadedOut();
+
 private:
     QWidget*                _targetWidget;          /** Pointer to target widget to fade */
     float                   _minimumOpacity;        /** Target fade out opacity */
@@ -83,5 +91,4 @@ private:
     QPropertyAnimation      _opacityAnimation;      /** Opacity animation */
 };
 
-}
 }

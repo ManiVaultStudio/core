@@ -187,8 +187,12 @@ void WorkspaceManager::initialize(QWidget* widget)
     if (_initialized)
         return;
 
+    return;
+
     _dockManager        = new DockManager(widget);
     _viewPluginsWidget  = new ViewPluginsDockWidget(_dockManager);
+
+    _dockManager->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     _dockManager->setObjectName("MainDockManager");
 

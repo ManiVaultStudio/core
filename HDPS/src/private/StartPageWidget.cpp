@@ -16,7 +16,7 @@ using namespace hdps;
 using namespace hdps::gui;
 
 StartPageWidget::StartPageWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
+    OverlayWidget(parent),
     _layout(),
     _barLayout(),
     _backgroundImage(":/Images/StartPageBackground")
@@ -27,28 +27,36 @@ StartPageWidget::StartPageWidget(QWidget* parent /*= nullptr*/) :
     _layout.setContentsMargins(0, 0, 0, 0);
     _layout.setSpacing(0);
 
+    _barLayout.addWidget(new HeaderWidget(this));
+    //_barLayout.addWidget(createHorizontalDivider());
+    _barLayout.addWidget(new ProjectsWidget(this));
+
     _layout.addStretch(1);
     _layout.addLayout(&_barLayout, 2);
     _layout.addStretch(1);
 
-    _barLayout.addWidget(new HeaderWidget());
-    //_barLayout.addWidget(createHorizontalDivider());
-    _barLayout.addWidget(new ProjectsWidget());
+    getWidgetFader().setFadeInDuration(250);
+    getWidgetFader().setFadeOutDuration(250);
+
+    connect(this, &OverlayWidget::shown, this, [this]() -> void {
+        setAttribute(Qt::WA_TransparentForMouseEvents, false);
+    });
+
+    connect(this, &OverlayWidget::hidden, this, [this]() -> void {
+        setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    });
 }
 
 void StartPageWidget::paintEvent(QPaintEvent* paintEvent)
 {
     QPainter painter(this);
 
-    // Get scaled background image and rectangles for positioning the background image
     auto backgroundImage    = _backgroundImage.scaled(width(), height(), Qt::KeepAspectRatioByExpanding);
     auto centerOfWidget     = rect().center();
     auto pixmapRectangle    = backgroundImage.rect();
 
-    // Position in the center
     pixmapRectangle.moveCenter(centerOfWidget);
 
-    // Draw the background
     painter.drawPixmap(pixmapRectangle.topLeft(), QPixmap(backgroundImage));
 }
 
@@ -56,20 +64,15 @@ void StartPageWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPalet
 {
     Q_ASSERT(widget != nullptr);
 
-    // Create palette for changing the background color
     QPalette palette;
 
-    // Get color from style option
     QStyleOption styleOption;
 
-    // Initialize the style options from this widget
     styleOption.initFrom(widget);
 
-    // Set the palette color for the background
     palette.setColor(QPalette::Window, styleOption.palette.color(QPalette::Normal, colorRole));
 
-    // Apply the palette
-    widget->setPalette(palette);
+    widget->setStyleSheet(QString("background-color: %1").arg(styleOption.palette.color(QPalette::Normal, colorRole).name(QColor::HexArgb)));
 }
 
 StartPageWidget::HeaderWidget::HeaderWidget(QWidget* parent /*= nullptr*/) :
@@ -77,7 +80,6 @@ StartPageWidget::HeaderWidget::HeaderWidget(QWidget* parent /*= nullptr*/) :
     _layout(),
     _headerLabel()
 {
-    setAutoFillBackground(true);
     setLayout(&_layout);
 
     const int pixelRatio = devicePixelRatio();
@@ -96,7 +98,6 @@ StartPageWidget::HeaderWidget::HeaderWidget(QWidget* parent /*= nullptr*/) :
     _layout.setContentsMargins(50, 50, 50, 50);
     _layout.addWidget(&_headerLabel);
 
-    // Change the background color
     StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
 
@@ -136,13 +137,11 @@ StartPageWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, con
 
     setLayout(&_layout);
 
-    // Change the background color
     StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
 
 void StartPageWidget::ProjectActionWidget::enterEvent(QEnterEvent* event)
 {
-    // Change the background color
     StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Dark);
 
     event->ignore();
@@ -150,7 +149,6 @@ void StartPageWidget::ProjectActionWidget::enterEvent(QEnterEvent* event)
 
 void StartPageWidget::ProjectActionWidget::leaveEvent(QEvent* event)
 {
-    // Change the background color
     StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 
     event->ignore();
@@ -167,13 +165,9 @@ StartPageWidget::ProjectsWidget::ProjectsWidget(QWidget* parent /*= nullptr*/) :
     _leftColumnLayout(),
     _rightColumnLayout()
 {
-    setAutoFillBackground(true);
-
-    // Change the background color
     StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 
     _layout.setContentsMargins(35, 35, 35, 35);
-    //_layout.setSpacing(30);
 
     _leftColumnLayout.setAlignment(Qt::AlignTop);
     _rightColumnLayout.setAlignment(Qt::AlignTop);
@@ -181,41 +175,34 @@ StartPageWidget::ProjectsWidget::ProjectsWidget(QWidget* parent /*= nullptr*/) :
     _layout.addLayout(&_leftColumnLayout, 1);
     _layout.addLayout(&_rightColumnLayout, 1);
 
-    // Create left and right column
     createLeftColumn();
     createRightColumn();
 
-    // Apply the layout
     setLayout(&_layout);
 }
 
 void StartPageWidget::ProjectsWidget::createLeftColumn()
 {
-    // Add header and widget for recent projects
     _leftColumnLayout.addWidget(createHeaderLabel("Recent", "Recently opened HDPS projects"));
     _leftColumnLayout.addSpacerItem(new QSpacerItem(0, 10));
-    _leftColumnLayout.addWidget(new RecentProjectsWidget());
+    _leftColumnLayout.addWidget(new RecentProjectsWidget(this));
 }
 
 void StartPageWidget::ProjectsWidget::createRightColumn()
 {
-    // Add header
     _rightColumnLayout.addWidget(createHeaderLabel("Open", "Project open options"));
     _rightColumnLayout.addSpacerItem(new QSpacerItem(0, 10));
 
-    // Establish title, description and tooltip
     const auto title        = "Open project";
     const auto description  = "Open an existing project from disk";
     const auto tooltip      = "Use the file navigator to open an existing project from disk";
 
-    // Add file action for opening a project from a picked location
     _rightColumnLayout.addWidget(new ProjectActionWidget(Application::getIconFont("FontAwesome").getIcon("folder-open"), title, description, tooltip, []() {
         Application::core()->getProjectManager().loadProject();
     }));
 
     _rightColumnLayout.addSpacerItem(new QSpacerItem(0, 40));
 
-    // Add header and widget for import data
     _rightColumnLayout.addWidget(createHeaderLabel("Import data", "Import data into HDPS"));
     _rightColumnLayout.addSpacerItem(new QSpacerItem(0, 10));
     //_rightColumnLayout.addWidget(new ImportDataWidget());
@@ -259,7 +246,6 @@ StartPageWidget::RecentProjectsWidget::RecentProjectsWidget(QWidget* parent /*= 
     _containerWidget(this),
     _containerLayout()
 {
-    setAutoFillBackground(true);
     setFrameShape(QFrame::NoFrame);
     createContainerWidget();
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -273,26 +259,19 @@ void StartPageWidget::RecentProjectsWidget::createContainerWidget()
 {
     StartPageWidget::setWidgetBackgroundColorRole(&_containerWidget, QPalette::Midlight);
 
-    _containerWidget.setAutoFillBackground(true);
     _containerLayout.setContentsMargins(0, 0, 0, 0);
 
-    // Get recent projects
     const auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();
 
-    // Add click able label for each recent project
     for (const auto& recentProject : recentProjects) {
-
-        // Establish file path, title, description and tooltip
         const auto filePath     = recentProject.toMap()["FilePath"].toString();
         const auto title        = QFileInfo(filePath).baseName();
         const auto description  = filePath;
         const auto tooltip      = title + ", last opened on " + recentProject.toMap()["DateTime"].toDateTime().toString();
 
-        // Check if the recent project exists on disk
         if (!QFileInfo(filePath).exists())
             continue;
 
-        // Create recent project widget and add it to the layout
         _containerLayout.addWidget(new ProjectActionWidget(Application::getIconFont("FontAwesome").getIcon("file"), title, description, tooltip, [filePath]() {
             Application::core()->getProjectManager().loadProject(filePath);
         }));
@@ -307,7 +286,6 @@ StartPageWidget::ImportDataWidget::ImportDataWidget(QWidget* parent /*= nullptr*
     _containerWidget(this),
     _containerLayout()
 {
-    setAutoFillBackground(true);
     setFrameShape(QFrame::NoFrame);
     createContainerWidget();
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -321,7 +299,6 @@ void StartPageWidget::ImportDataWidget::createContainerWidget()
 {
     StartPageWidget::setWidgetBackgroundColorRole(&_containerWidget, QPalette::Midlight);
 
-    _containerWidget.setAutoFillBackground(true);
     _containerLayout.setContentsMargins(0, 0, 0, 0);
 
     const auto loaderPluginKinds = Application::core()->getPluginManager().getPluginKindsByPluginTypes({ plugin::Type::LOADER });

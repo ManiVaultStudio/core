@@ -24,6 +24,15 @@ class AbstractDataHierarchyManager : public AbstractManager
 public:
 
     /**
+     * Construct data hierarchy manager with \p parent object
+     * @param parent Pointer to parent object
+     */
+    AbstractDataHierarchyManager(QObject* parent = nullptr) :
+        AbstractManager(parent, "DataHierarchy")
+    {
+    }
+
+    /**
      * Add a dataset to the hierarchy
      * @param dataset Smart pointer to dataset
      * @param parentDataset Smart pointer to parent dataset (if any)

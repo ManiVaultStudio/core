@@ -2,68 +2,24 @@
 
 #include <QDebug>
 #include <QResizeEvent>
-#include <QVBoxLayout>
 
-#include <stdexcept>
+#ifdef _DEBUG
+    #define OVERLAY_WIDGET_VERBOSE
+#endif
 
-//#define OVERLAY_WIDGET_VERBOSE
+using namespace hdps::util;
 
-namespace hdps
-{
-
-namespace gui
+namespace hdps::gui
 {
 
 OverlayWidget::OverlayWidget(QWidget* parent) :
     QWidget(parent),
-    _widgetFader(this, this, 0.0f, 0.0f, 0.35f, 120, 60),
-    _iconLabel(),
-    _titleLabel(),
-    _descriptionLabel(),
-    _backgroundColor(),
-    _textColor()
+    _widgetFader(this, this, 0.0f, 0.0f, 1.0f, 120, 60)
 {
-    setColors(Qt::lightGray, Qt::black);
     initialize();
-}
 
-OverlayWidget::OverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description /*= ""*/, const QColor backgroundColor /*= Qt::lightgray*/, const QColor textColor /*= Qt::black*/) :
-    QWidget(parent),
-    _widgetFader(this, this, 0.0f, 0.0f, 0.35f, 120, 60),
-    _iconLabel(),
-    _titleLabel(),
-    _descriptionLabel(),
-    _backgroundColor(),
-    _textColor()
-{
-    set(icon, title, description);
-    setColors(backgroundColor, textColor);
-    initialize();
-}
-
-void OverlayWidget::set(const QIcon& icon, const QString& title, const QString& description /*= ""*/)
-{
-    _iconLabel.setPixmap(icon.pixmap(QSize(24, 24)));
-    _titleLabel.setText(title);
-    _descriptionLabel.setText(description);
-}
-
-void OverlayWidget::setColor(const QColor color)
-{
-    _backgroundColor    = color;
-    _textColor          = color;
-
-    _backgroundColor.setAlphaF(0.1f);
-
-    setStyleSheet(QString("QWidget#OverlayWidget { background-color: %1; } QWidget#OverlayWidget > QLabel { color: %2; }").arg(_backgroundColor.name(), _textColor.name()));
-}
-
-void OverlayWidget::setColors(const QColor backgroundColor, const QColor textColor)
-{
-    _backgroundColor    = backgroundColor;
-    _textColor          = textColor;
-
-    setStyleSheet(QString("QWidget#OverlayWidget { background-color: %1; } QWidget#OverlayWidget > QLabel { color: %2; }").arg(_backgroundColor.name(), _textColor.name()));
+    connect(&_widgetFader, &WidgetFader::fadedIn, this, &OverlayWidget::shown);
+    connect(&_widgetFader, &WidgetFader::fadedOut, this, &OverlayWidget::hidden);
 }
 
 bool OverlayWidget::eventFilter(QObject* target, QEvent* event)
@@ -114,33 +70,9 @@ void OverlayWidget::initialize()
 {
     QWidget::show();
 
-    setAttribute(Qt::WA_TransparentForMouseEvents);
-
-    auto layout = new QVBoxLayout();
-
-    _iconLabel.setAlignment(Qt::AlignCenter);
-
-    _titleLabel.setAlignment(Qt::AlignCenter);
-    _titleLabel.setStyleSheet("font-weight: bold");
-
-    _descriptionLabel.setAlignment(Qt::AlignCenter);
-
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-    layout->setAlignment(Qt::AlignCenter);
-
-    layout->addStretch(1);
-    layout->addWidget(&_iconLabel);
-    layout->addWidget(&_titleLabel);
-    layout->addWidget(&_descriptionLabel);
-    layout->addStretch(1);
-
-    setLayout(layout);
-
     parent()->installEventFilter(this);
 
     setObjectName("OverlayWidget");
 }
 
-}
 }

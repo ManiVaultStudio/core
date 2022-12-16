@@ -125,10 +125,6 @@ QVariantMap DockManager::toVariantMap() const
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
-    DockArea rootDockArea(const_cast<DockManager*>(this), 0);
-
-    rootDockArea.buildTreeFromDocking(rootSplitter());
-
     QVariantList viewPluginDockWidgetsList;
 
     for (auto viewPluginDockWidget : getViewPluginDockWidgets())

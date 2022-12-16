@@ -26,9 +26,7 @@ hdps::Application::Application(int& argc, char** argv) :
     _settings(),
     _serializationTemporaryDirectory(),
     _serializationAborted(false),
-    _logger(),
-    _globalSettingsAction(nullptr),
-    _exitAction(nullptr)
+    _logger()
 {
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));
     
@@ -72,36 +70,11 @@ void Application::setCore(CoreInterface* core)
     _core = core;
 
     emit coreSet(_core);
-
-    //connect(_core, &CoreInterface::initialized, this, [this]() -> void {
-    //    _globalSettingsAction = new TriggerAction(this, "Global &Settings...");
-    //    _exitAction = new TriggerAction(this, "Exit");
-
-    //    _globalSettingsAction->setShortcut(QKeySequence("Ctrl+E"));
-    //    _globalSettingsAction->setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
-    //    _globalSettingsAction->setToolTip("Modify global HDPS settings");
-
-    //    _exitAction->setShortcut(QKeySequence("Alt+F4"));
-    //    _exitAction->setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
-    //    _exitAction->setToolTip("Exit the HDPS application");
-
-    //    connect(_exitAction, &TriggerAction::triggered, Application::current(), &Application::quit);
-    //});
 }
 
 hdps::CoreInterface* Application::core()
 {
     return current()->getCore();
-}
-
-hdps::gui::TriggerAction& Application::getGlobalSettingsAction()
-{
-    return *_globalSettingsAction;
-}
-
-hdps::gui::TriggerAction& Application::getExitAction()
-{
-    return *_exitAction;
 }
 
 QVariant Application::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const

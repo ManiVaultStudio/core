@@ -16,10 +16,7 @@
 
 MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     QMainWindow(parent),
-    _core(),
-    _stackedWidget(nullptr),
-    _startPageWidget(nullptr),
-    _projectWidget(nullptr)
+    _core()
 {
     dynamic_cast<Application*>(qApp)->setCore(&_core);
 
@@ -39,14 +36,14 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     menuBar()->addMenu(new ViewMenu());
     menuBar()->addMenu(new HelpMenu());
 
-    _stackedWidget      = new QStackedWidget();
-    _startPageWidget    = new StartPageWidget();
-    _projectWidget      = new ProjectWidget();
+    auto projectWidget = new ProjectWidget();
+    
+    setCentralWidget(projectWidget);
 
-    _stackedWidget->addWidget(_startPageWidget);
-    _stackedWidget->addWidget(_projectWidget);
+    auto startPageWidget = new StartPageWidget(projectWidget);
 
-    setCentralWidget(_stackedWidget);
+    //startPageWidget->raise();
+    startPageWidget->show();
 
     auto& projectManager = Application::core()->getProjectManager();
 
@@ -69,16 +66,16 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     connect(&projectManager, &ProjectManager::projectLoaded, this, updateWindowTitle);
     connect(&projectManager, &ProjectManager::projectSaved, this, updateWindowTitle);
 
-    const auto toggleStartPage = [&](bool toggled) -> void {
+    const auto toggleStartPage = [startPageWidget](bool toggled) -> void {
         if (toggled)
-            _stackedWidget->setCurrentWidget(_startPageWidget);
+            startPageWidget->show();
         else
-            _stackedWidget->setCurrentWidget(_projectWidget);
+            startPageWidget->hide();
     };
 
     connect(&projectManager.getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
 
-    Application::core()->getWorkspaceManager().initialize(_projectWidget);
+    Application::core()->getWorkspaceManager().initialize(projectWidget);
 }
 
 void MainWindow::closeEvent(QCloseEvent* closeEvent)
