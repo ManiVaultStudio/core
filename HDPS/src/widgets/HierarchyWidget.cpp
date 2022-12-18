@@ -17,12 +17,12 @@ using namespace hdps::util;
 namespace hdps::gui
 {
 
-HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, QAbstractItemModel& model, QSortFilterProxyModel* filterModel /*= nullptr*/, bool showToolbar /*= true*/, bool showOverlay /*= true*/) :
+HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, const QAbstractItemModel& model, QSortFilterProxyModel* filterModel /*= nullptr*/, bool showToolbar /*= true*/, bool showOverlay /*= true*/) :
     QWidget(parent),
     _itemTypeName(itemTypeName),
     _model(model),
     _filterModel(filterModel),
-    _selectionModel(_filterModel != nullptr ? _filterModel : &_model),
+    _selectionModel(_filterModel != nullptr ? _filterModel : const_cast<QAbstractItemModel*>(&_model)),
     _treeView(this),
     _infoOverlayWidget(&_treeView),
     _noItemsDescription(""),
@@ -136,8 +136,11 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
 
         toolbarLayout->setSpacing(3);
 
-        toolbarLayout->addWidget(_filterNameAction.createWidget(this), 1);
-        toolbarLayout->addWidget(_filterGroupAction.createCollapsedWidget(this));
+        if (_filterModel) {
+            toolbarLayout->addWidget(_filterNameAction.createWidget(this), 1);
+            toolbarLayout->addWidget(_filterGroupAction.createCollapsedWidget(this));
+        }
+        
         toolbarLayout->addWidget(_expandAllAction.createWidget(this));
         toolbarLayout->addWidget(_collapseAllAction.createWidget(this));
         toolbarLayout->addWidget(_selectionGroupAction.createCollapsedWidget(this));
@@ -162,11 +165,11 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     setLayout(layout);
 
     if (_filterModel) {
-        _filterModel->setSourceModel(&_model);
+        _filterModel->setSourceModel(const_cast<QAbstractItemModel*>(&_model));
         _treeView.setModel(_filterModel);
     }
     else {
-        _treeView.setModel(&_model);
+        _treeView.setModel(const_cast<QAbstractItemModel*>(&_model));
     }
 
     _treeView.setAutoFillBackground(true);

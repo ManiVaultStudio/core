@@ -2,6 +2,7 @@
 #include "Application.h"
 
 #include <QHBoxLayout>
+#include <QHeaderView>
 #include <QMenu>
 
 namespace hdps::gui {
@@ -11,9 +12,16 @@ RecentFilePathsAction::RecentFilePathsAction(QObject* parent, const QString& set
     _settingsKey(),
     _fileType(),
     _icon(),
-    _model(this)
+    _model(this),
+    _filterModel(this),
+    _editAction(this, "Edit...")
 {
     initialize(settingsKey, fileType, shortcutPrefix, icon);
+
+    connect(&_editAction, &TriggerAction::triggered, this, [this]() -> void {
+        Dialog dialog(this);
+        dialog.exec();
+    });
 }
 
 QString RecentFilePathsAction::getTypeString() const
@@ -33,6 +41,11 @@ QMenu* RecentFilePathsAction::getMenu()
     for (auto action : _model.getActions())
         menu->addAction(action);
     
+    if (!_model.getActions().isEmpty()) {
+        menu->addSeparator();
+        menu->addAction(&_editAction);
+    }
+
     return menu;
 }
 
@@ -65,9 +78,28 @@ void RecentFilePathsAction::initialize(const QString& settingsKey, const QString
 {
     _settingsKey    = settingsKey;
     _fileType       = fileType;
+    _shortcutPrefix = shortcutPrefix;
     _icon           = icon;
 
+    _editAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _editAction.setToolTip(QString("Edit recently opened %1s").arg(_fileType.toLower()));
+
     _model.loadFromSettings();
+}
+
+TriggerAction& RecentFilePathsAction::getEditAction()
+{
+    return _editAction;
+}
+
+RecentFilePathsAction::Model& RecentFilePathsAction::getModel()
+{
+    return _model;
+}
+
+const RecentFilePathsAction::FilterModel& RecentFilePathsAction::getFilterModel() const
+{
+    return _filterModel;
 }
 
 RecentFilePathsAction::Model::Model(RecentFilePathsAction* recentFilePathsAction) :
@@ -75,8 +107,11 @@ RecentFilePathsAction::Model::Model(RecentFilePathsAction* recentFilePathsAction
     _recentFilePathsAction(recentFilePathsAction),
     _actions()
 {
-    setHeaderData(0, Qt::Horizontal, "File path");
-    setHeaderData(1, Qt::Horizontal, "Date/time");
+    setHeaderData(0, Qt::Horizontal, "File path", Qt::EditRole);
+    setHeaderData(1, Qt::Horizontal, "Date/time", Qt::EditRole);
+
+    setHeaderData(0, Qt::Horizontal, "File path", Qt::DisplayRole);
+    setHeaderData(1, Qt::Horizontal, "Date/time", Qt::DisplayRole);
 
     setColumnCount(2);
 }
@@ -105,7 +140,7 @@ void RecentFilePathsAction::Model::loadFromSettings()
 
         recentFilePathAction->setIcon(_recentFilePathsAction->getIcon());
 
-        if (_recentFilePathsAction->getShortcutPrefix().isEmpty())
+        if (!_recentFilePathsAction->getShortcutPrefix().isEmpty())
             recentFilePathAction->setShortcut(QKeySequence(QString("%1+%2").arg(_recentFilePathsAction->getShortcutPrefix(), QString::number(recentFilePaths.indexOf(recentFilePath) + 1))));
 
         auto mainWindow = Application::topLevelWidgets().first();
@@ -142,13 +177,13 @@ void RecentFilePathsAction::Model::removeRecentFilePath(const QString& filePath)
 {
     auto recentFilePaths = Application::current()->getSetting(_recentFilePathsAction->getSettingsKey(), QVariantList()).toList();
 
+    QVariantList recentFilePathsToKeep;
+
     for (auto recentFilePath : recentFilePaths)
-        if (recentFilePath.toMap()["FilePath"].toString() == filePath)
-            recentFilePaths.removeOne(recentFilePath);
+        if (filePath != recentFilePath.toMap()["FilePath"].toString())
+            recentFilePathsToKeep << recentFilePath;
 
-    Application::current()->setSetting(_recentFilePathsAction->getSettingsKey(), recentFilePaths);
-
-    loadFromSettings();
+    Application::current()->setSetting(_recentFilePathsAction->getSettingsKey(), recentFilePathsToKeep);
 }
 
 QList<TriggerAction*> RecentFilePathsAction::Model::getActions()
@@ -156,38 +191,110 @@ QList<TriggerAction*> RecentFilePathsAction::Model::getActions()
     return _actions;
 }
 
-RecentFilePathsAction::Widget::Widget(QWidget* parent, RecentFilePathsAction* recentFilePathsAction, const std::int32_t& widgetFlags) :
-    WidgetActionWidget(parent, recentFilePathsAction, widgetFlags),
-    _recentFilePathsAction(recentFilePathsAction)
+RecentFilePathsAction::Dialog::Dialog(RecentFilePathsAction* recentFilePathsAction) :
+    QDialog(),
+    _hierarchyWidget(this, "Recent file path", recentFilePathsAction->getModel(), const_cast<RecentFilePathsAction::FilterModel*>(&recentFilePathsAction->getFilterModel())),
+    _removeAction(this, "Remove"),
+    _okAction(this, "Ok")
 {
-    //connect(this, &QPushButton::clicked, this, [this, triggerAction]() {
-    //    triggerAction->trigger();
-    //});
+    setModal(true);
+    setWindowIcon(recentFilePathsAction->getIcon());
+    setWindowTitle(QString("Edit recent %1s").arg(recentFilePathsAction->getFileType().toLower()));
 
-    //const auto update = [this, triggerAction, widgetFlags]() -> void {
-    //    QSignalBlocker blocker(this);
+    auto layout = new QVBoxLayout();
 
-    //    setEnabled(triggerAction->isEnabled());
+    layout->addWidget(&_hierarchyWidget, 1);
 
-    //    if (widgetFlags & WidgetFlag::Text)
-    //        setText(triggerAction->text());
+    auto bottomLayout = new QHBoxLayout();
 
-    //    if (widgetFlags & WidgetFlag::Icon) {
-    //        setIcon(triggerAction->icon());
+    bottomLayout->addWidget(_removeAction.createWidget(this));
+    bottomLayout->addStretch(1);
+    bottomLayout->addWidget(_okAction.createWidget(this));
 
-    //        if ((widgetFlags & WidgetFlag::Text) == 0)
-    //            setProperty("class", "square-button");
-    //    }
+    layout->addLayout(bottomLayout);
 
-    //    setToolTip(triggerAction->toolTip());
-    //    setVisible(triggerAction->isVisible());
-    //};
+    setLayout(layout);
 
-    //connect(triggerAction, &QAction::changed, this, [this, update]() {
-    //    update();
-    //});
+    _okAction.setToolTip("Exit the dialog");
 
-    //update();
+    auto& treeView = _hierarchyWidget.getTreeView();
+
+    treeView.setRootIsDecorated(false);
+
+    _hierarchyWidget.getExpandAllAction().setVisible(false);
+    _hierarchyWidget.getCollapseAllAction().setVisible(false);
+
+    auto treeViewHeader = treeView.header();
+
+    treeViewHeader->setStretchLastSection(false);
+
+    treeViewHeader->resizeSection(static_cast<int>(0), 300);
+    treeViewHeader->resizeSection(static_cast<int>(1), 100);
+
+    treeViewHeader->setSectionResizeMode(0, QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(1, QHeaderView::Fixed);
+
+    _removeAction.setEnabled(false);
+
+    const auto updateRemoveReadOnly = [this]() -> void {
+        const auto numberOfSelectedRows = _hierarchyWidget.getTreeView().selectionModel()->selectedRows().count();
+
+        _removeAction.setText(QString("Remove %1").arg(numberOfSelectedRows >= 1 ? QString::number(numberOfSelectedRows) : ""));
+        _removeAction.setEnabled(numberOfSelectedRows >= 1);
+    };
+
+    connect(_hierarchyWidget.getTreeView().selectionModel(), &QItemSelectionModel::selectionChanged, this, updateRemoveReadOnly);
+    connect(&recentFilePathsAction->getFilterModel(), &QAbstractItemModel::rowsInserted, this, updateRemoveReadOnly);
+    connect(&recentFilePathsAction->getFilterModel(), &QAbstractItemModel::rowsRemoved, this, updateRemoveReadOnly);
+
+    connect(&_removeAction, &TriggerAction::triggered, this, [this, recentFilePathsAction]() -> void {
+        const auto selectedRows = _hierarchyWidget.getTreeView().selectionModel()->selectedRows();
+
+        if (selectedRows.isEmpty())
+            return;
+
+        auto mayDestroyPlugins = true;
+
+        for (const auto& selectedRow : selectedRows)
+            recentFilePathsAction->getModel().removeRecentFilePath(selectedRow.siblingAtColumn(0).data().toString());
+
+        recentFilePathsAction->getModel().loadFromSettings();
+    });
+
+    connect(&_okAction, &TriggerAction::triggered, this, &Dialog::accept);
+}
+
+RecentFilePathsAction::FilterModel::FilterModel(QObject* parent /*= nullptr*/) :
+    QSortFilterProxyModel(parent)
+{
+}
+
+bool RecentFilePathsAction::FilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
+{
+    const auto index = sourceModel()->index(row, 0, parent);
+
+    if (!index.isValid())
+        return true;
+
+    if (filterRegularExpression().isValid()) {
+        const auto key = sourceModel()->data(index.siblingAtColumn(filterKeyColumn()), filterRole()).toString();
+
+        if (!key.contains(filterRegularExpression()))
+            return false;
+    }
+
+    return true;
+}
+
+bool RecentFilePathsAction::FilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
+{
+    if (lhs.column() == 0)
+        return lhs.data().toString() < rhs.data().toString();
+
+    if (lhs.column() == 1)
+        return lhs.data().toDateTime() < rhs.data().toDateTime();
+
+    return false;
 }
 
 }

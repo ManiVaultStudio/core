@@ -3,7 +3,11 @@
 #include "WidgetAction.h"
 #include "TriggerAction.h"
 
+#include "widgets/HierarchyWidget.h"
+
 #include <QStandardItemModel>
+#include <QSortFilterProxyModel>
+#include <QDialog>
 
 namespace hdps::gui {
 
@@ -58,44 +62,60 @@ public:
         friend class RecentFilePathsAction;
     };
 
-public:
+    class FilterModel : public QSortFilterProxyModel
+    {
+    public:
 
-    /** Widget class for recent file paths action */
-    class Widget : public WidgetActionWidget {
+        /**
+         * Construct the filter model with \p parent
+         * @param parent Pointer to parent object
+        */
+        FilterModel(QObject* parent = nullptr);
+
+        /**
+         * Returns whether \p row with \p parent is filtered out (false) or in (true)
+         * @param row Row index
+         * @param parent Parent index
+         * @return Boolean indicating whether the item is filtered in or out
+         */
+        bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
+
+        /**
+         * Compares two model indices plugin \p lhs with \p rhs
+         * @param lhs Left-hand model index
+         * @param rhs Right-hand model index
+         */
+        bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
+    };
+
+    /** Dialog for editing recent file paths */
+    class Dialog : public QDialog
+    {
     protected:
 
         /**
-         * Constructor
-         * @param parent Pointer to parent widget
+         * Construct a dialog with owning \p recentFilePathsAction
          * @param recentFilePathsAction Pointer to recent file paths action
-         * @param widgetFlags Widget flags
          */
-        Widget(QWidget* parent, RecentFilePathsAction* recentFilePathsAction, const std::int32_t& widgetFlags);
+        Dialog(RecentFilePathsAction* recentFilePathsAction);
 
-    protected:
-        RecentFilePathsAction*  _recentFilePathsAction;     /** Pointer to recent file paths action */
+        /** Get preferred size */
+        QSize sizeHint() const override {
+            return QSize(640, 480);
+        }
+
+        /** Get minimum size hint*/
+        QSize minimumSizeHint() const override {
+            return sizeHint();
+        }
+
+    private:
+        HierarchyWidget  _hierarchyWidget;      /** Widget for displaying the loaded plugins */
+        TriggerAction    _removeAction;         /** Action for removing one, or more, recent file paths */
+        TriggerAction    _okAction;             /** Action for exiting the dialog */
 
         friend class RecentFilePathsAction;
     };
-
-public:
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
-
-protected:
-
-    /**
-     * Get widget representation of the recent file paths action
-     * @param parent Pointer to parent widget
-     * @param widgetFlags Widget flags for the configuration of the widget (type)
-     */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new Widget(parent, this, widgetFlags);
-    }
 
 public:
 
@@ -108,6 +128,12 @@ public:
      * @param icon Icon in menu
      */
     RecentFilePathsAction(QObject* parent, const QString& settingsKey = "", const QString& fileType = "", const QString& shortcutPrefix = "", const QIcon& icon = QIcon());
+
+    /**
+     * Get type string
+     * @return Widget action type in string format
+     */
+    QString getTypeString() const override;
 
     /**
      * Initializes the action
@@ -150,6 +176,24 @@ public:
     QIcon getIcon() const;
 
     /**
+     * Get model
+     * @return Reference to model
+     */
+    Model& getModel();
+
+    /**
+     * Get filter model
+     * @return Reference to filter model
+     */
+    const FilterModel& getFilterModel() const;
+
+    /**
+     * Get edit action
+     * @return Action which triggers a dialog in which the recent file paths can be edited
+     */
+    TriggerAction& getEditAction();
+
+    /**
      * Get recent file paths menu
      * @return Pointer to menu
      */
@@ -161,11 +205,13 @@ signals:
     void triggered(const QString& filePath);
 
 private:
-    QString     _settingsKey;       /** Settings key where the recent file paths will be stored */
-    QString     _fileType;          /** Recent file type */
-    QString     _shortcutPrefix;    /** Shortcut prefix (if empty, no shortcut is created) */
-    QIcon       _icon;              /** Icon for the recent file type */
-    Model       _model;             /** Model for storing recent file paths */
+    QString         _settingsKey;       /** Settings key where the recent file paths will be stored */
+    QString         _fileType;          /** Recent file type */
+    QString         _shortcutPrefix;    /** Shortcut prefix (if empty, no shortcut is created) */
+    QIcon           _icon;              /** Icon for the recent file type */
+    Model           _model;             /** Model for storing recent file paths */
+    FilterModel     _filterModel;       /** Sort/filter model */
+    TriggerAction   _editAction;        /** Action which triggers a dialog in which the recent file paths can be edited */
 };
 
 }

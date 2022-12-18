@@ -89,7 +89,7 @@ public:
      * @param showToolbar Whether to add a default toolbar for filtering and expand/collapse
      * @param showOverlay Whether to show an overlay when the (filter) model is empty
      */
-    HierarchyWidget(QWidget* parent, const QString& itemTypeName, QAbstractItemModel& model, QSortFilterProxyModel* filterModel = nullptr, bool showToolbar = true, bool showOverlay = true);
+    HierarchyWidget(QWidget* parent, const QString& itemTypeName, const QAbstractItemModel& model, QSortFilterProxyModel* filterModel = nullptr, bool showToolbar = true, bool showOverlay = true);
 
     /**
      * Override set window icon to update the overlay icons as well
@@ -107,7 +107,7 @@ public:
      * Get input model
      * @return Input model
      */
-    QAbstractItemModel& getModel() {
+    const QAbstractItemModel& getModel() {
         return _model;
     }
 
@@ -271,7 +271,7 @@ private:
 
 private:
     QString                     _itemTypeName;                      /** Name of the item type */
-    QAbstractItemModel&         _model;                             /** Model containing data to be displayed in the hierarchy */
+    const QAbstractItemModel&   _model;                             /** Model containing data to be displayed in the hierarchy */
     QSortFilterProxyModel*      _filterModel;                       /** Pointer to filter model (maybe nullptr) */
     QItemSelectionModel         _selectionModel;                    /** Selection model */
     HierarchyWidgetTreeView     _treeView;                          /** Tree view that contains the data hierarchy */
