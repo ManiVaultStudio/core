@@ -15,6 +15,8 @@
 #include <QMainWindow>
 #include <QToolButton>
 #include <QPainter>
+#include <QFileDialog>
+#include <QStandardPaths>
 
 #ifdef _DEBUG
     #define WORKSPACE_MANAGER_VERBOSE
@@ -112,7 +114,7 @@ WorkspaceManager::WorkspaceManager() :
     _loadWorkspaceAction(this, "Load"),
     _saveWorkspaceAction(this, "Save"),
     _saveWorkspaceAsAction(this, "Save As..."),
-    _recentWorkspacesMenu(),
+    _recentWorkspacesAction(this),
     _icon()
 {
     setObjectName("WorkspaceManager");
@@ -130,30 +132,48 @@ WorkspaceManager::WorkspaceManager() :
     _saveWorkspaceAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveWorkspaceAsAction.setToolTip("Save workspace under a new file to disk");
 
-    _recentWorkspacesMenu.setTitle("Recent...");
-    _recentWorkspacesMenu.setToolTip("Recently opened workspaces");
-    _recentWorkspacesMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("clock"));
-
     auto mainWindow = Application::topLevelWidgets().first();
 
     mainWindow->addAction(&_loadWorkspaceAction);
     mainWindow->addAction(&_saveWorkspaceAction);
     mainWindow->addAction(&_saveWorkspaceAsAction);
 
-    connect(&_loadWorkspaceAction, &QAction::triggered, [this](bool) {
+    connect(&_loadWorkspaceAction, &TriggerAction::triggered, [this](bool) {
         loadWorkspace();
     });
 
-    connect(&_saveWorkspaceAction, &QAction::triggered, [this](bool) {
+    connect(&_saveWorkspaceAction, &TriggerAction::triggered, [this](bool) {
         saveWorkspace(getWorkspaceFilePath());
     });
 
-    connect(&_saveWorkspaceAsAction, &QAction::triggered, [this](bool) {
+    connect(&_saveWorkspaceAsAction, &TriggerAction::triggered, [this](bool) {
         saveWorkspaceAs();
     });
 
+    //connect(&_clearRecentWorkspacesAction, &TriggerAction::triggered, [this](bool) {
+    //    auto recentWorkspaces = Application::current()->getSetting("Workspaces/Recent", QVariantList()).toList();
+
+    //    QVariantMap recentWorkspace{
+    //        { "FilePath", filePath },
+    //        { "DateTime", QDateTime::currentDateTime() }
+    //    };
+
+    //    for (auto recentWorkspace : recentWorkspaces)
+    //        if (recentWorkspace.toMap()["FilePath"].toString() == filePath)
+    //            recentWorkspaces.removeOne(recentWorkspace);
+
+    //    recentWorkspaces.insert(0, recentWorkspace);
+
+    //    Application::current()->setSetting("Workspaces/Recent", recentWorkspaces);
+    //});
+
     createIcon();
-    updateRecentWorkspacesMenu();
+
+    _recentWorkspacesAction.initialize("Managers/Workspaces/Recent", "Workspace", _icon);
+
+    connect(&_recentWorkspacesAction, &RecentFilePathsAction::triggered, this, [this](const QString& filePath) -> void {
+        loadWorkspace(filePath);
+    });
 }
 
 WorkspaceManager::~WorkspaceManager()
@@ -225,6 +245,29 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/)
 
         beginLoadWorkspace();
         {
+            if (filePath.isEmpty()) {
+                QFileDialog fileDialog;
+
+                fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+                fileDialog.setWindowTitle("Load existing HDPS workspace");
+                fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+                fileDialog.setFileMode(QFileDialog::ExistingFile);
+                fileDialog.setNameFilters({ "HDPS workspace files (*.hws)" });
+                fileDialog.setDefaultSuffix(".hws");
+                fileDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+
+                if (fileDialog.exec() == 0)
+                    return;
+
+                if (fileDialog.selectedFiles().count() != 1)
+                    throw std::runtime_error("Only one file may be selected");
+
+                filePath = fileDialog.selectedFiles().first();
+
+                Application::current()->setSetting("Workspaces/WorkingDirectory", QFileInfo(filePath).absolutePath());
+            }
+
+            fromJsonFile(filePath);
         }
         endLoadWorkspace();
     }
@@ -249,7 +292,33 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
 
         beginSaveWorkspace();
         {
-            addRecentWorkspace(getWorkspaceFilePath());
+            if (filePath.isEmpty()) {
+
+                QFileDialog fileDialog;
+
+                fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+                fileDialog.setWindowTitle("Save HDPS workspace");
+                fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+                fileDialog.setNameFilters({ "HDPS workspace files (*.hws)" });
+                fileDialog.setDefaultSuffix(".hws");
+                fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+                fileDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+
+                fileDialog.exec();
+
+                if (fileDialog.selectedFiles().count() != 1)
+                    throw std::runtime_error("Only one file may be selected");
+
+                filePath = fileDialog.selectedFiles().first();
+
+                Application::current()->setSetting("Workspaces/WorkingDirectory", QFileInfo(filePath).absolutePath());
+            }
+
+            toJsonFile(filePath);
+
+            setWorkspaceFilePath(filePath);
+
+            _recentWorkspacesAction.addRecentFilePath(getWorkspaceFilePath());
         }
         endSaveWorkspace();
     }
@@ -355,7 +424,7 @@ QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)
     menu->addAction(&_saveWorkspaceAction);
     menu->addAction(&_saveWorkspaceAsAction);
     menu->addSeparator();
-    menu->addMenu(&_recentWorkspacesMenu);
+    menu->addMenu(_recentWorkspacesAction.getMenu());
 
     return menu;
 }
@@ -390,59 +459,9 @@ void WorkspaceManager::createIcon()
     _icon = hdps::gui::createIcon(pixmap);
 }
 
-void WorkspaceManager::updateRecentWorkspacesMenu()
-{
-    _recentWorkspacesMenu.clear();
-
-    const auto recentWorkspaces = Application::current()->getSetting("Workspaces/Recent", QVariantList()).toList();
-
-    _recentWorkspacesMenu.setEnabled(!recentWorkspaces.isEmpty());
-
-    for (const auto& recentWorkspace : recentWorkspaces) {
-        const auto recentWorkspaceFilePath = recentWorkspace.toMap()["FilePath"].toString();
-
-        if (!QFileInfo(recentWorkspaceFilePath).exists())
-            continue;
-
-        auto recentProjectAction = new QAction(recentWorkspaceFilePath);
-
-        recentProjectAction->setIcon(_icon);
-        recentProjectAction->setToolTip("Load " + recentWorkspaceFilePath + "(last opened on " + recentWorkspace.toMap()["DateTime"].toDate().toString() + ")");
-
-        connect(recentProjectAction, &QAction::triggered, this, [recentWorkspaceFilePath]() -> void {
-            Application::core()->getWorkspaceManager().loadWorkspace(recentWorkspaceFilePath);
-        });
-
-        _recentWorkspacesMenu.addAction(recentProjectAction);
-    }
-}
-
-void WorkspaceManager::addRecentWorkspace(const QString& filePath)
-{
-    auto recentWorkspaces = Application::current()->getSetting("Workspaces/Recent", QVariantList()).toList();
-
-    QVariantMap recentWorkspace {
-        { "FilePath", filePath },
-        { "DateTime", QDateTime::currentDateTime() }
-    };
-
-    for (auto recentWorkspace : recentWorkspaces)
-        if (recentWorkspace.toMap()["FilePath"].toString() == filePath)
-            recentWorkspaces.removeOne(recentWorkspace);
-
-    recentWorkspaces.insert(0, recentWorkspace);
-
-    Application::current()->setSetting("Workspaces/Recent", recentWorkspaces);
-}
-
 QWidget* WorkspaceManager::getWidget()
 {
     return _mainDockManager;
 }
-
-//QMenu* WorkspaceManager::getViewMenu(const ViewMenuOptions& options /*= ViewMenuOption::Default*/, ads::CDockAreaWidget* dockAreaWidget /*= nullptr*/)
-//{
-//
-//}
 
 }

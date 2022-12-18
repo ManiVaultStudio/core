@@ -5,6 +5,8 @@
 
 #include <AbstractWorkspaceManager.h>
 
+#include <actions/RecentFilePathsAction.h>
+
 #include <DockAreaWidget.h>
 
 #include <QSharedPointer>
@@ -143,15 +145,6 @@ private:
     /** Create custom icon for the manager */
     void createIcon();
 
-    /** Update the contents of the recent workspaces menu */
-    void updateRecentWorkspacesMenu();
-
-    /**
-     * Add loaded workspace \p filePath to settings
-     * @param filePath File path of the added workspace
-     */
-    void addRecentWorkspace(const QString& filePath);
-
 private:
     QPointer<DockManager>               _mainDockManager;               /** Main dock manager for docking system view plugins */
     QPointer<DockManager>               _viewPluginsdockManager;        /** Main dock manager for non-system view plugins */
@@ -160,7 +153,7 @@ private:
     hdps::gui::TriggerAction            _loadWorkspaceAction;           /** Action for loading a workspace from file */
     hdps::gui::TriggerAction            _saveWorkspaceAction;           /** Action for saving the current workspace to file */
     hdps::gui::TriggerAction            _saveWorkspaceAsAction;         /** Action for saving the current workspace to file with a different path */
-    QMenu                               _recentWorkspacesMenu;          /** Menu for loading recent workspaces */
+    hdps::gui::RecentFilePathsAction    _recentWorkspacesAction;        /** Action for saving the current workspace to file with a different path */
     QIcon                               _icon;                          /** Manager icon */
 };
 
