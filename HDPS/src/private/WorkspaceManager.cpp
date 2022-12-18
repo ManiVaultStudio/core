@@ -106,16 +106,14 @@ namespace hdps
 
 WorkspaceManager::WorkspaceManager() :
     AbstractWorkspaceManager(),
-    _dockManager(),
-    _viewPluginsWidget(),
-    _initialized(false),
+    _mainDockManager(),
+    //_viewPluginsWidget(),
     _cachedDockWidgetsVisibility(),
     _loadWorkspaceAction(this, "Load"),
     _saveWorkspaceAction(this, "Save"),
     _saveWorkspaceAsAction(this, "Save As..."),
     _recentWorkspacesMenu(),
-    _icon(),
-    _filePath()
+    _icon()
 {
     setObjectName("WorkspaceManager");
 
@@ -147,7 +145,7 @@ WorkspaceManager::WorkspaceManager() :
     });
 
     connect(&_saveWorkspaceAction, &QAction::triggered, [this](bool) {
-        saveWorkspace(_filePath);
+        saveWorkspace(getWorkspaceFilePath());
     });
 
     connect(&_saveWorkspaceAsAction, &QAction::triggered, [this](bool) {
@@ -168,6 +166,39 @@ void WorkspaceManager::initalize()
 #ifdef WORKSPACE_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    if (isInitialized())
+        return;
+
+    beginInitialization();
+    {
+        _mainDockManager = new DockManager();
+        //_viewPluginsdockManager = new DockManager(widget);
+        //_viewPluginsWidget  = new ViewPluginsDockWidget(_mainDockManager);
+
+        _mainDockManager->setObjectName("MainDockManager");
+
+        auto dw = new CDockWidget("View plugins central dock widget");
+
+        //dw->setWidget(_viewPluginsWidget);
+
+        auto viewPluginsDockArea = _mainDockManager->setCentralWidget(dw);
+
+        //viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
+
+        //connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
+        //    const auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
+
+        //    if (!viewPlugin)
+        //        return;
+
+        //    if (viewPlugin->isSystemViewPlugin())
+        //        _mainDockManager->removeViewPluginDockWidget(viewPlugin);
+        //    else
+        //        _viewPluginsWidget->getDockManager().removeViewPluginDockWidget(viewPlugin);
+        //});
+    }
+    endInitialization();
 }
 
 void WorkspaceManager::reset()
@@ -182,44 +213,6 @@ void WorkspaceManager::reset()
     endReset();
 }
 
-void WorkspaceManager::initialize(QWidget* widget)
-{
-    if (_initialized)
-        return;
-
-    return;
-
-    _dockManager        = new DockManager(widget);
-    _viewPluginsWidget  = new ViewPluginsDockWidget(_dockManager);
-
-    _dockManager->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    _dockManager->setObjectName("MainDockManager");
-
-    auto dw = new CDockWidget("View plugins central dock widget");
-
-    
-    dw->setWidget(_viewPluginsWidget);
-
-    auto viewPluginsDockArea = _dockManager->setCentralWidget(dw);
-
-    //viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
-
-    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
-        const auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
-
-        if (!viewPlugin)
-            return;
-
-        if (viewPlugin->isSystemViewPlugin())
-            _dockManager->removeViewPluginDockWidget(viewPlugin);
-        else
-            _viewPluginsWidget->getDockManager().removeViewPluginDockWidget(viewPlugin);
-    });
-
-    _initialized = true;
-}
-
 void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/)
 {
     try
@@ -228,11 +221,12 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/)
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
-        emit workspaceAboutToBeLoaded(filePath);
+        setWorkspaceFilePath(filePath);
+
+        beginLoadWorkspace();
         {
-            _filePath = filePath;
         }
-        emit workspaceLoaded(filePath);
+        endLoadWorkspace();
     }
     catch (std::exception& e)
     {
@@ -251,11 +245,13 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
 #ifdef WORKSPACE_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << filePath;
 #endif
-        _filePath = filePath;
+        setWorkspaceFilePath(filePath);
 
-        addRecentWorkspace(_filePath);
-
-        emit workspaceSaved(filePath);
+        beginSaveWorkspace();
+        {
+            addRecentWorkspace(getWorkspaceFilePath());
+        }
+        endSaveWorkspace();
     }
     catch (std::exception& e)
     {
@@ -285,13 +281,13 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(dockingManagersMap, "Main");
     variantMapMustContain(dockingManagersMap, "ViewPlugins");
         
-    _dockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
+    _mainDockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
     //_viewPluginsDockWidget.getDockManager().fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
 }
 
 QVariantMap WorkspaceManager::toVariantMap() const
 {
-    const auto mainDockingManager           = _dockManager->toVariantMap();
+    const auto mainDockingManager           = _mainDockManager->toVariantMap();
     //const auto viewPluginsDockingManager    = _viewPluginsDockWidget.getDockManager().toVariantMap();
 
     const QVariantMap dockingManagers = {
@@ -309,9 +305,9 @@ void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::Vie
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
     if (viewPlugin->isSystemViewPlugin())
-        _dockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _dockManager->findDockAreaWidget(dockToViewPlugin ? &dockToViewPlugin->getWidget() : nullptr));
-    else
-        _viewPluginsWidget->addViewPlugin(viewPluginDockWidget, dockToViewPlugin, dockArea);
+        _mainDockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _mainDockManager->findDockAreaWidget(dockToViewPlugin ? &dockToViewPlugin->getWidget() : nullptr));
+    //else
+    //    _viewPluginsWidget->addViewPlugin(viewPluginDockWidget, dockToViewPlugin, dockArea);
 }
 
 void WorkspaceManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate)
@@ -343,7 +339,7 @@ void WorkspaceManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool is
 
 ViewPluginDockWidgets WorkspaceManager::getViewPluginDockWidgets()
 {
-    return _dockManager->getViewPluginDockWidgets();// << _viewPluginsDockWidget.getDockManager().getViewPluginDockWidgets();
+    return _mainDockManager->getViewPluginDockWidgets();// << _viewPluginsDockWidget.getDockManager().getViewPluginDockWidgets();
 }
 
 QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)
@@ -438,5 +434,15 @@ void WorkspaceManager::addRecentWorkspace(const QString& filePath)
 
     Application::current()->setSetting("Workspaces/Recent", recentWorkspaces);
 }
+
+QWidget* WorkspaceManager::getWidget()
+{
+    return _mainDockManager;
+}
+
+//QMenu* WorkspaceManager::getViewMenu(const ViewMenuOptions& options /*= ViewMenuOption::Default*/, ads::CDockAreaWidget* dockAreaWidget /*= nullptr*/)
+//{
+//
+//}
 
 }

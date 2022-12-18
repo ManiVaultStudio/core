@@ -6,6 +6,10 @@
 
 class QMainWindow;
 
+#ifdef _DEBUG
+    #define ABSTRACT_WORKSPACE_MANAGER_VERBOSE
+#endif
+
 namespace hdps
 {
 
@@ -32,12 +36,6 @@ public:
     }
 
     /**
-     * Initializes the layout manager to work with the \p widget
-     * @param widget Pointer to the widget to apply the layout manager to
-     */
-    virtual void initialize(QWidget* widget) = 0;
-
-    /**
      * Add a view plugin to the \p dockArea of \p dockViewPlugin
      * @param viewPlugin Pointer to view plugin to add to layout
      * @param dockToViewPlugin Pointer to view plugin to which new view plugins are docked (new view plugins be docked top-level if nullptr)
@@ -53,11 +51,69 @@ public:
     virtual void isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate) = 0;
 
     /**
+     * Get workspace widget
+     * @return Pointer to workspace widget
+     */
+    virtual QWidget* getWidget() = 0;
+
+    /**
      * Get workspace menu
      * @param menu Pointer to parent menu
      * @return Pointer to created menu
      */
     virtual QMenu* getMenu(QWidget* parent = nullptr) = 0;
+
+    /**
+     * Get the file path of the loaded workspace
+     * @return File path of the loaded workspace
+     */
+    virtual QString getWorkspaceFilePath() const final {
+        return _workspaceFilePath;
+    }
+
+    /**
+     * Set the file path of the loaded workspace
+     * @param filePath File path of the loaded workspace
+     */
+    virtual void setWorkspaceFilePath(const QString& filePath) final {
+        _workspaceFilePath = filePath;
+    }
+
+    /** Begin the workspace loading process */
+    virtual void beginLoadWorkspace() final {
+#ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__;
+#endif
+
+        emit workspaceAboutToBeLoaded(_workspaceFilePath);
+    }
+
+    /** End the workspace loading process */
+    virtual void endLoadWorkspace() final {
+#ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__;
+#endif
+
+        emit workspaceLoaded(_workspaceFilePath);
+    }
+
+    /** Begin the workspace saving process */
+    virtual void beginSaveWorkspace() final {
+#ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__;
+#endif
+
+        emit workspaceAboutToBeSaved(_workspaceFilePath);
+    }
+
+    /** End the workspace saving process */
+    virtual void endSaveWorkspace() final {
+#ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__;
+#endif
+
+        emit workspaceSaved(_workspaceFilePath);
+    }
 
 public: // IO
 
@@ -82,19 +138,28 @@ signals:
      * Signals that a workspace is about to be loaded from \p filePath
      * @param filePath File path of the workspace
      */
-    void workspaceAboutToBeLoaded(const QString& filepath);
+    void workspaceAboutToBeLoaded(const QString& filePath);
 
     /**
      * Signals that a workspace is loaded from \p filePath
      * @param filePath File path of the workspace
      */
-    void workspaceLoaded(const QString& filepath);
+    void workspaceLoaded(const QString& filePath);
+
+    /**
+     * Signals that a workspace is about to be saved to \p filePath
+     * @param filePath File path of the workspace
+     */
+    void workspaceAboutToBeSaved(const QString& filePath);
 
     /**
      * Signals that a workspace is saved to \p filePath
      * @param filePath File path of the workspace
      */
-    void workspaceSaved(const QString& filepath);
+    void workspaceSaved(const QString& filePath);
+
+private:
+    QString     _workspaceFilePath;      /** File path of the current workspace */
 };
 
 }

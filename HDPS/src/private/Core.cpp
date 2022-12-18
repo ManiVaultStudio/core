@@ -50,6 +50,13 @@ void Core::init()
     _dataHierarchyManager.reset(new DataHierarchyManager());
     _workspaceManager.reset(new WorkspaceManager());
     _projectManager.reset(new ProjectManager());
+
+    _actionsManager->initalize();
+    _pluginManager->initalize();
+    _dataManager->initalize();
+    _dataHierarchyManager->initalize();
+    _workspaceManager->initalize();
+    _projectManager->initalize();
 }
 
 void Core::addPlugin(plugin::Plugin* plugin)

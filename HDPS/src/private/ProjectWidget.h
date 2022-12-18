@@ -5,7 +5,7 @@
 /**
  * Project widget class
  *
- * Widget class for showing the contents of a project
+ * Widget class for showing the workspace of the current project.
  *
  * @author Thomas Kroes
  */

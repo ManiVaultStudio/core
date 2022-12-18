@@ -38,11 +38,12 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
     auto projectWidget = new ProjectWidget();
     
+    //setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setCentralWidget(projectWidget);
 
     auto startPageWidget = new StartPageWidget(projectWidget);
 
-    //startPageWidget->raise();
+    startPageWidget->raise();
     startPageWidget->show();
 
     auto& projectManager = Application::core()->getProjectManager();
@@ -74,8 +75,6 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     };
 
     connect(&projectManager.getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
-
-    Application::core()->getWorkspaceManager().initialize(projectWidget);
 }
 
 void MainWindow::closeEvent(QCloseEvent* closeEvent)

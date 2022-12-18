@@ -32,7 +32,8 @@ public:
      */
     AbstractManager(QObject* parent = nullptr, const QString& name = "") :
         QObject(parent),
-        Serializable(name)
+        Serializable(name),
+        _initialized(false)
     {
     }
 
@@ -60,13 +61,50 @@ public:
         emit managerReset();
     }
 
+    /** Begin the initialization process */
+    virtual void beginInitialization() final {
+#ifdef ABSTRACT_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__;
+#endif
+
+        emit managerAboutToBeInitialized();
+    }
+
+    /** End the initialization process */
+    virtual void endInitialization() final {
+#ifdef ABSTRACT_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__;
+#endif
+
+        _initialized = true;
+
+        emit managerInitialized();
+    }
+
+    /**
+     * Get whether the manager is initialized or not
+     * @return Boolean determining whether the manager is initialized or not
+     */
+    virtual bool isInitialized() const final {
+        return _initialized;
+    }
+
 signals:
+
+    /** Signals that the initialization process has begun */
+    void managerAboutToBeInitialized();
+
+    /** Signals that the initialization process has ended */
+    void managerInitialized();
 
     /** Signals that the manager is about to be reset */
     void managerAboutToBeReset();
 
     /** Signals that the manager has been reset */
     void managerReset();
+
+private:
+    bool    _initialized;       /** Whether the manager is initialized or not */
 };
 
 }

@@ -36,6 +36,19 @@ class WorkspaceManager final : public AbstractWorkspaceManager
 
 public:
 
+    /** View menu options */
+    enum ViewMenuOption {
+        LoadSystemViewPlugins   = 0x00001,      /** Show menu for loading system views */
+        LoadViewPlugins         = 0x00002,      /** Show menu for loading views */
+        LoadedViewsSubMenu      = 0x00004,      /** Show menu for toggling loaded views visibility */
+
+        Default = LoadSystemViewPlugins | LoadViewPlugins | LoadedViewsSubMenu
+    };
+
+    Q_DECLARE_FLAGS(ViewMenuOptions, ViewMenuOption)
+
+public:
+
     /** Default constructor */
     WorkspaceManager();
 
@@ -47,12 +60,6 @@ public:
 
     /** Resets the contents of the layout manager */
     void reset() override;
-
-    /**
-     * Initializes the layout manager to work with the \p widget
-     * @param widget Pointer to the widget to apply the layout manager to
-     */
-    void initialize(QWidget* widget) override;
 
     /**
      * Add a view plugin to the \p dockArea of \p dockViewPlugin
@@ -68,6 +75,12 @@ public:
      * @param isolate Whether to isolate \p viewPlugin or to reset the view layout prior to isolation
      */
     void isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate) override;
+
+    /**
+     * Get workspace widget
+     * @return Pointer to workspace widget
+     */
+    QWidget* getWidget() override;
 
 public: // IO
 
@@ -100,6 +113,17 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+public: // Menus
+
+    /**
+     * Get view menu
+     * @param options Menu options
+     * @param dockAreaWidget Menu options
+     * @param options Pointer to dock area widget to which new view plugins are docked (new view plugins will be docked top-level if nullptr)
+     * @return Pointer to created menu
+     */
+    //QMenu* getViewMenu(const ViewMenuOptions& options = ViewMenuOption::Default, ads::CDockAreaWidget* dockAreaWidget = nullptr);
+
 public: // Miscellaneous
 
     /** Get all view plugin dock widgets, both from the main and the view plugins dock widget dock managers */
@@ -129,16 +153,15 @@ private:
     void addRecentWorkspace(const QString& filePath);
 
 private:
-    QPointer<DockManager>               _dockManager;                   /** Main dock manager for docking system plugins */
-    QPointer<ViewPluginsDockWidget>     _viewPluginsWidget;             /** Pointer to view plugins widget in which non-system view plugins are docked */
-    bool                                _initialized;                   /** Whether the layout manager is initialized or not */
+    QPointer<DockManager>               _mainDockManager;               /** Main dock manager for docking system view plugins */
+    QPointer<DockManager>               _viewPluginsdockManager;        /** Main dock manager for non-system view plugins */
+    //QPointer<ViewPluginsDockWidget>     _viewPluginsWidget;             /** Pointer to view plugins widget in which non-system view plugins are docked */
     QMap<DockWidget*, bool>             _cachedDockWidgetsVisibility;   /** Cached dock widgets visibility for view plugin isolation */
     hdps::gui::TriggerAction            _loadWorkspaceAction;           /** Action for loading a workspace from file */
     hdps::gui::TriggerAction            _saveWorkspaceAction;           /** Action for saving the current workspace to file */
     hdps::gui::TriggerAction            _saveWorkspaceAsAction;         /** Action for saving the current workspace to file with a different path */
     QMenu                               _recentWorkspacesMenu;          /** Menu for loading recent workspaces */
     QIcon                               _icon;                          /** Manager icon */
-    QString                             _filePath;                      /** File path of the current workspace */
 };
 
 }

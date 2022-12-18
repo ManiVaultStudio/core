@@ -50,6 +50,15 @@ void PluginManager::initalize()
 #ifdef PLUGIN_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    if (isInitialized())
+        return;
+
+    beginInitialization();
+    {
+        loadPlugins();
+    }
+    endInitialization();
 }
 
 void PluginManager::reset()
