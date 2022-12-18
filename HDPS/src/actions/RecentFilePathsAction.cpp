@@ -6,48 +6,14 @@
 
 namespace hdps::gui {
 
-RecentFilePathsAction::RecentFilePathsAction(QObject* parent, const QString& settingsKey /*= ""*/, const QString& fileType /*= ""*/, const QIcon& icon /*= QIcon()*/) :
+RecentFilePathsAction::RecentFilePathsAction(QObject* parent, const QString& settingsKey /*= ""*/, const QString& fileType /*= ""*/, const QString& shortcutPrefix /*= ""*/, const QIcon& icon /*= QIcon()*/) :
     WidgetAction(parent),
     _settingsKey(),
     _fileType(),
     _icon(),
     _model(this)
 {
-    initialize(settingsKey, fileType, icon);
-}
-
-RecentFilePathsAction::Widget::Widget(QWidget* parent, RecentFilePathsAction* recentFilePathsAction, const std::int32_t& widgetFlags) :
-    WidgetActionWidget(parent, recentFilePathsAction, widgetFlags),
-    _recentFilePathsAction(recentFilePathsAction)
-{
-    //connect(this, &QPushButton::clicked, this, [this, triggerAction]() {
-    //    triggerAction->trigger();
-    //});
-
-    //const auto update = [this, triggerAction, widgetFlags]() -> void {
-    //    QSignalBlocker blocker(this);
-
-    //    setEnabled(triggerAction->isEnabled());
-
-    //    if (widgetFlags & WidgetFlag::Text)
-    //        setText(triggerAction->text());
-
-    //    if (widgetFlags & WidgetFlag::Icon) {
-    //        setIcon(triggerAction->icon());
-
-    //        if ((widgetFlags & WidgetFlag::Text) == 0)
-    //            setProperty("class", "square-button");
-    //    }
-
-    //    setToolTip(triggerAction->toolTip());
-    //    setVisible(triggerAction->isVisible());
-    //};
-
-    //connect(triggerAction, &QAction::changed, this, [this, update]() {
-    //    update();
-    //});
-
-    //update();
+    initialize(settingsKey, fileType, shortcutPrefix, icon);
 }
 
 QString RecentFilePathsAction::getTypeString() const
@@ -80,6 +46,11 @@ QString RecentFilePathsAction::getFileType() const
     return _fileType;
 }
 
+QString RecentFilePathsAction::getShortcutPrefix() const
+{
+    return _shortcutPrefix;
+}
+
 QIcon RecentFilePathsAction::getIcon() const
 {
     return _icon;
@@ -90,7 +61,7 @@ void RecentFilePathsAction::addRecentFilePath(const QString& filePath)
     _model.addRecentFilePath(filePath);
 }
 
-void RecentFilePathsAction::initialize(const QString& settingsKey, const QString& fileType, const QIcon& icon)
+void RecentFilePathsAction::initialize(const QString& settingsKey, const QString& fileType, const QString& shortcutPrefix, const QIcon& icon)
 {
     _settingsKey    = settingsKey;
     _fileType       = fileType;
@@ -133,7 +104,9 @@ void RecentFilePathsAction::Model::loadFromSettings()
         auto recentFilePathAction = new TriggerAction(this, filePath);
 
         recentFilePathAction->setIcon(_recentFilePathsAction->getIcon());
-        recentFilePathAction->setShortcut(QKeySequence(QString("Ctrl+Shift+%1").arg(QString::number(recentFilePaths.indexOf(recentFilePath) + 1))));
+
+        if (_recentFilePathsAction->getShortcutPrefix().isEmpty())
+            recentFilePathAction->setShortcut(QKeySequence(QString("%1+%2").arg(_recentFilePathsAction->getShortcutPrefix(), QString::number(recentFilePaths.indexOf(recentFilePath) + 1))));
 
         auto mainWindow = Application::topLevelWidgets().first();
 
@@ -181,6 +154,40 @@ void RecentFilePathsAction::Model::removeRecentFilePath(const QString& filePath)
 QList<TriggerAction*> RecentFilePathsAction::Model::getActions()
 {
     return _actions;
+}
+
+RecentFilePathsAction::Widget::Widget(QWidget* parent, RecentFilePathsAction* recentFilePathsAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, recentFilePathsAction, widgetFlags),
+    _recentFilePathsAction(recentFilePathsAction)
+{
+    //connect(this, &QPushButton::clicked, this, [this, triggerAction]() {
+    //    triggerAction->trigger();
+    //});
+
+    //const auto update = [this, triggerAction, widgetFlags]() -> void {
+    //    QSignalBlocker blocker(this);
+
+    //    setEnabled(triggerAction->isEnabled());
+
+    //    if (widgetFlags & WidgetFlag::Text)
+    //        setText(triggerAction->text());
+
+    //    if (widgetFlags & WidgetFlag::Icon) {
+    //        setIcon(triggerAction->icon());
+
+    //        if ((widgetFlags & WidgetFlag::Text) == 0)
+    //            setProperty("class", "square-button");
+    //    }
+
+    //    setToolTip(triggerAction->toolTip());
+    //    setVisible(triggerAction->isVisible());
+    //};
+
+    //connect(triggerAction, &QAction::changed, this, [this, update]() {
+    //    update();
+    //});
+
+    //update();
 }
 
 }

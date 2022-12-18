@@ -21,7 +21,7 @@ void FileMenu::showEvent(QShowEvent* showEvent)
     addAction(&projectManager.getOpenProjectAction());
     addAction(&projectManager.getSaveProjectAction());
     addAction(&projectManager.getSaveProjectAsAction());
-    addMenu(projectManager.getRecentProjectsMenu());
+    addMenu(projectManager.getRecentProjectsAction().getMenu());
     addSeparator();
     addMenu(Application::core()->getWorkspaceManager().getMenu());
     addSeparator();

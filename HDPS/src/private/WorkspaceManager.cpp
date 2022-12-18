@@ -169,7 +169,7 @@ WorkspaceManager::WorkspaceManager() :
 
     createIcon();
 
-    _recentWorkspacesAction.initialize("Managers/Workspaces/Recent", "Workspace", _icon);
+    _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Shift", _icon);
 
     connect(&_recentWorkspacesAction, &RecentFilePathsAction::triggered, this, [this](const QString& filePath) -> void {
         loadWorkspace(filePath);

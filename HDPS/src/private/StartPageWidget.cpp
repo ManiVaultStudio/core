@@ -261,7 +261,7 @@ void StartPageWidget::RecentProjectsWidget::createContainerWidget()
 
     _containerLayout.setContentsMargins(0, 0, 0, 0);
 
-    const auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();
+    const auto recentProjects = Application::current()->getSetting("Manager/Project/Recent", QVariantList()).toList();
 
     for (const auto& recentProject : recentProjects) {
         const auto filePath     = recentProject.toMap()["FilePath"].toString();

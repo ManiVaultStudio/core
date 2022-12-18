@@ -4,6 +4,7 @@
 #include "Project.h"
 
 #include "actions/TriggerAction.h"
+#include <actions/RecentFilePathsAction.h>
 #include "actions/ToggleAction.h"
 
 #include <QObject>
@@ -66,12 +67,6 @@ public:
 public: // Menus
 
     /**
-     * Get recent projects menu
-     * @return Pointer to recent projects menu
-     */
-    virtual QMenu* getRecentProjectsMenu() = 0;
-
-    /**
      * Get import data menu
      * @return Pointer to import data menu
      */
@@ -83,6 +78,7 @@ public: // Action getters
     virtual hdps::gui::TriggerAction& getOpenProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getSaveProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getSaveProjectAsAction() = 0;
+    virtual hdps::gui::RecentFilePathsAction& getRecentProjectsAction() = 0;
     virtual hdps::gui::TriggerAction& getPublishAction() = 0;
     virtual hdps::gui::TriggerAction& getPluginManagerAction() = 0;
     virtual hdps::gui::ToggleAction& getShowStartPageAction() = 0;

@@ -77,12 +77,6 @@ public: // Serialization
 public: // Menus
 
     /**
-     * Get recent projects menu
-     * @return Pointer to recent projects menu
-     */
-    QMenu* getRecentProjectsMenu() override;
-
-    /**
      * Get import data menu
      * @return Pointer to import data menu
      */
@@ -93,36 +87,28 @@ private:
     /** Resets the core and creates a new project */
     void createProject();
 
-    /** Update the contents of the recent projects menu */
-    void updateRecentProjectsMenu();
-
-    /**
-     * Add loaded project \p filePath to settings
-     * @param filePath File path of the added project
-     */
-    void addRecentProject(const QString& filePath);
-
 public: // Action getters
 
     hdps::gui::TriggerAction& getNewProjectAction() override { return _newProjectAction; }
     hdps::gui::TriggerAction& getOpenProjectAction() override { return _openProjectAction; }
     hdps::gui::TriggerAction& getSaveProjectAction() override { return _saveProjectAction; }
     hdps::gui::TriggerAction& getSaveProjectAsAction() override { return _saveProjectAsAction; }
+    hdps::gui::RecentFilePathsAction& getRecentProjectsAction() override { return _recentProjectsAction; }
     hdps::gui::TriggerAction& getPublishAction() override { return _publishAction; }
     hdps::gui::TriggerAction& getPluginManagerAction() override { return _pluginManagerAction; }
     hdps::gui::ToggleAction& getShowStartPageAction() override { return _showStartPageAction; }
 
 private:
-    QScopedPointer<hdps::Project>   _project;                               /** Current project */
-    hdps::gui::TriggerAction        _newProjectAction;                      /** Action for creating a new project */
-    hdps::gui::TriggerAction        _openProjectAction;                     /** Action for opening a project */
-    hdps::gui::TriggerAction        _saveProjectAction;                     /** Action for saving a project */
-    hdps::gui::TriggerAction        _saveProjectAsAction;                   /** Action for saving a project under a new name */
-    QMenu                           _recentProjectsMenu;                    /** Menu for loading recent projects */
-    QMenu                           _importDataMenu;                        /** Menu for importing data */
-    hdps::gui::TriggerAction        _publishAction;                         /** Action for publishing the project to an end-user */
-    hdps::gui::TriggerAction        _pluginManagerAction;                   /** Action for showing the loaded plugins dialog */
-    hdps::gui::ToggleAction         _showStartPageAction;                   /** Action for toggling the start page */
+    QScopedPointer<hdps::Project>       _project;                   /** Current project */
+    hdps::gui::TriggerAction            _newProjectAction;          /** Action for creating a new project */
+    hdps::gui::TriggerAction            _openProjectAction;         /** Action for opening a project */
+    hdps::gui::TriggerAction            _saveProjectAction;         /** Action for saving a project */
+    hdps::gui::TriggerAction            _saveProjectAsAction;       /** Action for saving a project under a new name */
+    hdps::gui::RecentFilePathsAction    _recentProjectsAction;      /** Menu for loading recent projects */
+    QMenu                               _importDataMenu;            /** Menu for importing data */
+    hdps::gui::TriggerAction            _publishAction;             /** Action for publishing the project to an end-user */
+    hdps::gui::TriggerAction            _pluginManagerAction;       /** Action for showing the loaded plugins dialog */
+    hdps::gui::ToggleAction             _showStartPageAction;       /** Action for toggling the start page */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

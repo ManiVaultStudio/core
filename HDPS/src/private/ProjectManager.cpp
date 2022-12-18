@@ -34,7 +34,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _openProjectAction(nullptr, "Open Project"),
     _saveProjectAction(nullptr, "Save Project"),
     _saveProjectAsAction(nullptr, "Save Project As..."),
-    _recentProjectsMenu(),
+    _recentProjectsAction(nullptr),
     _importDataMenu(),
     _publishAction(nullptr, "Publish"),
     _pluginManagerAction(nullptr, "Plugin Manager"),
@@ -55,10 +55,6 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _saveProjectAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveProjectAsAction.setToolTip("Save project to disk in a chosen location");
 
-    _recentProjectsMenu.setTitle("Recent Projects...");
-    _recentProjectsMenu.setToolTip("Recently opened HDPS projects");
-    _recentProjectsMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("clock"));
-
     _publishAction.setShortcut(QKeySequence("Ctrl+P"));
     _publishAction.setIcon(Application::getIconFont("FontAwesome").getIcon("share"));
     _publishAction.setToolTip("Publish the HDPS application");
@@ -77,8 +73,6 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     mainWindow->addAction(&_openProjectAction);
     mainWindow->addAction(&_saveProjectAction);
     mainWindow->addAction(&_showStartPageAction);
-
-    updateRecentProjectsMenu();
 
     _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
     _importDataMenu.setTitle("Import data...");
@@ -127,6 +121,12 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     connect(this, &ProjectManager::projectDestroyed, this, updateActionsReadOnly);
 
     updateActionsReadOnly();
+
+    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
+
+    connect(&_recentProjectsAction, &RecentFilePathsAction::triggered, this, [this](const QString& filePath) -> void {
+        loadProject(filePath);
+    });
 }
 
 void ProjectManager::initalize()
@@ -252,7 +252,7 @@ void ProjectManager::loadProject(QString filePath /*= ""*/)
 
             taskProgressDialog.setTaskFinished("Import data model");
 
-            addRecentProject(filePath);
+            _recentProjectsAction.addRecentFilePath(filePath);
 
             _project->setFilePath(filePath);
 
@@ -408,14 +408,12 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
             archiver.compressDirectory(temporaryDirectoryPath, filePath, true, enableCompression ? compressionLevel : 0, "");
 
-            addRecentProject(filePath);
+            _recentProjectsAction.addRecentFilePath(filePath);
 
             Application::current()->setSetting(getSettingsPrefix(filePath) + "EnableCompression", enableCompression);
             Application::current()->setSetting(getSettingsPrefix(filePath) + "CompressionLevel", compressionLevel);
 
             _project->setFilePath(filePath);
-
-            updateRecentProjectsMenu();
 
             qDebug().noquote() << filePath << "saved successfully";
         }
@@ -436,41 +434,9 @@ void ProjectManager::saveProjectAs()
     saveProject("");
 }
 
-QMenu* ProjectManager::getRecentProjectsMenu()
-{
-    return &_recentProjectsMenu;
-}
-
 QMenu* ProjectManager::getImportDataMenu()
 {
     return &_importDataMenu;
-}
-
-void ProjectManager::updateRecentProjectsMenu()
-{
-    _recentProjectsMenu.clear();
-
-    const auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();
-
-    _recentProjectsMenu.setEnabled(!recentProjects.isEmpty());
-
-    for (const auto& recentProject : recentProjects) {
-        const auto recentProjectFilePath = recentProject.toMap()["FilePath"].toString();
-
-        if (!QFileInfo(recentProjectFilePath).exists())
-            continue;
-
-        auto recentProjectAction = new QAction(recentProjectFilePath);
-
-        recentProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
-        recentProjectAction->setToolTip("Load " + recentProjectFilePath + "(last opened on " + recentProject.toMap()["DateTime"].toDate().toString() + ")");
-
-        connect(recentProjectAction, &QAction::triggered, this, [recentProjectFilePath]() -> void {
-            Application::core()->getProjectManager().loadProject(recentProjectFilePath);
-        });
-
-        _recentProjectsMenu.addAction(recentProjectAction);
-    }
 }
 
 void ProjectManager::createProject()
@@ -482,24 +448,6 @@ void ProjectManager::createProject()
     emit projectCreated(*(_project.get()));
 
     _showStartPageAction.setChecked(false);
-}
-
-void ProjectManager::addRecentProject(const QString& filePath)
-{
-    auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();
-
-    QVariantMap recentProject {
-        { "FilePath", filePath },
-        { "DateTime", QDateTime::currentDateTime() }
-    };
-
-    for (auto recentProject : recentProjects)
-        if (recentProject.toMap()["FilePath"].toString() == filePath)
-            recentProjects.removeOne(recentProject);
-
-    recentProjects.insert(0, recentProject);
-
-    Application::current()->setSetting("Projects/Recent", recentProjects);
 }
 
 bool ProjectManager::hasProject() const
