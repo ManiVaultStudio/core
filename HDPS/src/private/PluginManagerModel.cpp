@@ -11,15 +11,20 @@ using namespace hdps;
 
 Q_DECLARE_METATYPE(hdps::plugin::Plugin*);
 
+QMap<PluginManagerModel::Column, QPair<QString, QString>> PluginManagerModel::columnInfo = QMap<PluginManagerModel::Column, QPair<QString, QString>>({
+    { PluginManagerModel::Column::Name, { "Name", "Item name (plugin type, factory name or plugin name)" }},
+    { PluginManagerModel::Column::Category, { "Category", "Item category (type, factory or instance)" }}
+});
+
 PluginManagerModel::PluginManagerModel(QObject* parent /*= nullptr*/) :
     QStandardItemModel(parent)
 {
     synchronizeWithPluginManager();
 
-    setHeaderData(0, Qt::Horizontal, "Name");
-    setHeaderData(1, Qt::Horizontal, "Category");
-
-    setColumnCount(2);
+    for (const auto& column : columnInfo.keys()) {
+        setHeaderData(static_cast<int>(column), Qt::Horizontal, columnInfo[column].first);
+        setHeaderData(static_cast<int>(column), Qt::Horizontal, columnInfo[column].first, Qt::DecorationRole);
+    }
 }
 
 void PluginManagerModel::removeItem(const QModelIndex& index)

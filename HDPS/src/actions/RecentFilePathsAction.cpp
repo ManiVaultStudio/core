@@ -4,6 +4,11 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QMenu>
+#include <QLocale>
+
+#ifdef _DEBUG
+    #define RECENT_FILE_PATHS_ACTION_VERBOSE
+#endif
 
 namespace hdps::gui {
 
@@ -71,6 +76,10 @@ QIcon RecentFilePathsAction::getIcon() const
 
 void RecentFilePathsAction::addRecentFilePath(const QString& filePath)
 {
+#ifdef RECENT_FILE_PATHS_ACTION_VERBOSE
+    qDebug() << __FUNCTION__ << filePath;
+#endif
+
     _model.addRecentFilePath(filePath);
 }
 
@@ -102,23 +111,22 @@ const RecentFilePathsAction::FilterModel& RecentFilePathsAction::getFilterModel(
     return _filterModel;
 }
 
+
+QMap<RecentFilePathsAction::Model::Column, QPair<QString, QString>> RecentFilePathsAction::Model::columnInfo = QMap<RecentFilePathsAction::Model::Column, QPair<QString, QString>>({
+    { RecentFilePathsAction::Model::Column::FilePath, { "File path", "Location of the recent file" }},
+    { RecentFilePathsAction::Model::Column::DateTime, { "Date/time", "Date and time when the file was opened" }}
+});
+
 RecentFilePathsAction::Model::Model(RecentFilePathsAction* recentFilePathsAction) :
-    QStandardItemModel(),
+    QStandardItemModel(recentFilePathsAction),
     _recentFilePathsAction(recentFilePathsAction),
     _actions()
 {
-    setHeaderData(0, Qt::Horizontal, "File path", Qt::EditRole);
-    setHeaderData(1, Qt::Horizontal, "Date/time", Qt::EditRole);
-
-    setHeaderData(0, Qt::Horizontal, "File path", Qt::DisplayRole);
-    setHeaderData(1, Qt::Horizontal, "Date/time", Qt::DisplayRole);
-
-    setColumnCount(2);
 }
 
 void RecentFilePathsAction::Model::loadFromSettings()
 {
-    clear();
+    setRowCount(0);
 
     for (auto action : _actions)
         delete action;
@@ -129,12 +137,17 @@ void RecentFilePathsAction::Model::loadFromSettings()
 
     for (const auto& recentFilePath : recentFilePaths) {
         const auto filePath = recentFilePath.toMap()["FilePath"].toString();
-        const auto dateTime = recentFilePath.toMap()["DateTime"].toString();
+        const auto dateTime = recentFilePath.toMap()["DateTime"].toDateTime();
 
         if (!QFileInfo(filePath).exists())
             continue;
 
-        appendRow({ new QStandardItem(_recentFilePathsAction->getIcon(), filePath), new QStandardItem(dateTime) });
+        auto filePathItem = new QStandardItem(_recentFilePathsAction->getIcon(), filePath);
+        auto dateTimeItem = new QStandardItem(dateTime.toString("ddd MMMM d yy"));
+
+        dateTimeItem->setData(dateTime, Qt::EditRole);
+
+        appendRow({ filePathItem, dateTimeItem });
 
         auto recentFilePathAction = new TriggerAction(this, filePath);
 
@@ -153,6 +166,11 @@ void RecentFilePathsAction::Model::loadFromSettings()
 
         _actions << recentFilePathAction;
     }
+
+    for (const auto& column : columnInfo.keys()) {
+        setHeaderData(static_cast<int>(column), Qt::Horizontal, columnInfo[column].first);
+        setHeaderData(static_cast<int>(column), Qt::Horizontal, columnInfo[column].first, Qt::DecorationRole);
+    }
 }
 
 void RecentFilePathsAction::Model::addRecentFilePath(const QString& filePath)
@@ -164,17 +182,23 @@ void RecentFilePathsAction::Model::addRecentFilePath(const QString& filePath)
         { "DateTime", QDateTime::currentDateTime() }
     };
 
-    removeRecentFilePath(filePath);
+    QVariantList recentFilePathsToKeep;
 
-    recentFilePaths.insert(0, recentFilePath);
+    for (auto recentFilePath : recentFilePaths)
+        if (filePath != recentFilePath.toMap()["FilePath"].toString())
+            recentFilePathsToKeep << recentFilePath;
 
-    Application::current()->setSetting(_recentFilePathsAction->getSettingsKey(), recentFilePaths);
+    recentFilePathsToKeep.insert(0, recentFilePath);
+
+    Application::current()->setSetting(_recentFilePathsAction->getSettingsKey(), recentFilePathsToKeep);
 
     loadFromSettings();
 }
 
 void RecentFilePathsAction::Model::removeRecentFilePath(const QString& filePath)
 {
+
+
     auto recentFilePaths = Application::current()->getSetting(_recentFilePathsAction->getSettingsKey(), QVariantList()).toList();
 
     QVariantList recentFilePathsToKeep;
@@ -193,7 +217,7 @@ QList<TriggerAction*> RecentFilePathsAction::Model::getActions()
 
 RecentFilePathsAction::Dialog::Dialog(RecentFilePathsAction* recentFilePathsAction) :
     QDialog(),
-    _hierarchyWidget(this, "Recent file path", recentFilePathsAction->getModel(), const_cast<RecentFilePathsAction::FilterModel*>(&recentFilePathsAction->getFilterModel())),
+    _hierarchyWidget(this, QString("Recent %1").arg(recentFilePathsAction->getFileType()), recentFilePathsAction->getModel(), const_cast<RecentFilePathsAction::FilterModel*>(&recentFilePathsAction->getFilterModel())),
     _removeAction(this, "Remove"),
     _okAction(this, "Ok")
 {
@@ -220,7 +244,8 @@ RecentFilePathsAction::Dialog::Dialog(RecentFilePathsAction* recentFilePathsActi
     auto& treeView = _hierarchyWidget.getTreeView();
 
     treeView.setRootIsDecorated(false);
-
+    treeView.setSortingEnabled(true);
+    
     _hierarchyWidget.getExpandAllAction().setVisible(false);
     _hierarchyWidget.getCollapseAllAction().setVisible(false);
 
@@ -228,18 +253,21 @@ RecentFilePathsAction::Dialog::Dialog(RecentFilePathsAction* recentFilePathsActi
 
     treeViewHeader->setStretchLastSection(false);
 
-    treeViewHeader->resizeSection(static_cast<int>(0), 300);
-    treeViewHeader->resizeSection(static_cast<int>(1), 100);
+    treeViewHeader->setSortIndicator(static_cast<int>(RecentFilePathsAction::Model::Column::DateTime), Qt::DescendingOrder);
 
-    treeViewHeader->setSectionResizeMode(0, QHeaderView::Stretch);
-    treeViewHeader->setSectionResizeMode(1, QHeaderView::Fixed);
+    treeViewHeader->resizeSection(static_cast<int>(RecentFilePathsAction::Model::Column::FilePath), 300);
+    treeViewHeader->resizeSection(static_cast<int>(RecentFilePathsAction::Model::Column::DateTime), 200);
+
+    treeViewHeader->setSectionResizeMode(static_cast<int>(RecentFilePathsAction::Model::Column::FilePath), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(RecentFilePathsAction::Model::Column::DateTime), QHeaderView::Fixed);
 
     _removeAction.setEnabled(false);
 
-    const auto updateRemoveReadOnly = [this]() -> void {
+    const auto updateRemoveReadOnly = [this, recentFilePathsAction]() -> void {
         const auto numberOfSelectedRows = _hierarchyWidget.getTreeView().selectionModel()->selectedRows().count();
 
         _removeAction.setText(QString("Remove %1").arg(numberOfSelectedRows >= 1 ? QString::number(numberOfSelectedRows) : ""));
+        _removeAction.setToolTip(QString("Remove %1 recent %2%3").arg(numberOfSelectedRows >= 1 ? QString::number(numberOfSelectedRows) : "", recentFilePathsAction->getFileType().toLower(), numberOfSelectedRows >= 2 ? "s" : ""));
         _removeAction.setEnabled(numberOfSelectedRows >= 1);
     };
 
@@ -256,7 +284,7 @@ RecentFilePathsAction::Dialog::Dialog(RecentFilePathsAction* recentFilePathsActi
         auto mayDestroyPlugins = true;
 
         for (const auto& selectedRow : selectedRows)
-            recentFilePathsAction->getModel().removeRecentFilePath(selectedRow.siblingAtColumn(0).data().toString());
+            recentFilePathsAction->getModel().removeRecentFilePath(selectedRow.siblingAtColumn(static_cast<int>(RecentFilePathsAction::Model::Column::FilePath)).data().toString());
 
         recentFilePathsAction->getModel().loadFromSettings();
     });
@@ -267,6 +295,7 @@ RecentFilePathsAction::Dialog::Dialog(RecentFilePathsAction* recentFilePathsActi
 RecentFilePathsAction::FilterModel::FilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent)
 {
+    setFilterKeyColumn(static_cast<int>(RecentFilePathsAction::Model::Column::FilePath));
 }
 
 bool RecentFilePathsAction::FilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -292,7 +321,7 @@ bool RecentFilePathsAction::FilterModel::lessThan(const QModelIndex& lhs, const 
         return lhs.data().toString() < rhs.data().toString();
 
     if (lhs.column() == 1)
-        return lhs.data().toDateTime() < rhs.data().toDateTime();
+        return lhs.data(Qt::EditRole).toDateTime() < rhs.data(Qt::EditRole).toDateTime();
 
     return false;
 }

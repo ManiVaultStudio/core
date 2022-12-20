@@ -121,11 +121,11 @@ WorkspaceManager::WorkspaceManager() :
 
     ads::CDockComponentsFactory::setFactory(new CustomComponentsFactory());
 
-    _loadWorkspaceAction.setShortcut(QKeySequence("Ctrl+Shift+O"));
+    _loadWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+O"));
     _loadWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
     _loadWorkspaceAction.setToolTip("Open workspace from disk");
 
-    _saveWorkspaceAction.setShortcut(QKeySequence("Ctrl+Shift+S"));
+    _saveWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+S"));
     _saveWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveWorkspaceAction.setToolTip("Save workspace to disk");
 

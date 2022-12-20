@@ -4,7 +4,7 @@
 #include <QWidget>
 
 #ifdef _DEBUG
-#define WIDGET_FADER_VERBOSE
+    #define WIDGET_FADER_VERBOSE
 #endif
 
 namespace hdps::util {
@@ -39,6 +39,9 @@ WidgetFader::WidgetFader(QObject* parent, QWidget* targetWidget, float opacity /
 
 void WidgetFader::fadeIn()
 {
+    if (_opacityEffect.opacity() == _maximumOpacity)
+        return;
+
 #ifdef WIDGET_FADER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
@@ -54,6 +57,9 @@ void WidgetFader::fadeIn()
 
 void WidgetFader::fadeOut()
 {
+    if (_opacityEffect.opacity() == _minimumOpacity)
+        return;
+
 #ifdef WIDGET_FADER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
@@ -65,6 +71,16 @@ void WidgetFader::fadeOut()
     _opacityAnimation.setStartValue(_opacityEffect.opacity());
     _opacityAnimation.setEndValue(_minimumOpacity);
     _opacityAnimation.start();
+}
+
+bool WidgetFader::isFadedIn() const
+{
+    return _opacityEffect.opacity() == _maximumOpacity;
+}
+
+bool WidgetFader::isFadedOut() const
+{
+    return _opacityEffect.opacity() == _minimumOpacity;
 }
 
 float WidgetFader::getMinimumOpacity() const

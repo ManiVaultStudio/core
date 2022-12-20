@@ -37,6 +37,18 @@ public:
     /** Fade out the target widget */
     void fadeOut();
 
+    /**
+     * Get whether the target widget is faded in
+     * @return Boolean determining whether the target widget is faded in
+     */
+    bool isFadedIn() const;
+
+    /**
+     * Get whether the target widget is faded out
+     * @return Boolean determining whether the target widget is faded out
+     */
+    bool isFadedOut() const;
+
     /** Get minimum opacity */
     float getMinimumOpacity() const;
 

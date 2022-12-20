@@ -45,6 +45,9 @@ bool OverlayWidget::eventFilter(QObject* target, QEvent* event)
 
 void OverlayWidget::show()
 {
+    if (_widgetFader.isFadedIn())
+        return;
+
 #ifdef OVERLAY_WIDGET_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
@@ -54,6 +57,9 @@ void OverlayWidget::show()
 
 void OverlayWidget::hide()
 {
+    if (_widgetFader.isFadedOut())
+        return;
+
 #ifdef OVERLAY_WIDGET_VERBOSE
     qDebug() << __FUNCTION__;
 #endif

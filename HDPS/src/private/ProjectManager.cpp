@@ -52,6 +52,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _saveProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveProjectAction.setToolTip("Save project to disk");
 
+    _saveProjectAsAction.setShortcut(QKeySequence("Ctrl+Shift+S"));
     _saveProjectAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveProjectAsAction.setToolTip("Save project to disk in a chosen location");
 
@@ -119,6 +120,8 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
 
     connect(this, &ProjectManager::projectCreated, this, updateActionsReadOnly);
     connect(this, &ProjectManager::projectDestroyed, this, updateActionsReadOnly);
+    connect(this, &ProjectManager::projectLoaded, this, updateActionsReadOnly);
+    connect(this, &ProjectManager::projectSaved, this, updateActionsReadOnly);
 
     updateActionsReadOnly();
 

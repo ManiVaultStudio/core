@@ -13,6 +13,17 @@ class PluginManagerModel : public QStandardItemModel
 {
 public:
 
+    /** Model columns */
+    enum class Column {
+        Name,       /** Item name (plugin type, factory name or plugin name) */
+        Category    /** Item category (type, factory or instance) */
+    };
+
+    /** Column name and tooltip */
+    static QMap<Column, QPair<QString, QString>> columnInfo;
+
+public:
+
     /**
      * Construct plugin manager model with \p parent
      * @param parent Pointer to parent object

@@ -26,6 +26,17 @@ public:
 
     /** Standard item model loading and manipulating the recent file paths */
     class Model final : public QStandardItemModel {
+    public:
+
+        /** Model columns */
+        enum class Column {
+            FilePath,       /** Location of the recent file */
+            DateTime        /** Date and time when the file was opened */
+        };
+
+        /** Column name and tooltip */
+        static QMap<Column, QPair<QString, QString>> columnInfo;
+
     protected:
 
         /**
