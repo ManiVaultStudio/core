@@ -150,28 +150,11 @@ WorkspaceManager::WorkspaceManager() :
         saveWorkspaceAs();
     });
 
-    //connect(&_clearRecentWorkspacesAction, &TriggerAction::triggered, [this](bool) {
-    //    auto recentWorkspaces = Application::current()->getSetting("Workspaces/Recent", QVariantList()).toList();
-
-    //    QVariantMap recentWorkspace{
-    //        { "FilePath", filePath },
-    //        { "DateTime", QDateTime::currentDateTime() }
-    //    };
-
-    //    for (auto recentWorkspace : recentWorkspaces)
-    //        if (recentWorkspace.toMap()["FilePath"].toString() == filePath)
-    //            recentWorkspaces.removeOne(recentWorkspace);
-
-    //    recentWorkspaces.insert(0, recentWorkspace);
-
-    //    Application::current()->setSetting("Workspaces/Recent", recentWorkspaces);
-    //});
-
     createIcon();
 
-    _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Shift", _icon);
+    _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Alt", _icon);
 
-    connect(&_recentWorkspacesAction, &RecentFilePathsAction::triggered, this, [this](const QString& filePath) -> void {
+    connect(&_recentWorkspacesAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
         loadWorkspace(filePath);
     });
 }
@@ -206,17 +189,17 @@ void WorkspaceManager::initalize()
 
         //viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
-        //connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
-        //    const auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
+        connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
+            const auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
 
-        //    if (!viewPlugin)
-        //        return;
+            if (!viewPlugin)
+                return;
 
-        //    if (viewPlugin->isSystemViewPlugin())
-        //        _mainDockManager->removeViewPluginDockWidget(viewPlugin);
-        //    else
-        //        _viewPluginsWidget->getDockManager().removeViewPluginDockWidget(viewPlugin);
-        //});
+            if (viewPlugin->isSystemViewPlugin())
+                _mainDockManager->removeViewPluginDockWidget(viewPlugin);
+            //else
+            //    _viewPluginsWidget->getDockManager().removeViewPluginDockWidget(viewPlugin);
+            });
     }
     endInitialization();
 }
@@ -249,7 +232,7 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/)
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-                fileDialog.setWindowTitle("Load existing HDPS workspace");
+                fileDialog.setWindowTitle("Load workspace");
                 fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
                 fileDialog.setFileMode(QFileDialog::ExistingFile);
                 fileDialog.setNameFilters({ "HDPS workspace files (*.hws)" });
@@ -297,7 +280,7 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-                fileDialog.setWindowTitle("Save HDPS workspace");
+                fileDialog.setWindowTitle("Save workspace");
                 fileDialog.setAcceptMode(QFileDialog::AcceptSave);
                 fileDialog.setNameFilters({ "HDPS workspace files (*.hws)" });
                 fileDialog.setDefaultSuffix(".hws");
@@ -348,7 +331,7 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
     const auto dockingManagersMap = variantMap["DockingManagers"].toMap();
 
     variantMapMustContain(dockingManagersMap, "Main");
-    variantMapMustContain(dockingManagersMap, "ViewPlugins");
+    //variantMapMustContain(dockingManagersMap, "ViewPlugins");
         
     _mainDockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
     //_viewPluginsDockWidget.getDockManager().fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
@@ -373,8 +356,11 @@ void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::Vie
 {
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
-    if (viewPlugin->isSystemViewPlugin())
+    if (viewPlugin->isSystemViewPlugin()) {
         _mainDockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _mainDockManager->findDockAreaWidget(dockToViewPlugin ? &dockToViewPlugin->getWidget() : nullptr));
+
+    }
+        
     //else
     //    _viewPluginsWidget->addViewPlugin(viewPluginDockWidget, dockToViewPlugin, dockArea);
 }

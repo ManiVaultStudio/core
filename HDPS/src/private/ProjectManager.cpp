@@ -127,7 +127,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
 
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
 
-    connect(&_recentProjectsAction, &RecentFilePathsAction::triggered, this, [this](const QString& filePath) -> void {
+    connect(&_recentProjectsAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
         loadProject(filePath);
     });
 }

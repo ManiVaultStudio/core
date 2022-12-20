@@ -7,6 +7,8 @@
 #include <QWidget>
 #include <QFileDialog>
 
+using namespace hdps::gui;
+
 namespace hdps::plugin
 {
 
@@ -180,7 +182,8 @@ void ViewPlugin::createScreenshot()
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :
     PluginFactory(Type::VIEW),
-    _producesSystemViewPlugins(producesSystemViewPlugins)
+    _producesSystemViewPlugins(producesSystemViewPlugins),
+    _preferredDockArea(DockAreaFlag::Right)
 {
     if (_producesSystemViewPlugins)
         setMaximumNumberOfInstances(1);
@@ -194,6 +197,16 @@ QIcon ViewPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 bool ViewPluginFactory::producesSystemViewPlugins() const
 {
     return _producesSystemViewPlugins;
+}
+
+DockAreaFlag ViewPluginFactory::getPreferredDockArea() const
+{
+    return _preferredDockArea;
+}
+
+void ViewPluginFactory::setPreferredDockArea(const gui::DockAreaFlag& preferredDockArea)
+{
+    _preferredDockArea = preferredDockArea;
 }
 
 }

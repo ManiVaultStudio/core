@@ -386,7 +386,7 @@ set(PUBLIC_ACTIONS_HEADERS
     src/actions/DirectoryPickerAction.h
     src/actions/FilePickerAction.h
     src/actions/StatusAction.h
-    src/actions/RecentFilePathsAction.h
+    src/actions/RecentFilesAction.h
     src/actions/GroupSectionTreeItem.h
     src/actions/GroupWidgetTreeItem.h
     src/actions/WidgetActionContextMenu.h
@@ -439,7 +439,7 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/DirectoryPickerAction.cpp
     src/actions/FilePickerAction.cpp
     src/actions/StatusAction.cpp
-    src/actions/RecentFilePathsAction.cpp
+    src/actions/RecentFilesAction.cpp
     src/actions/GroupSectionTreeItem.cpp
     src/actions/GroupWidgetTreeItem.cpp
     src/actions/WidgetActionContextMenu.cpp

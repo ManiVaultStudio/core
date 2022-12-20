@@ -7,6 +7,7 @@
 Q_PLUGIN_METADATA(IID "nl.BioVault.LoggingPlugin")
 
 using namespace hdps;
+using namespace hdps::gui;
 
 LoggingPlugin::LoggingPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
@@ -30,6 +31,7 @@ void LoggingPlugin::init()
 LoggingPluginFactory::LoggingPluginFactory() :
     ViewPluginFactory(true)
 {
+    setPreferredDockArea(DockAreaFlag::Bottom);
 }
 
 QIcon LoggingPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const

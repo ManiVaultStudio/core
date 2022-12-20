@@ -4,7 +4,7 @@
 #include "Project.h"
 
 #include "actions/TriggerAction.h"
-#include <actions/RecentFilePathsAction.h>
+#include <actions/RecentFilesAction.h>
 #include "actions/ToggleAction.h"
 
 #include <QObject>
@@ -78,7 +78,7 @@ public: // Action getters
     virtual hdps::gui::TriggerAction& getOpenProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getSaveProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getSaveProjectAsAction() = 0;
-    virtual hdps::gui::RecentFilePathsAction& getRecentProjectsAction() = 0;
+    virtual hdps::gui::RecentFilesAction& getRecentProjectsAction() = 0;
     virtual hdps::gui::TriggerAction& getPublishAction() = 0;
     virtual hdps::gui::TriggerAction& getPluginManagerAction() = 0;
     virtual hdps::gui::ToggleAction& getShowStartPageAction() = 0;

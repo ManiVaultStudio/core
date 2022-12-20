@@ -36,10 +36,10 @@ private:
 
     /**
      * Get actions for loading system views
-     * @param dockArea Dock area to dock to
+     * @param dockArea Dock area to dock to (if set to none, the view plugin preferred dock area is used)
      * @return Vector of actions
      */
-    QVector<QPointer<hdps::gui::TriggerAction>> getLoadSystemViewsActions(hdps::gui::DockAreaFlag dockArea);
+    QVector<QPointer<hdps::gui::TriggerAction>> getLoadSystemViewsActions(hdps::gui::DockAreaFlag dockArea = hdps::gui::DockAreaFlag::None);
 
 private:
     ads::CDockAreaWidget*   _dockAreaWidget;      /** Pointer to dock area widget to which new view plugins are docked (new view plugins will be docked top-level if nullptr) */

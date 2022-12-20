@@ -122,8 +122,23 @@ public:
      */
     bool producesSystemViewPlugins() const;
 
+    /**
+     * Get preferred dock area
+     * @return Preferred initial dock area when the view plugin is added to the workspace
+     */
+    gui::DockAreaFlag getPreferredDockArea() const;
+
+protected:
+
+    /**
+     * Set preferred dock area
+     * @param preferredDockArea Preferred initial dock area when the view plugin is added to the workspace
+     */
+    void setPreferredDockArea(const gui::DockAreaFlag& preferredDockArea);
+
 private:
-    const bool  _producesSystemViewPlugins;     /** Whether this factory produces system view plugins or not */
+    const bool          _producesSystemViewPlugins;     /** Whether this factory produces system view plugins or not */
+    gui::DockAreaFlag   _preferredDockArea;             /** Preferred initial dock area when the view plugin is added to the workspace */
 };
 
 }

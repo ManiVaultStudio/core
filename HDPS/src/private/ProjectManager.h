@@ -93,7 +93,7 @@ public: // Action getters
     hdps::gui::TriggerAction& getOpenProjectAction() override { return _openProjectAction; }
     hdps::gui::TriggerAction& getSaveProjectAction() override { return _saveProjectAction; }
     hdps::gui::TriggerAction& getSaveProjectAsAction() override { return _saveProjectAsAction; }
-    hdps::gui::RecentFilePathsAction& getRecentProjectsAction() override { return _recentProjectsAction; }
+    hdps::gui::RecentFilesAction& getRecentProjectsAction() override { return _recentProjectsAction; }
     hdps::gui::TriggerAction& getPublishAction() override { return _publishAction; }
     hdps::gui::TriggerAction& getPluginManagerAction() override { return _pluginManagerAction; }
     hdps::gui::ToggleAction& getShowStartPageAction() override { return _showStartPageAction; }
@@ -104,7 +104,7 @@ private:
     hdps::gui::TriggerAction            _openProjectAction;         /** Action for opening a project */
     hdps::gui::TriggerAction            _saveProjectAction;         /** Action for saving a project */
     hdps::gui::TriggerAction            _saveProjectAsAction;       /** Action for saving a project under a new name */
-    hdps::gui::RecentFilePathsAction    _recentProjectsAction;      /** Menu for loading recent projects */
+    hdps::gui::RecentFilesAction        _recentProjectsAction;      /** Menu for loading recent projects */
     QMenu                               _importDataMenu;            /** Menu for importing data */
     hdps::gui::TriggerAction            _publishAction;             /** Action for publishing the project to an end-user */
     hdps::gui::TriggerAction            _pluginManagerAction;       /** Action for showing the loaded plugins dialog */

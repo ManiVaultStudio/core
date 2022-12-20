@@ -5,7 +5,7 @@
 
 #include <AbstractWorkspaceManager.h>
 
-#include <actions/RecentFilePathsAction.h>
+#include <actions/RecentFilesAction.h>
 
 #include <DockAreaWidget.h>
 
@@ -153,7 +153,7 @@ private:
     hdps::gui::TriggerAction            _loadWorkspaceAction;           /** Action for loading a workspace from file */
     hdps::gui::TriggerAction            _saveWorkspaceAction;           /** Action for saving the current workspace to file */
     hdps::gui::TriggerAction            _saveWorkspaceAsAction;         /** Action for saving the current workspace to file with a different path */
-    hdps::gui::RecentFilePathsAction    _recentWorkspacesAction;        /** Action for saving the current workspace to file with a different path */
+    hdps::gui::RecentFilesAction        _recentWorkspacesAction;        /** Action for saving the current workspace to file with a different path */
     QIcon                               _icon;                          /** Manager icon */
 };
 

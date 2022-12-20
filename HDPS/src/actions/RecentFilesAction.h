@@ -12,13 +12,13 @@
 namespace hdps::gui {
 
 /**
- * Recent file paths action class
+ * Recent files action class
  *
  * Action class for storing and editing recent file paths and saving them to settings.
  *
  * @author Thomas Kroes
  */
-class RecentFilePathsAction : public WidgetAction
+class RecentFilesAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -43,7 +43,7 @@ public:
          * Constructor
          * @param recentFilePathsAction Pointer to owning recent file paths action
          */
-        Model(RecentFilePathsAction* recentFilePathsAction);
+        Model(RecentFilesAction* recentFilePathsAction);
 
         /** Load recent file paths from settings */
         void loadFromSettings();
@@ -67,10 +67,10 @@ public:
         QList<TriggerAction*> getActions();
 
     private:
-        RecentFilePathsAction*  _recentFilePathsAction;     /** Pointer to owning recent file paths action */
+        RecentFilesAction*  _recentFilePathsAction;     /** Pointer to owning recent file paths action */
         QList<TriggerAction*>   _actions;                   /** Menu trigger actions */
 
-        friend class RecentFilePathsAction;
+        friend class RecentFilesAction;
     };
 
     class FilterModel : public QSortFilterProxyModel
@@ -108,7 +108,7 @@ public:
          * Construct a dialog with owning \p recentFilePathsAction
          * @param recentFilePathsAction Pointer to recent file paths action
          */
-        Dialog(RecentFilePathsAction* recentFilePathsAction);
+        Dialog(RecentFilesAction* recentFilePathsAction);
 
         /** Get preferred size */
         QSize sizeHint() const override {
@@ -125,7 +125,7 @@ public:
         TriggerAction    _removeAction;         /** Action for removing one, or more, recent file paths */
         TriggerAction    _okAction;             /** Action for exiting the dialog */
 
-        friend class RecentFilePathsAction;
+        friend class RecentFilesAction;
     };
 
 public:
@@ -138,7 +138,7 @@ public:
      * @param shortcutPrefix Prefix of the shortcut
      * @param icon Icon in menu
      */
-    RecentFilePathsAction(QObject* parent, const QString& settingsKey = "", const QString& fileType = "", const QString& shortcutPrefix = "", const QIcon& icon = QIcon());
+    RecentFilesAction(QObject* parent, const QString& settingsKey = "", const QString& fileType = "", const QString& shortcutPrefix = "", const QIcon& icon = QIcon());
 
     /**
      * Get type string

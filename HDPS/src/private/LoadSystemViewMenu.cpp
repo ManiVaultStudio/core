@@ -45,7 +45,7 @@ LoadSystemViewMenu::LoadSystemViewMenu(QWidget *parent /*= nullptr*/, ads::CDock
             addMenu(addLoadViewsDocked(gui::DockAreaFlag::Center));
         }
         else {
-            const auto actions = getLoadSystemViewsActions(gui::DockAreaFlag::Right);
+            const auto actions = getLoadSystemViewsActions();
 
             for (auto action : actions)
                 addAction(action);
@@ -68,7 +68,7 @@ bool LoadSystemViewMenu::mayProducePlugins() const
     return false;
 }
 
-QVector<QPointer<TriggerAction>> LoadSystemViewMenu::getLoadSystemViewsActions(hdps::gui::DockAreaFlag dockArea)
+QVector<QPointer<TriggerAction>> LoadSystemViewMenu::getLoadSystemViewsActions(hdps::gui::DockAreaFlag dockArea /*= hdps::gui::DockAreaFlag::None*/)
 {
     QVector<QPointer<TriggerAction>> actions;
 
@@ -96,8 +96,8 @@ QVector<QPointer<TriggerAction>> LoadSystemViewMenu::getLoadSystemViewsActions(h
                 dockToViewPlugin = firstViewPluginDockWidget->getViewPlugin();
         }
 
-        connect(action, &QAction::triggered, this, [pluginTriggerAction, dockToViewPlugin, dockArea]() -> void {
-            Application::core()->getPluginManager().requestViewPlugin(pluginTriggerAction->getPluginFactory()->getKind(), dockToViewPlugin, dockArea);
+        connect(action, &QAction::triggered, this, [pluginTriggerAction, dockToViewPlugin, viewPluginFactory, dockArea]() -> void {
+            Application::core()->getPluginManager().requestViewPlugin(pluginTriggerAction->getPluginFactory()->getKind(), dockToViewPlugin, dockArea == DockAreaFlag::None ? viewPluginFactory->getPreferredDockArea() : dockArea);
         });
 
         actions << action;

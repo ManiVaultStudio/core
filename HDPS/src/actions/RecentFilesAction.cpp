@@ -1,4 +1,4 @@
-#include "RecentFilePathsAction.h"
+#include "RecentFilesAction.h"
 #include "Application.h"
 
 #include <QHBoxLayout>
@@ -12,7 +12,7 @@
 
 namespace hdps::gui {
 
-RecentFilePathsAction::RecentFilePathsAction(QObject* parent, const QString& settingsKey /*= ""*/, const QString& fileType /*= ""*/, const QString& shortcutPrefix /*= ""*/, const QIcon& icon /*= QIcon()*/) :
+RecentFilesAction::RecentFilesAction(QObject* parent, const QString& settingsKey /*= ""*/, const QString& fileType /*= ""*/, const QString& shortcutPrefix /*= ""*/, const QIcon& icon /*= QIcon()*/) :
     WidgetAction(parent),
     _settingsKey(),
     _fileType(),
@@ -29,12 +29,12 @@ RecentFilePathsAction::RecentFilePathsAction(QObject* parent, const QString& set
     });
 }
 
-QString RecentFilePathsAction::getTypeString() const
+QString RecentFilesAction::getTypeString() const
 {
     return "RecentFilePaths";
 }
 
-QMenu* RecentFilePathsAction::getMenu()
+QMenu* RecentFilesAction::getMenu()
 {
     auto menu = new QMenu();
 
@@ -54,27 +54,27 @@ QMenu* RecentFilePathsAction::getMenu()
     return menu;
 }
 
-QString RecentFilePathsAction::getSettingsKey() const
+QString RecentFilesAction::getSettingsKey() const
 {
     return _settingsKey;
 }
 
-QString RecentFilePathsAction::getFileType() const
+QString RecentFilesAction::getFileType() const
 {
     return _fileType;
 }
 
-QString RecentFilePathsAction::getShortcutPrefix() const
+QString RecentFilesAction::getShortcutPrefix() const
 {
     return _shortcutPrefix;
 }
 
-QIcon RecentFilePathsAction::getIcon() const
+QIcon RecentFilesAction::getIcon() const
 {
     return _icon;
 }
 
-void RecentFilePathsAction::addRecentFilePath(const QString& filePath)
+void RecentFilesAction::addRecentFilePath(const QString& filePath)
 {
 #ifdef RECENT_FILE_PATHS_ACTION_VERBOSE
     qDebug() << __FUNCTION__ << filePath;
@@ -83,7 +83,7 @@ void RecentFilePathsAction::addRecentFilePath(const QString& filePath)
     _model.addRecentFilePath(filePath);
 }
 
-void RecentFilePathsAction::initialize(const QString& settingsKey, const QString& fileType, const QString& shortcutPrefix, const QIcon& icon)
+void RecentFilesAction::initialize(const QString& settingsKey, const QString& fileType, const QString& shortcutPrefix, const QIcon& icon)
 {
     _settingsKey    = settingsKey;
     _fileType       = fileType;
@@ -96,35 +96,35 @@ void RecentFilePathsAction::initialize(const QString& settingsKey, const QString
     _model.loadFromSettings();
 }
 
-TriggerAction& RecentFilePathsAction::getEditAction()
+TriggerAction& RecentFilesAction::getEditAction()
 {
     return _editAction;
 }
 
-RecentFilePathsAction::Model& RecentFilePathsAction::getModel()
+RecentFilesAction::Model& RecentFilesAction::getModel()
 {
     return _model;
 }
 
-const RecentFilePathsAction::FilterModel& RecentFilePathsAction::getFilterModel() const
+const RecentFilesAction::FilterModel& RecentFilesAction::getFilterModel() const
 {
     return _filterModel;
 }
 
 
-QMap<RecentFilePathsAction::Model::Column, QPair<QString, QString>> RecentFilePathsAction::Model::columnInfo = QMap<RecentFilePathsAction::Model::Column, QPair<QString, QString>>({
-    { RecentFilePathsAction::Model::Column::FilePath, { "File path", "Location of the recent file" }},
-    { RecentFilePathsAction::Model::Column::DateTime, { "Date/time", "Date and time when the file was opened" }}
+QMap<RecentFilesAction::Model::Column, QPair<QString, QString>> RecentFilesAction::Model::columnInfo = QMap<RecentFilesAction::Model::Column, QPair<QString, QString>>({
+    { RecentFilesAction::Model::Column::FilePath, { "File path", "Location of the recent file" }},
+    { RecentFilesAction::Model::Column::DateTime, { "Date/time", "Date and time when the file was opened" }}
 });
 
-RecentFilePathsAction::Model::Model(RecentFilePathsAction* recentFilePathsAction) :
+RecentFilesAction::Model::Model(RecentFilesAction* recentFilePathsAction) :
     QStandardItemModel(recentFilePathsAction),
     _recentFilePathsAction(recentFilePathsAction),
     _actions()
 {
 }
 
-void RecentFilePathsAction::Model::loadFromSettings()
+void RecentFilesAction::Model::loadFromSettings()
 {
     setRowCount(0);
 
@@ -173,7 +173,7 @@ void RecentFilePathsAction::Model::loadFromSettings()
     }
 }
 
-void RecentFilePathsAction::Model::addRecentFilePath(const QString& filePath)
+void RecentFilesAction::Model::addRecentFilePath(const QString& filePath)
 {
     auto recentFilePaths = Application::current()->getSetting(_recentFilePathsAction->getSettingsKey(), QVariantList()).toList();
 
@@ -195,7 +195,7 @@ void RecentFilePathsAction::Model::addRecentFilePath(const QString& filePath)
     loadFromSettings();
 }
 
-void RecentFilePathsAction::Model::removeRecentFilePath(const QString& filePath)
+void RecentFilesAction::Model::removeRecentFilePath(const QString& filePath)
 {
 
 
@@ -210,14 +210,14 @@ void RecentFilePathsAction::Model::removeRecentFilePath(const QString& filePath)
     Application::current()->setSetting(_recentFilePathsAction->getSettingsKey(), recentFilePathsToKeep);
 }
 
-QList<TriggerAction*> RecentFilePathsAction::Model::getActions()
+QList<TriggerAction*> RecentFilesAction::Model::getActions()
 {
     return _actions;
 }
 
-RecentFilePathsAction::Dialog::Dialog(RecentFilePathsAction* recentFilePathsAction) :
+RecentFilesAction::Dialog::Dialog(RecentFilesAction* recentFilePathsAction) :
     QDialog(),
-    _hierarchyWidget(this, QString("Recent %1").arg(recentFilePathsAction->getFileType()), recentFilePathsAction->getModel(), const_cast<RecentFilePathsAction::FilterModel*>(&recentFilePathsAction->getFilterModel())),
+    _hierarchyWidget(this, QString("Recent %1").arg(recentFilePathsAction->getFileType()), recentFilePathsAction->getModel(), const_cast<RecentFilesAction::FilterModel*>(&recentFilePathsAction->getFilterModel())),
     _removeAction(this, "Remove"),
     _okAction(this, "Ok")
 {
@@ -253,13 +253,13 @@ RecentFilePathsAction::Dialog::Dialog(RecentFilePathsAction* recentFilePathsActi
 
     treeViewHeader->setStretchLastSection(false);
 
-    treeViewHeader->setSortIndicator(static_cast<int>(RecentFilePathsAction::Model::Column::DateTime), Qt::DescendingOrder);
+    treeViewHeader->setSortIndicator(static_cast<int>(RecentFilesAction::Model::Column::DateTime), Qt::DescendingOrder);
 
-    treeViewHeader->resizeSection(static_cast<int>(RecentFilePathsAction::Model::Column::FilePath), 300);
-    treeViewHeader->resizeSection(static_cast<int>(RecentFilePathsAction::Model::Column::DateTime), 200);
+    treeViewHeader->resizeSection(static_cast<int>(RecentFilesAction::Model::Column::FilePath), 300);
+    treeViewHeader->resizeSection(static_cast<int>(RecentFilesAction::Model::Column::DateTime), 200);
 
-    treeViewHeader->setSectionResizeMode(static_cast<int>(RecentFilePathsAction::Model::Column::FilePath), QHeaderView::Stretch);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(RecentFilePathsAction::Model::Column::DateTime), QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(RecentFilesAction::Model::Column::FilePath), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(RecentFilesAction::Model::Column::DateTime), QHeaderView::Fixed);
 
     _removeAction.setEnabled(false);
 
@@ -284,7 +284,7 @@ RecentFilePathsAction::Dialog::Dialog(RecentFilePathsAction* recentFilePathsActi
         auto mayDestroyPlugins = true;
 
         for (const auto& selectedRow : selectedRows)
-            recentFilePathsAction->getModel().removeRecentFilePath(selectedRow.siblingAtColumn(static_cast<int>(RecentFilePathsAction::Model::Column::FilePath)).data().toString());
+            recentFilePathsAction->getModel().removeRecentFilePath(selectedRow.siblingAtColumn(static_cast<int>(RecentFilesAction::Model::Column::FilePath)).data().toString());
 
         recentFilePathsAction->getModel().loadFromSettings();
     });
@@ -292,13 +292,13 @@ RecentFilePathsAction::Dialog::Dialog(RecentFilePathsAction* recentFilePathsActi
     connect(&_okAction, &TriggerAction::triggered, this, &Dialog::accept);
 }
 
-RecentFilePathsAction::FilterModel::FilterModel(QObject* parent /*= nullptr*/) :
+RecentFilesAction::FilterModel::FilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent)
 {
-    setFilterKeyColumn(static_cast<int>(RecentFilePathsAction::Model::Column::FilePath));
+    setFilterKeyColumn(static_cast<int>(RecentFilesAction::Model::Column::FilePath));
 }
 
-bool RecentFilePathsAction::FilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
+bool RecentFilesAction::FilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
     const auto index = sourceModel()->index(row, 0, parent);
 
@@ -315,7 +315,7 @@ bool RecentFilePathsAction::FilterModel::filterAcceptsRow(int row, const QModelI
     return true;
 }
 
-bool RecentFilePathsAction::FilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
+bool RecentFilesAction::FilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
 {
     if (lhs.column() == 0)
         return lhs.data().toString() < rhs.data().toString();
