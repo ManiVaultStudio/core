@@ -15,15 +15,15 @@ namespace hdps::plugin
 ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
     _widget(),
-    _editActionsAction(&_widget, "Edit..."),
-    _screenshotAction(&_widget, "Screenshot..."),
-    _isolateAction(&_widget, "Isolate"),
-    _mayCloseAction(this, "May close", true, true),
-    _mayFloatAction(this, "May float", true, true),
-    _mayMoveAction(this, "May move", true, true),
-    _visibleAction(this, "Visible", true, true),
-    _helpAction(this, "Trigger help"),
-    _removeAction(this, "Remove")
+    _editActionsAction(nullptr, "Edit..."),
+    _screenshotAction(nullptr, "Screenshot..."),
+    _isolateAction(nullptr, "Isolate"),
+    _mayCloseAction(nullptr, "May close", true, true),
+    _mayFloatAction(nullptr, "May float", true, true),
+    _mayMoveAction(nullptr, "May move", true, true),
+    _visibleAction(nullptr, "Visible", true, true),
+    _helpAction(nullptr, "Trigger help"),
+    _removeAction(nullptr, "Remove")
 {
     setText(getGuiName());
 

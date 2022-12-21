@@ -146,8 +146,8 @@ private:
     void createIcon();
 
 private:
-    QPointer<DockManager>               _mainDockManager;               /** Main dock manager for docking system view plugins */
-    QPointer<DockManager>               _viewPluginsdockManager;        /** Main dock manager for non-system view plugins */
+    QScopedPointer<DockManager>         _mainDockManager;               /** Main dock manager for docking system view plugins */
+    QScopedPointer<DockManager>         _viewPluginsdockManager;        /** Main dock manager for non-system view plugins */
     //QPointer<ViewPluginsDockWidget>     _viewPluginsWidget;             /** Pointer to view plugins widget in which non-system view plugins are docked */
     QMap<DockWidget*, bool>             _cachedDockWidgetsVisibility;   /** Cached dock widgets visibility for view plugin isolation */
     hdps::gui::TriggerAction            _loadWorkspaceAction;           /** Action for loading a workspace from file */

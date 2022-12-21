@@ -157,6 +157,17 @@ WorkspaceManager::WorkspaceManager() :
     connect(&_recentWorkspacesAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
         loadWorkspace(filePath);
     });
+
+    const auto updateActionsReadOnly = [this]() -> void {
+        _saveWorkspaceAction.setEnabled(true);
+        _saveWorkspaceAsAction.setEnabled(true);
+        _saveWorkspaceAsAction.setEnabled(!getWorkspaceFilePath().isEmpty());
+    };
+
+    connect(this, &WorkspaceManager::workspaceLoaded, this, updateActionsReadOnly);
+    connect(this, &WorkspaceManager::workspaceSaved, this, updateActionsReadOnly);
+
+    updateActionsReadOnly();
 }
 
 WorkspaceManager::~WorkspaceManager()
@@ -175,7 +186,7 @@ void WorkspaceManager::initalize()
 
     beginInitialization();
     {
-        _mainDockManager = new DockManager();
+        _mainDockManager.reset(new DockManager());
         //_viewPluginsdockManager = new DockManager(widget);
         //_viewPluginsWidget  = new ViewPluginsDockWidget(_mainDockManager);
 
@@ -195,11 +206,15 @@ void WorkspaceManager::initalize()
             if (!viewPlugin)
                 return;
 
-            if (viewPlugin->isSystemViewPlugin())
-                _mainDockManager->removeViewPluginDockWidget(viewPlugin);
+            //if (viewPlugin->isSystemViewPlugin())
+            //    _mainDockManager->removeViewPluginDockWidget(viewPlugin);
             //else
             //    _viewPluginsWidget->getDockManager().removeViewPluginDockWidget(viewPlugin);
-            });
+        });
+
+        connect(&Application::core()->getProjectManager(), &AbstractProjectManager::projectCreated, this, [this]() -> void {
+            setWorkspaceFilePath("");
+        });
     }
     endInitialization();
 }
@@ -326,6 +341,7 @@ void WorkspaceManager::saveWorkspaceAs()
 
 void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 {
+    
     variantMapMustContain(variantMap, "DockingManagers");
 
     const auto dockingManagersMap = variantMap["DockingManagers"].toMap();
@@ -447,7 +463,7 @@ void WorkspaceManager::createIcon()
 
 QWidget* WorkspaceManager::getWidget()
 {
-    return _mainDockManager;
+    return _mainDockManager.get();
 }
 
 }

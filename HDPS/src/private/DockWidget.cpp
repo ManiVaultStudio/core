@@ -32,6 +32,7 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
 #endif
 
     setObjectName(_id);
+    setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromContent);
 
     auto& widgetFader = _infoOverlayWidget.getWidgetFader();
 
@@ -59,6 +60,8 @@ DockWidget::~DockWidget()
 #ifdef DOCK_WIDGET_VERBOSE
     qDebug() << __FUNCTION__ << getSerializationName();
 #endif
+
+    takeWidget();
 }
 
 QString DockWidget::getTypeString() const

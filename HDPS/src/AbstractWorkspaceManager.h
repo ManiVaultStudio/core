@@ -4,8 +4,6 @@
 
 #include <ViewPlugin.h>
 
-class QMainWindow;
-
 #ifdef _DEBUG
     #define ABSTRACT_WORKSPACE_MANAGER_VERBOSE
 #endif
@@ -76,7 +74,16 @@ public:
      * @param filePath File path of the loaded workspace
      */
     virtual void setWorkspaceFilePath(const QString& filePath) final {
+        if (filePath == _workspaceFilePath)
+            return;
+
+#ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__;
+#endif
+
         _workspaceFilePath = filePath;
+
+        emit workspaceFilePathChanged(_workspaceFilePath);
     }
 
     /** Begin the workspace loading process */
@@ -157,6 +164,18 @@ signals:
      * @param filePath File path of the workspace
      */
     void workspaceSaved(const QString& filePath);
+
+    /**
+     * Signals that the location of the current workspace changed to \p filePath
+     * @param filePath File path of the workspace
+     */
+    void workspaceFilePathChanged(const QString& filePath);
+
+    /**
+     * Signals that a new dock manager was set
+     * @param dockManager Pointer to the new dock manager
+     */
+    void dockManagerChanged(QWidget* dockManager);
 
 private:
     QString     _workspaceFilePath;      /** File path of the current workspace */

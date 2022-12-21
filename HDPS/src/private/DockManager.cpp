@@ -110,8 +110,13 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
 //        _viewPluginDockWidgets.clear();
 
-        for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList())
+        for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList()) {
+            //auto dockWidget = new CDockWidget("Test");
+            //dockWidget->setObjectName(viewPluginDockWidgetVariant.toMap()["ID"].toString());
+            //addDockWidget(RightDockWidgetArea, dockWidget);
             addDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));
+        }
+            
 
         if (!restoreState(QByteArray::fromBase64(variantMap["State"].toString().toUtf8()), variantMap["Version"].toInt()))
             qCritical() << "Unable to restore state from" << objectName();

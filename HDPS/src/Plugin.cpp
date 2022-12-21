@@ -1,11 +1,11 @@
 #include "Plugin.h"
-#include "actions/WidgetAction.h"
 #include "Application.h"
 
-namespace hdps
-{
+#ifdef _DEBUG
+    #define PLUGIN_VERBOSE
+#endif
 
-namespace plugin
+namespace hdps::plugin
 {
 
 QMap<QString, std::int32_t> hdps::plugin::Plugin::noInstances = QMap<QString, std::int32_t>();
@@ -30,6 +30,9 @@ Plugin::Plugin(const PluginFactory* factory) :
 
 Plugin::~Plugin()
 {
+#ifdef PLUGIN_VERBOSE
+    qDebug() << __FUNCTION__ << getGuiName();
+#endif
 }
 
 const hdps::plugin::PluginFactory* Plugin::getFactory() const
@@ -139,5 +142,4 @@ hdps::gui::StringAction& Plugin::getGuiNameAction()
     return _guiNameAction;
 }
 
-}
 }

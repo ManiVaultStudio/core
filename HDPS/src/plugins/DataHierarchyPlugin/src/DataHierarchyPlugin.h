@@ -18,6 +18,11 @@ class DataHierarchyPlugin : public ViewPlugin
     Q_OBJECT
     
 public:
+
+    /**
+     * Construct plugin with \p factory
+     * @param factory Pointer to plugin factory
+     */
     DataHierarchyPlugin(const PluginFactory* factory);
     
     void init() override;

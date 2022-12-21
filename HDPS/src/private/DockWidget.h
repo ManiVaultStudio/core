@@ -43,6 +43,9 @@ public:
      */
     virtual QString getTypeString() const;
 
+    /** Performs custom dock widget initialization */
+    virtual void initialize() {};
+
     /**
      * Invoked when the menu is shown
      * @param showEvent Pointer to the show event

@@ -46,6 +46,9 @@ public:
      */
     QString getTypeString() const override;
 
+    /** Performs custom view plugin dock widget initialization */
+    void initialize() override;
+
     /** Load view plugin */
     void loadViewPlugin();
 

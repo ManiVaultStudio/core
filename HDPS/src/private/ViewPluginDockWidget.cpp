@@ -49,6 +49,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
     _viewPluginMap(),
     _helpAction(this, "Help")
 {
+    initialize();
     setViewPlugin(viewPlugin);
     initializeSettingsMenu();
 }
@@ -60,12 +61,25 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QVariantMap& variantMap) :
     _viewPluginMap(),
     _helpAction(this, "Help")
 {
+    initialize();
     fromVariantMap(variantMap);
+    setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
 }
 
 QString ViewPluginDockWidget::getTypeString() const
 {
     return "ViewPluginDockWidget";
+}
+
+void ViewPluginDockWidget::initialize()
+{
+    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
+        if (plugin != _viewPlugin)
+            return;
+
+        
+        setWidget(nullptr);
+    });
 }
 
 void ViewPluginDockWidget::loadViewPlugin()
@@ -128,7 +142,8 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
 
     QVariantMap variantMap = DockWidget::toVariantMap();
 
-    variantMap["ViewPlugin"] = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin()->toVariantMap();
+    if (_viewPlugin)
+        variantMap["ViewPlugin"] = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin()->toVariantMap();
 
     return variantMap;
 }
@@ -208,4 +223,8 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
     connectToViewPluginVisibleAction(this);
 
     initializeSettingsMenu();
+
+    _viewPlugin->setParent(nullptr);
+
+    qDebug() << _viewPlugin->objectName();
 }

@@ -14,9 +14,7 @@
 
 class QMenu;
 
-namespace hdps
-{
-namespace plugin
+namespace hdps::plugin
 {
 
 class Plugin : public hdps::gui::WidgetAction
@@ -167,7 +165,5 @@ using Plugins = QVector<QPointer<plugin::Plugin*>>;
 using UniquePtrPlugin = std::unique_ptr<plugin::Plugin>;
 using UniquePtrsPlugin = std::vector<UniquePtrPlugin>;
 using PluginPtrs = std::vector<plugin::Plugin*>;
-
-}
 
 }
