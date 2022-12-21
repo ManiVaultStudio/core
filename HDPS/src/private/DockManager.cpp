@@ -94,6 +94,16 @@ void DockManager::removeViewPluginDockWidget(ViewPlugin* viewPlugin)
     }
 }
 
+void DockManager::reset()
+{
+#ifdef DOCK_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << objectName();
+#endif
+
+    for (auto viewPluginDockWidget : getViewPluginDockWidgets())
+        removeDockWidget(viewPluginDockWidget);
+}
+
 void DockManager::fromVariantMap(const QVariantMap& variantMap)
 {
 #ifdef DOCK_MANAGER_VERBOSE
@@ -139,14 +149,4 @@ QVariantMap DockManager::toVariantMap() const
         { "State", QVariant::fromValue(saveState().toBase64()) },
         { "ViewPluginDockWidgets", viewPluginDockWidgetsList }
     };
-}
-
-void DockManager::reset()
-{
-#ifdef DOCK_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__ << objectName();
-#endif
-
-    for (auto viewPluginDockWidget : getViewPluginDockWidgets())
-        removeDockWidget(viewPluginDockWidget);
 }

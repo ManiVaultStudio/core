@@ -20,7 +20,7 @@ LoadSystemViewMenu::LoadSystemViewMenu(QWidget *parent /*= nullptr*/, ads::CDock
 {
     setTitle("System views");
     setToolTip("Manage system view plugins");
-    setEnabled(mayProducePlugins());
+    //setEnabled(mayProducePlugins());
     setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
 
     connect(this, &QMenu::aboutToShow, this, [this]() -> void {

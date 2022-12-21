@@ -43,7 +43,7 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
 
 WidgetAction::~WidgetAction()
 {
-    //Application::core()->getActionsManager().removeAction(this);
+    Application::core()->getActionsManager().removeAction(this);
 }
 
 QString WidgetAction::getTypeString() const

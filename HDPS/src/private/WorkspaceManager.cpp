@@ -112,6 +112,7 @@ WorkspaceManager::WorkspaceManager() :
     //_viewPluginsWidget(),
     _cachedDockWidgetsVisibility(),
     _loadWorkspaceAction(this, "Load"),
+    _newWorkspaceAction(this, "New"),
     _saveWorkspaceAction(this, "Save"),
     _saveWorkspaceAsAction(this, "Save As..."),
     _recentWorkspacesAction(this),
@@ -121,6 +122,10 @@ WorkspaceManager::WorkspaceManager() :
 
     ads::CDockComponentsFactory::setFactory(new CustomComponentsFactory());
 
+    _newWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+N"));
+    _newWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+    _newWorkspaceAction.setToolTip("Create new workspace");
+
     _loadWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+O"));
     _loadWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
     _loadWorkspaceAction.setToolTip("Open workspace from disk");
@@ -129,14 +134,21 @@ WorkspaceManager::WorkspaceManager() :
     _saveWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveWorkspaceAction.setToolTip("Save workspace to disk");
 
+    _saveWorkspaceAsAction.setShortcut(QKeySequence("Ctrl+Alt+Shift+S"));
     _saveWorkspaceAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveWorkspaceAsAction.setToolTip("Save workspace under a new file to disk");
 
     auto mainWindow = Application::topLevelWidgets().first();
 
+    mainWindow->addAction(&_newWorkspaceAction);
     mainWindow->addAction(&_loadWorkspaceAction);
     mainWindow->addAction(&_saveWorkspaceAction);
     mainWindow->addAction(&_saveWorkspaceAsAction);
+
+    connect(&_newWorkspaceAction, &TriggerAction::triggered, [this](bool) {
+        reset();
+        setWorkspaceFilePath("");
+    });
 
     connect(&_loadWorkspaceAction, &TriggerAction::triggered, [this](bool) {
         loadWorkspace();
@@ -206,8 +218,8 @@ void WorkspaceManager::initalize()
             if (!viewPlugin)
                 return;
 
-            //if (viewPlugin->isSystemViewPlugin())
-            //    _mainDockManager->removeViewPluginDockWidget(viewPlugin);
+            if (viewPlugin->isSystemViewPlugin())
+                _mainDockManager->removeViewPluginDockWidget(viewPlugin);
             //else
             //    _viewPluginsWidget->getDockManager().removeViewPluginDockWidget(viewPlugin);
         });
@@ -227,6 +239,8 @@ void WorkspaceManager::reset()
 
     beginReset();
     {
+        for (auto plugin : Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW))
+            plugin->destroy();
     }
     endReset();
 }
@@ -266,6 +280,8 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/)
             }
 
             fromJsonFile(filePath);
+
+            _recentWorkspacesAction.addRecentFilePath(filePath);
         }
         endLoadWorkspace();
     }
@@ -422,6 +438,7 @@ QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)
     menu->setToolTip("Workspace operations");
     menu->setEnabled(Application::core()->getProjectManager().hasProject());
 
+    menu->addAction(&_newWorkspaceAction);
     menu->addAction(&_loadWorkspaceAction);
     menu->addAction(&_saveWorkspaceAction);
     menu->addAction(&_saveWorkspaceAsAction);

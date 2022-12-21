@@ -451,6 +451,8 @@ void ProjectManager::createProject()
     emit projectCreated(*(_project.get()));
 
     _showStartPageAction.setChecked(false);
+
+    Application::core()->getWorkspaceManager().reset();
 }
 
 bool ProjectManager::hasProject() const

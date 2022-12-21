@@ -4,8 +4,10 @@
 #include "PluginType.h"
 
 #include "event/EventListener.h"
+
 #include "actions/WidgetAction.h"
 #include "actions/StringAction.h"
+#include "actions/TriggerAction.h"
 
 #include <QString>
 #include <QMap>
@@ -136,16 +138,13 @@ public: // Serialization
 
 public: // Miscellaneous
 
-    /**
-     * Get number of plugin instances
-     * @param pluginKind The kind of plugin
-     * @return The number of plugin instances
-     */
-    static std::uint32_t getNumberOfInstances(const QString& pluginKind);
+    /** Destroys the plugin and removes it from the plugin manager */
+    virtual void destroy() final;
 
 public: // Action getters
 
-    gui::StringAction& getGuiNameAction();
+    gui::StringAction& getGuiNameAction() { return _guiNameAction; };
+    gui::TriggerAction& getDestroyAction() { return _destroyAction; }
 
 protected:
     CoreInterface*              _core;              /** Pointer to the core interface */
@@ -154,9 +153,7 @@ protected:
     QMap<QString, QVariant>     _properties;        /** Properties map */
     EventListener               _eventListener;     /** Listen to public events */
     gui::StringAction           _guiNameAction;     /** Action for the GUI name */
-
-    /** Keeps track of how many instance have been created per plugin kind */
-    static QMap<QString, std::int32_t> noInstances;
+    gui::TriggerAction          _destroyAction;     /** Action for destroying the plugin */
 
     friend class PluginFactory;
 };

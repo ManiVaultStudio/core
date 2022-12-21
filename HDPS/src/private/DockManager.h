@@ -59,6 +59,9 @@ public:
      */
     void removeViewPluginDockWidget(hdps::plugin::ViewPlugin * viewPlugin);
 
+    /** Resets the docking layout to defaults */
+    void reset();
+
 public: // Serialization
 
     /**
@@ -72,11 +75,6 @@ public: // Serialization
      * @return Variant map representation of the serializable object
      */
     QVariantMap toVariantMap() const override;
-
-private:
-
-    /** Resets the docking layout to defaults */
-    void reset();
 
     friend class ViewPluginsDockWidget;
 };

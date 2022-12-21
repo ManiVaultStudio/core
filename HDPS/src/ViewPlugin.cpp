@@ -15,15 +15,14 @@ namespace hdps::plugin
 ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
     _widget(),
-    _editActionsAction(nullptr, "Edit..."),
-    _screenshotAction(nullptr, "Screenshot..."),
-    _isolateAction(nullptr, "Isolate"),
-    _mayCloseAction(nullptr, "May close", true, true),
-    _mayFloatAction(nullptr, "May float", true, true),
-    _mayMoveAction(nullptr, "May move", true, true),
-    _visibleAction(nullptr, "Visible", true, true),
-    _helpAction(nullptr, "Trigger help"),
-    _removeAction(nullptr, "Remove")
+    _editActionsAction(&_widget, "Edit..."),
+    _screenshotAction(&_widget, "Screenshot..."),
+    _isolateAction(&_widget, "Isolate"),
+    _mayCloseAction(this, "May close", true, true),
+    _mayFloatAction(this, "May float", true, true),
+    _mayMoveAction(this, "May move", true, true),
+    _visibleAction(this, "Visible", true, true),
+    _helpAction(this, "Trigger help")
 {
     setText(getGuiName());
 
@@ -85,12 +84,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
     _helpAction.setConnectionPermissionsToNone();
-    
-    _removeAction.setToolTip(QString("Remove %1").arg(getGuiName()));
-    _removeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
-    _removeAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _removeAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
-    _removeAction.setConnectionPermissionsToNone();
 
     connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
         ProjectEditorDialog viewPluginEditorDialog(nullptr, this);
@@ -107,10 +100,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
     connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
         getTriggerHelpAction().trigger();
-    });
-
-    connect(&_removeAction, &TriggerAction::triggered, this, [this]() -> void {
-        Application::core()->getPluginManager().destroyPlugin(this);
     });
 
     connect(&getGuiNameAction(), &StringAction::stringChanged, this, [this](const QString& guiName) -> void {

@@ -70,7 +70,7 @@ public: // Plugin creation/destruction
      */
     void destroyPlugin(plugin::Plugin* plugin) override;
 
-public: // Plugin factories getters
+public: // Plugin factory
 
     /**
      * Get plugin factory from \p pluginKind

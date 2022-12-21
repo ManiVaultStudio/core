@@ -77,8 +77,7 @@ void ViewPluginDockWidget::initialize()
         if (plugin != _viewPlugin)
             return;
 
-        
-        setWidget(nullptr);
+        takeWidget();
     });
 }
 
@@ -161,7 +160,7 @@ void ViewPluginDockWidget::initializeSettingsMenu()
     _settingsMenu.addSeparator();
 
 #ifdef _DEBUG
-    _settingsMenu.addAction(&_viewPlugin->getRemoveAction());
+    _settingsMenu.addAction(&_viewPlugin->getDestroyAction());
 #endif
     
     _settingsMenu.addAction(&_viewPlugin->getEditActionsAction());
@@ -223,8 +222,4 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
     connectToViewPluginVisibleAction(this);
 
     initializeSettingsMenu();
-
-    _viewPlugin->setParent(nullptr);
-
-    qDebug() << _viewPlugin->objectName();
 }

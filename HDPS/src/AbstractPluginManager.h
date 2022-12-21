@@ -88,7 +88,7 @@ public: // Plugin creation/destruction
      */
     virtual void destroyPlugin(plugin::Plugin* plugin) = 0;
     
-public: // Plugin factories getters
+public: // Plugin factory
 
     /**
      * Get plugin factory from \p pluginKind

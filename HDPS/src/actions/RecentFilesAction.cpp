@@ -197,8 +197,6 @@ void RecentFilesAction::Model::addRecentFilePath(const QString& filePath)
 
 void RecentFilesAction::Model::removeRecentFilePath(const QString& filePath)
 {
-
-
     auto recentFilePaths = Application::current()->getSetting(_recentFilePathsAction->getSettingsKey(), QVariantList()).toList();
 
     QVariantList recentFilePathsToKeep;

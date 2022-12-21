@@ -25,7 +25,6 @@ void LoggingPlugin::init()
 
     getWidget().setLayout(layout);
     getWidget().setWindowTitle("Logging");
-    getWidget().setFixedHeight(100);
 }
 
 LoggingPluginFactory::LoggingPluginFactory() :

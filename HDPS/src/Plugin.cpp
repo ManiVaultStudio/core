@@ -5,10 +5,10 @@
     #define PLUGIN_VERBOSE
 #endif
 
+using namespace hdps::gui;
+
 namespace hdps::plugin
 {
-
-QMap<QString, std::int32_t> hdps::plugin::Plugin::noInstances = QMap<QString, std::int32_t>();
 
 Plugin::Plugin(const PluginFactory* factory) :
     WidgetAction(nullptr),
@@ -17,15 +17,22 @@ Plugin::Plugin(const PluginFactory* factory) :
     _name(getKind() + QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _properties(),
     _eventListener(),
-    _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), QString::number(noInstances[getKind()] + 1)))
+    _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), QString::number(factory->getNumberOfInstances() + 1))),
+    _destroyAction(this, "Remove")
 {
-    noInstances[getKind()]++;
-
     _eventListener.setEventCore(Application::core());
 
     _guiNameAction.setConnectionPermissionsToNone();
     _guiNameAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
     _guiNameAction.setPlaceHolderString("Enter plugin name here...");
+
+    _destroyAction.setToolTip(QString("Remove %1").arg(getGuiName()));
+    _destroyAction.setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
+    _destroyAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _destroyAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _destroyAction.setConnectionPermissionsToNone();
+
+    connect(&_destroyAction, &TriggerAction::triggered, this, &Plugin::destroy);
 }
 
 Plugin::~Plugin()
@@ -132,14 +139,9 @@ QVariantMap Plugin::toVariantMap() const
     };
 }
 
-std::uint32_t Plugin::getNumberOfInstances(const QString& pluginKind)
+void Plugin::destroy()
 {
-    return Plugin::noInstances[pluginKind];
-}
-
-hdps::gui::StringAction& Plugin::getGuiNameAction()
-{
-    return _guiNameAction;
+    Application::core()->getPluginManager().destroyPlugin(this);
 }
 
 }
