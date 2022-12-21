@@ -54,6 +54,13 @@ public:
     ads::CDockAreaWidget* findDockAreaWidget(QWidget* widget);
 
     /**
+     * Find the dock area widget where the widget of \p viewPlugin resides
+     * @param viewPlugin Pointer to view plugin that holds the widget
+     * @return Pointer to ADS dock widget area (if found, otherwise nullptr)
+     */
+    ads::CDockAreaWidget* findDockAreaWidget(hdps::plugin::ViewPlugin* viewPlugin);
+
+    /**
      * Remove \p viewPlugin from the dock manager
      * @param viewPlugin Pointer to the view plugin to remove
      */

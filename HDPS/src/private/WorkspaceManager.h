@@ -146,16 +146,16 @@ private:
     void createIcon();
 
 private:
-    QScopedPointer<DockManager>         _mainDockManager;               /** Main dock manager for docking system view plugins */
-    QScopedPointer<DockManager>         _viewPluginsdockManager;        /** Main dock manager for non-system view plugins */
-    //QPointer<ViewPluginsDockWidget>     _viewPluginsWidget;             /** Pointer to view plugins widget in which non-system view plugins are docked */
-    QMap<DockWidget*, bool>             _cachedDockWidgetsVisibility;   /** Cached dock widgets visibility for view plugin isolation */
-    hdps::gui::TriggerAction            _newWorkspaceAction;            /** Action for creating a workspace */
-    hdps::gui::TriggerAction            _loadWorkspaceAction;           /** Action for loading a workspace from file */
-    hdps::gui::TriggerAction            _saveWorkspaceAction;           /** Action for saving the current workspace to file */
-    hdps::gui::TriggerAction            _saveWorkspaceAsAction;         /** Action for saving the current workspace to file with a different path */
-    hdps::gui::RecentFilesAction        _recentWorkspacesAction;        /** Action for saving the current workspace to file with a different path */
-    QIcon                               _icon;                          /** Manager icon */
+    QPointer<DockManager>               _mainDockManager;                   /** Dock manager for docking system view plugins */
+    QPointer<DockManager>               _viewPluginsDockManager;            /** Dock manager for docking non-system view plugins */
+    QPointer<ViewPluginsDockWidget>     _viewPluginsDockWidget;             /** Pointer to view plugins dock widget in which non-system view plugins are docked */
+    QMap<DockWidget*, bool>             _cachedDockWidgetsVisibility;       /** Cached dock widgets visibility for view plugin isolation */
+    hdps::gui::TriggerAction            _newWorkspaceAction;                /** Action for creating a workspace */
+    hdps::gui::TriggerAction            _loadWorkspaceAction;               /** Action for loading a workspace from file */
+    hdps::gui::TriggerAction            _saveWorkspaceAction;               /** Action for saving the current workspace to file */
+    hdps::gui::TriggerAction            _saveWorkspaceAsAction;             /** Action for saving the current workspace to file with a different path */
+    hdps::gui::RecentFilesAction        _recentWorkspacesAction;            /** Action for saving the current workspace to file with a different path */
+    QIcon                               _icon;                              /** Manager icon */
 };
 
 }

@@ -2,6 +2,10 @@
 
 #include <util/Serialization.h>
 
+#include <Application.h>
+#include <AbstractPluginManager.h>
+#include <Plugin.h>
+
 #include "DockAreaWidget.h"
 
 #include <QVBoxLayout>
@@ -12,60 +16,40 @@
 
 using namespace ads;
 
+using namespace hdps;
 using namespace hdps::plugin;
 using namespace hdps::util;
 using namespace hdps::gui;
 
-ViewPluginsDockWidget::ViewPluginsDockWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    _dockManager(this),
+ViewPluginsDockWidget::ViewPluginsDockWidget(QPointer<DockManager> dockManager, QWidget* parent /*= nullptr*/) :
+    CDockWidget("View plugins", parent),
+    _dockManager(dockManager),
     _centralDockWidget("Central dock widget"),
     _logoWidget()
 {
-    //_dockManager.setConfigFlag(CDockManager::FocusHighlighting, true);
-    _dockManager.setObjectName("ViewPluginsDockManager");
-
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(&_dockManager);
+    layout->addWidget(_dockManager);
 
     setLayout(layout);
 
-    //_centralDockWidget.setWidget(&_logoWidget);
+    _centralDockWidget.setWidget(&_logoWidget);
 
-    _dockManager.setCentralWidget(&_centralDockWidget);
+    _dockManager->setCentralWidget(&_centralDockWidget);
 
-    connect(&_dockManager, &CDockManager::dockAreasAdded, this, &ViewPluginsDockWidget::updateCentralWidget);
-    connect(&_dockManager, &CDockManager::dockAreasRemoved, this, &ViewPluginsDockWidget::updateCentralWidget);
-    connect(&_dockManager, &CDockManager::dockWidgetAdded, this, &ViewPluginsDockWidget::dockWidgetAdded);
-    connect(&_dockManager, &CDockManager::dockWidgetAboutToBeRemoved, this, &ViewPluginsDockWidget::dockWidgetAboutToBeRemoved);
-    connect(&_dockManager, &CDockManager::focusedDockWidgetChanged, this, &ViewPluginsDockWidget::updateCentralWidget);
-}
+    connect(_dockManager, &CDockManager::dockAreasAdded, this, &ViewPluginsDockWidget::updateCentralWidget);
+    connect(_dockManager, &CDockManager::dockAreasRemoved, this, &ViewPluginsDockWidget::updateCentralWidget);
+    connect(_dockManager, &CDockManager::dockWidgetAdded, this, &ViewPluginsDockWidget::dockWidgetAdded);
+    connect(_dockManager, &CDockManager::dockWidgetAboutToBeRemoved, this, &ViewPluginsDockWidget::dockWidgetAboutToBeRemoved);
+    connect(_dockManager, &CDockManager::focusedDockWidgetChanged, this, &ViewPluginsDockWidget::updateCentralWidget);
 
-DockManager& ViewPluginsDockWidget::getDockManager()
-{
-    return _dockManager;
-}
+    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
+        const auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
 
-const DockManager& ViewPluginsDockWidget::getDockManager() const
-{
-    return const_cast<ViewPluginsDockWidget*>(this)->_dockManager;
-}
-
-void ViewPluginsDockWidget::addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget, hdps::plugin::ViewPlugin* dockToViewPlugin, hdps::gui::DockAreaFlag dockArea)
-{
-    Q_ASSERT(viewPluginDockWidget != nullptr);
-
-    auto dockAreaWidget = findDockAreaWidget(dockToViewPlugin);
-
-#ifdef VIEW_PLUGINS_DOCK_WIDGET_VERBOSE
-    qDebug() << __FUNCTION__ << dockAreaWidget << dockAreaMap.key(dockArea);
-#endif
-
-    _dockManager.addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockAreaWidget);
-
-    updateCentralWidget();
+        if (viewPlugin && !viewPlugin->isSystemViewPlugin())
+            _dockManager->removeViewPluginDockWidget(viewPlugin);
+    });
 }
 
 void ViewPluginsDockWidget::updateCentralWidget()
@@ -81,19 +65,11 @@ std::int32_t ViewPluginsDockWidget::getNumberOfOpenViewPluginDockWidgets() const
 {
     std::int32_t numberOfOpenViewPluginDockWidgets = 0;
     
-    for (auto dockWidget : _dockManager.dockWidgets())
+    for (auto dockWidget : _dockManager->dockWidgets())
         if (qobject_cast<ViewPluginDockWidget*>(dockWidget) && !dockWidget->isClosed())
             numberOfOpenViewPluginDockWidgets++;
 
     return numberOfOpenViewPluginDockWidgets;
-}
-
-ads::CDockAreaWidget* ViewPluginsDockWidget::findDockAreaWidget(ViewPlugin* viewPlugin)
-{
-    if (viewPlugin == nullptr)
-        return nullptr;
-
-    return _dockManager.findDockAreaWidget(&viewPlugin->getWidget());
 }
 
 void ViewPluginsDockWidget::dockWidgetAdded(ads::CDockWidget* dockWidget)

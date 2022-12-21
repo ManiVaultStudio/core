@@ -109,7 +109,7 @@ namespace hdps
 WorkspaceManager::WorkspaceManager() :
     AbstractWorkspaceManager(),
     _mainDockManager(),
-    //_viewPluginsWidget(),
+    _viewPluginsDockWidget(),
     _cachedDockWidgetsVisibility(),
     _loadWorkspaceAction(this, "Load"),
     _newWorkspaceAction(this, "New"),
@@ -198,30 +198,25 @@ void WorkspaceManager::initalize()
 
     beginInitialization();
     {
-        _mainDockManager.reset(new DockManager());
-        //_viewPluginsdockManager = new DockManager(widget);
-        //_viewPluginsWidget  = new ViewPluginsDockWidget(_mainDockManager);
+        _mainDockManager        = new DockManager();
+        _viewPluginsDockManager = new DockManager();
+        _viewPluginsDockWidget      = new ViewPluginsDockWidget(_viewPluginsDockManager);
 
+        _mainDockManager->setConfigFlag(CDockManager::FocusHighlighting, true);
         _mainDockManager->setObjectName("MainDockManager");
 
-        auto dw = new CDockWidget("View plugins central dock widget");
+        _viewPluginsDockManager->setConfigFlag(CDockManager::FocusHighlighting, true);
+        _viewPluginsDockManager->setObjectName("ViewPluginsDockManager");
 
-        //dw->setWidget(_viewPluginsWidget);
+        auto viewPluginsDockArea = _mainDockManager->setCentralWidget(_viewPluginsDockWidget.get());
 
-        auto viewPluginsDockArea = _mainDockManager->setCentralWidget(dw);
-
-        //viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
+        viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
 
         connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
             const auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
 
-            if (!viewPlugin)
-                return;
-
-            if (viewPlugin->isSystemViewPlugin())
+            if (viewPlugin && viewPlugin->isSystemViewPlugin())
                 _mainDockManager->removeViewPluginDockWidget(viewPlugin);
-            //else
-            //    _viewPluginsWidget->getDockManager().removeViewPluginDockWidget(viewPlugin);
         });
 
         connect(&Application::core()->getProjectManager(), &AbstractProjectManager::projectCreated, this, [this]() -> void {
@@ -358,29 +353,29 @@ void WorkspaceManager::saveWorkspaceAs()
 void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 {
     
-    variantMapMustContain(variantMap, "DockingManagers");
+    variantMapMustContain(variantMap, "DockManagers");
 
-    const auto dockingManagersMap = variantMap["DockingManagers"].toMap();
+    const auto dockingManagersMap = variantMap["DockManagers"].toMap();
 
     variantMapMustContain(dockingManagersMap, "Main");
-    //variantMapMustContain(dockingManagersMap, "ViewPlugins");
+    variantMapMustContain(dockingManagersMap, "ViewPlugins");
         
     _mainDockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
-    //_viewPluginsDockWidget.getDockManager().fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
+    _viewPluginsDockManager->fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
 }
 
 QVariantMap WorkspaceManager::toVariantMap() const
 {
     const auto mainDockingManager           = _mainDockManager->toVariantMap();
-    //const auto viewPluginsDockingManager    = _viewPluginsDockWidget.getDockManager().toVariantMap();
+    const auto viewPluginsDockingManager    = _viewPluginsDockManager->toVariantMap();
 
-    const QVariantMap dockingManagers = {
+    const QVariantMap dockManagers = {
         { "Main", mainDockingManager },
-        //{ "ViewPlugins", viewPluginsDockingManager }
+        { "ViewPlugins", viewPluginsDockingManager }
     };
 
     return {
-        { "DockingManagers", dockingManagers }
+        { "DockManagers", dockManagers }
     };
 }
 
@@ -388,13 +383,10 @@ void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::Vie
 {
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
-    if (viewPlugin->isSystemViewPlugin()) {
+    if (viewPlugin->isSystemViewPlugin())
         _mainDockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _mainDockManager->findDockAreaWidget(dockToViewPlugin ? &dockToViewPlugin->getWidget() : nullptr));
-
-    }
-        
-    //else
-    //    _viewPluginsWidget->addViewPlugin(viewPluginDockWidget, dockToViewPlugin, dockArea);
+    else
+        _viewPluginsDockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _viewPluginsDockManager->findDockAreaWidget(dockToViewPlugin));
 }
 
 void WorkspaceManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate)

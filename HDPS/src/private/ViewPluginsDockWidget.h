@@ -1,5 +1,7 @@
 #pragma once
 
+#include <DockWidget.h>
+
 #include "CentralDockWidget.h"
 #include "LogoWidget.h"
 #include "DockManager.h"
@@ -16,7 +18,7 @@
  *
  * @author Thomas Kroes
  */
-class ViewPluginsDockWidget : public QWidget
+class ViewPluginsDockWidget : public ads::CDockWidget
 {
     Q_OBJECT
 
@@ -24,29 +26,10 @@ public:
 
     /**
      * Constructor
+     * @param dockManager Pointer to docking manager owned by the workspace manager
      * @param parent Pointer to parent widget
      */
-    ViewPluginsDockWidget(QWidget* parent = nullptr);
-
-    /**
-     * Get dock manager
-     * @return Reference to the dock manager
-     */
-    DockManager& getDockManager();
-
-    /**
-     * Get dock manager
-     * @return Reference to the dock manager
-     */
-    const DockManager& getDockManager() const;
-
-    /**
-     * Add view plugin
-     * @param viewPluginDockWidget Pointer to view plugin dock widget
-     * @param dockViewPlugin Pointer to view plugin to which the dock widget will be docked (docked top-level if nullptr)
-     * @param dockArea Dock area in which the dock widget will be docked
-     */
-    void addViewPlugin(ViewPluginDockWidget* viewPluginDockWidget, hdps::plugin::ViewPlugin* dockToViewPlugin, hdps::gui::DockAreaFlag dockArea);
+    ViewPluginsDockWidget(QPointer<DockManager> dockManager, QWidget* parent = nullptr);
 
 private:
 
@@ -58,13 +41,6 @@ private:
      * @return Number of open view plugin dock widgets
      */
     std::int32_t getNumberOfOpenViewPluginDockWidgets() const;
-
-    /**
-     * Find the dock area widget where the widget of \p viewPlugin resides
-     * @param viewPlugin Pointer to view plugin that holds the widget
-     * @return Pointer to ADS dock widget area (if found, otherwise nullptr)
-     */
-    ads::CDockAreaWidget* findDockAreaWidget(hdps::plugin::ViewPlugin* viewPlugin);
 
     /**
      * Invoked when a dock widget is added
@@ -79,7 +55,7 @@ private:
     void dockWidgetAboutToBeRemoved(ads::CDockWidget* dockWidget);
 
 private:
-    DockManager         _dockManager;           /** Dock manager for docking of view plugins */
-    ads::CDockWidget    _centralDockWidget;     /** Central dock widget (show when no view plugins are visible) */
-    LogoWidget          _logoWidget;            /** Logo widget for logo dock widget */
+    QPointer<DockManager>   _dockManager;           /** Dock manager for docking of view plugins */
+    ads::CDockWidget        _centralDockWidget;     /** Central dock widget (show when no view plugins are visible) */
+    LogoWidget              _logoWidget;            /** Logo widget for logo dock widget */
 };

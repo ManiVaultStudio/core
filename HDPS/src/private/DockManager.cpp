@@ -75,6 +75,14 @@ ads::CDockAreaWidget* DockManager::findDockAreaWidget(QWidget* widget)
     return nullptr;
 }
 
+ads::CDockAreaWidget* DockManager::findDockAreaWidget(hdps::plugin::ViewPlugin* viewPlugin)
+{
+    if (viewPlugin == nullptr)
+        return nullptr;
+
+    return findDockAreaWidget(&viewPlugin->getWidget());
+}
+
 void DockManager::removeViewPluginDockWidget(ViewPlugin* viewPlugin)
 {
 #ifdef DOCK_MANAGER_VERBOSE
