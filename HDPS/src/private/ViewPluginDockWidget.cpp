@@ -19,6 +19,8 @@ using namespace hdps::plugin;
 using namespace hdps::util;
 using namespace hdps::gui;
 
+QList<ViewPluginDockWidget*> ViewPluginDockWidget::active = QList<ViewPluginDockWidget*>();
+
 ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidget* parent /*= nullptr*/) :
     DockWidget(title, parent),
     _viewPlugin(nullptr),
@@ -27,6 +29,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
     _settingsMenu(),
     _helpAction(this, "Help")
 {
+    active << this;
+
     setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
 
     _helpAction.setIcon(Application::getIconFont("FontAwesome").getIcon("question"));
@@ -40,6 +44,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
     });
 
     getInfoOverlayWidget().show();
+
+    initialize();
 }
 
 ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* viewPlugin, QWidget* parent /*= nullptr*/) :
@@ -49,6 +55,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
     _viewPluginMap(),
     _helpAction(this, "Help")
 {
+    active << this;
+
     initialize();
     setViewPlugin(viewPlugin);
     initializeSettingsMenu();
@@ -61,9 +69,15 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QVariantMap& variantMap) :
     _viewPluginMap(),
     _helpAction(this, "Help")
 {
+    active << this;
+
     initialize();
     fromVariantMap(variantMap);
     setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
+}
+
+ViewPluginDockWidget::~ViewPluginDockWidget()
+{
 }
 
 QString ViewPluginDockWidget::getTypeString() const
@@ -74,6 +88,10 @@ QString ViewPluginDockWidget::getTypeString() const
 void ViewPluginDockWidget::initialize()
 {
     connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
+        for (auto viewPluginDockWidget : active)
+            if (viewPluginDockWidget->getViewPlugin() == plugin)
+                active.removeOne(this);
+
         if (plugin != _viewPlugin)
             return;
 
@@ -145,6 +163,16 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
         variantMap["ViewPlugin"] = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin()->toVariantMap();
 
     return variantMap;
+}
+
+void ViewPluginDockWidget::cacheVisibility()
+{
+    _cachedVisibility = !isClosed();
+}
+
+void ViewPluginDockWidget::restoreVisibility()
+{
+    toggleView(_cachedVisibility);
 }
 
 void ViewPluginDockWidget::initializeSettingsMenu()

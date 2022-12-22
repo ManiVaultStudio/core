@@ -135,6 +135,8 @@ void RecentFilesAction::Model::loadFromSettings()
 
     const auto recentFilePaths = Application::current()->getSetting(_recentFilePathsAction->getSettingsKey(), QVariantList()).toList();
 
+    std::int32_t shortcutIndex = 0;
+
     for (const auto& recentFilePath : recentFilePaths) {
         const auto filePath = recentFilePath.toMap()["FilePath"].toString();
         const auto dateTime = recentFilePath.toMap()["DateTime"].toDateTime();
@@ -154,7 +156,7 @@ void RecentFilesAction::Model::loadFromSettings()
         recentFilePathAction->setIcon(_recentFilePathsAction->getIcon());
 
         if (!_recentFilePathsAction->getShortcutPrefix().isEmpty())
-            recentFilePathAction->setShortcut(QKeySequence(QString("%1+%2").arg(_recentFilePathsAction->getShortcutPrefix(), QString::number(recentFilePaths.indexOf(recentFilePath) + 1))));
+            recentFilePathAction->setShortcut(QKeySequence(QString("%1+%2").arg(_recentFilePathsAction->getShortcutPrefix(), QString::number(shortcutIndex))));
 
         auto mainWindow = Application::topLevelWidgets().first();
 
@@ -165,6 +167,8 @@ void RecentFilesAction::Model::loadFromSettings()
         });
 
         _actions << recentFilePathAction;
+
+        shortcutIndex++;
     }
 
     for (const auto& column : columnInfo.keys()) {

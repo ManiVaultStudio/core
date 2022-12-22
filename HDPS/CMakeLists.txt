@@ -92,6 +92,7 @@ set(PRIVATE_WORKSPACE_MANAGER_HEADERS
     src/private/ViewPluginDockWidget.h
     src/private/CentralDockWidget.h
     src/private/DockWidget.h
+    src/private/DockAreaTitleBar.h
 )
 
 set(PRIVATE_WORKSPACE_MANAGER_SOURCES
@@ -102,6 +103,7 @@ set(PRIVATE_WORKSPACE_MANAGER_SOURCES
     src/private/ViewPluginDockWidget.cpp
     src/private/CentralDockWidget.cpp
     src/private/DockWidget.cpp
+    src/private/DockAreaTitleBar.cpp
 )
 
 set(PRIVATE_WORKSPACE_MANAGER_FILES

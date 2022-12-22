@@ -54,8 +54,23 @@ private:
      */
     void dockWidgetAboutToBeRemoved(ads::CDockWidget* dockWidget);
 
+public: // Cache and restore visibility for view plugin isolation
+
+    /**
+     * Set \p viewPlugin isolation to \p isolate
+     * @param viewPlugin View plugin to isolate
+     * @param isolate Whether to isolate the view plugin or not
+     */
+    static void isolate(hdps::plugin::ViewPlugin* viewPlugin, bool isolate);
+
+    /** Caches the visibility of each view plugin */
+    static void cacheVisibility();
+
+    /** Restores the visibility of each view plugin */
+    static void restoreVisibility();
+
 private:
-    QPointer<DockManager>   _dockManager;           /** Dock manager for docking of view plugins */
-    ads::CDockWidget        _centralDockWidget;     /** Central dock widget (show when no view plugins are visible) */
-    LogoWidget              _logoWidget;            /** Logo widget for logo dock widget */
+    QPointer<DockManager>           _dockManager;                   /** Dock manager for docking of view plugins */
+    ads::CDockWidget                _centralDockWidget;             /** Central dock widget (show when no view plugins are visible) */
+    LogoWidget                      _logoWidget;                    /** Logo widget for logo dock widget */
 };

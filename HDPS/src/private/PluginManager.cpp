@@ -348,9 +348,9 @@ void PluginManager::destroyPlugin(plugin::Plugin* plugin)
 
             pluginFactory->setNumberOfInstances(pluginFactory->getNumberOfInstances() - 1);
 
-            delete plugin;
-
             _plugins.removeOne(plugin);
+
+            delete plugin;
         }
         emit pluginDestroyed(pluginId);
     }

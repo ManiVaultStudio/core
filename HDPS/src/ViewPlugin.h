@@ -64,6 +64,18 @@ public:
      */
     virtual void createScreenshot();
 
+    /**
+     * Get shortcut for triggering the plugin
+     * @return Shortcut key sequence
+     */
+    virtual QKeySequence getTriggerShortcut() const final;
+
+    /**
+     * Set shortcut for triggering the plugin
+     * @param keySequence Shortcut key sequence
+     */
+    virtual void setTriggerShortcut(const QKeySequence& keySequence) final;
+
 public: // Action getters
 
     gui::TriggerAction& getEditActionsAction() { return _editActionsAction; }
@@ -84,6 +96,7 @@ private:
     gui::ToggleAction       _mayMoveAction;         /** Action for toggling whether a view plugin may be moved */
     gui::ToggleAction       _visibleAction;         /** Action which determines whether the view plugin is visible or not */
     gui::TriggerAction      _helpAction;            /** Action which triggers documentation */
+    QKeySequence            _triggerShortcut;       /** Shortcut for triggering the plugin */
 };
 
 class ViewPluginFactory : public PluginFactory

@@ -40,6 +40,9 @@ public:
      */
     ViewPluginDockWidget(const QVariantMap& variantMap);
 
+    /** Destructor (needed to update the active dock widgets) */
+    ~ViewPluginDockWidget();
+
     /**
      * Get string that describes the dock widget type
      * @return Type string
@@ -64,6 +67,9 @@ public:
      */
     QMenu* getSettingsMenu() override;
 
+
+    void resetActive();
+
 public: // Serialization
 
     /**
@@ -78,6 +84,14 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+public: // View plugin isolation
+
+    /** Caches the visibility */
+    void cacheVisibility();
+
+    /** Restores the visibility */
+    void restoreVisibility();
+
 private:
 
     /** Populates the settings menu with actions from the view plugin */
@@ -90,11 +104,18 @@ private:
     void setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin);
 
 private:
-    hdps::plugin::ViewPlugin*   _viewPlugin;        /** Pointer to view plugin */
-    QString                     _viewPluginKind;    /** Kind of (view) plugin */
-    QVariantMap                 _viewPluginMap;     /** View plugin cached map for deferred loading */
-    QMenu                       _settingsMenu;      /** Menu for view plugin settings */
-    hdps::gui::TriggerAction    _helpAction;        /** Action for triggering help */
+    hdps::plugin::ViewPlugin*   _viewPlugin;            /** Pointer to view plugin */
+    QString                     _viewPluginKind;        /** Kind of (view) plugin */
+    QVariantMap                 _viewPluginMap;         /** View plugin cached map for deferred loading */
+    QMenu                       _settingsMenu;          /** Menu for view plugin settings */
+    hdps::gui::TriggerAction    _helpAction;            /** Action for triggering help */
+    bool                        _cachedVisibility;      /** Cached visibility for view plugin isolation */
+
+protected:
+    static QList<ViewPluginDockWidget*> active;  /** Loaded view plugin dock widgets */
+
+    friend class ViewPluginsDockWidget;
+    friend class WorkspaceManager;
 };
 
 using ViewPluginDockWidgets = QVector<QPointer<ViewPluginDockWidget>>;

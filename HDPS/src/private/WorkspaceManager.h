@@ -28,7 +28,7 @@ namespace hdps
  * 
  * It uses two ADS dock managers:
  * - One for the main layout (\p _dockManager) 
- * - One for the docking of non-system view plugins in the central area dock widget (\p _viewPluginsDockWidget)
+ * - One for the docking of non-system view plugins in the central area dock widget (\p _viewPluginsDockManager)
  * 
  * @author Thomas Kroes
  */
@@ -60,7 +60,7 @@ public:
     /** Perform manager startup initialization */
     void initalize() override;
 
-    /** Resets the contents of the layout manager */
+    /** Resets the contents of the workspace manager */
     void reset() override;
 
     /**
@@ -89,8 +89,9 @@ public: // IO
     /**
      * Load a workspace from disk
      * @param filePath File path of the existing workspace (choose file path with dialog when empty)
+     * @param addToRecentWorkspaces Whether to add the workspace file path to the recent workspace file paths
      */
-    void loadWorkspace(QString filePath = "") override;
+    void loadWorkspace(QString filePath = "", bool addToRecentWorkspaces = true) override;
 
     /**
      * Save a workspace to disk
@@ -114,22 +115,6 @@ public: // Serialization
      * @return Variant representation of the layout
      */
     QVariantMap toVariantMap() const override;
-
-public: // Menus
-
-    /**
-     * Get view menu
-     * @param options Menu options
-     * @param dockAreaWidget Menu options
-     * @param options Pointer to dock area widget to which new view plugins are docked (new view plugins will be docked top-level if nullptr)
-     * @return Pointer to created menu
-     */
-    //QMenu* getViewMenu(const ViewMenuOptions& options = ViewMenuOption::Default, ads::CDockAreaWidget* dockAreaWidget = nullptr);
-
-public: // Miscellaneous
-
-    /** Get all view plugin dock widgets, both from the main and the view plugins dock widget dock managers */
-    ViewPluginDockWidgets getViewPluginDockWidgets();
 
 public: // Menus
 
@@ -162,7 +147,6 @@ private:
     QPointer<DockManager>               _mainDockManager;                   /** Dock manager for docking system view plugins */
     QPointer<DockManager>               _viewPluginsDockManager;            /** Dock manager for docking non-system view plugins */
     QPointer<ViewPluginsDockWidget>     _viewPluginsDockWidget;             /** Pointer to view plugins dock widget in which non-system view plugins are docked */
-    QMap<DockWidget*, bool>             _cachedDockWidgetsVisibility;       /** Cached dock widgets visibility for view plugin isolation */
     hdps::gui::TriggerAction            _newWorkspaceAction;                /** Action for creating a workspace */
     hdps::gui::TriggerAction            _loadWorkspaceAction;               /** Action for loading a workspace from file */
     hdps::gui::TriggerAction            _saveWorkspaceAction;               /** Action for saving the current workspace to file */

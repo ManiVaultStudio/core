@@ -27,29 +27,26 @@ ViewPluginsDockWidget::ViewPluginsDockWidget(QPointer<DockManager> dockManager, 
     _centralDockWidget("Central dock widget"),
     _logoWidget()
 {
-    //auto layout = new QVBoxLayout();
+    auto widget = new QWidget();
+    auto layout = new QVBoxLayout();
 
-    //layout->setContentsMargins(0, 0, 0, 0);
-    //layout->addWidget(_dockManager);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(_dockManager);
 
-    //setLayout(layout);
+    widget->setLayout(layout);
 
-    _centralDockWidget.setWidget(_dockManager.get());
+    setWidget(widget);
 
-    //_dockManager->setCentralWidget(&_centralDockWidget);
+    _centralDockWidget.setWidget(&_logoWidget);
+
+    _dockManager->setCentralWidget(&_centralDockWidget);
 
     connect(_dockManager, &CDockManager::dockAreasAdded, this, &ViewPluginsDockWidget::updateCentralWidget);
     connect(_dockManager, &CDockManager::dockAreasRemoved, this, &ViewPluginsDockWidget::updateCentralWidget);
     connect(_dockManager, &CDockManager::dockWidgetAdded, this, &ViewPluginsDockWidget::dockWidgetAdded);
     connect(_dockManager, &CDockManager::dockWidgetAboutToBeRemoved, this, &ViewPluginsDockWidget::dockWidgetAboutToBeRemoved);
     connect(_dockManager, &CDockManager::focusedDockWidgetChanged, this, &ViewPluginsDockWidget::updateCentralWidget);
-
-    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
-        const auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
-
-        if (viewPlugin && !viewPlugin->isSystemViewPlugin())
-            _dockManager->removeViewPluginDockWidget(viewPlugin);
-    });
+    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginDestroyed, this, &ViewPluginsDockWidget::updateCentralWidget);
 }
 
 void ViewPluginsDockWidget::updateCentralWidget()
@@ -65,8 +62,8 @@ std::int32_t ViewPluginsDockWidget::getNumberOfOpenViewPluginDockWidgets() const
 {
     std::int32_t numberOfOpenViewPluginDockWidgets = 0;
     
-    for (auto dockWidget : _dockManager->dockWidgets())
-        if (qobject_cast<ViewPluginDockWidget*>(dockWidget) && !dockWidget->isClosed())
+    for (auto viewPluginDockWidget : ViewPluginDockWidget::active)
+        if (!viewPluginDockWidget->getViewPlugin()->isSystemViewPlugin() && !viewPluginDockWidget->isClosed())
             numberOfOpenViewPluginDockWidgets++;
 
     return numberOfOpenViewPluginDockWidgets;
@@ -102,4 +99,33 @@ void ViewPluginsDockWidget::dockWidgetAboutToBeRemoved(ads::CDockWidget* dockWid
     disconnect(dockWidget, &CDockWidget::viewToggled, this, nullptr);
     disconnect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, this, nullptr);
     disconnect(dockWidget, &CDockWidget::topLevelChanged, this, nullptr);
+}
+
+void ViewPluginsDockWidget::isolate(plugin::ViewPlugin* viewPlugin, bool isolate)
+{
+    if (viewPlugin->isSystemViewPlugin())
+        return;
+
+    if (isolate) {
+        cacheVisibility();
+
+        for (auto viewPluginDockWidget : ViewPluginDockWidget::active)
+            if (viewPlugin != viewPluginDockWidget->getViewPlugin())
+                viewPluginDockWidget->toggleView(false);
+    }
+    else {
+        restoreVisibility();
+    }
+}
+
+void ViewPluginsDockWidget::cacheVisibility()
+{
+    for (auto viewPluginDockWidget : ViewPluginDockWidget::active)
+        viewPluginDockWidget->cacheVisibility();
+}
+
+void ViewPluginsDockWidget::restoreVisibility()
+{
+    for (auto viewPluginDockWidget : ViewPluginDockWidget::active)
+        viewPluginDockWidget->restoreVisibility();
 }

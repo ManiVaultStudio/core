@@ -41,30 +41,37 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _showStartPageAction(nullptr, "Start Page...", true, true)
 {
     _newProjectAction.setShortcut(QKeySequence("Ctrl+N"));
+    _newProjectAction.setShortcutContext(Qt::ApplicationShortcut);
     _newProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
     _newProjectAction.setToolTip("Open project from disk");
 
     _openProjectAction.setShortcut(QKeySequence("Ctrl+O"));
+    _openProjectAction.setShortcutContext(Qt::ApplicationShortcut);
     _openProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
     _openProjectAction.setToolTip("Open project from disk");
 
     _saveProjectAction.setShortcut(QKeySequence("Ctrl+S"));
+    _saveProjectAction.setShortcutContext(Qt::ApplicationShortcut);
     _saveProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveProjectAction.setToolTip("Save project to disk");
 
     _saveProjectAsAction.setShortcut(QKeySequence("Ctrl+Shift+S"));
+    _saveProjectAsAction.setShortcutContext(Qt::ApplicationShortcut);
     _saveProjectAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveProjectAsAction.setToolTip("Save project to disk in a chosen location");
 
     _publishAction.setShortcut(QKeySequence("Ctrl+P"));
+    _publishAction.setShortcutContext(Qt::ApplicationShortcut);
     _publishAction.setIcon(Application::getIconFont("FontAwesome").getIcon("share"));
     _publishAction.setToolTip("Publish the HDPS application");
 
     _pluginManagerAction.setShortcut(QKeySequence("Ctrl+M"));
+    _pluginManagerAction.setShortcutContext(Qt::ApplicationShortcut);
     _pluginManagerAction.setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
     _pluginManagerAction.setToolTip("View loaded plugins");
 
     _showStartPageAction.setShortcut(QKeySequence("Alt+W"));
+    _showStartPageAction.setShortcutContext(Qt::ApplicationShortcut);
     _showStartPageAction.setIcon(Application::getIconFont("FontAwesome").getIcon("door-open"));
     _showStartPageAction.setToolTip("Show the HDPS start page");
 
@@ -253,6 +260,10 @@ void ProjectManager::loadProject(QString filePath /*= ""*/)
 
             Application::core()->getProjectManager().fromJsonFile(inputJsonFileInfo.absoluteFilePath());
 
+            QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
+
+            Application::core()->getWorkspaceManager().loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
+
             taskProgressDialog.setTaskFinished("Import data model");
 
             _recentProjectsAction.addRecentFilePath(filePath);
@@ -408,6 +419,10 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
             connect(&archiver, &Archiver::taskStarted, &taskProgressDialog, &TaskProgressDialog::setCurrentTask);
             connect(&archiver, &Archiver::taskFinished, &taskProgressDialog, &TaskProgressDialog::setTaskFinished);
+
+            QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
+
+            Application::core()->getWorkspaceManager().saveWorkspace(workspaceFileInfo.absoluteFilePath());
 
             archiver.compressDirectory(temporaryDirectoryPath, filePath, true, enableCompression ? compressionLevel : 0, "");
 

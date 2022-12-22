@@ -22,7 +22,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _mayFloatAction(this, "May float", true, true),
     _mayMoveAction(this, "May move", true, true),
     _visibleAction(this, "Visible", true, true),
-    _helpAction(this, "Trigger help")
+    _helpAction(this, "Trigger help"),
+    _triggerShortcut()
 {
     setText(getGuiName());
 
@@ -167,6 +168,16 @@ void ViewPlugin::createScreenshot()
     auto widgetPixmap = getWidget().grab();
 
     widgetPixmap.toImage().save(fileDialog.selectedFiles().first());
+}
+
+QKeySequence ViewPlugin::getTriggerShortcut() const
+{
+    return _triggerShortcut;
+}
+
+void ViewPlugin::setTriggerShortcut(const QKeySequence& keySequence)
+{
+    _triggerShortcut = keySequence;
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :

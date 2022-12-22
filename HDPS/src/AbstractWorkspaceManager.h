@@ -127,8 +127,9 @@ public: // IO
     /**
      * Load a workspace from disk
      * @param filePath File path of the existing workspace (choose file path with dialog when empty)
+     * @param addToRecentWorkspaces Whether to add the workspace file path to the recent workspace file paths
      */
-    virtual void loadWorkspace(QString filePath = "") = 0;
+    virtual void loadWorkspace(QString filePath = "", bool addToRecentWorkspaces = true) = 0;
 
     /**
      * Save a workspace to disk
