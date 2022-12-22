@@ -1,6 +1,7 @@
 #include "ProjectWidget.h"
 
 #include <Application.h>
+#include <AbstractWorkspaceManager.h>
 
 #include <QVBoxLayout>
 

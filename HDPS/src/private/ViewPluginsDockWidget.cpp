@@ -27,16 +27,16 @@ ViewPluginsDockWidget::ViewPluginsDockWidget(QPointer<DockManager> dockManager, 
     _centralDockWidget("Central dock widget"),
     _logoWidget()
 {
-    auto layout = new QVBoxLayout();
+    //auto layout = new QVBoxLayout();
 
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(_dockManager);
+    //layout->setContentsMargins(0, 0, 0, 0);
+    //layout->addWidget(_dockManager);
 
-    setLayout(layout);
+    //setLayout(layout);
 
-    _centralDockWidget.setWidget(&_logoWidget);
+    _centralDockWidget.setWidget(_dockManager.get());
 
-    _dockManager->setCentralWidget(&_centralDockWidget);
+    //_dockManager->setCentralWidget(&_centralDockWidget);
 
     connect(_dockManager, &CDockManager::dockAreasAdded, this, &ViewPluginsDockWidget::updateCentralWidget);
     connect(_dockManager, &CDockManager::dockAreasRemoved, this, &ViewPluginsDockWidget::updateCentralWidget);

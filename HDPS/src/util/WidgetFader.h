@@ -67,6 +67,12 @@ public:
      */
     void setMaximumOpacity(float maximumOpacity);
 
+    /**
+     * Set opacity
+     * @param opacity Opacity
+     */
+    void setOpacity(float opacity);
+
     /** Get fade-in duration */
     std::int32_t getFadeInDuration() const;
 

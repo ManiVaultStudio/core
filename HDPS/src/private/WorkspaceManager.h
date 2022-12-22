@@ -145,6 +145,19 @@ private:
     /** Create custom icon for the manager */
     void createIcon();
 
+    /**
+     * Get a preview image
+     * @return Workspace manager preview image
+     */
+    QImage toPreviewImage() const;
+
+    /**
+     * Get preview image enclosed in \p workspaceFilePath
+     * @param workspaceFilePath Path of the workspace file
+     * @return Preview image
+     */
+    QImage getPreviewImageFromWorkspaceFile(const QString& workspaceFilePath) const;
+
 private:
     QPointer<DockManager>               _mainDockManager;                   /** Dock manager for docking system view plugins */
     QPointer<DockManager>               _viewPluginsDockManager;            /** Dock manager for docking non-system view plugins */

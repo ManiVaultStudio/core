@@ -18,6 +18,4 @@ public:
      * @param parent Pointer to parent widget
      */
     ProjectWidget(QWidget* parent = nullptr);
-
-private:
 };

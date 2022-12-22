@@ -135,4 +135,9 @@ void WidgetFader::setFadeOutDuration(std::int32_t fadeOutDuration)
     _fadeOutDuration = fadeOutDuration;
 }
 
+void WidgetFader::setOpacity(float opacity)
+{
+    _opacityEffect.setOpacity(opacity);
+}
+
 }

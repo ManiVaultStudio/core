@@ -17,6 +17,7 @@
 #include <QPainter>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QBuffer>
 
 #ifdef _DEBUG
     #define WORKSPACE_MANAGER_VERBOSE
@@ -126,7 +127,7 @@ WorkspaceManager::WorkspaceManager() :
     _newWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
     _newWorkspaceAction.setToolTip("Create new workspace");
 
-    _loadWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+O"));
+    _loadWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+L"));
     _loadWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
     _loadWorkspaceAction.setToolTip("Open workspace from disk");
 
@@ -200,7 +201,7 @@ void WorkspaceManager::initalize()
     {
         _mainDockManager        = new DockManager();
         _viewPluginsDockManager = new DockManager();
-        _viewPluginsDockWidget      = new ViewPluginsDockWidget(_viewPluginsDockManager);
+        _viewPluginsDockWidget  = new ViewPluginsDockWidget(_viewPluginsDockManager);
 
         _mainDockManager->setConfigFlag(CDockManager::FocusHighlighting, true);
         _mainDockManager->setObjectName("MainDockManager");
@@ -262,6 +263,21 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/)
                 fileDialog.setNameFilters({ "HDPS workspace files (*.hws)" });
                 fileDialog.setDefaultSuffix(".hws");
                 fileDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+                fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+                fileDialog.setMinimumHeight(700);
+
+                auto fileDialogLayout = dynamic_cast<QGridLayout*>(fileDialog.layout());
+                auto rowCount = fileDialogLayout->rowCount();
+
+                QLabel label("Preview:");
+                QLabel image("");
+
+                fileDialogLayout->addWidget(&label, rowCount, 0);
+                fileDialogLayout->addWidget(&image, rowCount, 1, 1, 2);
+
+                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, &image](const QString& filePath) -> void {
+                    image.setPixmap(QPixmap::fromImage(getPreviewImageFromWorkspaceFile(filePath).scaledToWidth(650, Qt::SmoothTransformation)));
+                });
 
                 if (fileDialog.exec() == 0)
                     return;
@@ -352,7 +368,6 @@ void WorkspaceManager::saveWorkspaceAs()
 
 void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    
     variantMapMustContain(variantMap, "DockManagers");
 
     const auto dockingManagersMap = variantMap["DockManagers"].toMap();
@@ -374,8 +389,14 @@ QVariantMap WorkspaceManager::toVariantMap() const
         { "ViewPlugins", viewPluginsDockingManager }
     };
 
+    QByteArray previewImageByteArray;
+    QBuffer previewImageBuffer(&previewImageByteArray);
+
+    toPreviewImage().save(&previewImageBuffer, "PNG");
+
     return {
-        { "DockManagers", dockManagers }
+        { "DockManagers", dockManagers },
+        { "PreviewImage", QVariant::fromValue(previewImageByteArray.toBase64()) }
     };
 }
 
@@ -473,6 +494,51 @@ void WorkspaceManager::createIcon()
 QWidget* WorkspaceManager::getWidget()
 {
     return _mainDockManager.get();
+}
+
+QImage WorkspaceManager::toPreviewImage() const
+{
+    return _mainDockManager->grab().toImage();
+}
+
+QImage WorkspaceManager::getPreviewImageFromWorkspaceFile(const QString& workspaceFilePath) const
+{
+    QImage previewImage;
+
+    try {
+        if (!QFileInfo(workspaceFilePath).exists())
+            throw std::runtime_error("File does not exist");
+
+        QFile workspaceJsonFile(workspaceFilePath);
+
+        if (!workspaceJsonFile.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Unable to open file for reading");
+
+        QByteArray data = workspaceJsonFile.readAll();
+
+        QJsonDocument jsonDocument;
+
+        jsonDocument = QJsonDocument::fromJson(data);
+
+        if (jsonDocument.isNull() || jsonDocument.isEmpty())
+            throw std::runtime_error("JSON document is invalid");
+
+        const auto workspaceVariantMap = jsonDocument.toVariant().toMap()["Workspace"].toMap();
+
+        previewImage.loadFromData(QByteArray::fromBase64(workspaceVariantMap["PreviewImage"].toByteArray()));
+        
+        return previewImage;
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to retrieve preview image from workspace file", e);
+        return previewImage;
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to retrieve preview image from workspace file");
+        return previewImage;
+    }
 }
 
 }
