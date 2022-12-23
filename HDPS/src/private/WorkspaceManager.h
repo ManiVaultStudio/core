@@ -54,9 +54,6 @@ public:
     /** Default constructor */
     WorkspaceManager();
 
-    /** Default destructor */
-    ~WorkspaceManager() override;
-
     /** Perform manager startup initialization */
     void initalize() override;
 

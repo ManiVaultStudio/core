@@ -26,4 +26,7 @@ public:
      * @param showEvent Pointer to show event
      */
     void showEvent(QShowEvent* showEvent) override;
+
+private:
+    hdps::gui::TriggerAction    _exitApplictionAction;  /** Trigger action to exit the application */
 };

@@ -123,11 +123,6 @@ WorkspaceManager::WorkspaceManager() :
     updateActionsReadOnly();
 }
 
-WorkspaceManager::~WorkspaceManager()
-{
-    reset();
-} 
-
 void WorkspaceManager::initalize()
 {
 #ifdef WORKSPACE_MANAGER_VERBOSE

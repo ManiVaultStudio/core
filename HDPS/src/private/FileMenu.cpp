@@ -3,12 +3,23 @@
 #include <Application.h>
 
 using namespace hdps;
+using namespace hdps::gui;
 
 FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
-    QMenu(parent)
+    QMenu(parent),
+    _exitApplictionAction(this, "Exit")
 {
     setTitle("File");
     setToolTip("File operations");
+
+    _exitApplictionAction.setShortcut(QKeySequence("Alt+F4"));
+    _exitApplictionAction.setShortcutContext(Qt::ApplicationShortcut);
+    _exitApplictionAction.setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
+    _exitApplictionAction.setToolTip("Exit HDPS");
+
+    connect(&_exitApplictionAction, &TriggerAction::triggered, this, []() -> void {
+        Application::current()->quit();
+    });
 }
 
 void FileMenu::showEvent(QShowEvent* showEvent)
@@ -33,5 +44,6 @@ void FileMenu::showEvent(QShowEvent* showEvent)
     //addAction(&Application::current()->getGlobalSettingsAction());
     addSeparator();
     addAction(&projectManager.getShowStartPageAction());
-    //addAction(&Application::current()->getExitAction());
+    addSeparator();
+    addAction(&_exitApplictionAction);
 }
