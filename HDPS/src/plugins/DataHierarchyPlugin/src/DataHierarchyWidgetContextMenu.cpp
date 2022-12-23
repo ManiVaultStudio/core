@@ -87,8 +87,8 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
         }
     }
             
-    menus["Analyze"]->setTitle(hdps::plugin::getPluginTypeName(pluginType));
-    menus["Analyze"]->setIcon(hdps::plugin::getPluginTypeIcon(pluginType));
+    //menus["Analyze"]->setTitle(hdps::plugin::getPluginTypeName(pluginType));
+    //menus["Analyze"]->setIcon(hdps::plugin::getPluginTypeIcon(pluginType));
 }
 
 QAction* DataHierarchyWidgetContextMenu::getGroupAction()

@@ -4,7 +4,7 @@
 #include "Project.h"
 
 #include "actions/TriggerAction.h"
-#include <actions/RecentFilesAction.h>
+#include "actions/RecentFilesAction.h"
 #include "actions/ToggleAction.h"
 
 #include <QObject>
@@ -38,18 +38,26 @@ public:
     virtual void newProject() = 0;
 
     /**
-     * Load a project from disk
-     * @param projectFilePath File path of the existing project (choose file path when empty)
+     * Open project from \p filePath
+     * @param filePath File path of the project (choose file path when empty)
+     * @param importDataOnly Whether to only import the data from the project
+     * @param loadWorkspace Whether to load the workspace which is accompanied with the project
      */
-    virtual void loadProject(QString projectFilePath = "") = 0;
+    virtual void openProject(QString filePath = "", bool importDataOnly = true, bool loadWorkspace = true) = 0;
 
     /**
-     * Save a project to disk
-     * @param projectFilePath File path of the existing project (choose file path when empty)
+     * Import project from \p filePath (only import the data)
+     * @param filePath File path of the project (choose file path when empty)
      */
-    virtual void saveProject(QString projectFilePath = "") = 0;
+    virtual void importProject(QString filePath = "") = 0;
 
-    /** Save project to different file (use is prompted to choose the file location) */
+    /**
+     * Save a project to \p filePath
+     * @param filePath File path of the project (choose file path when empty)
+     */
+    virtual void saveProject(QString filePath = "") = 0;
+
+    /** Save project to different file (user is prompted to choose the file location) */
     virtual void saveProjectAs() = 0;
 
     /**
@@ -76,6 +84,7 @@ public: // Action getters
 
     virtual hdps::gui::TriggerAction& getNewProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getOpenProjectAction() = 0;
+    virtual hdps::gui::TriggerAction& getImportProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getSaveProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getSaveProjectAsAction() = 0;
     virtual hdps::gui::RecentFilesAction& getRecentProjectsAction() = 0;
@@ -108,6 +117,18 @@ signals:
      * @param project Reference to the project that is loaded
      */
     void projectLoaded(const hdps::Project& project);
+
+    /**
+     * Signals that a project is about to be imported from \p filePath
+     * @param filePath Path of the project file which is about to be imported
+     */
+    void projectAboutToBeImported(const QString& filePath);
+
+    /**
+     * Signals that a project is imported from \p filePath
+     * @param filePath Path of the project file which is imported
+     */
+    void projectImported(const QString& filePath);
 
     /**
      * Signals that \p project is about to be saved

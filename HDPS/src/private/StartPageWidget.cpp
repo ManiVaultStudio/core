@@ -198,7 +198,7 @@ void StartPageWidget::ProjectsWidget::createRightColumn()
     const auto tooltip      = "Use the file navigator to open an existing project from disk";
 
     _rightColumnLayout.addWidget(new ProjectActionWidget(Application::getIconFont("FontAwesome").getIcon("folder-open"), title, description, tooltip, []() {
-        Application::core()->getProjectManager().loadProject();
+        Application::core()->getProjectManager().openProject();
     }));
 
     _rightColumnLayout.addSpacerItem(new QSpacerItem(0, 40));
@@ -273,7 +273,7 @@ void StartPageWidget::RecentProjectsWidget::createContainerWidget()
             continue;
 
         _containerLayout.addWidget(new ProjectActionWidget(Application::getIconFont("FontAwesome").getIcon("file"), title, description, tooltip, [filePath]() {
-            Application::core()->getProjectManager().loadProject(filePath);
+            Application::core()->getProjectManager().openProject(filePath);
         }));
     }
 

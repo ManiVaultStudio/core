@@ -34,18 +34,26 @@ public:
     void newProject() override;
 
     /**
-     * Load project from \p filePath
-     * @param filePath File path of the existing project (choose file path when empty)
+     * Open project from \p filePath
+     * @param filePath File path of the project (choose file path when empty)
+     * @param importDataOnly Whether to only import the data from the project
+     * @param loadWorkspace Whether to load the workspace which is accompanied with the project
      */
-    void loadProject(QString filePath = "") override;
+    void openProject(QString filePath = "", bool importDataOnly = false, bool loadWorkspace = true) override;
 
     /**
-     * Save project to \p filePath (uses file path of loaded project when empty)
-     * @param filePath File path of the existing project (choose file path when empty)
+     * Import project from \p filePath (only import the data)
+     * @param filePath File path of the project (choose file path when empty)
+     */
+    void importProject(QString filePath = "") override;
+
+    /**
+     * Save a project to \p filePath
+     * @param filePath File path of the project (choose file path when empty)
      */
     void saveProject(QString filePath = "") override;
 
-    /** Save project to different file (use is prompted to choose the file location) */
+    /** Save project to different file (user is prompted to choose the file location) */
     void saveProjectAs() override;
 
     /**
@@ -91,6 +99,7 @@ public: // Action getters
 
     hdps::gui::TriggerAction& getNewProjectAction() override { return _newProjectAction; }
     hdps::gui::TriggerAction& getOpenProjectAction() override { return _openProjectAction; }
+    hdps::gui::TriggerAction& getImportProjectAction() override { return _importProjectAction; };
     hdps::gui::TriggerAction& getSaveProjectAction() override { return _saveProjectAction; }
     hdps::gui::TriggerAction& getSaveProjectAsAction() override { return _saveProjectAsAction; }
     hdps::gui::RecentFilesAction& getRecentProjectsAction() override { return _recentProjectsAction; }
@@ -102,6 +111,7 @@ private:
     QScopedPointer<hdps::Project>       _project;                   /** Current project */
     hdps::gui::TriggerAction            _newProjectAction;          /** Action for creating a new project */
     hdps::gui::TriggerAction            _openProjectAction;         /** Action for opening a project */
+    hdps::gui::TriggerAction            _importProjectAction;       /** Action for importing a project */
     hdps::gui::TriggerAction            _saveProjectAction;         /** Action for saving a project */
     hdps::gui::TriggerAction            _saveProjectAsAction;       /** Action for saving a project under a new name */
     hdps::gui::RecentFilesAction        _recentProjectsAction;      /** Menu for loading recent projects */

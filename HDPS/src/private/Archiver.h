@@ -67,6 +67,15 @@ public:
      */
     QStringList getTaskNamesForDecompression(const QString& compressedFilePath);
 
+    /**
+     * Extracts a file
+     * @param compressedFilePath File path of the compressed input file
+     * @param sourceFileName File name of the compressed source file
+     * @param targetFilePath Path of the extracted target file
+     * @param password Password string if the compressed file is encrypted with a password
+     */
+    void extractSingleFile(const QString& compressedFilePath, const QString& sourceFileName, const QString& targetFilePath, const QString& password = "");
+
 protected:
 
     /**

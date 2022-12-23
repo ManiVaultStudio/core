@@ -52,7 +52,8 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
-    treeView.setColumnHidden(1, true);
+    treeView.setColumnHidden(static_cast<int>(PluginManagerModel::Column::Category), true);
+    treeView.setColumnHidden(static_cast<int>(PluginManagerModel::Column::ID), true);
 
     auto treeViewHeader = treeView.header();
 
@@ -85,14 +86,27 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
         QMenu contextMenu;
 
         contextMenu.addAction(Application::getIconFont("FontAwesome").getIcon("trash"), QString("Destroy %1 plugin%2").arg(QString::number(selectedRows.count()), selectedRows.count() >= 2 ? "s" : ""), [this, selectedRows] {
-            for (const auto& selectedRow : selectedRows) {
-                Application::core()->getPluginManager().destroyPlugin(selectedRow.data(Qt::UserRole + 1).value<plugin::Plugin*>());
+            QList<plugin::Plugin*> plugins;
 
-                _model.removeItem(_filterModel.mapToSource(selectedRow));
-            }
+            for (const auto& selectedRow : selectedRows)
+                plugins << selectedRow.data(Qt::UserRole + 1).value<plugin::Plugin*>();
+
+            for (auto plugin : plugins)
+                Application::core()->getPluginManager().destroyPlugin(plugin);
         });
 
         contextMenu.exec(QCursor::pos());
+    });
+
+    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
+        const auto matches = _model.findItems(plugin->getId(), Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive, static_cast<int>(PluginManagerModel::Column::ID));
+
+        if (matches.isEmpty())
+            return;
+
+        const auto firstIndex = matches.first()->index();
+
+        _model.removeRow(firstIndex.row(), firstIndex.parent());
     });
 
     connect(&_okAction, &TriggerAction::triggered, this, &PluginManagerDialog::accept);

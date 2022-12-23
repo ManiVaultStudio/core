@@ -11,9 +11,10 @@ using namespace hdps;
 
 Q_DECLARE_METATYPE(hdps::plugin::Plugin*);
 
-QMap<PluginManagerModel::Column, QPair<QString, QString>> PluginManagerModel::columnInfo = QMap<PluginManagerModel::Column, QPair<QString, QString>>({
+QMap<PluginManagerModel::Column, QPair<QString, QString>> PluginManagerModel::columns = QMap<PluginManagerModel::Column, QPair<QString, QString>>({
     { PluginManagerModel::Column::Name, { "Name", "Item name (plugin type, factory name or plugin name)" }},
-    { PluginManagerModel::Column::Category, { "Category", "Item category (type, factory or instance)" }}
+    { PluginManagerModel::Column::Category, { "Category", "Item category (type, factory or instance)" }},
+    { PluginManagerModel::Column::ID, { "ID", "Globally unique plugin instance identifier" }}
 });
 
 PluginManagerModel::PluginManagerModel(QObject* parent /*= nullptr*/) :
@@ -21,16 +22,10 @@ PluginManagerModel::PluginManagerModel(QObject* parent /*= nullptr*/) :
 {
     synchronizeWithPluginManager();
 
-    for (const auto& column : columnInfo.keys()) {
-        setHeaderData(static_cast<int>(column), Qt::Horizontal, columnInfo[column].first);
-        setHeaderData(static_cast<int>(column), Qt::Horizontal, columnInfo[column].first, Qt::DecorationRole);
+    for (const auto& column : columns.keys()) {
+        setHeaderData(static_cast<int>(column), Qt::Horizontal, columns[column].first);
+        setHeaderData(static_cast<int>(column), Qt::Horizontal, columns[column].second, Qt::ToolTipRole);
     }
-}
-
-void PluginManagerModel::removeItem(const QModelIndex& index)
-{
-    beginRemoveRows(index.parent(), index.row(), index.row());
-    endRemoveRows();
 }
 
 void PluginManagerModel::synchronizeWithPluginManager()
@@ -54,7 +49,7 @@ void PluginManagerModel::synchronizeWithPluginManager()
         pluginTypeRow->setEnabled(false);
         pluginTypeRow->setEditable(false);
 
-        appendRow({ pluginTypeRow, new QStandardItem("Type") });
+        appendRow({ pluginTypeRow, new QStandardItem("Type"), new QStandardItem("") });
 
         for (auto pluginFactory : Application::core()->getPluginManager().getPluginFactoriesByType(pluginType)) {
             auto pluginFactoryRow = new QStandardItem(pluginFactory->getIcon(), pluginFactory->getKind());
@@ -62,15 +57,18 @@ void PluginManagerModel::synchronizeWithPluginManager()
             pluginFactoryRow->setEnabled(false);
             pluginFactoryRow->setEditable(false);
 
-            pluginTypeRow->appendRow({ pluginFactoryRow, new QStandardItem("Factory") });
+            pluginTypeRow->appendRow({ pluginFactoryRow, new QStandardItem("Factory"), new QStandardItem("") });
 
             for (auto plugin : Application::core()->getPluginManager().getPluginsByFactory(pluginFactory)) {
-                auto pluginRow = new QStandardItem(plugin->getGuiName());
+                auto pluginRow  = new QStandardItem(plugin->getGuiName());
+                auto pluginId   = new QStandardItem(plugin->getId());
                 
+                pluginId->setEditable(false);
+
                 pluginRow->setData(QVariant::fromValue(plugin));
                 pluginRow->setEditable(false);
 
-                pluginFactoryRow->appendRow({ pluginRow, new QStandardItem("Instance") });
+                pluginFactoryRow->appendRow({ pluginRow, new QStandardItem("Instance"), pluginId });
 
                 pluginTypeRow->setEnabled(true);
                 pluginFactoryRow->setEnabled(true);

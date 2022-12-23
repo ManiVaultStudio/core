@@ -156,6 +156,33 @@ QStringList Archiver::getTaskNamesForDecompression(const QString& compressedFile
     return taskNames;
 }
 
+void Archiver::extractSingleFile(const QString& compressedFilePath, const QString& sourceFileName, const QString& targetFilePath, const QString& password /*= ""*/)
+{
+    QuaZip zip(compressedFilePath);
+
+    if (!zip.open(QuaZip::mdUnzip))
+        throw std::runtime_error("Unable to open ZIP file");
+
+    const auto directory = QFileInfo(targetFilePath).absoluteDir();
+
+    if (!zip.goToFirstFile())
+        throw std::runtime_error("No files found");
+
+    do {
+        const auto fileName = zip.getCurrentFileName();
+
+        if (fileName != sourceFileName)
+            continue;
+
+        extractFile(&zip, QLatin1String(""), targetFilePath, password);
+    } while (zip.goToNextFile());
+
+    zip.close();
+
+    if (zip.getZipError() != 0)
+        throw std::runtime_error("Decompression error occurred");
+}
+
 void Archiver::compressSubDirectory(QuaZip* parentZip, const QString& directory, const QString& parentDirectory, bool recursive /*= true*/, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/, QDir::Filters filters /*= QDir::Filter::Files*/)
 {
     // Except if the parent zip is invalid

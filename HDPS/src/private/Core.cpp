@@ -44,6 +44,8 @@ Core::~Core()
 
 void Core::init()
 {
+    _eventListeners.clear();
+
     _actionsManager.reset(new ActionsManager());
     _pluginManager.reset(new PluginManager());
     _dataManager.reset(new DataManager());

@@ -32,6 +32,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _project(),
     _newProjectAction(nullptr, "New Project"),
     _openProjectAction(nullptr, "Open Project"),
+    _importProjectAction(nullptr, "Import Project"),
     _saveProjectAction(nullptr, "Save Project"),
     _saveProjectAsAction(nullptr, "Save Project As..."),
     _recentProjectsAction(nullptr),
@@ -50,6 +51,11 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _openProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
     _openProjectAction.setToolTip("Open project from disk");
 
+    _importProjectAction.setShortcut(QKeySequence("Ctrl+I"));
+    _importProjectAction.setShortcutContext(Qt::ApplicationShortcut);
+    _importProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    _importProjectAction.setToolTip("Import project from disk");
+
     _saveProjectAction.setShortcut(QKeySequence("Ctrl+S"));
     _saveProjectAction.setShortcutContext(Qt::ApplicationShortcut);
     _saveProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
@@ -59,6 +65,10 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _saveProjectAsAction.setShortcutContext(Qt::ApplicationShortcut);
     _saveProjectAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveProjectAsAction.setToolTip("Save project to disk in a chosen location");
+
+    _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    _importDataMenu.setTitle("Import data...");
+    _importDataMenu.setToolTip("Import data into HDPS");
 
     _publishAction.setShortcut(QKeySequence("Ctrl+P"));
     _publishAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -79,12 +89,9 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
 
     mainWindow->addAction(&_newProjectAction);
     mainWindow->addAction(&_openProjectAction);
+    mainWindow->addAction(&_importProjectAction);
     mainWindow->addAction(&_saveProjectAction);
     mainWindow->addAction(&_showStartPageAction);
-
-    _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
-    _importDataMenu.setTitle("Import data...");
-    _importDataMenu.setToolTip("Import data into HDPS");
 
     connect(&_importDataMenu, &QMenu::aboutToShow, this, [this]() -> void {
         _importDataMenu.clear();
@@ -98,7 +105,11 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     });
 
     connect(&_openProjectAction, &QAction::triggered, this, [this]() -> void {
-        loadProject();
+        openProject();
+    });
+
+    connect(&_importProjectAction, &QAction::triggered, this, [this]() -> void {
+        importProject();
     });
 
     connect(&_saveProjectAction, &QAction::triggered, [this]() -> void {
@@ -123,6 +134,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
         _saveProjectAction.setEnabled(!_project.isNull());
         _saveProjectAsAction.setEnabled(!_project.isNull());
         _saveProjectAsAction.setEnabled(!_project.isNull() && !_project->getFilePath().isEmpty());
+        _importProjectAction.setEnabled(!_project.isNull());
     };
 
     connect(this, &ProjectManager::projectCreated, this, updateActionsReadOnly);
@@ -135,7 +147,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
 
     connect(&_recentProjectsAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
-        loadProject(filePath);
+        openProject(filePath);
     });
 }
 
@@ -185,7 +197,7 @@ void ProjectManager::newProject()
     }
 }
 
-void ProjectManager::loadProject(QString filePath /*= ""*/)
+void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= true*/)
 {
     try
     {
@@ -229,7 +241,8 @@ void ProjectManager::loadProject(QString filePath /*= ""*/)
                 Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
             }
 
-            newProject();
+            if (!importDataOnly)
+                newProject();
 
             qDebug().noquote() << "Loading HDPS project from" << filePath;
 
@@ -260,9 +273,13 @@ void ProjectManager::loadProject(QString filePath /*= ""*/)
 
             Application::core()->getProjectManager().fromJsonFile(inputJsonFileInfo.absoluteFilePath());
 
-            QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
+            if (loadWorkspace) {
+                const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
 
-            Application::core()->getWorkspaceManager().loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
+                if (workspaceFileInfo.exists())
+                    Application::core()->getWorkspaceManager().loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
+            }
+                
 
             taskProgressDialog.setTaskFinished("Import data model");
 
@@ -284,6 +301,15 @@ void ProjectManager::loadProject(QString filePath /*= ""*/)
     }
 }
 
+void ProjectManager::importProject(QString filePath /*= ""*/)
+{
+    emit projectAboutToBeImported(filePath);
+    {
+        openProject(filePath, true, false);
+    }
+    emit projectImported(filePath);
+}
+
 void ProjectManager::saveProject(QString filePath /*= ""*/)
 {
     try
@@ -301,8 +327,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
 
-            const auto getSettingsPrefix = [](const QString& projectFilePath) -> QString {
-                return "Projects/" + projectFilePath + "/";
+            const auto getSettingsPrefix = [](const QString& filePath) -> QString {
+                return "Projects/" + filePath + "/";
             };
 
             bool            enableCompression = DEFAULT_ENABLE_COMPRESSION;

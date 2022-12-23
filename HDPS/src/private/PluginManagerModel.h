@@ -5,7 +5,7 @@
 /**
  * Plugin manager model class
  *
- * Model implementation for the plugin manager
+ * Model implementation for the plugin manager.
  *
  * @author Thomas Kroes
  */
@@ -16,11 +16,12 @@ public:
     /** Model columns */
     enum class Column {
         Name,       /** Item name (plugin type, factory name or plugin name) */
-        Category    /** Item category (type, factory or instance) */
+        Category,   /** Item category (type, factory or instance) */
+        ID          /** Globally unique plugin instance identifier */
     };
 
     /** Column name and tooltip */
-    static QMap<Column, QPair<QString, QString>> columnInfo;
+    static QMap<Column, QPair<QString, QString>> columns;
 
 public:
 
@@ -29,8 +30,6 @@ public:
      * @param parent Pointer to parent object
      */
     PluginManagerModel(QObject* parent = nullptr);
-
-    void removeItem(const QModelIndex& index);
 
 private:
 

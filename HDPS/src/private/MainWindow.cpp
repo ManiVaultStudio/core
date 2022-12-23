@@ -123,6 +123,8 @@ void MainWindow::setDefaultWindowGeometry(const float& coverage /*= 0.7f*/) {
 
 void MainWindow::checkGraphicsCapabilities()
 {
+    return;
+
     QOffscreenSurface surf;
     surf.create();
 

@@ -128,6 +128,8 @@ void RecentFilesAction::Model::loadFromSettings()
 {
     setRowCount(0);
 
+    auto mainWindow = Application::topLevelWidgets().first();
+
     for (auto action : _actions)
         delete action;
 
@@ -135,7 +137,7 @@ void RecentFilesAction::Model::loadFromSettings()
 
     const auto recentFilePaths = Application::current()->getSetting(_recentFilePathsAction->getSettingsKey(), QVariantList()).toList();
 
-    std::int32_t shortcutIndex = 0;
+    std::int32_t shortcutIndex = 1;
 
     for (const auto& recentFilePath : recentFilePaths) {
         const auto filePath = recentFilePath.toMap()["FilePath"].toString();
@@ -158,10 +160,8 @@ void RecentFilesAction::Model::loadFromSettings()
         if (!_recentFilePathsAction->getShortcutPrefix().isEmpty())
             recentFilePathAction->setShortcut(QKeySequence(QString("%1+%2").arg(_recentFilePathsAction->getShortcutPrefix(), QString::number(shortcutIndex))));
 
-        auto mainWindow = Application::topLevelWidgets().first();
-
         mainWindow->addAction(recentFilePathAction);
-
+        
         connect(recentFilePathAction, &TriggerAction::triggered, this, [this, filePath]() -> void {
             emit _recentFilePathsAction->triggered(filePath);
         });

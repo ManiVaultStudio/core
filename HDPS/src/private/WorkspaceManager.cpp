@@ -3,6 +3,7 @@
 #include "ViewMenu.h"
 #include "LoadSystemViewMenu.h"
 #include "DockComponentsFactory.h"
+#include "Archiver.h"
 
 #include <Application.h>
 
@@ -15,6 +16,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QBuffer>
+#include <QTemporaryDir>
 
 #ifdef _DEBUG
     #define WORKSPACE_MANAGER_VERBOSE
@@ -35,6 +37,7 @@ WorkspaceManager::WorkspaceManager() :
     _mainDockManager(),
     _viewPluginsDockWidget(),
     _loadWorkspaceAction(this, "Load"),
+    _importWorkspaceFromProjectAction(this, "Import from project"),
     _newWorkspaceAction(this, "New"),
     _saveWorkspaceAction(this, "Save"),
     _saveWorkspaceAsAction(this, "Save As..."),
@@ -65,10 +68,17 @@ WorkspaceManager::WorkspaceManager() :
     _saveWorkspaceAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveWorkspaceAsAction.setToolTip("Save workspace under a new file to disk");
 
+    _importWorkspaceFromProjectAction.setShortcut(QKeySequence("Ctrl+Alt+I"));
+    _importWorkspaceFromProjectAction.setShortcutContext(Qt::ApplicationShortcut);
+    _importWorkspaceFromProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    _importWorkspaceFromProjectAction.setToolTip("Import workspace from project");
+    //_importWorkspaceFromProjectAction.setEnabled(false);
+
     auto mainWindow = Application::topLevelWidgets().first();
 
     mainWindow->addAction(&_newWorkspaceAction);
     mainWindow->addAction(&_loadWorkspaceAction);
+    mainWindow->addAction(&_importWorkspaceFromProjectAction);
     mainWindow->addAction(&_saveWorkspaceAction);
     mainWindow->addAction(&_saveWorkspaceAsAction);
 
@@ -87,6 +97,10 @@ WorkspaceManager::WorkspaceManager() :
 
     connect(&_saveWorkspaceAsAction, &TriggerAction::triggered, [this](bool) {
         saveWorkspaceAs();
+    });
+
+    connect(&_importWorkspaceFromProjectAction, &TriggerAction::triggered, [this](bool) {
+        importWorkspaceFromProjectFile("", false);
     });
 
     createIcon();
@@ -367,6 +381,8 @@ QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)
     menu->addAction(&_saveWorkspaceAction);
     menu->addAction(&_saveWorkspaceAsAction);
     menu->addSeparator();
+    menu->addAction(&_importWorkspaceFromProjectAction);
+    menu->addSeparator();
     menu->addMenu(_recentWorkspacesAction.getMenu());
 
     return menu;
@@ -450,6 +466,45 @@ QImage WorkspaceManager::getPreviewImageFromWorkspaceFile(const QString& workspa
         exceptionMessageBox("Unable to retrieve preview image from workspace file");
         return previewImage;
     }
+}
+
+void WorkspaceManager::importWorkspaceFromProjectFile(QString filePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
+{
+    QTemporaryDir temporaryDirectory;
+
+    const auto temporaryDirectoryPath = temporaryDirectory.path();
+
+    Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
+    Application::setSerializationAborted(false);
+
+    if (filePath.isEmpty()) {
+        QFileDialog fileDialog;
+
+        fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+        fileDialog.setWindowTitle("Load project");
+        fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+        fileDialog.setFileMode(QFileDialog::ExistingFile);
+        fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
+        fileDialog.setDefaultSuffix(".hdps");
+        fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+
+        if (fileDialog.exec() == 0)
+            return;
+
+        if (fileDialog.selectedFiles().count() != 1)
+            throw std::runtime_error("Only one file may be selected");
+
+        filePath = fileDialog.selectedFiles().first();
+    }
+
+    Archiver archiver;
+
+    QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
+
+    archiver.extractSingleFile(filePath, "workspace.hws", workspaceFileInfo.absoluteFilePath());
+
+    if (workspaceFileInfo.exists())
+        loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 }
 
 }

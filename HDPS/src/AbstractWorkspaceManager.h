@@ -126,14 +126,21 @@ public: // IO
 
     /**
      * Load a workspace from disk
-     * @param filePath File path of the existing workspace (choose file path with dialog when empty)
+     * @param filePath File path of the workspace (choose file path with dialog when empty)
      * @param addToRecentWorkspaces Whether to add the workspace file path to the recent workspace file paths
      */
     virtual void loadWorkspace(QString filePath = "", bool addToRecentWorkspaces = true) = 0;
 
     /**
+     * Import a workspace from a project file
+     * @param filePath File path of the project (choose file path with dialog when empty)
+     * @param addToRecentWorkspaces Whether to add the workspace file path to the recent workspace file paths
+     */
+    virtual void importWorkspaceFromProjectFile(QString filePath = "", bool addToRecentWorkspaces = true) = 0;
+
+    /**
      * Save a workspace to disk
-     * @param filePath File path of the existing workspace (choose file path with dialog when empty)
+     * @param filePath File path of the workspace (choose file path with dialog when empty)
      */
     virtual void saveWorkspace(QString filePath = "") = 0;
 

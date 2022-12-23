@@ -19,6 +19,7 @@ void FileMenu::showEvent(QShowEvent* showEvent)
 
     addAction(&projectManager.getNewProjectAction());
     addAction(&projectManager.getOpenProjectAction());
+    //addAction(&projectManager.getImportProjectAction());
     addAction(&projectManager.getSaveProjectAction());
     addAction(&projectManager.getSaveProjectAsAction());
     addMenu(projectManager.getRecentProjectsAction().getMenu());
