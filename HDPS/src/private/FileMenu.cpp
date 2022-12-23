@@ -44,6 +44,6 @@ void FileMenu::showEvent(QShowEvent* showEvent)
     //addAction(&Application::current()->getGlobalSettingsAction());
     addSeparator();
     addAction(&projectManager.getShowStartPageAction());
-    addSeparator();
-    addAction(&_exitApplictionAction);
+    //addSeparator();
+    //addAction(&_exitApplictionAction);
 }
