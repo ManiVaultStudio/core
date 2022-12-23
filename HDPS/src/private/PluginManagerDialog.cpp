@@ -59,8 +59,9 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
 
     treeViewHeader->setStretchLastSection(false);
 
-    treeViewHeader->resizeSection(static_cast<int>(0), 300);
-    treeViewHeader->resizeSection(static_cast<int>(1), 200);
+    treeViewHeader->resizeSection(static_cast<int>(PluginManagerModel::Column::Name), 300);
+    treeViewHeader->resizeSection(static_cast<int>(PluginManagerModel::Column::Category), 70);
+    treeViewHeader->resizeSection(static_cast<int>(PluginManagerModel::Column::ID), 240);
 
     treeViewHeader->setSectionResizeMode(0, QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(1, QHeaderView::Fixed);

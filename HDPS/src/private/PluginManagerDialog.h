@@ -13,8 +13,14 @@
  * Plugin manager dialog class
  * 
  * Dialog class for inspecting the loaded plugins and the created plugin instances.
- * It shows the plugin factories at the top level and the plugin instances below it.
+ * 
+ * It shows plugin:
+ * - Types at the top-level
+ *     - Factories below the plugin types
+ *         - Instances for each plugin factory   
  *
+ * It also allows plugins to be destroyed (available in right-click menu).
+ * 
  * @author Thomas Kroes
  */
 class PluginManagerDialog : public QDialog
@@ -29,7 +35,7 @@ public:
 
     /** Get preferred size */
     QSize sizeHint() const override {
-        return QSize(640, 320);
+        return QSize(700, 500);
     }
 
     /** Get minimum size hint*/
