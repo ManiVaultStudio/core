@@ -31,6 +31,11 @@ public:
     /** Default destructor */
     ~Core();
 
+public:
+
+    /** Resets the entire core implementation */
+    void reset() override;
+
 public: // Data access
 
     /**

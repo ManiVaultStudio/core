@@ -169,8 +169,8 @@ void ProjectManager::reset()
         auto core = Application::core();
 
         core->getActionsManager().reset();
-        core->getDataManager().reset();
         core->getPluginManager().reset();
+        core->getDataManager().reset();
         core->getDataHierarchyManager().reset();
         core->getWorkspaceManager().reset();
     }
@@ -485,10 +485,12 @@ QMenu* ProjectManager::getImportDataMenu()
 
 void ProjectManager::createProject()
 {
-    reset();
+    emit projectAboutToBeCreated();
+    {
+        reset();
 
-    _project.reset(new Project());
-
+        _project.reset(new Project());
+    }
     emit projectCreated(*(_project.get()));
 
     _showStartPageAction.setChecked(false);

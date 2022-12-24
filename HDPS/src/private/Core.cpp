@@ -42,10 +42,20 @@ Core::~Core()
     _pluginManager.reset();
 }
 
-void Core::init()
+void Core::reset()
 {
     _eventListeners.clear();
 
+    _actionsManager->reset();
+    _pluginManager->reset();
+    _dataManager->reset();
+    _dataHierarchyManager->reset();
+    _workspaceManager->reset();
+    _projectManager->reset();
+}
+
+void Core::init()
+{
     _actionsManager.reset(new ActionsManager());
     _pluginManager.reset(new PluginManager());
     _dataManager.reset(new DataManager());

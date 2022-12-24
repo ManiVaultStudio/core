@@ -94,6 +94,9 @@ public: // Action getters
 
 signals:
 
+    /** Signals that a new project is about to be created */
+    void projectAboutToBeCreated();
+
     /**
      * Signals that \p project is created
      * @param project Reference to the created project

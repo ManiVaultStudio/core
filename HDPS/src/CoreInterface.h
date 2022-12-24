@@ -47,6 +47,11 @@ class CoreInterface
 public:
     //CoreInterface() = delete;
 
+public:
+    
+    /** Resets the entire core implementation */
+    virtual void reset() = 0;
+
 public: // Data access
 
     /**
@@ -186,6 +191,7 @@ public: // Data grouping
      * @param guiName Name of the created dataset in the GUI (if empty, the user will be prompted for a name)
      * @return Smart pointer to created group dataset
      */
+    [[deprecated("This function will be removed in version 0.5, and replaced by core->getDataManager().groupDatasets(...).")]]
     virtual Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") = 0;
 
 public: // Data hierarchy
@@ -211,12 +217,14 @@ public: // Events & notifications
      * Notify listeners that a new dataset has been added to the core
      * @param dataset Smart pointer to the dataset that was added
      */
+    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetAdded(...).")]]
     virtual void notifyDatasetAdded(const Dataset<DatasetImpl>& dataset) = 0;
 
     /**
      * Notify listeners that a dataset is about to be removed
      * @param dataset Smart pointer to the dataset which is about to be removed
      */
+    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetAboutToBeRemoved(...).")]]
     virtual void notifyDatasetAboutToBeRemoved(const Dataset<DatasetImpl>& dataset) = 0;
 
     /**
@@ -224,12 +232,14 @@ public: // Events & notifications
      * @param datasetGuid GUID of the dataset that was removed
      * @param dataType Type of the data
      */
+    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetRemoved(...).")]]
     virtual void notifyDatasetRemoved(const QString& datasetGuid, const DataType& dataType) = 0;
 
     /**
      * Notify listeners that a dataset has changed
      * @param dataset Smart pointer to the dataset of which the data changed
      */
+    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetChanged(...).")]]
     virtual void notifyDatasetChanged(const Dataset<DatasetImpl>& dataset) = 0;
 
     /**
@@ -237,6 +247,7 @@ public: // Events & notifications
      * @param dataset Smart pointer to the dataset of which the selection changed
      * @param ignoreDatasets Pointer to datasets that should be ignored during notification
      */
+    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetSelectionChanged(...).")]]
     virtual void notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets* ignoreDatasets = nullptr) = 0;
 
     /**
@@ -244,30 +255,35 @@ public: // Events & notifications
      * @param dataset Smart pointer to the dataset of which the GUI name changed
      * @param previousGuiName Previous dataset name
      */
+    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetGuiNameChanged(...).")]]
     virtual void notifyDatasetGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) = 0;
 
     /**
      * Notify all listeners that a dataset is locked
      * @param dataset Smart pointer to the dataset
      */
+    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetLocked(...).")]]
     virtual void notifyDatasetLocked(const Dataset<DatasetImpl>& dataset) = 0;
 
     /**
      * Notify all listeners that a dataset is unlocked
      * @param dataset Smart pointer to the dataset
      */
+    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetUnlocked(...).")]]
     virtual void notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset) = 0;
 
     /**
      * Register an event listener
      * @param eventListener Pointer to event listener to register
      */
+    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().registerEventListener(...).")]]
     virtual void registerEventListener(EventListener* eventListener) = 0;
 
     /**
      * Unregister an event listener
      * @param eventListener Pointer to event listener to unregister
      */
+    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().unregisterEventListener(...).")]]
     virtual void unregisterEventListener(EventListener* eventListener) = 0;
 
 public: // Managers
