@@ -169,19 +169,6 @@ set(PRIVATE_ACTIONS_MANAGER_FILES
     ${PRIVATE_ACTIONS_MANAGER_SOURCES}
 )
 
-set(PRIVATE_ACTIONS_HEADERS
-    src/private/GlobalSettingsAction.h
-)
-
-set(PRIVATE_ACTIONS_SOURCES
-    src/private/GlobalSettingsAction.cpp
-)
-
-set(PRIVATE_ACTIONS_FILES
-    ${PRIVATE_ACTIONS_HEADERS}
-    ${PRIVATE_ACTIONS_SOURCES}
-)
-
 set(PRIVATE_PROJECT_MANAGER_HEADERS
     src/private/ProjectManager.h
     src/private/ProjectWidget.h
@@ -197,6 +184,21 @@ set(PRIVATE_PROJECT_MANAGER_FILES
     ${PRIVATE_PROJECT_MANAGER_SOURCES}
 )
 
+set(PRIVATE_SETTINGS_MANAGER_HEADERS
+    src/private/SettingsManager.h
+    src/private/SettingsManagerDialog.h
+)
+
+set(PRIVATE_SETTINGS_MANAGER_SOURCES
+    src/private/SettingsManager.cpp
+    src/private/SettingsManagerDialog.cpp
+)
+
+set(PRIVATE_SETTINGS_MANAGER_FILES
+    ${PRIVATE_SETTINGS_MANAGER_HEADERS}
+    ${PRIVATE_SETTINGS_MANAGER_SOURCES}
+)
+
 set(PRIVATE_MANAGER_HEADERS
     ${PRIVATE_WORKSPACE_MANAGER_HEADERS}
     ${PRIVATE_PLUGIN_MANAGER_HEADERS}
@@ -204,6 +206,7 @@ set(PRIVATE_MANAGER_HEADERS
     ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
     ${PRIVATE_ACTIONS_MANAGER_HEADERS}
     ${PRIVATE_PROJECT_MANAGER_HEADERS}
+    ${PRIVATE_SETTINGS_MANAGER_HEADERS}
 )
 
 set(PRIVATE_MANAGER_SOURCES
@@ -214,6 +217,7 @@ set(PRIVATE_MANAGER_SOURCES
     ${PRIVATE_ACTIONS_MANAGER_SOURCES}
     ${PRIVATE_PROJECT_MANAGER_SOURCES}
     ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
+    ${PRIVATE_SETTINGS_MANAGER_SOURCES}
 )
 
 set(PRIVATE_MANAGER_FILES
@@ -229,7 +233,6 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/LoadedViewsMenu.h
     src/private/HelpMenu.h
     src/private/PluginHelpMenu.h
-    src/private/GlobalSettingsDialog.h
 )
 
 set(PRIVATE_APPLICATION_SOURCES
@@ -240,7 +243,6 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/LoadedViewsMenu.cpp
     src/private/HelpMenu.cpp
     src/private/PluginHelpMenu.cpp
-    src/private/GlobalSettingsDialog.cpp
 )
 
 set(PRIVATE_APPLICATION_FILES
@@ -306,6 +308,7 @@ source_group(Managers\\DataHierarchy FILES ${PRIVATE_DATA_HIERARCHY_MANAGER_FILE
 source_group(Managers\\Actions FILES ${PRIVATE_ACTIONS_MANAGER_FILES})
 source_group(Managers\\Project FILES ${PRIVATE_PROJECT_MANAGER_FILES})
 source_group(Managers\\Workspace FILES ${PRIVATE_WORKSPACE_MANAGER_FILES})
+source_group(Managers\\Settings FILES ${PRIVATE_SETTINGS_MANAGER_FILES})
 source_group(StartPage FILES ${PRIVATE_START_PAGE_FILES})
 source_group(Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
 source_group(Actions FILES ${PRIVATE_ACTIONS_FILES})
@@ -319,6 +322,7 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractDataHierarchyManager.h
     src/AbstractWorkspaceManager.h
     src/AbstractProjectManager.h
+    src/AbstractSettingsManager.h
 )
 
 set(PUBLIC_CORE_INTERFACE_FILES

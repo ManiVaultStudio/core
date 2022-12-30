@@ -2,22 +2,24 @@
 
 #include <QDialog>
 
+namespace hdps::gui {
+
 /**
- * Global settings dialog class
+ * Settings manager dialog class
  * 
- * Dialog class for modifying global settings.
+ * Dialog class for modifying settings.
  *
  * @author Thomas Kroes
  */
-class GlobalSettingsDialog : public QDialog
+class SettingsManagerDialog : public QDialog
 {
 public:
 
     /**
-     * Construct a global settings dialog with \p with parent widget
+     * Construct a dialog for the settings manager with \p with parent widget
      * @param parent Pointer to parent widget
      */
-    GlobalSettingsDialog(QWidget* parent = nullptr);
+    SettingsManagerDialog(QWidget* parent = nullptr);
 
     /** Get preferred size */
     QSize sizeHint() const override {
@@ -28,7 +30,6 @@ public:
     QSize minimumSizeHint() const override {
         return sizeHint();
     }
-
-private:
-
 };
+
+}

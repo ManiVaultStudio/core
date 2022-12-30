@@ -1,8 +1,10 @@
 #pragma once
 
-#include "CoreInterface.h"
-#include "PluginType.h"
-#include "DataType.h"
+#include <CoreInterface.h>
+#include <PluginType.h>
+#include <DataType.h>
+
+#include <event/EventListener.h>
 
 #include "DataManager.h"
 #include "PluginManager.h"
@@ -10,8 +12,7 @@
 #include "DataHierarchyManager.h"
 #include "WorkspaceManager.h"
 #include "ProjectManager.h"
-
-#include <event/EventListener.h>
+#include "SettingsManager.h"
 
 #include <memory>
 #include <unordered_map>
@@ -211,6 +212,7 @@ public: // Managers
     AbstractDataHierarchyManager& getDataHierarchyManager() override;
     AbstractWorkspaceManager& getWorkspaceManager() override;
     AbstractProjectManager& getProjectManager();
+    AbstractSettingsManager& getSettingsManager();
 
 private:
     QScopedPointer<ActionsManager>          _actionsManager;            /** Actions manager for storing actions */
@@ -219,6 +221,7 @@ private:
     QScopedPointer<DataHierarchyManager>    _dataHierarchyManager;      /** Data hierarchy manager for providing a hierarchical dataset structure */
     QScopedPointer<WorkspaceManager>        _workspaceManager;          /** Workspace manager for controlling widgets layout */
     QScopedPointer<ProjectManager>          _projectManager;            /** Manager for loading/saving projects */
+    QScopedPointer<SettingsManager>         _settingsManager;           /** Manager for managing global settings */
     std::vector<EventListener*>             _eventListeners;            /** List of classes listening for core events */
 
     friend class DataHierarchyManager;

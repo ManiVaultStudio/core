@@ -2,7 +2,6 @@
 
 #include <models/DataHierarchyModel.h>
 #include <models/DataHierarchyFilterModel.h>
-#include <actions/StringAction.h>
 #include <actions/TriggerAction.h>
 #include <actions/ToggleAction.h>
 #include <widgets/HierarchyWidget.h>
@@ -61,4 +60,5 @@ private:
     DataHierarchyFilterModel    _filterModel;           /** Data hierarchy filter model */
     hdps::gui::HierarchyWidget  _hierarchyWidget;       /** Widget for displaying hierarchy */
     hdps::gui::ToggleAction     _groupingAction;        /** Data grouping action */
+    hdps::gui::TriggerAction    _resetAction;           /** Reset all action */
 };

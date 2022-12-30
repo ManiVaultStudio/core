@@ -1,4 +1,4 @@
-#include "GlobalSettingsDialog.h"
+#include "SettingsManagerDialog.h"
 
 #include <Application.h>
 
@@ -7,17 +7,21 @@
 using namespace hdps;
 
 #ifdef _DEBUG
-    #define GLOBAL_SETTINGS_DIALOG_VERBOSE
+    #define SETTINGS_MANAGER_DIALOG_VERBOSE
 #endif
 
-GlobalSettingsDialog::GlobalSettingsDialog(QWidget* parent /*= nullptr*/) :
+namespace hdps::gui {
+
+SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
     setModal(true);
-    setWindowTitle("Global settings");
+    setWindowTitle("Settings");
 
     auto layout = new QVBoxLayout();
 
     setLayout(layout);
+}
+
 }

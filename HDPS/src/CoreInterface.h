@@ -11,6 +11,7 @@
 #include "AbstractDataHierarchyManager.h"
 #include "AbstractWorkspaceManager.h"
 #include "AbstractProjectManager.h"
+#include "AbstractSettingsManager.h"
 
 #include <QString>
 
@@ -38,6 +39,7 @@ namespace hdps
     namespace gui
     {
         class PluginTriggerAction;
+        class GlobalSettingsAction;
 
         using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
     }
@@ -294,6 +296,7 @@ public: // Managers
     virtual AbstractDataHierarchyManager& getDataHierarchyManager() = 0;
     virtual AbstractWorkspaceManager& getWorkspaceManager() = 0;
     virtual AbstractProjectManager& getProjectManager() = 0;
+    virtual AbstractSettingsManager& getSettingsManager() = 0;
 
 protected:
     bool    _datasetGroupingEnabled;        /** Whether datasets can be grouped or not */

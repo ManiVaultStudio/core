@@ -136,9 +136,6 @@ private:
     * NOTE: Can't be a QMap because it doesn't support move semantics of unique_ptr
     */
     std::unordered_map<QString, Dataset<DatasetImpl>> _selections;
-
-    /** Non-owning pointer to core for event notifications */
-    CoreInterface* _core;
 };
 
 } // namespace hdps

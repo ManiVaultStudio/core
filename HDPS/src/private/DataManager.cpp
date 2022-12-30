@@ -1,10 +1,10 @@
 #include "DataManager.h"
 #include "RawData.h"
 #include "DataHierarchyItem.h"
+#include "Application.h"
 
 #include "util/Exception.h"
 
-#include <QRegularExpression>
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
@@ -18,11 +18,11 @@ using namespace hdps::util;
 namespace hdps
 {
 
-	DataManager::DataManager() :
-		AbstractDataManager()
-	{
-		setObjectName("Datasets");
-	}
+DataManager::DataManager() :
+	AbstractDataManager()
+{
+	setObjectName("Datasets");
+}
 
 void DataManager::addRawData(plugin::RawData* rawData)
 {
@@ -33,11 +33,9 @@ void DataManager::addSet(const Dataset<DatasetImpl>& dataset)
 {
     try
     {
-        // Except in the case of an invalid dataset smart pointer
         if (!dataset.isValid())
             throw std::runtime_error("Dataset smart pointer is invalid");
 
-        // Add the data set to the map
         _datasets.push_back(dataset);
 
         emit dataChanged();
@@ -65,16 +63,23 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 
         qDebug() << "Removing" << dataset->getGuiName() << "from the data manager";
 
-        for (auto& underiveDataset : _datasets) {
-            if (underiveDataset->isDerivedData() && underiveDataset->getSourceDataset<DatasetImpl>()->getGuid() == dataset->getGuid()) {
-                qDebug() << "Un-derive" << underiveDataset->getGuiName();
+        const auto guid = dataset->getGuid();
+        const auto type = dataset->getDataType();
 
-                underiveDataset->_derived = false;
-                underiveDataset->setSourceDataSet(Dataset<DatasetImpl>());
+        Application::core()->notifyDatasetAboutToBeRemoved(dataset);
+        {
+            for (auto& underiveDataset : _datasets) {
+                if (underiveDataset->isDerivedData() && underiveDataset->getSourceDataset<DatasetImpl>()->getGuid() == dataset->getGuid()) {
+                    qDebug() << "Un-derive" << underiveDataset->getGuiName();
+
+                    underiveDataset->_derived = false;
+                    underiveDataset->setSourceDataSet(Dataset<DatasetImpl>());
+                }
             }
-        }
 
-        _datasets.removeOne(dataset);
+            _datasets.removeOne(dataset);
+        }
+        Application::core()->notifyDatasetRemoved(guid, type);
 
         emit dataChanged();
     }
@@ -91,11 +96,9 @@ plugin::RawData& DataManager::getRawData(const QString& name)
 {
     try
     {
-        // Except when the dataset smart pointer is invalid
         if (name.isEmpty())
             throw std::runtime_error("Raw data name is invalid");
 
-        // Except when the raw data is not found
         if (_rawDataMap.find(name) == _rawDataMap.end())
             throw std::runtime_error("Raw data not found");
 
@@ -141,11 +144,9 @@ Dataset<DatasetImpl> DataManager::getSelection(const QString& dataName)
 {
     try
     {
-        // Except when the data name is invalid
         if (dataName.isEmpty())
             throw std::runtime_error("Data name is invalid");
 
-        // Except when the selection set is not found
         if (_selections.find(dataName) == _selections.end())
             throw std::runtime_error("Selection set not found");
 
@@ -189,6 +190,16 @@ void DataManager::reset()
 
     beginReset();
     {
+        for (std::pair<QString, Dataset<DatasetImpl>> selection : _selections) {
+            //delete selection.second
+        }
+            
+
+        for (auto& dataset : _datasets)
+            removeDataset(dataset);
+
+        _rawDataMap.clear();
+
     }
     endReset();
 }
@@ -205,4 +216,4 @@ DataManager::~DataManager()
     reset();
 }
 
-} // namespace hdps
+}

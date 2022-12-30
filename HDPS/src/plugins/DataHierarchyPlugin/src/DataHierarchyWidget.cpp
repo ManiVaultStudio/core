@@ -60,7 +60,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _model(this),
     _filterModel(this),
     _hierarchyWidget(this, "Dataset", _model, &_filterModel),
-    _groupingAction(this, "Selection grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled())
+    _groupingAction(this, "Selection grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled()),
+    _resetAction(this, "Reset")
 {
     auto layout = new QVBoxLayout();
 
@@ -79,6 +80,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     settingsGroupAction.setShowLabels(false);
 
     settingsGroupAction << _groupingAction;
+    settingsGroupAction << _resetAction;
 
     _groupingAction.setConnectionPermissionsToNone();
 
@@ -111,6 +113,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _groupingAction.setToolTip("Enable/disable dataset grouping");
 
     connect(&_groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::onGroupingActionToggled);
+
+    connect(&_resetAction, &TriggerAction::triggered, &Application::core()->getDataManager(), &AbstractDataManager::reset);
 
     connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemAdded, this, [this](DataHierarchyItem& dataHierarchyItem) -> void {
         addDataHierarchyItem(dataHierarchyItem);

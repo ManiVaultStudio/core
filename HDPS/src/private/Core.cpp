@@ -32,6 +32,8 @@ Core::Core() :
     _dataManager(),
     _dataHierarchyManager(),
     _workspaceManager(),
+    _projectManager(),
+    _settingsManager(),
     _eventListeners()
 {
     _datasetGroupingEnabled = Application::current()->getSetting("Core/DatasetGroupingEnabled", false).toBool();
@@ -52,6 +54,7 @@ void Core::reset()
     _dataHierarchyManager->reset();
     _workspaceManager->reset();
     _projectManager->reset();
+    _settingsManager->reset();
 }
 
 void Core::init()
@@ -62,6 +65,7 @@ void Core::init()
     _dataHierarchyManager.reset(new DataHierarchyManager());
     _workspaceManager.reset(new WorkspaceManager());
     _projectManager.reset(new ProjectManager());
+    _settingsManager.reset(new SettingsManager());
 
     _actionsManager->initalize();
     _pluginManager->initalize();
@@ -69,6 +73,7 @@ void Core::init()
     _dataHierarchyManager->initalize();
     _workspaceManager->initalize();
     _projectManager->initalize();
+    _settingsManager->initalize();
 }
 
 void Core::addPlugin(plugin::Plugin* plugin)
@@ -358,6 +363,11 @@ AbstractActionsManager& Core::getActionsManager()
 AbstractProjectManager& Core::getProjectManager()
 {
     return *_projectManager;
+}
+
+AbstractSettingsManager& Core::getSettingsManager()
+{
+    return *_settingsManager;
 }
 
 AbstractDataHierarchyManager& Core::getDataHierarchyManager()

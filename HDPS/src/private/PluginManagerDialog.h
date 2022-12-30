@@ -44,7 +44,7 @@ public:
     }
 
     /** Show the plugin manager dialog modally */
-    static void managePlugins();
+    static void create();
 
 private:
     PluginManagerModel          _model;                 /** Plugin manager model (interfaces with a plugin manager) */

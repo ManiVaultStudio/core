@@ -127,7 +127,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     });
 
     connect(&_pluginManagerAction, &TriggerAction::triggered, this, [this]() -> void {
-        PluginManagerDialog::managePlugins();
+        PluginManagerDialog::create();
     });
 
     const auto updateActionsReadOnly = [this]() -> void {

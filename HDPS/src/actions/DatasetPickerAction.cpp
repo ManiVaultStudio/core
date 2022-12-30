@@ -31,11 +31,11 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, 
 
     _eventListener.setEventCore(Application::core());
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAboutToBeRemoved));
+    //_eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAboutToBeRemoved));
     _eventListener.registerDataEvent([this](DataEvent* dataEvent) {
         switch (dataEvent->getType()) {
             case EventType::DataAdded:
-            case EventType::DataAboutToBeRemoved:
+            //case EventType::DataAboutToBeRemoved:
                 populateDatasetsFromCore();
                 break;
         }
@@ -248,6 +248,9 @@ QVariant DatasetPickerAction::DatasetsModel::data(const QModelIndex& index, int 
     const auto column   = static_cast<Column>(index.column());
     const auto dataset  = _datasets.at(index.row());
 
+    if (!dataset.isValid())
+        return QVariant();
+
     switch (role)
     {
         case Qt::DecorationRole:
@@ -258,7 +261,7 @@ QVariant DatasetPickerAction::DatasetsModel::data(const QModelIndex& index, int 
             switch (column)
             {
                 case Column::Name:
-                    return _showFullPathName ? dataset->getDataHierarchyItem().getFullPathName() : dataset->getGuiName();
+                    return dataset->getGuiName();// _showFullPathName ? dataset->getDataHierarchyItem().getFullPathName() : dataset->getGuiName();
 
                 case Column::GUID:
                     return dataset->getGuid();
