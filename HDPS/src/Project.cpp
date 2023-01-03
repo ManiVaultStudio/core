@@ -1,13 +1,23 @@
 #include "Project.h"
 
-#include <Application.h>
+#include "Application.h"
 
 namespace hdps {
 
 Project::Project(QObject* parent /*= nullptr*/) :
     QObject(parent),
-    Serializable("Project")
+    Serializable("Project"),
+    _filePath(),
+    _descriptionAction(this, "Description"),
+    _commentsAction(this, "Comments")
 {
+    _descriptionAction.setPlaceHolderString("Enter description here...");
+    _descriptionAction.setConnectionPermissionsToNone();
+    _descriptionAction.setClearable(true);
+
+    _commentsAction.setPlaceHolderString("Enter comments here...");
+    _commentsAction.setConnectionPermissionsToNone();
+    _commentsAction.setClearable(true);
 }
 
 QString Project::getFilePath() const

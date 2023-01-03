@@ -8,33 +8,33 @@
 namespace hdps {
 
 /**
- * Project class
+ * Workspace class
  *
  * TODO: Write description
  *
  * @author Thomas Kroes
  */
-class Project final : public QObject, public hdps::util::Serializable
+class Workspace final : public QObject, public hdps::util::Serializable
 {
     Q_OBJECT
 
 public:
 
     /**
-    * Construct project with \p parent
+    * Construct workspace with \p parent
     * @param parent Pointer to parent object
     */
-    Project(QObject* parent = nullptr);
+    Workspace(QObject* parent = nullptr);
 
     /**
-     * Get project file path
-     * @return Location on disk where the project resides
+     * Get workspace file path
+     * @return Location on disk where the workspace resides
      */
     QString getFilePath() const;
 
     /**
-     * Set project file path
-     * @param filePath Location on disk where the project resides
+     * Set workspace file path
+     * @param filePath Location on disk where the workspace resides
      */
     void setFilePath(const QString& filePath);
 
@@ -55,20 +55,20 @@ public: // Serialization
 public: // Action getters
 
     gui::StringAction& getDescriptionAction() { return _descriptionAction; }
-    gui::StringAction& getCommentsAction() { return _commentsAction; }
+    gui::StringsAction& getTagsAction() { return _tagsAction; }
 
 signals:
 
     /**
-     * Signals that the project file path changed
-     * @param filePath Location on disk where the project resides
+     * Signals that the workspace file path changed
+     * @param filePath Location on disk where the workspace resides
      */
     void filePathChanged(const QString& filePath);
 
 private:
-    QString             _filePath;              /** Location on disk where the project resides */
-    gui::StringAction   _descriptionAction;     /** Project description action */
-    gui::StringAction   _commentsAction;        /** Project comments action */
+    QString             _filePath;              /** Location on disk where the workspace resides */
+    gui::StringAction   _descriptionAction;     /** Work description action */
+    gui::StringsAction  _tagsAction;            /** Workspace tags action */
 };
 
 }

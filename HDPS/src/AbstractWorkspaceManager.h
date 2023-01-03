@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AbstractManager.h"
+#include "Workspace.h"
 
 #include <ViewPlugin.h>
 
@@ -147,7 +148,28 @@ public: // IO
     /** Save a workspace to disk on a different location */
     virtual void saveWorkspaceAs() = 0;
 
+    /**
+     * Get whether a workspace exists
+     * @return Boolean determining whether a workspace exists
+     */
+    virtual bool hasWorkspace() const = 0;
+
+    /**
+     * Get current workspace
+     * @return Pointer to workspace (nullptr if no workspace is loaded)
+     */
+    virtual const Workspace* getWorkspace() const = 0;
+
 signals:
+
+    /** Signals that a new workspace is about to be created */
+    void workspaceAboutToBeCreated();
+
+    /**
+     * Signals that \p workspace is created
+     * @param workspace Reference to the created workspace
+     */
+    void workspaceCreated(const hdps::Workspace& workspace);
 
     /**
      * Signals that a workspace is about to be loaded from \p filePath

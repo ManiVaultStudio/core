@@ -602,11 +602,13 @@ set(PUBLIC_UTIL_FILES
 set(PUBLIC_APPLICATION_HEADERS
     src/Application.h
     src/Project.h
+    src/Workspace.h
 )
 
 set(PUBLIC_APPLICATION_SOURCES
     src/Application.cpp
     src/Project.cpp
+    src/Workspace.cpp
 )
 
 set(PUBLIC_APPLICATION_FILES

@@ -91,6 +91,13 @@ public: // IO
     void loadWorkspace(QString filePath = "", bool addToRecentWorkspaces = true) override;
 
     /**
+     * Import a workspace from a project file
+     * @param filePath File path of the project (choose file path with dialog when empty)
+     * @param addToRecentWorkspaces Whether to add the workspace file path to the recent workspace file paths
+     */
+    void importWorkspaceFromProjectFile(QString filePath = "", bool addToRecentWorkspaces = true) override;
+
+    /**
      * Save a workspace to disk
      * @param filePath File path of the workspace (choose file path with dialog when empty)
      */
@@ -100,11 +107,16 @@ public: // IO
     void saveWorkspaceAs() override;
 
     /**
-     * Import a workspace from a project file
-     * @param filePath File path of the project (choose file path with dialog when empty)
-     * @param addToRecentWorkspaces Whether to add the workspace file path to the recent workspace file paths
+     * Get whether a workspace exists
+     * @return Boolean determining whether a workspace exists
      */
-    void importWorkspaceFromProjectFile(QString filePath = "", bool addToRecentWorkspaces = true) override;
+    bool hasWorkspace() const override;
+
+    /**
+     * Get current workspace
+     * @return Pointer to workspace (nullptr if no workspace is loaded)
+     */
+    const Workspace* getWorkspace() const override;
 
 public: // Serialization
 
@@ -131,6 +143,9 @@ public: // Menus
 
 private:
 
+    /** Creates a new workspace */
+    void createWorkspace();
+
     /** Create custom icon for the manager */
     void createIcon();
 
@@ -148,6 +163,7 @@ private:
     QImage getPreviewImageFromWorkspaceFile(const QString& workspaceFilePath) const;
 
 private:
+    QScopedPointer<hdps::Workspace>     _workspace;                             /** Current workspace */
     QPointer<DockManager>               _mainDockManager;                       /** Dock manager for docking system view plugins */
     QPointer<DockManager>               _viewPluginsDockManager;                /** Dock manager for docking non-system view plugins */
     QPointer<ViewPluginsDockWidget>     _viewPluginsDockWidget;                 /** Pointer to view plugins dock widget in which non-system view plugins are docked */

@@ -221,7 +221,8 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                 fileDialogLayout->addWidget(&image, rowCount, 1, 1, 2);
 
                 connect(&fileDialog, &QFileDialog::currentChanged, this, [this, &image](const QString& filePath) -> void {
-                    image.setPixmap(QPixmap::fromImage(getPreviewImageFromWorkspaceFile(filePath).scaledToWidth(650, Qt::SmoothTransformation)));
+                    if (QFileInfo(filePath).isFile())
+                        image.setPixmap(QPixmap::fromImage(getPreviewImageFromWorkspaceFile(filePath).scaledToWidth(650, Qt::SmoothTransformation)));
                 });
 
                 if (fileDialog.exec() == 0)
@@ -250,6 +251,45 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
     {
         exceptionMessageBox("Unable to load workspace");
     }
+}
+
+void WorkspaceManager::importWorkspaceFromProjectFile(QString filePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
+{
+    QTemporaryDir temporaryDirectory;
+
+    const auto temporaryDirectoryPath = temporaryDirectory.path();
+
+    Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
+    Application::setSerializationAborted(false);
+
+    if (filePath.isEmpty()) {
+        QFileDialog fileDialog;
+
+        fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+        fileDialog.setWindowTitle("Load project");
+        fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+        fileDialog.setFileMode(QFileDialog::ExistingFile);
+        fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
+        fileDialog.setDefaultSuffix(".hdps");
+        fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+
+        if (fileDialog.exec() == 0)
+            return;
+
+        if (fileDialog.selectedFiles().count() != 1)
+            throw std::runtime_error("Only one file may be selected");
+
+        filePath = fileDialog.selectedFiles().first();
+    }
+
+    Archiver archiver;
+
+    QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
+
+    archiver.extractSingleFile(filePath, "workspace.hws", workspaceFileInfo.absoluteFilePath());
+
+    if (workspaceFileInfo.exists())
+        loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 }
 
 void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
@@ -298,7 +338,8 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
                 fileDialogLayout->addWidget(tagsAction.createLabelWidget(nullptr), rowCount + 1, 0);
                 fileDialogLayout->addWidget(tagsAction.createWidget(nullptr), rowCount + 1, 1, 1, 2);
 
-                fileDialog.exec();
+                if (fileDialog.exec() == 0)
+                    return;
 
                 if (fileDialog.selectedFiles().count() != 1)
                     throw std::runtime_error("Only one file may be selected");
@@ -409,6 +450,17 @@ QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)
     return menu;
 }
 
+void WorkspaceManager::createWorkspace()
+{
+    emit workspaceAboutToBeCreated();
+    {
+        reset();
+
+        _workspace.reset(new Workspace());
+    }
+    emit workspaceCreated(*(_workspace.get()));
+}
+
 void WorkspaceManager::createIcon()
 {
     const auto size             = 128;
@@ -489,43 +541,14 @@ QImage WorkspaceManager::getPreviewImageFromWorkspaceFile(const QString& workspa
     }
 }
 
-void WorkspaceManager::importWorkspaceFromProjectFile(QString filePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
+bool WorkspaceManager::hasWorkspace() const
 {
-    QTemporaryDir temporaryDirectory;
+    return getWorkspace() != nullptr;
+}
 
-    const auto temporaryDirectoryPath = temporaryDirectory.path();
-
-    Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
-    Application::setSerializationAborted(false);
-
-    if (filePath.isEmpty()) {
-        QFileDialog fileDialog;
-
-        fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-        fileDialog.setWindowTitle("Load project");
-        fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-        fileDialog.setFileMode(QFileDialog::ExistingFile);
-        fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
-        fileDialog.setDefaultSuffix(".hdps");
-        fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
-
-        if (fileDialog.exec() == 0)
-            return;
-
-        if (fileDialog.selectedFiles().count() != 1)
-            throw std::runtime_error("Only one file may be selected");
-
-        filePath = fileDialog.selectedFiles().first();
-    }
-
-    Archiver archiver;
-
-    QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
-
-    archiver.extractSingleFile(filePath, "workspace.hws", workspaceFileInfo.absoluteFilePath());
-
-    if (workspaceFileInfo.exists())
-        loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
+const hdps::Workspace* WorkspaceManager::getWorkspace() const
+{
+    return _workspace.get();
 }
 
 }
