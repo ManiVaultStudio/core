@@ -26,7 +26,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _treeView(this),
     _infoOverlayWidget(&_treeView),
     _noItemsDescription(""),
-    _filterNameAction(this, "Name filter"),
+    _filterNameAction(this, "Name"),
     _filterGroupAction(this),
     _filterCaseSensitiveAction(this, "Case-sensitive", false, false),
     _filterRegularExpressionAction(this, "Regular expression", false, false),
@@ -35,11 +35,12 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _selectAllAction(this, "Select all"),
     _selectNoneAction(this, "Select none"),
     _selectionGroupAction(this),
-    _columnsAction(this),
+    _columnsGroupAction(this),
     _settingsGroupAction(this)
 {
     _filterNameAction.setSearchMode(true);
     _filterNameAction.setClearable(true);
+    _filterNameAction.setConnectionPermissionsToNone();
 
     _filterGroupAction.setText("Filtering");
     _filterGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
@@ -50,6 +51,9 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
     _filterRegularExpressionAction.setToolTip("Enable/disable search filter with regular expression");
     _filterRegularExpressionAction.setConnectionPermissionsToNone();
+
+    if (_filterModel)
+        _filterGroupAction << _filterNameAction;
 
     _filterGroupAction << _filterCaseSensitiveAction;
     _filterGroupAction << _filterRegularExpressionAction;
@@ -71,10 +75,10 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _selectionGroupAction << _selectAllAction;
     _selectionGroupAction << _selectNoneAction;
 
-    _columnsAction.setText("Columns");
-    _columnsAction.setToolTip(QString("Edit which %1s hierarchy columns should be visible").arg(_itemTypeName.toLower()));
-    _columnsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("columns"));
-    _columnsAction.setShowLabels(false);
+    _columnsGroupAction.setText("Columns");
+    _columnsGroupAction.setToolTip(QString("Edit which %1s hierarchy columns should be visible").arg(_itemTypeName.toLower()));
+    _columnsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("columns"));
+    _columnsGroupAction.setShowLabels(false);
 
     auto selectAllCollumns = new TriggerAction(this, "Select all");
 
@@ -93,7 +97,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
     connect(selectAllCollumns, &TriggerAction::triggered, this, [this]() -> void {
         for (std::int32_t columnIndex = 0; columnIndex < _model.columnCount(); columnIndex++)
-            _columnsAction.getActions()[columnIndex]->setChecked(true);
+            _columnsGroupAction.getActions()[columnIndex]->setChecked(true);
     });
 
     for (std::int32_t columnIndex = 0; columnIndex < _model.columnCount(); columnIndex++) {
@@ -108,13 +112,13 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
             updateSelectAllCollumnsReadOnly();
         });
 
-        _columnsAction << *columnVisibilityAction;
+        _columnsGroupAction << *columnVisibilityAction;
     }
 
-    _columnsAction << *selectAllCollumns;
+    _columnsGroupAction << *selectAllCollumns;
 
     connect(&_treeView, &HierarchyWidgetTreeView::columnHiddenChanged, this, [this](int column, bool hide) -> void {
-        auto columnAction = _columnsAction.getActions()[column];
+        auto columnAction = _columnsGroupAction.getActions()[column];
 
         if (columnAction->isChecked() == hide)
             columnAction->setChecked(!hide);
@@ -144,7 +148,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
         toolbarLayout->addWidget(_expandAllAction.createWidget(this));
         toolbarLayout->addWidget(_collapseAllAction.createWidget(this));
         toolbarLayout->addWidget(_selectionGroupAction.createCollapsedWidget(this));
-        toolbarLayout->addWidget(_columnsAction.createCollapsedWidget(this));
+        toolbarLayout->addWidget(_columnsGroupAction.createCollapsedWidget(this));
         toolbarLayout->addWidget(_settingsGroupAction.createCollapsedWidget(this));
 
         //auto testTriggerAction = new TriggerAction(this, "test");
@@ -197,10 +201,10 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
         _filterNameAction.setEnabled(_model.rowCount() >= 1);
         _filterGroupAction.setEnabled(_model.rowCount() >= 1);
         _selectionGroupAction.setEnabled(hasItems);
-        _columnsAction.setEnabled(hasItems);
+        _columnsGroupAction.setEnabled(hasItems);
         _settingsGroupAction.setEnabled(hasItems);
 
-        _treeView.setHeaderHidden(!hasItems);
+        _treeView.setHeaderHidden(_headerHidden || !hasItems);
         
         updateExpandCollapseActionsReadOnly();
         updateOverlayWidget();
@@ -240,6 +244,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     connect(&_filterNameAction, &StringAction::stringChanged, this, updateFilterModel);
     connect(&_filterCaseSensitiveAction, &ToggleAction::toggled, this, updateFilterModel);
     connect(&_filterRegularExpressionAction, &ToggleAction::toggled, this, updateFilterModel);
+    connect(&_model, &QAbstractItemModel::layoutChanged, this, updateFilterModel);
 
     const auto connectExpandCollapseActionsReadOnly = [this]() -> void {
         connect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
@@ -478,6 +483,19 @@ void HierarchyWidget::updateExpandCollapseActionsReadOnly()
 
     _expandAllAction.setEnabled(hasItems && mayExpandAll());
     _collapseAllAction.setEnabled(hasItems && mayCollapseAll());
+}
+
+bool HierarchyWidget::getHeaderHidden() const
+{
+    return _headerHidden;
+}
+
+void HierarchyWidget::setHeaderHidden(bool headerHidden)
+{
+    _headerHidden = headerHidden;
+
+    if (_headerHidden)
+        _treeView.setHeaderHidden(true);
 }
 
 }

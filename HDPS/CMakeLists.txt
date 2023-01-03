@@ -383,6 +383,7 @@ set(PUBLIC_ACTIONS_HEADERS
     src/actions/TriggersAction.h
     src/actions/ToggleAction.h
     src/actions/StringAction.h
+    src/actions/StringsAction.h
     src/actions/WidgetAction.h
     src/actions/WidgetActionWidget.h
     src/actions/WidgetActionCollapsedWidget.h
@@ -436,6 +437,7 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/TriggersAction.cpp
     src/actions/ToggleAction.cpp
     src/actions/StringAction.cpp
+    src/actions/StringsAction.cpp
     src/actions/WidgetAction.cpp
     src/actions/WidgetActionWidget.cpp
     src/actions/WidgetActionCollapsedWidget.cpp

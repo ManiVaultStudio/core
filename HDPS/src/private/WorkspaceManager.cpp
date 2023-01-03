@@ -7,6 +7,8 @@
 
 #include <Application.h>
 
+#include <actions/StringsAction.h>
+
 #include <util/Serialization.h>
 #include <util/Icon.h>
 
@@ -17,6 +19,7 @@
 #include <QStandardPaths>
 #include <QBuffer>
 #include <QTemporaryDir>
+#include <QListWidget>
 
 #ifdef _DEBUG
     #define WORKSPACE_MANAGER_VERBOSE
@@ -271,6 +274,29 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
                 fileDialog.setDefaultSuffix(".hws");
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
                 fileDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+                fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+                fileDialog.setMinimumHeight(500);
+
+                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
+                auto rowCount           = fileDialogLayout->rowCount();
+
+                StringAction descriptionAction(this, "Description");
+
+                descriptionAction.setPlaceHolderString("Enter description here...");
+                descriptionAction.setConnectionPermissionsToNone();
+                descriptionAction.setClearable(true);
+
+                fileDialogLayout->addWidget(descriptionAction.createLabelWidget(nullptr), rowCount, 0);
+                fileDialogLayout->addWidget(descriptionAction.createWidget(nullptr), rowCount, 1, 1, 2);
+
+                StringsAction tagsAction(this, "Tags");
+
+                tagsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tag"));
+                tagsAction.setCategory("Tag");
+                tagsAction.setConnectionPermissionsToNone();
+
+                fileDialogLayout->addWidget(tagsAction.createLabelWidget(nullptr), rowCount + 1, 0);
+                fileDialogLayout->addWidget(tagsAction.createWidget(nullptr), rowCount + 1, 1, 1, 2);
 
                 fileDialog.exec();
 

@@ -104,6 +104,18 @@ public:
     void setNoItemsDescription(const QString& noItemsDescription);
 
     /**
+     * Get whether the header view is visible or not
+     * @return Boolean determining whether the header view is visible or not
+     */
+    bool getHeaderHidden() const;
+
+    /**
+     * Set whether the header view is visible or not
+     * @param headerHidden Boolean determining whether the header view is visible or not
+     */
+    void setHeaderHidden(bool headerHidden);
+
+    /**
      * Get input model
      * @return Input model
      */
@@ -185,10 +197,18 @@ public:
 
     /**
      * Get selection group action
-     * @return Reference to selection group
+     * @return Reference to selection group action
      */
     GroupAction& getSelectionGroupAction() {
         return _selectionGroupAction;
+    }
+
+    /**
+     * Get columns group action
+     * @return Reference to columns group action
+     */
+    GroupAction& getColumnsGroupAction() {
+        return _columnsGroupAction;
     }
 
     /**
@@ -271,6 +291,7 @@ private:
 
 private:
     QString                     _itemTypeName;                      /** Name of the item type */
+    bool                        _headerHidden;                      /** Whether the header view is visible or not */
     const QAbstractItemModel&   _model;                             /** Model containing data to be displayed in the hierarchy */
     QSortFilterProxyModel*      _filterModel;                       /** Pointer to filter model (maybe nullptr) */
     QItemSelectionModel         _selectionModel;                    /** Selection model */
@@ -286,7 +307,7 @@ private:
     TriggerAction               _selectAllAction;                   /** Select all action */
     TriggerAction               _selectNoneAction;                  /** Select none action */
     GroupAction                 _selectionGroupAction;              /** Selection group action */
-    GroupAction                 _columnsAction;                     /** Column visibility action */
+    GroupAction                 _columnsGroupAction;                /** Column visibility action */
     GroupAction                 _settingsGroupAction;               /** Settings group action */
 };
 

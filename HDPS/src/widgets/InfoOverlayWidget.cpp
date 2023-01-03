@@ -40,6 +40,9 @@ void InfoOverlayWidget::set(const QIcon& icon, const QString& title, const QStri
     _iconLabel.setPixmap(icon.pixmap(QSize(24, 24)));
     _titleLabel.setText(title);
     _descriptionLabel.setText(description);
+
+    //_titleLabel.setVisible(!_titleLabel.text().isEmpty());
+    //_descriptionLabel.setVisible(!_descriptionLabel.text().isEmpty());
 }
 
 void InfoOverlayWidget::setColor(const QColor color)
