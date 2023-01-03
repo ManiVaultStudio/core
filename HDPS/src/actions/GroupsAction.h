@@ -180,7 +180,7 @@ public: // Adding/removing group action(s)
     void setGroupActions(const GroupActions& groupActions);
 
     /**
-     * Reset group actions
+     * Reset group actions to default
      */
     void resetGroupActions();
 

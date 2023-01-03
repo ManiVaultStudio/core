@@ -5,6 +5,8 @@
 
 #include <util/Exception.h>
 
+#include <QStandardPaths>
+
 using namespace hdps::gui;
 using namespace hdps::util;
 
@@ -17,7 +19,7 @@ namespace hdps
 
 SettingsManager::SettingsManager() :
     AbstractSettingsManager(),
-    _editSettingsAction(this, "Edit"),
+    _editSettingsAction(this, "Settings..."),
     _globalProjectsPathAction(this, "Projects"),
     _globalWorkspacesPathAction(this, "Workspaces"),
     _globalDataPathAction(this, "Data")
@@ -26,6 +28,31 @@ SettingsManager::SettingsManager() :
     _editSettingsAction.setShortcut(QKeySequence("Ctrl+P"));
     _editSettingsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
+    _globalProjectsPathAction.setConnectionPermissionsToNone();
+    _globalWorkspacesPathAction.setConnectionPermissionsToNone();
+    _globalDataPathAction.setConnectionPermissionsToNone();
+
+    _globalProjectsPathAction.setSettingsPrefix("Settings/Paths/Projects", true);
+    _globalWorkspacesPathAction.setSettingsPrefix("Settings/Paths/Workspaces", true);
+    _globalDataPathAction.setSettingsPrefix("Settings/Paths/Data", true);
+
+    const auto makeDirIfNotExist = [](const QString& pathToDirectory) -> void {
+        QDir dir(pathToDirectory);
+
+        if (!dir.exists())
+            dir.mkpath(".");
+    };
+
+    qDebug() << QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    qDebug() << QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+
+    if (!QFileInfo(_globalProjectsPathAction.getDirectory()).exists()) {
+        const auto projectsDir = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first();// +"/HDPS/Projects";
+
+        makeDirIfNotExist(projectsDir);
+        _globalProjectsPathAction.setDirectory(projectsDir);
+    }
+        
     connect(&_editSettingsAction, &TriggerAction::triggered, this, &SettingsManager::edit);
 
     auto mainWindow = Application::topLevelWidgets().first();

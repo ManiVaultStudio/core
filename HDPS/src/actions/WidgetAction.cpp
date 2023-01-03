@@ -367,7 +367,6 @@ QVector<WidgetAction*> WidgetAction::findChildren(const QString& searchString, b
     QVector<WidgetAction*> foundChildren;
 
     for (auto child : children()) {
-
         auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
 
         if (!childWidgetAction)

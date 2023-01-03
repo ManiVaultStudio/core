@@ -9,7 +9,7 @@
 #include <util/Serialization.h>
 
 #ifdef _DEBUG
-    //#define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
+    #define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
 #endif
 
 using namespace ads;
@@ -57,6 +57,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
 {
     active << this;
 
+    setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
     initialize();
     setViewPlugin(viewPlugin);
     initializeSettingsMenu();
@@ -71,13 +72,16 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QVariantMap& variantMap) :
 {
     active << this;
 
+    setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
     initialize();
     fromVariantMap(variantMap);
-    setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
 }
 
 ViewPluginDockWidget::~ViewPluginDockWidget()
 {
+#ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__ << windowTitle();
+#endif
 }
 
 QString ViewPluginDockWidget::getTypeString() const
@@ -88,12 +92,14 @@ QString ViewPluginDockWidget::getTypeString() const
 void ViewPluginDockWidget::initialize()
 {
     connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
-        for (auto viewPluginDockWidget : active)
-            if (viewPluginDockWidget->getViewPlugin() == plugin)
-                active.removeOne(this);
-
         if (plugin != _viewPlugin)
             return;
+
+#ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
+        qDebug() << "Remove active view plugin dock widget" << plugin->getGuiName();
+#endif
+
+        active.removeOne(this);
 
         takeWidget();
     });

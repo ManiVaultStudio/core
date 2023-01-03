@@ -40,6 +40,11 @@ int main(int argc, char *argv[])
     QSurfaceFormat::setDefaultFormat(defaultFormat);
 #endif
 
+    QSurfaceFormat format;
+    format.setDepthBufferSize(24);
+    format.setVersion(4, 1);
+    QSurfaceFormat::setDefaultFormat(format);
+
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 
     hdps::Application application(argc, argv);

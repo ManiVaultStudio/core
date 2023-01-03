@@ -123,7 +123,9 @@ void MainWindow::setDefaultWindowGeometry(const float& coverage /*= 0.7f*/) {
 
 void MainWindow::checkGraphicsCapabilities()
 {
-    return;
+#ifdef MAIN_WINDOW_VERBOSE
+    qDebug() << "Checking graphics card capabilities";
+#endif
 
     QOffscreenSurface surf;
     surf.create();
