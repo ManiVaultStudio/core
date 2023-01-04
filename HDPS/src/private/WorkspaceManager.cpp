@@ -43,7 +43,7 @@ WorkspaceManager::WorkspaceManager() :
     _loadWorkspaceAction(this, "Load"),
     _saveWorkspaceAction(this, "Save"),
     _saveWorkspaceAsAction(this, "Save As..."),
-    _editWorkspaceAction(this, "Settings..."),
+    _editWorkspaceSettingsAction(this, "Workspace Settings..."),
     _importWorkspaceFromProjectAction(this, "Import from project"),
     _recentWorkspacesAction(this),
     _icon()
@@ -72,20 +72,15 @@ WorkspaceManager::WorkspaceManager() :
     _saveWorkspaceAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveWorkspaceAsAction.setToolTip("Save workspace under a new file to disk");
 
-    _editWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+P"));
-    _editWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
-    _editWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
-    _editWorkspaceAction.setConnectionPermissionsToNone();
+    _editWorkspaceSettingsAction.setShortcut(QKeySequence("Ctrl+Alt+P"));
+    _editWorkspaceSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
+    _editWorkspaceSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _editWorkspaceSettingsAction.setConnectionPermissionsToNone();
 
     _importWorkspaceFromProjectAction.setShortcut(QKeySequence("Ctrl+Alt+I"));
     _importWorkspaceFromProjectAction.setShortcutContext(Qt::ApplicationShortcut);
     _importWorkspaceFromProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
     _importWorkspaceFromProjectAction.setToolTip("Import workspace from project");
-
-    connect(&_editWorkspaceAction, &TriggerAction::triggered, this, []() -> void {
-        WorkspaceSettingsDialog workspaceSettingsDialog;
-        workspaceSettingsDialog.exec();
-    });
 
     auto mainWindow = Application::topLevelWidgets().first();
 
@@ -94,7 +89,7 @@ WorkspaceManager::WorkspaceManager() :
     mainWindow->addAction(&_saveWorkspaceAction);
     mainWindow->addAction(&_saveWorkspaceAsAction);
     mainWindow->addAction(&_importWorkspaceFromProjectAction);
-    mainWindow->addAction(&_editWorkspaceAction);
+    mainWindow->addAction(&_editWorkspaceSettingsAction);
 
     connect(&_newWorkspaceAction, &TriggerAction::triggered, [this](bool) {
         newWorkspace();
@@ -110,6 +105,11 @@ WorkspaceManager::WorkspaceManager() :
 
     connect(&_saveWorkspaceAsAction, &TriggerAction::triggered, [this](bool) {
         saveWorkspaceAs();
+    });
+
+    connect(&_editWorkspaceSettingsAction, &TriggerAction::triggered, this, []() -> void {
+        WorkspaceSettingsDialog workspaceSettingsDialog;
+        workspaceSettingsDialog.exec();
     });
 
     connect(&_importWorkspaceFromProjectAction, &TriggerAction::triggered, [this](bool) {
@@ -239,20 +239,49 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                 fileDialog.setDefaultSuffix(".hws");
                 fileDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-                fileDialog.setMinimumHeight(700);
+                fileDialog.setMinimumHeight(400);
 
-                auto fileDialogLayout = dynamic_cast<QGridLayout*>(fileDialog.layout());
-                auto rowCount = fileDialogLayout->rowCount();
+                StringAction descriptionAction(this, "Description");
+                StringAction tagsAction(this, "Tags");
+                StringAction commentsAction(this, "Comments");
 
-                QLabel label("Preview:");
-                QLabel image("");
+                descriptionAction.setEnabled(false);
+                tagsAction.setEnabled(false);
+                commentsAction.setEnabled(false);
 
-                fileDialogLayout->addWidget(&label, rowCount, 0);
-                fileDialogLayout->addWidget(&image, rowCount, 1, 1, 2);
+                descriptionAction.setConnectionPermissionsToNone();
+                tagsAction.setConnectionPermissionsToNone();
+                commentsAction.setConnectionPermissionsToNone();
 
-                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, &image](const QString& filePath) -> void {
-                    if (QFileInfo(filePath).isFile())
-                        image.setPixmap(QPixmap::fromImage(Workspace::getPreviewImage(filePath).scaledToWidth(650, Qt::SmoothTransformation)));
+                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
+                auto rowCount           = fileDialogLayout->rowCount();
+
+                fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileDialog), rowCount, 0);
+                fileDialogLayout->addWidget(descriptionAction.createWidget(&fileDialog), rowCount, 1, 1, 2);
+
+                fileDialogLayout->addWidget(tagsAction.createLabelWidget(&fileDialog), rowCount + 1, 0);
+                fileDialogLayout->addWidget(tagsAction.createWidget(&fileDialog), rowCount + 1, 1, 1, 2);
+
+                fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileDialog), rowCount + 2, 0);
+                fileDialogLayout->addWidget(commentsAction.createWidget(&fileDialog), rowCount + 2, 1, 1, 2);
+
+                //QLabel label("Preview:");
+                //QLabel image("");
+
+                //fileDialogLayout->addWidget(&label, rowCount, 0);
+                //fileDialogLayout->addWidget(&image, rowCount, 1, 1, 2);
+
+                connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
+                    if (!QFileInfo(filePath).isFile())
+                        return;
+
+                    Workspace workspace(filePath);
+
+                    descriptionAction.setString(workspace.getDescriptionAction().getString());
+                    tagsAction.setString(workspace.getTagsAction().getStrings().join(", "));
+                    commentsAction.setString(workspace.getDescriptionAction().getString());
+
+                    //    image.setPixmap(QPixmap::fromImage(Workspace::getPreviewImage(filePath).scaledToWidth(650, Qt::SmoothTransformation)));
                 });
 
                 if (fileDialog.exec() == 0)
@@ -491,7 +520,7 @@ QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)
     menu->addAction(&_saveWorkspaceAction);
     menu->addAction(&_saveWorkspaceAsAction);
     menu->addSeparator();
-    menu->addAction(&_editWorkspaceAction);
+    menu->addAction(&_editWorkspaceSettingsAction);
     menu->addSeparator();
     menu->addAction(&_importWorkspaceFromProjectAction);
     menu->addSeparator();

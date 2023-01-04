@@ -1,6 +1,7 @@
 #include "ProjectManager.h"
 #include "Archiver.h"
 #include "PluginManagerDialog.h"
+#include "ProjectSettingsDialog.h"
 
 #include <Application.h>
 
@@ -35,6 +36,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _importProjectAction(nullptr, "Import Project"),
     _saveProjectAction(nullptr, "Save Project"),
     _saveProjectAsAction(nullptr, "Save Project As..."),
+    _editProjectSettingsAction(nullptr, "Project Settings..."),
     _recentProjectsAction(nullptr),
     _importDataMenu(),
     _publishAction(nullptr, "Publish"),
@@ -65,6 +67,11 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _saveProjectAsAction.setShortcutContext(Qt::ApplicationShortcut);
     _saveProjectAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveProjectAsAction.setToolTip("Save project to disk in a chosen location");
+
+    _editProjectSettingsAction.setShortcut(QKeySequence("Ctrl+Alt+P"));
+    _editProjectSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
+    _editProjectSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _editProjectSettingsAction.setConnectionPermissionsToNone();
 
     _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
     _importDataMenu.setTitle("Import data...");
@@ -126,15 +133,21 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
         saveProjectAs();
     });
 
+    connect(&_editProjectSettingsAction, &TriggerAction::triggered, this, []() -> void {
+        ProjectSettingsDialog projectSettingsDialog;
+        projectSettingsDialog.exec();
+    });
+
     connect(&_pluginManagerAction, &TriggerAction::triggered, this, [this]() -> void {
         PluginManagerDialog::create();
     });
 
     const auto updateActionsReadOnly = [this]() -> void {
-        _saveProjectAction.setEnabled(!_project.isNull());
-        _saveProjectAsAction.setEnabled(!_project.isNull());
-        _saveProjectAsAction.setEnabled(!_project.isNull() && !_project->getFilePath().isEmpty());
-        _importProjectAction.setEnabled(!_project.isNull());
+        _saveProjectAction.setEnabled(hasProject());
+        _saveProjectAsAction.setEnabled(hasProject());
+        _saveProjectAsAction.setEnabled(hasProject() && !_project->getFilePath().isEmpty());
+        _editProjectSettingsAction.setEnabled(hasProject());
+        _importProjectAction.setEnabled(hasProject());
     };
 
     connect(this, &ProjectManager::projectCreated, this, updateActionsReadOnly);
@@ -229,6 +242,42 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
                 fileDialog.setDefaultSuffix(".hdps");
                 fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+                fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+                StringAction descriptionAction(this, "Description");
+                StringAction tagsAction(this, "Tags");
+                StringAction commentsAction(this, "Comments");
+
+                descriptionAction.setEnabled(false);
+                tagsAction.setEnabled(false);
+                commentsAction.setEnabled(false);
+
+                descriptionAction.setConnectionPermissionsToNone();
+                tagsAction.setConnectionPermissionsToNone();
+                commentsAction.setConnectionPermissionsToNone();
+
+                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
+                auto rowCount           = fileDialogLayout->rowCount();
+
+                fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileDialog), rowCount, 0);
+                fileDialogLayout->addWidget(descriptionAction.createWidget(&fileDialog), rowCount, 1, 1, 2);
+
+                fileDialogLayout->addWidget(tagsAction.createLabelWidget(&fileDialog), rowCount + 1, 0);
+                fileDialogLayout->addWidget(tagsAction.createWidget(&fileDialog), rowCount + 1, 1, 1, 2);
+
+                fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileDialog), rowCount + 2, 0);
+                fileDialogLayout->addWidget(commentsAction.createWidget(&fileDialog), rowCount + 2, 1, 1, 2);
+
+                connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
+                    if (!QFileInfo(filePath).isFile())
+                        return;
+
+                    Project project(filePath);
+
+                    descriptionAction.setString(project.getDescriptionAction().getString());
+                    tagsAction.setString(project.getTagsAction().getStrings().join(", "));
+                    commentsAction.setString(project.getDescriptionAction().getString());
+                });
 
                 if (fileDialog.exec() == 0)
                     return;
@@ -504,6 +553,11 @@ bool ProjectManager::hasProject() const
 }
 
 const hdps::Project* ProjectManager::getProject() const
+{
+    return _project.get();
+}
+
+hdps::Project* ProjectManager::getProject()
 {
     return _project.get();
 }

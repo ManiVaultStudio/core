@@ -49,15 +49,15 @@ Workspace::Workspace(const QString& filePath, QObject* parent /*= nullptr*/) :
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
             throw std::runtime_error("JSON document is invalid");
 
-        fromVariantMap(jsonDocument.toVariant().toMap());
+        fromVariantMap(jsonDocument.toVariant().toMap()["Workspace"].toMap());
     }
     catch (std::exception& e)
     {
-        qDebug() << "Unable to load a workspace from file" << e.what();
+        qDebug() << "Unable to load workspace from file" << e.what();
     }
     catch (...)
     {
-        qDebug() << "Unable to load a workspace from file";
+        qDebug() << "Unable to load workspace from file";
     }
 }
 
@@ -135,7 +135,7 @@ QImage Workspace::getPreviewImage(const QString& filePath)
 
 void Workspace::initialize()
 {
-    _descriptionAction.setPlaceHolderString("Enter description here...");
+    _descriptionAction.setPlaceHolderString("Enter workspace description here...");
     _descriptionAction.setConnectionPermissionsToNone();
     _descriptionAction.setClearable(true);
 
@@ -143,7 +143,7 @@ void Workspace::initialize()
     _tagsAction.setCategory("Tag");
     _tagsAction.setConnectionPermissionsToNone();
 
-    _commentsAction.setPlaceHolderString("Enter comments here...");
+    _commentsAction.setPlaceHolderString("Enter workspace comments here...");
     _commentsAction.setConnectionPermissionsToNone();
     _commentsAction.setClearable(true);
     _commentsAction.setDefaultWidgetFlags(StringAction::TextEdit);

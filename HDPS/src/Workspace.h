@@ -28,7 +28,7 @@ public:
 
     /**
      * Construct workspace with \p parent and load from \p filePath
-     * @param filePath Path of the work space file
+     * @param filePath Path of the workspace file
      * @param parent Pointer to parent object
      */
     Workspace(const QString& filePath, QObject* parent = nullptr);

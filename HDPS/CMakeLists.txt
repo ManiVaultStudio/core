@@ -174,11 +174,13 @@ set(PRIVATE_ACTIONS_MANAGER_FILES
 set(PRIVATE_PROJECT_MANAGER_HEADERS
     src/private/ProjectManager.h
     src/private/ProjectWidget.h
+    src/private/ProjectSettingsDialog.h
 )
 
 set(PRIVATE_PROJECT_MANAGER_SOURCES
     src/private/ProjectManager.cpp
     src/private/ProjectWidget.cpp
+    src/private/ProjectSettingsDialog.cpp
 )
 
 set(PRIVATE_PROJECT_MANAGER_FILES

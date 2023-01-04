@@ -72,6 +72,12 @@ public:
      */
     virtual const Project* getProject() const = 0;
 
+    /**
+     * Get current project
+     * @return Pointer to project (nullptr if no project is loaded)
+     */
+    virtual Project* getProject() = 0;
+
 public: // Menus
 
     /**
@@ -87,6 +93,7 @@ public: // Action getters
     virtual hdps::gui::TriggerAction& getImportProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getSaveProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getSaveProjectAsAction() = 0;
+    virtual hdps::gui::TriggerAction& getEditProjectSettingsAction() = 0;
     virtual hdps::gui::RecentFilesAction& getRecentProjectsAction() = 0;
     virtual hdps::gui::TriggerAction& getPublishAction() = 0;
     virtual hdps::gui::TriggerAction& getPluginManagerAction() = 0;

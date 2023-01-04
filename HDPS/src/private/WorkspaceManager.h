@@ -171,7 +171,7 @@ private:
     hdps::gui::TriggerAction            _loadWorkspaceAction;                   /** Action for loading a workspace from file */
     hdps::gui::TriggerAction            _saveWorkspaceAction;                   /** Action for saving the current workspace to file */
     hdps::gui::TriggerAction            _saveWorkspaceAsAction;                 /** Action for saving the current workspace to file with a different path */
-    hdps::gui::TriggerAction            _editWorkspaceAction;                   /** Action for triggering the workspace settings dialog */
+    hdps::gui::TriggerAction            _editWorkspaceSettingsAction;           /** Action for triggering the workspace settings dialog */
     hdps::gui::TriggerAction            _importWorkspaceFromProjectAction;      /** Action for importing a workspace from a project file */
     hdps::gui::RecentFilesAction        _recentWorkspacesAction;                /** Action for saving the current workspace to file with a different path */
     QIcon                               _icon;                                  /** Manager icon */

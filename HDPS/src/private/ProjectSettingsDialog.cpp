@@ -1,34 +1,34 @@
-#include "WorkspaceSettingsDialog.h"
+#include "ProjectSettingsDialog.h"
 
-#include <AbstractWorkspaceManager.h>
+#include <AbstractProjectManager.h>
 
 #include <Application.h>
 
 #include <QVBoxLayout>
 
 #ifdef _DEBUG
-    #define WORKSPACE_SETTINGS_DIALOG_VERBOSE
+    #define PROJECT_SETTINGS_DIALOG_VERBOSE
 #endif
 
 using namespace hdps;
 using namespace hdps::gui;
 
-WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) :
+ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _groupAction(this),
     _okAction(this, "Ok")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);
-    setWindowTitle("Workspace Settings");
+    setWindowTitle("Project Settings");
 
     _groupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-    const auto workspace = Application::core()->getWorkspaceManager().getWorkspace();
+    const auto project = Application::core()->getProjectManager().getProject();
 
-    _groupAction << workspace->getDescriptionAction();
-    _groupAction << workspace->getTagsAction();
-    _groupAction << workspace->getCommentsAction();
+    _groupAction << project->getDescriptionAction();
+    _groupAction << project->getTagsAction();
+    _groupAction << project->getCommentsAction();
 
     auto layout = new QVBoxLayout();
 
@@ -47,5 +47,5 @@ WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) 
 
     setLayout(layout);
 
-    connect(&_okAction, &TriggerAction::triggered, this, &WorkspaceSettingsDialog::accept);
+    connect(&_okAction, &TriggerAction::triggered, this, &ProjectSettingsDialog::accept);
 }

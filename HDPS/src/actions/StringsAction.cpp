@@ -151,6 +151,8 @@ StringsAction::Widget::Widget(QWidget* parent, StringsAction* stringsAction, con
     _addAction(this),
     _removeAction(this)
 {
+    resize(0, 150);
+
     _hierarchyWidget.getTreeView().setRootIsDecorated(false);
     _hierarchyWidget.setWindowIcon(stringsAction->icon());
     _hierarchyWidget.setHeaderHidden(true);
