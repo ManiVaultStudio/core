@@ -171,10 +171,16 @@ void RecentFilesAction::Model::loadFromSettings()
         shortcutIndex++;
     }
 
-    for (const auto& column : columnInfo.keys()) {
-        setHeaderData(static_cast<int>(column), Qt::Horizontal, columnInfo[column].first);
-        setHeaderData(static_cast<int>(column), Qt::Horizontal, columnInfo[column].first, Qt::DecorationRole);
-    }
+    const auto setHeader = [this](Column column) -> void {
+        auto headerItem = new QStandardItem(columnInfo[column].first);
+
+        headerItem->setToolTip(columnInfo[column].second);
+
+        setHorizontalHeaderItem(static_cast<int>(column), headerItem);
+    };
+    
+    setHeader(Column::FilePath);
+    setHeader(Column::DateTime);
 }
 
 void RecentFilesAction::Model::addRecentFilePath(const QString& filePath)

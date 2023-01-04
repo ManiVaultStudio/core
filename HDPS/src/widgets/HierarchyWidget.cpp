@@ -20,6 +20,7 @@ namespace hdps::gui
 HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, const QAbstractItemModel& model, QSortFilterProxyModel* filterModel /*= nullptr*/, bool showToolbar /*= true*/, bool showOverlay /*= true*/) :
     QWidget(parent),
     _itemTypeName(itemTypeName),
+    _headerHidden(false),
     _model(model),
     _filterModel(filterModel),
     _selectionModel(_filterModel != nullptr ? _filterModel : const_cast<QAbstractItemModel*>(&_model)),

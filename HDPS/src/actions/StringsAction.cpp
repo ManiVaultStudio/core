@@ -268,6 +268,8 @@ StringsAction::Widget::Widget(QWidget* parent, StringsAction* stringsAction, con
 
     updateModel(stringsAction->getStrings());
     updateActions();
+
+    emit _model.layoutChanged();
 }
 
 }

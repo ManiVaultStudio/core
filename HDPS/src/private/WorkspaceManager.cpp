@@ -444,7 +444,10 @@ Workspace* WorkspaceManager::getWorkspace()
 
 void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 {
+    getWorkspace()->fromVariantMap(variantMap);
+
     variantMapMustContain(variantMap, "DockManagers");
+    variantMapMustContain(variantMap, "PreviewImage");
 
     const auto dockingManagersMap = variantMap["DockManagers"].toMap();
 
@@ -453,17 +456,11 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 
     _mainDockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
     _viewPluginsDockManager->fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
-
-    variantMapMustContain(variantMap, "Description");
-    variantMapMustContain(variantMap, "Tags");
-
-    getWorkspace()->getDescriptionAction().fromVariantMap(variantMap["Description"].toMap());
-    getWorkspace()->getTagsAction().fromVariantMap(variantMap["Tags"].toMap());
 }
 
 QVariantMap WorkspaceManager::toVariantMap() const
 {
-    auto workspaceMap = getWorkspace()->getDescriptionAction().toVariantMap();
+    auto workspaceMap = getWorkspace()->toVariantMap();
 
     workspaceMap["DockManagers"] = QVariantMap {
         { "Main", _mainDockManager->toVariantMap() },

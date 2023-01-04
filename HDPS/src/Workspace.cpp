@@ -3,7 +3,10 @@
 
 #include "Application.h"
 
+#include "util/Serialization.h"
+
 using namespace hdps::gui;
+using namespace hdps::util;
 
 namespace hdps {
 
@@ -72,15 +75,13 @@ void Workspace::setFilePath(const QString& filePath)
 
 void Workspace::fromVariantMap(const QVariantMap& variantMap)
 {
-    //auto core = Application::core();
+    variantMapMustContain(variantMap, "Description");
+    variantMapMustContain(variantMap, "Tags");
+    variantMapMustContain(variantMap, "Comments");
 
-    //auto& pluginManager         = core->getPluginManager();
-    //auto& dataHierarchyManager  = core->getDataHierarchyManager();
-    //auto& actionsManager        = core->getActionsManager();
-
-    //pluginManager.fromVariantMap(variantMap[pluginManager.getSerializationName()].toMap());
-    //dataHierarchyManager.fromVariantMap(variantMap[dataHierarchyManager.getSerializationName()].toMap());
-    //actionsManager.fromVariantMap(variantMap[actionsManager.getSerializationName()].toMap());
+    _descriptionAction.fromVariantMap(variantMap["Description"].toMap());
+    _tagsAction.fromVariantMap(variantMap["Tags"].toMap());
+    _commentsAction.fromVariantMap(variantMap["Comments"].toMap());
 }
 
 QVariantMap Workspace::toVariantMap() const
@@ -89,7 +90,6 @@ QVariantMap Workspace::toVariantMap() const
         { "Description", _descriptionAction.toVariantMap() },
         { "Tags", _tagsAction.toVariantMap() },
         { "Comments", _commentsAction.toVariantMap() },
-        { "PreviewImage", _commentsAction.toVariantMap() }
     };
 }
 
