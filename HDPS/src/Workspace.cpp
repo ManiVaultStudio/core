@@ -85,19 +85,12 @@ void Workspace::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap Workspace::toVariantMap() const
 {
-    QVariantMap variantMap;
-
-    //auto core = Application::core();
-
-    //auto& pluginManager         = core->getPluginManager();
-    //auto& dataHierarchyManager  = core->getDataHierarchyManager();
-    //auto& actionsManager        = core->getActionsManager();
-
-    //variantMap[pluginManager.getSerializationName()]        = pluginManager.toVariantMap();
-    //variantMap[dataHierarchyManager.getSerializationName()] = dataHierarchyManager.toVariantMap();
-    //variantMap[actionsManager.getSerializationName()]       = actionsManager.toVariantMap();
-
-    return variantMap;
+    return {
+        { "Description", _descriptionAction.toVariantMap() },
+        { "Tags", _tagsAction.toVariantMap() },
+        { "Comments", _commentsAction.toVariantMap() },
+        { "PreviewImage", _commentsAction.toVariantMap() }
+    };
 }
 
 QImage Workspace::getPreviewImage(const QString& filePath)
@@ -153,6 +146,7 @@ void Workspace::initialize()
     _commentsAction.setPlaceHolderString("Enter comments here...");
     _commentsAction.setConnectionPermissionsToNone();
     _commentsAction.setClearable(true);
+    _commentsAction.setDefaultWidgetFlags(StringAction::TextEdit);
 }
 
 }

@@ -3,6 +3,7 @@
 #include <QDialog>
 
 #include <actions/GroupAction.h>
+#include <actions/TriggerAction.h>
 
 /**
  * Workspace settings class
@@ -23,7 +24,7 @@ public:
 
     /** Get preferred size */
     QSize sizeHint() const override {
-        return QSize(700, 500);
+        return QSize(600, 400);
     }
 
     /** Get minimum size hint*/
@@ -33,4 +34,5 @@ public:
 
 private:
     hdps::gui::GroupAction      _groupAction;       /** Settings group action */
+    hdps::gui::TriggerAction    _okAction;          /** Action for exiting the dialog */
 };

@@ -144,7 +144,7 @@ void StringsAction::removeStrings(const QStringList& strings)
 
 StringsAction::Widget::Widget(QWidget* parent, StringsAction* stringsAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, stringsAction, widgetFlags),
-    _model(),
+    _model(stringsAction->icon(), this),
     _filterModel(),
     _hierarchyWidget(this, stringsAction->getCategory(), _model, &_filterModel, false),
     _nameAction(this, "Name"),
@@ -213,15 +213,11 @@ StringsAction::Widget::Widget(QWidget* parent, StringsAction* stringsAction, con
     };
 
     const auto updateModel = [this, stringsAction, updateActions](const QStringList& strings) -> void {
-        _model.clear();
+        if (strings != _model.stringList())
+            _model.setStringList(strings);
 
-        for (const auto& string : strings) {
-            auto row = new QStandardItem(stringsAction->icon(), string);
-
-            row->setEditable(false);
-
-            _model.appendRow(row);
-        }
+        for (int rowIndex = 0; rowIndex < _model.rowCount(); rowIndex++)
+            _model.setData(_model.index(rowIndex), stringsAction->icon(), Qt::DecorationRole);
 
         _model.setHeaderData(0, Qt::Horizontal, "Name", Qt::UserRole);
         _model.setHeaderData(0, Qt::Horizontal, "Name", Qt::DisplayRole);
@@ -254,9 +250,23 @@ StringsAction::Widget::Widget(QWidget* parent, StringsAction* stringsAction, con
         _nameAction.setString("");
     });
 
-    connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, updateActions);
+    connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, [this, updateActions](const QItemSelection& selected, const QItemSelection& deselected) -> void {
+        if (selected.count() == 0 && deselected.count() >= 1)
+            _nameAction.setString("");
+
+        updateActions();
+    });
+
     connect(&_model, &QStandardItemModel::layoutChanged, this, updateActions);
 
+    const auto updateAction = [this, stringsAction]() -> void {
+        stringsAction->setStrings(_model.stringList());
+    };
+
+    connect(&_model, &QAbstractItemModel::rowsInserted, this, updateAction);
+    connect(&_model, &QAbstractItemModel::rowsRemoved, this, updateAction);
+
+    updateModel(stringsAction->getStrings());
     updateActions();
 }
 

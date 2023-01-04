@@ -212,30 +212,24 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
     setObjectName("LineEdit");
     setAcceptDrops(true);
     
-    // Update the line edit text from the string action
     const auto updateLineEdit = [this, stringAction]() {
         QSignalBlocker blocker(this);
 
         setText(stringAction->getString());
     };
 
-    // Update the place holder text in the line edit
     const auto updatePlaceHolderText = [this, stringAction]() -> void {
         setPlaceholderText(stringAction->getPlaceholderString());
     };
 
-    // Update the line edit string when the action string changes
     connect(stringAction, &StringAction::stringChanged, this, updateLineEdit);
 
-    // Update the line edit placeholder string when the action placeholder string changes
     connect(stringAction, &StringAction::placeholderStringChanged, this, updatePlaceHolderText);
 
-    // Update the action string when the line edit text changes
     connect(this, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
         stringAction->setString(text);
     });
 
-    // Update the leading action
     const auto updateLeadingAction = [this, stringAction]() {
         if (!stringAction->getLeadingAction().isVisible())
             removeAction(&stringAction->getLeadingAction());
@@ -243,7 +237,6 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
             addAction(&stringAction->getLeadingAction(), QLineEdit::LeadingPosition);
     };
 
-    // Update the trailing action
     const auto updateTrailingAction = [this, stringAction]() {
         if (!stringAction->getTrailingAction().isVisible())
             removeAction(&stringAction->getTrailingAction());
@@ -251,19 +244,15 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
             addAction(&stringAction->getTrailingAction(), QLineEdit::TrailingPosition);
     };
 
-    // Update leading/trailing action when they change
     connect(&stringAction->getLeadingAction(), &QAction::changed, this, updateLeadingAction);
     connect(&stringAction->getTrailingAction(), &QAction::changed, this, updateTrailingAction);
 
-    // Update the completer
     const auto updateCompleter = [this, stringAction]() -> void {
         setCompleter(stringAction->getCompleter());
     };
 
-    // Update completer when action completer changes
     connect(stringAction, &StringAction::completerChanged, this, updateCompleter);
 
-    // Perform initial updates
     updateLineEdit();
     updatePlaceHolderText();
     updateLeadingAction();
@@ -282,9 +271,46 @@ QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     if (widgetFlags & WidgetFlag::LineEdit)
         layout->addWidget(new StringAction::LineEditWidget(parent, this));
 
+    if (widgetFlags & WidgetFlag::TextEdit)
+        layout->addWidget(new StringAction::TextEditWidget(parent, this));
+
     widget->setLayout(layout);
 
     return widget;
+}
+
+StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stringAction) :
+    QTextEdit(parent)
+{
+    setObjectName("LineEdit");
+    setAcceptDrops(true);
+
+    const auto updateTextEdit = [this, stringAction]() {
+        QSignalBlocker blocker(this);
+
+        setText(stringAction->getString());
+
+        auto cursor = textCursor();
+
+        cursor.movePosition(QTextCursor::End);
+
+        setTextCursor(cursor);
+    };
+
+    const auto updatePlaceHolderText = [this, stringAction]() -> void {
+        setPlaceholderText(stringAction->getPlaceholderString());
+    };
+
+    connect(stringAction, &StringAction::stringChanged, this, updateTextEdit);
+
+    connect(stringAction, &StringAction::placeholderStringChanged, this, updatePlaceHolderText);
+
+    connect(this, &QTextEdit::textChanged, this, [this, stringAction]() {
+        stringAction->setString(toPlainText());
+    });
+
+    updateTextEdit();
+    updatePlaceHolderText();
 }
 
 }

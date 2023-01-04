@@ -4,7 +4,7 @@
 
 #include "widgets/HierarchyWidget.h"
 
-#include <QStandardItemModel>
+#include <QStringListModel>
 #include <QSortFilterProxyModel>
 
 namespace hdps::gui {
@@ -36,6 +36,46 @@ public:
     {
     protected:
 
+        /** Qt native string list model does not support icons, this class solves that for the strings action */
+        class IconStringListModel final : public QStringListModel {
+        public:
+
+            /**
+             * Construct string list model from \p icon and \p parent object
+             * @param icon Global model icon
+             * @param parent Pointer to parent object
+             */
+            explicit IconStringListModel(const QIcon& icon, QObject* parent = nullptr) :
+                QStringListModel(parent),
+                _icon(icon)
+            {
+            }
+
+            /**
+             * Override string list model to also support data decoration role
+             * @param index Index to fetch the data for
+             * @param role Data role
+             * @return Data in variant form
+             */
+            QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
+                switch (role) {
+                    case Qt::DisplayRole:
+                    case Qt::EditRole:
+                        return QStringListModel::data(index, role);
+
+                    case Qt::DecorationRole:
+                        return _icon;
+                }
+
+                return QVariant();
+            }
+
+        private:
+            const QIcon   _icon;  /** Global icon */
+        };
+
+    protected:
+
         /**
          * Constructor
          * @param parent Pointer to parent widget
@@ -45,7 +85,7 @@ public:
         Widget(QWidget* parent, StringsAction* stringsAction, const std::int32_t& widgetFlags);
 
     private:
-        QStandardItemModel      _model;             /** Strings standard item model */
+        IconStringListModel     _model;             /** Strings model */
         QSortFilterProxyModel   _filterModel;       /** Strings filter model */
         HierarchyWidget         _hierarchyWidget;   /** Hierarchy widget for show the strings */
         StringAction            _nameAction;        /** String name action */

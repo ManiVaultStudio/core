@@ -18,9 +18,8 @@
 #include <QPainter>
 #include <QFileDialog>
 #include <QStandardPaths>
-#include <QBuffer>
 #include <QTemporaryDir>
-#include <QListWidget>
+#include <QBuffer>
 
 #ifdef _DEBUG
     #define WORKSPACE_MANAGER_VERBOSE
@@ -40,8 +39,8 @@ WorkspaceManager::WorkspaceManager() :
     AbstractWorkspaceManager(),
     _mainDockManager(),
     _viewPluginsDockWidget(),
-    _loadWorkspaceAction(this, "Load"),
     _newWorkspaceAction(this, "New"),
+    _loadWorkspaceAction(this, "Load"),
     _saveWorkspaceAction(this, "Save"),
     _saveWorkspaceAsAction(this, "Save As..."),
     _editWorkspaceAction(this, "Settings..."),
@@ -73,13 +72,15 @@ WorkspaceManager::WorkspaceManager() :
     _saveWorkspaceAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveWorkspaceAsAction.setToolTip("Save workspace under a new file to disk");
 
+    _editWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+P"));
+    _editWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
+    _editWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _editWorkspaceAction.setConnectionPermissionsToNone();
+
     _importWorkspaceFromProjectAction.setShortcut(QKeySequence("Ctrl+Alt+I"));
     _importWorkspaceFromProjectAction.setShortcutContext(Qt::ApplicationShortcut);
     _importWorkspaceFromProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
     _importWorkspaceFromProjectAction.setToolTip("Import workspace from project");
-
-    _editWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
-    _editWorkspaceAction.setConnectionPermissionsToNone();
 
     connect(&_editWorkspaceAction, &TriggerAction::triggered, this, []() -> void {
         WorkspaceSettingsDialog workspaceSettingsDialog;
@@ -90,9 +91,10 @@ WorkspaceManager::WorkspaceManager() :
 
     mainWindow->addAction(&_newWorkspaceAction);
     mainWindow->addAction(&_loadWorkspaceAction);
-    mainWindow->addAction(&_importWorkspaceFromProjectAction);
     mainWindow->addAction(&_saveWorkspaceAction);
     mainWindow->addAction(&_saveWorkspaceAsAction);
+    mainWindow->addAction(&_importWorkspaceFromProjectAction);
+    mainWindow->addAction(&_editWorkspaceAction);
 
     connect(&_newWorkspaceAction, &TriggerAction::triggered, [this](bool) {
         newWorkspace();
@@ -358,6 +360,11 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
                 fileDialogLayout->addWidget(tagsAction.createLabelWidget(nullptr), rowCount + 1, 0);
                 fileDialogLayout->addWidget(tagsAction.createWidget(nullptr), rowCount + 1, 1, 1, 2);
 
+                auto& commentsAction = getWorkspace()->getCommentsAction();
+
+                fileDialogLayout->addWidget(commentsAction.createLabelWidget(nullptr), rowCount + 2, 0);
+                fileDialogLayout->addWidget(commentsAction.createWidget(nullptr), rowCount + 2, 1, 1, 2);
+
                 if (fileDialog.exec() == 0)
                     return;
 
@@ -456,12 +463,11 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap WorkspaceManager::toVariantMap() const
 {
-    const auto mainDockingManager = _mainDockManager->toVariantMap();
-    const auto viewPluginsDockingManager = _viewPluginsDockManager->toVariantMap();
+    auto workspaceMap = getWorkspace()->getDescriptionAction().toVariantMap();
 
-    const QVariantMap dockManagers = {
-        { "Main", mainDockingManager },
-        { "ViewPlugins", viewPluginsDockingManager }
+    workspaceMap["DockManagers"] = QVariantMap {
+        { "Main", _mainDockManager->toVariantMap() },
+        { "ViewPlugins", _viewPluginsDockManager->toVariantMap() }
     };
 
     QByteArray previewImageByteArray;
@@ -469,12 +475,9 @@ QVariantMap WorkspaceManager::toVariantMap() const
 
     toPreviewImage().save(&previewImageBuffer, "PNG");
 
-    return {
-        { "DockManagers", dockManagers },
-        { "PreviewImage", QVariant::fromValue(previewImageByteArray.toBase64()) },
-        { "Description", getWorkspace()->getDescriptionAction().toVariantMap() },
-        { "Tags", getWorkspace()->getTagsAction().toVariantMap() }
-    };
+    workspaceMap["PreviewImage"] = QVariant::fromValue(previewImageByteArray.toBase64());
+
+    return workspaceMap;
 }
 
 QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)

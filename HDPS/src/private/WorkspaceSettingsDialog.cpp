@@ -15,7 +15,8 @@ using namespace hdps::gui;
 
 WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _groupAction(this)
+    _groupAction(this),
+    _okAction(this, "Ok")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);
@@ -31,8 +32,20 @@ WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) 
 
     auto layout = new QVBoxLayout();
 
-    //layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(_groupAction.createWidget(this));
+    auto groupActionWidget = _groupAction.createWidget(this);
+
+    groupActionWidget->layout()->setContentsMargins(0, 0, 0, 0);
+
+    layout->addWidget(groupActionWidget);
+
+    auto bottomLayout = new QHBoxLayout();
+
+    bottomLayout->addStretch(1);
+    bottomLayout->addWidget(_okAction.createWidget(this));
+
+    layout->addLayout(bottomLayout);
 
     setLayout(layout);
+
+    connect(&_okAction, &TriggerAction::triggered, this, &WorkspaceSettingsDialog::accept);
 }
