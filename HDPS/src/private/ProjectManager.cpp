@@ -236,7 +236,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-                fileDialog.setWindowTitle("Load project");
+                fileDialog.setWindowTitle("Load Project");
                 fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
                 fileDialog.setFileMode(QFileDialog::ExistingFile);
                 fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
@@ -403,7 +403,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-                fileDialog.setWindowTitle("Save project");
+                fileDialog.setWindowTitle("Save Project");
                 fileDialog.setAcceptMode(QFileDialog::AcceptSave);
                 fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
                 fileDialog.setDefaultSuffix(".hdps");

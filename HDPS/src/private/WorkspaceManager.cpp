@@ -232,7 +232,7 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-                fileDialog.setWindowTitle("Load workspace");
+                fileDialog.setWindowTitle("Load Workspace");
                 fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
                 fileDialog.setFileMode(QFileDialog::ExistingFile);
                 fileDialog.setNameFilters({ "HDPS workspace files (*.hws)" });
@@ -325,7 +325,7 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*
         QFileDialog fileDialog;
 
         fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-        fileDialog.setWindowTitle("Load project");
+        fileDialog.setWindowTitle("Import Workspace From Project");
         fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
         fileDialog.setFileMode(QFileDialog::ExistingFile);
         fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
@@ -369,7 +369,7 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-                fileDialog.setWindowTitle("Save workspace");
+                fileDialog.setWindowTitle("Save Workspace");
                 fileDialog.setAcceptMode(QFileDialog::AcceptSave);
                 fileDialog.setNameFilters({ "HDPS workspace files (*.hws)" });
                 fileDialog.setDefaultSuffix(".hws");
