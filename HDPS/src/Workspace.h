@@ -10,7 +10,7 @@ namespace hdps {
 /**
  * Workspace class
  *
- * TODO: Write description
+ * TODO: Write description.
  *
  * @author Thomas Kroes
  */
@@ -21,10 +21,17 @@ class Workspace final : public QObject, public hdps::util::Serializable
 public:
 
     /**
-    * Construct workspace with \p parent
-    * @param parent Pointer to parent object
-    */
+     * Construct workspace with \p parent
+     * @param parent Pointer to parent object
+     */
     Workspace(QObject* parent = nullptr);
+
+    /**
+     * Construct workspace with \p parent and load from \p filePath
+     * @param filePath Path of the work space file
+     * @param parent Pointer to parent object
+     */
+    Workspace(const QString& filePath, QObject* parent = nullptr);
 
     /**
      * Get workspace file path
@@ -32,30 +39,51 @@ public:
      */
     QString getFilePath() const;
 
+protected:
+
     /**
      * Set workspace file path
      * @param filePath Location on disk where the workspace resides
      */
     void setFilePath(const QString& filePath);
 
+public:
+
+    /**
+     * Get preview image
+     * @param filePath Path of the work space file
+     * @return Preview image
+     */
+    static QImage getPreviewImage(const QString& filePath);
+
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
+     * Load workspace from variant
+     * @param Variant representation of the workspace
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-     * Save widget action to variant
+     * Save workspace to variant
      * @return Variant representation of the widget action
      */
     QVariantMap toVariantMap() const override;
 
+private:
+
+    /** Startup initialization */
+    void initialize();
+
 public: // Action getters
+
+    const gui::StringAction& getDescriptionAction() const { return _descriptionAction; }
+    const gui::StringsAction& getTagsAction() const { return _tagsAction; }
+    const gui::StringAction& getCommentsAction() const { return _commentsAction; }
 
     gui::StringAction& getDescriptionAction() { return _descriptionAction; }
     gui::StringsAction& getTagsAction() { return _tagsAction; }
+    gui::StringAction& getCommentsAction() { return _commentsAction; }
 
 signals:
 
@@ -69,6 +97,9 @@ private:
     QString             _filePath;              /** Location on disk where the workspace resides */
     gui::StringAction   _descriptionAction;     /** Work description action */
     gui::StringsAction  _tagsAction;            /** Workspace tags action */
+    gui::StringAction   _commentsAction;        /** Workspace comments action */
+
+    friend class AbstractWorkspaceManager;
 };
 
 }

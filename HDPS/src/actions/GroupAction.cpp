@@ -217,7 +217,7 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction, c
             {
                 case LabelSizingType::Auto:
                 {
-                    //_layout->setColumnStretch(1, 1);
+                    _layout->setColumnStretch(1, 1);
                     break;
                 }
 
@@ -258,18 +258,24 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction, c
                 switch (groupAction->getLabelSizingType())
                 {
                     case LabelSizingType::Auto:
+                    {
                         labelWidget->setElide(false);
-                        labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
+                        //labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
                         break;
+                    }
 
                     case LabelSizingType::Percentage:
+                    {
                         labelWidget->setElide(true);
                         break;
+                    }
 
                     case LabelSizingType::Fixed:
+                    {
                         labelWidget->setElide(true);
                         labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
                         break;
+                    }
 
                     default:
                         break;

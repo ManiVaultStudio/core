@@ -9,8 +9,6 @@
 
 #include <DockAreaWidget.h>
 
-#include <QSharedPointer>
-
 class QMainWindow;
 
 namespace hdps
@@ -83,6 +81,9 @@ public:
 
 public: // IO
 
+    /** Creates a new workspace */
+    void newWorkspace() override;
+
     /**
      * Load a workspace from disk
      * @param filePath File path of the workspace (choose file path with dialog when empty)
@@ -117,6 +118,12 @@ public: // IO
      * @return Pointer to workspace (nullptr if no workspace is loaded)
      */
     const Workspace* getWorkspace() const override;
+
+    /**
+     * Get current workspace
+     * @return Pointer to workspace (nullptr if no workspace is loaded)
+     */
+    Workspace* getWorkspace() override;
 
 public: // Serialization
 
@@ -155,13 +162,6 @@ private:
      */
     QImage toPreviewImage() const;
 
-    /**
-     * Get preview image enclosed in \p workspaceFilePath
-     * @param workspaceFilePath Path of the workspace file
-     * @return Preview image
-     */
-    QImage getPreviewImageFromWorkspaceFile(const QString& workspaceFilePath) const;
-
 private:
     QScopedPointer<hdps::Workspace>     _workspace;                             /** Current workspace */
     QPointer<DockManager>               _mainDockManager;                       /** Dock manager for docking system view plugins */
@@ -171,7 +171,8 @@ private:
     hdps::gui::TriggerAction            _loadWorkspaceAction;                   /** Action for loading a workspace from file */
     hdps::gui::TriggerAction            _saveWorkspaceAction;                   /** Action for saving the current workspace to file */
     hdps::gui::TriggerAction            _saveWorkspaceAsAction;                 /** Action for saving the current workspace to file with a different path */
-    hdps::gui::TriggerAction            _importWorkspaceFromProjectAction;      /** Action for import a workspace from a project  file */
+    hdps::gui::TriggerAction            _editWorkspaceAction;                   /** Action for triggering the workspace settings dialog */
+    hdps::gui::TriggerAction            _importWorkspaceFromProjectAction;      /** Action for importing a workspace from a project file */
     hdps::gui::RecentFilesAction        _recentWorkspacesAction;                /** Action for saving the current workspace to file with a different path */
     QIcon                               _icon;                                  /** Manager icon */
 };

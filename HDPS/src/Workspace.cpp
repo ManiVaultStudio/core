@@ -1,6 +1,9 @@
 #include "Workspace.h"
+#include "AbstractWorkspaceManager.h"
 
 #include "Application.h"
+
+using namespace hdps::gui;
 
 namespace hdps {
 
@@ -9,15 +12,50 @@ Workspace::Workspace(QObject* parent /*= nullptr*/) :
     Serializable("Workspace"),
     _filePath(),
     _descriptionAction(this, "Description"),
-    _tagsAction(this, "Tags")
+    _tagsAction(this, "Tags"),
+    _commentsAction(this, "Comments")
 {
-    _descriptionAction.setPlaceHolderString("Enter description here...");
-    _descriptionAction.setConnectionPermissionsToNone();
-    _descriptionAction.setClearable(true);
+    initialize();
+}
 
-    _tagsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tag"));
-    _tagsAction.setCategory("Tag");
-    _tagsAction.setConnectionPermissionsToNone();
+Workspace::Workspace(const QString& filePath, QObject* parent /*= nullptr*/) :
+    QObject(parent),
+    Serializable("Workspace"),
+    _filePath(filePath),
+    _descriptionAction(this, "Description"),
+    _tagsAction(this, "Tags"),
+    _commentsAction(this, "Comments")
+{
+    initialize();
+
+    try {
+        if (!QFileInfo(getFilePath()).exists())
+            throw std::runtime_error("File does not exist");
+
+        QFile workspaceJsonFile(getFilePath());
+
+        if (!workspaceJsonFile.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Unable to open file for reading");
+
+        QByteArray workspaceByteArray = workspaceJsonFile.readAll();
+
+        QJsonDocument jsonDocument;
+
+        jsonDocument = QJsonDocument::fromJson(workspaceByteArray);
+
+        if (jsonDocument.isNull() || jsonDocument.isEmpty())
+            throw std::runtime_error("JSON document is invalid");
+
+        fromVariantMap(jsonDocument.toVariant().toMap());
+    }
+    catch (std::exception& e)
+    {
+        qDebug() << "Unable to load a workspace from file" << e.what();
+    }
+    catch (...)
+    {
+        qDebug() << "Unable to load a workspace from file";
+    }
 }
 
 QString Workspace::getFilePath() const
@@ -60,6 +98,61 @@ QVariantMap Workspace::toVariantMap() const
     //variantMap[actionsManager.getSerializationName()]       = actionsManager.toVariantMap();
 
     return variantMap;
+}
+
+QImage Workspace::getPreviewImage(const QString& filePath)
+{
+    QImage previewImage;
+
+    try {
+        if (!QFileInfo(filePath).exists())
+            throw std::runtime_error("File does not exist");
+
+        QFile workspaceJsonFile(filePath);
+
+        if (!workspaceJsonFile.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Unable to open file for reading");
+
+        QByteArray workspaceByteArray = workspaceJsonFile.readAll();
+
+        QJsonDocument jsonDocument;
+
+        jsonDocument = QJsonDocument::fromJson(workspaceByteArray);
+
+        if (jsonDocument.isNull() || jsonDocument.isEmpty())
+            throw std::runtime_error("JSON document is invalid");
+
+        const auto workspaceVariantMap = jsonDocument.toVariant().toMap()["Workspace"].toMap();
+
+        previewImage.loadFromData(QByteArray::fromBase64(workspaceVariantMap["PreviewImage"].toByteArray()));
+
+        return previewImage;
+    }
+    catch (std::exception& e)
+    {
+        qDebug() << "Unable to retrieve preview image from workspace file" << e.what();
+    }
+    catch (...)
+    {
+        qDebug() << "Unable to retrieve preview image from workspace file";
+    }
+
+    return previewImage;
+}
+
+void Workspace::initialize()
+{
+    _descriptionAction.setPlaceHolderString("Enter description here...");
+    _descriptionAction.setConnectionPermissionsToNone();
+    _descriptionAction.setClearable(true);
+
+    _tagsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tag"));
+    _tagsAction.setCategory("Tag");
+    _tagsAction.setConnectionPermissionsToNone();
+
+    _commentsAction.setPlaceHolderString("Enter comments here...");
+    _commentsAction.setConnectionPermissionsToNone();
+    _commentsAction.setClearable(true);
 }
 
 }

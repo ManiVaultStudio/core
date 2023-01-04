@@ -4,6 +4,7 @@
 #include "LoadSystemViewMenu.h"
 #include "DockComponentsFactory.h"
 #include "Archiver.h"
+#include "WorkspaceSettingsDialog.h"
 
 #include <Application.h>
 
@@ -40,10 +41,11 @@ WorkspaceManager::WorkspaceManager() :
     _mainDockManager(),
     _viewPluginsDockWidget(),
     _loadWorkspaceAction(this, "Load"),
-    _importWorkspaceFromProjectAction(this, "Import from project"),
     _newWorkspaceAction(this, "New"),
     _saveWorkspaceAction(this, "Save"),
     _saveWorkspaceAsAction(this, "Save As..."),
+    _editWorkspaceAction(this, "Settings..."),
+    _importWorkspaceFromProjectAction(this, "Import from project"),
     _recentWorkspacesAction(this),
     _icon()
 {
@@ -75,7 +77,14 @@ WorkspaceManager::WorkspaceManager() :
     _importWorkspaceFromProjectAction.setShortcutContext(Qt::ApplicationShortcut);
     _importWorkspaceFromProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
     _importWorkspaceFromProjectAction.setToolTip("Import workspace from project");
-    //_importWorkspaceFromProjectAction.setEnabled(false);
+
+    _editWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _editWorkspaceAction.setConnectionPermissionsToNone();
+
+    connect(&_editWorkspaceAction, &TriggerAction::triggered, this, []() -> void {
+        WorkspaceSettingsDialog workspaceSettingsDialog;
+        workspaceSettingsDialog.exec();
+    });
 
     auto mainWindow = Application::topLevelWidgets().first();
 
@@ -86,8 +95,7 @@ WorkspaceManager::WorkspaceManager() :
     mainWindow->addAction(&_saveWorkspaceAsAction);
 
     connect(&_newWorkspaceAction, &TriggerAction::triggered, [this](bool) {
-        reset();
-        setWorkspaceFilePath("");
+        newWorkspace();
     });
 
     connect(&_loadWorkspaceAction, &TriggerAction::triggered, [this](bool) {
@@ -164,7 +172,7 @@ void WorkspaceManager::initalize()
         });
 
         connect(&Application::core()->getProjectManager(), &AbstractProjectManager::projectCreated, this, [this]() -> void {
-            setWorkspaceFilePath("");
+            newWorkspace();
         });
     }
     endInitialization();
@@ -184,6 +192,26 @@ void WorkspaceManager::reset()
     endReset();
 }
 
+void WorkspaceManager::newWorkspace()
+{
+    try
+    {
+#ifdef WORKSPACE_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__;
+#endif
+
+        createWorkspace();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to create new workspace", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to create new workspace");
+    }
+}
+
 void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
 {
     try
@@ -192,7 +220,7 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
-        reset();
+        createWorkspace();
 
         setWorkspaceFilePath(filePath);
 
@@ -222,7 +250,7 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
 
                 connect(&fileDialog, &QFileDialog::currentChanged, this, [this, &image](const QString& filePath) -> void {
                     if (QFileInfo(filePath).isFile())
-                        image.setPixmap(QPixmap::fromImage(getPreviewImageFromWorkspaceFile(filePath).scaledToWidth(650, Qt::SmoothTransformation)));
+                        image.setPixmap(QPixmap::fromImage(Workspace::getPreviewImage(filePath).scaledToWidth(650, Qt::SmoothTransformation)));
                 });
 
                 if (fileDialog.exec() == 0)
@@ -320,20 +348,12 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
                 auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
 
-                StringAction descriptionAction(this, "Description");
-
-                descriptionAction.setPlaceHolderString("Enter description here...");
-                descriptionAction.setConnectionPermissionsToNone();
-                descriptionAction.setClearable(true);
+                auto& descriptionAction = getWorkspace()->getDescriptionAction();
 
                 fileDialogLayout->addWidget(descriptionAction.createLabelWidget(nullptr), rowCount, 0);
                 fileDialogLayout->addWidget(descriptionAction.createWidget(nullptr), rowCount, 1, 1, 2);
 
-                StringsAction tagsAction(this, "Tags");
-
-                tagsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tag"));
-                tagsAction.setCategory("Tag");
-                tagsAction.setConnectionPermissionsToNone();
+                auto& tagsAction = getWorkspace()->getTagsAction();
 
                 fileDialogLayout->addWidget(tagsAction.createLabelWidget(nullptr), rowCount + 1, 0);
                 fileDialogLayout->addWidget(tagsAction.createWidget(nullptr), rowCount + 1, 1, 1, 2);
@@ -376,40 +396,6 @@ void WorkspaceManager::saveWorkspaceAs()
     saveWorkspace();
 }
 
-void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
-{
-    variantMapMustContain(variantMap, "DockManagers");
-
-    const auto dockingManagersMap = variantMap["DockManagers"].toMap();
-
-    variantMapMustContain(dockingManagersMap, "Main");
-    variantMapMustContain(dockingManagersMap, "ViewPlugins");
-        
-    _mainDockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
-    _viewPluginsDockManager->fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
-}
-
-QVariantMap WorkspaceManager::toVariantMap() const
-{
-    const auto mainDockingManager           = _mainDockManager->toVariantMap();
-    const auto viewPluginsDockingManager    = _viewPluginsDockManager->toVariantMap();
-
-    const QVariantMap dockManagers = {
-        { "Main", mainDockingManager },
-        { "ViewPlugins", viewPluginsDockingManager }
-    };
-
-    QByteArray previewImageByteArray;
-    QBuffer previewImageBuffer(&previewImageByteArray);
-
-    toPreviewImage().save(&previewImageBuffer, "PNG");
-
-    return {
-        { "DockManagers", dockManagers },
-        { "PreviewImage", QVariant::fromValue(previewImageByteArray.toBase64()) }
-    };
-}
-
 void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, DockAreaFlag dockArea /*= DockAreaFlag::Right*/)
 {
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
@@ -429,6 +415,68 @@ void WorkspaceManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool is
     ViewPluginsDockWidget::isolate(viewPlugin, isolate);
 }
 
+QWidget* WorkspaceManager::getWidget()
+{
+    return _mainDockManager.get();
+}
+
+bool WorkspaceManager::hasWorkspace() const
+{
+    return getWorkspace() != nullptr;
+}
+
+const Workspace* WorkspaceManager::getWorkspace() const
+{
+    return _workspace.get();
+}
+
+Workspace* WorkspaceManager::getWorkspace()
+{
+    return _workspace.get();
+}
+
+void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
+{
+    variantMapMustContain(variantMap, "DockManagers");
+
+    const auto dockingManagersMap = variantMap["DockManagers"].toMap();
+
+    variantMapMustContain(dockingManagersMap, "Main");
+    variantMapMustContain(dockingManagersMap, "ViewPlugins");
+
+    _mainDockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
+    _viewPluginsDockManager->fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
+
+    variantMapMustContain(variantMap, "Description");
+    variantMapMustContain(variantMap, "Tags");
+
+    getWorkspace()->getDescriptionAction().fromVariantMap(variantMap["Description"].toMap());
+    getWorkspace()->getTagsAction().fromVariantMap(variantMap["Tags"].toMap());
+}
+
+QVariantMap WorkspaceManager::toVariantMap() const
+{
+    const auto mainDockingManager = _mainDockManager->toVariantMap();
+    const auto viewPluginsDockingManager = _viewPluginsDockManager->toVariantMap();
+
+    const QVariantMap dockManagers = {
+        { "Main", mainDockingManager },
+        { "ViewPlugins", viewPluginsDockingManager }
+    };
+
+    QByteArray previewImageByteArray;
+    QBuffer previewImageBuffer(&previewImageByteArray);
+
+    toPreviewImage().save(&previewImageBuffer, "PNG");
+
+    return {
+        { "DockManagers", dockManagers },
+        { "PreviewImage", QVariant::fromValue(previewImageByteArray.toBase64()) },
+        { "Description", getWorkspace()->getDescriptionAction().toVariantMap() },
+        { "Tags", getWorkspace()->getTagsAction().toVariantMap() }
+    };
+}
+
 QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)
 {
     auto menu = new QMenu("Workspace", parent);
@@ -442,6 +490,8 @@ QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)
     menu->addAction(&_loadWorkspaceAction);
     menu->addAction(&_saveWorkspaceAction);
     menu->addAction(&_saveWorkspaceAsAction);
+    menu->addSeparator();
+    menu->addAction(&_editWorkspaceAction);
     menu->addSeparator();
     menu->addAction(&_importWorkspaceFromProjectAction);
     menu->addSeparator();
@@ -463,12 +513,12 @@ void WorkspaceManager::createWorkspace()
 
 void WorkspaceManager::createIcon()
 {
-    const auto size             = 128;
-    const auto halfSize         = size / 2;
-    const auto margin           = 12;
-    const auto spacing          = 14;
-    const auto halfSpacing      = spacing / 2;
-    const auto lineThickness    = 7.0;
+    const auto size = 128;
+    const auto halfSize = size / 2;
+    const auto margin = 12;
+    const auto spacing = 14;
+    const auto halfSpacing = spacing / 2;
+    const auto lineThickness = 7.0;
 
     QPixmap pixmap(size, size);
 
@@ -491,64 +541,9 @@ void WorkspaceManager::createIcon()
     _icon = hdps::gui::createIcon(pixmap);
 }
 
-QWidget* WorkspaceManager::getWidget()
-{
-    return _mainDockManager.get();
-}
-
 QImage WorkspaceManager::toPreviewImage() const
 {
     return _mainDockManager->grab().toImage();
-}
-
-QImage WorkspaceManager::getPreviewImageFromWorkspaceFile(const QString& workspaceFilePath) const
-{
-    QImage previewImage;
-
-    try {
-        if (!QFileInfo(workspaceFilePath).exists())
-            throw std::runtime_error("File does not exist");
-
-        QFile workspaceJsonFile(workspaceFilePath);
-
-        if (!workspaceJsonFile.open(QIODevice::ReadOnly))
-            throw std::runtime_error("Unable to open file for reading");
-
-        QByteArray data = workspaceJsonFile.readAll();
-
-        QJsonDocument jsonDocument;
-
-        jsonDocument = QJsonDocument::fromJson(data);
-
-        if (jsonDocument.isNull() || jsonDocument.isEmpty())
-            throw std::runtime_error("JSON document is invalid");
-
-        const auto workspaceVariantMap = jsonDocument.toVariant().toMap()["Workspace"].toMap();
-
-        previewImage.loadFromData(QByteArray::fromBase64(workspaceVariantMap["PreviewImage"].toByteArray()));
-        
-        return previewImage;
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to retrieve preview image from workspace file", e);
-        return previewImage;
-    }
-    catch (...)
-    {
-        exceptionMessageBox("Unable to retrieve preview image from workspace file");
-        return previewImage;
-    }
-}
-
-bool WorkspaceManager::hasWorkspace() const
-{
-    return getWorkspace() != nullptr;
-}
-
-const hdps::Workspace* WorkspaceManager::getWorkspace() const
-{
-    return _workspace.get();
 }
 
 }

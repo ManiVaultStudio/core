@@ -10,7 +10,7 @@ namespace hdps {
 /**
  * Project class
  *
- * TODO: Write description
+ * TODO: Write description.
  *
  * @author Thomas Kroes
  */
@@ -41,14 +41,14 @@ public:
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
+     * Load project from variant
+     * @param Variant representation of the project
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
+     * Save project to variant
+     * @return Variant representation of the project
      */
     QVariantMap toVariantMap() const override;
 

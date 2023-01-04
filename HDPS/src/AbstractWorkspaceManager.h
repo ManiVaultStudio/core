@@ -3,7 +3,7 @@
 #include "AbstractManager.h"
 #include "Workspace.h"
 
-#include <ViewPlugin.h>
+#include "ViewPlugin.h"
 
 #ifdef _DEBUG
     #define ABSTRACT_WORKSPACE_MANAGER_VERBOSE
@@ -67,7 +67,10 @@ public:
      * @return File path of the loaded workspace
      */
     virtual QString getWorkspaceFilePath() const final {
-        return _workspaceFilePath;
+        if (!hasWorkspace())
+            return "";
+
+        return getWorkspace()->getFilePath();
     }
 
     /**
@@ -75,16 +78,19 @@ public:
      * @param filePath File path of the loaded workspace
      */
     virtual void setWorkspaceFilePath(const QString& filePath) final {
-        if (filePath == _workspaceFilePath)
+        if (!hasWorkspace())
+            return;
+
+        if (filePath == getWorkspace()->getFilePath())
             return;
 
 #ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
 
-        _workspaceFilePath = filePath;
+        getWorkspace()->setFilePath(filePath);
 
-        emit workspaceFilePathChanged(_workspaceFilePath);
+        emit workspaceFilePathChanged(getWorkspace()->getFilePath());
     }
 
     /** Begin the workspace loading process */
@@ -93,7 +99,12 @@ public:
         qDebug() << __FUNCTION__;
 #endif
 
-        emit workspaceAboutToBeLoaded(_workspaceFilePath);
+        Q_ASSERT(getWorkspace() != nullptr);
+
+        if (!hasWorkspace())
+            return;
+
+        emit workspaceAboutToBeLoaded(getWorkspace()->getFilePath());
     }
 
     /** End the workspace loading process */
@@ -102,7 +113,12 @@ public:
         qDebug() << __FUNCTION__;
 #endif
 
-        emit workspaceLoaded(_workspaceFilePath);
+        Q_ASSERT(getWorkspace() != nullptr);
+
+        if (!hasWorkspace())
+            return;
+
+        emit workspaceLoaded(getWorkspace()->getFilePath());
     }
 
     /** Begin the workspace saving process */
@@ -111,7 +127,12 @@ public:
         qDebug() << __FUNCTION__;
 #endif
 
-        emit workspaceAboutToBeSaved(_workspaceFilePath);
+        Q_ASSERT(getWorkspace() != nullptr);
+
+        if (!hasWorkspace())
+            return;
+
+        emit workspaceAboutToBeSaved(getWorkspace()->getFilePath());
     }
 
     /** End the workspace saving process */
@@ -120,10 +141,18 @@ public:
         qDebug() << __FUNCTION__;
 #endif
 
-        emit workspaceSaved(_workspaceFilePath);
+        Q_ASSERT(getWorkspace() != nullptr);
+
+        if (!hasWorkspace())
+            return;
+
+        emit workspaceSaved(getWorkspace()->getFilePath());
     }
 
 public: // IO
+
+    /** Creates a new workspace */
+    virtual void newWorkspace() = 0;
 
     /**
      * Load a workspace from disk
@@ -159,6 +188,12 @@ public: // IO
      * @return Pointer to workspace (nullptr if no workspace is loaded)
      */
     virtual const Workspace* getWorkspace() const = 0;
+
+    /**
+     * Get current workspace
+     * @return Pointer to workspace (nullptr if no workspace is loaded)
+     */
+    virtual Workspace* getWorkspace() = 0;
 
 signals:
 
@@ -200,15 +235,6 @@ signals:
      * @param filePath File path of the workspace
      */
     void workspaceFilePathChanged(const QString& filePath);
-
-    /**
-     * Signals that a new dock manager was set
-     * @param dockManager Pointer to the new dock manager
-     */
-    void dockManagerChanged(QWidget* dockManager);
-
-private:
-    QString     _workspaceFilePath;      /** File path of the current workspace */
 };
 
 }
