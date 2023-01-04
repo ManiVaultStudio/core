@@ -93,10 +93,10 @@ public: // IO
 
     /**
      * Import a workspace from a project file
-     * @param filePath File path of the project (choose file path with dialog when empty)
+     * @param projectFilePath File path of the project (choose file path with dialog when empty)
      * @param addToRecentWorkspaces Whether to add the workspace file path to the recent workspace file paths
      */
-    void importWorkspaceFromProjectFile(QString filePath = "", bool addToRecentWorkspaces = true) override;
+    void importWorkspaceFromProjectFile(QString projectFilePath = "", bool addToRecentWorkspaces = true) override;
 
     /**
      * Save a workspace to disk

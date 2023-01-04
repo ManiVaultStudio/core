@@ -312,7 +312,7 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
     }
 }
 
-void WorkspaceManager::importWorkspaceFromProjectFile(QString filePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
+void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
 {
     QTemporaryDir temporaryDirectory;
 
@@ -321,7 +321,7 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString filePath /*= ""*/,
     Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
     Application::setSerializationAborted(false);
 
-    if (filePath.isEmpty()) {
+    if (projectFilePath.isEmpty()) {
         QFileDialog fileDialog;
 
         fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
@@ -338,14 +338,16 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString filePath /*= ""*/,
         if (fileDialog.selectedFiles().count() != 1)
             throw std::runtime_error("Only one file may be selected");
 
-        filePath = fileDialog.selectedFiles().first();
+        projectFilePath = fileDialog.selectedFiles().first();
     }
 
     Archiver archiver;
 
-    QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
+    const QString workspaceFile("workspace.hws");
 
-    archiver.extractSingleFile(filePath, "workspace.hws", workspaceFileInfo.absoluteFilePath());
+    QFileInfo workspaceFileInfo(temporaryDirectoryPath, workspaceFile);
+
+    archiver.extractSingleFile(projectFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
 
     if (workspaceFileInfo.exists())
         loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);

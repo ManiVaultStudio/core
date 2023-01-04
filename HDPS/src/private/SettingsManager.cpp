@@ -25,7 +25,7 @@ SettingsManager::SettingsManager() :
     _globalDataPathAction(this, "Data")
 {
     _editSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
-    _editSettingsAction.setShortcut(QKeySequence("Ctrl+P"));
+    _editSettingsAction.setShortcut(QKeySequence("Ctrl+G"));
     _editSettingsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
     _globalProjectsPathAction.setConnectionPermissionsToNone();

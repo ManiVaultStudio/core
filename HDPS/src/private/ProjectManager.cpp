@@ -68,7 +68,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _saveProjectAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveProjectAsAction.setToolTip("Save project to disk in a chosen location");
 
-    _editProjectSettingsAction.setShortcut(QKeySequence("Ctrl+Alt+P"));
+    _editProjectSettingsAction.setShortcut(QKeySequence("Ctrl+P"));
     _editProjectSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
     _editProjectSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     _editProjectSettingsAction.setConnectionPermissionsToNone();
@@ -272,7 +272,22 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                     if (!QFileInfo(filePath).isFile())
                         return;
 
-                    Project project(filePath);
+                    QTemporaryDir temporaryDirectory;
+
+                    const auto temporaryDirectoryPath = temporaryDirectory.path();
+
+                    Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
+                    Application::setSerializationAborted(false);
+
+                    Archiver archiver;
+
+                    const QString projectFile("project.json");
+
+                    QFileInfo projectFileInfo(temporaryDirectoryPath, projectFile);
+
+                    archiver.extractSingleFile(filePath, projectFile, projectFileInfo.absoluteFilePath());
+
+                    Project project(projectFileInfo.absoluteFilePath());
 
                     descriptionAction.setString(project.getDescriptionAction().getString());
                     tagsAction.setString(project.getTagsAction().getStrings().join(", "));
