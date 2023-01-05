@@ -2,6 +2,7 @@
 #include "Archiver.h"
 #include "PluginManagerDialog.h"
 #include "ProjectSettingsDialog.h"
+#include "NewProjectDialog.h"
 
 #include <Application.h>
 
@@ -31,7 +32,7 @@ using namespace hdps::gui;
 
 ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _project(),
-    _newProjectAction(nullptr, "New Project"),
+    _newProjectAction(nullptr, "New Project..."),
     _openProjectAction(nullptr, "Open Project"),
     _importProjectAction(nullptr, "Import Project"),
     _saveProjectAction(nullptr, "Save Project"),
@@ -100,15 +101,10 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     mainWindow->addAction(&_saveProjectAction);
     mainWindow->addAction(&_showStartPageAction);
 
-    connect(&_importDataMenu, &QMenu::aboutToShow, this, [this]() -> void {
-        _importDataMenu.clear();
-
-        for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::LOADER))
-            _importDataMenu.addAction(pluginTriggerAction);
-    });
-
     connect(&_newProjectAction, &QAction::triggered, this, [this]() -> void {
-        newProject();
+        NewProjectDialog newProjectDialog;
+
+        newProjectDialog.exec();
     });
 
     connect(&_openProjectAction, &QAction::triggered, this, [this]() -> void {
@@ -136,6 +132,13 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     connect(&_editProjectSettingsAction, &TriggerAction::triggered, this, []() -> void {
         ProjectSettingsDialog projectSettingsDialog;
         projectSettingsDialog.exec();
+    });
+
+    connect(&_importDataMenu, &QMenu::aboutToShow, this, [this]() -> void {
+        _importDataMenu.clear();
+
+        for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::LOADER))
+            _importDataMenu.addAction(pluginTriggerAction);
     });
 
     connect(&_pluginManagerAction, &TriggerAction::triggered, this, [this]() -> void {
@@ -190,15 +193,16 @@ void ProjectManager::reset()
     endReset();
 }
 
-void ProjectManager::newProject()
+void ProjectManager::newProject(const QString& workspaceFilePath /*= ""*/)
 {
     try
     {
 #ifdef PROJECT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
-
         createProject();
+
+        Application::core()->getWorkspaceManager().loadWorkspace(workspaceFilePath);
     }
     catch (std::exception& e)
     {

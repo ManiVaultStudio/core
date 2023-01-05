@@ -6,21 +6,21 @@
 #include <actions/TriggerAction.h>
 
 /**
- * Project settings dialog class
+ * New project dialog class
  * 
- * Dialog class for editing project settings.
+ * Dialog class for creating new projects.
  * 
  * @author Thomas Kroes
  */
-class ProjectSettingsDialog : public QDialog
+class NewProjectDialog : public QDialog
 {
 public:
 
     /**
-     * Construct a project settings dialog with \p parent
+     * Construct a dialog with \p parent
      * @param parent Pointer to parent widget
      */
-    ProjectSettingsDialog(QWidget* parent = nullptr);
+    NewProjectDialog(QWidget* parent = nullptr);
 
     /** Get preferred size */
     QSize sizeHint() const override {

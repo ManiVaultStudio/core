@@ -30,8 +30,11 @@ public:
     /** Resets the contents of the project manager */
     void reset() override;
 
-    /** Creates a new project */
-    void newProject() override;
+    /**
+     * Creates a new project, possibly also loading a workspace located at \p workspaceFilePath
+     * @param workspaceFilePath File path of the workspace to load (will not attempt to load workspace if empty)
+     */
+    void newProject(const QString& workspaceFilePath = "") override;
 
     /**
      * Open project from \p filePath

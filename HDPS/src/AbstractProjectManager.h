@@ -34,8 +34,11 @@ public:
     {
     }
 
-    /** Creates a new project */
-    virtual void newProject() = 0;
+    /**
+     * Creates a new project, possibly also loading a workspace located at \p workspaceFilePath
+     * @param workspaceFilePath File path of the workspace to load (will not attempt to load workspace if empty)
+     */
+    virtual void newProject(const QString& workspaceFilePath = "") = 0;
 
     /**
      * Open project from \p filePath

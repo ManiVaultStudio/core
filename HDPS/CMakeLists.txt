@@ -175,12 +175,14 @@ set(PRIVATE_PROJECT_MANAGER_HEADERS
     src/private/ProjectManager.h
     src/private/ProjectWidget.h
     src/private/ProjectSettingsDialog.h
+    src/private/NewProjectDialog.h
 )
 
 set(PRIVATE_PROJECT_MANAGER_SOURCES
     src/private/ProjectManager.cpp
     src/private/ProjectWidget.cpp
     src/private/ProjectSettingsDialog.cpp
+    src/private/NewProjectDialog.cpp
 )
 
 set(PRIVATE_PROJECT_MANAGER_FILES
