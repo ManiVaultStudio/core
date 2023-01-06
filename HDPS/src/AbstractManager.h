@@ -4,6 +4,7 @@
 
 #include <QObject>
 #include <QDebug>
+#include <QIcon>
 
 #ifdef _DEBUG
     #define ABSTRACT_MANAGER_VERBOSE
@@ -87,6 +88,14 @@ public:
      */
     virtual bool isInitialized() const final {
         return _initialized;
+    }
+
+    /**
+     * Get manager icon
+     * @return Icon
+     */
+    virtual QIcon getIcon() const {
+        return QIcon();
     }
 
 signals:

@@ -12,6 +12,92 @@
 namespace hdps
 {
 
+/** Workspace location which consists of a workspace title, file path and location type */
+class WorkspaceLocation final {
+public:
+
+    /** Enum determining the type of workspace location */
+    enum Type {
+        BuiltIn = 0x0001,   /** Built-in workspaces (located in /workspaces in the application dir) */
+        Path    = 0x0002,   /** Workspaces on the global workspaces path */
+        Recent  = 0x0004,   /** Recent workspaces */
+
+        All = BuiltIn | Path | Recent
+    };
+
+    Q_DECLARE_FLAGS(Types, Type)
+
+    /** Map enum type to name */
+    static inline QMap<Type, QString> typeNames{
+            { Type::BuiltIn, "Built-in" },
+            { Type::Path, "Path" },
+            { Type::Recent, "Recent" },
+            { Type::All, "All" }
+    };
+
+    /**
+     * Get name of \p type
+     * @return Type name
+     */
+    static QString getTypeName(const Type& type) {
+        return typeNames[type];
+    }
+
+public:
+
+    /**
+        * Construct workspace location with \p filePath and \p type
+        * @param title Title of the workspace
+        * @param filePath Location of the workspace on disk
+        * @param type Location type of the workspace
+        */
+    explicit WorkspaceLocation(const QString& title, const QString& filePath, const Type& type) :
+        _title(title),
+        _filePath(filePath),
+        _type(type)
+    {
+    }
+
+    /**
+     * Get file path of the workspace
+     * @return File path of the workspace
+     */
+    QString getTitle() const {
+        return _title;
+    }
+
+    /**
+     * Get file path of the workspace
+     * @return File path of the workspace
+     */
+    QString getFilePath() const {
+        return _filePath;
+    }
+
+    /**
+     * Get type of workspace location
+     * @return Type
+     */
+    Type getType() const {
+        return _type;
+    }
+
+    /**
+     * Get type name of workspace location
+     * @return Type name
+     */
+    QString getTypeName() const {
+        return getTypeName(_type);
+    }
+
+private:
+    QString   _title;       /** Title of the workspace */
+    QString   _filePath;    /** File path of the workspace */
+    Type      _type;        /** Type of workspace location */
+};
+
+using WorkspaceLocations = QList<WorkspaceLocation>;
+
 /**
  * Abstract workspace manager class
  *
@@ -194,6 +280,12 @@ public: // IO
      * @return Pointer to workspace (nullptr if no workspace is loaded)
      */
     virtual Workspace* getWorkspace() = 0;
+
+    /**
+     * Get workspace locations for location \p types
+     * @return List of workspace locations
+     */
+    virtual WorkspaceLocations getWorkspaceLocations(const WorkspaceLocation::Types& types = WorkspaceLocation::Type::All) = 0;
 
 signals:
 

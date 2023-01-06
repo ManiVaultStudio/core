@@ -10,6 +10,7 @@
 #include <QWidget>
 #include <QTreeView>
 #include <QAbstractItemModel>
+#include <QHBoxLayout>
 
 class QSortFilterProxyModel;
 
@@ -114,6 +115,12 @@ public:
      * @param headerHidden Boolean determining whether the header view is visible or not
      */
     void setHeaderHidden(bool headerHidden);
+
+    /**
+     * Get layout for the horizontal toolbar
+     * @return Reference to the toolbar layout
+     */
+    QHBoxLayout& getToolbarLayout();
 
     /**
      * Get input model
@@ -298,6 +305,7 @@ private:
     HierarchyWidgetTreeView     _treeView;                          /** Tree view that contains the data hierarchy */
     InfoOverlayWidget           _infoOverlayWidget;                 /** Overlay widget that show information when there are no items in the model */
     QString                     _noItemsDescription;                /** Overlay widget description when no items are loaded */
+    QHBoxLayout                 _toolbarLayout;                     /** Layout for the top toolbar */
     StringAction                _filterNameAction;                  /** String action for filtering by name */
     GroupAction                 _filterGroupAction;                 /** Filter group action */
     ToggleAction                _filterCaseSensitiveAction;         /** Filter case-sensitive action */

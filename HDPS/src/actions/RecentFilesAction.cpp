@@ -111,6 +111,15 @@ const RecentFilesAction::FilterModel& RecentFilesAction::getFilterModel() const
     return _filterModel;
 }
 
+QStringList RecentFilesAction::getRecentFilePaths() const
+{
+    return _model.getRecentFilePaths();
+}
+
+void RecentFilesAction::updateRecentFilePaths()
+{
+    loadFromSettings();
+}
 
 QMap<RecentFilesAction::Model::Column, QPair<QString, QString>> RecentFilesAction::Model::columnInfo = QMap<RecentFilesAction::Model::Column, QPair<QString, QString>>({
     { RecentFilesAction::Model::Column::FilePath, { "File path", "Location of the recent file" }},
@@ -221,6 +230,16 @@ void RecentFilesAction::Model::removeRecentFilePath(const QString& filePath)
 QList<TriggerAction*> RecentFilesAction::Model::getActions()
 {
     return _actions;
+}
+
+QStringList RecentFilesAction::Model::getRecentFilePaths() const
+{
+    QStringList recentFilePaths;
+
+    for (int rowIndex = 0; rowIndex < rowCount(); rowIndex++)
+        recentFilePaths << data(index(rowIndex, static_cast<int>(Column::FilePath))).toString();
+
+    return recentFilePaths;
 }
 
 RecentFilesAction::Dialog::Dialog(RecentFilesAction* recentFilePathsAction) :

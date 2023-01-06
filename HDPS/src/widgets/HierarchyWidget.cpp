@@ -137,20 +137,18 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     layout->setContentsMargins(0, 0, 0, 0);
 
     if (showToolbar) {
-        auto toolbarLayout = new QHBoxLayout();
-
-        toolbarLayout->setSpacing(3);
+        _toolbarLayout.setSpacing(3);
 
         if (_filterModel) {
-            toolbarLayout->addWidget(_filterNameAction.createWidget(this), 1);
-            toolbarLayout->addWidget(_filterGroupAction.createCollapsedWidget(this));
+            _toolbarLayout.addWidget(_filterNameAction.createWidget(this), 1);
+            _toolbarLayout.addWidget(_filterGroupAction.createCollapsedWidget(this));
         }
         
-        toolbarLayout->addWidget(_expandAllAction.createWidget(this));
-        toolbarLayout->addWidget(_collapseAllAction.createWidget(this));
-        toolbarLayout->addWidget(_selectionGroupAction.createCollapsedWidget(this));
-        toolbarLayout->addWidget(_columnsGroupAction.createCollapsedWidget(this));
-        toolbarLayout->addWidget(_settingsGroupAction.createCollapsedWidget(this));
+        _toolbarLayout.addWidget(_expandAllAction.createWidget(this));
+        _toolbarLayout.addWidget(_collapseAllAction.createWidget(this));
+        _toolbarLayout.addWidget(_selectionGroupAction.createCollapsedWidget(this));
+        _toolbarLayout.addWidget(_columnsGroupAction.createCollapsedWidget(this));
+        _toolbarLayout.addWidget(_settingsGroupAction.createCollapsedWidget(this));
 
         //auto testTriggerAction = new TriggerAction(this, "test");
 
@@ -162,7 +160,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
         //testTriggerAction->trigger();
 
-        layout->addLayout(toolbarLayout);
+        layout->addLayout(&_toolbarLayout);
     }
     
     layout->addWidget(&_treeView);
@@ -497,6 +495,11 @@ void HierarchyWidget::setHeaderHidden(bool headerHidden)
 
     if (_headerHidden)
         _treeView.setHeaderHidden(true);
+}
+
+QHBoxLayout& HierarchyWidget::getToolbarLayout()
+{
+    return _toolbarLayout;
 }
 
 }

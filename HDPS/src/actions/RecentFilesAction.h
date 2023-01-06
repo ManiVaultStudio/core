@@ -66,8 +66,14 @@ public:
          */
         QList<TriggerAction*> getActions();
 
+        /**
+         * Get recent file paths
+         * @return File paths as string list
+         */
+        QStringList getRecentFilePaths() const;
+
     private:
-        RecentFilesAction*  _recentFilePathsAction;     /** Pointer to owning recent file paths action */
+        RecentFilesAction*      _recentFilePathsAction;     /** Pointer to owning recent file paths action */
         QList<TriggerAction*>   _actions;                   /** Menu trigger actions */
 
         friend class RecentFilesAction;
@@ -133,7 +139,7 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param settingsKey Settings key where the recent file paths will be stored
+     * @param settingsKey Settings key where the recent file paths are stored
      * @param fileType Type of file e.g. project or workspace
      * @param shortcutPrefix Prefix of the shortcut
      * @param icon Icon in menu
@@ -149,7 +155,7 @@ public:
     /**
      * Initializes the action
      * @param parent Pointer to parent object
-     * @param settingsKey Settings key where the recent file paths will be stored
+     * @param settingsKey Settings key where the recent file paths are stored
      * @param fileType Type of file e.g. project or workspace
      * @param shortcutPrefix Prefix of the shortcut
      * @param icon Icon in menu
@@ -209,6 +215,15 @@ public:
      * @return Pointer to menu
      */
     QMenu* getMenu();
+
+    /** Grab latest recent file paths from settings and update model */
+    void updateRecentFilePaths();
+
+    /**
+     * Get recent file paths
+     * @return File paths as string list
+     */
+    QStringList getRecentFilePaths() const;
 
 signals:
 

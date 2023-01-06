@@ -26,6 +26,7 @@ WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) 
 
     const auto workspace = Application::core()->getWorkspaceManager().getWorkspace();
 
+    _groupAction << workspace->getTitleAction();
     _groupAction << workspace->getDescriptionAction();
     _groupAction << workspace->getTagsAction();
     _groupAction << workspace->getCommentsAction();

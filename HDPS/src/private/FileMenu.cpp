@@ -7,7 +7,7 @@ using namespace hdps::gui;
 
 FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
-    _exitApplictionAction(this, "Exit")
+    _exitApplictionAction(nullptr, "Exit")
 {
     setTitle("File");
     setToolTip("File operations");
@@ -45,6 +45,6 @@ void FileMenu::showEvent(QShowEvent* showEvent)
     addAction(&Application::core()->getSettingsManager().getEditSettingsAction());
     addSeparator();
     addAction(&projectManager.getShowStartPageAction());
-    //addSeparator();
-    //addAction(&_exitApplictionAction);
+    addSeparator();
+    addAction(&_exitApplictionAction);
 }

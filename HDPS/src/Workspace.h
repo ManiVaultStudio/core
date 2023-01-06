@@ -77,10 +77,12 @@ private:
 
 public: // Action getters
 
+    const gui::StringAction& getTitleAction() const { return _titleAction; }
     const gui::StringAction& getDescriptionAction() const { return _descriptionAction; }
     const gui::StringsAction& getTagsAction() const { return _tagsAction; }
     const gui::StringAction& getCommentsAction() const { return _commentsAction; }
 
+    gui::StringAction& getTitleAction() { return _titleAction; }
     gui::StringAction& getDescriptionAction() { return _descriptionAction; }
     gui::StringsAction& getTagsAction() { return _tagsAction; }
     gui::StringAction& getCommentsAction() { return _commentsAction; }
@@ -95,7 +97,8 @@ signals:
 
 private:
     QString             _filePath;              /** Location on disk where the workspace resides */
-    gui::StringAction   _descriptionAction;     /** Work description action */
+    gui::StringAction   _titleAction;           /** Workspace title action */
+    gui::StringAction   _descriptionAction;     /** Workspace description action */
     gui::StringsAction  _tagsAction;            /** Workspace tags action */
     gui::StringAction   _commentsAction;        /** Workspace comments action */
 

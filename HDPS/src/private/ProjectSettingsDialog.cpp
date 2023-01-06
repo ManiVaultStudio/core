@@ -26,6 +26,7 @@ ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
 
     const auto project = Application::core()->getProjectManager().getProject();
 
+    _groupAction << project->getTitleAction();
     _groupAction << project->getDescriptionAction();
     _groupAction << project->getTagsAction();
     _groupAction << project->getCommentsAction();

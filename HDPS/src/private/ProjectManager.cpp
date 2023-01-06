@@ -103,7 +103,6 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
 
     connect(&_newProjectAction, &QAction::triggered, this, [this]() -> void {
         NewProjectDialog newProjectDialog;
-
         newProjectDialog.exec();
     });
 
@@ -430,10 +429,35 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
                 passwordProtectedCheckBox.setChecked(false);
                 passwordLineEdit.setPlaceholderText("Enter encryption password...");
 
-                fileDialogLayout->addWidget(&enableCompressionCheckBox, rowCount, 0);
-                fileDialogLayout->addWidget(&compressionLevelSpinBox, rowCount, 1);
+                auto compressionLayout = new QHBoxLayout();
+
+                fileDialogLayout->addWidget(&enableCompressionCheckBox, rowCount, 1, 1, 2);
+                fileDialogLayout->addWidget(&compressionLevelSpinBox, rowCount + 1, 1, 1, 2);
                 //fileDialogLayout->addWidget(&passwordProtectedCheckBox, ++rowCount, 0);
                 //fileDialogLayout->addWidget(&passwordLineEdit, rowCount, 1);
+
+                auto& titleAction = getProject()->getTitleAction();
+
+                fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 2, 0);
+
+                GroupAction settingsGroupAction(this);
+
+                settingsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+                settingsGroupAction.setToolTip("Edit project settings");
+                settingsGroupAction.setPopupSizeHint(QSize(420, 320));
+                settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
+
+                settingsGroupAction << getProject()->getTitleAction();
+                settingsGroupAction << getProject()->getDescriptionAction();
+                settingsGroupAction << getProject()->getTagsAction();
+                settingsGroupAction << getProject()->getCommentsAction();
+
+                auto titleLayout = new QHBoxLayout();
+
+                titleLayout->addWidget(titleAction.createWidget(&fileDialog));
+                titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&fileDialog));
+
+                fileDialogLayout->addLayout(titleLayout, rowCount + 2, 1, 1, 2);
 
                 const auto updateCompressionLevel = [&]() -> void {
                     compressionLevelSpinBox.setEnabled(enableCompressionCheckBox.isChecked());

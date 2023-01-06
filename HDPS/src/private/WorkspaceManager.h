@@ -59,6 +59,12 @@ public:
     void reset() override;
 
     /**
+     * Get manager icon
+     * @return Icon
+     */
+    QIcon getIcon() const override;
+
+    /**
      * Add a view plugin to the \p dockArea of \p dockViewPlugin
      * @param viewPlugin Pointer to view plugin to add to layout
      * @param dockToViewPlugin Pointer to view plugin to which the view plugin will be docked (docked top-level if nullptr)
@@ -125,6 +131,12 @@ public: // IO
      */
     Workspace* getWorkspace() override;
 
+    /**
+     * Get workspace locations for location \p types
+     * @return List of workspace locations
+     */
+    WorkspaceLocations getWorkspaceLocations(const WorkspaceLocation::Types& types = WorkspaceLocation::Type::All) override;
+
 public: // Serialization
 
     /**
@@ -161,6 +173,10 @@ private:
      * @return Workspace manager preview image
      */
     QImage toPreviewImage() const;
+
+public: // Action getters
+
+    gui::TriggerAction& getEditWorkspaceSettingsAction() { return _editWorkspaceSettingsAction; }
 
 private:
     QScopedPointer<hdps::Workspace>     _workspace;                             /** Current workspace */

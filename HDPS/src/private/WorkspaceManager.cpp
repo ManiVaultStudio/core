@@ -194,6 +194,11 @@ void WorkspaceManager::reset()
     endReset();
 }
 
+QIcon WorkspaceManager::getIcon() const
+{
+    return _icon;
+}
+
 void WorkspaceManager::newWorkspace()
 {
     try
@@ -373,7 +378,6 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
                 fileDialog.setAcceptMode(QFileDialog::AcceptSave);
                 fileDialog.setNameFilters({ "HDPS workspace files (*.hws)" });
                 fileDialog.setDefaultSuffix(".hws");
-                fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
                 fileDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
                 fileDialog.setMinimumHeight(500);
@@ -381,20 +385,28 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
                 auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
 
-                auto& descriptionAction = getWorkspace()->getDescriptionAction();
+                auto& titleAction = getWorkspace()->getTitleAction();
 
-                fileDialogLayout->addWidget(descriptionAction.createLabelWidget(nullptr), rowCount, 0);
-                fileDialogLayout->addWidget(descriptionAction.createWidget(nullptr), rowCount, 1, 1, 2);
+                fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount, 0);
 
-                auto& tagsAction = getWorkspace()->getTagsAction();
+                GroupAction settingsGroupAction(this);
 
-                fileDialogLayout->addWidget(tagsAction.createLabelWidget(nullptr), rowCount + 1, 0);
-                fileDialogLayout->addWidget(tagsAction.createWidget(nullptr), rowCount + 1, 1, 1, 2);
+                settingsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+                settingsGroupAction.setToolTip("Edit workspace settings");
+                settingsGroupAction.setPopupSizeHint(QSize(420, 320));
+                settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-                auto& commentsAction = getWorkspace()->getCommentsAction();
+                settingsGroupAction << getWorkspace()->getTitleAction();
+                settingsGroupAction << getWorkspace()->getDescriptionAction();
+                settingsGroupAction << getWorkspace()->getTagsAction();
+                settingsGroupAction << getWorkspace()->getCommentsAction();
 
-                fileDialogLayout->addWidget(commentsAction.createLabelWidget(nullptr), rowCount + 2, 0);
-                fileDialogLayout->addWidget(commentsAction.createWidget(nullptr), rowCount + 2, 1, 1, 2);
+                auto titleLayout = new QHBoxLayout();
+
+                titleLayout->addWidget(titleAction.createWidget(&fileDialog));
+                titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&fileDialog));
+
+                fileDialogLayout->addLayout(titleLayout, rowCount, 1, 1, 2);
 
                 if (fileDialog.exec() == 0)
                     return;
@@ -575,6 +587,32 @@ void WorkspaceManager::createIcon()
 QImage WorkspaceManager::toPreviewImage() const
 {
     return _mainDockManager->grab().toImage();
+}
+
+WorkspaceLocations WorkspaceManager::getWorkspaceLocations(const WorkspaceLocation::Types& types /*= WorkspaceLocation::Type::All*/)
+{
+    WorkspaceLocations workspaceLocations;
+
+    if (types.testFlag(WorkspaceLocation::Type::BuiltIn)) {
+
+    }
+
+    if (types.testFlag(WorkspaceLocation::Type::Path)) {
+
+    }
+
+    if (types.testFlag(WorkspaceLocation::Type::Recent)) {
+        _recentWorkspacesAction.updateRecentFilePaths();
+
+        for (const auto recentFilePath : _recentWorkspacesAction.getRecentFilePaths()) {
+            Workspace workspace(recentFilePath);
+
+            workspaceLocations << WorkspaceLocation(workspace.getTitleAction().getString(), recentFilePath, WorkspaceLocation::Type::Recent);
+        }
+            
+    }
+    
+    return workspaceLocations;
 }
 
 }

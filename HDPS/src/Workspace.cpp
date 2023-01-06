@@ -14,6 +14,7 @@ Workspace::Workspace(QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("Workspace"),
     _filePath(),
+    _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments")
@@ -25,6 +26,7 @@ Workspace::Workspace(const QString& filePath, QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("Workspace"),
     _filePath(filePath),
+    _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments")
@@ -75,10 +77,12 @@ void Workspace::setFilePath(const QString& filePath)
 
 void Workspace::fromVariantMap(const QVariantMap& variantMap)
 {
+    variantMapMustContain(variantMap, "Title");
     variantMapMustContain(variantMap, "Description");
     variantMapMustContain(variantMap, "Tags");
     variantMapMustContain(variantMap, "Comments");
 
+    _titleAction.fromVariantMap(variantMap["Title"].toMap());
     _descriptionAction.fromVariantMap(variantMap["Description"].toMap());
     _tagsAction.fromVariantMap(variantMap["Tags"].toMap());
     _commentsAction.fromVariantMap(variantMap["Comments"].toMap());
@@ -87,6 +91,7 @@ void Workspace::fromVariantMap(const QVariantMap& variantMap)
 QVariantMap Workspace::toVariantMap() const
 {
     return {
+        { "Title", _titleAction.toVariantMap() },
         { "Description", _descriptionAction.toVariantMap() },
         { "Tags", _tagsAction.toVariantMap() },
         { "Comments", _commentsAction.toVariantMap() },
@@ -135,6 +140,10 @@ QImage Workspace::getPreviewImage(const QString& filePath)
 
 void Workspace::initialize()
 {
+    _titleAction.setPlaceHolderString("Enter workspace title here...");
+    _titleAction.setConnectionPermissionsToNone();
+    _titleAction.setClearable(true);
+
     _descriptionAction.setPlaceHolderString("Enter workspace description here...");
     _descriptionAction.setConnectionPermissionsToNone();
     _descriptionAction.setClearable(true);

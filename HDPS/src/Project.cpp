@@ -13,6 +13,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("Project"),
     _filePath(),
+    _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments")
@@ -24,6 +25,7 @@ Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("Project"),
     _filePath(filePath),
+    _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments")
@@ -115,6 +117,10 @@ QVariantMap Project::toVariantMap() const
 
 void Project::initialize()
 {
+    _titleAction.setPlaceHolderString("Enter project title here...");
+    _titleAction.setConnectionPermissionsToNone();
+    _titleAction.setClearable(true);
+
     _descriptionAction.setPlaceHolderString("Enter project description here...");
     _descriptionAction.setConnectionPermissionsToNone();
     _descriptionAction.setClearable(true);
