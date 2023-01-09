@@ -183,10 +183,10 @@ private:
     QPointer<DockManager>               _mainDockManager;                       /** Dock manager for docking system view plugins */
     QPointer<DockManager>               _viewPluginsDockManager;                /** Dock manager for docking non-system view plugins */
     QPointer<ViewPluginsDockWidget>     _viewPluginsDockWidget;                 /** Pointer to view plugins dock widget in which non-system view plugins are docked */
-    hdps::gui::TriggerAction            _newWorkspaceAction;                    /** Action for creating a workspace */
-    hdps::gui::TriggerAction            _loadWorkspaceAction;                   /** Action for loading a workspace from file */
-    hdps::gui::TriggerAction            _saveWorkspaceAction;                   /** Action for saving the current workspace to file */
-    hdps::gui::TriggerAction            _saveWorkspaceAsAction;                 /** Action for saving the current workspace to file with a different path */
+    hdps::gui::TriggerAction            _resetWorkspaceAction;                  /** Action for resetting the current workspace */
+    hdps::gui::TriggerAction            _importWorkspaceAction;                 /** Action for importing a workspace from file */
+    hdps::gui::TriggerAction            _exportWorkspaceAction;                 /** Action for exporting the current workspace to file */
+    hdps::gui::TriggerAction            _exportWorkspaceAsAction;               /** Action for exporting the current workspace to file with a different path */
     hdps::gui::TriggerAction            _editWorkspaceSettingsAction;           /** Action for triggering the workspace settings dialog */
     hdps::gui::TriggerAction            _importWorkspaceFromProjectAction;      /** Action for importing a workspace from a project file */
     hdps::gui::RecentFilesAction        _recentWorkspacesAction;                /** Action for saving the current workspace to file with a different path */

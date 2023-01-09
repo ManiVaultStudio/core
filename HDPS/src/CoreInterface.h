@@ -306,4 +306,46 @@ protected:
     friend class EventListener;
 };
 
+/**
+ * Convenience function to obtain access to the actions manager
+ * @return Reference to abstract actions manager
+ */
+AbstractActionsManager& actionsManager();
+
+/**
+ * Convenience function to obtain access to the plugin manager
+ * @return Reference to abstract plugin manager
+ */
+AbstractPluginManager& pluginManager();
+
+/**
+ * Convenience function to obtain access to the data manager
+ * @return Reference to abstract data manager
+ */
+AbstractDataManager& dataManager();
+
+/**
+ * Convenience function to obtain access to the data hierarchy manager
+ * @return Reference to abstract data hierarchy manager
+ */
+AbstractDataHierarchyManager& dataHierarchyManager();
+
+/**
+ * Convenience function to obtain access to the workspace manager
+ * @return Reference to abstract workspace manager
+ */
+AbstractWorkspaceManager& workspaceManager();
+
+/**
+ * Convenience function to obtain access to the project manager
+ * @return Reference to abstract project manager
+ */
+AbstractProjectManager& projectManager();
+
+/**
+ * Convenience function to obtain access to the settings manager
+ * @return Reference to abstract settings manager
+ */
+AbstractSettingsManager& settingsManager();
+
 }

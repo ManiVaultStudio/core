@@ -20,7 +20,6 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     _model(this),
     _filterModel(this),
     _hierarchyWidget(this, "Workspace", _model, &_filterModel),
-    _filterAction(this, "Filter", {"Built-in", "Path"}),
     _createAction(this, "Create"),
     _cancelAction(this, "Cancel")
 {
@@ -41,6 +40,8 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     layout->addLayout(bottomLayout);
 
     setLayout(layout);
+
+    _filterModel.setFilterKeyColumn(static_cast<int>(WorkspaceInventoryModel::Column::Name));
 
     _hierarchyWidget.setWindowIcon(Application::core()->getWorkspaceManager().getIcon());
     _hierarchyWidget.getFilterGroupAction().setVisible(false);

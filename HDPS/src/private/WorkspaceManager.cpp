@@ -39,10 +39,10 @@ WorkspaceManager::WorkspaceManager() :
     AbstractWorkspaceManager(),
     _mainDockManager(),
     _viewPluginsDockWidget(),
-    _newWorkspaceAction(this, "New"),
-    _loadWorkspaceAction(this, "Load"),
-    _saveWorkspaceAction(this, "Save"),
-    _saveWorkspaceAsAction(this, "Save As..."),
+    _resetWorkspaceAction(this, "New"),
+    _importWorkspaceAction(this, "Load"),
+    _exportWorkspaceAction(this, "Save"),
+    _exportWorkspaceAsAction(this, "Save As..."),
     _editWorkspaceSettingsAction(this, "Workspace Settings..."),
     _importWorkspaceFromProjectAction(this, "Import from project"),
     _recentWorkspacesAction(this),
@@ -52,25 +52,25 @@ WorkspaceManager::WorkspaceManager() :
 
     ads::CDockComponentsFactory::setFactory(new DockComponentsFactory());
 
-    _newWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+N"));
-    _newWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
-    _newWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
-    _newWorkspaceAction.setToolTip("Create new workspace");
+    _resetWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+R"));
+    _resetWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
+    _resetWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+    _resetWorkspaceAction.setToolTip("Reset the current workspace");
 
-    _loadWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+L"));
-    _loadWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
-    _loadWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-    _loadWorkspaceAction.setToolTip("Open workspace from disk");
+    _importWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+I"));
+    _importWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
+    _importWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    _importWorkspaceAction.setToolTip("Open workspace from disk");
 
-    _saveWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+S"));
-    _saveWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
-    _saveWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-    _saveWorkspaceAction.setToolTip("Save workspace to disk");
+    _exportWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+E"));
+    _exportWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
+    _exportWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+    _exportWorkspaceAction.setToolTip("Export workspace to disk");
 
-    _saveWorkspaceAsAction.setShortcut(QKeySequence("Ctrl+Alt+Shift+S"));
-    _saveWorkspaceAsAction.setShortcutContext(Qt::ApplicationShortcut);
-    _saveWorkspaceAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-    _saveWorkspaceAsAction.setToolTip("Save workspace under a new file to disk");
+    _exportWorkspaceAsAction.setShortcut(QKeySequence("Ctrl+Alt+Shift+E"));
+    _exportWorkspaceAsAction.setShortcutContext(Qt::ApplicationShortcut);
+    _exportWorkspaceAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+    _exportWorkspaceAsAction.setToolTip("Export workspace under a new file to disk");
 
     _editWorkspaceSettingsAction.setShortcut(QKeySequence("Ctrl+Alt+P"));
     _editWorkspaceSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -84,26 +84,26 @@ WorkspaceManager::WorkspaceManager() :
 
     auto mainWindow = Application::topLevelWidgets().first();
 
-    mainWindow->addAction(&_newWorkspaceAction);
-    mainWindow->addAction(&_loadWorkspaceAction);
-    mainWindow->addAction(&_saveWorkspaceAction);
-    mainWindow->addAction(&_saveWorkspaceAsAction);
+    mainWindow->addAction(&_resetWorkspaceAction);
+    mainWindow->addAction(&_importWorkspaceAction);
+    mainWindow->addAction(&_exportWorkspaceAction);
+    mainWindow->addAction(&_exportWorkspaceAsAction);
     mainWindow->addAction(&_importWorkspaceFromProjectAction);
     mainWindow->addAction(&_editWorkspaceSettingsAction);
 
-    connect(&_newWorkspaceAction, &TriggerAction::triggered, [this](bool) {
+    connect(&_resetWorkspaceAction, &TriggerAction::triggered, [this](bool) {
         newWorkspace();
     });
 
-    connect(&_loadWorkspaceAction, &TriggerAction::triggered, [this](bool) {
+    connect(&_importWorkspaceAction, &TriggerAction::triggered, [this](bool) {
         loadWorkspace();
     });
 
-    connect(&_saveWorkspaceAction, &TriggerAction::triggered, [this](bool) {
+    connect(&_exportWorkspaceAction, &TriggerAction::triggered, [this](bool) {
         saveWorkspace(getWorkspaceFilePath());
     });
 
-    connect(&_saveWorkspaceAsAction, &TriggerAction::triggered, [this](bool) {
+    connect(&_exportWorkspaceAsAction, &TriggerAction::triggered, [this](bool) {
         saveWorkspaceAs();
     });
 
@@ -125,9 +125,9 @@ WorkspaceManager::WorkspaceManager() :
     });
 
     const auto updateActionsReadOnly = [this]() -> void {
-        _saveWorkspaceAction.setEnabled(true);
-        _saveWorkspaceAsAction.setEnabled(true);
-        _saveWorkspaceAsAction.setEnabled(!getWorkspaceFilePath().isEmpty());
+        _exportWorkspaceAction.setEnabled(true);
+        _exportWorkspaceAsAction.setEnabled(true);
+        _exportWorkspaceAsAction.setEnabled(!getWorkspaceFilePath().isEmpty());
     };
 
     connect(this, &WorkspaceManager::workspaceLoaded, this, updateActionsReadOnly);
@@ -529,10 +529,10 @@ QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)
     menu->setToolTip("Workspace operations");
     menu->setEnabled(Application::core()->getProjectManager().hasProject());
 
-    menu->addAction(&_newWorkspaceAction);
-    menu->addAction(&_loadWorkspaceAction);
-    menu->addAction(&_saveWorkspaceAction);
-    menu->addAction(&_saveWorkspaceAsAction);
+    menu->addAction(&_resetWorkspaceAction);
+    menu->addAction(&_importWorkspaceAction);
+    menu->addAction(&_exportWorkspaceAction);
+    menu->addAction(&_exportWorkspaceAsAction);
     menu->addSeparator();
     menu->addAction(&_editWorkspaceSettingsAction);
     menu->addSeparator();
