@@ -307,43 +307,43 @@ protected:
 };
 
 /**
- * Convenience function to obtain access to the actions manager
+ * Convenience function to obtain access to the actions manager in the core
  * @return Reference to abstract actions manager
  */
 AbstractActionsManager& actionsManager();
 
 /**
- * Convenience function to obtain access to the plugin manager
+ * Convenience function to obtain access to the plugin manager in the core
  * @return Reference to abstract plugin manager
  */
 AbstractPluginManager& pluginManager();
 
 /**
- * Convenience function to obtain access to the data manager
+ * Convenience function to obtain access to the data manager in the core
  * @return Reference to abstract data manager
  */
 AbstractDataManager& dataManager();
 
 /**
- * Convenience function to obtain access to the data hierarchy manager
+ * Convenience function to obtain access to the data hierarchy manager in the core
  * @return Reference to abstract data hierarchy manager
  */
 AbstractDataHierarchyManager& dataHierarchyManager();
 
 /**
- * Convenience function to obtain access to the workspace manager
+ * Convenience function to obtain access to the workspace manager in the core
  * @return Reference to abstract workspace manager
  */
 AbstractWorkspaceManager& workspaceManager();
 
 /**
- * Convenience function to obtain access to the project manager
+ * Convenience function to obtain access to the project manager in the core
  * @return Reference to abstract project manager
  */
 AbstractProjectManager& projectManager();
 
 /**
- * Convenience function to obtain access to the settings manager
+ * Convenience function to obtain access to the settings manager in the core
  * @return Reference to abstract settings manager
  */
 AbstractSettingsManager& settingsManager();
