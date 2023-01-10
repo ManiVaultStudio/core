@@ -4,39 +4,44 @@
 namespace hdps
 {
 
-AbstractActionsManager& actionsManager()
+CoreInterface* core()
 {
-    return Application::core()->getActionsManager();
+    return Application::core();
 }
 
-AbstractPluginManager& pluginManager()
+AbstractActionsManager& actions()
 {
-    return Application::core()->getPluginManager();
+    return core()->getActionsManager();
 }
 
-AbstractDataManager& dataManager()
+AbstractPluginManager& plugins()
 {
-    return Application::core()->getDataManager();
+    return core()->getPluginManager();
 }
 
-AbstractDataHierarchyManager& dataHierarchyManager()
+AbstractDataManager& data()
 {
-    return Application::core()->getDataHierarchyManager();
+    return core()->getDataManager();
 }
 
-AbstractWorkspaceManager& workspaceManager()
+AbstractDataHierarchyManager& dataHierarchy()
 {
-    return Application::core()->getWorkspaceManager();
+    return core()->getDataHierarchyManager();
 }
 
-AbstractProjectManager& projectManager()
+AbstractWorkspaceManager& workspaces()
 {
-    return Application::core()->getProjectManager();
+    return core()->getWorkspaceManager();
 }
 
-AbstractSettingsManager& settingsManager()
+AbstractProjectManager& projects()
 {
-    return Application::core()->getSettingsManager();
+    return core()->getProjectManager();
+}
+
+AbstractSettingsManager& settings()
+{
+    return core()->getSettingsManager();
 }
 
 }

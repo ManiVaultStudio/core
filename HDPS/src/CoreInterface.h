@@ -307,45 +307,51 @@ protected:
 };
 
 /**
+ * Convenience function to obtain access to the core
+ * @return Pointer to the current instance of the core
+ */
+CoreInterface* core();
+
+/**
  * Convenience function to obtain access to the actions manager in the core
  * @return Reference to abstract actions manager
  */
-AbstractActionsManager& actionsManager();
+AbstractActionsManager& actions();
 
 /**
  * Convenience function to obtain access to the plugin manager in the core
  * @return Reference to abstract plugin manager
  */
-AbstractPluginManager& pluginManager();
+AbstractPluginManager& plugins();
 
 /**
  * Convenience function to obtain access to the data manager in the core
  * @return Reference to abstract data manager
  */
-AbstractDataManager& dataManager();
+AbstractDataManager& data();
 
 /**
  * Convenience function to obtain access to the data hierarchy manager in the core
  * @return Reference to abstract data hierarchy manager
  */
-AbstractDataHierarchyManager& dataHierarchyManager();
+AbstractDataHierarchyManager& dataHierarchy();
 
 /**
  * Convenience function to obtain access to the workspace manager in the core
  * @return Reference to abstract workspace manager
  */
-AbstractWorkspaceManager& workspaceManager();
+AbstractWorkspaceManager& workspaces();
 
 /**
  * Convenience function to obtain access to the project manager in the core
  * @return Reference to abstract project manager
  */
-AbstractProjectManager& projectManager();
+AbstractProjectManager& projects();
 
 /**
  * Convenience function to obtain access to the settings manager in the core
  * @return Reference to abstract settings manager
  */
-AbstractSettingsManager& settingsManager();
+AbstractSettingsManager& settings();
 
 }
