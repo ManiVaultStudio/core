@@ -156,10 +156,10 @@ void WorkspaceManager::initalize()
         _viewPluginsDockManager = new DockManager();
         _viewPluginsDockWidget  = new ViewPluginsDockWidget(_viewPluginsDockManager);
 
-        _mainDockManager->setConfigFlag(CDockManager::FocusHighlighting, true);
+        //_mainDockManager->setConfigFlag(CDockManager::FocusHighlighting, true);
         _mainDockManager->setObjectName("MainDockManager");
 
-        _viewPluginsDockManager->setConfigFlag(CDockManager::FocusHighlighting, true);
+        //_viewPluginsDockManager->setConfigFlag(CDockManager::FocusHighlighting, true);
         _viewPluginsDockManager->setObjectName("ViewPluginsDockManager");
 
         auto viewPluginsDockArea = _mainDockManager->setCentralWidget(_viewPluginsDockWidget.get());

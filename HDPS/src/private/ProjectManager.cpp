@@ -202,7 +202,8 @@ void ProjectManager::newProject(const QString& workspaceFilePath /*= ""*/)
 #endif
         createProject();
 
-        Application::core()->getWorkspaceManager().loadWorkspace(workspaceFilePath);
+        if (QFileInfo(workspaceFilePath).exists())
+            workspaces().loadWorkspace(workspaceFilePath);
     }
     catch (std::exception& e)
     {

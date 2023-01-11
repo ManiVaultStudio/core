@@ -28,7 +28,7 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewHasWindowFrame, true);
     CDockManager::setConfigFlag(CDockManager::OpaqueSplitterResize, false);
-    CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
+    CDockManager::setConfigFlag(CDockManager::FocusHighlighting, false);
     CDockManager::setConfigFlag(CDockManager::EqualSplitOnInsertion, true);
     CDockManager::setConfigFlag(CDockManager::DockAreaHasUndockButton, true);
     CDockManager::setConfigFlag(CDockManager::DockAreaHasCloseButton, false);
@@ -36,6 +36,9 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager::setConfigFlag(CDockManager::DockAreaHasTabsMenuButton, true);
     CDockManager::setConfigFlag(CDockManager::DockAreaDynamicTabsMenuButtonVisibility, false);
     CDockManager::setConfigFlag(CDockManager::AllTabsHaveCloseButton, true);
+    
+    //setAutoHideConfigFlag(AutoHideFeatureEnabled);
+    //setAutoHideConfigFlag(DockAreaHasAutoHideButton);
 }
 
 DockManager::~DockManager()
