@@ -11,19 +11,14 @@
 namespace hdps
 {
 
-CoreInterface* EventListener::_eventCore = nullptr;
-
-void EventListener::setEventCore(CoreInterface* core)
+EventListener::EventListener()
 {
-    _eventCore = core;
-
-    _eventCore->registerEventListener(this);
+    core()->getEventManager().registerEventListener(this);
 }
 
 EventListener::~EventListener()
 {
-    if (_eventCore)
-        _eventCore->unregisterEventListener(this);
+    core()->getEventManager().unregisterEventListener(this);
 }
 
 bool EventListener::isEventTypeSupported(std::uint32_t eventType) const

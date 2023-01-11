@@ -316,7 +316,6 @@ void Points::init()
 
     _infoAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 
-    _eventListener.setEventCore(Application::core());
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
     _eventListener.registerDataEventByType(PointType, [this](DataEvent* dataEvent)
     {
@@ -354,8 +353,7 @@ void Points::init()
                 // Copy indices from source to target if the indices have changed
                 targetIndices = sourceIndices;
 
-                // Notify others that the cluster selection has changed
-                Application::core()->notifyDatasetSelectionChanged(this);
+                events().notifyDatasetSelectionChanged(this);
 
                 break;
             }
@@ -894,7 +892,7 @@ void Points::selectAll()
             selectionIndices.push_back(index);
     }
 
-    Application::core()->notifyDatasetSelectionChanged(this);
+    events().notifyDatasetSelectionChanged(this);
 }
 
 void Points::selectNone()
@@ -903,7 +901,7 @@ void Points::selectNone()
 
     selectionIndices.clear();
 
-    Application::core()->notifyDatasetSelectionChanged(this);
+    events().notifyDatasetSelectionChanged(this);
 }
 
 void Points::selectInvert()
@@ -922,7 +920,7 @@ void Points::selectInvert()
             selectionIndices.push_back(i);
     }
 
-    Application::core()->notifyDatasetSelectionChanged(this);
+    events().notifyDatasetSelectionChanged(this);
 }
 
 void Points::fromVariantMap(const QVariantMap& variantMap)
@@ -976,7 +974,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
     setDimensionNames(dimensionNames);
 
-    Application::core()->notifyDatasetChanged(this);
+    events().notifyDatasetChanged(this);
 }
 
 QVariantMap Points::toVariantMap() const

@@ -1,6 +1,7 @@
 #include "WorkspaceInventoryModel.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 #include <Workspace.h>
 
 using namespace hdps;
@@ -35,9 +36,7 @@ void WorkspaceInventoryModel::synchronizeWithWorkspaceManager()
     qDebug() << __FUNCTION__;
 #endif
 
-    auto& workspaceManager = Application::core()->getWorkspaceManager();
-
-    for (const auto workspaceLocation : workspaceManager.getWorkspaceLocations()) {
+    for (const auto workspaceLocation : workspaces().getWorkspaceLocations()) {
         Workspace workspace(workspaceLocation.getFilePath());
 
         const auto workspaceName = QFileInfo(workspaceLocation.getFilePath()).baseName();
@@ -51,7 +50,7 @@ void WorkspaceInventoryModel::synchronizeWithWorkspaceManager()
             new QStandardItem()
         };
 
-        workspaceRow[static_cast<int>(WorkspaceInventoryModel::Column::Icon)]->setData(workspaceManager.getIcon(), Qt::DecorationRole);
+        workspaceRow[static_cast<int>(WorkspaceInventoryModel::Column::Icon)]->setData(workspaces().getIcon(), Qt::DecorationRole);
         workspaceRow[static_cast<int>(WorkspaceInventoryModel::Column::Icon)]->setTextAlignment(Qt::AlignTop);
         workspaceRow[static_cast<int>(WorkspaceInventoryModel::Column::Tags)]->setData(workspace.getTagsAction().getStrings(), Qt::EditRole);
 

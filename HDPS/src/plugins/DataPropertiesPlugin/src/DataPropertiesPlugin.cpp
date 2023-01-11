@@ -1,6 +1,7 @@
 #include "DataPropertiesPlugin.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 #include <AbstractDataHierarchyManager.h>
 
 Q_PLUGIN_METADATA(IID "nl.BioVault.DataPropertiesPlugin")
@@ -23,7 +24,7 @@ void DataPropertiesPlugin::init()
 
     getWidget().setLayout(layout);
 
-    connect(&_core->getDataHierarchyManager(), &AbstractDataHierarchyManager::selectedItemsChanged, this, [this](DataHierarchyItems selectedItems) -> void {
+    connect(&dataHierarchy(), &AbstractDataHierarchyManager::selectedItemsChanged, this, [this](DataHierarchyItems selectedItems) -> void {
         if (selectedItems.isEmpty())
             getWidget().setWindowTitle("Data properties");
         else

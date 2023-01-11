@@ -1,6 +1,7 @@
 #include "FileMenu.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -26,25 +27,23 @@ void FileMenu::showEvent(QShowEvent* showEvent)
 {
     clear();
 
-    auto& projectManager = Application::core()->getProjectManager();
-
-    addAction(&projectManager.getNewProjectAction());
-    addAction(&projectManager.getOpenProjectAction());
-    //addAction(&projectManager.getImportProjectAction());
-    addAction(&projectManager.getSaveProjectAction());
-    addAction(&projectManager.getSaveProjectAsAction());
-    addAction(&projectManager.getEditProjectSettingsAction());
-    addMenu(projectManager.getRecentProjectsAction().getMenu());
+    addAction(&projects().getNewProjectAction());
+    addAction(&projects().getOpenProjectAction());
+    //addAction(&projects().getImportProjectAction());
+    addAction(&projects().getSaveProjectAction());
+    addAction(&projects().getSaveProjectAsAction());
+    addAction(&projects().getEditProjectSettingsAction());
+    addMenu(projects().getRecentProjectsAction().getMenu());
     addSeparator();
     addMenu(Application::core()->getWorkspaceManager().getMenu());
     addSeparator();
-    addMenu(projectManager.getImportDataMenu());
+    addMenu(projects().getImportDataMenu());
     addSeparator();
-    addAction(&projectManager.getPluginManagerAction());
+    addAction(&projects().getPluginManagerAction());
     addSeparator();
-    addAction(&Application::core()->getSettingsManager().getEditSettingsAction());
+    addAction(&settings().getEditSettingsAction());
     addSeparator();
-    addAction(&projectManager.getShowStartPageAction());
+    addAction(&projects().getShowStartPageAction());
     addSeparator();
     addAction(&_exitApplictionAction);
 }

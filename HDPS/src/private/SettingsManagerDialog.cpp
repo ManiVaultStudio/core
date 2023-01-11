@@ -1,7 +1,7 @@
 #include "SettingsManagerDialog.h"
 
 #include <Application.h>
-
+#include <CoreInterface.h>
 #include <QVBoxLayout>
 
 using namespace hdps;
@@ -26,15 +26,13 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     setLayout(layout);
 
     layout->addWidget(_groupsAction.createWidget(this));
-    
-    auto& settingsManager = Application::core()->getSettingsManager();
 
     _globalPathsGroupAction.setText("Paths");
     _globalPathsGroupAction.setLabelWidthPercentage(20);
 
-    _globalPathsGroupAction << settingsManager.getGlobalProjectsPathAction();
-    _globalPathsGroupAction << settingsManager.getGlobalWorkspacesPathAction();
-    _globalPathsGroupAction << settingsManager.getGlobalDataPathAction();
+    _globalPathsGroupAction << settings().getGlobalProjectsPathAction();
+    _globalPathsGroupAction << settings().getGlobalWorkspacesPathAction();
+    _globalPathsGroupAction << settings().getGlobalDataPathAction();
 
     _groupsAction.addGroupAction(&_globalPathsGroupAction);
 }

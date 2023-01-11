@@ -141,8 +141,6 @@ void DatasetPrivate::registerDatasetEvents()
 {
     try
     {
-        _eventListener.setEventCore(Application::core());
-
         _eventListener.registerDataEvent([this](DataEvent* dataEvent) {
             switch (dataEvent->getType()) {
 

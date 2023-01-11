@@ -60,7 +60,7 @@ endif(MSVC)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
-find_package(Qt6 6.3 COMPONENTS Widgets WebEngineWidgets OpenGL Core REQUIRED)
+find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
 
 # Normalize the incoming install path
 file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
@@ -160,6 +160,19 @@ set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
     ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
 )
 
+set(PRIVATE_EVENT_MANAGER_HEADERS
+    src/private/EventManager.h
+)
+
+set(PRIVATE_EVENT_MANAGER_SOURCES
+    src/private/EventManager.cpp
+)
+
+set(PRIVATE_EVENT_MANAGER_FILES
+    ${PRIVATE_EVENT_MANAGER_HEADERS}
+    ${PRIVATE_EVENT_MANAGER_SOURCES}
+)
+
 set(PRIVATE_ACTIONS_MANAGER_HEADERS
     src/private/ActionsManager.h
 )
@@ -212,6 +225,7 @@ set(PRIVATE_MANAGER_HEADERS
     ${PRIVATE_PLUGIN_MANAGER_HEADERS}
     ${PRIVATE_DATA_MANAGER_HEADERS}
     ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
+    ${PRIVATE_EVENT_MANAGER_HEADERS}
     ${PRIVATE_ACTIONS_MANAGER_HEADERS}
     ${PRIVATE_PROJECT_MANAGER_HEADERS}
     ${PRIVATE_SETTINGS_MANAGER_HEADERS}
@@ -222,6 +236,7 @@ set(PRIVATE_MANAGER_SOURCES
     ${PRIVATE_PLUGIN_MANAGER_SOURCES}
     ${PRIVATE_DATA_MANAGER_SOURCES}
     ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
+    ${PRIVATE_EVENT_MANAGER_SOURCES}
     ${PRIVATE_ACTIONS_MANAGER_SOURCES}
     ${PRIVATE_PROJECT_MANAGER_SOURCES}
     ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
@@ -313,6 +328,7 @@ source_group(Managers\\Layout FILES ${PRIVATE_LAYOUT_MANAGER_FILES})
 source_group(Managers\\Plugin FILES ${PRIVATE_PLUGIN_MANAGER_FILES})
 source_group(Managers\\Data FILES ${PRIVATE_DATA_MANAGER_FILES})
 source_group(Managers\\DataHierarchy FILES ${PRIVATE_DATA_HIERARCHY_MANAGER_FILES})
+source_group(Managers\\Event FILES ${PRIVATE_EVENT_MANAGER_FILES})
 source_group(Managers\\Actions FILES ${PRIVATE_ACTIONS_MANAGER_FILES})
 source_group(Managers\\Project FILES ${PRIVATE_PROJECT_MANAGER_FILES})
 source_group(Managers\\Workspace FILES ${PRIVATE_WORKSPACE_MANAGER_FILES})
@@ -328,6 +344,7 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractPluginManager.h
     src/AbstractActionsManager.h
     src/AbstractDataHierarchyManager.h
+    src/AbstractEventManager.h
     src/AbstractWorkspaceManager.h
     src/AbstractProjectManager.h
     src/AbstractSettingsManager.h
@@ -840,6 +857,8 @@ set_property(TARGET ${HDPS_PRIVATE_LIB} PROPERTY CXX_STANDARD 14)
 
 target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::Widgets)
 target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::WebEngineWidgets)
+target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::OpenGL)
+target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::OpenGLWidgets)
 target_link_libraries(${HDPS_PRIVATE_LIB} qtadvanceddocking)
 target_link_libraries(${HDPS_PRIVATE_LIB} QuaZip)
 target_link_libraries(${HDPS_PRIVATE_LIB} "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
@@ -869,6 +888,8 @@ target_include_directories(${HDPS_EXE} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_link_libraries(${HDPS_EXE} Qt6::Widgets)
 target_link_libraries(${HDPS_EXE} Qt6::WebEngineWidgets)
+target_link_libraries(${HDPS_EXE} Qt6::OpenGL)
+target_link_libraries(${HDPS_EXE} Qt6::OpenGLWidgets)
 target_link_libraries(${HDPS_EXE} qtadvanceddocking)
 target_link_libraries(${HDPS_EXE} QuaZip)
 
@@ -1074,7 +1095,7 @@ add_subdirectory(src/plugins/ActionsPlugin)
 add_subdirectory(src/plugins/LoggingPlugin)
 
 # Qt Advanced docking system
-set(VERSION_SHORT 3.7.0)
+set(VERSION_SHORT 4.0.1)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external)
 add_subdirectory(external/advanced_docking)

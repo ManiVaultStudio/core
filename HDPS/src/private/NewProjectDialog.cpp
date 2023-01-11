@@ -3,6 +3,7 @@
 #include <AbstractWorkspaceManager.h>
 
 #include <Application.h>
+#include <CoreInterface.h>
 
 #include <QVBoxLayout>
 #include <QPainter>
@@ -43,7 +44,7 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
 
     _filterModel.setFilterKeyColumn(static_cast<int>(WorkspaceInventoryModel::Column::Name));
 
-    _hierarchyWidget.setWindowIcon(Application::core()->getWorkspaceManager().getIcon());
+    _hierarchyWidget.setWindowIcon(workspaces().getIcon());
     _hierarchyWidget.getFilterGroupAction().setVisible(false);
     _hierarchyWidget.getCollapseAllAction().setVisible(false);
     _hierarchyWidget.getExpandAllAction().setVisible(false);

@@ -3,6 +3,7 @@
 #include "WidgetActionCollapsedWidget.h"
 #include "WidgetActionContextMenu.h"
 #include "Application.h"
+#include "CoreInterface.h"
 #include "DataHierarchyItem.h"
 #include "Plugin.h"
 #include "util/Exception.h"
@@ -38,12 +39,12 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     _popupSizeHint(QSize(0, 0)),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default))
 {
-    Application::core()->getActionsManager().addAction(this);
+    actions().addAction(this);
 }
 
 WidgetAction::~WidgetAction()
 {
-    Application::core()->getActionsManager().removeAction(this);
+    actions().removeAction(this);
 }
 
 QString WidgetAction::getTypeString() const

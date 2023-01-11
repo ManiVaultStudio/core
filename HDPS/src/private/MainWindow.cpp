@@ -14,6 +14,8 @@
 
 #define MAIN_WINDOW_VERBOSE
 
+using namespace hdps;
+
 MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     QMainWindow(parent),
     _core()

@@ -29,14 +29,11 @@ public:
 
 public:
 
+    /** Constructor, registers the event listener */
+    EventListener();
+
     /** Destructor, unregisters the event listener from the core */
     virtual ~EventListener();
-
-    /**
-     * Sets internal static event core, called once upon plugin creation
-     * @param core Pointer to the core
-     */
-    void setEventCore(CoreInterface* core);
 
 public: // Event filtering
 
@@ -78,10 +75,7 @@ private:
     std::vector<DataEventHandler>                   _dataEventHandlers;             /** Non-specific Data event handlers */
     QSet<std::uint32_t>                             _supportEventTypes;             /** Event types this listener should listen to (will listen to all if left empty) */
 
-    /** Pointer to the the (event) core */
-    static CoreInterface* _eventCore;
-
-    friend class Core;
+    friend class AbstractEventManager;
 };
 
 }

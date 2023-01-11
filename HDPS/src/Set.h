@@ -481,6 +481,11 @@ public: // Linked data
      */
     virtual void resolveLinkedData(bool force = false) {};
 
+public:
+        
+    /** Get the name of the raw data */
+    QString getRawDataName() const;
+
 protected:
 
     /** Get raw data */
@@ -491,9 +496,6 @@ protected:
 
         return *static_cast<DataType*>(_rawData);
     }
-
-    /** Get the name of the raw data */
-    QString getRawDataName() const;
 
     /**
      * Set whether this set represents all the data or only a subset

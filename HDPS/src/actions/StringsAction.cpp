@@ -2,6 +2,7 @@
 #include "Application.h"
 
 #include <QHBoxLayout>
+#include <QStandardItemModel>
 
 namespace hdps::gui {
 

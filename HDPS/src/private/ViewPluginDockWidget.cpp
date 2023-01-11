@@ -1,6 +1,7 @@
 #include "ViewPluginDockWidget.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 
 #include <actions/WidgetAction.h>
 
@@ -91,7 +92,7 @@ QString ViewPluginDockWidget::getTypeString() const
 
 void ViewPluginDockWidget::initialize()
 {
-    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
+    connect(&plugins(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
         if (plugin != _viewPlugin)
             return;
 
@@ -111,8 +112,8 @@ void ViewPluginDockWidget::loadViewPlugin()
     qDebug() << __FUNCTION__;
 #endif
 
-    if (Application::core()->getPluginManager().isPluginLoaded(_viewPluginKind)) {
-        auto viewPlugin = dynamic_cast<ViewPlugin*>(Application::core()->getPluginManager().requestPlugin(_viewPluginKind));
+    if (plugins().isPluginLoaded(_viewPluginKind)) {
+        auto viewPlugin = dynamic_cast<ViewPlugin*>(plugins().requestPlugin(_viewPluginKind));
 
         if (viewPlugin)
             setViewPlugin(viewPlugin);
@@ -216,7 +217,6 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
     _viewPlugin->fromVariantMap(_viewPluginMap);
 
     setIcon(viewPlugin->getIcon());
-
     setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
 
     connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, this, [this](const QString& title) {

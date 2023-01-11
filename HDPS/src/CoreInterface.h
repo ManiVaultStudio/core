@@ -2,13 +2,13 @@
 
 #include "PluginType.h"
 #include "Dataset.h"
-
-#include "util/DockArea.h"
+#include "Application.h"
 
 #include "AbstractActionsManager.h"
 #include "AbstractPluginManager.h"
 #include "AbstractDataManager.h"
 #include "AbstractDataHierarchyManager.h"
+#include "AbstractEventManager.h"
 #include "AbstractWorkspaceManager.h"
 #include "AbstractProjectManager.h"
 #include "AbstractSettingsManager.h"
@@ -213,85 +213,11 @@ public: // Dataset grouping
     /** Get whether dataset grouping is enabled or not */
     virtual void setDatasetGroupingEnabled(const bool& datasetGroupingEnabled) = 0;
 
-public: // Events & notifications
-
-    /**
-     * Notify listeners that a new dataset has been added to the core
-     * @param dataset Smart pointer to the dataset that was added
-     */
-    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetAdded(...).")]]
-    virtual void notifyDatasetAdded(const Dataset<DatasetImpl>& dataset) = 0;
-
-    /**
-     * Notify listeners that a dataset is about to be removed
-     * @param dataset Smart pointer to the dataset which is about to be removed
-     */
-    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetAboutToBeRemoved(...).")]]
-    virtual void notifyDatasetAboutToBeRemoved(const Dataset<DatasetImpl>& dataset) = 0;
-
-    /**
-     * Notify listeners that a dataset is removed
-     * @param datasetGuid GUID of the dataset that was removed
-     * @param dataType Type of the data
-     */
-    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetRemoved(...).")]]
-    virtual void notifyDatasetRemoved(const QString& datasetGuid, const DataType& dataType) = 0;
-
-    /**
-     * Notify listeners that a dataset has changed
-     * @param dataset Smart pointer to the dataset of which the data changed
-     */
-    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetChanged(...).")]]
-    virtual void notifyDatasetChanged(const Dataset<DatasetImpl>& dataset) = 0;
-
-    /**
-     * Notify listeners that dataset selection has changed
-     * @param dataset Smart pointer to the dataset of which the selection changed
-     * @param ignoreDatasets Pointer to datasets that should be ignored during notification
-     */
-    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetSelectionChanged(...).")]]
-    virtual void notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets* ignoreDatasets = nullptr) = 0;
-
-    /**
-     * Notify all listeners that a dataset GUI name has changed
-     * @param dataset Smart pointer to the dataset of which the GUI name changed
-     * @param previousGuiName Previous dataset name
-     */
-    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetGuiNameChanged(...).")]]
-    virtual void notifyDatasetGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) = 0;
-
-    /**
-     * Notify all listeners that a dataset is locked
-     * @param dataset Smart pointer to the dataset
-     */
-    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetLocked(...).")]]
-    virtual void notifyDatasetLocked(const Dataset<DatasetImpl>& dataset) = 0;
-
-    /**
-     * Notify all listeners that a dataset is unlocked
-     * @param dataset Smart pointer to the dataset
-     */
-    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().notifyDatasetUnlocked(...).")]]
-    virtual void notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset) = 0;
-
-    /**
-     * Register an event listener
-     * @param eventListener Pointer to event listener to register
-     */
-    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().registerEventListener(...).")]]
-    virtual void registerEventListener(EventListener* eventListener) = 0;
-
-    /**
-     * Unregister an event listener
-     * @param eventListener Pointer to event listener to unregister
-     */
-    [[deprecated("This function will be removed in version 0.5, and replaced by core->getEventManager().unregisterEventListener(...).")]]
-    virtual void unregisterEventListener(EventListener* eventListener) = 0;
-
 public: // Managers
     
     virtual AbstractActionsManager& getActionsManager() = 0;
     virtual AbstractPluginManager& getPluginManager() = 0;
+    virtual AbstractEventManager& getEventManager() = 0;
     virtual AbstractDataManager& getDataManager() = 0;
     virtual AbstractDataHierarchyManager& getDataHierarchyManager() = 0;
     virtual AbstractWorkspaceManager& getWorkspaceManager() = 0;
@@ -310,48 +236,72 @@ protected:
  * Convenience function to obtain access to the core
  * @return Pointer to the current instance of the core
  */
-CoreInterface* core();
+static CoreInterface* core() {
+    return Application::core();
+}
 
 /**
  * Convenience function to obtain access to the actions manager in the core
  * @return Reference to abstract actions manager
  */
-AbstractActionsManager& actions();
+static AbstractActionsManager& actions() {
+    return core()->getActionsManager();
+}
 
 /**
  * Convenience function to obtain access to the plugin manager in the core
  * @return Reference to abstract plugin manager
  */
-AbstractPluginManager& plugins();
+static AbstractPluginManager& plugins() {
+    return core()->getPluginManager();
+}
+
+/**
+ * Convenience function to obtain access to the event manager in the core
+ * @return Reference to abstract event manager
+ */
+static AbstractEventManager& events() {
+    return core()->getEventManager();
+}
 
 /**
  * Convenience function to obtain access to the data manager in the core
  * @return Reference to abstract data manager
  */
-AbstractDataManager& data();
+static AbstractDataManager& data() {
+    return core()->getDataManager();
+}
 
 /**
  * Convenience function to obtain access to the data hierarchy manager in the core
  * @return Reference to abstract data hierarchy manager
  */
-AbstractDataHierarchyManager& dataHierarchy();
+static AbstractDataHierarchyManager& dataHierarchy() {
+    return core()->getDataHierarchyManager();
+}
 
 /**
  * Convenience function to obtain access to the workspace manager in the core
  * @return Reference to abstract workspace manager
  */
-AbstractWorkspaceManager& workspaces();
+static AbstractWorkspaceManager& workspaces() {
+    return core()->getWorkspaceManager();
+}
 
 /**
  * Convenience function to obtain access to the project manager in the core
  * @return Reference to abstract project manager
  */
-AbstractProjectManager& projects();
+static AbstractProjectManager& projects() {
+    return core()->getProjectManager();
+}
 
 /**
  * Convenience function to obtain access to the settings manager in the core
  * @return Reference to abstract settings manager
  */
-AbstractSettingsManager& settings();
+static AbstractSettingsManager& settings() {
+    return core()->getSettingsManager();
+}
 
 }

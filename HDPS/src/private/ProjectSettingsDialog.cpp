@@ -3,6 +3,7 @@
 #include <AbstractProjectManager.h>
 
 #include <Application.h>
+#include <CoreInterface.h>
 
 #include <QVBoxLayout>
 
@@ -24,7 +25,7 @@ ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
 
     _groupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-    const auto project = Application::core()->getProjectManager().getProject();
+    const auto project = projects().getProject();
 
     _groupAction << project->getTitleAction();
     _groupAction << project->getDescriptionAction();

@@ -10,6 +10,7 @@
 #include <QGuiApplication>
 #include <QClipboard>
 #include <QAbstractEventDispatcher>
+#include <QMessageBox>
 
 using namespace hdps;
 using namespace hdps::util;

@@ -3,6 +3,7 @@
 #include <util/Serialization.h>
 
 #include <Application.h>
+#include <CoreInterface.h>
 #include <AbstractPluginManager.h>
 #include <Plugin.h>
 
@@ -46,7 +47,8 @@ ViewPluginsDockWidget::ViewPluginsDockWidget(QPointer<DockManager> dockManager, 
     connect(_dockManager, &CDockManager::dockWidgetAdded, this, &ViewPluginsDockWidget::dockWidgetAdded);
     connect(_dockManager, &CDockManager::dockWidgetAboutToBeRemoved, this, &ViewPluginsDockWidget::dockWidgetAboutToBeRemoved);
     connect(_dockManager, &CDockManager::focusedDockWidgetChanged, this, &ViewPluginsDockWidget::updateCentralWidget);
-    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginDestroyed, this, &ViewPluginsDockWidget::updateCentralWidget);
+
+    connect(&plugins(), &AbstractPluginManager::pluginDestroyed, this, &ViewPluginsDockWidget::updateCentralWidget);
 }
 
 void ViewPluginsDockWidget::updateCentralWidget()

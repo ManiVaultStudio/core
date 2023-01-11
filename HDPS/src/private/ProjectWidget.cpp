@@ -1,6 +1,7 @@
 #include "ProjectWidget.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 #include <AbstractWorkspaceManager.h>
 
 #include <QVBoxLayout>
@@ -13,7 +14,7 @@ ProjectWidget::ProjectWidget(QWidget* parent /*= nullptr*/) :
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(Application::core()->getWorkspaceManager().getWidget());
+    layout->addWidget(workspaces().getWidget());
 
     setLayout(layout);
 }

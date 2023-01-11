@@ -36,8 +36,6 @@ PluginManager::PluginManager() :
     AbstractPluginManager()
 {
     setObjectName("Plugins");
-
-    loadPlugins();
 }
 
 PluginManager::~PluginManager(void)

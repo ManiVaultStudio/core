@@ -1,5 +1,5 @@
 #include "Plugin.h"
-#include "Application.h"
+#include "CoreInterface.h"
 
 #ifdef _DEBUG
     #define PLUGIN_VERBOSE
@@ -20,8 +20,6 @@ Plugin::Plugin(const PluginFactory* factory) :
     _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), QString::number(factory->getNumberOfInstances() + 1))),
     _destroyAction(this, "Remove")
 {
-    _eventListener.setEventCore(Application::core());
-
     _guiNameAction.setConnectionPermissionsToNone();
     _guiNameAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
     _guiNameAction.setPlaceHolderString("Enter plugin name here...");
@@ -141,7 +139,7 @@ QVariantMap Plugin::toVariantMap() const
 
 void Plugin::destroy()
 {
-    Application::core()->getPluginManager().destroyPlugin(this);
+    plugins().destroyPlugin(this);
 }
 
 }

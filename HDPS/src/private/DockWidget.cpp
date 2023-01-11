@@ -71,6 +71,8 @@ QString DockWidget::getTypeString() const
 
 void DockWidget::showEvent(QShowEvent* showEvent)
 {
+    CDockWidget::showEvent(showEvent);
+
     if (_settingsToolButton != nullptr) {
         auto settingsMenu = this->getSettingsMenu();
 

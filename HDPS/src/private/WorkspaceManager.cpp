@@ -7,6 +7,7 @@
 #include "WorkspaceSettingsDialog.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 
 #include <actions/StringsAction.h>
 
@@ -20,6 +21,7 @@
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QBuffer>
+#include <QOpenGLWidget>
 
 #ifdef _DEBUG
     #define WORKSPACE_MANAGER_VERBOSE
@@ -48,6 +50,9 @@ WorkspaceManager::WorkspaceManager() :
     _recentWorkspacesAction(this),
     _icon()
 {
+    // Temporary solution for https://github.com/hdps/core/issues/274
+    new QOpenGLWidget();
+
     setObjectName("WorkspaceManager");
 
     ads::CDockComponentsFactory::setFactory(new DockComponentsFactory());
@@ -556,12 +561,12 @@ void WorkspaceManager::createWorkspace()
 
 void WorkspaceManager::createIcon()
 {
-    const auto size = 128;
-    const auto halfSize = size / 2;
-    const auto margin = 12;
-    const auto spacing = 14;
-    const auto halfSpacing = spacing / 2;
-    const auto lineThickness = 7.0;
+    const auto size             = 128;
+    const auto halfSize         = size / 2;
+    const auto margin           = 12;
+    const auto spacing          = 14;
+    const auto halfSpacing      = spacing / 2;
+    const auto lineThickness    = 7.0;
 
     QPixmap pixmap(size, size);
 

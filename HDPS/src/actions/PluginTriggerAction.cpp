@@ -1,5 +1,5 @@
 #include "PluginTriggerAction.h"
-#include "Application.h"
+#include "CoreInterface.h"
 #include "AbstractPluginManager.h"
 
 #include "pluginFactory.h"
@@ -23,7 +23,7 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFa
     connect(this, &TriggerAction::triggered, this, &PluginTriggerAction::requestPlugin);
 
     setRequestPluginCallback([this](PluginTriggerAction& pluginTriggerAction) -> void {
-        Application::core()->getPluginManager().requestPlugin(_pluginFactory->getKind());
+        plugins().requestPlugin(_pluginFactory->getKind());
     });
 }
 

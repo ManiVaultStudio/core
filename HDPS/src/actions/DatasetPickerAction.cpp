@@ -29,7 +29,6 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, 
         emit datasetPicked(_datasetsModel.getDataset(currentIndex));
     });
 
-    _eventListener.setEventCore(Application::core());
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
     //_eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAboutToBeRemoved));
     _eventListener.registerDataEvent([this](DataEvent* dataEvent) {

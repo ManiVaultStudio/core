@@ -1,6 +1,7 @@
 #include "LoadedViewsMenu.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 #include <ViewPlugin.h>
 
 #include <actions/PluginTriggerAction.h>
@@ -17,7 +18,7 @@ LoadedViewsMenu::LoadedViewsMenu(QWidget *parent /*= nullptr*/) :
 {
     setTitle("Toggle");
     setToolTip("Toggle loaded view plugin visibility");
-    setEnabled(!Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW).empty());
+    setEnabled(!plugins().getPluginsByType(plugin::Type::VIEW).empty());
     setIcon(Application::getIconFont("FontAwesome").getIcon("low-vision"));
 
     connect(this, &QMenu::aboutToShow, this, [this]() -> void {
@@ -48,9 +49,7 @@ QVector<QPointer<ToggleAction>> LoadedViewsMenu::getLoadedViewsActions(bool syst
 {
     QVector<QPointer<ToggleAction>> actions;
 
-    const auto plugins = Application::core()->getPluginManager().getPluginsByType(plugin::Type::VIEW);
-
-    for (auto plugin : plugins) {
+    for (auto plugin : plugins().getPluginsByType(plugin::Type::VIEW)) {
         auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
 
         if (systemView) {

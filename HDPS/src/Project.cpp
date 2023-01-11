@@ -1,6 +1,5 @@
 #include "Project.h"
-
-#include "Application.h"
+#include "CoreInterface.h"
 
 #include "util/Serialization.h"
 
@@ -84,31 +83,19 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     _tagsAction.fromVariantMap(variantMap["Tags"].toMap());
     _commentsAction.fromVariantMap(variantMap["Comments"].toMap());
 
-    auto core = Application::core();
-
-    auto& pluginManager         = core->getPluginManager();
-    auto& dataHierarchyManager  = core->getDataHierarchyManager();
-    auto& actionsManager        = core->getActionsManager();
-
-    pluginManager.fromVariantMap(variantMap[pluginManager.getSerializationName()].toMap());
-    dataHierarchyManager.fromVariantMap(variantMap[dataHierarchyManager.getSerializationName()].toMap());
-    actionsManager.fromVariantMap(variantMap[actionsManager.getSerializationName()].toMap());
+    plugins().fromVariantMap(variantMap[plugins().getSerializationName()].toMap());
+    dataHierarchy().fromVariantMap(variantMap[dataHierarchy().getSerializationName()].toMap());
+    actions().fromVariantMap(variantMap[actions().getSerializationName()].toMap());
 }
 
 QVariantMap Project::toVariantMap() const
 {
     QVariantMap variantMap;
 
-    auto core = Application::core();
-
-    auto& pluginManager         = core->getPluginManager();
-    auto& dataHierarchyManager  = core->getDataHierarchyManager();
-    auto& actionsManager        = core->getActionsManager();
-
     return {
-        { pluginManager.getSerializationName(), pluginManager.toVariantMap() },
-        { dataHierarchyManager.getSerializationName(), dataHierarchyManager.toVariantMap() },
-        { actionsManager.getSerializationName(), actionsManager.toVariantMap() },
+        { plugins().getSerializationName(), plugins().toVariantMap() },
+        { dataHierarchy().getSerializationName(), dataHierarchy().toVariantMap() },
+        { actions().getSerializationName(), actions().toVariantMap() },
         { "Description", _descriptionAction.toVariantMap() },
         { "Tags", _tagsAction.toVariantMap() },
         { "Comments", _commentsAction.toVariantMap() },

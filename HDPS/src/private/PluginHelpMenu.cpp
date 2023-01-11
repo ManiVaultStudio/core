@@ -2,6 +2,7 @@
 #include "PluginManager.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 #include <Plugin.h>
 
 #include <actions/TriggerAction.h>
@@ -25,9 +26,7 @@ PluginHelpMenu::PluginHelpMenu(QWidget* parent /*= nullptr*/) :
 
         QVector<QPointer<TriggerAction>> actions;
 
-        const auto plugins = Application::core()->getPluginManager().getPluginsByTypes({ Type::ANALYSIS, Type::DATA, Type::LOADER, Type::WRITER, Type::TRANSFORMATION, Type::VIEW });
-
-        for (auto plugin : plugins)
+        for (auto plugin : plugins().getPluginsByTypes({ Type::ANALYSIS, Type::DATA, Type::LOADER, Type::WRITER, Type::TRANSFORMATION, Type::VIEW }))
             actions << &plugin->getTriggerHelpAction();
 
         sortActions(actions);

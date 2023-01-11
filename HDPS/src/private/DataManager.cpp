@@ -66,7 +66,7 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         const auto guid = dataset->getGuid();
         const auto type = dataset->getDataType();
 
-        Application::core()->notifyDatasetAboutToBeRemoved(dataset);
+        events().notifyDatasetAboutToBeRemoved(dataset);
         {
             for (auto& underiveDataset : _datasets) {
                 if (underiveDataset->isDerivedData() && underiveDataset->getSourceDataset<DatasetImpl>()->getGuid() == dataset->getGuid()) {
@@ -79,7 +79,7 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 
             _datasets.removeOne(dataset);
         }
-        Application::core()->notifyDatasetRemoved(guid, type);
+        events().notifyDatasetRemoved(guid, type);
 
         emit dataChanged();
     }

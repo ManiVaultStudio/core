@@ -1,6 +1,7 @@
 #include "PluginManagerDialog.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 #include <Plugin.h>
 
 #include <QVBoxLayout>
@@ -99,7 +100,7 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
         contextMenu.exec(QCursor::pos());
     });
 
-    connect(&Application::core()->getPluginManager(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
+    connect(&plugins(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
         const auto matches = _model.findItems(plugin->getId(), Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive, static_cast<int>(PluginManagerModel::Column::ID));
 
         if (matches.isEmpty())

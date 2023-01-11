@@ -5,6 +5,7 @@
 #include "ViewPluginDockWidget.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 #include <AbstractWorkspaceManager.h>
 
 #include <util/Miscellaneous.h>
@@ -74,7 +75,7 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
 
 bool ViewMenu::mayProducePlugins() const
 {
-    for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(Type::VIEW)) {
+    for (auto pluginTriggerAction : plugins().getPluginTriggerActions(Type::VIEW)) {
         auto viewPluginFactory = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
 
         if (viewPluginFactory->producesSystemViewPlugins())
@@ -91,7 +92,7 @@ QVector<QPointer<PluginTriggerAction>> ViewMenu::getLoadViewsActions(gui::DockAr
 {
     PluginTriggerActions pluginTriggerActions;
 
-    for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::VIEW)) {
+    for (auto pluginTriggerAction : plugins().getPluginTriggerActions(plugin::Type::VIEW)) {
         auto viewPluginFactory = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
 
         if (viewPluginFactory->producesSystemViewPlugins())
@@ -111,7 +112,7 @@ QVector<QPointer<PluginTriggerAction>> ViewMenu::getLoadViewsActions(gui::DockAr
         }
 
         pluginTriggerActions.last()->setRequestPluginCallback([dockToViewPlugin, dockArea](PluginTriggerAction& pluginTriggerAction) -> void {
-            Application::core()->getPluginManager().requestViewPlugin(pluginTriggerAction.getPluginFactory()->getKind(), dockToViewPlugin, dockArea);
+            plugins().requestViewPlugin(pluginTriggerAction.getPluginFactory()->getKind(), dockToViewPlugin, dockArea);
         });
     }
 

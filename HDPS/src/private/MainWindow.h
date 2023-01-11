@@ -61,5 +61,5 @@ private: // Window geometry persistence
     void checkGraphicsCapabilities();
 
 private:
-    Core    _core;      /** Instance of the core */
+    hdps::Core    _core;      /** Instance of the core */
 };

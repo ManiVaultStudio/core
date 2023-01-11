@@ -80,7 +80,7 @@ void DatasetImpl::lock()
 {
     _locked = true;
 
-    Application::core()->notifyDatasetLocked(toSmartPointer());
+    events().notifyDatasetLocked(toSmartPointer());
 
     emit getDataHierarchyItem().lockedChanged(_locked);
 }
@@ -89,7 +89,7 @@ void DatasetImpl::unlock()
 {
     _locked = false;
 
-    Application::core()->notifyDatasetUnlocked(toSmartPointer());
+    events().notifyDatasetUnlocked(toSmartPointer());
 
     emit getDataHierarchyItem().lockedChanged(_locked);
 }
@@ -199,7 +199,7 @@ void DatasetImpl::setGroupIndex(const std::int32_t& groupIndex)
 {
     _groupIndex = groupIndex;
 
-    Application::core()->notifyDatasetSelectionChanged(this);
+    events().notifyDatasetSelectionChanged(this);
 }
 
 hdps::Datasets DatasetImpl::getProxyMembers() const
@@ -224,7 +224,7 @@ void DatasetImpl::setProxyMembers(const Datasets& proxyDatasets)
 
         setStorageType(StorageType::Proxy);
 
-        Application::core()->notifyDatasetChanged(this);
+        events().notifyDatasetChanged(this);
     }
     catch (std::exception& e)
     {
@@ -342,7 +342,7 @@ void DatasetImpl::setGuiName(const QString& guiName)
 
     setText(_guiName);
 
-    Application::core()->notifyDatasetGuiNameChanged(*this, previousGuiName);
+    events().notifyDatasetGuiNameChanged(*this, previousGuiName);
 }
 
 bool DatasetImpl::isFull() const

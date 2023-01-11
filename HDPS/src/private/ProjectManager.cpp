@@ -5,6 +5,7 @@
 #include "NewProjectDialog.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 
 #include <util/Exception.h>
 #include <util/Serialization.h>
@@ -136,7 +137,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     connect(&_importDataMenu, &QMenu::aboutToShow, this, [this]() -> void {
         _importDataMenu.clear();
 
-        for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(plugin::Type::LOADER))
+        for (auto pluginTriggerAction : plugins().getPluginTriggerActions(plugin::Type::LOADER))
             _importDataMenu.addAction(pluginTriggerAction);
     });
 

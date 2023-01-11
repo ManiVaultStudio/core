@@ -3,6 +3,7 @@
 #include "ViewPluginDockWidget.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 #include <AbstractWorkspaceManager.h>
 
 #include <actions/PluginTriggerAction.h>
@@ -55,7 +56,7 @@ LoadSystemViewMenu::LoadSystemViewMenu(QWidget *parent /*= nullptr*/, ads::CDock
 
 bool LoadSystemViewMenu::mayProducePlugins() const
 {
-    for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(Type::VIEW)) {
+    for (auto pluginTriggerAction : plugins().getPluginTriggerActions(Type::VIEW)) {
         auto viewPluginFactory = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
 
         if (!viewPluginFactory->producesSystemViewPlugins())
@@ -72,7 +73,7 @@ QVector<QPointer<TriggerAction>> LoadSystemViewMenu::getLoadSystemViewsActions(h
 {
     QVector<QPointer<TriggerAction>> actions;
 
-    auto pluginTriggerActions = Application::core()->getPluginManager().getPluginTriggerActions(Type::VIEW);
+    auto pluginTriggerActions = plugins().getPluginTriggerActions(Type::VIEW);
 
     for (auto pluginTriggerAction : pluginTriggerActions) {
         auto viewPluginFactory = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());

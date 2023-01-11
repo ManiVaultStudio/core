@@ -672,7 +672,7 @@ void Images::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("ImageFilePaths"))
         setImageFilePaths(variantMap["ImageFilePaths"].toStringList());
 
-    Application::core()->notifyDatasetChanged(this);
+    events().notifyDatasetChanged(this);
 }
 
 QVariantMap Images::toVariantMap() const

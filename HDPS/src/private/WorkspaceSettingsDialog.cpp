@@ -3,6 +3,7 @@
 #include <AbstractWorkspaceManager.h>
 
 #include <Application.h>
+#include <CoreInterface.h>
 
 #include <QVBoxLayout>
 
@@ -24,7 +25,7 @@ WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) 
 
     _groupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-    const auto workspace = Application::core()->getWorkspaceManager().getWorkspace();
+    const auto workspace = workspaces().getWorkspace();
 
     _groupAction << workspace->getTitleAction();
     _groupAction << workspace->getDescriptionAction();

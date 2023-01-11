@@ -168,7 +168,6 @@ void Clusters::init()
 
     addAction(*_infoAction.get());
 
-    _eventListener.setEventCore(Application::core());
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
     _eventListener.registerDataEventByType(ClusterType, [this](DataEvent* dataEvent) {
 
@@ -246,7 +245,7 @@ void Clusters::fromVariantMap(const QVariantMap& variantMap)
 
     getRawData<ClusterData>().fromVariantMap(variantMap);
 
-    Application::core()->notifyDatasetChanged(this);
+    events().notifyDatasetChanged(this);
 }
 
 QVariantMap Clusters::toVariantMap() const
@@ -265,11 +264,9 @@ std::vector<std::uint32_t>& Clusters::getSelectionIndices()
 
 void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
-    // Assign new selection
     getSelection<Clusters>()->indices = indices;
 
-    // Notify others that the cluster selection has changed
-    Application::core()->notifyDatasetSelectionChanged(this);
+    events().notifyDatasetSelectionChanged(this);
 
     // Get reference to input dataset
     auto points             = getDataHierarchyItem().getParent().getDataset<Points>();
@@ -295,7 +292,7 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 
     points->setSelectionIndices(selectionIndices);
 
-    Application::core()->notifyDatasetSelectionChanged(points);
+    events().notifyDatasetSelectionChanged(points);
 }
 
 QStringList Clusters::getSelectionNames() const
@@ -352,52 +349,40 @@ bool Clusters::canSelectInvert() const
 
 void Clusters::selectAll()
 {
-    // Get reference to selection indices
     auto& selectionIndices = getSelectionIndices();
 
-    // Clear and resize
     selectionIndices.clear();
     selectionIndices.resize(getClusters().size());
 
-    // Generate cluster selection indices
     std::iota(selectionIndices.begin(), selectionIndices.end(), 0);
 
-    // Notify others that the selection changed
-    Application::core()->notifyDatasetSelectionChanged(this);
+    events().notifyDatasetSelectionChanged(this);
 }
 
 void Clusters::selectNone()
 {
-    // Clear selection indices
     getSelectionIndices().clear();
 
-    // Notify others that the selection changed
-    Application::core()->notifyDatasetSelectionChanged(this);
+    events().notifyDatasetSelectionChanged(this);
 }
 
 void Clusters::selectInvert()
 {
-    // Get reference to selection indices
     auto& selectionIndices = getSelectionIndices();
 
-    // Create set of selected indices
     std::set<std::uint32_t> selectionSet(selectionIndices.begin(), selectionIndices.end());
 
-    // Get number of clusters
     const auto numberOfClusters = getClusters().size();
 
-    // Clear and resize
     selectionIndices.clear();
     selectionIndices.reserve(numberOfClusters - selectionSet.size());
 
-    // Do the inversion
     for (std::uint32_t i = 0; i < static_cast<std::uint32_t>(numberOfClusters); i++) {
         if (selectionSet.find(i) == selectionSet.end())
             selectionIndices.push_back(i);
     }
 
-    // Notify others that the selection changed
-    Application::core()->notifyDatasetSelectionChanged(this);
+    events().notifyDatasetSelectionChanged(this);
 }
 
 QIcon ClusterDataFactory::getIcon(const QColor& color /*= Qt::black*/) const

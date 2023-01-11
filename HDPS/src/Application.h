@@ -5,8 +5,6 @@
 
 #include "actions/TriggerAction.h"
 
-#include "CoreInterface.h"
-
 #include <QApplication>
 #include <QSettings>
 

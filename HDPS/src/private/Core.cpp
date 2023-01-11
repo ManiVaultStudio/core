@@ -29,12 +29,12 @@ namespace hdps {
 Core::Core() :
     _actionsManager(),
     _pluginManager(),
+    _eventManager(),
     _dataManager(),
     _dataHierarchyManager(),
     _workspaceManager(),
     _projectManager(),
-    _settingsManager(),
-    _eventListeners()
+    _settingsManager()
 {
     _datasetGroupingEnabled = Application::current()->getSetting("Core/DatasetGroupingEnabled", false).toBool();
 }
@@ -46,10 +46,9 @@ Core::~Core()
 
 void Core::reset()
 {
-    _eventListeners.clear();
-
     _actionsManager->reset();
     _pluginManager->reset();
+    _eventManager->reset();
     _dataManager->reset();
     _dataHierarchyManager->reset();
     _workspaceManager->reset();
@@ -61,6 +60,7 @@ void Core::init()
 {
     _actionsManager.reset(new ActionsManager());
     _pluginManager.reset(new PluginManager());
+    _eventManager.reset(new EventManager());
     _dataManager.reset(new DataManager());
     _dataHierarchyManager.reset(new DataHierarchyManager());
     _workspaceManager.reset(new WorkspaceManager());
@@ -69,6 +69,7 @@ void Core::init()
 
     _actionsManager->initalize();
     _pluginManager->initalize();
+    _eventManager->initalize();
     _dataManager->initalize();
     _dataHierarchyManager->initalize();
     _workspaceManager->initalize();
@@ -101,7 +102,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
             auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
 
             if (analysisPlugin)
-                notifyDatasetAdded(analysisPlugin->getOutputDataset());
+                events().notifyDatasetAdded(analysisPlugin->getOutputDataset());
 
             break;
         }
@@ -193,11 +194,11 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
             const auto guid = datasetToRemove->getGuid();
             const auto type = datasetToRemove->getDataType();
 
-            notifyDatasetAboutToBeRemoved(datasetToRemove);
+            events().notifyDatasetAboutToBeRemoved(datasetToRemove);
             {
                 _dataManager->removeDataset(datasetToRemove);
             }
-            notifyDatasetRemoved(guid, type);
+            events().notifyDatasetRemoved(guid, type);
         }
     }
     catch (std::exception& e)
@@ -265,7 +266,7 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
         _dataHierarchyManager->addItem(subset, const_cast<Dataset<DatasetImpl>&>(parentDataset), visible);
 
         // Notify listeners that data was added
-        notifyDatasetAdded(*subset);
+        events().notifyDatasetAdded(*subset);
 
         // Initialize the dataset (e.g. setup default actions for info)
         subset->init();
@@ -375,6 +376,11 @@ AbstractDataHierarchyManager& Core::getDataHierarchyManager()
     return *_dataHierarchyManager;
 }
 
+AbstractEventManager& Core::getEventManager()
+{
+    return *_eventManager;
+}
+
 AbstractWorkspaceManager& Core::getWorkspaceManager()
 {
     return *_workspaceManager;
@@ -437,280 +443,6 @@ Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString
 Dataset<DatasetImpl> Core::requestSelection(const QString& name)
 {
     return Dataset<DatasetImpl>(_dataManager->getSelection(name));
-}
-
-void Core::registerEventListener(EventListener* eventListener)
-{
-    _eventListeners.push_back(eventListener);
-}
-
-void Core::unregisterEventListener(EventListener* eventListener)
-{
-    _eventListeners.erase(std::remove(_eventListeners.begin(), _eventListeners.end(), eventListener), _eventListeners.end());
-}
-
-void Core::notifyDatasetAdded(const Dataset<DatasetImpl>& dataset)
-{
-    try {
-
-        // Create data added event
-        DataAddedEvent dataEvent(dataset);
-
-        // Cache the event listeners to prevent crash
-        const auto eventListeners = _eventListeners;
-
-        // And notify all listeners
-        for (auto listener : eventListeners)
-            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                listener->onDataEvent(&dataEvent);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to notify that data was added", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to notify that data was added");
-    }
-}
-
-void Core::notifyDatasetAboutToBeRemoved(const Dataset<DatasetImpl>& dataset)
-{
-    try {
-
-        // Create data about to be removed event
-        DataAboutToBeRemovedEvent dataAboutToBeRemovedEvent(dataset);
-
-        // Cache the event listeners to prevent timing issues
-        const auto eventListeners = _eventListeners;
-
-        // And notify all listeners
-        for (auto listener : eventListeners)
-            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                listener->onDataEvent(&dataAboutToBeRemovedEvent);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to notify that data is about to be removed", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to notify that data is about to be removed");
-    }
-}
-
-void Core::notifyDatasetRemoved(const QString& datasetId, const DataType& dataType)
-{
-    try {
-
-        // Create data removed event
-        DataRemovedEvent dataRemovedEvent(nullptr, datasetId, dataType);
-
-        // Cache the event listeners to prevent timing issues
-        const auto eventListeners = _eventListeners;
-
-        // And notify all listeners
-        for (auto listener : eventListeners)
-            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                listener->onDataEvent(&dataRemovedEvent);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to notify that data is removed", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to notify that data is removed");
-    }
-}
-
-void Core::notifyDatasetChanged(const Dataset<DatasetImpl>& dataset)
-{
-    try {
-    
-        // Create data changed event
-        DataChangedEvent dataEvent(dataset);
-
-        // Cache the event listeners to prevent timing issues
-        const auto eventListeners = _eventListeners;
-
-        // And notify all listeners
-        for (auto listener : eventListeners)
-            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                listener->onDataEvent(&dataEvent);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to notify that data is changed", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to notify that data is changed");
-    }
-}
-
-void Core::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets* ignoreDatasets /*= nullptr*/)
-{
-    try {
-
-        // Do not notify if the dataset has already been notified
-        if (ignoreDatasets != nullptr && ignoreDatasets->contains(dataset))
-            return;
-
-        if (ignoreDatasets != nullptr)
-            *ignoreDatasets << dataset;
-
-        QStringList datasetNotifiedString;
-
-#ifdef CORE_VERBOSE
-        if (ignoreDatasets != nullptr)
-            for (auto datasetNotified : *ignoreDatasets)
-                datasetNotifiedString << datasetNotified->getGuiName();
-
-        qDebug() << __FUNCTION__ << dataset->getGuiName() << datasetNotifiedString;
-#endif
-
-        //qDebug() << __FUNCTION__ << dataset->getGuiName();
-
-        Datasets notified{ dataset };
-
-        if (ignoreDatasets == nullptr)
-            ignoreDatasets = &notified;
-
-        const auto callNotifyDatasetSelectionChanged = [this, dataset, ignoreDatasets](Dataset<DatasetImpl> notifyDataset) -> void {
-            if (ignoreDatasets != nullptr && ignoreDatasets->contains(notifyDataset))
-                return;
-
-            notifyDatasetSelectionChanged(notifyDataset, ignoreDatasets);
-        };
-
-        DataSelectionChangedEvent dataSelectionChangedEvent(dataset);
-
-        // Cache the event listeners to prevent timing issues
-        const auto eventListeners = _eventListeners;
-
-        // And notify all listeners
-        for (auto listener : eventListeners)
-            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                listener->onDataEvent(&dataSelectionChangedEvent);
-
-        // Notify full dataset if dataset is not full
-        if (!dataset->isFull())
-            callNotifyDatasetSelectionChanged(dataset->getFullDataset<DatasetImpl>());
-
-        // Notify all proxy members if the dataset is a proxy
-        if (dataset->isProxy())
-            for (auto proxyMember : dataset->getProxyMembers())
-                callNotifyDatasetSelectionChanged(proxyMember->getSourceDataset<DatasetImpl>());
-
-        // Iterate over all datasets, establish if they somehow have a relation with the supplied dataset and possibly notify the candidate dataset
-        for (auto candidateDataset : requestAllDataSets()) {
-
-            // Continue to the next candidate if it should be ignored
-            if (ignoreDatasets != nullptr && ignoreDatasets->contains(candidateDataset))
-                continue;
-
-            // Do not notify the supplied dataset
-            if (candidateDataset == dataset)
-                continue;
-
-            if (candidateDataset->isDerivedData() && candidateDataset->getSourceDataset<DatasetImpl>()->getRawDataName() == dataset->getSourceDataset<DatasetImpl>()->getRawDataName())
-                callNotifyDatasetSelectionChanged(candidateDataset);
-                
-            if (candidateDataset->getRawDataName() == dataset->getRawDataName())
-                callNotifyDatasetSelectionChanged(candidateDataset);
-
-            if (candidateDataset->isProxy() && candidateDataset->getProxyMembers().contains(dataset))
-                callNotifyDatasetSelectionChanged(candidateDataset);
-        }
-
-        // Notify linked data
-        for (const LinkedData& ld : dataset->getLinkedData())
-            callNotifyDatasetSelectionChanged(ld.getTargetDataset());
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to notify that data selection has changed", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to notify that data selection has changed");
-    }
-}
-
-void Core::notifyDatasetGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName)
-{
-    try {
-
-        // Create GUI name changed event
-        DataGuiNameChangedEvent dataGuiNameChangedEvent(dataset, previousGuiName);
-
-        // Cache the event listeners to prevent timing issues
-        const auto eventListeners = _eventListeners;
-
-        // And notify all listeners
-        for (auto listener : eventListeners)
-            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                listener->onDataEvent(&dataGuiNameChangedEvent);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to notify that data GUI name has changed", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to notify that data GUI name has changed");
-    }
-}
-
-void Core::notifyDatasetLocked(const Dataset<DatasetImpl>& dataset)
-{
-    try {
-
-        // Except if dataset is not valid
-        if (!dataset.isValid())
-            throw std::runtime_error("Dataset is invalid");
-
-        // Create data locked event
-        DataLockedEvent dataLockedEvent(dataset);
-
-        // Cache the event listeners to prevent timing issues
-        const auto eventListeners = _eventListeners;
-
-        // And notify all listeners
-        for (auto listener : eventListeners)
-            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                listener->onDataEvent(&dataLockedEvent);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to notify that a data was locked", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to notify that a data was locked");
-    }
-}
-
-void Core::notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset)
-{
-    try {
-
-        // Except if dataset is not valid
-        if (!dataset.isValid())
-            throw std::runtime_error("Dataset is invalid");
-
-        // Create data unlocked event
-        DataUnlockedEvent dataUnlockedEvent(dataset);
-
-        // Cache the event listeners to prevent timing issues
-        const auto eventListeners = _eventListeners;
-
-        // And notify all listeners
-        for (auto listener : eventListeners)
-            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                listener->onDataEvent(&dataUnlockedEvent);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to notify that a data was unlocked", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to notify that a data was unlocked");
-    }
 }
 
 void Core::setDatasetGroupingEnabled(const bool& datasetGroupingEnabled)

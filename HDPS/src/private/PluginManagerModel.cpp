@@ -1,6 +1,7 @@
 #include "PluginManagerModel.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 #include <AbstractPluginManager.h>
 
 using namespace hdps;
@@ -51,7 +52,7 @@ void PluginManagerModel::synchronizeWithPluginManager()
 
         appendRow({ pluginTypeRow, new QStandardItem("Type"), new QStandardItem("") });
 
-        for (auto pluginFactory : Application::core()->getPluginManager().getPluginFactoriesByType(pluginType)) {
+        for (auto pluginFactory : plugins().getPluginFactoriesByType(pluginType)) {
             auto pluginFactoryRow = new QStandardItem(pluginFactory->getIcon(), pluginFactory->getKind());
 
             pluginFactoryRow->setEnabled(false);
@@ -59,7 +60,7 @@ void PluginManagerModel::synchronizeWithPluginManager()
 
             pluginTypeRow->appendRow({ pluginFactoryRow, new QStandardItem("Factory"), new QStandardItem("") });
 
-            for (auto plugin : Application::core()->getPluginManager().getPluginsByFactory(pluginFactory)) {
+            for (auto plugin : plugins().getPluginsByFactory(pluginFactory)) {
                 auto pluginRow  = new QStandardItem(plugin->getGuiName());
                 auto pluginId   = new QStandardItem(plugin->getId());
                 
