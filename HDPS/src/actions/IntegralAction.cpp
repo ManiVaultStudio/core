@@ -138,6 +138,14 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
         onUpdateValueRange();
     });
 
+    const auto onUpdatePrefix = [this, integralAction, setToolTips]() {
+        QSignalBlocker blocker(this);
+
+        setPrefix(integralAction->getPrefix());
+
+        setToolTips();
+    };
+
     const auto onUpdateSuffix = [this, integralAction, setToolTips]() {
         QSignalBlocker blocker(this);
 
@@ -146,9 +154,8 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
         setToolTips();
     };
 
-    connect(integralAction, &IntegralAction::suffixChanged, this, [this, integralAction, onUpdateSuffix](const QString& suffix) {
-        onUpdateSuffix();
-    });
+    connect(integralAction, &IntegralAction::prefixChanged, this, onUpdatePrefix);
+    connect(integralAction, &IntegralAction::suffixChanged, this, onUpdateSuffix);
 
     connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](const std::int32_t& value) {
         onUpdateValue();
@@ -156,6 +163,7 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
 
     onUpdateValueRange();
     onUpdateValue();
+    onUpdatePrefix();
     onUpdateSuffix();
     setToolTips();
 }

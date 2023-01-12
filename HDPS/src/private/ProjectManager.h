@@ -80,6 +80,14 @@ public:
      */
     hdps::Project* getProject() override;
 
+    /**
+     * Extract the project JSON file (project.json) from a compressed HDPS file (*.hdps)
+     * @param hdpsFilePath File path of the compressed HDPS file (*.hdps)
+     * @param temporaryDir Temporary directory to store the project.json file
+     * @return File path of the extracted project.json file
+     */
+    QString extractProjectFileFromHdpsFile(const QString& hdpsFilePath, QTemporaryDir& temporaryDir) override;
+
 public: // Serialization
 
     /**
@@ -142,8 +150,4 @@ private:
     hdps::gui::TriggerAction            _publishAction;                     /** Action for publishing the project to an end-user */
     hdps::gui::TriggerAction            _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
     hdps::gui::ToggleAction             _showStartPageAction;               /** Action for toggling the start page */
-
-protected:
-    static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
-    static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL   = 2;        /** Default compression level*/
 };

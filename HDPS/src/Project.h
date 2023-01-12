@@ -4,6 +4,7 @@
 
 #include "actions/StringAction.h"
 #include "actions/StringsAction.h"
+#include "actions/IntegralAction.h"
 
 namespace hdps {
 
@@ -70,11 +71,15 @@ public: // Action getters
     const gui::StringAction& getDescriptionAction() const { return _descriptionAction; }
     const gui::StringsAction& getTagsAction() const { return _tagsAction; }
     const gui::StringAction& getCommentsAction() const { return _commentsAction; }
+    const gui::ToggleAction& getCompressionEnabledAction() const { return _compressionEnabledAction; }
+    const gui::IntegralAction& getCompressionLevelAction() const { return _compressionLevelAction; }
 
     gui::StringAction& getTitleAction() { return _titleAction; }
     gui::StringAction& getDescriptionAction() { return _descriptionAction; }
     gui::StringsAction& getTagsAction() { return _tagsAction; }
     gui::StringAction& getCommentsAction() { return _commentsAction; }
+    gui::ToggleAction& getCompressionEnabledAction() { return _compressionEnabledAction; }
+    gui::IntegralAction& getCompressionLevelAction() { return _compressionLevelAction; }
 
 signals:
 
@@ -85,11 +90,17 @@ signals:
     void filePathChanged(const QString& filePath);
 
 private:
-    QString             _filePath;              /** Location on disk where the project resides */
-    gui::StringAction   _titleAction;           /** Workspace title action */
-    gui::StringAction   _descriptionAction;     /** Work description action */
-    gui::StringsAction  _tagsAction;            /** Workspace tags action */
-    gui::StringAction   _commentsAction;        /** Workspace comments action */
+    QString                 _filePath;                  /** Location on disk where the project resides */
+    gui::StringAction       _titleAction;               /** Workspace title action */
+    gui::StringAction       _descriptionAction;         /** Work description action */
+    gui::StringsAction      _tagsAction;                /** Workspace tags action */
+    gui::StringAction       _commentsAction;            /** Workspace comments action */
+    gui::ToggleAction       _compressionEnabledAction;  /** Action to enable/disable project file compression */
+    gui::IntegralAction     _compressionLevelAction;    /** Action to control the amount of project file compression */
+
+protected:
+    static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
+    static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL   = 2;        /** Default compression level*/
 };
 
 }

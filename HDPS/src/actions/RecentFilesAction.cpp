@@ -123,7 +123,7 @@ void RecentFilesAction::updateRecentFilePaths()
 
 QMap<RecentFilesAction::Model::Column, QPair<QString, QString>> RecentFilesAction::Model::columnInfo = QMap<RecentFilesAction::Model::Column, QPair<QString, QString>>({
     { RecentFilesAction::Model::Column::FilePath, { "File path", "Location of the recent file" }},
-    { RecentFilesAction::Model::Column::DateTime, { "Date/time", "Date and time when the file was opened" }}
+    { RecentFilesAction::Model::Column::DateTime, { "Date and time", "Date and time when the file was opened" }}
 });
 
 RecentFilesAction::Model::Model(RecentFilesAction* recentFilePathsAction) :
@@ -282,8 +282,7 @@ RecentFilesAction::Dialog::Dialog(RecentFilesAction* recentFilePathsAction) :
 
     treeViewHeader->setSortIndicator(static_cast<int>(RecentFilesAction::Model::Column::DateTime), Qt::DescendingOrder);
 
-    treeViewHeader->resizeSection(static_cast<int>(RecentFilesAction::Model::Column::FilePath), 300);
-    treeViewHeader->resizeSection(static_cast<int>(RecentFilesAction::Model::Column::DateTime), 200);
+    treeViewHeader->resizeSection(static_cast<int>(RecentFilesAction::Model::Column::DateTime), 150);
 
     treeViewHeader->setSectionResizeMode(static_cast<int>(RecentFilesAction::Model::Column::FilePath), QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(static_cast<int>(RecentFilesAction::Model::Column::DateTime), QHeaderView::Fixed);
@@ -307,8 +306,6 @@ RecentFilesAction::Dialog::Dialog(RecentFilesAction* recentFilePathsAction) :
 
         if (selectedRows.isEmpty())
             return;
-
-        auto mayDestroyPlugins = true;
 
         for (const auto& selectedRow : selectedRows)
             recentFilePathsAction->getModel().removeRecentFilePath(selectedRow.siblingAtColumn(static_cast<int>(RecentFilesAction::Model::Column::FilePath)).data().toString());

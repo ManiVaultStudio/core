@@ -9,6 +9,7 @@
 
 #include <QObject>
 #include <QMenu>
+#include <QTemporaryDir>
 
 namespace hdps {
 
@@ -83,6 +84,14 @@ public:
      * @return Pointer to project (nullptr if no project is loaded)
      */
     virtual Project* getProject() = 0;
+
+    /**
+     * Extract the project JSON file (project.json) from a compressed HDPS file (*.hdps)
+     * @param hdpsFilePath File path of the compressed HDPS file (*.hdps)
+     * @param temporaryDir Temporary directory to store the project.json file
+     * @return File path of the extracted project.json file
+     */
+    virtual QString extractProjectFileFromHdpsFile(const QString& hdpsFilePath, QTemporaryDir& temporaryDir) = 0;
 
 public: // Menus
 

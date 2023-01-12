@@ -3,6 +3,7 @@
 #include <QDialog>
 
 #include "WorkspaceInventoryModel.h"
+#include "WorkspaceInventoryFilterModel.h"
 
 #include <widgets/HierarchyWidget.h>
 
@@ -76,9 +77,9 @@ public:
     }
 
 private:
-    WorkspaceInventoryModel     _model;                 /** Inventory model which contains available workspaces */
-    QSortFilterProxyModel       _filterModel;           /** Sorting and filtering model for the workspaces model */
-    hdps::gui::HierarchyWidget  _hierarchyWidget;       /** Widget for displaying the available workspaces */
-    hdps::gui::TriggerAction    _createAction;          /** Action for creating the project with the selected workspace */
-    hdps::gui::TriggerAction    _cancelAction;          /** Action for exiting the dialog without creating a new project */
+    WorkspaceInventoryModel         _model;                 /** Inventory model which contains available workspaces */
+    WorkspaceInventoryFilterModel   _filterModel;           /** Sorting and filtering model for the workspaces model */
+    hdps::gui::HierarchyWidget      _hierarchyWidget;       /** Widget for displaying the available workspaces */
+    hdps::gui::TriggerAction        _createAction;          /** Action for creating the project with the selected workspace */
+    hdps::gui::TriggerAction        _cancelAction;          /** Action for exiting the dialog without creating a new project */
 };

@@ -54,6 +54,8 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     _hierarchyWidget.getSelectionGroupAction().setVisible(false);
     _hierarchyWidget.setHeaderHidden(true);
 
+
+
     const auto updateActions = [this]() -> void {
         _createAction.setEnabled(_hierarchyWidget.getSelectionModel().hasSelection());
     };

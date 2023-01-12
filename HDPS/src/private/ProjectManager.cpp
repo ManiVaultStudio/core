@@ -13,7 +13,6 @@
 #include <widgets/TaskProgressDialog.h>
 
 #include <QFileDialog>
-#include <QTemporaryDir>
 #include <QStandardPaths>
 #include <QGridLayout>
 
@@ -284,14 +283,17 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 
+                StringAction titleAction(this, "Title");
                 StringAction descriptionAction(this, "Description");
                 StringAction tagsAction(this, "Tags");
                 StringAction commentsAction(this, "Comments");
 
+                titleAction.setEnabled(false);
                 descriptionAction.setEnabled(false);
                 tagsAction.setEnabled(false);
                 commentsAction.setEnabled(false);
 
+                titleAction.setConnectionPermissionsToNone();
                 descriptionAction.setConnectionPermissionsToNone();
                 tagsAction.setConnectionPermissionsToNone();
                 commentsAction.setConnectionPermissionsToNone();
@@ -299,39 +301,30 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
 
-                fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileDialog), rowCount, 0);
-                fileDialogLayout->addWidget(descriptionAction.createWidget(&fileDialog), rowCount, 1, 1, 2);
+                fileDialogLayout->addWidget(titleAction.createLabelWidget(&fileDialog), rowCount, 0);
+                fileDialogLayout->addWidget(titleAction.createWidget(&fileDialog), rowCount, 1, 1, 2);
 
-                fileDialogLayout->addWidget(tagsAction.createLabelWidget(&fileDialog), rowCount + 1, 0);
-                fileDialogLayout->addWidget(tagsAction.createWidget(&fileDialog), rowCount + 1, 1, 1, 2);
+                fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileDialog), rowCount + 1, 0);
+                fileDialogLayout->addWidget(descriptionAction.createWidget(&fileDialog), rowCount + 1, 1, 1, 2);
 
-                fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileDialog), rowCount + 2, 0);
-                fileDialogLayout->addWidget(commentsAction.createWidget(&fileDialog), rowCount + 2, 1, 1, 2);
+                fileDialogLayout->addWidget(tagsAction.createLabelWidget(&fileDialog), rowCount + 2, 0);
+                fileDialogLayout->addWidget(tagsAction.createWidget(&fileDialog), rowCount + 2, 1, 1, 2);
+
+                fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileDialog), rowCount + 3, 0);
+                fileDialogLayout->addWidget(commentsAction.createWidget(&fileDialog), rowCount + 3, 1, 1, 2);
 
                 connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
                         return;
 
-                    QTemporaryDir temporaryDirectory;
+                    QTemporaryDir temporaryDir;
 
-                    const auto temporaryDirectoryPath = temporaryDirectory.path();
+                    Project project(extractProjectFileFromHdpsFile(filePath, temporaryDir));
 
-                    Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
-                    Application::setSerializationAborted(false);
-
-                    Archiver archiver;
-
-                    const QString projectFile("project.json");
-
-                    QFileInfo projectFileInfo(temporaryDirectoryPath, projectFile);
-
-                    archiver.extractSingleFile(filePath, projectFile, projectFileInfo.absoluteFilePath());
-
-                    Project project(projectFileInfo.absoluteFilePath());
-
+                    titleAction.setString(project.getTitleAction().getString());
                     descriptionAction.setString(project.getDescriptionAction().getString());
                     tagsAction.setString(project.getTagsAction().getStrings().join(", "));
-                    commentsAction.setString(project.getDescriptionAction().getString());
+                    commentsAction.setString(project.getCommentsAction().getString());
                 });
 
                 if (fileDialog.exec() == 0)
@@ -352,7 +345,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             Archiver archiver;
 
-            QStringList tasks = archiver.getTaskNamesForDecompression(filePath) << "Import data model";
+            QStringList tasks = archiver.getTaskNamesForDecompression(filePath) << "Import data model" << "Load workspace";
 
             TaskProgressDialog taskProgressDialog(nullptr, tasks, "Loading HDPS project from " + filePath, Application::getIconFont("FontAwesome").getIcon("folder-open"));
 
@@ -372,20 +365,21 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             archiver.decompress(filePath, temporaryDirectoryPath);
 
             taskProgressDialog.setCurrentTask("Import data model");
-
-            QFileInfo inputJsonFileInfo(temporaryDirectoryPath, "project.json");
-
-            Application::core()->getProjectManager().fromJsonFile(inputJsonFileInfo.absoluteFilePath());
+            {
+                Application::core()->getProjectManager().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
+            }
+            taskProgressDialog.setTaskFinished("Import data model");
 
             if (loadWorkspace) {
-                const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
+                taskProgressDialog.setCurrentTask("Load workspace");
+                {
+                    const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
 
-                if (workspaceFileInfo.exists())
-                    Application::core()->getWorkspaceManager().loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
+                    if (workspaceFileInfo.exists())
+                        Application::core()->getWorkspaceManager().loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
+                }
+                taskProgressDialog.setTaskFinished("Load workspace");
             }
-                
-
-            taskProgressDialog.setTaskFinished("Import data model");
 
             _recentProjectsAction.addRecentFilePath(filePath);
 
@@ -435,9 +429,6 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
                 return "Projects/" + filePath + "/";
             };
 
-            bool            enableCompression = DEFAULT_ENABLE_COMPRESSION;
-            std::uint32_t   compressionLevel = DEFAULT_COMPRESSION_LEVEL;
-
             if (filePath.isEmpty()) {
 
                 QFileDialog fileDialog;
@@ -450,26 +441,22 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
                 fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
-                auto fileDialogLayout = dynamic_cast<QGridLayout*>(fileDialog.layout());
-                auto rowCount = fileDialogLayout->rowCount();
+                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
+                auto rowCount           = fileDialogLayout->rowCount();
 
-                QCheckBox   enableCompressionCheckBox("Compression:");
-                QSpinBox    compressionLevelSpinBox;
                 QCheckBox   passwordProtectedCheckBox("Password protected");
                 QLineEdit   passwordLineEdit;
 
-                enableCompressionCheckBox.setChecked(enableCompression);
-                compressionLevelSpinBox.setPrefix("Level: ");
-                compressionLevelSpinBox.setMinimum(1);
-                compressionLevelSpinBox.setMaximum(9);
-                compressionLevelSpinBox.setValue(compressionLevel);
                 passwordProtectedCheckBox.setChecked(false);
                 passwordLineEdit.setPlaceholderText("Enter encryption password...");
 
                 auto compressionLayout = new QHBoxLayout();
 
-                fileDialogLayout->addWidget(&enableCompressionCheckBox, rowCount, 1, 1, 2);
-                fileDialogLayout->addWidget(&compressionLevelSpinBox, rowCount + 1, 1, 1, 2);
+                compressionLayout->addWidget(projects().getProject()->getCompressionEnabledAction().createWidget(&fileDialog));
+                compressionLayout->addWidget(projects().getProject()->getCompressionLevelAction().createWidget(&fileDialog), 1);
+                
+                fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
+                
                 //fileDialogLayout->addWidget(&passwordProtectedCheckBox, ++rowCount, 0);
                 //fileDialogLayout->addWidget(&passwordLineEdit, rowCount, 1);
 
@@ -496,24 +483,20 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
                 fileDialogLayout->addLayout(titleLayout, rowCount + 2, 1, 1, 2);
 
-                const auto updateCompressionLevel = [&]() -> void {
-                    compressionLevelSpinBox.setEnabled(enableCompressionCheckBox.isChecked());
-                };
+                //const auto updatePassword = [&]() -> void {
+                //    passwordLineEdit.setEnabled(passwordProtectedCheckBox.isChecked());
+                //};
 
-                const auto updatePassword = [&]() -> void {
-                    passwordLineEdit.setEnabled(passwordProtectedCheckBox.isChecked());
-                };
+                //connect(&passwordProtectedCheckBox, &QCheckBox::toggled, this, updatePassword);
 
-                connect(&enableCompressionCheckBox, &QCheckBox::toggled, this, updateCompressionLevel);
-                connect(&passwordProtectedCheckBox, &QCheckBox::toggled, this, updatePassword);
+                //updatePassword();
 
-                updateCompressionLevel();
-                updatePassword();
+                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, getSettingsPrefix](const QString& path) -> void {
+                    Project project(path);
 
-                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, getSettingsPrefix, enableCompression, compressionLevel, &enableCompressionCheckBox, &compressionLevelSpinBox](const QString& path) -> void {
-                    enableCompressionCheckBox.setChecked(Application::current()->getSetting(getSettingsPrefix(path) + "EnableCompression", enableCompression).toBool());
-                    compressionLevelSpinBox.setValue(Application::current()->getSetting(getSettingsPrefix(path) + "CompressionLevel", compressionLevel).toInt());
-                    });
+                    projects().getProject()->getCompressionEnabledAction().setChecked(project.getCompressionEnabledAction().isChecked());
+                    projects().getProject()->getCompressionLevelAction().setValue(project.getCompressionLevelAction().getValue());
+                });
 
                 fileDialog.exec();
 
@@ -522,22 +505,14 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
                 filePath = fileDialog.selectedFiles().first();
 
-                enableCompression = enableCompressionCheckBox.isChecked();
-                compressionLevel = compressionLevelSpinBox.value();
-
                 Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
             }
-            else
-            {
-                enableCompression = Application::current()->getSetting(getSettingsPrefix(filePath) + "EnableCompression", enableCompression).toBool();
-                compressionLevel = Application::current()->getSetting(getSettingsPrefix(filePath) + "CompressionLevel", compressionLevel).toInt();
-            }
-
+            
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
-            if (enableCompression)
-                qDebug().noquote() << "Saving HDPS project to" << filePath << "with compression level" << compressionLevel;
+            if (projects().getProject()->getCompressionEnabledAction().isChecked())
+                qDebug().noquote() << "Saving HDPS project to" << filePath << "with compression level" << projects().getProject()->getCompressionLevelAction().getValue();
             else
                 qDebug().noquote() << "Saving HDPS project to" << filePath << "without compression";
 
@@ -579,12 +554,9 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
             Application::core()->getWorkspaceManager().saveWorkspace(workspaceFileInfo.absoluteFilePath());
 
-            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, enableCompression ? compressionLevel : 0, "");
+            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, projects().getProject()->getCompressionEnabledAction().isChecked() ? projects().getProject()->getCompressionLevelAction().getValue() : 0, "");
 
             _recentProjectsAction.addRecentFilePath(filePath);
-
-            Application::current()->setSetting(getSettingsPrefix(filePath) + "EnableCompression", enableCompression);
-            Application::current()->setSetting(getSettingsPrefix(filePath) + "CompressionLevel", compressionLevel);
 
             _project->setFilePath(filePath);
 
@@ -645,6 +617,21 @@ const hdps::Project* ProjectManager::getProject() const
 hdps::Project* ProjectManager::getProject()
 {
     return _project.get();
+}
+
+QString ProjectManager::extractProjectFileFromHdpsFile(const QString& hdpsFilePath, QTemporaryDir& temporaryDir)
+{
+    const auto temporaryDirectoryPath = temporaryDir.path();
+
+    const QString projectFile("project.json");
+
+    QFileInfo projectFileInfo(temporaryDirectoryPath, projectFile);
+
+    Archiver archiver;
+
+    archiver.extractSingleFile(hdpsFilePath, projectFile, projectFileInfo.absoluteFilePath());
+
+    return projectFileInfo.absoluteFilePath();
 }
 
 void ProjectManager::fromVariantMap(const QVariantMap& variantMap)

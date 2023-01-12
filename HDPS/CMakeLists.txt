@@ -95,6 +95,7 @@ set(PRIVATE_WORKSPACE_MANAGER_HEADERS
     src/private/DockAreaTitleBar.h
     src/private/WorkspaceSettingsDialog.h
     src/private/WorkspaceInventoryModel.h
+    src/private/WorkspaceInventoryFilterModel.h
 )
 
 set(PRIVATE_WORKSPACE_MANAGER_SOURCES
@@ -108,6 +109,7 @@ set(PRIVATE_WORKSPACE_MANAGER_SOURCES
     src/private/DockAreaTitleBar.cpp
     src/private/WorkspaceSettingsDialog.cpp
     src/private/WorkspaceInventoryModel.cpp
+    src/private/WorkspaceInventoryFilterModel.cpp
 )
 
 set(PRIVATE_WORKSPACE_MANAGER_FILES
