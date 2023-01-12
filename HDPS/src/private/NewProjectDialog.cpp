@@ -43,6 +43,8 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     setLayout(layout);
 
     _filterModel.setFilterKeyColumn(static_cast<int>(WorkspaceInventoryModel::Column::Name));
+    
+    emit _model.layoutChanged();
 
     _hierarchyWidget.setWindowIcon(workspaces().getIcon());
     _hierarchyWidget.getFilterGroupAction().setVisible(false);
@@ -148,7 +150,7 @@ QString WorkspaceDelegate::getHtml(const QModelIndex& index) const
 
     if (!tags.isEmpty()) {
         for (const auto& tag : tags)
-            tagsHtml += QString("<span id='tag'>%1</span>  ").arg(tag);
+            tagsHtml += QString("<span id='tag'> %1 </span>  ").arg(tag);
 
         tagsHtml.insert(0, "<p id='tags'>");
         tagsHtml.append("</p>");

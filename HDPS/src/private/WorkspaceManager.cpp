@@ -59,7 +59,7 @@ WorkspaceManager::WorkspaceManager() :
 
     _resetWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+R"));
     _resetWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
-    _resetWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+    _resetWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("undo"));
     _resetWorkspaceAction.setToolTip("Reset the current workspace");
 
     _importWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+I"));
@@ -84,7 +84,7 @@ WorkspaceManager::WorkspaceManager() :
 
     _importWorkspaceFromProjectAction.setShortcut(QKeySequence("Ctrl+Alt+I"));
     _importWorkspaceFromProjectAction.setShortcutContext(Qt::ApplicationShortcut);
-    _importWorkspaceFromProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    _importWorkspaceFromProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
     _importWorkspaceFromProjectAction.setToolTip("Import workspace from project");
 
     auto mainWindow = Application::topLevelWidgets().first();

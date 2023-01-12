@@ -67,9 +67,6 @@ public:
      */
     QMenu* getSettingsMenu() override;
 
-
-    void resetActive();
-
 public: // Serialization
 
     /**

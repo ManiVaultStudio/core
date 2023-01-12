@@ -40,6 +40,9 @@ public:
      */
     virtual void newProject(const QString& workspaceFilePath = "") = 0;
 
+    /** Creates a new blank project (without any view plugins or data) */
+    virtual void newBlankProject() = 0;
+
     /**
      * Open project from \p filePath
      * @param filePath File path of the project (choose file path when empty)
@@ -84,14 +87,21 @@ public:
 public: // Menus
 
     /**
+     * Get new project menu
+     * @return Pointer to new project menu
+     */
+    virtual QMenu& getNewProjectMenu() = 0;
+
+    /**
      * Get import data menu
      * @return Pointer to import data menu
      */
-    virtual QMenu* getImportDataMenu() = 0;
+    virtual QMenu& getImportDataMenu() = 0;
 
 public: // Action getters
 
-    virtual hdps::gui::TriggerAction& getNewProjectAction() = 0;
+    virtual hdps::gui::TriggerAction& getNewBlankProjectAction() = 0;
+    virtual hdps::gui::TriggerAction& getNewProjectFromWorkspaceAction() = 0;
     virtual hdps::gui::TriggerAction& getOpenProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getImportProjectAction() = 0;
     virtual hdps::gui::TriggerAction& getSaveProjectAction() = 0;

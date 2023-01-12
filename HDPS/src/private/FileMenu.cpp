@@ -27,7 +27,7 @@ void FileMenu::showEvent(QShowEvent* showEvent)
 {
     clear();
 
-    addAction(&projects().getNewProjectAction());
+    addMenu(&projects().getNewProjectMenu());
     addAction(&projects().getOpenProjectAction());
     //addAction(&projects().getImportProjectAction());
     addAction(&projects().getSaveProjectAction());
@@ -37,7 +37,7 @@ void FileMenu::showEvent(QShowEvent* showEvent)
     addSeparator();
     addMenu(Application::core()->getWorkspaceManager().getMenu());
     addSeparator();
-    addMenu(projects().getImportDataMenu());
+    addMenu(&projects().getImportDataMenu());
     addSeparator();
     addAction(&projects().getPluginManagerAction());
     addSeparator();

@@ -33,7 +33,8 @@ using namespace hdps::gui;
 
 ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _project(),
-    _newProjectAction(nullptr, "New Project..."),
+    _newBlankProjectAction(nullptr, "Blank"),
+    _newProjectFromWorkspaceAction(nullptr, "From Workspace..."),
     _openProjectAction(nullptr, "Open Project"),
     _importProjectAction(nullptr, "Import Project"),
     _saveProjectAction(nullptr, "Save Project"),
@@ -45,10 +46,15 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _pluginManagerAction(nullptr, "Plugin Manager"),
     _showStartPageAction(nullptr, "Start Page...", true, true)
 {
-    _newProjectAction.setShortcut(QKeySequence("Ctrl+N"));
-    _newProjectAction.setShortcutContext(Qt::ApplicationShortcut);
-    _newProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
-    _newProjectAction.setToolTip("Open project from disk");
+    _newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
+    _newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
+    _newBlankProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+    _newBlankProjectAction.setToolTip("Create project without view plugins and data");
+
+    _newProjectFromWorkspaceAction.setShortcut(QKeySequence("Ctrl+N"));
+    _newProjectFromWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
+    _newProjectFromWorkspaceAction.setIcon(workspaces().getIcon());
+    _newProjectFromWorkspaceAction.setToolTip("Create new project with workspace");
 
     _openProjectAction.setShortcut(QKeySequence("Ctrl+O"));
     _openProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -75,6 +81,12 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _editProjectSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     _editProjectSettingsAction.setConnectionPermissionsToNone();
 
+    _newProjectMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+    _newProjectMenu.setTitle("New Project");
+    _newProjectMenu.setToolTip("Create new project");
+    _newProjectMenu.addAction(&_newBlankProjectAction);
+    _newProjectMenu.addAction(&_newProjectFromWorkspaceAction);
+
     _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
     _importDataMenu.setTitle("Import data...");
     _importDataMenu.setToolTip("Import data into HDPS");
@@ -96,13 +108,17 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
 
     auto mainWindow = Application::topLevelWidgets().first();
 
-    mainWindow->addAction(&_newProjectAction);
+    mainWindow->addAction(&_newProjectFromWorkspaceAction);
     mainWindow->addAction(&_openProjectAction);
     mainWindow->addAction(&_importProjectAction);
     mainWindow->addAction(&_saveProjectAction);
     mainWindow->addAction(&_showStartPageAction);
 
-    connect(&_newProjectAction, &QAction::triggered, this, [this]() -> void {
+    connect(&_newBlankProjectAction, &QAction::triggered, this, [this]() -> void {
+        newBlankProject();
+    });
+
+    connect(&_newProjectFromWorkspaceAction, &QAction::triggered, this, [this]() -> void {
         NewProjectDialog newProjectDialog;
         newProjectDialog.exec();
     });
@@ -212,6 +228,25 @@ void ProjectManager::newProject(const QString& workspaceFilePath /*= ""*/)
     catch (...)
     {
         exceptionMessageBox("Unable to create new project");
+    }
+}
+
+void ProjectManager::newBlankProject()
+{
+    try
+    {
+#ifdef PROJECT_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__;
+#endif
+        createProject();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to create blank project", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to create blank project");
     }
 }
 
@@ -572,9 +607,14 @@ void ProjectManager::saveProjectAs()
     saveProject("");
 }
 
-QMenu* ProjectManager::getImportDataMenu()
+QMenu& ProjectManager::getNewProjectMenu()
 {
-    return &_importDataMenu;
+    return _newProjectMenu;
+}
+
+QMenu& ProjectManager::getImportDataMenu()
+{
+    return _importDataMenu;
 }
 
 void ProjectManager::createProject()
