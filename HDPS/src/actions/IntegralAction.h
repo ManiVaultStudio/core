@@ -9,9 +9,7 @@
 class QWidget;
 class QPushButton;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Integral widget action class
@@ -185,5 +183,4 @@ protected:
     static constexpr std::int32_t INIT_DEFAULT_VALUE    = 0;        /** Initialization default value */
 };
 
-}
 }

@@ -8,6 +8,7 @@
 #include <QFileDialog>
 
 using namespace hdps::gui;
+using namespace hdps::util;
 
 namespace hdps::plugin
 {
@@ -72,7 +73,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
     _mayMoveAction.setConnectionPermissionsToNone();
 
-    _visibleAction.setToolTip("Determines whether the view plugin is visible in the user interface or not");
+    _visibleAction.setToolTip("Determines whether the view plugin is visible or not");
     _visibleAction.setIcon(getIcon());
     _visibleAction.setConnectionPermissionsToNone();
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
@@ -146,7 +147,7 @@ void ViewPlugin::createScreenshot()
 {
     QFileDialog fileDialog;
 
-    fileDialog.setWindowTitle("Save screenshot to image file");
+    fileDialog.setWindowTitle("Save Screenshot");
     fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
     fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
@@ -178,6 +179,28 @@ QKeySequence ViewPlugin::getTriggerShortcut() const
 void ViewPlugin::setTriggerShortcut(const QKeySequence& keySequence)
 {
     _triggerShortcut = keySequence;
+}
+
+void ViewPlugin::fromVariantMap(const QVariantMap& variantMap)
+{
+    Plugin::fromVariantMap(variantMap);
+
+    Serializable::fromVariantMap(_mayCloseAction, variantMap, "MayClose");
+    Serializable::fromVariantMap(_mayFloatAction, variantMap, "MayFloat");
+    Serializable::fromVariantMap(_mayMoveAction, variantMap, "MayMove");
+    Serializable::fromVariantMap(_visibleAction, variantMap, "Visible");
+}
+
+QVariantMap ViewPlugin::toVariantMap() const
+{
+    auto variantMap = Plugin::toVariantMap();
+
+    Serializable::insertIntoVariantMap(_mayCloseAction, variantMap, "MayClose");
+    Serializable::insertIntoVariantMap(_mayFloatAction, variantMap, "MayFloat");
+    Serializable::insertIntoVariantMap(_mayMoveAction, variantMap, "MayMove");
+    Serializable::insertIntoVariantMap(_visibleAction, variantMap, "Visible");
+
+    return variantMap;
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :

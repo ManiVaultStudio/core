@@ -2,9 +2,9 @@
 
 #include <QHBoxLayout>
 
-namespace hdps {
+using namespace hdps::util;
 
-namespace gui {
+namespace hdps::gui {
 
 #if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
     constexpr std::int32_t IntegralAction::INIT_MIN;
@@ -82,15 +82,22 @@ WidgetAction* IntegralAction::getPublicCopy() const
 
 void IntegralAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!variantMap.contains("Value"))
-        return;
+    WidgetAction::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "Value");
 
     setValue(variantMap["Value"].toInt());
 }
 
 QVariantMap IntegralAction::toVariantMap() const
 {
-    return { { "Value", QVariant::fromValue(_value) } };
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", QVariant::fromValue(getValue()) }
+    });
+
+    return variantMap;
 }
 
 IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* integralAction) :
@@ -291,5 +298,4 @@ QWidget* IntegralAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
     return widget;
 }
 
-}
 }

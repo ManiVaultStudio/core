@@ -156,7 +156,7 @@ public:
         if (!hasWorkspace())
             return "";
 
-        return getWorkspace()->getFilePath();
+        return getCurrentWorkspace()->getFilePath();
     }
 
     /**
@@ -167,16 +167,16 @@ public:
         if (!hasWorkspace())
             return;
 
-        if (filePath == getWorkspace()->getFilePath())
+        if (filePath == getCurrentWorkspace()->getFilePath())
             return;
 
 #ifdef ABSTRACT_WORKSPACE_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
 
-        getWorkspace()->setFilePath(filePath);
+        getCurrentWorkspace()->setFilePath(filePath);
 
-        emit workspaceFilePathChanged(getWorkspace()->getFilePath());
+        emit workspaceFilePathChanged(getCurrentWorkspace()->getFilePath());
     }
 
     /** Begin the workspace loading process */
@@ -185,12 +185,12 @@ public:
         qDebug() << __FUNCTION__;
 #endif
 
-        Q_ASSERT(getWorkspace() != nullptr);
+        Q_ASSERT(getCurrentWorkspace() != nullptr);
 
         if (!hasWorkspace())
             return;
 
-        emit workspaceAboutToBeLoaded(getWorkspace()->getFilePath());
+        emit workspaceAboutToBeLoaded(getCurrentWorkspace()->getFilePath());
     }
 
     /** End the workspace loading process */
@@ -199,12 +199,12 @@ public:
         qDebug() << __FUNCTION__;
 #endif
 
-        Q_ASSERT(getWorkspace() != nullptr);
+        Q_ASSERT(getCurrentWorkspace() != nullptr);
 
         if (!hasWorkspace())
             return;
 
-        emit workspaceLoaded(getWorkspace()->getFilePath());
+        emit workspaceLoaded(getCurrentWorkspace()->getFilePath());
     }
 
     /** Begin the workspace saving process */
@@ -213,12 +213,12 @@ public:
         qDebug() << __FUNCTION__;
 #endif
 
-        Q_ASSERT(getWorkspace() != nullptr);
+        Q_ASSERT(getCurrentWorkspace() != nullptr);
 
         if (!hasWorkspace())
             return;
 
-        emit workspaceAboutToBeSaved(getWorkspace()->getFilePath());
+        emit workspaceAboutToBeSaved(getCurrentWorkspace()->getFilePath());
     }
 
     /** End the workspace saving process */
@@ -227,12 +227,12 @@ public:
         qDebug() << __FUNCTION__;
 #endif
 
-        Q_ASSERT(getWorkspace() != nullptr);
+        Q_ASSERT(getCurrentWorkspace() != nullptr);
 
         if (!hasWorkspace())
             return;
 
-        emit workspaceSaved(getWorkspace()->getFilePath());
+        emit workspaceSaved(getCurrentWorkspace()->getFilePath());
     }
 
 public: // IO
@@ -257,8 +257,9 @@ public: // IO
     /**
      * Save a workspace to disk
      * @param filePath File path of the workspace (choose file path with dialog when empty)
+     * @param addToRecentWorkspaces Whether to add the workspace file path to the recent workspace file paths
      */
-    virtual void saveWorkspace(QString filePath = "") = 0;
+    virtual void saveWorkspace(QString filePath = "", bool addToRecentWorkspaces = true) = 0;
 
     /** Save a workspace to disk on a different location */
     virtual void saveWorkspaceAs() = 0;
@@ -271,15 +272,15 @@ public: // IO
 
     /**
      * Get current workspace
-     * @return Pointer to workspace (nullptr if no workspace is loaded)
+     * @return Pointer to current workspace (nullptr if no workspace is loaded)
      */
-    virtual const Workspace* getWorkspace() const = 0;
+    virtual const Workspace* getCurrentWorkspace() const = 0;
 
     /**
      * Get current workspace
-     * @return Pointer to workspace (nullptr if no workspace is loaded)
+     * @return Pointer to current workspace (nullptr if no workspace is loaded)
      */
-    virtual Workspace* getWorkspace() = 0;
+    virtual Workspace* getCurrentWorkspace() = 0;
 
     /**
      * Get workspace locations for location \p types

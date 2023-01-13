@@ -22,6 +22,7 @@ namespace hdps {
 hdps::Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
     _core(nullptr),
+    _version({ 3, 0 }),
     _iconFonts(),
     _settings(),
     _serializationTemporaryDirectory(),
@@ -75,6 +76,11 @@ void Application::setCore(CoreInterface* core)
 hdps::CoreInterface* Application::core()
 {
     return current()->getCore();
+}
+
+util::Version Application::getVersion() const
+{
+    return _version;
 }
 
 QVariant Application::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const

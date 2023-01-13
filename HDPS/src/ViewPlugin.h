@@ -76,6 +76,20 @@ public:
      */
     virtual void setTriggerShortcut(const QKeySequence& keySequence) final;
 
+public: // Serialization
+
+    /**
+     * Load view plugin from variant
+     * @param Variant representation of the view plugin
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save view plugin to variant
+     * @return Variant representation of the view plugin
+     */
+    QVariantMap toVariantMap() const override;
+
 public: // Action getters
 
     gui::TriggerAction& getEditActionsAction() { return _editActionsAction; }

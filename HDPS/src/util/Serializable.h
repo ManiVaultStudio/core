@@ -5,9 +5,7 @@
 #include <QString>
 #include <QJsonDocument>
 
-namespace hdps {
-
-namespace util {
+namespace hdps::util {
 
 /**
  * Serializable class
@@ -84,17 +82,31 @@ protected:
     static void fromVariantMap(Serializable* serializable, const QVariantMap& variantMap);
 
     /**
+     * Load from variant map
+     * @param serializable Reference to serializable object
+     * @param variantMap Variant map
+     * @param key Variant map key
+     */
+    static void fromVariantMap(Serializable& serializable, const QVariantMap& variantMap, const QString& key);
+
+    /**
      * Save serializable object to variant map
      * @param serializable Pointer to serializable object
      * @return Variant map
      */
     static QVariantMap toVariantMap(const Serializable* serializable);
 
+    /**
+     * Save \p serializable object in \p variantMap with \p key
+     * @param serializable Reference to serializable object
+     * @param variantMap Variant map
+     * @param key Variant map key
+     */
+    static void insertIntoVariantMap(const Serializable& serializable, QVariantMap& variantMap, const QString& key);
+
 private:
     QString     _id;        /** Globally unique identifier of the serializable object */
     QString     _name;      /** Serialization name */
 };
-
-}
 
 }

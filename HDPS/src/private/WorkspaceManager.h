@@ -107,8 +107,9 @@ public: // IO
     /**
      * Save a workspace to disk
      * @param filePath File path of the workspace (choose file path with dialog when empty)
+     * @param addToRecentWorkspaces Whether to add the workspace file path to the recent workspace file paths
      */
-    void saveWorkspace(QString filePath = "") override;
+    void saveWorkspace(QString filePath = "", bool addToRecentWorkspaces = true) override;
 
     /** Save a workspace to disk on a different location */
     void saveWorkspaceAs() override;
@@ -121,15 +122,15 @@ public: // IO
 
     /**
      * Get current workspace
-     * @return Pointer to workspace (nullptr if no workspace is loaded)
+     * @return Pointer to current workspace (nullptr if no workspace is loaded)
      */
-    const Workspace* getWorkspace() const override;
+    const Workspace* getCurrentWorkspace() const override;
 
     /**
      * Get current workspace
-     * @return Pointer to workspace (nullptr if no workspace is loaded)
+     * @return Pointer to current workspace (nullptr if no workspace is loaded)
      */
-    Workspace* getWorkspace() override;
+    Workspace* getCurrentWorkspace() override;
 
     /**
      * Get workspace locations for location \p types

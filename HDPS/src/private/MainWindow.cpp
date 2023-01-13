@@ -55,7 +55,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
             setWindowTitle("HDPS");
         }
         else {
-            const auto projectFilePath = projectManager.getProject()->getFilePath();
+            const auto projectFilePath = projectManager.getCurrentProject()->getFilePath();
 
             if (projectFilePath.isEmpty())
                 setWindowTitle("Unsaved - HDPS");

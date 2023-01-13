@@ -70,15 +70,15 @@ public:
 
     /**
      * Get current project
-     * @return Pointer to project (nullptr if no project is loaded)
+     * @return Pointer to current project (nullptr if no project is loaded)
      */
-    const hdps::Project* getProject() const override;
+    const hdps::Project* getCurrentProject() const override;
 
     /**
      * Get current project
-     * @return Pointer to project (nullptr if no project is loaded)
+     * @return Pointer to current project (nullptr if no project is loaded)
      */
-    hdps::Project* getProject() override;
+    hdps::Project* getCurrentProject() override;
 
     /**
      * Extract the project JSON file (project.json) from a compressed HDPS file (*.hdps)

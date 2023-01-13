@@ -7,7 +7,6 @@
 #include <DockWidget.h>
 
 #include <QMenu>
-#include <QUuid>
 
 class QToolButton;
 
@@ -86,7 +85,6 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    QString                         _id;                    /** Unique identifier by which to identify the dock widget */
     hdps::gui::InfoOverlayWidget    _infoOverlayWidget;     /** Info overlay widget for showing loading information */
     QToolButton*                    _settingsToolButton;    /** Pointer to settings tool button (located in the dock widget tab bar) */
     QMenu                           _settingsMenu;          /** Settings menu for settings tool button */

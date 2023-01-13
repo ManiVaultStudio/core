@@ -6,9 +6,7 @@
 
 class QWidget;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Integral rectangle action class
@@ -119,5 +117,4 @@ signals:
     void defaultRectangleChanged(const QRect& defaultRectangle);
 };
 
-}
 }

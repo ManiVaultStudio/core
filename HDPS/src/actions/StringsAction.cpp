@@ -4,6 +4,8 @@
 #include <QHBoxLayout>
 #include <QStandardItemModel>
 
+using namespace hdps::util;
+
 namespace hdps::gui {
 
 StringsAction::StringsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& strings /*= QStringList()*/, const QStringList& defaultStrings /*= QStringList()*/) :
@@ -15,6 +17,11 @@ StringsAction::StringsAction(QObject* parent, const QString& title /*= ""*/, con
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
     initialize(strings, defaultStrings);
+}
+
+QString StringsAction::getTypeString() const
+{
+    return "Strings";
 }
 
 void StringsAction::initialize(const QStringList& strings /*= QStringList()*/, const QStringList& defaultStrings /*= QStringList()*/)
@@ -98,17 +105,22 @@ WidgetAction* StringsAction::getPublicCopy() const
 
 void StringsAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!variantMap.contains("value"))
-        return;
+    WidgetAction::fromVariantMap(variantMap);
 
-    setStrings(variantMap["value"].toStringList());
+    variantMapMustContain(variantMap, "Value");
+
+    setStrings(variantMap["Value"].toStringList());
 }
 
 QVariantMap StringsAction::toVariantMap() const
 {
-    return {
-        { "value", QVariant::fromValue(_strings) }
-    };
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", QVariant::fromValue(getStrings()) }
+    });
+
+    return variantMap;
 }
 
 QString StringsAction::getCategory() const

@@ -147,15 +147,13 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
 
     _viewPluginMap = variantMap["ViewPlugin"].toMap();
 
-    variantMapMustContain(_viewPluginMap, "Plugin");
+    variantMapMustContain(_viewPluginMap, "Kind");
 
-    const auto pluginMap = _viewPluginMap["Plugin"].toMap();
-
-    variantMapMustContain(pluginMap, "Kind");
-
-    _viewPluginKind = pluginMap["Kind"].toString();
+    _viewPluginKind = _viewPluginMap["Kind"].toString();
 
     loadViewPlugin();
+    
+    _viewPlugin->fromVariantMap(_viewPluginMap);
 }
 
 QVariantMap ViewPluginDockWidget::toVariantMap() const
@@ -164,7 +162,7 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
     qDebug() << __FUNCTION__;
 #endif
 
-    QVariantMap variantMap = DockWidget::toVariantMap();
+    auto variantMap = DockWidget::toVariantMap();
 
     if (_viewPlugin)
         variantMap["ViewPlugin"] = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin()->toVariantMap();
@@ -214,8 +212,6 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 
     _viewPlugin = viewPlugin;
 
-    _viewPlugin->fromVariantMap(_viewPluginMap);
-
     setIcon(viewPlugin->getIcon());
     setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
 
@@ -223,17 +219,17 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
         setWindowTitle(title);
     });
 
-    connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, this, [this](bool toggled) {
-        setFeature(CDockWidget::DockWidgetClosable, toggled);
-    });
+    const auto updateFeatures = [this]() -> void {
+        setFeature(CDockWidget::DockWidgetClosable, _viewPlugin->getMayCloseAction().isChecked());
+        setFeature(CDockWidget::DockWidgetFloatable, _viewPlugin->getMayFloatAction().isChecked());
+        setFeature(CDockWidget::DockWidgetMovable, _viewPlugin->getMayMoveAction().isChecked());
+    };
 
-    connect(&viewPlugin->getMayFloatAction(), &ToggleAction::toggled, this, [this](bool toggled) {
-        setFeature(CDockWidget::DockWidgetFloatable, toggled);
-    });
+    connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, this, updateFeatures);
+    connect(&viewPlugin->getMayFloatAction(), &ToggleAction::toggled, this, updateFeatures);
+    connect(&viewPlugin->getMayMoveAction(), &ToggleAction::toggled, this, updateFeatures);
 
-    connect(&viewPlugin->getMayMoveAction(), &ToggleAction::toggled, this, [this](bool toggled) {
-        setFeature(CDockWidget::DockWidgetMovable, toggled);
-    });
+    updateFeatures();
 
     const auto connectToViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
         connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {

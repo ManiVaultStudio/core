@@ -5,9 +5,7 @@
 #include <QCheckBox>
 #include <QPushButton>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Toggle action class
@@ -198,5 +196,4 @@ protected:
     bool    _indeterminate;         /** Whether the toggle action is in an indeterminate state */
 };
 
-}
 }

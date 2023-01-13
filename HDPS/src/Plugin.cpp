@@ -124,17 +124,17 @@ void Plugin::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap Plugin::toVariantMap() const
 {
-    QVariantMap plugin {
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Name", _name },
+        { "GuiName", _guiNameAction.getString() },
         { "Kind", _factory->getKind() },
         { "Type", static_cast<std::uint32_t>(_factory->getType()) },
         { "Version", _factory->getVersion() }
-    };
+    });
 
-    return {
-        { "Name", _name },
-        { "GuiName", _guiNameAction.getString() },
-        { "Plugin", plugin }
-    };
+    return variantMap;
 }
 
 void Plugin::destroy()

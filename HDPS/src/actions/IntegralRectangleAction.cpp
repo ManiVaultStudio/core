@@ -2,9 +2,9 @@
 
 #include <QHBoxLayout>
 
-namespace hdps {
+using namespace hdps::util;
 
-namespace gui {
+namespace hdps::gui {
 
 IntegralRectangleAction::IntegralRectangleAction(QObject * parent, const QString& title, const QRect& rectangle /*= QRect()*/, const QRect& defaultRectangle /*= QRect()*/) :
     RectangleAction<QRect>(parent, title, rectangle, defaultRectangle)
@@ -62,15 +62,22 @@ WidgetAction* IntegralRectangleAction::getPublicCopy() const
 
 void IntegralRectangleAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!variantMap.contains("Value"))
-        return;
+    WidgetAction::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "Value");
 
     setRectangle(variantMap["Value"].toRect());
 }
 
 QVariantMap IntegralRectangleAction::toVariantMap() const
 {
-    return { { "Value", _rectangle } };
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", QVariant::fromValue(getRectangle()) }
+    });
+
+    return variantMap;
 }
 
 IntegralRectangleAction::LineEditWidget::LineEditWidget(QWidget* parent, IntegralRectangleAction* integralRectangleAction) :
@@ -109,5 +116,4 @@ QWidget* IntegralRectangleAction::getWidget(QWidget* parent, const std::int32_t&
     return widget;
 }
 
-}
 }

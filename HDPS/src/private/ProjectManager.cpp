@@ -429,6 +429,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
                 return "Projects/" + filePath + "/";
             };
 
+            auto currentProject = getCurrentProject();
+
             if (filePath.isEmpty()) {
 
                 QFileDialog fileDialog;
@@ -452,15 +454,15 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
                 auto compressionLayout = new QHBoxLayout();
 
-                compressionLayout->addWidget(projects().getProject()->getCompressionEnabledAction().createWidget(&fileDialog));
-                compressionLayout->addWidget(projects().getProject()->getCompressionLevelAction().createWidget(&fileDialog), 1);
+                compressionLayout->addWidget(currentProject->getCompressionEnabledAction().createWidget(&fileDialog));
+                compressionLayout->addWidget(currentProject->getCompressionLevelAction().createWidget(&fileDialog), 1);
                 
                 fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
                 
                 //fileDialogLayout->addWidget(&passwordProtectedCheckBox, ++rowCount, 0);
                 //fileDialogLayout->addWidget(&passwordLineEdit, rowCount, 1);
 
-                auto& titleAction = getProject()->getTitleAction();
+                auto& titleAction = currentProject->getTitleAction();
 
                 fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 2, 0);
 
@@ -471,10 +473,10 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
                 settingsGroupAction.setPopupSizeHint(QSize(420, 320));
                 settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-                settingsGroupAction << getProject()->getTitleAction();
-                settingsGroupAction << getProject()->getDescriptionAction();
-                settingsGroupAction << getProject()->getTagsAction();
-                settingsGroupAction << getProject()->getCommentsAction();
+                settingsGroupAction << currentProject->getTitleAction();
+                settingsGroupAction << currentProject->getDescriptionAction();
+                settingsGroupAction << currentProject->getTagsAction();
+                settingsGroupAction << currentProject->getCommentsAction();
 
                 auto titleLayout = new QHBoxLayout();
 
@@ -491,11 +493,11 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
                 //updatePassword();
 
-                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, getSettingsPrefix](const QString& path) -> void {
+                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, getSettingsPrefix, currentProject](const QString& path) -> void {
                     Project project(path);
 
-                    projects().getProject()->getCompressionEnabledAction().setChecked(project.getCompressionEnabledAction().isChecked());
-                    projects().getProject()->getCompressionLevelAction().setValue(project.getCompressionLevelAction().getValue());
+                    currentProject->getCompressionEnabledAction().setChecked(project.getCompressionEnabledAction().isChecked());
+                    currentProject->getCompressionLevelAction().setValue(project.getCompressionLevelAction().getValue());
                 });
 
                 fileDialog.exec();
@@ -511,8 +513,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
-            if (projects().getProject()->getCompressionEnabledAction().isChecked())
-                qDebug().noquote() << "Saving HDPS project to" << filePath << "with compression level" << projects().getProject()->getCompressionLevelAction().getValue();
+            if (currentProject->getCompressionEnabledAction().isChecked())
+                qDebug().noquote() << "Saving HDPS project to" << filePath << "with compression level" << currentProject->getCompressionLevelAction().getValue();
             else
                 qDebug().noquote() << "Saving HDPS project to" << filePath << "without compression";
 
@@ -552,9 +554,9 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
             QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
 
-            Application::core()->getWorkspaceManager().saveWorkspace(workspaceFileInfo.absoluteFilePath());
+            Application::core()->getWorkspaceManager().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 
-            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, projects().getProject()->getCompressionEnabledAction().isChecked() ? projects().getProject()->getCompressionLevelAction().getValue() : 0, "");
+            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, currentProject->getCompressionEnabledAction().isChecked() ? currentProject->getCompressionLevelAction().getValue() : 0, "");
 
             _recentProjectsAction.addRecentFilePath(filePath);
 
@@ -606,15 +608,15 @@ void ProjectManager::createProject()
 
 bool ProjectManager::hasProject() const
 {
-    return getProject() != nullptr;
+    return getCurrentProject() != nullptr;
 }
 
-const hdps::Project* ProjectManager::getProject() const
+const hdps::Project* ProjectManager::getCurrentProject() const
 {
     return _project.get();
 }
 
-hdps::Project* ProjectManager::getProject()
+hdps::Project* ProjectManager::getCurrentProject()
 {
     return _project.get();
 }

@@ -25,7 +25,7 @@ WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) 
 
     _groupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-    const auto workspace = workspaces().getWorkspace();
+    const auto workspace = workspaces().getCurrentWorkspace();
 
     _groupAction << workspace->getTitleAction();
     _groupAction << workspace->getDescriptionAction();

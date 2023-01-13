@@ -363,7 +363,7 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*
         loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 }
 
-void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
+void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
 {
     try
     {
@@ -374,12 +374,14 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
 
         beginSaveWorkspace();
         {
+            auto currentWorkspace = getCurrentWorkspace();
+
             if (filePath.isEmpty()) {
 
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-                fileDialog.setWindowTitle("Save Workspace");
+                fileDialog.setWindowTitle("Export Workspace");
                 fileDialog.setAcceptMode(QFileDialog::AcceptSave);
                 fileDialog.setNameFilters({ "HDPS workspace files (*.hws)" });
                 fileDialog.setDefaultSuffix(".hws");
@@ -390,7 +392,7 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
                 auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
 
-                auto& titleAction = getWorkspace()->getTitleAction();
+                auto& titleAction = currentWorkspace->getTitleAction();
 
                 fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount, 0);
 
@@ -401,10 +403,10 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
                 settingsGroupAction.setPopupSizeHint(QSize(420, 320));
                 settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-                settingsGroupAction << getWorkspace()->getTitleAction();
-                settingsGroupAction << getWorkspace()->getDescriptionAction();
-                settingsGroupAction << getWorkspace()->getTagsAction();
-                settingsGroupAction << getWorkspace()->getCommentsAction();
+                settingsGroupAction << currentWorkspace->getTitleAction();
+                settingsGroupAction << currentWorkspace->getDescriptionAction();
+                settingsGroupAction << currentWorkspace->getTagsAction();
+                settingsGroupAction << currentWorkspace->getCommentsAction();
 
                 auto titleLayout = new QHBoxLayout();
 
@@ -428,7 +430,8 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/)
 
             setWorkspaceFilePath(filePath);
 
-            _recentWorkspacesAction.addRecentFilePath(getWorkspaceFilePath());
+            if (addToRecentWorkspaces)
+                _recentWorkspacesAction.addRecentFilePath(getWorkspaceFilePath());
         }
         endSaveWorkspace();
     }
@@ -477,22 +480,22 @@ QWidget* WorkspaceManager::getWidget()
 
 bool WorkspaceManager::hasWorkspace() const
 {
-    return getWorkspace() != nullptr;
+    return getCurrentWorkspace() != nullptr;
 }
 
-const Workspace* WorkspaceManager::getWorkspace() const
+const Workspace* WorkspaceManager::getCurrentWorkspace() const
 {
     return _workspace.get();
 }
 
-Workspace* WorkspaceManager::getWorkspace()
+Workspace* WorkspaceManager::getCurrentWorkspace()
 {
     return _workspace.get();
 }
 
 void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    getWorkspace()->fromVariantMap(variantMap);
+    getCurrentWorkspace()->fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "DockManagers");
     variantMapMustContain(variantMap, "PreviewImage");
@@ -508,9 +511,9 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap WorkspaceManager::toVariantMap() const
 {
-    auto workspaceMap = getWorkspace()->toVariantMap();
+    auto currentWorkspaceMap = getCurrentWorkspace()->toVariantMap();
 
-    workspaceMap["DockManagers"] = QVariantMap {
+    QVariantMap dockManagers{
         { "Main", _mainDockManager->toVariantMap() },
         { "ViewPlugins", _viewPluginsDockManager->toVariantMap() }
     };
@@ -520,9 +523,12 @@ QVariantMap WorkspaceManager::toVariantMap() const
 
     toPreviewImage().save(&previewImageBuffer, "PNG");
 
-    workspaceMap["PreviewImage"] = QVariant::fromValue(previewImageByteArray.toBase64());
+    currentWorkspaceMap.insert({
+        { "DockManagers", dockManagers },
+        { "PreviewImage", QVariant::fromValue(previewImageByteArray.toBase64()) }
+    });
 
-    return workspaceMap;
+    return currentWorkspaceMap;
 }
 
 QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)

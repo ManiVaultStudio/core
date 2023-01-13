@@ -5,9 +5,9 @@
 #include <QPainter>
 #include <QStyleOption>
 
-namespace hdps {
+using namespace hdps::util;
 
-namespace gui {
+namespace hdps::gui {
 
 const QColor ColorAction::DEFAULT_COLOR = Qt::gray;
 
@@ -95,15 +95,22 @@ WidgetAction* ColorAction::getPublicCopy() const
 
 void ColorAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!variantMap.contains("Value"))
-        return;
+    Serializable::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "Value");
 
     setColor(variantMap["Value"].value<QColor>());
 }
 
 QVariantMap ColorAction::toVariantMap() const
 {
-    return { { "Value", _color } };
+    QVariantMap variantMap = Serializable::toVariantMap();
+
+    variantMap.insert({
+        { "Value", QVariant::fromValue(_color) }
+    });
+
+    return variantMap;
 }
 
 ColorAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ColorAction* colorAction) :
@@ -214,5 +221,4 @@ QWidget* ColorAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
     return widget;
 }
 
-}
 }

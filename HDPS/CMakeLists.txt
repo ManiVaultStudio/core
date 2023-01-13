@@ -594,6 +594,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/DockArea.h
     src/util/Logger.h
     src/util/AbstractItemModelTester.h
+    src/util/Version.h
 )
 
 set(PUBLIC_UTIL_SOURCES
@@ -624,6 +625,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/DockArea.cpp
     src/util/Logger.cpp
     src/util/AbstractItemModelTester.cpp
+    src/util/Version.cpp
 )
 
 set(PUBLIC_UTIL_FILES

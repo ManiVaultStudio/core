@@ -75,15 +75,15 @@ public:
 
     /**
      * Get current project
-     * @return Pointer to project (nullptr if no project is loaded)
+     * @return Pointer to current project (nullptr if no project is loaded)
      */
-    virtual const Project* getProject() const = 0;
+    virtual const Project* getCurrentProject() const = 0;
 
     /**
      * Get current project
-     * @return Pointer to project (nullptr if no project is loaded)
+     * @return Pointer to current project (nullptr if no project is loaded)
      */
-    virtual Project* getProject() = 0;
+    virtual Project* getCurrentProject() = 0;
 
     /**
      * Extract the project JSON file (project.json) from a compressed HDPS file (*.hdps)

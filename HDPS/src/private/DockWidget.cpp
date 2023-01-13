@@ -23,7 +23,6 @@ using namespace hdps::plugin;
 DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     CDockWidget(title, parent),
     Serializable(title),
-    _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _infoOverlayWidget(this, Application::getIconFont("FontAwesome").getIcon("hourglass-half"), "Loading", QString("Waiting for %1 to load...").arg(title)),
     _settingsToolButton(nullptr)
 {
@@ -31,7 +30,7 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     qDebug() << __FUNCTION__ << title;
 #endif
 
-    setObjectName(_id);
+    setObjectName(getId());
     setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromContent);
 
     auto& widgetFader = _infoOverlayWidget.getWidgetFader();
@@ -101,32 +100,22 @@ void DockWidget::setWidget(QWidget* widget, eInsertMode insertMode /*= AutoScrol
 
 void DockWidget::fromVariantMap(const QVariantMap& variantMap)
 {
-    variantMapMustContain(variantMap, "ID");
+    Serializable::fromVariantMap(variantMap);
+
     variantMapMustContain(variantMap, "Title");
-    variantMapMustContain(variantMap, "Closed");
-    variantMapMustContain(variantMap, "Closable");
-    variantMapMustContain(variantMap, "Movable");
-    variantMapMustContain(variantMap, "Floatable");
 
-    _id = variantMap["ID"].toString();
-
-    setObjectName(_id);
+    setObjectName(getId());
     setWindowTitle(variantMap["Title"].toString());
-    //toggleView(variantMap["Closed"].toBool());
-    setFeature(CDockWidget::DockWidgetClosable, variantMap["Closable"].toBool());
-    setFeature(CDockWidget::DockWidgetMovable, variantMap["Movable"].toBool());
-    setFeature(CDockWidget::DockWidgetFloatable, variantMap["Floatable"].toBool());
 }
 
 QVariantMap DockWidget::toVariantMap() const
 {
-    return {
-        { "ID", QVariant::fromValue(_id) },
+    auto variantMap = Serializable::toVariantMap();
+
+    variantMap.insert({
         { "Title", QVariant::fromValue(windowTitle()) },
-        { "Type", QVariant::fromValue(this->getTypeString()) },
-        { "Closed", QVariant::fromValue(isClosed()) },
-        { "Closable", QVariant::fromValue(features().testFlag(CDockWidget::DockWidgetClosable)) },
-        { "Movable", QVariant::fromValue(features().testFlag(CDockWidget::DockWidgetMovable)) },
-        { "Floatable", QVariant::fromValue(features().testFlag(CDockWidget::DockWidgetFloatable)) }
-    };
+        { "Type", QVariant::fromValue(this->getTypeString()) }
+    });
+
+    return variantMap;
 }

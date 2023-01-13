@@ -25,7 +25,7 @@ ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
 
     _groupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-    const auto project = projects().getProject();
+    const auto project = projects().getCurrentProject();
 
     _groupAction << project->getTitleAction();
     _groupAction << project->getDescriptionAction();

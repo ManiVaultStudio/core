@@ -169,7 +169,7 @@ void populateDataBufferFromVariantMap (const QVariantMap& variantMap, const char
 void variantMapMustContain(const QVariantMap& variantMap, const QString& key)
 {
     if (!variantMap.contains(key))
-        throw std::runtime_error(QString("%1 not found in map").arg(key).toLatin1());
+        throw std::runtime_error(QString("%1 not found in map: %2").arg(key, variantMap.keys().join(", ")).toLatin1());
 }
 
 }

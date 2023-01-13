@@ -7,9 +7,9 @@
 #include <QLabel>
 #include <QEvent>
 
-namespace hdps {
+using namespace hdps::util;
 
-namespace gui {
+namespace hdps::gui {
 
 ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/) :
     WidgetAction(parent),
@@ -74,15 +74,22 @@ void ToggleAction::setIndeterminate(bool indeterminate)
 
 void ToggleAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (variantMap.contains("value"))
-        setChecked(variantMap["value"].toBool());
+    WidgetAction::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "Value");
+
+    setChecked(variantMap["Value"].toBool());
 }
 
 QVariantMap ToggleAction::toVariantMap() const
 {
-    return {
-        { "value", QVariant::fromValue(isChecked()) }
-    };
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", QVariant::fromValue(isChecked()) }
+    });
+
+    return variantMap;
 }
 
 void ToggleAction::connectToPublicAction(WidgetAction* publicAction)
@@ -251,5 +258,4 @@ QWidget* ToggleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     return widget;
 }
 
-}
 }

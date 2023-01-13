@@ -1,10 +1,13 @@
 #pragma once
 
 #include "util/Serializable.h"
+#include "util/Version.h"
 
 #include "actions/StringAction.h"
 #include "actions/StringsAction.h"
 #include "actions/IntegralAction.h"
+
+#include "Application.h"
 
 namespace hdps {
 
@@ -45,6 +48,14 @@ public:
      * @param filePath Location on disk where the project resides
      */
     void setFilePath(const QString& filePath);
+
+public:
+
+    /**
+     * Get version of the application (major and minor version number) with which the project is created
+     * @return Pair of integers representing major and minor version number respectively
+     */
+    util::Version getVersion() const;
 
 public: // Serialization
 
@@ -90,13 +101,14 @@ signals:
     void filePathChanged(const QString& filePath);
 
 private:
-    QString                 _filePath;                  /** Location on disk where the project resides */
-    gui::StringAction       _titleAction;               /** Workspace title action */
-    gui::StringAction       _descriptionAction;         /** Work description action */
-    gui::StringsAction      _tagsAction;                /** Workspace tags action */
-    gui::StringAction       _commentsAction;            /** Workspace comments action */
-    gui::ToggleAction       _compressionEnabledAction;  /** Action to enable/disable project file compression */
-    gui::IntegralAction     _compressionLevelAction;    /** Action to control the amount of project file compression */
+    QString                 _filePath;                      /** Location on disk where the project resides */
+    util::Version           _version;                       /** Version of the application with which the project is created */
+    gui::StringAction       _titleAction;                   /** Workspace title action */
+    gui::StringAction       _descriptionAction;             /** Work description action */
+    gui::StringsAction      _tagsAction;                    /** Workspace tags action */
+    gui::StringAction       _commentsAction;                /** Workspace comments action */
+    gui::ToggleAction       _compressionEnabledAction;      /** Action to enable/disable project file compression */
+    gui::IntegralAction     _compressionLevelAction;        /** Action to control the amount of project file compression */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

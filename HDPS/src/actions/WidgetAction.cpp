@@ -22,12 +22,11 @@
 
 using namespace hdps::util;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     QWidgetAction(parent),
+    util::Serializable("WidgetAction"),
     _defaultWidgetFlags(),
     _sortIndex(-1),
     _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::Default)),
@@ -401,6 +400,36 @@ QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     return new QWidget();
 }
 
+void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    Serializable::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "Enabled");
+    variantMapMustContain(variantMap, "Visible");
+    variantMapMustContain(variantMap, "SortIndex");
+    variantMapMustContain(variantMap, "ConnectionPermissions");
+
+    setEnabled(variantMap["Enabled"].toBool());
+    setVisible(variantMap["Visible"].toBool());
+    setSortIndex(variantMap["SortIndex"].toInt());
+    setConnectionPermissions(variantMap["ConnectionPermissions"].toInt());
+}
+
+QVariantMap WidgetAction::toVariantMap() const
+{
+    QVariantMap variantMap = Serializable::toVariantMap();
+
+    variantMap.insert({
+        { "Type", QVariant::fromValue(getTypeString()) },
+        { "Enabled", QVariant::fromValue(isEnabled()) },
+        { "Visible", QVariant::fromValue(isVisible()) },
+        { "SortIndex", QVariant::fromValue(_sortIndex) },
+        { "ConnectionPermissions", QVariant::fromValue(_connectionPermissions) }
+    });
+
+    return variantMap;
+}
+
 QVector<WidgetAction*> WidgetAction::getChildActions()
 {
     QVector<WidgetAction*> childActions;
@@ -539,5 +568,4 @@ void WidgetAction::setConfiguration(std::int32_t configuration, bool recursive /
     }
 }
 
-}
 }

@@ -121,6 +121,8 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
+    Serializable::fromVariantMap(variantMap);
+
     variantMapMustContain(variantMap, "State");
     variantMapMustContain(variantMap, "ViewPluginDockWidgets");
 
@@ -151,13 +153,17 @@ QVariantMap DockManager::toVariantMap() const
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
+    auto variantMap = Serializable::toVariantMap();
+
     QVariantList viewPluginDockWidgetsList;
 
     for (auto viewPluginDockWidget : getViewPluginDockWidgets())
         viewPluginDockWidgetsList << viewPluginDockWidget->toVariantMap();
 
-    return {
+    variantMap.insert({
         { "State", QVariant::fromValue(saveState().toBase64()) },
         { "ViewPluginDockWidgets", viewPluginDockWidgetsList }
-    };
+    });
+
+    return variantMap;
 }

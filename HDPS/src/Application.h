@@ -2,6 +2,7 @@
 
 #include "util/IconFonts.h"
 #include "util/Logger.h"
+#include "util/Version.h"
 
 #include "actions/TriggerAction.h"
 
@@ -15,8 +16,6 @@ class CoreInterface;
 /**
  * HDPS application class
  * 
- * Its intended use is application-wide sharing of resources such as icons and fonts
- *
  * @author Thomas Kroes
  */
 class Application : public QApplication
@@ -48,6 +47,12 @@ public: // Miscellaneous
 
     /** Get pointer to the core */
     static CoreInterface* core();
+
+    /**
+     * Get application version (major and minor version number)
+     * @return Pair of integers representing major and minor version number respectively
+     */
+    util::Version getVersion() const;
 
 public: // Static resource access functions
 
@@ -117,6 +122,7 @@ signals:
 
 protected:
     CoreInterface*              _core;                                  /** Pointer to HDPS core */
+    const util::Version         _version;                               /** Application version */
     IconFonts                   _iconFonts;                             /** Icon fonts resource */
     QSettings                   _settings;                              /** Settings */
     QString                     _serializationTemporaryDirectory;       /** Temporary directory for serialization */

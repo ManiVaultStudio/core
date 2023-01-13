@@ -4,9 +4,9 @@
 #include <QHBoxLayout>
 #include <QCompleter>
 
-namespace hdps {
+using namespace hdps::util;
 
-namespace gui {
+namespace hdps::gui {
 
 StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const QString& string /*= ""*/, const QString& defaultString /*= ""*/) :
     WidgetAction(parent),
@@ -25,6 +25,11 @@ StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const
 
     _leadingAction.setVisible(false);
     _trailingAction.setVisible(false);
+}
+
+QString StringAction::getTypeString() const
+{
+    return "String";
 }
 
 void StringAction::initialize(const QString& string /*= ""*/, const QString& defaultString /*= ""*/)
@@ -193,17 +198,22 @@ WidgetAction* StringAction::getPublicCopy() const
 
 void StringAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!variantMap.contains("value"))
-        return;
+    WidgetAction::fromVariantMap(variantMap);
 
-    setString(variantMap["value"].toString());
+    variantMapMustContain(variantMap, "Value");
+
+    setString(variantMap["Value"].toString());
 }
 
 QVariantMap StringAction::toVariantMap() const
 {
-    return {
-        { "value", QVariant::fromValue(_string) }
-    };
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", QVariant::fromValue(getString()) }
+    });
+
+    return variantMap;
 }
 
 StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stringAction) :
@@ -314,5 +324,4 @@ StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stri
     updatePlaceHolderText();
 }
 
-}
 }

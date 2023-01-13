@@ -46,6 +46,8 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     
     emit _model.layoutChanged();
 
+    _hierarchyWidget.getToolbarLayout().addWidget(_filterModel.getFilterTypesAction().createWidget(this));
+
     _hierarchyWidget.setWindowIcon(workspaces().getIcon());
     _hierarchyWidget.getFilterGroupAction().setVisible(false);
     _hierarchyWidget.getCollapseAllAction().setVisible(false);
@@ -53,8 +55,6 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     _hierarchyWidget.getColumnsGroupAction().setVisible(false);
     _hierarchyWidget.getSelectionGroupAction().setVisible(false);
     _hierarchyWidget.setHeaderHidden(true);
-
-
 
     const auto updateActions = [this]() -> void {
         _createAction.setEnabled(_hierarchyWidget.getSelectionModel().hasSelection());
@@ -68,6 +68,7 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
 
     treeView.setRootIsDecorated(false);
     treeView.setItemDelegateForColumn(static_cast<int>(WorkspaceInventoryModel::Column::Summary), new WorkspaceDelegate());
+    treeView.setSelectionBehavior(QAbstractItemView::SelectRows);
     treeView.setSelectionMode(QAbstractItemView::SingleSelection);
     treeView.setIconSize(QSize(24, 24));
 
@@ -80,6 +81,10 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     auto treeViewHeader = treeView.header();
 
     treeViewHeader->resizeSection(static_cast<int>(WorkspaceInventoryModel::Column::Icon), 32);
+    treeViewHeader->resizeSection(static_cast<int>(WorkspaceInventoryModel::Column::Type), 100);
+
+    treeViewHeader->setSectionResizeMode(static_cast<int>(RecentFilesAction::Model::Column::FilePath), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(RecentFilesAction::Model::Column::DateTime), QHeaderView::Fixed);
 
     _createAction.setToolTip("Create the project with the selected workspace");
     _cancelAction.setToolTip("Exit the dialog without creating a new project");

@@ -77,25 +77,24 @@ void Workspace::setFilePath(const QString& filePath)
 
 void Workspace::fromVariantMap(const QVariantMap& variantMap)
 {
-    variantMapMustContain(variantMap, "Title");
-    variantMapMustContain(variantMap, "Description");
-    variantMapMustContain(variantMap, "Tags");
-    variantMapMustContain(variantMap, "Comments");
+    Serializable::fromVariantMap(variantMap);
 
-    _titleAction.fromVariantMap(variantMap["Title"].toMap());
-    _descriptionAction.fromVariantMap(variantMap["Description"].toMap());
-    _tagsAction.fromVariantMap(variantMap["Tags"].toMap());
-    _commentsAction.fromVariantMap(variantMap["Comments"].toMap());
+    Serializable::fromVariantMap(_titleAction, variantMap, "Title");
+    Serializable::fromVariantMap(_descriptionAction, variantMap, "Description");
+    Serializable::fromVariantMap(_tagsAction, variantMap, "Tags");
+    Serializable::fromVariantMap(_commentsAction, variantMap, "Comments");
 }
 
 QVariantMap Workspace::toVariantMap() const
 {
-    return {
-        { "Title", _titleAction.toVariantMap() },
-        { "Description", _descriptionAction.toVariantMap() },
-        { "Tags", _tagsAction.toVariantMap() },
-        { "Comments", _commentsAction.toVariantMap() },
-    };
+    auto variantMap = Serializable::toVariantMap();
+
+    Serializable::insertIntoVariantMap(_titleAction, variantMap, "Title");
+    Serializable::insertIntoVariantMap(_descriptionAction, variantMap, "Description");
+    Serializable::insertIntoVariantMap(_tagsAction, variantMap, "Tags");
+    Serializable::insertIntoVariantMap(_commentsAction, variantMap, "Comments");
+
+    return variantMap;
 }
 
 QImage Workspace::getPreviewImage(const QString& filePath)

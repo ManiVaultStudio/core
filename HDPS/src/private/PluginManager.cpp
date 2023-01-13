@@ -515,39 +515,35 @@ QIcon PluginManager::getPluginIcon(const QString& pluginKind) const
 
 void PluginManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    try {
-        variantMapMustContain(variantMap, "UsedPlugins");
+    Serializable::fromVariantMap(variantMap);
 
-        QStringList missingPluginKinds;
+    variantMapMustContain(variantMap, "UsedPlugins");
 
-        for (const auto& usedPlugin : variantMap["UsedPlugins"].toList())
-            if (!_pluginFactories.contains(usedPlugin.toString()))
-                missingPluginKinds << usedPlugin.toString();
+    QStringList missingPluginKinds;
 
-        if (!missingPluginKinds.isEmpty())
-            throw std::runtime_error(QString("One or more plugins are not available: %1").arg(missingPluginKinds.join(", ")).toLocal8Bit());
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Error(s) occurred during project loading", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Error(s) occurred during project loading");
-    }
+    for (const auto& usedPlugin : variantMap["UsedPlugins"].toList())
+        if (!_pluginFactories.contains(usedPlugin.toString()))
+            missingPluginKinds << usedPlugin.toString();
+
+    if (!missingPluginKinds.isEmpty())
+        throw std::runtime_error(QString("One or more plugins are not available: %1").arg(missingPluginKinds.join(", ")).toLocal8Bit());
 }
 
 QVariantMap PluginManager::toVariantMap() const
 {
-    QVariantMap pluginsMap;
+    auto variantMap = Serializable::toVariantMap();
+
     QVariantList usedPluginsList;
 
     for (auto pluginFactory : _pluginFactories.values())
         if ((pluginFactory->getType() == Type::DATA || pluginFactory->getType() == Type::ANALYSIS || pluginFactory->getType() == Type::VIEW) && pluginFactory->getNumberOfInstances() > 0)
             usedPluginsList << pluginFactory->getKind();
 
-    return {
+    variantMap.insert({
         { "UsedPlugins", usedPluginsList }
-    };
+    });
+
+    return variantMap;
 }
 
 }

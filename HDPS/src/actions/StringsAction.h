@@ -118,6 +118,12 @@ public:
     StringsAction(QObject* parent, const QString& title = "", const QStringList& strings = QStringList(), const QStringList& defaultStrings = QStringList());
 
     /**
+     * Get type string
+     * @return Widget action type in string format
+     */
+    QString getTypeString() const override;
+
+    /**
      * Initialize the strings action
      * @param strings Strings
      * @param defaultStrings Default strings

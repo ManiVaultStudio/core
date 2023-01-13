@@ -2,6 +2,7 @@
 #include "Application.h"
 
 #include "actions/WidgetAction.h"
+#include "util/Serialization.h"
 #include "util/Exception.h"
 
 #include <QDebug>
@@ -15,9 +16,7 @@
 
 using namespace hdps::gui;
 
-namespace hdps {
-
-namespace util {
+namespace hdps::util {
 
 Serializable::Serializable(const QString& name /*= ""*/) :
     _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
@@ -46,11 +45,16 @@ QString Serializable::getSerializationName() const
 
 void Serializable::fromVariantMap(const QVariantMap& variantMap)
 {
+    variantMapMustContain(variantMap, "ID");
+
+    _id = variantMap["ID"].toString();
 }
 
 QVariantMap Serializable::toVariantMap() const
 {
-    return QVariantMap();
+    return {
+        { "ID", _id }
+    };
 }
 
 void Serializable::fromJsonDocument(const QJsonDocument& jsonDocument)
@@ -144,6 +148,7 @@ void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap&
 
     serializable->fromVariantMap(variantMap);
 
+    /*
     auto object = dynamic_cast<const QObject*>(serializable);
 
     if (object == nullptr)
@@ -157,6 +162,15 @@ void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap&
 
         fromVariantMap(childSerializable, variantMap[childSerializable->getSerializationName()].toMap());
     }
+    */
+}
+
+void Serializable::fromVariantMap(Serializable& serializable, const QVariantMap& variantMap, const QString& key)
+{
+    if (!variantMap.contains(key))
+        throw std::runtime_error(QString("%1 not found in map").arg(key).toLatin1());
+
+    serializable.fromVariantMap(variantMap[key].toMap());
 }
 
 QVariantMap Serializable::toVariantMap(const Serializable* serializable)
@@ -168,6 +182,9 @@ QVariantMap Serializable::toVariantMap(const Serializable* serializable)
     return serializable->toVariantMap();
 }
 
+void Serializable::insertIntoVariantMap(const Serializable& serializable, QVariantMap& variantMap, const QString& key)
+{
+    variantMap.insert(key, serializable.toVariantMap());
 }
 
 }
