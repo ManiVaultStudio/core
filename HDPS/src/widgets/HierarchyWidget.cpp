@@ -25,7 +25,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _filterModel(filterModel),
     _selectionModel(_filterModel != nullptr ? _filterModel : const_cast<QAbstractItemModel*>(&_model)),
     _treeView(this),
-    _infoOverlayWidget(&_treeView),
+    _infoOverlayWidget(showOverlay ? new InfoOverlayWidget(&_treeView) : nullptr),
     _noItemsDescription(""),
     _filterNameAction(this, "Name"),
     _filterGroupAction(this),
@@ -53,8 +53,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _filterRegularExpressionAction.setToolTip("Enable/disable search filter with regular expression");
     _filterRegularExpressionAction.setConnectionPermissionsToNone();
 
-    if (_filterModel)
-        _filterGroupAction << _filterNameAction;
+    //if (_filterModel)
+    //    _filterGroupAction << _filterNameAction;
 
     _filterGroupAction << _filterCaseSensitiveAction;
     _filterGroupAction << _filterRegularExpressionAction;
@@ -450,28 +450,31 @@ void HierarchyWidget::selectNone()
 
 void HierarchyWidget::updateOverlayWidget()
 {
+    if (_infoOverlayWidget.isNull())
+        return;
+
     if (_filterModel == nullptr) {
         if (_model.rowCount() == 0) {
-            _infoOverlayWidget.set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
-            _infoOverlayWidget.show();
+            _infoOverlayWidget->set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
+            _infoOverlayWidget->show();
         }
         else {
-            _infoOverlayWidget.hide();
+            _infoOverlayWidget->hide();
         }
     }
     else {
         if (_model.rowCount() >= 1) {
             if (_filterModel->rowCount() == 0) {
-                _infoOverlayWidget.set(windowIcon(), QString("No %1s found").arg(_itemTypeName.toLower()), "Try changing the filter parameters...");
-                _infoOverlayWidget.show();
+                _infoOverlayWidget->set(windowIcon(), QString("No %1s found").arg(_itemTypeName.toLower()), "Try changing the filter parameters...");
+                _infoOverlayWidget->show();
             }
             else {
-                _infoOverlayWidget.hide();
+                _infoOverlayWidget->hide();
             }
         }
         else {
-            _infoOverlayWidget.set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
-            _infoOverlayWidget.show();
+            _infoOverlayWidget->set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
+            _infoOverlayWidget->show();
         }
     }
 }

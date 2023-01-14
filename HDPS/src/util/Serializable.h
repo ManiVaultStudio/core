@@ -105,8 +105,8 @@ protected:
     static void insertIntoVariantMap(const Serializable& serializable, QVariantMap& variantMap, const QString& key);
 
 private:
-    QString     _id;        /** Globally unique identifier of the serializable object */
-    QString     _name;      /** Serialization name */
+    QString     _id;            /** Globally unique identifier of the serializable object */
+    QString     _name;          /** Serialization name */
 };
 
 }

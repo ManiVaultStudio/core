@@ -277,11 +277,25 @@ set(PRIVATE_APPLICATION_FILES
 
 set(PRIVATE_START_PAGE_HEADERS
     src/private/StartPageWidget.h
+    src/private/StartPageContentWidget.h
+    src/private/StartPageOpenProjectWidget.h
+    src/private/StartPageGetStartedWidget.h
+    src/private/StartPageActionsWidget.h
+    src/private/StartPageActionsModel.h
+    src/private/StartPageActionsFilterModel.h
+    src/private/StartPageActionDelegate.h
     src/private/LogoWidget.h
 )
 
 set(PRIVATE_START_PAGE_SOURCES
     src/private/StartPageWidget.cpp
+    src/private/StartPageContentWidget.cpp
+    src/private/StartPageOpenProjectWidget.cpp
+    src/private/StartPageGetStartedWidget.cpp
+    src/private/StartPageActionsWidget.cpp
+    src/private/StartPageActionsModel.cpp
+    src/private/StartPageActionsFilterModel.cpp
+    src/private/StartPageActionDelegate.cpp
     src/private/LogoWidget.cpp
 )
 

@@ -83,9 +83,6 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     treeViewHeader->resizeSection(static_cast<int>(WorkspaceInventoryModel::Column::Icon), 32);
     treeViewHeader->resizeSection(static_cast<int>(WorkspaceInventoryModel::Column::Type), 100);
 
-    treeViewHeader->setSectionResizeMode(static_cast<int>(RecentFilesAction::Model::Column::FilePath), QHeaderView::Stretch);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(RecentFilesAction::Model::Column::DateTime), QHeaderView::Fixed);
-
     _createAction.setToolTip("Create the project with the selected workspace");
     _cancelAction.setToolTip("Exit the dialog without creating a new project");
 

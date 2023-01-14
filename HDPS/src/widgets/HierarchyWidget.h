@@ -297,26 +297,26 @@ private:
     void updateExpandCollapseActionsReadOnly();
 
 private:
-    QString                     _itemTypeName;                      /** Name of the item type */
-    bool                        _headerHidden;                      /** Whether the header view is visible or not */
-    const QAbstractItemModel&   _model;                             /** Model containing data to be displayed in the hierarchy */
-    QSortFilterProxyModel*      _filterModel;                       /** Pointer to filter model (maybe nullptr) */
-    QItemSelectionModel         _selectionModel;                    /** Selection model */
-    HierarchyWidgetTreeView     _treeView;                          /** Tree view that contains the data hierarchy */
-    InfoOverlayWidget           _infoOverlayWidget;                 /** Overlay widget that show information when there are no items in the model */
-    QString                     _noItemsDescription;                /** Overlay widget description when no items are loaded */
-    QHBoxLayout                 _toolbarLayout;                     /** Layout for the top toolbar */
-    StringAction                _filterNameAction;                  /** String action for filtering by name */
-    GroupAction                 _filterGroupAction;                 /** Filter group action */
-    ToggleAction                _filterCaseSensitiveAction;         /** Filter case-sensitive action */
-    ToggleAction                _filterRegularExpressionAction;     /** Enable filter with regular expression action */
-    TriggerAction               _expandAllAction;                   /** Expand all items action */
-    TriggerAction               _collapseAllAction;                 /** Collapse all items action */
-    TriggerAction               _selectAllAction;                   /** Select all action */
-    TriggerAction               _selectNoneAction;                  /** Select none action */
-    GroupAction                 _selectionGroupAction;              /** Selection group action */
-    GroupAction                 _columnsGroupAction;                /** Column visibility action */
-    GroupAction                 _settingsGroupAction;               /** Settings group action */
+    QString                             _itemTypeName;                      /** Name of the item type */
+    bool                                _headerHidden;                      /** Whether the header view is visible or not */
+    const QAbstractItemModel&           _model;                             /** Model containing data to be displayed in the hierarchy */
+    QSortFilterProxyModel*              _filterModel;                       /** Pointer to filter model (maybe nullptr) */
+    QItemSelectionModel                 _selectionModel;                    /** Selection model */
+    HierarchyWidgetTreeView             _treeView;                          /** Tree view that contains the data hierarchy */
+    QScopedPointer<InfoOverlayWidget>   _infoOverlayWidget;                 /** Overlay widget that show information when there are no items in the model */
+    QString                             _noItemsDescription;                /** Overlay widget description when no items are loaded */
+    QHBoxLayout                         _toolbarLayout;                     /** Layout for the top toolbar */
+    StringAction                        _filterNameAction;                  /** String action for filtering by name */
+    GroupAction                         _filterGroupAction;                 /** Filter group action */
+    ToggleAction                        _filterCaseSensitiveAction;         /** Filter case-sensitive action */
+    ToggleAction                        _filterRegularExpressionAction;     /** Enable filter with regular expression action */
+    TriggerAction                       _expandAllAction;                   /** Expand all items action */
+    TriggerAction                       _collapseAllAction;                 /** Collapse all items action */
+    TriggerAction                       _selectAllAction;                   /** Select all action */
+    TriggerAction                       _selectNoneAction;                  /** Select none action */
+    GroupAction                         _selectionGroupAction;              /** Selection group action */
+    GroupAction                         _columnsGroupAction;                /** Column visibility action */
+    GroupAction                         _settingsGroupAction;               /** Settings group action */
 };
 
 }
