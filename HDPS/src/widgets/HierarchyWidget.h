@@ -93,6 +93,18 @@ public:
     HierarchyWidget(QWidget* parent, const QString& itemTypeName, const QAbstractItemModel& model, QSortFilterProxyModel* filterModel = nullptr, bool showToolbar = true, bool showOverlay = true);
 
     /**
+     * Get item type name
+     * @return Item type name
+     */
+    QString getItemTypeName() const;
+
+    /**
+     * Set item type name to \p itemTypeName
+     * @return Item type name
+     */
+    void setItemTypeName(const QString& itemTypeName);
+
+    /**
      * Override set window icon to update the overlay icons as well
      * @param icon Window icon
      */
@@ -295,6 +307,9 @@ private:
 
     /** Update the read-only state of the expand/collapse action in response to change in the model and the tree view */
     void updateExpandCollapseActionsReadOnly();
+
+    /** Update the filter model and related actions */
+    void updateFilterModel();
 
 private:
     QString                             _itemTypeName;                      /** Name of the item type */

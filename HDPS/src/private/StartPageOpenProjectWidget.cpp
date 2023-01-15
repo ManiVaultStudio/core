@@ -1,8 +1,9 @@
 #include "StartPageOpenProjectWidget.h"
-#include "StartPageActionDelegate.h"
 #include "StartPageContentWidget.h"
 
 #include <Application.h>
+
+#include <CoreInterface.h>
 
 #include <QDebug>
 
@@ -20,19 +21,16 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullp
     layout->addWidget(&_openProjectWidget);
 
     layout->addWidget(StartPageContentWidget::createHeaderLabel("Recent", "Recently opened project"));
-    layout->addWidget(&_recentProjectsWidget);
-
-    layout->addStretch(1);
+    layout->addWidget(&_recentProjectsWidget, 1);
 
     setLayout(layout);
 
     _openProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
     _openProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
-    _openProjectWidget.getHierarchyWidget().setFixedHeight(40);
-
-    //qDebug() << _openProjectWidget.getHierarchyWidget().getTreeView().rowHeight(_openProjectWidget.getModel().index(0, 0));
-
-    _recentProjectsWidget.getHierarchyWidget().getFilterGroupAction().setVisible(true);
+    _openProjectWidget.getHierarchyWidget().setFixedHeight(45);
+    _openProjectWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+ 
+    _recentProjectsWidget.getHierarchyWidget().setItemTypeName("Recent Project");
 }
 
 void StartPageOpenProjectWidget::updateActions()
@@ -40,12 +38,20 @@ void StartPageOpenProjectWidget::updateActions()
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _openProjectWidget.getModel().removeRows(0, _recentProjectsWidget.getModel().rowCount());
-    _openProjectWidget.getModel().add(fontAwesome.getIcon("file"), "Open project", "Browse to an existing project and open it");
+    _openProjectWidget.getModel().add(fontAwesome.getIcon("file"), "Open project", "Open an existing project", "", "Browse to an existing project and open it", []() -> void {
+        projects().openProject();
+    });
 
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
 
     _recentProjectsWidget.getModel().removeRows(0, _recentProjectsWidget.getModel().rowCount());
 
-    for (const auto& recentFilePath : _recentProjectsAction.getRecentFilePaths())
-        _recentProjectsWidget.getModel().add(fontAwesome.getIcon("file"), QFileInfo(recentFilePath).baseName(), recentFilePath);
+    for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
+        const auto recentFilePath = recentFile.getFilePath();
+
+        _recentProjectsWidget.getModel().add(fontAwesome.getIcon("file"), QFileInfo(recentFilePath).baseName(), recentFilePath, recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"), QString("Open %1").arg(recentFilePath), [recentFilePath]() -> void {
+            projects().openProject(recentFilePath);
+        });
+    }
+        
 }

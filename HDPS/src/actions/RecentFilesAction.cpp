@@ -121,6 +121,16 @@ void RecentFilesAction::updateRecentFilePaths()
     loadFromSettings();
 }
 
+RecentFiles RecentFilesAction::getRecentFiles() const
+{
+    RecentFiles recentFiles;
+
+    for (int rowIndex = 0; rowIndex < _model.rowCount(); rowIndex++)
+        recentFiles << RecentFile(_model.data(_model.index(rowIndex, static_cast<int>(Model::Column::FilePath))).toString(), _model.data(_model.index(rowIndex, static_cast<int>(Model::Column::DateTime))).toDateTime());
+
+    return recentFiles;
+}
+
 QMap<RecentFilesAction::Model::Column, QPair<QString, QString>> RecentFilesAction::Model::columnInfo = QMap<RecentFilesAction::Model::Column, QPair<QString, QString>>({
     { RecentFilesAction::Model::Column::FilePath, { "File path", "Location of the recent file" }},
     { RecentFilesAction::Model::Column::DateTime, { "Date and time", "Date and time when the file was opened" }}

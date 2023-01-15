@@ -1,5 +1,7 @@
 #pragma once
 
+#include "StartPageActionsWidget.h"
+
 #include <QWidget>
 
 /**
@@ -21,6 +23,10 @@ protected:
 
     /** Updates the actions to reflect changes */
     void updateActions();
+
+private:
+    StartPageActionsWidget  _createProjectFromWorkspaceWidget;  /** Actions widget for creating a project from workspace */
+    StartPageActionsWidget  _createProjectFromDatasetWidget;    /** Actions widget for creating a project from a dataset */
 
     friend class StartPageContentWidget;
 };

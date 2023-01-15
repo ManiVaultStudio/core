@@ -37,18 +37,32 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
     auto& treeView = _hierarchyWidget.getTreeView();
 
     treeView.setRootIsDecorated(false);
-    treeView.setItemDelegateForColumn(static_cast<int>(StartPageActionsModel::Column::Summary), new StartPageActionDelegate());
+    treeView.setItemDelegateForColumn(static_cast<int>(StartPageActionsModel::Column::SummaryDelegate), new StartPageActionDelegate());
+    treeView.setItemDelegateForColumn(static_cast<int>(StartPageActionsModel::Column::CommentsDelegate), new StartPageActionDelegate());
     treeView.setSelectionBehavior(QAbstractItemView::SelectRows);
     treeView.setSelectionMode(QAbstractItemView::SingleSelection);
     treeView.setIconSize(QSize(24, 24));
-    treeView.setStyleSheet("border: none;");
+    treeView.setStyleSheet("QTreeView { border: none; }");
 
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Title), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Description), true);
+    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Comments), true);
+    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Callback), true);
 
     auto treeViewHeader = treeView.header();
 
-    treeViewHeader->resizeSection(static_cast<int>(StartPageActionsModel::Column::Icon), 32);
+    treeViewHeader->setStretchLastSection(false);
+
+    treeViewHeader->setSectionResizeMode(static_cast<int>(StartPageActionsModel::Column::Icon), QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(StartPageActionsModel::Column::SummaryDelegate), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(StartPageActionsModel::Column::CommentsDelegate), QHeaderView::ResizeToContents);
+
+    treeViewHeader->resizeSection(static_cast<int>(StartPageActionsModel::Column::Icon), 34);
+
+    connect(&_model, &QStandardItemModel::layoutChanged, this, [this, &treeView]() -> void {
+        treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::CommentsDelegate), !_model.hasComments());
+        treeView.resizeColumnToContents(static_cast<int>(StartPageActionsModel::Column::CommentsDelegate));
+    });
 }
 
 StartPageActionsModel& StartPageActionsWidget::getModel()

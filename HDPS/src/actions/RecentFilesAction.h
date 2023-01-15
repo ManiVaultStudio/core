@@ -11,6 +11,44 @@
 
 namespace hdps::gui {
 
+/** Recent file utility class (contains file path and date time) */
+class RecentFile final {
+public:
+
+    /**
+     * Construct with \p filePath and \p dateTime
+     * @param filePath File path of the recent file
+     * @param dateTime Date and time the recent file was last opened
+     */
+    RecentFile(const QString filePath, const QDateTime dateTime) :
+        _filePath(filePath),
+        _dateTime(dateTime)
+    {
+    }
+
+    /**
+     * Get file path
+     * @return File path of the recent file
+     */
+    QString getFilePath() const {
+        return _filePath;
+    }
+
+    /**
+     * Get date and time
+     * @return Date and time the recent file was last opened
+     */
+    QDateTime getDateTime() const {
+        return _dateTime;
+    }
+
+private:
+    QString       _filePath;  /** File path of the recent file */
+    QDateTime     _dateTime;  /** Date and time the recent file was last opened */
+};
+
+using RecentFiles = QList<RecentFile>;
+
 /**
  * Recent files action class
  *
@@ -225,6 +263,12 @@ public:
      */
     QStringList getRecentFilePaths() const;
 
+    /**
+     * Get recent files
+     * @return Recent files list
+     */
+    RecentFiles getRecentFiles() const;
+    
 signals:
 
     /** Signals that recent \p filePath is triggered */

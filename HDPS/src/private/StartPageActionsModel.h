@@ -13,12 +13,17 @@ class StartPageActionsModel final : public QStandardItemModel
 {
 public:
 
+    using ClickecCB = std::function<void()>;
+
     /** Model columns */
     enum class Column {
-        Icon,           /** Action icon */
-        Title,          /** Action title */
-        Description,    /** Action description */
-        Summary         /** Shows a delegate item with icon, title and description */
+        Icon,               /** Action icon */
+        Title,              /** Action title */
+        Description,        /** Action description */
+        Comments,           /** Action comments */
+        Callback,           /** Callback which is called when the action is clicked */
+        SummaryDelegate,    /** Delegate item with title and subtitle */
+        CommentsDelegate    /** Delegate item with title */
     };
 
     /** Column name and tooltip */
@@ -37,6 +42,15 @@ public:
      * @param icon Action icon
      * @param title Action title
      * @param description Action description
+     * @param comments Action comments
+     * @param tooltip Action tooltip
+     * @param clickedCallback Callback which is called when the action is clicked
      */
-    void add(const QIcon& icon, const QString& title, const QString& description);
+    void add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QString& tooltip, const ClickecCB& clickedCallback);
+
+    /**
+     * Get whether the model has any comments
+     * @return Boolean determining whether the model has any comments
+     */
+    bool hasComments() const;
 };

@@ -209,41 +209,10 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
         updateOverlayWidget();
     };
 
-    const auto updateFilterModel = [this]() -> void {
-        if (_filterModel == nullptr)
-            return;
-
-        const auto caseSensitivity  = _filterCaseSensitiveAction.isChecked() ? "case-sensitive" : "case-insensitive";
-        const auto itemTypeName     = _itemTypeName.toLower();
-
-        if (_filterRegularExpressionAction.isChecked()) {
-            _filterNameAction.setPlaceHolderString(QString("Search for %1 by regular expression (%2)").arg(itemTypeName, caseSensitivity));
-
-            auto regularExpression = QRegularExpression(_filterNameAction.getString());
-
-            if (!_filterCaseSensitiveAction.isChecked())
-                regularExpression.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
-
-            if (regularExpression.isValid())
-                _filterModel->setFilterRegularExpression(regularExpression);
-        }
-        else {
-            const auto filterColumn = _model.headerData(_filterModel->filterKeyColumn(), Qt::Horizontal).toString().toLower();
-
-            _filterNameAction.setPlaceHolderString(QString("Search for %1 by %2 (%3)").arg(itemTypeName, filterColumn, caseSensitivity));
-            _filterModel->setFilterFixedString(_filterNameAction.getString());
-        }
-            
-        _filterModel->setFilterCaseSensitivity(_filterCaseSensitiveAction.isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
-        _filterModel->invalidate();
-
-        updateOverlayWidget();
-    };
-
-    connect(&_filterNameAction, &StringAction::stringChanged, this, updateFilterModel);
-    connect(&_filterCaseSensitiveAction, &ToggleAction::toggled, this, updateFilterModel);
-    connect(&_filterRegularExpressionAction, &ToggleAction::toggled, this, updateFilterModel);
-    connect(&_model, &QAbstractItemModel::layoutChanged, this, updateFilterModel);
+    connect(&_filterNameAction, &StringAction::stringChanged, this, &HierarchyWidget::updateFilterModel);
+    connect(&_filterCaseSensitiveAction, &ToggleAction::toggled, this, &HierarchyWidget::updateFilterModel);
+    connect(&_filterRegularExpressionAction, &ToggleAction::toggled, this, &HierarchyWidget::updateFilterModel);
+    connect(&_model, &QAbstractItemModel::layoutChanged, this, &HierarchyWidget::updateFilterModel);
 
     const auto connectExpandCollapseActionsReadOnly = [this]() -> void {
         connect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
@@ -301,6 +270,21 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
     modelLayoutChanged();
     selectionChanged();
+    updateFilterModel();
+}
+
+QString HierarchyWidget::getItemTypeName() const
+{
+    return _itemTypeName;
+}
+
+void HierarchyWidget::setItemTypeName(const QString& itemTypeName)
+{
+    if (itemTypeName == _itemTypeName)
+        return;
+
+    _itemTypeName = itemTypeName;
+
     updateFilterModel();
 }
 
@@ -503,6 +487,37 @@ void HierarchyWidget::setHeaderHidden(bool headerHidden)
 QHBoxLayout& HierarchyWidget::getToolbarLayout()
 {
     return _toolbarLayout;
+}
+
+void HierarchyWidget::updateFilterModel()
+{
+    if (_filterModel == nullptr)
+        return;
+
+    const auto itemTypeNameLowered = _itemTypeName.toLower();
+
+    if (_filterRegularExpressionAction.isChecked()) {
+        _filterNameAction.setPlaceHolderString(QString("Search for %1 by regular expression").arg(itemTypeNameLowered));
+
+        auto regularExpression = QRegularExpression(_filterNameAction.getString());
+
+        if (!_filterCaseSensitiveAction.isChecked())
+            regularExpression.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+
+        if (regularExpression.isValid())
+            _filterModel->setFilterRegularExpression(regularExpression);
+    }
+    else {
+        const auto filterColumn = _model.headerData(_filterModel->filterKeyColumn(), Qt::Horizontal).toString().toLower();
+
+        _filterNameAction.setPlaceHolderString(QString("Search for %1 by %2").arg(itemTypeNameLowered, filterColumn));
+        _filterModel->setFilterFixedString(_filterNameAction.getString());
+    }
+
+    _filterModel->setFilterCaseSensitivity(_filterCaseSensitiveAction.isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
+    _filterModel->invalidate();
+
+    updateOverlayWidget();
 }
 
 }
