@@ -275,7 +275,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-                fileDialog.setWindowTitle("Load Project");
+                fileDialog.setWindowTitle("Open Project");
                 fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
                 fileDialog.setFileMode(QFileDialog::ExistingFile);
                 fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
@@ -341,13 +341,13 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (!importDataOnly)
                 newProject();
 
-            qDebug().noquote() << "Loading HDPS project from" << filePath;
+            qDebug().noquote() << "Open HDPS project from" << filePath;
 
             Archiver archiver;
 
             QStringList tasks = archiver.getTaskNamesForDecompression(filePath) << "Import data model" << "Load workspace";
 
-            TaskProgressDialog taskProgressDialog(nullptr, tasks, "Loading HDPS project from " + filePath, Application::getIconFont("FontAwesome").getIcon("folder-open"));
+            TaskProgressDialog taskProgressDialog(nullptr, tasks, "Open HDPS project from " + filePath, Application::getIconFont("FontAwesome").getIcon("folder-open"));
 
             connect(&taskProgressDialog, &TaskProgressDialog::canceled, this, [this]() -> void {
                 Application::setSerializationAborted(true);

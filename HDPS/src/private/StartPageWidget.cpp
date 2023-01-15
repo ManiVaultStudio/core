@@ -65,17 +65,17 @@ void StartPageWidget::paintEvent(QPaintEvent* paintEvent)
 
 void StartPageWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPalette::ColorRole& colorRole)
 {
-    Q_ASSERT(widget != nullptr);
+    //Q_ASSERT(widget != nullptr);
 
-    QPalette palette;
+    //QPalette palette;
 
-    QStyleOption styleOption;
+    //QStyleOption styleOption;
 
-    styleOption.initFrom(widget);
+    //styleOption.initFrom(widget);
 
-    palette.setColor(QPalette::Window, styleOption.palette.color(QPalette::Normal, colorRole));
+    //palette.setColor(QPalette::Window, styleOption.palette.color(QPalette::Normal, colorRole));
 
-    widget->setStyleSheet(QString("background-color: %1").arg(styleOption.palette.color(QPalette::Normal, colorRole).name(QColor::HexArgb)));
+    //widget->setStyleSheet(QString("background-color: %1").arg(styleOption.palette.color(QPalette::Normal, colorRole).name(QColor::HexArgb)));
 }
 
 StartPageWidget::HeaderWidget::HeaderWidget(QWidget* parent /*= nullptr*/) :
@@ -103,42 +103,3 @@ StartPageWidget::HeaderWidget::HeaderWidget(QWidget* parent /*= nullptr*/) :
 
     StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
-
-/*
-StartPageWidget::ImportDataWidget::ImportDataWidget(QWidget* parent) :
-    ScrollArea(parent),
-    _containerWidget(this),
-    _containerLayout()
-{
-    setFrameShape(QFrame::NoFrame);
-    createContainerWidget();
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    setWidget(&_containerWidget);
-
-    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
-}
-
-void StartPageWidget::ImportDataWidget::createContainerWidget()
-{
-    StartPageWidget::setWidgetBackgroundColorRole(&_containerWidget, QPalette::Midlight);
-
-    _containerLayout.setContentsMargins(0, 0, 0, 0);
-
-    const auto loaderPluginKinds = Application::core()->getPluginManager().getPluginKindsByPluginTypes({ plugin::Type::LOADER });
-
-    for (const auto& pluginKind : loaderPluginKinds) {
-
-        const auto title        = Application::core()->getPluginManager().getPluginGuiName(pluginKind);
-        const auto description  = "Import data";
-        const auto tooltip      = "Import data into HDPS with the " + pluginKind;
-
-        _containerLayout.addWidget(new ProjectActionWidget(QIcon(), title, description, tooltip, [pluginKind]() {
-            Application::core()->getPluginManager().requestPlugin(pluginKind);
-        }));
-    }
-
-    _containerWidget.setLayout(&_containerLayout);
-    _containerWidget.setVisible(!loaderPluginKinds.isEmpty());
-}
-*/

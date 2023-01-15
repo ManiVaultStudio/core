@@ -82,7 +82,7 @@ QString StartPageActionDelegate::getHtml(const QModelIndex& index) const
 
         case StartPageActionsModel::Column::CommentsDelegate:
         {
-            title       = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Comments)).data(Qt::DisplayRole).toString().replace(" ", "&nbsp;");
+            title       = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Comments)).data(Qt::DisplayRole).toString().replace(" ", "&nbsp;") + "&nbsp;";
             subTitle    = "";
 
             break;

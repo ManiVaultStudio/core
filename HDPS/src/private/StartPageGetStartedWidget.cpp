@@ -16,10 +16,10 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(QWidget* parent /*= nullptr
 {
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(StartPageContentWidget::createHeaderLabel("Create From Workspace", "Create project from workspace"));
+    layout->addWidget(StartPageContentWidget::createHeaderLabel("Create Project From Workspace", "Create project from workspace"));
     layout->addWidget(&_createProjectFromWorkspaceWidget);
 
-    layout->addWidget(StartPageContentWidget::createHeaderLabel("Create From Data", "Create project from data"));
+    layout->addWidget(StartPageContentWidget::createHeaderLabel("Create Project From Data", "Create project from data"));
     layout->addWidget(&_createProjectFromDatasetWidget);
 
     layout->addStretch(1);
@@ -34,14 +34,20 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(QWidget* parent /*= nullptr
 
 void StartPageGetStartedWidget::updateActions()
 {
+    _createProjectFromWorkspaceWidget.getModel().removeRows(0, _createProjectFromWorkspaceWidget.getModel().rowCount());
+    _createProjectFromDatasetWidget.getModel().removeRows(0, _createProjectFromDatasetWidget.getModel().rowCount());
+
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     for (const auto workspaceLocation : workspaces().getWorkspaceLocations()) {
         Workspace workspace(workspaceLocation.getFilePath());
 
-        const auto workspaceName = QFileInfo(workspaceLocation.getFilePath()).baseName();
+        const auto icon         = workspaces().getIcon();
+        const auto title        = QFileInfo(workspaceLocation.getFilePath()).baseName();
+        const auto description  = workspace.getDescriptionAction().getString();
+        const auto tooltip      = Workspace::getPreviewImageHtml(workspaceLocation.getFilePath(), QSize(500, 500));
 
-        _createProjectFromWorkspaceWidget.getModel().add(workspaces().getIcon(), workspaceName, workspace.getDescriptionAction().getString(), "", QString("Create project from %1 workspace").arg(workspaceName), [workspaceLocation]() -> void {
+        _createProjectFromWorkspaceWidget.getModel().add(icon, title, description, "", tooltip, [workspaceLocation]() -> void {
             projects().newProject(workspaceLocation.getFilePath());
         });
     }

@@ -1,7 +1,7 @@
 #include "StartPageActionsModel.h"
 
 #ifdef _DEBUG
-    #define START_PAGE_ACTIONS_MODEL_VERBOSE
+    //#define START_PAGE_ACTIONS_MODEL_VERBOSE
 #endif
 
 QMap<StartPageActionsModel::Column, QPair<QString, QString>> StartPageActionsModel::columns = QMap<StartPageActionsModel::Column, QPair<QString, QString>>({
@@ -26,13 +26,11 @@ StartPageActionsModel::StartPageActionsModel(QObject* parent /*= nullptr*/) :
     }
 }
 
-void StartPageActionsModel::add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QString& tooltip, const ClickecCB& clickedCallback)
+void StartPageActionsModel::add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QString& tooltip, const ClickedCB& clickedCallback)
 {
 #ifdef START_PAGE_ACTIONS_MODEL_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
-
-    qDebug() << comments;
 
     QList<QStandardItem*> startPageActionRow = {
         new QStandardItem(icon, ""),

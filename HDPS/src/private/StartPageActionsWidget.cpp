@@ -63,6 +63,11 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
         treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::CommentsDelegate), !_model.hasComments());
         treeView.resizeColumnToContents(static_cast<int>(StartPageActionsModel::Column::CommentsDelegate));
     });
+
+    connect(&treeView, &QTreeView::clicked, this, [](const QModelIndex& index) -> void {
+        auto callback = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Callback)).data(Qt::UserRole + 1).value<StartPageActionsModel::ClickedCB>();
+        callback();
+    });
 }
 
 StartPageActionsModel& StartPageActionsWidget::getModel()

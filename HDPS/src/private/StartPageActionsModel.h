@@ -13,7 +13,7 @@ class StartPageActionsModel final : public QStandardItemModel
 {
 public:
 
-    using ClickecCB = std::function<void()>;
+    using ClickedCB = std::function<void()>;
 
     /** Model columns */
     enum class Column {
@@ -46,7 +46,7 @@ public:
      * @param tooltip Action tooltip
      * @param clickedCallback Callback which is called when the action is clicked
      */
-    void add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QString& tooltip, const ClickecCB& clickedCallback);
+    void add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QString& tooltip, const ClickedCB& clickedCallback);
 
     /**
      * Get whether the model has any comments

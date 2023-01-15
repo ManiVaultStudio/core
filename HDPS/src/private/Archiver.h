@@ -7,9 +7,7 @@
 
 class QuaZip;
 
-namespace hdps {
-
-namespace util {
+namespace hdps::util {
 
 /**
  * Archiver class
@@ -130,7 +128,4 @@ signals:
     void taskFinished(const QString& taskName);
 };
 
-
-
-}
 }

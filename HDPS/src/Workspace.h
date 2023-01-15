@@ -51,10 +51,18 @@ public:
 
     /**
      * Get preview image
-     * @param filePath Path of the work space file
+     * @param workspaceFilePath Path of the work space file
      * @return Preview image
      */
-    static QImage getPreviewImage(const QString& filePath);
+    static QImage getPreviewImage(const QString& workspaceFilePath);
+
+    /**
+     * Get preview image HTML (for tooltip)
+     * @param workspaceFilePath Path of the work space file
+     * @param targetSize Rescale the image to fit inside the target size (respects aspect ratio)
+     * @return Preview image embedded in HTML string
+     */
+    static QString getPreviewImageHtml(const QString workspaceFilePath, const QSize& targetSize = QSize());
 
 public: // Serialization
 

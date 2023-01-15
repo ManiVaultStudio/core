@@ -5,6 +5,8 @@
 
 #include "util/Serialization.h"
 
+#include <QBuffer>
+
 using namespace hdps::gui;
 using namespace hdps::util;
 
@@ -97,15 +99,15 @@ QVariantMap Workspace::toVariantMap() const
     return variantMap;
 }
 
-QImage Workspace::getPreviewImage(const QString& filePath)
+QImage Workspace::getPreviewImage(const QString& workspaceFilePath)
 {
     QImage previewImage;
 
     try {
-        if (!QFileInfo(filePath).exists())
+        if (!QFileInfo(workspaceFilePath).exists())
             throw std::runtime_error("File does not exist");
 
-        QFile workspaceJsonFile(filePath);
+        QFile workspaceJsonFile(workspaceFilePath);
 
         if (!workspaceJsonFile.open(QIODevice::ReadOnly))
             throw std::runtime_error("Unable to open file for reading");
@@ -135,6 +137,21 @@ QImage Workspace::getPreviewImage(const QString& filePath)
     }
 
     return previewImage;
+}
+
+QString Workspace::getPreviewImageHtml(const QString workspaceFilePath, const QSize& targetSize/*= QSize()*/)
+{
+    QBuffer buffer;
+
+    buffer.open(QIODevice::WriteOnly);
+    
+    const auto previewImage = getPreviewImage(workspaceFilePath);
+
+    QPixmap::fromImage(targetSize.isValid() ? previewImage.scaled(targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation) : previewImage).save(&buffer, "PNG");
+
+    auto image = buffer.data().toBase64();
+
+    return QString("<img src='data:image/png;base64,%1'></p>").arg(image);
 }
 
 void Workspace::initialize()

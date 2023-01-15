@@ -1,5 +1,6 @@
 #include "StartPageOpenProjectWidget.h"
 #include "StartPageContentWidget.h"
+#include "Archiver.h"
 
 #include <Application.h>
 
@@ -8,6 +9,7 @@
 #include <QDebug>
 
 using namespace hdps;
+using namespace hdps::util;
 
 StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
@@ -17,7 +19,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullp
 {
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(StartPageContentWidget::createHeaderLabel("Open", "Open existing project"));
+    layout->addWidget(StartPageContentWidget::createHeaderLabel("OpenProject ", "Open existing project"));
     layout->addWidget(&_openProjectWidget);
 
     layout->addWidget(StartPageContentWidget::createHeaderLabel("Recent", "Recently opened project"));
@@ -27,7 +29,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullp
 
     _openProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
     _openProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
-    _openProjectWidget.getHierarchyWidget().setFixedHeight(45);
+    _openProjectWidget.getHierarchyWidget().setFixedHeight(50);
     _openProjectWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
  
     _recentProjectsWidget.getHierarchyWidget().setItemTypeName("Recent Project");
@@ -36,6 +38,25 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullp
 void StartPageOpenProjectWidget::updateActions()
 {
     auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    const auto getTooltip = [](const QString& projectFilePath) -> QString {
+        Archiver archiver;
+
+        const QString workspaceFile("workspace.hws");
+
+        QTemporaryDir temporaryDirectory;
+
+        const auto temporaryDirectoryPath = temporaryDirectory.path();
+
+        QFileInfo workspaceFileInfo(temporaryDirectoryPath, workspaceFile);
+
+        archiver.extractSingleFile(projectFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
+
+        if (workspaceFileInfo.exists())
+            return Workspace::getPreviewImageHtml(workspaceFileInfo.absoluteFilePath(), QSize(500, 500));
+
+        return "";
+    };
 
     _openProjectWidget.getModel().removeRows(0, _recentProjectsWidget.getModel().rowCount());
     _openProjectWidget.getModel().add(fontAwesome.getIcon("file"), "Open project", "Open an existing project", "", "Browse to an existing project and open it", []() -> void {
@@ -47,9 +68,14 @@ void StartPageOpenProjectWidget::updateActions()
     _recentProjectsWidget.getModel().removeRows(0, _recentProjectsWidget.getModel().rowCount());
 
     for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
-        const auto recentFilePath = recentFile.getFilePath();
-
-        _recentProjectsWidget.getModel().add(fontAwesome.getIcon("file"), QFileInfo(recentFilePath).baseName(), recentFilePath, recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"), QString("Open %1").arg(recentFilePath), [recentFilePath]() -> void {
+        const auto recentFilePath   = recentFile.getFilePath();
+        const auto icon             = fontAwesome.getIcon("file");
+        const auto title            = QFileInfo(recentFilePath).baseName();
+        const auto description      = recentFilePath;
+        const auto comments         = recentFile.getDateTime().toString("dd/MM/yyyy hh:mm");
+        const auto tooltip          = getTooltip(recentFilePath);
+        
+        _recentProjectsWidget.getModel().add(icon, title, description, comments, tooltip, [recentFilePath]() -> void {
             projects().openProject(recentFilePath);
         });
     }
