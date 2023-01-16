@@ -13,8 +13,8 @@ class StartPageActionsModel final : public QStandardItemModel
 {
 public:
 
-    /** Callback function that is triggered when the action row is clicked */
-    using ClickedCB = std::function<void()>;
+    using ClickedCB = std::function<void()>;        /** Callback function that is called when the action row is clicked */
+    using TooltipCB = std::function<QString()>;     /** Callback function that is called when a tooltip is required */
 
     /** Model columns */
     enum class Column {
@@ -22,7 +22,8 @@ public:
         Title,              /** Action title */
         Description,        /** Action description */
         Comments,           /** Action comments */
-        Callback,           /** Callback which is called when the action is clicked */
+        ClickedCallback,    /** Callback which is called when the action is clicked */
+        TooltipCallback,    /** Callback which is called when a tooltip is required */
         SummaryDelegate,    /** Delegate item with title and subtitle */
         CommentsDelegate    /** Delegate item with title */
     };
@@ -45,10 +46,12 @@ public:
      * @param description Action description
      * @param comments Action comments
      * @param tooltip Action tooltip
-     * @param clickedCallback Callback which is called when the action is clicked
+     * @param clickedCallback Callback function that is called when the action row is clicked
+     * @param tooltipCallback Callback function that is called when a tooltip is required
      */
-    void add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QString& tooltip, const ClickedCB& clickedCallback);
+    void add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QString& tooltip, const ClickedCB& clickedCallback, const TooltipCB& tooltipCallback = TooltipCB());
 
+    /** Resets the rows and notifies others */
     void reset();
 
     /**

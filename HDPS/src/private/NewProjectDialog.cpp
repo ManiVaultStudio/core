@@ -26,7 +26,7 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file"));
     setModal(true);
-    setWindowTitle("New Project");
+    setWindowTitle("New Project From Workspace");
 
     auto layout = new QVBoxLayout();
 
@@ -46,7 +46,7 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     
     emit _model.layoutChanged();
 
-    _hierarchyWidget.getToolbarLayout().addWidget(_filterModel.getFilterTypesAction().createWidget(this));
+    //_hierarchyWidget.getToolbarLayout().addWidget(_filterModel.getFilterTypesAction().createWidget(this));
 
     _hierarchyWidget.setWindowIcon(workspaces().getIcon());
     _hierarchyWidget.getFilterGroupAction().setVisible(false);
@@ -67,7 +67,7 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     auto& treeView = _hierarchyWidget.getTreeView();
 
     treeView.setRootIsDecorated(false);
-    treeView.setItemDelegateForColumn(static_cast<int>(WorkspaceInventoryModel::Column::Summary), new WorkspaceDelegate());
+    treeView.setItemDelegateForColumn(static_cast<int>(WorkspaceInventoryModel::Column::SummaryDelegate), new WorkspaceDelegate());
     treeView.setSelectionBehavior(QAbstractItemView::SelectRows);
     treeView.setSelectionMode(QAbstractItemView::SingleSelection);
     treeView.setIconSize(QSize(24, 24));
@@ -77,11 +77,17 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     treeView.setColumnHidden(static_cast<int>(WorkspaceInventoryModel::Column::Description), true);
     treeView.setColumnHidden(static_cast<int>(WorkspaceInventoryModel::Column::Tags), true);
     treeView.setColumnHidden(static_cast<int>(WorkspaceInventoryModel::Column::FilePath), true);
+    treeView.setColumnHidden(static_cast<int>(WorkspaceInventoryModel::Column::Type), true);
 
     auto treeViewHeader = treeView.header();
 
+    treeViewHeader->setStretchLastSection(false);
+
     treeViewHeader->resizeSection(static_cast<int>(WorkspaceInventoryModel::Column::Icon), 32);
     treeViewHeader->resizeSection(static_cast<int>(WorkspaceInventoryModel::Column::Type), 100);
+
+    treeViewHeader->setSectionResizeMode(static_cast<int>(WorkspaceInventoryModel::Column::SummaryDelegate), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(WorkspaceInventoryModel::Column::Type), QHeaderView::Fixed);
 
     _createAction.setToolTip("Create the project with the selected workspace");
     _cancelAction.setToolTip("Exit the dialog without creating a new project");
@@ -154,7 +160,7 @@ QString WorkspaceDelegate::getHtml(const QModelIndex& index) const
 
     if (!tags.isEmpty()) {
         for (const auto& tag : tags)
-            tagsHtml += QString("<span id='tag'> %1 </span>  ").arg(tag);
+            tagsHtml += QString("<span id='tag'>&nbsp;%1&nbsp;</span>&nbsp;&nbsp;").arg(tag);
 
         tagsHtml.insert(0, "<p id='tags'>");
         tagsHtml.append("</p>");

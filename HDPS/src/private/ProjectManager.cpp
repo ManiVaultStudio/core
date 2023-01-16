@@ -32,18 +32,19 @@ using namespace hdps::gui;
 
 ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _project(),
-    _newBlankProjectAction(nullptr, "Blank"),
-    _newProjectFromWorkspaceAction(nullptr, "From Workspace..."),
-    _openProjectAction(nullptr, "Open Project"),
-    _importProjectAction(nullptr, "Import Project"),
-    _saveProjectAction(nullptr, "Save Project"),
-    _saveProjectAsAction(nullptr, "Save Project As..."),
-    _editProjectSettingsAction(nullptr, "Project Settings..."),
-    _recentProjectsAction(nullptr),
+    _newBlankProjectAction(this, "Blank"),
+    _newProjectFromWorkspaceAction(this, "From Workspace..."),
+    _openProjectAction(this, "Open Project"),
+    _importProjectAction(this, "Import Project"),
+    _saveProjectAction(this, "Save Project"),
+    _saveProjectAsAction(this, "Save Project As..."),
+    _editProjectSettingsAction(this, "Project Settings..."),
+    _recentProjectsAction(this),
+    _newProjectMenu(),
     _importDataMenu(),
-    _publishAction(nullptr, "Publish"),
-    _pluginManagerAction(nullptr, "Plugin Manager"),
-    _showStartPageAction(nullptr, "Start Page...", true, true)
+    _publishAction(this, "Publish"),
+    _pluginManagerAction(this, "Plugin Manager"),
+    _showStartPageAction(this, "Start Page...", true, true)
 {
     _newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     _newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);

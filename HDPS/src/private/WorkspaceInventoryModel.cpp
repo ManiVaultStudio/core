@@ -11,7 +11,7 @@ using namespace hdps;
 #endif
 
 QMap<WorkspaceInventoryModel::Column, QPair<QString, QString>> WorkspaceInventoryModel::columns = QMap<WorkspaceInventoryModel::Column, QPair<QString, QString>>({
-    { WorkspaceInventoryModel::Column::Summary, { "Summary", "Workspace summary delegate column" }},
+    { WorkspaceInventoryModel::Column::SummaryDelegate, { "Summary", "Workspace summary delegate column" }},
     { WorkspaceInventoryModel::Column::Icon, { "Icon", "Icon of the workspace" }},
     { WorkspaceInventoryModel::Column::Name, { "Name", "Name of the workspace" }},
     { WorkspaceInventoryModel::Column::Description, { "Description", "Description of the workspace" }},

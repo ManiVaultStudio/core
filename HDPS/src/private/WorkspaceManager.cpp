@@ -521,7 +521,7 @@ QVariantMap WorkspaceManager::toVariantMap() const
     QByteArray previewImageByteArray;
     QBuffer previewImageBuffer(&previewImageByteArray);
 
-    toPreviewImage().save(&previewImageBuffer, "PNG");
+    toPreviewImage().save(&previewImageBuffer, "JPG");
 
     currentWorkspaceMap.insert({
         { "DockManagers", dockManagers },

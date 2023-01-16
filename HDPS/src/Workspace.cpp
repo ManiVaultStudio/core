@@ -147,11 +147,11 @@ QString Workspace::getPreviewImageHtml(const QString workspaceFilePath, const QS
     
     const auto previewImage = getPreviewImage(workspaceFilePath);
 
-    QPixmap::fromImage(targetSize.isValid() ? previewImage.scaled(targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation) : previewImage).save(&buffer, "PNG");
+    QPixmap::fromImage(targetSize.isValid() ? previewImage.scaled(targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation) : previewImage).save(&buffer, "JPG");
 
     auto image = buffer.data().toBase64();
 
-    return QString("<img src='data:image/png;base64,%1'></p>").arg(image);
+    return QString("<img src='data:image/jpg;base64,%1'></p>").arg(image);
 }
 
 void Workspace::initialize()

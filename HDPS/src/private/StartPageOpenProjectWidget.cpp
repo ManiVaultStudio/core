@@ -39,25 +39,6 @@ void StartPageOpenProjectWidget::updateActions()
 {
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    const auto getTooltip = [](const QString& projectFilePath) -> QString {
-        Archiver archiver;
-
-        const QString workspaceFile("workspace.hws");
-
-        QTemporaryDir temporaryDirectory;
-
-        const auto temporaryDirectoryPath = temporaryDirectory.path();
-
-        QFileInfo workspaceFileInfo(temporaryDirectoryPath, workspaceFile);
-
-        archiver.extractSingleFile(projectFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
-
-        if (workspaceFileInfo.exists())
-            return Workspace::getPreviewImageHtml(workspaceFileInfo.absoluteFilePath());
-
-        return "";
-    };
-
     _openProjectWidget.getModel().reset();
     _openProjectWidget.getModel().add(fontAwesome.getIcon("file"), "Open project", "Open an existing project", "", "Browse to an existing project and open it", []() -> void {
         projects().openProject();
@@ -73,11 +54,32 @@ void StartPageOpenProjectWidget::updateActions()
         const auto title            = QFileInfo(recentFilePath).baseName();
         const auto description      = recentFilePath;
         const auto comments         = recentFile.getDateTime().toString("dd/MM/yyyy hh:mm");
-        const auto tooltip          = getTooltip(recentFilePath);
+        const auto tooltip          = "";
         
-        _recentProjectsWidget.getModel().add(icon, title, description, comments, tooltip, [recentFilePath]() -> void {
+        const auto clickedCallback = [recentFilePath]() -> void {
             projects().openProject(recentFilePath);
-        });
+        };
+
+        const auto tooltipCallback = [recentFilePath]() -> QString {
+            Archiver archiver;
+
+            const QString workspaceFile("workspace.hws");
+
+            QTemporaryDir temporaryDirectory;
+
+            const auto temporaryDirectoryPath = temporaryDirectory.path();
+
+            QFileInfo workspaceFileInfo(temporaryDirectoryPath, workspaceFile);
+
+            archiver.extractSingleFile(recentFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
+
+            if (workspaceFileInfo.exists())
+                return Workspace::getPreviewImageHtml(workspaceFileInfo.absoluteFilePath());
+
+            return "";
+        };
+
+        _recentProjectsWidget.getModel().add(icon, title, description, comments, tooltip, clickedCallback, tooltipCallback);
     }
         
 }

@@ -137,7 +137,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     layout->setContentsMargins(0, 0, 0, 0);
 
     if (showToolbar) {
-        //_toolbarLayout.setSpacing(3);
+        _toolbarLayout.setSpacing(3);
 
         if (_filterModel) {
             _toolbarLayout.addWidget(_filterNameAction.createWidget(this), 1);
@@ -149,16 +149,6 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
         _toolbarLayout.addWidget(_selectionGroupAction.createCollapsedWidget(this));
         _toolbarLayout.addWidget(_columnsGroupAction.createCollapsedWidget(this));
         _toolbarLayout.addWidget(_settingsGroupAction.createCollapsedWidget(this));
-
-        //auto testTriggerAction = new TriggerAction(this, "test");
-
-        //connect(testTriggerAction, &TriggerAction::triggered, this, []() -> void {
-        //    qDebug() << "TriggerAction::triggered()";
-        //});
-
-        //toolbarLayout->addWidget(testTriggerAction->createWidget(this));
-
-        //testTriggerAction->trigger();
 
         layout->addLayout(&_toolbarLayout);
     }

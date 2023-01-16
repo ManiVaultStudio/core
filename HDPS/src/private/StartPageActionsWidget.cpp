@@ -43,6 +43,7 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
     treeView.setSelectionBehavior(QAbstractItemView::SelectRows);
     treeView.setSelectionMode(QAbstractItemView::SingleSelection);
     treeView.setIconSize(QSize(24, 24));
+    treeView.setMouseTracking(true);
     treeView.setStyleSheet(" \
         QTreeView { \
             border: none; \
@@ -52,7 +53,8 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Title), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Description), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Comments), true);
-    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Callback), true);
+    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::ClickedCallback), true);
+    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::TooltipCallback), true);
 
     QPalette treeViewPalette(treeView.palette());
 
@@ -79,8 +81,15 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
         treeView.resizeColumnToContents(static_cast<int>(StartPageActionsModel::Column::CommentsDelegate));
     });
 
+    connect(&treeView, &QTreeView::entered, this, [this](const QModelIndex& index) -> void {
+        auto callback = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::TooltipCallback)).data(Qt::UserRole + 1).value<StartPageActionsModel::TooltipCB>();
+
+        if (callback)
+            _model.item(index.row(), index.column())->setToolTip(callback());
+    });
+
     connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
-        auto callback = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Callback)).data(Qt::UserRole + 1).value<StartPageActionsModel::ClickedCB>();
+        auto callback = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::ClickedCallback)).data(Qt::UserRole + 1).value<StartPageActionsModel::ClickedCB>();
         callback();
 
         _hierarchyWidget.getSelectionModel().clear();

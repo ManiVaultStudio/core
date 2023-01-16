@@ -15,13 +15,13 @@ public:
 
     /** Model columns */
     enum class Column {
-        Summary,        /** Shows a delegate item with title, description and tags */
-        Icon,           /** Workspace icon */
-        Name,           /** Workspace name */
-        Description,    /** Workspace description */
-        Tags,           /** Workspace tags */
-        FilePath,       /** Location of the workspace on disk */
-        Type            /** Type of workspace (built-in or recent) */
+        SummaryDelegate,    /** Shows a delegate item with title, description and tags */
+        Icon,               /** Workspace icon */
+        Name,               /** Workspace name */
+        Description,        /** Workspace description */
+        Tags,               /** Workspace tags */
+        FilePath,           /** Location of the workspace on disk */
+        Type                /** Type of workspace (built-in or recent) */
     };
 
     /** Column name and tooltip */
