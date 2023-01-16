@@ -139,7 +139,7 @@ QImage Workspace::getPreviewImage(const QString& workspaceFilePath)
     return previewImage;
 }
 
-QString Workspace::getPreviewImageHtml(const QString workspaceFilePath, const QSize& targetSize/*= QSize()*/)
+QString Workspace::getPreviewImageHtml(const QString workspaceFilePath, const QSize& targetSize/*= QSize(500, 500)*/)
 {
     QBuffer buffer;
 

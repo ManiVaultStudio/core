@@ -1,11 +1,9 @@
 #pragma once
 
+#include "StartPageHeaderWidget.h"
 #include "StartPageContentWidget.h"
 
-#include <widgets/OverlayWidget.h>
-
-#include <QGridLayout>
-#include <QLabel>
+#include <QWidget>
 
 /**
  * Start page widget class
@@ -14,32 +12,8 @@
  *
  * @author Thomas Kroes
  */
-class StartPageWidget : public hdps::gui::OverlayWidget
+class StartPageWidget : public QWidget
 {
-public:
-
-    /**
-     * Header widget class
-     *
-     * Widget class for header with logo
-     *
-     * @author Thomas Kroes
-     */
-    class HeaderWidget : public QWidget
-    {
-    public:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         */
-        HeaderWidget(QWidget* parent = nullptr);
-
-    protected:
-        QVBoxLayout     _layout;        /** Main layout */
-        QLabel          _headerLabel;   /** Header label */
-    };
-
 public:
 
     /**
@@ -48,7 +22,17 @@ public:
      */
     StartPageWidget(QWidget* parent = nullptr);
 
+    /**
+     * Override paint event to draw the logo in the background
+     * @param paintEvent Pointer to paint event
+     */
     void paintEvent(QPaintEvent* paintEvent);
+
+    /**
+     * Override show event to update start page actions
+     * @param showEvent Pointer to show event which occurred
+     */
+    void showEvent(QShowEvent* showEvent);
 
     /**
      * Set the widget background color role
@@ -60,6 +44,7 @@ public:
 protected:
     QHBoxLayout             _layout;                    /** Main layout */
     QVBoxLayout             _centerColumnLayout;        /** Layout for the center column */
+    StartPageHeaderWidget   _startPageHeaderWidget;     /** Widget which contains the header */
     StartPageContentWidget  _startPageContentWidget;    /** Widget which contains all the actions */
     QPixmap                 _backgroundImage;           /** Background image */
 };

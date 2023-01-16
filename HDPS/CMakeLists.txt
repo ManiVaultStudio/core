@@ -277,6 +277,7 @@ set(PRIVATE_APPLICATION_FILES
 
 set(PRIVATE_START_PAGE_HEADERS
     src/private/StartPageWidget.h
+    src/private/StartPageHeaderWidget.h
     src/private/StartPageContentWidget.h
     src/private/StartPageOpenProjectWidget.h
     src/private/StartPageGetStartedWidget.h
@@ -289,6 +290,7 @@ set(PRIVATE_START_PAGE_HEADERS
 
 set(PRIVATE_START_PAGE_SOURCES
     src/private/StartPageWidget.cpp
+    src/private/StartPageHeaderWidget.cpp
     src/private/StartPageContentWidget.cpp
     src/private/StartPageOpenProjectWidget.cpp
     src/private/StartPageGetStartedWidget.cpp

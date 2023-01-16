@@ -6,6 +6,7 @@
 #include <CoreInterface.h>
 
 #include <QDebug>
+#include <QScrollBar>
 
 using namespace hdps;
 
@@ -28,14 +29,15 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(QWidget* parent /*= nullptr
 
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setMinimumHeight(300);
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setItemTypeName("Workspace");
+    _createProjectFromWorkspaceWidget.getHierarchyWidget().getTreeView().verticalScrollBar()->setDisabled(true);
 
     _createProjectFromDatasetWidget.getHierarchyWidget().setItemTypeName("Importer");
 }
 
 void StartPageGetStartedWidget::updateActions()
 {
-    _createProjectFromWorkspaceWidget.getModel().removeRows(0, _createProjectFromWorkspaceWidget.getModel().rowCount());
-    _createProjectFromDatasetWidget.getModel().removeRows(0, _createProjectFromDatasetWidget.getModel().rowCount());
+    _createProjectFromWorkspaceWidget.getModel().reset();
+    _createProjectFromDatasetWidget.getModel().reset();
 
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
@@ -45,7 +47,7 @@ void StartPageGetStartedWidget::updateActions()
         const auto icon         = workspaces().getIcon();
         const auto title        = QFileInfo(workspaceLocation.getFilePath()).baseName();
         const auto description  = workspace.getDescriptionAction().getString();
-        const auto tooltip      = Workspace::getPreviewImageHtml(workspaceLocation.getFilePath(), QSize(500, 500));
+        const auto tooltip      = Workspace::getPreviewImageHtml(workspaceLocation.getFilePath());
 
         _createProjectFromWorkspaceWidget.getModel().add(icon, title, description, "", tooltip, [workspaceLocation]() -> void {
             projects().newProject(workspaceLocation.getFilePath());
@@ -53,8 +55,15 @@ void StartPageGetStartedWidget::updateActions()
     }
 
     for (auto viewPluginFactory : plugins().getPluginFactoriesByType(plugin::Type::LOADER)) {
-        _createProjectFromDatasetWidget.getModel().add(viewPluginFactory->getIcon(), viewPluginFactory->getKind(), "", "", QString("Create project and import data with the %1").arg(viewPluginFactory->getKind()), []() -> void {
+        const auto icon         = viewPluginFactory->getIcon();
+        const auto title        = viewPluginFactory->getKind();
+        const auto description  = "";
+        const auto comments     = "";
+        const auto tooltip      = QString("Create project and import data with the %1").arg(viewPluginFactory->getKind());
+
+        _createProjectFromDatasetWidget.getModel().add(icon, title, description, comments, tooltip, [viewPluginFactory]() -> void {
             projects().newBlankProject();
+            plugins().requestPlugin(viewPluginFactory->getKind());
         });
     }
         

@@ -1,5 +1,6 @@
 #include "StartPageActionsWidget.h"
 #include "StartPageActionDelegate.h"
+#include "StartPageWidget.h"
 
 #include <Application.h>
 
@@ -42,12 +43,26 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
     treeView.setSelectionBehavior(QAbstractItemView::SelectRows);
     treeView.setSelectionMode(QAbstractItemView::SingleSelection);
     treeView.setIconSize(QSize(24, 24));
-    treeView.setStyleSheet("QTreeView { border: none; }");
+    treeView.setStyleSheet(" \
+        QTreeView { \
+            border: none; \
+        } \
+    ");
 
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Title), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Description), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Comments), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Callback), true);
+
+    QPalette treeViewPalette(treeView.palette());
+
+    QStyleOption styleOption;
+
+    styleOption.initFrom(&treeView);
+
+    treeViewPalette.setColor(QPalette::Base, styleOption.palette.color(QPalette::Normal, QPalette::Midlight));
+
+    treeView.setPalette(treeViewPalette);
 
     auto treeViewHeader = treeView.header();
 
@@ -64,9 +79,11 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
         treeView.resizeColumnToContents(static_cast<int>(StartPageActionsModel::Column::CommentsDelegate));
     });
 
-    connect(&treeView, &QTreeView::clicked, this, [](const QModelIndex& index) -> void {
+    connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
         auto callback = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Callback)).data(Qt::UserRole + 1).value<StartPageActionsModel::ClickedCB>();
         callback();
+
+        _hierarchyWidget.getSelectionModel().clear();
     });
 }
 

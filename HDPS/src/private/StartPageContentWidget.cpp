@@ -9,6 +9,8 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _openProjectWidget(this),
     _getStartedWidget(this)
 {
+    setAutoFillBackground(true);
+
     StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 
     _layout.setContentsMargins(35, 35, 35, 35);

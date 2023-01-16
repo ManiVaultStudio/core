@@ -11,6 +11,7 @@
 #include <QOffscreenSurface>
 #include <QMessageBox>
 #include <QTimer>
+#include <QStackedWidget>
 
 #define MAIN_WINDOW_VERBOSE
 
@@ -38,15 +39,14 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     menuBar()->addMenu(new ViewMenu());
     menuBar()->addMenu(new HelpMenu());
 
-    auto projectWidget = new ProjectWidget();
-    
-    //setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    setCentralWidget(projectWidget);
+    auto stackedWidget      = new QStackedWidget();
+    auto projectWidget      = new ProjectWidget();
+    auto startPageWidget    = new StartPageWidget(projectWidget);
 
-    auto startPageWidget = new StartPageWidget(projectWidget);
+    stackedWidget->addWidget(startPageWidget);
+    stackedWidget->addWidget(projectWidget);
 
-    startPageWidget->raise();
-    startPageWidget->show();
+    setCentralWidget(stackedWidget);
 
     auto& projectManager = Application::core()->getProjectManager();
 
@@ -69,11 +69,11 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     connect(&projectManager, &ProjectManager::projectLoaded, this, updateWindowTitle);
     connect(&projectManager, &ProjectManager::projectSaved, this, updateWindowTitle);
 
-    const auto toggleStartPage = [startPageWidget](bool toggled) -> void {
+    const auto toggleStartPage = [stackedWidget, projectWidget, startPageWidget](bool toggled) -> void {
         if (toggled)
-            startPageWidget->show();
+            stackedWidget->setCurrentWidget(startPageWidget);
         else
-            startPageWidget->hide();
+            stackedWidget->setCurrentWidget(projectWidget);
     };
 
     connect(&projectManager.getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);

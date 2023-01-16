@@ -10,7 +10,7 @@
 /**
  * Start page actions widget class
  *
- * Base widget class for listing start page actions.
+ * Widget class for listing start page actions.
  *
  * @author Thomas Kroes
  */
@@ -37,7 +37,7 @@ public:
     hdps::gui::HierarchyWidget& getHierarchyWidget();
 
 private:
-    StartPageActionsModel       _model;             /** Model which contains start page actions */
-    StartPageActionsFilterModel _filterModel;       /** Model for filtering and sorting start page actions */
-    hdps::gui::HierarchyWidget  _hierarchyWidget;   /** Widget for displaying the actions */
+    StartPageActionsModel           _model;             /** Model which contains start page actions */
+    StartPageActionsFilterModel     _filterModel;       /** Model for filtering and sorting start page actions */
+    hdps::gui::HierarchyWidget      _hierarchyWidget;   /** Widget for displaying the actions */
 };

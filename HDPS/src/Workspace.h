@@ -62,7 +62,7 @@ public:
      * @param targetSize Rescale the image to fit inside the target size (respects aspect ratio)
      * @return Preview image embedded in HTML string
      */
-    static QString getPreviewImageHtml(const QString workspaceFilePath, const QSize& targetSize = QSize());
+    static QString getPreviewImageHtml(const QString workspaceFilePath, const QSize& targetSize = QSize(500, 500));
 
 public: // Serialization
 

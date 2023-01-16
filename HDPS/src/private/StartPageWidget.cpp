@@ -16,7 +16,7 @@ using namespace hdps;
 using namespace hdps::gui;
 
 StartPageWidget::StartPageWidget(QWidget* parent /*= nullptr*/) :
-    OverlayWidget(parent),
+    QWidget(parent),
     _layout(),
     _centerColumnLayout(),
     _startPageContentWidget(this),
@@ -28,26 +28,12 @@ StartPageWidget::StartPageWidget(QWidget* parent /*= nullptr*/) :
     _layout.setContentsMargins(0, 0, 0, 0);
     _layout.setSpacing(0);
 
-    _centerColumnLayout.addWidget(new HeaderWidget(this));
-    //_barLayout.addWidget(createHorizontalDivider());
+    _centerColumnLayout.addWidget(&_startPageHeaderWidget);
     _centerColumnLayout.addWidget(&_startPageContentWidget);
 
     _layout.addStretch(1);
     _layout.addLayout(&_centerColumnLayout, 2);
     _layout.addStretch(1);
-
-    getWidgetFader().setFadeInDuration(250);
-    getWidgetFader().setFadeOutDuration(250);
-
-    connect(this, &OverlayWidget::shown, this, [this]() -> void {
-        setAttribute(Qt::WA_TransparentForMouseEvents, false);
-
-        _startPageContentWidget.updateActions();
-    });
-
-    connect(this, &OverlayWidget::hidden, this, [this]() -> void {
-        setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    });
 }
 
 void StartPageWidget::paintEvent(QPaintEvent* paintEvent)
@@ -63,43 +49,22 @@ void StartPageWidget::paintEvent(QPaintEvent* paintEvent)
     painter.drawPixmap(pixmapRectangle.topLeft(), QPixmap(backgroundImage));
 }
 
-void StartPageWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPalette::ColorRole& colorRole)
+void StartPageWidget::showEvent(QShowEvent* showEvent)
 {
-    //Q_ASSERT(widget != nullptr);
-
-    //QPalette palette;
-
-    //QStyleOption styleOption;
-
-    //styleOption.initFrom(widget);
-
-    //palette.setColor(QPalette::Window, styleOption.palette.color(QPalette::Normal, colorRole));
-
-    //widget->setStyleSheet(QString("background-color: %1").arg(styleOption.palette.color(QPalette::Normal, colorRole).name(QColor::HexArgb)));
+    _startPageContentWidget.updateActions();
 }
 
-StartPageWidget::HeaderWidget::HeaderWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    _layout(),
-    _headerLabel()
+void StartPageWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPalette::ColorRole& colorRole)
 {
-    setLayout(&_layout);
+    Q_ASSERT(widget != nullptr);
 
-    const int pixelRatio = devicePixelRatio();
+    QStyleOption styleOption;
 
-    QString iconName = ":/Images/AppBackground256";
+    styleOption.initFrom(widget);
 
-    if (pixelRatio > 1)
-        iconName = ":/Images/AppBackground512";
+    auto palette = widget->palette();
 
-    if (pixelRatio > 2)
-        iconName = ":/Images/AppBackground1024";
+    palette.setColor(widget->backgroundRole(), styleOption.palette.color(QPalette::Normal, colorRole));
 
-    _headerLabel.setPixmap(QPixmap(iconName).scaled(256, 256));
-    _headerLabel.setAlignment(Qt::AlignCenter);
-
-    _layout.setContentsMargins(50, 50, 50, 50);
-    _layout.addWidget(&_headerLabel);
-
-    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+    widget->setPalette(palette);
 }

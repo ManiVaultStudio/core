@@ -137,7 +137,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     layout->setContentsMargins(0, 0, 0, 0);
 
     if (showToolbar) {
-        _toolbarLayout.setSpacing(3);
+        //_toolbarLayout.setSpacing(3);
 
         if (_filterModel) {
             _toolbarLayout.addWidget(_filterNameAction.createWidget(this), 1);

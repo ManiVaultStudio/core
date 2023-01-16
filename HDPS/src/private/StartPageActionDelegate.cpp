@@ -23,13 +23,13 @@ void StartPageActionDelegate::paint(QPainter* painter, const QStyleOptionViewIte
     options.widget->style()->drawControl(QStyle::CE_ItemViewItem, &options, painter);
 
     painter->translate(options.rect.left(), options.rect.top());
-    
+
     QRect clip(0, 0, options.rect.width(), options.rect.height());
-    
+
     textDocument.drawContents(painter, clip);
 
     painter->restore();
-    
+
     QStyledItemDelegate::paint(painter, option, index);
 }
 
@@ -44,7 +44,7 @@ QSize StartPageActionDelegate::sizeHint(const QStyleOptionViewItem& option, cons
     textDocument.setHtml(getHtml(index));
 
     textDocument.setTextWidth(options.rect.width());
-    
+
     return QSize(textDocument.idealWidth(), textDocument.size().height());
 }
 

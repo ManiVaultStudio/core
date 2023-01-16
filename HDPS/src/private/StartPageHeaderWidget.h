@@ -1,30 +1,26 @@
 #pragma once
 
-#include <QWidget>
 #include <QVBoxLayout>
 #include <QLabel>
 
 /**
- * Logo widget class
+ * Header widget class
  *
- * Widget class for displaying the application logo
+ * Widget class for header with logo.
  *
  * @author Thomas Kroes
  */
-class LogoWidget : public QWidget
+class StartPageHeaderWidget : public QWidget
 {
-    Q_OBJECT
-
 public:
 
     /**
      * Construct with \p parent widget
      * @param parent Pointer to parent widget
      */
-    LogoWidget(QWidget* parent = nullptr);
+    StartPageHeaderWidget(QWidget* parent = nullptr);
 
 protected:
     QVBoxLayout     _layout;        /** Main layout */
     QLabel          _headerLabel;   /** Header label */
 };
-

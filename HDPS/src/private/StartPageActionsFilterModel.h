@@ -5,7 +5,7 @@
 /**
  * Start page actions filter model class
  *
- * Sorting and filtering model for the start page action model
+ * Sorting and filtering model for the start page actions model.
  *
  * @author Thomas Kroes
  */

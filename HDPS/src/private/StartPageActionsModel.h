@@ -13,6 +13,7 @@ class StartPageActionsModel final : public QStandardItemModel
 {
 public:
 
+    /** Callback function that is triggered when the action row is clicked */
     using ClickedCB = std::function<void()>;
 
     /** Model columns */
@@ -47,6 +48,8 @@ public:
      * @param clickedCallback Callback which is called when the action is clicked
      */
     void add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QString& tooltip, const ClickedCB& clickedCallback);
+
+    void reset();
 
     /**
      * Get whether the model has any comments

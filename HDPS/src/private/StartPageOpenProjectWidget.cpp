@@ -19,7 +19,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullp
 {
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(StartPageContentWidget::createHeaderLabel("OpenProject ", "Open existing project"));
+    layout->addWidget(StartPageContentWidget::createHeaderLabel("Open", "Open existing project"));
     layout->addWidget(&_openProjectWidget);
 
     layout->addWidget(StartPageContentWidget::createHeaderLabel("Recent", "Recently opened project"));
@@ -53,19 +53,19 @@ void StartPageOpenProjectWidget::updateActions()
         archiver.extractSingleFile(projectFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
 
         if (workspaceFileInfo.exists())
-            return Workspace::getPreviewImageHtml(workspaceFileInfo.absoluteFilePath(), QSize(500, 500));
+            return Workspace::getPreviewImageHtml(workspaceFileInfo.absoluteFilePath());
 
         return "";
     };
 
-    _openProjectWidget.getModel().removeRows(0, _recentProjectsWidget.getModel().rowCount());
+    _openProjectWidget.getModel().reset();
     _openProjectWidget.getModel().add(fontAwesome.getIcon("file"), "Open project", "Open an existing project", "", "Browse to an existing project and open it", []() -> void {
         projects().openProject();
     });
 
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
 
-    _recentProjectsWidget.getModel().removeRows(0, _recentProjectsWidget.getModel().rowCount());
+    _recentProjectsWidget.getModel().reset();
 
     for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
         const auto recentFilePath   = recentFile.getFilePath();

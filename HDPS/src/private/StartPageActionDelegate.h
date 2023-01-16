@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QDialog>
-
 #include "StartPageActionsModel.h"
 #include "StartPageActionsFilterModel.h"
 

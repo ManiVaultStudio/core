@@ -61,3 +61,10 @@ bool StartPageActionsModel::hasComments() const
 
     return false;
 }
+
+void StartPageActionsModel::reset()
+{
+    removeRows(0, rowCount());
+
+    emit layoutChanged();
+}
