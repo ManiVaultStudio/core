@@ -4,6 +4,11 @@
 #include "StartPageActionsFilterModel.h"
 
 #include <QStyledItemDelegate>
+#include <QScopedPointer>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QScopedPointer>
+#include <QLabel>
 
 /**
  * Workspace delegate class
@@ -16,7 +21,12 @@ class StartPageActionDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    using QStyledItemDelegate::QStyledItemDelegate;
+    
+    /**
+     * Construct delegate with \p parent object
+     * @param parent Pointer to parent object
+     */
+    StartPageActionDelegate(QObject* parent = nullptr);
 
     /**
      * Paint the delegate using \p painter, \p option and model \p index
@@ -35,10 +45,14 @@ public:
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 private:
-
-    /**
-     * Get HTML for \p index
-     * @return HTML string
-     */
-    QString getHtml(const QModelIndex& index) const;
+    QWidget                         _widget;                    /** Delegate widget */
+    QHBoxLayout                     _mainLayout;                /** Delegate widget layout */
+    QLabel                          _iconLabel;                 /** Label for the left icon */
+    QVBoxLayout                     _textLayout;                /** Layout for the text labels on the right */
+    QHBoxLayout                     _topLayout;                 /** Layout for top labels */
+    QLabel                          _titleLabel;                /** Title label */
+    QLabel                          _descriptionLabel;          /** Description label */
+    QLabel                          _commentsLabel;             /** Comments label */
+    QHBoxLayout                     _tagsLayout;                /** Tags layout */
+    QList<QSharedPointer<QLabel>>   _tagLabels;                 /** Tag labels */
 };

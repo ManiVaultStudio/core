@@ -40,7 +40,7 @@ void StartPageOpenProjectWidget::updateActions()
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _openProjectWidget.getModel().reset();
-    _openProjectWidget.getModel().add(fontAwesome.getIcon("file"), "Open project", "Open an existing project", "", "Browse to an existing project and open it", []() -> void {
+    _openProjectWidget.getModel().add(fontAwesome.getIcon("file"), "Open project", "Open an existing project", "", QStringList(), "Browse to an existing project and open it", []() -> void {
         projects().openProject();
     });
 
@@ -54,6 +54,7 @@ void StartPageOpenProjectWidget::updateActions()
         const auto title            = QFileInfo(recentFilePath).baseName();
         const auto description      = recentFilePath;
         const auto comments         = recentFile.getDateTime().toString("dd/MM/yyyy hh:mm");
+        const auto tags             = QStringList();
         const auto tooltip          = "";
         
         const auto clickedCallback = [recentFilePath]() -> void {
@@ -79,7 +80,7 @@ void StartPageOpenProjectWidget::updateActions()
             return "";
         };
 
-        _recentProjectsWidget.getModel().add(icon, title, description, comments, tooltip, clickedCallback, tooltipCallback);
+        _recentProjectsWidget.getModel().add(icon, title, description, comments, tags, tooltip, clickedCallback, tooltipCallback);
     }
         
 }

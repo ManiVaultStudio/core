@@ -46,10 +46,12 @@ void StartPageGetStartedWidget::updateActions()
 
         const auto icon         = workspaces().getIcon();
         const auto title        = QFileInfo(workspaceLocation.getFilePath()).baseName();
-        const auto description  = workspace.getDescriptionAction().getString();
+        const auto description  = workspaceLocation.getFilePath();
+        const auto comments     = "";
+        const auto tags         = workspace.getTagsAction().getStrings();
         const auto tooltip      = Workspace::getPreviewImageHtml(workspaceLocation.getFilePath());
 
-        _createProjectFromWorkspaceWidget.getModel().add(icon, title, description, "", tooltip, [workspaceLocation]() -> void {
+        _createProjectFromWorkspaceWidget.getModel().add(icon, title, description, comments, tags, tooltip, [workspaceLocation]() -> void {
             projects().newProject(workspaceLocation.getFilePath());
         });
     }
@@ -59,9 +61,10 @@ void StartPageGetStartedWidget::updateActions()
         const auto title        = viewPluginFactory->getKind();
         const auto description  = "";
         const auto comments     = "";
+        const auto tags         = QStringList();
         const auto tooltip      = QString("Create project and import data with the %1").arg(viewPluginFactory->getKind());
 
-        _createProjectFromDatasetWidget.getModel().add(icon, title, description, comments, tooltip, [viewPluginFactory]() -> void {
+        _createProjectFromDatasetWidget.getModel().add(icon, title, description, comments, tags, tooltip, [viewPluginFactory]() -> void {
             projects().newBlankProject();
             plugins().requestPlugin(viewPluginFactory->getKind());
         });

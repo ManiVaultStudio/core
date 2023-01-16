@@ -22,10 +22,10 @@ public:
         Title,              /** Action title */
         Description,        /** Action description */
         Comments,           /** Action comments */
+        Tags,               /** Action tags */
         ClickedCallback,    /** Callback which is called when the action is clicked */
         TooltipCallback,    /** Callback which is called when a tooltip is required */
-        SummaryDelegate,    /** Delegate item with title and subtitle */
-        CommentsDelegate    /** Delegate item with title */
+        SummaryDelegate     /** Delegate item with title and subtitle */
     };
 
     /** Column name and tooltip */
@@ -49,7 +49,7 @@ public:
      * @param clickedCallback Callback function that is called when the action row is clicked
      * @param tooltipCallback Callback function that is called when a tooltip is required
      */
-    void add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QString& tooltip, const ClickedCB& clickedCallback, const TooltipCB& tooltipCallback = TooltipCB());
+    void add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QStringList& tags, const QString& tooltip, const ClickedCB& clickedCallback, const TooltipCB& tooltipCallback = TooltipCB());
 
     /** Resets the rows and notifies others */
     void reset();

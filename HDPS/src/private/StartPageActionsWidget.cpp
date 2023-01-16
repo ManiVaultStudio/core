@@ -39,7 +39,6 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
 
     treeView.setRootIsDecorated(false);
     treeView.setItemDelegateForColumn(static_cast<int>(StartPageActionsModel::Column::SummaryDelegate), new StartPageActionDelegate());
-    treeView.setItemDelegateForColumn(static_cast<int>(StartPageActionsModel::Column::CommentsDelegate), new StartPageActionDelegate());
     treeView.setSelectionBehavior(QAbstractItemView::SelectRows);
     treeView.setSelectionMode(QAbstractItemView::SingleSelection);
     treeView.setIconSize(QSize(24, 24));
@@ -50,9 +49,11 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
         } \
     ");
 
+    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Icon), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Title), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Description), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Comments), true);
+    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Tags), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::ClickedCallback), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::TooltipCallback), true);
 
@@ -70,16 +71,9 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
 
     treeViewHeader->setStretchLastSection(false);
 
-    treeViewHeader->setSectionResizeMode(static_cast<int>(StartPageActionsModel::Column::Icon), QHeaderView::Fixed);
     treeViewHeader->setSectionResizeMode(static_cast<int>(StartPageActionsModel::Column::SummaryDelegate), QHeaderView::Stretch);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(StartPageActionsModel::Column::CommentsDelegate), QHeaderView::ResizeToContents);
 
     treeViewHeader->resizeSection(static_cast<int>(StartPageActionsModel::Column::Icon), 34);
-
-    connect(&_model, &QStandardItemModel::layoutChanged, this, [this, &treeView]() -> void {
-        treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::CommentsDelegate), !_model.hasComments());
-        treeView.resizeColumnToContents(static_cast<int>(StartPageActionsModel::Column::CommentsDelegate));
-    });
 
     connect(&treeView, &QTreeView::entered, this, [this](const QModelIndex& index) -> void {
         auto callback = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::TooltipCallback)).data(Qt::UserRole + 1).value<StartPageActionsModel::TooltipCB>();
