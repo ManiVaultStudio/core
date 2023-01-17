@@ -153,7 +153,8 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
 
     loadViewPlugin();
     
-    _viewPlugin->fromVariantMap(_viewPluginMap);
+    if (_viewPlugin)
+        _viewPlugin->fromVariantMap(_viewPluginMap);
 }
 
 QVariantMap ViewPluginDockWidget::toVariantMap() const

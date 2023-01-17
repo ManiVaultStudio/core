@@ -181,6 +181,17 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     connect(&_recentProjectsAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
         openProject(filePath);
     });
+
+    const auto updateReadOnly = [this]() -> void {
+        _editProjectSettingsAction.setEnabled(hasProject());
+        _importDataMenu.setEnabled(hasProject());
+        _pluginManagerAction.setEnabled(hasProject());
+    };
+
+    updateReadOnly();
+
+    connect(this, &ProjectManager::projectCreated, this, updateReadOnly);
+    connect(this, &ProjectManager::projectDestroyed, this, updateReadOnly);
 }
 
 void ProjectManager::initalize()

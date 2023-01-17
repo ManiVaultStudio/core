@@ -64,9 +64,13 @@ std::int32_t ViewPluginsDockWidget::getNumberOfOpenViewPluginDockWidgets() const
 {
     std::int32_t numberOfOpenViewPluginDockWidgets = 0;
     
-    for (auto viewPluginDockWidget : ViewPluginDockWidget::active)
-        if (!viewPluginDockWidget->getViewPlugin()->isSystemViewPlugin() && !viewPluginDockWidget->isClosed())
+    for (auto viewPluginDockWidget : ViewPluginDockWidget::active) {
+        if (viewPluginDockWidget->getViewPlugin() != nullptr && viewPluginDockWidget->getViewPlugin()->isSystemViewPlugin())
+            continue;
+
+        if (!viewPluginDockWidget->isClosed())
             numberOfOpenViewPluginDockWidgets++;
+    }
 
     return numberOfOpenViewPluginDockWidgets;
 }
