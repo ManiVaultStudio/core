@@ -45,15 +45,12 @@ public:
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 private:
-
-    /**
-     * Get delegate with for \p option and model \p index
-     * @param option Style option
-     * @param index Model index to paint
-     * @return Pointer to delegate widget
-     */
-    QWidget* getWidget(const QStyleOptionViewItem& option, const QModelIndex& index);
-
-private:
-    QScopedPointer<QWidget>     _widget;        /** Delegate widget */
+    QWidget         _widget;
+    QHBoxLayout     _mainLayout;
+    QVBoxLayout     _iconLayout;
+    QLabel          _iconLabel;
+    QGridLayout     _textLayout;
+    QLabel          _titleLabel;
+    QLabel          _descriptionLabel;
+    QLabel          _commentsLabel;
 };

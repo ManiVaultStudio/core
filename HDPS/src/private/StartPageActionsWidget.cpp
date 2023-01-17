@@ -74,8 +74,6 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
 
     treeViewHeader->setSectionResizeMode(static_cast<int>(StartPageActionsModel::Column::SummaryDelegate), QHeaderView::Stretch);
 
-    treeViewHeader->resizeSection(static_cast<int>(StartPageActionsModel::Column::Icon), 34);
-
     connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
         auto callback = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::ClickedCallback)).data(Qt::UserRole + 1).value<StartPageActionsModel::ClickedCB>();
         callback();
@@ -107,27 +105,18 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
             <html> \
                 <head> \
                     <style> \
-                        body { \
-                            height: auto; \
-                        } \
                         p { \
                             margin: 4px; \
-                        } \
-                        .margin { \
-                            height: 1500px; \
-                            background-color: green; \
                         } \
                     </style> \
                 </head> \
                 <body> \
-                    <div height='100' class='margin'></div> \
                     <div> \
                         <p><b>%1</b></p> \
                         <p>%2</p> \
                         <p><i>%3</i></p> \
                         <p>%4</p> \
                     </div> \
-                    <div class='margin'>&nbsp;</div> \
                 </body> \
             </html> \
         ").arg(title, description, tags.join(", "), previewImageHtml);
