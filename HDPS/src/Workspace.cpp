@@ -99,7 +99,7 @@ QVariantMap Workspace::toVariantMap() const
     return variantMap;
 }
 
-QImage Workspace::getPreviewImage(const QString& workspaceFilePath)
+QImage Workspace::getPreviewImage(const QString& workspaceFilePath, const QSize& targetSize /*= QSize(500, 500)*/)
 {
     QImage previewImage;
 
@@ -125,7 +125,10 @@ QImage Workspace::getPreviewImage(const QString& workspaceFilePath)
 
         previewImage.loadFromData(QByteArray::fromBase64(workspaceVariantMap["PreviewImage"].toByteArray()));
 
-        return previewImage;
+        if (targetSize.isValid())
+            return previewImage.scaled(targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        else
+            return previewImage;
     }
     catch (std::exception& e)
     {
@@ -137,21 +140,6 @@ QImage Workspace::getPreviewImage(const QString& workspaceFilePath)
     }
 
     return previewImage;
-}
-
-QString Workspace::getPreviewImageHtml(const QString workspaceFilePath, const QSize& targetSize/*= QSize(500, 500)*/)
-{
-    QBuffer buffer;
-
-    buffer.open(QIODevice::WriteOnly);
-    
-    const auto previewImage = getPreviewImage(workspaceFilePath);
-
-    QPixmap::fromImage(targetSize.isValid() ? previewImage.scaled(targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation) : previewImage).save(&buffer, "JPG");
-
-    auto image = buffer.data().toBase64();
-
-    return QString("<img src='data:image/jpg;base64,%1'></p>").arg(image);
 }
 
 void Workspace::initialize()

@@ -1,56 +1,71 @@
 #include "StartPageActionDelegate.h"
 
+#include <Application.h>
+
 #include <QPainter>
 
 #ifdef _DEBUG
     #define START_PAGE_ACTION_DELEGATE
 #endif
 
+using namespace hdps;
+
 StartPageActionDelegate::StartPageActionDelegate(QObject* parent /*= nullptr*/) :
     QStyledItemDelegate(parent),
-    _widget(),
-    _mainLayout(),
-    _topLayout(),
-    _titleLabel(),
-    _descriptionLabel(),
-    _tagsLayout(),
-    _tagLabels()
+    _widget(new QWidget())
 {
-    _widget.setLayout(&_mainLayout);
-    _widget.setObjectName("StartPageActionDelegateWidget");
+    
 
-    _mainLayout.setContentsMargins(4, 4, 4, 4);
-    _mainLayout.setSpacing(3);
+    //_mainLayout.setContentsMargins(4, 4, 4, 4);
+    //_mainLayout.setSpacing(3);
+    //_mainLayout.setAlignment(Qt::AlignTop);
 
-    _mainLayout.addWidget(&_iconLabel);
-    _mainLayout.addLayout(&_textLayout);
+    //_mainLayout.addWidget(&_iconLabel);
+    //_mainLayout.addSpacing(4);
+    //_mainLayout.addLayout(&_textLayout);
+    //_mainLayout.addLayout(&_rightIconsLayout);
 
-    _textLayout.addLayout(&_topLayout);
-    _textLayout.addWidget(&_descriptionLabel);
-    _textLayout.addLayout(&_tagsLayout);
+    //_iconLabel.setStyleSheet("background-color: red;");
+    //_titleLabel.setStyleSheet("background-color: red;");
+    //_descriptionLabel.setStyleSheet("background-color: red;");
+    //_iconLabel.setAlignment(Qt::AlignTop);
 
+    //_textLayout.setContentsMargins(0, 0, 0, 0);
     //_topLayout.setContentsMargins(0, 0, 0, 0);
-    _topLayout.addWidget(&_titleLabel);
-    _topLayout.addWidget(&_commentsLabel);
+    //_topLayout.setAlignment(Qt::AlignTop);
+    //_textLayout.setAlignment(Qt::AlignTop);
 
-    _topLayout.addWidget(&_titleLabel, 1);
-    _topLayout.addWidget(&_commentsLabel);
+    //_textLayout.addLayout(&_topLayout);
+    //_textLayout.addWidget(&_descriptionLabel);
+    //_textLayout.addLayout(&_tagsLayout);
 
-    _commentsLabel.setAlignment(Qt::AlignTop);
+    ////_topLayout.setContentsMargins(0, 0, 0, 0);
+    //_topLayout.addWidget(&_titleLabel);
+    //_topLayout.addWidget(&_commentsLabel);
 
-    _tagsLayout.setContentsMargins(0, 0, 0, 0);
-    _tagsLayout.setAlignment(Qt::AlignLeft);
+    //_topLayout.addWidget(&_titleLabel, 1);
+    //_topLayout.addWidget(&_commentsLabel);
+
+    //_commentsLabel.setAlignment(Qt::AlignTop);
+
+    //_tagsLayout.setContentsMargins(0, 0, 0, 0);
+    //_tagsLayout.setAlignment(Qt::AlignLeft);
 }
-
-#include <Application.h>
 
 void StartPageActionDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-    auto nonConstThis = const_cast<StartPageActionDelegate*>(this);
+    auto widget = const_cast<StartPageActionDelegate*>(this)->getWidget(option, index);
 
-    nonConstThis->_widget.setStyleSheet(QString("QWidget#StartPageActionDelegateWidget { background-color: %1; }").arg(option.state & QStyle::State_MouseOver ? "rgba(0, 0, 0, 100)" : "transparent"));
+    widget->setFixedWidth(option.rect.size().width());
 
-    nonConstThis->_iconLabel.setPixmap(hdps::Application::getIconFont("FontAwesome").getIcon("file").pixmap(QSize(24, 24)));
+    painter->save();
+    painter->translate(option.rect.topLeft());
+
+    widget->render(painter, QPoint(), QRegion(), QWidget::DrawChildren);
+
+    painter->restore();
+
+    /*
 
     nonConstThis->_tagLabels.clear();
 
@@ -70,27 +85,6 @@ void StartPageActionDelegate::paint(QPainter* painter, const QStyleOptionViewIte
 
     nonConstThis->_commentsLabel.setText(index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Comments)).data(Qt::DisplayRole).toString());
 
-    //const auto tags = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Tags)).data(Qt::UserRole + 1).toStringList();
-
-    //for (const auto& tag : tags) {
-    //    auto label = new QLabel(tag);
-
-    //    label->setStyleSheet("QLabel { \
-    //        padding: 2px; \
-    //        font-size: 8pt; \
-    //        border-radius: 3px; \
-    //        background: rgb(150, 150, 150); \
-    //        color: rgb(40, 40, 40); \
-    //    }");
-
-    //    label->setMargin(1);
-
-    //    nonConstThis->_tagLabels << QSharedPointer<QLabel>(label);
-    //}
-
-    //for (auto& tagLabel : nonConstThis->_tagLabels)
-    //    nonConstThis->_tagsLayout.addWidget(tagLabel.get());
-
     nonConstThis->_widget.setFixedWidth(option.rect.size().width());
 
     painter->save();
@@ -99,9 +93,78 @@ void StartPageActionDelegate::paint(QPainter* painter, const QStyleOptionViewIte
     nonConstThis->_widget.render(painter, QPoint(), QRegion(), QWidget::DrawChildren);
 
     painter->restore();
+    */
 }
 
 QSize StartPageActionDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-    return _widget.minimumSizeHint();
+    return const_cast<StartPageActionDelegate*>(this)->getWidget(option, index)->minimumSizeHint();
+}
+
+QWidget* StartPageActionDelegate::getWidget(const QStyleOptionViewItem& option, const QModelIndex& index)
+{
+    auto widget             = new QWidget();
+    auto mainLayout         = new QHBoxLayout();
+    auto leftIconsLayout    = new QVBoxLayout();
+    auto gridLayout         = new QGridLayout();
+
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+
+    QMargins margins(3, 3, 3, 3);
+
+    leftIconsLayout->setContentsMargins(margins);
+    gridLayout->setContentsMargins(margins);
+
+    leftIconsLayout->setAlignment(Qt::AlignTop);
+    gridLayout->setAlignment(Qt::AlignTop);
+
+    mainLayout->addLayout(leftIconsLayout);
+    mainLayout->addLayout(gridLayout);
+
+    widget->setObjectName("StartPageActionDelegateWidget");
+    widget->setStyleSheet(QString("QWidget#StartPageActionDelegateWidget { background-color: %1; }").arg(option.state & QStyle::State_MouseOver ? "rgba(0, 0, 0, 100)" : "transparent"));
+    widget->setLayout(mainLayout);
+
+    const auto getIconLabel = [](const QIcon& icon, const QSize& size = QSize(24, 24)) -> QLabel* {
+        auto label = new QLabel();
+
+        label->setPixmap(icon.pixmap(size));
+
+        return label;
+    };
+
+    // Left icons
+    {
+        leftIconsLayout->addWidget(getIconLabel(index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Icon)).data(Qt::UserRole + 1).value<QIcon>()));
+    }
+
+    // Text
+    {
+        const auto title        = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Title)).data(Qt::EditRole).toString();
+        const auto description  = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Description)).data(Qt::EditRole).toString();
+        const auto comments     = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Comments)).data(Qt::EditRole).toString();
+
+        auto titleLabel         = new QLabel(title);
+        auto commentsLabel      = new QLabel(comments);
+        auto descriptionLabel   = new QLabel(description);
+
+        titleLabel->setStyleSheet("font-weight: bold");
+
+        gridLayout->addWidget(titleLabel, 0, 0);
+        gridLayout->addWidget(commentsLabel, 0, 1);
+        gridLayout->addWidget(descriptionLabel, 1, 0, 1, 2);
+
+        QFontMetrics titleMetrics(titleLabel->font()), descriptionMetrics(descriptionLabel->font());
+
+        qDebug() << titleLabel->width() << descriptionLabel->width();
+
+        titleLabel->setText(titleMetrics.elidedText(title, Qt::ElideMiddle, titleLabel->width() - 2));
+        descriptionLabel->setText(descriptionMetrics.elidedText(description, Qt::ElideMiddle, descriptionLabel->width() - 2));
+
+        gridLayout->setColumnStretch(0, 1);
+    }
+
+    
+
+    return widget;
 }

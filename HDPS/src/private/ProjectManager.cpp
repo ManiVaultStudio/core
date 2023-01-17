@@ -651,3 +651,23 @@ QVariantMap ProjectManager::toVariantMap() const
 
     return QVariantMap();
 }
+
+QImage ProjectManager::getPreviewImage(const QString& projectFilePath, const QSize& targetSize /*= QSize(500, 500)*/) const
+{
+    Archiver archiver;
+
+    const QString workspaceFile("workspace.hws");
+
+    QTemporaryDir temporaryDirectory;
+
+    const auto temporaryDirectoryPath = temporaryDirectory.path();
+
+    QFileInfo workspaceFileInfo(temporaryDirectoryPath, workspaceFile);
+
+    archiver.extractSingleFile(projectFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
+
+    if (workspaceFileInfo.exists())
+        return Workspace::getPreviewImage(workspaceFileInfo.absoluteFilePath());
+
+    return QImage();
+}

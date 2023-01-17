@@ -6,6 +6,7 @@
 
 #include <QDebug>
 #include <QHeaderView>
+#include <QBuffer>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -54,8 +55,8 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Description), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Comments), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Tags), true);
+    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::PreviewImage), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::ClickedCallback), true);
-    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::TooltipCallback), true);
 
     QPalette treeViewPalette(treeView.palette());
 
@@ -75,18 +76,63 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
 
     treeViewHeader->resizeSection(static_cast<int>(StartPageActionsModel::Column::Icon), 34);
 
-    connect(&treeView, &QTreeView::entered, this, [this](const QModelIndex& index) -> void {
-        auto callback = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::TooltipCallback)).data(Qt::UserRole + 1).value<StartPageActionsModel::TooltipCB>();
-
-        if (callback)
-            _model.item(index.row(), index.column())->setToolTip(callback());
-    });
-
     connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
         auto callback = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::ClickedCallback)).data(Qt::UserRole + 1).value<StartPageActionsModel::ClickedCB>();
         callback();
 
         _hierarchyWidget.getSelectionModel().clear();
+    });
+
+    connect(&treeView, &QTreeView::entered, this, [this](const QModelIndex& index) -> void {
+        const auto title        = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Title)).data(Qt::EditRole).toString();
+        const auto description  = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Description)).data(Qt::EditRole).toString();
+        const auto previewImage = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::PreviewImage)).data(Qt::UserRole + 1).value<QImage>();
+        const auto tags         = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Tags)).data(Qt::EditRole).toStringList();
+
+        QString previewImageHtml;
+
+        if (!previewImage.isNull()) {
+            QBuffer buffer;
+
+            buffer.open(QIODevice::WriteOnly);
+
+            QPixmap::fromImage(previewImage).save(&buffer, "JPG");
+
+            auto image = buffer.data().toBase64();
+
+            previewImageHtml = QString("<img style='padding: 100px;'src='data:image/jpg;base64,%1'></p>").arg(image);
+        }
+
+        auto tooltip = QString(" \
+            <html> \
+                <head> \
+                    <style> \
+                        body { \
+                            height: auto; \
+                        } \
+                        p { \
+                            margin: 4px; \
+                        } \
+                        .margin { \
+                            height: 1500px; \
+                            background-color: green; \
+                        } \
+                    </style> \
+                </head> \
+                <body> \
+                    <div height='100' class='margin'></div> \
+                    <div> \
+                        <p><b>%1</b></p> \
+                        <p>%2</p> \
+                        <p><i>%3</i></p> \
+                        <p>%4</p> \
+                    </div> \
+                    <div class='margin'>&nbsp;</div> \
+                </body> \
+            </html> \
+        ").arg(title, description, tags.join(", "), previewImageHtml);
+
+        _model.item(index.row(), index.column())->setToolTip(tooltip);
     });
 }
 

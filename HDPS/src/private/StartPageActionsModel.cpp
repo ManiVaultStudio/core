@@ -10,8 +10,8 @@ QMap<StartPageActionsModel::Column, QPair<QString, QString>> StartPageActionsMod
     { StartPageActionsModel::Column::Description, { "Description", "Description" }},
     { StartPageActionsModel::Column::Comments, { "Comments", "Comments" }},
     { StartPageActionsModel::Column::Tags, { "Tags", "Tags" }},
+    { StartPageActionsModel::Column::PreviewImage, { "Preview", "Preview image" }},
     { StartPageActionsModel::Column::ClickedCallback, { "Clicked Callback", "Callback which is called when the action is clicked" }},
-    { StartPageActionsModel::Column::TooltipCallback, { "Tooltip Callback", "Callback which is called when the action is clicked" }},
     { StartPageActionsModel::Column::SummaryDelegate, { "Summary", "Delegate item with title and subtitle" }}
 });
 
@@ -27,14 +27,14 @@ StartPageActionsModel::StartPageActionsModel(QObject* parent /*= nullptr*/) :
     }
 }
 
-void StartPageActionsModel::add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QStringList& tags, const QString& tooltip, const ClickedCB& clickedCallback, const TooltipCB& tooltipCallback /*= TooltipCB()*/)
+void StartPageActionsModel::add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QStringList& tags, const QImage& previewImage, const QString& tooltip, const ClickedCB& clickedCallback)
 {
 #ifdef START_PAGE_ACTIONS_MODEL_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
     QList<QStandardItem*> startPageActionRow = {
-        new QStandardItem(icon, ""),
+        new QStandardItem(),
         new QStandardItem(title),
         new QStandardItem(description),
         new QStandardItem(comments),
@@ -44,11 +44,13 @@ void StartPageActionsModel::add(const QIcon& icon, const QString& title, const Q
         new QStandardItem()
     };
 
-    startPageActionRow[static_cast<int>(Column::SummaryDelegate)]->setToolTip(tooltip);
+    //startPageActionRow[static_cast<int>(Column::SummaryDelegate)]->setToolTip(tooltip);
 
-    startPageActionRow[static_cast<int>(Column::Tags)]->setData(tags);
+    startPageActionRow[static_cast<int>(Column::Icon)]->setData(QVariant::fromValue(icon));
+    startPageActionRow[static_cast<int>(Column::Tags)]->setData(QVariant::fromValue(tags), Qt::EditRole);
+    startPageActionRow[static_cast<int>(Column::PreviewImage)]->setData(QVariant::fromValue(previewImage));
+    
     startPageActionRow[static_cast<int>(Column::ClickedCallback)]->setData(QVariant::fromValue(clickedCallback));
-    startPageActionRow[static_cast<int>(Column::TooltipCallback)]->setData(QVariant::fromValue(tooltipCallback));
 
     for (auto item : startPageActionRow)
         item->setEditable(false);

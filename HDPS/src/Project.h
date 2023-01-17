@@ -49,7 +49,7 @@ public:
      */
     void setFilePath(const QString& filePath);
 
-public:
+public: // Miscellaneous
 
     /**
      * Get version of the application (major and minor version number) with which the project is created

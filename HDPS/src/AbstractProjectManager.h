@@ -93,6 +93,13 @@ public:
      */
     virtual QString extractProjectFileFromHdpsFile(const QString& hdpsFilePath, QTemporaryDir& temporaryDir) = 0;
 
+    /**
+     * Get preview image of the project
+     * @param projectFilePath Path of the project file
+     * @return Preview image
+     */
+    virtual QImage getPreviewImage(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const = 0;
+
 public: // Menus
 
     /**

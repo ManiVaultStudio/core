@@ -7,6 +7,7 @@
 #include <CoreInterface.h>
 
 #include <QDebug>
+#include <QImage>
 
 using namespace hdps;
 using namespace hdps::util;
@@ -40,7 +41,7 @@ void StartPageOpenProjectWidget::updateActions()
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _openProjectWidget.getModel().reset();
-    _openProjectWidget.getModel().add(fontAwesome.getIcon("file"), "Open project", "Open an existing project", "", QStringList(), "Browse to an existing project and open it", []() -> void {
+    _openProjectWidget.getModel().add(fontAwesome.getIcon("file"), "Open project", "Open an existing project", "", QStringList(), QImage(), "Browse to an existing project and open it", []() -> void {
         projects().openProject();
     });
 
@@ -55,32 +56,14 @@ void StartPageOpenProjectWidget::updateActions()
         const auto description      = recentFilePath;
         const auto comments         = recentFile.getDateTime().toString("dd/MM/yyyy hh:mm");
         const auto tags             = QStringList();
+        const auto previewImage     = projects().getPreviewImage(recentFilePath);
         const auto tooltip          = "";
         
         const auto clickedCallback = [recentFilePath]() -> void {
             projects().openProject(recentFilePath);
         };
 
-        const auto tooltipCallback = [recentFilePath]() -> QString {
-            Archiver archiver;
-
-            const QString workspaceFile("workspace.hws");
-
-            QTemporaryDir temporaryDirectory;
-
-            const auto temporaryDirectoryPath = temporaryDirectory.path();
-
-            QFileInfo workspaceFileInfo(temporaryDirectoryPath, workspaceFile);
-
-            archiver.extractSingleFile(recentFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
-
-            if (workspaceFileInfo.exists())
-                return Workspace::getPreviewImageHtml(workspaceFileInfo.absoluteFilePath());
-
-            return "";
-        };
-
-        _recentProjectsWidget.getModel().add(icon, title, description, comments, tags, tooltip, clickedCallback, tooltipCallback);
+        _recentProjectsWidget.getModel().add(icon, title, description, comments, tags, previewImage, tooltip, clickedCallback);
     }
         
 }

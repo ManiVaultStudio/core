@@ -13,7 +13,7 @@
 /**
  * Workspace delegate class
  *
- * Delegate class for custom start page action display in a cell.
+ * Delegate class for custom start page action display in a view.
  *
  * @author Thomas Kroes
  */
@@ -45,14 +45,15 @@ public:
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 private:
-    QWidget                         _widget;                    /** Delegate widget */
-    QHBoxLayout                     _mainLayout;                /** Delegate widget layout */
-    QLabel                          _iconLabel;                 /** Label for the left icon */
-    QVBoxLayout                     _textLayout;                /** Layout for the text labels on the right */
-    QHBoxLayout                     _topLayout;                 /** Layout for top labels */
-    QLabel                          _titleLabel;                /** Title label */
-    QLabel                          _descriptionLabel;          /** Description label */
-    QLabel                          _commentsLabel;             /** Comments label */
-    QHBoxLayout                     _tagsLayout;                /** Tags layout */
-    QList<QSharedPointer<QLabel>>   _tagLabels;                 /** Tag labels */
+
+    /**
+     * Get delegate with for \p option and model \p index
+     * @param option Style option
+     * @param index Model index to paint
+     * @return Pointer to delegate widget
+     */
+    QWidget* getWidget(const QStyleOptionViewItem& option, const QModelIndex& index);
+
+private:
+    QScopedPointer<QWidget>     _widget;        /** Delegate widget */
 };

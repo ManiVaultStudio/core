@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QStandardItemModel>
+#include <QImage>
 
 /**
  * Start page actions model class
@@ -13,8 +14,7 @@ class StartPageActionsModel final : public QStandardItemModel
 {
 public:
 
-    using ClickedCB = std::function<void()>;        /** Callback function that is called when the action row is clicked */
-    using TooltipCB = std::function<QString()>;     /** Callback function that is called when a tooltip is required */
+    using ClickedCB = std::function<void()>;    /** Callback function that is called when the action row is clicked */
 
     /** Model columns */
     enum class Column {
@@ -23,8 +23,8 @@ public:
         Description,        /** Action description */
         Comments,           /** Action comments */
         Tags,               /** Action tags */
+        PreviewImage,       /** Action preview image */
         ClickedCallback,    /** Callback which is called when the action is clicked */
-        TooltipCallback,    /** Callback which is called when a tooltip is required */
         SummaryDelegate     /** Delegate item with title and subtitle */
     };
 
@@ -45,11 +45,13 @@ public:
      * @param title Action title
      * @param description Action description
      * @param comments Action comments
+     * @param tags Action tags
+     * @param previewImage Action preview image
      * @param tooltip Action tooltip
      * @param clickedCallback Callback function that is called when the action row is clicked
      * @param tooltipCallback Callback function that is called when a tooltip is required
      */
-    void add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QStringList& tags, const QString& tooltip, const ClickedCB& clickedCallback, const TooltipCB& tooltipCallback = TooltipCB());
+    void add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QStringList& tags, const QImage& previewImage, const QString& tooltip, const ClickedCB& clickedCallback);
 
     /** Resets the rows and notifies others */
     void reset();

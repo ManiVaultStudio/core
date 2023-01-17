@@ -88,6 +88,13 @@ public:
      */
     QString extractProjectFileFromHdpsFile(const QString& hdpsFilePath, QTemporaryDir& temporaryDir) override;
 
+    /**
+     * Get preview image of the project
+     * @param projectFilePath Path of the project file
+     * @return Preview image
+     */
+    QImage getPreviewImage(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const override;
+
 public: // Serialization
 
     /**
