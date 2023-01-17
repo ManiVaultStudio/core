@@ -24,6 +24,7 @@ public:
         Comments,           /** Action comments */
         Tags,               /** Action tags */
         PreviewImage,       /** Action preview image */
+        Tooltip,            /** Action tooltip */
         ClickedCallback,    /** Callback which is called when the action is clicked */
         SummaryDelegate     /** Delegate item with title and subtitle */
     };

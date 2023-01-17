@@ -57,6 +57,16 @@ void StartPageGetStartedWidget::updateActions()
         });
     }
 
+    _createProjectFromWorkspaceWidget.getModel().add(fontAwesome.getIcon("file"), "From Project...", "Use workspace from other project", "", QStringList(), QImage(), "Pick an existing project and use its workspace", []() -> void {
+        projects().newBlankProject();
+        workspaces().importWorkspaceFromProjectFile();
+    });
+
+    _createProjectFromWorkspaceWidget.getModel().add(fontAwesome.getIcon("folder-open"), "Browse...", "Browse for workspace", "", QStringList(), QImage(), "Load workspace from custom location", []() -> void {
+        projects().newBlankProject();
+        workspaces().loadWorkspace();
+    });
+
     for (auto viewPluginFactory : plugins().getPluginFactoriesByType(plugin::Type::LOADER)) {
         const auto icon         = viewPluginFactory->getIcon();
         const auto title        = viewPluginFactory->getKind();

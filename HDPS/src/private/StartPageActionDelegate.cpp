@@ -18,12 +18,10 @@ StartPageActionDelegate::StartPageActionDelegate(QObject* parent /*= nullptr*/) 
     _mainLayout.setContentsMargins(1, 1, 1, 1);
     _mainLayout.setSpacing(0);
 
-    QMargins margins(3, 3, 3, 3);
+    _iconLayout.setContentsMargins(5, 3, 5, 3);
+    _textLayout.setContentsMargins(3, 3, 3, 3);
 
-    _iconLayout.setContentsMargins(margins);
-    _textLayout.setContentsMargins(margins);
-
-    _iconLayout.setAlignment(Qt::AlignTop);
+    _iconLayout.setAlignment(Qt::AlignTop | Qt::AlignCenter);
 
     _textLayout.setAlignment(Qt::AlignTop);
     _textLayout.setSpacing(1);

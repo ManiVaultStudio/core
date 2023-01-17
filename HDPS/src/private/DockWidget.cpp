@@ -102,10 +102,7 @@ void DockWidget::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "Title");
-
     setObjectName(getId());
-    setWindowTitle(variantMap["Title"].toString());
 }
 
 QVariantMap DockWidget::toVariantMap() const
@@ -113,7 +110,6 @@ QVariantMap DockWidget::toVariantMap() const
     auto variantMap = Serializable::toVariantMap();
 
     variantMap.insert({
-        { "Title", QVariant::fromValue(windowTitle()) },
         { "Type", QVariant::fromValue(this->getTypeString()) }
     });
 

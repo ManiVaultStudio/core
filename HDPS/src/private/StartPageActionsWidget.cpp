@@ -48,6 +48,9 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
         QTreeView { \
             border: none; \
         } \
+        QToolTip { \
+            min-width: 150; \
+        } \
     ");
 
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Icon), true);
@@ -56,6 +59,7 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Comments), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Tags), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::PreviewImage), true);
+    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Tooltip), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::ClickedCallback), true);
 
     QPalette treeViewPalette(treeView.palette());
@@ -86,8 +90,9 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
         const auto description  = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Description)).data(Qt::EditRole).toString();
         const auto previewImage = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::PreviewImage)).data(Qt::UserRole + 1).value<QImage>();
         const auto tags         = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Tags)).data(Qt::EditRole).toStringList();
+        const auto tooltip      = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Tooltip)).data(Qt::EditRole).toString();
 
-        QString previewImageHtml;
+        QString tooltipTextHtml;
 
         if (!previewImage.isNull()) {
             QBuffer buffer;
@@ -98,30 +103,28 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
 
             auto image = buffer.data().toBase64();
 
-            previewImageHtml = QString("<img style='padding: 100px;'src='data:image/jpg;base64,%1'></p>").arg(image);
+            tooltipTextHtml = QString("<img style='padding: 100px;'src='data:image/jpg;base64,%1'></p>").arg(image);
+        }
+        else {
+            tooltipTextHtml = tooltip;
         }
 
-        auto tooltip = QString(" \
+        auto tooltipHtml = QString(" \
             <html> \
                 <head> \
                     <style> \
-                        p { \
-                            margin: 4px; \
+                        body { \
+                            width: 250px; \
                         } \
                     </style> \
                 </head> \
                 <body> \
-                    <div> \
-                        <p><b>%1</b></p> \
-                        <p>%2</p> \
-                        <p><i>%3</i></p> \
-                        <p>%4</p> \
-                    </div> \
+                    <div style='width: 300px;'>%1</div> \
                 </body> \
             </html> \
-        ").arg(title, description, tags.join(", "), previewImageHtml);
+        ").arg(tooltipTextHtml);
 
-        _model.item(index.row(), index.column())->setToolTip(tooltip);
+        _model.item(index.row(), index.column())->setToolTip(tooltipHtml);
     });
 }
 

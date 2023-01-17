@@ -215,9 +215,14 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
     setIcon(viewPlugin->getIcon());
     setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
 
-    connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, this, [this](const QString& title) {
-        setWindowTitle(title);
-    });
+    const auto updateWindowTitle = [this]() -> void {
+        qDebug() << _viewPlugin->getGuiNameAction().getString();
+        setWindowTitle(_viewPlugin->getGuiNameAction().getString());
+    };
+
+    connect(&viewPlugin->getGuiNameAction(), &StringAction::stringChanged, this, updateWindowTitle);
+
+    updateWindowTitle();
 
     const auto updateFeatures = [this]() -> void {
         setFeature(CDockWidget::DockWidgetClosable, _viewPlugin->getMayCloseAction().isChecked());

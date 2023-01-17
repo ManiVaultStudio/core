@@ -71,6 +71,15 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
         if (_options.testFlag(LoadedViewsSubMenu))
             addMenu(new LoadedViewsMenu());
     });
+
+    const auto updateReadOnly = [this]() -> void {
+        setEnabled(projects().hasProject());
+    };
+
+    updateReadOnly();
+
+    connect(&projects(), &AbstractProjectManager::projectCreated, this, updateReadOnly);
+    connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateReadOnly);
 }
 
 bool ViewMenu::mayProducePlugins() const

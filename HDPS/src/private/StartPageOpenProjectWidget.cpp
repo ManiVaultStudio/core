@@ -41,13 +41,17 @@ void StartPageOpenProjectWidget::updateActions()
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _openProjectWidget.getModel().reset();
-    _openProjectWidget.getModel().add(fontAwesome.getIcon("file"), "Open project", "Open an existing project", "", QStringList(), QImage(), "Browse to an existing project and open it", []() -> void {
+    _openProjectWidget.getModel().add(fontAwesome.getIcon("folder-open"), "Open project", "Open an existing project", "", QStringList(), QImage(), "Browse to an existing project and open it", []() -> void {
         projects().openProject();
     });
 
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
 
     _recentProjectsWidget.getModel().reset();
+
+    _recentProjectsWidget.getModel().add(fontAwesome.getIcon("file"), "Blank", "Create project without any plugins", "", QStringList(), QImage(), "Create a blank project without any plugins", []() -> void {
+        projects().newBlankProject();
+    });
 
     for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
         const auto recentFilePath   = recentFile.getFilePath();

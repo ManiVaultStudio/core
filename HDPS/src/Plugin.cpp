@@ -120,15 +120,19 @@ void Plugin::setSetting(const QString& path, const QVariant& value)
 
 void Plugin::fromVariantMap(const QVariantMap& variantMap)
 {
+    WidgetAction::fromVariantMap(variantMap);
+
+    Serializable::fromVariantMap(_guiNameAction, variantMap, "GuiName");
 }
 
 QVariantMap Plugin::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 
+    Serializable::insertIntoVariantMap(_guiNameAction, variantMap, "GuiName");
+
     variantMap.insert({
         { "Name", _name },
-        { "GuiName", _guiNameAction.getString() },
         { "Kind", _factory->getKind() },
         { "Type", static_cast<std::uint32_t>(_factory->getType()) },
         { "Version", _factory->getVersion() }

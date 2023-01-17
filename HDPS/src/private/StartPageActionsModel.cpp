@@ -11,6 +11,7 @@ QMap<StartPageActionsModel::Column, QPair<QString, QString>> StartPageActionsMod
     { StartPageActionsModel::Column::Comments, { "Comments", "Comments" }},
     { StartPageActionsModel::Column::Tags, { "Tags", "Tags" }},
     { StartPageActionsModel::Column::PreviewImage, { "Preview", "Preview image" }},
+    { StartPageActionsModel::Column::Tooltip, { "Tooltip", "Tooltip" }},
     { StartPageActionsModel::Column::ClickedCallback, { "Clicked Callback", "Callback which is called when the action is clicked" }},
     { StartPageActionsModel::Column::SummaryDelegate, { "Summary", "Delegate item with title and subtitle" }}
 });
@@ -40,11 +41,10 @@ void StartPageActionsModel::add(const QIcon& icon, const QString& title, const Q
         new QStandardItem(comments),
         new QStandardItem(),
         new QStandardItem(),
+        new QStandardItem(tooltip),
         new QStandardItem(),
         new QStandardItem()
     };
-
-    //startPageActionRow[static_cast<int>(Column::SummaryDelegate)]->setToolTip(tooltip);
 
     startPageActionRow[static_cast<int>(Column::Icon)]->setData(QVariant::fromValue(icon));
     startPageActionRow[static_cast<int>(Column::Tags)]->setData(QVariant::fromValue(tags), Qt::EditRole);
