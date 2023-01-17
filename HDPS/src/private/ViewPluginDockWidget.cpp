@@ -216,7 +216,6 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
     setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
 
     const auto updateWindowTitle = [this]() -> void {
-        qDebug() << _viewPlugin->getGuiNameAction().getString();
         setWindowTitle(_viewPlugin->getGuiNameAction().getString());
     };
 

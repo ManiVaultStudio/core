@@ -18,10 +18,10 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(QWidget* parent /*= nullptr
     auto layout = new QVBoxLayout();
 
     layout->addWidget(StartPageContentWidget::createHeaderLabel("Create Project From Workspace", "Create project from workspace"));
-    layout->addWidget(&_createProjectFromWorkspaceWidget);
+    layout->addWidget(&_createProjectFromWorkspaceWidget, 3);
 
     layout->addWidget(StartPageContentWidget::createHeaderLabel("Create Project From Data", "Create project from data"));
-    layout->addWidget(&_createProjectFromDatasetWidget);
+    layout->addWidget(&_createProjectFromDatasetWidget, 2);
 
     layout->addStretch(1);
 
@@ -57,12 +57,12 @@ void StartPageGetStartedWidget::updateActions()
         });
     }
 
-    _createProjectFromWorkspaceWidget.getModel().add(fontAwesome.getIcon("file"), "From Project...", "Use workspace from other project", "", QStringList(), QImage(), "Pick an existing project and use its workspace", []() -> void {
+    _createProjectFromWorkspaceWidget.getModel().add(fontAwesome.getIcon("file"), "From Project", "Import workspace from project", "", QStringList(), QImage(), "Pick an existing project and use its workspace", []() -> void {
         projects().newBlankProject();
         workspaces().importWorkspaceFromProjectFile();
     });
 
-    _createProjectFromWorkspaceWidget.getModel().add(fontAwesome.getIcon("folder-open"), "Browse...", "Browse for workspace", "", QStringList(), QImage(), "Load workspace from custom location", []() -> void {
+    _createProjectFromWorkspaceWidget.getModel().add(fontAwesome.getIcon("folder-open"), "Browse", "Browse for workspace", "", QStringList(), QImage(), "Load workspace from custom location", []() -> void {
         projects().newBlankProject();
         workspaces().loadWorkspace();
     });
