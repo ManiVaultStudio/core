@@ -7,6 +7,7 @@
 #include <AbstractPluginManager.h>
 
 #include <util/Serialization.h>
+#include <widgets/InfoWidget.h>
 
 #include <DockAreaWidget.h> 
 
@@ -20,6 +21,7 @@ using namespace ads;
 
 using namespace hdps;
 using namespace hdps::plugin;
+using namespace hdps::gui;
 using namespace hdps::util;
 
 DockManager::DockManager(QWidget* parent /*= nullptr*/) :
@@ -132,19 +134,21 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
     hide();
     {
         for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList()) {
-            const auto pluginKind = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap()["Kind"].toString();
+            const auto viewPluginMap    = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap();
+            const auto pluginKind       = viewPluginMap["Kind"].toString();
+            const auto pluginMap        = viewPluginMap["Plugin"].toMap();
 
             if (plugins().isPluginLoaded(pluginKind)) {
                 addDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));
             } else {
-                auto dw = new CDockWidget("test");
+                auto notLoadedDockWidget    = new CDockWidget(QString("%1 (not loaded)").arg(viewPluginMap["GuiName"].toMap()["Value"].toString()));
+                auto notLoadedInfoWidget    = new InfoWidget(this, Application::getIconFont("FontAwesome").getIcon("exclamation-circle"), "View not loaded", QString("We were unable to load the %1 because the plugin is not loaded properly.\nThe workspace might not behave as expected, please ensure the required plugin is loaded properly...").arg(pluginKind));
 
-                dw->setWidget(new QLabel("======"));
-                qDebug() << viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap()["ID"].toString();
+                notLoadedInfoWidget->setColor(Qt::gray);
+                notLoadedDockWidget->setWidget(notLoadedInfoWidget);
+                notLoadedDockWidget->setObjectName(viewPluginDockWidgetVariant.toMap()["ID"].toString());
 
-                dw->setObjectName(viewPluginDockWidgetVariant.toMap()["ID"].toString());
-
-                addDockWidget(RightDockWidgetArea, dw);
+                addDockWidget(RightDockWidgetArea, notLoadedDockWidget);
             }
         }
 

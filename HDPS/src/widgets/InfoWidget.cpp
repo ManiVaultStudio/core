@@ -12,31 +12,35 @@ namespace hdps::gui
 
 InfoWidget::InfoWidget(QWidget* parent) :
     QWidget(parent),
+    _icon(),
     _iconLabel(),
     _titleLabel(),
     _descriptionLabel(),
-    _backgroundColor(),
-    _textColor()
+    _foregroundColor(),
+    _backgroundColor()
 {
     setColors(Qt::lightGray, Qt::black);
     initialize();
 }
 
-InfoWidget::InfoWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description /*= ""*/, const QColor backgroundColor /*= Qt::lightgray*/, const QColor textColor /*= Qt::black*/) :
+InfoWidget::InfoWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description /*= ""*/, const QColor foregroundColor /*= Qt::black*/, const QColor backgroundColor /*= Qt::lightGray*/) :
     QWidget(parent),
+    _icon(),
     _iconLabel(),
     _titleLabel(),
     _descriptionLabel(),
-    _backgroundColor(),
-    _textColor()
+    _foregroundColor(),
+    _backgroundColor()
 {
     set(icon, title, description);
-    setColors(backgroundColor, textColor);
+    setColors(foregroundColor, backgroundColor);
     initialize();
 }
 
 void InfoWidget::set(const QIcon& icon, const QString& title, const QString& description /*= ""*/)
 {
+    _icon = icon;
+
     _iconLabel.setPixmap(icon.pixmap(QSize(24, 24)));
     _titleLabel.setText(title);
     _descriptionLabel.setText(description);
@@ -47,20 +51,40 @@ void InfoWidget::set(const QIcon& icon, const QString& title, const QString& des
 
 void InfoWidget::setColor(const QColor color)
 {
+    _foregroundColor    = color;
     _backgroundColor    = color;
-    _textColor          = color;
-
+    
     _backgroundColor.setAlphaF(0.1f);
 
-    setStyleSheet(QString("QWidget#InfoWidget { background-color: %1; } QWidget#InfoWidget > QLabel { color: %2; }").arg(_backgroundColor.name(), _textColor.name()));
+    setColors(_foregroundColor, _backgroundColor);
 }
 
-void InfoWidget::setColors(const QColor backgroundColor, const QColor textColor)
+void InfoWidget::setColors(const QColor foregroundColor /*= Qt::black*/, const QColor backgroundColor /*= Qt::lightGray*/)
 {
+    _foregroundColor    = foregroundColor;
     _backgroundColor    = backgroundColor;
-    _textColor          = textColor;
 
-    setStyleSheet(QString("QWidget#InfoWidget { background-color: %1; } QWidget#InfoWidget > QLabel { color: %2; }").arg(_backgroundColor.name(), _textColor.name()));
+    const auto colorToRgba = [](const QColor& color) -> QString {
+        return QString("rgba(%1,%2,%3,%4)").arg(QString::number(color.red()), QString::number(color.green()), QString::number(color.blue()), QString::number(color.alpha()));
+    };
+
+    setStyleSheet(QString("QWidget#InfoWidget { background-color: %1; } QWidget#InfoWidget > QLabel { color: %2; }").arg(colorToRgba(_backgroundColor), colorToRgba(_foregroundColor)));
+
+    QImage tmp = _icon.pixmap(QSize(24, 24)).toImage();
+
+    for (int pixelY = 0; pixelY < tmp.height(); pixelY++)
+    {
+        for (int pixelX = 0; pixelX < tmp.width(); pixelX++)
+        {
+            auto color = _foregroundColor;
+
+            color.setAlpha(_foregroundColor.alphaF() * tmp.pixelColor(pixelX, pixelY).alpha());
+
+            tmp.setPixelColor(pixelX, pixelY, color);
+        }
+    }
+
+    _iconLabel.setPixmap(QPixmap::fromImage(tmp));
 }
 
 void InfoWidget::initialize()

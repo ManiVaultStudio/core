@@ -29,8 +29,10 @@ public:
      * @param icon Icon
      * @param title Title of the overlay
      * @param description Overlay description
+     * @param foregroundColor Foreground color
+     * @param backgroundColor Background color
      */
-    InfoWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description = "", const QColor backgroundColor = Qt::lightGray, const QColor textColor = Qt::black);
+    InfoWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description = "", const QColor foregroundColor = Qt::black, const QColor backgroundColor = Qt::lightGray);
     
     /**
      * Set overlay parameters
@@ -48,10 +50,10 @@ public:
 
     /**
      * Set overlay colors
-     * @param backgroundColor Background color of the widget
-     * @param textColor Text color of the widget
+     * @param foregroundColor Foreground color
+     * @param backgroundColor Background color
      */
-    void setColors(const QColor backgroundColor, const QColor textColor);
+    void setColors(const QColor foregroundColor = Qt::black, const QColor backgroundColor = Qt::lightGray);
 
 private:
 
@@ -59,11 +61,12 @@ private:
     void initialize();
 
 private:
+    QIcon       _icon;                  /** Icon */
     QLabel      _iconLabel;             /** Label for displaying the icon */
     QLabel      _titleLabel;            /** Label for displaying the title */
     QLabel      _descriptionLabel;      /** Label for displaying the description */
+    QColor      _foregroundColor;       /** Foreground color of the widget */
     QColor      _backgroundColor;       /** Background color of the widget */
-    QColor      _textColor;             /** Text color of the widget */
 };
 
 }

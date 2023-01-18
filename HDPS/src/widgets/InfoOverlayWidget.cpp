@@ -13,15 +13,15 @@ InfoOverlayWidget::InfoOverlayWidget(QWidget* parent) :
     InfoWidget(parent),
     _widgetOverlayer(this, this, parent)
 {
-    setColors(Qt::lightGray, Qt::black);
+    setColors(Qt::black, Qt::lightGray);
 }
 
-InfoOverlayWidget::InfoOverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description /*= ""*/, const QColor backgroundColor /*= Qt::lightgray*/, const QColor textColor /*= Qt::black*/) :
+InfoOverlayWidget::InfoOverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description /*= ""*/, const QColor foregroundColor /*= Qt::black*/, const QColor backgroundColor /*= Qt::lightGray*/) :
     InfoWidget(parent),
     _widgetOverlayer(this, this, parent)
 {
     set(icon, title, description);
-    setColors(backgroundColor, textColor);
+    setColors(foregroundColor, backgroundColor);
 }
 
 hdps::util::WidgetFader& InfoOverlayWidget::getWidgetFader()
