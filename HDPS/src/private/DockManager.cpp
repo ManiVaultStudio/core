@@ -3,6 +3,9 @@
 
 #include <ViewPlugin.h>
 
+#include <CoreInterface.h>
+#include <AbstractPluginManager.h>
+
 #include <util/Serialization.h>
 
 #include <DockAreaWidget.h> 
@@ -128,18 +131,22 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
     hide();
     {
-        //for (auto viewPluginDockWidget : _viewPluginDockWidgets)
-        //    removeDockWidget(viewPluginDockWidget);
-
-//        _viewPluginDockWidgets.clear();
-
         for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList()) {
-            //auto dockWidget = new CDockWidget("Test");
-            //dockWidget->setObjectName(viewPluginDockWidgetVariant.toMap()["ID"].toString());
-            //addDockWidget(RightDockWidgetArea, dockWidget);
-            addDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));
+            const auto pluginKind = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap()["Kind"].toString();
+
+            if (plugins().isPluginLoaded(pluginKind)) {
+                addDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));
+            } else {
+                auto dw = new CDockWidget("test");
+
+                dw->setWidget(new QLabel("======"));
+                qDebug() << viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap()["ID"].toString();
+
+                dw->setObjectName(viewPluginDockWidgetVariant.toMap()["ID"].toString());
+
+                addDockWidget(RightDockWidgetArea, dw);
+            }
         }
-            
 
         if (!restoreState(QByteArray::fromBase64(variantMap["State"].toString().toUtf8()), variantMap["Version"].toInt()))
             qCritical() << "Unable to restore state from" << objectName();

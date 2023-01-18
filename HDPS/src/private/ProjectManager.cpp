@@ -213,8 +213,8 @@ void ProjectManager::reset()
 
         core->getActionsManager().reset();
         core->getPluginManager().reset();
-        core->getDataManager().reset();
         core->getDataHierarchyManager().reset();
+        core->getDataManager().reset();
         core->getWorkspaceManager().reset();
     }
     endReset();

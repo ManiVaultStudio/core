@@ -4,17 +4,18 @@
 #include <QDebug>
 
 #ifdef _DEBUG
-    #define PLUGIN_MANAGER_FILTER_MODEL_VERBOSE
+    //#define PLUGIN_MANAGER_FILTER_MODEL_VERBOSE
 #endif
 
 using namespace hdps::gui;
 
 PluginManagerFilterModel::PluginManagerFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
-    _instantiatedPluginsOnlyAction(this, "Show only instantiated plugins", false, false)
+    _instantiatedPluginsOnlyAction(this, "Show only instantiated plugins", true, true)
 {
     _instantiatedPluginsOnlyAction.setConnectionPermissionsToNone();
     _instantiatedPluginsOnlyAction.setToolTip("Show only instantiated plugins are all available plugins");
+    //_instantiatedPluginsOnlyAction.setSettingsPrefix("PluginManager/ShowInstantiatedPluginsOnly", true);
 
     setRecursiveFilteringEnabled(true);
 

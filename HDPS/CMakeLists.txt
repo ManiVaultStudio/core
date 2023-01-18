@@ -511,8 +511,9 @@ set(PUBLIC_WIDGET_HEADERS
     src/widgets/DropWidget.h
     src/widgets/Divider.h
     src/widgets/HierarchyWidget.h
-    src/widgets/OverlayWidget.h
     src/widgets/InfoOverlayWidget.h
+    src/widgets/OverlayWidget.h
+    src/widgets/InfoWidget.h
     src/widgets/ProjectEditorDialog.h
     src/widgets/ActionHierarchyWidget.h
     src/widgets/TaskProgressDialog.h
@@ -523,8 +524,9 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/DropWidget.cpp
     src/widgets/Divider.cpp
     src/widgets/HierarchyWidget.cpp
-    src/widgets/OverlayWidget.cpp
     src/widgets/InfoOverlayWidget.cpp
+    src/widgets/OverlayWidget.cpp
+    src/widgets/InfoWidget.cpp
     src/widgets/ProjectEditorDialog.cpp
     src/widgets/ActionHierarchyWidget.cpp
     src/widgets/TaskProgressDialog.cpp
@@ -605,6 +607,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/PresetsModel.h
     src/util/PresetsFilterModel.h
     src/util/WidgetFader.h
+    src/util/WidgetOverlayer.h
     src/util/Serialization.h
     src/util/Serializable.h
     src/util/DockArea.h
@@ -636,6 +639,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/PresetsModel.cpp
     src/util/PresetsFilterModel.cpp
     src/util/WidgetFader.cpp
+    src/util/WidgetOverlayer.cpp
     src/util/Serialization.cpp
     src/util/Serializable.cpp
     src/util/DockArea.cpp

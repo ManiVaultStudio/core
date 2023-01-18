@@ -28,7 +28,7 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
 
     setWindowIcon(pluginIcon);
     setModal(true);
-    setWindowTitle("Plugin Manager");
+    setWindowTitle("Plugin Browser");
     
     auto layout = new QVBoxLayout();
 
