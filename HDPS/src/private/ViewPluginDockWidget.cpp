@@ -44,8 +44,6 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
         _viewPlugin->getTriggerHelpAction().trigger();
     });
 
-    getInfoOverlayWidget().show();
-
     initialize();
 }
 
@@ -112,17 +110,13 @@ void ViewPluginDockWidget::loadViewPlugin()
     qDebug() << __FUNCTION__;
 #endif
 
-    if (plugins().isPluginLoaded(_viewPluginKind)) {
-        auto viewPlugin = dynamic_cast<ViewPlugin*>(plugins().requestPlugin(_viewPluginKind));
+    if (!plugins().isPluginLoaded(_viewPluginKind))
+        return;
 
-        if (viewPlugin)
-            setViewPlugin(viewPlugin);
-    } else {
-        auto& overlayWidget = getInfoOverlayWidget();
+    auto viewPlugin = dynamic_cast<ViewPlugin*>(plugins().requestPlugin(_viewPluginKind));
 
-        overlayWidget.setColor(QColor(1, 0, 0));
-        overlayWidget.set(Application::getIconFont("FontAwesome").getIcon("exclamation-triangle"), "Error loading view", QString("%1 plugin is not loaded").arg(_viewPluginKind));
-    }
+    if (viewPlugin)
+        setViewPlugin(viewPlugin);
 }
 
 ViewPlugin* ViewPluginDockWidget::getViewPlugin()

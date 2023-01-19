@@ -37,12 +37,6 @@ private:
     void updateCentralWidget();
 
     /**
-     * Get number of open view plugin dock widgets
-     * @return Number of open view plugin dock widgets
-     */
-    std::int32_t getNumberOfOpenViewPluginDockWidgets() const;
-
-    /**
      * Invoked when a dock widget is added
      * @param dockWidget Pointer to added dock widget
      */

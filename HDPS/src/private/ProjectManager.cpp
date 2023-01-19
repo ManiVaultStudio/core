@@ -43,7 +43,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _newProjectMenu(),
     _importDataMenu(),
     _publishAction(this, "Publish"),
-    _pluginManagerAction(this, "Plugin Manager"),
+    _pluginManagerAction(this, "Plugin Browser..."),
     _showStartPageAction(this, "Start Page...", true, true)
 {
     _newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));

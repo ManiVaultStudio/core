@@ -23,7 +23,6 @@ using namespace hdps::plugin;
 DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     CDockWidget(title, parent),
     Serializable(title),
-    _infoOverlayWidget(this, Application::getIconFont("FontAwesome").getIcon("hourglass-half"), "Loading", QString("Waiting for %1 to load...").arg(title)),
     _settingsToolButton(nullptr)
 {
 #ifdef DOCK_WIDGET_VERBOSE
@@ -32,12 +31,7 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
 
     setObjectName(getId());
     setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromContent);
-
-    auto& widgetFader = _infoOverlayWidget.getWidgetFader();
-
-    widgetFader.setMaximumOpacity(0.6f);
-    widgetFader.setFadeInDuration(150);
-    widgetFader.setFadeOutDuration(150);
+    setFeature(DockWidgetPinnable, true);
 
     _settingsToolButton = new QToolButton();
 
@@ -80,11 +74,6 @@ void DockWidget::showEvent(QShowEvent* showEvent)
     }
 }
 
-hdps::gui::InfoOverlayWidget& DockWidget::getInfoOverlayWidget()
-{
-    return _infoOverlayWidget;
-}
-
 QMenu* DockWidget::getSettingsMenu()
 {
     return nullptr;
@@ -93,9 +82,6 @@ QMenu* DockWidget::getSettingsMenu()
 void DockWidget::setWidget(QWidget* widget, eInsertMode insertMode /*= AutoScrollArea*/)
 {
     CDockWidget::setWidget(widget, insertMode);
-
-    _infoOverlayWidget.raise();
-    _infoOverlayWidget.hide();
 }
 
 void DockWidget::fromVariantMap(const QVariantMap& variantMap)

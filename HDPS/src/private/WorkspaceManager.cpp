@@ -53,6 +53,10 @@ WorkspaceManager::WorkspaceManager() :
     // Temporary solution for https://github.com/hdps/core/issues/274
     new QOpenGLWidget();
 
+    CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
+    //CDockManager::setAutoHideConfigFlags(CDockManager::DefaultAutoHideConfig);
+    //CDockManager::setAutoHideConfigFlag(CDockManager::AutoHideShowOnMouseOver, true);
+
     setObjectName("WorkspaceManager");
 
     ads::CDockComponentsFactory::setFactory(new DockComponentsFactory());
@@ -156,10 +160,7 @@ void WorkspaceManager::initalize()
         _viewPluginsDockManager = new DockManager();
         _viewPluginsDockWidget  = new ViewPluginsDockWidget(_viewPluginsDockManager);
 
-        //_mainDockManager->setConfigFlag(CDockManager::FocusHighlighting, true);
         _mainDockManager->setObjectName("MainDockManager");
-
-        //_viewPluginsDockManager->setConfigFlag(CDockManager::FocusHighlighting, true);
         _viewPluginsDockManager->setObjectName("ViewPluginsDockManager");
 
         auto viewPluginsDockArea = _mainDockManager->setCentralWidget(_viewPluginsDockWidget.get());

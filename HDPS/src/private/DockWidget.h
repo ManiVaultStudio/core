@@ -2,8 +2,6 @@
 
 #include <util/Serializable.h>
 
-#include <widgets/InfoOverlayWidget.h>
-
 #include <DockWidget.h>
 
 #include <QMenu>
@@ -15,7 +13,6 @@ class QToolButton;
  *
  * ADS dock widget class enhanced with:
  * - Serialization
- * - Widget overlay for display of additional information
  * - Ability to choose additional settings from tool button in tab bar
  *
  * @author Thomas Kroes
@@ -52,12 +49,6 @@ public:
     void showEvent(QShowEvent* showEvent) override;
 
     /**
-     * Get info overlay widget (for showing docking information)
-     * @return Reference to info overlay widget
-     */
-    hdps::gui::InfoOverlayWidget& getInfoOverlayWidget();
-
-    /**
      * Get settings menu (when derived dock widgets return a valid menu, a tool button will in the tab bar that shows this menu)
      * @return Pointer to settings menu
      */
@@ -85,9 +76,8 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    hdps::gui::InfoOverlayWidget    _infoOverlayWidget;     /** Info overlay widget for showing loading information */
-    QToolButton*                    _settingsToolButton;    /** Pointer to settings tool button (located in the dock widget tab bar) */
-    QMenu                           _settingsMenu;          /** Settings menu for settings tool button */
+    QToolButton*    _settingsToolButton;    /** Pointer to settings tool button (located in the dock widget tab bar) */
+    QMenu           _settingsMenu;          /** Settings menu for settings tool button */
 };
 
 using DockWidgets = QVector<DockWidget*>;

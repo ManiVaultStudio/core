@@ -54,25 +54,16 @@ ViewPluginsDockWidget::ViewPluginsDockWidget(QPointer<DockManager> dockManager, 
 void ViewPluginsDockWidget::updateCentralWidget()
 {
 #ifdef VIEW_PLUGINS_DOCK_WIDGET_VERBOSE
-    qDebug() << __FUNCTION__ << getNumberOfOpenViewPluginDockWidgets();
+    qDebug() << __FUNCTION__;
 #endif
     
-    _centralDockWidget.toggleView(getNumberOfOpenViewPluginDockWidgets() == 0);
-}
+    std::int32_t numberOfVisibleNonCentralDockWidgets = 0;
 
-std::int32_t ViewPluginsDockWidget::getNumberOfOpenViewPluginDockWidgets() const
-{
-    std::int32_t numberOfOpenViewPluginDockWidgets = 0;
-    
-    for (auto viewPluginDockWidget : ViewPluginDockWidget::active) {
-        if (viewPluginDockWidget->getViewPlugin() != nullptr && viewPluginDockWidget->getViewPlugin()->isSystemViewPlugin())
-            continue;
+    for (auto dockWidget : _dockManager->dockWidgets())
+        if (!dockWidget->isCentralWidget() && !dockWidget->isClosed())
+            numberOfVisibleNonCentralDockWidgets++;
 
-        if (!viewPluginDockWidget->isClosed())
-            numberOfOpenViewPluginDockWidgets++;
-    }
-
-    return numberOfOpenViewPluginDockWidgets;
+    _centralDockWidget.toggleView(numberOfVisibleNonCentralDockWidgets == 0);
 }
 
 void ViewPluginsDockWidget::dockWidgetAdded(ads::CDockWidget* dockWidget)
