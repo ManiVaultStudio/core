@@ -4,6 +4,7 @@
 #include "LoadSystemViewMenu.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 
 #include <QToolButton>
 
@@ -25,8 +26,6 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
     addViewPluginToolButton->setIconSize(QSize(16, 16));
 
     auto dockManager = dockAreaWidget->dockManager();
-
-    QMenu* menu = nullptr;
 
     if (dockManager->objectName() == "MainDockManager") {
         auto loadSystemViewMenu = new LoadSystemViewMenu(nullptr, dockAreaWidget);
@@ -59,4 +58,12 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
     }
 
     insertWidget(indexOf(button(ads::TitleBarButtonTabsMenu)) - 1, addViewPluginToolButton);
+
+    const auto updateReadOnly = [addViewPluginToolButton]() -> void {
+        addViewPluginToolButton->setVisible(!workspaces().getLockingAction().isLocked());
+    };
+
+    connect(&workspaces().getLockingAction().getLockedAction(), &ToggleAction::toggled, this, updateReadOnly);
+
+    updateReadOnly();
 }

@@ -5,6 +5,8 @@
 
 #include "ViewPlugin.h"
 
+#include "util/DockWidgetPermission.h"
+
 #ifdef _DEBUG
     #define ABSTRACT_WORKSPACE_MANAGER_VERBOSE
 #endif
@@ -234,6 +236,15 @@ public:
 
         emit workspaceSaved(getCurrentWorkspace()->getFilePath());
     }
+
+public: // View plugin dock widget permissions
+
+    /**
+     * Set \p dockWidgetPermissions for all view plugin dock widgets
+     * @param dockWidgetPermissions Global dock widget permission flags
+     * @param set Whether to set or unset the dock widget permission flags
+     */
+    virtual void setViewPluginDockWidgetPermissionsGlobally(const util::DockWidgetPermissions& dockWidgetPermissions = util::DockWidgetPermission::All, bool set = true) = 0;
 
 public: // IO
 

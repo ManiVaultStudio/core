@@ -442,6 +442,7 @@ set(PUBLIC_ACTIONS_HEADERS
     src/actions/FilePickerAction.h
     src/actions/StatusAction.h
     src/actions/RecentFilesAction.h
+    src/actions/LockingAction.h
     src/actions/GroupSectionTreeItem.h
     src/actions/GroupWidgetTreeItem.h
     src/actions/WidgetActionContextMenu.h
@@ -496,6 +497,7 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/FilePickerAction.cpp
     src/actions/StatusAction.cpp
     src/actions/RecentFilesAction.cpp
+    src/actions/LockingAction.cpp
     src/actions/GroupSectionTreeItem.cpp
     src/actions/GroupWidgetTreeItem.cpp
     src/actions/WidgetActionContextMenu.cpp
@@ -614,6 +616,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Logger.h
     src/util/AbstractItemModelTester.h
     src/util/Version.h
+    src/util/DockWidgetPermission.h
 )
 
 set(PUBLIC_UTIL_SOURCES
@@ -646,6 +649,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Logger.cpp
     src/util/AbstractItemModelTester.cpp
     src/util/Version.cpp
+    src/util/DockWidgetPermission.cpp
 )
 
 set(PUBLIC_UTIL_FILES
@@ -1061,6 +1065,14 @@ install(FILES
 # Initially install everything in the same place
 # this may need to be split up 
 
+file(GLOB EXAMPLE_PROJECTS res/examples/*.hdps)
+
+add_custom_command(TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                       ${EXAMPLE_PROJECTS}
+                       "${INSTALL_DIR}/$<CONFIGURATION>/examples/"
+                   )
+
 # Install the HDPSPUBLIC components needed for the Plugin builds
 add_custom_command(
     TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
@@ -1106,6 +1118,7 @@ add_custom_command(
     #     --prefix ${INSTALL_DIR}/$<CONFIGURATION>
     #     --verbose
 )
+                   
 
 # System plugins
 add_subdirectory(src/plugins/PointData)

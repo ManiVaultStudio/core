@@ -22,6 +22,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _mayCloseAction(this, "May close", true, true),
     _mayFloatAction(this, "May float", true, true),
     _mayMoveAction(this, "May move", true, true),
+    _lockingAction(this),
     _visibleAction(this, "Visible", true, true),
     _helpAction(this, "Trigger help"),
     _triggerShortcut()
@@ -97,8 +98,28 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     });
 
     connect(&_isolateAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
-        Application::core()->getWorkspaceManager().isolateViewPlugin(this, toggled);
+        workspaces().isolateViewPlugin(this, toggled);
     });
+
+    const auto updateDockWidgetPermissionsReadOnly = [this]() -> void {
+        const auto enabled = !_lockingAction.getLockedAction().isChecked();
+
+        _mayCloseAction.setEnabled(enabled);
+        _mayFloatAction.setEnabled(enabled);
+        _mayMoveAction.setEnabled(enabled);
+    };
+
+    connect(&_lockingAction.getLockedAction(), &ToggleAction::toggled, this, [this, updateDockWidgetPermissionsReadOnly](bool toggled) -> void {
+        _mayCloseAction.setChecked(!toggled);
+        _mayFloatAction.setChecked(!toggled);
+        _mayMoveAction.setChecked(!toggled);
+
+        getDestroyAction().setEnabled(!toggled);
+
+        updateDockWidgetPermissionsReadOnly();
+    });
+
+    updateDockWidgetPermissionsReadOnly();
 
     connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
         getTriggerHelpAction().trigger();
@@ -188,6 +209,7 @@ void ViewPlugin::fromVariantMap(const QVariantMap& variantMap)
     Serializable::fromVariantMap(_mayCloseAction, variantMap, "MayClose");
     Serializable::fromVariantMap(_mayFloatAction, variantMap, "MayFloat");
     Serializable::fromVariantMap(_mayMoveAction, variantMap, "MayMove");
+    Serializable::fromVariantMap(_lockingAction, variantMap, "Locking");
     Serializable::fromVariantMap(_visibleAction, variantMap, "Visible");
 }
 
@@ -198,6 +220,7 @@ QVariantMap ViewPlugin::toVariantMap() const
     Serializable::insertIntoVariantMap(_mayCloseAction, variantMap, "MayClose");
     Serializable::insertIntoVariantMap(_mayFloatAction, variantMap, "MayFloat");
     Serializable::insertIntoVariantMap(_mayMoveAction, variantMap, "MayMove");
+    Serializable::insertIntoVariantMap(_lockingAction, variantMap, "Locking");
     Serializable::insertIntoVariantMap(_visibleAction, variantMap, "Visible");
 
     return variantMap;

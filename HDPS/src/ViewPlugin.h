@@ -6,6 +6,7 @@
 #include "actions/ToggleAction.h"
 #include "actions/OptionsAction.h"
 #include "actions/OptionAction.h"
+#include "actions/LockingAction.h"
 
 #include "Plugin.h"
 
@@ -98,6 +99,7 @@ public: // Action getters
     gui::ToggleAction& getMayCloseAction() { return _mayCloseAction; }
     gui::ToggleAction& getMayFloatAction() { return _mayFloatAction; }
     gui::ToggleAction& getMayMoveAction() { return _mayMoveAction; }
+    gui::LockingAction& getLockingAction() { return _lockingAction; }
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
 
 private:
@@ -105,9 +107,10 @@ private:
     gui::TriggerAction      _editActionsAction;     /** Trigger action to start editing the view plugin action hierarchy */
     gui::TriggerAction      _screenshotAction;      /** Trigger action to create a screenshot */
     gui::ToggleAction       _isolateAction;         /** Toggle action to toggle view isolation (when toggled, all other view plugins are temporarily closed) */
-    gui::ToggleAction       _mayCloseAction;        /** Action for toggling whether a view plugin may be closed */
-    gui::ToggleAction       _mayFloatAction;        /** Action for toggling whether a view plugin may float */
-    gui::ToggleAction       _mayMoveAction;         /** Action for toggling whether a view plugin may be moved */
+    gui::ToggleAction       _mayCloseAction;        /** Action for toggling whether the view plugin may be closed */
+    gui::ToggleAction       _mayFloatAction;        /** Action for toggling whether the view plugin may float */
+    gui::ToggleAction       _mayMoveAction;         /** Action for toggling whether the view plugin may be moved */
+    gui::LockingAction      _lockingAction;         /** Action for toggling whether the view plugin is locked */
     gui::ToggleAction       _visibleAction;         /** Action which determines whether the view plugin is visible or not */
     gui::TriggerAction      _helpAction;            /** Action which triggers documentation */
     QKeySequence            _triggerShortcut;       /** Shortcut for triggering the plugin */

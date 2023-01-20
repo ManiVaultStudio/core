@@ -2,6 +2,7 @@
 #include "AbstractWorkspaceManager.h"
 
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include "util/Serialization.h"
 
@@ -16,6 +17,7 @@ Workspace::Workspace(QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("Workspace"),
     _filePath(),
+    _lockingAction(this),
     _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
@@ -28,6 +30,7 @@ Workspace::Workspace(const QString& filePath, QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("Workspace"),
     _filePath(filePath),
+    _lockingAction(this),
     _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
@@ -81,16 +84,20 @@ void Workspace::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
+    Serializable::fromVariantMap(_lockingAction, variantMap, "Locking");
     Serializable::fromVariantMap(_titleAction, variantMap, "Title");
     Serializable::fromVariantMap(_descriptionAction, variantMap, "Description");
     Serializable::fromVariantMap(_tagsAction, variantMap, "Tags");
     Serializable::fromVariantMap(_commentsAction, variantMap, "Comments");
+
+    workspaces().getLockingAction().setLocked(_lockingAction.isLocked());
 }
 
 QVariantMap Workspace::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
 
+    Serializable::insertIntoVariantMap(_lockingAction, variantMap, "Locking");
     Serializable::insertIntoVariantMap(_titleAction, variantMap, "Title");
     Serializable::insertIntoVariantMap(_descriptionAction, variantMap, "Description");
     Serializable::insertIntoVariantMap(_tagsAction, variantMap, "Tags");
@@ -160,6 +167,15 @@ void Workspace::initialize()
     _commentsAction.setConnectionPermissionsToNone();
     _commentsAction.setClearable(true);
     _commentsAction.setDefaultWidgetFlags(StringAction::TextEdit);
+
+    connect(&_lockingAction.getLockedAction(), &ToggleAction::toggled, this, [this]() -> void {
+        for (auto plugin : plugins().getPluginsByType(plugin::Type::VIEW))
+            dynamic_cast<hdps::plugin::ViewPlugin*>(plugin)->getLockingAction().setLocked(_lockingAction.isLocked());
+    });
+
+    connect(&workspaces().getLockingAction().getLockedAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        _lockingAction.setLocked(toggled);
+    });
 }
 
 }

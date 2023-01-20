@@ -85,6 +85,29 @@ public:
      */
     QWidget* getWidget() override;
 
+public: // View plugin dock widget permissions
+
+    /**
+     * Freeze all dock widgets with \p dockWidgetPermissions
+     * @param dockWidgetPermissions Global dock widget permission flags
+     * @param set Whether to set or unset the dock widget permission flags
+     */
+    void setViewPluginDockWidgetPermissionsGlobally(const util::DockWidgetPermissions& dockWidgetPermissions = util::DockWidgetPermission::All, bool set = true) override;
+
+public: // Locking
+
+    /**
+     * Get whether the manager be locked
+     * @return Boolean determining whether the manager be locked
+     */
+    bool mayLock() const override;
+
+    /**
+     * Get whether the manager be unlocked
+     * @return Boolean determining whether the manager be unlocked
+     */
+    bool mayUnlock() const override;
+
 public: // IO
 
     /** Creates a new workspace */

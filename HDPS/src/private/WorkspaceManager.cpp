@@ -627,4 +627,38 @@ WorkspaceLocations WorkspaceManager::getWorkspaceLocations(const WorkspaceLocati
     return workspaceLocations;
 }
 
+void WorkspaceManager::setViewPluginDockWidgetPermissionsGlobally(const util::DockWidgetPermissions& dockWidgetPermissions /*= util::DockWidgetPermission::All*/, bool set /*= true*/)
+{
+    for (auto plugin : plugins().getPluginsByType(plugin::Type::VIEW)) {
+        auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
+
+        if (dockWidgetPermissions.testFlag(DockWidgetPermission::MayClose))
+            viewPlugin->getMayCloseAction().setChecked(set);
+
+        if (dockWidgetPermissions.testFlag(DockWidgetPermission::MayFloat))
+            viewPlugin->getMayFloatAction().setChecked(set);
+
+        if (dockWidgetPermissions.testFlag(DockWidgetPermission::MayMove))
+            viewPlugin->getMayMoveAction().setChecked(set);
+    }
+}
+
+bool WorkspaceManager::mayLock() const
+{
+    for (auto plugin : plugins().getPluginsByType(plugin::Type::VIEW))
+        if (!dynamic_cast<hdps::plugin::ViewPlugin*>(plugin)->getLockingAction().isLocked())
+            return true;
+
+    return false;
+}
+
+bool WorkspaceManager::mayUnlock() const
+{
+    for (auto plugin : plugins().getPluginsByType(plugin::Type::VIEW))
+        if (dynamic_cast<hdps::plugin::ViewPlugin*>(plugin)->getLockingAction().isLocked())
+            return true;
+
+    return false;
+}
+
 }

@@ -2,8 +2,10 @@
 
 #include "util/Serializable.h"
 
+#include "actions/LockingAction.h"
 #include "actions/StringAction.h"
 #include "actions/StringsAction.h"
+#include "actions/ToggleAction.h"
 
 namespace hdps {
 
@@ -77,11 +79,13 @@ private:
 
 public: // Action getters
 
+    const gui::LockingAction& getLockingAction() const { return _lockingAction; }
     const gui::StringAction& getTitleAction() const { return _titleAction; }
     const gui::StringAction& getDescriptionAction() const { return _descriptionAction; }
     const gui::StringsAction& getTagsAction() const { return _tagsAction; }
     const gui::StringAction& getCommentsAction() const { return _commentsAction; }
 
+    gui::LockingAction& getLockingAction() { return _lockingAction; }
     gui::StringAction& getTitleAction() { return _titleAction; }
     gui::StringAction& getDescriptionAction() { return _descriptionAction; }
     gui::StringsAction& getTagsAction() { return _tagsAction; }
@@ -97,6 +101,7 @@ signals:
 
 private:
     QString             _filePath;              /** Location on disk where the workspace resides */
+    gui::LockingAction  _lockingAction;         /** Workspace locking action */
     gui::StringAction   _titleAction;           /** Workspace title action */
     gui::StringAction   _descriptionAction;     /** Workspace description action */
     gui::StringsAction  _tagsAction;            /** Workspace tags action */

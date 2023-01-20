@@ -91,9 +91,6 @@ public: // View plugin isolation
 
 private:
 
-    /** Populates the settings menu with actions from the view plugin */
-    void initializeSettingsMenu();
-
     /**
      * Assign \p viewPlugin to dock widget (configures the dock widget properties and sets the dock widget widget)
      * @param viewPlugin Pointer to view plugin

@@ -16,6 +16,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullp
     QWidget(parent),
     _openProjectWidget(this),
     _recentProjectsWidget(this),
+    _exampleProjectsWidget(this),
     _recentProjectsAction(this)
 {
     auto layout = new QVBoxLayout();
@@ -24,7 +25,12 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullp
     layout->addWidget(&_openProjectWidget);
 
     layout->addWidget(StartPageContentWidget::createHeaderLabel("Recent", "Recently opened project"));
-    layout->addWidget(&_recentProjectsWidget, 1);
+    layout->addWidget(&_recentProjectsWidget);
+
+    layout->addWidget(StartPageContentWidget::createHeaderLabel("Examples", "Open example project"));
+    layout->addWidget(&_exampleProjectsWidget);
+
+    layout->addStretch(1);
 
     setLayout(layout);
 
@@ -34,6 +40,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullp
     _openProjectWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
  
     _recentProjectsWidget.getHierarchyWidget().setItemTypeName("Recent Project");
+    _exampleProjectsWidget.getHierarchyWidget().setItemTypeName("Example Project");
 }
 
 void StartPageOpenProjectWidget::updateActions()
@@ -69,5 +76,37 @@ void StartPageOpenProjectWidget::updateActions()
 
         _recentProjectsWidget.getModel().add(icon, title, description, comments, tags, previewImage, tooltip, clickedCallback);
     }
+
+    QStringList projectFilter("*.hdps");
+
+    QDir directory(QString("%1/examples").arg(qApp->applicationDirPath()));
+
+    const auto exampleProjects = directory.entryList(projectFilter);
+
+    for (const auto& exampleProject : exampleProjects) {
+        const auto exampleProjectFilePath = QString("%1/examples/%2").arg(qApp->applicationDirPath(), exampleProject);
+
+        QTemporaryDir temporaryDir;
+
+        const auto exampleProjectJsonFilePath = projects().extractProjectFileFromHdpsFile(exampleProjectFilePath, temporaryDir);
+
+        Project project(exampleProjectJsonFilePath);
+
+        const auto icon         = fontAwesome.getIcon("file");
+        const auto title        = project.getTitleAction().getString();
+        const auto description  = project.getDescriptionAction().getString();
+        const auto comments     = "";
+        const auto tags         = QStringList();
+        const auto previewImage = projects().getPreviewImage(exampleProjectFilePath);
+        const auto tooltip      = "";
+
+        const auto clickedCallback = [exampleProjectFilePath]() -> void {
+            projects().openProject(exampleProjectFilePath);
+        };
+
+        _exampleProjectsWidget.getModel().add(icon, title, description, comments, tags, previewImage, tooltip, clickedCallback);
+
+    }
+    qDebug() << exampleProjects;
         
 }

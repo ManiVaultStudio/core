@@ -31,6 +31,7 @@ WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) 
     _groupAction << workspace->getDescriptionAction();
     _groupAction << workspace->getTagsAction();
     _groupAction << workspace->getCommentsAction();
+    _groupAction << workspaces().getLockingAction().getLockedAction();
 
     auto layout = new QVBoxLayout();
 

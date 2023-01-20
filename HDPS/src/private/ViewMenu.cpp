@@ -73,13 +73,14 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
     });
 
     const auto updateReadOnly = [this]() -> void {
-        setEnabled(projects().hasProject());
+        setEnabled(projects().hasProject() && !workspaces().getLockingAction().isLocked());
     };
 
     updateReadOnly();
 
     connect(&projects(), &AbstractProjectManager::projectCreated, this, updateReadOnly);
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateReadOnly);
+    connect(&workspaces().getLockingAction(), &LockingAction::lockedChanged, this, updateReadOnly);
 }
 
 bool ViewMenu::mayProducePlugins() const

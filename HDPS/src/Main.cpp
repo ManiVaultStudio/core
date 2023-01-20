@@ -33,20 +33,16 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
 
 #ifdef __APPLE__
-    // Ask for an OpenGL 3.3 Core Context as the default
     QSurfaceFormat defaultFormat;
+    
     defaultFormat.setVersion(3, 3);
     defaultFormat.setProfile(QSurfaceFormat::CoreProfile);
     defaultFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    
     QSurfaceFormat::setDefaultFormat(defaultFormat);
 #endif
 
-    QSurfaceFormat format;
-    format.setDepthBufferSize(24);
-    format.setVersion(4, 1);
-    QSurfaceFormat::setDefaultFormat(format);
-
-    //QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 
     hdps::Application application(argc, argv);
 

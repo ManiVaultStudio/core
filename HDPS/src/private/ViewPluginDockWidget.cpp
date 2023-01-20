@@ -59,7 +59,6 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
     setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
     initialize();
     setViewPlugin(viewPlugin);
-    initializeSettingsMenu();
 }
 
 ViewPluginDockWidget::ViewPluginDockWidget(const QVariantMap& variantMap) :
@@ -101,6 +100,28 @@ void ViewPluginDockWidget::initialize()
         active.removeOne(this);
 
         takeWidget();
+    });
+
+    connect(&_settingsMenu, &QMenu::aboutToShow, this, [this]() -> void {
+        _settingsMenu.clear();
+        
+        if (_viewPlugin->hasHelp())
+            _settingsMenu.addAction(&_helpAction);
+
+        _settingsMenu.addAction(&_viewPlugin->getScreenshotAction());
+
+        if (!_viewPlugin->isSystemViewPlugin())
+            _settingsMenu.addAction(&_viewPlugin->getIsolateAction());
+
+        _settingsMenu.addSeparator();
+        _settingsMenu.addAction(&_viewPlugin->getDestroyAction());
+
+        if (!_viewPlugin->getLockingAction().isLocked())
+            _settingsMenu.addAction(&_viewPlugin->getEditActionsAction());
+
+        _settingsMenu.addSeparator();
+
+        _settingsMenu.addAction(&_viewPlugin->getLockingAction().getLockedAction());
     });
 }
 
@@ -175,25 +196,6 @@ void ViewPluginDockWidget::restoreVisibility()
     toggleView(_cachedVisibility);
 }
 
-void ViewPluginDockWidget::initializeSettingsMenu()
-{
-    if (_viewPlugin->hasHelp())
-        _settingsMenu.addAction(&_helpAction);
-
-    _settingsMenu.addAction(&_viewPlugin->getScreenshotAction());
-
-    if (!_viewPlugin->isSystemViewPlugin())
-        _settingsMenu.addAction(&_viewPlugin->getIsolateAction());
-
-    _settingsMenu.addSeparator();
-
-#ifdef _DEBUG
-    _settingsMenu.addAction(&_viewPlugin->getDestroyAction());
-#endif
-    
-    _settingsMenu.addAction(&_viewPlugin->getEditActionsAction());
-}
-
 void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 {
 #ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
@@ -249,6 +251,4 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
     });
 
     connectToViewPluginVisibleAction(this);
-
-    initializeSettingsMenu();
 }

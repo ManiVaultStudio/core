@@ -29,6 +29,7 @@ ProjectEditorDialog::ProjectEditorDialog(QWidget* parent, ViewPlugin* viewPlugin
     layout->addWidget(viewPlugin->getMayCloseAction().createWidget(this));
     layout->addWidget(viewPlugin->getMayFloatAction().createWidget(this));
     layout->addWidget(viewPlugin->getMayMoveAction().createWidget(this));
+    layout->addWidget(viewPlugin->getLockingAction().getLockedAction().createWidget(this));
     layout->addWidget(viewPlugin->getGuiNameAction().createWidget(this));
     //layout->addWidget(_groupsAction.createWidget(this));
 

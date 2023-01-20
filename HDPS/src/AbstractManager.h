@@ -2,6 +2,8 @@
 
 #include "util/Serializable.h"
 
+#include "actions/LockingAction.h"
+
 #include <QObject>
 #include <QDebug>
 #include <QIcon>
@@ -34,7 +36,8 @@ public:
     AbstractManager(QObject* parent = nullptr, const QString& name = "") :
         QObject(parent),
         Serializable(name),
-        _initialized(false)
+        _initialized(false),
+        _lockingAction(this)
     {
     }
 
@@ -98,6 +101,28 @@ public:
         return QIcon();
     }
 
+public: // Action getters
+
+    gui::LockingAction& getLockingAction() { return _lockingAction; }
+
+public: // Locking
+
+    /**
+     * Get whether the manager be locked
+     * @return Boolean determining whether the manager be locked
+     */
+    virtual bool mayLock() const {
+        return true;
+    };
+
+    /**
+     * Get whether the manager be unlocked
+     * @return Boolean determining whether the manager be unlocked
+     */
+    virtual bool mayUnlock() const {
+        return true;
+    };
+    
 signals:
 
     /** Signals that the initialization process has begun */
@@ -113,7 +138,8 @@ signals:
     void managerReset();
 
 private:
-    bool    _initialized;       /** Whether the manager is initialized or not */
+    bool                _initialized;       /** Whether the manager is initialized or not */
+    gui::LockingAction  _lockingAction;     /** Manager locking action */
 };
 
 }
