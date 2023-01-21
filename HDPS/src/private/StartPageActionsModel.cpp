@@ -28,7 +28,7 @@ StartPageActionsModel::StartPageActionsModel(QObject* parent /*= nullptr*/) :
     }
 }
 
-void StartPageActionsModel::add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QStringList& tags, const QImage& previewImage, const QString& tooltip, const ClickedCB& clickedCallback)
+void StartPageActionsModel::add(const StartPageAction& startPageAction)
 {
 #ifdef START_PAGE_ACTIONS_MODEL_VERBOSE
     qDebug() << __FUNCTION__;
@@ -36,21 +36,21 @@ void StartPageActionsModel::add(const QIcon& icon, const QString& title, const Q
 
     QList<QStandardItem*> startPageActionRow = {
         new QStandardItem(),
-        new QStandardItem(title),
-        new QStandardItem(description),
-        new QStandardItem(comments),
+        new QStandardItem(startPageAction.getTitle()),
+        new QStandardItem(startPageAction.getDescription()),
+        new QStandardItem(startPageAction.getComments()),
         new QStandardItem(),
         new QStandardItem(),
-        new QStandardItem(tooltip),
+        new QStandardItem(startPageAction.getTooltip()),
         new QStandardItem(),
         new QStandardItem()
     };
 
-    startPageActionRow[static_cast<int>(Column::Icon)]->setData(QVariant::fromValue(icon));
-    startPageActionRow[static_cast<int>(Column::Tags)]->setData(QVariant::fromValue(tags), Qt::EditRole);
-    startPageActionRow[static_cast<int>(Column::PreviewImage)]->setData(QVariant::fromValue(previewImage));
+    startPageActionRow[static_cast<int>(Column::Icon)]->setData(QVariant::fromValue(startPageAction.getIcon()));
+    startPageActionRow[static_cast<int>(Column::Tags)]->setData(QVariant::fromValue(startPageAction.getTags()), Qt::EditRole);
+    startPageActionRow[static_cast<int>(Column::PreviewImage)]->setData(QVariant::fromValue(startPageAction.getPreviewImage()));
     
-    startPageActionRow[static_cast<int>(Column::ClickedCallback)]->setData(QVariant::fromValue(clickedCallback));
+    startPageActionRow[static_cast<int>(Column::ClickedCallback)]->setData(QVariant::fromValue(startPageAction.getClickedCallback()));
 
     for (auto item : startPageActionRow)
         item->setEditable(false);

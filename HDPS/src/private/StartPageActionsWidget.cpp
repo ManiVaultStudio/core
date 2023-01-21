@@ -8,6 +8,10 @@
 #include <QHeaderView>
 #include <QBuffer>
 
+#ifdef _DEBUG
+    #define START_PAGE_ACTIONS_WIDGET_VERBOSE
+#endif
+
 using namespace hdps;
 using namespace hdps::gui;
 
@@ -44,6 +48,7 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
     treeView.setSelectionMode(QAbstractItemView::SingleSelection);
     treeView.setIconSize(QSize(24, 24));
     treeView.setMouseTracking(true);
+    treeView.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     treeView.setStyleSheet(" \
         QTreeView { \
             border: none; \
@@ -79,7 +84,7 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
     treeViewHeader->setSectionResizeMode(static_cast<int>(StartPageActionsModel::Column::SummaryDelegate), QHeaderView::Stretch);
 
     connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
-        auto callback = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::ClickedCallback)).data(Qt::UserRole + 1).value<StartPageActionsModel::ClickedCB>();
+        auto callback = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::ClickedCallback)).data(Qt::UserRole + 1).value<StartPageAction::ClickedCallback>();
         callback();
 
         _hierarchyWidget.getSelectionModel().clear();
@@ -114,7 +119,6 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
                 <head> \
                     <style> \
                         body { \
-                            width: 250px; \
                         } \
                     </style> \
                 </head> \
@@ -133,7 +137,26 @@ StartPageActionsModel& StartPageActionsWidget::getModel()
     return _model;
 }
 
+StartPageActionsFilterModel& StartPageActionsWidget::getFilterModel()
+{
+    return _filterModel;
+}
+
 HierarchyWidget& StartPageActionsWidget::getHierarchyWidget()
 {
     return _hierarchyWidget;
+}
+
+void StartPageActionsWidget::createEditors()
+{
+#ifdef START_PAGE_ACTIONS_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    for (int rowIndex = 0; rowIndex < _filterModel.rowCount(); rowIndex++) {
+        const auto editorModelIndex = _filterModel.index(rowIndex, static_cast<int>(StartPageActionsModel::Column::SummaryDelegate));
+
+        if (!_hierarchyWidget.getTreeView().isPersistentEditorOpen(editorModelIndex))
+            _hierarchyWidget.getTreeView().openPersistentEditor(editorModelIndex);
+    }
 }

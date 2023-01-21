@@ -48,33 +48,34 @@ void StartPageOpenProjectWidget::updateActions()
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _openProjectWidget.getModel().reset();
-    _openProjectWidget.getModel().add(fontAwesome.getIcon("folder-open"), "Open project", "Open an existing project", "", QStringList(), QImage(), "Browse to an existing project and open it", []() -> void {
+
+    StartPageAction openProjectStartPageAction(fontAwesome.getIcon("folder-open"), "Open project", "Open an existing project", "Browse to an existing project and open it", []() -> void {
         projects().openProject();
     });
+
+    _openProjectWidget.getModel().add(openProjectStartPageAction);
 
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
 
     _recentProjectsWidget.getModel().reset();
 
-    _recentProjectsWidget.getModel().add(fontAwesome.getIcon("file"), "Blank", "Create project without any plugins", "", QStringList(), QImage(), "Create a blank project without any plugins", []() -> void {
+    StartPageAction blankProjectStartPageAction(fontAwesome.getIcon("file"), "Blank", "Create project without any plugins", "Create a blank project without any plugins", []() -> void {
         projects().newBlankProject();
     });
 
-    for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
-        const auto recentFilePath   = recentFile.getFilePath();
-        const auto icon             = fontAwesome.getIcon("file");
-        const auto title            = QFileInfo(recentFilePath).baseName();
-        const auto description      = recentFilePath;
-        const auto comments         = recentFile.getDateTime().toString("dd/MM/yyyy hh:mm");
-        const auto tags             = QStringList();
-        const auto previewImage     = projects().getPreviewImage(recentFilePath);
-        const auto tooltip          = "";
-        
-        const auto clickedCallback = [recentFilePath]() -> void {
-            projects().openProject(recentFilePath);
-        };
+    _recentProjectsWidget.getModel().add(blankProjectStartPageAction);
 
-        _recentProjectsWidget.getModel().add(icon, title, description, comments, tags, previewImage, tooltip, clickedCallback);
+    for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
+        const auto recentFilePath = recentFile.getFilePath();
+        
+        StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("file"), QFileInfo(recentFilePath).baseName(), recentFilePath, "", [recentFilePath]() -> void {
+            projects().openProject(recentFilePath);
+        });
+
+        recentProjectStartPageAction.setComments(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
+        recentProjectStartPageAction.setPreviewImage(projects().getPreviewImage(recentFilePath));
+
+        _recentProjectsWidget.getModel().add(recentProjectStartPageAction);
     }
 
     QStringList projectFilter("*.hdps");
@@ -92,21 +93,15 @@ void StartPageOpenProjectWidget::updateActions()
 
         Project project(exampleProjectJsonFilePath);
 
-        const auto icon         = fontAwesome.getIcon("file");
-        const auto title        = project.getTitleAction().getString();
-        const auto description  = project.getDescriptionAction().getString();
-        const auto comments     = "";
-        const auto tags         = QStringList();
-        const auto previewImage = projects().getPreviewImage(exampleProjectFilePath);
-        const auto tooltip      = "";
-
-        const auto clickedCallback = [exampleProjectFilePath]() -> void {
+        StartPageAction exampleProjectStartPageAction(fontAwesome.getIcon("file-prescription"), project.getTitleAction().getString(), project.getDescriptionAction().getString(), "", [exampleProjectFilePath]() -> void {
             projects().openProject(exampleProjectFilePath);
-        };
+        });
 
-        _exampleProjectsWidget.getModel().add(icon, title, description, comments, tags, previewImage, tooltip, clickedCallback);
+        exampleProjectStartPageAction.setPreviewImage(projects().getPreviewImage(exampleProjectFilePath));
 
+        _exampleProjectsWidget.getModel().add(exampleProjectStartPageAction);
     }
-    qDebug() << exampleProjects;
-        
+
+    _recentProjectsWidget.createEditors();
+    _exampleProjectsWidget.createEditors();
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "StartPageAction.h"
+
 #include <QStandardItemModel>
 #include <QImage>
 
@@ -13,8 +15,6 @@
 class StartPageActionsModel final : public QStandardItemModel
 {
 public:
-
-    using ClickedCB = std::function<void()>;    /** Callback function that is called when the action row is clicked */
 
     /** Model columns */
     enum class Column {
@@ -41,18 +41,10 @@ public:
     StartPageActionsModel(QObject* parent = nullptr);
 
     /**
-     * Add action with \p icon, \p name and \p title
-     * @param icon Action icon
-     * @param title Action title
-     * @param description Action description
-     * @param comments Action comments
-     * @param tags Action tags
-     * @param previewImage Action preview image
-     * @param tooltip Action tooltip
-     * @param clickedCallback Callback function that is called when the action row is clicked
-     * @param tooltipCallback Callback function that is called when a tooltip is required
+     * Add start page action
+     * @param startPageAction Start page action
      */
-    void add(const QIcon& icon, const QString& title, const QString& description, const QString& comments, const QStringList& tags, const QImage& previewImage, const QString& tooltip, const ClickedCB& clickedCallback);
+    void add(const StartPageAction& startPageAction);
 
     /** Resets the rows and notifies others */
     void reset();

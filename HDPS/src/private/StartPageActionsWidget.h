@@ -31,10 +31,18 @@ public:
     StartPageActionsModel& getModel();
 
     /**
+     * Get filter model
+     * @return Reference to filter model
+     */
+    StartPageActionsFilterModel& getFilterModel();
+
+    /**
      * Get hierarchy widget
      * @return Reference to hierarchy widget
      */
     hdps::gui::HierarchyWidget& getHierarchyWidget();
+
+    void createEditors();
 
 private:
     StartPageActionsModel           _model;             /** Model which contains start page actions */

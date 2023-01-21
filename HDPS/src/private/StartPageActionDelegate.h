@@ -1,14 +1,6 @@
 #pragma once
 
-#include "StartPageActionsModel.h"
-#include "StartPageActionsFilterModel.h"
-
 #include <QStyledItemDelegate>
-#include <QScopedPointer>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QScopedPointer>
-#include <QLabel>
 
 /**
  * Workspace delegate class
@@ -29,14 +21,6 @@ public:
     StartPageActionDelegate(QObject* parent = nullptr);
 
     /**
-     * Paint the delegate using \p painter, \p option and model \p index
-     * @param painter Pointer to painter
-     * @param option Style option
-     * @param index Model index to paint
-     */
-    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
-
-    /**
      * Gives the size hint for \p option and model \p index
      * @param option Style option
      * @param index Model index to compute the size hint for
@@ -44,13 +28,18 @@ public:
      */
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
-private:
-    QWidget         _widget;
-    QHBoxLayout     _mainLayout;
-    QVBoxLayout     _iconLayout;
-    QLabel          _iconLabel;
-    QGridLayout     _textLayout;
-    QLabel          _titleLabel;
-    QLabel          _descriptionLabel;
-    QLabel          _commentsLabel;
+    /**
+     * 
+     */
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+
+    /**
+     * 
+     */
+    void setEditorData(QWidget* editor, const QModelIndex& index) const;
+
+    /**
+     * 
+     */
+    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 };

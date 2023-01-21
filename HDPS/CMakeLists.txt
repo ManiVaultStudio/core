@@ -285,6 +285,8 @@ set(PRIVATE_START_PAGE_HEADERS
     src/private/StartPageActionsModel.h
     src/private/StartPageActionsFilterModel.h
     src/private/StartPageActionDelegate.h
+    src/private/StartPageActionDelegateEditorWidget.h
+    src/private/StartPageAction.h
     src/private/LogoWidget.h
 )
 
@@ -298,6 +300,8 @@ set(PRIVATE_START_PAGE_SOURCES
     src/private/StartPageActionsModel.cpp
     src/private/StartPageActionsFilterModel.cpp
     src/private/StartPageActionDelegate.cpp
+    src/private/StartPageActionDelegateEditorWidget.cpp
+    src/private/StartPageAction.cpp
     src/private/LogoWidget.cpp
 )
 

@@ -1,0 +1,24 @@
+#include "StartPageAction.h"
+#include "StartPageActionsModel.h"
+
+StartPageAction::StartPageAction(const QIcon& icon, const QString& title, const QString& description, const QString& tooltip, const ClickedCallback& clickedCallback) :
+    _icon(icon),
+    _title(title),
+    _description(description),
+    _tooltip(tooltip),
+    _clickedCallback(clickedCallback)
+{
+}
+
+StartPageAction::StartPageAction(const QModelIndex& index)
+{
+    setEditorData(index);
+}
+
+void StartPageAction::setEditorData(const QModelIndex& index)
+{
+    setIcon(index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Icon)).data(Qt::UserRole + 1).value<QIcon>());
+    setTitle(index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Title)).data(Qt::EditRole).toString());
+    setDescription(index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Description)).data(Qt::EditRole).toString());
+    setComments(index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Comments)).data(Qt::EditRole).toString());
+}
