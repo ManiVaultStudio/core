@@ -8,15 +8,16 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-LockingAction::LockingAction(QObject* parent, bool locked /*= false*/) :
+LockingAction::LockingAction(QObject* parent, const QString& what /*= ""*/, bool locked /*= false*/) :
     GroupAction(parent),
-    _lockedAction(this, "Locked"),
-    _lockAction(this, "Lock"),
-    _unlockAction(this, "Unlock")
+    _lockedAction(this),
+    _lockAction(this),
+    _unlockAction(this)
 {
     setCheckable(true);
     setText("Locking");
     initialize(locked);
+    updateActionsText();
 }
 
 QString LockingAction::getTypeString() const
@@ -79,6 +80,25 @@ bool LockingAction::isLocked() const
 void LockingAction::setLocked(bool locked)
 {
     _lockedAction.setChecked(locked);
+}
+
+QString LockingAction::getWhat() const
+{
+    return _what;
+}
+
+void LockingAction::setWhat(QString what)
+{
+    _what = what;
+
+    updateActionsText();
+}
+
+void LockingAction::updateActionsText()
+{
+    _lockedAction.setText(QString("%1 locked").arg(_what));
+    _lockAction.setText(QString("Lock %1").arg(_what));
+    _unlockAction.setText(QString("Unlock %1").arg(_what));
 }
 
 }

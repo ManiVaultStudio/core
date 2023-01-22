@@ -65,8 +65,11 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Description), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Comments), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Tags), true);
+    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Subtitle), true);
+    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::MetaData), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::PreviewImage), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Tooltip), true);
+    treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::Contributors), true);
     treeView.setColumnHidden(static_cast<int>(StartPageActionsModel::Column::ClickedCallback), true);
 
     QPalette treeViewPalette(treeView.palette());

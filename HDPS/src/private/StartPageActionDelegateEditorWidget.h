@@ -92,18 +92,19 @@ private:
     void updateTextLabels();
 
 private:
-    QModelIndex     _index;                 /** Editor model index */
-    QHBoxLayout     _mainLayout;            /** Main editor layout */
-    QVBoxLayout     _iconLayout;            /** Left icon layout */
-    QLabel          _iconLabel;             /** Left icon label */
-    QVBoxLayout     _textLayout;            /** Right text layout */
-    QHBoxLayout     _primaryTextLayout;     /** Primary layout with title and comments labels */
-    QLabel          _titleLabel;            /** Title label */
-    QLabel          _commentsLabel;         /** Comments label */
-    QHBoxLayout     _secondaryTextLayout;   /** Secondary layout with description and info labels */
-    QLabel          _descriptionLabel;      /** Description label */
-    QHBoxLayout     _infoLayout;            /** Layout for preview, tags and meta info popups */
-    IconLabel       _previewIconLabel;      /** Icon label for preview image */
-    IconLabel       _commentsIconLabel;     /** Icon label for comments */
-    IconLabel       _tagsIconLabel;         /** Icon label for tags */
+    QModelIndex     _index;                     /** Editor model index */
+    QHBoxLayout     _mainLayout;                /** Main editor layout */
+    QVBoxLayout     _iconLayout;                /** Left icon layout */
+    QLabel          _iconLabel;                 /** Left icon label */
+    QVBoxLayout     _textLayout;                /** Right text layout */
+    QHBoxLayout     _primaryTextLayout;         /** Primary layout with title and comments labels */
+    QLabel          _titleLabel;                /** Title label */
+    QLabel          _metaDataLabel;             /** Label with meta data (may be empty) */
+    QHBoxLayout     _secondaryTextLayout;       /** Secondary layout with subtitle and info labels */
+    QLabel          _subtitleLabel;             /** Subtitle label */
+    QHBoxLayout     _infoLayout;                /** Layout for preview, tags and meta info popups */
+    IconLabel       _previewIconLabel;          /** Icon label for preview image */
+    IconLabel       _metaDataIconLabel;         /** Icon label for meta data */
+    IconLabel       _tagsIconLabel;             /** Icon label for tags */
+    IconLabel       _contributorsIconLabel;     /** Icon label for contributors */
 };

@@ -143,6 +143,8 @@ WorkspaceManager::WorkspaceManager() :
     connect(this, &WorkspaceManager::workspaceSaved, this, updateActionsReadOnly);
 
     updateActionsReadOnly();
+
+    getLockingAction().setWhat("Workspace");
 }
 
 void WorkspaceManager::initalize()

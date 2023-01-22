@@ -18,6 +18,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments"),
+    _contributorsAction(this, "Contributors"),
     _compressionEnabledAction(this, "Compression", DEFAULT_ENABLE_COMPRESSION, DEFAULT_ENABLE_COMPRESSION),
     _compressionLevelAction(this, "Compression level", 1, 9, DEFAULT_COMPRESSION_LEVEL, DEFAULT_COMPRESSION_LEVEL)
 {
@@ -33,6 +34,7 @@ Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments"),
+    _contributorsAction(this, "Contributors"),
     _compressionEnabledAction(this, "Compression enabled", DEFAULT_ENABLE_COMPRESSION, DEFAULT_ENABLE_COMPRESSION),
     _compressionLevelAction(this, "Compression enabled", 1, 9, DEFAULT_COMPRESSION_LEVEL, DEFAULT_COMPRESSION_LEVEL)
 {
@@ -84,17 +86,12 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "Version");
-    variantMapMustContain(variantMap, "Title");
-    variantMapMustContain(variantMap, "Description");
-    variantMapMustContain(variantMap, "Tags");
-    variantMapMustContain(variantMap, "Comments");
-
-    _version.fromVariantMap(variantMap["Version"].toMap());
-    _titleAction.fromVariantMap(variantMap["Title"].toMap());
-    _descriptionAction.fromVariantMap(variantMap["Description"].toMap());
-    _tagsAction.fromVariantMap(variantMap["Tags"].toMap());
-    _commentsAction.fromVariantMap(variantMap["Comments"].toMap());
+    Serializable::fromVariantMap(_version, variantMap, "Version");
+    Serializable::fromVariantMap(_titleAction, variantMap, "Title");
+    Serializable::fromVariantMap(_descriptionAction, variantMap, "Description");
+    Serializable::fromVariantMap(_tagsAction, variantMap, "Tags");
+    Serializable::fromVariantMap(_commentsAction, variantMap, "Comments");
+    Serializable::fromVariantMap(_contributorsAction, variantMap, "Contributors");
 
     variantMapMustContain(variantMap, "Compression");
 
@@ -120,12 +117,14 @@ QVariantMap Project::toVariantMap() const
         { "Level", _compressionLevelAction.toVariantMap() }
     };
 
+    Serializable::insertIntoVariantMap(_version, variantMap, "Version");
+    Serializable::insertIntoVariantMap(_titleAction, variantMap, "Title");
+    Serializable::insertIntoVariantMap(_descriptionAction, variantMap, "Description");
+    Serializable::insertIntoVariantMap(_tagsAction, variantMap, "Tags");
+    Serializable::insertIntoVariantMap(_commentsAction, variantMap, "Comments");
+    Serializable::insertIntoVariantMap(_contributorsAction, variantMap, "Contributors");
+
     variantMap.insert({
-        { "Version", _version.toVariantMap() },
-        { "Title", _titleAction.toVariantMap() },
-        { "Description", _descriptionAction.toVariantMap() },
-        { "Tags", _tagsAction.toVariantMap() },
-        { "Comments", _commentsAction.toVariantMap() },
         { "Compression", compressionMap },
         { plugins().getSerializationName(), plugins().toVariantMap() },
         { dataHierarchy().getSerializationName(), dataHierarchy().toVariantMap() },
@@ -154,6 +153,9 @@ void Project::initialize()
     _commentsAction.setClearable(true);
     _commentsAction.setDefaultWidgetFlags(StringAction::TextEdit);
 
+    _contributorsAction.setConnectionPermissionsToNone();
+    _contributorsAction.setDefaultWidgetFlags(StringsAction::ListView);
+
     _compressionEnabledAction.setConnectionPermissionsToNone();
 
     _compressionLevelAction.setConnectionPermissionsToNone();
@@ -171,6 +173,20 @@ void Project::initialize()
 util::Version Project::getVersion() const
 {
     return _version;
+}
+
+void Project::updateContributors()
+{
+    QString currentUserName;
+
+#ifdef __APPLE__
+    currentUserName = getenv("USER");
+#else
+    currentUserName = getenv("USERNAME");
+#endif
+
+    if (!currentUserName.isEmpty() && !_contributorsAction.getStrings().contains(currentUserName))
+        _contributorsAction.addString(currentUserName);
 }
 
 }

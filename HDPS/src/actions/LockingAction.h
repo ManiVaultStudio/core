@@ -22,9 +22,10 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param what What is to be locked
      * @param locked Locked
      */
-    LockingAction(QObject* parent, bool locked = false);
+    LockingAction(QObject* parent, const QString& what = "", bool locked = false);
 
     /**
      * Get type string
@@ -37,6 +38,18 @@ public:
      * @param locked Locked
      */
     void initialize(bool locked = false);
+
+    /**
+     * Get what
+     * @return What is locked
+     */
+    QString getWhat() const;
+
+    /**
+     * Set what to \p whatB
+     * @param what What is locked
+     */
+    void setWhat(QString what);
 
     /**
      * Get locked status
@@ -70,6 +83,11 @@ public: // Action getters
     gui::TriggerAction& getLockAction() { return _lockAction; }
     gui::TriggerAction& getUnlockAction() { return _unlockAction; }
 
+private:
+
+    /** Update the text of the actions to reflect changes to what */
+    void updateActionsText();
+
 signals:
 
     /**
@@ -79,6 +97,7 @@ signals:
     void lockedChanged(bool locked);
 
 private:
+    QString             _what;              /** What is to be locked */
     gui::ToggleAction   _lockedAction;      /** Action for toggling the locking status */
     gui::TriggerAction  _lockAction;        /** Action for locking */
     gui::TriggerAction  _unlockAction;      /** Action for unlocking */

@@ -35,6 +35,5 @@ public:
 
 private:
     hdps::gui::GroupAction      _groupAction;       /** Settings group action */
-    hdps::gui::TriggersAction   _freezeAction;      /** Action for freezing/unfreezing the workspace */
     hdps::gui::TriggerAction    _okAction;          /** Action for exiting the dialog */
 };

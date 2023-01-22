@@ -37,7 +37,7 @@ public:
         QObject(parent),
         Serializable(name),
         _initialized(false),
-        _lockingAction(this)
+        _lockingAction(this, name)
     {
     }
 

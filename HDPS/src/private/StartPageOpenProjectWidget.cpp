@@ -51,36 +51,41 @@ void StartPageOpenProjectWidget::updateActions()
     _recentProjectsWidget.getModel().reset();
     _exampleProjectsWidget.getModel().reset();
 
-    StartPageAction openProjectStartPageAction(fontAwesome.getIcon("folder-open"), "Open project", "Open an existing project", "Browse to an existing project and open it", []() -> void {
+    StartPageAction openProjectStartPageAction(fontAwesome.getIcon("folder-open"), "Open project", "Open an existing project", "Open an existing project", "Browse to an existing project and open it", []() -> void {
         projects().openProject();
     });
+
+    openProjectStartPageAction.setSubtitle("Open an existing project");
 
     _openProjectWidget.getModel().add(openProjectStartPageAction);
 
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
 
-    StartPageAction blankProjectStartPageAction(fontAwesome.getIcon("file"), "Blank", "Create project without any plugins", "Create a blank project without any plugins", []() -> void {
+    StartPageAction blankProjectStartPageAction(fontAwesome.getIcon("file"), "Blank", "Create blank project", "Empty project", "Create a blank project without any plugins", []() -> void {
         projects().newBlankProject();
     });
+
+    blankProjectStartPageAction.setComments("Create a blank project without any plugins");
 
     _recentProjectsWidget.getModel().add(blankProjectStartPageAction);
 
     for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
         const auto recentFilePath = recentFile.getFilePath();
         
-        StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("file"), QFileInfo(recentFilePath).baseName(), recentFilePath, "", [recentFilePath]() -> void {
-            projects().openProject(recentFilePath);
-        });
-
         QTemporaryDir temporaryDir;
 
         const auto recentProjectJsonFilePath = projects().extractProjectFileFromHdpsFile(recentFilePath, temporaryDir);
 
         Project project(recentProjectJsonFilePath);
 
-        recentProjectStartPageAction.setComments(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
+        StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("file"), QFileInfo(recentFilePath).baseName(), recentFilePath, project.getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+            projects().openProject(recentFilePath);
+        });
+
         recentProjectStartPageAction.setTags(project.getTagsAction().getStrings());
+        recentProjectStartPageAction.setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
         recentProjectStartPageAction.setPreviewImage(projects().getPreviewImage(recentFilePath));
+        recentProjectStartPageAction.setContributors(project.getContributorsAction().getStrings());
 
         _recentProjectsWidget.getModel().add(recentProjectStartPageAction);
     }
@@ -100,7 +105,7 @@ void StartPageOpenProjectWidget::updateActions()
 
         Project project(exampleProjectJsonFilePath);
 
-        StartPageAction exampleProjectStartPageAction(fontAwesome.getIcon("file-prescription"), project.getTitleAction().getString(), project.getDescriptionAction().getString(), "", [exampleProjectFilePath]() -> void {
+        StartPageAction exampleProjectStartPageAction(fontAwesome.getIcon("file-prescription"), project.getTitleAction().getString(), exampleProjectFilePath, project.getDescriptionAction().getString(), "", [exampleProjectFilePath]() -> void {
             projects().openProject(exampleProjectFilePath);
         });
 

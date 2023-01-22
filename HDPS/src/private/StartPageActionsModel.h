@@ -3,7 +3,6 @@
 #include "StartPageAction.h"
 
 #include <QStandardItemModel>
-#include <QImage>
 
 /**
  * Start page actions model class
@@ -18,13 +17,16 @@ public:
 
     /** Model columns */
     enum class Column {
-        Icon,               /** Action icon */
-        Title,              /** Action title */
-        Description,        /** Action description */
-        Comments,           /** Action comments */
-        Tags,               /** Action tags */
+        Icon,               /** Icon */
+        Title,              /** Title */
+        Description,        /** Description (may be empty) */
+        Comments,           /** Comments (may be empty) */
+        Tags,               /** Tags (may be empty) */
+        Subtitle,           /** Sub title */
+        MetaData,           /** Meta information */
         PreviewImage,       /** Action preview image */
         Tooltip,            /** Action tooltip */
+        Contributors,       /** Action contributors */
         ClickedCallback,    /** Callback which is called when the action is clicked */
         SummaryDelegate     /** Delegate item with title and subtitle */
     };
@@ -48,10 +50,4 @@ public:
 
     /** Resets the rows and notifies others */
     void reset();
-
-    /**
-     * Get whether the model has any comments
-     * @return Boolean determining whether the model has any comments
-     */
-    bool hasComments() const;
 };

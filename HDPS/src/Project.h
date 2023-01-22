@@ -57,6 +57,9 @@ public: // Miscellaneous
      */
     util::Version getVersion() const;
 
+    /** Update the contributors (adds current user if not already added) */
+    void updateContributors();
+
 public: // Serialization
 
     /**
@@ -82,6 +85,7 @@ public: // Action getters
     const gui::StringAction& getDescriptionAction() const { return _descriptionAction; }
     const gui::StringsAction& getTagsAction() const { return _tagsAction; }
     const gui::StringAction& getCommentsAction() const { return _commentsAction; }
+    const gui::StringsAction& getContributorsAction() const { return _contributorsAction; }
     const gui::ToggleAction& getCompressionEnabledAction() const { return _compressionEnabledAction; }
     const gui::IntegralAction& getCompressionLevelAction() const { return _compressionLevelAction; }
 
@@ -89,6 +93,7 @@ public: // Action getters
     gui::StringAction& getDescriptionAction() { return _descriptionAction; }
     gui::StringsAction& getTagsAction() { return _tagsAction; }
     gui::StringAction& getCommentsAction() { return _commentsAction; }
+    gui::StringsAction& getContributorsAction() { return _contributorsAction; }
     gui::ToggleAction& getCompressionEnabledAction() { return _compressionEnabledAction; }
     gui::IntegralAction& getCompressionLevelAction() { return _compressionLevelAction; }
 
@@ -104,9 +109,10 @@ private:
     QString                 _filePath;                      /** Location on disk where the project resides */
     util::Version           _version;                       /** Version of the application with which the project is created */
     gui::StringAction       _titleAction;                   /** Workspace title action */
-    gui::StringAction       _descriptionAction;             /** Work description action */
-    gui::StringsAction      _tagsAction;                    /** Workspace tags action */
-    gui::StringAction       _commentsAction;                /** Workspace comments action */
+    gui::StringAction       _descriptionAction;             /** Description action */
+    gui::StringsAction      _tagsAction;                    /** Tags action */
+    gui::StringAction       _commentsAction;                /** Comments action */
+    gui::StringsAction      _contributorsAction;            /** Contributors action */
     gui::ToggleAction       _compressionEnabledAction;      /** Action to enable/disable project file compression */
     gui::IntegralAction     _compressionLevelAction;        /** Action to control the amount of project file compression */
 

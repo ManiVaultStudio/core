@@ -20,13 +20,14 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
     _textLayout(),
     _primaryTextLayout(),
     _titleLabel(),
-    _commentsLabel(),
+    _metaDataLabel(),
     _secondaryTextLayout(),
-    _descriptionLabel(),
+    _subtitleLabel(),
     _infoLayout(),
     _previewIconLabel(Application::getIconFont("FontAwesome").getIcon("image")),
-    _commentsIconLabel(Application::getIconFont("FontAwesome").getIcon("file-alt")),
-    _tagsIconLabel(Application::getIconFont("FontAwesome").getIcon("tags"))
+    _metaDataIconLabel(Application::getIconFont("FontAwesome").getIcon("file-alt")),
+    _tagsIconLabel(Application::getIconFont("FontAwesome").getIcon("tags")),
+    _contributorsIconLabel(Application::getIconFont("FontAwesome").getIcon("user"))
 {
     setObjectName("StartPageActionDelegateEditorWidget");
     setMouseTracking(true);
@@ -51,12 +52,12 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
     _iconLabel.setStyleSheet("padding-top: 3px;");
 
     _primaryTextLayout.addWidget(&_titleLabel, 1);
-    _primaryTextLayout.addWidget(&_commentsLabel);
+    _primaryTextLayout.addWidget(&_metaDataLabel);
 
     _titleLabel.setStyleSheet("font-weight: bold;");
-    _commentsLabel.setStyleSheet("color: dark-gray;");
+    _metaDataLabel.setStyleSheet("color: dark-gray;");
 
-    _secondaryTextLayout.addWidget(&_descriptionLabel, 1);
+    _secondaryTextLayout.addWidget(&_subtitleLabel, 1);
     _secondaryTextLayout.addLayout(&_infoLayout);
 
     const auto getTooltipHtml = [](const QString& tooltipTextHtml) -> QString {
@@ -76,9 +77,14 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
     };
 
     _previewIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
-        const auto previewImage = _index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::PreviewImage)).data(Qt::UserRole + 1).value<QImage>();
+        if (!_index.isValid())
+            return QString();
+
+        StartPageAction startPageAction(_index);
 
         QString tooltipTextHtml;
+
+        const auto previewImage = startPageAction.getPreviewImage();
 
         if (!previewImage.isNull()) {
             QBuffer buffer;
@@ -95,25 +101,66 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
         return getTooltipHtml(tooltipTextHtml);
     });
 
-    _commentsIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
-        return getTooltipHtml(_index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Comments)).data(Qt::EditRole).toString());
+    _metaDataIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
+        if (!_index.isValid())
+            return QString();
+
+        StartPageAction startPageAction(_index);
+
+        auto metaDataHtml = QString(" \
+            <table> \
+                <tr> \
+                    <td><b>Title:&nbsp;</b></td> \
+                    <td>%1</td> \
+                </tr> \
+                <tr> \
+                    <td><b>Description:&nbsp;</b></td> \
+                    <td>%2</td> \
+                </tr> \
+                <tr> \
+                    <td><b>Comments:&nbsp;</b></td> \
+                    <td>%3</td> \
+                </tr> \
+            </table> \
+        ").arg(startPageAction.getTitle(), startPageAction.getDescription(), startPageAction.getComments());
+
+        return getTooltipHtml(metaDataHtml);
     });
 
     _tagsIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
-        return getTooltipHtml(_index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Tags)).data(Qt::EditRole).toStringList().join(", "));
+        if (!_index.isValid())
+            return QString();
+
+        StartPageAction startPageAction(_index);
+
+        auto tagsHtml = QString("<p><b>Tags:</b>&nbsp;%1</p>").arg(startPageAction.getTags().join(", "));
+
+        return getTooltipHtml(tagsHtml);
+    });
+
+    _contributorsIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
+        if (!_index.isValid())
+            return QString();
+
+        StartPageAction startPageAction(_index);
+
+        auto tagsHtml = QString("<p><b>Contributors:</b>&nbsp;%1</p>").arg(startPageAction.getContributors().join(", "));
+
+        return getTooltipHtml(tagsHtml);
     });
 
     _infoLayout.setSpacing(5);
     _infoLayout.addWidget(&_previewIconLabel);
-    _infoLayout.addWidget(&_commentsIconLabel);
+    _infoLayout.addWidget(&_metaDataIconLabel);
     _infoLayout.addWidget(&_tagsIconLabel);
+    _infoLayout.addWidget(&_contributorsIconLabel);
     _infoLayout.addStretch(1);
     
     setLayout(&_mainLayout);
 
-    _descriptionLabel.installEventFilter(this);
+    _subtitleLabel.installEventFilter(this);
     _titleLabel.installEventFilter(this);
-    _commentsLabel.installEventFilter(this);
+    _metaDataLabel.installEventFilter(this);
 }
 
 void StartPageActionDelegateEditorWidget::setEditorData(const QModelIndex& index)
@@ -127,8 +174,8 @@ void StartPageActionDelegateEditorWidget::setEditorData(const QModelIndex& index
     updateTextLabels();
 
     _previewIconLabel.setVisible(!startPageAction.getPreviewImage().isNull());
-    _commentsIconLabel.setVisible(!startPageAction.getComments().isEmpty());
     _tagsIconLabel.setVisible(!startPageAction.getTags().isEmpty());
+    _contributorsIconLabel.setVisible(!startPageAction.getContributors().isEmpty());
 }
 
 bool StartPageActionDelegateEditorWidget::eventFilter(QObject* target, QEvent* event)
@@ -152,11 +199,11 @@ void StartPageActionDelegateEditorWidget::updateTextLabels()
 
     _iconLabel.setPixmap(startPageAction.getIcon().pixmap(QSize(24, 24)));
 
-    QFontMetrics titleMetrics(_titleLabel.font()), descriptionMetrics(_descriptionLabel.font());
+    QFontMetrics titleMetrics(_titleLabel.font()), descriptionMetrics(_subtitleLabel.font());
 
     _titleLabel.setText(titleMetrics.elidedText(startPageAction.getTitle(), Qt::ElideMiddle, _titleLabel.width() - 2));
-    _descriptionLabel.setText(descriptionMetrics.elidedText(startPageAction.getDescription(), Qt::ElideMiddle, _descriptionLabel.width() - 2));
-    _commentsLabel.setText(startPageAction.getComments());
+    _subtitleLabel.setText(descriptionMetrics.elidedText(startPageAction.getSubtitle(), Qt::ElideMiddle, _subtitleLabel.width() - 2));
+    _metaDataLabel.setText(startPageAction.getMetaData());
 }
 
 StartPageActionDelegateEditorWidget::IconLabel::IconLabel(const QIcon& icon, QWidget* parent /*= nullptr*/) :

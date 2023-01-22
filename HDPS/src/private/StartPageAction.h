@@ -25,11 +25,12 @@ public:
      * Construct with \p icon, \p title, \p description and \p clickedCallback
      * @param icon Action icon
      * @param title Action title
+     * @param subtitle Action subtitle
      * @param description Action description
      * @param tooltip Action tooltip
      * @param clickedCallback Callback function that is called when the action row is clicked
      */
-    StartPageAction(const QIcon& icon, const QString& title, const QString& description, const QString& tooltip, const ClickedCallback& clickedCallback);
+    StartPageAction(const QIcon& icon, const QString& title, const QString& subtitle, const QString& description, const QString& tooltip, const ClickedCallback& clickedCallback);
 
     /**
      * Construct from model \p index
@@ -42,23 +43,32 @@ public: // Getters and setters
     QIcon getIcon() const { return _icon; }
     void setIcon(const QIcon& icon) { _icon = icon; }
 
-    QString getTitle() const { return _title; }
+    QString getTitle() const { return _title.isEmpty() ? "NA" : _title; }
     void setTitle(const QString& title) { _title = title; }
 
-    QString getDescription() const { return _description; }
+    QString getDescription() const { return _description.isEmpty() ? "NA" : _description; }
     void setDescription(const QString& description) { _description = description; }
 
-    QString getComments() const { return _comments; }
+    QString getComments() const { return _comments.isEmpty() ? "NA" : _comments; }
     void setComments(const QString& comments) { _comments = comments; }
 
     QStringList getTags() const { return _tags; }
     void setTags(const QStringList& tags) { _tags = tags; }
+
+    QString getSubtitle() const { return _subtitle.isEmpty() ? "NA" : _subtitle; }
+    void setSubtitle(const QString& subtitle) { _subtitle = subtitle; }
+
+    QString getMetaData() const { return _metaData; }
+    void setMetaData(const QString& metaData) { _metaData = metaData; }
 
     QImage getPreviewImage() const { return _previewImage; }
     void setPreviewImage(const QImage& previewImage) { _previewImage = previewImage; }
 
     QString getTooltip() const { return _tooltip; }
     void setTooltip(const QString& tooltip) { _tooltip = tooltip; }
+
+    QStringList getContributors() const { return _contributors; }
+    void setContributors(const QStringList& contributors) { _contributors = contributors; }
 
     ClickedCallback getClickedCallback() const { return _clickedCallback; }
     void setClickedCallback(const ClickedCallback& clickedCallback) { _clickedCallback = clickedCallback; }
@@ -77,7 +87,10 @@ protected:
     QString             _description;       /** Description is in the second row */
     QString             _comments;          /** Comments are show on the top right */
     QStringList         _tags;              /** Tags (might be empty) */
+    QString             _subtitle;          /** Subtitle */
+    QString             _metaData;          /** Meta data (might be empty) */
     QImage              _previewImage;      /** Preview image (might be empty) */
     QString             _tooltip;           /** Tooltip (might be empty) */
+    QStringList         _contributors;      /** List of contributors */
     ClickedCallback     _clickedCallback;   /** Callback function that is called when the action row is clicked */
 };

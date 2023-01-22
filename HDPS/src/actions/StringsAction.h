@@ -24,15 +24,17 @@ public:
 
     /** Describes the widget configurations */
     enum WidgetFlag {
-        LineEdit    = 0x00001,      /** Widget includes a line edit */
+        MayEdit             = 0x00001,              /** Strings may be added and removed from the user interface */
+        ListView            = 0x00002,              /** Widget includes a list view */
+        EditableListView    = ListView | MayEdit,   /** Widget includes a list view with which strings may be added and removed from the user interface */
 
-        Default = LineEdit,
+        Default = EditableListView
     };
 
 public:
 
     /** Widget class for strings action */
-    class Widget : public WidgetActionWidget
+    class ListWidget : public WidgetActionWidget
     {
     protected:
 
@@ -82,7 +84,7 @@ public:
          * @param stringsAction Pointer to strings action
          * @param widgetFlags Widget flags for the configuration of the widget (type)
          */
-        Widget(QWidget* parent, StringsAction* stringsAction, const std::int32_t& widgetFlags);
+        ListWidget(QWidget* parent, StringsAction* stringsAction, const std::int32_t& widgetFlags);
 
     private:
         IconStringListModel     _model;             /** Strings model */
@@ -102,9 +104,7 @@ protected:
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new Widget(parent, this, widgetFlags);
-    }
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 

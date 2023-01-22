@@ -155,7 +155,22 @@ void StringsAction::removeStrings(const QStringList& strings)
     emit stringsChanged(_strings);
 }
 
-StringsAction::Widget::Widget(QWidget* parent, StringsAction* stringsAction, const std::int32_t& widgetFlags) :
+QWidget* StringsAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+{
+    auto widget = new WidgetActionWidget(parent, this);
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    if (widgetFlags & WidgetFlag::ListView)
+        layout->addWidget(new ListWidget(parent, this, widgetFlags));
+
+    widget->setLayout(layout);
+
+    return widget;
+}
+
+StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, stringsAction, widgetFlags),
     _model(stringsAction->icon(), this),
     _filterModel(),
@@ -195,14 +210,16 @@ StringsAction::Widget::Widget(QWidget* parent, StringsAction* stringsAction, con
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(&_hierarchyWidget, 1);
 
-    auto toolbarLayout = new QHBoxLayout();
+    if (widgetFlags & StringsAction::WidgetFlag::MayEdit) {
+        auto toolbarLayout = new QHBoxLayout();
 
-    toolbarLayout->addWidget(_nameAction.createWidget(this), 1);
-    toolbarLayout->addWidget(_addAction.createWidget(this, TriggerAction::Icon));
-    toolbarLayout->addWidget(_removeAction.createWidget(this, TriggerAction::Icon));
-    toolbarLayout->addWidget(_hierarchyWidget.getFilterGroupAction().createCollapsedWidget(this));
+        toolbarLayout->addWidget(_nameAction.createWidget(this), 1);
+        toolbarLayout->addWidget(_addAction.createWidget(this, TriggerAction::Icon));
+        toolbarLayout->addWidget(_removeAction.createWidget(this, TriggerAction::Icon));
+        toolbarLayout->addWidget(_hierarchyWidget.getFilterGroupAction().createCollapsedWidget(this));
 
-    layout->addLayout(toolbarLayout);
+        layout->addLayout(toolbarLayout);
+    }
 
     setLayout(layout);
 

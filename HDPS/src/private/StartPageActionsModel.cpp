@@ -10,8 +10,10 @@ QMap<StartPageActionsModel::Column, QPair<QString, QString>> StartPageActionsMod
     { StartPageActionsModel::Column::Description, { "Description", "Description" }},
     { StartPageActionsModel::Column::Comments, { "Comments", "Comments" }},
     { StartPageActionsModel::Column::Tags, { "Tags", "Tags" }},
+    { StartPageActionsModel::Column::MetaData, { "Meta Data", "Meta Data" }},
     { StartPageActionsModel::Column::PreviewImage, { "Preview", "Preview image" }},
     { StartPageActionsModel::Column::Tooltip, { "Tooltip", "Tooltip" }},
+    { StartPageActionsModel::Column::Contributors, { "Contributors", "Contributors" }},
     { StartPageActionsModel::Column::ClickedCallback, { "Clicked Callback", "Callback which is called when the action is clicked" }},
     { StartPageActionsModel::Column::SummaryDelegate, { "Summary", "Delegate item with title and subtitle" }}
 });
@@ -40,8 +42,11 @@ void StartPageActionsModel::add(const StartPageAction& startPageAction)
         new QStandardItem(startPageAction.getDescription()),
         new QStandardItem(startPageAction.getComments()),
         new QStandardItem(),
+        new QStandardItem(startPageAction.getSubtitle()),
+        new QStandardItem(startPageAction.getMetaData()),
         new QStandardItem(),
         new QStandardItem(startPageAction.getTooltip()),
+        new QStandardItem(),
         new QStandardItem(),
         new QStandardItem()
     };
@@ -49,7 +54,7 @@ void StartPageActionsModel::add(const StartPageAction& startPageAction)
     startPageActionRow[static_cast<int>(Column::Icon)]->setData(QVariant::fromValue(startPageAction.getIcon()));
     startPageActionRow[static_cast<int>(Column::Tags)]->setData(QVariant::fromValue(startPageAction.getTags()), Qt::EditRole);
     startPageActionRow[static_cast<int>(Column::PreviewImage)]->setData(QVariant::fromValue(startPageAction.getPreviewImage()));
-    
+    startPageActionRow[static_cast<int>(Column::Contributors)]->setData(QVariant::fromValue(startPageAction.getContributors()));
     startPageActionRow[static_cast<int>(Column::ClickedCallback)]->setData(QVariant::fromValue(startPageAction.getClickedCallback()));
 
     for (auto item : startPageActionRow)
@@ -58,15 +63,6 @@ void StartPageActionsModel::add(const StartPageAction& startPageAction)
     appendRow(startPageActionRow);
 
     emit layoutChanged();
-}
-
-bool StartPageActionsModel::hasComments() const
-{
-    for (int rowIndex = 0; rowIndex < rowCount(); rowIndex++)
-        if (!data(index(rowIndex, static_cast<int>(Column::Comments))).toString().isEmpty())
-            return true;
-
-    return false;
 }
 
 void StartPageActionsModel::reset()

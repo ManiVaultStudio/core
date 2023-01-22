@@ -44,20 +44,19 @@ void StartPageGetStartedWidget::updateActions()
     for (const auto workspaceLocation : workspaces().getWorkspaceLocations()) {
         Workspace workspace(workspaceLocation.getFilePath());
 
-        StartPageAction fromWorkspaceStartPageAction(workspaces().getIcon(), QFileInfo(workspaceLocation.getFilePath()).baseName(), workspaceLocation.getFilePath(), workspaceLocation.getFilePath(), [workspaceLocation]() -> void {
+        StartPageAction fromWorkspaceStartPageAction(workspaces().getIcon(), QFileInfo(workspaceLocation.getFilePath()).baseName(), workspaceLocation.getFilePath(), workspace.getDescriptionAction().getString(), workspaceLocation.getFilePath(), [workspaceLocation]() -> void {
             projects().newProject(workspaceLocation.getFilePath());
         });
 
-        QString comments;
-
-        fromWorkspaceStartPageAction.setComments(workspaceLocation.getTypeName());
+        fromWorkspaceStartPageAction.setComments(workspace.getCommentsAction().getString());
         fromWorkspaceStartPageAction.setTags(workspace.getTagsAction().getStrings());
+        fromWorkspaceStartPageAction.setMetaData(workspaceLocation.getTypeName());
         fromWorkspaceStartPageAction.setPreviewImage(Workspace::getPreviewImage(workspaceLocation.getFilePath()));
 
         _createProjectFromWorkspaceWidget.getModel().add(fromWorkspaceStartPageAction);
     }
 
-    StartPageAction importWorkspaceFromProjectStartPageAction(fontAwesome.getIcon("file"), "From Project", "Import workspace from project", "Pick an existing project and use its workspace", []() -> void {
+    StartPageAction importWorkspaceFromProjectStartPageAction(fontAwesome.getIcon("file"), "From Project", "Import workspace from project", "Import workspace from project", "Pick an existing project and use its workspace", []() -> void {
         projects().newBlankProject();
         workspaces().importWorkspaceFromProjectFile();
     });
@@ -65,10 +64,15 @@ void StartPageGetStartedWidget::updateActions()
     _createProjectFromWorkspaceWidget.getModel().add(importWorkspaceFromProjectStartPageAction);
 
     for (auto viewPluginFactory : plugins().getPluginFactoriesByType(plugin::Type::LOADER)) {
-        StartPageAction fromDataStartPageAction(viewPluginFactory->getIcon(), viewPluginFactory->getKind(), QString("Create project and import data with the %1").arg(viewPluginFactory->getKind()), "", [viewPluginFactory]() -> void {
+        const auto subtitle = QString("Import data into project with %1").arg(viewPluginFactory->getKind());
+
+        StartPageAction fromDataStartPageAction(viewPluginFactory->getIcon(), viewPluginFactory->getKind(), subtitle, subtitle, "", [viewPluginFactory]() -> void {
             projects().newBlankProject();
             plugins().requestPlugin(viewPluginFactory->getKind());
         });
+
+        fromDataStartPageAction.setSubtitle(subtitle);
+        fromDataStartPageAction.setComments(QString("Create a new project and import data into it with the %1").arg(viewPluginFactory->getKind()));
 
         _createProjectFromDatasetWidget.getModel().add(fromDataStartPageAction);
     }

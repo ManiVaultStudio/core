@@ -227,7 +227,10 @@ void ProjectManager::newProject(const QString& workspaceFilePath /*= ""*/)
 #ifdef PROJECT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
+
         createProject();
+
+        getCurrentProject()->updateContributors();
 
         if (QFileInfo(workspaceFilePath).exists())
             workspaces().loadWorkspace(workspaceFilePath);
@@ -378,7 +381,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             taskProgressDialog.setCurrentTask("Import data model");
             {
-                Application::core()->getProjectManager().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
+                projects().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
             }
             taskProgressDialog.setTaskFinished("Import data model");
 
@@ -388,7 +391,9 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                     const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
 
                     if (workspaceFileInfo.exists())
-                        Application::core()->getWorkspaceManager().loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
+                        workspaces().loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
+
+                    workspaces().setWorkspaceFilePath("");
                 }
                 taskProgressDialog.setTaskFinished("Load workspace");
             }
@@ -396,6 +401,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             _recentProjectsAction.addRecentFilePath(filePath);
 
             _project->setFilePath(filePath);
+            _project->updateContributors();
 
             qDebug().noquote() << filePath << "loaded successfully";
         }
@@ -555,7 +561,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
                 taskProgressDialog.setCurrentTask("Exporting dataset: " + savingItem.getFullPathName());
             });
 
-            Application::core()->getProjectManager().toJsonFile(jsonFileInfo.absoluteFilePath());
+            projects().toJsonFile(jsonFileInfo.absoluteFilePath());
 
             taskProgressDialog.setTaskFinished("Export data model");
             taskProgressDialog.addTasks(archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath));
@@ -566,7 +572,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
             QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
 
-            Application::core()->getWorkspaceManager().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
+            workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 
             archiver.compressDirectory(temporaryDirectoryPath, filePath, true, currentProject->getCompressionEnabledAction().isChecked() ? currentProject->getCompressionLevelAction().getValue() : 0, "");
 
@@ -615,7 +621,7 @@ void ProjectManager::createProject()
 
     _showStartPageAction.setChecked(false);
 
-    Application::core()->getWorkspaceManager().reset();
+    workspaces().reset();
 }
 
 bool ProjectManager::hasProject() const
