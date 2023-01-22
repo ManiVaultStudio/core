@@ -20,7 +20,7 @@ QSize StartPageActionDelegate::sizeHint(const QStyleOptionViewItem& option, cons
 
     QCoreApplication::processEvents();
 
-    return widget->sizeHint();
+    return QSize(option.rect.width(), widget->sizeHint().height());
 }
 
 QWidget* StartPageActionDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const

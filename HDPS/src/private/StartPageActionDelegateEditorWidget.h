@@ -79,6 +79,18 @@ public:
      */
     void setEditorData(const QModelIndex& index);
 
+    /**
+     * Respond to \p target object events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
+     */
+    bool eventFilter(QObject* target, QEvent* event) override;
+
+private:
+
+    /** Update all text labels and takes care of elidation */
+    void updateTextLabels();
+
 private:
     QModelIndex     _index;                 /** Editor model index */
     QHBoxLayout     _mainLayout;            /** Main editor layout */

@@ -43,7 +43,7 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
     _iconLayout.setAlignment(Qt::AlignTop | Qt::AlignCenter);
 
     _textLayout.setAlignment(Qt::AlignTop);
-    _textLayout.setSpacing(1);
+    _textLayout.setSpacing(3);
     _textLayout.addLayout(&_primaryTextLayout);
     _textLayout.addLayout(&_secondaryTextLayout);
 
@@ -110,6 +110,10 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
     _infoLayout.addStretch(1);
     
     setLayout(&_mainLayout);
+
+    _descriptionLabel.installEventFilter(this);
+    _titleLabel.installEventFilter(this);
+    _commentsLabel.installEventFilter(this);
 }
 
 void StartPageActionDelegateEditorWidget::setEditorData(const QModelIndex& index)
@@ -120,15 +124,39 @@ void StartPageActionDelegateEditorWidget::setEditorData(const QModelIndex& index
 
     _iconLabel.setPixmap(startPageAction.getIcon().pixmap(QSize(24, 24)));
 
+    updateTextLabels();
+
+    _previewIconLabel.setVisible(!startPageAction.getPreviewImage().isNull());
+    _commentsIconLabel.setVisible(!startPageAction.getComments().isEmpty());
+    _tagsIconLabel.setVisible(!startPageAction.getTags().isEmpty());
+}
+
+bool StartPageActionDelegateEditorWidget::eventFilter(QObject* target, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::Resize:
+            updateTextLabels();
+            break;
+
+        default:
+            break;
+    }
+
+    return QWidget::eventFilter(target, event);
+}
+
+void StartPageActionDelegateEditorWidget::updateTextLabels()
+{
+    StartPageAction startPageAction(_index);
+
+    _iconLabel.setPixmap(startPageAction.getIcon().pixmap(QSize(24, 24)));
+
     QFontMetrics titleMetrics(_titleLabel.font()), descriptionMetrics(_descriptionLabel.font());
 
     _titleLabel.setText(titleMetrics.elidedText(startPageAction.getTitle(), Qt::ElideMiddle, _titleLabel.width() - 2));
     _descriptionLabel.setText(descriptionMetrics.elidedText(startPageAction.getDescription(), Qt::ElideMiddle, _descriptionLabel.width() - 2));
     _commentsLabel.setText(startPageAction.getComments());
-
-    _previewIconLabel.setVisible(!startPageAction.getPreviewImage().isNull());
-    _commentsIconLabel.setVisible(!startPageAction.getComments().isEmpty());
-    _tagsIconLabel.setVisible(!startPageAction.getTags().isEmpty());
 }
 
 StartPageActionDelegateEditorWidget::IconLabel::IconLabel(const QIcon& icon, QWidget* parent /*= nullptr*/) :
