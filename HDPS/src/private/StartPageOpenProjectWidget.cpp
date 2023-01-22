@@ -48,6 +48,8 @@ void StartPageOpenProjectWidget::updateActions()
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _openProjectWidget.getModel().reset();
+    _recentProjectsWidget.getModel().reset();
+    _exampleProjectsWidget.getModel().reset();
 
     StartPageAction openProjectStartPageAction(fontAwesome.getIcon("folder-open"), "Open project", "Open an existing project", "Browse to an existing project and open it", []() -> void {
         projects().openProject();
@@ -56,8 +58,6 @@ void StartPageOpenProjectWidget::updateActions()
     _openProjectWidget.getModel().add(openProjectStartPageAction);
 
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
-
-    _recentProjectsWidget.getModel().reset();
 
     StartPageAction blankProjectStartPageAction(fontAwesome.getIcon("file"), "Blank", "Create project without any plugins", "Create a blank project without any plugins", []() -> void {
         projects().newBlankProject();
@@ -72,7 +72,14 @@ void StartPageOpenProjectWidget::updateActions()
             projects().openProject(recentFilePath);
         });
 
+        QTemporaryDir temporaryDir;
+
+        const auto recentProjectJsonFilePath = projects().extractProjectFileFromHdpsFile(recentFilePath, temporaryDir);
+
+        Project project(recentProjectJsonFilePath);
+
         recentProjectStartPageAction.setComments(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
+        recentProjectStartPageAction.setTags(project.getTagsAction().getStrings());
         recentProjectStartPageAction.setPreviewImage(projects().getPreviewImage(recentFilePath));
 
         _recentProjectsWidget.getModel().add(recentProjectStartPageAction);
@@ -80,12 +87,12 @@ void StartPageOpenProjectWidget::updateActions()
 
     QStringList projectFilter("*.hdps");
 
-    QDir directory(QString("%1/examples").arg(qApp->applicationDirPath()));
+    QDir exampleProjectsDirectory(QString("%1/examples/projects").arg(qApp->applicationDirPath()));
 
-    const auto exampleProjects = directory.entryList(projectFilter);
+    const auto exampleProjects = exampleProjectsDirectory.entryList(projectFilter);
 
     for (const auto& exampleProject : exampleProjects) {
-        const auto exampleProjectFilePath = QString("%1/examples/%2").arg(qApp->applicationDirPath(), exampleProject);
+        const auto exampleProjectFilePath = QString("%1/examples/projects/%2").arg(qApp->applicationDirPath(), exampleProject);
 
         QTemporaryDir temporaryDir;
 
@@ -98,10 +105,12 @@ void StartPageOpenProjectWidget::updateActions()
         });
 
         exampleProjectStartPageAction.setPreviewImage(projects().getPreviewImage(exampleProjectFilePath));
+        exampleProjectStartPageAction.setTags(project.getTagsAction().getStrings());
 
         _exampleProjectsWidget.getModel().add(exampleProjectStartPageAction);
     }
 
+    _openProjectWidget.createEditors();
     _recentProjectsWidget.createEditors();
     _exampleProjectsWidget.createEditors();
 }

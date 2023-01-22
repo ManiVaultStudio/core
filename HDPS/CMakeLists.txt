@@ -1069,14 +1069,6 @@ install(FILES
 # Initially install everything in the same place
 # this may need to be split up 
 
-file(GLOB EXAMPLE_PROJECTS res/examples/*.hdps)
-
-add_custom_command(TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                       ${EXAMPLE_PROJECTS}
-                       "${INSTALL_DIR}/$<CONFIGURATION>/examples/"
-                   )
-
 # Install the HDPSPUBLIC components needed for the Plugin builds
 add_custom_command(
     TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
@@ -1105,6 +1097,11 @@ add_custom_command(
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
 )
+
+add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_CURRENT_SOURCE_DIR}/res/examples
+                ${INSTALL_DIR}/$<CONFIGURATION>/examples)
 
 # Install the HDPS executable and lib
 add_custom_command(

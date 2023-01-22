@@ -6,7 +6,6 @@
 
 #include <QDebug>
 #include <QHeaderView>
-#include <QBuffer>
 
 #ifdef _DEBUG
     #define START_PAGE_ACTIONS_WIDGET_VERBOSE
@@ -53,8 +52,11 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
         QTreeView { \
             border: none; \
         } \
+        QTreeView::item:hover { \
+            background-color: rgba(0, 0, 0, 100); \
+        } \
         QToolTip { \
-            min-width: 150; \
+            //min-width: 150; \
         } \
     ");
 
@@ -88,47 +90,6 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
         callback();
 
         _hierarchyWidget.getSelectionModel().clear();
-    });
-
-    connect(&treeView, &QTreeView::entered, this, [this](const QModelIndex& index) -> void {
-        const auto title        = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Title)).data(Qt::EditRole).toString();
-        const auto description  = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Description)).data(Qt::EditRole).toString();
-        const auto previewImage = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::PreviewImage)).data(Qt::UserRole + 1).value<QImage>();
-        const auto tags         = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Tags)).data(Qt::EditRole).toStringList();
-        const auto tooltip      = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Tooltip)).data(Qt::EditRole).toString();
-
-        QString tooltipTextHtml;
-
-        if (!previewImage.isNull()) {
-            QBuffer buffer;
-
-            buffer.open(QIODevice::WriteOnly);
-
-            QPixmap::fromImage(previewImage).save(&buffer, "JPG");
-
-            auto image = buffer.data().toBase64();
-
-            tooltipTextHtml = QString("<img style='padding: 100px;'src='data:image/jpg;base64,%1'></p>").arg(image);
-        }
-        else {
-            tooltipTextHtml = tooltip;
-        }
-
-        auto tooltipHtml = QString(" \
-            <html> \
-                <head> \
-                    <style> \
-                        body { \
-                        } \
-                    </style> \
-                </head> \
-                <body> \
-                    <div style='width: 300px;'>%1</div> \
-                </body> \
-            </html> \
-        ").arg(tooltipTextHtml);
-
-        _model.item(index.row(), index.column())->setToolTip(tooltipHtml);
     });
 }
 

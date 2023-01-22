@@ -606,7 +606,12 @@ WorkspaceLocations WorkspaceManager::getWorkspaceLocations(const WorkspaceLocati
     WorkspaceLocations workspaceLocations;
 
     if (types.testFlag(WorkspaceLocation::Type::BuiltIn)) {
+        QStringList workspaceFilter("*.hws");
 
+        QDir workspaceExamplesDirectory(QString("%1/examples/workspaces/").arg(qApp->applicationDirPath()));
+
+        for (const auto workspaceFileName : workspaceExamplesDirectory.entryList(workspaceFilter))
+            workspaceLocations << WorkspaceLocation(workspaceFileName, QString("%1/%2").arg(workspaceExamplesDirectory.absolutePath(), workspaceFileName), WorkspaceLocation::Type::BuiltIn);
     }
 
     if (types.testFlag(WorkspaceLocation::Type::Path)) {

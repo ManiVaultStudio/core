@@ -48,8 +48,13 @@ void StartPageGetStartedWidget::updateActions()
             projects().newProject(workspaceLocation.getFilePath());
         });
 
+        QString comments;
+
+        fromWorkspaceStartPageAction.setComments(workspaceLocation.getTypeName());
         fromWorkspaceStartPageAction.setTags(workspace.getTagsAction().getStrings());
         fromWorkspaceStartPageAction.setPreviewImage(Workspace::getPreviewImage(workspaceLocation.getFilePath()));
+
+        _createProjectFromWorkspaceWidget.getModel().add(fromWorkspaceStartPageAction);
     }
 
     StartPageAction importWorkspaceFromProjectStartPageAction(fontAwesome.getIcon("file"), "From Project", "Import workspace from project", "Pick an existing project and use its workspace", []() -> void {
@@ -60,12 +65,14 @@ void StartPageGetStartedWidget::updateActions()
     _createProjectFromWorkspaceWidget.getModel().add(importWorkspaceFromProjectStartPageAction);
 
     for (auto viewPluginFactory : plugins().getPluginFactoriesByType(plugin::Type::LOADER)) {
-        StartPageAction fromDataStartPageAction(viewPluginFactory->getIcon(), viewPluginFactory->getKind(), "", QString("Create project and import data with the %1").arg(viewPluginFactory->getKind()), [viewPluginFactory]() -> void {
+        StartPageAction fromDataStartPageAction(viewPluginFactory->getIcon(), viewPluginFactory->getKind(), QString("Create project and import data with the %1").arg(viewPluginFactory->getKind()), "", [viewPluginFactory]() -> void {
             projects().newBlankProject();
             plugins().requestPlugin(viewPluginFactory->getKind());
         });
 
         _createProjectFromDatasetWidget.getModel().add(fromDataStartPageAction);
     }
-        
+    
+    _createProjectFromWorkspaceWidget.createEditors();
+    _createProjectFromDatasetWidget.createEditors();
 }

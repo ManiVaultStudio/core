@@ -3,7 +3,8 @@
 #include "StartPageActionsFilterModel.h"
 
 #include <Application.h>
-#include <QToolButton>
+#include <QBuffer>
+#include <QPainter>
 
 #ifdef _DEBUG
     #define START_PAGE_ACTION_DELEGATE_EDITOR_WIDGET_VERBOSE
@@ -13,15 +14,21 @@ using namespace hdps;
 
 StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
+    _index(),
     _mainLayout(),
     _iconLayout(),
     _textLayout(),
+    _primaryTextLayout(),
     _titleLabel(),
-    _descriptionLabel(),
     _commentsLabel(),
-    _infoLayout()
+    _secondaryTextLayout(),
+    _descriptionLabel(),
+    _infoLayout(),
+    _previewIconLabel(Application::getIconFont("FontAwesome").getIcon("image")),
+    _commentsIconLabel(Application::getIconFont("FontAwesome").getIcon("file-alt")),
+    _tagsIconLabel(Application::getIconFont("FontAwesome").getIcon("tags"))
 {
-    setObjectName("StartPageActionDelegateWidget");
+    setObjectName("StartPageActionDelegateEditorWidget");
     setMouseTracking(true);
 
     _mainLayout.setContentsMargins(1, 1, 1, 1);
@@ -37,31 +44,79 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
 
     _textLayout.setAlignment(Qt::AlignTop);
     _textLayout.setSpacing(1);
-    _textLayout.setColumnStretch(0, 1);
+    _textLayout.addLayout(&_primaryTextLayout);
+    _textLayout.addLayout(&_secondaryTextLayout);
 
     _iconLayout.addWidget(&_iconLabel);
-
     _iconLabel.setStyleSheet("padding-top: 3px;");
+
+    _primaryTextLayout.addWidget(&_titleLabel, 1);
+    _primaryTextLayout.addWidget(&_commentsLabel);
+
     _titleLabel.setStyleSheet("font-weight: bold;");
+    _commentsLabel.setStyleSheet("color: dark-gray;");
 
-    _textLayout.addWidget(&_titleLabel, 0, 0);
-    _textLayout.addWidget(&_commentsLabel, 0, 1);
-    _textLayout.addWidget(&_descriptionLabel, 1, 0, 1, 2);
-    _textLayout.addLayout(&_infoLayout, 2, 0, 1, 2);
+    _secondaryTextLayout.addWidget(&_descriptionLabel, 1);
+    _secondaryTextLayout.addLayout(&_infoLayout);
 
-    {
-        _infoLayout.addWidget(new QPushButton("A"));
-        _infoLayout.addWidget(new QPushButton("B"));
-        _infoLayout.addWidget(new QPushButton("C"));
-        _infoLayout.addStretch(1);
-    }
+    const auto getTooltipHtml = [](const QString& tooltipTextHtml) -> QString {
+        return QString(" \
+            <html> \
+                <head> \
+                    <style> \
+                        body { \
+                        } \
+                    </style> \
+                </head> \
+                <body> \
+                    <div style='width: 300px;'>%1</div> \
+                </body> \
+            </html> \
+        ").arg(tooltipTextHtml);
+    };
 
+    _previewIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
+        const auto previewImage = _index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::PreviewImage)).data(Qt::UserRole + 1).value<QImage>();
+
+        QString tooltipTextHtml;
+
+        if (!previewImage.isNull()) {
+            QBuffer buffer;
+
+            buffer.open(QIODevice::WriteOnly);
+
+            QPixmap::fromImage(previewImage).save(&buffer, "JPG");
+
+            auto image = buffer.data().toBase64();
+
+            tooltipTextHtml = QString("<img style='padding: 100px;'src='data:image/jpg;base64,%1'></p>").arg(image);
+        }
+
+        return getTooltipHtml(tooltipTextHtml);
+    });
+
+    _commentsIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
+        return getTooltipHtml(_index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Comments)).data(Qt::EditRole).toString());
+    });
+
+    _tagsIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
+        return getTooltipHtml(_index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Tags)).data(Qt::EditRole).toStringList().join(", "));
+    });
+
+    _infoLayout.setSpacing(5);
+    _infoLayout.addWidget(&_previewIconLabel);
+    _infoLayout.addWidget(&_commentsIconLabel);
+    _infoLayout.addWidget(&_tagsIconLabel);
+    _infoLayout.addStretch(1);
+    
     setLayout(&_mainLayout);
 }
 
 void StartPageActionDelegateEditorWidget::setEditorData(const QModelIndex& index)
 {
-    StartPageAction startPageAction(index);
+    _index = index;
+
+    StartPageAction startPageAction(_index);
 
     _iconLabel.setPixmap(startPageAction.getIcon().pixmap(QSize(24, 24)));
 
@@ -71,6 +126,45 @@ void StartPageActionDelegateEditorWidget::setEditorData(const QModelIndex& index
     _descriptionLabel.setText(descriptionMetrics.elidedText(startPageAction.getDescription(), Qt::ElideMiddle, _descriptionLabel.width() - 2));
     _commentsLabel.setText(startPageAction.getComments());
 
-    //nonConstThis->_widget.setStyleSheet(QString("QWidget#StartPageActionDelegateWidget { background-color: %1; }").arg(option.state & QStyle::State_MouseOver ? "rgba(0, 0, 0, 100)" : "transparent"));
-    //nonConstThis->_widget.setFixedWidth(option.rect.size().width());
+    _previewIconLabel.setVisible(!startPageAction.getPreviewImage().isNull());
+    _commentsIconLabel.setVisible(!startPageAction.getComments().isEmpty());
+    _tagsIconLabel.setVisible(!startPageAction.getTags().isEmpty());
+}
+
+StartPageActionDelegateEditorWidget::IconLabel::IconLabel(const QIcon& icon, QWidget* parent /*= nullptr*/) :
+    QLabel(parent),
+    _opacityEffect(this),
+    _tooltipCallback()
+{
+    setPixmap(icon.pixmap(QSize(14, 14)));
+    setGraphicsEffect(&_opacityEffect);
+
+    updateOpacityEffect();
+}
+
+void StartPageActionDelegateEditorWidget::IconLabel::setTooltipCallback(const TooltipCallback& tooltipCallback)
+{
+    _tooltipCallback = tooltipCallback;
+}
+
+void StartPageActionDelegateEditorWidget::IconLabel::enterEvent(QEnterEvent* enterEvent)
+{
+    QLabel::enterEvent(enterEvent);
+
+    updateOpacityEffect();
+
+    if (toolTip().isEmpty() && _tooltipCallback)
+        setToolTip(_tooltipCallback());
+}
+
+void StartPageActionDelegateEditorWidget::IconLabel::leaveEvent(QEvent* event)
+{
+    QLabel::leaveEvent(event);
+
+    updateOpacityEffect();
+}
+
+void StartPageActionDelegateEditorWidget::IconLabel::updateOpacityEffect()
+{
+    _opacityEffect.setOpacity(QWidget::underMouse() ? 0.5 : 1.0);
 }
