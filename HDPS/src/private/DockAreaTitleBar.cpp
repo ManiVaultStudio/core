@@ -23,7 +23,7 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
     addViewPluginToolButton->setAutoRaise(true);
     addViewPluginToolButton->setPopupMode(QToolButton::InstantPopup);
     addViewPluginToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
-    addViewPluginToolButton->setIconSize(QSize(16, 16));
+    addViewPluginToolButton->setIconSize(QSize(8, 8));
 
     auto dockManager = dockAreaWidget->dockManager();
 

@@ -61,8 +61,6 @@ void StartPageActionsModel::add(const StartPageAction& startPageAction)
         item->setEditable(false);
 
     appendRow(startPageActionRow);
-
-    emit layoutChanged();
 }
 
 void StartPageActionsModel::reset()

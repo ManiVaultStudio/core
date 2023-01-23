@@ -7,22 +7,21 @@
 #include <CoreInterface.h>
 
 #include <QDebug>
-#include <QImage>
 
 using namespace hdps;
 using namespace hdps::util;
 
 StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    _openProjectWidget(this),
+    _openCreateProjectWidget(this),
     _recentProjectsWidget(this),
     _exampleProjectsWidget(this),
     _recentProjectsAction(this)
 {
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(StartPageContentWidget::createHeaderLabel("Open", "Open existing project"));
-    layout->addWidget(&_openProjectWidget);
+    layout->addWidget(StartPageContentWidget::createHeaderLabel("Open & Create", "Open existing project and create new project"));
+    layout->addWidget(&_openCreateProjectWidget);
 
     layout->addWidget(StartPageContentWidget::createHeaderLabel("Recent", "Recently opened project"));
     layout->addWidget(&_recentProjectsWidget);
@@ -34,11 +33,11 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullp
 
     setLayout(layout);
 
-    _openProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
-    _openProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
-    _openProjectWidget.getHierarchyWidget().setFixedHeight(50);
-    _openProjectWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
- 
+    _openCreateProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
+    _openCreateProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
+    _openCreateProjectWidget.getHierarchyWidget().setFixedHeight(129);
+    _openCreateProjectWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
     _recentProjectsWidget.getHierarchyWidget().setItemTypeName("Recent Project");
     _exampleProjectsWidget.getHierarchyWidget().setItemTypeName("Example Project");
 }
@@ -47,7 +46,7 @@ void StartPageOpenProjectWidget::updateActions()
 {
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    _openProjectWidget.getModel().reset();
+    _openCreateProjectWidget.getModel().reset();
     _recentProjectsWidget.getModel().reset();
     _exampleProjectsWidget.getModel().reset();
 
@@ -57,17 +56,23 @@ void StartPageOpenProjectWidget::updateActions()
 
     openProjectStartPageAction.setSubtitle("Open an existing project");
 
-    _openProjectWidget.getModel().add(openProjectStartPageAction);
+    _openCreateProjectWidget.getModel().add(openProjectStartPageAction);
 
-    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
-
-    StartPageAction blankProjectStartPageAction(fontAwesome.getIcon("file"), "Blank", "Create blank project", "Empty project", "Create a blank project without any plugins", []() -> void {
+    StartPageAction leftAlignedProjectStartPageAction(fontAwesome.getIcon("industry"), "Left-aligned project", "Create project with standard plugins on the left", "Create project with data hierarchy and data properties plugins on the left", "", []() -> void {
         projects().newBlankProject();
     });
 
-    blankProjectStartPageAction.setComments("Create a blank project without any plugins");
+    StartPageAction rightAlignedProjectStartPageAction(fontAwesome.getIcon("industry"), "Right-aligned project", "Create project with standard plugins on the right", "Create project with data hierarchy and data properties plugins on the right", "", []() -> void {
+        projects().newBlankProject();
+    });
 
-    _recentProjectsWidget.getModel().add(blankProjectStartPageAction);
+    leftAlignedProjectStartPageAction.setComments(leftAlignedProjectStartPageAction.getDescription());
+    rightAlignedProjectStartPageAction.setComments(rightAlignedProjectStartPageAction.getDescription());
+
+    _openCreateProjectWidget.getModel().add(leftAlignedProjectStartPageAction);
+    _openCreateProjectWidget.getModel().add(rightAlignedProjectStartPageAction);
+
+    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
 
     for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
         const auto recentFilePath = recentFile.getFilePath();
@@ -78,10 +83,11 @@ void StartPageOpenProjectWidget::updateActions()
 
         Project project(recentProjectJsonFilePath);
 
-        StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("file"), QFileInfo(recentFilePath).baseName(), recentFilePath, project.getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+        StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), recentFilePath, project.getDescriptionAction().getString(), "", [recentFilePath]() -> void {
             projects().openProject(recentFilePath);
         });
 
+        recentProjectStartPageAction.setComments(project.getCommentsAction().getString());
         recentProjectStartPageAction.setTags(project.getTagsAction().getStrings());
         recentProjectStartPageAction.setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
         recentProjectStartPageAction.setPreviewImage(projects().getPreviewImage(recentFilePath));
@@ -114,8 +120,4 @@ void StartPageOpenProjectWidget::updateActions()
 
         _exampleProjectsWidget.getModel().add(exampleProjectStartPageAction);
     }
-
-    _openProjectWidget.createEditors();
-    _recentProjectsWidget.createEditors();
-    _exampleProjectsWidget.createEditors();
 }

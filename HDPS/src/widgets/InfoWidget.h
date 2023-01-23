@@ -55,6 +55,18 @@ public:
      */
     void setColors(const QColor foregroundColor = Qt::black, const QColor backgroundColor = Qt::lightGray);
 
+    /**
+     * Set foreground color to \p foregroundColor
+     * @param foregroundColor Foreground color
+     */
+    void setForegroundColor(const QColor foregroundColor = Qt::black);
+
+    /**
+     * Set background color to \p backgroundColor
+     * @param backgroundColor Background color
+     */
+    void setBackgroundColor(const QColor backgroundColor = Qt::lightGray);
+
 private:
 
     /** Initializes the controls */

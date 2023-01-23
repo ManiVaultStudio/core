@@ -1,12 +1,14 @@
 #pragma once
 
+#include "util/WidgetFader.h"
+
 #include <QWidget>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QGridLayout>
 #include <QGraphicsOpacityEffect>
-#include <QModelIndex>
+#include <QPersistentModelIndex>
 #include <QStyleOptionViewItem>
 
 /**
@@ -86,25 +88,41 @@ public:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
+    /**
+     * Triggered on mouse hover
+     * @param enterEvent Pointer to enter event
+     */
+    void enterEvent(QEnterEvent* enterEvent) override;
+
+    /**
+     * Triggered on mouse leave
+     * @param event Pointer to event
+     */
+    void leaveEvent(QEvent* event) override;
+
 private:
 
     /** Update all text labels and takes care of elidation */
     void updateTextLabels();
 
+    /** Show the info widget when mouse hovered */
+    void updateInfoWidgetVisibility();
+
 private:
-    QModelIndex     _index;                     /** Editor model index */
-    QHBoxLayout     _mainLayout;                /** Main editor layout */
-    QVBoxLayout     _iconLayout;                /** Left icon layout */
-    QLabel          _iconLabel;                 /** Left icon label */
-    QVBoxLayout     _textLayout;                /** Right text layout */
-    QHBoxLayout     _primaryTextLayout;         /** Primary layout with title and comments labels */
-    QLabel          _titleLabel;                /** Title label */
-    QLabel          _metaDataLabel;             /** Label with meta data (may be empty) */
-    QHBoxLayout     _secondaryTextLayout;       /** Secondary layout with subtitle and info labels */
-    QLabel          _subtitleLabel;             /** Subtitle label */
-    QHBoxLayout     _infoLayout;                /** Layout for preview, tags and meta info popups */
-    IconLabel       _previewIconLabel;          /** Icon label for preview image */
-    IconLabel       _metaDataIconLabel;         /** Icon label for meta data */
-    IconLabel       _tagsIconLabel;             /** Icon label for tags */
-    IconLabel       _contributorsIconLabel;     /** Icon label for contributors */
+    QPersistentModelIndex       _index;                     /** Editor model index */
+    QHBoxLayout                 _mainLayout;                /** Main editor layout */
+    QVBoxLayout                 _iconLayout;                /** Left icon layout */
+    QLabel                      _iconLabel;                 /** Left icon label */
+    QVBoxLayout                 _textLayout;                /** Right text layout */
+    QHBoxLayout                 _primaryTextLayout;         /** Primary layout with title and comments labels */
+    QLabel                      _titleLabel;                /** Title label */
+    QLabel                      _metaDataLabel;             /** Label with meta data (may be empty) */
+    QHBoxLayout                 _secondaryTextLayout;       /** Secondary layout with subtitle and info labels */
+    QLabel                      _subtitleLabel;             /** Subtitle label */
+    QWidget                     _infoWidget;                /** Widget for info labels */
+    QHBoxLayout                 _infoLayout;                /** Layout for preview, tags and meta info popups */
+    IconLabel                   _previewIconLabel;          /** Icon label for preview image */
+    IconLabel                   _metaDataIconLabel;         /** Icon label for meta data */
+    IconLabel                   _tagsIconLabel;             /** Icon label for tags */
+    IconLabel                   _contributorsIconLabel;     /** Icon label for contributors */
 };

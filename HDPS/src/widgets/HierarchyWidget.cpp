@@ -184,7 +184,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     header->setMinimumSectionSize(18);
     header->setIconSize(QSize(4, 10));
 
-    const auto modelLayoutChanged = [this]() -> void {
+    const auto filterModelRowsChanged = [this]() -> void {
         const auto hasItems = _filterModel != nullptr ? _filterModel->rowCount() >= 1 : _model.rowCount() >= 1;
 
         _filterNameAction.setEnabled(_model.rowCount() >= 1);
@@ -239,10 +239,12 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     });
 
     if (_filterModel) {
-        connect(_filterModel, &QAbstractItemModel::layoutChanged, this, modelLayoutChanged);
+        connect(_filterModel, &QAbstractItemModel::rowsInserted, this, filterModelRowsChanged);
+        connect(_filterModel, &QAbstractItemModel::rowsRemoved, this, filterModelRowsChanged);
     }
     else {
-        connect(&_model, &QAbstractItemModel::layoutChanged, this, modelLayoutChanged);
+        connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateFilterModel);
+        connect(&_model, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateFilterModel);
     }
 
     connect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
@@ -258,7 +260,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     connect(&_selectAllAction, &TriggerAction::triggered, this, &HierarchyWidget::selectAll);
     connect(&_selectNoneAction, &TriggerAction::triggered, this, &HierarchyWidget::selectNone);
 
-    modelLayoutChanged();
+    filterModelRowsChanged();
     selectionChanged();
     updateFilterModel();
 }

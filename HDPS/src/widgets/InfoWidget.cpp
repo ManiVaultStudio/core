@@ -45,8 +45,8 @@ void InfoWidget::set(const QIcon& icon, const QString& title, const QString& des
     _titleLabel.setText(title);
     _descriptionLabel.setText(description);
 
-    //_titleLabel.setVisible(!_titleLabel.text().isEmpty());
-    //_descriptionLabel.setVisible(!_descriptionLabel.text().isEmpty());
+    _titleLabel.setVisible(!_titleLabel.text().isEmpty());
+    _descriptionLabel.setVisible(!_descriptionLabel.text().isEmpty());
 }
 
 void InfoWidget::setColor(const QColor color)
@@ -111,6 +111,20 @@ void InfoWidget::initialize()
     layout->addStretch(1);
 
     setLayout(layout);
+}
+
+void InfoWidget::setForegroundColor(const QColor foregroundColor /*= Qt::black*/)
+{
+    _foregroundColor = foregroundColor;
+
+    setColors(_foregroundColor, _backgroundColor);
+}
+
+void InfoWidget::setBackgroundColor(const QColor backgroundColor /*= Qt::lightGray*/)
+{
+    _backgroundColor = backgroundColor;
+
+    setColors(_foregroundColor, _backgroundColor);
 }
 
 }

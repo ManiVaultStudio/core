@@ -29,6 +29,7 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     util::Serializable("WidgetAction"),
     _defaultWidgetFlags(),
     _sortIndex(-1),
+    _stretch(-1),
     _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::Default)),
     _isPublic(false),
     _publicAction(nullptr),
@@ -566,6 +567,16 @@ void WidgetAction::setConfiguration(std::int32_t configuration, bool recursive /
         for (auto childAction : getChildActions())
             childAction->setConfiguration(configuration, recursive);
     }
+}
+
+std::int32_t WidgetAction::getStretch() const
+{
+    return _stretch;
+}
+
+void WidgetAction::setStretch(const std::int32_t& stretch)
+{
+    _stretch = stretch;
 }
 
 }

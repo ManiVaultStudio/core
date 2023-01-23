@@ -146,16 +146,22 @@ void Project::initialize()
 
     _tagsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tag"));
     _tagsAction.setCategory("Tag");
+    _tagsAction.setStretch(2);
     _tagsAction.setConnectionPermissionsToNone();
 
     _commentsAction.setPlaceHolderString("Enter project comments here...");
     _commentsAction.setConnectionPermissionsToNone();
     _commentsAction.setClearable(true);
+    _commentsAction.setStretch(2);
     _commentsAction.setDefaultWidgetFlags(StringAction::TextEdit);
 
+    _contributorsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("user"));
     _contributorsAction.setConnectionPermissionsToNone();
+    _contributorsAction.setCategory("Contributor");
+    _contributorsAction.setEnabled(false);
+    _contributorsAction.setStretch(1);
     _contributorsAction.setDefaultWidgetFlags(StringsAction::ListView);
-
+    
     _compressionEnabledAction.setConnectionPermissionsToNone();
 
     _compressionLevelAction.setConnectionPermissionsToNone();
@@ -168,6 +174,8 @@ void Project::initialize()
     connect(&_compressionEnabledAction, &ToggleAction::toggled, this, updateCompressionLevelReadOnly);
 
     updateCompressionLevelReadOnly();
+
+    updateContributors();
 }
 
 util::Version Project::getVersion() const

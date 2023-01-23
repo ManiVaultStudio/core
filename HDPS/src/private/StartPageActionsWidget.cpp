@@ -8,7 +8,7 @@
 #include <QHeaderView>
 
 #ifdef _DEBUG
-    #define START_PAGE_ACTIONS_WIDGET_VERBOSE
+    //#define START_PAGE_ACTIONS_WIDGET_VERBOSE
 #endif
 
 using namespace hdps;
@@ -18,7 +18,7 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _model(this),
     _filterModel(this),
-    _hierarchyWidget(this, "Item", _model, &_filterModel, true, false)    
+    _hierarchyWidget(this, "Item", _model, &_filterModel, true, true)
 {
     auto layout = new QVBoxLayout();
 
@@ -30,7 +30,7 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
 
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    _hierarchyWidget.setWindowIcon(fontAwesome.getIcon("play"));
+    _hierarchyWidget.setWindowIcon(fontAwesome.getIcon("search"));
 
     _hierarchyWidget.getFilterGroupAction().setVisible(false);
     _hierarchyWidget.getCollapseAllAction().setVisible(false);
@@ -38,7 +38,9 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
     _hierarchyWidget.getColumnsGroupAction().setVisible(false);
     _hierarchyWidget.getSelectionGroupAction().setVisible(false);
     _hierarchyWidget.setHeaderHidden(true);
-
+    
+    _hierarchyWidget.getInfoOverlayWidget()->setBackgroundColor(Qt::transparent);
+    
     auto& treeView = _hierarchyWidget.getTreeView();
 
     treeView.setRootIsDecorated(false);
@@ -94,6 +96,16 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/) :
 
         _hierarchyWidget.getSelectionModel().clear();
     });
+
+    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
+        for (int rowIndex = first; rowIndex <= last; rowIndex++)
+            openPersistentEditor(rowIndex);
+    });
+
+    connect(&_filterModel, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
+        for (int rowIndex = first; rowIndex <= last; rowIndex++)
+            openPersistentEditor(rowIndex);
+    });
 }
 
 StartPageActionsModel& StartPageActionsWidget::getModel()
@@ -111,16 +123,34 @@ HierarchyWidget& StartPageActionsWidget::getHierarchyWidget()
     return _hierarchyWidget;
 }
 
-void StartPageActionsWidget::createEditors()
+void StartPageActionsWidget::openPersistentEditor(int rowIndex)
 {
+    const auto index = _filterModel.index(rowIndex, static_cast<int>(StartPageActionsModel::Column::SummaryDelegate));
+
+    if (_hierarchyWidget.getTreeView().isPersistentEditorOpen(index))
+        return;
+
+    if (index.isValid()) {
 #ifdef START_PAGE_ACTIONS_WIDGET_VERBOSE
-    qDebug() << __FUNCTION__;
+        qDebug() << __FUNCTION__ << index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Title)).data().toString() << index << index.isValid();
 #endif
 
-    for (int rowIndex = 0; rowIndex < _filterModel.rowCount(); rowIndex++) {
-        const auto editorModelIndex = _filterModel.index(rowIndex, static_cast<int>(StartPageActionsModel::Column::SummaryDelegate));
+        _hierarchyWidget.getTreeView().openPersistentEditor(index);
+    }
+}
 
-        if (!_hierarchyWidget.getTreeView().isPersistentEditorOpen(editorModelIndex))
-            _hierarchyWidget.getTreeView().openPersistentEditor(editorModelIndex);
+void StartPageActionsWidget::closePersistentEditor(int rowIndex)
+{
+    const auto index = _filterModel.index(rowIndex, static_cast<int>(StartPageActionsModel::Column::SummaryDelegate));
+
+    if (!_hierarchyWidget.getTreeView().isPersistentEditorOpen(index))
+        return;
+
+    if (index.isValid()) {
+#ifdef START_PAGE_ACTIONS_WIDGET_VERBOSE
+        qDebug() << __FUNCTION__ << index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Title)).data().toString() << index;
+#endif
+
+        _hierarchyWidget.getTreeView().closePersistentEditor(index);
     }
 }

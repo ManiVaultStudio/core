@@ -139,6 +139,18 @@ public:
      */
     void setSortIndex(const std::int32_t& sortIndex);
 
+    /**
+     * Get stretch
+     * @return The stretch factor
+     */
+    std::int32_t getStretch() const;
+
+    /**
+     * Set stretch to \p stretch
+     * @param stretch Stretch factor
+     */
+    void setStretch(const std::int32_t& stretch);
+
     /** Gets the default widget flags */
     std::int32_t getDefaultWidgetFlags() const;
 
@@ -458,6 +470,7 @@ signals:
 private:
     std::int32_t                _defaultWidgetFlags;        /** Default widget flags which are used to configure newly created widget action widgets */
     std::int32_t                _sortIndex;                 /** Sort index (used in the group action to sort actions) */
+    std::int32_t                _stretch;                   /** Stretch factor */
     std::int32_t                _connectionPermissions;     /** Allowed connection options flags */
     bool                        _isPublic;                  /** Determines whether this action is a public (shared) action or not */
     WidgetAction*               _publicAction;              /** Public action to which this action might be connected */

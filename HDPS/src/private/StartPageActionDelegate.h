@@ -42,4 +42,7 @@ public:
      * 
      */
     void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+
+private:
+    static std::int32_t height;
 };

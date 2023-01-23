@@ -134,17 +134,22 @@ WorkspaceManager::WorkspaceManager() :
     });
 
     const auto updateActionsReadOnly = [this]() -> void {
+        _resetWorkspaceAction.setEnabled(!getLockingAction().isLocked());
+        _importWorkspaceAction.setEnabled(!getLockingAction().isLocked());
+        _importWorkspaceFromProjectAction.setEnabled(!getLockingAction().isLocked());
         _exportWorkspaceAction.setEnabled(true);
         _exportWorkspaceAsAction.setEnabled(true);
         _exportWorkspaceAsAction.setEnabled(!getWorkspaceFilePath().isEmpty());
+        _recentWorkspacesAction.setEnabled(!getLockingAction().isLocked());
     };
 
     connect(this, &WorkspaceManager::workspaceLoaded, this, updateActionsReadOnly);
     connect(this, &WorkspaceManager::workspaceSaved, this, updateActionsReadOnly);
+    connect(&getLockingAction(), &LockingAction::lockedChanged, this, updateActionsReadOnly);
 
     updateActionsReadOnly();
 
-    getLockingAction().setWhat("Workspace");
+    getLockingAction().setWhat("Layout");
 }
 
 void WorkspaceManager::initalize()
@@ -543,14 +548,14 @@ QMenu* WorkspaceManager::getMenu(QWidget* parent /*= nullptr*/)
     menu->setToolTip("Workspace operations");
     menu->setEnabled(Application::core()->getProjectManager().hasProject());
 
-    menu->addAction(&_resetWorkspaceAction);
     menu->addAction(&_importWorkspaceAction);
+    menu->addAction(&_importWorkspaceFromProjectAction);
     menu->addAction(&_exportWorkspaceAction);
     menu->addAction(&_exportWorkspaceAsAction);
     menu->addSeparator();
-    menu->addAction(&_editWorkspaceSettingsAction);
+    menu->addAction(&_resetWorkspaceAction);
     menu->addSeparator();
-    menu->addAction(&_importWorkspaceFromProjectAction);
+    menu->addAction(&_editWorkspaceSettingsAction);
     menu->addSeparator();
     menu->addMenu(_recentWorkspacesAction.getMenu());
 

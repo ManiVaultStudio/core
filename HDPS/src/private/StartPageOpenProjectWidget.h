@@ -27,7 +27,7 @@ protected:
     void updateActions();
 
 private:
-    StartPageActionsWidget          _openProjectWidget;         /** Actions widget for open project action */
+    StartPageActionsWidget          _openCreateProjectWidget;   /** Actions widget for open and create project action */
     StartPageActionsWidget          _recentProjectsWidget;      /** Actions widget for existing projects action */
     StartPageActionsWidget          _exampleProjectsWidget;     /** Actions widget for example projects action */
     hdps::gui::RecentFilesAction    _recentProjectsAction;      /** Action for recent projects */

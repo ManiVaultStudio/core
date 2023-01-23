@@ -14,13 +14,18 @@ StartPageActionDelegate::StartPageActionDelegate(QObject* parent /*= nullptr*/) 
 
 QSize StartPageActionDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
+    /*
     QScopedPointer<StartPageActionDelegateEditorWidget> widget(new StartPageActionDelegateEditorWidget);
 
     widget->setAttribute(Qt::WA_DontShowOnScreen);
 
     QCoreApplication::processEvents();
 
-    return QSize(option.rect.width(), widget->sizeHint().height());
+    qDebug() << QSize(option.rect.width(), widget->sizeHint().height());
+    */
+
+    // Hard-coded for optimization purposes
+    return QSize(0, 43);
 }
 
 QWidget* StartPageActionDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const

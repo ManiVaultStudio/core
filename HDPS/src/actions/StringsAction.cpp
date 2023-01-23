@@ -254,8 +254,6 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
         _model.setHeaderData(0, Qt::Horizontal, "Name", Qt::UserRole);
         _model.setHeaderData(0, Qt::Horizontal, "Name", Qt::DisplayRole);
 
-        emit _model.layoutChanged();
-
         updateActions();
     };
 

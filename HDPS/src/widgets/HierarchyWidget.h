@@ -167,6 +167,14 @@ public:
     }
 
     /**
+     * Get overlay widget
+     * @return Pointer to overlay widget
+     */
+    InfoOverlayWidget* getInfoOverlayWidget() {
+        return _infoOverlayWidget.get();
+    }
+
+    /**
      * Get filter name action
      * @return Reference to filter name action
      */

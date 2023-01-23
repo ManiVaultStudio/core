@@ -27,6 +27,7 @@ protected:
 private:
     StartPageActionsWidget  _createProjectFromWorkspaceWidget;  /** Actions widget for creating a project from workspace */
     StartPageActionsWidget  _createProjectFromDatasetWidget;    /** Actions widget for creating a project from a dataset */
+    StartPageActionsWidget  _instructionVideosWidget;           /** Actions widget for watching instruction videos */
 
     friend class StartPageContentWidget;
 };

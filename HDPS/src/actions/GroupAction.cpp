@@ -288,6 +288,9 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction, c
 
             _layout->addWidget(actionWidget, numRows, 1);
 
+            if (widgetAction->getStretch() >= 0)
+                _layout->setRowStretch(numRows, widgetAction->getStretch());
+
             if (isToggleAction)
                 _layout->setAlignment(actionWidget, Qt::AlignLeft);
         }

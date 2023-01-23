@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QImage>
 #include <QModelIndex>
+#include <QList>
 
 /**
  * Start page action
@@ -94,3 +95,5 @@ protected:
     QStringList         _contributors;      /** List of contributors */
     ClickedCallback     _clickedCallback;   /** Callback function that is called when the action row is clicked */
 };
+
+using StartPageActions = QList<StartPageAction>;

@@ -25,7 +25,7 @@ public:
 
     /** Get preferred size */
     QSize sizeHint() const override {
-        return QSize(600, 400);
+        return QSize(600, 500);
     }
 
     /** Get minimum size hint*/

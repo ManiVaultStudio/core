@@ -230,8 +230,6 @@ void ProjectManager::newProject(const QString& workspaceFilePath /*= ""*/)
 
         createProject();
 
-        getCurrentProject()->updateContributors();
-
         if (QFileInfo(workspaceFilePath).exists())
             workspaces().loadWorkspace(workspaceFilePath);
     }
@@ -252,6 +250,7 @@ void ProjectManager::newBlankProject()
 #ifdef PROJECT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__;
 #endif
+
         createProject();
     }
     catch (std::exception& e)

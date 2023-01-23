@@ -23,6 +23,7 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
     _metaDataLabel(),
     _secondaryTextLayout(),
     _subtitleLabel(),
+    _infoWidget(),
     _infoLayout(),
     _previewIconLabel(Application::getIconFont("FontAwesome").getIcon("image")),
     _metaDataIconLabel(Application::getIconFont("FontAwesome").getIcon("file-alt")),
@@ -58,7 +59,7 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
     _metaDataLabel.setStyleSheet("color: dark-gray;");
 
     _secondaryTextLayout.addWidget(&_subtitleLabel, 1);
-    _secondaryTextLayout.addLayout(&_infoLayout);
+    _secondaryTextLayout.addWidget(&_infoWidget);
 
     const auto getTooltipHtml = [](const QString& tooltipTextHtml) -> QString {
         return QString(" \
@@ -149,6 +150,7 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
         return getTooltipHtml(tagsHtml);
     });
 
+    _infoLayout.setContentsMargins(0, 0, 0, 0);
     _infoLayout.setSpacing(5);
     _infoLayout.addWidget(&_previewIconLabel);
     _infoLayout.addWidget(&_metaDataIconLabel);
@@ -156,11 +158,15 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
     _infoLayout.addWidget(&_contributorsIconLabel);
     _infoLayout.addStretch(1);
     
+    _infoWidget.setLayout(&_infoLayout);
+
     setLayout(&_mainLayout);
 
     _subtitleLabel.installEventFilter(this);
     _titleLabel.installEventFilter(this);
     _metaDataLabel.installEventFilter(this);
+
+    updateInfoWidgetVisibility();
 }
 
 void StartPageActionDelegateEditorWidget::setEditorData(const QModelIndex& index)
@@ -193,6 +199,20 @@ bool StartPageActionDelegateEditorWidget::eventFilter(QObject* target, QEvent* e
     return QWidget::eventFilter(target, event);
 }
 
+void StartPageActionDelegateEditorWidget::enterEvent(QEnterEvent* enterEvent)
+{
+    QWidget::enterEvent(enterEvent);
+
+    updateInfoWidgetVisibility();
+}
+
+void StartPageActionDelegateEditorWidget::leaveEvent(QEvent* event)
+{
+    QWidget::leaveEvent(event);
+
+    updateInfoWidgetVisibility();
+}
+
 void StartPageActionDelegateEditorWidget::updateTextLabels()
 {
     StartPageAction startPageAction(_index);
@@ -204,6 +224,11 @@ void StartPageActionDelegateEditorWidget::updateTextLabels()
     _titleLabel.setText(titleMetrics.elidedText(startPageAction.getTitle(), Qt::ElideMiddle, _titleLabel.width() - 2));
     _subtitleLabel.setText(descriptionMetrics.elidedText(startPageAction.getSubtitle(), Qt::ElideMiddle, _subtitleLabel.width() - 2));
     _metaDataLabel.setText(startPageAction.getMetaData());
+}
+
+void StartPageActionDelegateEditorWidget::updateInfoWidgetVisibility()
+{
+    _infoWidget.setVisible(QWidget::underMouse());
 }
 
 StartPageActionDelegateEditorWidget::IconLabel::IconLabel(const QIcon& icon, QWidget* parent /*= nullptr*/) :
