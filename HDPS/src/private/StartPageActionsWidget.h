@@ -21,8 +21,15 @@ public:
     /**
      * Construct with \p parent widget
      * @param parent Pointer to parent widget
+     * @param restyle Whether to change the style to seamlessly integrate with the start page (false for use outside of startpage widget)
      */
-    StartPageActionsWidget(QWidget* parent = nullptr);
+    StartPageActionsWidget(QWidget* parent = nullptr, bool restyle = true);
+
+    /**
+     * Get layout
+     * @return Reference to main layout
+     */
+    QVBoxLayout& getLayout();
 
     /**
      * Get model
@@ -57,6 +64,7 @@ private:
     void closePersistentEditor(int rowIndex);
 
 private:
+    QVBoxLayout                     _layout;            /** Main layout */
     StartPageActionsModel           _model;             /** Model which contains start page actions */
     StartPageActionsFilterModel     _filterModel;       /** Model for filtering and sorting start page actions */
     hdps::gui::HierarchyWidget      _hierarchyWidget;   /** Widget for displaying the actions */

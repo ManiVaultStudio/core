@@ -243,6 +243,34 @@ void ProjectManager::newProject(const QString& workspaceFilePath /*= ""*/)
     }
 }
 
+void ProjectManager::newProject(const Qt::AlignmentFlag& defaultPluginsAlignment)
+{
+    newBlankProject();
+
+    auto dockAreaFlag = DockAreaFlag::Right;
+
+    switch (defaultPluginsAlignment) {
+        case Qt::AlignLeft:
+            dockAreaFlag = DockAreaFlag::Left;
+            break;
+
+        case Qt::AlignRight:
+            dockAreaFlag = DockAreaFlag::Right;
+            break;
+
+        default:
+            break;
+    }
+
+    plugin::ViewPlugin* dataHierarchyPlugin = nullptr;
+
+    if (plugins().isPluginLoaded("Data hierarchy"))
+        dataHierarchyPlugin = plugins().requestViewPlugin("Data hierarchy", nullptr, dockAreaFlag);
+
+    if (plugins().isPluginLoaded("Data properties"))
+        plugins().requestViewPlugin("Data properties", dataHierarchyPlugin, DockAreaFlag::Bottom);
+}
+
 void ProjectManager::newBlankProject()
 {
     try

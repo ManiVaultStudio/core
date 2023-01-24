@@ -41,6 +41,12 @@ public:
      */
     virtual void newProject(const QString& workspaceFilePath = "") = 0;
 
+    /**
+     * Creates a new project with default system view plugins (either on the left or right, other alignments are ignored)
+     * @param defaultPluginsAlignment Alignment of the default plugins
+     */
+    virtual void newProject(const Qt::AlignmentFlag& defaultPluginsAlignment) = 0;
+
     /** Creates a new blank project (without any view plugins or data) */
     virtual void newBlankProject() = 0;
 

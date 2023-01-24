@@ -36,6 +36,12 @@ public:
      */
     void newProject(const QString& workspaceFilePath = "") override;
 
+    /**
+     * Creates a new project with default system view plugins (either on the left or right, other alignments are ignored)
+     * @param defaultPluginsAlignment Alignment of the default plugins
+     */
+    void newProject(const Qt::AlignmentFlag& defaultPluginsAlignment) override;
+
     /** Creates a new blank project (without any view plugins or data) */
     void newBlankProject() override;
 

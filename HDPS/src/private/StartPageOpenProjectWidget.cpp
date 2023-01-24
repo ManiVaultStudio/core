@@ -3,10 +3,12 @@
 #include "Archiver.h"
 
 #include <Application.h>
-
 #include <CoreInterface.h>
 
+#include <util/icon.h>
+
 #include <QDebug>
+#include <QPainter>
 
 using namespace hdps;
 using namespace hdps::util;
@@ -16,7 +18,9 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullp
     _openCreateProjectWidget(this),
     _recentProjectsWidget(this),
     _exampleProjectsWidget(this),
-    _recentProjectsAction(this)
+    _recentProjectsAction(this),
+    _leftAlignedIcon(),
+    _rightAlignedIcon()
 {
     auto layout = new QVBoxLayout();
 
@@ -40,6 +44,9 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullp
 
     _recentProjectsWidget.getHierarchyWidget().setItemTypeName("Recent Project");
     _exampleProjectsWidget.getHierarchyWidget().setItemTypeName("Example Project");
+
+    createIconForDefaultProject(Qt::AlignLeft, _leftAlignedIcon);
+    createIconForDefaultProject(Qt::AlignRight, _rightAlignedIcon);
 }
 
 void StartPageOpenProjectWidget::updateActions()
@@ -58,12 +65,12 @@ void StartPageOpenProjectWidget::updateActions()
 
     _openCreateProjectWidget.getModel().add(openProjectStartPageAction);
 
-    StartPageAction leftAlignedProjectStartPageAction(fontAwesome.getIcon("industry"), "Left-aligned project", "Create project with standard plugins on the left", "Create project with data hierarchy and data properties plugins on the left", "", []() -> void {
-        projects().newBlankProject();
+    StartPageAction leftAlignedProjectStartPageAction(_leftAlignedIcon, "Left-aligned project", "Create project with standard plugins on the left", "Create project with data hierarchy and data properties plugins on the left", "", []() -> void {
+        projects().newProject(Qt::AlignLeft);
     });
 
-    StartPageAction rightAlignedProjectStartPageAction(fontAwesome.getIcon("industry"), "Right-aligned project", "Create project with standard plugins on the right", "Create project with data hierarchy and data properties plugins on the right", "", []() -> void {
-        projects().newBlankProject();
+    StartPageAction rightAlignedProjectStartPageAction(_rightAlignedIcon, "Right-aligned project", "Create project with standard plugins on the right", "Create project with data hierarchy and data properties plugins on the right", "", []() -> void {
+        projects().newProject(Qt::AlignRight);
     });
 
     leftAlignedProjectStartPageAction.setComments(leftAlignedProjectStartPageAction.getDescription());
@@ -120,4 +127,40 @@ void StartPageOpenProjectWidget::updateActions()
 
         _exampleProjectsWidget.getModel().add(exampleProjectStartPageAction);
     }
+}
+
+void StartPageOpenProjectWidget::createIconForDefaultProject(const Qt::Alignment& alignment, QIcon& icon)
+{
+    const auto size             = 128.0;
+    const auto halfSize         = size / 2.0;
+    const auto margin           = 12.0;
+    const auto spacing          = 14.0;
+    const auto halfSpacing      = spacing / 2.0;
+    const auto lineThickness    = 7.0;
+    const auto offset           = 80.0;
+
+    QPixmap pixmap(size, size);
+
+    pixmap.fill(Qt::transparent);
+
+    QPainter painter(&pixmap);
+
+    painter.setWindow(0, 0, size, size);
+
+    const auto drawWindow = [&](QRectF rectangle) -> void {
+        painter.setBrush(Qt::black);
+        painter.setPen(Qt::NoPen);
+        painter.drawRect(rectangle);
+    };
+
+    drawWindow(QRectF(QPointF(margin, margin), QPointF(offset - halfSpacing, size - margin)));
+    drawWindow(QRectF(QPointF(offset + halfSpacing, margin), QPointF(size - margin, halfSize - halfSpacing)));
+    drawWindow(QRectF(QPointF(offset + halfSpacing, halfSize + halfSpacing), QPointF(size - margin, size - margin)));
+
+    QPixmap finalPixmap = pixmap;
+
+    if (alignment == Qt::AlignLeft)
+        finalPixmap = pixmap.transformed(QTransform().scale(-1, 1));
+
+    icon = hdps::gui::createIcon(finalPixmap);
 }
