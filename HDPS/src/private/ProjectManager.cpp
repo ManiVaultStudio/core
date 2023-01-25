@@ -243,13 +243,13 @@ void ProjectManager::newProject(const QString& workspaceFilePath /*= ""*/)
     }
 }
 
-void ProjectManager::newProject(const Qt::AlignmentFlag& defaultPluginsAlignment)
+void ProjectManager::newProject(const Qt::AlignmentFlag& alignment, bool logging /*= false*/)
 {
     newBlankProject();
 
     auto dockAreaFlag = DockAreaFlag::Right;
 
-    switch (defaultPluginsAlignment) {
+    switch (alignment) {
         case Qt::AlignLeft:
             dockAreaFlag = DockAreaFlag::Left;
             break;
@@ -269,6 +269,9 @@ void ProjectManager::newProject(const Qt::AlignmentFlag& defaultPluginsAlignment
 
     if (plugins().isPluginLoaded("Data properties"))
         plugins().requestViewPlugin("Data properties", dataHierarchyPlugin, DockAreaFlag::Bottom);
+
+    if (logging && plugins().isPluginLoaded("Logging"))
+        plugins().requestViewPlugin("Logging", nullptr, DockAreaFlag::Bottom);
 }
 
 void ProjectManager::newBlankProject()
@@ -358,7 +361,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
                         return;
-
+                    
                     QTemporaryDir temporaryDir;
 
                     Project project(extractProjectFileFromHdpsFile(filePath, temporaryDir));
@@ -539,7 +542,14 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
                 //updatePassword();
 
                 connect(&fileDialog, &QFileDialog::currentChanged, this, [this, getSettingsPrefix, currentProject](const QString& path) -> void {
-                    Project project(path);
+                    if (!QFileInfo(path).isFile())
+                        return;
+
+                    QTemporaryDir temporaryDir;
+
+                    const auto projectJsonFilePath = projects().extractProjectFileFromHdpsFile(path, temporaryDir);
+
+                    Project project(projectJsonFilePath);
 
                     currentProject->getCompressionEnabledAction().setChecked(project.getCompressionEnabledAction().isChecked());
                     currentProject->getCompressionLevelAction().setValue(project.getCompressionLevelAction().getValue());

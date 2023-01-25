@@ -86,8 +86,6 @@ WorkspaceManager::WorkspaceManager() :
     _editWorkspaceSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     _editWorkspaceSettingsAction.setConnectionPermissionsToNone();
 
-    _importWorkspaceFromProjectAction.setShortcut(QKeySequence("Ctrl+Alt+I"));
-    _importWorkspaceFromProjectAction.setShortcutContext(Qt::ApplicationShortcut);
     _importWorkspaceFromProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
     _importWorkspaceFromProjectAction.setToolTip("Import workspace from project");
 

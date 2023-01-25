@@ -138,7 +138,7 @@ QMap<RecentFilesAction::Model::Column, QPair<QString, QString>> RecentFilesActio
 
 RecentFilesAction::Model::Model(RecentFilesAction* recentFilePathsAction) :
     QStandardItemModel(recentFilePathsAction),
-    _recentFilePathsAction(recentFilePathsAction),
+    _recentFilesAction(recentFilePathsAction),
     _actions()
 {
 }
@@ -154,7 +154,7 @@ void RecentFilesAction::Model::loadFromSettings()
 
     _actions.clear();
 
-    const auto recentFilePaths = Application::current()->getSetting(_recentFilePathsAction->getSettingsKey(), QVariantList()).toList();
+    const auto recentFilePaths = Application::current()->getSetting(_recentFilesAction->getSettingsKey(), QVariantList()).toList();
 
     std::int32_t shortcutIndex = 1;
 
@@ -165,7 +165,7 @@ void RecentFilesAction::Model::loadFromSettings()
         if (!QFileInfo(filePath).exists())
             continue;
 
-        auto filePathItem = new QStandardItem(_recentFilePathsAction->getIcon(), filePath);
+        auto filePathItem = new QStandardItem(_recentFilesAction->getIcon(), filePath);
         auto dateTimeItem = new QStandardItem(dateTime.toString("ddd MMMM d yy"));
 
         dateTimeItem->setData(dateTime, Qt::EditRole);
@@ -174,15 +174,15 @@ void RecentFilesAction::Model::loadFromSettings()
 
         auto recentFilePathAction = new TriggerAction(this, filePath);
 
-        recentFilePathAction->setIcon(_recentFilePathsAction->getIcon());
+        recentFilePathAction->setIcon(_recentFilesAction->getIcon());
 
-        if (!_recentFilePathsAction->getShortcutPrefix().isEmpty())
-            recentFilePathAction->setShortcut(QKeySequence(QString("%1+%2").arg(_recentFilePathsAction->getShortcutPrefix(), QString::number(shortcutIndex))));
+        if (!_recentFilesAction->getShortcutPrefix().isEmpty())
+            recentFilePathAction->setShortcut(QKeySequence(QString("%1+%2").arg(_recentFilesAction->getShortcutPrefix(), QString::number(shortcutIndex))));
 
         mainWindow->addAction(recentFilePathAction);
         
         connect(recentFilePathAction, &TriggerAction::triggered, this, [this, filePath]() -> void {
-            emit _recentFilePathsAction->triggered(filePath);
+            emit _recentFilesAction->triggered(filePath);
         });
 
         _actions << recentFilePathAction;
@@ -200,11 +200,13 @@ void RecentFilesAction::Model::loadFromSettings()
     
     setHeader(Column::FilePath);
     setHeader(Column::DateTime);
+
+    emit _recentFilesAction->recentFilesChanged(_recentFilesAction->getRecentFiles());
 }
 
 void RecentFilesAction::Model::addRecentFilePath(const QString& filePath)
 {
-    auto recentFilePaths = Application::current()->getSetting(_recentFilePathsAction->getSettingsKey(), QVariantList()).toList();
+    auto recentFilePaths = Application::current()->getSetting(_recentFilesAction->getSettingsKey(), QVariantList()).toList();
 
     QVariantMap recentFilePath{
         { "FilePath", filePath },
@@ -219,14 +221,16 @@ void RecentFilesAction::Model::addRecentFilePath(const QString& filePath)
 
     recentFilePathsToKeep.insert(0, recentFilePath);
 
-    Application::current()->setSetting(_recentFilePathsAction->getSettingsKey(), recentFilePathsToKeep);
+    Application::current()->setSetting(_recentFilesAction->getSettingsKey(), recentFilePathsToKeep);
 
     loadFromSettings();
+
+    emit _recentFilesAction->recentFilesChanged(_recentFilesAction->getRecentFiles());
 }
 
 void RecentFilesAction::Model::removeRecentFilePath(const QString& filePath)
 {
-    auto recentFilePaths = Application::current()->getSetting(_recentFilePathsAction->getSettingsKey(), QVariantList()).toList();
+    auto recentFilePaths = Application::current()->getSetting(_recentFilesAction->getSettingsKey(), QVariantList()).toList();
 
     QVariantList recentFilePathsToKeep;
 
@@ -234,7 +238,9 @@ void RecentFilesAction::Model::removeRecentFilePath(const QString& filePath)
         if (filePath != recentFilePath.toMap()["FilePath"].toString())
             recentFilePathsToKeep << recentFilePath;
 
-    Application::current()->setSetting(_recentFilePathsAction->getSettingsKey(), recentFilePathsToKeep);
+    Application::current()->setSetting(_recentFilesAction->getSettingsKey(), recentFilePathsToKeep);
+
+    emit _recentFilesAction->recentFilesChanged(_recentFilesAction->getRecentFiles());
 }
 
 QList<TriggerAction*> RecentFilesAction::Model::getActions()
@@ -282,7 +288,8 @@ RecentFilesAction::Dialog::Dialog(RecentFilesAction* recentFilePathsAction) :
 
     treeView.setRootIsDecorated(false);
     treeView.setSortingEnabled(true);
-    
+    treeView.setTextElideMode(Qt::ElideMiddle);
+
     _hierarchyWidget.getExpandAllAction().setVisible(false);
     _hierarchyWidget.getCollapseAllAction().setVisible(false);
 

@@ -38,9 +38,10 @@ public:
 
     /**
      * Creates a new project with default system view plugins (either on the left or right, other alignments are ignored)
-     * @param defaultPluginsAlignment Alignment of the default plugins
+     * @param alignment Alignment of the default plugins
+     * @param logging Whether to add a logging view at the bottom
      */
-    void newProject(const Qt::AlignmentFlag& defaultPluginsAlignment) override;
+    void newProject(const Qt::AlignmentFlag& alignment, bool logging = false) override;
 
     /** Creates a new blank project (without any view plugins or data) */
     void newBlankProject() override;

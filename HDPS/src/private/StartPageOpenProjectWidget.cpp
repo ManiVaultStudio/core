@@ -12,6 +12,7 @@
 
 using namespace hdps;
 using namespace hdps::util;
+using namespace hdps::gui;
 
 StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
@@ -20,7 +21,9 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullp
     _exampleProjectsWidget(this),
     _recentProjectsAction(this),
     _leftAlignedIcon(),
-    _rightAlignedIcon()
+    _leftAlignedLoggingIcon(),
+    _rightAlignedIcon(),
+    _rightAlignedLoggingIcon()
 {
     auto layout = new QVBoxLayout();
 
@@ -39,51 +42,122 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullp
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
-    _openCreateProjectWidget.getHierarchyWidget().setFixedHeight(129);
+    _openCreateProjectWidget.getHierarchyWidget().setFixedHeight(258);
     _openCreateProjectWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     _recentProjectsWidget.getHierarchyWidget().setItemTypeName("Recent Project");
     _exampleProjectsWidget.getHierarchyWidget().setItemTypeName("Example Project");
 
+    _recentProjectsWidget.getHierarchyWidget().getToolbarLayout().addWidget(_recentProjectsAction.getEditAction().createWidget(this, TriggerAction::Icon));
+
+    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
+
+    connect(&_recentProjectsAction, &RecentFilesAction::recentFilesChanged, this, &StartPageOpenProjectWidget::updateRecentActions);
+
     createIconForDefaultProject(Qt::AlignLeft, _leftAlignedIcon);
+    createIconForDefaultProject(Qt::AlignLeft, _leftAlignedLoggingIcon, true);
     createIconForDefaultProject(Qt::AlignRight, _rightAlignedIcon);
+    createIconForDefaultProject(Qt::AlignRight, _rightAlignedLoggingIcon, true);
 }
 
 void StartPageOpenProjectWidget::updateActions()
 {
+    updateOpenCreateActions();
+    updateRecentActions();
+    updateExamplesActions();
+}
+
+void StartPageOpenProjectWidget::createIconForDefaultProject(const Qt::Alignment& alignment, QIcon& icon, bool logging /*= false*/)
+{
+    const auto size             = 128.0;
+    const auto margin           = 12.0;
+    const auto spacing          = 14.0;
+    const auto halfSpacing      = spacing / 2.0;
+    const auto lineThickness    = 7.0;
+    const auto offset           = 80.0;
+    const auto loggingHeight    = logging ? 25.0 : 0.0;
+    const auto halfSize         = logging ? margin + ((size - margin - margin - loggingHeight - spacing) / 2.0) : size / 2.0;
+
+    QPixmap pixmap(size, size);
+
+    pixmap.fill(Qt::transparent);
+
+    QPainter painter(&pixmap);
+
+    painter.setWindow(0, 0, size, size);
+
+    const auto drawWindow = [&](QRectF rectangle) -> void {
+        painter.setBrush(Qt::black);
+        painter.setPen(Qt::NoPen);
+        painter.drawRect(rectangle);
+    };
+
+    drawWindow(QRectF(QPointF(margin, margin), QPointF(offset - halfSpacing, size - margin - loggingHeight - (logging ? spacing : 0.0))));
+
+    drawWindow(QRectF(QPointF(offset + halfSpacing, margin), QPointF(size - margin, halfSize - halfSpacing)));
+    drawWindow(QRectF(QPointF(offset + halfSpacing, halfSize + halfSpacing), QPointF(size - margin, size - margin - loggingHeight - (logging ? spacing : 0.0))));
+
+    if (logging)
+        drawWindow(QRectF(QPointF(margin, size - margin - loggingHeight), QPointF(size - margin, size - margin)));
+
+    QPixmap finalPixmap = pixmap;
+
+    if (alignment == Qt::AlignLeft)
+        finalPixmap = pixmap.transformed(QTransform().scale(-1, 1));
+
+    icon = hdps::gui::createIcon(finalPixmap);
+}
+
+void StartPageOpenProjectWidget::updateOpenCreateActions()
+{
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _openCreateProjectWidget.getModel().reset();
-    _recentProjectsWidget.getModel().reset();
-    _exampleProjectsWidget.getModel().reset();
 
     StartPageAction openProjectStartPageAction(fontAwesome.getIcon("folder-open"), "Open project", "Open an existing project", "Open an existing project", "Browse to an existing project and open it", []() -> void {
         projects().openProject();
     });
 
-    openProjectStartPageAction.setSubtitle("Open an existing project");
+    openProjectStartPageAction.setComments("Use the file browser to navigate to the project and open it");
 
     _openCreateProjectWidget.getModel().add(openProjectStartPageAction);
 
-    StartPageAction leftAlignedProjectStartPageAction(_leftAlignedIcon, "Left-aligned project", "Create project with standard plugins on the left", "Create project with data hierarchy and data properties plugins on the left", "", []() -> void {
-        projects().newProject(Qt::AlignLeft);
-    });
-
-    StartPageAction rightAlignedProjectStartPageAction(_rightAlignedIcon, "Right-aligned project", "Create project with standard plugins on the right", "Create project with data hierarchy and data properties plugins on the right", "", []() -> void {
+    StartPageAction rightAlignedProjectStartPageAction(_rightAlignedIcon, "Right-aligned", "Create project with standard plugins on the right", "Create project with data hierarchy and data properties plugins on the right", "", []() -> void {
         projects().newProject(Qt::AlignRight);
     });
 
-    leftAlignedProjectStartPageAction.setComments(leftAlignedProjectStartPageAction.getDescription());
+    StartPageAction rightAlignedLoggingProjectStartPageAction(_rightAlignedLoggingIcon, "Right-aligned with logging", "Create project with standard plugins on the right and logging at the bottom", "Create project with data hierarchy and data properties plugins on the right and a logging plugin at the bottom", "", []() -> void {
+        projects().newProject(Qt::AlignRight, true);
+    });
+
+    StartPageAction leftAlignedProjectStartPageAction(_leftAlignedIcon, "Left-aligned", "Create project with standard plugins on the left", "Create project with data hierarchy and data properties plugins on the left", "", []() -> void {
+        projects().newProject(Qt::AlignLeft);
+    });
+
+    StartPageAction leftAlignedLoggingProjectStartPageAction(_leftAlignedLoggingIcon, "Left-aligned with logging", "Create project with standard plugins on the left and logging at the bottom", "Create project with data hierarchy and data properties plugins on the left and a logging plugin at the bottom", "", []() -> void {
+        projects().newProject(Qt::AlignLeft, true);
+    });
+
     rightAlignedProjectStartPageAction.setComments(rightAlignedProjectStartPageAction.getDescription());
+    rightAlignedLoggingProjectStartPageAction.setComments(rightAlignedLoggingProjectStartPageAction.getDescription());
+    leftAlignedProjectStartPageAction.setComments(leftAlignedProjectStartPageAction.getDescription());
+    leftAlignedLoggingProjectStartPageAction.setComments(leftAlignedLoggingProjectStartPageAction.getDescription());
 
-    _openCreateProjectWidget.getModel().add(leftAlignedProjectStartPageAction);
     _openCreateProjectWidget.getModel().add(rightAlignedProjectStartPageAction);
+    _openCreateProjectWidget.getModel().add(rightAlignedLoggingProjectStartPageAction);
+    _openCreateProjectWidget.getModel().add(leftAlignedProjectStartPageAction);
+    _openCreateProjectWidget.getModel().add(leftAlignedLoggingProjectStartPageAction);
+}
 
-    _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
+void StartPageOpenProjectWidget::updateRecentActions()
+{
+    _recentProjectsWidget.getModel().reset();
+
+    auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
         const auto recentFilePath = recentFile.getFilePath();
-        
+
         QTemporaryDir temporaryDir;
 
         const auto recentProjectJsonFilePath = projects().extractProjectFileFromHdpsFile(recentFilePath, temporaryDir);
@@ -102,6 +176,13 @@ void StartPageOpenProjectWidget::updateActions()
 
         _recentProjectsWidget.getModel().add(recentProjectStartPageAction);
     }
+}
+
+void StartPageOpenProjectWidget::updateExamplesActions()
+{
+    _exampleProjectsWidget.getModel().reset();
+
+    auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     QStringList projectFilter("*.hdps");
 
@@ -122,45 +203,11 @@ void StartPageOpenProjectWidget::updateActions()
             projects().openProject(exampleProjectFilePath);
         });
 
-        exampleProjectStartPageAction.setPreviewImage(projects().getPreviewImage(exampleProjectFilePath));
+        exampleProjectStartPageAction.setComments(project.getCommentsAction().getString());
         exampleProjectStartPageAction.setTags(project.getTagsAction().getStrings());
+        exampleProjectStartPageAction.setPreviewImage(projects().getPreviewImage(exampleProjectFilePath));
+        exampleProjectStartPageAction.setContributors(project.getContributorsAction().getStrings());
 
         _exampleProjectsWidget.getModel().add(exampleProjectStartPageAction);
     }
-}
-
-void StartPageOpenProjectWidget::createIconForDefaultProject(const Qt::Alignment& alignment, QIcon& icon)
-{
-    const auto size             = 128.0;
-    const auto halfSize         = size / 2.0;
-    const auto margin           = 12.0;
-    const auto spacing          = 14.0;
-    const auto halfSpacing      = spacing / 2.0;
-    const auto lineThickness    = 7.0;
-    const auto offset           = 80.0;
-
-    QPixmap pixmap(size, size);
-
-    pixmap.fill(Qt::transparent);
-
-    QPainter painter(&pixmap);
-
-    painter.setWindow(0, 0, size, size);
-
-    const auto drawWindow = [&](QRectF rectangle) -> void {
-        painter.setBrush(Qt::black);
-        painter.setPen(Qt::NoPen);
-        painter.drawRect(rectangle);
-    };
-
-    drawWindow(QRectF(QPointF(margin, margin), QPointF(offset - halfSpacing, size - margin)));
-    drawWindow(QRectF(QPointF(offset + halfSpacing, margin), QPointF(size - margin, halfSize - halfSpacing)));
-    drawWindow(QRectF(QPointF(offset + halfSpacing, halfSize + halfSpacing), QPointF(size - margin, size - margin)));
-
-    QPixmap finalPixmap = pixmap;
-
-    if (alignment == Qt::AlignLeft)
-        finalPixmap = pixmap.transformed(QTransform().scale(-1, 1));
-
-    icon = hdps::gui::createIcon(finalPixmap);
 }

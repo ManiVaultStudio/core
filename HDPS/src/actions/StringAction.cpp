@@ -226,7 +226,10 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
     const auto updateLineEdit = [this, stringAction]() {
         QSignalBlocker blocker(this);
 
+        const auto cacheCursorPosition = cursorPosition();
+
         setText(stringAction->getString());
+        setCursorPosition(cacheCursorPosition);
     };
 
     const auto updatePlaceHolderText = [this, stringAction]() -> void {
@@ -299,13 +302,15 @@ StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stri
     const auto updateTextEdit = [this, stringAction]() {
         QSignalBlocker blocker(this);
 
+        const auto cacheCursorPosition = textCursor().position();
+
         setText(stringAction->getString());
 
-        auto cursor = textCursor();
+        auto updateCursor = textCursor();
 
-        cursor.movePosition(QTextCursor::End);
+        updateCursor.setPosition(cacheCursorPosition);
 
-        setTextCursor(cursor);
+        setTextCursor(updateCursor);
     };
 
     const auto updatePlaceHolderText = [this, stringAction]() -> void {

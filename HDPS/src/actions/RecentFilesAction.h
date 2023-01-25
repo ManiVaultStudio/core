@@ -111,8 +111,8 @@ public:
         QStringList getRecentFilePaths() const;
 
     private:
-        RecentFilesAction*      _recentFilePathsAction;     /** Pointer to owning recent file paths action */
-        QList<TriggerAction*>   _actions;                   /** Menu trigger actions */
+        RecentFilesAction*      _recentFilesAction; /** Pointer to owning recent file paths action */
+        QList<TriggerAction*>   _actions;           /** Menu trigger actions */
 
         friend class RecentFilesAction;
     };
@@ -273,6 +273,12 @@ signals:
 
     /** Signals that recent \p filePath is triggered */
     void triggered(const QString& filePath);
+
+    /**
+     * Signals that recent files changed
+     * @param recentFiles Recent files which changed
+     */
+    void recentFilesChanged(const RecentFiles& recentFiles);
 
 private:
     QString         _settingsKey;       /** Settings key where the recent file paths will be stored */
