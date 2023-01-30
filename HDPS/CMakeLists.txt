@@ -444,6 +444,7 @@ set(PUBLIC_ACTIONS_HEADERS
     src/actions/WindowLevelAction.h
     src/actions/DirectoryPickerAction.h
     src/actions/FilePickerAction.h
+    src/actions/VariantAction.h
     src/actions/StatusAction.h
     src/actions/RecentFilesAction.h
     src/actions/LockingAction.h
@@ -499,6 +500,7 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/WindowLevelAction.cpp
     src/actions/DirectoryPickerAction.cpp
     src/actions/FilePickerAction.cpp
+    src/actions/VariantAction.cpp
     src/actions/StatusAction.cpp
     src/actions/RecentFilesAction.cpp
     src/actions/LockingAction.cpp
