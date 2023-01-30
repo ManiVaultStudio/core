@@ -24,10 +24,10 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(QWidget* parent /*= nullptr
     auto layout = new QVBoxLayout();
 
     layout->addWidget(StartPageContentWidget::createHeaderLabel("Create Project From Workspace", "Create project from workspace"));
-    layout->addWidget(&_createProjectFromWorkspaceWidget, 2);
+    layout->addWidget(&_createProjectFromWorkspaceWidget, 3);
 
     layout->addWidget(StartPageContentWidget::createHeaderLabel("Create Project From Data", "Create project from data"));
-    layout->addWidget(&_createProjectFromDatasetWidget, 2);
+    layout->addWidget(&_createProjectFromDatasetWidget, 3);
 
     layout->addWidget(StartPageContentWidget::createHeaderLabel("Instruction Videos", "Watch instructional videos that learn how to work with the software"));
     layout->addWidget(&_instructionVideosWidget, 1);
@@ -49,7 +49,7 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(QWidget* parent /*= nullptr
     _createProjectFromDatasetWidget.getHierarchyWidget().setItemTypeName("Importer");
     _instructionVideosWidget.getHierarchyWidget().setItemTypeName("Instruction video");
 
-    _workspaceLocationTypesModel.appendRow(new QStandardItem(hdps::Application::getIconFont("FontAwesome").getIcon("industry"), "Built-in"));
+    _workspaceLocationTypesModel.appendRow(new QStandardItem(hdps::Application::getIconFont("FontAwesome").getIcon("industry"), "Built-in Workspace"));
     _workspaceLocationTypesModel.appendRow(new QStandardItem(hdps::Application::getIconFont("FontAwesome").getIcon("clock"), "Recent Workspace"));
     _workspaceLocationTypesModel.appendRow(new QStandardItem(hdps::Application::getIconFont("FontAwesome").getIcon("clock"), "Recent Project"));
     
@@ -73,6 +73,7 @@ void StartPageGetStartedWidget::updateActions()
 void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
 {
     _createProjectFromWorkspaceWidget.getModel().reset();
+    _createProjectFromWorkspaceWidget.getHierarchyWidget().setItemTypeName(_workspaceLocationTypeAction.getCurrentText());
 
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 

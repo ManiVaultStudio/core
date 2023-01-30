@@ -324,7 +324,10 @@ void WidgetAction::loadFromSettings()
     qDebug() << QString("Load from settings: %1").arg(getSettingsPrefix());
 #endif
 
-    fromVariantMap(Application::current()->getSetting(_settingsPrefix).toMap());
+    const auto settingsVariant = Application::current()->getSetting(_settingsPrefix);
+
+    if (settingsVariant.isValid())
+        fromVariantMap(settingsVariant.toMap());
 }
 
 void WidgetAction::saveToSettings()
