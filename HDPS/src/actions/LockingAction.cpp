@@ -27,10 +27,6 @@ QString LockingAction::getTypeString() const
 
 void LockingAction::initialize(bool locked /*= false*/)
 {
-    _lockedAction.setConnectionPermissionsToNone();
-    _lockAction.setConnectionPermissionsToNone();
-    _unlockAction.setConnectionPermissionsToNone();
-
     _lockedAction.setIcon(Application::getIconFont("FontAwesome").getIcon("lock"));
     _lockAction.setIcon(Application::getIconFont("FontAwesome").getIcon("lock"));
     _unlockAction.setIcon(Application::getIconFont("FontAwesome").getIcon("unlock"));

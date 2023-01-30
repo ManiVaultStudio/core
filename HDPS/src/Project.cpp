@@ -25,7 +25,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     initialize();
 }
 
-Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
+Project::Project(const QString& filePath, bool preview, QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("Project"),
     _filePath(filePath),
@@ -58,7 +58,7 @@ Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
             throw std::runtime_error("JSON document is invalid");
 
-        fromVariantMap(jsonDocument.toVariant().toMap()["Project"].toMap());
+        fromVariantMap(jsonDocument.toVariant().toMap()["Project"].toMap(), preview);
     }
     catch (std::exception& e)
     {
@@ -84,6 +84,11 @@ void Project::setFilePath(const QString& filePath)
 
 void Project::fromVariantMap(const QVariantMap& variantMap)
 {
+    fromVariantMap(variantMap, false);
+}
+
+void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
+{
     Serializable::fromVariantMap(variantMap);
 
     Serializable::fromVariantMap(_version, variantMap, "Version");
@@ -103,9 +108,11 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     _compressionEnabledAction.fromVariantMap(compressionMap["Enabled"].toMap());
     _compressionLevelAction.fromVariantMap(compressionMap["Level"].toMap());
 
-    plugins().fromVariantMap(variantMap[plugins().getSerializationName()].toMap());
-    dataHierarchy().fromVariantMap(variantMap[dataHierarchy().getSerializationName()].toMap());
-    actions().fromVariantMap(variantMap[actions().getSerializationName()].toMap());
+    if (!preview) {
+        plugins().fromVariantMap(variantMap[plugins().getSerializationName()].toMap());
+        dataHierarchy().fromVariantMap(variantMap[dataHierarchy().getSerializationName()].toMap());
+        actions().fromVariantMap(variantMap[actions().getSerializationName()].toMap());
+    }
 }
 
 QVariantMap Project::toVariantMap() const

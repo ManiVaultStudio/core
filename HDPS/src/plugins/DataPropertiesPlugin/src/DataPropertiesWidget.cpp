@@ -36,8 +36,6 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
 void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems)
 {
-    return;
-    
     try
     {
         if (selectedItems.isEmpty()) {

@@ -31,11 +31,12 @@ public:
     Project(QObject* parent = nullptr);
 
     /**
-     * Construct project with \p parent and load from \p filePath
+     * Construct project from project JSON \p filePath and \p parent 
      * @param filePath Path of the project file
+     * @param preview Only extract basic info from the project JSON file for preview purposes
      * @param parent Pointer to parent object
      */
-    Project(const QString& filePath, QObject* parent = nullptr);
+    Project(const QString& filePath, bool preview, QObject* parent = nullptr);
 
     /**
      * Get project file path
@@ -61,6 +62,13 @@ public: // Miscellaneous
     void updateContributors();
 
 public: // Serialization
+
+    /**
+     * Load project from variant
+     * @param preview Only extract basic info from the project JSON file for preview purposes
+     * @param Variant representation of the project
+     */
+    void fromVariantMap(const QVariantMap& variantMap, bool preview);
 
     /**
      * Load project from variant

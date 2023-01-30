@@ -168,7 +168,7 @@ void StartPageOpenProjectWidget::updateRecentActions()
 
         const auto recentProjectJsonFilePath = projects().extractProjectFileFromHdpsFile(recentFilePath, temporaryDir);
 
-        Project project(recentProjectJsonFilePath);
+        Project project(recentProjectJsonFilePath, true);
 
         StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), recentFilePath, project.getDescriptionAction().getString(), "", [recentFilePath]() -> void {
             projects().openProject(recentFilePath);
@@ -203,7 +203,7 @@ void StartPageOpenProjectWidget::updateExamplesActions()
 
         const auto exampleProjectJsonFilePath = projects().extractProjectFileFromHdpsFile(exampleProjectFilePath, temporaryDir);
 
-        Project project(exampleProjectJsonFilePath);
+        Project project(exampleProjectJsonFilePath, true);
 
         StartPageAction exampleProjectStartPageAction(fontAwesome.getIcon("file-prescription"), project.getTitleAction().getString(), exampleProjectFilePath, project.getDescriptionAction().getString(), "", [exampleProjectFilePath]() -> void {
             projects().openProject(exampleProjectFilePath);

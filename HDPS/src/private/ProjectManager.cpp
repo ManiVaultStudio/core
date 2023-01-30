@@ -366,7 +366,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                     
                     QTemporaryDir temporaryDir;
 
-                    Project project(extractProjectFileFromHdpsFile(filePath, temporaryDir));
+                    Project project(extractProjectFileFromHdpsFile(filePath, temporaryDir), true);
 
                     titleAction.setString(project.getTitleAction().getString());
                     descriptionAction.setString(project.getDescriptionAction().getString());
@@ -551,7 +551,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
                     const auto projectJsonFilePath = projects().extractProjectFileFromHdpsFile(path, temporaryDir);
 
-                    Project project(projectJsonFilePath);
+                    Project project(projectJsonFilePath, true);
 
                     currentProject->getCompressionEnabledAction().setChecked(project.getCompressionEnabledAction().isChecked());
                     currentProject->getCompressionLevelAction().setValue(project.getCompressionLevelAction().getValue());

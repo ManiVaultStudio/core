@@ -30,7 +30,7 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     _defaultWidgetFlags(),
     _sortIndex(-1),
     _stretch(-1),
-    _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::Default)),
+    _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
     _isPublic(false),
     _publicAction(nullptr),
     _connectedActions(),

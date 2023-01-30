@@ -48,7 +48,7 @@ void VariantAction::connectToPublicAction(WidgetAction* publicAction)
 
 void VariantAction::disconnectFromPublicAction()
 {
-    auto publicStringAction = dynamic_cast<VariantAction*>(_publicAction);
+    auto publicStringAction = dynamic_cast<VariantAction*>(getPublicAction());
 
     Q_ASSERT(publicStringAction != nullptr);
 
