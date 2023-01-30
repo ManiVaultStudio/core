@@ -39,12 +39,12 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     _popupSizeHint(QSize(0, 0)),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default))
 {
-    //actions().addAction(this);
+    actions().addAction(this);
 }
 
 WidgetAction::~WidgetAction()
 {
-    //actions().removeAction(this);
+    actions().removeAction(this);
 }
 
 QString WidgetAction::getTypeString() const

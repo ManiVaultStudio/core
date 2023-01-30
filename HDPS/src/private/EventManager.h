@@ -17,7 +17,7 @@ public:
     EventManager();
 
     /** Perform event manager startup initialization */
-    void initalize() override;
+    void initialize() override;
 
     /** Resets the contents of the event manager */
     void reset() override;

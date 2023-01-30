@@ -28,11 +28,13 @@ ActionsManager::~ActionsManager()
     reset();
 }
 
-void ActionsManager::initalize()
+void ActionsManager::initialize()
 {
 #ifdef ACTIONS_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    AbstractManager::initialize();
 }
 
 void ActionsManager::reset()

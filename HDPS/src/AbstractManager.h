@@ -37,12 +37,14 @@ public:
         QObject(parent),
         Serializable(name),
         _initialized(false),
-        _lockingAction(this, name)
+        _lockingAction(nullptr)
     {
     }
 
     /** Perform manager startup initialization */
-    virtual void initalize() = 0;
+    virtual void initialize() {
+        _lockingAction = new gui::LockingAction(this, getSerializationName());
+    };
 
     /** Begin reset operation */
     virtual void beginReset() final {
@@ -103,7 +105,7 @@ public:
 
 public: // Action getters
 
-    gui::LockingAction& getLockingAction() { return _lockingAction; }
+    gui::LockingAction& getLockingAction() { return *_lockingAction; }
 
 public: // Locking
 
@@ -139,7 +141,7 @@ signals:
 
 private:
     bool                _initialized;       /** Whether the manager is initialized or not */
-    gui::LockingAction  _lockingAction;     /** Manager locking action */
+    gui::LockingAction* _lockingAction;     /** Manager locking action */
 };
 
 }

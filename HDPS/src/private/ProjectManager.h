@@ -25,7 +25,7 @@ public:
     ProjectManager(QObject* parent = nullptr);
 
     /** Perform manager startup initialization */
-    void initalize() override;
+    void initialize() override;
 
     /** Resets the contents of the project manager */
     void reset() override;

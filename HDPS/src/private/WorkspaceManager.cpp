@@ -53,7 +53,7 @@ WorkspaceManager::WorkspaceManager() :
     // Temporary solution for https://github.com/hdps/core/issues/274
     new QOpenGLWidget();
 
-    CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
+    //CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
     //CDockManager::setAutoHideConfigFlags(CDockManager::DefaultAutoHideConfig);
     //CDockManager::setAutoHideConfigFlag(CDockManager::AutoHideShowOnMouseOver, true);
 
@@ -130,37 +130,39 @@ WorkspaceManager::WorkspaceManager() :
     connect(&_recentWorkspacesAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
         loadWorkspace(filePath);
     });
-
-    const auto updateActionsReadOnly = [this]() -> void {
-        _resetWorkspaceAction.setEnabled(!getLockingAction().isLocked());
-        _importWorkspaceAction.setEnabled(!getLockingAction().isLocked());
-        _importWorkspaceFromProjectAction.setEnabled(!getLockingAction().isLocked());
-        _exportWorkspaceAction.setEnabled(true);
-        _exportWorkspaceAsAction.setEnabled(true);
-        _exportWorkspaceAsAction.setEnabled(!getWorkspaceFilePath().isEmpty());
-        _recentWorkspacesAction.setEnabled(!getLockingAction().isLocked());
-    };
-
-    connect(this, &WorkspaceManager::workspaceLoaded, this, updateActionsReadOnly);
-    connect(this, &WorkspaceManager::workspaceSaved, this, updateActionsReadOnly);
-    connect(&getLockingAction(), &LockingAction::lockedChanged, this, updateActionsReadOnly);
-
-    updateActionsReadOnly();
-
-    getLockingAction().setWhat("Layout");
 }
 
-void WorkspaceManager::initalize()
+void WorkspaceManager::initialize()
 {
 #ifdef WORKSPACE_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    AbstractManager::initialize();
 
     if (isInitialized())
         return;
 
     beginInitialization();
     {
+        const auto updateActionsReadOnly = [this]() -> void {
+            _resetWorkspaceAction.setEnabled(!getLockingAction().isLocked());
+            _importWorkspaceAction.setEnabled(!getLockingAction().isLocked());
+            _importWorkspaceFromProjectAction.setEnabled(!getLockingAction().isLocked());
+            _exportWorkspaceAction.setEnabled(true);
+            _exportWorkspaceAsAction.setEnabled(true);
+            _exportWorkspaceAsAction.setEnabled(!getWorkspaceFilePath().isEmpty());
+            _recentWorkspacesAction.setEnabled(!getLockingAction().isLocked());
+        };
+
+        connect(this, &WorkspaceManager::workspaceLoaded, this, updateActionsReadOnly);
+        connect(this, &WorkspaceManager::workspaceSaved, this, updateActionsReadOnly);
+        connect(&getLockingAction(), &LockingAction::lockedChanged, this, updateActionsReadOnly);
+
+        updateActionsReadOnly();
+
+        getLockingAction().setWhat("Layout");
+
         _mainDockManager        = new DockManager();
         _viewPluginsDockManager = new DockManager();
         _viewPluginsDockWidget  = new ViewPluginsDockWidget(_viewPluginsDockManager);

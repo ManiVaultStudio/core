@@ -67,14 +67,14 @@ void Core::init()
     _projectManager.reset(new ProjectManager());
     _settingsManager.reset(new SettingsManager());
 
-    _actionsManager->initalize();
-    _pluginManager->initalize();
-    _eventManager->initalize();
-    _dataManager->initalize();
-    _dataHierarchyManager->initalize();
-    _workspaceManager->initalize();
-    _projectManager->initalize();
-    _settingsManager->initalize();
+    _actionsManager->initialize();
+    _pluginManager->initialize();
+    _eventManager->initialize();
+    _dataManager->initialize();
+    _dataHierarchyManager->initialize();
+    _workspaceManager->initialize();
+    _projectManager->initialize();
+    _settingsManager->initialize();
 }
 
 void Core::addPlugin(plugin::Plugin* plugin)

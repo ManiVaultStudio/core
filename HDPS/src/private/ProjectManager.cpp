@@ -194,11 +194,13 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     connect(this, &ProjectManager::projectDestroyed, this, updateReadOnly);
 }
 
-void ProjectManager::initalize()
+void ProjectManager::initialize()
 {
 #ifdef PROJECT_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    AbstractManager::initialize();
 }
 
 void ProjectManager::reset()

@@ -43,11 +43,13 @@ PluginManager::~PluginManager(void)
     reset();
 }
 
-void PluginManager::initalize()
+void PluginManager::initialize()
 {
 #ifdef PLUGIN_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    AbstractManager::initialize();
 
     if (isInitialized())
         return;

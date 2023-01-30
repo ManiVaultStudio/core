@@ -204,11 +204,13 @@ void DataManager::reset()
     endReset();
 }
 
-void DataManager::initalize()
+void DataManager::initialize()
 {
 #ifdef DATA_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    AbstractManager::initialize();
 }
 
 DataManager::~DataManager()

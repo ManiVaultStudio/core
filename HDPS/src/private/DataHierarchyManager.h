@@ -26,7 +26,7 @@ public:
     ~DataHierarchyManager() override;
 
     /** Perform manager startup initialization */
-    void initalize() override;
+    void initialize() override;
 
     /** Resets the contents of the data hierarchy manager */
     void reset() override;

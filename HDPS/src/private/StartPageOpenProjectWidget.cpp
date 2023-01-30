@@ -122,6 +122,10 @@ void StartPageOpenProjectWidget::updateOpenCreateActions()
 
     _openCreateProjectWidget.getModel().add(openProjectStartPageAction);
 
+    StartPageAction blankProjectStartPageAction(fontAwesome.getIcon("file"), "Blank", "Create project without plugins", "Create project without any plugins", "", []() -> void {
+        projects().newProject();
+    });
+
     StartPageAction rightAlignedProjectStartPageAction(_rightAlignedIcon, "Right-aligned", "Create project with standard plugins on the right", "Create project with data hierarchy and data properties plugins on the right", "", []() -> void {
         projects().newProject(Qt::AlignRight);
     });
@@ -138,11 +142,13 @@ void StartPageOpenProjectWidget::updateOpenCreateActions()
         projects().newProject(Qt::AlignLeft, true);
     });
 
-    rightAlignedProjectStartPageAction.setComments(rightAlignedProjectStartPageAction.getDescription());
-    rightAlignedLoggingProjectStartPageAction.setComments(rightAlignedLoggingProjectStartPageAction.getDescription());
-    leftAlignedProjectStartPageAction.setComments(leftAlignedProjectStartPageAction.getDescription());
-    leftAlignedLoggingProjectStartPageAction.setComments(leftAlignedLoggingProjectStartPageAction.getDescription());
+    //blankProjectStartPageAction.setComments(blankProjectStartPageAction.getDescription());
+    //rightAlignedProjectStartPageAction.setComments(rightAlignedProjectStartPageAction.getDescription());
+    //rightAlignedLoggingProjectStartPageAction.setComments(rightAlignedLoggingProjectStartPageAction.getDescription());
+    //leftAlignedProjectStartPageAction.setComments(leftAlignedProjectStartPageAction.getDescription());
+    //leftAlignedLoggingProjectStartPageAction.setComments(leftAlignedLoggingProjectStartPageAction.getDescription());
 
+    _openCreateProjectWidget.getModel().add(blankProjectStartPageAction);
     _openCreateProjectWidget.getModel().add(rightAlignedProjectStartPageAction);
     _openCreateProjectWidget.getModel().add(rightAlignedLoggingProjectStartPageAction);
     _openCreateProjectWidget.getModel().add(leftAlignedProjectStartPageAction);

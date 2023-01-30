@@ -18,7 +18,7 @@ public:
     ~PluginManager() override;
     
     /** Perform manager startup initialization */
-    void initalize() override;
+    void initialize() override;
 
     /** Resets the contents of the plugin manager */
     void reset() override;

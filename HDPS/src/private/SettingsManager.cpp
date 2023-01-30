@@ -43,8 +43,8 @@ SettingsManager::SettingsManager() :
             dir.mkpath(".");
     };
 
-    qDebug() << QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-    qDebug() << QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    //qDebug() << QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    //qDebug() << QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
 
     if (!QFileInfo(_globalProjectsPathAction.getDirectory()).exists()) {
         const auto projectsDir = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first();// +"/HDPS/Projects";
@@ -60,11 +60,13 @@ SettingsManager::SettingsManager() :
     mainWindow->addAction(&_editSettingsAction);
 }
 
-void SettingsManager::initalize()
+void SettingsManager::initialize()
 {
 #ifdef SETTINGS_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    AbstractManager::initialize();
 }
 
 void SettingsManager::reset()

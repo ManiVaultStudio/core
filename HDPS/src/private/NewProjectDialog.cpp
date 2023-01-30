@@ -46,7 +46,7 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
 
     _workspacesWidget.getModel().reset();
 
-    for (const auto workspaceLocation : workspaces().getWorkspaceLocations(WorkspaceLocation::Type::BuiltIn)) {
+    for (const auto workspaceLocation : workspaces().getWorkspaceLocations(WorkspaceLocation::Types(WorkspaceLocation::Type::BuiltIn | WorkspaceLocation::Type::Recent))) {
         Workspace workspace(workspaceLocation.getFilePath());
 
         StartPageAction fromWorkspaceStartPageAction(workspaces().getIcon(), QFileInfo(workspaceLocation.getFilePath()).baseName(), workspaceLocation.getFilePath(), workspace.getDescriptionAction().getString(), workspaceLocation.getFilePath(), [this, workspaceLocation]() -> void {

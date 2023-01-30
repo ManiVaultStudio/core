@@ -29,11 +29,13 @@ DataHierarchyManager::~DataHierarchyManager()
     reset();
 }
 
-void DataHierarchyManager::initalize()
+void DataHierarchyManager::initialize()
 {
 #ifdef DATA_HIERARCHY_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    AbstractManager::initialize();
 }
 
 void DataHierarchyManager::reset()

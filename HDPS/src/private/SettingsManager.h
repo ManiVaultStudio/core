@@ -17,7 +17,7 @@ public:
     SettingsManager();
 
     /** Perform manager startup initialization */
-    void initalize() override;
+    void initialize() override;
 
     /** Resets the contents of the actions manager */
     void reset() override;

@@ -53,7 +53,7 @@ public:
     WorkspaceManager();
 
     /** Perform manager startup initialization */
-    void initalize() override;
+    void initialize() override;
 
     /** Resets the contents of the workspace manager */
     void reset() override;
