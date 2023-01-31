@@ -8,9 +8,7 @@
 class QWidget;
 class QPushButton;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Decimal action class
@@ -196,5 +194,4 @@ protected:
     static constexpr int    INIT_DECIMALS       = 1;            /** Initialization number of decimals */
 };
 
-}
 }

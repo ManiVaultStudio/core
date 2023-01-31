@@ -1,82 +1,80 @@
 #include "PluginTriggerAction.h"
+#include "CoreInterface.h"
+#include "AbstractPluginManager.h"
+
+#include "pluginFactory.h"
 
 #include <QCryptographicHash>
 
-namespace hdps {
+namespace hdps::gui {
 
-namespace gui {
-
-PluginTriggerAction::PluginTriggerAction(QObject* parent, const QString& title, const plugin::Type& pluginType, const QString& pluginKind, const Datasets& datasets) :
+PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon) :
     TriggerAction(parent),
-    _title(title),
-    _sha(QString(QCryptographicHash::hash(QString("%1_%2").arg(pluginKind, title).toUtf8(), QCryptographicHash::Sha1).toHex())),
-    _pluginType(pluginType),
-    _pluginKind(pluginKind),
-    _datasets(datasets),
-    _configurationAction(nullptr)
+    _pluginFactory(pluginFactory),
+    _location(),
+    _sha(),
+    _configurationAction(nullptr),
+    _requestPluginCallback()
 {
-    // Prefix the title with the plugin type string
-    switch (_pluginType)
-    {
-        case plugin::Type::ANALYSIS:
-            _title.insert(0, "Analyze/");
-    	    break;
+    setText(title);
+    setToolTip(tooltip);
+    setIcon(icon);
 
-        case plugin::Type::DATA:
-            _title.insert(0, "Data/");
-            break;
+    connect(this, &TriggerAction::triggered, this, &PluginTriggerAction::requestPlugin);
 
-        case plugin::Type::LOADER:
-            _title.insert(0, "Import/");
-            break;
-
-        case plugin::Type::TRANSFORMATION:
-            _title.insert(0, "Transform/");
-            break;
-
-        case plugin::Type::VIEW:
-            _title.insert(0, "View/");
-            break;
-
-        case plugin::Type::WRITER:
-            _title.insert(0, "Export/");
-            break;
-
-        default:
-            break;
-    }
-
-    setText(_title.split("/").last());
+    setRequestPluginCallback([this](PluginTriggerAction& pluginTriggerAction) -> void {
+        plugins().requestPlugin(_pluginFactory->getKind());
+    });
 }
 
-QString PluginTriggerAction::getTitle() const
+PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon, RequestPluginCallback requestPluginCallback) :
+    TriggerAction(parent),
+    _pluginFactory(pluginFactory),
+    _location(),
+    _sha(),
+    _configurationAction(nullptr),
+    _requestPluginCallback(requestPluginCallback)
 {
-    return _title;
+    setText(title);
+    setToolTip(tooltip);
+    setIcon(icon);
+
+    connect(this, &TriggerAction::triggered, this, &PluginTriggerAction::requestPlugin);
+}
+
+PluginTriggerAction::PluginTriggerAction(const PluginTriggerAction& pluginTriggerAction) :
+    TriggerAction(pluginTriggerAction.parent()),
+    _pluginFactory(pluginTriggerAction.getPluginFactory()),
+    _location(),
+    _sha(),
+    _configurationAction(nullptr),
+    _requestPluginCallback()
+{
+    setText(pluginTriggerAction.text());
+    setToolTip(pluginTriggerAction.toolTip());
+    setIcon(pluginTriggerAction.icon());
+
+    connect(this, &TriggerAction::triggered, this, &PluginTriggerAction::requestPlugin);
+}
+
+const hdps::plugin::PluginFactory* PluginTriggerAction::getPluginFactory() const
+{
+    return _pluginFactory;
+}
+
+QString PluginTriggerAction::getLocation() const
+{
+    return _location;
+}
+
+void PluginTriggerAction::setLocation(const QString& location)
+{
+    _location = location;
 }
 
 QString PluginTriggerAction::getSha() const
 {
     return _sha;
-}
-
-plugin::Type PluginTriggerAction::getPluginType() const
-{
-    return _pluginType;
-}
-
-QString PluginTriggerAction::getPluginKind() const
-{
-    return _pluginKind;
-}
-
-Datasets PluginTriggerAction::getDatasets() const
-{
-    return _datasets;
-}
-
-void PluginTriggerAction::setDatasets(const Datasets& datasets)
-{
-    _datasets = datasets;
 }
 
 WidgetAction* PluginTriggerAction::getConfigurationAction()
@@ -89,5 +87,60 @@ void PluginTriggerAction::setConfigurationAction(WidgetAction* configurationActi
     _configurationAction = configurationAction;
 }
 
+void PluginTriggerAction::initialize()
+{
+    _sha = QString(QCryptographicHash::hash(QString("%1_%2").arg(_pluginFactory->getKind(), getLocation()).toUtf8(), QCryptographicHash::Sha1).toHex());
+
+    setIcon(_pluginFactory->getIcon());
 }
+
+void PluginTriggerAction::setText(const QString& text)
+{
+    QAction::setText(text);
+
+    switch (_pluginFactory->getType())
+    {
+        case plugin::Type::ANALYSIS:
+            _location = "Analyze";
+            break;
+
+        case plugin::Type::DATA:
+            _location = "Data";
+            break;
+
+        case plugin::Type::LOADER:
+            _location = "Import";
+            break;
+
+        case plugin::Type::TRANSFORMATION:
+            _location = "Transform";
+            break;
+
+        case plugin::Type::VIEW:
+            _location = "View";
+            break;
+
+        case plugin::Type::WRITER:
+            _location = "Export";
+            break;
+
+        default:
+            break;
+    }
+
+    _location.append("/");
+    _location.append(this->text());
+}
+
+void PluginTriggerAction::setRequestPluginCallback(RequestPluginCallback requestPluginCallback)
+{
+    _requestPluginCallback = requestPluginCallback;
+}
+
+void PluginTriggerAction::requestPlugin()
+{
+    if (_requestPluginCallback)
+        _requestPluginCallback(*this);
+}
+
 }

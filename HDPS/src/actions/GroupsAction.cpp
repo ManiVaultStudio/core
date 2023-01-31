@@ -19,6 +19,12 @@ GroupsAction::GroupsAction(QObject* parent /*= nullptr*/) :
     setDefaultWidgetFlags(Default);
 }
 
+GroupsAction::~GroupsAction()
+{
+    //for (auto groupAction : _groupActions)
+    //    groupAction->setParent(nullptr);
+}
+
 void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= true*/)
 {
 #ifdef GROUPS_ACTION_VERBOSE
@@ -267,9 +273,6 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
         _toolbarLayout.addWidget(_filterAction.createWidget(this), 2);
 
     if (widgetFlags & Expansion) {
-        if (widgetFlags & Filtering)
-            _toolbarLayout.addWidget(createVerticalDivider());
-
         _toolbarLayout.addWidget(_expandAllAction.createWidget(this, TriggerAction::Icon));
         _toolbarLayout.addWidget(_collapseAllAction.createWidget(this, TriggerAction::Icon));
     }
@@ -371,8 +374,11 @@ void GroupsAction::Widget::updateFiltering()
     // Found child widget actions
     QVector<WidgetAction*> foundActions;
 
-    for (auto groupAction : groupActions)
-        foundActions << groupAction->findChildren(filterString, false);
+    for (auto groupAction : groupActions) {
+        for (auto action : groupAction->getActions())
+            if (action->text().contains(filterString, Qt::CaseInsensitive))
+                foundActions << action;
+    }
 
     // Update filtered actions group action
     _filteredActionsAction.setExpanded(true);

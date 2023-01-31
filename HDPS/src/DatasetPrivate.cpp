@@ -1,5 +1,5 @@
 #include "DatasetPrivate.h"
-
+#include "CoreInterface.h"
 #include "event/Event.h"
 #include "Application.h"
 #include "Set.h"
@@ -141,8 +141,6 @@ void DatasetPrivate::registerDatasetEvents()
 {
     try
     {
-        _eventListener.setEventCore(Application::core());
-
         _eventListener.registerDataEvent([this](DataEvent* dataEvent) {
             switch (dataEvent->getType()) {
 

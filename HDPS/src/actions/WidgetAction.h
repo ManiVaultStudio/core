@@ -1,7 +1,8 @@
 #pragma once
 
 #include "WidgetActionWidget.h"
-#include "Serializable.h"
+
+#include "util/Serializable.h"
 
 #include <QWidgetAction>
 
@@ -28,7 +29,7 @@ class WidgetActionLabel;
  * 
  * @author Thomas Kroes
  */
-class WidgetAction : public QWidgetAction, public Serializable
+class WidgetAction : public QWidgetAction, public util::Serializable
 {
     Q_OBJECT
 
@@ -37,9 +38,9 @@ public:
     /** Describes the configuration options */
     enum class ConfigurationFlag {
         VisibleInMenu       = 0x00001,      /** Whether the action may show itself in (context) menus */
-        VisibleInHierarchy  = 0x00002,      /** Whether the action may be edited in the actions hierarchy */
+        InternalUseOnly     = 0x00002,      /** Action is only for internal use, it is not part of the graphical user interface */
 
-        Default = VisibleInMenu | VisibleInHierarchy
+        Default = 0
     };
 
     ///** Describes the connection context options */
@@ -138,6 +139,18 @@ public:
      */
     void setSortIndex(const std::int32_t& sortIndex);
 
+    /**
+     * Get stretch
+     * @return The stretch factor
+     */
+    std::int32_t getStretch() const;
+
+    /**
+     * Set stretch to \p stretch
+     * @param stretch Stretch factor
+     */
+    void setStretch(const std::int32_t& stretch);
+
     /** Gets the default widget flags */
     std::int32_t getDefaultWidgetFlags() const;
 
@@ -164,8 +177,8 @@ public: // Highlighting
 public: // Linking
 
     /**
-     * Get whether the action is public (visible to other actions)
-     * @return Boolean indicating whether the action is public (visible to other actions)
+     * Get whether this action is a public (shared) action or not
+     * @return Boolean determining whether this action is a public (shared) action or not
      */
     virtual bool isPublic() const;
 
@@ -173,13 +186,13 @@ public: // Linking
      * Get whether the action is published
      * @return Boolean indicating whether the action is published
      */
-    virtual bool isPublished() const;
+    virtual bool isPublished() const final;
 
     /**
      * Get whether the action is connect to a public action
      * @return Boolean indicating whether the action is connect to a public action
      */
-    virtual bool isConnected() const;
+    virtual bool isConnected() const final;
 
     /**
      * Publish this action so that other actions can connect to it
@@ -258,17 +271,22 @@ public: // Linking
      * Set connection permissions flag
      * @param connectionPermissionsFlag Connection permissions flag to set
      * @param unset Whether to unset the connection permissions flag
+     * @param recursive Whether to recursively set child connection permissions
      */
-    virtual void setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset = false) final;
+    virtual void setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset = false, bool recursive = false) final;
 
     /**
      * Set connection permissions
      * @param connectionPermissions Connection permissions value
+     * @param recursive Whether to recursively set child connection permissions
      */
-    virtual void setConnectionPermissions(std::int32_t connectionPermissions) final;
+    virtual void setConnectionPermissions(std::int32_t connectionPermissions, bool recursive = false) final;
 
-    /** Reset connection permissions to ConnectionPermissionFlag::None */
-    virtual void setConnectionPermissionsToNone() final;
+    /**
+     * Reset connection permissions to none
+     * @param recursive Whether to recursively set child connection permissions
+     */
+    virtual void setConnectionPermissionsToNone(bool recursive = false) final;
 
 protected: // Linking
 
@@ -329,7 +347,7 @@ public: // Settings
      * @return Found vector of pointers to widget action(s)
      */
     QVector<WidgetAction*> findChildren(const QString& searchString, bool recursive = true) const;
-
+    
 public: // Popups
 
     /**
@@ -363,14 +381,16 @@ public: // Configuration flags
      * Set configuration flag
      * @param configurationFlag Configuration flag to set
      * @param unset Whether to unset the \p configurationFlag flag
+     * @param recursive Whether to recursively set child child configuration flag
      */
-    virtual void setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset = false) final;
+    virtual void setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset = false, bool recursive = false) final;
 
     /**
      * Set configuration
      * @param configuration Configuration value
+     * @param recursive Whether to recursively set child child configuration flag
      */
-    virtual void setConfiguration(std::int32_t configuration) final;
+    virtual void setConfiguration(std::int32_t configuration, bool recursive = false) final;
 
 protected:
 
@@ -380,6 +400,28 @@ protected:
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
     virtual QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags);
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
+public:
+
+    /**
+     * Get child actions
+     * @return Vector of pointers to child actions
+     */
+    QVector<WidgetAction*> getChildActions();
 
 signals:
 
@@ -425,10 +467,12 @@ signals:
      */
     void configurationChanged(std::int32_t configuration);
 
-protected:
+private:
     std::int32_t                _defaultWidgetFlags;        /** Default widget flags which are used to configure newly created widget action widgets */
     std::int32_t                _sortIndex;                 /** Sort index (used in the group action to sort actions) */
+    std::int32_t                _stretch;                   /** Stretch factor */
     std::int32_t                _connectionPermissions;     /** Allowed connection options flags */
+    bool                        _isPublic;                  /** Determines whether this action is a public (shared) action or not */
     WidgetAction*               _publicAction;              /** Public action to which this action might be connected */
     QVector<WidgetAction*>      _connectedActions;          /** Pointers to widget action that are connected to this action */
     QString                     _settingsPrefix;            /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */

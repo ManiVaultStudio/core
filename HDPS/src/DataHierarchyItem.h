@@ -1,12 +1,8 @@
 #pragma once
 
 #include "DataType.h"
-#include "CoreInterface.h"
 #include "actions/WidgetAction.h"
 #include "event/Event.h"
-#include "Set.h"
-#include "actions/DataRemoveAction.h"
-#include "actions/DataCopyAction.h"
 
 #include <QObject>
 #include <QMap>
@@ -15,6 +11,7 @@
 #include <QIcon>
 #include <QTimer>
 #include <QBitArray>
+#include <QVector>
 
 namespace hdps
 {
@@ -217,7 +214,7 @@ public: // Expanded
      * Set expanded status
      * @param expanded Whether the dataset is expanded
      */
-    void setExpanded(const bool& expanded);
+    void setExpanded(bool expanded);
 
 public: // Tasks
 
@@ -249,19 +246,19 @@ public: // Tasks
      * Sets the task progress
      * @param taskProgress Task progress
      */
-    void setTaskProgress(const float& taskProgress);
+    void setTaskProgress(float taskProgress);
 
     /**
      * Set the number of sub tasks
      * @param numberOfSubTasks Number of sub tasks
      */
-    void setNumberOfSubTasks(const float& numberOfSubTasks);
+    void setNumberOfSubTasks(float numberOfSubTasks);
 
     /**
      * Flag sub task as finished
      * @param subTaskIndex Index of the sub task
      */
-    void setSubTaskFinished(const float& subTaskIndex);
+    void setSubTaskFinished(float subTaskIndex);
 
     /** Convenience functions for status checking */
     bool isIdle() const;
@@ -369,7 +366,7 @@ protected:
     Dataset<DatasetImpl>        _dataset;               /** Smart pointer to dataset */
     DataHierarchyItem*          _parent;                /** Pointer to parent data hierarchy item */
     DataHierarchyItems          _children;              /** Pointers to child items (if any) */
-    QString                     _fullPathName;          /** The full hierarchy path name of the data hiearchy item */
+    QString                     _fullPathName;          /** The full hierarchy path name of the data hierarchy item */
     bool                        _selected;              /** Whether the hierarchy item is selected */
     bool                        _expanded;              /** Whether the item is expanded or not (when it has children) */
     QString                     _taskDescription;       /** Task description */
@@ -381,8 +378,6 @@ protected:
     QTimer                      _taskProgressTimer;     /** Task progress timer which prevents excessive GUI updates */
     QIcon                       _icon;                  /** Icon */
     hdps::gui::WidgetActions    _actions;               /** Widget actions */
-    DataRemoveAction            _dataRemoveAction;      /** Data remove action */
-    DataCopyAction              _dataCopyAction;        /** Data copy action */
 
 protected:
     friend class DataHierarchyManager;

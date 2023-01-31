@@ -23,7 +23,6 @@ InfoAction::InfoAction(QObject* parent, Clusters& clusters) :
         _numberOfClustersAction.setString(QString::number(_clusters->getClusters().size()));
     };
 
-    _eventListener.setEventCore(Application::core());
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));

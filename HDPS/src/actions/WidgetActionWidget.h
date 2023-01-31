@@ -7,7 +7,7 @@ namespace hdps {
 namespace gui {
 
 class WidgetAction;
-class HighlightWidget;
+class OverlayWidget;
 
 /**
  * Widget action widget class
@@ -69,7 +69,7 @@ protected: // Miscellaneous
 protected:
     WidgetAction*       _widgetAction;      /** Pointer to widget action that will be displayed */
     std::int32_t        _widgetFlags;       /** Widget creation flags */
-    HighlightWidget*    _highlightWidget;   /** Pointer to highlight widget (if any) */
+    OverlayWidget*      _highlightWidget;   /** Pointer to highlight widget (if any) */
 };
 
 }

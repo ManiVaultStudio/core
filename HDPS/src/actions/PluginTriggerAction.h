@@ -6,68 +6,81 @@
 #include "PluginType.h"
 #include "Dataset.h"
 
-namespace hdps {
+namespace hdps::plugin {
+    class PluginFactory;
+}
 
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Plugin trigger action class
  *
- * Action class for triggering the creation of plugins (and possible configuration)
+ * Action class for triggering the creation of plugins.
+ * 
+ * By default, a plugin is automatically created when the trigger action is triggered.
+ * Custom plugin creation is possible by setting a creation handler function, see setCreatePluginFunction()
  *
  * @author Thomas Kroes
  */
 class PluginTriggerAction : public TriggerAction
 {
     Q_OBJECT
+    
+        /** Request plugin callback function (invoked when the trigger action is triggered) */
+    using RequestPluginCallback = std::function<void(PluginTriggerAction&)>;
 
 public:
 
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param title Plugin trigger title (if title is in path format, the trigger will be added to the data hierarchy context menu in a hierarchical fashion)
-     * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param pluginKind Kind of plugin
-     * @param datasets Input datasets
+     * @param pluginFactory Pointer to plugin factory
+     * @param title Title of the plugin trigger action
+     * @param icon Icon
+     * @param tooltip Tooltip of the plugin trigger action
      */
-    PluginTriggerAction(QObject* parent, const QString& title, const plugin::Type& pluginType, const QString& pluginKind, const Datasets& datasets);
+    PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon);
 
     /**
-     * Get title
-     * @return Title
+     * Constructor
+     * @param parent Pointer to parent object
+     * @param pluginFactory Pointer to plugin factory
+     * @param title Title of the plugin trigger action
+     * @param tooltip Tooltip of the plugin trigger action
+     * @param icon Icon
+     * @param requestPluginCallback Callback which is invoked when the trigger action is triggered
      */
-    QString getTitle() const;
+    PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon, RequestPluginCallback requestPluginCallback);
+
+    /**
+     * Copy constructor
+     * @param pluginTriggerAction Reference to other plugin trigger action
+     */
+    PluginTriggerAction(const PluginTriggerAction& pluginTriggerAction);
+
+    /**
+     * Get the plugin factory
+     * @return Pointer to the plugin factory
+     */
+    const plugin::PluginFactory* getPluginFactory() const;
+
+    /**
+     * Get location of the plugin trigger action
+     * @return Location of the plugin trigger action
+     */
+    QString getLocation() const;
+
+    /**
+     * Set location of the plugin trigger action
+     * @param location Location of the plugin trigger action
+     */
+    void setLocation(const QString& location);
 
     /**
      * Get sha of plugin kind + trigger title
      * @return Sha
      */
     QString getSha() const;
-
-    /**
-     * Get type of plugin
-     * @return Type of plugin
-     */
-    plugin::Type getPluginType() const;
-
-    /**
-     * Get kind of plugin
-     * @return Kind of plugin in string format
-     */
-    QString getPluginKind() const;
-
-    /**
-     * Get input datasets
-     * @return Vector of input datasets
-     */
-    Datasets getDatasets() const;
-
-    /**
-     * Set input datasets
-     * @param Vector of input datasets
-     */
-    void setDatasets(const Datasets& datasets);
 
     /**
      * Get configuration action
@@ -81,16 +94,38 @@ public:
      */
     void setConfigurationAction(WidgetAction* configurationAction);
 
+    /**
+     * Override base class to also update location
+     * @param text Action text
+     */
+    void setText(const QString& text);
+
+    /**
+     * Set the callback function which is invoked when the trigger action is triggered
+     * @param requestPluginCallback Request plugin callback function (invoked when the trigger action is triggered)
+     */
+    void setRequestPluginCallback(RequestPluginCallback requestPluginCallback);
+
+protected:
+
+    /** Sets up the trigger action */
+    virtual void initialize();
+
 private:
-    QString             _title;                 /** Plugin trigger title (if title is in path format, the trigger will be added to the data hierarchy context menu in a hierarchical fashion) */
-    const QString       _sha;                   /** Cryptographic hash of the plugin kind and trigger title */
-    const plugin::Type  _pluginType;            /** Type of plugin e.g. analysis, exporter */
-    const QString       _pluginKind;            /** Kind of plugin */
-    Datasets            _datasets;              /** Input datasets */
-    WidgetAction*       _configurationAction;   /** Action for configuring the plugin creation */
+
+    /** Request a plugin by calling the request plugin callback (invoked when the trigger action is triggered) */
+    void requestPlugin();
+
+private:
+    const plugin::PluginFactory*    _pluginFactory;             /** Pointer to plugin factory */
+    QString                         _location;                  /** Determines where the plugin trigger action resides w.r.t. other plugin trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images */
+    QString                         _sha;                       /** Cryptographic hash of the plugin kind and trigger title */
+    WidgetAction*                   _configurationAction;       /** Action for configuring the plugin creation */
+    RequestPluginCallback           _requestPluginCallback;     /** Request plugin callback function which should create the plugin (invoked when the trigger action is triggered) */
+
+    friend class plugin::PluginFactory;
 };
 
-using PluginTriggerActions = QVector<PluginTriggerAction*>;
+using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
 
-}
 }

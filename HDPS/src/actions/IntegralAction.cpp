@@ -2,9 +2,9 @@
 
 #include <QHBoxLayout>
 
-namespace hdps {
+using namespace hdps::util;
 
-namespace gui {
+namespace hdps::gui {
 
 #if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
     constexpr std::int32_t IntegralAction::INIT_MIN;
@@ -65,7 +65,7 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
 
 void IntegralAction::disconnectFromPublicAction()
 {
-    auto publicIntegralAction = dynamic_cast<IntegralAction*>(_publicAction);
+    auto publicIntegralAction = dynamic_cast<IntegralAction*>(getPublicAction());
 
     Q_ASSERT(publicIntegralAction != nullptr);
 
@@ -82,15 +82,22 @@ WidgetAction* IntegralAction::getPublicCopy() const
 
 void IntegralAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!variantMap.contains("Value"))
-        return;
+    WidgetAction::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "Value");
 
     setValue(variantMap["Value"].toInt());
 }
 
 QVariantMap IntegralAction::toVariantMap() const
 {
-    return { { "Value", QVariant::fromValue(_value) } };
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", QVariant::fromValue(getValue()) }
+    });
+
+    return variantMap;
 }
 
 IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* integralAction) :
@@ -138,6 +145,14 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
         onUpdateValueRange();
     });
 
+    const auto onUpdatePrefix = [this, integralAction, setToolTips]() {
+        QSignalBlocker blocker(this);
+
+        setPrefix(integralAction->getPrefix());
+
+        setToolTips();
+    };
+
     const auto onUpdateSuffix = [this, integralAction, setToolTips]() {
         QSignalBlocker blocker(this);
 
@@ -146,9 +161,8 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
         setToolTips();
     };
 
-    connect(integralAction, &IntegralAction::suffixChanged, this, [this, integralAction, onUpdateSuffix](const QString& suffix) {
-        onUpdateSuffix();
-    });
+    connect(integralAction, &IntegralAction::prefixChanged, this, onUpdatePrefix);
+    connect(integralAction, &IntegralAction::suffixChanged, this, onUpdateSuffix);
 
     connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](const std::int32_t& value) {
         onUpdateValue();
@@ -156,6 +170,7 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
 
     onUpdateValueRange();
     onUpdateValue();
+    onUpdatePrefix();
     onUpdateSuffix();
     setToolTips();
 }
@@ -283,5 +298,4 @@ QWidget* IntegralAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
     return widget;
 }
 
-}
 }

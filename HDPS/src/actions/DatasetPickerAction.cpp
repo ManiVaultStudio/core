@@ -29,13 +29,12 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, 
         emit datasetPicked(_datasetsModel.getDataset(currentIndex));
     });
 
-    _eventListener.setEventCore(Application::core());
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAboutToBeRemoved));
+    //_eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAboutToBeRemoved));
     _eventListener.registerDataEvent([this](DataEvent* dataEvent) {
         switch (dataEvent->getType()) {
             case EventType::DataAdded:
-            case EventType::DataAboutToBeRemoved:
+            //case EventType::DataAboutToBeRemoved:
                 populateDatasetsFromCore();
                 break;
         }
@@ -109,7 +108,7 @@ void DatasetPickerAction::setDatasets(Datasets datasets)
         connect(&dataset, &Dataset<DatasetImpl>::dataGuiNameChanged, &_datasetsModel, &DatasetsModel::updateData);
     }
 
-    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(_publicAction);
+    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
     if (publicDatasetPickerAction)
         setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
@@ -176,7 +175,7 @@ void DatasetPickerAction::populateDatasetsFromCore()
     for (auto& dataset : datasets)
         connect(&dataset, &Dataset<DatasetImpl>::dataGuiNameChanged, &_datasetsModel, &DatasetsModel::updateData);
 
-    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(_publicAction);
+    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
     if (publicDatasetPickerAction)
         setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
@@ -198,7 +197,7 @@ void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction)
 
 void DatasetPickerAction::disconnectFromPublicAction()
 {
-    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(_publicAction);
+    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
     Q_ASSERT(publicDatasetPickerAction != nullptr);
 
@@ -248,6 +247,9 @@ QVariant DatasetPickerAction::DatasetsModel::data(const QModelIndex& index, int 
     const auto column   = static_cast<Column>(index.column());
     const auto dataset  = _datasets.at(index.row());
 
+    if (!dataset.isValid())
+        return QVariant();
+
     switch (role)
     {
         case Qt::DecorationRole:
@@ -258,7 +260,7 @@ QVariant DatasetPickerAction::DatasetsModel::data(const QModelIndex& index, int 
             switch (column)
             {
                 case Column::Name:
-                    return _showFullPathName ? dataset->getDataHierarchyItem().getFullPathName() : dataset->getGuiName();
+                    return dataset->getGuiName();// _showFullPathName ? dataset->getDataHierarchyItem().getFullPathName() : dataset->getGuiName();
 
                 case Column::GUID:
                     return dataset->getGuid();

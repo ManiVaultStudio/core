@@ -165,6 +165,12 @@ public:
     void setActions(const WidgetActions& widgetActions = WidgetActions());
 
     /**
+     * Get actions
+     * @return Widget actions
+     */
+    WidgetActions getActions();
+
+    /**
      * Get sorted widget actions
      * @return Vector of sorted widget actions
      */
@@ -214,11 +220,12 @@ signals:
 private:
     bool                            _expanded;                      /** Whether or not the group is expanded */
     bool                            _readOnly;                      /** Whether or not the group is read-only */
-    WidgetActions          _widgetActions;                 /** Widget actions */
+    WidgetActions                   _widgetActions;                 /** Widget actions */
     bool                            _showLabels;                    /** Whether to show labels or not */
     LabelSizingType                 _labelSizingType;               /** Type of label sizing */
     std::uint32_t                   _labelWidthPercentage;          /** User label width in percentages [0..100] */
     std::uint32_t                   _labelWidthFixed;               /** User label width in pixels */
+
     static const std::uint32_t      globalLabelWidthPercentage;     /** Global label width in percentages */
     static const std::uint32_t      globalLabelWidthFixed;          /** Global label width in pixels */
 };

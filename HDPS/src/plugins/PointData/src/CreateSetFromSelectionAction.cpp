@@ -1,5 +1,7 @@
 #include "CreateSetFromSelectionAction.h"
 
+#include <Application.h>
+
 #include <QHBoxLayout>
 
 using namespace hdps;

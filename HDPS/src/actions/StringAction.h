@@ -3,13 +3,12 @@
 #include "WidgetAction.h"
 
 #include <QLineEdit>
+#include <QTextEdit>
 
 class QWidget;
 class QCompleter;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * String widget action class
@@ -27,6 +26,7 @@ public:
     /** Describes the widget configurations */
     enum WidgetFlag {
         LineEdit    = 0x00001,      /** Widget includes a line edit */
+        TextEdit    = 0x00002,      /** Widget includes a text edit */
 
         Default = LineEdit,
     };
@@ -44,6 +44,21 @@ public:
          * @param stringAction Pointer to string action
          */
         LineEditWidget(QWidget* parent, StringAction* stringAction);
+
+        friend class StringAction;
+    };
+
+    /** Text edit widget class for multi-line strings */
+    class TextEditWidget : public QTextEdit
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param stringAction Pointer to string action
+         */
+        TextEditWidget(QWidget* parent, StringAction* stringAction);
 
         friend class StringAction;
     };
@@ -67,6 +82,12 @@ public:
      * @param defaultString Default string
      */
     StringAction(QObject* parent, const QString& title = "", const QString& string = "", const QString& defaultString = "");
+
+    /**
+     * Get type string
+     * @return Widget action type in string format
+     */
+    QString getTypeString() const override;
 
     /**
      * Initialize the string action
@@ -235,5 +256,4 @@ protected:
     bool            _clearable;             /** Whether the string can be cleared by clicking the trailing action */
 };
 
-}
 }

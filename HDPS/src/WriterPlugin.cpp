@@ -1,4 +1,5 @@
 #include "WriterPlugin.h"
+#include "Application.h"
 
 namespace hdps
 {

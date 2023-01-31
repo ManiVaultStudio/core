@@ -6,9 +6,7 @@
 #include <QHBoxLayout>
 #include <QToolButton>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Color widget action class
@@ -185,5 +183,4 @@ protected:
     static const QColor DEFAULT_COLOR;
 };
 
-}
 }

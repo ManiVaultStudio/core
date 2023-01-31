@@ -2,11 +2,18 @@
 
 #include "PluginType.h"
 #include "Dataset.h"
+#include "Application.h"
 
-#include <actions/WidgetAction.h>
+#include "AbstractActionsManager.h"
+#include "AbstractPluginManager.h"
+#include "AbstractDataManager.h"
+#include "AbstractDataHierarchyManager.h"
+#include "AbstractEventManager.h"
+#include "AbstractWorkspaceManager.h"
+#include "AbstractProjectManager.h"
+#include "AbstractSettingsManager.h"
 
 #include <QString>
-#include <QSharedPointer>
 
 #include <vector>
 #include <functional>
@@ -16,8 +23,6 @@ namespace hdps
     class DatasetImpl;
     class DataType;
     class EventListener;
-    class DataManager;
-    class DataHierarchyManager;
     class DataHierarchyItem;
 
     namespace plugin
@@ -34,14 +39,20 @@ namespace hdps
     namespace gui
     {
         class PluginTriggerAction;
+        class GlobalSettingsAction;
 
-        using PluginTriggerActions = QVector<PluginTriggerAction*>;
+        using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
     }
 
-class CoreInterface : public hdps::gui::WidgetAction
+class CoreInterface
 {
 public:
     //CoreInterface() = delete;
+
+public:
+    
+    /** Resets the entire core implementation */
+    virtual void reset() = 0;
 
 public: // Data access
 
@@ -61,18 +72,6 @@ public: // Data access
      * @param dataset Smart pointer to the dataset to remove
      */
     virtual void removeDataset(Dataset<DatasetImpl> dataset) = 0;
-
-    /** Removes all currently loaded datasets */
-    virtual void removeAllDatasets() = 0;
-
-    /**
-     * Copies a dataset and adds it to the data hierarchy
-     * @param dataset Smart pointer to dataset to copy
-     * @param datasetGuiName Name of the added dataset in the GUI
-     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (root if not valid)
-     * @return Smart pointer to the copied dataset
-     */
-    virtual Dataset<DatasetImpl> copyDataset(const Dataset<DatasetImpl>& dataset, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) = 0;
 
     /**
      * Requests the plugin manager to create new RawData of the given kind
@@ -194,89 +193,10 @@ public: // Data grouping
      * @param guiName Name of the created dataset in the GUI (if empty, the user will be prompted for a name)
      * @return Smart pointer to created group dataset
      */
+    [[deprecated("This function will be removed in version 0.5, and replaced by core->getDataManager().groupDatasets(...).")]]
     virtual Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") = 0;
 
-public: // Plugin creation
-
-    /**
-     * Create a plugin of \p kind
-     * @param kind Kind of plugin (name of the plugin)
-     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-     * @return Pointer to created plugin
-     */
-    virtual plugin::Plugin* requestPlugin(const QString& kind, const Datasets& datasets = Datasets()) = 0;
-
-    /**
-     * Create a plugin of \p kind
-     * @param kind Kind of plugin (name of the plugin)
-     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-     * @return Pointer to created plugin
-     */
-    template<typename PluginType>
-    PluginType* requestPlugin(const QString& kind, const Datasets& datasets)
-    {
-        return dynamic_cast<PluginType*>(requestPlugin(kind, datasets));
-    }
-
-public: // Plugin queries
-
-    /**
-     * Get plugin kinds by plugin type(s)
-     * @param pluginTypes Plugin type(s)
-     * @return Plugin kinds
-     */
-    virtual QStringList getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const = 0;
-
-    /**
-     * Get plugin trigger actions by \p pluginType and \p datasets
-     * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param datasets Vector of input datasets
-     * @return Vector of plugin trigger actions
-     */
-    virtual gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const = 0;
-
-    /**
-     * Get plugin trigger actions by \p pluginType and \p dataTypes
-     * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param dataTypes Vector of input data types
-     * @return Vector of plugin trigger actions
-     */
-    virtual gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const = 0;
-
-    /**
-     * Get plugin trigger actions by \p pluginKind and \p datasets
-     * @param pluginKind Kind of plugin
-     * @param datasets Vector of input datasets
-     * @return Vector of plugin trigger actions
-     */
-    virtual gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const Datasets& datasets) const = 0;
-
-    /**
-     * Get plugin trigger actions by \p pluginKind and \p dataTypes
-     * @param pluginKind Kind of plugin
-     * @param dataTypes Vector of input data types
-     * @return Vector of plugin trigger actions
-     */
-    virtual gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const = 0;
-
-    /**
-     * Get plugin GUI name from plugin kind
-     * @param pluginKind Kind of plugin
-     * @return GUI name of the plugin, empty if the plugin kind was not found
-     */
-    virtual QString getPluginGuiName(const QString& pluginKind) const = 0;
-
-    /**
-     * Get plugin icon from plugin kind
-     * @param pluginKind Kind of plugin
-     * @return Plugin icon name of the plugin, null icon if the plugin kind was not found
-     */
-    virtual QIcon getPluginIcon(const QString& pluginKind) const = 0;
-
 public: // Data hierarchy
-
-    /** Get a reference to the data hierarchy manager */
-    virtual DataHierarchyManager& getDataHierarchyManager() = 0;
 
     /**
      * Get data hierarchy item by dataset GUID
@@ -293,77 +213,95 @@ public: // Dataset grouping
     /** Get whether dataset grouping is enabled or not */
     virtual void setDatasetGroupingEnabled(const bool& datasetGroupingEnabled) = 0;
 
-public: // Events & notifications
-
-    /**
-     * Notify listeners that a new dataset has been added to the core
-     * @param dataset Smart pointer to the dataset that was added
-     */
-    virtual void notifyDatasetAdded(const Dataset<DatasetImpl>& dataset) = 0;
-
-    /**
-     * Notify listeners that a dataset is about to be removed
-     * @param dataset Smart pointer to the dataset which is about to be removed
-     */
-    virtual void notifyDatasetAboutToBeRemoved(const Dataset<DatasetImpl>& dataset) = 0;
-
-    /**
-     * Notify listeners that a dataset is removed
-     * @param datasetGuid GUID of the dataset that was removed
-     * @param dataType Type of the data
-     */
-    virtual void notifyDatasetRemoved(const QString& datasetGuid, const DataType& dataType) = 0;
-
-    /**
-     * Notify listeners that a dataset has changed
-     * @param dataset Smart pointer to the dataset of which the data changed
-     */
-    virtual void notifyDatasetChanged(const Dataset<DatasetImpl>& dataset) = 0;
-
-    /**
-     * Notify listeners that dataset selection has changed
-     * @param dataset Smart pointer to the dataset of which the selection changed
-     * @param ignoreDatasets Pointer to datasets that should be ignored during notification
-     */
-    virtual void notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets* ignoreDatasets = nullptr) = 0;
-
-    /**
-     * Notify all listeners that a dataset GUI name has changed
-     * @param dataset Smart pointer to the dataset of which the GUI name changed
-     * @param previousGuiName Previous dataset name
-     */
-    virtual void notifyDatasetGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) = 0;
-
-    /**
-     * Notify all listeners that a dataset is locked
-     * @param dataset Smart pointer to the dataset
-     */
-    virtual void notifyDatasetLocked(const Dataset<DatasetImpl>& dataset) = 0;
-
-    /**
-     * Notify all listeners that a dataset is unlocked
-     * @param dataset Smart pointer to the dataset
-     */
-    virtual void notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset) = 0;
-
-    /**
-     * Register an event listener
-     * @param eventListener Pointer to event listener to register
-     */
-    virtual void registerEventListener(EventListener* eventListener) = 0;
-
-    /**
-     * Unregister an event listener
-     * @param eventListener Pointer to event listener to unregister
-     */
-    virtual void unregisterEventListener(EventListener* eventListener) = 0;
+public: // Managers
+    
+    virtual AbstractActionsManager& getActionsManager() = 0;
+    virtual AbstractPluginManager& getPluginManager() = 0;
+    virtual AbstractEventManager& getEventManager() = 0;
+    virtual AbstractDataManager& getDataManager() = 0;
+    virtual AbstractDataHierarchyManager& getDataHierarchyManager() = 0;
+    virtual AbstractWorkspaceManager& getWorkspaceManager() = 0;
+    virtual AbstractProjectManager& getProjectManager() = 0;
+    virtual AbstractSettingsManager& getSettingsManager() = 0;
 
 protected:
     bool    _datasetGroupingEnabled;        /** Whether datasets can be grouped or not */
 
-    friend class RawData;
+    friend class plugin::RawData;
     friend class DatasetImpl;
     friend class EventListener;
 };
+
+/**
+ * Convenience function to obtain access to the core
+ * @return Pointer to the current instance of the core
+ */
+static CoreInterface* core() {
+    return Application::core();
+}
+
+/**
+ * Convenience function to obtain access to the actions manager in the core
+ * @return Reference to abstract actions manager
+ */
+static AbstractActionsManager& actions() {
+    return core()->getActionsManager();
+}
+
+/**
+ * Convenience function to obtain access to the plugin manager in the core
+ * @return Reference to abstract plugin manager
+ */
+static AbstractPluginManager& plugins() {
+    return core()->getPluginManager();
+}
+
+/**
+ * Convenience function to obtain access to the event manager in the core
+ * @return Reference to abstract event manager
+ */
+static AbstractEventManager& events() {
+    return core()->getEventManager();
+}
+
+/**
+ * Convenience function to obtain access to the data manager in the core
+ * @return Reference to abstract data manager
+ */
+static AbstractDataManager& data() {
+    return core()->getDataManager();
+}
+
+/**
+ * Convenience function to obtain access to the data hierarchy manager in the core
+ * @return Reference to abstract data hierarchy manager
+ */
+static AbstractDataHierarchyManager& dataHierarchy() {
+    return core()->getDataHierarchyManager();
+}
+
+/**
+ * Convenience function to obtain access to the workspace manager in the core
+ * @return Reference to abstract workspace manager
+ */
+static AbstractWorkspaceManager& workspaces() {
+    return core()->getWorkspaceManager();
+}
+
+/**
+ * Convenience function to obtain access to the project manager in the core
+ * @return Reference to abstract project manager
+ */
+static AbstractProjectManager& projects() {
+    return core()->getProjectManager();
+}
+
+/**
+ * Convenience function to obtain access to the settings manager in the core
+ * @return Reference to abstract settings manager
+ */
+static AbstractSettingsManager& settings() {
+    return core()->getSettingsManager();
+}
 
 }

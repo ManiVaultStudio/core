@@ -169,6 +169,11 @@ void GroupAction::setActions(const WidgetActions& widgetActions /*= WidgetAction
     emit actionsChanged(_widgetActions);
 }
 
+hdps::gui::WidgetActions GroupAction::getActions()
+{
+    return _widgetActions;
+}
+
 WidgetActions GroupAction::getSortedWidgetActions() const
 {
     auto sortedActions = _widgetActions;
@@ -212,7 +217,7 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction, c
             {
                 case LabelSizingType::Auto:
                 {
-                    //_layout->setColumnStretch(1, 1);
+                    _layout->setColumnStretch(1, 1);
                     break;
                 }
 
@@ -253,18 +258,24 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction, c
                 switch (groupAction->getLabelSizingType())
                 {
                     case LabelSizingType::Auto:
+                    {
                         labelWidget->setElide(false);
-                        labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
+                        //labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
                         break;
+                    }
 
                     case LabelSizingType::Percentage:
+                    {
                         labelWidget->setElide(true);
                         break;
+                    }
 
                     case LabelSizingType::Fixed:
+                    {
                         labelWidget->setElide(true);
                         labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
                         break;
+                    }
 
                     default:
                         break;
@@ -276,6 +287,9 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction, c
             auto actionWidget = widgetAction->createWidget(this);
 
             _layout->addWidget(actionWidget, numRows, 1);
+
+            if (widgetAction->getStretch() >= 0)
+                _layout->setRowStretch(numRows, widgetAction->getStretch());
 
             if (isToggleAction)
                 _layout->setAlignment(actionWidget, Qt::AlignLeft);

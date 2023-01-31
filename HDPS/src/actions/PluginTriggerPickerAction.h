@@ -92,7 +92,7 @@ public:
      * @return sha SHA of the plugin trigger action to find
      * @return Pointer to plugin trigger action (if found)
      */
-    PluginTriggerAction* getPluginTriggerAction(const QString& sha);
+    QPointer<PluginTriggerAction> getPluginTriggerAction(const QString& sha);
 
     /**
      * Get plugin trigger actions
@@ -104,13 +104,13 @@ public:
      * Get current plugin trigger action (if any)
      * @return Pointer to current plugin trigger action (if any)
      */
-    PluginTriggerAction* getCurrentPluginTriggerAction();
+    QPointer<PluginTriggerAction> getCurrentPluginTriggerAction();
 
     /**
      * Set current plugin trigger action by \p pluginTriggerAction
      * @param pluginTriggerAction Pointer to plugin trigger action
      */
-    void setCurrentPluginTriggerAction(PluginTriggerAction* pluginTriggerAction);
+    void setCurrentPluginTriggerAction(QPointer<PluginTriggerAction> pluginTriggerAction);
 
     /**
      * Set current plugin trigger action by \p sha
@@ -133,7 +133,7 @@ signals:
      * Signals that the current plugin trigger action changed
      * @param currentPluginTriggerAction Pointer to current plugin trigger action that changed
      */
-    void currentPluginTriggerActionChanged(const PluginTriggerAction* currentPluginTriggerAction);
+    void currentPluginTriggerActionChanged(const QPointer<PluginTriggerAction> currentPluginTriggerAction);
 
     /**
      * Signals that the plugin trigger actions have changed

@@ -85,13 +85,10 @@ void ClustersAction::updateClustersModel()
 
 void ClustersAction::updateClustersDataset()
 {
-    // Only update if the clusters have changed
     if (_clustersModel.getClusters() == _clustersDataset->getClusters())
         return;
 
-    // Transfer clusters to the clusters dataset
     _clustersDataset->getClusters() = _clustersModel.getClusters();
 
-    // Notify others that the clusters changed
-    Application::core()->notifyDatasetChanged(_clustersDataset);
+    events().notifyDatasetChanged(_clustersDataset);
 }

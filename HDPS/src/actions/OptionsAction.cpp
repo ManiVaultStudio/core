@@ -8,6 +8,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QAbstractItemView>
 
 namespace hdps {
 
@@ -184,7 +185,7 @@ void OptionsAction::connectToPublicAction(WidgetAction* publicAction)
 
 void OptionsAction::disconnectFromPublicAction()
 {
-    auto publicOptionsAction = dynamic_cast<OptionsAction*>(_publicAction);
+    auto publicOptionsAction = dynamic_cast<OptionsAction*>(getPublicAction());
 
     Q_ASSERT(publicOptionsAction != nullptr);
 
@@ -213,19 +214,18 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
     _optionsAction(optionsAction)
 {
     setObjectName("ComboBox");
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    setSizeAdjustPolicy(QComboBox::AdjustToContents);
     setModel(&const_cast<QStandardItemModel&>(optionsAction->getOptionsModel()));
     
-    const auto updateToolTip = [this, optionsAction]() -> void {
+    const auto onSelectedOptionsChanged = [this, optionsAction]() -> void {
         setToolTip("Selected: " + optionsAction->getSelectedOptions().join(", "));
+        update();
     };
 
-    connect(optionsAction, &OptionsAction::selectedOptionsChanged, this, [this, updateToolTip]() -> void {
-        update();
-        updateToolTip();
-    });
+    connect(optionsAction, &OptionsAction::selectedOptionsChanged, this, onSelectedOptionsChanged);
 
-    updateToolTip();
+    onSelectedOptionsChanged();
 }
 
 void OptionsAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)

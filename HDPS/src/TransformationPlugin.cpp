@@ -1,4 +1,5 @@
 #include "TransformationPlugin.h"
+#include "Application.h"
 
 namespace hdps
 {

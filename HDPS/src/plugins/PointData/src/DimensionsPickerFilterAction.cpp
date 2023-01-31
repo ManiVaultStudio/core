@@ -1,6 +1,8 @@
 #include "DimensionsPickerFilterAction.h"
 #include "DimensionsPickerAction.h"
 
+#include <Application.h>
+
 namespace hdps {
 
 namespace gui {

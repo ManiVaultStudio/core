@@ -1,8 +1,11 @@
-#include <QStringList>
+#include "Miscellaneous.h"
 
-namespace hdps
-{
-namespace util
+#include <QStringList>
+#include <QAction>
+
+using namespace std;
+
+namespace hdps::util
 {
 
 QString getIntegerCountHumanReadable(const float& count)
@@ -33,8 +36,6 @@ QString getNoBytesHumanReadable(float noBytes)
     }
 
     return QString::number(noBytes, 'f', 2) + " " + unit;
-}
-
 }
 
 }

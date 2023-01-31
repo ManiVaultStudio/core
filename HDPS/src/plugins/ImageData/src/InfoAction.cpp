@@ -41,7 +41,6 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
         _numberComponentsPerPixelAction.setString(QString::number(_images->getNumberOfComponentsPerPixel()));
     };
 
-    _eventListener.setEventCore(Application::core());
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));

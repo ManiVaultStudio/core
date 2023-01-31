@@ -45,7 +45,7 @@ void DecimalRectangleAction::connectToPublicAction(WidgetAction* publicAction)
 
 void DecimalRectangleAction::disconnectFromPublicAction()
 {
-    auto publicDecimalRectangleAction = dynamic_cast<DecimalRectangleAction*>(_publicAction);
+    auto publicDecimalRectangleAction = dynamic_cast<DecimalRectangleAction*>(getPublicAction());
 
     Q_ASSERT(publicDecimalRectangleAction != nullptr);
 

@@ -1,25 +1,20 @@
-#ifndef HDPS_VIEWPLUGIN_H
-#define HDPS_VIEWPLUGIN_H
-/**
-* View.h
-*
-* Base plugin class for plugins that visualize data.
-*/
+#pragma once
 
-#include "widgets/DockableWidget.h"
-#include "widgets/ViewPluginEditorDialog.h"
+#include "util/DockArea.h"
+
 #include "actions/TriggerAction.h"
 #include "actions/ToggleAction.h"
+#include "actions/OptionsAction.h"
+#include "actions/OptionAction.h"
+#include "actions/LockingAction.h"
+
 #include "Plugin.h"
 
-#include <QWidget>
-#include <QGridLayout>
+namespace hdps::gui {
+    class ViewPluginTriggerAction;
+}
 
-class QToolBar;
-
-namespace hdps
-{
-namespace plugin
+namespace hdps::plugin
 {
 
 class ViewPlugin : public Plugin
@@ -27,9 +22,18 @@ class ViewPlugin : public Plugin
     Q_OBJECT
     
 public:
+
+    /**
+     * Constructor
+     * @param factory Pointer to plugin factory
+     */
     ViewPlugin(const PluginFactory* factory);
 
-    ~ViewPlugin() override {};
+    /** Destructor */
+    ~ViewPlugin() = default;
+
+    /** Perform startup initialization */
+    void init() override;
 
     /**
      * Set name of the object
@@ -47,23 +51,69 @@ public:
      * Get widget representation of the plugin
      * @return Widget representation of the plugin
      */
-    QWidget& getWidget()
-    {
-        return _widget;
-    }
+    QWidget& getWidget();
+
+    /**
+     * Get whether this plugin is a system view plugin or not
+     * @return Boolean determining whether this plugin is a system view plugin or not
+     */
+    virtual bool isSystemViewPlugin() const final;
+
+    /**
+     * Create screenshot from the view plugin
+     * Base implementation grabs the widget and saves it in a user-chosen location
+     */
+    virtual void createScreenshot();
+
+    /**
+     * Get shortcut for triggering the plugin
+     * @return Shortcut key sequence
+     */
+    virtual QKeySequence getTriggerShortcut() const final;
+
+    /**
+     * Set shortcut for triggering the plugin
+     * @param keySequence Shortcut key sequence
+     */
+    virtual void setTriggerShortcut(const QKeySequence& keySequence) final;
+
+public: // Serialization
+
+    /**
+     * Load view plugin from variant
+     * @param Variant representation of the view plugin
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save view plugin to variant
+     * @return Variant representation of the view plugin
+     */
+    QVariantMap toVariantMap() const override;
 
 public: // Action getters
 
     gui::TriggerAction& getEditActionsAction() { return _editActionsAction; }
+    gui::TriggerAction& getScreenshotAction() { return _screenshotAction; }
+    gui::ToggleAction& getIsolateAction() { return _isolateAction; }
     gui::ToggleAction& getMayCloseAction() { return _mayCloseAction; }
+    gui::ToggleAction& getMayFloatAction() { return _mayFloatAction; }
+    gui::ToggleAction& getMayMoveAction() { return _mayMoveAction; }
+    gui::LockingAction& getLockingAction() { return _lockingAction; }
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
 
 private:
     QWidget                 _widget;                /** Widget representation of the plugin */
     gui::TriggerAction      _editActionsAction;     /** Trigger action to start editing the view plugin action hierarchy */
-    gui::ToggleAction       _mayCloseAction;        /** Action for toggling whether a view plugin may be closed */
+    gui::TriggerAction      _screenshotAction;      /** Trigger action to create a screenshot */
+    gui::ToggleAction       _isolateAction;         /** Toggle action to toggle view isolation (when toggled, all other view plugins are temporarily closed) */
+    gui::ToggleAction       _mayCloseAction;        /** Action for toggling whether the view plugin may be closed */
+    gui::ToggleAction       _mayFloatAction;        /** Action for toggling whether the view plugin may float */
+    gui::ToggleAction       _mayMoveAction;         /** Action for toggling whether the view plugin may be moved */
+    gui::LockingAction      _lockingAction;         /** Action for toggling whether the view plugin is locked */
     gui::ToggleAction       _visibleAction;         /** Action which determines whether the view plugin is visible or not */
-    gui::TriggerAction      _triggerHelpAction;     /** Action which shows help (internal use only) */
+    gui::TriggerAction      _helpAction;            /** Action which triggers documentation */
+    QKeySequence            _triggerShortcut;       /** Shortcut for triggering the plugin */
 };
 
 class ViewPluginFactory : public PluginFactory
@@ -71,9 +121,15 @@ class ViewPluginFactory : public PluginFactory
     Q_OBJECT
 
 public:
-    ViewPluginFactory();
 
-    ~ViewPluginFactory() override {};
+    /**
+     * Constructor
+     * @param producesSystemViewPlugins Whether this factory generates system view plugins or not
+     */
+    ViewPluginFactory(bool producesSystemViewPlugins = false);
+
+    /** Destructor */
+    ~ViewPluginFactory() = default;
 
     /**
      * Get plugin icon
@@ -83,15 +139,36 @@ public:
     QIcon getIcon(const QColor& color = Qt::black) const override;
 
     /**
-     * Produces an instance of a view plugin. This function gets called by the plugin manager.
+     * Produces the plugin
+     * @return Pointer to the produced plugin
      */
     ViewPlugin* produce() override = 0;
+
+    /**
+     * Get whether this factory produces system view plugins or not
+     * @return Boolean determining whether this factory produces system view plugins or not
+     */
+    bool producesSystemViewPlugins() const;
+
+    /**
+     * Get preferred dock area
+     * @return Preferred initial dock area when the view plugin is added to the workspace
+     */
+    gui::DockAreaFlag getPreferredDockArea() const;
+
+protected:
+
+    /**
+     * Set preferred dock area
+     * @param preferredDockArea Preferred initial dock area when the view plugin is added to the workspace
+     */
+    void setPreferredDockArea(const gui::DockAreaFlag& preferredDockArea);
+
+private:
+    const bool          _producesSystemViewPlugins;     /** Whether this factory produces system view plugins or not */
+    gui::DockAreaFlag   _preferredDockArea;             /** Preferred initial dock area when the view plugin is added to the workspace */
 };
 
-} // namespace plugin
-
-} // namespace hdps
+}
 
 Q_DECLARE_INTERFACE(hdps::plugin::ViewPluginFactory, "hdps.ViewPluginFactory")
-
-#endif // HDPS_VIEWPLUGIN_H

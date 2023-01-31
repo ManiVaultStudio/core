@@ -6,6 +6,8 @@
 #include <QSettings>
 #include <QString>
 
+using namespace hdps::gui;
+
 namespace hdps {
 
 namespace plugin {
@@ -28,13 +30,7 @@ QString LoaderPlugin::AskForFileName(const QString& fileNameFilter)
 
 PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const Datasets& datasets) const
 {
-    const auto pluginTriggerAction = createPluginTriggerAction(QString("%1").arg(getKind()), QString("Load %1").arg(getKind()), Datasets());
-
-    connect(pluginTriggerAction, &QAction::triggered, this, [this]() -> void {
-        Application::core()->requestPlugin(getKind());
-    });
-
-    return { pluginTriggerAction };
+    return { new PluginTriggerAction(const_cast<LoaderPluginFactory*>(this), this, QString("%1").arg(getKind()), QString("Load %1").arg(getKind()), getIcon()) };
 }
 
 PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const DataTypes& dataTypes) const

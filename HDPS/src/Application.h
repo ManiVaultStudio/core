@@ -1,8 +1,10 @@
 #pragma once
 
-#include "ActionsManager.h"
+#include "util/IconFonts.h"
+#include "util/Logger.h"
+#include "util/Version.h"
 
-#include <util/IconFonts.h>
+#include "actions/TriggerAction.h"
 
 #include <QApplication>
 #include <QSettings>
@@ -14,8 +16,6 @@ class CoreInterface;
 /**
  * HDPS application class
  * 
- * Its intended use is application-wide sharing of resources such as icons and fonts
- *
  * @author Thomas Kroes
  */
 class Application : public QApplication
@@ -48,6 +48,12 @@ public: // Miscellaneous
     /** Get pointer to the core */
     static CoreInterface* core();
 
+    /**
+     * Get application version (major and minor version number)
+     * @return Pair of integers representing major and minor version number respectively
+     */
+    util::Version getVersion() const;
+
 public: // Static resource access functions
 
     /**
@@ -57,14 +63,6 @@ public: // Static resource access functions
      * @param minorVersion Minor version number
      */
     static const IconFont& getIconFont(const QString& name, const std::int32_t& majorVersion = -1, const std::int32_t& minorVersion = -1);
-
-public: // Actions manager
-
-    /**
-     * Get the actions manager
-     * @return Actions manager
-     */
-    static ActionsManager& getActionsManager();
 
 public: // Settings API
 
@@ -83,37 +81,13 @@ public: // Settings API
      */
     void setSetting(const QString& path, const QVariant& value);
 
-public: // Project IO
+public: // Logging
 
     /**
-     * Load project from disk
-     * @param projectFilePath File path of the project (if empty, the user will  select a file location by hand)
+     * Get application-wide logger instance
+     * @return Reference to logger instance
      */
-    virtual void loadProject(QString projectFilePath = "") = 0;
-
-    /**
-     * Save project to disk
-     * @param projectFilePath File path of the project (if empty, the user will  select a file location by hand)
-     */
-    virtual void saveProject(QString projectFilePath = "") = 0;
-
-    /**
-     * Get current project file path
-     * @return File path of the current project
-     */
-    virtual QString getCurrentProjectFilePath() const final;
-
-    /**
-     * Set current project file path
-     * @param currentProjectFilePath Current project file path
-     */
-    virtual void setCurrentProjectFilePath(const QString& currentProjectFilePath) final;
-
-    /**
-     * Add recent project file path (adds the path to the settings so that users can select the project from a recent list)
-     * @param recentProjectFilePath File path of the recent project
-     */
-    virtual void addRecentProjectFilePath(const QString& recentProjectFilePath) final;
+    static util::Logger& getLogger();
 
 public: // Serialization
 
@@ -124,26 +98,37 @@ public: // Serialization
     static QString getSerializationTemporaryDirectory();
 
     /**
-     * Get whether (de)serialization was aborted
-     * @return Boolean indicating whether (de)serialization was aborted
+     * Set serialization temporary directory to \p serializationTemporaryDirectory
+     * @param serializationTemporaryDirectory Serialization temporary directory
+     */
+    static void setSerializationTemporaryDirectory(const QString& serializationTemporaryDirectory);
+
+    /**
+     * Get whether serialization was aborted
+     * @return Boolean indicating whether serialization was aborted
      */
     static bool isSerializationAborted();
 
+    /**
+     * Set whether serialization was aborted
+     * @param serializationAborted Boolean indicating whether serialization was aborted
+     */
+    static void setSerializationAborted(bool serializationAborted);
+
 signals:
 
-    /**
-     * Signals that the current project file changed
-     */
-    void currentProjectFilePathChanged(const QString& currentProjectFilePath);
+    /** Signals that the core has been become available */
+    void coreSet(CoreInterface* core);
 
 protected:
-    CoreInterface*      _core;                                  /** Shared pointer to HDPS core */
-    IconFonts           _iconFonts;                             /** Icon fonts resource */
-    QSettings           _settings;                              /** Settings */
-    QString             _currentProjectFilePath;                /** File path of the current project */
-    QString             _serializationTemporaryDirectory;       /** Temporary directory for serialization */
-    bool                _serializationAborted;                  /** Whether (de)serialization was aborted */
-    ActionsManager      _actionsManager;                        /** Actions manager */
+    CoreInterface*              _core;                                  /** Pointer to HDPS core */
+    const util::Version         _version;                               /** Application version */
+    IconFonts                   _iconFonts;                             /** Icon fonts resource */
+    QSettings                   _settings;                              /** Settings */
+    QString                     _serializationTemporaryDirectory;       /** Temporary directory for serialization */
+    bool                        _serializationAborted;                  /** Whether serialization was aborted */
+    util::Logger                _logger;                                /** Logger instance */
+    hdps::gui::TriggerAction*   _exitAction;                            /** Action for exiting the application */
 };
 
 }

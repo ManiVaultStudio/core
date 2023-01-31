@@ -16,7 +16,7 @@ TriggerAction::TriggerAction(QObject* parent, const QString& title /*= ""*/) :
 
 void TriggerAction::selfTriggered()
 {
-    auto publicTriggerAction = dynamic_cast<TriggerAction*>(_publicAction);
+    auto publicTriggerAction = dynamic_cast<TriggerAction*>(getPublicAction());
 
     if (publicTriggerAction == nullptr)
         return;
@@ -107,7 +107,7 @@ void TriggerAction::connectToPublicAction(WidgetAction* publicAction)
 
 void TriggerAction::disconnectFromPublicAction()
 {
-    auto publicTriggerAction = dynamic_cast<TriggerAction*>(_publicAction);
+    auto publicTriggerAction = dynamic_cast<TriggerAction*>(getPublicAction());
 
     Q_ASSERT(publicTriggerAction != nullptr);
 

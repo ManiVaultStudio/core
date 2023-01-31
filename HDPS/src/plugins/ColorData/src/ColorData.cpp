@@ -25,7 +25,7 @@ uint ColorData::count()
 
 Dataset<DatasetImpl> ColorData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return Dataset<DatasetImpl>(new Colors(_core, getName(), guid));
+    return Dataset<DatasetImpl>(new Colors(Application::core(), getName(), guid));
 }
 
 // =============================================================================

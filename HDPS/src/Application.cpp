@@ -14,8 +14,6 @@
 #include <QDir>
 #include <QDateTime>
 
-#define _VERBOSE
-
 using namespace hdps::gui;
 using namespace hdps::util;
 
@@ -23,12 +21,17 @@ namespace hdps {
 
 hdps::Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
+    _core(nullptr),
+    _version({ 3, 0 }),
     _iconFonts(),
     _settings(),
-    _currentProjectFilePath(),
-    _serializationTemporaryDirectory()
+    _serializationTemporaryDirectory(),
+    _serializationAborted(false),
+    _logger()
 {
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));
+    
+    _logger.initialize();
 }
 
 hdps::Application* hdps::Application::current()
@@ -63,9 +66,11 @@ hdps::CoreInterface* Application::getCore()
 
 void Application::setCore(CoreInterface* core)
 {
-    Q_ASSERT(_core != nullptr);
+    Q_ASSERT(core != nullptr);
 
     _core = core;
+
+    emit coreSet(_core);
 }
 
 hdps::CoreInterface* Application::core()
@@ -73,9 +78,9 @@ hdps::CoreInterface* Application::core()
     return current()->getCore();
 }
 
-hdps::ActionsManager& Application::getActionsManager()
+util::Version Application::getVersion() const
 {
-    return current()->_actionsManager;
+    return _version;
 }
 
 QVariant Application::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const
@@ -88,43 +93,9 @@ void Application::setSetting(const QString& path, const QVariant& value)
     _settings.setValue(path, value);
 }
 
-QString Application::getCurrentProjectFilePath() const
+Logger& Application::getLogger()
 {
-    return _currentProjectFilePath;
-}
-
-void Application::setCurrentProjectFilePath(const QString& currentProjectFilePath)
-{
-    if (currentProjectFilePath == _currentProjectFilePath)
-        return;
-
-    _currentProjectFilePath = currentProjectFilePath;
-
-    // Notify others that the current project file path changed
-    emit currentProjectFilePathChanged(_currentProjectFilePath);
-}
-
-void Application::addRecentProjectFilePath(const QString& recentProjectFilePath)
-{
-    // Get recent projects from settings
-    auto recentProjects = getSetting("Projects/Recent", QVariantList()).toList();
-
-    // Create recent project map
-    QVariantMap recentProject{
-        { "FilePath", recentProjectFilePath },
-        { "DateTime", QDateTime::currentDateTime() }
-    };
-
-    // Add to recent projects if not already in there
-    for (auto recentProject : recentProjects)
-        if (recentProject.toMap()["FilePath"].toString() == recentProjectFilePath)
-            recentProjects.removeOne(recentProject);
-
-    // Insert the entry at the beginning
-    recentProjects.insert(0, recentProject);
-
-    // Save settings
-    setSetting("Projects/Recent", recentProjects);
+    return current()->_logger;
 }
 
 QString Application::getSerializationTemporaryDirectory()
@@ -132,9 +103,19 @@ QString Application::getSerializationTemporaryDirectory()
     return current()->_serializationTemporaryDirectory;
 }
 
+void Application::setSerializationTemporaryDirectory(const QString& serializationTemporaryDirectory)
+{
+    current()->_serializationTemporaryDirectory = serializationTemporaryDirectory;
+}
+
 bool Application::isSerializationAborted()
 {
     return current()->_serializationAborted;
+}
+
+void Application::setSerializationAborted(bool serializationAborted)
+{
+    current()->_serializationAborted = serializationAborted;
 }
 
 }

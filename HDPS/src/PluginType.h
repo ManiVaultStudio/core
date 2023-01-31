@@ -2,6 +2,8 @@
 #define HDPS_PLUGINTYPE_H
 
 #include <QVector>
+#include <QMap>
+#include <QIcon>
 
 #include <cstddef>
 
@@ -31,6 +33,10 @@ namespace plugin
     };
     
     using Types = QVector<Type>;
+
+    QString getPluginTypeName(const Type& type);
+    QIcon getPluginTypeIcon(const Type& type);
+
 } // namespace plugin
 
 } // namespace hdps

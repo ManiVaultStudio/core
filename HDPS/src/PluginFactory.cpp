@@ -4,6 +4,9 @@
 
 namespace hdps
 {
+
+using namespace gui;
+
 namespace plugin
 {
 
@@ -14,7 +17,7 @@ PluginFactory::PluginFactory(Type type) :
     _version(),
     _numberOfInstances(0),
     _maximumNumberOfInstances(-1),
-    _producePluginTriggerAction(this, ""),
+    _pluginTriggerAction(this, this, "Plugin trigger", "A plugin trigger action creates a new plugin when triggered", QIcon()),
     _triggerHelpAction(nullptr, "Trigger plugin help")
 {
 }
@@ -27,11 +30,21 @@ QString PluginFactory::getKind() const
 void PluginFactory::setKind(const QString& kind)
 {
     _kind = kind;
+
+    _pluginTriggerAction.setText(_kind);
 }
 
 hdps::plugin::Type PluginFactory::getType() const
 {
     return _type;
+}
+
+void PluginFactory::initialize()
+{
+    getPluginTriggerAction().initialize();
+
+    _triggerHelpAction.setText(_kind);
+    _triggerHelpAction.setIcon(getIcon());
 }
 
 bool PluginFactory::hasHelp()
@@ -52,9 +65,6 @@ QString PluginFactory::getGuiName() const
 void PluginFactory::setGuiName(const QString& guiName)
 {
     _guiName = guiName;
-
-    _producePluginTriggerAction.setText(_guiName);
-    _triggerHelpAction.setText(_guiName);
 }
 
 QString PluginFactory::getVersion() const
@@ -77,9 +87,9 @@ bool PluginFactory::mayProduce() const
     return _numberOfInstances < _maximumNumberOfInstances;
 }
 
-hdps::gui::TriggerAction& PluginFactory::getProducePluginTriggerAction()
+hdps::gui::PluginTriggerAction& PluginFactory::getPluginTriggerAction()
 {
-    return _producePluginTriggerAction;
+    return _pluginTriggerAction;
 }
 
 std::uint32_t PluginFactory::getNumberOfInstances() const
@@ -91,7 +101,7 @@ void PluginFactory::setNumberOfInstances(std::uint32_t numberOfInstances)
 {
     _numberOfInstances = numberOfInstances;
 
-    _producePluginTriggerAction.setEnabled(mayProduce());
+    _pluginTriggerAction.setEnabled(mayProduce());
 }
 
 std::uint32_t PluginFactory::getMaximumNumberOfInstances() const
@@ -132,36 +142,6 @@ std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets
             numberOfDatasetsForType++;
 
     return numberOfDatasetsForType;
-}
-
-PluginTriggerAction* PluginFactory::createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets) const
-{
-    auto action = new PluginTriggerAction(nullptr, title, _type, _kind, datasets);
-
-    action->setToolTip(description);
-    action->setIcon(getIcon());
-
-    return action;
-}
-
-PluginTriggerAction* PluginFactory::createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QString& iconName) const
-{
-    auto action = new PluginTriggerAction(nullptr, title, _type, _kind, datasets);
-
-    action->setToolTip(description);
-    action->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon(iconName));
-
-    return action;
-}
-
-PluginTriggerAction* PluginFactory::createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QIcon& icon) const
-{
-    auto action = new PluginTriggerAction(nullptr, title, _type, _kind, datasets);
-
-    action->setToolTip(description);
-    action->setIcon(icon);
-
-    return action;
 }
 
 }

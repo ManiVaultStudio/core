@@ -60,7 +60,7 @@ endif(MSVC)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
-find_package(Qt6 6.3 COMPONENTS Widgets WebEngineWidgets OpenGL Core REQUIRED)
+find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
 
 # Normalize the incoming install path
 file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
@@ -71,46 +71,314 @@ set( MAIN_SOURCES
     res/styles/default.qss
 )
 
+set(PRIVATE_CORE_HEADERS
+    src/private/Core.h
+)
+
+set(PRIVATE_CORE_SOURCES
+    src/private/Core.cpp
+)
+
+set(PRIVATE_CORE_FILES
+    ${PRIVATE_CORE_HEADERS}
+    ${PRIVATE_CORE_SOURCES}
+)
+
+set(PRIVATE_WORKSPACE_MANAGER_HEADERS
+    src/private/WorkspaceManager.h
+    src/private/DockManager.h
+    src/private/DockComponentsFactory.h
+    src/private/ViewPluginsDockWidget.h
+    src/private/ViewPluginDockWidget.h
+    src/private/CentralDockWidget.h
+    src/private/DockWidget.h
+    src/private/DockAreaTitleBar.h
+    src/private/WorkspaceSettingsDialog.h
+    src/private/WorkspaceInventoryModel.h
+    src/private/WorkspaceInventoryFilterModel.h
+)
+
+set(PRIVATE_WORKSPACE_MANAGER_SOURCES
+    src/private/WorkspaceManager.cpp
+    src/private/DockManager.cpp
+    src/private/DockComponentsFactory.cpp
+    src/private/ViewPluginsDockWidget.cpp
+    src/private/ViewPluginDockWidget.cpp
+    src/private/CentralDockWidget.cpp
+    src/private/DockWidget.cpp
+    src/private/DockAreaTitleBar.cpp
+    src/private/WorkspaceSettingsDialog.cpp
+    src/private/WorkspaceInventoryModel.cpp
+    src/private/WorkspaceInventoryFilterModel.cpp
+)
+
+set(PRIVATE_WORKSPACE_MANAGER_FILES
+    ${PRIVATE_WORKSPACE_MANAGER_HEADERS}
+    ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
+)
+
+set(PRIVATE_PLUGIN_MANAGER_HEADERS
+    src/private/PluginManager.h
+    src/private/PluginManagerModel.h
+    src/private/PluginManagerFilterModel.h
+    src/private/PluginManagerDialog.h
+)
+
+set(PRIVATE_PLUGIN_MANAGER_SOURCES
+    src/private/PluginManager.cpp
+    src/private/PluginManagerModel.cpp
+    src/private/PluginManagerFilterModel.cpp
+    src/private/PluginManagerDialog.cpp
+)
+
+set(PRIVATE_PLUGIN_MANAGER_FILES
+    ${PRIVATE_PLUGIN_MANAGER_HEADERS}
+    ${PRIVATE_PLUGIN_MANAGER_SOURCES}
+)
+
+set(PRIVATE_DATA_MANAGER_HEADERS
+    src/private/DataManager.h
+)
+
+set(PRIVATE_DATA_MANAGER_SOURCES
+    src/private/DataManager.cpp
+)
+
+set(PRIVATE_DATA_MANAGER_FILES
+    ${PRIVATE_DATA_MANAGER_HEADERS}
+    ${PRIVATE_DATA_MANAGER_SOURCES}
+)
+
+set(PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS
+    src/private/DataHierarchyManager.h
+)
+
+set(PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES
+    src/private/DataHierarchyManager.cpp
+)
+
+set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
+    ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
+    ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
+)
+
+set(PRIVATE_EVENT_MANAGER_HEADERS
+    src/private/EventManager.h
+)
+
+set(PRIVATE_EVENT_MANAGER_SOURCES
+    src/private/EventManager.cpp
+)
+
+set(PRIVATE_EVENT_MANAGER_FILES
+    ${PRIVATE_EVENT_MANAGER_HEADERS}
+    ${PRIVATE_EVENT_MANAGER_SOURCES}
+)
+
+set(PRIVATE_ACTIONS_MANAGER_HEADERS
+    src/private/ActionsManager.h
+)
+
+set(PRIVATE_ACTIONS_MANAGER_SOURCES
+    src/private/ActionsManager.cpp
+)
+
+set(PRIVATE_ACTIONS_MANAGER_FILES
+    ${PRIVATE_ACTIONS_MANAGER_HEADERS}
+    ${PRIVATE_ACTIONS_MANAGER_SOURCES}
+)
+
+set(PRIVATE_PROJECT_MANAGER_HEADERS
+    src/private/ProjectManager.h
+    src/private/ProjectWidget.h
+    src/private/ProjectSettingsDialog.h
+    src/private/NewProjectDialog.h
+)
+
+set(PRIVATE_PROJECT_MANAGER_SOURCES
+    src/private/ProjectManager.cpp
+    src/private/ProjectWidget.cpp
+    src/private/ProjectSettingsDialog.cpp
+    src/private/NewProjectDialog.cpp
+)
+
+set(PRIVATE_PROJECT_MANAGER_FILES
+    ${PRIVATE_PROJECT_MANAGER_HEADERS}
+    ${PRIVATE_PROJECT_MANAGER_SOURCES}
+)
+
+set(PRIVATE_SETTINGS_MANAGER_HEADERS
+    src/private/SettingsManager.h
+    src/private/SettingsManagerDialog.h
+)
+
+set(PRIVATE_SETTINGS_MANAGER_SOURCES
+    src/private/SettingsManager.cpp
+    src/private/SettingsManagerDialog.cpp
+)
+
+set(PRIVATE_SETTINGS_MANAGER_FILES
+    ${PRIVATE_SETTINGS_MANAGER_HEADERS}
+    ${PRIVATE_SETTINGS_MANAGER_SOURCES}
+)
+
+set(PRIVATE_MANAGER_HEADERS
+    ${PRIVATE_WORKSPACE_MANAGER_HEADERS}
+    ${PRIVATE_PLUGIN_MANAGER_HEADERS}
+    ${PRIVATE_DATA_MANAGER_HEADERS}
+    ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
+    ${PRIVATE_EVENT_MANAGER_HEADERS}
+    ${PRIVATE_ACTIONS_MANAGER_HEADERS}
+    ${PRIVATE_PROJECT_MANAGER_HEADERS}
+    ${PRIVATE_SETTINGS_MANAGER_HEADERS}
+)
+
+set(PRIVATE_MANAGER_SOURCES
+    ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
+    ${PRIVATE_PLUGIN_MANAGER_SOURCES}
+    ${PRIVATE_DATA_MANAGER_SOURCES}
+    ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
+    ${PRIVATE_EVENT_MANAGER_SOURCES}
+    ${PRIVATE_ACTIONS_MANAGER_SOURCES}
+    ${PRIVATE_PROJECT_MANAGER_SOURCES}
+    ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
+    ${PRIVATE_SETTINGS_MANAGER_SOURCES}
+)
+
+set(PRIVATE_MANAGER_FILES
+    ${PRIVATE_MANAGER_HEADERS}
+    ${PRIVATE_MANAGER_SOURCES}
+)
+
+set(PRIVATE_APPLICATION_HEADERS
+    src/private/MainWindow.h
+    src/private/FileMenu.h
+    src/private/ViewMenu.h
+    src/private/LoadSystemViewMenu.h
+    src/private/LoadedViewsMenu.h
+    src/private/HelpMenu.h
+    src/private/PluginHelpMenu.h
+)
+
+set(PRIVATE_APPLICATION_SOURCES
+    src/private/MainWindow.cpp
+    src/private/FileMenu.cpp
+    src/private/ViewMenu.cpp
+    src/private/LoadSystemViewMenu.cpp
+    src/private/LoadedViewsMenu.cpp
+    src/private/HelpMenu.cpp
+    src/private/PluginHelpMenu.cpp
+)
+
+set(PRIVATE_APPLICATION_FILES
+    ${PRIVATE_APPLICATION_HEADERS}
+    ${PRIVATE_APPLICATION_SOURCES}
+)
+
+set(PRIVATE_START_PAGE_HEADERS
+    src/private/StartPageWidget.h
+    src/private/StartPageHeaderWidget.h
+    src/private/StartPageContentWidget.h
+    src/private/StartPageOpenProjectWidget.h
+    src/private/StartPageGetStartedWidget.h
+    src/private/StartPageActionsWidget.h
+    src/private/StartPageActionsModel.h
+    src/private/StartPageActionsFilterModel.h
+    src/private/StartPageActionDelegate.h
+    src/private/StartPageActionDelegateEditorWidget.h
+    src/private/StartPageAction.h
+    src/private/LogoWidget.h
+)
+
+set(PRIVATE_START_PAGE_SOURCES
+    src/private/StartPageWidget.cpp
+    src/private/StartPageHeaderWidget.cpp
+    src/private/StartPageContentWidget.cpp
+    src/private/StartPageOpenProjectWidget.cpp
+    src/private/StartPageGetStartedWidget.cpp
+    src/private/StartPageActionsWidget.cpp
+    src/private/StartPageActionsModel.cpp
+    src/private/StartPageActionsFilterModel.cpp
+    src/private/StartPageActionDelegate.cpp
+    src/private/StartPageActionDelegateEditorWidget.cpp
+    src/private/StartPageAction.cpp
+    src/private/LogoWidget.cpp
+)
+
+set(PRIVATE_START_PAGE_FILES
+    ${PRIVATE_START_PAGE_HEADERS}
+    ${PRIVATE_START_PAGE_SOURCES}
+)
+
+set(PRIVATE_MISCELLANEOUS_HEADERS
+    src/private/Archiver.h
+    src/private/GroupDataDialog.h
+)
+
+set(PRIVATE_MISCELLANEOUS_SOURCES
+    src/private/Archiver.cpp
+    src/private/GroupDataDialog.cpp
+)
+
+set(PRIVATE_MISCELLANEOUS_FILES
+    ${PRIVATE_MISCELLANEOUS_HEADERS}
+    ${PRIVATE_MISCELLANEOUS_SOURCES}
+)
+
 set(PRIVATE_HEADERS
-    ui/MainWindow.ui
-    src/Logger.h
-    src/LogItemModel.h
-    src/LogDockWidget.h
-    src/MainWindow.h
-    src/PluginManager.h
-    src/Core.h
-    src/DataManager.h
-    src/Archiver.h
-    src/HdpsApplication.h
-    src/StartPageWidget.h
-    src/ProjectBarWidget.h
-    src/LogoWidget.h
-    src/GroupDataDialog.h
+    ${PRIVATE_CORE_HEADERS}
+    ${PRIVATE_MANAGER_HEADERS}
+    ${PRIVATE_APPLICATION_HEADERS}
+    ${PRIVATE_START_PAGE_HEADERS}
+    ${PRIVATE_MISCELLANEOUS_HEADERS}
+    ${PRIVATE_ACTIONS_HEADERS}
 )
 
 set(PRIVATE_SOURCES
-    src/Logger.cpp
-    src/LogItemModel.cpp
-    src/LogDockWidget.cpp
-    src/MainWindow.cpp
-    src/PluginManager.cpp
-    src/Core.cpp
-    src/DataManager.cpp
-    src/Archiver.cpp
-    src/HdpsApplication.cpp
-    src/StartPageWidget.cpp
-    src/ProjectBarWidget.cpp
-    src/LogoWidget.cpp
-    src/GroupDataDialog.cpp
+    ${PRIVATE_CORE_SOURCES}
+    ${PRIVATE_MANAGER_SOURCES}
+    ${PRIVATE_APPLICATION_SOURCES}
+    ${PRIVATE_START_PAGE_SOURCES}
+    ${PRIVATE_MISCELLANEOUS_SOURCES}
+    ${PRIVATE_ACTIONS_SOURCES}
     ${PRIVATE_HEADERS}
 )
 
+source_group(Core FILES ${PRIVATE_CORE_FILES})
+source_group(Application FILES ${PRIVATE_APPLICATION_FILES})
+source_group(Managers\\Layout FILES ${PRIVATE_LAYOUT_MANAGER_FILES})
+source_group(Managers\\Plugin FILES ${PRIVATE_PLUGIN_MANAGER_FILES})
+source_group(Managers\\Data FILES ${PRIVATE_DATA_MANAGER_FILES})
+source_group(Managers\\DataHierarchy FILES ${PRIVATE_DATA_HIERARCHY_MANAGER_FILES})
+source_group(Managers\\Event FILES ${PRIVATE_EVENT_MANAGER_FILES})
+source_group(Managers\\Actions FILES ${PRIVATE_ACTIONS_MANAGER_FILES})
+source_group(Managers\\Project FILES ${PRIVATE_PROJECT_MANAGER_FILES})
+source_group(Managers\\Workspace FILES ${PRIVATE_WORKSPACE_MANAGER_FILES})
+source_group(Managers\\Settings FILES ${PRIVATE_SETTINGS_MANAGER_FILES})
+source_group(StartPage FILES ${PRIVATE_START_PAGE_FILES})
+source_group(Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
+source_group(Actions FILES ${PRIVATE_ACTIONS_FILES})
+
 set(PUBLIC_CORE_INTERFACE_HEADERS
     src/CoreInterface.h
+    src/AbstractManager.h
+    src/AbstractDataManager.h
+    src/AbstractPluginManager.h
+    src/AbstractActionsManager.h
+    src/AbstractDataHierarchyManager.h
+    src/AbstractEventManager.h
+    src/AbstractWorkspaceManager.h
+    src/AbstractProjectManager.h
+    src/AbstractSettingsManager.h
+)
+
+set(PUBLIC_CORE_INTERFACE_SOURCES
+    src/CoreInterface.cpp
 )
 
 set(PUBLIC_CORE_INTERFACE_FILES
     ${PUBLIC_CORE_INTERFACE_HEADERS}
+    ${PUBLIC_CORE_INTERFACE_SOURCES}
 )
 
 set(PUBLIC_EVENT_HEADERS
@@ -167,19 +435,19 @@ set(PUBLIC_ACTIONS_HEADERS
     src/actions/TriggersAction.h
     src/actions/ToggleAction.h
     src/actions/StringAction.h
+    src/actions/StringsAction.h
     src/actions/WidgetAction.h
     src/actions/WidgetActionWidget.h
     src/actions/WidgetActionCollapsedWidget.h
     src/actions/WidgetActionLabel.h
     src/actions/WidgetActionStateWidget.h
     src/actions/WindowLevelAction.h
-    src/actions/DataCopyAction.h
-    src/actions/DataRemoveAction.h
-    src/actions/DataGroupingAction.h
     src/actions/DirectoryPickerAction.h
     src/actions/FilePickerAction.h
     src/actions/VariantAction.h
     src/actions/StatusAction.h
+    src/actions/RecentFilesAction.h
+    src/actions/LockingAction.h
     src/actions/GroupSectionTreeItem.h
     src/actions/GroupWidgetTreeItem.h
     src/actions/WidgetActionContextMenu.h
@@ -223,19 +491,19 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/TriggersAction.cpp
     src/actions/ToggleAction.cpp
     src/actions/StringAction.cpp
+    src/actions/StringsAction.cpp
     src/actions/WidgetAction.cpp
     src/actions/WidgetActionWidget.cpp
     src/actions/WidgetActionCollapsedWidget.cpp
     src/actions/WidgetActionLabel.cpp
     src/actions/WidgetActionStateWidget.cpp
     src/actions/WindowLevelAction.cpp
-    src/actions/DataCopyAction.cpp
-    src/actions/DataRemoveAction.cpp
-    src/actions/DataGroupingAction.cpp
     src/actions/DirectoryPickerAction.cpp
     src/actions/FilePickerAction.cpp
     src/actions/VariantAction.cpp
     src/actions/StatusAction.cpp
+    src/actions/RecentFilesAction.cpp
+    src/actions/LockingAction.cpp
     src/actions/GroupSectionTreeItem.cpp
     src/actions/GroupWidgetTreeItem.cpp
     src/actions/WidgetActionContextMenu.cpp
@@ -246,43 +514,30 @@ set(PUBLIC_ACTIONS_FILES
     ${PUBLIC_ACTIONS_SOURCES}
 )
 
-set(PUBLIC_ACTION_HIERARCHY_HEADERS
-    src/ActionHierarchyWidget.h
-    src/ActionHierarchyModelItem.h
-    src/ActionHierarchyModel.h
-    src/ActionHierarchyFilterModel.h
-)
-
-set(PUBLIC_ACTION_HIERARCHY_SOURCES
-    src/ActionHierarchyWidget.cpp
-    src/ActionHierarchyModelItem.cpp
-    src/ActionHierarchyModel.cpp
-    src/ActionHierarchyFilterModel.cpp
-)
-
-set(PUBLIC_ACTION_HIERARCHY_FILES
-    ${PUBLIC_ACTION_HIERARCHY_HEADERS}
-    ${PUBLIC_ACTION_HIERARCHY_SOURCES}
-)
-
 set(PUBLIC_WIDGET_HEADERS
     src/widgets/WebWidget.h
-    src/widgets/DockableWidget.h
     src/widgets/DropWidget.h
     src/widgets/Divider.h
     src/widgets/HierarchyWidget.h
+    src/widgets/InfoOverlayWidget.h
     src/widgets/OverlayWidget.h
-    src/widgets/ViewPluginEditorDialog.h
+    src/widgets/InfoWidget.h
+    src/widgets/ProjectEditorDialog.h
+    src/widgets/ActionHierarchyWidget.h
+    src/widgets/TaskProgressDialog.h
 )
 
 set(PUBLIC_WIDGET_SOURCES
     src/widgets/WebWidget.cpp
-    src/widgets/DockableWidget.cpp
     src/widgets/DropWidget.cpp
     src/widgets/Divider.cpp
     src/widgets/HierarchyWidget.cpp
+    src/widgets/InfoOverlayWidget.cpp
     src/widgets/OverlayWidget.cpp
-    src/widgets/ViewPluginEditorDialog.cpp
+    src/widgets/InfoWidget.cpp
+    src/widgets/ProjectEditorDialog.cpp
+    src/widgets/ActionHierarchyWidget.cpp
+    src/widgets/TaskProgressDialog.cpp
     ${ACTION_HIERARCHY_SOURCES}
 )
 
@@ -359,6 +614,15 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Preset.h
     src/util/PresetsModel.h
     src/util/PresetsFilterModel.h
+    src/util/WidgetFader.h
+    src/util/WidgetOverlayer.h
+    src/util/Serialization.h
+    src/util/Serializable.h
+    src/util/DockArea.h
+    src/util/Logger.h
+    src/util/AbstractItemModelTester.h
+    src/util/Version.h
+    src/util/DockWidgetPermission.h
 )
 
 set(PUBLIC_UTIL_SOURCES
@@ -383,6 +647,15 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Preset.cpp
     src/util/PresetsModel.cpp
     src/util/PresetsFilterModel.cpp
+    src/util/WidgetFader.cpp
+    src/util/WidgetOverlayer.cpp
+    src/util/Serialization.cpp
+    src/util/Serializable.cpp
+    src/util/DockArea.cpp
+    src/util/Logger.cpp
+    src/util/AbstractItemModelTester.cpp
+    src/util/Version.cpp
+    src/util/DockWidgetPermission.cpp
 )
 
 set(PUBLIC_UTIL_FILES
@@ -392,75 +665,19 @@ set(PUBLIC_UTIL_FILES
 
 set(PUBLIC_APPLICATION_HEADERS
     src/Application.h
+    src/Project.h
+    src/Workspace.h
 )
 
 set(PUBLIC_APPLICATION_SOURCES
     src/Application.cpp
+    src/Project.cpp
+    src/Workspace.cpp
 )
 
 set(PUBLIC_APPLICATION_FILES
     ${PUBLIC_APPLICATION_HEADERS}
     ${PUBLIC_APPLICATION_SOURCES}
-)
-
-set(PUBLIC_SERIALIZATION_HEADERS
-    src/Serialization.h
-    src/Serializable.h
-)
-
-set(PUBLIC_SERIALIZATION_SOURCES
-    src/Serialization.cpp
-    src/Serializable.cpp
-)
-
-set(PUBLIC_SERIALIZATION_FILES
-    ${PUBLIC_SERIALIZATION_HEADERS}
-    ${PUBLIC_SERIALIZATION_SOURCES}
-)
-
-set(PUBLIC_LAYOUT_MANAGER_HEADERS
-    src/LayoutManager.h
-)
-
-set(PUBLIC_LAYOUT_MANAGER_SOURCES
-    src/LayoutManager.cpp
-)
-
-set(PUBLIC_LAYOUT_MANAGER_FILES
-    ${PUBLIC_LAYOUT_MANAGER_HEADERS}
-    ${PUBLIC_LAYOUT_MANAGER_SOURCES}
-)
-
-set(PUBLIC_ACTIONS_MANAGER_HEADERS
-    src/ActionsModel.h
-    src/ActionsFilterModel.h
-    src/ActionsManager.h
-    src/ActionsViewerWidget.h
-)
-
-set(PUBLIC_ACTIONS_MANAGER_SOURCES
-    src/ActionsModel.cpp
-    src/ActionsFilterModel.cpp
-    src/ActionsManager.cpp
-    src/ActionsViewerWidget.cpp
-)
-
-set(PUBLIC_ACTIONS_MANAGER_FILES
-    ${PUBLIC_ACTIONS_MANAGER_HEADERS}
-    ${PUBLIC_ACTIONS_MANAGER_SOURCES}
-)
-
-set(PUBLIC_LAYOUT_MANAGER_HEADERS
-    src/LayoutManager.h
-)
-
-set(PUBLIC_LAYOUT_MANAGER_SOURCES
-    src/LayoutManager.cpp
-)
-
-set(PUBLIC_LAYOUT_MANAGER_FILES
-    ${PUBLIC_LAYOUT_MANAGER_HEADERS}
-    ${PUBLIC_LAYOUT_MANAGER_SOURCES}
 )
 
 set(PUBLIC_DATASET_HEADERS
@@ -497,6 +714,7 @@ set(PUBLIC_PLUGIN_HEADERS
 
 set(PUBLIC_PLUGIN_SOURCES
     src/Plugin.cpp
+    src/PluginType.cpp
     src/PluginFactory.cpp
     src/LoaderPlugin.cpp
     src/WriterPlugin.cpp
@@ -511,30 +729,65 @@ list(APPEND PUBLIC_PLUGIN_FILES
 )
 
 set(PUBLIC_DATA_HIERARCHY_HEADERS
-    src/DataHierarchyManager.h
     src/DataHierarchyItem.h
-    src/DataHierarchyModelItem.h
-    src/DataHierarchyFilterModel.h
-    src/DataHierarchyModel.h
-    src/DataHierarchyWidget.h
-    src/DataPropertiesWidget.h
-    src/DataHierarchyFilterAction.h
 )
 
 set(PUBLIC_DATA_HIERARCHY_SOURCES
-    src/DataHierarchyManager.cpp
     src/DataHierarchyItem.cpp
-    src/DataHierarchyModelItem.cpp
-    src/DataHierarchyFilterModel.cpp
-    src/DataHierarchyModel.cpp
-    src/DataHierarchyWidget.cpp
-    src/DataPropertiesWidget.cpp
-    src/DataHierarchyFilterAction.cpp
 )
 
 list(APPEND PUBLIC_DATA_HIERARCHY_FILES
     ${PUBLIC_DATA_HIERARCHY_HEADERS}
     ${PUBLIC_DATA_HIERARCHY_SOURCES}
+)
+
+set(PUBLIC_ACTIONS_MODEL_HEADERS
+    src/models/ActionsModel.h
+    src/models/ActionsFilterModel.h
+)
+
+set(PUBLIC_ACTIONS_MODEL_SOURCES
+    src/models/ActionsModel.cpp
+    src/models/ActionsFilterModel.cpp
+)
+
+set(PUBLIC_ACTIONS_MODEL_FILES
+    ${PUBLIC_ACTIONS_MODEL_HEADERS}
+    ${PUBLIC_ACTIONS_MODEL_SOURCES}
+)
+
+set(PUBLIC_ACTION_HIERARCHY_MODEL_HEADERS
+    src/models/ActionHierarchyModelItem.h
+    src/models/ActionHierarchyModel.h
+    src/models/ActionHierarchyFilterModel.h
+)
+
+set(PUBLIC_ACTION_HIERARCHY_MODEL_SOURCES
+    src/models/ActionHierarchyModelItem.cpp
+    src/models/ActionHierarchyModel.cpp
+    src/models/ActionHierarchyFilterModel.cpp
+)
+
+set(PUBLIC_ACTION_HIERARCHY_MODEL_FILES
+    ${PUBLIC_ACTION_HIERARCHY_MODEL_HEADERS}
+    ${PUBLIC_ACTION_HIERARCHY_MODEL_SOURCES}
+)
+
+set(PUBLIC_DATA_HIERARCHY_MODEL_HEADERS
+    src/models/DataHierarchyModelItem.h
+    src/models/DataHierarchyModel.h
+    src/models/DataHierarchyFilterModel.h
+)
+
+set(PUBLIC_DATA_HIERARCHY_MODEL_SOURCES
+    src/models/DataHierarchyModelItem.cpp
+    src/models/DataHierarchyModel.cpp
+    src/models/DataHierarchyFilterModel.cpp
+)
+
+set(PUBLIC_DATA_HIERARCHY_MODEL_FILES
+    ${PUBLIC_DATA_HIERARCHY_MODEL_HEADERS}
+    ${PUBLIC_DATA_HIERARCHY_MODEL_SOURCES}
 )
 
 set(PUBLIC_HEADERS
@@ -547,12 +800,13 @@ set(PUBLIC_HEADERS
     ${PUBLIC_GRAPHICS_HEADERS}
     ${PUBLIC_UTIL_HEADERS}
     ${PUBLIC_APPLICATION_HEADERS}
-    ${PUBLIC_SERIALIZATION_HEADERS}
-    ${PUBLIC_ACTIONS_MANAGER_HEADERS}
-    ${PUBLIC_LAYOUT_MANAGER_HEADERS}
     ${PUBLIC_DATASET_HEADERS}
     ${PUBLIC_PLUGIN_HEADERS}
+    ${PUBLIC_PROJECT_HEADERS}
     ${PUBLIC_DATA_HIERARCHY_HEADERS}
+    ${PUBLIC_ACTIONS_MODEL_HEADERS}
+    ${PUBLIC_ACTION_HIERARCHY_MODEL_HEADERS}
+    ${PUBLIC_DATA_HIERARCHY_MODEL_HEADERS}
 )
 
 set(PUBLIC_SOURCES
@@ -564,12 +818,13 @@ set(PUBLIC_SOURCES
     ${PUBLIC_GRAPHICS_SOURCES}
     ${PUBLIC_UTIL_SOURCES}
     ${PUBLIC_APPLICATION_SOURCES}
-    ${PUBLIC_SERIALIZATION_SOURCES}
-    ${PUBLIC_ACTIONS_MANAGER_SOURCES}
-    ${PUBLIC_LAYOUT_MANAGER_SOURCES}
     ${PUBLIC_DATASET_SOURCES}
     ${PUBLIC_PLUGIN_SOURCES}
     ${PUBLIC_DATA_HIERARCHY_SOURCES}
+    ${PUBLIC_PROJECT_SOURCES}
+    ${PUBLIC_ACTIONS_MODEL_SOURCES}
+    ${PUBLIC_ACTION_HIERARCHY_MODEL_SOURCES}
+    ${PUBLIC_DATA_HIERARCHY_MODEL_SOURCES}
     ${PUBLIC_HEADERS}
 )
 
@@ -582,38 +837,29 @@ if(APPLE)
     set_source_files_properties(res/icons/AppIcon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif(APPLE)
 
-set(UI_FILES
-    ui/MainWindow.ui
-)
-
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
-QT6_WRAP_UI(UI_HEADERS ${UI_FILES})
 QT6_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
 
-source_group( GUI FILES ${PRIVATE_SOURCES})
-source_group( Private FILES ${PRIVATE_SOURCES})
+source_group(CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
+source_group(Event FILES ${PUBLIC_EVENT_FILES})
+source_group(Actions FILES ${PUBLIC_ACTIONS_FILES})
+source_group(Widgets FILES ${PUBLIC_WIDGET_FILES})
+source_group(Renderers FILES ${PUBLIC_RENDERERS_FILES})
+source_group(Graphics FILES ${PUBLIC_GRAPHICS_FILES})
+source_group(Util FILES ${PUBLIC_UTIL_FILES})
+source_group(Application FILES ${PUBLIC_APPLICATION_FILES})
+source_group(DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_FILES})
+source_group(Dataset FILES ${PUBLIC_DATASET_FILES})
+source_group(Plugin FILES ${PUBLIC_PLUGIN_FILES})
+source_group(Project FILES ${PUBLIC_PROJECT_FILES})
+source_group(Model\\Actions FILES ${PUBLIC_ACTIONS_MODEL_FILES})
+source_group(Model\\ActionHierarchy FILES ${PUBLIC_ACTION_HIERARCHY_MODEL_FILES})
+source_group(Model\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
 
-source_group(Public\\CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
-source_group(Public\\Event FILES ${PUBLIC_EVENT_FILES})
-source_group(Public\\Actions FILES ${PUBLIC_ACTIONS_FILES})
-source_group(Public\\Widgets FILES ${PUBLIC_WIDGET_FILES})
-source_group(Public\\Renderers FILES ${PUBLIC_RENDERERS_FILES})
-source_group(Public\\Graphics FILES ${PUBLIC_GRAPHICS_FILES})
-source_group(Public\\Util FILES ${PUBLIC_UTIL_FILES})
-source_group(Public\\Application FILES ${PUBLIC_APPLICATION_FILES})
-source_group(Public\\Serialization FILES ${PUBLIC_SERIALIZATION_FILES})
-source_group(Public\\Managers\\Actions FILES ${PUBLIC_ACTIONS_MANAGER_FILES})
-source_group(Public\\Managers\\Layout FILES ${PUBLIC_LAYOUT_MANAGER_FILES})
-source_group(Public\\Managers\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_FILES})
-source_group(Public\\Managers\\ActionHierarchy FILES ${PUBLIC_ACTION_HIERARCHY_FILES})
-source_group(Public\\Dataset FILES ${PUBLIC_DATASET_FILES})
-source_group(Public\\Plugin FILES ${PUBLIC_PLUGIN_FILES})
-
-source_group( Resources FILES res/resources.qrc)
-source_group( Resources FILES ${UI_FILES})
-source_group( Resources FILES win/hdps.rc)
-source_group( Resources\\generated FILES ${UI_HEADERS})
+source_group(Resources FILES res/resources.qrc)
+source_group(Resources FILES win/hdps.rc)
+source_group(Resources\\generated FILES ${UI_HEADERS})
 
 set(LINK_TYPE SHARED)
 if(APPLE)
@@ -645,6 +891,8 @@ set_property(TARGET ${HDPS_PRIVATE_LIB} PROPERTY CXX_STANDARD 14)
 
 target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::Widgets)
 target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::WebEngineWidgets)
+target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::OpenGL)
+target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::OpenGLWidgets)
 target_link_libraries(${HDPS_PRIVATE_LIB} qtadvanceddocking)
 target_link_libraries(${HDPS_PRIVATE_LIB} QuaZip)
 target_link_libraries(${HDPS_PRIVATE_LIB} "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
@@ -661,7 +909,6 @@ add_executable(${HDPS_EXE} MACOSX_BUNDLE WIN32
     src/.editorconfig
     ${MAIN_SOURCES}
     ${UI_HEADERS}
-    ${UI_FILES}
     ${RESOURCE_FILES}
 )
 
@@ -675,6 +922,8 @@ target_include_directories(${HDPS_EXE} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_link_libraries(${HDPS_EXE} Qt6::Widgets)
 target_link_libraries(${HDPS_EXE} Qt6::WebEngineWidgets)
+target_link_libraries(${HDPS_EXE} Qt6::OpenGL)
+target_link_libraries(${HDPS_EXE} Qt6::OpenGLWidgets)
 target_link_libraries(${HDPS_EXE} qtadvanceddocking)
 target_link_libraries(${HDPS_EXE} QuaZip)
 
@@ -851,6 +1100,11 @@ add_custom_command(
         --verbose
 )
 
+add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_CURRENT_SOURCE_DIR}/res/examples
+                ${INSTALL_DIR}/$<CONFIGURATION>/examples)
+
 # Install the HDPS executable and lib
 add_custom_command(
     TARGET ${HDPS_EXE} POST_BUILD
@@ -867,26 +1121,22 @@ add_custom_command(
     #     --prefix ${INSTALL_DIR}/$<CONFIGURATION>
     #     --verbose
 )
+                   
 
-# Point Data
+# System plugins
 add_subdirectory(src/plugins/PointData)
-
-# Color Data
 add_subdirectory(src/plugins/ColorData)
-
-# Text Data
 add_subdirectory(src/plugins/TextData)
-
-# Cluster Data
 add_subdirectory(src/plugins/ClusterData)
-
-# Image Data
 add_subdirectory(src/plugins/ImageData)
+add_subdirectory(src/plugins/DataHierarchyPlugin)
+add_subdirectory(src/plugins/DataPropertiesPlugin)
+add_subdirectory(src/plugins/ActionsPlugin)
+add_subdirectory(src/plugins/LoggingPlugin)
 
 # Qt Advanced docking system
-set(VERSION_SHORT 3.7.0)
+set(VERSION_SHORT 4.0.1)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
-add_subdirectory(external)
 add_subdirectory(external/advanced_docking)
 
 # File compression LIBRARY

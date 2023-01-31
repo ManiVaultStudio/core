@@ -1,5 +1,6 @@
 #include "EditProxyDatasetsAction.h"
 
+#include <Application.h>
 #include <DataHierarchyItem.h>
 
 #include <QHBoxLayout>

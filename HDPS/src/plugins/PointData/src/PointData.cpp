@@ -21,7 +21,7 @@
 #include "Application.h"
 
 #include <actions/GroupAction.h>
-#include <Serialization.h>
+#include <util/Serialization.h>
 #include <util/Timer.h>
 #include <DataHierarchyItem.h>
 
@@ -45,7 +45,7 @@ void PointData::init()
 
 hdps::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return hdps::Dataset<DatasetImpl>(new Points(_core, getName(), guid));
+    return hdps::Dataset<DatasetImpl>(new Points(Application::core(), getName(), guid));
 }
 
 unsigned int PointData::getNumPoints() const
@@ -316,7 +316,6 @@ void Points::init()
 
     _infoAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 
-    _eventListener.setEventCore(_core);
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
     _eventListener.registerDataEventByType(PointType, [this](DataEvent* dataEvent)
     {
@@ -329,7 +328,7 @@ void Points::init()
                     return;
 
                 // Only synchronize when dataset grouping is enabled and our own group index is non-negative
-                if (!_core->isDatasetGroupingEnabled() || getGroupIndex() < 0)
+                if (!Application::core()->isDatasetGroupingEnabled() || getGroupIndex() < 0)
                     return;
 
                 // Only synchronize of the group indexes match
@@ -354,8 +353,7 @@ void Points::init()
                 // Copy indices from source to target if the indices have changed
                 targetIndices = sourceIndices;
 
-                // Notify others that the cluster selection has changed
-                _core->notifyDatasetSelectionChanged(this);
+                events().notifyDatasetSelectionChanged(this);
 
                 break;
             }
@@ -571,7 +569,7 @@ bool Points::mayProxy(const Datasets& proxyDatasets) const
 
 Dataset<DatasetImpl> Points::copy() const
 {
-    auto set = new Points(_core, getRawDataName());
+    auto set = new Points(Application::core(), getRawDataName());
 
     set->setGuiName(getGuiName());
     set->indices = indices;
@@ -581,7 +579,7 @@ Dataset<DatasetImpl> Points::copy() const
 
 Dataset<DatasetImpl> Points::createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const bool& visible /*= true*/) const
 {
-    return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
+    return Application::core()->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
 }
 
 Dataset<DatasetImpl> Points::createSubsetFromVisibleSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const bool& visible /*= true*/) const
@@ -894,7 +892,7 @@ void Points::selectAll()
             selectionIndices.push_back(index);
     }
 
-    _core->notifyDatasetSelectionChanged(this);
+    events().notifyDatasetSelectionChanged(this);
 }
 
 void Points::selectNone()
@@ -903,7 +901,7 @@ void Points::selectNone()
 
     selectionIndices.clear();
 
-    _core->notifyDatasetSelectionChanged(this);
+    events().notifyDatasetSelectionChanged(this);
 }
 
 void Points::selectInvert()
@@ -922,7 +920,7 @@ void Points::selectInvert()
             selectionIndices.push_back(i);
     }
 
-    _core->notifyDatasetSelectionChanged(this);
+    events().notifyDatasetSelectionChanged(this);
 }
 
 void Points::fromVariantMap(const QVariantMap& variantMap)
@@ -976,7 +974,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
     setDimensionNames(dimensionNames);
 
-    _core->notifyDatasetChanged(this);
+    events().notifyDatasetChanged(this);
 }
 
 QVariantMap Points::toVariantMap() const

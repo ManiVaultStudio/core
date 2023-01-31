@@ -319,7 +319,7 @@ void DimensionsPickerAction::selectDimensions(const QVector<std::int32_t>& dimen
     if (dimensionIndices == getSelectedDimensions())
         return;
 
-    const auto numberOfDimensions = _holder.getNumberOfDimensions();
+    const auto numberOfDimensions = static_cast<std::int32_t>(_holder.getNumberOfDimensions());
 
     if (clearExisiting)
         for (int dimensionIndex = 0; dimensionIndex < numberOfDimensions; ++dimensionIndex)
@@ -517,7 +517,7 @@ void DimensionsPickerAction::connectToPublicAction(WidgetAction* publicAction)
 
 void DimensionsPickerAction::disconnectFromPublicAction()
 {
-    auto publicDimensionsPickerAction = dynamic_cast<DimensionsPickerAction*>(_publicAction);
+    auto publicDimensionsPickerAction = dynamic_cast<DimensionsPickerAction*>(getPublicAction());
 
     Q_ASSERT(publicDimensionsPickerAction != nullptr);
 

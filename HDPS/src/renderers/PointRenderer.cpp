@@ -130,7 +130,7 @@ namespace hdps
             _colorScalarsRange.z = _colorScalarsRange.y - _colorScalarsRange.x;
 
             if (_colorScalarsRange.z < 1e-07)
-                _colorScalarsRange.z = 1e-07;
+                _colorScalarsRange.z = static_cast<float>(1e-07);
 
             _colorScalars = scalars;
 

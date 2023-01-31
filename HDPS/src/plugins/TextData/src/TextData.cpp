@@ -1,5 +1,7 @@
 #include "TextData.h"
 
+#include <Application.h>
+
 #include <QtCore>
 #include <QtDebug>
 

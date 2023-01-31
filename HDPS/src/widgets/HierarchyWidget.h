@@ -5,30 +5,73 @@
 #include "actions/GroupAction.h"
 #include "actions/ToggleAction.h"
 
-#include "OverlayWidget.h"
+#include "InfoOverlayWidget.h"
 
 #include <QWidget>
 #include <QTreeView>
 #include <QAbstractItemModel>
+#include <QHBoxLayout>
 
 class QSortFilterProxyModel;
 
-namespace hdps
+namespace hdps::gui
 {
 
-namespace gui
+class HierarchyWidget;
+
+/**
+ * Custom tree view class
+ * Tree view does not emit signals when column visibility changes (needed to update visible columns popup), this class solves this problem.
+ */
+class HierarchyWidgetTreeView : public QTreeView
 {
+    Q_OBJECT
+
+protected:
+    
+    /** No need for a custom constructor */
+    using QTreeView::QTreeView;
+
+public:
+
+    /**
+     * Set column hidden (overridden to emit custom signal)
+     * @param column Column to hide/show
+     * @param hide Hide or show column
+     */
+    void setColumnHidden(int column, bool hide) {
+        QTreeView::setColumnHidden(column, hide);
+
+        emit columnHiddenChanged(column, hide);
+    }
+
+signals:
+
+    /**
+     * Signals that the column hidden parameter changed
+     * @param column Index of the column of which the visibility changed
+     * @param hide Whether the column has become hidden or visible
+     */
+    void columnHiddenChanged(int column, bool hide);
+
+    friend class HierarchyWidget;
+};
 
 /**
  * Base widget for displaying a hierarchical model in a tree view
  * 
- * It sets up the tree view and links up the filter and selection models
- * May show a toolbar for:
- * - Filtering by name (possibly with regular expression)
+ * It sets up the tree view and links up the filter and selection models.
+ * 
+ * Features a toolbar for interaction with the model built with actions:
+ * - Filter by name (possibly with regular expression)
  * - Expanding all items
  * - Collapsing all items
  * - Selecting all items
  * - De-selecting all items
+ * - Edit settings
+ * 
+ * In addition, it shows an overlay widget (with icon, title and description) when no items are loaded
+ * or filtering did not yield any items.
  * 
  * @author Thomas Kroes
  */
@@ -47,13 +90,55 @@ public:
      * @param showToolbar Whether to add a default toolbar for filtering and expand/collapse
      * @param showOverlay Whether to show an overlay when the (filter) model is empty
      */
-    HierarchyWidget(QWidget* parent, const QString& itemTypeName, QAbstractItemModel& model, QSortFilterProxyModel* filterModel = nullptr, bool showToolbar = true, bool showOverlay = true);
+    HierarchyWidget(QWidget* parent, const QString& itemTypeName, const QAbstractItemModel& model, QSortFilterProxyModel* filterModel = nullptr, bool showToolbar = true, bool showOverlay = true);
+
+    /**
+     * Get item type name
+     * @return Item type name
+     */
+    QString getItemTypeName() const;
+
+    /**
+     * Set item type name to \p itemTypeName
+     * @return Item type name
+     */
+    void setItemTypeName(const QString& itemTypeName);
+
+    /**
+     * Override set window icon to update the overlay icons as well
+     * @param icon Window icon
+     */
+    void setWindowIcon(const QIcon& icon);
+
+    /**
+     * Set overlay widget description when no items are loaded
+     * @param noItemsDescription Overlay widget description when no items are loaded
+     */
+    void setNoItemsDescription(const QString& noItemsDescription);
+
+    /**
+     * Get whether the header view is visible or not
+     * @return Boolean determining whether the header view is visible or not
+     */
+    bool getHeaderHidden() const;
+
+    /**
+     * Set whether the header view is visible or not
+     * @param headerHidden Boolean determining whether the header view is visible or not
+     */
+    void setHeaderHidden(bool headerHidden);
+
+    /**
+     * Get layout for the horizontal toolbar
+     * @return Reference to the toolbar layout
+     */
+    QHBoxLayout& getToolbarLayout();
 
     /**
      * Get input model
      * @return Input model
      */
-    QAbstractItemModel& getModel() {
+    const QAbstractItemModel& getModel() {
         return _model;
     }
 
@@ -77,8 +162,16 @@ public:
      * Get tree view widget
      * @return Reference to tree view widget
      */
-    QTreeView& getTreeView() {
+    HierarchyWidgetTreeView& getTreeView() {
         return _treeView;
+    }
+
+    /**
+     * Get overlay widget
+     * @return Pointer to overlay widget
+     */
+    InfoOverlayWidget* getInfoOverlayWidget() {
+        return _infoOverlayWidget.get();
     }
 
     /**
@@ -130,13 +223,37 @@ public:
     }
 
     /**
+     * Get selection group action
+     * @return Reference to selection group action
+     */
+    GroupAction& getSelectionGroupAction() {
+        return _selectionGroupAction;
+    }
+
+    /**
+     * Get columns group action
+     * @return Reference to columns group action
+     */
+    GroupAction& getColumnsGroupAction() {
+        return _columnsGroupAction;
+    }
+
+    /**
+     * Get selection group action
+     * @return Reference to selection group
+     */
+    GroupAction& getSettingsGroupAction() {
+        return _settingsGroupAction;
+    }
+
+    /**
      * Maps a model index to source model index
      * @param modelIndex Model index to map
      * @return The mapped model index if a filter model is present, other wise the input model index
      */
     QModelIndex toSourceModelIndex(const QModelIndex& modelIndex) const;
 
-protected:
+public:
 
     /**
      * Get selected rows
@@ -199,23 +316,30 @@ private:
     /** Update the read-only state of the expand/collapse action in response to change in the model and the tree view */
     void updateExpandCollapseActionsReadOnly();
 
+    /** Update the filter model and related actions */
+    void updateFilterModel();
+
 private:
-    QString                     _itemTypeName;                      /** Name of the item type */
-    QAbstractItemModel&         _model;                             /** Model containing data to be displayed in the hierarchy */
-    QSortFilterProxyModel*      _filterModel;                       /** Pointer to filter model (maybe nullptr) */
-    QItemSelectionModel         _selectionModel;                    /** Selection model */
-    QTreeView                   _treeView;                          /** Tree view that contains the data hierarchy */
-    OverlayWidget               _overlayWidget;                     /** Overlay widget that show information when there are no items in the model */
-    StringAction                _filterNameAction;                  /** String action for filtering by name */
-    GroupAction                 _filterGroupAction;                 /** Filter group action */
-    ToggleAction                _filterCaseSensitiveAction;         /** Filter case-sensitive action */
-    ToggleAction                _filterRegularExpressionAction;     /** Enable filter with regular expression action */
-    TriggerAction               _expandAllAction;                   /** Expand all items action */
-    TriggerAction               _collapseAllAction;                 /** Collapse all items action */
-    TriggerAction               _selectAllAction;                   /** Select all action */
-    TriggerAction               _selectNoneAction;                  /** Select none action */
-    GroupAction                 _selectionGroupAction;              /** Selection action */
+    QString                             _itemTypeName;                      /** Name of the item type */
+    bool                                _headerHidden;                      /** Whether the header view is visible or not */
+    const QAbstractItemModel&           _model;                             /** Model containing data to be displayed in the hierarchy */
+    QSortFilterProxyModel*              _filterModel;                       /** Pointer to filter model (maybe nullptr) */
+    QItemSelectionModel                 _selectionModel;                    /** Selection model */
+    HierarchyWidgetTreeView             _treeView;                          /** Tree view that contains the data hierarchy */
+    QScopedPointer<InfoOverlayWidget>   _infoOverlayWidget;                 /** Overlay widget that show information when there are no items in the model */
+    QString                             _noItemsDescription;                /** Overlay widget description when no items are loaded */
+    QHBoxLayout                         _toolbarLayout;                     /** Layout for the top toolbar */
+    StringAction                        _filterNameAction;                  /** String action for filtering by name */
+    GroupAction                         _filterGroupAction;                 /** Filter group action */
+    ToggleAction                        _filterCaseSensitiveAction;         /** Filter case-sensitive action */
+    ToggleAction                        _filterRegularExpressionAction;     /** Enable filter with regular expression action */
+    TriggerAction                       _expandAllAction;                   /** Expand all items action */
+    TriggerAction                       _collapseAllAction;                 /** Collapse all items action */
+    TriggerAction                       _selectAllAction;                   /** Select all action */
+    TriggerAction                       _selectNoneAction;                  /** Select none action */
+    GroupAction                         _selectionGroupAction;              /** Selection group action */
+    GroupAction                         _columnsGroupAction;                /** Column visibility action */
+    GroupAction                         _settingsGroupAction;               /** Settings group action */
 };
 
-}
 }

@@ -8,23 +8,26 @@
 
 #include <stdexcept>
 
+#ifdef _DEBUG
+    #define HIERARCHY_WIDGET_VERBOSE
+#endif
+
 using namespace hdps::util;
 
-namespace hdps
+namespace hdps::gui
 {
 
-namespace gui
-{
-
-HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, QAbstractItemModel& model, QSortFilterProxyModel* filterModel /*= nullptr*/, bool showToolbar /*= true*/, bool showOverlay /*= true*/) :
+HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, const QAbstractItemModel& model, QSortFilterProxyModel* filterModel /*= nullptr*/, bool showToolbar /*= true*/, bool showOverlay /*= true*/) :
     QWidget(parent),
     _itemTypeName(itemTypeName),
+    _headerHidden(false),
     _model(model),
     _filterModel(filterModel),
-    _selectionModel(_filterModel != nullptr ? _filterModel : &_model),
+    _selectionModel(_filterModel != nullptr ? _filterModel : const_cast<QAbstractItemModel*>(&_model)),
     _treeView(this),
-    _overlayWidget(this),
-    _filterNameAction(this, "Name filter"),
+    _infoOverlayWidget(showOverlay ? new InfoOverlayWidget(&_treeView) : nullptr),
+    _noItemsDescription(""),
+    _filterNameAction(this, "Name"),
     _filterGroupAction(this),
     _filterCaseSensitiveAction(this, "Case-sensitive", false, false),
     _filterRegularExpressionAction(this, "Regular expression", false, false),
@@ -32,12 +35,15 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _collapseAllAction(this, "Collapse all"),
     _selectAllAction(this, "Select all"),
     _selectNoneAction(this, "Select none"),
-    _selectionGroupAction(this)
+    _selectionGroupAction(this),
+    _columnsGroupAction(this),
+    _settingsGroupAction(this)
 {
     _filterNameAction.setSearchMode(true);
     _filterNameAction.setClearable(true);
+    _filterNameAction.setConnectionPermissionsToNone();
 
-    _filterGroupAction.setText(QString("%1 filtering").arg(_itemTypeName));
+    _filterGroupAction.setText("Filtering");
     _filterGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
     _filterGroupAction.setToolTip("Adjust filtering parameters");
 
@@ -46,6 +52,9 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
 
     _filterRegularExpressionAction.setToolTip("Enable/disable search filter with regular expression");
     _filterRegularExpressionAction.setConnectionPermissionsToNone();
+
+    //if (_filterModel)
+    //    _filterGroupAction << _filterNameAction;
 
     _filterGroupAction << _filterCaseSensitiveAction;
     _filterGroupAction << _filterRegularExpressionAction;
@@ -58,8 +67,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _collapseAllAction.setToolTip(QString("Collapse all %1s in the hierarchy").arg(_itemTypeName.toLower()));
     _collapseAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
-    _selectAllAction.setToolTip(QString("Select all %1s in the hierarchy").arg(_itemTypeName.toLower()));
-    _selectNoneAction.setToolTip(QString("De-select all %1s in the hierarchy").arg(_itemTypeName.toLower()));
+    _selectAllAction.setToolTip(QString("Select all %1s").arg(_itemTypeName.toLower()));
+    _selectNoneAction.setToolTip(QString("De-select all %1s").arg(_itemTypeName.toLower()));
 
     _selectionGroupAction.setText("Selection");
     _selectionGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
@@ -67,22 +76,81 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _selectionGroupAction << _selectAllAction;
     _selectionGroupAction << _selectNoneAction;
 
+    _columnsGroupAction.setText("Columns");
+    _columnsGroupAction.setToolTip(QString("Edit which %1s hierarchy columns should be visible").arg(_itemTypeName.toLower()));
+    _columnsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("columns"));
+    _columnsGroupAction.setShowLabels(false);
+
+    auto selectAllCollumns = new TriggerAction(this, "Select all");
+
+    const auto updateSelectAllCollumnsReadOnly = [this, selectAllCollumns]() -> void {
+        auto readOnly = true;
+
+        for (std::int32_t columnIndex = 0; columnIndex < _model.columnCount(); columnIndex++) {
+            if (_treeView.isColumnHidden(columnIndex)) {
+                readOnly = false;
+                break;
+            }
+        }
+                
+        selectAllCollumns->setEnabled(!readOnly);
+    };
+
+    connect(selectAllCollumns, &TriggerAction::triggered, this, [this]() -> void {
+        for (std::int32_t columnIndex = 0; columnIndex < _model.columnCount(); columnIndex++)
+            _columnsGroupAction.getActions()[columnIndex]->setChecked(true);
+    });
+
+    for (std::int32_t columnIndex = 0; columnIndex < _model.columnCount(); columnIndex++) {
+        const auto columnVisible = !_treeView.isColumnHidden(columnIndex);
+
+        auto columnVisibilityAction = new ToggleAction(this, _model.headerData(columnIndex, Qt::Horizontal, Qt::EditRole).toString(), columnVisible, columnVisible);
+
+        columnVisibilityAction->setConnectionPermissionsToNone();
+
+        connect(columnVisibilityAction, &ToggleAction::toggled, this, [this, columnIndex, updateSelectAllCollumnsReadOnly](bool toggled) -> void {
+            _treeView.setColumnHidden(columnIndex, !toggled);
+            updateSelectAllCollumnsReadOnly();
+        });
+
+        _columnsGroupAction << *columnVisibilityAction;
+    }
+
+    _columnsGroupAction << *selectAllCollumns;
+
+    connect(&_treeView, &HierarchyWidgetTreeView::columnHiddenChanged, this, [this](int column, bool hide) -> void {
+        auto columnAction = _columnsGroupAction.getActions()[column];
+
+        if (columnAction->isChecked() == hide)
+            columnAction->setChecked(!hide);
+    });
+
+    updateSelectAllCollumnsReadOnly();
+
+    _settingsGroupAction.setText("Settings");
+    _settingsGroupAction.setToolTip(QString("Edit %1s hierarchy settings").arg(_itemTypeName.toLower()));
+    _settingsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _settingsGroupAction.setVisible(false);
+
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
 
     if (showToolbar) {
-        auto toolbarLayout = new QHBoxLayout();
+        _toolbarLayout.setSpacing(3);
 
-        toolbarLayout->setSpacing(3);
+        if (_filterModel) {
+            _toolbarLayout.addWidget(_filterNameAction.createWidget(this), 1);
+            _toolbarLayout.addWidget(_filterGroupAction.createCollapsedWidget(this));
+        }
+        
+        _toolbarLayout.addWidget(_expandAllAction.createWidget(this));
+        _toolbarLayout.addWidget(_collapseAllAction.createWidget(this));
+        _toolbarLayout.addWidget(_selectionGroupAction.createCollapsedWidget(this));
+        _toolbarLayout.addWidget(_columnsGroupAction.createCollapsedWidget(this));
+        _toolbarLayout.addWidget(_settingsGroupAction.createCollapsedWidget(this));
 
-        toolbarLayout->addWidget(_filterNameAction.createWidget(this), 1);
-        toolbarLayout->addWidget(_filterGroupAction.createCollapsedWidget(this));
-        toolbarLayout->addWidget(_expandAllAction.createWidget(this));
-        toolbarLayout->addWidget(_collapseAllAction.createWidget(this));
-        toolbarLayout->addWidget(_selectionGroupAction.createCollapsedWidget(this));
-
-        layout->addLayout(toolbarLayout);
+        layout->addLayout(&_toolbarLayout);
     }
     
     layout->addWidget(&_treeView);
@@ -90,13 +158,15 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     setLayout(layout);
 
     if (_filterModel) {
-        _filterModel->setSourceModel(&_model);
+        _filterModel->setSourceModel(const_cast<QAbstractItemModel*>(&_model));
         _treeView.setModel(_filterModel);
     }
     else {
-        _treeView.setModel(&_model);
+        _treeView.setModel(const_cast<QAbstractItemModel*>(&_model));
     }
 
+    _treeView.setAutoFillBackground(true);
+    //_treeView.setAutoExpandDelay(300);
     _treeView.setContextMenuPolicy(Qt::CustomContextMenu);
     _treeView.setSelectionModel(&_selectionModel);
     _treeView.setDragEnabled(true);
@@ -106,55 +176,33 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _treeView.setRootIsDecorated(true);
     _treeView.setItemsExpandable(true);
     _treeView.setIconSize(QSize(14, 14));
+    _treeView.setAnimated(true);
+    //_treeView.setUniformRowHeights(true);
     
     auto header = _treeView.header();
 
     header->setMinimumSectionSize(18);
     header->setIconSize(QSize(4, 10));
 
-    const auto numberOfRowsChanged = [this]() -> void {
-        const auto hasItems = _model.rowCount() >= 1;
+    const auto filterModelRowsChanged = [this]() -> void {
+        const auto hasItems = _filterModel != nullptr ? _filterModel->rowCount() >= 1 : _model.rowCount() >= 1;
 
-        _filterNameAction.setEnabled(hasItems);
-        _treeView.setHeaderHidden(!hasItems);
+        _filterNameAction.setEnabled(_model.rowCount() >= 1);
+        _filterGroupAction.setEnabled(_model.rowCount() >= 1);
+        _selectionGroupAction.setEnabled(hasItems);
+        _columnsGroupAction.setEnabled(hasItems);
+        _settingsGroupAction.setEnabled(hasItems);
 
+        _treeView.setHeaderHidden(_headerHidden || !hasItems);
+        
         updateExpandCollapseActionsReadOnly();
         updateOverlayWidget();
     };
 
-    const auto updateFilterModel = [this]() -> void {
-        if (_filterModel == nullptr)
-            return;
-
-        const auto caseSensitivity = _filterCaseSensitiveAction.isChecked() ? "case-sensitive" : "case-insensitive";
-
-        if (_filterRegularExpressionAction.isChecked()) {
-            _filterNameAction.setPlaceHolderString(QString("Search for %1 by regular expression (%2)").arg(_itemTypeName.toLower(), caseSensitivity));
-
-            auto regularExpression = QRegularExpression(_filterNameAction.getString());
-
-            if (!_filterCaseSensitiveAction.isChecked())
-                regularExpression.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
-
-            if (regularExpression.isValid())
-                _filterModel->setFilterRegularExpression(regularExpression);
-        }
-        else {
-            _filterNameAction.setPlaceHolderString(QString("Search for %1 by name (%2)").arg(_itemTypeName.toLower(), caseSensitivity));
-            _filterModel->setFilterFixedString(_filterNameAction.getString());
-
-            //auto regularExpression = QRegularExpression();
-
-            //_filterModel->setFilterRegularExpression(regularExpression);
-        }
-            
-        _filterModel->setFilterCaseSensitivity(_filterCaseSensitiveAction.isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
-        _filterModel->invalidate();
-    };
-
-    connect(&_filterNameAction, &StringAction::stringChanged, this, updateFilterModel);
-    connect(&_filterCaseSensitiveAction, &ToggleAction::toggled, this, updateFilterModel);
-    connect(&_filterRegularExpressionAction, &ToggleAction::toggled, this, updateFilterModel);
+    connect(&_filterNameAction, &StringAction::stringChanged, this, &HierarchyWidget::updateFilterModel);
+    connect(&_filterCaseSensitiveAction, &ToggleAction::toggled, this, &HierarchyWidget::updateFilterModel);
+    connect(&_filterRegularExpressionAction, &ToggleAction::toggled, this, &HierarchyWidget::updateFilterModel);
+    connect(&_model, &QAbstractItemModel::layoutChanged, this, &HierarchyWidget::updateFilterModel);
 
     const auto connectExpandCollapseActionsReadOnly = [this]() -> void {
         connect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
@@ -190,12 +238,13 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
         connectExpandCollapseActionsReadOnly();
     });
 
-    connect(&_model, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
-    connect(&_model, &QAbstractItemModel::rowsRemoved, this, numberOfRowsChanged);
-
     if (_filterModel) {
-        connect(_filterModel, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
-        connect(_filterModel, &QAbstractItemModel::rowsRemoved, this, numberOfRowsChanged);
+        connect(_filterModel, &QAbstractItemModel::rowsInserted, this, filterModelRowsChanged);
+        connect(_filterModel, &QAbstractItemModel::rowsRemoved, this, filterModelRowsChanged);
+    }
+    else {
+        connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateFilterModel);
+        connect(&_model, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateFilterModel);
     }
 
     connect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
@@ -211,9 +260,41 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     connect(&_selectAllAction, &TriggerAction::triggered, this, &HierarchyWidget::selectAll);
     connect(&_selectNoneAction, &TriggerAction::triggered, this, &HierarchyWidget::selectNone);
 
-    numberOfRowsChanged();
+    filterModelRowsChanged();
     selectionChanged();
     updateFilterModel();
+}
+
+QString HierarchyWidget::getItemTypeName() const
+{
+    return _itemTypeName;
+}
+
+void HierarchyWidget::setItemTypeName(const QString& itemTypeName)
+{
+    if (itemTypeName == _itemTypeName)
+        return;
+
+    _itemTypeName = itemTypeName;
+
+    updateFilterModel();
+}
+
+void HierarchyWidget::setWindowIcon(const QIcon& icon)
+{
+    QWidget::setWindowIcon(icon);
+
+    updateOverlayWidget();
+}
+
+void HierarchyWidget::setNoItemsDescription(const QString& noItemsDescription)
+{
+    if (noItemsDescription == _noItemsDescription)
+        return;
+
+    _noItemsDescription = noItemsDescription;
+
+    updateOverlayWidget();
 }
 
 QModelIndex HierarchyWidget::toSourceModelIndex(const QModelIndex& modelIndex) const
@@ -272,10 +353,11 @@ bool HierarchyWidget::mayExpandAll() const
 
 void HierarchyWidget::expandAll()
 {
-    const auto allFilterModelIndices = fetchFilterModelIndices();
+#ifdef HIERARCHY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 
-    for (const auto& filterModelIndex : allFilterModelIndices)
-        _treeView.setExpanded(filterModelIndex, true);
+    _treeView.expandAll();
 }
 
 bool HierarchyWidget::mayCollapseAll() const
@@ -294,19 +376,27 @@ bool HierarchyWidget::mayCollapseAll() const
 
 void HierarchyWidget::collapseAll()
 {
-    const auto allFilterModelIndices = fetchFilterModelIndices();
+#ifdef HIERARCHY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 
-    for (const auto& filterModelIndex : allFilterModelIndices)
-        _treeView.setExpanded(filterModelIndex, false);
+    _treeView.collapseAll();
 }
 
 bool HierarchyWidget::maySelectAll() const
 {
+    if (_filterModel == nullptr)
+        return _selectionModel.selectedRows().count() < _model.rowCount();
+
     return _selectionModel.selectedRows().count() < _filterModel->rowCount();
 }
 
 void HierarchyWidget::selectAll()
 {
+#ifdef HIERARCHY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     _treeView.setFocus(Qt::NoFocusReason);
 
     for (const auto& filterModelIndex : fetchFilterModelIndices())
@@ -315,7 +405,10 @@ void HierarchyWidget::selectAll()
 
 bool HierarchyWidget::maySelectNone() const
 {
-    if (_filterModel->rowCount() == 0)
+    if (_filterModel != nullptr && _filterModel->rowCount() == 0)
+        return false;
+
+    if (_model.rowCount() == 0)
         return false;
 
     return _selectionModel.selectedRows().count() >= 1;
@@ -323,28 +416,41 @@ bool HierarchyWidget::maySelectNone() const
 
 void HierarchyWidget::selectNone()
 {
+#ifdef HIERARCHY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     for (const auto& filterModelIndex : fetchFilterModelIndices())
         _selectionModel.select(filterModelIndex, QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
 }
 
 void HierarchyWidget::updateOverlayWidget()
 {
+    if (_infoOverlayWidget.isNull())
+        return;
+
     if (_filterModel == nullptr) {
         if (_model.rowCount() == 0) {
-            _overlayWidget.set(windowIcon(), QString("No %1s loaded").arg(_itemTypeName.toLower()), "");
-            _overlayWidget.show();
+            _infoOverlayWidget->set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
+            _infoOverlayWidget->show();
         }
         else {
-            _overlayWidget.hide();
+            _infoOverlayWidget->hide();
         }
     }
     else {
-        if (_model.rowCount() >= 1 && _filterModel->rowCount() == 0) {
-            _overlayWidget.set(windowIcon(), QString("No %1s found for %2").arg(_itemTypeName.toLower(), _filterNameAction.getString()), "Try changing the filter parameters...");
-            _overlayWidget.show();
+        if (_model.rowCount() >= 1) {
+            if (_filterModel->rowCount() == 0) {
+                _infoOverlayWidget->set(windowIcon(), QString("No %1s found").arg(_itemTypeName.toLower()), "Try changing the filter parameters...");
+                _infoOverlayWidget->show();
+            }
+            else {
+                _infoOverlayWidget->hide();
+            }
         }
         else {
-            _overlayWidget.hide();
+            _infoOverlayWidget->set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
+            _infoOverlayWidget->show();
         }
     }
 }
@@ -357,5 +463,53 @@ void HierarchyWidget::updateExpandCollapseActionsReadOnly()
     _collapseAllAction.setEnabled(hasItems && mayCollapseAll());
 }
 
+bool HierarchyWidget::getHeaderHidden() const
+{
+    return _headerHidden;
 }
+
+void HierarchyWidget::setHeaderHidden(bool headerHidden)
+{
+    _headerHidden = headerHidden;
+
+    if (_headerHidden)
+        _treeView.setHeaderHidden(true);
+}
+
+QHBoxLayout& HierarchyWidget::getToolbarLayout()
+{
+    return _toolbarLayout;
+}
+
+void HierarchyWidget::updateFilterModel()
+{
+    if (_filterModel == nullptr)
+        return;
+
+    const auto itemTypeNameLowered = _itemTypeName.toLower();
+
+    if (_filterRegularExpressionAction.isChecked()) {
+        _filterNameAction.setPlaceHolderString(QString("Search for %1 by regular expression").arg(itemTypeNameLowered));
+
+        auto regularExpression = QRegularExpression(_filterNameAction.getString());
+
+        if (!_filterCaseSensitiveAction.isChecked())
+            regularExpression.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+
+        if (regularExpression.isValid())
+            _filterModel->setFilterRegularExpression(regularExpression);
+    }
+    else {
+        const auto filterColumn = _model.headerData(_filterModel->filterKeyColumn(), Qt::Horizontal).toString().toLower();
+
+        _filterNameAction.setPlaceHolderString(QString("Search for %1 by %2").arg(itemTypeNameLowered, filterColumn));
+        _filterModel->setFilterFixedString(_filterNameAction.getString());
+    }
+
+    _filterModel->setFilterCaseSensitivity(_filterCaseSensitiveAction.isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
+    _filterModel->invalidate();
+
+    updateOverlayWidget();
+}
+
 }

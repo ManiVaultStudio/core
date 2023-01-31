@@ -2,9 +2,9 @@
 
 #include <QHBoxLayout>
 
-namespace hdps {
+using namespace hdps::util;
 
-namespace gui {
+namespace hdps::gui {
 
 #if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
     constexpr float DecimalAction::INIT_MIN;
@@ -87,7 +87,7 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
 
 void DecimalAction::disconnectFromPublicAction()
 {
-    auto publicDecimalAction = dynamic_cast<DecimalAction*>(_publicAction);
+    auto publicDecimalAction = dynamic_cast<DecimalAction*>(getPublicAction());
 
     Q_ASSERT(publicDecimalAction != nullptr);
 
@@ -104,15 +104,22 @@ WidgetAction* DecimalAction::getPublicCopy() const
 
 void DecimalAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!variantMap.contains("Value"))
-        return;
+    WidgetAction::fromVariantMap(variantMap);
 
-    setValue(variantMap["Value"].toDouble());
+    variantMapMustContain(variantMap, "Value");
+
+    setValue(static_cast<float>(variantMap["Value"].toDouble()));
 }
 
 QVariantMap DecimalAction::toVariantMap() const
 {
-    return { { "Value", static_cast<double>(_value) } };
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", QVariant::fromValue(static_cast<double>(getValue())) }
+    });
+
+    return variantMap;
 }
 
 DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction) :
@@ -261,5 +268,4 @@ QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     return widget;
 }
 
-}
 }

@@ -4,12 +4,13 @@
 #include "PluginType.h"
 #include "DataType.h"
 #include "Dataset.h"
-#include "actions/TriggerAction.h"
+#include "actions/PluginTriggerAction.h"
 
 #include <QObject>
 #include <QIcon>
 #include <QVariant>
 #include <QAction>
+#include <QPointer>
 
 namespace hdps
 {
@@ -19,7 +20,7 @@ namespace hdps
     {
         class PluginTriggerAction;
 
-        using PluginTriggerActions = QVector<PluginTriggerAction*>;
+        using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
     }
 
 namespace plugin
@@ -56,6 +57,9 @@ public:
      * @return Plugin type
      */
     Type getType() const;
+
+    /** Perform post-construction initialization */
+    virtual void initialize();
 
 public: // Help
 
@@ -124,9 +128,9 @@ public:
 
     /**
      * Get the trigger action that produces an instance of the plugin
-     * @return Reference to the trigger action that produces an instance of the plugin
+     * @return Reference to a trigger action that produces an instance of the plugin
      */
-    gui::TriggerAction& getProducePluginTriggerAction();
+    virtual gui::PluginTriggerAction& getPluginTriggerAction();
 
     /**
      * Get plugin trigger actions given \p datasets
@@ -190,45 +194,18 @@ protected:
      */
     static std::uint16_t getNumberOfDatasetsForType(const Datasets& datasets, const DataType& dataType);
 
-    /**
-     * Convenience function for generating a plugin trigger action (icon from the plugin factory)
-     * @param title Title of the plugin trigger action
-     * @param description Description of the plugin trigger action
-     * @param datasets Input datasets
-     * @return Pointer to plugin trigger action
-     */
-    gui::PluginTriggerAction* createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets) const;
-
-    /**
-     * Convenience function for generating a plugin trigger action
-     * @param title Title of the plugin trigger action
-     * @param description Description of the plugin trigger action
-     * @param datasets Input datasets
-     * @param iconName Name of the icon
-     * @return Pointer to plugin trigger action
-     */
-    gui::PluginTriggerAction* createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QString& iconName) const;
-
-    /**
-     * Convenience function for generating a plugin trigger action
-     * @param title Title of the plugin trigger action
-     * @param description Description of the plugin trigger action
-     * @param datasets Input datasets
-     * @param icon Icon
-     * @return Pointer to plugin trigger action
-     */
-    gui::PluginTriggerAction* createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QIcon& icon) const;
-
 private:
-    QString                 _kind;                          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
-    Type                    _type;                          /** Type of plugin (e.g. analysis, data, loader, writer & view) */
-    QString                 _guiName;                       /** Name of the plugin in the GUI */
-    QString                 _version;                       /** Plugin version */
-    gui::TriggerAction      _producePluginTriggerAction;    /** Trigger action that produces an instance of the plugin (respects the maximum number of allowed instances) */
-    std::uint32_t           _numberOfInstances;             /** Number of plugin instances */
-    std::uint32_t           _maximumNumberOfInstances;      /** Maximum number of plugin instances (unlimited when -1) */
-    gui::TriggerAction      _triggerHelpAction;             /** Trigger action that triggers help (icon and text are already set) */
+    QString                     _kind;                          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
+    Type                        _type;                          /** Type of plugin (e.g. analysis, data, loader, writer & view) */
+    QString                     _guiName;                       /** Name of the plugin in the GUI */
+    QString                     _version;                       /** Plugin version */
+    gui::PluginTriggerAction    _pluginTriggerAction;           /** Standard plugin trigger action that produces an instance of the plugin without any special behavior (respects the maximum number of allowed instances) */
+    std::uint32_t               _numberOfInstances;             /** Number of plugin instances */
+    std::uint32_t               _maximumNumberOfInstances;      /** Maximum number of plugin instances (unlimited when -1) */
+    gui::TriggerAction          _triggerHelpAction;             /** Trigger action that triggers help (icon and text are already set) */
 };
+
+using PluginFactoryPtrs = std::vector<plugin::PluginFactory*>;
 
 } // namespace plugin
 

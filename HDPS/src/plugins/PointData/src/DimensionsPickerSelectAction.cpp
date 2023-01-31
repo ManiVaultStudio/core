@@ -1,6 +1,8 @@
 #include "DimensionsPickerSelectAction.h"
 #include "DimensionsPickerAction.h"
 
+#include <Application.h>
+
 #include <QFileDialog>
 #include <QLabel>
 

@@ -38,12 +38,12 @@ void Images::init()
 
 Dataset<DatasetImpl> Images::createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const bool& visible /*= true*/) const
 {
-    return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
+    return Application::core()->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
 }
 
 Dataset<DatasetImpl> Images::copy() const
 {
-    auto images = new Images(_core, getRawDataName());
+    auto images = new Images(Application::core(), getRawDataName());
 
     images->setGuiName(getGuiName());
 
@@ -672,7 +672,7 @@ void Images::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("ImageFilePaths"))
         setImageFilePaths(variantMap["ImageFilePaths"].toStringList());
 
-    _core->notifyDatasetChanged(this);
+    events().notifyDatasetChanged(this);
 }
 
 QVariantMap Images::toVariantMap() const

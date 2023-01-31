@@ -4,9 +4,9 @@
 #include <QHBoxLayout>
 #include <QCompleter>
 
-namespace hdps {
+using namespace hdps::util;
 
-namespace gui {
+namespace hdps::gui {
 
 StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const QString& string /*= ""*/, const QString& defaultString /*= ""*/) :
     WidgetAction(parent),
@@ -25,6 +25,11 @@ StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const
 
     _leadingAction.setVisible(false);
     _trailingAction.setVisible(false);
+}
+
+QString StringAction::getTypeString() const
+{
+    return "String";
 }
 
 void StringAction::initialize(const QString& string /*= ""*/, const QString& defaultString /*= ""*/)
@@ -176,7 +181,7 @@ void StringAction::connectToPublicAction(WidgetAction* publicAction)
 
 void StringAction::disconnectFromPublicAction()
 {
-    auto publicStringAction = dynamic_cast<StringAction*>(_publicAction);
+    auto publicStringAction = dynamic_cast<StringAction*>(getPublicAction());
 
     Q_ASSERT(publicStringAction != nullptr);
 
@@ -193,17 +198,22 @@ WidgetAction* StringAction::getPublicCopy() const
 
 void StringAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!variantMap.contains("value"))
-        return;
+    WidgetAction::fromVariantMap(variantMap);
 
-    setString(variantMap["value"].toString());
+    variantMapMustContain(variantMap, "Value");
+
+    setString(variantMap["Value"].toString());
 }
 
 QVariantMap StringAction::toVariantMap() const
 {
-    return {
-        { "value", QVariant::fromValue(_string) }
-    };
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", QVariant::fromValue(getString()) }
+    });
+
+    return variantMap;
 }
 
 StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stringAction) :
@@ -211,31 +221,29 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
 {
     setObjectName("LineEdit");
     setAcceptDrops(true);
+    setToolTip(stringAction->getString());
     
-    // Update the line edit text from the string action
     const auto updateLineEdit = [this, stringAction]() {
         QSignalBlocker blocker(this);
 
+        const auto cacheCursorPosition = cursorPosition();
+
         setText(stringAction->getString());
+        setCursorPosition(cacheCursorPosition);
     };
 
-    // Update the place holder text in the line edit
     const auto updatePlaceHolderText = [this, stringAction]() -> void {
         setPlaceholderText(stringAction->getPlaceholderString());
     };
 
-    // Update the line edit string when the action string changes
     connect(stringAction, &StringAction::stringChanged, this, updateLineEdit);
 
-    // Update the line edit placeholder string when the action placeholder string changes
     connect(stringAction, &StringAction::placeholderStringChanged, this, updatePlaceHolderText);
 
-    // Update the action string when the line edit text changes
     connect(this, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
         stringAction->setString(text);
     });
 
-    // Update the leading action
     const auto updateLeadingAction = [this, stringAction]() {
         if (!stringAction->getLeadingAction().isVisible())
             removeAction(&stringAction->getLeadingAction());
@@ -243,7 +251,6 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
             addAction(&stringAction->getLeadingAction(), QLineEdit::LeadingPosition);
     };
 
-    // Update the trailing action
     const auto updateTrailingAction = [this, stringAction]() {
         if (!stringAction->getTrailingAction().isVisible())
             removeAction(&stringAction->getTrailingAction());
@@ -251,19 +258,15 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
             addAction(&stringAction->getTrailingAction(), QLineEdit::TrailingPosition);
     };
 
-    // Update leading/trailing action when they change
     connect(&stringAction->getLeadingAction(), &QAction::changed, this, updateLeadingAction);
     connect(&stringAction->getTrailingAction(), &QAction::changed, this, updateTrailingAction);
 
-    // Update the completer
     const auto updateCompleter = [this, stringAction]() -> void {
         setCompleter(stringAction->getCompleter());
     };
 
-    // Update completer when action completer changes
     connect(stringAction, &StringAction::completerChanged, this, updateCompleter);
 
-    // Perform initial updates
     updateLineEdit();
     updatePlaceHolderText();
     updateLeadingAction();
@@ -282,10 +285,48 @@ QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     if (widgetFlags & WidgetFlag::LineEdit)
         layout->addWidget(new StringAction::LineEditWidget(parent, this));
 
+    if (widgetFlags & WidgetFlag::TextEdit)
+        layout->addWidget(new StringAction::TextEditWidget(parent, this));
+
     widget->setLayout(layout);
 
     return widget;
 }
 
+StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stringAction) :
+    QTextEdit(parent)
+{
+    setObjectName("LineEdit");
+    setAcceptDrops(true);
+
+    const auto updateTextEdit = [this, stringAction]() {
+        QSignalBlocker blocker(this);
+
+        const auto cacheCursorPosition = textCursor().position();
+
+        setText(stringAction->getString());
+
+        auto updateCursor = textCursor();
+
+        updateCursor.setPosition(cacheCursorPosition);
+
+        setTextCursor(updateCursor);
+    };
+
+    const auto updatePlaceHolderText = [this, stringAction]() -> void {
+        setPlaceholderText(stringAction->getPlaceholderString());
+    };
+
+    connect(stringAction, &StringAction::stringChanged, this, updateTextEdit);
+
+    connect(stringAction, &StringAction::placeholderStringChanged, this, updatePlaceHolderText);
+
+    connect(this, &QTextEdit::textChanged, this, [this, stringAction]() {
+        stringAction->setString(toPlainText());
+    });
+
+    updateTextEdit();
+    updatePlaceHolderText();
 }
+
 }

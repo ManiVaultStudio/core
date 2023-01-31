@@ -3,9 +3,11 @@
 #include "WidgetActionCollapsedWidget.h"
 #include "WidgetActionContextMenu.h"
 #include "Application.h"
+#include "CoreInterface.h"
 #include "DataHierarchyItem.h"
 #include "Plugin.h"
 #include "util/Exception.h"
+#include "AbstractActionsManager.h"
 
 #include <QDebug>
 #include <QMenu>
@@ -18,15 +20,18 @@
     #define WIDGET_ACTION_VERBOSE
 #endif
 
-namespace hdps {
+using namespace hdps::util;
 
-namespace gui {
+namespace hdps::gui {
 
 WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     QWidgetAction(parent),
+    util::Serializable("WidgetAction"),
     _defaultWidgetFlags(),
     _sortIndex(-1),
-    _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::Default)),
+    _stretch(-1),
+    _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
+    _isPublic(false),
     _publicAction(nullptr),
     _connectedActions(),
     _settingsPrefix(),
@@ -34,10 +39,12 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     _popupSizeHint(QSize(0, 0)),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default))
 {
+    actions().addAction(this);
 }
 
 WidgetAction::~WidgetAction()
 {
+    actions().removeAction(this);
 }
 
 QString WidgetAction::getTypeString() const
@@ -115,17 +122,24 @@ bool WidgetAction::isHighlighted() const
 
 bool WidgetAction::isPublic() const
 {
-    return Application::getActionsManager().isActionPublic(this);
+    return _isPublic;
 }
 
 bool WidgetAction::isPublished() const
 {
-    return Application::getActionsManager().isActionPublished(this);
+    if (_publicAction == nullptr)
+        return false;
+
+    for (const auto connectedAction : _publicAction->getConnectedActions())
+        if (connectedAction == this)
+            return true;
+
+    return false;
 }
 
 bool WidgetAction::isConnected() const
 {
-    return Application::getActionsManager().isActionConnected(this);
+    return _publicAction != nullptr;
 }
 
 void WidgetAction::publish(const QString& name /*= ""*/)
@@ -176,10 +190,12 @@ void WidgetAction::publish(const QString& name /*= ""*/)
                 publish(lineEdit->text());
         }
         else {
-            if (Application::getActionsManager().isActionPublished(this))
+            if (isPublished())
                 throw std::runtime_error("Action is already published");
 
             auto publicCopy = getPublicCopy();
+
+            publicCopy->_isPublic = true;
 
             if (publicCopy == nullptr)
                 throw std::runtime_error("Public copy not created");
@@ -188,10 +204,10 @@ void WidgetAction::publish(const QString& name /*= ""*/)
 
             connectToPublicAction(publicCopy);
 
-            Application::getActionsManager().addAction(publicCopy);
+            Application::core()->getActionsManager().addAction(publicCopy);
 
-            emit isPublishedChanged(Application::getActionsManager().isActionPublished(this));
-            emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
+            emit isPublishedChanged(isPublished());
+            emit isConnectedChanged(isConnected());
         }
     }
     catch (std::exception& e)
@@ -212,7 +228,7 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
 
     _publicAction->connectPrivateAction(this);
 
-    emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
+    emit isConnectedChanged(isConnected());
 }
 
 void WidgetAction::disconnectFromPublicAction()
@@ -221,7 +237,7 @@ void WidgetAction::disconnectFromPublicAction()
 
     _publicAction->disconnectPrivateAction(this);
 
-    emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
+    emit isConnectedChanged(isConnected());
 }
 
 void WidgetAction::connectPrivateAction(WidgetAction* privateAction)
@@ -260,17 +276,17 @@ bool WidgetAction::mayPublish(ConnectionContextFlag connectionContextFlags) cons
 {
     switch (connectionContextFlags)
     {
-    case WidgetAction::Api:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::PublishViaApi);
+        case WidgetAction::Api:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::PublishViaApi);
 
-    case WidgetAction::Gui:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::PublishViaGui);
+        case WidgetAction::Gui:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::PublishViaGui);
 
-    case WidgetAction::ApiAndGui:
-        break;
+        case WidgetAction::ApiAndGui:
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return false;
@@ -308,7 +324,10 @@ void WidgetAction::loadFromSettings()
     qDebug() << QString("Load from settings: %1").arg(getSettingsPrefix());
 #endif
 
-    fromVariantMap(Application::current()->getSetting(_settingsPrefix).toMap());
+    const auto settingsVariant = Application::current()->getSetting(_settingsPrefix);
+
+    if (settingsVariant.isValid())
+        fromVariantMap(settingsVariant.toMap());
 }
 
 void WidgetAction::saveToSettings()
@@ -352,7 +371,6 @@ QVector<WidgetAction*> WidgetAction::findChildren(const QString& searchString, b
     QVector<WidgetAction*> foundChildren;
 
     for (auto child : children()) {
-
         auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
 
         if (!childWidgetAction)
@@ -386,21 +404,65 @@ QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     return new QWidget();
 }
 
+void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    Serializable::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "Enabled");
+    variantMapMustContain(variantMap, "Visible");
+    variantMapMustContain(variantMap, "SortIndex");
+    variantMapMustContain(variantMap, "ConnectionPermissions");
+
+    setEnabled(variantMap["Enabled"].toBool());
+    setVisible(variantMap["Visible"].toBool());
+    setSortIndex(variantMap["SortIndex"].toInt());
+    setConnectionPermissions(variantMap["ConnectionPermissions"].toInt());
+}
+
+QVariantMap WidgetAction::toVariantMap() const
+{
+    QVariantMap variantMap = Serializable::toVariantMap();
+
+    variantMap.insert({
+        { "Type", QVariant::fromValue(getTypeString()) },
+        { "Enabled", QVariant::fromValue(isEnabled()) },
+        { "Visible", QVariant::fromValue(isVisible()) },
+        { "SortIndex", QVariant::fromValue(_sortIndex) },
+        { "ConnectionPermissions", QVariant::fromValue(_connectionPermissions) }
+    });
+
+    return variantMap;
+}
+
+QVector<WidgetAction*> WidgetAction::getChildActions()
+{
+    QVector<WidgetAction*> childActions;
+
+    for (auto child : children()) {
+        auto childAction = dynamic_cast<WidgetAction*>(child);
+
+        if (childAction)
+            childActions << childAction;
+    }
+
+    return childActions;
+}
+
 bool WidgetAction::mayConnect(ConnectionContextFlag connectionContextFlags) const
 {
     switch (connectionContextFlags)
     {
-    case WidgetAction::Api:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaApi);
+        case WidgetAction::Api:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaApi);
 
-    case WidgetAction::Gui:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaGui);
+        case WidgetAction::Gui:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaGui);
 
-    case WidgetAction::ApiAndGui:
-        break;
+        case WidgetAction::ApiAndGui:
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return false;
@@ -410,17 +472,17 @@ bool WidgetAction::mayDisconnect(ConnectionContextFlag connectionContextFlags) c
 {
     switch (connectionContextFlags)
     {
-    case hdps::gui::WidgetAction::Api:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi);
+        case hdps::gui::WidgetAction::Api:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi);
 
-    case hdps::gui::WidgetAction::Gui:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaGui);
+        case hdps::gui::WidgetAction::Gui:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaGui);
 
-    case hdps::gui::WidgetAction::ApiAndGui:
-        break;
+        case hdps::gui::WidgetAction::ApiAndGui:
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return false;
@@ -436,7 +498,7 @@ bool WidgetAction::isConnectionPermissionFlagSet(ConnectionPermissionFlag connec
     return _connectionPermissions & static_cast<std::int32_t>(connectionPermissionsFlag);
 }
 
-void WidgetAction::setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset /*= false*/)
+void WidgetAction::setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset /*= false*/, bool recursive /*= false*/)
 {
     if (unset)
         _connectionPermissions = _connectionPermissions & ~static_cast<std::int32_t>(connectionPermissionsFlag);
@@ -444,18 +506,28 @@ void WidgetAction::setConnectionPermissionsFlag(ConnectionPermissionFlag connect
         _connectionPermissions |= static_cast<std::int32_t>(connectionPermissionsFlag);
 
     emit connectionPermissionsChanged(_connectionPermissions);
+
+    if (recursive) {
+        for (auto childAction : getChildActions())
+            childAction->setConnectionPermissionsFlag(connectionPermissionsFlag, unset, recursive);
+    }
 }
 
-void WidgetAction::setConnectionPermissions(std::int32_t connectionPermissions)
+void WidgetAction::setConnectionPermissions(std::int32_t connectionPermissions, bool recursive /*= false*/)
 {
     _connectionPermissions = connectionPermissions;
 
     emit connectionPermissionsChanged(_connectionPermissions);
+
+    if (recursive) {
+        for (auto childAction : getChildActions())
+            childAction->setConnectionPermissions(connectionPermissions, recursive);
+    }
 }
 
-void WidgetAction::setConnectionPermissionsToNone()
+void WidgetAction::setConnectionPermissionsToNone(bool recursive /*= false*/)
 {
-    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None));
+    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None), recursive);
 }
 
 bool WidgetAction::isResettable()
@@ -473,7 +545,7 @@ bool WidgetAction::isConfigurationFlagSet(ConfigurationFlag configurationFlag)
     return _configuration & static_cast<std::int32_t>(configurationFlag);
 }
 
-void WidgetAction::setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset /*= false*/)
+void WidgetAction::setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset /*= false*/, bool recursive /*= false*/)
 {
     if (unset)
         _configuration = _configuration & ~static_cast<std::int32_t>(configurationFlag);
@@ -481,14 +553,33 @@ void WidgetAction::setConfigurationFlag(ConfigurationFlag configurationFlag, boo
         _configuration |= static_cast<std::int32_t>(configurationFlag);
 
     emit configurationChanged(_configuration);
+
+    if (recursive) {
+        for (auto childAction : getChildActions())
+            childAction->setConfigurationFlag(configurationFlag, unset, recursive);
+    }
 }
 
-void WidgetAction::setConfiguration(std::int32_t configuration)
+void WidgetAction::setConfiguration(std::int32_t configuration, bool recursive /*= false*/)
 {
     _configuration = configuration;
 
     emit configurationChanged(_configuration);
+
+    if (recursive) {
+        for (auto childAction : getChildActions())
+            childAction->setConfiguration(configuration, recursive);
+    }
 }
 
+std::int32_t WidgetAction::getStretch() const
+{
+    return _stretch;
 }
+
+void WidgetAction::setStretch(const std::int32_t& stretch)
+{
+    _stretch = stretch;
+}
+
 }
