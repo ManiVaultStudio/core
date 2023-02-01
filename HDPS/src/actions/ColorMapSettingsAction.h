@@ -14,9 +14,7 @@
 #include "TriggerAction.h"
 #include "IntegralAction.h"
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 class ColorMapAction;
 
@@ -73,13 +71,27 @@ public: // Linking
     /** Disconnect this action from a public action */
     void disconnectFromPublicAction() override;
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 public: // Action getters
 
     ColorMapAction& getColorMapAction() { return _colorMapAction; }
     ColorMapAxisAction& getHorizontalAxisAction() { return _horizontalAxisAction; }
     ColorMapAxisAction& getVerticalAxisAction() { return _verticalAxisAction; }
     ColorMapDiscreteAction& getDiscreteAction() { return _discreteAction; }
-    ColorMapSettings1DAction& getSettings1DAction() { return _settings1DAction; }
+    ColorMapSettings1DAction& getSettings1DAction() { return _settingsOneDimensionalAction; }
     ColorMapSettings2DAction& getSettings2DAction() { return _settingsTwoDimensionalAction; }
     ColorMapEditor1DAction& getEditor1DAction() { return _editorOneDimensionalAction; }
 
@@ -88,7 +100,7 @@ protected:
     ColorMapAxisAction          _horizontalAxisAction;              /** Horizontal axis action (used in 1D settings action) */
     ColorMapAxisAction          _verticalAxisAction;                /** Vertical axis action (used in 1D + 2D settings action) */
     ColorMapDiscreteAction      _discreteAction;                    /** Discrete action (used in 1D + 2D settings action) */
-    ColorMapSettings1DAction    _settings1DAction;                  /** One-dimensional settings action */
+    ColorMapSettings1DAction    _settingsOneDimensionalAction;      /** One-dimensional settings action */
     ColorMapSettings2DAction    _settingsTwoDimensionalAction;      /** Two-dimensional settings action */
     ColorMapEditor1DAction      _editorOneDimensionalAction;        /** One-dimensional editor action */
 
@@ -96,5 +108,4 @@ protected:
     friend class ColorMapAction;
 };
 
-}
 }

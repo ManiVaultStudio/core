@@ -7,9 +7,7 @@
 #include "util/ColorMapModel.h"
 #include "util/ColorMapFilterModel.h"
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Color map action class
@@ -140,6 +138,20 @@ protected:  // Linking
      */
     virtual WidgetAction* getPublicCopy() const override;
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+    
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 signals:
 
     /**
@@ -165,5 +177,4 @@ protected:
     ColorMapSettingsAction      _settingsAction;            /** Color map settings action */
 };
 
-}
 }

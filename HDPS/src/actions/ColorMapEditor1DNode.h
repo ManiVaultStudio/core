@@ -1,12 +1,12 @@
 #pragma once
 
+#include <util/Serializable.h>
+
 #include <QObject>
 #include <QColor>
 #include <QPointF>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 class ColorMapEditor1DAction;
 
@@ -17,7 +17,7 @@ class ColorMapEditor1DAction;
  *
  * @author Thomas Kroes and Mitchell M. de Boer
  */
-class ColorMapEditor1DNode : public QObject
+class ColorMapEditor1DNode : public QObject, public util::Serializable
 {
     Q_OBJECT
 
@@ -85,6 +85,20 @@ public:
      */
     QRectF getLimits() const;
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 signals:
 
     /**
@@ -107,5 +121,4 @@ private:
     float                       _radius;                    /** Node radius */
 };
 
-}
 }

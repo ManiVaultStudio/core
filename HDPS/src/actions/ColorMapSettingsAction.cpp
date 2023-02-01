@@ -6,9 +6,7 @@
 
 using namespace hdps::util;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
@@ -16,12 +14,16 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     _horizontalAxisAction(*this, "Horizontal Axis"),
     _verticalAxisAction(*this, "Vertical Axis"),
     _discreteAction(*this),
-    _settings1DAction(colorMapAction),
+    _settingsOneDimensionalAction(colorMapAction),
     _settingsTwoDimensionalAction(colorMapAction),
     _editorOneDimensionalAction(colorMapAction)
 {
     setText("Settings");
     setIcon(Application::getIconFont("FontAwesome").getIcon("sliders-h"));
+    setSerializationName("Settings");
+
+    _horizontalAxisAction.setSerializationName("HorizontalAxis");
+    _verticalAxisAction.setSerializationName("VerticalAxis");
 }
 
 void ColorMapSettingsAction::connectToPublicAction(WidgetAction* publicAction)
@@ -40,6 +42,28 @@ void ColorMapSettingsAction::disconnectFromPublicAction()
     _horizontalAxisAction.disconnectFromPublicAction();
     _verticalAxisAction.disconnectFromPublicAction();
     _discreteAction.disconnectFromPublicAction();
+}
+
+void ColorMapSettingsAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    WidgetAction::fromVariantMap(variantMap);
+
+    _horizontalAxisAction.fromParentVariantMap(variantMap);
+    _verticalAxisAction.fromParentVariantMap(variantMap);
+    _discreteAction.fromParentVariantMap(variantMap);
+    _editorOneDimensionalAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap ColorMapSettingsAction::toVariantMap() const
+{
+    QVariantMap variantMap = WidgetAction::toVariantMap();
+
+    _horizontalAxisAction.insertIntoVariantMap(variantMap);
+    _verticalAxisAction.insertIntoVariantMap(variantMap);
+    _discreteAction.insertIntoVariantMap(variantMap);
+    _editorOneDimensionalAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
 ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction) :
@@ -66,5 +90,4 @@ ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* 
     setLayout(layout);
 }
 
-}
 }

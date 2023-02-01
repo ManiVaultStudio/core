@@ -7,9 +7,7 @@
 
 using namespace hdps::util;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 ColorMapSettings1DAction::ColorMapSettings1DAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
@@ -37,5 +35,4 @@ ColorMapSettings1DAction::Widget::Widget(QWidget* parent, ColorMapSettings1DActi
     setLayout(layout);
 }
 
-}
 }

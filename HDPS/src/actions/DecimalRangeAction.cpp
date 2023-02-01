@@ -23,6 +23,10 @@ DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title /*=
     _rangeMaxAction(this, "Maximum")
 {
     setText(title);
+    setSerializationName("Range");
+
+    _rangeMinAction.setSerializationName("Min");
+    _rangeMaxAction.setSerializationName("Max");
 
     connect(&_rangeMinAction, &DecimalAction::valueChanged, this, [this](const float& value) -> void {
         if (value >= _rangeMaxAction.getValue())
@@ -73,6 +77,24 @@ void DecimalRangeAction::setRange(const float& minimum, const float& maximum)
 
     _rangeMinAction.initialize(minimum, maximum, minimum, minimum);
     _rangeMaxAction.initialize(minimum, maximum, maximum, maximum);
+}
+
+void DecimalRangeAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    WidgetAction::fromVariantMap(variantMap);
+
+    _rangeMinAction.fromParentVariantMap(variantMap);
+    _rangeMaxAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap DecimalRangeAction::toVariantMap() const
+{
+    QVariantMap variantMap = WidgetAction::toVariantMap();
+
+    _rangeMinAction.insertIntoVariantMap(variantMap);
+    _rangeMaxAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
 DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags /*= 0*/) :

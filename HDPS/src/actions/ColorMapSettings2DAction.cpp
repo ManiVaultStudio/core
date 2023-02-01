@@ -5,9 +5,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 ColorMapSettings2DAction::ColorMapSettings2DAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
@@ -41,5 +39,4 @@ ColorMapSettings2DAction::Widget::Widget(QWidget* parent, ColorMapSettings2DActi
     setLayout(mainLayout);
 }
 
-}
 }

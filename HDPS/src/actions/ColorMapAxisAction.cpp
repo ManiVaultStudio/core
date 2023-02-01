@@ -9,9 +9,7 @@
 
 using namespace hdps::util;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsAction, const QString& title) :
     WidgetAction(&colorMapSettingsAction),
@@ -19,6 +17,10 @@ ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsA
     _mirrorAction(this, "Mirror")
 {
     setText(title);
+    setSerializationName("Axis");
+
+    _rangeAction.setSerializationName("Range");
+    _mirrorAction.setSerializationName("Mirror");
 
     _rangeAction.setToolTip("Range of the color map");
     _mirrorAction.setToolTip("Mirror the color map");
@@ -40,6 +42,24 @@ void ColorMapAxisAction::disconnectFromPublicAction()
     _mirrorAction.disconnectFromPublicAction();
 
     WidgetAction::disconnectFromPublicAction();
+}
+
+void ColorMapAxisAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    WidgetAction::fromVariantMap(variantMap);
+
+    _rangeAction.fromParentVariantMap(variantMap);
+    _mirrorAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap ColorMapAxisAction::toVariantMap() const
+{
+    QVariantMap variantMap = WidgetAction::toVariantMap();
+
+    _rangeAction.insertIntoVariantMap(variantMap);
+    _mirrorAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
 ColorMapAxisAction::Widget::Widget(QWidget* parent, ColorMapAxisAction* colorMapAxisAction) :
@@ -65,5 +85,4 @@ ColorMapAxisAction::Widget::Widget(QWidget* parent, ColorMapAxisAction* colorMap
     setPopupLayout(layout);
 }
 
-}
 }

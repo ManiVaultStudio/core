@@ -9,8 +9,7 @@
 
 #include <QAbstractListModel>
 
-using namespace hdps::gui;
-using namespace hdps::util;
+namespace hdps::gui {
 
 /**
  * Dataset picker action class
@@ -263,6 +262,20 @@ protected:  // Linking
      */
     virtual WidgetAction* getPublicCopy() const override;
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 signals:
 
     /**
@@ -283,3 +296,5 @@ protected:
     DatasetsModel               _datasetsModel;             /** Datasets list model */
     hdps::EventListener         _eventListener;             /** Listen to events from the core */
 };
+
+}

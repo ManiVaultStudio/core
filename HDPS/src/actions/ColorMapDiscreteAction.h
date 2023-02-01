@@ -4,9 +4,7 @@
 #include "IntegralAction.h"
 #include "ToggleAction.h"
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 class ColorMapSettingsAction;
 
@@ -90,5 +88,4 @@ protected:
     friend class ColorMapSettingsAction;
 };
 
-}
 }

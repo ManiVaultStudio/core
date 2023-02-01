@@ -147,6 +147,22 @@ void DimensionPickerAction::disconnectFromPublicAction()
     WidgetAction::disconnectFromPublicAction();
 }
 
+void DimensionPickerAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    WidgetAction::fromVariantMap(variantMap);
+
+    _currentDimensionAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap DimensionPickerAction::toVariantMap() const
+{
+    QVariantMap variantMap = WidgetAction::toVariantMap();
+
+    _currentDimensionAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
+}
+
 DimensionPickerAction::Widget::Widget(QWidget* parent, DimensionPickerAction* dimensionPickerAction) :
     WidgetActionWidget(parent, dimensionPickerAction)
 {

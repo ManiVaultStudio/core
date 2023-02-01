@@ -7,9 +7,7 @@
 
 using namespace hdps::util;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapSettingsAction) :
     WidgetAction(&colorMapSettingsAction),
@@ -18,6 +16,10 @@ ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapS
 {
     setText("Discrete");
     setCheckable(true);
+    setSerializationName("Discrete");
+
+    _numberOfStepsAction.setSerializationName("NumberOfSteps");
+    _discretizeAlphaAction.setSerializationName("DiscretizeAlpha");
 
     _numberOfStepsAction.setToolTip("Number of discrete steps");
     _discretizeAlphaAction.setToolTip("Whether to discrete the alpha channel");
@@ -50,15 +52,20 @@ void ColorMapDiscreteAction::disconnectFromPublicAction()
 
 void ColorMapDiscreteAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!variantMap.contains("Enabled"))
-        return;
+    WidgetAction::fromVariantMap(variantMap);
 
-    setChecked(variantMap["Enabled"].toBool());
+    _numberOfStepsAction.fromParentVariantMap(variantMap);
+    _discretizeAlphaAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ColorMapDiscreteAction::toVariantMap() const
 {
-    return { { "Enabled", isChecked()} };
+    QVariantMap variantMap = WidgetAction::toVariantMap();
+
+    _numberOfStepsAction.insertIntoVariantMap(variantMap);
+    _discretizeAlphaAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
 ColorMapDiscreteAction::Widget::Widget(QWidget* parent, ColorMapDiscreteAction* colorMapDiscreteAction) :
@@ -97,5 +104,4 @@ ColorMapDiscreteAction::Widget::Widget(QWidget* parent, ColorMapDiscreteAction* 
     updateGroupBox();
 }
 
-}
 }

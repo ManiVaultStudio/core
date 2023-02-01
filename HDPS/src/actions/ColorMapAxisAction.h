@@ -5,9 +5,7 @@
 #include "ToggleAction.h"
 #include "TriggerAction.h"
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 class ColorMapSettingsAction;
 
@@ -65,6 +63,20 @@ public: // Linking
     /** Disconnect this action from a public action */
     void disconnectFromPublicAction() override;
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 public: // Action getters
 
     DecimalRangeAction& getRangeAction() { return _rangeAction; }
@@ -78,5 +90,4 @@ protected:
     friend class ColorMapSettingsAction;
 };
 
-}
 }

@@ -20,9 +20,9 @@ public:
 
     /**
      * Construct with serialization name
-     * @param name Serialization key
+     * @param serializationName Serialization name
      */
-    Serializable(const QString& name = "");
+    Serializable(const QString& serializationName = "");
 
     /**
      * Get id
@@ -34,7 +34,13 @@ public:
      * Get serialization name
      * @return Serialization name
      */
-    virtual QString getSerializationName() const;
+    virtual QString getSerializationName() const final;
+
+    /**
+     * Set serialization name to \p name
+     * @param serializationName Serialization name
+     */
+    virtual void setSerializationName(const QString& serializationName) final;
 
     /**
      * Load from variant map
@@ -43,10 +49,22 @@ public:
     virtual void fromVariantMap(const QVariantMap& variantMap);
 
     /**
+     * Load from variant map located in \p parentVariantMap at the serialization name
+     * @param parentVariantMap Parent variant map
+     */
+    virtual void fromParentVariantMap(const QVariantMap& parentVariantMap);
+
+    /**
      * Save to variant map
      * @return Variant map
      */
     virtual QVariantMap toVariantMap() const;
+
+    /**
+     * Save into \p variantMap
+     * @param variantMap Variant map
+     */
+    virtual void insertIntoVariantMap(QVariantMap& variantMap) const final;
 
     /**
      * Load widget action from JSON document
@@ -104,9 +122,16 @@ protected:
      */
     static void insertIntoVariantMap(const Serializable& serializable, QVariantMap& variantMap, const QString& key);
 
+    /**
+     * Save \p serializable object in \p variantMap
+     * @param serializable Reference to serializable object
+     * @param variantMap Variant map
+     */
+    static void insertIntoVariantMap(const Serializable& serializable, QVariantMap& variantMap);
+
 private:
-    QString     _id;            /** Globally unique identifier of the serializable object */
-    QString     _name;          /** Serialization name */
+    QString     _id;                    /** Globally unique identifier of the serializable object */
+    QString     _serializationName;     /** Serialization name */
 };
 
 }

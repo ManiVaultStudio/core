@@ -67,6 +67,12 @@ public:
      */
     QMenu* getSettingsMenu() override;
 
+    /** Restores the view plugin state */
+    void restoreViewPluginState();
+
+    /** Restores the view plugin states of all active view plugins */
+    static void restoreViewPluginStates();
+
 public: // Serialization
 
     /**

@@ -13,9 +13,7 @@
 
 using namespace hdps::util;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= "RdYlBu"*/, const QString& defaultColorMap /*= "RdYlBu"*/) :
     WidgetAction(parent),
@@ -26,6 +24,9 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
     setDefaultWidgetFlags(WidgetFlag::Default);
+    setSerializationName("ColorMap");
+    
+    _currentColorMapAction.setSerializationName("Current");
 
     initialize(colorMap, defaultColorMap);
 
@@ -267,6 +268,24 @@ WidgetAction* ColorMapAction::getPublicCopy() const
     return new ColorMapAction(parent(), text(), _colorMapFilterModel.getType(), _currentColorMapAction.getCurrentText(), _currentColorMapAction.getDefaultText());
 }
 
+void ColorMapAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    WidgetAction::fromVariantMap(variantMap);
+
+    _currentColorMapAction.fromParentVariantMap(variantMap);
+    _settingsAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap ColorMapAction::toVariantMap() const
+{
+    QVariantMap variantMap = WidgetAction::toVariantMap();
+
+    _currentColorMapAction.insertIntoVariantMap(variantMap);
+    _settingsAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
+}
+
 ColorMapAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction) :
     OptionAction::ComboBoxWidget(parent, optionAction),
     _colorMapAction(colorMapAction)
@@ -409,5 +428,4 @@ QWidget* ColorMapAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
     return widget;
 }
 
-}
 }

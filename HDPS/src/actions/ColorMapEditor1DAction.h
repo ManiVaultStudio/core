@@ -6,9 +6,7 @@
 
 #include "TriggerAction.h"
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 class ColorMapAction;
 
@@ -87,6 +85,7 @@ public: // Nodes
      * Add node at normalized coordinate
      * @param normalizedCoordinate Normalized coordinate
      * @param color Node color
+     * @param radius Node radius
      * @return Pointer to created node
      */
     ColorMapEditor1DNode* addNode(const QPointF& normalizedCoordinate, const QColor& color = Qt::gray);
@@ -144,6 +143,20 @@ public: // Linking
     /** Disconnect this action from a public action */
     void disconnectFromPublicAction() override;
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+        void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 public: // Action getters
 
     ColorMapAction& getColorMapAction() { return _colorMapAction; }
@@ -188,5 +201,4 @@ protected:
     friend class ColorMapSettingsAction;
 };
 
-}
 }

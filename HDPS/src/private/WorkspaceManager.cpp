@@ -515,6 +515,8 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 
     _mainDockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
     _viewPluginsDockManager->fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
+
+    ViewPluginDockWidget::restoreViewPluginStates();
 }
 
 QVariantMap WorkspaceManager::toVariantMap() const

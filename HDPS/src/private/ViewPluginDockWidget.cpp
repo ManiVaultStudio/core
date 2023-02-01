@@ -150,6 +150,19 @@ QMenu* ViewPluginDockWidget::getSettingsMenu()
     return &_settingsMenu;
 }
 
+void ViewPluginDockWidget::restoreViewPluginState()
+{
+    if(!_viewPlugin)
+        return;
+
+    _viewPlugin->fromVariantMap(_viewPluginMap);
+}
+void ViewPluginDockWidget::restoreViewPluginStates()
+{
+    for (auto viewPluginDockWidget : ViewPluginDockWidget::active)
+        viewPluginDockWidget->restoreViewPluginState();
+}
+
 void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
 {
 #ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
@@ -167,9 +180,6 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
     _viewPluginKind = _viewPluginMap["Kind"].toString();
 
     loadViewPlugin();
-    
-    if (_viewPlugin)
-        _viewPlugin->fromVariantMap(_viewPluginMap);
 }
 
 QVariantMap ViewPluginDockWidget::toVariantMap() const
@@ -242,7 +252,7 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
         disconnect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, nullptr);
     };
 
-    QObject::connect(this, &CDockWidget::viewToggled, this, [this, viewPlugin, connectToViewPluginVisibleAction, disconnectFromViewPluginVisibleAction](bool toggled) {
+    connect(this, &CDockWidget::viewToggled, this, [this, viewPlugin, connectToViewPluginVisibleAction, disconnectFromViewPluginVisibleAction](bool toggled) {
         disconnectFromViewPluginVisibleAction(this);
         {
             viewPlugin->getVisibleAction().setChecked(toggled);

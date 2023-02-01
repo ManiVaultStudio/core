@@ -7,9 +7,7 @@
     #define COLOR_MAP_EDITOR_1D_NODE_VERBOSE
 #endif
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 ColorMapEditor1DNode::ColorMapEditor1DNode(ColorMapEditor1DAction& colorMapEditor1DAction, const QPointF& normalizedCoordinate, const QColor& color /*= Qt::gray*/) :
     QObject(&colorMapEditor1DAction),
@@ -88,5 +86,33 @@ QRectF ColorMapEditor1DNode::getLimits() const
     return QRectF(QPointF(previousNode->getNormalizedCoordinate().x(), 0.0f), QPointF(nextNode->getNormalizedCoordinate().x(), 1.0f));
 }
 
+void ColorMapEditor1DNode::fromVariantMap(const QVariantMap& variantMap)
+{
+    Serializable::fromVariantMap(variantMap);
+
+    _normalizedCoordinate.setX(variantMap["NormX"].toReal());
+    _normalizedCoordinate.setY(variantMap["NormY"].toReal());
+    
+    _color.setRed(variantMap["ColorR"].toInt());
+    _color.setGreen(variantMap["ColorG"].toInt());
+    _color.setBlue(variantMap["ColorB"].toInt());
+
+    _radius = variantMap["Radius"].toFloat();
 }
+
+QVariantMap ColorMapEditor1DNode::toVariantMap() const
+{
+    QVariantMap variantMap = Serializable::toVariantMap();
+
+    variantMap.insert({
+        { "NormX", QVariant::fromValue(_normalizedCoordinate.x()) },
+        { "NormY", QVariant::fromValue(_normalizedCoordinate.y()) },
+        { "ColorR", QVariant::fromValue(_color.red()) },
+        { "ColorG", QVariant::fromValue(_color.green()) },
+        { "ColorB", QVariant::fromValue(_color.blue()) }
+    });
+
+    return variantMap;
+}
+
 }

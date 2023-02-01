@@ -409,11 +409,13 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
     Serializable::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "Enabled");
+    variantMapMustContain(variantMap, "Checked");
     variantMapMustContain(variantMap, "Visible");
     variantMapMustContain(variantMap, "SortIndex");
     variantMapMustContain(variantMap, "ConnectionPermissions");
 
     setEnabled(variantMap["Enabled"].toBool());
+    setChecked(variantMap["Checked"].toBool());
     setVisible(variantMap["Visible"].toBool());
     setSortIndex(variantMap["SortIndex"].toInt());
     setConnectionPermissions(variantMap["ConnectionPermissions"].toInt());
@@ -426,6 +428,7 @@ QVariantMap WidgetAction::toVariantMap() const
     variantMap.insert({
         { "Type", QVariant::fromValue(getTypeString()) },
         { "Enabled", QVariant::fromValue(isEnabled()) },
+        { "Checked", QVariant::fromValue(isChecked()) },
         { "Visible", QVariant::fromValue(isVisible()) },
         { "SortIndex", QVariant::fromValue(_sortIndex) },
         { "ConnectionPermissions", QVariant::fromValue(_connectionPermissions) }

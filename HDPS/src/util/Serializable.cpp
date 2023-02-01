@@ -20,7 +20,7 @@ namespace hdps::util {
 
 Serializable::Serializable(const QString& name /*= ""*/) :
     _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
-    _name(name)
+    _serializationName(name)
 {
 }
 
@@ -31,16 +31,12 @@ QString Serializable::getId() const
 
 QString Serializable::getSerializationName() const
 {
-    if (_name.isEmpty()) {
-        auto widgetAction = dynamic_cast<const WidgetAction*>(this);
+    return _serializationName;
+}
 
-        if (widgetAction)
-            return !widgetAction->objectName().isEmpty() ? widgetAction->objectName() : widgetAction->text();
-        else
-            return "unnamed";
-    }
-    
-    return _name;
+void Serializable::setSerializationName(const QString& serializationName)
+{
+    _serializationName = serializationName;
 }
 
 void Serializable::fromVariantMap(const QVariantMap& variantMap)
@@ -173,6 +169,35 @@ void Serializable::fromVariantMap(Serializable& serializable, const QVariantMap&
     serializable.fromVariantMap(variantMap[key].toMap());
 }
 
+void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap)
+{
+    try
+    {
+        if (getSerializationName().isEmpty())
+            throw std::runtime_error("Serialization name may not be empty");
+
+        if (!parentVariantMap.contains(getSerializationName()))
+            throw std::runtime_error(QString("%1 not found in map: %2").arg(getSerializationName()).toLatin1());
+
+        fromVariantMap(parentVariantMap[getSerializationName()].toMap());
+    }
+    catch (std::exception& e)
+    {
+#ifdef _DEBUG
+        qDebug() << QString("%1 failed: %2").arg(__FUNCTION__, e.what());
+#else
+        throw e;
+#endif
+    }
+    catch (...) {
+#ifdef _DEBUG
+        qDebug() << "";
+#else
+        throw std::runtime_error(QString("%1 failed due to unhandled exception").arg(__FUNCTION__, getSerializationName()).toLatin1());
+#endif
+    }
+}
+
 QVariantMap Serializable::toVariantMap(const Serializable* serializable)
 {
 #ifdef SERIALIZABLE_VERBOSE
@@ -185,6 +210,19 @@ QVariantMap Serializable::toVariantMap(const Serializable* serializable)
 void Serializable::insertIntoVariantMap(const Serializable& serializable, QVariantMap& variantMap, const QString& key)
 {
     variantMap.insert(key, serializable.toVariantMap());
+}
+
+void Serializable::insertIntoVariantMap(const Serializable& serializable, QVariantMap& variantMap)
+{
+    serializable.insertIntoVariantMap(variantMap);
+}
+
+void Serializable::insertIntoVariantMap(QVariantMap& variantMap) const
+{
+    if (getSerializationName().isEmpty())
+        throw std::runtime_error("Serialization name may not be empty");
+
+    variantMap.insert(getSerializationName(), toVariantMap());
 }
 
 }

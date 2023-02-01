@@ -10,7 +10,9 @@
     #define DATASET_PICKER_ACTION_VERBOSE
 #endif
 
-using namespace hdps;
+using namespace hdps::util;
+
+namespace hdps::gui {
 
 DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, Mode mode /*= Mode::Automatic*/) :
     OptionAction(parent, "Pick dataset"),
@@ -143,7 +145,10 @@ void DatasetPickerAction::setCurrentDataset(Dataset<DatasetImpl> currentDataset)
 
 void DatasetPickerAction::setCurrentDataset(const QString& guid)
 {
-    const auto matches = _datasetsModel.match(QModelIndex(), Qt::EditRole, guid, 1);
+    if (guid.isEmpty())
+        return;
+
+    const auto matches = _datasetsModel.match(_datasetsModel.index(0, static_cast<int>(DatasetsModel::Column::GUID)), Qt::EditRole, guid, -1);
 
     if (matches.isEmpty())
         return;
@@ -216,6 +221,26 @@ hdps::gui::WidgetAction* DatasetPickerAction::getPublicCopy() const
     return publicCopy;
 }
 
+void DatasetPickerAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    WidgetAction::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "Value");
+
+    setCurrentDataset(variantMap["Value"].toString());
+}
+
+QVariantMap DatasetPickerAction::toVariantMap() const
+{
+    QVariantMap variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", getCurrentDatasetGuid() }
+    });
+
+    return variantMap;
+}
+
 DatasetPickerAction::DatasetsModel::DatasetsModel(QObject* parent /*= nullptr*/) :
     QAbstractListModel(parent),
     _datasets(),
@@ -255,6 +280,7 @@ QVariant DatasetPickerAction::DatasetsModel::data(const QModelIndex& index, int 
         case Qt::DecorationRole:
             return _showIcon ? dataset->getIcon() : QVariant();
 
+        case Qt::EditRole:
         case Qt::DisplayRole:
         {
             switch (column)
@@ -390,4 +416,6 @@ void DatasetPickerAction::DatasetsModel::updateData()
 
         emit dataChanged(datasetModelIndex, datasetModelIndex);
     }
+}
+
 }

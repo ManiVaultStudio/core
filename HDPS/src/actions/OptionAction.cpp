@@ -143,6 +143,8 @@ WidgetAction* OptionAction::getPublicCopy() const
 
 void OptionAction::fromVariantMap(const QVariantMap& variantMap)
 {
+    WidgetAction::fromVariantMap(variantMap);
+
     if (!variantMap.contains("Value"))
         return;
 
@@ -151,7 +153,13 @@ void OptionAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap OptionAction::toVariantMap() const
 {
-    return { { "Value", getCurrentText() } };
+    QVariantMap variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", getCurrentText() }
+    });
+
+    return variantMap;
 }
 
 void OptionAction::updateCurrentIndex()

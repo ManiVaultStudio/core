@@ -10,9 +10,7 @@
     #define COLOR_MAP_EDITOR_1D_ACTION
 #endif
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 #if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
     constexpr QSize ColorMapEditor1DAction::colorMapImageSize;
@@ -28,6 +26,7 @@ ColorMapEditor1DAction::ColorMapEditor1DAction(ColorMapAction& colorMapAction) :
     setText("Custom");
     setIcon(Application::getIconFont("FontAwesome").getIcon("chart-line"));
     setCheckable(true);
+    setSerializationName("Editor1D");
 
     addNode(QPointF(0.0f, 0.0f), Qt::black);
     addNode(QPointF(1.0f, 1.0f), Qt::white);
@@ -186,6 +185,35 @@ void ColorMapEditor1DAction::disconnectFromPublicAction()
     WidgetAction::disconnectFromPublicAction();
 }
 
+void ColorMapEditor1DAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    WidgetAction::fromVariantMap(variantMap);
+
+    removeNode(_nodes.last());
+    removeNode(_nodes.first());
+
+    auto nodes = variantMap["Nodes"].toList();
+
+    for (auto node : nodes) {
+        const auto nodeMap = node.toMap();
+        addNode(QPointF(nodeMap["NormX"].toFloat(), nodeMap["NormY"].toFloat()), QColor(nodeMap["ColorR"].toInt(), nodeMap["ColorG"].toInt(), nodeMap["ColorB"].toInt()));
+    }
+}
+
+QVariantMap ColorMapEditor1DAction::toVariantMap() const
+{
+    QVariantMap variantMap = WidgetAction::toVariantMap();
+
+    QVariantList nodes;
+
+    for (auto node : _nodes)
+        nodes << node->toVariantMap();
+
+    variantMap["Nodes"] = nodes;
+
+    return variantMap;
+}
+
 ColorMapEditor1DAction::Widget::Widget(QWidget* parent, ColorMapEditor1DAction* colorMapEditor1DAction) :
     WidgetActionWidget(parent, colorMapEditor1DAction),
     _colorMapEditor1DWidget(this, *colorMapEditor1DAction),
@@ -287,5 +315,4 @@ ColorMapEditor1DAction::Widget::Widget(QWidget* parent, ColorMapEditor1DAction* 
     updateActions();
 }
 
-}
 }
