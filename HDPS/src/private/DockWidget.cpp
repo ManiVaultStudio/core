@@ -31,7 +31,6 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
 
     setObjectName(getId());
     setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromContent);
-    setFeature(DockWidgetPinnable, true);
 
     _settingsToolButton = new QToolButton();
 
