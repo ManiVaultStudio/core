@@ -77,6 +77,33 @@ public:
      */
     virtual void setTriggerShortcut(const QKeySequence& keySequence) final;
 
+public: // Presets
+
+    /**
+     * Load preset from settings with \p name
+     * @param name Name of the preset
+     */
+    virtual void loadPreset(const QString& name) final;
+
+    /**
+     * Save preset to settings with \p name
+     * @param name Name of the preset
+     */
+    virtual void savePreset(const QString& name) final;
+
+    /** Import preset from file */
+    virtual void importPreset() final;
+
+    /** Export preset to file */
+    virtual void exportPreset() final;
+
+    /**
+     * Get menu for saving/restoring presets
+     * @param parent Pointer to parent menu
+     * @return Pointer to presets menu
+     */
+    virtual QMenu* getPresetsMenu(QWidget* parent = nullptr) final;
+
 public: // Serialization
 
     /**
