@@ -106,9 +106,10 @@ void ViewPluginsDockWidget::isolate(plugin::ViewPlugin* viewPlugin, bool isolate
     if (isolate) {
         cacheVisibility();
 
-        for (auto viewPluginDockWidget : ViewPluginDockWidget::active)
+        for (auto viewPluginDockWidget : ViewPluginDockWidget::active) {
             if (viewPlugin != viewPluginDockWidget->getViewPlugin())
                 viewPluginDockWidget->toggleView(false);
+        }
     }
     else {
         restoreVisibility();

@@ -105,9 +105,10 @@ void ViewPluginDockWidget::initialize()
     connect(&_settingsMenu, &QMenu::aboutToShow, this, [this]() -> void {
         _settingsMenu.clear();
         
-        _settingsMenu.addMenu(_viewPlugin->getPresetsMenu(this));
-
-        _settingsMenu.addSeparator();
+        if (!_viewPlugin->isSystemViewPlugin()) {
+            _settingsMenu.addMenu(_viewPlugin->getPresetsMenu(this));
+            _settingsMenu.addSeparator();
+        }
 
         if (_viewPlugin->hasHelp())
             _settingsMenu.addAction(&_helpAction);

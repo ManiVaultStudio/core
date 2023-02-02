@@ -91,6 +91,12 @@ public: // Presets
      */
     virtual void savePreset(const QString& name) final;
 
+    /** Load default preset from settings */
+    virtual void loadDefaultPreset() final;
+
+    /** Save default preset to settings */
+    virtual void saveDefaultPreset() final;
+
     /** Import preset from file */
     virtual void importPreset() final;
 

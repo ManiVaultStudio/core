@@ -470,6 +470,8 @@ void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::Vie
         _mainDockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _mainDockManager->findDockAreaWidget(dockToViewPlugin ? &dockToViewPlugin->getWidget() : nullptr));
     else
         _viewPluginsDockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockToViewPlugin ? _viewPluginsDockManager->findDockAreaWidget(dockToViewPlugin) : nullptr);
+
+    viewPlugin->loadDefaultPreset();
 }
 
 void WorkspaceManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool isolate)

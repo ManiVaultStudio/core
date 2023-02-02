@@ -108,6 +108,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
         _mayCloseAction.setChecked(!toggled);
         _mayFloatAction.setChecked(!toggled);
         _mayMoveAction.setChecked(!toggled);
+        _isolateAction.setEnabled(!toggled);
 
         getDestroyAction().setEnabled(!toggled);
 
@@ -312,15 +313,15 @@ QMenu* ViewPlugin::getPresetsMenu(QWidget* parent /*= nullptr*/)
 
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    const auto presetIcon = fontAwesome.getIcon("sliders-h");
+    const auto presetIcon = fontAwesome.getIcon("prescription");
 
     menu->setIcon(presetIcon);
 
-    auto addPresetAction = new QAction("Add");
+    auto savePresetAction = new QAction("Save");
 
-    addPresetAction->setIcon(fontAwesome.getIcon("plus"));
+    savePresetAction->setIcon(fontAwesome.getIcon("save"));
 
-    connect(addPresetAction, &TriggerAction::triggered, this, [this, &fontAwesome]() -> void {
+    connect(savePresetAction, &TriggerAction::triggered, this, [this, &fontAwesome]() -> void {
         QInputDialog inputDialog;
 
         inputDialog.setWindowIcon(fontAwesome.getIcon("list-alt"));
@@ -332,12 +333,25 @@ QMenu* ViewPlugin::getPresetsMenu(QWidget* parent /*= nullptr*/)
             savePreset(inputDialog.textValue());
     });
 
-    menu->addAction(addPresetAction);
+    menu->addAction(savePresetAction);
 
-    const auto presetNames = getSetting("Presets").toMap().keys();
+    auto saveDefaultPresetAction = new QAction("Save As Default");
+
+    saveDefaultPresetAction->setIcon(fontAwesome.getIcon("save"));
+
+    connect(saveDefaultPresetAction, &TriggerAction::triggered, this, &ViewPlugin::saveDefaultPreset);
+
+    menu->addAction(saveDefaultPresetAction);
+
+    auto presetNames = getSetting("Presets").toMap().keys();
 
     if (!presetNames.isEmpty())
         menu->addSeparator();
+
+    if (presetNames.contains("Default"))
+        presetNames.removeOne("Default");
+
+    presetNames.insert(0, "Default");
 
     for (const auto& presetName : presetNames) {
         auto loadPresetAction = new QAction(presetName);
@@ -349,6 +363,9 @@ QMenu* ViewPlugin::getPresetsMenu(QWidget* parent /*= nullptr*/)
         });
 
         menu->addAction(loadPresetAction);
+
+        if (presetName == "Default")
+            menu->addSeparator();
     }
 
     menu->addSeparator();
@@ -356,8 +373,8 @@ QMenu* ViewPlugin::getPresetsMenu(QWidget* parent /*= nullptr*/)
     auto importPresetAction = new QAction("Import...");
     auto exportPresetAction = new QAction("Export...");
 
-    importPresetAction->setIcon(fontAwesome.getIcon("folder-open"));
-    exportPresetAction->setIcon(fontAwesome.getIcon("save"));
+    importPresetAction->setIcon(fontAwesome.getIcon("file-import"));
+    exportPresetAction->setIcon(fontAwesome.getIcon("file-export"));
 
     menu->addAction(importPresetAction);
     menu->addAction(exportPresetAction);
@@ -377,6 +394,16 @@ QMenu* ViewPlugin::getPresetsMenu(QWidget* parent /*= nullptr*/)
     });
 
     return menu;
+}
+
+void ViewPlugin::loadDefaultPreset()
+{
+    loadPreset("Default");
+}
+
+void ViewPlugin::saveDefaultPreset()
+{
+    savePreset("Default");
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :
