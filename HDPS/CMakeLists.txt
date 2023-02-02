@@ -1137,6 +1137,7 @@ add_subdirectory(src/plugins/LoggingPlugin)
 # Qt Advanced docking system
 set(VERSION_SHORT 4.0.1)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
+add_subdirectory(external)
 add_subdirectory(external/advanced_docking)
 
 # File compression LIBRARY
