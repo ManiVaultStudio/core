@@ -192,10 +192,6 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
     filterGroupAction.setLabelWidthFixed(40);
     filterGroupAction.setPopupSizeHint(QSize(350, 0));
 
-    _nameAction.setConnectionPermissionsToNone();
-    _addAction.setConnectionPermissionsToNone();
-    _removeAction.setConnectionPermissionsToNone();
-
     _nameAction.setClearable(true);
     _nameAction.setPlaceHolderString(QString("Enter %1 name here...").arg(stringsAction->getCategory().toLower()));
 

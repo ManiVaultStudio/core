@@ -20,7 +20,6 @@ Plugin::Plugin(const PluginFactory* factory) :
     _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), QString::number(factory->getNumberOfInstances() + 1))),
     _destroyAction(this, "Remove")
 {
-    _guiNameAction.setConnectionPermissionsToNone();
     _guiNameAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
     _guiNameAction.setPlaceHolderString("Enter plugin name here...");
 
@@ -28,7 +27,6 @@ Plugin::Plugin(const PluginFactory* factory) :
     _destroyAction.setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
     _destroyAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _destroyAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
-    _destroyAction.setConnectionPermissionsToNone();
 
     connect(&_destroyAction, &TriggerAction::triggered, this, &Plugin::destroy);
 }

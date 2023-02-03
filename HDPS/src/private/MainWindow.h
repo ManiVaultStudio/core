@@ -2,23 +2,19 @@
 
 #include "Core.h"
 
-#include "FileMenu.h"
-#include "ViewMenu.h"
-#include "HelpMenu.h"
-
-#include "StartPageWidget.h"
-#include "ProjectWidget.h"
-
 #include <QMainWindow>
-#include <QStackedWidget>
-#include <QPointer>
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+
+    /**
+     * Construct main window with \p parent widget
+     * @param parent Parent widget
+     */
+    MainWindow(QWidget* parent = nullptr);
 
     /**
      * Callback invoked when the window shows
@@ -58,8 +54,11 @@ private: // Window geometry persistence
      */
     void setDefaultWindowGeometry(const float& coverage = 0.7f);
 
+public: // Miscellaneous
+
+    /** Does a graphics requirements check (used at startup of the application) */
     void checkGraphicsCapabilities();
 
 private:
-    hdps::Core    _core;      /** Instance of the core */
+    hdps::Core  _core;  /** Instance of the core */
 };
