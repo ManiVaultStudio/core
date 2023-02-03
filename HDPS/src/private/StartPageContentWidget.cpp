@@ -3,22 +3,37 @@
 
 #include <QDebug>
 
+using namespace hdps::gui;
+
 StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    _layout(),
+    _mainLayout(),
+    _collumnsLayout(),
+    _toolbarLayout(),
     _openProjectWidget(this),
-    _getStartedWidget(this)
+    _getStartedWidget(this),
+    _compactViewAction(this, "Compact view")
 {
     setAutoFillBackground(true);
 
     StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 
-    _layout.setContentsMargins(35, 35, 35, 35);
+    _collumnsLayout.setContentsMargins(35, 35, 35, 35);
+    _toolbarLayout.setContentsMargins(35, 10, 35, 10);
 
-    _layout.addWidget(&_openProjectWidget, 1);
-    _layout.addWidget(&_getStartedWidget, 1);
+    _collumnsLayout.addWidget(&_openProjectWidget, 1);
+    _collumnsLayout.addWidget(&_getStartedWidget, 1);
 
-    setLayout(&_layout);
+    _mainLayout.addLayout(&_collumnsLayout, 1);
+    _mainLayout.addLayout(&_toolbarLayout);
+
+    _toolbarLayout.addWidget(_compactViewAction.createWidget(this), 1);
+
+    setLayout(&_mainLayout);
+
+    _compactViewAction.setSettingsPrefix("StartPage/CompactView");
+
+    connect(&_compactViewAction, &ToggleAction::toggled, this, &StartPageContentWidget::updateActions);
 }
 
 QLabel* StartPageContentWidget::createHeaderLabel(const QString& title, const QString& tooltip)
@@ -34,6 +49,8 @@ QLabel* StartPageContentWidget::createHeaderLabel(const QString& title, const QS
 
 void StartPageContentWidget::updateActions()
 {
+    StartPageAction::setCompactView(_compactViewAction.isChecked());
+
     _openProjectWidget.updateActions();
     _getStartedWidget.updateActions();
 }

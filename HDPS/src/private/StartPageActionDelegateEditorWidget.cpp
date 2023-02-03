@@ -44,22 +44,71 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
 
     _iconLayout.setAlignment(Qt::AlignTop | Qt::AlignCenter);
 
-    _textLayout.setAlignment(Qt::AlignTop);
-    _textLayout.setSpacing(3);
-    _textLayout.addLayout(&_primaryTextLayout);
-    _textLayout.addLayout(&_secondaryTextLayout);
 
-    _iconLayout.addWidget(&_iconLabel);
-    _iconLabel.setStyleSheet("padding-top: 3px;");
 
-    _primaryTextLayout.addWidget(&_titleLabel, 1);
-    _primaryTextLayout.addWidget(&_metaDataLabel);
 
-    _titleLabel.setStyleSheet("font-weight: bold;");
-    _metaDataLabel.setStyleSheet("color: dark-gray;");
 
-    _secondaryTextLayout.addWidget(&_subtitleLabel, 1);
-    _secondaryTextLayout.addWidget(&_infoWidget);
+
+
+
+
+
+    if (StartPageAction::isCompactView()) {
+        _textLayout.setAlignment(Qt::AlignTop);
+        _textLayout.setSpacing(3);
+        _textLayout.addLayout(&_primaryTextLayout);
+        _textLayout.addLayout(&_secondaryTextLayout);
+
+        _iconLayout.addWidget(&_iconLabel);
+        _iconLabel.setStyleSheet("padding-top: 3px;");
+
+        _primaryTextLayout.addWidget(&_titleLabel, 1);
+        _primaryTextLayout.addWidget(&_metaDataLabel);
+        _primaryTextLayout.addWidget(&_infoWidget);
+
+        _titleLabel.setStyleSheet("font-weight: bold;");
+        _metaDataLabel.setStyleSheet("color: dark-gray;");
+
+        _subtitleLabel.hide();
+
+        _infoLayout.setContentsMargins(0, 0, 0, 0);
+        _infoLayout.setSpacing(5);
+        _infoLayout.addWidget(&_previewIconLabel);
+        _infoLayout.addWidget(&_metaDataIconLabel);
+        _infoLayout.addWidget(&_tagsIconLabel);
+        _infoLayout.addWidget(&_contributorsIconLabel);
+        _infoLayout.addStretch(1);
+
+        _infoWidget.setLayout(&_infoLayout);
+    }
+    else {
+        _textLayout.setAlignment(Qt::AlignTop);
+        _textLayout.setSpacing(3);
+        _textLayout.addLayout(&_primaryTextLayout);
+        _textLayout.addLayout(&_secondaryTextLayout);
+
+        _iconLayout.addWidget(&_iconLabel);
+        _iconLabel.setStyleSheet("padding-top: 3px;");
+
+        _primaryTextLayout.addWidget(&_titleLabel, 1);
+        _primaryTextLayout.addWidget(&_metaDataLabel);
+
+        _titleLabel.setStyleSheet("font-weight: bold;");
+        _metaDataLabel.setStyleSheet("color: dark-gray;");
+
+        _secondaryTextLayout.addWidget(&_subtitleLabel, 1);
+        _secondaryTextLayout.addWidget(&_infoWidget);
+
+        _infoLayout.setContentsMargins(0, 0, 0, 0);
+        _infoLayout.setSpacing(5);
+        _infoLayout.addWidget(&_previewIconLabel);
+        _infoLayout.addWidget(&_metaDataIconLabel);
+        _infoLayout.addWidget(&_tagsIconLabel);
+        _infoLayout.addWidget(&_contributorsIconLabel);
+        _infoLayout.addStretch(1);
+
+        _infoWidget.setLayout(&_infoLayout);
+    }
 
     const auto getTooltipHtml = [](const QString& tooltipTextHtml) -> QString {
         return QString(" \
@@ -150,15 +199,7 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
         return getTooltipHtml(tagsHtml);
     });
 
-    _infoLayout.setContentsMargins(0, 0, 0, 0);
-    _infoLayout.setSpacing(5);
-    _infoLayout.addWidget(&_previewIconLabel);
-    _infoLayout.addWidget(&_metaDataIconLabel);
-    _infoLayout.addWidget(&_tagsIconLabel);
-    _infoLayout.addWidget(&_contributorsIconLabel);
-    _infoLayout.addStretch(1);
     
-    _infoWidget.setLayout(&_infoLayout);
 
     setLayout(&_mainLayout);
 
@@ -174,8 +215,6 @@ void StartPageActionDelegateEditorWidget::setEditorData(const QModelIndex& index
     _index = index;
 
     StartPageAction startPageAction(_index);
-
-    _iconLabel.setPixmap(startPageAction.getIcon().pixmap(QSize(24, 24)));
 
     updateTextLabels();
 
@@ -217,7 +256,7 @@ void StartPageActionDelegateEditorWidget::updateTextLabels()
 {
     StartPageAction startPageAction(_index);
 
-    _iconLabel.setPixmap(startPageAction.getIcon().pixmap(QSize(24, 24)));
+    _iconLabel.setPixmap(startPageAction.getIcon().pixmap(StartPageAction::isCompactView() ? QSize(14, 14) : QSize(24, 24)));
 
     QFontMetrics titleMetrics(_titleLabel.font()), descriptionMetrics(_subtitleLabel.font());
 
@@ -228,6 +267,9 @@ void StartPageActionDelegateEditorWidget::updateTextLabels()
 
 void StartPageActionDelegateEditorWidget::updateInfoWidgetVisibility()
 {
+    if (StartPageAction::isCompactView())
+        _metaDataLabel.setVisible(!QWidget::underMouse());
+
     _infoWidget.setVisible(QWidget::underMouse());
 }
 

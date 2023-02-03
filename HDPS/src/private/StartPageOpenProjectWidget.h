@@ -6,6 +6,8 @@
 
 #include <QWidget>
 
+class StartPageContentWidget;
+
 /**
  * Start page open project widget class
  *
@@ -18,10 +20,10 @@ class StartPageOpenProjectWidget : public QWidget
 protected:
 
     /**
-     * Construct with \p parent widget
-     * @param parent Pointer to parent widget
+     * Construct with \p startPageContentWidget
+     * @param startPageContentWidget Pointer to start page content widget
      */
-    StartPageOpenProjectWidget(QWidget* parent = nullptr);
+    StartPageOpenProjectWidget(StartPageContentWidget* startPageContentWidget);
 
     /** Updates the actions to reflect changes */
     void updateActions();
@@ -46,6 +48,7 @@ private:
     void updateExamplesActions();
 
 private:
+    StartPageContentWidget*         _startPageContentWidget;    /** Non-owning pointer to start page content widget */
     StartPageActionsWidget          _openCreateProjectWidget;   /** Actions widget for open and create project action */
     StartPageActionsWidget          _recentProjectsWidget;      /** Actions widget for existing projects action */
     StartPageActionsWidget          _exampleProjectsWidget;     /** Actions widget for example projects action */

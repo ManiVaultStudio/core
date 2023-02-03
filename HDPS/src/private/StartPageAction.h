@@ -82,6 +82,20 @@ private:
      */
     void setEditorData(const QModelIndex& index);
 
+public:
+
+    /**
+     * Get whether compact view is enabled
+     * @return Boolean determining whether to show actions in compact view mode
+     */
+    static bool isCompactView();
+
+    /**
+     * Toggles compact view
+     * @param compactView Boolean determining whether to show actions in compact view mode
+     */
+    static void setCompactView(bool compactView);
+
 protected:
     QIcon               _icon;              /** Action icon (shown on the left) */
     QString             _title;             /** Title is shown next to the icon */
@@ -94,6 +108,8 @@ protected:
     QString             _tooltip;           /** Tooltip (might be empty) */
     QStringList         _contributors;      /** List of contributors */
     ClickedCallback     _clickedCallback;   /** Callback function that is called when the action row is clicked */
+
+    static bool compactView;
 };
 
 using StartPageActions = QList<StartPageAction>;
