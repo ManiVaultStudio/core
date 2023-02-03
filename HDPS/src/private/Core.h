@@ -31,6 +31,9 @@ public:
 
 public:
 
+    /** Initializes all core managers */
+    void init() override;
+
     /** Resets the entire core implementation */
     void reset() override;
 
@@ -129,9 +132,6 @@ public: // Dataset grouping
     void setDatasetGroupingEnabled(const bool& datasetGroupingEnabled) override;
 
 public:
-
-    /** Initializes the core; loads all plugins from the designated plugin directory */
-    void init();
 
     /** Adds the given plugin to the list of plugins kept by the core */
     void addPlugin(plugin::Plugin* plugin);

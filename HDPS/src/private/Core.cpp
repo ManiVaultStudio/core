@@ -44,20 +44,10 @@ Core::~Core()
     _pluginManager.reset();
 }
 
-void Core::reset()
-{
-    _actionsManager->reset();
-    _pluginManager->reset();
-    _eventManager->reset();
-    _dataManager->reset();
-    _dataHierarchyManager->reset();
-    _workspaceManager->reset();
-    _projectManager->reset();
-    _settingsManager->reset();
-}
-
 void Core::init()
 {
+    CoreInterface::init();
+
     _actionsManager.reset(new ActionsManager());
     _pluginManager.reset(new PluginManager());
     _eventManager.reset(new EventManager());
@@ -75,6 +65,18 @@ void Core::init()
     _workspaceManager->initialize();
     _projectManager->initialize();
     _settingsManager->initialize();
+}
+
+void Core::reset()
+{
+    _actionsManager->reset();
+    _pluginManager->reset();
+    _eventManager->reset();
+    _dataManager->reset();
+    _dataHierarchyManager->reset();
+    _workspaceManager->reset();
+    _projectManager->reset();
+    _settingsManager->reset();
 }
 
 void Core::addPlugin(plugin::Plugin* plugin)

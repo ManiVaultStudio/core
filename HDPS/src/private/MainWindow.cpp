@@ -1,5 +1,10 @@
 #include "MainWindow.h"
 #include "PluginManager.h"
+#include "StartPageWidget.h"
+#include "ProjectWidget.h"
+#include "FileMenu.h"
+#include "ViewMenu.h"
+#include "HelpMenu.h"
 
 #include <Application.h>
 
@@ -33,50 +38,52 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 {
     QMainWindow::showEvent(showEvent);
 
-    _core.init();
+    if (!_core.isInitialized()) {
+        _core.init();
 
-    menuBar()->addMenu(new FileMenu());
-    menuBar()->addMenu(new ViewMenu());
-    menuBar()->addMenu(new HelpMenu());
+        menuBar()->addMenu(new FileMenu());
+        menuBar()->addMenu(new ViewMenu());
+        menuBar()->addMenu(new HelpMenu());
 
-    auto stackedWidget      = new QStackedWidget();
-    auto projectWidget      = new ProjectWidget();
-    auto startPageWidget    = new StartPageWidget(projectWidget);
+        auto stackedWidget      = new QStackedWidget();
+        auto projectWidget      = new ProjectWidget();
+        auto startPageWidget    = new StartPageWidget(projectWidget);
 
-    stackedWidget->addWidget(startPageWidget);
-    stackedWidget->addWidget(projectWidget);
+        stackedWidget->addWidget(startPageWidget);
+        stackedWidget->addWidget(projectWidget);
 
-    setCentralWidget(stackedWidget);
+        setCentralWidget(stackedWidget);
 
-    auto& projectManager = Application::core()->getProjectManager();
+        auto& projectManager = Application::core()->getProjectManager();
 
-    const auto updateWindowTitle = [&]() -> void {
-        if (!projectManager.hasProject()) {
-            setWindowTitle("HDPS");
-        }
-        else {
-            const auto projectFilePath = projectManager.getCurrentProject()->getFilePath();
+        const auto updateWindowTitle = [&]() -> void {
+            if (!projectManager.hasProject()) {
+                setWindowTitle("HDPS");
+            }
+            else {
+                const auto projectFilePath = projectManager.getCurrentProject()->getFilePath();
 
-            if (projectFilePath.isEmpty())
-                setWindowTitle("Unsaved - HDPS");
+                if (projectFilePath.isEmpty())
+                    setWindowTitle("Unsaved - HDPS");
+                else
+                    setWindowTitle(QString("%1 - HDPS").arg(projectFilePath));
+            }
+        };
+
+        connect(&projectManager, &ProjectManager::projectCreated, this, updateWindowTitle);
+        connect(&projectManager, &ProjectManager::projectDestroyed, this, updateWindowTitle);
+        connect(&projectManager, &ProjectManager::projectLoaded, this, updateWindowTitle);
+        connect(&projectManager, &ProjectManager::projectSaved, this, updateWindowTitle);
+
+        const auto toggleStartPage = [stackedWidget, projectWidget, startPageWidget](bool toggled) -> void {
+            if (toggled)
+                stackedWidget->setCurrentWidget(startPageWidget);
             else
-                setWindowTitle(QString("%1 - HDPS").arg(projectFilePath));
-        }
-    };
+                stackedWidget->setCurrentWidget(projectWidget);
+        };
 
-    connect(&projectManager, &ProjectManager::projectCreated, this, updateWindowTitle);
-    connect(&projectManager, &ProjectManager::projectDestroyed, this, updateWindowTitle);
-    connect(&projectManager, &ProjectManager::projectLoaded, this, updateWindowTitle);
-    connect(&projectManager, &ProjectManager::projectSaved, this, updateWindowTitle);
-
-    const auto toggleStartPage = [stackedWidget, projectWidget, startPageWidget](bool toggled) -> void {
-        if (toggled)
-            stackedWidget->setCurrentWidget(startPageWidget);
-        else
-            stackedWidget->setCurrentWidget(projectWidget);
-    };
-
-    connect(&projectManager.getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
+        connect(&projectManager.getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent* closeEvent)

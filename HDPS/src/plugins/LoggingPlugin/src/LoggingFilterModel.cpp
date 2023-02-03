@@ -14,7 +14,6 @@ LoggingFilterModel::LoggingFilterModel(QObject* parent /*= nullptr*/) :
 {
     setFilterKeyColumn(static_cast<int>(LoggingModel::Column::Message));
 
-    _filterTypeAction.setConnectionPermissionsToNone();
     _filterTypeAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
 
     connect(&_filterTypeAction, &OptionsAction::selectedOptionsChanged, this, &LoggingFilterModel::invalidate);

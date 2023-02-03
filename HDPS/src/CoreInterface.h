@@ -47,12 +47,29 @@ namespace hdps
 class CoreInterface
 {
 public:
-    //CoreInterface() = delete;
 
-public:
+    /** Default constructor */
+    CoreInterface() :
+        _initialized(false),
+        _datasetGroupingEnabled(false)
+    {
+    }
     
+    /** Initializes all core managers */
+    virtual void init() {
+        _initialized = true;
+    };
+
     /** Resets the entire core implementation */
     virtual void reset() = 0;
+
+    /**
+     * Get whether the core is initialized or not
+     * @return Boolean determining whether the core is initialized or not
+     */
+    virtual bool isInitialized() const final {
+        return _initialized;
+    }
 
 public: // Data access
 
@@ -225,7 +242,8 @@ public: // Managers
     virtual AbstractSettingsManager& getSettingsManager() = 0;
 
 protected:
-    bool    _datasetGroupingEnabled;        /** Whether datasets can be grouped or not */
+    bool    _initialized;               /** Boolean determining whether the core is initialized or not */
+    bool    _datasetGroupingEnabled;    /** Whether datasets can be grouped or not */
 
     friend class plugin::RawData;
     friend class DatasetImpl;

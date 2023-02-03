@@ -82,8 +82,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     settingsGroupAction << _groupingAction;
     settingsGroupAction << _resetAction;
 
-    _groupingAction.setConnectionPermissionsToNone();
-
     auto& treeView = _hierarchyWidget.getTreeView();
 
     auto treeViewHeader = treeView.header();

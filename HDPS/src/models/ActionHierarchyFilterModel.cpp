@@ -32,13 +32,6 @@ ActionHierarchyFilterModel::ActionHierarchyFilterModel(QObject* parent /*= nullp
     _filterMayDisconnectAction.setToolTip("Filter actions based on whether they may disconnect from a public action");
     _removeFiltersAction.setToolTip("Remove all filters");
 
-    _filterInternalUseAction.setConnectionPermissionsToNone();
-    _filterEnabledAction.setConnectionPermissionsToNone();
-    _filterVisibilityAction.setConnectionPermissionsToNone();
-    _filterMayPublishAction.setConnectionPermissionsToNone();
-    _filterMayConnectAction.setConnectionPermissionsToNone();
-    _filterMayDisconnectAction.setConnectionPermissionsToNone();
-
     const auto selectedOptionsChanged = [this]() -> void {
         invalidate();
 
