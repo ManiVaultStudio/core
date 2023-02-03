@@ -44,35 +44,28 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
 
     _iconLayout.setAlignment(Qt::AlignTop | Qt::AlignCenter);
 
+    _textLayout.setAlignment(Qt::AlignTop);
+    _textLayout.setSpacing(3);
 
+    _infoLayout.setContentsMargins(0, 0, 0, 0);
+    _infoLayout.setSpacing(5);
 
-
-
-
-
-
-
+    _iconLabel.setStyleSheet("padding-top: 3px;");
+    _titleLabel.setStyleSheet("font-weight: bold;");
+    _metaDataLabel.setStyleSheet("color: dark-gray;");
 
     if (StartPageAction::isCompactView()) {
-        _textLayout.setAlignment(Qt::AlignTop);
-        _textLayout.setSpacing(3);
         _textLayout.addLayout(&_primaryTextLayout);
         _textLayout.addLayout(&_secondaryTextLayout);
 
         _iconLayout.addWidget(&_iconLabel);
-        _iconLabel.setStyleSheet("padding-top: 3px;");
 
         _primaryTextLayout.addWidget(&_titleLabel, 1);
         _primaryTextLayout.addWidget(&_metaDataLabel);
         _primaryTextLayout.addWidget(&_infoWidget);
 
-        _titleLabel.setStyleSheet("font-weight: bold;");
-        _metaDataLabel.setStyleSheet("color: dark-gray;");
-
         _subtitleLabel.hide();
-
-        _infoLayout.setContentsMargins(0, 0, 0, 0);
-        _infoLayout.setSpacing(5);
+        
         _infoLayout.addWidget(&_previewIconLabel);
         _infoLayout.addWidget(&_metaDataIconLabel);
         _infoLayout.addWidget(&_tagsIconLabel);
@@ -82,25 +75,16 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
         _infoWidget.setLayout(&_infoLayout);
     }
     else {
-        _textLayout.setAlignment(Qt::AlignTop);
-        _textLayout.setSpacing(3);
         _textLayout.addLayout(&_primaryTextLayout);
         _textLayout.addLayout(&_secondaryTextLayout);
-
         _iconLayout.addWidget(&_iconLabel);
-        _iconLabel.setStyleSheet("padding-top: 3px;");
 
         _primaryTextLayout.addWidget(&_titleLabel, 1);
         _primaryTextLayout.addWidget(&_metaDataLabel);
 
-        _titleLabel.setStyleSheet("font-weight: bold;");
-        _metaDataLabel.setStyleSheet("color: dark-gray;");
-
         _secondaryTextLayout.addWidget(&_subtitleLabel, 1);
         _secondaryTextLayout.addWidget(&_infoWidget);
 
-        _infoLayout.setContentsMargins(0, 0, 0, 0);
-        _infoLayout.setSpacing(5);
         _infoLayout.addWidget(&_previewIconLabel);
         _infoLayout.addWidget(&_metaDataIconLabel);
         _infoLayout.addWidget(&_tagsIconLabel);
