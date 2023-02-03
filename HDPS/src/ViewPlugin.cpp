@@ -382,6 +382,7 @@ QMenu* ViewPlugin::getPresetsMenu(QWidget* parent /*= nullptr*/)
     connect(importPresetAction, &TriggerAction::triggered, this, &ViewPlugin::importPreset);
     connect(exportPresetAction, &TriggerAction::triggered, this, &ViewPlugin::exportPreset);
 
+    /*
     menu->addSeparator();
 
     auto editPresetsAction = new QAction("Edit...");
@@ -392,6 +393,7 @@ QMenu* ViewPlugin::getPresetsMenu(QWidget* parent /*= nullptr*/)
 
     connect(editPresetsAction, &TriggerAction::triggered, this, [this, presetNames, &fontAwesome]() -> void {
     });
+    */
 
     return menu;
 }
