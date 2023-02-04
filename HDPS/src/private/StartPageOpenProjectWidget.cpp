@@ -14,8 +14,9 @@ using namespace hdps;
 using namespace hdps::util;
 using namespace hdps::gui;
 
-StartPageOpenProjectWidget::StartPageOpenProjectWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
+StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* startPageContentWidget) :
+    QWidget(startPageContentWidget),
+    _startPageContentWidget(startPageContentWidget),
     _openCreateProjectWidget(this),
     _recentProjectsWidget(this),
     _exampleProjectsWidget(this),

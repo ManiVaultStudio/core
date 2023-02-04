@@ -1,5 +1,6 @@
 #include "StartPageActionDelegate.h"
 #include "StartPageActionDelegateEditorWidget.h"
+#include "StartPageAction.h"
 
 #include <QCoreApplication>
 
@@ -25,7 +26,7 @@ QSize StartPageActionDelegate::sizeHint(const QStyleOptionViewItem& option, cons
     */
 
     // Hard-coded for optimization purposes
-    return QSize(0, 43); // 43
+    return StartPageAction::isCompactView() ? QSize(0, 26) : QSize(0, 43); // 43
 }
 
 QWidget* StartPageActionDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const

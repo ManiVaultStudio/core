@@ -37,7 +37,6 @@ LoggingModel::LoggingModel(QObject* parent /*= nullptr*/) :
     _wordWrapAction(this, "Word wrap", true, true)
 {
     _wordWrapAction.setToolTip("Enables/disables word wrapping");
-    _wordWrapAction.setConnectionPermissionsToNone();
 
     synchronizeLogRecords();
 

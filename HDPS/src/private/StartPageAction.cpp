@@ -1,6 +1,8 @@
 #include "StartPageAction.h"
 #include "StartPageActionsModel.h"
 
+bool StartPageAction::compactView = false;
+
 StartPageAction::StartPageAction(const QIcon& icon, const QString& title, const QString& subtitle, const QString& description, const QString& tooltip, const ClickedCallback& clickedCallback) :
     _icon(icon),
     _title(title),
@@ -27,4 +29,14 @@ void StartPageAction::setEditorData(const QModelIndex& index)
     setMetaData(index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::MetaData)).data(Qt::EditRole).toString());
     setPreviewImage(index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::PreviewImage)).data(Qt::UserRole + 1).value<QImage>());
     setContributors(index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::Contributors)).data(Qt::UserRole + 1).toStringList());
+}
+
+bool StartPageAction::isCompactView()
+{
+    return StartPageAction::compactView;
+}
+
+void StartPageAction::setCompactView(bool compactView)
+{
+    StartPageAction::compactView = compactView;
 }

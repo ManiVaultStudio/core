@@ -8,6 +8,8 @@
 #include <QWidget>
 #include <QStandardItemModel>
 
+class StartPageContentWidget;
+
 /**
  * Start page get started widget class
  *
@@ -29,10 +31,10 @@ public:
 protected:
 
     /**
-     * Construct with \p parent widget
-     * @param parent Pointer to parent widget
+     * Construct with \p startPageContentWidget
+     * @param startPageContentWidget Pointer to start page content widget
      */
-    StartPageGetStartedWidget(QWidget* parent = nullptr);
+    StartPageGetStartedWidget(StartPageContentWidget* startPageContentWidget);
 
     /** Updates the actions to reflect changes */
     void updateActions();
@@ -46,6 +48,7 @@ private:
     void updateCreateProjectFromDatasetActions();
 
 private:
+    StartPageContentWidget*         _startPageContentWidget;            /** Non-owning pointer to start page content widget */
     StartPageActionsWidget          _createProjectFromWorkspaceWidget;  /** Actions widget for creating a project from workspace */
     StartPageActionsWidget          _createProjectFromDatasetWidget;    /** Actions widget for creating a project from a dataset */
     StartPageActionsWidget          _instructionVideosWidget;           /** Actions widget for watching instruction videos */

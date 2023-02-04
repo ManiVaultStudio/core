@@ -221,6 +221,195 @@ QVariantMap ViewPlugin::toVariantMap() const
     return variantMap;
 }
 
+<<<<<<< HEAD
+=======
+void ViewPlugin::loadPreset(const QString& name)
+{
+#ifdef VIEW_PLUGIN_VERBOSE
+    qDebug() << __FUNCTION__ << name;
+#endif
+
+    if (name.isEmpty())
+        return;
+
+    auto presets = getSetting("Presets", QVariantMap()).toMap();
+
+    if (!presets.contains(name))
+        return;
+
+    fromVariantMap(presets[name].toMap());
+}
+
+void ViewPlugin::savePreset(const QString& name)
+{
+#ifdef VIEW_PLUGIN_VERBOSE
+    qDebug() << __FUNCTION__ << name;
+#endif
+
+    if (name.isEmpty())
+        return;
+
+    auto presets = getSetting("Presets", QVariantMap()).toMap();
+
+    presets[name] = toVariantMap();
+
+    setSetting("Presets", presets);
+}
+
+void ViewPlugin::importPreset()
+{
+#ifdef VIEW_PLUGIN_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    QFileDialog fileDialog;
+
+    fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    fileDialog.setWindowTitle("Import Preset");
+    fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+    fileDialog.setFileMode(QFileDialog::ExistingFile);
+    fileDialog.setNameFilters({ "HDPS View Preset (*.hvp)" });
+    fileDialog.setDefaultSuffix(".hvp");
+    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+    if (fileDialog.exec() == 0)
+        return;
+
+    if (fileDialog.selectedFiles().count() != 1)
+        throw std::runtime_error("Only one file may be selected");
+
+    const auto presetFilePath = fileDialog.selectedFiles().first();
+
+    fromJsonFile(presetFilePath);
+    savePreset(QFileInfo(presetFilePath).baseName());
+}
+
+void ViewPlugin::exportPreset()
+{
+#ifdef VIEW_PLUGIN_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    QFileDialog fileDialog;
+
+    fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+    fileDialog.setWindowTitle("Export Preset");
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    fileDialog.setNameFilters({ "HDPS View Preset (*.hvp)" });
+    fileDialog.setDefaultSuffix(".hvp");
+    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+    if (fileDialog.exec() == 0)
+        return;
+
+    if (fileDialog.selectedFiles().count() != 1)
+        throw std::runtime_error("Only one file may be selected");
+
+    toJsonFile(fileDialog.selectedFiles().first());
+}
+
+QMenu* ViewPlugin::getPresetsMenu(QWidget* parent /*= nullptr*/)
+{
+    auto menu = new QMenu("Presets", parent);
+
+    auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    const auto presetIcon = fontAwesome.getIcon("prescription");
+
+    menu->setIcon(presetIcon);
+
+    auto savePresetAction = new QAction("Save");
+
+    savePresetAction->setIcon(fontAwesome.getIcon("save"));
+
+    connect(savePresetAction, &TriggerAction::triggered, this, [this, &fontAwesome]() -> void {
+        QInputDialog inputDialog;
+
+        inputDialog.setWindowIcon(fontAwesome.getIcon("list-alt"));
+        inputDialog.setWindowTitle("Choose preset name");
+        inputDialog.setInputMode(QInputDialog::TextInput);
+        inputDialog.setLabelText("Preset name:");
+
+        if (inputDialog.exec())
+            savePreset(inputDialog.textValue());
+    });
+
+    menu->addAction(savePresetAction);
+
+    auto saveDefaultPresetAction = new QAction("Save As Default");
+
+    saveDefaultPresetAction->setIcon(fontAwesome.getIcon("save"));
+
+    connect(saveDefaultPresetAction, &TriggerAction::triggered, this, &ViewPlugin::saveDefaultPreset);
+
+    menu->addAction(saveDefaultPresetAction);
+
+    auto presetNames = getSetting("Presets").toMap().keys();
+
+    if (!presetNames.isEmpty())
+        menu->addSeparator();
+
+    if (presetNames.contains("Default"))
+        presetNames.removeOne("Default");
+
+    presetNames.insert(0, "Default");
+
+    for (const auto& presetName : presetNames) {
+        auto loadPresetAction = new QAction(presetName);
+
+        loadPresetAction->setIcon(presetIcon);
+
+        connect(loadPresetAction, &TriggerAction::triggered, this, [this, presetName]() -> void {
+            loadPreset(presetName);
+        });
+
+        menu->addAction(loadPresetAction);
+
+        if (presetName == "Default")
+            menu->addSeparator();
+    }
+
+    menu->addSeparator();
+
+    auto importPresetAction = new QAction("Import...");
+    auto exportPresetAction = new QAction("Export...");
+
+    importPresetAction->setIcon(fontAwesome.getIcon("file-import"));
+    exportPresetAction->setIcon(fontAwesome.getIcon("file-export"));
+
+    menu->addAction(importPresetAction);
+    menu->addAction(exportPresetAction);
+
+    connect(importPresetAction, &TriggerAction::triggered, this, &ViewPlugin::importPreset);
+    connect(exportPresetAction, &TriggerAction::triggered, this, &ViewPlugin::exportPreset);
+
+    /*
+    menu->addSeparator();
+
+    auto editPresetsAction = new QAction("Edit...");
+
+    editPresetsAction->setIcon(fontAwesome.getIcon("cog"));
+
+    menu->addAction(editPresetsAction);
+
+    connect(editPresetsAction, &TriggerAction::triggered, this, [this, presetNames, &fontAwesome]() -> void {
+    });
+    */
+
+    return menu;
+}
+
+void ViewPlugin::loadDefaultPreset()
+{
+    loadPreset("Default");
+}
+
+void ViewPlugin::saveDefaultPreset()
+{
+    savePreset("Default");
+}
+
+>>>>>>> origin/master
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :
     PluginFactory(Type::VIEW),
     _producesSystemViewPlugins(producesSystemViewPlugins),

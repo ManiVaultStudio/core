@@ -40,8 +40,8 @@ void FileMenu::showEvent(QShowEvent* showEvent)
     addMenu(&projects().getImportDataMenu());
     addSeparator();
     addAction(&projects().getPluginManagerAction());
-    addSeparator();
-    addAction(&settings().getEditSettingsAction());
+    //addSeparator();
+    //addAction(&settings().getEditSettingsAction());
     addSeparator();
     addAction(&projects().getShowStartPageAction());
     addSeparator();
