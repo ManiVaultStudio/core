@@ -21,9 +21,10 @@ public:
     /**
      * Construct with \p parent widget
      * @param parent Pointer to parent widget
+     * @param title Title shown in the header
      * @param restyle Whether to change the style to seamlessly integrate with the start page (false for use outside of startpage widget)
      */
-    StartPageActionsWidget(QWidget* parent = nullptr, bool restyle = true);
+    StartPageActionsWidget(QWidget* parent = nullptr, const QString& title = "", bool restyle = true);
 
     /**
      * Get layout

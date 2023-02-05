@@ -17,9 +17,9 @@ using namespace hdps::gui;
 StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* startPageContentWidget) :
     QWidget(startPageContentWidget),
     _startPageContentWidget(startPageContentWidget),
-    _openCreateProjectWidget(this),
-    _recentProjectsWidget(this),
-    _exampleProjectsWidget(this),
+    _openCreateProjectWidget(this, "Open & Create"),
+    _recentProjectsWidget(this, "Recent"),
+    _exampleProjectsWidget(this, "Examples"),
     _recentProjectsAction(this),
     _leftAlignedIcon(),
     _leftAlignedLoggingIcon(),
@@ -28,13 +28,9 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 {
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(StartPageContentWidget::createHeaderLabel("Open & Create", "Open existing project and create new project"));
+    
     layout->addWidget(&_openCreateProjectWidget);
-
-    layout->addWidget(StartPageContentWidget::createHeaderLabel("Recent", "Recently opened project"));
     layout->addWidget(&_recentProjectsWidget);
-
-    layout->addWidget(StartPageContentWidget::createHeaderLabel("Examples", "Open example project"));
     layout->addWidget(&_exampleProjectsWidget);
 
     layout->addStretch(1);
@@ -59,6 +55,18 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     createIconForDefaultProject(Qt::AlignLeft, _leftAlignedLoggingIcon, true);
     createIconForDefaultProject(Qt::AlignRight, _rightAlignedIcon);
     createIconForDefaultProject(Qt::AlignRight, _rightAlignedLoggingIcon, true);
+
+    const auto toggleViews = [this]() -> void {
+        _openCreateProjectWidget.setVisible(_startPageContentWidget->getToggleOpenCreateProjectAction().isChecked());
+        _recentProjectsWidget.setVisible(_startPageContentWidget->getToggleRecentProjectsAction().isChecked());
+        _exampleProjectsWidget.setVisible(_startPageContentWidget->getToggleExampleProjectsAction().isChecked());
+    };
+
+    connect(&_startPageContentWidget->getToggleOpenCreateProjectAction(), &ToggleAction::toggled, this, toggleViews);
+    connect(&_startPageContentWidget->getToggleRecentProjectsAction(), &ToggleAction::toggled, this, toggleViews);
+    connect(&_startPageContentWidget->getToggleExampleProjectsAction(), &ToggleAction::toggled, this, toggleViews);
+
+    toggleViews();
 }
 
 void StartPageOpenProjectWidget::updateActions()

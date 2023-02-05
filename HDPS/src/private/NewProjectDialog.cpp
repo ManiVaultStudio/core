@@ -16,7 +16,7 @@ using namespace hdps::gui;
 
 NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _workspacesWidget(this, false),
+    _workspacesWidget(this, "", false),
     _cancelAction(this, "Cancel")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file"));

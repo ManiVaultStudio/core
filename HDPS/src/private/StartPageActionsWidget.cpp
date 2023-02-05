@@ -14,13 +14,16 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/, bool restyle /*= true*/) :
+StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/, const QString& title /*= ""*/, bool restyle /*= true*/) :
     QWidget(parent),
     _layout(),
     _model(this),
     _filterModel(this),
     _hierarchyWidget(this, "Item", _model, &_filterModel, true, true)
 {
+    if (!title.isEmpty())
+        _layout.addWidget(StartPageContentWidget::createHeaderLabel(title, title));
+
     _layout.addWidget(&_hierarchyWidget, 1);
 
     setLayout(&_layout);

@@ -14,9 +14,9 @@ using namespace hdps::gui;
 StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* startPageContentWidget) :
     QWidget(startPageContentWidget),
     _startPageContentWidget(startPageContentWidget),
-    _createProjectFromWorkspaceWidget(this),
-    _createProjectFromDatasetWidget(this),
-    _instructionVideosWidget(this),
+    _createProjectFromWorkspaceWidget(this, "Project From Workspace"),
+    _createProjectFromDatasetWidget(this, "Project From Data"),
+    _instructionVideosWidget(this, "Instruction Videos"),
     _workspaceLocationTypeAction(this, "Workspace location type"),
     _workspaceLocationTypesModel(this),
     _recentWorkspacesAction(this),
@@ -24,13 +24,8 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 {
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(StartPageContentWidget::createHeaderLabel("Create Project From Workspace", "Create project from workspace"));
     layout->addWidget(&_createProjectFromWorkspaceWidget, 3);
-
-    layout->addWidget(StartPageContentWidget::createHeaderLabel("Create Project From Data", "Create project from data"));
     layout->addWidget(&_createProjectFromDatasetWidget, 3);
-
-    layout->addWidget(StartPageContentWidget::createHeaderLabel("Instruction Videos", "Watch instructional videos that learn how to work with the software"));
     layout->addWidget(&_instructionVideosWidget, 1);
 
     layout->addStretch(1);
@@ -63,6 +58,18 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Alt", Application::getIconFont("FontAwesome").getIcon("clock"));
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("clock"));
+
+    const auto toggleViews = [this]() -> void {
+        _createProjectFromWorkspaceWidget.setVisible(_startPageContentWidget->getToggleProjectFromWorkspaceAction().isChecked());
+        _createProjectFromDatasetWidget.setVisible(_startPageContentWidget->getToggleProjectFromDataAction().isChecked());
+        _instructionVideosWidget.setVisible(_startPageContentWidget->getToggleTutorialVideosAction().isChecked());
+    };
+
+    connect(&_startPageContentWidget->getToggleProjectFromWorkspaceAction(), &ToggleAction::toggled, this, toggleViews);
+    connect(&_startPageContentWidget->getToggleProjectFromDataAction(), &ToggleAction::toggled, this, toggleViews);
+    connect(&_startPageContentWidget->getToggleTutorialVideosAction(), &ToggleAction::toggled, this, toggleViews);
+
+    toggleViews();
 }
 
 void StartPageGetStartedWidget::updateActions()

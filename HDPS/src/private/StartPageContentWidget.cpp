@@ -1,8 +1,11 @@
 #include "StartPageContentWidget.h"
 #include "StartPageWidget.h"
 
+#include <Application.h>
+
 #include <QDebug>
 
+using namespace hdps;
 using namespace hdps::gui;
 
 StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
@@ -10,28 +13,53 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _mainLayout(),
     _collumnsLayout(),
     _toolbarLayout(),
+    _compactViewAction(this, "Compact view"),
+    _toggleOpenCreateProjectAction(this, "Open & Create"),
+    _toggleRecentProjectsAction(this, "Recent Projects"),
+    _toggleExampleProjectsAction(this, "Example Project"),
+    _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
+    _toggleProjectFromDataAction(this, "Project From Data"),
+    _toggleTutorialVideosAction(this, "Instructional Videos"),
+    _settingsAction(this, "Settings"),
     _openProjectWidget(this),
-    _getStartedWidget(this),
-    _compactViewAction(this, "Compact view")
+    _getStartedWidget(this)
 {
     setAutoFillBackground(true);
 
     StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 
+    _compactViewAction.setSettingsPrefix("StartPage/ToggleCompactView");
+    _toggleOpenCreateProjectAction.setSettingsPrefix("StartPage/ToggleOpenCreateProject");
+    _toggleRecentProjectsAction.setSettingsPrefix("StartPage/ToggleRecentProjects");
+    _toggleExampleProjectsAction.setSettingsPrefix("StartPage/ToggleExampleProjects");
+    _toggleProjectFromWorkspaceAction.setSettingsPrefix("StartPage/ToggleProjectFromWorkspace");
+    _toggleProjectFromDataAction.setSettingsPrefix("StartPage/ToggleProjectFromData");
+    _toggleTutorialVideosAction.setSettingsPrefix("StartPage/ToggleTutorialVideos");
+
+    _settingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
+    _settingsAction.setText("Toggle Views");
+
+    _settingsAction << _toggleOpenCreateProjectAction;
+    _settingsAction << _toggleRecentProjectsAction;
+    _settingsAction << _toggleExampleProjectsAction;
+    _settingsAction << _toggleProjectFromWorkspaceAction;
+    _settingsAction << _toggleProjectFromDataAction;
+    _settingsAction << _toggleTutorialVideosAction;
+
     _collumnsLayout.setContentsMargins(35, 35, 35, 35);
     _toolbarLayout.setContentsMargins(35, 10, 35, 10);
 
-    _collumnsLayout.addWidget(&_openProjectWidget, 1);
-    _collumnsLayout.addWidget(&_getStartedWidget, 1);
+    _collumnsLayout.addWidget(&_openProjectWidget);
+    _collumnsLayout.addWidget(&_getStartedWidget);
 
     _mainLayout.addLayout(&_collumnsLayout, 1);
     _mainLayout.addLayout(&_toolbarLayout);
 
-    _toolbarLayout.addWidget(_compactViewAction.createWidget(this), 1);
+    _toolbarLayout.addWidget(_compactViewAction.createWidget(this));
+    _toolbarLayout.addStretch(1);
+    _toolbarLayout.addWidget(_settingsAction.createCollapsedWidget(this));
 
     setLayout(&_mainLayout);
-
-    _compactViewAction.setSettingsPrefix("StartPage/CompactView");
 
     connect(&_compactViewAction, &ToggleAction::toggled, this, &StartPageContentWidget::updateActions);
 }
