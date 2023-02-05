@@ -4,6 +4,7 @@
 
 #include "actions/TriggerAction.h"
 #include "actions/DirectoryPickerAction.h"
+#include "actions/ToggleAction.h"
 
 namespace hdps
 {
@@ -39,6 +40,7 @@ public: // Action getters
     virtual gui::DirectoryPickerAction& getGlobalProjectsPathAction() = 0;
     virtual gui::DirectoryPickerAction& getGlobalWorkspacesPathAction() = 0;
     virtual gui::DirectoryPickerAction& getGlobalDataPathAction() = 0;
+    virtual gui::ToggleAction& getIgnoreLoadingErrorsAction() = 0;
 };
 
 }

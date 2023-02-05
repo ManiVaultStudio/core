@@ -1,5 +1,6 @@
 #include "Serializable.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include "actions/WidgetAction.h"
 #include "util/Serialization.h"
@@ -14,6 +15,7 @@
     #define SERIALIZABLE_VERBOSE
 #endif
 
+using namespace hdps;
 using namespace hdps::gui;
 
 namespace hdps::util {
@@ -163,8 +165,14 @@ void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap&
 
 void Serializable::fromVariantMap(Serializable& serializable, const QVariantMap& variantMap, const QString& key)
 {
-    if (!variantMap.contains(key))
-        throw std::runtime_error(QString("%1 not found in map").arg(key).toLatin1());
+    if (!variantMap.contains(key)) {
+        const auto errorMessage = QString("%1 not found in map: %2").arg(key);
+
+        if (settings().getIgnoreLoadingErrorsAction().isChecked())
+            qCritical() << errorMessage; 
+        else
+            throw std::runtime_error(errorMessage.toLatin1());
+    }
 
     serializable.fromVariantMap(variantMap[key].toMap());
 }
@@ -176,8 +184,14 @@ void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap)
         if (getSerializationName().isEmpty())
             throw std::runtime_error("Serialization name may not be empty");
 
-        if (!parentVariantMap.contains(getSerializationName()))
-            throw std::runtime_error(QString("%1 not found in map: %2").arg(getSerializationName()).toLatin1());
+        if (!parentVariantMap.contains(getSerializationName())) {
+            const auto errorMessage = QString("%1 not found in map: %2").arg(getSerializationName());
+
+            if (settings().getIgnoreLoadingErrorsAction().isChecked())
+                qCritical() << errorMessage;
+            else
+                throw std::runtime_error(errorMessage.toLatin1());
+        }
 
         fromVariantMap(parentVariantMap[getSerializationName()].toMap());
     }

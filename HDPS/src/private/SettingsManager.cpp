@@ -22,7 +22,8 @@ SettingsManager::SettingsManager() :
     _editSettingsAction(this, "Settings..."),
     _globalProjectsPathAction(this, "Projects"),
     _globalWorkspacesPathAction(this, "Workspaces"),
-    _globalDataPathAction(this, "Data")
+    _globalDataPathAction(this, "Data"),
+    _ignoreLoadingErrorsAction(this, "Ignore loading errors")
 {
     _editSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
     _editSettingsAction.setShortcut(QKeySequence("Ctrl+G"));
@@ -32,9 +33,10 @@ SettingsManager::SettingsManager() :
     _globalWorkspacesPathAction.setConnectionPermissionsToNone();
     _globalDataPathAction.setConnectionPermissionsToNone();
 
-    _globalProjectsPathAction.setSettingsPrefix("Settings/Paths/Projects", true);
-    _globalWorkspacesPathAction.setSettingsPrefix("Settings/Paths/Workspaces", true);
-    _globalDataPathAction.setSettingsPrefix("Settings/Paths/Data", true);
+    _globalProjectsPathAction.setSettingsPrefix("GlobalSettings/Paths/Projects", true);
+    _globalWorkspacesPathAction.setSettingsPrefix("GlobalSettings/Paths/Workspaces", true);
+    _globalDataPathAction.setSettingsPrefix("GlobalSettings/Paths/Data", true);
+    _ignoreLoadingErrorsAction.setSettingsPrefix("GlobalSettings/IO/IgnoreLoadingErrors");
 
     const auto makeDirIfNotExist = [](const QString& pathToDirectory) -> void {
         QDir dir(pathToDirectory);

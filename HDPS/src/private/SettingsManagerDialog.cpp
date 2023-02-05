@@ -15,7 +15,8 @@ namespace hdps::gui {
 SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _groupsAction(this),
-    _globalPathsGroupAction(this, true)
+    _globalPathsGroupAction(this, true),
+    _ioAction(this, true)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
     setModal(true);
@@ -34,7 +35,13 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     _globalPathsGroupAction << settings().getGlobalWorkspacesPathAction();
     _globalPathsGroupAction << settings().getGlobalDataPathAction();
 
-    _groupsAction.addGroupAction(&_globalPathsGroupAction);
+    _ioAction.setText("IO");
+    _ioAction.setLabelWidthPercentage(20);
+
+    _ioAction << settings().getIgnoreLoadingErrorsAction();
+
+    //_groupsAction.addGroupAction(&_globalPathsGroupAction);
+    _groupsAction.addGroupAction(&_ioAction);
 }
 
 }

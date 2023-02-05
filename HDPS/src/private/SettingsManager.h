@@ -31,12 +31,14 @@ public: // Action getters
     gui::DirectoryPickerAction& getGlobalProjectsPathAction() override { return _globalProjectsPathAction; }
     gui::DirectoryPickerAction& getGlobalWorkspacesPathAction() override { return _globalWorkspacesPathAction; }
     gui::DirectoryPickerAction& getGlobalDataPathAction() override { return _globalDataPathAction; }
+    gui::ToggleAction& getIgnoreLoadingErrorsAction() override { return _ignoreLoadingErrorsAction; }
 
 private:
     gui::TriggerAction          _editSettingsAction;            /** Action for triggering the settings dialog */
     gui::DirectoryPickerAction  _globalProjectsPathAction;      /** Directory picker action for global projects directory  */
     gui::DirectoryPickerAction  _globalWorkspacesPathAction;    /** Directory picker action for global workspaces directory  */
     gui::DirectoryPickerAction  _globalDataPathAction;          /** Directory picker action for global data directory  */
+    gui::ToggleAction           _ignoreLoadingErrorsAction;     /** Toggle action for ignoring loading errors */
 };
 
 }
