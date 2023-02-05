@@ -8,15 +8,23 @@
 #include <QStandardItemModel>
 #include <QSortFilterProxyModel>
 #include <QDialog>
+#include <QCompleter>
 
 namespace hdps::gui {
 
 /**
  * Presets action class
  *
- * Action class for interacting with presets.
+ * Action class for interacting with widget action presets.
  * 
- * TODO: Write more documentation
+ * This action allows you to manage the presets for a particular widget action. More precisely it allows to:
+ * - Save the widget action state to application settings
+ * - Load the widget action state from application settings
+ * - Save widget action default preset to application settings
+ * - Load widget action default preset  from application settings
+ * - Export widget action state to preset file
+ * - Import widget action state from preset file
+ * - Manage presets for the widget action (remove presets etc.)
  *
  * @author Thomas Kroes
  */
@@ -29,7 +37,7 @@ public:
     /** Model columns */
     enum class Column {
         Name,       /** Name of the preset */
-        Content     /** Preset content */
+        DateTime    /** Date and time when the preset was created */
     };
 
     /** Column name and tooltip */
@@ -62,8 +70,45 @@ public:
         bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
     };
 
+    /** Dialog for choosing a preset name */
+    class ChoosePresetNameDialog final : public QDialog
+    {
+    protected:
+
+        /**
+         * Construct a dialog with \p parent
+         * @param presetsAction Pointer to presets action
+         * @param parent Pointer to parent widget
+         */
+        ChoosePresetNameDialog(PresetsAction* presetsAction, QWidget* parent = nullptr);
+
+        /** Get preferred size */
+        QSize sizeHint() const override;
+
+        /** Get minimum size hint*/
+        QSize minimumSizeHint() const override {
+            return sizeHint();
+        }
+
+        /**
+         * Get preset name action
+         * @return Reference to preset name action
+         */
+        StringAction& getPresetNameAction() {
+            return _presetNameAction;
+        }
+
+    private:
+        StringAction    _presetNameAction;  /** Action for picking the preset name */
+        QCompleter      _completer;         /** Complete with existing preset names */
+        TriggerAction   _okAction;          /** Trigger action for accepting the preset name */
+        TriggerAction   _cancelAction;      /** Trigger action for canceling the creation of the preset */
+
+        friend class PresetsAction;
+    };
+
     /** Dialog for managing presets */
-    class Dialog final : public QDialog
+    class ManagePresetsDialog final : public QDialog
     {
     protected:
 
@@ -71,12 +116,10 @@ public:
          * Construct a dialog with owning \p presetsAction
          * @param presetsAction Pointer to presets action
          */
-        Dialog(PresetsAction* presetsAction);
+        ManagePresetsDialog(PresetsAction* presetsAction);
 
         /** Get preferred size */
-        QSize sizeHint() const override {
-            return QSize(640, 480);
-        }
+        QSize sizeHint() const override;
 
         /** Get minimum size hint*/
         QSize minimumSizeHint() const override {
@@ -122,16 +165,16 @@ public:
     QString getPresetType() const;
 
     /**
-     * Get shortcut prefix
-     * @return Shortcut prefix (if empty, no shortcut is created)
-     */
-    QString getShortcutPrefix() const;
-
-    /**
      * Get icon
-     * @return Icon for the recent file type
+     * @return Icon for the preset type
      */
     QIcon getIcon() const;
+
+    /**
+     * Set icon to \p icon
+     * @param icon Icon for the preset type
+     */
+    void setIcon(const QIcon& icon);
 
     /**
      * Get model
@@ -151,8 +194,17 @@ public:
      */
     TriggerAction& getEditAction();
 
-    /** Synchronize presets with settings */
-    void updatePresetsFromSettings();
+    /**
+     * Get presets
+     * @return Variant map containing the presets
+     */
+    const QVariantMap& getPresets() const;
+
+    /** Load presets variant map from application settings */
+    void loadPresetsFromApplicationSettings();
+
+    /** Save presets variant map to application settings */
+    void savePresetsToApplicationSettings();
 
     /**
      * Get recent file paths menu
@@ -166,39 +218,96 @@ public: // Presets
      * Load preset from settings with \p name
      * @param name Name of the preset
      */
-    virtual void loadPreset(const QString& name);
+    void loadPreset(const QString& name);
 
     /**
-     * Save preset to settings with \p name
+     * Save preset to settings with \p name and update application settings
      * @param name Name of the preset
      */
-    virtual void savePreset(const QString& name);
+    void savePreset(const QString& name);
+
+    /**
+     * Remove preset with \p name and update application settings
+     * @param name Name of the preset to remove
+     */
+    void removePreset(const QString& name);
+
+    /**
+     * Remove presets with \p names and update application settings
+     * @param names Names of the preset to remove
+     */
+    void removePresets(const QStringList& names);
 
     /** Load default preset from settings */
-    virtual void loadDefaultPreset();
+    void loadDefaultPreset();
 
     /** Save default preset to settings */
-    virtual void saveDefaultPreset();
+    void saveDefaultPreset();
 
     /** Import preset from file */
-    virtual void importPreset();
+    void importPreset();
 
     /** Export preset to file */
-    virtual void exportPreset();
+    void exportPreset();
+
+private:
+
+    /** Update the model with presets names and date time */
+    void updateModel();
 
 signals:
 
-    void presetsChanged();
+    /**
+     * Signals that preset with \p name is about to be loaded
+     * @param name Name of the preset that is about to be loaded
+     */
+    void presetAboutToBeLoaded(const QString& name);
+
+    /**
+     * Signals that preset with \p name is loaded
+     * @param name Name of the preset that was loaded
+     */
+    void presetLoaded(const QString& name);
+
+    /**
+     * Signals that preset with \p name is saved
+     * @param name Name of the preset that was saved
+     */
+    void presetSaved(const QString& name);
+
+    /**
+     * Signals that preset with \p name is about to be removed
+     * @param name Name of the preset that is about to be removed
+     */
+    void presetAboutToBeRemoved(const QString& name);
+
+    /**
+     * Signals that preset with \p name is removed
+     * @param name Name of the preset that was removed
+     */
+    void presetRemoved(const QString& name);
+
+    /**
+     * Signals that preset with \p filePath is imported
+     * @param filePath File path of the preset that was imported
+     */
+    void presetImported(const QString& filePath);
+
+    /**
+     * Signals that preset with \p filePath is exported
+     * @param filePath File path of the preset that was exported
+     */
+    void presetExported(const QString& filePath);
 
 private:
     WidgetAction*       _sourceAction;      /** Non-owning pointer to widget action of which to save presets */
     QString             _settingsKey;       /** Settings key where the preset will be stored */
     QString             _presetType;        /** Preset type */
-    QString             _shortcutPrefix;    /** Shortcut prefix (if empty, no shortcut is created) */
-    QIcon               _icon;              /** Icon for the recent file type */
-    QStandardItemModel  _model;             /** Model for storing recent file paths */
+    QIcon               _icon;              /** Icon for the preset type */
+    QStandardItemModel  _model;             /** Model for storing preset names and icons */
     FilterModel         _filterModel;       /** Sort/filter model */
-    TriggerAction       _editAction;        /** Action which triggers a dialog in which the recent file paths can be edited */
+    TriggerAction       _editAction;        /** Action which triggers a dialog in which the presets can be managed */
+    QVariantMap         _presets;           /** Cached presets */
 };
 
 }

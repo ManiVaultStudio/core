@@ -18,6 +18,10 @@ LockingAction::LockingAction(QObject* parent, const QString& what /*= ""*/, bool
     setText("Locking");
     initialize(locked);
     updateActionsText();
+
+    setSerializationName("Locking");
+
+    _lockedAction.setSerializationName("Locked");
 }
 
 QString LockingAction::getTypeString() const
@@ -56,14 +60,14 @@ void LockingAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    Serializable::fromVariantMap(_lockedAction, variantMap, "Locked");
+    _lockedAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap LockingAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 
-    Serializable::insertIntoVariantMap(_lockedAction, variantMap, "Locked");
+    _lockedAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

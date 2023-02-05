@@ -5,14 +5,19 @@
 #include <QHeaderView>
 #include <QMenu>
 #include <QLocale>
-#include <QInputDialog>
 #include <QFileDialog>
+#include <QStringListModel>
 
 #ifdef _DEBUG
     #define PRESETS_ACTION_VERBOSE
 #endif
 
 namespace hdps::gui {
+
+QMap<PresetsAction::Column, QPair<QString, QString>> PresetsAction::columnInfo = QMap<PresetsAction::Column, QPair<QString, QString>>({
+    { PresetsAction::Column::Name, { "Name", "Preset name" }},
+    { PresetsAction::Column::DateTime, { "Date and time", "Date and time when the preset was changed" }}
+});
 
 PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const QString& settingsKey /*= ""*/, const QString& presetType /*= ""*/, const QIcon& icon /*= QIcon()*/) :
     WidgetAction(parent),
@@ -22,17 +27,20 @@ PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const 
     _icon(icon),
     _model(this),
     _filterModel(this),
-    _editAction(this, "Edit...")
+    _editAction(this, "Edit..."),
+    _presets()
 {
+    Q_ASSERT(_sourceAction != nullptr);
+
     _editAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     _editAction.setToolTip(QString("Manage %1 presets").arg(_presetType.toLower()));
 
     connect(&_editAction, &TriggerAction::triggered, this, [this]() -> void {
-        Dialog dialog(this);
+        ManagePresetsDialog dialog(this);
         dialog.exec();
     });
 
-    updatePresetsFromSettings();
+    loadPresetsFromApplicationSettings();
 }
 
 QString PresetsAction::getTypeString() const
@@ -70,112 +78,100 @@ TriggerAction& PresetsAction::getEditAction()
     return _editAction;
 }
 
-void PresetsAction::updatePresetsFromSettings()
+void PresetsAction::loadPresetsFromApplicationSettings()
 {
-    _model.setRowCount(0);
+#ifdef PRESETS_ACTION_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 
-    auto presetNames = Application::current()->getSetting(_settingsKey, QVariantMap()).toMap().keys();
+    _presets = Application::current()->getSetting(_settingsKey, QVariantMap()).toMap();
 
-    
-    for (const auto& presetName : presetNames) {
-        auto presetItem = new QStandardItem(_icon, presetName);
+    updateModel();
+}
 
-        //presetItem->setData(dateTime, Qt::EditRole);
+void PresetsAction::savePresetsToApplicationSettings()
+{
+#ifdef PRESETS_ACTION_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 
-        _model.appendRow({ presetItem });
-    }
+    Application::current()->setSetting(_settingsKey, _presets);
 }
 
 QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
 {
+    loadPresetsFromApplicationSettings();
+
     auto menu = new QMenu("Presets", parent);
 
-    //auto& fontAwesome = Application::getIconFont("FontAwesome");
+    auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    //const auto presetIcon = fontAwesome.getIcon("prescription");
+    const auto presetIcon = fontAwesome.getIcon("prescription");
 
-    //menu->setIcon(presetIcon);
+    menu->setIcon(presetIcon);
 
-    //auto savePresetAction = new QAction("Save");
+    auto savePresetAction = new QAction("Save");
 
-    //savePresetAction->setIcon(fontAwesome.getIcon("save"));
+    savePresetAction->setIcon(fontAwesome.getIcon("save"));
 
-    //connect(savePresetAction, &TriggerAction::triggered, this, [this, &fontAwesome]() -> void {
-    //    QInputDialog inputDialog;
+    connect(savePresetAction, &TriggerAction::triggered, this, [this, &fontAwesome, presetIcon]() -> void {
+        ChoosePresetNameDialog choosePresetNameDialog(this);
 
-    //    inputDialog.setWindowIcon(fontAwesome.getIcon("list-alt"));
-    //    inputDialog.setWindowTitle("Choose preset name");
-    //    inputDialog.setInputMode(QInputDialog::TextInput);
-    //    inputDialog.setLabelText("Preset name:");
+        if (choosePresetNameDialog.exec())
+            savePreset(choosePresetNameDialog.getPresetNameAction().getString());
+        });
 
-    //    if (inputDialog.exec())
-    //        savePreset(inputDialog.textValue());
-    //    });
+    menu->addAction(savePresetAction);
 
-    //menu->addAction(savePresetAction);
+    auto saveDefaultPresetAction = new QAction("Save As Default");
 
-    //auto saveDefaultPresetAction = new QAction("Save As Default");
+    saveDefaultPresetAction->setIcon(fontAwesome.getIcon("save"));
 
-    //saveDefaultPresetAction->setIcon(fontAwesome.getIcon("save"));
+    connect(saveDefaultPresetAction, &TriggerAction::triggered, this, &PresetsAction::saveDefaultPreset);
 
-    //connect(saveDefaultPresetAction, &TriggerAction::triggered, this, &ViewPlugin::saveDefaultPreset);
+    menu->addAction(saveDefaultPresetAction);
 
-    //menu->addAction(saveDefaultPresetAction);
+    auto presetNames = _presets.keys();
 
-    //auto presetNames = getSetting("Presets").toMap().keys();
+    if (!presetNames.isEmpty())
+        menu->addSeparator();
 
-    //if (!presetNames.isEmpty())
-    //    menu->addSeparator();
+    if (presetNames.contains("Default")) {
+        presetNames.removeOne("Default");
+        presetNames.insert(0, "Default");
+    }
 
-    //if (presetNames.contains("Default"))
-    //    presetNames.removeOne("Default");
+    for (const auto& presetName : presetNames) {
+        auto loadPresetAction = new QAction(presetName);
 
-    //presetNames.insert(0, "Default");
+        loadPresetAction->setIcon(presetIcon);
 
-    //for (const auto& presetName : presetNames) {
-    //    auto loadPresetAction = new QAction(presetName);
+        connect(loadPresetAction, &TriggerAction::triggered, this, [this, presetName]() -> void {
+            loadPreset(presetName);
+        });
 
-    //    loadPresetAction->setIcon(presetIcon);
+        menu->addAction(loadPresetAction);
 
-    //    connect(loadPresetAction, &TriggerAction::triggered, this, [this, presetName]() -> void {
-    //        loadPreset(presetName);
-    //        });
+        if (presetName == "Default")
+            menu->addSeparator();
+    }
 
-    //    QWidgetAction* pWidgetAction = new QWidgetAction(0); // no parent-owner?
-    //    QLabel* pLabelWidget = new QLabel("Test");           // label widget
-    //    pWidgetAction->setDefaultWidget(pLabelWidget);       // label is a widget
-    //    pWidgetAction->setCheckable(true);
-    //    menu->addAction(pWidgetAction);
-    //    menu->addAction(loadPresetAction);
+    menu->addSeparator();
 
-    //    if (presetName == "Default")
-    //        menu->addSeparator();
-    //}
+    auto importPresetAction = new QAction("Import...");
+    auto exportPresetAction = new QAction("Export...");
 
-    //menu->addSeparator();
+    importPresetAction->setIcon(fontAwesome.getIcon("file-import"));
+    exportPresetAction->setIcon(fontAwesome.getIcon("file-export"));
 
-    //auto importPresetAction = new QAction("Import...");
-    //auto exportPresetAction = new QAction("Export...");
+    menu->addAction(importPresetAction);
+    menu->addAction(exportPresetAction);
 
-    //importPresetAction->setIcon(fontAwesome.getIcon("file-import"));
-    //exportPresetAction->setIcon(fontAwesome.getIcon("file-export"));
+    connect(importPresetAction, &TriggerAction::triggered, this, &PresetsAction::importPreset);
+    connect(exportPresetAction, &TriggerAction::triggered, this, &PresetsAction::exportPreset);
 
-    //menu->addAction(importPresetAction);
-    //menu->addAction(exportPresetAction);
-
-    //connect(importPresetAction, &TriggerAction::triggered, this, &ViewPlugin::importPreset);
-    //connect(exportPresetAction, &TriggerAction::triggered, this, &ViewPlugin::exportPreset);
-
-    //menu->addSeparator();
-
-    //auto editPresetsAction = new QAction("Edit...");
-
-    //editPresetsAction->setIcon(fontAwesome.getIcon("cog"));
-
-    //menu->addAction(editPresetsAction);
-
-    //connect(editPresetsAction, &TriggerAction::triggered, this, [this, presetNames, &fontAwesome]() -> void {
-    //    });
+    menu->addSeparator();
+    menu->addAction(&_editAction);
 
     return menu;
 }
@@ -186,15 +182,17 @@ void PresetsAction::loadPreset(const QString& name)
     qDebug() << __FUNCTION__ << name;
 #endif
 
-    //if (name.isEmpty())
-    //    return;
+    if (name.isEmpty())
+        return;
 
-    //auto presets = getSetting("Presets", QVariantMap()).toMap();
+    if (!_presets.keys().contains(name))
+        return;
 
-    //if (!presets.contains(name))
-    //    return;
-
-    //fromVariantMap(presets[name].toMap());
+    emit presetAboutToBeLoaded(name);
+    {
+        _sourceAction->fromVariantMap(_presets[name].toMap());
+    }
+    emit presetLoaded(name);
 }
 
 void PresetsAction::savePreset(const QString& name)
@@ -203,14 +201,69 @@ void PresetsAction::savePreset(const QString& name)
     qDebug() << __FUNCTION__ << name;
 #endif
 
-    //if (name.isEmpty())
-    //    return;
+    if (name.isEmpty())
+        return;
 
-    //auto presets = getSetting("Presets", QVariantMap()).toMap();
+    auto sourceActionVariantMap = _sourceAction->toVariantMap();
 
-    //presets[name] = toVariantMap();
+    sourceActionVariantMap["DateTime"] = QDateTime::currentDateTime();
 
-    //setSetting("Presets", presets);
+    _presets[name] = sourceActionVariantMap;
+
+    savePresetsToApplicationSettings();
+
+    emit presetSaved(name);
+}
+
+void PresetsAction::removePreset(const QString& name)
+{
+#ifdef PRESETS_ACTION_VERBOSE
+    qDebug() << __FUNCTION__ << name;
+#endif
+
+    if (!_presets.contains(name))
+        return;
+
+    emit presetAboutToBeRemoved(name);
+    {
+        _presets.remove(name);
+        
+        savePresetsToApplicationSettings();
+        loadPresetsFromApplicationSettings();
+    }
+    emit presetRemoved(name);
+}
+
+void PresetsAction::removePresets(const QStringList& names)
+{
+#ifdef PRESETS_ACTION_VERBOSE
+    qDebug() << __FUNCTION__ << names;
+#endif
+
+    if (names.isEmpty())
+        return;
+
+    for (const auto& name : names) {
+        emit presetAboutToBeRemoved(name);
+        {
+            if (_presets.contains(name))
+                _presets.remove(name);
+        }
+        emit presetRemoved(name);
+    }
+
+    savePresetsToApplicationSettings();
+    loadPresetsFromApplicationSettings();
+}
+
+void PresetsAction::loadDefaultPreset()
+{
+    loadPreset("Default");
+}
+
+void PresetsAction::saveDefaultPreset()
+{
+    savePreset("Default");
 }
 
 void PresetsAction::importPreset()
@@ -237,8 +290,11 @@ void PresetsAction::importPreset()
 
     const auto presetFilePath = fileDialog.selectedFiles().first();
 
-    fromJsonFile(presetFilePath);
+    _sourceAction->fromJsonFile(presetFilePath);
+
     savePreset(QFileInfo(presetFilePath).baseName());
+
+    emit presetImported(presetFilePath);
 }
 
 void PresetsAction::exportPreset()
@@ -262,17 +318,57 @@ void PresetsAction::exportPreset()
     if (fileDialog.selectedFiles().count() != 1)
         throw std::runtime_error("Only one file may be selected");
 
-    toJsonFile(fileDialog.selectedFiles().first());
+    const auto presetFilePath = fileDialog.selectedFiles().first();
+
+    _sourceAction->toJsonFile(presetFilePath);
+
+    emit presetExported(presetFilePath);
 }
 
-void PresetsAction::loadDefaultPreset()
+void PresetsAction::updateModel()
 {
-    loadPreset("Default");
+    _model.setRowCount(0);
+
+    auto presetNames = _presets.keys();
+
+    for (const auto& presetName : presetNames) {
+        const auto dateTime = _presets[presetName].toMap()["DateTime"].toDateTime();
+
+        auto nameItem       = new QStandardItem(presetName);
+        auto dateTimeItem   = new QStandardItem(dateTime.toString("ddd MMMM d yy"));
+
+        dateTimeItem->setData(dateTime, Qt::EditRole);
+
+        const auto itemEnabled = presetName != "Default";
+
+        nameItem->setEnabled(itemEnabled);
+        dateTimeItem->setEnabled(itemEnabled);
+
+        _model.appendRow({ nameItem, dateTimeItem });
+    }
+
+    const auto setHeader = [this](Column column) -> void {
+        auto headerItem = new QStandardItem(columnInfo[column].first);
+
+        headerItem->setToolTip(columnInfo[column].second);
+
+        _model.setHorizontalHeaderItem(static_cast<int>(column), headerItem);
+    };
+
+    setHeader(Column::Name);
+    setHeader(Column::DateTime);
 }
 
-void PresetsAction::saveDefaultPreset()
+void PresetsAction::setIcon(const QIcon& icon)
 {
-    savePreset("Default");
+    _icon = icon;
+
+    updateModel();
+}
+
+const QVariantMap& PresetsAction::getPresets() const
+{
+    return _presets;
 }
 
 PresetsAction::FilterModel::FilterModel(QObject* parent /*= nullptr*/) :
@@ -309,15 +405,64 @@ bool PresetsAction::FilterModel::lessThan(const QModelIndex& lhs, const QModelIn
     return false;
 }
 
-PresetsAction::Dialog::Dialog(PresetsAction* presetsAction) :
+PresetsAction::ChoosePresetNameDialog::ChoosePresetNameDialog(PresetsAction* presetsAction, QWidget* parent /*= nullptr*/) :
+    QDialog(parent),
+    _presetNameAction(this, "Preset name"),
+    _completer(this),
+    _okAction(this, "Create"),
+    _cancelAction(this, "Cancel")
+{
+    setWindowTitle(QString("Choose %1 preset name").arg(presetsAction->getPresetType().toLower()));
+    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("prescription"));
+
+    _completer.setCompletionMode(QCompleter::PopupCompletion);
+    _completer.setCaseSensitivity(Qt::CaseInsensitive);
+    _completer.setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+    _completer.setModel(new QStringListModel(presetsAction->getPresets().keys()));
+
+    _presetNameAction.setCompleter(&_completer);
+    _presetNameAction.setClearable(true);
+    _presetNameAction.setPlaceHolderString("Enter preset name here...");
+
+    auto mainLayout = new QGridLayout();
+
+    mainLayout->addWidget(_presetNameAction.createLabelWidget(this), 0, 0);
+    mainLayout->addWidget(_presetNameAction.createWidget(this), 0, 1);
+
+    auto buttonsLayout = new QHBoxLayout();
+
+    buttonsLayout->addStretch(1);
+    buttonsLayout->addWidget(_okAction.createWidget(this));
+    buttonsLayout->addWidget(_cancelAction.createWidget(this));
+
+    mainLayout->addLayout(buttonsLayout, 1, 0, 1, 2);
+
+    setLayout(mainLayout);
+
+    const auto updateOkAction = [this]() -> void {
+        _okAction.setEnabled(!_presetNameAction.getString().isEmpty());
+    };
+
+    connect(&_presetNameAction, &StringAction::stringChanged, this, updateOkAction);
+    connect(&_okAction, &TriggerAction::triggered, this, &QDialog::accept);
+    connect(&_cancelAction, &TriggerAction::triggered, this, &QDialog::reject);
+
+    updateOkAction();
+}
+
+QSize PresetsAction::ChoosePresetNameDialog::sizeHint() const
+{
+    return QSize(300, 0);
+}
+
+PresetsAction::ManagePresetsDialog::ManagePresetsDialog(PresetsAction* presetsAction) :
     QDialog(),
     _hierarchyWidget(this, QString("%1 Preset").arg(presetsAction->getPresetType()), presetsAction->getModel(), const_cast<PresetsAction::FilterModel*>(&presetsAction->getFilterModel())),
     _removeAction(this, "Remove"),
     _okAction(this, "Ok")
 {
-    /*
     setModal(true);
-    setWindowIcon(presetsAction->getIcon());
+    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("prescription"));
     setWindowTitle(QString("Edit %1 presets").arg(presetsAction->getPresetType().toLower()));
 
     auto layout = new QVBoxLayout();
@@ -342,6 +487,7 @@ PresetsAction::Dialog::Dialog(PresetsAction* presetsAction) :
     treeView.setSortingEnabled(true);
     treeView.setTextElideMode(Qt::ElideMiddle);
 
+    _hierarchyWidget.setWindowIcon(windowIcon());
     _hierarchyWidget.getExpandAllAction().setVisible(false);
     _hierarchyWidget.getCollapseAllAction().setVisible(false);
 
@@ -349,41 +495,47 @@ PresetsAction::Dialog::Dialog(PresetsAction* presetsAction) :
 
     treeViewHeader->setStretchLastSection(false);
 
-    treeViewHeader->setSortIndicator(static_cast<int>(RecentFilesAction::Model::Column::DateTime), Qt::DescendingOrder);
+    treeViewHeader->setSortIndicator(static_cast<int>(PresetsAction::Column::Name), Qt::DescendingOrder);
 
-    treeViewHeader->resizeSection(static_cast<int>(RecentFilesAction::Model::Column::DateTime), 150);
+    treeViewHeader->resizeSection(static_cast<int>(PresetsAction::Column::DateTime), 100);
 
-    treeViewHeader->setSectionResizeMode(static_cast<int>(RecentFilesAction::Model::Column::FilePath), QHeaderView::Stretch);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(RecentFilesAction::Model::Column::DateTime), QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(PresetsAction::Column::Name), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(PresetsAction::Column::DateTime), QHeaderView::Fixed);
 
     _removeAction.setEnabled(false);
-
-    const auto updateRemoveReadOnly = [this, recentFilePathsAction]() -> void {
+    
+    const auto updateRemoveReadOnly = [this, presetsAction]() -> void {
         const auto numberOfSelectedRows = _hierarchyWidget.getTreeView().selectionModel()->selectedRows().count();
 
         _removeAction.setText(QString("Remove %1").arg(numberOfSelectedRows >= 1 ? QString::number(numberOfSelectedRows) : ""));
-        _removeAction.setToolTip(QString("Remove %1 recent %2%3").arg(numberOfSelectedRows >= 1 ? QString::number(numberOfSelectedRows) : "", recentFilePathsAction->getFileType().toLower(), numberOfSelectedRows >= 2 ? "s" : ""));
+        _removeAction.setToolTip(QString("Remove %1 recent %2%3").arg(numberOfSelectedRows >= 1 ? QString::number(numberOfSelectedRows) : "", presetsAction->getPresetType().toLower(), numberOfSelectedRows >= 2 ? "s" : ""));
         _removeAction.setEnabled(numberOfSelectedRows >= 1);
     };
 
     connect(_hierarchyWidget.getTreeView().selectionModel(), &QItemSelectionModel::selectionChanged, this, updateRemoveReadOnly);
-    connect(&recentFilePathsAction->getFilterModel(), &QAbstractItemModel::rowsInserted, this, updateRemoveReadOnly);
-    connect(&recentFilePathsAction->getFilterModel(), &QAbstractItemModel::rowsRemoved, this, updateRemoveReadOnly);
+    connect(&presetsAction->getFilterModel(), &QAbstractItemModel::rowsInserted, this, updateRemoveReadOnly);
+    connect(&presetsAction->getFilterModel(), &QAbstractItemModel::rowsRemoved, this, updateRemoveReadOnly);
 
-    connect(&_removeAction, &TriggerAction::triggered, this, [this, recentFilePathsAction]() -> void {
+    connect(&_removeAction, &TriggerAction::triggered, this, [this, presetsAction]() -> void {
         const auto selectedRows = _hierarchyWidget.getTreeView().selectionModel()->selectedRows();
 
         if (selectedRows.isEmpty())
             return;
 
-        for (const auto& selectedRow : selectedRows)
-            recentFilePathsAction->getModel().removeRecentFilePath(selectedRow.siblingAtColumn(static_cast<int>(RecentFilesAction::Model::Column::FilePath)).data().toString());
+        QStringList presetsToRemove;
 
-        recentFilePathsAction->getModel().loadFromSettings();
+        for (const auto& selectedRow : selectedRows)
+            presetsToRemove << selectedRow.siblingAtColumn(static_cast<int>(PresetsAction::Column::Name)).data().toString();
+
+        presetsAction->removePresets(presetsToRemove);
     });
 
-    connect(&_okAction, &TriggerAction::triggered, this, &Dialog::accept);
-    */
+    connect(&_okAction, &TriggerAction::triggered, this, &ManagePresetsDialog::accept);
+}
+
+QSize PresetsAction::ManagePresetsDialog::sizeHint() const
+{
+    return QSize(480, 480);
 }
 
 }
