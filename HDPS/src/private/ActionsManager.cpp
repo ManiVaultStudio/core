@@ -85,4 +85,33 @@ const QAbstractItemModel& ActionsManager::getModel() const
     return _model;
 }
 
+void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
+{
+    //Serializable::fromVariantMap(variantMap);
+
+    //variantMapMustContain(variantMap, "PublicActions");
+
+    //const auto publicActions = variantMap["PublicActions"].toList();
+}
+
+QVariantMap ActionsManager::toVariantMap() const
+{
+    auto variantMap = Serializable::toVariantMap();
+
+    //QVariantList publicActions;
+
+    //for (const auto& action : _actions) {
+    //    if (!action->isPublic())
+    //        continue;
+
+    //    publicActions << action->toVariantMap();
+    //}
+
+    //variantMap.insert({
+    //    { "PublicActions", publicActions }
+    //});
+
+    return variantMap;
+}
+
 }

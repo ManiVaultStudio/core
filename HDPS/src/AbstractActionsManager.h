@@ -25,6 +25,10 @@ class AbstractActionsManager : public AbstractManager
 
 public:
 
+    //using CreateActionFunction = std::function<WidgetAction*(const hdps::Datasets&)>;
+
+public:
+
     /**
      * Construct actions manager with \p parent object
      * @param parent Pointer to parent object
@@ -51,6 +55,11 @@ public:
      * @return Reference to an abstract item model inherited model class
      */
     virtual const QAbstractItemModel& getModel() const = 0;
+
+    template<typename ActionType>
+    void registerActionType(const QString& actionTypeString) {
+
+    }
 
 signals:
 

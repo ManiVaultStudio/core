@@ -25,9 +25,7 @@ public:
     SettingsManagerDialog(QWidget* parent = nullptr);
 
     /** Get preferred size */
-    QSize sizeHint() const override {
-        return QSize(640, 320);
-    }
+    QSize sizeHint() const override;
 
     /** Get minimum size hint*/
     QSize minimumSizeHint() const override {

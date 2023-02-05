@@ -36,12 +36,17 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     _globalPathsGroupAction << settings().getGlobalDataPathAction();
 
     _ioAction.setText("IO");
-    _ioAction.setLabelWidthPercentage(20);
+    _ioAction.setShowLabels(false);
 
     _ioAction << settings().getIgnoreLoadingErrorsAction();
 
     //_groupsAction.addGroupAction(&_globalPathsGroupAction);
     _groupsAction.addGroupAction(&_ioAction);
+}
+
+QSize SettingsManagerDialog::sizeHint() const
+{
+    return QSize(400, 500);
 }
 
 }

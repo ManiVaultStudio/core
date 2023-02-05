@@ -45,6 +45,20 @@ public:
      */
     const QAbstractItemModel& getModel() const override;
 
+public: // Serialization
+
+    /**
+     * Load manager from variant map
+     * @param Variant map representation of the manager
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save manager to variant map
+     * @return Variant map representation of the manager
+     */
+    QVariantMap toVariantMap() const override;
+
 private:
     gui::WidgetActions  _actions;   /** Keep track of allocated actions */
     ActionsModel        _model;     /** Actions model */
