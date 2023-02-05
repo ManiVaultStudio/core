@@ -7,6 +7,7 @@
 #include "actions/OptionsAction.h"
 #include "actions/OptionAction.h"
 #include "actions/LockingAction.h"
+#include "actions/PresetsAction.h"
 
 #include "Plugin.h"
 
@@ -77,39 +78,6 @@ public:
      */
     virtual void setTriggerShortcut(const QKeySequence& keySequence) final;
 
-public: // Presets
-
-    /**
-     * Load preset from settings with \p name
-     * @param name Name of the preset
-     */
-    virtual void loadPreset(const QString& name) final;
-
-    /**
-     * Save preset to settings with \p name
-     * @param name Name of the preset
-     */
-    virtual void savePreset(const QString& name) final;
-
-    /** Load default preset from settings */
-    virtual void loadDefaultPreset() final;
-
-    /** Save default preset to settings */
-    virtual void saveDefaultPreset() final;
-
-    /** Import preset from file */
-    virtual void importPreset() final;
-
-    /** Export preset to file */
-    virtual void exportPreset() final;
-
-    /**
-     * Get menu for saving/restoring presets
-     * @param parent Pointer to parent menu
-     * @return Pointer to presets menu
-     */
-    virtual QMenu* getPresetsMenu(QWidget* parent = nullptr) final;
-
 public: // Serialization
 
     /**
@@ -134,6 +102,8 @@ public: // Action getters
     gui::ToggleAction& getMayMoveAction() { return _mayMoveAction; }
     gui::LockingAction& getLockingAction() { return _lockingAction; }
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
+    gui::TriggerAction& getHelpAction() { return _helpAction; }
+    gui::PresetsAction& getPresetsAction() { return _presetsAction; }
 
 private:
     QWidget                 _widget;                /** Widget representation of the plugin */
@@ -146,6 +116,7 @@ private:
     gui::LockingAction      _lockingAction;         /** Action for toggling whether the view plugin is locked */
     gui::ToggleAction       _visibleAction;         /** Action which determines whether the view plugin is visible or not */
     gui::TriggerAction      _helpAction;            /** Action which triggers documentation */
+    gui::PresetsAction      _presetsAction;         /** Action for managing presets */
     QKeySequence            _triggerShortcut;       /** Shortcut for triggering the plugin */
 };
 

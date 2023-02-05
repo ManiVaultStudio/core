@@ -447,6 +447,7 @@ set(PUBLIC_ACTIONS_HEADERS
     src/actions/VariantAction.h
     src/actions/StatusAction.h
     src/actions/RecentFilesAction.h
+    src/actions/PresetsAction.h
     src/actions/LockingAction.h
     src/actions/GroupSectionTreeItem.h
     src/actions/GroupWidgetTreeItem.h
@@ -503,6 +504,7 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/VariantAction.cpp
     src/actions/StatusAction.cpp
     src/actions/RecentFilesAction.cpp
+    src/actions/PresetsAction.cpp
     src/actions/LockingAction.cpp
     src/actions/GroupSectionTreeItem.cpp
     src/actions/GroupWidgetTreeItem.cpp

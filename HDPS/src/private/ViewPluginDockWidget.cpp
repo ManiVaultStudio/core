@@ -106,7 +106,7 @@ void ViewPluginDockWidget::initialize()
         _settingsMenu.clear();
         
         if (!_viewPlugin->isSystemViewPlugin()) {
-            _settingsMenu.addMenu(_viewPlugin->getPresetsMenu(this));
+            _settingsMenu.addMenu(_viewPlugin->getPresetsAction().getMenu());
             _settingsMenu.addSeparator();
         }
 
