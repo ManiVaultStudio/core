@@ -160,6 +160,23 @@ void WidgetAction::publish(const QString& name /*= ""*/)
             publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
             publishDialog.setWindowTitle("Publish " + text() + " parameter");
 
+            QString suggestedName = "";
+
+            /*
+            auto currentParent = dynamic_cast<WidgetAction*>(parent());
+
+            while (currentParent) {
+                auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(currentParent);
+                
+                if (viewPlugin)
+                    suggestedName = viewPlugin->getGuiName();
+
+                currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());
+            }
+
+            suggestedName += "/" + text();
+            */
+
             auto mainLayout         = new QVBoxLayout();
             auto parameterLayout    = new QHBoxLayout();
             auto label              = new QLabel("Name:");
@@ -201,7 +218,7 @@ void WidgetAction::publish(const QString& name /*= ""*/)
 
             auto publicCopy = getPublicCopy();
 
-            publicCopy->_isPublic = true;
+            publicCopy->makePublic();
 
             if (publicCopy == nullptr)
                 throw std::runtime_error("Public copy not created");
@@ -209,8 +226,6 @@ void WidgetAction::publish(const QString& name /*= ""*/)
             publicCopy->setText(name);
 
             connectToPublicAction(publicCopy);
-
-            actions().addAction(publicCopy);
 
             emit isPublishedChanged(isPublished());
             emit isConnectedChanged(isConnected());
@@ -425,6 +440,16 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
     setVisible(variantMap["Visible"].toBool());
     setSortIndex(variantMap["SortIndex"].toInt());
     setConnectionPermissions(variantMap["ConnectionPermissions"].toInt());
+
+    /*
+    if (variantMap.contains("PublicActionID")) {
+        const auto publicActionId   = variantMap["PublicActionID"].toString();
+        const auto publicAction     = actions().getAction(publicActionId);
+
+        if (publicAction)
+            connectToPublicAction(publicAction);
+    }
+    */
 }
 
 QVariantMap WidgetAction::toVariantMap() const
@@ -437,8 +462,11 @@ QVariantMap WidgetAction::toVariantMap() const
         { "Checked", QVariant::fromValue(isChecked()) },
         { "Visible", QVariant::fromValue(isVisible()) },
         { "SortIndex", QVariant::fromValue(_sortIndex) },
-        { "ConnectionPermissions", QVariant::fromValue(_connectionPermissions) }
+        { "ConnectionPermissions", QVariant::fromValue(_connectionPermissions) },
+        { "PublicActionID", QVariant::fromValue(_publicAction == nullptr ? "" : _publicAction->getId()) }
     });
+
+    
 
     return variantMap;
 }
@@ -599,6 +627,8 @@ void WidgetAction::setStretch(const std::int32_t& stretch)
 void WidgetAction::makePublic()
 {
 	_isPublic = true;
+
+    actions().addPublicAction(this);
 }
 
 }

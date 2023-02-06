@@ -29,10 +29,6 @@ SettingsManager::SettingsManager() :
     _editSettingsAction.setShortcut(QKeySequence("Ctrl+G"));
     _editSettingsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
-    _globalProjectsPathAction.setConnectionPermissionsToNone();
-    _globalWorkspacesPathAction.setConnectionPermissionsToNone();
-    _globalDataPathAction.setConnectionPermissionsToNone();
-
     _globalProjectsPathAction.setSettingsPrefix("GlobalSettings/Paths/Projects", true);
     _globalWorkspacesPathAction.setSettingsPrefix("GlobalSettings/Paths/Workspaces", true);
     _globalDataPathAction.setSettingsPrefix("GlobalSettings/Paths/Data", true);

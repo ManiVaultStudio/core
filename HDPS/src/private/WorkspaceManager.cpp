@@ -84,7 +84,6 @@ WorkspaceManager::WorkspaceManager() :
     _editWorkspaceSettingsAction.setShortcut(QKeySequence("Ctrl+Alt+P"));
     _editWorkspaceSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
     _editWorkspaceSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
-    _editWorkspaceSettingsAction.setConnectionPermissionsToNone();
 
     _importWorkspaceFromProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
     _importWorkspaceFromProjectAction.setToolTip("Import workspace from project");
@@ -266,10 +265,6 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                 descriptionAction.setEnabled(false);
                 tagsAction.setEnabled(false);
                 commentsAction.setEnabled(false);
-
-                descriptionAction.setConnectionPermissionsToNone();
-                tagsAction.setConnectionPermissionsToNone();
-                commentsAction.setConnectionPermissionsToNone();
 
                 auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();

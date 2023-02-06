@@ -41,17 +41,14 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 {
     _filterNameAction.setSearchMode(true);
     _filterNameAction.setClearable(true);
-    _filterNameAction.setConnectionPermissionsToNone();
 
     _filterGroupAction.setText("Filtering");
     _filterGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
     _filterGroupAction.setToolTip("Adjust filtering parameters");
 
     _filterCaseSensitiveAction.setToolTip("Enable/disable search filter case-sensitive");
-    _filterCaseSensitiveAction.setConnectionPermissionsToNone();
 
     _filterRegularExpressionAction.setToolTip("Enable/disable search filter with regular expression");
-    _filterRegularExpressionAction.setConnectionPermissionsToNone();
 
     //if (_filterModel)
     //    _filterGroupAction << _filterNameAction;
@@ -105,8 +102,6 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
         const auto columnVisible = !_treeView.isColumnHidden(columnIndex);
 
         auto columnVisibilityAction = new ToggleAction(this, _model.headerData(columnIndex, Qt::Horizontal, Qt::EditRole).toString(), columnVisible, columnVisible);
-
-        columnVisibilityAction->setConnectionPermissionsToNone();
 
         connect(columnVisibilityAction, &ToggleAction::toggled, this, [this, columnIndex, updateSelectAllCollumnsReadOnly](bool toggled) -> void {
             _treeView.setColumnHidden(columnIndex, !toggled);

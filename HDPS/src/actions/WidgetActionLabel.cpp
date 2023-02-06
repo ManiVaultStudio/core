@@ -128,14 +128,12 @@ QString WidgetActionLabel::getLabelText() const
 
 void WidgetActionLabel::updateNameLabel()
 {
-    auto contextMenu = _widgetAction->getContextMenu();
+    const auto connectionEnabled = _widgetAction->mayPublish(WidgetAction::Gui) || _widgetAction->mayConnect(WidgetAction::Gui) || _widgetAction->mayDisconnect(WidgetAction::Gui);
 
     auto font = _nameLabel.font();
 
-    font.setUnderline(_widgetAction->isEnabled() && !contextMenu->actions().isEmpty());
+    font.setUnderline(_widgetAction->isEnabled() && connectionEnabled);
     font.setItalic(_widgetAction->mayPublish(WidgetAction::Gui) && _widgetAction->isConnected());
-
-    delete contextMenu;
 
     _nameLabel.setFont(font);
     _nameLabel.setEnabled(_widgetAction->isEnabled());

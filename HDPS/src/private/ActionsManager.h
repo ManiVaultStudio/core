@@ -32,6 +32,12 @@ public:
     const gui::WidgetActions& getActions() const override;
 
     /**
+     * Get actions with \p id
+     * @return Pointer to widget action (may return nullptr)
+     */
+    gui::WidgetAction* getAction(const QString& id) override;
+
+    /**
      * Add action to the model
      * @param action Pointer to action
      */
@@ -42,6 +48,18 @@ public:
      * @param action Pointer to action
      */
     void removeAction(gui::WidgetAction* action) override;
+
+    /**
+     * Add public action to the manager
+     * @param action Pointer to public action
+     */
+    void addPublicAction(gui::WidgetAction* action) override;
+
+    /**
+     * Remove public action from the manager
+     * @param action Pointer to public action
+     */
+    void removePublicAction(gui::WidgetAction* action) override;
 
 public: // Serialization
 
@@ -58,7 +76,8 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    gui::WidgetActions  _actions;   /** Keep track of allocated actions */
+    gui::WidgetActions  _actions;           /** Keep track of allocated actions */
+    gui::WidgetActions  _publicActions;     /** Keep track of allocated public actions */
 };
 
 }

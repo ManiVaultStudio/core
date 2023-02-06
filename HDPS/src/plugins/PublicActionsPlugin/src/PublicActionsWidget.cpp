@@ -18,7 +18,7 @@ PublicActionsWidget::PublicActionsWidget(QWidget* parent /*= nullptr*/) :
     _hierarchyWidget(this, "Shared Parameter", _model, &_filterModel)
 {
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cloud"));
-    _hierarchyWidget.getTreeView().setRootIsDecorated(true);
+    _hierarchyWidget.getTreeView().setRootIsDecorated(false);
 
     auto layout = new QVBoxLayout();
 
@@ -30,17 +30,14 @@ PublicActionsWidget::PublicActionsWidget(QWidget* parent /*= nullptr*/) :
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
-    treeView.setColumnHidden(static_cast<int>(ActionsModel::Column::ID), true);
-    treeView.setColumnHidden(static_cast<int>(ActionsModel::Column::Scope), true);
+    treeView.setColumnHidden(static_cast<int>(PublicActionsModel::Column::ID), true);
 
     auto treeViewHeader = treeView.header();
 
     treeViewHeader->setStretchLastSection(false);
 
-    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::Name), 300);
-    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::ID), 100);
-    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::Type), 60);
-    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::Scope), 60);
+    treeViewHeader->resizeSection(static_cast<int>(PublicActionsModel::Column::Name), 300);
+    treeViewHeader->resizeSection(static_cast<int>(PublicActionsModel::Column::ID), 100);
 
     treeViewHeader->setSectionResizeMode(0, QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(1, QHeaderView::Fixed);

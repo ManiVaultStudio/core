@@ -32,6 +32,8 @@ PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const 
 {
     Q_ASSERT(_sourceAction != nullptr);
 
+    setText("Presets");
+
     _editAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     _editAction.setToolTip(QString("Manage %1 presets").arg(_presetType.toLower()));
 
@@ -334,7 +336,7 @@ void PresetsAction::updateModel()
 
         dateTimeItem->setData(dateTime, Qt::EditRole);
 
-        const auto itemEnabled = presetName != "Default";
+        const auto itemEnabled = true;// presetName != "Default";
 
         nameItem->setEnabled(itemEnabled);
         dateTimeItem->setEnabled(itemEnabled);

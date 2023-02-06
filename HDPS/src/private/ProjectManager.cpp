@@ -79,7 +79,6 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _editProjectSettingsAction.setShortcut(QKeySequence("Ctrl+P"));
     _editProjectSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
     _editProjectSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
-    _editProjectSettingsAction.setConnectionPermissionsToNone();
 
     _newProjectMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
     _newProjectMenu.setTitle("New Project");
@@ -340,11 +339,6 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 tagsAction.setEnabled(false);
                 commentsAction.setEnabled(false);
 
-                titleAction.setConnectionPermissionsToNone();
-                descriptionAction.setConnectionPermissionsToNone();
-                tagsAction.setConnectionPermissionsToNone();
-                commentsAction.setConnectionPermissionsToNone();
-
                 auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
 
@@ -504,8 +498,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
                 auto compressionLayout = new QHBoxLayout();
 
-                compressionLayout->addWidget(currentProject->getCompressionEnabledAction().createWidget(&fileDialog));
-                compressionLayout->addWidget(currentProject->getCompressionLevelAction().createWidget(&fileDialog), 1);
+                compressionLayout->addWidget(currentProject->getCompressionAction().getEnabledAction().createWidget(&fileDialog));
+                compressionLayout->addWidget(currentProject->getCompressionAction().getLevelAction().createWidget(&fileDialog), 1);
                 
                 fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
                 
@@ -553,8 +547,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
                     Project project(projectJsonFilePath, true);
 
-                    currentProject->getCompressionEnabledAction().setChecked(project.getCompressionEnabledAction().isChecked());
-                    currentProject->getCompressionLevelAction().setValue(project.getCompressionLevelAction().getValue());
+                    currentProject->getCompressionAction().getEnabledAction().setChecked(project.getCompressionAction().getEnabledAction().isChecked());
+                    currentProject->getCompressionAction().getLevelAction().setValue(project.getCompressionAction().getLevelAction().getValue());
                 });
 
                 fileDialog.exec();
@@ -570,8 +564,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
-            if (currentProject->getCompressionEnabledAction().isChecked())
-                qDebug().noquote() << "Saving HDPS project to" << filePath << "with compression level" << currentProject->getCompressionLevelAction().getValue();
+            if (currentProject->getCompressionAction().getEnabledAction().isChecked())
+                qDebug().noquote() << "Saving HDPS project to" << filePath << "with compression level" << currentProject->getCompressionAction().getLevelAction().getValue();
             else
                 qDebug().noquote() << "Saving HDPS project to" << filePath << "without compression";
 
@@ -613,7 +607,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
             workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 
-            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, currentProject->getCompressionEnabledAction().isChecked() ? currentProject->getCompressionLevelAction().getValue() : 0, "");
+            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, currentProject->getCompressionAction().getEnabledAction().isChecked() ? currentProject->getCompressionAction().getLevelAction().getValue() : 0, "");
 
             _recentProjectsAction.addRecentFilePath(filePath);
 
