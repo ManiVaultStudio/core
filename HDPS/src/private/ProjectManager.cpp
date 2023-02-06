@@ -329,15 +329,17 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 
-                StringAction titleAction(this, "Title");
-                StringAction descriptionAction(this, "Description");
-                StringAction tagsAction(this, "Tags");
-                StringAction commentsAction(this, "Comments");
+                StringAction    titleAction(this, "Title");
+                StringAction    descriptionAction(this, "Description");
+                StringAction    tagsAction(this, "Tags");
+                StringAction    commentsAction(this, "Comments");
+                StringAction    contributorsAction(this, "Contributors");
 
                 titleAction.setEnabled(false);
                 descriptionAction.setEnabled(false);
                 tagsAction.setEnabled(false);
                 commentsAction.setEnabled(false);
+                contributorsAction.setEnabled(false);
 
                 auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
@@ -354,6 +356,9 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileDialog), rowCount + 3, 0);
                 fileDialogLayout->addWidget(commentsAction.createWidget(&fileDialog), rowCount + 3, 1, 1, 2);
 
+                fileDialogLayout->addWidget(contributorsAction.createLabelWidget(&fileDialog), rowCount + 4, 0);
+                fileDialogLayout->addWidget(contributorsAction.createWidget(&fileDialog), rowCount + 4, 1, 1, 2);
+
                 connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
                         return;
@@ -366,6 +371,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                     descriptionAction.setString(project.getDescriptionAction().getString());
                     tagsAction.setString(project.getTagsAction().getStrings().join(", "));
                     commentsAction.setString(project.getCommentsAction().getString());
+                    contributorsAction.setString(project.getContributorsAction().getStrings().join(","));
                 });
 
                 if (fileDialog.exec() == 0)
