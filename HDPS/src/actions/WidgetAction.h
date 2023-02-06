@@ -13,6 +13,7 @@ namespace hdps {
 
 class DataHierarchyItem;
 class Application;
+class AbstractActionsManager;
 
 namespace plugin {
     class Plugin;

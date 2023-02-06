@@ -17,12 +17,9 @@ namespace hdps
 
 ActionsManager::ActionsManager() :
     AbstractActionsManager(),
-    _actions(),
-    _model()
+    _actions()
 {
     setObjectName("Actions");
-
-    qDebug() << "------------------" << QMetaType::fromName("Toggle").isValid();
 }
 
 ActionsManager::~ActionsManager()
@@ -49,6 +46,11 @@ void ActionsManager::reset()
     {
     }
     endReset();
+}
+
+const hdps::gui::WidgetActions& ActionsManager::getActions() const
+{
+    return _actions;
 }
 
 void ActionsManager::addAction(WidgetAction* action)
@@ -82,11 +84,6 @@ void ActionsManager::removeAction(WidgetAction* action)
     emit actionRemoved(actionId);
 }
 
-const QAbstractItemModel& ActionsManager::getModel() const
-{
-    return _model;
-}
-
 void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
@@ -100,12 +97,12 @@ void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
         const auto metaTypeId   = QMetaType::type(metaType.toLatin1());
         const auto metaObject   = QMetaType::metaObjectForType(metaTypeId);
 
-        if (metaObject) {
-            auto action = qobject_cast<WidgetAction*>(metaObject->newInstance());
+        //if (metaObject) {
+        //    auto action = qobject_cast<WidgetAction*>(metaObject->newInstance());
 
-            makeActionPublic(action);
-            addAction(action);
-        }
+        //    makeActionPublic(action);
+        //    addAction(action);
+        //}
 
         //qDebug() << publicAction.toMap()["ID"];
         //qDebug() << publicAction.toMap()["Type"];

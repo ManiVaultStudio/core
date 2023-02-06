@@ -1133,7 +1133,7 @@ add_subdirectory(src/plugins/ClusterData)
 add_subdirectory(src/plugins/ImageData)
 add_subdirectory(src/plugins/DataHierarchyPlugin)
 add_subdirectory(src/plugins/DataPropertiesPlugin)
-add_subdirectory(src/plugins/ActionsPlugin)
+add_subdirectory(src/plugins/PublicActionsPlugin)
 add_subdirectory(src/plugins/LoggingPlugin)
 
 # Qt Advanced docking system

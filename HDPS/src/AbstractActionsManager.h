@@ -3,7 +3,6 @@
 #include "AbstractManager.h"
 
 #include <QObject>
-#include <QAbstractItemModel>
 
 namespace hdps
 {
@@ -39,6 +38,12 @@ public:
     }
 
     /**
+     * Get all actions in the manager
+     * @return List of all actions in the manager
+     */
+    virtual const gui::WidgetActions& getActions() const = 0;
+
+    /**
      * Add action to the manager
      * @param action Pointer to action
      */
@@ -49,12 +54,6 @@ public:
      * @param action Pointer to action
      */
     virtual void removeAction(gui::WidgetAction* action) = 0;
-
-    /**
-     * Get model which is associated with the manager
-     * @return Reference to an abstract item model inherited model class
-     */
-    virtual const QAbstractItemModel& getModel() const = 0;
 
 protected:
 

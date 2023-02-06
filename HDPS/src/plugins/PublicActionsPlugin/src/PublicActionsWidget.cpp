@@ -1,4 +1,4 @@
-#include "ActionsWidget.h"
+#include "PublicActionsWidget.h"
 
 #include <CoreInterface.h>
 #include <AbstractActionsManager.h>
@@ -11,12 +11,13 @@
 
 using namespace hdps;
 
-ActionsWidget::ActionsWidget(QWidget* parent /*= nullptr*/) :
+PublicActionsWidget::PublicActionsWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
+    _model(this),
     _filterModel(this),
-    _hierarchyWidget(this, "Action", const_cast<QAbstractItemModel&>(Application::core()->getActionsManager().getModel()), &_filterModel)
+    _hierarchyWidget(this, "Shared Parameter", _model, &_filterModel)
 {
-    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("running"));
+    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cloud"));
     _hierarchyWidget.getTreeView().setRootIsDecorated(true);
 
     auto layout = new QVBoxLayout();

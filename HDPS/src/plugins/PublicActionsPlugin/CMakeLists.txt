@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-set(PROJECT "ActionsPlugin")
+set(PROJECT "PublicActionsPlugin")
 
 PROJECT(${PROJECT})
 
@@ -21,26 +21,35 @@ file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 set(PLUGIN
-    src/ActionsPlugin.h
-    src/ActionsPlugin.cpp
+    src/PublicActionsPlugin.h
+    src/PublicActionsPlugin.cpp
+)
+
+set(MODELS
+    src/PublicActionsModel.h
+    src/PublicActionsModel.cpp
+    src/PublicActionsFilterModel.h
+    src/PublicActionsFilterModel.cpp
 )
 
 set(WIDGETS
-    src/ActionsWidget.h
-    src/ActionsWidget.cpp
+    src/PublicActionsWidget.h
+    src/PublicActionsWidget.cpp
 )
 
 set(AUX
-    src/ActionsPlugin.json
+    src/PublicActionsPlugin.json
 )
 
 set(SOURCES
 	${PLUGIN}
+    ${MODELS}
 	${WIDGETS}
 	${AUX}
 )
 
 source_group(Plugin FILES ${PLUGIN})
+source_group(Models FILES ${MODELS})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
 

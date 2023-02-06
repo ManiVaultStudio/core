@@ -1,0 +1,39 @@
+#include "PublicActionsPlugin.h"
+
+#include <Application.h>
+
+Q_PLUGIN_METADATA(IID "nl.BioVault.PublicActionsPlugin")
+
+using namespace hdps;
+
+PublicActionsPlugin::PublicActionsPlugin(const PluginFactory* factory) :
+    ViewPlugin(factory),
+    _publicActionsWidget(nullptr)
+{
+}
+
+void PublicActionsPlugin::init()
+{
+    auto layout = new QVBoxLayout();
+
+    layout->setContentsMargins(6, 6, 6, 6);
+
+    layout->addWidget(&_publicActionsWidget);
+
+    getWidget().setLayout(layout);
+}
+
+PublicActionsPluginFactory::PublicActionsPluginFactory() :
+    ViewPluginFactory(true)
+{
+}
+
+QIcon PublicActionsPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+{
+    return Application::getIconFont("FontAwesome").getIcon("link", color);
+}
+
+ViewPlugin* PublicActionsPluginFactory::produce()
+{
+    return new PublicActionsPlugin(this);
+}

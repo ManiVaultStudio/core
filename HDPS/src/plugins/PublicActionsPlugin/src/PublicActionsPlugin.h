@@ -1,41 +1,41 @@
 #pragma once
 
-#include "ActionsWidget.h"
+#include "PublicActionsWidget.h"
 
 #include <ViewPlugin.h>
 
 using namespace hdps::plugin;
 
 /**
- * Actions  plugin
+ * Public actions plugin
  *
  * This plugin provides a user interface for viewing/configuring (public) actions.
  *
  * @author Thomas Kroes
  */
-class ActionsPlugin : public ViewPlugin
+class PublicActionsPlugin : public ViewPlugin
 {
     Q_OBJECT
     
 public:
-    ActionsPlugin(const PluginFactory* factory);
+    PublicActionsPlugin(const PluginFactory* factory);
     
     void init() override;
 
 private:
-    ActionsWidget     _actionsWidget;       /** Widget for interaction with (public) actions */
+    PublicActionsWidget     _publicActionsWidget;       /** Widget for interaction with (public) actions */
 };
 
-class ActionsPluginFactory : public ViewPluginFactory
+class PublicActionsPluginFactory : public ViewPluginFactory
 {
     Q_INTERFACES(hdps::plugin::ViewPluginFactory hdps::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "nl.BioVault.ActionsPlugin" FILE "ActionsPlugin.json")
+    Q_PLUGIN_METADATA(IID "nl.BioVault.PublicActionsPlugin" FILE "PublicActionsPlugin.json")
     
 public:
 
     /** Constructor */
-    ActionsPluginFactory();
+    PublicActionsPluginFactory();
 
     /**
      * Get plugin icon

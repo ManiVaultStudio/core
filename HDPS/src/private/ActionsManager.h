@@ -4,8 +4,6 @@
 
 #include <models/ActionsModel.h>
 
-#include <QList>
-
 namespace hdps
 {
 
@@ -28,6 +26,12 @@ public:
     void reset() override;
 
     /**
+     * Get all actions in the manager
+     * @return List of all actions in the manager
+     */
+    const gui::WidgetActions& getActions() const override;
+
+    /**
      * Add action to the model
      * @param action Pointer to action
      */
@@ -38,12 +42,6 @@ public:
      * @param action Pointer to action
      */
     void removeAction(gui::WidgetAction* action) override;
-
-    /**
-     * Get model which is associated with the manager
-     * @return Reference to an abstract item model inherited model class
-     */
-    const QAbstractItemModel& getModel() const override;
 
 public: // Serialization
 
@@ -61,7 +59,6 @@ public: // Serialization
 
 private:
     gui::WidgetActions  _actions;   /** Keep track of allocated actions */
-    ActionsModel        _model;     /** Actions model */
 };
 
 }
