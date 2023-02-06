@@ -102,13 +102,7 @@ public:
      * @param toggled Toggled
      * @param defaultToggled Default toggled
      */
-    ToggleAction(QObject* parent, const QString& title = "", const bool& toggled = false, const bool& defaultToggled = false);
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE ToggleAction(QObject* parent, const QString& title = "", const bool& toggled = false, const bool& defaultToggled = false);
 
     /**
      * Initialize the toggle action
@@ -197,3 +191,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::ToggleAction)
+
+inline const auto toggleActionMetaTypeId = qRegisterMetaType<hdps::gui::ToggleAction*>("ToggleAction");

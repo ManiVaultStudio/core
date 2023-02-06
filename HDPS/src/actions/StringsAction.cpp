@@ -19,11 +19,6 @@ StringsAction::StringsAction(QObject* parent, const QString& title /*= ""*/, con
     initialize(strings, defaultStrings);
 }
 
-QString StringsAction::getTypeString() const
-{
-    return "Strings";
-}
-
 void StringsAction::initialize(const QStringList& strings /*= QStringList()*/, const QStringList& defaultStrings /*= QStringList()*/)
 {
     setStrings(strings);

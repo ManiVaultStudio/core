@@ -22,11 +22,6 @@ ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const
     initialize(toggled, defaultToggled);
 }
 
-QString ToggleAction::getTypeString() const
-{
-    return "Toggle";
-}
-
 void ToggleAction::initialize(const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/)
 {
     setChecked(toggled);

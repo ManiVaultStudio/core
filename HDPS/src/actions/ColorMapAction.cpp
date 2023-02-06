@@ -42,11 +42,6 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     connect(&_settingsAction.getDiscreteAction().getDiscretizeAlphaAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
 }
 
-QString ColorMapAction::getTypeString() const
-{
-    return "ColorMap";
-}
-
 void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString& defaultColorMap /*= ""*/)
 {
     _colorMapFilterModel.setSourceModel(ColorMapModel::getGlobalInstance());

@@ -25,13 +25,7 @@ public:
      * @param what What is to be locked
      * @param locked Locked
      */
-    LockingAction(QObject* parent, const QString& what = "", bool locked = false);
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE LockingAction(QObject* parent, const QString& what = "", bool locked = false);
 
     /**
      * Initialize the toggle action

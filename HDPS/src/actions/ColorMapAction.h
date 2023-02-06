@@ -75,13 +75,7 @@ public:
      * @param colorMap Current color map
      * @param defaultColorMap Default color map
      */
-    ColorMapAction(QObject* parent, const QString& title = "", const util::ColorMap::Type& colorMapType = util::ColorMap::Type::OneDimensional, const QString& colorMap = "RdYlBu", const QString& defaultColorMap = "RdYlBu");
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE ColorMapAction(QObject* parent, const QString& title = "", const util::ColorMap::Type& colorMapType = util::ColorMap::Type::OneDimensional, const QString& colorMap = "RdYlBu", const QString& defaultColorMap = "RdYlBu");
 
     /**
      * Initialize the color map action

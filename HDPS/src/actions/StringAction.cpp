@@ -27,11 +27,6 @@ StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const
     _trailingAction.setVisible(false);
 }
 
-QString StringAction::getTypeString() const
-{
-    return "String";
-}
-
 void StringAction::initialize(const QString& string /*= ""*/, const QString& defaultString /*= ""*/)
 {
     setString(string);

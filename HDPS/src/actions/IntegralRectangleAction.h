@@ -54,13 +54,7 @@ public:
      * @param rectangle Rectangle
      * @param defaultRectangle Default rectangle
      */
-    IntegralRectangleAction(QObject * parent, const QString& title, const QRect& rectangle = QRect(), const QRect& defaultRectangle = QRect());
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE IntegralRectangleAction(QObject * parent, const QString& title, const QRect& rectangle = QRect(), const QRect& defaultRectangle = QRect());
 
     /**
      * Initialize the action

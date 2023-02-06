@@ -56,9 +56,16 @@ public:
      */
     virtual const QAbstractItemModel& getModel() const = 0;
 
-    template<typename ActionType>
-    void registerActionType(const QString& actionTypeString) {
+protected:
 
+    /**
+     * Make widget \p action public
+     * @param action Pointer to action
+     */
+    virtual void makeActionPublic(gui::WidgetAction* action) final {
+        Q_ASSERT(action != nullptr);
+
+        action->makePublic();
     }
 
 signals:

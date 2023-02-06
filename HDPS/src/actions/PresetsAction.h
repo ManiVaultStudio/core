@@ -144,13 +144,7 @@ public:
      * @param presetType Type of preset
      * @param icon Icon in menu
      */
-    PresetsAction(QObject* parent, WidgetAction* sourceAction, const QString& settingsKey = "", const QString& presetType = "", const QIcon& icon = QIcon());
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE PresetsAction(QObject* parent, WidgetAction* sourceAction, const QString& settingsKey = "", const QString& presetType = "", const QIcon& icon = QIcon());
 
     /**
      * Get settings key

@@ -52,14 +52,6 @@ public:
         friend class TriggerAction;
     };
 
-public:
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
-
 protected:
 
     /**
@@ -95,7 +87,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    TriggerAction(QObject* parent, const QString& title = "");
+    Q_INVOKABLE TriggerAction(QObject* parent, const QString& title = "");
 
 private:
 

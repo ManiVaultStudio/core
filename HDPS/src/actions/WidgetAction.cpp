@@ -51,7 +51,11 @@ WidgetAction::~WidgetAction()
 
 QString WidgetAction::getTypeString() const
 {
-    return "";
+    auto typeString = QString(metaObject()->className());
+
+    typeString.replace("hdps::gui::", "");
+
+    return typeString;
 }
 
 WidgetAction* WidgetAction::getParentWidgetAction()
@@ -206,7 +210,7 @@ void WidgetAction::publish(const QString& name /*= ""*/)
 
             connectToPublicAction(publicCopy);
 
-            Application::core()->getActionsManager().addAction(publicCopy);
+            actions().addAction(publicCopy);
 
             emit isPublishedChanged(isPublished());
             emit isConnectedChanged(isConnected());
@@ -535,6 +539,11 @@ void WidgetAction::setConnectionPermissionsToNone(bool recursive /*= false*/)
     setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None), recursive);
 }
 
+void WidgetAction::setConnectionPermissionsToAll(bool recursive /*= false*/)
+{
+    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::All), recursive);
+}
+
 bool WidgetAction::isResettable()
 {
     return false;
@@ -585,6 +594,11 @@ std::int32_t WidgetAction::getStretch() const
 void WidgetAction::setStretch(const std::int32_t& stretch)
 {
     _stretch = stretch;
+}
+
+void WidgetAction::makePublic()
+{
+	_isPublic = true;
 }
 
 }

@@ -193,13 +193,7 @@ public:
      * @param options Options to select from
      * @param selectedOptions Initial selected options
      */
-    OptionsAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QStringList& selectedOptions = QStringList(), const QStringList& defaultSelectedOptions = QStringList());
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE OptionsAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QStringList& selectedOptions = QStringList(), const QStringList& defaultSelectedOptions = QStringList());
 
     /**
      * Initialize the option action

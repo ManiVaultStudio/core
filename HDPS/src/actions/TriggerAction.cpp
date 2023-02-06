@@ -62,19 +62,6 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
     update();
 }
 
-QString TriggerAction::getTypeString() const
-{
-    return "Trigger";
-}
-
-//void TriggerAction::trigger(TriggerAction* sender /*= nullptr*/)
-//{
-//    if (sender == this)
-//        return;
-//
-//    QAction::trigger();
-//}
-
 QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     if (dynamic_cast<QMenu*>(parent))

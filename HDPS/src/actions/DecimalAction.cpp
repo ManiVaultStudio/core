@@ -29,11 +29,6 @@ DecimalAction::DecimalAction(QObject * parent, const QString& title, const float
     initialize(minimum, maximum, value, defaultValue, numberOfDecimals);
 }
 
-QString DecimalAction::getTypeString() const
-{
-    return "Decimal";
-}
-
 void DecimalAction::initialize(const float& minimum, const float& maximum, const float& value, const float& defaultValue, const std::uint32_t& numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/)
 {
     _minimum            = std::min(minimum, _maximum);

@@ -29,11 +29,6 @@ RecentFilesAction::RecentFilesAction(QObject* parent, const QString& settingsKey
     });
 }
 
-QString RecentFilesAction::getTypeString() const
-{
-    return "RecentFilePaths";
-}
-
 QMenu* RecentFilesAction::getMenu()
 {
     auto menu = new QMenu();

@@ -21,11 +21,6 @@ ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const Q
     setDefaultWidgetFlags(WidgetFlag::Basic);
 }
 
-QString ColorAction::getTypeString() const
-{
-    return "Color";
-}
-
 void ColorAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/)
 {
     setColor(color);

@@ -26,11 +26,6 @@ IntegralAction::IntegralAction(QObject * parent, const QString& title, const std
     initialize(minimum, maximum, value, defaultValue);
 }
 
-QString IntegralAction::getTypeString() const
-{
-    return "Integral";
-}
-
 void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue)
 {
     _minimum        = std::min(minimum, _maximum);

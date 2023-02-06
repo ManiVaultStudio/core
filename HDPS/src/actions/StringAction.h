@@ -81,13 +81,7 @@ public:
      * @param string String
      * @param defaultString Default string
      */
-    StringAction(QObject* parent, const QString& title = "", const QString& string = "", const QString& defaultString = "");
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE StringAction(QObject* parent, const QString& title = "", const QString& string = "", const QString& defaultString = "");
 
     /**
      * Initialize the string action

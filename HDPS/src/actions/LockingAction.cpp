@@ -24,11 +24,6 @@ LockingAction::LockingAction(QObject* parent, const QString& what /*= ""*/, bool
     _lockedAction.setSerializationName("Locked");
 }
 
-QString LockingAction::getTypeString() const
-{
-    return "Locking";
-}
-
 void LockingAction::initialize(bool locked /*= false*/)
 {
     _lockedAction.setIcon(Application::getIconFont("FontAwesome").getIcon("lock"));

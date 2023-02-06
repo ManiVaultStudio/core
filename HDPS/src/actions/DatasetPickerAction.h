@@ -153,13 +153,7 @@ public:
      * @param title Title of the action
      * @param mode Picker mode
      */
-    DatasetPickerAction(QObject* parent, const QString& title, Mode mode = Mode::Automatic);
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE DatasetPickerAction(QObject* parent = nullptr, const QString& title = "", Mode mode = Mode::Automatic);
 
     /** Get current mode */
     Mode getMode() const;
@@ -298,3 +292,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::DatasetPickerAction)
+
+inline const auto datasetPickerActionMetaTypeId = qRegisterMetaType<hdps::gui::DatasetPickerAction*>("DatasetPickerAction");

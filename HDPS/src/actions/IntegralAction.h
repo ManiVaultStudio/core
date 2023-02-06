@@ -88,13 +88,7 @@ public:
      * @param maximum Maximum value
      * @param defaultValue Default value
      */
-    IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum = INIT_MIN, const std::int32_t& maximum = INIT_MAX, const std::int32_t& value = INIT_VALUE, const std::int32_t& defaultValue = INIT_DEFAULT_VALUE);
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum = INIT_MIN, const std::int32_t& maximum = INIT_MAX, const std::int32_t& value = INIT_VALUE, const std::int32_t& defaultValue = INIT_DEFAULT_VALUE);
 
     /**
      * Initialize the integral action

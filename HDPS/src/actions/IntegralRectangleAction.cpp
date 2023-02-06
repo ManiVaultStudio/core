@@ -15,11 +15,6 @@ IntegralRectangleAction::IntegralRectangleAction(QObject * parent, const QString
     initialize(rectangle, defaultRectangle);
 }
 
-QString IntegralRectangleAction::getTypeString() const
-{
-    return "IntegralRectangle";
-}
-
 void IntegralRectangleAction::initialize(const QRect& rectangle /*= QRect()*/, const QRect& defaultRectangle /*= QRect()*/)
 {
     _rectangle          = rectangle;

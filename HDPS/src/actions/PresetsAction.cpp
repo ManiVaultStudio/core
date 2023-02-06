@@ -43,11 +43,6 @@ PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const 
     loadPresetsFromApplicationSettings();
 }
 
-QString PresetsAction::getTypeString() const
-{
-    return "Presets";
-}
-
 QString PresetsAction::getSettingsKey() const
 {
     return _settingsKey;

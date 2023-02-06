@@ -21,6 +21,8 @@ ActionsManager::ActionsManager() :
     _model()
 {
     setObjectName("Actions");
+
+    qDebug() << "------------------" << QMetaType::fromName("Toggle").isValid();
 }
 
 ActionsManager::~ActionsManager()
@@ -87,29 +89,47 @@ const QAbstractItemModel& ActionsManager::getModel() const
 
 void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    //Serializable::fromVariantMap(variantMap);
+    Serializable::fromVariantMap(variantMap);
 
-    //variantMapMustContain(variantMap, "PublicActions");
+    variantMapMustContain(variantMap, "PublicActions");
 
-    //const auto publicActions = variantMap["PublicActions"].toList();
+    const auto publicActions = variantMap["PublicActions"].toList();
+
+    for (const auto& publicAction : publicActions) {
+        const auto metaType     = publicAction.toMap()["Type"].toString();
+        const auto metaTypeId   = QMetaType::type(metaType.toLatin1());
+        const auto metaObject   = QMetaType::metaObjectForType(metaTypeId);
+
+        if (metaObject) {
+            auto action = qobject_cast<WidgetAction*>(metaObject->newInstance());
+
+            makeActionPublic(action);
+            addAction(action);
+        }
+
+        //qDebug() << publicAction.toMap()["ID"];
+        //qDebug() << publicAction.toMap()["Type"];
+    }
+
+    qDebug() << "test";
 }
 
 QVariantMap ActionsManager::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
 
-    //QVariantList publicActions;
+    QVariantList publicActions;
 
-    //for (const auto& action : _actions) {
-    //    if (!action->isPublic())
-    //        continue;
+    for (const auto& action : _actions) {
+        if (!action->isPublic())
+            continue;
 
-    //    publicActions << action->toVariantMap();
-    //}
+        publicActions << action->toVariantMap();
+    }
 
-    //variantMap.insert({
-    //    { "PublicActions", publicActions }
-    //});
+    variantMap.insert({
+        { "PublicActions", publicActions }
+        });
 
     return variantMap;
 }

@@ -56,13 +56,7 @@ public:
      * @param rectangle Rectangle
      * @param defaultRectangle Default rectangle
      */
-    DecimalRectangleAction(QObject * parent, const QString& title, const QRectF& rectangle = QRectF(), const QRectF& defaultRectangle = QRectF());
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE DecimalRectangleAction(QObject * parent, const QString& title, const QRectF& rectangle = QRectF(), const QRectF& defaultRectangle = QRectF());
 
     /**
      * Initialize the action

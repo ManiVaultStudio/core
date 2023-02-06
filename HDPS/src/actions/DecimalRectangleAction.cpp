@@ -15,11 +15,6 @@ DecimalRectangleAction::DecimalRectangleAction(QObject * parent, const QString& 
     initialize(rectangle, defaultRectangle);
 }
 
-QString DecimalRectangleAction::getTypeString() const
-{
-    return "DecimalRectangle";
-}
-
 void DecimalRectangleAction::initialize(const QRectF& rectangle /*= QRectF()*/, const QRectF& defaultRectangle /*= QRectF()*/)
 {
     _rectangle          = rectangle;

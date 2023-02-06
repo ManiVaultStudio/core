@@ -86,7 +86,7 @@ public:
      * Get type string
      * @return Widget action type in string format
      */
-    virtual QString getTypeString() const;
+    virtual QString getTypeString() const final;
 
     /**
      * Get parent widget action
@@ -288,6 +288,12 @@ public: // Linking
      */
     virtual void setConnectionPermissionsToNone(bool recursive = false) final;
 
+    /**
+     * Set connection permissions to all
+     * @param recursive Whether to recursively set child connection permissions
+     */
+    virtual void setConnectionPermissionsToAll(bool recursive = false) final;
+
 protected: // Linking
 
     /**
@@ -401,6 +407,9 @@ protected:
      */
     virtual QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags);
 
+    /** Make widget action public */
+    virtual void makePublic() final;
+
 public: // Serialization
 
     /**
@@ -479,6 +488,8 @@ private:
     bool                        _highlighted;               /** Whether the action is in a highlighted state or not */
     QSize                       _popupSizeHint;             /** Size hint of the popup */
     std::int32_t                _configuration;             /** Configuration flags */
+
+    friend class AbstractActionsManager;
 };
 
 /** List of widget actions */

@@ -74,13 +74,7 @@ public:
      * @param defaultValue Default value
      * @param numberOfDecimals Number of decimals
      */
-    DecimalAction(QObject * parent, const QString& title, const float& minimum = INIT_MIN, const float& maximum = INIT_MAX, const float& value = INIT_VALUE, const float& defaultValue = INIT_DEFAULT_VALUE, const std::uint32_t& numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE DecimalAction(QObject * parent, const QString& title, const float& minimum = INIT_MIN, const float& maximum = INIT_MAX, const float& value = INIT_VALUE, const float& defaultValue = INIT_DEFAULT_VALUE, const std::uint32_t& numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
 
     /**
      * Initialize the decimal action
@@ -195,3 +189,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::DecimalAction)
+
+inline const auto decimalActionMetaTypeId = qRegisterMetaType<hdps::gui::DecimalAction*>("DecimalAction");

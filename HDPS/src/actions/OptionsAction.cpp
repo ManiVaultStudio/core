@@ -30,11 +30,6 @@ OptionsAction::OptionsAction(QObject* parent, const QString& title /*= ""*/, con
     });
 }
 
-QString OptionsAction::getTypeString() const
-{
-    return "Options";
-}
-
 void OptionsAction::initialize(const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/)
 {
     setOptions(options);
