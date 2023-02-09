@@ -182,6 +182,14 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
 
     actions().addPrivateActionToPublicAction(this, publicAction);
 
+    const auto updateReadOnly = [this]() -> void {
+        setEnabled(_publicAction->isEnabled());
+    };
+
+    updateReadOnly();
+
+    connect(_publicAction, &QAction::changed, this, updateReadOnly);
+
     emit isConnectedChanged(isConnected());
 }
 
@@ -197,6 +205,10 @@ void WidgetAction::disconnectFromPublicAction()
 #endif
 
     actions().removePrivateActionFromPublicAction(this, _publicAction);
+
+    disconnect(_publicAction, &QAction::changed, this, nullptr);
+
+    setEnabled(true);
 
     emit isConnectedChanged(isConnected());
 }

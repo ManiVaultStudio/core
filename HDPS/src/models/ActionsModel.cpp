@@ -26,6 +26,13 @@ ActionsModel::Item::Item(ActionsModel* actionsModel, gui::WidgetAction* widgetAc
 
     setData(QVariant::fromValue(widgetAction));
 
+    const auto updateReadOnly = [this]() -> void {
+        setForeground(_widgetAction->isEnabled() ? Qt::black : Qt::gray);
+    };
+
+    connect(_widgetAction, &WidgetAction::changed, this, updateReadOnly);
+    connect(_widgetAction, &WidgetAction::scopeChanged, this, updateReadOnly);
+
     switch (_column) {
         case Column::Name:
         {
@@ -33,8 +40,16 @@ ActionsModel::Item::Item(ActionsModel* actionsModel, gui::WidgetAction* widgetAc
 
             updateName();
 
-            connect(_widgetAction, &WidgetAction::scopeChanged, this, &Item::updateName);
             connect(_widgetAction, &WidgetAction::changed, this, &Item::updateName);
+
+            connect(_widgetAction, &WidgetAction::scopeChanged, this, [this]() -> void {
+                if (_widgetAction->isPublic())
+                    setData(_widgetAction->text(), Qt::EditRole);
+                
+                setCheckState(_widgetAction->isEnabled() ? Qt::Checked : Qt::Unchecked);
+                setCheckable(_widgetAction->isPublic());
+                setEditable(_widgetAction->isPublic());
+            });
 
             connect(_widgetAction, &WidgetAction::actionConnected, this, [this, actionsModel](WidgetAction* action) -> void {
                 const QList<QStandardItem*> row {
@@ -99,7 +114,10 @@ void ActionsModel::Item::updateName()
     if (_widgetAction.isNull())
         return;
 
-    setText(_widgetAction->isPrivate() ? _widgetAction->getPath() : _widgetAction->text());
+    if (_widgetAction->isPrivate())
+        setText(_widgetAction->getPath());
+
+    setEditable(_widgetAction->isPublic());
 }
 
 void ActionsModel::Item::updateId()
@@ -158,6 +176,20 @@ ActionsModel::ActionsModel(QObject* parent /*= nullptr*/) :
     setHeaderData(static_cast<int>(Column::ID), Qt::Horizontal, "Globally unique identifier of the parameter", Qt::ToolTipRole);
     setHeaderData(static_cast<int>(Column::Type), Qt::Horizontal, "Type of parameter", Qt::ToolTipRole);
     setHeaderData(static_cast<int>(Column::Scope), Qt::Horizontal, "Whether the parameter is public or private", Qt::ToolTipRole);
+
+    connect(this, &QStandardItemModel::itemChanged, this, [this](QStandardItem* standardItem) -> void {
+        auto actionItem = static_cast<Item*>(standardItem);
+
+        if (actionItem->column() == static_cast<int>(Column::Name)) {
+            if (actionItem->getAction()->isPrivate())
+                return;
+
+            if (standardItem->isCheckable())
+                actionItem->getAction()->setEnabled(standardItem->checkState() == Qt::Checked);
+
+            actionItem->getAction()->setText(standardItem->data(Qt::EditRole).toString());
+        }
+    });
 }
 
 void ActionsModel::addAction(WidgetAction* action)

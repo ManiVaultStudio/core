@@ -51,6 +51,11 @@ void WidgetActionContextMenu::initialize()
     if (_widgetAction->mayDisconnect(WidgetAction::Gui) && _widgetAction->isConnected())
         addAction(&_disconnectAction);
 
+    if (_widgetAction->isConnected())
+        _disconnectAction.setText(QString("Disconnect from %1").arg(_widgetAction->getPublicAction()->text()));
+    else
+        _disconnectAction.setText("Disconnect");
+
     if (_widgetAction->mayConnect(WidgetAction::Gui)) {
         auto connectMenu = new QMenu("Connect to:");
 
