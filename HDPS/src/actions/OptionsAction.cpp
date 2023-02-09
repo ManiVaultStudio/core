@@ -96,6 +96,17 @@ QStringList OptionsAction::getSelectedOptions() const
     return selectedOptions;
 }
 
+QList<int> OptionsAction::getSelectedOptionIndices() const
+{
+    QList<int> selectedOptionIndices;
+
+    for (int i = 0; i < _optionsModel.rowCount(); i++)
+        if (_optionsModel.item(i, 0)->checkState() == Qt::Checked)
+            selectedOptionIndices << i;
+
+    return selectedOptionIndices;
+}
+
 QStringList OptionsAction::getDefaultSelectedOptions() const
 {
     return _defaultSelectedOptions;

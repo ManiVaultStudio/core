@@ -41,12 +41,21 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, QWidget* targetWidge
 {
     setText("Pixel selection");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+    setSerializationName("PixelSelection");
 
     initOverlay();
     initType();
     initModifier();
     initOperations();
     initMiscellaneous();
+
+    _overlayColorAction.setSerializationName("OverlayColor");
+    _overlayOpacityAction.setSerializationName("OverlayOpacity");
+    _typeAction.setSerializationName("Type");
+    _modifierReplaceAction.setSerializationName("ModifierReplace");
+    _modifierAddAction.setSerializationName("ModifierAdd");
+    _modifierSubtractAction.setSerializationName("ModifierSubtract");
+    _notifyDuringSelectionAction.setSerializationName("NotifyDuringSelection");
 
     setShortcutsEnabled(true);
 
@@ -431,6 +440,34 @@ bool PixelSelectionAction::eventFilter(QObject* object, QEvent* event)
     }
 
     return QObject::eventFilter(object, event);
+}
+
+void PixelSelectionAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    WidgetAction::fromVariantMap(variantMap);
+
+    _overlayColorAction.fromParentVariantMap(variantMap);
+    _overlayOpacityAction.fromParentVariantMap(variantMap);
+    _typeAction.fromParentVariantMap(variantMap);
+    _modifierReplaceAction.fromParentVariantMap(variantMap);
+    _modifierAddAction.fromParentVariantMap(variantMap);
+    _modifierSubtractAction.fromParentVariantMap(variantMap);
+    _notifyDuringSelectionAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap PixelSelectionAction::toVariantMap() const
+{
+    auto variantMap = WidgetAction::toVariantMap();
+
+    _overlayColorAction.insertIntoVariantMap(variantMap);
+    _overlayOpacityAction.insertIntoVariantMap(variantMap);
+    _typeAction.insertIntoVariantMap(variantMap);
+    _modifierReplaceAction.insertIntoVariantMap(variantMap);
+    _modifierAddAction.insertIntoVariantMap(variantMap);
+    _modifierSubtractAction.insertIntoVariantMap(variantMap);
+    _notifyDuringSelectionAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
 }

@@ -1,7 +1,10 @@
 #include "ActionsFilterModel.h"
 #include "ActionsModel.h"
+#include "CoreInterface.h"
 
 #include <QDebug>
+
+using namespace hdps::gui;
 
 namespace hdps
 {
@@ -9,9 +12,22 @@ namespace hdps
 ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
     _typeFilterAction(this, "Type"),
-    _scopeFilterAction(this, "Scope", { "Public", "Private" }, { "Public" })
+    _typeCompleter(this),
+    _scopeFilterAction(this, "Scope", { "Private", "Public" }, { "Private", "Public" })
 {
     setRecursiveFilteringEnabled(true);
+
+    _typeFilterAction.setClearable(true);
+    _typeFilterAction.setCompleter(&_typeCompleter);
+
+    _scopeFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+
+    connect(&_typeFilterAction, &StringAction::stringChanged, this, &ActionsFilterModel::invalidate);
+    connect(&_scopeFilterAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
+
+    connect(&actions().getActionsModel(), &ActionsModel::actionTypesChanged, this, [this](const QStringList& actionTypes) -> void {
+        _typeFilterAction.getCompleter()->setModel(new QStringListModel(actionTypes));
+    });
 }
 
 bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -28,12 +44,37 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
             return false;
     }
 
+    const auto typeFilter   = _typeFilterAction.getString();
+
+    if (!typeFilter.isEmpty()) {
+        const auto type = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Type)), Qt::DisplayRole).toString();
+
+        if (type != typeFilter)
+            return false;
+    }
+
+    if (!parent.isValid()) {
+        const auto scope = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Scope)), Qt::UserRole + 1).toInt();
+
+        if (scope == 0 && !_scopeFilterAction.getSelectedOptionIndices().contains(0))
+            return false;
+
+        if (scope == 1 && !_scopeFilterAction.getSelectedOptionIndices().contains(1))
+            return false;
+    }
+
     return true;
 }
 
 bool ActionsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
 {
     return lhs.data().toString() < rhs.data().toString();
+}
+
+WidgetAction* ActionsFilterModel::getAction(std::int32_t rowIndex)
+{
+    const auto sourceModelIndex = mapToSource(index(rowIndex, 0));
+    return static_cast<ActionsModel*>(sourceModel())->getAction(sourceModelIndex.row());
 }
 
 }

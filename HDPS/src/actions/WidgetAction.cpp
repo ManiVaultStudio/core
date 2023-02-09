@@ -14,7 +14,6 @@
 #include <QFileDialog>
 #include <QJsonArray>
 #include <QDialog>
-#include <QDialogButtonBox>
 
 #ifdef _DEBUG
     #define WIDGET_ACTION_VERBOSE
@@ -24,6 +23,11 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
+QMap<WidgetAction::Scope, QString> WidgetAction::scopeNames {
+    { WidgetAction::Scope::Private, "Private" },
+    { WidgetAction::Scope::Public, "Public" }
+};
+
 WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     QWidgetAction(parent),
     util::Serializable("WidgetAction"),
@@ -31,7 +35,7 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     _sortIndex(-1),
     _stretch(-1),
     _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
-    _isPublic(false),
+    _scope(Scope::Private),
     _publicAction(nullptr),
     _connectedActions(),
     _settingsPrefix(),
@@ -40,22 +44,15 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default))
 {
     if (core()->isInitialized())
-        actions().addAction(this);
+        actions().addActionToModel(this);
 }
 
 WidgetAction::~WidgetAction()
 {
-    if (core()->isInitialized())
-        actions().removeAction(this);
-}
+    if (!core()->isInitialized())
+        return;
 
-QString WidgetAction::getTypeString() const
-{
-    auto typeString = QString(metaObject()->className());
-
-    typeString.replace("hdps::gui::", "");
-
-    return typeString;
+    actions().removeActionFromModel(this);
 }
 
 WidgetAction* WidgetAction::getParentWidgetAction()
@@ -126,9 +123,26 @@ bool WidgetAction::isHighlighted() const
     return _highlighted;
 }
 
+WidgetAction::Scope WidgetAction::getScope() const
+{
+    return _scope;
+}
+
+bool WidgetAction::isPrivate() const
+{
+    return _scope == Scope::Private;
+}
+
 bool WidgetAction::isPublic() const
 {
-    return _isPublic;
+    return _scope == Scope::Public;
+}
+
+void WidgetAction::makePublic()
+{
+    _scope = Scope::Public;
+
+    emit scopeChanged(_scope);
 }
 
 bool WidgetAction::isPublished() const
@@ -150,104 +164,23 @@ bool WidgetAction::isConnected() const
 
 void WidgetAction::publish(const QString& name /*= ""*/)
 {
-    try
-    {
-        if (name.isEmpty()) {
-            auto& fontAwesome = Application::getIconFont("FontAwesome");
-
-            QDialog publishDialog;
-
-            publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
-            publishDialog.setWindowTitle("Publish " + text() + " parameter");
-
-            QString suggestedName = "";
-
-            /*
-            auto currentParent = dynamic_cast<WidgetAction*>(parent());
-
-            while (currentParent) {
-                auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(currentParent);
-                
-                if (viewPlugin)
-                    suggestedName = viewPlugin->getGuiName();
-
-                currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());
-            }
-
-            suggestedName += "/" + text();
-            */
-
-            auto mainLayout         = new QVBoxLayout();
-            auto parameterLayout    = new QHBoxLayout();
-            auto label              = new QLabel("Name:");
-            auto lineEdit           = new QLineEdit(text());
-
-            parameterLayout->addWidget(label);
-            parameterLayout->addWidget(lineEdit);
-
-            mainLayout->addLayout(parameterLayout);
-
-            auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-
-            dialogButtonBox->button(QDialogButtonBox::Ok)->setText("Publish");
-            dialogButtonBox->button(QDialogButtonBox::Ok)->setToolTip("Publish the parameter");
-            dialogButtonBox->button(QDialogButtonBox::Cancel)->setToolTip("Cancel publishing");
-
-            connect(dialogButtonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, &publishDialog, &QDialog::accept);
-            connect(dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, &publishDialog, &QDialog::reject);
-
-            mainLayout->addWidget(dialogButtonBox);
-
-            publishDialog.setLayout(mainLayout);
-            publishDialog.setFixedWidth(300);
-
-            const auto updateOkButtonReadOnly = [dialogButtonBox, lineEdit]() -> void {
-                dialogButtonBox->button(QDialogButtonBox::Ok)->setEnabled(!lineEdit->text().isEmpty());
-            };
-
-            connect(lineEdit, &QLineEdit::textChanged, this, updateOkButtonReadOnly);
-
-            updateOkButtonReadOnly();
-
-            if (publishDialog.exec() == QDialog::Accepted)
-                publish(lineEdit->text());
-        }
-        else {
-            if (isPublished())
-                throw std::runtime_error("Action is already published");
-
-            auto publicCopy = getPublicCopy();
-
-            publicCopy->makePublic();
-
-            if (publicCopy == nullptr)
-                throw std::runtime_error("Public copy not created");
-
-            publicCopy->setText(name);
-
-            connectToPublicAction(publicCopy);
-
-            emit isPublishedChanged(isPublished());
-            emit isConnectedChanged(isConnected());
-        }
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to publish " + text(), e);
-    }
-    catch (...)
-    {
-        exceptionMessageBox("Unable to publish " + text());
-    }
+    hdps::actions().publishPrivateAction(this, name);
 }
 
 void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
 {
     Q_ASSERT(publicAction != nullptr);
 
+    if (_publicAction == nullptr)
+        return;
+
+#ifdef WIDGET_ACTION_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     _publicAction = publicAction;
 
-    _publicAction->connectPrivateAction(this);
+    actions().addPrivateActionToPublicAction(this, publicAction);
 
     emit isConnectedChanged(isConnected());
 }
@@ -256,31 +189,16 @@ void WidgetAction::disconnectFromPublicAction()
 {
     Q_ASSERT(_publicAction != nullptr);
 
-    _publicAction->disconnectPrivateAction(this);
+    if (_publicAction == nullptr)
+        return;
+
+#ifdef WIDGET_ACTION_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    actions().removePrivateActionFromPublicAction(this, _publicAction);
 
     emit isConnectedChanged(isConnected());
-}
-
-void WidgetAction::connectPrivateAction(WidgetAction* privateAction)
-{
-    Q_ASSERT(privateAction != nullptr);
-
-    _connectedActions << privateAction;
-
-    emit actionConnected(privateAction);
-
-    connect(privateAction, &WidgetAction::destroyed, this, [this, privateAction]() -> void {
-        disconnectPrivateAction(privateAction);
-    });
-}
-
-void WidgetAction::disconnectPrivateAction(WidgetAction* privateAction)
-{
-    Q_ASSERT(privateAction != nullptr);
-
-    _connectedActions.removeOne(privateAction);
-
-    emit actionDisconnected(privateAction);
 }
 
 WidgetAction* WidgetAction::getPublicAction()
@@ -289,6 +207,11 @@ WidgetAction* WidgetAction::getPublicAction()
 }
 
 const QVector<WidgetAction*> WidgetAction::getConnectedActions() const
+{
+    return _connectedActions;
+}
+
+QVector<WidgetAction*>& WidgetAction::getConnectedActions()
 {
     return _connectedActions;
 }
@@ -363,23 +286,16 @@ void WidgetAction::saveToSettings()
     Application::current()->setSetting(_settingsPrefix, toVariantMap());
 }
 
-QString WidgetAction::getSettingsPath() const
+QString WidgetAction::getPath() const
 {
     QStringList actionPath;
 
     auto currentParent = dynamic_cast<WidgetAction*>(parent());
 
-    const auto getPathName = [](const WidgetAction* widgetAction) -> QString {
-        if (!widgetAction->objectName().isEmpty())
-            return widgetAction->objectName();
-
-        return widgetAction->text();
-    };
-
-    actionPath << getPathName(this);
+    actionPath << text();
 
     while (currentParent) {
-        actionPath.insert(actionPath.begin(), getPathName(currentParent));
+        actionPath.insert(actionPath.begin(), currentParent->text());
 
         currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());
     }
@@ -614,6 +530,16 @@ void WidgetAction::setConfiguration(std::int32_t configuration, bool recursive /
     }
 }
 
+QString WidgetAction::getTypeString(bool humanFriendly /*= false*/) const
+{
+    const auto className = QString(metaObject()->className());
+
+    if (humanFriendly)
+        return className.split("::").last().replace("Action", "");
+    
+    return className;
+}
+
 std::int32_t WidgetAction::getStretch() const
 {
     return _stretch;
@@ -622,13 +548,6 @@ std::int32_t WidgetAction::getStretch() const
 void WidgetAction::setStretch(const std::int32_t& stretch)
 {
     _stretch = stretch;
-}
-
-void WidgetAction::makePublic()
-{
-	_isPublic = true;
-
-    actions().addPublicAction(this);
 }
 
 }

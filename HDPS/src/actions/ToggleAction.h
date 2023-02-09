@@ -192,6 +192,8 @@ protected:
 
 }
 
-//Q_DECLARE_METATYPE(hdps::gui::ToggleAction)
+Q_DECLARE_METATYPE(hdps::gui::ToggleAction*)
 
-inline const auto toggleActionMetaTypeId = qRegisterMetaType<hdps::gui::ToggleAction*>("ToggleAction");
+const auto actionMetaTypeId = qRegisterMetaType<hdps::gui::ToggleAction*>("ToggleAction");
+//const auto actionMetaTypeId = registerAction<hdps::gui::ToggleAction>("ToggleAction");
+

@@ -28,10 +28,12 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetAction* 
     connect(_widgetAction, &WidgetAction::isPublishedChanged, this, updatePublishAction);
 
     connect(&_publishAction, &TriggerAction::triggered, this, [this]() -> void {
-        _widgetAction->publish();
+        hdps::actions().publishPrivateAction(_widgetAction);
     });
 
-    connect(&_disconnectAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::disconnectFromPublicAction);
+    connect(&_disconnectAction, &TriggerAction::triggered, this, [this]() -> void {
+        hdps::actions().disconnectPrivateActionFromPublicAction(_widgetAction);
+    });
 
     updatePublishAction();
 
@@ -56,20 +58,27 @@ void WidgetActionContextMenu::initialize()
 
         auto actionsFilterModel = new ActionsFilterModel(this);
 
+        actionsFilterModel->setSourceModel(&hdps::actions().getActionsModel());
         actionsFilterModel->getScopeFilterAction().setSelectedOptions({ "Public" });
-        actionsFilterModel->getTypeFilterAction().setString(_widgetAction->getTypeString());
+        actionsFilterModel->getTypeFilterAction().setString(_widgetAction->getTypeString(true));
 
         const auto numberOfRows = actionsFilterModel->rowCount();
 
         for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
-            const auto publicAction = static_cast<WidgetAction*>(actionsFilterModel->mapToSource(actionsFilterModel->index(rowIndex, 0)).internalPointer());
+            auto publicAction = actionsFilterModel->getAction(rowIndex);
+
+            if (!publicAction)
+                continue;
+
+            if (publicAction == _widgetAction->getPublicAction())
+                continue;
 
             auto connectAction = new QAction(publicAction->text());
 
             connectAction->setToolTip("Connect " + _widgetAction->text() + " to " + publicAction->text());
 
             connect(connectAction, &QAction::triggered, this, [this, publicAction]() -> void {
-                _widgetAction->connectToPublicAction(publicAction);
+                hdps::actions().connectPrivateActionToPublicAction(_widgetAction, publicAction);
             });
 
             connectMenu->addAction(connectAction);

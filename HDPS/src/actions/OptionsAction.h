@@ -246,6 +246,12 @@ public:
     QStringList getSelectedOptions() const;
 
     /**
+     * Get selected option indices
+     * @return Selected options indices
+     */
+    QList<int> getSelectedOptionIndices() const;
+
+    /**
      * Get default selected options
      * @return Default selected options
      */

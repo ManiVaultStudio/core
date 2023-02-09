@@ -4,21 +4,13 @@
 #include "actions/OptionsAction.h"
 
 #include <QSortFilterProxyModel>
+#include <QCompleter>
 
 namespace hdps
 {
 
 class ActionsFilterModel : public QSortFilterProxyModel
 {
-public:
-
-    /** Action scope filter flags */
-    enum ScopeFilter {
-        None        = 0x00001,      /** Do no filter actions based on their scope */
-        Private     = 0x00002,      /** Filter private actions */
-        Public      = 0x00004       /** Filter public actions */
-    };
-
 public:
 
     /** Construct with parent \p parent object
@@ -41,6 +33,13 @@ public:
      */
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
 
+    /**
+     * Get action for filter model \p index
+     * @param rowIndex Row index to retrieve the action for
+     * @return Pointer to action (nullptr if not found)
+     */
+    gui::WidgetAction* getAction(std::int32_t rowIndex);
+
 public: // Action getters
 
     gui::StringAction& getTypeFilterAction() { return _typeFilterAction; }
@@ -48,6 +47,7 @@ public: // Action getters
 
 private:
     gui::StringAction   _typeFilterAction;      /** Action for filtering by action type */
+    QCompleter          _typeCompleter;         /** Completer for type filter */
     gui::OptionsAction  _scopeFilterAction;     /** Action for filtering based on action scope */
 };
 

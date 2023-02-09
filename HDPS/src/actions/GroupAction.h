@@ -237,7 +237,7 @@ private:
  */
 inline QDebug operator << (QDebug debug, const GroupAction& groupAction)
 {
-    debug << groupAction.getSettingsPath();
+    debug << groupAction.getPath();
 
     return debug.space();
 }
@@ -251,7 +251,7 @@ inline QDebug operator << (QDebug debug, const GroupAction* groupAction)
 {
     Q_ASSERT(groupAction != nullptr);
 
-    debug << groupAction->getSettingsPath();
+    debug << groupAction->getPath();
 
     return debug.space();
 }

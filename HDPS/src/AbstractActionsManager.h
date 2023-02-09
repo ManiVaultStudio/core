@@ -2,6 +2,9 @@
 
 #include "AbstractManager.h"
 
+#include "models/ActionsModel.h"
+#include "models/ActionsFilterModel.h"
+
 #include <QObject>
 
 namespace hdps
@@ -21,10 +24,6 @@ namespace gui {
 class AbstractActionsManager : public AbstractManager
 {
     Q_OBJECT
-
-public:
-
-    //using CreateActionFunction = std::function<WidgetAction*(const hdps::Datasets&)>;
 
 public:
 
@@ -50,28 +49,104 @@ public:
     virtual gui::WidgetAction* getAction(const QString& id) = 0;
 
     /**
-     * Add action to the manager
+     * Add action to the actions model
      * @param action Pointer to action
      */
-    virtual void addAction(gui::WidgetAction* action) = 0;
+    virtual void addActionToModel(gui::WidgetAction* action) = 0;
 
     /**
-     * Remove action from the manager
+     * Remove action from the actions model
      * @param action Pointer to action
      */
-    virtual void removeAction(gui::WidgetAction* action) = 0;
+    virtual void removeActionFromModel(gui::WidgetAction* action) = 0;
+
+public: // Linking
 
     /**
-     * Add public action to the manager
-     * @param action Pointer to public action
+     * Publish \p privateAction so that other private actions can connect to it
+     * @param privateAction Pointer to private action to publish
+     * @param name Name of the published widget action (if empty, a name choosing dialog will popup)
      */
-    virtual void addPublicAction(gui::WidgetAction* action) = 0;
+    virtual void publishPrivateAction(gui::WidgetAction* privateAction, const QString& name = "") = 0;
 
     /**
-     * Remove public action from the manager
-     * @param action Pointer to public action
+     * Connect \p privateAction to \p publicAction
+     * @param privateAction Pointer to private action
+     * @param publicAction Pointer to public action
      */
-    virtual void removePublicAction(gui::WidgetAction* action) = 0;
+    virtual void connectPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) {
+        Q_ASSERT(privateAction != nullptr);
+        Q_ASSERT(publicAction != nullptr);
+
+        if (privateAction == nullptr || publicAction == nullptr)
+            return;
+
+        qDebug() << __FUNCTION__;
+
+        privateAction->_publicAction = publicAction;
+
+        privateAction->connectToPublicAction(publicAction);
+    }
+
+    /**
+     * Disconnect \p privateAction from public action
+     * @param privateAction Pointer to private action
+     */
+    virtual void disconnectPrivateActionFromPublicAction(gui::WidgetAction* privateAction) final {
+        Q_ASSERT(privateAction != nullptr);
+
+        if (privateAction == nullptr)
+            return;
+
+        qDebug() << __FUNCTION__;
+
+        if (privateAction->isConnected())
+            privateAction->disconnectFromPublicAction();
+
+        privateAction->_publicAction = nullptr;
+    }
+
+protected:
+
+    void addPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) {
+        Q_ASSERT(privateAction != nullptr);
+        Q_ASSERT(publicAction != nullptr);
+
+        if (privateAction == nullptr || publicAction == nullptr)
+            return;
+
+        qDebug() << __FUNCTION__;
+
+        publicAction->getConnectedActions() << privateAction;
+
+        emit publicAction->actionConnected(privateAction);
+
+        connect(privateAction, &gui::WidgetAction::destroyed, this, [&]() -> void {
+            removePrivateActionFromPublicAction(privateAction, publicAction);
+        });
+    }
+
+    void removePrivateActionFromPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) {
+        Q_ASSERT(privateAction != nullptr);
+        Q_ASSERT(publicAction != nullptr);
+
+        if (privateAction == nullptr || publicAction == nullptr)
+            return;
+
+        qDebug() << __FUNCTION__;
+
+        publicAction->getConnectedActions().removeOne(privateAction);
+
+        emit publicAction->actionDisconnected(privateAction);
+    }
+
+public: // Model
+
+    /**
+     * Get model which contains all actions
+     * @return Reference to actions model
+     */
+    virtual ActionsModel& getActionsModel() = 0;
 
 protected:
 
@@ -105,23 +180,7 @@ signals:
      */
     void actionRemoved(const QString& actionId);
 
-    /**
-     * Signals that public \p action is added to the manager
-     * @param action Pointer to public action that is added to the manager
-     */
-    void publicActionAdded(gui::WidgetAction* action);
-
-    /**
-     * Signals that public \p action is about to be removed from the manager
-     * @param action Pointer to public action that is about to be removed from the manager
-     */
-    void publicActionAboutToBeRemoved(gui::WidgetAction* action);
-
-    /**
-     * Signals that public action with \p actionId was removed from the manager
-     * @param actionId Globally unique identifier of the public action that was removed from the manager
-     */
-    void publicActionRemoved(const QString& actionId);
+    friend class gui::WidgetAction;
 };
 
 }

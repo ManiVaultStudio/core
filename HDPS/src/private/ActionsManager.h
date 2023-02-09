@@ -38,28 +38,31 @@ public:
     gui::WidgetAction* getAction(const QString& id) override;
 
     /**
-     * Add action to the model
+     * Add action to the actions model
      * @param action Pointer to action
      */
-    void addAction(gui::WidgetAction* action) override;
+    void addActionToModel(gui::WidgetAction* action) override;
 
     /**
-     * Remove action from the model
+     * Remove action from the actions model
      * @param action Pointer to action
      */
-    void removeAction(gui::WidgetAction* action) override;
+    void removeActionFromModel(gui::WidgetAction* action) override;
 
     /**
-     * Add public action to the manager
-     * @param action Pointer to public action
+     * Publish \p privateAction so that other private actions can connect to it
+     * @param privateAction Pointer to private action to publish
+     * @param name Name of the published widget action (if empty, a name choosing dialog will popup)
      */
-    void addPublicAction(gui::WidgetAction* action) override;
+    void publishPrivateAction(gui::WidgetAction* privateAction, const QString& name = "") override;
+
+public: // Model
 
     /**
-     * Remove public action from the manager
-     * @param action Pointer to public action
+     * Get model which contains all actions
+     * @return Reference to actions model
      */
-    void removePublicAction(gui::WidgetAction* action) override;
+    ActionsModel& getActionsModel() override;
 
 public: // Serialization
 
@@ -76,8 +79,7 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    gui::WidgetActions  _actions;           /** Keep track of allocated actions */
-    gui::WidgetActions  _publicActions;     /** Keep track of allocated public actions */
+    ActionsModel    _model;     /** Actions model */
 };
 
 }

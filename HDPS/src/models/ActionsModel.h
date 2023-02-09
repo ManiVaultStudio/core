@@ -3,12 +3,22 @@
 #include "actions/WidgetAction.h"
 
 #include <QStandardItemModel>
+#include <QPointer>
 
 namespace hdps
 {
 
-class ActionsModel : public QStandardItemModel
+/**
+ * Actions model class
+ *
+ * Standard item model class for actions
+ *
+ * @author Thomas Kroes
+ */
+class ActionsModel final : public QStandardItemModel
 {
+    Q_OBJECT
+
 public:
 
     /** Action columns */
@@ -19,6 +29,48 @@ public:
         Scope,      /** Scope of the action (whether the action is public or private) */
 
         Count
+    };
+
+protected:
+
+    /**
+     * Item class
+     *
+     * Standard item class for displaying actions model column
+     *
+     * @author Thomas Kroes
+     */
+    class Item final : public QStandardItem, public QObject
+    {
+    public:
+
+        /**
+         * Construct item from \p actionsModel, \p widgetAction and \p column
+         * @param actionsModel Pointer to actions model
+         * @param widgetAction Pointer to source widget action
+         * @param column Column to display
+         */
+        Item(ActionsModel* actionsModel, gui::WidgetAction* widgetAction, const Column& column);
+
+        /** Destructor  */
+        ~Item();
+
+        /**
+         * Get pointer to source widget action
+         * @return Pointer to source widget action
+         */
+        gui::WidgetAction* getAction();
+
+    private:
+        void updateName();      /** Update item for name column */
+        void updateId();        /** Update item for identifier column */
+        void updateType();      /** Update item for type column */
+        void updateScope();     /** Update item for scope column */
+
+    private:
+        ActionsModel*               _actionsModel;  /** Pointer to parent actions model */
+        QPointer<gui::WidgetAction> _widgetAction;  /** Pointer to source widget action */
+        Column                      _column;        /** Column to display */
     };
 
 public:
@@ -40,6 +92,59 @@ public:
      * @param action Pointer to action to remove
      */
     void removeAction(gui::WidgetAction* action);
+
+    /**
+     * Get all actions in the manager
+     * @return List of all actions in the manager
+     */
+    const gui::WidgetActions& getActions() const;
+
+    /**
+     * Get set of action types
+     * @return List action types
+     */
+    const QStringList getActionTypes() const;
+
+    /**
+     * Get action for model \p index
+     * @param index Model index to retrieve the action for
+     * @return Pointer to action (nullptr if not found)
+     */
+    gui::WidgetAction* getAction(const QModelIndex& index);
+
+    /**
+     * Get action for model \p rowIndex
+     * @param rowIndex Row index to retrieve the action for
+     * @return Pointer to action (nullptr if not found)
+     */
+    gui::WidgetAction* getAction(std::int32_t rowIndex);
+
+protected:
+
+    /**
+     * Add \p actionType
+     * @param actionType Action type to add
+     */
+    void addActionType(const QString& actionType);
+
+    /**
+     * Remove \p actionType
+     * @param actionType Action type to remove
+     */
+    void removeActionType(const QString& actionType);
+
+signals:
+
+    /**
+     * Signals that the \p actionTypes changed
+     * @param actionTypes Action types
+     */
+    void actionTypesChanged(const QStringList& actionTypes);
+
+private:
+    QMap<QString, std::int32_t>   _actionTypes;     /** Number of rows per action type */
+
+    friend class Item;
 };
 
 }

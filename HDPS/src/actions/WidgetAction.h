@@ -5,6 +5,7 @@
 #include "util/Serializable.h"
 
 #include <QWidgetAction>
+#include <QPointer>
 
 class QLabel;
 class QMenu;
@@ -35,6 +36,15 @@ class WidgetAction : public QWidgetAction, public util::Serializable
     Q_OBJECT
 
 public:
+
+    /** Describes the widget action scope of use */
+    enum class Scope {
+        Private,    /** Action is in the private pool */
+        Public      /** Action is in the public pool and eligible for connections */
+    };
+
+    /** Map scope enum to scope name */
+    static QMap<Scope, QString> scopeNames;
 
     /** Describes the configuration options */
     enum class ConfigurationFlag {
@@ -82,12 +92,6 @@ public:
 
     /** Destructor */
     ~WidgetAction();
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    virtual QString getTypeString() const final;
 
     /**
      * Get parent widget action
@@ -175,19 +179,34 @@ public: // Highlighting
      */
     bool isHighlighted() const;
 
-public: // Linking
+public: // Scope, publishing and connections
 
     /**
-     * Get whether this action is a public (shared) action or not
-     * @return Boolean determining whether this action is a public (shared) action or not
+     * Get widget action scope
+     * @return Widget action scope enum
+     */
+    virtual Scope getScope() const final;
+
+    /**
+     * Get whether this action is in the private actions pool
+     * @return Boolean determining whether this action is in the private actions pool
+     */
+    virtual bool isPrivate() const final;
+
+    /**
+     * Get whether this action is in the public actions pool
+     * @return Boolean determining whether this action is in the private public pool
      */
     virtual bool isPublic() const;
+
+    /** Make widget action public */
+    virtual void makePublic() final;
 
     /**
      * Get whether the action is published
      * @return Boolean indicating whether the action is published
      */
-    virtual bool isPublished() const final;
+    virtual bool isPublished() const;
 
     /**
      * Get whether the action is connect to a public action
@@ -197,7 +216,7 @@ public: // Linking
 
     /**
      * Publish this action so that other actions can connect to it
-     * @param text Name of the published widget action (if empty, a configuration dialog will popup)
+     * @param name Name of the published widget action (if empty, a configuration dialog will popup)
      */
     virtual void publish(const QString& name = "");
 
@@ -211,22 +230,16 @@ public: // Linking
     virtual void disconnectFromPublicAction();
 
     /**
-     * Connect a private action to this action
-     * @param action Pointer to private action to connect to this action
-     */
-    void connectPrivateAction(WidgetAction* privateAction);
-
-    /**
-     * Disconnect a private action from this action
-     * @param action Pointer to private action to disconnect from this action
-     */
-    void disconnectPrivateAction(WidgetAction* privateAction);
-
-    /**
      * Get the public action (if any)
      * @return Pointer to the public action
      */
-    WidgetAction* getPublicAction();
+    virtual WidgetAction* getPublicAction() final;
+
+    /**
+     * Get connected actions
+     * @return Vector of pointers to connected actions
+     */
+    QVector<WidgetAction*>& getConnectedActions();
 
     /**
      * Get connected actions
@@ -295,8 +308,6 @@ public: // Linking
      */
     virtual void setConnectionPermissionsToAll(bool recursive = false) final;
 
-protected: // Linking
-
     /**
      * Get public copy of the action (other compatible actions can connect to it)
      * @return Pointer to public copy of the action
@@ -309,16 +320,16 @@ public: // Settings
      * Determines whether the action can be reset to its default
      * @return Whether the action can be reset to its default
      */
-    virtual bool isResettable();;
+    virtual bool isResettable();
 
     /** Reset to default */
     virtual void reset() {};
 
     /**
-     * Get settings path
-     * @return Path of the action w.r.t. to the top-level action
+     * Get path relative to the top-level action
+     * @return Path relative to the top-level action
      */
-    QString getSettingsPath() const;
+    QString getPath() const;
 
     /**
      * Set settings prefix
@@ -399,6 +410,15 @@ public: // Configuration flags
      */
     virtual void setConfiguration(std::int32_t configuration, bool recursive = false) final;
 
+public: // Type string
+
+    /**
+     * Get type string
+     * @param humanFriendly Whether to return a type string where the namespace is omitted
+     * @return Widget action type in string format
+     */
+    virtual QString getTypeString(bool humanFriendly = false) const final;
+
 protected:
 
     /**
@@ -407,9 +427,6 @@ protected:
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
     virtual QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags);
-
-    /** Make widget action public */
-    virtual void makePublic() final;
 
 public: // Serialization
 
@@ -457,13 +474,13 @@ signals:
      * Signals that an action connected
      * @param action Action that connected
      */
-    void actionConnected(const WidgetAction* action);
+    void actionConnected(WidgetAction* action);
 
     /**
      * Signals that an action disconnected
      * @param action Action that disconnected
      */
-    void actionDisconnected(const WidgetAction* action);
+    void actionDisconnected(WidgetAction* action);
 
     /**
      * Signals that the connection permissions changed
@@ -477,13 +494,20 @@ signals:
      */
     void configurationChanged(std::int32_t configuration);
 
+    /**
+     * Signals that the widget action scope changed to \p scope
+     * @param scope Scope of the widget action
+     */
+    void scopeChanged(const Scope& scope);
+
 private:
+                    
     std::int32_t                _defaultWidgetFlags;        /** Default widget flags which are used to configure newly created widget action widgets */
     std::int32_t                _sortIndex;                 /** Sort index (used in the group action to sort actions) */
     std::int32_t                _stretch;                   /** Stretch factor */
     std::int32_t                _connectionPermissions;     /** Allowed connection options flags */
-    bool                        _isPublic;                  /** Determines whether this action is a public (shared) action or not */
-    WidgetAction*               _publicAction;              /** Public action to which this action might be connected */
+    Scope                       _scope;                     /** Determines whether this action is a public (shared) action or not */
+    QPointer<WidgetAction>      _publicAction;              /** Public action to which this action might be connected */
     QVector<WidgetAction*>      _connectedActions;          /** Pointers to widget action that are connected to this action */
     QString                     _settingsPrefix;            /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
     bool                        _highlighted;               /** Whether the action is in a highlighted state or not */

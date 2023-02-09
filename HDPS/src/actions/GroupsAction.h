@@ -327,7 +327,7 @@ inline QDebug operator << (QDebug debug, const GroupsAction::GroupActions& group
     QStringList names;
 
     for (const auto groupAction : groupActions)
-        names << groupAction->getSettingsPath();
+        names << groupAction->getPath();
 
     debug << names.join(", ");
 

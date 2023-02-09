@@ -171,7 +171,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _treeView.setRootIsDecorated(true);
     _treeView.setItemsExpandable(true);
     _treeView.setIconSize(QSize(14, 14));
-    _treeView.setAnimated(true);
+    //_treeView.setAnimated(true);
     //_treeView.setUniformRowHeights(true);
     
     auto header = _treeView.header();
