@@ -4,9 +4,7 @@
 #include <QDebug>
 #include <QHBoxLayout>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 #if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
     constexpr float  DecimalRangeAction::INIT_LIMIT_MIN;
@@ -18,7 +16,7 @@ namespace gui {
 #endif
 
 DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title /*= ""*/, const float& limitMin /*= INIT_LIMIT_MIN*/, const float& limitMax /*= INIT_LIMIT_MAX*/, const float& rangeMin /*= INIT_RANGE_MIN*/, const float& rangeMax /*= INIT_RANGE_MAX*/, const float& defaultRangeMin /*= INIT_DEFAULT_RANGE_MIN*/, const float& defaultRangeMax /*= INIT_DEFAULT_RANGE_MAX*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, title),
     _rangeMinAction(this, "Minimum"),
     _rangeMaxAction(this, "Maximum")
 {
@@ -120,5 +118,4 @@ DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, Deci
     }
 }
 
-}
 }

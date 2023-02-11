@@ -39,7 +39,7 @@ public:
      * @param defaultRectangle Default rectangle
      */
     RectangleAction(QObject * parent, const QString& title, const RectangleType& rectangle = RectangleType(), const RectangleType& defaultRectangle = RectangleType()) :
-        WidgetAction(parent)
+        WidgetAction(parent, title)
     {
         setText(title);
         setDefaultWidgetFlags(WidgetFlag::Default);

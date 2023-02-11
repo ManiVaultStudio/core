@@ -11,7 +11,7 @@ namespace hdps {
 namespace gui {
 
 DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& title /*= ""*/, const QString& directory /*= QString()*/, const QString& defaultDirectory /*= QString()*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, title),
     _dirModel(),
     _completer(),
     _directoryAction(this, "Directory"),

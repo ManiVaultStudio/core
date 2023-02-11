@@ -20,7 +20,7 @@ QMap<PresetsAction::Column, QPair<QString, QString>> PresetsAction::columnInfo =
 });
 
 PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const QString& settingsKey /*= ""*/, const QString& presetType /*= ""*/, const QIcon& icon /*= QIcon()*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Presets"),
     _sourceAction(sourceAction),
     _settingsKey(settingsKey),
     _presetType(presetType),

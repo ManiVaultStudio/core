@@ -279,7 +279,7 @@ void DatasetImpl::addLinkedData(const hdps::Dataset<DatasetImpl>& targetDataSet,
 }
 
 DatasetImpl::DatasetImpl(CoreInterface* core, const QString& rawDataName, const QString& guid /*= ""*/) :
-    WidgetAction(nullptr),
+    WidgetAction(nullptr, "Set"),
     _core(core),
     _storageType(StorageType::Owner),
     _rawData(nullptr),

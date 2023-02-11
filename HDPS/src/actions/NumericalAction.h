@@ -52,7 +52,7 @@ public:
      * @param defaultValue Default value
      */
     NumericalAction(QObject * parent, const QString& title, const NumericalType& minimum, const NumericalType& maximum, const NumericalType& value, const NumericalType& defaultValue, const std::uint32_t& numberOfDecimals = INIT_NUMBER_OF_DECIMALS) :
-        WidgetAction(parent),
+        WidgetAction(parent, title),
         _value(),
         _defaultValue(),
         _minimum(std::numeric_limits<NumericalType>::lowest()),

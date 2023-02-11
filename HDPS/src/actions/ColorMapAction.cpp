@@ -16,7 +16,7 @@ using namespace hdps::util;
 namespace hdps::gui {
 
 ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= "RdYlBu"*/, const QString& defaultColorMap /*= "RdYlBu"*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Color Map"),
     _currentColorMapAction(this, "Current color map"),
     _colorMapFilterModel(this, colorMapType),
     _settingsAction(*this)

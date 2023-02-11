@@ -7,7 +7,7 @@
 #include <QHBoxLayout>
 
 SubsetAction::SubsetAction(ClustersActionWidget* clustersActionWidget) :
-    WidgetAction(clustersActionWidget),
+    WidgetAction(clustersActionWidget, "Subset"),
     _clustersActionWidget(clustersActionWidget),
     _subsetNameAction(this, "Subset name"),
     _createSubsetAction(this, "Create subset")

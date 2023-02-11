@@ -7,7 +7,7 @@ using namespace hdps::gui;
 using namespace hdps::util;
 
 InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
-    GroupAction(parent, true),
+    GroupAction(parent, "Group", true),
     _points(points),
     _dataStorageAction(this, "Storage type"),
     _proxyDatasetsAction(this, points),

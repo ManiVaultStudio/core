@@ -12,7 +12,7 @@ namespace gui {
 const QColor ColorPickerAction::DEFAULT_COLOR = Qt::gray;
 
 ColorPickerAction::ColorPickerAction(QObject* parent, const QString& title /*= ""*/, const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, title),
     _color()
 {
     setText(title);

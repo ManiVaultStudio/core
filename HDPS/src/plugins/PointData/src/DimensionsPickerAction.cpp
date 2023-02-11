@@ -23,7 +23,7 @@ using namespace hdps;
 using namespace hdps::gui;
 
 DimensionsPickerAction::DimensionsPickerAction(QObject* parent) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Dimension Picker"),
     _points(nullptr),
     _holder(),
     _itemModel(new DimensionsPickerItemModel(_holder)),

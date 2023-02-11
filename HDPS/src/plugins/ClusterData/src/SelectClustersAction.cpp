@@ -7,7 +7,7 @@
 #include <QHBoxLayout>
 
 SelectClustersAction::SelectClustersAction(ClustersActionWidget* clustersActionWidget) :
-    WidgetAction(clustersActionWidget),
+    WidgetAction(clustersActionWidget, "Select Clusters"),
     _clustersActionWidget(clustersActionWidget),
     _selectAllAction(this, "All"),
     _selectNoneAction(this, "None"),

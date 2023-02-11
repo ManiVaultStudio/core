@@ -12,16 +12,13 @@ using namespace hdps::plugin;
 
 ProjectEditorDialog::ProjectEditorDialog(QWidget* parent, ViewPlugin* viewPlugin) :
     QDialog(parent),
-    _groupsAction(this),
-    _menusGroupAction(&_groupsAction),
+    _groupsAction(this, "Groups"),
     _actionHierarchyWidget(this, viewPlugin)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);
     //setWindowTitle(QString("Edit project (%1)").arg(_viewPlugin->text()));
     setMinimumSize(QSize(320, 240));
-
-    //_groupsAction.addGroupAction(&_menusGroupAction);
 
     auto layout = new QVBoxLayout();
 

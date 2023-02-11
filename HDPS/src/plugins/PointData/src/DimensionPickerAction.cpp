@@ -6,7 +6,7 @@
 using namespace hdps;
 
 DimensionPickerAction::DimensionPickerAction(QObject* parent, const QString& title) :
-    WidgetAction(parent),
+    WidgetAction(parent, title),
     _points(nullptr),
     _currentDimensionAction(this, "Select dimension"),
     _searchThreshold(DEFAULT_SEARCH_THRESHOLD)

@@ -17,7 +17,7 @@ namespace hdps::gui {
 #endif
 
 ColorMapEditor1DAction::ColorMapEditor1DAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction),
+    WidgetAction(&colorMapAction, "Editor 1D"),
     _colorMapAction(colorMapAction),
     _nodes(),
     _nodeAction(*this),

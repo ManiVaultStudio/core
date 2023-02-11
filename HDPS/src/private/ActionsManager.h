@@ -53,8 +53,9 @@ public:
      * Publish \p privateAction so that other private actions can connect to it
      * @param privateAction Pointer to private action to publish
      * @param name Name of the published widget action (if empty, a name choosing dialog will popup)
+     * @param recursive Whether to also publish the child actions recursively
      */
-    void publishPrivateAction(gui::WidgetAction* privateAction, const QString& name = "") override;
+    void publishPrivateAction(gui::WidgetAction* privateAction, const QString& name = "", bool recursive = true) override;
 
 public: // Model
 

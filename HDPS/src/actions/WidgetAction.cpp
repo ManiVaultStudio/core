@@ -28,9 +28,9 @@ QMap<WidgetAction::Scope, QString> WidgetAction::scopeNames {
     { WidgetAction::Scope::Public, "Public" }
 };
 
-WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
+WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     QWidgetAction(parent),
-    util::Serializable("WidgetAction"),
+    util::Serializable(),
     _defaultWidgetFlags(),
     _sortIndex(-1),
     _stretch(-1),
@@ -43,6 +43,14 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     _popupSizeHint(QSize(0, 0)),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default))
 {
+    setText(title);
+    
+    auto serializationName = title;
+
+    serializationName.replace(" ", "");
+
+    setSerializationName(serializationName);
+
     if (core()->isInitialized())
         actions().addActionToModel(this);
 }
@@ -138,11 +146,18 @@ bool WidgetAction::isPublic() const
     return _scope == Scope::Public;
 }
 
-void WidgetAction::makePublic()
+void WidgetAction::makePublic(bool recursive /*= true*/)
 {
     _scope = Scope::Public;
 
     emit scopeChanged(_scope);
+
+    for (auto child : children()) {
+        auto widgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (widgetAction != nullptr)
+            widgetAction->makePublic(recursive);
+    }
 }
 
 bool WidgetAction::isPublished() const
@@ -560,6 +575,17 @@ std::int32_t WidgetAction::getStretch() const
 void WidgetAction::setStretch(const std::int32_t& stretch)
 {
     _stretch = stretch;
+}
+
+WidgetAction* WidgetAction::_getPublicCopy() const
+{
+    auto actionCopy = static_cast<WidgetAction*>(metaObject()->newInstance(Q_ARG(QObject*, parent()), Q_ARG(QString, text())));
+
+    actionCopy->fromVariantMap(toVariantMap());
+    actionCopy->makePublic();
+
+    return actionCopy;
+
 }
 
 }

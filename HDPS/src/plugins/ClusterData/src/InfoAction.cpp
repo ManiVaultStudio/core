@@ -6,7 +6,7 @@ using namespace hdps;
 using namespace hdps::gui;
 
 InfoAction::InfoAction(QObject* parent, Clusters& clusters) :
-    GroupAction(parent, true),
+    GroupAction(parent, "Group", true),
     _clusters(&clusters),
     _numberOfClustersAction(this, "Number of clusters"),
     _clustersAction(this, clusters)

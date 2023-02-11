@@ -72,17 +72,19 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param title Title of the group action
      * @param expanded Whether the group is initially expanded/collapsed
      */
-    GroupAction(QObject* parent, const bool& expanded = false);
+    GroupAction(QObject* parent, const QString& title, const bool& expanded = false);
 
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param title Title of the group action
      * @param widgetActions Widget actions to initialize with
      * @param expanded Whether the group is initially expanded/collapsed
      */
-    GroupAction(QObject* parent, WidgetActions widgetActions, const bool& expanded = false);
+    GroupAction(QObject* parent, const QString& title, WidgetActions widgetActions, const bool& expanded = false);
 
     /** Set expanded/collapsed */
     void setExpanded(const bool& expanded);

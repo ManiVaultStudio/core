@@ -13,7 +13,7 @@
 namespace hdps::gui {
 
 RecentFilesAction::RecentFilesAction(QObject* parent, const QString& settingsKey /*= ""*/, const QString& fileType /*= ""*/, const QString& shortcutPrefix /*= ""*/, const QIcon& icon /*= QIcon()*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Recent Files"),
     _settingsKey(),
     _fileType(),
     _icon(),

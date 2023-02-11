@@ -11,7 +11,7 @@ namespace hdps {
 namespace gui {
 
 DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerAction& dimensionsPickerAction) :
-    WidgetAction(&dimensionsPickerAction),
+    WidgetAction(&dimensionsPickerAction, "Dimension Picker"),
     _dimensionsPickerAction(dimensionsPickerAction),
     _selectionThresholdAction(this, "Selection threshold", 0),
     _computeStatisticsAction(this, "Compute statistics"),

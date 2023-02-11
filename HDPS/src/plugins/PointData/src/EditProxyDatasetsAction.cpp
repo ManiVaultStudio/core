@@ -8,7 +8,7 @@
 #include <QStringListModel>
 
 EditProxyDatasetsAction::EditProxyDatasetsAction(QObject* parent, const Dataset<Points>& points) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Edit Proxy Datasets"),
     _points(points)
 {
     setText("View proxy datasets");

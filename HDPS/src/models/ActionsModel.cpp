@@ -10,7 +10,7 @@
 using namespace hdps::gui;
 
 #ifdef _DEBUG
-    //#define ACTIONS_MODEL_VERBOSE
+    #define ACTIONS_MODEL_VERBOSE
 #endif
 
 namespace hdps
@@ -114,8 +114,11 @@ void ActionsModel::Item::updateName()
     if (_widgetAction.isNull())
         return;
 
+    //if (_widgetAction->isPrivate())
+    //    setText(_widgetAction->getPath());
+
     if (_widgetAction->isPrivate())
-        setText(_widgetAction->getPath());
+        setText(_widgetAction->text());
 
     setEditable(_widgetAction->isPublic());
 }
@@ -195,7 +198,7 @@ ActionsModel::ActionsModel(QObject* parent /*= nullptr*/) :
 void ActionsModel::addAction(WidgetAction* action)
 {
 #ifdef ACTIONS_MODEL_VERBOSE
-    qDebug() << __FUNCTION__ << action->text();
+    qDebug() << __FUNCTION__;
 #endif
 
     const QList<QStandardItem*> row {
@@ -208,13 +211,29 @@ void ActionsModel::addAction(WidgetAction* action)
     for (auto item : row)
         item->setEditable(false);
     
-    appendRow(row);
+    const auto parentAction = action->getParentWidgetAction();
+
+    if (parentAction) {
+        const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::DisplayRole, parentAction->getId(), 1, Qt::MatchFlag::MatchRecursive);
+
+        if (matches.count() != 1)
+            appendRow(row);
+        else {
+            const auto parentItem = itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::Name)));
+
+            if (parentItem != nullptr)
+                parentItem->appendRow(row);
+        }
+    }
+    else {
+        appendRow(row);
+    }
 }
 
 void ActionsModel::removeAction(WidgetAction* action)
 {
 #ifdef ACTIONS_MODEL_VERBOSE
-    qDebug() << __FUNCTION__ << action->getId();
+    qDebug() << __FUNCTION__;
 #endif
 
     const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::DisplayRole, action->getId(), -1, Qt::MatchFlag::MatchRecursive);

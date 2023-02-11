@@ -15,7 +15,7 @@ namespace hdps {
 namespace gui {
 
 OptionsAction::OptionsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/, const QStringList& defaultSelectedOptions /*= QStringList()*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, title),
     _optionsModel(),
     _selectionAction(*this),
     _fileAction(*this),
@@ -278,7 +278,7 @@ QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
 }
 
 OptionsAction::SelectionAction::SelectionAction(OptionsAction& optionsAction) :
-    WidgetAction(&optionsAction),
+    WidgetAction(&optionsAction, "Selection"),
     _optionsAction(optionsAction),
     _selectAllAction(this, "All"),
     _clearSelectionAction(this, "Clear"),
@@ -328,7 +328,7 @@ OptionsAction::SelectionAction::Widget::Widget(QWidget* parent, SelectionAction*
 }
 
 OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
-    WidgetAction(&optionsAction),
+    WidgetAction(&optionsAction, "File"),
     _optionsAction(optionsAction),
     _loadSelectionAction(this, "Load selection"),
     _saveSelectionAction(this, "Save selection")

@@ -399,7 +399,7 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/, bool addToRecent
 
                 fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount, 0);
 
-                GroupAction settingsGroupAction(this);
+                GroupAction settingsGroupAction(this, "Group");
 
                 settingsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
                 settingsGroupAction.setToolTip("Edit workspace settings");

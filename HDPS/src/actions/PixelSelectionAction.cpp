@@ -14,7 +14,7 @@ namespace hdps {
 namespace gui {
 
 PixelSelectionAction::PixelSelectionAction(QObject* parent, QWidget* targetWidget, PixelSelectionTool& pixelSelectionTool, const PixelSelectionTypes& pixelSelectionTypes /*= util::defaultPixelSelectionTypes*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Pixel Selection"),
     _targetWidget(targetWidget),
     _pixelSelectionTool(pixelSelectionTool),
     _pixelSelectionTypes(pixelSelectionTypes),

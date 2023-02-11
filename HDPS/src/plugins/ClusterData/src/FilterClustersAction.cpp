@@ -9,7 +9,7 @@
 #include <QHBoxLayout>
 
 FilterClustersAction::FilterClustersAction(ClustersActionWidget* clustersActionWidget) :
-    WidgetAction(clustersActionWidget),
+    WidgetAction(clustersActionWidget, "Filter Clusters"),
     _clustersActionWidget(clustersActionWidget),
     _nameFilterAction(this, "Name filter")
 {

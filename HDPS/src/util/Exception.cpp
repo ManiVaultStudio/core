@@ -1,8 +1,5 @@
 #include "Exception.h"
 
-namespace hdps {
+namespace hdps::util {
 
-namespace util {
-
-}
 }

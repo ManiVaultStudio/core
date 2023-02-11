@@ -3,7 +3,7 @@
 namespace hdps::gui {
 
 VariantAction::VariantAction(QObject* parent, const QString& title /*= ""*/, const QVariant& variant /*= QVariant()*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, title),
     _variant()
 {
     setText(title);

@@ -9,7 +9,7 @@ using namespace hdps::util;
 namespace hdps::gui {
 
 LockingAction::LockingAction(QObject* parent, const QString& what /*= ""*/, bool locked /*= false*/) :
-    GroupAction(parent),
+    GroupAction(parent, "Locking"),
     _lockedAction(this),
     _lockAction(this),
     _unlockAction(this)

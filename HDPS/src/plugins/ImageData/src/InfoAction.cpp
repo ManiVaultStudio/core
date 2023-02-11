@@ -6,7 +6,7 @@ using namespace hdps;
 using namespace hdps::gui;
 
 InfoAction::InfoAction(QObject* parent, Images& images) :
-    GroupAction(parent, true),
+    GroupAction(parent, "Group", true),
     _images(&images),
     _typeAction(this, "Image collection type"),
     _numberOfImagesAction(this, "Number of images"),

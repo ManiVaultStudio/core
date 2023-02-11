@@ -12,7 +12,7 @@ using namespace hdps::util;
 namespace hdps::gui {
 
 ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsAction, const QString& title) :
-    WidgetAction(&colorMapSettingsAction),
+    WidgetAction(&colorMapSettingsAction, "Axis"),
     _rangeAction(this, "Range", 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1),
     _mirrorAction(this, "Mirror")
 {

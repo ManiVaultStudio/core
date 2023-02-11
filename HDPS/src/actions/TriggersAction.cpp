@@ -9,7 +9,7 @@ namespace hdps {
 namespace gui {
 
 TriggersAction::TriggersAction(QObject* parent, const QString& title /*= ""*/, const QVector<Trigger>& triggers /*= QVector<Trigger>()*/) :
-    WidgetAction(parent)
+    WidgetAction(parent, title)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);

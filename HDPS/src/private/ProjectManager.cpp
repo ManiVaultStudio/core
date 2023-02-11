@@ -154,6 +154,8 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
 
         for (auto pluginTriggerAction : plugins().getPluginTriggerActions(plugin::Type::LOADER))
             _importDataMenu.addAction(pluginTriggerAction);
+
+        _importDataMenu.setEnabled(!_importDataMenu.actions().isEmpty());
     });
 
     connect(&_pluginManagerAction, &TriggerAction::triggered, this, [this]() -> void {
@@ -516,7 +518,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
                 fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 2, 0);
 
-                GroupAction settingsGroupAction(this);
+                GroupAction settingsGroupAction(this, "Settings");
 
                 settingsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
                 settingsGroupAction.setToolTip("Edit project settings");

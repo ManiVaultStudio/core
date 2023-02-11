@@ -14,9 +14,9 @@ namespace hdps::gui {
 
 SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _groupsAction(this),
-    _globalPathsGroupAction(this, true),
-    _ioAction(this, true)
+    _groupsAction(this, "Groups"),
+    _globalPathsGroupAction(this, "Global Paths", true),
+    _ioAction(this, "IO", true)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
     setModal(true);
@@ -38,14 +38,6 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     _ioAction.setText("IO");
     _ioAction.setShowLabels(false);
     
-    
-
-    /*auto test = QMetaType::construct(QMetaType::type("ToggleAction"));
-
-    auto mt = QMetaType::fromName("Toggle");
-    auto mo = mt.metaObject();
-    auto toggleAction = dynamic_cast<ToggleAction*>(mo->newInstance());*/
-
     _ioAction << settings().getIgnoreLoadingErrorsAction();
     //_ioAction << *toggleAction;
 

@@ -8,7 +8,7 @@ namespace hdps {
 namespace gui {
 
 DimensionsPickerMiscellaneousAction::DimensionsPickerMiscellaneousAction(DimensionsPickerAction& dimensionsPickerAction) :
-    WidgetAction(&dimensionsPickerAction),
+    WidgetAction(&dimensionsPickerAction, "Miscellaneous"),
     _dimensionsPickerAction(dimensionsPickerAction),
     _showOnlySelectedDimensionsAction(this, "Show only selected dimensions"),
     _applyExclusionListAction(this, "Apply exclusion list"),

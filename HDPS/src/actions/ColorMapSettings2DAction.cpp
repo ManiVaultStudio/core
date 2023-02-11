@@ -8,7 +8,7 @@
 namespace hdps::gui {
 
 ColorMapSettings2DAction::ColorMapSettings2DAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction),
+    WidgetAction(&colorMapAction, "Settings 2D"),
     _colorMapAction(colorMapAction)
 {
     setText("Settings (one-dimensional)");

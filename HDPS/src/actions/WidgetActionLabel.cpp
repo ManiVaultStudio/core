@@ -51,7 +51,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::MouseButtonPress:
         {
-            if (!_widgetAction->isEnabled())
+            if (!isEnabled())
                 break;
 
             auto mouseButtonPress = static_cast<QMouseEvent*>(event);

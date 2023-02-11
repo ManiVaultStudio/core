@@ -12,7 +12,7 @@ namespace hdps {
 namespace gui {
 
 ColorMapEditor1DNodeAction::ColorMapEditor1DNodeAction(ColorMapEditor1DAction& colorMapEditor1DAction) :
-    WidgetAction(&colorMapEditor1DAction),
+    WidgetAction(&colorMapEditor1DAction, "Editor 1D Node"),
     _colorMapEditor1DAction(colorMapEditor1DAction),
     _currentNode(nullptr),
     _colorAction(this, "Color", Qt::yellow),

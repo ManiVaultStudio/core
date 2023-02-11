@@ -66,8 +66,9 @@ public: // Linking
      * Publish \p privateAction so that other private actions can connect to it
      * @param privateAction Pointer to private action to publish
      * @param name Name of the published widget action (if empty, a name choosing dialog will popup)
+     * @param recursive Whether to also publish the child actions recursively
      */
-    virtual void publishPrivateAction(gui::WidgetAction* privateAction, const QString& name = "") = 0;
+    virtual void publishPrivateAction(gui::WidgetAction* privateAction, const QString& name = "", bool recursive = true) = 0;
 
     /**
      * Connect \p privateAction to \p publicAction
@@ -108,14 +109,17 @@ public: // Linking
 
 protected:
 
+    /**
+     * Add \p privateAction to the list of connected actions in the \p publicAction and notify listeners
+     * @param privateAction Pointer to private action
+     * @param publicAction Pointer to public action
+     */
     void addPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) {
         Q_ASSERT(privateAction != nullptr);
         Q_ASSERT(publicAction != nullptr);
 
         if (privateAction == nullptr || publicAction == nullptr)
             return;
-
-        qDebug() << __FUNCTION__;
 
         publicAction->getConnectedActions() << privateAction;
 
@@ -126,14 +130,17 @@ protected:
         });
     }
 
+    /**
+     * Remove \p privateAction from the list of connected actions in the \p publicAction and notify listeners
+     * @param privateAction Pointer to private action
+     * @param publicAction Pointer to public action
+     */
     void removePrivateActionFromPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) {
         Q_ASSERT(privateAction != nullptr);
         Q_ASSERT(publicAction != nullptr);
 
         if (privateAction == nullptr || publicAction == nullptr)
             return;
-
-        qDebug() << __FUNCTION__;
 
         publicAction->getConnectedActions().removeOne(privateAction);
 
@@ -156,6 +163,9 @@ protected:
      */
     virtual void makeActionPublic(gui::WidgetAction* action) final {
         Q_ASSERT(action != nullptr);
+
+        if (action == nullptr)
+            return;
 
         action->makePublic();
     }

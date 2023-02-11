@@ -8,7 +8,7 @@ namespace hdps {
 namespace gui {
 
 DimensionsPickerFilterAction::DimensionsPickerFilterAction(DimensionsPickerAction& dimensionsPickerAction) :
-    WidgetAction(&dimensionsPickerAction),
+    WidgetAction(&dimensionsPickerAction, "Filter"),
     _dimensionsPickerAction(dimensionsPickerAction),
     _nameFilterAction(this, "Name filter")
 {

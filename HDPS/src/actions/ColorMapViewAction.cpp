@@ -13,7 +13,7 @@ namespace hdps {
 namespace gui {
 
 ColorMapViewAction::ColorMapViewAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction),
+    WidgetAction(&colorMapAction, "Color Map View"),
     _colorMapAction(colorMapAction)
 {
     setText("Preview");

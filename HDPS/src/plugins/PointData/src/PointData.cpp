@@ -300,7 +300,7 @@ void Points::init()
     _infoAction = new InfoAction(this, *this);
 
     if (isFull()) {
-        _dimensionsPickerGroupAction = new GroupAction(this);
+        _dimensionsPickerGroupAction = new GroupAction(this, "Group");
 
         _dimensionsPickerGroupAction->setText("Dimensions");
         _dimensionsPickerGroupAction->setShowLabels(false);

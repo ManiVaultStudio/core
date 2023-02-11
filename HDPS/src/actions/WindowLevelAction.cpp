@@ -7,7 +7,7 @@
 using namespace hdps;
 
 WindowLevelAction::WindowLevelAction(QObject* parent) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Window Level"),
     _windowAction(this, "Window", 0.0f, 1.0f, 1.0f, 1.0f, 1),
     _levelAction(this, "Level", 0.0f, 1.0f, 0.5f, 0.5f, 1)
 {

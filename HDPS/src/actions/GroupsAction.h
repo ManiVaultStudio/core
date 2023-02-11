@@ -8,9 +8,7 @@
 
 class QWidget;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 class GroupSectionTreeItem;
 
@@ -153,8 +151,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param title Title of the groups action
      */
-    GroupsAction(QObject* parent = nullptr);
+    GroupsAction(QObject* parent, const QString& title);
 
     ~GroupsAction();
 
@@ -334,5 +333,4 @@ inline QDebug operator << (QDebug debug, const GroupsAction::GroupActions& group
     return debug.space();
 }
 
-}
 }

@@ -28,16 +28,16 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _infoOverlayWidget(showOverlay ? new InfoOverlayWidget(&_treeView) : nullptr),
     _noItemsDescription(""),
     _filterNameAction(this, "Name"),
-    _filterGroupAction(this),
+    _filterGroupAction(this, "Filter"),
     _filterCaseSensitiveAction(this, "Case-sensitive", false, false),
     _filterRegularExpressionAction(this, "Regular expression", false, false),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
     _selectAllAction(this, "Select all"),
     _selectNoneAction(this, "Select none"),
-    _selectionGroupAction(this),
-    _columnsGroupAction(this),
-    _settingsGroupAction(this)
+    _selectionGroupAction(this, "Selection"),
+    _columnsGroupAction(this, "Columns"),
+    _settingsGroupAction(this, "Settings")
 {
     _filterNameAction.setSearchMode(true);
     _filterNameAction.setClearable(true);

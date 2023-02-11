@@ -7,12 +7,10 @@
 
 //#define GROUPS_ACTION_VERBOSE
 
-namespace hdps {
+namespace hdps::gui {
 
-namespace gui {
-
-GroupsAction::GroupsAction(QObject* parent /*= nullptr*/) :
-    WidgetAction(parent),
+GroupsAction::GroupsAction(QObject* parent, const QString& title) :
+    WidgetAction(parent, title),
     _groupActions(),
     _visibility()
 {
@@ -222,7 +220,7 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     WidgetActionWidget(parent, groupsAction, widgetFlags),
     _groupsAction(groupsAction),
     _layout(),
-    _filteredActionsAction(this, true),
+    _filteredActionsAction(this, "Filtered Actions", true),
     _toolbarWidget(parent),
     _toolbarLayout(),
     _filterAction(this, "Search"),
@@ -440,5 +438,4 @@ void GroupsAction::Widget::hideGroupAction(GroupAction* groupAction)
     _groupSectionTreeItems[groupAction]->setHidden(_groupsAction->isGroupActionHidden(groupAction));
 }
 
-}
 }

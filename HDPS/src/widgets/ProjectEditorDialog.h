@@ -44,7 +44,6 @@ public:
     }
 
 private:
-    GroupsAction    _groupsAction;          /** Groups action */
-    GroupAction     _menusGroupAction;      /** Group action */
-    ActionHierarchyWidget   _actionHierarchyWidget;
+    GroupsAction            _groupsAction;              /** Groups action */
+    ActionHierarchyWidget   _actionHierarchyWidget;     /** Hierarchy widget for showing action trees */
 };

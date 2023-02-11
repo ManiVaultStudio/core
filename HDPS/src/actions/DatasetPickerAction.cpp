@@ -15,7 +15,7 @@ using namespace hdps::util;
 namespace hdps::gui {
 
 DatasetPickerAction::DatasetPickerAction(QObject* parent /*= nullptr*/, const QString& title /*= ""*/, Mode mode /*= Mode::Automatic*/) :
-    OptionAction(parent, "Pick dataset"),
+    OptionAction(parent, title),
     _mode(mode),
     _datasetsFilterFunction(),
     _datasetsModel(),

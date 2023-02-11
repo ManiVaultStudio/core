@@ -87,8 +87,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param title Widget action title and serialization name
      */
-    WidgetAction(QObject* parent = nullptr);
+    WidgetAction(QObject* parent, const QString& title);
 
     /** Destructor */
     ~WidgetAction();
@@ -199,8 +200,15 @@ public: // Scope, publishing and connections
      */
     virtual bool isPublic() const;
 
-    /** Make widget action public */
-    virtual void makePublic() final;
+protected:
+
+    /**
+     * Make widget action public (and possibly all of its descendant widget actions)
+     * @param recursive Whether to also make all descendant widget actions public
+     */
+    virtual void makePublic(bool recursive = true) final;
+
+public:
 
     /**
      * Get whether the action is published
@@ -313,6 +321,12 @@ public: // Scope, publishing and connections
      * @return Pointer to public copy of the action
      */
     virtual WidgetAction* getPublicCopy() const;
+
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    WidgetAction* _getPublicCopy() const;
 
 public: // Settings
 

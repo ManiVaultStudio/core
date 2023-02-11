@@ -14,8 +14,8 @@ namespace gui {
 const std::uint32_t GroupAction::globalLabelWidthPercentage = 35;
 const std::uint32_t GroupAction::globalLabelWidthFixed      = 200;
 
-GroupAction::GroupAction(QObject* parent, const bool& expanded /*= false*/) :
-    WidgetAction(parent),
+GroupAction::GroupAction(QObject* parent, const QString& title, const bool& expanded /*= false*/) :
+    WidgetAction(parent, title),
     _expanded(expanded),
     _readOnly(false),
     _widgetActions(),
@@ -26,8 +26,8 @@ GroupAction::GroupAction(QObject* parent, const bool& expanded /*= false*/) :
 {
 }
 
-GroupAction::GroupAction(QObject* parent, WidgetActions widgetActions, const bool& expanded /*= false*/) :
-    WidgetAction(parent),
+GroupAction::GroupAction(QObject* parent, const QString& title, WidgetActions widgetActions, const bool& expanded /*= false*/) :
+    WidgetAction(parent, title),
     _expanded(expanded),
     _readOnly(false),
     _widgetActions(),

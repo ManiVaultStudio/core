@@ -9,7 +9,7 @@ using namespace hdps::util;
 namespace hdps::gui {
 
 StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const QString& string /*= ""*/, const QString& defaultString /*= ""*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Title"),
     _string(),
     _defaultString(),
     _placeholderString(),

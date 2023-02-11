@@ -13,7 +13,7 @@ using namespace hdps::gui;
 using namespace hdps::util;
 
 #ifdef _DEBUG
-    #define ACTIONS_MANAGER_VERBOSE
+    //#define ACTIONS_MANAGER_VERBOSE
 #endif
 
 namespace hdps
@@ -151,7 +151,7 @@ ActionsModel& ActionsManager::getActionsModel()
     return _model;
 }
 
-void ActionsManager::publishPrivateAction(gui::WidgetAction* privateAction, const QString& name /*= ""*/)
+void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QString& name /*= ""*/, bool recursive /*= true*/)
 {
 #ifdef ACTIONS_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << privateAction->text();
@@ -167,53 +167,55 @@ void ActionsManager::publishPrivateAction(gui::WidgetAction* privateAction, cons
             publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
             publishDialog.setWindowTitle("Publish " + privateAction->text() + " parameter");
 
-            auto mainLayout         = new QVBoxLayout();
-            auto parameterLayout    = new QHBoxLayout();
-            auto label              = new QLabel("Name:");
-            auto lineEdit           = new QLineEdit(privateAction->text());
+            QVBoxLayout mainLayout;
+            QGridLayout parameterLayout;
+            QHBoxLayout buttonsLayout;
 
-            parameterLayout->addWidget(label);
-            parameterLayout->addWidget(lineEdit);
+            StringAction nameAction(this, "Name", privateAction->text());
+            ToggleAction recursiveAction(this, "Recursive");
+            TriggerAction publishAction(this, "Publish");
+            TriggerAction cancelAction(this, "Cancel");
 
-            mainLayout->addLayout(parameterLayout);
+            nameAction.setToolTip("Name of the shared parameter");
+            nameAction.setToolTip("Name of the shared parameter");
+            nameAction.setToolTip("Name of the shared parameter");
 
-            auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+            parameterLayout.addWidget(nameAction.createLabelWidget(&publishDialog), 0, 0);
+            parameterLayout.addWidget(nameAction.createWidget(&publishDialog), 0, 1);
+            //parameterLayout.addWidget(recursiveAction.createWidget(&publishDialog), 1, 1);
 
-            dialogButtonBox->button(QDialogButtonBox::Ok)->setText("Publish");
-            dialogButtonBox->button(QDialogButtonBox::Ok)->setToolTip("Publish the parameter");
-            dialogButtonBox->button(QDialogButtonBox::Cancel)->setToolTip("Cancel publishing");
+            buttonsLayout.addStretch(1);
+            buttonsLayout.addWidget(publishAction.createWidget(&publishDialog));
+            buttonsLayout.addWidget(cancelAction.createWidget(&publishDialog));
 
-            connect(dialogButtonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, &publishDialog, &QDialog::accept);
-            connect(dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, &publishDialog, &QDialog::reject);
+            mainLayout.addLayout(&parameterLayout);
+            mainLayout.addLayout(&buttonsLayout);
 
-            mainLayout->addWidget(dialogButtonBox);
-
-            publishDialog.setLayout(mainLayout);
+            publishDialog.setLayout(&mainLayout);
             publishDialog.setFixedWidth(300);
 
-            const auto updateOkButtonReadOnly = [dialogButtonBox, lineEdit]() -> void {
-                dialogButtonBox->button(QDialogButtonBox::Ok)->setEnabled(!lineEdit->text().isEmpty());
+            const auto updateActionsReadOnly = [&]() -> void {
+                recursiveAction.setEnabled(!nameAction.getString().isEmpty());
+                publishAction.setEnabled(!nameAction.getString().isEmpty());
             };
 
-            connect(lineEdit, &QLineEdit::textChanged, this, updateOkButtonReadOnly);
+            connect(&nameAction, &StringAction::stringChanged, this, updateActionsReadOnly);
+            connect(&publishAction, &TriggerAction::triggered, &publishDialog, &QDialog::accept);
+            connect(&cancelAction, &TriggerAction::triggered, &publishDialog, &QDialog::reject);
 
-            updateOkButtonReadOnly();
+            updateActionsReadOnly();
 
             if (publishDialog.exec() == QDialog::Accepted)
-                publishPrivateAction(privateAction, lineEdit->text());
+                publishPrivateAction(privateAction, nameAction.getString(), recursiveAction.isChecked());
         }
         else {
             if (privateAction->isPublished())
                 throw std::runtime_error("Action is already published");
 
-            auto publicAction = privateAction->getPublicCopy();
-
-            makeActionPublic(publicAction);
+            auto publicAction = privateAction->_getPublicCopy();
 
             if (publicAction == nullptr)
-                throw std::runtime_error("Public copy not created");
-
-            publicAction->setText(name);
+                throw std::runtime_error("Unable to create public action");
 
             connectPrivateActionToPublicAction(privateAction, publicAction);
 

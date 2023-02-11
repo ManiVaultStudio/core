@@ -9,7 +9,7 @@
 namespace hdps::gui {
 
 PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon) :
-    TriggerAction(parent),
+    TriggerAction(parent, "Plugin Trigger"),
     _pluginFactory(pluginFactory),
     _location(),
     _sha(),

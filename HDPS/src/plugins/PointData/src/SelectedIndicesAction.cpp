@@ -8,7 +8,7 @@ using namespace hdps;
 using namespace hdps::gui;
 
 SelectedIndicesAction::SelectedIndicesAction(QObject* parent, const Dataset<Points>& points) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Selected Indices"),
     _points(points),
     _updateAction(this, "Update"),
     _manualUpdateAction(this, "Manual update")

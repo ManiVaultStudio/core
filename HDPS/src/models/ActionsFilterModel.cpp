@@ -53,7 +53,7 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
             return false;
     }
 
-    if (!parent.isValid()) {
+    //if (!parent.isValid()) {
         const auto scope = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Scope)), Qt::UserRole + 1).toInt();
 
         if (scope == 0 && !_scopeFilterAction.getSelectedOptionIndices().contains(0))
@@ -61,7 +61,7 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
 
         if (scope == 1 && !_scopeFilterAction.getSelectedOptionIndices().contains(1))
             return false;
-    }
+    //}
 
     return true;
 }

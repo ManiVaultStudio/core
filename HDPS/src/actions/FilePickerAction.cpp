@@ -11,7 +11,7 @@ namespace hdps {
 namespace gui {
 
 FilePickerAction::FilePickerAction(QObject* parent, const QString& title /*= ""*/, const QString& filePath /*= QString()*/, const QString& defaultFilePath /*= QString()*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, title),
     _dirModel(),
     _completer(),
     _filePathAction(this, "File path"),

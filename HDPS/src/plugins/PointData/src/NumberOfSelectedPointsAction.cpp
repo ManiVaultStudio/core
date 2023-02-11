@@ -5,7 +5,7 @@
 #include <QStringListModel>
 
 NumberOfSelectedPointsAction::NumberOfSelectedPointsAction(QObject* parent, const Dataset<Points>& points) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Number Of Selected Points"),
     _points(points),
     _numberOfSelectedPointsAction(this, "Number of selected points")
 {

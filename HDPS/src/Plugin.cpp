@@ -11,7 +11,7 @@ namespace hdps::plugin
 {
 
 Plugin::Plugin(const PluginFactory* factory) :
-    WidgetAction(nullptr),
+    WidgetAction(nullptr, "Plugin"),
     _core(Application::core()),
     _factory(factory),
     _name(getKind() + QUuid::createUuid().toString(QUuid::WithoutBraces)),

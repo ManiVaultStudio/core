@@ -9,7 +9,7 @@ using namespace hdps::util;
 namespace hdps::gui {
 
 ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction),
+    WidgetAction(&colorMapAction, "Settings"),
     _colorMapAction(colorMapAction),
     _horizontalAxisAction(*this, "Horizontal Axis"),
     _verticalAxisAction(*this, "Vertical Axis"),

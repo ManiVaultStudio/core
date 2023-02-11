@@ -17,7 +17,7 @@ using namespace hdps::gui;
 
 ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _groupAction(this),
+    _groupAction(this, "Group"),
     _okAction(this, "Ok")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));

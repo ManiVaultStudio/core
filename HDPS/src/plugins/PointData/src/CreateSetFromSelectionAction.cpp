@@ -7,7 +7,7 @@
 using namespace hdps;
 
 CreateSetFromSelectionAction::CreateSetFromSelectionAction(QObject* parent, const Dataset<Points>& points) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Create Set From Selection"),
     _points(points),
     _nameAction(this, "Name"),
     _createAction(this, "Create")

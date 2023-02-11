@@ -15,7 +15,7 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     QWidget(parent),
     _dataset(),
     _layout(),
-    _groupsAction(parent),
+    _groupsAction(parent, "Groups"),
     _groupsActionWidget(nullptr)
 {
     setAutoFillBackground(true);
@@ -82,9 +82,8 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                 for (const auto& selectedItem : selectedItems)
                     datasets << selectedItem->getDataset();
 
-                auto groupAction = new GroupAction(nullptr, true);
+                auto groupAction = new GroupAction(nullptr, "Actions", true);
 
-                groupAction->setText("Actions");
                 groupAction->setToolTip("Actions for the current selection");
                 groupAction->setShowLabels(false);
 

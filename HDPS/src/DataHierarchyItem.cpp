@@ -16,7 +16,7 @@ namespace hdps
 {
 
 DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/, const bool& selected /*= false*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Data Hierarchy Item"),
     _dataset(dataset),
     _parent(),
     _children(),
