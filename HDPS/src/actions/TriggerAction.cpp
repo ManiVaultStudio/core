@@ -96,7 +96,8 @@ void TriggerAction::disconnectFromPublicAction()
 {
     auto publicTriggerAction = dynamic_cast<TriggerAction*>(getPublicAction());
 
-    Q_ASSERT(publicTriggerAction != nullptr);
+    if (publicTriggerAction == nullptr)
+        return;
 
     disconnect(this, &TriggerAction::triggered, this, &TriggerAction::selfTriggered);
     disconnect(publicTriggerAction, &TriggerAction::triggered, this, &TriggerAction::trigger);

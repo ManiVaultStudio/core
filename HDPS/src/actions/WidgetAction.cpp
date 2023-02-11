@@ -4,16 +4,13 @@
 #include "WidgetActionContextMenu.h"
 #include "Application.h"
 #include "CoreInterface.h"
-#include "DataHierarchyItem.h"
 #include "Plugin.h"
 #include "util/Exception.h"
 #include "AbstractActionsManager.h"
 
 #include <QDebug>
 #include <QMenu>
-#include <QFileDialog>
 #include <QJsonArray>
-#include <QDialog>
 
 #ifdef _DEBUG
     #define WIDGET_ACTION_VERBOSE
@@ -206,6 +203,16 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
     connect(_publicAction, &QAction::changed, this, updateReadOnly);
 
     emit isConnectedChanged(isConnected());
+
+    for (auto child : children()) {
+        auto action = dynamic_cast<WidgetAction*>(child);
+
+        if (action == nullptr)
+            continue;
+
+        action->cacheConnectionPermissions(true);
+        action->setConnectionPermissionsToNone(true);
+    }
 }
 
 void WidgetAction::disconnectFromPublicAction()
@@ -226,6 +233,15 @@ void WidgetAction::disconnectFromPublicAction()
     setEnabled(true);
 
     emit isConnectedChanged(isConnected());
+
+    for (auto child : children()) {
+        auto action = dynamic_cast<WidgetAction*>(child);
+
+        if (action == nullptr)
+            continue;
+
+        action->restoreConnectionPermissions(true);
+    }
 }
 
 WidgetAction* WidgetAction::getPublicAction()
@@ -487,10 +503,9 @@ void WidgetAction::setConnectionPermissionsFlag(ConnectionPermissionFlag connect
 
     emit connectionPermissionsChanged(_connectionPermissions);
 
-    if (recursive) {
+    if (recursive)
         for (auto childAction : getChildActions())
             childAction->setConnectionPermissionsFlag(connectionPermissionsFlag, unset, recursive);
-    }
 }
 
 void WidgetAction::setConnectionPermissions(std::int32_t connectionPermissions, bool recursive /*= false*/)
@@ -499,10 +514,9 @@ void WidgetAction::setConnectionPermissions(std::int32_t connectionPermissions, 
 
     emit connectionPermissionsChanged(_connectionPermissions);
 
-    if (recursive) {
+    if (recursive)
         for (auto childAction : getChildActions())
             childAction->setConnectionPermissions(connectionPermissions, recursive);
-    }
 }
 
 void WidgetAction::setConnectionPermissionsToNone(bool recursive /*= false*/)
@@ -513,6 +527,24 @@ void WidgetAction::setConnectionPermissionsToNone(bool recursive /*= false*/)
 void WidgetAction::setConnectionPermissionsToAll(bool recursive /*= false*/)
 {
     setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::All), recursive);
+}
+
+void WidgetAction::cacheConnectionPermissions(bool recursive /*= false*/)
+{
+    _cachedConnectionPermissions = _connectionPermissions;
+
+    if (recursive)
+        for (auto childAction : getChildActions())
+            childAction->cacheConnectionPermissions(recursive);
+}
+
+void WidgetAction::restoreConnectionPermissions(bool recursive /*= false*/)
+{
+    setConnectionPermissions(_cachedConnectionPermissions);
+
+    if (recursive)
+        for (auto childAction : getChildActions())
+            childAction->restoreConnectionPermissions(recursive);
 }
 
 bool WidgetAction::isResettable()

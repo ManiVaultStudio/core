@@ -95,6 +95,29 @@ QVariantMap DecimalRangeAction::toVariantMap() const
     return variantMap;
 }
 
+void DecimalRangeAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicDecimalRangeAction = dynamic_cast<DecimalRangeAction*>(publicAction);
+
+    Q_ASSERT(publicDecimalRangeAction != nullptr);
+
+    if (publicDecimalRangeAction == nullptr)
+        return;
+
+    _rangeMinAction.connectToPublicAction(&publicDecimalRangeAction->getRangeMinAction());
+    _rangeMaxAction.connectToPublicAction(&publicDecimalRangeAction->getRangeMaxAction());
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void DecimalRangeAction::disconnectFromPublicAction()
+{
+    _rangeMinAction.disconnectFromPublicAction();
+    _rangeMaxAction.disconnectFromPublicAction();
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
 DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags /*= 0*/) :
     WidgetActionWidget(parent, decimalRangeAction, widgetFlags)
 {

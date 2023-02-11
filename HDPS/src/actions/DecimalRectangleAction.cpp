@@ -42,7 +42,8 @@ void DecimalRectangleAction::disconnectFromPublicAction()
 {
     auto publicDecimalRectangleAction = dynamic_cast<DecimalRectangleAction*>(getPublicAction());
 
-    Q_ASSERT(publicDecimalRectangleAction != nullptr);
+    if (publicDecimalRectangleAction == nullptr)
+        return;
 
     disconnect(this, &DecimalRectangleAction::rectangleChanged, publicDecimalRectangleAction, &DecimalRectangleAction::setRectangle);
     disconnect(publicDecimalRectangleAction, &DecimalRectangleAction::rectangleChanged, this, &DecimalRectangleAction::setRectangle);

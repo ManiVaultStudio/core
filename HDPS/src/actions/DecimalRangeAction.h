@@ -104,6 +104,17 @@ public:
      */
     void setRange(const float& minimum, const float& maximum);
 
+public: // Linking
+
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     */
+    void connectToPublicAction(WidgetAction* publicAction) override;
+
+    /** Disconnect this action from a public action */
+    void disconnectFromPublicAction() override;
+
 public: // Serialization
 
     /**

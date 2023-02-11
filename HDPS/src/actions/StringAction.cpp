@@ -166,6 +166,9 @@ void StringAction::connectToPublicAction(WidgetAction* publicAction)
 
     Q_ASSERT(publicStringAction != nullptr);
 
+    if (publicStringAction == nullptr)
+        return;
+
     connect(this, &StringAction::stringChanged, publicStringAction, &StringAction::setString);
     connect(publicStringAction, &StringAction::stringChanged, this, &StringAction::setString);
 
@@ -178,7 +181,8 @@ void StringAction::disconnectFromPublicAction()
 {
     auto publicStringAction = dynamic_cast<StringAction*>(getPublicAction());
 
-    Q_ASSERT(publicStringAction != nullptr);
+    if (publicStringAction == nullptr)
+        return;
 
     disconnect(this, &StringAction::stringChanged, publicStringAction, &StringAction::setString);
     disconnect(publicStringAction, &StringAction::stringChanged, this, &StringAction::setString);

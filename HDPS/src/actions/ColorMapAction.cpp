@@ -252,7 +252,6 @@ void ColorMapAction::connectToPublicAction(WidgetAction* publicAction)
 void ColorMapAction::disconnectFromPublicAction()
 {
     _currentColorMapAction.disconnectFromPublicAction();
-
     _settingsAction.disconnectFromPublicAction();
 
     WidgetAction::disconnectFromPublicAction();

@@ -199,7 +199,8 @@ void DatasetPickerAction::disconnectFromPublicAction()
 {
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
-    Q_ASSERT(publicDatasetPickerAction != nullptr);
+    if (publicDatasetPickerAction == nullptr)
+        return;
 
     disconnect(this, &DatasetPickerAction::datasetPicked, publicDatasetPickerAction, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
     disconnect(publicDatasetPickerAction, &DatasetPickerAction::datasetPicked, this, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));

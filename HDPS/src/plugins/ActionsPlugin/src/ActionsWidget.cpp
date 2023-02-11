@@ -21,6 +21,7 @@ ActionsWidget::ActionsWidget(QWidget* parent /*= nullptr*/) :
 
     _hierarchyWidget.getFilterGroupAction() << _filterModel.getTypeFilterAction();
     _hierarchyWidget.getFilterGroupAction() << _filterModel.getScopeFilterAction();
+    _hierarchyWidget.getFilterGroupAction() << _filterModel.getConnectedFilterAction();
 
 #ifdef _DEBUG
     _filterModel.getScopeFilterAction().setEnabled(true);

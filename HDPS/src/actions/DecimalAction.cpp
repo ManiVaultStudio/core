@@ -84,7 +84,8 @@ void DecimalAction::disconnectFromPublicAction()
 {
     auto publicDecimalAction = dynamic_cast<DecimalAction*>(getPublicAction());
 
-    Q_ASSERT(publicDecimalAction != nullptr);
+    if (publicDecimalAction == nullptr)
+        return;
 
     disconnect(this, &DecimalAction::valueChanged, publicDecimalAction, nullptr);
     disconnect(publicDecimalAction, &DecimalAction::valueChanged, this, nullptr);

@@ -85,7 +85,8 @@ void StringsAction::disconnectFromPublicAction()
 {
     auto publicStringsAction = dynamic_cast<StringsAction*>(getPublicAction());
 
-    Q_ASSERT(publicStringsAction != nullptr);
+    if (publicStringsAction == nullptr)
+        return;
 
     disconnect(this, &StringsAction::stringsChanged, publicStringsAction, &StringsAction::setStrings);
     disconnect(publicStringsAction, &StringsAction::stringsChanged, this, &StringsAction::setStrings);

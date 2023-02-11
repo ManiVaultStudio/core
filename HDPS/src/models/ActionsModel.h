@@ -27,9 +27,13 @@ public:
         ID,         /** Globally unique identifier of the action */
         Type,       /** Action type string */
         Scope,      /** Scope of the action (whether the action is public or private) */
+        Connected,  /** Whether the action is connected or not */
 
         Count
     };
+
+    /** Column name and tooltip */
+    static QMap<Column, QPair<QString, QString>> columnInfo;
 
 protected:
 
@@ -62,10 +66,11 @@ protected:
         gui::WidgetAction* getAction();
 
     private:
-        void updateName();      /** Update item for name column */
-        void updateId();        /** Update item for identifier column */
-        void updateType();      /** Update item for type column */
-        void updateScope();     /** Update item for scope column */
+        void updateNameColumn();      /** Update item in case of name column */
+        void updateIdColumn();        /** Update item in case of identifier column */
+        void updateTypeColumn();      /** Update item in case of type column */
+        void updateScopeColumn();     /** Update item in case of scope column */
+        void updateConnectedColumn(); /** Update item in case of connected column */
 
     private:
         ActionsModel*               _actionsModel;  /** Pointer to parent actions model */

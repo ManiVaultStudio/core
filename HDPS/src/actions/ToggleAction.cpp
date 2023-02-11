@@ -105,7 +105,8 @@ void ToggleAction::disconnectFromPublicAction()
 {
     auto publicToggleAction = dynamic_cast<ToggleAction*>(getPublicAction());
 
-    Q_ASSERT(publicToggleAction != nullptr);
+    if (publicToggleAction == nullptr)
+        return;
 
     disconnect(this, &ToggleAction::toggled, publicToggleAction, &ToggleAction::setChecked);
     disconnect(publicToggleAction, &ToggleAction::toggled, this, &ToggleAction::setChecked);

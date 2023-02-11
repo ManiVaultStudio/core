@@ -13,7 +13,8 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
     _typeFilterAction(this, "Type"),
     _typeCompleter(this),
-    _scopeFilterAction(this, "Scope", { "Private", "Public" }, { "Private", "Public" })
+    _scopeFilterAction(this, "Scope", { "Private", "Public" }, { "Private", "Public" }),
+    _connectedFilterAction(this, "Connected", true, true)
 {
     setRecursiveFilteringEnabled(true);
 
@@ -24,6 +25,7 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
 
     connect(&_typeFilterAction, &StringAction::stringChanged, this, &ActionsFilterModel::invalidate);
     connect(&_scopeFilterAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
+    connect(&_connectedFilterAction, &ToggleAction::toggled, this, &ActionsFilterModel::invalidate);
 
     connect(&actions().getActionsModel(), &ActionsModel::actionTypesChanged, this, [this](const QStringList& actionTypes) -> void {
         _typeFilterAction.getCompleter()->setModel(new QStringListModel(actionTypes));
@@ -52,6 +54,11 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
         if (type != typeFilter)
             return false;
     }
+
+    const auto isConnected = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Connected)), Qt::EditRole).toBool();
+
+    if (_connectedFilterAction.isChecked() && !isConnected)
+        return false;
 
     //if (!parent.isValid()) {
         const auto scope = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Scope)), Qt::UserRole + 1).toInt();

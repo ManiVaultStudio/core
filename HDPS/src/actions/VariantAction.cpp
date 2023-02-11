@@ -1,5 +1,7 @@
 #include "VariantAction.h"
 
+using namespace hdps::util;
+
 namespace hdps::gui {
 
 VariantAction::VariantAction(QObject* parent, const QString& title /*= ""*/, const QVariant& variant /*= QVariant()*/) :
@@ -50,7 +52,8 @@ void VariantAction::disconnectFromPublicAction()
 {
     auto publicStringAction = dynamic_cast<VariantAction*>(getPublicAction());
 
-    Q_ASSERT(publicStringAction != nullptr);
+    if (publicStringAction == nullptr)
+        return;
 
     disconnect(this, &VariantAction::variantChanged, publicStringAction, &VariantAction::setVariant);
     disconnect(publicStringAction, &VariantAction::variantChanged, this, &VariantAction::setVariant);
@@ -65,11 +68,22 @@ WidgetAction* VariantAction::getPublicCopy() const
 
 void VariantAction::fromVariantMap(const QVariantMap& variantMap)
 {
+    WidgetAction::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "Value");
+
+    setVariant(variantMap["Value"]);
 }
 
 QVariantMap VariantAction::toVariantMap() const
 {
-    return {};
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", getVariant() }
+    });
+
+    return variantMap;
 }
 
 }

@@ -62,7 +62,8 @@ void IntegralAction::disconnectFromPublicAction()
 {
     auto publicIntegralAction = dynamic_cast<IntegralAction*>(getPublicAction());
 
-    Q_ASSERT(publicIntegralAction != nullptr);
+    if (publicIntegralAction == nullptr)
+        return;
 
     disconnect(this, &IntegralAction::valueChanged, publicIntegralAction, nullptr);
     disconnect(publicIntegralAction, &IntegralAction::valueChanged, this, nullptr);

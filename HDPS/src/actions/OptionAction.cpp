@@ -123,7 +123,8 @@ void OptionAction::disconnectFromPublicAction()
 {
     auto publicOptionAction = dynamic_cast<OptionAction*>(getPublicAction());
 
-    Q_ASSERT(publicOptionAction != nullptr);
+    if (publicOptionAction == nullptr)
+        return;
 
     disconnect(this, &OptionAction::currentTextChanged, publicOptionAction, &OptionAction::setCurrentText);
     disconnect(publicOptionAction, &OptionAction::currentTextChanged, this, &OptionAction::setCurrentText);

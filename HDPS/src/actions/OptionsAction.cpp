@@ -193,7 +193,8 @@ void OptionsAction::disconnectFromPublicAction()
 {
     auto publicOptionsAction = dynamic_cast<OptionsAction*>(getPublicAction());
 
-    Q_ASSERT(publicOptionsAction != nullptr);
+    if (publicOptionsAction == nullptr)
+        return;
 
     disconnect(this, &OptionsAction::selectedOptionsChanged, publicOptionsAction, &OptionsAction::setSelectedOptions);
     disconnect(publicOptionsAction, &OptionsAction::selectedOptionsChanged, this, &OptionsAction::setSelectedOptions);

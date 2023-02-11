@@ -317,6 +317,18 @@ public:
     virtual void setConnectionPermissionsToAll(bool recursive = false) final;
 
     /**
+     * Cache connection permissions
+     * @param recursive Whether to recursively cache child connection permissions
+     */
+    virtual void cacheConnectionPermissions(bool recursive = false) final;
+
+    /**
+     * Restore connection permissions
+     * @param recursive Whether to recursively restore child connection permissions
+     */
+    virtual void restoreConnectionPermissions(bool recursive = false) final;
+
+    /**
      * Get public copy of the action (other compatible actions can connect to it)
      * @return Pointer to public copy of the action
      */
@@ -516,17 +528,18 @@ signals:
 
 private:
                     
-    std::int32_t                _defaultWidgetFlags;        /** Default widget flags which are used to configure newly created widget action widgets */
-    std::int32_t                _sortIndex;                 /** Sort index (used in the group action to sort actions) */
-    std::int32_t                _stretch;                   /** Stretch factor */
-    std::int32_t                _connectionPermissions;     /** Allowed connection options flags */
-    Scope                       _scope;                     /** Determines whether this action is a public (shared) action or not */
-    QPointer<WidgetAction>      _publicAction;              /** Public action to which this action might be connected */
-    QVector<WidgetAction*>      _connectedActions;          /** Pointers to widget action that are connected to this action */
-    QString                     _settingsPrefix;            /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
-    bool                        _highlighted;               /** Whether the action is in a highlighted state or not */
-    QSize                       _popupSizeHint;             /** Size hint of the popup */
-    std::int32_t                _configuration;             /** Configuration flags */
+    std::int32_t                _defaultWidgetFlags;            /** Default widget flags which are used to configure newly created widget action widgets */
+    std::int32_t                _sortIndex;                     /** Sort index (used in the group action to sort actions) */
+    std::int32_t                _stretch;                       /** Stretch factor */
+    std::int32_t                _connectionPermissions;         /** Allowed connection permissions flags */
+    std::int32_t                _cachedConnectionPermissions;   /** Cached connection permissions flags */
+    Scope                       _scope;                         /** Determines whether this action is a public (shared) action or not */
+    QPointer<WidgetAction>      _publicAction;                  /** Public action to which this action might be connected */
+    QVector<WidgetAction*>      _connectedActions;              /** Pointers to widget action that are connected to this action */
+    QString                     _settingsPrefix;                /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
+    bool                        _highlighted;                   /** Whether the action is in a highlighted state or not */
+    QSize                       _popupSizeHint;                 /** Size hint of the popup */
+    std::int32_t                _configuration;                 /** Configuration flags */
 
     friend class AbstractActionsManager;
 };

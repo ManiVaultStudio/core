@@ -135,7 +135,14 @@ void DimensionPickerAction::publish(const QString& name)
 
 void DimensionPickerAction::connectToPublicAction(WidgetAction* publicAction)
 {
-    _currentDimensionAction.connectToPublicAction(publicAction);
+    auto publicDimensionPickerAction = dynamic_cast<DimensionPickerAction*>(publicAction);
+
+    Q_ASSERT(publicDimensionPickerAction != nullptr);
+
+    if (publicDimensionPickerAction == nullptr)
+        return;
+
+    _currentDimensionAction.connectToPublicAction(&publicDimensionPickerAction->getCurrentDimensionAction());
 
     WidgetAction::connectToPublicAction(publicAction);
 }

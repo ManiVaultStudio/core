@@ -73,7 +73,8 @@ void ColorPickerAction::disconnectFromPublicAction()
 {
     auto publicColorPickerAction = dynamic_cast<ColorPickerAction*>(getPublicAction());
 
-    Q_ASSERT(publicColorPickerAction != nullptr);
+    if (publicColorPickerAction == nullptr)
+        return;
 
     disconnect(this, &ColorPickerAction::colorChanged, publicColorPickerAction, &ColorPickerAction::setColor);
     disconnect(publicColorPickerAction, &ColorPickerAction::colorChanged, this, &ColorPickerAction::setColor);

@@ -2,6 +2,7 @@
 
 #include "actions/StringAction.h"
 #include "actions/OptionsAction.h"
+#include "actions/ToggleAction.h"
 
 #include <QSortFilterProxyModel>
 #include <QCompleter>
@@ -44,11 +45,13 @@ public: // Action getters
 
     gui::StringAction& getTypeFilterAction() { return _typeFilterAction; }
     gui::OptionsAction& getScopeFilterAction() { return _scopeFilterAction; }
+    gui::ToggleAction& getConnectedFilterAction() { return _connectedFilterAction; }
 
 private:
-    gui::StringAction   _typeFilterAction;      /** Action for filtering by action type */
-    QCompleter          _typeCompleter;         /** Completer for type filter */
-    gui::OptionsAction  _scopeFilterAction;     /** Action for filtering based on action scope */
+    gui::StringAction   _typeFilterAction;          /** Action for filtering by action type */
+    QCompleter          _typeCompleter;             /** Completer for type filter */
+    gui::OptionsAction  _scopeFilterAction;         /** Action for filtering based on action scope */
+    gui::ToggleAction   _connectedFilterAction;     /** Action for filtering based on whether an action is connected or not */
 };
 
 }
