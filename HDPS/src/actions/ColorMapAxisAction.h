@@ -50,7 +50,7 @@ protected:
      * @param colorMapSettingsAction Reference to color map settings action
      * @param title Axis title
      */
-    ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsAction, const QString& title);
+    Q_INVOKABLE ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsAction, const QString& title);
 
 public: // Linking
 
@@ -91,3 +91,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::ColorMapAxisAction)
+
+inline const auto colorMapAxisActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapAxisAction*>("ColorMapAxisAction");

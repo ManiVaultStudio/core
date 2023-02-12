@@ -6,9 +6,7 @@
 
 class QWidget;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Decimal rectangle action class
@@ -114,4 +112,7 @@ signals:
 };
 
 }
-}
+
+Q_DECLARE_METATYPE(hdps::gui::DecimalRectangleAction)
+
+inline const auto decimalRectangleActionMetaTypeId = qRegisterMetaType<hdps::gui::DecimalRectangleAction*>("DecimalRectangleAction");

@@ -39,7 +39,7 @@ public:
      * @param icon Icon
      * @param tooltip Tooltip of the plugin trigger action
      */
-    PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon);
+    Q_INVOKABLE PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon);
 
     /**
      * Constructor
@@ -50,7 +50,7 @@ public:
      * @param icon Icon
      * @param requestPluginCallback Callback which is invoked when the trigger action is triggered
      */
-    PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon, RequestPluginCallback requestPluginCallback);
+    Q_INVOKABLE PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon, RequestPluginCallback requestPluginCallback);
 
     /**
      * Copy constructor
@@ -129,3 +129,7 @@ private:
 using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::PluginTriggerAction)
+
+inline const auto pluginTriggerActionMetaTypeId = qRegisterMetaType<hdps::gui::PluginTriggerAction*>("PluginTriggerAction");

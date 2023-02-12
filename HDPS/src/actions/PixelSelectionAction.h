@@ -13,9 +13,7 @@
 
 class QWidget;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Pixel selection action class
@@ -35,7 +33,7 @@ public:
      * @param pixelSelectionTool Reference to pixel selection tool
      * @param pixelSelectionTypes Allowed pixel selection types
      */
-    PixelSelectionAction(QObject* parent, QWidget* targetWidget, util::PixelSelectionTool& pixelSelectionTool, const util::PixelSelectionTypes& pixelSelectionTypes = util::defaultPixelSelectionTypes);
+    Q_INVOKABLE PixelSelectionAction(QObject* parent, QWidget* targetWidget, util::PixelSelectionTool& pixelSelectionTool, const util::PixelSelectionTypes& pixelSelectionTypes = util::defaultPixelSelectionTypes);
 
     /**
      * Get the context menu for the action
@@ -143,4 +141,7 @@ protected:
 };
 
 }
-}
+
+Q_DECLARE_METATYPE(hdps::gui::PixelSelectionAction)
+
+inline const auto pixelSelectionActionMetaTypeId = qRegisterMetaType<hdps::gui::PixelSelectionAction*>("PixelSelectionAction");

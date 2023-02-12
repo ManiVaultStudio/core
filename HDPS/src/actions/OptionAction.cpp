@@ -8,9 +8,7 @@
 #include <QPushButton>
 #include <QStylePainter>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/) :
     WidgetAction(parent, title),
@@ -539,5 +537,4 @@ QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     return widget;
 }
 
-}
 }

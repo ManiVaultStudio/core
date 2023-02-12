@@ -305,3 +305,7 @@ private:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::PresetsAction)
+
+inline const auto presetsActionMetaTypeId = qRegisterMetaType<hdps::gui::PresetsAction*>("PresetsAction");

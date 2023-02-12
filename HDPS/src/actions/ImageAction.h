@@ -5,9 +5,7 @@
 #include <QLabel>
 #include <QImage>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Image widget action class (WIP)
@@ -76,7 +74,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    ImageAction(QObject* parent, const QString& title = "");
+    Q_INVOKABLE ImageAction(QObject* parent, const QString& title = "");
 
     /** Get the current image */
     QImage getImage() const;
@@ -100,4 +98,7 @@ protected:
 };
 
 }
-}
+
+Q_DECLARE_METATYPE(hdps::gui::ImageAction)
+
+inline const auto imageActionMetaTypeId = qRegisterMetaType<hdps::gui::ImageAction*>("ImageAction");

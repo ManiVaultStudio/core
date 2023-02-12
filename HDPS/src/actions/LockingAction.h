@@ -98,3 +98,7 @@ private:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::LockingAction)
+
+inline const auto lockingActionMetaTypeId = qRegisterMetaType<hdps::gui::LockingAction*>("LockingAction");

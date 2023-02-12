@@ -172,3 +172,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::ColorMapAction)
+
+inline const auto colorMapActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapAction*>("ColorMapAction");

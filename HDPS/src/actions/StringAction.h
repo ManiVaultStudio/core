@@ -251,3 +251,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::StringAction)
+
+inline const auto stringActionMetaTypeId = qRegisterMetaType<hdps::gui::StringAction*>("StringAction");

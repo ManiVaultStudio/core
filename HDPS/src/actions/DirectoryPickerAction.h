@@ -11,9 +11,7 @@
 
 class QWidget;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Directory picker action class
@@ -153,4 +151,7 @@ protected:
 };
 
 }
-}
+
+Q_DECLARE_METATYPE(hdps::gui::DirectoryPickerAction)
+
+inline const auto directoryPickerActionMetaTypeId = qRegisterMetaType<hdps::gui::DirectoryPickerAction*>("DirectoryPickerAction");

@@ -2,9 +2,7 @@
 
 #include <QHBoxLayout>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 DecimalRectangleAction::DecimalRectangleAction(QObject * parent, const QString& title, const QRectF& rectangle /*= QRectF()*/, const QRectF& defaultRectangle /*= QRectF()*/) :
     RectangleAction<QRectF>(parent, title, rectangle, defaultRectangle)
@@ -105,5 +103,4 @@ QWidget* DecimalRectangleAction::getWidget(QWidget* parent, const std::int32_t& 
     return widget;
 }
 
-}
 }

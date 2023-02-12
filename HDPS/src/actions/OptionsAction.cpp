@@ -10,9 +10,7 @@
 #include <QJsonObject>
 #include <QAbstractItemView>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 OptionsAction::OptionsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/, const QStringList& defaultSelectedOptions /*= QStringList()*/) :
     WidgetAction(parent, title),
@@ -423,5 +421,4 @@ OptionsAction::FileAction::Widget::Widget(QWidget* parent, FileAction* fileActio
     setPopupLayout(layout);
 }
 
-}
 }

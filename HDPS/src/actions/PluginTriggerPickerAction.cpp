@@ -5,9 +5,7 @@
 
 #include <QHBoxLayout>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 PluginTriggerPickerAction::PluginTriggerPickerAction(QObject* parent, const QString& title /*= ""*/) :
     TriggerAction(parent, "Plugin Trigger Picker"),
@@ -160,5 +158,4 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
     setLayout(layout);
 }
 
-}
 }

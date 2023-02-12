@@ -11,9 +11,7 @@
 
 class QWidget;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * File picker action class
@@ -54,7 +52,7 @@ public:
      * @param filePath File path
      * @param defaultFilePath Default file path
      */
-    FilePickerAction(QObject* parent, const QString& title = "", const QString& filePath = QString(), const QString& defaultFilePath = QString());
+    Q_INVOKABLE FilePickerAction(QObject* parent, const QString& title = "", const QString& filePath = QString(), const QString& defaultFilePath = QString());
 
     /**
      * Initialize the directory picker action
@@ -139,4 +137,7 @@ protected:
 };
 
 }
-}
+
+Q_DECLARE_METATYPE(hdps::gui::FilePickerAction)
+
+inline const auto filePickerActionMetaTypeId = qRegisterMetaType<hdps::gui::FilePickerAction*>("FilePickerAction");

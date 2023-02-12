@@ -5,9 +5,7 @@
 #include "actions/DecimalAction.h"
 #include "actions/ColorAction.h"
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 class ColorMapEditor1DNode;
 class ColorMapEditor1DAction;
@@ -17,7 +15,7 @@ class ColorMapEditor1DAction;
  *
  * Action class for editing one-dimensional color map editor node parameters
  *
- * @author Thomas Kroes and Mitchell M. de Boer
+ * @author Mitchell M. de Boer and Thomas Kroes
  */
 class ColorMapEditor1DNodeAction : public WidgetAction
 {
@@ -52,7 +50,7 @@ public:
      * Constructor
      * @param colorMapEditor1DAction Reference to owning one-dimensional color map action
      */
-    ColorMapEditor1DNodeAction(ColorMapEditor1DAction& colorMapEditor1DAction);
+    Q_INVOKABLE ColorMapEditor1DNodeAction(ColorMapEditor1DAction& colorMapEditor1DAction);
 
     /**
      * Connect to a node
@@ -84,4 +82,7 @@ protected:
 };
 
 }
-}
+
+Q_DECLARE_METATYPE(hdps::gui::ColorMapEditor1DNodeAction)
+
+inline const auto colorMapEditor1DNodeActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapEditor1DNodeAction*>("ColorMapEditor1DNodeAction");

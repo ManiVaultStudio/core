@@ -285,3 +285,7 @@ private:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::RecentFilesAction)
+
+inline const auto recentFilesActionMetaTypeId = qRegisterMetaType<hdps::gui::RecentFilesAction*>("RecentFilesAction");

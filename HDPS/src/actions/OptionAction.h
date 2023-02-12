@@ -13,9 +13,7 @@ class QWidget;
 class QPushButton;
 class QAbstractListModel;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Option widget action class
@@ -296,4 +294,7 @@ protected:
 };
 
 }
-}
+
+Q_DECLARE_METATYPE(hdps::gui::OptionAction)
+
+inline const auto optionActionMetaTypeId = qRegisterMetaType<hdps::gui::OptionAction*>("OptionAction");

@@ -9,9 +9,7 @@
 
 using namespace hdps::util;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 PixelSelectionAction::PixelSelectionAction(QObject* parent, QWidget* targetWidget, PixelSelectionTool& pixelSelectionTool, const PixelSelectionTypes& pixelSelectionTypes /*= util::defaultPixelSelectionTypes*/) :
     WidgetAction(parent, "Pixel Selection"),
@@ -470,5 +468,4 @@ QVariantMap PixelSelectionAction::toVariantMap() const
     return variantMap;
 }
 
-}
 }

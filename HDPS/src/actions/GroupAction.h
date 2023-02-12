@@ -75,7 +75,7 @@ public:
      * @param title Title of the group action
      * @param expanded Whether the group is initially expanded/collapsed
      */
-    GroupAction(QObject* parent, const QString& title, const bool& expanded = false);
+    Q_INVOKABLE GroupAction(QObject* parent, const QString& title, const bool& expanded = false);
 
     /**
      * Constructor
@@ -84,7 +84,7 @@ public:
      * @param widgetActions Widget actions to initialize with
      * @param expanded Whether the group is initially expanded/collapsed
      */
-    GroupAction(QObject* parent, const QString& title, WidgetActions widgetActions, const bool& expanded = false);
+    Q_INVOKABLE GroupAction(QObject* parent, const QString& title, WidgetActions widgetActions, const bool& expanded = false);
 
     /** Set expanded/collapsed */
     void setExpanded(const bool& expanded);
@@ -231,6 +231,10 @@ private:
     static const std::uint32_t      globalLabelWidthPercentage;     /** Global label width in percentages */
     static const std::uint32_t      globalLabelWidthFixed;          /** Global label width in pixels */
 };
+
+Q_DECLARE_METATYPE(hdps::gui::GroupAction)
+
+inline const auto groupActionMetaTypeId = qRegisterMetaType<hdps::gui::GroupAction*>("GroupAction");
 
 /**
  * Print group action to console

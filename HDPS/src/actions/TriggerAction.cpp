@@ -3,9 +3,7 @@
 #include <QHBoxLayout>
 #include <QMenu>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 TriggerAction::TriggerAction(QObject* parent, const QString& title /*= ""*/) :
     WidgetAction(parent, title)
@@ -110,5 +108,4 @@ hdps::gui::WidgetAction* TriggerAction::getPublicCopy() const
     return new TriggerAction(parent(), text());
 }
 
-}
 }

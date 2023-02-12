@@ -3,7 +3,7 @@
 #include "actions/WidgetAction.h"
 #include "actions/DecimalAction.h"
 
-using namespace hdps::gui;
+namespace hdps::gui {
 
 /**
  * Window/level settings action class
@@ -51,7 +51,7 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      */
-    WindowLevelAction(QObject* parent);
+    Q_INVOKABLE WindowLevelAction(QObject* parent);
 
 public: /** Action getters */
 
@@ -67,3 +67,9 @@ protected:
     DecimalAction   _windowAction;      /** Window action */
     DecimalAction   _levelAction;       /** Level action */
 };
+
+}
+
+Q_DECLARE_METATYPE(hdps::gui::WindowLevelAction)
+
+inline const auto windowLevelActionMetaTypeId = qRegisterMetaType<hdps::gui::WindowLevelAction*>("WindowLevelAction");

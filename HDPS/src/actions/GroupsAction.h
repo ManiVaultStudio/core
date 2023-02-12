@@ -153,7 +153,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the groups action
      */
-    GroupsAction(QObject* parent, const QString& title);
+    Q_INVOKABLE GroupsAction(QObject* parent, const QString& title);
 
     ~GroupsAction();
 
@@ -315,6 +315,10 @@ protected:
     GroupActions                _groupActions;      /** Pointers to group actions */
     QMap<GroupAction*, bool>    _visibility;        /** Group action visibility */
 };
+
+Q_DECLARE_METATYPE(hdps::gui::GroupsAction)
+
+inline const auto groupsActionMetaTypeId = qRegisterMetaType<hdps::gui::GroupsAction*>("GroupsAction");
 
 /**
  * Print group actions to console

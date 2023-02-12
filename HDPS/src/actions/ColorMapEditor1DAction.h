@@ -63,7 +63,7 @@ protected:
      * Constructor
      * @param colorMapAction Reference to color map action
      */
-    ColorMapEditor1DAction(ColorMapAction& colorMapAction);
+    Q_INVOKABLE ColorMapEditor1DAction(ColorMapAction& colorMapAction);
 
 public:
 
@@ -202,3 +202,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::ColorMapEditor1DAction)
+
+inline const auto colorMapEditor1DActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapEditor1DAction*>("ColorMapEditor1DAction");

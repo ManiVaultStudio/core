@@ -6,9 +6,7 @@
 #include <QVBoxLayout>
 #include <QColorDialog>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Color picker action class
@@ -64,7 +62,7 @@ protected:
      * @param title Title of the action
      * @param color Initial color
      */
-    ColorPickerAction(QObject* parent, const QString& title = "", const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
+    Q_INVOKABLE ColorPickerAction(QObject* parent, const QString& title = "", const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
 
 public:
 
@@ -125,4 +123,7 @@ protected:
 };
 
 }
-}
+
+Q_DECLARE_METATYPE(hdps::gui::ColorPickerAction)
+
+inline const auto colorPickerActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorPickerAction*>("ColorPickerAction");

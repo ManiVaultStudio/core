@@ -6,9 +6,7 @@
 #include <QStandardItemModel>
 #include <QComboBox>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Options widget action class
@@ -365,4 +363,7 @@ protected:
 };
 
 }   
-}
+
+Q_DECLARE_METATYPE(hdps::gui::OptionsAction)
+
+inline const auto optionsActionMetaTypeId = qRegisterMetaType<hdps::gui::OptionsAction*>("OptionsAction");

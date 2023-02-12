@@ -2,9 +2,7 @@
 
 #include "DecimalAction.h"
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Decimal range action class
@@ -60,7 +58,7 @@ public:
      * @param defaultRangeMin Default range minimum
      * @param defaultRangeMax Default range maximum
      */
-    DecimalRangeAction(QObject* parent, const QString& title = "", const float& limitMin = INIT_LIMIT_MIN, const float& limitMax = INIT_LIMIT_MAX, const float& rangeMin = INIT_RANGE_MIN, const float& rangeMax = INIT_RANGE_MAX, const float& defaultRangeMin = INIT_DEFAULT_RANGE_MIN, const float& defaultRangeMax = INIT_DEFAULT_RANGE_MAX);
+    Q_INVOKABLE DecimalRangeAction(QObject* parent, const QString& title = "", const float& limitMin = INIT_LIMIT_MIN, const float& limitMax = INIT_LIMIT_MAX, const float& rangeMin = INIT_RANGE_MIN, const float& rangeMax = INIT_RANGE_MAX, const float& defaultRangeMin = INIT_DEFAULT_RANGE_MIN, const float& defaultRangeMax = INIT_DEFAULT_RANGE_MAX);
 
     /**
      * Initialize the color action
@@ -157,4 +155,7 @@ protected:
 };
 
 }
-}
+
+Q_DECLARE_METATYPE(hdps::gui::DecimalRangeAction)
+
+inline const auto decimalRangeActionMetaTypeId = qRegisterMetaType<hdps::gui::DecimalRangeAction*>("DecimalRangeAction");

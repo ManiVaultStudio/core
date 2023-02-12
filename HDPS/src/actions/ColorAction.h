@@ -178,3 +178,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::ColorAction)
+
+inline const auto colorActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorAction*>("ColorAction");

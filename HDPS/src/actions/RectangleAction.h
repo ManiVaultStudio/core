@@ -2,9 +2,7 @@
 
 #include "WidgetAction.h"
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Rectangle action class
@@ -100,5 +98,4 @@ protected: // Callbacks for implementations of the numerical action
     DefaultRectangleChangedCB   _defaultRectangleChanged;   /** Callback which is called when the default rectangle changed */
 };
 
-}
 }

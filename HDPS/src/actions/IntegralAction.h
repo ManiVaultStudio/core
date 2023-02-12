@@ -178,3 +178,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::IntegralAction)
+
+inline const auto integralActionMetaTypeId = qRegisterMetaType<hdps::gui::IntegralAction*>("IntegralAction");

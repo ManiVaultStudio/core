@@ -25,7 +25,7 @@ public:
      * @param title Title of the action
      * @param variant Initial variant value
      */
-    VariantAction(QObject* parent, const QString& title = "", const QVariant& variant = QVariant());
+    Q_INVOKABLE VariantAction(QObject* parent, const QString& title = "", const QVariant& variant = QVariant());
 
     /**
      * Initialize the variant action
@@ -91,3 +91,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::VariantAction)
+
+inline const auto variantActionMetaTypeId = qRegisterMetaType<hdps::gui::VariantAction*>("VariantAction");
