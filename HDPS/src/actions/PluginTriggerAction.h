@@ -56,7 +56,7 @@ public:
      * Copy constructor
      * @param pluginTriggerAction Reference to other plugin trigger action
      */
-    PluginTriggerAction(const PluginTriggerAction& pluginTriggerAction);
+    Q_INVOKABLE PluginTriggerAction(const PluginTriggerAction& pluginTriggerAction, const QString& title);
 
     /**
      * Get the plugin factory

@@ -60,6 +60,13 @@ protected:
         ~Item();
 
         /**
+         * Get data for \p role
+         * @param role Data role
+         * @return Data in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
          * Get pointer to source widget action
          * @return Pointer to source widget action
          */
@@ -102,7 +109,7 @@ public:
      * Get all actions in the manager
      * @return List of all actions in the manager
      */
-    const gui::WidgetActions& getActions() const;
+    gui::WidgetActions getActions() const;
 
     /**
      * Get set of action types
@@ -147,7 +154,11 @@ signals:
     void actionTypesChanged(const QStringList& actionTypes);
 
 private:
-    QMap<QString, std::int32_t>   _actionTypes;     /** Number of rows per action type */
+    gui::WidgetActions          _actions;       /** Flat list of actions in the model */
+    QMap<QString, std::int32_t> _actionTypes;   /** Number of rows per action type */
+    QStringList removed;
+    int add;
+    int remove;
 
     friend class Item;
 };

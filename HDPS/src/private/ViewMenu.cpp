@@ -108,7 +108,7 @@ QVector<QPointer<PluginTriggerAction>> ViewMenu::getLoadViewsActions(gui::DockAr
         if (viewPluginFactory->producesSystemViewPlugins())
             continue;
             
-        pluginTriggerActions << new PluginTriggerAction(*pluginTriggerAction);
+        pluginTriggerActions << new PluginTriggerAction(*pluginTriggerAction, QString("Create %1").arg(viewPluginFactory->getKind()));
 
         ViewPlugin* dockToViewPlugin = nullptr;
 

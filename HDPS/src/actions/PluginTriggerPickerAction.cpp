@@ -8,7 +8,7 @@
 namespace hdps::gui {
 
 PluginTriggerPickerAction::PluginTriggerPickerAction(QObject* parent, const QString& title /*= ""*/) :
-    TriggerAction(parent, "Plugin Trigger Picker"),
+    TriggerAction(parent, title),
     _pluginTriggerActions(),
     _selectTriggerAction(this, "Pick plugin")
 {

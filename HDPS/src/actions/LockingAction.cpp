@@ -10,9 +10,9 @@ namespace hdps::gui {
 
 LockingAction::LockingAction(QObject* parent, const QString& what /*= ""*/, bool locked /*= false*/) :
     GroupAction(parent, "Locking"),
-    _lockedAction(this),
-    _lockAction(this),
-    _unlockAction(this)
+    _lockedAction(this, "Locked"),
+    _lockAction(this, "Lock"),
+    _unlockAction(this, "Unlock")
 {
     setCheckable(true);
     setText("Locking");

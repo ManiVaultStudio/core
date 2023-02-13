@@ -40,6 +40,8 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _popupSizeHint(QSize(0, 0)),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default))
 {
+    Q_ASSERT(!title.isEmpty());
+
     setText(title);
     
     auto serializationName = title;
@@ -50,6 +52,8 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
 
     if (core()->isInitialized())
         actions().addActionToModel(this);
+    else
+        qDebug() << getId();
 }
 
 WidgetAction::~WidgetAction()
@@ -424,8 +428,6 @@ QVariantMap WidgetAction::toVariantMap() const
         { "ConnectionPermissions", QVariant::fromValue(_connectionPermissions) },
         { "PublicActionID", QVariant::fromValue(_publicAction == nullptr ? "" : _publicAction->getId()) }
     });
-
-    
 
     return variantMap;
 }

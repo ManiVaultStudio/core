@@ -96,7 +96,7 @@ void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
 
     for (const auto& publicAction : publicActions) {
         const auto publicActionMap  = publicAction.toMap();
-        const auto metaType         = publicAction.toMap()["Type"].toString();
+        const auto metaType         = publicActionMap["Type"].toString();
         const auto metaTypeId       = QMetaType::type(metaType.toLatin1());
         const auto metaObject       = QMetaType::metaObjectForType(metaTypeId);
 
@@ -117,18 +117,21 @@ QVariantMap ActionsManager::toVariantMap() const
 
     QVariantList publicActions;
 
-    /*
-    for (const auto action : _model.getActions()) {
+    for (auto action : _model.getActions()) {
+        //Q_ASSERT(action != nullptr);
+
+        if (action == nullptr)
+            break;
+
         if (!action->isPublic())
             continue;
 
-        auto actionVariantMap = action->toVariantMap();
+        //auto actionVariantMap = action->toVariantMap();
 
-        actionVariantMap["Title"] = action->text();
+        //actionVariantMap["Title"] = action->text();
 
-        publicActions << actionVariantMap;
+        //publicActions << actionVariantMap;
     }
-    */
 
     variantMap.insert({
         { "PublicActions", publicActions }

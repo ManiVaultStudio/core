@@ -135,8 +135,8 @@ void ActionsModel::Item::updateNameColumn()
     if (_widgetAction->isPrivate())
         setText(_widgetAction->getPath());
 
-    if (_widgetAction->isPrivate())
-        setText(_widgetAction->text());
+    //if (_widgetAction->isPrivate())
+    //    setText(_widgetAction->text());
 
     setEditable(_widgetAction->isPublic());
 }
@@ -179,8 +179,6 @@ void ActionsModel::Item::updateConnectedColumn()
 
     const auto isConnected = _widgetAction->isConnected();
 
-    qDebug() << isConnected;
-
     setText(isConnected ? "Yes" : "No");
     //setData(QVariant::fromValue(isConnected), Qt::EditRole);
 }
@@ -196,8 +194,17 @@ ActionsModel::Item::~Item()
         _actionsModel->removeActionType(this->data(Qt::DisplayRole).toString());
 }
 
+QVariant ActionsModel::Item::data(int role /*= Qt::UserRole + 1*/) const
+{
+
+}
+
 ActionsModel::ActionsModel(QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent)
+    QStandardItemModel(parent),
+    _actions(),
+    _actionTypes(),
+    add(0),
+    remove(0)
 {
     setColumnCount(static_cast<int>(Column::Count));
 
@@ -230,8 +237,13 @@ ActionsModel::ActionsModel(QObject* parent /*= nullptr*/) :
 void ActionsModel::addAction(WidgetAction* action)
 {
 #ifdef ACTIONS_MODEL_VERBOSE
-    qDebug() << __FUNCTION__;
+    qDebug() << __FUNCTION__ << action->getId();
 #endif
+
+    _actions << action;
+
+    if (action->getId().startsWith("6d6e"))
+        qDebug() << "FOUND_6E6D";
 
     const QList<QStandardItem*> row {
         new Item(this, action, Column::Name),
@@ -261,29 +273,65 @@ void ActionsModel::addAction(WidgetAction* action)
     else {
         appendRow(row);
     }
+
+    add++;
 }
 
 void ActionsModel::removeAction(WidgetAction* action)
 {
 #ifdef ACTIONS_MODEL_VERBOSE
-    qDebug() << __FUNCTION__;
+    qDebug() << __FUNCTION__ << action->getId();
 #endif
 
-    const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::DisplayRole, action->getId(), -1, Qt::MatchFlag::MatchRecursive);
+    if (_actions.contains(action))
+        _actions.removeOne(action);
+
+    removed << action->getId();
+
+    auto text = action->text();
+    auto rc = rowCount();
+
+    const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::EditRole, action->getId(), -1, Qt::MatchFlag::MatchRecursive);
 
     if (matches.isEmpty())
         return;
 
+    QList<QPersistentModelIndex> persistentMatches;
+
     for (const auto& match : matches)
-        removeRow(match.row(), match.parent());
+        persistentMatches << QPersistentModelIndex(match);
+
+    for (const auto& persistentMatch : persistentMatches)
+        qDebug() << removeRow(persistentMatch.row(), persistentMatch.parent());
+
+    const auto matches2 = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::EditRole, "*", -1, Qt::MatchFlag::MatchRecursive | Qt::MatchFlag::MatchWildcard);
+
+    //QStringList ids2;
+
+    //for (const auto& match : matches2)
+    //    ids2 << match.data().toString();
+
+    //qDebug() << ids2.count();
+
+    //ids2.removeDuplicates();
+
+    //qDebug() << ids2.count();
+
+    remove++;
+
+    qDebug() << "*Number of actions:" << matches.count() << matches2.count() << _actions.count() << removed.count() << add << remove;
 }
 
-const WidgetActions& ActionsModel::getActions() const
+WidgetActions ActionsModel::getActions() const
 {
     WidgetActions actions;
 
-    //for (int rowIndex = 0; rowIndex < rowCount(); rowIndex++)
-    //    actions << static_cast<Item*>(item(rowIndex, 0))->getAction();
+    const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::EditRole, "*", -1, Qt::MatchFlag::MatchRecursive | Qt::MatchFlag::MatchWildcard);
+
+    qDebug() << "*Number of actions:" << matches.count() << _actions.count();
+
+    for (int rowIndex = 0; rowIndex < rowCount(); rowIndex++)
+        actions << static_cast<Item*>(item(rowIndex, 0))->getAction();
 
     return actions;
 }

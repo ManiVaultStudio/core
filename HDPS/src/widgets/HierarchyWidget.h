@@ -4,6 +4,7 @@
 #include "actions/TriggerAction.h"
 #include "actions/GroupAction.h"
 #include "actions/ToggleAction.h"
+#include "actions/OptionAction.h"
 
 #include "InfoOverlayWidget.h"
 
@@ -183,6 +184,14 @@ public:
     }
 
     /**
+    * Get filter column action
+    * @return Reference to filter column action
+    */
+    OptionAction& getFilterColumnAction() {
+        return _filterColumnAction;
+    }
+
+    /**
      * Get filter group action
      * @return Reference to filter group action
      */
@@ -330,6 +339,7 @@ private:
     QString                             _noItemsDescription;                /** Overlay widget description when no items are loaded */
     QHBoxLayout                         _toolbarLayout;                     /** Layout for the top toolbar */
     StringAction                        _filterNameAction;                  /** String action for filtering by name */
+    OptionAction                        _filterColumnAction;                /** Option action for choosing the filtering column */
     GroupAction                         _filterGroupAction;                 /** Filter group action */
     ToggleAction                        _filterCaseSensitiveAction;         /** Filter case-sensitive action */
     ToggleAction                        _filterRegularExpressionAction;     /** Enable filter with regular expression action */

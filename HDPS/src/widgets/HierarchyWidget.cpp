@@ -28,6 +28,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _infoOverlayWidget(showOverlay ? new InfoOverlayWidget(&_treeView) : nullptr),
     _noItemsDescription(""),
     _filterNameAction(this, "Name"),
+    _filterColumnAction(this, "Column"),
     _filterGroupAction(this, "Filter"),
     _filterCaseSensitiveAction(this, "Case-sensitive", false, false),
     _filterRegularExpressionAction(this, "Regular expression", false, false),
@@ -53,6 +54,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     //if (_filterModel)
     //    _filterGroupAction << _filterNameAction;
 
+    _filterGroupAction << _filterColumnAction;
     _filterGroupAction << _filterCaseSensitiveAction;
     _filterGroupAction << _filterRegularExpressionAction;
 
@@ -98,10 +100,15 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
             _columnsGroupAction.getActions()[columnIndex]->setChecked(true);
     });
 
-    for (std::int32_t columnIndex = 0; columnIndex < _model.columnCount(); columnIndex++) {
-        const auto columnVisible = !_treeView.isColumnHidden(columnIndex);
+    QStringList columnNames;
 
-        auto columnVisibilityAction = new ToggleAction(this, _model.headerData(columnIndex, Qt::Horizontal, Qt::EditRole).toString(), columnVisible, columnVisible);
+    for (std::int32_t columnIndex = 0; columnIndex < _model.columnCount(); columnIndex++) {
+        const auto columnVisible    = !_treeView.isColumnHidden(columnIndex);
+        const auto columnHeader     = _model.headerData(columnIndex, Qt::Horizontal, Qt::EditRole).toString();
+
+        columnNames << columnHeader;
+
+        auto columnVisibilityAction = new ToggleAction(this, columnHeader.isEmpty() ? QString("Column %1").arg(QString::number(columnIndex)) : columnHeader, columnVisible, columnVisible);
 
         connect(columnVisibilityAction, &ToggleAction::toggled, this, [this, columnIndex, updateSelectAllCollumnsReadOnly](bool toggled) -> void {
             _treeView.setColumnHidden(columnIndex, !toggled);
@@ -110,6 +117,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
         _columnsGroupAction << *columnVisibilityAction;
     }
+
+    _filterColumnAction.setOptions(columnNames);
 
     _columnsGroupAction << *selectAllCollumns;
 
@@ -183,6 +192,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
         const auto hasItems = _filterModel != nullptr ? _filterModel->rowCount() >= 1 : _model.rowCount() >= 1;
 
         _filterNameAction.setEnabled(_model.rowCount() >= 1);
+        _filterColumnAction.setEnabled(_model.rowCount() >= 1);
         _filterGroupAction.setEnabled(_model.rowCount() >= 1);
         _selectionGroupAction.setEnabled(hasItems);
         _columnsGroupAction.setEnabled(hasItems);
@@ -195,6 +205,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     };
 
     connect(&_filterNameAction, &StringAction::stringChanged, this, &HierarchyWidget::updateFilterModel);
+    connect(&_filterColumnAction, &OptionAction::currentIndexChanged, this, &HierarchyWidget::updateFilterModel);
     connect(&_filterCaseSensitiveAction, &ToggleAction::toggled, this, &HierarchyWidget::updateFilterModel);
     connect(&_filterRegularExpressionAction, &ToggleAction::toggled, this, &HierarchyWidget::updateFilterModel);
     connect(&_model, &QAbstractItemModel::layoutChanged, this, &HierarchyWidget::updateFilterModel);
@@ -482,6 +493,8 @@ void HierarchyWidget::updateFilterModel()
         return;
 
     const auto itemTypeNameLowered = _itemTypeName.toLower();
+
+    _filterModel->setFilterKeyColumn(_filterColumnAction.getCurrentIndex());
 
     if (_filterRegularExpressionAction.isChecked()) {
         _filterNameAction.setPlaceHolderString(QString("Search for %1 by regular expression").arg(itemTypeNameLowered));
