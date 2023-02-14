@@ -73,13 +73,6 @@ protected:
         gui::WidgetAction* getAction();
 
     private:
-        void updateNameColumn();      /** Update item in case of name column */
-        void updateIdColumn();        /** Update item in case of identifier column */
-        void updateTypeColumn();      /** Update item in case of type column */
-        void updateScopeColumn();     /** Update item in case of scope column */
-        void updateConnectedColumn(); /** Update item in case of connected column */
-
-    private:
         ActionsModel*               _actionsModel;  /** Pointer to parent actions model */
         QPointer<gui::WidgetAction> _widgetAction;  /** Pointer to source widget action */
         Column                      _column;        /** Column to display */

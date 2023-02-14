@@ -36,6 +36,7 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
 {
     const auto index = sourceModel()->index(row, 0, parent);
 
+    return true;
     if (!index.isValid())
         return true;
 
@@ -49,7 +50,7 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
     const auto typeFilter   = _typeFilterAction.getString();
 
     if (!typeFilter.isEmpty()) {
-        const auto type = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Type)), Qt::DisplayRole).toString();
+        const auto type = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Type)), Qt::EditRole).toString();
 
         if (type != typeFilter)
             return false;
@@ -61,7 +62,7 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
         return false;
 
     //if (!parent.isValid()) {
-        const auto scope = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Scope)), Qt::UserRole + 1).toInt();
+        const auto scope = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Scope)), Qt::EditRole).toInt();
 
         if (scope == 0 && !_scopeFilterAction.getSelectedOptionIndices().contains(0))
             return false;

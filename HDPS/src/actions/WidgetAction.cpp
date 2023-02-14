@@ -390,6 +390,8 @@ QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
 
 void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
 {
+    auto previousId = getId();
+
     Serializable::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "Enabled");
@@ -413,6 +415,9 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
             connectToPublicAction(publicAction);
     }
     */
+
+    if (getId() != previousId)
+        emit idChanged(getId());
 }
 
 QVariantMap WidgetAction::toVariantMap() const

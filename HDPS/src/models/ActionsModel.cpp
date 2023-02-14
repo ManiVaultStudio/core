@@ -32,6 +32,9 @@ ActionsModel::Item::Item(ActionsModel* actionsModel, gui::WidgetAction* widgetAc
 {
     Q_ASSERT(_widgetAction != nullptr);
 
+    if (_widgetAction == nullptr)
+        return;
+
     setData(QVariant::fromValue(widgetAction));
 
     //const auto updateReadOnly = [this]() -> void {
@@ -45,19 +48,19 @@ ActionsModel::Item::Item(ActionsModel* actionsModel, gui::WidgetAction* widgetAc
         case Column::Name:
         {
             //setIcon(Application::getIconFont("FontAwesome").getIcon("link"));
-
-            updateNameColumn();
-
-            connect(_widgetAction, &WidgetAction::changed, this, &Item::updateNameColumn);
-
-            connect(_widgetAction, &WidgetAction::scopeChanged, this, [this]() -> void {
-                if (_widgetAction->isPublic())
-                    setData(_widgetAction->text(), Qt::EditRole);
-                
-                //setCheckState(_widgetAction->isEnabled() ? Qt::Checked : Qt::Unchecked);
-                //setCheckable(_widgetAction->isPublic());
-                setEditable(_widgetAction->isPublic());
+            
+            connect(_widgetAction, &WidgetAction::changed, this, [this]() -> void {
+                emitDataChanged();
             });
+            
+            //connect(_widgetAction, &WidgetAction::scopeChanged, this, [this]() -> void {
+            //    if (_widgetAction->isPublic())
+            //        setData(_widgetAction->text(), Qt::EditRole);
+            //    
+            //    //setCheckState(_widgetAction->isEnabled() ? Qt::Checked : Qt::Unchecked);
+            //    //setCheckable(_widgetAction->isPublic());
+            //    setEditable(_widgetAction->isPublic());
+            //});
 
             connect(_widgetAction, &WidgetAction::actionConnected, this, [this, actionsModel](WidgetAction* action) -> void {
                 const QList<QStandardItem*> row {
@@ -90,34 +93,38 @@ ActionsModel::Item::Item(ActionsModel* actionsModel, gui::WidgetAction* widgetAc
 
         case Column::ID:
         {
-            updateIdColumn();
+            connect(_widgetAction, &WidgetAction::idChanged, this, [this]() -> void {
+                emitDataChanged();
+            });
 
             break;
         }
 
         case Column::Type:
         {
-            updateTypeColumn();
-
-            QTimer::singleShot(10, this, &Item::updateTypeColumn);
+            QTimer::singleShot(10, this, [this]() -> void {
+                emitDataChanged();
+                _actionsModel->addActionType(data(Qt::DisplayRole).toString());
+            });
 
             break;
         }
 
         case Column::Scope:
         {
-            updateScopeColumn();
-
-            connect(_widgetAction, &WidgetAction::scopeChanged, this, &Item::updateScopeColumn);
+            connect(_widgetAction, &WidgetAction::scopeChanged, this, [this]() -> void {
+                setEditable(_widgetAction->isPublic());
+                emitDataChanged();
+            });
 
             break;
         }
 
         case Column::Connected:
         {
-            updateConnectedColumn();
-
-            connect(_widgetAction, &WidgetAction::isConnectedChanged, this, &Item::updateConnectedColumn);
+            connect(_widgetAction, &WidgetAction::isConnectedChanged, this, [this]() -> void {
+                emitDataChanged();
+            });
 
             break;
         }
@@ -125,62 +132,6 @@ ActionsModel::Item::Item(ActionsModel* actionsModel, gui::WidgetAction* widgetAc
         default:
             break;
     }
-}
-
-void ActionsModel::Item::updateNameColumn()
-{
-    if (_widgetAction.isNull())
-        return;
-
-    if (_widgetAction->isPrivate())
-        setText(_widgetAction->getPath());
-
-    //if (_widgetAction->isPrivate())
-    //    setText(_widgetAction->text());
-
-    setEditable(_widgetAction->isPublic());
-}
-
-void ActionsModel::Item::updateIdColumn()
-{
-    if (_widgetAction.isNull())
-        return;
-
-    setText(_widgetAction->getId());
-}
-
-void ActionsModel::Item::updateTypeColumn()
-{
-    if (_widgetAction.isNull())
-        return;
-
-    const auto typeString               = _widgetAction->getTypeString();
-    const auto humanFriendlyTypeString  = _widgetAction->getTypeString(true);
-
-    setData(typeString, Qt::EditRole);
-    setData(humanFriendlyTypeString, Qt::DisplayRole);
-
-    _actionsModel->addActionType(humanFriendlyTypeString);
-}
-
-void ActionsModel::Item::updateScopeColumn()
-{
-    if (_widgetAction.isNull())
-        return;
-
-    setText(WidgetAction::scopeNames[_widgetAction->getScope()]);
-    setData(QVariant::fromValue(static_cast<int>(_widgetAction->getScope())), Qt::UserRole + 1);
-}
-
-void ActionsModel::Item::updateConnectedColumn()
-{
-    if (_widgetAction.isNull())
-        return;
-
-    const auto isConnected = _widgetAction->isConnected();
-
-    setText(isConnected ? "Yes" : "No");
-    //setData(QVariant::fromValue(isConnected), Qt::EditRole);
 }
 
 WidgetAction* ActionsModel::Item::getAction()
@@ -196,7 +147,80 @@ ActionsModel::Item::~Item()
 
 QVariant ActionsModel::Item::data(int role /*= Qt::UserRole + 1*/) const
 {
+    Q_ASSERT(_widgetAction != nullptr);
 
+    if (_widgetAction.isNull())
+        return QVariant();
+    
+    switch (_column) {
+        case Column::Name:
+        {
+            switch (role) {
+                case Qt::EditRole:
+                    return _widgetAction->getPath();
+
+                case Qt::DisplayRole:
+                    return _widgetAction->getPath();
+            }
+
+            return _widgetAction->getPath();
+        }
+
+        case Column::ID:
+        {
+            switch (role) {
+                case Qt::EditRole:
+                case Qt::DisplayRole:
+                    return _widgetAction->getId();
+            }
+
+            return _widgetAction->getPath();
+        }
+
+        case Column::Type:
+        {
+            switch (role) {
+                case Qt::EditRole:
+                    return _widgetAction->getTypeString();
+
+                case Qt::DisplayRole:
+                    return _widgetAction->getTypeString(true);
+            }
+
+            break;
+        }
+
+        case Column::Scope:
+        {
+            switch (role) {
+                case Qt::EditRole:
+                    return static_cast<int>(_widgetAction->getScope());
+
+                case Qt::DisplayRole:
+                    return WidgetAction::scopeNames[_widgetAction->getScope()];
+            }
+
+            break;
+        }
+
+        case Column::Connected:
+        {
+            switch (role) {
+                case Qt::EditRole:
+                    return _widgetAction->isConnected();
+
+                case Qt::DisplayRole:
+                    return _widgetAction->isConnected() ? "Yes" : "No";
+            }
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return QVariant();
 }
 
 ActionsModel::ActionsModel(QObject* parent /*= nullptr*/) :

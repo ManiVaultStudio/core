@@ -479,6 +479,12 @@ public:
 signals:
 
     /**
+     * Signals that the globally unique identifier changed (only happens upon de-serialization of a widget action)
+     * @param id Globally unique identifier that changed
+     */
+    void idChanged(const QString& id);
+
+    /**
      * Signals that the highlighted state changed
      * @param highlighted Whether the action is in a highlighted state or not
      */
