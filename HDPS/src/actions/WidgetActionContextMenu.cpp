@@ -46,8 +46,10 @@ void WidgetActionContextMenu::initialize()
     if (!actions().isEmpty())
         addSeparator();
 
-    if (_widgetAction->mayDisconnect(WidgetAction::Gui) && _widgetAction->isConnected())
+    if (_widgetAction->mayDisconnect(WidgetAction::Gui) && _widgetAction->isConnected()) {
         addAction(&_disconnectAction);
+        _disconnectAction.setText(QString("Disconnect from %1").arg(_widgetAction->getPublicAction()->text()));
+    }
 
     if (_widgetAction->mayConnect(WidgetAction::Gui)) {
         auto connectMenu = new QMenu("Connect to:");
@@ -56,13 +58,16 @@ void WidgetActionContextMenu::initialize()
 
         auto actionsFilterModel = new ActionsFilterModel(this);
 
+        actionsFilterModel->setSourceModel(&const_cast<QAbstractItemModel&>(hdps::actions().getModel()));
         actionsFilterModel->getScopeFilterAction().setSelectedOptions({ "Public" });
         actionsFilterModel->getTypeFilterAction().setString(_widgetAction->getTypeString());
 
         const auto numberOfRows = actionsFilterModel->rowCount();
 
         for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
-            const auto publicAction = static_cast<WidgetAction*>(actionsFilterModel->mapToSource(actionsFilterModel->index(rowIndex, 0)).internalPointer());
+            const auto filterIndex = actionsFilterModel->index(rowIndex, 0);
+            const auto sourceIndex = actionsFilterModel->mapToSource(filterIndex);
+            const auto publicAction = sourceIndex.data(Qt::UserRole + 1).value<WidgetAction*>();
 
             auto connectAction = new QAction(publicAction->text());
 

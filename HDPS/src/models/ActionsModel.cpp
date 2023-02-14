@@ -13,6 +13,20 @@ using namespace hdps::gui;
 
 namespace hdps
 {
+    class ScopeItem : public QStandardItem {
+    public:
+        ScopeItem(WidgetAction* action) :
+            _action(action)
+        {
+        }
+
+        QVariant data(int role = Qt::UserRole + 1) const override {
+            return _action->isPublic() ? "Public" : "Private";
+        }
+
+    private:
+        WidgetAction* _action;
+    };
 
 ActionsModel::ActionsModel(QObject* parent /*= nullptr*/) :
     QStandardItemModel(parent)
@@ -50,23 +64,24 @@ void ActionsModel::addAction(WidgetAction* action)
             new QStandardItem(action->text()),
             new QStandardItem(action->getId()),
             new QStandardItem(action->getTypeString()),
-            new QStandardItem(action->isPublic() ? "Public" : "Private")
+            new ScopeItem(action)
         };
 
-        
-
-        //for (auto standardItem : standardItems)
-        //    standardItem->setEditable(false);
+        for (auto standardItem : standardItems)
+            standardItem->setData(QVariant::fromValue(action), Qt::UserRole + 1);
 
         return standardItems;
     };
-    
+
+    appendRow(createRow());
+    /*
     if (action->isPublic()) {
 
     }
     else {
         appendRow(createRow());
     }
+    */
 }
 
 void ActionsModel::removeAction(WidgetAction* action)

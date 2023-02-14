@@ -206,8 +206,6 @@ void WidgetAction::publish(const QString& name /*= ""*/)
 
             connectToPublicAction(publicCopy);
 
-            Application::core()->getActionsManager().addAction(publicCopy);
-
             emit isPublishedChanged(isPublished());
             emit isConnectedChanged(isConnected());
         }
@@ -231,6 +229,30 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
     _publicAction->connectPrivateAction(this);
 
     emit isConnectedChanged(isConnected());
+}
+
+void WidgetAction::connectToPublicActionByName(const QString& publicActionName)
+{
+    Q_ASSERT(!publicActionName.isEmpty());
+
+    if (publicActionName.isEmpty())
+        return;
+
+    auto& model = Application::core()->getActionsManager().getModel();
+
+    const auto matches = model.match(model.index(0, 0), Qt::DisplayRole, publicActionName, -1, Qt::MatchFlag::MatchRecursive);
+
+    if (matches.count() == 1) {
+        auto publicAction = matches.first().data(Qt::UserRole + 1).value<WidgetAction*>();
+
+        qDebug() << publicAction->text();
+
+        _publicAction = publicAction;
+
+        _publicAction->connectPrivateAction(this);
+
+        emit isConnectedChanged(isConnected());
+    }
 }
 
 void WidgetAction::disconnectFromPublicAction()
@@ -588,3 +610,5 @@ void WidgetAction::setStretch(const std::int32_t& stretch)
 }
 
 }
+
+

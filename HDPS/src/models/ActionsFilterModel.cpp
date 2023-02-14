@@ -28,6 +28,13 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
             return false;
     }
 
+    if (_scopeFilterAction.hasSelectedOptions()) {
+        const auto scope = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Scope)), Qt::DisplayRole).toString();
+
+        if (!_scopeFilterAction.getSelectedOptions().contains(scope))
+            return false;
+    }
+
     return true;
 }
 

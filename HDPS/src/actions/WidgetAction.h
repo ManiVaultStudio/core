@@ -206,6 +206,13 @@ public: // Linking
      */
     virtual void connectToPublicAction(WidgetAction* publicAction);
 
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     */
+    void connectToPublicActionByName(const QString& publicActionName);
+
+
     /** Disconnect this action from a public action */
     virtual void disconnectFromPublicAction();
 

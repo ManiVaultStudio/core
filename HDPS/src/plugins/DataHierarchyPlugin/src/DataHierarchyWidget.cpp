@@ -69,6 +69,33 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     layout->addWidget(&_hierarchyWidget, 1);
 
+    auto triggerActionA = new TriggerAction(this, "Trigger A");
+    auto triggerActionB = new TriggerAction(this, "Trigger B");
+
+    triggerActionA->setConnectionPermissionsFlag(WidgetAction::ConnectionPermissionFlag::All);
+    triggerActionB->setConnectionPermissionsFlag(WidgetAction::ConnectionPermissionFlag::All);
+
+    layout->addWidget(triggerActionA->createLabelWidget(this));
+    layout->addWidget(triggerActionA->createWidget(this));
+
+    layout->addWidget(triggerActionB->createLabelWidget(this));
+    layout->addWidget(triggerActionB->createWidget(this));
+
+    connect(triggerActionA, &TriggerAction::triggered, this, []() -> void {
+        qDebug() << "Trigger Action A was triggered!";
+    });
+
+    connect(triggerActionB, &TriggerAction::triggered, this, []() -> void {
+        qDebug() << "Trigger Action B was triggered!";
+    });
+
+    const auto publicActionId = "TriggerActionA";
+
+    triggerActionA->publish(publicActionId);
+    triggerActionB->connectToPublicActionByName(publicActionId);
+
+    layout->addWidget(&_hierarchyWidget, 1);
+
     setLayout(layout);
 
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
