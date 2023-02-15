@@ -159,10 +159,10 @@ signals:
     void projectAboutToBeLoaded(const hdps::Project& project);
 
     /**
-     * Signals that \p project is loaded
-     * @param project Reference to the project that is loaded
+     * Signals that \p project is opened
+     * @param project Reference to the project that is opened
      */
-    void projectLoaded(const hdps::Project& project);
+    void projectOpened(const hdps::Project& project);
 
     /**
      * Signals that a project is about to be imported from \p filePath

@@ -105,6 +105,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _showStartPageAction.setShortcutContext(Qt::ApplicationShortcut);
     _showStartPageAction.setIcon(Application::getIconFont("FontAwesome").getIcon("door-open"));
     _showStartPageAction.setToolTip("Show the HDPS start page");
+    //_showStartPageAction.setChecked(!Application::current()->shouldOpenProjectAtStartup());
 
     auto mainWindow = Application::topLevelWidgets().first();
 
@@ -171,7 +172,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
 
     connect(this, &ProjectManager::projectCreated, this, updateActionsReadOnly);
     connect(this, &ProjectManager::projectDestroyed, this, updateActionsReadOnly);
-    connect(this, &ProjectManager::projectLoaded, this, updateActionsReadOnly);
+    connect(this, &ProjectManager::projectOpened, this, updateActionsReadOnly);
     connect(this, &ProjectManager::projectSaved, this, updateActionsReadOnly);
 
     updateActionsReadOnly();
@@ -437,7 +438,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             qDebug().noquote() << filePath << "loaded successfully";
         }
-        emit projectLoaded(*(_project.get()));
+        emit projectOpened(*(_project.get()));
     }
     catch (std::exception& e)
     {

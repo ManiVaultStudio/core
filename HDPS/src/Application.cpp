@@ -27,7 +27,8 @@ hdps::Application::Application(int& argc, char** argv) :
     _settings(),
     _serializationTemporaryDirectory(),
     _serializationAborted(false),
-    _logger()
+    _logger(),
+    _startupProjectFilePath()
 {
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));
     
@@ -81,6 +82,21 @@ hdps::CoreInterface* Application::core()
 util::Version Application::getVersion() const
 {
     return _version;
+}
+
+QString Application::getStartupProjectFilePath() const
+{
+    return _startupProjectFilePath;
+}
+
+void Application::setStartupProjectFilePath(const QString& startupProjectFilePath)
+{
+    _startupProjectFilePath = startupProjectFilePath;
+}
+
+bool Application::shouldOpenProjectAtStartup() const
+{
+    return !_startupProjectFilePath.isEmpty() && QFileInfo(_startupProjectFilePath).exists();
 }
 
 QVariant Application::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const
