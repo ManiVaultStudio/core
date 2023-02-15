@@ -134,36 +134,39 @@ QVariantMap Project::toVariantMap() const
 
 void Project::initialize()
 {
+    _readOnlyAction.setToolTip("Whether the project is in read-only mode or not");
+    _readOnlyAction.setSerializationName("ReadOnly");
+
     _titleAction.setPlaceHolderString("Enter project title here...");
-    _titleAction.setConnectionPermissionsToNone();
     _titleAction.setClearable(true);
+    _titleAction.setSerializationName("Title");
 
     _descriptionAction.setPlaceHolderString("Enter project description here...");
-    _descriptionAction.setConnectionPermissionsToNone();
     _descriptionAction.setClearable(true);
+    _descriptionAction.setSerializationName("Description");
 
     _tagsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tag"));
     _tagsAction.setCategory("Tag");
     _tagsAction.setStretch(2);
-    _tagsAction.setConnectionPermissionsToNone();
+    _tagsAction.setSerializationName("Tags");
 
     _commentsAction.setPlaceHolderString("Enter project comments here...");
-    _commentsAction.setConnectionPermissionsToNone();
     _commentsAction.setClearable(true);
     _commentsAction.setStretch(2);
     _commentsAction.setDefaultWidgetFlags(StringAction::TextEdit);
+    _commentsAction.setSerializationName("Comments");
 
     _contributorsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("user"));
-    _contributorsAction.setConnectionPermissionsToNone();
     _contributorsAction.setCategory("Contributor");
     _contributorsAction.setEnabled(false);
     _contributorsAction.setStretch(1);
     _contributorsAction.setDefaultWidgetFlags(StringsAction::ListView);
+    _contributorsAction.setSerializationName("Contributors");
     
-    _compressionEnabledAction.setConnectionPermissionsToNone();
+    _compressionEnabledAction.setSerializationName("CompressionEnabled");
 
-    _compressionLevelAction.setConnectionPermissionsToNone();
     _compressionLevelAction.setPrefix("Level: ");
+    _compressionLevelAction.setSerializationName("CompressionLevel");
 
     const auto updateCompressionLevelReadOnly = [this]() -> void {
         _compressionLevelAction.setEnabled(_compressionEnabledAction.isChecked());
