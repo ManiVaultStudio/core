@@ -108,7 +108,7 @@ void DockManager::reset()
 #endif
 
     for (auto viewPluginDockWidget : getViewPluginDockWidgets())
-        removeDockWidget(viewPluginDockWidget);
+        removeViewPluginDockWidget(viewPluginDockWidget);
 }
 
 
