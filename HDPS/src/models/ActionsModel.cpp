@@ -8,7 +8,7 @@
 using namespace hdps::gui;
 
 #ifdef _DEBUG
-    #define ACTIONS_MODEL_VERBOSE
+    //#define ACTIONS_MODEL_VERBOSE
 #endif
 
 namespace hdps
@@ -21,11 +21,14 @@ namespace hdps
         }
 
         QVariant data(int role = Qt::UserRole + 1) const override {
+            if (_action.isNull())
+                return QVariant();
+
             return _action->isPublic() ? "Public" : "Private";
         }
 
     private:
-        WidgetAction* _action;
+        QPointer<WidgetAction> _action;
     };
 
 ActionsModel::ActionsModel(QObject* parent /*= nullptr*/) :
@@ -74,14 +77,6 @@ void ActionsModel::addAction(WidgetAction* action)
     };
 
     appendRow(createRow());
-    /*
-    if (action->isPublic()) {
-
-    }
-    else {
-        appendRow(createRow());
-    }
-    */
 }
 
 void ActionsModel::removeAction(WidgetAction* action)

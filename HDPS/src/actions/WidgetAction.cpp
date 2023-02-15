@@ -242,17 +242,8 @@ void WidgetAction::connectToPublicActionByName(const QString& publicActionName)
 
     const auto matches = model.match(model.index(0, 0), Qt::DisplayRole, publicActionName, -1, Qt::MatchFlag::MatchRecursive);
 
-    if (matches.count() == 1) {
-        auto publicAction = matches.first().data(Qt::UserRole + 1).value<WidgetAction*>();
-
-        qDebug() << publicAction->text();
-
-        _publicAction = publicAction;
-
-        _publicAction->connectPrivateAction(this);
-
-        emit isConnectedChanged(isConnected());
-    }
+    if (matches.count() == 1)
+        connectToPublicAction(matches.first().data(Qt::UserRole + 1).value<WidgetAction*>());
 }
 
 void WidgetAction::disconnectFromPublicAction()
@@ -261,12 +252,18 @@ void WidgetAction::disconnectFromPublicAction()
 
     _publicAction->disconnectPrivateAction(this);
 
+    _publicAction = nullptr;
+
     emit isConnectedChanged(isConnected());
 }
 
 void WidgetAction::connectPrivateAction(WidgetAction* privateAction)
 {
     Q_ASSERT(privateAction != nullptr);
+
+#ifdef WIDGET_ACTION_VERBOSE
+    qDebug() << __FUNCTION__ << privateAction->text();
+#endif
 
     _connectedActions << privateAction;
 
