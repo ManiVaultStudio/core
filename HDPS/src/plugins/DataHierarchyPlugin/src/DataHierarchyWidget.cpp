@@ -124,6 +124,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         _model.removeDataHierarchyModelItem(getModelIndexByDataset(dataset));
     });
 
+    /*
     connect(&_model, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
         for (std::int32_t rowIndex = first; rowIndex < last; rowIndex++) {
             auto childIndex = _model.index(rowIndex, 0, parent);
@@ -143,6 +144,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
              Application::processEvents();
         }
     }, Qt::QueuedConnection);
+    */
 
     connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
         DataHierarchyItems dataHierarchyItems;
