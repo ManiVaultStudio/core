@@ -33,6 +33,7 @@ void FileMenu::showEvent(QShowEvent* showEvent)
     addAction(&projects().getSaveProjectAction());
     addAction(&projects().getSaveProjectAsAction());
     addAction(&projects().getEditProjectSettingsAction());
+    addAction(&projects().getPublishAction());
     addMenu(projects().getRecentProjectsAction().getMenu());
     addSeparator();
     addMenu(Application::core()->getWorkspaceManager().getMenu());
