@@ -19,9 +19,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments"),
-    _contributorsAction(this, "Contributors"),
-    _compressionEnabledAction(this, "Compression", DEFAULT_ENABLE_COMPRESSION, DEFAULT_ENABLE_COMPRESSION),
-    _compressionLevelAction(this, "Compression level", 1, 9, DEFAULT_COMPRESSION_LEVEL, DEFAULT_COMPRESSION_LEVEL)
+    _contributorsAction(this, "Contributors")
 {
     initialize();
 }
@@ -36,9 +34,7 @@ Project::Project(const QString& filePath, bool preview, QObject* parent /*= null
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments"),
-    _contributorsAction(this, "Contributors"),
-    _compressionEnabledAction(this, "Compression enabled", DEFAULT_ENABLE_COMPRESSION, DEFAULT_ENABLE_COMPRESSION),
-    _compressionLevelAction(this, "Compression enabled", 1, 9, DEFAULT_COMPRESSION_LEVEL, DEFAULT_COMPRESSION_LEVEL)
+    _contributorsAction(this, "Contributors")
 {
     initialize();
 
@@ -93,27 +89,19 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
 {
     Serializable::fromVariantMap(variantMap);
 
-    Serializable::fromVariantMap(_version, variantMap, "Version");
-    Serializable::fromVariantMap(_titleAction, variantMap, "Title");
-    Serializable::fromVariantMap(_descriptionAction, variantMap, "Description");
-    Serializable::fromVariantMap(_tagsAction, variantMap, "Tags");
-    Serializable::fromVariantMap(_commentsAction, variantMap, "Comments");
-    Serializable::fromVariantMap(_contributorsAction, variantMap, "Contributors");
-
-    variantMapMustContain(variantMap, "Compression");
-
-    const auto compressionMap = variantMap["Compression"].toMap();
-
-    variantMapMustContain(compressionMap, "Enabled");
-    variantMapMustContain(compressionMap, "Level");
-
-    _compressionEnabledAction.fromVariantMap(compressionMap["Enabled"].toMap());
-    _compressionLevelAction.fromVariantMap(compressionMap["Level"].toMap());
+    _version.fromParentVariantMap(variantMap);
+    _readOnlyAction.fromParentVariantMap(variantMap);
+    _titleAction.fromParentVariantMap(variantMap);
+    _descriptionAction.fromParentVariantMap(variantMap);
+    _tagsAction.fromParentVariantMap(variantMap);
+    _commentsAction.fromParentVariantMap(variantMap);
+    _contributorsAction.fromParentVariantMap(variantMap);
+    _compressionAction.fromParentVariantMap(variantMap);
 
     if (!preview) {
-        plugins().fromVariantMap(variantMap[plugins().getSerializationName()].toMap());
-        dataHierarchy().fromVariantMap(variantMap[dataHierarchy().getSerializationName()].toMap());
-        actions().fromVariantMap(variantMap[actions().getSerializationName()].toMap());
+        plugins().fromParentVariantMap(variantMap);
+        dataHierarchy().fromParentVariantMap(variantMap);
+        actions().fromParentVariantMap(variantMap);
     }
 }
 
@@ -121,24 +109,18 @@ QVariantMap Project::toVariantMap() const
 {
     QVariantMap variantMap = Serializable::toVariantMap();
 
-    const QVariantMap compressionMap{
-        { "Enabled", _compressionEnabledAction.toVariantMap() },
-        { "Level", _compressionLevelAction.toVariantMap() }
-    };
+    _version.insertIntoVariantMap(variantMap);
+    _readOnlyAction.insertIntoVariantMap(variantMap);
+    _titleAction.insertIntoVariantMap(variantMap);
+    _descriptionAction.insertIntoVariantMap(variantMap);
+    _tagsAction.insertIntoVariantMap(variantMap);
+    _commentsAction.insertIntoVariantMap(variantMap);
+    _contributorsAction.insertIntoVariantMap(variantMap);
+    _compressionAction.insertIntoVariantMap(variantMap);
 
-    Serializable::insertIntoVariantMap(_version, variantMap, "Version");
-    Serializable::insertIntoVariantMap(_titleAction, variantMap, "Title");
-    Serializable::insertIntoVariantMap(_descriptionAction, variantMap, "Description");
-    Serializable::insertIntoVariantMap(_tagsAction, variantMap, "Tags");
-    Serializable::insertIntoVariantMap(_commentsAction, variantMap, "Comments");
-    Serializable::insertIntoVariantMap(_contributorsAction, variantMap, "Contributors");
-
-    variantMap.insert({
-        { "Compression", compressionMap },
-        { plugins().getSerializationName(), plugins().toVariantMap() },
-        { dataHierarchy().getSerializationName(), dataHierarchy().toVariantMap() },
-        { actions().getSerializationName(), actions().toVariantMap() }
-        });
+    plugins().insertIntoVariantMap(variantMap);
+    dataHierarchy().insertIntoVariantMap(variantMap);
+    actions().insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
@@ -174,19 +156,6 @@ void Project::initialize()
     _contributorsAction.setDefaultWidgetFlags(StringsAction::ListView);
     _contributorsAction.setSerializationName("Contributors");
     
-    _compressionEnabledAction.setSerializationName("CompressionEnabled");
-
-    _compressionLevelAction.setPrefix("Level: ");
-    _compressionLevelAction.setSerializationName("CompressionLevel");
-
-    const auto updateCompressionLevelReadOnly = [this]() -> void {
-        _compressionLevelAction.setEnabled(_compressionEnabledAction.isChecked());
-    };
-
-    connect(&_compressionEnabledAction, &ToggleAction::toggled, this, updateCompressionLevelReadOnly);
-
-    updateCompressionLevelReadOnly();
-
     updateContributors();
 }
 

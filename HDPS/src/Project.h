@@ -152,17 +152,15 @@ signals:
     void filePathChanged(const QString& filePath);
 
 private:
-    QString                 _filePath;                      /** Location on disk where the project resides */
-    util::Version           _version;                       /** Version of the application with which the project is created */
-    gui::ToggleAction       _readOnlyAction;                /** Read-only action */
-    gui::StringAction       _titleAction;                   /** Title action */
-    gui::StringAction       _descriptionAction;             /** Description action */
-    gui::StringsAction      _tagsAction;                    /** Tags action */
-    gui::StringAction       _commentsAction;                /** Comments action */
-    gui::StringsAction      _contributorsAction;            /** Contributors action */
-    gui::ToggleAction       _compressionEnabledAction;      /** Action to enable/disable project file compression */
-    gui::IntegralAction     _compressionLevelAction;        /** Action to control the amount of project file compression */
-    CompressionAction       _compressionAction;             /** Compression action */
+    QString                 _filePath;              /** Location on disk where the project resides */
+    util::Version           _version;               /** Version of the application with which the project is created */
+    gui::ToggleAction       _readOnlyAction;        /** Read-only action */
+    gui::StringAction       _titleAction;           /** Title action */
+    gui::StringAction       _descriptionAction;     /** Description action */
+    gui::StringsAction      _tagsAction;            /** Tags action */
+    gui::StringAction       _commentsAction;        /** Comments action */
+    gui::StringsAction      _contributorsAction;    /** Contributors action */
+    CompressionAction       _compressionAction;     /** Compression action */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
