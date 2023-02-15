@@ -14,6 +14,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     Serializable("Project"),
     _filePath(),
     _version(Application::current()->getVersion()),
+    _readOnlyAction(this, "Read-only"),
     _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
@@ -29,6 +30,7 @@ Project::Project(const QString& filePath, bool preview, QObject* parent /*= null
     Serializable("Project"),
     _filePath(filePath),
     _version(Application::current()->getVersion()),
+    _readOnlyAction(this, "Read-only"),
     _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
@@ -91,6 +93,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
 
     Serializable::fromVariantMap(_version, variantMap, "Version");
 
+    _readOnlyAction.fromParentVariantMap(variantMap);
     _titleAction.fromParentVariantMap(variantMap);
     _descriptionAction.fromParentVariantMap(variantMap);
     _tagsAction.fromParentVariantMap(variantMap);
@@ -111,6 +114,7 @@ QVariantMap Project::toVariantMap() const
 
     Serializable::insertIntoVariantMap(_version, variantMap, "Version");
 
+    _readOnlyAction.insertIntoVariantMap(variantMap);
     _titleAction.insertIntoVariantMap(variantMap);
     _descriptionAction.insertIntoVariantMap(variantMap);
     _tagsAction.insertIntoVariantMap(variantMap);
@@ -124,6 +128,7 @@ QVariantMap Project::toVariantMap() const
 
     return variantMap;
 }
+
 
 void Project::initialize()
 {

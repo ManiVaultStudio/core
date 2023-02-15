@@ -30,6 +30,7 @@ ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
 
     _groupAction << project->getTitleAction();
     _groupAction << project->getDescriptionAction();
+    _groupAction << project->getReadOnlyAction();
     _groupAction << project->getTagsAction();
     _groupAction << project->getCommentsAction();
     _groupAction << project->getContributorsAction();

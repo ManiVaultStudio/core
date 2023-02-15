@@ -127,6 +127,7 @@ private:
 
 public: // Action getters
 
+    const gui::ToggleAction& getReadOnlyAction() const { return _readOnlyAction; }
     const gui::StringAction& getTitleAction() const { return _titleAction; }
     const gui::StringAction& getDescriptionAction() const { return _descriptionAction; }
     const gui::StringsAction& getTagsAction() const { return _tagsAction; }
@@ -134,6 +135,7 @@ public: // Action getters
     const gui::StringsAction& getContributorsAction() const { return _contributorsAction; }
     const CompressionAction& getCompressionAction() const { return _compressionAction; }
 
+    gui::ToggleAction& getReadOnlyAction() { return _readOnlyAction; }
     gui::StringAction& getTitleAction() { return _titleAction; }
     gui::StringAction& getDescriptionAction() { return _descriptionAction; }
     gui::StringsAction& getTagsAction() { return _tagsAction; }
@@ -152,12 +154,17 @@ signals:
 private:
     QString                 _filePath;              /** Location on disk where the project resides */
     util::Version           _version;               /** Version of the application with which the project is created */
+    gui::ToggleAction       _readOnlyAction;        /** Read-only action */
     gui::StringAction       _titleAction;           /** Workspace title action */
     gui::StringAction       _descriptionAction;     /** Description action */
     gui::StringsAction      _tagsAction;            /** Tags action */
     gui::StringAction       _commentsAction;        /** Comments action */
     gui::StringsAction      _contributorsAction;    /** Contributors action */
     CompressionAction       _compressionAction;     /** Compression action */
+
+protected:
+    static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
+    static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL   = 2;        /** Default compression level*/
 };
 
 }
