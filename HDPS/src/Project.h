@@ -22,6 +22,44 @@ class Project final : public QObject, public hdps::util::Serializable
 {
     Q_OBJECT
 
+    /** Container action class for compression parameters */
+    class CompressionAction final : public gui::WidgetAction {
+    public:
+
+        /**
+            * Constructs from \p parent object
+            * @param parent Pointer to parent object
+            */
+        CompressionAction(QObject* parent = nullptr);
+
+    public: // Serialization
+
+        /**
+            * Load compression action from variant
+            * @param Variant representation of the compression action
+            */
+        void fromVariantMap(const QVariantMap& variantMap) override;
+
+        /**
+            * Save compression action to variant
+            * @return Variant representation of the compression action
+            */
+        QVariantMap toVariantMap() const override;
+
+    public: // Action getters
+
+        gui::ToggleAction& getEnabledAction() { return _enabledAction; }
+        gui::IntegralAction& getLevelAction() { return _levelAction; }
+
+    private:
+        gui::ToggleAction       _enabledAction;     /** Action to enable/disable project file compression */
+        gui::IntegralAction     _levelAction;       /** Action to control the amount of project file compression */
+
+    public:
+        static constexpr bool           DEFAULT_ENABLE_COMPRESSION = false;    /** No compression by default */
+        static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL = 2;        /** Default compression level*/
+};
+
 public:
 
     /**
@@ -89,21 +127,21 @@ private:
 
 public: // Action getters
 
+    const gui::ToggleAction& getReadOnlyAction() const { return _readOnlyAction; }
     const gui::StringAction& getTitleAction() const { return _titleAction; }
     const gui::StringAction& getDescriptionAction() const { return _descriptionAction; }
     const gui::StringsAction& getTagsAction() const { return _tagsAction; }
     const gui::StringAction& getCommentsAction() const { return _commentsAction; }
     const gui::StringsAction& getContributorsAction() const { return _contributorsAction; }
-    const gui::ToggleAction& getCompressionEnabledAction() const { return _compressionEnabledAction; }
-    const gui::IntegralAction& getCompressionLevelAction() const { return _compressionLevelAction; }
+    const CompressionAction& getCompressionAction() const { return _compressionAction; }
 
+    gui::ToggleAction& getReadOnlyAction() { return _readOnlyAction; }
     gui::StringAction& getTitleAction() { return _titleAction; }
     gui::StringAction& getDescriptionAction() { return _descriptionAction; }
     gui::StringsAction& getTagsAction() { return _tagsAction; }
     gui::StringAction& getCommentsAction() { return _commentsAction; }
     gui::StringsAction& getContributorsAction() { return _contributorsAction; }
-    gui::ToggleAction& getCompressionEnabledAction() { return _compressionEnabledAction; }
-    gui::IntegralAction& getCompressionLevelAction() { return _compressionLevelAction; }
+    CompressionAction& getCompressionAction() { return _compressionAction; }
 
 signals:
 
@@ -116,13 +154,15 @@ signals:
 private:
     QString                 _filePath;                      /** Location on disk where the project resides */
     util::Version           _version;                       /** Version of the application with which the project is created */
-    gui::StringAction       _titleAction;                   /** Workspace title action */
+    gui::ToggleAction       _readOnlyAction;                /** Read-only action */
+    gui::StringAction       _titleAction;                   /** Title action */
     gui::StringAction       _descriptionAction;             /** Description action */
     gui::StringsAction      _tagsAction;                    /** Tags action */
     gui::StringAction       _commentsAction;                /** Comments action */
     gui::StringsAction      _contributorsAction;            /** Contributors action */
     gui::ToggleAction       _compressionEnabledAction;      /** Action to enable/disable project file compression */
     gui::IntegralAction     _compressionLevelAction;        /** Action to control the amount of project file compression */
+    CompressionAction       _compressionAction;             /** Compression action */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

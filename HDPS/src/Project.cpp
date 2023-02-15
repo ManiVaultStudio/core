@@ -14,6 +14,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     Serializable("Project"),
     _filePath(),
     _version(Application::current()->getVersion()),
+    _readOnlyAction(this, "Read-only"),
     _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
@@ -30,6 +31,7 @@ Project::Project(const QString& filePath, bool preview, QObject* parent /*= null
     Serializable("Project"),
     _filePath(filePath),
     _version(Application::current()->getVersion()),
+    _readOnlyAction(this, "Read-only"),
     _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
@@ -136,43 +138,46 @@ QVariantMap Project::toVariantMap() const
         { plugins().getSerializationName(), plugins().toVariantMap() },
         { dataHierarchy().getSerializationName(), dataHierarchy().toVariantMap() },
         { actions().getSerializationName(), actions().toVariantMap() }
-    });
+        });
 
     return variantMap;
 }
 
 void Project::initialize()
 {
+    _readOnlyAction.setToolTip("Whether the project is in read-only mode or not");
+    _readOnlyAction.setSerializationName("ReadOnly");
+
     _titleAction.setPlaceHolderString("Enter project title here...");
-    _titleAction.setConnectionPermissionsToNone();
     _titleAction.setClearable(true);
+    _titleAction.setSerializationName("Title");
 
     _descriptionAction.setPlaceHolderString("Enter project description here...");
-    _descriptionAction.setConnectionPermissionsToNone();
     _descriptionAction.setClearable(true);
+    _descriptionAction.setSerializationName("Description");
 
     _tagsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tag"));
     _tagsAction.setCategory("Tag");
     _tagsAction.setStretch(2);
-    _tagsAction.setConnectionPermissionsToNone();
+    _tagsAction.setSerializationName("Tags");
 
     _commentsAction.setPlaceHolderString("Enter project comments here...");
-    _commentsAction.setConnectionPermissionsToNone();
     _commentsAction.setClearable(true);
     _commentsAction.setStretch(2);
     _commentsAction.setDefaultWidgetFlags(StringAction::TextEdit);
+    _commentsAction.setSerializationName("Comments");
 
     _contributorsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("user"));
-    _contributorsAction.setConnectionPermissionsToNone();
     _contributorsAction.setCategory("Contributor");
     _contributorsAction.setEnabled(false);
     _contributorsAction.setStretch(1);
     _contributorsAction.setDefaultWidgetFlags(StringsAction::ListView);
+    _contributorsAction.setSerializationName("Contributors");
     
-    _compressionEnabledAction.setConnectionPermissionsToNone();
+    _compressionEnabledAction.setSerializationName("CompressionEnabled");
 
-    _compressionLevelAction.setConnectionPermissionsToNone();
     _compressionLevelAction.setPrefix("Level: ");
+    _compressionLevelAction.setSerializationName("CompressionLevel");
 
     const auto updateCompressionLevelReadOnly = [this]() -> void {
         _compressionLevelAction.setEnabled(_compressionEnabledAction.isChecked());
@@ -202,6 +207,45 @@ void Project::updateContributors()
 
     if (!currentUserName.isEmpty() && !_contributorsAction.getStrings().contains(currentUserName))
         _contributorsAction.addString(currentUserName);
+}
+
+Project::CompressionAction::CompressionAction(QObject* parent /*= nullptr*/) :
+    WidgetAction(parent),
+    _enabledAction(this, "Compression", DEFAULT_ENABLE_COMPRESSION, DEFAULT_ENABLE_COMPRESSION),
+    _levelAction(this, "Compression level", 1, 9, DEFAULT_COMPRESSION_LEVEL, DEFAULT_COMPRESSION_LEVEL)
+{
+    setSerializationName("Compression");
+
+    _enabledAction.setSerializationName("Enabled");
+    _levelAction.setSerializationName("Level");
+
+    _levelAction.setPrefix("Level: ");
+
+    const auto updateCompressionLevelReadOnly = [this]() -> void {
+        _levelAction.setEnabled(_enabledAction.isChecked());
+    };
+
+    connect(&_enabledAction, &ToggleAction::toggled, this, updateCompressionLevelReadOnly);
+
+    updateCompressionLevelReadOnly();
+}
+
+void Project::CompressionAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    WidgetAction::fromVariantMap(variantMap);
+
+    _enabledAction.fromParentVariantMap(variantMap);
+    _levelAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap Project::CompressionAction::toVariantMap() const
+{
+    QVariantMap variantMap = WidgetAction::toVariantMap();
+
+    _enabledAction.insertIntoVariantMap(variantMap);
+    _levelAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
 }

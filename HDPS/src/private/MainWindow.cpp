@@ -54,14 +54,12 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         setCentralWidget(stackedWidget);
 
-        auto& projectManager = Application::core()->getProjectManager();
-
         const auto updateWindowTitle = [&]() -> void {
-            if (!projectManager.hasProject()) {
+            if (!projects().hasProject()) {
                 setWindowTitle("HDPS");
             }
             else {
-                const auto projectFilePath = projectManager.getCurrentProject()->getFilePath();
+                const auto projectFilePath = projects().getCurrentProject()->getFilePath();
 
                 if (projectFilePath.isEmpty())
                     setWindowTitle("Unsaved - HDPS");
@@ -70,19 +68,22 @@ void MainWindow::showEvent(QShowEvent* showEvent)
             }
         };
 
-        connect(&projectManager, &ProjectManager::projectCreated, this, updateWindowTitle);
-        connect(&projectManager, &ProjectManager::projectDestroyed, this, updateWindowTitle);
-        connect(&projectManager, &ProjectManager::projectLoaded, this, updateWindowTitle);
-        connect(&projectManager, &ProjectManager::projectSaved, this, updateWindowTitle);
+        connect(&projects(), &ProjectManager::projectCreated, this, updateWindowTitle);
+        connect(&projects(), &ProjectManager::projectDestroyed, this, updateWindowTitle);
+        connect(&projects(), &ProjectManager::projectOpened, this, updateWindowTitle);
+        connect(&projects(), &ProjectManager::projectSaved, this, updateWindowTitle);
 
-        const auto toggleStartPage = [stackedWidget, projectWidget, startPageWidget](bool toggled) -> void {
-            if (toggled)
+        const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget]() -> void {
+            if (projects().getShowStartPageAction().isChecked())
                 stackedWidget->setCurrentWidget(startPageWidget);
             else
                 stackedWidget->setCurrentWidget(projectWidget);
         };
 
-        connect(&projectManager.getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
+        connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
+
+        if (Application::current()->shouldOpenProjectAtStartup())
+            projects().openProject(Application::current()->getStartupProjectFilePath());
     }
 }
 

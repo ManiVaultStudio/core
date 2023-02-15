@@ -6,6 +6,7 @@
 #include <QStyleFactory>
 #include <QProxyStyle>
 #include <QQuickWindow>
+#include <QCommandLineParser>
 
 class NoFocusProxyStyle : public QProxyStyle {
 public:
@@ -45,6 +46,20 @@ int main(int argc, char *argv[])
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 
     hdps::Application application(argc, argv);
+
+    QCommandLineParser commandLineParser;
+
+    commandLineParser.setApplicationDescription("Application for viewing and analyzing high-dimensional data");
+    commandLineParser.addHelpOption();
+    commandLineParser.addVersionOption();
+
+    QCommandLineOption projectOption({ "p","project" }, "File path of the project to load upon startup", "project");
+
+    commandLineParser.addOption(projectOption);
+    commandLineParser.process(QCoreApplication::arguments());
+    
+    if (commandLineParser.isSet("project"))
+        application.setStartupProjectFilePath(commandLineParser.value("project"));
 
     application.setStyle(new NoFocusProxyStyle);
 

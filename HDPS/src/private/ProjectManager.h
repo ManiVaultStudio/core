@@ -70,6 +70,12 @@ public:
     void saveProjectAs() override;
 
     /**
+     * Publish project to \p filePath
+     * @param filePath File path of the published project
+     */
+    void publishProject(QString filePath = "") override;
+
+    /**
      * Get whether a project exists
      * @return Boolean determining whether a project exists
      */
