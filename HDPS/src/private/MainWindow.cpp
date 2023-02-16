@@ -86,7 +86,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
             projects().openProject(Application::current()->getStartupProjectFilePath());
 
         connect(&projects(), &ProjectManager::projectOpened, this, [this](const Project& project) -> void {
-            menuBar()->setVisible(project.getReadOnlyAction().isChecked());
+            menuBar()->setVisible(!project.getReadOnlyAction().isChecked());
         });
     }
 }
