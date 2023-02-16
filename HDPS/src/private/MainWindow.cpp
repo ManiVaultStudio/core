@@ -83,7 +83,12 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
 
         connect(&projects(), &ProjectManager::projectOpened, this, [this](const Project& project) -> void {
-            menuBar()->setVisible(!project.getReadOnlyAction().isChecked());
+            if (project.getReadOnlyAction().isChecked()) {
+                menuBar()->setVisible(false);
+
+                if (workspaces().hasWorkspace())
+                    workspaces().getCurrentWorkspace()->getLockingAction().getLockedAction().setChecked(true);
+            }
         });
 
         if (Application::current()->shouldOpenProjectAtStartup())
