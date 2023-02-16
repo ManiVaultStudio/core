@@ -84,6 +84,10 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         if (Application::current()->shouldOpenProjectAtStartup())
             projects().openProject(Application::current()->getStartupProjectFilePath());
+
+        connect(&projects(), &ProjectManager::projectOpened, this, [this](const Project& project) -> void {
+            menuBar()->setVisible(project.getReadOnlyAction().isChecked());
+        });
     }
 }
 
