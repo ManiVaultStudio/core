@@ -587,4 +587,41 @@ void WidgetAction::setStretch(const std::int32_t& stretch)
     _stretch = stretch;
 }
 
+void WidgetAction::cacheState(const QString& name /*= "cache"*/)
+{
+#ifdef WIDGET_ACTION_VERBOSE
+    qDebug() << __FUNCTION__ << name;
+#endif
+
+    _cachedStates[name] = toVariantMap();
+}
+
+void WidgetAction::restoreState(const QString& name /*= "cache"*/, bool remove /*= true*/)
+{
+#ifdef WIDGET_ACTION_VERBOSE
+    qDebug() << __FUNCTION__ << name << remove;
+#endif
+
+    const auto exceptionMessage = QString("Unable to restore %1 state called %2").arg(text(), name);
+
+    try
+    {
+        if (!_cachedStates.contains(name))
+            throw std::runtime_error(QString("%1 does not exist").arg(name).toLatin1());
+
+        fromVariantMap(_cachedStates[name].toMap());
+
+        if (remove)
+            _cachedStates.remove(name);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox(exceptionMessage, e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox(exceptionMessage);
+    }
+}
+
 }

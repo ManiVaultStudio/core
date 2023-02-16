@@ -415,6 +415,21 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+public: // State caching
+
+    /**
+     * Cache the state of a widget action under \p name in the action itself (for global presets use the presets action)
+     * @param name Name to use for the cached widget action state
+     */
+    void cacheState(const QString& name = "cache");
+
+    /**
+     * Restore the state of under \p name
+     * @param name Name of the cached widget action state to restore
+     * @param remove Whether to remove the cache
+     */
+    void restoreState(const QString& name = "cache", bool remove = true);
+
 public:
 
     /**
@@ -479,6 +494,7 @@ private:
     bool                        _highlighted;               /** Whether the action is in a highlighted state or not */
     QSize                       _popupSizeHint;             /** Size hint of the popup */
     std::int32_t                _configuration;             /** Configuration flags */
+    QMap<QString, QVariant>     _cachedStates;              /** Maps cache name to state */
 };
 
 /** List of widget actions */

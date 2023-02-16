@@ -76,7 +76,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _saveProjectAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     _saveProjectAsAction.setToolTip("Save project to disk in a chosen location");
 
-    _editProjectSettingsAction.setShortcut(QKeySequence("Ctrl+P"));
+    _editProjectSettingsAction.setShortcut(QKeySequence("Ctrl+Shift+P"));
     _editProjectSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
     _editProjectSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     _editProjectSettingsAction.setConnectionPermissionsToNone();
@@ -93,7 +93,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
 
     _publishAction.setShortcut(QKeySequence("Ctrl+P"));
     _publishAction.setShortcutContext(Qt::ApplicationShortcut);
-    _publishAction.setIcon(Application::getIconFont("FontAwesome").getIcon("share"));
+    _publishAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cloud-upload-alt"));
     _publishAction.setToolTip("Publish the HDPS application");
 
     _pluginManagerAction.setShortcut(QKeySequence("Ctrl+M"));
@@ -455,7 +455,7 @@ void ProjectManager::importProject(QString filePath /*= ""*/)
     emit projectImported(filePath);
 }
 
-void ProjectManager::saveProject(QString filePath /*= ""*/)
+void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& password /*= ""*/)
 {
     try
     {
@@ -471,10 +471,6 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
             QTemporaryDir temporaryDirectory;
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
-
-            const auto getSettingsPrefix = [](const QString& filePath) -> QString {
-                return "Projects/" + filePath + "/";
-            };
 
             auto currentProject = getCurrentProject();
 
@@ -540,7 +536,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
                 //updatePassword();
 
-                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, getSettingsPrefix, currentProject](const QString& path) -> void {
+                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, currentProject](const QString& path) -> void {
                     if (!QFileInfo(path).isFile())
                         return;
 
@@ -610,7 +606,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/)
 
             workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 
-            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, currentProject->getCompressionAction().getEnabledAction().isChecked() ? currentProject->getCompressionAction().getLevelAction().getValue() : 0, "");
+            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, currentProject->getCompressionAction().getEnabledAction().isChecked() ? currentProject->getCompressionAction().getLevelAction().getValue() : 0, password);
 
             _recentProjectsAction.addRecentFilePath(filePath);
 
@@ -643,164 +639,135 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
-        emit projectAboutToBePublished(*(_project.get()));
+        if (!hasProject())
+            return;
+
+        auto& readOnlyAction = getCurrentProject()->getReadOnlyAction();
+
+        readOnlyAction.cacheState();
         {
-            /*
-            if (QFileInfo(filePath).isDir())
-                throw std::runtime_error("Project file path may not be a directory");
+            readOnlyAction.setChecked(true);
 
-            QTemporaryDir temporaryDirectory;
+            emit projectAboutToBePublished(*(_project.get()));
+            {
+                if (QFileInfo(filePath).isDir())
+                    throw std::runtime_error("Project file path may not be a directory");
 
-            const auto temporaryDirectoryPath = temporaryDirectory.path();
+                QTemporaryDir temporaryDirectory;
 
-            const auto getSettingsPrefix = [](const QString& filePath) -> QString {
-                return "Projects/" + filePath + "/";
-            };
+                const auto temporaryDirectoryPath = temporaryDirectory.path();
 
-            auto currentProject = getCurrentProject();
+                auto currentProject = getCurrentProject();
 
-            if (filePath.isEmpty()) {
+                ToggleAction    passwordProtectedAction(this, "Password Protected");
+                StringAction    passwordAction(this, "Password");
 
-                QFileDialog fileDialog;
+                if (filePath.isEmpty()) {
 
-                fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-                fileDialog.setWindowTitle("Save Project");
-                fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-                fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
-                fileDialog.setDefaultSuffix(".hdps");
-                fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-                fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+                    QFileDialog fileDialog;
 
-                auto fileDialogLayout = dynamic_cast<QGridLayout*>(fileDialog.layout());
-                auto rowCount = fileDialogLayout->rowCount();
+                    fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cloud-upload-alt"));
+                    fileDialog.setWindowTitle("Publish Project");
+                    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+                    fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
+                    fileDialog.setDefaultSuffix(".hdps");
+                    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+                    fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
-                QCheckBox   passwordProtectedCheckBox("Password protected");
-                QLineEdit   passwordLineEdit;
+                    auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
+                    auto rowCount           = fileDialogLayout->rowCount();
 
-                passwordProtectedCheckBox.setChecked(false);
-                passwordLineEdit.setPlaceholderText("Enter encryption password...");
+                    QStringList options{ "Compression", "Title" };
 
-                auto compressionLayout = new QHBoxLayout();
+                    if (options.contains("Password")) {
+                        passwordProtectedAction.setToolTip("Whether to password-protect the project");
 
-                compressionLayout->addWidget(currentProject->getCompressionAction().getEnabledAction().createWidget(&fileDialog));
-                compressionLayout->addWidget(currentProject->getCompressionAction().getLevelAction().createWidget(&fileDialog), 1);
+                        passwordAction.setToolTip("Project password");
+                        passwordAction.setPlaceHolderString("Enter encryption password...");
+                        passwordAction.setClearable(true);
 
-                fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
+                        auto passwordLayout = new QHBoxLayout();
 
-                //fileDialogLayout->addWidget(&passwordProtectedCheckBox, ++rowCount, 0);
-                //fileDialogLayout->addWidget(&passwordLineEdit, rowCount, 1);
+                        passwordLayout->addWidget(passwordProtectedAction.createWidget(&fileDialog));
+                        passwordLayout->addWidget(passwordAction.createWidget(&fileDialog), 1);
 
-                auto& titleAction = currentProject->getTitleAction();
+                        const auto updatePasswordActionReadOnly = [&]() -> void {
+                            passwordAction.setEnabled(passwordProtectedAction.isChecked());
+                        };
 
-                fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 2, 0);
+                        connect(&passwordProtectedAction, &ToggleAction::toggled, this, updatePasswordActionReadOnly);
 
-                GroupAction settingsGroupAction(this);
+                        updatePasswordActionReadOnly();
 
-                settingsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
-                settingsGroupAction.setToolTip("Edit project settings");
-                settingsGroupAction.setPopupSizeHint(QSize(420, 320));
-                settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
+                        fileDialogLayout->addLayout(passwordLayout, rowCount + 3, 1, 1, 2);
+                    }
 
-                settingsGroupAction << currentProject->getTitleAction();
-                settingsGroupAction << currentProject->getDescriptionAction();
-                settingsGroupAction << currentProject->getTagsAction();
-                settingsGroupAction << currentProject->getCommentsAction();
+                    if (options.contains("Compression")) {
+                        auto compressionLayout = new QHBoxLayout();
 
-                auto titleLayout = new QHBoxLayout();
+                        compressionLayout->addWidget(currentProject->getCompressionAction().getEnabledAction().createWidget(&fileDialog));
+                        compressionLayout->addWidget(currentProject->getCompressionAction().getLevelAction().createWidget(&fileDialog), 1);
 
-                titleLayout->addWidget(titleAction.createWidget(&fileDialog));
-                titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&fileDialog));
+                        fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
+                    }
+                    
+                    if (options.contains("Title")) {
+                        auto& titleAction = currentProject->getTitleAction();
 
-                fileDialogLayout->addLayout(titleLayout, rowCount + 2, 1, 1, 2);
+                        fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 2, 0);
 
-                //const auto updatePassword = [&]() -> void {
-                //    passwordLineEdit.setEnabled(passwordProtectedCheckBox.isChecked());
-                //};
+                        GroupAction settingsGroupAction(this);
 
-                //connect(&passwordProtectedCheckBox, &QCheckBox::toggled, this, updatePassword);
+                        settingsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+                        settingsGroupAction.setToolTip("Edit project settings");
+                        settingsGroupAction.setPopupSizeHint(QSize(420, 320));
+                        settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-                //updatePassword();
+                        settingsGroupAction << currentProject->getTitleAction();
+                        settingsGroupAction << currentProject->getDescriptionAction();
+                        settingsGroupAction << currentProject->getTagsAction();
+                        settingsGroupAction << currentProject->getCommentsAction();
 
-                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, getSettingsPrefix, currentProject](const QString& path) -> void {
-                    if (!QFileInfo(path).isFile())
-                        return;
+                        auto titleLayout = new QHBoxLayout();
 
-                    QTemporaryDir temporaryDir;
+                        titleLayout->addWidget(titleAction.createWidget(&fileDialog));
+                        titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&fileDialog));
 
-                    const auto projectJsonFilePath = projects().extractProjectFileFromHdpsFile(path, temporaryDir);
+                        fileDialogLayout->addLayout(titleLayout, rowCount + 2, 1, 1, 2);
+                    }
+                    
+                    connect(&fileDialog, &QFileDialog::currentChanged, this, [this, currentProject](const QString& path) -> void {
+                        if (!QFileInfo(path).isFile())
+                            return;
 
-                    Project project(projectJsonFilePath, true);
+                        QTemporaryDir temporaryDir;
 
-                    currentProject->getCompressionAction().getEnabledAction().setChecked(project.getCompressionAction().getEnabledAction().isChecked());
-                    currentProject->getCompressionAction().getLevelAction().setValue(project.getCompressionAction().getLevelAction().getValue());
+                        const auto projectJsonFilePath = projects().extractProjectFileFromHdpsFile(path, temporaryDir);
+
+                        Project project(projectJsonFilePath, true);
+
+                        currentProject->getCompressionAction().getEnabledAction().setChecked(project.getCompressionAction().getEnabledAction().isChecked());
+                        currentProject->getCompressionAction().getLevelAction().setValue(project.getCompressionAction().getLevelAction().getValue());
                     });
 
-                fileDialog.exec();
+                    fileDialog.exec();
 
-                if (fileDialog.selectedFiles().count() != 1)
-                    throw std::runtime_error("Only one file may be selected");
+                    if (fileDialog.selectedFiles().count() != 1)
+                        throw std::runtime_error("Only one file may be selected");
 
-                filePath = fileDialog.selectedFiles().first();
+                    filePath = fileDialog.selectedFiles().first();
 
-                Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
+                    Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
+                }
+
+                if (filePath.isEmpty() || QFileInfo(filePath).isDir())
+                    return;
+
+                saveProject(filePath, passwordAction.getString());
             }
-
-            if (filePath.isEmpty() || QFileInfo(filePath).isDir())
-                return;
-
-            if (currentProject->getCompressionAction().getEnabledAction().isChecked())
-                qDebug().noquote() << "Saving HDPS project to" << filePath << "with compression level" << currentProject->getCompressionAction().getLevelAction().getValue();
-            else
-                qDebug().noquote() << "Saving HDPS project to" << filePath << "without compression";
-
-            Archiver archiver;
-
-            QStringList tasks;
-
-            tasks << "Export data model" << "Temporary task";
-
-            TaskProgressDialog taskProgressDialog(nullptr, tasks, "Saving HDPS project to " + filePath, Application::current()->getIconFont("FontAwesome").getIcon("save"));
-
-            taskProgressDialog.setCurrentTask("Export data model");
-
-            connect(&taskProgressDialog, &TaskProgressDialog::canceled, this, [this]() -> void {
-                Application::setSerializationAborted(true);
-
-                throw std::runtime_error("Canceled before project was saved");
-                });
-
-            QFileInfo jsonFileInfo(temporaryDirectoryPath, "project.json");
-
-            Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
-            Application::setSerializationAborted(false);
-
-            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaving, this, [&taskProgressDialog](DataHierarchyItem& savingItem) {
-                taskProgressDialog.setCurrentTask("Exporting dataset: " + savingItem.getFullPathName());
-                });
-
-            projects().toJsonFile(jsonFileInfo.absoluteFilePath());
-
-            taskProgressDialog.setTaskFinished("Export data model");
-            taskProgressDialog.addTasks(archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath));
-            taskProgressDialog.setTaskFinished("Temporary task");
-
-            connect(&archiver, &Archiver::taskStarted, &taskProgressDialog, &TaskProgressDialog::setCurrentTask);
-            connect(&archiver, &Archiver::taskFinished, &taskProgressDialog, &TaskProgressDialog::setTaskFinished);
-
-            QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
-
-            workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
-
-            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, currentProject->getCompressionAction().getEnabledAction().isChecked() ? currentProject->getCompressionAction().getLevelAction().getValue() : 0, "");
-
-            _recentProjectsAction.addRecentFilePath(filePath);
-
-            _project->setFilePath(filePath);
-
-            qDebug().noquote() << filePath << "saved successfully";
-            */
+            emit projectPublished(*(_project.get()));
         }
-        emit projectPublished(*(_project.get()));
+        readOnlyAction.restoreState();
     }
     catch (std::exception& e)
     {
