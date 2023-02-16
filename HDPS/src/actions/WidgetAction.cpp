@@ -148,6 +148,9 @@ void WidgetAction::publish(const QString& name /*= ""*/)
 {
     try
     {
+        if (isPublished())
+            return;
+
         if (name.isEmpty()) {
             auto& fontAwesome = Application::getIconFont("FontAwesome");
 
