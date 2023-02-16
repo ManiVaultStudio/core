@@ -69,6 +69,28 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     layout->addWidget(&_hierarchyWidget, 1);
 
+    const QStringList options({
+        "A",
+        "B",
+        "C",
+        "D"
+        });
+
+    auto optionsA = new OptionsAction(this, "Options A", options);
+    auto optionsB = new OptionsAction(this, "Options B", options);
+
+    optionsA->setConnectionPermissionsFlag(WidgetAction::ConnectionPermissionFlag::All);
+    optionsB->setConnectionPermissionsFlag(WidgetAction::ConnectionPermissionFlag::All);
+
+    layout->addWidget(optionsA->createLabelWidget(this));
+    layout->addWidget(optionsA->createWidget(this));
+
+    layout->addWidget(optionsB->createLabelWidget(this));
+    layout->addWidget(optionsB->createWidget(this));
+
+    optionsA->publish("Common Options");
+    optionsB->connectToPublicActionByName("Common Options");
+
     setLayout(layout);
 
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
