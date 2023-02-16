@@ -85,7 +85,9 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         connect(&projects(), &ProjectManager::projectOpened, this, [this](const Project& project) -> void {
             if (project.getReadOnlyAction().isChecked()) {
                 menuBar()->setVisible(false);
-                workspaces().getCurrentWorkspace()->getLockingAction().getLockedAction().setChecked(true);
+
+                if (workspaces().hasWorkspace())
+                    workspaces().getCurrentWorkspace()->getLockingAction().getLockedAction().setChecked(true);
             }
         });
 
