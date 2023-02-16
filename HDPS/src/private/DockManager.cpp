@@ -55,18 +55,9 @@ DockManager::~DockManager()
 
 ViewPluginDockWidgets DockManager::getViewPluginDockWidgets()
 {
-    ViewPluginDockWidgets viewPluginDockWidgets;
 
-    for (auto dockWidget : dockWidgets()) {
-        auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget);
-
-        if (viewPluginDockWidget == nullptr)
-            continue;
-
-        viewPluginDockWidgets << viewPluginDockWidget;
-    }
-
-    return viewPluginDockWidgets;
+    return _orderedViewPluginDockWidgets;
+   
 }
 
 const ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
@@ -106,7 +97,7 @@ void DockManager::removeViewPluginDockWidget(ViewPlugin* viewPlugin)
             continue;
 
         if (viewPlugin == viewPluginDockWidget->getViewPlugin())
-            removeDockWidget(viewPluginDockWidget);
+            removeViewPluginDockWidget(viewPluginDockWidget);
     }
 }
 
@@ -117,8 +108,36 @@ void DockManager::reset()
 #endif
 
     for (auto viewPluginDockWidget : getViewPluginDockWidgets())
-        removeDockWidget(viewPluginDockWidget);
+        removeViewPluginDockWidget(viewPluginDockWidget);
 }
+
+
+void DockManager::addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* Dockwidget, ads::CDockAreaWidget* DockAreaWidget)
+{
+#ifdef DOCK_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << objectName();
+#endif
+    ViewPluginDockWidget* viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(Dockwidget);
+    if (viewPluginDockWidget)
+        _orderedViewPluginDockWidgets << viewPluginDockWidget;
+    CDockManager::addDockWidget(area, Dockwidget, DockAreaWidget);
+}
+
+
+void DockManager::removeViewPluginDockWidget(ads::CDockWidget* Dockwidget)
+{
+#ifdef DOCK_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << objectName();
+#endif
+    CDockManager::removeDockWidget(Dockwidget);
+    _orderedViewPluginDockWidgets.removeAll(Dockwidget);
+}
+
+QWidget* DockManager::getWidget()
+{
+    return this;
+}
+
 
 void DockManager::fromVariantMap(const QVariantMap& variantMap)
 {
@@ -139,7 +158,7 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
             const auto pluginMap        = viewPluginMap["Plugin"].toMap();
 
             if (plugins().isPluginLoaded(pluginKind)) {
-                addDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));
+                addViewPluginDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));
             } else {
                 auto notLoadedDockWidget    = new CDockWidget(QString("%1 (not loaded)").arg(viewPluginMap["GuiName"].toMap()["Value"].toString()));
                 auto notLoadedInfoWidget    = new InfoWidget(this, Application::getIconFont("FontAwesome").getIcon("exclamation-circle"), "View not loaded", QString("We were unable to load the %1 because the plugin is not loaded properly.\nThe workspace might not behave as expected, please ensure the required plugin is loaded properly...").arg(pluginKind));
@@ -148,7 +167,7 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
                 notLoadedDockWidget->setWidget(notLoadedInfoWidget);
                 notLoadedDockWidget->setObjectName(viewPluginDockWidgetVariant.toMap()["ID"].toString());
 
-                addDockWidget(RightDockWidgetArea, notLoadedDockWidget);
+                addViewPluginDockWidget(RightDockWidgetArea, notLoadedDockWidget);
             }
         }
 

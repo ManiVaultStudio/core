@@ -11,20 +11,31 @@
 #include <DockAreaWidget.h>
 
 #include <QString>
+#include <QWidget>
+
 
 /**
  * Dock manager class
  *
  * ADS inherited dock manager class, primary purpose it to support layout serialization
  *
+ * inherits ADS dock manager as protected so add/remove of dockwidgets has to pass through this class.
+ *
  * @author Thomas Kroes
  */
-class DockManager : public ads::CDockManager, public hdps::util::Serializable
+class DockManager : protected ads::CDockManager, public hdps::util::Serializable
 {
     Q_OBJECT
 
 public:
 
+    using CDockManager::objectName;
+    using CDockManager::setObjectName;
+    using CDockManager::setCentralWidget;
+    using CDockManager::dockWidgetsMap;
+    using CDockManager::grab;
+    
+    
     /**
      * Constructs a dock manager derived from the advanced docking system
      * @param parent Pointer to parent widget
@@ -60,6 +71,9 @@ public:
      */
     ads::CDockAreaWidget* findDockAreaWidget(hdps::plugin::ViewPlugin* viewPlugin);
 
+
+    
+
     /**
      * Remove \p viewPlugin from the dock manager
      * @param viewPlugin Pointer to the view plugin to remove
@@ -68,6 +82,15 @@ public:
 
     /** Resets the docking layout to defaults */
     void reset();
+
+    /** Adds a ViewPluginDockWidget */
+    void addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* Dockwidget, ads::CDockAreaWidget* DockAreaWidget = nullptr);
+
+    /** Removes a ViewPluginDockWidget */
+    void removeViewPluginDockWidget(ads::CDockWidget* Dockwidget);
+
+    /** get as QWidget pointer*/
+    QWidget* getWidget();
 
 public: // Serialization
 
@@ -84,6 +107,10 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
     friend class ViewPluginsDockWidget;
+    friend class QPointer<DockManager>;
+
+private:
+    ViewPluginDockWidgets _orderedViewPluginDockWidgets; /* the ViewPluginDockWidgets in the order in which they were created */
 };
 
 /**
