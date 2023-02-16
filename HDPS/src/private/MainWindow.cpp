@@ -82,12 +82,12 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
 
-        if (Application::current()->shouldOpenProjectAtStartup())
-            projects().openProject(Application::current()->getStartupProjectFilePath());
-
         connect(&projects(), &ProjectManager::projectOpened, this, [this](const Project& project) -> void {
             menuBar()->setVisible(!project.getReadOnlyAction().isChecked());
         });
+
+        if (Application::current()->shouldOpenProjectAtStartup())
+            projects().openProject(Application::current()->getStartupProjectFilePath());
     }
 }
 
