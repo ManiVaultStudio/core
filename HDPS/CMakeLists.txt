@@ -450,6 +450,8 @@ set(PUBLIC_ACTIONS_HEADERS
     src/actions/RecentFilesAction.h
     src/actions/PresetsAction.h
     src/actions/LockingAction.h
+    src/actions/VersionAction.h
+    src/actions/ProjectSplashScreenAction.h
     src/actions/GroupSectionTreeItem.h
     src/actions/GroupWidgetTreeItem.h
     src/actions/WidgetActionContextMenu.h
@@ -508,6 +510,8 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/RecentFilesAction.cpp
     src/actions/PresetsAction.cpp
     src/actions/LockingAction.cpp
+    src/actions/VersionAction.cpp
+    src/actions/ProjectSplashScreenAction.cpp
     src/actions/GroupSectionTreeItem.cpp
     src/actions/GroupWidgetTreeItem.cpp
     src/actions/WidgetActionContextMenu.cpp

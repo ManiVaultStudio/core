@@ -13,13 +13,16 @@ Project::Project(QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("Project"),
     _filePath(),
-    _version(Application::current()->getVersion()),
+    _applicationVersion(Application::current()->getVersion()),
+    _applicationVersionAction(this),
+    _projectVersionAction(this),
     _readOnlyAction(this, "Read-only"),
     _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments"),
-    _contributorsAction(this, "Contributors")
+    _contributorsAction(this, "Contributors"),
+    _splashScreenAction(this, *this)
 {
     initialize();
 }
@@ -28,13 +31,16 @@ Project::Project(const QString& filePath, bool preview, QObject* parent /*= null
     QObject(parent),
     Serializable("Project"),
     _filePath(filePath),
-    _version(Application::current()->getVersion()),
+    _applicationVersion(Application::current()->getVersion()),
+    _applicationVersionAction(this),
+    _projectVersionAction(this),
     _readOnlyAction(this, "Read-only"),
     _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments"),
-    _contributorsAction(this, "Contributors")
+    _contributorsAction(this, "Contributors"),
+    _splashScreenAction(this, *this)
 {
     initialize();
 
@@ -89,7 +95,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
 {
     Serializable::fromVariantMap(variantMap);
 
-    _version.fromParentVariantMap(variantMap);
+    _applicationVersion.fromParentVariantMap(variantMap);
     _readOnlyAction.fromParentVariantMap(variantMap);
     _titleAction.fromParentVariantMap(variantMap);
     _descriptionAction.fromParentVariantMap(variantMap);
@@ -97,6 +103,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
     _commentsAction.fromParentVariantMap(variantMap);
     _contributorsAction.fromParentVariantMap(variantMap);
     _compressionAction.fromParentVariantMap(variantMap);
+    _splashScreenAction.fromParentVariantMap(variantMap);
 
     if (!preview) {
         plugins().fromParentVariantMap(variantMap);
@@ -109,7 +116,7 @@ QVariantMap Project::toVariantMap() const
 {
     QVariantMap variantMap = Serializable::toVariantMap();
 
-    _version.insertIntoVariantMap(variantMap);
+    _applicationVersion.insertIntoVariantMap(variantMap);
     _readOnlyAction.insertIntoVariantMap(variantMap);
     _titleAction.insertIntoVariantMap(variantMap);
     _descriptionAction.insertIntoVariantMap(variantMap);
@@ -117,6 +124,7 @@ QVariantMap Project::toVariantMap() const
     _commentsAction.insertIntoVariantMap(variantMap);
     _contributorsAction.insertIntoVariantMap(variantMap);
     _compressionAction.insertIntoVariantMap(variantMap);
+    _splashScreenAction.insertIntoVariantMap(variantMap);
 
     plugins().insertIntoVariantMap(variantMap);
     dataHierarchy().insertIntoVariantMap(variantMap);
@@ -161,7 +169,7 @@ void Project::initialize()
 
 util::Version Project::getVersion() const
 {
-    return _version;
+    return _applicationVersion;
 }
 
 void Project::updateContributors()
