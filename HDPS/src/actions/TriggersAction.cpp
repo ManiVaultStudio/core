@@ -13,6 +13,7 @@ TriggersAction::TriggersAction(QObject* parent, const QString& title /*= ""*/, c
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
+    setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
     setTriggers(triggers);
 }
 

@@ -19,6 +19,7 @@ ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const
     setCheckable(true);
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
+    setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
     initialize(toggled, defaultToggled);
 }
 

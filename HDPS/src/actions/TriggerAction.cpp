@@ -12,6 +12,7 @@ TriggerAction::TriggerAction(QObject* parent, const QString& title /*= ""*/) :
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Text);
+    setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 }
 
 void TriggerAction::selfTriggered()

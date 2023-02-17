@@ -1,6 +1,6 @@
 #pragma once
 
-#include "InlineGroupAction.h"
+#include "HorizontalGroupAction.h"
 #include "ToggleAction.h"
 #include "TriggerAction.h"
 
@@ -19,7 +19,7 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class ProjectSplashScreenAction : public InlineGroupAction
+class ProjectSplashScreenAction : public HorizontalGroupAction
 {
     Q_OBJECT
     
