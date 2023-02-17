@@ -762,8 +762,16 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
                 if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                     return;
+                
+                auto& workspaceLockingAction = workspaces().getCurrentWorkspace()->getLockingAction();
 
-                saveProject(filePath, passwordAction.getString());
+                const auto cacheWorkspaceLocked = workspaceLockingAction.isLocked();
+
+                workspaceLockingAction.setLocked(true);
+                {
+                    saveProject(filePath, passwordAction.getString());
+                }
+                workspaceLockingAction.setLocked(cacheWorkspaceLocked);
             }
             emit projectPublished(*(_project.get()));
         }

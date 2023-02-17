@@ -4,9 +4,7 @@
 #include <QDebug>
 #include <QPainter>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* widgetAction) :
     WidgetActionWidget(parent, widgetAction),
@@ -40,6 +38,7 @@ void WidgetActionCollapsedWidget::setWidgetAction(WidgetAction* widgetAction)
     const auto updateToolButton = [this, widgetAction]() {
         _toolButton.setIcon(widgetAction->icon());
         _toolButton.setToolTip(widgetAction->toolTip());
+        _toolButton.setVisible(widgetAction->isVisible());
     };
 
     connect(_widgetAction, &WidgetAction::changed, this, updateToolButton);
@@ -67,5 +66,4 @@ void WidgetActionCollapsedWidget::ToolButton::paintEvent(QPaintEvent* paintEvent
     painter.drawPoint(center);
 }
 
-}
 }
