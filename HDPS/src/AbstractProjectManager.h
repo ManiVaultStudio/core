@@ -68,11 +68,18 @@ public:
     /**
      * Save a project to \p filePath
      * @param filePath File path of the project (choose file path when empty)
+     * @param password Encryption password
      */
-    virtual void saveProject(QString filePath = "") = 0;
+    virtual void saveProject(QString filePath = "", const QString& password = "") = 0;
 
     /** Save project to different file (user is prompted to choose the file location) */
     virtual void saveProjectAs() = 0;
+
+    /**
+     * Publish project to \p filePath
+     * @param filePath File path of the published project
+     */
+    virtual void publishProject(QString filePath = "") = 0;
 
     /**
      * Get whether a project exists
@@ -159,10 +166,10 @@ signals:
     void projectAboutToBeLoaded(const hdps::Project& project);
 
     /**
-     * Signals that \p project is loaded
-     * @param project Reference to the project that is loaded
+     * Signals that \p project is opened
+     * @param project Reference to the project that is opened
      */
-    void projectLoaded(const hdps::Project& project);
+    void projectOpened(const hdps::Project& project);
 
     /**
      * Signals that a project is about to be imported from \p filePath
@@ -187,6 +194,18 @@ signals:
      * @param project Reference to the saved project
      */
     void projectSaved(const hdps::Project& project);
+
+    /**
+     * Signals that \p project is about to be published
+     * @param project Reference to the project that is about to be published
+     */
+    void projectAboutToBePublished(const hdps::Project& project);
+
+    /**
+     * Signals that \p project is published
+     * @param project Reference to the published project
+     */
+    void projectPublished(const hdps::Project& project);
 
     /**
      * Signals that \p project is about to be destroyed

@@ -446,6 +446,7 @@ set(PUBLIC_ACTIONS_HEADERS
     src/actions/FilePickerAction.h
     src/actions/VariantAction.h
     src/actions/StatusAction.h
+    src/actions/InlineGroupAction.h
     src/actions/RecentFilesAction.h
     src/actions/PresetsAction.h
     src/actions/LockingAction.h
@@ -503,6 +504,7 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/FilePickerAction.cpp
     src/actions/VariantAction.cpp
     src/actions/StatusAction.cpp
+    src/actions/InlineGroupAction.cpp
     src/actions/RecentFilesAction.cpp
     src/actions/PresetsAction.cpp
     src/actions/LockingAction.cpp

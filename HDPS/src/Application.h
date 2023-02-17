@@ -54,6 +54,24 @@ public: // Miscellaneous
      */
     util::Version getVersion() const;
 
+    /**
+     * Get file path of the project to automatically open upon startup (if set)
+     * @return Startup project file path
+     */
+    QString getStartupProjectFilePath() const;
+
+    /**
+     * Set file path of the project to automatically open upon startup (if set)
+     * @param startupProjectFilePath Startup project file path
+     */
+    void setStartupProjectFilePath(const QString& startupProjectFilePath);
+
+    /**
+     * Get whether a project should be opened after the application starts
+     * @return Boolean determining whether a project should be opened after the application starts
+     */
+    bool shouldOpenProjectAtStartup() const;
+
 public: // Static resource access functions
 
     /**
@@ -129,6 +147,7 @@ protected:
     bool                        _serializationAborted;                  /** Whether serialization was aborted */
     util::Logger                _logger;                                /** Logger instance */
     hdps::gui::TriggerAction*   _exitAction;                            /** Action for exiting the application */
+    QString                     _startupProjectFilePath;                /** File path of the project to automatically open upon startup (if set) */
 };
 
 }
