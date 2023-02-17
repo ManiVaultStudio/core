@@ -49,8 +49,13 @@ void HorizontalGroupAction::addAction(const WidgetAction& action)
 {
     _actions << &action;
 
-    connect(&action, &WidgetAction::configurationFlagToggled, this, [this](const WidgetAction::ConfigurationFlag& configurationFlag, bool set) -> void {
-        if (configurationFlag != WidgetAction::ConfigurationFlag::NoLabelInGroup)
+    QList<std::int32_t> configurationFlagsRequireUpdate{
+        static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::NoLabelInGroup),
+        static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::AlwaysCollapsed)
+    };
+
+    connect(&action, &WidgetAction::configurationFlagToggled, this, [&](const WidgetAction::ConfigurationFlag& configurationFlag, bool set) -> void {
+        if (!configurationFlagsRequireUpdate.contains(static_cast<std::int32_t>(configurationFlag)))
             return;
 
         emit actionsChanged(getActions());
@@ -89,7 +94,10 @@ HorizontalGroupAction::Widget::Widget(QWidget* parent, HorizontalGroupAction* ho
             if (horizontalGroupAction->getShowLabels() && !action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup))
                 layout->addWidget(action->createLabelWidget(this));
 
-            layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this), action->getStretch());
+            if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::AlwaysCollapsed))
+                layout->addWidget(const_cast<WidgetAction*>(action)->createCollapsedWidget(this));
+            else
+                layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this), action->getStretch());
         }
     };
 

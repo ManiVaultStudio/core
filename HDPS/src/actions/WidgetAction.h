@@ -40,6 +40,7 @@ public:
         VisibleInMenu       = 0x00001,      /** Whether the action may show itself in (context) menus */
         InternalUseOnly     = 0x00002,      /** Action is only for internal use, it is not part of the graphical user interface */
         NoLabelInGroup      = 0x00004,      /** Action will not have a label when it is displayed in a group */
+        AlwaysCollapsed     = 0x00008,      /** Action will be always collapsed, no matter the circumstances */
 
         Default = 0
     };
