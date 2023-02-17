@@ -6,11 +6,14 @@
 namespace hdps::gui {
 
 ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Project& project) :
-    InlineGroupAction(parent, "Splash Screen"),
+    HorizontalGroupAction(parent, "Splash Screen"),
     _project(project),
     _enabledAction(this, "Enabled"),
     _previewAction(this, "Preview")
 {
+    *this << _enabledAction;
+    *this << _previewAction;
+
     _enabledAction.setStretch(1);
 
     connect(&_previewAction, &TriggerAction::triggered, this, [this]() -> void {

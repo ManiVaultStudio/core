@@ -1,6 +1,6 @@
 #pragma once
 
-#include "InlineGroupAction.h"
+#include "HorizontalGroupAction.h"
 #include "IntegralAction.h"
 
 namespace hdps::gui {
@@ -12,7 +12,7 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class VersionAction final : public InlineGroupAction
+class VersionAction final : public HorizontalGroupAction
 {
     Q_OBJECT
 

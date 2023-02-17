@@ -3,10 +3,13 @@
 namespace hdps::gui {
 
 VersionAction::VersionAction(QObject* parent) :
-    InlineGroupAction(parent, "Version"),
+    HorizontalGroupAction(parent, "Version"),
     _majorVersionAction(this, "Major Version", 0, 100, 1),
     _minorVersionAction(this, "Major Version", 0, 100, 0)
 {
+    *this << _majorVersionAction;
+    *this << _minorVersionAction;
+
     _majorVersionAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _minorVersionAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
 

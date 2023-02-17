@@ -82,12 +82,12 @@ void WidgetAction::setSortIndex(const std::int32_t& sortIndex)
     _sortIndex = sortIndex;
 }
 
-QWidget* WidgetAction::createCollapsedWidget(QWidget* parent)
+QWidget* WidgetAction::createCollapsedWidget(QWidget* parent) const
 {
     return new WidgetActionCollapsedWidget(parent, this);
 }
 
-QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags /*= 0x00001*/)
+QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags /*= 0x00001*/) const
 {
     return new WidgetActionLabel(this, parent, widgetFlags);
 }
