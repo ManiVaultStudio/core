@@ -7,8 +7,10 @@ VersionAction::VersionAction(QObject* parent) :
     _majorVersionAction(this, "Major Version", 0, 100, 1),
     _minorVersionAction(this, "Major Version", 0, 100, 0)
 {
-    *this << _majorVersionAction;
-    *this << _minorVersionAction;
+    addAction(_majorVersionAction);
+    addAction(_minorVersionAction);
+
+    _majorVersionAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
     _majorVersionAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _minorVersionAction.setDefaultWidgetFlags(IntegralAction::SpinBox);

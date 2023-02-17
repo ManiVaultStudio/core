@@ -78,6 +78,12 @@ public:
     void addAction(const WidgetAction& action);
 
     /**
+     * Remove \p action from the group
+     * @param action Reference to action to add
+     */
+    void removeAction(const WidgetAction& action);
+
+    /**
      * Set actions to \p actions
      * @param actions Widget actions
      */

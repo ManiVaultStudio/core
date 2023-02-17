@@ -376,7 +376,7 @@ public: // Configuration flags
      * @param configurationFlag Configuration flag
      * @return Boolean determining whether \p configurationFlag is set or not
      */
-    virtual bool isConfigurationFlagSet(ConfigurationFlag configurationFlag) final;
+    virtual bool isConfigurationFlagSet(ConfigurationFlag configurationFlag) const final;
 
     /**
      * Set configuration flag
@@ -476,6 +476,13 @@ signals:
      * @param connectionPermissions New connection permissions
      */
     void connectionPermissionsChanged(std::int32_t connectionPermissions);
+
+    /**
+     * Signals that \p configurationFlag is \p set
+     * @param configurationFlag Toggled configuration flag
+     * @param set Whether the flag was set or unset
+     */
+    void configurationFlagToggled(const ConfigurationFlag& configurationFlag, bool set);
 
     /**
      * Signals that the configuration changed

@@ -11,10 +11,8 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _enabledAction(this, "Enabled"),
     _previewAction(this, "Preview")
 {
-    *this << _enabledAction;
-    *this << _previewAction;
-
-    _enabledAction.setStretch(1);
+    addAction(_enabledAction);
+    addAction(_previewAction);
 
     connect(&_previewAction, &TriggerAction::triggered, this, [this]() -> void {
         Dialog previeweDialog(*this);
