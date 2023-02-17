@@ -39,6 +39,7 @@ public:
     enum class ConfigurationFlag {
         VisibleInMenu       = 0x00001,      /** Whether the action may show itself in (context) menus */
         InternalUseOnly     = 0x00002,      /** Action is only for internal use, it is not part of the graphical user interface */
+        NoLabelInGroup      = 0x00004,      /** Action will not have a label when it is displayed in a group */
 
         Default = 0
     };
@@ -99,14 +100,14 @@ public:
      * @param parent Parent widget
      * @return Pointer to created widget
      */
-    QWidget* createWidget(QWidget* parent) override;
+    virtual QWidget* createWidget(QWidget* parent) override final;
 
     /**
      * Create collapsed widget
      * @param parent Parent widget
      * @return Pointer to collapsed widget
      */
-    QWidget* createCollapsedWidget(QWidget* parent);
+    virtual QWidget* createCollapsedWidget(QWidget* parent) const final;
 
     /**
      * Create label widget
@@ -114,7 +115,7 @@ public:
      * @param widgetFlags Label widget configuration flags
      * @return Pointer to widget
      */
-    QWidget* createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags = 0x00001);
+    virtual QWidget* createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags = 0x00001) const final;
 
     /**
      * Get the context menu for the action
@@ -375,7 +376,7 @@ public: // Configuration flags
      * @param configurationFlag Configuration flag
      * @return Boolean determining whether \p configurationFlag is set or not
      */
-    virtual bool isConfigurationFlagSet(ConfigurationFlag configurationFlag) final;
+    virtual bool isConfigurationFlagSet(ConfigurationFlag configurationFlag) const final;
 
     /**
      * Set configuration flag
@@ -477,6 +478,13 @@ signals:
     void connectionPermissionsChanged(std::int32_t connectionPermissions);
 
     /**
+     * Signals that \p configurationFlag is \p set
+     * @param configurationFlag Toggled configuration flag
+     * @param set Whether the flag was set or unset
+     */
+    void configurationFlagToggled(const ConfigurationFlag& configurationFlag, bool set);
+
+    /**
      * Signals that the configuration changed
      * @param configuration New configuration
      */
@@ -497,8 +505,8 @@ private:
     QMap<QString, QVariant>     _cachedStates;              /** Maps cache name to state */
 };
 
-/** List of widget actions */
 using WidgetActions = QVector<WidgetAction*>;
+using ConstWidgetActions = QVector<const WidgetAction*>;
 
 /**
  * Print widget action to console
