@@ -6,6 +6,8 @@
 #include "actions/StringAction.h"
 #include "actions/StringsAction.h"
 #include "actions/IntegralAction.h"
+#include "actions/ProjectSplashScreenAction.h"
+#include "actions/VersionAction.h"
 
 #include "Application.h"
 
@@ -127,6 +129,8 @@ private:
 
 public: // Action getters
 
+    const gui::VersionAction& getApplicationVersionAction() const { return _applicationVersionAction; }
+    const gui::VersionAction& getProjectVersionAction() const { return _projectVersionAction; }
     const gui::ToggleAction& getReadOnlyAction() const { return _readOnlyAction; }
     const gui::StringAction& getTitleAction() const { return _titleAction; }
     const gui::StringAction& getDescriptionAction() const { return _descriptionAction; }
@@ -134,7 +138,10 @@ public: // Action getters
     const gui::StringAction& getCommentsAction() const { return _commentsAction; }
     const gui::StringsAction& getContributorsAction() const { return _contributorsAction; }
     const CompressionAction& getCompressionAction() const { return _compressionAction; }
+    const gui::ProjectSplashScreenAction& getProjectSplashScreenAction() const { return _splashScreenAction; }
 
+    gui::VersionAction& getApplicationVersionAction() { return _applicationVersionAction; }
+    gui::VersionAction& getProjectVersionAction() { return _projectVersionAction; }
     gui::ToggleAction& getReadOnlyAction() { return _readOnlyAction; }
     gui::StringAction& getTitleAction() { return _titleAction; }
     gui::StringAction& getDescriptionAction() { return _descriptionAction; }
@@ -142,6 +149,7 @@ public: // Action getters
     gui::StringAction& getCommentsAction() { return _commentsAction; }
     gui::StringsAction& getContributorsAction() { return _contributorsAction; }
     CompressionAction& getCompressionAction() { return _compressionAction; }
+    gui::ProjectSplashScreenAction& getProjectSplashScreenAction() { return _splashScreenAction; }
 
 signals:
 
@@ -152,15 +160,18 @@ signals:
     void filePathChanged(const QString& filePath);
 
 private:
-    QString                 _filePath;              /** Location on disk where the project resides */
-    util::Version           _version;               /** Version of the application with which the project is created */
-    gui::ToggleAction       _readOnlyAction;        /** Read-only action */
-    gui::StringAction       _titleAction;           /** Title action */
-    gui::StringAction       _descriptionAction;     /** Description action */
-    gui::StringsAction      _tagsAction;            /** Tags action */
-    gui::StringAction       _commentsAction;        /** Comments action */
-    gui::StringsAction      _contributorsAction;    /** Contributors action */
-    CompressionAction       _compressionAction;     /** Compression action */
+    QString                         _filePath;                  /** Location on disk where the project resides */
+    util::Version                   _applicationVersion;        /** Version of the application with which the project is created */
+    gui::VersionAction              _applicationVersionAction;  /** Action for storing the project version */
+    gui::VersionAction              _projectVersionAction;      /** Action for storing the project version */
+    gui::ToggleAction               _readOnlyAction;            /** Read-only action */
+    gui::StringAction               _titleAction;               /** Title action */
+    gui::StringAction               _descriptionAction;         /** Description action */
+    gui::StringsAction              _tagsAction;                /** Tags action */
+    gui::StringAction               _commentsAction;            /** Comments action */
+    gui::StringsAction              _contributorsAction;        /** Contributors action */
+    CompressionAction               _compressionAction;         /** Compression action */
+    gui::ProjectSplashScreenAction  _splashScreenAction;        /** Action for configuring the project splash screen */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

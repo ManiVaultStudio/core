@@ -134,6 +134,7 @@ void WidgetActionLabel::updateNameLabel()
 
     if (_widgetAction->mayPublish(WidgetAction::Gui) && !_widgetAction->isPublic())
         hasContextMenu = true;
+
     if (_widgetAction->mayDisconnect(WidgetAction::Gui) && _widgetAction->isConnected())
         hasContextMenu = true;
 
@@ -142,6 +143,7 @@ void WidgetActionLabel::updateNameLabel()
 
     font.setUnderline(_widgetAction->isEnabled() && hasContextMenu);
     font.setItalic(_widgetAction->mayPublish(WidgetAction::Gui) && _widgetAction->isConnected());
+
     _nameLabel.setFont(font);
     _nameLabel.setEnabled(_widgetAction->isEnabled());
     _nameLabel.setToolTip(_widgetAction->toolTip());

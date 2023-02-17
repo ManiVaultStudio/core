@@ -82,14 +82,14 @@ void WidgetAction::setSortIndex(const std::int32_t& sortIndex)
     _sortIndex = sortIndex;
 }
 
-QWidget* WidgetAction::createCollapsedWidget(QWidget* parent)
+QWidget* WidgetAction::createCollapsedWidget(QWidget* parent) const
 {
-    return new WidgetActionCollapsedWidget(parent, this);
+    return new WidgetActionCollapsedWidget(parent, const_cast<WidgetAction*>(this));
 }
 
-QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags /*= 0x00001*/)
+QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags /*= 0x00001*/) const
 {
-    return new WidgetActionLabel(this, parent, widgetFlags);
+    return new WidgetActionLabel(const_cast<WidgetAction*>(this), parent, widgetFlags);
 }
 
 QMenu* WidgetAction::getContextMenu(QWidget* parent /*= nullptr*/)
@@ -567,13 +567,15 @@ std::int32_t WidgetAction::getConfiguration() const
     return _configuration;
 }
 
-bool WidgetAction::isConfigurationFlagSet(ConfigurationFlag configurationFlag)
+bool WidgetAction::isConfigurationFlagSet(ConfigurationFlag configurationFlag) const
 {
     return _configuration & static_cast<std::int32_t>(configurationFlag);
 }
 
 void WidgetAction::setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset /*= false*/, bool recursive /*= false*/)
 {
+    const auto flagSet = isConfigurationFlagSet(configurationFlag);
+
     if (unset)
         _configuration = _configuration & ~static_cast<std::int32_t>(configurationFlag);
     else
@@ -585,6 +587,9 @@ void WidgetAction::setConfigurationFlag(ConfigurationFlag configurationFlag, boo
         for (auto childAction : getChildActions())
             childAction->setConfigurationFlag(configurationFlag, unset, recursive);
     }
+
+    if (flagSet != isConfigurationFlagSet(configurationFlag))
+        emit configurationFlagToggled(configurationFlag, isConfigurationFlagSet(configurationFlag));
 }
 
 void WidgetAction::setConfiguration(std::int32_t configuration, bool recursive /*= false*/)

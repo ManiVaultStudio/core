@@ -149,8 +149,7 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
 
     QSignalBlocker optionsModelBlocker(&_optionsModel);
 
-    for (int i = 0; i < _optionsModel.rowCount(); i++)
-        _optionsModel.item(i, 0)->setData(Qt::Unchecked, Qt::CheckStateRole);
+    auto selectionChanged = false;
 
     for (int i = 0; i < _optionsModel.rowCount(); i++)
         _optionsModel.item(i, 0)->setData(selectedOptions.contains(_optionsModel.item(i, 0)->text()) ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
@@ -188,11 +187,11 @@ void OptionsAction::connectToPublicAction(WidgetAction* publicAction)
             publicSelectedOptions << selectedOption;
 
         publicOptionsAction->setSelectedOptions(publicSelectedOptions);
-        });
+    });
 
     connect(publicOptionsAction, &OptionsAction::selectedOptionsChanged, this, [this, publicOptionsAction](const QStringList& selectedOptions) -> void {
         setSelectedOptions(selectedOptions);
-        });
+    });
 
     connect(this, &OptionsAction::optionsChanged, this, [this, publicOptionsAction](const QStringList& options) -> void {
         auto allOptions = publicOptionsAction->getOptions() + options;
@@ -200,7 +199,7 @@ void OptionsAction::connectToPublicAction(WidgetAction* publicAction)
         allOptions.removeDuplicates();
 
         publicOptionsAction->setOptions(allOptions);
-        });
+    });
 
     setSelectedOptions(publicOptionsAction->getSelectedOptions());
 
@@ -244,7 +243,7 @@ QVariantMap OptionsAction::toVariantMap() const
 
     variantMap.insert({
         { "Value", getSelectedOptions() }
-        });
+    });
 
     return variantMap;
 }

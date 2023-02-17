@@ -19,6 +19,20 @@ InlineGroupAction::Widget::Widget(QWidget* parent, InlineGroupAction* inlineGrou
     WidgetActionWidget(parent, inlineGroupAction, widgetFlags),
     _inlineGroupAction(inlineGroupAction)
 {
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    for (auto child : inlineGroupAction->children()) {
+        auto widgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (widgetAction == nullptr)
+            continue;
+
+        layout->addWidget(widgetAction->createWidget(this), widgetAction->getStretch());
+    }
+
+    setLayout(layout);
 }
 
 }

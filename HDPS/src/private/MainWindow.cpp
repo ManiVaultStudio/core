@@ -41,9 +41,9 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     if (!_core.isInitialized()) {
         _core.init();
 
-        menuBar()->addMenu(new FileMenu());
-        menuBar()->addMenu(new ViewMenu());
-        menuBar()->addMenu(new HelpMenu());
+        auto fileMenuAction = menuBar()->addMenu(new FileMenu());
+        auto viewMenuAction = menuBar()->addMenu(new ViewMenu());
+        auto helpMenuAction = menuBar()->addMenu(new HelpMenu());
 
         auto stackedWidget      = new QStackedWidget();
         auto projectWidget      = new ProjectWidget();
@@ -82,13 +82,11 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
 
-        connect(&projects(), &ProjectManager::projectOpened, this, [this](const Project& project) -> void {
-            if (project.getReadOnlyAction().isChecked()) {
-                menuBar()->setVisible(false);
+        connect(&projects(), &ProjectManager::projectOpened, this, [this, fileMenuAction, viewMenuAction](const Project& project) -> void {
+            const auto projectIsReadOnly = project.getReadOnlyAction().isChecked();
 
-                if (workspaces().hasWorkspace())
-                    workspaces().getCurrentWorkspace()->getLockingAction().getLockedAction().setChecked(true);
-            }
+            fileMenuAction->setVisible(!projectIsReadOnly);
+            viewMenuAction->setVisible(!projectIsReadOnly);
         });
 
         if (Application::current()->shouldOpenProjectAtStartup())
