@@ -2,6 +2,7 @@
 
 #include "InlineGroupAction.h"
 #include "ToggleAction.h"
+#include "IntegralAction.h"
 #include "TriggerAction.h"
 
 #include <QDialog>
@@ -50,9 +51,19 @@ protected:
      */
     QString getTypeString() const override;
 
+public:
+    const ToggleAction& getEnabledAction() const { return _enabledAction; }
+    const IntegralAction& getDurationAction() const { return _durationAction; }
+    const TriggerAction& getPreviewAction() const { return _previewAction; }
+
+    ToggleAction& getEnabledAction() { return _enabledAction; }
+    IntegralAction& getDurationAction() { return _durationAction; }
+    TriggerAction& getPreviewAction() { return _previewAction; }
+
 private:
     const Project&  _project;           /** Reference to project which owns this action */
     ToggleAction    _enabledAction;     /** Action to toggle the splash screen on/off */
+    IntegralAction  _durationAction;    /** Action to control the display duration */
     TriggerAction   _previewAction;     /** Action to preview the splash screen */
 
     friend class Project;
