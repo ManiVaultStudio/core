@@ -9,9 +9,7 @@
 class QWidget;
 class QGridLayout;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Group action class
@@ -256,5 +254,4 @@ inline QDebug operator << (QDebug debug, const GroupAction* groupAction)
     return debug.space();
 }
 
-}
 }

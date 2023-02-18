@@ -6,7 +6,7 @@
 namespace hdps::gui {
 
 ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Project& project) :
-    InlineGroupAction(parent, "Splash Screen"),
+    HorizontalGroupAction(parent, "Splash Screen"),
     _project(project),
     _enabledAction(this, "Enabled"),
     _durationAction(this, "Duration", 1000, 10000, 3000),
@@ -19,6 +19,9 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _durationAction.setSuffix("ms");
 
     _previewAction.setToolTip("Preview the splash screen");
+
+    addAction(_enabledAction);
+    addAction(_previewAction);
 
     connect(&_previewAction, &TriggerAction::triggered, this, [this]() -> void {
         Dialog previeweDialog(*this);
