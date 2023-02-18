@@ -282,6 +282,9 @@ QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(3);
 
+    if (widgetFlags & WidgetFlag::Label)
+        layout->addWidget(new StringAction::LabelWidget(parent, this));
+
     if (widgetFlags & WidgetFlag::LineEdit)
         layout->addWidget(new StringAction::LineEditWidget(parent, this));
 
@@ -291,6 +294,20 @@ QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     widget->setLayout(layout);
 
     return widget;
+}
+
+StringAction::LabelWidget::LabelWidget(QWidget* parent, StringAction* stringAction) :
+    QLabel(parent)
+{
+    setObjectName("Label");
+
+    const auto updateLabel = [this, stringAction]() {
+        setText(stringAction->getString());
+    };
+    
+    updateLabel();
+
+    connect(stringAction, &StringAction::stringChanged, this, updateLabel);
 }
 
 StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stringAction) :

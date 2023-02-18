@@ -4,20 +4,32 @@ namespace hdps::gui {
 
 VersionAction::VersionAction(QObject* parent) :
     HorizontalGroupAction(parent, "Version"),
-    _majorVersionAction(this, "Major Version", 0, 100, 1),
-    _minorVersionAction(this, "Major Version", 0, 100, 0)
+    _majorAction(this, "Major Version", 0, 100, 1),
+    _minorAction(this, "Major Version", 0, 100, 0),
+    _versionStringAction(this, "Version String")
 {
-    addAction(_majorVersionAction);
-    addAction(_minorVersionAction);
+    setShowLabels(false);
 
-    _majorVersionAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
-    _minorVersionAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+    addAction(_majorAction);
+    addAction(_minorAction);
 
-    _majorVersionAction.setPrefix("major: ");
-    _minorVersionAction.setPrefix("minor: ");
+    _majorAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+    _minorAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
 
-    _majorVersionAction.setToolTip("Major version number");
-    _minorVersionAction.setToolTip("Minor version number");
+    _majorAction.setPrefix("major: ");
+    _minorAction.setPrefix("minor: ");
+
+    _majorAction.setToolTip("Major version number");
+    _minorAction.setToolTip("Minor version number");
+
+    const auto updateVersionStringAction = [this]() -> void {
+        _versionStringAction.setString(QString("%1.%2").arg(QString::number(_majorAction.getValue()), QString::number(_minorAction.getValue())));
+    };
+
+    updateVersionStringAction();
+
+    connect(&_majorAction, &IntegralAction::valueChanged, this, updateVersionStringAction);
+    connect(&_minorAction, &IntegralAction::valueChanged, this, updateVersionStringAction);
 }
 
 QString VersionAction::getTypeString() const
@@ -29,16 +41,16 @@ void VersionAction::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
-    _majorVersionAction.fromParentVariantMap(variantMap);
-    _minorVersionAction.fromParentVariantMap(variantMap);
+    _majorAction.fromParentVariantMap(variantMap);
+    _minorAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap VersionAction::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
 
-    _majorVersionAction.insertIntoVariantMap(variantMap);
-    _minorVersionAction.insertIntoVariantMap(variantMap);
+    _majorAction.insertIntoVariantMap(variantMap);
+    _minorAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

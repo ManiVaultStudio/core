@@ -2,6 +2,7 @@
 
 #include "HorizontalGroupAction.h"
 #include "IntegralAction.h"
+#include "StringAction.h"
 
 namespace hdps::gui {
 
@@ -46,15 +47,18 @@ public: // Serialization
 
 public: // Action getters
 
-    const gui::IntegralAction& getMajorVersionAction() const { return _majorVersionAction; }
-    const gui::IntegralAction& getMinorVersionAction() const { return _minorVersionAction; }
+    const gui::IntegralAction& getMajorAction() const { return _majorAction; }
+    const gui::IntegralAction& getMinorAction() const { return _minorAction; }
+    const gui::StringAction& getVersionStringAction() const { return _versionStringAction; }
 
-    gui::IntegralAction& getMajorVersionAction() { return _majorVersionAction; }
-    gui::IntegralAction& getMinorVersionAction() { return _minorVersionAction; }
+    gui::IntegralAction& getMajorAction() { return _majorAction; }
+    gui::IntegralAction& getMinorAction() { return _minorAction; }
+    gui::StringAction& getVersionStringAction() { return _versionStringAction; }
 
 private:
-    IntegralAction  _majorVersionAction;            /** Action for storing the major version */
-    IntegralAction  _minorVersionAction;            /** Action for storing the minor version */
+    IntegralAction  _majorAction;           /** Action for storing the major version */
+    IntegralAction  _minorAction;           /** Action for storing the minor version */
+    StringAction    _versionStringAction;   /** Action which stores the string representation of the version */
 };
 
 }

@@ -189,6 +189,13 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     connect(&_publishAction, &TriggerAction::triggered, this, [this]() -> void {
         publishProject();
     });
+
+    connect(this, &ProjectManager::projectOpened, this, [](const hdps::Project& project) -> void {
+        auto& splashScreenAction = const_cast<Project&>(project).getProjectSplashScreenAction();
+
+        if (splashScreenAction.getEnabledAction().isChecked())
+            splashScreenAction.getShowSplashScreenAction().trigger();
+    });
 }
 
 void ProjectManager::initialize()
@@ -727,6 +734,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                         settingsGroupAction << currentProject->getDescriptionAction();
                         settingsGroupAction << currentProject->getTagsAction();
                         settingsGroupAction << currentProject->getCommentsAction();
+                        settingsGroupAction << currentProject->getProjectSplashScreenAction().getEnabledAction();
 
                         auto titleLayout = new QHBoxLayout();
 

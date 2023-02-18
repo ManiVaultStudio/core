@@ -114,7 +114,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
 
 QVariantMap Project::toVariantMap() const
 {
-    QVariantMap variantMap = Serializable::toVariantMap();
+    auto variantMap = Serializable::toVariantMap();
 
     _applicationVersion.insertIntoVariantMap(variantMap);
     _readOnlyAction.insertIntoVariantMap(variantMap);
