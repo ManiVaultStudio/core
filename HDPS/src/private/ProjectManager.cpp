@@ -718,23 +718,23 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                         fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
                     }
                     
+                    GroupAction settingsGroupAction(this);
+
                     if (options.contains("Title")) {
                         auto& titleAction = currentProject->getTitleAction();
 
                         fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 2, 0);
 
-                        GroupAction settingsGroupAction(this);
-
                         settingsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
                         settingsGroupAction.setToolTip("Edit project settings");
-                        settingsGroupAction.setPopupSizeHint(QSize(420, 320));
+                        settingsGroupAction.setPopupSizeHint(QSize(420, 0));
                         settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
                         settingsGroupAction << currentProject->getTitleAction();
                         settingsGroupAction << currentProject->getDescriptionAction();
                         settingsGroupAction << currentProject->getTagsAction();
                         settingsGroupAction << currentProject->getCommentsAction();
-                        settingsGroupAction << currentProject->getProjectSplashScreenAction().getEnabledAction();
+                        settingsGroupAction << currentProject->getProjectSplashScreenAction();
 
                         auto titleLayout = new QHBoxLayout();
 

@@ -315,13 +315,13 @@ StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stri
 {
     setObjectName("LineEdit");
     setAcceptDrops(true);
-
+    
     const auto updateTextEdit = [this, stringAction]() {
         QSignalBlocker blocker(this);
 
         const auto cacheCursorPosition = textCursor().position();
 
-        setText(stringAction->getString());
+        setPlainText(stringAction->getString());
 
         auto updateCursor = textCursor();
 
