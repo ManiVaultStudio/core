@@ -150,7 +150,6 @@ private:
     GroupAction         _editAction;                    /** Group action for editing the splash screen */
     TriggerAction       _showSplashScreenAction;        /** Trigger action to show the splash screen */
     ImageAction         _projectImageAction;            /** Trigger action to show the splash screen */
-    ImageAction         _affiliateLogosImageAction;     /** Trigger action to show the splash screen */
     Dialog              _splashScreenDialog;            /** Splash screen dialog */
 
     friend class hdps::Project;
