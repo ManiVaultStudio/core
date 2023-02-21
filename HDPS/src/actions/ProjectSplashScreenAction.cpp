@@ -16,12 +16,13 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _enabledAction(this, "Splash screen post-load"),
     _closeManuallyAction(this, "Close manually"),
     _durationAction(this, "Duration", 1000, 10000, 10000),
-    _animationDurationAction(this, "Duration", 10, 10000, 5000),
+    _animationDurationAction(this, "Duration", 10, 10000, 250),
     _animationPanAmountAction(this, "Pan Amount", 10, 100, 20),
     _backgroundColorAction(this, "Background Color", Qt::white),
     _editAction(this, "Edit"),
     _showSplashScreenAction(this, "Show"),
-    _splashScreenDialog(*this)
+    _splashScreenDialog(*this),
+    _projectImageAction(this, "Primary Image")
 {
     setSerializationName("Splash Screen");
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
@@ -57,14 +58,20 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _editAction << _durationAction;
     _editAction << _closeManuallyAction;
     _editAction << _backgroundColorAction;
+    _editAction << _projectImageAction;
 
     _showSplashScreenAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _showSplashScreenAction.setIcon(fontAwesome.getIcon("eye"));
     _showSplashScreenAction.setToolTip("Preview the splash screen");
 
-    addAction(_enabledAction);
-    addAction(_editAction);
-    addAction(_showSplashScreenAction);
+    _projectImageAction.setDefaultWidgetFlags(ImageAction::Loader);
+    _projectImageAction.setIcon(fontAwesome.getIcon("image"));
+    _projectImageAction.setToolTip("Primary image");
+    _projectImageAction.setSerializationName("PrimaryImage");
+
+    addAction(&_enabledAction);
+    addAction(&_editAction);
+    addAction(&_showSplashScreenAction);
 
     const auto updateDurationAction = [this]() -> void {
         _durationAction.setEnabled(!_closeManuallyAction.isChecked());
@@ -99,6 +106,7 @@ void ProjectSplashScreenAction::fromVariantMap(const QVariantMap& variantMap)
     _animationDurationAction.fromParentVariantMap(variantMap);
     _animationPanAmountAction.fromParentVariantMap(variantMap);
     _backgroundColorAction.fromParentVariantMap(variantMap);
+    _projectImageAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ProjectSplashScreenAction::toVariantMap() const
@@ -111,6 +119,7 @@ QVariantMap ProjectSplashScreenAction::toVariantMap() const
     _animationDurationAction.insertIntoVariantMap(variantMap);
     _animationPanAmountAction.insertIntoVariantMap(variantMap);
     _backgroundColorAction.insertIntoVariantMap(variantMap);
+    _projectImageAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
@@ -171,7 +180,7 @@ ProjectSplashScreenAction::Dialog::Dialog(ProjectSplashScreenAction& projectSpla
 
     const auto margin = 5;
 
-    mainLayout->setContentsMargins(margin, margin, margin, margin);
+    mainLayout->setContentsMargins(margin + 20, margin, margin, margin);
 
     _closeToolButton.setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
     _closeToolButton.setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
@@ -181,10 +190,18 @@ ProjectSplashScreenAction::Dialog::Dialog(ProjectSplashScreenAction& projectSpla
     connect(&_closeToolButton, &QToolButton::clicked, this, &Dialog::fadeOut);
 
     mainLayout->addWidget(&_closeToolButton, 0, 2, Qt::AlignRight);
+    mainLayout->setSpacing(20);
 
     auto imageLabel = new QLabel();
 
     imageLabel->setFixedSize(200, 200);
+    imageLabel->setScaledContents(true);
+
+    const auto updatePrimaryImage = [this, imageLabel]() -> void {
+        imageLabel->setPixmap(QPixmap::fromImage(_projectSplashScreenAction.getPrimaryImageAction().getImage()));
+    };
+
+    connect(&_projectSplashScreenAction.getPrimaryImageAction(), &ImageAction::imageChanged, this, updatePrimaryImage);
 
     mainLayout->addWidget(imageLabel, 1, 0);
 

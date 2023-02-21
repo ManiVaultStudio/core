@@ -45,16 +45,16 @@ ConstWidgetActions HorizontalGroupAction::getActions()
     return _actions;
 }
 
-void HorizontalGroupAction::addAction(const WidgetAction& action)
+void HorizontalGroupAction::addAction(const WidgetAction* action)
 {
-    _actions << &action;
+    _actions << action;
 
     QList<std::int32_t> configurationFlagsRequireUpdate{
         static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::NoLabelInGroup),
         static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::AlwaysCollapsed)
     };
 
-    connect(&action, &WidgetAction::configurationFlagToggled, this, [&](const WidgetAction::ConfigurationFlag& configurationFlag, bool set) -> void {
+    connect(action, &WidgetAction::configurationFlagToggled, this, [&](const WidgetAction::ConfigurationFlag& configurationFlag, bool set) -> void {
         if (!configurationFlagsRequireUpdate.contains(static_cast<std::int32_t>(configurationFlag)))
             return;
 
@@ -64,14 +64,14 @@ void HorizontalGroupAction::addAction(const WidgetAction& action)
     emit actionsChanged(getActions());
 }
 
-void HorizontalGroupAction::removeAction(const WidgetAction& action)
+void HorizontalGroupAction::removeAction(const WidgetAction* action)
 {
-    if (!_actions.contains(&action))
+    if (!_actions.contains(action))
         return;
 
-    _actions.removeOne(&action);
+    _actions.removeOne(action);
 
-    disconnect(&action, &WidgetAction::configurationFlagToggled, this, nullptr);
+    disconnect(action, &WidgetAction::configurationFlagToggled, this, nullptr);
 }
 
 HorizontalGroupAction::Widget::Widget(QWidget* parent, HorizontalGroupAction* horizontalGroupAction, const std::int32_t& widgetFlags) :

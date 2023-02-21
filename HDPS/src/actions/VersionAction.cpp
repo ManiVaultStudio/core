@@ -14,9 +14,9 @@ VersionAction::VersionAction(QObject* parent) :
 {
     setShowLabels(false);
 
-    addAction(_majorAction);
-    addAction(_minorAction);
-    addAction(_suffixAction);
+    addAction(&_majorAction);
+    addAction(&_minorAction);
+    addAction(&_suffixAction);
 
     _majorAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _minorAction.setDefaultWidgetFlags(IntegralAction::SpinBox);

@@ -6,6 +6,7 @@
 #include "TriggerAction.h"
 #include "GroupAction.h"
 #include "ColorAction.h"
+#include "ImageAction.h"
 
 #include <QDialog>
 #include <QPropertyAnimation>
@@ -78,6 +79,8 @@ protected:
         QPixmap                     _backgroundImage;               /** Background image */
         QToolButton                 _closeToolButton;               /** Button for forcefully closing the splash screen */
         AnimationState              _animationState;                /** Animation state */
+
+        friend class ProjectSplashScreenAction;
     };
 
 protected:
@@ -124,6 +127,7 @@ public:
     const ColorAction& getBackgroundColorAction() const { return _backgroundColorAction; }
     const GroupAction& getEditAction() const { return _editAction; }
     const TriggerAction& getShowSplashScreenAction() const { return _showSplashScreenAction; }
+    const ImageAction& getPrimaryImageAction() const { return _projectImageAction; }
 
     ToggleAction& getEnabledAction() { return _enabledAction; }
     ToggleAction& getCloseManuallyAction() { return _closeManuallyAction; }
@@ -133,20 +137,23 @@ public:
     ColorAction& getBackgroundColorAction() { return _backgroundColorAction; }
     GroupAction& getEditAction() { return _editAction; }
     TriggerAction& getShowSplashScreenAction() { return _showSplashScreenAction; }
-
+    ImageAction& getPrimaryImageAction() { return _projectImageAction; }
+    
 private:
-    const Project&      _project;                   /** Reference to project which owns this action */
-    ToggleAction        _enabledAction;             /** Action to toggle the splash screen on/off */
-    ToggleAction        _closeManuallyAction;       /** Action to toggle whether the splash screen has to be closed manually */
-    IntegralAction      _durationAction;            /** Action to control the display duration */
-    IntegralAction      _animationDurationAction;   /** Action to control the duration of the fade in/out animations */
-    IntegralAction      _animationPanAmountAction;  /** Action to control the amount of up/down panning of animations */
-    ColorAction         _backgroundColorAction;     /** Action to control the background color of the splash screen */
-    GroupAction         _editAction;                /** Group action for editing the splash screen */
-    TriggerAction       _showSplashScreenAction;    /** Trigger action to show the splash screen */
-    Dialog              _splashScreenDialog;        /** Splash screen dialog */
+    const Project& _project;                            /** Reference to project which owns this action */
+    ToggleAction        _enabledAction;                 /** Action to toggle the splash screen on/off */
+    ToggleAction        _closeManuallyAction;           /** Action to toggle whether the splash screen has to be closed manually */
+    IntegralAction      _durationAction;                /** Action to control the display duration */
+    IntegralAction      _animationDurationAction;       /** Action to control the duration of the fade in/out animations */
+    IntegralAction      _animationPanAmountAction;      /** Action to control the amount of up/down panning of animations */
+    ColorAction         _backgroundColorAction;         /** Action to control the background color of the splash screen */
+    GroupAction         _editAction;                    /** Group action for editing the splash screen */
+    TriggerAction       _showSplashScreenAction;        /** Trigger action to show the splash screen */
+    ImageAction         _projectImageAction;            /** Trigger action to show the splash screen */
+    ImageAction         _affiliateLogosImageAction;     /** Trigger action to show the splash screen */
+    Dialog              _splashScreenDialog;            /** Splash screen dialog */
 
-    friend class Project;
+    friend class hdps::Project;
 };
 
 }
