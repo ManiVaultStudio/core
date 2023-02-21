@@ -1,13 +1,14 @@
 #pragma once
 
 #include "WidgetAction.h"
+#include "HorizontalGroupAction.h"
+#include "FilePickerAction.h"
+#include "TriggerAction.h"
 
 #include <QLabel>
 #include <QImage>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Image widget action class (WIP)
@@ -24,38 +25,49 @@ public:
 
     /** Describes the widget configurations */
     enum WidgetFlag {
-        Label = 0x00001     /** Image preview with a label widget */
+        Preview = 0x00001,   /** Image preview with a label widget */
+        Loader  = 0x00002,   /** Widget for loading an image into the action */
     };
 
 public:
 
-    /** Label widget class for image action */
-    class LabelWidget : public QLabel
+    /** Preview widget class for image action */
+    class PreviewWidget : public QLabel
     {
     protected:
 
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param imageAction Pointer to image action
+         * @param imageAction Reference to image action
          */
-        LabelWidget(QWidget* parent, ImageAction* imageAction);
+        PreviewWidget(QWidget* parent, ImageAction& imageAction);
 
-        /**
-         * Invoked when the label is resized
-         * @param resizeEvent Resize event that occurred
-         */
-        //void resizeEvent(QResizeEvent* resizeEvent) override;
-
-        //QSize minimumSizeHint() const override;
         QSize sizeHint() const override {
             return QSize(100, 100);
         }
 
-        //int heightForWidth(int w) const override;
+    protected:
+        ImageAction& _imageAction;       /** Reference to owning image action */
+
+        friend class ImageAction;
+    };
+
+    /** Loader widget class for image action */
+    class LoaderWidget : public QWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param imageAction Reference to image action
+         */
+        LoaderWidget(QWidget* parent, ImageAction& imageAction);
 
     protected:
-        ImageAction*    _imageAction;       /** Pointer to image action */
+        ImageAction&            _imageAction;       /** Pointer to owning image action */
+        HorizontalGroupAction   _groupAction;       /** Group action for the preview and picker action */
 
         friend class ImageAction;
     };
@@ -79,13 +91,38 @@ public:
     ImageAction(QObject* parent, const QString& title = "");
 
     /** Get the current image */
-    QImage getImage() const;
+    const QImage getImage() const;
 
     /**
      * Set the current image
      * @param image Current image
      */
     void setImage(const QImage& image);
+
+    /**
+     * Load image from disk
+     * @param filePath Path of the image on disk
+     */
+    void loadImage(const QString& filePath);
+
+public: // Serialization
+
+    /**
+     * Load image action from variant
+     * @param Variant representation of the image action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save image action to variant
+     * @return Variant representation of the image action
+     */
+    QVariantMap toVariantMap() const override;
+
+public: // Action getters
+
+    FilePickerAction& getFilePickerAction() { return _filePickerAction; }
+    TriggerAction& getPreviewAction() { return _previewAction; }
 
 signals:
 
@@ -96,8 +133,9 @@ signals:
     void imageChanged(const QImage& string);
 
 protected:
-    QImage     _image;      /** Current image */
+    QImage              _image;             /** Current image */
+    FilePickerAction    _filePickerAction;  /** Action for loading the image from disk */
+    TriggerAction       _previewAction;     /** Action for previewing the image (via tooltip) */
 };
 
-}
 }

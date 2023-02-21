@@ -4,8 +4,6 @@
 #include "IntegralAction.h"
 #include "StringAction.h"
 
-#include <QCompleter>
-
 namespace hdps::gui {
 
 /**
@@ -64,7 +62,6 @@ private:
     IntegralAction  _minorAction;           /** Action for storing the minor version */
     StringAction    _suffixAction;          /** Action which stores the version suffix (e.g. alpha or beta) */
     StringAction    _versionStringAction;   /** Action which stores the string representation of the version */
-    QCompleter      _suffixCompleter;       /** Completer for version suffix */
 };
 
 }

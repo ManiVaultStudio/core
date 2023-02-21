@@ -5,66 +5,75 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QHBoxLayout>
+#include <QStandardPaths>
 
-namespace hdps {
+using namespace hdps::util;
 
-namespace gui {
+namespace hdps::gui {
 
-FilePickerAction::FilePickerAction(QObject* parent, const QString& title /*= ""*/, const QString& filePath /*= QString()*/, const QString& defaultFilePath /*= QString()*/) :
+FilePickerAction::FilePickerAction(QObject* parent, const QString& title /*= ""*/, const QString& filePath /*= QString()*/) :
     WidgetAction(parent),
     _dirModel(),
     _completer(),
     _filePathAction(this, "File path"),
-    _pickAction(this, "Pick")
+    _pickAction(this, "Pick"),
+    _nameFilters(),
+    _defaultSuffix(),
+    _fileType("File")
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
-    initialize(filePath, defaultFilePath);
 
     _completer.setModel(&_dirModel);
 
-    // Show directory line edit action
     _filePathAction.getTrailingAction().setVisible(true);
     _filePathAction.setCompleter(&_completer);
 
-    // Configure pick action
     _pickAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _pickAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder"));
     _pickAction.setToolTip("Click to choose a file");
 
-    // Disable trailing action
     _filePathAction.getTrailingAction().setEnabled(false);
 
-    // Update the trailing action of the string action to indicate whether the (typed) directory is valid or not
     const auto updateStatusAction = [this]() -> void {
         _filePathAction.getTrailingAction().setIcon(isValid() ? Application::getIconFont("FontAwesome").getIcon("check") : Application::getIconFont("FontAwesome").getIcon("exclamation"));
         _filePathAction.getTrailingAction().setToolTip(isValid() ? "File exists" : "File does not exist");
     };
 
-    // Initial update of the status action
     updateStatusAction();
 
-    // Update the line edit string when the directory string changes
     connect(&_filePathAction, &StringAction::stringChanged, this, updateStatusAction);
 
-    // Open file dialog when pick action is triggered
     connect(&_pickAction, &TriggerAction::triggered, this, [this]() {
-        const auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, tr("Open file"));
+        QFileDialog fileDialog;
 
-        if (fileUrl.isValid())
-            setFilePath(fileUrl.toLocalFile());
+        fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+        fileDialog.setWindowTitle(QString("Open %1").arg(getFileType()));
+        fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+        fileDialog.setFileMode(QFileDialog::ExistingFile);
+        fileDialog.setNameFilters(getNameFilters());
+        fileDialog.setDefaultSuffix(getDefaultSuffix());
+        fileDialog.setDirectory(Application::current()->getSetting(getSettingsPrefix(), QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+        fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+        if (fileDialog.exec() == 0)
+            return;
+
+        if (fileDialog.selectedFiles().count() != 1)
+            throw std::runtime_error("Only one file may be selected");
+
+        const auto filePath = fileDialog.selectedFiles().first();
+
+        setFilePath(filePath);
+
+        if (!getSettingsPrefix().isEmpty())
+            Application::current()->setSetting(getSettingsPrefix(), QFileInfo(filePath).absolutePath());
     });
 
-    // Pass-through action signals
-    connect(&_filePathAction, &StringAction::stringChanged, this, &FilePickerAction::directoryChanged);
-    connect(&_filePathAction, &StringAction::defaultStringChanged, this, &FilePickerAction::defaultDirectoryChanged);
+    connect(&_filePathAction, &StringAction::stringChanged, this, &FilePickerAction::filePathChanged);
     connect(&_filePathAction, &StringAction::placeholderStringChanged, this, &FilePickerAction::placeholderStringChanged);
-}
 
-void FilePickerAction::initialize(const QString& filePath /*= QString()*/, const QString& defaultFilePath /*= QString()*/)
-{
     setFilePath(filePath);
-    setDefaultFilePath(defaultFilePath);
 }
 
 QString FilePickerAction::getFilePath() const
@@ -80,17 +89,34 @@ void FilePickerAction::setFilePath(const QString& filePath)
     _filePathAction.setString(filePath);
 }
 
-QString FilePickerAction::getDefaultFilePath() const
+QStringList FilePickerAction::getNameFilters() const
 {
-    return _filePathAction.getDefaultString();
+    return _nameFilters;
 }
 
-void FilePickerAction::setDefaultFilePath(const QString& defaultFilePath)
+void FilePickerAction::setNameFilters(const QStringList& nameFilters)
 {
-    if (defaultFilePath == getDefaultFilePath())
-        return;
+    _nameFilters = nameFilters;
+}
 
-    _filePathAction.setDefaultString(defaultFilePath);
+QString FilePickerAction::getDefaultSuffix() const
+{
+    return _defaultSuffix;
+}
+
+void FilePickerAction::setDefaultSuffix(const QString& defaultSuffix)
+{
+    _defaultSuffix = defaultSuffix;
+}
+
+QString FilePickerAction::getFileType() const
+{
+    return _fileType;
+}
+
+void FilePickerAction::setFileType(const QString& fileType)
+{
+    _fileType = fileType;
 }
 
 QString FilePickerAction::getPlaceholderString() const
@@ -135,5 +161,24 @@ QWidget* FilePickerAction::getWidget(QWidget* parent, const std::int32_t& widget
     return widget;
 }
 
+void FilePickerAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    WidgetAction::fromVariantMap(variantMap);
+
+    //variantMapMustContain(variantMap, "Value");
+
+    //setFilePath(variantMap["Value"].toString());
 }
+
+QVariantMap FilePickerAction::toVariantMap() const
+{
+    auto variantMap = WidgetAction::toVariantMap();
+
+    //variantMap.insert({
+    //    { "Value", QVariant::fromValue(getFilePath()) }
+    //});
+
+    return variantMap;
+}
+
 }

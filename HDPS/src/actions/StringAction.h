@@ -2,6 +2,7 @@
 
 #include "WidgetAction.h"
 
+#include <QLabel>
 #include <QLineEdit>
 #include <QTextEdit>
 
@@ -25,13 +26,29 @@ public:
 
     /** Describes the widget configurations */
     enum WidgetFlag {
-        LineEdit    = 0x00001,      /** Widget includes a line edit */
-        TextEdit    = 0x00002,      /** Widget includes a text edit */
+        Label       = 0x00001,      /** Widget includes a label */
+        LineEdit    = 0x00002,      /** Widget includes a line edit */
+        TextEdit    = 0x00004,      /** Widget includes a text edit */
 
         Default = LineEdit,
     };
 
 public:
+
+    /** Label widget class for string action */
+    class LabelWidget : public QLabel
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param stringAction Pointer to string action
+         */
+        LabelWidget(QWidget* parent, StringAction* stringAction);
+
+        friend class StringAction;
+    };
 
     /** Line edit widget class for string action */
     class LineEditWidget : public QLineEdit

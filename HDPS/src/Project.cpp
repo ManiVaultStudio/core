@@ -96,6 +96,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
     Serializable::fromVariantMap(variantMap);
 
     _applicationVersion.fromParentVariantMap(variantMap);
+    _projectVersionAction.fromParentVariantMap(variantMap);
     _readOnlyAction.fromParentVariantMap(variantMap);
     _titleAction.fromParentVariantMap(variantMap);
     _descriptionAction.fromParentVariantMap(variantMap);
@@ -114,9 +115,10 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
 
 QVariantMap Project::toVariantMap() const
 {
-    QVariantMap variantMap = Serializable::toVariantMap();
+    auto variantMap = Serializable::toVariantMap();
 
     _applicationVersion.insertIntoVariantMap(variantMap);
+    _projectVersionAction.insertIntoVariantMap(variantMap);
     _readOnlyAction.insertIntoVariantMap(variantMap);
     _titleAction.insertIntoVariantMap(variantMap);
     _descriptionAction.insertIntoVariantMap(variantMap);
@@ -135,6 +137,9 @@ QVariantMap Project::toVariantMap() const
 
 void Project::initialize()
 {
+    _applicationVersion.setSerializationName("Application Version");
+    _projectVersionAction.setSerializationName("Project Version");
+
     _readOnlyAction.setToolTip("Whether the project is in read-only mode or not");
     _readOnlyAction.setSerializationName("ReadOnly");
 

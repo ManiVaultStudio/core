@@ -73,15 +73,15 @@ public:
 
     /**
      * Add \p action to the group
-     * @param action Reference to action to add
+     * @param action Pointer to action to add
      */
-    void addAction(const WidgetAction& action);
+    void addAction(const WidgetAction* action);
 
     /**
      * Remove \p action from the group
-     * @param action Reference to action to add
+     * @param action Pointer to action to add
      */
-    void removeAction(const WidgetAction& action);
+    void removeAction(const WidgetAction* action);
 
     /**
      * Set actions to \p actions
