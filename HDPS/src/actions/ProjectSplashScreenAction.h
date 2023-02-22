@@ -2,9 +2,16 @@
 
 #include "HorizontalGroupAction.h"
 #include "ToggleAction.h"
+#include "IntegralAction.h"
 #include "TriggerAction.h"
+#include "GroupAction.h"
+#include "ColorAction.h"
+#include "ImageAction.h"
 
 #include <QDialog>
+#include <QPropertyAnimation>
+
+class QMainWindow;
 
 namespace hdps {
     class Project;
@@ -15,7 +22,7 @@ namespace hdps::gui {
 /**
  * Splash screen action class
  *
- * Action class for configuring a project splash screen
+ * Action class for configuring and displaying a project splash screen
  *
  * @author Thomas Kroes
  */
@@ -25,14 +32,55 @@ class ProjectSplashScreenAction : public HorizontalGroupAction
     
 protected:
 
+    /** Splash screen dialog class */
     class Dialog final : public QDialog {
     public:
-        Dialog(const ProjectSplashScreenAction& projectSplashScreenAction, QWidget* parent = nullptr);
 
-        int exec() override;
+        enum class AnimationState {
+            Idle,
+            FadingIn,
+            FadingOut
+        };
+
+        /**
+         * Construct owning \p projectSplashScreenAction and \p parent widget
+         * @param projectSplashScreenAction Owning project splash screen action
+         * @param parent Pointer to parent widget
+         */
+        Dialog(ProjectSplashScreenAction& projectSplashScreenAction, QWidget* parent = nullptr);
+
+        /** Open the dialog */
+        void open() override;
+
+        /** Fade the dialog in */
+        void fadeIn();
+
+        /** Fade the dialog out and accept */
+        void fadeOut();
+
+        /**
+         * Override paint event to draw the logo in the background
+         * @param paintEvent Pointer to paint event
+         */
+        void paintEvent(QPaintEvent* paintEvent);
 
     private:
-        const ProjectSplashScreenAction& _projectSplashScreenAction;
+
+        /**
+         * Get main window (for centering the splash screen w.r.t. the main window)
+         * @return Pointer to main window
+         */
+        QMainWindow* getMainWindow() const;
+
+    private:
+        ProjectSplashScreenAction&  _projectSplashScreenAction;     /** Owning project splash screen action */
+        QPropertyAnimation          _opacityAnimation;              /** Property animation for controlling window opacity */
+        QPropertyAnimation          _positionAnimation;             /** Property animation for controlling window position */
+        QPixmap                     _backgroundImage;               /** Background image */
+        QToolButton                 _closeToolButton;               /** Button for forcefully closing the splash screen */
+        AnimationState              _animationState;                /** Animation state */
+
+        friend class ProjectSplashScreenAction;
     };
 
 protected:
@@ -50,12 +98,61 @@ protected:
      */
     QString getTypeString() const override;
 
-private:
-    const Project&  _project;           /** Reference to project which owns this action */
-    ToggleAction    _enabledAction;     /** Action to toggle the splash screen on/off */
-    TriggerAction   _previewAction;     /** Action to preview the splash screen */
+    /**
+     * Get parent project
+     * @return Reference to parent project
+     */
+    const Project& getProject() const;
 
-    friend class Project;
+public: // Serialization
+
+    /**
+     * Load project from variant
+     * @param Variant representation of the project
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save project to variant
+     * @return Variant representation of the project
+     */
+    QVariantMap toVariantMap() const override;
+
+public:
+    const ToggleAction& getEnabledAction() const { return _enabledAction; }
+    const ToggleAction& getCloseManuallyAction() const { return _closeManuallyAction; }
+    const IntegralAction& getDurationAction() const { return _durationAction; }
+    const IntegralAction& getAnimationDurationAction() const { return _animationDurationAction; }
+    const IntegralAction& getAnimationPanAmountAction() const { return _animationPanAmountAction; }
+    const ColorAction& getBackgroundColorAction() const { return _backgroundColorAction; }
+    const GroupAction& getEditAction() const { return _editAction; }
+    const TriggerAction& getShowSplashScreenAction() const { return _showSplashScreenAction; }
+    const ImageAction& getPrimaryImageAction() const { return _projectImageAction; }
+
+    ToggleAction& getEnabledAction() { return _enabledAction; }
+    ToggleAction& getCloseManuallyAction() { return _closeManuallyAction; }
+    IntegralAction& getDurationAction() { return _durationAction; }
+    IntegralAction& getAnimationDurationAction() { return _animationDurationAction; }
+    IntegralAction& getAnimationPanAmountAction() { return _animationPanAmountAction; }
+    ColorAction& getBackgroundColorAction() { return _backgroundColorAction; }
+    GroupAction& getEditAction() { return _editAction; }
+    TriggerAction& getShowSplashScreenAction() { return _showSplashScreenAction; }
+    ImageAction& getPrimaryImageAction() { return _projectImageAction; }
+    
+private:
+    const Project& _project;                            /** Reference to project which owns this action */
+    ToggleAction        _enabledAction;                 /** Action to toggle the splash screen on/off */
+    ToggleAction        _closeManuallyAction;           /** Action to toggle whether the splash screen has to be closed manually */
+    IntegralAction      _durationAction;                /** Action to control the display duration */
+    IntegralAction      _animationDurationAction;       /** Action to control the duration of the fade in/out animations */
+    IntegralAction      _animationPanAmountAction;      /** Action to control the amount of up/down panning of animations */
+    ColorAction         _backgroundColorAction;         /** Action to control the background color of the splash screen */
+    GroupAction         _editAction;                    /** Group action for editing the splash screen */
+    TriggerAction       _showSplashScreenAction;        /** Trigger action to show the splash screen */
+    ImageAction         _projectImageAction;            /** Trigger action to show the splash screen */
+    Dialog              _splashScreenDialog;            /** Splash screen dialog */
+
+    friend class hdps::Project;
 };
 
 }
