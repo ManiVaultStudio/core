@@ -9,23 +9,41 @@ namespace hdps::gui {
 ImageAction::ImageAction(QObject* parent, const QString& title /*= ""*/) :
     WidgetAction(parent),
     _image(),
-    _filePickerAction(parent, "Load"),
+    _filePathAction(this, "File Path"),
+    _fileNameAction(this, "File Name"),
+    _filePickerAction(parent, ""),
     _previewAction(this)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Preview);
 
+    _filePathAction.setEnabled(false);
+    _filePathAction.setTextElideMode(Qt::ElideMiddle);
+    _filePathAction.setSerializationName("FilePath");
+    _filePathAction.setStretch(1);
+
+    _fileNameAction.setEnabled(false);
+    _fileNameAction.setTextElideMode(Qt::ElideMiddle);
+    _fileNameAction.setSerializationName("FileName");
+    _fileNameAction.setStretch(1);
+
     _filePickerAction.setPlaceHolderString("Pick image...");
     _filePickerAction.setFileType("Image");
-    _filePickerAction.setNameFilters({ "Images (*.png *.xpm *.jpg)" });
+    _filePickerAction.setNameFilters({ "Images (*.png *.bmp *.jpg)" });
     _filePickerAction.setDefaultWidgetFlags(FilePickerAction::PushButton);
-    
-    _filePickerAction.getPickAction().setDefaultWidgetFlags(TriggerAction::Text);
+        
+    _filePickerAction.getPickAction().setDefaultWidgetFlags(TriggerAction::Icon);
 
+    _previewAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _previewAction.setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
 
     connect(&_filePickerAction, &FilePickerAction::filePathChanged, this, [this](const QString& filePath) -> void {
         loadImage(filePath);
+    });
+
+    connect(&_filePathAction, &StringAction::stringChanged, this, [this](const QString& string) -> void {
+        _fileNameAction.setString(QFileInfo(string).fileName());
+        _fileNameAction.setToolTip(string);
     });
 }
 
@@ -43,7 +61,12 @@ void ImageAction::setImage(const QImage& image)
 
 void ImageAction::loadImage(const QString& filePath)
 {
+    if (!QFileInfo(filePath).exists())
+        return;
+
     setImage(QImage(filePath));
+
+    _filePathAction.setString(filePath);
 }
 
 ImageAction::PreviewWidget::PreviewWidget(QWidget* parent, ImageAction& imageAction) :
@@ -86,8 +109,9 @@ ImageAction::LoaderWidget::LoaderWidget(QWidget* parent, ImageAction& imageActio
 {
     _groupAction.setShowLabels(false);
 
+    _groupAction.addAction(&_imageAction.getFileNameAction());
     _groupAction.addAction(&_imageAction.getFilePickerAction());
-    _groupAction.addAction(&_imageAction.getPreviewAction());
+    //_groupAction.addAction(&_imageAction.getPreviewAction());
 
     auto layout = new QHBoxLayout();
     
@@ -127,6 +151,9 @@ void ImageAction::fromVariantMap(const QVariantMap& variantMap)
     image.loadFromData(QByteArray::fromBase64(variantMap["Value"].toByteArray()));
 
     setImage(image);
+
+    _filePathAction.fromParentVariantMap(variantMap);
+    _fileNameAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ImageAction::toVariantMap() const
@@ -141,6 +168,9 @@ QVariantMap ImageAction::toVariantMap() const
     variantMap.insert({
         { "Value", QVariant::fromValue(previewImageByteArray.toBase64()) }
     });
+
+    _filePathAction.insertIntoVariantMap(variantMap);
+    _fileNameAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

@@ -138,7 +138,7 @@ public: // Action getters
     const gui::StringAction& getCommentsAction() const { return _commentsAction; }
     const gui::StringsAction& getContributorsAction() const { return _contributorsAction; }
     const CompressionAction& getCompressionAction() const { return _compressionAction; }
-    const gui::ProjectSplashScreenAction& getProjectSplashScreenAction() const { return _splashScreenAction; }
+    const gui::ProjectSplashScreenAction& getSplashScreenAction() const { return _splashScreenAction; }
 
     gui::VersionAction& getApplicationVersionAction() { return _applicationVersionAction; }
     gui::VersionAction& getProjectVersionAction() { return _projectVersionAction; }
@@ -149,7 +149,7 @@ public: // Action getters
     gui::StringAction& getCommentsAction() { return _commentsAction; }
     gui::StringsAction& getContributorsAction() { return _contributorsAction; }
     CompressionAction& getCompressionAction() { return _compressionAction; }
-    gui::ProjectSplashScreenAction& getProjectSplashScreenAction() { return _splashScreenAction; }
+    gui::ProjectSplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
 
 signals:
 

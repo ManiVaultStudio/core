@@ -95,6 +95,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
 {
     Serializable::fromVariantMap(variantMap);
 
+    _splashScreenAction.fromParentVariantMap(variantMap);
     _applicationVersion.fromParentVariantMap(variantMap);
     _projectVersionAction.fromParentVariantMap(variantMap);
     _readOnlyAction.fromParentVariantMap(variantMap);
@@ -104,7 +105,6 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
     _commentsAction.fromParentVariantMap(variantMap);
     _contributorsAction.fromParentVariantMap(variantMap);
     _compressionAction.fromParentVariantMap(variantMap);
-    _splashScreenAction.fromParentVariantMap(variantMap);
 
     if (!preview) {
         plugins().fromParentVariantMap(variantMap);
@@ -116,7 +116,8 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
 QVariantMap Project::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
-
+    
+    _splashScreenAction.insertIntoVariantMap(variantMap);
     _applicationVersion.insertIntoVariantMap(variantMap);
     _projectVersionAction.insertIntoVariantMap(variantMap);
     _readOnlyAction.insertIntoVariantMap(variantMap);
@@ -126,7 +127,6 @@ QVariantMap Project::toVariantMap() const
     _commentsAction.insertIntoVariantMap(variantMap);
     _contributorsAction.insertIntoVariantMap(variantMap);
     _compressionAction.insertIntoVariantMap(variantMap);
-    _splashScreenAction.insertIntoVariantMap(variantMap);
 
     plugins().insertIntoVariantMap(variantMap);
     dataHierarchy().insertIntoVariantMap(variantMap);

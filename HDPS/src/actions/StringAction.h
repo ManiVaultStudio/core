@@ -47,6 +47,21 @@ public:
          */
         LabelWidget(QWidget* parent, StringAction* stringAction);
 
+        /**
+         * Respond to \p target events
+         * @param target Object of which an event occurred
+         * @param event The event that took place
+         */
+        bool eventFilter(QObject* target, QEvent* event) override;
+
+    private:
+
+        /** Fetches text from the string action and computes the resultant text (taking into account text elidation) */
+        void updateText();
+
+    private:
+        StringAction* _stringAction;    /** Pointer to string action */
+
         friend class StringAction;
     };
 
@@ -61,6 +76,21 @@ public:
          * @param stringAction Pointer to string action
          */
         LineEditWidget(QWidget* parent, StringAction* stringAction);
+
+        /**
+         * Respond to \p target events
+         * @param target Object of which an event occurred
+         * @param event The event that took place
+         */
+        bool eventFilter(QObject* target, QEvent* event) override;
+
+    private:
+
+        /** Fetches text from the string action and computes the resultant text (taking into account text elidation) */
+        void updateText();
+
+    private:
+        StringAction* _stringAction;    /** Pointer to string action */
 
         friend class StringAction;
     };
@@ -188,6 +218,18 @@ public:
      */
     void setClearable(bool clearable);
 
+    /**
+     * Get text elide mode
+     * @return Text elide mode
+     */
+    Qt::TextElideMode getTextElideMode() const;
+
+    /**
+     * Set text elide mode
+     * @param textElideMode Text elide mode
+     */
+    void setTextElideMode(const Qt::TextElideMode& textElideMode);
+
 public: // Settings
 
     /**
@@ -239,38 +281,45 @@ public: // Serialization
 signals:
 
     /**
-     * Signals that the current string changed
+     * Signals that the current string changed to \p string
      * @param string Current string that changed
      */
     void stringChanged(const QString& string);
 
     /**
-     * Signals that the default string changed
+     * Signals that the default string changed to \p defaultString
      * @param defaultString Default string that changed
      */
     void defaultStringChanged(const QString& defaultString);
 
     /**
-     * Signals that the placeholder string changed
+     * Signals that the placeholder string changed to \p placeholderString
      * @param placeholderString Placeholder string that changed
      */
     void placeholderStringChanged(const QString& placeholderString);
 
     /**
-     * Signals that the completer changed
+     * Signals that the completer changed to \p completer
      * @param completer Pointer to completer
      */
     void completerChanged(QCompleter* completer);
 
+    /**
+     * Signals that the text elide mode changed to \p textElideMode
+     * @param textElideMode Text elide mode
+     */
+    void textElideModeChanged(const Qt::TextElideMode& textElideMode);
+    
 protected:
-    QString         _string;                /** Current string */
-    QString         _defaultString;         /** Default string */
-    QString         _placeholderString;     /** Place holder string */
-    QAction         _leadingAction;         /** Action at the leading position */
-    QAction         _trailingAction;        /** Action at the trailing position */
-    QCompleter*     _completer;             /** Pointer to completer */
-    bool            _searchMode;            /** Whether the string action is in search mode */
-    bool            _clearable;             /** Whether the string can be cleared by clicking the trailing action */
+    QString             _string;                /** Current string */
+    QString             _defaultString;         /** Default string */
+    QString             _placeholderString;     /** Place holder string */
+    QAction             _leadingAction;         /** Action at the leading position */
+    QAction             _trailingAction;        /** Action at the trailing position */
+    QCompleter*         _completer;             /** Pointer to completer */
+    bool                _searchMode;            /** Whether the string action is in search mode */
+    bool                _clearable;             /** Whether the string can be cleared by clicking the trailing action */
+    Qt::TextElideMode   _textElideMode;         /** Text elide mode */
 };
 
 }

@@ -159,6 +159,12 @@ signals:
      */
     void placeholderStringChanged(const QString& placeholderString);
 
+    /**
+     * Signals that the file type has changed to \p fileType
+     * @param fileType File type
+     */
+    void fileTypeChanged(const QString& fileType);
+
 private:
     QFileSystemModel    _dirModel;          /** Directory model */
     QCompleter          _completer;         /** Completer */
