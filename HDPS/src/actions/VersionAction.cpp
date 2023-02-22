@@ -37,7 +37,7 @@ VersionAction::VersionAction(QObject* parent) :
     _suffixAction.setCompleter(&_suffixCompleter);
     _suffixAction.setSerializationName("Suffix");
 
-    _suffixCompleter.setModel(new QStringListModel({ "Alpha", "Beta", "Release Candidate", "Pre-release" }));
+    _suffixCompleter.setModel(new QStringListModel({ "Alpha", "Beta", "Release Candidate", "Pre-release", "alpha", "beta", "rc", "pre-release" }));
 
     const auto updateVersionStringAction = [this]() -> void {
         _versionStringAction.setString(QString("%1.%2 %3").arg(QString::number(_majorAction.getValue()), QString::number(_minorAction.getValue()), _suffixAction.getString()));

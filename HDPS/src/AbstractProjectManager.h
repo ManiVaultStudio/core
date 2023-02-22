@@ -160,10 +160,10 @@ signals:
     void projectDestroyed(const QString& projectId);
 
     /**
-     * Signals that \p project is about to be loaded
-     * @param project Reference to the project that is about to be loaded
+     * Signals that \p project is about to be opened
+     * @param project Reference to the project that is about to be opened
      */
-    void projectAboutToBeLoaded(const hdps::Project& project);
+    void projectAboutToBeOpened(const hdps::Project& project);
 
     /**
      * Signals that \p project is opened

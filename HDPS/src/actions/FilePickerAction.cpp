@@ -30,8 +30,15 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title /*= ""*
     _filePathAction.setCompleter(&_completer);
 
     _pickAction.setDefaultWidgetFlags(TriggerAction::Icon);
-    _pickAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder"));
-    _pickAction.setToolTip("Click to choose a file");
+    _pickAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+    
+    const auto updatePickActionToolTip = [this]() -> void {
+        _pickAction.setToolTip(QString("Click to browse for %1").arg(getFileType().toLower()));
+    };
+
+    updatePickActionToolTip();
+
+    connect(this, &FilePickerAction::fileTypeChanged, this, updatePickActionToolTip);
 
     _filePathAction.getTrailingAction().setEnabled(false);
 
@@ -116,7 +123,12 @@ QString FilePickerAction::getFileType() const
 
 void FilePickerAction::setFileType(const QString& fileType)
 {
+    if (fileType == _fileType)
+        return;
+
     _fileType = fileType;
+
+    emit fileTypeChanged(_fileType);
 }
 
 QString FilePickerAction::getPlaceholderString() const
