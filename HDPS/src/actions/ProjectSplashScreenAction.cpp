@@ -15,14 +15,15 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _project(project),
     _enabledAction(this, "Splash screen"),
     _closeManuallyAction(this, "Close manually"),
-    _durationAction(this, "Duration", 1000, 10000, 10000),
+    _durationAction(this, "Duration", 1000, 10000, 4000),
     _animationDurationAction(this, "Duration", 10, 10000, 250),
     _animationPanAmountAction(this, "Pan Amount", 10, 100, 20),
     _backgroundColorAction(this, "Background Color", Qt::white),
     _editAction(this, "Edit"),
     _showSplashScreenAction(this, "Show"),
     _splashScreenDialog(*this),
-    _projectImageAction(this, "Primary Image")
+    _projectImageAction(this, "Project Image"),
+    _affiliateLogosImageAction(this, "Affiliate Logos")
 {
     setSerializationName("Splash Screen");
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
@@ -57,8 +58,9 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
 
     _editAction << _durationAction;
     _editAction << _closeManuallyAction;
-    _editAction << _backgroundColorAction;
     _editAction << _projectImageAction;
+    _editAction << _affiliateLogosImageAction;
+    _editAction << _backgroundColorAction;
 
     _showSplashScreenAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _showSplashScreenAction.setIcon(fontAwesome.getIcon("eye"));
@@ -66,8 +68,13 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
 
     _projectImageAction.setDefaultWidgetFlags(ImageAction::Loader);
     _projectImageAction.setIcon(fontAwesome.getIcon("image"));
-    _projectImageAction.setToolTip("Primary image");
-    _projectImageAction.setSerializationName("PrimaryImage");
+    _projectImageAction.setToolTip("Project image");
+    _projectImageAction.setSerializationName("ProjectImage");
+
+    _affiliateLogosImageAction.setDefaultWidgetFlags(ImageAction::Loader);
+    _affiliateLogosImageAction.setIcon(fontAwesome.getIcon("image"));
+    _affiliateLogosImageAction.setToolTip("Affiliate logos image");
+    _affiliateLogosImageAction.setSerializationName("AffiliateLogosImage");
 
     addAction(&_enabledAction);
     addAction(&_editAction);
@@ -107,6 +114,7 @@ void ProjectSplashScreenAction::fromVariantMap(const QVariantMap& variantMap)
     _animationPanAmountAction.fromParentVariantMap(variantMap);
     _backgroundColorAction.fromParentVariantMap(variantMap);
     _projectImageAction.fromParentVariantMap(variantMap);
+    _affiliateLogosImageAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ProjectSplashScreenAction::toVariantMap() const
@@ -120,6 +128,7 @@ QVariantMap ProjectSplashScreenAction::toVariantMap() const
     _animationPanAmountAction.insertIntoVariantMap(variantMap);
     _backgroundColorAction.insertIntoVariantMap(variantMap);
     _projectImageAction.insertIntoVariantMap(variantMap);
+    _affiliateLogosImageAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
@@ -130,13 +139,15 @@ ProjectSplashScreenAction::Dialog::Dialog(ProjectSplashScreenAction& projectSpla
     _opacityAnimation(this, "windowOpacity", this),
     _positionAnimation(this, "pos", this),
     _backgroundImage(":/Images/StartPageBackground"),
+    _mainLayout(),
     _closeToolButton(),
     _animationState(AnimationState::Idle)
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    setWindowFlags(Qt::Window | Qt::Popup);
+    setWindowFlags(Qt::Window | Qt::Popup | Qt::WindowStaysOnTopHint);
     setAttribute(Qt::WA_StyledBackground);
     setFixedSize(QSize(640, 480));
+    //setModal(true);
 
     const auto updateStyleSheet = [this]() -> void {
         setStyleSheet(QString("QDialog { \
@@ -176,70 +187,15 @@ ProjectSplashScreenAction::Dialog::Dialog(ProjectSplashScreenAction& projectSpla
 
     auto& project = const_cast<Project&>(_projectSplashScreenAction.getProject());
 
-    auto mainLayout = new QGridLayout();
+    const auto margin = 10;
 
-    const auto margin = 5;
+    _mainLayout.setContentsMargins(margin, margin, margin, margin);
 
-    mainLayout->setContentsMargins(margin + 20, margin, margin, margin);
+    createTopContent();
+    createCenterContent();
+    createBottomContent();
 
-    _closeToolButton.setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
-    _closeToolButton.setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
-    _closeToolButton.setAutoRaise(true);
-    _closeToolButton.setToolTip("Close the splash screen");
-
-    connect(&_closeToolButton, &QToolButton::clicked, this, &Dialog::fadeOut);
-
-    mainLayout->addWidget(&_closeToolButton, 0, 2, Qt::AlignRight);
-    mainLayout->setSpacing(20);
-
-    auto imageLabel = new QLabel();
-
-    imageLabel->setFixedSize(200, 200);
-    imageLabel->setScaledContents(true);
-
-    const auto updatePrimaryImage = [this, imageLabel]() -> void {
-        imageLabel->setPixmap(QPixmap::fromImage(_projectSplashScreenAction.getPrimaryImageAction().getImage()));
-    };
-
-    connect(&_projectSplashScreenAction.getPrimaryImageAction(), &ImageAction::imageChanged, this, updatePrimaryImage);
-
-    mainLayout->addWidget(imageLabel, 1, 0);
-
-    auto htmlLabel = new QLabel();
-    
-    htmlLabel->setWordWrap(true);
-    htmlLabel->setTextFormat(Qt::RichText);
-    htmlLabel->setOpenExternalLinks(true);
-
-    mainLayout->addWidget(htmlLabel, 1, 2);
-
-    const auto updateText = [this, &project, htmlLabel]() -> void {
-        auto& versionAction = project.getProjectVersionAction();
-
-        const auto title        = project.getTitleAction().getString();
-        const auto version      = QString("%1.%2 <i>%3</i>").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), versionAction.getSuffixAction().getString().toLower());
-        const auto description  = project.getDescriptionAction().getString();
-        const auto comments     = project.getCommentsAction().getString();
-
-        htmlLabel->setText(QString(" \
-            <p style='font-size: 20pt; font-weight: bold;'>%1</p> \
-            <p>Version: %2</p> \
-            <p>%3</p> \
-            <p>%4</p> \
-        ").arg(title, version, description, comments));
-    };
-
-    updateText();
-
-    connect(&project.getTitleAction(), &StringAction::stringChanged, this, updateText);
-    connect(&project.getProjectVersionAction().getVersionStringAction(), &StringAction::stringChanged, this, updateText);
-    connect(&project.getDescriptionAction(), &StringAction::stringChanged, this, updateText);
-    connect(&project.getCommentsAction(), &StringAction::stringChanged, this, updateText);
-
-    //mainLayout->setColumnStretch(2, 1);
-    mainLayout->setRowStretch(2, 1);
-
-    setLayout(mainLayout);
+    setLayout(&_mainLayout);
 }
 
 void ProjectSplashScreenAction::Dialog::open()
@@ -317,7 +273,7 @@ void ProjectSplashScreenAction::Dialog::fadeOut()
     _positionAnimation.start();
 }
 
-QMainWindow* ProjectSplashScreenAction::Dialog::getMainWindow() const
+QMainWindow* ProjectSplashScreenAction::Dialog::getMainWindow()
 {
     for (auto topLevelWidget : qApp->topLevelWidgets()) {
         auto mainWindow = qobject_cast<QMainWindow*>(topLevelWidget);
@@ -342,6 +298,106 @@ void ProjectSplashScreenAction::Dialog::paintEvent(QPaintEvent* paintEvent)
 
     painter.setOpacity(0.5);
     painter.drawPixmap(pixmapRectangle.topLeft(), _backgroundImage);
+}
+
+void ProjectSplashScreenAction::Dialog::createTopContent()
+{
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    _closeToolButton.setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
+    _closeToolButton.setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
+    _closeToolButton.setAutoRaise(true);
+    _closeToolButton.setToolTip("Close the splash screen");
+
+    connect(&_closeToolButton, &QToolButton::clicked, this, &Dialog::fadeOut);
+
+    layout->addStretch(1);
+    layout->addWidget(&_closeToolButton);
+
+    _mainLayout.addLayout(layout);
+}
+
+void ProjectSplashScreenAction::Dialog::createCenterContent()
+{
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(20, 5, 20, 5);
+    layout->setSpacing(50);
+    layout->setAlignment(Qt::AlignTop);
+
+    auto projectImageLabel = new QLabel();
+
+    projectImageLabel->setFixedSize(200, 200);
+    projectImageLabel->setScaledContents(true);
+
+    const auto updateProjectImage = [this, projectImageLabel]() -> void {
+        projectImageLabel->setPixmap(QPixmap::fromImage(_projectSplashScreenAction.getProjectImageAction().getImage()));
+    };
+
+    connect(&_projectSplashScreenAction.getProjectImageAction(), &ImageAction::imageChanged, this, updateProjectImage);
+
+    layout->addWidget(projectImageLabel);
+
+    auto htmlLabel = new QLabel();
+
+    htmlLabel->setWordWrap(true);
+    htmlLabel->setTextFormat(Qt::RichText);
+    htmlLabel->setOpenExternalLinks(true);
+    htmlLabel->setAlignment(Qt::AlignTop);
+
+    layout->addWidget(htmlLabel);
+    
+    const auto updateText = [this, htmlLabel]() -> void {
+        auto& project       = _projectSplashScreenAction.getProject();
+        auto& versionAction = project.getProjectVersionAction();
+
+        const auto title        = project.getTitleAction().getString();
+        const auto version      = QString("%1.%2 <i>%3</i>").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), versionAction.getSuffixAction().getString().toLower());
+        const auto description  = project.getDescriptionAction().getString();
+        const auto comments     = project.getCommentsAction().getString();
+
+        htmlLabel->setText(QString(" \
+            <p style='font-size: 20pt; font-weight: bold;'>%1</p> \
+            <p>Version: %2</p> \
+            <p>%3</p> \
+            <p>%4</p> \
+        ").arg(title, version, description, comments));
+    };
+
+    updateText();
+
+    connect(&_projectSplashScreenAction.getProject().getTitleAction(), &StringAction::stringChanged, this, updateText);
+    connect(&_projectSplashScreenAction.getProject().getProjectVersionAction().getVersionStringAction(), &StringAction::stringChanged, this, updateText);
+    connect(&_projectSplashScreenAction.getProject().getDescriptionAction(), &StringAction::stringChanged, this, updateText);
+    connect(&_projectSplashScreenAction.getProject().getCommentsAction(), &StringAction::stringChanged, this, updateText);
+
+    _mainLayout.addLayout(layout);
+}
+
+void ProjectSplashScreenAction::Dialog::createBottomContent()
+{
+    _mainLayout.addStretch(1);
+
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(20, 20, 20, 20);
+
+    auto affiliateLogosImageLabel = new QLabel();
+
+    affiliateLogosImageLabel->setScaledContents(true);
+
+    const auto updateAffiliateLogosImage = [this, affiliateLogosImageLabel]() -> void {
+        affiliateLogosImageLabel->setPixmap(QPixmap::fromImage(_projectSplashScreenAction.getAffiliateLogosImageAction().getImage()));
+    };
+
+    connect(&_projectSplashScreenAction.getAffiliateLogosImageAction(), &ImageAction::imageChanged, this, updateAffiliateLogosImage);
+
+    layout->addWidget(affiliateLogosImageLabel);
+    layout->addStretch(1);
+
+    _mainLayout.addLayout(layout);
 }
 
 }

@@ -121,6 +121,8 @@ public: // Serialization
 
 public: // Action getters
 
+    StringAction& getFilePathAction() { return _filePathAction; }
+    StringAction& getFileNameAction() { return _fileNameAction; }
     FilePickerAction& getFilePickerAction() { return _filePickerAction; }
     TriggerAction& getPreviewAction() { return _previewAction; }
 
@@ -134,6 +136,8 @@ signals:
 
 protected:
     QImage              _image;             /** Current image */
+    StringAction        _filePathAction;    /** String action which contains the last loaded file path */
+    StringAction        _fileNameAction;    /** String action which contains the last loaded file name */
     FilePickerAction    _filePickerAction;  /** Action for loading the image from disk */
     TriggerAction       _previewAction;     /** Action for previewing the image (via tooltip) */
 };

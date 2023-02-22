@@ -70,13 +70,23 @@ protected:
          * Get main window (for centering the splash screen w.r.t. the main window)
          * @return Pointer to main window
          */
-        QMainWindow* getMainWindow() const;
+        static QMainWindow* getMainWindow();
+
+        /** Create layout with close tool button on the right */
+        void createTopContent();
+
+        /** Create layout with project image and accompanying text in the center */
+        void createCenterContent();
+
+        /** Create layout with affiliate logo's at the bottom */
+        void createBottomContent();
 
     private:
         ProjectSplashScreenAction&  _projectSplashScreenAction;     /** Owning project splash screen action */
         QPropertyAnimation          _opacityAnimation;              /** Property animation for controlling window opacity */
         QPropertyAnimation          _positionAnimation;             /** Property animation for controlling window position */
         QPixmap                     _backgroundImage;               /** Background image */
+        QVBoxLayout                 _mainLayout;                    /** Main vertical layout */
         QToolButton                 _closeToolButton;               /** Button for forcefully closing the splash screen */
         AnimationState              _animationState;                /** Animation state */
 
@@ -127,7 +137,8 @@ public:
     const ColorAction& getBackgroundColorAction() const { return _backgroundColorAction; }
     const GroupAction& getEditAction() const { return _editAction; }
     const TriggerAction& getShowSplashScreenAction() const { return _showSplashScreenAction; }
-    const ImageAction& getPrimaryImageAction() const { return _projectImageAction; }
+    const ImageAction& getProjectImageAction() const { return _projectImageAction; }
+    const ImageAction& getAffiliateLogosImageAction() const { return _affiliateLogosImageAction; }
 
     ToggleAction& getEnabledAction() { return _enabledAction; }
     ToggleAction& getCloseManuallyAction() { return _closeManuallyAction; }
@@ -137,10 +148,11 @@ public:
     ColorAction& getBackgroundColorAction() { return _backgroundColorAction; }
     GroupAction& getEditAction() { return _editAction; }
     TriggerAction& getShowSplashScreenAction() { return _showSplashScreenAction; }
-    ImageAction& getPrimaryImageAction() { return _projectImageAction; }
+    ImageAction& getProjectImageAction() { return _projectImageAction; }
+    ImageAction& getAffiliateLogosImageAction() { return _affiliateLogosImageAction; }
     
 private:
-    const Project& _project;                            /** Reference to project which owns this action */
+    const Project&      _project;                       /** Reference to project which owns this action */
     ToggleAction        _enabledAction;                 /** Action to toggle the splash screen on/off */
     ToggleAction        _closeManuallyAction;           /** Action to toggle whether the splash screen has to be closed manually */
     IntegralAction      _durationAction;                /** Action to control the display duration */
@@ -149,7 +161,8 @@ private:
     ColorAction         _backgroundColorAction;         /** Action to control the background color of the splash screen */
     GroupAction         _editAction;                    /** Group action for editing the splash screen */
     TriggerAction       _showSplashScreenAction;        /** Trigger action to show the splash screen */
-    ImageAction         _projectImageAction;            /** Trigger action to show the splash screen */
+    ImageAction         _projectImageAction;            /** Image action for the project image */
+    ImageAction         _affiliateLogosImageAction;     /** Image action for the affiliate logo's image */
     Dialog              _splashScreenDialog;            /** Splash screen dialog */
 
     friend class hdps::Project;
