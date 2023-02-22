@@ -13,7 +13,7 @@ namespace hdps::gui {
 ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Project& project) :
     HorizontalGroupAction(parent, "Splash Screen"),
     _project(project),
-    _enabledAction(this, "Splash screen post-load"),
+    _enabledAction(this, "Splash screen"),
     _closeManuallyAction(this, "Close manually"),
     _durationAction(this, "Duration", 1000, 10000, 10000),
     _animationDurationAction(this, "Duration", 10, 10000, 250),

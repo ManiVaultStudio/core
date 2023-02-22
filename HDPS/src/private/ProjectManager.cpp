@@ -190,7 +190,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
         publishProject();
     });
 
-    connect(this, &ProjectManager::projectOpened, this, [](const hdps::Project& project) -> void {
+    connect(this, &ProjectManager::projectAboutToBeOpened, this, [](const hdps::Project& project) -> void {
         auto& splashScreenAction = const_cast<Project&>(project).getProjectSplashScreenAction();
 
         if (splashScreenAction.getEnabledAction().isChecked())
@@ -308,7 +308,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
-        emit projectAboutToBeLoaded(*(_project.get()));
+        emit projectAboutToBeOpened(*(_project.get()));
         {
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
