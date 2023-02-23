@@ -82,11 +82,15 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
 
-        connect(&projects(), &ProjectManager::projectOpened, this, [this, fileMenuAction, viewMenuAction](const Project& project) -> void {
-            const auto projectIsReadOnly = project.getReadOnlyAction().isChecked();
+        const auto updateMenuVisibility = [fileMenuAction, viewMenuAction]() -> void {
+            const auto projectIsReadOnly = projects().getCurrentProject()->getReadOnlyAction().isChecked();
 
             fileMenuAction->setVisible(!projectIsReadOnly);
             viewMenuAction->setVisible(!projectIsReadOnly);
+        };
+
+        connect(&projects(), &ProjectManager::projectCreated, this, [this, updateMenuVisibility]() -> void {
+            connect(&projects().getCurrentProject()->getReadOnlyAction(), &ToggleAction::toggled, this, updateMenuVisibility);
         });
 
         if (Application::current()->shouldOpenProjectAtStartup())
