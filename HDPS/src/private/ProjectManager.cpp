@@ -325,6 +325,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
             Application::setSerializationAborted(false);
 
+            ToggleAction disableReadOnlyAction(this, "Allow edit of published project");
+
             if (filePath.isEmpty()) {
                 QFileDialog fileDialog;
 
@@ -346,11 +348,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 descriptionAction.setEnabled(false);
                 tagsAction.setEnabled(false);
                 commentsAction.setEnabled(false);
-
-                titleAction.setConnectionPermissionsToNone();
-                descriptionAction.setConnectionPermissionsToNone();
-                tagsAction.setConnectionPermissionsToNone();
-                commentsAction.setConnectionPermissionsToNone();
+                disableReadOnlyAction.setEnabled(false);
 
                 auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
@@ -367,6 +365,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileDialog), rowCount + 3, 0);
                 fileDialogLayout->addWidget(commentsAction.createWidget(&fileDialog), rowCount + 3, 1, 1, 2);
 
+                fileDialogLayout->addWidget(disableReadOnlyAction.createWidget(&fileDialog), rowCount + 4, 1, 1, 2);
+
                 connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
                         return;
@@ -379,6 +379,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                     descriptionAction.setString(project.getDescriptionAction().getString());
                     tagsAction.setString(project.getTagsAction().getStrings().join(", "));
                     commentsAction.setString(project.getCommentsAction().getString());
+
+                    disableReadOnlyAction.setEnabled(project.getReadOnlyAction().isChecked());
                 });
 
                 if (fileDialog.exec() == 0)
@@ -441,6 +443,9 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             _project->setFilePath(filePath);
             _project->updateContributors();
+
+            if (disableReadOnlyAction.isEnabled() && disableReadOnlyAction.isChecked())
+                _project->getReadOnlyAction().setChecked(disableReadOnlyAction.isChecked());
 
             qDebug().noquote() << filePath << "loaded successfully";
         }
