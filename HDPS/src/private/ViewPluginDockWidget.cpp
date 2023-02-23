@@ -33,17 +33,6 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
     active << this;
 
     setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
-
-    _helpAction.setIcon(Application::getIconFont("FontAwesome").getIcon("question"));
-    _helpAction.setShortcut(tr("F1"));
-    _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
-
-    connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
-        _viewPlugin->getTriggerHelpAction().trigger();
-    });
-
     initialize();
 }
 
@@ -89,6 +78,16 @@ QString ViewPluginDockWidget::getTypeString() const
 
 void ViewPluginDockWidget::initialize()
 {
+    _helpAction.setIcon(Application::getIconFont("FontAwesome").getIcon("question"));
+    _helpAction.setShortcut(tr("F1"));
+    _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+
+    connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
+        _viewPlugin->getTriggerHelpAction().trigger();
+    });
+
     connect(&plugins(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
         if (plugin != _viewPlugin)
             return;
