@@ -20,7 +20,7 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _animationPanAmountAction(this, "Pan Amount", 10, 100, 20),
     _backgroundColorAction(this, "Background Color", Qt::white),
     _editAction(this, "Edit"),
-    _showSplashScreenAction(this, "Show"),
+    _showSplashScreenAction(this, "About project..."),
     _splashScreenDialog(*this),
     _projectImageAction(this, "Project Image"),
     _affiliateLogosImageAction(this, "Affiliate Logos")
