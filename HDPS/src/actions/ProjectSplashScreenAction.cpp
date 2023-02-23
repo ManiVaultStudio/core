@@ -353,10 +353,19 @@ void ProjectSplashScreenAction::Dialog::createCenterContent()
         auto& project       = _projectSplashScreenAction.getProject();
         auto& versionAction = project.getProjectVersionAction();
 
-        const auto title        = project.getTitleAction().getString();
-        const auto version      = QString("%1.%2 <i>%3</i>").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), versionAction.getSuffixAction().getString().toLower());
-        const auto description  = project.getDescriptionAction().getString();
-        const auto comments     = project.getCommentsAction().getString();
+        auto title        = project.getTitleAction().getString();
+        auto version      = QString("%1.%2 <i>%3</i>").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), versionAction.getSuffixAction().getString().toLower());
+        auto description  = project.getDescriptionAction().getString();
+        auto comments     = project.getCommentsAction().getString();
+
+        if (title.isEmpty())
+            title = "Untitled Project";
+
+        if (description.isEmpty())
+            description = "No description";
+
+        if (comments.isEmpty())
+            comments = "No comments";
 
         htmlLabel->setText(QString(" \
             <p style='font-size: 20pt; font-weight: bold;'>%1</p> \

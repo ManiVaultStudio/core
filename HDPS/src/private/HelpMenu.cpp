@@ -41,7 +41,7 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
 
         auto currentProject = projects().getCurrentProject();
 
-        if (currentProject) {
+        if (currentProject && currentProject->getSplashScreenAction().getEnabledAction().isChecked()) {
             addSeparator();
 
             addAction(&currentProject->getSplashScreenAction().getShowSplashScreenAction());
