@@ -3,7 +3,7 @@
 #include "actions/WidgetAction.h"
 #include "actions/DecimalAction.h"
 
-using namespace hdps::gui;
+namespace hdps::gui {
 
 /**
  * Window/level settings action class
@@ -67,3 +67,5 @@ protected:
     DecimalAction   _windowAction;      /** Window action */
     DecimalAction   _levelAction;       /** Level action */
 };
+
+}
