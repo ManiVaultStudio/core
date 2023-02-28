@@ -6,15 +6,16 @@ using namespace hdps;
 using namespace hdps::gui;
 
 InfoAction::InfoAction(QObject* parent, Clusters& clusters) :
-    GroupAction(parent, true),
+    VerticalGroupAction(parent, "Info", true),
     _clusters(&clusters),
     _numberOfClustersAction(this, "Number of clusters"),
     _clustersAction(this, clusters)
 {
-    setText("Clusters");
-
     _numberOfClustersAction.setEnabled(false);
     _numberOfClustersAction.setToolTip("The number of clusters");
+
+    addAction(&_numberOfClustersAction);
+    addAction(&_clustersAction);
 
     const auto updateActions = [this]() -> void {
         if (!_clusters.isValid())

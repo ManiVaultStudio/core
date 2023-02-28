@@ -5,6 +5,7 @@
 
 #include <QDebug>
 #include <QMenu>
+#include <QResizeEvent>
 
 //#define GROUP_SECTION_TREE_ITEM_VERBOSE
 

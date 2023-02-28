@@ -7,7 +7,7 @@ using namespace hdps::gui;
 using namespace hdps::util;
 
 InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
-    GroupAction(parent, true),
+    VerticalGroupAction(parent, "Info", true),
     _points(points),
     _dataStorageAction(this, "Storage type"),
     _proxyDatasetsAction(this, points),
@@ -18,8 +18,6 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
     _selectedIndicesAction(this, points),
     _createSetFromSelection(this, points)
 {
-    setText("Info");
-
     _dataStorageAction.setEnabled(false);
     _numberOfPointsAction.setEnabled(false);
     _numberOfDimensionsAction.setEnabled(false);
@@ -30,6 +28,14 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
     _numberOfPointsAction.setToolTip("The number of points");
     _numberOfDimensionsAction.setToolTip("The number of dimensions in the point data");
     _rawDataSizeAction.setToolTip("The amount of memory occupied for raw data by the dataset");
+
+    addAction(&_dataStorageAction);
+    addAction(&_proxyDatasetsAction);
+    addAction(&_numberOfPointsAction);
+    addAction(&_numberOfDimensionsAction);
+    addAction(&_rawDataSizeAction);
+    addAction(&_numberOfSelectedPointsAction);
+    addAction(&_selectedIndicesAction);
 
     _createSetFromSelection.setVisible(false);
 

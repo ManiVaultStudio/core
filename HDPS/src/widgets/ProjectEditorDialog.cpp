@@ -13,7 +13,7 @@ using namespace hdps::plugin;
 ProjectEditorDialog::ProjectEditorDialog(QWidget* parent, ViewPlugin* viewPlugin) :
     QDialog(parent),
     _groupsAction(this),
-    _menusGroupAction(&_groupsAction),
+    _menusGroupAction(&_groupsAction, "AdditionalOptions"),
     _actionHierarchyWidget(this, viewPlugin)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));

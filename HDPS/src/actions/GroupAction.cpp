@@ -1,40 +1,17 @@
 #include "GroupAction.h"
-#include "WidgetActionLabel.h"
-#include "ToggleAction.h"
-#include "TriggerAction.h"
-#include "TriggersAction.h"
 
 #include <QDebug>
-#include <QGridLayout>
 
 namespace hdps::gui {
 
-const std::uint32_t GroupAction::globalLabelWidthPercentage = 35;
-const std::uint32_t GroupAction::globalLabelWidthFixed      = 200;
-
-GroupAction::GroupAction(QObject* parent, const bool& expanded /*= false*/) :
+GroupAction::GroupAction(QObject* parent, const QString& title, const bool& expanded /*= false*/) :
     WidgetAction(parent),
     _expanded(expanded),
     _readOnly(false),
-    _widgetActions(),
-    _showLabels(true),
-    _labelSizingType(LabelSizingType::Percentage),
-    _labelWidthPercentage(GroupAction::globalLabelWidthPercentage),
-    _labelWidthFixed(GroupAction::globalLabelWidthFixed)
+    _actions(),
+    _showLabels(true)
 {
-}
-
-GroupAction::GroupAction(QObject* parent, WidgetActions widgetActions, const bool& expanded /*= false*/) :
-    WidgetAction(parent),
-    _expanded(expanded),
-    _readOnly(false),
-    _widgetActions(),
-    _showLabels(true),
-    _labelSizingType(LabelSizingType::Percentage),
-    _labelWidthPercentage(GroupAction::globalLabelWidthPercentage),
-    _labelWidthFixed(GroupAction::globalLabelWidthFixed)
-{
-    setActions(widgetActions);
+    setText(title);
 }
 
 void GroupAction::setExpanded(const bool& expanded)
@@ -113,195 +90,45 @@ void GroupAction::setShowLabels(bool showLabels)
     emit showLabelsChanged(_showLabels);
 }
 
-GroupAction::LabelSizingType GroupAction::getLabelSizingType() const
+void GroupAction::addAction(const WidgetAction* action)
 {
-    return _labelSizingType;
-}
+    _actions << action;
 
-void GroupAction::setLabelSizingType(const LabelSizingType& labelSizingType)
-{
-    if (labelSizingType == _labelSizingType)
-        return;
-
-    _labelSizingType = labelSizingType;
-
-    emit labelSizingTypeChanged(_labelSizingType);
-}
-
-std::uint32_t GroupAction::getLabelWidthPercentage() const
-{
-    return _labelWidthPercentage;
-}
-
-void GroupAction::setLabelWidthPercentage(std::uint32_t labelWidthPercentage)
-{
-    if (labelWidthPercentage == _labelWidthPercentage)
-        return;
-
-    _labelSizingType        = LabelSizingType::Percentage;
-    _labelWidthPercentage   = labelWidthPercentage;
-
-    emit labelWidthPercentageChanged(_labelWidthPercentage);
-}
-
-std::uint32_t GroupAction::getLabelWidthFixed() const
-{
-    return _labelWidthFixed;
-}
-
-void GroupAction::setLabelWidthFixed(std::uint32_t labelWidthFixed)
-{
-    if (labelWidthFixed == _labelWidthFixed)
-        return;
-
-    _labelSizingType    = LabelSizingType::Fixed;
-    _labelWidthFixed    = labelWidthFixed;
-
-    emit labelWidthFixedChanged(_labelWidthFixed);
-}
-
-void GroupAction::setActions(const WidgetActions& widgetActions /*= WidgetActions()*/)
-{
-    _widgetActions = widgetActions;
-
-    emit actionsChanged(_widgetActions);
-}
-
-hdps::gui::WidgetActions GroupAction::getActions()
-{
-    return _widgetActions;
-}
-
-WidgetActions GroupAction::getSortedWidgetActions() const
-{
-    auto sortedActions = _widgetActions;
-
-    for (auto child : children()) {
-        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-        if (childWidgetAction == nullptr)
-            continue;
-
-        if (!childWidgetAction->isVisible())
-            continue;
-
-        sortedActions << childWidgetAction;
-    }
-
-    std::sort(sortedActions.begin(), sortedActions.end(), [](WidgetAction* lhs, WidgetAction* rhs) {
-        return rhs->getSortIndex() > lhs->getSortIndex();
-    });
-
-    return sortedActions;
-}
-
-GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags) :
-    WidgetActionWidget(parent, groupAction, widgetFlags),
-    _layout(new QGridLayout())
-{
-    auto contentsMargin = _layout->contentsMargins();
-
-    //_layout->setContentsMargins(10, 10, 10, 10);
-    
-    if (widgetFlags & PopupLayout)
-        setPopupLayout(_layout);
-    else {
-        setLayout(_layout);
-    }
-
-    const auto reset = [this, groupAction]() -> void {
-        if (groupAction->getShowLabels()) {
-            switch (groupAction->getLabelSizingType())
-            {
-                case LabelSizingType::Auto:
-                {
-                    _layout->setColumnStretch(1, 1);
-                    break;
-                }
-
-                case LabelSizingType::Percentage:
-                {
-                    _layout->setColumnStretch(0, groupAction->getLabelWidthPercentage());
-                    _layout->setColumnStretch(1, 100 - groupAction->getLabelWidthPercentage());
-                    break;
-                }
-
-                default:
-                    break;
-            }
-
-        }
-        else {
-            _layout->setColumnStretch(0, 0);
-            _layout->setColumnStretch(1, 1);
-        }
-
-        QLayoutItem* layoutItem;
-
-        while ((layoutItem = layout()->takeAt(0)) != NULL)
-        {
-            delete layoutItem->widget();
-            delete layoutItem;
-        }
-
-        for (auto widgetAction : groupAction->getSortedWidgetActions()) {
-            const auto numRows          = _layout->rowCount();
-
-            if (groupAction->getShowLabels() && !widgetAction->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup)) {
-                auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this, WidgetActionLabel::ColonAfterName));
-
-                switch (groupAction->getLabelSizingType())
-                {
-                    case LabelSizingType::Auto:
-                    {
-                        labelWidget->setElide(false);
-                        //labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
-                        break;
-                    }
-
-                    case LabelSizingType::Percentage:
-                    {
-                        labelWidget->setElide(true);
-                        break;
-                    }
-
-                    case LabelSizingType::Fixed:
-                    {
-                        labelWidget->setElide(true);
-                        labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
-                        break;
-                    }
-
-                    default:
-                        break;
-                }
-
-                _layout->addWidget(labelWidget, numRows, 0);
-            }
-
-            auto actionWidget = widgetAction->createWidget(this);
-
-            _layout->addWidget(actionWidget, numRows, 1);
-
-            if (widgetAction->getStretch() >= 0)
-                _layout->setRowStretch(numRows, widgetAction->getStretch());
-
-            //_layout->setAlignment(actionWidget, Qt::AlignLeft);
-        }
+    QList<std::int32_t> configurationFlagsRequireUpdate{
+        static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::NoLabelInGroup),
+        static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::AlwaysCollapsed)
     };
 
-    connect(groupAction, &GroupAction::actionsChanged, this, reset);
-    connect(groupAction, &GroupAction::showLabelsChanged, this, reset);
-    connect(groupAction, &GroupAction::labelSizingTypeChanged, this, reset);
-    connect(groupAction, &GroupAction::labelWidthPercentageChanged, this, reset);
-    connect(groupAction, &GroupAction::labelWidthFixedChanged, this, reset);
+    connect(action, &WidgetAction::configurationFlagToggled, this, [&](const WidgetAction::ConfigurationFlag& configurationFlag, bool set) -> void {
+        if (!configurationFlagsRequireUpdate.contains(static_cast<std::int32_t>(configurationFlag)))
+            return;
 
-    reset();
+        emit actionsChanged(getActions());
+    });
+
+    emit actionsChanged(getActions());
 }
 
-QGridLayout* GroupAction::FormWidget::layout()
+void GroupAction::removeAction(const WidgetAction* action)
 {
-    return _layout;
+    if (!_actions.contains(action))
+        return;
+
+    _actions.removeOne(action);
+
+    disconnect(action, &WidgetAction::configurationFlagToggled, this, nullptr);
+}
+
+ConstWidgetActions GroupAction::getActions()
+{
+    return _actions;
+}
+
+void GroupAction::setActions(const ConstWidgetActions& actions)
+{
+    _actions = actions;
+
+    emit actionsChanged(_actions);
 }
 
 }

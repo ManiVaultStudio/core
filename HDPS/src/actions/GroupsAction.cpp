@@ -222,7 +222,7 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     WidgetActionWidget(parent, groupsAction, widgetFlags),
     _groupsAction(groupsAction),
     _layout(),
-    _filteredActionsAction(this, true),
+    _filteredActionsAction(this, "Filtered", true),
     _toolbarWidget(parent),
     _toolbarLayout(),
     _filterAction(this, "Search"),
@@ -350,16 +350,11 @@ void GroupsAction::Widget::updateFiltering()
     qDebug() << "Updating action filtering";
 #endif
 
-    // Get filter string
     const auto filterString = _filterAction.getString();
-
-    // Establish whether we are filtering out actions or not
     const auto areFiltering = !filterString.isEmpty();
-
-    // Get group actions
+    
     auto groupActions = _groupsAction->getGroupActions();
 
-    // Set actions visibility
     for (auto groupAction : groupActions) {
         if (groupAction == groupActions.first())
             _groupsAction->setGroupActionVisibility(groupAction, areFiltering);
@@ -367,12 +362,10 @@ void GroupsAction::Widget::updateFiltering()
             _groupsAction->setGroupActionVisibility(groupAction, !areFiltering);
     }
 
-    // Do not include actions from the special filtering group action
     if (!groupActions.isEmpty())
         groupActions.removeFirst();
 
-    // Found child widget actions
-    QVector<WidgetAction*> foundActions;
+    ConstWidgetActions foundActions;
 
     for (auto groupAction : groupActions) {
         for (auto action : groupAction->getActions())
@@ -380,7 +373,6 @@ void GroupsAction::Widget::updateFiltering()
                 foundActions << action;
     }
 
-    // Update filtered actions group action
     _filteredActionsAction.setExpanded(true);
     _filteredActionsAction.setActions(foundActions);
     _filteredActionsAction.setText(foundActions.count() == 0 ? "No properties found" : QString("Found %1 proper%2").arg(QString::number(foundActions.count()), foundActions.count() == 1 ? "ty": "ties"));

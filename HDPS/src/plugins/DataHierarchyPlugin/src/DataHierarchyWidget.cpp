@@ -79,8 +79,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     settingsGroupAction.setVisible(true);
     settingsGroupAction.setShowLabels(false);
 
-    settingsGroupAction << _groupingAction;
-    settingsGroupAction << _resetAction;
+    settingsGroupAction.addAction(&_groupingAction);
+    settingsGroupAction.addAction(&_resetAction);
 
     auto& treeView = _hierarchyWidget.getTreeView();
 

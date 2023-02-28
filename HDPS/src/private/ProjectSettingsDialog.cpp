@@ -17,25 +17,25 @@ using namespace hdps::gui;
 
 ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _groupAction(this),
+    _groupAction(this, "Settings"),
     _okAction(this, "Ok")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);
     setWindowTitle("Project Settings");
 
-    _groupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
+    _groupAction.setLabelSizingType(VerticalGroupAction::LabelSizingType::Auto);
 
     const auto project = projects().getCurrentProject();
 
-    _groupAction << project->getTitleAction();
-    _groupAction << project->getDescriptionAction();
-    _groupAction << project->getProjectVersionAction();
-    _groupAction << project->getTagsAction();
-    _groupAction << project->getCommentsAction();
-    _groupAction << project->getContributorsAction();
-    _groupAction << project->getSplashScreenAction();
-    _groupAction << workspaces().getLockingAction().getLockedAction();
+    _groupAction.addAction(&project->getTitleAction());
+    _groupAction.addAction(&project->getDescriptionAction());
+    _groupAction.addAction(&project->getProjectVersionAction());
+    _groupAction.addAction(&project->getTagsAction());
+    _groupAction.addAction(&project->getCommentsAction());
+    _groupAction.addAction(&project->getContributorsAction());
+    _groupAction.addAction(&project->getSplashScreenAction());
+    _groupAction.addAction(&workspaces().getLockingAction().getLockedAction());
 
     auto layout = new QVBoxLayout();
 

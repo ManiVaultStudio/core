@@ -22,7 +22,7 @@ using namespace hdps::util;
  *
  * @author Thomas Kroes
  */
-class InfoAction : public GroupAction
+class InfoAction : public VerticalGroupAction
 {
     Q_OBJECT
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WidgetAction.h"
+#include "GroupAction.h"
 
 namespace hdps::gui {
 
@@ -11,13 +11,13 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class HorizontalGroupAction : public WidgetAction
+class HorizontalGroupAction : public GroupAction
 {
     Q_OBJECT
 
 public:
 
-    /** Widget class for inline group action */
+    /** Widget class for horizontal group action */
     class Widget : public WidgetActionWidget
     {
     protected:
@@ -25,13 +25,13 @@ public:
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param HorizontalGroupAction Pointer to inline group action
+         * @param horizontalGroupAction Pointer to horizontal group action
          * @param widgetFlags Widget flags for the configuration of the widget (type)
          */
-        Widget(QWidget* parent, HorizontalGroupAction* HorizontalGroupAction, const std::int32_t& widgetFlags);
+        Widget(QWidget* parent, HorizontalGroupAction* horizontalGroupAction, const std::int32_t& widgetFlags);
 
     protected:
-        HorizontalGroupAction*   _HorizontalGroupAction;      /** Pointer to inline group action */
+        HorizontalGroupAction*   _horizontalGroupAction;      /** Pointer to horizontal group action */
 
         friend class HorizontalGroupAction;
     };
@@ -53,65 +53,15 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      * @param title Title of the action
+     * @param expanded Whether the group is initially expanded/collapsed
      */
-    HorizontalGroupAction(QObject* parent, const QString& title = "");
+    HorizontalGroupAction(QObject* parent, const QString& title, const bool& expanded = false);
 
     /**
      * Get type string
      * @return Widget action type in string format
      */
     QString getTypeString() const override;
-
-    /** Gets whether the group should show labels or not */
-    bool getShowLabels() const;
-
-    /**
-     * Sets whether the group should show labels or not
-     * @param showLabels Whether the group should show labels or not
-     */
-    void setShowLabels(bool showLabels);
-
-    /**
-     * Add \p action to the group
-     * @param action Pointer to action to add
-     */
-    void addAction(const WidgetAction* action);
-
-    /**
-     * Remove \p action from the group
-     * @param action Pointer to action to add
-     */
-    void removeAction(const WidgetAction* action);
-
-    /**
-     * Set actions to \p actions
-     * @param actions Widget actions
-     */
-    void setActions(const ConstWidgetActions& actions);
-
-    /**
-     * Get actions
-     * @return Widget actions
-     */
-    ConstWidgetActions getActions();
-
-signals:
-
-    /**
-     * Signals that the actions changed to \p actions
-     * @param actions Current actions in the group
-     */
-    void actionsChanged(const ConstWidgetActions& actions);
-
-    /**
-     * Signals that the group show labels option changed
-     * @param showLabels Whether label are visible or not
-     */
-    void showLabelsChanged(const bool& showLabels);
-
-private:
-    ConstWidgetActions  _actions;       /** Widget actions in the group */
-    bool                _showLabels;    /** Whether to show labels or not */
 };
 
 }

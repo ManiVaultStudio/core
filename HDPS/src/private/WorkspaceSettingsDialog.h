@@ -2,7 +2,7 @@
 
 #include <QDialog>
 
-#include <actions/GroupAction.h>
+#include <actions/VerticalGroupAction.h>
 #include <actions/TriggerAction.h>
 
 /**
@@ -33,6 +33,6 @@ public:
     }
 
 private:
-    hdps::gui::GroupAction      _groupAction;       /** Settings group action */
-    hdps::gui::TriggerAction    _okAction;          /** Action for exiting the dialog */
+    hdps::gui::VerticalGroupAction  _groupAction;       /** Settings group action */
+    hdps::gui::TriggerAction        _okAction;          /** Action for exiting the dialog */
 };

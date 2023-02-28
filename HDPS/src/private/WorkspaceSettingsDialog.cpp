@@ -16,22 +16,22 @@ using namespace hdps::gui;
 
 WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _groupAction(this),
+    _groupAction(this, "Settings"),
     _okAction(this, "Ok")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);
     setWindowTitle("Workspace Settings");
 
-    _groupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
+    _groupAction.setLabelSizingType(VerticalGroupAction::LabelSizingType::Auto);
 
     const auto workspace = workspaces().getCurrentWorkspace();
 
-    _groupAction << workspace->getTitleAction();
-    _groupAction << workspace->getDescriptionAction();
-    _groupAction << workspace->getTagsAction();
-    _groupAction << workspace->getCommentsAction();
-    _groupAction << workspaces().getLockingAction().getLockedAction();
+    _groupAction.addAction(&workspace->getTitleAction());
+    _groupAction.addAction(&workspace->getDescriptionAction());
+    _groupAction.addAction(&workspace->getTagsAction());
+    _groupAction.addAction(&workspace->getCommentsAction());
+    _groupAction.addAction(&workspaces().getLockingAction().getLockedAction());
 
     auto layout = new QVBoxLayout();
 

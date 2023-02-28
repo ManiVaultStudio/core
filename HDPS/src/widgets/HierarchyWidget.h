@@ -2,7 +2,7 @@
 
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
-#include "actions/GroupAction.h"
+#include "actions/VerticalGroupAction.h"
 #include "actions/ToggleAction.h"
 
 #include "InfoOverlayWidget.h"
@@ -186,7 +186,7 @@ public:
      * Get filter group action
      * @return Reference to filter group action
      */
-    GroupAction& getFilterGroupAction() {
+    VerticalGroupAction& getFilterGroupAction() {
         return _filterGroupAction;
     }
 
@@ -226,7 +226,7 @@ public:
      * Get selection group action
      * @return Reference to selection group action
      */
-    GroupAction& getSelectionGroupAction() {
+    VerticalGroupAction& getSelectionGroupAction() {
         return _selectionGroupAction;
     }
 
@@ -234,7 +234,7 @@ public:
      * Get columns group action
      * @return Reference to columns group action
      */
-    GroupAction& getColumnsGroupAction() {
+    VerticalGroupAction& getColumnsGroupAction() {
         return _columnsGroupAction;
     }
 
@@ -242,7 +242,7 @@ public:
      * Get selection group action
      * @return Reference to selection group
      */
-    GroupAction& getSettingsGroupAction() {
+    VerticalGroupAction& getSettingsGroupAction() {
         return _settingsGroupAction;
     }
 
@@ -330,16 +330,16 @@ private:
     QString                             _noItemsDescription;                /** Overlay widget description when no items are loaded */
     QHBoxLayout                         _toolbarLayout;                     /** Layout for the top toolbar */
     StringAction                        _filterNameAction;                  /** String action for filtering by name */
-    GroupAction                         _filterGroupAction;                 /** Filter group action */
+    VerticalGroupAction                 _filterGroupAction;                 /** Filter group action */
     ToggleAction                        _filterCaseSensitiveAction;         /** Filter case-sensitive action */
     ToggleAction                        _filterRegularExpressionAction;     /** Enable filter with regular expression action */
     TriggerAction                       _expandAllAction;                   /** Expand all items action */
     TriggerAction                       _collapseAllAction;                 /** Collapse all items action */
     TriggerAction                       _selectAllAction;                   /** Select all action */
     TriggerAction                       _selectNoneAction;                  /** Select none action */
-    GroupAction                         _selectionGroupAction;              /** Selection group action */
-    GroupAction                         _columnsGroupAction;                /** Column visibility action */
-    GroupAction                         _settingsGroupAction;               /** Settings group action */
+    VerticalGroupAction                 _selectionGroupAction;              /** Selection group action */
+    VerticalGroupAction                 _columnsGroupAction;                /** Column visibility action */
+    VerticalGroupAction                 _settingsGroupAction;               /** Settings group action */
 };
 
 }

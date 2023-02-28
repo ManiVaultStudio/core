@@ -6,7 +6,7 @@ using namespace hdps;
 using namespace hdps::gui;
 
 InfoAction::InfoAction(QObject* parent, Images& images) :
-    GroupAction(parent, true),
+    VerticalGroupAction(parent, "Info", true),
     _images(&images),
     _typeAction(this, "Image collection type"),
     _numberOfImagesAction(this, "Number of images"),
@@ -14,17 +14,20 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
     _numberOfPixelsAction(this, "Number of pixels"),
     _numberComponentsPerPixelAction(this, "Number of components per pixel")
 {
-    setText("Info");
-
     _typeAction.setEnabled(false);
     _numberOfImagesAction.setEnabled(false);
     _imageResolutionAction.setEnabled(false);
     _numberOfPixelsAction.setEnabled(false);
     _numberComponentsPerPixelAction.setEnabled(false);
 
+    addAction(&_typeAction);
+    addAction(&_numberOfImagesAction);
+    addAction(&_imageResolutionAction);
+    addAction(&_numberOfPixelsAction);
+    addAction(&_numberComponentsPerPixelAction);
+
     const auto sizeToString = [](const QSize& size) -> QString {
         return QString("[%1, %2]").arg(QString::number(size.width()), QString::number(size.height()));
-
     };
 
     const auto updateActions = [this, sizeToString]() -> void {

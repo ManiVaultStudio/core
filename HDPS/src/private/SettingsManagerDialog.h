@@ -3,7 +3,7 @@
 #include <QDialog>
 
 #include <actions/GroupsAction.h>
-#include <actions/GroupAction.h>
+#include <actions/VerticalGroupAction.h>
 
 namespace hdps::gui {
 
@@ -33,9 +33,9 @@ public:
     }
 
 private:
-    GroupsAction    _groupsAction;              /** Groups action for all global settings sections */
-    GroupAction     _globalPathsGroupAction;    /** Group action for global paths */
-    GroupAction     _ioAction;                  /** Group action for IO related settings */
+    GroupsAction            _groupsAction;              /** Groups action for all global settings sections */
+    VerticalGroupAction     _globalPathsGroupAction;    /** Group action for global paths */
+    VerticalGroupAction     _ioAction;                  /** Group action for IO related settings */
 };
 
 }

@@ -82,10 +82,10 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                 for (const auto& selectedItem : selectedItems)
                     datasets << selectedItem->getDataset();
 
-                auto groupAction = new GroupAction(nullptr, true);
+                auto groupAction = new VerticalGroupAction(nullptr, "Properties", true);
 
-                groupAction->setText("Actions");
-                groupAction->setToolTip("Actions for the current selection");
+                groupAction->setText("Properties");
+                groupAction->setToolTip("Properties for the current selection");
                 groupAction->setShowLabels(false);
 
                 QVector<WidgetAction*> triggerActions;

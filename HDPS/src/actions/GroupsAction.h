@@ -5,12 +5,12 @@
 #include "TriggerAction.h"
 
 #include <QStyledItemDelegate>
+#include <QHBoxLayout>
+#include <QTreeWidget>
 
 class QWidget;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 class GroupSectionTreeItem;
 
@@ -334,5 +334,4 @@ inline QDebug operator << (QDebug debug, const GroupsAction::GroupActions& group
     return debug.space();
 }
 
-}
 }
