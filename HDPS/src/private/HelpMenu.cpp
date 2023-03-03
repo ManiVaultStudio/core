@@ -22,7 +22,7 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
         QVector<QPointer<TriggerAction>> actions;
 
         for (auto pluginFactory : plugins().getPluginFactoriesByTypes({ Type::ANALYSIS, Type::DATA, Type::LOADER, Type::WRITER, Type::TRANSFORMATION, Type::VIEW }))
-            if (pluginFactory->getNumberOfInstances() >= 1)
+            if (pluginFactory->hasHelp() && pluginFactory->getNumberOfInstances() >= 1)
                 actions << &pluginFactory->getTriggerHelpAction();
 
         sortActions(actions);

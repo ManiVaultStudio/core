@@ -6,6 +6,8 @@
 
 using namespace hdps;
 
+namespace hdps::gui {
+
 WindowLevelAction::WindowLevelAction(QObject* parent) :
     WidgetAction(parent),
     _windowAction(this, "Window", 0.0f, 1.0f, 1.0f, 1.0f, 1),
@@ -46,4 +48,6 @@ WindowLevelAction::Widget::Widget(QWidget* parent, WindowLevelAction* windowLeve
     layout->addWidget(windowLevelAction->getLevelAction().createWidget(this), 1, 1);
 
     setPopupLayout(layout);
+}
+
 }
