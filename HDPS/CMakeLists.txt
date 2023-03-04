@@ -17,7 +17,7 @@ if(NOT DEFINED ENV{HDPS_INSTALL_DIR})
     ***************************************************" )
 endif()
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -26,6 +26,10 @@ set(CMAKE_AUTOMOC_PATH_PREFIX ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
+
+# Normalize the incoming install path
+file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
+#message(STATUS ${INSTALL_DIR})
 
 if(APPLE)
     # These are the properties for the Info.plist in the mac bindle
@@ -36,7 +40,7 @@ if(APPLE)
     set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2021. All rights reserved.")
     set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.biovault.hdps")
     set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
-    
+
     # use, i.e. don't skip the full RPATH for the build tree
     set(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
@@ -51,8 +55,23 @@ if(APPLE)
     set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif()
 
+if(UNIX AND NOT APPLE)
+    # use, i.e. don't skip the full RPATH for the build tree
+    set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+    # when building, don't use the install RPATH already
+    # (but later on when installing)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+    set(CMAKE_INSTALL_RPATH "${INSTALL_DIR}/$<CONFIGURATION>/lib")
+
+    # add the automatically determined parts of the RPATH
+    # which point to directories outside the build tree to the install RPATH
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+endif()
+
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP/ permissive- /Zc:__cplusplus")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
@@ -61,10 +80,6 @@ endif(MSVC)
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
 find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
-
-# Normalize the incoming install path
-file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
-#message(STATUS ${INSTALL_DIR})
 
 set( MAIN_SOURCES
     src/Main.cpp
@@ -880,7 +895,7 @@ add_library(${HDPS_PUBLIC_LIB} ${LINK_TYPE}
     ${PUBLIC_SOURCES}
 )
 
-set_property(TARGET ${HDPS_PUBLIC_LIB} PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${HDPS_PUBLIC_LIB} PROPERTY CXX_STANDARD 17)
 
 target_include_directories(${HDPS_PUBLIC_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -893,7 +908,7 @@ add_library(${HDPS_PRIVATE_LIB} ${LINK_TYPE}
 	${RESOURCE_FILES}
 )
 
-set_property(TARGET ${HDPS_PRIVATE_LIB} PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${HDPS_PRIVATE_LIB} PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::Widgets)
 target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::WebEngineWidgets)
@@ -918,7 +933,7 @@ add_executable(${HDPS_EXE} MACOSX_BUNDLE WIN32
     ${RESOURCE_FILES}
 )
 
-set_property(TARGET ${HDPS_EXE} PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${HDPS_EXE} PROPERTY CXX_STANDARD 17)
 # find libraries relative to the executable in the macOS .app tree
 if(APPLE)
     set_target_properties( ${HDPS_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
@@ -988,6 +1003,16 @@ if(APPLE)
             COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} ${BUNDLE_DIR}
         )"
         COMPONENT MACOS_BUNDLE
+    )
+elseif(UNIX)
+    install(TARGETS ${HDPS_EXE}
+        RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
+        # ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
+    )
+    
+    install(TARGETS ${HDPS_PRIVATE_LIB}
+        RUNTIME DESTINATION lib COMPONENT HDPSPRIVATE_LINKLIB
+        LIBRARY DESTINATION lib COMPONENT HDPSPRIVATE_LINKLIB # Linux/Mac .so for linking
     )
 else()
     install(TARGETS ${HDPS_EXE}
@@ -1106,6 +1131,18 @@ add_custom_command(
         --verbose
 )
 
+if (UNIX AND NOT APPLE)
+add_custom_command(
+    TARGET ${HDPS_PRIVATE_LIB} POST_BUILD
+    COMMAND "${CMAKE_COMMAND}"
+        --install ${CMAKE_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component HDPSPRIVATE_LINKLIB
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --verbose
+)
+endif()
+
 add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 ${CMAKE_CURRENT_SOURCE_DIR}/res/examples
@@ -1155,11 +1192,11 @@ elseif (APPLE)
     #set(QUAZIP_USE_QT_ZLIB OFF)
     find_program(BREW_BIN brew)
     execute_process(COMMAND ${BREW_BIN} install pkg-config) 
-else ()
-    message(FATAL_ERROR,
-    "*****************************
-    zlib needed for linux build.
-    ******************************" )
+#else ()
+#    message(FATAL_ERROR,
+#    "*****************************
+#    zlib needed for linux build.
+#    ******************************" )
 endif()
 
 set(QUAZIP_QT_MAJOR_VERSION 6)
