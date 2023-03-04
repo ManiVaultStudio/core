@@ -4,7 +4,7 @@
 #include "ToggleAction.h"
 #include "IntegralAction.h"
 #include "TriggerAction.h"
-#include "GroupAction.h"
+#include "VerticalGroupAction.h"
 #include "ColorAction.h"
 #include "ImageAction.h"
 
@@ -135,10 +135,11 @@ public:
     const IntegralAction& getAnimationDurationAction() const { return _animationDurationAction; }
     const IntegralAction& getAnimationPanAmountAction() const { return _animationPanAmountAction; }
     const ColorAction& getBackgroundColorAction() const { return _backgroundColorAction; }
-    const GroupAction& getEditAction() const { return _editAction; }
+    const VerticalGroupAction& getEditAction() const { return _editAction; }
     const TriggerAction& getShowSplashScreenAction() const { return _showSplashScreenAction; }
     const ImageAction& getProjectImageAction() const { return _projectImageAction; }
     const ImageAction& getAffiliateLogosImageAction() const { return _affiliateLogosImageAction; }
+    const TriggerAction& getFinishedAction() const { return _finishedAction; }
 
     ToggleAction& getEnabledAction() { return _enabledAction; }
     ToggleAction& getCloseManuallyAction() { return _closeManuallyAction; }
@@ -146,11 +147,12 @@ public:
     IntegralAction& getAnimationDurationAction() { return _animationDurationAction; }
     IntegralAction& getAnimationPanAmountAction() { return _animationPanAmountAction; }
     ColorAction& getBackgroundColorAction() { return _backgroundColorAction; }
-    GroupAction& getEditAction() { return _editAction; }
+    VerticalGroupAction& getEditAction() { return _editAction; }
     TriggerAction& getShowSplashScreenAction() { return _showSplashScreenAction; }
     ImageAction& getProjectImageAction() { return _projectImageAction; }
     ImageAction& getAffiliateLogosImageAction() { return _affiliateLogosImageAction; }
-    
+    TriggerAction& getFinishedAction() { return _finishedAction; }
+
 private:
     const Project&      _project;                       /** Reference to project which owns this action */
     ToggleAction        _enabledAction;                 /** Action to toggle the splash screen on/off */
@@ -159,10 +161,11 @@ private:
     IntegralAction      _animationDurationAction;       /** Action to control the duration of the fade in/out animations */
     IntegralAction      _animationPanAmountAction;      /** Action to control the amount of up/down panning of animations */
     ColorAction         _backgroundColorAction;         /** Action to control the background color of the splash screen */
-    GroupAction         _editAction;                    /** Group action for editing the splash screen */
+    VerticalGroupAction _editAction;                    /** Group action for editing the splash screen */
     TriggerAction       _showSplashScreenAction;        /** Trigger action to show the splash screen */
     ImageAction         _projectImageAction;            /** Image action for the project image */
     ImageAction         _affiliateLogosImageAction;     /** Image action for the affiliate logo's image */
+    TriggerAction       _finishedAction;                /** Trigger action which is triggered when the splash screen finished */
     Dialog              _splashScreenDialog;            /** Splash screen dialog */
 
     friend class hdps::Project;

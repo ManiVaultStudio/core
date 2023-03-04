@@ -59,6 +59,20 @@ WidgetAction* WidgetAction::getParentWidgetAction()
     return dynamic_cast<WidgetAction*>(this->parent());
 }
 
+QAction* WidgetAction::getMenuAction(QObject* parent /*= nullptr*/)
+{
+    auto action = new QAction(icon(), text(), parent);
+
+    action->setToolTip(toolTip());
+    action->setCheckable(isCheckable());
+    action->setChecked(isChecked());
+
+    connect(action, &QAction::triggered, this, &WidgetAction::trigger);
+    connect(action, &QAction::toggled, this, &WidgetAction::toggle);
+
+    return action;
+}
+
 QWidget* WidgetAction::createWidget(QWidget* parent)
 {
     if (parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent()))
@@ -79,7 +93,12 @@ std::int32_t WidgetAction::getSortIndex() const
 
 void WidgetAction::setSortIndex(const std::int32_t& sortIndex)
 {
+    if (sortIndex == _sortIndex)
+        return;
+
     _sortIndex = sortIndex;
+
+    emit sortIndexChanged(_sortIndex);
 }
 
 QWidget* WidgetAction::createCollapsedWidget(QWidget* parent) const

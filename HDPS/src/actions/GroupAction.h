@@ -97,6 +97,11 @@ public: // Actions management
      */
     void setActions(const ConstWidgetActions& actions);
 
+private:
+
+    /** Sort added actions based on their sort index */
+    virtual void sortActions() final;
+
 signals:
 
     /**

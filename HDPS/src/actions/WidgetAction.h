@@ -97,6 +97,14 @@ public:
     WidgetAction* getParentWidgetAction();
 
     /**
+     * Get a copy of the widget action for use in menus (copies text, icon checkable, checked state and tooltip)
+     * Also passes through the triggered() and toggled() signals
+     * @parent Pointer to parent object
+     * @return Pointer to action
+     */
+    virtual QAction* getMenuAction(QObject* parent = nullptr) final;
+
+    /**
      * Create standard widget
      * @param parent Parent widget
      * @return Pointer to created widget
@@ -448,6 +456,12 @@ public:
     QVector<WidgetAction*> getChildActions();
 
 signals:
+
+    /**
+     * Signals that the sort index changed to \p sortIndex
+     * @param sortIndex Sort index (used to sort actions in a group)
+     */
+    void sortIndexChanged(std::int32_t sortIndex);
 
     /**
      * Signals that the highlighted state changed

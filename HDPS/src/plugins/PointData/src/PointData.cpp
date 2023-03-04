@@ -310,6 +310,8 @@ void Points::init()
             if (_dimensionsPickerAction == nullptr)
                 _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction);
 
+            _dimensionsPickerGroupAction->addAction(_dimensionsPickerAction);
+
             _dimensionsPickerAction->setPointsDataset(*this);
         });
     }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <actions/TriggerAction.h>
+
 #include <QMenu>
 
 /**
@@ -18,4 +20,7 @@ public:
      * @param parent Pointer to parent widget
      */
     HelpMenu(QWidget *parent = nullptr);
+
+private:
+    hdps::gui::TriggerAction    _projectAboutAction;    /** Action for triggering the project about splash screen */
 };

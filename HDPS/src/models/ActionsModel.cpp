@@ -4,6 +4,7 @@
 #include <actions/WidgetAction.h>
 
 #include <Application.h>
+#include <QPointer>
 
 using namespace hdps::gui;
 

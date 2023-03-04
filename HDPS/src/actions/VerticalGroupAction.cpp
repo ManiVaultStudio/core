@@ -1,6 +1,5 @@
 #include "VerticalGroupAction.h"
-
-#include <QHBoxLayout>
+#include "WidgetActionLabel.h"
 
 namespace hdps::gui {
 
@@ -71,62 +70,28 @@ VerticalGroupAction::Widget::Widget(QWidget* parent, VerticalGroupAction* vertic
     WidgetActionWidget(parent, verticalGroupAction, widgetFlags),
     _verticalGroupAction(verticalGroupAction)
 {
-    /*
-    auto layout = new QHBoxLayout();
-
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    const auto updateLayout = [&]() -> void {
-        QLayoutItem* layoutItem;
-
-        while ((layoutItem = layout->takeAt(0)) != nullptr) {
-            delete layoutItem->widget();
-            delete layoutItem;
-        }
-
-        for (auto action : _verticalGroupAction->getActions()) {
-            if (_verticalGroupAction->getShowLabels() && !action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup))
-                layout->addWidget(action->createLabelWidget(this));
-
-            if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::AlwaysCollapsed))
-                layout->addWidget(const_cast<WidgetAction*>(action)->createCollapsedWidget(this));
-            else
-                layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this), action->getStretch());
-        }
-    };
-
-    updateLayout();
-
-    connect(_verticalGroupAction, &VerticalGroupAction::actionsChanged, this, updateLayout);
-
-    setLayout(layout);
-    */
-
-    /*
-    auto contentsMargin = _layout->contentsMargins();
-
     //_layout->setContentsMargins(10, 10, 10, 10);
 
     if (widgetFlags & PopupLayout)
-        setPopupLayout(_layout);
+        setPopupLayout(&_layout);
     else {
-        setLayout(_layout);
+        setLayout(&_layout);
     }
 
-    const auto reset = [this, groupAction]() -> void {
-        if (groupAction->getShowLabels()) {
-            switch (groupAction->getLabelSizingType())
+    const auto reset = [this]() -> void {
+        if (_verticalGroupAction->getShowLabels()) {
+            switch (_verticalGroupAction->getLabelSizingType())
             {
                 case LabelSizingType::Auto:
                 {
-                    _layout->setColumnStretch(1, 1);
+                    _layout.setColumnStretch(1, 1);
                     break;
                 }
 
                 case LabelSizingType::Percentage:
                 {
-                    _layout->setColumnStretch(0, groupAction->getLabelWidthPercentage());
-                    _layout->setColumnStretch(1, 100 - groupAction->getLabelWidthPercentage());
+                    _layout.setColumnStretch(0, _verticalGroupAction->getLabelWidthPercentage());
+                    _layout.setColumnStretch(1, 100 - _verticalGroupAction->getLabelWidthPercentage());
                     break;
                 }
 
@@ -136,25 +101,25 @@ VerticalGroupAction::Widget::Widget(QWidget* parent, VerticalGroupAction* vertic
 
         }
         else {
-            _layout->setColumnStretch(0, 0);
-            _layout->setColumnStretch(1, 1);
+            _layout.setColumnStretch(0, 0);
+            _layout.setColumnStretch(1, 1);
         }
 
         QLayoutItem* layoutItem;
 
-        while ((layoutItem = layout()->takeAt(0)) != NULL)
+        while ((layoutItem = _layout.takeAt(0)) != NULL)
         {
             delete layoutItem->widget();
             delete layoutItem;
         }
 
-        for (auto widgetAction : groupAction->getSortedWidgetActions()) {
-            const auto numRows          = _layout->rowCount();
+        for (auto widgetAction : _verticalGroupAction->getActions()) {
+            const auto numRows = _layout.rowCount();
 
-            if (groupAction->getShowLabels() && !widgetAction->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup)) {
+            if (_verticalGroupAction->getShowLabels() && !widgetAction->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup)) {
                 auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this, WidgetActionLabel::ColonAfterName));
 
-                switch (groupAction->getLabelSizingType())
+                switch (_verticalGroupAction->getLabelSizingType())
                 {
                     case LabelSizingType::Auto:
                     {
@@ -172,7 +137,7 @@ VerticalGroupAction::Widget::Widget(QWidget* parent, VerticalGroupAction* vertic
                     case LabelSizingType::Fixed:
                     {
                         labelWidget->setElide(true);
-                        labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
+                        labelWidget->setFixedWidth(_verticalGroupAction->getLabelWidthFixed());
                         break;
                     }
 
@@ -180,28 +145,27 @@ VerticalGroupAction::Widget::Widget(QWidget* parent, VerticalGroupAction* vertic
                         break;
                 }
 
-                _layout->addWidget(labelWidget, numRows, 0);
+                _layout.addWidget(labelWidget, numRows, 0);
             }
 
-            auto actionWidget = widgetAction->createWidget(this);
+            auto actionWidget = const_cast<WidgetAction*>(widgetAction)->createWidget(this);
 
-            _layout->addWidget(actionWidget, numRows, 1);
+            _layout.addWidget(actionWidget, numRows, 1);
 
             if (widgetAction->getStretch() >= 0)
-                _layout->setRowStretch(numRows, widgetAction->getStretch());
+                _layout.setRowStretch(numRows, widgetAction->getStretch());
 
             //_layout->setAlignment(actionWidget, Qt::AlignLeft);
         }
     };
 
-    connect(groupAction, &GroupAction::actionsChanged, this, reset);
-    connect(groupAction, &GroupAction::showLabelsChanged, this, reset);
-    connect(groupAction, &GroupAction::labelSizingTypeChanged, this, reset);
-    connect(groupAction, &GroupAction::labelWidthPercentageChanged, this, reset);
-    connect(groupAction, &GroupAction::labelWidthFixedChanged, this, reset);
+    connect(_verticalGroupAction, &GroupAction::actionsChanged, this, reset);
+    connect(_verticalGroupAction, &GroupAction::showLabelsChanged, this, reset);
+    connect(_verticalGroupAction, &VerticalGroupAction::labelSizingTypeChanged, this, reset);
+    connect(_verticalGroupAction, &VerticalGroupAction::labelWidthPercentageChanged, this, reset);
+    connect(_verticalGroupAction, &VerticalGroupAction::labelWidthFixedChanged, this, reset);
 
     reset();
-    */
 }
 
 }

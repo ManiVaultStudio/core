@@ -657,15 +657,6 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
         if (!hasProject())
             return;
 
-        auto& readOnlyAction        = getCurrentProject()->getReadOnlyAction();
-        auto& splashScreenAction    = getCurrentProject()->getSplashScreenAction();
-
-        readOnlyAction.cacheState();
-        splashScreenAction.cacheState();
-        
-        readOnlyAction.setChecked(true);
-        splashScreenAction.getEnabledAction().setChecked(true);
-
         emit projectAboutToBePublished(*(_project.get()));
         {
             if (QFileInfo(filePath).isDir())
@@ -782,20 +773,25 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
                 
-            auto& workspaceLockingAction = workspaces().getCurrentWorkspace()->getLockingAction();
+            auto& workspaceLockingAction    = workspaces().getCurrentWorkspace()->getLockingAction();
+            auto& readOnlyAction            = getCurrentProject()->getReadOnlyAction();
+            auto& splashScreenAction        = getCurrentProject()->getSplashScreenAction();
 
-            const auto cacheWorkspaceLocked = workspaceLockingAction.isLocked();
+            workspaceLockingAction.cacheState();
+            readOnlyAction.cacheState();
+            splashScreenAction.cacheState();
 
-            workspaceLockingAction.setLocked(true);
-            {
-                saveProject(filePath, passwordAction.getString());
-            }
-            workspaceLockingAction.setLocked(cacheWorkspaceLocked);
+            workspaceLockingAction.setChecked(true);
+            readOnlyAction.setChecked(true);
+            splashScreenAction.getEnabledAction().setChecked(true);
+            
+            saveProject(filePath, passwordAction.getString());
+            
+            workspaceLockingAction.restoreState();
+            readOnlyAction.restoreState();
+            splashScreenAction.restoreState();
         }
         emit projectPublished(*(_project.get()));
-        
-        readOnlyAction.restoreState();
-        splashScreenAction.restoreState();
     }
     catch (std::exception& e)
     {

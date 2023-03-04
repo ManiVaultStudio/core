@@ -94,6 +94,8 @@ void GroupAction::addAction(const WidgetAction* action)
 {
     _actions << action;
 
+    sortActions();
+
     QList<std::int32_t> configurationFlagsRequireUpdate{
         static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::NoLabelInGroup),
         static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::AlwaysCollapsed)
@@ -102,6 +104,12 @@ void GroupAction::addAction(const WidgetAction* action)
     connect(action, &WidgetAction::configurationFlagToggled, this, [&](const WidgetAction::ConfigurationFlag& configurationFlag, bool set) -> void {
         if (!configurationFlagsRequireUpdate.contains(static_cast<std::int32_t>(configurationFlag)))
             return;
+
+        emit actionsChanged(getActions());
+    });
+
+    connect(action, &WidgetAction::sortIndexChanged, this, [&](std::int32_t sortIndex) -> void {
+        sortActions();
 
         emit actionsChanged(getActions());
     });
@@ -117,6 +125,7 @@ void GroupAction::removeAction(const WidgetAction* action)
     _actions.removeOne(action);
 
     disconnect(action, &WidgetAction::configurationFlagToggled, this, nullptr);
+    disconnect(action, &WidgetAction::sortIndexChanged, this, nullptr);
 }
 
 ConstWidgetActions GroupAction::getActions()
@@ -129,6 +138,13 @@ void GroupAction::setActions(const ConstWidgetActions& actions)
     _actions = actions;
 
     emit actionsChanged(_actions);
+}
+
+void GroupAction::sortActions()
+{
+    std::sort(_actions.begin(), _actions.end(), [](const WidgetAction* lhs, const WidgetAction* rhs) {
+        return rhs->getSortIndex() > lhs->getSortIndex();
+    });
 }
 
 }

@@ -23,7 +23,8 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _showSplashScreenAction(this, "About project..."),
     _splashScreenDialog(*this),
     _projectImageAction(this, "Project Image"),
-    _affiliateLogosImageAction(this, "Affiliate Logos")
+    _affiliateLogosImageAction(this, "Affiliate Logos"),
+    _finishedAction(this, "Finished")
 {
     setSerializationName("Splash Screen");
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
@@ -91,6 +92,15 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     });
 
     connect(&_closeManuallyAction, &ToggleAction::toggled, this, updateDurationAction);
+
+    const auto updateReadOnly = [this]() -> void {
+        _editAction.setEnabled(_enabledAction.isChecked());
+        _showSplashScreenAction.setEnabled(_enabledAction.isChecked());
+    };
+
+    updateReadOnly();
+
+    connect(&_enabledAction, &ToggleAction::toggled, this, updateReadOnly);
 }
 
 QString ProjectSplashScreenAction::getTypeString() const
@@ -180,6 +190,7 @@ ProjectSplashScreenAction::Dialog::Dialog(ProjectSplashScreenAction& projectSpla
             accept();
 
             _projectSplashScreenAction.getShowSplashScreenAction().setEnabled(true);
+            _projectSplashScreenAction.getFinishedAction().trigger();
         }
 
         _animationState = AnimationState::Idle;

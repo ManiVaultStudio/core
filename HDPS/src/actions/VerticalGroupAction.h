@@ -2,12 +2,14 @@
 
 #include "GroupAction.h"
 
+#include <QGridLayout>
+
 namespace hdps::gui {
 
 /**
  * Vertical group action class
  *
- * Group action which displays multiple child actions vertically
+ * Group action which displays multiple child actions vertically with labels
  *
  * @author Thomas Kroes
  */
@@ -40,7 +42,8 @@ public:
         Widget(QWidget* parent, VerticalGroupAction* verticalGroupAction, const std::int32_t& widgetFlags);
 
     protected:
-        VerticalGroupAction*   _verticalGroupAction;      /** Pointer to vertical group action */
+        VerticalGroupAction*    _verticalGroupAction;   /** Pointer to vertical group action which created this widget */
+        QGridLayout             _layout;                /** Vertical layout */
 
         friend class VerticalGroupAction;
     };

@@ -11,14 +11,31 @@ using namespace hdps::util;
 using namespace hdps::gui;
 
 HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
-    QMenu(parent)
+    QMenu(parent),
+    _projectAboutAction(this, "Project about...")
 {
     setTitle("Help");
     setToolTip("HDPS help");
 
+    connect(&_projectAboutAction, &TriggerAction::triggered, this, [this]() -> void {
+        if (!projects().hasProject())
+            return;
+
+        auto& splashScreenAction = projects().getCurrentProject()->getSplashScreenAction();
+
+        connect(&splashScreenAction.getFinishedAction(), &TriggerAction::triggered, this, [this, &splashScreenAction]() -> void {
+            splashScreenAction.getCloseManuallyAction().restoreState();
+        });
+
+        splashScreenAction.getCloseManuallyAction().cacheState();
+        splashScreenAction.getCloseManuallyAction().setChecked(true);
+
+        splashScreenAction.getShowSplashScreenAction().trigger();
+    });
+
     connect(this, &QMenu::aboutToShow, this, [this]() -> void {
         clear();
-        
+
         QVector<QPointer<TriggerAction>> actions;
 
         for (auto pluginFactory : plugins().getPluginFactoriesByTypes({ Type::ANALYSIS, Type::DATA, Type::LOADER, Type::WRITER, Type::TRANSFORMATION, Type::VIEW }))
@@ -41,10 +58,13 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
 
         auto currentProject = projects().getCurrentProject();
 
-        if (currentProject && currentProject->getSplashScreenAction().getEnabledAction().isChecked()) {
-            addSeparator();
-
-            addAction(&currentProject->getSplashScreenAction().getShowSplashScreenAction());
+        if (projects().hasProject()) {
+            auto& splashScreenAction = currentProject->getSplashScreenAction();
+            
+            if (splashScreenAction.getEnabledAction().isChecked()) {
+                addSeparator();
+                addAction(_projectAboutAction.getMenuAction());
+            }
         }
     });
 }

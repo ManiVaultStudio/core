@@ -14,7 +14,7 @@
 /**
  * Start page content widget class
  *
- * Widget class for showingall the actions.
+ * Widget class for showing all the actions.
  *
  * @author Thomas Kroes
  */
@@ -52,19 +52,19 @@ public: // Action getters
     const hdps::gui::ToggleAction& getToggleTutorialVideosAction() const { return _toggleTutorialVideosAction; }
 
 private:
-    QVBoxLayout                 _mainLayout;                        /** Main layout */
-    QHBoxLayout                 _collumnsLayout;                    /** Columns layout */
-    QHBoxLayout                 _toolbarLayout;                     /** Toolbar layout */
-    hdps::gui::ToggleAction     _compactViewAction;                 /** Toggle compact view on/off */
-    hdps::gui::ToggleAction     _toggleOpenCreateProjectAction;     /** Toggle open and create project section */
-    hdps::gui::ToggleAction     _toggleRecentProjectsAction;        /** Toggle recent projects section */
-    hdps::gui::ToggleAction     _toggleExampleProjectsAction;       /** Toggle example projects section */
-    hdps::gui::ToggleAction     _toggleProjectFromWorkspaceAction;  /** Toggle project from workspace section */
-    hdps::gui::ToggleAction     _toggleProjectFromDataAction;       /** Toggle project from data section */
-    hdps::gui::ToggleAction     _toggleTutorialVideosAction;        /** Toggle tutorial videos section */
-    hdps::gui::GroupAction      _settingsAction;                    /** Settings action */
-    StartPageOpenProjectWidget  _openProjectWidget;                 /** Left column widget for opening existing projects */
-    StartPageGetStartedWidget   _getStartedWidget;                  /** Right column widget for getting started operations */
+    QVBoxLayout                     _mainLayout;                        /** Main layout */
+    QHBoxLayout                     _collumnsLayout;                    /** Columns layout */
+    QHBoxLayout                     _toolbarLayout;                     /** Toolbar layout */
+    hdps::gui::ToggleAction         _compactViewAction;                 /** Toggle compact view on/off */
+    hdps::gui::ToggleAction         _toggleOpenCreateProjectAction;     /** Toggle open and create project section */
+    hdps::gui::ToggleAction         _toggleRecentProjectsAction;        /** Toggle recent projects section */
+    hdps::gui::ToggleAction         _toggleExampleProjectsAction;       /** Toggle example projects section */
+    hdps::gui::ToggleAction         _toggleProjectFromWorkspaceAction;  /** Toggle project from workspace section */
+    hdps::gui::ToggleAction         _toggleProjectFromDataAction;       /** Toggle project from data section */
+    hdps::gui::ToggleAction         _toggleTutorialVideosAction;        /** Toggle tutorial videos section */
+    hdps::gui::VerticalGroupAction  _settingsAction;                    /** Settings action */
+    StartPageOpenProjectWidget      _openProjectWidget;                 /** Left column widget for opening existing projects */
+    StartPageGetStartedWidget       _getStartedWidget;                  /** Right column widget for getting started operations */
 
     friend class StartPageWidget;
 };
