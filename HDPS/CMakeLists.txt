@@ -447,6 +447,9 @@ set(PUBLIC_ACTIONS_HEADERS
     src/actions/HorizontalGroupAction.h
     src/actions/VerticalGroupAction.h
     src/actions/ToolbarAction.h
+    src/actions/ToolbarActionItem.h
+    src/actions/ToolbarActionItemWidget.h
+    src/actions/HorizontalToolbarAction.h
     src/actions/RecentFilesAction.h
     src/actions/PresetsAction.h
     src/actions/LockingAction.h
@@ -509,6 +512,9 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/HorizontalGroupAction.cpp
     src/actions/VerticalGroupAction.cpp
     src/actions/ToolbarAction.cpp
+    src/actions/ToolbarActionItem.cpp
+    src/actions/ToolbarActionItemWidget.cpp
+    src/actions/HorizontalToolbarAction.cpp
     src/actions/RecentFilesAction.cpp
     src/actions/PresetsAction.cpp
     src/actions/LockingAction.cpp

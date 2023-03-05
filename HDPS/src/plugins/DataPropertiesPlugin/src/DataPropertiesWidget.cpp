@@ -8,6 +8,8 @@
 #include <actions/GroupAction.h>
 #include <actions/OptionsAction.h>
 #include <actions/PluginTriggerAction.h>
+#include <actions/HorizontalToolbarAction.h>
+#include <actions/IntegralAction.h>
 
 #include <QDebug>
 
@@ -26,6 +28,19 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     _groupsActionWidget = dynamic_cast<GroupsAction::Widget*>(_groupsAction.createWidget(this));
 
     _layout.addWidget(_groupsActionWidget);
+
+    auto horizontalToolbarAction    = new HorizontalToolbarAction(this);
+    auto integralActionActionA      = new IntegralAction(this, "Integral A");
+    auto integralActionActionB      = new IntegralAction(this, "Integral B");
+    auto integralActionActionC      = new IntegralAction(this, "Integral C");
+    auto integralActionActionD      = new IntegralAction(this, "Integral D");
+
+    horizontalToolbarAction->addAction(integralActionActionA);
+    horizontalToolbarAction->addAction(integralActionActionB);
+    horizontalToolbarAction->addAction(integralActionActionC);
+    horizontalToolbarAction->addAction(integralActionActionD);
+
+    _layout.addWidget(horizontalToolbarAction->createWidget(this));
 
     connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::selectedItemsChanged);
 

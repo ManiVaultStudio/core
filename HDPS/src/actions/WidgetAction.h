@@ -147,19 +147,19 @@ public:
      * Set the sort index
      * @param sortIndex Sorting index
      */
-    void setSortIndex(const std::int32_t& sortIndex);
+    virtual void setSortIndex(const std::int32_t& sortIndex) final;
 
     /**
      * Get stretch
      * @return The stretch factor
      */
-    std::int32_t getStretch() const;
+    virtual std::int32_t getStretch() const final;
 
     /**
      * Set stretch to \p stretch
      * @param stretch Stretch factor
      */
-    void setStretch(const std::int32_t& stretch);
+    virtual void setStretch(const std::int32_t& stretch) final;
 
     /** Gets the default widget flags */
     std::int32_t getDefaultWidgetFlags() const;

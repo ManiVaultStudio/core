@@ -2,6 +2,8 @@
 
 #include "WidgetAction.h"
 
+#include <QGridLayout>
+
 namespace hdps::gui {
 
 /**
@@ -19,11 +21,72 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        Horizontal  = 0x00001,      /** The child actions are arranged horizontally in the group */
-        Vertical    = 0x00002,      /** The child actions are arranged vertically in the group */
+        Horizontal          = 0x00001,                  /** Actions are arranged horizontally in the group */
+        Vertical            = 0x00002,                  /** Actions are arranged vertically in the group */
+        Toolbar             = 0x00004,                  /** Actions are arranged in a toolbar */
+
+        HorizontalToolbar   = Horizontal | Toolbar,     /** Actions are arranged in a horizontal toolbar */
+        VerticalToolbar     = Vertical | Toolbar,       /** Actions are arranged in a vertical toolbar */
 
         Default = Horizontal
     };
+
+    /** Label sizing types (in case of vertical group) */
+    enum class LabelSizingType {
+        Auto,           /** The widest label in the group action determines the width for the other labels */
+        Percentage,     /** The label width is a percentage of the available width */
+        Fixed           /** The label width is fixed width in pixels */
+    };
+
+public: // Widgets
+
+    /** Widget class for arranging the groups actions vertically */
+    class VerticalWidget : public WidgetActionWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param groupAction Pointer to group action which creates the widget
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        VerticalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags);
+
+    protected:
+        GroupAction*    _groupAction;   /** Pointer to group action which created the widget */
+        QGridLayout     _layout;        /** Vertical layout */
+
+        friend class GroupAction;
+    };
+
+    /** Widget class for arranging the groups actions horizontally */
+    class HorizontalWidget : public WidgetActionWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param groupAction Pointer to group action which creates the widget
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        HorizontalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags);
+
+    protected:
+        GroupAction*    _groupAction;   /** Pointer to group action which created the widget */
+
+        friend class GroupAction;
+    };
+
+protected: // Widgets
+
+    /**
+     * Get widget representation of the group action
+     * @param parent Pointer to parent widget
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
+     */
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 
@@ -77,25 +140,57 @@ public: // Actions management
      * Add \p action to the group
      * @param action Pointer to action to add
      */
-    void addAction(const WidgetAction* action);
+    virtual void addAction(const WidgetAction* action) final;
 
     /**
      * Remove \p action from the group
      * @param action Pointer to action to add
      */
-    void removeAction(const WidgetAction* action);
+    virtual void removeAction(const WidgetAction* action) final;
 
     /**
      * Get const actions
      * @return Const actions
      */
-    ConstWidgetActions getActions();
+    virtual ConstWidgetActions getActions() final;
 
     /**
      * Set actions to \p actions
      * @param actions Widget actions
      */
-    void setActions(const ConstWidgetActions& actions);
+    virtual void setActions(const ConstWidgetActions& actions) final;
+
+public: // Label sizing for vertical layout
+
+    /**
+     * Get the label sizing type
+     * @return Label sizing type enum
+     */
+    LabelSizingType getLabelSizingType() const;
+
+    /**
+     * Sets the label sizing type
+     * @param labelSizingType Type of label sizing
+     */
+    void setLabelSizingType(const LabelSizingType& labelSizingType);
+
+    /** Gets the user label width in percentages */
+    std::uint32_t getLabelWidthPercentage() const;
+
+    /**
+     * Sets the user label width in percentages (sets the label sizing type to LabelSizingType::Percentage)
+     * @param labelWidthPercentage User label width in percentages
+     */
+    void setLabelWidthPercentage(std::uint32_t labelWidthPercentage);
+
+    /** Gets the user label width in pixels */
+    std::uint32_t getLabelWidthFixed() const;
+
+    /**
+     * Sets the user label width in pixels (sets the label sizing type to LabelSizingType::Fixed)
+     * @param labelWidthFixed User label width in pixels
+     */
+    void setLabelWidthFixed(std::uint32_t labelWidthFixed);
 
 private:
 
@@ -128,11 +223,37 @@ signals:
      */
     void showLabelsChanged(const bool& showLabels);
 
+    /**
+     * Signals that the label sizing type changed to \p labelSizingType
+     * @param labelSizingType Label sizing type
+     */
+    void labelSizingTypeChanged(const LabelSizingType& labelSizingType);
+
+    /**
+     * Signals that the label width in percentages changed to \p labelWidthPercentage
+     * @param labelWidthPercentage Label width in percentages
+     */
+    void labelWidthPercentageChanged(const std::uint32_t& labelWidthPercentage);
+
+    /**
+     * Signals that the label width in fixed pixels changed to \p labelWidthFixed
+     * @param labelWidthFixed Label width in fixed pixels
+     */
+    void labelWidthFixedChanged(const std::uint32_t& labelWidthFixed);
+
 private:
-    bool                _expanded;      /** Whether or not the group is expanded */
-    bool                _readOnly;      /** Whether or not the group is read-only */
-    ConstWidgetActions  _actions;       /** Widget actions in the group */
-    bool                _showLabels;    /** Whether to show labels or not */
+    bool                    _expanded;              /** Whether or not the group is expanded */
+    bool                    _readOnly;              /** Whether or not the group is read-only */
+    ConstWidgetActions      _actions;               /** Widget actions in the group */
+    bool                    _showLabels;            /** Whether to show labels or not */
+
+private: // Specific settings for vertical layout
+    LabelSizingType     _labelSizingType;           /** Type of label sizing */
+    std::uint32_t       _labelWidthPercentage;      /** User label width in percentages [0..100] */
+    std::uint32_t       _labelWidthFixed;           /** User label width in pixels */
+
+    static const std::uint32_t          globalLabelWidthPercentage;     /** Global label width in percentages */
+    static const std::uint32_t          globalLabelWidthFixed;          /** Global label width in pixels */
 };
 
 }

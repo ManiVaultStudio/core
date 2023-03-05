@@ -24,7 +24,7 @@ ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
     setModal(true);
     setWindowTitle("Project Settings");
 
-    _groupAction.setLabelSizingType(VerticalGroupAction::LabelSizingType::Auto);
+    _groupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
     const auto project = projects().getCurrentProject();
 
