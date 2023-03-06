@@ -10,13 +10,17 @@ ToolbarActionItemWidget::ToolbarActionItemWidget(QWidget* parent, ToolbarActionI
     QWidget(parent),
     _toolbarActionItem(toolbarActionItem),
     _collapsedWidget(),
-    _expandedWidget()
+    _expandedWidget()//,
+    //_collapsedWidgetFader(this, _collapsedWidget),
+    //_expandedWidgetFader(this, _expandedWidget)
 {
     auto layout         = new QHBoxLayout();
     auto nonConstAction = const_cast<WidgetAction*>(_toolbarActionItem.getAction());
 
-    _collapsedWidget    = nonConstAction->createCollapsedWidget(parent);
-    _expandedWidget     = nonConstAction->createWidget(parent);
+    _collapsedWidget    = nonConstAction->createCollapsedWidget(this);
+    _expandedWidget     = nonConstAction->createWidget(this);
+
+    layout->setContentsMargins(0, 0, 0, 0);
 
     layout->addWidget(_collapsedWidget);
     layout->addWidget(_expandedWidget);

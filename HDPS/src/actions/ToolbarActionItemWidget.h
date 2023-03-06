@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/WidgetFader.h"
+
 #include <QWidget>
 #include <QPointer>
 
@@ -29,6 +31,8 @@ private:
     ToolbarActionItem&  _toolbarActionItem;     /** Reference to owning toolbar action item */
     QPointer<QWidget>   _collapsedWidget;       /** Pointer to collapsed widget */
     QPointer<QWidget>   _expandedWidget;        /** Pointer to expanded widget */
+    //util::WidgetFader   _collapsedWidgetFader;  
+    //util::WidgetFader   _expandedWidgetFader;  
 
     friend class ToolbarActionItem;
 };

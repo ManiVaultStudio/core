@@ -2,6 +2,8 @@
 
 #include "ToolbarAction.h"
 
+#include <QTimer>
+
 namespace hdps::gui {
 
 /**
@@ -18,7 +20,7 @@ class HorizontalToolbarAction : public ToolbarAction
 public: // Widgets
 
     /** Widget class for the horizontal toolbar */
-    class ToolbarWidget final : public WidgetActionWidget
+    class Widget final : public WidgetActionWidget
     {
     protected:
 
@@ -28,7 +30,7 @@ public: // Widgets
          * @param horizontalToolbarAction Pointer to horizontal toolbar action that creates the widget
          * @param widgetFlags Widget flags for the configuration of the widget (type)
          */
-        ToolbarWidget(QWidget* parent, HorizontalToolbarAction* horizontalToolbarAction, const std::int32_t& widgetFlags);
+        Widget(QWidget* parent, HorizontalToolbarAction* horizontalToolbarAction, const std::int32_t& widgetFlags);
 
         /**
          * Respond to \p target object events
@@ -40,10 +42,14 @@ public: // Widgets
     private:
 
         virtual void setActionWidgets() final;
+        virtual void updateLayout() final;
 
     protected:
         HorizontalToolbarAction*    _horizontalToolbarAction;   /** Pointer to horizontal toolbar action that creates the widget */
         QHBoxLayout                 _layout;                    /** Main layout */
+        QHBoxLayout                 _toolbarLayout;             /** Toolbar layout */
+        QWidget                     _toolbarWidget;             /** Toolbar widget */
+        QTimer                      _timer;                     /** Timer to periodically update the layout */
 
         friend class HorizontalToolbarAction;
     };
@@ -56,7 +62,7 @@ protected: // Widgets
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new ToolbarWidget(parent, this, widgetFlags);
+        return new Widget(parent, this, widgetFlags);
     }
 
 public:

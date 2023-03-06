@@ -35,10 +35,10 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     auto integralActionActionC      = new IntegralAction(this, "Integral C");
     auto integralActionActionD      = new IntegralAction(this, "Integral D");
 
-    horizontalToolbarAction->addAction(integralActionActionA);
-    horizontalToolbarAction->addAction(integralActionActionB);
-    horizontalToolbarAction->addAction(integralActionActionC);
-    horizontalToolbarAction->addAction(integralActionActionD);
+    horizontalToolbarAction->addAction(integralActionActionA, 0);
+    horizontalToolbarAction->addAction(integralActionActionB, 1);
+    horizontalToolbarAction->addAction(integralActionActionC, 2);
+    horizontalToolbarAction->addAction(integralActionActionD, 3);
 
     _layout.addWidget(horizontalToolbarAction->createWidget(this));
 
