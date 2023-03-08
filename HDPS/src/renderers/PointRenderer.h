@@ -20,7 +20,7 @@ namespace hdps
         };
 
         enum PointEffect {
-            None, Color, Size, Outline
+            None, Color, Size, Outline, Color2D
         };
 
         enum class PointSelectionDisplayMode {

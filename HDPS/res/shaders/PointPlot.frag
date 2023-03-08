@@ -5,9 +5,13 @@
 #define EFFECT_COLOR   1
 #define EFFECT_SIZE    2
 #define EFFECT_OUTLINE 3
+#define EFFECT_COLOR_2D 4
 
 // Point properties
 uniform int   scalarEffect;
+
+// Data properties
+uniform vec4 dataBounds;
 
 // Selection
 uniform int	selectionDisplayMode;				/** Type of selection display (e.g. outline, override) */
@@ -27,9 +31,19 @@ flat   in int   vHighlight;
 smooth in float vScalar;
 smooth in vec3  vColor;
 smooth in float vOpacity;
+smooth in vec2  vPosOrig;
 
 // Output color
 out vec4 fragColor;
+
+// Perform channel tone mapping
+float normalize(float minPixelValue, float maxPixelValue, float pixelValue)
+{
+    float range		= maxPixelValue - minPixelValue;
+    float shift		= pixelValue - minPixelValue;
+
+    return clamp(shift / range, 0.0, 1.0);
+}
 
 void main()
 {
@@ -68,7 +82,15 @@ void main()
     
     if (scalarEffect == EFFECT_COLOR)
         color = texture(colormap, vec2(vScalar, 1 - vScalar)).rgb;
-    
+
+    if (scalarEffect == EFFECT_COLOR_2D)
+	{
+            float channel1 = normalize(dataBounds[0], dataBounds[1], vPosOrig[0]);
+            float channel2 = normalize(dataBounds[2], dataBounds[3], vPosOrig[1]);
+            
+            color = texture(colormap, vec2(channel1, channel2)).rgb;
+	}
+
 	float opacity = 1.0;
 	
 	switch (selectionDisplayMode) {

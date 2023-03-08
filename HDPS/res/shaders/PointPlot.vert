@@ -5,6 +5,7 @@
 #define EFFECT_COLOR   1
 #define EFFECT_SIZE    2
 #define EFFECT_OUTLINE 3
+#define EFFECT_COLOR_2D 4
 
 // Point properties
 uniform float pointSize;        				/** Point size */
@@ -41,11 +42,13 @@ flat   out int   vHighlight;
 smooth out float vScalar;
 smooth out vec3  vColor;
 smooth out float vOpacity;
+smooth out vec2  vPosOrig;
 
 void main()
 {
     // The texture coordinates match vertex coordinates
     vTexCoord = vertex;
+
     // Pass input attributes to fragment shader if they are defined
     vHighlight = hasHighlights ? highlight : 0;
     
@@ -56,6 +59,9 @@ void main()
     vOpacity = pointOpacity;
     if (hasOpacities)
         vOpacity = opacity;
+
+    // use data position for 2D colormap
+    vPosOrig = position;
 
     // Transform position to clip space
     vec2 pos = (orthoM * vec3(position, 1)).xy;
