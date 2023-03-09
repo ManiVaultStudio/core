@@ -87,14 +87,14 @@ source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Model FILES ${MODEL_SOURCES})
 source_group(Dialog FILES ${DIALOG_SOURCES})
 
-include_directories("${INSTALL_DIR}/$<CONFIGURATION>/include/")
-
 add_library(${PROJECT} SHARED ${SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${DIALOG_SOURCES})
-
-set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 17)
 
 add_dependencies(${PROJECT} HDPS_Public)
 add_dependencies(${PROJECT} PointData)
+
+target_include_directories(${PROJECT} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
+
+target_compile_features(${PROJECT} PRIVATE cxx_std_17)
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
@@ -114,10 +114,10 @@ endif(MSVC)
 set(HDPS_LINK_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_LINK_SUFFIX}")
 set(POINTDATA_LINK_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}PointData${LIB_LINK_SUFFIX}") 
 
-target_link_libraries(${PROJECT} Qt6::Widgets)
-target_link_libraries(${PROJECT} Qt6::WebEngineWidgets)
-target_link_libraries(${PROJECT} "${HDPS_LINK_LIBRARY}")
-target_link_libraries(${PROJECT} "${POINTDATA_LINK_LIBRARY}")
+target_link_libraries(${PROJECT} PRIVATE Qt6::Widgets)
+target_link_libraries(${PROJECT} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${PROJECT} PRIVATE "${HDPS_LINK_LIBRARY}")
+target_link_libraries(${PROJECT} PRIVATE "${POINTDATA_LINK_LIBRARY}")
 
 set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${CLUSTER_HEADERS}")
 

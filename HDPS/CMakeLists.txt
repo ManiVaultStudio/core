@@ -475,8 +475,8 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/ColorPickerAction.cpp
     src/actions/ColorMapAction.cpp
     src/actions/ColorMapEditor1DAction.cpp
-	src/actions/ColorMapEditor1DEdgesGraphicsItem.cpp
-	src/actions/ColorMapEditor1DHistogramGraphicsItem.cpp
+    src/actions/ColorMapEditor1DEdgesGraphicsItem.cpp
+    src/actions/ColorMapEditor1DHistogramGraphicsItem.cpp
     src/actions/ColorMapEditor1DNode.cpp
     src/actions/ColorMapEditor1DNodeGraphicsItem.cpp
     src/actions/ColorMapEditor1DNodeAction.cpp
@@ -486,9 +486,9 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/ColorMapDiscreteAction.cpp
     src/actions/ColorMapViewAction.cpp
     src/actions/ColorMapSettingsAction.cpp
-	src/actions/ColorMapSettings1DAction.cpp
+    src/actions/ColorMapSettings1DAction.cpp
     src/actions/ColorMapSettings2DAction.cpp
-	src/actions/DatasetPickerAction.cpp
+    src/actions/DatasetPickerAction.cpp
     src/actions/DecimalAction.cpp
     src/actions/DecimalRangeAction.cpp
     src/actions/GroupAction.cpp
@@ -899,12 +899,12 @@ add_library(${HDPS_PUBLIC_LIB} ${LINK_TYPE}
     ${PUBLIC_SOURCES}
 )
 
-set_property(TARGET ${HDPS_PUBLIC_LIB} PROPERTY CXX_STANDARD 17)
-
 target_include_directories(${HDPS_PUBLIC_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-target_link_libraries(${HDPS_PUBLIC_LIB} Qt6::Widgets)
-target_link_libraries(${HDPS_PUBLIC_LIB} Qt6::WebEngineWidgets)
+target_compile_features(${HDPS_PUBLIC_LIB} PRIVATE cxx_std_17)
+
+target_link_libraries(${HDPS_PUBLIC_LIB} PRIVATE Qt6::Widgets)
+target_link_libraries(${HDPS_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 
 add_library(${HDPS_PRIVATE_LIB} ${LINK_TYPE}
     src/.editorconfig
@@ -912,15 +912,16 @@ add_library(${HDPS_PRIVATE_LIB} ${LINK_TYPE}
 	${RESOURCE_FILES}
 )
 
-set_property(TARGET ${HDPS_PRIVATE_LIB} PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::Widgets)
-target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::WebEngineWidgets)
-target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::OpenGL)
-target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::OpenGLWidgets)
-target_link_libraries(${HDPS_PRIVATE_LIB} qtadvanceddocking)
-target_link_libraries(${HDPS_PRIVATE_LIB} QuaZip)
-target_link_libraries(${HDPS_PRIVATE_LIB} "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
+target_compile_features(${HDPS_PRIVATE_LIB} PRIVATE cxx_std_17)
+
+target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE Qt6::Widgets)
+target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE Qt6::OpenGL)
+target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE Qt6::OpenGLWidgets)
+target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE qtadvanceddocking)
+target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE QuaZip)
+target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
 
 target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/advanced_docking/src)
 target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -937,7 +938,7 @@ add_executable(${HDPS_EXE} MACOSX_BUNDLE WIN32
     ${RESOURCE_FILES}
 )
 
-set_property(TARGET ${HDPS_EXE} PROPERTY CXX_STANDARD 17)
+target_compile_features(${HDPS_EXE} PRIVATE cxx_std_17)
 # find libraries relative to the executable in the macOS .app tree
 if(APPLE)
     set_target_properties( ${HDPS_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
@@ -945,15 +946,15 @@ endif()
 
 target_include_directories(${HDPS_EXE} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-target_link_libraries(${HDPS_EXE} Qt6::Widgets)
-target_link_libraries(${HDPS_EXE} Qt6::WebEngineWidgets)
-target_link_libraries(${HDPS_EXE} Qt6::OpenGL)
-target_link_libraries(${HDPS_EXE} Qt6::OpenGLWidgets)
-target_link_libraries(${HDPS_EXE} qtadvanceddocking)
-target_link_libraries(${HDPS_EXE} QuaZip)
+target_link_libraries(${HDPS_EXE} PRIVATE Qt6::Widgets)
+target_link_libraries(${HDPS_EXE} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${HDPS_EXE} PRIVATE Qt6::OpenGL)
+target_link_libraries(${HDPS_EXE} PRIVATE Qt6::OpenGLWidgets)
+target_link_libraries(${HDPS_EXE} PRIVATE qtadvanceddocking)
+target_link_libraries(${HDPS_EXE} PRIVATE QuaZip)
 
-target_link_libraries(${HDPS_EXE} "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
-target_link_libraries(${HDPS_EXE} "$<TARGET_FILE:${HDPS_PRIVATE_LIB}>")
+target_link_libraries(${HDPS_EXE} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
+target_link_libraries(${HDPS_EXE} PRIVATE "$<TARGET_FILE:${HDPS_PRIVATE_LIB}>")
 
 add_dependencies(${HDPS_EXE} ${HDPS_PUBLIC_LIB})
 add_dependencies(${HDPS_EXE} ${HDPS_PRIVATE_LIB})

@@ -44,16 +44,13 @@ source_group(Plugin FILES ${PLUGIN})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
 
-include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
-
 add_library(${PROJECT} SHARED ${SOURCES})
 
 add_dependencies(${PROJECT} HDPS_Public)
 
-target_link_libraries(${PROJECT} Qt6::Widgets)
-target_link_libraries(${PROJECT} Qt6::WebEngineWidgets)
+target_include_directories(${PROJECT} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 17)
+target_compile_features(${PROJECT} PRIVATE cxx_std_17)
 
 if(MSVC)
     set(LIB_LINK_SUFFIX ".lib") 
@@ -61,7 +58,9 @@ else()
     set(LIB_LINK_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif(MSVC)
 
-target_link_libraries(${PROJECT} ${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_LINK_SUFFIX})
+target_link_libraries(${PROJECT} PRIVATE Qt6::Widgets)
+target_link_libraries(${PROJECT} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${PROJECT} PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_LINK_SUFFIX})
 
 install(TARGETS ${PROJECT}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
