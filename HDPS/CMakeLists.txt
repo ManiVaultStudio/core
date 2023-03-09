@@ -849,6 +849,10 @@ set(PUBLIC_SOURCES
     ${PUBLIC_HEADERS}
 )
 
+set(QRESOURCES
+    res/ResourcesCore.qrc
+)
+
 if(WIN32)
     set(MAIN_SOURCES ${MAIN_SOURCES} win/hdps.rc)
 endif(WIN32)
@@ -860,7 +864,7 @@ endif(APPLE)
 
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
-QT6_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
+QT6_ADD_RESOURCES(RESOURCE_FILES ${QRESOURCES})
 
 source_group(CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
 source_group(Event FILES ${PUBLIC_EVENT_FILES})
@@ -878,7 +882,7 @@ source_group(Model\\Actions FILES ${PUBLIC_ACTIONS_MODEL_FILES})
 source_group(Model\\ActionHierarchy FILES ${PUBLIC_ACTION_HIERARCHY_MODEL_FILES})
 source_group(Model\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
 
-source_group(Resources FILES res/resources.qrc)
+source_group(Resources FILES ${QRESOURCES})
 source_group(Resources FILES win/hdps.rc)
 source_group(Resources\\generated FILES ${UI_HEADERS})
 
