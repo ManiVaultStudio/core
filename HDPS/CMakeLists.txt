@@ -912,6 +912,9 @@ add_library(${HDPS_PRIVATE_LIB} ${LINK_TYPE}
 	${RESOURCE_FILES}
 )
 
+target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/advanced_docking/src)
+target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/include/QuaZip-Qt6-1.2)
 
 target_compile_features(${HDPS_PRIVATE_LIB} PRIVATE cxx_std_17)
 
@@ -923,13 +926,8 @@ target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE qtadvanceddocking)
 target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE QuaZip)
 target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
 
-target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/advanced_docking/src)
-target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/include/QuaZip-Qt6-1.2)
-
 add_dependencies(${HDPS_PRIVATE_LIB} ${HDPS_PUBLIC_LIB})
 add_dependencies(${HDPS_PRIVATE_LIB} QuaZip)
-#add_dependencies(${HDPS_PRIVATE_LIB} QArchive)
 
 add_executable(${HDPS_EXE} MACOSX_BUNDLE WIN32
     src/.editorconfig
@@ -969,8 +967,6 @@ if(MSVC)
 endif(MSVC)
 
 #executable & linklib
-
-target_include_directories(${HDPS_PUBLIC_LIB} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/QArchive")
 
 if(APPLE)
     set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
