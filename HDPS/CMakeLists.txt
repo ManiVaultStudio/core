@@ -912,9 +912,7 @@ add_library(${HDPS_PRIVATE_LIB} ${LINK_TYPE}
 	${RESOURCE_FILES}
 )
 
-target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/advanced_docking/src)
 target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/include/QuaZip-Qt6-1.2)
 
 target_compile_features(${HDPS_PRIVATE_LIB} PRIVATE cxx_std_17)
 
