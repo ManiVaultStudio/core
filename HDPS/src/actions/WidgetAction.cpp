@@ -92,14 +92,14 @@ void WidgetAction::setSortIndex(const std::int32_t& sortIndex)
     _sortIndex = sortIndex;
 }
 
-QWidget* WidgetAction::createCollapsedWidget(QWidget* parent)
+QWidget* WidgetAction::createCollapsedWidget(QWidget* parent) const
 {
-    return new WidgetActionCollapsedWidget(parent, this);
+    return new WidgetActionCollapsedWidget(parent, const_cast<WidgetAction*>(this));
 }
 
-QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags /*= 0x00001*/)
+QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags /*= 0x00001*/) const
 {
-    return new WidgetActionLabel(this, parent, widgetFlags);
+    return new WidgetActionLabel(const_cast<WidgetAction*>(this), parent, widgetFlags);
 }
 
 QMenu* WidgetAction::getContextMenu(QWidget* parent /*= nullptr*/)
@@ -219,6 +219,23 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
     }
 }
 
+void WidgetAction::connectToPublicActionByName(const QString& publicActionName)
+{
+    Q_ASSERT(!publicActionName.isEmpty());
+
+    if (publicActionName.isEmpty())
+        return;
+
+    /*
+    auto& model = Application::core()->getActionsManager().getModel();
+
+    const auto matches = model.match(model.index(0, 0), Qt::DisplayRole, publicActionName, -1, Qt::MatchFlag::MatchRecursive);
+
+    if (matches.count() == 1)
+        connectToPublicAction(matches.first().data(Qt::UserRole + 1).value<WidgetAction*>());
+    */
+}
+
 void WidgetAction::disconnectFromPublicAction()
 {
     Q_ASSERT(_publicAction != nullptr);
@@ -235,6 +252,8 @@ void WidgetAction::disconnectFromPublicAction()
     disconnect(_publicAction, &QAction::changed, this, nullptr);
 
     setEnabled(true);
+
+    _publicAction = nullptr;
 
     emit isConnectedChanged(isConnected());
 
@@ -564,13 +583,15 @@ std::int32_t WidgetAction::getConfiguration() const
     return _configuration;
 }
 
-bool WidgetAction::isConfigurationFlagSet(ConfigurationFlag configurationFlag)
+bool WidgetAction::isConfigurationFlagSet(ConfigurationFlag configurationFlag) const
 {
     return _configuration & static_cast<std::int32_t>(configurationFlag);
 }
 
 void WidgetAction::setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset /*= false*/, bool recursive /*= false*/)
 {
+    const auto flagSet = isConfigurationFlagSet(configurationFlag);
+
     if (unset)
         _configuration = _configuration & ~static_cast<std::int32_t>(configurationFlag);
     else
@@ -582,6 +603,9 @@ void WidgetAction::setConfigurationFlag(ConfigurationFlag configurationFlag, boo
         for (auto childAction : getChildActions())
             childAction->setConfigurationFlag(configurationFlag, unset, recursive);
     }
+
+    if (flagSet != isConfigurationFlagSet(configurationFlag))
+        emit configurationFlagToggled(configurationFlag, isConfigurationFlagSet(configurationFlag));
 }
 
 void WidgetAction::setConfiguration(std::int32_t configuration, bool recursive /*= false*/)
@@ -627,4 +651,43 @@ WidgetAction* WidgetAction::_getPublicCopy() const
 
 }
 
+void WidgetAction::cacheState(const QString& name /*= "cache"*/)
+{
+#ifdef WIDGET_ACTION_VERBOSE
+    qDebug() << __FUNCTION__ << name;
+#endif
+
+    _cachedStates[name] = toVariantMap();
 }
+
+void WidgetAction::restoreState(const QString& name /*= "cache"*/, bool remove /*= true*/)
+{
+#ifdef WIDGET_ACTION_VERBOSE
+    qDebug() << __FUNCTION__ << name << remove;
+#endif
+
+    const auto exceptionMessage = QString("Unable to restore %1 state called %2").arg(text(), name);
+
+    try
+    {
+        if (!_cachedStates.contains(name))
+            throw std::runtime_error(QString("%1 does not exist").arg(name).toLatin1());
+
+        fromVariantMap(_cachedStates[name].toMap());
+
+        if (remove)
+            _cachedStates.remove(name);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox(exceptionMessage, e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox(exceptionMessage);
+    }
+}
+
+}
+
+

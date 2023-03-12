@@ -13,14 +13,17 @@ Project::Project(QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("Project"),
     _filePath(),
-    _version(Application::current()->getVersion()),
+    _applicationVersion(Application::current()->getVersion()),
+    _applicationVersionAction(this),
+    _projectVersionAction(this),
     _readOnlyAction(this, "Read-only"),
     _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments"),
     _contributorsAction(this, "Contributors"),
-    _compressionAction(this)
+    _compressionAction(this),
+    _splashScreenAction(this, *this)
 {
     initialize();
 }
@@ -29,14 +32,17 @@ Project::Project(const QString& filePath, bool preview, QObject* parent /*= null
     QObject(parent),
     Serializable("Project"),
     _filePath(filePath),
-    _version(Application::current()->getVersion()),
+    _applicationVersion(Application::current()->getVersion()),
+    _applicationVersionAction(this),
+    _projectVersionAction(this),
     _readOnlyAction(this, "Read-only"),
     _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments"),
     _contributorsAction(this, "Contributors"),
-    _compressionAction(this)
+    _compressionAction(this),
+    _splashScreenAction(this, *this)
 {
     initialize();
 
@@ -91,8 +97,9 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
 {
     Serializable::fromVariantMap(variantMap);
 
-    Serializable::fromVariantMap(_version, variantMap, "Version");
-
+    _splashScreenAction.fromParentVariantMap(variantMap);
+    _applicationVersion.fromParentVariantMap(variantMap);
+    _projectVersionAction.fromParentVariantMap(variantMap);
     _readOnlyAction.fromParentVariantMap(variantMap);
     _titleAction.fromParentVariantMap(variantMap);
     _descriptionAction.fromParentVariantMap(variantMap);
@@ -110,10 +117,11 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
 
 QVariantMap Project::toVariantMap() const
 {
-    QVariantMap variantMap = Serializable::toVariantMap();
-
-    Serializable::insertIntoVariantMap(_version, variantMap, "Version");
-
+    auto variantMap = Serializable::toVariantMap();
+    
+    _splashScreenAction.insertIntoVariantMap(variantMap);
+    _applicationVersion.insertIntoVariantMap(variantMap);
+    _projectVersionAction.insertIntoVariantMap(variantMap);
     _readOnlyAction.insertIntoVariantMap(variantMap);
     _titleAction.insertIntoVariantMap(variantMap);
     _descriptionAction.insertIntoVariantMap(variantMap);
@@ -129,10 +137,15 @@ QVariantMap Project::toVariantMap() const
     return variantMap;
 }
 
-
 void Project::initialize()
 {
     setSerializationName("Project");
+
+    _applicationVersion.setSerializationName("Application Version");
+    _projectVersionAction.setSerializationName("Project Version");
+
+    _readOnlyAction.setToolTip("Whether the project is in read-only mode or not");
+    _readOnlyAction.setSerializationName("ReadOnly");
 
     _titleAction.setPlaceHolderString("Enter project title here...");
     _titleAction.setClearable(true);
@@ -165,7 +178,7 @@ void Project::initialize()
 
 util::Version Project::getVersion() const
 {
-    return _version;
+    return _applicationVersion;
 }
 
 void Project::updateContributors()

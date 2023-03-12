@@ -1,20 +1,53 @@
 #include "ImageAction.h"
+#include "Application.h"
 
 #include <QHBoxLayout>
-#include <QResizeEvent>
-#include <QCoreApplication>
+#include <QBuffer>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 ImageAction::ImageAction(QObject* parent, const QString& title /*= ""*/) :
-    WidgetAction(parent, title)
+    WidgetAction(parent, title),
+    _image(),
+    _filePathAction(this, "File Path"),
+    _fileNameAction(this, "File Name"),
+    _filePickerAction(parent, "File Path"),
+    _previewAction(this, "Preview")
 {
     setText(title);
+    setDefaultWidgetFlags(WidgetFlag::Preview);
+
+    _filePathAction.setEnabled(false);
+    _filePathAction.setTextElideMode(Qt::ElideMiddle);
+    _filePathAction.setSerializationName("FilePath");
+    _filePathAction.setStretch(1);
+
+    _fileNameAction.setEnabled(false);
+    _fileNameAction.setTextElideMode(Qt::ElideMiddle);
+    _fileNameAction.setSerializationName("FileName");
+    _fileNameAction.setStretch(1);
+
+    _filePickerAction.setPlaceHolderString("Pick image...");
+    _filePickerAction.setFileType("Image");
+    _filePickerAction.setNameFilters({ "Images (*.png *.bmp *.jpg)" });
+    _filePickerAction.setDefaultWidgetFlags(FilePickerAction::PushButton);
+        
+    _filePickerAction.getPickAction().setDefaultWidgetFlags(TriggerAction::Icon);
+
+    _previewAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    _previewAction.setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
+
+    connect(&_filePickerAction, &FilePickerAction::filePathChanged, this, [this](const QString& filePath) -> void {
+        loadImage(filePath);
+    });
+
+    connect(&_filePathAction, &StringAction::stringChanged, this, [this](const QString& string) -> void {
+        _fileNameAction.setString(QFileInfo(string).fileName());
+        _fileNameAction.setToolTip(string);
+    });
 }
 
-QImage ImageAction::getImage() const
+const QImage ImageAction::getImage() const
 {
     return _image;
 }
@@ -26,139 +59,120 @@ void ImageAction::setImage(const QImage& image)
     emit imageChanged(_image);
 }
 
-ImageAction::LabelWidget::LabelWidget(QWidget* parent, ImageAction* imageAction) :
+void ImageAction::loadImage(const QString& filePath)
+{
+    if (!QFileInfo(filePath).exists())
+        return;
+
+    setImage(QImage(filePath));
+
+    _filePathAction.setString(filePath);
+}
+
+ImageAction::PreviewWidget::PreviewWidget(QWidget* parent, ImageAction& imageAction) :
     QLabel("No image loaded...", parent),
     _imageAction(imageAction)
 {
-    //setStyleSheet("QWidget { background-color: red;}");
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     setAlignment(Qt::AlignCenter);
     setFrameShape(QFrame::Panel);
     setFrameShadow(QFrame::Sunken);
     setScaledContents(true);
 
-    const auto update = [this, imageAction]() {
+    const auto update = [this]() {
 
-        // Get image from action
-        const auto image = _imageAction->getImage();
+        const auto image = _imageAction.getImage();
 
-        // Only process valid image
         if (image.isNull())
             return;
 
-        // Assign bitmap to label
-        setPixmap(QPixmap::fromImage(imageAction->getImage()));
+        setPixmap(QPixmap::fromImage(_imageAction.getImage()));
 
-        // Compute fixed size
         const auto aspectRatio  = static_cast<float>(image.height()) / static_cast<float>(image.width());
         const auto fixedSize    = QSize(width(), width() * aspectRatio);
 
-        // Set fixed size
         setFixedSize(fixedSize);
-
-        QCoreApplication::processEvents();
 
         adjustSize();
         updateGeometry();
-
-        //parentWidget()->layout()->update();
-        //parentWidget()->adjustSize();
-        //parentWidget()->parentWidget()->adjustSize();
-        //parentWidget()->parentWidget()->updateGeometry();
     };
 
-    connect(imageAction, &ImageAction::imageChanged, this, update);
+    connect(&imageAction, &ImageAction::imageChanged, this, update);
 
     update();
 }
 
-//QSize ImageAction::LabelWidget::minimumSizeHint() const
-//{
-//    qDebug() << "sizeHint";
-//
-//    // Get image from action
-//    const auto image = _imageAction->getImage();
-//
-//    if (image.isNull())
-//        return QSize(10, 10);
-//
-//    return QSize(500, 500);
-//    return image.size();
-//}
+ImageAction::LoaderWidget::LoaderWidget(QWidget* parent, ImageAction& imageAction) :
+    QWidget(parent),
+    _imageAction(imageAction),
+    _groupAction(this, "Group")
+{
+    _groupAction.setShowLabels(false);
 
-//void ImageAction::LabelWidget::resizeEvent(QResizeEvent* resizeEvent)
-//{
-//    // Get image from action
-//    const auto image = _imageAction->getImage();
-//
-//    if (image.isNull())
-//        return;
-//
-//    // Compute fixed size
-//    const auto aspectRatio  = static_cast<float>(image.height()) / static_cast<float>(image.width());
-//    const auto fixedSize    = QSize(resizeEvent->size().width(), resizeEvent->size().width() * aspectRatio);
-//
-//    //setFixedWidth(resizeEvent->size().width());
-//    //if (fixedSize != size())
-//    setFixedHeight(500);
-//
-//    //setS
-//    adjustSize();
-//    //qDebug() << aspectRatio << fixedSize << resizeEvent;
-//}
+    _groupAction.addAction(&_imageAction.getFileNameAction());
+    _groupAction.addAction(&_imageAction.getFilePickerAction());
+    //_groupAction.addAction(&_imageAction.getPreviewAction());
 
-//QSize ImageAction::LabelWidget::sizeHint() const
-//{
-//    qDebug() << "sizeHint";
-//
-//    // Get image from action
-//    const auto image = _imageAction->getImage();
-//
-//    if (image.isNull())
-//        return QSize(10, 10);
-//
-//    return QSize(500, 500);
-//    return image.size();
-//
-//    //// Compute fixed size
-//    //const auto aspectRatio  = static_cast<float>(image.height()) / static_cast<float>(image.width());
-//    //const auto fixedHeight  = size().width() * aspectRatio;
-//
-//    //return QSize(size().width(), 500);
-//}
+    auto layout = new QHBoxLayout();
+    
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(3);
 
-//int ImageAction::LabelWidget::heightForWidth(int w) const
-//{
-//    qDebug() << "heightForWidth";
-//
-//    // Get image from action
-//    const auto image = _imageAction->getImage();
-//
-//    if (image.isNull())
-//        return w;
-//
-//    // Compute fixed size
-//    const auto aspectRatio = static_cast<float>(image.height()) / static_cast<float>(image.width());
-//    return size().width() * aspectRatio;
-//}
+    layout->addWidget(_groupAction.createWidget(this));
+
+    setLayout(layout);
+}
 
 QWidget* ImageAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    return new ImageAction::LabelWidget(parent, this);
-
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(3);
 
-    if (widgetFlags & WidgetFlag::Label)
-        layout->addWidget(new ImageAction::LabelWidget(parent, this));
+    if (widgetFlags & WidgetFlag::Preview)
+        layout->addWidget(new ImageAction::PreviewWidget(parent, *this));
+
+    if (widgetFlags & WidgetFlag::Loader)
+        layout->addWidget(new ImageAction::LoaderWidget(parent, *this));
 
     widget->setLayout(layout);
 
     return widget;
 }
 
+void ImageAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    Serializable::fromVariantMap(variantMap);
+    
+    QImage image;
+
+    image.loadFromData(QByteArray::fromBase64(variantMap["Value"].toByteArray()));
+
+    setImage(image);
+
+    _filePathAction.fromParentVariantMap(variantMap);
+    _fileNameAction.fromParentVariantMap(variantMap);
 }
+
+QVariantMap ImageAction::toVariantMap() const
+{
+    auto variantMap = Serializable::toVariantMap();
+
+    QByteArray previewImageByteArray;
+    QBuffer previewImageBuffer(&previewImageByteArray);
+
+    _image.save(&previewImageBuffer, "PNG");
+
+    variantMap.insert({
+        { "Value", QVariant::fromValue(previewImageByteArray.toBase64()) }
+    });
+
+    _filePathAction.insertIntoVariantMap(variantMap);
+    _fileNameAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
+}
+
 }

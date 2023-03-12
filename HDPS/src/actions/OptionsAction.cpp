@@ -149,18 +149,17 @@ void OptionsAction::selectOption(const QString& option, const bool& replaceSelec
 
 void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
 {
-    if (selectedOptions == getSelectedOptions())
-        return;
+    auto previousSelectedOptions = getSelectedOptions();
 
     QSignalBlocker optionsModelBlocker(&_optionsModel);
 
+    auto selectionChanged = false;
+
     for (int i = 0; i < _optionsModel.rowCount(); i++)
-        _optionsModel.item(i, 0)->setData(Qt::Unchecked, Qt::CheckStateRole);
+        _optionsModel.item(i, 0)->setData(selectedOptions.contains(_optionsModel.item(i, 0)->text()) ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
 
-    for (int i = 0; i < selectedOptions.count(); i++)
-        selectOption(selectedOptions.at(i));
-
-    emit selectedOptionsChanged(getSelectedOptions());
+    if (getSelectedOptions() != previousSelectedOptions)
+        emit selectedOptionsChanged(getSelectedOptions());
 }
 
 bool OptionsAction::isResettable()
@@ -179,8 +178,32 @@ void OptionsAction::connectToPublicAction(WidgetAction* publicAction)
 
     Q_ASSERT(publicOptionsAction != nullptr);
 
-    connect(this, &OptionsAction::selectedOptionsChanged, publicOptionsAction, &OptionsAction::setSelectedOptions);
-    connect(publicOptionsAction, &OptionsAction::selectedOptionsChanged, this, &OptionsAction::setSelectedOptions);
+    if (publicOptionsAction == nullptr)
+        return;
+
+    connect(this, &OptionsAction::selectedOptionsChanged, this, [this, publicOptionsAction](const QStringList& selectedOptions) -> void {
+        auto publicSelectedOptions = publicOptionsAction->getSelectedOptions();
+
+        for (auto option : getOptions())
+            publicSelectedOptions.removeOne(option);
+
+        for (auto selectedOption : getSelectedOptions())
+            publicSelectedOptions << selectedOption;
+
+        publicOptionsAction->setSelectedOptions(publicSelectedOptions);
+    });
+
+    connect(publicOptionsAction, &OptionsAction::selectedOptionsChanged, this, [this, publicOptionsAction](const QStringList& selectedOptions) -> void {
+        setSelectedOptions(selectedOptions);
+    });
+
+    connect(this, &OptionsAction::optionsChanged, this, [this, publicOptionsAction](const QStringList& options) -> void {
+        auto allOptions = publicOptionsAction->getOptions() + options;
+
+        allOptions.removeDuplicates();
+
+        publicOptionsAction->setOptions(allOptions);
+    });
 
     setSelectedOptions(publicOptionsAction->getSelectedOptions());
 
@@ -194,8 +217,12 @@ void OptionsAction::disconnectFromPublicAction()
     if (publicOptionsAction == nullptr)
         return;
 
-    disconnect(this, &OptionsAction::selectedOptionsChanged, publicOptionsAction, &OptionsAction::setSelectedOptions);
-    disconnect(publicOptionsAction, &OptionsAction::selectedOptionsChanged, this, &OptionsAction::setSelectedOptions);
+    if (publicOptionsAction == nullptr)
+        return;
+
+    disconnect(this, &OptionsAction::selectedOptionsChanged, this, nullptr);
+    disconnect(publicOptionsAction, &OptionsAction::selectedOptionsChanged, this, nullptr);
+    disconnect(this, &OptionsAction::optionsChanged, this, nullptr);
 
     WidgetAction::disconnectFromPublicAction();
 }
@@ -207,11 +234,23 @@ WidgetAction* OptionsAction::getPublicCopy() const
 
 void OptionsAction::fromVariantMap(const QVariantMap& variantMap)
 {
+    WidgetAction::fromVariantMap(variantMap);
+
+    if (!variantMap.contains("Value"))
+        return;
+
+    setSelectedOptions(variantMap["Value"].toStringList());
 }
 
 QVariantMap OptionsAction::toVariantMap() const
 {
-    return {};
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", getSelectedOptions() }
+    });
+
+    return variantMap;
 }
 
 OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* optionsAction) :

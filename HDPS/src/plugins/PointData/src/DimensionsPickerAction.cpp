@@ -16,7 +16,13 @@
 #include <set>
 
 #if !defined(Q_OS_MAC)
+#ifndef Q_MOC_RUN
+#if defined(emit) // tbb defines emit which clashes with Qt's emit
+    #undef emit
     #include <execution>
+    #define emit
+#endif
+#endif
 #endif
 
 using namespace hdps;
@@ -544,6 +550,9 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
     setMinimumHeight(300);
 
     connect(dimensionsPickerAction, &DimensionsPickerAction::proxyModelChanged, this, &DimensionsPickerAction::Widget::updateTableViewModel);
+    connect(dimensionsPickerAction, &DimensionsPickerAction::proxyModelChanged, this, [&](DimensionsPickerProxyModel* dimensionsPickerProxyModel) {
+        Widget::updateTableViewModel(dimensionsPickerProxyModel); // implicit conversion from DimensionsPickerProxyModel to QAbstractItemModel 
+        });
 
     auto layout = new QVBoxLayout();
 

@@ -462,9 +462,9 @@ void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::Vie
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
     if (viewPlugin->isSystemViewPlugin())
-        _mainDockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _mainDockManager->findDockAreaWidget(dockToViewPlugin ? &dockToViewPlugin->getWidget() : nullptr));
+        _mainDockManager->addViewPluginDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _mainDockManager->findDockAreaWidget(dockToViewPlugin ? &dockToViewPlugin->getWidget() : nullptr));
     else
-        _viewPluginsDockManager->addDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockToViewPlugin ? _viewPluginsDockManager->findDockAreaWidget(dockToViewPlugin) : nullptr);
+        _viewPluginsDockManager->addViewPluginDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockToViewPlugin ? _viewPluginsDockManager->findDockAreaWidget(dockToViewPlugin) : nullptr);
 
     viewPlugin->getPresetsAction().loadDefaultPreset();
 }
@@ -480,7 +480,7 @@ void WorkspaceManager::isolateViewPlugin(plugin::ViewPlugin* viewPlugin, bool is
 
 QWidget* WorkspaceManager::getWidget()
 {
-    return _mainDockManager.get();
+    return  _mainDockManager->getWidget();
 }
 
 bool WorkspaceManager::hasWorkspace() const

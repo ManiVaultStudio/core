@@ -66,6 +66,8 @@ void ActionsManager::addActionToModel(WidgetAction* action)
 
     _model.addAction(action);
 
+    _model.addAction(action);
+
     emit actionAdded(action);
 }
 

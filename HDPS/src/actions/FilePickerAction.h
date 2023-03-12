@@ -50,10 +50,9 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      * @param filePath File path
-     * @param defaultFilePath Default file path
      */
-    Q_INVOKABLE FilePickerAction(QObject* parent, const QString& title = "", const QString& filePath = QString(), const QString& defaultFilePath = QString());
-
+    Q_INVOKABLE FilePickerAction(QObject* parent, const QString& title, const QString& filePath = QString());
+    
     /**
      * Initialize the directory picker action
      * @param filePath File path
@@ -74,16 +73,40 @@ public:
     void setFilePath(const QString& filePath);
 
     /**
-     * Get the default file path
-     * @return Default file path
+     * Get the name filters
+     * @return Name filters
      */
-    QString getDefaultFilePath() const;
+    QStringList getNameFilters() const;
 
     /**
-     * Set the default file path
-     * @param defaultFilePath Default file path
+     * Set the name filters to \p nameFilters
+     * @param filePath Name filters
      */
-    void setDefaultFilePath(const QString& defaultFilePath);
+    void setNameFilters(const QStringList& nameFilters);
+
+    /**
+     * Get the default suffix
+     * @return Default suffix
+     */
+    QString getDefaultSuffix() const;
+
+    /**
+     * Set the default suffix to \p defaultSuffix
+     * @param defaultSuffix Default suffix
+     */
+    void setDefaultSuffix(const QString& defaultSuffix);
+
+    /**
+     * Get the file type
+     * @return File type
+     */
+    QString getFileType() const;
+
+    /**
+     * Set file type to \p fileType
+     * @param fileType File type
+     */
+    void setFileType(const QString& fileType);
 
     /**
      * Get placeholder text
@@ -109,19 +132,32 @@ public:
      */
     bool isValid() const;
 
+public: // Serialization
+
+    /**
+     * Load file picker action from variant
+     * @param Variant representation of the file picker action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save file picker action to variant
+     * @return Variant representation of the file picker action
+     */
+    QVariantMap toVariantMap() const override;
+
+public: // Action getters
+
+    StringAction& getFilePathAction() { return _filePathAction; }
+    TriggerAction& getPickAction() { return _pickAction; }
+
 signals:
 
     /**
-     * Signals that the directory changed
-     * @param directory Directory that changed
+     * Signals that the file path changed to \p filePath
+     * @param filePath New file path
      */
-    void directoryChanged(const QString& directory);
-
-    /**
-     * Signals that the default directory changed
-     * @param defaultString Default directory that changed
-     */
-    void defaultDirectoryChanged(const QString& defaultDirectory);
+    void filePathChanged(const QString& filePath);
 
     /**
      * Signals that the placeholder string changed
@@ -129,11 +165,20 @@ signals:
      */
     void placeholderStringChanged(const QString& placeholderString);
 
-protected:
-    QFileSystemModel    _dirModel;              /** Directory model */
-    QCompleter          _completer;             /** Completer */
-    StringAction        _filePathAction;        /** File path action */
-    TriggerAction       _pickAction;            /** Pick file action */
+    /**
+     * Signals that the file type has changed to \p fileType
+     * @param fileType File type
+     */
+    void fileTypeChanged(const QString& fileType);
+
+private:
+    QFileSystemModel    _dirModel;          /** Directory model */
+    QCompleter          _completer;         /** Completer */
+    StringAction        _filePathAction;    /** File path action */
+    TriggerAction       _pickAction;        /** Pick file action */
+    QStringList         _nameFilters;       /** File type filters */
+    QString             _defaultSuffix;     /** Default suffix */
+    QString             _fileType;          /** File type (e.g. image and project)*/
 };
 
 }

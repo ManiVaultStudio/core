@@ -2,6 +2,7 @@
 
 from conan import ConanFile
 from conan.tools.cmake import CMakeDeps, CMake, CMakeToolchain
+from conans.tools import save, load
 from conans import tools
 import os
 import sys
@@ -39,16 +40,35 @@ class HdpsCoreConan(ConanFile):
 
     # Options may need to change depending on the packaged library
     settings = {"os": None, "build_type": None, "compiler": None, "arch": None}
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "macos_bundle": [True, False],
+    }
+    default_options = {"shared": True, "fPIC": True, "macos_bundle": False}
 
     # Custom attributes for Bincrafters recipe conventions
     install_dir = None
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
-    requires = ("qt/6.3.1@lkeb/stable", "bzip2/1.0.8@", "zlib/1.2.8@")
+    requires = ("qt/6.3.2@lkeb/stable", "bzip2/1.0.8@", "zlib/1.2.8@")
 
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
+
+    def __get_git_path(self):
+        path = load(
+            pathlib.Path(pathlib.Path(__file__).parent.resolve(), "__gitpath.txt")
+        )
+        print(f"git info from {path}")
+        return path
+
+    def export(self):
+        print("In export")
+        # save the original source path to the directory used to build the package
+        save(
+            pathlib.Path(self.export_folder, "__gitpath.txt"),
+            str(pathlib.Path(__file__).parent.resolve()),
+        )
 
     def set_version(self):
         # Assign a version from the branch name
@@ -143,6 +163,11 @@ class HdpsCoreConan(ConanFile):
     def build(self):
         print("Build OS is : ", self.settings.os)
         print(f"In build, build folder {self.build_folder}")
+        # save the last build folder to allow double packaging with export-pkg
+        save(
+            pathlib.Path(self.__get_git_path(), "__last_build_folder.txt"),
+            self.build_folder,
+        )
         # If the user has no preference in HDPS_INSTALL_DIR simply set the install dir
         if not os.environ.get("HDPS_INSTALL_DIR", None):
             os.environ["HDPS_INSTALL_DIR"] = os.path.join(self.build_folder, "install")
@@ -158,12 +183,35 @@ class HdpsCoreConan(ConanFile):
         cmake.install(build_type="Release")
 
     def package(self):
+        # if just running package
+        if self.install_dir is None:
+            if not os.environ.get("HDPS_INSTALL_DIR", None):
+                os.environ["HDPS_INSTALL_DIR"] = os.path.join(
+                    self.build_folder, "install"
+                )
+            self.install_dir = os.environ["HDPS_INSTALL_DIR"]
+
         print("Packaging install dir: ", self.install_dir)
-        if self.settings.os == "Macos":
+        print("Options macos: ", self.options["macos_bundle"])
+        if not self.options["macos_bundle"]:
+            print("No macos_bundle in package")
+        else:
+            print("Macos including bundle")
+
+        if self.settings.os == "Macos" and not self.options["macos_bundle"]:
             # remove the bundle before packaging -
             # it contains the complete QtWebEngine > 1GB
             shutil.rmtree(str(pathlib.Path(self.install_dir, "Debug/HDPS.app")))
             shutil.rmtree(str(pathlib.Path(self.install_dir, "Release/HDPS.app")))
+
+        # Add the pdb files next to the libs for debug linking
+        if tools.os_info.is_windows:
+            pdb_dest = pathlib.Path(self.install_dir, "Debug/lib")
+            # pdb_dest.mkdir()
+            pdb_files = pathlib.Path(self.build_folder).glob("hdps/Debug/*.pdb")
+            for pfile in pdb_files:
+                shutil.copy(pfile, pdb_dest)
+
         self.copy(pattern="*", src=self.install_dir)
 
     def package_info(self):

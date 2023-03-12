@@ -10,11 +10,28 @@
 using namespace hdps::gui;
 
 #ifdef _DEBUG
-    #define ACTIONS_MODEL_VERBOSE
+    //#define ACTIONS_MODEL_VERBOSE
 #endif
 
 namespace hdps
 {
+    class ScopeItem : public QStandardItem {
+    public:
+        ScopeItem(WidgetAction* action) :
+            _action(action)
+        {
+        }
+
+        QVariant data(int role = Qt::UserRole + 1) const override {
+            if (_action.isNull())
+                return QVariant();
+
+            return _action->isPublic() ? "Public" : "Private";
+        }
+
+    private:
+        QPointer<WidgetAction> _action;
+    };
 
 QMap<ActionsModel::Column, QPair<QString, QString>> ActionsModel::columnInfo = QMap<ActionsModel::Column, QPair<QString, QString>>({
     { ActionsModel::Column::Name, { "Name", "Action name" }},
@@ -343,7 +360,7 @@ void ActionsModel::removeAction(WidgetAction* action)
 
     remove++;
 
-    qDebug() << "*Number of actions:" << matches.count() << matches2.count() << _actions.count() << removed.count() << add << remove;
+    //qDebug() << "*Number of actions:" << matches.count() << matches2.count() << _actions.count() << removed.count() << add << remove;
 }
 
 WidgetActions ActionsModel::getActions() const
@@ -352,7 +369,7 @@ WidgetActions ActionsModel::getActions() const
 
     const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::EditRole, "*", -1, Qt::MatchFlag::MatchRecursive | Qt::MatchFlag::MatchWildcard);
 
-    qDebug() << "*Number of actions:" << matches.count() << _actions.count();
+    //qDebug() << "*Number of actions:" << matches.count() << _actions.count();
 
     for (int rowIndex = 0; rowIndex < rowCount(); rowIndex++)
         actions << static_cast<Item*>(item(rowIndex, 0))->getAction();

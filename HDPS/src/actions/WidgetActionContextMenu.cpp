@@ -48,8 +48,10 @@ void WidgetActionContextMenu::initialize()
     if (!actions().isEmpty())
         addSeparator();
 
-    if (_widgetAction->mayDisconnect(WidgetAction::Gui) && _widgetAction->isConnected())
+    if (_widgetAction->mayDisconnect(WidgetAction::Gui) && _widgetAction->isConnected()) {
         addAction(&_disconnectAction);
+        _disconnectAction.setText(QString("Disconnect from %1").arg(_widgetAction->getPublicAction()->text()));
+    }
 
     if (_widgetAction->isConnected())
         _disconnectAction.setText(QString("Disconnect from %1").arg(_widgetAction->getPublicAction()->text()));

@@ -2,7 +2,7 @@
 #include "CoreInterface.h"
 #include "AbstractPluginManager.h"
 
-#include "pluginFactory.h"
+#include "PluginFactory.h"
 
 #include <QCryptographicHash>
 
@@ -28,7 +28,7 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFa
 }
 
 PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon, RequestPluginCallback requestPluginCallback) :
-    TriggerAction(parent),
+    TriggerAction(parent, title),
     _pluginFactory(pluginFactory),
     _location(),
     _sha(),

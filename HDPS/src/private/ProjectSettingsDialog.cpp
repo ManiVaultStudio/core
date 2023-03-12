@@ -30,10 +30,11 @@ ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
 
     _groupAction << project->getTitleAction();
     _groupAction << project->getDescriptionAction();
-    _groupAction << project->getReadOnlyAction();
+    _groupAction << project->getProjectVersionAction();
     _groupAction << project->getTagsAction();
     _groupAction << project->getCommentsAction();
     _groupAction << project->getContributorsAction();
+    _groupAction << project->getSplashScreenAction();
     _groupAction << workspaces().getLockingAction().getLockedAction();
 
     auto layout = new QVBoxLayout();

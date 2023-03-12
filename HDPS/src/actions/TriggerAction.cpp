@@ -5,11 +5,11 @@
 
 namespace hdps::gui {
 
-TriggerAction::TriggerAction(QObject* parent, const QString& title /*= ""*/) :
+TriggerAction::TriggerAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title)
 {
-    setText(title);
     setDefaultWidgetFlags(WidgetFlag::Text);
+    setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 }
 
 void TriggerAction::selfTriggered()

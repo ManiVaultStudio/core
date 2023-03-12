@@ -2,18 +2,16 @@
 
 #include "WidgetAction.h"
 
-#include <QPushButton>
-
 namespace hdps::gui {
 
 /**
- * Trigger action class
+ * Project splash screen action class
  *
- * Action class for trigger
+ * Action class for configuring a project splash screen
  *
  * @author Thomas Kroes
  */
-class TriggerAction : public WidgetAction
+class ProjectSplashScreenAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -50,6 +48,14 @@ public:
         friend class TriggerAction;
     };
 
+public:
+
+    /**
+     * Get type string
+     * @return Widget action type in string format
+     */
+    QString getTypeString() const override;
+
 protected:
 
     /**
@@ -85,7 +91,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    Q_INVOKABLE TriggerAction(QObject* parent, const QString& title);
+    ProjectSplashScreenAction(QObject* parent, const QString& title = "");
 
 private:
 
@@ -94,7 +100,3 @@ private:
 };
 
 }
-
-Q_DECLARE_METATYPE(hdps::gui::TriggerAction)
-
-inline const auto triggerActionMetaTypeId = qRegisterMetaType<hdps::gui::TriggerAction*>("TriggerAction");

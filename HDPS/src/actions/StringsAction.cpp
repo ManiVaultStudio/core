@@ -172,8 +172,8 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
     _filterModel(),
     _hierarchyWidget(this, stringsAction->getCategory(), _model, &_filterModel, false),
     _nameAction(this, "Name"),
-    _addAction(this),
-    _removeAction(this)
+    _addAction(this, "Add"),
+    _removeAction(this, "Remove")
 {
     resize(0, 150);
 

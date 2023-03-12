@@ -17,7 +17,8 @@ StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const
     _trailingAction(),
     _completer(nullptr),
     _searchMode(false),
-    _clearable(false)
+    _clearable(false),
+    _textElideMode(Qt::ElideNone)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -215,33 +216,110 @@ QVariantMap StringAction::toVariantMap() const
     return variantMap;
 }
 
+QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+{
+    auto widget = new WidgetActionWidget(parent, this);
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(3);
+
+    if (widgetFlags & WidgetFlag::Label)
+        layout->addWidget(new StringAction::LabelWidget(parent, this));
+
+    if (widgetFlags & WidgetFlag::LineEdit)
+        layout->addWidget(new StringAction::LineEditWidget(parent, this));
+
+    if (widgetFlags & WidgetFlag::TextEdit)
+        layout->addWidget(new StringAction::TextEditWidget(parent, this));
+
+    widget->setLayout(layout);
+
+    return widget;
+}
+
+Qt::TextElideMode StringAction::getTextElideMode() const
+{
+    return _textElideMode;
+}
+
+void StringAction::setTextElideMode(const Qt::TextElideMode& textElideMode)
+{
+    if (textElideMode == _textElideMode)
+        return;
+
+    _textElideMode = textElideMode;
+
+    emit textElideModeChanged(_textElideMode);
+}
+
+StringAction::LabelWidget::LabelWidget(QWidget* parent, StringAction* stringAction) :
+    QLabel(parent),
+    _stringAction(stringAction)
+{
+    setObjectName("Label");
+
+    const auto updateToolTip = [this, stringAction]() -> void {
+        setToolTip(stringAction->toolTip());
+    };
+
+    updateToolTip();
+
+    connect(stringAction, &QAction::changed, this, updateToolTip);
+
+    updateText();
+
+    connect(stringAction, &StringAction::stringChanged, this, &LabelWidget::updateText);
+    connect(stringAction, &StringAction::textElideModeChanged, this, &LabelWidget::updateText);
+
+    installEventFilter(this);
+}
+
+bool StringAction::LabelWidget::eventFilter(QObject* target, QEvent* event)
+{
+    if (event->type() == QEvent::Resize)
+        updateText();
+
+    return QLabel::eventFilter(target, event);
+}
+
+void StringAction::LabelWidget::updateText()
+{
+    QFontMetrics titleMetrics(font());
+
+    if (_stringAction->getTextElideMode() == Qt::ElideNone)
+        setText(_stringAction->getString());
+    else
+        setText(titleMetrics.elidedText(_stringAction->getString(), _stringAction->getTextElideMode(), width() - 2));
+}
+
 StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stringAction) :
-    QLineEdit(parent)
+    QLineEdit(parent),
+    _stringAction(stringAction)
 {
     setObjectName("LineEdit");
     setAcceptDrops(true);
-    setToolTip(stringAction->getString());
-    
-    const auto updateLineEdit = [this, stringAction]() {
-        QSignalBlocker blocker(this);
 
-        const auto cacheCursorPosition = cursorPosition();
-
-        setText(stringAction->getString());
-        setCursorPosition(cacheCursorPosition);
+    const auto updateToolTip = [this, stringAction]() -> void {
+        setToolTip(stringAction->toolTip());
     };
+
+    updateToolTip();
+
+    connect(stringAction, &QAction::changed, this, updateToolTip);
 
     const auto updatePlaceHolderText = [this, stringAction]() -> void {
         setPlaceholderText(stringAction->getPlaceholderString());
     };
 
-    connect(stringAction, &StringAction::stringChanged, this, updateLineEdit);
+    connect(stringAction, &StringAction::stringChanged, this, &LineEditWidget::updateText);
+    connect(stringAction, &StringAction::textElideModeChanged, this, &LineEditWidget::updateText);
 
     connect(stringAction, &StringAction::placeholderStringChanged, this, updatePlaceHolderText);
 
     connect(this, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
         stringAction->setString(text);
-    });
+        });
 
     const auto updateLeadingAction = [this, stringAction]() {
         if (!stringAction->getLeadingAction().isVisible())
@@ -266,30 +344,37 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
 
     connect(stringAction, &StringAction::completerChanged, this, updateCompleter);
 
-    updateLineEdit();
+    updateText();
     updatePlaceHolderText();
     updateLeadingAction();
     updateTrailingAction();
     updateCompleter();
+
+    installEventFilter(this);
 }
 
-QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+bool StringAction::LineEditWidget::eventFilter(QObject* target, QEvent* event)
 {
-    auto widget = new WidgetActionWidget(parent, this);
-    auto layout = new QHBoxLayout();
+    if (event->type() == QEvent::Resize)
+        updateText();
 
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
+    return QLineEdit::eventFilter(target, event);
+}
 
-    if (widgetFlags & WidgetFlag::LineEdit)
-        layout->addWidget(new StringAction::LineEditWidget(parent, this));
+void StringAction::LineEditWidget::updateText()
+{
+    QSignalBlocker blocker(this);
 
-    if (widgetFlags & WidgetFlag::TextEdit)
-        layout->addWidget(new StringAction::TextEditWidget(parent, this));
+    const auto cacheCursorPosition = cursorPosition();
 
-    widget->setLayout(layout);
+    QFontMetrics titleMetrics(font());
 
-    return widget;
+    if (_stringAction->getTextElideMode() == Qt::ElideNone)
+        setText(_stringAction->getString());
+    else
+        setText(titleMetrics.elidedText(_stringAction->getString(), _stringAction->getTextElideMode(), width() - 2));
+
+    setCursorPosition(cacheCursorPosition);
 }
 
 StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stringAction) :
@@ -297,13 +382,21 @@ StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stri
 {
     setObjectName("LineEdit");
     setAcceptDrops(true);
+    
+    const auto updateToolTip = [this, stringAction]() -> void {
+        setToolTip(stringAction->toolTip());
+    };
+
+    updateToolTip();
+
+    connect(stringAction, &QAction::changed, this, updateToolTip);
 
     const auto updateTextEdit = [this, stringAction]() {
         QSignalBlocker blocker(this);
 
         const auto cacheCursorPosition = textCursor().position();
 
-        setText(stringAction->getString());
+        setPlainText(stringAction->getString());
 
         auto updateCursor = textCursor();
 

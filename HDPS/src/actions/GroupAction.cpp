@@ -7,9 +7,7 @@
 #include <QDebug>
 #include <QGridLayout>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 const std::uint32_t GroupAction::globalLabelWidthPercentage = 35;
 const std::uint32_t GroupAction::globalLabelWidthFixed      = 200;
@@ -248,11 +246,8 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction, c
 
         for (auto widgetAction : groupAction->getSortedWidgetActions()) {
             const auto numRows          = _layout->rowCount();
-            const auto isToggleAction   = dynamic_cast<ToggleAction*>(widgetAction);
-            const auto isTriggerAction  = dynamic_cast<TriggerAction*>(widgetAction);
-            const auto isTriggersAction = dynamic_cast<TriggersAction*>(widgetAction);
 
-            if (groupAction->getShowLabels() && !isToggleAction && !isTriggerAction && !isTriggersAction) {
+            if (groupAction->getShowLabels() && !widgetAction->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup)) {
                 auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this, WidgetActionLabel::ColonAfterName));
 
                 switch (groupAction->getLabelSizingType())
@@ -291,8 +286,7 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction, c
             if (widgetAction->getStretch() >= 0)
                 _layout->setRowStretch(numRows, widgetAction->getStretch());
 
-            if (isToggleAction)
-                _layout->setAlignment(actionWidget, Qt::AlignLeft);
+            //_layout->setAlignment(actionWidget, Qt::AlignLeft);
         }
     };
 
@@ -310,5 +304,4 @@ QGridLayout* GroupAction::FormWidget::layout()
     return _layout;
 }
 
-}
 }

@@ -33,17 +33,6 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
     active << this;
 
     setFeature(CDockWidget::DockWidgetDeleteOnClose, false);
-
-    _helpAction.setIcon(Application::getIconFont("FontAwesome").getIcon("question"));
-    _helpAction.setShortcut(tr("F1"));
-    _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
-
-    connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
-        _viewPlugin->getTriggerHelpAction().trigger();
-    });
-
     initialize();
 }
 
@@ -89,6 +78,16 @@ QString ViewPluginDockWidget::getTypeString() const
 
 void ViewPluginDockWidget::initialize()
 {
+    _helpAction.setIcon(Application::getIconFont("FontAwesome").getIcon("question"));
+    _helpAction.setShortcut(tr("F1"));
+    _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+
+    connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
+        _viewPlugin->getTriggerHelpAction().trigger();
+    });
+
     connect(&plugins(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
         if (plugin != _viewPlugin)
             return;
@@ -105,7 +104,9 @@ void ViewPluginDockWidget::initialize()
     connect(&_settingsMenu, &QMenu::aboutToShow, this, [this]() -> void {
         _settingsMenu.clear();
         
-        if (!_viewPlugin->isSystemViewPlugin()) {
+        const auto projectIsReadOnly = projects().hasProject() ? projects().getCurrentProject()->getReadOnlyAction().isChecked() : false;
+
+        if (!_viewPlugin->isSystemViewPlugin() && !projectIsReadOnly) {
             _settingsMenu.addMenu(_viewPlugin->getPresetsAction().getMenu());
             _settingsMenu.addSeparator();
         }
@@ -119,14 +120,17 @@ void ViewPluginDockWidget::initialize()
             _settingsMenu.addAction(&_viewPlugin->getIsolateAction());
 
         _settingsMenu.addSeparator();
-        _settingsMenu.addAction(&_viewPlugin->getDestroyAction());
 
-        if (!_viewPlugin->getLockingAction().isLocked())
+        if (!projectIsReadOnly)
+            _settingsMenu.addAction(&_viewPlugin->getDestroyAction());
+
+        if (!_viewPlugin->getLockingAction().isLocked() && !projectIsReadOnly)
             _settingsMenu.addAction(&_viewPlugin->getEditActionsAction());
 
         _settingsMenu.addSeparator();
 
-        _settingsMenu.addAction(&_viewPlugin->getLockingAction().getLockedAction());
+        if (!projectIsReadOnly)
+            _settingsMenu.addAction(&_viewPlugin->getLockingAction().getLockedAction());
     });
 }
 
