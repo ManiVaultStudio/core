@@ -5,9 +5,7 @@
 class QWidget;
 class QPushButton;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Numerical action class
@@ -278,5 +276,4 @@ protected: // Callbacks for implementations of the numerical action
 template<typename T> constexpr std::uint32_t  NumericalAction<T>::INIT_NUMBER_OF_DECIMALS;
 #endif
 
-}
 }

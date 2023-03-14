@@ -439,6 +439,7 @@ set(PUBLIC_NUMERICAL_ACTIONS_HEADERS
     src/actions/NumericalAction.h
     src/actions/DecimalAction.h
     src/actions/IntegralAction.h
+    src/actions/NumericalRangeAction.h
     src/actions/DecimalRangeAction.h
 )
 
@@ -446,6 +447,7 @@ set(PUBLIC_NUMERICAL_ACTIONS_SOURCES
     src/actions/NumericalAction.cpp
     src/actions/DecimalAction.cpp
     src/actions/IntegralAction.cpp
+    src/actions/NumericalRangeAction.cpp
     src/actions/DecimalRangeAction.cpp
 )
 

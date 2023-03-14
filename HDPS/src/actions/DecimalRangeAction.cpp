@@ -15,121 +15,22 @@ namespace hdps::gui {
     constexpr float  DecimalRangeAction::INIT_DEFAULT_RANGE_MAX;
 #endif
 
-DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title /*= ""*/, const float& limitMin /*= INIT_LIMIT_MIN*/, const float& limitMax /*= INIT_LIMIT_MAX*/, const float& rangeMin /*= INIT_RANGE_MIN*/, const float& rangeMax /*= INIT_RANGE_MAX*/, const float& defaultRangeMin /*= INIT_DEFAULT_RANGE_MIN*/, const float& defaultRangeMax /*= INIT_DEFAULT_RANGE_MAX*/) :
-    WidgetAction(parent),
-    _rangeMinAction(this, "Minimum"),
-    _rangeMaxAction(this, "Maximum")
+DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title, const float& limitMin /*= INIT_LIMIT_MIN*/, const float& limitMax /*= INIT_LIMIT_MAX*/, const float& rangeMin /*= INIT_RANGE_MIN*/, const float& rangeMax /*= INIT_RANGE_MAX*/) :
+    NumericalRangeAction(parent, title, limitMin, limitMax, rangeMin, rangeMax)
 {
-    setText(title);
-    setSerializationName("Range");
-
-    _rangeMinAction.setSerializationName("Min");
-    _rangeMaxAction.setSerializationName("Max");
-
-    _rangeMinAction.setNumberOfDecimals(3);
-    _rangeMaxAction.setNumberOfDecimals(3);
-
-    connect(&_rangeMinAction, &DecimalAction::valueChanged, this, [this](const float& value) -> void {
+    connect(&getRangeMinAction(), &DecimalAction::valueChanged, this, [this](const float& value) -> void {
         if (value >= _rangeMaxAction.getValue())
             _rangeMaxAction.setValue(value);
 
         emit rangeChanged(_rangeMinAction.getValue(), _rangeMaxAction.getValue());
     });
 
-    connect(&_rangeMaxAction, &DecimalAction::valueChanged, this, [this](const float& value) -> void {
+    connect(&getRangeMaxAction(), &DecimalAction::valueChanged, this, [this](const float& value) -> void {
         if (value <= _rangeMinAction.getValue())
             _rangeMinAction.setValue(value);
 
         emit rangeChanged(_rangeMinAction.getValue(), _rangeMaxAction.getValue());
     });
-
-    initialize(limitMin, limitMax, rangeMin, rangeMax);
-}
-
-void DecimalRangeAction::initialize(const float& limitMin /*= INIT_LIMIT_MIN*/, const float& limitMax /*= INIT_LIMIT_MAX*/, const float& rangeMin /*= INIT_RANGE_MIN*/, const float& rangeMax /*= INIT_RANGE_MAX*/, const float& defaultRangeMin /*= INIT_DEFAULT_RANGE_MIN*/, const float& defaultRangeMax /*= INIT_DEFAULT_RANGE_MAX*/)
-{
-    _rangeMinAction.initialize(limitMin, limitMax, rangeMin, defaultRangeMin);
-    _rangeMaxAction.initialize(limitMin, limitMax, rangeMax, defaultRangeMax);
-}
-
-float DecimalRangeAction::getMinimum() const
-{
-    return _rangeMinAction.getValue();
-}
-
-void DecimalRangeAction::setMinimum(float minimum)
-{
-    _rangeMinAction.setValue(minimum);
-}
-
-float DecimalRangeAction::getMaximum() const
-{
-    return _rangeMaxAction.getValue();
-}
-
-void DecimalRangeAction::setMaximum(float maximum)
-{
-    _rangeMaxAction.setValue(maximum);
-}
-
-void DecimalRangeAction::setRange(const float& minimum, const float& maximum)
-{
-    Q_ASSERT(minimum < maximum);
-
-    if (minimum > maximum)
-        return;
-
-    _rangeMinAction.initialize(minimum, maximum, minimum, minimum);
-    _rangeMaxAction.initialize(minimum, maximum, maximum, maximum);
-}
-
-float DecimalRangeAction::getLimitsMinimum() const
-{
-    return _rangeMinAction.getMinimum();
-}
-
-void DecimalRangeAction::setLimitsMinimum(float limitsMinimum)
-{
-    _rangeMinAction.setMinimum(limitsMinimum);
-}
-
-float DecimalRangeAction::getLimitsMaximum() const
-{
-    return _rangeMaxAction.getMaximum();
-}
-
-void DecimalRangeAction::setLimitsMaximum(float limitsMaximum)
-{
-    _rangeMaxAction.setMaximum(limitsMaximum);
-}
-
-void DecimalRangeAction::setLimits(const float& limitsMinimum, const float& limitsMaximum)
-{
-    Q_ASSERT(limitsMinimum < limitsMaximum);
-
-    if (limitsMinimum > limitsMaximum)
-        return;
-
-    setLimitsMinimum(limitsMinimum);
-    setLimitsMaximum(limitsMaximum);
-}
-
-void DecimalRangeAction::fromVariantMap(const QVariantMap& variantMap)
-{
-    WidgetAction::fromVariantMap(variantMap);
-
-    _rangeMinAction.fromParentVariantMap(variantMap);
-    _rangeMaxAction.fromParentVariantMap(variantMap);
-}
-
-QVariantMap DecimalRangeAction::toVariantMap() const
-{
-    QVariantMap variantMap = WidgetAction::toVariantMap();
-
-    _rangeMinAction.insertIntoVariantMap(variantMap);
-    _rangeMaxAction.insertIntoVariantMap(variantMap);
-
-    return variantMap;
 }
 
 DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags /*= 0*/) :

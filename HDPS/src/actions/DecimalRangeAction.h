@@ -1,5 +1,6 @@
 #pragma once
 
+#include "NumericalRangeAction.h"
 #include "DecimalAction.h"
 
 namespace hdps::gui {
@@ -11,7 +12,7 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class DecimalRangeAction : public WidgetAction
+class DecimalRangeAction : public NumericalRangeAction<float, DecimalAction>
 {
     Q_OBJECT
 
@@ -55,102 +56,8 @@ public:
      * @param limitMax Range upper limit
      * @param rangeMin Range minimum
      * @param rangeMax Range maximum
-     * @param defaultRangeMin Default range minimum
-     * @param defaultRangeMax Default range maximum
      */
-    DecimalRangeAction(QObject* parent, const QString& title = "", const float& limitMin = INIT_LIMIT_MIN, const float& limitMax = INIT_LIMIT_MAX, const float& rangeMin = INIT_RANGE_MIN, const float& rangeMax = INIT_RANGE_MAX, const float& defaultRangeMin = INIT_DEFAULT_RANGE_MIN, const float& defaultRangeMax = INIT_DEFAULT_RANGE_MAX);
-
-    /**
-     * Initialize the color action
-     * @param limitMin Range lower limit
-     * @param limitMax Range upper limit
-     * @param rangeMin Range minimum
-     * @param rangeMax Range maximum
-     * @param defaultRangeMin Default range minimum
-     * @param defaultRangeMax Default range maximum
-     */
-    void initialize(const float& limitMin = INIT_LIMIT_MIN, const float& limitMax = INIT_LIMIT_MAX, const float& rangeMin = INIT_RANGE_MIN, const float& rangeMax = INIT_RANGE_MAX, const float& defaultRangeMin = INIT_DEFAULT_RANGE_MIN, const float& defaultRangeMax = INIT_DEFAULT_RANGE_MAX);
-
-    /**
-     * Get range minimum
-     * @return Range minimum
-     */
-    float getMinimum() const;
-
-    /**
-     * Set range minimum
-     * @return Range minimum
-     */
-    void setMinimum(float minimum);
-
-    /**
-     * Get range maximum
-     * @return Range maximum
-     */
-    float getMaximum() const;
-
-    /**
-     * Set range maximum
-     * @return Range maximum
-     */
-    void setMaximum(float maximum);
-
-    /**
-     * Sets the range
-     * @param minimum Range minimum
-     * @param maximum Range maximum
-     */
-    void setRange(const float& minimum, const float& maximum);
-
-    /**
-     * Get limits minimum
-     * @return Limits minimum
-     */
-    float getLimitsMinimum() const;
-
-    /**
-     * Set limits minimum
-     * @param limitsMinimum Limits minimum
-     */
-    void setLimitsMinimum(float limitsMinimum);
-
-    /**
-     * Get limits maximum
-     * @return Limits maximum
-     */
-    float getLimitsMaximum() const;
-
-    /**
-     * Set limits maximum
-     * @param limitsMaximum Limits maximum
-     */
-    void setLimitsMaximum(float limitsMaximum);
-
-    /**
-     * Sets the limits
-     * @param limitsMinimum Limits minimum
-     * @param limitsMaximum Limits maximum
-     */
-    void setLimits(const float& limitsMinimum, const float& limitsMaximum);
-
-public: // Serialization
-
-    /**
-     * Load widget action from variant map
-     * @param Variant map representation of the widget action
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
-
-    /**
-     * Save widget action to variant map
-     * @return Variant map representation of the widget action
-     */
-    QVariantMap toVariantMap() const override;
-
-public: // Action getters
-
-    DecimalAction& getRangeMinAction() { return _rangeMinAction; }
-    DecimalAction& getRangeMaxAction() { return _rangeMaxAction; }
+    DecimalRangeAction(QObject* parent, const QString& title, const float& limitMin = INIT_LIMIT_MIN, const float& limitMax = INIT_LIMIT_MAX, const float& rangeMin = INIT_RANGE_MIN, const float& rangeMax = INIT_RANGE_MAX);
 
 signals:
 
@@ -162,16 +69,10 @@ signals:
     void rangeChanged(const float& minimum, const float& maximum);
 
 protected:
-    DecimalAction       _rangeMinAction;        /** Minimum range decimal action */
-    DecimalAction       _rangeMaxAction;        /** Maximum range decimal action */
-
-protected:
-    static constexpr float  INIT_LIMIT_MIN          = std::numeric_limits<float>::lowest();     /** Initialization minimum limit */
-    static constexpr float  INIT_LIMIT_MAX          = std::numeric_limits<float>::max();        /** Initialization maximum limit */
-    static constexpr float  INIT_RANGE_MIN          = 0.0f;                                     /** Initialization minimum range */
-    static constexpr float  INIT_RANGE_MAX          = 100.0f;                                   /** Initialization maximum range */
-    static constexpr float  INIT_DEFAULT_RANGE_MIN  = 0.0f;                                     /** Initialization default minimum range */
-    static constexpr float  INIT_DEFAULT_RANGE_MAX  = 100.0f;                                   /** Initialization default maximum range */
+    static constexpr float  INIT_LIMIT_MIN  = std::numeric_limits<float>::lowest();     /** Initialization minimum limit */
+    static constexpr float  INIT_LIMIT_MAX  = std::numeric_limits<float>::max();        /** Initialization maximum limit */
+    static constexpr float  INIT_RANGE_MIN  = 0.0f;                                     /** Initialization minimum range */
+    static constexpr float  INIT_RANGE_MAX  = 100.0f;                                   /** Initialization maximum range */
 };
 
 }
