@@ -4,9 +4,7 @@
 #include <QDebug>
 #include <QHBoxLayout>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 #if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
     constexpr float  DecimalRangeAction::INIT_LIMIT_MIN;
@@ -27,6 +25,9 @@ DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title /*=
 
     _rangeMinAction.setSerializationName("Min");
     _rangeMaxAction.setSerializationName("Max");
+
+    _rangeMinAction.setNumberOfDecimals(3);
+    _rangeMaxAction.setNumberOfDecimals(3);
 
     connect(&_rangeMinAction, &DecimalAction::valueChanged, this, [this](const float& value) -> void {
         if (value >= _rangeMaxAction.getValue())
@@ -75,8 +76,42 @@ void DecimalRangeAction::setRange(const float& minimum, const float& maximum)
 {
     Q_ASSERT(minimum < maximum);
 
+    if (minimum > maximum)
+        return;
+
     _rangeMinAction.initialize(minimum, maximum, minimum, minimum);
     _rangeMaxAction.initialize(minimum, maximum, maximum, maximum);
+}
+
+float DecimalRangeAction::getLimitsMinimum() const
+{
+    return _rangeMinAction.getMinimum();
+}
+
+void DecimalRangeAction::setLimitsMinimum(float limitsMinimum)
+{
+    _rangeMinAction.setMinimum(limitsMinimum);
+}
+
+float DecimalRangeAction::getLimitsMaximum() const
+{
+    return _rangeMaxAction.getMaximum();
+}
+
+void DecimalRangeAction::setLimitsMaximum(float limitsMaximum)
+{
+    _rangeMaxAction.setMaximum(limitsMaximum);
+}
+
+void DecimalRangeAction::setLimits(const float& limitsMinimum, const float& limitsMaximum)
+{
+    Q_ASSERT(limitsMinimum < limitsMaximum);
+
+    if (limitsMinimum > limitsMaximum)
+        return;
+
+    setLimitsMinimum(limitsMinimum);
+    setLimitsMaximum(limitsMaximum);
 }
 
 void DecimalRangeAction::fromVariantMap(const QVariantMap& variantMap)
@@ -120,5 +155,4 @@ DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, Deci
     }
 }
 
-}
 }

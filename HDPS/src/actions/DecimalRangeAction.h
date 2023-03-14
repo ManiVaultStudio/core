@@ -2,9 +2,7 @@
 
 #include "DecimalAction.h"
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Decimal range action class
@@ -104,6 +102,37 @@ public:
      */
     void setRange(const float& minimum, const float& maximum);
 
+    /**
+     * Get limits minimum
+     * @return Limits minimum
+     */
+    float getLimitsMinimum() const;
+
+    /**
+     * Set limits minimum
+     * @param limitsMinimum Limits minimum
+     */
+    void setLimitsMinimum(float limitsMinimum);
+
+    /**
+     * Get limits maximum
+     * @return Limits maximum
+     */
+    float getLimitsMaximum() const;
+
+    /**
+     * Set limits maximum
+     * @param limitsMaximum Limits maximum
+     */
+    void setLimitsMaximum(float limitsMaximum);
+
+    /**
+     * Sets the limits
+     * @param limitsMinimum Limits minimum
+     * @param limitsMaximum Limits maximum
+     */
+    void setLimits(const float& limitsMinimum, const float& limitsMaximum);
+
 public: // Serialization
 
     /**
@@ -145,5 +174,4 @@ protected:
     static constexpr float  INIT_DEFAULT_RANGE_MAX  = 100.0f;                                   /** Initialization default maximum range */
 };
 
-}
 }

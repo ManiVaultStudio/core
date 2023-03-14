@@ -170,11 +170,17 @@ public: // Action getters
 
     OptionAction& getCurrentColorMapAction() { return _currentColorMapAction; }
     ColorMapSettingsAction& getSettingsAction() { return _settingsAction; }
+    DecimalRangeAction& getDataRange1dAction() { return _dataRange1dAction; }
+    DecimalRangeAction& getGlobalDataRange1dAction() { return _globalDataRange1dAction; }
+    ToggleAction& getUseGlobalDataRange1d() { return _useGlobalDataRange1d; }
 
 protected:
     OptionAction                _currentColorMapAction;     /** Current color map selection action */
     util::ColorMapFilterModel   _colorMapFilterModel;       /** The filtered color map model (contains either 1D or 2D color maps) */
     ColorMapSettingsAction      _settingsAction;            /** Color map settings action */
+    DecimalRangeAction          _dataRange1dAction;         /** One-dimensional data range */
+    DecimalRangeAction          _globalDataRange1dAction;   /** Combined one-dimensional data range of all connected private color map actions */
+    ToggleAction                _useGlobalDataRange1d;      /** Use global one-dimensional data range */
 };
 
 }
