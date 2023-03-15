@@ -4,9 +4,7 @@
 
 #include <QTimer>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 #if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
     constexpr std::int32_t StatusAction::MESSAGE_DISAPPEAR_INTERVAL;
@@ -110,5 +108,4 @@ StatusAction::LineEditWidget::LineEditWidget(QWidget* parent, StatusAction* stat
     updateMessage();
 }
 
-}
 }

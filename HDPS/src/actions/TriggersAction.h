@@ -6,9 +6,7 @@
 
 class QPushButton;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Triggers action class
@@ -172,9 +170,6 @@ signals:
 
 protected:
     QVector<Trigger>     _triggers;      /** Triggers */
-
-    friend class Widget;
 };
 
-}
 }
