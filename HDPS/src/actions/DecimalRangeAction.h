@@ -57,7 +57,7 @@ public:
      * @param rangeMin Range minimum
      * @param rangeMax Range maximum
      */
-    DecimalRangeAction(QObject* parent, const QString& title, const float& limitMin = INIT_LIMIT_MIN, const float& limitMax = INIT_LIMIT_MAX, const float& rangeMin = INIT_RANGE_MIN, const float& rangeMax = INIT_RANGE_MAX);
+    DecimalRangeAction(QObject* parent, const QString& title, const float& limitMin = INIT_LIMIT_MIN, const float& limitMax = INIT_LIMIT_MAX, const float& rangeMin = INIT_RANGE_MIN, const float& rangeMax = INIT_RANGE_MAX, std::int32_t numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
 
 signals:
 
@@ -69,10 +69,11 @@ signals:
     void rangeChanged(const float& minimum, const float& maximum);
 
 protected:
-    static constexpr float  INIT_LIMIT_MIN  = std::numeric_limits<float>::lowest();     /** Initialization minimum limit */
-    static constexpr float  INIT_LIMIT_MAX  = std::numeric_limits<float>::max();        /** Initialization maximum limit */
-    static constexpr float  INIT_RANGE_MIN  = 0.0f;                                     /** Initialization minimum range */
-    static constexpr float  INIT_RANGE_MAX  = 100.0f;                                   /** Initialization maximum range */
+    static constexpr float  INIT_LIMIT_MIN          = std::numeric_limits<float>::lowest();     /** Default minimum limit */
+    static constexpr float  INIT_LIMIT_MAX          = std::numeric_limits<float>::max();        /** Default maximum limit */
+    static constexpr float  INIT_RANGE_MIN          = 0.0f;                                     /** Default minimum range */
+    static constexpr float  INIT_RANGE_MAX          = 100.0f;                                   /** Default maximum range */
+    static constexpr float  INIT_NUMBER_OF_DECIMALS = 100.0f;                                   /** Default number of decimals */
 };
 
 }

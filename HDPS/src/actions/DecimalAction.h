@@ -172,10 +172,10 @@ signals:
     void suffixChanged(const QString& suffix);
 
     /**
-     * Signals that the number of decimals changed
+     * Signals that the number of decimals changed to \p numberOfDecimals
      * @param numberOfDecimals Number of decimals
      */
-    void numberOfDecimalsChanged(const std::uint32_t& numberOfDecimals);
+    void numberOfDecimalsChanged(std::uint32_t numberOfDecimals);
 
     /**
      * Signals that the single step changed

@@ -36,9 +36,6 @@ public:
         _rangeMinAction.setSerializationName("Min");
         _rangeMaxAction.setSerializationName("Max");
 
-        _rangeMinAction.setNumberOfDecimals(3);
-        _rangeMaxAction.setNumberOfDecimals(3);
-
         initialize(limitMin, limitMax, rangeMin, rangeMax);
     }
 
@@ -47,7 +44,6 @@ public:
      * @param limitMin Range lower limit
      * @param limitMax Range upper limit
      * @param rangeMin Range minimum
-     * @param rangeMax Range maximum
      */
     void initialize(const NumericalType& limitMin, const NumericalType& limitMax, const NumericalType& rangeMin, const NumericalType& rangeMax)
     {
