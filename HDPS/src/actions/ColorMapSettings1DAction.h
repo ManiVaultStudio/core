@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WidgetAction.h"
+#include "GroupAction.h"
 
 namespace hdps::gui {
 
@@ -13,7 +13,7 @@ class ColorMapAction;
  *
  * @author Thomas Kroes
  */
-class ColorMapSettings1DAction : public WidgetAction
+class ColorMapSettings1DAction : public GroupAction
 {
     Q_OBJECT
 

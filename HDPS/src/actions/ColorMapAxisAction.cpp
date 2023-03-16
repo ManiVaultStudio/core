@@ -14,7 +14,7 @@ namespace hdps::gui {
 ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsAction, const QString& title) :
     WidgetAction(&colorMapSettingsAction),
     _colorMapSettingsAction(colorMapSettingsAction),
-    _rangeAction(this, "Range", NumericalRange<float>(0.0f, 1.0f), NumericalRange<float>(0.0f, 1.0f), 1),
+    _rangeAction(this, "Custom", NumericalRange<float>(0.0f, 1.0f), NumericalRange<float>(0.0f, 1.0f), 1),
     _mirrorAction(this, "Mirror")
 {
     setText(title);
@@ -83,15 +83,15 @@ ColorMapAxisAction::Widget::Widget(QWidget* parent, ColorMapAxisAction* colorMap
 
     rowIndex++;
 
-    if (colorMapAxisAction->isConnected()) {
-        layout->addWidget(colorMapSettings.getGlobalDataRangeOneDimensionalAction().createLabelWidget(this), rowIndex, 0);
-        layout->addWidget(colorMapSettings.getGlobalDataRangeOneDimensionalAction().createWidget(this, DecimalRangeAction::MinimumLineEdit | DecimalRangeAction::MaximumLineEdit), rowIndex, 1);
-
-        rowIndex++;
+    if (colorMapSettings.getSharedDataRangeOneDimensionalAction().isVisible()) {
+        layout->addWidget(colorMapSettings.getSharedDataRangeOneDimensionalAction().createLabelWidget(this), rowIndex, 0);
+        layout->addWidget(colorMapSettings.getSharedDataRangeOneDimensionalAction().createWidget(this, DecimalRangeAction::MinimumLineEdit | DecimalRangeAction::MaximumLineEdit), rowIndex, 1);
     }
 
-    layout->addWidget(colorMapSettings.getUseDataRangeAction().createLabelWidget(this), rowIndex, 0);
-    layout->addWidget(colorMapSettings.getUseDataRangeAction().createWidget(this), rowIndex, 1);
+    rowIndex++;
+    
+    if (colorMapSettings.getSynchronizeWithSharedDataRange().isVisible())
+        layout->addWidget(colorMapSettings.getSynchronizeWithSharedDataRange().createWidget(this), rowIndex, 1);
 
     rowIndex++;
 

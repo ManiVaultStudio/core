@@ -17,11 +17,10 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     _settingsOneDimensionalAction(colorMapAction),
     _settingsTwoDimensionalAction(colorMapAction),
     _editorOneDimensionalAction(colorMapAction),
-    _syncWithLocalDataRange(this, "Local Data Range"),
-    _syncWithGlobalDataRange(this, "Global Data Range"),
-    _syncWithDataRangeAction(this, "Sync. with"),
+    _synchronizeWithLocalDataRange(this, "Local data range"),
+    _synchronizeWithSharedDataRange(this, "Synchronize with shared data range"),
     _localDataRangeOneDimensionalAction(this, "Data Range"),
-    _globalDataRangeOneDimensionalAction(this, "Global Data Range")
+    _sharedDataRangeOneDimensionalAction(this, "Shared data range")
 {
     setText("Settings");
     setIcon(Application::getIconFont("FontAwesome").getIcon("sliders-h"));
@@ -30,22 +29,45 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     _horizontalAxisAction.setSerializationName("HorizontalAxis");
     _verticalAxisAction.setSerializationName("VerticalAxis");
 
-    _syncWithLocalDataRange.setSerializationName("UseLocalDataRange");
-    _syncWithGlobalDataRange.setSerializationName("UseGlobalDataRange");
-    _syncWithDataRangeAction.setSerializationName("UseDataRange");
+    _synchronizeWithLocalDataRange.setSerializationName("UseLocalDataRange");
+    _synchronizeWithSharedDataRange.setSerializationName("UseGlobalDataRange");
     _localDataRangeOneDimensionalAction.setSerializationName("LocalDataRangeOne1D");
-    _globalDataRangeOneDimensionalAction.setSerializationName("GlobalDataRangeOne1D");
+    _sharedDataRangeOneDimensionalAction.setSerializationName("GlobalDataRangeOne1D");
 
-    _syncWithDataRangeAction.addAction(&_syncWithLocalDataRange);
-    _syncWithDataRangeAction.addAction(&_syncWithGlobalDataRange);
+    _localDataRangeOneDimensionalAction.setEnabled(false);
+    _sharedDataRangeOneDimensionalAction.setEnabled(false);
 
     const auto updateUseGlobalDataRangeVisibility = [this]() -> void {
-        _syncWithGlobalDataRange.setVisible(_colorMapAction.isConnected());
+        _sharedDataRangeOneDimensionalAction.setVisible(_colorMapAction.isConnected());
+        _synchronizeWithSharedDataRange.setVisible(_colorMapAction.isConnected());
     };
 
     updateUseGlobalDataRangeVisibility();
 
     connect(&_colorMapAction, &ColorMapAction::isConnectedChanged, this, updateUseGlobalDataRangeVisibility);
+
+    const auto updateSharedDataRange = [this]() -> void {
+
+        NumericalRange<float> sharedDataRangeOneDimensional;
+
+        for (auto connectedAction : _colorMapAction.getConnectedActions()) {
+            auto privateColorMapAction = dynamic_cast<ColorMapAction*>(connectedAction);
+
+            sharedDataRangeOneDimensional += privateColorMapAction->getSettingsAction().getLocalDataRangeOneDimensionalAction().getRange();
+        }
+
+        for (auto connectedAction : _colorMapAction.getConnectedActions()) {
+            auto privateColorMapAction = dynamic_cast<ColorMapAction*>(connectedAction);
+
+            privateColorMapAction->getSettingsAction().getSharedDataRangeOneDimensionalAction().setRange(sharedDataRangeOneDimensional);
+        }
+    };
+
+    updateSharedDataRange();
+
+    connect(&_colorMapAction, &ColorMapAction::actionConnected, this, updateSharedDataRange);
+    connect(&_colorMapAction, &ColorMapAction::actionDisconnected, this, updateSharedDataRange);
+    connect(&_synchronizeWithSharedDataRange, &ToggleAction::toggled, this, &ColorMapSettingsAction::synchronizeWithSharedDataRange);
 }
 
 void ColorMapSettingsAction::connectToPublicAction(WidgetAction* publicAction)
@@ -58,7 +80,7 @@ void ColorMapSettingsAction::connectToPublicAction(WidgetAction* publicAction)
     _verticalAxisAction.connectToPublicAction(&publicColorMapSettingsAction->getVerticalAxisAction());
     _discreteAction.connectToPublicAction(&publicColorMapSettingsAction->getDiscreteAction());
 
-
+    connect(&publicColorMapSettingsAction->getSharedDataRangeOneDimensionalAction(), &DecimalRangeAction::rangeChanged, this, &ColorMapSettingsAction::synchronizeWithSharedDataRange);
 
 
     //connect(&publicColorMapAction->getGlobalDataRange1dAction(), &DecimalRangeAction::rangeChanged, this, [this]() -> void {
@@ -94,6 +116,19 @@ QVariantMap ColorMapSettingsAction::toVariantMap() const
     return variantMap;
 }
 
+void ColorMapSettingsAction::synchronizeWithSharedDataRange()
+{
+    if (!_colorMapAction.isConnected())
+        return;
+
+    if (!_synchronizeWithSharedDataRange.isChecked())
+        return;
+
+    const auto sharedDataRange = dynamic_cast<ColorMapAction*>(_colorMapAction.getPublicAction())->getSettingsAction().getSharedDataRangeOneDimensionalAction().getRange();
+
+    getHorizontalAxisAction().getRangeAction().initialize(sharedDataRange, sharedDataRange);
+}
+
 ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction) :
     WidgetActionWidget(parent, colorMapSettingsAction)
 {
@@ -115,7 +150,7 @@ ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* 
             break;
     }
 
-    setLayout(layout);
+    setPopupLayout(layout);
 }
 
 }

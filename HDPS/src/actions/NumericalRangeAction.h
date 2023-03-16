@@ -45,9 +45,13 @@ public:
     {
         setText(title);
         setSerializationName("Range");
+        setDefaultWidgetFlags(WidgetFlag::Default);
 
         _rangeMinAction.setSerializationName("Min");
         _rangeMaxAction.setSerializationName("Max");
+
+        _rangeMinAction.setPrefix("Min:");
+        _rangeMaxAction.setPrefix("Max:");
 
         initialize(limits, range);
     }

@@ -64,7 +64,10 @@ public:
          * @param parent Pointer to parent widget
          * @param decimalAction Pointer to decimal action
          */
-        QLineEdit(QWidget* parent, DecimalAction* decimalAction);
+        LineEditWidget(QWidget* parent, DecimalAction* decimalAction);
+
+    private:
+        QDoubleValidator    _doubleValidator;
 
         friend class DecimalAction;
     };

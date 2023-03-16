@@ -21,8 +21,8 @@ public:
      * @param minimum Range minimum
      * @param maximum Range maximum
      */
-    NumericalRange(NumericalType minimum, NumericalType maximum) :
-        QPair<NumericalType, NumericalType>(std::numeric_limits<NumericalType>::lowest(), std::numeric_limits<NumericalType>::max())
+    NumericalRange(NumericalType minimum = std::numeric_limits<NumericalType>::max(), NumericalType maximum = std::numeric_limits<NumericalType>::lowest()) :
+        QPair<NumericalType, NumericalType>(std::numeric_limits<NumericalType>::max(), std::numeric_limits<NumericalType>::lowest())
     {
         setMinimum(minimum);
         setMaximum(maximum);
@@ -38,7 +38,7 @@ public:
      * @param minimum Range minimum
      */
     void setMinimum(NumericalType minimum) {
-        this->first = std::min(minimum, this->second);
+        this->first = std::min(minimum, this->first);
     }
 
     /** Get range maximum */
@@ -51,7 +51,19 @@ public:
      * @param maximum Range maximum
      */
     void setMaximum(NumericalType maximum) {
-        this->second = std::max(maximum, this->first);
+        this->second = std::max(maximum, this->second);
+    }
+
+    /**
+     * Addition operator
+     * @return Added range
+     */
+    NumericalRange<NumericalType>& operator += (const NumericalRange<NumericalType>& other)
+    {
+        this->first     = std::min(this->first, other.getMinimum());
+        this->second    = std::max(this->second, other.getMaximum());
+
+        return *this;
     }
 };
 

@@ -24,14 +24,14 @@ DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title, co
         if (value >= _rangeMaxAction.getValue())
             _rangeMaxAction.setValue(value);
 
-        emit rangeChanged(_rangeMinAction.getValue(), _rangeMaxAction.getValue());
+        emit rangeChanged({_rangeMinAction.getValue(), _rangeMaxAction.getValue() });
     });
 
     connect(&getRangeMaxAction(), &DecimalAction::valueChanged, this, [this](const float& value) -> void {
         if (value <= _rangeMinAction.getValue())
             _rangeMinAction.setValue(value);
 
-        emit rangeChanged(_rangeMinAction.getValue(), _rangeMaxAction.getValue());
+        emit rangeChanged({ _rangeMinAction.getValue(), _rangeMaxAction.getValue() });
     });
 }
 
@@ -51,8 +51,11 @@ QWidget* DecimalRangeAction::getWidget(QWidget* parent, const std::int32_t& widg
     if (widgetFlags & WidgetFlag::Slider) {
         auto slidersLayout = new QHBoxLayout();
 
-        slidersLayout->addWidget(_rangeMinAction.createWidget(widget, DecimalAction::Slider));
-        slidersLayout->addWidget(_rangeMaxAction.createWidget(widget, DecimalAction::Slider));
+        auto minSliderWidget = _rangeMinAction.createWidget(widget, DecimalAction::Slider);
+
+        slidersLayout->addWidget(minSliderWidget);
+
+        _rangeMaxAction.createWidget(minSliderWidget, DecimalAction::Slider);
 
         layout->addLayout(slidersLayout);
     }

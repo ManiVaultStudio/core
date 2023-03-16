@@ -250,6 +250,39 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
     setToolTips();
 }
 
+DecimalAction::LineEditWidget::LineEditWidget(QWidget* parent, DecimalAction* decimalAction) :
+    QLineEdit(parent),
+    _doubleValidator()
+{
+    _doubleValidator.setNotation(QDoubleValidator::StandardNotation);
+
+    setValidator(&_doubleValidator);
+
+    const auto updateDoubleValidator = [this, decimalAction]() -> void {
+        _doubleValidator.setBottom(decimalAction->getMinimum());
+        _doubleValidator.setTop(decimalAction->getMaximum());
+    };
+
+    updateDoubleValidator();
+
+    connect(decimalAction, &DecimalAction::minimumChanged, this, updateDoubleValidator);
+    connect(decimalAction, &DecimalAction::maximumChanged, this, updateDoubleValidator);
+
+    const auto updateText = [this, decimalAction]() -> void {
+        QSignalBlocker blocker(this);
+
+        setText(QString("%1 %2").arg(decimalAction->getPrefix(), QString::number(decimalAction->getValue(), 'f', decimalAction->getNumberOfDecimals())));
+    };
+
+    updateText();
+
+    connect(decimalAction, &DecimalAction::valueChanged, this, updateText);
+
+    connect(this, &QLineEdit::textChanged, this, [decimalAction](const QString& text) -> void {
+        decimalAction->setValue(text.toFloat());
+    });
+}
+
 QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     auto widget = new WidgetActionWidget(parent, this);
@@ -262,6 +295,9 @@ QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
 
     if (widgetFlags & WidgetFlag::Slider)
         layout->addWidget(new SliderWidget(parent, this), 2);
+
+    if (widgetFlags & WidgetFlag::LineEdit)
+        layout->addWidget(new LineEditWidget(parent, this), 2);
 
     widget->setLayout(layout);
 
