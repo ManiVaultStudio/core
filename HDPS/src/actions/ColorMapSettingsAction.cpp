@@ -11,16 +11,6 @@ namespace hdps::gui {
 ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction),
-    _horizontalAxisAction(*this, "Range"),
-    _verticalAxisAction(*this, "Range"),
-    _discreteAction(*this),
-    _settingsOneDimensionalAction(colorMapAction),
-    _settingsTwoDimensionalAction(colorMapAction),
-    _editorOneDimensionalAction(colorMapAction),
-    _synchronizeWithLocalDataRange(this, "Local data range"),
-    _synchronizeWithSharedDataRange(this, "Synchronize with shared data range"),
-    _localDataRangeOneDimensionalAction(this, "Data Range"),
-    _sharedDataRangeOneDimensionalAction(this, "Shared data range")
 {
     setText("Settings");
     setIcon(Application::getIconFont("FontAwesome").getIcon("sliders-h"));
@@ -136,14 +126,16 @@ ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* 
 
     layout->setContentsMargins(0, 0, 0, 0);
 
+    auto& colorMapAction = colorMapSettingsAction->getColorMapAction();
+
     switch (colorMapSettingsAction->getColorMapAction().getColorMapType())
     {
         case ColorMap::Type::OneDimensional:
-            layout->addWidget(colorMapSettingsAction->getSettings1DAction().createWidget(this));
+            layout->addWidget(colorMapAction.getSettings1DAction().createWidget(this));
             break;
 
         case ColorMap::Type::TwoDimensional:
-            layout->addWidget(colorMapSettingsAction->getSettings2DAction().createWidget(this));
+            layout->addWidget(colorMapAction.getSettings2DAction().createWidget(this));
             break;
 
         default:

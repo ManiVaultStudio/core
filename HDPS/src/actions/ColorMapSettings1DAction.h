@@ -13,7 +13,7 @@ class ColorMapAction;
  *
  * @author Thomas Kroes
  */
-class ColorMapSettings1DAction : public GroupAction
+class ColorMapSettings1DAction : public WidgetAction
 {
     Q_OBJECT
 

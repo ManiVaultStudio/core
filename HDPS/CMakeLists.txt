@@ -404,8 +404,6 @@ set(PUBLIC_COLOR_MAP_ACTION_HEADERS
     src/actions/ColorMapEditor1DNodeAction.h
     src/actions/ColorMapEditor1DScene.h
     src/actions/ColorMapEditor1DWidget.h
-    src/actions/ColorMapAxisAction.h
-    src/actions/ColorMapDiscreteAction.h
     src/actions/ColorMapViewAction.h
     src/actions/ColorMapSettingsAction.h
     src/actions/ColorMapSettings1DAction.h
@@ -422,8 +420,6 @@ set(PUBLIC_COLOR_MAP_ACTION_SOURCES
     src/actions/ColorMapEditor1DNodeAction.cpp
     src/actions/ColorMapEditor1DScene.cpp
     src/actions/ColorMapEditor1DWidget.cpp
-    src/actions/ColorMapAxisAction.cpp
-    src/actions/ColorMapDiscreteAction.cpp
     src/actions/ColorMapViewAction.cpp
     src/actions/ColorMapSettingsAction.cpp
 	src/actions/ColorMapSettings1DAction.cpp
@@ -491,6 +487,7 @@ set(PUBLIC_TEXTUAL_ACTIONS_FILES
 set(PUBLIC_GROUPING_ACTIONS_HEADERS
     src/actions/GroupAction.h
     src/actions/HorizontalGroupAction.h
+    src/actions/VerticalGroupAction.h
     src/actions/GroupsAction.h
     src/actions/GroupSectionTreeItem.h
     src/actions/GroupWidgetTreeItem.h
@@ -499,6 +496,7 @@ set(PUBLIC_GROUPING_ACTIONS_HEADERS
 set(PUBLIC_GROUPING_ACTIONS_SOURCES
     src/actions/GroupAction.cpp
     src/actions/HorizontalGroupAction.cpp
+    src/actions/VerticalGroupAction.cpp
     src/actions/GroupsAction.cpp
     src/actions/GroupSectionTreeItem.cpp
     src/actions/GroupWidgetTreeItem.cpp
@@ -581,6 +579,23 @@ set(PUBLIC_FILE_ACTIONS_SOURCES
 set(PUBLIC_FILE_ACTIONS_FILES
     ${PUBLIC_FILE_ACTIONS_HEADERS}    
     ${PUBLIC_FILE_ACTIONS_SOURCES}
+)
+
+set(PUBLIC_TOOLBAR_ACTIONS_HEADERS
+    src/actions/ToolbarAction.h
+    src/actions/ToolbarActionItem.h
+    src/actions/ToolbarActionItemWidget.h
+)
+
+set(PUBLIC_TOOLBAR_ACTIONS_SOURCES
+    src/actions/ToolbarAction.cpp
+    src/actions/ToolbarActionItem.cpp
+    src/actions/ToolbarActionItemWidget.cpp
+)
+
+set(PUBLIC_TOOLBAR_ACTIONS_FILES
+    ${PUBLIC_TOOLBAR_ACTIONS_HEADERS}    
+    ${PUBLIC_TOOLBAR_ACTIONS_SOURCES}
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
@@ -935,6 +950,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_COLOR_ACTIONS_HEADERS}
     ${PUBLIC_TOGGLE_ACTIONS_HEADERS}
     ${PUBLIC_FILE_ACTIONS_HEADERS}
+    ${PUBLIC_TOOLBAR_ACTIONS_HEADERS}
     ${PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS}
     ${PUBLIC_ACTIONS_INTERNAL_HEADERS}
     ${PUBLIC_ACTION_HIERARCHY_HEADERS}
@@ -964,6 +980,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_COLOR_ACTIONS_SOURCES}
     ${PUBLIC_TOGGLE_ACTIONS_SOURCES}
     ${PUBLIC_FILE_ACTIONS_SOURCES}
+    ${PUBLIC_TOOLBAR_ACTIONS_SOURCES}
     ${PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES}
     ${PUBLIC_ACTIONS_INTERNAL_SOURCES}
     ${PUBLIC_ACTION_HIERARCHY_SOURCES}
@@ -1007,6 +1024,7 @@ source_group(Actions\\Option FILES ${PUBLIC_OPTION_ACTIONS_FILES})
 source_group(Actions\\Color FILES ${PUBLIC_COLOR_ACTIONS_FILES})
 source_group(Actions\\Toggle FILES ${PUBLIC_TOGGLE_ACTIONS_FILES})
 source_group(Actions\\File FILES ${PUBLIC_FILE_ACTIONS_FILES})
+source_group(Actions\\Toolbar FILES ${PUBLIC_TOOLBAR_ACTIONS_FILES})
 source_group(Actions\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_ACTIONS_FILES})
 source_group(Actions\\Internal FILES ${PUBLIC_ACTIONS_INTERNAL_FILES})
 source_group(Widgets FILES ${PUBLIC_WIDGET_FILES})

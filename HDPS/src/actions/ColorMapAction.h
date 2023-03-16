@@ -169,12 +169,36 @@ signals:
 public: // Action getters
 
     OptionAction& getCurrentColorMapAction() { return _currentColorMapAction; }
+    DecimalRangeAction& getRangeAction(const Qt::Orientation& orientation) { return _rangeAction[orientation]; }
+    DecimalRangeAction& getDataRangeAction(const Qt::Orientation& orientation) { return _dataRangeAction[orientation]; }
+    DecimalRangeAction& getSharedDataRangeAction(const Qt::Orientation& orientation) { return _sharedDataRangeAction[orientation]; }
+    ToggleAction& getSynchronizeWithLocalDataRange() { return _synchronizeWithLocalDataRange; }
+    ToggleAction& getSynchronizeWithSharedDataRange() { return _synchronizeWithSharedDataRange; }
+    ToggleAction& getMirrorAction(const Qt::Orientation& orientation) { return _mirrorAction[orientation]; }
+    ToggleAction& getDiscretizeAction() { return _discretizeAction; }
+    IntegralAction& getNumberOfDiscreteStepsAction() { return _numberOfDiscreteStepsAction; }
+    ToggleAction& getDiscretizeAlphaAction() { return _discretizeAlphaAction; }
+    ColorMapSettings1DAction& getSettings1DAction() { return _settingsOneDimensionalAction; }
+    ColorMapSettings2DAction& getSettings2DAction() { return _settingsTwoDimensionalAction; }
+    ColorMapEditor1DAction& getEditor1DAction() { return _editorOneDimensionalAction; }
     ColorMapSettingsAction& getSettingsAction() { return _settingsAction; }
 
 protected:
-    OptionAction                _currentColorMapAction;     /** Current color map selection action */
-    util::ColorMapFilterModel   _colorMapFilterModel;       /** The filtered color map model (contains either 1D or 2D color maps) */
-    ColorMapSettingsAction      _settingsAction;            /** Color map settings action */
+    util::ColorMapFilterModel   _colorMapFilterModel;                   /** The filtered color map model (contains either 1D or 2D color maps) */
+    OptionAction                _currentColorMapAction;                 /** Current color map selection action */
+    DecimalRangeAction          _rangeAction[2];                        /** Color map range action (1D/2D color map) */
+    DecimalRangeAction          _dataRangeAction[2];                    /** Range of the associated dataset (1D/2D color map) */
+    DecimalRangeAction          _sharedDataRangeAction[2];              /** Shared range (1D/2D color map) of all connected color maps (if the color map is connected to a public color map) */
+    ToggleAction                _synchronizeWithLocalDataRange;         /** Synchronize with local data range */
+    ToggleAction                _synchronizeWithSharedDataRange;        /** Synchronize with shared data range */
+    ToggleAction                _mirrorAction[2];                       /** Mirror along the horizontal/vertical axis action */
+    ToggleAction                _discretizeAction;                      /** Discretize toggle action */
+    IntegralAction              _numberOfDiscreteStepsAction;           /** Number of discrete steps action */
+    ToggleAction                _discretizeAlphaAction;                 /** Whether to also discretize the alpha channel of the color map */
+    ColorMapSettings1DAction    _settingsOneDimensionalAction;          /** One-dimensional settings action */
+    ColorMapSettings2DAction    _settingsTwoDimensionalAction;          /** Two-dimensional settings action */
+    ColorMapEditor1DAction      _editorOneDimensionalAction;            /** One-dimensional editor action */
+    ColorMapSettingsAction      _settingsAction;                        /** Color map settings action */
 };
 
 }

@@ -17,8 +17,20 @@ namespace hdps::gui {
 
 ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= "RdYlBu"*/, const QString& defaultColorMap /*= "RdYlBu"*/) :
     WidgetAction(parent),
-    _currentColorMapAction(this, "Current color map"),
     _colorMapFilterModel(this, colorMapType),
+    _currentColorMapAction(this, "Current color map"),
+    _rangeAction{ DecimalRangeAction(this, "Range (x)"), DecimalRangeAction(this, "Range (y)") },
+    _dataRangeAction{ DecimalRangeAction(this, "Data range (x)"), DecimalRangeAction(this, "Data range (y)") },
+    _sharedDataRangeAction{ DecimalRangeAction(this, "Shared data range (x)"), DecimalRangeAction(this, "Shared data range (y)") },
+    _synchronizeWithLocalDataRange(this, "Local data range"),
+    _synchronizeWithSharedDataRange(this, "Synchronize with shared data range"),
+    _mirrorAction{ ToggleAction(this, "Mirror horizontally"), ToggleAction(this, "Mirror vertically") },
+    _discretizeAction(this, "Discrete"),
+    _numberOfDiscreteStepsAction(this, "Number of steps", 2, 10, 5, 5),
+    _discretizeAlphaAction(this, "Discretize alpha", false, false),
+    _settingsOneDimensionalAction(*this),
+    _settingsTwoDimensionalAction(*this),
+    _editorOneDimensionalAction(*this),
     _settingsAction(*this)
 {
     setText(title);
@@ -35,11 +47,18 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     };
 
     connect(&_currentColorMapAction, &OptionAction::currentIndexChanged, this, notifyColorMapImageChanged);
-    connect(&_settingsAction.getHorizontalAxisAction().getMirrorAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
-    connect(&_settingsAction.getVerticalAxisAction().getMirrorAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
-    connect(&_settingsAction.getDiscreteAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
-    connect(&_settingsAction.getDiscreteAction().getNumberOfStepsAction(), &IntegralAction::valueChanged, this, notifyColorMapImageChanged);
-    connect(&_settingsAction.getDiscreteAction().getDiscretizeAlphaAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
+    connect(&getMirrorAction(Qt::Horizontal), &ToggleAction::toggled, this, notifyColorMapImageChanged);
+    connect(&getMirrorAction(Qt::Vertical), &ToggleAction::toggled, this, notifyColorMapImageChanged);
+    connect(&_discretizeAction, &ToggleAction::toggled, this, notifyColorMapImageChanged);
+    connect(&_numberOfDiscreteStepsAction, &IntegralAction::valueChanged, this, notifyColorMapImageChanged);
+    connect(&_discretizeAlphaAction, &ToggleAction::toggled, this, notifyColorMapImageChanged);
+
+
+    _numberOfDiscreteStepsAction.setSerializationName("NumberOfDiscreteSteps");
+    _discretizeAlphaAction.setSerializationName("DiscretizeAlpha");
+
+    _numberOfDiscreteStepsAction.setToolTip("Number of discrete steps");
+    _discretizeAlphaAction.setToolTip("Whether to discrete the alpha channel");
 }
 
 QString ColorMapAction::getTypeString() const
@@ -255,6 +274,22 @@ void ColorMapAction::connectToPublicAction(WidgetAction* publicAction)
     _settingsAction.connectToPublicAction(&publicColorMapAction->getSettingsAction());
 
     WidgetAction::connectToPublicAction(publicAction);
+
+    /*
+    auto publicColorMapDiscreteAction = dynamic_cast<ColorMapDiscreteAction*>(publicAction);
+
+    Q_ASSERT(publicColorMapDiscreteAction != nullptr);
+
+    _numberOfStepsAction.connectToPublicAction(&publicColorMapDiscreteAction->getNumberOfStepsAction());
+    _discretizeAlphaAction.connectToPublicAction(&publicColorMapDiscreteAction->getDiscretizeAlphaAction());
+
+    connect(this, &WidgetAction::toggled, publicColorMapDiscreteAction, &WidgetAction::setChecked);
+    connect(publicColorMapDiscreteAction, &WidgetAction::toggled, this, &WidgetAction::setChecked);
+
+    setChecked(publicColorMapDiscreteAction->isChecked());
+
+    WidgetAction::connectToPublicAction(publicAction);
+    */
 }
 
 void ColorMapAction::disconnectFromPublicAction()
@@ -264,6 +299,13 @@ void ColorMapAction::disconnectFromPublicAction()
     _settingsAction.disconnectFromPublicAction();
 
     WidgetAction::disconnectFromPublicAction();
+
+    /*
+    _numberOfStepsAction.disconnectFromPublicAction();
+    _discretizeAlphaAction.disconnectFromPublicAction();
+
+    WidgetAction::disconnectFromPublicAction();
+    */
 }
 
 WidgetAction* ColorMapAction::getPublicCopy() const
@@ -277,6 +319,9 @@ void ColorMapAction::fromVariantMap(const QVariantMap& variantMap)
 
     _currentColorMapAction.fromParentVariantMap(variantMap);
     _settingsAction.fromParentVariantMap(variantMap);
+
+    _numberOfDiscreteStepsAction.fromParentVariantMap(variantMap);
+    _discretizeAlphaAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ColorMapAction::toVariantMap() const
@@ -285,6 +330,9 @@ QVariantMap ColorMapAction::toVariantMap() const
 
     _currentColorMapAction.insertIntoVariantMap(variantMap);
     _settingsAction.insertIntoVariantMap(variantMap);
+
+    _numberOfDiscreteStepsAction.insertIntoVariantMap(variantMap);
+    _discretizeAlphaAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

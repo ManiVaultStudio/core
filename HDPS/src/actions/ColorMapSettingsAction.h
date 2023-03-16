@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ColorMapAxisAction.h"
+#include "ColorMapRangeAction.h"
 #include "ColorMapViewAction.h"
 #include "ColorMapDiscreteAction.h"
 #include "ColorMapSettings1DAction.h"
@@ -93,29 +93,9 @@ public: // Serialization
 public: // Action getters
 
     ColorMapAction& getColorMapAction() { return _colorMapAction; }
-    ColorMapAxisAction& getHorizontalAxisAction() { return _horizontalAxisAction; }
-    ColorMapAxisAction& getVerticalAxisAction() { return _verticalAxisAction; }
-    ColorMapDiscreteAction& getDiscreteAction() { return _discreteAction; }
-    ColorMapSettings1DAction& getSettings1DAction() { return _settingsOneDimensionalAction; }
-    ColorMapSettings2DAction& getSettings2DAction() { return _settingsTwoDimensionalAction; }
-    ColorMapEditor1DAction& getEditor1DAction() { return _editorOneDimensionalAction; }
-    ToggleAction& getSynchronizeWithLocalDataRange() { return _synchronizeWithLocalDataRange; }
-    ToggleAction& getSynchronizeWithSharedDataRange() { return _synchronizeWithSharedDataRange; }
-    DecimalRangeAction& getLocalDataRangeOneDimensionalAction() { return _localDataRangeOneDimensionalAction; }
-    DecimalRangeAction& getSharedDataRangeOneDimensionalAction() { return _sharedDataRangeOneDimensionalAction; }
 
 protected:
-    ColorMapAction&             _colorMapAction;                        /** Reference to color map action */
-    ColorMapAxisAction          _horizontalAxisAction;                  /** Horizontal axis action (used in 1D settings action) */
-    ColorMapAxisAction          _verticalAxisAction;                    /** Vertical axis action (used in 1D + 2D settings action) */
-    ColorMapDiscreteAction      _discreteAction;                        /** Discrete action (used in 1D + 2D settings action) */
-    ColorMapSettings1DAction    _settingsOneDimensionalAction;          /** One-dimensional settings action */
-    ColorMapSettings2DAction    _settingsTwoDimensionalAction;          /** Two-dimensional settings action */
-    ColorMapEditor1DAction      _editorOneDimensionalAction;            /** One-dimensional editor action */
-    ToggleAction                _synchronizeWithLocalDataRange;         /** Synchronize with local data range */
-    ToggleAction                _synchronizeWithSharedDataRange;        /** Synchronize with shared data range */
-    DecimalRangeAction          _localDataRangeOneDimensionalAction;    /** One-dimensional local data range of the dataset which is associated with the color map */
-    DecimalRangeAction          _sharedDataRangeOneDimensionalAction;   /** One-dimensional global data range (in case the color map is public, this data range is the absolute min/max of all connected color maps) */
+    ColorMapAction&     _colorMapAction;                        /** Reference to color map action */
 
     /** Only color map actions may instantiate this class */
     friend class ColorMapAction;
