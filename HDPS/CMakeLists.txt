@@ -752,6 +752,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/AbstractItemModelTester.h
     src/util/Version.h
     src/util/DockWidgetPermission.h
+    src/util/NumericalRange.h
 )
 
 set(PUBLIC_UTIL_SOURCES
@@ -785,6 +786,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/AbstractItemModelTester.cpp
     src/util/Version.cpp
     src/util/DockWidgetPermission.cpp
+    src/util/NumericalRange.cpp
 )
 
 set(PUBLIC_UTIL_FILES

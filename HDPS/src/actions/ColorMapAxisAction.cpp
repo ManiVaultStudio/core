@@ -13,11 +13,13 @@ namespace hdps::gui {
 
 ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsAction, const QString& title) :
     WidgetAction(&colorMapSettingsAction),
-    _rangeAction(this, "Range", 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1),
+    _colorMapSettingsAction(colorMapSettingsAction),
+    _rangeAction(this, "Range", NumericalRange<float>(0.0f, 1.0f), NumericalRange<float>(0.0f, 1.0f), 1),
     _mirrorAction(this, "Mirror")
 {
     setText(title);
     setSerializationName("Axis");
+    setDefaultWidgetFlags(DecimalRangeAction::Slider);
 
     _rangeAction.setSerializationName("Range");
     _mirrorAction.setSerializationName("Mirror");
@@ -67,18 +69,33 @@ ColorMapAxisAction::Widget::Widget(QWidget* parent, ColorMapAxisAction* colorMap
 {
     auto layout = new QGridLayout();
 
-    auto& rangeAction = colorMapAxisAction->getRangeAction();
+    auto rowIndex = 0;
+        
+    layout->addWidget(colorMapAxisAction->getRangeAction().createLabelWidget(this), rowIndex, 0);
+    layout->addWidget(colorMapAxisAction->getRangeAction().createWidget(this), rowIndex, 1);
 
-    auto& rangeMinAction = rangeAction.getRangeMinAction();
-    auto& rangeMaxAction = rangeAction.getRangeMaxAction();
+    rowIndex++;
 
-    layout->addWidget(rangeMinAction.createLabelWidget(this), 0, 0);
-    layout->addWidget(rangeMinAction.createWidget(this), 0, 1);
+    auto& colorMapSettings = colorMapAxisAction->getColorMapSettingsAction();
 
-    layout->addWidget(rangeMaxAction.createLabelWidget(this), 1, 0);
-    layout->addWidget(rangeMaxAction.createWidget(this), 1, 1);
+    layout->addWidget(colorMapSettings.getLocalDataRangeOneDimensionalAction().createLabelWidget(this), rowIndex, 0);
+    layout->addWidget(colorMapSettings.getLocalDataRangeOneDimensionalAction().createWidget(this, DecimalRangeAction::MinimumLineEdit | DecimalRangeAction::MaximumLineEdit), rowIndex, 1);
 
-    layout->addWidget(colorMapAxisAction->getMirrorAction().createWidget(this), 2, 1);
+    rowIndex++;
+
+    if (colorMapAxisAction->isConnected()) {
+        layout->addWidget(colorMapSettings.getGlobalDataRangeOneDimensionalAction().createLabelWidget(this), rowIndex, 0);
+        layout->addWidget(colorMapSettings.getGlobalDataRangeOneDimensionalAction().createWidget(this, DecimalRangeAction::MinimumLineEdit | DecimalRangeAction::MaximumLineEdit), rowIndex, 1);
+
+        rowIndex++;
+    }
+
+    layout->addWidget(colorMapSettings.getUseDataRangeAction().createLabelWidget(this), rowIndex, 0);
+    layout->addWidget(colorMapSettings.getUseDataRangeAction().createWidget(this), rowIndex, 1);
+
+    rowIndex++;
+
+    layout->addWidget(colorMapAxisAction->getMirrorAction().createWidget(this), rowIndex, 1);
 
     layout->setColumnStretch(1, 1);
 

@@ -14,8 +14,8 @@ namespace hdps::gui {
     constexpr float  DecimalRangeAction::INIT_NUMBER_OF_DECIMALS;
 #endif
 
-DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title, const float& limitMin /*= INIT_LIMIT_MIN*/, const float& limitMax /*= INIT_LIMIT_MAX*/, const float& rangeMin /*= INIT_RANGE_MIN*/, const float& rangeMax /*= INIT_RANGE_MAX*/, std::int32_t numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/) :
-    NumericalRangeAction(parent, title, limitMin, limitMax, rangeMin, rangeMax)
+DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title, const util::NumericalRange<float>& limits /*= util::NumericalRange<float>(INIT_LIMIT_MIN, INIT_LIMIT_MAX)*/, const util::NumericalRange<float>& range /*= util::NumericalRange<float>(INIT_RANGE_MIN, INIT_RANGE_MAX)*/, std::int32_t numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/) :
+    NumericalRangeAction(parent, title, limits, range)
 {
     getRangeMinAction().setNumberOfDecimals(numberOfDecimals);
     getRangeMaxAction().setNumberOfDecimals(numberOfDecimals);
@@ -33,6 +33,39 @@ DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title, co
 
         emit rangeChanged(_rangeMinAction.getValue(), _rangeMaxAction.getValue());
     });
+}
+
+QWidget* DecimalRangeAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+{
+    auto widget = new WidgetActionWidget(parent, this);
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    if (widgetFlags & WidgetFlag::MinimumSpinBox)
+        layout->addWidget(_rangeMinAction.createWidget(widget, DecimalAction::SpinBox));
+
+    if (widgetFlags & WidgetFlag::MinimumLineEdit)
+        layout->addWidget(_rangeMinAction.createWidget(widget, DecimalAction::LineEdit));
+
+    if (widgetFlags & WidgetFlag::Slider) {
+        auto slidersLayout = new QHBoxLayout();
+
+        slidersLayout->addWidget(_rangeMinAction.createWidget(widget, DecimalAction::Slider));
+        slidersLayout->addWidget(_rangeMaxAction.createWidget(widget, DecimalAction::Slider));
+
+        layout->addLayout(slidersLayout);
+    }
+
+    if (widgetFlags & WidgetFlag::MaximumSpinBox)
+        layout->addWidget(_rangeMaxAction.createWidget(widget, DecimalAction::SpinBox));
+
+    if (widgetFlags & WidgetFlag::MaximumLineEdit)
+        layout->addWidget(_rangeMaxAction.createWidget(widget, DecimalAction::LineEdit));
+
+    widget->setLayout(layout);
+
+    return widget;
 }
 
 DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags /*= 0*/) :

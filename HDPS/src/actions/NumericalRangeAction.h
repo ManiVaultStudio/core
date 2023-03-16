@@ -2,6 +2,8 @@
 
 #include "WidgetAction.h"
 
+#include "util/NumericalRange.h"
+
 namespace hdps::gui {
 
 /**
@@ -16,16 +18,27 @@ class NumericalRangeAction : public WidgetAction
 {
 public:
 
+    /** Describes the widget settings */
+    enum WidgetFlag {
+        MinimumSpinBox  = 0x00001,      /** Widget includes a spin box for the minimum range*/
+        MinimumLineEdit = 0x00002,      /** Widget includes a label for the minimum range*/
+        Slider          = 0x00004,      /** Widget includes a slider */
+        MaximumSpinBox  = 0x00008,      /** Widget includes a spin box for the maximum range */
+        MaximumLineEdit = 0x00010,      /** Widget includes a label for the maximum range */
+
+        Default = MinimumSpinBox | Slider | MaximumSpinBox
+    };
+
+public:
+
     /**
      * Constructor
      * @param parent Pointer to parent object
      * @param title Title of the action
-     * @param limitMin Range lower limit
-     * @param limitMax Range upper limit
-     * @param rangeMin Range minimum
-     * @param rangeMax Range maximum
+     * @param limits Limits
+     * @param range Range
      */
-    NumericalRangeAction(QObject* parent, const QString& title, const NumericalType& limitMin, const NumericalType& limitMax, const NumericalType& rangeMin, const NumericalType& rangeMax) :
+    NumericalRangeAction(QObject* parent, const QString& title, const util::NumericalRange<NumericalType>& limits, const util::NumericalRange<NumericalType>& range) :
         WidgetAction(parent),
         _rangeMinAction(this, "Range Minimum"),
         _rangeMaxAction(this, "Range Maximum")
@@ -36,27 +49,25 @@ public:
         _rangeMinAction.setSerializationName("Min");
         _rangeMaxAction.setSerializationName("Max");
 
-        initialize(limitMin, limitMax, rangeMin, rangeMax);
+        initialize(limits, range);
     }
 
     /**
-     * Initializes the numerical range action
-     * @param limitMin Range lower limit
-     * @param limitMax Range upper limit
-     * @param rangeMin Range minimum
+     * Initializes the numerical range action with \p limits and \p range
+     * @param limits Limits
+     * @param range Range
      */
-    void initialize(const NumericalType& limitMin, const NumericalType& limitMax, const NumericalType& rangeMin, const NumericalType& rangeMax)
+    void initialize(const util::NumericalRange<NumericalType>& limits, const util::NumericalRange<NumericalType>& range)
     {
-        _rangeMinAction.initialize(limitMin, limitMax, rangeMin, rangeMin);
-        _rangeMaxAction.initialize(limitMin, limitMax, rangeMax, rangeMax);
+        _rangeMinAction.initialize(limits.getMinimum(), limits.getMaximum(), range.getMinimum(), range.getMinimum());
+        _rangeMaxAction.initialize(limits.getMinimum(), limits.getMaximum(), range.getMaximum(), range.getMaximum());
     }
 
     /**
      * Get range minimum
      * @return Range minimum
      */
-    NumericalType getMinimum() const
-    {
+    NumericalType getMinimum() const {
         return _rangeMinAction.getValue();
     }
 
@@ -64,8 +75,7 @@ public:
      * Set range minimum to \p minimum
      * @return Range minimum
      */
-    void setMinimum(NumericalType minimum)
-    {
+    void setMinimum(NumericalType minimum) {
         _rangeMinAction.setValue(minimum);
     }
 
@@ -73,8 +83,7 @@ public:
      * Get range maximum
      * @return Range maximum
      */
-    NumericalType getMaximum() const
-    {
+    NumericalType getMaximum() const {
         return _rangeMaxAction.getValue();
     }
 
@@ -82,33 +91,29 @@ public:
      * Set range maximum to \p maximum
      * @return Range maximum
      */
-    void setMaximum(NumericalType maximum)
-    {
+    void setMaximum(NumericalType maximum) {
         _rangeMaxAction.setValue(maximum);
     }
 
+    /** Get the range */
+    util::NumericalRange<NumericalType> getRange() const {
+        return util::NumericalRange<NumericalType>(_rangeMinAction.getValue(), _rangeMaxAction.getValue());
+    }
+
     /**
-     * Sets the range to \p minimum and \p maximum
-     * @param minimum Range minimum
-     * @param maximum Range maximum
+     * Sets the range to \p range
+     * @param range Range
      */
-    void setRange(const NumericalType& minimum, const NumericalType& maximum)
-    {
-        Q_ASSERT(minimum < maximum);
-
-        if (minimum > maximum)
-            return;
-
-        _rangeMinAction.initialize(minimum, maximum, minimum, minimum);
-        _rangeMaxAction.initialize(minimum, maximum, maximum, maximum);
+    void setRange(const util::NumericalRange<NumericalType>& range) {
+        _rangeMinAction.initialize(range.getMinimum(), range.getMaximum(), range.getMinimum(), range.getMinimum());
+        _rangeMaxAction.initialize(range.getMinimum(), range.getMaximum(), range.getMaximum(), range.getMaximum());
     }
 
     /**
      * Get limits minimum
      * @return Limits minimum
      */
-    NumericalType getLimitsMinimum() const
-    {
+    NumericalType getLimitsMinimum() const {
         return _rangeMinAction.getMinimum();
     }
 
@@ -116,8 +121,7 @@ public:
      * Set limits minimum to \p limitsMinimum
      * @param limitsMinimum Limits minimum
      */
-    void setLimitsMinimum(NumericalType limitsMinimum)
-    {
+    void setLimitsMinimum(NumericalType limitsMinimum) {
         _rangeMinAction.setMinimum(limitsMinimum);
     }
 
@@ -125,8 +129,7 @@ public:
      * Get limits maximum
      * @return Limits maximum
      */
-    NumericalType getLimitsMaximum() const
-    {
+    NumericalType getLimitsMaximum() const {
         return _rangeMaxAction.getMaximum();
     }
 
@@ -134,25 +137,22 @@ public:
      * Set limits maximum to \p limitsMaximum
      * @param limitsMaximum Limits maximum
      */
-    void setLimitsMaximum(NumericalType limitsMaximum)
-    {
+    void setLimitsMaximum(NumericalType limitsMaximum) {
         _rangeMaxAction.setMaximum(limitsMaximum);
     }
 
+    /** Get the limits */
+    util::NumericalRange<NumericalType> getLimits() const {
+        return util::NumericalRange<NumericalType>(_rangeMinAction.getMinimum(), _rangeMaxAction.getMaximum());
+    }
+
     /**
-     * Set limits to \p limitsMinimum and \p limitsMaximum
-     * @param limitsMinimum Limits minimum
-     * @param limitsMaximum Limits maximum
+     * Set limits to \p limits
+     * @param limits Limits
      */
-    void setLimits(const NumericalType& limitsMinimum, const NumericalType& limitsMaximum)
-    {
-        Q_ASSERT(limitsMinimum < limitsMaximum);
-
-        if (limitsMinimum > limitsMaximum)
-            return;
-
-        setLimitsMinimum(limitsMinimum);
-        setLimitsMaximum(limitsMaximum);
+    void setLimits(const util::NumericalRange<NumericalType>& limits) {
+        setLimitsMinimum(limits.getMinimum());
+        setLimitsMaximum(limits.getMaximum());
     }
 
 public: // Serialization

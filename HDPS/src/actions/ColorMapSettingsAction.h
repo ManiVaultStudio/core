@@ -13,6 +13,7 @@
 #include "ToggleAction.h"
 #include "TriggerAction.h"
 #include "IntegralAction.h"
+#include "HorizontalGroupAction.h"
 
 namespace hdps::gui {
 
@@ -94,15 +95,25 @@ public: // Action getters
     ColorMapSettings1DAction& getSettings1DAction() { return _settingsOneDimensionalAction; }
     ColorMapSettings2DAction& getSettings2DAction() { return _settingsTwoDimensionalAction; }
     ColorMapEditor1DAction& getEditor1DAction() { return _editorOneDimensionalAction; }
+    ToggleAction& getUseLocalDataRange() { return _syncWithLocalDataRange; }
+    ToggleAction& getUseGlobalDataRange() { return _syncWithGlobalDataRange; }
+    HorizontalGroupAction& getUseDataRangeAction() { return _syncWithDataRangeAction; }
+    DecimalRangeAction& getLocalDataRangeOneDimensionalAction() { return _localDataRangeOneDimensionalAction; }
+    DecimalRangeAction& getGlobalDataRangeOneDimensionalAction() { return _globalDataRangeOneDimensionalAction; }
 
 protected:
-    ColorMapAction&             _colorMapAction;                    /** Reference to color map action */
-    ColorMapAxisAction          _horizontalAxisAction;              /** Horizontal axis action (used in 1D settings action) */
-    ColorMapAxisAction          _verticalAxisAction;                /** Vertical axis action (used in 1D + 2D settings action) */
-    ColorMapDiscreteAction      _discreteAction;                    /** Discrete action (used in 1D + 2D settings action) */
-    ColorMapSettings1DAction    _settingsOneDimensionalAction;      /** One-dimensional settings action */
-    ColorMapSettings2DAction    _settingsTwoDimensionalAction;      /** Two-dimensional settings action */
-    ColorMapEditor1DAction      _editorOneDimensionalAction;        /** One-dimensional editor action */
+    ColorMapAction&             _colorMapAction;                        /** Reference to color map action */
+    ColorMapAxisAction          _horizontalAxisAction;                  /** Horizontal axis action (used in 1D settings action) */
+    ColorMapAxisAction          _verticalAxisAction;                    /** Vertical axis action (used in 1D + 2D settings action) */
+    ColorMapDiscreteAction      _discreteAction;                        /** Discrete action (used in 1D + 2D settings action) */
+    ColorMapSettings1DAction    _settingsOneDimensionalAction;          /** One-dimensional settings action */
+    ColorMapSettings2DAction    _settingsTwoDimensionalAction;          /** Two-dimensional settings action */
+    ColorMapEditor1DAction      _editorOneDimensionalAction;            /** One-dimensional editor action */
+    ToggleAction                _syncWithLocalDataRange;                     /** Use local data range */
+    ToggleAction                _syncWithGlobalDataRange;                    /** Use global data range */
+    HorizontalGroupAction       _syncWithDataRangeAction;                    /** Use data range (combined local and global) */
+    DecimalRangeAction          _localDataRangeOneDimensionalAction;    /** One-dimensional local data range of the dataset which is associated with the color map */
+    DecimalRangeAction          _globalDataRangeOneDimensionalAction;   /** One-dimensional global data range (in case the color map is public, this data range is the absolute min/max of all connected color maps) */
 
     /** Only color map actions may instantiate this class */
     friend class ColorMapAction;

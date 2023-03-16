@@ -79,12 +79,14 @@ public: // Serialization
 
 public: // Action getters
 
+    ColorMapSettingsAction& getColorMapSettingsAction() { return _colorMapSettingsAction; }
     DecimalRangeAction& getRangeAction() { return _rangeAction; }
     ToggleAction& getMirrorAction() { return _mirrorAction; }
 
 protected:
-    DecimalRangeAction  _rangeAction;       /** Range action */
-    ToggleAction        _mirrorAction;      /** Mirror along the axis action */
+    ColorMapSettingsAction& _colorMapSettingsAction;    /** Reference to owning color map settings action */
+    DecimalRangeAction      _rangeAction;               /** Range action */
+    ToggleAction            _mirrorAction;              /** Mirror along the axis action */
 
     /** Only color map settings action may instantiate this class */
     friend class ColorMapSettingsAction;

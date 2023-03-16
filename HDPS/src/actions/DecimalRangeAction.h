@@ -42,9 +42,7 @@ protected:
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new DecimalRangeWidget(parent, this);
-    };
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;;
 
 public:
 
@@ -57,8 +55,8 @@ public:
      * @param rangeMin Range minimum
      * @param rangeMax Range maximum
      */
-    DecimalRangeAction(QObject* parent, const QString& title, const float& limitMin = INIT_LIMIT_MIN, const float& limitMax = INIT_LIMIT_MAX, const float& rangeMin = INIT_RANGE_MIN, const float& rangeMax = INIT_RANGE_MAX, std::int32_t numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
-
+    DecimalRangeAction(QObject* parent, const QString& title, const util::NumericalRange<float>& limits = util::NumericalRange<float>(INIT_LIMIT_MIN, INIT_LIMIT_MAX), const util::NumericalRange<float>& range = util::NumericalRange<float>(INIT_RANGE_MIN, INIT_RANGE_MAX), std::int32_t numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
+    
 signals:
 
     /**

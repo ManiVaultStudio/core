@@ -4,6 +4,7 @@
 
 #include <QDoubleSpinBox>
 #include <QSlider>
+#include <QLineEdit>
 
 class QWidget;
 class QPushButton;
@@ -49,6 +50,21 @@ public:
          * @param decimalAction Pointer to decimal action
          */
         SliderWidget(QWidget* parent, DecimalAction* decimalAction);
+
+        friend class DecimalAction;
+    };
+
+    /** Line edit widget class for decimal action */
+    class LineEditWidget : public QLineEdit
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param decimalAction Pointer to decimal action
+         */
+        QLineEdit(QWidget* parent, DecimalAction* decimalAction);
 
         friend class DecimalAction;
     };

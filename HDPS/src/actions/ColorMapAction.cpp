@@ -19,16 +19,13 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     WidgetAction(parent),
     _currentColorMapAction(this, "Current color map"),
     _colorMapFilterModel(this, colorMapType),
-    _settingsAction(*this),
-    _dataRange1dAction(this, "One-dimensional data range"),
-    _globalDataRange1dAction(this, "Global one-dimensional data range"),
-    _useGlobalDataRange1d(this, "Use global one-dimensional data range")
+    _settingsAction(*this)
 {
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
     setDefaultWidgetFlags(WidgetFlag::Default);
     setSerializationName("ColorMap");
-    
+
     _currentColorMapAction.setSerializationName("Current");
 
     initialize(colorMap, defaultColorMap);
@@ -256,10 +253,6 @@ void ColorMapAction::connectToPublicAction(WidgetAction* publicAction)
     _currentColorMapAction.connectToPublicAction(&publicColorMapAction->getCurrentColorMapAction());
 
     _settingsAction.connectToPublicAction(&publicColorMapAction->getSettingsAction());
-
-    connect(&publicColorMapAction->getGlobalDataRange1dAction(), &DecimalRangeAction::rangeChanged, this, [this]() -> void {
-
-    });
 
     WidgetAction::connectToPublicAction(publicAction);
 }

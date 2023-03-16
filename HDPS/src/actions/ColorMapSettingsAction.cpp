@@ -11,12 +11,17 @@ namespace hdps::gui {
 ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction),
-    _horizontalAxisAction(*this, "Horizontal Axis"),
-    _verticalAxisAction(*this, "Vertical Axis"),
+    _horizontalAxisAction(*this, "Range"),
+    _verticalAxisAction(*this, "Range"),
     _discreteAction(*this),
     _settingsOneDimensionalAction(colorMapAction),
     _settingsTwoDimensionalAction(colorMapAction),
-    _editorOneDimensionalAction(colorMapAction)
+    _editorOneDimensionalAction(colorMapAction),
+    _syncWithLocalDataRange(this, "Local Data Range"),
+    _syncWithGlobalDataRange(this, "Global Data Range"),
+    _syncWithDataRangeAction(this, "Sync. with"),
+    _localDataRangeOneDimensionalAction(this, "Data Range"),
+    _globalDataRangeOneDimensionalAction(this, "Global Data Range")
 {
     setText("Settings");
     setIcon(Application::getIconFont("FontAwesome").getIcon("sliders-h"));
@@ -24,6 +29,23 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
 
     _horizontalAxisAction.setSerializationName("HorizontalAxis");
     _verticalAxisAction.setSerializationName("VerticalAxis");
+
+    _syncWithLocalDataRange.setSerializationName("UseLocalDataRange");
+    _syncWithGlobalDataRange.setSerializationName("UseGlobalDataRange");
+    _syncWithDataRangeAction.setSerializationName("UseDataRange");
+    _localDataRangeOneDimensionalAction.setSerializationName("LocalDataRangeOne1D");
+    _globalDataRangeOneDimensionalAction.setSerializationName("GlobalDataRangeOne1D");
+
+    _syncWithDataRangeAction.addAction(&_syncWithLocalDataRange);
+    _syncWithDataRangeAction.addAction(&_syncWithGlobalDataRange);
+
+    const auto updateUseGlobalDataRangeVisibility = [this]() -> void {
+        _syncWithGlobalDataRange.setVisible(_colorMapAction.isConnected());
+    };
+
+    updateUseGlobalDataRangeVisibility();
+
+    connect(&_colorMapAction, &ColorMapAction::isConnectedChanged, this, updateUseGlobalDataRangeVisibility);
 }
 
 void ColorMapSettingsAction::connectToPublicAction(WidgetAction* publicAction)
@@ -35,6 +57,12 @@ void ColorMapSettingsAction::connectToPublicAction(WidgetAction* publicAction)
     _horizontalAxisAction.connectToPublicAction(&publicColorMapSettingsAction->getHorizontalAxisAction());
     _verticalAxisAction.connectToPublicAction(&publicColorMapSettingsAction->getVerticalAxisAction());
     _discreteAction.connectToPublicAction(&publicColorMapSettingsAction->getDiscreteAction());
+
+
+
+
+    //connect(&publicColorMapAction->getGlobalDataRange1dAction(), &DecimalRangeAction::rangeChanged, this, [this]() -> void {
+    //});
 }
 
 void ColorMapSettingsAction::disconnectFromPublicAction()
