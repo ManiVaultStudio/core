@@ -66,11 +66,11 @@ signals:
     void rangeChanged(const util::NumericalRange<float>& range);
 
 protected:
-    static constexpr float  INIT_LIMIT_MIN          = std::numeric_limits<float>::lowest();     /** Default minimum limit */
-    static constexpr float  INIT_LIMIT_MAX          = std::numeric_limits<float>::max();        /** Default maximum limit */
-    static constexpr float  INIT_RANGE_MIN          = 0.0f;                                     /** Default minimum range */
-    static constexpr float  INIT_RANGE_MAX          = 100.0f;                                   /** Default maximum range */
-    static constexpr float  INIT_NUMBER_OF_DECIMALS = 2;                                        /** Default number of decimals */
+    static constexpr float  INIT_LIMIT_MIN          = 0.0f;         /** Default minimum limit */
+    static constexpr float  INIT_LIMIT_MAX          = 100.0f;       /** Default maximum limit */
+    static constexpr float  INIT_RANGE_MIN          = 0.0f;         /** Default minimum range */
+    static constexpr float  INIT_RANGE_MAX          = 100.0f;       /** Default maximum range */
+    static constexpr float  INIT_NUMBER_OF_DECIMALS = 2;            /** Default number of decimals */
 };
 
 }

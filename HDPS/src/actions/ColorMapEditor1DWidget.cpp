@@ -70,7 +70,7 @@ void ColorMapEditor1DWidget::showEvent(QShowEvent* event)
     for (auto node : _colorMapEditor1DAction.getNodes())
         addNodeGraphicsItem(node);
 
-    connect(&_colorMapEditor1DAction.getColorMapAction().getSettingsAction().getHorizontalAxisAction().getRangeAction(), &DecimalRangeAction::rangeChanged, this, [this]() -> void {
+    connect(&_colorMapEditor1DAction.getColorMapAction().getRangeAction(ColorMapAction::Axis::X), &DecimalRangeAction::rangeChanged, this, [this]() -> void {
         _scene.update();
     });
 }
@@ -238,7 +238,7 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
         painter->drawLine(QPointF(textRectangle.center().x(), textRectangle.top() - 3), QPointF(textRectangle.center().x(), _graphRectangle.bottom()));
     };
 
-    auto& rangeAction = _colorMapEditor1DAction.getColorMapAction().getSettingsAction().getHorizontalAxisAction().getRangeAction();
+    auto& rangeAction = _colorMapEditor1DAction.getColorMapAction().getRangeAction(ColorMapAction::Axis::X);
 
     drawVerticalAxis(0.0f, rangeAction.getMinimum());
     drawVerticalAxis(1.0f, rangeAction.getMaximum());

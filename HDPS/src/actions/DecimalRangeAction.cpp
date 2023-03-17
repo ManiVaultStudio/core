@@ -43,7 +43,7 @@ QWidget* DecimalRangeAction::getWidget(QWidget* parent, const std::int32_t& widg
     layout->setContentsMargins(0, 0, 0, 0);
 
     if (widgetFlags & WidgetFlag::MinimumSpinBox)
-        layout->addWidget(_rangeMinAction.createWidget(widget, DecimalAction::SpinBox));
+        layout->addWidget(_rangeMinAction.createWidget(widget, DecimalAction::SpinBox), 1);
 
     if (widgetFlags & WidgetFlag::MinimumLineEdit)
         layout->addWidget(_rangeMinAction.createWidget(widget, DecimalAction::LineEdit));
@@ -51,17 +51,14 @@ QWidget* DecimalRangeAction::getWidget(QWidget* parent, const std::int32_t& widg
     if (widgetFlags & WidgetFlag::Slider) {
         auto slidersLayout = new QHBoxLayout();
 
-        auto minSliderWidget = _rangeMinAction.createWidget(widget, DecimalAction::Slider);
-
-        slidersLayout->addWidget(minSliderWidget);
-
-        _rangeMaxAction.createWidget(minSliderWidget, DecimalAction::Slider);
+        slidersLayout->addWidget(_rangeMinAction.createWidget(widget, DecimalAction::Slider), 2);
+        slidersLayout->addWidget(_rangeMaxAction.createWidget(widget, DecimalAction::Slider), 2);
 
         layout->addLayout(slidersLayout);
     }
 
     if (widgetFlags & WidgetFlag::MaximumSpinBox)
-        layout->addWidget(_rangeMaxAction.createWidget(widget, DecimalAction::SpinBox));
+        layout->addWidget(_rangeMaxAction.createWidget(widget, DecimalAction::SpinBox), 1);
 
     if (widgetFlags & WidgetFlag::MaximumLineEdit)
         layout->addWidget(_rangeMaxAction.createWidget(widget, DecimalAction::LineEdit));

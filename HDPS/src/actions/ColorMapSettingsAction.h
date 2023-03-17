@@ -1,19 +1,6 @@
 #pragma once
 
-#include "ColorMapRangeAction.h"
-#include "ColorMapViewAction.h"
-#include "ColorMapDiscreteAction.h"
-#include "ColorMapSettings1DAction.h"
-#include "ColorMapSettings2DAction.h"
-#include "ColorMapEditor1DAction.h"
-
 #include "WidgetAction.h"
-#include "DecimalAction.h"
-#include "DecimalRangeAction.h"
-#include "ToggleAction.h"
-#include "TriggerAction.h"
-#include "IntegralAction.h"
-#include "HorizontalGroupAction.h"
 
 namespace hdps::gui {
 
@@ -61,43 +48,14 @@ protected:
      */
     ColorMapSettingsAction(ColorMapAction& colorMapAction);
 
-private:
-
-    void synchronizeWithSharedDataRange();
-
-public: // Linking
-
-    /**
-     * Connect this action to a public action
-     * @param publicAction Pointer to public action to connect to
-     */
-    void connectToPublicAction(WidgetAction* publicAction) override;
-
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
-
-public: // Serialization
-
-    /**
-     * Load widget action from variant map
-     * @param Variant map representation of the widget action
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
-
-    /**
-     * Save widget action to variant map
-     * @return Variant map representation of the widget action
-     */
-    QVariantMap toVariantMap() const override;
-
 public: // Action getters
 
     ColorMapAction& getColorMapAction() { return _colorMapAction; }
 
 protected:
-    ColorMapAction&     _colorMapAction;                        /** Reference to color map action */
+    ColorMapAction&     _colorMapAction;        /** Reference to owning color map action */
 
-    /** Only color map actions may instantiate this class */
+    /** Only color map may instantiate this class */
     friend class ColorMapAction;
 };
 
