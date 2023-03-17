@@ -51,9 +51,6 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, QWidget* targetWidge
     setShortcutsEnabled(true);
 
     _targetWidget->installEventFilter(this);
-
-    _overlayColorAction.setConnectionPermissionsFlag(ConnectionPermissionFlag::All);
-    _overlayColorAction.publish("Global Selection Color");
 }
 
 QWidget* PixelSelectionAction::getTargetWidget()

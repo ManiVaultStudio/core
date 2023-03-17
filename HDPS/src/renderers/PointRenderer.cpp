@@ -413,6 +413,8 @@ namespace hdps
             _shader.uniform1f("pointOpacity", _pointSettings._alpha);
             _shader.uniform1i("scalarEffect", _pointEffect);
             
+            _shader.uniform4f("dataBounds", _bounds.getLeft(), _bounds.getRight(), _bounds.getBottom(), _bounds.getTop());
+
             _shader.uniform1i("selectionDisplayMode", static_cast<std::int32_t>(_selectionDisplayMode));
             _shader.uniform1f("selectionOutlineScale", _selectionOutlineScale);
             _shader.uniform3f("selectionOutlineColor", _selectionOutlineColor);
@@ -430,7 +432,7 @@ namespace hdps
             if (_gpuPoints.hasColorScalars())
                 _shader.uniform3f("colorMapRange", _gpuPoints.getColorMapRange());
 
-            if (_pointEffect == PointEffect::Color) {
+            if (_pointEffect == PointEffect::Color || PointEffect::Color2D) {
                 _colormap.bind(0);
                 _shader.uniform1i("colormap", 0);
             }
