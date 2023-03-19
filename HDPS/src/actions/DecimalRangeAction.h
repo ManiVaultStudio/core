@@ -57,7 +57,32 @@ public:
      */
     DecimalRangeAction(QObject* parent, const QString& title, const util::NumericalRange<float>& limits = util::NumericalRange<float>(INIT_LIMIT_MIN, INIT_LIMIT_MAX), const util::NumericalRange<float>& range = util::NumericalRange<float>(INIT_RANGE_MIN, INIT_RANGE_MAX), std::int32_t numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
     
+public: // Linking
+
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     */
+    void connectToPublicAction(WidgetAction* publicAction) override;
+
+    /** Disconnect this action from a public action */
+    void disconnectFromPublicAction() override;
+
+protected:  // Linking
+
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    virtual WidgetAction* getPublicCopy() const override;
+
 signals:
+
+    /**
+     * Signals that the limits changed to \p limits
+     * @param limits Limits
+     */
+    void limitsChanged(const util::NumericalRange<float>& limits);
 
     /**
      * Signals that the range changed to \p range

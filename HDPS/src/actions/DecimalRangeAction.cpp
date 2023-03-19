@@ -17,6 +17,9 @@ namespace hdps::gui {
 DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title, const util::NumericalRange<float>& limits /*= util::NumericalRange<float>(INIT_LIMIT_MIN, INIT_LIMIT_MAX)*/, const util::NumericalRange<float>& range /*= util::NumericalRange<float>(INIT_RANGE_MIN, INIT_RANGE_MAX)*/, std::int32_t numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/) :
     NumericalRangeAction(parent, title, limits, range)
 {
+    _limitsChanged  = [this]() -> void { emit limitsChanged(getLimits()); };
+    _rangeChanged   = [this]() -> void { emit rangeChanged(getRange()); };
+
     getRangeMinAction().setNumberOfDecimals(numberOfDecimals);
     getRangeMaxAction().setNumberOfDecimals(numberOfDecimals);
 
@@ -24,7 +27,7 @@ DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title, co
         if (value >= _rangeMaxAction.getValue())
             _rangeMaxAction.setValue(value);
 
-        emit rangeChanged({_rangeMinAction.getValue(), _rangeMaxAction.getValue() });
+        emit rangeChanged({ _rangeMinAction.getValue(), _rangeMaxAction.getValue() });
     });
 
     connect(&getRangeMaxAction(), &DecimalAction::valueChanged, this, [this](const float& value) -> void {
@@ -66,6 +69,30 @@ QWidget* DecimalRangeAction::getWidget(QWidget* parent, const std::int32_t& widg
     widget->setLayout(layout);
 
     return widget;
+}
+
+void DecimalRangeAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicDecimalRangeAction = dynamic_cast<DecimalRangeAction*>(publicAction);
+
+    Q_ASSERT(publicDecimalRangeAction != nullptr);
+
+    if (publicDecimalRangeAction == nullptr)
+        return;
+
+    getRangeMinAction().connectToPublicAction(&publicDecimalRangeAction->getRangeMinAction());
+    getRangeMaxAction().connectToPublicAction(&publicDecimalRangeAction->getRangeMaxAction());
+}
+
+void DecimalRangeAction::disconnectFromPublicAction()
+{
+    getRangeMinAction().disconnectFromPublicAction();
+    getRangeMaxAction().disconnectFromPublicAction();
+}
+
+WidgetAction* DecimalRangeAction::getPublicCopy() const
+{
+    return new DecimalRangeAction(parent(), text(), getLimits(), getRange());
 }
 
 DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags /*= 0*/) :

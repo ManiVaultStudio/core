@@ -23,7 +23,7 @@ ColorMapEditor1DAction::ColorMapEditor1DAction(ColorMapAction& colorMapAction) :
     _nodeAction(*this),
     _colorMapImage(colorMapImageSize, QImage::Format::Format_ARGB32_Premultiplied)
 {
-    setText("Custom color map");
+    setText("1D custom color map");
     setIcon(Application::getIconFont("FontAwesome").getIcon("chart-line"));
     setSerializationName("Editor1D");
 

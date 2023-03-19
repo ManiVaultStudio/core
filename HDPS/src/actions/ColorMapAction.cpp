@@ -78,32 +78,84 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     getMirrorGroupAction().addAction(&getMirrorAction(Axis::Y));
 
     const auto updateSharedDataRange = [this]() -> void {
-        NumericalRange<float> sharedDataRangeOneDimensional;
+        NumericalRange<float> sharedDataRangeX(std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest());
 
         for (auto connectedAction : getConnectedActions()) {
             auto privateColorMapAction = dynamic_cast<ColorMapAction*>(connectedAction);
 
-            sharedDataRangeOneDimensional += privateColorMapAction->getDataRangeAction(Axis::X).getRange();
+            sharedDataRangeX += privateColorMapAction->getDataRangeAction(Axis::X).getRange();
         }
 
-        for (auto connectedAction : getConnectedActions()) {
-            auto privateColorMapAction = dynamic_cast<ColorMapAction*>(connectedAction);
+        getSharedDataRangeAction(Axis::X).setRange(sharedDataRangeX);
 
-            getSharedDataRangeAction(Axis::X).setRange(sharedDataRangeOneDimensional);
-        }
+        qDebug() << sharedDataRangeX;
     };
 
-    updateSharedDataRange();
+    //updateSharedDataRange();
 
-    connect(this, &ColorMapAction::actionConnected, this, [this, updateSharedDataRange](const WidgetAction* action) -> void {
-        connect(dynamic_cast<const DecimalRangeAction*>(action), &DecimalRangeAction::rangeChanged, this, updateSharedDataRange);
+    connect(this, &ColorMapAction::actionConnected, this, [this, updateSharedDataRange](const WidgetAction* privateAction) -> void {
+        if (!isPublic())
+            return;
+
+        auto privateColorMapAction = dynamic_cast<const ColorMapAction*>(privateAction);
+
+        if (privateColorMapAction == nullptr)
+            return;
+
+        connect(&privateColorMapAction->getDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, updateSharedDataRange);
+        connect(&privateColorMapAction->getDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, updateSharedDataRange);
+
+        updateSharedDataRange();
     });
 
-    connect(this, &ColorMapAction::actionDisconnected, this, [this](const WidgetAction* action) -> void {
-        disconnect(dynamic_cast<const DecimalRangeAction*>(action), &DecimalRangeAction::rangeChanged, this, nullptr);
+    connect(this, &ColorMapAction::actionDisconnected, this, [this, updateSharedDataRange](const WidgetAction* privateAction) -> void {
+        if (!isPublic())
+            return;
+
+        auto privateColorMapAction = dynamic_cast<const ColorMapAction*>(privateAction);
+
+        if (privateColorMapAction == nullptr)
+            return;
+
+        disconnect(&privateColorMapAction->getDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, nullptr);
+        disconnect(&privateColorMapAction->getDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, nullptr);
+
+        updateSharedDataRange();
     });
 
-    connect(&getSynchronizeWithSharedDataRangeAction(), &ToggleAction::toggled, this, updateSharedDataRange);
+    connect(&getSynchronizeWithSharedDataRangeAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        const auto sharedDataRange = getSharedDataRangeAction(Axis::X).getRange();
+
+        getRangeAction(Axis::X).initialize(sharedDataRange, sharedDataRange);
+    });
+
+    connect(&getRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, [this](const NumericalRange<float>& range) -> void {
+        if (!isConnected() || !getSynchronizeWithSharedDataRangeAction().isChecked())
+            return;
+
+        getSynchronizeWithSharedDataRangeAction().setChecked(false);
+    });
+
+    connect(&getRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, [this](const NumericalRange<float>& range) -> void {
+        if (!isConnected() || !getSynchronizeWithSharedDataRangeAction().isChecked())
+            return;
+
+        getSynchronizeWithSharedDataRangeAction().setChecked(false);
+    });
+
+    connect(&getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, [this](const NumericalRange<float>& range) -> void {
+        if (!getSynchronizeWithSharedDataRangeAction().isChecked())
+            return;
+
+        getDataRangeAction(Axis::X).initialize(range, range);
+    });
+
+    connect(&getSharedDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, [this](const NumericalRange<float>& range) -> void {
+        if (!getSynchronizeWithSharedDataRangeAction().isChecked())
+            return;
+
+        getDataRangeAction(Axis::Y).initialize(range, range);
+    });
 
     updateDiscretizationActions();
     updateEditorActionReadOnly();
@@ -156,20 +208,6 @@ void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString&
 
     getSharedDataRangeAction(Axis::X).setEnabled(false);
     getSharedDataRangeAction(Axis::Y).setEnabled(false);
-
-    connect(&getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, [this](const NumericalRange<float>& range) -> void {
-        if (!getSynchronizeWithSharedDataRangeAction().isChecked())
-            return;
-
-        getDataRangeAction(Axis::X).initialize(range, range);
-    });
-
-    connect(&getSharedDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, [this](const NumericalRange<float>& range) -> void {
-        if (!getSynchronizeWithSharedDataRangeAction().isChecked())
-            return;
-
-        getDataRangeAction(Axis::Y).initialize(range, range);
-    });
 
     getSharedDataRangeAction(Axis::X).setDefaultWidgetFlags(DecimalRangeAction::MinimumLineEdit | DecimalRangeAction::MaximumLineEdit);
     getSharedDataRangeAction(Axis::Y).setDefaultWidgetFlags(DecimalRangeAction::MinimumLineEdit | DecimalRangeAction::MaximumLineEdit);
@@ -344,10 +382,15 @@ void ColorMapAction::connectToPublicAction(WidgetAction* publicAction)
         return;
 
     getCurrentColorMapAction().connectToPublicAction(&publicColorMapAction->getCurrentColorMapAction());
-    //getRangeAction(Axis::X).connectToPublicAction(&publicColorMapAction->getRangeAction(Axis::X));
-    //getRangeAction(Axis::Y).connectToPublicAction(&publicColorMapAction->getRangeAction(Axis::Y));
-    getSharedDataRangeAction(Axis::X).connectToPublicAction(&publicColorMapAction->getSharedDataRangeAction(Axis::X));
-    getSharedDataRangeAction(Axis::Y).connectToPublicAction(&publicColorMapAction->getSharedDataRangeAction(Axis::Y));
+    
+    connect(&publicColorMapAction->getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, [this](const util::NumericalRange<float>& range) -> void {
+        getSharedDataRangeAction(Axis::X).setRange(range);
+    });
+
+    connect(&publicColorMapAction->getSharedDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, [this](const util::NumericalRange<float>& range) -> void {
+        getSharedDataRangeAction(Axis::Y).setRange(range);
+    });
+
     getMirrorAction(Axis::X).connectToPublicAction(&publicColorMapAction->getMirrorAction(Axis::X));
     getMirrorAction(Axis::Y).connectToPublicAction(&publicColorMapAction->getMirrorAction(Axis::Y));
     getDiscretizeAction().connectToPublicAction(&publicColorMapAction->getDiscretizeAction());
@@ -360,11 +403,18 @@ void ColorMapAction::connectToPublicAction(WidgetAction* publicAction)
 
 void ColorMapAction::disconnectFromPublicAction()
 {
+    auto publicColorMapAction = dynamic_cast<ColorMapAction*>(getPublicAction());
+
+    Q_ASSERT(publicColorMapAction != nullptr);
+
+    if (publicColorMapAction == nullptr)
+        return;
+
     getCurrentColorMapAction().disconnectFromPublicAction();
-    //getRangeAction(Axis::X).disconnectFromPublicAction();
-    //getRangeAction(Axis::Y).disconnectFromPublicAction();
-    getSharedDataRangeAction(Axis::X).disconnectFromPublicAction();
-    getSharedDataRangeAction(Axis::Y).disconnectFromPublicAction();
+    
+    disconnect(&publicColorMapAction->getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, nullptr);
+    disconnect(&publicColorMapAction->getSharedDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, nullptr);
+
     getMirrorAction(Axis::X).disconnectFromPublicAction();
     getMirrorAction(Axis::Y).disconnectFromPublicAction();
     getDiscretizeAction().disconnectFromPublicAction();
@@ -423,6 +473,7 @@ ColorMapAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* op
     setObjectName("ComboBox");
 
     QPalette palette = this->palette();
+
     palette.setColor(QPalette::Text, QColor(0, 0, 0, 0));
     
     setPalette(palette);

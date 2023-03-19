@@ -10,8 +10,7 @@ ColorMapSettings2DAction::ColorMapSettings2DAction(ColorMapAction& colorMapActio
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction)
 {
-    setText("Settings 2D");
-    setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    setText("2D color map settings");
 }
 
 ColorMapSettings2DAction::Widget::Widget(QWidget* parent, ColorMapSettings2DAction* colorMapSettings2DAction) :

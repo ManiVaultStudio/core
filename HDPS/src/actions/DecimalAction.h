@@ -67,7 +67,7 @@ public:
         LineEditWidget(QWidget* parent, DecimalAction* decimalAction);
 
     private:
-        QDoubleValidator    _doubleValidator;
+        QDoubleValidator    _validator;
 
         friend class DecimalAction;
     };

@@ -5,16 +5,13 @@
 
 #include <QVBoxLayout>
 
-using namespace hdps::util;
-
 namespace hdps::gui {
 
 ColorMapSettings1DAction::ColorMapSettings1DAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction)
 {
-    setText("Settings 1D");
-    setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    setText("1D color map settings");
 }
 
 ColorMapSettings1DAction::Widget::Widget(QWidget* parent, ColorMapSettings1DAction* colorMapSettings1DAction) :

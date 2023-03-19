@@ -16,6 +16,10 @@ namespace hdps::gui {
 template<typename NumericalType, typename NumericalActionType>
 class NumericalRangeAction : public WidgetAction
 {
+    /** Templated classes with Q_OBJECT macro are not allowed, so use std functions instead */
+    using LimitsChangedCB   = std::function<void()>;
+    using RangeChangedCB    = std::function<void()>;
+
 public:
 
     /** Describes the widget settings */
@@ -81,6 +85,8 @@ public:
      */
     void setMinimum(NumericalType minimum) {
         _rangeMinAction.setValue(minimum);
+
+        _rangeChanged();
     }
 
     /**
@@ -97,6 +103,8 @@ public:
      */
     void setMaximum(NumericalType maximum) {
         _rangeMaxAction.setValue(maximum);
+
+        _rangeChanged();
     }
 
     /** Get the range */
@@ -111,6 +119,8 @@ public:
     void setRange(const util::NumericalRange<NumericalType>& range) {
         _rangeMinAction.initialize(range.getMinimum(), range.getMaximum(), range.getMinimum(), range.getMinimum());
         _rangeMaxAction.initialize(range.getMinimum(), range.getMaximum(), range.getMaximum(), range.getMaximum());
+
+        _rangeChanged();
     }
 
     /**
@@ -127,6 +137,8 @@ public:
      */
     void setLimitsMinimum(NumericalType limitsMinimum) {
         _rangeMinAction.setMinimum(limitsMinimum);
+
+        _limitsChanged();
     }
 
     /**
@@ -143,6 +155,8 @@ public:
      */
     void setLimitsMaximum(NumericalType limitsMaximum) {
         _rangeMaxAction.setMaximum(limitsMaximum);
+
+        _limitsChanged();
     }
 
     /** Get the limits */
@@ -157,6 +171,8 @@ public:
     void setLimits(const util::NumericalRange<NumericalType>& limits) {
         setLimitsMinimum(limits.getMinimum());
         setLimitsMaximum(limits.getMaximum());
+
+        _limitsChanged();
     }
 
 public: // Serialization
@@ -193,8 +209,10 @@ public: // Action getters
     NumericalActionType& getRangeMaxAction() { return _rangeMaxAction; }
 
 protected:
-    NumericalActionType     _rangeMinAction;    /** Minimum range numerical action */
-    NumericalActionType     _rangeMaxAction;    /** Maximum range numerical action */
+    NumericalActionType     _rangeMinAction;        /** Minimum range numerical action */
+    NumericalActionType     _rangeMaxAction;        /** Maximum range numerical action */
+    LimitsChangedCB         _limitsChanged;         /** Callback which is called when the limits change */
+    RangeChangedCB          _rangeChanged;          /** Callback which is called when the range changes */
 };
 
 }

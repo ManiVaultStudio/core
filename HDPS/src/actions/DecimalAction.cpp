@@ -72,6 +72,17 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
 
     Q_ASSERT(publicDecimalAction != nullptr);
 
+    if (publicDecimalAction == nullptr)
+        return;
+
+    connect(this, &DecimalAction::minimumChanged, publicDecimalAction, [publicDecimalAction](const float& minimum) -> void {
+        publicDecimalAction->setMinimum(minimum);
+    });
+
+    connect(this, &DecimalAction::maximumChanged, publicDecimalAction, [publicDecimalAction](const float& maximum) -> void {
+        publicDecimalAction->setMaximum(maximum);
+    });
+
     connect(this, &DecimalAction::valueChanged, publicDecimalAction, [publicDecimalAction](const float& value) -> void {
         publicDecimalAction->setValue(value);
     });
@@ -80,6 +91,8 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
         setValue(value);
     });
 
+    setMinimum(publicDecimalAction->getMinimum());
+    setMaximum(publicDecimalAction->getMaximum());
     setValue(publicDecimalAction->getValue());
 
     WidgetAction::connectToPublicAction(publicAction);
@@ -91,6 +104,11 @@ void DecimalAction::disconnectFromPublicAction()
 
     Q_ASSERT(publicDecimalAction != nullptr);
 
+    if (publicDecimalAction == nullptr)
+        return;
+
+    disconnect(this, &DecimalAction::minimumChanged, publicDecimalAction, nullptr);
+    disconnect(this, &DecimalAction::maximumChanged, publicDecimalAction, nullptr);
     disconnect(this, &DecimalAction::valueChanged, publicDecimalAction, nullptr);
     disconnect(publicDecimalAction, &DecimalAction::valueChanged, this, nullptr);
 
@@ -125,7 +143,6 @@ QVariantMap DecimalAction::toVariantMap() const
 DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction) :
     QDoubleSpinBox(parent)
 {
-    setAcceptDrops(true);
     setObjectName("SpinBox");
 
     connect(this, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, decimalAction](double value) {
@@ -197,7 +214,6 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
 DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decimalAction) :
     QSlider(Qt::Horizontal, parent)
 {
-    setAcceptDrops(true);
     setObjectName("Slider");
     setRange(std::numeric_limits<std::int16_t>::lowest(), std::numeric_limits<std::int16_t>::max());
 
@@ -252,21 +268,23 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
 
 DecimalAction::LineEditWidget::LineEditWidget(QWidget* parent, DecimalAction* decimalAction) :
     QLineEdit(parent),
-    _doubleValidator()
+    _validator()
 {
-    _doubleValidator.setNotation(QDoubleValidator::StandardNotation);
+    setObjectName("LineEdit");
 
-    setValidator(&_doubleValidator);
+    _validator.setNotation(QDoubleValidator::StandardNotation);
 
-    const auto updateDoubleValidator = [this, decimalAction]() -> void {
-        _doubleValidator.setBottom(decimalAction->getMinimum());
-        _doubleValidator.setTop(decimalAction->getMaximum());
+    setValidator(&_validator);
+
+    const auto updateValidator = [this, decimalAction]() -> void {
+        _validator.setBottom(decimalAction->getMinimum());
+        _validator.setTop(decimalAction->getMaximum());
     };
 
-    updateDoubleValidator();
+    updateValidator();
 
-    connect(decimalAction, &DecimalAction::minimumChanged, this, updateDoubleValidator);
-    connect(decimalAction, &DecimalAction::maximumChanged, this, updateDoubleValidator);
+    connect(decimalAction, &DecimalAction::minimumChanged, this, updateValidator);
+    connect(decimalAction, &DecimalAction::maximumChanged, this, updateValidator);
 
     const auto updateText = [this, decimalAction]() -> void {
         QSignalBlocker blocker(this);

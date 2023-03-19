@@ -17,7 +17,7 @@ namespace hdps::gui {
 template<typename NumericalType>
 class NumericalAction : public WidgetAction
 {
-    /** Templated classes with Q_OBJECT macro are not allowed, so use function pointers in stead */
+    /** Templated classes with Q_OBJECT macro are not allowed, so use std functions instead */
     using ValueChangedCB                = std::function<void()>;
     using DefaultValueChangedCB         = std::function<void()>;
     using MinimumChangedCB              = std::function<void()>;
