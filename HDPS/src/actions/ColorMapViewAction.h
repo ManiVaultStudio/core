@@ -2,9 +2,7 @@
 
 #include "WidgetAction.h"
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 class ColorMapAction;
 
@@ -62,5 +60,4 @@ protected:
     friend class ColorMapSettings2DAction;
 };
 
-}
 }

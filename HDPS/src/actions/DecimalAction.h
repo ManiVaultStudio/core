@@ -4,6 +4,7 @@
 
 #include <QDoubleSpinBox>
 #include <QSlider>
+#include <QLineEdit>
 
 class QWidget;
 class QPushButton;
@@ -49,6 +50,24 @@ public:
          * @param decimalAction Pointer to decimal action
          */
         SliderWidget(QWidget* parent, DecimalAction* decimalAction);
+
+        friend class DecimalAction;
+    };
+
+    /** Line edit widget class for decimal action */
+    class LineEditWidget : public QLineEdit
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param decimalAction Pointer to decimal action
+         */
+        LineEditWidget(QWidget* parent, DecimalAction* decimalAction);
+
+    private:
+        QDoubleValidator    _validator;
 
         friend class DecimalAction;
     };
@@ -172,10 +191,10 @@ signals:
     void suffixChanged(const QString& suffix);
 
     /**
-     * Signals that the number of decimals changed
+     * Signals that the number of decimals changed to \p numberOfDecimals
      * @param numberOfDecimals Number of decimals
      */
-    void numberOfDecimalsChanged(const std::uint32_t& numberOfDecimals);
+    void numberOfDecimalsChanged(std::uint32_t numberOfDecimals);
 
     /**
      * Signals that the single step changed

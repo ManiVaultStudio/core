@@ -1,8 +1,5 @@
 #include "NumericalAction.h"
 
-namespace hdps {
+namespace hdps::gui {
 
-namespace gui {
-
-}
 }

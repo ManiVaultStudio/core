@@ -1,11 +1,20 @@
 #pragma once
 
 #include "WidgetAction.h"
-#include "OptionAction.h"
-#include "ColorMapSettingsAction.h"
+
 #include "util/ColorMap.h"
 #include "util/ColorMapModel.h"
 #include "util/ColorMapFilterModel.h"
+
+#include "OptionAction.h"
+#include "DecimalRangeAction.h"
+#include "ToggleAction.h"
+#include "IntegralAction.h"
+#include "HorizontalGroupAction.h"
+#include "ColorMapSettings1DAction.h"
+#include "ColorMapSettings2DAction.h"
+#include "ColorMapEditor1DAction.h"
+#include "ColorMapSettingsAction.h"
 
 namespace hdps::gui {
 
@@ -28,6 +37,14 @@ public:
         EditRange   = 0x00002,      /** Users are allowed to change the color map range */
 
         Default = Settings | EditRange
+    };
+
+    /** Axis enum for distinguishing between x- and y axis part of the color map (range) */
+    enum class Axis {
+        X = 0,      /** Along x-axis */
+        Y,          /** Along x-axis */
+
+        Count
     };
 
 public:
@@ -168,13 +185,58 @@ signals:
 
 public: // Action getters
 
+    const OptionAction& getCurrentColorMapAction() const { return _currentColorMapAction; }
+    const DecimalRangeAction& getRangeAction(const Axis& axis) const { return _rangeAction[static_cast<int>(axis)]; }
+    const DecimalRangeAction& getDataRangeAction(const Axis& axis) const { return _dataRangeAction[static_cast<int>(axis)]; }
+    const DecimalRangeAction& getSharedDataRangeAction(const Axis& axis) const { return _sharedDataRangeAction[static_cast<int>(axis)]; }
+    const ToggleAction& getLockToSharedDataRangeAction() const { return _lockToSharedDataRangeAction; }
+    const ToggleAction& getMirrorAction(const Axis& axis) const { return _mirrorAction[static_cast<int>(axis)]; }
+    const HorizontalGroupAction& getMirrorGroupAction() const { return _mirrorGroupAction; }
+    const ToggleAction& getDiscretizeAction() const { return _discretizeAction; }
+    const IntegralAction& getNumberOfDiscreteStepsAction()const { return _numberOfDiscreteStepsAction; }
+    const ToggleAction& getDiscretizeAlphaAction() const { return _discretizeAlphaAction; }
+    const ColorMapSettings1DAction& getSettings1DAction() const { return _settings1DAction; }
+    const ColorMapSettings2DAction& getSettings2DAction() const { return _settings2DAction; }
+    const ToggleAction& getCustomColorMapAction() const { return _customColorMapAction; }
+    const ColorMapEditor1DAction& getEditor1DAction() const { return _editor1DAction; }
+    const HorizontalGroupAction& getCustomColorMapGroupAction() const { return _customColorMapGroupAction; }
+    const ColorMapSettingsAction& getSettingsAction() const { return _settingsAction; }
+
     OptionAction& getCurrentColorMapAction() { return _currentColorMapAction; }
+    DecimalRangeAction& getRangeAction(const Axis& axis) { return _rangeAction[static_cast<int>(axis)]; }
+    DecimalRangeAction& getDataRangeAction(const Axis& axis) { return _dataRangeAction[static_cast<int>(axis)]; }
+    DecimalRangeAction& getSharedDataRangeAction(const Axis& axis) { return _sharedDataRangeAction[static_cast<int>(axis)]; }
+    ToggleAction& getLockToSharedDataRangeAction() { return _lockToSharedDataRangeAction; }
+    ToggleAction& getMirrorAction(const Axis& axis) { return _mirrorAction[static_cast<int>(axis)]; }
+    HorizontalGroupAction& getMirrorGroupAction() { return _mirrorGroupAction; }
+    ToggleAction& getDiscretizeAction() { return _discretizeAction; }
+    IntegralAction& getNumberOfDiscreteStepsAction() { return _numberOfDiscreteStepsAction; }
+    ToggleAction& getDiscretizeAlphaAction() { return _discretizeAlphaAction; }
+    ColorMapSettings1DAction& getSettings1DAction() { return _settings1DAction; }
+    ColorMapSettings2DAction& getSettings2DAction() { return _settings2DAction; }
+    ToggleAction& getCustomColorMapAction() { return _customColorMapAction; }
+    ColorMapEditor1DAction& getEditor1DAction() { return _editor1DAction; }
+    HorizontalGroupAction& getCustomColorMapGroupAction() { return _customColorMapGroupAction; }
     ColorMapSettingsAction& getSettingsAction() { return _settingsAction; }
 
 protected:
-    OptionAction                _currentColorMapAction;     /** Current color map selection action */
-    util::ColorMapFilterModel   _colorMapFilterModel;       /** The filtered color map model (contains either 1D or 2D color maps) */
-    ColorMapSettingsAction      _settingsAction;            /** Color map settings action */
+    util::ColorMapFilterModel   _colorMapFilterModel;                                   /** The filtered color map model (contains either 1D or 2D color maps) */
+    OptionAction                _currentColorMapAction;                                 /** Current color map selection action */
+    DecimalRangeAction          _rangeAction[static_cast<int>(Axis::Count)];            /** Color map range action (1D/2D color map) */
+    DecimalRangeAction          _dataRangeAction[static_cast<int>(Axis::Count)];        /** Range of the associated dataset (1D/2D color map) */
+    DecimalRangeAction          _sharedDataRangeAction[static_cast<int>(Axis::Count)];  /** Shared range (1D/2D color map) of all connected color maps (if the color map is connected to a public color map) */
+    ToggleAction                _lockToSharedDataRangeAction;                           /** Lock to shared data range action */
+    ToggleAction                _mirrorAction[static_cast<int>(Axis::Count)];           /** Mirror along the horizontal/vertical axis action */
+    HorizontalGroupAction       _mirrorGroupAction;                                     /** Group action for mirroring along horizontal/vertical axis */
+    ToggleAction                _discretizeAction;                                      /** Discretize toggle action */
+    IntegralAction              _numberOfDiscreteStepsAction;                           /** Number of discrete steps action */
+    ToggleAction                _discretizeAlphaAction;                                 /** Whether to also discretize the alpha channel of the color map */
+    ColorMapSettings1DAction    _settings1DAction;                                      /** One-dimensional settings action */
+    ColorMapSettings2DAction    _settings2DAction;                                      /** Two-dimensional settings action */
+    ToggleAction                _customColorMapAction;                                  /** Toggle custom color map action */
+    ColorMapEditor1DAction      _editor1DAction;                                        /** One-dimensional editor action */
+    HorizontalGroupAction       _customColorMapGroupAction;                             /** Groups the custom color map and editor action */
+    ColorMapSettingsAction      _settingsAction;                                        /** Color map settings action */
 };
 
 }

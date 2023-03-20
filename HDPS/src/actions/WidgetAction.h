@@ -42,6 +42,8 @@ public:
         NoLabelInGroup      = 0x00004,      /** Action will not have a label when it is displayed in a group */
         AlwaysCollapsed     = 0x00008,      /** Action will be always collapsed, no matter the circumstances */
 
+        User                = 0x00100,      /** And beyond for custom configuration flags */
+
         Default = 0
     };
 

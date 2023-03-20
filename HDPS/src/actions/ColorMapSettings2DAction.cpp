@@ -3,7 +3,6 @@
 #include "Application.h"
 
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 
 namespace hdps::gui {
 
@@ -11,8 +10,7 @@ ColorMapSettings2DAction::ColorMapSettings2DAction(ColorMapAction& colorMapActio
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction)
 {
-    setText("Settings (one-dimensional)");
-    setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    setText("2D Color Map Settings");
 }
 
 ColorMapSettings2DAction::Widget::Widget(QWidget* parent, ColorMapSettings2DAction* colorMapSettings2DAction) :
@@ -21,22 +19,43 @@ ColorMapSettings2DAction::Widget::Widget(QWidget* parent, ColorMapSettings2DActi
 {
     setAutoFillBackground(true);
 
-    auto& settingsAction = colorMapSettings2DAction->getColorMapAction().getSettingsAction();
+    auto& colorMapAction = colorMapSettings2DAction->getColorMapAction();
 
-    auto mainLayout     = new QHBoxLayout();
-    auto settingsLayout = new QVBoxLayout();
-    auto rangeLayout    = new QHBoxLayout();
+    auto layout = new QVBoxLayout();
 
-    mainLayout->addLayout(settingsLayout);
+    layout->setContentsMargins(0, 0, 0, 0);
 
-    settingsLayout->addLayout(rangeLayout);
-    settingsLayout->addWidget(settingsAction.getDiscreteAction().createWidget(this));
+    auto groupAction = new GroupAction(this);
 
-    rangeLayout->addWidget(settingsAction.getHorizontalAxisAction().createWidget(this));
-    rangeLayout->addWidget(settingsAction.getVerticalAxisAction().createWidget(this));
-    mainLayout->addWidget(_colorMapViewAction.createWidget(this));
+    groupAction->setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-    setLayout(mainLayout);
+    WidgetActions actions;
+
+    //actions << &colorMapAction.getRangeAction(ColorMapAction::Axis::X);
+    //actions << &colorMapAction.getRangeAction(ColorMapAction::Axis::Y);
+
+    //if (colorMapAction.isConnected())
+    //    actions << &colorMapAction.getSynchronizeWithSharedDataRangeAction();
+
+    //actions << &colorMapAction.getDataRangeAction(ColorMapAction::Axis::X);
+    //actions << &colorMapAction.getDataRangeAction(ColorMapAction::Axis::Y);
+
+    if (colorMapAction.isConnected()) {
+        actions << &colorMapAction.getSharedDataRangeAction(ColorMapAction::Axis::X);
+        actions << &colorMapAction.getSharedDataRangeAction(ColorMapAction::Axis::Y);
+    }
+
+    actions << &colorMapAction.getMirrorGroupAction();
+    actions << &colorMapAction.getDiscretizeAction();
+    actions << &colorMapAction.getNumberOfDiscreteStepsAction();
+    actions << &colorMapAction.getDiscretizeAlphaAction();
+    actions << &_colorMapViewAction;
+
+    groupAction->setActions(actions);
+
+    layout->addWidget(groupAction->createWidget(this));
+
+    setPopupLayout(layout);
 }
 
 }

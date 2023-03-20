@@ -5,6 +5,7 @@
 #include <QSpinBox>
 #include <QSlider>
 #include <QLineEdit>
+#include <QIntValidator>
 
 class QWidget;
 class QPushButton;
@@ -65,6 +66,9 @@ public:
          * @param integralAction Pointer to integral action
          */
         LineEditWidget(QWidget* parent, IntegralAction* integralAction);
+
+    private:
+        QIntValidator   _validator;
 
         friend class IntegralAction;
     };
