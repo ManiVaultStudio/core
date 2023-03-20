@@ -2,12 +2,12 @@
 
 #include "WidgetAction.h"
 
+#include "util/NumericalRange.h"
+
 class QWidget;
 class QPushButton;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Numerical action class
@@ -19,7 +19,7 @@ namespace gui {
 template<typename NumericalType>
 class NumericalAction : public WidgetAction
 {
-    /** Templated classes with Q_OBJECT macro are not allowed, so use function pointers in stead */
+    /** Templated classes with Q_OBJECT macro are not allowed, so use std functions instead */
     using ValueChangedCB                = std::function<void()>;
     using DefaultValueChangedCB         = std::function<void()>;
     using MinimumChangedCB              = std::function<void()>;
@@ -150,6 +150,23 @@ public:
 
         _maximumChanged();
     }
+    
+    /**
+     * Gets the value range
+     * @return Range
+     */
+    virtual util::NumericalRange<NumericalType> getRange() const final {
+        return { getMinimum(), getMaximum() };
+    }
+
+    /**
+     * Sets the value range
+     * @param range Range
+     */
+    virtual void setRange(const util::NumericalRange<NumericalType>& range) final {
+        setMinimum(range.getMinimum());
+        setMaximum(range.getMaximum());
+    }
 
     /**
      * Sets the value range
@@ -278,5 +295,4 @@ protected: // Callbacks for implementations of the numerical action
 template<typename T> constexpr std::uint32_t  NumericalAction<T>::INIT_NUMBER_OF_DECIMALS;
 #endif
 
-}
 }

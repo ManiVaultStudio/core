@@ -4,97 +4,95 @@
 #include <QDebug>
 #include <QHBoxLayout>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 #if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
     constexpr float  DecimalRangeAction::INIT_LIMIT_MIN;
     constexpr float  DecimalRangeAction::INIT_LIMIT_MAX;
     constexpr float  DecimalRangeAction::INIT_RANGE_MIN;
     constexpr float  DecimalRangeAction::INIT_RANGE_MAX;
-    constexpr float  DecimalRangeAction::INIT_DEFAULT_RANGE_MIN;
-    constexpr float  DecimalRangeAction::INIT_DEFAULT_RANGE_MAX;
+    constexpr float  DecimalRangeAction::INIT_NUMBER_OF_DECIMALS;
 #endif
 
-DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title /*= ""*/, const float& limitMin /*= INIT_LIMIT_MIN*/, const float& limitMax /*= INIT_LIMIT_MAX*/, const float& rangeMin /*= INIT_RANGE_MIN*/, const float& rangeMax /*= INIT_RANGE_MAX*/, const float& defaultRangeMin /*= INIT_DEFAULT_RANGE_MIN*/, const float& defaultRangeMax /*= INIT_DEFAULT_RANGE_MAX*/) :
-    WidgetAction(parent),
-    _rangeMinAction(this, "Minimum"),
-    _rangeMaxAction(this, "Maximum")
+DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title, const util::NumericalRange<float>& limits /*= util::NumericalRange<float>(INIT_LIMIT_MIN, INIT_LIMIT_MAX)*/, const util::NumericalRange<float>& range /*= util::NumericalRange<float>(INIT_RANGE_MIN, INIT_RANGE_MAX)*/, std::int32_t numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/) :
+    NumericalRangeAction(parent, title, limits, range)
 {
-    setText(title);
-    setSerializationName("Range");
+    _limitsChanged  = [this]() -> void { emit limitsChanged(getLimits()); };
+    _rangeChanged   = [this]() -> void { emit rangeChanged(getRange()); };
 
-    _rangeMinAction.setSerializationName("Min");
-    _rangeMaxAction.setSerializationName("Max");
+    getRangeMinAction().setNumberOfDecimals(numberOfDecimals);
+    getRangeMaxAction().setNumberOfDecimals(numberOfDecimals);
 
-    connect(&_rangeMinAction, &DecimalAction::valueChanged, this, [this](const float& value) -> void {
+    connect(&getRangeMinAction(), &DecimalAction::valueChanged, this, [this](const float& value) -> void {
         if (value >= _rangeMaxAction.getValue())
             _rangeMaxAction.setValue(value);
 
-        emit rangeChanged(_rangeMinAction.getValue(), _rangeMaxAction.getValue());
+        emit rangeChanged({ _rangeMinAction.getValue(), _rangeMaxAction.getValue() });
     });
 
-    connect(&_rangeMaxAction, &DecimalAction::valueChanged, this, [this](const float& value) -> void {
+    connect(&getRangeMaxAction(), &DecimalAction::valueChanged, this, [this](const float& value) -> void {
         if (value <= _rangeMinAction.getValue())
             _rangeMinAction.setValue(value);
 
-        emit rangeChanged(_rangeMinAction.getValue(), _rangeMaxAction.getValue());
+        emit rangeChanged({ _rangeMinAction.getValue(), _rangeMaxAction.getValue() });
     });
-
-    initialize(limitMin, limitMax, rangeMin, rangeMax);
 }
 
-void DecimalRangeAction::initialize(const float& limitMin /*= INIT_LIMIT_MIN*/, const float& limitMax /*= INIT_LIMIT_MAX*/, const float& rangeMin /*= INIT_RANGE_MIN*/, const float& rangeMax /*= INIT_RANGE_MAX*/, const float& defaultRangeMin /*= INIT_DEFAULT_RANGE_MIN*/, const float& defaultRangeMax /*= INIT_DEFAULT_RANGE_MAX*/)
+QWidget* DecimalRangeAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    _rangeMinAction.initialize(limitMin, limitMax, rangeMin, defaultRangeMin);
-    _rangeMaxAction.initialize(limitMin, limitMax, rangeMax, defaultRangeMax);
+    auto widget = new WidgetActionWidget(parent, this);
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    if (widgetFlags & WidgetFlag::MinimumSpinBox)
+        layout->addWidget(_rangeMinAction.createWidget(widget, DecimalAction::SpinBox), 1);
+
+    if (widgetFlags & WidgetFlag::MinimumLineEdit)
+        layout->addWidget(_rangeMinAction.createWidget(widget, DecimalAction::LineEdit));
+
+    if (widgetFlags & WidgetFlag::Slider) {
+        auto slidersLayout = new QHBoxLayout();
+
+        slidersLayout->addWidget(_rangeMinAction.createWidget(widget, DecimalAction::Slider), 2);
+        slidersLayout->addWidget(_rangeMaxAction.createWidget(widget, DecimalAction::Slider), 2);
+
+        layout->addLayout(slidersLayout);
+    }
+
+    if (widgetFlags & WidgetFlag::MaximumSpinBox)
+        layout->addWidget(_rangeMaxAction.createWidget(widget, DecimalAction::SpinBox), 1);
+
+    if (widgetFlags & WidgetFlag::MaximumLineEdit)
+        layout->addWidget(_rangeMaxAction.createWidget(widget, DecimalAction::LineEdit));
+
+    widget->setLayout(layout);
+
+    return widget;
 }
 
-float DecimalRangeAction::getMinimum() const
+void DecimalRangeAction::connectToPublicAction(WidgetAction* publicAction)
 {
-    return _rangeMinAction.getValue();
+    auto publicDecimalRangeAction = dynamic_cast<DecimalRangeAction*>(publicAction);
+
+    Q_ASSERT(publicDecimalRangeAction != nullptr);
+
+    if (publicDecimalRangeAction == nullptr)
+        return;
+
+    getRangeMinAction().connectToPublicAction(&publicDecimalRangeAction->getRangeMinAction());
+    getRangeMaxAction().connectToPublicAction(&publicDecimalRangeAction->getRangeMaxAction());
 }
 
-void DecimalRangeAction::setMinimum(float minimum)
+void DecimalRangeAction::disconnectFromPublicAction()
 {
-    _rangeMinAction.setValue(minimum);
+    getRangeMinAction().disconnectFromPublicAction();
+    getRangeMaxAction().disconnectFromPublicAction();
 }
 
-float DecimalRangeAction::getMaximum() const
+WidgetAction* DecimalRangeAction::getPublicCopy() const
 {
-    return _rangeMaxAction.getValue();
-}
-
-void DecimalRangeAction::setMaximum(float maximum)
-{
-    _rangeMaxAction.setValue(maximum);
-}
-
-void DecimalRangeAction::setRange(const float& minimum, const float& maximum)
-{
-    Q_ASSERT(minimum < maximum);
-
-    _rangeMinAction.initialize(minimum, maximum, minimum, minimum);
-    _rangeMaxAction.initialize(minimum, maximum, maximum, maximum);
-}
-
-void DecimalRangeAction::fromVariantMap(const QVariantMap& variantMap)
-{
-    WidgetAction::fromVariantMap(variantMap);
-
-    _rangeMinAction.fromParentVariantMap(variantMap);
-    _rangeMaxAction.fromParentVariantMap(variantMap);
-}
-
-QVariantMap DecimalRangeAction::toVariantMap() const
-{
-    QVariantMap variantMap = WidgetAction::toVariantMap();
-
-    _rangeMinAction.insertIntoVariantMap(variantMap);
-    _rangeMaxAction.insertIntoVariantMap(variantMap);
-
-    return variantMap;
+    return new DecimalRangeAction(parent(), text(), getLimits(), getRange());
 }
 
 DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags /*= 0*/) :
@@ -120,5 +118,4 @@ DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, Deci
     }
 }
 
-}
 }

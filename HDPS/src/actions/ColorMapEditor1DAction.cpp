@@ -23,18 +23,17 @@ ColorMapEditor1DAction::ColorMapEditor1DAction(ColorMapAction& colorMapAction) :
     _nodeAction(*this),
     _colorMapImage(colorMapImageSize, QImage::Format::Format_ARGB32_Premultiplied)
 {
-    setText("Custom");
+    setText("1D custom color map");
     setIcon(Application::getIconFont("FontAwesome").getIcon("chart-line"));
-    setCheckable(true);
     setSerializationName("Editor1D");
 
     addNode(QPointF(0.0f, 0.0f), Qt::black);
     addNode(QPointF(1.0f, 1.0f), Qt::white);
 
-    connect(this, &ColorMapEditor1DAction::toggled, this, &ColorMapEditor1DAction::updateColorMap);
+    connect(&colorMapAction.getCustomColorMapAction(), &ColorMapEditor1DAction::toggled, this, &ColorMapEditor1DAction::updateColorMap);
 }
 
-QImage ColorMapEditor1DAction::getColorMapImage()
+QImage ColorMapEditor1DAction::getColorMapImage() const
 {
     return _colorMapImage;
 }
@@ -257,6 +256,7 @@ ColorMapEditor1DAction::Widget::Widget(QWidget* parent, ColorMapEditor1DAction* 
     toolbarLayout->addWidget(_goToLastNodeAction.createWidget(this));
     toolbarLayout->addWidget(_removeNodeAction.createWidget(this));
 
+    //layout->setContentsMargins(0, 0, 0, 0);
     layout->addStretch(1);
     layout->addWidget(&_colorMapEditor1DWidget);
     layout->addLayout(toolbarLayout);
