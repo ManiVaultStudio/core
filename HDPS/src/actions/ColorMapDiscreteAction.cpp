@@ -1,6 +1,5 @@
 #include "ColorMapDiscreteAction.h"
 #include "ColorMapAction.h"
-#include "ColorMapSettingsAction.h"
 
 #include <QVBoxLayout>
 #include <QGroupBox>
@@ -9,8 +8,8 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapSettingsAction) :
-    WidgetAction(&colorMapSettingsAction),
+ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapAction& colorMapAction) :
+    WidgetAction(&colorMapAction),
     _numberOfStepsAction(this, "Number of steps", 2, 10, 5, 5),
     _discretizeAlphaAction(this, "Discretize alpha", false, false)
 {
@@ -18,52 +17,31 @@ ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapS
     setCheckable(true);
     setSerializationName("Discrete");
 
-    _numberOfStepsAction.setSerializationName("NumberOfSteps");
-    _discretizeAlphaAction.setSerializationName("DiscretizeAlpha");
-
-    _numberOfStepsAction.setToolTip("Number of discrete steps");
-    _discretizeAlphaAction.setToolTip("Whether to discrete the alpha channel");
+    
 }
 
 void ColorMapDiscreteAction::connectToPublicAction(WidgetAction* publicAction)
 {
-    auto publicColorMapDiscreteAction = dynamic_cast<ColorMapDiscreteAction*>(publicAction);
-
-    Q_ASSERT(publicColorMapDiscreteAction != nullptr);
-
-    _numberOfStepsAction.connectToPublicAction(&publicColorMapDiscreteAction->getNumberOfStepsAction());
-    _discretizeAlphaAction.connectToPublicAction(&publicColorMapDiscreteAction->getDiscretizeAlphaAction());
-
-    connect(this, &WidgetAction::toggled, publicColorMapDiscreteAction, &WidgetAction::setChecked);
-    connect(publicColorMapDiscreteAction, &WidgetAction::toggled, this, &WidgetAction::setChecked);
-
-    setChecked(publicColorMapDiscreteAction->isChecked());
-
-    WidgetAction::connectToPublicAction(publicAction);
+    
 }
 
 void ColorMapDiscreteAction::disconnectFromPublicAction()
 {
-    _numberOfStepsAction.disconnectFromPublicAction();
-    _discretizeAlphaAction.disconnectFromPublicAction();
-
-    WidgetAction::disconnectFromPublicAction();
+    
 }
 
 void ColorMapDiscreteAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    _numberOfStepsAction.fromParentVariantMap(variantMap);
-    _discretizeAlphaAction.fromParentVariantMap(variantMap);
+    
 }
 
 QVariantMap ColorMapDiscreteAction::toVariantMap() const
 {
     QVariantMap variantMap = WidgetAction::toVariantMap();
 
-    _numberOfStepsAction.insertIntoVariantMap(variantMap);
-    _discretizeAlphaAction.insertIntoVariantMap(variantMap);
+    
 
     return variantMap;
 }

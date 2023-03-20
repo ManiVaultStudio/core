@@ -1,10 +1,9 @@
 #pragma once
 
+#include "NumericalRangeAction.h"
 #include "DecimalAction.h"
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Decimal range action class
@@ -13,7 +12,7 @@ namespace gui {
  *
  * @author Thomas Kroes
  */
-class DecimalRangeAction : public WidgetAction
+class DecimalRangeAction : public NumericalRangeAction<float, DecimalAction>
 {
     Q_OBJECT
 
@@ -43,9 +42,7 @@ protected:
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new DecimalRangeWidget(parent, this);
-    };
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;;
 
 public:
 
@@ -57,93 +54,48 @@ public:
      * @param limitMax Range upper limit
      * @param rangeMin Range minimum
      * @param rangeMax Range maximum
-     * @param defaultRangeMin Default range minimum
-     * @param defaultRangeMax Default range maximum
      */
-    DecimalRangeAction(QObject* parent, const QString& title = "", const float& limitMin = INIT_LIMIT_MIN, const float& limitMax = INIT_LIMIT_MAX, const float& rangeMin = INIT_RANGE_MIN, const float& rangeMax = INIT_RANGE_MAX, const float& defaultRangeMin = INIT_DEFAULT_RANGE_MIN, const float& defaultRangeMax = INIT_DEFAULT_RANGE_MAX);
+    DecimalRangeAction(QObject* parent, const QString& title, const util::NumericalRange<float>& limits = util::NumericalRange<float>(INIT_LIMIT_MIN, INIT_LIMIT_MAX), const util::NumericalRange<float>& range = util::NumericalRange<float>(INIT_RANGE_MIN, INIT_RANGE_MAX), std::int32_t numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
+    
+public: // Linking
 
     /**
-     * Initialize the color action
-     * @param limitMin Range lower limit
-     * @param limitMax Range upper limit
-     * @param rangeMin Range minimum
-     * @param rangeMax Range maximum
-     * @param defaultRangeMin Default range minimum
-     * @param defaultRangeMax Default range maximum
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
      */
-    void initialize(const float& limitMin = INIT_LIMIT_MIN, const float& limitMax = INIT_LIMIT_MAX, const float& rangeMin = INIT_RANGE_MIN, const float& rangeMax = INIT_RANGE_MAX, const float& defaultRangeMin = INIT_DEFAULT_RANGE_MIN, const float& defaultRangeMax = INIT_DEFAULT_RANGE_MAX);
+    void connectToPublicAction(WidgetAction* publicAction) override;
+
+    /** Disconnect this action from a public action */
+    void disconnectFromPublicAction() override;
+
+protected:  // Linking
 
     /**
-     * Get range minimum
-     * @return Range minimum
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
      */
-    float getMinimum() const;
-
-    /**
-     * Set range minimum
-     * @return Range minimum
-     */
-    void setMinimum(float minimum);
-
-    /**
-     * Get range maximum
-     * @return Range maximum
-     */
-    float getMaximum() const;
-
-    /**
-     * Set range maximum
-     * @return Range maximum
-     */
-    void setMaximum(float maximum);
-
-    /**
-     * Sets the range
-     * @param minimum Range minimum
-     * @param maximum Range maximum
-     */
-    void setRange(const float& minimum, const float& maximum);
-
-public: // Serialization
-
-    /**
-     * Load widget action from variant map
-     * @param Variant map representation of the widget action
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
-
-    /**
-     * Save widget action to variant map
-     * @return Variant map representation of the widget action
-     */
-    QVariantMap toVariantMap() const override;
-
-public: // Action getters
-
-    DecimalAction& getRangeMinAction() { return _rangeMinAction; }
-    DecimalAction& getRangeMaxAction() { return _rangeMaxAction; }
+    virtual WidgetAction* getPublicCopy() const override;
 
 signals:
 
     /**
-     * Signals that the range changed
-     * @param minimum Range minimum
-     * @param maximum Range maximum
+     * Signals that the limits changed to \p limits
+     * @param limits Limits
      */
-    void rangeChanged(const float& minimum, const float& maximum);
+    void limitsChanged(const util::NumericalRange<float>& limits);
+
+    /**
+     * Signals that the range changed to \p range
+     * @param range Range
+     */
+    void rangeChanged(const util::NumericalRange<float>& range);
 
 protected:
-    DecimalAction       _rangeMinAction;        /** Minimum range decimal action */
-    DecimalAction       _rangeMaxAction;        /** Maximum range decimal action */
-
-protected:
-    static constexpr float  INIT_LIMIT_MIN          = std::numeric_limits<float>::lowest();     /** Initialization minimum limit */
-    static constexpr float  INIT_LIMIT_MAX          = std::numeric_limits<float>::max();        /** Initialization maximum limit */
-    static constexpr float  INIT_RANGE_MIN          = 0.0f;                                     /** Initialization minimum range */
-    static constexpr float  INIT_RANGE_MAX          = 100.0f;                                   /** Initialization maximum range */
-    static constexpr float  INIT_DEFAULT_RANGE_MIN  = 0.0f;                                     /** Initialization default minimum range */
-    static constexpr float  INIT_DEFAULT_RANGE_MAX  = 100.0f;                                   /** Initialization default maximum range */
+    static constexpr float  INIT_LIMIT_MIN          = 0.0f;         /** Default minimum limit */
+    static constexpr float  INIT_LIMIT_MAX          = 100.0f;       /** Default maximum limit */
+    static constexpr float  INIT_RANGE_MIN          = 0.0f;         /** Default minimum range */
+    static constexpr float  INIT_RANGE_MAX          = 100.0f;       /** Default maximum range */
+    static constexpr float  INIT_NUMBER_OF_DECIMALS = 2;            /** Default number of decimals */
 };
 
-}
 }

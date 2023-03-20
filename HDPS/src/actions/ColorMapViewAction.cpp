@@ -8,9 +8,7 @@
 
 using namespace hdps::util;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 ColorMapViewAction::ColorMapViewAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
@@ -24,9 +22,11 @@ ColorMapViewAction::Widget::Widget(QWidget* parent, ColorMapViewAction* colorMap
 {
     auto layout = new QVBoxLayout();
 
+    layout->setContentsMargins(0, 0, 0, 0);
+
     auto colorMapPreviewLabel = new QLabel();
 
-    colorMapPreviewLabel->setFixedWidth(200);
+    colorMapPreviewLabel->setFixedHeight(250);
     colorMapPreviewLabel->setFrameShape(QFrame::Panel);
     colorMapPreviewLabel->setFrameShadow(QFrame::Sunken);
     colorMapPreviewLabel->setScaledContents(true);
@@ -49,8 +49,7 @@ ColorMapViewAction::Widget::Widget(QWidget* parent, ColorMapViewAction* colorMap
 
     updateColorMapImagePreview();
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }
 
-}
 }

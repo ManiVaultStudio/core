@@ -71,7 +71,7 @@ public:
      * Get color map image
      * @return Color map image
      */
-    QImage getColorMapImage();
+    QImage getColorMapImage() const;
 
 public: // Nodes
 
@@ -197,8 +197,8 @@ protected:
 
     static constexpr QSize colorMapImageSize = QSize(256, 1);
 
-    /** Only color map settings action may instantiate this class */
-    friend class ColorMapSettingsAction;
+    /** Only color map action may instantiate this class */
+    friend class ColorMapAction;
 };
 
 }

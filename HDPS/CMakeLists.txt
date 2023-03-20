@@ -409,10 +409,7 @@ set(PUBLIC_EVENT_FILES
     ${PUBLIC_EVENT_SOURCES}
 )
 
-set(PUBLIC_ACTIONS_HEADERS
-    src/actions/Actions.h
-    src/actions/ColorAction.h
-    src/actions/ColorPickerAction.h
+set(PUBLIC_COLOR_MAP_ACTION_HEADERS
     src/actions/ColorMapAction.h
     src/actions/ColorMapEditor1DAction.h
     src/actions/ColorMapEditor1DEdgesGraphicsItem.h
@@ -422,57 +419,13 @@ set(PUBLIC_ACTIONS_HEADERS
     src/actions/ColorMapEditor1DNodeAction.h
     src/actions/ColorMapEditor1DScene.h
     src/actions/ColorMapEditor1DWidget.h
-    src/actions/ColorMapAxisAction.h
-    src/actions/ColorMapDiscreteAction.h
     src/actions/ColorMapViewAction.h
     src/actions/ColorMapSettingsAction.h
     src/actions/ColorMapSettings1DAction.h
     src/actions/ColorMapSettings2DAction.h
-    src/actions/DatasetPickerAction.h
-    src/actions/DecimalAction.h
-    src/actions/DecimalRangeAction.h
-    src/actions/GroupAction.h
-    src/actions/GroupsAction.h
-    src/actions/ImageAction.h
-    src/actions/IntegralAction.h
-    src/actions/RectangleAction.h
-    src/actions/IntegralRectangleAction.h
-    src/actions/DecimalRectangleAction.h
-    src/actions/NumericalAction.h
-    src/actions/OptionAction.h
-    src/actions/OptionsAction.h
-    src/actions/PixelSelectionAction.h
-    src/actions/PluginTriggerPickerAction.h
-    src/actions/PluginTriggerAction.h
-    src/actions/TriggerAction.h
-    src/actions/TriggersAction.h
-    src/actions/ToggleAction.h
-    src/actions/StringAction.h
-    src/actions/StringsAction.h
-    src/actions/WidgetAction.h
-    src/actions/WidgetActionWidget.h
-    src/actions/WidgetActionCollapsedWidget.h
-    src/actions/WidgetActionLabel.h
-    src/actions/WidgetActionStateWidget.h
-    src/actions/WindowLevelAction.h
-    src/actions/DirectoryPickerAction.h
-    src/actions/FilePickerAction.h
-    src/actions/VariantAction.h
-    src/actions/StatusAction.h
-    src/actions/HorizontalGroupAction.h
-    src/actions/RecentFilesAction.h
-    src/actions/PresetsAction.h
-    src/actions/LockingAction.h
-    src/actions/VersionAction.h
-    src/actions/ProjectSplashScreenAction.h
-    src/actions/GroupSectionTreeItem.h
-    src/actions/GroupWidgetTreeItem.h
-    src/actions/WidgetActionContextMenu.h
 )
 
-set(PUBLIC_ACTIONS_SOURCES
-    src/actions/ColorAction.cpp
-    src/actions/ColorPickerAction.cpp
+set(PUBLIC_COLOR_MAP_ACTION_SOURCES
     src/actions/ColorMapAction.cpp
     src/actions/ColorMapEditor1DAction.cpp
     src/actions/ColorMapEditor1DEdgesGraphicsItem.cpp
@@ -482,57 +435,242 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/ColorMapEditor1DNodeAction.cpp
     src/actions/ColorMapEditor1DScene.cpp
     src/actions/ColorMapEditor1DWidget.cpp
-    src/actions/ColorMapAxisAction.cpp
-    src/actions/ColorMapDiscreteAction.cpp
     src/actions/ColorMapViewAction.cpp
     src/actions/ColorMapSettingsAction.cpp
     src/actions/ColorMapSettings1DAction.cpp
     src/actions/ColorMapSettings2DAction.cpp
-    src/actions/DatasetPickerAction.cpp
+)
+
+set(PUBLIC_COLOR_MAP_ACTION_FILES
+    ${PUBLIC_COLOR_MAP_ACTION_HEADERS}    
+    ${PUBLIC_COLOR_MAP_ACTION_SOURCES}
+)
+
+set(PUBLIC_NUMERICAL_ACTIONS_HEADERS
+    src/actions/NumericalAction.h
+    src/actions/DecimalAction.h
+    src/actions/IntegralAction.h
+    src/actions/NumericalRangeAction.h
+    src/actions/DecimalRangeAction.h
+)
+
+set(PUBLIC_NUMERICAL_ACTIONS_SOURCES
+    src/actions/NumericalAction.cpp
     src/actions/DecimalAction.cpp
-    src/actions/DecimalRangeAction.cpp
-    src/actions/GroupAction.cpp
-    src/actions/GroupsAction.cpp
-    src/actions/ImageAction.cpp
     src/actions/IntegralAction.cpp
+    src/actions/NumericalRangeAction.cpp
+    src/actions/DecimalRangeAction.cpp
+)
+
+set(PUBLIC_NUMERICAL_ACTIONS_FILES
+    ${PUBLIC_NUMERICAL_ACTIONS_HEADERS}    
+    ${PUBLIC_NUMERICAL_ACTIONS_SOURCES}
+)
+
+set(PUBLIC_RECTANGLE_ACTIONS_HEADERS
+    src/actions/RectangleAction.h
+    src/actions/IntegralRectangleAction.h
+    src/actions/DecimalRectangleAction.h
+)
+
+set(PUBLIC_RECTANGLE_ACTIONS_SOURCES
     src/actions/RectangleAction.cpp
     src/actions/IntegralRectangleAction.cpp
     src/actions/DecimalRectangleAction.cpp
-    src/actions/NumericalAction.cpp
+)
+
+set(PUBLIC_RECTANGLE_ACTIONS_FILES
+    ${PUBLIC_RECTANGLE_ACTIONS_HEADERS}    
+    ${PUBLIC_RECTANGLE_ACTIONS_SOURCES}
+)
+
+set(PUBLIC_TEXTUAL_ACTIONS_HEADERS
+    src/actions/StringAction.h
+    src/actions/StringsAction.h
+)
+
+set(PUBLIC_TEXTUAL_ACTIONS_SOURCES
+    src/actions/StringAction.cpp
+    src/actions/StringsAction.cpp
+)
+
+set(PUBLIC_TEXTUAL_ACTIONS_FILES
+    ${PUBLIC_TEXTUAL_ACTIONS_HEADERS}    
+    ${PUBLIC_TEXTUAL_ACTIONS_SOURCES}
+)
+
+set(PUBLIC_GROUPING_ACTIONS_HEADERS
+    src/actions/GroupAction.h
+    src/actions/HorizontalGroupAction.h
+    src/actions/VerticalGroupAction.h
+    src/actions/GroupsAction.h
+    src/actions/GroupSectionTreeItem.h
+    src/actions/GroupWidgetTreeItem.h
+)
+
+set(PUBLIC_GROUPING_ACTIONS_SOURCES
+    src/actions/GroupAction.cpp
+    src/actions/HorizontalGroupAction.cpp
+    src/actions/VerticalGroupAction.cpp
+    src/actions/GroupsAction.cpp
+    src/actions/GroupSectionTreeItem.cpp
+    src/actions/GroupWidgetTreeItem.cpp
+)
+
+set(PUBLIC_GROUPING_ACTIONS_FILES
+    ${PUBLIC_GROUPING_ACTIONS_HEADERS}    
+    ${PUBLIC_GROUPING_ACTIONS_SOURCES}
+)
+
+set(PUBLIC_TRIGGER_ACTIONS_HEADERS
+    src/actions/TriggerAction.h
+    src/actions/TriggersAction.h
+)
+
+set(PUBLIC_TRIGGER_ACTIONS_SOURCES
+    src/actions/TriggerAction.cpp
+    src/actions/TriggersAction.cpp
+)
+
+set(PUBLIC_TRIGGER_ACTIONS_FILES
+    ${PUBLIC_TRIGGER_ACTIONS_HEADERS}    
+    ${PUBLIC_TRIGGER_ACTIONS_SOURCES}
+)
+
+set(PUBLIC_OPTION_ACTIONS_HEADERS
+    src/actions/OptionAction.h
+    src/actions/OptionsAction.h
+)
+
+set(PUBLIC_OPTION_ACTIONS_SOURCES
     src/actions/OptionAction.cpp
     src/actions/OptionsAction.cpp
+)
+
+set(PUBLIC_OPTION_ACTIONS_FILES
+    ${PUBLIC_OPTION_ACTIONS_HEADERS}    
+    ${PUBLIC_OPTION_ACTIONS_SOURCES}
+)
+
+set(PUBLIC_COLOR_ACTIONS_HEADERS
+    src/actions/ColorAction.h
+    src/actions/ColorPickerAction.h
+)
+
+set(PUBLIC_COLOR_ACTIONS_SOURCES
+    src/actions/ColorAction.cpp
+    src/actions/ColorPickerAction.cpp
+)
+
+set(PUBLIC_COLOR_ACTIONS_FILES
+    ${PUBLIC_COLOR_ACTIONS_HEADERS}    
+    ${PUBLIC_COLOR_ACTIONS_SOURCES}
+)
+
+set(PUBLIC_TOGGLE_ACTIONS_HEADERS
+    src/actions/ToggleAction.h
+)
+
+set(PUBLIC_TOGGLE_ACTIONS_SOURCES
+    src/actions/ToggleAction.cpp
+)
+
+set(PUBLIC_TOGGLE_ACTIONS_FILES
+    ${PUBLIC_TOGGLE_ACTIONS_HEADERS}    
+    ${PUBLIC_TOGGLE_ACTIONS_SOURCES}
+)
+
+set(PUBLIC_FILE_ACTIONS_HEADERS
+    src/actions/DirectoryPickerAction.h
+    src/actions/FilePickerAction.h
+)
+
+set(PUBLIC_FILE_ACTIONS_SOURCES
+    src/actions/DirectoryPickerAction.cpp
+    src/actions/FilePickerAction.cpp
+)
+
+set(PUBLIC_FILE_ACTIONS_FILES
+    ${PUBLIC_FILE_ACTIONS_HEADERS}    
+    ${PUBLIC_FILE_ACTIONS_SOURCES}
+)
+
+set(PUBLIC_TOOLBAR_ACTIONS_HEADERS
+    src/actions/ToolbarAction.h
+    src/actions/ToolbarActionItem.h
+    src/actions/ToolbarActionItemWidget.h
+)
+
+set(PUBLIC_TOOLBAR_ACTIONS_SOURCES
+    src/actions/ToolbarAction.cpp
+    src/actions/ToolbarActionItem.cpp
+    src/actions/ToolbarActionItemWidget.cpp
+)
+
+set(PUBLIC_TOOLBAR_ACTIONS_FILES
+    ${PUBLIC_TOOLBAR_ACTIONS_HEADERS}    
+    ${PUBLIC_TOOLBAR_ACTIONS_SOURCES}
+)
+
+set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
+    src/actions/Actions.h
+    src/actions/DatasetPickerAction.h
+    src/actions/ImageAction.h
+    src/actions/PixelSelectionAction.h
+    src/actions/PluginTriggerPickerAction.h
+    src/actions/PluginTriggerAction.h
+    src/actions/WindowLevelAction.h
+    src/actions/VariantAction.h
+    src/actions/StatusAction.h
+    src/actions/RecentFilesAction.h
+    src/actions/PresetsAction.h
+    src/actions/LockingAction.h
+    src/actions/VersionAction.h
+    src/actions/ProjectSplashScreenAction.h
+)
+
+set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
+    src/actions/DatasetPickerAction.cpp
+    src/actions/ImageAction.cpp
     src/actions/PixelSelectionAction.cpp
     src/actions/PluginTriggerPickerAction.cpp
     src/actions/PluginTriggerAction.cpp
-    src/actions/TriggerAction.cpp
-    src/actions/TriggersAction.cpp
-    src/actions/ToggleAction.cpp
-    src/actions/StringAction.cpp
-    src/actions/StringsAction.cpp
-    src/actions/WidgetAction.cpp
-    src/actions/WidgetActionWidget.cpp
-    src/actions/WidgetActionCollapsedWidget.cpp
-    src/actions/WidgetActionLabel.cpp
-    src/actions/WidgetActionStateWidget.cpp
     src/actions/WindowLevelAction.cpp
-    src/actions/DirectoryPickerAction.cpp
-    src/actions/FilePickerAction.cpp
     src/actions/VariantAction.cpp
     src/actions/StatusAction.cpp
-    src/actions/HorizontalGroupAction.cpp
     src/actions/RecentFilesAction.cpp
     src/actions/PresetsAction.cpp
     src/actions/LockingAction.cpp
     src/actions/VersionAction.cpp
     src/actions/ProjectSplashScreenAction.cpp
-    src/actions/GroupSectionTreeItem.cpp
-    src/actions/GroupWidgetTreeItem.cpp
+)
+
+set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
+    ${PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS}    
+    ${PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES}
+)
+
+set(PUBLIC_ACTIONS_INTERNAL_HEADERS
+    src/actions/WidgetAction.h
+    src/actions/WidgetActionWidget.h
+    src/actions/WidgetActionCollapsedWidget.h
+    src/actions/WidgetActionLabel.h
+    src/actions/WidgetActionStateWidget.h
+    src/actions/WidgetActionContextMenu.h
+)
+
+set(PUBLIC_ACTIONS_INTERNAL_SOURCES
+    src/actions/WidgetAction.cpp
+    src/actions/WidgetActionWidget.cpp
+    src/actions/WidgetActionCollapsedWidget.cpp
+    src/actions/WidgetActionLabel.cpp
+    src/actions/WidgetActionStateWidget.cpp
     src/actions/WidgetActionContextMenu.cpp
 )
 
-set(PUBLIC_ACTIONS_FILES
-    ${PUBLIC_ACTIONS_HEADERS}    
-    ${PUBLIC_ACTIONS_SOURCES}
+set(PUBLIC_ACTIONS_INTERNAL_FILES
+    ${PUBLIC_ACTIONS_INTERNAL_HEADERS}    
+    ${PUBLIC_ACTIONS_INTERNAL_SOURCES}
 )
 
 set(PUBLIC_WIDGET_HEADERS
@@ -644,6 +782,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/AbstractItemModelTester.h
     src/util/Version.h
     src/util/DockWidgetPermission.h
+    src/util/NumericalRange.h
 )
 
 set(PUBLIC_UTIL_SOURCES
@@ -677,6 +816,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/AbstractItemModelTester.cpp
     src/util/Version.cpp
     src/util/DockWidgetPermission.cpp
+    src/util/NumericalRange.cpp
 )
 
 set(PUBLIC_UTIL_FILES
@@ -814,7 +954,19 @@ set(PUBLIC_DATA_HIERARCHY_MODEL_FILES
 set(PUBLIC_HEADERS
     ${PUBLIC_CORE_INTERFACE_HEADERS}
     ${PUBLIC_EVENT_HEADERS}
-    ${PUBLIC_ACTIONS_HEADERS}
+    ${PUBLIC_COLOR_MAP_ACTION_HEADERS}
+    ${PUBLIC_NUMERICAL_ACTIONS_HEADERS}
+    ${PUBLIC_RECTANGLE_ACTIONS_HEADERS}
+    ${PUBLIC_TEXTUAL_ACTIONS_HEADERS}
+    ${PUBLIC_GROUPING_ACTIONS_HEADERS}
+    ${PUBLIC_TRIGGER_ACTIONS_HEADERS}
+    ${PUBLIC_OPTION_ACTIONS_HEADERS}
+    ${PUBLIC_COLOR_ACTIONS_HEADERS}
+    ${PUBLIC_TOGGLE_ACTIONS_HEADERS}
+    ${PUBLIC_FILE_ACTIONS_HEADERS}
+    ${PUBLIC_TOOLBAR_ACTIONS_HEADERS}
+    ${PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS}
+    ${PUBLIC_ACTIONS_INTERNAL_HEADERS}
     ${PUBLIC_ACTION_HIERARCHY_HEADERS}
     ${PUBLIC_WIDGET_HEADERS}
     ${PUBLIC_RENDERERS_HEADERS}
@@ -832,7 +984,19 @@ set(PUBLIC_HEADERS
 
 set(PUBLIC_SOURCES
     ${PUBLIC_EVENT_SOURCES}
-    ${PUBLIC_ACTIONS_SOURCES}
+    ${PUBLIC_COLOR_MAP_ACTION_SOURCES}
+    ${PUBLIC_NUMERICAL_ACTIONS_SOURCES}
+    ${PUBLIC_RECTANGLE_ACTIONS_SOURCES}
+    ${PUBLIC_TEXTUAL_ACTIONS_SOURCES}
+    ${PUBLIC_GROUPING_ACTIONS_SOURCES}
+    ${PUBLIC_TRIGGER_ACTIONS_SOURCES}
+    ${PUBLIC_OPTION_ACTIONS_SOURCES}
+    ${PUBLIC_COLOR_ACTIONS_SOURCES}
+    ${PUBLIC_TOGGLE_ACTIONS_SOURCES}
+    ${PUBLIC_FILE_ACTIONS_SOURCES}
+    ${PUBLIC_TOOLBAR_ACTIONS_SOURCES}
+    ${PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES}
+    ${PUBLIC_ACTIONS_INTERNAL_SOURCES}
     ${PUBLIC_ACTION_HIERARCHY_SOURCES}
     ${PUBLIC_WIDGET_SOURCES}
     ${PUBLIC_RENDERERS_SOURCES}
@@ -868,7 +1032,19 @@ QT6_ADD_RESOURCES(RESOURCE_FILES ${QRESOURCES})
 
 source_group(CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
 source_group(Event FILES ${PUBLIC_EVENT_FILES})
-source_group(Actions FILES ${PUBLIC_ACTIONS_FILES})
+source_group(Actions\\Colormap FILES ${PUBLIC_COLOR_MAP_ACTION_FILES})
+source_group(Actions\\Numerical FILES ${PUBLIC_NUMERICAL_ACTIONS_FILES})
+source_group(Actions\\Rectangle FILES ${PUBLIC_RECTANGLE_ACTIONS_FILES})
+source_group(Actions\\Textual FILES ${PUBLIC_TEXTUAL_ACTIONS_FILES})
+source_group(Actions\\Grouping FILES ${PUBLIC_GROUPING_ACTIONS_FILES})
+source_group(Actions\\Trigger FILES ${PUBLIC_TRIGGER_ACTIONS_FILES})
+source_group(Actions\\Option FILES ${PUBLIC_OPTION_ACTIONS_FILES})
+source_group(Actions\\Color FILES ${PUBLIC_COLOR_ACTIONS_FILES})
+source_group(Actions\\Toggle FILES ${PUBLIC_TOGGLE_ACTIONS_FILES})
+source_group(Actions\\File FILES ${PUBLIC_FILE_ACTIONS_FILES})
+source_group(Actions\\Toolbar FILES ${PUBLIC_TOOLBAR_ACTIONS_FILES})
+source_group(Actions\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_ACTIONS_FILES})
+source_group(Actions\\Internal FILES ${PUBLIC_ACTIONS_INTERNAL_FILES})
 source_group(Widgets FILES ${PUBLIC_WIDGET_FILES})
 source_group(Renderers FILES ${PUBLIC_RENDERERS_FILES})
 source_group(Graphics FILES ${PUBLIC_GRAPHICS_FILES})
