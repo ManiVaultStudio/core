@@ -86,17 +86,14 @@ set(ACTIONS_SOURCES
 source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 
-include_directories("${INSTALL_DIR}/$<CONFIGURATION>/include/")
-
 add_library(${PROJECT} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
 
-set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 17)
-
-target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16)
-if(UNIX AND NOT APPLE)
-target_include_directories(${PROJECT} PRIVATE tbb)
-endif()
 add_dependencies(${PROJECT} HDPS_Public)
+
+target_include_directories(${PROJECT} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
+target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16)
+
+target_compile_features(${PROJECT} PRIVATE cxx_std_17)
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
@@ -114,11 +111,12 @@ else()
 endif(MSVC)
 set(HDPS_LINK_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_LINK_SUFFIX}")
 
-target_link_libraries(${PROJECT} Qt6::Widgets)
-target_link_libraries(${PROJECT} Qt6::WebEngineWidgets)
-target_link_libraries(${PROJECT} "${HDPS_LINK_LIBRARY}")
+target_link_libraries(${PROJECT} PRIVATE Qt6::Widgets)
+target_link_libraries(${PROJECT} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${PROJECT} PRIVATE "${HDPS_LINK_LIBRARY}")
 if(UNIX AND NOT APPLE)
-target_link_libraries(${PROJECT} tbb)
+   find_package(TBB REQUIRED)
+   target_link_libraries(${PROJECT} PRIVATE TBB::tbb)
 endif()
 
 set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")

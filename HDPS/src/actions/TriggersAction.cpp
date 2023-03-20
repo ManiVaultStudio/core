@@ -4,9 +4,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 TriggersAction::TriggersAction(QObject* parent, const QString& title /*= ""*/, const QVector<Trigger>& triggers /*= QVector<Trigger>()*/) :
     WidgetAction(parent)
@@ -139,5 +137,4 @@ TriggersAction::Widget::Widget(QWidget* parent, TriggersAction* triggersAction, 
     connect(triggersAction, &TriggersAction::triggerChanged, this, updatePushButton);
 }
 
-}
 }
