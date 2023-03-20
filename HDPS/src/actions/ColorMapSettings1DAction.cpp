@@ -11,7 +11,7 @@ ColorMapSettings1DAction::ColorMapSettings1DAction(ColorMapAction& colorMapActio
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction)
 {
-    setText("1D color map settings");
+    setText("1D Color Map Settings");
 }
 
 ColorMapSettings1DAction::Widget::Widget(QWidget* parent, ColorMapSettings1DAction* colorMapSettings1DAction) :

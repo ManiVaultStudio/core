@@ -10,7 +10,7 @@ ColorMapSettings2DAction::ColorMapSettings2DAction(ColorMapAction& colorMapActio
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction)
 {
-    setText("2D color map settings");
+    setText("2D Color Map Settings");
 }
 
 ColorMapSettings2DAction::Widget::Widget(QWidget* parent, ColorMapSettings2DAction* colorMapSettings2DAction) :
