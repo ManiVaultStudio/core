@@ -119,6 +119,11 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
         updateSharedDataRange();
     });
 
+    const auto syncRangeWithDataRange = [this]() -> void {
+        const auto dataRange = getDataRangeAction(Axis::X).getRange();
+        getRangeAction(Axis::X).initialize(dataRange, dataRange);
+    };
+
     const auto syncRangeWithSharedDataRange = [this]() -> void {
         const auto sharedDataRange = getSharedDataRangeAction(Axis::X).getRange();
         getRangeAction(Axis::X).initialize(sharedDataRange, sharedDataRange);
@@ -128,9 +133,13 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
         getRangeAction(Axis::X).setEnabled(!getLockToSharedDataRangeAction().isChecked());
     };
 
-    connect(&getLockToSharedDataRangeAction(), &ToggleAction::toggled, this, [syncRangeWithSharedDataRange, updateRangeActionReadOnly](bool toggled) -> void {
+    connect(&getLockToSharedDataRangeAction(), &ToggleAction::toggled, this, [updateRangeActionReadOnly, syncRangeWithDataRange, syncRangeWithSharedDataRange](bool toggled) -> void {
         updateRangeActionReadOnly();
-        syncRangeWithSharedDataRange();
+
+        if (toggled)
+            syncRangeWithSharedDataRange();
+        else
+            syncRangeWithDataRange();
     });
 
     connect(&getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, [this](const NumericalRange<float>& range) -> void {
@@ -149,6 +158,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
 
     updateDiscretizationActions();
     updateEditorActionReadOnly();
+    updateRangeActionReadOnly;
 }
 
 QString ColorMapAction::getTypeString() const
@@ -429,6 +439,7 @@ void ColorMapAction::fromVariantMap(const QVariantMap& variantMap)
     getRangeAction(Axis::Y).fromParentVariantMap(variantMap);
     getSharedDataRangeAction(Axis::X).fromParentVariantMap(variantMap);
     getSharedDataRangeAction(Axis::Y).fromParentVariantMap(variantMap);
+    getLockToSharedDataRangeAction().fromParentVariantMap(variantMap);
     getMirrorAction(Axis::X).fromParentVariantMap(variantMap);
     getMirrorAction(Axis::Y).fromParentVariantMap(variantMap);
     getDiscretizeAction().fromParentVariantMap(variantMap);
@@ -446,6 +457,7 @@ QVariantMap ColorMapAction::toVariantMap() const
     getRangeAction(Axis::Y).insertIntoVariantMap(variantMap);
     getSharedDataRangeAction(Axis::X).insertIntoVariantMap(variantMap);
     getSharedDataRangeAction(Axis::Y).insertIntoVariantMap(variantMap);
+    getLockToSharedDataRangeAction().insertIntoVariantMap(variantMap);
     getMirrorAction(Axis::X).insertIntoVariantMap(variantMap);
     getMirrorAction(Axis::Y).insertIntoVariantMap(variantMap);
     getDiscretizeAction().insertIntoVariantMap(variantMap);
