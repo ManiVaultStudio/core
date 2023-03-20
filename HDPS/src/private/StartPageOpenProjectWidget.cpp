@@ -5,7 +5,7 @@
 #include <Application.h>
 #include <CoreInterface.h>
 
-#include <util/icon.h>
+#include <util/Icon.h>
 
 #include <QDebug>
 #include <QPainter>

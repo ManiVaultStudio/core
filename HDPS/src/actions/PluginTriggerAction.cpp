@@ -2,7 +2,7 @@
 #include "CoreInterface.h"
 #include "AbstractPluginManager.h"
 
-#include "pluginFactory.h"
+#include "PluginFactory.h"
 
 #include <QCryptographicHash>
 

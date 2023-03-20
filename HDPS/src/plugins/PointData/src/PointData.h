@@ -773,7 +773,7 @@ public:
     void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
     {
         if (isProxy()) {
-            auto offset = 0;
+            std::size_t offset = 0;
 
             for (auto proxyMember : getProxyMembers()) {
                 auto points = hdps::Dataset<Points>(proxyMember);
