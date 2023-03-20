@@ -34,7 +34,7 @@ ColorMapSettings1DAction::Widget::Widget(QWidget* parent, ColorMapSettings1DActi
     actions << &colorMapAction.getRangeAction(ColorMapAction::Axis::X);
 
     if (colorMapAction.isConnected())
-        actions << &colorMapAction.getSynchronizeWithSharedDataRangeAction();
+        actions << &colorMapAction.getLockToSharedDataRangeAction();
 
     actions << &colorMapAction.getDataRangeAction(ColorMapAction::Axis::X);
 

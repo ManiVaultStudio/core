@@ -84,6 +84,9 @@ public:
      * @return Range minimum
      */
     void setMinimum(NumericalType minimum) {
+        if (minimum == _rangeMinAction.getValue())
+            return;
+
         _rangeMinAction.setValue(minimum);
 
         _rangeChanged();
@@ -102,6 +105,9 @@ public:
      * @return Range maximum
      */
     void setMaximum(NumericalType maximum) {
+        if (maximum == _rangeMaxAction.getValue())
+            return;
+
         _rangeMaxAction.setValue(maximum);
 
         _rangeChanged();
@@ -117,6 +123,12 @@ public:
      * @param range Range
      */
     void setRange(const util::NumericalRange<NumericalType>& range) {
+        if (range == getRange())
+            return;
+
+        QSignalBlocker rangeMinActionBlocker(&_rangeMinAction);
+        QSignalBlocker rangeMaxActionBlocker(&_rangeMaxAction);
+
         _rangeMinAction.initialize(range.getMinimum(), range.getMaximum(), range.getMinimum(), range.getMinimum());
         _rangeMaxAction.initialize(range.getMinimum(), range.getMaximum(), range.getMaximum(), range.getMaximum());
 
@@ -136,6 +148,9 @@ public:
      * @param limitsMinimum Limits minimum
      */
     void setLimitsMinimum(NumericalType limitsMinimum) {
+        if (limitsMinimum == _rangeMinAction.getMinimum())
+            return;
+
         _rangeMinAction.setMinimum(limitsMinimum);
 
         _limitsChanged();
@@ -154,6 +169,9 @@ public:
      * @param limitsMaximum Limits maximum
      */
     void setLimitsMaximum(NumericalType limitsMaximum) {
+        if (limitsMaximum == _rangeMaxAction.getMinimum())
+            return;
+
         _rangeMaxAction.setMaximum(limitsMaximum);
 
         _limitsChanged();
@@ -169,8 +187,11 @@ public:
      * @param limits Limits
      */
     void setLimits(const util::NumericalRange<NumericalType>& limits) {
-        setLimitsMinimum(limits.getMinimum());
-        setLimitsMaximum(limits.getMaximum());
+        if (limits == getLimits())
+            return;
+
+        _rangeMinAction.setMinimum(limits.getMinimum());
+        _rangeMaxAction.setMaximum(limits.getMaximum());
 
         _limitsChanged();
     }

@@ -65,6 +65,22 @@ public:
 
         return *this;
     }
+
+    /**
+     * Equality operator
+     * @param rhs Right-hand-side operator
+     */
+    const bool operator == (const NumericalRange<NumericalType>& rhs) const {
+        return rhs.getMinimum() == getMinimum() && rhs.getMaximum() == getMaximum();
+    }
+
+    /**
+     * Inequality operator
+     * @param rhs Right-hand-side operator
+     */
+    const bool operator != (const NumericalRange<NumericalType>& rhs) const {
+        return rhs.getMinimum() != getMinimum() || rhs.getMaximum() != getMaximum();
+    }
 };
 
 }

@@ -2,6 +2,8 @@
 
 #include "WidgetAction.h"
 
+#include "util/NumericalRange.h"
+
 class QWidget;
 class QPushButton;
 
@@ -147,6 +149,23 @@ public:
         _maximum = std::max(maximum, _minimum);
 
         _maximumChanged();
+    }
+    
+    /**
+     * Gets the value range
+     * @return Range
+     */
+    virtual util::NumericalRange<NumericalType> getRange() const final {
+        return { getMinimum(), getMaximum() };
+    }
+
+    /**
+     * Sets the value range
+     * @param range Range
+     */
+    virtual void setRange(const util::NumericalRange<NumericalType>& range) final {
+        setMinimum(range.getMinimum());
+        setMaximum(range.getMaximum());
     }
 
     /**

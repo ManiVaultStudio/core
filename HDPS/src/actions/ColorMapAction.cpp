@@ -22,7 +22,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     _rangeAction{ DecimalRangeAction(this, "Range"), DecimalRangeAction(this, "Range (y)") },
     _dataRangeAction{ DecimalRangeAction(this, "Data range"), DecimalRangeAction(this, "Data range (y)") },
     _sharedDataRangeAction{ DecimalRangeAction(this, "Shared data range"), DecimalRangeAction(this, "Shared data range (y)") },
-    _synchronizeWithSharedDataRangeAction(this, "Synchronize with shared data range"),
+    _lockToSharedDataRangeAction(this, "Lock to shared data range"),
     _mirrorAction{ ToggleAction(this, "Mirror horizontally"), ToggleAction(this, "Mirror vertically") },
     _mirrorGroupAction(this, "Mirror"),
     _discretizeAction(this, "Discrete"),
@@ -87,11 +87,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
         }
 
         getSharedDataRangeAction(Axis::X).setRange(sharedDataRangeX);
-
-        qDebug() << sharedDataRangeX;
     };
-
-    //updateSharedDataRange();
 
     connect(this, &ColorMapAction::actionConnected, this, [this, updateSharedDataRange](const WidgetAction* privateAction) -> void {
         if (!isPublic())
@@ -123,38 +119,32 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
         updateSharedDataRange();
     });
 
-    connect(&getSynchronizeWithSharedDataRangeAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {
+    const auto syncRangeWithSharedDataRange = [this]() -> void {
         const auto sharedDataRange = getSharedDataRangeAction(Axis::X).getRange();
-
         getRangeAction(Axis::X).initialize(sharedDataRange, sharedDataRange);
-    });
+    };
 
-    connect(&getRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, [this](const NumericalRange<float>& range) -> void {
-        if (!isConnected() || !getSynchronizeWithSharedDataRangeAction().isChecked())
-            return;
+    const auto updateRangeActionReadOnly = [this]() -> void {
+        getRangeAction(Axis::X).setEnabled(!getLockToSharedDataRangeAction().isChecked());
+    };
 
-        getSynchronizeWithSharedDataRangeAction().setChecked(false);
-    });
-
-    connect(&getRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, [this](const NumericalRange<float>& range) -> void {
-        if (!isConnected() || !getSynchronizeWithSharedDataRangeAction().isChecked())
-            return;
-
-        getSynchronizeWithSharedDataRangeAction().setChecked(false);
+    connect(&getLockToSharedDataRangeAction(), &ToggleAction::toggled, this, [syncRangeWithSharedDataRange, updateRangeActionReadOnly](bool toggled) -> void {
+        updateRangeActionReadOnly();
+        syncRangeWithSharedDataRange();
     });
 
     connect(&getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, [this](const NumericalRange<float>& range) -> void {
-        if (!getSynchronizeWithSharedDataRangeAction().isChecked())
+        if (!getLockToSharedDataRangeAction().isChecked())
             return;
 
-        getDataRangeAction(Axis::X).initialize(range, range);
+        getRangeAction(Axis::X).initialize(range, range);
     });
 
     connect(&getSharedDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, [this](const NumericalRange<float>& range) -> void {
-        if (!getSynchronizeWithSharedDataRangeAction().isChecked())
+        if (!getLockToSharedDataRangeAction().isChecked())
             return;
 
-        getDataRangeAction(Axis::Y).initialize(range, range);
+        getRangeAction(Axis::Y).initialize(range, range);
     });
 
     updateDiscretizationActions();

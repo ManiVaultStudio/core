@@ -189,7 +189,7 @@ public: // Action getters
     const DecimalRangeAction& getRangeAction(const Axis& axis) const { return _rangeAction[static_cast<int>(axis)]; }
     const DecimalRangeAction& getDataRangeAction(const Axis& axis) const { return _dataRangeAction[static_cast<int>(axis)]; }
     const DecimalRangeAction& getSharedDataRangeAction(const Axis& axis) const { return _sharedDataRangeAction[static_cast<int>(axis)]; }
-    const ToggleAction& getSynchronizeWithSharedDataRangeAction() const { return _synchronizeWithSharedDataRangeAction; }
+    const ToggleAction& getLockToSharedDataRangeAction() const { return _lockToSharedDataRangeAction; }
     const ToggleAction& getMirrorAction(const Axis& axis) const { return _mirrorAction[static_cast<int>(axis)]; }
     const HorizontalGroupAction& getMirrorGroupAction() const { return _mirrorGroupAction; }
     const ToggleAction& getDiscretizeAction() const { return _discretizeAction; }
@@ -206,7 +206,7 @@ public: // Action getters
     DecimalRangeAction& getRangeAction(const Axis& axis) { return _rangeAction[static_cast<int>(axis)]; }
     DecimalRangeAction& getDataRangeAction(const Axis& axis) { return _dataRangeAction[static_cast<int>(axis)]; }
     DecimalRangeAction& getSharedDataRangeAction(const Axis& axis) { return _sharedDataRangeAction[static_cast<int>(axis)]; }
-    ToggleAction& getSynchronizeWithSharedDataRangeAction() { return _synchronizeWithSharedDataRangeAction; }
+    ToggleAction& getLockToSharedDataRangeAction() { return _lockToSharedDataRangeAction; }
     ToggleAction& getMirrorAction(const Axis& axis) { return _mirrorAction[static_cast<int>(axis)]; }
     HorizontalGroupAction& getMirrorGroupAction() { return _mirrorGroupAction; }
     ToggleAction& getDiscretizeAction() { return _discretizeAction; }
@@ -225,7 +225,7 @@ protected:
     DecimalRangeAction          _rangeAction[static_cast<int>(Axis::Count)];            /** Color map range action (1D/2D color map) */
     DecimalRangeAction          _dataRangeAction[static_cast<int>(Axis::Count)];        /** Range of the associated dataset (1D/2D color map) */
     DecimalRangeAction          _sharedDataRangeAction[static_cast<int>(Axis::Count)];  /** Shared range (1D/2D color map) of all connected color maps (if the color map is connected to a public color map) */
-    ToggleAction                _synchronizeWithSharedDataRangeAction;                  /** Synchronize with shared data range action */
+    ToggleAction                _lockToSharedDataRangeAction;                           /** Lock to shared data range action */
     ToggleAction                _mirrorAction[static_cast<int>(Axis::Count)];           /** Mirror along the horizontal/vertical axis action */
     HorizontalGroupAction       _mirrorGroupAction;                                     /** Group action for mirroring along horizontal/vertical axis */
     ToggleAction                _discretizeAction;                                      /** Discretize toggle action */
