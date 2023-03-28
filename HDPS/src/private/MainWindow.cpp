@@ -62,9 +62,9 @@ void MainWindow::showEvent(QShowEvent* showEvent)
                 const auto projectFilePath = projects().getCurrentProject()->getFilePath();
 
                 if (projectFilePath.isEmpty())
-                    setWindowTitle("Unsaved - HDPS");
+                    setWindowTitle("Unsaved - ManiVault");
                 else
-                    setWindowTitle(QString("%1 - HDPS").arg(projectFilePath));
+                    setWindowTitle(QString("%1 - ManiVault").arg(projectFilePath));
             }
         };
 
