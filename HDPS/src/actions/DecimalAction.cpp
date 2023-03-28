@@ -75,13 +75,13 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
     if (publicDecimalAction == nullptr)
         return;
 
-    connect(this, &DecimalAction::minimumChanged, publicDecimalAction, [publicDecimalAction](const float& minimum) -> void {
-        publicDecimalAction->setMinimum(minimum);
-    });
+    //connect(this, &DecimalAction::minimumChanged, publicDecimalAction, [publicDecimalAction](const float& minimum) -> void {
+    //    publicDecimalAction->setMinimum(minimum);
+    //});
 
-    connect(this, &DecimalAction::maximumChanged, publicDecimalAction, [publicDecimalAction](const float& maximum) -> void {
-        publicDecimalAction->setMaximum(maximum);
-    });
+    //connect(this, &DecimalAction::maximumChanged, publicDecimalAction, [publicDecimalAction](const float& maximum) -> void {
+    //    publicDecimalAction->setMaximum(maximum);
+    //});
 
     connect(this, &DecimalAction::valueChanged, publicDecimalAction, [publicDecimalAction](const float& value) -> void {
         publicDecimalAction->setValue(value);
@@ -91,8 +91,8 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
         setValue(value);
     });
 
-    setMinimum(publicDecimalAction->getMinimum());
-    setMaximum(publicDecimalAction->getMaximum());
+    //setMinimum(publicDecimalAction->getMinimum());
+    //setMaximum(publicDecimalAction->getMaximum());
     setValue(publicDecimalAction->getValue());
 
     WidgetAction::connectToPublicAction(publicAction);
@@ -107,8 +107,8 @@ void DecimalAction::disconnectFromPublicAction()
     if (publicDecimalAction == nullptr)
         return;
 
-    disconnect(this, &DecimalAction::minimumChanged, publicDecimalAction, nullptr);
-    disconnect(this, &DecimalAction::maximumChanged, publicDecimalAction, nullptr);
+    //disconnect(this, &DecimalAction::minimumChanged, publicDecimalAction, nullptr);
+    //disconnect(this, &DecimalAction::maximumChanged, publicDecimalAction, nullptr);
     disconnect(this, &DecimalAction::valueChanged, publicDecimalAction, nullptr);
     disconnect(publicDecimalAction, &DecimalAction::valueChanged, this, nullptr);
 
@@ -117,7 +117,7 @@ void DecimalAction::disconnectFromPublicAction()
 
 WidgetAction* DecimalAction::getPublicCopy() const
 {
-    return new DecimalAction(parent(), text(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), getValue(), getDefaultValue(), getNumberOfDecimals());
+    return new DecimalAction(parent(), text(), getMinimum(), getMaximum(), getValue(), getDefaultValue(), getNumberOfDecimals());
 }
 
 void DecimalAction::fromVariantMap(const QVariantMap& variantMap)
