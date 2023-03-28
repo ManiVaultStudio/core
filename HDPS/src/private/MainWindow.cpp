@@ -95,6 +95,9 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         if (Application::current()->shouldOpenProjectAtStartup())
             projects().openProject(Application::current()->getStartupProjectFilePath());
+    
+        updateWindowTitle();
+
     }
 }
 
