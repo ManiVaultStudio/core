@@ -132,9 +132,13 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
     _guid       = variantMap["GUID"].toString();
     _derived    = variantMap["Derived"].toBool();
+    bool full   = variantMap["Full"].toBool();
 
     if (_derived)
         _sourceDataset = getParent();
+
+    if (!full)
+        _fullDataset = getParent()->getFullDataset<hdps::DatasetImpl>();
 
     setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
 

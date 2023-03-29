@@ -95,7 +95,7 @@ WidgetAction* ColorAction::getPublicCopy() const
 
 void ColorAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    Serializable::fromVariantMap(variantMap);
+    WidgetAction::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "Value");
 
@@ -104,7 +104,7 @@ void ColorAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap ColorAction::toVariantMap() const
 {
-    QVariantMap variantMap = Serializable::toVariantMap();
+    QVariantMap variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
         { "Value", QVariant::fromValue(_color) }

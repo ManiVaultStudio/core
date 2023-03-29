@@ -56,7 +56,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         const auto updateWindowTitle = [&]() -> void {
             if (!projects().hasProject()) {
-                setWindowTitle("HDPS");
+                setWindowTitle("ManiVault");
             }
             else {
                 const auto projectFilePath = projects().getCurrentProject()->getFilePath();
@@ -95,6 +95,9 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         if (Application::current()->shouldOpenProjectAtStartup())
             projects().openProject(Application::current()->getStartupProjectFilePath());
+    
+        updateWindowTitle();
+
     }
 }
 
