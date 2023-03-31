@@ -39,6 +39,9 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _settingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
     _settingsAction.setText("Toggle Views");
 
+    _toggleOpenCreateProjectAction.setChecked(true);
+    _toggleExampleProjectsAction.setChecked(true);
+
     _settingsAction << _toggleOpenCreateProjectAction;
     _settingsAction << _toggleRecentProjectsAction;
     _settingsAction << _toggleExampleProjectsAction;
