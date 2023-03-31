@@ -14,9 +14,9 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _collumnsLayout(),
     _toolbarLayout(),
     _compactViewAction(this, "Compact"),
-    _toggleOpenCreateProjectAction(this, "Open & Create"),
+    _toggleOpenCreateProjectAction(this, "Open & Create", true),
     _toggleRecentProjectsAction(this, "Recent Projects"),
-    _toggleExampleProjectsAction(this, "Examples"),
+    _toggleExampleProjectsAction(this, "Examples", true),
     _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
     _toggleProjectFromDataAction(this, "Project From Data"),
     _toggleTutorialVideosAction(this, "Instructional Videos"),
@@ -38,9 +38,6 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
 
     _settingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
     _settingsAction.setText("Toggle Views");
-
-    _toggleOpenCreateProjectAction.setChecked(true);
-    _toggleExampleProjectsAction.setChecked(true);
 
     _settingsAction << _toggleOpenCreateProjectAction;
     _settingsAction << _toggleRecentProjectsAction;
