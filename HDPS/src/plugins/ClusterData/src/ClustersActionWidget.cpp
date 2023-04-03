@@ -2,7 +2,7 @@
 #include "ClustersAction.h"
 #include "ClusterData.h"
 
-#include <PointData.h>
+#include <PointData/PointData.h>
 
 #include <QHeaderView>
 #include <QVBoxLayout>

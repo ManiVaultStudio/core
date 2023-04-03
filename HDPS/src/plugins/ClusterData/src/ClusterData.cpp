@@ -4,7 +4,7 @@
 #include "Dataset.h"
 #include "DataHierarchyItem.h"
 #include "event/Event.h"
-#include "PointData.h"
+#include "PointData/PointData.h"
 
 #include "Application.h"
 
