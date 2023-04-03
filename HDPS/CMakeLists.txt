@@ -1360,18 +1360,21 @@ add_subdirectory(external/advanced_docking)
 
 # File compression LIBRARY
 if (WIN32)
-    #message(status, "********Using QTZLIB for QUAZIP *********")
-    #set(QUAZIP_USE_QT_ZLIB ON)  # Use the Qt supplied zlib
+    if(NOT DEFINED ZLIB_ROOT)
+        message(FATAL_ERROR "You need to define ZLIB_ROOT, pointing to a zlib installation")
+    else()
+        message(STATUS "Using zlib at ${ZLIB_ROOT}")
+    endif()
+
 elseif (APPLE)
-    message(status, "********Using brew zlib for QUAZIP *********")
-    #set(QUAZIP_USE_QT_ZLIB OFF)
+    message(STATUS "********Using brew zlib for QUAZIP *********")
+
     find_program(BREW_BIN brew)
     execute_process(COMMAND ${BREW_BIN} install pkg-config) 
-#else ()
-#    message(FATAL_ERROR,
-#    "*****************************
-#    zlib needed for linux build.
-#    ******************************" )
+
+else()
+    find_package(ZLIB REQUIRED)
+    message(STATUS "Using zlib at ${ZLIB_INCLUDE_DIRS}")
 endif()
 
 set(QUAZIP_QT_MAJOR_VERSION 6)
