@@ -31,8 +31,6 @@ set(POINTS_HEADERS
     src/PointDataRange.h
     src/PointView.h
     src/RandomAccessRange.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16/biovault_bfloat16.h
-
     src/InfoAction.h
     src/SelectedIndicesAction.h
     src/ProxyDatasetsAction.h
@@ -48,6 +46,10 @@ set(POINTS_HEADERS
     src/DimensionsPickerProxyModel.h
     src/ModelResetter.h
     src/CreateSetFromSelectionAction.h
+)
+
+set(BFLOAT_HEADER
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/biovault_bfloat16/biovault_bfloat16.h
 )
 
 set(ACTIONS_SOURCES
@@ -91,7 +93,7 @@ add_library(${PROJECT} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
 add_dependencies(${PROJECT} HDPS_Public)
 
 target_include_directories(${PROJECT} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
-target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16)
+target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/)
 
 target_compile_features(${PROJECT} PRIVATE cxx_std_17)
 
@@ -136,6 +138,13 @@ if (NOT WIN32)
         PUBLIC_HEADER DESTINATION include COMPONENT HEADERS
     )
 endif()
+
+# Copy the external biovault_bfloat16 header into its own subfolder - cmake's install PUBLIC_HEADER flattens all subdirs
+install(CODE "execute_process(
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different  
+                ${BFLOAT_HEADER} 
+                ${INSTALL_DIR}/$<CONFIGURATION>/include/biovault_bfloat16/biovault_bfloat16.h)"
+)
 
 # PointData is needed to build other plugins - install it now.
 add_custom_command(TARGET ${PROJECT} POST_BUILD
