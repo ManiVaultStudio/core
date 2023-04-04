@@ -86,7 +86,6 @@ install(TARGETS ${PROJECT}
 if (NOT WIN32)
     install(TARGETS ${PROJECT}
         LIBRARY DESTINATION lib COMPONENT LINKLIB # Linux/Mac .so for linking
-        PUBLIC_HEADER DESTINATION include COMPONENT HEADERS
     )
 endif()
 
