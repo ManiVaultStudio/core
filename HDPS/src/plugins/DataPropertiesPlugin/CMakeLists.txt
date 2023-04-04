@@ -68,12 +68,6 @@ install(TARGETS ${PROJECT}
     ARCHIVE DESTINATION lib COMPONENT LINKLIB
 )
 
-if (NOT WIN32)
-    install(TARGETS ${PROJECT}
-        LIBRARY DESTINATION lib COMPONENT LINKLIB # Linux/Mac .so for linking
-    )
-endif()
-
 add_custom_command(TARGET ${PROJECT} POST_BUILD
 	COMMAND "${CMAKE_COMMAND}"
 	--install ${CMAKE_CURRENT_BINARY_DIR}
