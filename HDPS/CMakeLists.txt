@@ -1405,6 +1405,8 @@ if(APPLE)
     )
 endif()
 
-# Automatically set the debug environment (command + working directory) for MSVC in debug mode
-set_property(TARGET ${HDPS_EXE} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY  $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
-set_property(TARGET ${HDPS_EXE} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/${HDPS_EXE}.exe,${INSTALL_DIR}/release/${HDPS_EXE}.exe>)
+# Automatically set the debug environment (command + working directory) for MSVC
+if(MSVC)
+    set_property(TARGET ${HDPS_EXE} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY  $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
+    set_property(TARGET ${HDPS_EXE} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/${HDPS_EXE}.exe,${INSTALL_DIR}/release/${HDPS_EXE}.exe>)
+endif()
