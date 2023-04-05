@@ -21,6 +21,17 @@ public:
     StartPageHeaderWidget(QWidget* parent = nullptr);
 
 protected:
+    void resizeEvent(QResizeEvent* event) override;
+    void showEvent(QShowEvent* event) override;
+
+private:
+    void resizeIcon(const QSize& newSize);
+
+protected:
     QVBoxLayout     _layout;        /** Main layout */
     QLabel          _headerLabel;   /** Header label */
+
+private:
+    QString         _iconName;      /** Name of background icon */
+    int             _previousHeight;/** Name of background icon */
 };

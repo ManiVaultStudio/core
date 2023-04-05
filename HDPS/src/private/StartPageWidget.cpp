@@ -28,8 +28,8 @@ StartPageWidget::StartPageWidget(QWidget* parent /*= nullptr*/) :
     _layout.setContentsMargins(0, 0, 0, 0);
     _layout.setSpacing(0);
 
-    _centerColumnLayout.addWidget(&_startPageHeaderWidget);
-    _centerColumnLayout.addWidget(&_startPageContentWidget);
+    _centerColumnLayout.addWidget(&_startPageHeaderWidget, 1);
+    _centerColumnLayout.addWidget(&_startPageContentWidget, 2);
 
     _layout.addStretch(1);
     _layout.addLayout(&_centerColumnLayout, 2);

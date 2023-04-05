@@ -2,6 +2,7 @@
 #include "StartPageWidget.h"
 
 #include <QDebug>
+#include <algorithm>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -9,26 +10,52 @@ using namespace hdps::gui;
 StartPageHeaderWidget::StartPageHeaderWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _layout(),
-    _headerLabel()
+    _headerLabel(),
+    _iconName(":/Images/AppBackground256"),
+    _previousHeight(-1)
 {
     setLayout(&_layout);
     setAutoFillBackground(true);
 
+    setMinimumHeight(150);
+
     const int pixelRatio = devicePixelRatio();
 
-    QString iconName = ":/Images/AppBackground256";
-
     if (pixelRatio > 1)
-        iconName = ":/Images/AppBackground512";
+        _iconName = ":/Images/AppBackground512";
 
     if (pixelRatio > 2)
-        iconName = ":/Images/AppBackground1024";
+        _iconName = ":/Images/AppBackground1024";
 
-    _headerLabel.setPixmap(QPixmap(iconName).scaled(256, 256));
+    _headerLabel.setPixmap(QPixmap(_iconName).scaled(256, 256));
     _headerLabel.setAlignment(Qt::AlignCenter);
 
-    _layout.setContentsMargins(50, 50, 50, 50);
+    _layout.setContentsMargins(50, 25, 50, 0);
     _layout.addWidget(&_headerLabel);
 
     StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+}
+
+void StartPageHeaderWidget::resizeEvent(QResizeEvent* event)
+{
+    resizeIcon(event->size());
+}
+
+void StartPageHeaderWidget::showEvent(QShowEvent* event)
+{
+    // Resize icon when widget is first open
+    resizeIcon(size());
+}
+
+void StartPageHeaderWidget::resizeIcon(const QSize& newSize)
+{
+    if (isVisible() && newSize.height() != _previousHeight)
+    {
+        float fracHeight = newSize.height() / 296.0f; // 296 = 2 * top margin + default pixmap size
+        float scale = std::clamp(fracHeight, 0.1f, 1.0f);
+
+        _headerLabel.setPixmap(QPixmap(_iconName).scaled(scale * 256, scale * 256));
+
+        _previousHeight = newSize.height();
+    }
 }
