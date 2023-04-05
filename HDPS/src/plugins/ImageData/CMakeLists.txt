@@ -54,9 +54,10 @@ target_compile_features(${PROJECT} PRIVATE cxx_std_17)
 include(GenerateExportHeader)
 generate_export_header(${PROJECT})
 
+# Retrieve the file name of the generated export header.
 file(GLOB EXPORT_HEADER_FILE_NAME 
     RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*_export.h)
-list(APPEND IMAGEDATA_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME})
+list(APPEND IMAGE_DATA_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME})
 
 set(HDPS_LINK_PATH "${INSTALL_DIR}/$<CONFIGURATION>/lib")
 set(PLUGIN_LINK_PATH "${INSTALL_DIR}/$<CONFIGURATION>/$<IF:$<CXX_COMPILER_ID:MSVC>,lib,Plugins>")
