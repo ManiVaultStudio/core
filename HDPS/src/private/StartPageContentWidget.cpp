@@ -46,7 +46,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _settingsAction << _toggleProjectFromDataAction;
     _settingsAction << _toggleTutorialVideosAction;
 
-    _collumnsLayout.setContentsMargins(35, 0, 35, 10);
+    _collumnsLayout.setContentsMargins(35, 35, 35, 35);
     _toolbarLayout.setContentsMargins(35, 10, 35, 10);
 
     _collumnsLayout.addWidget(&_openProjectWidget);

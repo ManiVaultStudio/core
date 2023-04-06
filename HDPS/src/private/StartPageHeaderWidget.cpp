@@ -44,7 +44,7 @@ void StartPageHeaderWidget::resizeEvent(QResizeEvent* event)
 
 void StartPageHeaderWidget::showEvent(QShowEvent* event)
 {
-    // resize icon when widget is first open
+    // resize icon when widget is first opened
     resizeIcon(size());
 }
 

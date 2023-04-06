@@ -22,7 +22,7 @@
 
 using namespace hdps;
 
-// QStackedWidget, be default, returns the maximum size of all widgets
+// QStackedWidget, by default, returns the maximum size of all widgets
 // We are interested in the size of the currently shown widget instead
 class StackedWidget : public QStackedWidget
 {
