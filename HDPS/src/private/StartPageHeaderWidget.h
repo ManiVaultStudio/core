@@ -21,10 +21,23 @@ public:
     StartPageHeaderWidget(QWidget* parent = nullptr);
 
 protected:
+    /**
+     * Override resize event to resize header icon when main window is resized
+     * @param event Pointer to resize event which occurred
+     */
     void resizeEvent(QResizeEvent* event) override;
+
+    /**
+     * Override show event to resize header icon on first window opening
+     * @param event Pointer to show event which occurred
+     */
     void showEvent(QShowEvent* event) override;
 
 private:
+    /**
+     * Resize the main icon shown in the header to newSize x newSize pixels
+     * @param newSize new icon width and height
+     */
     void resizeIcon(const QSize& newSize);
 
 protected:
@@ -33,5 +46,5 @@ protected:
 
 private:
     QString         _iconName;      /** Name of background icon */
-    int             _previousHeight;/** Name of background icon */
+    int             _previousHeight;/** Height of main header icon */
 };

@@ -38,17 +38,19 @@ StartPageHeaderWidget::StartPageHeaderWidget(QWidget* parent /*= nullptr*/) :
 
 void StartPageHeaderWidget::resizeEvent(QResizeEvent* event)
 {
+    // resize icon when widget is resized
     resizeIcon(event->size());
 }
 
 void StartPageHeaderWidget::showEvent(QShowEvent* event)
 {
-    // Resize icon when widget is first open
+    // resize icon when widget is first open
     resizeIcon(size());
 }
 
 void StartPageHeaderWidget::resizeIcon(const QSize& newSize)
 {
+    // only update when visible and if the window height changed, i.e. ignore width changes
     if (isVisible() && newSize.height() != _previousHeight)
     {
         float fracHeight = newSize.height() / 296.0f; // 296 = 2 * top margin + default pixmap size
