@@ -78,6 +78,26 @@ public:
      */
     virtual void setTriggerShortcut(const QKeySequence& keySequence) final;
 
+public: // Title bar settings menu
+
+    /**
+     * Add action to the title bar menu
+     * @param action Pointer to widget action
+     */
+    void addTitleBarMenuAction(gui::WidgetAction* action);
+
+    /**
+     * Remove action from the title bar menu
+     * @param action Pointer to widget action
+     */
+    void removeTitleBarMenuAction(gui::WidgetAction* action);
+
+    /**
+     * Get title bar actions
+     * @return List of pointers to title bar actions
+     */
+    gui::WidgetActions getTitleBarMenuActions();
+
 public: // Serialization
 
     /**
@@ -106,18 +126,19 @@ public: // Action getters
     gui::PresetsAction& getPresetsAction() { return _presetsAction; }
 
 private:
-    QWidget                 _widget;                /** Widget representation of the plugin */
-    gui::TriggerAction      _editActionsAction;     /** Trigger action to start editing the view plugin action hierarchy */
-    gui::TriggerAction      _screenshotAction;      /** Trigger action to create a screenshot */
-    gui::ToggleAction       _isolateAction;         /** Toggle action to toggle view isolation (when toggled, all other view plugins are temporarily closed) */
-    gui::ToggleAction       _mayCloseAction;        /** Action for toggling whether the view plugin may be closed */
-    gui::ToggleAction       _mayFloatAction;        /** Action for toggling whether the view plugin may float */
-    gui::ToggleAction       _mayMoveAction;         /** Action for toggling whether the view plugin may be moved */
-    gui::LockingAction      _lockingAction;         /** Action for toggling whether the view plugin is locked */
-    gui::ToggleAction       _visibleAction;         /** Action which determines whether the view plugin is visible or not */
-    gui::TriggerAction      _helpAction;            /** Action which triggers documentation */
-    gui::PresetsAction      _presetsAction;         /** Action for managing presets */
-    QKeySequence            _triggerShortcut;       /** Shortcut for triggering the plugin */
+    QWidget                 _widget;                    /** Widget representation of the plugin */
+    gui::TriggerAction      _editActionsAction;         /** Trigger action to start editing the view plugin action hierarchy */
+    gui::TriggerAction      _screenshotAction;          /** Trigger action to create a screenshot */
+    gui::ToggleAction       _isolateAction;             /** Toggle action to toggle view isolation (when toggled, all other view plugins are temporarily closed) */
+    gui::ToggleAction       _mayCloseAction;            /** Action for toggling whether the view plugin may be closed */
+    gui::ToggleAction       _mayFloatAction;            /** Action for toggling whether the view plugin may float */
+    gui::ToggleAction       _mayMoveAction;             /** Action for toggling whether the view plugin may be moved */
+    gui::LockingAction      _lockingAction;             /** Action for toggling whether the view plugin is locked */
+    gui::ToggleAction       _visibleAction;             /** Action which determines whether the view plugin is visible or not */
+    gui::TriggerAction      _helpAction;                /** Action which triggers documentation */
+    gui::PresetsAction      _presetsAction;             /** Action for managing presets */
+    QKeySequence            _triggerShortcut;           /** Shortcut for triggering the plugin */
+    gui::WidgetActions      _titleBarMenuActions;       /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
 };
 
 class ViewPluginFactory : public PluginFactory
