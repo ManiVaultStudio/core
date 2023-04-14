@@ -30,7 +30,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction(this, "Visible", true, true),
     _helpAction(this, "Trigger help"),
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
-    _triggerShortcut()
+    _triggerShortcut(),
+    _titleBarMenuActions()
 {
     setText(getGuiName());
 
@@ -224,6 +225,25 @@ QVariantMap ViewPlugin::toVariantMap() const
     _visibleAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
+}
+
+void ViewPlugin::addTitleBarMenuAction(hdps::gui::WidgetAction* action)
+{
+    Q_ASSERT(action != nullptr);
+
+    _titleBarMenuActions << action;
+}
+
+void ViewPlugin::removeTitleBarMenuAction(hdps::gui::WidgetAction* action)
+{
+    Q_ASSERT(action != nullptr);
+
+    _titleBarMenuActions.removeOne(action);
+}
+
+hdps::gui::WidgetActions ViewPlugin::getTitleBarMenuActions()
+{
+    return _titleBarMenuActions;
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :
