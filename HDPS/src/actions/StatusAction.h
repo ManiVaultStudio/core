@@ -129,8 +129,6 @@ protected:
     QString     _message;   /** Status message */
 
     static constexpr std::int32_t MESSAGE_DISAPPEAR_INTERVAL = 1500;   /** Delay after which a message is reset */
-
-    friend class Widget;
 };
 
 }

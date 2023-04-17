@@ -17,16 +17,28 @@ namespace hdps::gui {
 
 ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= "RdYlBu"*/, const QString& defaultColorMap /*= "RdYlBu"*/) :
     WidgetAction(parent, "Color Map"),
-    _currentColorMapAction(this, "Current color map"),
     _colorMapFilterModel(this, colorMapType),
+    _currentColorMapAction(this, "Current color map"),
+    _rangeAction{ DecimalRangeAction(this, "Range"), DecimalRangeAction(this, "Range (y)") },
+    _dataRangeAction{ DecimalRangeAction(this, "Data range"), DecimalRangeAction(this, "Data range (y)") },
+    _sharedDataRangeAction{ DecimalRangeAction(this, "Shared data range"), DecimalRangeAction(this, "Shared data range (y)") },
+    _lockToSharedDataRangeAction(this, "Lock to shared data range"),
+    _mirrorAction{ ToggleAction(this, "Mirror horizontally"), ToggleAction(this, "Mirror vertically") },
+    _mirrorGroupAction(this, "Mirror"),
+    _discretizeAction(this, "Discrete"),
+    _numberOfDiscreteStepsAction(this, "Number of steps", 2, 10, 5, 5),
+    _discretizeAlphaAction(this, "Discretize alpha", false, false),
+    _settings1DAction(*this),
+    _settings2DAction(*this),
+    _customColorMapAction(this, "Custom color map"),
+    _editor1DAction(*this),
+    _customColorMapGroupAction(this, "Custom color map"),
     _settingsAction(*this)
 {
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
     setDefaultWidgetFlags(WidgetFlag::Default);
     setSerializationName("ColorMap");
-    
-    _currentColorMapAction.setSerializationName("Current");
 
     initialize(colorMap, defaultColorMap);
 
@@ -34,18 +46,168 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
         emit imageChanged(getColorMapImage());
     };
 
-    connect(&_currentColorMapAction, &OptionAction::currentIndexChanged, this, notifyColorMapImageChanged);
-    connect(&_settingsAction.getHorizontalAxisAction().getMirrorAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
-    connect(&_settingsAction.getVerticalAxisAction().getMirrorAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
-    connect(&_settingsAction.getDiscreteAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
-    connect(&_settingsAction.getDiscreteAction().getNumberOfStepsAction(), &IntegralAction::valueChanged, this, notifyColorMapImageChanged);
-    connect(&_settingsAction.getDiscreteAction().getDiscretizeAlphaAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
+    connect(&getCurrentColorMapAction(), &OptionAction::currentIndexChanged, this, notifyColorMapImageChanged);
+    connect(&getMirrorAction(Axis::X), &ToggleAction::toggled, this, notifyColorMapImageChanged);
+    connect(&getMirrorAction(Axis::Y), &ToggleAction::toggled, this, notifyColorMapImageChanged);
+    connect(&getDiscretizeAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
+    connect(&getNumberOfDiscreteStepsAction(), &IntegralAction::valueChanged, this, notifyColorMapImageChanged);
+    connect(&getDiscretizeAlphaAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
+    connect(&getCustomColorMapAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
+
+    const auto updateDiscretizationActions = [this]() -> void {
+        getNumberOfDiscreteStepsAction().setEnabled(_discretizeAction.isChecked());
+        getDiscretizeAlphaAction().setEnabled(_discretizeAction.isChecked());
+    };
+
+    connect(&getDiscretizeAction(), &ToggleAction::toggled, this, updateDiscretizationActions);
+
+    const auto updateEditorActionReadOnly = [this]() -> void {
+        getEditor1DAction().setEnabled(getCustomColorMapAction().isChecked());
+    };
+
+    connect(&getCustomColorMapAction(), &ToggleAction::toggled, this, updateEditorActionReadOnly);
+
+    getEditor1DAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
+
+    getCustomColorMapGroupAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
+    getCustomColorMapGroupAction().addAction(&getCustomColorMapAction());
+    getCustomColorMapGroupAction().addAction(&getEditor1DAction());
+
+    getMirrorGroupAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
+    getMirrorGroupAction().addAction(&getMirrorAction(Axis::X));
+    getMirrorGroupAction().addAction(&getMirrorAction(Axis::Y));
+
+    const auto updateSharedDataRange = [this]() -> void {
+        NumericalRange<float> sharedDataRangeX(std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest());
+
+        for (auto connectedAction : getConnectedActions()) {
+            auto privateColorMapAction = dynamic_cast<ColorMapAction*>(connectedAction);
+
+            sharedDataRangeX += privateColorMapAction->getDataRangeAction(Axis::X).getRange();
+        }
+
+        getSharedDataRangeAction(Axis::X).setRange(sharedDataRangeX);
+    };
+
+    connect(this, &ColorMapAction::actionConnected, this, [this, updateSharedDataRange](const WidgetAction* privateAction) -> void {
+        if (!isPublic())
+            return;
+
+        auto privateColorMapAction = dynamic_cast<const ColorMapAction*>(privateAction);
+
+        if (privateColorMapAction == nullptr)
+            return;
+
+        connect(&privateColorMapAction->getDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, updateSharedDataRange);
+        connect(&privateColorMapAction->getDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, updateSharedDataRange);
+
+        updateSharedDataRange();
+    });
+
+    connect(this, &ColorMapAction::actionDisconnected, this, [this, updateSharedDataRange](const WidgetAction* privateAction) -> void {
+        if (!isPublic())
+            return;
+
+        auto privateColorMapAction = dynamic_cast<const ColorMapAction*>(privateAction);
+
+        if (privateColorMapAction == nullptr)
+            return;
+
+        disconnect(&privateColorMapAction->getDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, nullptr);
+        disconnect(&privateColorMapAction->getDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, nullptr);
+
+        updateSharedDataRange();
+    });
+
+    const auto syncRangeWithDataRange = [this]() -> void {
+        const auto dataRange = getDataRangeAction(Axis::X).getRange();
+        getRangeAction(Axis::X).initialize(dataRange, dataRange);
+    };
+
+    const auto syncRangeWithSharedDataRange = [this]() -> void {
+        const auto sharedDataRange = getSharedDataRangeAction(Axis::X).getRange();
+        getRangeAction(Axis::X).initialize(sharedDataRange, sharedDataRange);
+    };
+
+    const auto updateRangeActionReadOnly = [this]() -> void {
+        getRangeAction(Axis::X).setEnabled(!getLockToSharedDataRangeAction().isChecked());
+    };
+
+    connect(&getLockToSharedDataRangeAction(), &ToggleAction::toggled, this, [updateRangeActionReadOnly, syncRangeWithDataRange, syncRangeWithSharedDataRange](bool toggled) -> void {
+        updateRangeActionReadOnly();
+
+        if (toggled)
+            syncRangeWithSharedDataRange();
+        else
+            syncRangeWithDataRange();
+    });
+
+    connect(&getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, [this](const NumericalRange<float>& range) -> void {
+        if (!getLockToSharedDataRangeAction().isChecked())
+            return;
+
+        getRangeAction(Axis::X).initialize(range, range);
+    });
+
+    connect(&getSharedDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, [this](const NumericalRange<float>& range) -> void {
+        if (!getLockToSharedDataRangeAction().isChecked())
+            return;
+
+        getRangeAction(Axis::Y).initialize(range, range);
+    });
+
+    updateDiscretizationActions();
+    updateEditorActionReadOnly();
+    updateRangeActionReadOnly;
 }
 
 void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString& defaultColorMap /*= ""*/)
 {
     _colorMapFilterModel.setSourceModel(ColorMapModel::getGlobalInstance());
-    _currentColorMapAction.initialize(_colorMapFilterModel, colorMap, defaultColorMap);
+
+    getCurrentColorMapAction().setSerializationName("Current");
+    getRangeAction(Axis::X).setSerializationName("RangeX");
+    getRangeAction(Axis::Y).setSerializationName("RangeY");
+    getDataRangeAction(Axis::X).setSerializationName("DataRangeX");
+    getDataRangeAction(Axis::Y).setSerializationName("DataRangeY");
+    getSharedDataRangeAction(Axis::X).setSerializationName("SharedDataRangeX");
+    getSharedDataRangeAction(Axis::Y).setSerializationName("SharedDataRangeY");
+    getMirrorAction(Axis::X).setSerializationName("MirrorX");
+    getMirrorAction(Axis::Y).setSerializationName("MirrorY");
+    getDiscretizeAction().setSerializationName("Discretize");
+    getNumberOfDiscreteStepsAction().setSerializationName("NumberOfDiscreteSteps");
+    getDiscretizeAlphaAction().setSerializationName("DiscretizeAlpha");
+    getCustomColorMapAction().setSerializationName("Custom");
+
+    getCurrentColorMapAction().setToolTip("Current");
+    getRangeAction(Axis::X).setToolTip("Range in the x-axis");
+    getRangeAction(Axis::Y).setToolTip("Range in the y-axis");
+    getDataRangeAction(Axis::X).setToolTip("Data range in the x-axis");
+    getDataRangeAction(Axis::Y).setToolTip("Data range in the y-axis");
+    getSharedDataRangeAction(Axis::X).setToolTip("Shared data range in the x-axis");
+    getSharedDataRangeAction(Axis::Y).setToolTip("Shared data range in the y-axis");
+    getMirrorAction(Axis::X).setToolTip("Mirror in the x-axis");
+    getMirrorAction(Axis::Y).setToolTip("Mirror in the y-axis");
+    getDiscretizeAction().setToolTip("Whether to discretize the color map");
+    getNumberOfDiscreteStepsAction().setToolTip("Number of discrete steps");
+    getDiscretizeAlphaAction().setToolTip("Whether to discrete the alpha channel");
+    getCustomColorMapAction().setToolTip("Customize the color map");
+
+    getCurrentColorMapAction().initialize(_colorMapFilterModel, colorMap, defaultColorMap);
+
+    getDataRangeAction(Axis::X).setEnabled(false);
+    getDataRangeAction(Axis::Y).setEnabled(false);
+
+    getDataRangeAction(Axis::X).setDefaultWidgetFlags(DecimalRangeAction::MinimumLineEdit | DecimalRangeAction::MaximumLineEdit);
+    getDataRangeAction(Axis::Y).setDefaultWidgetFlags(DecimalRangeAction::MinimumLineEdit | DecimalRangeAction::MaximumLineEdit);
+
+    getSharedDataRangeAction(Axis::X).setEnabled(false);
+    getSharedDataRangeAction(Axis::Y).setEnabled(false);
+
+    getSharedDataRangeAction(Axis::X).setDefaultWidgetFlags(DecimalRangeAction::MinimumLineEdit | DecimalRangeAction::MaximumLineEdit);
+    getSharedDataRangeAction(Axis::Y).setDefaultWidgetFlags(DecimalRangeAction::MinimumLineEdit | DecimalRangeAction::MaximumLineEdit);
+
+    getEditor1DAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::AlwaysCollapsed);
 }
 
 hdps::util::ColorMap::Type ColorMapAction::getColorMapType() const
@@ -69,55 +231,39 @@ QString ColorMapAction::getColorMap() const
 
 QImage ColorMapAction::getColorMapImage() const
 {
-    if (_currentColorMapAction.getModel() == nullptr)
+    if (getCurrentColorMapAction().getModel() == nullptr)
         return QImage();
 
-    // Get the model index of the selected color map image
-    const auto filteredModelIndex = _currentColorMapAction.getModel()->index(_currentColorMapAction.getCurrentIndex(), 0);
+    const auto filteredModelIndex = getCurrentColorMapAction().getModel()->index(getCurrentColorMapAction().getCurrentIndex(), 0);
 
-    // Get the selected color map image
     auto colorMapImage = filteredModelIndex.siblingAtColumn(static_cast<std::int32_t>(ColorMapModel::Column::Image)).data(Qt::EditRole).value<QImage>();
 
-    // Cast away the const-ness of the this pointer and get the settings action
-    auto& settingsAction = const_cast<ColorMapAction*>(this)->getSettingsAction();
+    if (getCustomColorMapAction().isChecked())
+        colorMapImage = getEditor1DAction().getColorMapImage();
 
-    if (settingsAction.getEditor1DAction().isChecked())
-        colorMapImage = settingsAction.getEditor1DAction().getColorMapImage();
+    const auto mirrorHorizontally   = getMirrorAction(Axis::X).isChecked();
+    const auto mirrorVertically     = getMirrorAction(Axis::Y).isChecked();
 
-    // Establish whether the color map needs to be mirrored in the horizontal and vertical direction
-    const auto mirrorHorizontally   = settingsAction.getHorizontalAxisAction().getMirrorAction().isChecked();
-    const auto mirrorVertically     = settingsAction.getVerticalAxisAction().getMirrorAction().isChecked();
-
-    // Perform the mirroring
     colorMapImage = colorMapImage.mirrored(mirrorHorizontally, mirrorVertically);
 
-    // Convert to discrete representation
-    if (settingsAction.getDiscreteAction().isChecked()) {
+    if (getDiscretizeAction().isChecked()) {
 
-        // Get the number of discrete color map steps
-        const auto numberOfDiscreteSteps = settingsAction.getDiscreteAction().getNumberOfStepsAction().getValue();
+        const auto numberOfDiscreteSteps = getNumberOfDiscreteStepsAction().getValue();
 
         switch (_colorMapFilterModel.getType())
         {
             case ColorMap::Type::OneDimensional:
             {
-                // The discrete one-dimensional color map image
                 QImage discreteColorMapImage(numberOfDiscreteSteps, 1, QImage::Format::Format_ARGB32);
 
-                // Compute step size in source image coordinates 
                 const auto sourceStepSizeX = static_cast<std::int32_t>(ceilf(colorMapImage.width()) / static_cast<float>(numberOfDiscreteSteps));
 
-                // Create average color for each discrete color section
                 for (int discreteStepIndex = 0; discreteStepIndex < numberOfDiscreteSteps; discreteStepIndex++) {
-
-                    // Compute source image pixel range
                     const auto rangeStartX  = discreteStepIndex * sourceStepSizeX;
                     const auto rangeEndR    = rangeStartX + sourceStepSizeX;
 
-                    // Create channel for RGB color components
                     QVector<QVector<float>> channels(4);
 
-                    // Sum the pixel colors so that we can average them later
                     for (int p = rangeStartX; p < rangeEndR; p++) {
                         const auto pixel = colorMapImage.pixelColor(p, 0);
 
@@ -127,25 +273,22 @@ QImage ColorMapAction::getColorMapImage() const
                         channels[3].push_back(pixel.alphaF());
                     }
 
-                    // Compute number of pixels
                     const auto noPixels = static_cast<float>(sourceStepSizeX);
 
                     QColor discreteColor;
 
-                    // Compute average color per channel
                     discreteColor.setRedF(std::accumulate(channels[0].begin(), channels[0].end(), 0.0f) / noPixels);
                     discreteColor.setGreenF(std::accumulate(channels[1].begin(), channels[1].end(), 0.0f) / noPixels);
                     discreteColor.setBlueF(std::accumulate(channels[2].begin(), channels[2].end(), 0.0f) / noPixels);
                     discreteColor.setAlphaF(std::accumulate(channels[3].begin(), channels[3].end(), 0.0f) / noPixels);
 
-                    // Assign the pixel color
                     discreteColorMapImage.setPixelColor(discreteStepIndex, 0, discreteColor);
                 }
 
                 for (int pixelX = 0; pixelX < colorMapImage.width(); pixelX++) {
                     auto pixelColor = discreteColorMapImage.pixelColor(QPoint(std::min(numberOfDiscreteSteps - 1, static_cast<std::int32_t>(floorf(static_cast<float>(pixelX) / sourceStepSizeX))), 0));
 
-                    if (!settingsAction.getDiscreteAction().getDiscretizeAlphaAction().isChecked())
+                    if (!_discretizeAlphaAction.isChecked())
                         pixelColor.setAlphaF(colorMapImage.pixelColor(QPoint(pixelX, 0)).alphaF());
 
                     colorMapImage.setPixelColor(QPoint(pixelX, 0), pixelColor);
@@ -156,31 +299,22 @@ QImage ColorMapAction::getColorMapImage() const
 
             case ColorMap::Type::TwoDimensional:
             {
-                // The discrete one-dimensional color map image
                 QImage discreteColorMapImage(numberOfDiscreteSteps, numberOfDiscreteSteps, QImage::Format::Format_ARGB32);
 
-                // Compute step size in source image coordinates 
                 const auto sourceStepSizeX = static_cast<std::int32_t>(floorf(colorMapImage.width()) / static_cast<float>(numberOfDiscreteSteps));
                 const auto sourceStepSizeY = static_cast<std::int32_t>(floorf(colorMapImage.height()) / static_cast<float>(numberOfDiscreteSteps));
 
-                // Create average color for each discrete color section
                 for (int stepY = 0; stepY < numberOfDiscreteSteps; stepY++) {
                     for (int stepX = 0; stepX < numberOfDiscreteSteps; stepX++) {
-                        
-                        // Compute source image pixel ranges in x and y direction
                         const auto rangeStartX  = stepX * sourceStepSizeX;
                         const auto rangeEndX    = rangeStartX + sourceStepSizeX;
                         const auto rangeStartY  = stepY * sourceStepSizeY;
                         const auto rangeEndY    = rangeStartY + sourceStepSizeY;
 
-                        // Create channel for RGB color components
                         QVector<QVector<float>> channels(4);
 
-                        // Sum the pixel colors so that we can average them later
                         for (int pixelY = rangeStartY; pixelY < rangeEndY; pixelY++) {
                             for (int pixelX = rangeStartX; pixelX < rangeEndX; pixelX++) {
-
-                                // Get source image pixel color
                                 const auto pixel = colorMapImage.pixelColor(pixelX, pixelY);
 
                                 channels[0].push_back(pixel.redF());
@@ -190,18 +324,15 @@ QImage ColorMapAction::getColorMapImage() const
                             }
                         }
                         
-                        // Compute number of pixels
                         const auto noPixels = static_cast<float>(sourceStepSizeX * sourceStepSizeY);
 
                         QColor discreteColor;
 
-                        // Compute average color per channel
                         discreteColor.setRedF(std::accumulate(channels[0].begin(), channels[0].end(), 0.0f) / noPixels);
                         discreteColor.setGreenF(std::accumulate(channels[1].begin(), channels[1].end(), 0.0f) / noPixels);
                         discreteColor.setBlueF(std::accumulate(channels[2].begin(), channels[2].end(), 0.0f) / noPixels);
                         discreteColor.setAlphaF(std::accumulate(channels[3].begin(), channels[3].end(), 0.0f) / noPixels);
 
-                        // Assign the pixel color
                         discreteColorMapImage.setPixelColor(stepX, stepY, discreteColor);
                     }
                 }
@@ -242,17 +373,49 @@ void ColorMapAction::connectToPublicAction(WidgetAction* publicAction)
 
     Q_ASSERT(publicColorMapAction != nullptr);
 
-    _currentColorMapAction.connectToPublicAction(&publicColorMapAction->getCurrentColorMapAction());
+    if (publicColorMapAction == nullptr)
+        return;
 
-    _settingsAction.connectToPublicAction(&publicColorMapAction->getSettingsAction());
+    getCurrentColorMapAction().connectToPublicAction(&publicColorMapAction->getCurrentColorMapAction());
+    
+    connect(&publicColorMapAction->getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, [this](const util::NumericalRange<float>& range) -> void {
+        getSharedDataRangeAction(Axis::X).setRange(range);
+    });
+
+    connect(&publicColorMapAction->getSharedDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, [this](const util::NumericalRange<float>& range) -> void {
+        getSharedDataRangeAction(Axis::Y).setRange(range);
+    });
+
+    getMirrorAction(Axis::X).connectToPublicAction(&publicColorMapAction->getMirrorAction(Axis::X));
+    getMirrorAction(Axis::Y).connectToPublicAction(&publicColorMapAction->getMirrorAction(Axis::Y));
+    getDiscretizeAction().connectToPublicAction(&publicColorMapAction->getDiscretizeAction());
+    getNumberOfDiscreteStepsAction().connectToPublicAction(&publicColorMapAction->getNumberOfDiscreteStepsAction());
+    getDiscretizeAlphaAction().connectToPublicAction(&publicColorMapAction->getDiscretizeAlphaAction());
+    getCustomColorMapAction().connectToPublicAction(&publicColorMapAction->getCustomColorMapAction());
 
     WidgetAction::connectToPublicAction(publicAction);
 }
 
 void ColorMapAction::disconnectFromPublicAction()
 {
-    _currentColorMapAction.disconnectFromPublicAction();
-    _settingsAction.disconnectFromPublicAction();
+    auto publicColorMapAction = dynamic_cast<ColorMapAction*>(getPublicAction());
+
+    Q_ASSERT(publicColorMapAction != nullptr);
+
+    if (publicColorMapAction == nullptr)
+        return;
+
+    getCurrentColorMapAction().disconnectFromPublicAction();
+    
+    disconnect(&publicColorMapAction->getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, nullptr);
+    disconnect(&publicColorMapAction->getSharedDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, nullptr);
+
+    getMirrorAction(Axis::X).disconnectFromPublicAction();
+    getMirrorAction(Axis::Y).disconnectFromPublicAction();
+    getDiscretizeAction().disconnectFromPublicAction();
+    getNumberOfDiscreteStepsAction().disconnectFromPublicAction();
+    getDiscretizeAlphaAction().disconnectFromPublicAction();
+    getCustomColorMapAction().disconnectFromPublicAction();
 
     WidgetAction::disconnectFromPublicAction();
 }
@@ -266,16 +429,36 @@ void ColorMapAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    _currentColorMapAction.fromParentVariantMap(variantMap);
-    _settingsAction.fromParentVariantMap(variantMap);
+    getCurrentColorMapAction().fromParentVariantMap(variantMap);
+    getRangeAction(Axis::X).fromParentVariantMap(variantMap);
+    getRangeAction(Axis::Y).fromParentVariantMap(variantMap);
+    getSharedDataRangeAction(Axis::X).fromParentVariantMap(variantMap);
+    getSharedDataRangeAction(Axis::Y).fromParentVariantMap(variantMap);
+    getLockToSharedDataRangeAction().fromParentVariantMap(variantMap);
+    getMirrorAction(Axis::X).fromParentVariantMap(variantMap);
+    getMirrorAction(Axis::Y).fromParentVariantMap(variantMap);
+    getDiscretizeAction().fromParentVariantMap(variantMap);
+    getNumberOfDiscreteStepsAction().fromParentVariantMap(variantMap);
+    getDiscretizeAlphaAction().fromParentVariantMap(variantMap);
+    getCustomColorMapAction().fromParentVariantMap(variantMap);
 }
 
 QVariantMap ColorMapAction::toVariantMap() const
 {
     QVariantMap variantMap = WidgetAction::toVariantMap();
 
-    _currentColorMapAction.insertIntoVariantMap(variantMap);
-    _settingsAction.insertIntoVariantMap(variantMap);
+    getCurrentColorMapAction().insertIntoVariantMap(variantMap);
+    getRangeAction(Axis::X).insertIntoVariantMap(variantMap);
+    getRangeAction(Axis::Y).insertIntoVariantMap(variantMap);
+    getSharedDataRangeAction(Axis::X).insertIntoVariantMap(variantMap);
+    getSharedDataRangeAction(Axis::Y).insertIntoVariantMap(variantMap);
+    getLockToSharedDataRangeAction().insertIntoVariantMap(variantMap);
+    getMirrorAction(Axis::X).insertIntoVariantMap(variantMap);
+    getMirrorAction(Axis::Y).insertIntoVariantMap(variantMap);
+    getDiscretizeAction().insertIntoVariantMap(variantMap);
+    getNumberOfDiscreteStepsAction().insertIntoVariantMap(variantMap);
+    getDiscretizeAlphaAction().insertIntoVariantMap(variantMap);
+    getCustomColorMapAction().insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
@@ -286,20 +469,18 @@ ColorMapAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* op
 {
     setObjectName("ComboBox");
 
-    // Make text color transparent
     QPalette palette = this->palette();
+
     palette.setColor(QPalette::Text, QColor(0, 0, 0, 0));
     
-    // Assign palette
     setPalette(palette);
 
-    // Paint the control when the color map image changes
     connect(colorMapAction, &ColorMapAction::imageChanged, this, [this](const QImage& colorMapImage) {
         update();
     });
 
     const auto updateStyle = [this, colorMapAction]() -> void {
-        if (colorMapAction->getSettingsAction().getEditor1DAction().isChecked()) {
+        if (colorMapAction->getEditor1DAction().isChecked()) {
             style()->unpolish(this);
             setEnabled(false);
         }
@@ -309,7 +490,7 @@ ColorMapAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* op
         }
     };
 
-    connect(&colorMapAction->getSettingsAction().getEditor1DAction(), &ColorMapEditor1DAction::toggled, this, updateStyle);
+    connect(&colorMapAction->getEditor1DAction(), &ColorMapEditor1DAction::toggled, this, updateStyle);
 
     updateStyle();
 }
@@ -318,49 +499,36 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
 {
     OptionAction::ComboBoxWidget::paintEvent(paintEvent);
 
-    // Draw at a higher resolution to get better anti-aliasing
     const auto pixmapSize = 2 * size();
     const auto pixmapRect = QRect(QPoint(), pixmapSize);
 
-    // Create color pixmap
     QPixmap colorPixmap(pixmapSize);
 
-    // Fill with a transparent background
     colorPixmap.fill(Qt::transparent);
 
-    // Create a painter to draw in the color pixmap
     QPainter painter(&colorPixmap);
 
-    // Enable anti-aliasing
     painter.setRenderHint(QPainter::Antialiasing);
 
     QStyleOption styleOption;
 
     styleOption.initFrom(this);
 
-    // Set inset margins
     const auto margin = 8;
 
-    // Deflated fill rectangle for color map inset
-    const auto colorMapRectangle = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + (_colorMapAction->getSettingsAction().getEditor1DAction().isChecked() ? 2 : 31), margin + 1));
+    const auto colorMapRectangle = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + (_colorMapAction->getEditor1DAction().isChecked() ? 2 : 31), margin + 1));
 
-    // Get color map image from the model
     auto colorMapImage = _colorMapAction->getColorMapImage();
 
-    // Convert to gray scale if disabled
-    if (!_colorMapAction->getSettingsAction().getEditor1DAction().isChecked() && !isEnabled())
+    if (!_colorMapAction->getEditor1DAction().isChecked() && !isEnabled())
         colorMapImage = colorMapImage.convertToFormat(QImage::Format_Grayscale8);
 
-    // Establish pen color based on whether the color map is enabled or not
     const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::Shadow) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
 
-    // Get scaled copy of the color map image so that it fits correctly
     colorMapImage = colorMapImage.scaled(colorMapRectangle.size(), Qt::AspectRatioMode::IgnoreAspectRatio).mirrored(false, true);
 
-    // Create a textured brush
     QBrush colorMapPixMapBrush(colorMapImage);
 
-    // And set the texture offset such that it aligns properly
     colorMapPixMapBrush.setTransform(QTransform::fromTranslate(margin, margin));
 
     QSize checkerBoardSize(22, 22);
@@ -376,7 +544,6 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     checkerBoardPainter.drawRect(QRect(QPoint(0, 0), QSize(11, 11)));
     checkerBoardPainter.drawRect(QRect(QPoint(11, 11), QSize(11, 11)));
 
-    // Create a checkerboard brush
     QBrush checkerBoardBrush(Qt::black);
 
     checkerBoardBrush.setTransform(QTransform::fromTranslate(margin, margin));
@@ -385,14 +552,12 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     painter.setBrush(checkerBoardBrush);
     painter.drawRoundedRect(colorMapRectangle, 4, 4);
     
-    // Do the painting
     painter.setPen(QPen(penColor, 1.5, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
     painter.setBrush(colorMapPixMapBrush);
     painter.drawRoundedRect(colorMapRectangle, 4, 4);
 
     QPainter painterColorWidget(this);
 
-    // Draw the color map over the control
     painterColorWidget.drawPixmap(rect(), colorPixmap, pixmapRect);
 }
 

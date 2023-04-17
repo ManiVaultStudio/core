@@ -67,6 +67,17 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
 
     Q_ASSERT(publicDecimalAction != nullptr);
 
+    if (publicDecimalAction == nullptr)
+        return;
+
+    //connect(this, &DecimalAction::minimumChanged, publicDecimalAction, [publicDecimalAction](const float& minimum) -> void {
+    //    publicDecimalAction->setMinimum(minimum);
+    //});
+
+    //connect(this, &DecimalAction::maximumChanged, publicDecimalAction, [publicDecimalAction](const float& maximum) -> void {
+    //    publicDecimalAction->setMaximum(maximum);
+    //});
+
     connect(this, &DecimalAction::valueChanged, publicDecimalAction, [publicDecimalAction](const float& value) -> void {
         publicDecimalAction->setValue(value);
     });
@@ -75,6 +86,8 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
         setValue(value);
     });
 
+    //setMinimum(publicDecimalAction->getMinimum());
+    //setMaximum(publicDecimalAction->getMaximum());
     setValue(publicDecimalAction->getValue());
 
     WidgetAction::connectToPublicAction(publicAction);
@@ -87,6 +100,11 @@ void DecimalAction::disconnectFromPublicAction()
     if (publicDecimalAction == nullptr)
         return;
 
+    if (publicDecimalAction == nullptr)
+        return;
+
+    //disconnect(this, &DecimalAction::minimumChanged, publicDecimalAction, nullptr);
+    //disconnect(this, &DecimalAction::maximumChanged, publicDecimalAction, nullptr);
     disconnect(this, &DecimalAction::valueChanged, publicDecimalAction, nullptr);
     disconnect(publicDecimalAction, &DecimalAction::valueChanged, this, nullptr);
 
@@ -95,7 +113,7 @@ void DecimalAction::disconnectFromPublicAction()
 
 WidgetAction* DecimalAction::getPublicCopy() const
 {
-    return new DecimalAction(parent(), text(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), getValue(), getDefaultValue(), getNumberOfDecimals());
+    return new DecimalAction(parent(), text(), getMinimum(), getMaximum(), getValue(), getDefaultValue(), getNumberOfDecimals());
 }
 
 void DecimalAction::fromVariantMap(const QVariantMap& variantMap)
@@ -121,7 +139,6 @@ QVariantMap DecimalAction::toVariantMap() const
 DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction) :
     QDoubleSpinBox(parent)
 {
-    setAcceptDrops(true);
     setObjectName("SpinBox");
 
     connect(this, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, decimalAction](double value) {
@@ -193,7 +210,6 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
 DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decimalAction) :
     QSlider(Qt::Horizontal, parent)
 {
-    setAcceptDrops(true);
     setObjectName("Slider");
     setRange(std::numeric_limits<std::int16_t>::lowest(), std::numeric_limits<std::int16_t>::max());
 
@@ -246,6 +262,41 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
     setToolTips();
 }
 
+DecimalAction::LineEditWidget::LineEditWidget(QWidget* parent, DecimalAction* decimalAction) :
+    QLineEdit(parent),
+    _validator()
+{
+    setObjectName("LineEdit");
+
+    _validator.setNotation(QDoubleValidator::StandardNotation);
+
+    setValidator(&_validator);
+
+    const auto updateValidator = [this, decimalAction]() -> void {
+        _validator.setBottom(decimalAction->getMinimum());
+        _validator.setTop(decimalAction->getMaximum());
+    };
+
+    updateValidator();
+
+    connect(decimalAction, &DecimalAction::minimumChanged, this, updateValidator);
+    connect(decimalAction, &DecimalAction::maximumChanged, this, updateValidator);
+
+    const auto updateText = [this, decimalAction]() -> void {
+        QSignalBlocker blocker(this);
+
+        setText(QString("%1 %2").arg(decimalAction->getPrefix(), QString::number(decimalAction->getValue(), 'f', decimalAction->getNumberOfDecimals())));
+    };
+
+    updateText();
+
+    connect(decimalAction, &DecimalAction::valueChanged, this, updateText);
+
+    connect(this, &QLineEdit::textChanged, this, [decimalAction](const QString& text) -> void {
+        decimalAction->setValue(text.toFloat());
+    });
+}
+
 QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     auto widget = new WidgetActionWidget(parent, this);
@@ -258,6 +309,9 @@ QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
 
     if (widgetFlags & WidgetFlag::Slider)
         layout->addWidget(new SliderWidget(parent, this), 2);
+
+    if (widgetFlags & WidgetFlag::LineEdit)
+        layout->addWidget(new LineEditWidget(parent, this), 2);
 
     widget->setLayout(layout);
 

@@ -28,7 +28,7 @@ WebWidget::~WebWidget()
 void WebWidget::init(WebCommunicationObject* communicationObject)
 {
     _js = communicationObject;
-    //QObject::connect(_js, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, &WebWidget::initWebPage);
+    QObject::connect(_js, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, &WebWidget::initWebPage);
 
     _webView = new QWebEngineView();
     _webView->setAcceptDrops(false);
@@ -38,14 +38,14 @@ void WebWidget::init(WebCommunicationObject* communicationObject)
     layout->addWidget(_webView);
     setLayout(layout);
 
-    QWebEnginePage* page = _webView->page();
+    //QWebEnginePage* page = _webView->page();
 
     _communicationChannel = new QWebChannel();
-    page->setWebChannel(_communicationChannel);
+    _webView->page()->setWebChannel(_communicationChannel);
 
     _communicationChannel->registerObject("QtBridge", _js);
 
-    QObject::connect(page, &QWebEnginePage::loadFinished, this, &WebWidget::initWebPage);
+    //QObject::connect(page, &QWebEnginePage::loadFinished, this, &WebWidget::initWebPage);
 }
 
 QWebEngineView* WebWidget::getView()

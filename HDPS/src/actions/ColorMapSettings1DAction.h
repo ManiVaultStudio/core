@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WidgetAction.h"
+#include "GroupAction.h"
 
 namespace hdps::gui {
 
@@ -55,8 +55,8 @@ public: // Action getters
 protected:
     ColorMapAction&     _colorMapAction;    /** Reference to color map action */
 
-    /** Only color map settings action may instantiate this class */
-    friend class ColorMapSettingsAction;
+    /** Only color map action may instantiate this class */
+    friend class ColorMapAction;
 };
 
 }

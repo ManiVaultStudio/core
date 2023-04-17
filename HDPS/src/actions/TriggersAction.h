@@ -170,8 +170,6 @@ signals:
 
 protected:
     QVector<Trigger>     _triggers;      /** Triggers */
-
-    friend class Widget;
 };
 
 }

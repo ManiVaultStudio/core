@@ -28,11 +28,9 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     layout->addWidget(&_createProjectFromDatasetWidget, 3);
     layout->addWidget(&_instructionVideosWidget, 1);
 
-    layout->addStretch(1);
-
     setLayout(layout);
 
-    _createProjectFromWorkspaceWidget.getHierarchyWidget().setMinimumHeight(300);
+    _createProjectFromWorkspaceWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setItemTypeName("Item");
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getTreeView().verticalScrollBar()->setDisabled(true);
 

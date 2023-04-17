@@ -45,6 +45,17 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
 
     Q_ASSERT(publicIntegralAction != nullptr);
 
+    if (publicIntegralAction == nullptr)
+        return;
+
+    connect(this, &IntegralAction::minimumChanged, publicIntegralAction, [publicIntegralAction](const std::int32_t& minimum) -> void {
+        publicIntegralAction->setMinimum(minimum);
+    });
+
+    connect(this, &IntegralAction::maximumChanged, publicIntegralAction, [publicIntegralAction](const std::int32_t& maximum) -> void {
+        publicIntegralAction->setMaximum(maximum);
+    });
+
     connect(this, &IntegralAction::valueChanged, publicIntegralAction, [publicIntegralAction](const std::int32_t& value) -> void {
         publicIntegralAction->setValue(value);
     });
@@ -53,6 +64,8 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
         setValue(value);
     });
 
+    setMinimum(publicIntegralAction->getMinimum());
+    setMaximum(publicIntegralAction->getMaximum());
     setValue(publicIntegralAction->getValue());
 
     WidgetAction::connectToPublicAction(publicAction);
@@ -65,6 +78,11 @@ void IntegralAction::disconnectFromPublicAction()
     if (publicIntegralAction == nullptr)
         return;
 
+    if (publicIntegralAction == nullptr)
+        return;
+
+    disconnect(this, &IntegralAction::minimumChanged, publicIntegralAction, nullptr);
+    disconnect(this, &IntegralAction::maximumChanged, publicIntegralAction, nullptr);
     disconnect(this, &IntegralAction::valueChanged, publicIntegralAction, nullptr);
     disconnect(publicIntegralAction, &IntegralAction::valueChanged, this, nullptr);
 
@@ -236,41 +254,36 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
 }
 
 IntegralAction::LineEditWidget::LineEditWidget(QWidget* parent, IntegralAction* integralAction) :
-    QLineEdit(parent)
+    QLineEdit(parent),
+    _validator()
 {
-    setAcceptDrops(true);
     setObjectName("LineEdit");
 
-    connect(this, &QLineEdit::textChanged, this, [this, integralAction](const QString& value) {
-        integralAction->setValue(text().toInt());
-    });
+    setValidator(&_validator);
 
-    const auto valueString = [](const std::int32_t& value) -> QString {
-        return QString::number(value);
-
-    };
-    const auto setToolTips = [this, integralAction, valueString]() {
-        setToolTip(QString("%1: %2%3").arg(integralAction->text(), valueString(integralAction->getValue()), integralAction->getSuffix()));
+    const auto updateValidator = [this, integralAction]() -> void {
+        _validator.setBottom(integralAction->getMinimum());
+        _validator.setTop(integralAction->getMaximum());
     };
 
-    const auto onUpdateValue = [this, integralAction, setToolTips]() {
-        const auto actionValue = integralAction->getValue();
+    updateValidator();
 
-        if (actionValue == text().toInt())
-            return;
+    connect(integralAction, &IntegralAction::minimumChanged, this, updateValidator);
+    connect(integralAction, &IntegralAction::maximumChanged, this, updateValidator);
 
+    const auto updateText = [this, integralAction]() -> void {
         QSignalBlocker blocker(this);
 
-        setText(QString::number(integralAction->getValue()));
-
-        setToolTips();
+        setText(QString("%1 %2").arg(integralAction->getPrefix(), QString::number(integralAction->getValue())));
     };
 
-    connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](const std::int32_t& value) {
-        onUpdateValue();
-    });
+    updateText();
 
-    onUpdateValue();
+    connect(integralAction, &IntegralAction::valueChanged, this, updateText);
+
+    connect(this, &QLineEdit::textChanged, this, [integralAction](const QString& text) -> void {
+        integralAction->setValue(text.toInt());
+    });
 }
 
 QWidget* IntegralAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -287,7 +300,7 @@ QWidget* IntegralAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
         layout->addWidget(new SliderWidget(parent, this), 2);
 
     if (widgetFlags & WidgetFlag::LineEdit)
-        layout->addWidget(new LineEditWidget(parent, this));
+        layout->addWidget(new LineEditWidget(parent, this), 2);
 
     widget->setLayout(layout);
 

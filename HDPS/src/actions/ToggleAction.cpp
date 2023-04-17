@@ -184,8 +184,11 @@ bool ToggleAction::CheckBoxWidget::eventFilter(QObject* target, QEvent* event)
     switch (event->type())
     {
         case QEvent::MouseButtonPress:
+        {
             _toggleAction->toggle();
+            return true;
             break;
+        }
 
         default:
             break;

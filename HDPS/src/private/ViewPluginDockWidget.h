@@ -13,7 +13,7 @@
  *
  * @author Thomas Kroes
  */
-class ViewPluginDockWidget : public DockWidget
+class ViewPluginDockWidget final : public DockWidget
 {
     Q_OBJECT
 
@@ -61,17 +61,19 @@ public:
      */
     hdps::plugin::ViewPlugin* getViewPlugin();
 
-    /**
-     * Get settings menu for view plugin dock widget (edit view, create screenshot etc.)
-     * @return Pointer to settings menu
-     */
-    QMenu* getSettingsMenu() override;
-
     /** Restores the view plugin state */
     void restoreViewPluginState();
 
     /** Restores the view plugin states of all active view plugins */
     static void restoreViewPluginStates();
+
+public: // Title bar settings menu
+
+    /**
+     * Get settings menu for view plugin dock widget (edit view, create screenshot etc.)
+     * @return Pointer to settings menu
+     */
+    QMenu* getSettingsMenu() override;
 
 public: // Serialization
 

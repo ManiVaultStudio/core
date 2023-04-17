@@ -6,7 +6,7 @@
 
 namespace hdps::gui {
 
-class ColorMapSettingsAction;
+class ColorMapAction;
 
 /**
  * Color map discrete action class
@@ -15,7 +15,7 @@ class ColorMapSettingsAction;
  *
  * @author Thomas Kroes
  */
-class ColorMapDiscreteAction : public WidgetAction
+class ColorMapDiscreteAction final : public WidgetAction
 {
     Q_OBJECT
 
@@ -46,9 +46,13 @@ protected:
 
     /**
      * Constructor
-     * @param colorMapSettingsAction Reference to color map settings action
+     * @param colorMapAction Reference to owning color map action
      */
+<<<<<<< HEAD
     Q_INVOKABLE ColorMapDiscreteAction(ColorMapSettingsAction& colorMapSettingsAction);
+=======
+    ColorMapDiscreteAction(ColorMapAction& colorMapAction);
+>>>>>>> origin/master
 
 public: // Linking
 
@@ -81,11 +85,10 @@ public: // Action getters
     ToggleAction& getDiscretizeAlphaAction() { return _discretizeAlphaAction; }
 
 protected:
-    IntegralAction      _numberOfStepsAction;       /** Number of discrete steps action */
-    ToggleAction        _discretizeAlphaAction;     /** Whether to also discretize the alpha channel of the color map */
+    
 
     /** Only color map settings action may instantiate this class */
-    friend class ColorMapSettingsAction;
+    friend class ColorMapAction;
 };
 
 }

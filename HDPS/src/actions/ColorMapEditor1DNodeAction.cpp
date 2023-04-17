@@ -36,7 +36,7 @@ ColorMapEditor1DNodeAction::ColorMapEditor1DNodeAction(ColorMapEditor1DAction& c
         if (!_currentNode)
             return;
 
-        auto& rangeAction = _colorMapEditor1DAction.getColorMapAction().getSettingsAction().getHorizontalAxisAction().getRangeAction();
+        auto& rangeAction = _colorMapEditor1DAction.getColorMapAction().getRangeAction(ColorMapAction::Axis::X);
 
         const auto minimum      = rangeAction.getMinimum();
         const auto maximum      = rangeAction.getMaximum();
@@ -57,7 +57,7 @@ ColorMapEditor1DNodeAction::ColorMapEditor1DNodeAction(ColorMapEditor1DAction& c
         disconnectFromNode(node);
     });
 
-    connect(&_colorMapEditor1DAction.getColorMapAction().getSettingsAction().getHorizontalAxisAction().getRangeAction(), &DecimalRangeAction::rangeChanged, this, [this]() -> void {
+    connect(&_colorMapEditor1DAction.getColorMapAction().getRangeAction(ColorMapAction::Axis::X), &DecimalRangeAction::rangeChanged, this, [this]() -> void {
         nodeChanged();
     });
 }
@@ -102,7 +102,7 @@ void ColorMapEditor1DNodeAction::nodeChanged()
         return;
 
     const auto normalizedValueToRange = [this](const float& normalizedValue) -> float {
-        auto& rangeAction = _colorMapEditor1DAction.getColorMapAction().getSettingsAction().getHorizontalAxisAction().getRangeAction();
+        auto& rangeAction = _colorMapEditor1DAction.getColorMapAction().getRangeAction(ColorMapAction::Axis::X);
 
         const auto minimum      = rangeAction.getMinimum();
         const auto maximum      = rangeAction.getMaximum();
