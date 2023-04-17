@@ -25,7 +25,7 @@ ColorMapSettings1DAction::Widget::Widget(QWidget* parent, ColorMapSettings1DActi
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    auto groupAction = new GroupAction(this);
+    auto groupAction = new GroupAction(this, colorMapSettings1DAction->text());
 
     groupAction->setLabelSizingType(GroupAction::LabelSizingType::Auto);
 

@@ -7,7 +7,7 @@
 #include <Application.h>
 
 PrefixClustersAction::PrefixClustersAction(ClustersAction& clustersAction) :
-    TriggerAction(&clustersAction),
+    TriggerAction(&clustersAction, "Prefix"),
     _clustersAction(clustersAction),
     _prefixAction(this, "Name prefix", "id_", "id_"),
     _applyAction(this, "Apply")

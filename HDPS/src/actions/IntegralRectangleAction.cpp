@@ -51,11 +51,6 @@ void IntegralRectangleAction::disconnectFromPublicAction()
     WidgetAction::disconnectFromPublicAction();
 }
 
-WidgetAction* IntegralRectangleAction::getPublicCopy() const
-{
-    return new IntegralRectangleAction(parent(), text(), _rectangle, _defaultRectangle);
-}
-
 void IntegralRectangleAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);

@@ -84,11 +84,6 @@ void ColorAction::disconnectFromPublicAction()
     WidgetAction::disconnectFromPublicAction();
 }
 
-WidgetAction* ColorAction::getPublicCopy() const
-{
-    return new ColorAction(parent(), text(), getColor(), getDefaultColor());
-}
-
 void ColorAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);

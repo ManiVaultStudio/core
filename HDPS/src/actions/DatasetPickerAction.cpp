@@ -208,15 +208,6 @@ void DatasetPickerAction::disconnectFromPublicAction()
     WidgetAction::disconnectFromPublicAction();
 }
 
-hdps::gui::WidgetAction* DatasetPickerAction::getPublicCopy() const
-{
-    auto publicCopy = new DatasetPickerAction(parent(), text());
-
-    publicCopy->setCurrentDataset(getCurrentDataset());
-    
-    return publicCopy;
-}
-
 void DatasetPickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);

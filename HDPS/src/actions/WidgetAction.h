@@ -343,12 +343,6 @@ public:
      * Get public copy of the action (other compatible actions can connect to it)
      * @return Pointer to public copy of the action
      */
-    virtual WidgetAction* getPublicCopy() const;
-
-    /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
-     */
     WidgetAction* _getPublicCopy() const;
 
 public: // Settings

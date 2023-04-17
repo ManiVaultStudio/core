@@ -56,14 +56,6 @@ public: // Linking
     /** Disconnect this action from a public action */
     void disconnectFromPublicAction() override;
 
-protected:  // Linking
-
-    /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
-     */
-    WidgetAction* getPublicCopy() const override;
-
 public: // Serialization
 
     /**

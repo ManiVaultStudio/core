@@ -82,38 +82,14 @@ void DecimalRangeAction::connectToPublicAction(WidgetAction* publicAction)
 
     getRangeMinAction().connectToPublicAction(&publicDecimalRangeAction->getRangeMinAction());
     getRangeMaxAction().connectToPublicAction(&publicDecimalRangeAction->getRangeMaxAction());
-}
-
-void DecimalRangeAction::disconnectFromPublicAction()
-{
-    getRangeMinAction().disconnectFromPublicAction();
-    getRangeMaxAction().disconnectFromPublicAction();
-}
-
-WidgetAction* DecimalRangeAction::getPublicCopy() const
-{
-    return new DecimalRangeAction(parent(), text(), getLimits(), getRange());
-}
-
-void DecimalRangeAction::connectToPublicAction(WidgetAction* publicAction)
-{
-    auto publicDecimalRangeAction = dynamic_cast<DecimalRangeAction*>(publicAction);
-
-    Q_ASSERT(publicDecimalRangeAction != nullptr);
-
-    if (publicDecimalRangeAction == nullptr)
-        return;
-
-    _rangeMinAction.connectToPublicAction(&publicDecimalRangeAction->getRangeMinAction());
-    _rangeMaxAction.connectToPublicAction(&publicDecimalRangeAction->getRangeMaxAction());
 
     WidgetAction::connectToPublicAction(publicAction);
 }
 
 void DecimalRangeAction::disconnectFromPublicAction()
 {
-    _rangeMinAction.disconnectFromPublicAction();
-    _rangeMaxAction.disconnectFromPublicAction();
+    getRangeMinAction().disconnectFromPublicAction();
+    getRangeMaxAction().disconnectFromPublicAction();
 
     WidgetAction::disconnectFromPublicAction();
 }

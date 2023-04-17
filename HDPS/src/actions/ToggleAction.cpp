@@ -115,11 +115,6 @@ void ToggleAction::disconnectFromPublicAction()
     WidgetAction::disconnectFromPublicAction();
 }
 
-WidgetAction* ToggleAction::getPublicCopy() const
-{
-    return new ToggleAction(parent(), text(), isChecked(), _defaultToggled);
-}
-
 ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* toggleAction) :
     QCheckBox(parent),
     _toggleAction(toggleAction)

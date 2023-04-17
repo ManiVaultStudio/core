@@ -5,7 +5,7 @@
 #include "ClustersActionWidget.h"
 
 ColorizeClustersAction::ColorizeClustersAction(ClustersAction& clustersAction) :
-    TriggerAction(&clustersAction),
+    TriggerAction(&clustersAction, "Colorize"),
     _clustersAction(clustersAction),
     _colorByAction(this, "Color by", {"Color map", "Pseudo-random colors"}, "Color map", "Color map"),
     _colorMapAction(this, "Color map"),

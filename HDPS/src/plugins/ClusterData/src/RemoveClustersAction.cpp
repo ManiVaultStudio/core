@@ -5,7 +5,7 @@
 #include "ClustersActionWidget.h"
 
 RemoveClustersAction::RemoveClustersAction(ClustersActionWidget* clustersActionWidget) :
-    TriggerAction(clustersActionWidget),
+    TriggerAction(clustersActionWidget, "Remove"),
     _clustersActionWidget(clustersActionWidget)
 {
     setText("");

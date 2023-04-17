@@ -302,11 +302,6 @@ bool WidgetAction::mayPublish(ConnectionContextFlag connectionContextFlags) cons
     return false;
 }
 
-WidgetAction* WidgetAction::getPublicCopy() const
-{
-    return nullptr;
-}
-
 void WidgetAction::setSettingsPrefix(const QString& settingsPrefix, const bool& load /*= true*/)
 {
     _settingsPrefix = settingsPrefix;
@@ -573,6 +568,17 @@ void WidgetAction::restoreConnectionPermissions(bool recursive /*= false*/)
             childAction->restoreConnectionPermissions(recursive);
 }
 
+WidgetAction* WidgetAction::_getPublicCopy() const
+{
+    auto actionCopy = static_cast<WidgetAction*>(metaObject()->newInstance(Q_ARG(QObject*, parent()), Q_ARG(QString, text())));
+
+    actionCopy->fromVariantMap(toVariantMap());
+    actionCopy->makePublic();
+
+    return actionCopy;
+
+}
+
 bool WidgetAction::isResettable()
 {
     return false;
@@ -638,17 +644,6 @@ std::int32_t WidgetAction::getStretch() const
 void WidgetAction::setStretch(const std::int32_t& stretch)
 {
     _stretch = stretch;
-}
-
-WidgetAction* WidgetAction::_getPublicCopy() const
-{
-    auto actionCopy = static_cast<WidgetAction*>(metaObject()->newInstance(Q_ARG(QObject*, parent()), Q_ARG(QString, text())));
-
-    actionCopy->fromVariantMap(toVariantMap());
-    actionCopy->makePublic();
-
-    return actionCopy;
-
 }
 
 void WidgetAction::cacheState(const QString& name /*= "cache"*/)

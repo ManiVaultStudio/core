@@ -420,11 +420,6 @@ void ColorMapAction::disconnectFromPublicAction()
     WidgetAction::disconnectFromPublicAction();
 }
 
-WidgetAction* ColorMapAction::getPublicCopy() const
-{
-    return new ColorMapAction(parent(), text(), _colorMapFilterModel.getType(), _currentColorMapAction.getCurrentText(), _currentColorMapAction.getDefaultText());
-}
-
 void ColorMapAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);

@@ -49,11 +49,6 @@ void DecimalRectangleAction::disconnectFromPublicAction()
     WidgetAction::disconnectFromPublicAction();
 }
 
-WidgetAction* DecimalRectangleAction::getPublicCopy() const
-{
-    return new DecimalRectangleAction(parent(), text(), _rectangle, _defaultRectangle);
-}
-
 void DecimalRectangleAction::fromVariantMap(const QVariantMap& variantMap)
 {
     if (!variantMap.contains("Value"))

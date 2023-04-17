@@ -5,7 +5,7 @@
 #include "ClustersActionWidget.h"
 
 MergeClustersAction::MergeClustersAction(ClustersActionWidget* clustersActionWidget) :
-    TriggerAction(clustersActionWidget),
+    TriggerAction(clustersActionWidget, "Merge"),
     _clustersActionWidget(clustersActionWidget)
 {
     setText("");

@@ -61,11 +61,6 @@ void VariantAction::disconnectFromPublicAction()
     WidgetAction::disconnectFromPublicAction();
 }
 
-WidgetAction* VariantAction::getPublicCopy() const
-{
-    return new VariantAction(parent(), text(), getVariant());
-}
-
 void VariantAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);

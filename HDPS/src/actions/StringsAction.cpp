@@ -94,11 +94,6 @@ void StringsAction::disconnectFromPublicAction()
     WidgetAction::disconnectFromPublicAction();
 }
 
-WidgetAction* StringsAction::getPublicCopy() const
-{
-    return new StringsAction(parent(), text(), getStrings(), getDefaultStrings());
-}
-
 void StringsAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);

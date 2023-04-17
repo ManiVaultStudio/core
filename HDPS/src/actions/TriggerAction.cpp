@@ -103,9 +103,4 @@ void TriggerAction::disconnectFromPublicAction()
     WidgetAction::disconnectFromPublicAction();
 }
 
-hdps::gui::WidgetAction* TriggerAction::getPublicCopy() const
-{
-    return new TriggerAction(parent(), text());
-}
-
 }

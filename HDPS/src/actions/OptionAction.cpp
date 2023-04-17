@@ -130,11 +130,6 @@ void OptionAction::disconnectFromPublicAction()
     WidgetAction::disconnectFromPublicAction();
 }
 
-WidgetAction* OptionAction::getPublicCopy() const
-{
-    return new OptionAction(parent(), text(), getOptions(), getCurrentText(), getDefaultText());
-}
-
 void OptionAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);

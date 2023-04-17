@@ -7,7 +7,7 @@
 #include <Application.h>
 
 RefreshClustersAction::RefreshClustersAction(ClustersActionWidget* clustersActionWidget) :
-    TriggerAction(clustersActionWidget),
+    TriggerAction(clustersActionWidget, "Refresh"),
     _clustersActionWidget(clustersActionWidget)
 {
     setText("");

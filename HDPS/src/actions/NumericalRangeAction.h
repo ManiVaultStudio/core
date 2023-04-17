@@ -43,7 +43,7 @@ public:
      * @param range Range
      */
     NumericalRangeAction(QObject* parent, const QString& title, const util::NumericalRange<NumericalType>& limits, const util::NumericalRange<NumericalType>& range) :
-        WidgetAction(parent),
+        WidgetAction(parent, title),
         _rangeMinAction(this, "Range Minimum"),
         _rangeMaxAction(this, "Range Maximum")
     {
