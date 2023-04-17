@@ -16,6 +16,11 @@ namespace hdps
         {
         }
 
+        constexpr Vector3f(float f)
+            : x(f), y(f), z(f)
+        {
+        }
+
         /**
         * Sets the x, y and z components of this vector to the given parameters.
         * @param x the x-component of the vector

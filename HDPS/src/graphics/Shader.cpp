@@ -150,6 +150,11 @@ void ShaderProgram::uniformMatrix3f(const char* name, Matrix3f& m) {
 //    glUniformMatrix4fv(location(name), 1, false, m.toArray());
 //}
 
+void ShaderProgram::uniformMatrix4f(const char* name, const float* const m)
+{
+    glUniformMatrix4fv(location(name), 1, false, m);
+}
+
 int ShaderProgram::location(const char* name) {
     std::unordered_map<std::string, int>::const_iterator it = _locationMap.find(std::string(name));
     if (it != _locationMap.end()) {
