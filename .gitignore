@@ -6,3 +6,4 @@ Doxygen/
 .vscode
 install/
 
+.DS_Store
