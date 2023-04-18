@@ -142,7 +142,8 @@ class HdpsCoreConan(ConanFile):
         # Use the Qt provided .cmake files
         qtpath = pathlib.Path(self.deps_cpp_info["qt"].rootpath)
         qt_root = str(list(qtpath.glob("**/Qt6Config.cmake"))[0].parents[3].as_posix())
-        tc.variables["Qt6_ROOT"] = qt_root
+        #tc.variables["Qt6_ROOT"] = qt_root
+        tc.variables["CMAKE_PREFIX_PATH"] = f"{qt_root}"
 
         zlibpath = pathlib.Path(self.deps_cpp_info["zlib"].rootpath).as_posix()
         tc.variables["ZLIB_ROOT"] = zlibpath
