@@ -26,11 +26,6 @@ Images::Images(hdps::CoreInterface* core, QString dataName, const QString& guid 
     _imageData = &getRawData<ImageData>();
 
     setLinkedDataFlags(0);
-
-    if (!getDataHierarchyItem().getParent().getDataset<DatasetImpl>().isValid() ||
-        getDataHierarchyItem().getParent().getDataType() != PointType ||
-        getDataHierarchyItem().getParent().getDataType() != ClusterType)
-        qWarning() << "Images: warning: image data set must be derived from points or clusters.";
 }
 
 void Images::init()
@@ -40,6 +35,12 @@ void Images::init()
     _infoAction = QSharedPointer<InfoAction>::create(nullptr, *this);
 
     addAction(*_infoAction.get());
+
+    // parent data set must be valid and derived from either point or cluster data
+    if (!getDataHierarchyItem().getParent().getDataset<DatasetImpl>().isValid() ||
+        !(getDataHierarchyItem().getParent().getDataType() == PointType || getDataHierarchyItem().getParent().getDataType() == ClusterType))
+        qCritical() << "Images: warning: image data set must be derived from points or clusters.";
+
 }
 
 std::tuple<hdps::Dataset<hdps::DatasetImpl>, hdps::Dataset<Images>> Images::addImageDataset(QString datasetGuiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const QString pluginKind /*= "Points"*/)
@@ -54,7 +55,7 @@ std::tuple<hdps::Dataset<hdps::DatasetImpl>, hdps::Dataset<Images>> Images::addI
         using ptype = Clusters;
     }
     else if (pluginKind != "Points")
-        qWarning() << "Images::addImageDataset: warning: pluginKind must be Points or Cluster - defaulting to Points. Given: " << pluginKind;
+        qCritical() << "Images::addImageDataset: warning: pluginKind must be Points or Cluster - defaulting to Points. Given: " << pluginKind;
 
     auto points = Application::core()->addDataset<ptype>(pkind, datasetGuiName, parentDataSet);
     events().notifyDatasetAdded(points);
