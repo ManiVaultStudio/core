@@ -1063,9 +1063,6 @@ source_group(Resources FILES win/hdps.rc)
 source_group(Resources\\generated FILES ${UI_HEADERS})
 
 set(LINK_TYPE SHARED)
-if(APPLE)
-    set(LINK_TYPE SHARED)
-endif(APPLE)
 if(MSVC)
     set(LINK_TYPE STATIC)
 endif(MSVC)
@@ -1182,17 +1179,14 @@ if(APPLE)
 elseif(UNIX)
     install(TARGETS ${HDPS_EXE}
         RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
-        # ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
     )
     
     install(TARGETS ${HDPS_PRIVATE_LIB}
-        RUNTIME DESTINATION lib COMPONENT HDPSPRIVATE_LINKLIB
-        LIBRARY DESTINATION lib COMPONENT HDPSPRIVATE_LINKLIB # Linux/Mac .so for linking
+        LIBRARY DESTINATION lib COMPONENT HDPSPRIVATE_LINKLIB # Linux .so for linking
     )
 else()
     install(TARGETS ${HDPS_EXE}
         RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
-        # ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
     )
 endif()
 
@@ -1411,6 +1405,8 @@ if(APPLE)
     )
 endif()
 
-# Automatically set the debug environment (command + working directory) for MSVC in debug mode
-set_property(TARGET ${HDPS_EXE} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY  $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
-set_property(TARGET ${HDPS_EXE} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/${HDPS_EXE}.exe,${INSTALL_DIR}/release/${HDPS_EXE}.exe>)
+# Automatically set the debug environment (command + working directory) for MSVC
+if(MSVC)
+    set_property(TARGET ${HDPS_EXE} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY  $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
+    set_property(TARGET ${HDPS_EXE} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/${HDPS_EXE}.exe,${INSTALL_DIR}/release/${HDPS_EXE}.exe>)
+endif()

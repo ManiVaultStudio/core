@@ -2,7 +2,7 @@
 #include "Images.h"
 #include "Application.h"
 
-#include "PointData.h"
+#include "PointData/PointData.h"
 #include "DataHierarchyItem.h"
 
 #include "util/Exception.h"

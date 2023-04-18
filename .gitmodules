@@ -1,5 +1,5 @@
 [submodule "biovault_bfloat16"]
-	path = external/biovault_bfloat16
+	path = HDPS/external/biovault/biovault_bfloat16
 	url = https://github.com/biovault/biovault_bfloat16
 [submodule "advanced_docking"]
 	path = HDPS/external/advanced_docking
