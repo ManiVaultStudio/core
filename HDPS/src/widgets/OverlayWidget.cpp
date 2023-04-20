@@ -17,4 +17,9 @@ OverlayWidget::OverlayWidget(QWidget* parent) :
 {
 }
 
+hdps::util::WidgetOverlayer& OverlayWidget::getWidgetOverlayer()
+{
+    return _widgetOverlayer;
+}
+
 }

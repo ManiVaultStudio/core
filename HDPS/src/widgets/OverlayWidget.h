@@ -24,6 +24,12 @@ public:
      */
     OverlayWidget(QWidget* parent);
 
+    /**
+     * Get the utility class for overlaying the widget
+     * @return Widget overlayer
+     */
+    hdps::util::WidgetOverlayer& getWidgetOverlayer();
+
 private:
     hdps::util::WidgetOverlayer     _widgetOverlayer;      /** Utility for layering on top of the target widget */
 };
