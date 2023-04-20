@@ -98,17 +98,19 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     treeView.setItemDelegate(new ItemDelegate(this));
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::entered, this, [this](const QModelIndex& index) -> void {
-        //setActionHighlighted(_hierarchyWidget.toSourceModelIndex(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), true);
+        const auto sourceModelIndex = _hierarchyWidget.toSourceModelIndex(index);
 
-        //if (_lastHoverModelIndex.isValid())
-        //    setActionHighlighted(_hierarchyWidget.toSourceModelIndex(_lastHoverModelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), false);
+        setActionHighlighted(sourceModelIndex, true);
 
-        //_lastHoverModelIndex = index;
+        if (_lastHoverModelIndex.isValid())
+            setActionHighlighted(_lastHoverModelIndex, false);
+
+        _lastHoverModelIndex = _hierarchyWidget.toSourceModelIndex(index);
     });
 
     const auto numberOfRowsChanged = [this]() -> void {
         if (_lastHoverModelIndex.isValid())
-            setActionHighlighted(_hierarchyWidget.toSourceModelIndex(_lastHoverModelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), false);
+            setActionHighlighted(_lastHoverModelIndex, false);
 
         _lastHoverModelIndex = QModelIndex();
     };
@@ -138,29 +140,26 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     filterGroupAction.setPopupSizeHint(QSize(300, 0));
 }
 
-ActionHierarchyWidget::~ActionHierarchyWidget()
-{
-    //const auto lastSourceHoverModelIndex = _lastHoverModelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Name);
-
-    //if (!lastSourceHoverModelIndex.isValid())
-    //    return;
-
-    //auto actionHierarchyModelItem = static_cast<ActionHierarchyModelItem*>(lastSourceHoverModelIndex.internalPointer());
-
-    //actionHierarchyModelItem->getAction()->setHighlighted(false);
-}
-
 void ActionHierarchyWidget::setActionHighlighted(const QModelIndex& index, bool highlighted)
 {
-    if (!index.isValid())
+    const auto nameIndex = index.siblingAtColumn(ActionHierarchyModelItem::Column::Name);
+
+    if (!nameIndex.isValid())
         return;
 
-    if (index.internalPointer() == nullptr)
+    if (nameIndex.internalPointer() == nullptr)
         return;
 
-    auto actionHierarchyModelItem = static_cast<ActionHierarchyModelItem*>(index.internalPointer());
+    auto actionHierarchyModelItem = static_cast<ActionHierarchyModelItem*>(nameIndex.internalPointer());
 
     actionHierarchyModelItem->getAction()->setHighlighted(highlighted);
+}
+
+void ActionHierarchyWidget::leaveEvent(QEvent* event)
+{
+    setActionHighlighted(_lastHoverModelIndex, false);
+
+    _lastHoverModelIndex = QModelIndex();
 }
 
 }

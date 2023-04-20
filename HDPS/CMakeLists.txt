@@ -657,6 +657,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WidgetActionLabel.h
     src/actions/WidgetActionStateWidget.h
     src/actions/WidgetActionContextMenu.h
+    src/actions/WidgetActionViewWidget.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -666,6 +667,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/WidgetActionLabel.cpp
     src/actions/WidgetActionStateWidget.cpp
     src/actions/WidgetActionContextMenu.cpp
+    src/actions/WidgetActionViewWidget.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES

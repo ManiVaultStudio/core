@@ -36,7 +36,6 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
 {
     const auto index = sourceModel()->index(row, 0, parent);
 
-    return true;
     if (!index.isValid())
         return true;
 
@@ -46,7 +45,7 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
         if (!key.contains(filterRegularExpression()))
             return false;
     }
-
+    
     const auto typeFilter   = _typeFilterAction.getString();
 
     if (!typeFilter.isEmpty()) {
@@ -55,11 +54,14 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
         if (type != typeFilter)
             return false;
     }
+    /**/
 
+    /*
     const auto isConnected = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Connected)), Qt::EditRole).toBool();
 
     if (_connectedFilterAction.isChecked() && !isConnected)
         return false;
+    */
 
     //if (!parent.isValid()) {
         const auto scope = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Scope)), Qt::EditRole).toInt();

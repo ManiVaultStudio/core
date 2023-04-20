@@ -88,8 +88,8 @@ ActionsModel::Item::Item(ActionsModel* actionsModel, gui::WidgetAction* widgetAc
                     new Item(actionsModel, action, Column::Connected)
                 };
 
-                for (auto item : row)
-                    item->setEditable(false);
+                //for (auto item : row)
+                //    item->setEditable(false);
 
                 row[static_cast<int>(Column::Name)]->setToolTip(_widgetAction->getPath());
 
@@ -130,7 +130,7 @@ ActionsModel::Item::Item(ActionsModel* actionsModel, gui::WidgetAction* widgetAc
         case Column::Scope:
         {
             connect(_widgetAction, &WidgetAction::scopeChanged, this, [this]() -> void {
-                setEditable(_widgetAction->isPublic());
+                //setEditable(_widgetAction->isPublic());
                 emitDataChanged();
             });
 
@@ -283,9 +283,6 @@ void ActionsModel::addAction(WidgetAction* action)
 
     _actions << action;
 
-    if (action->getId().startsWith("6d6e"))
-        qDebug() << "FOUND_6E6D";
-
     const QList<QStandardItem*> row {
         new Item(this, action, Column::Name),
         new Item(this, action, Column::ID),
@@ -294,8 +291,8 @@ void ActionsModel::addAction(WidgetAction* action)
         new Item(this, action, Column::Connected)
     };
 
-    for (auto item : row)
-        item->setEditable(false);
+    //for (auto item : row)
+    //    item->setEditable(false);
     
     const auto parentAction = action->getParentWidgetAction();
 
@@ -343,24 +340,11 @@ void ActionsModel::removeAction(WidgetAction* action)
         persistentMatches << QPersistentModelIndex(match);
 
     for (const auto& persistentMatch : persistentMatches)
-        qDebug() << removeRow(persistentMatch.row(), persistentMatch.parent());
+    removeRow(persistentMatch.row(), persistentMatch.parent());
 
     const auto matches2 = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::EditRole, "*", -1, Qt::MatchFlag::MatchRecursive | Qt::MatchFlag::MatchWildcard);
 
-    //QStringList ids2;
-
-    //for (const auto& match : matches2)
-    //    ids2 << match.data().toString();
-
-    //qDebug() << ids2.count();
-
-    //ids2.removeDuplicates();
-
-    //qDebug() << ids2.count();
-
     remove++;
-
-    //qDebug() << "*Number of actions:" << matches.count() << matches2.count() << _actions.count() << removed.count() << add << remove;
 }
 
 WidgetActions ActionsModel::getActions() const

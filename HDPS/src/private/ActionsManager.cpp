@@ -13,7 +13,7 @@ using namespace hdps::gui;
 using namespace hdps::util;
 
 #ifdef _DEBUG
-    //#define ACTIONS_MANAGER_VERBOSE
+    #define ACTIONS_MANAGER_VERBOSE
 #endif
 
 namespace hdps
@@ -63,8 +63,6 @@ void ActionsManager::addActionToModel(WidgetAction* action)
 #ifdef ACTIONS_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << action->text();
 #endif
-
-    _model.addAction(action);
 
     _model.addAction(action);
 
@@ -181,8 +179,6 @@ void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
             TriggerAction publishAction(this, "Publish");
             TriggerAction cancelAction(this, "Cancel");
 
-            nameAction.setToolTip("Name of the shared parameter");
-            nameAction.setToolTip("Name of the shared parameter");
             nameAction.setToolTip("Name of the shared parameter");
 
             parameterLayout.addWidget(nameAction.createLabelWidget(&publishDialog), 0, 0);

@@ -1,6 +1,8 @@
 #include "OverlayWidget.h"
 
 #include <QDebug>
+#include <QHBoxLayout>
+#include <QLabel>
 
 #ifdef _DEBUG
     #define OVERLAY_WIDGET_VERBOSE

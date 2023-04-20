@@ -1,10 +1,8 @@
 #pragma once
 
-#include <QWidget>
+#include "WidgetActionViewWidget.h"
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 class WidgetAction;
 class OverlayWidget;
@@ -16,7 +14,7 @@ class OverlayWidget;
  * 
  * @author Thomas Kroes
  */
-class WidgetActionWidget : public QWidget
+class WidgetActionWidget : public WidgetActionViewWidget
 {
 public:
 
@@ -39,22 +37,10 @@ public:
     /**
      * Constructor
      * @param parent Parent widget
-     * @param widgetAction Pointer to the widget action that will be displayed
+     * @param action Pointer to the widget action that will be displayed
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    WidgetActionWidget(QWidget* parent, WidgetAction* widgetAction, const std::int32_t& widgetFlags = 0);
-
-    /**
-     * Get the widget action
-     * @return Pointer to widget action
-     */
-    WidgetAction* getWidgetAction();
-
-    /**
-     * Set the widget action
-     * @param widgetAction Pointer to widget action
-     */
-    virtual void setWidgetAction(WidgetAction* widgetAction);
+    WidgetActionWidget(QWidget* parent, WidgetAction* action, const std::int32_t& widgetFlags = 0);
 
     QSize sizeHint() const override;
 
@@ -69,8 +55,6 @@ protected: // Miscellaneous
 protected:
     WidgetAction*       _widgetAction;      /** Pointer to widget action that will be displayed */
     std::int32_t        _widgetFlags;       /** Widget creation flags */
-    OverlayWidget*      _highlightWidget;   /** Pointer to highlight widget (if any) */
 };
 
-}
 }

@@ -33,9 +33,6 @@ public:
      */
     ActionHierarchyWidget(QWidget* parent, WidgetAction* rootAction);
 
-    /** Destructor */
-    ~ActionHierarchyWidget();
-
 private:
 
     /**
@@ -43,12 +40,18 @@ private:
      * @param index Model index of the action to highlight
      */
     void setActionHighlighted(const QModelIndex& index, bool highlighted);
+    
+    /**
+     * Leave event invoked when the mouse pointer leaves the widget
+     * @param event Pointer to event
+     */
+    void leaveEvent(QEvent* event) override;
 
 private:
-    ActionHierarchyModel        _model;                             /** Hierarchical action model */
-    ActionHierarchyFilterModel  _filterModel;                       /** Hierarchical action filter model */
-    HierarchyWidget             _hierarchyWidget;                   /** Widget for displaying hierarchy */
-    QModelIndex                 _lastHoverModelIndex;               /** Model index of the item that was last hovered */
+    ActionHierarchyModel        _model;                     /** Hierarchical action model */
+    ActionHierarchyFilterModel  _filterModel;               /** Hierarchical action filter model */
+    HierarchyWidget             _hierarchyWidget;           /** Widget for displaying hierarchy */
+    QPersistentModelIndex       _lastHoverModelIndex;       /** Model index of the item that was last hovered */
 };
 
 }

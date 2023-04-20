@@ -141,11 +141,11 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
         const auto pluginTriggerActions  = _pluginTriggerPickerAction->getPluginTriggerActions();
 
         if (pluginTriggerPickerAction->getSelectTriggerAction().getCurrentIndex() >= 0)
-            _configurationToolButton.setWidgetAction(pluginTriggerActions[pluginTriggerPickerAction->getSelectTriggerAction().getCurrentIndex() - 1]->getConfigurationAction());
+            _configurationToolButton.setAction(pluginTriggerActions[pluginTriggerPickerAction->getSelectTriggerAction().getCurrentIndex() - 1]->getConfigurationAction());
         else
-            _configurationToolButton.setWidgetAction(nullptr);
+            _configurationToolButton.setAction(nullptr);
 
-        _configurationToolButton.setEnabled(_configurationToolButton.getWidgetAction());
+        _configurationToolButton.setEnabled(_configurationToolButton.getAction());
         _configurationToolButton.getToolButton().setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     };
 

@@ -9,21 +9,20 @@
 #include <QMenu>
 #include <QTimer>
 
-namespace hdps {
+namespace hdps::gui {
 
-namespace gui {
-
-WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent /*= nullptr*/, const std::uint32_t& flags /*= ColonAfterName*/) :
-    QWidget(parent),
+WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= nullptr*/, const std::uint32_t& flags /*= ColonAfterName*/) :
+    WidgetActionViewWidget(parent, action),
     _flags(flags),
-    _widgetAction(widgetAction),
     _nameLabel(),
     _elide(false)
 {
+    setAction(action);
+
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    connect(_widgetAction, &WidgetAction::isConnectedChanged, this, &WidgetActionLabel::updateNameLabel);
-    connect(_widgetAction, &WidgetAction::connectionPermissionsChanged, this, &WidgetActionLabel::updateNameLabel);
+    connect(getAction(), &WidgetAction::isConnectedChanged, this, &WidgetActionLabel::updateNameLabel);
+    connect(getAction(), &WidgetAction::connectionPermissionsChanged, this, &WidgetActionLabel::updateNameLabel);
 
     auto layout = new QHBoxLayout();
 
@@ -38,7 +37,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     _nameLabel.setAlignment(Qt::AlignRight);
     _nameLabel.setStyleSheet("color: black;");
 
-    connect(widgetAction, &WidgetAction::changed, this, &WidgetActionLabel::updateNameLabel);
+    connect(getAction(), &WidgetAction::changed, this, &WidgetActionLabel::updateNameLabel);
 
     updateNameLabel();
 
@@ -59,7 +58,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
             if (mouseButtonPress->button() != Qt::LeftButton)
                 break;
 
-            auto contextMenu = _widgetAction->getContextMenu(this);
+            auto contextMenu = getAction()->getContextMenu(this);
 
             if (contextMenu->actions().isEmpty())
                 return QWidget::eventFilter(target, event);
@@ -123,25 +122,25 @@ void WidgetActionLabel::elide()
 
 QString WidgetActionLabel::getLabelText() const
 {
-    return QString("%1%2").arg(_widgetAction->text(), (_flags & ColonAfterName) ? ":" : "");
+    return QString("%1%2").arg(const_cast<WidgetActionLabel*>(this)->getAction()->text(), (_flags & ColonAfterName) ? ":" : "");
 }
 
 void WidgetActionLabel::updateNameLabel()
 {
-    const auto connectionEnabled = _widgetAction->mayPublish(WidgetAction::Gui) || _widgetAction->mayConnect(WidgetAction::Gui) || _widgetAction->mayDisconnect(WidgetAction::Gui);
+    const auto connectionEnabled = getAction()->mayPublish(WidgetAction::Gui) || getAction()->mayConnect(WidgetAction::Gui) || getAction()->mayDisconnect(WidgetAction::Gui);
 
     auto font = _nameLabel.font();
 
-    font.setUnderline(_widgetAction->isEnabled() && connectionEnabled);
-    font.setItalic(_widgetAction->mayPublish(WidgetAction::Gui) && _widgetAction->isConnected());
+    font.setUnderline(getAction()->isEnabled() && connectionEnabled);
+    font.setItalic(getAction()->mayPublish(WidgetAction::Gui) && getAction()->isConnected());
 
     _nameLabel.setFont(font);
-    _nameLabel.setEnabled(_widgetAction->isEnabled());
-    _nameLabel.setToolTip(_widgetAction->toolTip());
-    _nameLabel.setVisible(_widgetAction->isVisible());
+    _nameLabel.setEnabled(getAction()->isEnabled());
+    _nameLabel.setToolTip(getAction()->toolTip());
+    _nameLabel.setVisible(getAction()->isVisible());
 
-    if (_widgetAction->isEnabled() && isEnabled()) {
-        if (_widgetAction->mayPublish(WidgetAction::Gui) && _nameLabel.underMouse())
+    if (getAction()->isEnabled() && isEnabled()) {
+        if (getAction()->mayPublish(WidgetAction::Gui) && _nameLabel.underMouse())
             _nameLabel.setStyleSheet("color: gray;");
         else
             _nameLabel.setStyleSheet("color: black;");
@@ -150,5 +149,4 @@ void WidgetActionLabel::updateNameLabel()
     }
 }
 
-}
 }
