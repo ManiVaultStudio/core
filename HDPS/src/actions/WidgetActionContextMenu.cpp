@@ -65,7 +65,7 @@ void WidgetActionContextMenu::initialize()
 
         auto actionsFilterModel = new ActionsFilterModel(this);
 
-        actionsFilterModel->setSourceModel(&hdps::actions().getActionsModel());
+        actionsFilterModel->setSourceModel(&hdps::actions().getModel());
         actionsFilterModel->getScopeFilterAction().setSelectedOptions({ "Public" });
         actionsFilterModel->getTypeFilterAction().setString(_widgetAction->getTypeString(true));
 

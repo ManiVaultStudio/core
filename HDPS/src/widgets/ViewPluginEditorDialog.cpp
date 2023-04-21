@@ -1,4 +1,4 @@
-#include "ProjectEditorDialog.h"
+#include "ViewPluginEditorDialog.h"
 #include "ViewPlugin.h"
 
 #include <Application.h>
@@ -10,10 +10,10 @@
 using namespace hdps;
 using namespace hdps::plugin;
 
-ProjectEditorDialog::ProjectEditorDialog(QWidget* parent, ViewPlugin* viewPlugin) :
+ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* viewPlugin) :
     QDialog(parent),
     _groupsAction(this, "Groups"),
-    _actionHierarchyWidget(this, viewPlugin)
+    _actionsWidget(this, viewPlugin)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);
@@ -22,7 +22,7 @@ ProjectEditorDialog::ProjectEditorDialog(QWidget* parent, ViewPlugin* viewPlugin
 
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(&_actionHierarchyWidget);
+    layout->addWidget(&_actionsWidget);
     layout->addWidget(viewPlugin->getMayCloseAction().createWidget(this));
     layout->addWidget(viewPlugin->getMayFloatAction().createWidget(this));
     layout->addWidget(viewPlugin->getMayMoveAction().createWidget(this));
@@ -36,5 +36,5 @@ ProjectEditorDialog::ProjectEditorDialog(QWidget* parent, ViewPlugin* viewPlugin
 
     layout->addWidget(dialogButtonBox);
 
-    connect(dialogButtonBox, &QDialogButtonBox::accepted, this, &ProjectEditorDialog::accept);
+    connect(dialogButtonBox, &QDialogButtonBox::accepted, this, &ViewPluginEditorDialog::accept);
 }

@@ -23,59 +23,202 @@ public:
 
     /** Action columns */
     enum class Column {
-        Name,       /** Name of the action */
-        ID,         /** Globally unique identifier of the action */
-        Type,       /** Action type string */
-        Scope,      /** Scope of the action (whether the action is public or private) */
-        Connected,  /** Whether the action is connected or not */
+        Name,               /** Name of the action */
+        ID,                 /** Globally unique identifier of the action */
+        Type,               /** Action type string */
+        Scope,              /** Scope of the action (whether the action is public or private) */
+        IsConnected,        /** Whether the action is connected or not */
+        Visible,            /** Whether the action is visible in the GUI */
+        MayPublish,         /** Whether the action may be published */
+        MayConnect,         /** Whether the action may connect to a public action */
+        MayDisconnect,      /** Whether the action may disconnect from a public action */
+        SortIndex,          /** The sorting index of the action (its relative position in action groups) */
 
         Count
     };
 
+    /** Header strings for several data roles */
+    struct ColumHeaderInfo {
+        QString     _display;   /** Header string for display role */
+        QString     _edit;      /** Header string for edit role */
+        QString     _tooltip;   /** Header string for tooltip role */
+    };
+
     /** Column name and tooltip */
-    static QMap<Column, QPair<QString, QString>> columnInfo;
+    static QMap<Column, ColumHeaderInfo> columnInfo;
 
 protected:
 
-    /**
-     * Item class
-     *
-     * Standard item class for displaying actions model column
-     *
-     * @author Thomas Kroes
-     */
-    class Item final : public QStandardItem, public QObject
+    /** Header standard model item class */
+    class HeaderItem : public QStandardItem {
+    public:
+
+        /**
+         * Construct with \p columHeaderInfo
+         * @param columHeaderInfo Column header info
+         */
+        HeaderItem(const ColumHeaderInfo& columHeaderInfo);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+    private:
+        ColumHeaderInfo     _columHeaderInfo;   /** Column header info */
+    };
+
+    /** Base standard model item class for widget action */
+    class Item : public QStandardItem {
+    public:
+
+        /**
+         * Construct with \p action
+         * @param action Pointer to action to display item for
+         * @param editable Whether the model item is editable or not
+         */
+        Item(gui::WidgetAction* action, bool editable = false);
+
+        /**
+         * Get action
+         * return Pointer to action to display item for
+         */
+        QPointer<gui::WidgetAction> getAction() const;
+
+    private:
+        QPointer<gui::WidgetAction>      _action;        /** Pointer to action to display item for */
+    };
+
+    /** Standard model item class for displaying the action name */
+    class NameItem final : public Item {
+    public:
+
+        /** Use base action item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for displaying the action identifier */
+    class IdItem final : public Item {
+    public:
+
+        /** Use base action item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for displaying the action type */
+    class TypeItem final : public Item {
+    public:
+
+        /** Use base action item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for displaying the action scope */
+    class ScopeItem final : public Item {
+    public:
+
+        /** Use base action item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for displaying whether the action is connected or not */
+    class IsConnectedItem final : public Item {
+    public:
+
+        /** Use base action item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Model item class for toggling action visibility */
+    class VisibilityItem final : public Item {
+    public:
+
+        /** Use base action item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Model item class for toggling a permission flag */
+    class ConnectionPermissionItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p action and \p connectionPermissionFlag
+         * @param action Pointer to action to display item for
+         * @param connectionPermissionFlag Connection permission flag to display
+         */
+        ConnectionPermissionItem(gui::WidgetAction* action, const gui::WidgetAction::ConnectionPermissionFlag& connectionPermissionFlag);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+    private:
+        gui::WidgetAction::ConnectionPermissionFlag  _connectionPermissionFlag;      /** Connection permission flag to toggle */
+    };
+
+    /** Model item class for action sort index */
+    class SortIndexItem final : public Item {
+    public:
+
+        /** Use base action item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Convenience class for combining action items in a row */
+    class Row : public QList<QStandardItem*>
     {
     public:
 
         /**
-         * Construct item from \p actionsModel, \p widgetAction and \p column
-         * @param actionsModel Pointer to actions model
-         * @param widgetAction Pointer to source widget action
-         * @param column Column to display
+         * Construct row with \p action
+         * @param action Pointer to row action
          */
-        Item(ActionsModel* actionsModel, gui::WidgetAction* widgetAction, const Column& column);
-
-        /** Destructor  */
-        ~Item();
-
-        /**
-         * Get data for \p role
-         * @param role Data role
-         * @return Data in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get pointer to source widget action
-         * @return Pointer to source widget action
-         */
-        gui::WidgetAction* getAction();
-
-    private:
-        ActionsModel*               _actionsModel;  /** Pointer to parent actions model */
-        QPointer<gui::WidgetAction> _widgetAction;  /** Pointer to source widget action */
-        Column                      _column;        /** Column to display */
+        Row(gui::WidgetAction* action);
     };
 
 public:
@@ -153,6 +296,7 @@ private:
     int add;
     int remove;
 
+    friend class ActionsFilterModel;
     friend class Item;
 };
 

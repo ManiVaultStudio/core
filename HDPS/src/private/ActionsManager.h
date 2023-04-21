@@ -63,7 +63,7 @@ public: // Model
      * Get model which contains all actions
      * @return Reference to actions model
      */
-    ActionsModel& getActionsModel() override;
+    ActionsModel& getModel() override;
 
 public: // Serialization
 

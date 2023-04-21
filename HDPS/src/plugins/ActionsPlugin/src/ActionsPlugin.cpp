@@ -8,7 +8,7 @@ using namespace hdps;
 
 ActionsPlugin::ActionsPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
-    _actionsWidget(nullptr)
+    _actionsWidget(&getWidget(), this)
 {
 }
 

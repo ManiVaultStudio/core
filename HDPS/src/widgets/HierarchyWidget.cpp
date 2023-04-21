@@ -119,6 +119,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     }
 
     _filterColumnAction.setOptions(columnNames);
+    _filterColumnAction.setCurrentIndex(0);
 
     _columnsGroupAction << *selectAllCollumns;
 

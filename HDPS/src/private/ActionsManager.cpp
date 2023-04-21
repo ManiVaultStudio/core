@@ -149,7 +149,7 @@ WidgetAction* ActionsManager::getAction(const QString& id)
     return nullptr;
 }
 
-ActionsModel& ActionsManager::getActionsModel()
+ActionsModel& ActionsManager::getModel()
 {
     return _model;
 }

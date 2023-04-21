@@ -1,8 +1,9 @@
 #include "ViewPlugin.h"
 #include "CoreInterface.h"
-#include "widgets/ProjectEditorDialog.h"
 #include "Application.h"
 #include "AbstractWorkspaceManager.h"
+
+#include "widgets/ViewPluginEditorDialog.h"
 
 #include <QWidget>
 #include <QFileDialog>
@@ -20,7 +21,7 @@ namespace hdps::plugin
 ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
     _widget(),
-    _editActionsAction(&_widget, "Edit..."),
+    _editorAction(&_widget, "Edit..."),
     _screenshotAction(&_widget, "Screenshot..."),
     _isolateAction(&_widget, "Isolate"),
     _mayCloseAction(this, "May close", true, true),
@@ -37,16 +38,16 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
     _widget.setAutoFillBackground(true);
 
-    _widget.addAction(&_editActionsAction);
+    _widget.addAction(&_editorAction);
     _widget.addAction(&_screenshotAction);
     _widget.addAction(&_isolateAction);
     _widget.addAction(&_helpAction);
 
-    _editActionsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
-    _editActionsAction.setShortcut(tr("F12"));
-    _editActionsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _editorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _editorAction.setShortcut(tr("F12"));
+    _editorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _editorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _editorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
     _screenshotAction.setIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
     _screenshotAction.setShortcut(tr("F2"));
@@ -89,8 +90,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
 
-    connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
-        ProjectEditorDialog viewPluginEditorDialog(nullptr, this);
+    connect(&_editorAction, &TriggerAction::triggered, this, [this]() -> void {
+        ViewPluginEditorDialog viewPluginEditorDialog(nullptr, this);
         viewPluginEditorDialog.exec();
     });
 

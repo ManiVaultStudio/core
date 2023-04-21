@@ -114,7 +114,7 @@ public: // Serialization
 
 public: // Action getters
 
-    gui::TriggerAction& getEditActionsAction() { return _editActionsAction; }
+    gui::TriggerAction& getEditorAction() { return _editorAction; }
     gui::TriggerAction& getScreenshotAction() { return _screenshotAction; }
     gui::ToggleAction& getIsolateAction() { return _isolateAction; }
     gui::ToggleAction& getMayCloseAction() { return _mayCloseAction; }
@@ -127,7 +127,7 @@ public: // Action getters
 
 private:
     QWidget                 _widget;                    /** Widget representation of the plugin */
-    gui::TriggerAction      _editActionsAction;         /** Trigger action to start editing the view plugin action hierarchy */
+    gui::TriggerAction      _editorAction;              /** Trigger action to start the view plugin editor */
     gui::TriggerAction      _screenshotAction;          /** Trigger action to create a screenshot */
     gui::ToggleAction       _isolateAction;             /** Toggle action to toggle view isolation (when toggled, all other view plugins are temporarily closed) */
     gui::ToggleAction       _mayCloseAction;            /** Action for toggling whether the view plugin may be closed */

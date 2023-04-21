@@ -25,24 +25,17 @@ set(PLUGIN
     src/ActionsPlugin.cpp
 )
 
-set(WIDGETS
-    src/ActionsWidget.h
-    src/ActionsWidget.cpp
-)
-
 set(AUX
     src/ActionsPlugin.json
 )
 
 set(SOURCES
 	${PLUGIN}
-	${WIDGETS}
 	${AUX}
 )
 
 source_group(Plugin FILES ${PLUGIN})
 source_group(Models FILES ${MODELS})
-source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
 
 add_library(${PROJECT} SHARED ${SOURCES})

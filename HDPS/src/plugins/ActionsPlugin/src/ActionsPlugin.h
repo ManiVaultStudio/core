@@ -1,10 +1,11 @@
 #pragma once
 
-#include "ActionsWidget.h"
+#include "widgets/ActionsWidget.h"
 
 #include <ViewPlugin.h>
 
 using namespace hdps::plugin;
+using namespace hdps::gui;
 
 /**
  * Actions plugin

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ActionHierarchyWidget.h"
+#include "ActionsWidget.h"
 
 #include <actions/GroupsAction.h>
 #include <actions/GroupAction.h>
@@ -16,13 +16,13 @@ namespace hdps {
 }
 
 /**
- * Project editor editor dialog
+ * View plugin editor dialog class
  * 
- * Dialog class for editing project properties
+ * Dialog class for editing view plugin properties such as the actions and docking properties
  *
  * @author Thomas Kroes
  */
-class ProjectEditorDialog : public QDialog
+class ViewPluginEditorDialog : public QDialog
 {
 public:
 
@@ -31,7 +31,7 @@ public:
      * @param parent Pointer to parent widget
      * @param viewPlugin Pointer to view plugin to edit
      */
-    ProjectEditorDialog(QWidget* parent, hdps::plugin::ViewPlugin* viewPlugin);
+    ViewPluginEditorDialog(QWidget* parent, hdps::plugin::ViewPlugin* viewPlugin);
 
     /** Get preferred size */
     QSize sizeHint() const override {
@@ -44,6 +44,6 @@ public:
     }
 
 private:
-    GroupsAction            _groupsAction;              /** Groups action */
-    ActionHierarchyWidget   _actionHierarchyWidget;     /** Hierarchy widget for showing action trees */
+    GroupsAction    _groupsAction;      /** Groups action */
+    ActionsWidget   _actionsWidget;     /** Hierarchical actions widget */
 };

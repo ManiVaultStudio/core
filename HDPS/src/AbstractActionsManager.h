@@ -153,7 +153,7 @@ public: // Model
      * Get model which contains all actions
      * @return Reference to actions model
      */
-    virtual ActionsModel& getActionsModel() = 0;
+    virtual ActionsModel& getModel() = 0;
 
 protected:
 
