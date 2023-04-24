@@ -24,9 +24,9 @@ public:
     /**
      * Constructor
      * @param parent Parent widget
-     * @param rootAction Pointer to non-owning root action
+     * @param action Pointer to non-owning root action
      */
-    ActionsWidget(QWidget* parent, WidgetAction* rootAction);
+    ActionsWidget(QWidget* parent, WidgetAction* action);
 
 private:
 

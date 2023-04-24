@@ -11,7 +11,7 @@ namespace hdps
 /**
  * Actions model class
  *
- * Standard item model class for actions
+ * Standard item model class for actions (hierarchical)
  *
  * @author Thomas Kroes
  */
@@ -69,8 +69,10 @@ protected:
         ColumHeaderInfo     _columHeaderInfo;   /** Column header info */
     };
 
+public:
+
     /** Base standard model item class for widget action */
-    class Item : public QStandardItem {
+    class Item : public QStandardItem, public QObject {
     public:
 
         /**
@@ -89,6 +91,8 @@ protected:
     private:
         QPointer<gui::WidgetAction>      _action;        /** Pointer to action to display item for */
     };
+
+protected:
 
     /** Standard model item class for displaying the action name */
     class NameItem final : public Item {
@@ -164,14 +168,20 @@ protected:
     class VisibilityItem final : public Item {
     public:
 
-        /** Use base action item constructor */
-        using Item::Item;
+        /**
+         * Construct with \p action
+         * @param action Pointer to action to display item for
+         */
+        VisibilityItem(gui::WidgetAction* action);
 
         /**
          * Get model data for \p role
          * @return Data for \p role in variant form
          */
         QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /** Set model data to \p value for \p role */
+        void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
     };
 
     /** Model item class for toggling a permission flag */
@@ -191,6 +201,9 @@ protected:
          */
         QVariant data(int role = Qt::UserRole + 1) const override;
 
+        /** Set model data to \p value for \p role */
+        void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
+
     private:
         gui::WidgetAction::ConnectionPermissionFlag  _connectionPermissionFlag;      /** Connection permission flag to toggle */
     };
@@ -199,14 +212,20 @@ protected:
     class SortIndexItem final : public Item {
     public:
 
-        /** Use base action item constructor */
-        using Item::Item;
+        /**
+         * Construct with \p action
+         * @param action Pointer to action to display item for
+         */
+        SortIndexItem(gui::WidgetAction* action);
 
         /**
          * Get model data for \p role
          * @return Data for \p role in variant form
          */
         QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /** Set model data to \p value for \p role */
+        void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
     };
 
     /** Convenience class for combining action items in a row */
@@ -228,6 +247,12 @@ public:
      * @param parent Pointer to parent object
      */
     ActionsModel(QObject* parent = nullptr);
+
+    /**
+     * Get flags for item with \p index 
+     * @return Item flags
+     */
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     /**
      * Add \p action to the model
@@ -267,6 +292,13 @@ public:
      */
     gui::WidgetAction* getAction(std::int32_t rowIndex);
 
+    /**
+     * Get model index for \p action
+     * @param action Pointer to action to retrieve the model index for
+     * @return Found model index
+     */
+    QModelIndex getActionIndex(const gui::WidgetAction* action) const;
+
 protected:
 
     /**
@@ -292,9 +324,6 @@ signals:
 private:
     gui::WidgetActions          _actions;       /** Flat list of actions in the model */
     QMap<QString, std::int32_t> _actionTypes;   /** Number of rows per action type */
-    QStringList removed;
-    int add;
-    int remove;
 
     friend class ActionsFilterModel;
     friend class Item;

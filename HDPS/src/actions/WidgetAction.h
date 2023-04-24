@@ -161,6 +161,28 @@ public:
      */
     void setStretch(const std::int32_t& stretch);
 
+public: // Visibility
+
+    /**
+     * Get force hidden
+     * @return Boolean determining whether the widget action should be hidden regardless of its built-in visibility setting
+     */
+    bool getForceHidden() const;
+
+    /**
+     * Set force hidden to \p forceHidden
+     * @param forceHidden Boolean determining whether the widget action should be hidden regardless of its built-in visibility setting
+     */
+    void setForceHidden(bool forceHidden);
+
+    /**
+     * Re-implement the visibility getter from the widget to account for force hidden
+     * @return Boolean determining whether the widget action is visible or not
+     */
+    bool isVisible() const;
+
+public: // Widget flags
+
     /** Gets the default widget flags */
     std::int32_t getDefaultWidgetFlags() const;
 
@@ -505,6 +527,18 @@ signals:
     void idChanged(const QString& id);
 
     /**
+     * Signals that the sort index changed to \p sortIndex
+     * @param sortIndex Sort index (relative position in group items)
+     */
+    void sortIndexChanged(std::int32_t sortIndex);
+
+    /**
+     * Signals that the force hidden settings changed to \p forceHidden
+     * @param forceHidden Boolean determining whether the widget action should be hidden regardless of its built-in visibility setting
+     */
+    void forceHiddenChanged(bool forceHidden);
+
+    /**
      * Signals that the highlighted state changed
      * @param highlighted Whether the action is in a highlighted state or not
      */
@@ -554,15 +588,16 @@ signals:
     void configurationChanged(std::int32_t configuration);
 
     /**
-     * Signals that the widget action scope changed to \p scope
+     * Signals that the scope changed to \p scope
      * @param scope Scope of the widget action
      */
     void scopeChanged(const Scope& scope);
 
 private:
     std::int32_t                _defaultWidgetFlags;            /** Default widget flags which are used to configure newly created widget action widgets */
-    std::int32_t                _sortIndex;                     /** Sort index (used in the group action to sort actions) */
+    std::int32_t                _sortIndex;                     /** Sort index (relative position in group items) */
     std::int32_t                _stretch;                       /** Stretch factor */
+    bool                        _forceHidden;                   /** Boolean determining whether the widget action should be hidden regardless of its built-in visibility setting */
     std::int32_t                _connectionPermissions;         /** Allowed connection permissions flags */
     std::int32_t                _cachedConnectionPermissions;   /** Cached connection permissions flags */
     Scope                       _scope;                         /** Determines whether this action is a public (shared) action or not */

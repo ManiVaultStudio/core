@@ -31,6 +31,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _defaultWidgetFlags(),
     _sortIndex(-1),
     _stretch(-1),
+    _forceHidden(false),
     _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
     _scope(Scope::Private),
     _publicAction(nullptr),
@@ -89,7 +90,12 @@ std::int32_t WidgetAction::getSortIndex() const
 
 void WidgetAction::setSortIndex(const std::int32_t& sortIndex)
 {
+    if (sortIndex == _sortIndex)
+        return;
+
     _sortIndex = sortIndex;
+
+    emit sortIndexChanged(_sortIndex);
 }
 
 QWidget* WidgetAction::createCollapsedWidget(QWidget* parent) const
@@ -418,6 +424,10 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
     setChecked(variantMap["Checked"].toBool());
     setVisible(variantMap["Visible"].toBool());
     setSortIndex(variantMap["SortIndex"].toInt());
+
+    if (variantMap.contains("ForceHidden"))
+        setForceHidden(variantMap["ForceHidden"].toInt());
+
     setConnectionPermissions(variantMap["ConnectionPermissions"].toInt());
 
     /*
@@ -681,6 +691,31 @@ void WidgetAction::restoreState(const QString& name /*= "cache"*/, bool remove /
     {
         exceptionMessageBox(exceptionMessage);
     }
+}
+
+bool WidgetAction::getForceHidden() const
+{
+    return _forceHidden;
+}
+
+void WidgetAction::setForceHidden(bool forceHidden)
+{
+    if (forceHidden == _forceHidden)
+        return;
+
+    _forceHidden = forceHidden;
+
+    emit visibleChanged();
+    emit changed();
+    emit forceHiddenChanged(_forceHidden);
+}
+
+bool WidgetAction::isVisible() const
+{
+    if (getForceHidden())
+        return false;
+
+    return QWidgetAction::isVisible();
 }
 
 }

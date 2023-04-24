@@ -43,6 +43,8 @@ QVariant ActionsModel::HeaderItem::data(int role /*= Qt::UserRole + 1*/) const
 }
 
 ActionsModel::Item::Item(gui::WidgetAction* action, bool editable /*= false*/) :
+    QStandardItem(),
+    QObject(),
     _action(action)
 {
     Q_ASSERT(_action != nullptr);
@@ -104,6 +106,16 @@ QVariant ActionsModel::IsConnectedItem::data(int role /*= Qt::UserRole + 1*/) co
     return QVariant();
 }
 
+ActionsModel::VisibilityItem::VisibilityItem(gui::WidgetAction* action) :
+    Item(action, false)
+{
+    setEditable(false);
+
+    connect(action, &WidgetAction::forceHiddenChanged, this, [this](bool forceHidden) -> void {
+        emitDataChanged();
+    });
+}
+
 QVariant ActionsModel::VisibilityItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role)
@@ -112,13 +124,13 @@ QVariant ActionsModel::VisibilityItem::data(int role /*= Qt::UserRole + 1*/) con
             return QVariant();
 
         case Qt::EditRole:
-            return QVariant();
+            return getAction()->getForceHidden();
 
         case Qt::ToolTipRole:
-            return QString("%1 %2").arg(getAction()->text(), getAction()->mayPublish(gui::WidgetAction::ConnectionContextFlag::Gui) ? "is visible" : "is hidden");
+            return QString("%1 %2").arg(getAction()->text(), getAction()->getForceHidden() ? "is hidden" : "is not hidden");
 
         case Qt::DecorationRole:
-            return Application::getIconFont("FontAwesome").getIcon("eye");
+            return Application::getIconFont("FontAwesome").getIcon("eye-slash");
 
         case Qt::TextAlignmentRole:
             return Qt::AlignCenter;
@@ -130,10 +142,19 @@ QVariant ActionsModel::VisibilityItem::data(int role /*= Qt::UserRole + 1*/) con
     return QVariant();
 }
 
+void ActionsModel::VisibilityItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
+{
+    if (role == Qt::EditRole)
+        getAction()->setForceHidden(value.toBool());
+}
+
 ActionsModel::ConnectionPermissionItem::ConnectionPermissionItem(gui::WidgetAction* action, const WidgetAction::ConnectionPermissionFlag& connectionPermissionFlag) :
     Item(action, true),
     _connectionPermissionFlag(connectionPermissionFlag)
 {
+    connect(action, &WidgetAction::connectionPermissionsChanged, this, [this](std::int32_t connectionPermissions) -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant ActionsModel::ConnectionPermissionItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -144,18 +165,18 @@ QVariant ActionsModel::ConnectionPermissionItem::data(int role /*= Qt::UserRole 
             return QVariant();
 
         case Qt::EditRole:
-            return QVariant();
+            return getAction()->isConnectionPermissionFlagSet(_connectionPermissionFlag);
 
         case Qt::ToolTipRole:
         {
             if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::PublishViaGui)
-                return QString("%1 %2").arg(getAction()->text(), getAction()->mayPublish(gui::WidgetAction::ConnectionContextFlag::Gui) ? "may be published from the GUI" : "may not be published from the GUI");
+                return QString("%1 %2").arg(getAction()->text(), getAction()->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::PublishViaGui) ? "may be published from the GUI" : "may not be published from the GUI");
 
             if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::ConnectViaGui)
-                return QString("%1 %2").arg(getAction()->text(), getAction()->mayPublish(gui::WidgetAction::ConnectionContextFlag::Gui) ? "may be connected to a public action from the GUI" : "may be connected to a public action from the GUI");
+                return QString("%1 %2").arg(getAction()->text(), getAction()->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::ConnectViaGui) ? "may be connected to a public parameter from the GUI" : "may be connected to a public parameter from the GUI");
 
             if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::DisconnectViaGui)
-                return QString("%1 %2").arg(getAction()->text(), getAction()->mayPublish(gui::WidgetAction::ConnectionContextFlag::Gui) ? "may be disconnected from a public action from the GUI" : "may be disconnected from a public action from the GUI");
+                return QString("%1 %2").arg(getAction()->text(), getAction()->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::DisconnectViaGui) ? "may be disconnected from a public parameter from the GUI" : "may be disconnected from a public parameter from the GUI");
 
             break;
         }
@@ -185,7 +206,23 @@ QVariant ActionsModel::ConnectionPermissionItem::data(int role /*= Qt::UserRole 
 
     return QVariant();
 }
-    
+
+void ActionsModel::ConnectionPermissionItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
+{
+    if (role == Qt::EditRole)
+        getAction()->setConnectionPermissionsFlag(_connectionPermissionFlag, !value.toBool());
+}
+
+ActionsModel::SortIndexItem::SortIndexItem(gui::WidgetAction* action) :
+    Item(action, true)
+{
+    setTextAlignment(Qt::AlignRight);
+
+    connect(action, &WidgetAction::sortIndexChanged, this, [this](std::int32_t sortIndex) -> void {
+        emitDataChanged();
+    });
+}
+
 QVariant ActionsModel::SortIndexItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role)
@@ -206,6 +243,11 @@ QVariant ActionsModel::SortIndexItem::data(int role /*= Qt::UserRole + 1*/) cons
     return QVariant();
 }
 
+void ActionsModel::SortIndexItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
+{
+    getAction()->setSortIndex(value.toInt());
+}
+
 ActionsModel::Row::Row(gui::WidgetAction* action) :
     QList<QStandardItem*>()
 {
@@ -218,7 +260,7 @@ ActionsModel::Row::Row(gui::WidgetAction* action) :
     append(new ConnectionPermissionItem(action, WidgetAction::ConnectionPermissionFlag::PublishViaGui));
     append(new ConnectionPermissionItem(action, WidgetAction::ConnectionPermissionFlag::ConnectViaGui));
     append(new ConnectionPermissionItem(action, WidgetAction::ConnectionPermissionFlag::DisconnectViaGui));
-    append(new SortIndexItem(action, true));
+    append(new SortIndexItem(action));
 }
 
 QMap<ActionsModel::Column, ActionsModel::ColumHeaderInfo> ActionsModel::columnInfo = QMap<ActionsModel::Column, ActionsModel::ColumHeaderInfo>({
@@ -229,9 +271,9 @@ QMap<ActionsModel::Column, ActionsModel::ColumHeaderInfo> ActionsModel::columnIn
     { ActionsModel::Column::IsConnected, { "Connected", "Connected", "Whether the parameter is connected or not" } },
     { ActionsModel::Column::Visible, { "", "Visible", "Whether the parameter is visible in the GUI" } },
     { ActionsModel::Column::MayPublish, { "", "May Publish", "Whether the parameter may be published" } },
-    { ActionsModel::Column::MayConnect, { "", "May Connect", "Whether the parameter may connect to a parameter action" } },
+    { ActionsModel::Column::MayConnect, { "", "May Connect", "Whether the parameter may connect to a public parameter" } },
     { ActionsModel::Column::MayDisconnect, { "", "May Disconnect", "Whether the parameter may disconnect from a public parameter" } },
-    { ActionsModel::Column::SortIndex, { "", "Sort Index", "The sorting index of the parameter (its relative position in parameter groups)" } }
+    { ActionsModel::Column::SortIndex, { "Sort Index", "Sort Index", "The sorting index of the parameter (its relative position in parameter groups)" } }
 });
 
 /*
@@ -365,9 +407,7 @@ ActionsModel::Item::~Item()
 ActionsModel::ActionsModel(QObject* parent /*= nullptr*/) :
     QStandardItemModel(parent),
     _actions(),
-    _actionTypes(),
-    add(0),
-    remove(0)
+    _actionTypes()
 {
     setColumnCount(static_cast<int>(Column::Count));
 
@@ -389,6 +429,14 @@ ActionsModel::ActionsModel(QObject* parent /*= nullptr*/) :
         }
     });
     */
+}
+
+Qt::ItemFlags ActionsModel::flags(const QModelIndex& index) const
+{
+    if (index.column() != static_cast<int>(ActionsModel::Column::SortIndex))
+        return  QStandardItemModel::flags(index) & ~Qt::ItemIsEditable;
+    
+    return  QStandardItemModel::flags(index) | Qt::ItemIsEditable;
 }
 
 void ActionsModel::addAction(WidgetAction* action)
@@ -417,8 +465,6 @@ void ActionsModel::addAction(WidgetAction* action)
     else {
         appendRow(row);
     }
-
-    add++;
 }
 
 void ActionsModel::removeAction(WidgetAction* action)
@@ -429,11 +475,6 @@ void ActionsModel::removeAction(WidgetAction* action)
 
     if (_actions.contains(action))
         _actions.removeOne(action);
-
-    removed << action->getId();
-
-    auto text = action->text();
-    auto rc = rowCount();
 
     const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::EditRole, action->getId(), -1, Qt::MatchFlag::MatchRecursive);
 
@@ -509,6 +550,16 @@ WidgetAction* ActionsModel::getAction(std::int32_t rowIndex)
 WidgetAction* ActionsModel::getAction(const QModelIndex& index)
 {
     return static_cast<Item*>(itemFromIndex(index))->getAction();
+}
+
+QModelIndex ActionsModel::getActionIndex(const gui::WidgetAction* action) const
+{
+    const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::EditRole, action->getId(), 1, Qt::MatchFlag::MatchRecursive);
+
+    if (matches.count() == 1)
+        return matches.first();
+
+    return QModelIndex();
 }
 
 }

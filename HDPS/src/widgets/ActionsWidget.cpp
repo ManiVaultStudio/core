@@ -17,48 +17,48 @@ namespace hdps::gui
 {
 
 /** Tree view item delegate class for overriding painting of toggle columns */
-//class ItemDelegate : public QStyledItemDelegate {
-//public:
-//
-//    /**
-//     * Constructor
-//     * @param parent Pointer to parent object
-//     */
-//    explicit ItemDelegate(QObject* parent = nullptr) :
-//        QStyledItemDelegate(parent)
-//    {
-//    }
-//
-//protected:
-//
-//    /** Init the style option(s) for the item delegate (we override the options to paint disabled when not visible etc.) */
-//    void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override
-//    {
-//        QStyledItemDelegate::initStyleOption(option, index);
-//
-//        switch (index.column())
-//        {
-//            case ActionHierarchyModelItem::Column::Name:
-//                break;
-//
-//            case ActionHierarchyModelItem::Column::Visible:
-//            case ActionHierarchyModelItem::Column::MayPublish:
-//            case ActionHierarchyModelItem::Column::MayConnect:
-//            case ActionHierarchyModelItem::Column::MayDisconnect:
-//            {
-//                if (!index.data(Qt::EditRole).toBool())
-//                    option->state &= ~QStyle::State_Enabled;
-//
-//                break;
-//            }
-//
-//            default:
-//                break;
-//        }
-//    }
-//};
+class ItemDelegate : public QStyledItemDelegate {
+public:
 
-ActionsWidget::ActionsWidget(QWidget* parent, WidgetAction* rootAction) :
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     */
+    explicit ItemDelegate(QObject* parent = nullptr) :
+        QStyledItemDelegate(parent)
+    {
+    }
+
+protected:
+
+    /** Init the style option(s) for the item delegate (we override the options to paint disabled when not visible etc.) */
+    void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override
+    {
+        QStyledItemDelegate::initStyleOption(option, index);
+
+        switch (static_cast<ActionsModel::Column>(index.column()))
+        {
+            case ActionsModel::Column::Name:
+                break;
+
+            case ActionsModel::Column::Visible:
+            case ActionsModel::Column::MayPublish:
+            case ActionsModel::Column::MayConnect:
+            case ActionsModel::Column::MayDisconnect:
+            {
+                if (!index.data(Qt::EditRole).toBool())
+                    option->state &= ~QStyle::State_Enabled;
+
+                break;
+            }
+
+            default:
+                break;
+        }
+    }
+};
+
+ActionsWidget::ActionsWidget(QWidget* parent, WidgetAction* action) :
     QWidget(parent),
     _filterModel(this),
     _hierarchyWidget(this, "Action", hdps::actions().getModel(), &_filterModel),
@@ -75,6 +75,8 @@ ActionsWidget::ActionsWidget(QWidget* parent, WidgetAction* rootAction) :
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
+    //treeView.setRootIndex(_filterModel.mapFromSource(hdps::actions().getModel().getActionIndex(action)));
+
     auto treeViewHeader = treeView.header();
 
     treeViewHeader->setStretchLastSection(false);
@@ -89,7 +91,7 @@ ActionsWidget::ActionsWidget(QWidget* parent, WidgetAction* rootAction) :
     treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::MayPublish), toggleColumnSize);
     treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::MayConnect), toggleColumnSize);
     treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::MayDisconnect), toggleColumnSize);
-    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::SortIndex), toggleColumnSize);
+    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::SortIndex), 80);
 
     treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::Name), QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::Scope), QHeaderView::Fixed);
@@ -101,7 +103,7 @@ ActionsWidget::ActionsWidget(QWidget* parent, WidgetAction* rootAction) :
     treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::SortIndex), QHeaderView::Fixed);
 
     treeView.setMouseTracking(true);
-    //treeView.setItemDelegate(new ItemDelegate(this));
+    treeView.setItemDelegate(new ItemDelegate(this));
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::entered, this, [this](const QModelIndex& index) -> void {
         const auto sourceModelIndex = _hierarchyWidget.toSourceModelIndex(index);
@@ -125,12 +127,19 @@ ActionsWidget::ActionsWidget(QWidget* parent, WidgetAction* rootAction) :
     connect(&_filterModel, &QAbstractItemModel::rowsAboutToBeRemoved, this, numberOfRowsChanged);
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
-        //if (index.column() == ActionHierarchyModelItem::Column::Name)
-        //    return;
+        static const QVector<int> toggleColumns = {
+            static_cast<int>(ActionsModel::Column::Visible),
+            static_cast<int>(ActionsModel::Column::MayPublish),
+            static_cast<int>(ActionsModel::Column::MayConnect),
+            static_cast<int>(ActionsModel::Column::MayDisconnect)
+        };
 
-        //auto sourceModelIndex = _hierarchyWidget.toSourceModelIndex(index);
+        if (!toggleColumns.contains(index.column()))
+            return;
 
-        //_model.setData(sourceModelIndex, !_model.data(sourceModelIndex, Qt::EditRole).toBool(), Qt::CheckStateRole);
+        const auto sourceModelIndex = _hierarchyWidget.toSourceModelIndex(index);
+
+        hdps::actions().getModel().setData(sourceModelIndex, !hdps::actions().getModel().data(sourceModelIndex, Qt::EditRole).toBool(), Qt::EditRole);
     });
     
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
@@ -148,17 +157,17 @@ ActionsWidget::ActionsWidget(QWidget* parent, WidgetAction* rootAction) :
 
 void ActionsWidget::setActionHighlighted(const QModelIndex& index, bool highlighted)
 {
-    //const auto nameIndex = index.siblingAtColumn(ActionHierarchyModelItem::Column::Name);
+    const auto nameIndex = index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Name));
 
-    //if (!nameIndex.isValid())
-    //    return;
+    if (!nameIndex.isValid())
+        return;
 
-    //if (nameIndex.internalPointer() == nullptr)
-    //    return;
+    if (nameIndex.internalPointer() == nullptr)
+        return;
 
-    //auto actionHierarchyModelItem = static_cast<ActionsModel::Item*>(nameIndex.internalPointer());
+    auto actionHierarchyModelItem = static_cast<ActionsModel::Item*>(nameIndex.internalPointer());
 
-    //actionHierarchyModelItem->getAction()->setHighlighted(highlighted);
+    actionHierarchyModelItem->getAction()->setHighlighted(highlighted);
 }
 
 void ActionsWidget::leaveEvent(QEvent* event)
