@@ -91,7 +91,7 @@ ActionsWidget::ActionsWidget(QWidget* parent, WidgetAction* action) :
     treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::MayPublish), toggleColumnSize);
     treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::MayConnect), toggleColumnSize);
     treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::MayDisconnect), toggleColumnSize);
-    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::SortIndex), 80);
+    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::SortIndex), 100);
 
     treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::Name), QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::Scope), QHeaderView::Fixed);

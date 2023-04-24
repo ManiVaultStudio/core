@@ -76,6 +76,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
+    _dockingOptionsAction.setToolTip("Determines the docking options");
+
     _lockingAction.setSerializationName("Locking");
     _lockingAction.setWhat("Layout");
 
@@ -165,7 +167,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     connect(&_mayFloatAction, &ToggleAction::toggled, this, updateDockingOptionsAction);
     connect(&_mayMoveAction, &ToggleAction::toggled, this, updateDockingOptionsAction);
 
-    connect(&_dockingOptionsAction, &OptionsAction::optionsChanged, this, [this]() -> void {
+    connect(&_dockingOptionsAction, &OptionsAction::selectedOptionsChanged, this, [this]() -> void {
         _mayCloseAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Close"));
         _mayFloatAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Float"));
         _mayMoveAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Move"));
