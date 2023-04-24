@@ -173,10 +173,10 @@ QVariant ActionsModel::ConnectionPermissionItem::data(int role /*= Qt::UserRole 
                 return QString("%1 %2").arg(getAction()->text(), getAction()->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::PublishViaGui) ? "may be published from the GUI" : "may not be published from the GUI");
 
             if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::ConnectViaGui)
-                return QString("%1 %2").arg(getAction()->text(), getAction()->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::ConnectViaGui) ? "may be connected to a public parameter from the GUI" : "may be connected to a public parameter from the GUI");
+                return QString("%1 %2").arg(getAction()->text(), getAction()->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::ConnectViaGui) ? "may be connected to a public parameter from the GUI" : "may not be connected to a public parameter from the GUI");
 
             if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::DisconnectViaGui)
-                return QString("%1 %2").arg(getAction()->text(), getAction()->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::DisconnectViaGui) ? "may be disconnected from a public parameter from the GUI" : "may be disconnected from a public parameter from the GUI");
+                return QString("%1 %2").arg(getAction()->text(), getAction()->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::DisconnectViaGui) ? "may be disconnected from a public parameter from the GUI" : "may not be disconnected from a public parameter from the GUI");
 
             break;
         }
@@ -305,33 +305,6 @@ ActionsModel::Item::Item(ActionsModel* actionsModel, gui::WidgetAction* widgetAc
             connect(_widgetAction, &WidgetAction::changed, this, [this]() -> void {
                 emitDataChanged();
             });
-            
-            //connect(_widgetAction, &WidgetAction::scopeChanged, this, [this]() -> void {
-            //    if (_widgetAction->isPublic())
-            //        setData(_widgetAction->text(), Qt::EditRole);
-            //    
-            //    //setCheckState(_widgetAction->isEnabled() ? Qt::Checked : Qt::Unchecked);
-            //    //setCheckable(_widgetAction->isPublic());
-            //    setEditable(_widgetAction->isPublic());
-            //});
-
-            connect(_widgetAction, &WidgetAction::actionConnected, this, [this, actionsModel](WidgetAction* action) -> void {
-                const QList<QStandardItem*> row {
-                    new Item(actionsModel, action, Column::Name),
-                    new Item(actionsModel, action, Column::ID),
-                    new Item(actionsModel, action, Column::Type),
-                    new Item(actionsModel, action, Column::Scope),
-                    new Item(actionsModel, action, Column::IsConnected),
-                    new Item(actionsModel, action, Column::Visible),
-                    new Item(actionsModel, action, Column::MayPublish),
-                    new Item(actionsModel, action, Column::MayConnect),
-                    new Item(actionsModel, action, Column::MayDisconnect),
-                    new Item(actionsModel, action, Column::SortIndex)
-                };
-
-                //for (auto item : row)
-                //    item->setEditable(false);
-
                 row[static_cast<int>(Column::Name)]->setToolTip(_widgetAction->getPath());
 
                 appendRow(row);
@@ -344,25 +317,6 @@ ActionsModel::Item::Item(ActionsModel* actionsModel, gui::WidgetAction* widgetAc
                     if (action == item->getAction())
                         removeRow(rowIndex);
                 }
-            });
-
-            break;
-        }
-
-        case Column::ID:
-        {
-            connect(_widgetAction, &WidgetAction::idChanged, this, [this]() -> void {
-                emitDataChanged();
-            });
-
-            break;
-        }
-
-        case Column::Type:
-        {
-            QTimer::singleShot(10, this, [this]() -> void {
-                emitDataChanged();
-                _actionsModel->addActionType(data(Qt::DisplayRole).toString());
             });
 
             break;
@@ -390,17 +344,6 @@ ActionsModel::Item::Item(ActionsModel* actionsModel, gui::WidgetAction* widgetAc
         default:
             break;
     }
-}
-
-WidgetAction* ActionsModel::Item::getAction()
-{
-    return _widgetAction;
-}
-
-ActionsModel::Item::~Item()
-{
-    if (_column == Column::Type)
-        _actionsModel->removeActionType(this->data(Qt::DisplayRole).toString());
 }
 */
 
