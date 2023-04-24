@@ -44,6 +44,7 @@ public:
     }
 
 private:
-    GroupsAction    _groupsAction;      /** Groups action */
-    ActionsWidget   _actionsWidget;     /** Hierarchical actions widget */
+    GroupsAction            _groupsAction;          /** Groups action */
+    ActionsWidget           _actionsWidget;         /** Hierarchical actions widget */
+    GroupAction             _settingsAction;        /** Group action for miscellaneous settings actions */
 };

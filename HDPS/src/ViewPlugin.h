@@ -120,6 +120,7 @@ public: // Action getters
     gui::ToggleAction& getMayCloseAction() { return _mayCloseAction; }
     gui::ToggleAction& getMayFloatAction() { return _mayFloatAction; }
     gui::ToggleAction& getMayMoveAction() { return _mayMoveAction; }
+    gui::OptionsAction& getDockingOptionsAction() { return _dockingOptionsAction; }
     gui::LockingAction& getLockingAction() { return _lockingAction; }
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
     gui::TriggerAction& getHelpAction() { return _helpAction; }
@@ -133,6 +134,7 @@ private:
     gui::ToggleAction       _mayCloseAction;            /** Action for toggling whether the view plugin may be closed */
     gui::ToggleAction       _mayFloatAction;            /** Action for toggling whether the view plugin may float */
     gui::ToggleAction       _mayMoveAction;             /** Action for toggling whether the view plugin may be moved */
+    gui::OptionsAction      _dockingOptionsAction;      /** Action for toggling docking options */
     gui::LockingAction      _lockingAction;             /** Action for toggling whether the view plugin is locked */
     gui::ToggleAction       _visibleAction;             /** Action which determines whether the view plugin is visible or not */
     gui::TriggerAction      _helpAction;                /** Action which triggers documentation */

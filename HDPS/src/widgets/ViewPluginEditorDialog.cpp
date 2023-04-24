@@ -13,22 +13,25 @@ using namespace hdps::plugin;
 ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* viewPlugin) :
     QDialog(parent),
     _groupsAction(this, "Groups"),
-    _actionsWidget(this, viewPlugin)
+    _actionsWidget(this, viewPlugin),
+    _settingsAction(this, "Settings")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);
-    //setWindowTitle(QString("Edit project (%1)").arg(_viewPlugin->text()));
+    setWindowTitle(QString("Edit (%1) settings").arg(viewPlugin->text()));
     setMinimumSize(QSize(320, 240));
 
     auto layout = new QVBoxLayout();
 
     layout->addWidget(&_actionsWidget);
-    layout->addWidget(viewPlugin->getMayCloseAction().createWidget(this));
-    layout->addWidget(viewPlugin->getMayFloatAction().createWidget(this));
-    layout->addWidget(viewPlugin->getMayMoveAction().createWidget(this));
-    layout->addWidget(viewPlugin->getLockingAction().getLockedAction().createWidget(this));
-    layout->addWidget(viewPlugin->getGuiNameAction().createWidget(this));
-    //layout->addWidget(_groupsAction.createWidget(this));
+    
+    _settingsAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
+
+    _settingsAction << viewPlugin->getLockingAction().getLockedAction();
+    _settingsAction << viewPlugin->getDockingOptionsAction();
+    _settingsAction << viewPlugin->getGuiNameAction();
+
+    layout->addWidget(_settingsAction.createWidget(this));
 
     setLayout(layout);
 

@@ -27,6 +27,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _mayCloseAction(this, "May close", true, true),
     _mayFloatAction(this, "May float", true, true),
     _mayMoveAction(this, "May move", true, true),
+    _dockingOptionsAction(this, "Docking options", { "May Close", "May Float", "May Move" }),
     _lockingAction(this),
     _visibleAction(this, "Visible", true, true),
     _helpAction(this, "Trigger help"),
@@ -118,6 +119,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
         getDestroyAction().setEnabled(!toggled);
 
+        _dockingOptionsAction.setEnabled(!toggled);
+
         updateDockWidgetPermissionsReadOnly();
     });
 
@@ -140,6 +143,33 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction.setText(getGuiName());
 
     updateVisibleAction();
+
+    const auto updateDockingOptionsAction = [this]() -> void {
+        QStringList selectedOptions;
+        
+        if (_mayCloseAction.isChecked())
+            selectedOptions << "May Close";
+
+        if (_mayFloatAction.isChecked())
+            selectedOptions << "May Float";
+
+        if (_mayMoveAction.isChecked())
+            selectedOptions << "May Move";
+
+        _dockingOptionsAction.setSelectedOptions(selectedOptions);
+    };
+
+    updateDockingOptionsAction();
+
+    connect(&_mayCloseAction, &ToggleAction::toggled, this, updateDockingOptionsAction);
+    connect(&_mayFloatAction, &ToggleAction::toggled, this, updateDockingOptionsAction);
+    connect(&_mayMoveAction, &ToggleAction::toggled, this, updateDockingOptionsAction);
+
+    connect(&_dockingOptionsAction, &OptionsAction::optionsChanged, this, [this]() -> void {
+        _mayCloseAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Close"));
+        _mayFloatAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Float"));
+        _mayMoveAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Move"));
+    });
 }
 
 void ViewPlugin::init()

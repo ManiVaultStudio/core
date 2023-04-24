@@ -157,6 +157,7 @@ ActionsWidget::ActionsWidget(QWidget* parent, WidgetAction* action) :
 
 void ActionsWidget::setActionHighlighted(const QModelIndex& index, bool highlighted)
 {
+    return;
     const auto nameIndex = index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Name));
 
     if (!nameIndex.isValid())
