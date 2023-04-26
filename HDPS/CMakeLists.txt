@@ -1,13 +1,21 @@
 cmake_minimum_required(VERSION 3.17)
 
+# -----------------------------------------------------------------------------
+# Project: HDPS-core
+# -----------------------------------------------------------------------------
 set(HDPS_CORE "hdps-core")
 project(${HDPS_CORE})
+set(version 0.2)
 
 # These three targets defined in this CMakeLists.txt
-set(HDPS_EXE HDPS)  # The HDPS executable
-set(HDPS_PUBLIC_LIB HDPS_Public) # A public shared library used by plugin builders and the HDPS executable
-set(HDPS_PRIVATE_LIB HDPS_Private) # A private shared library contain code for the HDPS executable
+set(HDPS_EXE HDPS)                  # The HDPS executable
+set(HDPS_PUBLIC_LIB HDPS_Public)    # A public shared library used by plugin builders and the HDPS executable
+set(HDPS_PRIVATE_LIB HDPS_Private)  # A private shared library contain code for the HDPS executable
 
+
+# -----------------------------------------------------------------------------
+# CMake Settings
+# -----------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -18,6 +26,13 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
+# include CMakePackageConfigHelpers macro
+include(CMakePackageConfigHelpers)
+
+
+# -----------------------------------------------------------------------------
+# Set install directory
+# -----------------------------------------------------------------------------
 if(DEFINED ENV{HDPS_INSTALL_DIR})
     message(STATUS 
     "***************************************************
@@ -39,6 +54,10 @@ else()
     message(STATUS "Install HDPS to ${INSTALL_DIR}")
 endif()
 
+
+# -----------------------------------------------------------------------------
+# Apple settings
+# -----------------------------------------------------------------------------
 if(APPLE)
     # These are the properties for the Info.plist in the mac bindle
     set(MACOSX_BUNDLE_BUNDLE_NAME "HDPS")
@@ -63,6 +82,10 @@ if(APPLE)
     set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif()
 
+
+# -----------------------------------------------------------------------------
+# Other Unix settings
+# -----------------------------------------------------------------------------
 if(UNIX AND NOT APPLE)
     # use, i.e. don't skip the full RPATH for the build tree
     set(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -78,6 +101,10 @@ if(UNIX AND NOT APPLE)
     set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif()
 
+
+# -----------------------------------------------------------------------------
+# Windows compiler and linker flags
+# -----------------------------------------------------------------------------
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
@@ -88,14 +115,54 @@ endif(MSVC)
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
+
+# -----------------------------------------------------------------------------
+# Dependencies
+# -----------------------------------------------------------------------------
+
 find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
 
-include(CMakeHdpsSourcesPrivate)
-include(CMakeHdpsSourcesPublic)
-include(CMakeHdpsSourcesMain)
-include(CMakeHdpsSourcesResources)
+# Qt Advanced docking system
+set(VERSION_SHORT 4.0.1)
+set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
+add_subdirectory(external)
+add_subdirectory(external/advanced_docking)
+
+# File compression LIBRARY
+if (WIN32)
+    if(NOT DEFINED ZLIB_ROOT)
+        message(FATAL_ERROR "You need to define ZLIB_ROOT, pointing to a zlib installation")
+    else()
+        message(STATUS "Using zlib at ${ZLIB_ROOT}")
+    endif()
+
+elseif (APPLE)
+    message(STATUS "********Using brew zlib for QUAZIP *********")
+
+    find_program(BREW_BIN brew)
+    execute_process(COMMAND ${BREW_BIN} install pkg-config) 
+
+else()
+    find_package(ZLIB REQUIRED)
+    message(STATUS "Using zlib at ${ZLIB_INCLUDE_DIRS}")
+endif()
+
+set(QUAZIP_QT_MAJOR_VERSION 6)
+add_subdirectory(external/quazip)
 
 
+# -----------------------------------------------------------------------------
+# Source files
+# -----------------------------------------------------------------------------
+include(CMakeHdpsSourcesMain)           # defines MAIN_SOURCES
+include(CMakeHdpsSourcesPublic)         # defines PUBLIC_SOURCES
+include(CMakeHdpsSourcesPrivate)        # defines PRIVATE_SOURCES
+include(CMakeHdpsSourcesResources)      # defines RESOURCE_FILES and UI_HEADERS
+
+
+# -----------------------------------------------------------------------------
+# Target HDPS_PUBLIC_LIB
+# -----------------------------------------------------------------------------
 set(LINK_TYPE SHARED)
 if(MSVC)
     set(LINK_TYPE STATIC)
@@ -113,6 +180,10 @@ target_compile_features(${HDPS_PUBLIC_LIB} PRIVATE cxx_std_17)
 target_link_libraries(${HDPS_PUBLIC_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${HDPS_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 
+
+# -----------------------------------------------------------------------------
+# Target HDPS_PRIVATE_LIB
+# -----------------------------------------------------------------------------
 add_library(${HDPS_PRIVATE_LIB} ${LINK_TYPE}
     src/.editorconfig
     ${PRIVATE_SOURCES}
@@ -134,6 +205,10 @@ target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_L
 add_dependencies(${HDPS_PRIVATE_LIB} ${HDPS_PUBLIC_LIB})
 add_dependencies(${HDPS_PRIVATE_LIB} QuaZip)
 
+
+# -----------------------------------------------------------------------------
+# Target HDPS_EXE
+# -----------------------------------------------------------------------------
 add_executable(${HDPS_EXE} MACOSX_BUNDLE WIN32
     src/.editorconfig
     ${MAIN_SOURCES}
@@ -142,6 +217,7 @@ add_executable(${HDPS_EXE} MACOSX_BUNDLE WIN32
 )
 
 target_compile_features(${HDPS_EXE} PRIVATE cxx_std_17)
+
 # find libraries relative to the executable in the macOS .app tree
 if(APPLE)
     set_target_properties( ${HDPS_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
@@ -171,8 +247,10 @@ if(MSVC)
     )
 endif(MSVC)
 
-#executable & linklib
 
+# -----------------------------------------------------------------------------
+# Installation
+# -----------------------------------------------------------------------------
 if(APPLE)
     set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
     set(WEBENGINEINSTALL_CMD "${CMAKE_CURRENT_SOURCE_DIR}/macos_webengineinstall.sh")
@@ -260,12 +338,6 @@ target_include_directories(${HDPS_PUBLIC_LIB} PUBLIC
     $<INSTALL_INTERFACE:include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
-
-# include CMakePackageConfigHelpers macro
-include(CMakePackageConfigHelpers)
-
-# set version
-set(version 0.2)
 
 # ***Create a HdpsCore package to support the find_package command**
 
@@ -367,46 +439,7 @@ add_custom_command(
     #     --prefix ${INSTALL_DIR}/$<CONFIGURATION>
     #     --verbose
 )
-                   
 
-# System plugins
-add_subdirectory(src/plugins/PointData)
-add_subdirectory(src/plugins/ColorData)
-add_subdirectory(src/plugins/TextData)
-add_subdirectory(src/plugins/ClusterData)
-add_subdirectory(src/plugins/ImageData)
-add_subdirectory(src/plugins/DataHierarchyPlugin)
-add_subdirectory(src/plugins/DataPropertiesPlugin)
-add_subdirectory(src/plugins/ActionsPlugin)
-add_subdirectory(src/plugins/LoggingPlugin)
-
-# Qt Advanced docking system
-set(VERSION_SHORT 4.0.1)
-set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
-add_subdirectory(external)
-add_subdirectory(external/advanced_docking)
-
-# File compression LIBRARY
-if (WIN32)
-    if(NOT DEFINED ZLIB_ROOT)
-        message(FATAL_ERROR "You need to define ZLIB_ROOT, pointing to a zlib installation")
-    else()
-        message(STATUS "Using zlib at ${ZLIB_ROOT}")
-    endif()
-
-elseif (APPLE)
-    message(STATUS "********Using brew zlib for QUAZIP *********")
-
-    find_program(BREW_BIN brew)
-    execute_process(COMMAND ${BREW_BIN} install pkg-config) 
-
-else()
-    find_package(ZLIB REQUIRED)
-    message(STATUS "Using zlib at ${ZLIB_INCLUDE_DIRS}")
-endif()
-
-set(QUAZIP_QT_MAJOR_VERSION 6)
-add_subdirectory(external/quazip)
 
 add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" 
@@ -438,6 +471,29 @@ if(APPLE)
             --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
     )
 endif()
+
+
+# -----------------------------------------------------------------------------
+# Plugin projects
+# -----------------------------------------------------------------------------
+
+# System plugins
+add_subdirectory(src/plugins/DataHierarchyPlugin)
+add_subdirectory(src/plugins/DataPropertiesPlugin)
+add_subdirectory(src/plugins/ActionsPlugin)
+add_subdirectory(src/plugins/LoggingPlugin)
+
+# Data plugins
+add_subdirectory(src/plugins/PointData)
+add_subdirectory(src/plugins/ColorData)
+add_subdirectory(src/plugins/TextData)
+add_subdirectory(src/plugins/ClusterData)
+add_subdirectory(src/plugins/ImageData)
+
+
+# -----------------------------------------------------------------------------
+# Miscellaneous
+# -----------------------------------------------------------------------------
 
 # Automatically set the debug environment (command + working directory) for MSVC
 if(MSVC)
