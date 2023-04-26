@@ -17,8 +17,3 @@ endif()
 
 add_subdirectory(HDPS)
 
-add_dependencies(PointData HDPS)
-
-add_dependencies(ImageData HDPS)
-add_dependencies(ImageData PointData)
-add_dependencies(ImageData ClusterData)

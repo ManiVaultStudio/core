@@ -47,6 +47,8 @@ source_group(Aux FILES ${AUX})
 
 add_library(${PROJECT} SHARED ${IMAGE_DATA_HEADERS} ${IMAGE_DATA_SOURCES} ${ACTIONS_SOURCES} ${AUX})
 
+add_dependencies(${PROJECT} HDPS_Public PointData ClusterData)
+
 target_include_directories(${PROJECT} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 target_compile_features(${PROJECT} PRIVATE cxx_std_17)
