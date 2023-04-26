@@ -44,12 +44,12 @@ if(DEFINED ENV{HDPS_INSTALL_DIR})
 endif()
 
 # Get the env path and allow the user to change it
-set(INSTALL_DIR_PATH $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
+set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
 # Normalize the incoming install path
-file(TO_CMAKE_PATH ${INSTALL_DIR_PATH} INSTALL_DIR)
+file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
 
 if(NOT DEFINED INSTALL_DIR)
-    message(FATAL_ERROR "No install path provided! Set the cmake variable INSTALL_DIR_PATH or environment variable HDPS_INSTALL_DIR")
+    message(FATAL_ERROR "No install path provided! Set the cmake variable INSTALL_DIR or environment variable HDPS_INSTALL_DIR")
 else()
     message(STATUS "Install HDPS to ${INSTALL_DIR}")
 endif()
