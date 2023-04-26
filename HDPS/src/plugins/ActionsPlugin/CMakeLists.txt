@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.17)
 
-set(PROJECT "ActionsPlugin")
-
-PROJECT(${PROJECT})
+set(ACTIONSPLUGIN "ActionsPlugin")
+PROJECT(${ACTIONSPLUGIN})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -16,7 +15,10 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
-file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
+# Get the env path and allow the user to change it
+set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
+# Normalize the incoming install path
+file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
 
 find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
@@ -34,7 +36,7 @@ set(AUX
     src/ActionsPlugin.json
 )
 
-set(SOURCES
+set(ACTIONS_SOURCES
 	${PLUGIN}
 	${WIDGETS}
 	${AUX}
@@ -44,29 +46,29 @@ source_group(Plugin FILES ${PLUGIN})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
 
-add_library(${PROJECT} SHARED ${SOURCES})
+add_library(${ACTIONSPLUGIN} SHARED ${ACTIONS_SOURCES})
 
-add_dependencies(${PROJECT} HDPS_Public)
+add_dependencies(${ACTIONSPLUGIN} HDPS_Public)
 
-target_include_directories(${PROJECT} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include")
+target_include_directories(${ACTIONSPLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include")
 
-target_compile_features(${PROJECT} PRIVATE cxx_std_17)
+target_compile_features(${ACTIONSPLUGIN} PRIVATE cxx_std_17)
 
 set(HDPS_LINK_PATH "${INSTALL_DIR}/$<CONFIGURATION>/lib/")
 set(HDPS_LINK_SUFFIX $<IF:$<CXX_COMPILER_ID:MSVC>,${CMAKE_LINK_LIBRARY_SUFFIX},${CMAKE_SHARED_LIBRARY_SUFFIX}>)
 
 set(HDPS_LINK_LIBRARY "${HDPS_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${HDPS_LINK_SUFFIX}")
 
-target_link_libraries(${PROJECT} PRIVATE Qt6::Widgets)
-target_link_libraries(${PROJECT} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${PROJECT} PRIVATE "${HDPS_LINK_LIBRARY}")
+target_link_libraries(${ACTIONSPLUGIN} PRIVATE Qt6::Widgets)
+target_link_libraries(${ACTIONSPLUGIN} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${ACTIONSPLUGIN} PRIVATE "${HDPS_LINK_LIBRARY}")
 
-install(TARGETS ${PROJECT}
+install(TARGETS ${ACTIONSPLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
     LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
 )
 
-add_custom_command(TARGET ${PROJECT} POST_BUILD
+add_custom_command(TARGET ${ACTIONSPLUGIN} POST_BUILD
 	COMMAND "${CMAKE_COMMAND}"
 	--install ${CMAKE_CURRENT_BINARY_DIR}
 	--config $<CONFIGURATION>
@@ -75,6 +77,6 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
 
 # Automatically set the debug environment (command + working directory) for MSVC
 if(MSVC)
-    set_property(TARGET ${PROJECT} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
-    set_property(TARGET ${PROJECT} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/HDPS.exe,${INSTALL_DIR}/release/HDPS.exe>)
+    set_property(TARGET ${ACTIONSPLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
+    set_property(TARGET ${ACTIONSPLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/HDPS.exe,${INSTALL_DIR}/release/HDPS.exe>)
 endif()

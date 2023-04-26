@@ -1,22 +1,21 @@
 cmake_minimum_required(VERSION 3.17)
 
-set(PROJECT "hdps-common")
-project(${PROJECT})
+# -----------------------------------------------------------------------------
+# Project: HDPS-core
+# -----------------------------------------------------------------------------
+set(HDPS_CORE "hdps-core")
+project(${HDPS_CORE})
+set(version 0.2)
 
 # These three targets defined in this CMakeLists.txt
-set(HDPS_EXE HDPS)  # The HDPS executable
-set(HDPS_PUBLIC_LIB HDPS_Public) # A public shared library used by plugin builders and the HDPS executable
-set(HDPS_PRIVATE_LIB HDPS_Private) # A private shared library contain code for the HDPS executable
+set(HDPS_EXE HDPS)                  # The HDPS executable
+set(HDPS_PUBLIC_LIB HDPS_Public)    # A public shared library used by plugin builders and the HDPS executable
+set(HDPS_PRIVATE_LIB HDPS_Private)  # A private shared library contain code for the HDPS executable
 
-if(NOT DEFINED ENV{HDPS_INSTALL_DIR})
-    message(FATAL_ERROR, "$ENV{HDPS_INSTALL_DIR}
-    ***************************************************
-    Supply an environment variable HDPS_INSTALL_DIR 
-    to indicate where the HDPS output will be installed,
-    make sure the directory exists.
-    ***************************************************" )
-endif()
 
+# -----------------------------------------------------------------------------
+# CMake Settings
+# -----------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -27,10 +26,38 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
-# Normalize the incoming install path
-file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
-#message(STATUS ${INSTALL_DIR})
+# include CMakePackageConfigHelpers macro
+include(CMakePackageConfigHelpers)
 
+
+# -----------------------------------------------------------------------------
+# Set install directory
+# -----------------------------------------------------------------------------
+if(DEFINED ENV{HDPS_INSTALL_DIR})
+    message(STATUS 
+    "***************************************************
+    Using environment variable HDPS_INSTALL_DIR 
+    $ENV{HDPS_INSTALL_DIR}
+    to indicate where the HDPS output will be installed,
+    make sure the directory exists.
+    ***************************************************" )
+endif()
+
+# Get the env path and allow the user to change it
+set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
+# Normalize the incoming install path
+file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
+
+if(NOT DEFINED INSTALL_DIR)
+    message(FATAL_ERROR "No install path provided! Set the cmake variable INSTALL_DIR or environment variable HDPS_INSTALL_DIR")
+else()
+    message(STATUS "Install HDPS to ${INSTALL_DIR}")
+endif()
+
+
+# -----------------------------------------------------------------------------
+# Apple settings
+# -----------------------------------------------------------------------------
 if(APPLE)
     # These are the properties for the Info.plist in the mac bindle
     set(MACOSX_BUNDLE_BUNDLE_NAME "HDPS")
@@ -55,6 +82,10 @@ if(APPLE)
     set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif()
 
+
+# -----------------------------------------------------------------------------
+# Other Unix settings
+# -----------------------------------------------------------------------------
 if(UNIX AND NOT APPLE)
     # use, i.e. don't skip the full RPATH for the build tree
     set(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -70,6 +101,10 @@ if(UNIX AND NOT APPLE)
     set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif()
 
+
+# -----------------------------------------------------------------------------
+# Windows compiler and linker flags
+# -----------------------------------------------------------------------------
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
@@ -78,990 +113,56 @@ if(MSVC)
 endif(MSVC)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
+
+
+# -----------------------------------------------------------------------------
+# Dependencies
+# -----------------------------------------------------------------------------
 
 find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
 
-set( MAIN_SOURCES
-    src/Main.cpp
-    res/styles/default.qss
-)
-
-set(PRIVATE_CORE_HEADERS
-    src/private/Core.h
-)
-
-set(PRIVATE_CORE_SOURCES
-    src/private/Core.cpp
-)
-
-set(PRIVATE_CORE_FILES
-    ${PRIVATE_CORE_HEADERS}
-    ${PRIVATE_CORE_SOURCES}
-)
-
-set(PRIVATE_WORKSPACE_MANAGER_HEADERS
-    src/private/WorkspaceManager.h
-    src/private/DockManager.h
-    src/private/DockComponentsFactory.h
-    src/private/ViewPluginsDockWidget.h
-    src/private/ViewPluginDockWidget.h
-    src/private/CentralDockWidget.h
-    src/private/DockWidget.h
-    src/private/DockAreaTitleBar.h
-    src/private/WorkspaceSettingsDialog.h
-    src/private/WorkspaceInventoryModel.h
-    src/private/WorkspaceInventoryFilterModel.h
-)
-
-set(PRIVATE_WORKSPACE_MANAGER_SOURCES
-    src/private/WorkspaceManager.cpp
-    src/private/DockManager.cpp
-    src/private/DockComponentsFactory.cpp
-    src/private/ViewPluginsDockWidget.cpp
-    src/private/ViewPluginDockWidget.cpp
-    src/private/CentralDockWidget.cpp
-    src/private/DockWidget.cpp
-    src/private/DockAreaTitleBar.cpp
-    src/private/WorkspaceSettingsDialog.cpp
-    src/private/WorkspaceInventoryModel.cpp
-    src/private/WorkspaceInventoryFilterModel.cpp
-)
-
-set(PRIVATE_WORKSPACE_MANAGER_FILES
-    ${PRIVATE_WORKSPACE_MANAGER_HEADERS}
-    ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
-)
-
-set(PRIVATE_PLUGIN_MANAGER_HEADERS
-    src/private/PluginManager.h
-    src/private/PluginManagerModel.h
-    src/private/PluginManagerFilterModel.h
-    src/private/PluginManagerDialog.h
-)
-
-set(PRIVATE_PLUGIN_MANAGER_SOURCES
-    src/private/PluginManager.cpp
-    src/private/PluginManagerModel.cpp
-    src/private/PluginManagerFilterModel.cpp
-    src/private/PluginManagerDialog.cpp
-)
-
-set(PRIVATE_PLUGIN_MANAGER_FILES
-    ${PRIVATE_PLUGIN_MANAGER_HEADERS}
-    ${PRIVATE_PLUGIN_MANAGER_SOURCES}
-)
-
-set(PRIVATE_DATA_MANAGER_HEADERS
-    src/private/DataManager.h
-)
-
-set(PRIVATE_DATA_MANAGER_SOURCES
-    src/private/DataManager.cpp
-)
-
-set(PRIVATE_DATA_MANAGER_FILES
-    ${PRIVATE_DATA_MANAGER_HEADERS}
-    ${PRIVATE_DATA_MANAGER_SOURCES}
-)
-
-set(PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS
-    src/private/DataHierarchyManager.h
-)
-
-set(PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES
-    src/private/DataHierarchyManager.cpp
-)
-
-set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
-    ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
-    ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
-)
-
-set(PRIVATE_EVENT_MANAGER_HEADERS
-    src/private/EventManager.h
-)
-
-set(PRIVATE_EVENT_MANAGER_SOURCES
-    src/private/EventManager.cpp
-)
-
-set(PRIVATE_EVENT_MANAGER_FILES
-    ${PRIVATE_EVENT_MANAGER_HEADERS}
-    ${PRIVATE_EVENT_MANAGER_SOURCES}
-)
-
-set(PRIVATE_ACTIONS_MANAGER_HEADERS
-    src/private/ActionsManager.h
-)
-
-set(PRIVATE_ACTIONS_MANAGER_SOURCES
-    src/private/ActionsManager.cpp
-)
-
-set(PRIVATE_ACTIONS_MANAGER_FILES
-    ${PRIVATE_ACTIONS_MANAGER_HEADERS}
-    ${PRIVATE_ACTIONS_MANAGER_SOURCES}
-)
-
-set(PRIVATE_PROJECT_MANAGER_HEADERS
-    src/private/ProjectManager.h
-    src/private/ProjectWidget.h
-    src/private/ProjectSettingsDialog.h
-    src/private/NewProjectDialog.h
-)
-
-set(PRIVATE_PROJECT_MANAGER_SOURCES
-    src/private/ProjectManager.cpp
-    src/private/ProjectWidget.cpp
-    src/private/ProjectSettingsDialog.cpp
-    src/private/NewProjectDialog.cpp
-)
-
-set(PRIVATE_PROJECT_MANAGER_FILES
-    ${PRIVATE_PROJECT_MANAGER_HEADERS}
-    ${PRIVATE_PROJECT_MANAGER_SOURCES}
-)
-
-set(PRIVATE_SETTINGS_MANAGER_HEADERS
-    src/private/SettingsManager.h
-    src/private/SettingsManagerDialog.h
-)
-
-set(PRIVATE_SETTINGS_MANAGER_SOURCES
-    src/private/SettingsManager.cpp
-    src/private/SettingsManagerDialog.cpp
-)
-
-set(PRIVATE_SETTINGS_MANAGER_FILES
-    ${PRIVATE_SETTINGS_MANAGER_HEADERS}
-    ${PRIVATE_SETTINGS_MANAGER_SOURCES}
-)
-
-set(PRIVATE_MANAGER_HEADERS
-    ${PRIVATE_WORKSPACE_MANAGER_HEADERS}
-    ${PRIVATE_PLUGIN_MANAGER_HEADERS}
-    ${PRIVATE_DATA_MANAGER_HEADERS}
-    ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
-    ${PRIVATE_EVENT_MANAGER_HEADERS}
-    ${PRIVATE_ACTIONS_MANAGER_HEADERS}
-    ${PRIVATE_PROJECT_MANAGER_HEADERS}
-    ${PRIVATE_SETTINGS_MANAGER_HEADERS}
-)
-
-set(PRIVATE_MANAGER_SOURCES
-    ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
-    ${PRIVATE_PLUGIN_MANAGER_SOURCES}
-    ${PRIVATE_DATA_MANAGER_SOURCES}
-    ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
-    ${PRIVATE_EVENT_MANAGER_SOURCES}
-    ${PRIVATE_ACTIONS_MANAGER_SOURCES}
-    ${PRIVATE_PROJECT_MANAGER_SOURCES}
-    ${PRIVATE_WORKSPACE_MANAGER_SOURCES}
-    ${PRIVATE_SETTINGS_MANAGER_SOURCES}
-)
-
-set(PRIVATE_MANAGER_FILES
-    ${PRIVATE_MANAGER_HEADERS}
-    ${PRIVATE_MANAGER_SOURCES}
-)
-
-set(PRIVATE_APPLICATION_HEADERS
-    src/private/MainWindow.h
-    src/private/FileMenu.h
-    src/private/ViewMenu.h
-    src/private/LoadSystemViewMenu.h
-    src/private/LoadedViewsMenu.h
-    src/private/HelpMenu.h
-)
-
-set(PRIVATE_APPLICATION_SOURCES
-    src/private/MainWindow.cpp
-    src/private/FileMenu.cpp
-    src/private/ViewMenu.cpp
-    src/private/LoadSystemViewMenu.cpp
-    src/private/LoadedViewsMenu.cpp
-    src/private/HelpMenu.cpp
-)
-
-set(PRIVATE_APPLICATION_FILES
-    ${PRIVATE_APPLICATION_HEADERS}
-    ${PRIVATE_APPLICATION_SOURCES}
-)
-
-set(PRIVATE_START_PAGE_HEADERS
-    src/private/StartPageWidget.h
-    src/private/StartPageHeaderWidget.h
-    src/private/StartPageContentWidget.h
-    src/private/StartPageOpenProjectWidget.h
-    src/private/StartPageGetStartedWidget.h
-    src/private/StartPageActionsWidget.h
-    src/private/StartPageActionsModel.h
-    src/private/StartPageActionsFilterModel.h
-    src/private/StartPageActionDelegate.h
-    src/private/StartPageActionDelegateEditorWidget.h
-    src/private/StartPageAction.h
-    src/private/LogoWidget.h
-)
-
-set(PRIVATE_START_PAGE_SOURCES
-    src/private/StartPageWidget.cpp
-    src/private/StartPageHeaderWidget.cpp
-    src/private/StartPageContentWidget.cpp
-    src/private/StartPageOpenProjectWidget.cpp
-    src/private/StartPageGetStartedWidget.cpp
-    src/private/StartPageActionsWidget.cpp
-    src/private/StartPageActionsModel.cpp
-    src/private/StartPageActionsFilterModel.cpp
-    src/private/StartPageActionDelegate.cpp
-    src/private/StartPageActionDelegateEditorWidget.cpp
-    src/private/StartPageAction.cpp
-    src/private/LogoWidget.cpp
-)
-
-set(PRIVATE_START_PAGE_FILES
-    ${PRIVATE_START_PAGE_HEADERS}
-    ${PRIVATE_START_PAGE_SOURCES}
-)
-
-set(PRIVATE_MISCELLANEOUS_HEADERS
-    src/private/Archiver.h
-    src/private/GroupDataDialog.h
-)
-
-set(PRIVATE_MISCELLANEOUS_SOURCES
-    src/private/Archiver.cpp
-    src/private/GroupDataDialog.cpp
-)
-
-set(PRIVATE_MISCELLANEOUS_FILES
-    ${PRIVATE_MISCELLANEOUS_HEADERS}
-    ${PRIVATE_MISCELLANEOUS_SOURCES}
-)
-
-set(PRIVATE_HEADERS
-    ${PRIVATE_CORE_HEADERS}
-    ${PRIVATE_MANAGER_HEADERS}
-    ${PRIVATE_APPLICATION_HEADERS}
-    ${PRIVATE_START_PAGE_HEADERS}
-    ${PRIVATE_MISCELLANEOUS_HEADERS}
-    ${PRIVATE_ACTIONS_HEADERS}
-)
-
-set(PRIVATE_SOURCES
-    ${PRIVATE_CORE_SOURCES}
-    ${PRIVATE_MANAGER_SOURCES}
-    ${PRIVATE_APPLICATION_SOURCES}
-    ${PRIVATE_START_PAGE_SOURCES}
-    ${PRIVATE_MISCELLANEOUS_SOURCES}
-    ${PRIVATE_ACTIONS_SOURCES}
-    ${PRIVATE_HEADERS}
-)
-
-source_group(Core FILES ${PRIVATE_CORE_FILES})
-source_group(Application FILES ${PRIVATE_APPLICATION_FILES})
-source_group(Managers\\Layout FILES ${PRIVATE_LAYOUT_MANAGER_FILES})
-source_group(Managers\\Plugin FILES ${PRIVATE_PLUGIN_MANAGER_FILES})
-source_group(Managers\\Data FILES ${PRIVATE_DATA_MANAGER_FILES})
-source_group(Managers\\DataHierarchy FILES ${PRIVATE_DATA_HIERARCHY_MANAGER_FILES})
-source_group(Managers\\Event FILES ${PRIVATE_EVENT_MANAGER_FILES})
-source_group(Managers\\Actions FILES ${PRIVATE_ACTIONS_MANAGER_FILES})
-source_group(Managers\\Project FILES ${PRIVATE_PROJECT_MANAGER_FILES})
-source_group(Managers\\Workspace FILES ${PRIVATE_WORKSPACE_MANAGER_FILES})
-source_group(Managers\\Settings FILES ${PRIVATE_SETTINGS_MANAGER_FILES})
-source_group(StartPage FILES ${PRIVATE_START_PAGE_FILES})
-source_group(Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
-source_group(Actions FILES ${PRIVATE_ACTIONS_FILES})
-
-set(PUBLIC_CORE_INTERFACE_HEADERS
-    src/CoreInterface.h
-    src/AbstractManager.h
-    src/AbstractDataManager.h
-    src/AbstractPluginManager.h
-    src/AbstractActionsManager.h
-    src/AbstractDataHierarchyManager.h
-    src/AbstractEventManager.h
-    src/AbstractWorkspaceManager.h
-    src/AbstractProjectManager.h
-    src/AbstractSettingsManager.h
-)
-
-set(PUBLIC_CORE_INTERFACE_SOURCES
-    src/CoreInterface.cpp
-)
-
-set(PUBLIC_CORE_INTERFACE_FILES
-    ${PUBLIC_CORE_INTERFACE_HEADERS}
-    ${PUBLIC_CORE_INTERFACE_SOURCES}
-)
-
-set(PUBLIC_EVENT_HEADERS
-    src/event/Event.h
-    src/event/EventListener.h
-)
-
-set(PUBLIC_EVENT_SOURCES
-    src/event/Event.cpp
-    src/event/EventListener.cpp
-)
-
-set(PUBLIC_EVENT_FILES
-    ${PUBLIC_EVENT_HEADERS}
-    ${PUBLIC_EVENT_SOURCES}
-)
-
-set(PUBLIC_COLOR_MAP_ACTION_HEADERS
-    src/actions/ColorMapAction.h
-    src/actions/ColorMapEditor1DAction.h
-    src/actions/ColorMapEditor1DEdgesGraphicsItem.h
-    src/actions/ColorMapEditor1DHistogramGraphicsItem.h
-    src/actions/ColorMapEditor1DNode.h
-    src/actions/ColorMapEditor1DNodeGraphicsItem.h
-    src/actions/ColorMapEditor1DNodeAction.h
-    src/actions/ColorMapEditor1DScene.h
-    src/actions/ColorMapEditor1DWidget.h
-    src/actions/ColorMapViewAction.h
-    src/actions/ColorMapSettingsAction.h
-    src/actions/ColorMapSettings1DAction.h
-    src/actions/ColorMapSettings2DAction.h
-)
-
-set(PUBLIC_COLOR_MAP_ACTION_SOURCES
-    src/actions/ColorMapAction.cpp
-    src/actions/ColorMapEditor1DAction.cpp
-    src/actions/ColorMapEditor1DEdgesGraphicsItem.cpp
-    src/actions/ColorMapEditor1DHistogramGraphicsItem.cpp
-    src/actions/ColorMapEditor1DNode.cpp
-    src/actions/ColorMapEditor1DNodeGraphicsItem.cpp
-    src/actions/ColorMapEditor1DNodeAction.cpp
-    src/actions/ColorMapEditor1DScene.cpp
-    src/actions/ColorMapEditor1DWidget.cpp
-    src/actions/ColorMapViewAction.cpp
-    src/actions/ColorMapSettingsAction.cpp
-    src/actions/ColorMapSettings1DAction.cpp
-    src/actions/ColorMapSettings2DAction.cpp
-)
-
-set(PUBLIC_COLOR_MAP_ACTION_FILES
-    ${PUBLIC_COLOR_MAP_ACTION_HEADERS}    
-    ${PUBLIC_COLOR_MAP_ACTION_SOURCES}
-)
-
-set(PUBLIC_NUMERICAL_ACTIONS_HEADERS
-    src/actions/NumericalAction.h
-    src/actions/DecimalAction.h
-    src/actions/IntegralAction.h
-    src/actions/NumericalRangeAction.h
-    src/actions/DecimalRangeAction.h
-)
-
-set(PUBLIC_NUMERICAL_ACTIONS_SOURCES
-    src/actions/NumericalAction.cpp
-    src/actions/DecimalAction.cpp
-    src/actions/IntegralAction.cpp
-    src/actions/NumericalRangeAction.cpp
-    src/actions/DecimalRangeAction.cpp
-)
-
-set(PUBLIC_NUMERICAL_ACTIONS_FILES
-    ${PUBLIC_NUMERICAL_ACTIONS_HEADERS}    
-    ${PUBLIC_NUMERICAL_ACTIONS_SOURCES}
-)
-
-set(PUBLIC_RECTANGLE_ACTIONS_HEADERS
-    src/actions/RectangleAction.h
-    src/actions/IntegralRectangleAction.h
-    src/actions/DecimalRectangleAction.h
-)
-
-set(PUBLIC_RECTANGLE_ACTIONS_SOURCES
-    src/actions/RectangleAction.cpp
-    src/actions/IntegralRectangleAction.cpp
-    src/actions/DecimalRectangleAction.cpp
-)
-
-set(PUBLIC_RECTANGLE_ACTIONS_FILES
-    ${PUBLIC_RECTANGLE_ACTIONS_HEADERS}    
-    ${PUBLIC_RECTANGLE_ACTIONS_SOURCES}
-)
-
-set(PUBLIC_TEXTUAL_ACTIONS_HEADERS
-    src/actions/StringAction.h
-    src/actions/StringsAction.h
-)
-
-set(PUBLIC_TEXTUAL_ACTIONS_SOURCES
-    src/actions/StringAction.cpp
-    src/actions/StringsAction.cpp
-)
-
-set(PUBLIC_TEXTUAL_ACTIONS_FILES
-    ${PUBLIC_TEXTUAL_ACTIONS_HEADERS}    
-    ${PUBLIC_TEXTUAL_ACTIONS_SOURCES}
-)
-
-set(PUBLIC_GROUPING_ACTIONS_HEADERS
-    src/actions/GroupAction.h
-    src/actions/HorizontalGroupAction.h
-    src/actions/VerticalGroupAction.h
-    src/actions/GroupsAction.h
-    src/actions/GroupSectionTreeItem.h
-    src/actions/GroupWidgetTreeItem.h
-)
-
-set(PUBLIC_GROUPING_ACTIONS_SOURCES
-    src/actions/GroupAction.cpp
-    src/actions/HorizontalGroupAction.cpp
-    src/actions/VerticalGroupAction.cpp
-    src/actions/GroupsAction.cpp
-    src/actions/GroupSectionTreeItem.cpp
-    src/actions/GroupWidgetTreeItem.cpp
-)
-
-set(PUBLIC_GROUPING_ACTIONS_FILES
-    ${PUBLIC_GROUPING_ACTIONS_HEADERS}    
-    ${PUBLIC_GROUPING_ACTIONS_SOURCES}
-)
-
-set(PUBLIC_TRIGGER_ACTIONS_HEADERS
-    src/actions/TriggerAction.h
-    src/actions/TriggersAction.h
-)
-
-set(PUBLIC_TRIGGER_ACTIONS_SOURCES
-    src/actions/TriggerAction.cpp
-    src/actions/TriggersAction.cpp
-)
-
-set(PUBLIC_TRIGGER_ACTIONS_FILES
-    ${PUBLIC_TRIGGER_ACTIONS_HEADERS}    
-    ${PUBLIC_TRIGGER_ACTIONS_SOURCES}
-)
-
-set(PUBLIC_OPTION_ACTIONS_HEADERS
-    src/actions/OptionAction.h
-    src/actions/OptionsAction.h
-)
-
-set(PUBLIC_OPTION_ACTIONS_SOURCES
-    src/actions/OptionAction.cpp
-    src/actions/OptionsAction.cpp
-)
-
-set(PUBLIC_OPTION_ACTIONS_FILES
-    ${PUBLIC_OPTION_ACTIONS_HEADERS}    
-    ${PUBLIC_OPTION_ACTIONS_SOURCES}
-)
-
-set(PUBLIC_COLOR_ACTIONS_HEADERS
-    src/actions/ColorAction.h
-    src/actions/ColorPickerAction.h
-)
-
-set(PUBLIC_COLOR_ACTIONS_SOURCES
-    src/actions/ColorAction.cpp
-    src/actions/ColorPickerAction.cpp
-)
-
-set(PUBLIC_COLOR_ACTIONS_FILES
-    ${PUBLIC_COLOR_ACTIONS_HEADERS}    
-    ${PUBLIC_COLOR_ACTIONS_SOURCES}
-)
-
-set(PUBLIC_TOGGLE_ACTIONS_HEADERS
-    src/actions/ToggleAction.h
-)
-
-set(PUBLIC_TOGGLE_ACTIONS_SOURCES
-    src/actions/ToggleAction.cpp
-)
-
-set(PUBLIC_TOGGLE_ACTIONS_FILES
-    ${PUBLIC_TOGGLE_ACTIONS_HEADERS}    
-    ${PUBLIC_TOGGLE_ACTIONS_SOURCES}
-)
-
-set(PUBLIC_FILE_ACTIONS_HEADERS
-    src/actions/DirectoryPickerAction.h
-    src/actions/FilePickerAction.h
-)
-
-set(PUBLIC_FILE_ACTIONS_SOURCES
-    src/actions/DirectoryPickerAction.cpp
-    src/actions/FilePickerAction.cpp
-)
-
-set(PUBLIC_FILE_ACTIONS_FILES
-    ${PUBLIC_FILE_ACTIONS_HEADERS}    
-    ${PUBLIC_FILE_ACTIONS_SOURCES}
-)
-
-set(PUBLIC_TOOLBAR_ACTIONS_HEADERS
-    src/actions/ToolbarAction.h
-    src/actions/ToolbarActionItem.h
-    src/actions/ToolbarActionItemWidget.h
-)
-
-set(PUBLIC_TOOLBAR_ACTIONS_SOURCES
-    src/actions/ToolbarAction.cpp
-    src/actions/ToolbarActionItem.cpp
-    src/actions/ToolbarActionItemWidget.cpp
-)
-
-set(PUBLIC_TOOLBAR_ACTIONS_FILES
-    ${PUBLIC_TOOLBAR_ACTIONS_HEADERS}    
-    ${PUBLIC_TOOLBAR_ACTIONS_SOURCES}
-)
-
-set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
-    src/actions/Actions.h
-    src/actions/DatasetPickerAction.h
-    src/actions/ImageAction.h
-    src/actions/PixelSelectionAction.h
-    src/actions/PluginTriggerPickerAction.h
-    src/actions/PluginTriggerAction.h
-    src/actions/WindowLevelAction.h
-    src/actions/VariantAction.h
-    src/actions/StatusAction.h
-    src/actions/RecentFilesAction.h
-    src/actions/PresetsAction.h
-    src/actions/LockingAction.h
-    src/actions/VersionAction.h
-    src/actions/ProjectSplashScreenAction.h
-)
-
-set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
-    src/actions/DatasetPickerAction.cpp
-    src/actions/ImageAction.cpp
-    src/actions/PixelSelectionAction.cpp
-    src/actions/PluginTriggerPickerAction.cpp
-    src/actions/PluginTriggerAction.cpp
-    src/actions/WindowLevelAction.cpp
-    src/actions/VariantAction.cpp
-    src/actions/StatusAction.cpp
-    src/actions/RecentFilesAction.cpp
-    src/actions/PresetsAction.cpp
-    src/actions/LockingAction.cpp
-    src/actions/VersionAction.cpp
-    src/actions/ProjectSplashScreenAction.cpp
-)
-
-set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
-    ${PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS}    
-    ${PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES}
-)
-
-set(PUBLIC_ACTIONS_INTERNAL_HEADERS
-    src/actions/WidgetAction.h
-    src/actions/WidgetActionWidget.h
-    src/actions/WidgetActionCollapsedWidget.h
-    src/actions/WidgetActionLabel.h
-    src/actions/WidgetActionStateWidget.h
-    src/actions/WidgetActionContextMenu.h
-)
-
-set(PUBLIC_ACTIONS_INTERNAL_SOURCES
-    src/actions/WidgetAction.cpp
-    src/actions/WidgetActionWidget.cpp
-    src/actions/WidgetActionCollapsedWidget.cpp
-    src/actions/WidgetActionLabel.cpp
-    src/actions/WidgetActionStateWidget.cpp
-    src/actions/WidgetActionContextMenu.cpp
-)
-
-set(PUBLIC_ACTIONS_INTERNAL_FILES
-    ${PUBLIC_ACTIONS_INTERNAL_HEADERS}    
-    ${PUBLIC_ACTIONS_INTERNAL_SOURCES}
-)
-
-set(PUBLIC_WIDGET_HEADERS
-    src/widgets/WebWidget.h
-    src/widgets/DropWidget.h
-    src/widgets/Divider.h
-    src/widgets/HierarchyWidget.h
-    src/widgets/InfoOverlayWidget.h
-    src/widgets/OverlayWidget.h
-    src/widgets/InfoWidget.h
-    src/widgets/ProjectEditorDialog.h
-    src/widgets/ActionHierarchyWidget.h
-    src/widgets/TaskProgressDialog.h
-)
-
-set(PUBLIC_WIDGET_SOURCES
-    src/widgets/WebWidget.cpp
-    src/widgets/DropWidget.cpp
-    src/widgets/Divider.cpp
-    src/widgets/HierarchyWidget.cpp
-    src/widgets/InfoOverlayWidget.cpp
-    src/widgets/OverlayWidget.cpp
-    src/widgets/InfoWidget.cpp
-    src/widgets/ProjectEditorDialog.cpp
-    src/widgets/ActionHierarchyWidget.cpp
-    src/widgets/TaskProgressDialog.cpp
-    ${ACTION_HIERARCHY_SOURCES}
-)
-
-set(PUBLIC_WIDGET_FILES
-    ${PUBLIC_WIDGET_HEADERS}
-    ${PUBLIC_WIDGET_SOURCES}
-)
-
-set(PUBLIC_RENDERERS_HEADERS
-    src/renderers/Renderer.h
-    src/renderers/PointRenderer.h
-    src/renderers/DensityRenderer.h
-    src/renderers/ImageRenderer.h
-)
-
-set(PUBLIC_RENDERERS_SOURCES
-    src/renderers/PointRenderer.cpp
-    src/renderers/DensityRenderer.cpp
-    src/renderers/ImageRenderer.cpp
-)
-
-set(PUBLIC_RENDERERS_FILES
-    ${PUBLIC_RENDERERS_HEADERS}
-    ${PUBLIC_RENDERERS_SOURCES}
-)
-
-set(PUBLIC_GRAPHICS_HEADERS
-    src/graphics/BufferObject.h
-    src/graphics/Vector2f.h
-    src/graphics/Vector3f.h
-    src/graphics/Matrix3f.h
-    src/graphics/Selection.h
-    src/graphics/Texture.h
-    src/graphics/Shader.h
-    src/graphics/Framebuffer.h
-    src/graphics/OffscreenBuffer.h
-    src/graphics/Bounds.h
-)
-
-set(PUBLIC_GRAPHICS_SOURCES
-    src/graphics/BufferObject.cpp
-    src/graphics/Shader.cpp
-    src/graphics/Selection.cpp
-    src/graphics/Matrix3f.cpp
-    src/graphics/Vector2f.cpp
-    src/graphics/Vector3f.cpp
-    src/graphics/Bounds.cpp
-)
-
-set(PUBLIC_GRAPHICS_FILES
-    ${PUBLIC_GRAPHICS_HEADERS}
-    ${PUBLIC_GRAPHICS_SOURCES}
-)
-
-set(PUBLIC_UTIL_HEADERS
-    src/util/Miscellaneous.h
-    src/util/FileUtil.h
-    src/util/MeanShift.h
-    src/util/DensityComputation.h
-    src/util/Exception.h
-    src/util/Math.h
-    src/util/Timer.h
-    src/util/Icon.h
-    src/util/IconFont.h
-    src/util/IconFonts.h
-    src/util/Interpolation.h
-    src/util/FontAwesome.h
-    src/util/ColorMap.h
-    src/util/ColorMapFilterModel.h
-    src/util/ColorMapModel.h
-    src/util/ColorSpace.h
-    src/util/PixelSelectionTool.h
-    src/util/PixelSelection.h
-    src/util/Preset.h
-    src/util/PresetsModel.h
-    src/util/PresetsFilterModel.h
-    src/util/WidgetFader.h
-    src/util/WidgetOverlayer.h
-    src/util/Serialization.h
-    src/util/Serializable.h
-    src/util/DockArea.h
-    src/util/Logger.h
-    src/util/AbstractItemModelTester.h
-    src/util/Version.h
-    src/util/DockWidgetPermission.h
-    src/util/NumericalRange.h
-)
-
-set(PUBLIC_UTIL_SOURCES
-    src/util/Miscellaneous.cpp
-    src/util/FileUtil.cpp
-    src/util/MeanShift.cpp
-    src/util/DensityComputation.cpp
-    src/util/Exception.cpp
-    src/util/Math.cpp
-    src/util/Timer.cpp
-    src/util/Icon.cpp
-    src/util/IconFont.cpp
-    src/util/IconFonts.cpp
-    src/util/Interpolation.cpp
-    src/util/FontAwesome.cpp
-    src/util/ColorMap.cpp
-    src/util/ColorMapFilterModel.cpp
-    src/util/ColorMapModel.cpp
-    src/util/ColorSpace.cpp
-    src/util/PixelSelectionTool.cpp
-    src/util/PixelSelection.cpp
-    src/util/Preset.cpp
-    src/util/PresetsModel.cpp
-    src/util/PresetsFilterModel.cpp
-    src/util/WidgetFader.cpp
-    src/util/WidgetOverlayer.cpp
-    src/util/Serialization.cpp
-    src/util/Serializable.cpp
-    src/util/DockArea.cpp
-    src/util/Logger.cpp
-    src/util/AbstractItemModelTester.cpp
-    src/util/Version.cpp
-    src/util/DockWidgetPermission.cpp
-    src/util/NumericalRange.cpp
-)
-
-set(PUBLIC_UTIL_FILES
-    ${PUBLIC_UTIL_HEADERS}    
-    ${PUBLIC_UTIL_SOURCES}
-)
-
-set(PUBLIC_APPLICATION_HEADERS
-    src/Application.h
-    src/Project.h
-    src/Workspace.h
-)
-
-set(PUBLIC_APPLICATION_SOURCES
-    src/Application.cpp
-    src/Project.cpp
-    src/Workspace.cpp
-)
-
-set(PUBLIC_APPLICATION_FILES
-    ${PUBLIC_APPLICATION_HEADERS}
-    ${PUBLIC_APPLICATION_SOURCES}
-)
-
-set(PUBLIC_DATASET_HEADERS
-    src/DataType.h
-    src/RawData.h
-    src/Set.h
-    src/LinkedData.h
-    src/Dataset.h
-    src/DatasetPrivate.h
-)
-
-set(PUBLIC_DATASET_SOURCES
-    src/Set.cpp
-    src/LinkedData.cpp
-    src/Dataset.cpp
-    src/DatasetPrivate.cpp
-)
-
-set(PUBLIC_DATASET_FILES
-    ${PUBLIC_DATASET_HEADERS}
-    ${PUBLIC_DATASET_SOURCES}
-)
-
-set(PUBLIC_PLUGIN_HEADERS
-    src/Plugin.h
-    src/PluginType.h
-    src/PluginFactory.h
-    src/LoaderPlugin.h
-    src/WriterPlugin.h
-    src/AnalysisPlugin.h
-    src/TransformationPlugin.h
-    src/ViewPlugin.h
-)
-
-set(PUBLIC_PLUGIN_SOURCES
-    src/Plugin.cpp
-    src/PluginType.cpp
-    src/PluginFactory.cpp
-    src/LoaderPlugin.cpp
-    src/WriterPlugin.cpp
-    src/AnalysisPlugin.cpp
-    src/TransformationPlugin.cpp
-    src/ViewPlugin.cpp
-)
-
-list(APPEND PUBLIC_PLUGIN_FILES
-    ${PUBLIC_PLUGIN_HEADERS}
-    ${PUBLIC_PLUGIN_SOURCES}
-)
-
-set(PUBLIC_DATA_HIERARCHY_HEADERS
-    src/DataHierarchyItem.h
-)
-
-set(PUBLIC_DATA_HIERARCHY_SOURCES
-    src/DataHierarchyItem.cpp
-)
-
-list(APPEND PUBLIC_DATA_HIERARCHY_FILES
-    ${PUBLIC_DATA_HIERARCHY_HEADERS}
-    ${PUBLIC_DATA_HIERARCHY_SOURCES}
-)
-
-set(PUBLIC_ACTIONS_MODEL_HEADERS
-    src/models/ActionsModel.h
-    src/models/ActionsFilterModel.h
-)
-
-set(PUBLIC_ACTIONS_MODEL_SOURCES
-    src/models/ActionsModel.cpp
-    src/models/ActionsFilterModel.cpp
-)
-
-set(PUBLIC_ACTIONS_MODEL_FILES
-    ${PUBLIC_ACTIONS_MODEL_HEADERS}
-    ${PUBLIC_ACTIONS_MODEL_SOURCES}
-)
-
-set(PUBLIC_ACTION_HIERARCHY_MODEL_HEADERS
-    src/models/ActionHierarchyModelItem.h
-    src/models/ActionHierarchyModel.h
-    src/models/ActionHierarchyFilterModel.h
-)
-
-set(PUBLIC_ACTION_HIERARCHY_MODEL_SOURCES
-    src/models/ActionHierarchyModelItem.cpp
-    src/models/ActionHierarchyModel.cpp
-    src/models/ActionHierarchyFilterModel.cpp
-)
-
-set(PUBLIC_ACTION_HIERARCHY_MODEL_FILES
-    ${PUBLIC_ACTION_HIERARCHY_MODEL_HEADERS}
-    ${PUBLIC_ACTION_HIERARCHY_MODEL_SOURCES}
-)
-
-set(PUBLIC_DATA_HIERARCHY_MODEL_HEADERS
-    src/models/DataHierarchyModelItem.h
-    src/models/DataHierarchyModel.h
-    src/models/DataHierarchyFilterModel.h
-)
-
-set(PUBLIC_DATA_HIERARCHY_MODEL_SOURCES
-    src/models/DataHierarchyModelItem.cpp
-    src/models/DataHierarchyModel.cpp
-    src/models/DataHierarchyFilterModel.cpp
-)
-
-set(PUBLIC_DATA_HIERARCHY_MODEL_FILES
-    ${PUBLIC_DATA_HIERARCHY_MODEL_HEADERS}
-    ${PUBLIC_DATA_HIERARCHY_MODEL_SOURCES}
-)
-
-set(PUBLIC_HEADERS
-    ${PUBLIC_CORE_INTERFACE_HEADERS}
-    ${PUBLIC_EVENT_HEADERS}
-    ${PUBLIC_COLOR_MAP_ACTION_HEADERS}
-    ${PUBLIC_NUMERICAL_ACTIONS_HEADERS}
-    ${PUBLIC_RECTANGLE_ACTIONS_HEADERS}
-    ${PUBLIC_TEXTUAL_ACTIONS_HEADERS}
-    ${PUBLIC_GROUPING_ACTIONS_HEADERS}
-    ${PUBLIC_TRIGGER_ACTIONS_HEADERS}
-    ${PUBLIC_OPTION_ACTIONS_HEADERS}
-    ${PUBLIC_COLOR_ACTIONS_HEADERS}
-    ${PUBLIC_TOGGLE_ACTIONS_HEADERS}
-    ${PUBLIC_FILE_ACTIONS_HEADERS}
-    ${PUBLIC_TOOLBAR_ACTIONS_HEADERS}
-    ${PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS}
-    ${PUBLIC_ACTIONS_INTERNAL_HEADERS}
-    ${PUBLIC_ACTION_HIERARCHY_HEADERS}
-    ${PUBLIC_WIDGET_HEADERS}
-    ${PUBLIC_RENDERERS_HEADERS}
-    ${PUBLIC_GRAPHICS_HEADERS}
-    ${PUBLIC_UTIL_HEADERS}
-    ${PUBLIC_APPLICATION_HEADERS}
-    ${PUBLIC_DATASET_HEADERS}
-    ${PUBLIC_PLUGIN_HEADERS}
-    ${PUBLIC_PROJECT_HEADERS}
-    ${PUBLIC_DATA_HIERARCHY_HEADERS}
-    ${PUBLIC_ACTIONS_MODEL_HEADERS}
-    ${PUBLIC_ACTION_HIERARCHY_MODEL_HEADERS}
-    ${PUBLIC_DATA_HIERARCHY_MODEL_HEADERS}
-)
-
-set(PUBLIC_SOURCES
-    ${PUBLIC_EVENT_SOURCES}
-    ${PUBLIC_COLOR_MAP_ACTION_SOURCES}
-    ${PUBLIC_NUMERICAL_ACTIONS_SOURCES}
-    ${PUBLIC_RECTANGLE_ACTIONS_SOURCES}
-    ${PUBLIC_TEXTUAL_ACTIONS_SOURCES}
-    ${PUBLIC_GROUPING_ACTIONS_SOURCES}
-    ${PUBLIC_TRIGGER_ACTIONS_SOURCES}
-    ${PUBLIC_OPTION_ACTIONS_SOURCES}
-    ${PUBLIC_COLOR_ACTIONS_SOURCES}
-    ${PUBLIC_TOGGLE_ACTIONS_SOURCES}
-    ${PUBLIC_FILE_ACTIONS_SOURCES}
-    ${PUBLIC_TOOLBAR_ACTIONS_SOURCES}
-    ${PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES}
-    ${PUBLIC_ACTIONS_INTERNAL_SOURCES}
-    ${PUBLIC_ACTION_HIERARCHY_SOURCES}
-    ${PUBLIC_WIDGET_SOURCES}
-    ${PUBLIC_RENDERERS_SOURCES}
-    ${PUBLIC_GRAPHICS_SOURCES}
-    ${PUBLIC_UTIL_SOURCES}
-    ${PUBLIC_APPLICATION_SOURCES}
-    ${PUBLIC_DATASET_SOURCES}
-    ${PUBLIC_PLUGIN_SOURCES}
-    ${PUBLIC_DATA_HIERARCHY_SOURCES}
-    ${PUBLIC_PROJECT_SOURCES}
-    ${PUBLIC_ACTIONS_MODEL_SOURCES}
-    ${PUBLIC_ACTION_HIERARCHY_MODEL_SOURCES}
-    ${PUBLIC_DATA_HIERARCHY_MODEL_SOURCES}
-    ${PUBLIC_HEADERS}
-)
-
-set(QRESOURCES
-    res/ResourcesCore.qrc
-)
-
-if(WIN32)
-    set(MAIN_SOURCES ${MAIN_SOURCES} win/hdps.rc)
-endif(WIN32)
-
-if(APPLE)
-    set(MAIN_SOURCES ${MAIN_SOURCES} res/icons/AppIcon.icns)
-    set_source_files_properties(res/icons/AppIcon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-endif(APPLE)
-
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
-
-QT6_ADD_RESOURCES(RESOURCE_FILES ${QRESOURCES})
-
-source_group(CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
-source_group(Event FILES ${PUBLIC_EVENT_FILES})
-source_group(Actions\\Colormap FILES ${PUBLIC_COLOR_MAP_ACTION_FILES})
-source_group(Actions\\Numerical FILES ${PUBLIC_NUMERICAL_ACTIONS_FILES})
-source_group(Actions\\Rectangle FILES ${PUBLIC_RECTANGLE_ACTIONS_FILES})
-source_group(Actions\\Textual FILES ${PUBLIC_TEXTUAL_ACTIONS_FILES})
-source_group(Actions\\Grouping FILES ${PUBLIC_GROUPING_ACTIONS_FILES})
-source_group(Actions\\Trigger FILES ${PUBLIC_TRIGGER_ACTIONS_FILES})
-source_group(Actions\\Option FILES ${PUBLIC_OPTION_ACTIONS_FILES})
-source_group(Actions\\Color FILES ${PUBLIC_COLOR_ACTIONS_FILES})
-source_group(Actions\\Toggle FILES ${PUBLIC_TOGGLE_ACTIONS_FILES})
-source_group(Actions\\File FILES ${PUBLIC_FILE_ACTIONS_FILES})
-source_group(Actions\\Toolbar FILES ${PUBLIC_TOOLBAR_ACTIONS_FILES})
-source_group(Actions\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_ACTIONS_FILES})
-source_group(Actions\\Internal FILES ${PUBLIC_ACTIONS_INTERNAL_FILES})
-source_group(Widgets FILES ${PUBLIC_WIDGET_FILES})
-source_group(Renderers FILES ${PUBLIC_RENDERERS_FILES})
-source_group(Graphics FILES ${PUBLIC_GRAPHICS_FILES})
-source_group(Util FILES ${PUBLIC_UTIL_FILES})
-source_group(Application FILES ${PUBLIC_APPLICATION_FILES})
-source_group(DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_FILES})
-source_group(Dataset FILES ${PUBLIC_DATASET_FILES})
-source_group(Plugin FILES ${PUBLIC_PLUGIN_FILES})
-source_group(Project FILES ${PUBLIC_PROJECT_FILES})
-source_group(Model\\Actions FILES ${PUBLIC_ACTIONS_MODEL_FILES})
-source_group(Model\\ActionHierarchy FILES ${PUBLIC_ACTION_HIERARCHY_MODEL_FILES})
-source_group(Model\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
-
-source_group(Resources FILES ${QRESOURCES})
-source_group(Resources FILES win/hdps.rc)
-source_group(Resources\\generated FILES ${UI_HEADERS})
-
+# Qt Advanced docking system
+set(VERSION_SHORT 4.0.1)
+set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
+add_subdirectory(external)
+add_subdirectory(external/advanced_docking)
+
+# File compression LIBRARY
+if (WIN32)
+    if(NOT DEFINED ZLIB_ROOT)
+        message(FATAL_ERROR "You need to define ZLIB_ROOT, pointing to a zlib installation")
+    else()
+        message(STATUS "Using zlib at ${ZLIB_ROOT}")
+    endif()
+
+elseif (APPLE)
+    message(STATUS "********Using brew zlib for QUAZIP *********")
+
+    find_program(BREW_BIN brew)
+    execute_process(COMMAND ${BREW_BIN} install pkg-config) 
+
+else()
+    find_package(ZLIB REQUIRED)
+    message(STATUS "Using zlib at ${ZLIB_INCLUDE_DIRS}")
+endif()
+
+set(QUAZIP_QT_MAJOR_VERSION 6)
+add_subdirectory(external/quazip)
+
+
+# -----------------------------------------------------------------------------
+# Source files
+# -----------------------------------------------------------------------------
+include(CMakeHdpsSourcesMain)           # defines MAIN_SOURCES
+include(CMakeHdpsSourcesPublic)         # defines PUBLIC_SOURCES
+include(CMakeHdpsSourcesPrivate)        # defines PRIVATE_SOURCES
+include(CMakeHdpsSourcesResources)      # defines RESOURCE_FILES and UI_HEADERS
+
+
+# -----------------------------------------------------------------------------
+# Target HDPS_PUBLIC_LIB
+# -----------------------------------------------------------------------------
 set(LINK_TYPE SHARED)
 if(MSVC)
     set(LINK_TYPE STATIC)
@@ -1079,6 +180,10 @@ target_compile_features(${HDPS_PUBLIC_LIB} PRIVATE cxx_std_17)
 target_link_libraries(${HDPS_PUBLIC_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${HDPS_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 
+
+# -----------------------------------------------------------------------------
+# Target HDPS_PRIVATE_LIB
+# -----------------------------------------------------------------------------
 add_library(${HDPS_PRIVATE_LIB} ${LINK_TYPE}
     src/.editorconfig
     ${PRIVATE_SOURCES}
@@ -1100,6 +205,10 @@ target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_L
 add_dependencies(${HDPS_PRIVATE_LIB} ${HDPS_PUBLIC_LIB})
 add_dependencies(${HDPS_PRIVATE_LIB} QuaZip)
 
+
+# -----------------------------------------------------------------------------
+# Target HDPS_EXE
+# -----------------------------------------------------------------------------
 add_executable(${HDPS_EXE} MACOSX_BUNDLE WIN32
     src/.editorconfig
     ${MAIN_SOURCES}
@@ -1108,6 +217,7 @@ add_executable(${HDPS_EXE} MACOSX_BUNDLE WIN32
 )
 
 target_compile_features(${HDPS_EXE} PRIVATE cxx_std_17)
+
 # find libraries relative to the executable in the macOS .app tree
 if(APPLE)
     set_target_properties( ${HDPS_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
@@ -1137,8 +247,10 @@ if(MSVC)
     )
 endif(MSVC)
 
-#executable & linklib
 
+# -----------------------------------------------------------------------------
+# Installation
+# -----------------------------------------------------------------------------
 if(APPLE)
     set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
     set(WEBENGINEINSTALL_CMD "${CMAKE_CURRENT_SOURCE_DIR}/macos_webengineinstall.sh")
@@ -1226,12 +338,6 @@ target_include_directories(${HDPS_PUBLIC_LIB} PUBLIC
     $<INSTALL_INTERFACE:include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
-
-# include CMakePackageConfigHelpers macro
-include(CMakePackageConfigHelpers)
-
-# set version
-set(version 0.2)
 
 # ***Create a HdpsCore package to support the find_package command**
 
@@ -1333,46 +439,7 @@ add_custom_command(
     #     --prefix ${INSTALL_DIR}/$<CONFIGURATION>
     #     --verbose
 )
-                   
 
-# System plugins
-add_subdirectory(src/plugins/PointData)
-add_subdirectory(src/plugins/ColorData)
-add_subdirectory(src/plugins/TextData)
-add_subdirectory(src/plugins/ClusterData)
-add_subdirectory(src/plugins/ImageData)
-add_subdirectory(src/plugins/DataHierarchyPlugin)
-add_subdirectory(src/plugins/DataPropertiesPlugin)
-add_subdirectory(src/plugins/ActionsPlugin)
-add_subdirectory(src/plugins/LoggingPlugin)
-
-# Qt Advanced docking system
-set(VERSION_SHORT 4.0.1)
-set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
-add_subdirectory(external)
-add_subdirectory(external/advanced_docking)
-
-# File compression LIBRARY
-if (WIN32)
-    if(NOT DEFINED ZLIB_ROOT)
-        message(FATAL_ERROR "You need to define ZLIB_ROOT, pointing to a zlib installation")
-    else()
-        message(STATUS "Using zlib at ${ZLIB_ROOT}")
-    endif()
-
-elseif (APPLE)
-    message(STATUS "********Using brew zlib for QUAZIP *********")
-
-    find_program(BREW_BIN brew)
-    execute_process(COMMAND ${BREW_BIN} install pkg-config) 
-
-else()
-    find_package(ZLIB REQUIRED)
-    message(STATUS "Using zlib at ${ZLIB_INCLUDE_DIRS}")
-endif()
-
-set(QUAZIP_QT_MAJOR_VERSION 6)
-add_subdirectory(external/quazip)
 
 add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" 
@@ -1404,6 +471,29 @@ if(APPLE)
             --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
     )
 endif()
+
+
+# -----------------------------------------------------------------------------
+# Plugin projects
+# -----------------------------------------------------------------------------
+
+# System plugins
+add_subdirectory(src/plugins/DataHierarchyPlugin)
+add_subdirectory(src/plugins/DataPropertiesPlugin)
+add_subdirectory(src/plugins/ActionsPlugin)
+add_subdirectory(src/plugins/LoggingPlugin)
+
+# Data plugins
+add_subdirectory(src/plugins/PointData)
+add_subdirectory(src/plugins/ColorData)
+add_subdirectory(src/plugins/TextData)
+add_subdirectory(src/plugins/ClusterData)
+add_subdirectory(src/plugins/ImageData)
+
+
+# -----------------------------------------------------------------------------
+# Miscellaneous
+# -----------------------------------------------------------------------------
 
 # Automatically set the debug environment (command + working directory) for MSVC
 if(MSVC)
