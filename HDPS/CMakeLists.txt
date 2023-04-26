@@ -8,15 +8,6 @@ set(HDPS_EXE HDPS)  # The HDPS executable
 set(HDPS_PUBLIC_LIB HDPS_Public) # A public shared library used by plugin builders and the HDPS executable
 set(HDPS_PRIVATE_LIB HDPS_Private) # A private shared library contain code for the HDPS executable
 
-if(NOT DEFINED ENV{HDPS_INSTALL_DIR})
-    message(FATAL_ERROR, "$ENV{HDPS_INSTALL_DIR}
-    ***************************************************
-    Supply an environment variable HDPS_INSTALL_DIR 
-    to indicate where the HDPS output will be installed,
-    make sure the directory exists.
-    ***************************************************" )
-endif()
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -27,9 +18,26 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
+if(DEFINED ENV{HDPS_INSTALL_DIR})
+    message(STATUS "
+    ***************************************************
+    Using environment variable HDPS_INSTALL_DIR 
+    $ENV{HDPS_INSTALL_DIR}
+    to indicate where the HDPS output will be installed,
+    make sure the directory exists.
+    ***************************************************" )
+endif()
+
+# Get the env path and allow the user to change it
+set(INSTALL_DIR_PATH $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
 # Normalize the incoming install path
-file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
-#message(STATUS ${INSTALL_DIR})
+file(TO_CMAKE_PATH ${INSTALL_DIR_PATH} INSTALL_DIR)
+
+if(NOT DEFINED INSTALL_DIR)
+    message(FATAL_ERROR "No install path provided! Set the cmake variable INSTALL_DIR_PATH or environment variable HDPS_INSTALL_DIR")
+else()
+    message(STATUS "Install HDPS to ${INSTALL_DIR}")
+endif()
 
 if(APPLE)
     # These are the properties for the Info.plist in the mac bindle
