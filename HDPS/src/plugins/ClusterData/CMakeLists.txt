@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 
-set(PROJECT "ClusterData")
-
-PROJECT(${PROJECT})
+set(CLUSTERDATA "ClusterData")
+PROJECT(${CLUSTERDATA})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -19,7 +18,7 @@ file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 
 find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
-set(SOURCES
+set(CLUSTERD_SOURCES
     src/ClusterData.h
     src/ClusterData.cpp
     src/Cluster.h
@@ -82,23 +81,23 @@ set(DIALOG_SOURCES
     src/OverwriteClustersConfirmationDialog.cpp
 )
 
-source_group(Plugin FILES ${SOURCES})
+source_group(Plugin FILES ${CLUSTERD_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Model FILES ${MODEL_SOURCES})
 source_group(Dialog FILES ${DIALOG_SOURCES})
 
-add_library(${PROJECT} SHARED ${SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${DIALOG_SOURCES})
+add_library(${CLUSTERDATA} SHARED ${CLUSTERD_SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${DIALOG_SOURCES})
 
-add_dependencies(${PROJECT} HDPS_Public)
-add_dependencies(${PROJECT} PointData)
+add_dependencies(${CLUSTERDATA} HDPS_Public)
+add_dependencies(${CLUSTERDATA} PointData)
 
-target_include_directories(${PROJECT} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
+target_include_directories(${CLUSTERDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${PROJECT} PRIVATE cxx_std_17)
+target_compile_features(${CLUSTERDATA} PRIVATE cxx_std_17)
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
-generate_export_header(${PROJECT})
+generate_export_header(${CLUSTERDATA})
 
 # Retrieve the file name of the generated export header.
 file(GLOB EXPORT_HEADER_FILE_NAME
@@ -112,21 +111,21 @@ set(HDPS_LINK_SUFFIX $<IF:$<CXX_COMPILER_ID:MSVC>,${CMAKE_LINK_LIBRARY_SUFFIX},$
 set(HDPS_LINK_LIBRARY "${HDPS_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${HDPS_LINK_SUFFIX}")
 set(POINTDATA_LINK_LIBRARY "${PLUGIN_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}PointData${HDPS_LINK_SUFFIX}") 
 
-target_link_libraries(${PROJECT} PRIVATE Qt6::Widgets)
-target_link_libraries(${PROJECT} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${PROJECT} PRIVATE "${HDPS_LINK_LIBRARY}")
-target_link_libraries(${PROJECT} PRIVATE "${POINTDATA_LINK_LIBRARY}")
+target_link_libraries(${CLUSTERDATA} PRIVATE Qt6::Widgets)
+target_link_libraries(${CLUSTERDATA} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${CLUSTERDATA} PRIVATE "${HDPS_LINK_LIBRARY}")
+target_link_libraries(${CLUSTERDATA} PRIVATE "${POINTDATA_LINK_LIBRARY}")
 
-set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${CLUSTER_HEADERS}")
+set_target_properties(${CLUSTERDATA} PROPERTIES PUBLIC_HEADER "${CLUSTER_HEADERS}")
 
-install(TARGETS ${PROJECT}
+install(TARGETS ${CLUSTERDATA}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
     LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
     ARCHIVE DESTINATION lib     COMPONENT LINKLIB # Windows .lib
-    PUBLIC_HEADER DESTINATION include/${PROJECT} COMPONENT HEADERS
+    PUBLIC_HEADER DESTINATION include/${CLUSTERDATA} COMPONENT HEADERS
 )
 
-add_custom_command(TARGET ${PROJECT} POST_BUILD
+add_custom_command(TARGET ${CLUSTERDATA} POST_BUILD
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>

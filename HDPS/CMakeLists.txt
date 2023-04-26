@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 
-set(PROJECT "hdps-common")
-project(${PROJECT})
+set(HDPS_CORE "hdps-core")
+project(${HDPS_CORE})
 
 # These three targets defined in this CMakeLists.txt
 set(HDPS_EXE HDPS)  # The HDPS executable
@@ -19,8 +19,8 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
 if(DEFINED ENV{HDPS_INSTALL_DIR})
-    message(STATUS "
-    ***************************************************
+    message(STATUS 
+    "***************************************************
     Using environment variable HDPS_INSTALL_DIR 
     $ENV{HDPS_INSTALL_DIR}
     to indicate where the HDPS output will be installed,

@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 
-set(PROJECT "ImageData")
-
-PROJECT(${PROJECT})
+set(IMAGEDATA "ImageData")
+PROJECT(${IMAGEDATA})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -45,16 +44,16 @@ source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Plugin FILES ${IMAGE_DATA_HEADERS} ${IMAGE_DATA_SOURCES})
 source_group(Aux FILES ${AUX})
 
-add_library(${PROJECT} SHARED ${IMAGE_DATA_HEADERS} ${IMAGE_DATA_SOURCES} ${ACTIONS_SOURCES} ${AUX})
+add_library(${IMAGEDATA} SHARED ${IMAGE_DATA_HEADERS} ${IMAGE_DATA_SOURCES} ${ACTIONS_SOURCES} ${AUX})
 
-add_dependencies(${PROJECT} HDPS_Public PointData ClusterData)
+add_dependencies(${IMAGEDATA} HDPS_Public PointData ClusterData)
 
-target_include_directories(${PROJECT} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
+target_include_directories(${IMAGEDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${PROJECT} PRIVATE cxx_std_17)
+target_compile_features(${IMAGEDATA} PRIVATE cxx_std_17)
 
 include(GenerateExportHeader)
-generate_export_header(${PROJECT})
+generate_export_header(${IMAGEDATA})
 
 # Retrieve the file name of the generated export header.
 file(GLOB EXPORT_HEADER_FILE_NAME 
@@ -69,22 +68,22 @@ set(HDPS_LINK_LIBRARY "${HDPS_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Publ
 set(POINTDATA_LINK_LIBRARY "${PLUGIN_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}PointData${HDPS_LINK_SUFFIX}") 
 set(CLUSTER_DATA_LINK_LIBRARY "${PLUGIN_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}ClusterData${HDPS_LINK_SUFFIX}") 
 
-target_link_libraries(${PROJECT} PRIVATE Qt6::Widgets)
-target_link_libraries(${PROJECT} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${PROJECT} PRIVATE "${HDPS_LINK_LIBRARY}")
-target_link_libraries(${PROJECT} PRIVATE "${POINTDATA_LINK_LIBRARY}")
-target_link_libraries(${PROJECT} PRIVATE "${CLUSTER_DATA_LINK_LIBRARY}")
+target_link_libraries(${IMAGEDATA} PRIVATE Qt6::Widgets)
+target_link_libraries(${IMAGEDATA} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${IMAGEDATA} PRIVATE "${HDPS_LINK_LIBRARY}")
+target_link_libraries(${IMAGEDATA} PRIVATE "${POINTDATA_LINK_LIBRARY}")
+target_link_libraries(${IMAGEDATA} PRIVATE "${CLUSTER_DATA_LINK_LIBRARY}")
 
-set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${IMAGE_DATA_HEADERS}")
+set_target_properties(${IMAGEDATA} PROPERTIES PUBLIC_HEADER "${IMAGE_DATA_HEADERS}")
 
-install(TARGETS ${PROJECT}
+install(TARGETS ${IMAGEDATA}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
     LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
     ARCHIVE DESTINATION lib     COMPONENT LINKLIB # Windows .lib
-    PUBLIC_HEADER DESTINATION include/${PROJECT} COMPONENT HEADERS
+    PUBLIC_HEADER DESTINATION include/${IMAGEDATA} COMPONENT HEADERS
 )
 
-add_custom_command(TARGET ${PROJECT} POST_BUILD
+add_custom_command(TARGET ${IMAGEDATA} POST_BUILD
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
