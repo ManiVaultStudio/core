@@ -21,7 +21,7 @@ file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
 
 find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
-set(TEXT_TEXT_SOURCES
+set(TEXTDATA_SOURCES
     src/TextData.h
     src/TextData.cpp
     src/TextData.json
@@ -31,9 +31,9 @@ set(TEXTDATA_HEADERS
     src/TextData.h
 )
 
-source_group( Plugin FILES ${TEXT_SOURCES})
+source_group( Plugin FILES ${TEXTDATA_SOURCES})
 
-add_library(${TEXTDATA} SHARED ${TEXT_SOURCES})
+add_library(${TEXTDATA} SHARED ${TEXTDATA_SOURCES})
 
 add_dependencies(${TEXTDATA} HDPS_Public)
 
