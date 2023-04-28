@@ -10,10 +10,15 @@
 using namespace hdps;
 using namespace hdps::plugin;
 
+namespace hdps::gui {
+
 ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* viewPlugin) :
     QDialog(parent),
     _groupsAction(this, "Groups"),
-    _actionsWidget(this, viewPlugin),
+    _actionsListModel(this, viewPlugin),
+    _actionsHierarchyModel(this, viewPlugin),
+    _actionsListWidget(this, _actionsListModel),
+    _actionsHierarchyWidget(this, _actionsHierarchyModel),
     _settingsAction(this, "Settings")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
@@ -22,9 +27,14 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* view
     setMinimumSize(QSize(320, 240));
 
     auto layout = new QVBoxLayout();
-
-    layout->addWidget(&_actionsWidget);
     
+    auto actionsWidgetsLayout = new QHBoxLayout();
+
+    actionsWidgetsLayout->addWidget(&_actionsListWidget);
+    actionsWidgetsLayout->addWidget(&_actionsHierarchyWidget);
+    
+    layout->addLayout(actionsWidgetsLayout);
+
     _settingsAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
     _settingsAction << viewPlugin->getLockingAction().getLockedAction();
@@ -40,4 +50,6 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* view
     layout->addWidget(dialogButtonBox);
 
     connect(dialogButtonBox, &QDialogButtonBox::accepted, this, &ViewPluginEditorDialog::accept);
+}
+
 }

@@ -2,18 +2,22 @@
 
 #include "ActionsWidget.h"
 
-#include <actions/GroupsAction.h>
-#include <actions/GroupAction.h>
+#include "models/ActionsListModel.h"
+#include "models/ActionsHierarchyModel.h"
+
+#include "actions/GroupsAction.h"
+#include "actions/GroupAction.h"
+#include "actions/GroupAction.h"
 
 #include <QDialog>
-
-using namespace hdps::gui;
 
 namespace hdps {
     namespace plugin {
         class ViewPlugin;
     }
 }
+
+namespace hdps::gui {
 
 /**
  * View plugin editor dialog class
@@ -44,7 +48,12 @@ public:
     }
 
 private:
-    GroupsAction            _groupsAction;          /** Groups action */
-    ActionsWidget           _actionsWidget;         /** Hierarchical actions widget */
-    GroupAction             _settingsAction;        /** Group action for miscellaneous settings actions */
+    GroupsAction            _groupsAction;              /** Groups action */
+    ActionsListModel        _actionsListModel;          /** Actions list model */
+    ActionsHierarchyModel   _actionsHierarchyModel;     /** Hierarchical actions model of the view plugin action and its descendants */
+    ActionsWidget           _actionsListWidget;         /** Actions list widget */
+    ActionsWidget           _actionsHierarchyWidget;    /** Actions hierarchy widget */
+    GroupAction             _settingsAction;            /** Group action for miscellaneous settings actions */
 };
+
+}

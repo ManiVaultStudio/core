@@ -2,7 +2,7 @@
 
 #include "AbstractActionsManager.h"
 
-#include <models/ActionsModel.h>
+#include <models/ActionsListModel.h>
 
 namespace hdps
 {
@@ -57,14 +57,6 @@ public:
      */
     void publishPrivateAction(gui::WidgetAction* privateAction, const QString& name = "", bool recursive = true) override;
 
-public: // Model
-
-    /**
-     * Get model which contains all actions
-     * @return Reference to actions model
-     */
-    ActionsModel& getModel() override;
-
 public: // Serialization
 
     /**
@@ -78,9 +70,6 @@ public: // Serialization
      * @return Variant map representation of the manager
      */
     QVariantMap toVariantMap() const override;
-
-private:
-    ActionsModel    _model;     /** Actions model */
 };
 
 }

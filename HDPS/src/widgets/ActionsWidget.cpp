@@ -1,8 +1,5 @@
 #include "ActionsWidget.h"
-
 #include "CoreInterface.h"
-
-#include "models/ActionsModel.h"
 
 #include <Application.h>
 
@@ -58,10 +55,10 @@ protected:
     }
 };
 
-ActionsWidget::ActionsWidget(QWidget* parent, WidgetAction* action) :
+ActionsWidget::ActionsWidget(QWidget* parent, ActionsModel& actionsModel) :
     QWidget(parent),
     _filterModel(this),
-    _hierarchyWidget(this, "Action", hdps::actions().getModel(), &_filterModel),
+    _hierarchyWidget(this, "Action", actionsModel, &_filterModel),
     _lastHoverModelIndex()
 {
     auto layout = new QVBoxLayout();
@@ -129,7 +126,9 @@ ActionsWidget::ActionsWidget(QWidget* parent, WidgetAction* action) :
 
         const auto sourceModelIndex = _hierarchyWidget.toSourceModelIndex(index);
 
-        hdps::actions().getModel().setData(sourceModelIndex, !hdps::actions().getModel().data(sourceModelIndex, Qt::EditRole).toBool(), Qt::EditRole);
+        auto& actionsModel = const_cast<QAbstractItemModel&>(_hierarchyWidget.getModel());
+
+        actionsModel.setData(sourceModelIndex, !actionsModel.data(sourceModelIndex, Qt::EditRole).toBool(), Qt::EditRole);
     });
     
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();

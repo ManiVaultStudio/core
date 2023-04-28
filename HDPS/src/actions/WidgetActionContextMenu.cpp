@@ -1,6 +1,9 @@
 #include "WidgetActionContextMenu.h"
 #include "WidgetAction.h"
+
+#include "models/ActionsListModel.h"
 #include "models/ActionsFilterModel.h"
+
 #include "Application.h"
 #include "CoreInterface.h"
 
@@ -63,9 +66,10 @@ void WidgetActionContextMenu::initialize()
 
         connectMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("link"));
 
+        auto actionsListModel = ActionsListModel(this);
         auto actionsFilterModel = new ActionsFilterModel(this);
 
-        actionsFilterModel->setSourceModel(&hdps::actions().getModel());
+        actionsFilterModel->setSourceModel(&actionsListModel);
         actionsFilterModel->getScopeFilterAction().setSelectedOptions({ "Public" });
         actionsFilterModel->getTypeFilterAction().setString(_widgetAction->getTypeString(true));
 

@@ -534,11 +534,15 @@ list(APPEND PUBLIC_DATA_HIERARCHY_FILES
 
 set(PUBLIC_ACTIONS_MODEL_HEADERS
     src/models/ActionsModel.h
+    src/models/ActionsListModel.h
+    src/models/ActionsHierarchyModel.h
     src/models/ActionsFilterModel.h
 )
 
 set(PUBLIC_ACTIONS_MODEL_SOURCES
     src/models/ActionsModel.cpp
+    src/models/ActionsListModel.cpp
+	src/models/ActionsHierarchyModel.cpp
     src/models/ActionsFilterModel.cpp
 )
 

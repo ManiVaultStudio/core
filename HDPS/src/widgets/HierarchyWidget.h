@@ -144,6 +144,12 @@ public:
     }
 
     /**
+     * Set input model to \p model
+     * @param model Input model
+     */
+    void setModel(const QAbstractItemModel& model);
+
+    /**
      * Get input filter model
      * @return Pointer to input filter model
      */

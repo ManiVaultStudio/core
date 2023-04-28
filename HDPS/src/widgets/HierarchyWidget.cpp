@@ -40,6 +40,14 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _columnsGroupAction(this, "Columns"),
     _settingsGroupAction(this, "Settings")
 {
+    if (_filterModel) {
+        _filterModel->setSourceModel(const_cast<QAbstractItemModel*>(&_model));
+        _treeView.setModel(_filterModel);
+    }
+    else {
+        _treeView.setModel(const_cast<QAbstractItemModel*>(&_model));
+    }
+
     _filterNameAction.setSearchMode(true);
     _filterNameAction.setClearable(true);
 
@@ -161,14 +169,6 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     layout->addWidget(&_treeView);
 
     setLayout(layout);
-
-    if (_filterModel) {
-        _filterModel->setSourceModel(const_cast<QAbstractItemModel*>(&_model));
-        _treeView.setModel(_filterModel);
-    }
-    else {
-        _treeView.setModel(const_cast<QAbstractItemModel*>(&_model));
-    }
 
     _treeView.setAutoFillBackground(true);
     //_treeView.setAutoExpandDelay(300);
@@ -468,6 +468,13 @@ void HierarchyWidget::updateExpandCollapseActionsReadOnly()
 
     _expandAllAction.setEnabled(hasItems && mayExpandAll());
     _collapseAllAction.setEnabled(hasItems && mayCollapseAll());
+
+    QModelIndex index;
+
+    const auto showExpandCollapse = mayExpandAll() || mayCollapseAll();
+
+    _expandAllAction.setVisible(showExpandCollapse);
+    _collapseAllAction.setVisible(showExpandCollapse);
 }
 
 bool HierarchyWidget::getHeaderHidden() const

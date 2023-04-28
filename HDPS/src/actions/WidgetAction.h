@@ -102,7 +102,7 @@ public:
      * Get parent widget action
      * @return Pointer to parent widget action (if any)
      */
-    WidgetAction* getParentWidgetAction();
+    WidgetAction* getParentAction();
 
     /**
      * Create standard widget

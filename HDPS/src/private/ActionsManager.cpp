@@ -20,8 +20,7 @@ namespace hdps
 {
 
 ActionsManager::ActionsManager() :
-    AbstractActionsManager(),
-    _model()
+    AbstractActionsManager()
 {
 }
 
@@ -53,7 +52,7 @@ void ActionsManager::reset()
 
 const hdps::gui::WidgetActions& ActionsManager::getActions() const
 {
-    return _model.getActions();
+    return _actions;
 }
 
 void ActionsManager::addAction(WidgetAction* action)
@@ -65,8 +64,6 @@ void ActionsManager::addAction(WidgetAction* action)
 #endif
 
     _actions << action;
-
-    _model.addAction(action);
 
     emit actionAdded(action);
 
@@ -87,8 +84,6 @@ void ActionsManager::removeAction(WidgetAction* action)
     {
         if (_actions.contains(action))
             _actions.removeOne(action);
-
-        _model.removeAction(action);
     }
     emit actionRemoved(actionId);
 
@@ -158,11 +153,6 @@ WidgetAction* ActionsManager::getAction(const QString& id)
             return action;
     
     return nullptr;
-}
-
-ActionsModel& ActionsManager::getModel()
-{
-    return _model;
 }
 
 void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QString& name /*= ""*/, bool recursive /*= true*/)

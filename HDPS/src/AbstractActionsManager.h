@@ -2,7 +2,6 @@
 
 #include "AbstractManager.h"
 
-#include "models/ActionsModel.h"
 #include "models/ActionsFilterModel.h"
 
 #include <QObject>
@@ -143,14 +142,6 @@ protected:
         emit publicAction->actionDisconnected(privateAction);
     }
 
-public: // Model
-
-    /**
-     * Get model which contains all actions
-     * @return Reference to actions model
-     */
-    virtual ActionsModel& getModel() = 0;
-
 protected:
 
     /**
@@ -264,8 +255,8 @@ signals:
     friend class gui::WidgetAction;
 
 protected:
-    gui::WidgetActions          _actions;       /** Flat list of actions that are instantiated in the plugin system */
-    QMap<QString, std::int32_t> _actionTypes;   /** Number of rows per action type */
+    gui::WidgetActions              _actions;       /** Flat list of actions that are instantiated in the plugin system */
+    QMap<QString, std::int32_t>     _actionTypes;   /** Number of rows per action type */
 };
 
 }

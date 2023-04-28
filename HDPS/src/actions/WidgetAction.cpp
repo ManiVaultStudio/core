@@ -65,7 +65,7 @@ WidgetAction::~WidgetAction()
     actions().removeAction(this);
 }
 
-WidgetAction* WidgetAction::getParentWidgetAction()
+WidgetAction* WidgetAction::getParentAction()
 {
     return dynamic_cast<WidgetAction*>(this->parent());
 }

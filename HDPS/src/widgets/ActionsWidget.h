@@ -1,7 +1,8 @@
 #pragma once
 
-#include <models/ActionsFilterModel.h>
-#include <widgets/HierarchyWidget.h>
+#include "models/ActionsModel.h"
+#include "models/ActionsFilterModel.h"
+#include "widgets/HierarchyWidget.h"
 
 #include <QWidget>
 
@@ -11,11 +12,11 @@ namespace hdps::gui
 /**
  * Actions widget class
  *
- * Widget class for viewing the actions model from the core actions manager
+ * Widget class for viewing the contents of an actions model (e.g. list or hierarchy)
  *
  * @author Thomas Kroes
  */
-class ActionsWidget : public QWidget
+class ActionsWidget final : public QWidget
 {
     Q_OBJECT
 
@@ -24,9 +25,9 @@ public:
     /**
      * Constructor
      * @param parent Parent widget
-     * @param action Pointer to non-owning root action
+     * @param actionsModel Reference to actions input model
      */
-    ActionsWidget(QWidget* parent, WidgetAction* action);
+    ActionsWidget(QWidget* parent, ActionsModel& actionsModel);
 
 private:
 

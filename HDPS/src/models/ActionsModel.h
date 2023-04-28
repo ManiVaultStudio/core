@@ -1,9 +1,10 @@
 #pragma once
 
+#include "CoreInterface.h"
+
 #include "actions/WidgetAction.h"
 
 #include <QStandardItemModel>
-#include <QPointer>
 
 namespace hdps
 {
@@ -15,7 +16,7 @@ namespace hdps
  *
  * @author Thomas Kroes
  */
-class ActionsModel final : public QStandardItemModel
+class ActionsModel : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -279,28 +280,25 @@ public:
     ActionsModel(QObject* parent = nullptr);
 
     /**
-     * Get flags for item with \p index 
-     * @return Item flags
+     * Add \p action to the model
+     * @param action Pointer to action to add
      */
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    virtual void addAction(gui::WidgetAction* action) = 0;
 
     /**
      * Add \p action to the model
      * @param action Pointer to action to add
      */
-    void addAction(gui::WidgetAction* action);
+    virtual void removeAction(gui::WidgetAction* action) = 0;
+
+    /** Initializes the model from the current state of the actions manager */
+    virtual void initialize() = 0;
 
     /**
-     * Remove \p action from the model
-     * @param action Pointer to action to remove
+     * Get flags for item with \p index
+     * @return Item flags
      */
-    void removeAction(gui::WidgetAction* action);
-
-    /**
-     * Get all actions in the manager
-     * @return List of all actions in the manager
-     */
-    gui::WidgetActions getActions() const;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     /**
      * Get action for model \p index
