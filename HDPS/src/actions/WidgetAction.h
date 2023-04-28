@@ -271,8 +271,8 @@ public:
     virtual void disconnectFromPublicAction();
 
     /**
-     * Get the public action (if any)
-     * @return Pointer to the public action
+     * Get the public action to which the action is connected
+     * @return Pointer to the public action (returns nullptr if not connected to a public action)
      */
     virtual WidgetAction* getPublicAction() final;
 

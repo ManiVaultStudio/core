@@ -27,12 +27,14 @@ public:
         ID,                 /** Globally unique identifier of the action */
         Type,               /** Action type string */
         Scope,              /** Scope of the action (whether the action is public or private) */
-        IsConnected,        /** Whether the action is connected or not */
         Visible,            /** Whether the action is visible in the GUI */
         MayPublish,         /** Whether the action may be published */
         MayConnect,         /** Whether the action may connect to a public action */
         MayDisconnect,      /** Whether the action may disconnect from a public action */
         SortIndex,          /** The sorting index of the action (its relative position in action groups) */
+        ParentActionId,     /** The identifier of the parent action (if not a top-level action) */
+        IsConnected,        /** Whether the action is connected or not */
+        PublicActionID,     /** The identifier of the public action with which the action is connected */
 
         Count
     };
@@ -150,20 +152,6 @@ protected:
         QVariant data(int role = Qt::UserRole + 1) const override;
     };
 
-    /** Standard model item class for displaying whether the action is connected or not */
-    class IsConnectedItem final : public Item {
-    public:
-
-        /** Use base action item constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-    };
-
     /** Model item class for toggling action visibility */
     class VisibilityItem final : public Item {
     public:
@@ -226,6 +214,48 @@ protected:
 
         /** Set model data to \p value for \p role */
         void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
+    };
+
+    /** Standard model item class for displaying the parent action identifier */
+    class ParentActionIdItem final : public Item {
+    public:
+
+        /** Use base action item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for displaying whether the action is connected or not */
+    class IsConnectedItem final : public Item {
+    public:
+
+        /** Use base action item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for displaying the public action identifier */
+    class PublicActionIdItem final : public Item {
+    public:
+
+        /** Use base action item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
     };
 
     /** Convenience class for combining action items in a row */

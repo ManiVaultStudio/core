@@ -84,25 +84,33 @@ ActionsWidget::ActionsWidget(QWidget* parent, WidgetAction* action) :
     const auto toggleColumnSize = 16;
 
     treeView.setColumnHidden(static_cast<int>(ActionsModel::Column::ID), true);
-    treeView.setColumnHidden(static_cast<int>(ActionsModel::Column::IsConnected), true);
     treeView.setColumnHidden(static_cast<int>(ActionsModel::Column::Scope), true);
+    treeView.setColumnHidden(static_cast<int>(ActionsModel::Column::ParentActionId), true);
+    treeView.setColumnHidden(static_cast<int>(ActionsModel::Column::IsConnected), true);
+    treeView.setColumnHidden(static_cast<int>(ActionsModel::Column::PublicActionID), true);
 
-    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::IsConnected), 75);
-    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::Scope), 55);
-    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::Visible), toggleColumnSize);
-    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::MayPublish), toggleColumnSize);
-    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::MayConnect), toggleColumnSize);
-    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::MayDisconnect), toggleColumnSize);
-    treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::SortIndex), 70);
+    treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+
+    //treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::Scope), 55);
+    //treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::Visible), toggleColumnSize);
+    //treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::MayPublish), toggleColumnSize);
+    //treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::MayConnect), toggleColumnSize);
+    //treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::MayDisconnect), toggleColumnSize);
+    //treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::SortIndex), 65);
+    //treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::ParentActionId), 60);
+    //treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::IsConnected), 75);
+    //treeViewHeader->resizeSection(static_cast<int>(ActionsModel::Column::PublicActionID), 115);
 
     treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::Name), QHeaderView::Stretch);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::Scope), QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::IsConnected), QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::Visible), QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::MayPublish), QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::MayConnect), QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::MayDisconnect), QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::SortIndex), QHeaderView::Fixed);
+    //treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::Scope), QHeaderView::Fixed);
+    //treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::IsConnected), QHeaderView::Fixed);
+    //treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::Visible), QHeaderView::Fixed);
+    //treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::MayPublish), QHeaderView::Fixed);
+    //treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::MayConnect), QHeaderView::Fixed);
+    //treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::MayDisconnect), QHeaderView::Fixed);
+    //treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::SortIndex), QHeaderView::Fixed);
+
+    treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
 
     treeView.setMouseTracking(true);
     treeView.setItemDelegate(new ItemDelegate(this));

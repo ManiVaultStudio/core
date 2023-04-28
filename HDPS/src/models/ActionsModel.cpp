@@ -77,7 +77,7 @@ QVariant ActionsModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
             return getAction()->getTypeString(true);
     }
 
-    return QVariant();
+    return {};
 }
 
 QVariant ActionsModel::ScopeItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -90,20 +90,7 @@ QVariant ActionsModel::ScopeItem::data(int role /*= Qt::UserRole + 1*/) const
             return WidgetAction::scopeNames[getAction()->getScope()];
     }
 
-    return QVariant();
-}
-
-QVariant ActionsModel::IsConnectedItem::data(int role /*= Qt::UserRole + 1*/) const
-{
-    switch (role) {
-        case Qt::EditRole:
-            return getAction()->isConnected();
-
-        case Qt::DisplayRole:
-            return getAction()->isConnected() ? "Yes" : "No";
-    }
-
-    return QVariant();
+    return {};
 }
 
 ActionsModel::VisibilityItem::VisibilityItem(gui::WidgetAction* action) :
@@ -139,7 +126,7 @@ QVariant ActionsModel::VisibilityItem::data(int role /*= Qt::UserRole + 1*/) con
             break;
     }
 
-    return QVariant();
+    return {};
 }
 
 void ActionsModel::VisibilityItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
@@ -204,7 +191,7 @@ QVariant ActionsModel::ConnectionPermissionItem::data(int role /*= Qt::UserRole 
             break;
     }
 
-    return QVariant();
+    return {};
 }
 
 void ActionsModel::ConnectionPermissionItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
@@ -240,12 +227,47 @@ QVariant ActionsModel::SortIndexItem::data(int role /*= Qt::UserRole + 1*/) cons
             break;
     }
 
-    return QVariant();
+    return {};
 }
 
 void ActionsModel::SortIndexItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
 {
     getAction()->setSortIndex(value.toInt());
+}
+
+QVariant ActionsModel::ParentActionIdItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getAction()->getParentWidgetAction() ? getAction()->getParentWidgetAction()->getId() : "";
+    }
+
+    return {};
+}
+
+QVariant ActionsModel::IsConnectedItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return getAction()->isConnected();
+
+        case Qt::DisplayRole:
+            return getAction()->isConnected() ? "Yes" : "No";
+    }
+
+    return {};
+}
+
+QVariant ActionsModel::PublicActionIdItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getAction()->isConnected() ? getAction()->getPublicAction()->getId() : "";
+    }
+
+    return {};
 }
 
 ActionsModel::Row::Row(gui::WidgetAction* action) :
@@ -255,12 +277,14 @@ ActionsModel::Row::Row(gui::WidgetAction* action) :
     append(new IdItem(action));
     append(new TypeItem(action));
     append(new ScopeItem(action));
-    append(new IsConnectedItem(action));
     append(new VisibilityItem(action));
     append(new ConnectionPermissionItem(action, WidgetAction::ConnectionPermissionFlag::PublishViaGui));
     append(new ConnectionPermissionItem(action, WidgetAction::ConnectionPermissionFlag::ConnectViaGui));
     append(new ConnectionPermissionItem(action, WidgetAction::ConnectionPermissionFlag::DisconnectViaGui));
     append(new SortIndexItem(action));
+    append(new ParentActionIdItem(action));
+    append(new IsConnectedItem(action));
+    append(new PublicActionIdItem(action));
 }
 
 QMap<ActionsModel::Column, ActionsModel::ColumHeaderInfo> ActionsModel::columnInfo = QMap<ActionsModel::Column, ActionsModel::ColumHeaderInfo>({
@@ -268,84 +292,15 @@ QMap<ActionsModel::Column, ActionsModel::ColumHeaderInfo> ActionsModel::columnIn
     { ActionsModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the parameter" } },
     { ActionsModel::Column::Type, { "Type",  "Type", "Type of parameter" } },
     { ActionsModel::Column::Scope, { "Scope",  "Scope", "Scope of the parameter (whether the parameter is public or private)" } },
-    { ActionsModel::Column::IsConnected, { "Connected", "Connected", "Whether the parameter is connected or not" } },
     { ActionsModel::Column::Visible, { "", "Visible", "Whether the parameter is visible in the GUI" } },
     { ActionsModel::Column::MayPublish, { "", "May Publish", "Whether the parameter may be published" } },
     { ActionsModel::Column::MayConnect, { "", "May Connect", "Whether the parameter may connect to a public parameter" } },
     { ActionsModel::Column::MayDisconnect, { "", "May Disconnect", "Whether the parameter may disconnect from a public parameter" } },
-    { ActionsModel::Column::SortIndex, { "Sort Index", "Sort Index", "The sorting index of the parameter (its relative position in parameter groups)" } }
+    { ActionsModel::Column::SortIndex, { "Sort Index", "Sort Index", "The sorting index of the parameter (its relative position in parameter groups)" } },
+    { ActionsModel::Column::ParentActionId, { "Parent ID", "Parent ID", "The identifier of the parent parameter (if not a top-level parameter)" } },
+    { ActionsModel::Column::IsConnected, { "Connected", "Connected", "Whether the parameter is connected or not" } },
+    { ActionsModel::Column::PublicActionID, { "Public Parameter ID", "Public Parameter ID", "The identifier of the public parameter with which the parameter is connected" } }
 });
-
-/*
-ActionsModel::Item::Item(ActionsModel* actionsModel, gui::WidgetAction* widgetAction, const ActionsModel::Column& column) :
-    QStandardItem(),
-    _actionsModel(actionsModel),
-    _widgetAction(widgetAction),
-    _column(column)
-{
-    Q_ASSERT(_widgetAction != nullptr);
-
-    if (_widgetAction == nullptr)
-        return;
-
-    setData(QVariant::fromValue(widgetAction));
-
-    //const auto updateReadOnly = [this]() -> void {
-    //    setForeground(_widgetAction->isEnabled() ? Qt::black : Qt::gray);
-    //};
-
-    //connect(_widgetAction, &WidgetAction::changed, this, updateReadOnly);
-    //connect(_widgetAction, &WidgetAction::scopeChanged, this, updateReadOnly);
-
-    switch (_column) {
-        case Column::Name:
-        {
-            //setIcon(Application::getIconFont("FontAwesome").getIcon("link"));
-            
-            connect(_widgetAction, &WidgetAction::changed, this, [this]() -> void {
-                emitDataChanged();
-            });
-                row[static_cast<int>(Column::Name)]->setToolTip(_widgetAction->getPath());
-
-                appendRow(row);
-            });
-
-            connect(_widgetAction, &WidgetAction::actionDisconnected, this, [this, actionsModel](WidgetAction* action) -> void {
-                for (int rowIndex = 0; rowIndex < rowCount(); rowIndex++) {
-                    auto item = static_cast<Item*>(child(rowIndex));
-
-                    if (action == item->getAction())
-                        removeRow(rowIndex);
-                }
-            });
-
-            break;
-        }
-
-        case Column::Scope:
-        {
-            connect(_widgetAction, &WidgetAction::scopeChanged, this, [this]() -> void {
-                //setEditable(_widgetAction->isPublic());
-                emitDataChanged();
-            });
-
-            break;
-        }
-
-        case Column::IsConnected:
-        {
-            connect(_widgetAction, &WidgetAction::isConnectedChanged, this, [this]() -> void {
-                emitDataChanged();
-            });
-
-            break;
-        }
-
-        default:
-            break;
-    }
-}
-*/
 
 ActionsModel::ActionsModel(QObject* parent /*= nullptr*/) :
     QStandardItemModel(parent),
@@ -390,24 +345,7 @@ void ActionsModel::addAction(WidgetAction* action)
 
     _actions << action;
 
-    const auto row          = Row(action);
-    const auto parentAction = action->getParentWidgetAction();
-
-    if (parentAction) {
-        const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::EditRole, parentAction->getId(), 1, Qt::MatchFlag::MatchRecursive);
-
-        if (matches.count() != 1)
-            appendRow(row);
-        else {
-            const auto parentItem = itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::Name)));
-
-            if (parentItem != nullptr)
-                parentItem->appendRow(row);
-        }
-    }
-    else {
-        appendRow(row);
-    }
+    appendRow(Row(action));
 }
 
 void ActionsModel::removeAction(WidgetAction* action)
@@ -502,7 +440,7 @@ QModelIndex ActionsModel::getActionIndex(const gui::WidgetAction* action) const
     if (matches.count() == 1)
         return matches.first();
 
-    return QModelIndex();
+    return {};
 }
 
 }
