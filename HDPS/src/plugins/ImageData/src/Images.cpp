@@ -6,9 +6,10 @@
 #include <util/Timer.h>
 
 #include <DataHierarchyItem.h>
+#include <Dataset.h>
 
-#include <PointData.h>
-#include <ClusterData.h>
+#include <PointData/PointData.h>
+#include <ClusterData/ClusterData.h>
 
 #include <QDebug>
 
@@ -34,6 +35,35 @@ void Images::init()
     _infoAction = QSharedPointer<InfoAction>::create(nullptr, *this);
 
     addAction(*_infoAction.get());
+
+    // parent data set must be valid and derived from either point or cluster data
+    if (!getDataHierarchyItem().getParent().getDataset<DatasetImpl>().isValid() ||
+        !(getDataHierarchyItem().getParent().getDataType() == PointType || getDataHierarchyItem().getParent().getDataType() == ClusterType))
+        qCritical() << "Images: warning: image data set must be derived from points or clusters.";
+
+}
+
+std::tuple<hdps::Dataset<hdps::DatasetImpl>, hdps::Dataset<Images>> Images::addImageDataset(QString datasetGuiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const QString pluginKind /*= "Points"*/)
+{
+    // default to point type
+    QString pkind = "Points";
+    using ptype = Points;
+
+    if (pluginKind == "Cluster")
+    {
+        pkind = "Cluster";
+        using ptype = Clusters;
+    }
+    else if (pluginKind != "Points")
+        qCritical() << "Images::addImageDataset: warning: pluginKind must be Points or Cluster - defaulting to Points. Given: " << pluginKind;
+
+    auto points = Application::core()->addDataset<ptype>(pkind, datasetGuiName, parentDataSet);
+    events().notifyDatasetAdded(points);
+
+    hdps::Dataset<Images> images = Application::core()->addDataset<Images>("Images", "images", Dataset<DatasetImpl>(*points));
+    events().notifyDatasetAdded(images);
+
+    return { points, images };
 }
 
 Dataset<DatasetImpl> Images::createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const bool& visible /*= true*/) const

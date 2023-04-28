@@ -10,7 +10,7 @@
 
 #include "event/EventListener.h"
 
-#include <biovault_bfloat16.h>
+#include <biovault_bfloat16/biovault_bfloat16.h>
 
 #include <QString>
 #include <QMap>

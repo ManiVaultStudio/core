@@ -1,4 +1,7 @@
-set(PROJECT "PointData")
+cmake_minimum_required(VERSION 3.17)
+
+set(POINTDATA "PointData")
+PROJECT(${POINTDATA})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -11,7 +14,10 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
-file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
+# Get the env path and allow the user to change it
+set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
+# Normalize the incoming install path
+file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
 
 find_package(Qt6 COMPONENTS Widgets REQUIRED)
 
@@ -31,8 +37,6 @@ set(POINTS_HEADERS
     src/PointDataRange.h
     src/PointView.h
     src/RandomAccessRange.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16/biovault_bfloat16.h
-
     src/InfoAction.h
     src/SelectedIndicesAction.h
     src/ProxyDatasetsAction.h
@@ -48,6 +52,10 @@ set(POINTS_HEADERS
     src/DimensionsPickerProxyModel.h
     src/ModelResetter.h
     src/CreateSetFromSelectionAction.h
+)
+
+set(BFLOAT_HEADER
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/biovault_bfloat16/biovault_bfloat16.h
 )
 
 set(ACTIONS_SOURCES
@@ -86,59 +94,52 @@ set(ACTIONS_SOURCES
 source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 
-add_library(${PROJECT} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
+add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
 
-add_dependencies(${PROJECT} HDPS_Public)
+add_dependencies(${POINTDATA} HDPS_Public)
 
-target_include_directories(${PROJECT} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
-target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16)
+target_include_directories(${POINTDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
+target_include_directories(${POINTDATA} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/)
 
-target_compile_features(${PROJECT} PRIVATE cxx_std_17)
+target_compile_features(${POINTDATA} PRIVATE cxx_std_17)
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
-generate_export_header(${PROJECT})
+generate_export_header(${POINTDATA})
 
 # Retrieve the file name of the generated export header.
 file(GLOB EXPORT_HEADER_FILE_NAME
     RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*_export.h)
 list(APPEND POINTS_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME})
 
-if(MSVC)
-    set(LIB_LINK_SUFFIX ".lib")
-else()
-    set(LIB_LINK_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}")
-endif(MSVC)
-set(HDPS_LINK_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_LINK_SUFFIX}")
+set(HDPS_LINK_PATH "${INSTALL_DIR}/$<CONFIGURATION>/lib")
+set(HDPS_LINK_SUFFIX $<IF:$<CXX_COMPILER_ID:MSVC>,${CMAKE_LINK_LIBRARY_SUFFIX},${CMAKE_SHARED_LIBRARY_SUFFIX}>)
 
-target_link_libraries(${PROJECT} PRIVATE Qt6::Widgets)
-target_link_libraries(${PROJECT} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${PROJECT} PRIVATE "${HDPS_LINK_LIBRARY}")
+set(HDPS_LINK_LIBRARY "${HDPS_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${HDPS_LINK_SUFFIX}")
+
+target_link_libraries(${POINTDATA} PRIVATE Qt6::Widgets)
+target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${POINTDATA} PRIVATE "${HDPS_LINK_LIBRARY}")
+
 if(UNIX AND NOT APPLE)
    find_package(TBB REQUIRED)
-   target_link_libraries(${PROJECT} PRIVATE TBB::tbb)
+   target_link_libraries(${POINTDATA} PRIVATE TBB::tbb)
 endif()
 
-set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
+set_target_properties(${POINTDATA} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
 
-# Copy the DLL, the LIB file and the export header of this library to the appropriate subdirectory
-# of the installation directory.
-install(TARGETS ${PROJECT}
+install(TARGETS ${POINTDATA}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
     LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
-    ARCHIVE DESTINATION lib COMPONENT LINKLIB
-    PUBLIC_HEADER DESTINATION include COMPONENT HEADERS
+    ARCHIVE DESTINATION lib     COMPONENT LINKLIB # Windows .lib
+    PUBLIC_HEADER DESTINATION include/${POINTDATA} COMPONENT HEADERS
 )
 
-if (NOT WIN32)
-    install(TARGETS ${PROJECT}
-        LIBRARY DESTINATION lib COMPONENT LINKLIB # Linux/Mac .so for linking
-        PUBLIC_HEADER DESTINATION include COMPONENT HEADERS
-    )
-endif()
+# Copy the external biovault_bfloat16 header into its own subfolder - cmake's install PUBLIC_HEADER flattens all subdirs
+install(FILES "${BFLOAT_HEADER}" DESTINATION "${INSTALL_DIR}/$<CONFIGURATION>/include/biovault_bfloat16/")
 
 # PointData is needed to build other plugins - install it now.
-add_custom_command(TARGET ${PROJECT} POST_BUILD
+add_custom_command(TARGET ${POINTDATA} POST_BUILD
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>

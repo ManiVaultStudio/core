@@ -2,11 +2,8 @@
 
 cmake_minimum_required(VERSION 3.17)
 
-set(PROJECT "hdps-core")
-
-PROJECT(${PROJECT})
-
-add_definitions(-DQT_MESSAGELOGCONTEXT)
+set(HDPS_MAIN "hdps-main")
+PROJECT(${HDPS_MAIN})
 
 option(HDPS_USE_GTEST "Use GoogleTest" OFF)
 
@@ -16,9 +13,3 @@ if (HDPS_USE_GTEST)
 endif()
 
 add_subdirectory(HDPS)
-
-add_dependencies(PointData HDPS)
-
-add_dependencies(ImageData HDPS)
-add_dependencies(ImageData PointData)
-add_dependencies(ImageData ClusterData)

@@ -13,6 +13,7 @@
 #include <QSize>
 
 #include <vector>
+#include <tuple>
 
 using namespace hdps::plugin;
 
@@ -39,6 +40,20 @@ public: // Construction
 
     /** Initializes the dataset */
     void init() override;
+
+    /**
+     * Creates a dataset and derives an image dataset from it:
+     *
+     *      auto [pointDataset, imageDatset] = Images::addImageDataset("My Image", parent);
+     *      auto [clusterDataset, imageDatset] = Images::addImageDataset("My Image", parent, "Cluster");
+     *
+     * This function sends the core event notifications "notifyDatasetAdded" for both pointDataset and imageDatset
+     *
+     * @param datasetGuiName Name of the added dataset in the GUI
+     * @param parentDataSet Smart pointer to the parent dataset in the data hierarchy (root if smart pointer is not valid)
+     * @param pluginKind Either "Points" (default) or "Cluster" to define the data type of the raw value data set
+     */
+    static std::tuple<hdps::Dataset<hdps::DatasetImpl>, hdps::Dataset<Images>> addImageDataset(QString datasetGuiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), QString pluginKind = "Points");
 
 public: // Subsets
 

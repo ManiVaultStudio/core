@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.17)
 
-set(PROJECT "DataHierarchyPlugin")
-
-PROJECT(${PROJECT})
+set(DATAHIERARCHYPLUGIN "DataHierarchyPlugin")
+PROJECT(${DATAHIERARCHYPLUGIN})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -15,7 +14,10 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
-file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
+# Get the env path and allow the user to change it
+set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
+# Normalize the incoming install path
+file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
 
 find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
@@ -35,7 +37,7 @@ set(AUX
     src/DataHierarchyPlugin.json
 )
 
-set(SOURCES
+set(DATAHIERARCHY_SOURCES
 	${PLUGIN}
 	${WIDGETS}
 	${AUX}
@@ -45,44 +47,37 @@ source_group(Plugin FILES ${PLUGIN})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
 
-add_library(${PROJECT} SHARED ${SOURCES})
+add_library(${DATAHIERARCHYPLUGIN} SHARED ${DATAHIERARCHY_SOURCES})
 
-add_dependencies(${PROJECT} HDPS_Public)
+add_dependencies(${DATAHIERARCHYPLUGIN} HDPS_Public)
 
-target_include_directories(${PROJECT} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
+target_include_directories(${DATAHIERARCHYPLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${PROJECT} PRIVATE cxx_std_17)
+target_compile_features(${DATAHIERARCHYPLUGIN} PRIVATE cxx_std_17)
 
-if(MSVC)
-    set(LIB_LINK_SUFFIX ".lib") 
-else()
-    set(LIB_LINK_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}")
-endif(MSVC)
+set(HDPS_LINK_PATH "${INSTALL_DIR}/$<CONFIGURATION>/lib")
+set(HDPS_LINK_SUFFIX $<IF:$<CXX_COMPILER_ID:MSVC>,${CMAKE_LINK_LIBRARY_SUFFIX},${CMAKE_SHARED_LIBRARY_SUFFIX}>)
 
-target_link_libraries(${PROJECT} PRIVATE Qt6::Widgets)
-target_link_libraries(${PROJECT} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${PROJECT} PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_LINK_SUFFIX})
+set(HDPS_LINK_LIBRARY "${HDPS_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${HDPS_LINK_SUFFIX}")
 
-install(TARGETS ${PROJECT}
+target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Widgets)
+target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE "${HDPS_LINK_LIBRARY}")
+
+install(TARGETS ${DATAHIERARCHYPLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
     LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
-    ARCHIVE DESTINATION lib COMPONENT LINKLIB
-    PUBLIC_HEADER DESTINATION include COMPONENT HEADERS
 )
 
-if (NOT WIN32)
-    install(TARGETS ${PROJECT}
-        LIBRARY DESTINATION lib COMPONENT LINKLIB # Linux/Mac .so for linking
-        PUBLIC_HEADER DESTINATION include COMPONENT HEADERS
-    )
-endif()
-
-add_custom_command(TARGET ${PROJECT} POST_BUILD
+add_custom_command(TARGET ${DATAHIERARCHYPLUGIN} POST_BUILD
 	COMMAND "${CMAKE_COMMAND}"
 	--install ${CMAKE_CURRENT_BINARY_DIR}
 	--config $<CONFIGURATION>
 	--prefix ${INSTALL_DIR}/$<CONFIGURATION>
 )
 
-set_property(TARGET ${PROJECT} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
-set_property(TARGET ${PROJECT} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/HDPS.exe,${INSTALL_DIR}/release/HDPS.exe>)
+# Automatically set the debug environment (command + working directory) for MSVC
+if(MSVC)
+    set_property(TARGET ${DATAHIERARCHYPLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
+    set_property(TARGET ${DATAHIERARCHYPLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/HDPS.exe,${INSTALL_DIR}/release/HDPS.exe>)
+endif()

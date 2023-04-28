@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QPair>
+#include <algorithm>
 
 namespace hdps::util {
 
