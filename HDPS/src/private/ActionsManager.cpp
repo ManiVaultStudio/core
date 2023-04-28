@@ -56,7 +56,7 @@ const hdps::gui::WidgetActions& ActionsManager::getActions() const
     return _model.getActions();
 }
 
-void ActionsManager::addActionToModel(WidgetAction* action)
+void ActionsManager::addAction(WidgetAction* action)
 {
     Q_ASSERT(action != nullptr);
 
@@ -64,12 +64,16 @@ void ActionsManager::addActionToModel(WidgetAction* action)
     qDebug() << __FUNCTION__ << action->text();
 #endif
 
+    _actions << action;
+
     _model.addAction(action);
 
     emit actionAdded(action);
+
+    addActionType(action->getTypeString());
 }
 
-void ActionsManager::removeActionFromModel(WidgetAction* action)
+void ActionsManager::removeAction(WidgetAction* action)
 {
     Q_ASSERT(action != nullptr);
 
@@ -81,9 +85,14 @@ void ActionsManager::removeActionFromModel(WidgetAction* action)
 
     emit actionAboutToBeRemoved(action);
     {
+        if (_actions.contains(action))
+            _actions.removeOne(action);
+
         _model.removeAction(action);
     }
     emit actionRemoved(actionId);
+
+    removeActionType(action->getTypeString());
 }
 
 void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
@@ -117,6 +126,7 @@ QVariantMap ActionsManager::toVariantMap() const
 
     QVariantList publicActions;
 
+    /*
     for (auto action : _model.getActions()) {
         //Q_ASSERT(action != nullptr);
 
@@ -132,6 +142,7 @@ QVariantMap ActionsManager::toVariantMap() const
 
         //publicActions << actionVariantMap;
     }
+    */
 
     variantMap.insert({
         { "PublicActions", publicActions }
@@ -142,7 +153,7 @@ QVariantMap ActionsManager::toVariantMap() const
 
 WidgetAction* ActionsManager::getAction(const QString& id)
 {
-    for (const auto action : _model.getActions())
+    for (const auto action : _actions)
         if (id == action->getId())
             return action;
     

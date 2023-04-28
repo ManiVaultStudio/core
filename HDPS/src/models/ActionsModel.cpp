@@ -303,9 +303,7 @@ QMap<ActionsModel::Column, ActionsModel::ColumHeaderInfo> ActionsModel::columnIn
 });
 
 ActionsModel::ActionsModel(QObject* parent /*= nullptr*/) :
-    QStandardItemModel(parent),
-    _actions(),
-    _actionTypes()
+    QStandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
 
@@ -343,8 +341,6 @@ void ActionsModel::addAction(WidgetAction* action)
     qDebug() << __FUNCTION__ << action->getId();
 #endif
 
-    _actions << action;
-
     appendRow(Row(action));
 }
 
@@ -353,9 +349,6 @@ void ActionsModel::removeAction(WidgetAction* action)
 #ifdef ACTIONS_MODEL_VERBOSE
     qDebug() << __FUNCTION__ << action->getId();
 #endif
-
-    if (_actions.contains(action))
-        _actions.removeOne(action);
 
     const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::EditRole, action->getId(), -1, Qt::MatchFlag::MatchRecursive);
 
@@ -383,44 +376,6 @@ WidgetActions ActionsModel::getActions() const
         actions << static_cast<Item*>(item(rowIndex, 0))->getAction();
 
     return actions;
-}
-
-void ActionsModel::addActionType(const QString& actionType)
-{
-    const auto cachedActionTypes = getActionTypes();
-
-    if (_actionTypes.contains(actionType))
-        _actionTypes[actionType]++;
-    else
-        _actionTypes[actionType] = 1;
-
-    if (getActionTypes() != cachedActionTypes)
-        emit actionTypesChanged(getActionTypes());
-}
-
-void ActionsModel::removeActionType(const QString& actionType)
-{
-    const auto cachedActionTypes = getActionTypes();
-
-    if (!_actionTypes.contains(actionType))
-        return;
-
-    _actionTypes[actionType]--;
-
-    if (_actionTypes[actionType] <= 0)
-        _actionTypes.remove(actionType);
-
-    if (getActionTypes() != cachedActionTypes)
-        emit actionTypesChanged(getActionTypes());
-}
-
-const QStringList ActionsModel::getActionTypes() const
-{
-    auto actionTypes = _actionTypes.keys();
-
-    actionTypes.removeDuplicates();
-
-    return actionTypes;
 }
 
 WidgetAction* ActionsModel::getAction(std::int32_t rowIndex)

@@ -49,16 +49,16 @@ public:
     virtual gui::WidgetAction* getAction(const QString& id) = 0;
 
     /**
-     * Add action to the actions model
+     * Add action to the manager
      * @param action Pointer to action
      */
-    virtual void addActionToModel(gui::WidgetAction* action) = 0;
+    virtual void addAction(gui::WidgetAction* action) = 0;
 
     /**
-     * Remove action from the actions model
+     * Remove action from the manager
      * @param action Pointer to action
      */
-    virtual void removeActionFromModel(gui::WidgetAction* action) = 0;
+    virtual void removeAction(gui::WidgetAction* action) = 0;
 
 public: // Linking
 
@@ -82,8 +82,6 @@ public: // Linking
         if (privateAction == nullptr || publicAction == nullptr)
             return;
 
-        qDebug() << __FUNCTION__;
-
         privateAction->_publicAction = publicAction;
 
         privateAction->connectToPublicAction(publicAction);
@@ -98,8 +96,6 @@ public: // Linking
 
         if (privateAction == nullptr)
             return;
-
-        qDebug() << __FUNCTION__;
 
         if (privateAction->isConnected())
             privateAction->disconnectFromPublicAction();
@@ -158,6 +154,63 @@ public: // Model
 protected:
 
     /**
+     * Add \p actionType
+     * @param actionType Action type to add
+     */
+    void addActionType(const QString& actionType) {
+        const auto cachedActionTypes = getActionTypes();
+
+        if (_actionTypes.contains(actionType)) {
+            _actionTypes[actionType]++;
+        } else {
+            _actionTypes[actionType] = 1;
+
+            emit actionTypeAdded(actionType);
+        }
+
+        if (getActionTypes() != cachedActionTypes)
+            emit actionTypesChanged(getActionTypes());
+    }
+
+    /**
+     * Remove \p actionType
+     * @param actionType Action type to remove
+     */
+    void removeActionType(const QString& actionType) {
+        const auto cachedActionTypes = getActionTypes();
+
+        if (!_actionTypes.contains(actionType))
+            return;
+
+        _actionTypes[actionType]--;
+
+        if (_actionTypes[actionType] <= 0) {
+            _actionTypes.remove(actionType);
+
+            emit actionTypeRemoved(actionType);
+        }
+
+        if (getActionTypes() != cachedActionTypes)
+            emit actionTypesChanged(getActionTypes());
+    }
+
+public:
+
+    /**
+     * Get set of action types
+     * @return List action types
+     */
+    const QStringList getActionTypes() const {
+        auto actionTypes = _actionTypes.keys();
+
+        actionTypes.removeDuplicates();
+
+        return actionTypes;
+    }
+
+protected:
+
+    /**
      * Make widget \p action public
      * @param action Pointer to action
      */
@@ -190,7 +243,29 @@ signals:
      */
     void actionRemoved(const QString& actionId);
 
+    /**
+     * Signals that a new \p actionType has been added to the manager
+     * @param actionType Action type
+     */
+    void actionTypeAdded(const QString& actionType);
+
+    /**
+     * Signals that the last instance of \p actionType has been removed from the manager
+     * @param actionType Action type
+     */
+    void actionTypeRemoved(const QString& actionType);
+
+    /**
+     * Signals that the \p actionTypes changed
+     * @param actionTypes Action types
+     */
+    void actionTypesChanged(const QStringList& actionTypes);
+
     friend class gui::WidgetAction;
+
+protected:
+    gui::WidgetActions          _actions;       /** Flat list of actions that are instantiated in the plugin system */
+    QMap<QString, std::int32_t> _actionTypes;   /** Number of rows per action type */
 };
 
 }

@@ -38,16 +38,16 @@ public:
     gui::WidgetAction* getAction(const QString& id) override;
 
     /**
-     * Add action to the actions model
+     * Add action to the manager
      * @param action Pointer to action
      */
-    void addActionToModel(gui::WidgetAction* action) override;
+    void addAction(gui::WidgetAction* action) override;
 
     /**
-     * Remove action from the actions model
+     * Remove action from the manager
      * @param action Pointer to action
      */
-    void removeActionFromModel(gui::WidgetAction* action) override;
+    void removeAction(gui::WidgetAction* action) override;
 
     /**
      * Publish \p privateAction so that other private actions can connect to it

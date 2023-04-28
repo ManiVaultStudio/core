@@ -303,12 +303,6 @@ public:
     gui::WidgetActions getActions() const;
 
     /**
-     * Get set of action types
-     * @return List action types
-     */
-    const QStringList getActionTypes() const;
-
-    /**
      * Get action for model \p index
      * @param index Model index to retrieve the action for
      * @return Pointer to action (nullptr if not found)
@@ -328,32 +322,6 @@ public:
      * @return Found model index
      */
     QModelIndex getActionIndex(const gui::WidgetAction* action) const;
-
-protected:
-
-    /**
-     * Add \p actionType
-     * @param actionType Action type to add
-     */
-    void addActionType(const QString& actionType);
-
-    /**
-     * Remove \p actionType
-     * @param actionType Action type to remove
-     */
-    void removeActionType(const QString& actionType);
-
-signals:
-
-    /**
-     * Signals that the \p actionTypes changed
-     * @param actionTypes Action types
-     */
-    void actionTypesChanged(const QStringList& actionTypes);
-
-private:
-    gui::WidgetActions          _actions;       /** Flat list of actions in the model */
-    QMap<QString, std::int32_t> _actionTypes;   /** Number of rows per action type */
 
     friend class ActionsFilterModel;
     friend class Item;

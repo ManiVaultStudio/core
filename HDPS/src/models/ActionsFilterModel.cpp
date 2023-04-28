@@ -34,7 +34,7 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     connect(&_scopeFilterAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
     connect(&_connectedFilterAction, &ToggleAction::toggled, this, &ActionsFilterModel::invalidate);
 
-    connect(&actions().getModel(), &ActionsModel::actionTypesChanged, this, [this](const QStringList& actionTypes) -> void {
+    connect(&actions(), &AbstractActionsManager::actionTypesChanged, this, [this](const QStringList& actionTypes) -> void {
         _typeFilterAction.getCompleter()->setModel(new QStringListModel(actionTypes));
     });
 

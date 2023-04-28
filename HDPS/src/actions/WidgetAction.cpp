@@ -52,7 +52,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     setSerializationName(serializationName);
 
     if (core()->isInitialized())
-        actions().addActionToModel(this);
+        actions().addAction(this);
     else
         qDebug() << getId();
 }
@@ -62,7 +62,7 @@ WidgetAction::~WidgetAction()
     if (!core()->isInitialized())
         return;
 
-    actions().removeActionFromModel(this);
+    actions().removeAction(this);
 }
 
 WidgetAction* WidgetAction::getParentWidgetAction()
