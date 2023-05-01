@@ -168,7 +168,7 @@ void StartPageGetStartedWidget::updateCreateProjectFromDatasetActions()
         const auto subtitle = QString("Import data into new project with %1").arg(viewPluginFactory->getKind());
 
         StartPageAction fromDataStartPageAction(viewPluginFactory->getIcon(), viewPluginFactory->getKind(), subtitle, subtitle, "", [viewPluginFactory]() -> void {
-            projects().newBlankProject();
+            projects().newProject(Qt::AlignRight);
             plugins().requestPlugin(viewPluginFactory->getKind());
         });
 
