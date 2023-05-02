@@ -7,6 +7,8 @@ set(HDPS_CORE "hdps-core")
 project(${HDPS_CORE})
 set(version 0.2)
 
+option(USE_AVX "Use AVX if available - by default OFF" OFF)
+
 # These three targets defined in this CMakeLists.txt
 set(HDPS_EXE HDPS)                  # The HDPS executable
 set(HDPS_PUBLIC_LIB HDPS_Public)    # A public shared library used by plugin builders and the HDPS executable
@@ -16,7 +18,6 @@ set(LINK_TYPE SHARED)
 if(MSVC)
     set(LINK_TYPE STATIC)
 endif(MSVC)
-
 
 # -----------------------------------------------------------------------------
 # CMake Settings
@@ -33,6 +34,9 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
 # include CMakePackageConfigHelpers macro
 include(CMakePackageConfigHelpers)
+
+# Test hardware avx capabilities
+include(CMakeCheckLinkAVX)
 
 # -----------------------------------------------------------------------------
 # Set install directory
@@ -178,6 +182,8 @@ target_compile_features(${HDPS_PUBLIC_LIB} PRIVATE cxx_std_17)
 target_link_libraries(${HDPS_PUBLIC_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${HDPS_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 
+# Use avx if enabled and available
+check_and_link_AVX(${HDPS_PUBLIC_LIB} ${USE_AVX})
 
 # -----------------------------------------------------------------------------
 # Target HDPS_PRIVATE_LIB
@@ -185,7 +191,7 @@ target_link_libraries(${HDPS_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 add_library(${HDPS_PRIVATE_LIB} ${LINK_TYPE}
     src/.editorconfig
     ${PRIVATE_SOURCES}
-	${RESOURCE_FILES}
+    ${RESOURCE_FILES}
 )
 
 target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -199,6 +205,9 @@ target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE qtadvanceddocking)
 target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE QuaZip)
 target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
+
+# Use avx if enabled and available
+check_and_link_AVX(${HDPS_PRIVATE_LIB} ${USE_AVX})
 
 add_dependencies(${HDPS_PRIVATE_LIB} ${HDPS_PUBLIC_LIB} QuaZip)
 
@@ -230,6 +239,9 @@ target_link_libraries(${HDPS_EXE} PRIVATE QuaZip)
 
 target_link_libraries(${HDPS_EXE} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
 target_link_libraries(${HDPS_EXE} PRIVATE "$<TARGET_FILE:${HDPS_PRIVATE_LIB}>")
+
+# Use avx if enabled and available
+check_and_link_AVX(${HDPS_EXE} ${USE_AVX})
 
 add_dependencies(${HDPS_EXE} ${HDPS_PUBLIC_LIB} ${HDPS_PRIVATE_LIB} QuaZip)
 

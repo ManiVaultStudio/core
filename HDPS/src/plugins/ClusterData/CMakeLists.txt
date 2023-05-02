@@ -119,6 +119,9 @@ target_link_libraries(${CLUSTERDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${CLUSTERDATA} PRIVATE "${HDPS_LINK_LIBRARY}")
 target_link_libraries(${CLUSTERDATA} PRIVATE "${POINTDATA_LINK_LIBRARY}")
 
+# Use avx if enabled and available
+check_and_link_AVX(${CLUSTERDATA} ${USE_AVX})
+
 set_target_properties(${CLUSTERDATA} PROPERTIES PUBLIC_HEADER "${CLUSTER_HEADERS}")
 
 install(TARGETS ${CLUSTERDATA}

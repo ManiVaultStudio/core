@@ -64,6 +64,9 @@ target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE "${HDPS_LINK_LIBRARY}")
 
+# Use avx if enabled and available
+check_and_link_AVX(${DATAHIERARCHYPLUGIN} ${USE_AVX})
+
 install(TARGETS ${DATAHIERARCHYPLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
     LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
