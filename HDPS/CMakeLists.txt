@@ -12,6 +12,11 @@ set(HDPS_EXE HDPS)                  # The HDPS executable
 set(HDPS_PUBLIC_LIB HDPS_Public)    # A public shared library used by plugin builders and the HDPS executable
 set(HDPS_PRIVATE_LIB HDPS_Private)  # A private shared library contain code for the HDPS executable
 
+set(LINK_TYPE SHARED)
+if(MSVC)
+    set(LINK_TYPE STATIC)
+endif(MSVC)
+
 
 # -----------------------------------------------------------------------------
 # CMake Settings
@@ -28,7 +33,6 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
 # include CMakePackageConfigHelpers macro
 include(CMakePackageConfigHelpers)
-
 
 # -----------------------------------------------------------------------------
 # Set install directory
@@ -112,15 +116,14 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
-add_definitions(-DQT_MESSAGELOGCONTEXT)
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
-
-
 # -----------------------------------------------------------------------------
 # Dependencies
 # -----------------------------------------------------------------------------
 
 find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
+
+add_definitions(-DQT_MESSAGELOGCONTEXT)
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 # Qt Advanced docking system
 set(VERSION_SHORT 4.0.1)
@@ -163,11 +166,6 @@ include(CMakeHdpsSourcesResources)      # defines RESOURCE_FILES and UI_HEADERS
 # -----------------------------------------------------------------------------
 # Target HDPS_PUBLIC_LIB
 # -----------------------------------------------------------------------------
-set(LINK_TYPE SHARED)
-if(MSVC)
-    set(LINK_TYPE STATIC)
-endif(MSVC)
-
 add_library(${HDPS_PUBLIC_LIB} ${LINK_TYPE}
     src/.editorconfig
     ${PUBLIC_SOURCES}
@@ -202,9 +200,7 @@ target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE qtadvanceddocking)
 target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE QuaZip)
 target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
 
-add_dependencies(${HDPS_PRIVATE_LIB} ${HDPS_PUBLIC_LIB})
-add_dependencies(${HDPS_PRIVATE_LIB} QuaZip)
-
+add_dependencies(${HDPS_PRIVATE_LIB} ${HDPS_PUBLIC_LIB} QuaZip)
 
 # -----------------------------------------------------------------------------
 # Target HDPS_EXE
@@ -235,9 +231,7 @@ target_link_libraries(${HDPS_EXE} PRIVATE QuaZip)
 target_link_libraries(${HDPS_EXE} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
 target_link_libraries(${HDPS_EXE} PRIVATE "$<TARGET_FILE:${HDPS_PRIVATE_LIB}>")
 
-add_dependencies(${HDPS_EXE} ${HDPS_PUBLIC_LIB})
-add_dependencies(${HDPS_EXE} ${HDPS_PRIVATE_LIB})
-add_dependencies(${HDPS_EXE} QuaZip)
+add_dependencies(${HDPS_EXE} ${HDPS_PUBLIC_LIB} ${HDPS_PRIVATE_LIB} QuaZip)
 
 if(MSVC)
     set_target_properties(${HDPS_EXE} PROPERTIES
@@ -332,11 +326,6 @@ install(EXPORT HdpsPublicExport
         NAMESPACE HdpsCore::
         DESTINATION lib/cmake/HdpsCore
         COMPONENT HDPSPUBLIC_TARGET
-)
-
-target_include_directories(${HDPS_PUBLIC_LIB} PUBLIC
-    $<INSTALL_INTERFACE:include>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
 # ***Create a HdpsCore package to support the find_package command**
