@@ -162,7 +162,7 @@ add_subdirectory(external/quazip)
 # Source files
 # -----------------------------------------------------------------------------
 include(CMakeHdpsSourcesMain)           # defines MAIN_SOURCES
-include(CMakeHdpsSourcesPublic)         # defines PUBLIC_SOURCES
+include(CMakeHdpsSourcesPublic)         # defines PUBLIC_SOURCES and PUBLIC_HEADERS
 include(CMakeHdpsSourcesPrivate)        # defines PRIVATE_SOURCES
 include(CMakeHdpsSourcesResources)      # defines RESOURCE_FILES and UI_HEADERS
 
@@ -257,13 +257,14 @@ endif(MSVC)
 # -----------------------------------------------------------------------------
 # Installation
 # -----------------------------------------------------------------------------
+
+# Install the HDPS executable 
 if(APPLE)
     set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
     set(WEBENGINEINSTALL_CMD "${CMAKE_CURRENT_SOURCE_DIR}/macos_webengineinstall.sh")
     install(TARGETS ${HDPS_EXE}
         RUNTIME DESTINATION bin COMPONENT MACOS_BUNDLE
         BUNDLE DESTINATION . COMPONENT MACOS_BUNDLE
-        # ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
     )
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
@@ -306,9 +307,10 @@ else()
     install(TARGETS ${HDPS_EXE}
         RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
     )
+    # On MSVC, HDPS_PRIVATE_LIB is statically linked to HDPS_EXE and does not need to be installed
 endif()
 
-#headers - Would it be better to refactor the headers to allow "install(DIRECTORY)"?
+# Install public headers 
 install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
         string(REGEX REPLACE \"^src/\" \"\" STRIPPED_PUBLIC_HEADER \${PUBLIC_HEADER})
         execute_process(
@@ -321,11 +323,11 @@ install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
     COMPONENT HDPSPUBLIC_HEADERS
 )
 
+# Install public headers 
 install(TARGETS ${HDPS_PUBLIC_LIB}
     EXPORT HdpsPublicExport
-    ARCHIVE DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB
-    LIBRARY DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB
-    PUBLIC_HEADER DESTINATION include COMPONENT HDPSPUBLIC_HEADERS
+    ARCHIVE DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB  # Linux/Mac .so
+    LIBRARY DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB  # Windows .lib
     INCLUDES DESTINATION include
 )
 
@@ -359,7 +361,7 @@ configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/HdpsCoreConfig.cmake.i
   INSTALL_DESTINATION lib/cmake/HdpsCore
 )
 
-# install the package files files
+# install the package files
 install(FILES
           "${CMAKE_CURRENT_BINARY_DIR}/HdpsCoreConfig.cmake"
           "${CMAKE_CURRENT_BINARY_DIR}/HdpsCoreConfigVersion.cmake"
@@ -375,10 +377,8 @@ install(FILES
 #        NAMESPACE HdpsCore::
 # )
 
-# Initially install everything in the same place
-# this may need to be split up 
-
-# Install the HDPSPUBLIC components needed for the Plugin builds
+# Call the install functions of the all public targets
+# needed for plugins directly after the build
 add_custom_command(
     TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
     COMMAND "${CMAKE_COMMAND}"
@@ -407,41 +407,47 @@ add_custom_command(
         --verbose
 )
 
-if (UNIX AND NOT APPLE)
-add_custom_command(
-    TARGET ${HDPS_PRIVATE_LIB} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}"
-        --install ${CMAKE_BINARY_DIR}
-        --config $<CONFIGURATION>
-        --component HDPSPRIVATE_LINKLIB
-        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
-        --verbose
-)
+# Install the HDPS executable
+if(APPLE)
+    add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}"
+            --install ${CMAKE_BINARY_DIR}
+            --config $<CONFIGURATION>
+            --component MACOS_BUNDLE
+            --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
+    )
+elseif(UNIX)
+    add_custom_command(
+        TARGET ${HDPS_PRIVATE_LIB} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}"
+            --install ${CMAKE_BINARY_DIR}
+            --config $<CONFIGURATION>
+            --component HDPSPRIVATE_LINKLIB
+            --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+            --verbose
+    )
 endif()
 
+if(NOT APPLE)
+    add_custom_command(
+        TARGET ${HDPS_EXE} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}"
+            --install ${CMAKE_BINARY_DIR}
+            --config $<CONFIGURATION>
+            --component HDPS_EXECUTABLE
+            --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+            --verbose
+    )
+endif()
+
+# Install examples
 add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 ${CMAKE_CURRENT_SOURCE_DIR}/res/examples
-                ${INSTALL_DIR}/$<CONFIGURATION>/examples)
-
-# Install the HDPS executable and lib
-add_custom_command(
-    TARGET ${HDPS_EXE} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}"
-        --install ${CMAKE_BINARY_DIR}
-        --config $<CONFIGURATION>
-        --component HDPS_EXECUTABLE
-        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
-        --verbose
-    # COMMAND "${CMAKE_COMMAND}"
-    #     --install ${CMAKE_BINARY_DIR}
-    #     --config $<CONFIGURATION>
-    #     --component HDPS_LINKLIB
-    #     --prefix ${INSTALL_DIR}/$<CONFIGURATION>
-    #     --verbose
+                ${INSTALL_DIR}/$<CONFIGURATION>/examples
 )
 
-
+# Install dependencies
 add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" 
         --install ${CMAKE_CURRENT_BINARY_DIR}/external/advanced_docking
@@ -453,23 +459,17 @@ add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
 )
 
+# Move quazip from INSTALL_DIR/bin to INSTALL_DIR
 if(WIN32)
     # Note! the quazip lib is named differently in Debug & Release
     # simply copy the bin directory contents to let HDPS.exe run.
     add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${INSTALL_DIR}/$<CONFIGURATION>/bin/quazip1-qt6.dll
+            ${INSTALL_DIR}/$<CONFIGURATION>/quazip1-qt6.dll
+        # since only quazip is in the bin folder, remove it
+        COMMAND ${CMAKE_COMMAND} -E remove_directory
             ${INSTALL_DIR}/$<CONFIGURATION>/bin/
-            ${INSTALL_DIR}/$<CONFIGURATION>/
-    )
-endif()
-
-if(APPLE)
-    add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" 
-            --install ${CMAKE_BINARY_DIR}
-            --config $<CONFIGURATION> 
-            --component MACOS_BUNDLE
-            --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
     )
 endif()
 
