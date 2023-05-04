@@ -94,6 +94,9 @@ void ToggleAction::connectToPublicAction(WidgetAction* publicAction)
 
     Q_ASSERT(publicToggleAction != nullptr);
 
+    if (publicToggleAction == nullptr)
+        return;
+
     connect(this, &ToggleAction::toggled, publicToggleAction, &ToggleAction::setChecked);
     connect(publicToggleAction, &ToggleAction::toggled, this, &ToggleAction::setChecked);
 

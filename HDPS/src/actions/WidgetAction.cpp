@@ -194,7 +194,7 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
 {
     Q_ASSERT(publicAction != nullptr);
 
-    if (_publicAction == nullptr)
+    if (publicAction == nullptr)
         return;
 
 #ifdef WIDGET_ACTION_VERBOSE

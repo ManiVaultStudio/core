@@ -40,6 +40,7 @@ protected:
 
 ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel) :
     QWidget(parent),
+    _actionsModel(actionsModel),
     _filterModel(this),
     _hierarchyWidget(this, "Parameter", actionsModel, &_filterModel),
     _lastHoverModelIndex()
@@ -55,8 +56,6 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
-    //treeView.setRootIndex(_filterModel.mapFromSource(hdps::actions().getModel().getActionIndex(action)));
-
     auto treeViewHeader = treeView.header();
 
     treeViewHeader->setStretchLastSection(false);
@@ -70,10 +69,8 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::IsConnected), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::PublicActionID), true);
 
-    treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Name), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Name), QHeaderView::Interactive);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Path), QHeaderView::Stretch);
-
-    treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
 
     treeView.setMouseTracking(true);
 
@@ -85,23 +82,29 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::entered, this, [this](const QModelIndex& index) -> void {
         const auto sourceModelIndex = _hierarchyWidget.toSourceModelIndex(index);
 
-        setActionHighlighted(sourceModelIndex, true);
+        _actionsModel.getAction(sourceModelIndex)->setHighlighted(true);
 
         if (_lastHoverModelIndex.isValid())
-            setActionHighlighted(_lastHoverModelIndex, false);
+            _actionsModel.getAction(_lastHoverModelIndex)->setHighlighted(false);
 
         _lastHoverModelIndex = _hierarchyWidget.toSourceModelIndex(index);
     });
 
     const auto numberOfRowsChanged = [this]() -> void {
         if (_lastHoverModelIndex.isValid())
-            setActionHighlighted(_lastHoverModelIndex, false);
+            _actionsModel.getAction(_lastHoverModelIndex)->setHighlighted(false);
 
         _lastHoverModelIndex = QModelIndex();
+
+        resizeSectionsToContent();
     };
     
     connect(&_filterModel, &QAbstractItemModel::rowsAboutToBeInserted, this, numberOfRowsChanged);
     connect(&_filterModel, &QAbstractItemModel::rowsAboutToBeRemoved, this, numberOfRowsChanged);
+    
+    connect(&treeView, &HierarchyWidgetTreeView::columnHiddenChanged, this, &ActionsWidget::resizeSectionsToContent);
+    connect(&treeView, &HierarchyWidgetTreeView::expanded, this, &ActionsWidget::resizeSectionsToContent);
+    connect(&treeView, &HierarchyWidgetTreeView::collapsed, this, &ActionsWidget::resizeSectionsToContent);
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
         static const QVector<int> toggleColumns = {
@@ -135,25 +138,10 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     filterGroupAction.setPopupSizeHint(QSize(300, 0));
 }
 
-void ActionsWidget::setActionHighlighted(const QModelIndex& index, bool highlighted)
-{
-    return;
-    const auto nameIndex = index.siblingAtColumn(static_cast<int>(AbstractActionsModel::Column::Name));
-
-    if (!nameIndex.isValid())
-        return;
-
-    if (nameIndex.internalPointer() == nullptr)
-        return;
-
-    auto actionModelItem = static_cast<AbstractActionsModel::Item*>(nameIndex.internalPointer());
-
-    actionModelItem->getAction()->setHighlighted(highlighted);
-}
-
 void ActionsWidget::leaveEvent(QEvent* event)
 {
-    setActionHighlighted(_lastHoverModelIndex, false);
+    if (_lastHoverModelIndex.isValid())
+        _actionsModel.getAction(_lastHoverModelIndex)->setHighlighted(false);
 
     _lastHoverModelIndex = QModelIndex();
 }
@@ -161,6 +149,14 @@ void ActionsWidget::leaveEvent(QEvent* event)
 HierarchyWidget& ActionsWidget::getHierarchyWidget()
 {
     return _hierarchyWidget;
+}
+
+void ActionsWidget::resizeSectionsToContent()
+{
+    if (_hierarchyWidget.getModel().rowCount() <= 0)
+        return;
+
+    _hierarchyWidget.getTreeView().header()->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
 }
 
 }

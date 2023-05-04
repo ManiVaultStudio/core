@@ -73,6 +73,12 @@ QVariant AbstractActionsModel::NameItem::data(int role /*= Qt::UserRole + 1*/) c
 
         case Qt::CheckStateRole:
             return getAction()->isEnabled() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;
+
+        case Qt::ToolTipRole:
+            return data(Qt::DisplayRole).toString() + " is " + QString(getAction()->isEnabled() ? "enabled" : "disabled");
+
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -92,6 +98,12 @@ QVariant AbstractActionsModel::PathItem::data(int role /*= Qt::UserRole + 1*/) c
         case Qt::EditRole:
         case Qt::DisplayRole:
             return getAction()->getPath();
+
+        case Qt::ToolTipRole:
+            return "Parameter is located in: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -103,6 +115,12 @@ QVariant AbstractActionsModel::IdItem::data(int role /*= Qt::UserRole + 1*/) con
         case Qt::EditRole:
         case Qt::DisplayRole:
             return getAction()->getId();
+
+        case Qt::ToolTipRole:
+            return "Parameter globally unique identifier: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -116,6 +134,12 @@ QVariant AbstractActionsModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) c
 
         case Qt::DisplayRole:
             return getAction()->getTypeString(true);
+
+        case Qt::ToolTipRole:
+            return "Parameter type: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -129,6 +153,12 @@ QVariant AbstractActionsModel::ScopeItem::data(int role /*= Qt::UserRole + 1*/) 
 
         case Qt::DisplayRole:
             return WidgetAction::scopeNames[getAction()->getScope()];
+
+        case Qt::ToolTipRole:
+            return "Parameter is: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -152,14 +182,14 @@ QVariant AbstractActionsModel::VisibilityItem::data(int role /*= Qt::UserRole + 
         case Qt::EditRole:
             return getAction()->getForceHidden();
 
-        case Qt::ToolTipRole:
-            return QString("%1 %2").arg(getAction()->text(), getAction()->getForceHidden() ? "is hidden" : "is not hidden");
-
         case Qt::DecorationRole:
             return Application::getIconFont("FontAwesome").getIcon("eye-slash");
 
         case Qt::TextAlignmentRole:
             return Qt::AlignCenter;
+
+        case Qt::ToolTipRole:
+            return QString("%1 %2").arg(getAction()->text(), getAction()->getForceHidden() ? "is hidden" : "is not hidden");
 
         default:
             break;
@@ -195,20 +225,6 @@ QVariant AbstractActionsModel::ConnectionPermissionItem::data(int role /*= Qt::U
         case Qt::EditRole:
             return getAction()->isConnectionPermissionFlagSet(_connectionPermissionFlag);
 
-        case Qt::ToolTipRole:
-        {
-            if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::PublishViaGui)
-                return QString("%1 %2").arg(getAction()->text(), getAction()->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::PublishViaGui) ? "may be published from the GUI" : "may not be published from the GUI");
-
-            if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::ConnectViaGui)
-                return QString("%1 %2").arg(getAction()->text(), getAction()->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::ConnectViaGui) ? "may be connected to a public parameter from the GUI" : "may not be connected to a public parameter from the GUI");
-
-            if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::DisconnectViaGui)
-                return QString("%1 %2").arg(getAction()->text(), getAction()->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::DisconnectViaGui) ? "may be disconnected from a public parameter from the GUI" : "may not be disconnected from a public parameter from the GUI");
-
-            break;
-        }
-
         case Qt::DecorationRole:
         {
             auto& fa = Application::getIconFont("FontAwesome");
@@ -227,6 +243,20 @@ QVariant AbstractActionsModel::ConnectionPermissionItem::data(int role /*= Qt::U
 
         case Qt::TextAlignmentRole:
             return Qt::AlignCenter;
+
+        case Qt::ToolTipRole:
+        {
+            if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::PublishViaGui)
+                return QString("%1 %2").arg(getAction()->text(), getAction()->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::PublishViaGui) ? "may be published from the GUI" : "may not be published from the GUI");
+
+            if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::ConnectViaGui)
+                return QString("%1 %2").arg(getAction()->text(), getAction()->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::ConnectViaGui) ? "may be connected to a public parameter from the GUI" : "may not be connected to a public parameter from the GUI");
+
+            if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::DisconnectViaGui)
+                return QString("%1 %2").arg(getAction()->text(), getAction()->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::DisconnectViaGui) ? "may be disconnected from a public parameter from the GUI" : "may not be disconnected from a public parameter from the GUI");
+
+            break;
+        }
 
         default:
             break;
@@ -287,6 +317,12 @@ QVariant AbstractActionsModel::ParentActionIdItem::data(int role /*= Qt::UserRol
         case Qt::EditRole:
         case Qt::DisplayRole:
             return getAction()->getParentAction() ? getAction()->getParentAction()->getId() : "";
+
+        case Qt::ToolTipRole:
+            return QString("Parent parameter globally unique identifier: %1").arg(data(Qt::DisplayRole).toString());
+
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -300,6 +336,12 @@ QVariant AbstractActionsModel::IsConnectedItem::data(int role /*= Qt::UserRole +
 
         case Qt::DisplayRole:
             return getAction()->isConnected() ? "Yes" : "No";
+
+        case Qt::ToolTipRole:
+            return "Parameter " + QString(getAction()->isConnected() ? "is connected" : "is not connected");
+
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -311,6 +353,12 @@ QVariant AbstractActionsModel::PublicActionIdItem::data(int role /*= Qt::UserRol
         case Qt::EditRole:
         case Qt::DisplayRole:
             return getAction()->isConnected() ? getAction()->getPublicAction()->getId() : "";
+
+        case Qt::ToolTipRole:
+            return "Public parameter globally unique identifier: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
     }
 
     return Item::data(role);
@@ -372,14 +420,14 @@ Qt::ItemFlags AbstractActionsModel::flags(const QModelIndex& index) const
     return  QStandardItemModel::flags(index);
 }
 
-WidgetAction* AbstractActionsModel::getAction(std::int32_t rowIndex)
-{
-    return static_cast<Item*>(item(rowIndex, 0))->getAction();
-}
-
 WidgetAction* AbstractActionsModel::getAction(const QModelIndex& index)
 {
     return static_cast<Item*>(itemFromIndex(index))->getAction();
+}
+
+WidgetAction* AbstractActionsModel::getAction(std::int32_t rowIndex)
+{
+    return static_cast<Item*>(item(rowIndex, 0))->getAction();
 }
 
 QModelIndex AbstractActionsModel::getActionIndex(const gui::WidgetAction* action, const Column& column /** = Column::Name */) const

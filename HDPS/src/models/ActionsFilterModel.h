@@ -2,7 +2,6 @@
 
 #include "actions/StringAction.h"
 #include "actions/OptionsAction.h"
-#include "actions/ToggleAction.h"
 
 #include <QSortFilterProxyModel>
 #include <QCompleter>
@@ -57,7 +56,7 @@ public: // Action getters
 private:
     gui::StringAction   _typeFilterAction;                  /** Action for filtering by action type */
     gui::StringAction   _typeFilterHumanReadableAction;     /** Action for filtering by human-readable action type */
-    QCompleter          _typeCompleter;                     /** Completer for type filter */
+    QCompleter          _typeCompleter;                     /** Completer for human-readable action type filter */
     gui::OptionsAction  _scopeFilterAction;                 /** Action for filtering based on action scope */
     gui::OptionsAction  _filterInternalUseAction;           /** Filter internal use action */
     gui::OptionsAction  _filterEnabledAction;               /** Filter enabled action */

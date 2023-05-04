@@ -36,12 +36,6 @@ public:
     HierarchyWidget& getHierarchyWidget();
 
 private:
-
-    /**
-     * Set action highlight state
-     * @param index Model index of the action to highlight
-     */
-    void setActionHighlighted(const QModelIndex& index, bool highlighted);
     
     /**
      * Leave event invoked when the mouse pointer leaves the widget
@@ -49,7 +43,11 @@ private:
      */
     void leaveEvent(QEvent* event) override;
 
+    /** Resize sections based on content */
+    void resizeSectionsToContent();
+
 private:
+    AbstractActionsModel&   _actionsModel;              /** Input actions model */
     ActionsFilterModel      _filterModel;               /** Hierarchical actions filter model */
     HierarchyWidget         _hierarchyWidget;           /** Widget for displaying action hierarchy */
     QPersistentModelIndex   _lastHoverModelIndex;       /** Model index of the item that was last hovered */

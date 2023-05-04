@@ -99,24 +99,36 @@ void PublicActionsModel::removeAction(WidgetAction* action)
 
 void PublicActionsModel::addPublicAction(WidgetAction* action)
 {
-    appendRow(Row(action));
+#ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
+    qDebug() << __FUNCTION__ << action->text();
+#endif
 
-    const auto actionIndex = getActionIndex(action);
+    if (action->getParentAction()) {
+        auto parentActionItem = getActionItem(action->getParentAction());
 
-    if (!actionIndex.isValid())
-        return;
-
-    auto actionItem = itemFromIndex(actionIndex);
+        if (parentActionItem)
+            parentActionItem->appendRow(Row(action));
+        else
+            appendRow(Row(action));
+    }
+    else {
+        appendRow(Row(action));
+    }
+    
+    auto actionItem = getActionItem(action);
 
     Q_ASSERT(actionItem != nullptr);
 
-    if (!actionItem)
-        return;
-
-    for (auto connectedAction : action->getConnectedActions())
-        actionItem->appendColumn(Row(connectedAction));
+    if (actionItem) {
+        for (auto connectedAction : action->getConnectedActions())
+            actionItem->appendRow(Row(connectedAction));
+    }
 
     connect(action, &WidgetAction::actionConnected, this, [this](WidgetAction* action) -> void {
+#ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
+        qDebug() << action->text() << " connected to " << action->getPublicAction()->text();
+#endif
+
         addAction(action);
     });
 
