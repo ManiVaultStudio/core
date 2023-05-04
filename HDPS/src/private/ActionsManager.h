@@ -7,6 +7,13 @@
 namespace hdps
 {
 
+/**
+ * Actions manager
+ *
+ * Extends the abstract actions manager class and adds functionality for serialization and action publishing
+ *
+ * @author Thomas Kroes
+ */
 class ActionsManager final : public AbstractActionsManager
 {
     Q_OBJECT
@@ -24,30 +31,6 @@ public:
 
     /** Resets the contents of the actions manager */
     void reset() override;
-
-    /**
-     * Get all actions in the manager
-     * @return List of all actions in the manager
-     */
-    const gui::WidgetActions& getActions() const override;
-
-    /**
-     * Get actions with \p id
-     * @return Pointer to widget action (may return nullptr)
-     */
-    gui::WidgetAction* getAction(const QString& id) override;
-
-    /**
-     * Add action to the manager
-     * @param action Pointer to action
-     */
-    void addAction(gui::WidgetAction* action) override;
-
-    /**
-     * Remove action from the manager
-     * @param action Pointer to action
-     */
-    void removeAction(gui::WidgetAction* action) override;
 
     /**
      * Publish \p privateAction so that other private actions can connect to it

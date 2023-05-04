@@ -50,46 +50,6 @@ void ActionsManager::reset()
     endReset();
 }
 
-const hdps::gui::WidgetActions& ActionsManager::getActions() const
-{
-    return _actions;
-}
-
-void ActionsManager::addAction(WidgetAction* action)
-{
-    Q_ASSERT(action != nullptr);
-
-#ifdef ACTIONS_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__ << action->text();
-#endif
-
-    _actions << action;
-
-    emit actionAdded(action);
-
-    addActionType(action->getTypeString());
-}
-
-void ActionsManager::removeAction(WidgetAction* action)
-{
-    Q_ASSERT(action != nullptr);
-
-#ifdef ACTIONS_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__ << action->text();
-#endif
-
-    const auto actionId = action->getId();
-
-    emit actionAboutToBeRemoved(action);
-    {
-        if (_actions.contains(action))
-            _actions.removeOne(action);
-    }
-    emit actionRemoved(actionId);
-
-    removeActionType(action->getTypeString());
-}
-
 void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
@@ -144,15 +104,6 @@ QVariantMap ActionsManager::toVariantMap() const
     });
 
     return variantMap;
-}
-
-WidgetAction* ActionsManager::getAction(const QString& id)
-{
-    for (const auto action : _actions)
-        if (id == action->getId())
-            return action;
-    
-    return nullptr;
 }
 
 void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QString& name /*= ""*/, bool recursive /*= true*/)

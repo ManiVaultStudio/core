@@ -33,32 +33,15 @@ protected:
     {
         QStyledItemDelegate::initStyleOption(option, index);
 
-        switch (static_cast<ActionsModel::Column>(index.column()))
-        {
-            case ActionsModel::Column::Name:
-                break;
-
-            case ActionsModel::Column::Visible:
-            case ActionsModel::Column::MayPublish:
-            case ActionsModel::Column::MayConnect:
-            case ActionsModel::Column::MayDisconnect:
-            {
-                if (!index.data(Qt::EditRole).toBool())
-                    option->state &= ~QStyle::State_Enabled;
-
-                break;
-            }
-
-            default:
-                break;
-        }
+        if (!index.data(Qt::EditRole).toBool())
+            option->state &= ~QStyle::State_Enabled;
     }
 };
 
-ActionsWidget::ActionsWidget(QWidget* parent, ActionsModel& actionsModel) :
+ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel) :
     QWidget(parent),
     _filterModel(this),
-    _hierarchyWidget(this, "Action", actionsModel, &_filterModel),
+    _hierarchyWidget(this, "Parameter", actionsModel, &_filterModel),
     _lastHoverModelIndex()
 {
     auto layout = new QVBoxLayout();
@@ -80,17 +63,24 @@ ActionsWidget::ActionsWidget(QWidget* parent, ActionsModel& actionsModel) :
 
     const auto toggleColumnSize = 16;
 
-    treeView.setColumnHidden(static_cast<int>(ActionsModel::Column::ID), true);
-    treeView.setColumnHidden(static_cast<int>(ActionsModel::Column::Scope), true);
-    treeView.setColumnHidden(static_cast<int>(ActionsModel::Column::ParentActionId), true);
-    treeView.setColumnHidden(static_cast<int>(ActionsModel::Column::IsConnected), true);
-    treeView.setColumnHidden(static_cast<int>(ActionsModel::Column::PublicActionID), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::Path), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::ID), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::Scope), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::ParentActionId), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::IsConnected), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::PublicActionID), true);
 
-    treeViewHeader->setSectionResizeMode(static_cast<int>(ActionsModel::Column::Name), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Name), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Path), QHeaderView::Stretch);
+
     treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
 
     treeView.setMouseTracking(true);
-    treeView.setItemDelegate(new ItemDelegate(this));
+
+    treeView.setItemDelegateForColumn(static_cast<int>(AbstractActionsModel::Column::Visible), new ItemDelegate(this));
+    treeView.setItemDelegateForColumn(static_cast<int>(AbstractActionsModel::Column::MayPublish), new ItemDelegate(this));
+    treeView.setItemDelegateForColumn(static_cast<int>(AbstractActionsModel::Column::MayConnect), new ItemDelegate(this));
+    treeView.setItemDelegateForColumn(static_cast<int>(AbstractActionsModel::Column::MayDisconnect), new ItemDelegate(this));
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::entered, this, [this](const QModelIndex& index) -> void {
         const auto sourceModelIndex = _hierarchyWidget.toSourceModelIndex(index);
@@ -115,10 +105,10 @@ ActionsWidget::ActionsWidget(QWidget* parent, ActionsModel& actionsModel) :
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
         static const QVector<int> toggleColumns = {
-            static_cast<int>(ActionsModel::Column::Visible),
-            static_cast<int>(ActionsModel::Column::MayPublish),
-            static_cast<int>(ActionsModel::Column::MayConnect),
-            static_cast<int>(ActionsModel::Column::MayDisconnect)
+            static_cast<int>(AbstractActionsModel::Column::Visible),
+            static_cast<int>(AbstractActionsModel::Column::MayPublish),
+            static_cast<int>(AbstractActionsModel::Column::MayConnect),
+            static_cast<int>(AbstractActionsModel::Column::MayDisconnect)
         };
 
         if (!toggleColumns.contains(index.column()))
@@ -133,6 +123,7 @@ ActionsWidget::ActionsWidget(QWidget* parent, ActionsModel& actionsModel) :
     
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
 
+    filterGroupAction << _filterModel.getTypeFilterHumanReadableAction();
     filterGroupAction << _filterModel.getHideInternalUseAction();
     filterGroupAction << _filterModel.getFilterEnabledAction();
     filterGroupAction << _filterModel.getFilterVisibilityAction();
@@ -147,7 +138,7 @@ ActionsWidget::ActionsWidget(QWidget* parent, ActionsModel& actionsModel) :
 void ActionsWidget::setActionHighlighted(const QModelIndex& index, bool highlighted)
 {
     return;
-    const auto nameIndex = index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Name));
+    const auto nameIndex = index.siblingAtColumn(static_cast<int>(AbstractActionsModel::Column::Name));
 
     if (!nameIndex.isValid())
         return;
@@ -155,9 +146,9 @@ void ActionsWidget::setActionHighlighted(const QModelIndex& index, bool highligh
     if (nameIndex.internalPointer() == nullptr)
         return;
 
-    auto actionHierarchyModelItem = static_cast<ActionsModel::Item*>(nameIndex.internalPointer());
+    auto actionModelItem = static_cast<AbstractActionsModel::Item*>(nameIndex.internalPointer());
 
-    actionHierarchyModelItem->getAction()->setHighlighted(highlighted);
+    actionModelItem->getAction()->setHighlighted(highlighted);
 }
 
 void ActionsWidget::leaveEvent(QEvent* event)
@@ -165,6 +156,11 @@ void ActionsWidget::leaveEvent(QEvent* event)
     setActionHighlighted(_lastHoverModelIndex, false);
 
     _lastHoverModelIndex = QModelIndex();
+}
+
+HierarchyWidget& ActionsWidget::getHierarchyWidget()
+{
+    return _hierarchyWidget;
 }
 
 }

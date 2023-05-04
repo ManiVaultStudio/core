@@ -11,7 +11,7 @@ namespace hdps
 {
 
 ActionsListModel::ActionsListModel(QObject* parent, gui::WidgetAction* rootAction /*= nullptr*/) :
-    ActionsModel(parent),
+    AbstractActionsModel(parent),
     _rootAction(rootAction)
 {
     initialize();
@@ -23,9 +23,47 @@ void ActionsListModel::initialize()
         addAction(_rootAction);
     }
     else {
-        //for (auto action : hdps::actions().getActions())
-        //    addAction(action);
+        for (auto action : hdps::actions().getActions())
+            addAction(action);
     }
+}
+
+WidgetAction* ActionsListModel::getRootAction()
+{
+    return _rootAction;
+}
+
+void ActionsListModel::setRootAction(gui::WidgetAction* rootAction)
+{
+    if (rootAction == _rootAction)
+        return;
+
+    _rootAction = rootAction;
+
+    initialize();
+
+    emit rootActionChanged(_rootAction);
+}
+
+void ActionsListModel::actionAddedToManager(gui::WidgetAction* action)
+{
+    addAction(action);
+}
+
+void ActionsListModel::actionAboutToBeRemovedFromManager(gui::WidgetAction* action)
+{
+    const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::EditRole, action->getId(), -1, Qt::MatchFlag::MatchRecursive);
+
+    if (matches.isEmpty())
+        return;
+
+    QList<QPersistentModelIndex> persistentMatches;
+
+    for (const auto& match : matches)
+        persistentMatches << QPersistentModelIndex(match);
+
+    for (const auto& persistentMatch : persistentMatches)
+        removeRow(persistentMatch.row(), persistentMatch.parent());
 }
 
 void ActionsListModel::addAction(gui::WidgetAction* action)
@@ -45,22 +83,6 @@ void ActionsListModel::addAction(gui::WidgetAction* action)
     else {
         appendRow(Row(action));
     }
-}
-
-void ActionsListModel::removeAction(gui::WidgetAction* action)
-{
-    const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::EditRole, action->getId(), -1, Qt::MatchFlag::MatchRecursive);
-
-    if (matches.isEmpty())
-        return;
-
-    QList<QPersistentModelIndex> persistentMatches;
-
-    for (const auto& match : matches)
-        persistentMatches << QPersistentModelIndex(match);
-
-    for (const auto& persistentMatch : persistentMatches)
-        removeRow(persistentMatch.row(), persistentMatch.parent());
 }
 
 }

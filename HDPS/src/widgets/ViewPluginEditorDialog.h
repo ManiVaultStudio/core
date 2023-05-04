@@ -49,10 +49,9 @@ public:
 
 private:
     GroupsAction            _groupsAction;              /** Groups action */
-    ActionsListModel        _actionsListModel;          /** Actions list model */
+    ActionsListModel        _actionsListModel;          /** List actions model of the view plugin action and its descendants */
     ActionsHierarchyModel   _actionsHierarchyModel;     /** Hierarchical actions model of the view plugin action and its descendants */
-    ActionsWidget           _actionsListWidget;         /** Actions list widget */
-    ActionsWidget           _actionsHierarchyWidget;    /** Actions hierarchy widget */
+    ActionsWidget           _actionsHierarchyWidget;    /** Actions hierarchy widget (displays the actions hierarchy model) */
     GroupAction             _settingsAction;            /** Group action for miscellaneous settings actions */
 };
 

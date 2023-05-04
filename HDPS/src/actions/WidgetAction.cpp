@@ -3,10 +3,11 @@
 #include "WidgetActionCollapsedWidget.h"
 #include "WidgetActionContextMenu.h"
 #include "Application.h"
-#include "CoreInterface.h"
 #include "Plugin.h"
-#include "util/Exception.h"
 #include "AbstractActionsManager.h"
+#include "CoreInterface.h"
+
+#include "util/Exception.h"
 
 #include <QDebug>
 #include <QMenu>

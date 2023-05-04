@@ -24,6 +24,11 @@ class AbstractActionsManager : public AbstractManager
 {
     Q_OBJECT
 
+private:
+
+    /** Number of instances for action type and human-friendly action type string */
+    using ActionType = QPair<std::int32_t, QString>;
+
 public:
 
     /**
@@ -39,25 +44,113 @@ public:
      * Get all actions in the manager
      * @return List of all actions in the manager
      */
-    virtual const gui::WidgetActions& getActions() const = 0;
+    virtual const gui::WidgetActions& getActions() const final {
+        return _actions;
+    }
 
     /**
-     * Get actions with \p id
+     * Get all public actions in the manager
+     * @return List of all public actions in the manager
+     */
+    virtual const gui::WidgetActions& getPublicActions() const final {
+        return _publicActions;
+    }
+
+    /**
+     * Get action with \p id
      * @return Pointer to widget action (may return nullptr)
      */
-    virtual gui::WidgetAction* getAction(const QString& id) = 0;
+    virtual gui::WidgetAction* getAction(const QString& id) final {
+        for (const auto action : _actions)
+            if (id == action->getId())
+                return action;
+
+        return nullptr;
+    }
 
     /**
-     * Add action to the manager
+     * Add \p action of action type to the manager
      * @param action Pointer to action
      */
-    virtual void addAction(gui::WidgetAction* action) = 0;
+    template<typename ActionType>
+    void addAction(ActionType* action) {
+        Q_ASSERT(action != nullptr);
+
+        _actions << action;
+
+        emit actionAdded(action);
+
+        connect(action, &gui::WidgetAction::scopeChanged, this, [this, action](const gui::WidgetAction::Scope& scope) -> void {
+            switch (scope)
+            {
+                case gui::WidgetAction::Scope::Public: {
+                    addPublicAction(action);
+                    break;
+                }
+                
+                case gui::WidgetAction::Scope::Private: {
+                    removePublicAction(action);
+                    break;
+                }
+            }
+        });
+
+        addActionType(action->getTypeString());
+    }
 
     /**
-     * Remove action from the manager
+     * Remove \p action of action type from the manager
      * @param action Pointer to action
      */
-    virtual void removeAction(gui::WidgetAction* action) = 0;
+    template<typename ActionType>
+    void removeAction(ActionType* action) {
+        Q_ASSERT(action != nullptr);
+
+        const auto actionId = action->getId();
+
+        emit actionAboutToBeRemoved(action);
+        {
+            if (_actions.contains(action))
+                _actions.removeOne(action);
+        }
+        emit actionRemoved(actionId);
+
+        if (action->isPublic())
+            removePublicAction(action);
+
+        removeActionType(action->getTypeString());
+    }
+
+private: // Public actions
+
+    /**
+     * Add \p publicAction to the manager
+     * @param publicAction Pointer to public action
+     */
+    virtual void addPublicAction(gui::WidgetAction* publicAction) final {
+        Q_ASSERT(publicAction != nullptr);
+
+        _publicActions << publicAction;
+
+        emit publicActionAdded(publicAction);
+    }
+
+    /**
+     * Remove \p publicAction from the manager
+     * @param publicAction Pointer to public action
+     */
+    virtual void removePublicAction(gui::WidgetAction* publicAction) final {
+        Q_ASSERT(publicAction != nullptr);
+
+        if (!_publicActions.contains(publicAction))
+            return;
+
+        emit publicActionAboutToBeRemoved(publicAction);
+        {
+            _publicActions.removeOne(publicAction);
+        }
+        emit publicActionRemoved(publicAction->getId());
+    }
 
 public: // Linking
 
@@ -142,30 +235,32 @@ protected:
         emit publicAction->actionDisconnected(privateAction);
     }
 
-protected:
+protected: // Action types
 
     /**
-     * Add \p actionType
-     * @param actionType Action type to add
+     * Add \p actionType string
+     * @param actionType Action type string to add
      */
     void addActionType(const QString& actionType) {
         const auto cachedActionTypes = getActionTypes();
 
         if (_actionTypes.contains(actionType)) {
-            _actionTypes[actionType]++;
+            _actionTypes[actionType].first++;
         } else {
-            _actionTypes[actionType] = 1;
+            _actionTypes[actionType].first = 1;
 
             emit actionTypeAdded(actionType);
         }
 
-        if (getActionTypes() != cachedActionTypes)
+        if (getActionTypes() != cachedActionTypes) {
             emit actionTypesChanged(getActionTypes());
+            emit actionTypesHumanFriendlyChanged(getActionTypesHumanFriendly());
+        }
     }
 
     /**
-     * Remove \p actionType
-     * @param actionType Action type to remove
+     * Remove \p actionType string
+     * @param actionType Action type string to remove
      */
     void removeActionType(const QString& actionType) {
         const auto cachedActionTypes = getActionTypes();
@@ -173,23 +268,25 @@ protected:
         if (!_actionTypes.contains(actionType))
             return;
 
-        _actionTypes[actionType]--;
+        _actionTypes[actionType].first--;
 
-        if (_actionTypes[actionType] <= 0) {
+        if (_actionTypes[actionType].first <= 0) {
             _actionTypes.remove(actionType);
 
             emit actionTypeRemoved(actionType);
         }
 
-        if (getActionTypes() != cachedActionTypes)
+        if (getActionTypes() != cachedActionTypes) {
             emit actionTypesChanged(getActionTypes());
+            emit actionTypesHumanFriendlyChanged(getActionTypesHumanFriendly());
+        }
     }
 
-public:
+public: // Action types
 
     /**
      * Get set of action types
-     * @return List action types
+     * @return List of action types
      */
     const QStringList getActionTypes() const {
         auto actionTypes = _actionTypes.keys();
@@ -197,6 +294,19 @@ public:
         actionTypes.removeDuplicates();
 
         return actionTypes;
+    }
+
+    /**
+     * Get set of human-friendly action types (without prefixes)
+     * @return List of human-friendly action types
+     */
+    const QStringList getActionTypesHumanFriendly() const {
+        QStringList actionTypesHumanFriendly;
+
+        for (const auto& actionType : _actionTypes)
+            actionTypesHumanFriendly << actionType.second;
+
+        return actionTypesHumanFriendly;
     }
 
 protected:
@@ -235,6 +345,24 @@ signals:
     void actionRemoved(const QString& actionId);
 
     /**
+     * Signals that \p publicAction is added to the manager
+     * @param action Pointer to public action that is added to the manager
+     */
+    void publicActionAdded(gui::WidgetAction* publicAction);
+
+    /**
+     * Signals that \p publicAction is about to be removed from the manager
+     * @param action Pointer to public action that is about to be removed from the manager
+     */
+    void publicActionAboutToBeRemoved(gui::WidgetAction* publicAction);
+
+    /**
+     * Signals that public action with \p publicActionId was removed from the manager
+     * @param publicActionId Globally unique identifier of the public action that was removed from the manager
+     */
+    void publicActionRemoved(const QString& publicActionId);
+
+    /**
      * Signals that a new \p actionType has been added to the manager
      * @param actionType Action type
      */
@@ -252,11 +380,18 @@ signals:
      */
     void actionTypesChanged(const QStringList& actionTypes);
 
-    friend class gui::WidgetAction;
+    /**
+     * Signals that the human-friendly \p actionTypes changed
+     * @param actionTypesHumanFriendly Human-friendly action types
+     */
+    void actionTypesHumanFriendlyChanged(const QStringList& actionTypesHumanFriendly);
 
 protected:
-    gui::WidgetActions              _actions;       /** Flat list of actions that are instantiated in the plugin system */
-    QMap<QString, std::int32_t>     _actionTypes;   /** Number of rows per action type */
+    gui::WidgetActions          _publicActions;     /** List of public actions that are instantiated in the plugin system */
+    gui::WidgetActions          _actions;           /** List of actions that are instantiated in the plugin system */
+    QMap<QString, ActionType>   _actionTypes;       /** Maps action type to counter and human-friendly action type string */
+
+    friend class gui::WidgetAction;
 };
 
 }

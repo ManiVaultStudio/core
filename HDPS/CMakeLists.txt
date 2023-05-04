@@ -480,7 +480,7 @@ endif()
 # System plugins
 add_subdirectory(src/plugins/DataHierarchyPlugin)
 add_subdirectory(src/plugins/DataPropertiesPlugin)
-add_subdirectory(src/plugins/ActionsPlugin)
+add_subdirectory(src/plugins/SharedParametersPlugin)
 add_subdirectory(src/plugins/LoggingPlugin)
 
 # Data plugins

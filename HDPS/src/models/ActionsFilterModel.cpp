@@ -1,6 +1,7 @@
 #include "ActionsFilterModel.h"
-#include "ActionsModel.h"
-#include "CoreInterface.h"
+#include "AbstractActionsModel.h"
+
+#include "actions/WidgetAction.h"
 
 #include <QDebug>
 
@@ -12,9 +13,9 @@ namespace hdps
 ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
     _typeFilterAction(this, "Type"),
+    _typeFilterHumanReadableAction(this, "Type"),
     _typeCompleter(this),
     _scopeFilterAction(this, "Scope", { "Private", "Public" }, { "Private", "Public" }),
-    _connectedFilterAction(this, "Connected", true, true),
     _filterInternalUseAction(this, "Internal", { "Yes", "No" }, { "No" }),
     _filterEnabledAction(this, "Enabled", { "Yes", "No" }),
     _filterVisibilityAction(this, "Visibility", { "Visible", "Hidden" }),
@@ -25,18 +26,23 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
 {
     setRecursiveFilteringEnabled(true);
 
-    _typeFilterAction.setClearable(true);
-    _typeFilterAction.setCompleter(&_typeCompleter);
+    _typeFilterHumanReadableAction.setClearable(true);
+    _typeFilterHumanReadableAction.setCompleter(&_typeCompleter);
 
     _scopeFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
 
     connect(&_typeFilterAction, &StringAction::stringChanged, this, &ActionsFilterModel::invalidate);
-    connect(&_scopeFilterAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
-    connect(&_connectedFilterAction, &ToggleAction::toggled, this, &ActionsFilterModel::invalidate);
+    connect(&_typeFilterHumanReadableAction, &StringAction::stringChanged, this, &ActionsFilterModel::invalidate);
 
-    connect(&actions(), &AbstractActionsManager::actionTypesChanged, this, [this](const QStringList& actionTypes) -> void {
-        _typeFilterAction.getCompleter()->setModel(new QStringListModel(actionTypes));
-    });
+    connect(&_scopeFilterAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
+
+    const auto updateTypeFilterActionCompleter = [this]() -> void {
+        _typeFilterHumanReadableAction.getCompleter()->setModel(new QStringListModel(actions().getActionTypesHumanFriendly()));
+    };
+
+    updateTypeFilterActionCompleter();
+
+    connect(&actions(), &AbstractActionsManager::actionTypesHumanFriendlyChanged, this, updateTypeFilterActionCompleter);
 
     _filterInternalUseAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     _filterEnabledAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
@@ -94,7 +100,7 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
     if (!index.isValid())
         return true;
 
-    //auto action = dynamic_cast<ActionsModel::Item*>(index.internalPointer())->getAction();
+    auto action = static_cast<const AbstractActionsModel::Item*>(index.internalPointer())->getAction();
 
     if (filterRegularExpression().isValid()) {
         const auto key = sourceModel()->data(index.siblingAtColumn(filterKeyColumn()), filterRole()).toString();
@@ -103,97 +109,96 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
             return false;
     }
     
-    const auto typeFilter   = _typeFilterAction.getString();
+    const auto typeFilter = _typeFilterAction.getString();
 
     if (!typeFilter.isEmpty()) {
-        const auto type = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Type)), Qt::EditRole).toString();
+        const auto type = sourceModel()->data(index.siblingAtColumn(static_cast<int>(AbstractActionsModel::Column::Type)), Qt::EditRole).toString();
 
         if (type != typeFilter)
             return false;
     }
-    /**/
 
-    /*
-    const auto isConnected = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Connected)), Qt::EditRole).toBool();
+    const auto typeFilterHumanReadable = _typeFilterHumanReadableAction.getString();
 
-    if (_connectedFilterAction.isChecked() && !isConnected)
+    if (!typeFilterHumanReadable.isEmpty()) {
+        const auto type = sourceModel()->data(index.siblingAtColumn(static_cast<int>(AbstractActionsModel::Column::Type)), Qt::DisplayRole).toString();
+
+        if (type != typeFilter)
+            return false;
+    }
+
+    const auto scope = sourceModel()->data(index.siblingAtColumn(static_cast<int>(AbstractActionsModel::Column::Scope)), Qt::EditRole).toInt();
+
+    if (scope == 0 && !_scopeFilterAction.getSelectedOptionIndices().contains(0))
         return false;
-    */
 
-    //if (!parent.isValid()) {
-        const auto scope = sourceModel()->data(index.siblingAtColumn(static_cast<int>(ActionsModel::Column::Scope)), Qt::EditRole).toInt();
+    if (scope == 1 && !_scopeFilterAction.getSelectedOptionIndices().contains(1))
+        return false;
 
-        if (scope == 0 && !_scopeFilterAction.getSelectedOptionIndices().contains(0))
-            return false;
+    std::int32_t numberOfActiveFilters = 0;
+    std::int32_t numberOfMatches = 0;
 
-        if (scope == 1 && !_scopeFilterAction.getSelectedOptionIndices().contains(1))
-            return false;
-    //}
+    if (_filterInternalUseAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
 
-        std::int32_t numberOfActiveFilters = 0;
-        std::int32_t numberOfMatches = 0;
+        const auto selectedOptions = _filterInternalUseAction.getSelectedOptions();
+        const auto internalUseOnly = action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
-        //if (_filterInternalUseAction.hasSelectedOptions()) {
-        //    numberOfActiveFilters++;
+        if (selectedOptions.contains("Yes") && internalUseOnly || selectedOptions.contains("No") && !internalUseOnly)
+            numberOfMatches++;
+    }
 
-        //    const auto selectedOptions = _filterInternalUseAction.getSelectedOptions();
-        //    const auto internalUseOnly = action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    if (_filterEnabledAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
 
-        //    if (selectedOptions.contains("Yes") && internalUseOnly || selectedOptions.contains("No") && !internalUseOnly)
-        //        numberOfMatches++;
-        //}
+        const auto selectedOptions = _filterEnabledAction.getSelectedOptions();
+        const auto isEnabled = action->isEnabled();
 
-        //if (_filterEnabledAction.hasSelectedOptions()) {
-        //    numberOfActiveFilters++;
+        if (selectedOptions.contains("Yes") && isEnabled || selectedOptions.contains("No") && !isEnabled)
+            numberOfMatches++;
+    }
 
-        //    const auto selectedOptions = _filterEnabledAction.getSelectedOptions();
-        //    const auto isEnabled = action->isEnabled();
+    if (_filterVisibilityAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
 
-        //    if (selectedOptions.contains("Yes") && isEnabled || selectedOptions.contains("No") && !isEnabled)
-        //        numberOfMatches++;
-        //}
+        const auto selectedOptions = _filterVisibilityAction.getSelectedOptions();
+        const auto isVisible = action->isVisible();
 
-        //if (_filterVisibilityAction.hasSelectedOptions()) {
-        //    numberOfActiveFilters++;
+        if (selectedOptions.contains("Visible") && isVisible || selectedOptions.contains("Hidden") && !isVisible)
+            numberOfMatches++;
+    }
 
-        //    const auto selectedOptions = _filterVisibilityAction.getSelectedOptions();
-        //    const auto isVisible = action->isVisible();
+    if (_filterMayPublishAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
 
-        //    if (selectedOptions.contains("Visible") && isVisible || selectedOptions.contains("Hidden") && !isVisible)
-        //        numberOfMatches++;
-        //}
+        const auto selectedOptions = _filterMayPublishAction.getSelectedOptions();
+        const auto mayPublish = action->mayPublish(WidgetAction::Gui);
 
-        //if (_filterMayPublishAction.hasSelectedOptions()) {
-        //    numberOfActiveFilters++;
+        if (selectedOptions.contains("Yes") && mayPublish || selectedOptions.contains("No") && !mayPublish)
+            numberOfMatches++;
+    }
 
-        //    const auto selectedOptions = _filterMayPublishAction.getSelectedOptions();
-        //    const auto mayPublish = action->mayPublish(WidgetAction::Gui);
+    if (_filterMayConnectAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
 
-        //    if (selectedOptions.contains("Yes") && mayPublish || selectedOptions.contains("No") && !mayPublish)
-        //        numberOfMatches++;
-        //}
+        const auto selectedOptions = _filterMayConnectAction.getSelectedOptions();
+        const auto mayConnect = action->mayConnect(WidgetAction::Gui);
 
-        //if (_filterMayConnectAction.hasSelectedOptions()) {
-        //    numberOfActiveFilters++;
+        if (selectedOptions.contains("Yes") && mayConnect || selectedOptions.contains("No") && !mayConnect)
+            numberOfMatches++;
+    }
 
-        //    const auto selectedOptions = _filterMayConnectAction.getSelectedOptions();
-        //    const auto mayConnect = action->mayConnect(WidgetAction::Gui);
+    if (_filterMayDisconnectAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
 
-        //    if (selectedOptions.contains("Yes") && mayConnect || selectedOptions.contains("No") && !mayConnect)
-        //        numberOfMatches++;
-        //}
+        const auto selectedOptions = _filterMayDisconnectAction.getSelectedOptions();
+        const auto mayDisconnect = action->mayDisconnect(WidgetAction::Gui);
 
-        //if (_filterMayDisconnectAction.hasSelectedOptions()) {
-        //    numberOfActiveFilters++;
+        if (selectedOptions.contains("Yes") && mayDisconnect || selectedOptions.contains("No") && !mayDisconnect)
+            numberOfMatches++;
+    }
 
-        //    const auto selectedOptions = _filterMayDisconnectAction.getSelectedOptions();
-        //    const auto mayDisconnect = action->mayDisconnect(WidgetAction::Gui);
-
-        //    if (selectedOptions.contains("Yes") && mayDisconnect || selectedOptions.contains("No") && !mayDisconnect)
-        //        numberOfMatches++;
-        //}
-
-        return numberOfMatches == numberOfActiveFilters;
+    return numberOfMatches == numberOfActiveFilters;
 }
 
 bool ActionsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
@@ -204,7 +209,8 @@ bool ActionsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs
 WidgetAction* ActionsFilterModel::getAction(std::int32_t rowIndex)
 {
     const auto sourceModelIndex = mapToSource(index(rowIndex, 0));
-    return static_cast<ActionsModel*>(sourceModel())->getAction(sourceModelIndex.row());
+
+    return static_cast<AbstractActionsModel*>(sourceModel())->getAction(sourceModelIndex.row());
 }
 
 }

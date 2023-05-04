@@ -44,8 +44,8 @@ public:
 public: // Action getters
 
     gui::StringAction& getTypeFilterAction() { return _typeFilterAction; }
+    gui::StringAction& getTypeFilterHumanReadableAction() { return _typeFilterHumanReadableAction; }
     gui::OptionsAction& getScopeFilterAction() { return _scopeFilterAction; }
-    gui::ToggleAction& getConnectedFilterAction() { return _connectedFilterAction; }
     gui::OptionsAction& getHideInternalUseAction() { return _filterInternalUseAction; }
     gui::OptionsAction& getFilterEnabledAction() { return _filterEnabledAction; }
     gui::OptionsAction& getFilterVisibilityAction() { return _filterVisibilityAction; }
@@ -55,17 +55,17 @@ public: // Action getters
     gui::TriggerAction& getRemoveFiltersAction() { return _removeFiltersAction; }
 
 private:
-    gui::StringAction   _typeFilterAction;              /** Action for filtering by action type */
-    QCompleter          _typeCompleter;                 /** Completer for type filter */
-    gui::OptionsAction  _scopeFilterAction;             /** Action for filtering based on action scope */
-    gui::ToggleAction   _connectedFilterAction;         /** Action for filtering based on whether an action is connected or not */
-    gui::OptionsAction  _filterInternalUseAction;       /** Filter internal use action */
-    gui::OptionsAction  _filterEnabledAction;           /** Filter enabled action */
-    gui::OptionsAction  _filterVisibilityAction;        /** Filter visibility action */
-    gui::OptionsAction  _filterMayPublishAction;        /** Filter may publish action */
-    gui::OptionsAction  _filterMayConnectAction;        /** Filter may connect action */
-    gui::OptionsAction  _filterMayDisconnectAction;     /** Filter may disconnect action */
-    gui::TriggerAction  _removeFiltersAction;           /** Remove filters action */
+    gui::StringAction   _typeFilterAction;                  /** Action for filtering by action type */
+    gui::StringAction   _typeFilterHumanReadableAction;     /** Action for filtering by human-readable action type */
+    QCompleter          _typeCompleter;                     /** Completer for type filter */
+    gui::OptionsAction  _scopeFilterAction;                 /** Action for filtering based on action scope */
+    gui::OptionsAction  _filterInternalUseAction;           /** Filter internal use action */
+    gui::OptionsAction  _filterEnabledAction;               /** Filter enabled action */
+    gui::OptionsAction  _filterVisibilityAction;            /** Filter visibility action */
+    gui::OptionsAction  _filterMayPublishAction;            /** Filter may publish action */
+    gui::OptionsAction  _filterMayConnectAction;            /** Filter may connect action */
+    gui::OptionsAction  _filterMayDisconnectAction;         /** Filter may disconnect action */
+    gui::TriggerAction  _removeFiltersAction;               /** Remove filters action */
 };
 
 }

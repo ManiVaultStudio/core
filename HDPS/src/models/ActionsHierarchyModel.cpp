@@ -1,5 +1,4 @@
 #include "ActionsHierarchyModel.h"
-#include "AbstractActionsManager.h"
 
 using namespace hdps::gui;
 
@@ -11,7 +10,7 @@ namespace hdps
 {
 
 ActionsHierarchyModel::ActionsHierarchyModel(QObject* parent, gui::WidgetAction* rootAction /*= nullptr*/) :
-    ActionsModel(parent),
+    AbstractActionsModel(parent),
     _rootAction(rootAction)
 {
     Q_ASSERT(_rootAction != nullptr);
@@ -24,6 +23,26 @@ void ActionsHierarchyModel::initialize()
     setRowCount(0);
 
     addAction(_rootAction);
+}
+
+void ActionsHierarchyModel::actionAddedToManager(gui::WidgetAction* action)
+{
+
+}
+
+void ActionsHierarchyModel::actionAboutToBeRemovedFromManager(gui::WidgetAction* action)
+{
+
+}
+
+void ActionsHierarchyModel::publicActionAddedToManager(gui::WidgetAction* publicAction)
+{
+
+}
+
+void ActionsHierarchyModel::publicActionAboutToBeRemovedFromManager(gui::WidgetAction* publicAction)
+{
+
 }
 
 void ActionsHierarchyModel::addAction(gui::WidgetAction* action)

@@ -17,7 +17,6 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* view
     _groupsAction(this, "Groups"),
     _actionsListModel(this, viewPlugin),
     _actionsHierarchyModel(this, viewPlugin),
-    _actionsListWidget(this, _actionsListModel),
     _actionsHierarchyWidget(this, _actionsHierarchyModel),
     _settingsAction(this, "Settings")
 {
@@ -28,12 +27,7 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* view
 
     auto layout = new QVBoxLayout();
     
-    auto actionsWidgetsLayout = new QHBoxLayout();
-
-    actionsWidgetsLayout->addWidget(&_actionsListWidget);
-    actionsWidgetsLayout->addWidget(&_actionsHierarchyWidget);
-    
-    layout->addLayout(actionsWidgetsLayout);
+    layout->addWidget(&_actionsHierarchyWidget);
 
     _settingsAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 

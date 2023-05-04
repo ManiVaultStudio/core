@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AbstractActionsModel.h"
+#include "models/AbstractActionsModel.h"
 
 namespace hdps
 {
@@ -12,18 +12,17 @@ namespace hdps
  *
  * @author Thomas Kroes
  */
-class ActionsHierarchyModel final : public AbstractActionsModel
+class PublicActionsModel final : public AbstractActionsModel
 {
     Q_OBJECT
 
 public:
 
     /**
-     * Construct with \p parent object and \p rootAction
+     * Construct with \p parent object
      * @param parent Pointer to parent object
-     * @param rootAction When set, only list the root action and its descendants
      */
-    ActionsHierarchyModel(QObject* parent, gui::WidgetAction* rootAction = nullptr);
+    PublicActionsModel(QObject* parent);
 
     /** Initializes the model from the current state of the actions manager */
     void initialize() override;
@@ -31,25 +30,25 @@ public:
 protected:
 
     /**
-     * Invoked when \p action is added to the actions manager
+     * Helper method which is invoked when \p action is added to the actions manager
      * @param action Pointer to action that was added
      */
     void actionAddedToManager(gui::WidgetAction* action) override;
 
     /**
-     * Invoked when \p action is about to be removed from the actions manager
+     * Helper method which is invoked when \p action is about to be removed from the actions manager
      * @param action Pointer to action that was removed
      */
     void actionAboutToBeRemovedFromManager(gui::WidgetAction* action) override;
 
     /**
-     * Invoked when \p publicAction is added to the actions manager
+     * Helper method which is invoked when \p publicAction is added to the actions manager
      * @param publicAction Pointer to public action that was added
      */
     void publicActionAddedToManager(gui::WidgetAction* publicAction) override;
 
     /**
-     * Invoked when \p publicAction is about to be removed from the actions manager
+     * Helper method which is invoked when \p publicAction is about to be removed from the actions manager
      * @param publicAction Pointer to public action to remove
      */
     void publicActionAboutToBeRemovedFromManager(gui::WidgetAction* publicAction) override;
@@ -68,8 +67,17 @@ private:
      */
     void removeAction(gui::WidgetAction* action);
 
-private:
-    gui::WidgetAction*  _rootAction;     /** Root of the action hierarchy */
+    /**
+     * Add \p publicAction to the model
+     * @param publicAction Pointer to public action to add
+     */
+    void addPublicAction(gui::WidgetAction* action);
+
+    /**
+     * Remove \p publicAction from the model
+     * @param publicAction Pointer to public action to remove
+     */
+    void removePublicAction(gui::WidgetAction* publicAction);
 };
 
 }

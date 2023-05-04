@@ -602,7 +602,7 @@ private:
     std::int32_t                _cachedConnectionPermissions;   /** Cached connection permissions flags */
     Scope                       _scope;                         /** Determines whether this action is a public (shared) action or not */
     QPointer<WidgetAction>      _publicAction;                  /** Public action to which this action might be connected */
-    QVector<WidgetAction*>      _connectedActions;              /** Pointers to widget action that are connected to this action */
+    QVector<WidgetAction*>      _connectedActions;              /** Pointers to widget actions that are connected to this action */
     QString                     _settingsPrefix;                /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
     bool                        _highlighted;                   /** Whether the action is in a highlighted state or not */
     QSize                       _popupSizeHint;                 /** Size hint of the popup */
@@ -614,30 +614,6 @@ private:
 
 using WidgetActions = QVector<WidgetAction*>;
 using ConstWidgetActions = QVector<const WidgetAction*>;
-
-/**
- * Print widget action to console
- * @param debug Debug
- * @param widgetAction Reference to widget action
- */
-inline QDebug operator << (QDebug debug, const WidgetAction& widgetAction)
-{
-    debug.noquote().nospace() << widgetAction.text();
-
-    return debug.space();
-}
-
-/**
- * Print widget action to console
- * @param debug Debug
- * @param widgetAction Pointer to widget action
- */
-inline QDebug operator << (QDebug debug, WidgetAction* widgetAction)
-{
-    debug.noquote().nospace() << widgetAction->text();
-
-    return debug.space();
-}
 
 }
 }

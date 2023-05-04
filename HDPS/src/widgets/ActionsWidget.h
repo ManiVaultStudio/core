@@ -1,6 +1,6 @@
 #pragma once
 
-#include "models/ActionsModel.h"
+#include "models/AbstractActionsModel.h"
 #include "models/ActionsFilterModel.h"
 #include "widgets/HierarchyWidget.h"
 
@@ -27,7 +27,13 @@ public:
      * @param parent Parent widget
      * @param actionsModel Reference to actions input model
      */
-    ActionsWidget(QWidget* parent, ActionsModel& actionsModel);
+    ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel);
+
+    /**
+     * Get hierarchy widget
+     * @return Reference to hierarchy widget
+     */
+    HierarchyWidget& getHierarchyWidget();
 
 private:
 
