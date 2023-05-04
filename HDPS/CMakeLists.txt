@@ -7,11 +7,17 @@ set(HDPS_CORE "hdps-core")
 project(${HDPS_CORE})
 set(version 0.2)
 
+option(USE_AVX "Use AVX if available - by default OFF" OFF)
+
 # These three targets defined in this CMakeLists.txt
 set(HDPS_EXE HDPS)                  # The HDPS executable
 set(HDPS_PUBLIC_LIB HDPS_Public)    # A public shared library used by plugin builders and the HDPS executable
 set(HDPS_PRIVATE_LIB HDPS_Private)  # A private shared library contain code for the HDPS executable
 
+set(LINK_TYPE SHARED)
+if(MSVC)
+    set(LINK_TYPE STATIC)
+endif(MSVC)
 
 # -----------------------------------------------------------------------------
 # CMake Settings
@@ -29,6 +35,8 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 # include CMakePackageConfigHelpers macro
 include(CMakePackageConfigHelpers)
 
+# Test hardware avx capabilities
+include(CMakeCheckSetAVX)
 
 # -----------------------------------------------------------------------------
 # Set install directory
@@ -112,15 +120,14 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
-add_definitions(-DQT_MESSAGELOGCONTEXT)
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
-
-
 # -----------------------------------------------------------------------------
 # Dependencies
 # -----------------------------------------------------------------------------
 
 find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
+
+add_definitions(-DQT_MESSAGELOGCONTEXT)
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 # Qt Advanced docking system
 set(VERSION_SHORT 4.0.1)
@@ -155,7 +162,7 @@ add_subdirectory(external/quazip)
 # Source files
 # -----------------------------------------------------------------------------
 include(CMakeHdpsSourcesMain)           # defines MAIN_SOURCES
-include(CMakeHdpsSourcesPublic)         # defines PUBLIC_SOURCES
+include(CMakeHdpsSourcesPublic)         # defines PUBLIC_SOURCES and PUBLIC_HEADERS
 include(CMakeHdpsSourcesPrivate)        # defines PRIVATE_SOURCES
 include(CMakeHdpsSourcesResources)      # defines RESOURCE_FILES and UI_HEADERS
 
@@ -163,11 +170,6 @@ include(CMakeHdpsSourcesResources)      # defines RESOURCE_FILES and UI_HEADERS
 # -----------------------------------------------------------------------------
 # Target HDPS_PUBLIC_LIB
 # -----------------------------------------------------------------------------
-set(LINK_TYPE SHARED)
-if(MSVC)
-    set(LINK_TYPE STATIC)
-endif(MSVC)
-
 add_library(${HDPS_PUBLIC_LIB} ${LINK_TYPE}
     src/.editorconfig
     ${PUBLIC_SOURCES}
@@ -180,6 +182,8 @@ target_compile_features(${HDPS_PUBLIC_LIB} PRIVATE cxx_std_17)
 target_link_libraries(${HDPS_PUBLIC_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${HDPS_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 
+# Use avx if enabled and available
+check_and_set_AVX(${HDPS_PUBLIC_LIB} ${USE_AVX})
 
 # -----------------------------------------------------------------------------
 # Target HDPS_PRIVATE_LIB
@@ -187,7 +191,7 @@ target_link_libraries(${HDPS_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 add_library(${HDPS_PRIVATE_LIB} ${LINK_TYPE}
     src/.editorconfig
     ${PRIVATE_SOURCES}
-	${RESOURCE_FILES}
+    ${RESOURCE_FILES}
 )
 
 target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -202,9 +206,10 @@ target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE qtadvanceddocking)
 target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE QuaZip)
 target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
 
-add_dependencies(${HDPS_PRIVATE_LIB} ${HDPS_PUBLIC_LIB})
-add_dependencies(${HDPS_PRIVATE_LIB} QuaZip)
+# Use avx if enabled and available
+check_and_set_AVX(${HDPS_PRIVATE_LIB} ${USE_AVX})
 
+add_dependencies(${HDPS_PRIVATE_LIB} ${HDPS_PUBLIC_LIB} QuaZip)
 
 # -----------------------------------------------------------------------------
 # Target HDPS_EXE
@@ -235,9 +240,10 @@ target_link_libraries(${HDPS_EXE} PRIVATE QuaZip)
 target_link_libraries(${HDPS_EXE} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
 target_link_libraries(${HDPS_EXE} PRIVATE "$<TARGET_FILE:${HDPS_PRIVATE_LIB}>")
 
-add_dependencies(${HDPS_EXE} ${HDPS_PUBLIC_LIB})
-add_dependencies(${HDPS_EXE} ${HDPS_PRIVATE_LIB})
-add_dependencies(${HDPS_EXE} QuaZip)
+# Use avx if enabled and available
+check_and_set_AVX(${HDPS_EXE} ${USE_AVX})
+
+add_dependencies(${HDPS_EXE} ${HDPS_PUBLIC_LIB} ${HDPS_PRIVATE_LIB} QuaZip)
 
 if(MSVC)
     set_target_properties(${HDPS_EXE} PROPERTIES
@@ -251,13 +257,14 @@ endif(MSVC)
 # -----------------------------------------------------------------------------
 # Installation
 # -----------------------------------------------------------------------------
+
+# Install the HDPS executable 
 if(APPLE)
     set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
     set(WEBENGINEINSTALL_CMD "${CMAKE_CURRENT_SOURCE_DIR}/macos_webengineinstall.sh")
     install(TARGETS ${HDPS_EXE}
         RUNTIME DESTINATION bin COMPONENT MACOS_BUNDLE
         BUNDLE DESTINATION . COMPONENT MACOS_BUNDLE
-        # ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
     )
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
@@ -300,9 +307,10 @@ else()
     install(TARGETS ${HDPS_EXE}
         RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
     )
+    # On MSVC, HDPS_PRIVATE_LIB is statically linked to HDPS_EXE and does not need to be installed
 endif()
 
-#headers - Would it be better to refactor the headers to allow "install(DIRECTORY)"?
+# Install public headers 
 install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
         string(REGEX REPLACE \"^src/\" \"\" STRIPPED_PUBLIC_HEADER \${PUBLIC_HEADER})
         execute_process(
@@ -315,11 +323,11 @@ install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
     COMPONENT HDPSPUBLIC_HEADERS
 )
 
+# Install public headers 
 install(TARGETS ${HDPS_PUBLIC_LIB}
     EXPORT HdpsPublicExport
-    ARCHIVE DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB
-    LIBRARY DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB
-    PUBLIC_HEADER DESTINATION include COMPONENT HDPSPUBLIC_HEADERS
+    ARCHIVE DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB  # Linux/Mac .so
+    LIBRARY DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB  # Windows .lib
     INCLUDES DESTINATION include
 )
 
@@ -332,11 +340,6 @@ install(EXPORT HdpsPublicExport
         NAMESPACE HdpsCore::
         DESTINATION lib/cmake/HdpsCore
         COMPONENT HDPSPUBLIC_TARGET
-)
-
-target_include_directories(${HDPS_PUBLIC_LIB} PUBLIC
-    $<INSTALL_INTERFACE:include>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
 # ***Create a HdpsCore package to support the find_package command**
@@ -358,7 +361,7 @@ configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/HdpsCoreConfig.cmake.i
   INSTALL_DESTINATION lib/cmake/HdpsCore
 )
 
-# install the package files files
+# install the package files
 install(FILES
           "${CMAKE_CURRENT_BINARY_DIR}/HdpsCoreConfig.cmake"
           "${CMAKE_CURRENT_BINARY_DIR}/HdpsCoreConfigVersion.cmake"
@@ -374,10 +377,8 @@ install(FILES
 #        NAMESPACE HdpsCore::
 # )
 
-# Initially install everything in the same place
-# this may need to be split up 
-
-# Install the HDPSPUBLIC components needed for the Plugin builds
+# Call the install functions of the all public targets
+# needed for plugins directly after the build
 add_custom_command(
     TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
     COMMAND "${CMAKE_COMMAND}"
@@ -406,41 +407,47 @@ add_custom_command(
         --verbose
 )
 
-if (UNIX AND NOT APPLE)
-add_custom_command(
-    TARGET ${HDPS_PRIVATE_LIB} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}"
-        --install ${CMAKE_BINARY_DIR}
-        --config $<CONFIGURATION>
-        --component HDPSPRIVATE_LINKLIB
-        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
-        --verbose
-)
+# Install the HDPS executable
+if(APPLE)
+    add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}"
+            --install ${CMAKE_BINARY_DIR}
+            --config $<CONFIGURATION>
+            --component MACOS_BUNDLE
+            --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
+    )
+elseif(UNIX)
+    add_custom_command(
+        TARGET ${HDPS_PRIVATE_LIB} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}"
+            --install ${CMAKE_BINARY_DIR}
+            --config $<CONFIGURATION>
+            --component HDPSPRIVATE_LINKLIB
+            --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+            --verbose
+    )
 endif()
 
+if(NOT APPLE)
+    add_custom_command(
+        TARGET ${HDPS_EXE} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}"
+            --install ${CMAKE_BINARY_DIR}
+            --config $<CONFIGURATION>
+            --component HDPS_EXECUTABLE
+            --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+            --verbose
+    )
+endif()
+
+# Install examples
 add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 ${CMAKE_CURRENT_SOURCE_DIR}/res/examples
-                ${INSTALL_DIR}/$<CONFIGURATION>/examples)
-
-# Install the HDPS executable and lib
-add_custom_command(
-    TARGET ${HDPS_EXE} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}"
-        --install ${CMAKE_BINARY_DIR}
-        --config $<CONFIGURATION>
-        --component HDPS_EXECUTABLE
-        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
-        --verbose
-    # COMMAND "${CMAKE_COMMAND}"
-    #     --install ${CMAKE_BINARY_DIR}
-    #     --config $<CONFIGURATION>
-    #     --component HDPS_LINKLIB
-    #     --prefix ${INSTALL_DIR}/$<CONFIGURATION>
-    #     --verbose
+                ${INSTALL_DIR}/$<CONFIGURATION>/examples
 )
 
-
+# Install dependencies
 add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" 
         --install ${CMAKE_CURRENT_BINARY_DIR}/external/advanced_docking
@@ -452,23 +459,16 @@ add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
 )
 
+# Move quazip from INSTALL_DIR/bin to INSTALL_DIR
 if(WIN32)
     # Note! the quazip lib is named differently in Debug & Release
-    # simply copy the bin directory contents to let HDPS.exe run.
     add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${INSTALL_DIR}/$<CONFIGURATION>/bin/quazip1-qt6$<IF:$<CONFIG:DEBUG>,d,>.dll"
+            "${INSTALL_DIR}/$<CONFIGURATION>/quazip1-qt6$<IF:$<CONFIG:DEBUG>,d,>.dll"
+        # since only quazip is in the bin folder, remove it
+        COMMAND ${CMAKE_COMMAND} -E remove_directory
             ${INSTALL_DIR}/$<CONFIGURATION>/bin/
-            ${INSTALL_DIR}/$<CONFIGURATION>/
-    )
-endif()
-
-if(APPLE)
-    add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" 
-            --install ${CMAKE_BINARY_DIR}
-            --config $<CONFIGURATION> 
-            --component MACOS_BUNDLE
-            --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
     )
 endif()
 

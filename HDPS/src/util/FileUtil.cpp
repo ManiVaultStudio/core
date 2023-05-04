@@ -34,7 +34,7 @@ bool ShowFileInFolder(const QString path)
         return false;
     }
 
-    // Based upon: How to "Reveal in Finder" or “Show in Explorer” with Qt
+    // Based upon: How to "Reveal in Finder" or "Show in Explorer" with Qt
     // https://stackoverflow.com/questions/3490336/how-to-reveal-in-finder-or-show-in-explorer-with-qt
     enum class Os { Windows, Mac, Other };
 
