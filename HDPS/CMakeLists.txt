@@ -36,7 +36,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 include(CMakePackageConfigHelpers)
 
 # Test hardware avx capabilities
-include(CMakeCheckLinkAVX)
+include(CMakeCheckSetAVX)
 
 # -----------------------------------------------------------------------------
 # Set install directory
@@ -183,7 +183,7 @@ target_link_libraries(${HDPS_PUBLIC_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${HDPS_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 
 # Use avx if enabled and available
-check_and_link_AVX(${HDPS_PUBLIC_LIB} ${USE_AVX})
+check_and_set_AVX(${HDPS_PUBLIC_LIB} ${USE_AVX})
 
 # -----------------------------------------------------------------------------
 # Target HDPS_PRIVATE_LIB
@@ -207,7 +207,7 @@ target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE QuaZip)
 target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
 
 # Use avx if enabled and available
-check_and_link_AVX(${HDPS_PRIVATE_LIB} ${USE_AVX})
+check_and_set_AVX(${HDPS_PRIVATE_LIB} ${USE_AVX})
 
 add_dependencies(${HDPS_PRIVATE_LIB} ${HDPS_PUBLIC_LIB} QuaZip)
 
@@ -241,7 +241,7 @@ target_link_libraries(${HDPS_EXE} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
 target_link_libraries(${HDPS_EXE} PRIVATE "$<TARGET_FILE:${HDPS_PRIVATE_LIB}>")
 
 # Use avx if enabled and available
-check_and_link_AVX(${HDPS_EXE} ${USE_AVX})
+check_and_set_AVX(${HDPS_EXE} ${USE_AVX})
 
 add_dependencies(${HDPS_EXE} ${HDPS_PUBLIC_LIB} ${HDPS_PRIVATE_LIB} QuaZip)
 

@@ -64,7 +64,7 @@ target_link_libraries(${ACTIONSPLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${ACTIONSPLUGIN} PRIVATE "${HDPS_LINK_LIBRARY}")
 
 # Use avx if enabled and available
-check_and_link_AVX(${ACTIONSPLUGIN} ${USE_AVX})
+check_and_set_AVX(${ACTIONSPLUGIN} ${USE_AVX})
 
 install(TARGETS ${ACTIONSPLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll

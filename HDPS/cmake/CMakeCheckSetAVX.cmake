@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 # Check for and link to AVX instruction sets
 # -----------------------------------------------------------------------------
-macro(check_and_link_AVX target useavx)
+macro(check_and_set_AVX target useavx)
 	message(STATUS "Set instruction sets for ${target}, useavx is ${useavx}")
 	
 	# Use cmake hardware checks to see whether AVX should be activated

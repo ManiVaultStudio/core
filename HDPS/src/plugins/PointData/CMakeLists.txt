@@ -122,7 +122,7 @@ target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${POINTDATA} PRIVATE "${HDPS_LINK_LIBRARY}")
 
 # Use avx if enabled and available
-check_and_link_AVX(${POINTDATA} ${USE_AVX})
+check_and_set_AVX(${POINTDATA} ${USE_AVX})
 
 if(UNIX AND NOT APPLE)
    find_package(TBB REQUIRED)
