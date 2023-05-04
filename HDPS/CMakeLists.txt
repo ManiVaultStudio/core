@@ -462,11 +462,10 @@ add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
 # Move quazip from INSTALL_DIR/bin to INSTALL_DIR
 if(WIN32)
     # Note! the quazip lib is named differently in Debug & Release
-    # simply copy the bin directory contents to let HDPS.exe run.
     add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-            ${INSTALL_DIR}/$<CONFIGURATION>/bin/quazip1-qt6.dll
-            ${INSTALL_DIR}/$<CONFIGURATION>/quazip1-qt6.dll
+            "${INSTALL_DIR}/$<CONFIGURATION>/bin/quazip1-qt6$<IF:$<CONFIG:DEBUG>,d,>.dll"
+            "${INSTALL_DIR}/$<CONFIGURATION>/quazip1-qt6$<IF:$<CONFIG:DEBUG>,d,>.dll"
         # since only quazip is in the bin folder, remove it
         COMMAND ${CMAKE_COMMAND} -E remove_directory
             ${INSTALL_DIR}/$<CONFIGURATION>/bin/
