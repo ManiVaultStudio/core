@@ -63,6 +63,9 @@ target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE "${HDPS_LINK_LIBRARY}")
 
+# Use avx if enabled and available
+check_and_set_AVX(${DATAPROPERTIESPLUGIN} ${USE_AVX})
+
 install(TARGETS ${DATAPROPERTIESPLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
     LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so

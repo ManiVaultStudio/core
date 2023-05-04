@@ -72,6 +72,9 @@ target_link_libraries(${LOGGINGPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${LOGGINGPLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${LOGGINGPLUGIN} PRIVATE "${HDPS_LINK_LIBRARY}")
 
+# Use avx if enabled and available
+check_and_set_AVX(${LOGGINGPLUGIN} ${USE_AVX})
+
 install(TARGETS ${LOGGINGPLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
     LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
