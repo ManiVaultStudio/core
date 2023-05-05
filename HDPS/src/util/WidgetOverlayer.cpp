@@ -54,10 +54,6 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
             if(_widgetFader.isFadedIn())
                 break;
 
-#ifdef WIDGET_OVERLAYER_VERBOSE
-            qDebug() << __FUNCTION__;
-#endif
-
             _widgetFader.fadeIn();
 
             break;
@@ -70,10 +66,6 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
 
             if (_widgetFader.isFadedOut())
                 break;
-
-#ifdef WIDGET_OVERLAYER_VERBOSE
-            qDebug() << __FUNCTION__;
-#endif
 
             _widgetFader.fadeOut();
 

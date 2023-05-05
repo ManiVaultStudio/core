@@ -3,6 +3,8 @@
 
 #include "actions/WidgetAction.h"
 
+#include "models/ActionsListModel.h"
+
 using namespace hdps::gui;
 
 #ifdef _DEBUG

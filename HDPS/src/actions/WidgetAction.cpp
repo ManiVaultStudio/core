@@ -111,7 +111,7 @@ QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& wi
 
 QMenu* WidgetAction::getContextMenu(QWidget* parent /*= nullptr*/)
 {
-    return new WidgetActionContextMenu(parent, this);
+    return new WidgetActionContextMenu(parent, { this });
 }
 
 std::int32_t WidgetAction::getDefaultWidgetFlags() const

@@ -4,14 +4,14 @@
 
 #include <QMenu>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 class WidgetAction;
 
 /**
  * Widget action context menu class
+ * 
+ * Context menu for one (or more) widget actions
  *
  * @author Thomas Kroes
  */
@@ -20,23 +20,17 @@ class WidgetActionContextMenu : public QMenu
 public:
 
     /**
-     * Constructor
-     * @param widgetAction Pointer to widget action
+     * Construct with \p parent widget and \p widgetActions
      * @param parent Pointer to parent widget
-     * @param windowFlags Window flags
+     * @param actions Actions to create the context menu for
      */
-    explicit WidgetActionContextMenu(QWidget* parent, WidgetAction* widgetAction);
+    explicit WidgetActionContextMenu(QWidget* parent, WidgetActions actions);
 
 private:
-
-    /** Populates the context menu with actions */
-    void initialize();
-
-private:
-    WidgetAction*       _widgetAction;          /** Pointer to widget action */
-    TriggerAction       _publishAction;         /** Publish action (so that other actions can connect) */
-    TriggerAction       _disconnectAction;      /** Disconnect from public action */
+    WidgetActions   _actions;               /** Actions to create the context menu for */
+    TriggerAction   _publishAction;         /** Publish action (so that other actions can connect) */
+    TriggerAction   _disconnectAction;      /** Disconnect one or more parameters from shared parameter */
+    TriggerAction   _removeAction;          /** Remove one or more shared parameters */
 };
 
-}
 }
