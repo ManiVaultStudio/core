@@ -54,8 +54,9 @@ set(POINTS_HEADERS
     src/CreateSetFromSelectionAction.h
 )
 
+# Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
 set(BFLOAT_HEADER
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault_bfloat16/biovault_bfloat16.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/biovault_bfloat16/biovault_bfloat16.h
 )
 
 set(ACTIONS_SOURCES
