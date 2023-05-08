@@ -40,11 +40,11 @@ protected:
     }
 };
 
-ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel) :
+ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel, const QString& itemTypeName /*= "Parameter"*/) :
     QWidget(parent),
     _actionsModel(actionsModel),
     _filterModel(this),
-    _hierarchyWidget(this, "Parameter", actionsModel, &_filterModel)
+    _hierarchyWidget(this, itemTypeName, actionsModel, &_filterModel)
 {
     auto layout = new QVBoxLayout();
 

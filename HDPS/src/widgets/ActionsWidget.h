@@ -26,8 +26,9 @@ public:
      * Constructor
      * @param parent Parent widget
      * @param actionsModel Reference to actions input model
+     * @param itemTypeName Name of the action in the hierarchy widget
      */
-    ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel);
+    ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel, const QString& itemTypeName = "Parameter");
 
     /**
      * Get hierarchy widget

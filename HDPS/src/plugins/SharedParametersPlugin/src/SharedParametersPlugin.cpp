@@ -9,7 +9,7 @@ using namespace hdps;
 SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _publicActionsModel(this),
-    _actionsWidget(&getWidget(), _publicActionsModel)
+    _actionsWidget(&getWidget(), _publicActionsModel, "Shared Parameter")
 {
     auto& treeView = _actionsWidget.getHierarchyWidget().getTreeView();
 
