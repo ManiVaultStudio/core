@@ -38,19 +38,26 @@ public:
 private:
     
     /**
-     * Leave event invoked when the mouse pointer leaves the widget
-     * @param event Pointer to event
+     * Respond to target object events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
      */
-    void leaveEvent(QEvent* event) override;
+    bool eventFilter(QObject* target, QEvent* event) override;
 
     /** Resize sections based on content */
     void resizeSectionsToContent();
 
+    /**
+     * Highlight all items in the \p selection
+     * @param selection Item selection
+     * @param highlight Whether to highlight or not
+     */
+    void highlightSelection(const QItemSelection& selection, bool highlight);
+
 private:
-    AbstractActionsModel&   _actionsModel;              /** Input actions model */
-    ActionsFilterModel      _filterModel;               /** Hierarchical actions filter model */
-    HierarchyWidget         _hierarchyWidget;           /** Widget for displaying action hierarchy */
-    QPersistentModelIndex   _lastHoverModelIndex;       /** Model index of the item that was last hovered */
+    AbstractActionsModel&   _actionsModel;      /** Input actions model */
+    ActionsFilterModel      _filterModel;       /** Hierarchical actions filter model */
+    HierarchyWidget         _hierarchyWidget;   /** Widget for displaying action hierarchy */
 };
 
 }

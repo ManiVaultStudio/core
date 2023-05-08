@@ -44,8 +44,7 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     QWidget(parent),
     _actionsModel(actionsModel),
     _filterModel(this),
-    _hierarchyWidget(this, "Parameter", actionsModel, &_filterModel),
-    _lastHoverModelIndex()
+    _hierarchyWidget(this, "Parameter", actionsModel, &_filterModel)
 {
     auto layout = new QVBoxLayout();
 
@@ -81,33 +80,12 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     treeView.setItemDelegateForColumn(static_cast<int>(AbstractActionsModel::Column::MayConnect), new ItemDelegate(this));
     treeView.setItemDelegateForColumn(static_cast<int>(AbstractActionsModel::Column::MayDisconnect), new ItemDelegate(this));
 
-    //connect(&_hierarchyWidget.getTreeView(), &QTreeView::entered, this, [this](const QModelIndex& index) -> void {
-    //    const auto sourceModelIndex = _hierarchyWidget.toSourceModelIndex(index);
-
-    //    _actionsModel.getAction(sourceModelIndex)->setHighlighted(true);
-
-    //    if (_lastHoverModelIndex.isValid())
-    //        _actionsModel.getAction(_lastHoverModelIndex)->setHighlighted(false);
-
-    //    _lastHoverModelIndex = _hierarchyWidget.toSourceModelIndex(index);
-    //});
-
     connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) -> void {
-        for (const auto& range : deselected)
-            for (const auto& index : range.indexes())
-                _actionsModel.getAction(_hierarchyWidget.toSourceModelIndex(index))->setHighlighted(false);
-
-        for (const auto& range : selected)
-            for (const auto& index : range.indexes())
-                _actionsModel.getAction(_hierarchyWidget.toSourceModelIndex(index))->setHighlighted(true);
+        highlightSelection(deselected, false);
+        highlightSelection(selected, true);
     });
 
     const auto numberOfRowsChanged = [this]() -> void {
-        if (_lastHoverModelIndex.isValid())
-            _actionsModel.getAction(_lastHoverModelIndex)->setHighlighted(false);
-
-        _lastHoverModelIndex = QModelIndex();
-
         resizeSectionsToContent();
     };
     
@@ -163,14 +141,27 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
         if (!contextMenu->actions().isEmpty())
             contextMenu->exec(QCursor::pos());
     });
+
+    _hierarchyWidget.getTreeView().installEventFilter(this);
 }
 
-void ActionsWidget::leaveEvent(QEvent* event)
+bool ActionsWidget::eventFilter(QObject* target, QEvent* event)
 {
-    if (_lastHoverModelIndex.isValid())
-        _actionsModel.getAction(_lastHoverModelIndex)->setHighlighted(false);
+    switch (event->type())
+    {
+        case QEvent::Enter:
+            highlightSelection(_hierarchyWidget.getTreeView().selectionModel()->selection(), true);
+            break;
 
-    _lastHoverModelIndex = QModelIndex();
+        case QEvent::Leave:
+            highlightSelection(_hierarchyWidget.getTreeView().selectionModel()->selection(), false);
+            break;
+
+        default:
+            break;
+    }
+
+    return QObject::eventFilter(target, event);
 }
 
 HierarchyWidget& ActionsWidget::getHierarchyWidget()
@@ -184,6 +175,13 @@ void ActionsWidget::resizeSectionsToContent()
         return;
 
     _hierarchyWidget.getTreeView().header()->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+}
+
+void ActionsWidget::highlightSelection(const QItemSelection& selection, bool highlight)
+{
+    for (const auto& range : selection)
+        for (const auto& index : range.indexes())
+            _actionsModel.getAction(_hierarchyWidget.toSourceModelIndex(index))->setHighlighted(highlight);
 }
 
 }
