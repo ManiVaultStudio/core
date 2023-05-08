@@ -273,10 +273,10 @@ if(APPLE)
         #	RESULT_VARIABLE retval
             COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
             COMMAND ${CMAKE_COMMAND} -E copy 
-                    \"${INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.3.6.3.dylib\" 
+                    \"${INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.${VERSION_SHORT}.dylib\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
             COMMAND ${CMAKE_COMMAND} -E copy 
-                    \"$<TARGET_FILE:${HDPS_PUBLIC_LIB}\" 
+                    \"$<TARGET_FILE:${HDPS_PUBLIC_LIB}>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
                     
             COMMAND ${CMAKE_COMMAND} -E copy 
