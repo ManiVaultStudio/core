@@ -23,6 +23,10 @@ namespace plugin {
 namespace gui {
 
 class WidgetActionLabel;
+class WidgetAction;
+
+using WidgetActions = QVector<WidgetAction*>;
+using ConstWidgetActions = QVector<const WidgetAction*>;
 
 /**
  * Widget action class
@@ -225,6 +229,12 @@ public: // Scope, publishing and connections
      * @return Boolean determining whether this action is in the private public pool
      */
     virtual bool isPublic() const;
+
+    /**
+     * Determine whether the action is a root public action
+     * @return Boolean determining whether the action is a root public action
+     */
+    virtual bool isRootPublic() const final;
 
 protected:
 
@@ -516,7 +526,13 @@ public:
      * Get child actions
      * @return Vector of pointers to child actions
      */
-    QVector<WidgetAction*> getChildActions();
+    WidgetActions getChildActions();
+
+    /**
+     * Get child public actions
+     * @return Vector of pointers to child public actions
+     */
+    WidgetActions getChildPublicActions();
 
 signals:
 
@@ -596,12 +612,12 @@ signals:
 private:
     std::int32_t                _defaultWidgetFlags;            /** Default widget flags which are used to configure newly created widget action widgets */
     std::int32_t                _sortIndex;                     /** Sort index (relative position in group items) */
-    std::int32_t                _stretch;                       /** Stretch factor */
+    std::int32_t                _stretch;                       /** Stretch factor (in group items) */
     bool                        _forceHidden;                   /** Boolean determining whether the widget action should be hidden regardless of its built-in visibility setting */
     std::int32_t                _connectionPermissions;         /** Allowed connection permissions flags */
     std::int32_t                _cachedConnectionPermissions;   /** Cached connection permissions flags */
-    Scope                       _scope;                         /** Determines whether this action is a public (shared) action or not */
-    QPointer<WidgetAction>      _publicAction;                  /** Public action to which this action might be connected */
+    Scope                       _scope;                         /** Determines whether this action is a public (shared) action or not (private) */
+    QPointer<WidgetAction>      _publicAction;                  /** Public action to which this action is connected (nullptr if not connected) */
     QVector<WidgetAction*>      _connectedActions;              /** Pointers to widget actions that are connected to this action */
     QString                     _settingsPrefix;                /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
     bool                        _highlighted;                   /** Whether the action is in a highlighted state or not */
@@ -611,9 +627,6 @@ private:
 
     friend class AbstractActionsManager;
 };
-
-using WidgetActions = QVector<WidgetAction*>;
-using ConstWidgetActions = QVector<const WidgetAction*>;
 
 }
 }

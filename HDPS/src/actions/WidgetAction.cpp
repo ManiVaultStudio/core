@@ -154,6 +154,14 @@ bool WidgetAction::isPublic() const
     return _scope == Scope::Public;
 }
 
+bool WidgetAction::isRootPublic() const
+{
+    if (isPrivate())
+        return false;
+
+    return const_cast<WidgetAction*>(this)->getParentAction() && !const_cast<WidgetAction*>(this)->getParentAction()->isPublic();
+}
+
 void WidgetAction::makePublic(bool recursive /*= true*/)
 {
     _scope = Scope::Public;
@@ -462,9 +470,9 @@ QVariantMap WidgetAction::toVariantMap() const
     return variantMap;
 }
 
-QVector<WidgetAction*> WidgetAction::getChildActions()
+WidgetActions WidgetAction::getChildActions()
 {
-    QVector<WidgetAction*> childActions;
+    WidgetActions childActions;
 
     for (auto child : children()) {
         auto childAction = dynamic_cast<WidgetAction*>(child);
@@ -474,6 +482,20 @@ QVector<WidgetAction*> WidgetAction::getChildActions()
     }
 
     return childActions;
+}
+
+WidgetActions WidgetAction::getChildPublicActions()
+{
+    WidgetActions childPublicActions;
+
+    for (auto child : children()) {
+        auto childAction = dynamic_cast<WidgetAction*>(child);
+
+        if (childAction && childAction->isPublic())
+            childPublicActions << childAction;
+    }
+
+    return childPublicActions;
 }
 
 bool WidgetAction::mayConnect(ConnectionContextFlag connectionContextFlags) const

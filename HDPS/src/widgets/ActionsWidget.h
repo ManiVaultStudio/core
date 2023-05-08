@@ -20,6 +20,8 @@ class ActionsWidget final : public QWidget
 {
     Q_OBJECT
 
+    using RequestContextMenuFN = std::function<void(QMenu* menu, WidgetActions selectedActions)>;
+
 public:
 
     /**
@@ -31,10 +33,22 @@ public:
     ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel, const QString& itemTypeName = "Parameter");
 
     /**
+     * Get filter model
+     * @return Reference to actions filter model
+     */
+    ActionsFilterModel& getFilterModel();
+
+    /**
      * Get hierarchy widget
      * @return Reference to hierarchy widget
      */
     HierarchyWidget& getHierarchyWidget();
+
+    /**
+     * Sets the callback function which is called when the widget asks for a context menu
+     * @param requestContextMenu Callback function which is called when the widget asks for a context menu
+     */
+    void setRequestContextMenuCallback(RequestContextMenuFN requestContextMenu);
 
 private:
     
@@ -56,9 +70,10 @@ private:
     void highlightSelection(const QItemSelection& selection, bool highlight);
 
 private:
-    AbstractActionsModel&   _actionsModel;      /** Input actions model */
-    ActionsFilterModel      _filterModel;       /** Hierarchical actions filter model */
-    HierarchyWidget         _hierarchyWidget;   /** Widget for displaying action hierarchy */
+    AbstractActionsModel&   _actionsModel;              /** Input actions model */
+    ActionsFilterModel      _filterModel;               /** Hierarchical actions filter model */
+    HierarchyWidget         _hierarchyWidget;           /** Widget for displaying action hierarchy */
+    RequestContextMenuFN    _requestContextMenu;        /** Callback which is called when a context menu is requested */
 };
 
 }

@@ -3,13 +3,15 @@
 #include "actions/StringAction.h"
 #include "actions/OptionsAction.h"
 
+#include "AbstractActionsModel.h"
+
 #include <QSortFilterProxyModel>
 #include <QCompleter>
 
 namespace hdps
 {
 
-class ActionsFilterModel : public QSortFilterProxyModel
+class ActionsFilterModel final : public QSortFilterProxyModel
 {
 public:
 
@@ -39,6 +41,17 @@ public:
      * @return Pointer to action (nullptr if not found)
      */
     gui::WidgetAction* getAction(std::int32_t rowIndex);
+
+private:
+
+    /**
+     * Get source variant data for \p index, \p column and data role
+     * @param index Source model index
+     * @param column Source model column
+     * @param role Data role
+     * @return Data in variant form
+     */
+    QVariant getSourceData(const QModelIndex& index, const AbstractActionsModel::Column& column, int role) const;
 
 public: // Action getters
 

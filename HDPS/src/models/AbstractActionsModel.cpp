@@ -99,10 +99,10 @@ QVariant AbstractActionsModel::PathItem::data(int role /*= Qt::UserRole + 1*/) c
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
-            return getAction()->getPath();
+            return getAction()->isPrivate() ? getAction()->getPath() : "";
 
         case Qt::ToolTipRole:
-            return "Parameter is located in: " + data(Qt::DisplayRole).toString();
+            return getAction()->isPrivate() ? "Parameter is located in: " + data(Qt::DisplayRole).toString() : "";
 
         default:
             break;
@@ -366,6 +366,25 @@ QVariant AbstractActionsModel::PublicActionIdItem::data(int role /*= Qt::UserRol
     return Item::data(role);
 }
 
+QVariant AbstractActionsModel::IsRootPublicActionItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return getAction()->isRootPublic();
+
+        case Qt::DisplayRole:
+            return data(Qt::EditRole).toBool() ? "Yes" : "No";
+
+        case Qt::ToolTipRole:
+            return "Public parameter is a root parameter: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 AbstractActionsModel::Row::Row(gui::WidgetAction* action) :
     QList<QStandardItem*>()
 {
@@ -382,11 +401,12 @@ AbstractActionsModel::Row::Row(gui::WidgetAction* action) :
     append(new ParentActionIdItem(action));
     append(new IsConnectedItem(action));
     append(new PublicActionIdItem(action));
+    append(new IsRootPublicActionItem(action));
 }
 
 QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> AbstractActionsModel::columnInfo = QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo>({
     { AbstractActionsModel::Column::Name, { "Name" , "Name", "Name of the parameter" } },
-    { AbstractActionsModel::Column::Path, { "Path" , "Path", "Relative position of the parameter" } },
+    { AbstractActionsModel::Column::Location, { "Location" , "Location", "Where the parameter is located in the user interface" } },
     { AbstractActionsModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the parameter" } },
     { AbstractActionsModel::Column::Type, { "Type",  "Type", "Type of parameter" } },
     { AbstractActionsModel::Column::Scope, { "Scope",  "Scope", "Scope of the parameter (whether the parameter is public or private)" } },
@@ -397,7 +417,8 @@ QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> Abstra
     { AbstractActionsModel::Column::SortIndex, { "Sort Index", "Sort Index", "The sorting index of the parameter (its relative position in parameter groups)" } },
     { AbstractActionsModel::Column::ParentActionId, { "Parent ID", "Parent ID", "The identifier of the parent parameter (if not a top-level parameter)" } },
     { AbstractActionsModel::Column::IsConnected, { "Connected", "Connected", "Whether the parameter is connected or not" } },
-    { AbstractActionsModel::Column::PublicActionID, { "Public Parameter ID", "Public Parameter ID", "The identifier of the public parameter with which the parameter is connected" } }
+    { AbstractActionsModel::Column::PublicActionID, { "Public Parameter ID", "Public Parameter ID", "The identifier of the public parameter with which the parameter is connected" } },
+    { AbstractActionsModel::Column::IsRootPublicAction, { "Root Public", "Root Public", "Whether the parameter is a root public parameter" } }
 });
 
 AbstractActionsModel::AbstractActionsModel(QObject* parent /*= nullptr*/) :

@@ -9,6 +9,7 @@
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QStyledItemDelegate>
+#include <QScrollBar>
 
 using namespace hdps::util;
 
@@ -44,7 +45,8 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     QWidget(parent),
     _actionsModel(actionsModel),
     _filterModel(this),
-    _hierarchyWidget(this, itemTypeName, actionsModel, &_filterModel)
+    _hierarchyWidget(this, itemTypeName, actionsModel, &_filterModel),
+    _requestContextMenu()
 {
     auto layout = new QVBoxLayout();
 
@@ -63,17 +65,17 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
 
     const auto toggleColumnSize = 16;
 
-    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::Path), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::Location), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::ID), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::Scope), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::ParentActionId), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::IsConnected), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::PublicActionID), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::SortIndex), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::IsRootPublicAction), true);
 
-    treeViewHeader->resizeSection(static_cast<int>(AbstractActionsModel::Column::Name), 150);
-
-    treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Name), QHeaderView::Interactive);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Path), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Name), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Location), QHeaderView::Stretch);
 
     treeView.setMouseTracking(true);
 
@@ -87,12 +89,8 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
         highlightSelection(selected, true);
     });
 
-    const auto numberOfRowsChanged = [this]() -> void {
-        resizeSectionsToContent();
-    };
-    
-    connect(&_filterModel, &QAbstractItemModel::rowsAboutToBeInserted, this, numberOfRowsChanged);
-    connect(&_filterModel, &QAbstractItemModel::rowsAboutToBeRemoved, this, numberOfRowsChanged);
+    connect(&_filterModel, &QAbstractItemModel::rowsInserted, this, &ActionsWidget::resizeSectionsToContent);
+    connect(&_filterModel, &QAbstractItemModel::rowsRemoved, this, &ActionsWidget::resizeSectionsToContent);
     
     connect(&treeView, &HierarchyWidgetTreeView::columnHiddenChanged, this, &ActionsWidget::resizeSectionsToContent);
     connect(&treeView, &HierarchyWidgetTreeView::expanded, this, &ActionsWidget::resizeSectionsToContent);
@@ -115,7 +113,7 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
 
         actionsModel.setData(sourceModelIndex, !actionsModel.data(sourceModelIndex, Qt::EditRole).toBool(), Qt::EditRole);
     });
-    
+
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
 
     filterGroupAction << _filterModel.getHideInternalUseAction();
@@ -139,11 +137,17 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
 
         auto contextMenu = new WidgetActionContextMenu(this, selectedActions);
 
+        if (_requestContextMenu)
+            _requestContextMenu(contextMenu, selectedActions);
+
         if (!contextMenu->actions().isEmpty())
             contextMenu->exec(QCursor::pos());
     });
 
     _hierarchyWidget.getTreeView().installEventFilter(this);
+    _hierarchyWidget.getTreeView().verticalScrollBar()->installEventFilter(this);
+
+    resizeSectionsToContent();
 }
 
 bool ActionsWidget::eventFilter(QObject* target, QEvent* event)
@@ -151,18 +155,42 @@ bool ActionsWidget::eventFilter(QObject* target, QEvent* event)
     switch (event->type())
     {
         case QEvent::Enter:
-            highlightSelection(_hierarchyWidget.getTreeView().selectionModel()->selection(), true);
+        {
+            if (target != &_hierarchyWidget.getTreeView())
+                highlightSelection(_hierarchyWidget.getTreeView().selectionModel()->selection(), true);
+
             break;
+        }
 
         case QEvent::Leave:
-            highlightSelection(_hierarchyWidget.getTreeView().selectionModel()->selection(), false);
-            break;
+        {
+            if (target != &_hierarchyWidget.getTreeView())
+                highlightSelection(_hierarchyWidget.getTreeView().selectionModel()->selection(), false);
 
+            break;
+        }
+
+        case QEvent::Show:
+        case QEvent::Hide:
+        {
+            if (target != _hierarchyWidget.getTreeView().verticalScrollBar())
+                break;
+
+            resizeSectionsToContent();
+
+            break;
+        }
+            
         default:
             break;
     }
 
     return QObject::eventFilter(target, event);
+}
+
+hdps::ActionsFilterModel& ActionsWidget::getFilterModel()
+{
+    return _filterModel;
 }
 
 HierarchyWidget& ActionsWidget::getHierarchyWidget()
@@ -177,11 +205,15 @@ void ActionsWidget::resizeSectionsToContent()
 
     auto treeViewHeader = _hierarchyWidget.getTreeView().header();
 
-    const auto cachedNameColumnSectrionSize = treeViewHeader->sectionSize(static_cast<int>(AbstractActionsModel::Column::Name));
+    //treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Name), QHeaderView::Stretch);
 
-    treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+    const auto cachedNameColumnSectionSize = treeViewHeader->sectionSize(static_cast<int>(AbstractActionsModel::Column::Name));
+    {
+        treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+    }
 
-    treeViewHeader->resizeSection(static_cast<int>(AbstractActionsModel::Column::Name), cachedNameColumnSectrionSize);
+    //treeViewHeader->resizeSection(static_cast<int>(AbstractActionsModel::Column::Name), cachedNameColumnSectionSize);
+    //treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Name), QHeaderView::Interactive);
 }
 
 void ActionsWidget::highlightSelection(const QItemSelection& selection, bool highlight)
@@ -189,6 +221,11 @@ void ActionsWidget::highlightSelection(const QItemSelection& selection, bool hig
     for (const auto& range : selection)
         for (const auto& index : range.indexes())
             _actionsModel.getAction(_hierarchyWidget.toSourceModelIndex(index))->setHighlighted(highlight);
+}
+
+void ActionsWidget::setRequestContextMenuCallback(RequestContextMenuFN requestContextMenu)
+{
+    _requestContextMenu = requestContextMenu;
 }
 
 }

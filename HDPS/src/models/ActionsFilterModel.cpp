@@ -1,5 +1,4 @@
 #include "ActionsFilterModel.h"
-#include "AbstractActionsModel.h"
 
 #include "actions/WidgetAction.h"
 
@@ -51,12 +50,12 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     _filterMayConnectAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     _filterMayDisconnectAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
 
-    _filterInternalUseAction.setToolTip("Hide actions that are for internal use only");
-    _filterEnabledAction.setToolTip("Filter actions based on their visibility");
-    _filterVisibilityAction.setToolTip("Filter actions based on their visibility");
-    _filterMayPublishAction.setToolTip("Filter actions based on whether they may publish");
-    _filterMayConnectAction.setToolTip("Filter actions based on whether they may connect to a public action");
-    _filterMayDisconnectAction.setToolTip("Filter actions based on whether they may disconnect from a public action");
+    _filterInternalUseAction.setToolTip("Hide parameters that are for internal use only");
+    _filterEnabledAction.setToolTip("Filter parameters based on their visibility");
+    _filterVisibilityAction.setToolTip("Filter parameters based on their visibility");
+    _filterMayPublishAction.setToolTip("Filter parameters based on whether they may publish");
+    _filterMayConnectAction.setToolTip("Filter parameters based on whether they may connect to a public parameter");
+    _filterMayDisconnectAction.setToolTip("Filter parameters based on whether they may disconnect from a public parameter");
     _removeFiltersAction.setToolTip("Remove all filters");
 
     const auto selectedOptionsChanged = [this]() -> void {
@@ -112,7 +111,7 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
     const auto typeFilter = _typeFilterAction.getString();
 
     if (!typeFilter.isEmpty()) {
-        const auto type = sourceModel()->data(index.siblingAtColumn(static_cast<int>(AbstractActionsModel::Column::Type)), Qt::EditRole).toString();
+        const auto type = getSourceData(index, AbstractActionsModel::Column::Type, Qt::EditRole).toString();
 
         if (type != typeFilter)
             return false;
@@ -121,13 +120,13 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
     const auto typeFilterHumanReadable = _typeFilterHumanReadableAction.getString();
 
     if (!typeFilterHumanReadable.isEmpty()) {
-        const auto type = sourceModel()->data(index.siblingAtColumn(static_cast<int>(AbstractActionsModel::Column::Type)), Qt::DisplayRole).toString();
+        const auto type = getSourceData(index, AbstractActionsModel::Column::Type, Qt::DisplayRole).toString();
 
         if (type != typeFilter)
             return false;
     }
 
-    const auto scope = sourceModel()->data(index.siblingAtColumn(static_cast<int>(AbstractActionsModel::Column::Scope)), Qt::EditRole).toInt();
+    const auto scope = getSourceData(index, AbstractActionsModel::Column::Scope, Qt::EditRole).toInt();
 
     if (scope == 0 && !_scopeFilterAction.getSelectedOptionIndices().contains(0))
         return false;
@@ -135,8 +134,12 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
     if (scope == 1 && !_scopeFilterAction.getSelectedOptionIndices().contains(1))
         return false;
 
-    std::int32_t numberOfActiveFilters = 0;
-    std::int32_t numberOfMatches = 0;
+    //if (!_expertModeAction.isChecked())
+    //    if (scope == 1 && !getSourceData(index, AbstractActionsModel::Column::IsRootPublicAction, Qt::EditRole).toBool())
+    //        return false;
+
+    std::int32_t numberOfActiveFilters  = 0;
+    std::int32_t numberOfMatches        = 0;
 
     if (_filterInternalUseAction.hasSelectedOptions()) {
         numberOfActiveFilters++;
@@ -151,8 +154,8 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
     if (_filterEnabledAction.hasSelectedOptions()) {
         numberOfActiveFilters++;
 
-        const auto selectedOptions = _filterEnabledAction.getSelectedOptions();
-        const auto isEnabled = action->isEnabled();
+        const auto selectedOptions  = _filterEnabledAction.getSelectedOptions();
+        const auto isEnabled        = action->isEnabled();
 
         if (selectedOptions.contains("Yes") && isEnabled || selectedOptions.contains("No") && !isEnabled)
             numberOfMatches++;
@@ -161,8 +164,8 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
     if (_filterVisibilityAction.hasSelectedOptions()) {
         numberOfActiveFilters++;
 
-        const auto selectedOptions = _filterVisibilityAction.getSelectedOptions();
-        const auto isVisible = action->isVisible();
+        const auto selectedOptions  = _filterVisibilityAction.getSelectedOptions();
+        const auto isVisible        = action->isVisible();
 
         if (selectedOptions.contains("Visible") && isVisible || selectedOptions.contains("Hidden") && !isVisible)
             numberOfMatches++;
@@ -171,8 +174,8 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
     if (_filterMayPublishAction.hasSelectedOptions()) {
         numberOfActiveFilters++;
 
-        const auto selectedOptions = _filterMayPublishAction.getSelectedOptions();
-        const auto mayPublish = action->mayPublish(WidgetAction::Gui);
+        const auto selectedOptions  = _filterMayPublishAction.getSelectedOptions();
+        const auto mayPublish       = action->mayPublish(WidgetAction::Gui);
 
         if (selectedOptions.contains("Yes") && mayPublish || selectedOptions.contains("No") && !mayPublish)
             numberOfMatches++;
@@ -181,8 +184,8 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
     if (_filterMayConnectAction.hasSelectedOptions()) {
         numberOfActiveFilters++;
 
-        const auto selectedOptions = _filterMayConnectAction.getSelectedOptions();
-        const auto mayConnect = action->mayConnect(WidgetAction::Gui);
+        const auto selectedOptions  = _filterMayConnectAction.getSelectedOptions();
+        const auto mayConnect       = action->mayConnect(WidgetAction::Gui);
 
         if (selectedOptions.contains("Yes") && mayConnect || selectedOptions.contains("No") && !mayConnect)
             numberOfMatches++;
@@ -191,8 +194,8 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
     if (_filterMayDisconnectAction.hasSelectedOptions()) {
         numberOfActiveFilters++;
 
-        const auto selectedOptions = _filterMayDisconnectAction.getSelectedOptions();
-        const auto mayDisconnect = action->mayDisconnect(WidgetAction::Gui);
+        const auto selectedOptions  = _filterMayDisconnectAction.getSelectedOptions();
+        const auto mayDisconnect    = action->mayDisconnect(WidgetAction::Gui);
 
         if (selectedOptions.contains("Yes") && mayDisconnect || selectedOptions.contains("No") && !mayDisconnect)
             numberOfMatches++;
@@ -211,6 +214,11 @@ WidgetAction* ActionsFilterModel::getAction(std::int32_t rowIndex)
     const auto sourceModelIndex = mapToSource(index(rowIndex, 0));
 
     return static_cast<AbstractActionsModel*>(sourceModel())->getAction(sourceModelIndex.row());
+}
+
+QVariant ActionsFilterModel::getSourceData(const QModelIndex& index, const AbstractActionsModel::Column& column, int role) const
+{
+    return sourceModel()->data(index.siblingAtColumn(static_cast<int>(column)), role);
 }
 
 }

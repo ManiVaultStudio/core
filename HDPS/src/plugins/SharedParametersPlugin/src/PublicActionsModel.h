@@ -53,7 +53,7 @@ protected:
      */
     void publicActionAboutToBeRemovedFromManager(gui::WidgetAction* publicAction) override;
 
-private:
+public:
 
     /**
      * Add \p action to the model
@@ -70,8 +70,9 @@ private:
     /**
      * Add \p publicAction to the model
      * @param publicAction Pointer to public action to add
+     * @param onlyAddIfRoot Only public add if is a root public action
      */
-    void addPublicAction(gui::WidgetAction* action);
+    void addPublicAction(gui::WidgetAction* action, bool onlyAddIfRoot = true);
 
     /**
      * Remove \p publicAction from the model

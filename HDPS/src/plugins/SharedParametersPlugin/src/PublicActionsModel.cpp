@@ -50,30 +50,29 @@ void PublicActionsModel::addAction(WidgetAction* action)
     if (action == nullptr)
         return;
 
-    if (!action->isConnected())
-        return;
+    if (action->isPrivate() && action->isConnected()) {
+        auto publicAction = action->getPublicAction();
 
-    auto publicAction = action->getPublicAction();
+        if (!publicAction)
+            return;
 
-    if (!publicAction)
-        return;
+        auto publicActionItem = getActionItem(publicAction);
 
-    auto publicActionItem = getActionItem(publicAction);
+        if (!publicActionItem)
+            return;
 
-    if (!publicActionItem)
-        return;
+        auto row = Row(action);
 
-    auto row = Row(action);
+        publicActionItem->appendRow(row);
 
-    publicActionItem->appendRow(row);
+        if (action->isPrivate()) {
+            QFont font;
 
-    if (action->isPrivate()) {
-        QFont font;
+            font.setItalic(true);
 
-        font.setItalic(true);
-
-        for (auto item : row)
-            item->setFont(font);
+            for (auto item : row)
+                item->setFont(font);
+        }
     }
 }
 
@@ -100,32 +99,27 @@ void PublicActionsModel::removeAction(WidgetAction* action)
     }
 }
 
-void PublicActionsModel::addPublicAction(WidgetAction* action)
+void PublicActionsModel::addPublicAction(WidgetAction* action, bool onlyAddIfRoot /*= true*/)
 {
 #ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
     qDebug() << __FUNCTION__ << action->text();
 #endif
 
-    if (action->getParentAction()) {
-        auto parentActionItem = getActionItem(action->getParentAction());
+    auto parentActionItem = getActionItem(action->getParentAction());
 
-        if (parentActionItem)
-            parentActionItem->appendRow(Row(action));
-        else
-            appendRow(Row(action));
-    }
-    else {
+    if (parentActionItem)
+        parentActionItem->appendRow(Row(action));
+    else
         appendRow(Row(action));
-    }
-    
+
     auto actionItem = getActionItem(action);
 
-    Q_ASSERT(actionItem != nullptr);
+    //Q_ASSERT(actionItem != nullptr);
 
-    if (actionItem) {
-        for (auto connectedAction : action->getConnectedActions())
-            actionItem->appendRow(Row(connectedAction));
-    }
+    //if (actionItem) {
+    //    for (auto connectedAction : action->getConnectedActions())
+    //        actionItem->appendRow(Row(connectedAction));
+    //}
 
     connect(action, &WidgetAction::actionConnected, this, [this](WidgetAction* action) -> void {
 #ifdef PUBLIC_ACTIONS_MODEL_VERBOSE

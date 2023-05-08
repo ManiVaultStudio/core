@@ -2,8 +2,6 @@
 
 #include "AbstractManager.h"
 
-#include "models/ActionsFilterModel.h"
-
 #include <QObject>
 
 namespace hdps

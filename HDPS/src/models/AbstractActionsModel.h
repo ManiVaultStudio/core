@@ -24,19 +24,20 @@ public:
 
     /** Action columns */
     enum class Column {
-        Name,               /** Name of the action */
-        Path,               /** Path of the action */
-        ID,                 /** Globally unique identifier of the action */
-        Type,               /** Action type string */
-        Scope,              /** Scope of the action (whether the action is public or private) */
-        Visible,            /** Whether the action is visible in the GUI */
-        MayPublish,         /** Whether the action may be published */
-        MayConnect,         /** Whether the action may connect to a public action */
-        MayDisconnect,      /** Whether the action may disconnect from a public action */
-        SortIndex,          /** The sorting index of the action (its relative position in action groups) */
-        ParentActionId,     /** The identifier of the parent action (if not a top-level action) */
-        IsConnected,        /** Whether the action is connected or not */
-        PublicActionID,     /** The identifier of the public action with which the action is connected */
+        Name,                   /** Name of the action */
+        Location,               /** Where the action is located in the user interface */
+        ID,                     /** Globally unique identifier of the action */
+        Type,                   /** Action type string */
+        Scope,                  /** Scope of the action (whether the action is public or private) */
+        Visible,                /** Whether the action is visible in the GUI */
+        MayPublish,             /** Whether the action may be published */
+        MayConnect,             /** Whether the action may connect to a public action */
+        MayDisconnect,          /** Whether the action may disconnect from a public action */
+        SortIndex,              /** The sorting index of the action (its relative position in action groups) */
+        ParentActionId,         /** The identifier of the parent action (if not a top-level action) */
+        IsConnected,            /** Whether the action is connected or not */
+        PublicActionID,         /** The identifier of the public action with which the action is connected */
+        IsRootPublicAction,     /** If the action is public whether it is at the root or not */
 
         Count
     };
@@ -268,6 +269,20 @@ protected:
 
     /** Standard model item class for displaying the public action identifier */
     class PublicActionIdItem final : public Item {
+    public:
+
+        /** Use base action item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for displaying whether the action is a public root action */
+    class IsRootPublicActionItem final : public Item {
     public:
 
         /** Use base action item constructor */
