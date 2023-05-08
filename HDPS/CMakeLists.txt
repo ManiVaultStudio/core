@@ -129,8 +129,8 @@ find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidge
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
-# Qt Advanced docking system
-set(VERSION_SHORT 4.0.1)
+# Qt Advanced docking system, set version manually
+set(ADS_VERSION 4.0.1)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external)
 add_subdirectory(external/advanced_docking)
@@ -273,7 +273,7 @@ if(APPLE)
         #	RESULT_VARIABLE retval
             COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
             COMMAND ${CMAKE_COMMAND} -E copy 
-                    \"${INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.${VERSION_SHORT}.dylib\" 
+                    \"${INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.${ADS_VERSION}.dylib\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
             COMMAND ${CMAKE_COMMAND} -E copy 
                     \"$<TARGET_FILE:${HDPS_PUBLIC_LIB}>\" 
