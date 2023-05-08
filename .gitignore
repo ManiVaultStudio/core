@@ -7,3 +7,5 @@ Doxygen/
 install/
 
 .DS_Store
+
+*.aps
