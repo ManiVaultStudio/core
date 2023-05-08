@@ -8,7 +8,7 @@ namespace hdps
 /**
  * Actions hierarchy model class
  *
- * Hierarchical actions model class
+ * Hierarchical actions model class for management of public actions (parameters)
  *
  * @author Thomas Kroes
  */

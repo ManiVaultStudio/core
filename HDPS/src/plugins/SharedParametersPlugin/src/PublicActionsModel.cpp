@@ -89,12 +89,15 @@ void PublicActionsModel::removeAction(WidgetAction* action)
     if (!actionItem)
         return;
 
-    auto actionItemParent = actionItem->parent();
-
-    if (actionItemParent)
-        actionItemParent->removeRow(actionItem->row());
-    else
+    if (action->isPublic())
         removeRow(actionItem->row());
+
+    if (action->isPrivate()) {
+        auto publicActionItem = getActionItem(action->getPublicAction());
+
+        if (publicActionItem)
+            publicActionItem->removeRow(actionItem->row());
+    }
 }
 
 void PublicActionsModel::addPublicAction(WidgetAction* action)
@@ -133,6 +136,10 @@ void PublicActionsModel::addPublicAction(WidgetAction* action)
     });
 
     connect(action, &WidgetAction::actionDisconnected, this, [this](WidgetAction* action) -> void {
+#ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
+        qDebug() << action->text() << " disconnected from " << action->getPublicAction()->text();
+#endif
+
         removeAction(action);
     });
 }

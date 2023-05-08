@@ -70,6 +70,8 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::IsConnected), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::PublicActionID), true);
 
+    treeViewHeader->resizeSection(static_cast<int>(AbstractActionsModel::Column::Name), 150);
+
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Name), QHeaderView::Interactive);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Path), QHeaderView::Stretch);
 
@@ -116,7 +118,6 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
 
-    filterGroupAction << _filterModel.getTypeFilterHumanReadableAction();
     filterGroupAction << _filterModel.getHideInternalUseAction();
     filterGroupAction << _filterModel.getFilterEnabledAction();
     filterGroupAction << _filterModel.getFilterVisibilityAction();
@@ -174,7 +175,13 @@ void ActionsWidget::resizeSectionsToContent()
     if (_hierarchyWidget.getModel().rowCount() <= 0)
         return;
 
-    _hierarchyWidget.getTreeView().header()->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+    auto treeViewHeader = _hierarchyWidget.getTreeView().header();
+
+    const auto cachedNameColumnSectrionSize = treeViewHeader->sectionSize(static_cast<int>(AbstractActionsModel::Column::Name));
+
+    treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+
+    treeViewHeader->resizeSection(static_cast<int>(AbstractActionsModel::Column::Name), cachedNameColumnSectrionSize);
 }
 
 void ActionsWidget::highlightSelection(const QItemSelection& selection, bool highlight)
