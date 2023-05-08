@@ -132,7 +132,6 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 # Qt Advanced docking system, set version manually
 set(ADS_VERSION 4.0.1)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
-add_subdirectory(external)
 add_subdirectory(external/advanced_docking)
 
 # File compression LIBRARY
@@ -447,7 +446,7 @@ add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
                 ${INSTALL_DIR}/$<CONFIGURATION>/examples
 )
 
-# Install dependencies
+# Install dependencies (probably better: combination of add_custom_command and add_custom_target)
 add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" 
         --install ${CMAKE_CURRENT_BINARY_DIR}/external/advanced_docking
@@ -459,14 +458,17 @@ add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
 )
 
-# Move quazip from INSTALL_DIR/bin to INSTALL_DIR
+# Move quazip and qtadvanceddocking from INSTALL_DIR/bin to INSTALL_DIR
 if(WIN32)
     # Note! the quazip lib is named differently in Debug & Release
     add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
             "${INSTALL_DIR}/$<CONFIGURATION>/bin/quazip1-qt6$<IF:$<CONFIG:DEBUG>,d,>.dll"
             "${INSTALL_DIR}/$<CONFIGURATION>/quazip1-qt6$<IF:$<CONFIG:DEBUG>,d,>.dll"
-        # since only quazip is in the bin folder, remove it
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${INSTALL_DIR}/$<CONFIGURATION>/bin/qtadvanceddocking.dll"
+            "${INSTALL_DIR}/$<CONFIGURATION>/qtadvanceddocking.dll"
+        # since only quazip and qtadvanceddocking in the bin folder, remove it
         COMMAND ${CMAKE_COMMAND} -E remove_directory
             ${INSTALL_DIR}/$<CONFIGURATION>/bin/
     )
