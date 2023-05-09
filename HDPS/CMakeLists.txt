@@ -310,7 +310,7 @@ else()
     # On MSVC, HDPS_PRIVATE_LIB is statically linked to HDPS_EXE and does not need to be installed
 endif()
 
-# Install public headers 
+# Install public headers
 install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
         string(REGEX REPLACE \"^src/\" \"\" STRIPPED_PUBLIC_HEADER \${PUBLIC_HEADER})
         execute_process(
@@ -323,7 +323,7 @@ install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
     COMPONENT HDPSPUBLIC_HEADERS
 )
 
-# Install public headers 
+# Install public library
 install(TARGETS ${HDPS_PUBLIC_LIB}
     EXPORT HdpsPublicExport
     ARCHIVE DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB  # Linux/Mac .so
@@ -454,6 +454,7 @@ add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
 )
 
 # Install dependency runtime libraries
+# on windows, the DLLs should be placed in the same dir as the exe
 add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E echo "Installing: dependency runtime libraries"
     COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:qtadvanceddocking>" "${INSTALL_DIR}$<IF:$<CXX_COMPILER_ID:MSVC>,,/bin>/$<CONFIGURATION>"
