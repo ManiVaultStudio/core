@@ -154,6 +154,7 @@ else()
 endif()
 
 set(QUAZIP_QT_MAJOR_VERSION 6)
+set(QUAZIP_BZIP2 OFF CACHE BOOL "Enables BZIP2 compression")  # we use ZLIB, not BZIP
 add_subdirectory(external/quazip)
 
 
@@ -378,9 +379,8 @@ install(FILES
 
 # Call the install functions of the all public targets
 # needed for plugins directly after the build
-add_custom_command(
-    MESSAGE(STATUS "Installing: ManiVault link library")
-    TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
+add_custom_command(TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault link library"
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
@@ -410,7 +410,7 @@ add_custom_command(
 # Install the HDPS executable
 if(APPLE)
     add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
-        MESSAGE(STATUS "Installing: ManiVault executable (bundle)")
+        COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault executable (bundle)"
         COMMAND "${CMAKE_COMMAND}"
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
@@ -418,9 +418,8 @@ if(APPLE)
             --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
     )
 elseif(UNIX)
-    add_custom_command(
-        MESSAGE(STATUS "Installing: ManiVault link library (private)")
-        TARGET ${HDPS_PRIVATE_LIB} POST_BUILD
+    add_custom_command(TARGET ${HDPS_PRIVATE_LIB} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault link library (private)"
         COMMAND "${CMAKE_COMMAND}"
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
@@ -431,9 +430,8 @@ elseif(UNIX)
 endif()
 
 if(NOT APPLE)
-    add_custom_command(
-        MESSAGE(STATUS "Installing: ManiVault executable")
-        TARGET ${HDPS_EXE} POST_BUILD
+    add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault executable"
         COMMAND "${CMAKE_COMMAND}"
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
@@ -445,7 +443,7 @@ endif()
 
 # Install examples
 add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
-    MESSAGE(STATUS "Installing: ManiVault examples")
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault examples"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/res/examples
             ${INSTALL_DIR}/$<CONFIGURATION>/examples
@@ -453,14 +451,14 @@ add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
 
 # Install dependency runtime libraries
 add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
-    MESSAGE(STATUS "Installing: dependency runtime libraries")
-    COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:qtadvanceddocking>" "${INSTALL_DIR}/$<CONFIGURATION>"
-    COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:QuaZip>" "${INSTALL_DIR}/$<CONFIGURATION>"
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: dependency runtime libraries"
+    COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:qtadvanceddocking>" "${INSTALL_DIR}$<IF:$<CXX_COMPILER_ID:MSVC>,,/bin>/$<CONFIGURATION>"
+    COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:QuaZip>" "${INSTALL_DIR}$<IF:$<CXX_COMPILER_ID:MSVC>,,/bin>/$<CONFIGURATION>"
 )
 
 # Install dependency licences
 add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
-    MESSAGE(STATUS "Installing: dependency licences")
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: dependency licences"
     COMMAND "${CMAKE_COMMAND}" 
         --install ${CMAKE_CURRENT_BINARY_DIR}/external/advanced_docking
         --config $<CONFIGURATION> 
