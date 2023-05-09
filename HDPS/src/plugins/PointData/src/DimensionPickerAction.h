@@ -118,12 +118,6 @@ public:
 public: // Action publishing
 
     /**
-     * Get whether the action is public (visible to other actions)
-     * @return Boolean indicating whether the action is public (visible to other actions)
-     */
-    bool isPublic() const override;
-
-    /**
      * Publish this action so that other actions can connect to it
      * @param text Name of the published widget action
      */

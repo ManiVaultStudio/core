@@ -64,6 +64,7 @@ public: // Action getters
     gui::OptionsAction& getFilterMayPublishAction() { return _filterMayPublishAction; }
     gui::OptionsAction& getFilterMayConnectAction() { return _filterMayConnectAction; }
     gui::OptionsAction& getFilterMayDisconnectAction() { return _filterMayDisconnectAction; }
+    gui::ToggleAction& getPublicRootOnlyAction() { return _publicRootOnlyAction; }
     gui::TriggerAction& getRemoveFiltersAction() { return _removeFiltersAction; }
 
 private:
@@ -71,12 +72,13 @@ private:
     gui::StringAction   _typeFilterHumanReadableAction;     /** Action for filtering by human-readable action type */
     QCompleter          _typeCompleter;                     /** Completer for human-readable action type filter */
     gui::OptionsAction  _scopeFilterAction;                 /** Action for filtering based on action scope */
-    gui::OptionsAction  _filterInternalUseAction;           /** Filter internal use action */
-    gui::OptionsAction  _filterEnabledAction;               /** Filter enabled action */
-    gui::OptionsAction  _filterVisibilityAction;            /** Filter visibility action */
-    gui::OptionsAction  _filterMayPublishAction;            /** Filter may publish action */
-    gui::OptionsAction  _filterMayConnectAction;            /** Filter may connect action */
-    gui::OptionsAction  _filterMayDisconnectAction;         /** Filter may disconnect action */
+    gui::OptionsAction  _filterInternalUseAction;           /** Hide actions that are for internal use only */
+    gui::OptionsAction  _filterEnabledAction;               /** Filter actions based on whether they are enabled or not */
+    gui::OptionsAction  _filterVisibilityAction;            /** Filter actions based on their visibility */
+    gui::OptionsAction  _filterMayPublishAction;            /** Filter actions based on whether they may publish */
+    gui::OptionsAction  _filterMayConnectAction;            /** Filter actions based on whether they may connect to a public action */
+    gui::OptionsAction  _filterMayDisconnectAction;         /** Filter actions based on whether they may disconnect from a public action */
+    gui::ToggleAction   _publicRootOnlyAction;              /** Filter public root or not */
     gui::TriggerAction  _removeFiltersAction;               /** Remove filters action */
 };
 

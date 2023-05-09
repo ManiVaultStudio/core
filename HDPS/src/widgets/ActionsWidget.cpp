@@ -72,7 +72,8 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::IsConnected), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::PublicActionID), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::SortIndex), true);
-    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::IsRootPublicAction), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::IsRoot), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::IsLeaf), true);
 
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Name), QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Location), QHeaderView::Stretch);

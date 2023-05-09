@@ -165,7 +165,7 @@ void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
             if (privateAction->isPublished())
                 throw std::runtime_error("Action is already published");
 
-            auto publicAction = privateAction->_getPublicCopy();
+            auto publicAction = privateAction->getPublicCopy();
 
             if (publicAction == nullptr)
                 throw std::runtime_error("Unable to create public action");

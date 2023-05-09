@@ -123,11 +123,6 @@ bool DimensionPickerAction::maySearch() const
     return _currentDimensionAction.getNumberOfOptions() >= _searchThreshold;
 }
 
-bool DimensionPickerAction::isPublic() const
-{
-    return _currentDimensionAction.isPublic();
-}
-
 void DimensionPickerAction::publish(const QString& name)
 {
     _currentDimensionAction.publish(name);

@@ -37,7 +37,8 @@ public:
         ParentActionId,         /** The identifier of the parent action (if not a top-level action) */
         IsConnected,            /** Whether the action is connected or not */
         PublicActionID,         /** The identifier of the public action with which the action is connected */
-        IsRootPublicAction,     /** If the action is public whether it is at the root or not */
+        IsRoot,                 /** If the action is at the root or not */
+        IsLeaf,                 /** If the action is a leaf or not */
 
         Count
     };
@@ -281,8 +282,22 @@ protected:
         QVariant data(int role = Qt::UserRole + 1) const override;
     };
 
-    /** Standard model item class for displaying whether the action is a public root action */
-    class IsRootPublicActionItem final : public Item {
+    /** Standard model item class for displaying whether the action is a root action */
+    class IsRootItem final : public Item {
+    public:
+
+        /** Use base action item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for displaying whether the action is a leaf action */
+    class IsLeafItem final : public Item {
     public:
 
         /** Use base action item constructor */

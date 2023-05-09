@@ -21,9 +21,10 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     _filterMayPublishAction(this, "May publish", { "Yes", "No" }),
     _filterMayConnectAction(this, "May connect", { "Yes", "No" }),
     _filterMayDisconnectAction(this, "May disconnect", { "Yes", "No" }),
+    _publicRootOnlyAction(this, "Public root only", true, true),
     _removeFiltersAction(this, "Remove filters")
 {
-    setRecursiveFilteringEnabled(true);
+    setRecursiveFilteringEnabled(false);
 
     _typeFilterHumanReadableAction.setClearable(true);
     _typeFilterHumanReadableAction.setCompleter(&_typeCompleter);
@@ -32,8 +33,8 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
 
     connect(&_typeFilterAction, &StringAction::stringChanged, this, &ActionsFilterModel::invalidate);
     connect(&_typeFilterHumanReadableAction, &StringAction::stringChanged, this, &ActionsFilterModel::invalidate);
-
     connect(&_scopeFilterAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
+    connect(&_publicRootOnlyAction, &ToggleAction::toggled, this, &ActionsFilterModel::invalidate);
 
     const auto updateTypeFilterActionCompleter = [this]() -> void {
         _typeFilterHumanReadableAction.getCompleter()->setModel(new QStringListModel(actions().getActionTypesHumanFriendly()));
@@ -51,11 +52,12 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     _filterMayDisconnectAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
 
     _filterInternalUseAction.setToolTip("Hide parameters that are for internal use only");
-    _filterEnabledAction.setToolTip("Filter parameters based on their visibility");
+    _filterEnabledAction.setToolTip("Filter parameters based on whether they are enabled or not");
     _filterVisibilityAction.setToolTip("Filter parameters based on their visibility");
     _filterMayPublishAction.setToolTip("Filter parameters based on whether they may publish");
     _filterMayConnectAction.setToolTip("Filter parameters based on whether they may connect to a public parameter");
     _filterMayDisconnectAction.setToolTip("Filter parameters based on whether they may disconnect from a public parameter");
+    _publicRootOnlyAction.setToolTip("Filter public root or not");
     _removeFiltersAction.setToolTip("Remove all filters");
 
     const auto selectedOptionsChanged = [this]() -> void {
@@ -99,10 +101,8 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
     if (!index.isValid())
         return true;
 
-    auto action = static_cast<const AbstractActionsModel::Item*>(index.internalPointer())->getAction();
-
     if (filterRegularExpression().isValid()) {
-        const auto key = sourceModel()->data(index.siblingAtColumn(filterKeyColumn()), filterRole()).toString();
+        const auto key = getSourceData(index, static_cast<AbstractActionsModel::Column>(filterKeyColumn()), filterRole()).toString();
 
         if (!key.contains(filterRegularExpression()))
             return false;
@@ -134,30 +134,26 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
     if (scope == 1 && !_scopeFilterAction.getSelectedOptionIndices().contains(1))
         return false;
 
-    //if (!_expertModeAction.isChecked())
-    //    if (scope == 1 && !getSourceData(index, AbstractActionsModel::Column::IsRootPublicAction, Qt::EditRole).toBool())
-    //        return false;
-
     std::int32_t numberOfActiveFilters  = 0;
     std::int32_t numberOfMatches        = 0;
 
     if (_filterInternalUseAction.hasSelectedOptions()) {
-        numberOfActiveFilters++;
+        //numberOfActiveFilters++;
 
-        const auto selectedOptions = _filterInternalUseAction.getSelectedOptions();
-        const auto internalUseOnly = action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::InternalUseOnly);
+        //const auto selectedOptions = _filterInternalUseAction.getSelectedOptions();
+        //const auto internalUseOnly = action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
-        if (selectedOptions.contains("Yes") && internalUseOnly || selectedOptions.contains("No") && !internalUseOnly)
-            numberOfMatches++;
+        //if (selectedOptions.contains("Yes") && internalUseOnly || selectedOptions.contains("No") && !internalUseOnly)
+        //    numberOfMatches++;
     }
 
     if (_filterEnabledAction.hasSelectedOptions()) {
         numberOfActiveFilters++;
 
         const auto selectedOptions  = _filterEnabledAction.getSelectedOptions();
-        const auto isEnabled        = action->isEnabled();
+        const auto isEnabled        = getSourceData(index, AbstractActionsModel::Column::Name, Qt::CheckStateRole).toBool();
 
-        if (selectedOptions.contains("Yes") && isEnabled || selectedOptions.contains("No") && !isEnabled)
+        if ((selectedOptions.contains("Yes") && isEnabled) || (selectedOptions.contains("No") && !isEnabled))
             numberOfMatches++;
     }
 
@@ -165,9 +161,9 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
         numberOfActiveFilters++;
 
         const auto selectedOptions  = _filterVisibilityAction.getSelectedOptions();
-        const auto isVisible        = action->isVisible();
+        const auto isVisible        = getSourceData(index, AbstractActionsModel::Column::Visible, Qt::EditRole).toBool();
 
-        if (selectedOptions.contains("Visible") && isVisible || selectedOptions.contains("Hidden") && !isVisible)
+        if ((selectedOptions.contains("Visible") && isVisible) || (selectedOptions.contains("Hidden") && !isVisible))
             numberOfMatches++;
     }
 
@@ -175,9 +171,9 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
         numberOfActiveFilters++;
 
         const auto selectedOptions  = _filterMayPublishAction.getSelectedOptions();
-        const auto mayPublish       = action->mayPublish(WidgetAction::Gui);
+        const auto mayPublish       = getSourceData(index, AbstractActionsModel::Column::MayPublish, Qt::EditRole).toBool();
 
-        if (selectedOptions.contains("Yes") && mayPublish || selectedOptions.contains("No") && !mayPublish)
+        if ((selectedOptions.contains("Yes") && mayPublish) || (selectedOptions.contains("No") && !mayPublish))
             numberOfMatches++;
     }
 
@@ -185,9 +181,9 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
         numberOfActiveFilters++;
 
         const auto selectedOptions  = _filterMayConnectAction.getSelectedOptions();
-        const auto mayConnect       = action->mayConnect(WidgetAction::Gui);
+        const auto mayConnect       = getSourceData(index, AbstractActionsModel::Column::MayConnect, Qt::EditRole).toBool();
 
-        if (selectedOptions.contains("Yes") && mayConnect || selectedOptions.contains("No") && !mayConnect)
+        if ((selectedOptions.contains("Yes") && mayConnect) || (selectedOptions.contains("No") && !mayConnect))
             numberOfMatches++;
     }
 
@@ -195,9 +191,16 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
         numberOfActiveFilters++;
 
         const auto selectedOptions  = _filterMayDisconnectAction.getSelectedOptions();
-        const auto mayDisconnect    = action->mayDisconnect(WidgetAction::Gui);
+        const auto mayDisconnect    = getSourceData(index, AbstractActionsModel::Column::MayDisconnect, Qt::EditRole).toBool();
 
-        if (selectedOptions.contains("Yes") && mayDisconnect || selectedOptions.contains("No") && !mayDisconnect)
+        if ((selectedOptions.contains("Yes") && mayDisconnect) || (selectedOptions.contains("No") && !mayDisconnect))
+            numberOfMatches++;
+    }
+
+    if (_publicRootOnlyAction.isChecked() && getSourceData(index, AbstractActionsModel::Column::Scope, Qt::EditRole).toInt() == static_cast<int>(WidgetAction::Scope::Public)) {
+        numberOfActiveFilters++;
+
+        if (getSourceData(index, AbstractActionsModel::Column::IsRoot, Qt::EditRole).toBool())
             numberOfMatches++;
     }
 

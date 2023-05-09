@@ -34,6 +34,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _stretch(-1),
     _forceHidden(false),
     _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
+    _cachedConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
     _scope(Scope::Private),
     _publicAction(nullptr),
     _connectedActions(),
@@ -66,9 +67,36 @@ WidgetAction::~WidgetAction()
     actions().removeAction(this);
 }
 
-WidgetAction* WidgetAction::getParentAction()
+WidgetAction* WidgetAction::getParentAction() const
 {
     return dynamic_cast<WidgetAction*>(this->parent());
+}
+
+WidgetActions WidgetAction::getChildActions() const
+{
+    WidgetActions childActions;
+
+    for (auto child : children()) {
+        auto childAction = dynamic_cast<WidgetAction*>(child);
+
+        if (childAction)
+            childActions << childAction;
+    }
+
+    return childActions;
+}
+
+bool WidgetAction::isRoot() const
+{
+    if (!getParentAction())
+        return true;
+
+    return getParentAction()->getScope() != getScope();
+}
+
+bool WidgetAction::isLeaf() const
+{
+    return getChildActions().isEmpty();
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
@@ -152,14 +180,6 @@ bool WidgetAction::isPrivate() const
 bool WidgetAction::isPublic() const
 {
     return _scope == Scope::Public;
-}
-
-bool WidgetAction::isRootPublic() const
-{
-    if (isPrivate())
-        return false;
-
-    return const_cast<WidgetAction*>(this)->getParentAction() && !const_cast<WidgetAction*>(this)->getParentAction()->isPublic();
 }
 
 void WidgetAction::makePublic(bool recursive /*= true*/)
@@ -287,12 +307,22 @@ WidgetAction* WidgetAction::getPublicAction()
     return _publicAction;
 }
 
-const QVector<WidgetAction*> WidgetAction::getConnectedActions() const
+WidgetAction* WidgetAction::getPublicCopy() const
+{
+    auto actionCopy = static_cast<WidgetAction*>(metaObject()->newInstance(Q_ARG(QObject*, parent()), Q_ARG(QString, text())));
+
+    actionCopy->fromVariantMap(toVariantMap());
+    actionCopy->makePublic();
+
+    return actionCopy;
+}
+
+const WidgetActions WidgetAction::getConnectedActions() const
 {
     return _connectedActions;
 }
 
-QVector<WidgetAction*>& WidgetAction::getConnectedActions()
+WidgetActions& WidgetAction::getConnectedActions()
 {
     return _connectedActions;
 }
@@ -470,34 +500,6 @@ QVariantMap WidgetAction::toVariantMap() const
     return variantMap;
 }
 
-WidgetActions WidgetAction::getChildActions()
-{
-    WidgetActions childActions;
-
-    for (auto child : children()) {
-        auto childAction = dynamic_cast<WidgetAction*>(child);
-
-        if (childAction)
-            childActions << childAction;
-    }
-
-    return childActions;
-}
-
-WidgetActions WidgetAction::getChildPublicActions()
-{
-    WidgetActions childPublicActions;
-
-    for (auto child : children()) {
-        auto childAction = dynamic_cast<WidgetAction*>(child);
-
-        if (childAction && childAction->isPublic())
-            childPublicActions << childAction;
-    }
-
-    return childPublicActions;
-}
-
 bool WidgetAction::mayConnect(ConnectionContextFlag connectionContextFlags) const
 {
     switch (connectionContextFlags)
@@ -599,17 +601,6 @@ void WidgetAction::restoreConnectionPermissions(bool recursive /*= false*/)
     if (recursive)
         for (auto childAction : getChildActions())
             childAction->restoreConnectionPermissions(recursive);
-}
-
-WidgetAction* WidgetAction::_getPublicCopy() const
-{
-    auto actionCopy = static_cast<WidgetAction*>(metaObject()->newInstance(Q_ARG(QObject*, parent()), Q_ARG(QString, text())));
-
-    actionCopy->fromVariantMap(toVariantMap());
-    actionCopy->makePublic();
-
-    return actionCopy;
-
 }
 
 bool WidgetAction::isResettable()

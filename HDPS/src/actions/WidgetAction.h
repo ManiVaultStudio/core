@@ -102,12 +102,34 @@ public:
     /** Destructor */
     ~WidgetAction();
 
+public: // Hierarchy queries
+
     /**
      * Get parent widget action
      * @return Pointer to parent widget action (if any)
      */
-    WidgetAction* getParentAction();
+    virtual WidgetAction* getParentAction() const final;
 
+    /**
+     * Get child actions
+     * @return Vector of pointers to child actions
+     */
+    virtual WidgetActions getChildActions() const final;
+
+    /**
+     * Establish whether this action is positioned at the top of the hierarchy
+     * @return Boolean determining whether this action is positioned at the top of the hierarchy
+     */
+    virtual bool isRoot() const final;
+
+    /**
+     * Establish whether this action is positioned at the bottom of the hierarchy
+     * @return Boolean determining whether this action is positioned at the bottom of the hierarchy
+     */
+    virtual bool isLeaf() const final;
+
+public: // Widgets
+     
     /**
      * Create standard widget
      * @param parent Parent widget
@@ -210,7 +232,7 @@ public: // Highlighting
      */
     bool isHighlighted() const;
 
-public: // Scope, publishing and connections
+public: // Scope
 
     /**
      * Get widget action scope
@@ -228,15 +250,9 @@ public: // Scope, publishing and connections
      * Get whether this action is in the public actions pool
      * @return Boolean determining whether this action is in the private public pool
      */
-    virtual bool isPublic() const;
+    virtual bool isPublic() const final;
 
-    /**
-     * Determine whether the action is a root public action
-     * @return Boolean determining whether the action is a root public action
-     */
-    virtual bool isRootPublic() const final;
-
-protected:
+protected: // Connections
 
     /**
      * Make widget action public (and possibly all of its descendant widget actions)
@@ -244,7 +260,7 @@ protected:
      */
     virtual void makePublic(bool recursive = true) final;
 
-public:
+public: // Connections and publishing
 
     /**
      * Get whether the action is published
@@ -287,19 +303,27 @@ public:
     virtual WidgetAction* getPublicAction() final;
 
     /**
-     * Get connected actions
-     * @return Vector of pointers to connected actions
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
      */
-    QVector<WidgetAction*>& getConnectedActions();
+    WidgetAction* getPublicCopy() const;
 
     /**
      * Get connected actions
      * @return Vector of pointers to connected actions
      */
-    const QVector<WidgetAction*> getConnectedActions() const;
+    virtual const WidgetActions getConnectedActions() const final;
 
     /**
-     * Get whether a copy of this action may published and shared, depending on the \p connectionContextFlags
+     * Get connected actions
+     * @return Vector of pointers to connected actions
+     */
+    virtual WidgetActions& getConnectedActions() final;
+
+public: // Connection permissions
+
+    /**
+     * Get whether a copy of this action may be published and shared, depending on the \p connectionContextFlags
      * @param connectionContextFlags The context from which the action will be published (API and/or GUI)
      * @return Boolean determining whether a copy of this action may published and shared, depending on the \p connectionContextFlags
      */
@@ -370,12 +394,6 @@ public:
      * @param recursive Whether to recursively restore child connection permissions
      */
     virtual void restoreConnectionPermissions(bool recursive = false) final;
-
-    /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
-     */
-    WidgetAction* _getPublicCopy() const;
 
 public: // Settings
 
@@ -519,20 +537,6 @@ public: // State caching
      * @param remove Whether to remove the cache
      */
     void restoreState(const QString& name = "cache", bool remove = true);
-
-public:
-
-    /**
-     * Get child actions
-     * @return Vector of pointers to child actions
-     */
-    WidgetActions getChildActions();
-
-    /**
-     * Get child public actions
-     * @return Vector of pointers to child public actions
-     */
-    WidgetActions getChildPublicActions();
 
 signals:
 

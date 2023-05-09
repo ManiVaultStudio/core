@@ -366,17 +366,36 @@ QVariant AbstractActionsModel::PublicActionIdItem::data(int role /*= Qt::UserRol
     return Item::data(role);
 }
 
-QVariant AbstractActionsModel::IsRootPublicActionItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractActionsModel::IsRootItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
-            return getAction()->isRootPublic();
+            return getAction()->isRoot();
 
         case Qt::DisplayRole:
             return data(Qt::EditRole).toBool() ? "Yes" : "No";
 
         case Qt::ToolTipRole:
-            return "Public parameter is a root parameter: " + data(Qt::DisplayRole).toString();
+            return "Root parameter: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractActionsModel::IsLeafItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return getAction()->isLeaf();
+
+        case Qt::DisplayRole:
+            return data(Qt::EditRole).toBool() ? "Yes" : "No";
+
+        case Qt::ToolTipRole:
+            return "Leaf parameter: " + data(Qt::DisplayRole).toString();
 
         default:
             break;
@@ -401,7 +420,8 @@ AbstractActionsModel::Row::Row(gui::WidgetAction* action) :
     append(new ParentActionIdItem(action));
     append(new IsConnectedItem(action));
     append(new PublicActionIdItem(action));
-    append(new IsRootPublicActionItem(action));
+    append(new IsRootItem(action));
+    append(new IsLeafItem(action));
 }
 
 QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> AbstractActionsModel::columnInfo = QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo>({
@@ -418,7 +438,8 @@ QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> Abstra
     { AbstractActionsModel::Column::ParentActionId, { "Parent ID", "Parent ID", "The identifier of the parent parameter (if not a top-level parameter)" } },
     { AbstractActionsModel::Column::IsConnected, { "Connected", "Connected", "Whether the parameter is connected or not" } },
     { AbstractActionsModel::Column::PublicActionID, { "Public Parameter ID", "Public Parameter ID", "The identifier of the public parameter with which the parameter is connected" } },
-    { AbstractActionsModel::Column::IsRootPublicAction, { "Root Public", "Root Public", "Whether the parameter is a root public parameter" } }
+    { AbstractActionsModel::Column::IsRoot, { "Root", "Root", "Whether the parameter is located at the root of the hierarchy" } },
+    { AbstractActionsModel::Column::IsLeaf, { "Leaf", "Leaf", "Whether the parameter is a leaf or not" } }
 });
 
 AbstractActionsModel::AbstractActionsModel(QObject* parent /*= nullptr*/) :
