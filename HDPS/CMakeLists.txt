@@ -405,6 +405,10 @@ add_custom_command(TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
         --component HDPSPUBLIC_TARGET
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
+    # If no plugin directory exsists, ManiVault might try to import 
+    # any library in the executable directory as a plugin
+    COMMAND "${CMAKE_COMMAND}"
+        -E make_directory ${INSTALL_DIR}/$<CONFIGURATION>/Plugins
 )
 
 # Install the HDPS executable
