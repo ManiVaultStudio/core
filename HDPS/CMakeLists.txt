@@ -473,6 +473,8 @@ add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
         --config $<CONFIGURATION> 
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
         --component license
+    COMMAND "${CMAKE_COMMAND}" -E make_directory ${INSTALL_DIR}/$<CONFIGURATION>/license/quazip
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/external/quazip/COPYING ${INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
 )
 
 # -----------------------------------------------------------------------------
