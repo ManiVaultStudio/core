@@ -207,7 +207,7 @@ target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_L
 # Use avx if enabled and available
 check_and_set_AVX(${HDPS_PRIVATE_LIB} ${USE_AVX})
 
-add_dependencies(${HDPS_PRIVATE_LIB} ${HDPS_PUBLIC_LIB} QuaZip)
+add_dependencies(${HDPS_PRIVATE_LIB} ${HDPS_PUBLIC_LIB} QuaZip qtadvanceddocking)
 
 # -----------------------------------------------------------------------------
 # Target HDPS_EXE
@@ -241,7 +241,7 @@ target_link_libraries(${HDPS_EXE} PRIVATE "$<TARGET_FILE:${HDPS_PRIVATE_LIB}>")
 # Use avx if enabled and available
 check_and_set_AVX(${HDPS_EXE} ${USE_AVX})
 
-add_dependencies(${HDPS_EXE} ${HDPS_PUBLIC_LIB} ${HDPS_PRIVATE_LIB} QuaZip)
+add_dependencies(${HDPS_EXE} ${HDPS_PUBLIC_LIB} ${HDPS_PRIVATE_LIB} QuaZip qtadvanceddocking)
 
 if(MSVC)
     set_target_properties(${HDPS_EXE} PROPERTIES
@@ -378,7 +378,7 @@ install(FILES
 # Call the install functions of the all public targets
 # needed for plugins directly after the build
 add_custom_command(TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault link library"
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault public link library"
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
@@ -412,7 +412,7 @@ add_custom_command(TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
 # Install the HDPS executable
 if(APPLE)
     add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault executable (bundle)"
+        COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault executable bundle"
         COMMAND "${CMAKE_COMMAND}"
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
@@ -421,7 +421,7 @@ if(APPLE)
     )
 elseif(UNIX)
     add_custom_command(TARGET ${HDPS_PRIVATE_LIB} POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault link library (private)"
+        COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault private link library"
         COMMAND "${CMAKE_COMMAND}"
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
@@ -452,12 +452,18 @@ add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
 )
 
 # Install dependency runtime libraries
-# on windows, the DLLs should be placed in the same dir as the exe
+# on windows, the DLLs should be placed in the same directory as the executable
 add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E echo "Installing: dependency runtime libraries"
-    COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:qtadvanceddocking>" "${INSTALL_DIR}$<IF:$<CXX_COMPILER_ID:MSVC>,,/bin>/$<CONFIGURATION>"
-    COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:QuaZip>" "${INSTALL_DIR}$<IF:$<CXX_COMPILER_ID:MSVC>,,/bin>/$<CONFIGURATION>"
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:qtadvanceddocking> ${INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:QuaZip> ${INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
 )
+
+if(UNIX AND NOT APPLE)
+    # Creat symlink with slightly different name required on some linux distributions
+    include(CMakeQuaZipSymlink)
+    create_quazip_symlink()
+endif()
 
 # Install dependency licences
 add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
