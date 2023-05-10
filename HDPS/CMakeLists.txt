@@ -27,6 +27,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_INSTALL_MESSAGE LAZY)
 set(CMAKE_AUTOMOC_PATH_PREFIX ON)
 set(CMAKE_AUTOMOC ON)
 
@@ -309,17 +310,17 @@ else()
 endif()
 
 # Install public headers
-install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
-        string(REGEX REPLACE \"^src/\" \"\" STRIPPED_PUBLIC_HEADER \${PUBLIC_HEADER})
-        execute_process(
-            COMMAND \"${CMAKE_COMMAND}\" -E copy_if_different 
-                \"${CMAKE_CURRENT_SOURCE_DIR}/\${PUBLIC_HEADER}\" 
-                \"${INSTALL_DIR}/$<CONFIGURATION>/include/\${STRIPPED_PUBLIC_HEADER}\"
-        )
-    MESSAGE(STATUS \"Installing: \${PUBLIC_HEADER}\")
-    endforeach(PUBLIC_HEADER)"
-    COMPONENT HDPSPUBLIC_HEADERS
-)
+foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
+    # Remove the "src" prefix of the header get the remaining subdirectory
+    string(REGEX REPLACE "^src/(.*/).*" "\\1" STRIPPED_PUBLIC_HEADER ${PUBLIC_HEADER})
+    if("${STRIPPED_PUBLIC_HEADER}" STREQUAL "${PUBLIC_HEADER}")
+        set(STRIPPED_PUBLIC_HEADER "")
+    endif()
+    set(HEADER_DEST "${INSTALL_DIR}/$<CONFIGURATION>/include/${STRIPPED_PUBLIC_HEADER}")
+
+    # Install the header file while preserving the folder structure
+    install(FILES ${PUBLIC_HEADER} DESTINATION ${HEADER_DEST} COMPONENT HDPSPUBLIC_HEADERS)
+endforeach()
 
 # Install public library
 install(TARGETS ${HDPS_PUBLIC_LIB}
