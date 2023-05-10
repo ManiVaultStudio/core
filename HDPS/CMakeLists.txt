@@ -379,25 +379,28 @@ install(FILES
 # Call the install functions of the all public targets
 # needed for plugins directly after the build
 add_custom_command(TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault public link library"
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault public headers"
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component HDPSPUBLIC_HEADERS
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault public link library"
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component HDPSPUBLIC_LINKLIB
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault cmake config files"
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component HDPSPUBLIC_PACKAGE
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault cmake target files"
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
