@@ -34,6 +34,7 @@ public:
         MayConnect,                 /** Whether the action may connect to a public action */
         MayDisconnect,              /** Whether the action may disconnect from a public action */
         SortIndex,                  /** The sorting index of the action (its relative position in action groups) */
+        Stretch,                    /** The stretch in action groups */
         ParentActionId,             /** The identifier of the parent action (if not a top-level action) */
         IsConnected,                /** Whether the action is connected or not */
         NumberOfConnectedActions,   /** Number of connected actions (in case the action is public) */
@@ -234,6 +235,26 @@ protected:
          * @param action Pointer to action to display item for
          */
         SortIndexItem(gui::WidgetAction* action);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /** Set model data to \p value for \p role */
+        void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
+    };
+
+    /** Model item class for action stretch */
+    class StretchItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p action
+         * @param action Pointer to action to display item for
+         */
+        StretchItem(gui::WidgetAction* action);
 
         /**
          * Get model data for \p role

@@ -55,6 +55,14 @@ void HorizontalGroupAction::addAction(const WidgetAction* action)
         emit actionsChanged(getActions());
     });
 
+    connect(action, &WidgetAction::sortIndexChanged, this, [this](std::int32_t sortIndex) -> void {
+        emit actionsChanged(getActions());
+    });
+
+    connect(action, &WidgetAction::stretchChanged, this, [this](std::int32_t stretch) -> void {
+        emit actionsChanged(getActions());
+    });
+
     emit actionsChanged(getActions());
 }
 
@@ -70,13 +78,14 @@ void HorizontalGroupAction::removeAction(const WidgetAction* action)
 
 HorizontalGroupAction::Widget::Widget(QWidget* parent, HorizontalGroupAction* horizontalGroupAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, horizontalGroupAction, widgetFlags),
-    _HorizontalGroupAction(horizontalGroupAction)
+    _horizontalGroupAction(horizontalGroupAction)
 {
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(3);
 
-    const auto updateLayout = [&]() -> void {
+    const auto updateLayout = [this, layout]() -> void {
         QLayoutItem* layoutItem;
 
         while ((layoutItem = layout->takeAt(0)) != nullptr) {
@@ -84,14 +93,18 @@ HorizontalGroupAction::Widget::Widget(QWidget* parent, HorizontalGroupAction* ho
             delete layoutItem;
         }
 
-        for (auto action : horizontalGroupAction->getActions()) {
-            if (horizontalGroupAction->getShowLabels() && !action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup))
+        for (auto action : _horizontalGroupAction->getActions()) {
+            if (_horizontalGroupAction->getShowLabels() && !action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup))
                 layout->addWidget(action->createLabelWidget(this));
 
             if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::AlwaysCollapsed))
                 layout->addWidget(const_cast<WidgetAction*>(action)->createCollapsedWidget(this));
-            else
-                layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this), action->getStretch());
+            else {
+                if (action->getStretch() >= 1)
+                    layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this), action->getStretch());
+                else
+                    layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this));
+            }
         }
     };
 

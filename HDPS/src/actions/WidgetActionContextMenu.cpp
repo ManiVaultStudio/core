@@ -110,7 +110,15 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     if (allPublic) {
         _publishAction.setVisible(false);
         _disconnectAction.setVisible(false);
-        _removeAction.setVisible(true);
+
+        WidgetActions rootPublicActions;
+
+        for (auto action : actions) {
+            if (action->isPublic() && action->isRoot())
+                rootPublicActions << action;
+        }
+
+        _removeAction.setVisible(rootPublicActions.count() >= 1);
 
         if (_actions.count() == 1)
             _removeAction.setText(QString("Remove: %1").arg(firstAction->text()));
@@ -123,12 +131,12 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
             if (action->isPublic())
                 publicActions << action;
 
-        connect(&_removeAction, &TriggerAction::triggered, this, [this, publicActions]() -> void {
-            for (auto publicAction : publicActions) {
-                for (auto connectedAction : publicAction->getConnectedActions())
+        connect(&_removeAction, &TriggerAction::triggered, this, [this, rootPublicActions]() -> void {
+            for (auto rootPublicAction : rootPublicActions) {
+                for (auto connectedAction : rootPublicAction->getConnectedActions())
                     hdps::actions().disconnectPrivateActionFromPublicAction(connectedAction);
 
-                delete publicAction;
+                delete rootPublicAction;
             }
         });
     }

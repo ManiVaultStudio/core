@@ -553,6 +553,12 @@ signals:
     void sortIndexChanged(std::int32_t sortIndex);
 
     /**
+     * Signals that the stretch changed to \p stretch
+     * @param stretch Stretch factor (in action groups)
+     */
+    void stretchChanged(std::int32_t stretch);
+
+    /**
      * Signals that the force hidden settings changed to \p forceHidden
      * @param forceHidden Boolean determining whether the widget action should be hidden regardless of its built-in visibility setting
      */

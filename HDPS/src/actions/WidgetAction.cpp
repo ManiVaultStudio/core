@@ -670,7 +670,12 @@ std::int32_t WidgetAction::getStretch() const
 
 void WidgetAction::setStretch(const std::int32_t& stretch)
 {
+    if (stretch == _stretch)
+        return;
+
     _stretch = stretch;
+
+    emit stretchChanged(_stretch);
 }
 
 void WidgetAction::cacheState(const QString& name /*= "cache"*/)

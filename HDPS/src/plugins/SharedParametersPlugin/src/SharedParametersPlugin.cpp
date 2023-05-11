@@ -15,6 +15,7 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
     _expertModeAction.setChecked(!_actionsWidget.getFilterModel().getPublicRootOnlyAction().isChecked());
     _expertModeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("user-graduate"));
     _expertModeAction.setToolTip("In expert mode, all descendants of a root public parameter are displayed, otherwise they are hidden");
+    _expertModeAction.setDefaultWidgetFlags(ToggleAction::PushButtonIcon);
 
     connect(&_expertModeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
         _actionsWidget.getFilterModel().getPublicRootOnlyAction().setChecked(!toggled);

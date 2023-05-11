@@ -25,13 +25,13 @@ public:
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param HorizontalGroupAction Pointer to inline group action
+         * @param horizontalGroupAction Pointer to horizontal group action
          * @param widgetFlags Widget flags for the configuration of the widget (type)
          */
-        Widget(QWidget* parent, HorizontalGroupAction* HorizontalGroupAction, const std::int32_t& widgetFlags);
+        Widget(QWidget* parent, HorizontalGroupAction* horizontalGroupAction, const std::int32_t& widgetFlags);
 
     protected:
-        HorizontalGroupAction*   _HorizontalGroupAction;      /** Pointer to inline group action */
+        HorizontalGroupAction*   _horizontalGroupAction;      /** Pointer to horizontal group action */
 
         friend class HorizontalGroupAction;
     };
@@ -39,7 +39,7 @@ public:
 protected:
 
     /**
-     * Get widget representation of the inline group action
+     * Get widget representation of the horizontal group action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */

@@ -330,6 +330,44 @@ void AbstractActionsModel::SortIndexItem::setData(const QVariant& value, int rol
         Item::setData(value, role);
 }
 
+AbstractActionsModel::StretchItem::StretchItem(gui::WidgetAction* action) :
+    Item(action, true)
+{
+    setTextAlignment(Qt::AlignRight);
+
+    connect(action, &WidgetAction::stretchChanged, this, [this](std::int32_t stretch) -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant AbstractActionsModel::StretchItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role)
+    {
+        case Qt::DisplayRole:
+            return QVariant(QString::number(data(Qt::EditRole).toInt()));
+
+        case Qt::EditRole:
+            return getAction()->getStretch();
+
+        case Qt::ToolTipRole:
+            return QString("Stretch: %1").arg(QString::number(data(Qt::EditRole).toInt()));
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+void AbstractActionsModel::StretchItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
+{
+    if (role == Qt::EditRole)
+        getAction()->setStretch(value.toInt());
+    else
+        Item::setData(value, role);
+}
+
 QVariant AbstractActionsModel::ParentActionIdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
@@ -472,6 +510,7 @@ AbstractActionsModel::Row::Row(gui::WidgetAction* action) :
     append(new ConnectionPermissionItem(action, WidgetAction::ConnectionPermissionFlag::ConnectViaGui));
     append(new ConnectionPermissionItem(action, WidgetAction::ConnectionPermissionFlag::DisconnectViaGui));
     append(new SortIndexItem(action));
+    append(new StretchItem(action));
     append(new ParentActionIdItem(action));
     append(new IsConnectedItem(action));
     append(new NumberOfConnectedActionsItem(action));
@@ -492,6 +531,7 @@ QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> Abstra
     { AbstractActionsModel::Column::MayConnect, { "", "May Connect", "Whether the parameter may connect to a public parameter" } },
     { AbstractActionsModel::Column::MayDisconnect, { "", "May Disconnect", "Whether the parameter may disconnect from a public parameter" } },
     { AbstractActionsModel::Column::SortIndex, { "Sort Index", "Sort Index", "The sorting index of the parameter (its relative position in parameter groups)" } },
+    { AbstractActionsModel::Column::Stretch, { "Stretch", "Stretch", "The parameter stretch in parameter groups" } },
     { AbstractActionsModel::Column::ParentActionId, { "Parent ID", "Parent ID", "The identifier of the parent parameter (if not a top-level parameter)" } },
     { AbstractActionsModel::Column::IsConnected, { "Connected", "Connected", "Whether the parameter is connected or not" } },
     { AbstractActionsModel::Column::NumberOfConnectedActions, { "No. Connected Parameters", "No. Connected Parameters", "The number of connected parameters (in case the parameter is public)" } },
