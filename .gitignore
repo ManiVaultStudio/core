@@ -6,3 +6,6 @@ Doxygen/
 .vscode
 install/
 
+.DS_Store
+
+*.aps

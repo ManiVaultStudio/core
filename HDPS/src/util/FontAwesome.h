@@ -12,7 +12,7 @@ namespace hdps {
  * 2. Extract the zip file and note the major and minor version ([MAJOR_VERSION], [MINOR_VERSION])
  * 3. Copy the font from /otfs/Font Awesome x Free-Solid-900.otf to /core/HDPS/res/iconfonts and rename the file to: FontAwesome-[MAJOR_VERSION].[MINOR_VERSION].otf
  * 4. Copy the meta data file from /metadata/icons.json to core/HDPS/res/iconfonts and rename the file to: FontAwesome-[MAJOR_VERSION].[MINOR_VERSION].json
- * 5. Open /core/HDPS/res/resources.qrc in a text editor and add two entries:
+ * 5. Open /core/HDPS/res/ResourcesCore.qrc in a text editor and add two entries:
  * 6. <qresource prefix="/IconFonts">
           ...
           <file alias="FontAwesome-[MAJOR_VERSION].[MINOR_VERSION].otf">iconfonts/FontAwesome-[MAJOR_VERSION].[MINOR_VERSION].otf</file>

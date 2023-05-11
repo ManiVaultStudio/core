@@ -31,6 +31,7 @@ public:
     void uniform4f(const char* name, float v0, float v1, float v2, float v3);
     void uniformMatrix3f(const char* name, Matrix3f& m);
     void uniformMatrix4f(const char* name, Matrix4f& m);
+    void uniformMatrix4f(const char* name, const float* const m);
 
     bool loadShaderFromFile(QString vertPath, QString fragPath);
 private:

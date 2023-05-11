@@ -28,11 +28,9 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     layout->addWidget(&_createProjectFromDatasetWidget, 3);
     layout->addWidget(&_instructionVideosWidget, 1);
 
-    layout->addStretch(1);
-
     setLayout(layout);
 
-    _createProjectFromWorkspaceWidget.getHierarchyWidget().setMinimumHeight(300);
+    _createProjectFromWorkspaceWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setItemTypeName("Item");
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getTreeView().verticalScrollBar()->setDisabled(true);
 
@@ -170,7 +168,7 @@ void StartPageGetStartedWidget::updateCreateProjectFromDatasetActions()
         const auto subtitle = QString("Import data into new project with %1").arg(viewPluginFactory->getKind());
 
         StartPageAction fromDataStartPageAction(viewPluginFactory->getIcon(), viewPluginFactory->getKind(), subtitle, subtitle, "", [viewPluginFactory]() -> void {
-            projects().newBlankProject();
+            projects().newProject(Qt::AlignRight);
             plugins().requestPlugin(viewPluginFactory->getKind());
         });
 

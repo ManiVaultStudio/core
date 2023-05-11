@@ -1,9 +1,9 @@
 [submodule "biovault_bfloat16"]
-	path = external/biovault_bfloat16
-	url = https://github.com/biovault/biovault_bfloat16
+	path = HDPS/external/biovault/biovault_bfloat16
+	url = https://github.com/biovault/biovault_bfloat16.git
 [submodule "advanced_docking"]
 	path = HDPS/external/advanced_docking
-	url = https://github.com/hdps/Qt-Advanced-Docking-System.git
-[submodule "HDPS/external/quazip"]
+	url = https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System.git
+[submodule "quazip"]
 	path = HDPS/external/quazip
 	url = https://github.com/stachenov/quazip.git

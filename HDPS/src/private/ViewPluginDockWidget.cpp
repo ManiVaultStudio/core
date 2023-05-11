@@ -28,7 +28,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
     _viewPluginKind(),
     _viewPluginMap(),
     _settingsMenu(),
-    _helpAction(this, "Help")
+    _helpAction(this, "Help"),
+    _cachedVisibility(false)
 {
     active << this;
 
@@ -41,7 +42,9 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
     _viewPlugin(nullptr),
     _viewPluginKind(),
     _viewPluginMap(),
-    _helpAction(this, "Help")
+    _settingsMenu(),
+    _helpAction(this, "Help"),
+    _cachedVisibility(false)
 {
     active << this;
 
@@ -131,6 +134,13 @@ void ViewPluginDockWidget::initialize()
 
         if (!projectIsReadOnly)
             _settingsMenu.addAction(&_viewPlugin->getLockingAction().getLockedAction());
+
+        if (!_viewPlugin->getTitleBarMenuActions().isEmpty()) {
+            _settingsMenu.addSeparator();
+
+            for (auto titleBarMenuAction : _viewPlugin->getTitleBarMenuActions())
+                _settingsMenu.addAction(titleBarMenuAction);
+        }
     });
 }
 
@@ -154,14 +164,9 @@ ViewPlugin* ViewPluginDockWidget::getViewPlugin()
     return _viewPlugin;
 }
 
-QMenu* ViewPluginDockWidget::getSettingsMenu()
-{
-    return &_settingsMenu;
-}
-
 void ViewPluginDockWidget::restoreViewPluginState()
 {
-    if(!_viewPlugin)
+    if (!_viewPlugin)
         return;
 
     _viewPlugin->fromVariantMap(_viewPluginMap);
@@ -170,6 +175,11 @@ void ViewPluginDockWidget::restoreViewPluginStates()
 {
     for (auto viewPluginDockWidget : ViewPluginDockWidget::active)
         viewPluginDockWidget->restoreViewPluginState();
+}
+
+QMenu* ViewPluginDockWidget::getSettingsMenu()
+{
+    return &_settingsMenu;
 }
 
 void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)

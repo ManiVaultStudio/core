@@ -5,7 +5,7 @@
 #include <Application.h>
 #include <CoreInterface.h>
 
-#include <util/icon.h>
+#include <util/Icon.h>
 
 #include <QDebug>
 #include <QPainter>
@@ -33,13 +33,10 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     layout->addWidget(&_recentProjectsWidget);
     layout->addWidget(&_exampleProjectsWidget);
 
-    layout->addStretch(1);
-
     setLayout(layout);
 
     _openCreateProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
-    _openCreateProjectWidget.getHierarchyWidget().setFixedHeight(258);
     _openCreateProjectWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     _recentProjectsWidget.getHierarchyWidget().setItemTypeName("Recent Project");
