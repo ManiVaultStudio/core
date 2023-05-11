@@ -38,7 +38,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _selectNoneAction(this, "Select none"),
     _selectionGroupAction(this, "Selection"),
     _columnsGroupAction(this, "Columns"),
-    _settingsGroupAction(this, "Settings")
+    _settingsGroupAction(this, "Settings"),
+    _toolbarAction(this, "Toolbar")
 {
     if (_filterModel) {
         _filterModel->setSourceModel(const_cast<QAbstractItemModel*>(&_model));
@@ -149,21 +150,26 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    if (showToolbar) {
-        _toolbarLayout.setSpacing(3);
+    _filterGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::AlwaysCollapsed);
+    _selectionGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::AlwaysCollapsed);
+    _columnsGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::AlwaysCollapsed);
+    _settingsGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::AlwaysCollapsed);
 
+    _toolbarAction.setShowLabels(false);
+
+    if (showToolbar) {
         if (_filterModel) {
-            _toolbarLayout.addWidget(_filterNameAction.createWidget(this), 1);
-            _toolbarLayout.addWidget(_filterGroupAction.createCollapsedWidget(this));
+            _toolbarAction.addAction(&_filterNameAction);
+            _toolbarAction.addAction(&_filterGroupAction);
         }
         
-        _toolbarLayout.addWidget(_expandAllAction.createWidget(this));
-        _toolbarLayout.addWidget(_collapseAllAction.createWidget(this));
-        _toolbarLayout.addWidget(_selectionGroupAction.createCollapsedWidget(this));
-        _toolbarLayout.addWidget(_columnsGroupAction.createCollapsedWidget(this));
-        _toolbarLayout.addWidget(_settingsGroupAction.createCollapsedWidget(this));
+        _toolbarAction.addAction(&_expandAllAction);
+        _toolbarAction.addAction(&_collapseAllAction);
+        _toolbarAction.addAction(&_selectionGroupAction);
+        _toolbarAction.addAction(&_columnsGroupAction);
+        _toolbarAction.addAction(&_settingsGroupAction);
 
-        layout->addLayout(&_toolbarLayout);
+        layout->addWidget(_toolbarAction.createWidget(this));
     }
     
     layout->addWidget(&_treeView);
@@ -191,6 +197,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
     const auto filterModelRowsChanged = [this]() -> void {
         const auto hasItems = _filterModel != nullptr ? _filterModel->rowCount() >= 1 : _model.rowCount() >= 1;
+
+        _toolbarAction.setEnabled(hasItems);
 
         _filterNameAction.setEnabled(_model.rowCount() >= 1);
         _filterColumnAction.setEnabled(_model.rowCount() >= 1);
@@ -488,11 +496,6 @@ void HierarchyWidget::setHeaderHidden(bool headerHidden)
 
     if (_headerHidden)
         _treeView.setHeaderHidden(true);
-}
-
-QHBoxLayout& HierarchyWidget::getToolbarLayout()
-{
-    return _toolbarLayout;
 }
 
 void HierarchyWidget::updateFilterModel()

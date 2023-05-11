@@ -32,7 +32,7 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::SortIndex), true);
 
     hierarchyWidget.getFilterGroupAction().setPopupSizeHint(QSize(350, 0));
-    hierarchyWidget.getToolbarLayout().addWidget(_expertModeAction.createWidget(&getWidget(), ToggleAction::PushButtonIcon));
+    hierarchyWidget.getToolbarAction().addAction(&_expertModeAction);
 }
 
 void SharedParametersPlugin::init()

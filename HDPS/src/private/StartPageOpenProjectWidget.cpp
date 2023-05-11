@@ -42,7 +42,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _recentProjectsWidget.getHierarchyWidget().setItemTypeName("Recent Project");
     _exampleProjectsWidget.getHierarchyWidget().setItemTypeName("Example Project");
 
-    _recentProjectsWidget.getHierarchyWidget().getToolbarLayout().addWidget(_recentProjectsAction.getEditAction().createWidget(this, TriggerAction::Icon));
+    _recentProjectsWidget.getHierarchyWidget().getToolbarAction().addAction(&_recentProjectsAction);
 
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
 
