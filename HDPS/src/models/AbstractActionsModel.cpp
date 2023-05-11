@@ -59,6 +59,7 @@ AbstractActionsModel::NameItem::NameItem(gui::WidgetAction* action) :
     Item(action)
 {
     setCheckable(true);
+    setEditable(action->isPublic());
     setCheckState(getAction()->isEnabled() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
 
     connect(getAction(), &WidgetAction::changed, this, [this]() -> void {
@@ -88,18 +89,26 @@ QVariant AbstractActionsModel::NameItem::data(int role /*= Qt::UserRole + 1*/) c
 
 void AbstractActionsModel::NameItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
 {
-    if (role == Qt::CheckStateRole)
-        getAction()->setEnabled(value.toBool());
-    else
-        Item::setData(value, role);
+    switch (role) {
+        case Qt::EditRole:
+            getAction()->setText(value.toString());
+            break;
+
+        case Qt::CheckStateRole:
+            getAction()->setEnabled(value.toBool());
+            break;
+
+        default:
+            Item::setData(value, role);
+    }
 }
 
-QVariant AbstractActionsModel::PathItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractActionsModel::LocationItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
-            return getAction()->isPrivate() ? getAction()->getPath() : "";
+            return getAction()->isPrivate() ? getAction()->getLocation() : "";
 
         case Qt::ToolTipRole:
             return getAction()->isPrivate() ? "Parameter is located in: " + data(Qt::DisplayRole).toString() : "";
@@ -109,6 +118,14 @@ QVariant AbstractActionsModel::PathItem::data(int role /*= Qt::UserRole + 1*/) c
     }
 
     return Item::data(role);
+}
+
+AbstractActionsModel::IdItem::IdItem(gui::WidgetAction* action) :
+    Item(action)
+{
+    connect(getAction(), &WidgetAction::idChanged, this, [this](const QString& id) -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant AbstractActionsModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -337,10 +354,29 @@ QVariant AbstractActionsModel::IsConnectedItem::data(int role /*= Qt::UserRole +
             return getAction()->isConnected();
 
         case Qt::DisplayRole:
-            return getAction()->isConnected() ? "Yes" : "No";
+            return data(Qt::EditRole).toBool() ? "Yes" : "No";
 
         case Qt::ToolTipRole:
             return "Parameter " + QString(getAction()->isConnected() ? "is connected" : "is not connected");
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractActionsModel::NumberOfConnectedActionsItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return getAction()->getConnectedActions().count();
+
+        case Qt::DisplayRole:
+            return QString::number(data(Qt::EditRole).toInt());
+
+        case Qt::ToolTipRole:
+            return "Number of connected parameters: " + data(Qt::DisplayRole).toString();
 
         default:
             break;
@@ -404,11 +440,30 @@ QVariant AbstractActionsModel::IsLeafItem::data(int role /*= Qt::UserRole + 1*/)
     return Item::data(role);
 }
 
+QVariant AbstractActionsModel::InternalUseOnlyItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return (getAction()->getConfiguration() & static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::InternalUseOnly));
+
+        case Qt::DisplayRole:
+            return data(Qt::EditRole).toBool() ? "Yes" : "No";
+
+        case Qt::ToolTipRole:
+            return "Parameter internal use only: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 AbstractActionsModel::Row::Row(gui::WidgetAction* action) :
     QList<QStandardItem*>()
 {
     append(new NameItem(action));
-    append(new PathItem(action));
+    append(new LocationItem(action));
     append(new IdItem(action));
     append(new TypeItem(action));
     append(new ScopeItem(action));
@@ -419,9 +474,11 @@ AbstractActionsModel::Row::Row(gui::WidgetAction* action) :
     append(new SortIndexItem(action));
     append(new ParentActionIdItem(action));
     append(new IsConnectedItem(action));
+    append(new NumberOfConnectedActionsItem(action));
     append(new PublicActionIdItem(action));
     append(new IsRootItem(action));
     append(new IsLeafItem(action));
+    append(new InternalUseOnlyItem(action));
 }
 
 QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> AbstractActionsModel::columnInfo = QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo>({
@@ -437,9 +494,11 @@ QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> Abstra
     { AbstractActionsModel::Column::SortIndex, { "Sort Index", "Sort Index", "The sorting index of the parameter (its relative position in parameter groups)" } },
     { AbstractActionsModel::Column::ParentActionId, { "Parent ID", "Parent ID", "The identifier of the parent parameter (if not a top-level parameter)" } },
     { AbstractActionsModel::Column::IsConnected, { "Connected", "Connected", "Whether the parameter is connected or not" } },
+    { AbstractActionsModel::Column::NumberOfConnectedActions, { "No. Connected Parameters", "No. Connected Parameters", "The number of connected parameters (in case the parameter is public)" } },
     { AbstractActionsModel::Column::PublicActionID, { "Public Parameter ID", "Public Parameter ID", "The identifier of the public parameter with which the parameter is connected" } },
     { AbstractActionsModel::Column::IsRoot, { "Root", "Root", "Whether the parameter is located at the root of the hierarchy" } },
-    { AbstractActionsModel::Column::IsLeaf, { "Leaf", "Leaf", "Whether the parameter is a leaf or not" } }
+    { AbstractActionsModel::Column::IsLeaf, { "Leaf", "Leaf", "Whether the parameter is a leaf or not" } },
+    { AbstractActionsModel::Column::InternalUseOnly, { "Internal use only", "Internal use only", "Whether the parameter is for internal use only" } }
 });
 
 AbstractActionsModel::AbstractActionsModel(QObject* parent /*= nullptr*/) :
@@ -459,7 +518,7 @@ AbstractActionsModel::AbstractActionsModel(QObject* parent /*= nullptr*/) :
 Qt::ItemFlags AbstractActionsModel::flags(const QModelIndex& index) const
 {
     if (index.column() == static_cast<int>(AbstractActionsModel::Column::Name))
-        return (QStandardItemModel::flags(index) & ~Qt::ItemIsEditable) | Qt::ItemIsUserCheckable;
+        return QStandardItemModel::flags(index) | Qt::ItemIsUserCheckable;
     
     return  QStandardItemModel::flags(index);
 }
@@ -476,7 +535,7 @@ WidgetAction* AbstractActionsModel::getAction(std::int32_t rowIndex)
 
 QModelIndex AbstractActionsModel::getActionIndex(const gui::WidgetAction* action, const Column& column /** = Column::Name */) const
 {
-    const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::EditRole, action->getId(), 1, Qt::MatchFlag::MatchRecursive);
+    const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::EditRole, action->getId(), 1, Qt::MatchFlag::MatchRecursive | Qt::MatchExactly);
 
     if (matches.count() == 1)
         return matches.first().siblingAtColumn(static_cast<int>(column));
@@ -491,12 +550,12 @@ QStandardItem* AbstractActionsModel::getActionItem(const gui::WidgetAction* acti
     if (action == nullptr)
         return nullptr;
 
-    const auto parentActionIndex = getActionIndex(action);
+    const auto actionIndex = getActionIndex(action);
 
-    if (!parentActionIndex.isValid())
+    if (!actionIndex.isValid())
         return nullptr;
 
-    return itemFromIndex(parentActionIndex);
+    return itemFromIndex(actionIndex);
 }
 
 }

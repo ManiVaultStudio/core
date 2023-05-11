@@ -24,7 +24,7 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     _publicRootOnlyAction(this, "Public root only", true, true),
     _removeFiltersAction(this, "Remove filters")
 {
-    setRecursiveFilteringEnabled(false);
+    setRecursiveFilteringEnabled(true);
 
     _typeFilterHumanReadableAction.setClearable(true);
     _typeFilterHumanReadableAction.setCompleter(&_typeCompleter);
@@ -128,6 +128,8 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
 
     const auto scope = getSourceData(index, AbstractActionsModel::Column::Scope, Qt::EditRole).toInt();
 
+    //qDebug() << scope;
+
     if (scope == 0 && !_scopeFilterAction.getSelectedOptionIndices().contains(0))
         return false;
 
@@ -138,13 +140,13 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
     std::int32_t numberOfMatches        = 0;
 
     if (_filterInternalUseAction.hasSelectedOptions()) {
-        //numberOfActiveFilters++;
+        numberOfActiveFilters++;
 
-        //const auto selectedOptions = _filterInternalUseAction.getSelectedOptions();
-        //const auto internalUseOnly = action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::InternalUseOnly);
+        const auto selectedOptions = _filterInternalUseAction.getSelectedOptions();
+        const auto internalUseOnly = getSourceData(index, AbstractActionsModel::Column::InternalUseOnly, Qt::CheckStateRole).toBool();
 
-        //if (selectedOptions.contains("Yes") && internalUseOnly || selectedOptions.contains("No") && !internalUseOnly)
-        //    numberOfMatches++;
+        if (selectedOptions.contains("Yes") && internalUseOnly || selectedOptions.contains("No") && !internalUseOnly)
+            numberOfMatches++;
     }
 
     if (_filterEnabledAction.hasSelectedOptions()) {

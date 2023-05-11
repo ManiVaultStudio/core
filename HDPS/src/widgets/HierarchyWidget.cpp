@@ -504,6 +504,8 @@ void HierarchyWidget::updateFilterModel()
 
     _filterModel->setFilterKeyColumn(_filterColumnAction.getCurrentIndex());
 
+    //_filterModel->setRecursiveFilteringEnabled(!_filterNameAction.getString().isEmpty());
+
     if (_filterRegularExpressionAction.isChecked()) {
         _filterNameAction.setPlaceHolderString(QString("Search for %1 by regular expression").arg(itemTypeNameLowered));
 

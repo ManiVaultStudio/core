@@ -108,10 +108,6 @@ QVariantMap ActionsManager::toVariantMap() const
 
 void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QString& name /*= ""*/, bool recursive /*= true*/)
 {
-#ifdef ACTIONS_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__ << privateAction->text();
-#endif
-
     try
     {
         if (name.isEmpty()) {
@@ -162,6 +158,10 @@ void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
                 publishPrivateAction(privateAction, nameAction.getString(), recursiveAction.isChecked());
         }
         else {
+#ifdef ACTIONS_MANAGER_VERBOSE
+            qDebug() << __FUNCTION__ << privateAction->text();
+#endif
+
             if (privateAction->isPublished())
                 throw std::runtime_error("Action is already published");
 

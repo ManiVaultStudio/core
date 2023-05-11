@@ -185,8 +185,11 @@ bool WidgetAction::isPublic() const
 void WidgetAction::makePublic(bool recursive /*= true*/)
 {
     _scope = Scope::Public;
+    
+    makeUnique();
 
     emit scopeChanged(_scope);
+    emit idChanged(getId());
 
     for (auto child : children()) {
         auto widgetAction = dynamic_cast<WidgetAction*>(child);
@@ -309,12 +312,12 @@ WidgetAction* WidgetAction::getPublicAction()
 
 WidgetAction* WidgetAction::getPublicCopy() const
 {
-    auto actionCopy = static_cast<WidgetAction*>(metaObject()->newInstance(Q_ARG(QObject*, parent()), Q_ARG(QString, text())));
+    auto publicCopy = static_cast<WidgetAction*>(metaObject()->newInstance(Q_ARG(QObject*, parent()), Q_ARG(QString, text())));
 
-    actionCopy->fromVariantMap(toVariantMap());
-    actionCopy->makePublic();
+    publicCopy->fromVariantMap(toVariantMap());
+    publicCopy->makePublic();
 
-    return actionCopy;
+    return publicCopy;
 }
 
 const WidgetActions WidgetAction::getConnectedActions() const
@@ -392,21 +395,21 @@ void WidgetAction::saveToSettings()
     Application::current()->setSetting(_settingsPrefix, toVariantMap());
 }
 
-QString WidgetAction::getPath() const
+QString WidgetAction::getLocation() const
 {
-    QStringList actionPath;
+    QStringList location;
 
     auto currentParent = dynamic_cast<WidgetAction*>(parent());
 
-    actionPath << text();
+    location << text();
 
     while (currentParent) {
-        actionPath.insert(actionPath.begin(), currentParent->text());
+        location.insert(location.begin(), currentParent->text());
 
         currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());
     }
 
-    return actionPath.join("/");
+    return location.join("/");
 }
 
 QVector<WidgetAction*> WidgetAction::findChildren(const QString& searchString, bool recursive /*= true*/) const

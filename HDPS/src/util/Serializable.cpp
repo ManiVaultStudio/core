@@ -21,7 +21,7 @@ using namespace hdps::gui;
 namespace hdps::util {
 
 Serializable::Serializable(const QString& name /*= ""*/) :
-    _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
+    _id(createId()),
     _serializationName(name)
 {
 }
@@ -136,6 +136,16 @@ void Serializable::toJsonFile(const QString& filePath /*= ""*/)
     catch (...) {
         exceptionMessageBox("Unable to save data to JSON file");
     }
+}
+
+void Serializable::makeUnique()
+{
+    _id = createId();
+}
+
+QString Serializable::createId()
+{
+    return QUuid::createUuid().toString(QUuid::WithoutBraces);
 }
 
 void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap& variantMap)

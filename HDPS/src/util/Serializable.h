@@ -90,6 +90,15 @@ public:
      */
     virtual void toJsonFile(const QString& filePath = "") final;
 
+    /** Assigns a fresh new identifier to the serializable object */
+    virtual void makeUnique() final;
+
+    /**
+     * Creates a new globally unique identifier for a serializable object
+     * @return Globally unique identifier
+     */
+    static QString createId();
+
 protected:
 
     /**

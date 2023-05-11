@@ -56,6 +56,10 @@ void PublicActionsModel::addAction(WidgetAction* action)
         if (!publicAction)
             return;
 
+//#ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
+//        qDebug() << __FUNCTION__ << publicAction->getId() << action->getId();
+//#endif
+
         auto publicActionItem = getActionItem(publicAction);
 
         if (!publicActionItem)
@@ -83,13 +87,17 @@ void PublicActionsModel::removeAction(WidgetAction* action)
     if (action == nullptr)
         return;
 
+#ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
+    qDebug() << __FUNCTION__ << action->text();
+#endif
+
     auto actionItem = getActionItem(action);
 
     if (!actionItem)
         return;
 
-    if (action->isPublic())
-        removeRow(actionItem->row());
+    //if (action->isPublic())
+    //    removeRow(actionItem->row());
 
     if (action->isPrivate()) {
         auto publicActionItem = getActionItem(action->getPublicAction());
@@ -99,20 +107,20 @@ void PublicActionsModel::removeAction(WidgetAction* action)
     }
 }
 
-void PublicActionsModel::addPublicAction(WidgetAction* action, bool onlyAddIfRoot /*= true*/)
+void PublicActionsModel::addPublicAction(WidgetAction* publicAction)
 {
 #ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
-    qDebug() << __FUNCTION__ << action->text();
+    qDebug() << __FUNCTION__ << publicAction->text();
 #endif
 
-    auto parentActionItem = getActionItem(action->getParentAction());
+    auto parentActionItem = getActionItem(publicAction->getParentAction());
 
     if (parentActionItem)
-        parentActionItem->appendRow(Row(action));
+        parentActionItem->appendRow(Row(publicAction));
     else
-        appendRow(Row(action));
+        appendRow(Row(publicAction));
 
-    auto actionItem = getActionItem(action);
+    auto actionItem = getActionItem(publicAction);
 
     //Q_ASSERT(actionItem != nullptr);
 
@@ -121,17 +129,17 @@ void PublicActionsModel::addPublicAction(WidgetAction* action, bool onlyAddIfRoo
     //        actionItem->appendRow(Row(connectedAction));
     //}
 
-    connect(action, &WidgetAction::actionConnected, this, [this](WidgetAction* action) -> void {
+    connect(publicAction, &WidgetAction::actionConnected, this, [this](WidgetAction* action) -> void {
 #ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
-        qDebug() << action->text() << " connected to " << action->getPublicAction()->text();
+        qDebug() << action->getLocation() << " connected to " << action->getPublicAction()->getLocation();
 #endif
 
         addAction(action);
     });
 
-    connect(action, &WidgetAction::actionDisconnected, this, [this](WidgetAction* action) -> void {
+    connect(publicAction, &WidgetAction::actionDisconnected, this, [this](WidgetAction* action) -> void {
 #ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
-        qDebug() << action->text() << " disconnected from " << action->getPublicAction()->text();
+        qDebug() << action->getLocation() << " disconnected from " << action->getPublicAction()->getLocation();
 #endif
 
         removeAction(action);
@@ -140,8 +148,31 @@ void PublicActionsModel::addPublicAction(WidgetAction* action, bool onlyAddIfRoo
 
 void PublicActionsModel::removePublicAction(WidgetAction* publicAction)
 {
+#ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
+    qDebug() << __FUNCTION__ << publicAction->text();
+#endif
+
+    Q_ASSERT(publicAction != nullptr);
+
+    if (publicAction == nullptr)
+        return;
+
     disconnect(publicAction, &WidgetAction::actionConnected, this, nullptr);
     disconnect(publicAction, &WidgetAction::actionDisconnected, this, nullptr);
+
+    auto publicActionItem = getActionItem(publicAction);
+
+    Q_ASSERT(publicActionItem != nullptr);
+
+    if (!publicActionItem)
+        return;
+
+    auto parentItem = publicActionItem->parent();
+
+    if (parentItem)
+        parentItem->removeRow(publicActionItem->row());
+    else
+        removeRow(publicActionItem->row());
 }
 
 }

@@ -407,10 +407,10 @@ public: // Settings
     virtual void reset() {};
 
     /**
-     * Get path relative to the top-level action
+     * Get location
      * @return Path relative to the top-level action
      */
-    QString getPath() const;
+    QString getLocation() const;
 
     /**
      * Set settings prefix

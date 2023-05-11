@@ -320,21 +320,4 @@ Q_DECLARE_METATYPE(hdps::gui::GroupsAction)
 
 inline const auto groupsActionMetaTypeId = qRegisterMetaType<hdps::gui::GroupsAction*>("GroupsAction");
 
-/**
- * Print group actions to console
- * @param debug Debug
- * @param groupActions Reference to group actions
- */
-inline QDebug operator << (QDebug debug, const GroupsAction::GroupActions& groupActions)
-{
-    QStringList names;
-
-    for (const auto groupAction : groupActions)
-        names << groupAction->getPath();
-
-    debug << names.join(", ");
-
-    return debug.space();
-}
-
 }

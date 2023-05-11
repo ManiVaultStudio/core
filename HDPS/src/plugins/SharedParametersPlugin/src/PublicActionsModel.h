@@ -70,9 +70,8 @@ public:
     /**
      * Add \p publicAction to the model
      * @param publicAction Pointer to public action to add
-     * @param onlyAddIfRoot Only public add if is a root public action
      */
-    void addPublicAction(gui::WidgetAction* action, bool onlyAddIfRoot = true);
+    void addPublicAction(gui::WidgetAction* publicAction);
 
     /**
      * Remove \p publicAction from the model

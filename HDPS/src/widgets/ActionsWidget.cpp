@@ -70,10 +70,12 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::Scope), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::ParentActionId), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::IsConnected), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::NumberOfConnectedActions), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::PublicActionID), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::SortIndex), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::IsRoot), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::IsLeaf), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::InternalUseOnly), true);
 
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Name), QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Location), QHeaderView::Stretch);
@@ -117,6 +119,7 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
 
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
 
+    filterGroupAction << _filterModel.getScopeFilterAction();
     filterGroupAction << _filterModel.getHideInternalUseAction();
     filterGroupAction << _filterModel.getFilterEnabledAction();
     filterGroupAction << _filterModel.getFilterVisibilityAction();

@@ -11,6 +11,13 @@
 namespace hdps
 {
 
+/**
+ * Actions filter class
+ *
+ * Proxy model for filtering concrete actions model classes (derived from AbstractActionsModel)
+ *
+ * @author Thomas Kroes
+ */
 class ActionsFilterModel final : public QSortFilterProxyModel
 {
 public:
