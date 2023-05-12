@@ -31,7 +31,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     util::Serializable(),
     _defaultWidgetFlags(),
     _sortIndex(-1),
-    _stretch(-1),
+    _stretch(0),
     _forceHidden(false),
     _forceDisabled(false),
     _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
