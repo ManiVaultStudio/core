@@ -211,7 +211,7 @@ protected:
 
         emit publicAction->actionConnected(privateAction);
 
-        connect(privateAction, &gui::WidgetAction::destroyed, this, [&]() -> void {
+        connect(privateAction, &gui::WidgetAction::destroyed, this, [this, privateAction, publicAction]() -> void {
             removePrivateActionFromPublicAction(privateAction, publicAction);
         });
     }

@@ -96,7 +96,6 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
 
 bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
-    return true;
     const auto index = sourceModel()->index(row, 0, parent);
 
     if (!index.isValid())
