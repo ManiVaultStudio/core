@@ -67,7 +67,8 @@ public: // Action getters
     gui::OptionsAction& getScopeFilterAction() { return _scopeFilterAction; }
     gui::OptionsAction& getHideInternalUseAction() { return _filterInternalUseAction; }
     gui::OptionsAction& getFilterEnabledAction() { return _filterEnabledAction; }
-    gui::OptionsAction& getFilterVisibilityAction() { return _filterVisibilityAction; }
+    gui::OptionsAction& getFilterForceHiddenAction() { return _filterForceHiddenAction; }
+    gui::OptionsAction& getFilterForceDisabledAction() { return _filterForceDisabledAction; }
     gui::OptionsAction& getFilterMayPublishAction() { return _filterMayPublishAction; }
     gui::OptionsAction& getFilterMayConnectAction() { return _filterMayConnectAction; }
     gui::OptionsAction& getFilterMayDisconnectAction() { return _filterMayDisconnectAction; }
@@ -81,7 +82,8 @@ private:
     gui::OptionsAction  _scopeFilterAction;                 /** Action for filtering based on action scope */
     gui::OptionsAction  _filterInternalUseAction;           /** Hide actions that are for internal use only */
     gui::OptionsAction  _filterEnabledAction;               /** Filter actions based on whether they are enabled or not */
-    gui::OptionsAction  _filterVisibilityAction;            /** Filter actions based on their visibility */
+    gui::OptionsAction  _filterForceHiddenAction;           /** Filter actions based on their force hidden state */
+    gui::OptionsAction  _filterForceDisabledAction;         /** Filter actions based on their force disabled state */
     gui::OptionsAction  _filterMayPublishAction;            /** Filter actions based on whether they may publish */
     gui::OptionsAction  _filterMayConnectAction;            /** Filter actions based on whether they may connect to a public action */
     gui::OptionsAction  _filterMayDisconnectAction;         /** Filter actions based on whether they may disconnect from a public action */

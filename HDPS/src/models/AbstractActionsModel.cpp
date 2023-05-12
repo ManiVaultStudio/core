@@ -73,7 +73,7 @@ QVariant AbstractActionsModel::NameItem::data(int role /*= Qt::UserRole + 1*/) c
             return getAction()->text();
 
         case Qt::ToolTipRole:
-            return QString("Parameter name: %1").arg(data(Qt::DisplayRole).toString());
+            return QString("Parameter name: %1 (double-click to edit)").arg(data(Qt::DisplayRole).toString());
 
         //case Qt::CheckStateRole:
         //    return getAction()->isEnabled() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;

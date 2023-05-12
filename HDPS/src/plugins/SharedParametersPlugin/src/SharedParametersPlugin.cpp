@@ -25,8 +25,8 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
 
     auto& treeView = hierarchyWidget.getTreeView();
 
-    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::ForceDisabled), false);
-    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::ForceHidden), false);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::ForceDisabled), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::ForceHidden), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::Location), false);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::MayPublish), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::MayConnect), true);

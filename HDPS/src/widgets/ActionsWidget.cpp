@@ -53,14 +53,7 @@ protected:
             }
 
             default:
-            {
-                const auto forceDisabled = index.siblingAtColumn(static_cast<int>(AbstractActionsModel::Column::ForceDisabled)).data(Qt::EditRole).toBool();
-
-                if (column != AbstractActionsModel::Column::ForceDisabled && forceDisabled)
-                    option->state &= ~QStyle::State_Enabled;
-
                 break;
-            }
         }
     }
 };
@@ -147,7 +140,8 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     filterGroupAction << _filterModel.getScopeFilterAction();
     filterGroupAction << _filterModel.getHideInternalUseAction();
     filterGroupAction << _filterModel.getFilterEnabledAction();
-    filterGroupAction << _filterModel.getFilterVisibilityAction();
+    filterGroupAction << _filterModel.getFilterForceHiddenAction();
+    filterGroupAction << _filterModel.getFilterForceDisabledAction();
     filterGroupAction << _filterModel.getFilterMayPublishAction();
     filterGroupAction << _filterModel.getFilterMayConnectAction();
     filterGroupAction << _filterModel.getFilterMayDisconnectAction();

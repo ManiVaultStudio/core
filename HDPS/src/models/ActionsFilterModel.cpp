@@ -17,7 +17,8 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     _scopeFilterAction(this, "Scope", { "Private", "Public" }, { "Private", "Public" }),
     _filterInternalUseAction(this, "Internal", { "Yes", "No" }, { "No" }),
     _filterEnabledAction(this, "Enabled", { "Yes", "No" }),
-    _filterVisibilityAction(this, "Visibility", { "Visible", "Hidden" }),
+    _filterForceHiddenAction(this, "Force hidden", { "Yes", "No" }),
+    _filterForceDisabledAction(this, "Force disabled", { "Yes", "No" }),
     _filterMayPublishAction(this, "May publish", { "Yes", "No" }),
     _filterMayConnectAction(this, "May connect", { "Yes", "No" }),
     _filterMayDisconnectAction(this, "May disconnect", { "Yes", "No" }),
@@ -44,16 +45,18 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
 
     connect(&actions(), &AbstractActionsManager::actionTypesHumanFriendlyChanged, this, updateTypeFilterActionCompleter);
 
-    _filterInternalUseAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
-    _filterEnabledAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
-    _filterVisibilityAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
-    _filterMayPublishAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
-    _filterMayConnectAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
-    _filterMayDisconnectAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    //_filterInternalUseAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    //_filterEnabledAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    //_filterForceHiddenAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    //_filterForceDisabledAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    //_filterMayPublishAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    //_filterMayConnectAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    //_filterMayDisconnectAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
 
     _filterInternalUseAction.setToolTip("Hide parameters that are for internal use only");
     _filterEnabledAction.setToolTip("Filter parameters based on whether they are enabled or not");
-    _filterVisibilityAction.setToolTip("Filter parameters based on their visibility");
+    _filterForceHiddenAction.setToolTip("Filter parameters based whether they are force hidden");
+    _filterForceDisabledAction.setToolTip("Filter parameters based whether they are force disabled");
     _filterMayPublishAction.setToolTip("Filter parameters based on whether they may publish");
     _filterMayConnectAction.setToolTip("Filter parameters based on whether they may connect to a public parameter");
     _filterMayDisconnectAction.setToolTip("Filter parameters based on whether they may disconnect from a public parameter");
@@ -67,7 +70,8 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
 
         resettable << _filterInternalUseAction.isResettable();
         resettable << _filterEnabledAction.isResettable();
-        resettable << _filterVisibilityAction.isResettable();
+        resettable << _filterForceHiddenAction.isResettable();
+        resettable << _filterForceDisabledAction.isResettable();
         resettable << _filterMayPublishAction.isResettable();
         resettable << _filterMayConnectAction.isResettable();
         resettable << _filterMayDisconnectAction.isResettable();
@@ -77,7 +81,8 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
 
     connect(&_filterInternalUseAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
     connect(&_filterEnabledAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
-    connect(&_filterVisibilityAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
+    connect(&_filterForceHiddenAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
+    connect(&_filterForceDisabledAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
     connect(&_filterMayPublishAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
     connect(&_filterMayConnectAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
     connect(&_filterMayDisconnectAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
@@ -85,7 +90,8 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     connect(&_removeFiltersAction, &TriggerAction::triggered, this, [this]() -> void {
         _filterInternalUseAction.reset();
         _filterEnabledAction.reset();
-        _filterVisibilityAction.reset();
+        _filterForceHiddenAction.reset();
+        _filterForceDisabledAction.reset();
         _filterMayPublishAction.reset();
         _filterMayConnectAction.reset();
         _filterMayDisconnectAction.reset();
@@ -128,8 +134,6 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
 
     const auto scope = getSourceData(index, AbstractActionsModel::Column::Scope, Qt::EditRole).toInt();
 
-    //qDebug() << scope;
-
     if (scope == 0 && !_scopeFilterAction.getSelectedOptionIndices().contains(0))
         return false;
 
@@ -145,7 +149,7 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
         const auto selectedOptions = _filterInternalUseAction.getSelectedOptions();
         const auto internalUseOnly = getSourceData(index, AbstractActionsModel::Column::InternalUseOnly, Qt::CheckStateRole).toBool();
 
-        if (selectedOptions.contains("Yes") && internalUseOnly || selectedOptions.contains("No") && !internalUseOnly)
+        if ((selectedOptions.contains("Yes") && internalUseOnly) || (selectedOptions.contains("No") && !internalUseOnly))
             numberOfMatches++;
     }
 
@@ -159,13 +163,23 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
             numberOfMatches++;
     }
 
-    if (_filterVisibilityAction.hasSelectedOptions()) {
+    if (_filterForceHiddenAction.hasSelectedOptions()) {
         numberOfActiveFilters++;
 
-        const auto selectedOptions  = _filterVisibilityAction.getSelectedOptions();
-        const auto isVisible        = getSourceData(index, AbstractActionsModel::Column::ForceHidden, Qt::EditRole).toBool();
+        const auto selectedOptions  = _filterForceHiddenAction.getSelectedOptions();
+        const auto isForceHidden    = getSourceData(index, AbstractActionsModel::Column::ForceHidden, Qt::EditRole).toBool();
 
-        if ((selectedOptions.contains("Visible") && isVisible) || (selectedOptions.contains("Hidden") && !isVisible))
+        if ((selectedOptions.contains("Yes") && isForceHidden) || (selectedOptions.contains("No") && !isForceHidden))
+            numberOfMatches++;
+    }
+
+    if (_filterForceDisabledAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
+
+        const auto selectedOptions  = _filterForceDisabledAction.getSelectedOptions();
+        const auto isForceDisabled  = getSourceData(index, AbstractActionsModel::Column::ForceDisabled, Qt::EditRole).toBool();
+
+        if ((selectedOptions.contains("Yes") && isForceDisabled) || (selectedOptions.contains("No") && !isForceDisabled))
             numberOfMatches++;
     }
 
