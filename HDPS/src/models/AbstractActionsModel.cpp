@@ -632,8 +632,8 @@ AbstractActionsModel::AbstractActionsModel(QObject* parent /*= nullptr*/) :
 
 Qt::ItemFlags AbstractActionsModel::flags(const QModelIndex& index) const
 {
-    if (index.column() == static_cast<int>(AbstractActionsModel::Column::ForceDisabled))
-        return QStandardItemModel::flags(index) | Qt::ItemIsUserCheckable;
+    //if (index.column() == static_cast<int>(AbstractActionsModel::Column::ForceDisabled))
+    //    return QStandardItemModel::flags(index) | Qt::ItemIsUserCheckable;
     
     return  QStandardItemModel::flags(index);
 }

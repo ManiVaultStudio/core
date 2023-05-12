@@ -56,10 +56,6 @@ void PublicActionsModel::addAction(WidgetAction* action)
         if (!publicAction)
             return;
 
-//#ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
-//        qDebug() << __FUNCTION__ << publicAction->getId() << action->getId();
-//#endif
-
         auto publicActionItem = getActionItem(publicAction);
 
         if (!publicActionItem)
@@ -95,9 +91,6 @@ void PublicActionsModel::removeAction(WidgetAction* action)
 
     if (!actionItem)
         return;
-
-    //if (action->isPublic())
-    //    removeRow(actionItem->row());
 
     if (action->isPrivate()) {
         auto publicActionItem = getActionItem(action->getPublicAction());
