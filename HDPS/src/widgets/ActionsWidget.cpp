@@ -139,7 +139,6 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
 
     filterGroupAction << _filterModel.getScopeFilterAction();
     filterGroupAction << _filterModel.getHideInternalUseAction();
-    filterGroupAction << _filterModel.getFilterEnabledAction();
     filterGroupAction << _filterModel.getFilterForceHiddenAction();
     filterGroupAction << _filterModel.getFilterForceDisabledAction();
     filterGroupAction << _filterModel.getFilterMayPublishAction();
