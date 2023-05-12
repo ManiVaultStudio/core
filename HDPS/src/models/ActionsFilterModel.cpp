@@ -16,7 +16,6 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     _typeCompleter(this),
     _scopeFilterAction(this, "Scope", { "Private", "Public" }, { "Private", "Public" }),
     _filterInternalUseAction(this, "Internal", { "Yes", "No" }, { "No" }),
-    _filterEnabledAction(this, "Enabled", { "Yes", "No" }),
     _filterForceHiddenAction(this, "Force hidden", { "Yes", "No" }),
     _filterForceDisabledAction(this, "Force disabled", { "Yes", "No" }),
     _filterMayPublishAction(this, "May publish", { "Yes", "No" }),
@@ -46,7 +45,6 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     connect(&actions(), &AbstractActionsManager::actionTypesHumanFriendlyChanged, this, updateTypeFilterActionCompleter);
 
     //_filterInternalUseAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
-    //_filterEnabledAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     //_filterForceHiddenAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     //_filterForceDisabledAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     //_filterMayPublishAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
@@ -54,7 +52,6 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     //_filterMayDisconnectAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
 
     _filterInternalUseAction.setToolTip("Hide parameters that are for internal use only");
-    _filterEnabledAction.setToolTip("Filter parameters based on whether they are enabled or not");
     _filterForceHiddenAction.setToolTip("Filter parameters based whether they are force hidden");
     _filterForceDisabledAction.setToolTip("Filter parameters based whether they are force disabled");
     _filterMayPublishAction.setToolTip("Filter parameters based on whether they may publish");
@@ -69,7 +66,6 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
         QList<bool> resettable;
 
         resettable << _filterInternalUseAction.isResettable();
-        resettable << _filterEnabledAction.isResettable();
         resettable << _filterForceHiddenAction.isResettable();
         resettable << _filterForceDisabledAction.isResettable();
         resettable << _filterMayPublishAction.isResettable();
@@ -80,7 +76,6 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     };
 
     connect(&_filterInternalUseAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
-    connect(&_filterEnabledAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
     connect(&_filterForceHiddenAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
     connect(&_filterForceDisabledAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
     connect(&_filterMayPublishAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
@@ -89,7 +84,6 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
 
     connect(&_removeFiltersAction, &TriggerAction::triggered, this, [this]() -> void {
         _filterInternalUseAction.reset();
-        _filterEnabledAction.reset();
         _filterForceHiddenAction.reset();
         _filterForceDisabledAction.reset();
         _filterMayPublishAction.reset();
@@ -150,16 +144,6 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
         const auto internalUseOnly = getSourceData(index, AbstractActionsModel::Column::InternalUseOnly, Qt::CheckStateRole).toBool();
 
         if ((selectedOptions.contains("Yes") && internalUseOnly) || (selectedOptions.contains("No") && !internalUseOnly))
-            numberOfMatches++;
-    }
-
-    if (_filterEnabledAction.hasSelectedOptions()) {
-        numberOfActiveFilters++;
-
-        const auto selectedOptions  = _filterEnabledAction.getSelectedOptions();
-        const auto isEnabled        = getSourceData(index, AbstractActionsModel::Column::Name, Qt::CheckStateRole).toBool();
-
-        if ((selectedOptions.contains("Yes") && isEnabled) || (selectedOptions.contains("No") && !isEnabled))
             numberOfMatches++;
     }
 

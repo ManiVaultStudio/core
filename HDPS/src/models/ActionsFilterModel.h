@@ -66,7 +66,6 @@ public: // Action getters
     gui::StringAction& getTypeFilterHumanReadableAction() { return _typeFilterHumanReadableAction; }
     gui::OptionsAction& getScopeFilterAction() { return _scopeFilterAction; }
     gui::OptionsAction& getHideInternalUseAction() { return _filterInternalUseAction; }
-    gui::OptionsAction& getFilterEnabledAction() { return _filterEnabledAction; }
     gui::OptionsAction& getFilterForceHiddenAction() { return _filterForceHiddenAction; }
     gui::OptionsAction& getFilterForceDisabledAction() { return _filterForceDisabledAction; }
     gui::OptionsAction& getFilterMayPublishAction() { return _filterMayPublishAction; }
@@ -81,7 +80,6 @@ private:
     QCompleter          _typeCompleter;                     /** Completer for human-readable action type filter */
     gui::OptionsAction  _scopeFilterAction;                 /** Action for filtering based on action scope */
     gui::OptionsAction  _filterInternalUseAction;           /** Hide actions that are for internal use only */
-    gui::OptionsAction  _filterEnabledAction;               /** Filter actions based on whether they are enabled or not */
     gui::OptionsAction  _filterForceHiddenAction;           /** Filter actions based on their force hidden state */
     gui::OptionsAction  _filterForceDisabledAction;         /** Filter actions based on their force disabled state */
     gui::OptionsAction  _filterMayPublishAction;            /** Filter actions based on whether they may publish */
