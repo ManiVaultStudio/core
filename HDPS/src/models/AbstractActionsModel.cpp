@@ -58,9 +58,7 @@ QPointer<hdps::gui::WidgetAction> AbstractActionsModel::Item::getAction() const
 AbstractActionsModel::NameItem::NameItem(gui::WidgetAction* action) :
     Item(action)
 {
-    setCheckable(true);
     setEditable(action->isPublic());
-    setCheckState(getAction()->isEnabled() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
 
     connect(getAction(), &WidgetAction::changed, this, [this]() -> void {
         emitDataChanged();
@@ -74,11 +72,14 @@ QVariant AbstractActionsModel::NameItem::data(int role /*= Qt::UserRole + 1*/) c
         case Qt::DisplayRole:
             return getAction()->text();
 
-        case Qt::CheckStateRole:
-            return getAction()->isEnabled() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;
-
         case Qt::ToolTipRole:
-            return data(Qt::DisplayRole).toString() + " is " + QString(getAction()->isEnabled() ? "enabled" : "disabled");
+            return QString("Parameter name: %1").arg(data(Qt::DisplayRole).toString());
+
+        //case Qt::CheckStateRole:
+        //    return getAction()->isEnabled() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;
+
+        //case Qt::ToolTipRole:
+        //    return data(Qt::DisplayRole).toString() + " is " + QString(getAction()->isEnabled() ? "enabled" : "disabled");
 
         default:
             break;
@@ -94,10 +95,6 @@ void AbstractActionsModel::NameItem::setData(const QVariant& value, int role /* 
             getAction()->setText(value.toString());
             break;
 
-        case Qt::CheckStateRole:
-            getAction()->setEnabled(value.toBool());
-            break;
-
         default:
             Item::setData(value, role);
     }
@@ -105,13 +102,16 @@ void AbstractActionsModel::NameItem::setData(const QVariant& value, int role /* 
 
 QVariant AbstractActionsModel::LocationItem::data(int role /*= Qt::UserRole + 1*/) const
 {
+    if (getAction()->isPublic())
+        return {};
+
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
-            return getAction()->isPrivate() ? getAction()->getLocation() : "";
+            return getAction()->getLocation();
 
         case Qt::ToolTipRole:
-            return getAction()->isPrivate() ? "Parameter is located in: " + data(Qt::DisplayRole).toString() : "";
+            return "Parameter is located in: " + data(Qt::DisplayRole).toString();
 
         default:
             break;
@@ -183,7 +183,58 @@ QVariant AbstractActionsModel::ScopeItem::data(int role /*= Qt::UserRole + 1*/) 
     return Item::data(role);
 }
 
-AbstractActionsModel::VisibilityItem::VisibilityItem(gui::WidgetAction* action) :
+AbstractActionsModel::ForceDisabledItem::ForceDisabledItem(gui::WidgetAction* action) :
+    Item(action, false)
+{
+    connect(getAction(), &WidgetAction::forceDisabledChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant AbstractActionsModel::ForceDisabledItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    if (getAction()->isPublic())
+        return {};
+
+    const auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    switch (role)
+    {
+        case Qt::DisplayRole:
+            return QVariant();
+
+        case Qt::EditRole:
+            return getAction()->getForceDisabled();
+
+        case Qt::DecorationRole:
+            return fontAwesome.getIcon("lock");
+
+        case Qt::TextAlignmentRole:
+            return Qt::AlignCenter;
+
+        case Qt::ToolTipRole:
+            return QString("%1 %2 force disabled").arg(getAction()->text(), data(Qt::EditRole).toBool() ? "is" : "is not");
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+void AbstractActionsModel::ForceDisabledItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
+{
+    switch (role) {
+        case Qt::EditRole:
+            getAction()->setForceDisabled(value.toBool());
+            break;
+
+        default:
+            Item::setData(value, role);
+    }
+}
+
+AbstractActionsModel::ForceHiddenItem::ForceHiddenItem(gui::WidgetAction* action) :
     Item(action, false)
 {
     connect(getAction(), &WidgetAction::forceHiddenChanged, this, [this](bool forceHidden) -> void {
@@ -191,8 +242,11 @@ AbstractActionsModel::VisibilityItem::VisibilityItem(gui::WidgetAction* action) 
     });
 }
 
-QVariant AbstractActionsModel::VisibilityItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractActionsModel::ForceHiddenItem::data(int role /*= Qt::UserRole + 1*/) const
 {
+    if (getAction()->isPublic())
+        return {};
+
     switch (role)
     {
         case Qt::DisplayRole:
@@ -208,7 +262,7 @@ QVariant AbstractActionsModel::VisibilityItem::data(int role /*= Qt::UserRole + 
             return Qt::AlignCenter;
 
         case Qt::ToolTipRole:
-            return QString("%1 %2").arg(getAction()->text(), getAction()->getForceHidden() ? "is hidden" : "is not hidden");
+            return QString("%1 %2 force hidden").arg(getAction()->text(), getAction()->getForceHidden() ? "is" : "is not");
 
         default:
             break;
@@ -217,7 +271,7 @@ QVariant AbstractActionsModel::VisibilityItem::data(int role /*= Qt::UserRole + 
     return Item::data(role);
 }
 
-void AbstractActionsModel::VisibilityItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
+void AbstractActionsModel::ForceHiddenItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
 {
     if (role == Qt::EditRole)
         getAction()->setForceHidden(value.toBool());
@@ -236,6 +290,9 @@ AbstractActionsModel::ConnectionPermissionItem::ConnectionPermissionItem(gui::Wi
 
 QVariant AbstractActionsModel::ConnectionPermissionItem::data(int role /*= Qt::UserRole + 1*/) const
 {
+    if (getAction()->isPublic())
+        return {};
+
     switch (role)
     {
         case Qt::DisplayRole:
@@ -304,6 +361,9 @@ AbstractActionsModel::SortIndexItem::SortIndexItem(gui::WidgetAction* action) :
 
 QVariant AbstractActionsModel::SortIndexItem::data(int role /*= Qt::UserRole + 1*/) const
 {
+    if (getAction()->isPublic())
+        return {};
+
     switch (role)
     {
         case Qt::DisplayRole:
@@ -342,6 +402,9 @@ AbstractActionsModel::StretchItem::StretchItem(gui::WidgetAction* action) :
 
 QVariant AbstractActionsModel::StretchItem::data(int role /*= Qt::UserRole + 1*/) const
 {
+    if (getAction()->isPublic())
+        return {};
+
     switch (role)
     {
         case Qt::DisplayRole:
@@ -387,6 +450,9 @@ QVariant AbstractActionsModel::ParentActionIdItem::data(int role /*= Qt::UserRol
 
 QVariant AbstractActionsModel::IsConnectedItem::data(int role /*= Qt::UserRole + 1*/) const
 {
+    if (getAction()->isPublic())
+        return {};
+
     switch (role) {
         case Qt::EditRole:
             return getAction()->isConnected();
@@ -406,6 +472,9 @@ QVariant AbstractActionsModel::IsConnectedItem::data(int role /*= Qt::UserRole +
 
 QVariant AbstractActionsModel::NumberOfConnectedActionsItem::data(int role /*= Qt::UserRole + 1*/) const
 {
+    if (getAction()->isPrivate())
+        return {};
+
     switch (role) {
         case Qt::EditRole:
             return getAction()->getConnectedActions().count();
@@ -425,6 +494,9 @@ QVariant AbstractActionsModel::NumberOfConnectedActionsItem::data(int role /*= Q
 
 QVariant AbstractActionsModel::PublicActionIdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
+    if (getAction()->isPublic())
+        return {};
+
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
@@ -505,7 +577,8 @@ AbstractActionsModel::Row::Row(gui::WidgetAction* action) :
     append(new IdItem(action));
     append(new TypeItem(action));
     append(new ScopeItem(action));
-    append(new VisibilityItem(action));
+    append(new ForceDisabledItem(action));
+    append(new ForceHiddenItem(action));
     append(new ConnectionPermissionItem(action, WidgetAction::ConnectionPermissionFlag::PublishViaGui));
     append(new ConnectionPermissionItem(action, WidgetAction::ConnectionPermissionFlag::ConnectViaGui));
     append(new ConnectionPermissionItem(action, WidgetAction::ConnectionPermissionFlag::DisconnectViaGui));
@@ -521,12 +594,14 @@ AbstractActionsModel::Row::Row(gui::WidgetAction* action) :
 }
 
 QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> AbstractActionsModel::columnInfo = QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo>({
+    { AbstractActionsModel::Column::ForceDisabled, { "" , "Enabled", "Whether the parameter is enabled or not" } },
     { AbstractActionsModel::Column::Name, { "Name" , "Name", "Name of the parameter" } },
     { AbstractActionsModel::Column::Location, { "Location" , "Location", "Where the parameter is located in the user interface" } },
     { AbstractActionsModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the parameter" } },
     { AbstractActionsModel::Column::Type, { "Type",  "Type", "Type of parameter" } },
     { AbstractActionsModel::Column::Scope, { "Scope",  "Scope", "Scope of the parameter (whether the parameter is public or private)" } },
-    { AbstractActionsModel::Column::Visible, { "", "Visible", "Whether the parameter is visible in the GUI" } },
+    { AbstractActionsModel::Column::ForceDisabled, { "", "Force Disabled", "Whether the parameter is forcibly disabled (regardless of its programmatic enabled setting)" } },
+    { AbstractActionsModel::Column::ForceHidden, { "", "Force Hidden", "Whether the parameter is forcibly hidden (regardless of its programmatic visibility setting)" } },
     { AbstractActionsModel::Column::MayPublish, { "", "May Publish", "Whether the parameter may be published" } },
     { AbstractActionsModel::Column::MayConnect, { "", "May Connect", "Whether the parameter may connect to a public parameter" } },
     { AbstractActionsModel::Column::MayDisconnect, { "", "May Disconnect", "Whether the parameter may disconnect from a public parameter" } },
@@ -557,7 +632,7 @@ AbstractActionsModel::AbstractActionsModel(QObject* parent /*= nullptr*/) :
 
 Qt::ItemFlags AbstractActionsModel::flags(const QModelIndex& index) const
 {
-    if (index.column() == static_cast<int>(AbstractActionsModel::Column::Name))
+    if (index.column() == static_cast<int>(AbstractActionsModel::Column::ForceDisabled))
         return QStandardItemModel::flags(index) | Qt::ItemIsUserCheckable;
     
     return  QStandardItemModel::flags(index);

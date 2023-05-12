@@ -29,7 +29,8 @@ public:
         ID,                         /** Globally unique identifier of the action */
         Type,                       /** Action type string */
         Scope,                      /** Scope of the action (whether the action is public or private) */
-        Visible,                    /** Whether the action is visible in the GUI */
+        ForceDisabled,              /** Whether the action is force disabled or not */
+        ForceHidden,                /** Whether the action is force hidden or not */
         MayPublish,                 /** Whether the action may be published */
         MayConnect,                 /** Whether the action may connect to a public action */
         MayDisconnect,              /** Whether the action may disconnect from a public action */
@@ -182,15 +183,35 @@ protected:
         QVariant data(int role = Qt::UserRole + 1) const override;
     };
 
-    /** Model item class for toggling action visibility */
-    class VisibilityItem final : public Item {
+    /** Model item class for toggling action force disabled */
+    class ForceDisabledItem final : public Item {
     public:
 
         /**
          * Construct with \p action
          * @param action Pointer to action to display item for
          */
-        VisibilityItem(gui::WidgetAction* action);
+        ForceDisabledItem(gui::WidgetAction* action);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /** Set model data to \p value for \p role */
+        void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
+    };
+
+    /** Model item class for toggling force hidden */
+    class ForceHiddenItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p action
+         * @param action Pointer to action to display item for
+         */
+        ForceHiddenItem(gui::WidgetAction* action);
 
         /**
          * Get model data for \p role

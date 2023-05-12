@@ -33,6 +33,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _sortIndex(-1),
     _stretch(-1),
     _forceHidden(false),
+    _forceDisabled(false),
     _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
     _cachedConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
     _scope(Scope::Private),
@@ -738,6 +739,31 @@ bool WidgetAction::isVisible() const
         return false;
 
     return QWidgetAction::isVisible();
+}
+
+bool WidgetAction::getForceDisabled() const
+{
+    return _forceDisabled;
+}
+
+void WidgetAction::setForceDisabled(bool forceDisabled)
+{
+    if (forceDisabled == _forceDisabled)
+        return;
+
+    _forceDisabled = forceDisabled;
+
+    emit enabledChanged(isEnabled());
+    emit changed();
+    emit forceDisabledChanged(_forceDisabled);
+}
+
+bool WidgetAction::isEnabled() const
+{
+    if (getForceDisabled())
+        return false;
+
+    return QWidgetAction::isEnabled();
 }
 
 }

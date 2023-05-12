@@ -36,8 +36,32 @@ protected:
     {
         QStyledItemDelegate::initStyleOption(option, index);
 
-        if (!index.data(Qt::EditRole).toBool())
-            option->state &= ~QStyle::State_Enabled;
+        const auto column = static_cast<AbstractActionsModel::Column>(index.column());
+
+        switch (column)
+        {
+            case AbstractActionsModel::Column::ForceDisabled:
+            case AbstractActionsModel::Column::ForceHidden:
+            case AbstractActionsModel::Column::MayPublish:
+            case AbstractActionsModel::Column::MayConnect:
+            case AbstractActionsModel::Column::MayDisconnect:
+            {
+                if (!index.data(Qt::EditRole).toBool())
+                    option->state &= ~QStyle::State_Enabled;
+
+                break;
+            }
+
+            default:
+            {
+                const auto forceDisabled = index.siblingAtColumn(static_cast<int>(AbstractActionsModel::Column::ForceDisabled)).data(Qt::EditRole).toBool();
+
+                if (column != AbstractActionsModel::Column::ForceDisabled && forceDisabled)
+                    option->state &= ~QStyle::State_Enabled;
+
+                break;
+            }
+        }
     }
 };
 
@@ -59,6 +83,8 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
+    //treeView.setRootIsDecorated(false);
+
     auto treeViewHeader = treeView.header();
 
     treeViewHeader->setStretchLastSection(false);
@@ -73,6 +99,7 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::NumberOfConnectedActions), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::PublicActionID), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::SortIndex), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::Stretch), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::IsRoot), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::IsLeaf), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::InternalUseOnly), true);
@@ -82,10 +109,7 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
 
     treeView.setMouseTracking(true);
 
-    treeView.setItemDelegateForColumn(static_cast<int>(AbstractActionsModel::Column::Visible), new ItemDelegate(this));
-    treeView.setItemDelegateForColumn(static_cast<int>(AbstractActionsModel::Column::MayPublish), new ItemDelegate(this));
-    treeView.setItemDelegateForColumn(static_cast<int>(AbstractActionsModel::Column::MayConnect), new ItemDelegate(this));
-    treeView.setItemDelegateForColumn(static_cast<int>(AbstractActionsModel::Column::MayDisconnect), new ItemDelegate(this));
+    treeView.setItemDelegate(new ItemDelegate(this));
 
     connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) -> void {
         highlightSelection(deselected, false);
@@ -101,7 +125,8 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
         static const QVector<int> toggleColumns = {
-            static_cast<int>(AbstractActionsModel::Column::Visible),
+            static_cast<int>(AbstractActionsModel::Column::ForceDisabled),
+            static_cast<int>(AbstractActionsModel::Column::ForceHidden),
             static_cast<int>(AbstractActionsModel::Column::MayPublish),
             static_cast<int>(AbstractActionsModel::Column::MayConnect),
             static_cast<int>(AbstractActionsModel::Column::MayDisconnect)
@@ -209,15 +234,7 @@ void ActionsWidget::resizeSectionsToContent()
 
     auto treeViewHeader = _hierarchyWidget.getTreeView().header();
 
-    //treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Name), QHeaderView::Stretch);
-
-    const auto cachedNameColumnSectionSize = treeViewHeader->sectionSize(static_cast<int>(AbstractActionsModel::Column::Name));
-    {
-        treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
-    }
-
-    //treeViewHeader->resizeSection(static_cast<int>(AbstractActionsModel::Column::Name), cachedNameColumnSectionSize);
-    //treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractActionsModel::Column::Name), QHeaderView::Interactive);
+    treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
 }
 
 void ActionsWidget::highlightSelection(const QItemSelection& selection, bool highlight)

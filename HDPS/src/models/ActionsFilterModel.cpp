@@ -163,7 +163,7 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
         numberOfActiveFilters++;
 
         const auto selectedOptions  = _filterVisibilityAction.getSelectedOptions();
-        const auto isVisible        = getSourceData(index, AbstractActionsModel::Column::Visible, Qt::EditRole).toBool();
+        const auto isVisible        = getSourceData(index, AbstractActionsModel::Column::ForceHidden, Qt::EditRole).toBool();
 
         if ((selectedOptions.contains("Visible") && isVisible) || (selectedOptions.contains("Hidden") && !isVisible))
             numberOfMatches++;

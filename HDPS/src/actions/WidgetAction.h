@@ -191,21 +191,41 @@ public: // Visibility
 
     /**
      * Get force hidden
-     * @return Boolean determining whether the widget action should be hidden regardless of its built-in visibility setting
+     * @return Boolean determining whether the widget action should be forcibly hidden (regardless of the visibility setting in the base QWidgetAction class)
      */
     bool getForceHidden() const;
 
     /**
      * Set force hidden to \p forceHidden
-     * @param forceHidden Boolean determining whether the widget action should be hidden regardless of its built-in visibility setting
+     * @param forceHidden Boolean determining whether the widget action should be forcibly hidden (regardless of the enabled visibility in the base QWidgetAction class)
      */
     void setForceHidden(bool forceHidden);
 
     /**
-     * Re-implement the visibility getter from the widget to account for force hidden
+     * Re-implement the isVisible() getter from the base QWidgetAction class to support the force hidden functionality
      * @return Boolean determining whether the widget action is visible or not
      */
     bool isVisible() const;
+
+public: // Disabled
+
+    /**
+     * Get force disabled
+     * @return Boolean determining whether the widget action should be forcibly disabled (regardless of the enabled setting in the base QWidgetAction class)
+     */
+    bool getForceDisabled() const;
+
+    /**
+     * Set force disabled to \p forceDisabled
+     * @param forceDisabled Boolean determining whether the widget action should be forcibly disabled (regardless of the enabled setting in the base QWidgetAction class)
+     */
+    void setForceDisabled(bool forceDisabled);
+
+    /**
+     * Re-implement the isEnabled() getter from the base QWidgetAction class to support the force disabled functionality
+     * @return Boolean determining whether the widget action is enabled or not
+     */
+    bool isEnabled() const;
 
 public: // Widget flags
 
@@ -559,10 +579,16 @@ signals:
     void stretchChanged(std::int32_t stretch);
 
     /**
-     * Signals that the force hidden settings changed to \p forceHidden
-     * @param forceHidden Boolean determining whether the widget action should be hidden regardless of its built-in visibility setting
+     * Signals that force hidden changed to \p forceHidden
+     * @param forceHidden Boolean determining whether the widget action should be forcibly hidden (regardless of the visibility setting in the base QWidgetAction class)
      */
     void forceHiddenChanged(bool forceHidden);
+
+    /**
+     * Signals that force disabled changed to \p forceDisabled
+     * @param forceDisabled Boolean determining whether the widget action should be forcibly disabled (regardless of the enabled setting in the base QWidgetAction class)
+     */
+    void forceDisabledChanged(bool forceDisabled);
 
     /**
      * Signals that the highlighted state changed
@@ -623,7 +649,8 @@ private:
     std::int32_t                _defaultWidgetFlags;            /** Default widget flags which are used to configure newly created widget action widgets */
     std::int32_t                _sortIndex;                     /** Sort index (relative position in group items) */
     std::int32_t                _stretch;                       /** Stretch factor (in group items) */
-    bool                        _forceHidden;                   /** Boolean determining whether the widget action should be hidden regardless of its built-in visibility setting */
+    bool                        _forceHidden;                   /** When set to true, this action is hidden, regardless of the visibility setting in the base QWidgetAction class */
+    bool                        _forceDisabled;                 /** When set to true, this action is read-only, regardless of the enabled setting in the base QWidgetAction class */
     std::int32_t                _connectionPermissions;         /** Allowed connection permissions flags */
     std::int32_t                _cachedConnectionPermissions;   /** Cached connection permissions flags */
     Scope                       _scope;                         /** Determines whether this action is a public (shared) action or not (private) */
