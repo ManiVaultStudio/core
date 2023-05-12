@@ -113,15 +113,6 @@ void PublicActionsModel::addPublicAction(WidgetAction* publicAction)
     else
         appendRow(Row(publicAction));
 
-    auto actionItem = getActionItem(publicAction);
-
-    //Q_ASSERT(actionItem != nullptr);
-
-    //if (actionItem) {
-    //    for (auto connectedAction : action->getConnectedActions())
-    //        actionItem->appendRow(Row(connectedAction));
-    //}
-
     connect(publicAction, &WidgetAction::actionConnected, this, [this](WidgetAction* action) -> void {
 #ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
         qDebug() << action->getLocation() << " connected to " << action->getPublicAction()->getLocation();
