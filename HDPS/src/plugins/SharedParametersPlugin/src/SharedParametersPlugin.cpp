@@ -14,11 +14,20 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
 {
     _expertModeAction.setChecked(!_actionsWidget.getFilterModel().getPublicRootOnlyAction().isChecked());
     _expertModeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("user-graduate"));
-    _expertModeAction.setToolTip("In expert mode, all descendants of a root public parameter are displayed, otherwise they are hidden");
     _expertModeAction.setDefaultWidgetFlags(ToggleAction::PushButtonIcon);
 
-    connect(&_expertModeAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
+    const auto updateExpertModeActionTooltip = [this]() -> void {
+        if (_expertModeAction.isChecked())
+            _expertModeAction.setToolTip("Display all parameter connections (expert mode)");
+        else
+            _expertModeAction.setToolTip("Display simplified parameter connections");
+    };
+
+    updateExpertModeActionTooltip();
+
+    connect(&_expertModeAction, &ToggleAction::toggled, this, [this, updateExpertModeActionTooltip](bool toggled) -> void {
         _actionsWidget.getFilterModel().getPublicRootOnlyAction().setChecked(!toggled);
+        updateExpertModeActionTooltip();
     });
 
     auto& hierarchyWidget = _actionsWidget.getHierarchyWidget();

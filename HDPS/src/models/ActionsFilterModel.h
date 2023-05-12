@@ -87,7 +87,7 @@ private:
     gui::OptionsAction  _filterMayPublishAction;            /** Filter actions based on whether they may publish */
     gui::OptionsAction  _filterMayConnectAction;            /** Filter actions based on whether they may connect to a public action */
     gui::OptionsAction  _filterMayDisconnectAction;         /** Filter actions based on whether they may disconnect from a public action */
-    gui::ToggleAction   _publicRootOnlyAction;              /** Filter public root or not */
+    gui::ToggleAction   _publicRootOnlyAction;              /** Filter public root items (used solely by the public actions model) */
     gui::TriggerAction  _removeFiltersAction;               /** Remove filters action */
 };
 

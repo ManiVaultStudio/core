@@ -213,11 +213,34 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
             numberOfMatches++;
     }
 
-    if (_publicRootOnlyAction.isChecked() && getSourceData(index, AbstractActionsModel::Column::Scope, Qt::EditRole).toInt() == static_cast<int>(WidgetAction::Scope::Public)) {
-        numberOfActiveFilters++;
+    if (_publicRootOnlyAction.isChecked()) {
+        const auto scope = static_cast<WidgetAction::Scope>(getSourceData(index, AbstractActionsModel::Column::Scope, Qt::EditRole).toInt());
 
-        if (getSourceData(index, AbstractActionsModel::Column::IsRoot, Qt::EditRole).toBool())
-            numberOfMatches++;
+        switch (scope)
+        {
+            case WidgetAction::Scope::Private:
+            {
+                const auto parentIsPublic   = static_cast<WidgetAction::Scope>(getSourceData(parent, AbstractActionsModel::Column::Scope, Qt::EditRole).toInt()) == WidgetAction::Scope::Public;
+                const auto parentIsRoot     = getSourceData(parent, AbstractActionsModel::Column::IsRoot, Qt::EditRole).toBool();
+
+                if (!(parentIsPublic && parentIsRoot))
+                    return false;
+
+                break;
+            }
+
+            case WidgetAction::Scope::Public:
+            {
+                if (!getSourceData(index, AbstractActionsModel::Column::IsRoot, Qt::EditRole).toBool())
+                    return false;
+
+                break;
+            }
+
+            default:
+                break;
+        }
+        
     }
 
     return numberOfMatches == numberOfActiveFilters;
