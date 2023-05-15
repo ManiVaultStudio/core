@@ -147,8 +147,6 @@ const DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGui
 
 DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid)
 {
-    DataHierarchyItem* item = nullptr;
-
     try
     {
         Q_ASSERT(!datasetGuid.isEmpty());
@@ -167,8 +165,6 @@ DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid)
     catch (...) {
         exceptionMessageBox("Unable to get item from the data hierarchy manager");
     }
-
-    return *item;
 }
 
 hdps::DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive /*= true*/)

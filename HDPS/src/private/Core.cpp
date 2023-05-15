@@ -288,11 +288,9 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
 
 plugin::RawData& Core::requestRawData(const QString& name)
 {
-    plugin::RawData* data = nullptr;
-
     try
     {
-        data = &(_dataManager->getRawData(name));
+        return _dataManager->getRawData(name);
     }
     catch (std::exception& e)
     {
@@ -301,8 +299,6 @@ plugin::RawData& Core::requestRawData(const QString& name)
     catch (...) {
         exceptionMessageBox("Unable to request raw data");
     }
-
-    return *data;
 }
 
 Dataset<DatasetImpl> Core::requestDataset(const QString& dataSetId)

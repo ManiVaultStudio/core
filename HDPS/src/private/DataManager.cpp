@@ -94,8 +94,6 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 
 plugin::RawData& DataManager::getRawData(const QString& name)
 {
-    plugin::RawData* data = nullptr;
-
     try
     {
         if (name.isEmpty())
@@ -104,7 +102,7 @@ plugin::RawData& DataManager::getRawData(const QString& name)
         if (_rawDataMap.find(name) == _rawDataMap.end())
             throw std::runtime_error("Raw data not found");
 
-        data = _rawDataMap[name].get();
+        return *_rawDataMap[name];
     }
     catch (std::exception& e)
     {
@@ -113,8 +111,6 @@ plugin::RawData& DataManager::getRawData(const QString& name)
     catch (...) {
         exceptionMessageBox("Unable to get raw data from data manager");
     }
-
-    return *data;
 }
 
 Dataset<DatasetImpl> DataManager::getSet(const QString& datasetGuid)
