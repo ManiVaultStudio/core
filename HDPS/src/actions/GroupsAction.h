@@ -316,8 +316,8 @@ protected:
     QMap<GroupAction*, bool>    _visibility;        /** Group action visibility */
 };
 
+}
+
 Q_DECLARE_METATYPE(hdps::gui::GroupsAction)
 
-inline const auto groupsActionMetaTypeId = qRegisterMetaType<hdps::gui::GroupsAction*>("GroupsAction");
-
-}
+inline const auto groupsActionMetaTypeId = qRegisterMetaType<hdps::gui::GroupsAction*>("hdps::gui::GroupsAction");

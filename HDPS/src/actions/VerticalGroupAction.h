@@ -33,3 +33,7 @@ namespace hdps::gui {
 //};
 
 }
+
+//Q_DECLARE_METATYPE(hdps::gui::VerticalGroupAction)
+//
+//inline const auto verticalGroupActionMetaTypeId = qRegisterMetaType<hdps::gui::VerticalGroupAction*>("hdps::gui::VerticalGroupAction");

@@ -93,4 +93,4 @@ private:
 
 Q_DECLARE_METATYPE(hdps::gui::TriggerAction)
 
-inline const auto triggerActionMetaTypeId = qRegisterMetaType<hdps::gui::TriggerAction*>("TriggerAction");
+inline const auto triggerActionMetaTypeId = qRegisterMetaType<hdps::gui::TriggerAction*>("hdps::gui::TriggerAction");

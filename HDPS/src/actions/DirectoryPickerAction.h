@@ -154,4 +154,4 @@ protected:
 
 Q_DECLARE_METATYPE(hdps::gui::DirectoryPickerAction)
 
-inline const auto directoryPickerActionMetaTypeId = qRegisterMetaType<hdps::gui::DirectoryPickerAction*>("DirectoryPickerAction");
+inline const auto directoryPickerActionMetaTypeId = qRegisterMetaType<hdps::gui::DirectoryPickerAction*>("hdps::gui::DirectoryPickerAction");

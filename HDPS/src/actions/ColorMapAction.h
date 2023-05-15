@@ -233,4 +233,4 @@ protected:
 
 Q_DECLARE_METATYPE(hdps::gui::ColorMapAction)
 
-inline const auto colorMapActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapAction*>("ColorMapAction");
+inline const auto colorMapActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapAction*>("hdps::gui::ColorMapAction");

@@ -28,12 +28,12 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     _discretizeAction(this, "Discrete"),
     _numberOfDiscreteStepsAction(this, "Number of steps", 2, 10, 5, 5),
     _discretizeAlphaAction(this, "Discretize alpha", false, false),
-    _settings1DAction(*this),
-    _settings2DAction(*this),
+    _settings1DAction(this, "Settings 1D"),
+    _settings2DAction(this, "Settings 2D"),
     _customColorMapAction(this, "Custom color map"),
-    _editor1DAction(*this),
+    _editor1DAction(this, "Editor 1D"),
     _customColorMapGroupAction(this, "Custom color map"),
-    _settingsAction(*this)
+    _settingsAction(*this, "Settings")
 {
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));

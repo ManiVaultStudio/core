@@ -61,9 +61,10 @@ protected:
 
     /**
      * Constructor
-     * @param colorMapAction Reference to color map action
+     * @param parent Pointer to parent object
+     * @param title Title of the action
      */
-    Q_INVOKABLE ColorMapEditor1DAction(ColorMapAction& colorMapAction);
+    Q_INVOKABLE ColorMapEditor1DAction(QObject* parent, const QString& title);
 
 public:
 
@@ -209,4 +210,4 @@ protected:
 
 Q_DECLARE_METATYPE(hdps::gui::ColorMapEditor1DAction)
 
-inline const auto colorMapEditor1DActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapEditor1DAction*>("ColorMapEditor1DAction");
+inline const auto colorMapEditor1DActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapEditor1DAction*>("hdps::gui::ColorMapEditor1DAction");

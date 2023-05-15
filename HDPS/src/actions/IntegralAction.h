@@ -189,4 +189,4 @@ protected:
 
 Q_DECLARE_METATYPE(hdps::gui::IntegralAction)
 
-inline const auto integralActionMetaTypeId = qRegisterMetaType<hdps::gui::IntegralAction*>("IntegralAction");
+inline const auto integralActionMetaTypeId = qRegisterMetaType<hdps::gui::IntegralAction*>("hdps::gui::IntegralAction");

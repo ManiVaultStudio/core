@@ -232,6 +232,6 @@ private:
 
 Q_DECLARE_METATYPE(hdps::gui::GroupAction)
 
-inline const auto groupActionMetaTypeId = qRegisterMetaType<hdps::gui::GroupAction*>("GroupAction");
+inline const auto groupActionMetaTypeId = qRegisterMetaType<hdps::gui::GroupAction*>("hdps::gui::GroupAction");
 
 }

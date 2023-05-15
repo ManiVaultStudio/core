@@ -54,7 +54,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    HorizontalGroupAction(QObject* parent, const QString& title = "");
+    Q_INVOKABLE HorizontalGroupAction(QObject* parent, const QString& title);
 
     /** Gets whether the group should show labels or not */
     bool getShowLabels() const;
@@ -109,3 +109,7 @@ private:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::HorizontalGroupAction)
+
+inline const auto horizontalGroupActionMetaTypeId = qRegisterMetaType<hdps::gui::HorizontalGroupAction*>("hdps::gui::HorizontalGroupAction");

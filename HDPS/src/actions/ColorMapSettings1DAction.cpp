@@ -7,9 +7,9 @@
 
 namespace hdps::gui {
 
-ColorMapSettings1DAction::ColorMapSettings1DAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction, "Settings 1D"),
-    _colorMapAction(colorMapAction)
+ColorMapSettings1DAction::ColorMapSettings1DAction(QObject* parent, const QString& title) :
+    WidgetAction(parent, title),
+    _colorMapAction(*static_cast<ColorMapAction*>(parent))
 {
     setText("1D Color Map Settings");
 }

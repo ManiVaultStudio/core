@@ -16,11 +16,11 @@ namespace hdps::gui {
     constexpr QSize ColorMapEditor1DAction::colorMapImageSize;
 #endif
 
-ColorMapEditor1DAction::ColorMapEditor1DAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction, "Editor 1D"),
-    _colorMapAction(colorMapAction),
+ColorMapEditor1DAction::ColorMapEditor1DAction(QObject* parent, const QString& title) :
+    WidgetAction(parent, title),
+    _colorMapAction(*static_cast<ColorMapAction*>(parent)),
     _nodes(),
-    _nodeAction(*this),
+    _nodeAction(this, "Node 1D"),
     _colorMapImage(colorMapImageSize, QImage::Format::Format_ARGB32_Premultiplied)
 {
     setText("1D custom color map");
@@ -30,7 +30,7 @@ ColorMapEditor1DAction::ColorMapEditor1DAction(ColorMapAction& colorMapAction) :
     addNode(QPointF(0.0f, 0.0f), Qt::black);
     addNode(QPointF(1.0f, 1.0f), Qt::white);
 
-    connect(&colorMapAction.getCustomColorMapAction(), &ColorMapEditor1DAction::toggled, this, &ColorMapEditor1DAction::updateColorMap);
+    connect(&_colorMapAction.getCustomColorMapAction(), &ColorMapEditor1DAction::toggled, this, &ColorMapEditor1DAction::updateColorMap);
 }
 
 QImage ColorMapEditor1DAction::getColorMapImage() const

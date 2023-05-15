@@ -207,4 +207,4 @@ protected:
 
 Q_DECLARE_METATYPE(hdps::gui::DecimalAction)
 
-inline const auto decimalActionMetaTypeId = qRegisterMetaType<hdps::gui::DecimalAction*>("DecimalAction");
+inline const auto decimalActionMetaTypeId = qRegisterMetaType<hdps::gui::DecimalAction*>("hdps::gui::DecimalAction");

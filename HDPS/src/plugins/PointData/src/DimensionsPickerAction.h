@@ -297,3 +297,7 @@ protected:
 
     friend class Widget;
 };
+
+Q_DECLARE_METATYPE(DimensionsPickerAction)
+
+inline const auto dimensionsPickerActionMetaTypeId = qRegisterMetaType<DimensionsPickerAction*>("DimensionsPickerAction");

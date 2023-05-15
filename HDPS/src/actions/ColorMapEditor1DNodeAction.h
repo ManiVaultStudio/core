@@ -48,9 +48,10 @@ public:
 
     /**
      * Constructor
-     * @param colorMapEditor1DAction Reference to owning one-dimensional color map action
+     * @param parent Pointer to parent object
+     * title Title of the action
      */
-    Q_INVOKABLE ColorMapEditor1DNodeAction(ColorMapEditor1DAction& colorMapEditor1DAction);
+    Q_INVOKABLE ColorMapEditor1DNodeAction(QObject* parent, const QString& title);
 
     /**
      * Connect to a node
@@ -85,4 +86,4 @@ protected:
 
 Q_DECLARE_METATYPE(hdps::gui::ColorMapEditor1DNodeAction)
 
-inline const auto colorMapEditor1DNodeActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapEditor1DNodeAction*>("ColorMapEditor1DNodeAction");
+inline const auto colorMapEditor1DNodeActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapEditor1DNodeAction*>("hdps::gui::ColorMapEditor1DNodeAction");

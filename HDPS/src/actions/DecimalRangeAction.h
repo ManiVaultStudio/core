@@ -98,4 +98,4 @@ protected:
 
 Q_DECLARE_METATYPE(hdps::gui::DecimalRangeAction)
 
-inline const auto decimalRangeActionMetaTypeId = qRegisterMetaType<hdps::gui::DecimalRangeAction*>("DecimalRangeAction");
+inline const auto decimalRangeActionMetaTypeId = qRegisterMetaType<hdps::gui::DecimalRangeAction*>("hdps::gui::DecimalRangeAction");

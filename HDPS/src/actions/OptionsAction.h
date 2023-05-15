@@ -362,4 +362,4 @@ protected:
 
 Q_DECLARE_METATYPE(hdps::gui::OptionsAction)
 
-inline const auto optionsActionMetaTypeId = qRegisterMetaType<hdps::gui::OptionsAction*>("OptionsAction");
+inline const auto optionsActionMetaTypeId = qRegisterMetaType<hdps::gui::OptionsAction*>("hdps::gui::OptionsAction");

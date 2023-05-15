@@ -185,4 +185,4 @@ private:
 
 Q_DECLARE_METATYPE(hdps::gui::FilePickerAction)
 
-inline const auto filePickerActionMetaTypeId = qRegisterMetaType<hdps::gui::FilePickerAction*>("FilePickerAction");
+inline const auto filePickerActionMetaTypeId = qRegisterMetaType<hdps::gui::FilePickerAction*>("hdps::gui::FilePickerAction");

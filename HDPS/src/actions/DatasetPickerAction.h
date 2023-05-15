@@ -291,4 +291,4 @@ protected:
 
 Q_DECLARE_METATYPE(hdps::gui::DatasetPickerAction)
 
-inline const auto datasetPickerActionMetaTypeId = qRegisterMetaType<hdps::gui::DatasetPickerAction*>("DatasetPickerAction");
+inline const auto datasetPickerActionMetaTypeId = qRegisterMetaType<hdps::gui::DatasetPickerAction*>("hdps::gui::DatasetPickerAction");

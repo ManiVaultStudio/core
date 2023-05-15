@@ -54,28 +54,48 @@ void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "PublicActions");
+#ifdef ACTIONS_MANAGER_VERBOSE
+    qDebug() << "Loading public actions";
+#endif
+    
+        variantMapMustContain(variantMap, "PublicActions");
 
-    const auto publicActions = variantMap["PublicActions"].toList();
+        const auto publicActionsMap = variantMap["PublicActions"].toList();
 
-    for (const auto& publicAction : publicActions) {
-        const auto publicActionMap  = publicAction.toMap();
-        const auto metaType         = publicActionMap["Type"].toString();
-        const auto metaTypeId       = QMetaType::type(metaType.toLatin1());
-        const auto metaObject       = QMetaType::metaObjectForType(metaTypeId);
+        for (const auto& publicActionVariant : publicActionsMap) {
+            try
+            {
+                const auto publicActionMap      = publicActionVariant.toMap();
+                const auto publicActionTitle    = publicActionMap["Title"].toString();
+                const auto metaType             = publicActionMap["Type"].toString();
 
-        if (metaObject) {
-            auto metaObjectInstance = metaObject->newInstance(Q_ARG(QObject*, this), Q_ARG(QString, publicActionMap["Title"].toString()));
-            auto publicAction       = qobject_cast<WidgetAction*>(metaObjectInstance);
+                if (metaType.isEmpty())
+                    throw std::runtime_error(QString("Action type is not specified for %1").arg(publicActionTitle).toLatin1());
 
-            publicAction->fromVariantMap(publicActionMap);
+                const auto metaTypeId   = QMetaType::type(metaType.toLatin1());
+                const auto metaObject   = QMetaType::metaObjectForType(metaTypeId);
+                
+                if (!metaObject)
+                    throw std::runtime_error(QString("Meta object type '%1' for '%2' is not known. Did you forget to register the action correctly with Qt meta object system? See ToggleAction.h for an example.").arg(metaType, publicActionTitle).toLatin1());
 
-            makeActionPublic(publicAction);
-        }
-    }
+                auto metaObjectInstance = metaObject->newInstance(Q_ARG(QObject*, this), Q_ARG(QString, publicActionTitle));
+                auto publicAction       = qobject_cast<WidgetAction*>(metaObjectInstance);
 
-    for (auto action : getActions()) {
+                if (!publicAction)
+                    throw std::runtime_error(QString("Unable to create a new instance of type '%1'").arg(metaType).toLatin1());
 
+                publicAction->fromVariantMap(publicActionMap);
+
+                makeActionPublic(publicAction);
+            }
+            catch (std::exception& e)
+            {
+                exceptionMessageBox("Unable to load public action:", e);
+            }
+            catch (...)
+            {
+                exceptionMessageBox("Unable to load public action:");
+            }
     }
 }
 
@@ -86,6 +106,11 @@ QVariantMap ActionsManager::toVariantMap() const
     QVariantList publicActions;
 
     for (auto publicAction : getPublicActions()) {
+        auto parentPublicAction = dynamic_cast<WidgetAction*>(publicAction->getParentAction());
+
+        if (parentPublicAction)
+            continue;
+
         auto actionVariantMap = publicAction->toVariantMap();
 
         actionVariantMap["Title"] = publicAction->text();

@@ -11,9 +11,9 @@ namespace hdps {
 
 namespace gui {
 
-ColorMapEditor1DNodeAction::ColorMapEditor1DNodeAction(ColorMapEditor1DAction& colorMapEditor1DAction) :
-    WidgetAction(&colorMapEditor1DAction, "Editor 1D Node"),
-    _colorMapEditor1DAction(colorMapEditor1DAction),
+ColorMapEditor1DNodeAction::ColorMapEditor1DNodeAction(QObject* parent, const QString& title) :
+    WidgetAction(parent, title),
+    _colorMapEditor1DAction(*static_cast<ColorMapEditor1DAction*>(parent)),
     _currentNode(nullptr),
     _colorAction(this, "Color", Qt::yellow),
     _opacityAction(this, "Intensity", 0.0f, 100.0f, 0.0f, 0.0f, 0),

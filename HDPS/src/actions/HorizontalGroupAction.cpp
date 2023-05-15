@@ -5,7 +5,7 @@
 
 namespace hdps::gui {
 
-HorizontalGroupAction::HorizontalGroupAction(QObject* parent, const QString& title /*= ""*/) :
+HorizontalGroupAction::HorizontalGroupAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
     _actions(),
     _showLabels(true)

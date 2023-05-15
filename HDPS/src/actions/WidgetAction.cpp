@@ -184,12 +184,9 @@ bool WidgetAction::isPublic() const
 void WidgetAction::makePublic(bool recursive /*= true*/)
 {
     _scope = Scope::Public;
-    
-    makeUnique();
 
     emit scopeChanged(_scope);
-    emit idChanged(getId());
-
+    
     for (auto child : children()) {
         auto widgetAction = dynamic_cast<WidgetAction*>(child);
 
@@ -319,6 +316,9 @@ WidgetAction* WidgetAction::getPublicCopy() const
 
     publicCopy->fromVariantMap(toVariantMap());
     publicCopy->makePublic();
+    publicCopy->makeUnique();
+
+    emit publicCopy->idChanged(getId());
 
     return publicCopy;
 }
@@ -475,15 +475,16 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
 
     setConnectionPermissions(variantMap["ConnectionPermissions"].toInt());
 
-    /*
     if (variantMap.contains("PublicActionID")) {
-        const auto publicActionId   = variantMap["PublicActionID"].toString();
-        const auto publicAction     = actions().getAction(publicActionId);
+        const auto publicActionId = variantMap["PublicActionID"].toString();
 
-        if (publicAction)
-            connectToPublicAction(publicAction);
+        if (!publicActionId.isEmpty()) {
+            const auto publicAction = actions().getAction(publicActionId);
+
+            if (publicAction)
+                connectToPublicAction(publicAction, false);
+        }
     }
-    */
 
     if (getId() != previousId)
         emit idChanged(getId());

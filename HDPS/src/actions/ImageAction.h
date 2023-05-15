@@ -146,4 +146,4 @@ protected:
 
 Q_DECLARE_METATYPE(hdps::gui::ImageAction)
 
-inline const auto imageActionMetaTypeId = qRegisterMetaType<hdps::gui::ImageAction*>("ImageAction");
+inline const auto imageActionMetaTypeId = qRegisterMetaType<hdps::gui::ImageAction*>("hdps::gui::ImageAction");

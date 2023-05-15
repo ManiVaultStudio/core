@@ -21,7 +21,7 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     _filterMayPublishAction(this, "May publish", { "Yes", "No" }),
     _filterMayConnectAction(this, "May connect", { "Yes", "No" }),
     _filterMayDisconnectAction(this, "May disconnect", { "Yes", "No" }),
-    _publicRootOnlyAction(this, "Public root only", false, false),
+    _publicRootOnlyAction(this, "Public root only", true, true),
     _removeFiltersAction(this, "Remove filters")
 {
     setRecursiveFilteringEnabled(true);

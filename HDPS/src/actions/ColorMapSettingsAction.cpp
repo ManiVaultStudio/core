@@ -8,8 +8,8 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction, "Settings"),
+ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction, const QString& title) :
+    WidgetAction(&colorMapAction, title),
     _colorMapAction(colorMapAction)
 {
     setText("Settings");

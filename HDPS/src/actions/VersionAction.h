@@ -62,3 +62,7 @@ private:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::VersionAction)
+
+inline const auto versionActionMetaTypeId = qRegisterMetaType<hdps::gui::VersionAction*>("hdps::gui::VersionAction");

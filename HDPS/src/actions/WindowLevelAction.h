@@ -72,4 +72,4 @@ protected:
 
 Q_DECLARE_METATYPE(hdps::gui::WindowLevelAction)
 
-inline const auto windowLevelActionMetaTypeId = qRegisterMetaType<hdps::gui::WindowLevelAction*>("WindowLevelAction");
+inline const auto windowLevelActionMetaTypeId = qRegisterMetaType<hdps::gui::WindowLevelAction*>("hdps::gui::WindowLevelAction");

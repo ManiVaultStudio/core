@@ -176,3 +176,7 @@ protected:
 protected:
     static constexpr std::uint32_t DEFAULT_SEARCH_THRESHOLD = 100;     /** Default search threshold */
 };
+
+Q_DECLARE_METATYPE(DimensionPickerAction)
+
+inline const auto dimensionPickerActionMetaTypeId = qRegisterMetaType<DimensionPickerAction*>("DimensionPickerAction");
