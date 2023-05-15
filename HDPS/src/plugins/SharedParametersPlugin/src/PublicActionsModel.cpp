@@ -19,8 +19,8 @@ void PublicActionsModel::initialize()
 {
     setRowCount(0);
 
-    for (auto action : actions().getActions())
-        addAction(action);
+    for (auto publicAction : actions().getPublicActions())
+        addPublicAction(publicAction);
 }
 
 void PublicActionsModel::actionAddedToManager(WidgetAction* action)
@@ -106,12 +106,19 @@ void PublicActionsModel::addPublicAction(WidgetAction* publicAction)
     qDebug() << __FUNCTION__ << publicAction->text();
 #endif
 
-    auto parentActionItem = getActionItem(publicAction->getParentAction());
+    auto parentAction = publicAction->getParentAction();
 
-    if (parentActionItem)
-        parentActionItem->appendRow(Row(publicAction));
-    else
+    if (parentAction) {
+        auto parentActionItem = getActionItem(parentAction);
+
+        if (parentActionItem)
+            parentActionItem->appendRow(Row(publicAction));
+        else
+            appendRow(Row(publicAction));
+    }
+    else {
         appendRow(Row(publicAction));
+    }
 
     connect(publicAction, &WidgetAction::actionConnected, this, [this](WidgetAction* action) -> void {
 #ifdef PUBLIC_ACTIONS_MODEL_VERBOSE

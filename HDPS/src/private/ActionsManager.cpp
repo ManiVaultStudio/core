@@ -65,14 +65,17 @@ void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
         const auto metaObject       = QMetaType::metaObjectForType(metaTypeId);
 
         if (metaObject) {
-            auto metaObjectInstance = metaObject->newInstance();
-            auto action = qobject_cast<WidgetAction*>(metaObjectInstance);
+            auto metaObjectInstance = metaObject->newInstance(Q_ARG(QObject*, this), Q_ARG(QString, publicActionMap["Title"].toString()));
+            auto publicAction       = qobject_cast<WidgetAction*>(metaObjectInstance);
 
-            action->setText(publicActionMap["Title"].toString());
-            action->fromVariantMap(publicActionMap);
+            publicAction->fromVariantMap(publicActionMap);
 
-            makeActionPublic(action);
+            makeActionPublic(publicAction);
         }
+    }
+
+    for (auto action : getActions()) {
+
     }
 }
 
