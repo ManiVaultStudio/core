@@ -24,23 +24,28 @@ void IntegralRectangleAction::initialize(const QRect& rectangle /*= QRect()*/, c
     emit defaultRectangleChanged(_defaultRectangle);
 }
 
-void IntegralRectangleAction::connectToPublicAction(WidgetAction* publicAction)
+void IntegralRectangleAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicIntegralRectangleAction = dynamic_cast<IntegralRectangleAction*>(publicAction);
 
     Q_ASSERT(publicIntegralRectangleAction != nullptr);
+
+    if (publicIntegralRectangleAction == nullptr)
+        return;
 
     connect(this, &IntegralRectangleAction::rectangleChanged, publicIntegralRectangleAction, &IntegralRectangleAction::setRectangle);
     connect(publicIntegralRectangleAction, &IntegralRectangleAction::rectangleChanged, this, &IntegralRectangleAction::setRectangle);
 
     setRectangle(publicIntegralRectangleAction->getRectangle());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void IntegralRectangleAction::disconnectFromPublicAction()
+void IntegralRectangleAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicIntegralRectangleAction = dynamic_cast<IntegralRectangleAction*>(getPublicAction());
+
+    Q_ASSERT(publicIntegralRectangleAction != nullptr);
 
     if (publicIntegralRectangleAction == nullptr)
         return;
@@ -48,7 +53,7 @@ void IntegralRectangleAction::disconnectFromPublicAction()
     disconnect(this, &IntegralRectangleAction::rectangleChanged, publicIntegralRectangleAction, &IntegralRectangleAction::setRectangle);
     disconnect(publicIntegralRectangleAction, &IntegralRectangleAction::rectangleChanged, this, &IntegralRectangleAction::setRectangle);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void IntegralRectangleAction::fromVariantMap(const QVariantMap& variantMap)

@@ -22,23 +22,28 @@ void DecimalRectangleAction::initialize(const QRectF& rectangle /*= QRectF()*/, 
     emit defaultRectangleChanged(_defaultRectangle);
 }
 
-void DecimalRectangleAction::connectToPublicAction(WidgetAction* publicAction)
+void DecimalRectangleAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicDecimalRectangleAction = dynamic_cast<DecimalRectangleAction*>(publicAction);
 
     Q_ASSERT(publicDecimalRectangleAction != nullptr);
+
+    if (publicDecimalRectangleAction == nullptr)
+        return;
 
     connect(this, &DecimalRectangleAction::rectangleChanged, publicDecimalRectangleAction, &DecimalRectangleAction::setRectangle);
     connect(publicDecimalRectangleAction, &DecimalRectangleAction::rectangleChanged, this, &DecimalRectangleAction::setRectangle);
 
     setRectangle(publicDecimalRectangleAction->getRectangle());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void DecimalRectangleAction::disconnectFromPublicAction()
+void DecimalRectangleAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicDecimalRectangleAction = dynamic_cast<DecimalRectangleAction*>(getPublicAction());
+
+    Q_ASSERT(publicDecimalRectangleAction != nullptr);
 
     if (publicDecimalRectangleAction == nullptr)
         return;
@@ -46,7 +51,7 @@ void DecimalRectangleAction::disconnectFromPublicAction()
     disconnect(this, &DecimalRectangleAction::rectangleChanged, publicDecimalRectangleAction, &DecimalRectangleAction::setRectangle);
     disconnect(publicDecimalRectangleAction, &DecimalRectangleAction::rectangleChanged, this, &DecimalRectangleAction::setRectangle);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void DecimalRectangleAction::fromVariantMap(const QVariantMap& variantMap)

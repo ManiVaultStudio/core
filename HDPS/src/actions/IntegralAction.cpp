@@ -39,7 +39,7 @@ void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t&
     _defaultValueChanged();
 }
 
-void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
+void IntegralAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicIntegralAction = dynamic_cast<IntegralAction*>(publicAction);
 
@@ -68,10 +68,10 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
     setMaximum(publicIntegralAction->getMaximum());
     setValue(publicIntegralAction->getValue());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void IntegralAction::disconnectFromPublicAction()
+void IntegralAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicIntegralAction = dynamic_cast<IntegralAction*>(getPublicAction());
 
@@ -86,7 +86,7 @@ void IntegralAction::disconnectFromPublicAction()
     disconnect(this, &IntegralAction::valueChanged, publicIntegralAction, nullptr);
     disconnect(publicIntegralAction, &IntegralAction::valueChanged, this, nullptr);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 WidgetAction* IntegralAction::getPublicCopy() const

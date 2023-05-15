@@ -71,7 +71,7 @@ QWidget* DecimalRangeAction::getWidget(QWidget* parent, const std::int32_t& widg
     return widget;
 }
 
-void DecimalRangeAction::connectToPublicAction(WidgetAction* publicAction)
+void DecimalRangeAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicDecimalRangeAction = dynamic_cast<DecimalRangeAction*>(publicAction);
 
@@ -80,18 +80,22 @@ void DecimalRangeAction::connectToPublicAction(WidgetAction* publicAction)
     if (publicDecimalRangeAction == nullptr)
         return;
 
-    getRangeMinAction().connectToPublicAction(&publicDecimalRangeAction->getRangeMinAction());
-    getRangeMaxAction().connectToPublicAction(&publicDecimalRangeAction->getRangeMaxAction());
+    if (recursive) {
+        getRangeMinAction().connectToPublicAction(&publicDecimalRangeAction->getRangeMinAction(), recursive);
+        getRangeMaxAction().connectToPublicAction(&publicDecimalRangeAction->getRangeMaxAction(), recursive);
+    }
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void DecimalRangeAction::disconnectFromPublicAction()
+void DecimalRangeAction::disconnectFromPublicAction(bool recursive)
 {
-    getRangeMinAction().disconnectFromPublicAction();
-    getRangeMaxAction().disconnectFromPublicAction();
-
-    WidgetAction::disconnectFromPublicAction();
+    if (recursive) {
+        getRangeMinAction().disconnectFromPublicAction(recursive);
+        getRangeMaxAction().disconnectFromPublicAction(recursive);
+    }
+    
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags /*= 0*/) :

@@ -161,7 +161,7 @@ void StringAction::reset()
     setString(_defaultString);
 }
 
-void StringAction::connectToPublicAction(WidgetAction* publicAction)
+void StringAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicStringAction = dynamic_cast<StringAction*>(publicAction);
 
@@ -175,12 +175,14 @@ void StringAction::connectToPublicAction(WidgetAction* publicAction)
 
     setString(publicStringAction->getString());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void StringAction::disconnectFromPublicAction()
+void StringAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicStringAction = dynamic_cast<StringAction*>(getPublicAction());
+
+    Q_ASSERT(publicStringAction != nullptr);
 
     if (publicStringAction == nullptr)
         return;
@@ -188,7 +190,7 @@ void StringAction::disconnectFromPublicAction()
     disconnect(this, &StringAction::stringChanged, publicStringAction, &StringAction::setString);
     disconnect(publicStringAction, &StringAction::stringChanged, this, &StringAction::setString);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void StringAction::fromVariantMap(const QVariantMap& variantMap)

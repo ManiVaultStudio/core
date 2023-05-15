@@ -367,7 +367,7 @@ void ColorMapAction::setDefaultColorMap(const QString& defaultColorMap)
     _currentColorMapAction.setDefaultText(defaultColorMap);
 }
 
-void ColorMapAction::connectToPublicAction(WidgetAction* publicAction)
+void ColorMapAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicColorMapAction = dynamic_cast<ColorMapAction*>(publicAction);
 
@@ -376,7 +376,8 @@ void ColorMapAction::connectToPublicAction(WidgetAction* publicAction)
     if (publicColorMapAction == nullptr)
         return;
 
-    getCurrentColorMapAction().connectToPublicAction(&publicColorMapAction->getCurrentColorMapAction());
+    if (recursive)
+        getCurrentColorMapAction().connectToPublicAction(&publicColorMapAction->getCurrentColorMapAction(), recursive);
     
     connect(&publicColorMapAction->getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, [this](const util::NumericalRange<float>& range) -> void {
         getSharedDataRangeAction(Axis::X).setRange(range);
@@ -386,17 +387,19 @@ void ColorMapAction::connectToPublicAction(WidgetAction* publicAction)
         getSharedDataRangeAction(Axis::Y).setRange(range);
     });
 
-    getMirrorAction(Axis::X).connectToPublicAction(&publicColorMapAction->getMirrorAction(Axis::X));
-    getMirrorAction(Axis::Y).connectToPublicAction(&publicColorMapAction->getMirrorAction(Axis::Y));
-    getDiscretizeAction().connectToPublicAction(&publicColorMapAction->getDiscretizeAction());
-    getNumberOfDiscreteStepsAction().connectToPublicAction(&publicColorMapAction->getNumberOfDiscreteStepsAction());
-    getDiscretizeAlphaAction().connectToPublicAction(&publicColorMapAction->getDiscretizeAlphaAction());
-    getCustomColorMapAction().connectToPublicAction(&publicColorMapAction->getCustomColorMapAction());
+    if (recursive) {
+        getMirrorAction(Axis::X).connectToPublicAction(&publicColorMapAction->getMirrorAction(Axis::X), recursive);
+        getMirrorAction(Axis::Y).connectToPublicAction(&publicColorMapAction->getMirrorAction(Axis::Y), recursive);
+        getDiscretizeAction().connectToPublicAction(&publicColorMapAction->getDiscretizeAction(), recursive);
+        getNumberOfDiscreteStepsAction().connectToPublicAction(&publicColorMapAction->getNumberOfDiscreteStepsAction(), recursive);
+        getDiscretizeAlphaAction().connectToPublicAction(&publicColorMapAction->getDiscretizeAlphaAction(), recursive);
+        getCustomColorMapAction().connectToPublicAction(&publicColorMapAction->getCustomColorMapAction(), recursive);
+    }
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void ColorMapAction::disconnectFromPublicAction()
+void ColorMapAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicColorMapAction = dynamic_cast<ColorMapAction*>(getPublicAction());
 
@@ -405,19 +408,22 @@ void ColorMapAction::disconnectFromPublicAction()
     if (publicColorMapAction == nullptr)
         return;
 
-    getCurrentColorMapAction().disconnectFromPublicAction();
+    if (recursive)
+        getCurrentColorMapAction().disconnectFromPublicAction(recursive);
     
     disconnect(&publicColorMapAction->getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, nullptr);
     disconnect(&publicColorMapAction->getSharedDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, nullptr);
 
-    getMirrorAction(Axis::X).disconnectFromPublicAction();
-    getMirrorAction(Axis::Y).disconnectFromPublicAction();
-    getDiscretizeAction().disconnectFromPublicAction();
-    getNumberOfDiscreteStepsAction().disconnectFromPublicAction();
-    getDiscretizeAlphaAction().disconnectFromPublicAction();
-    getCustomColorMapAction().disconnectFromPublicAction();
+    if (recursive) {
+        getMirrorAction(Axis::X).disconnectFromPublicAction(recursive);
+        getMirrorAction(Axis::Y).disconnectFromPublicAction(recursive);
+        getDiscretizeAction().disconnectFromPublicAction(recursive);
+        getNumberOfDiscreteStepsAction().disconnectFromPublicAction(recursive);
+        getDiscretizeAlphaAction().disconnectFromPublicAction(recursive);
+        getCustomColorMapAction().disconnectFromPublicAction(recursive);
+    }
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void ColorMapAction::fromVariantMap(const QVariantMap& variantMap)

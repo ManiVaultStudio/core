@@ -303,8 +303,9 @@ public: // Connections and publishing
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    virtual void connectToPublicAction(WidgetAction* publicAction);
+    virtual void connectToPublicAction(WidgetAction* publicAction, bool recursive);
 
     /**
      * Connect this action to a public action
@@ -313,8 +314,11 @@ public: // Connections and publishing
     void connectToPublicActionByName(const QString& publicActionName);
 
 
-    /** Disconnect this action from a public action */
-    virtual void disconnectFromPublicAction();
+    /**
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
+     */
+    virtual void disconnectFromPublicAction(bool recursive);
 
     /**
      * Get the public action to which the action is connected

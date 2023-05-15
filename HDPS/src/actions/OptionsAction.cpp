@@ -172,7 +172,7 @@ void OptionsAction::reset()
     setSelectedOptions(getDefaultSelectedOptions());
 }
 
-void OptionsAction::connectToPublicAction(WidgetAction* publicAction)
+void OptionsAction::connectToPublicAction(WidgetAction* publicAction, bool recursive /*= true*/)
 {
     auto publicOptionsAction = dynamic_cast<OptionsAction*>(publicAction);
 
@@ -207,15 +207,14 @@ void OptionsAction::connectToPublicAction(WidgetAction* publicAction)
 
     setSelectedOptions(publicOptionsAction->getSelectedOptions());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void OptionsAction::disconnectFromPublicAction()
+void OptionsAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicOptionsAction = dynamic_cast<OptionsAction*>(getPublicAction());
 
-    if (publicOptionsAction == nullptr)
-        return;
+    Q_ASSERT(publicOptionsAction != nullptr);
 
     if (publicOptionsAction == nullptr)
         return;
@@ -224,7 +223,7 @@ void OptionsAction::disconnectFromPublicAction()
     disconnect(publicOptionsAction, &OptionsAction::selectedOptionsChanged, this, nullptr);
     disconnect(this, &OptionsAction::optionsChanged, this, nullptr);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void OptionsAction::fromVariantMap(const QVariantMap& variantMap)

@@ -88,7 +88,7 @@ QVariantMap ToggleAction::toVariantMap() const
     return variantMap;
 }
 
-void ToggleAction::connectToPublicAction(WidgetAction* publicAction)
+void ToggleAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicToggleAction = dynamic_cast<ToggleAction*>(publicAction);
 
@@ -102,12 +102,14 @@ void ToggleAction::connectToPublicAction(WidgetAction* publicAction)
 
     setChecked(publicToggleAction->isChecked());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void ToggleAction::disconnectFromPublicAction()
+void ToggleAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicToggleAction = dynamic_cast<ToggleAction*>(getPublicAction());
+
+    Q_ASSERT(publicToggleAction != nullptr);
 
     if (publicToggleAction == nullptr)
         return;
@@ -115,7 +117,7 @@ void ToggleAction::disconnectFromPublicAction()
     disconnect(this, &ToggleAction::toggled, publicToggleAction, &ToggleAction::setChecked);
     disconnect(publicToggleAction, &ToggleAction::toggled, this, &ToggleAction::setChecked);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* toggleAction) :

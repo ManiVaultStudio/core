@@ -78,21 +78,26 @@ QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     return widget;
 }
 
-void TriggerAction::connectToPublicAction(WidgetAction* publicAction)
+void TriggerAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicTriggerAction = dynamic_cast<TriggerAction*>(publicAction);
 
     Q_ASSERT(publicTriggerAction != nullptr);
 
+    if (publicTriggerAction == nullptr)
+        return;
+
     connect(this, &TriggerAction::triggered, this, &TriggerAction::selfTriggered);
     connect(publicTriggerAction, &TriggerAction::triggered, this, &TriggerAction::trigger);
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void TriggerAction::disconnectFromPublicAction()
+void TriggerAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicTriggerAction = dynamic_cast<TriggerAction*>(getPublicAction());
+
+    Q_ASSERT(publicTriggerAction != nullptr);
 
     if (publicTriggerAction == nullptr)
         return;
@@ -100,7 +105,7 @@ void TriggerAction::disconnectFromPublicAction()
     disconnect(this, &TriggerAction::triggered, this, &TriggerAction::selfTriggered);
     disconnect(publicTriggerAction, &TriggerAction::triggered, this, &TriggerAction::trigger);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 }

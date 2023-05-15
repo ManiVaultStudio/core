@@ -128,7 +128,7 @@ void DimensionPickerAction::publish(const QString& name)
     _currentDimensionAction.publish(name);
 }
 
-void DimensionPickerAction::connectToPublicAction(WidgetAction* publicAction)
+void DimensionPickerAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicDimensionPickerAction = dynamic_cast<DimensionPickerAction*>(publicAction);
 
@@ -137,16 +137,18 @@ void DimensionPickerAction::connectToPublicAction(WidgetAction* publicAction)
     if (publicDimensionPickerAction == nullptr)
         return;
 
-    _currentDimensionAction.connectToPublicAction(&publicDimensionPickerAction->getCurrentDimensionAction());
+    if (recursive)
+        _currentDimensionAction.connectToPublicAction(&publicDimensionPickerAction->getCurrentDimensionAction(), recursive);
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void DimensionPickerAction::disconnectFromPublicAction()
+void DimensionPickerAction::disconnectFromPublicAction(bool recursive)
 {
-    _currentDimensionAction.disconnectFromPublicAction();
+    if (recursive)
+        _currentDimensionAction.disconnectFromPublicAction(recursive);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void DimensionPickerAction::fromVariantMap(const QVariantMap& variantMap)

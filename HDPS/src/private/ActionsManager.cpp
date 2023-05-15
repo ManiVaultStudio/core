@@ -166,7 +166,7 @@ void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
 
             publicAction->setText(name);
 
-            connectPrivateActionToPublicAction(privateAction, publicAction);
+            connectPrivateActionToPublicAction(privateAction, publicAction, true);
 
             emit privateAction->isPublishedChanged(privateAction->isPublished());
             emit privateAction->isConnectedChanged(privateAction->isConnected());

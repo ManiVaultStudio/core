@@ -170,18 +170,18 @@ void ColorMapEditor1DAction::updateColorMap()
     emit _colorMapAction.imageChanged(_colorMapImage);
 }
 
-void ColorMapEditor1DAction::connectToPublicAction(WidgetAction* publicAction)
+void ColorMapEditor1DAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicColorMapEditor1DAction = dynamic_cast<ColorMapEditor1DAction*>(publicAction);
 
     Q_ASSERT(publicColorMapEditor1DAction != nullptr);
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void ColorMapEditor1DAction::disconnectFromPublicAction()
+void ColorMapEditor1DAction::disconnectFromPublicAction(bool recursive)
 {
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void ColorMapEditor1DAction::fromVariantMap(const QVariantMap& variantMap)

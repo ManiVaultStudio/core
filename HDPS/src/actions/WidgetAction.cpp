@@ -56,8 +56,6 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
 
     if (core()->isInitialized())
         actions().addAction(this);
-    else
-        qDebug() << getId();
 }
 
 WidgetAction::~WidgetAction()
@@ -222,7 +220,7 @@ void WidgetAction::publish(const QString& name /*= ""*/)
     hdps::actions().publishPrivateAction(this, name);
 }
 
-void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
+void WidgetAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     Q_ASSERT(publicAction != nullptr);
 
@@ -247,14 +245,16 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
 
     emit isConnectedChanged(isConnected());
 
-    for (auto child : children()) {
-        auto action = dynamic_cast<WidgetAction*>(child);
+    if (recursive) {
+        for (auto child : children()) {
+            auto action = dynamic_cast<WidgetAction*>(child);
 
-        if (action == nullptr)
-            continue;
+            if (action == nullptr)
+                continue;
 
-        action->cacheConnectionPermissions(true);
-        action->setConnectionPermissionsToNone(true);
+            action->cacheConnectionPermissions(true);
+            action->setConnectionPermissionsToNone(true);
+        }
     }
 }
 
@@ -275,7 +275,7 @@ void WidgetAction::connectToPublicActionByName(const QString& publicActionName)
     */
 }
 
-void WidgetAction::disconnectFromPublicAction()
+void WidgetAction::disconnectFromPublicAction(bool recursive)
 {
     Q_ASSERT(_publicAction != nullptr);
 
@@ -296,13 +296,15 @@ void WidgetAction::disconnectFromPublicAction()
 
     emit isConnectedChanged(isConnected());
 
-    for (auto child : children()) {
-        auto action = dynamic_cast<WidgetAction*>(child);
+    if (recursive) {
+        for (auto child : children()) {
+            auto action = dynamic_cast<WidgetAction*>(child);
 
-        if (action == nullptr)
-            continue;
+            if (action == nullptr)
+                continue;
 
-        action->restoreConnectionPermissions(true);
+            action->restoreConnectionPermissions(true);
+        }
     }
 }
 
@@ -313,7 +315,7 @@ WidgetAction* WidgetAction::getPublicAction()
 
 WidgetAction* WidgetAction::getPublicCopy() const
 {
-    auto publicCopy = static_cast<WidgetAction*>(metaObject()->newInstance(Q_ARG(QObject*, parent()), Q_ARG(QString, text())));
+    auto publicCopy = static_cast<WidgetAction*>(metaObject()->newInstance(Q_ARG(QObject*, &hdps::actions()), Q_ARG(QString, text())));
 
     publicCopy->fromVariantMap(toVariantMap());
     publicCopy->makePublic();

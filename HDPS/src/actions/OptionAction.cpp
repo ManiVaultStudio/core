@@ -103,7 +103,7 @@ const QAbstractItemModel* OptionAction::getModel() const
     return &_defaultModel;
 }
 
-void OptionAction::connectToPublicAction(WidgetAction* publicAction)
+void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicOptionAction = dynamic_cast<OptionAction*>(publicAction);
 
@@ -114,10 +114,10 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction)
 
     setCurrentText(publicOptionAction->getCurrentText());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void OptionAction::disconnectFromPublicAction()
+void OptionAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicOptionAction = dynamic_cast<OptionAction*>(getPublicAction());
 
@@ -127,7 +127,7 @@ void OptionAction::disconnectFromPublicAction()
     disconnect(this, &OptionAction::currentTextChanged, publicOptionAction, &OptionAction::setCurrentText);
     disconnect(publicOptionAction, &OptionAction::currentTextChanged, this, &OptionAction::setCurrentText);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void OptionAction::fromVariantMap(const QVariantMap& variantMap)

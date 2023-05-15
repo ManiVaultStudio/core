@@ -34,7 +34,7 @@ void VariantAction::setVariant(const QVariant& variant)
     saveToSettings();
 }
 
-void VariantAction::connectToPublicAction(WidgetAction* publicAction)
+void VariantAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicVariantAction = dynamic_cast<VariantAction*>(publicAction);
 
@@ -45,20 +45,19 @@ void VariantAction::connectToPublicAction(WidgetAction* publicAction)
 
     setVariant(publicVariantAction->getVariant());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void VariantAction::disconnectFromPublicAction()
+void VariantAction::disconnectFromPublicAction(bool recursive)
 {
-    auto publicStringAction = dynamic_cast<VariantAction*>(getPublicAction());
+    auto publicVariantAction = dynamic_cast<VariantAction*>(getPublicAction());
 
-    if (publicStringAction == nullptr)
-        return;
+    Q_ASSERT(publicVariantAction != nullptr);
 
-    disconnect(this, &VariantAction::variantChanged, publicStringAction, &VariantAction::setVariant);
-    disconnect(publicStringAction, &VariantAction::variantChanged, this, &VariantAction::setVariant);
+    disconnect(this, &VariantAction::variantChanged, publicVariantAction, &VariantAction::setVariant);
+    disconnect(publicVariantAction, &VariantAction::variantChanged, this, &VariantAction::setVariant);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void VariantAction::fromVariantMap(const QVariantMap& variantMap)

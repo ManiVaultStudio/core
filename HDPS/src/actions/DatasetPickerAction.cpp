@@ -181,7 +181,7 @@ void DatasetPickerAction::populateDatasetsFromCore()
         setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
 }
 
-void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction)
+void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(publicAction);
 
@@ -192,10 +192,10 @@ void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction)
 
     setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void DatasetPickerAction::disconnectFromPublicAction()
+void DatasetPickerAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
@@ -205,7 +205,7 @@ void DatasetPickerAction::disconnectFromPublicAction()
     disconnect(this, &DatasetPickerAction::datasetPicked, publicDatasetPickerAction, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
     disconnect(publicDatasetPickerAction, &DatasetPickerAction::datasetPicked, this, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void DatasetPickerAction::fromVariantMap(const QVariantMap& variantMap)

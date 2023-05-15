@@ -67,23 +67,28 @@ void StringsAction::reset()
     setStrings(_defaultStrings);
 }
 
-void StringsAction::connectToPublicAction(WidgetAction* publicAction)
+void StringsAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicStringsAction = dynamic_cast<StringsAction*>(publicAction);
 
     Q_ASSERT(publicStringsAction != nullptr);
+
+    if (publicStringsAction == nullptr)
+        return;
 
     connect(this, &StringsAction::stringsChanged, publicStringsAction, &StringsAction::setStrings);
     connect(publicStringsAction, &StringsAction::stringsChanged, this, &StringsAction::setStrings);
 
     setStrings(publicStringsAction->getStrings());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void StringsAction::disconnectFromPublicAction()
+void StringsAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicStringsAction = dynamic_cast<StringsAction*>(getPublicAction());
+
+    Q_ASSERT(publicStringsAction != nullptr);
 
     if (publicStringsAction == nullptr)
         return;
@@ -91,7 +96,7 @@ void StringsAction::disconnectFromPublicAction()
     disconnect(this, &StringsAction::stringsChanged, publicStringsAction, &StringsAction::setStrings);
     disconnect(publicStringsAction, &StringsAction::stringsChanged, this, &StringsAction::setStrings);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void StringsAction::fromVariantMap(const QVariantMap& variantMap)

@@ -88,7 +88,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
                 connectAction->setToolTip("Connect " + firstAction->text() + " to " + publicAction->text());
 
                 connect(connectAction, &QAction::triggered, this, [this, firstAction, publicAction]() -> void {
-                    hdps::actions().connectPrivateActionToPublicAction(firstAction, publicAction);
+                    hdps::actions().connectPrivateActionToPublicAction(firstAction, publicAction, true);
                 });
 
                 connectMenu->addAction(connectAction);
@@ -134,7 +134,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         connect(&_removeAction, &TriggerAction::triggered, this, [this, rootPublicActions]() -> void {
             for (auto rootPublicAction : rootPublicActions) {
                 for (auto connectedAction : rootPublicAction->getConnectedActions())
-                    hdps::actions().disconnectPrivateActionFromPublicAction(connectedAction);
+                    hdps::actions().disconnectPrivateActionFromPublicAction(connectedAction, true);
 
                 delete rootPublicAction;
             }
@@ -147,7 +147,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
     connect(&_disconnectAction, &TriggerAction::triggered, this, [this]() -> void {
         for (auto action : _actions)
-            hdps::actions().disconnectPrivateActionFromPublicAction(action);
+            hdps::actions().disconnectPrivateActionFromPublicAction(action, true);
     });
 }
 

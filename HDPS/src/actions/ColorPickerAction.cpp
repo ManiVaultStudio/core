@@ -55,7 +55,7 @@ void ColorPickerAction::setDefaultColor(const QColor& defaultColor)
     emit defaultColorChanged(_defaultColor);
 }
 
-void ColorPickerAction::connectToPublicAction(WidgetAction* publicAction)
+void ColorPickerAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicColorPickerAction = dynamic_cast<ColorPickerAction*>(publicAction);
 
@@ -66,20 +66,19 @@ void ColorPickerAction::connectToPublicAction(WidgetAction* publicAction)
 
     setColor(publicColorPickerAction->getColor());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void ColorPickerAction::disconnectFromPublicAction()
+void ColorPickerAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicColorPickerAction = dynamic_cast<ColorPickerAction*>(getPublicAction());
 
-    if (publicColorPickerAction == nullptr)
-        return;
+    Q_ASSERT(publicColorPickerAction != nullptr);
 
     disconnect(this, &ColorPickerAction::colorChanged, publicColorPickerAction, &ColorPickerAction::setColor);
     disconnect(publicColorPickerAction, &ColorPickerAction::colorChanged, this, &ColorPickerAction::setColor);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 ColorPickerAction::Widget::Widget(QWidget* parent, ColorPickerAction* colorPickerAction) :

@@ -57,7 +57,7 @@ void ColorAction::setDefaultColor(const QColor& defaultColor)
     emit defaultColorChanged(_defaultColor);
 }
 
-void ColorAction::connectToPublicAction(WidgetAction* publicAction)
+void ColorAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicColorAction = dynamic_cast<ColorAction*>(publicAction);
 
@@ -68,20 +68,19 @@ void ColorAction::connectToPublicAction(WidgetAction* publicAction)
 
     setColor(publicColorAction->getColor());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void ColorAction::disconnectFromPublicAction()
+void ColorAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicColorAction = dynamic_cast<ColorAction*>(getPublicAction());
 
-    if (publicColorAction == nullptr)
-        return;
+    Q_ASSERT(publicColorAction != nullptr);
 
     disconnect(this, &ColorAction::colorChanged, publicColorAction, &ColorAction::setColor);
     disconnect(publicColorAction, &ColorAction::colorChanged, this, &ColorAction::setColor);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void ColorAction::fromVariantMap(const QVariantMap& variantMap)

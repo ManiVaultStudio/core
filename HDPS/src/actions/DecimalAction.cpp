@@ -61,7 +61,7 @@ void DecimalAction::setSingleStep(const float& singleStep)
     emit singleStepChanged(_singleStep);
 }
 
-void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
+void DecimalAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicDecimalAction = dynamic_cast<DecimalAction*>(publicAction);
 
@@ -90,15 +90,14 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
     //setMaximum(publicDecimalAction->getMaximum());
     setValue(publicDecimalAction->getValue());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void DecimalAction::disconnectFromPublicAction()
+void DecimalAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicDecimalAction = dynamic_cast<DecimalAction*>(getPublicAction());
 
-    if (publicDecimalAction == nullptr)
-        return;
+    Q_ASSERT(publicDecimalAction != nullptr);
 
     if (publicDecimalAction == nullptr)
         return;
@@ -108,7 +107,7 @@ void DecimalAction::disconnectFromPublicAction()
     disconnect(this, &DecimalAction::valueChanged, publicDecimalAction, nullptr);
     disconnect(publicDecimalAction, &DecimalAction::valueChanged, this, nullptr);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void DecimalAction::fromVariantMap(const QVariantMap& variantMap)

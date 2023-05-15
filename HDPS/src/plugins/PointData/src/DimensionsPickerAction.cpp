@@ -502,11 +502,14 @@ void DimensionsPickerAction::updateSummary()
     _summaryAction.setString(tr("%1 available, %2 visible, %3 selected").arg(numberOfDimensions).arg(numberOfVisibleDimensions).arg(holder.getNumberOfSelectedDimensions()));
 }
 
-void DimensionsPickerAction::connectToPublicAction(WidgetAction* publicAction)
+void DimensionsPickerAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicDimensionsPickerAction = dynamic_cast<DimensionsPickerAction*>(publicAction);
 
     Q_ASSERT(publicDimensionsPickerAction != nullptr);
+
+    if (publicDimensionsPickerAction == nullptr)
+        return;
 
     connect(this, &DimensionsPickerAction::selectedDimensionsChanged, publicDimensionsPickerAction, [publicDimensionsPickerAction](const QVector<std::int32_t>& dimensionIndices) -> void {
         publicDimensionsPickerAction->selectDimensions(dimensionIndices);
@@ -518,19 +521,22 @@ void DimensionsPickerAction::connectToPublicAction(WidgetAction* publicAction)
 
     selectDimensions(publicDimensionsPickerAction->getSelectedDimensions());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void DimensionsPickerAction::disconnectFromPublicAction()
+void DimensionsPickerAction::disconnectFromPublicAction(bool recursive)
 {
     auto publicDimensionsPickerAction = dynamic_cast<DimensionsPickerAction*>(getPublicAction());
 
     Q_ASSERT(publicDimensionsPickerAction != nullptr);
 
+    if (publicDimensionsPickerAction == nullptr)
+        return;
+
     disconnect(this, &DimensionsPickerAction::selectedDimensionsChanged, publicDimensionsPickerAction, nullptr);
     disconnect(publicDimensionsPickerAction, &DimensionsPickerAction::selectedDimensionsChanged, this, nullptr);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 WidgetAction* DimensionsPickerAction::getPublicCopy() const

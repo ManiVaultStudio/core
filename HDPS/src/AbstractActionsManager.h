@@ -2,6 +2,8 @@
 
 #include "AbstractManager.h"
 
+#include "actions/WidgetAction.h"
+
 #include <QObject>
 
 namespace hdps
@@ -34,7 +36,10 @@ public:
      * @param parent Pointer to parent object
      */
     AbstractActionsManager(QObject* parent = nullptr) :
-        AbstractManager(parent, "Actions")
+        AbstractManager(parent, "Actions"),
+        _actions(),
+        _publicActions(),
+        _actionTypes()
     {
     }
 
@@ -164,8 +169,9 @@ public: // Linking
      * Connect \p privateAction to \p publicAction
      * @param privateAction Pointer to private action
      * @param publicAction Pointer to public action
+     * @param recursive Whether to also connect descendant child actions
      */
-    virtual void connectPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) {
+    virtual void connectPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction, bool recursive) {
         Q_ASSERT(privateAction != nullptr);
         Q_ASSERT(publicAction != nullptr);
 
@@ -174,21 +180,22 @@ public: // Linking
 
         privateAction->_publicAction = publicAction;
 
-        privateAction->connectToPublicAction(publicAction);
+        privateAction->connectToPublicAction(publicAction, recursive);
     }
 
     /**
      * Disconnect \p privateAction from public action
      * @param privateAction Pointer to private action
+     * @param recursive Whether to also disconnect descendant child actions
      */
-    virtual void disconnectPrivateActionFromPublicAction(gui::WidgetAction* privateAction) final {
+    virtual void disconnectPrivateActionFromPublicAction(gui::WidgetAction* privateAction, bool recursive) final {
         Q_ASSERT(privateAction != nullptr);
 
         if (privateAction == nullptr)
             return;
 
         if (privateAction->isConnected())
-            privateAction->disconnectFromPublicAction();
+            privateAction->disconnectFromPublicAction(recursive);
 
         privateAction->_publicAction = nullptr;
     }
@@ -385,9 +392,9 @@ signals:
     void actionTypesHumanFriendlyChanged(const QStringList& actionTypesHumanFriendly);
 
 protected:
-    gui::WidgetActions          _publicActions;     /** List of public actions that are instantiated in the plugin system */
-    gui::WidgetActions          _actions;           /** List of actions that are instantiated in the plugin system */
-    QMap<QString, ActionType>   _actionTypes;       /** Maps action type to counter and human-friendly action type string */
+    gui::WidgetActions          _actions;               /** List of actions that are instantiated in the plugin system */
+    gui::WidgetActions          _publicActions;         /** List of public actions that are instantiated in the plugin system */
+    QMap<QString, ActionType>   _actionTypes;           /** Maps action type to counter and human-friendly action type string */
 
     friend class gui::WidgetAction;
 };
