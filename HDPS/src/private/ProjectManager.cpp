@@ -16,6 +16,8 @@
 #include <QStandardPaths>
 #include <QGridLayout>
 
+#include <exception>
+
 #ifdef _DEBUG
     #define PROJECT_MANAGER_VERBOSE
 #endif
@@ -856,10 +858,19 @@ QString ProjectManager::extractProjectFileFromHdpsFile(const QString& hdpsFilePa
     QFileInfo projectFileInfo(temporaryDirectoryPath, projectFile);
 
     Archiver archiver;
+    QString projectFilePath = "";
 
-    archiver.extractSingleFile(hdpsFilePath, projectFile, projectFileInfo.absoluteFilePath());
+    try
+    {
+        archiver.extractSingleFile(hdpsFilePath, projectFile, projectFileInfo.absoluteFilePath());
+        projectFilePath = projectFileInfo.absoluteFilePath();
+    }
+    catch (const std::runtime_error& e)
+    {
+        qDebug() << "ProjectManager: exception caught in extractProjectFileFromHdpsFile, given file path " << hdpsFilePath << ": " << e.what();
+    }
 
-    return projectFileInfo.absoluteFilePath();
+    return projectFilePath;
 }
 
 void ProjectManager::fromVariantMap(const QVariantMap& variantMap)
@@ -889,7 +900,14 @@ QImage ProjectManager::getPreviewImage(const QString& projectFilePath, const QSi
 
     QFileInfo workspaceFileInfo(temporaryDirectoryPath, workspaceFile);
 
-    archiver.extractSingleFile(projectFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
+    try
+    {
+        archiver.extractSingleFile(projectFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
+    }
+    catch (const std::runtime_error& e)
+    {
+        qDebug() << "ProjectManager: exception caught in getPreviewImage, given file path " << projectFilePath << ": " << e.what();
+    }
 
     if (workspaceFileInfo.exists())
         return Workspace::getPreviewImage(workspaceFileInfo.absoluteFilePath());

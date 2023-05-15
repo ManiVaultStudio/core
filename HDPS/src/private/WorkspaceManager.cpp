@@ -23,6 +23,8 @@
 #include <QBuffer>
 #include <QOpenGLWidget>
 
+#include <exception>
+
 #ifdef _DEBUG
     #define WORKSPACE_MANAGER_VERBOSE
 #endif
@@ -365,7 +367,15 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*
 
     QFileInfo workspaceFileInfo(temporaryDirectoryPath, workspaceFile);
 
-    archiver.extractSingleFile(projectFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
+    try
+    {
+        archiver.extractSingleFile(projectFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
+    }
+    catch (const std::runtime_error& e)
+    {
+        qDebug() << "WorkspaceManager: exception caught in importWorkspaceFromProjectFile, given file path " << projectFilePath << ": " << e.what();
+        return;
+    }
 
     if (workspaceFileInfo.exists())
         loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
