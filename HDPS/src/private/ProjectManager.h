@@ -98,7 +98,7 @@ public:
      * Extract the project JSON file (project.json) from a compressed HDPS file (*.hdps)
      * @param hdpsFilePath File path of the compressed HDPS file (*.hdps)
      * @param temporaryDir Temporary directory to store the project.json file
-     * @return File path of the extracted project.json file
+     * @return File path of the extracted project.json file, empty string if extraction failed
      */
     QString extractProjectFileFromHdpsFile(const QString& hdpsFilePath, QTemporaryDir& temporaryDir) override;
 

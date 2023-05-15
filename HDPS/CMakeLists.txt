@@ -27,10 +27,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_INSTALL_MESSAGE LAZY)
 set(CMAKE_AUTOMOC_PATH_PREFIX ON)
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
 # include CMakePackageConfigHelpers macro
 include(CMakePackageConfigHelpers)
@@ -129,10 +128,9 @@ find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidge
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
-# Qt Advanced docking system
-set(VERSION_SHORT 4.0.1)
+# Qt Advanced docking system, set version manually
+set(ADS_VERSION 4.0.1)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
-add_subdirectory(external)
 add_subdirectory(external/advanced_docking)
 
 # File compression LIBRARY
@@ -155,6 +153,7 @@ else()
 endif()
 
 set(QUAZIP_QT_MAJOR_VERSION 6)
+set(QUAZIP_BZIP2 OFF CACHE BOOL "Enables BZIP2 compression")  # we use ZLIB, not BZIP
 add_subdirectory(external/quazip)
 
 
@@ -209,7 +208,7 @@ target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_L
 # Use avx if enabled and available
 check_and_set_AVX(${HDPS_PRIVATE_LIB} ${USE_AVX})
 
-add_dependencies(${HDPS_PRIVATE_LIB} ${HDPS_PUBLIC_LIB} QuaZip)
+add_dependencies(${HDPS_PRIVATE_LIB} ${HDPS_PUBLIC_LIB} QuaZip qtadvanceddocking)
 
 # -----------------------------------------------------------------------------
 # Target HDPS_EXE
@@ -243,7 +242,7 @@ target_link_libraries(${HDPS_EXE} PRIVATE "$<TARGET_FILE:${HDPS_PRIVATE_LIB}>")
 # Use avx if enabled and available
 check_and_set_AVX(${HDPS_EXE} ${USE_AVX})
 
-add_dependencies(${HDPS_EXE} ${HDPS_PUBLIC_LIB} ${HDPS_PRIVATE_LIB} QuaZip)
+add_dependencies(${HDPS_EXE} ${HDPS_PUBLIC_LIB} ${HDPS_PRIVATE_LIB} QuaZip qtadvanceddocking)
 
 if(MSVC)
     set_target_properties(${HDPS_EXE} PROPERTIES
@@ -273,10 +272,10 @@ if(APPLE)
         #	RESULT_VARIABLE retval
             COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
             COMMAND ${CMAKE_COMMAND} -E copy 
-                    \"${INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.3.6.3.dylib\" 
+                    \"${INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.${ADS_VERSION}.dylib\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
             COMMAND ${CMAKE_COMMAND} -E copy 
-                    \"$<TARGET_FILE:${HDPS_PUBLIC_LIB}\" 
+                    \"$<TARGET_FILE:${HDPS_PUBLIC_LIB}>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
                     
             COMMAND ${CMAKE_COMMAND} -E copy 
@@ -310,20 +309,20 @@ else()
     # On MSVC, HDPS_PRIVATE_LIB is statically linked to HDPS_EXE and does not need to be installed
 endif()
 
-# Install public headers 
-install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
-        string(REGEX REPLACE \"^src/\" \"\" STRIPPED_PUBLIC_HEADER \${PUBLIC_HEADER})
-        execute_process(
-            COMMAND \"${CMAKE_COMMAND}\" -E copy_if_different 
-                \"${CMAKE_CURRENT_SOURCE_DIR}/\${PUBLIC_HEADER}\" 
-                \"${INSTALL_DIR}/$<CONFIGURATION>/include/\${STRIPPED_PUBLIC_HEADER}\"
-        )
-	MESSAGE(STATUS \"Installing: \${PUBLIC_HEADER}\")
-    endforeach(PUBLIC_HEADER)"
-    COMPONENT HDPSPUBLIC_HEADERS
-)
+# Install public headers
+foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
+    # Remove the "src" prefix of the header get the remaining subdirectory
+    string(REGEX REPLACE "^src/(.*/).*" "\\1" STRIPPED_PUBLIC_HEADER ${PUBLIC_HEADER})
+    if("${STRIPPED_PUBLIC_HEADER}" STREQUAL "${PUBLIC_HEADER}")
+        set(STRIPPED_PUBLIC_HEADER "")
+    endif()
+    set(HEADER_DEST "${INSTALL_DIR}/$<CONFIGURATION>/include/${STRIPPED_PUBLIC_HEADER}")
 
-# Install public headers 
+    # Install the header file while preserving the folder structure
+    install(FILES ${PUBLIC_HEADER} DESTINATION ${HEADER_DEST} COMPONENT HDPSPUBLIC_HEADERS)
+endforeach()
+
+# Install public library
 install(TARGETS ${HDPS_PUBLIC_LIB}
     EXPORT HdpsPublicExport
     ARCHIVE DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB  # Linux/Mac .so
@@ -379,37 +378,45 @@ install(FILES
 
 # Call the install functions of the all public targets
 # needed for plugins directly after the build
-add_custom_command(
-    TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
+add_custom_command(TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault public headers"
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component HDPSPUBLIC_HEADERS
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault public link library"
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component HDPSPUBLIC_LINKLIB
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault cmake config files"
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component HDPSPUBLIC_PACKAGE
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault cmake target files"
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component HDPSPUBLIC_TARGET
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
+    # If no plugin directory exsists, ManiVault might try to import 
+    # any library in the executable directory as a plugin
+    COMMAND "${CMAKE_COMMAND}"
+        -E make_directory ${INSTALL_DIR}/$<CONFIGURATION>/Plugins
 )
 
 # Install the HDPS executable
 if(APPLE)
     add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault executable bundle"
         COMMAND "${CMAKE_COMMAND}"
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
@@ -417,8 +424,8 @@ if(APPLE)
             --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
     )
 elseif(UNIX)
-    add_custom_command(
-        TARGET ${HDPS_PRIVATE_LIB} POST_BUILD
+    add_custom_command(TARGET ${HDPS_PRIVATE_LIB} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault private link library"
         COMMAND "${CMAKE_COMMAND}"
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
@@ -429,8 +436,8 @@ elseif(UNIX)
 endif()
 
 if(NOT APPLE)
-    add_custom_command(
-        TARGET ${HDPS_EXE} POST_BUILD
+    add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault executable"
         COMMAND "${CMAKE_COMMAND}"
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
@@ -442,36 +449,37 @@ endif()
 
 # Install examples
 add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_CURRENT_SOURCE_DIR}/res/examples
-                ${INSTALL_DIR}/$<CONFIGURATION>/examples
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault examples"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/res/examples
+            ${INSTALL_DIR}/$<CONFIGURATION>/examples
 )
 
-# Install dependencies
+# Install dependency runtime libraries
+# on windows, the DLLs should be placed in the same directory as the executable
 add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: dependency runtime libraries"
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:qtadvanceddocking> ${INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:QuaZip> ${INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+)
+
+if(UNIX AND NOT APPLE)
+    # Creat symlink with slightly different name required on some linux distributions
+    include(CMakeQuaZipSymlink)
+    create_quazip_symlink()
+endif()
+
+# Install dependency licences
+add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: dependency licences"
     COMMAND "${CMAKE_COMMAND}" 
         --install ${CMAKE_CURRENT_BINARY_DIR}/external/advanced_docking
         --config $<CONFIGURATION> 
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
-    COMMAND "${CMAKE_COMMAND}" 
-        --install ${CMAKE_CURRENT_BINARY_DIR}/external/quazip
-        --config $<CONFIGURATION> 
-        --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
+        --component license
+    COMMAND "${CMAKE_COMMAND}" -E make_directory ${INSTALL_DIR}/$<CONFIGURATION>/license/quazip
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/external/quazip/COPYING ${INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
 )
-
-# Move quazip from INSTALL_DIR/bin to INSTALL_DIR
-if(WIN32)
-    # Note! the quazip lib is named differently in Debug & Release
-    add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-            "${INSTALL_DIR}/$<CONFIGURATION>/bin/quazip1-qt6$<IF:$<CONFIG:DEBUG>,d,>.dll"
-            "${INSTALL_DIR}/$<CONFIGURATION>/quazip1-qt6$<IF:$<CONFIG:DEBUG>,d,>.dll"
-        # since only quazip is in the bin folder, remove it
-        COMMAND ${CMAKE_COMMAND} -E remove_directory
-            ${INSTALL_DIR}/$<CONFIGURATION>/bin/
-    )
-endif()
-
 
 # -----------------------------------------------------------------------------
 # Plugin projects

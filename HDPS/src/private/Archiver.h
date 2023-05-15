@@ -67,6 +67,7 @@ public:
 
     /**
      * Extracts a file
+     * Might throw a std::runtime_error exception if an error occurs during extraction
      * @param compressedFilePath File path of the compressed input file
      * @param sourceFileName File name of the compressed source file
      * @param targetFilePath Path of the extracted target file

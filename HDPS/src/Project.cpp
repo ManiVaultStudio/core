@@ -68,7 +68,7 @@ Project::Project(const QString& filePath, bool preview, QObject* parent /*= null
     }
     catch (std::exception& e)
     {
-        qDebug() << "Unable to load project from file" << e.what();
+        qDebug() << "Unable to load project from file:" << e.what();
     }
     catch (...)
     {

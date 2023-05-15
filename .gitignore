@@ -9,3 +9,4 @@ install/
 .DS_Store
 
 external/biovault_bfloat16
+*.aps

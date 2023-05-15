@@ -6,7 +6,7 @@ set( MAIN_SOURCES
 )
 
 if(WIN32)
-    set(MAIN_SOURCES ${MAIN_SOURCES} win/hdps.rc)
+    set(MAIN_SOURCES ${MAIN_SOURCES} res/ResourcesWinIco.rc)
 endif(WIN32)
 
 if(APPLE)
