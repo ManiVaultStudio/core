@@ -147,13 +147,18 @@ const DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGui
 
 DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid)
 {
+    DataHierarchyItem* item = nullptr;
+
     try
     {
         Q_ASSERT(!datasetGuid.isEmpty());
 
         for (auto dataHierarchyItem : _items)
             if (dataHierarchyItem->getDatasetReference().getDatasetGuid() == datasetGuid)
-                return *dataHierarchyItem;
+            {
+                item = dataHierarchyItem;
+                break;
+            }
 
         QString errorMessage = QString("Failed to find data hierarchy item with guid: %1").arg(datasetGuid);
         throw std::runtime_error(errorMessage.toStdString());
@@ -165,6 +170,8 @@ DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid)
     catch (...) {
         exceptionMessageBox("Unable to get item from the data hierarchy manager");
     }
+
+    return *item;
 }
 
 hdps::DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive /*= true*/)
