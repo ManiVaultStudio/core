@@ -80,6 +80,7 @@ set(PUBLIC_NUMERICAL_ACTIONS_HEADERS
     src/actions/IntegralAction.h
     src/actions/NumericalRangeAction.h
     src/actions/DecimalRangeAction.h
+    src/actions/IntegralRangeAction.h
 )
 
 set(PUBLIC_NUMERICAL_ACTIONS_SOURCES
@@ -88,6 +89,7 @@ set(PUBLIC_NUMERICAL_ACTIONS_SOURCES
     src/actions/IntegralAction.cpp
     src/actions/NumericalRangeAction.cpp
     src/actions/DecimalRangeAction.cpp
+    src/actions/IntegralRangeAction.cpp
 )
 
 set(PUBLIC_NUMERICAL_ACTIONS_FILES

@@ -2,6 +2,8 @@
 
 #include "WidgetAction.h"
 
+#include "actions/HorizontalGroupAction.h"
+
 #include "widgets/HierarchyWidget.h"
 
 #include <QStringListModel>
@@ -93,6 +95,7 @@ public:
         StringAction            _nameAction;        /** String name action */
         TriggerAction           _addAction;         /** Add string action */
         TriggerAction           _removeAction;      /** Remove string action */
+        HorizontalGroupAction   _toolbarAction;     /** Toolbar action */
 
         friend class StringsAction;
     };

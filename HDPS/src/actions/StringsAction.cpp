@@ -173,7 +173,8 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
     _hierarchyWidget(this, stringsAction->getCategory(), _model, &_filterModel, false),
     _nameAction(this, "Name"),
     _addAction(this, "Add"),
-    _removeAction(this, "Remove")
+    _removeAction(this, "Remove"),
+    _toolbarAction(this, "Toolbar")
 {
     resize(0, 150);
 
@@ -193,32 +194,32 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
 
     _addAction.setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
     _addAction.setToolTip(QString("Add entered %1").arg(stringsAction->getCategory().toLower()));
+    _addAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     _removeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
     _removeAction.setToolTip(QString("Remove selected %1(s)").arg(stringsAction->getCategory().toLower()));
+    _removeAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(&_hierarchyWidget, 1);
 
-    if (widgetFlags & StringsAction::WidgetFlag::MayEdit) {
-        auto toolbarLayout = new QHBoxLayout();
+    _toolbarAction.setShowLabels(false);
 
-        toolbarLayout->addWidget(_nameAction.createWidget(this), 1);
-        toolbarLayout->addWidget(_addAction.createWidget(this, TriggerAction::Icon));
-        toolbarLayout->addWidget(_removeAction.createWidget(this, TriggerAction::Icon));
-        toolbarLayout->addWidget(_hierarchyWidget.getFilterGroupAction().createCollapsedWidget(this));
+    _toolbarAction.addAction(&_nameAction);
+    _toolbarAction.addAction(&_addAction);
+    _toolbarAction.addAction(&_removeAction);
 
-        layout->addLayout(toolbarLayout);
-    }
+    if (widgetFlags & StringsAction::WidgetFlag::MayEdit)
+        layout->addWidget(_toolbarAction.createWidget(this));
 
     setLayout(layout);
 
     const auto updateActions = [this]() -> void {
         const auto selectedRows = _hierarchyWidget.getSelectionModel().selectedRows();
 
-        _nameAction.setEnabled(selectedRows.isEmpty());
+        _nameAction.setEnabled(selectedRows.count() != 1);
 
         if (selectedRows.count() == 1)
             _nameAction.setString(selectedRows.first().data(Qt::DisplayRole).toString());
