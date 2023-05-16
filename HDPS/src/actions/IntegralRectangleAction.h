@@ -68,4 +68,4 @@ signals:
 
 Q_DECLARE_METATYPE(hdps::gui::IntegralRectangleAction)
 
-inline const auto integralRectangleActionMetaTypeId = qRegisterMetaType<hdps::gui::IntegralRangeAction*>("hdps::gui::IntegralRectangleAction");
+inline const auto integralRectangleActionMetaTypeId = qRegisterMetaType<hdps::gui::IntegralRectangleAction*>("hdps::gui::IntegralRectangleAction");

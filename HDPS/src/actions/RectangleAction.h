@@ -2,6 +2,7 @@
 
 #include "WidgetAction.h"
 #include "HorizontalGroupAction.h"
+#include "NumericalRangeAction.h"
 
 #include <QVBoxLayout>
 
@@ -37,7 +38,7 @@ public:
         Default = LineEdit
     };
 
-    /** Line edit widget class for rectangle action */
+    /** Widget class for editing the rectangle action */
     class EditWidget : public WidgetActionWidget
     {
     protected:
@@ -95,8 +96,10 @@ public:
         WidgetAction(parent, title),
         _rangeAction{ NumericalRangeActionType(this, "X-range"), NumericalRangeActionType(this, "Y-range") }
     {
-        setText(title);
         setDefaultWidgetFlags(WidgetFlag::Default);
+
+        getRangeAction(Axis::X).setDefaultWidgetFlags(NumericalRangeActionType::MinimumSpinBox | NumericalRangeActionType::MaximumSpinBox);
+        getRangeAction(Axis::Y).setDefaultWidgetFlags(NumericalRangeActionType::MinimumSpinBox | NumericalRangeActionType::MaximumSpinBox);
 
         getRangeAction(Axis::X).getRangeMinAction().setPrefix("xMin: ");
         getRangeAction(Axis::X).getRangeMaxAction().setPrefix("xMax: ");

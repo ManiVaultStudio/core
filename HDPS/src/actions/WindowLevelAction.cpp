@@ -15,8 +15,8 @@ WindowLevelAction::WindowLevelAction(QObject* parent, const QString& title) :
 {
     setIcon(Application::getIconFont("FontAwesome").getIcon("adjust"));
 
-    _windowAction.setPrefix("W: ");
-    _levelAction.setPrefix("L: ");
+    _windowAction.setPrefix("win: ");
+    _levelAction.setPrefix("lvl: ");
 
     _windowAction.setToolTip("Window");
     _levelAction.setToolTip("Level");

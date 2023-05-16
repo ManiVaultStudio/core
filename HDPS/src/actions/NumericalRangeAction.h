@@ -50,8 +50,8 @@ public:
         setText(title);
         setDefaultWidgetFlags(WidgetFlag::Default);
 
-        _rangeMinAction.setPrefix("Min: ");
-        _rangeMaxAction.setPrefix("Max: ");
+        _rangeMinAction.setPrefix("min: ");
+        _rangeMaxAction.setPrefix("max: ");
 
         initialize(limits, range);
     }

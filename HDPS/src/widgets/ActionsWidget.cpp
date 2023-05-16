@@ -232,9 +232,19 @@ void ActionsWidget::resizeSectionsToContent()
 
 void ActionsWidget::highlightSelection(const QItemSelection& selection, bool highlight)
 {
-    for (const auto& range : selection)
-        for (const auto& index : range.indexes())
-            _actionsModel.getAction(_hierarchyWidget.toSourceModelIndex(index))->setHighlighted(highlight);
+    for (const auto& range : selection) {
+        for (const auto& index : range.indexes()) {
+            auto action = _actionsModel.getAction(_hierarchyWidget.toSourceModelIndex(index));
+
+            if (action->isPublic()) {
+                for (auto connectedAction : action->getConnectedActions())
+                    connectedAction->setHighlighted(highlight);
+            }
+            else {
+                action->setHighlighted(highlight);
+            }
+        }
+    }
 }
 
 void ActionsWidget::setRequestContextMenuCallback(RequestContextMenuFN requestContextMenu)

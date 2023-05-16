@@ -153,7 +153,7 @@ void PublicActionsModel::removePublicAction(WidgetAction* publicAction)
 
     auto publicActionItem = getActionItem(publicAction);
 
-    Q_ASSERT(publicActionItem != nullptr);
+    //Q_ASSERT(publicActionItem != nullptr);
 
     if (!publicActionItem)
         return;

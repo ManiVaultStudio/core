@@ -46,6 +46,8 @@ void ActionsManager::reset()
 
     beginReset();
     {
+        //for (auto publicAction : _publicActions)
+        //    delete publicAction;
     }
     endReset();
 }
