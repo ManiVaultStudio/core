@@ -640,7 +640,12 @@ Qt::ItemFlags AbstractActionsModel::flags(const QModelIndex& index) const
 
 WidgetAction* AbstractActionsModel::getAction(const QModelIndex& index)
 {
-    return static_cast<Item*>(itemFromIndex(index))->getAction();
+    auto actionItem = static_cast<Item*>(itemFromIndex(index));
+
+    if (!actionItem)
+        return nullptr;
+
+    return actionItem->getAction();
 }
 
 WidgetAction* AbstractActionsModel::getAction(std::int32_t rowIndex)

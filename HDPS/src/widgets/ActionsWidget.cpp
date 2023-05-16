@@ -63,7 +63,8 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     _actionsModel(actionsModel),
     _filterModel(this),
     _hierarchyWidget(this, itemTypeName, actionsModel, &_filterModel),
-    _requestContextMenu()
+    _requestContextMenu(),
+    _highlightedIndices()
 {
     auto layout = new QVBoxLayout();
 
@@ -105,7 +106,6 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     treeView.setItemDelegate(new ItemDelegate(this));
 
     connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) -> void {
-        highlightSelection(deselected, false);
         highlightSelection(selected, true);
     });
 
@@ -187,7 +187,7 @@ bool ActionsWidget::eventFilter(QObject* target, QEvent* event)
         case QEvent::Leave:
         {
             if (target != &_hierarchyWidget.getTreeView())
-                highlightSelection(_hierarchyWidget.getTreeView().selectionModel()->selection(), false);
+                highlightSelection(_highlightedIndices, false);
 
             break;
         }
@@ -232,19 +232,46 @@ void ActionsWidget::resizeSectionsToContent()
 
 void ActionsWidget::highlightSelection(const QItemSelection& selection, bool highlight)
 {
-    for (const auto& range : selection) {
-        for (const auto& index : range.indexes()) {
-            auto action = _actionsModel.getAction(_hierarchyWidget.toSourceModelIndex(index));
+    PersistentModelIndices persistentModelIndices;
 
-            if (action->isPublic()) {
-                for (auto connectedAction : action->getConnectedActions())
-                    connectedAction->setHighlighted(highlight);
-            }
-            else {
-                action->setHighlighted(highlight);
-            }
+    for (const auto& range : selection) {
+        const auto index = range.indexes().first();
+
+        auto action = _actionsModel.getAction(_hierarchyWidget.toSourceModelIndex(index));
+
+        if (action->isPublic()) {
+            for (auto connectedAction : action->getConnectedActions())
+                persistentModelIndices << _actionsModel.getActionIndex(connectedAction);
+        }
+        else {
+            persistentModelIndices << index;
         }
     }
+
+    highlightSelection(persistentModelIndices, true);
+}
+
+void ActionsWidget::highlightSelection(const PersistentModelIndices& highlightModelIndices, bool highlight)
+{
+    qDebug() << _highlightedIndices << highlightModelIndices;
+    //return;
+
+    for (const auto& highlightedIndex : _highlightedIndices) {
+        auto action = _actionsModel.getAction(highlightedIndex);
+
+        if (action)
+            action->setHighlighted(false);
+    }
+
+    for (const auto& highlightModelIndex : highlightModelIndices) {
+        auto action = _actionsModel.getAction(highlightModelIndex);
+
+        if (action)
+            action->setHighlighted(highlight);
+    }
+        
+
+    _highlightedIndices = highlightModelIndices;
 }
 
 void ActionsWidget::setRequestContextMenuCallback(RequestContextMenuFN requestContextMenu)
