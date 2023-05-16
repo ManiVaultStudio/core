@@ -25,7 +25,6 @@ ColorMapEditor1DAction::ColorMapEditor1DAction(QObject* parent, const QString& t
 {
     setText("1D custom color map");
     setIcon(Application::getIconFont("FontAwesome").getIcon("chart-line"));
-    setSerializationName("Editor1D");
 
     addNode(QPointF(0.0f, 0.0f), Qt::black);
     addNode(QPointF(1.0f, 1.0f), Qt::white);

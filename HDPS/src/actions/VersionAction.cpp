@@ -4,8 +4,8 @@
 
 namespace hdps::gui {
 
-VersionAction::VersionAction(QObject* parent) :
-    HorizontalGroupAction(parent, "Version"),
+VersionAction::VersionAction(QObject* parent, const QString& title) :
+    HorizontalGroupAction(parent, title),
     _majorAction(this, "Major Version", 0, 100, 1),
     _minorAction(this, "Major Version", 0, 100, 0),
     _suffixAction(this, "Suffix"),
@@ -24,18 +24,15 @@ VersionAction::VersionAction(QObject* parent) :
     _majorAction.setPrefix("major: ");
     _majorAction.setToolTip("Major version number");
     _majorAction.setStretch(1);
-    _majorAction.setSerializationName("Major");
 
     _minorAction.setPrefix("minor: ");
     _minorAction.setToolTip("Minor version number");
     _minorAction.setStretch(1);
-    _majorAction.setSerializationName("Minor");
 
     _suffixAction.setPlaceHolderString("Enter suffix here...");
     _suffixAction.setClearable(true);
     _suffixAction.setStretch(3);
     _suffixAction.setCompleter(&_suffixCompleter);
-    _suffixAction.setSerializationName("Suffix");
 
     _suffixCompleter.setModel(new QStringListModel({ "Alpha", "Beta", "Release Candidate", "Pre-release", "alpha", "beta", "rc", "pre-release" }));
 

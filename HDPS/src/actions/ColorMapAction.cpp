@@ -38,7 +38,6 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
     setDefaultWidgetFlags(WidgetFlag::Default);
-    setSerializationName("ColorMap");
 
     initialize(colorMap, defaultColorMap);
 
@@ -164,20 +163,6 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
 void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString& defaultColorMap /*= ""*/)
 {
     _colorMapFilterModel.setSourceModel(ColorMapModel::getGlobalInstance());
-
-    getCurrentColorMapAction().setSerializationName("Current");
-    getRangeAction(Axis::X).setSerializationName("RangeX");
-    getRangeAction(Axis::Y).setSerializationName("RangeY");
-    getDataRangeAction(Axis::X).setSerializationName("DataRangeX");
-    getDataRangeAction(Axis::Y).setSerializationName("DataRangeY");
-    getSharedDataRangeAction(Axis::X).setSerializationName("SharedDataRangeX");
-    getSharedDataRangeAction(Axis::Y).setSerializationName("SharedDataRangeY");
-    getMirrorAction(Axis::X).setSerializationName("MirrorX");
-    getMirrorAction(Axis::Y).setSerializationName("MirrorY");
-    getDiscretizeAction().setSerializationName("Discretize");
-    getNumberOfDiscreteStepsAction().setSerializationName("NumberOfDiscreteSteps");
-    getDiscretizeAlphaAction().setSerializationName("DiscretizeAlpha");
-    getCustomColorMapAction().setSerializationName("Custom");
 
     getCurrentColorMapAction().setToolTip("Current");
     getRangeAction(Axis::X).setToolTip("Range in the x-axis");

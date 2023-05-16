@@ -61,27 +61,22 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _isolateAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _isolateAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
 
-    _mayCloseAction.setSerializationName("MayClose");
     _mayCloseAction.setToolTip("Determines whether this view plugin may be closed or not");
     _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
-    _mayFloatAction.setSerializationName("MayFloat");
     _mayFloatAction.setToolTip("Determines whether this view plugin may float or not");
     _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
-    _mayMoveAction.setSerializationName("MayMove");
     _mayMoveAction.setToolTip("Determines whether this view plugin may be moved or not");
     _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
 
     _dockingOptionsAction.setToolTip("Determines the docking options");
 
-    _lockingAction.setSerializationName("Locking");
     _lockingAction.setWhat("Layout");
 
-    _visibleAction.setSerializationName("Visible");
     _visibleAction.setToolTip("Determines whether the view plugin is visible or not");
     _visibleAction.setIcon(getIcon());
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);

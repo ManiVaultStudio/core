@@ -18,10 +18,6 @@ LockingAction::LockingAction(QObject* parent, const QString& what /*= ""*/, bool
     setText("Locking");
     initialize(locked);
     updateActionsText();
-
-    setSerializationName("Locking");
-
-    _lockedAction.setSerializationName("Locked");
 }
 
 void LockingAction::initialize(bool locked /*= false*/)

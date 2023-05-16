@@ -166,6 +166,14 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
         setRange(decimalAction->getMinimum(), decimalAction->getMaximum());
     };
 
+    const auto onUpdatePrefix = [this, decimalAction, setToolTips]() {
+        QSignalBlocker blocker(this);
+
+        setPrefix(decimalAction->getPrefix());
+
+        setToolTips();
+    };
+
     const auto onUpdateSuffix = [this, decimalAction, setToolTips]() {
         QSignalBlocker blocker(this);
 
@@ -188,6 +196,7 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
 
     connect(decimalAction, &DecimalAction::minimumChanged, this, onUpdateValueRange);
     connect(decimalAction, &DecimalAction::maximumChanged, this, onUpdateValueRange);
+    connect(decimalAction, &DecimalAction::prefixChanged, this, onUpdatePrefix);
     connect(decimalAction, &DecimalAction::suffixChanged, this, onUpdateSuffix);
     connect(decimalAction, &DecimalAction::numberOfDecimalsChanged, this, onUpdateDecimals);
     connect(decimalAction, &DecimalAction::singleStepChanged, this, onUpdateSingleStep);
@@ -195,6 +204,7 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
 
     onUpdateValueRange();
     onUpdateValue();
+    onUpdatePrefix();
     onUpdateSuffix();
     onUpdateDecimals();
     onUpdateSingleStep();
@@ -279,12 +289,13 @@ DecimalAction::LineEditWidget::LineEditWidget(QWidget* parent, DecimalAction* de
     const auto updateText = [this, decimalAction]() -> void {
         QSignalBlocker blocker(this);
 
-        setText(QString("%1 %2").arg(decimalAction->getPrefix(), QString::number(decimalAction->getValue(), 'f', decimalAction->getNumberOfDecimals())));
+        setText(QString::number(decimalAction->getValue(), 'f', decimalAction->getNumberOfDecimals()));
     };
 
     updateText();
 
     connect(decimalAction, &DecimalAction::valueChanged, this, updateText);
+    connect(decimalAction, &DecimalAction::prefixChanged, this, updateText);
 
     connect(this, &QLineEdit::textChanged, this, [decimalAction](const QString& text) -> void {
         decimalAction->setValue(text.toFloat());

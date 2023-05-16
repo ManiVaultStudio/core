@@ -47,12 +47,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     Q_ASSERT(!title.isEmpty());
 
     setText(title);
-    
-    auto serializationName = title;
-
-    serializationName.replace(" ", "");
-
-    setSerializationName(serializationName);
+    setSerializationName(title);
 
     if (core()->isInitialized())
         actions().addAction(this);

@@ -24,8 +24,9 @@ public:
     /**
      * Construct with \p parent and \p project
      * @param parent Pointer to parent object
+     * @param title Title of the action
      */
-    VersionAction(QObject* parent);
+    VersionAction(QObject* parent, const QString& title);
 
 public: // Serialization
 

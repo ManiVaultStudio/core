@@ -44,18 +44,14 @@ public:
      */
     NumericalRangeAction(QObject* parent, const QString& title, const util::NumericalRange<NumericalType>& limits, const util::NumericalRange<NumericalType>& range) :
         WidgetAction(parent, title),
-        _rangeMinAction(this, "Range Minimum"),
-        _rangeMaxAction(this, "Range Maximum")
+        _rangeMinAction(this, "Minimum"),
+        _rangeMaxAction(this, "Maximum")
     {
         setText(title);
-        setSerializationName("Range");
         setDefaultWidgetFlags(WidgetFlag::Default);
 
-        _rangeMinAction.setSerializationName("Min");
-        _rangeMaxAction.setSerializationName("Max");
-
-        _rangeMinAction.setPrefix("Min:");
-        _rangeMaxAction.setPrefix("Max:");
+        _rangeMinAction.setPrefix("Min: ");
+        _rangeMaxAction.setPrefix("Max: ");
 
         initialize(limits, range);
     }

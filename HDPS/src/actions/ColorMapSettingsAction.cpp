@@ -14,7 +14,6 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction, c
 {
     setText("Settings");
     setIcon(Application::getIconFont("FontAwesome").getIcon("sliders-h"));
-    setSerializationName("Settings");
 }
 
 ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction) :

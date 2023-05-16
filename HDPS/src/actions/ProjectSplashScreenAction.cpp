@@ -25,27 +25,21 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _projectImageAction(this, "Project Image"),
     _affiliateLogosImageAction(this, "Affiliate Logos")
 {
-    setSerializationName("Splash Screen");
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
     _enabledAction.setStretch(1);
     _enabledAction.setToolTip("Show splash screen at startup");
-    _enabledAction.setSerializationName("Enabled");
 
     _closeManuallyAction.setToolTip("Close manually");
-    _closeManuallyAction.setSerializationName("CloseManually");
 
     _durationAction.setToolTip("Duration of the splash screen in milliseconds");
     _durationAction.setSuffix("ms");
-    _durationAction.setSerializationName("Duration");
 
     _animationDurationAction.setToolTip("Duration of the splash screen animations in milliseconds");
     _animationDurationAction.setSuffix("ms");
-    _animationDurationAction.setSerializationName("AnimationDuration");
 
     _animationPanAmountAction.setToolTip("Amount of panning up/down during animation in pixels");
     _animationPanAmountAction.setSuffix("px");
-    _animationPanAmountAction.setSerializationName("Pan Amount");
 
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
@@ -69,12 +63,10 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _projectImageAction.setDefaultWidgetFlags(ImageAction::Loader);
     _projectImageAction.setIcon(fontAwesome.getIcon("image"));
     _projectImageAction.setToolTip("Project image");
-    _projectImageAction.setSerializationName("ProjectImage");
 
     _affiliateLogosImageAction.setDefaultWidgetFlags(ImageAction::Loader);
     _affiliateLogosImageAction.setIcon(fontAwesome.getIcon("image"));
     _affiliateLogosImageAction.setToolTip("Affiliate logos image");
-    _affiliateLogosImageAction.setSerializationName("AffiliateLogosImage");
 
     addAction(&_enabledAction);
     addAction(&_editAction);

@@ -39,21 +39,12 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, QWidget* targetWidge
 {
     setText("Pixel selection");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
-    setSerializationName("PixelSelection");
 
     initOverlay();
     initType();
     initModifier();
     initOperations();
     initMiscellaneous();
-
-    _overlayColorAction.setSerializationName("OverlayColor");
-    _overlayOpacityAction.setSerializationName("OverlayOpacity");
-    _typeAction.setSerializationName("Type");
-    _modifierReplaceAction.setSerializationName("ModifierReplace");
-    _modifierAddAction.setSerializationName("ModifierAdd");
-    _modifierSubtractAction.setSerializationName("ModifierSubtract");
-    _notifyDuringSelectionAction.setSerializationName("NotifyDuringSelection");
 
     setShortcutsEnabled(true);
 

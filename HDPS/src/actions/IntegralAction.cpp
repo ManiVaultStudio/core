@@ -274,12 +274,13 @@ IntegralAction::LineEditWidget::LineEditWidget(QWidget* parent, IntegralAction* 
     const auto updateText = [this, integralAction]() -> void {
         QSignalBlocker blocker(this);
 
-        setText(QString("%1 %2").arg(integralAction->getPrefix(), QString::number(integralAction->getValue())));
+        setText(QString::number(integralAction->getValue()));
     };
 
     updateText();
 
     connect(integralAction, &IntegralAction::valueChanged, this, updateText);
+    connect(integralAction, &IntegralAction::prefixChanged, this, updateText);
 
     connect(this, &QLineEdit::textChanged, this, [integralAction](const QString& text) -> void {
         integralAction->setValue(text.toInt());

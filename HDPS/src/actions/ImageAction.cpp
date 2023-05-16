@@ -19,12 +19,10 @@ ImageAction::ImageAction(QObject* parent, const QString& title /*= ""*/) :
 
     _filePathAction.setEnabled(false);
     _filePathAction.setTextElideMode(Qt::ElideMiddle);
-    _filePathAction.setSerializationName("FilePath");
     _filePathAction.setStretch(1);
 
     _fileNameAction.setEnabled(false);
     _fileNameAction.setTextElideMode(Qt::ElideMiddle);
-    _fileNameAction.setSerializationName("FileName");
     _fileNameAction.setStretch(1);
 
     _filePickerAction.setPlaceHolderString("Pick image...");
