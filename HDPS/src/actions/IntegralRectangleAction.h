@@ -1,10 +1,7 @@
 #pragma once
 
 #include "RectangleAction.h"
-
-#include <QLineEdit>
-
-class QWidget;
+#include "IntegralRangeAction.h"
 
 namespace hdps::gui {
 
@@ -15,35 +12,9 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class IntegralRectangleAction : public RectangleAction<QRect>
+class IntegralRectangleAction : public RectangleAction<QRect, IntegralRangeAction>
 {
     Q_OBJECT
-
-public:
-
-    /** Line edit widget class for integral rectangle action */
-    class LineEditWidget : public QLineEdit
-    {
-    protected:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         * @param integralRectangleAction Pointer to integral rectangle action
-         */
-        LineEditWidget(QWidget* parent, IntegralRectangleAction* integralRectangleAction);
-
-        friend class IntegralRectangleAction;
-    };
-
-protected:
-
-    /**
-     * Get widget representation of the integral rectangle action
-     * @param parent Pointer to parent widget
-     * @param widgetFlags Widget flags for the configuration of the widget (type)
-     */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 
@@ -52,16 +23,8 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      * @param rectangle Rectangle
-     * @param defaultRectangle Default rectangle
      */
-    Q_INVOKABLE IntegralRectangleAction(QObject * parent, const QString& title, const QRect& rectangle = QRect(), const QRect& defaultRectangle = QRect());
-
-    /**
-     * Initialize the action
-     * @param rectangle Rectangle
-     * @param defaultRectangle Default rectangle
-     */
-    void initialize(const QRect& rectangle = QRect(), const QRect& defaultRectangle = QRect());
+    Q_INVOKABLE IntegralRectangleAction(QObject* parent, const QString& title, const QRect& rectangle = QRect());
 
 public: // Linking
 
@@ -98,17 +61,11 @@ signals:
      * Signals that the rectangle changed
      * @param rectangle Rectangle
      */
-    void rectangleChanged(const QRect& rectangle);
-
-    /**
-     * Signals that the default rectangle changed
-     * @param defaultRectangle Default rectangle
-     */
-    void defaultRectangleChanged(const QRect& defaultRectangle);
+    void rectangleChanged(const QRectF& rectangle);
 };
 
 }
 
 Q_DECLARE_METATYPE(hdps::gui::IntegralRectangleAction)
 
-inline const auto integralRectangleActionMetaTypeId = qRegisterMetaType<hdps::gui::IntegralRectangleAction*>("IntegralRectangleAction");
+inline const auto integralRectangleActionMetaTypeId = qRegisterMetaType<hdps::gui::IntegralRangeAction*>("hdps::gui::IntegralRectangleAction");

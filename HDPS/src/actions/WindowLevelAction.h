@@ -2,6 +2,7 @@
 
 #include "actions/WidgetAction.h"
 #include "actions/DecimalAction.h"
+#include "actions/HorizontalGroupAction.h"
 
 namespace hdps::gui {
 
@@ -27,10 +28,13 @@ public:
          * Constructor
          * @param parent Pointer to parent widget
          * @param windowLevelAction Pointer to window level action
+         * @param widgetFlags Widget flags for the configuration of the widget
          */
-        Widget(QWidget* parent, WindowLevelAction* windowLevelAction);
+        Widget(QWidget* parent, WindowLevelAction* windowLevelAction, const std::int32_t& widgetFlags);
 
     protected:
+        HorizontalGroupAction   _groupAction;   /** Display window and level actions side-by-side */
+
         friend class WindowLevelAction;
     };
 
@@ -42,7 +46,7 @@ protected:
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new Widget(parent, this);
+        return new Widget(parent, this, widgetFlags);
     };
 
 public:
@@ -68,6 +72,20 @@ public: // Linking
      * @param recursive Whether to also disconnect descendant child actions
      */
     void disconnectFromPublicAction(bool recursive) override;
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
 
 public: /** Action getters */
 

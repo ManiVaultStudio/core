@@ -1,10 +1,7 @@
 #pragma once
 
 #include "RectangleAction.h"
-
-#include <QLineEdit>
-
-class QWidget;
+#include "DecimalRangeAction.h"
 
 namespace hdps::gui {
 
@@ -15,35 +12,9 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class DecimalRectangleAction : public RectangleAction<QRectF>
+class DecimalRectangleAction : public RectangleAction<QRectF, DecimalRangeAction>
 {
     Q_OBJECT
-
-public:
-
-    /** Line edit widget class for decimal rectangle action */
-    class LineEditWidget : public QLineEdit
-    {
-    protected:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         * @param decimalRectangleAction Pointer to decimal rectangle action
-         */
-        LineEditWidget(QWidget* parent, DecimalRectangleAction* decimalRectangleAction);
-
-        friend class DecimalRectangleAction;
-    };
-
-protected:
-
-    /**
-     * Get widget representation of the decimal rectangle action
-     * @param parent Pointer to parent widget
-     * @param widgetFlags Widget flags for the configuration of the widget (type)
-     */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 
@@ -52,16 +23,8 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      * @param rectangle Rectangle
-     * @param defaultRectangle Default rectangle
      */
-    Q_INVOKABLE DecimalRectangleAction(QObject * parent, const QString& title, const QRectF& rectangle = QRectF(), const QRectF& defaultRectangle = QRectF());
-
-    /**
-     * Initialize the action
-     * @param rectangle Rectangle
-     * @param defaultRectangle Default rectangle
-     */
-    void initialize(const QRectF& rectangle = QRectF(), const QRectF& defaultRectangle = QRectF());
+    Q_INVOKABLE DecimalRectangleAction(QObject * parent, const QString& title, const QRectF& rectangle = QRectF());
 
 public: // Linking
 
@@ -99,16 +62,10 @@ signals:
      * @param rectangle Rectangle
      */
     void rectangleChanged(const QRectF& rectangle);
-
-    /**
-     * Signals that the default rectangle changed
-     * @param defaultRectangle Default rectangle
-     */
-    void defaultRectangleChanged(const QRectF& defaultRectangle);
 };
 
 }
 
 Q_DECLARE_METATYPE(hdps::gui::DecimalRectangleAction)
 
-inline const auto decimalRectangleActionMetaTypeId = qRegisterMetaType<hdps::gui::DecimalRectangleAction*>("DecimalRectangleAction");
+inline const auto decimalRectangleActionMetaTypeId = qRegisterMetaType<hdps::gui::DecimalRectangleAction*>("hdps::gui::DecimalRectangleAction");

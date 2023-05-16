@@ -42,7 +42,7 @@ public:
     /** Axis enum for distinguishing between x- and y axis part of the color map (range) */
     enum class Axis {
         X = 0,      /** Along x-axis */
-        Y,          /** Along x-axis */
+        Y,          /** Along y-axis */
 
         Count
     };
