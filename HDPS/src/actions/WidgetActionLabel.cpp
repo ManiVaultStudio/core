@@ -50,20 +50,19 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::MouseButtonPress:
         {
-            if (!isEnabled())
-                break;
+            if (isEnabled() && (getAction()->mayPublish(WidgetAction::Gui) || getAction()->mayConnect(WidgetAction::Gui) || getAction()->mayDisconnect(WidgetAction::Gui))) {
+                auto mouseButtonPress = static_cast<QMouseEvent*>(event);
 
-            auto mouseButtonPress = static_cast<QMouseEvent*>(event);
+                if (mouseButtonPress->button() != Qt::LeftButton)
+                    break;
 
-            if (mouseButtonPress->button() != Qt::LeftButton)
-                break;
+                auto contextMenu = getAction()->getContextMenu(this);
 
-            auto contextMenu = getAction()->getContextMenu(this);
+                if (contextMenu->actions().isEmpty())
+                    return QWidget::eventFilter(target, event);
 
-            if (contextMenu->actions().isEmpty())
-                return QWidget::eventFilter(target, event);
-
-            contextMenu->exec(cursor().pos());
+                contextMenu->exec(cursor().pos());
+            }
 
             break;
         }
