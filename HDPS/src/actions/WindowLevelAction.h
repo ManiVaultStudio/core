@@ -50,8 +50,24 @@ public:
     /** 
      * Constructor
      * @param parent Pointer to parent object
+     * @param title Title of the action
      */
-    Q_INVOKABLE WindowLevelAction(QObject* parent);
+    Q_INVOKABLE WindowLevelAction(QObject* parent, const QString& title);
+
+public: // Linking
+
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
+     */
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
+
+    /**
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
+     */
+    void disconnectFromPublicAction(bool recursive) override;
 
 public: /** Action getters */
 

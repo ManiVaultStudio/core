@@ -98,7 +98,7 @@ public:
      * @param color Initial color
      * @param defaultColor Default color
      */
-    Q_INVOKABLE ColorAction(QObject* parent, const QString& title = "", const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
+    Q_INVOKABLE ColorAction(QObject* parent, const QString& title, const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
 
     /**
      * Initialize the color action

@@ -1,12 +1,16 @@
 #include "OptionAction.h"
 #include "Application.h"
 
+#include "util/Serialization.h"
+
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QComboBox>
 #include <QListView>
 #include <QPushButton>
 #include <QStylePainter>
+
+using namespace hdps::util;
 
 namespace hdps::gui {
 
@@ -134,9 +138,10 @@ void OptionAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    if (!variantMap.contains("Value"))
-        return;
+    variantMapMustContain(variantMap, "Value");
+    variantMapMustContain(variantMap, "Options");
 
+    setOptions(variantMap["Options"].toStringList());
     setCurrentText(variantMap["Value"].toString());
 }
 
@@ -145,6 +150,7 @@ QVariantMap OptionAction::toVariantMap() const
     QVariantMap variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
+        { "Options", getOptions() },
         { "Value", getCurrentText() }
     });
 

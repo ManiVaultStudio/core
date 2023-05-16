@@ -10,6 +10,8 @@
 #include <QJsonObject>
 #include <QAbstractItemView>
 
+using namespace hdps::util;
+
 namespace hdps::gui {
 
 OptionsAction::OptionsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/, const QStringList& defaultSelectedOptions /*= QStringList()*/) :
@@ -230,9 +232,10 @@ void OptionsAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    if (!variantMap.contains("Value"))
-        return;
+    variantMapMustContain(variantMap, "Value");
+    variantMapMustContain(variantMap, "Options");
 
+    setOptions(variantMap["Options"].toStringList());
     setSelectedOptions(variantMap["Value"].toStringList());
 }
 
@@ -241,6 +244,7 @@ QVariantMap OptionsAction::toVariantMap() const
     auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
+        { "Options", getOptions() },
         { "Value", getSelectedOptions() }
     });
 

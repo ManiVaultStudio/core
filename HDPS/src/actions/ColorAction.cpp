@@ -11,7 +11,7 @@ namespace hdps::gui {
 
 const QColor ColorAction::DEFAULT_COLOR = Qt::gray;
 
-ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/) :
+ColorAction::ColorAction(QObject* parent, const QString& title, const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/) :
     WidgetAction(parent, title),
     _color(),
     _defaultColor()

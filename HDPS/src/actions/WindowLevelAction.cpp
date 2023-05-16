@@ -8,23 +8,20 @@ using namespace hdps;
 
 namespace hdps::gui {
 
-WindowLevelAction::WindowLevelAction(QObject* parent) :
-    WidgetAction(parent, "Window Level"),
+WindowLevelAction::WindowLevelAction(QObject* parent, const QString& title) :
+    WidgetAction(parent, title),
     _windowAction(this, "Window", 0.0f, 1.0f, 1.0f, 1.0f, 1),
     _levelAction(this, "Level", 0.0f, 1.0f, 0.5f, 0.5f, 1)
 {
     setText("Window/level Settings");
     setIcon(Application::getIconFont("FontAwesome").getIcon("adjust"));
 
-    // Set tooltips
     _windowAction.setToolTip("Window");
     _levelAction.setToolTip("Level");
     
-    // Set decimals
     _windowAction.setNumberOfDecimals(2);
     _levelAction.setNumberOfDecimals(2);
 
-    // Set single step
     _windowAction.setSingleStep(0.05f);
     _levelAction.setSingleStep(0.05f);
 
@@ -34,6 +31,33 @@ WindowLevelAction::WindowLevelAction(QObject* parent) :
 
     connect(&_windowAction, &DecimalAction::valueChanged, this, windowLevelChanged);
     connect(&_levelAction, &DecimalAction::valueChanged, this, windowLevelChanged);
+}
+
+void WindowLevelAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
+{
+    auto publicWindowLevelAction = dynamic_cast<WindowLevelAction*>(publicAction);
+
+    Q_ASSERT(publicWindowLevelAction != nullptr);
+
+    if (publicWindowLevelAction == nullptr)
+        return;
+
+    if (recursive) {
+        getWindowAction().connectToPublicAction(&publicWindowLevelAction->getWindowAction(), recursive);
+        getLevelAction().connectToPublicAction(&publicWindowLevelAction->getLevelAction(), recursive);
+    }
+
+    WidgetAction::connectToPublicAction(publicAction, recursive);
+}
+
+void WindowLevelAction::disconnectFromPublicAction(bool recursive)
+{
+    if (recursive) {
+        getWindowAction().disconnectFromPublicAction(recursive);
+        getLevelAction().disconnectFromPublicAction(recursive);
+    }
+
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 WindowLevelAction::Widget::Widget(QWidget* parent, WindowLevelAction* windowLevelAction) :
