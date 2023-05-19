@@ -17,7 +17,7 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* view
     _groupsAction(this, "Groups"),
     _actionsListModel(this, viewPlugin),
     _actionsHierarchyModel(this, viewPlugin),
-    _actionsHierarchyWidget(this, _actionsHierarchyModel),
+    _actionsWidget(this, _actionsHierarchyModel),
     _settingsAction(this, "Settings")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
@@ -27,7 +27,7 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* view
 
     auto layout = new QVBoxLayout();
     
-    layout->addWidget(&_actionsHierarchyWidget);
+    layout->addWidget(&_actionsWidget);
 
     _settingsAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
@@ -44,6 +44,8 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* view
     layout->addWidget(dialogButtonBox);
 
     connect(dialogButtonBox, &QDialogButtonBox::accepted, this, &ViewPluginEditorDialog::accept);
+
+    _actionsWidget.getFilterModel().getPublicRootOnlyAction().setChecked(false);
 }
 
 }

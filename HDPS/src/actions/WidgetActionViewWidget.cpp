@@ -62,8 +62,8 @@ WidgetActionViewWidget::HighlightWidget::HighlightWidget(QWidget* parent) :
     auto& widgetFader = getWidgetOverlayer().getWidgetFader();
 
     widgetFader.setMaximumOpacity(0.3f);
-    widgetFader.setFadeInDuration(100);
-    widgetFader.setFadeOutDuration(400);
+    widgetFader.setFadeInDuration(250);
+    widgetFader.setFadeOutDuration(500);
 }
 
 }

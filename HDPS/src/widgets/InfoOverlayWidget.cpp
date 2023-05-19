@@ -14,6 +14,8 @@ InfoOverlayWidget::InfoOverlayWidget(QWidget* parent) :
     _widgetOverlayer(this, this, parent)
 {
     setColors(Qt::black, Qt::lightGray);
+
+    _widgetOverlayer.getWidgetFader().setOpacity(0.0f);
 }
 
 InfoOverlayWidget::InfoOverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description /*= ""*/, const QColor foregroundColor /*= Qt::black*/, const QColor backgroundColor /*= Qt::lightGray*/) :

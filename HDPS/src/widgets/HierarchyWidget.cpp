@@ -285,6 +285,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     filterModelRowsChanged();
     selectionChanged();
     updateFilterModel();
+    updateOverlayWidget();
 }
 
 QString HierarchyWidget::getItemTypeName() const
@@ -450,6 +451,10 @@ void HierarchyWidget::updateOverlayWidget()
 {
     if (_infoOverlayWidget.isNull())
         return;
+
+#ifdef HIERARCHY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
 
     auto& widgetFader = _infoOverlayWidget->getWidgetFader();
 
