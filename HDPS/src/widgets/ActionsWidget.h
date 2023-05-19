@@ -64,18 +64,18 @@ private:
     void resizeSectionsToContent();
 
     /**
-     * Highlight all items in the \p selection
-     * @param selection Item selection
+     * Highlight actions
+     * @param selectedRows Selected rows to highlight
      * @param highlight Whether to highlight or not
      */
-    void highlightSelection(const QItemSelection& selection, bool highlight);
+    void highlightActions(const QModelIndexList& selectedRows, bool highlight);
 
     /**
-     * Highlight all \p highlightModelIndices
+     * Highlight actions
      * @param highlightModelIndices Model indices to highlight
      * @param highlight Whether to highlight or not
      */
-    void highlightSelection(const PersistentModelIndices& highlightModelIndices, bool highlight);
+    void highlightActions(const PersistentModelIndices& highlightModelIndices, bool highlight);
 
 private:
     AbstractActionsModel&       _actionsModel;              /** Input actions model */

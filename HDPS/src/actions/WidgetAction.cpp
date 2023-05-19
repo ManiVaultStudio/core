@@ -154,6 +154,11 @@ void WidgetAction::setHighlighted(bool highlighted)
     _highlighted = highlighted;
 
     emit highlightedChanged(_highlighted);
+
+    if (isPublic()) {
+        for (auto connectedAction : getConnectedActions())
+            connectedAction->setHighlighted(highlighted);
+    }
 }
 
 bool WidgetAction::isHighlighted() const

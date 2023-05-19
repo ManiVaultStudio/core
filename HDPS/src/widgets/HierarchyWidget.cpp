@@ -7,6 +7,7 @@
 #include <QHeaderView>
 
 #include <stdexcept>
+#include <stdexcept>
 
 #ifdef _DEBUG
     #define HIERARCHY_WIDGET_VERBOSE
@@ -49,6 +50,14 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
         _treeView.setModel(const_cast<QAbstractItemModel*>(&_model));
     }
 
+    if (_infoOverlayWidget) {
+        auto& widgetFader = _infoOverlayWidget->getWidgetFader();
+
+        widgetFader.setMaximumOpacity(0.5f);
+        widgetFader.setFadeInDuration(100);
+        widgetFader.setFadeOutDuration(300);
+    }
+        
     _filterNameAction.setSearchMode(true);
     _filterNameAction.setClearable(true);
 
@@ -59,9 +68,6 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _filterCaseSensitiveAction.setToolTip("Enable/disable search filter case-sensitive");
 
     _filterRegularExpressionAction.setToolTip("Enable/disable search filter with regular expression");
-
-    //if (_filterModel)
-    //    _filterGroupAction << _filterNameAction;
 
     _filterGroupAction << _filterColumnAction;
     _filterGroupAction << _filterCaseSensitiveAction;
@@ -445,28 +451,30 @@ void HierarchyWidget::updateOverlayWidget()
     if (_infoOverlayWidget.isNull())
         return;
 
+    auto& widgetFader = _infoOverlayWidget->getWidgetFader();
+
     if (_filterModel == nullptr) {
         if (_model.rowCount() == 0) {
             _infoOverlayWidget->set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
-            _infoOverlayWidget->show();
+            widgetFader.fadeIn();
         }
         else {
-            _infoOverlayWidget->hide();
+            widgetFader.fadeOut();
         }
     }
     else {
         if (_model.rowCount() >= 1) {
             if (_filterModel->rowCount() == 0) {
                 _infoOverlayWidget->set(windowIcon(), QString("No %1s found").arg(_itemTypeName.toLower()), "Try changing the filter parameters...");
-                _infoOverlayWidget->show();
+                widgetFader.fadeIn();
             }
             else {
-                _infoOverlayWidget->hide();
+                widgetFader.fadeOut();
             }
         }
         else {
             _infoOverlayWidget->set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
-            _infoOverlayWidget->show();
+            widgetFader.fadeIn();
         }
     }
 }

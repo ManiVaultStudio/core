@@ -106,7 +106,7 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     treeView.setItemDelegate(new ItemDelegate(this));
 
     connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) -> void {
-        highlightSelection(selected, true);
+        highlightActions(_hierarchyWidget.getTreeView().selectionModel()->selectedRows(), true);
     });
 
     connect(&_filterModel, &QAbstractItemModel::rowsInserted, this, &ActionsWidget::resizeSectionsToContent);
@@ -178,16 +178,16 @@ bool ActionsWidget::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::Enter:
         {
-            if (target != &_hierarchyWidget.getTreeView())
-                highlightSelection(_hierarchyWidget.getTreeView().selectionModel()->selection(), true);
+            if (target == &_hierarchyWidget.getTreeView())
+                highlightActions(_hierarchyWidget.getTreeView().selectionModel()->selectedRows(), true);
 
             break;
         }
 
         case QEvent::Leave:
         {
-            if (target != &_hierarchyWidget.getTreeView())
-                highlightSelection(_highlightedIndices, false);
+            if (target == &_hierarchyWidget.getTreeView())
+                highlightActions(_highlightedIndices, false);
 
             break;
         }
@@ -230,33 +230,22 @@ void ActionsWidget::resizeSectionsToContent()
     treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
 }
 
-void ActionsWidget::highlightSelection(const QItemSelection& selection, bool highlight)
+void ActionsWidget::highlightActions(const QModelIndexList& selectedRows, bool highlight)
 {
     PersistentModelIndices persistentModelIndices;
 
-    for (const auto& range : selection) {
-        const auto index = range.indexes().first();
+    for (const auto& selectedRow : selectedRows)
+        persistentModelIndices << _hierarchyWidget.toSourceModelIndex(selectedRow);
 
-        auto action = _actionsModel.getAction(_hierarchyWidget.toSourceModelIndex(index));
-
-        if (action->isPublic()) {
-            for (auto connectedAction : action->getConnectedActions())
-                persistentModelIndices << _actionsModel.getActionIndex(connectedAction);
-        }
-        else {
-            persistentModelIndices << index;
-        }
-    }
-
-    highlightSelection(persistentModelIndices, true);
+    highlightActions(persistentModelIndices, true);
 }
 
-void ActionsWidget::highlightSelection(const PersistentModelIndices& highlightModelIndices, bool highlight)
+void ActionsWidget::highlightActions(const PersistentModelIndices& highlightModelIndices, bool highlight)
 {
-    qDebug() << _highlightedIndices << highlightModelIndices;
-    //return;
-
     for (const auto& highlightedIndex : _highlightedIndices) {
+        if (highlightModelIndices.contains(highlightedIndex))
+            continue;
+
         auto action = _actionsModel.getAction(highlightedIndex);
 
         if (action)
@@ -270,7 +259,6 @@ void ActionsWidget::highlightSelection(const PersistentModelIndices& highlightMo
             action->setHighlighted(highlight);
     }
         
-
     _highlightedIndices = highlightModelIndices;
 }
 

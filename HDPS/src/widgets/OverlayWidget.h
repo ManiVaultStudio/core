@@ -21,8 +21,9 @@ public:
     /**
      * Construct with \p parent
      * @param parent Pointer to parent widget
+     * @param initialOpacity Opacity at initialization
      */
-    OverlayWidget(QWidget* parent);
+    OverlayWidget(QWidget* parent, float initialOpacity = 1.0f);
 
     /**
      * Get the utility class for overlaying the widget

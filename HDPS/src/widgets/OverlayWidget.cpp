@@ -11,9 +11,9 @@
 namespace hdps::gui
 {
 
-OverlayWidget::OverlayWidget(QWidget* parent) :
+OverlayWidget::OverlayWidget(QWidget* parent, float initialOpacity /*= 1.0f*/) :
     QWidget(parent),
-    _widgetOverlayer(this, this, parent)
+    _widgetOverlayer(this, this, parent, initialOpacity)
 {
 }
 
