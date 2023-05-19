@@ -53,6 +53,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     if (_infoOverlayWidget) {
         auto& widgetFader = _infoOverlayWidget->getWidgetFader();
 
+        widgetFader.setOpacity(0.0f);
         widgetFader.setMaximumOpacity(0.5f);
         widgetFader.setFadeInDuration(100);
         widgetFader.setFadeOutDuration(300);
@@ -269,6 +270,10 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
         connect(&_model, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateFilterModel);
     }
 
+    connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateOverlayWidget);
+    connect(&_model, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateOverlayWidget);
+    connect(&_model, &QAbstractItemModel::layoutChanged, this, &HierarchyWidget::updateOverlayWidget);
+
     connect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
     connect(&_treeView, &QTreeView::collapsed, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
 
@@ -453,7 +458,7 @@ void HierarchyWidget::updateOverlayWidget()
         return;
 
 #ifdef HIERARCHY_WIDGET_VERBOSE
-    qDebug() << __FUNCTION__;
+    qDebug() << __FUNCTION__ << _itemTypeName << _model.rowCount() << (_filterModel ? _filterModel->rowCount() : -1);
 #endif
 
     auto& widgetFader = _infoOverlayWidget->getWidgetFader();

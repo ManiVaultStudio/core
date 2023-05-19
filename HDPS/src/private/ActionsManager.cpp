@@ -188,9 +188,6 @@ void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
 
             auto publicAction = privateAction->getPublicCopy();
 
-            if (publicAction == nullptr)
-                throw std::runtime_error("Unable to create public action");
-
             publicAction->setText(name);
 
             connectPrivateActionToPublicAction(privateAction, publicAction, true);

@@ -312,15 +312,33 @@ WidgetAction* WidgetAction::getPublicAction()
 
 WidgetAction* WidgetAction::getPublicCopy() const
 {
-    auto publicCopy = static_cast<WidgetAction*>(metaObject()->newInstance(Q_ARG(QObject*, &hdps::actions()), Q_ARG(QString, text())));
+    try
+    {
+        auto publicCopy = static_cast<WidgetAction*>(metaObject()->newInstance(Q_ARG(QObject*, &hdps::actions()), Q_ARG(QString, text())));
 
-    publicCopy->fromVariantMap(toVariantMap());
-    publicCopy->makePublic();
-    publicCopy->makeUnique();
+        if (publicCopy == nullptr)
+            throw std::runtime_error(QString("Unable to create new %1 instance using the Qt meta-object system.").arg(metaObject()->className()).toLatin1());
 
-    emit publicCopy->idChanged(getId());
+        publicCopy->fromVariantMap(toVariantMap());
+        publicCopy->makePublic();
+        publicCopy->makeUnique();
 
-    return publicCopy;
+        emit publicCopy->idChanged(getId());
+
+        return publicCopy;
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Get public copy failed:", e);
+
+        return nullptr;
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Get public copy failed:");
+
+        return nullptr;
+    }
 }
 
 const WidgetActions WidgetAction::getConnectedActions() const

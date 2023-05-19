@@ -31,11 +31,24 @@ public:
      */
     WidgetFader(QObject* parent, QWidget* targetWidget, float opacity = 0.0f, float minimumOpacity = 0.0f, float maximumOpacity = 1.0f, std::int32_t fadeInDuration = 150, std::int32_t fadeOutDuration = 150);
 
-    /** Fade in the target widget */
-    void fadeIn();
+    /**
+     * Fade in the target widget
+     * @param duration Only used if duration >= 0, otherwise uses _fadeInDuration 
+     */
+    void fadeIn(std::int32_t duration = -1);
 
-    /** Fade out the target widget */
-    void fadeOut();
+    /**
+     * Fade out the target widget
+     * @param duration Only used if duration >= 0, otherwise uses _fadeOutDuration
+     */
+    void fadeOut(std::int32_t duration = -1);
+
+    /**
+     * Set opacity
+     * @param opacity Opacity
+     * @param duration Animation duration
+     */
+    void setOpacity(float opacity, std::uint32_t duration = 0);
 
     /**
      * Get whether the target widget is faded in
@@ -66,12 +79,6 @@ public:
      * @param maximumOpacity Maximum opacity
      */
     void setMaximumOpacity(float maximumOpacity);
-
-    /**
-     * Set opacity
-     * @param opacity Opacity
-     */
-    void setOpacity(float opacity);
 
     /** Get fade-in duration */
     std::int32_t getFadeInDuration() const;

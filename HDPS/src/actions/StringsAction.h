@@ -8,6 +8,7 @@
 
 #include <QStringListModel>
 #include <QSortFilterProxyModel>
+#include <QStandardItemModel>
 
 namespace hdps::gui {
 
@@ -40,46 +41,6 @@ public:
     {
     protected:
 
-        /** Qt native string list model does not support icons, this class solves that for the strings action */
-        class IconStringListModel final : public QStringListModel {
-        public:
-
-            /**
-             * Construct string list model from \p icon and \p parent object
-             * @param icon Global model icon
-             * @param parent Pointer to parent object
-             */
-            explicit IconStringListModel(const QIcon& icon, QObject* parent = nullptr) :
-                QStringListModel(parent),
-                _icon(icon)
-            {
-            }
-
-            /**
-             * Override string list model to also support data decoration role
-             * @param index Index to fetch the data for
-             * @param role Data role
-             * @return Data in variant form
-             */
-            QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
-                switch (role) {
-                    case Qt::DisplayRole:
-                    case Qt::EditRole:
-                        return QStringListModel::data(index, role);
-
-                    case Qt::DecorationRole:
-                        return _icon;
-                }
-
-                return QVariant();
-            }
-
-        private:
-            const QIcon   _icon;  /** Global icon */
-        };
-
-    protected:
-
         /**
          * Constructor
          * @param parent Pointer to parent widget
@@ -89,13 +50,9 @@ public:
         ListWidget(QWidget* parent, StringsAction* stringsAction, const std::int32_t& widgetFlags);
 
     private:
-        IconStringListModel     _model;             /** Strings model */
+        QStandardItemModel      _model;             /** Strings model */
         QSortFilterProxyModel   _filterModel;       /** Strings filter model */
         HierarchyWidget         _hierarchyWidget;   /** Hierarchy widget for show the strings */
-        StringAction            _nameAction;        /** String name action */
-        TriggerAction           _addAction;         /** Add string action */
-        TriggerAction           _removeAction;      /** Remove string action */
-        HorizontalGroupAction   _toolbarAction;     /** Toolbar action */
 
         friend class StringsAction;
     };
@@ -225,6 +182,13 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+public: // Action getters
+
+    StringAction& getNameAction() { return _nameAction; }
+    TriggerAction& getAddAction() { return _addAction; }
+    TriggerAction& getRemoveAction() { return _removeAction; }
+    HorizontalGroupAction& getToolbarAction() { return _toolbarAction; }
+
 signals:
 
     /**
@@ -240,9 +204,13 @@ signals:
     void defaultStringsChanged(const QStringList& defaultString);
 
 protected:
-    QString         _category;          /** Type of string */
-    QStringList     _strings;           /** Current strings */
-    QStringList     _defaultStrings;    /** Default strings */
+    QString                 _category;          /** Type of string */
+    QStringList             _strings;           /** Current strings */
+    QStringList             _defaultStrings;    /** Default strings */
+    HorizontalGroupAction   _toolbarAction;     /** Toolbar action */
+    StringAction            _nameAction;        /** String name action */
+    TriggerAction           _addAction;         /** Add string action */
+    TriggerAction           _removeAction;      /** Remove string action */
 };
 
 }
