@@ -264,7 +264,6 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
 
     // Configure toolbar layout
     _toolbarLayout.setContentsMargins(0, 2, 0, 2);
-    _toolbarLayout.setSpacing(4);
 
     // Add toolbar items
     if (widgetFlags & Filtering)

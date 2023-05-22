@@ -245,7 +245,6 @@ QWidget* ToggleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::CheckBox)
         layout->addWidget(new ToggleAction::CheckBoxWidget(parent, this));

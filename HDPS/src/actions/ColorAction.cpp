@@ -201,7 +201,6 @@ QWidget* ColorAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::Picker)
         layout->addWidget(new PushButtonWidget(parent, this));

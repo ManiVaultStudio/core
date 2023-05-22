@@ -247,7 +247,6 @@ ColorMapEditor1DAction::Widget::Widget(QWidget* parent, ColorMapEditor1DAction* 
     auto layout         = new QVBoxLayout();
     auto toolbarLayout  = new QHBoxLayout();
 
-    toolbarLayout->setSpacing(3);
     toolbarLayout->addStretch(1);
     toolbarLayout->addWidget(_goToFirstNodeAction.createWidget(this));
     toolbarLayout->addWidget(_goToPreviousNodeAction.createWidget(this));

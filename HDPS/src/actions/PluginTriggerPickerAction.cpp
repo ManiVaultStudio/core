@@ -118,7 +118,6 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(4);
 
     layout->addWidget(pluginTriggerPickerAction->getSelectTriggerAction().createWidget(this));
     layout->addWidget(&_configurationToolButton);

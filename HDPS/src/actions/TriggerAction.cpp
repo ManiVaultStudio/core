@@ -69,7 +69,6 @@ QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     layout->addWidget(new TriggerAction::PushButtonWidget(parent, this, widgetFlags));
 

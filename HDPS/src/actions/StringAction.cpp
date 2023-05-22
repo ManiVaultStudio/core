@@ -219,7 +219,6 @@ QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::Label)
         layout->addWidget(new StringAction::LabelWidget(parent, this));

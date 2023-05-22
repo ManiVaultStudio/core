@@ -85,8 +85,6 @@ ClustersActionWidget::ClustersActionWidget(QWidget* parent, ClustersAction* clus
     if (widgetFlags & ClustersAction::Remove || widgetFlags & ClustersAction::Merge) {
         auto toolbarLayout = new QHBoxLayout();
 
-        toolbarLayout->setSpacing(3);
-
         // Add filter clusters widget if required
         if (widgetFlags & ClustersAction::Filter)
             toolbarLayout->addWidget(_filterClustersAction.createCollapsedWidget(this));

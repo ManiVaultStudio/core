@@ -109,12 +109,10 @@ ImageAction::LoaderWidget::LoaderWidget(QWidget* parent, ImageAction& imageActio
 
     _groupAction.addAction(&_imageAction.getFileNameAction());
     _groupAction.addAction(&_imageAction.getFilePickerAction());
-    //_groupAction.addAction(&_imageAction.getPreviewAction());
 
     auto layout = new QHBoxLayout();
     
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     layout->addWidget(_groupAction.createWidget(this));
 
@@ -127,7 +125,6 @@ QWidget* ImageAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::Preview)
         layout->addWidget(new ImageAction::PreviewWidget(parent, *this));

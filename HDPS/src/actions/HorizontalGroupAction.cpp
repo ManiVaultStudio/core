@@ -83,7 +83,6 @@ HorizontalGroupAction::Widget::Widget(QWidget* parent, HorizontalGroupAction* ho
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     const auto updateLayout = [this, layout]() -> void {
         QLayoutItem* layoutItem;
