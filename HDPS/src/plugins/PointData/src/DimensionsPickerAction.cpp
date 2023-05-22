@@ -82,6 +82,19 @@ void DimensionsPickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
+    if (variantMap.contains("DatasetID")) {
+        const auto datasetID = variantMap["DatasetID"].toString();
+
+        qDebug() << datasetID;
+
+        if (!datasetID.isEmpty()) {
+            auto dataset = hdps::data().getSet(datasetID);
+
+            if (dataset.isValid())
+                setPointsDataset(Dataset<Points>(dataset));
+        }
+    }
+
     if (variantMap.contains("EnabledDimensions")) {
 
         const auto enabledDimensions = variantMap["EnabledDimensions"].toList();
@@ -109,8 +122,11 @@ QVariantMap DimensionsPickerAction::toVariantMap() const
     for (const auto enabledDimension : getEnabledDimensions())
         enabledDimensions << QVariant(enabledDimension);
 
+    const auto datasetId = _points.isValid() ? _points->getGuid() : "";
+    
     variantMap.insert({
-        { "EnabledDimensions", enabledDimensions }
+        { "EnabledDimensions", enabledDimensions },
+        { "DatasetID", datasetId }
     });
 
     return variantMap;
@@ -174,8 +190,11 @@ void DimensionsPickerAction::setPointsDataset(const Dataset<Points>& points)
 {
     _points = points;
 
-    setDimensions(_points->getNumDimensions(), _points->getDimensionNames());
-    setObjectName(QString("%1/Selection").arg(_points->getGuiName()));
+    if (_points.isValid()) {
+        setDimensions(_points->getNumDimensions(), _points->getDimensionNames());
+        setObjectName(QString("%1/Selection").arg(_points->getGuiName()));
+    } else
+        setDimensions(0, {});
 }
 
 DimensionsPickerHolder& DimensionsPickerAction::getHolder()

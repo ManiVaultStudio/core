@@ -109,9 +109,9 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
     _compressionAction.fromParentVariantMap(variantMap);
 
     if (!preview) {
+        dataHierarchy().fromParentVariantMap(variantMap);
         actions().fromParentVariantMap(variantMap);
         plugins().fromParentVariantMap(variantMap);
-        dataHierarchy().fromParentVariantMap(variantMap);
     }
 }
 
