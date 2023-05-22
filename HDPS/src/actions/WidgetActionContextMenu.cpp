@@ -52,9 +52,10 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     addAction(&_removeAction);
     addAction(&_editAction);
 
+    _editAction.setVisible(_actions.count() == 1);
+
     if (allPrivate) {
         _removeAction.setVisible(false);
-        _editAction.setVisible(false);
 
         if (_actions.count() == 1) {
             _publishAction.setEnabled(!firstAction->isPublished());
@@ -106,7 +107,6 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
             _publishAction.setVisible(false);
             _disconnectAction.setVisible(true);
             _removeAction.setVisible(false);
-            _editAction.setVisible(false);
 
             _disconnectAction.setText(QString("Disconnect %1").arg(QString::number(_actions.count())));
         }
@@ -115,7 +115,6 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     if (allPublic) {
         _publishAction.setVisible(false);
         _disconnectAction.setVisible(false);
-        _editAction.setVisible(_actions.count() == 1);
 
         WidgetActions rootPublicActions;
 

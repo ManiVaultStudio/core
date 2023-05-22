@@ -29,9 +29,16 @@ public:
 
 protected:
 
+    /** Dialog class for editing an action */
     class EditActionDialog : public QDialog
     {
     public:
+
+        /**
+         * Construct with \p parent widget and edit \p action
+         * @param parent Pointer to parent widget (if any)
+         * @param action Reference to edit action
+         */
         EditActionDialog(QWidget* parent, WidgetAction& action);
 
     private:
