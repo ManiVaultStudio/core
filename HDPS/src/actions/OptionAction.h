@@ -8,9 +8,9 @@
 #include <QStringListModel>
 #include <QAbstractProxyModel>
 #include <QItemSelection>
+#include <QPushButton>
 
 class QWidget;
-class QPushButton;
 class QAbstractListModel;
 
 namespace hdps::gui {
@@ -34,6 +34,7 @@ public:
         LineEdit            = 0x00002,      /** The widget includes a searchable line edit widget */
         HorizontalButtons   = 0x00004,      /** The widget includes a push button for each option in a horizontal layout */
         VerticalButtons     = 0x00008,      /** The widget includes a push button for each option in a vertical layout */
+        Clearable           = 0x00010,      /** The widget includes a push button to clear the selection (current index is set to minus one) */
 
         Default = ComboBox
     };

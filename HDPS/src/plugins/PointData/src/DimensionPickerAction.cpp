@@ -160,7 +160,7 @@ void DimensionPickerAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap DimensionPickerAction::toVariantMap() const
 {
-    QVariantMap variantMap = WidgetAction::toVariantMap();
+    auto variantMap = WidgetAction::toVariantMap();
 
     _currentDimensionAction.insertIntoVariantMap(variantMap);
 

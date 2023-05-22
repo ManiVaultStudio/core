@@ -7,7 +7,6 @@
 #include <QHBoxLayout>
 #include <QComboBox>
 #include <QListView>
-#include <QPushButton>
 #include <QStylePainter>
 
 using namespace hdps::util;
@@ -116,6 +115,16 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
     connect(this, &OptionAction::currentTextChanged, publicOptionAction, &OptionAction::setCurrentText);
     connect(publicOptionAction, &OptionAction::currentTextChanged, this, &OptionAction::setCurrentText);
 
+    connect(this, &OptionAction::modelChanged, this, [this, publicOptionAction]() -> void {
+        auto publicOptions = publicOptionAction->getOptions();
+
+        publicOptions << getOptions();
+
+        publicOptions.removeDuplicates();
+
+        publicOptionAction->setOptions(publicOptions);
+    });
+
     setCurrentText(publicOptionAction->getCurrentText());
 
     WidgetAction::connectToPublicAction(publicAction, recursive);
@@ -129,6 +138,7 @@ void OptionAction::disconnectFromPublicAction(bool recursive)
         return;
 
     disconnect(this, &OptionAction::currentTextChanged, publicOptionAction, &OptionAction::setCurrentText);
+    disconnect(this, &OptionAction::modelChanged, this, nullptr);
     disconnect(publicOptionAction, &OptionAction::currentTextChanged, this, &OptionAction::setCurrentText);
 
     WidgetAction::disconnectFromPublicAction(recursive);
@@ -147,7 +157,7 @@ void OptionAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap OptionAction::toVariantMap() const
 {
-    QVariantMap variantMap = WidgetAction::toVariantMap();
+    auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
         { "Options", getOptions() },
@@ -174,18 +184,14 @@ void OptionAction::setCustomModel(QAbstractItemModel* itemModel)
 
     _customModel = itemModel;
 
-    // Notify others that the custom model and the current model changed
     emit customModelChanged(_customModel);
     emit modelChanged();
 
-    // Possibly adjust the current index when the layout of the custom model changes
     if (_customModel)
         connect(_customModel, &QAbstractItemModel::layoutChanged, this, &OptionAction::updateCurrentIndex);
 
-    // Update the current index so that it respects the underlying model
     updateCurrentIndex();
 
-    // Notify others that the current index and text changed
     emit currentIndexChanged(_currentIndex);
     emit currentTextChanged(getCurrentText());
 }
@@ -280,14 +286,19 @@ QString OptionAction::getCurrentText() const
 
 void OptionAction::setCurrentText(const QString& currentText)
 {
-    if (currentText == getCurrentText())
-        return;
+    if (currentText.isEmpty()) {
+        setCurrentIndex(-1);
+    }
+    else {
+        if (currentText == getCurrentText())
+            return;
 
-    if (hasOption(currentText))
-        _currentIndex = getModel()->match(getModel()->index(0, 0), Qt::DisplayRole, currentText).first().row();
+        if (hasOption(currentText))
+            _currentIndex = getModel()->match(getModel()->index(0, 0), Qt::DisplayRole, currentText).first().row();
 
-    emit currentTextChanged(getCurrentText());
-    emit currentIndexChanged(_currentIndex);
+        emit currentTextChanged(getCurrentText());
+        emit currentIndexChanged(_currentIndex);
+    }
 }
 
 bool OptionAction::hasSelection() const
@@ -532,6 +543,27 @@ QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
 
     if (widgetFlags & WidgetFlag::VerticalButtons)
         layout->addWidget(new ButtonsWidget(parent, this, Qt::Vertical));
+
+    if (widgetFlags & WidgetFlag::Clearable) {
+        auto clearSelectionAction = new TriggerAction(parent, "Clear");
+
+        clearSelectionAction->setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
+        clearSelectionAction->setToolTip("Clear the current selection");
+
+        connect(clearSelectionAction, &TriggerAction::triggered, this, [this]() -> void {
+            setCurrentIndex(-1);
+        });
+
+        const auto updateReadOnly = [this, clearSelectionAction]() -> void {
+            clearSelectionAction->setEnabled(getCurrentIndex() >= 0);
+        };
+
+        updateReadOnly();
+
+        connect(this, &OptionAction::currentIndexChanged, this, updateReadOnly);
+
+        layout->addWidget(clearSelectionAction->createWidget(widget, TriggerAction::Icon));
+    }
 
     widget->setLayout(layout);
 
