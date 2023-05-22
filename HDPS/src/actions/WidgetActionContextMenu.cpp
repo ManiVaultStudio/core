@@ -16,7 +16,8 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     _actions(actions),
     _publishAction(this, "Publish..."),
     _disconnectAction(this, "Disconnect..."),
-    _removeAction(this, "Disconnect...")
+    _removeAction(this, "Remove..."),
+    _editAction(this, "Edit...")
 {
     Q_ASSERT(actions.count() != 0);
 
@@ -25,6 +26,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     _publishAction.setIcon(fontAwesome.getIcon("cloud-upload-alt"));
     _disconnectAction.setIcon(fontAwesome.getIcon("unlink"));
     _removeAction.setIcon(fontAwesome.getIcon("trash"));
+    _editAction.setIcon(fontAwesome.getIcon("edit"));
 
     auto firstAction = _actions.first();
 
@@ -48,9 +50,11 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     addSeparator();
 
     addAction(&_removeAction);
+    addAction(&_editAction);
 
     if (allPrivate) {
         _removeAction.setVisible(false);
+        _editAction.setVisible(false);
 
         if (_actions.count() == 1) {
             _publishAction.setEnabled(!firstAction->isPublished());
@@ -102,6 +106,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
             _publishAction.setVisible(false);
             _disconnectAction.setVisible(true);
             _removeAction.setVisible(false);
+            _editAction.setVisible(false);
 
             _disconnectAction.setText(QString("Disconnect %1").arg(QString::number(_actions.count())));
         }
@@ -110,6 +115,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     if (allPublic) {
         _publishAction.setVisible(false);
         _disconnectAction.setVisible(false);
+        _editAction.setVisible(_actions.count() == 1);
 
         WidgetActions rootPublicActions;
 
@@ -149,6 +155,29 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         for (auto action : _actions)
             hdps::actions().disconnectPrivateActionFromPublicAction(action, true);
     });
+
+    connect(&_editAction, &TriggerAction::triggered, this, [this]() -> void {
+        if (_actions.isEmpty())
+            return;
+
+        EditActionDialog editActionDialog(this, *_actions.first());
+
+        editActionDialog.exec();
+    });
+}
+
+WidgetActionContextMenu::EditActionDialog::EditActionDialog(QWidget* parent, WidgetAction& action) :
+    QDialog(parent),
+    _action(action)
+{
+    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("edit"));
+    setWindowTitle(QString("Edit %1").arg(_action.text()));
+
+    auto layout = new QVBoxLayout();
+
+    layout->addWidget(_action.createWidget(this));
+
+    setLayout(layout);
 }
 
 }
