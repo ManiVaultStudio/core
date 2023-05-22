@@ -155,6 +155,17 @@ void DimensionPickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
+    if (variantMap.contains("DatasetID")) {
+        const auto datasetID = variantMap["DatasetID"].toString();
+
+        if (!datasetID.isEmpty()) {
+            auto dataset = hdps::data().getSet(datasetID);
+
+            if (dataset.isValid())
+                setPointsDataset(Dataset<Points>(dataset));
+        }
+    }
+
     _currentDimensionAction.fromParentVariantMap(variantMap);
 }
 
@@ -163,6 +174,12 @@ QVariantMap DimensionPickerAction::toVariantMap() const
     auto variantMap = WidgetAction::toVariantMap();
 
     _currentDimensionAction.insertIntoVariantMap(variantMap);
+
+    const auto datasetId = _points.isValid() ? _points->getGuid() : "";
+
+    variantMap.insert({
+        { "DatasetID", datasetId }
+    });
 
     return variantMap;
 }

@@ -85,8 +85,6 @@ void DimensionsPickerAction::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("DatasetID")) {
         const auto datasetID = variantMap["DatasetID"].toString();
 
-        qDebug() << datasetID;
-
         if (!datasetID.isEmpty()) {
             auto dataset = hdps::data().getSet(datasetID);
 
