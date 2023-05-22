@@ -74,8 +74,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param title Title of the action
      */
-    DimensionsPickerAction(QObject* parent);
+    Q_INVOKABLE DimensionsPickerAction(QObject* parent, const QString& title);
 
     /** Destructor */
     ~DimensionsPickerAction();
@@ -261,7 +262,7 @@ protected:  // Linking
      * Get public copy of the action (other compatible actions can connect to it)
      * @return Pointer to public copy of the action
      */
-    virtual WidgetAction* getPublicCopy() const;
+    WidgetAction* getPublicCopy() const override;
 
 signals:
 

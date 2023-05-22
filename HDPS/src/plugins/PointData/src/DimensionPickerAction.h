@@ -59,7 +59,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    DimensionPickerAction(QObject* parent, const QString& title);
+    Q_INVOKABLE DimensionPickerAction(QObject* parent, const QString& title);
 
     /**
      * Set the points dataset from which the dimension will be picked

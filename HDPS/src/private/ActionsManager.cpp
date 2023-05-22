@@ -81,7 +81,7 @@ void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
                     throw std::runtime_error(QString("Meta object type '%1' for '%2' is not known. Did you forget to register the action correctly with Qt meta object system? See ToggleAction.h for an example.").arg(metaType, publicActionTitle).toLatin1());
 
                 auto metaObjectInstance = metaObject->newInstance(Q_ARG(QObject*, this), Q_ARG(QString, publicActionTitle));
-                auto publicAction       = qobject_cast<WidgetAction*>(metaObjectInstance);
+                auto publicAction       = dynamic_cast<WidgetAction*>(metaObjectInstance);
 
                 if (!publicAction)
                     throw std::runtime_error(QString("Unable to create a new instance of type '%1'").arg(metaType).toLatin1());

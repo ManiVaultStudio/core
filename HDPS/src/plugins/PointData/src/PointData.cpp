@@ -308,7 +308,7 @@ void Points::init()
 
         connect(&getSmartPointer(), &Dataset<Points>::dataChanged, this, [this]() -> void {
             if (_dimensionsPickerAction == nullptr)
-                _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction);
+                _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction, "Dimensions");
 
             _dimensionsPickerAction->setPointsDataset(*this);
         });

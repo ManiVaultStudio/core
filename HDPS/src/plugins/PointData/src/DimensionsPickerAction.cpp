@@ -28,8 +28,8 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-DimensionsPickerAction::DimensionsPickerAction(QObject* parent) :
-    WidgetAction(parent, "Dimension Picker"),
+DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& title) :
+    WidgetAction(parent, title),
     _points(nullptr),
     _holder(),
     _itemModel(new DimensionsPickerItemModel(_holder)),
@@ -80,6 +80,8 @@ DimensionsPickerAction::~DimensionsPickerAction()
 
 void DimensionsPickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
+    WidgetAction::fromVariantMap(variantMap);
+
     if (variantMap.contains("EnabledDimensions")) {
 
         const auto enabledDimensions = variantMap["EnabledDimensions"].toList();
@@ -100,12 +102,18 @@ void DimensionsPickerAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap DimensionsPickerAction::toVariantMap() const
 {
+    auto variantMap = WidgetAction::toVariantMap();
+
     QVariantList enabledDimensions;
 
     for (const auto enabledDimension : getEnabledDimensions())
         enabledDimensions << QVariant(enabledDimension);
 
-    return { { "EnabledDimensions", enabledDimensions} };
+    variantMap.insert({
+        { "EnabledDimensions", enabledDimensions }
+    });
+
+    return variantMap;
 }
 
 void DimensionsPickerAction::setDimensions(const std::uint32_t numDimensions, const std::vector<QString>& names)
@@ -541,10 +549,12 @@ void DimensionsPickerAction::disconnectFromPublicAction(bool recursive)
 
 WidgetAction* DimensionsPickerAction::getPublicCopy() const
 {
-    auto dimensionsPickerActionCopy = new DimensionsPickerAction(nullptr);
+    auto dimensionsPickerActionCopy = dynamic_cast<DimensionsPickerAction*>(WidgetAction::getPublicCopy());
 
-    dimensionsPickerActionCopy->setPointsDataset(_points);
-    dimensionsPickerActionCopy->selectDimensions(getSelectedDimensions());
+    if (_points.isValid()) {
+        dimensionsPickerActionCopy->setPointsDataset(_points);
+        dimensionsPickerActionCopy->selectDimensions(getSelectedDimensions());
+    }
 
     return dimensionsPickerActionCopy;
 }
