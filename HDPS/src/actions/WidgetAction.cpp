@@ -40,7 +40,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _publicAction(nullptr),
     _connectedActions(),
     _settingsPrefix(),
-    _highlighted(false),
+    _highlighting(HighlightOption::None),
     _popupSizeHint(QSize(0, 0)),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default))
 {
@@ -146,24 +146,39 @@ void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
     _defaultWidgetFlags = widgetFlags;
 }
 
-void WidgetAction::setHighlighted(bool highlighted)
+WidgetAction::HighlightOption WidgetAction::getHighlighting() const
 {
-    if (highlighted == _highlighted)
-        return;
-
-    _highlighted = highlighted;
-
-    emit highlightedChanged(_highlighted);
-
-    if (isPublic()) {
-        for (auto connectedAction : getConnectedActions())
-            connectedAction->setHighlighted(highlighted);
-    }
+    return _highlighting;
 }
 
 bool WidgetAction::isHighlighted() const
 {
-    return _highlighted;
+    return (_highlighting == HighlightOption::Moderate) | (_highlighting == HighlightOption::Strong);
+}
+
+void WidgetAction::setHighlighting(const HighlightOption& highlighting)
+{
+    if (highlighting == _highlighting)
+        return;
+
+    _highlighting = highlighting;
+
+    emit highlightingChanged(_highlighting);
+}
+
+void WidgetAction::setHighlighted(bool highlighted)
+{
+    setHighlighting(highlighted ? HighlightOption::Moderate : HighlightOption::None);
+}
+
+void WidgetAction::highlight()
+{
+    setHighlighted(true);
+}
+
+void WidgetAction::unHighlight()
+{
+    setHighlighted(false);
 }
 
 WidgetAction::Scope WidgetAction::getScope() const

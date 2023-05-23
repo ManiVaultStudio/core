@@ -37,9 +37,22 @@ public:
      */
     virtual void setAction(WidgetAction* widgetAction);
 
+    /**
+     * Invoked when a \p dragEnterEvent occurs
+     * @param dragEnterEvent Pointer to drag enter event
+     */
+    void dragEnterEvent(QDragEnterEvent* dragEnterEvent) override;
+
+    /**
+     * Invoked when a \p dragLeaveEvent occurs
+     * @param dragLeaveEvent Pointer to drag leave event
+     */
+    void dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent) override;
+
 private:
-    WidgetAction*                   _action;            /** Pointer to action that will be displayed */
-    WidgetActionHighlightWidget*    _highlightWidget;   /** Pointer to highlight widget */
+    WidgetAction*                   _action;                /** Pointer to action that will be displayed */
+    WidgetActionHighlightWidget*    _highlightWidget;       /** Pointer to highlight widget */
+    std::int32_t                    _cachedHighlighting;    /** Cached highlighting */
 };
 
 }

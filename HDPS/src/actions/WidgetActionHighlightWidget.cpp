@@ -1,5 +1,4 @@
 #include "WidgetActionHighlightWidget.h"
-#include "WidgetAction.h"
 
 namespace hdps::gui {
 
@@ -9,7 +8,7 @@ WidgetActionHighlightWidget::WidgetActionHighlightWidget(QWidget* parent, Widget
 {
     setWindowFlag(Qt::WindowStaysOnTopHint);
     setStyleSheet("background-color: gray;");
-
+    
     auto& widgetFader = getWidgetOverlayer().getWidgetFader();
 
     widgetFader.setMaximumOpacity(0.3f);
@@ -25,26 +24,42 @@ WidgetAction* WidgetActionHighlightWidget::getAction()
 void WidgetActionHighlightWidget::setAction(WidgetAction* action)
 {
     if (_action != nullptr)
-        disconnect(_action, &WidgetAction::highlightedChanged, this, nullptr);
+        disconnect(_action, &WidgetAction::highlightingChanged, this, nullptr);
 
     _action = action;
 
     if (_action == nullptr)
         return;
 
-    connect(_action, &WidgetAction::highlightedChanged, this, &WidgetActionHighlightWidget::updateHighlight);
+    if (_action->isPublic())
+        return;
 
-    updateHighlight();
+    connect(_action, &WidgetAction::highlightingChanged, this, &WidgetActionHighlightWidget::highlightingChanged);
+
+    highlightingChanged(_action->getHighlighting());
 }
 
-void WidgetActionHighlightWidget::updateHighlight()
+void WidgetActionHighlightWidget::highlightingChanged(const WidgetAction::HighlightOption& highlighting)
 {
     auto& widgetFader = getWidgetOverlayer().getWidgetFader();
 
-    if (_action->isHighlighted())
-        widgetFader.fadeIn();
-    else
-        widgetFader.fadeOut();
+    switch (highlighting)
+    {
+        case WidgetAction::HighlightOption::None:
+            widgetFader.setOpacity(0.0f, 200);
+            break;
+
+        case WidgetAction::HighlightOption::Moderate:
+            widgetFader.setOpacity(0.25f, 200);
+            break;
+
+        case WidgetAction::HighlightOption::Strong:
+            widgetFader.setOpacity(0.5f, 200);
+            break;
+
+        default:
+            break;
+    }
 }
 
 }

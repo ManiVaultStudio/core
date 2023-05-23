@@ -50,6 +50,13 @@ public:
     /** Map scope enum to scope name */
     static QMap<Scope, QString> scopeNames;
 
+    /** Describes the highlight options */
+    enum class HighlightOption {
+        None,       /** Action is not highlighted */
+        Moderate,   /** Action is moderately highlighted */
+        Strong      /** Action is strongly highlighted */
+    };
+
     /** Describes the configuration options */
     enum class ConfigurationFlag {
         VisibleInMenu       = 0x00001,      /** Whether the action may show itself in (context) menus */
@@ -241,16 +248,34 @@ public: // Widget flags
 public: // Highlighting
 
     /**
-     * Highlight the action (draw the background in a different color)
-     * @param highlighted Whether the action is highlighted or not
+     * Get highlighting
+     * @return Highlight option
      */
-    void setHighlighted(bool highlighted);
+    virtual HighlightOption getHighlighting() const final;
 
     /**
      * Determine whether the action is in a highlighted state or not
      * @return Boolean determining whether the action is in a highlighted state or not
      */
-    bool isHighlighted() const;
+    virtual bool isHighlighted() const final;
+
+    /**
+     * Set highlighting to \p highlighting
+     * @param highlighting Highlighting state
+     */
+    virtual void setHighlighting(const HighlightOption& highlighting) final;
+
+    /**
+     * Set highlighted to \p highlighted
+     * @param highlighted Boolean determining whether the action is in a normal highlighted state or not
+     */
+    virtual void setHighlighted(bool highlighted) final;
+
+    /** Convenience method to highlight the action */
+    virtual void highlight() final;
+
+    /** Convenience method to un-highlight the action */
+    virtual void unHighlight() final;
 
 public: // Scope
 
@@ -595,10 +620,10 @@ signals:
     void forceDisabledChanged(bool forceDisabled);
 
     /**
-     * Signals that the highlighted state changed
-     * @param highlighted Whether the action is in a highlighted state or not
+     * Signals that the highlighting options changed to \p highlightOption
+     * @param highlightOption Current highlight option
      */
-    void highlightedChanged(bool highlighted);
+    void highlightingChanged(const HighlightOption& highlightOption);
 
     /**
      * Signals that the published state changed
@@ -661,7 +686,7 @@ private:
     QPointer<WidgetAction>      _publicAction;                  /** Public action to which this action is connected (nullptr if not connected) */
     QVector<WidgetAction*>      _connectedActions;              /** Pointers to widget actions that are connected to this action */
     QString                     _settingsPrefix;                /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
-    bool                        _highlighted;                   /** Whether the action is in a highlighted state or not */
+    HighlightOption             _highlighting;                  /** Highlighting state */
     QSize                       _popupSizeHint;                 /** Size hint of the popup */
     std::int32_t                _configuration;                 /** Configuration flags */
     QMap<QString, QVariant>     _cachedStates;                  /** Maps cache name to state */

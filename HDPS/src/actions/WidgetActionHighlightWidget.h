@@ -2,9 +2,9 @@
 
 #include "widgets/OverlayWidget.h"
 
-namespace hdps::gui {
+#include "WidgetAction.h"
 
-class WidgetAction;
+namespace hdps::gui {
 
 /**
  * Widget action highlight class
@@ -38,8 +38,11 @@ public:
 
 private:
 
-    /** Update the visual representation of the highlight */
-    void updateHighlight();
+    /**
+     * Invoked when the action highlighting state changes (update the visual representation of the highlight)
+     * @param highlighting Action highlighting state
+     */
+    void highlightingChanged(const WidgetAction::HighlightOption& highlighting);
 
 private:
     WidgetAction*   _action;  /** Pointer to widget action to highlight */

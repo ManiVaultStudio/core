@@ -178,16 +178,16 @@ bool ActionsWidget::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::Enter:
         {
-            if (target == &_hierarchyWidget.getTreeView())
-                highlightActions(_hierarchyWidget.getTreeView().selectionModel()->selectedRows(), true);
+            //if (target == &_hierarchyWidget.getTreeView())
+            //    highlightActions(_hierarchyWidget.getTreeView().selectionModel()->selectedRows(), true);
 
             break;
         }
 
         case QEvent::Leave:
         {
-            if (target == &_hierarchyWidget.getTreeView())
-                highlightActions(_highlightedIndices, false);
+            //if (target == &_hierarchyWidget.getTreeView())
+            //    highlightActions(_highlightedIndices, false);
 
             break;
         }

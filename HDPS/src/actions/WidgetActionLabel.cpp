@@ -83,38 +83,55 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
                 case Qt::RightButton:
                 {
-                    if (isEnabled() && getAction()->mayConnect(WidgetAction::Gui)) {
-                        auto drag = new QDrag(this);
+                    if (!isEnabled())
+                        break;
 
-                        auto mimeData = new WidgetActionMimeData(getAction());
+                    if (!getAction()->mayConnect(WidgetAction::Gui))
+                        break;
 
-                        drag->setMimeData(mimeData);
-                        drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(QSize(12, 12)));
+                    if (getAction()->isConnected())
+                        break;
 
-                        ActionsListModel actionsListModel(this);
-                        ActionsFilterModel actionsFilterModel(this);
+                    auto drag = new QDrag(this);
 
-                        actionsFilterModel.setSourceModel(&actionsListModel);
-                        actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Private" });
-                        actionsFilterModel.getTypeFilterAction().setString(getAction()->getTypeString());
+                    auto mimeData = new WidgetActionMimeData(getAction());
 
-                        const auto numberOfRows = actionsFilterModel.rowCount();
+                    drag->setMimeData(mimeData);
+                    drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(QSize(12, 12)));
 
-                        for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
-                            auto action = actionsFilterModel.getAction(rowIndex);
+                    ActionsListModel actionsListModel(this);
+                    ActionsFilterModel actionsFilterModel(this);
 
-                            if (action != getAction())
-                                actionsFilterModel.getAction(rowIndex)->setHighlighted(true);
-                        }
+                    actionsFilterModel.setSourceModel(&actionsListModel);
+                    actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Private" });
+                    actionsFilterModel.getTypeFilterAction().setString(getAction()->getTypeString());
 
-                        Qt::DropAction dropAction = drag->exec();
+                    const auto numberOfRows = actionsFilterModel.rowCount();
 
-                        for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
-                            auto action = actionsFilterModel.getAction(rowIndex);
+                    for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
+                        auto action = actionsFilterModel.getAction(rowIndex);
 
-                            if (action != getAction())
-                                actionsFilterModel.getAction(rowIndex)->setHighlighted(false);
-                        }
+                        if (action == getAction())
+                            continue;
+
+                        //if (action->getPublicAction() == getAction()->getPublicAction())
+                        //    continue;
+
+                        actionsFilterModel.getAction(rowIndex)->highlight();
+                    }
+
+                    Qt::DropAction dropAction = drag->exec();
+
+                    for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
+                        auto action = actionsFilterModel.getAction(rowIndex);
+
+                        if (action == getAction())
+                            continue;
+
+                        //if (action->getPublicAction() == getAction()->getPublicAction())
+                        //    continue;
+
+                        actionsFilterModel.getAction(rowIndex)->unHighlight();
                     }
 
                     break;
@@ -147,9 +164,16 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
             auto dropEvent      = static_cast<QDropEvent*>(event);
             auto actionMimeData = dynamic_cast<const WidgetActionMimeData*>(dropEvent->mimeData());
 
-            if (actionMimeData)
-                if ((actionMimeData->getAction() != getAction()) && (actionMimeData->getAction()->getTypeString() == getAction()->getTypeString()))
-                    hdps::actions().connectPrivateActions(actionMimeData->getAction(), getAction());
+            if (actionMimeData) {
+                if (actionMimeData->getAction() != getAction()) {
+                    if (actionMimeData->getAction()->getTypeString() == getAction()->getTypeString()) {
+                        if (getAction()->isConnected())
+                            hdps::actions().connectPrivateActionToPublicAction(actionMimeData->getAction(), getAction()->getPublicAction(), true);
+                        else
+                            hdps::actions().connectPrivateActions(actionMimeData->getAction(), getAction());
+                    }
+                }
+            }
 
             break;
         }
