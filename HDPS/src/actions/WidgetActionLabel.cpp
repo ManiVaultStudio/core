@@ -1,5 +1,6 @@
 #include "WidgetActionLabel.h"
 #include "WidgetAction.h"
+#include "WidgetActionMimeData.h"
 #include "Application.h"
 
 #include "models/ActionsFilterModel.h"
@@ -14,28 +15,6 @@
 #include <QMimeData>
 
 namespace hdps::gui {
-
-class ActionMimedata : public QMimeData
-{
-public:
-    ActionMimedata(WidgetAction* action) :
-        QMimeData(),
-        _action(action)
-    {
-    }
-
-    bool hasFormat(const QString& mimetype) const { return QMimeData::hasFormat(mimetype); }
-    QStringList formats() const { return { format() }; }
-
-    WidgetAction* getAction() const { return _action; }
-
-    static QString format() {
-        return "application/action";
-    }
-
-private:
-    WidgetAction* _action;  /** Pointer to mime data action */
-};
 
 WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= nullptr*/, const std::uint32_t& flags /*= ColonAfterName*/) :
     WidgetActionViewWidget(parent, action),
@@ -107,7 +86,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     if (isEnabled() && getAction()->mayConnect(WidgetAction::Gui)) {
                         auto drag = new QDrag(this);
 
-                        auto mimeData = new ActionMimedata(getAction());
+                        auto mimeData = new WidgetActionMimeData(getAction());
 
                         drag->setMimeData(mimeData);
                         drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(QSize(12, 12)));
@@ -151,7 +130,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                 break;
 
             auto dragEnterEvent = static_cast<QDragEnterEvent*>(event);
-            auto actionMimeData = dynamic_cast<const ActionMimedata*>(dragEnterEvent->mimeData());
+            auto actionMimeData = dynamic_cast<const WidgetActionMimeData*>(dragEnterEvent->mimeData());
 
             if (actionMimeData)
                 if ((actionMimeData->getAction() != getAction()) && (actionMimeData->getAction()->getTypeString() == getAction()->getTypeString()))
@@ -166,7 +145,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                 break;
 
             auto dropEvent      = static_cast<QDropEvent*>(event);
-            auto actionMimeData = dynamic_cast<const ActionMimedata*>(dropEvent->mimeData());
+            auto actionMimeData = dynamic_cast<const WidgetActionMimeData*>(dropEvent->mimeData());
 
             if (actionMimeData)
                 if ((actionMimeData->getAction() != getAction()) && (actionMimeData->getAction()->getTypeString() == getAction()->getTypeString()))

@@ -288,6 +288,8 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WidgetActionStateWidget.h
     src/actions/WidgetActionContextMenu.h
     src/actions/WidgetActionViewWidget.h
+    src/actions/WidgetActionMimeData.h
+    src/actions/WidgetActionHighlightWidget.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -298,6 +300,8 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/WidgetActionStateWidget.cpp
     src/actions/WidgetActionContextMenu.cpp
     src/actions/WidgetActionViewWidget.cpp
+    src/actions/WidgetActionMimeData.cpp
+    src/actions/WidgetActionHighlightWidget.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
