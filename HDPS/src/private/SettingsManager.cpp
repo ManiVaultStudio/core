@@ -23,7 +23,8 @@ SettingsManager::SettingsManager() :
     _globalProjectsPathAction(this, "Projects"),
     _globalWorkspacesPathAction(this, "Workspaces"),
     _globalDataPathAction(this, "Data"),
-    _ignoreLoadingErrorsAction(this, "Ignore loading errors")
+    _ignoreLoadingErrorsAction(this, "Ignore loading errors"),
+    _askForSharedParameterNameAction(this, "Ask for name when publishing a parameter")
 {
     _editSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
     _editSettingsAction.setShortcut(QKeySequence("Ctrl+G"));
@@ -33,6 +34,7 @@ SettingsManager::SettingsManager() :
     _globalWorkspacesPathAction.setSettingsPrefix("GlobalSettings/Paths/Workspaces", true);
     _globalDataPathAction.setSettingsPrefix("GlobalSettings/Paths/Data", true);
     _ignoreLoadingErrorsAction.setSettingsPrefix("GlobalSettings/IO/IgnoreLoadingErrors");
+    _askForSharedParameterNameAction.setSettingsPrefix("GlobalSettings/Parameters/AskForSharedParameterName");
 
     const auto makeDirIfNotExist = [](const QString& pathToDirectory) -> void {
         QDir dir(pathToDirectory);

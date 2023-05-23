@@ -457,10 +457,6 @@ void HierarchyWidget::updateOverlayWidget()
     if (_infoOverlayWidget.isNull())
         return;
 
-#ifdef HIERARCHY_WIDGET_VERBOSE
-    qDebug() << __FUNCTION__ << _itemTypeName << _model.rowCount() << (_filterModel ? _filterModel->rowCount() : -1);
-#endif
-
     auto& widgetFader = _infoOverlayWidget->getWidgetFader();
 
     if (_filterModel == nullptr) {

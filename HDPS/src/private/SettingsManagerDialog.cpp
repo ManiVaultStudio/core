@@ -15,8 +15,9 @@ namespace hdps::gui {
 SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _groupsAction(this, "Groups"),
-    _globalPathsGroupAction(this, "Global Paths", true),
-    _ioAction(this, "IO", true)
+    _globalPathsGroupAction(this, "Paths", true),
+    _ioGroupAction(this, "IO", true),
+    _parametersGroupAction(this, "Parameters", true)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
     setModal(true);
@@ -28,21 +29,22 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
 
     layout->addWidget(_groupsAction.createWidget(this));
 
-    _globalPathsGroupAction.setText("Paths");
     _globalPathsGroupAction.setLabelWidthPercentage(20);
 
     _globalPathsGroupAction << settings().getGlobalProjectsPathAction();
     _globalPathsGroupAction << settings().getGlobalWorkspacesPathAction();
     _globalPathsGroupAction << settings().getGlobalDataPathAction();
 
-    _ioAction.setText("IO");
-    _ioAction.setShowLabels(false);
-    
-    _ioAction << settings().getIgnoreLoadingErrorsAction();
-    //_ioAction << *toggleAction;
+    _ioGroupAction.setShowLabels(false);
 
-    //_groupsAction.addGroupAction(&_globalPathsGroupAction);
-    _groupsAction.addGroupAction(&_ioAction);
+    _ioGroupAction << settings().getIgnoreLoadingErrorsAction();
+
+    _parametersGroupAction.setShowLabels(false);
+
+    _parametersGroupAction << settings().getAskForSharedParameterNameAction();
+
+    _groupsAction.addGroupAction(&_ioGroupAction);
+    _groupsAction.addGroupAction(&_parametersGroupAction);
 }
 
 QSize SettingsManagerDialog::sizeHint() const

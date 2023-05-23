@@ -41,6 +41,7 @@ public: // Action getters
     virtual gui::DirectoryPickerAction& getGlobalWorkspacesPathAction() = 0;
     virtual gui::DirectoryPickerAction& getGlobalDataPathAction() = 0;
     virtual gui::ToggleAction& getIgnoreLoadingErrorsAction() = 0;
+    virtual gui::ToggleAction& getAskForSharedParameterNameAction() = 0;
 };
 
 }

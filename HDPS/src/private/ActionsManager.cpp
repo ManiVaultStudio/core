@@ -129,53 +129,57 @@ QVariantMap ActionsManager::toVariantMap() const
 
 void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QString& name /*= ""*/, bool recursive /*= true*/)
 {
-    
+    auto& askForSharedParameterNameAction = hdps::settings().getAskForSharedParameterNameAction();
+
     if (name.isEmpty()) {
-        auto& fontAwesome = Application::getIconFont("FontAwesome");
+        if (askForSharedParameterNameAction.isChecked()) {
+            auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-        QDialog publishDialog;
+            QDialog publishDialog;
 
-        publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
-        publishDialog.setWindowTitle("Publish " + privateAction->getLocation());
+            publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
+            publishDialog.setWindowTitle("Publish " + privateAction->getLocation());
+            publishDialog.setMinimumWidth(400);
 
-        QVBoxLayout mainLayout;
-        QGridLayout parameterLayout;
-        QHBoxLayout buttonsLayout;
+            QVBoxLayout mainLayout;
+            QGridLayout parameterLayout;
+            QHBoxLayout buttonsLayout;
 
-        StringAction nameAction(this, "Name", privateAction->text());
-        ToggleAction recursiveAction(this, "Recursive");
-        TriggerAction publishAction(this, "Publish");
-        TriggerAction cancelAction(this, "Cancel");
+            StringAction nameAction(this, "Name", privateAction->text());
+            TriggerAction publishAction(this, "Publish");
+            TriggerAction cancelAction(this, "Cancel");
 
-        nameAction.setToolTip("Name of the shared parameter");
+            nameAction.setToolTip("Name of the shared parameter");
 
-        parameterLayout.addWidget(nameAction.createLabelWidget(&publishDialog), 0, 0);
-        parameterLayout.addWidget(nameAction.createWidget(&publishDialog), 0, 1);
-        //parameterLayout.addWidget(recursiveAction.createWidget(&publishDialog), 1, 1);
+            parameterLayout.addWidget(nameAction.createLabelWidget(&publishDialog), 0, 0);
+            parameterLayout.addWidget(nameAction.createWidget(&publishDialog), 0, 1);
+            parameterLayout.addWidget(askForSharedParameterNameAction.createWidget(&publishDialog), 1, 1);
 
-        buttonsLayout.addStretch(1);
-        buttonsLayout.addWidget(publishAction.createWidget(&publishDialog));
-        buttonsLayout.addWidget(cancelAction.createWidget(&publishDialog));
+            buttonsLayout.addStretch(1);
+            buttonsLayout.addWidget(publishAction.createWidget(&publishDialog));
+            buttonsLayout.addWidget(cancelAction.createWidget(&publishDialog));
 
-        mainLayout.addLayout(&parameterLayout);
-        mainLayout.addLayout(&buttonsLayout);
+            mainLayout.addLayout(&parameterLayout);
+            mainLayout.addLayout(&buttonsLayout);
 
-        publishDialog.setLayout(&mainLayout);
-        publishDialog.setFixedWidth(300);
+            publishDialog.setLayout(&mainLayout);
 
-        const auto updateActionsReadOnly = [&]() -> void {
-            recursiveAction.setEnabled(!nameAction.getString().isEmpty());
-            publishAction.setEnabled(!nameAction.getString().isEmpty());
-        };
+            const auto updateActionsReadOnly = [&publishAction, &nameAction]() -> void {
+                publishAction.setEnabled(!nameAction.getString().isEmpty());
+            };
 
-        connect(&nameAction, &StringAction::stringChanged, this, updateActionsReadOnly);
-        connect(&publishAction, &TriggerAction::triggered, &publishDialog, &QDialog::accept);
-        connect(&cancelAction, &TriggerAction::triggered, &publishDialog, &QDialog::reject);
+            connect(&nameAction, &StringAction::stringChanged, this, updateActionsReadOnly);
+            connect(&publishAction, &TriggerAction::triggered, &publishDialog, &QDialog::accept);
+            connect(&cancelAction, &TriggerAction::triggered, &publishDialog, &QDialog::reject);
 
-        updateActionsReadOnly();
+            updateActionsReadOnly();
 
-        if (publishDialog.exec() == QDialog::Accepted)
-            publishPrivateAction(privateAction, nameAction.getString(), recursiveAction.isChecked());
+            if (publishDialog.exec() == QDialog::Accepted)
+                publishPrivateAction(privateAction, nameAction.getString(), true);
+        }
+        else {
+            publishPrivateAction(privateAction, QString("%1_pub").arg(privateAction->text()), true);
+        }
     }
     else {
 #ifdef ACTIONS_MANAGER_VERBOSE
