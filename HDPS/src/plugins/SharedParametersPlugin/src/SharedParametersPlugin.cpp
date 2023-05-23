@@ -12,6 +12,9 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
     _actionsWidget(&getWidget(), _publicActionsModel, "Shared Parameter"),
     _expertModeAction(this, "Expert mode")
 {
+    _actionsWidget.getFilterModel().getPublicRootOnlyAction().setChecked(true);
+
+    _expertModeAction.setChecked(false);
     _expertModeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("user-graduate"));
     _expertModeAction.setDefaultWidgetFlags(ToggleAction::PushButtonIcon);
 

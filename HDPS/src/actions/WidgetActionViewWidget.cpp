@@ -59,8 +59,8 @@ void WidgetActionViewWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
     if (actionMimeData->getAction()->getTypeString() != getAction()->getTypeString())
         return;
 
-    if (actionMimeData->getAction()->getPublicAction() == getAction()->getPublicAction())
-        return;
+    //if (actionMimeData->getAction()->getPublicAction() == getAction()->getPublicAction())
+    //    return;
 
     _cachedHighlighting = static_cast<std::int32_t>(getAction()->getHighlighting());
 

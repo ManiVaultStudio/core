@@ -8,12 +8,6 @@ WidgetActionHighlightWidget::WidgetActionHighlightWidget(QWidget* parent, Widget
 {
     setWindowFlag(Qt::WindowStaysOnTopHint);
     setStyleSheet("background-color: gray;");
-    
-    auto& widgetFader = getWidgetOverlayer().getWidgetFader();
-
-    widgetFader.setMaximumOpacity(0.3f);
-    widgetFader.setFadeInDuration(250);
-    widgetFader.setFadeOutDuration(500);
 }
 
 WidgetAction* WidgetActionHighlightWidget::getAction()
@@ -50,7 +44,7 @@ void WidgetActionHighlightWidget::highlightingChanged(const WidgetAction::Highli
             break;
 
         case WidgetAction::HighlightOption::Moderate:
-            widgetFader.setOpacity(0.25f, 200);
+            widgetFader.setOpacity(0.15f, 200);
             break;
 
         case WidgetAction::HighlightOption::Strong:

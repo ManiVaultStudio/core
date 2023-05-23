@@ -196,30 +196,30 @@ public: // Linking
     }
 
     /**
-     * Connect \p privateActionA to \p privateActionB
-     * @param privateActionA Pointer to private action A
-     * @param privateActionB Pointer to private action B
+     * Connect \p privateSourceAction to \p privateTargetAction
+     * @param privateSourceAction Pointer to private source action
+     * @param privateTargetAction Pointer to private target action (private source action will be connected to published private target action)
      * @param publicActionName Name of the public action (ask for name if empty)
      */
-    virtual void connectPrivateActions(gui::WidgetAction* privateActionA, gui::WidgetAction* privateActionB, const QString& publicActionName = "") final {
-        Q_ASSERT(privateActionA != nullptr);
-        Q_ASSERT(privateActionB != nullptr);
+    virtual void connectPrivateActions(gui::WidgetAction* privateSourceAction, gui::WidgetAction* privateTargetAction, const QString& publicActionName = "") final {
+        Q_ASSERT(privateSourceAction != nullptr);
+        Q_ASSERT(privateTargetAction != nullptr);
 
-        if (privateActionA == nullptr || privateActionB == nullptr)
+        if (privateSourceAction == nullptr || privateTargetAction == nullptr)
             return;
 
         try
         {
-            privateActionA->publish(publicActionName);
-            privateActionB->connectToPublicAction(privateActionA->getPublicAction(), true);
+            privateTargetAction->publish(publicActionName);
+            privateSourceAction->connectToPublicAction(privateTargetAction->getPublicAction(), true);
         }
         catch (std::exception& e)
         {
-            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateActionA->text(), privateActionB->text()), e);
+            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateSourceAction->text(), privateTargetAction->text()), e);
         }
         catch (...)
         {
-            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateActionA->text(), privateActionB->text()));
+            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateSourceAction->text(), privateTargetAction->text()));
         }
     }
 
