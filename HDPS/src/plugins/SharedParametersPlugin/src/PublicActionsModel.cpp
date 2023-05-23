@@ -1,7 +1,7 @@
 #include "PublicActionsModel.h"
 
 #ifdef _DEBUG
-    #define PUBLIC_ACTIONS_MODEL_VERBOSE
+    //#define PUBLIC_ACTIONS_MODEL_VERBOSE
 #endif
 
 using namespace hdps::gui;
