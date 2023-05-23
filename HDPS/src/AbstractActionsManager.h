@@ -3,6 +3,7 @@
 #include "AbstractManager.h"
 
 #include "actions/WidgetAction.h"
+#include "util/Exception.h"
 
 #include <QObject>
 
@@ -171,16 +172,55 @@ public: // Linking
      * @param publicAction Pointer to public action
      * @param recursive Whether to also connect descendant child actions
      */
-    virtual void connectPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction, bool recursive) {
+    virtual void connectPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction, bool recursive) final {
         Q_ASSERT(privateAction != nullptr);
         Q_ASSERT(publicAction != nullptr);
 
         if (privateAction == nullptr || publicAction == nullptr)
             return;
 
-        privateAction->_publicAction = publicAction;
+        try
+        {
+            privateAction->_publicAction = publicAction;
 
-        privateAction->connectToPublicAction(publicAction, recursive);
+            privateAction->connectToPublicAction(publicAction, recursive);
+        }
+        catch (std::exception& e)
+        {
+            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateAction->text(), publicAction->text()), e);
+        }
+        catch (...)
+        {
+            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateAction->text(), publicAction->text()));
+        }
+    }
+
+    /**
+     * Connect \p privateActionA to \p privateActionB
+     * @param privateActionA Pointer to private action A
+     * @param privateActionB Pointer to private action B
+     * @param publicActionName Name of the public action (ask for name if empty)
+     */
+    virtual void connectPrivateActions(gui::WidgetAction* privateActionA, gui::WidgetAction* privateActionB, const QString& publicActionName = "") final {
+        Q_ASSERT(privateActionA != nullptr);
+        Q_ASSERT(privateActionB != nullptr);
+
+        if (privateActionA == nullptr || privateActionB == nullptr)
+            return;
+
+        try
+        {
+            privateActionA->publish(publicActionName);
+            privateActionB->connectToPublicAction(privateActionA->getPublicAction(), true);
+        }
+        catch (std::exception& e)
+        {
+            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateActionA->text(), privateActionB->text()), e);
+        }
+        catch (...)
+        {
+            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateActionA->text(), privateActionB->text()));
+        }
     }
 
     /**
@@ -193,11 +233,22 @@ public: // Linking
 
         if (privateAction == nullptr)
             return;
+        
+        try
+        {
+            if (privateAction->isConnected())
+                privateAction->disconnectFromPublicAction(recursive);
 
-        if (privateAction->isConnected())
-            privateAction->disconnectFromPublicAction(recursive);
-
-        privateAction->_publicAction = nullptr;
+            privateAction->_publicAction = nullptr;
+        }
+        catch (std::exception& e)
+        {
+            util::exceptionMessageBox(QString("Unable to disconnect %1 to %2:").arg(privateAction->text(), privateAction->getPublicAction()->text()), e);
+        }
+        catch (...)
+        {
+            util::exceptionMessageBox(QString("Unable to disconnect %1 to %2:").arg(privateAction->text(), privateAction->getPublicAction()->text()));
+        }
     }
 
 protected:
@@ -207,20 +258,31 @@ protected:
      * @param privateAction Pointer to private action
      * @param publicAction Pointer to public action
      */
-    void addPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) {
+    virtual void addPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) final {
         Q_ASSERT(privateAction != nullptr);
         Q_ASSERT(publicAction != nullptr);
 
         if (privateAction == nullptr || publicAction == nullptr)
             return;
 
-        publicAction->getConnectedActions() << privateAction;
+        try
+        {
+            publicAction->getConnectedActions() << privateAction;
 
-        emit publicAction->actionConnected(privateAction);
+            emit publicAction->actionConnected(privateAction);
 
-        connect(privateAction, &gui::WidgetAction::destroyed, this, [this, privateAction, publicAction]() -> void {
-            removePrivateActionFromPublicAction(privateAction, publicAction);
-        });
+            connect(privateAction, &gui::WidgetAction::destroyed, this, [this, privateAction, publicAction]() -> void {
+                removePrivateActionFromPublicAction(privateAction, publicAction);
+                });
+        }
+        catch (std::exception& e)
+        {
+            util::exceptionMessageBox(QString("Unable to add %1 to %2:").arg(privateAction->text(), publicAction->text()), e);
+        }
+        catch (...)
+        {
+            util::exceptionMessageBox(QString("Unable to add %1 to %2:").arg(privateAction->text(), publicAction->text()));
+        }
     }
 
     /**
@@ -228,16 +290,27 @@ protected:
      * @param privateAction Pointer to private action
      * @param publicAction Pointer to public action
      */
-    void removePrivateActionFromPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) {
+    virtual void removePrivateActionFromPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) final {
         Q_ASSERT(privateAction != nullptr);
         Q_ASSERT(publicAction != nullptr);
 
         if (privateAction == nullptr || publicAction == nullptr)
             return;
 
-        publicAction->getConnectedActions().removeOne(privateAction);
+        try
+        {
+            publicAction->getConnectedActions().removeOne(privateAction);
 
-        emit publicAction->actionDisconnected(privateAction);
+            emit publicAction->actionDisconnected(privateAction);
+        }
+        catch (std::exception& e)
+        {
+            util::exceptionMessageBox(QString("Unable to remove %1 from %2:").arg(privateAction->text(), publicAction->text()), e);
+        }
+        catch (...)
+        {
+            util::exceptionMessageBox(QString("Unable to remove %1 from %2:").arg(privateAction->text(), publicAction->text()));
+        }
     }
 
 protected: // Action types

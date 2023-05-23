@@ -1,23 +1,52 @@
 #include "WidgetActionLabel.h"
 #include "WidgetAction.h"
-#include "models/ActionsFilterModel.h"
 #include "Application.h"
+
+#include "models/ActionsFilterModel.h"
+#include "models/ActionsListModel.h"
 
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QMouseEvent>
 #include <QMenu>
 #include <QTimer>
+#include <QDrag>
+#include <QMimeData>
 
 namespace hdps::gui {
+
+class ActionMimedata : public QMimeData
+{
+public:
+    ActionMimedata(WidgetAction* action) :
+        QMimeData(),
+        _action(action)
+    {
+    }
+
+    bool hasFormat(const QString& mimetype) const { return QMimeData::hasFormat(mimetype); }
+    QStringList formats() const { return { format() }; }
+
+    WidgetAction* getAction() const { return _action; }
+
+    static QString format() {
+        return "application/action";
+    }
+
+private:
+    WidgetAction* _action;  /** Pointer to mime data action */
+};
 
 WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= nullptr*/, const std::uint32_t& flags /*= ColonAfterName*/) :
     WidgetActionViewWidget(parent, action),
     _flags(flags),
     _nameLabel(),
-    _elide(false)
+    _elide(false),
+    _drag(nullptr),
+    _lastMousePressPosition()
 {
     setAction(action);
+    setAcceptDrops(true);
 
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
@@ -41,6 +70,8 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
 
     updateNameLabel();
 
+    installEventFilter(this);
+
     _nameLabel.installEventFilter(this);
 }
 
@@ -50,25 +81,100 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::MouseButtonPress:
         {
-            if (isEnabled() && (getAction()->mayPublish(WidgetAction::Gui) || getAction()->mayConnect(WidgetAction::Gui) || getAction()->mayDisconnect(WidgetAction::Gui))) {
-                auto mouseButtonPress = static_cast<QMouseEvent*>(event);
+            if (dynamic_cast<QWidget*>(target) != &_nameLabel)
+                break;
 
-                if (mouseButtonPress->button() != Qt::LeftButton)
+            auto mouseEvent = static_cast<QMouseEvent*>(event);
+
+            switch (mouseEvent->button())
+            {
+                case Qt::LeftButton:
+                {
+                    if (isEnabled() && (getAction()->mayPublish(WidgetAction::Gui) || getAction()->mayConnect(WidgetAction::Gui) || getAction()->mayDisconnect(WidgetAction::Gui))) {
+                        auto contextMenu = getAction()->getContextMenu(this);
+
+                        if (contextMenu->actions().isEmpty())
+                            return QWidget::eventFilter(target, event);
+
+                        contextMenu->exec(cursor().pos());
+                    }
+
                     break;
+                }
 
-                auto contextMenu = getAction()->getContextMenu(this);
+                case Qt::RightButton:
+                {
+                    if (isEnabled() && getAction()->mayConnect(WidgetAction::Gui)) {
+                        auto drag = new QDrag(this);
 
-                if (contextMenu->actions().isEmpty())
-                    return QWidget::eventFilter(target, event);
+                        auto mimeData = new ActionMimedata(getAction());
 
-                contextMenu->exec(cursor().pos());
+                        drag->setMimeData(mimeData);
+                        drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(QSize(12, 12)));
+
+                        ActionsListModel actionsListModel(this);
+                        ActionsFilterModel actionsFilterModel(this);
+
+                        actionsFilterModel.setSourceModel(&actionsListModel);
+                        actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Private" });
+                        actionsFilterModel.getTypeFilterAction().setString(getAction()->getTypeString());
+
+                        const auto numberOfRows = actionsFilterModel.rowCount();
+
+                        for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
+                            auto action = actionsFilterModel.getAction(rowIndex);
+
+                            if (action != getAction())
+                                actionsFilterModel.getAction(rowIndex)->setHighlighted(true);
+                        }
+
+                        Qt::DropAction dropAction = drag->exec();
+
+                        for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
+                            auto action = actionsFilterModel.getAction(rowIndex);
+
+                            if (action != getAction())
+                                actionsFilterModel.getAction(rowIndex)->setHighlighted(false);
+                        }
+                    }
+
+                    break;
+                }
             }
 
             break;
         }
 
-        case QEvent::Enter:
-        case QEvent::Leave:
+        case QEvent::DragEnter:
+        {
+            if (dynamic_cast<QWidget*>(target) != this)
+                break;
+
+            auto dragEnterEvent = static_cast<QDragEnterEvent*>(event);
+            auto actionMimeData = dynamic_cast<const ActionMimedata*>(dragEnterEvent->mimeData());
+
+            if (actionMimeData)
+                if ((actionMimeData->getAction() != getAction()) && (actionMimeData->getAction()->getTypeString() == getAction()->getTypeString()))
+                    dragEnterEvent->acceptProposedAction();
+
+            break;
+        }
+
+        case QEvent::Drop:
+        {
+            if (dynamic_cast<QWidget*>(target) != this)
+                break;
+
+            auto dropEvent      = static_cast<QDropEvent*>(event);
+            auto actionMimeData = dynamic_cast<const ActionMimedata*>(dropEvent->mimeData());
+
+            if (actionMimeData)
+                if ((actionMimeData->getAction() != getAction()) && (actionMimeData->getAction()->getTypeString() == getAction()->getTypeString()))
+                    hdps::actions().connectPrivateActions(actionMimeData->getAction(), getAction());
+
+            break;
+        }
+
         case QEvent::EnabledChange:
             updateNameLabel();
             break;

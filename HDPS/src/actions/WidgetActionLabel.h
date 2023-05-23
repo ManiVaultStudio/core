@@ -2,7 +2,11 @@
 
 #include "WidgetActionViewWidget.h"
 
+#include "util/WidgetFader.h"
+
 #include <QLabel>
+
+class QDrag;
 
 namespace hdps::gui {
 
@@ -78,9 +82,11 @@ private:
     QString getLabelText() const;
 
 protected:
-    std::uint32_t   _flags;         /** Configuration flags */
-    QLabel          _nameLabel;     /** Action name label */
-    bool            _elide;         /** Whether to enable label elide (e.g. whether to truncate text and show an ellipsis when there is insufficient space for the text) */
+    std::uint32_t       _flags;                     /** Configuration flags */
+    QLabel              _nameLabel;                 /** Action name label */
+    bool                _elide;                     /** Whether to enable label elide (e.g. whether to truncate text and show an ellipsis when there is insufficient space for the text) */
+    QDrag*              _drag;                      /** Pointer is set during drag and drop action connection */
+    QPoint              _lastMousePressPosition;    /** Location during last mouse press event */
 };
 
 }
