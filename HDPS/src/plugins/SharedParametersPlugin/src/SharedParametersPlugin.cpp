@@ -12,7 +12,6 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
     _actionsWidget(&getWidget(), _publicActionsModel, "Shared Parameter"),
     _expertModeAction(this, "Expert mode")
 {
-    _expertModeAction.setChecked(!_actionsWidget.getFilterModel().getPublicRootOnlyAction().isChecked());
     _expertModeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("user-graduate"));
     _expertModeAction.setDefaultWidgetFlags(ToggleAction::PushButtonIcon);
 
@@ -29,6 +28,8 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
         _actionsWidget.getFilterModel().getPublicRootOnlyAction().setChecked(!toggled);
         updateExpertModeActionTooltip();
     });
+
+    _expertModeAction.setChecked(false);
 
     auto& hierarchyWidget = _actionsWidget.getHierarchyWidget();
 

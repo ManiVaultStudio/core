@@ -16,6 +16,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     _actions(actions),
     _publishAction(this, "Publish..."),
     _disconnectAction(this, "Disconnect..."),
+    _disconnectAllAction(this, "Disconnect all..."),
     _removeAction(this, "Remove..."),
     _editAction(this, "Edit...")
 {
@@ -25,6 +26,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
     _publishAction.setIcon(fontAwesome.getIcon("cloud-upload-alt"));
     _disconnectAction.setIcon(fontAwesome.getIcon("unlink"));
+    _disconnectAllAction.setIcon(fontAwesome.getIcon("unlink"));
     _removeAction.setIcon(fontAwesome.getIcon("trash"));
     _editAction.setIcon(fontAwesome.getIcon("edit"));
 
@@ -46,12 +48,17 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     addSeparator();
 
     addAction(&_disconnectAction);
+    addAction(&_disconnectAllAction);
 
     addSeparator();
 
     addAction(&_removeAction);
+
+    addSeparator();
+
     addAction(&_editAction);
 
+    _disconnectAllAction.setVisible(allPublic);
     _editAction.setVisible(allPublic && _actions.count() == 1);
 
     if (allPrivate) {
@@ -153,6 +160,12 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     connect(&_disconnectAction, &TriggerAction::triggered, this, [this]() -> void {
         for (auto action : _actions)
             hdps::actions().disconnectPrivateActionFromPublicAction(action, true);
+    });
+
+    connect(&_disconnectAllAction, &TriggerAction::triggered, this, [this]() -> void {
+        for (auto publicAction : _actions)
+            for (auto connectedPrivateAction : publicAction->getConnectedActions())
+                hdps::actions().disconnectPrivateActionFromPublicAction(connectedPrivateAction, true);
     });
 
     connect(&_editAction, &TriggerAction::triggered, this, [this]() -> void {
