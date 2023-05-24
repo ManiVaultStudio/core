@@ -75,7 +75,7 @@ if(APPLE)
     set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
     set(MACOSX_BUNDLE_LONG_VERSION_STRING "1.0")
     set(MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0")
-    set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2021. All rights reserved.")
+    set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2023. All rights reserved.")
     set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.biovault.hdps")
     set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
 
