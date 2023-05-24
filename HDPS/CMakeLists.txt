@@ -269,14 +269,14 @@ if(APPLE)
             COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
         #	RESULT_VARIABLE retval
             COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
-            COMMAND ${CMAKE_COMMAND} -E copy 
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                     \"${INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.${ADS_VERSION}.dylib\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
-            COMMAND ${CMAKE_COMMAND} -E copy 
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                     \"$<TARGET_FILE:${HDPS_PUBLIC_LIB}>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
                     
-            COMMAND ${CMAKE_COMMAND} -E copy 
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                     \"$<TARGET_FILE:${HDPS_PRIVATE_LIB}>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
         )
@@ -448,7 +448,7 @@ endif()
 # Install examples
 add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault examples"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
             ${CMAKE_CURRENT_SOURCE_DIR}/res/examples
             ${INSTALL_DIR}/$<CONFIGURATION>/examples
 )
@@ -457,8 +457,8 @@ add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
 # on windows, the DLLs should be placed in the same directory as the executable
 add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E echo "Installing: dependency runtime libraries"
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:qtadvanceddocking> ${INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:QuaZip> ${INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking> ${INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
 )
 
 if(UNIX AND NOT APPLE)
@@ -476,7 +476,7 @@ add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
         --component license
     COMMAND "${CMAKE_COMMAND}" -E make_directory ${INSTALL_DIR}/$<CONFIGURATION>/license/quazip
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/external/quazip/COPYING ${INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/external/quazip/COPYING ${INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
 )
 
 # -----------------------------------------------------------------------------
