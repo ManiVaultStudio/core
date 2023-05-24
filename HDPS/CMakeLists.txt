@@ -38,20 +38,26 @@ include(CMakeCheckSetAVX)
 # -----------------------------------------------------------------------------
 # Set install directory
 # -----------------------------------------------------------------------------
-if(DEFINED ENV{HDPS_INSTALL_DIR})
-    message(STATUS 
-    "***************************************************
-    Using environment variable HDPS_INSTALL_DIR 
-    $ENV{HDPS_INSTALL_DIR}
-    to indicate where the HDPS output will be installed,
-    make sure the directory exists.
-    ***************************************************" )
-endif()
-
-# Get the env path and allow the user to change it
-set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
 # Normalize the incoming install path
 file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
+
+if(DEFINED ENV{HDPS_INSTALL_DIR})
+    set(ENV_HDPS_INSTALL_DIR "$ENV{HDPS_INSTALL_DIR}")
+    file(TO_CMAKE_PATH ${ENV_HDPS_INSTALL_DIR} ENV_HDPS_INSTALL_DIR)
+
+    if ("${INSTALL_DIR}" STREQUAL "${ENV_HDPS_INSTALL_DIR}")
+        set(messageText 
+        "***************************************************
+        Using environment variable HDPS_INSTALL_DIR 
+        $ENV{HDPS_INSTALL_DIR}
+        to indicate where the HDPS output will be installed,
+        make sure the directory exists.
+        ***************************************************")
+        string(REPLACE "\n        " "\n" messageText "${messageText}")
+        message(STATUS "${messageText}")
+    endif()
+
+endif()
 
 if(NOT DEFINED INSTALL_DIR)
     message(FATAL_ERROR "No install path provided! Set the cmake variable INSTALL_DIR or environment variable HDPS_INSTALL_DIR")
