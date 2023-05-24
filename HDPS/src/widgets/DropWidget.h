@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/WidgetFader.h"
+
 #include <QWidget>
 #include <QLabel>
 
@@ -153,9 +155,8 @@ public:
         void setHighLight(const bool& highlight = false);
 
     protected:
-        DropRegion*                 _dropRegion;        /** Drop region */
-        QGraphicsOpacityEffect*     _opacityEffect;     /** Effect for modulating opacity */
-        QPropertyAnimation*         _opacityAnimation;  /** Animation of the opacity effect */
+        DropRegion*         _dropRegion;        /** Drop region */
+        util::WidgetFader   _widgetFader;       /** Fade widget */
 
         friend class DropWidget;
     };

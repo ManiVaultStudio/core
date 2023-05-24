@@ -20,38 +20,12 @@ namespace hdps
 SettingsManager::SettingsManager() :
     AbstractSettingsManager(),
     _editSettingsAction(this, "Settings..."),
-    _globalProjectsPathAction(this, "Projects"),
-    _globalWorkspacesPathAction(this, "Workspaces"),
-    _globalDataPathAction(this, "Data"),
-    _ignoreLoadingErrorsAction(this, "Ignore loading errors"),
-    _askForSharedParameterNameAction(this, "Ask for name when publishing a parameter")
+    _parametersGlobalSettingsAction(this),
+    _miscellaneousGlobalSettingsAction(this)
 {
     _editSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
     _editSettingsAction.setShortcut(QKeySequence("Ctrl+G"));
     _editSettingsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-
-    _globalProjectsPathAction.setSettingsPrefix("GlobalSettings/Paths/Projects", true);
-    _globalWorkspacesPathAction.setSettingsPrefix("GlobalSettings/Paths/Workspaces", true);
-    _globalDataPathAction.setSettingsPrefix("GlobalSettings/Paths/Data", true);
-    _ignoreLoadingErrorsAction.setSettingsPrefix("GlobalSettings/IO/IgnoreLoadingErrors");
-    _askForSharedParameterNameAction.setSettingsPrefix("GlobalSettings/Parameters/AskForSharedParameterName");
-
-    const auto makeDirIfNotExist = [](const QString& pathToDirectory) -> void {
-        QDir dir(pathToDirectory);
-
-        if (!dir.exists())
-            dir.mkpath(".");
-    };
-
-    //qDebug() << QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-    //qDebug() << QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-
-    if (!QFileInfo(_globalProjectsPathAction.getDirectory()).exists()) {
-        const auto projectsDir = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first();// +"/HDPS/Projects";
-
-        makeDirIfNotExist(projectsDir);
-        _globalProjectsPathAction.setDirectory(projectsDir);
-    }
         
     connect(&_editSettingsAction, &TriggerAction::triggered, this, &SettingsManager::edit);
 

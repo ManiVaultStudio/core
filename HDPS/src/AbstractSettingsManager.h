@@ -3,8 +3,9 @@
 #include "AbstractManager.h"
 
 #include "actions/TriggerAction.h"
-#include "actions/DirectoryPickerAction.h"
-#include "actions/ToggleAction.h"
+
+#include "ParametersSettingsAction.h"
+#include "MiscellaneousSettingsAction.h"
 
 namespace hdps
 {
@@ -12,7 +13,7 @@ namespace hdps
 /**
  * Abstract settings manager
  *
- * Base abstract settings manager class for managing global settings.
+ * Base abstract settings manager class for managing global settings
  *
  * @author Thomas Kroes
  */
@@ -37,11 +38,11 @@ public:
 public: // Action getters
 
     virtual gui::TriggerAction& getEditSettingsAction() = 0;
-    virtual gui::DirectoryPickerAction& getGlobalProjectsPathAction() = 0;
-    virtual gui::DirectoryPickerAction& getGlobalWorkspacesPathAction() = 0;
-    virtual gui::DirectoryPickerAction& getGlobalDataPathAction() = 0;
-    virtual gui::ToggleAction& getIgnoreLoadingErrorsAction() = 0;
-    virtual gui::ToggleAction& getAskForSharedParameterNameAction() = 0;
+
+public: // Global settings actions
+
+    virtual ParametersSettingsAction& getParameters() = 0;
+    virtual MiscellaneousSettingsAction& getMiscellaneous() = 0;
 };
 
 }

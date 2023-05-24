@@ -185,14 +185,10 @@ void DropWidget::resetLayout()
 DropWidget::DropRegionContainerWidget::DropRegionContainerWidget(DropRegion* dropRegion, QWidget* parent) :
     QWidget(parent),
     _dropRegion(dropRegion),
-    _opacityEffect(new QGraphicsOpacityEffect(this)),
-    _opacityAnimation(new QPropertyAnimation(_opacityEffect, "opacity"))
+    _widgetFader(this, this)
 {
     setAutoFillBackground(true);
     setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-    setGraphicsEffect(_opacityEffect);
-
-    _opacityAnimation->setDuration(200);
 
     dropRegion->setParent(this);
 
@@ -214,16 +210,7 @@ DropWidget::DropRegion* DropWidget::DropRegionContainerWidget::getDropRegion()
 
 void DropWidget::DropRegionContainerWidget::setHighLight(const bool& highlight /*= false*/)
 {
-    const auto targetOpacity = highlight ? 0.98 : 0.8;
-
-    if (_opacityEffect->opacity() != targetOpacity)
-        _opacityEffect->setOpacity(targetOpacity);
-
-    /*
-    _opacityAnimation->setStartValue(_opacityEffect->opacity());
-    _opacityAnimation->setEndValue(targetOpacity);
-    _opacityAnimation->start();
-    */
+    _widgetFader.setOpacity(highlight ? 0.8f : 0.4f, 0);
 }
 
 DropWidget::DropRegion::DropRegion(QObject* parent, QWidget* widget, const Dropped& dropped /*= Dropped()*/) :

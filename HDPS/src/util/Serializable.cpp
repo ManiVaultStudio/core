@@ -178,7 +178,7 @@ void Serializable::fromVariantMap(Serializable& serializable, const QVariantMap&
     if (!variantMap.contains(key)) {
         const auto errorMessage = QString("%1 not found in map: %2").arg(key);
 
-        if (settings().getIgnoreLoadingErrorsAction().isChecked())
+        if (settings().getMiscellaneous().getIgnoreLoadingErrorsAction().isChecked())
             qCritical() << errorMessage; 
         else
             throw std::runtime_error(errorMessage.toLatin1());
@@ -197,7 +197,7 @@ void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap)
         if (!parentVariantMap.contains(getSerializationName())) {
             const auto errorMessage = QString("%1 not found in map: %2").arg(getSerializationName());
 
-            if (settings().getIgnoreLoadingErrorsAction().isChecked())
+            if (settings().getMiscellaneous().getIgnoreLoadingErrorsAction().isChecked())
                 qCritical() << errorMessage;
             else
                 throw std::runtime_error(errorMessage.toLatin1());

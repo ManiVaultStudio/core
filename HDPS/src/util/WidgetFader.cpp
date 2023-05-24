@@ -53,13 +53,18 @@ void WidgetFader::setOpacity(float opacity, std::uint32_t duration /*= 0*/)
     qDebug() << __FUNCTION__;
 #endif
 
-    if (_opacityAnimation.state() == QPropertyAnimation::Running)
-        _opacityAnimation.stop();
+    if (duration == 0) {
+        _opacityEffect.setOpacity(opacity);
+    }
+    else {
+        if (_opacityAnimation.state() == QPropertyAnimation::Running)
+            _opacityAnimation.stop();
 
-    _opacityAnimation.setDuration(duration);
-    _opacityAnimation.setStartValue(_opacityEffect.opacity());
-    _opacityAnimation.setEndValue(opacity);
-    _opacityAnimation.start();
+        _opacityAnimation.setDuration(duration);
+        _opacityAnimation.setStartValue(_opacityEffect.opacity());
+        _opacityAnimation.setEndValue(opacity);
+        _opacityAnimation.start();
+    }
 }
 
 bool WidgetFader::isFadedIn() const

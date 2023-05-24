@@ -2,8 +2,6 @@
 
 #include "AbstractSettingsManager.h"
 
-#include <actions/GroupAction.h>
-
 namespace hdps
 {
 
@@ -28,19 +26,16 @@ public:
 public: // Action getters
 
     gui::TriggerAction& getEditSettingsAction() override { return _editSettingsAction; }
-    gui::DirectoryPickerAction& getGlobalProjectsPathAction() override { return _globalProjectsPathAction; }
-    gui::DirectoryPickerAction& getGlobalWorkspacesPathAction() override { return _globalWorkspacesPathAction; }
-    gui::DirectoryPickerAction& getGlobalDataPathAction() override { return _globalDataPathAction; }
-    gui::ToggleAction& getIgnoreLoadingErrorsAction() override { return _ignoreLoadingErrorsAction; }
-    gui::ToggleAction& getAskForSharedParameterNameAction() override { return _askForSharedParameterNameAction; }
+
+public: // Global settings actions
+
+    ParametersSettingsAction& getParameters() override { return _parametersSettingsAction; };
+    MiscellaneousSettingsAction& getMiscellaneous() override { return _miscellaneousSettingsAction; };
 
 private:
-    gui::TriggerAction          _editSettingsAction;                /** Action for triggering the settings dialog */
-    gui::DirectoryPickerAction  _globalProjectsPathAction;          /** Directory picker action for global projects directory  */
-    gui::DirectoryPickerAction  _globalWorkspacesPathAction;        /** Directory picker action for global workspaces directory  */
-    gui::DirectoryPickerAction  _globalDataPathAction;              /** Directory picker action for global data directory  */
-    gui::ToggleAction           _ignoreLoadingErrorsAction;         /** Toggle action for ignoring loading errors */
-    gui::ToggleAction           _askForSharedParameterNameAction;   /** Toggle between asking for a name when publishing an action or not */
+    gui::TriggerAction          _editSettingsAction;            /** Action for triggering the settings dialog */
+    ParametersSettingsAction    _parametersSettingsAction;      /** Parameters global settings */
+    MiscellaneousSettingsAction _miscellaneousSettingsAction;   /** Miscellaneous global settings */
 };
 
 }
