@@ -377,29 +377,29 @@ install(FILES
 # Call the install functions of the all public targets
 # needed for plugins directly after the build
 add_custom_command(TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault public headers"
-    COMMAND "${CMAKE_COMMAND}"
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault public headers"
+    COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component HDPSPUBLIC_HEADERS
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
-    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault public link library"
-    COMMAND "${CMAKE_COMMAND}"
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault public link library"
+    COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component HDPSPUBLIC_LINKLIB
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
-    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault cmake config files"
-    COMMAND "${CMAKE_COMMAND}"
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake config files"
+    COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component HDPSPUBLIC_PACKAGE
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
-    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault cmake target files"
-    COMMAND "${CMAKE_COMMAND}"
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake target files"
+    COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component HDPSPUBLIC_TARGET
@@ -407,15 +407,15 @@ add_custom_command(TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
         --verbose
     # If no plugin directory exsists, ManiVault might try to import 
     # any library in the executable directory as a plugin
-    COMMAND "${CMAKE_COMMAND}"
+    COMMAND ${CMAKE_COMMAND}
         -E make_directory ${INSTALL_DIR}/$<CONFIGURATION>/Plugins
 )
 
 # Install the HDPS executable
 if(APPLE)
     add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault executable bundle"
-        COMMAND "${CMAKE_COMMAND}"
+        COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault executable bundle"
+        COMMAND ${CMAKE_COMMAND}
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
             --component MACOS_BUNDLE
@@ -423,8 +423,8 @@ if(APPLE)
     )
 elseif(UNIX)
     add_custom_command(TARGET ${HDPS_PRIVATE_LIB} POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault private link library"
-        COMMAND "${CMAKE_COMMAND}"
+        COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault private link library"
+        COMMAND ${CMAKE_COMMAND}
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
             --component HDPSPRIVATE_LINKLIB
@@ -435,8 +435,8 @@ endif()
 
 if(NOT APPLE)
     add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault executable"
-        COMMAND "${CMAKE_COMMAND}"
+        COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault executable"
+        COMMAND ${CMAKE_COMMAND}
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
             --component HDPS_EXECUTABLE
@@ -447,7 +447,7 @@ endif()
 
 # Install examples
 add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: ManiVault examples"
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault examples"
     COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
             ${CMAKE_CURRENT_SOURCE_DIR}/res/examples
             ${INSTALL_DIR}/$<CONFIGURATION>/examples
@@ -456,7 +456,7 @@ add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
 # Install dependency runtime libraries
 # on windows, the DLLs should be placed in the same directory as the executable
 add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: dependency runtime libraries"
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking> ${INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
 )
@@ -469,13 +469,13 @@ endif()
 
 # Install dependency licences
 add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E echo "Installing: dependency licences"
-    COMMAND "${CMAKE_COMMAND}" 
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licences"
+    COMMAND ${CMAKE_COMMAND} 
         --install ${CMAKE_CURRENT_BINARY_DIR}/external/advanced_docking
         --config $<CONFIGURATION> 
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
         --component license
-    COMMAND "${CMAKE_COMMAND}" -E make_directory ${INSTALL_DIR}/$<CONFIGURATION>/license/quazip
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${INSTALL_DIR}/$<CONFIGURATION>/license/quazip
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/external/quazip/COPYING ${INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
 )
 
