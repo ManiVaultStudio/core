@@ -6,6 +6,7 @@ set(HDPS_MAIN "hdps-main")
 PROJECT(${HDPS_MAIN})
 
 option(HDPS_USE_GTEST "Use GoogleTest" OFF)
+option(HDPS_USE_AVX "Use AVX if available - by default OFF" OFF)
 
 if (HDPS_USE_GTEST)
     enable_testing()
