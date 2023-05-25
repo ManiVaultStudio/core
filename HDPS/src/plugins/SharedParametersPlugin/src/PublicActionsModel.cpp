@@ -1,7 +1,7 @@
 #include "PublicActionsModel.h"
 
 #ifdef _DEBUG
-    //#define PUBLIC_ACTIONS_MODEL_VERBOSE
+    #define PUBLIC_ACTIONS_MODEL_VERBOSE
 #endif
 
 using namespace hdps::gui;
@@ -83,21 +83,20 @@ void PublicActionsModel::removeAction(WidgetAction* action)
     if (action == nullptr)
         return;
 
-#ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
-    qDebug() << __FUNCTION__ << action->text();
-#endif
-
     auto actionItem = getActionItem(action);
+
+#ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
+    if (actionItem)
+        qDebug() << __FUNCTION__ << action->getLocation() << action->getId() << actionItem->index().siblingAtColumn(2).data(Qt::DisplayRole).toString();
+#endif
 
     if (!actionItem)
         return;
 
-    if (action->isPrivate()) {
-        auto publicActionItem = getActionItem(action->getPublicAction());
+    const auto actionIndex = getActionIndex(action);
 
-        if (publicActionItem)
-            publicActionItem->removeRow(actionItem->row());
-    }
+    if (action->isPrivate())
+        removeRow(actionIndex.row(), actionIndex.parent());
 }
 
 void PublicActionsModel::addPublicAction(WidgetAction* publicAction)

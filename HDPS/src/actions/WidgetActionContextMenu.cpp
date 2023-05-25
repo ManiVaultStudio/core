@@ -146,9 +146,14 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
                     removePublicActions = false;
             }
 
-            if (removePublicActions)
-                for (auto publicAction : publicActions)
+            if (removePublicActions) {
+                for (auto publicAction : publicActions) {
+                    for (auto connectedAction : publicAction->getConnectedActions())
+                        hdps::actions().disconnectPrivateActionFromPublicAction(connectedAction, true);
+
                     delete publicAction;
+                }
+            }
         });
     }
     
