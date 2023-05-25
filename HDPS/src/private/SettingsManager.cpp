@@ -20,8 +20,8 @@ namespace hdps
 SettingsManager::SettingsManager() :
     AbstractSettingsManager(),
     _editSettingsAction(this, "Settings..."),
-    _parametersGlobalSettingsAction(this),
-    _miscellaneousGlobalSettingsAction(this)
+    _parametersSettingsAction(this),
+    _miscellaneousSettingsAction(this)
 {
     _editSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
     _editSettingsAction.setShortcut(QKeySequence("Ctrl+G"));

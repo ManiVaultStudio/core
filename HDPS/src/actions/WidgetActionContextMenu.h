@@ -1,6 +1,7 @@
 #pragma once
 
 #include "actions/TriggerAction.h"
+#include "actions/StringsAction.h"
 
 #include <QMenu>
 #include <QDialog>
@@ -28,6 +29,25 @@ public:
     explicit WidgetActionContextMenu(QWidget* parent, WidgetActions actions);
 
 protected:
+
+    /** Dialog class for asking permission prior to removing a public action */
+    class ConfirmRemovePublicActionDialog : public QDialog
+    {
+    public:
+
+        /**
+         * Construct with \p parent widget and edit \p publicAction
+         * @param parent Pointer to parent widget (if any)
+         * @param publicAction Reference to public action
+         */
+        ConfirmRemovePublicActionDialog(QWidget* parent, WidgetActions publicActions);
+
+    private:
+        WidgetActions   _publicActions;     /** Public action which is about to be removed */
+        StringsAction   _namesAction;       /** Action which lists the parameter names which are about to be removed */
+        TriggerAction   _removeAction;      /** Accept when triggered */
+        TriggerAction   _cancelAction;      /** Reject when triggered */
+    };
 
     /** Dialog class for editing an action */
     class EditActionDialog : public QDialog

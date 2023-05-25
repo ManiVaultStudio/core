@@ -29,8 +29,8 @@ public: // Action getters
 
 public: // Global settings actions
 
-    ParametersSettingsAction& getParameters() override { return _parametersSettingsAction; };
-    MiscellaneousSettingsAction& getMiscellaneous() override { return _miscellaneousSettingsAction; };
+    ParametersSettingsAction& getParametersSettings() override { return _parametersSettingsAction; };
+    MiscellaneousSettingsAction& getMiscellaneousSettings() override { return _miscellaneousSettingsAction; };
 
 private:
     gui::TriggerAction          _editSettingsAction;            /** Action for triggering the settings dialog */

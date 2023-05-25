@@ -129,7 +129,7 @@ QVariantMap ActionsManager::toVariantMap() const
 
 void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QString& name /*= ""*/, bool recursive /*= true*/)
 {
-    auto& askForSharedParameterNameAction = hdps::settings().getAskForSharedParameterNameAction();
+    auto& askForSharedParameterNameAction = hdps::settings().getParametersSettings().getAskForSharedParameterNameAction();
 
     if (name.isEmpty()) {
         if (askForSharedParameterNameAction.isChecked()) {
@@ -153,13 +153,14 @@ void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
 
             parameterLayout.addWidget(nameAction.createLabelWidget(&publishDialog), 0, 0);
             parameterLayout.addWidget(nameAction.createWidget(&publishDialog), 0, 1);
-            parameterLayout.addWidget(askForSharedParameterNameAction.createWidget(&publishDialog), 1, 1);
 
-            buttonsLayout.addStretch(1);
+            buttonsLayout.addWidget(askForSharedParameterNameAction.createWidget(&publishDialog));
+            buttonsLayout.addSpacing(10);
             buttonsLayout.addWidget(publishAction.createWidget(&publishDialog));
             buttonsLayout.addWidget(cancelAction.createWidget(&publishDialog));
 
             mainLayout.addLayout(&parameterLayout);
+            mainLayout.addSpacing(10);
             mainLayout.addLayout(&buttonsLayout);
 
             publishDialog.setLayout(&mainLayout);

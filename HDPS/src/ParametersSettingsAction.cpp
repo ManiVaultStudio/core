@@ -5,7 +5,7 @@ namespace hdps
 
 ParametersSettingsAction::ParametersSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Parameters"),
-    _askForSharedParameterNameAction(this, "Ask for name when publishing a parameter"),
+    _askForSharedParameterNameAction(this, "Ask for shared parameter name"),
     _confirmRemoveSharedParameterAction(this, "Confirm remove shared parameter")
 {
     setShowLabels(false);

@@ -123,33 +123,32 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         _publishAction.setVisible(false);
         _disconnectAction.setVisible(false);
 
-        WidgetActions rootPublicActions;
-
-        for (auto action : actions) {
-            if (action->isPublic() && action->isRoot())
-                rootPublicActions << action;
-        }
-
-        _removeAction.setVisible(rootPublicActions.count() >= 1);
-
-        if (_actions.count() == 1)
-            _removeAction.setText(QString("Remove: %1").arg(firstAction->text()));
-        else
-            _removeAction.setText(QString("Remove: %1").arg(QString::number(_actions.count())));
-
         WidgetActions publicActions;
 
-        for (auto action : _actions)
-            if (action->isPublic())
+        for (auto action : actions)
+            if (action->isPublic() && action->isRoot())
                 publicActions << action;
 
-        connect(&_removeAction, &TriggerAction::triggered, this, [this, rootPublicActions]() -> void {
-            for (auto rootPublicAction : rootPublicActions) {
-                for (auto connectedAction : rootPublicAction->getConnectedActions())
-                    hdps::actions().disconnectPrivateActionFromPublicAction(connectedAction, true);
+        _removeAction.setVisible(publicActions.count() >= 1);
 
-                delete rootPublicAction;
+        if (_actions.count() == 1)
+            _removeAction.setText(QString("Remove %1").arg(firstAction->text()));
+        else
+            _removeAction.setText(QString("Remove %1 shared parameters").arg(QString::number(_actions.count())));
+
+        connect(&_removeAction, &TriggerAction::triggered, this, [this, publicActions]() -> void {
+            auto removePublicActions = true;
+
+            if (hdps::settings().getParametersSettings().getConfirmRemoveSharedParameterAction().isChecked()) {
+                ConfirmRemovePublicActionDialog confirmRemovePublicActionDialog(this, publicActions);
+
+                if (confirmRemovePublicActionDialog.exec() == QDialog::Rejected)
+                    removePublicActions = false;
             }
+
+            if (removePublicActions)
+                for (auto publicAction : publicActions)
+                    delete publicAction;
         });
     }
     
@@ -176,6 +175,63 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
         editActionDialog.exec();
     });
+}
+
+WidgetActionContextMenu::ConfirmRemovePublicActionDialog::ConfirmRemovePublicActionDialog(QWidget* parent, WidgetActions publicActions) :
+    QDialog(parent),
+    _publicActions(publicActions),
+    _namesAction(this, "Names"),
+    _removeAction(this, "Remove"),
+    _cancelAction(this, "Cancel")
+{
+    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
+    setMinimumWidth(400);
+    
+    QStringList names;
+
+    for (const auto& publicAction : publicActions)
+        names << publicAction->text();
+
+    _namesAction.setEnabled(false);
+    _namesAction.setToolTip("Names of the shared parameters which will be removed");
+    _namesAction.setStrings(names);
+
+    if (_publicActions.count() == 1)
+        setWindowTitle(QString("Remove shared parameter %1").arg(_publicActions.first()->text()));
+    else
+        setWindowTitle(QString("Remove %1 shared parameters").arg(QString::number(_publicActions.count())));
+
+    auto layout = new QVBoxLayout();
+
+    std::int32_t numberOfConnectedActions = 0;
+
+    for (const auto& publicAction : publicActions)
+        numberOfConnectedActions += publicAction->getConnectedActions().count();
+
+    layout->addWidget(new QLabel(QString("Remove the parameter(s) below?")));
+    layout->addWidget(_namesAction.createWidget(this, StringsAction::ListView));
+
+    if (numberOfConnectedActions >= 1)
+        layout->addWidget(new QLabel(QString("Note: %1 parameters will be disconnected").arg(QString::number(numberOfConnectedActions))));
+
+    layout->addSpacing(10);
+
+    _removeAction.setToolTip("Remove shared parameter(s)");
+    _cancelAction.setToolTip("Quit and don't remove shared parameter(s)");
+
+    auto buttonsLayout = new QHBoxLayout();
+
+    buttonsLayout->addWidget(hdps::settings().getParametersSettings().getConfirmRemoveSharedParameterAction().createWidget(this));
+    buttonsLayout->addSpacing(10);
+    buttonsLayout->addWidget(_removeAction.createWidget(this));
+    buttonsLayout->addWidget(_cancelAction.createWidget(this));
+
+    layout->addLayout(buttonsLayout);
+
+    setLayout(layout);
+
+    connect(&_removeAction, &TriggerAction::triggered, this, &QDialog::accept);
+    connect(&_cancelAction, &TriggerAction::triggered, this, &QDialog::reject);
 }
 
 WidgetActionContextMenu::EditActionDialog::EditActionDialog(QWidget* parent, WidgetAction& action) :

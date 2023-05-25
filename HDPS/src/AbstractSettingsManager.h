@@ -41,8 +41,8 @@ public: // Action getters
 
 public: // Global settings actions
 
-    virtual ParametersSettingsAction& getParameters() = 0;
-    virtual MiscellaneousSettingsAction& getMiscellaneous() = 0;
+    virtual ParametersSettingsAction& getParametersSettings() = 0;
+    virtual MiscellaneousSettingsAction& getMiscellaneousSettings() = 0;
 };
 
 }

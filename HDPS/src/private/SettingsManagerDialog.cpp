@@ -26,8 +26,8 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
 
     layout->addWidget(_groupsAction.createWidget(this));
 
-    _groupsAction.addGroupAction(&hdps::settings().getParameters());
-    _groupsAction.addGroupAction(&hdps::settings().getMiscellaneous());
+    _groupsAction.addGroupAction(&hdps::settings().getParametersSettings());
+    _groupsAction.addGroupAction(&hdps::settings().getMiscellaneousSettings());
 }
 
 QSize SettingsManagerDialog::sizeHint() const

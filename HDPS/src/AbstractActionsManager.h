@@ -110,19 +110,30 @@ public:
     void removeAction(ActionType* action) {
         Q_ASSERT(action != nullptr);
 
-        const auto actionId = action->getId();
-
-        emit actionAboutToBeRemoved(action);
+        try
         {
-            if (_actions.contains(action))
-                _actions.removeOne(action);
+            const auto actionId = action->getId();
+
+            emit actionAboutToBeRemoved(action);
+            {
+                if (_actions.contains(action))
+                    _actions.removeOne(action);
+            }
+            emit actionRemoved(actionId);
+
+            if (action->isPublic())
+                removePublicAction(action);
+
+            removeActionType(action->getTypeString());
         }
-        emit actionRemoved(actionId);
-
-        if (action->isPublic())
-            removePublicAction(action);
-
-        removeActionType(action->getTypeString());
+        catch (std::exception& e)
+        {
+            util::exceptionMessageBox(QString("Unable to remove %1 from actions manager").arg(action->text()), e);
+        }
+        catch (...)
+        {
+            util::exceptionMessageBox(QString("Unable to remove %1 from actions manager").arg(action->text()));
+        }
     }
 
 private: // Public actions
@@ -151,6 +162,9 @@ private: // Public actions
 
         emit publicActionAboutToBeRemoved(publicAction);
         {
+            for (auto connectedAction : publicAction->getConnectedActions())
+                disconnectPrivateActionFromPublicAction(connectedAction, true);
+
             _publicActions.removeOne(publicAction);
         }
         emit publicActionRemoved(publicAction->getId());
