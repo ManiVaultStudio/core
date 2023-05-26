@@ -5,6 +5,9 @@
 #include "widgets/HierarchyWidget.h"
 
 #include <QWidget>
+#include <QPointer>
+
+class QMenu;
 
 namespace hdps::gui
 {
@@ -60,8 +63,8 @@ private:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
-    /** Resize sections based on content */
-    void resizeSectionsToContent();
+    /** Invoked when rows are inserted and/or removed or when the model layout changes */
+    void modelChanged();
 
     /**
      * Highlight actions
@@ -82,7 +85,8 @@ private:
     ActionsFilterModel          _filterModel;               /** Hierarchical actions filter model */
     HierarchyWidget             _hierarchyWidget;           /** Widget for displaying action hierarchy */
     RequestContextMenuFN        _requestContextMenu;        /** Callback which is called when a context menu is requested */
-    PersistentModelIndices      _highlightedIndices;
+    QPointer<QMenu>             _contextMenu;               /** Pointer to context menu (if any) */
+    WidgetActions               _highlightedActions;        /** Pointers to currently highlighted actions */
 };
 
 }

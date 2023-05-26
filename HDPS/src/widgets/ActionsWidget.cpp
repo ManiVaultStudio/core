@@ -10,6 +10,7 @@
 #include <QHeaderView>
 #include <QStyledItemDelegate>
 #include <QScrollBar>
+#include <QMenu>
 
 using namespace hdps::util;
 
@@ -64,7 +65,8 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     _filterModel(this),
     _hierarchyWidget(this, itemTypeName, actionsModel, &_filterModel),
     _requestContextMenu(),
-    _highlightedIndices()
+    _contextMenu(nullptr),
+    _highlightedActions()
 {
     auto layout = new QVBoxLayout();
 
@@ -109,12 +111,13 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
         highlightActions(_hierarchyWidget.getTreeView().selectionModel()->selectedRows(), true);
     });
 
-    connect(&_filterModel, &QAbstractItemModel::rowsInserted, this, &ActionsWidget::resizeSectionsToContent);
-    connect(&_filterModel, &QAbstractItemModel::rowsRemoved, this, &ActionsWidget::resizeSectionsToContent);
+    connect(&_filterModel, &QAbstractItemModel::rowsInserted, this, &ActionsWidget::modelChanged);
+    connect(&_filterModel, &QAbstractItemModel::rowsRemoved, this, &ActionsWidget::modelChanged);
+    connect(&_filterModel, &QAbstractItemModel::layoutChanged, this, &ActionsWidget::modelChanged);
     
-    connect(&treeView, &HierarchyWidgetTreeView::columnHiddenChanged, this, &ActionsWidget::resizeSectionsToContent);
-    connect(&treeView, &HierarchyWidgetTreeView::expanded, this, &ActionsWidget::resizeSectionsToContent);
-    connect(&treeView, &HierarchyWidgetTreeView::collapsed, this, &ActionsWidget::resizeSectionsToContent);
+    connect(&treeView, &HierarchyWidgetTreeView::columnHiddenChanged, this, &ActionsWidget::modelChanged);
+    connect(&treeView, &HierarchyWidgetTreeView::expanded, this, &ActionsWidget::modelChanged);
+    connect(&treeView, &HierarchyWidgetTreeView::collapsed, this, &ActionsWidget::modelChanged);
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
         static const QVector<int> toggleColumns = {
@@ -157,37 +160,37 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
         if (selectedActions.isEmpty())
             return;
 
-        auto contextMenu = new WidgetActionContextMenu(this, selectedActions);
+        _contextMenu = new WidgetActionContextMenu(this, selectedActions);
 
         if (_requestContextMenu)
-            _requestContextMenu(contextMenu, selectedActions);
+            _requestContextMenu(_contextMenu, selectedActions);
 
-        if (!contextMenu->actions().isEmpty())
-            contextMenu->exec(QCursor::pos());
+        if (!_contextMenu->actions().isEmpty())
+            _contextMenu->exec(QCursor::pos());
     });
 
     _hierarchyWidget.getTreeView().installEventFilter(this);
     _hierarchyWidget.getTreeView().verticalScrollBar()->installEventFilter(this);
 
-    resizeSectionsToContent();
+    modelChanged();
 }
 
 bool ActionsWidget::eventFilter(QObject* target, QEvent* event)
 {
     switch (event->type())
     {
-        case QEvent::Enter:
+        case QEvent::FocusIn:
         {
-            //if (target == &_hierarchyWidget.getTreeView())
-            //    highlightActions(_hierarchyWidget.getTreeView().selectionModel()->selectedRows(), true);
+            if (target == &_hierarchyWidget.getTreeView())
+                highlightActions(_hierarchyWidget.getTreeView().selectionModel()->selectedRows(), false);
 
             break;
         }
 
-        case QEvent::Leave:
+        case QEvent::FocusOut:
         {
-            //if (target == &_hierarchyWidget.getTreeView())
-            //    highlightActions(_highlightedIndices, false);
+            if (target == &_hierarchyWidget.getTreeView() && _contextMenu.isNull())
+                highlightActions(_hierarchyWidget.getTreeView().selectionModel()->selectedRows(), false);
 
             break;
         }
@@ -198,7 +201,7 @@ bool ActionsWidget::eventFilter(QObject* target, QEvent* event)
             if (target != _hierarchyWidget.getTreeView().verticalScrollBar())
                 break;
 
-            resizeSectionsToContent();
+            modelChanged();
 
             break;
         }
@@ -220,7 +223,7 @@ HierarchyWidget& ActionsWidget::getHierarchyWidget()
     return _hierarchyWidget;
 }
 
-void ActionsWidget::resizeSectionsToContent()
+void ActionsWidget::modelChanged()
 {
     if (_hierarchyWidget.getModel().rowCount() <= 0)
         return;
@@ -228,6 +231,8 @@ void ActionsWidget::resizeSectionsToContent()
     auto treeViewHeader = _hierarchyWidget.getTreeView().header();
 
     treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+
+    highlightActions(_hierarchyWidget.getTreeView().selectionModel()->selectedRows(), true);
 }
 
 void ActionsWidget::highlightActions(const QModelIndexList& selectedRows, bool highlight)
@@ -237,29 +242,35 @@ void ActionsWidget::highlightActions(const QModelIndexList& selectedRows, bool h
     for (const auto& selectedRow : selectedRows)
         persistentModelIndices << _hierarchyWidget.toSourceModelIndex(selectedRow);
 
-    highlightActions(persistentModelIndices, true);
+    highlightActions(persistentModelIndices, highlight);
 }
 
 void ActionsWidget::highlightActions(const PersistentModelIndices& highlightModelIndices, bool highlight)
 {
-    for (const auto& highlightedIndex : _highlightedIndices) {
-        if (highlightModelIndices.contains(highlightedIndex))
-            continue;
+    for (const auto& highlightedAction : _highlightedActions)
+        highlightedAction->setHighlighted(false);
 
-        auto action = _actionsModel.getAction(highlightedIndex);
-
-        if (action)
-            action->setHighlighted(false);
-    }
+    _highlightedActions.clear();
 
     for (const auto& highlightModelIndex : highlightModelIndices) {
         auto action = _actionsModel.getAction(highlightModelIndex);
 
-        if (action)
-            action->setHighlighted(highlight);
+        if (action == nullptr)
+            continue;
+
+        _highlightedActions << action;
+
+        action->setHighlighted(highlight);
+
+        if (!action->isPublic())
+            continue;
+
+        for (auto connectedAction : action->getConnectedActions()) {
+            connectedAction->setHighlighted(highlight);
+
+            _highlightedActions << connectedAction;
+        }
     }
-        
-    _highlightedIndices = highlightModelIndices;
 }
 
 void ActionsWidget::setRequestContextMenuCallback(RequestContextMenuFN requestContextMenu)
