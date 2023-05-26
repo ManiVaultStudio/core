@@ -180,6 +180,9 @@ void StringAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
 
 void StringAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicStringAction = dynamic_cast<StringAction*>(getPublicAction());
 
     Q_ASSERT(publicStringAction != nullptr);

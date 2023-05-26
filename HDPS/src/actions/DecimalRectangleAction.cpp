@@ -27,6 +27,9 @@ void DecimalRectangleAction::connectToPublicAction(WidgetAction* publicAction, b
 
 void DecimalRectangleAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     if (recursive) {
         getRangeAction(Axis::X).disconnectFromPublicAction(recursive);
         getRangeAction(Axis::Y).disconnectFromPublicAction(recursive);

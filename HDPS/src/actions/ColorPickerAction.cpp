@@ -71,9 +71,15 @@ void ColorPickerAction::connectToPublicAction(WidgetAction* publicAction, bool r
 
 void ColorPickerAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicColorPickerAction = dynamic_cast<ColorPickerAction*>(getPublicAction());
 
     Q_ASSERT(publicColorPickerAction != nullptr);
+
+    if (publicColorPickerAction == nullptr)
+        return;
 
     disconnect(this, &ColorPickerAction::colorChanged, publicColorPickerAction, &ColorPickerAction::setColor);
     disconnect(publicColorPickerAction, &ColorPickerAction::colorChanged, this, &ColorPickerAction::setColor);

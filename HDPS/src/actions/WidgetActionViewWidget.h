@@ -37,6 +37,8 @@ public:
      */
     virtual void setAction(WidgetAction* widgetAction);
 
+protected: // Drag-and-drop events
+
     /**
      * Invoked when a \p dragEnterEvent occurs
      * @param dragEnterEvent Pointer to drag enter event
@@ -48,6 +50,12 @@ public:
      * @param dragLeaveEvent Pointer to drag leave event
      */
     void dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent) override;
+
+    /**
+     * Invoked when a \p dropEvent occurs
+     * @param dropEvent Pointer to drop event
+     */
+    void dropEvent(QDropEvent* dropEvent) override;
 
 private:
     WidgetAction*                   _action;                /** Pointer to action that will be displayed */

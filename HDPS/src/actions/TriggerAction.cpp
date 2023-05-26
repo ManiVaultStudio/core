@@ -94,6 +94,9 @@ void TriggerAction::connectToPublicAction(WidgetAction* publicAction, bool recur
 
 void TriggerAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicTriggerAction = dynamic_cast<TriggerAction*>(getPublicAction());
 
     Q_ASSERT(publicTriggerAction != nullptr);

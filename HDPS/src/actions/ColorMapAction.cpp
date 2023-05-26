@@ -386,20 +386,21 @@ void ColorMapAction::connectToPublicAction(WidgetAction* publicAction, bool recu
 
 void ColorMapAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicColorMapAction = dynamic_cast<ColorMapAction*>(getPublicAction());
 
     Q_ASSERT(publicColorMapAction != nullptr);
 
     if (publicColorMapAction == nullptr)
         return;
-
-    if (recursive)
-        getCurrentColorMapAction().disconnectFromPublicAction(recursive);
     
     disconnect(&publicColorMapAction->getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, nullptr);
     disconnect(&publicColorMapAction->getSharedDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, nullptr);
 
     if (recursive) {
+        getCurrentColorMapAction().disconnectFromPublicAction(recursive);
         getMirrorAction(Axis::X).disconnectFromPublicAction(recursive);
         getMirrorAction(Axis::Y).disconnectFromPublicAction(recursive);
         getDiscretizeAction().disconnectFromPublicAction(recursive);

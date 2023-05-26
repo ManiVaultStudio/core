@@ -27,6 +27,9 @@ void IntegralRectangleAction::connectToPublicAction(WidgetAction* publicAction, 
 
 void IntegralRectangleAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     if (recursive) {
         getRangeAction(Axis::X).disconnectFromPublicAction(recursive);
         getRangeAction(Axis::Y).disconnectFromPublicAction(recursive);

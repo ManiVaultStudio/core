@@ -180,6 +180,9 @@ void ColorMapEditor1DAction::connectToPublicAction(WidgetAction* publicAction, b
 
 void ColorMapEditor1DAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     WidgetAction::disconnectFromPublicAction(recursive);
 }
 

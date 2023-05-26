@@ -86,6 +86,9 @@ void IntegralRangeAction::connectToPublicAction(WidgetAction* publicAction, bool
 
 void IntegralRangeAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     if (recursive) {
         getRangeMinAction().disconnectFromPublicAction(recursive);
         getRangeMaxAction().disconnectFromPublicAction(recursive);

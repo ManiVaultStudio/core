@@ -73,10 +73,12 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction, bool recu
 
 void IntegralAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicIntegralAction = dynamic_cast<IntegralAction*>(getPublicAction());
 
-    if (publicIntegralAction == nullptr)
-        return;
+    Q_ASSERT(publicIntegralAction != nullptr);
 
     if (publicIntegralAction == nullptr)
         return;

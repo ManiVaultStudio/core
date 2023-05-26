@@ -90,6 +90,9 @@ void DecimalRangeAction::connectToPublicAction(WidgetAction* publicAction, bool 
 
 void DecimalRangeAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     if (recursive) {
         getRangeMinAction().disconnectFromPublicAction(recursive);
         getRangeMaxAction().disconnectFromPublicAction(recursive);

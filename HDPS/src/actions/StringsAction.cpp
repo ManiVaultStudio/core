@@ -90,6 +90,9 @@ void StringsAction::connectToPublicAction(WidgetAction* publicAction, bool recur
 
 void StringsAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicStringsAction = dynamic_cast<StringsAction*>(getPublicAction());
 
     Q_ASSERT(publicStringsAction != nullptr);

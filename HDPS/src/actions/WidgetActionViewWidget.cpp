@@ -2,6 +2,7 @@
 #include "WidgetActionHighlightWidget.h"
 #include "WidgetActionMimeData.h"
 #include "WidgetAction.h"
+#include "CoreInterface.h"
 
 #include <QDebug>
 #include <QDragEnterEvent>
@@ -59,17 +60,38 @@ void WidgetActionViewWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
     if (actionMimeData->getAction()->getTypeString() != getAction()->getTypeString())
         return;
 
-    //if (actionMimeData->getAction()->getPublicAction() == getAction()->getPublicAction())
-    //    return;
+    if ((actionMimeData->getAction()->isConnected() && getAction()->isConnected()) && (actionMimeData->getAction()->getPublicAction() == getAction()->getPublicAction()))
+        return;
 
     _cachedHighlighting = static_cast<std::int32_t>(getAction()->getHighlighting());
 
     getAction()->setHighlighting(WidgetAction::HighlightOption::Strong);
+
+    dragEnterEvent->acceptProposedAction();
 }
 
 void WidgetActionViewWidget::dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent)
 {
     getAction()->setHighlighting(static_cast<WidgetAction::HighlightOption>(_cachedHighlighting));
+}
+
+void WidgetActionViewWidget::dropEvent(QDropEvent* dropEvent)
+{
+    auto actionMimeData = dynamic_cast<const WidgetActionMimeData*>(dropEvent->mimeData());
+
+    if (actionMimeData == nullptr)
+        return;
+
+    if (actionMimeData->getAction() == getAction())
+        return;
+
+    if (actionMimeData->getAction()->getTypeString() != getAction()->getTypeString())
+        return;
+
+    if (actionMimeData->getAction()->isConnected())
+        hdps::actions().connectPrivateActionToPublicAction(getAction(), actionMimeData->getAction()->getPublicAction(), true);
+    else
+        hdps::actions().connectPrivateActions(actionMimeData->getAction(), getAction());
 }
 
 }

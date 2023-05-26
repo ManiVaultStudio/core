@@ -197,7 +197,12 @@ void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction, bool
 
 void DatasetPickerAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
+
+    Q_ASSERT(publicDatasetPickerAction != nullptr);
 
     if (publicDatasetPickerAction == nullptr)
         return;

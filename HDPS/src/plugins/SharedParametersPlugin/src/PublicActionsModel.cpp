@@ -83,12 +83,11 @@ void PublicActionsModel::removeAction(WidgetAction* action)
     if (action == nullptr)
         return;
 
-    auto actionItem = getActionItem(action);
-
 #ifdef PUBLIC_ACTIONS_MODEL_VERBOSE
-    if (actionItem)
-        qDebug() << __FUNCTION__ << action->getLocation() << action->getId() << actionItem->index().siblingAtColumn(2).data(Qt::DisplayRole).toString();
+    qDebug() << __FUNCTION__ << action->getLocation();
 #endif
+
+    auto actionItem = getActionItem(action);
 
     if (!actionItem)
         return;

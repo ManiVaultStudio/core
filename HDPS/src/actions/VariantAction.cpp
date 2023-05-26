@@ -50,9 +50,15 @@ void VariantAction::connectToPublicAction(WidgetAction* publicAction, bool recur
 
 void VariantAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicVariantAction = dynamic_cast<VariantAction*>(getPublicAction());
 
     Q_ASSERT(publicVariantAction != nullptr);
+
+    if (publicVariantAction == nullptr)
+        return;
 
     disconnect(this, &VariantAction::variantChanged, publicVariantAction, &VariantAction::setVariant);
     disconnect(publicVariantAction, &VariantAction::variantChanged, this, &VariantAction::setVariant);

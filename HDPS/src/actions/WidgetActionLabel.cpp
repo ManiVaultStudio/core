@@ -49,8 +49,6 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
 
     updateNameLabel();
 
-    installEventFilter(this);
-
     _nameLabel.installEventFilter(this);
 }
 
@@ -89,8 +87,8 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     if (!getAction()->mayConnect(WidgetAction::Gui))
                         break;
 
-                    if (getAction()->isConnected())
-                        break;
+                    //if (getAction()->isConnected())
+                    //    break;
 
                     auto drag = new QDrag(this);
 
@@ -135,43 +133,6 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     }
 
                     break;
-                }
-            }
-
-            break;
-        }
-
-        case QEvent::DragEnter:
-        {
-            if (dynamic_cast<QWidget*>(target) != this)
-                break;
-
-            auto dragEnterEvent = static_cast<QDragEnterEvent*>(event);
-            auto actionMimeData = dynamic_cast<const WidgetActionMimeData*>(dragEnterEvent->mimeData());
-
-            if (actionMimeData)
-                if ((actionMimeData->getAction() != getAction()) && (actionMimeData->getAction()->getTypeString() == getAction()->getTypeString()))
-                    dragEnterEvent->acceptProposedAction();
-
-            break;
-        }
-
-        case QEvent::Drop:
-        {
-            if (dynamic_cast<QWidget*>(target) != this)
-                break;
-
-            auto dropEvent      = static_cast<QDropEvent*>(event);
-            auto actionMimeData = dynamic_cast<const WidgetActionMimeData*>(dropEvent->mimeData());
-
-            if (actionMimeData) {
-                if (actionMimeData->getAction() != getAction()) {
-                    if (actionMimeData->getAction()->getTypeString() == getAction()->getTypeString()) {
-                        if (getAction()->isConnected())
-                            hdps::actions().connectPrivateActionToPublicAction(actionMimeData->getAction(), getAction()->getPublicAction(), true);
-                        else
-                            hdps::actions().connectPrivateActions(actionMimeData->getAction(), getAction());
-                    }
                 }
             }
 

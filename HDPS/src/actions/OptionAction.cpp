@@ -132,7 +132,12 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
 
 void OptionAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicOptionAction = dynamic_cast<OptionAction*>(getPublicAction());
+
+    Q_ASSERT(publicOptionAction != nullptr);
 
     if (publicOptionAction == nullptr)
         return;

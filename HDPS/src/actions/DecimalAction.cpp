@@ -95,6 +95,9 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction, bool recur
 
 void DecimalAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicDecimalAction = dynamic_cast<DecimalAction*>(getPublicAction());
 
     Q_ASSERT(publicDecimalAction != nullptr);
@@ -102,8 +105,6 @@ void DecimalAction::disconnectFromPublicAction(bool recursive)
     if (publicDecimalAction == nullptr)
         return;
 
-    //disconnect(this, &DecimalAction::minimumChanged, publicDecimalAction, nullptr);
-    //disconnect(this, &DecimalAction::maximumChanged, publicDecimalAction, nullptr);
     disconnect(this, &DecimalAction::valueChanged, publicDecimalAction, nullptr);
     disconnect(publicDecimalAction, &DecimalAction::valueChanged, this, nullptr);
 

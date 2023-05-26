@@ -73,9 +73,15 @@ void ColorAction::connectToPublicAction(WidgetAction* publicAction, bool recursi
 
 void ColorAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicColorAction = dynamic_cast<ColorAction*>(getPublicAction());
 
     Q_ASSERT(publicColorAction != nullptr);
+
+    if (publicColorAction == nullptr)
+        return;
 
     disconnect(this, &ColorAction::colorChanged, publicColorAction, &ColorAction::setColor);
     disconnect(publicColorAction, &ColorAction::colorChanged, this, &ColorAction::setColor);

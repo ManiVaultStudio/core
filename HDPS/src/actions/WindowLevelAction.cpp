@@ -54,6 +54,9 @@ void WindowLevelAction::connectToPublicAction(WidgetAction* publicAction, bool r
 
 void WindowLevelAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     if (recursive) {
         getWindowAction().disconnectFromPublicAction(recursive);
         getLevelAction().disconnectFromPublicAction(recursive);
