@@ -70,14 +70,6 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction, bool recur
     if (publicDecimalAction == nullptr)
         return;
 
-    //connect(this, &DecimalAction::minimumChanged, publicDecimalAction, [publicDecimalAction](const float& minimum) -> void {
-    //    publicDecimalAction->setMinimum(minimum);
-    //});
-
-    //connect(this, &DecimalAction::maximumChanged, publicDecimalAction, [publicDecimalAction](const float& maximum) -> void {
-    //    publicDecimalAction->setMaximum(maximum);
-    //});
-
     connect(this, &DecimalAction::valueChanged, publicDecimalAction, [publicDecimalAction](const float& value) -> void {
         publicDecimalAction->setValue(value);
     });
@@ -86,8 +78,6 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction, bool recur
         setValue(value);
     });
 
-    //setMinimum(publicDecimalAction->getMinimum());
-    //setMaximum(publicDecimalAction->getMaximum());
     setValue(publicDecimalAction->getValue());
 
     WidgetAction::connectToPublicAction(publicAction, recursive);

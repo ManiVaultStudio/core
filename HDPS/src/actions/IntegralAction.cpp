@@ -48,14 +48,6 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction, bool recu
     if (publicIntegralAction == nullptr)
         return;
 
-    connect(this, &IntegralAction::minimumChanged, publicIntegralAction, [publicIntegralAction](const std::int32_t& minimum) -> void {
-        publicIntegralAction->setMinimum(minimum);
-    });
-
-    connect(this, &IntegralAction::maximumChanged, publicIntegralAction, [publicIntegralAction](const std::int32_t& maximum) -> void {
-        publicIntegralAction->setMaximum(maximum);
-    });
-
     connect(this, &IntegralAction::valueChanged, publicIntegralAction, [publicIntegralAction](const std::int32_t& value) -> void {
         publicIntegralAction->setValue(value);
     });
@@ -64,8 +56,6 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction, bool recu
         setValue(value);
     });
 
-    setMinimum(publicIntegralAction->getMinimum());
-    setMaximum(publicIntegralAction->getMaximum());
     setValue(publicIntegralAction->getValue());
 
     WidgetAction::connectToPublicAction(publicAction, recursive);
