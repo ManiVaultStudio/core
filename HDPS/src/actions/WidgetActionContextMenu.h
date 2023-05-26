@@ -68,6 +68,7 @@ protected:
 private:
     WidgetActions   _actions;               /** Actions to create the context menu for */
     TriggerAction   _publishAction;         /** Publish action (so that other actions can connect) */
+    TriggerAction   _connectAction;         /** Action which triggers a visual connection process */
     TriggerAction   _disconnectAction;      /** Disconnect one or more parameters from shared parameter */
     TriggerAction   _disconnectAllAction;   /** Disconnect all parameters which are connected to the shared parameter */
     TriggerAction   _removeAction;          /** Remove one or more shared parameters */

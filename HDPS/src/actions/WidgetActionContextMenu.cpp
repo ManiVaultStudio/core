@@ -15,6 +15,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     QMenu(parent),
     _actions(actions),
     _publishAction(this, "Publish..."),
+    _connectAction(this, "Connect..."),
     _disconnectAction(this, "Disconnect..."),
     _disconnectAllAction(this, "Disconnect all..."),
     _removeAction(this, "Remove..."),
@@ -25,6 +26,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _publishAction.setIcon(fontAwesome.getIcon("cloud-upload-alt"));
+    _connectAction.setIcon(fontAwesome.getIcon("crosshairs"));
     _disconnectAction.setIcon(fontAwesome.getIcon("unlink"));
     _disconnectAllAction.setIcon(fontAwesome.getIcon("unlink"));
     _removeAction.setIcon(fontAwesome.getIcon("trash"));
@@ -47,6 +49,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     
     addSeparator();
 
+    addAction(&_connectAction);
     addAction(&_disconnectAction);
     addAction(&_disconnectAllAction);
 
@@ -62,10 +65,12 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     _editAction.setVisible(allPublic && _actions.count() == 1);
 
     if (allPrivate) {
+        _connectAction.setVisible(false);
         _removeAction.setVisible(false);
 
         if (_actions.count() == 1) {
             _publishAction.setEnabled(!firstAction->isPublished());
+            _connectAction.setEnabled(true);
             _disconnectAction.setEnabled(firstAction->isConnected());
 
             if (firstAction->isConnected())
@@ -121,6 +126,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
     if (allPublic) {
         _publishAction.setVisible(false);
+        _connectAction.setVisible(false);
         _disconnectAction.setVisible(false);
 
         WidgetActions publicActions;
@@ -159,6 +165,16 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     
     connect(&_publishAction, &TriggerAction::triggered, this, [this]() -> void {
         hdps::actions().publishPrivateAction(_actions.first());
+    });
+
+    connect(&_connectAction, &TriggerAction::triggered, this, [this]() -> void {
+        //ActionsListModel actionsListModel(this);
+        //ActionsFilterModel actionsFilterModel(this);
+
+        //actionsFilterModel.setSourceModel(&actionsListModel);
+        //actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Public" });
+        //actionsFilterModel.getTypeFilterAction().setString(firstAction->getTypeString());
+
     });
 
     connect(&_disconnectAction, &TriggerAction::triggered, this, [this]() -> void {
