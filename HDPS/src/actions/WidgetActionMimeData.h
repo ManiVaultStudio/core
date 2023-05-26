@@ -2,6 +2,9 @@
 
 #include "WidgetAction.h"
 
+#include "models/ActionsFilterModel.h"
+#include "models/ActionsListModel.h"
+
 #include <QMimeData>
 
 namespace hdps::gui {
@@ -23,6 +26,9 @@ public:
      */
     WidgetActionMimeData(WidgetAction* action);
 
+    /** Destructor */
+    ~WidgetActionMimeData();
+
     /**
      * Get supported mime types
      * @return List of string of supported mime types
@@ -41,7 +47,9 @@ public:
     }
 
 private:
-    WidgetAction* _action;  /** Pointer to mime data action */
+    WidgetAction*       _action;                /** Pointer to mime data action */
+    ActionsListModel    _actionsListModel;
+    ActionsFilterModel  _actionsFilterModel;
 };
 
 }

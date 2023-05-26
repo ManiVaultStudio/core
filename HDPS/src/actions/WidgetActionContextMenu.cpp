@@ -61,16 +61,15 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
     addAction(&_editAction);
 
+    _connectAction.setVisible(allPrivate && _actions.count() == 1);
     _disconnectAllAction.setVisible(allPublic);
     _editAction.setVisible(allPublic && _actions.count() == 1);
 
     if (allPrivate) {
-        _connectAction.setVisible(false);
         _removeAction.setVisible(false);
 
         if (_actions.count() == 1) {
             _publishAction.setEnabled(!firstAction->isPublished());
-            _connectAction.setEnabled(true);
             _disconnectAction.setEnabled(firstAction->isConnected());
 
             if (firstAction->isConnected())
@@ -168,6 +167,11 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     });
 
     connect(&_connectAction, &TriggerAction::triggered, this, [this]() -> void {
+        if (_actions.isEmpty())
+            return;
+
+        _actions.first()->connectToPrivateActionByDragAnDrop();
+
         //ActionsListModel actionsListModel(this);
         //ActionsFilterModel actionsFilterModel(this);
 
@@ -175,6 +179,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         //actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Public" });
         //actionsFilterModel.getTypeFilterAction().setString(firstAction->getTypeString());
 
+        
     });
 
     connect(&_disconnectAction, &TriggerAction::triggered, this, [this]() -> void {

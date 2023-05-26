@@ -2,16 +2,16 @@
 #include "WidgetActionLabel.h"
 #include "WidgetActionCollapsedWidget.h"
 #include "WidgetActionContextMenu.h"
+#include "WidgetActionMimeData.h"
 #include "Application.h"
-#include "Plugin.h"
 #include "AbstractActionsManager.h"
-#include "CoreInterface.h"
 
 #include "util/Exception.h"
 
 #include <QDebug>
 #include <QMenu>
 #include <QJsonArray>
+#include <QDrag>
 
 #ifdef _DEBUG
     #define WIDGET_ACTION_VERBOSE
@@ -285,6 +285,20 @@ void WidgetAction::connectToPublicActionByName(const QString& publicActionName)
     if (matches.count() == 1)
         connectToPublicAction(matches.first().data(Qt::UserRole + 1).value<WidgetAction*>());
     */
+}
+
+void WidgetAction::connectToPrivateActionByDragAndDrop()
+{
+    if (!mayConnect(WidgetAction::Gui))
+        return;
+
+    auto drag       = new QDrag(this);
+    auto mimeData   = new WidgetActionMimeData(this);
+
+    drag->setMimeData(mimeData);
+    drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(QSize(12, 12)));
+
+    Qt::DropAction dropAction = drag->exec();
 }
 
 void WidgetAction::disconnectFromPublicAction(bool recursive)

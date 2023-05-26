@@ -210,7 +210,6 @@ public: // Data grouping
      * @param guiName Name of the created dataset in the GUI (if empty, the user will be prompted for a name)
      * @return Smart pointer to created group dataset
      */
-    [[deprecated("This function will be removed in version 0.5, and replaced by core->getDataManager().groupDatasets(...).")]]
     virtual Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") = 0;
 
 public: // Data hierarchy

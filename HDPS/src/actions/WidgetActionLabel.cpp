@@ -1,17 +1,12 @@
 #include "WidgetActionLabel.h"
 #include "WidgetAction.h"
-#include "WidgetActionMimeData.h"
 #include "Application.h"
-
-#include "models/ActionsFilterModel.h"
-#include "models/ActionsListModel.h"
 
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QMouseEvent>
 #include <QMenu>
 #include <QTimer>
-#include <QDrag>
 #include <QMimeData>
 
 namespace hdps::gui {
@@ -87,50 +82,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     if (!getAction()->mayConnect(WidgetAction::Gui))
                         break;
 
-                    //if (getAction()->isConnected())
-                    //    break;
-
-                    auto drag = new QDrag(this);
-
-                    auto mimeData = new WidgetActionMimeData(getAction());
-
-                    drag->setMimeData(mimeData);
-                    drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(QSize(12, 12)));
-
-                    ActionsListModel actionsListModel(this);
-                    ActionsFilterModel actionsFilterModel(this);
-
-                    actionsFilterModel.setSourceModel(&actionsListModel);
-                    actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Private" });
-                    actionsFilterModel.getTypeFilterAction().setString(getAction()->getTypeString());
-
-                    const auto numberOfRows = actionsFilterModel.rowCount();
-
-                    for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
-                        auto action = actionsFilterModel.getAction(rowIndex);
-
-                        if (action == getAction())
-                            continue;
-
-                        //if (action->getPublicAction() == getAction()->getPublicAction())
-                        //    continue;
-
-                        actionsFilterModel.getAction(rowIndex)->highlight();
-                    }
-
-                    Qt::DropAction dropAction = drag->exec();
-
-                    for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
-                        auto action = actionsFilterModel.getAction(rowIndex);
-
-                        if (action == getAction())
-                            continue;
-
-                        //if (action->getPublicAction() == getAction()->getPublicAction())
-                        //    continue;
-
-                        actionsFilterModel.getAction(rowIndex)->unHighlight();
-                    }
+                    getAction()->connectToPrivateActionByDragAndDrop();
 
                     break;
                 }
