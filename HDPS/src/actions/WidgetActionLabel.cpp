@@ -38,7 +38,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
 
     _nameLabel.setText(getLabelText());
     _nameLabel.setAlignment(Qt::AlignRight);
-    _nameLabel.setStyleSheet("color: black;");
+    _nameLabel.setStyleSheet("QLabel { color: black; }");
 
     connect(getAction(), &WidgetAction::changed, this, &WidgetActionLabel::updateNameLabel);
 
@@ -87,6 +87,28 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     break;
                 }
             }
+
+            break;
+        }
+
+        case QEvent::Enter:
+        {
+            if (dynamic_cast<QWidget*>(target) != &_nameLabel)
+                break;
+
+            if (isEnabled() && (getAction()->mayPublish(WidgetAction::Gui) || getAction()->mayConnect(WidgetAction::Gui) || getAction()->mayDisconnect(WidgetAction::Gui)))
+                _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(palette().highlight().color().name()));
+            
+            break;
+        }
+
+        case QEvent::Leave:
+        {
+            if (dynamic_cast<QWidget*>(target) != &_nameLabel)
+                break;
+
+            if (isEnabled() && (getAction()->mayPublish(WidgetAction::Gui) || getAction()->mayConnect(WidgetAction::Gui) || getAction()->mayDisconnect(WidgetAction::Gui)))
+                _nameLabel.setStyleSheet("QLabel { color: black; }");
 
             break;
         }

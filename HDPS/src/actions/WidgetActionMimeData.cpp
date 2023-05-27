@@ -6,10 +6,9 @@ WidgetActionMimeData::WidgetActionMimeData(WidgetAction* action) :
     QMimeData(),
     _action(action),
     _actionsListModel(this),
-    _actionsFilterModel(this)
+    _actionsFilterModel(this),
+    _highlightActions()
 {
-    qDebug() << "WidgetActionMimeData()";
-
     _actionsFilterModel.setSourceModel(&_actionsListModel);
     _actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Private" });
     _actionsFilterModel.getTypeFilterAction().setString(getAction()->getTypeString());
@@ -20,22 +19,23 @@ WidgetActionMimeData::WidgetActionMimeData(WidgetAction* action) :
         if (action == getAction())
             continue;
 
-        _actionsFilterModel.getAction(rowIndex)->highlight();
+        if (action->isHighlighted())
+            action->unHighlight();
+
+        if (action->isConnected() && (action->getPublicAction() == getAction()))
+            continue;
+
+        _highlightActions << action;
     }
+
+    for (auto highlightAction : _highlightActions)
+        highlightAction->highlight();
 }
 
 WidgetActionMimeData::~WidgetActionMimeData()
 {
-    qDebug() << "~WidgetActionMimeData()";
-
-    for (int rowIndex = 0; rowIndex < _actionsFilterModel.rowCount(); ++rowIndex) {
-        auto action = _actionsFilterModel.getAction(rowIndex);
-
-        if (action == getAction())
-            continue;
-
-        _actionsFilterModel.getAction(rowIndex)->unHighlight();
-    }
+    for (auto highlightAction : _highlightActions)
+        highlightAction->unHighlight();
 }
 
 QStringList WidgetActionMimeData::formats() const

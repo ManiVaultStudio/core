@@ -323,7 +323,7 @@ public: // Connections and publishing
      * Publish this action so that other actions can connect to it
      * @param name Name of the published widget action (if empty, a configuration dialog will popup)
      */
-    virtual void publish(const QString& name = "");
+    virtual void publish(const QString& name = "") final;
 
     /**
      * Connect this action to a public action

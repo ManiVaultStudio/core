@@ -64,13 +64,13 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     _connectAction.setVisible(allPrivate && _actions.count() == 1);
     _disconnectAllAction.setVisible(allPublic);
     _editAction.setVisible(allPublic && _actions.count() == 1);
+    _removeAction.setVisible(allPublic && !_actions.isEmpty());
 
     if (allPrivate) {
         _removeAction.setVisible(false);
 
         if (_actions.count() == 1) {
             _publishAction.setEnabled(!firstAction->isPublished());
-            _disconnectAction.setEnabled(firstAction->isConnected());
 
             if (firstAction->isConnected())
                 _disconnectAction.setText(QString("Disconnect from: %1").arg(firstAction->getPublicAction()->text()));
@@ -117,9 +117,6 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         else {
             _publishAction.setVisible(false);
             _disconnectAction.setVisible(true);
-            _removeAction.setVisible(false);
-
-            _disconnectAction.setText(QString("Disconnect %1").arg(QString::number(_actions.count())));
         }
     }
 
@@ -162,6 +159,23 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         });
     }
     
+    WidgetActions privateActions;
+
+    for (auto action : actions)
+        if (action->isPrivate())
+            privateActions << action;
+
+    _disconnectAction.setEnabled(!privateActions.isEmpty());
+
+    if (privateActions.isEmpty())
+        _disconnectAction.setText("Disconnect...");
+    else {
+        if (privateActions.count() == 1)
+            _disconnectAction.setText(QString("Disconnect %1").arg(privateActions.first()->text()));
+        else
+            _disconnectAction.setText(QString("Disconnect %1 parameter(s)").arg(QString::number(privateActions.count())));
+    }
+
     connect(&_publishAction, &TriggerAction::triggered, this, [this]() -> void {
         hdps::actions().publishPrivateAction(_actions.first());
     });
@@ -175,7 +189,9 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
     connect(&_disconnectAction, &TriggerAction::triggered, this, [this]() -> void {
         for (auto action : _actions)
-            hdps::actions().disconnectPrivateActionFromPublicAction(action, true);
+            if (action->isPrivate())
+                hdps::actions().disconnectPrivateActionFromPublicAction(action, true);
+            
     });
 
     connect(&_disconnectAllAction, &TriggerAction::triggered, this, [this]() -> void {

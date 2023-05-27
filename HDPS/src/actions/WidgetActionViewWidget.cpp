@@ -95,8 +95,8 @@ void WidgetActionViewWidget::dropEvent(QDropEvent* dropEvent)
         hdps::actions().connectPrivateActionToPublicAction(getAction(), actionMimeData->getAction(), true);
     }
     else {
-        if (actionMimeData->getAction()->isConnected())
-            hdps::actions().connectPrivateActionToPublicAction(getAction(), actionMimeData->getAction()->getPublicAction(), true);
+        if (getAction()->isConnected())
+            hdps::actions().connectPrivateActionToPublicAction(actionMimeData->getAction(), getAction()->getPublicAction(), true);
         else
             hdps::actions().connectPrivateActions(actionMimeData->getAction(), getAction());
     }

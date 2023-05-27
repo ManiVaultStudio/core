@@ -118,12 +118,6 @@ public:
 public: // Action publishing
 
     /**
-     * Publish this action so that other actions can connect to it
-     * @param text Name of the published widget action
-     */
-    void publish(const QString& name) override;
-
-    /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
      * @param recursive Whether to also connect descendant child actions
