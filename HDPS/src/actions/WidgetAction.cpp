@@ -287,7 +287,7 @@ void WidgetAction::connectToPublicActionByName(const QString& publicActionName)
     */
 }
 
-void WidgetAction::connectToPrivateActionByDragAndDrop()
+void WidgetAction::startDrag()
 {
     if (!mayConnect(WidgetAction::Gui))
         return;

@@ -82,7 +82,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     if (!getAction()->mayConnect(WidgetAction::Gui))
                         break;
 
-                    getAction()->connectToPrivateActionByDragAndDrop();
+                    getAction()->startDrag();
 
                     break;
                 }

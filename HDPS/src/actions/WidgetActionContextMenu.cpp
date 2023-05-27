@@ -170,7 +170,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         if (_actions.isEmpty())
             return;
 
-        _actions.first()->connectToPrivateActionByDragAndDrop();
+        _actions.first()->startDrag();
     });
 
     connect(&_disconnectAction, &TriggerAction::triggered, this, [this]() -> void {

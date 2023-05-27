@@ -444,6 +444,37 @@ public:
      */
     virtual QStandardItem* getActionItem(const gui::WidgetAction* action) const final;
     
+protected: // Drag-and-drop behavior
+
+    /** Get the supported drop actions */
+    Qt::DropActions supportedDropActions() const override;
+
+    /** Get the supported drag actions */
+    Qt::DropActions supportedDragActions() const override;
+
+    /**
+     * Get mime types
+     * @return Supported mime types
+     */
+    QStringList mimeTypes() const override;
+
+    /**
+     * Get mime data for model \p indexes
+     * @return Pointer to mime data for \p indexes
+     */
+    QMimeData* mimeData(const QModelIndexList& indexes) const override;
+
+    /**
+     * Invoked when \p mimeData is dropped
+     * @param mimeData Pointer to dropped mime data
+     * @param action Drop action
+     * @param row Drop row
+     * @param column Drop column
+     * @param parent Drop parent index
+     * @return Boolean determining whether the drop is possible or not
+     */
+    bool dropMimeData(const QMimeData* mimeData, Qt::DropAction action, int row, int column, const QModelIndex& parent);
+
 protected:
 
     /**

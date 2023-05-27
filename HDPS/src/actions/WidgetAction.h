@@ -339,8 +339,8 @@ public: // Connections and publishing
     [[deprecated("This function will be deprecated in version 1.0 of ManiVault, Please establish connections with the connections GUI in stead.")]]
     virtual void connectToPublicActionByName(const QString& publicActionName) final;
 
-    /** Connect this action to another private action with drag-and-drop */
-    virtual void connectToPrivateActionByDragAndDrop() final;
+    /** Start drag process */
+    virtual void startDrag() final;
 
     /**
      * Disconnect this action from its public action

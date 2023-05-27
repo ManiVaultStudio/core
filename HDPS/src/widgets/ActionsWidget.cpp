@@ -207,27 +207,6 @@ bool ActionsWidget::eventFilter(QObject* target, QEvent* event)
             break;
         }
 
-        case QEvent::Drop:
-        {
-            qDebug() << ">>>>> Drop";
-            auto dropEvent = static_cast<QDropEvent*>(event);
-
-            auto& treeView = _hierarchyWidget.getTreeView();
-
-            const auto index = treeView.indexAt(dropEvent->pos());
-
-            if (!index.isValid()) {
-                dropEvent->setDropAction(Qt::IgnoreAction);
-                break;
-            }
-
-            //auto item = treeView.itemFromIndex(index);
-
-            //qDebug() << "drop on item" << item->text(0);
-
-            break;
-        }
-            
         default:
             break;
     }

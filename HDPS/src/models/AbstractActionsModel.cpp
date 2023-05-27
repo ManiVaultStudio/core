@@ -2,6 +2,7 @@
 #include "AbstractActionsManager.h"
 
 #include "actions/WidgetAction.h"
+#include "actions/WidgetActionMimeData.h"
 
 #include "models/ActionsListModel.h"
 
@@ -677,6 +678,40 @@ QStandardItem* AbstractActionsModel::getActionItem(const gui::WidgetAction* acti
         return nullptr;
 
     return itemFromIndex(actionIndex);
+}
+
+Qt::DropActions AbstractActionsModel::supportedDropActions() const
+{
+    return Qt::MoveAction;
+}
+
+Qt::DropActions AbstractActionsModel::supportedDragActions() const
+{
+    return Qt::MoveAction;
+}
+
+QStringList AbstractActionsModel::mimeTypes() const
+{
+    return { "application/action" };
+}
+
+QMimeData* AbstractActionsModel::mimeData(const QModelIndexList& indexes) const
+{
+    if (indexes.isEmpty())
+        return nullptr;
+
+    return new WidgetActionMimeData(static_cast<Item*>(itemFromIndex(indexes.first()))->getAction());
+}
+
+bool AbstractActionsModel::dropMimeData(const QMimeData* mimeData, Qt::DropAction action, int row, int column, const QModelIndex& parent)
+{
+    auto actionMimeData = dynamic_cast<const WidgetActionMimeData*>(mimeData);
+
+    if (actionMimeData) {
+        qDebug() << "===== Action dropped!";
+    }
+
+    return true;
 }
 
 }
