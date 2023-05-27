@@ -195,8 +195,6 @@ public: // Linking
 
         try
         {
-            privateAction->_publicAction = publicAction;
-
             privateAction->connectToPublicAction(publicAction, recursive);
         }
         catch (std::exception& e)

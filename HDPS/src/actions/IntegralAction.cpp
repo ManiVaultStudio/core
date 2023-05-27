@@ -73,17 +73,10 @@ void IntegralAction::disconnectFromPublicAction(bool recursive)
     if (publicIntegralAction == nullptr)
         return;
 
-    disconnect(this, &IntegralAction::minimumChanged, publicIntegralAction, nullptr);
-    disconnect(this, &IntegralAction::maximumChanged, publicIntegralAction, nullptr);
     disconnect(this, &IntegralAction::valueChanged, publicIntegralAction, nullptr);
     disconnect(publicIntegralAction, &IntegralAction::valueChanged, this, nullptr);
 
     WidgetAction::disconnectFromPublicAction(recursive);
-}
-
-WidgetAction* IntegralAction::getPublicCopy() const
-{
-    return new IntegralAction(parent(), text(), std::numeric_limits<std::int32_t>::lowest(), std::numeric_limits<std::int32_t>::max(), getValue(), getDefaultValue());
 }
 
 void IntegralAction::fromVariantMap(const QVariantMap& variantMap)

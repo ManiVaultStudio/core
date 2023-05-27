@@ -145,6 +145,9 @@ void DimensionPickerAction::connectToPublicAction(WidgetAction* publicAction, bo
 
 void DimensionPickerAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     if (recursive)
         _currentDimensionAction.disconnectFromPublicAction(recursive);
 

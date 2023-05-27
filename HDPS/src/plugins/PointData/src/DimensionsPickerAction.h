@@ -256,14 +256,6 @@ public: // Linking
      */
     void disconnectFromPublicAction(bool recursive) override;
 
-protected:  // Linking
-
-    /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
-     */
-    WidgetAction* getPublicCopy() const override;
-
 signals:
 
     /**

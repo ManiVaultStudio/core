@@ -229,7 +229,7 @@ WidgetActionContextMenu::ConfirmRemovePublicActionDialog::ConfirmRemovePublicAct
     layout->addWidget(_namesAction.createWidget(this, StringsAction::ListView));
 
     if (numberOfConnectedActions >= 1)
-        layout->addWidget(new QLabel(QString("Note: %1 parameters will be disconnected as well").arg(QString::number(numberOfConnectedActions))));
+        layout->addWidget(new QLabel(QString("Note: %1 parameter(s) will be disconnected as well").arg(QString::number(numberOfConnectedActions))));
 
     layout->addSpacing(10);
 

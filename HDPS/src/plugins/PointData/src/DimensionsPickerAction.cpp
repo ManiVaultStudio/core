@@ -551,6 +551,9 @@ void DimensionsPickerAction::connectToPublicAction(WidgetAction* publicAction, b
 
 void DimensionsPickerAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicDimensionsPickerAction = dynamic_cast<DimensionsPickerAction*>(getPublicAction());
 
     Q_ASSERT(publicDimensionsPickerAction != nullptr);
@@ -562,18 +565,6 @@ void DimensionsPickerAction::disconnectFromPublicAction(bool recursive)
     disconnect(publicDimensionsPickerAction, &DimensionsPickerAction::selectedDimensionsChanged, this, nullptr);
 
     WidgetAction::disconnectFromPublicAction(recursive);
-}
-
-WidgetAction* DimensionsPickerAction::getPublicCopy() const
-{
-    auto dimensionsPickerActionCopy = dynamic_cast<DimensionsPickerAction*>(WidgetAction::getPublicCopy());
-
-    if (_points.isValid()) {
-        dimensionsPickerActionCopy->setPointsDataset(_points);
-        dimensionsPickerActionCopy->selectDimensions(getSelectedDimensions());
-    }
-
-    return dimensionsPickerActionCopy;
 }
 
 DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* dimensionsPickerAction, const std::int32_t& widgetFlags) :
