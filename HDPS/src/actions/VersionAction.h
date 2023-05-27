@@ -26,7 +26,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    VersionAction(QObject* parent, const QString& title);
+    Q_INVOKABLE VersionAction(QObject* parent, const QString& title);
 
 public: // Serialization
 

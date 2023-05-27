@@ -27,6 +27,11 @@ public:
     /** Initializes the model from the current state of the actions manager */
     void initialize() override;
 
+
+    QStringList mimeTypes() const;
+
+    bool dropMimeData(const QMimeData* mimeData, Qt::DropAction action, int row, int column, const QModelIndex& parent);
+
 protected:
 
     /**

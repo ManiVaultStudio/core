@@ -49,6 +49,8 @@ WidgetAction* WidgetActionViewWidget::getAction()
 
 void WidgetActionViewWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
 {
+    qDebug() << __FUNCTION__;
+
     auto actionMimeData = dynamic_cast<const WidgetActionMimeData*>(dragEnterEvent->mimeData());
 
     if (actionMimeData == nullptr)
@@ -77,6 +79,8 @@ void WidgetActionViewWidget::dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent)
 
 void WidgetActionViewWidget::dropEvent(QDropEvent* dropEvent)
 {
+    qDebug() << __FUNCTION__;
+
     auto actionMimeData = dynamic_cast<const WidgetActionMimeData*>(dropEvent->mimeData());
 
     if (actionMimeData == nullptr)

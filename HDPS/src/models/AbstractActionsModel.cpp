@@ -48,6 +48,7 @@ AbstractActionsModel::Item::Item(gui::WidgetAction* action, bool editable /*= fa
     Q_ASSERT(_action != nullptr);
 
     setEditable(editable);
+    setDropEnabled(true);
 }
 
 QPointer<hdps::gui::WidgetAction> AbstractActionsModel::Item::getAction() const
@@ -635,7 +636,7 @@ Qt::ItemFlags AbstractActionsModel::flags(const QModelIndex& index) const
     //if (index.column() == static_cast<int>(AbstractActionsModel::Column::ForceDisabled))
     //    return QStandardItemModel::flags(index) | Qt::ItemIsUserCheckable;
     
-    return  QStandardItemModel::flags(index);
+    return  QStandardItemModel::flags(index) | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;
 }
 
 WidgetAction* AbstractActionsModel::getAction(const QModelIndex& index)

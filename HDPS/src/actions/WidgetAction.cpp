@@ -298,7 +298,7 @@ void WidgetAction::connectToPrivateActionByDragAndDrop()
     drag->setMimeData(mimeData);
     drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(QSize(12, 12)));
 
-    Qt::DropAction dropAction = drag->exec();
+    drag->exec();
 }
 
 void WidgetAction::disconnectFromPublicAction(bool recursive)

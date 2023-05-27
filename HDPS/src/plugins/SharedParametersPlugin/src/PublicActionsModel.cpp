@@ -1,7 +1,9 @@
 #include "PublicActionsModel.h"
 
+#include <actions/WidgetActionMimeData.h>
+
 #ifdef _DEBUG
-    #define PUBLIC_ACTIONS_MODEL_VERBOSE
+    //#define PUBLIC_ACTIONS_MODEL_VERBOSE
 #endif
 
 using namespace hdps::gui;
@@ -162,6 +164,22 @@ void PublicActionsModel::removePublicAction(WidgetAction* publicAction)
         parentItem->removeRow(publicActionItem->row());
     else
         removeRow(publicActionItem->row());
+}
+
+bool PublicActionsModel::dropMimeData(const QMimeData* mimeData, Qt::DropAction action, int row, int column, const QModelIndex& parent)
+{
+    auto actionMimeData = dynamic_cast<const WidgetActionMimeData*>(mimeData);
+
+    if (actionMimeData) {
+        qDebug() << "===== Action dropped!";
+    }
+
+    return true;
+}
+
+QStringList PublicActionsModel::mimeTypes() const
+{
+    return { "application/action" };
 }
 
 }

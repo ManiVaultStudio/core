@@ -170,16 +170,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         if (_actions.isEmpty())
             return;
 
-        _actions.first()->connectToPrivateActionByDragAnDrop();
-
-        //ActionsListModel actionsListModel(this);
-        //ActionsFilterModel actionsFilterModel(this);
-
-        //actionsFilterModel.setSourceModel(&actionsListModel);
-        //actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Public" });
-        //actionsFilterModel.getTypeFilterAction().setString(firstAction->getTypeString());
-
-        
+        _actions.first()->connectToPrivateActionByDragAndDrop();
     });
 
     connect(&_disconnectAction, &TriggerAction::triggered, this, [this]() -> void {

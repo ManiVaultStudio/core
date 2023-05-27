@@ -8,6 +8,8 @@ WidgetActionMimeData::WidgetActionMimeData(WidgetAction* action) :
     _actionsListModel(this),
     _actionsFilterModel(this)
 {
+    qDebug() << "WidgetActionMimeData()";
+
     _actionsFilterModel.setSourceModel(&_actionsListModel);
     _actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Private" });
     _actionsFilterModel.getTypeFilterAction().setString(getAction()->getTypeString());
@@ -24,6 +26,8 @@ WidgetActionMimeData::WidgetActionMimeData(WidgetAction* action) :
 
 WidgetActionMimeData::~WidgetActionMimeData()
 {
+    qDebug() << "~WidgetActionMimeData()";
+
     for (int rowIndex = 0; rowIndex < _actionsFilterModel.rowCount(); ++rowIndex) {
         auto action = _actionsFilterModel.getAction(rowIndex);
 
