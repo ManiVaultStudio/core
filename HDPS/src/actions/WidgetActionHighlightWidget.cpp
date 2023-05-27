@@ -7,7 +7,7 @@ WidgetActionHighlightWidget::WidgetActionHighlightWidget(QWidget* parent, Widget
     _action(action)
 {
     setWindowFlag(Qt::WindowStaysOnTopHint);
-    setStyleSheet("background-color: gray;");
+    setStyleSheet(QString("background-color: %1;").arg(palette().highlight().color().name()));
 }
 
 WidgetAction* WidgetActionHighlightWidget::getAction()
@@ -44,11 +44,11 @@ void WidgetActionHighlightWidget::highlightingChanged(const WidgetAction::Highli
             break;
 
         case WidgetAction::HighlightOption::Moderate:
-            widgetFader.setOpacity(0.3f, 200);
+            widgetFader.setOpacity(0.1f, 200);
             break;
 
         case WidgetAction::HighlightOption::Strong:
-            widgetFader.setOpacity(0.6f, 200);
+            widgetFader.setOpacity(0.3f, 200);
             break;
 
         default:

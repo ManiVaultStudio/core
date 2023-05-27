@@ -195,6 +195,9 @@ public: // Linking
 
         try
         {
+            if (privateAction->isConnected() && (privateAction->getPublicAction() == publicAction))
+                throw std::runtime_error(QString("%1 is already connected to %2").arg(privateAction->getLocation(), publicAction->getLocation()).toLatin1());
+
             privateAction->connectToPublicAction(publicAction, recursive);
         }
         catch (std::exception& e)

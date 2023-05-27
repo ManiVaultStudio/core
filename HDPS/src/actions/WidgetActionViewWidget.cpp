@@ -49,8 +49,6 @@ WidgetAction* WidgetActionViewWidget::getAction()
 
 void WidgetActionViewWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
 {
-    qDebug() << __FUNCTION__;
-
     auto actionMimeData = dynamic_cast<const WidgetActionMimeData*>(dragEnterEvent->mimeData());
 
     if (actionMimeData == nullptr)
@@ -63,6 +61,9 @@ void WidgetActionViewWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
         return;
 
     if ((actionMimeData->getAction()->isConnected() && getAction()->isConnected()) && (actionMimeData->getAction()->getPublicAction() == getAction()->getPublicAction()))
+        return;
+
+    if (getAction()->isConnected() && (getAction()->getPublicAction() == actionMimeData->getAction()))
         return;
 
     _cachedHighlighting = static_cast<std::int32_t>(getAction()->getHighlighting());
@@ -79,8 +80,6 @@ void WidgetActionViewWidget::dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent)
 
 void WidgetActionViewWidget::dropEvent(QDropEvent* dropEvent)
 {
-    qDebug() << __FUNCTION__;
-
     auto actionMimeData = dynamic_cast<const WidgetActionMimeData*>(dropEvent->mimeData());
 
     if (actionMimeData == nullptr)
@@ -92,10 +91,15 @@ void WidgetActionViewWidget::dropEvent(QDropEvent* dropEvent)
     if (actionMimeData->getAction()->getTypeString() != getAction()->getTypeString())
         return;
 
-    if (actionMimeData->getAction()->isConnected())
-        hdps::actions().connectPrivateActionToPublicAction(getAction(), actionMimeData->getAction()->getPublicAction(), true);
-    else
-        hdps::actions().connectPrivateActions(actionMimeData->getAction(), getAction());
+    if (actionMimeData->getAction()->isPublic()) {
+        hdps::actions().connectPrivateActionToPublicAction(getAction(), actionMimeData->getAction(), true);
+    }
+    else {
+        if (actionMimeData->getAction()->isConnected())
+            hdps::actions().connectPrivateActionToPublicAction(getAction(), actionMimeData->getAction()->getPublicAction(), true);
+        else
+            hdps::actions().connectPrivateActions(actionMimeData->getAction(), getAction());
+    }
 }
 
 }
