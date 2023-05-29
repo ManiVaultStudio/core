@@ -67,33 +67,24 @@ bool OptionAction::hasOptions() const
 
 void OptionAction::setOptions(const QStringList& options)
 {
-    // Only proceed if the options changed
     if (_defaultModel.stringList() == options)
         return;
 
-    // Cache the current index and text
     const auto oldCurrentIndex  = _currentIndex;
     const auto oldCurrentText   = getCurrentText();
 
     if (_defaultModel.rowCount() == options.count()) {
-
-        // Number of items matches so update string list model with new items
         for (std::int32_t rowIndex = 0; rowIndex < _defaultModel.rowCount(); rowIndex++)
             _defaultModel.setData(_defaultModel.index(rowIndex, 0), options.at(rowIndex));
     }
     else {
-
-        // Override the string in the string list model
         _defaultModel.setStringList(options);
 
-        // Update the current index so that it respects the underlying model
         updateCurrentIndex();
     }
 
-    // Notify the others that the model changed
     emit modelChanged();
 
-    // Notify others that the current index and text changed
     emit currentIndexChanged(_currentIndex);
     emit currentTextChanged(getCurrentText());
 }
@@ -112,10 +103,27 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
 
     Q_ASSERT(publicOptionAction != nullptr);
 
-    connect(this, &OptionAction::currentTextChanged, publicOptionAction, &OptionAction::setCurrentText);
-    connect(publicOptionAction, &OptionAction::currentTextChanged, this, &OptionAction::setCurrentText);
+    const auto currentTextChanged = [this, publicOptionAction](const QString& currentText) -> void {
+        if (currentText.isEmpty())
+            return;
 
-    connect(this, &OptionAction::modelChanged, this, [this, publicOptionAction]() -> void {
+        publicOptionAction->setCurrentText(currentText);
+    };
+
+    connect(this, &OptionAction::currentTextChanged, publicOptionAction, currentTextChanged);
+    
+    connect(publicOptionAction, &OptionAction::currentTextChanged, this, [this, publicOptionAction, currentTextChanged](const QString& currentText) -> void {
+        disconnect(this, &OptionAction::currentTextChanged, publicOptionAction, nullptr);
+        {
+            if (hasOption(currentText))
+                setCurrentText(currentText);
+            else
+                setCurrentIndex(-1);
+        }
+        connect(this, &OptionAction::currentTextChanged, publicOptionAction, currentTextChanged);
+    });
+
+    const auto updatePublicActionOptions = [this, publicOptionAction]() -> void {
         auto publicOptions = publicOptionAction->getOptions();
 
         publicOptions << getOptions();
@@ -123,7 +131,11 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
         publicOptions.removeDuplicates();
 
         publicOptionAction->setOptions(publicOptions);
-    });
+    };
+
+    updatePublicActionOptions();
+
+    connect(this, &OptionAction::modelChanged, this, updatePublicActionOptions);
 
     setCurrentText(publicOptionAction->getCurrentText());
 
@@ -142,9 +154,9 @@ void OptionAction::disconnectFromPublicAction(bool recursive)
     if (publicOptionAction == nullptr)
         return;
 
-    disconnect(this, &OptionAction::currentTextChanged, publicOptionAction, &OptionAction::setCurrentText);
+    disconnect(this, &OptionAction::currentTextChanged, publicOptionAction, nullptr);
     disconnect(this, &OptionAction::modelChanged, this, nullptr);
-    disconnect(publicOptionAction, &OptionAction::currentTextChanged, this, &OptionAction::setCurrentText);
+    disconnect(publicOptionAction, &OptionAction::currentTextChanged, this, nullptr);
 
     WidgetAction::disconnectFromPublicAction(recursive);
 }
@@ -154,10 +166,12 @@ void OptionAction::fromVariantMap(const QVariantMap& variantMap)
     WidgetAction::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "Value");
-    variantMapMustContain(variantMap, "Options");
+    variantMapMustContain(variantMap, "IsPublic");
 
-    setOptions(variantMap["Options"].toStringList());
     setCurrentText(variantMap["Value"].toString());
+
+    if (variantMap["IsPublic"].toBool())
+        setOptions(variantMap["Options"].toStringList());
 }
 
 QVariantMap OptionAction::toVariantMap() const
@@ -165,9 +179,14 @@ QVariantMap OptionAction::toVariantMap() const
     auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
-        { "Options", getOptions() },
         { "Value", getCurrentText() }
     });
+
+    if (isPublic()) {
+        variantMap.insert({
+            { "Options", getOptions() }
+        });
+    }
 
     return variantMap;
 }
@@ -218,10 +237,8 @@ void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
 
     _currentIndex = currentIndex;
 
-    // Update the current index so that it respects the underlying model
     updateCurrentIndex();
 
-    // Notify others that the current index and text changed
     emit currentIndexChanged(_currentIndex);
     emit currentTextChanged(getCurrentText());
 }
@@ -238,7 +255,6 @@ void OptionAction::setDefaultIndex(const std::int32_t& defaultIndex)
 
     _defaultIndex = defaultIndex;
 
-    // Notify others that the default index changed
     emit defaultIndexChanged(_defaultIndex);
 }
 
@@ -291,19 +307,13 @@ QString OptionAction::getCurrentText() const
 
 void OptionAction::setCurrentText(const QString& currentText)
 {
-    if (currentText.isEmpty()) {
-        setCurrentIndex(-1);
-    }
-    else {
-        if (currentText == getCurrentText())
-            return;
+    if (currentText == getCurrentText())
+        return;
 
-        if (hasOption(currentText))
-            _currentIndex = getModel()->match(getModel()->index(0, 0), Qt::DisplayRole, currentText).first().row();
+    _currentIndex = hasOption(currentText) ? getModel()->match(getModel()->index(0, 0), Qt::DisplayRole, currentText).first().row() : -1;
 
-        emit currentTextChanged(getCurrentText());
-        emit currentIndexChanged(_currentIndex);
-    }
+    emit currentTextChanged(getCurrentText());
+    emit currentIndexChanged(_currentIndex);
 }
 
 bool OptionAction::hasSelection() const
@@ -318,7 +328,6 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     setObjectName("ComboBox");
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    // Update tooltips
     const auto updateToolTip = [this, optionAction]() -> void {
         setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
     };
@@ -332,23 +341,17 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         setCurrentText(optionAction->getCurrentText());
     };
 
-    // Assign option action model to combobox
     const auto updateComboBoxModel = [this, optionAction, updateToolTip, updateReadOnlyAndSelection]() -> void {
-
-        // Prevent signals from being emitted
         QSignalBlocker comboBoxSignalBlocker(this);
 
-        // Disconnect from any previous list model
         if (model()) {
             disconnect(model(), &QAbstractItemModel::layoutChanged, this, nullptr);
             disconnect(model(), &QAbstractItemModel::rowsInserted, this, nullptr);
             disconnect(model(), &QAbstractItemModel::rowsRemoved, this, nullptr);
         }
 
-        // Update model and enable/disable based on the row count
         setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
 
-        // Enable/disable the combobox depending on the number of options
         connect(model(), &QAbstractItemModel::layoutChanged, this, updateReadOnlyAndSelection);
         connect(model(), &QAbstractItemModel::rowsInserted, this, updateReadOnlyAndSelection);
         connect(model(), &QAbstractItemModel::rowsRemoved, this, updateReadOnlyAndSelection);
@@ -358,26 +361,18 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         updateReadOnlyAndSelection();
     };
 
-    // Assign model when changed in the option action
     connect(optionAction, &OptionAction::modelChanged, this, updateComboBoxModel);
 
-    // Update combobox selection when the action changes
     const auto updateComboBoxSelection = [this, optionAction]() -> void {
-
-        // Only proceed if the current text changed
         if (optionAction->getCurrentText() == currentText())
             return;
 
-        // Prevent signals from being emitted
         QSignalBlocker comboBoxSignalBlocker(this);
 
         setCurrentText(optionAction->getCurrentText());
     };
 
-    // Update the combobox selection and tooltip when the option action selection changes
     connect(optionAction, &OptionAction::currentTextChanged, this, [this, updateComboBoxSelection, updateToolTip](const QString& currentText) {
-
-        // Prevent signals from being emitted
         QSignalBlocker comboBoxSignalBlocker(this);
 
         updateComboBoxSelection();
@@ -386,17 +381,14 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         update();
     });
 
-    // Update the combobox placeholder string when the action placeholder string changes
     connect(optionAction, &OptionAction::placeholderStringChanged, this, [this]() -> void {
         update();
     });
 
-    // Update the option action when the combobox selection changes
     connect(this, qOverload<int>(&QComboBox::activated), this, [this, optionAction](const int& currentIndex) {
         optionAction->setCurrentIndex(currentIndex);
     });
 
-    // Perform initial updates
     updateReadOnlyAndSelection();
     updateComboBoxModel();
     updateComboBoxSelection();
@@ -409,7 +401,6 @@ void OptionAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
 
     painter->setPen(palette().color(QPalette::Text));
 
-    // Draw the combobox frame, focus rectangle and selected etc.
     auto styleOptionComboBox = QStyleOptionComboBox();
 
     initStyleOption(&styleOptionComboBox);
@@ -439,43 +430,32 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     _completer.setCompletionColumn(0);
     _completer.setCompletionMode(QCompleter::PopupCompletion);
 
-    // Update completer model
     const auto updateCompleterModel = [this, optionAction]() {
         _completer.setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
     };
 
-    // Update completer model when the option action model changes
     connect(optionAction, &OptionAction::modelChanged, this, updateCompleterModel);
 
-    // Update line edit text when the current option changes
     const auto updateText = [this, optionAction]() -> void {
-
-        // Prevent signals from being emitted
         QSignalBlocker lineEditBlocker(this);
 
-        // Update text
         setText(optionAction->getCurrentText());
     };
 
-    // Update line edit text when the current option changes
     connect(optionAction, &OptionAction::currentTextChanged, this, updateText);
 
-    // Update option action selection when the line edit editing finished
     connect(this, &QLineEdit::editingFinished, this, [this, optionAction]() {
         optionAction->setCurrentText(text());
     });
 
-    // Update option action selection when auto completion activated
     connect(&_completer, QOverload<const QString&>::of(&QCompleter::activated), [this, optionAction](const QString& text) {
         optionAction->setCurrentText(text);
     });
 
-    // Update option action selection when a auto completion item is highlighted
     connect(&_completer, QOverload<const QString&>::of(&QCompleter::highlighted), [this, optionAction](const QString& text) {
         optionAction->setCurrentText(text);
     });
 
-    // Do an initial update of the completer model and update the line edit text
     updateCompleterModel();
     updateText();
 }
@@ -485,7 +465,6 @@ OptionAction::ButtonsWidget::ButtonsWidget(QWidget* parent, OptionAction* option
 {
     setObjectName("Buttons");
 
-    // Create horizontal layout
     QLayout* layout = nullptr;
 
     switch (orientation)
@@ -506,19 +485,13 @@ OptionAction::ButtonsWidget::ButtonsWidget(QWidget* parent, OptionAction* option
 
     std::int32_t optionIndex = 0;
 
-    // Add push button for each option
     for (const auto& option : optionAction->getOptions()) {
-
-        // Create push button for the option
         auto optionPushButton = new QPushButton(option);
 
-        // Set tooltip
         optionPushButton->setToolTip(optionAction->text() + ": " + option);
 
-        // Add the push button to the layout
         layout->addWidget(optionPushButton);
 
-        // Update the current index when the option push button is clicked
         connect(optionPushButton, &QPushButton::clicked, this, [optionAction, optionIndex]() {
             optionAction->setCurrentIndex(optionIndex);
         });
@@ -526,7 +499,6 @@ OptionAction::ButtonsWidget::ButtonsWidget(QWidget* parent, OptionAction* option
         optionIndex++;
     }
 
-    // Apply the layout
     setLayout(layout);
 }
 

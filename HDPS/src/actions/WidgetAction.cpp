@@ -548,6 +548,7 @@ QVariantMap WidgetAction::toVariantMap() const
         { "Visible", QVariant::fromValue(isVisible()) },
         { "SortIndex", QVariant::fromValue(_sortIndex) },
         { "ConnectionPermissions", QVariant::fromValue(_connectionPermissions) },
+        { "IsPublic", QVariant::fromValue(isPublic()) },
         { "PublicActionID", QVariant::fromValue(_publicAction == nullptr ? "" : _publicAction->getId()) }
     });
 
