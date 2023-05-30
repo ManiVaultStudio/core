@@ -223,6 +223,8 @@ QImage ColorMapAction::getColorMapImage() const
 
     auto colorMapImage = filteredModelIndex.siblingAtColumn(static_cast<std::int32_t>(ColorMapModel::Column::Image)).data(Qt::EditRole).value<QImage>();
 
+    colorMapImage = colorMapImage.convertToFormat(QImage::Format_ARGB32);
+
     if (getCustomColorMapAction().isChecked())
         colorMapImage = getEditor1DAction().getColorMapImage();
 

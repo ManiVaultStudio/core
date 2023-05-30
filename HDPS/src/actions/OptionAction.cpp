@@ -103,6 +103,9 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
 
     Q_ASSERT(publicOptionAction != nullptr);
 
+    if (publicOptionAction == nullptr)
+        return;
+
     const auto currentTextChanged = [this, publicOptionAction](const QString& currentText) -> void {
         if (currentText.isEmpty())
             return;
