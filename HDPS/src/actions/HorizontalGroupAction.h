@@ -49,6 +49,9 @@ protected:
 
 public:
 
+    using WidgetFlagsMap = QMap<const WidgetAction*, std::int32_t>;
+    using WidgetFlagsList = QList<std::int32_t>;
+
     /**
      * Constructor
      * @param parent Pointer to parent object
@@ -69,7 +72,7 @@ public:
      * Add \p action to the group
      * @param action Pointer to action to add
      */
-    void addAction(const WidgetAction* action);
+    void addAction(const WidgetAction* action, std::int32_t widgetFlags = -1);
 
     /**
      * Remove \p action from the group
@@ -81,13 +84,19 @@ public:
      * Set actions to \p actions
      * @param actions Widget actions
      */
-    void setActions(const ConstWidgetActions& actions);
+    //void setActions(const ConstWidgetActions& actions);
 
     /**
      * Get actions
      * @return Widget actions
      */
     ConstWidgetActions getActions();
+
+    /**
+     * Get widget flags map (Maps widget action pointer to widget creation flags)
+     * @return Widget flags map
+     */
+    WidgetFlagsMap getWidgetFlagsMap();
 
 signals:
 
@@ -104,8 +113,9 @@ signals:
     void showLabelsChanged(const bool& showLabels);
 
 private:
-    ConstWidgetActions  _actions;       /** Widget actions in the group */
-    bool                _showLabels;    /** Whether to show labels or not */
+    ConstWidgetActions      _actions;           /** Widget actions in the group */
+    WidgetFlagsMap          _widgetFlagsMap;    /** Maps widget action pointer to widget creation flags */
+    bool                    _showLabels;        /** Whether to show labels or not */
 };
 
 }

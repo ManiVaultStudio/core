@@ -9,30 +9,13 @@ using namespace hdps;
 SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _publicActionsModel(this),
-    _actionsWidget(&getWidget(), _publicActionsModel, "Shared Parameter"),
-    _expertModeAction(this, "Expert mode")
+    _actionsWidget(&getWidget(), _publicActionsModel, "Shared Parameter")
 {
     _actionsWidget.getFilterModel().getPublicRootOnlyAction().setChecked(true);
 
-    _expertModeAction.setChecked(false);
-    _expertModeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("user-graduate"));
-    _expertModeAction.setDefaultWidgetFlags(ToggleAction::PushButtonIcon);
-
-    const auto updateExpertModeActionTooltip = [this]() -> void {
-        if (_expertModeAction.isChecked())
-            _expertModeAction.setToolTip("Display all parameter connections (expert mode)");
-        else
-            _expertModeAction.setToolTip("Display simplified parameter connections");
-    };
-
-    updateExpertModeActionTooltip();
-
-    connect(&_expertModeAction, &ToggleAction::toggled, this, [this, updateExpertModeActionTooltip](bool toggled) -> void {
+    connect(&hdps::settings().getParametersSettings().getExpertModeAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {
         _actionsWidget.getFilterModel().getPublicRootOnlyAction().setChecked(!toggled);
-        updateExpertModeActionTooltip();
     });
-
-    _expertModeAction.setChecked(false);
 
     auto& hierarchyWidget = _actionsWidget.getHierarchyWidget();
 
@@ -47,7 +30,8 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::SortIndex), true);
 
     hierarchyWidget.getFilterGroupAction().setPopupSizeHint(QSize(350, 0));
-    hierarchyWidget.getToolbarAction().addAction(&_expertModeAction);
+
+    hierarchyWidget.getToolbarAction().addAction(&hdps::settings().getParametersSettings().getExpertModeAction(), ToggleAction::PushButtonIcon);
 }
 
 void SharedParametersPlugin::init()

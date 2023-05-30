@@ -27,9 +27,8 @@ public:
     void init() override;
 
 private:
-    PublicActionsModel      _publicActionsModel;    /** Public actions model of the top-level public actions and their descendants */
-    ActionsWidget           _actionsWidget;         /** Widget for interaction with shared parameters */
-    gui::ToggleAction       _expertModeAction;      /** In expert mode, all descendants of a root public action are displayed, otherwise they are hidden */
+    PublicActionsModel  _publicActionsModel;    /** Public actions model of the top-level public actions and their descendants */
+    ActionsWidget       _actionsWidget;         /** Widget for interaction with shared parameters */
 };
 
 class ActionsPluginFactory : public ViewPluginFactory

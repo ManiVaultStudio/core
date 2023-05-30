@@ -8,6 +8,7 @@ namespace hdps::gui {
 HorizontalGroupAction::HorizontalGroupAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
     _actions(),
+    _widgetFlagsMap(),
     _showLabels(true)
 {
 }
@@ -27,21 +28,23 @@ void HorizontalGroupAction::setShowLabels(bool showLabels)
     emit showLabelsChanged(_showLabels);
 }
 
-void HorizontalGroupAction::setActions(const ConstWidgetActions& actions)
-{
-    _actions = actions;
-
-    emit actionsChanged(_actions);
-}
+//void HorizontalGroupAction::setActions(const ConstWidgetActions& actions)
+//{
+//    _actions = actions;
+//
+//    emit actionsChanged(_actions);
+//}
 
 ConstWidgetActions HorizontalGroupAction::getActions()
 {
     return _actions;
 }
 
-void HorizontalGroupAction::addAction(const WidgetAction* action)
+void HorizontalGroupAction::addAction(const WidgetAction* action, std::int32_t widgetFlags /*= -1*/)
 {
     _actions << action;
+
+    _widgetFlagsMap[action] = widgetFlags;
 
     QList<std::int32_t> configurationFlagsRequireUpdate{
         static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::NoLabelInGroup),
@@ -73,7 +76,15 @@ void HorizontalGroupAction::removeAction(const WidgetAction* action)
 
     _actions.removeOne(action);
 
+    if (_widgetFlagsMap.contains(action))
+        _widgetFlagsMap.remove(action);
+
     disconnect(action, &WidgetAction::configurationFlagToggled, this, nullptr);
+}
+
+HorizontalGroupAction::WidgetFlagsMap HorizontalGroupAction::getWidgetFlagsMap()
+{
+    return _widgetFlagsMap;
 }
 
 HorizontalGroupAction::Widget::Widget(QWidget* parent, HorizontalGroupAction* horizontalGroupAction, const std::int32_t& widgetFlags) :
@@ -84,7 +95,7 @@ HorizontalGroupAction::Widget::Widget(QWidget* parent, HorizontalGroupAction* ho
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    const auto updateLayout = [this, layout]() -> void {
+    const auto updateLayout = [this, layout, horizontalGroupAction]() -> void {
         QLayoutItem* layoutItem;
 
         while ((layoutItem = layout->takeAt(0)) != nullptr) {
@@ -99,10 +110,21 @@ HorizontalGroupAction::Widget::Widget(QWidget* parent, HorizontalGroupAction* ho
             if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::AlwaysCollapsed))
                 layout->addWidget(const_cast<WidgetAction*>(action)->createCollapsedWidget(this));
             else {
-                if (action->getStretch() >= 1)
-                    layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this), action->getStretch());
-                else
-                    layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this));
+                const auto widgetFlags = horizontalGroupAction->getWidgetFlagsMap()[action];
+
+                if (action->getStretch() >= 1) {
+                    if (widgetFlags >= 0)
+                        layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this, widgetFlags), action->getStretch());
+                    else
+                        layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this), action->getStretch());
+                }
+                else {
+                    if (widgetFlags >= 0)
+                        layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this, widgetFlags));
+                    else
+                        layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this));
+                }
+                    
             }
         }
     };

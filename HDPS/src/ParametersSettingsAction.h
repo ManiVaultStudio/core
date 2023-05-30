@@ -28,10 +28,12 @@ public: // Action getters
 
     gui::ToggleAction& getAskForSharedParameterNameAction() { return _askForSharedParameterNameAction; }
     gui::ToggleAction& getConfirmRemoveSharedParameterAction() { return _confirmRemoveSharedParameterAction; }
+    gui::ToggleAction& getExpertModeAction() { return _expertModeAction; }
 
 private:
     gui::ToggleAction   _askForSharedParameterNameAction;       /** Toggle between asking for a name when publishing an action or not */
     gui::ToggleAction   _confirmRemoveSharedParameterAction;    /** Toggle asking for confirmation prior to removal of public action */
+    gui::ToggleAction   _expertModeAction;                      /** In expert mode, all descendants of a root public action are displayed, otherwise they are hidden */
 };
 
 }
