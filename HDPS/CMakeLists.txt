@@ -454,7 +454,7 @@ endif()
 # Install examples
 add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault examples"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+    COMMAND ${CMAKE_COMMAND} -E $<IF:$<VERSION_LESS:${CMAKE_VERSION},3.26.0>,copy_directory,copy_directory_if_different>  # copy_directory_if_different is only available starting 3.26
             ${CMAKE_CURRENT_SOURCE_DIR}/res/examples
             ${INSTALL_DIR}/$<CONFIGURATION>/examples
 )
