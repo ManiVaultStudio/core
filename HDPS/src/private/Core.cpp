@@ -17,6 +17,8 @@
 
 #include <algorithm>
 
+#include <QEventLoop>
+
 //#define CORE_VERBOSE
 
 using namespace hdps;
@@ -413,7 +415,13 @@ Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString
             if (Application::current()->getSetting("AskForGroupName", true).toBool()) {
                 GroupDataDialog groupDataDialog(nullptr, datasets);
 
-                if (groupDataDialog.exec() == 1)
+                groupDataDialog.open();
+
+                QEventLoop eventLoop;
+                QObject::connect(&groupDataDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                eventLoop.exec();
+
+                if (groupDataDialog.result() == QDialog::Accepted)
                     return createGroupDataset(groupDataDialog.getGroupName());
                 else
                     return Dataset<DatasetImpl>();

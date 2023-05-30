@@ -15,6 +15,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QGridLayout>
+#include <QEventLoop>
 
 #include <exception>
 
@@ -387,7 +388,13 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                     disableReadOnlyAction.setEnabled(project.getReadOnlyAction().isChecked());
                 });
 
-                if (fileDialog.exec() == 0)
+                fileDialog.open();
+
+                QEventLoop eventLoop;
+                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                eventLoop.exec();
+
+                if (fileDialog.result() != QDialog::Accepted)
                     return;
 
                 if (fileDialog.selectedFiles().count() != 1)
@@ -569,7 +576,14 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                     currentProject->getCompressionAction().getLevelAction().setValue(project.getCompressionAction().getLevelAction().getValue());
                 });
 
-                fileDialog.exec();
+                fileDialog.open();
+
+                QEventLoop eventLoop;
+                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                eventLoop.exec();
+
+                if (fileDialog.result() != QDialog::Accepted)
+                    return;
 
                 if (fileDialog.selectedFiles().count() != 1)
                     throw std::runtime_error("Only one file may be selected");
@@ -773,7 +787,14 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     currentProject->getCompressionAction().getLevelAction().setValue(project.getCompressionAction().getLevelAction().getValue());
                 });
 
-                fileDialog.exec();
+                fileDialog.open();
+
+                QEventLoop eventLoop;
+                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                eventLoop.exec();
+
+                if (fileDialog.result() != QDialog::Accepted)
+                    return;
 
                 if (fileDialog.selectedFiles().count() != 1)
                     throw std::runtime_error("Only one file may be selected");

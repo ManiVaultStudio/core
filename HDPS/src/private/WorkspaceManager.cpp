@@ -22,6 +22,7 @@
 #include <QTemporaryDir>
 #include <QBuffer>
 #include <QOpenGLWidget>
+#include <QEventLoop>
 
 #include <exception>
 
@@ -305,7 +306,13 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                     //    image.setPixmap(QPixmap::fromImage(Workspace::getPreviewImage(filePath).scaledToWidth(650, Qt::SmoothTransformation)));
                 });
 
-                if (fileDialog.exec() == 0)
+                fileDialog.open();
+
+                QEventLoop eventLoop;
+                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                eventLoop.exec();
+
+                if (fileDialog.result() != QDialog::Accepted)
                     return;
 
                 if (fileDialog.selectedFiles().count() != 1)
@@ -353,7 +360,13 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*
         fileDialog.setDefaultSuffix(".hdps");
         fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
-        if (fileDialog.exec() == 0)
+        fileDialog.open();
+
+        QEventLoop eventLoop;
+        QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+        eventLoop.exec();
+
+        if (fileDialog.result() != QDialog::Accepted)
             return;
 
         if (fileDialog.selectedFiles().count() != 1)
@@ -434,7 +447,13 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/, bool addToRecent
 
                 fileDialogLayout->addLayout(titleLayout, rowCount, 1, 1, 2);
 
-                if (fileDialog.exec() == 0)
+                fileDialog.open();
+
+                QEventLoop eventLoop;
+                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                eventLoop.exec();
+
+                if (fileDialog.result() != QDialog::Accepted)
                     return;
 
                 if (fileDialog.selectedFiles().count() != 1)
