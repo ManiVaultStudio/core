@@ -57,6 +57,9 @@ std::uint32_t OptionAction::getNumberOfOptions() const
 
 bool OptionAction::hasOption(const QString& option) const
 {
+    if (option.isEmpty())
+        return false;
+
     return getModel()->match(getModel()->index(0, 0), Qt::DisplayRole, option).count() == 1;
 }
 
@@ -106,6 +109,22 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
     if (publicOptionAction == nullptr)
         return;
 
+    const auto updatePublicOptions = [this, publicOptionAction]() -> void {
+        auto publicOptions = publicOptionAction->getOptions();
+
+        publicOptions << getOptions();
+
+        publicOptions.removeDuplicates();
+        publicOptions.sort();
+
+        publicOptionAction->setOptions(publicOptions);
+    };
+
+    updatePublicOptions();
+
+    if (publicOptionAction->getCurrentText().isEmpty() && !getCurrentText().isEmpty())
+        publicOptionAction->setCurrentText(getCurrentText());
+
     const auto currentTextChanged = [this, publicOptionAction](const QString& currentText) -> void {
         if (currentText.isEmpty())
             return;
@@ -113,30 +132,15 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
         publicOptionAction->setCurrentText(currentText);
     };
 
-    connect(this, &OptionAction::currentTextChanged, publicOptionAction, currentTextChanged);
+    connect(this, &OptionAction::currentTextChanged, this, currentTextChanged);
     
     connect(publicOptionAction, &OptionAction::currentTextChanged, this, [this, publicOptionAction, currentTextChanged](const QString& currentText) -> void {
-        disconnect(this, &OptionAction::currentTextChanged, publicOptionAction, nullptr);
+        disconnect(this, &OptionAction::currentTextChanged, this, nullptr);
         {
-            if (hasOption(currentText))
-                setCurrentText(currentText);
-            else
-                setCurrentIndex(-1);
+            setCurrentText(currentText);
         }
-        connect(this, &OptionAction::currentTextChanged, publicOptionAction, currentTextChanged);
+        connect(this, &OptionAction::currentTextChanged, this, currentTextChanged);
     });
-
-    const auto updatePublicOptions = [this, publicOptionAction]() -> void {
-        auto publicOptions = publicOptionAction->getOptions();
-
-        publicOptions << getOptions();
-
-        publicOptions.removeDuplicates();
-
-        publicOptionAction->setOptions(publicOptions);
-    };
-
-    updatePublicOptions();
 
     connect(this, &OptionAction::modelChanged, this, updatePublicOptions);
 
@@ -157,7 +161,7 @@ void OptionAction::disconnectFromPublicAction(bool recursive)
     if (publicOptionAction == nullptr)
         return;
 
-    disconnect(this, &OptionAction::currentTextChanged, publicOptionAction, nullptr);
+    disconnect(this, &OptionAction::currentTextChanged, this, nullptr);
     disconnect(this, &OptionAction::modelChanged, this, nullptr);
     disconnect(publicOptionAction, &OptionAction::currentTextChanged, this, nullptr);
 

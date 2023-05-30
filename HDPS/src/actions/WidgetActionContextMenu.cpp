@@ -171,7 +171,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         _disconnectAction.setText("Disconnect...");
     else {
         if (privateActions.count() == 1)
-            _disconnectAction.setText(QString("Disconnect %1").arg(privateActions.first()->text()));
+            _disconnectAction.setText("Disconnect...");
         else
             _disconnectAction.setText(QString("Disconnect %1 parameter(s)").arg(QString::number(privateActions.count())));
     }
