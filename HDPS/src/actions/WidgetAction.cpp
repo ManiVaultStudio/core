@@ -272,19 +272,33 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
 
 void WidgetAction::connectToPublicActionByName(const QString& publicActionName)
 {
-    Q_ASSERT(!publicActionName.isEmpty());
+    try
+    {
+        Q_ASSERT(!publicActionName.isEmpty());
 
-    if (publicActionName.isEmpty())
-        return;
+        if (publicActionName.isEmpty())
+            throw std::runtime_error("Public action name is empty");
 
-    /*
-    auto& model = Application::core()->getActionsManager().getModel();
+        ActionsListModel actionsListModel(this);
 
-    const auto matches = model.match(model.index(0, 0), Qt::DisplayRole, publicActionName, -1, Qt::MatchFlag::MatchRecursive);
+        auto action = actionsListModel.getAction(publicActionName);
 
-    if (matches.count() == 1)
-        connectToPublicAction(matches.first().data(Qt::UserRole + 1).value<WidgetAction*>());
-    */
+        if (action == nullptr)
+            throw std::runtime_error(QString("Public action %1 not found in the actions database").arg(publicActionName).toLatin1());
+
+        if (!action->isPublic()) 
+            throw std::runtime_error(QString("%1 is not public").arg(publicActionName).toLatin1());
+
+        connectToPublicAction(action, true);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to connect to public action by name", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to connect to public action by name");
+    }
 }
 
 void WidgetAction::startDrag()

@@ -430,6 +430,13 @@ public:
     gui::WidgetAction* getAction(std::int32_t rowIndex);
 
     /**
+     * Get action by \p name
+     * @param name Name of the action
+     * @return Pointer to action (nullptr if not found)
+     */
+    gui::WidgetAction* getAction(const QString& name);
+
+    /**
      * Get model index for \p action and column
      * @param action Pointer to action to retrieve the model index for
      * @param column Column to retrieve the action index for

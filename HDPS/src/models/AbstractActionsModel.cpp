@@ -655,6 +655,19 @@ WidgetAction* AbstractActionsModel::getAction(std::int32_t rowIndex)
     return static_cast<Item*>(item(rowIndex, 0))->getAction();
 }
 
+WidgetAction* AbstractActionsModel::getAction(const QString& name)
+{
+    const auto matches = match(index(0, 0), Qt::DisplayRole, name, -1, Qt::MatchFlag::MatchRecursive);
+
+    if (matches.isEmpty())
+        return nullptr;
+
+    if (matches.count() > 1)
+        throw std::runtime_error(QString("Found more than one action with the name: %1").arg(name).toLatin1());
+
+    return getAction(matches.first());
+}
+
 QModelIndex AbstractActionsModel::getActionIndex(const gui::WidgetAction* action, const Column& column /** = Column::Name */) const
 {
     const auto matches = match(index(0, static_cast<int>(Column::ID), QModelIndex()), Qt::EditRole, action->getId(), 1, Qt::MatchFlag::MatchRecursive | Qt::MatchExactly);
