@@ -301,20 +301,6 @@ void WidgetAction::connectToPublicActionByName(const QString& publicActionName)
     }
 }
 
-void WidgetAction::startDrag()
-{
-    if (!mayConnect(WidgetAction::Gui))
-        return;
-
-    auto drag       = new QDrag(this);
-    auto mimeData   = new WidgetActionMimeData(this);
-
-    drag->setMimeData(mimeData);
-    drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(QSize(12, 12)));
-
-    drag->exec();
-}
-
 void WidgetAction::disconnectFromPublicAction(bool recursive)
 {
     Q_ASSERT(_publicAction != nullptr);
@@ -529,6 +515,20 @@ void WidgetAction::restoreConnectionPermissions(bool recursive /*= false*/)
     if (recursive)
         for (auto childAction : getChildActions())
             childAction->restoreConnectionPermissions(recursive);
+}
+
+void WidgetAction::startDrag()
+{
+    if (!mayConnect(WidgetAction::Gui))
+        return;
+
+    auto drag = new QDrag(this);
+    auto mimeData = new WidgetActionMimeData(this);
+
+    drag->setMimeData(mimeData);
+    drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(QSize(12, 12)));
+
+    drag->exec();
 }
 
 void WidgetAction::setSettingsPrefix(const QString& settingsPrefix, const bool& load /*= true*/)

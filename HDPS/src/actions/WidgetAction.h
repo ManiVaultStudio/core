@@ -341,9 +341,6 @@ public: // Connections and publishing
     [[deprecated("This function will be deprecated in version 1.0 of ManiVault, Please establish connections with the connections GUI instead.")]]
     virtual void connectToPublicActionByName(const QString& publicActionName) final;
 
-    /** Start drag process */
-    virtual void startDrag() final;
-
     /**
      * Disconnect this action from its public action
      * @param recursive Whether to also disconnect descendant child actions
@@ -454,6 +451,11 @@ public: // Connection permissions
      * @param recursive Whether to recursively restore child connection permissions
      */
     virtual void restoreConnectionPermissions(bool recursive = false) final;
+
+public: // Drag and drop
+
+    /** Start drag process */
+    virtual void startDrag() final;
 
 public: // Settings
 
