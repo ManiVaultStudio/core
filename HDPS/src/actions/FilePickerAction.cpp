@@ -52,29 +52,32 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title /*= ""*
     connect(&_filePathAction, &StringAction::stringChanged, this, updateStatusAction);
 
     connect(&_pickAction, &TriggerAction::triggered, this, [this]() {
-        QFileDialog fileDialog;
+        QFileDialog* fileDialog = new QFileDialog();
 
-        fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-        fileDialog.setWindowTitle(QString("Open %1").arg(getFileType()));
-        fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-        fileDialog.setFileMode(QFileDialog::ExistingFile);
-        fileDialog.setNameFilters(getNameFilters());
-        fileDialog.setDefaultSuffix(getDefaultSuffix());
-        fileDialog.setDirectory(Application::current()->getSetting(getSettingsPrefix(), QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
-        fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+        fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+        fileDialog->setWindowTitle(QString("Open %1").arg(getFileType()));
+        fileDialog->setAcceptMode(QFileDialog::AcceptOpen);
+        fileDialog->setFileMode(QFileDialog::ExistingFile);
+        fileDialog->setNameFilters(getNameFilters());
+        fileDialog->setDefaultSuffix(getDefaultSuffix());
+        fileDialog->setDirectory(Application::current()->getSetting(getSettingsPrefix(), QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+        fileDialog->setOption(QFileDialog::DontUseNativeDialog, true);
 
-        if (fileDialog.exec() == 0)
-            return;
+		connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
+            if (fileDialog->selectedFiles().count() != 1)
+                throw std::runtime_error("Only one file may be selected");
 
-        if (fileDialog.selectedFiles().count() != 1)
-            throw std::runtime_error("Only one file may be selected");
+            const auto filePath = fileDialog->selectedFiles().first();
 
-        const auto filePath = fileDialog.selectedFiles().first();
+            setFilePath(filePath);
 
-        setFilePath(filePath);
+            if (!getSettingsPrefix().isEmpty())
+                Application::current()->setSetting(getSettingsPrefix(), QFileInfo(filePath).absolutePath());
+			});
+        connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
-        if (!getSettingsPrefix().isEmpty())
-            Application::current()->setSetting(getSettingsPrefix(), QFileInfo(filePath).absolutePath());
+        fileDialog->open();
+
     });
 
     connect(&_filePathAction, &StringAction::stringChanged, this, &FilePickerAction::filePathChanged);

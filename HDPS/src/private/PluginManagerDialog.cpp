@@ -116,7 +116,7 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
 
 void PluginManagerDialog::create()
 {
-    PluginManagerDialog loadedPluginsDialog;
-
-    loadedPluginsDialog.exec();
+    PluginManagerDialog* loadedPluginsDialog = new PluginManagerDialog();
+    connect(loadedPluginsDialog, &PluginManagerDialog::finished, loadedPluginsDialog, &PluginManagerDialog::deleteLater);
+    loadedPluginsDialog->open();
 }

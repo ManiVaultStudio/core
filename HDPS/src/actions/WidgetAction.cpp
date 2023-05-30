@@ -154,10 +154,10 @@ void WidgetAction::publish(const QString& name /*= ""*/)
         if (name.isEmpty()) {
             auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-            QDialog publishDialog;
+            QDialog* publishDialog = new QDialog();
 
-            publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
-            publishDialog.setWindowTitle("Publish " + text() + " parameter");
+            publishDialog->setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
+            publishDialog->setWindowTitle("Publish " + text() + " parameter");
 
             auto mainLayout         = new QVBoxLayout();
             auto parameterLayout    = new QHBoxLayout();
@@ -175,13 +175,13 @@ void WidgetAction::publish(const QString& name /*= ""*/)
             dialogButtonBox->button(QDialogButtonBox::Ok)->setToolTip("Publish the parameter");
             dialogButtonBox->button(QDialogButtonBox::Cancel)->setToolTip("Cancel publishing");
 
-            connect(dialogButtonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, &publishDialog, &QDialog::accept);
-            connect(dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, &publishDialog, &QDialog::reject);
+            connect(dialogButtonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, publishDialog, &QDialog::accept);
+            connect(dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, publishDialog, &QDialog::reject);
 
             mainLayout->addWidget(dialogButtonBox);
 
-            publishDialog.setLayout(mainLayout);
-            publishDialog.setFixedWidth(300);
+            publishDialog->setLayout(mainLayout);
+            publishDialog->setFixedWidth(300);
 
             const auto updateOkButtonReadOnly = [dialogButtonBox, lineEdit]() -> void {
                 dialogButtonBox->button(QDialogButtonBox::Ok)->setEnabled(!lineEdit->text().isEmpty());
@@ -191,8 +191,12 @@ void WidgetAction::publish(const QString& name /*= ""*/)
 
             updateOkButtonReadOnly();
 
-            if (publishDialog.exec() == QDialog::Accepted)
+            connect(publishDialog, &QDialog::accepted, this, [this, &lineEdit]() -> void {
                 publish(lineEdit->text());
+                });
+            connect(publishDialog, &QDialog::finished, publishDialog, &QDialog::deleteLater);
+
+            publishDialog->open();
         }
         else {
             if (isPublished())

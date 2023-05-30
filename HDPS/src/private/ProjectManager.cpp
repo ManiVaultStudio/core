@@ -122,8 +122,9 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     });
 
     connect(&_newProjectFromWorkspaceAction, &QAction::triggered, this, [this]() -> void {
-        NewProjectDialog newProjectDialog;
-        newProjectDialog.exec();
+        NewProjectDialog* dialog = new NewProjectDialog();
+        connect(dialog, &NewProjectDialog::finished, dialog, &NewProjectDialog::deleteLater);
+        dialog->open();
     });
 
     connect(&_openProjectAction, &QAction::triggered, this, [this]() -> void {
@@ -149,8 +150,9 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     });
 
     connect(&_editProjectSettingsAction, &TriggerAction::triggered, this, []() -> void {
-        ProjectSettingsDialog projectSettingsDialog;
-        projectSettingsDialog.exec();
+        ProjectSettingsDialog* dialog = new ProjectSettingsDialog();
+        connect(dialog, &ProjectSettingsDialog::finished, dialog, &ProjectSettingsDialog::deleteLater);
+        dialog->open();
     });
 
     connect(&_importDataMenu, &QMenu::aboutToShow, this, [this]() -> void {
