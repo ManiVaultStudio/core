@@ -66,8 +66,10 @@ bool OptionsAction::hasOptions() const
     return _optionsModel.rowCount() >= 1;
 }
 
-void OptionsAction::setOptions(const QStringList& options)
+void OptionsAction::setOptions(const QStringList& options, bool clearSelection /*= false*/)
 {
+    const auto selectedOptions = getSelectedOptions();
+
     _optionsModel.clear();
 
     for (const auto& option : options) {
@@ -77,7 +79,7 @@ void OptionsAction::setOptions(const QStringList& options)
 
         item->setText(option);
         item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-        item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        item->setData(clearSelection ? Qt::Unchecked : (selectedOptions.contains(option) ? Qt::Checked : Qt::Unchecked), Qt::CheckStateRole);
 
         _optionsModel.setItem(row, 0, item);
     }
@@ -151,6 +153,9 @@ void OptionsAction::selectOption(const QString& option, const bool& replaceSelec
 
 void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
 {
+    if (selectedOptions == getSelectedOptions())
+        return;
+
     auto previousSelectedOptions = getSelectedOptions();
 
     QSignalBlocker optionsModelBlocker(&_optionsModel);
@@ -183,7 +188,40 @@ void OptionsAction::connectToPublicAction(WidgetAction* publicAction, bool recur
     if (publicOptionsAction == nullptr)
         return;
 
-    connect(this, &OptionsAction::selectedOptionsChanged, this, [this, publicOptionsAction](const QStringList& selectedOptions) -> void {
+    const auto updatePublicOptions = [this, publicOptionsAction]() -> void {
+        auto allOptions = publicOptionsAction->getOptions() + getOptions();
+
+        allOptions.removeDuplicates();
+        allOptions.sort();
+
+        publicOptionsAction->setOptions(allOptions);
+    };
+
+    updatePublicOptions();
+
+    const auto initializeSelectedOptions = [this, publicOptionsAction]() -> void {
+        auto publicSelectedOptions = publicOptionsAction->getSelectedOptions();
+
+        for (auto selectedOption : getSelectedOptions())
+            publicSelectedOptions << selectedOption;
+
+        setSelectedOptions(publicSelectedOptions);
+    };
+
+    initializeSelectedOptions();
+
+    const auto initializePublicOptionsSelection = [this, publicOptionsAction]() -> void {
+        auto publicSelectedOptions = publicOptionsAction->getSelectedOptions();
+
+        for (auto selectedOption : getSelectedOptions())
+            publicSelectedOptions << selectedOption;
+
+        publicOptionsAction->setSelectedOptions(publicSelectedOptions);
+    };
+
+    initializePublicOptionsSelection();
+
+    connect(this, &OptionsAction::selectedOptionsChanged, this, [this, publicOptionsAction]() -> void {
         auto publicSelectedOptions = publicOptionsAction->getSelectedOptions();
 
         for (auto option : getOptions())
@@ -195,19 +233,11 @@ void OptionsAction::connectToPublicAction(WidgetAction* publicAction, bool recur
         publicOptionsAction->setSelectedOptions(publicSelectedOptions);
     });
 
-    connect(publicOptionsAction, &OptionsAction::selectedOptionsChanged, this, [this, publicOptionsAction](const QStringList& selectedOptions) -> void {
+    connect(publicOptionsAction, &OptionsAction::selectedOptionsChanged, this, [this, publicOptionsAction, initializePublicOptionsSelection](const QStringList& selectedOptions) -> void {
         setSelectedOptions(selectedOptions);
     });
 
-    connect(this, &OptionsAction::optionsChanged, this, [this, publicOptionsAction](const QStringList& options) -> void {
-        auto allOptions = publicOptionsAction->getOptions() + options;
-
-        allOptions.removeDuplicates();
-
-        publicOptionsAction->setOptions(allOptions);
-    });
-
-    setSelectedOptions(publicOptionsAction->getSelectedOptions());
+    connect(this, &OptionsAction::optionsChanged, this, updatePublicOptions);
 
     WidgetAction::connectToPublicAction(publicAction, recursive);
 }
@@ -236,9 +266,11 @@ void OptionsAction::fromVariantMap(const QVariantMap& variantMap)
     WidgetAction::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "Value");
-    variantMapMustContain(variantMap, "Options");
+    variantMapMustContain(variantMap, "IsPublic");
 
-    setOptions(variantMap["Options"].toStringList());
+    if (variantMap["IsPublic"].toBool())
+        setOptions(variantMap["Options"].toStringList());
+
     setSelectedOptions(variantMap["Value"].toStringList());
 }
 
@@ -247,9 +279,14 @@ QVariantMap OptionsAction::toVariantMap() const
     auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
-        { "Options", getOptions() },
         { "Value", getSelectedOptions() }
     });
+
+    if (isPublic()) {
+        variantMap.insert({
+            { "Options", getOptions() }
+        });
+    }
 
     return variantMap;
 }

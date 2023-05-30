@@ -234,8 +234,9 @@ public:
     /**
      * Set the available options
      * @param options Available Options
+     * @param clearSelection Whether to clear the current selection
      */
-    void setOptions(const QStringList& options);
+    void setOptions(const QStringList& options, bool clearSelection = false);
 
     /**
      * Get selected options

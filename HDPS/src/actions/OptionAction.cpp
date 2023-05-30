@@ -123,7 +123,7 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
         connect(this, &OptionAction::currentTextChanged, publicOptionAction, currentTextChanged);
     });
 
-    const auto updatePublicActionOptions = [this, publicOptionAction]() -> void {
+    const auto updatePublicOptions = [this, publicOptionAction]() -> void {
         auto publicOptions = publicOptionAction->getOptions();
 
         publicOptions << getOptions();
@@ -133,9 +133,9 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
         publicOptionAction->setOptions(publicOptions);
     };
 
-    updatePublicActionOptions();
+    updatePublicOptions();
 
-    connect(this, &OptionAction::modelChanged, this, updatePublicActionOptions);
+    connect(this, &OptionAction::modelChanged, this, updatePublicOptions);
 
     setCurrentText(publicOptionAction->getCurrentText());
 
@@ -168,10 +168,10 @@ void OptionAction::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "Value");
     variantMapMustContain(variantMap, "IsPublic");
 
-    setCurrentText(variantMap["Value"].toString());
-
     if (variantMap["IsPublic"].toBool())
         setOptions(variantMap["Options"].toStringList());
+
+    setCurrentText(variantMap["Value"].toString());
 }
 
 QVariantMap OptionAction::toVariantMap() const
