@@ -93,6 +93,8 @@ public:
         DisconnectViaGui        = 0x00080,                              /** Widget may disconnect from a public action via the GUI */
         DisconnectViaApiAndGui  = DisconnectViaApi | DisconnectViaGui,  /** Widget may disconnect from a public action via the API and the GUI */
 
+        ForceNone               = 0x00100,                              /** Disables all connection options (API and GUI), regardless of other connection permission flags */
+
         All     = PublishViaApiAndGui | ConnectViaApiAndGui | DisconnectViaApiAndGui,
         Default = All
     };
@@ -336,7 +338,7 @@ public: // Connections and publishing
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
      */
-    [[deprecated("This function will be deprecated in version 1.0 of ManiVault, Please establish connections with the connections GUI in stead.")]]
+    [[deprecated("This function will be deprecated in version 1.0 of ManiVault, Please establish connections with the connections GUI instead.")]]
     virtual void connectToPublicActionByName(const QString& publicActionName) final;
 
     /** Start drag process */
@@ -428,6 +430,12 @@ public: // Connection permissions
      * @param recursive Whether to recursively set child connection permissions
      */
     virtual void setConnectionPermissionsToNone(bool recursive = false) final;
+
+    /**
+     * Set connection permissions to force none (connections fully disabled, regardless of other connection permission flags)
+     * @param recursive Whether to recursively set child connection permissions
+     */
+    virtual void setConnectionPermissionsToForceNone(bool recursive = false) final;
 
     /**
      * Set connection permissions to all

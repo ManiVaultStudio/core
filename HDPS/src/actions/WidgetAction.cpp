@@ -382,6 +382,9 @@ WidgetActions& WidgetAction::getConnectedActions()
 
 bool WidgetAction::mayPublish(ConnectionContextFlag connectionContextFlags) const
 {
+    if (_connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ForceNone))
+        return false;
+
     switch (connectionContextFlags)
     {
         case WidgetAction::Api:
@@ -398,6 +401,120 @@ bool WidgetAction::mayPublish(ConnectionContextFlag connectionContextFlags) cons
     }
 
     return false;
+}
+
+bool WidgetAction::mayConnect(ConnectionContextFlag connectionContextFlags) const
+{
+    if (_connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ForceNone))
+        return false;
+
+    switch (connectionContextFlags)
+    {
+    case WidgetAction::Api:
+        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaApi);
+
+    case WidgetAction::Gui:
+        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaGui);
+
+    case WidgetAction::ApiAndGui:
+        break;
+
+    default:
+        break;
+    }
+
+    return false;
+}
+
+bool WidgetAction::mayDisconnect(ConnectionContextFlag connectionContextFlags) const
+{
+    if (_connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ForceNone))
+        return false;
+
+    switch (connectionContextFlags)
+    {
+    case hdps::gui::WidgetAction::Api:
+        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi);
+
+    case hdps::gui::WidgetAction::Gui:
+        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaGui);
+
+    case hdps::gui::WidgetAction::ApiAndGui:
+        break;
+
+    default:
+        break;
+    }
+
+    return false;
+}
+
+std::int32_t WidgetAction::getConnectionPermissions() const
+{
+    return _connectionPermissions;
+}
+
+bool WidgetAction::isConnectionPermissionFlagSet(ConnectionPermissionFlag connectionPermissionsFlag)
+{
+    return _connectionPermissions & static_cast<std::int32_t>(connectionPermissionsFlag);
+}
+
+void WidgetAction::setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset /*= false*/, bool recursive /*= false*/)
+{
+    if (unset)
+        _connectionPermissions = _connectionPermissions & ~static_cast<std::int32_t>(connectionPermissionsFlag);
+    else
+        _connectionPermissions |= static_cast<std::int32_t>(connectionPermissionsFlag);
+
+    emit connectionPermissionsChanged(_connectionPermissions);
+
+    if (recursive)
+        for (auto childAction : getChildActions())
+            childAction->setConnectionPermissionsFlag(connectionPermissionsFlag, unset, recursive);
+}
+
+void WidgetAction::setConnectionPermissions(std::int32_t connectionPermissions, bool recursive /*= false*/)
+{
+    _connectionPermissions = connectionPermissions;
+
+    emit connectionPermissionsChanged(_connectionPermissions);
+
+    if (recursive)
+        for (auto childAction : getChildActions())
+            childAction->setConnectionPermissions(connectionPermissions, recursive);
+}
+
+void WidgetAction::setConnectionPermissionsToNone(bool recursive /*= false*/)
+{
+    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None), recursive);
+}
+
+void WidgetAction::setConnectionPermissionsToForceNone(bool recursive /*= false*/)
+{
+    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::ForceNone), recursive);
+}
+
+void WidgetAction::setConnectionPermissionsToAll(bool recursive /*= false*/)
+{
+    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::All), recursive);
+}
+
+void WidgetAction::cacheConnectionPermissions(bool recursive /*= false*/)
+{
+    _cachedConnectionPermissions = _connectionPermissions;
+
+    if (recursive)
+        for (auto childAction : getChildActions())
+            childAction->cacheConnectionPermissions(recursive);
+}
+
+void WidgetAction::restoreConnectionPermissions(bool recursive /*= false*/)
+{
+    setConnectionPermissions(_cachedConnectionPermissions);
+
+    if (recursive)
+        for (auto childAction : getChildActions())
+            childAction->restoreConnectionPermissions(recursive);
 }
 
 void WidgetAction::setSettingsPrefix(const QString& settingsPrefix, const bool& load /*= true*/)
@@ -553,109 +670,6 @@ QVariantMap WidgetAction::toVariantMap() const
     });
 
     return variantMap;
-}
-
-bool WidgetAction::mayConnect(ConnectionContextFlag connectionContextFlags) const
-{
-    switch (connectionContextFlags)
-    {
-        case WidgetAction::Api:
-            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaApi);
-
-        case WidgetAction::Gui:
-            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaGui);
-
-        case WidgetAction::ApiAndGui:
-            break;
-
-        default:
-            break;
-    }
-
-    return false;
-}
-
-bool WidgetAction::mayDisconnect(ConnectionContextFlag connectionContextFlags) const
-{
-    switch (connectionContextFlags)
-    {
-        case hdps::gui::WidgetAction::Api:
-            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi);
-
-        case hdps::gui::WidgetAction::Gui:
-            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaGui);
-
-        case hdps::gui::WidgetAction::ApiAndGui:
-            break;
-
-        default:
-            break;
-    }
-
-    return false;
-}
-
-std::int32_t WidgetAction::getConnectionPermissions() const
-{
-    return _connectionPermissions;
-}
-
-bool WidgetAction::isConnectionPermissionFlagSet(ConnectionPermissionFlag connectionPermissionsFlag)
-{
-    return _connectionPermissions & static_cast<std::int32_t>(connectionPermissionsFlag);
-}
-
-void WidgetAction::setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset /*= false*/, bool recursive /*= false*/)
-{
-    if (unset)
-        _connectionPermissions = _connectionPermissions & ~static_cast<std::int32_t>(connectionPermissionsFlag);
-    else
-        _connectionPermissions |= static_cast<std::int32_t>(connectionPermissionsFlag);
-
-    emit connectionPermissionsChanged(_connectionPermissions);
-
-    if (recursive)
-        for (auto childAction : getChildActions())
-            childAction->setConnectionPermissionsFlag(connectionPermissionsFlag, unset, recursive);
-}
-
-void WidgetAction::setConnectionPermissions(std::int32_t connectionPermissions, bool recursive /*= false*/)
-{
-    _connectionPermissions = connectionPermissions;
-
-    emit connectionPermissionsChanged(_connectionPermissions);
-
-    if (recursive)
-        for (auto childAction : getChildActions())
-            childAction->setConnectionPermissions(connectionPermissions, recursive);
-}
-
-void WidgetAction::setConnectionPermissionsToNone(bool recursive /*= false*/)
-{
-    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None), recursive);
-}
-
-void WidgetAction::setConnectionPermissionsToAll(bool recursive /*= false*/)
-{
-    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::All), recursive);
-}
-
-void WidgetAction::cacheConnectionPermissions(bool recursive /*= false*/)
-{
-    _cachedConnectionPermissions = _connectionPermissions;
-
-    if (recursive)
-        for (auto childAction : getChildActions())
-            childAction->cacheConnectionPermissions(recursive);
-}
-
-void WidgetAction::restoreConnectionPermissions(bool recursive /*= false*/)
-{
-    setConnectionPermissions(_cachedConnectionPermissions);
-
-    if (recursive)
-        for (auto childAction : getChildActions())
-            childAction->restoreConnectionPermissions(recursive);
 }
 
 bool WidgetAction::isResettable()
