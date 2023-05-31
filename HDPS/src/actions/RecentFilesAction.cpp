@@ -24,8 +24,9 @@ RecentFilesAction::RecentFilesAction(QObject* parent, const QString& settingsKey
     initialize(settingsKey, fileType, shortcutPrefix, icon);
 
     connect(&_editAction, &TriggerAction::triggered, this, [this]() -> void {
-        Dialog dialog(this);
-        dialog.exec();
+        auto* dialog = new Dialog(this);
+        connect(dialog, &Dialog::finished, dialog, &Dialog::deleteLater);
+        dialog->open();
     });
 }
 

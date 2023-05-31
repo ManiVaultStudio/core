@@ -380,65 +380,72 @@ OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
     connect(&_optionsAction, &OptionsAction::selectedOptionsChanged, this, updateReadOnly);
 
     connect(&_loadSelectionAction, &TriggerAction::triggered, this, [this]() -> void {
-        QFileDialog fileDialog;
+        auto* fileDialog = new QFileDialog();
 
-        fileDialog.setWindowTitle("Open selection from file");
-        fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-        fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-        fileDialog.setFileMode(QFileDialog::ExistingFile);
-        fileDialog.setNameFilters({ "Selection files (*.json)" });
-        fileDialog.setDefaultSuffix(".json");
-        //fileDialog.setDirectory(ApplicationgetSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+        fileDialog->setWindowTitle("Open selection from file");
+        fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+        fileDialog->setAcceptMode(QFileDialog::AcceptOpen);
+        fileDialog->setFileMode(QFileDialog::ExistingFile);
+        fileDialog->setNameFilters({ "Selection files (*.json)" });
+        fileDialog->setDefaultSuffix(".json");
+        //fileDialog->setDirectory(ApplicationgetSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
-        if (fileDialog.exec() == 0)
-            return;
+        connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
+            if (fileDialog->selectedFiles().count() != 1)
+                throw std::runtime_error("Only one file may be selected");
 
-        if (fileDialog.selectedFiles().count() != 1)
-            throw std::runtime_error("Only one file may be selected");
+            QFile jsonFile(fileDialog->selectedFiles().first());
 
-        QFile jsonFile(fileDialog.selectedFiles().first());
+            jsonFile.open(QFile::ReadOnly);
 
-        jsonFile.open(QFile::ReadOnly);
+            const auto jsonDocument = QJsonDocument::fromJson(jsonFile.readAll());
+            const auto variantMap = jsonDocument.toVariant().toMap();
+            const auto selection = variantMap["selection"].toStringList();
 
-        const auto jsonDocument = QJsonDocument::fromJson(jsonFile.readAll());
-        const auto variantMap = jsonDocument.toVariant().toMap();
-        const auto selection = variantMap["selection"].toStringList();
+            _optionsAction.setSelectedOptions(selection);
 
-        _optionsAction.setSelectedOptions(selection);
+            _loadSelectionAction.setEnabled(false);
+            });
+        connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
-        _loadSelectionAction.setEnabled(false);
+        fileDialog->open();
+
     });
 
     connect(&_saveSelectionAction, &TriggerAction::triggered, this, [this]() -> void {
-        QFileDialog fileDialog;
+        auto* fileDialog = new QFileDialog();
 
-        fileDialog.setWindowTitle("Save selection to file");
-        fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-        fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-        fileDialog.setNameFilters({ "Selection files (*.json)" });
-        fileDialog.setDefaultSuffix(".json");
-        fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-        //fileDialog.setDirectory(getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+        fileDialog->setWindowTitle("Save selection to file");
+        fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+        fileDialog->setAcceptMode(QFileDialog::AcceptSave);
+        fileDialog->setNameFilters({ "Selection files (*.json)" });
+        fileDialog->setDefaultSuffix(".json");
+        fileDialog->setOption(QFileDialog::DontUseNativeDialog, true);
+        //fileDialog->setDirectory(getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
-        fileDialog.exec();
+        connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
+            if (fileDialog->selectedFiles().count() != 1)
+                throw std::runtime_error("Only one file may be selected");
 
-        if (fileDialog.selectedFiles().count() != 1)
-            throw std::runtime_error("Only one file may be selected");
+            QJsonDocument jsonDocument;
 
-        QJsonDocument jsonDocument;
+            QJsonObject jsonObject;
 
-        QJsonObject jsonObject;
+            jsonObject.insert("selection", QJsonArray::fromStringList(_optionsAction.getSelectedOptions()));
 
-        jsonObject.insert("selection", QJsonArray::fromStringList(_optionsAction.getSelectedOptions()));
+            jsonDocument.setObject(jsonObject);
 
-        jsonDocument.setObject(jsonObject);
+            QFile jsonFile(fileDialog->selectedFiles().first());
 
-        QFile jsonFile(fileDialog.selectedFiles().first());
+            jsonFile.open(QFile::WriteOnly);
+            jsonFile.write(jsonDocument.toJson());
 
-        jsonFile.open(QFile::WriteOnly);
-        jsonFile.write(jsonDocument.toJson());
+            _saveSelectionAction.setEnabled(false);
+            });
+        connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
-        _saveSelectionAction.setEnabled(false);
+        fileDialog->open();
+
     });
 
     updateReadOnly();

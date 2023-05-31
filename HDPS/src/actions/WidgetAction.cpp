@@ -15,6 +15,7 @@
 #include <QJsonArray>
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QEventLoop>
 
 #ifdef _DEBUG
     #define WIDGET_ACTION_VERBOSE
@@ -191,8 +192,17 @@ void WidgetAction::publish(const QString& name /*= ""*/)
 
             updateOkButtonReadOnly();
 
-            if (publishDialog.exec() == QDialog::Accepted)
-                publish(lineEdit->text());
+            publishDialog.open();
+            
+            QEventLoop eventLoop;
+            QObject::connect(&publishDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+            eventLoop.exec();
+
+            if (publishDialog.result() != QDialog::Accepted)
+                return;
+
+            publish(lineEdit->text());
+
         }
         else {
             if (isPublished())
