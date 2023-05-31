@@ -260,6 +260,7 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
 
     emit isConnectedChanged(isConnected());
 
+    /*
     if (recursive) {
         for (auto child : children()) {
             auto action = dynamic_cast<WidgetAction*>(child);
@@ -271,6 +272,7 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
             action->setConnectionPermissionsToNone(true);
         }
     }
+    */
 }
 
 void WidgetAction::connectToPublicActionByName(const QString& publicActionName)

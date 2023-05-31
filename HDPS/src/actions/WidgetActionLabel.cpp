@@ -62,14 +62,21 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
             {
                 case Qt::LeftButton:
                 {
-                    if (isEnabled() && (getAction()->mayPublish(WidgetAction::Gui) || getAction()->mayConnect(WidgetAction::Gui) || getAction()->mayDisconnect(WidgetAction::Gui))) {
-                        auto contextMenu = getAction()->getContextMenu(this);
+                    if (!isEnabled())
+                        break;
 
-                        if (contextMenu->actions().isEmpty())
-                            return QWidget::eventFilter(target, event);
+                    if (!getAction()->isConnectionPermissionFlagSet(WidgetAction::ConnectionPermissionFlag::ForceNone))
+                        break;
 
-                        contextMenu->exec(cursor().pos());
-                    }
+                    if (!getAction()->mayPublish(WidgetAction::Gui) && getAction()->mayConnect(WidgetAction::Gui) && getAction()->mayDisconnect(WidgetAction::Gui))
+                        break;
+                    
+                    auto contextMenu = getAction()->getContextMenu(this);
+
+                    if (contextMenu->actions().isEmpty())
+                        return QWidget::eventFilter(target, event);
+
+                    contextMenu->exec(cursor().pos());
 
                     break;
                 }

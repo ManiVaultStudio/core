@@ -70,7 +70,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         _removeAction.setVisible(false);
 
         if (_actions.count() == 1) {
-            _publishAction.setEnabled(!firstAction->isPublished());
+            _publishAction.setEnabled(!firstAction->isPublished() && !firstAction->mayPublish(WidgetAction::ConnectionContextFlag::Gui));
 
             if (firstAction->isConnected())
                 _disconnectAction.setText(QString("Disconnect from: %1").arg(firstAction->getPublicAction()->text()));
@@ -165,7 +165,21 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         if (action->isPrivate())
             privateActions << action;
 
-    _disconnectAction.setEnabled(!privateActions.isEmpty());
+    WidgetActions connectablePrivateActions;
+
+    for (auto privateAction : privateActions)
+        if (privateAction->mayConnect(WidgetAction::Gui))
+            connectablePrivateActions << privateAction;
+
+    _connectAction.setEnabled(!connectablePrivateActions.isEmpty());
+    
+    WidgetActions disconnectablePrivateActions;
+
+    for (auto privateAction : privateActions)
+        if (privateAction->mayDisconnect(WidgetAction::Gui))
+            disconnectablePrivateActions << privateAction;
+    
+    _disconnectAction.setEnabled(!disconnectablePrivateActions.isEmpty());
 
     if (privateActions.isEmpty())
         _disconnectAction.setText("Disconnect...");

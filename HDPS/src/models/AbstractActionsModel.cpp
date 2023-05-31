@@ -75,7 +75,7 @@ QVariant AbstractActionsModel::NameItem::data(int role /*= Qt::UserRole + 1*/) c
             return getAction()->text();
 
         case Qt::ToolTipRole:
-            return QString("Parameter name: %1 (double-click to edit)").arg(data(Qt::DisplayRole).toString());
+            return QString("Parameter name: %1").arg(data(Qt::DisplayRole).toString());
 
         //case Qt::CheckStateRole:
         //    return getAction()->isEnabled() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;
@@ -285,6 +285,8 @@ AbstractActionsModel::ConnectionPermissionItem::ConnectionPermissionItem(gui::Wi
     Item(action, true),
     _connectionPermissionFlag(connectionPermissionFlag)
 {
+    setEnabled(!getAction()->isConnectionPermissionFlagSet(WidgetAction::ConnectionPermissionFlag::ForceNone));
+
     connect(action, &WidgetAction::connectionPermissionsChanged, this, [this](std::int32_t connectionPermissions) -> void {
         emitDataChanged();
     });
@@ -305,16 +307,19 @@ QVariant AbstractActionsModel::ConnectionPermissionItem::data(int role /*= Qt::U
 
         case Qt::DecorationRole:
         {
-            auto& fa = Application::getIconFont("FontAwesome");
+            if (getAction()->isConnectionPermissionFlagSet(WidgetAction::ConnectionPermissionFlag::ForceNone))
+                break;
+
+            auto& fontAwesome = Application::getIconFont("FontAwesome");
 
             if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::PublishViaGui)
-                return fa.getIcon("cloud-upload-alt");
+                return fontAwesome.getIcon("cloud-upload-alt");
 
             if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::ConnectViaGui)
-                return fa.getIcon("link");
+                return fontAwesome.getIcon("link");
 
             if (_connectionPermissionFlag == gui::WidgetAction::ConnectionPermissionFlag::DisconnectViaGui)
-                return fa.getIcon("unlink");
+                return fontAwesome.getIcon("unlink");
 
             break;
         }
@@ -345,7 +350,7 @@ QVariant AbstractActionsModel::ConnectionPermissionItem::data(int role /*= Qt::U
 
 void AbstractActionsModel::ConnectionPermissionItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
 {
-    if (role == Qt::EditRole)
+    if (role == Qt::EditRole && !getAction()->isConnectionPermissionFlagSet(WidgetAction::ConnectionPermissionFlag::ForceNone))
         getAction()->setConnectionPermissionsFlag(_connectionPermissionFlag, !value.toBool());
     else
         Item::setData(value, role);
