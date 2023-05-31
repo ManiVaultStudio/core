@@ -87,7 +87,7 @@ install(TARGETS ${IMAGEDATA}
 )
 
 add_custom_command(TARGET ${IMAGEDATA} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}"
+    COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>

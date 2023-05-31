@@ -73,7 +73,7 @@ target_link_libraries(${LOGGINGPLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${LOGGINGPLUGIN} PRIVATE "${HDPS_LINK_LIBRARY}")
 
 # Use avx if enabled and available
-check_and_set_AVX(${LOGGINGPLUGIN} ${USE_AVX})
+check_and_set_AVX(${LOGGINGPLUGIN} ${HDPS_USE_AVX})
 
 install(TARGETS ${LOGGINGPLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
@@ -81,7 +81,7 @@ install(TARGETS ${LOGGINGPLUGIN}
 )
 
 add_custom_command(TARGET ${LOGGINGPLUGIN} POST_BUILD
-	COMMAND "${CMAKE_COMMAND}"
+	COMMAND ${CMAKE_COMMAND}
 	--install ${CMAKE_CURRENT_BINARY_DIR}
 	--config $<CONFIGURATION>
 	--prefix ${INSTALL_DIR}/$<CONFIGURATION>

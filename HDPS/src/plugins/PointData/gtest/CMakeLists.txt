@@ -32,7 +32,7 @@ install(TARGETS ${PROJECT}
 )
 
 add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}"
+    COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
