@@ -52,7 +52,7 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title /*= ""*
     connect(&_filePathAction, &StringAction::stringChanged, this, updateStatusAction);
 
     connect(&_pickAction, &TriggerAction::triggered, this, [this]() {
-        QFileDialog* fileDialog = new QFileDialog();
+        auto* fileDialog = new QFileDialog();
 
         fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
         fileDialog->setWindowTitle(QString("Open %1").arg(getFileType()));

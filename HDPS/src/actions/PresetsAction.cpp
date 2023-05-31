@@ -36,7 +36,7 @@ PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const 
     _editAction.setToolTip(QString("Manage %1 presets").arg(_presetType.toLower()));
 
     connect(&_editAction, &TriggerAction::triggered, this, [this]() -> void {
-        ManagePresetsDialog* dialog = new ManagePresetsDialog(this);
+        auto* dialog = new ManagePresetsDialog(this);
         connect(dialog, &ManagePresetsDialog::finished, dialog, &ManagePresetsDialog::deleteLater);
         dialog->open();
     });
@@ -116,7 +116,7 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
     savePresetAction->setIcon(fontAwesome.getIcon("save"));
 
     connect(savePresetAction, &TriggerAction::triggered, this, [this, &fontAwesome, presetIcon]() -> void {
-        ChoosePresetNameDialog* choosePresetNameDialog = new ChoosePresetNameDialog(this);
+        auto* choosePresetNameDialog = new ChoosePresetNameDialog(this);
 
         connect(choosePresetNameDialog, &ChoosePresetNameDialog::accepted, this, [this, choosePresetNameDialog]() -> void {
             savePreset(choosePresetNameDialog->getPresetNameAction().getString());
@@ -277,7 +277,7 @@ void PresetsAction::importPreset()
     qDebug() << __FUNCTION__;
 #endif
 
-    QFileDialog* fileDialog = new QFileDialog();
+    auto* fileDialog = new QFileDialog();
 
     fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
     fileDialog->setWindowTitle("Import Preset");
@@ -310,7 +310,7 @@ void PresetsAction::exportPreset()
     qDebug() << __FUNCTION__;
 #endif
 
-    QFileDialog* fileDialog = new QFileDialog();
+    auto* fileDialog = new QFileDialog();
 
     fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
     fileDialog->setWindowTitle("Export Preset");

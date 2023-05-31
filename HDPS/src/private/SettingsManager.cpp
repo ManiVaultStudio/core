@@ -85,7 +85,7 @@ void SettingsManager::reset()
 
 void SettingsManager::edit()
 {
-    SettingsManagerDialog* dialog = new SettingsManagerDialog();
+    auto* dialog = new SettingsManagerDialog();
     connect(dialog, &SettingsManagerDialog::finished, dialog, &SettingsManagerDialog::deleteLater);
     dialog->open();
 }

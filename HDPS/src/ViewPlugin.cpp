@@ -90,7 +90,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
 
     connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
-        ProjectEditorDialog* viewPluginEditorDialog = new ProjectEditorDialog(nullptr, this);
+        auto* viewPluginEditorDialog = new ProjectEditorDialog(nullptr, this);
         connect(viewPluginEditorDialog, &ProjectEditorDialog::finished, viewPluginEditorDialog, &ProjectEditorDialog::deleteLater);
         viewPluginEditorDialog->open();
     });
@@ -168,7 +168,7 @@ bool ViewPlugin::isSystemViewPlugin() const
 
 void ViewPlugin::createScreenshot()
 {
-    QFileDialog* fileDialog = new QFileDialog();
+    auto* fileDialog = new QFileDialog();
 
     fileDialog->setWindowTitle("Save Screenshot");
     fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("camera"));

@@ -380,7 +380,7 @@ OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
     connect(&_optionsAction, &OptionsAction::selectedOptionsChanged, this, updateReadOnly);
 
     connect(&_loadSelectionAction, &TriggerAction::triggered, this, [this]() -> void {
-        QFileDialog* fileDialog = new QFileDialog();
+        auto* fileDialog = new QFileDialog();
 
         fileDialog->setWindowTitle("Open selection from file");
         fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
@@ -413,7 +413,7 @@ OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
     });
 
     connect(&_saveSelectionAction, &TriggerAction::triggered, this, [this]() -> void {
-        QFileDialog* fileDialog = new QFileDialog();
+        auto* fileDialog = new QFileDialog();
 
         fileDialog->setWindowTitle("Save selection to file");
         fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));

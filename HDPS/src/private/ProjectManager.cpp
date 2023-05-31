@@ -123,7 +123,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     });
 
     connect(&_newProjectFromWorkspaceAction, &QAction::triggered, this, [this]() -> void {
-        NewProjectDialog* dialog = new NewProjectDialog();
+        auto* dialog = new NewProjectDialog();
         connect(dialog, &NewProjectDialog::finished, dialog, &NewProjectDialog::deleteLater);
         dialog->open();
     });
@@ -151,7 +151,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     });
 
     connect(&_editProjectSettingsAction, &TriggerAction::triggered, this, []() -> void {
-        ProjectSettingsDialog* dialog = new ProjectSettingsDialog();
+        auto* dialog = new ProjectSettingsDialog();
         connect(dialog, &ProjectSettingsDialog::finished, dialog, &ProjectSettingsDialog::deleteLater);
         dialog->open();
     });
