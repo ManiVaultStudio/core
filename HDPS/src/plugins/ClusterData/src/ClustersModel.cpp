@@ -3,6 +3,7 @@
 #include "OverwriteClustersConfirmationDialog.h"
 
 #include <QPainter>
+#include <QEventLoop>
 
 using namespace hdps;
 
@@ -386,7 +387,11 @@ bool ClustersModel::mayOverrideUserInput()
         OverwriteClustersConfirmationDialog overwriteClustersConfirmationDialog(nullptr, _clusters.count(), numberOfUserModifiedClusters);
 
         // Show the confirm data removal dialog
-        overwriteClustersConfirmationDialog.exec();
+        overwriteClustersConfirmationDialog.open();
+
+        QEventLoop eventLoop;
+        QObject::connect(&overwriteClustersConfirmationDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+        eventLoop.exec();
 
         // If the user accepted, the clusters may be overwritten, otherwise not
         return overwriteClustersConfirmationDialog.result() == 1 ? true : false;

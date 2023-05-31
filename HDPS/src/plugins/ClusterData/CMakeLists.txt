@@ -120,7 +120,7 @@ target_link_libraries(${CLUSTERDATA} PRIVATE "${HDPS_LINK_LIBRARY}")
 target_link_libraries(${CLUSTERDATA} PRIVATE "${POINTDATA_LINK_LIBRARY}")
 
 # Use avx if enabled and available
-check_and_set_AVX(${CLUSTERDATA} ${USE_AVX})
+check_and_set_AVX(${CLUSTERDATA} ${HDPS_USE_AVX})
 
 set_target_properties(${CLUSTERDATA} PROPERTIES PUBLIC_HEADER "${CLUSTER_HEADERS}")
 
@@ -132,7 +132,7 @@ install(TARGETS ${CLUSTERDATA}
 )
 
 add_custom_command(TARGET ${CLUSTERDATA} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}"
+    COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>

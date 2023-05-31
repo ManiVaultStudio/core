@@ -472,7 +472,7 @@ OptionAction::ButtonsWidget::ButtonsWidget(QWidget* parent, OptionAction* option
 {
     setObjectName("Buttons");
 
-    QLayout* layout = nullptr;
+    QBoxLayout* layout = nullptr;
 
     switch (orientation)
     {
@@ -490,23 +490,52 @@ OptionAction::ButtonsWidget::ButtonsWidget(QWidget* parent, OptionAction* option
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    std::int32_t optionIndex = 0;
-
-    for (const auto& option : optionAction->getOptions()) {
-        auto optionPushButton = new QPushButton(option);
-
-        optionPushButton->setToolTip(optionAction->text() + ": " + option);
-
-        layout->addWidget(optionPushButton);
-
-        connect(optionPushButton, &QPushButton::clicked, this, [optionAction, optionIndex]() {
-            optionAction->setCurrentIndex(optionIndex);
-        });
-
-        optionIndex++;
-    }
-
     setLayout(layout);
+
+    const auto updateLayout = [this, layout, optionAction]() -> void {
+        QLayoutItem* layoutItem;
+
+        while ((layoutItem = layout->takeAt(0)) != nullptr) {
+            delete layoutItem->widget();
+            delete layoutItem;
+        }
+
+        std::int32_t optionIndex = 0;
+
+        QVector<QPushButton*> pushButtons;
+
+        for (const auto& option : optionAction->getOptions()) {
+            auto pushButton = new QPushButton(option);
+
+            pushButton->setCheckable(true);
+            pushButton->setToolTip(optionAction->text() + ": " + option);
+
+            layout->insertWidget(0, pushButton);
+
+            connect(pushButton, &QPushButton::clicked, this, [optionAction, optionIndex]() {
+                optionAction->setCurrentIndex(optionIndex);
+            });
+
+            optionIndex++;
+
+            pushButtons << pushButton;
+        }
+
+        disconnect(optionAction, &OptionAction::currentIndexChanged, this, nullptr);
+
+        const auto updatePushButtonCheckState = [pushButtons, optionAction]() {
+            for (auto pushButton : pushButtons)
+                pushButton->setChecked(pushButtons.indexOf(pushButton) == optionAction->getCurrentIndex());
+        };
+
+        updatePushButtonCheckState();
+
+        connect(optionAction, &OptionAction::currentIndexChanged, this, updatePushButtonCheckState);
+    };
+    
+    updateLayout();
+
+    connect(optionAction, &OptionAction::modelChanged, this, updateLayout);
 }
 
 QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -549,7 +578,10 @@ QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
         layout->addWidget(clearSelectionAction->createWidget(widget, TriggerAction::Icon));
     }
 
-    widget->setLayout(layout);
+    if (widgetFlags & WidgetActionWidget::PopupLayout)
+        widget->setPopupLayout(layout);
+    else
+        widget->setLayout(layout);
 
     return widget;
 }

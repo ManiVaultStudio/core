@@ -89,8 +89,9 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
 
     connect(&_editorAction, &TriggerAction::triggered, this, [this]() -> void {
-        ViewPluginEditorDialog viewPluginEditorDialog(nullptr, this);
-        viewPluginEditorDialog.exec();
+        auto* viewPluginEditorDialog = new ViewPluginEditorDialog(nullptr, this);
+        connect(viewPluginEditorDialog, &ViewPluginEditorDialog::finished, viewPluginEditorDialog, &ViewPluginEditorDialog::deleteLater);
+        viewPluginEditorDialog->open();
     });
 
     connect(&_screenshotAction, &TriggerAction::triggered, this, [this]() -> void {
@@ -195,30 +196,32 @@ bool ViewPlugin::isSystemViewPlugin() const
 
 void ViewPlugin::createScreenshot()
 {
-    QFileDialog fileDialog;
+    auto* fileDialog = new QFileDialog();
 
-    fileDialog.setWindowTitle("Save Screenshot");
-    fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
-    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setNameFilters({ "Image files (*.png)" });
-    fileDialog.setDefaultSuffix(".png");
+    fileDialog->setWindowTitle("Save Screenshot");
+    fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
+    fileDialog->setOption(QFileDialog::DontUseNativeDialog, true);
+    fileDialog->setAcceptMode(QFileDialog::AcceptSave);
+    fileDialog->setNameFilters({ "Image files (*.png)" });
+    fileDialog->setDefaultSuffix(".png");
 
     const auto cachedDirectory = QFileInfo(Application::current()->getSetting("ScreenShot/ViewPlugin/Directory", ".").toString()).dir();
 
-    fileDialog.setDirectory(cachedDirectory);
+    fileDialog->setDirectory(cachedDirectory);
 
-    if (fileDialog.exec() == 0)
-        return;
+    connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
+        if (fileDialog->selectedFiles().count() != 1)
+            throw std::runtime_error("Only one file may be selected");
 
-    if (fileDialog.selectedFiles().count() != 1)
-        throw std::runtime_error("Only one file may be selected");
+        Application::current()->setSetting("ScreenShot/ViewPlugin/Directory", fileDialog->selectedFiles().first());
 
-    Application::current()->setSetting("ScreenShot/ViewPlugin/Directory", fileDialog.selectedFiles().first());
+        auto widgetPixmap = getWidget().grab();
 
-    auto widgetPixmap = getWidget().grab();
+        widgetPixmap.toImage().save(fileDialog->selectedFiles().first());
+        });
+    connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
-    widgetPixmap.toImage().save(fileDialog.selectedFiles().first());
+    fileDialog->open();
 }
 
 QKeySequence ViewPlugin::getTriggerShortcut() const

@@ -15,6 +15,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QGridLayout>
+#include <QEventLoop>
 
 #include <exception>
 
@@ -121,8 +122,9 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     });
 
     connect(&_newProjectFromWorkspaceAction, &QAction::triggered, this, [this]() -> void {
-        NewProjectDialog newProjectDialog;
-        newProjectDialog.exec();
+        auto* dialog = new NewProjectDialog();
+        connect(dialog, &NewProjectDialog::finished, dialog, &NewProjectDialog::deleteLater);
+        dialog->open();
     });
 
     connect(&_openProjectAction, &QAction::triggered, this, [this]() -> void {
@@ -148,8 +150,9 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     });
 
     connect(&_editProjectSettingsAction, &TriggerAction::triggered, this, []() -> void {
-        ProjectSettingsDialog projectSettingsDialog;
-        projectSettingsDialog.exec();
+        auto* dialog = new ProjectSettingsDialog();
+        connect(dialog, &ProjectSettingsDialog::finished, dialog, &ProjectSettingsDialog::deleteLater);
+        dialog->open();
     });
 
     connect(&_importDataMenu, &QMenu::aboutToShow, this, [this]() -> void {
@@ -391,7 +394,13 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                     disableReadOnlyAction.setEnabled(project.getReadOnlyAction().isChecked());
                 });
 
-                if (fileDialog.exec() == 0)
+                fileDialog.open();
+
+                QEventLoop eventLoop;
+                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                eventLoop.exec();
+
+                if (fileDialog.result() != QDialog::Accepted)
                     return;
 
                 if (fileDialog.selectedFiles().count() != 1)
@@ -573,7 +582,14 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                     currentProject->getCompressionAction().getLevelAction().setValue(project.getCompressionAction().getLevelAction().getValue());
                 });
 
-                fileDialog.exec();
+                fileDialog.open();
+
+                QEventLoop eventLoop;
+                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                eventLoop.exec();
+
+                if (fileDialog.result() != QDialog::Accepted)
+                    return;
 
                 if (fileDialog.selectedFiles().count() != 1)
                     throw std::runtime_error("Only one file may be selected");
@@ -777,7 +793,14 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     currentProject->getCompressionAction().getLevelAction().setValue(project.getCompressionAction().getLevelAction().getValue());
                 });
 
-                fileDialog.exec();
+                fileDialog.open();
+
+                QEventLoop eventLoop;
+                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                eventLoop.exec();
+
+                if (fileDialog.result() != QDialog::Accepted)
+                    return;
 
                 if (fileDialog.selectedFiles().count() != 1)
                     throw std::runtime_error("Only one file may be selected");

@@ -123,7 +123,7 @@ target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${POINTDATA} PRIVATE "${HDPS_LINK_LIBRARY}")
 
 # Use avx if enabled and available
-check_and_set_AVX(${POINTDATA} ${USE_AVX})
+check_and_set_AVX(${POINTDATA} ${HDPS_USE_AVX})
 
 if(UNIX AND NOT APPLE)
    find_package(TBB REQUIRED)
@@ -144,7 +144,7 @@ install(FILES "${BFLOAT_HEADER}" DESTINATION "${INSTALL_DIR}/$<CONFIGURATION>/in
 
 # PointData is needed to build other plugins - install it now.
 add_custom_command(TARGET ${POINTDATA} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}"
+    COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>

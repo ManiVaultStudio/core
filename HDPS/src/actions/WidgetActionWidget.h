@@ -25,6 +25,7 @@ public:
 
 public:
 
+    // TODO: revisit
     /** Widget states */
     enum State {
         Standard,   /** Standard representation of the action (default) */
@@ -43,8 +44,6 @@ public:
     WidgetActionWidget(QWidget* parent, WidgetAction* action, const std::int32_t& widgetFlags = 0);
 
     QSize sizeHint() const override;
-
-protected: // Miscellaneous
 
     /**
      * Sets a popup layout

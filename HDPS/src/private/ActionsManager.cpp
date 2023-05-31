@@ -175,7 +175,15 @@ void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
 
             updateActionsReadOnly();
 
-            if (publishDialog.exec() == QDialog::Accepted)
+            publishDialog.open();
+
+            QEventLoop eventLoop;
+            
+            QObject::connect(&publishDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+            
+            eventLoop.exec();
+
+            if (publishDialog.result() == QDialog::Accepted)
                 publishPrivateAction(privateAction, nameAction.getString(), true);
         }
         else {

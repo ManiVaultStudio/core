@@ -44,11 +44,11 @@ void WidgetActionHighlightWidget::highlightingChanged(const WidgetAction::Highli
             break;
 
         case WidgetAction::HighlightOption::Moderate:
-            widgetFader.setOpacity(0.15f, 200);
+            widgetFader.setOpacity(0.25f, 200);
             break;
 
         case WidgetAction::HighlightOption::Strong:
-            widgetFader.setOpacity(0.3f, 200);
+            widgetFader.setOpacity(0.6f, 200);
             break;
 
         default:

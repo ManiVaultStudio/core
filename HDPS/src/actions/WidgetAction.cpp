@@ -12,6 +12,9 @@
 #include <QMenu>
 #include <QJsonArray>
 #include <QDrag>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QEventLoop>
 
 #ifdef _DEBUG
     #define WIDGET_ACTION_VERBOSE
