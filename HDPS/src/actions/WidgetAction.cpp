@@ -358,13 +358,13 @@ WidgetAction* WidgetAction::getPublicCopy() const
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Get public copy failed:", e);
+        exceptionMessageBox("Get public copy failed", e);
 
         return nullptr;
     }
     catch (...)
     {
-        exceptionMessageBox("Get public copy failed:");
+        exceptionMessageBox("Get public copy failed");
 
         return nullptr;
     }
