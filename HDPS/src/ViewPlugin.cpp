@@ -49,31 +49,38 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _editorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _editorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _editorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _editorAction.setConnectionPermissionsToForceNone();
 
     _screenshotAction.setIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
     _screenshotAction.setShortcut(tr("F2"));
     _screenshotAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _screenshotAction.setConnectionPermissionsToForceNone();
 
     _isolateAction.setIcon(Application::getIconFont("FontAwesome").getIcon("crosshairs"));
     _isolateAction.setShortcut(tr("F3"));
     _isolateAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _isolateAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _isolateAction.setConnectionPermissionsToForceNone();
 
     _mayCloseAction.setToolTip("Determines whether this view plugin may be closed or not");
     _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _mayCloseAction.setConnectionPermissionsToForceNone();
 
     _mayFloatAction.setToolTip("Determines whether this view plugin may float or not");
     _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _mayFloatAction.setConnectionPermissionsToForceNone();
 
     _mayMoveAction.setToolTip("Determines whether this view plugin may be moved or not");
     _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _mayMoveAction.setConnectionPermissionsToForceNone();
 
     _dockingOptionsAction.setToolTip("Determines the docking options");
+    _dockingOptionsAction.setConnectionPermissionsToForceNone(true);
 
     _lockingAction.setWhat("Layout");
 
@@ -81,12 +88,14 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction.setIcon(getIcon());
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _visibleAction.setConnectionPermissionsToForceNone();
 
     _helpAction.setToolTip(QString("Shows %1 documentation").arg(factory->getKind()));
     _helpAction.setShortcut(tr("F1"));
     _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
+    _helpAction.setConnectionPermissionsToForceNone();
 
     connect(&_editorAction, &TriggerAction::triggered, this, [this]() -> void {
         auto* viewPluginEditorDialog = new ViewPluginEditorDialog(nullptr, this);

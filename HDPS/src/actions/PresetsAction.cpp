@@ -33,6 +33,7 @@ PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const 
     Q_ASSERT(_sourceAction != nullptr);
 
     setText("Presets");
+    setConnectionPermissionsToForceNone(true);
 
     _editAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     _editAction.setToolTip(QString("Manage %1 presets").arg(_presetType.toLower()));

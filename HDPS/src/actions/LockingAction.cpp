@@ -18,6 +18,8 @@ LockingAction::LockingAction(QObject* parent, const QString& what /*= ""*/, bool
     setText("Locking");
     initialize(locked);
     updateActionsText();
+
+    setConnectionPermissionsToForceNone(true);
 }
 
 void LockingAction::initialize(bool locked /*= false*/)
