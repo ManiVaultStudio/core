@@ -54,6 +54,10 @@ set(POINTS_HEADERS
     src/CreateSetFromSelectionAction.h
 )
 
+set(PLUGIN_MOC_HEADERS
+	src/PointData.h
+)
+
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
 set(BFLOAT_HEADER
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/biovault_bfloat16/biovault_bfloat16.h
@@ -94,6 +98,8 @@ set(ACTIONS_SOURCES
 
 source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
+
+qt6_wrap_cpp(${POINTS_SOURCES} ${PLUGIN_MOC_HEADERS})
 
 add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
 

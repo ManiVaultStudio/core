@@ -32,6 +32,10 @@ set(IMAGE_DATA_HEADERS
     ${CMAKE_CURRENT_BINARY_DIR}/imagedata_export.h
 )
 
+set(PLUGIN_MOC_HEADERS
+	src/ImageData.h
+)
+
 set(IMAGE_DATA_SOURCES 
     src/Image.cpp
     src/ImageData.cpp
@@ -46,6 +50,8 @@ set(ACTIONS_SOURCES
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Plugin FILES ${IMAGE_DATA_HEADERS} ${IMAGE_DATA_SOURCES})
 source_group(Aux FILES ${AUX})
+
+qt6_wrap_cpp(${IMAGE_DATA_SOURCES} ${PLUGIN_MOC_HEADERS})
 
 add_library(${IMAGEDATA} SHARED ${IMAGE_DATA_HEADERS} ${IMAGE_DATA_SOURCES} ${ACTIONS_SOURCES} ${AUX})
 

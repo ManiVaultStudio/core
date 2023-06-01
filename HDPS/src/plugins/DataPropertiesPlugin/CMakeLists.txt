@@ -27,6 +27,10 @@ set(PLUGIN
     src/DataPropertiesPlugin.cpp
 )
 
+set(PLUGIN_MOC_HEADERS
+	src/DataPropertiesPlugin.h
+)
+
 set(WIDGETS
     src/DataPropertiesWidget.h
     src/DataPropertiesWidget.cpp
@@ -45,6 +49,8 @@ set(DATAPROPERTIES_SOURCES
 source_group(Plugin FILES ${PLUGIN})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
+
+qt6_wrap_cpp(${DATAPROPERTIES_SOURCES} ${PLUGIN_MOC_HEADERS})
 
 add_library(${DATAPROPERTIESPLUGIN} SHARED ${DATAPROPERTIES_SOURCES})
 

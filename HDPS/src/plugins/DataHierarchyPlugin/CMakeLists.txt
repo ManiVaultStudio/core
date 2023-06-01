@@ -22,8 +22,12 @@ file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
 find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 set(PLUGIN
-	src/DataHierarchyPlugin.h
+    src/DataHierarchyPlugin.h
     src/DataHierarchyPlugin.cpp
+)
+
+set(PLUGIN_MOC_HEADERS
+	src/DataHierarchyPlugin.h
 )
 
 set(WIDGETS
@@ -46,6 +50,8 @@ set(DATAHIERARCHY_SOURCES
 source_group(Plugin FILES ${PLUGIN})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
+
+qt6_wrap_cpp(${DATAHIERARCHY_SOURCES} ${PLUGIN_MOC_HEADERS})
 
 add_library(${DATAHIERARCHYPLUGIN} SHARED ${DATAHIERARCHY_SOURCES})
 

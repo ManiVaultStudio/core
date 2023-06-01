@@ -21,19 +21,26 @@ file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
 
 find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
-set(COLOR_SOURCES
+set(COLORDATA_SOURCES
     src/ColorData.h
     src/ColorData.cpp
     src/ColorData.json
 )
 
-set(COLORDATA_HEADERS
+set(COLORDATA_MOC_HEADERS
     src/ColorData.h
 )
 
-source_group( Plugin FILES ${COLOR_SOURCES})
+set(PLUGIN
+    ${COLORDATA_SOURCES}
+    ${COLORDATA_MOC_HEADERS}
+)
 
-add_library(${COLORDATA} SHARED ${COLOR_SOURCES})
+source_group( Plugin FILES ${PLUGIN})
+
+qt6_wrap_cpp(${COLORDATA_SOURCES} ${COLORDATA_MOC_HEADERS})
+
+add_library(${COLORDATA} SHARED ${COLORDATA_SOURCES})
 
 target_include_directories(${COLORDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 

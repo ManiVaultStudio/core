@@ -29,6 +29,10 @@ set(CLUSTERD_SOURCES
     src/ClusterData.json
 )
 
+set(PLUGIN_MOC_HEADERS
+    src/ClusterData.h
+)
+
 set(CLUSTER_HEADERS
     src/Cluster.h
     src/ClusterData.h
@@ -83,6 +87,8 @@ set(DIALOG_SOURCES
     src/OverwriteClustersConfirmationDialog.h
     src/OverwriteClustersConfirmationDialog.cpp
 )
+
+qt6_wrap_cpp(${CLUSTERD_SOURCES} ${PLUGIN_MOC_HEADERS})
 
 source_group(Plugin FILES ${CLUSTERD_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})

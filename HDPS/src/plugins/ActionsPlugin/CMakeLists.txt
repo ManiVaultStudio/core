@@ -27,6 +27,10 @@ set(PLUGIN
     src/ActionsPlugin.cpp
 )
 
+set(PLUGIN_MOC_HEADERS
+	src/ActionsPlugin.h
+)
+
 set(WIDGETS
     src/ActionsWidget.h
     src/ActionsWidget.cpp
@@ -45,6 +49,8 @@ set(ACTIONS_SOURCES
 source_group(Plugin FILES ${PLUGIN})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
+
+qt6_wrap_cpp(${ACTIONS_SOURCES} ${PLUGIN_MOC_HEADERS})
 
 add_library(${ACTIONSPLUGIN} SHARED ${ACTIONS_SOURCES})
 

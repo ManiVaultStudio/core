@@ -27,6 +27,10 @@ set(PLUGIN
     src/LoggingPlugin.cpp
 )
 
+set(PLUGIN_MOC_HEADERS
+	src/LoggingPlugin.h
+)
+
 set(MODEL
     src/LoggingModel.h
     src/LoggingModel.cpp
@@ -54,6 +58,8 @@ source_group(Plugin FILES ${PLUGIN})
 source_group(Model FILES ${MODEL})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
+
+qt6_wrap_cpp(${LOGGING_SOURCES} ${PLUGIN_MOC_HEADERS})
 
 add_library(${LOGGINGPLUGIN} SHARED ${LOGGING_SOURCES})
 

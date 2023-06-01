@@ -27,11 +27,18 @@ set(TEXTDATA_SOURCES
     src/TextData.json
 )
 
-set(TEXTDATA_HEADERS
+set(TEXTDATA_MOC_HEADERS
     src/TextData.h
 )
 
+set(PLUGIN
+    ${TEXTDATA_SOURCES}
+    ${TEXTDATA_MOC_HEADERS}
+)
+
 source_group( Plugin FILES ${TEXTDATA_SOURCES})
+
+qt6_wrap_cpp(${TEXTDATA_SOURCES} ${TEXTDATA_MOC_HEADERS})
 
 add_library(${TEXTDATA} SHARED ${TEXTDATA_SOURCES})
 
