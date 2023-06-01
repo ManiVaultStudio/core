@@ -13,9 +13,15 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
 {
     _actionsWidget.getFilterModel().getPublicRootOnlyAction().setChecked(true);
 
-    connect(&hdps::settings().getParametersSettings().getExpertModeAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {
-        _actionsWidget.getFilterModel().getPublicRootOnlyAction().setChecked(!toggled);
-    });
+    auto& exportMode = hdps::settings().getParametersSettings().getExpertModeAction();
+
+    const auto updateRootOnly = [this, &exportMode]() -> void {
+        _actionsWidget.getFilterModel().getPublicRootOnlyAction().setChecked(!exportMode.isChecked());
+    };
+
+    updateRootOnly();
+
+    connect(&hdps::settings().getParametersSettings().getExpertModeAction(), &ToggleAction::toggled, this, updateRootOnly);
 
     auto& hierarchyWidget = _actionsWidget.getHierarchyWidget();
 
