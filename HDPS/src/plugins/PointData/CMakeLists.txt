@@ -97,9 +97,8 @@ source_group(Actions FILES ${ACTIONS_SOURCES})
 
 add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
 
-add_dependencies(${POINTDATA} HDPS_Public)
-
 target_include_directories(${POINTDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
+
 target_include_directories(${POINTDATA} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/)
 
 target_compile_features(${POINTDATA} PRIVATE cxx_std_17)
@@ -113,14 +112,9 @@ file(GLOB EXPORT_HEADER_FILE_NAME
     RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*_export.h)
 list(APPEND POINTS_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME})
 
-set(HDPS_LINK_PATH "${INSTALL_DIR}/$<CONFIGURATION>/lib")
-set(HDPS_LINK_SUFFIX $<IF:$<CXX_COMPILER_ID:MSVC>,${CMAKE_LINK_LIBRARY_SUFFIX},${CMAKE_SHARED_LIBRARY_SUFFIX}>)
-
-set(HDPS_LINK_LIBRARY "${HDPS_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${HDPS_LINK_SUFFIX}")
-
 target_link_libraries(${POINTDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${POINTDATA} PRIVATE "${HDPS_LINK_LIBRARY}")
+target_link_libraries(${POINTDATA} PRIVATE HDPS_Public)
 
 # Use avx if enabled and available
 check_and_set_AVX(${POINTDATA} ${HDPS_USE_AVX})

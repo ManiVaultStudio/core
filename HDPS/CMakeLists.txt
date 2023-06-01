@@ -166,7 +166,7 @@ add_subdirectory(external/quazip)
 # -----------------------------------------------------------------------------
 include(CMakeHdpsSourcesMain)           # defines MAIN_SOURCES
 include(CMakeHdpsSourcesPublic)         # defines PUBLIC_SOURCES and PUBLIC_HEADERS
-include(CMakeHdpsSourcesPrivate)        # defines PRIVATE_SOURCES
+include(CMakeHdpsSourcesPrivate)        # defines PRIVATE_SOURCES and PRIVATE_HEADERS
 include(CMakeHdpsSourcesResources)      # defines RESOURCE_FILES and UI_HEADERS
 
 

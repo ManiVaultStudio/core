@@ -48,20 +48,13 @@ source_group(Aux FILES ${AUX})
 
 add_library(${ACTIONSPLUGIN} SHARED ${ACTIONS_SOURCES})
 
-add_dependencies(${ACTIONSPLUGIN} HDPS_Public)
-
-target_include_directories(${ACTIONSPLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include")
+target_include_directories(${ACTIONSPLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 target_compile_features(${ACTIONSPLUGIN} PRIVATE cxx_std_17)
 
-set(HDPS_LINK_PATH "${INSTALL_DIR}/$<CONFIGURATION>/lib/")
-set(HDPS_LINK_SUFFIX $<IF:$<CXX_COMPILER_ID:MSVC>,${CMAKE_LINK_LIBRARY_SUFFIX},${CMAKE_SHARED_LIBRARY_SUFFIX}>)
-
-set(HDPS_LINK_LIBRARY "${HDPS_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${HDPS_LINK_SUFFIX}")
-
 target_link_libraries(${ACTIONSPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${ACTIONSPLUGIN} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${ACTIONSPLUGIN} PRIVATE "${HDPS_LINK_LIBRARY}")
+target_link_libraries(${ACTIONSPLUGIN} PRIVATE HDPS_Public)
 
 # Use avx if enabled and available
 check_and_set_AVX(${ACTIONSPLUGIN} ${HDPS_USE_AVX})
