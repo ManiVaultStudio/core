@@ -548,10 +548,10 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 settingsGroupAction.setPopupSizeHint(QSize(420, 320));
                 settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-                settingsGroupAction << currentProject->getTitleAction();
-                settingsGroupAction << currentProject->getDescriptionAction();
-                settingsGroupAction << currentProject->getTagsAction();
-                settingsGroupAction << currentProject->getCommentsAction();
+                settingsGroupAction.addAction(&currentProject->getTitleAction());
+                settingsGroupAction.addAction(&currentProject->getDescriptionAction());
+                settingsGroupAction.addAction(&currentProject->getTagsAction());
+                settingsGroupAction.addAction(&currentProject->getCommentsAction());
 
                 auto titleLayout = new QHBoxLayout();
 
@@ -765,11 +765,11 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     settingsGroupAction.setPopupSizeHint(QSize(420, 0));
                     settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-                    settingsGroupAction << currentProject->getTitleAction();
-                    settingsGroupAction << currentProject->getDescriptionAction();
-                    settingsGroupAction << currentProject->getTagsAction();
-                    settingsGroupAction << currentProject->getCommentsAction();
-                    settingsGroupAction << currentProject->getSplashScreenAction();
+                    settingsGroupAction.addAction(&currentProject->getTitleAction());
+                    settingsGroupAction.addAction(&currentProject->getDescriptionAction());
+                    settingsGroupAction.addAction(&currentProject->getTagsAction());
+                    settingsGroupAction.addAction(&currentProject->getCommentsAction());
+                    settingsGroupAction.addAction(&currentProject->getSplashScreenAction());
 
                     auto titleLayout = new QHBoxLayout();
 

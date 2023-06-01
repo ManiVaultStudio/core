@@ -49,7 +49,7 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
     _hierarchyWidget.setWindowIcon(pluginIcon);
     _hierarchyWidget.getTreeView().setRootIsDecorated(true);
 
-    _hierarchyWidget.getFilterGroupAction() << _filterModel.getInstantiatedPluginsOnlyAction();
+    _hierarchyWidget.getFilterGroupAction().addAction(&_filterModel.getInstantiatedPluginsOnlyAction());
 
     auto& treeView = _hierarchyWidget.getTreeView();
 

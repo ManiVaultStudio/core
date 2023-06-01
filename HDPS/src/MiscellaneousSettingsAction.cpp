@@ -9,6 +9,8 @@ MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
 {
     setShowLabels(false);
 
+    addAction(&_ignoreLoadingErrorsAction);
+
     _ignoreLoadingErrorsAction.setSettingsPrefix(getSettingsPrefix() + "IgnoreLoadingErrors");
 }
 

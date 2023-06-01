@@ -28,14 +28,14 @@ ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
 
     const auto project = projects().getCurrentProject();
 
-    _groupAction << project->getTitleAction();
-    _groupAction << project->getDescriptionAction();
-    _groupAction << project->getProjectVersionAction();
-    _groupAction << project->getTagsAction();
-    _groupAction << project->getCommentsAction();
-    _groupAction << project->getContributorsAction();
-    _groupAction << project->getSplashScreenAction();
-    _groupAction << workspaces().getLockingAction().getLockedAction();
+    _groupAction.addAction(&project->getTitleAction());
+    _groupAction.addAction(&project->getDescriptionAction());
+    _groupAction.addAction(&project->getProjectVersionAction());
+    _groupAction.addAction(&project->getTagsAction());
+    _groupAction.addAction(&project->getCommentsAction());
+    _groupAction.addAction(&project->getContributorsAction());
+    _groupAction.addAction(&project->getSplashScreenAction());
+    _groupAction.addAction(&workspaces().getLockingAction().getLockedAction());
 
     auto layout = new QVBoxLayout();
 

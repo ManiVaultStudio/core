@@ -430,10 +430,10 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/, bool addToRecent
                 settingsGroupAction.setPopupSizeHint(QSize(420, 320));
                 settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-                settingsGroupAction << currentWorkspace->getTitleAction();
-                settingsGroupAction << currentWorkspace->getDescriptionAction();
-                settingsGroupAction << currentWorkspace->getTagsAction();
-                settingsGroupAction << currentWorkspace->getCommentsAction();
+                settingsGroupAction.addAction(&currentWorkspace->getTitleAction());
+                settingsGroupAction.addAction(&currentWorkspace->getDescriptionAction());
+                settingsGroupAction.addAction(&currentWorkspace->getTagsAction());
+                settingsGroupAction.addAction(&currentWorkspace->getCommentsAction());
 
                 auto titleLayout = new QHBoxLayout();
 

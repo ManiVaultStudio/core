@@ -10,9 +10,13 @@ ParametersSettingsAction::ParametersSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Parameters"),
     _askForSharedParameterNameAction(this, "Ask for shared parameter name"),
     _confirmRemoveSharedParameterAction(this, "Confirm remove shared parameter"),
-    _expertModeAction(this, "Expert mode", false)
+    _expertModeAction(this, "View in expert mode", false)
 {
     setShowLabels(false);
+
+    addAction(&_askForSharedParameterNameAction);
+    addAction(&_confirmRemoveSharedParameterAction);
+    addAction(&_expertModeAction);
 
     _askForSharedParameterNameAction.setSettingsPrefix(getSettingsPrefix() + "AskForSharedParameterName");
     _confirmRemoveSharedParameterAction.setSettingsPrefix(getSettingsPrefix() + "ConfirmRemoveSharedParameter");

@@ -141,14 +141,14 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
 
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
 
-    filterGroupAction << _filterModel.getScopeFilterAction();
-    filterGroupAction << _filterModel.getHideInternalUseAction();
-    filterGroupAction << _filterModel.getFilterForceHiddenAction();
-    filterGroupAction << _filterModel.getFilterForceDisabledAction();
-    filterGroupAction << _filterModel.getFilterMayPublishAction();
-    filterGroupAction << _filterModel.getFilterMayConnectAction();
-    filterGroupAction << _filterModel.getFilterMayDisconnectAction();
-    filterGroupAction << _filterModel.getRemoveFiltersAction();
+    filterGroupAction.addAction(&_filterModel.getScopeFilterAction());
+    filterGroupAction.addAction(&_filterModel.getHideInternalUseAction());
+    filterGroupAction.addAction(&_filterModel.getFilterForceHiddenAction());
+    filterGroupAction.addAction(&_filterModel.getFilterForceDisabledAction());
+    filterGroupAction.addAction(&_filterModel.getFilterMayPublishAction());
+    filterGroupAction.addAction(&_filterModel.getFilterMayConnectAction());
+    filterGroupAction.addAction(&_filterModel.getFilterMayDisconnectAction());
+    filterGroupAction.addAction(&_filterModel.getRemoveFiltersAction());
 
     filterGroupAction.setPopupSizeHint(QSize(300, 0));
 

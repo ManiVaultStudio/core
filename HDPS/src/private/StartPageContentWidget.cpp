@@ -39,12 +39,12 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _settingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
     _settingsAction.setText("Toggle Views");
 
-    _settingsAction << _toggleOpenCreateProjectAction;
-    _settingsAction << _toggleRecentProjectsAction;
-    _settingsAction << _toggleExampleProjectsAction;
-    _settingsAction << _toggleProjectFromWorkspaceAction;
-    _settingsAction << _toggleProjectFromDataAction;
-    _settingsAction << _toggleTutorialVideosAction;
+    _settingsAction.addAction(&_toggleOpenCreateProjectAction);
+    _settingsAction.addAction(&_toggleRecentProjectsAction);
+    _settingsAction.addAction(&_toggleExampleProjectsAction);
+    _settingsAction.addAction(&_toggleProjectFromWorkspaceAction);
+    _settingsAction.addAction(&_toggleProjectFromDataAction);
+    _settingsAction.addAction(&_toggleTutorialVideosAction);
 
     _collumnsLayout.setContentsMargins(35, 35, 35, 35);
     _toolbarLayout.setContentsMargins(35, 10, 35, 10);

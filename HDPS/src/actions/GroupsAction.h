@@ -5,6 +5,7 @@
 #include "TriggerAction.h"
 
 #include <QStyledItemDelegate>
+#include <QTreeWidget>
 
 class QWidget;
 

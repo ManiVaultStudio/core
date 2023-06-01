@@ -45,13 +45,11 @@ ColorMapSettings2DAction::Widget::Widget(QWidget* parent, ColorMapSettings2DActi
         actions << &colorMapAction.getSharedDataRangeAction(ColorMapAction::Axis::Y);
     }
 
-    actions << &colorMapAction.getMirrorGroupAction();
-    actions << &colorMapAction.getDiscretizeAction();
-    actions << &colorMapAction.getNumberOfDiscreteStepsAction();
-    actions << &colorMapAction.getDiscretizeAlphaAction();
-    actions << &_colorMapViewAction;
-
-    groupAction->setActions(actions);
+    groupAction->addAction(&colorMapAction.getMirrorGroupAction());
+    groupAction->addAction(&colorMapAction.getDiscretizeAction());
+    groupAction->addAction(&colorMapAction.getNumberOfDiscreteStepsAction());
+    groupAction->addAction(&colorMapAction.getDiscretizeAlphaAction());
+    groupAction->addAction(&_colorMapViewAction);
 
     layout->addWidget(groupAction->createWidget(this));
 

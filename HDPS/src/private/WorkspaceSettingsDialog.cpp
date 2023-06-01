@@ -27,11 +27,11 @@ WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) 
 
     const auto workspace = workspaces().getCurrentWorkspace();
 
-    _groupAction << workspace->getTitleAction();
-    _groupAction << workspace->getDescriptionAction();
-    _groupAction << workspace->getTagsAction();
-    _groupAction << workspace->getCommentsAction();
-    _groupAction << workspaces().getLockingAction().getLockedAction();
+    _groupAction.addAction(&workspace->getTitleAction());
+    _groupAction.addAction(&workspace->getDescriptionAction());
+    _groupAction.addAction(&workspace->getTagsAction());
+    _groupAction.addAction(&workspace->getCommentsAction());
+    _groupAction.addAction(&workspaces().getLockingAction().getLockedAction());
 
     auto layout = new QVBoxLayout();
 

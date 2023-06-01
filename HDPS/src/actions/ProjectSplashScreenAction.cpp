@@ -50,11 +50,11 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _editAction.setToolTip("Edit the splash screen settings");
     _editAction.setPopupSizeHint(QSize(350, 0));
 
-    _editAction << _durationAction;
-    _editAction << _closeManuallyAction;
-    _editAction << _projectImageAction;
-    _editAction << _affiliateLogosImageAction;
-    _editAction << _backgroundColorAction;
+    _editAction.addAction(&_durationAction);
+    _editAction.addAction(&_closeManuallyAction);
+    _editAction.addAction(&_projectImageAction);
+    _editAction.addAction(&_affiliateLogosImageAction);
+    _editAction.addAction(&_backgroundColorAction);
 
     _showSplashScreenAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _showSplashScreenAction.setIcon(fontAwesome.getIcon("eye"));

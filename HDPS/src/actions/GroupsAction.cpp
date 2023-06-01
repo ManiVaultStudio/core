@@ -368,8 +368,7 @@ void GroupsAction::Widget::updateFiltering()
     if (!groupActions.isEmpty())
         groupActions.removeFirst();
 
-    // Found child widget actions
-    QVector<WidgetAction*> foundActions;
+    WidgetActions foundActions;
 
     for (auto groupAction : groupActions) {
         for (auto action : groupAction->getActions())
@@ -377,9 +376,10 @@ void GroupsAction::Widget::updateFiltering()
                 foundActions << action;
     }
 
-    // Update filtered actions group action
+    for (auto foundAction : foundActions)
+        _filteredActionsAction.addAction(foundAction);
+
     _filteredActionsAction.setExpanded(true);
-    _filteredActionsAction.setActions(foundActions);
     _filteredActionsAction.setText(foundActions.count() == 0 ? "No properties found" : QString("Found %1 proper%2").arg(QString::number(foundActions.count()), foundActions.count() == 1 ? "ty": "ties"));
 }
 

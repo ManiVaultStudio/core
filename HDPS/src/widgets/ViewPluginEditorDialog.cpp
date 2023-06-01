@@ -31,9 +31,9 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* view
 
     _settingsAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-    _settingsAction << viewPlugin->getLockingAction().getLockedAction();
-    _settingsAction << viewPlugin->getDockingOptionsAction();
-    _settingsAction << viewPlugin->getGuiNameAction();
+    _settingsAction.addAction(&viewPlugin->getLockingAction().getLockedAction());
+    _settingsAction.addAction(&viewPlugin->getDockingOptionsAction());
+    _settingsAction.addAction(&viewPlugin->getGuiNameAction());
 
     layout->addWidget(_settingsAction.createWidget(this));
 
