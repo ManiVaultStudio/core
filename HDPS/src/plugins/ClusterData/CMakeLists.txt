@@ -5,7 +5,6 @@ PROJECT(${CLUSTERDATA})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
@@ -88,14 +87,15 @@ set(DIALOG_SOURCES
     src/OverwriteClustersConfirmationDialog.cpp
 )
 
-qt6_wrap_cpp(${CLUSTERD_SOURCES} ${PLUGIN_MOC_HEADERS})
-
 source_group(Plugin FILES ${CLUSTERD_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Model FILES ${MODEL_SOURCES})
 source_group(Dialog FILES ${DIALOG_SOURCES})
 
 add_library(${CLUSTERDATA} SHARED ${CLUSTERD_SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${DIALOG_SOURCES})
+
+qt_wrap_cpp(CLUSTERDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${CLUSTERDATA})
+target_sources(${CLUSTERDATA} PRIVATE ${CLUSTERDATA_MOC})
 
 target_include_directories(${CLUSTERDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 

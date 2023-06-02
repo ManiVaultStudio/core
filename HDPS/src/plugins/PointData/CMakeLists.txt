@@ -5,7 +5,6 @@ PROJECT(${POINTDATA})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP")
@@ -99,12 +98,12 @@ set(ACTIONS_SOURCES
 source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 
-qt6_wrap_cpp(${POINTS_SOURCES} ${PLUGIN_MOC_HEADERS})
-
 add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
 
-target_include_directories(${POINTDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
+qt_wrap_cpp(POINTDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${POINTDATA})
+target_sources(${POINTDATA} PRIVATE ${POINTDATA_MOC})
 
+target_include_directories(${POINTDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 target_include_directories(${POINTDATA} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/)
 
 target_compile_features(${POINTDATA} PRIVATE cxx_std_17)

@@ -5,7 +5,6 @@ PROJECT(${TEXTDATA})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
@@ -38,9 +37,10 @@ set(PLUGIN
 
 source_group( Plugin FILES ${TEXTDATA_SOURCES})
 
-qt6_wrap_cpp(${TEXTDATA_SOURCES} ${TEXTDATA_MOC_HEADERS})
-
 add_library(${TEXTDATA} SHARED ${TEXTDATA_SOURCES})
+
+qt_wrap_cpp(TEXTDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${TEXTDATA})
+target_sources(${TEXTDATA} PRIVATE ${TEXTDATA_MOC})
 
 target_include_directories(${TEXTDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 

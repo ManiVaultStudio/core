@@ -5,7 +5,6 @@ PROJECT(${COLORDATA})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
@@ -27,20 +26,16 @@ set(COLORDATA_SOURCES
     src/ColorData.json
 )
 
-set(COLORDATA_MOC_HEADERS
+set(PLUGIN_MOC_HEADERS
     src/ColorData.h
 )
 
-set(PLUGIN
-    ${COLORDATA_SOURCES}
-    ${COLORDATA_MOC_HEADERS}
-)
-
-source_group( Plugin FILES ${PLUGIN})
-
-qt6_wrap_cpp(${COLORDATA_SOURCES} ${COLORDATA_MOC_HEADERS})
+source_group( Plugin FILES ${COLORDATA_SOURCES})
 
 add_library(${COLORDATA} SHARED ${COLORDATA_SOURCES})
+
+qt_wrap_cpp(COLORDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${COLORDATA})
+target_sources(${COLORDATA} PRIVATE ${COLORDATA_MOC})
 
 target_include_directories(${COLORDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 

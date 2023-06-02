@@ -5,8 +5,6 @@ PROJECT(${ACTIONSPLUGIN})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
@@ -50,9 +48,10 @@ source_group(Plugin FILES ${PLUGIN})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
 
-qt6_wrap_cpp(${ACTIONS_SOURCES} ${PLUGIN_MOC_HEADERS})
-
 add_library(${ACTIONSPLUGIN} SHARED ${ACTIONS_SOURCES})
+
+qt_wrap_cpp(ACTIONS_MOC ${PLUGIN_MOC_HEADERS} TARGET ${ACTIONSPLUGIN})
+target_sources(${ACTIONSPLUGIN} PRIVATE ${ACTIONS_MOC})
 
 target_include_directories(${ACTIONSPLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
