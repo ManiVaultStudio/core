@@ -26,13 +26,8 @@ set(TEXTDATA_SOURCES
     src/TextData.json
 )
 
-set(TEXTDATA_MOC_HEADERS
+set(PLUGIN_MOC_HEADERS
     src/TextData.h
-)
-
-set(PLUGIN
-    ${TEXTDATA_SOURCES}
-    ${TEXTDATA_MOC_HEADERS}
 )
 
 source_group( Plugin FILES ${TEXTDATA_SOURCES})
