@@ -20,10 +20,23 @@ class ToolbarActionItemWidget final : public QWidget
 
 protected:
 
+    /** State widget class (displays either collapsed or expanded action) */
     class StateWidget : public QWidget
     {
     public:
+
+        /**
+         * Construct with \p parent widget, pointer to \p action to display and \p state
+         * @param parent Pointer to parent widget
+         * @param action Pointer to action to display
+         * @param state State in which to display the \p action
+         */
         StateWidget(QWidget* parent, WidgetAction* action, const ToolbarActionItem::State& state);
+
+        void setVisible(bool visible);
+
+    private:
+        util::WidgetFader   _widgetFader;   /** For fading in/out the widget */
     };
 
 protected:
@@ -51,11 +64,9 @@ private:
     void synchronizeWidgetSize(const ToolbarActionItem::State& state);
 
 private:
-    ToolbarActionItem&  _toolbarActionItem;     /** Reference to owning toolbar action item */
-    QPointer<QWidget>   _collapsedWidget;       /** Pointer to collapsed widget */
-    QPointer<QWidget>   _expandedWidget;        /** Pointer to expanded widget */
-    //util::WidgetFader   _collapsedWidgetFader;  
-    //util::WidgetFader   _expandedWidgetFader;  
+    ToolbarActionItem&  _toolbarActionItem;         /** Reference to owning toolbar action item */
+    StateWidget         _collapsedWidget;           /** State widget for collapsed action */
+    StateWidget         _expandedWidget;            /** State widget for expanded action */
 
     friend class ToolbarActionItem;
 };

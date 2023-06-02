@@ -12,21 +12,15 @@ namespace hdps::gui {
 ToolbarActionItemWidget::ToolbarActionItemWidget(QWidget* parent, ToolbarActionItem& toolbarActionItem) :
     QWidget(parent),
     _toolbarActionItem(toolbarActionItem),
-    _collapsedWidget(),
-    _expandedWidget()//,
-    //_collapsedWidgetFader(this, _collapsedWidget),
-    //_expandedWidgetFader(this, _expandedWidget)
+    _collapsedWidget(this, const_cast<WidgetAction*>(_toolbarActionItem.getAction()), ToolbarActionItem::State::Collapsed),
+    _expandedWidget(this, const_cast<WidgetAction*>(_toolbarActionItem.getAction()), ToolbarActionItem::State::Expanded)
 {
-    auto layout         = new QHBoxLayout();
-    auto nonConstAction = const_cast<WidgetAction*>(_toolbarActionItem.getAction());
-
-    _collapsedWidget    = new StateWidget(this, nonConstAction, ToolbarActionItem::State::Collapsed);
-    _expandedWidget     = new StateWidget(this, nonConstAction, ToolbarActionItem::State::Expanded);
+    auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    layout->addWidget(_collapsedWidget);
-    layout->addWidget(_expandedWidget);
+    layout->addWidget(&_collapsedWidget);
+    layout->addWidget(&_expandedWidget);
 
     setLayout(layout);
 
@@ -35,16 +29,16 @@ ToolbarActionItemWidget::ToolbarActionItemWidget(QWidget* parent, ToolbarActionI
         {
             case ToolbarActionItem::State::Collapsed:
             {
-                _collapsedWidget->setVisible(true);
-                _expandedWidget->setVisible(false);
+                _collapsedWidget.setVisible(true);
+                _expandedWidget.setVisible(false);
 
                 break;
             }
 
             case ToolbarActionItem::State::Expanded:
             {
-                _collapsedWidget->setVisible(false);
-                _expandedWidget->setVisible(true);
+                _collapsedWidget.setVisible(false);
+                _expandedWidget.setVisible(true);
 
                 break;
             }
@@ -72,10 +66,10 @@ bool ToolbarActionItemWidget::eventFilter(QObject* target, QEvent* event)
         {
             const auto resizeEvent = static_cast<QResizeEvent*>(event);
 
-            if (target == _collapsedWidget.get())
+            if (target == &_collapsedWidget)
                 synchronizeWidgetSize(ToolbarActionItem::State::Collapsed);
 
-            if (target == _expandedWidget.get())
+            if (target == &_expandedWidget)
                 synchronizeWidgetSize(ToolbarActionItem::State::Expanded);
 
             break;
@@ -92,11 +86,11 @@ void ToolbarActionItemWidget::synchronizeWidgetSize(const ToolbarActionItem::Sta
 {
     switch (state) {
         case ToolbarActionItem::State::Collapsed:
-            _toolbarActionItem.setWidgetSize(_collapsedWidget->sizeHint(), state);
+            _toolbarActionItem.setWidgetSize(_collapsedWidget.sizeHint(), state);
             break;
 
         case ToolbarActionItem::State::Expanded:
-            _toolbarActionItem.setWidgetSize(_expandedWidget->sizeHint(), state);
+            _toolbarActionItem.setWidgetSize(_expandedWidget.sizeHint(), state);
             break;
 
         default:
@@ -105,7 +99,8 @@ void ToolbarActionItemWidget::synchronizeWidgetSize(const ToolbarActionItem::Sta
 }
 
 ToolbarActionItemWidget::StateWidget::StateWidget(QWidget* parent, WidgetAction* action, const ToolbarActionItem::State& state) :
-    QWidget(parent)
+    QWidget(parent),
+    _widgetFader(this, this, 0.0f, 0.0f, 1.0f, 500, 1000)
 {
     auto layout = new QVBoxLayout();
     auto label  = new QLabel();
@@ -136,6 +131,16 @@ ToolbarActionItemWidget::StateWidget::StateWidget(QWidget* parent, WidgetAction*
     label->setText(metrics.elidedText(action->text(), Qt::ElideMiddle, widget->width()));
 
     setLayout(layout);
+}
+
+void ToolbarActionItemWidget::StateWidget::setVisible(bool visible)
+{
+    if (visible)
+        _widgetFader.setOpacity(1.0f, 250);
+    else
+        _widgetFader.setOpacity(0.0f);
+
+    QWidget::setVisible(visible);
 }
 
 }

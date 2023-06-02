@@ -98,6 +98,12 @@ public:
      */
     void setFadeOutDuration(std::int32_t fadeOutDuration);
 
+    /**
+     * Get opacity effect
+     * @return Reference to opacity effect
+     */
+    QGraphicsOpacityEffect& getOpacityEffect();
+
 signals:
 
     /** Signals that the animation has faded in */

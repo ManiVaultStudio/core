@@ -40,8 +40,13 @@ void WidgetActionHighlightWidget::highlightingChanged(const WidgetAction::Highli
     switch (highlighting)
     {
         case WidgetAction::HighlightOption::None:
+        {
+            widgetFader.getOpacityEffect().setEnabled(false);
             widgetFader.setOpacity(0.0f, 500);
+
+            hide();
             break;
+        }
 
         case WidgetAction::HighlightOption::Moderate:
             widgetFader.setOpacity(0.25f, 200);

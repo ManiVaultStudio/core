@@ -129,4 +129,9 @@ void WidgetFader::setFadeOutDuration(std::int32_t fadeOutDuration)
     _fadeOutDuration = fadeOutDuration;
 }
 
+QGraphicsOpacityEffect& WidgetFader::getOpacityEffect()
+{
+    return _opacityEffect;
+}
+
 }

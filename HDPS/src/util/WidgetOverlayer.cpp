@@ -23,8 +23,8 @@ WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget
     setObjectName("WidgetOverlayer");
 
     _sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
-    _sourceWidget->installEventFilter(this);
 
+    _sourceWidget->installEventFilter(this);
     _targetWidget->installEventFilter(this);
 }
 
