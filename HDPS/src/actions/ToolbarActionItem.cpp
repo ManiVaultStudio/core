@@ -1,5 +1,6 @@
 #include "ToolbarActionItem.h"
 #include "ToolbarActionItemWidget.h"
+#include "WidgetAction.h"
 
 namespace hdps::gui {
 
@@ -7,7 +8,8 @@ ToolbarActionItem::ToolbarActionItem(QObject* parent, const WidgetAction* action
     QObject(parent),
     _action(action),
     _state(state),
-    _autoExpandPriority(autoExpandPriority)
+    _autoExpandPriority(autoExpandPriority),
+    _widgetSizes()
 {
 }
 
@@ -22,16 +24,13 @@ void ToolbarActionItem::setAutoExpandPriority(std::int32_t autoExpandPriority)
         return;
 
     _autoExpandPriority = autoExpandPriority;
+
+    emit autoExpandPriorityChanged(_autoExpandPriority);
 }
 
 QWidget* ToolbarActionItem::createWidget(QWidget* parent)
 {
     return new ToolbarActionItemWidget(parent, *this);
-}
-
-bool ToolbarActionItem::eventFilter(QObject* target, QEvent* event)
-{
-    return QObject::eventFilter(target, event);
 }
 
 ToolbarActionItem::State ToolbarActionItem::getState() const
@@ -46,12 +45,26 @@ void ToolbarActionItem::setState(const State& state)
 
     _state = state;
 
+    qDebug() << __FUNCTION__ << getAction()->text() << static_cast<int>(state);
+
     emit stateChanged(_state);
 }
 
 const WidgetAction* ToolbarActionItem::getAction()
 {
     return _action;
+}
+
+QSize ToolbarActionItem::getWidgetSize(const State& state) const
+{
+    return _widgetSizes[static_cast<std::int32_t>(state)];
+}
+
+void ToolbarActionItem::setWidgetSize(const QSize& size, const State& state)
+{
+    _widgetSizes[static_cast<std::int32_t>(state)] = size;
+
+    emit widgetSizeChanged(size, state);
 }
 
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QSize>
 
 class QWidget;
 
@@ -73,11 +74,27 @@ protected:
     QWidget* createWidget(QWidget* parent);
 
     /**
-     * Respond to \p target object events
-     * @param target Object of which an event occurred
-     * @param event The event that took place
+     * Get widget size for \p state
+     * @param state State to get the widget size for
+     * @return Widget size
      */
-    bool eventFilter(QObject* target, QEvent* event) override;
+    QSize getWidgetSize(const State& state) const;
+
+    /**
+     * Set widget \p size for \p state
+     * @param state State to set the widget size for
+     * @param size Widget size
+     */
+    void setWidgetSize(const QSize& size, const State& state);
+
+    /**
+     * Compare with \p other toolbar action item on the basis of their auto expand priority
+     * @param other Other toolbar action item to compare with
+     * @return Boolean determining whether the \p other toolbar action item is smaller
+     */
+    bool operator < (const ToolbarActionItem& other) const {
+        return getAutoExpandPriority() < other.getAutoExpandPriority();
+    }
 
 signals:
 
@@ -87,10 +104,24 @@ signals:
      */
     void stateChanged(const State& state);
 
+    /**
+     * Signals that the auto expand priority changed to \p autoExpandPriority
+     * @param autoExpandPriority Auto expand priority
+     */
+    void autoExpandPriorityChanged(std::int32_t autoExpandPriority);
+
+    /**
+     * Signals that the size of widget with \p state changed to \p size
+     * @param size New size of the widget
+     * @param state State of the widget
+     */
+    void widgetSizeChanged(const QSize& size, const State& state);
+
 protected:
     const WidgetAction* _action;                /** Pointer to horizontal toolbar action that creates the widget */
     State               _state;                 /** Whether the item is expanded or collapsed */
     std::int32_t        _autoExpandPriority;    /** Priority with which action should be auto-expanded (higher priority w.r.t. other actions means it will auto-expanded sooner) */
+    QSize               _widgetSizes[2];        /** Widget sizes in collapsed and expanded state respectively */
 
     friend class ToolbarAction;
     friend class HorizontalToolbarAction;

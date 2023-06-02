@@ -137,6 +137,7 @@ set(PUBLIC_GROUPING_ACTIONS_HEADERS
     src/actions/GroupSectionTreeItem.h
     src/actions/GroupWidgetTreeItem.h
     src/actions/ToolbarAction.h
+    src/actions/HorizontalToolbarAction.h
     src/actions/ToolbarActionItem.h
     src/actions/ToolbarActionItemWidget.h
 )
@@ -149,6 +150,7 @@ set(PUBLIC_GROUPING_ACTIONS_SOURCES
     src/actions/GroupSectionTreeItem.cpp
     src/actions/GroupWidgetTreeItem.cpp
 	src/actions/ToolbarAction.cpp
+	src/actions/HorizontalToolbarAction.cpp
     src/actions/ToolbarActionItem.cpp
     src/actions/ToolbarActionItemWidget.cpp
 )

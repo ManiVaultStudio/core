@@ -240,6 +240,7 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 
     setIcon(viewPlugin->getIcon());
     setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
+    setMinimumSizeHintMode(eMinimumSizeHintMode::MinimumSizeHintFromDockWidget);
 
     const auto updateWindowTitle = [this]() -> void {
         setWindowTitle(_viewPlugin->getGuiNameAction().getString());

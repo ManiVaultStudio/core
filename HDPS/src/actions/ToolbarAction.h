@@ -82,6 +82,8 @@ private:
     GroupAction     _groupAction;   /** Group action which holds the actions */
     ActionItems     _actionItems;   /** Action items */
 
+protected:
+    static constexpr std::int32_t CONTENTS_MARGIN = 4;      /** Content margins around the toolbar */
 };
 
 }
