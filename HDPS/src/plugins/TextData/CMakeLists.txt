@@ -26,6 +26,10 @@ set(TEXTDATA_SOURCES
     src/TextData.json
 )
 
+set(TEXTDATA_HEADERS
+    src/TextData.h
+)
+
 set(PLUGIN_MOC_HEADERS
     src/TextData.h
 )

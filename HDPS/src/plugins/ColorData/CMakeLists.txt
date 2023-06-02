@@ -26,6 +26,10 @@ set(COLORDATA_SOURCES
     src/ColorData.json
 )
 
+set(COLORDATA_HEADERS
+    src/ColorData.h
+)
+
 set(PLUGIN_MOC_HEADERS
     src/ColorData.h
 )
