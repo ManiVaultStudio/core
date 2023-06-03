@@ -96,6 +96,20 @@ protected:
         return getAutoExpandPriority() < other.getAutoExpandPriority();
     }
 
+    /**
+     * Get whether the item is currently changing state
+     * @return Boolean determining whether the item is currently changing state
+     */
+    bool isChangingState() const;
+
+protected:
+
+    /**
+     * Set whether the item is currently changing state
+     * @param changingState Boolean determining whether the item is currently changing state
+     */
+    void setChangingState(bool changingState);
+
 signals:
 
     /**
@@ -103,6 +117,12 @@ signals:
      * @param state Item state
      */
     void stateChanged(const State& state);
+
+    /**
+     * Signals that the changing state changed to \p changingState
+     * @param changingState Boolean determining whether the item is currently changing state
+     */
+    void changingStateChanged(bool changingState);
 
     /**
      * Signals that the auto expand priority changed to \p autoExpandPriority
@@ -122,6 +142,7 @@ protected:
     State               _state;                 /** Whether the item is expanded or collapsed */
     std::int32_t        _autoExpandPriority;    /** Priority with which action should be auto-expanded (higher priority w.r.t. other actions means it will auto-expanded sooner) */
     QSize               _widgetSizes[2];        /** Widget sizes in collapsed and expanded state respectively */
+    bool                _changingState;         /** Boolean determining whether the item is currently changing state */
 
     friend class ToolbarAction;
     friend class HorizontalToolbarAction;

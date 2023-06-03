@@ -49,12 +49,20 @@ void WidgetActionHighlightWidget::highlightingChanged(const WidgetAction::Highli
         }
 
         case WidgetAction::HighlightOption::Moderate:
+        {
+            widgetFader.getOpacityEffect().setEnabled(true);
             widgetFader.setOpacity(0.25f, 200);
+            
             break;
+        }
 
         case WidgetAction::HighlightOption::Strong:
+        {
+            widgetFader.getOpacityEffect().setEnabled(true);
             widgetFader.setOpacity(0.6f, 200);
+
             break;
+        }
 
         default:
             break;

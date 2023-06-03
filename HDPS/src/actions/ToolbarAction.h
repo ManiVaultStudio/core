@@ -19,7 +19,32 @@ class ToolbarAction : public WidgetAction
 public:
 
     using AutoExpandPriorities  = QVector<std::int32_t>;
-    using ActionItems           = QMap<const WidgetAction*, ToolbarActionItem*>;
+    using ActionItems           = QVector<ToolbarActionItem*>;
+    using ActionItemsMap        = QMap<const WidgetAction*, ToolbarActionItem*>;
+
+    /** Convenience class for blocking toolbar layout invalidation (and automatically unblocking it when the object goes out of scope) */
+    class LayoutInvalidationBlocker {
+    public:
+
+        /**
+         * Construct with \p toolbarAction
+         * @param toolbarAction Reference to toolbar action to block layout invalidation for
+         */
+        LayoutInvalidationBlocker(ToolbarAction& toolbarAction) :
+            _toolbarAction(toolbarAction)
+        {
+            //_toolbarAction.blockLayoutInvalidation();
+        }
+
+        /** Destruct and cancel blocking layout invalidation */
+        ~LayoutInvalidationBlocker()
+        {
+            //_toolbarAction.unblockLayoutInvalidation();
+        }
+
+    private:
+        ToolbarAction& _toolbarAction;  /** Reference to toolbar action to block layout invalidation for */
+    };
 
 public:
 
@@ -38,7 +63,7 @@ public:
 
     /**
      * Get action items for the toolbar
-     * @return List of action items
+     * @return Vector of action items
      */
     virtual ActionItems& getActionItems();
 
@@ -70,17 +95,27 @@ public: // Actions management
      */
     virtual void setActionAutoExpandPriority(const WidgetAction* action, const std::int32_t& autoExpandPriority) final;
 
+private:
+
+    /** Invalidates the layout (might be prohibited by the ) */
+    void invalidateLayout();
+
 signals:
 
     /**
      * Signals that the action widgets changed to \p actionWidgets
      * @param actionWidgets New action widgets
      */
-    void actionWidgetsChanged(ActionItems& actionWidgets);
+    void actionWidgetsChanged(ActionItemsMap& actionWidgets);
+
+    /** Signals that the layout has become invalid due to changes in auto expand priorities or change in widget size */
+    void layoutInvalidated();
 
 private:
-    GroupAction     _groupAction;   /** Group action which holds the actions */
-    ActionItems     _actionItems;   /** Action items */
+    GroupAction     _groupAction;                   /** Group action which holds the actions */
+    ActionItems     _actionItems;                   /** Action items */
+    ActionItemsMap  _actionItemsMap;                /** Maps action pointer to action item pointer */
+    bool            _layoutInvalidationBlocked;     /** Whether layout invalidation is blocked or not */
 
 protected:
     static constexpr std::int32_t CONTENTS_MARGIN = 4;      /** Content margins around the toolbar */

@@ -33,6 +33,10 @@ protected:
          */
         StateWidget(QWidget* parent, WidgetAction* action, const ToolbarActionItem::State& state);
 
+        /**
+         * Overload set visible to enabled fading
+         * @param visible whether the state widget is visible or not
+         */
         void setVisible(bool visible);
 
     private:
@@ -64,9 +68,9 @@ private:
     void synchronizeWidgetSize(const ToolbarActionItem::State& state);
 
 private:
-    ToolbarActionItem&  _toolbarActionItem;         /** Reference to owning toolbar action item */
-    StateWidget         _collapsedWidget;           /** State widget for collapsed action */
-    StateWidget         _expandedWidget;            /** State widget for expanded action */
+    ToolbarActionItem&  _toolbarActionItem;     /** Reference to owning toolbar action item */
+    StateWidget         _collapsedWidget;       /** State widget for collapsed action */
+    StateWidget         _expandedWidget;        /** State widget for expanded action */
 
     friend class ToolbarActionItem;
 };

@@ -40,6 +40,7 @@ HorizontalToolbarAction::Widget::Widget(QWidget* parent, HorizontalToolbarAction
     setLayout(&_layout);
 
     connect(_horizontalToolbarAction, &ToolbarAction::actionWidgetsChanged, this, &HorizontalToolbarAction::Widget::setActionWidgets);
+    connect(_horizontalToolbarAction, &ToolbarAction::layoutInvalidated, this, &Widget::updateLayout);
     connect(&_timer, &QTimer::timeout, this, &Widget::updateLayout);
 
     setActionWidgets();
@@ -90,6 +91,10 @@ void HorizontalToolbarAction::Widget::setActionWidgets()
 
 void HorizontalToolbarAction::Widget::updateLayout()
 {
+    for (auto actionItem : _horizontalToolbarAction->getActionItems())
+        if (actionItem->isChangingState())
+            return;
+
     //qDebug() << "Update layout" << _toolbarWidget.sizeHint().width() << parentWidget()->width() << width();
     
     QMap<ToolbarActionItem*, ToolbarActionItem::State> states;
@@ -108,14 +113,16 @@ void HorizontalToolbarAction::Widget::updateLayout()
         return width;
     };
 
-    auto autoExpandPrioritySortedActionItems = _horizontalToolbarAction->getActionItems().values();
+    auto autoExpandPrioritySortedActionItems = _horizontalToolbarAction->getActionItems();
 
     std::sort(autoExpandPrioritySortedActionItems.begin(), autoExpandPrioritySortedActionItems.end());
+    std::reverse(autoExpandPrioritySortedActionItems.begin(), autoExpandPrioritySortedActionItems.end());
 
     for (auto actionItem : autoExpandPrioritySortedActionItems) {
         auto cachedStates = states;
 
-        states[actionItem] = ToolbarActionItem::State::Expanded;
+        if (!actionItem->getAction()->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::AlwaysCollapsed))
+            states[actionItem] = ToolbarActionItem::State::Expanded;
 
         if (getWidth() > static_cast<std::uint32_t>(parentWidget()->width())) {
             states = cachedStates;

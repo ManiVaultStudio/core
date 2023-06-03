@@ -347,14 +347,16 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
     WidgetActionWidget(parent, groupAction, widgetFlags),
     _groupAction(groupAction)
 {
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
     auto layout = new QHBoxLayout();
 
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    if (widgetFlags & PopupLayout)
+    if (widgetFlags & PopupLayout) {
         setPopupLayout(layout);
-    else
+    } else {
+        layout->setContentsMargins(0, 0, 0, 0);
         setLayout(layout);
+    }
 
     const auto updateLayout = [this, layout, groupAction]() -> void {
         QLayoutItem* layoutItem;

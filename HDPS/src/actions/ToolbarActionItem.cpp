@@ -9,7 +9,8 @@ ToolbarActionItem::ToolbarActionItem(QObject* parent, const WidgetAction* action
     _action(action),
     _state(state),
     _autoExpandPriority(autoExpandPriority),
-    _widgetSizes()
+    _widgetSizes(),
+    _changingState(false)
 {
 }
 
@@ -47,6 +48,8 @@ void ToolbarActionItem::setState(const State& state)
 
     qDebug() << __FUNCTION__ << getAction()->text() << static_cast<int>(state);
 
+    setChangingState(true);
+
     emit stateChanged(_state);
 }
 
@@ -63,8 +66,23 @@ QSize ToolbarActionItem::getWidgetSize(const State& state) const
 void ToolbarActionItem::setWidgetSize(const QSize& size, const State& state)
 {
     _widgetSizes[static_cast<std::int32_t>(state)] = size;
-
+    
     emit widgetSizeChanged(size, state);
+}
+
+bool ToolbarActionItem::isChangingState() const
+{
+    return _changingState;
+}
+
+void ToolbarActionItem::setChangingState(bool changingState)
+{
+    if (changingState == _changingState)
+        return;
+
+    _changingState = changingState;
+
+    emit changingStateChanged(_changingState);
 }
 
 }

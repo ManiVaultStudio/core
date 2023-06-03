@@ -9,7 +9,9 @@ namespace hdps::gui {
 ToolbarAction::ToolbarAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
     _groupAction(this, "Actions"),
-    _actionItems()
+    _actionItems(),
+    _actionItemsMap(),
+    _layoutInvalidationBlocked(false)
 {
     setText(title);
 }
@@ -23,19 +25,35 @@ void ToolbarAction::addAction(WidgetAction* action, const std::int32_t& autoExpa
 {
     _groupAction.addAction(action);
 
-    _actionItems[action] = new ToolbarActionItem(this, action, ToolbarActionItem::State::Collapsed, autoExpandPriority);
+    auto actionItem = new ToolbarActionItem(this, action, ToolbarActionItem::State::Collapsed, autoExpandPriority);
 
-    emit actionWidgetsChanged(_actionItems);
+    _actionItems << actionItem;
+
+    _actionItemsMap[action] = actionItem;
+
+    connect(_actionItemsMap[action], &ToolbarActionItem::autoExpandPriorityChanged, this, &ToolbarAction::layoutInvalidated);
+    connect(_actionItemsMap[action], &ToolbarActionItem::widgetSizeChanged, this, &ToolbarAction::layoutInvalidated);
+
+    emit actionWidgetsChanged(_actionItemsMap);
 }
 
 void ToolbarAction::removeAction(WidgetAction* action)
 {
     _groupAction.removeAction(action);
 
-    if (_actionItems.contains(action))
-        _actionItems.remove(action);
+    if (_actionItemsMap.contains(action)) {
+        auto actionItem = _actionItemsMap[action];
 
-    emit actionWidgetsChanged(_actionItems);
+        disconnect(actionItem, &ToolbarActionItem::autoExpandPriorityChanged, this, nullptr);
+        disconnect(actionItem, &ToolbarActionItem::widgetSizeChanged, this, nullptr);
+
+        if (_actionItems.contains(actionItem))
+            _actionItems.removeOne(actionItem);
+
+        _actionItemsMap.remove(action);
+
+        emit actionWidgetsChanged(_actionItemsMap);
+    }
 }
 
 WidgetActions ToolbarAction::getActions()
@@ -50,15 +68,20 @@ void ToolbarAction::setActionAutoExpandPriority(const WidgetAction* action, cons
     if (action == nullptr)
         return;
 
-    if (!_actionItems.contains(action))
+    if (!_actionItemsMap.contains(action))
         return;
 
-    _actionItems[action]->setAutoExpandPriority(autoExpandPriority);
+    _actionItemsMap[action]->setAutoExpandPriority(autoExpandPriority);
 }
 
 ToolbarAction::ActionItems& ToolbarAction::getActionItems()
 {
     return _actionItems;
+}
+
+void ToolbarAction::invalidateLayout()
+{
+    emit layoutInvalidated();
 }
 
 }

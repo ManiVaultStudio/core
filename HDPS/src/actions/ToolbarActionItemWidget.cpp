@@ -18,6 +18,7 @@ ToolbarActionItemWidget::ToolbarActionItemWidget(QWidget* parent, ToolbarActionI
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSizeConstraint(QLayout::SetFixedSize);
 
     layout->addWidget(&_collapsedWidget);
     layout->addWidget(&_expandedWidget);
@@ -46,6 +47,8 @@ ToolbarActionItemWidget::ToolbarActionItemWidget(QWidget* parent, ToolbarActionI
             default:
                 break;
         }
+
+        _toolbarActionItem.setChangingState(false);
     };
 
     updateState();
@@ -56,6 +59,9 @@ ToolbarActionItemWidget::ToolbarActionItemWidget(QWidget* parent, ToolbarActionI
 
     synchronizeWidgetSize(ToolbarActionItem::State::Collapsed);
     synchronizeWidgetSize(ToolbarActionItem::State::Expanded);
+
+    _collapsedWidget.installEventFilter(this);
+    _expandedWidget.installEventFilter(this);
 }
 
 bool ToolbarActionItemWidget::eventFilter(QObject* target, QEvent* event)
@@ -86,10 +92,12 @@ void ToolbarActionItemWidget::synchronizeWidgetSize(const ToolbarActionItem::Sta
 {
     switch (state) {
         case ToolbarActionItem::State::Collapsed:
+            qDebug() << _toolbarActionItem.getAction()->text() << "Collapsed" << _collapsedWidget.sizeHint();
             _toolbarActionItem.setWidgetSize(_collapsedWidget.sizeHint(), state);
             break;
 
         case ToolbarActionItem::State::Expanded:
+            qDebug() << _toolbarActionItem.getAction()->text() << "Expanded" << _expandedWidget.sizeHint();
             _toolbarActionItem.setWidgetSize(_expandedWidget.sizeHint(), state);
             break;
 
@@ -100,12 +108,13 @@ void ToolbarActionItemWidget::synchronizeWidgetSize(const ToolbarActionItem::Sta
 
 ToolbarActionItemWidget::StateWidget::StateWidget(QWidget* parent, WidgetAction* action, const ToolbarActionItem::State& state) :
     QWidget(parent),
-    _widgetFader(this, this, 0.0f, 0.0f, 1.0f, 500, 1000)
+    _widgetFader(this, this, 1.0f, 0.0f, 1.0f, 500, 1000)
 {
-    auto layout = new QVBoxLayout();
-    auto label  = new QLabel();
+    setObjectName("StateWidget");
 
-    label->setStyleSheet("background-color: gray; font-size: 8px;");
+    auto layout = new QVBoxLayout();
+
+    setStyleSheet("QWidget#StateWidget { background-color: rgba(150, 150, 150, 25); }");
 
     QWidget* widget = nullptr;
 
@@ -122,23 +131,34 @@ ToolbarActionItemWidget::StateWidget::StateWidget(QWidget* parent, WidgetAction*
             break;
     }
 
-    layout->setContentsMargins(0, 0, 0, 0);
-    //layout->addWidget(label);
+    /*
+    QFont labelFont("Courier", 7, 300);
+
+    QFontMetrics metrics(labelFont);
+
+    auto label = new QLabel(this);
+
+    label->setFont(labelFont);
+    label->setAlignment(Qt::AlignCenter);
+
+    if (state == ToolbarActionItem::State::Expanded)
+        label->setText(metrics.elidedText(action->text(), Qt::ElideRight, widget->width()));
+
+    layout->addWidget(label);
+    */
+
+    layout->setContentsMargins(4, 4, 4, 4);
     layout->addWidget(widget);
-
-    QFontMetrics metrics(font());
-
-    label->setText(metrics.elidedText(action->text(), Qt::ElideMiddle, widget->width()));
-
+    
     setLayout(layout);
 }
 
 void ToolbarActionItemWidget::StateWidget::setVisible(bool visible)
 {
-    if (visible)
-        _widgetFader.setOpacity(1.0f, 250);
-    else
-        _widgetFader.setOpacity(0.0f);
+    //if (visible)
+    //    _widgetFader.setOpacity(1.0f, 250);
+    //else
+    //    _widgetFader.setOpacity(0.0f);
 
     QWidget::setVisible(visible);
 }

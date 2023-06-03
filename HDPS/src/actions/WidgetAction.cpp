@@ -44,7 +44,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _connectedActions(),
     _settingsPrefix(),
     _highlighting(HighlightOption::None),
-    _popupSizeHint(QSize(0, 0)),
+    _popupSizeHint(),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default))
 {
     Q_ASSERT(!title.isEmpty());
