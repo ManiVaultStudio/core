@@ -104,24 +104,14 @@ void DecimalRangeAction::disconnectFromPublicAction(bool recursive)
 DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags /*= 0*/) :
     WidgetActionWidget(parent, decimalRangeAction, widgetFlags)
 {
-    if (widgetFlags & PopupLayout) {
-        auto layout = new QHBoxLayout();
+    auto layout = new QHBoxLayout();
 
-        layout->addWidget(decimalRangeAction->getRangeMinAction().createWidget(this, DecimalAction::SpinBox));
-        layout->addWidget(decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::SpinBox));
+    layout->setContentsMargins(0, 0, 0, 0);
 
-        setPopupLayout(layout);
-    }
-    else {
-        auto layout = new QHBoxLayout();
+    layout->addWidget(decimalRangeAction->getRangeMinAction().createWidget(this, DecimalAction::SpinBox));
+    layout->addWidget(decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::SpinBox));
 
-        layout->setContentsMargins(0, 0, 0, 0);
-
-        layout->addWidget(decimalRangeAction->getRangeMinAction().createWidget(this, DecimalAction::SpinBox));
-        layout->addWidget(decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::SpinBox));
-
-        setLayout(layout);
-    }
+    setLayout(layout);
 }
 
 }

@@ -49,7 +49,7 @@ ColorMapSettings1DAction::Widget::Widget(QWidget* parent, ColorMapSettings1DActi
 
     layout->addWidget(groupAction->createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }
 
 }

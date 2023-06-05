@@ -263,7 +263,7 @@ ColorMapEditor1DAction::Widget::Widget(QWidget* parent, ColorMapEditor1DAction* 
     layout->addLayout(toolbarLayout);
     layout->addWidget(colorMapEditor1DAction->getNodeAction().createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 
     connect(&_goToFirstNodeAction, &TriggerAction::triggered, this, [this] {
         _colorMapEditor1DWidget.selectNode(_colorMapEditor1DWidget.getNodes().first());

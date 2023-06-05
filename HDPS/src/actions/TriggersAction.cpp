@@ -80,12 +80,7 @@ TriggersAction::Widget::Widget(QWidget* parent, TriggersAction* triggersAction, 
     const auto applyLayout = [&](QLayout* layout) {
         layout->setContentsMargins(0, 0, 0, 0);
 
-        if (widgetFlags & PopupLayout)
-            setPopupLayout(layout);
-        else {
-            layout->setContentsMargins(0, 0, 0, 0);
-            setLayout(layout);
-        }
+        setLayout(layout);
     };
 
     if (widgetFlags & Horizontal) {

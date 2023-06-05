@@ -6,9 +6,7 @@
 #include <QFileDialog>
 #include <QLabel>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerAction& dimensionsPickerAction) :
     WidgetAction(&dimensionsPickerAction, "Dimension Picker"),
@@ -170,16 +168,9 @@ DimensionsPickerSelectAction::Widget::Widget(QWidget* parent, DimensionsPickerSe
 
     layout->addLayout(selectLayout);
 
-    if (widgetFlags & WidgetActionWidget::PopupLayout) {
-        setPopupLayout(layout);
-    }
-    else {
-        layout->setContentsMargins(0, 0, 0, 0);
-        setLayout(layout);
-    }
+    setLayout(layout);
 }
 
-}
 }
 
 

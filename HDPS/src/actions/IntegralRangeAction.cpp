@@ -100,24 +100,14 @@ void IntegralRangeAction::disconnectFromPublicAction(bool recursive)
 IntegralRangeAction::IntegralRangeWidget::IntegralRangeWidget(QWidget* parent, IntegralRangeAction* integralRangeAction, const std::int32_t& widgetFlags /*= 0*/) :
     WidgetActionWidget(parent, integralRangeAction, widgetFlags)
 {
-    if (widgetFlags & PopupLayout) {
-        auto layout = new QHBoxLayout();
+    auto layout = new QHBoxLayout();
 
-        layout->addWidget(integralRangeAction->getRangeMinAction().createWidget(this, IntegralAction::SpinBox));
-        layout->addWidget(integralRangeAction->getRangeMaxAction().createWidget(this, IntegralAction::SpinBox));
+    layout->setContentsMargins(0, 0, 0, 0);
 
-        setPopupLayout(layout);
-    }
-    else {
-        auto layout = new QHBoxLayout();
+    layout->addWidget(integralRangeAction->getRangeMinAction().createWidget(this, IntegralAction::SpinBox));
+    layout->addWidget(integralRangeAction->getRangeMaxAction().createWidget(this, IntegralAction::SpinBox));
 
-        layout->setContentsMargins(0, 0, 0, 0);
-
-        layout->addWidget(integralRangeAction->getRangeMinAction().createWidget(this, IntegralAction::SpinBox));
-        layout->addWidget(integralRangeAction->getRangeMaxAction().createWidget(this, IntegralAction::SpinBox));
-
-        setLayout(layout);
-    }
+    setLayout(layout);
 }
 
 }

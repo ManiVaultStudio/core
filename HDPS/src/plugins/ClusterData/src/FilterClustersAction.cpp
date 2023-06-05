@@ -50,5 +50,5 @@ FilterClustersAction::Widget::Widget(QWidget* parent, FilterClustersAction* filt
 
     layout->addWidget(filterClustersAction->getNameFilterAction().createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }

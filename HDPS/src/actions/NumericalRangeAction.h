@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WidgetAction.h"
+#include "GroupAction.h"
 
 #include "util/NumericalRange.h"
 
@@ -14,7 +14,7 @@ namespace hdps::gui {
  * @author Thomas Kroes
  */
 template<typename NumericalType, typename NumericalActionType>
-class NumericalRangeAction : public WidgetAction
+class NumericalRangeAction : public GroupAction
 {
     /** Templated classes with Q_OBJECT macro are not allowed, so use std functions instead */
     using LimitsChangedCB   = std::function<void()>;
@@ -43,7 +43,7 @@ public:
      * @param range Range
      */
     NumericalRangeAction(QObject* parent, const QString& title, const util::NumericalRange<NumericalType>& limits, const util::NumericalRange<NumericalType>& range) :
-        WidgetAction(parent, title),
+        GroupAction(parent, title),
         _rangeMinAction(this, "Minimum"),
         _rangeMaxAction(this, "Maximum")
     {

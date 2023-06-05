@@ -88,5 +88,5 @@ ColorizeClustersAction::Widget::Widget(QWidget* parent, ColorizeClustersAction* 
     layout->addWidget(colorizeClustersAction->getRandomSeedAction().createLabelWidget(this), 2, 0);
     layout->addWidget(colorizeClustersAction->getRandomSeedAction().createWidget(this), 2, 1);
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }

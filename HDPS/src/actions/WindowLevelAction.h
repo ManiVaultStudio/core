@@ -1,8 +1,7 @@
 #pragma once
 
-#include "actions/WidgetAction.h"
+#include "actions/GroupAction.h"
 #include "actions/DecimalAction.h"
-#include "actions/HorizontalGroupAction.h"
 
 namespace hdps::gui {
 
@@ -13,41 +12,9 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class WindowLevelAction : public WidgetAction
+class WindowLevelAction : public GroupAction
 {
-Q_OBJECT
-
-public:
-
-    /** Widget class for settings action */
-    class Widget : public WidgetActionWidget
-    {
-    protected:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         * @param windowLevelAction Pointer to window level action
-         * @param widgetFlags Widget flags for the configuration of the widget
-         */
-        Widget(QWidget* parent, WindowLevelAction* windowLevelAction, const std::int32_t& widgetFlags);
-
-    protected:
-        HorizontalGroupAction   _groupAction;   /** Display window and level actions side-by-side */
-
-        friend class WindowLevelAction;
-    };
-
-protected:
-
-    /**
-     * Get widget representation of the window & level action
-     * @param parent Pointer to parent widget
-     * @param widgetFlags Widget flags for the configuration of the widget (type)
-     */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new Widget(parent, this, widgetFlags);
-    };
+    Q_OBJECT
 
 public:
 

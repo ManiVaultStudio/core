@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WidgetAction.h"
+#include "GroupAction.h"
 #include "HorizontalGroupAction.h"
 #include "NumericalRangeAction.h"
 
@@ -16,7 +16,7 @@ namespace hdps::gui {
  * @author Thomas Kroes
  */
 template<typename RectangleType, typename NumericalRangeActionType>
-class RectangleAction : public WidgetAction
+class RectangleAction : public GroupAction
 {
 public:
 
@@ -93,7 +93,7 @@ public:
      * @param defaultRectangle Default rectangle
      */
     RectangleAction(QObject * parent, const QString& title, const RectangleType& rectangle = RectangleType()) :
-        WidgetAction(parent, title),
+        GroupAction(parent, title),
         _rangeAction{ NumericalRangeActionType(this, "X-range"), NumericalRangeActionType(this, "Y-range") }
     {
         setDefaultWidgetFlags(WidgetFlag::Default);

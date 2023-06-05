@@ -96,5 +96,5 @@ SelectClustersAction::Widget::Widget(QWidget* parent, SelectClustersAction* sele
     layout->addWidget(selectClustersAction->getSelectNoneAction().createWidget(this));
     layout->addWidget(selectClustersAction->getSelectInvertAction().createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }

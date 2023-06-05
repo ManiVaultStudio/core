@@ -31,7 +31,7 @@ EditProxyDatasetsAction::Widget::Widget(QWidget* parent, EditProxyDatasetsAction
 
     layout->addWidget(listView);
 
-    setPopupLayout(layout);
+    setLayout(layout);
     
     const auto updateListView = [this, editProxyDatasetsAction, listView]() -> void {
         QStringList proxyMemberNames;

@@ -250,11 +250,6 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
 {
     auto layout = new QGridLayout();
 
-    if (widgetFlags & PopupLayout)
-        setPopupLayout(layout);
-    else
-        setLayout(layout);
-
     const auto updateLayout = [this, layout, groupAction]() -> void {
         if (groupAction->getShowLabels()) {
             switch (groupAction->getLabelSizingType())
@@ -341,22 +336,19 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
     connect(groupAction, &GroupAction::labelWidthFixedChanged, this, updateLayout);
 
     updateLayout();
+
+    setLayout(layout);
 }
 
 GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, groupAction, widgetFlags),
     _groupAction(groupAction)
 {
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 
     auto layout = new QHBoxLayout();
 
-    if (widgetFlags & PopupLayout) {
-        setPopupLayout(layout);
-    } else {
-        layout->setContentsMargins(0, 0, 0, 0);
-        setLayout(layout);
-    }
+    layout->setContentsMargins(0, 0, 0, 0);
 
     const auto updateLayout = [this, layout, groupAction]() -> void {
         QLayoutItem* layoutItem;
@@ -390,11 +382,15 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
 
             }
         }
+
+        updateGeometry();
     };
 
     updateLayout();
 
     connect(groupAction, &GroupAction::actionsChanged, this, updateLayout);
+
+    setLayout(layout);
 }
 
 }

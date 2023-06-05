@@ -606,13 +606,7 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
 
     layout->addLayout(toolbarLayout);
 
-    if (widgetFlags & PopupLayout) {
-        setPopupLayout(layout);
-    }
-    else {
-        layout->setContentsMargins(0, 0, 0, 0);
-        setLayout(layout);
-    }
+    setLayout(layout);
 
     updateTableViewModel(&dimensionsPickerAction->getProxyModel());
 }

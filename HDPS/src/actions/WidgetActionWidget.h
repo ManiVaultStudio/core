@@ -43,13 +43,33 @@ public:
      */
     WidgetActionWidget(QWidget* parent, WidgetAction* action, const std::int32_t& widgetFlags = 0);
 
+public: // Popup widget related
+    
+    /**
+     * Get whether the widget is in a popup state
+     * @return Boolean determining whether the widget is in a popup state
+     */
+    virtual bool isPopup() const final;
+
+    /**
+     * Override the size hint to account for popups
+     * @return Size hint
+     */
     QSize sizeHint() const override;
 
     /**
-     * Sets a popup layout
-     * @param popupLayout Pointer to popup layout
+     * Override to allow for popup layouts
+     * @param layout Pointer to layout
      */
-    void setPopupLayout(QLayout* popupLayout);
+    void setLayout(QLayout* layout);
+
+private:
+
+    /**
+     * Set popup layout (layout contains groupbox etc.)
+     * @param popupLayout Pointer to the popup layout
+     */
+    virtual void setPopupLayout(QLayout* popupLayout) final;
 
 protected:
     WidgetAction*       _widgetAction;      /** Pointer to widget action that will be displayed */

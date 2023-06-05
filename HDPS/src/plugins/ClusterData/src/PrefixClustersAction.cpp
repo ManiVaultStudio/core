@@ -76,5 +76,5 @@ PrefixClustersAction::Widget::Widget(QWidget* parent, PrefixClustersAction* pref
     layout->addWidget(prefixClustersAction->getPrefixAction().createWidget(this));
     layout->addWidget(prefixClustersAction->getApplyAction().createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }

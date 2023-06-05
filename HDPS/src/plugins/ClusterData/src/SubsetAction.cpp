@@ -68,5 +68,5 @@ SubsetAction::Widget::Widget(QWidget* parent, SubsetAction* subsetAction) :
     layout->addWidget(subsetAction->getSubsetNameAction().createWidget(this));
     layout->addWidget(subsetAction->getCreateSubsetAction().createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }

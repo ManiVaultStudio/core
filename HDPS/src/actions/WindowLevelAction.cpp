@@ -9,11 +9,14 @@ using namespace hdps;
 namespace hdps::gui {
 
 WindowLevelAction::WindowLevelAction(QObject* parent, const QString& title) :
-    WidgetAction(parent, title),
+    GroupAction(parent, title),
     _windowAction(this, "Window", 0.0f, 1.0f, 1.0f, 1.0f, 1),
     _levelAction(this, "Level", 0.0f, 1.0f, 0.5f, 0.5f, 1)
 {
     setIcon(Application::getIconFont("FontAwesome").getIcon("adjust"));
+
+    addAction(&_windowAction);
+    addAction(&_levelAction);
 
     _windowAction.setPrefix("win: ");
     _levelAction.setPrefix("lvl: ");
@@ -81,34 +84,6 @@ QVariantMap WindowLevelAction::toVariantMap() const
     _levelAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
-}
-
-WindowLevelAction::Widget::Widget(QWidget* parent, WindowLevelAction* windowLevelAction, const std::int32_t& widgetFlags) :
-    WidgetActionWidget(parent, windowLevelAction),
-    _groupAction(this, "Group")
-{
-    _groupAction.setShowLabels(false);
-    _groupAction.addAction(&windowLevelAction->getWindowAction());
-    _groupAction.addAction(&windowLevelAction->getLevelAction());
-
-    if (widgetFlags & PopupLayout) {
-        auto layout = new QGridLayout();
-
-        layout->addWidget(windowLevelAction->getWindowAction().createLabelWidget(this), 0, 0);
-        layout->addWidget(windowLevelAction->getWindowAction().createWidget(this), 0, 1);
-
-        layout->addWidget(windowLevelAction->getLevelAction().createLabelWidget(this), 1, 0);
-        layout->addWidget(windowLevelAction->getLevelAction().createWidget(this), 1, 1);
-
-        setPopupLayout(layout);
-    } else {
-        auto layout = new QVBoxLayout();
-
-        layout->setContentsMargins(0, 0, 0, 0);
-        layout->addWidget(_groupAction.createWidget(this));
-
-        setLayout(layout);
-    }
 }
 
 }

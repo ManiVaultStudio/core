@@ -399,7 +399,7 @@ OptionsAction::SelectionAction::Widget::Widget(QWidget* parent, SelectionAction*
     layout->addWidget(selectionAction->getClearSelectionAction().createWidget(this));
     layout->addWidget(selectionAction->getInvertSelectionAction().createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }
 
 OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
@@ -501,7 +501,7 @@ OptionsAction::FileAction::Widget::Widget(QWidget* parent, FileAction* fileActio
     layout->addWidget(fileAction->getLoadSelectionAction().createWidget(this));
     layout->addWidget(fileAction->getSaveSelectionAction().createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }
 
 }

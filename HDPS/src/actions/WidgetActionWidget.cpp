@@ -23,7 +23,15 @@ QSize WidgetActionWidget::sizeHint() const
             return popupSizeHint;
     }
 
-    return QSize();// QWidget::sizeHint();
+    return QWidget::sizeHint();
+}
+
+void WidgetActionWidget::setLayout(QLayout* layout)
+{
+    if (isPopup())
+        setPopupLayout(layout);
+    else
+        WidgetActionViewWidget::setLayout(layout);
 }
 
 void WidgetActionWidget::setPopupLayout(QLayout* popupLayout)
@@ -32,7 +40,7 @@ void WidgetActionWidget::setPopupLayout(QLayout* popupLayout)
 
     mainLayout->setContentsMargins(4, 4, 4, 4);
 
-    setLayout(mainLayout);
+    WidgetActionViewWidget::setLayout(mainLayout);
 
     auto groupBox = new QGroupBox(getAction()->text());
 
@@ -58,6 +66,11 @@ void WidgetActionWidget::setPopupLayout(QLayout* popupLayout)
     });
 
     update();
+}
+
+bool WidgetActionWidget::isPopup() const
+{
+    return _widgetFlags & PopupLayout;
 }
 
 }

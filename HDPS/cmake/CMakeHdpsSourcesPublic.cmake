@@ -293,7 +293,6 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WidgetActionWidget.h
     src/actions/WidgetActionCollapsedWidget.h
     src/actions/WidgetActionLabel.h
-    src/actions/WidgetActionStateWidget.h
     src/actions/WidgetActionContextMenu.h
     src/actions/WidgetActionViewWidget.h
     src/actions/WidgetActionMimeData.h
@@ -305,7 +304,6 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/WidgetActionWidget.cpp
     src/actions/WidgetActionCollapsedWidget.cpp
     src/actions/WidgetActionLabel.cpp
-    src/actions/WidgetActionStateWidget.cpp
     src/actions/WidgetActionContextMenu.cpp
     src/actions/WidgetActionViewWidget.cpp
     src/actions/WidgetActionMimeData.cpp

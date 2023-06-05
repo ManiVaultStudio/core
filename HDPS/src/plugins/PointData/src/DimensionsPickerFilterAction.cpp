@@ -3,9 +3,7 @@
 
 #include <Application.h>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 DimensionsPickerFilterAction::DimensionsPickerFilterAction(DimensionsPickerAction& dimensionsPickerAction) :
     WidgetAction(&dimensionsPickerAction, "Filter"),
@@ -47,14 +45,7 @@ DimensionsPickerFilterAction::Widget::Widget(QWidget* parent, DimensionsPickerFi
     layout->addWidget(dimensionsPickerFilterAction->getNameFilterAction().createLabelWidget(this));
     layout->addWidget(dimensionsPickerFilterAction->getNameFilterAction().createWidget(this));
 
-    if (widgetFlags & WidgetActionWidget::PopupLayout) {
-        setPopupLayout(layout);
-    }
-    else {
-        layout->setContentsMargins(0, 0, 0, 0);
-        setLayout(layout);
-    }
+    setLayout(layout);
 }
 
-}
 }

@@ -578,10 +578,7 @@ QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
         layout->addWidget(clearSelectionAction->createWidget(widget, TriggerAction::Icon));
     }
 
-    if (widgetFlags & WidgetActionWidget::PopupLayout)
-        widget->setPopupLayout(layout);
-    else
-        widget->setLayout(layout);
+    widget->setLayout(layout);
 
     return widget;
 }
