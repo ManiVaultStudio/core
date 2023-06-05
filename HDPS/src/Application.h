@@ -55,6 +55,12 @@ public: // Miscellaneous
     util::Version getVersion() const;
 
     /**
+     * Get the application name
+     * @return The application name
+     */
+    static QString getName();
+
+    /**
      * Get file path of the project to automatically open upon startup (if set)
      * @return Startup project file path
      */

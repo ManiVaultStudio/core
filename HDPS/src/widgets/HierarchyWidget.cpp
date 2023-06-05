@@ -157,10 +157,10 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    _filterGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::AlwaysCollapsed);
-    _selectionGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::AlwaysCollapsed);
-    _columnsGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::AlwaysCollapsed);
-    _settingsGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::AlwaysCollapsed);
+    _filterGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _selectionGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _columnsGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _settingsGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
     _toolbarAction.setShowLabels(false);
 

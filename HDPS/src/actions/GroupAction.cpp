@@ -114,7 +114,7 @@ void GroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -
 
     QList<std::int32_t> configurationFlagsRequireUpdate{
         static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::NoLabelInGroup),
-        static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::AlwaysCollapsed)
+        static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup)
     };
 
     connect(action, &WidgetAction::configurationFlagToggled, this, [&](const WidgetAction::ConfigurationFlag& configurationFlag, bool set) -> void {
@@ -362,7 +362,7 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
             if (groupAction->getShowLabels() && !action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup))
                 layout->addWidget(action->createLabelWidget(this));
 
-            if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::AlwaysCollapsed))
+            if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup))
                 layout->addWidget(const_cast<WidgetAction*>(action)->createCollapsedWidget(this));
             else {
                 const auto widgetFlags = groupAction->getWidgetFlagsMap()[action];

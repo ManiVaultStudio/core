@@ -92,15 +92,32 @@ void HorizontalToolbarAction::Widget::setActionWidgets()
 void HorizontalToolbarAction::Widget::updateLayout()
 {
     for (auto actionItem : _horizontalToolbarAction->getActionItems())
-        if (actionItem->isChangingState())
+        if (actionItem->isChangingState()) {
+            qDebug() << actionItem->getAction()->text() << "is changing state";
             return;
+        }
+            
 
     //qDebug() << "Update layout" << _toolbarWidget.sizeHint().width() << parentWidget()->width() << width();
     
     QMap<ToolbarActionItem*, ToolbarActionItem::State> states;
 
-    for (auto actionItem : _horizontalToolbarAction->getActionItems())
+    ToolbarAction::ActionItems actionItems;
+
+    for (auto actionItem : _horizontalToolbarAction->getActionItems()) {
         states[actionItem] = ToolbarActionItem::State::Collapsed;
+
+        const auto forceCollapsedInGroup    = actionItem->getAction()->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+        const auto forceExpandedInGroup     = actionItem->getAction()->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::ForceExpandedInGroup);
+
+        if (forceCollapsedInGroup || forceExpandedInGroup) {
+            if (forceExpandedInGroup)
+                states[actionItem] = ToolbarActionItem::State::Expanded;
+        }
+        else {
+            actionItems << actionItem;
+        }
+    }
 
     const auto getWidth = [this, &states]() -> std::uint32_t {
         std::uint32_t width = 2 * ToolbarAction::CONTENTS_MARGIN;
@@ -113,16 +130,13 @@ void HorizontalToolbarAction::Widget::updateLayout()
         return width;
     };
 
-    auto autoExpandPrioritySortedActionItems = _horizontalToolbarAction->getActionItems();
+    std::sort(actionItems.begin(), actionItems.end());
+    std::reverse(actionItems.begin(), actionItems.end());
 
-    std::sort(autoExpandPrioritySortedActionItems.begin(), autoExpandPrioritySortedActionItems.end());
-    std::reverse(autoExpandPrioritySortedActionItems.begin(), autoExpandPrioritySortedActionItems.end());
-
-    for (auto actionItem : autoExpandPrioritySortedActionItems) {
+    for (auto actionItem : actionItems) {
         auto cachedStates = states;
 
-        if (!actionItem->getAction()->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::AlwaysCollapsed))
-            states[actionItem] = ToolbarActionItem::State::Expanded;
+        states[actionItem] = ToolbarActionItem::State::Expanded;
 
         if (getWidth() > static_cast<std::uint32_t>(parentWidget()->width())) {
             states = cachedStates;
@@ -130,7 +144,7 @@ void HorizontalToolbarAction::Widget::updateLayout()
         }
     }
 
-    for (auto actionItem : _horizontalToolbarAction->getActionItems())
+    for (auto actionItem : actionItems)
         actionItem->setState(states[actionItem]);
 }
 

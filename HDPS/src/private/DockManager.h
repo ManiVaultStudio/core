@@ -71,9 +71,6 @@ public:
      */
     ads::CDockAreaWidget* findDockAreaWidget(hdps::plugin::ViewPlugin* viewPlugin);
 
-
-    
-
     /**
      * Remove \p viewPlugin from the dock manager
      * @param viewPlugin Pointer to the view plugin to remove

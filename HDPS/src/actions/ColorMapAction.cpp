@@ -192,7 +192,7 @@ void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString&
     getSharedDataRangeAction(Axis::X).setDefaultWidgetFlags(DecimalRangeAction::MinimumLineEdit | DecimalRangeAction::MaximumLineEdit);
     getSharedDataRangeAction(Axis::Y).setDefaultWidgetFlags(DecimalRangeAction::MinimumLineEdit | DecimalRangeAction::MaximumLineEdit);
 
-    getEditor1DAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::AlwaysCollapsed);
+    getEditor1DAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 }
 
 hdps::util::ColorMap::Type ColorMapAction::getColorMapType() const

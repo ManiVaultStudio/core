@@ -84,6 +84,11 @@ util::Version Application::getVersion() const
     return _version;
 }
 
+QString Application::getName()
+{
+    return "ManiVault";
+}
+
 QString Application::getStartupProjectFilePath() const
 {
     return _startupProjectFilePath;

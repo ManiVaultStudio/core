@@ -92,12 +92,10 @@ void ToolbarActionItemWidget::synchronizeWidgetSize(const ToolbarActionItem::Sta
 {
     switch (state) {
         case ToolbarActionItem::State::Collapsed:
-            qDebug() << _toolbarActionItem.getAction()->text() << "Collapsed" << _collapsedWidget.sizeHint();
             _toolbarActionItem.setWidgetSize(_collapsedWidget.sizeHint(), state);
             break;
 
         case ToolbarActionItem::State::Expanded:
-            qDebug() << _toolbarActionItem.getAction()->text() << "Expanded" << _expandedWidget.sizeHint();
             _toolbarActionItem.setWidgetSize(_expandedWidget.sizeHint(), state);
             break;
 

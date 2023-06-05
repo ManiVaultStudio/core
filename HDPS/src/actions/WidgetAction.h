@@ -59,12 +59,13 @@ public:
 
     /** Describes the configuration options */
     enum class ConfigurationFlag {
-        VisibleInMenu       = 0x00001,      /** Whether the action may show itself in (context) menus */
-        InternalUseOnly     = 0x00002,      /** Action is only for internal use, it is not part of the graphical user interface */
-        NoLabelInGroup      = 0x00004,      /** Action will not have a label when it is displayed in a group */
-        AlwaysCollapsed     = 0x00008,      /** Action will be always collapsed, no matter the circumstances */
+        VisibleInMenu           = 0x00001,      /** Whether the action may show itself in (context) menus */
+        InternalUseOnly         = 0x00002,      /** Action is only for internal use, it is not part of the graphical user interface */
+        NoLabelInGroup          = 0x00004,      /** Action will not have a label when it is displayed in a group */
+        ForceCollapsedInGroup   = 0x00008,      /** Action will be collapsed in a horizontal group (or toolbar), no matter the circumstances */
+        ForceExpandedInGroup    = 0x00010,      /** Action will be expanded in a horizontal group (or toolbar), no matter the circumstances */
 
-        User                = 0x00100,      /** And beyond for custom configuration flags */
+        User                    = 0x00100,      /** And beyond for custom configuration flags */
 
         Default = 0
     };

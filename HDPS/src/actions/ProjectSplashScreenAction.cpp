@@ -44,7 +44,7 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _editAction.setDefaultWidgetFlags(TriggerAction::Icon);
-    _editAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::AlwaysCollapsed);
+    _editAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _editAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
     _editAction.setIcon(fontAwesome.getIcon("cog"));
     _editAction.setToolTip("Edit the splash screen settings");

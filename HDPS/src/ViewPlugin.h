@@ -141,6 +141,7 @@ private:
     gui::PresetsAction      _presetsAction;             /** Action for managing presets */
     QKeySequence            _triggerShortcut;           /** Shortcut for triggering the plugin */
     gui::WidgetActions      _titleBarMenuActions;       /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
+    //gui::WidgetActions      _settingsActions;           /** Settings actions which are added to the end of the settings menu of the view plugin title bar */
 };
 
 class ViewPluginFactory : public PluginFactory
