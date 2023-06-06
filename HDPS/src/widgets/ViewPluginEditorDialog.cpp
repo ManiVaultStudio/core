@@ -23,7 +23,7 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* view
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);
     setWindowTitle(QString("Edit (%1) settings").arg(viewPlugin->text()));
-    setMinimumSize(QSize(320, 240));
+    setMinimumSize(QSize(640, 480));
 
     auto layout = new QVBoxLayout();
     

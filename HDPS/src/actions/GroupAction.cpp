@@ -228,11 +228,16 @@ QWidget* GroupAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    if (widgetFlags & WidgetFlag::Vertical)
+    if (widgetFlags & WidgetActionWidget::PopupLayout) {
         layout->addWidget(new GroupAction::VerticalWidget(parent, this, widgetFlags));
+    }
+    else {
+        if (widgetFlags & WidgetFlag::Vertical)
+            layout->addWidget(new GroupAction::VerticalWidget(parent, this, widgetFlags));
 
-    if (widgetFlags & WidgetFlag::Horizontal)
-        layout->addWidget(new GroupAction::HorizontalWidget(parent, this, widgetFlags));
+        if (widgetFlags & WidgetFlag::Horizontal)
+            layout->addWidget(new GroupAction::HorizontalWidget(parent, this, widgetFlags));
+    }
 
     widget->setLayout(layout);
 

@@ -37,7 +37,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _stretch(0),
     _forceHidden(false),
     _forceDisabled(false),
-    _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
+    _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::PublishViaApi) | static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaApi) | static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi)),
     _cachedConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
     _scope(Scope::Private),
     _publicAction(nullptr),
