@@ -60,14 +60,14 @@ enum class PixelSelectionModifierType
 {
     Replace,        /** Replace selection */
     Add,            /** Add to selection */
-    Remove          /** Remove from selection */
+    Subtract        /** Subtract from selection */
 };
 
 /** Maps pixel selection modifier name to modifier enum and vice versa */
 static const QMap<PixelSelectionModifierType, QString> pixelSelectionModifiers = {
     { PixelSelectionModifierType::Replace, "Replace" },
     { PixelSelectionModifierType::Add, "Add" },
-    { PixelSelectionModifierType::Remove, "Remove" }
+    { PixelSelectionModifierType::Subtract, "Subtract" }
 };
 
 /**
@@ -101,12 +101,17 @@ class PixelSelectionTypeModel : public QAbstractListModel {
 public:
     
     /**
-     * Constructor
-     * @param pixelSelectionTypes Allowed pixel selection types
+     * Construct with \p parent
      * @param parent Pointer to parent object
      */
-    PixelSelectionTypeModel(const PixelSelectionTypes& pixelSelectionTypes, QObject* parent = nullptr);
+    PixelSelectionTypeModel(QObject* parent = nullptr);
     
+    /**
+     * Set pixel selection types
+     * @param pixelSelectionTypes Allowed pixel selection types
+     */
+    void setPixelSelectionTypes(const PixelSelectionTypes& pixelSelectionTypes);
+
     /**
      * Returns the number of pixel selection types in the model
      * @param parent Parent index

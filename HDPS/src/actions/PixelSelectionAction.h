@@ -1,13 +1,14 @@
 #pragma once
 
-#include "util/PixelSelectionTool.h"
-
 #include "WidgetAction.h"
 #include "ColorAction.h"
 #include "DecimalAction.h"
 #include "OptionAction.h"
 #include "TriggerAction.h"
 #include "ToggleAction.h"
+#include "GroupAction.h"
+
+#include "util/PixelSelectionTool.h"
 
 #include <QActionGroup>
 
@@ -22,18 +23,26 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class PixelSelectionAction : public WidgetAction
+class PixelSelectionAction final : public WidgetAction
 {
+    Q_OBJECT
+
 public:
 
     /**
-     * Constructor
+     * Construct with \p parent object and \p title
      * @param parent Pointer to parent object
-     * @param targetWidget Pointer to target widget
-     * @param pixelSelectionTool Reference to pixel selection tool
+     * @param title Title
+     */
+    Q_INVOKABLE PixelSelectionAction(QObject* parent, const QString& title);
+
+    /**
+     * Initialize the pixel selection action
+     * @param targetWidget Pointer to target widget (pixel selection tool will be drawn on top of it)
+     * @param pixelSelectionTool Pointer to pixel selection tool
      * @param pixelSelectionTypes Allowed pixel selection types
      */
-    Q_INVOKABLE PixelSelectionAction(QObject* parent, QWidget* targetWidget, util::PixelSelectionTool& pixelSelectionTool, const util::PixelSelectionTypes& pixelSelectionTypes = util::defaultPixelSelectionTypes);
+    void initialize(QWidget* targetWidget, util::PixelSelectionTool* pixelSelectionTool, const util::PixelSelectionTypes& pixelSelectionTypes = util::defaultPixelSelectionTypes);
 
     /**
      * Get the context menu for the action
@@ -45,8 +54,8 @@ public:
     /** Get pointer to the target on which the pixel selection tool operates */
     QWidget* getTargetWidget();
 
-    /** Get reference to pixel selection tool */
-    util::PixelSelectionTool& getPixelSelectionTool();
+    /** Get pointer to pixel selection tool */
+    util::PixelSelectionTool* getPixelSelectionTool();
 
     /**
      * Enables/disables shortcuts
@@ -71,6 +80,12 @@ protected:
     /** Perform miscellaneous initialization */
     void initMiscellaneous();
 
+    /**
+     * Get whether the pixel selection tool is initialized with a target widget and pixel selection tool
+     * @return Boolean determining whether the pixel selection tool is initialized with a target widget and pixel selection tool
+     */
+    bool isInitialized() const;
+
 public: // Event handling
 
     /**
@@ -79,6 +94,21 @@ public: // Event handling
      * @param event Event that occurred
      */
     bool eventFilter(QObject* object, QEvent* event) override;
+
+public: // Linking
+
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
+     */
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
+
+    /**
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
+     */
+    void disconnectFromPublicAction(bool recursive) override;
 
 public: // Serialization
 
@@ -105,9 +135,11 @@ public: // Action getters
     ToggleAction& getPolygonAction() { return _polygonAction; }
     ToggleAction& getSampleAction() { return _sampleAction; }
     ToggleAction& getRoiAction() { return _roiAction; }
+    OptionAction& getModifierAction() { return _modifierAction; }
     ToggleAction& getModifierReplaceAction() { return _modifierReplaceAction; }
     ToggleAction& getModifierAddAction() { return _modifierAddAction; }
     ToggleAction& getModifierSubtractAction() { return _modifierSubtractAction; }
+    GroupAction& getSelectAction() { return _selectAction; }
     TriggerAction& getClearSelectionAction() { return _clearSelectionAction; }
     TriggerAction& getSelectAllAction() { return _selectAllAction; }
     TriggerAction& getInvertSelectionAction() { return _invertSelectionAction; }
@@ -115,8 +147,9 @@ public: // Action getters
     ToggleAction& getNotifyDuringSelectionAction() { return _notifyDuringSelectionAction; }
 
 protected:
+    bool                            _initialized;                       /** Whether the pixel selection tool is initialized with a target widget and pixel selection tool */
     QWidget*                        _targetWidget;                      /** Pointer to target widget */
-    util::PixelSelectionTool&       _pixelSelectionTool;                /** Reference to pixel selection tool */
+    util::PixelSelectionTool*       _pixelSelectionTool;                /** Pointer to pixel selection tool */
     util::PixelSelectionTypes       _pixelSelectionTypes;               /** Pixel selection types */
     ColorAction                     _overlayColorAction;                /** Selection overlay color action */
     DecimalAction                   _overlayOpacityAction;              /** Selection overlay opacity action */
@@ -129,10 +162,11 @@ protected:
     ToggleAction                    _sampleAction;                      /** Switch to sample selection action */
     ToggleAction                    _roiAction;                         /** Switch to ROI selection action */
     QActionGroup                    _typeActionGroup;                   /** Type action group */
+    OptionAction                    _modifierAction;                    /** Modifier action */
     ToggleAction                    _modifierReplaceAction;             /** Replace current selection action */
     ToggleAction                    _modifierAddAction;                 /** Add to current selection action */
     ToggleAction                    _modifierSubtractAction;            /** Subtract from current selection action */
-    QActionGroup                    _modifierActionGroup;               /** Modifier action group */
+    GroupAction                     _selectAction;                      /** Select actions group */
     TriggerAction                   _clearSelectionAction;              /** Clear selection action */
     TriggerAction                   _selectAllAction;                   /** Select all action */
     TriggerAction                   _invertSelectionAction;             /** Invert selection action */
@@ -144,4 +178,4 @@ protected:
 
 Q_DECLARE_METATYPE(hdps::gui::PixelSelectionAction)
 
-inline const auto pixelSelectionActionMetaTypeId = qRegisterMetaType<hdps::gui::PixelSelectionAction*>("PixelSelectionAction");
+inline const auto pixelSelectionActionMetaTypeId = qRegisterMetaType<hdps::gui::PixelSelectionAction*>("hdps::gui::PixelSelectionAction");

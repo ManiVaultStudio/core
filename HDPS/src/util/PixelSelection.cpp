@@ -154,10 +154,18 @@ QIcon getPixelSelectionTypeIcon(const PixelSelectionType& selectionType)
     return QIcon(pixmap);
 }
 
-PixelSelectionTypeModel::PixelSelectionTypeModel(const PixelSelectionTypes& pixelSelectionTypes, QObject* parent /*= nullptr*/) :
+PixelSelectionTypeModel::PixelSelectionTypeModel(QObject* parent /*= nullptr*/) :
     QAbstractListModel(parent),
-    _pixelSelectionTypes(pixelSelectionTypes)
+    _pixelSelectionTypes()
 {
+}
+
+void PixelSelectionTypeModel::setPixelSelectionTypes(const PixelSelectionTypes& pixelSelectionTypes)
+{
+    if (pixelSelectionTypes == _pixelSelectionTypes)
+        return;
+
+    _pixelSelectionTypes = pixelSelectionTypes;
 }
 
 int PixelSelectionTypeModel::rowCount(const QModelIndex& parent /*= QModelIndex()*/) const

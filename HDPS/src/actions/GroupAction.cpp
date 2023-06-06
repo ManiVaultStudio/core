@@ -283,11 +283,11 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
             delete layoutItem;
         }
 
-        for (auto widgetAction : groupAction->getActions()) {
+        for (auto action : groupAction->getActions()) {
             const auto numRows = layout->rowCount();
 
-            if (groupAction->getShowLabels() && !widgetAction->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup)) {
-                auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this, WidgetActionLabel::ColonAfterName));
+            if (groupAction->getShowLabels() && !action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup)) {
+                auto labelWidget = dynamic_cast<WidgetActionLabel*>(action->createLabelWidget(this, WidgetActionLabel::ColonAfterName));
 
                 switch (groupAction->getLabelSizingType())
                 {
@@ -318,14 +318,15 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
                 layout->addWidget(labelWidget, numRows, 0);
             }
 
-            auto actionWidget = widgetAction->createWidget(this);
+            const auto widgetFlags = groupAction->getWidgetFlagsMap()[action];
 
-            layout->addWidget(actionWidget, numRows, 1);
+            if (widgetFlags >= 0)
+                layout->addWidget(action->createWidget(this, widgetFlags), numRows, 1);
+            else
+                layout->addWidget(action->createWidget(this), numRows, 1);
 
-            if (widgetAction->getStretch() >= 0)
-                layout->setRowStretch(numRows, widgetAction->getStretch());
-
-            //layout->setAlignment(actionWidget, Qt::AlignLeft);
+            if (action->getStretch() >= 0)
+                layout->setRowStretch(numRows, action->getStretch());
         }
     };
 

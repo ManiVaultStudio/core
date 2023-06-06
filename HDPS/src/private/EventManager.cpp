@@ -11,7 +11,7 @@ using namespace hdps::gui;
 using namespace hdps::util;
 
 #ifdef _DEBUG
-    #define EVENT_MANAGER_VERBOSE
+    //#define EVENT_MANAGER_VERBOSE
 #endif
 
 namespace hdps
