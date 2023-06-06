@@ -105,8 +105,8 @@ void ToolbarActionItemWidget::synchronizeWidgetSize(const ToolbarActionItem::Sta
 }
 
 ToolbarActionItemWidget::StateWidget::StateWidget(QWidget* parent, WidgetAction* action, const ToolbarActionItem::State& state) :
-    QWidget(parent),
-    _widgetFader(this, this, 1.0f, 0.0f, 1.0f, 500, 1000)
+    QWidget(parent)//,
+    //_widgetFader(this, this, 1.0f, 0.0f, 1.0f, 500, 1000)
 {
     setObjectName("StateWidget");
 

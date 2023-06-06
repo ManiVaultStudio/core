@@ -38,6 +38,125 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
 {
     setText("Pixel selection");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+
+    const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
+
+    _overlayColorAction.setToolTip("Selection color");
+
+    _overlayOpacityAction.setSuffix("%");
+    _overlayOpacityAction.setToolTip("Selection opacity");
+
+    _typeAction.setCustomModel(&_typeModel);
+
+    _rectangleAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Rectangle));
+    _rectangleAction.setToolTip("Select pixels inside a rectangle (R)");
+    _rectangleAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _rectangleAction.setShortcut(QKeySequence("R"));
+
+    _brushAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Brush));
+    _brushAction.setToolTip("Select pixels using a brush tool (B)");
+    _brushAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _brushAction.setShortcut(QKeySequence("B"));
+
+    _lassoAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Lasso));
+    _lassoAction.setToolTip("Select pixels using a lasso (L)");
+    _lassoAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _lassoAction.setShortcut(QKeySequence("L"));
+
+    _polygonAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Polygon));
+    _polygonAction.setToolTip("Select pixels by drawing a polygon (P)");
+    _polygonAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _polygonAction.setShortcut(QKeySequence("P"));
+
+    _sampleAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Sample));
+    _sampleAction.setToolTip("Sample pixel by dragging over the image (S)");
+    _sampleAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _sampleAction.setShortcut(QKeySequence("S"));
+
+    _roiAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _roiAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::ROI));
+    _roiAction.setToolTip("Sample within region of interest (I)");
+    _roiAction.setShortcut(QKeySequence("I"));
+    
+    _modifierAction.setToolTip("Type of selection modifier");
+    _modifierAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionModifierType::Replace));
+
+    _modifierReplaceAction.setCheckable(true);
+    _modifierReplaceAction.setDefaultWidgetFlags(ToggleAction::PushButton);
+
+    _modifierAddAction.setIcon(fontAwesome.getIcon("plus"));
+    _modifierAddAction.setToolTip("Add items to the existing selection");
+    _modifierAddAction.setCheckable(true);
+    _modifierAddAction.setDefaultWidgetFlags(ToggleAction::PushButton);
+
+    _modifierSubtractAction.setIcon(fontAwesome.getIcon("minus"));
+    _modifierSubtractAction.setToolTip("Remove items from the existing selection");
+    _modifierSubtractAction.setDefaultWidgetFlags(ToggleAction::PushButton);
+    _modifierSubtractAction.setCheckable(true);
+
+    _selectAction.setDefaultWidgetFlags(GroupAction::Horizontal);
+
+    _selectAction.addAction(&_clearSelectionAction);
+    _selectAction.addAction(&_selectAllAction);
+    _selectAction.addAction(&_invertSelectionAction);
+
+    _clearSelectionAction.setToolTip("Clears the selection (E)");
+    _clearSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _clearSelectionAction.setShortcut(QKeySequence("E"));
+
+    _selectAllAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _selectAllAction.setShortcut(QKeySequence("A"));
+    _selectAllAction.setToolTip("Select all data points (A)");
+
+    _invertSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _invertSelectionAction.setShortcut(QKeySequence("I"));
+    _invertSelectionAction.setToolTip("Invert the selection (I)");
+
+    _brushRadiusAction.setToolTip("Brush selection tool radius");
+    _brushRadiusAction.setSuffix("px");
+
+    _notifyDuringSelectionAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
+    _notifyDuringSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _notifyDuringSelectionAction.setShortcut(QKeySequence("U"));
+    _notifyDuringSelectionAction.setToolTip("Notify during selection or only at the end of the selection process (U)");
+
+    connect(&_rectangleAction, &QAction::toggled, this, [this](bool toggled) {
+        if (toggled)
+            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Rectangle));
+    });
+
+    connect(&_brushAction, &QAction::toggled, this, [this](bool toggled) {
+        if (toggled)
+            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Brush));
+    });
+
+    connect(&_lassoAction, &QAction::toggled, this, [this](bool toggled) {
+        if (toggled)
+            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Lasso));
+    });
+
+    connect(&_polygonAction, &QAction::toggled, this, [this](bool toggled) {
+        if (toggled)
+            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Polygon));
+    });
+
+    connect(&_sampleAction, &QAction::toggled, this, [this](bool toggled) {
+        if (toggled)
+            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::Sample));
+    });
+
+    connect(&_roiAction, &QAction::toggled, this, [this](bool toggled) {
+        if (toggled)
+            _typeAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionType::ROI));
+    });
+
+    const auto updateType = [this]() {
+        _brushRadiusAction.setEnabled(_typeAction.getCurrentIndex() == static_cast<std::int32_t>(PixelSelectionType::Brush));
+    };
+
+    updateType();
+
+    connect(&_typeAction, &OptionAction::currentTextChanged, this, updateType);
 }
 
 void PixelSelectionAction::initialize(QWidget* targetWidget, util::PixelSelectionTool* pixelSelectionTool, const util::PixelSelectionTypes& pixelSelectionTypes /*= util::defaultPixelSelectionTypes*/)
@@ -54,10 +173,8 @@ void PixelSelectionAction::initialize(QWidget* targetWidget, util::PixelSelectio
 
     _typeModel.setPixelSelectionTypes(pixelSelectionTypes);
 
-    initOverlay();
     initType();
     initModifier();
-    initOperations();
     initMiscellaneous();
 
     setShortcutsEnabled(true);
@@ -110,112 +227,30 @@ void PixelSelectionAction::setShortcutsEnabled(const bool& shortcutsEnabled)
     }
 }
 
-void PixelSelectionAction::initOverlay()
-{
-    _overlayOpacityAction.setSuffix("%");
-}
-
 void PixelSelectionAction::initType()
 {
-    auto targetWidget = getTargetWidget();
-
-    auto pixelSelectionTool = getPixelSelectionTool();
-
-    _rectangleAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _brushAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _lassoAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _polygonAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _sampleAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _roiAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-
-    _rectangleAction.setShortcut(QKeySequence("R"));
-    _brushAction.setShortcut(QKeySequence("B"));
-    _lassoAction.setShortcut(QKeySequence("L"));
-    _polygonAction.setShortcut(QKeySequence("P"));
-    _sampleAction.setShortcut(QKeySequence("S"));
-    _roiAction.setShortcut(QKeySequence("I"));
-
-    _typeAction.setCustomModel(&_typeModel);
-
-    _rectangleAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Rectangle));
-    _rectangleAction.setToolTip("Select pixels inside a rectangle (R)");
-
-    _brushAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Brush));
-    _brushAction.setToolTip("Select pixels using a brush tool (B)");
-
-    _lassoAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Lasso));
-    _lassoAction.setToolTip("Select pixels using a lasso (L)");
-
-    _polygonAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Polygon));
-    _polygonAction.setToolTip("Select pixels by drawing a polygon (P)");
-
-    _sampleAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::Sample));
-    _sampleAction.setToolTip("Sample pixel by dragging over the image (S)");
-
-    _roiAction.setIcon(getPixelSelectionTypeIcon(PixelSelectionType::ROI));
-    _roiAction.setToolTip("Sample within region of interest (I)");
-
     if (_typeModel.rowCount() > 0) {
         _typeAction.setCurrentIndex(0);
         _typeAction.setDefaultText(0);
     }
 
-    if (!isInitialized())
-        return;
-
-    if (_pixelSelectionTypes.contains(PixelSelectionType::Rectangle)) {
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Rectangle))
         _typeActionGroup.addAction(&_rectangleAction);
 
-        connect(&_rectangleAction, &QAction::toggled, this, [this](bool toggled) {
-            if (toggled)
-                _pixelSelectionTool->setType(PixelSelectionType::Rectangle);
-        });
-    }
-
-    if (_pixelSelectionTypes.contains(PixelSelectionType::Brush)) {
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Brush))
         _typeActionGroup.addAction(&_brushAction);
 
-        connect(&_brushAction, &QAction::toggled, this, [this](bool toggled) {
-            if (toggled)
-                _pixelSelectionTool->setType(PixelSelectionType::Brush);
-        });
-    }
-
-    if (_pixelSelectionTypes.contains(PixelSelectionType::Lasso)) {
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Lasso))
         _typeActionGroup.addAction(&_lassoAction);
 
-        connect(&_lassoAction, &QAction::toggled, this, [this](bool toggled) {
-            if (toggled)
-                _pixelSelectionTool->setType(PixelSelectionType::Lasso);
-        });
-    }
-
-    if (_pixelSelectionTypes.contains(PixelSelectionType::Polygon)) {
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Polygon))
         _typeActionGroup.addAction(&_polygonAction);
 
-        connect(&_polygonAction, &QAction::toggled, this, [this](bool toggled) {
-            if (toggled)
-                _pixelSelectionTool->setType(PixelSelectionType::Polygon);
-        });
-    }
-
-    if (_pixelSelectionTypes.contains(PixelSelectionType::Sample)) {
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Sample))
         _typeActionGroup.addAction(&_sampleAction);
 
-        connect(&_sampleAction, &QAction::toggled, this, [this](bool toggled) {
-            if (toggled)
-                _pixelSelectionTool->setType(PixelSelectionType::Sample);
-        });
-    }
-
-    if (_pixelSelectionTypes.contains(PixelSelectionType::ROI)) {
+    if (_pixelSelectionTypes.contains(PixelSelectionType::ROI))
         _typeActionGroup.addAction(&_roiAction);
-
-        connect(&_roiAction, &QAction::toggled, this, [this](bool toggled) {
-            if (toggled)
-                _pixelSelectionTool->setType(PixelSelectionType::ROI);
-        });
-    }
 
     connect(&_typeAction, &OptionAction::currentTextChanged, [this](const QString& currentText) {
         _pixelSelectionTool->setType(util::pixelSelectionTypes.key(currentText));
@@ -241,20 +276,6 @@ void PixelSelectionAction::initType()
 
 void PixelSelectionAction::initModifier()
 {
-    const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
-
-    _modifierAddAction.setDefaultWidgetFlags(ToggleAction::PushButton);
-    _modifierSubtractAction.setDefaultWidgetFlags(ToggleAction::PushButton);
-
-    _modifierAddAction.setCheckable(true);
-    _modifierSubtractAction.setCheckable(true);
-
-    _modifierAddAction.setIcon(fontAwesome.getIcon("plus"));
-    _modifierSubtractAction.setIcon(fontAwesome.getIcon("minus"));
-
-    _modifierAddAction.setToolTip("Add items to the existing selection");
-    _modifierSubtractAction.setToolTip("Remove items from the existing selection");
-
     connect(&_modifierReplaceAction, &QAction::toggled, [this](bool toggled) {
         if (toggled)
             _modifierAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionModifierType::Replace));
@@ -288,44 +309,8 @@ void PixelSelectionAction::initModifier()
     connect(&_modifierAction, &OptionAction::currentIndexChanged, this, updateModifier);
 }
 
-void PixelSelectionAction::initOperations()
-{
-    _clearSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _selectAllAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _invertSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-
-    _clearSelectionAction.setShortcut(QKeySequence("E"));
-    _selectAllAction.setShortcut(QKeySequence("A"));
-    _invertSelectionAction.setShortcut(QKeySequence("I"));
-
-    _clearSelectionAction.setToolTip("Clears the selection (E)");
-    _selectAllAction.setToolTip("Select all data points (A)");
-    _invertSelectionAction.setToolTip("Invert the selection (I)");
-
-    _selectAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
-    _selectAction.setDefaultWidgetFlags(GroupAction::Horizontal);
-
-    _selectAction.addAction(&_clearSelectionAction);
-    _selectAction.addAction(&_selectAllAction);
-    _selectAction.addAction(&_invertSelectionAction);
-}
-
 void PixelSelectionAction::initMiscellaneous()
 {
-    _notifyDuringSelectionAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
-    _notifyDuringSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _notifyDuringSelectionAction.setShortcut(QKeySequence("U"));
-    _notifyDuringSelectionAction.setToolTip("Notify during selection or only at the end of the selection process (U)");
-
-    _brushRadiusAction.setToolTip("Brush selection tool radius");
-
-    const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
-
-    _brushRadiusAction.setSuffix("px");
-
-    if (!isInitialized())
-        return;
-
     connect(_pixelSelectionTool, &PixelSelectionTool::brushRadiusChanged, this, [this](const float& brushRadius) {
         _brushRadiusAction.setValue(brushRadius);
     });
@@ -347,14 +332,6 @@ void PixelSelectionAction::initMiscellaneous()
     connect(&_notifyDuringSelectionAction, &QAction::toggled, [this](bool toggled) {
         _pixelSelectionTool->setNotifyDuringSelection(toggled);
     });
-
-    const auto updateType = [this]() {
-        _brushRadiusAction.setEnabled(_pixelSelectionTool->getType() == PixelSelectionType::Brush);
-    };
-
-    connect(_pixelSelectionTool, &PixelSelectionTool::typeChanged, this, updateType);
-
-    updateType();
 }
 
 bool PixelSelectionAction::isInitialized() const
@@ -483,6 +460,10 @@ void PixelSelectionAction::connectToPublicAction(WidgetAction* publicAction, boo
         getOverlayOpacityAction().connectToPublicAction(&publicPixelSelectionAction->getOverlayOpacityAction(), recursive);
         getTypeAction().connectToPublicAction(&publicPixelSelectionAction->getTypeAction(), recursive);
         getModifierAction().connectToPublicAction(&publicPixelSelectionAction->getModifierAction(), recursive);
+        getClearSelectionAction().connectToPublicAction(&publicPixelSelectionAction->getClearSelectionAction(), recursive);
+        getSelectAllAction().connectToPublicAction(&publicPixelSelectionAction->getSelectAllAction(), recursive);
+        getInvertSelectionAction().connectToPublicAction(&publicPixelSelectionAction->getInvertSelectionAction(), recursive);
+        getBrushRadiusAction().connectToPublicAction(&publicPixelSelectionAction->getBrushRadiusAction(), recursive);
         getNotifyDuringSelectionAction().connectToPublicAction(&publicPixelSelectionAction->getNotifyDuringSelectionAction(), recursive);
     }
 
@@ -499,6 +480,10 @@ void PixelSelectionAction::disconnectFromPublicAction(bool recursive)
         getOverlayOpacityAction().disconnectFromPublicAction(recursive);
         getTypeAction().disconnectFromPublicAction(recursive);
         getModifierAction().disconnectFromPublicAction(recursive);
+        getClearSelectionAction().disconnectFromPublicAction(recursive);
+        getSelectAllAction().disconnectFromPublicAction(recursive);
+        getInvertSelectionAction().disconnectFromPublicAction(recursive);
+        getBrushRadiusAction().disconnectFromPublicAction(recursive);
         getNotifyDuringSelectionAction().disconnectFromPublicAction(recursive);
     }
 
@@ -512,9 +497,7 @@ void PixelSelectionAction::fromVariantMap(const QVariantMap& variantMap)
     _overlayColorAction.fromParentVariantMap(variantMap);
     _overlayOpacityAction.fromParentVariantMap(variantMap);
     _typeAction.fromParentVariantMap(variantMap);
-    _modifierReplaceAction.fromParentVariantMap(variantMap);
-    _modifierAddAction.fromParentVariantMap(variantMap);
-    _modifierSubtractAction.fromParentVariantMap(variantMap);
+    _modifierAction.fromParentVariantMap(variantMap);
     _notifyDuringSelectionAction.fromParentVariantMap(variantMap);
 }
 
@@ -525,9 +508,7 @@ QVariantMap PixelSelectionAction::toVariantMap() const
     _overlayColorAction.insertIntoVariantMap(variantMap);
     _overlayOpacityAction.insertIntoVariantMap(variantMap);
     _typeAction.insertIntoVariantMap(variantMap);
-    _modifierReplaceAction.insertIntoVariantMap(variantMap);
-    _modifierAddAction.insertIntoVariantMap(variantMap);
-    _modifierSubtractAction.insertIntoVariantMap(variantMap);
+    _modifierAction.insertIntoVariantMap(variantMap);
     _notifyDuringSelectionAction.insertIntoVariantMap(variantMap);
 
     return variantMap;

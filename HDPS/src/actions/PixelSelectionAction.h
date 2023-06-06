@@ -63,19 +63,13 @@ public:
      */
     void setShortcutsEnabled(const bool& shortcutsEnabled);
 
-protected:
-
-    /** Perform selection overlay initialization */
-    void initOverlay();
+private:
 
     /** Perform selection type initialization */
     void initType();
 
     /** Perform selection modifier initialization */
     void initModifier();
-
-    /** Perform selection operations initialization */
-    void initOperations();
 
     /** Perform miscellaneous initialization */
     void initMiscellaneous();
@@ -146,7 +140,7 @@ public: // Action getters
     DecimalAction& getBrushRadiusAction() { return _brushRadiusAction; }
     ToggleAction& getNotifyDuringSelectionAction() { return _notifyDuringSelectionAction; }
 
-protected:
+private:
     bool                            _initialized;                       /** Whether the pixel selection tool is initialized with a target widget and pixel selection tool */
     QWidget*                        _targetWidget;                      /** Pointer to target widget */
     util::PixelSelectionTool*       _pixelSelectionTool;                /** Pointer to pixel selection tool */

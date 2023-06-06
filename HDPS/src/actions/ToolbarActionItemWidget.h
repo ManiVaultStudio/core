@@ -40,7 +40,7 @@ protected:
         void setVisible(bool visible);
 
     private:
-        util::WidgetFader   _widgetFader;   /** For fading in/out the widget */
+        //util::WidgetFader   _widgetFader;   /** For fading in/out the widget */
     };
 
 protected:
