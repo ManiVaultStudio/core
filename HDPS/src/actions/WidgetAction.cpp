@@ -353,8 +353,8 @@ WidgetAction* WidgetAction::getPublicCopy() const
         if (publicCopy == nullptr)
             throw std::runtime_error(QString("Unable to create new %1 instance using the Qt meta-object system.").arg(metaObject()->className()).toLatin1());
 
-        publicCopy->fromVariantMap(toVariantMap());
         publicCopy->makePublic();
+        publicCopy->fromVariantMap(toVariantMap());
         publicCopy->makeUnique();
 
         emit publicCopy->idChanged(getId());

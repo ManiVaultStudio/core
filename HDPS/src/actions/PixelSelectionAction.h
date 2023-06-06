@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WidgetAction.h"
+#include "GroupAction.h"
 #include "ColorAction.h"
 #include "DecimalAction.h"
 #include "OptionAction.h"
@@ -23,7 +23,7 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class PixelSelectionAction final : public WidgetAction
+class PixelSelectionAction final : public GroupAction
 {
     Q_OBJECT
 

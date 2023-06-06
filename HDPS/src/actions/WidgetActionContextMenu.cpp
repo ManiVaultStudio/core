@@ -70,7 +70,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         _removeAction.setVisible(false);
 
         if (_actions.count() == 1) {
-            _publishAction.setEnabled(!firstAction->isPublished() && !firstAction->mayPublish(WidgetAction::ConnectionContextFlag::Gui));
+            _publishAction.setEnabled(firstAction->isPublished() ? false : firstAction->mayPublish(WidgetAction::ConnectionContextFlag::Gui));
 
             if (firstAction->isConnected())
                 _disconnectAction.setText(QString("Disconnect from: %1").arg(firstAction->getPublicAction()->text()));

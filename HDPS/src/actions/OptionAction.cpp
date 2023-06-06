@@ -186,14 +186,9 @@ QVariantMap OptionAction::toVariantMap() const
     auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
-        { "Value", getCurrentText() }
+        { "Value", getCurrentText() },
+        { "Options", getOptions() }
     });
-
-    if (isPublic()) {
-        variantMap.insert({
-            { "Options", getOptions() }
-        });
-    }
 
     return variantMap;
 }

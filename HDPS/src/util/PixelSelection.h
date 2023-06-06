@@ -3,9 +3,7 @@
 #include <QMap>
 #include <QAbstractListModel>
 
-namespace hdps {
-
-namespace util {
+namespace hdps::util {
 
 /** Pixel selection types enum */
 enum class PixelSelectionType
@@ -135,5 +133,4 @@ protected:
     PixelSelectionTypes     _pixelSelectionTypes;       /** Allowed pixel selection types */
 };
 
-}
 }

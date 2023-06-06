@@ -8,9 +8,7 @@
 #include <QPainterPath>
 #include <QtMath>
 
-namespace hdps {
-
-namespace util {
+namespace hdps::util {
 
 QIcon getPixelSelectionTypeIcon(const PixelSelectionType& selectionType)
 {
@@ -201,5 +199,4 @@ QVariant PixelSelectionTypeModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-}
 }

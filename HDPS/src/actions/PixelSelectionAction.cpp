@@ -10,7 +10,7 @@ using namespace hdps::util;
 namespace hdps::gui {
 
 PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title) :
-    WidgetAction(parent, "Pixel Selection"),
+    GroupAction(parent, "Pixel Selection"),
     _targetWidget(nullptr),
     _pixelSelectionTool(nullptr),
     _pixelSelectionTypes(),
@@ -38,6 +38,14 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
 {
     setText("Pixel selection");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+
+    addAction(&_overlayColorAction);
+    addAction(&_overlayOpacityAction);
+    addAction(&_typeAction);
+    addAction(&_modifierAction);
+    addAction(&_selectAction);
+    addAction(&_brushRadiusAction);
+    addAction(&_notifyDuringSelectionAction);
 
     const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
@@ -119,6 +127,23 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _notifyDuringSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _notifyDuringSelectionAction.setShortcut(QKeySequence("U"));
     _notifyDuringSelectionAction.setToolTip("Notify during selection or only at the end of the selection process (U)");
+
+    const auto updatePixelSelectionTypesModel = [this]() {
+        PixelSelectionTypes types;
+
+        for (auto type : _typeAction.getOptions()) {
+            if (!pixelSelectionTypes.values().contains(type))
+                continue;
+
+            types << pixelSelectionTypes.key(type);
+        }
+
+        _typeModel.setPixelSelectionTypes(types);
+    };
+
+    updatePixelSelectionTypesModel();
+
+    connect(&_typeAction, &OptionAction::modelChanged, this, updatePixelSelectionTypesModel);
 
     connect(&_rectangleAction, &QAction::toggled, this, [this](bool toggled) {
         if (toggled)
@@ -492,18 +517,21 @@ void PixelSelectionAction::disconnectFromPublicAction(bool recursive)
 
 void PixelSelectionAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    WidgetAction::fromVariantMap(variantMap);
+    GroupAction::fromVariantMap(variantMap);
 
     _overlayColorAction.fromParentVariantMap(variantMap);
     _overlayOpacityAction.fromParentVariantMap(variantMap);
     _typeAction.fromParentVariantMap(variantMap);
     _modifierAction.fromParentVariantMap(variantMap);
     _notifyDuringSelectionAction.fromParentVariantMap(variantMap);
+
+    if (isPublic())
+        qDebug() << text() << _typeAction.getOptions();
 }
 
 QVariantMap PixelSelectionAction::toVariantMap() const
 {
-    auto variantMap = WidgetAction::toVariantMap();
+    auto variantMap = GroupAction::toVariantMap();
 
     _overlayColorAction.insertIntoVariantMap(variantMap);
     _overlayOpacityAction.insertIntoVariantMap(variantMap);
