@@ -656,6 +656,9 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("ForceHidden"))
         setForceHidden(variantMap["ForceHidden"].toInt());
 
+    if (variantMap.contains("ForceDisabled"))
+        setForceHidden(variantMap["ForceHidden"].toInt());
+
     setConnectionPermissions(variantMap["ConnectionPermissions"].toInt());
 
     if (variantMap.contains("PublicActionID")) {
@@ -685,7 +688,9 @@ QVariantMap WidgetAction::toVariantMap() const
         { "SortIndex", QVariant::fromValue(_sortIndex) },
         { "ConnectionPermissions", QVariant::fromValue(_connectionPermissions) },
         { "IsPublic", QVariant::fromValue(isPublic()) },
-        { "PublicActionID", QVariant::fromValue(_publicAction == nullptr ? "" : _publicAction->getId()) }
+        { "PublicActionID", QVariant::fromValue(_publicAction == nullptr ? "" : _publicAction->getId()) },
+        { "ForceHidden", QVariant::fromValue(getForceHidden()) },
+        { "ForceDisabled", QVariant::fromValue(getForceDisabled()) }
     });
 
     return variantMap;
