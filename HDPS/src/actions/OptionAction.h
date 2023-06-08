@@ -214,7 +214,7 @@ public:
     /** Get the used item model */
     const QAbstractItemModel* getModel() const;
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -288,6 +288,8 @@ protected:
     std::int32_t            _currentIndex;          /** Currently selected index */
     std::int32_t            _defaultIndex;          /** Default index */
     QString                 _placeholderString;     /** Place holder string */
+
+    friend class AbstractActionsManager;
 };
 
 }

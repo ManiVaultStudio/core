@@ -113,7 +113,7 @@ public:
      */
     void setSingleStep(const float& singleStep);
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -201,6 +201,8 @@ protected:
     static constexpr float  INIT_VALUE          = 0.0;          /** Initialization value */
     static constexpr float  INIT_DEFAULT_VALUE  = 0.0;          /** Initialization default value */
     static constexpr int    INIT_DECIMALS       = 1;            /** Initialization number of decimals */
+
+    friend class AbstractActionsManager;
 };
 
 }

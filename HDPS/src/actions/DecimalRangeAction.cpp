@@ -1,5 +1,6 @@
 #include "DecimalRangeAction.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include <QDebug>
 #include <QHBoxLayout>
@@ -81,11 +82,11 @@ void DecimalRangeAction::connectToPublicAction(WidgetAction* publicAction, bool 
         return;
 
     if (recursive) {
-        getRangeMinAction().connectToPublicAction(&publicDecimalRangeAction->getRangeMinAction(), recursive);
-        getRangeMaxAction().connectToPublicAction(&publicDecimalRangeAction->getRangeMaxAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_rangeMinAction, &publicDecimalRangeAction->getRangeMinAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_rangeMaxAction, &publicDecimalRangeAction->getRangeMaxAction(), recursive);
     }
 
-    WidgetAction::connectToPublicAction(publicAction, recursive);
+    NumericalRangeAction::connectToPublicAction(publicAction, recursive);
 }
 
 void DecimalRangeAction::disconnectFromPublicAction(bool recursive)
@@ -94,11 +95,11 @@ void DecimalRangeAction::disconnectFromPublicAction(bool recursive)
         return;
 
     if (recursive) {
-        getRangeMinAction().disconnectFromPublicAction(recursive);
-        getRangeMaxAction().disconnectFromPublicAction(recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_rangeMinAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_rangeMaxAction, recursive);
     }
     
-    WidgetAction::disconnectFromPublicAction(recursive);
+    NumericalRangeAction::disconnectFromPublicAction(recursive);
 }
 
 DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags /*= 0*/) :

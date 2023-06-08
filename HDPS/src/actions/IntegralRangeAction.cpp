@@ -1,5 +1,6 @@
 #include "IntegralRangeAction.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include <QDebug>
 #include <QHBoxLayout>
@@ -77,11 +78,11 @@ void IntegralRangeAction::connectToPublicAction(WidgetAction* publicAction, bool
         return;
 
     if (recursive) {
-        getRangeMinAction().connectToPublicAction(&publicIntegralRangeAction->getRangeMinAction(), recursive);
-        getRangeMaxAction().connectToPublicAction(&publicIntegralRangeAction->getRangeMaxAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_rangeMinAction, &publicIntegralRangeAction->getRangeMinAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_rangeMaxAction, &publicIntegralRangeAction->getRangeMaxAction(), recursive);
     }
 
-    WidgetAction::connectToPublicAction(publicAction, recursive);
+    NumericalRangeAction::connectToPublicAction(publicAction, recursive);
 }
 
 void IntegralRangeAction::disconnectFromPublicAction(bool recursive)
@@ -90,11 +91,11 @@ void IntegralRangeAction::disconnectFromPublicAction(bool recursive)
         return;
 
     if (recursive) {
-        getRangeMinAction().disconnectFromPublicAction(recursive);
-        getRangeMaxAction().disconnectFromPublicAction(recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_rangeMinAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_rangeMaxAction, recursive);
     }
     
-    WidgetAction::disconnectFromPublicAction(recursive);
+    NumericalRangeAction::disconnectFromPublicAction(recursive);
 }
 
 IntegralRangeAction::IntegralRangeWidget::IntegralRangeWidget(QWidget* parent, IntegralRangeAction* integralRangeAction, const std::int32_t& widgetFlags /*= 0*/) :

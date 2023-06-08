@@ -1,5 +1,6 @@
 #include "ColorMapAction.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include <QHBoxLayout>
 #include <QPaintEvent>
@@ -364,7 +365,7 @@ void ColorMapAction::connectToPublicAction(WidgetAction* publicAction, bool recu
         return;
 
     if (recursive)
-        getCurrentColorMapAction().connectToPublicAction(&publicColorMapAction->getCurrentColorMapAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_currentColorMapAction, &publicColorMapAction->getCurrentColorMapAction(), recursive);
     
     connect(&publicColorMapAction->getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, [this](const util::NumericalRange<float>& range) -> void {
         getSharedDataRangeAction(Axis::X).setRange(range);
@@ -375,12 +376,12 @@ void ColorMapAction::connectToPublicAction(WidgetAction* publicAction, bool recu
     });
 
     if (recursive) {
-        getMirrorAction(Axis::X).connectToPublicAction(&publicColorMapAction->getMirrorAction(Axis::X), recursive);
-        getMirrorAction(Axis::Y).connectToPublicAction(&publicColorMapAction->getMirrorAction(Axis::Y), recursive);
-        getDiscretizeAction().connectToPublicAction(&publicColorMapAction->getDiscretizeAction(), recursive);
-        getNumberOfDiscreteStepsAction().connectToPublicAction(&publicColorMapAction->getNumberOfDiscreteStepsAction(), recursive);
-        getDiscretizeAlphaAction().connectToPublicAction(&publicColorMapAction->getDiscretizeAlphaAction(), recursive);
-        getCustomColorMapAction().connectToPublicAction(&publicColorMapAction->getCustomColorMapAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&getMirrorAction(Axis::X), &publicColorMapAction->getMirrorAction(Axis::X), recursive);
+        actions().connectPrivateActionToPublicAction(&getMirrorAction(Axis::Y), &publicColorMapAction->getMirrorAction(Axis::Y), recursive);
+        actions().connectPrivateActionToPublicAction(&_discretizeAction, &publicColorMapAction->getDiscretizeAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_numberOfDiscreteStepsAction, &publicColorMapAction->getNumberOfDiscreteStepsAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_discretizeAlphaAction, &publicColorMapAction->getDiscretizeAlphaAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_currentColorMapAction, &publicColorMapAction->getCustomColorMapAction(), recursive);
     }
 
     WidgetAction::connectToPublicAction(publicAction, recursive);
@@ -402,13 +403,13 @@ void ColorMapAction::disconnectFromPublicAction(bool recursive)
     disconnect(&publicColorMapAction->getSharedDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, nullptr);
 
     if (recursive) {
-        getCurrentColorMapAction().disconnectFromPublicAction(recursive);
-        getMirrorAction(Axis::X).disconnectFromPublicAction(recursive);
-        getMirrorAction(Axis::Y).disconnectFromPublicAction(recursive);
-        getDiscretizeAction().disconnectFromPublicAction(recursive);
-        getNumberOfDiscreteStepsAction().disconnectFromPublicAction(recursive);
-        getDiscretizeAlphaAction().disconnectFromPublicAction(recursive);
-        getCustomColorMapAction().disconnectFromPublicAction(recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_currentColorMapAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&getMirrorAction(Axis::X), recursive);
+        actions().disconnectPrivateActionFromPublicAction(&getMirrorAction(Axis::Y), recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_discretizeAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_numberOfDiscreteStepsAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_discretizeAlphaAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_currentColorMapAction, recursive);
     }
 
     WidgetAction::disconnectFromPublicAction(recursive);

@@ -57,7 +57,7 @@ public:
      */
     Q_INVOKABLE IntegralRangeAction(QObject* parent, const QString& title, const util::NumericalRange<std::int32_t>& limits = util::NumericalRange<std::int32_t>(INIT_LIMIT_MIN, INIT_LIMIT_MAX), const util::NumericalRange<std::int32_t>& range = util::NumericalRange<std::int32_t>(INIT_RANGE_MIN, INIT_RANGE_MAX));
     
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -91,6 +91,8 @@ protected:
     static constexpr std::int32_t INIT_LIMIT_MAX    = 100;       /** Default maximum limit */
     static constexpr std::int32_t INIT_RANGE_MIN    = 0;         /** Default minimum range */
     static constexpr std::int32_t INIT_RANGE_MAX    = 100;       /** Default maximum range */
+
+    friend class AbstractActionsManager;
 };
 
 }

@@ -133,7 +133,7 @@ protected:
     /** Update the color map image */
     void updateColorMap();
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -202,8 +202,8 @@ protected:
 
     static constexpr QSize colorMapImageSize = QSize(256, 1);
 
-    /** Only color map action may instantiate this class */
     friend class ColorMapAction;
+    friend class AbstractActionsManager;
 };
 
 }

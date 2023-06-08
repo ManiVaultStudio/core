@@ -239,7 +239,7 @@ public: // Settings
      */
     void reset() override final;
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -310,6 +310,8 @@ protected:
     bool                _searchMode;            /** Whether the string action is in search mode */
     bool                _clearable;             /** Whether the string can be cleared by clicking the trailing action */
     Qt::TextElideMode   _textElideMode;         /** Text elide mode */
+
+    friend class AbstractActionsManager;
 };
 
 }

@@ -87,7 +87,7 @@ public:
     /** Sets the default color */
     void setDefaultColor(const QColor& defaultColor);
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -124,6 +124,7 @@ protected:
     static const QColor DEFAULT_COLOR;
 
     friend class ColorAction;
+    friend class AbstractActionsManager;
 };
 
 }

@@ -187,6 +187,9 @@ void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction, bool
 
     Q_ASSERT(publicDatasetPickerAction != nullptr);
 
+    if (publicDatasetPickerAction == nullptr)
+        return;
+
     connect(this, &DatasetPickerAction::datasetPicked, publicDatasetPickerAction, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
     connect(publicDatasetPickerAction, &DatasetPickerAction::datasetPicked, this, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
 

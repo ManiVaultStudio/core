@@ -61,6 +61,9 @@ void ColorPickerAction::connectToPublicAction(WidgetAction* publicAction, bool r
 
     Q_ASSERT(publicColorPickerAction != nullptr);
 
+    if (publicColorPickerAction == nullptr)
+        return;
+
     connect(this, &ColorPickerAction::colorChanged, publicColorPickerAction, &ColorPickerAction::setColor);
     connect(publicColorPickerAction, &ColorPickerAction::colorChanged, this, &ColorPickerAction::setColor);
 

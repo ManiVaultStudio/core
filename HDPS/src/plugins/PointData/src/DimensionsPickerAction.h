@@ -241,7 +241,7 @@ protected:
     /** Update the dimension selection summary */
     void updateSummary();
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -289,6 +289,7 @@ protected:
     QMetaObject::Connection                         _summaryUpdateAwakeConnection;      /** Update summary view when idle */
 
     friend class Widget;
+    friend class AbstractActionsManager;
 };
 
 Q_DECLARE_METATYPE(DimensionsPickerAction)

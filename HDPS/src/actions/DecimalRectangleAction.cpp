@@ -1,4 +1,5 @@
 #include "DecimalRectangleAction.h"
+#include "CoreInterface.h"
 
 namespace hdps::gui {
 
@@ -18,11 +19,11 @@ void DecimalRectangleAction::connectToPublicAction(WidgetAction* publicAction, b
         return;
 
     if (recursive) {
-        getRangeAction(Axis::X).connectToPublicAction(&publicDecimalRectangleAction->getRangeAction(Axis::X), recursive);
-        getRangeAction(Axis::Y).connectToPublicAction(&publicDecimalRectangleAction->getRangeAction(Axis::Y), recursive);
+        actions().connectPrivateActionToPublicAction(&getRangeAction(Axis::X), &publicDecimalRectangleAction->getRangeAction(Axis::X), recursive);
+        actions().connectPrivateActionToPublicAction(&getRangeAction(Axis::Y), &publicDecimalRectangleAction->getRangeAction(Axis::Y), recursive);
     }
 
-    WidgetAction::connectToPublicAction(publicAction, recursive);
+    RectangleAction<QRectF, DecimalRangeAction>::connectToPublicAction(publicAction, recursive);
 }
 
 void DecimalRectangleAction::disconnectFromPublicAction(bool recursive)
@@ -31,16 +32,16 @@ void DecimalRectangleAction::disconnectFromPublicAction(bool recursive)
         return;
 
     if (recursive) {
-        getRangeAction(Axis::X).disconnectFromPublicAction(recursive);
-        getRangeAction(Axis::Y).disconnectFromPublicAction(recursive);
+        actions().disconnectPrivateActionFromPublicAction(&getRangeAction(Axis::X), recursive);
+        actions().disconnectPrivateActionFromPublicAction(&getRangeAction(Axis::Y), recursive);
     }
 
-    WidgetAction::disconnectFromPublicAction(recursive);
+    RectangleAction<QRectF, DecimalRangeAction>::disconnectFromPublicAction(recursive);
 }
 
 void DecimalRectangleAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    WidgetAction::fromVariantMap(variantMap);
+    RectangleAction<QRectF, DecimalRangeAction>::fromVariantMap(variantMap);
 
     getRangeAction(Axis::X).fromParentVariantMap(variantMap);
     getRangeAction(Axis::Y).fromParentVariantMap(variantMap);
@@ -48,7 +49,7 @@ void DecimalRectangleAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap DecimalRectangleAction::toVariantMap() const
 {
-    auto variantMap = WidgetAction::toVariantMap();
+    auto variantMap = RectangleAction<QRectF, DecimalRangeAction>::toVariantMap();
 
     getRangeAction(Axis::X).insertIntoVariantMap(variantMap);
     getRangeAction(Axis::Y).insertIntoVariantMap(variantMap);

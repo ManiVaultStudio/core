@@ -1,4 +1,5 @@
 #include "IntegralRectangleAction.h"
+#include "CoreInterface.h"
 
 namespace hdps::gui {
 
@@ -18,11 +19,11 @@ void IntegralRectangleAction::connectToPublicAction(WidgetAction* publicAction, 
         return;
 
     if (recursive) {
-        getRangeAction(Axis::X).connectToPublicAction(&publicIntegralRectangleAction->getRangeAction(Axis::X), recursive);
-        getRangeAction(Axis::Y).connectToPublicAction(&publicIntegralRectangleAction->getRangeAction(Axis::Y), recursive);
+        actions().connectPrivateActionToPublicAction(&getRangeAction(Axis::X), &publicIntegralRectangleAction->getRangeAction(Axis::X), recursive);
+        actions().connectPrivateActionToPublicAction(&getRangeAction(Axis::Y), &publicIntegralRectangleAction->getRangeAction(Axis::Y), recursive);
     }
 
-    WidgetAction::connectToPublicAction(publicAction, recursive);
+    RectangleAction<QRect, IntegralRangeAction>::connectToPublicAction(publicAction, recursive);
 }
 
 void IntegralRectangleAction::disconnectFromPublicAction(bool recursive)
@@ -31,16 +32,16 @@ void IntegralRectangleAction::disconnectFromPublicAction(bool recursive)
         return;
 
     if (recursive) {
-        getRangeAction(Axis::X).disconnectFromPublicAction(recursive);
-        getRangeAction(Axis::Y).disconnectFromPublicAction(recursive);
+        actions().disconnectPrivateActionFromPublicAction(&getRangeAction(Axis::X), recursive);
+        actions().disconnectPrivateActionFromPublicAction(&getRangeAction(Axis::Y), recursive);
     }
 
-    WidgetAction::disconnectFromPublicAction(recursive);
+    RectangleAction<QRect, IntegralRangeAction>::disconnectFromPublicAction(recursive);
 }
 
 void IntegralRectangleAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    WidgetAction::fromVariantMap(variantMap);
+    RectangleAction<QRect, IntegralRangeAction>::fromVariantMap(variantMap);
 
     getRangeAction(Axis::X).fromParentVariantMap(variantMap);
     getRangeAction(Axis::Y).fromParentVariantMap(variantMap);
@@ -48,7 +49,7 @@ void IntegralRectangleAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap IntegralRectangleAction::toVariantMap() const
 {
-    auto variantMap = WidgetAction::toVariantMap();
+    auto variantMap = RectangleAction<QRect, IntegralRangeAction>::toVariantMap();
 
     getRangeAction(Axis::X).insertIntoVariantMap(variantMap);
     getRangeAction(Axis::Y).insertIntoVariantMap(variantMap);

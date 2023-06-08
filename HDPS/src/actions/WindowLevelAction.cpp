@@ -1,6 +1,7 @@
 #include "WindowLevelAction.h"
 #include "WidgetActionLabel.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include <QGridLayout>
 
@@ -48,11 +49,11 @@ void WindowLevelAction::connectToPublicAction(WidgetAction* publicAction, bool r
         return;
 
     if (recursive) {
-        getWindowAction().connectToPublicAction(&publicWindowLevelAction->getWindowAction(), recursive);
-        getLevelAction().connectToPublicAction(&publicWindowLevelAction->getLevelAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_windowAction, &publicWindowLevelAction->getWindowAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_levelAction, &publicWindowLevelAction->getLevelAction(), recursive);
     }
 
-    WidgetAction::connectToPublicAction(publicAction, recursive);
+    GroupAction::connectToPublicAction(publicAction, recursive);
 }
 
 void WindowLevelAction::disconnectFromPublicAction(bool recursive)
@@ -61,16 +62,16 @@ void WindowLevelAction::disconnectFromPublicAction(bool recursive)
         return;
 
     if (recursive) {
-        getWindowAction().disconnectFromPublicAction(recursive);
-        getLevelAction().disconnectFromPublicAction(recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_windowAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_levelAction, recursive);
     }
 
-    WidgetAction::disconnectFromPublicAction(recursive);
+    GroupAction::disconnectFromPublicAction(recursive);
 }
 
 void WindowLevelAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    WidgetAction::fromVariantMap(variantMap);
+    GroupAction::fromVariantMap(variantMap);
 
     _windowAction.fromParentVariantMap(variantMap);
     _levelAction.fromParentVariantMap(variantMap);
@@ -78,7 +79,7 @@ void WindowLevelAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap WindowLevelAction::toVariantMap() const
 {
-    auto variantMap = WidgetAction::toVariantMap();
+    auto variantMap = GroupAction::toVariantMap();
 
     _windowAction.insertIntoVariantMap(variantMap);
     _levelAction.insertIntoVariantMap(variantMap);

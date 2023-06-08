@@ -132,8 +132,9 @@ void DimensionPickerAction::connectToPublicAction(WidgetAction* publicAction, bo
     if (publicDimensionPickerAction == nullptr)
         return;
 
-    if (recursive)
-        _currentDimensionAction.connectToPublicAction(&publicDimensionPickerAction->getCurrentDimensionAction(), recursive);
+    if (recursive) {
+        actions().connectPrivateActionToPublicAction(&_currentDimensionAction, &publicDimensionPickerAction->getCurrentDimensionAction(), recursive);
+    }
 
     WidgetAction::connectToPublicAction(publicAction, recursive);
 }
@@ -143,8 +144,9 @@ void DimensionPickerAction::disconnectFromPublicAction(bool recursive)
     if (!isConnected())
         return;
 
-    if (recursive)
-        _currentDimensionAction.disconnectFromPublicAction(recursive);
+    if (recursive) {
+        actions().disconnectPrivateActionFromPublicAction(&_currentDimensionAction, recursive);
+    }
 
     WidgetAction::disconnectFromPublicAction(recursive);
 }

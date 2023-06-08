@@ -328,6 +328,8 @@ public: // Connections and publishing
      */
     virtual void publish(const QString& name = "") final;
 
+protected: 
+
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
@@ -347,6 +349,8 @@ public: // Connections and publishing
      * @param recursive Whether to also disconnect descendant child actions
      */
     virtual void disconnectFromPublicAction(bool recursive);
+
+public:
 
     /**
      * Get the public action to which the action is connected

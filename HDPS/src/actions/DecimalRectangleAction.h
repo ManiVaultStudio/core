@@ -26,7 +26,7 @@ public:
      */
     Q_INVOKABLE DecimalRectangleAction(QObject * parent, const QString& title, const QRectF& rectangle = QRectF());
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -62,6 +62,8 @@ signals:
      * @param rectangle Rectangle
      */
     void rectangleChanged(const QRectF& rectangle);
+
+    friend class AbstractActionsManager;
 };
 
 }

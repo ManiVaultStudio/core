@@ -89,7 +89,7 @@ public: // Event handling
      */
     bool eventFilter(QObject* object, QEvent* event) override;
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -166,6 +166,8 @@ private:
     TriggerAction                   _invertSelectionAction;             /** Invert selection action */
     DecimalAction                   _brushRadiusAction;                 /** Brush radius action */
     ToggleAction                    _notifyDuringSelectionAction;       /** Notify during selection action */
+
+    friend class AbstractActionsManager;
 };
 
 }

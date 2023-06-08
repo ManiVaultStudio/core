@@ -103,7 +103,7 @@ public:
      */
     void initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue);
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -175,6 +175,8 @@ protected:
     static constexpr std::int32_t INIT_MAX              = 100;      /** Initialization maximum value */
     static constexpr std::int32_t INIT_VALUE            = 0;        /** Initialization value */
     static constexpr std::int32_t INIT_DEFAULT_VALUE    = 0;        /** Initialization default value */
+
+    friend class AbstractActionsManager;
 };
 
 }

@@ -25,7 +25,7 @@ public:
      */
     Q_INVOKABLE WindowLevelAction(QObject* parent, const QString& title);
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -67,6 +67,8 @@ signals:
 protected:
     DecimalAction   _windowAction;      /** Window action */
     DecimalAction   _levelAction;       /** Level action */
+
+    friend class AbstractActionsManager;
 };
 
 }

@@ -57,7 +57,7 @@ public:
      */
     Q_INVOKABLE DecimalRangeAction(QObject* parent, const QString& title, const util::NumericalRange<float>& limits = util::NumericalRange<float>(INIT_LIMIT_MIN, INIT_LIMIT_MAX), const util::NumericalRange<float>& range = util::NumericalRange<float>(INIT_RANGE_MIN, INIT_RANGE_MAX), std::int32_t numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
     
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -92,6 +92,8 @@ protected:
     static constexpr float  INIT_RANGE_MIN          = 0.0f;         /** Default minimum range */
     static constexpr float  INIT_RANGE_MAX          = 100.0f;       /** Default maximum range */
     static constexpr float  INIT_NUMBER_OF_DECIMALS = 2;            /** Default number of decimals */
+
+    friend class AbstractActionsManager;
 };
 
 }

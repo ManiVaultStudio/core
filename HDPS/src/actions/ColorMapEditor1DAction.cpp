@@ -175,6 +175,9 @@ void ColorMapEditor1DAction::connectToPublicAction(WidgetAction* publicAction, b
 
     Q_ASSERT(publicColorMapEditor1DAction != nullptr);
 
+    if (publicColorMapEditor1DAction == nullptr)
+        return;
+
     WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 

@@ -297,7 +297,7 @@ public:
     /** Reset to default */
     void reset() override;
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -356,6 +356,8 @@ protected:
     SelectionAction         _selectionAction;           /** Selection action */
     FileAction              _fileAction;                /** File action */
     QStringList             _defaultSelectedOptions;    /** Default selection options */
+
+    friend class AbstractActionsManager;
 
 };
 

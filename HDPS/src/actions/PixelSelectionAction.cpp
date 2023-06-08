@@ -1,6 +1,6 @@
 #include "PixelSelectionAction.h"
-
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include <QKeyEvent>
 #include <QMenu>
@@ -481,15 +481,15 @@ void PixelSelectionAction::connectToPublicAction(WidgetAction* publicAction, boo
         return;
 
     if (recursive) {
-        getOverlayColorAction().connectToPublicAction(&publicPixelSelectionAction->getOverlayColorAction(), recursive);
-        getOverlayOpacityAction().connectToPublicAction(&publicPixelSelectionAction->getOverlayOpacityAction(), recursive);
-        getTypeAction().connectToPublicAction(&publicPixelSelectionAction->getTypeAction(), recursive);
-        getModifierAction().connectToPublicAction(&publicPixelSelectionAction->getModifierAction(), recursive);
-        getClearSelectionAction().connectToPublicAction(&publicPixelSelectionAction->getClearSelectionAction(), recursive);
-        getSelectAllAction().connectToPublicAction(&publicPixelSelectionAction->getSelectAllAction(), recursive);
-        getInvertSelectionAction().connectToPublicAction(&publicPixelSelectionAction->getInvertSelectionAction(), recursive);
-        getBrushRadiusAction().connectToPublicAction(&publicPixelSelectionAction->getBrushRadiusAction(), recursive);
-        getNotifyDuringSelectionAction().connectToPublicAction(&publicPixelSelectionAction->getNotifyDuringSelectionAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_overlayColorAction, &publicPixelSelectionAction->getOverlayColorAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_overlayOpacityAction, &publicPixelSelectionAction->getOverlayOpacityAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_typeAction, &publicPixelSelectionAction->getTypeAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_modifierAction, &publicPixelSelectionAction->getModifierAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_clearSelectionAction, &publicPixelSelectionAction->getClearSelectionAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_selectAllAction, &publicPixelSelectionAction->getSelectAllAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_invertSelectionAction, &publicPixelSelectionAction->getInvertSelectionAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_brushRadiusAction, &publicPixelSelectionAction->getBrushRadiusAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_notifyDuringSelectionAction, &publicPixelSelectionAction->getNotifyDuringSelectionAction(), recursive);
     }
 
     WidgetAction::connectToPublicAction(publicAction, recursive);
@@ -501,15 +501,15 @@ void PixelSelectionAction::disconnectFromPublicAction(bool recursive)
         return;
 
     if (recursive) {
-        getOverlayColorAction().disconnectFromPublicAction(recursive);
-        getOverlayOpacityAction().disconnectFromPublicAction(recursive);
-        getTypeAction().disconnectFromPublicAction(recursive);
-        getModifierAction().disconnectFromPublicAction(recursive);
-        getClearSelectionAction().disconnectFromPublicAction(recursive);
-        getSelectAllAction().disconnectFromPublicAction(recursive);
-        getInvertSelectionAction().disconnectFromPublicAction(recursive);
-        getBrushRadiusAction().disconnectFromPublicAction(recursive);
-        getNotifyDuringSelectionAction().disconnectFromPublicAction(recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_overlayColorAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_overlayOpacityAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_typeAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_modifierAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_clearSelectionAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_selectAllAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_invertSelectionAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_brushRadiusAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_notifyDuringSelectionAction, recursive);
     }
 
     WidgetAction::disconnectFromPublicAction(recursive);

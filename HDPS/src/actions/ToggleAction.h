@@ -152,7 +152,7 @@ public: // Serialization
         */
     QVariantMap toVariantMap() const override;
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -184,6 +184,8 @@ signals:
 protected:
     bool    _defaultToggled;        /** Whether toggled by default */
     bool    _indeterminate;         /** Whether the toggle action is in an indeterminate state */
+
+    friend class AbstractActionsManager;
 };
 
 }

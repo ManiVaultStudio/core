@@ -130,7 +130,7 @@ public: // Option action wrappers
      */
     void setDefaultColorMap(const QString& defaultColorMap);
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -227,6 +227,8 @@ protected:
     ColorMapEditor1DAction      _editor1DAction;                                        /** One-dimensional editor action */
     HorizontalGroupAction       _customColorMapGroupAction;                             /** Groups the custom color map and editor action */
     ColorMapSettingsAction      _settingsAction;                                        /** Color map settings action */
+
+    friend class AbstractActionsManager;
 };
 
 }

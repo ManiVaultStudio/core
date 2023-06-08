@@ -237,7 +237,7 @@ private:
     /** Populates the datasets from the core */
     void populateDatasetsFromCore();
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -285,6 +285,8 @@ protected:
     DatasetsFilterFunction      _datasetsFilterFunction;    /** Datasets filter lambda */
     DatasetsModel               _datasetsModel;             /** Datasets list model */
     hdps::EventListener         _eventListener;             /** Listen to events from the core */
+
+    friend class AbstractActionsManager;
 };
 
 }

@@ -115,7 +115,7 @@ public:
     /** Establishes whether the dimensions can be searched (number of options exceeds the search threshold) */
     bool maySearch() const;
 
-public: // Action publishing
+protected: // Action publishing
 
     /**
      * Connect this action to a public action
@@ -169,6 +169,8 @@ protected:
 
 protected:
     static constexpr std::uint32_t DEFAULT_SEARCH_THRESHOLD = 100;     /** Default search threshold */
+
+    friend class AbstractActionsManager;
 };
 
 Q_DECLARE_METATYPE(DimensionPickerAction)

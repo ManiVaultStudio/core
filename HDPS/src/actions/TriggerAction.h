@@ -59,7 +59,7 @@ protected:
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -87,6 +87,8 @@ private:
 
     /** Invoked when this trigger action is triggered (needed to prevent circular calls of trigger()) */
     void selfTriggered();
+
+    friend class AbstractActionsManager;
 };
 
 }

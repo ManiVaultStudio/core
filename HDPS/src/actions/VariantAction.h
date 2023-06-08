@@ -45,7 +45,7 @@ public:
      */
     void setVariant(const QVariant& variant);
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -84,6 +84,8 @@ signals:
 
 protected:
     QVariant    _variant;       /** Current variant value */
+
+    friend class AbstractActionsManager;
 };
 
 }

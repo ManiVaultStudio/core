@@ -153,7 +153,7 @@ public: // Settings
      */
     void reset() override final;
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
@@ -211,6 +211,8 @@ protected:
     StringAction            _nameAction;        /** String name action */
     TriggerAction           _addAction;         /** Add string action */
     TriggerAction           _removeAction;      /** Remove string action */
+
+    friend class AbstractActionsManager;
 };
 
 }
