@@ -6,6 +6,9 @@
 #include <widgets/HierarchyWidget.h>
 
 #include <QWidget>
+#include <QSharedPointer>
+
+class StartPageActionDelegate;
 
 /**
  * Start page actions widget class
@@ -69,4 +72,5 @@ private:
     StartPageActionsModel           _model;             /** Model which contains start page actions */
     StartPageActionsFilterModel     _filterModel;       /** Model for filtering and sorting start page actions */
     hdps::gui::HierarchyWidget      _hierarchyWidget;   /** Widget for displaying the actions */
+    QSharedPointer<StartPageActionDelegate> _startPageActionDelegate; /** Custom start page action display in _hierarchyWidget */
 };
