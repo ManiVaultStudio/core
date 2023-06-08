@@ -5,7 +5,6 @@ PROJECT(${TEXTDATA})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
@@ -31,24 +30,24 @@ set(TEXTDATA_HEADERS
     src/TextData.h
 )
 
+set(PLUGIN_MOC_HEADERS
+    src/TextData.h
+)
+
 source_group( Plugin FILES ${TEXTDATA_SOURCES})
 
 add_library(${TEXTDATA} SHARED ${TEXTDATA_SOURCES})
 
-add_dependencies(${TEXTDATA} HDPS_Public)
+qt_wrap_cpp(TEXTDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${TEXTDATA})
+target_sources(${TEXTDATA} PRIVATE ${TEXTDATA_MOC})
 
 target_include_directories(${TEXTDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 target_compile_features(${TEXTDATA} PRIVATE cxx_std_17)
 
-set(HDPS_LINK_PATH "${INSTALL_DIR}/$<CONFIGURATION>/lib")
-set(HDPS_LINK_SUFFIX $<IF:$<CXX_COMPILER_ID:MSVC>,${CMAKE_LINK_LIBRARY_SUFFIX},${CMAKE_SHARED_LIBRARY_SUFFIX}>)
-
-set(HDPS_LINK_LIBRARY "${HDPS_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${HDPS_LINK_SUFFIX}")
-
 target_link_libraries(${TEXTDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${TEXTDATA} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${TEXTDATA} PRIVATE "${HDPS_LINK_LIBRARY}")
+target_link_libraries(${TEXTDATA} PRIVATE HDPS_Public)
 
 set_target_properties(${TEXTDATA} PROPERTIES PUBLIC_HEADER "${TEXTDATA_HEADERS}")
 

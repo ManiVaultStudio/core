@@ -166,7 +166,7 @@ add_subdirectory(external/quazip)
 # -----------------------------------------------------------------------------
 include(CMakeHdpsSourcesMain)           # defines MAIN_SOURCES
 include(CMakeHdpsSourcesPublic)         # defines PUBLIC_SOURCES and PUBLIC_HEADERS
-include(CMakeHdpsSourcesPrivate)        # defines PRIVATE_SOURCES
+include(CMakeHdpsSourcesPrivate)        # defines PRIVATE_SOURCES and PRIVATE_HEADERS
 include(CMakeHdpsSourcesResources)      # defines RESOURCE_FILES and UI_HEADERS
 
 
@@ -207,7 +207,7 @@ target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE qtadvanceddocking)
 target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE QuaZip)
-target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
+target_link_libraries(${HDPS_PRIVATE_LIB} PRIVATE ${HDPS_PUBLIC_LIB})
 
 # Use avx if enabled and available
 check_and_set_AVX(${HDPS_PRIVATE_LIB} ${HDPS_USE_AVX})
@@ -240,8 +240,8 @@ target_link_libraries(${HDPS_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${HDPS_EXE} PRIVATE qtadvanceddocking)
 target_link_libraries(${HDPS_EXE} PRIVATE QuaZip)
 
-target_link_libraries(${HDPS_EXE} PRIVATE "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
-target_link_libraries(${HDPS_EXE} PRIVATE "$<TARGET_FILE:${HDPS_PRIVATE_LIB}>")
+target_link_libraries(${HDPS_EXE} PRIVATE ${HDPS_PUBLIC_LIB})
+target_link_libraries(${HDPS_EXE} PRIVATE ${HDPS_PRIVATE_LIB})
 
 # Use avx if enabled and available
 check_and_set_AVX(${HDPS_EXE} ${HDPS_USE_AVX})
