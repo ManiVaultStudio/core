@@ -7,8 +7,6 @@
 
 #include <QWidget>
 
-class StartPageActionDelegate;
-
 /**
  * Start page actions widget class
  *
