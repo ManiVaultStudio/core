@@ -19,8 +19,7 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/, co
     _layout(),
     _model(this),
     _filterModel(this),
-    _hierarchyWidget(this, "Item", _model, &_filterModel, true, true),
-    _startPageActionDelegate(new StartPageActionDelegate())
+    _hierarchyWidget(this, "Item", _model, &_filterModel, true, true)
 {
     if (!title.isEmpty())
         _layout.addWidget(StartPageContentWidget::createHeaderLabel(title, title));
@@ -47,7 +46,7 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/, co
     auto& treeView = _hierarchyWidget.getTreeView();
 
     treeView.setRootIsDecorated(false);
-    treeView.setItemDelegateForColumn(static_cast<int>(StartPageActionsModel::Column::SummaryDelegate), _startPageActionDelegate.get());
+    treeView.setItemDelegateForColumn(static_cast<int>(StartPageActionsModel::Column::SummaryDelegate), new StartPageActionDelegate(this));
     treeView.setSelectionBehavior(QAbstractItemView::SelectRows);
     treeView.setSelectionMode(QAbstractItemView::SingleSelection);
     treeView.setIconSize(QSize(24, 24));
