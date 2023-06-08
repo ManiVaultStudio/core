@@ -16,6 +16,12 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
 {
     setText("Info");
 
+    addAction(&_typeAction);
+    addAction(&_numberOfImagesAction);
+    addAction(&_imageResolutionAction);
+    addAction(&_numberOfPixelsAction);
+    addAction(&_numberComponentsPerPixelAction);
+
     _typeAction.setEnabled(false);
     _numberOfImagesAction.setEnabled(false);
     _imageResolutionAction.setEnabled(false);

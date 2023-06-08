@@ -20,6 +20,15 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
 {
     setText("Info");
 
+    addAction(&_dataStorageAction);
+    addAction(&_proxyDatasetsAction);
+    addAction(&_numberOfPointsAction);
+    addAction(&_numberOfDimensionsAction);
+    addAction(&_rawDataSizeAction);
+    addAction(&_numberOfSelectedPointsAction);
+    addAction(&_selectedIndicesAction);
+    addAction(&_createSetFromSelection);
+
     _dataStorageAction.setEnabled(false);
     _numberOfPointsAction.setEnabled(false);
     _numberOfDimensionsAction.setEnabled(false);
