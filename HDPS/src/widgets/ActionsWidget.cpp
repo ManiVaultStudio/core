@@ -188,6 +188,7 @@ bool ActionsWidget::eventFilter(QObject* target, QEvent* event)
             break;
         }
 
+        case QEvent::Close:
         case QEvent::FocusOut:
         {
             if (target == &_hierarchyWidget.getTreeView() && _contextMenu.isNull())
@@ -232,8 +233,6 @@ void ActionsWidget::modelChanged()
     auto treeViewHeader = _hierarchyWidget.getTreeView().header();
 
     treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
-
-    highlightActions(_hierarchyWidget.getTreeView().selectionModel()->selectedRows(), true);
 }
 
 void ActionsWidget::highlightActions(const QModelIndexList& selectedRows, bool highlight)

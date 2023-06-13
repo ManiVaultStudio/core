@@ -21,9 +21,9 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* view
     _settingsAction(this, "Settings")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
-    setModal(true);
     setWindowTitle(QString("Edit (%1) settings").arg(viewPlugin->text()));
     setMinimumSize(QSize(640, 480));
+    setFocus(Qt::NoFocusReason);
 
     auto layout = new QVBoxLayout();
     

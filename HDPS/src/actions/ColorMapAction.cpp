@@ -381,7 +381,7 @@ void ColorMapAction::connectToPublicAction(WidgetAction* publicAction, bool recu
         actions().connectPrivateActionToPublicAction(&_discretizeAction, &publicColorMapAction->getDiscretizeAction(), recursive);
         actions().connectPrivateActionToPublicAction(&_numberOfDiscreteStepsAction, &publicColorMapAction->getNumberOfDiscreteStepsAction(), recursive);
         actions().connectPrivateActionToPublicAction(&_discretizeAlphaAction, &publicColorMapAction->getDiscretizeAlphaAction(), recursive);
-        actions().connectPrivateActionToPublicAction(&_currentColorMapAction, &publicColorMapAction->getCustomColorMapAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_customColorMapAction, &publicColorMapAction->getCustomColorMapAction(), recursive);
     }
 
     WidgetAction::connectToPublicAction(publicAction, recursive);
@@ -409,7 +409,7 @@ void ColorMapAction::disconnectFromPublicAction(bool recursive)
         actions().disconnectPrivateActionFromPublicAction(&_discretizeAction, recursive);
         actions().disconnectPrivateActionFromPublicAction(&_numberOfDiscreteStepsAction, recursive);
         actions().disconnectPrivateActionFromPublicAction(&_discretizeAlphaAction, recursive);
-        actions().disconnectPrivateActionFromPublicAction(&_currentColorMapAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_customColorMapAction, recursive);
     }
 
     WidgetAction::disconnectFromPublicAction(recursive);
@@ -419,7 +419,7 @@ void ColorMapAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    getCurrentColorMapAction().fromParentVariantMap(variantMap);
+    _currentColorMapAction.fromParentVariantMap(variantMap);
     getRangeAction(Axis::X).fromParentVariantMap(variantMap);
     getRangeAction(Axis::Y).fromParentVariantMap(variantMap);
     getSharedDataRangeAction(Axis::X).fromParentVariantMap(variantMap);
@@ -427,17 +427,17 @@ void ColorMapAction::fromVariantMap(const QVariantMap& variantMap)
     getLockToSharedDataRangeAction().fromParentVariantMap(variantMap);
     getMirrorAction(Axis::X).fromParentVariantMap(variantMap);
     getMirrorAction(Axis::Y).fromParentVariantMap(variantMap);
-    getDiscretizeAction().fromParentVariantMap(variantMap);
-    getNumberOfDiscreteStepsAction().fromParentVariantMap(variantMap);
-    getDiscretizeAlphaAction().fromParentVariantMap(variantMap);
-    getCustomColorMapAction().fromParentVariantMap(variantMap);
+    _discretizeAction.fromParentVariantMap(variantMap);
+    _numberOfDiscreteStepsAction.fromParentVariantMap(variantMap);
+    _discretizeAlphaAction.fromParentVariantMap(variantMap);
+    _customColorMapAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ColorMapAction::toVariantMap() const
 {
     QVariantMap variantMap = WidgetAction::toVariantMap();
 
-    getCurrentColorMapAction().insertIntoVariantMap(variantMap);
+    _currentColorMapAction.insertIntoVariantMap(variantMap);
     getRangeAction(Axis::X).insertIntoVariantMap(variantMap);
     getRangeAction(Axis::Y).insertIntoVariantMap(variantMap);
     getSharedDataRangeAction(Axis::X).insertIntoVariantMap(variantMap);
@@ -445,10 +445,10 @@ QVariantMap ColorMapAction::toVariantMap() const
     getLockToSharedDataRangeAction().insertIntoVariantMap(variantMap);
     getMirrorAction(Axis::X).insertIntoVariantMap(variantMap);
     getMirrorAction(Axis::Y).insertIntoVariantMap(variantMap);
-    getDiscretizeAction().insertIntoVariantMap(variantMap);
-    getNumberOfDiscreteStepsAction().insertIntoVariantMap(variantMap);
-    getDiscretizeAlphaAction().insertIntoVariantMap(variantMap);
-    getCustomColorMapAction().insertIntoVariantMap(variantMap);
+    _discretizeAction.insertIntoVariantMap(variantMap);
+    _numberOfDiscreteStepsAction.insertIntoVariantMap(variantMap);
+    _discretizeAlphaAction.insertIntoVariantMap(variantMap);
+    _customColorMapAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
