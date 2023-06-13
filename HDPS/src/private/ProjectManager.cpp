@@ -446,7 +446,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (loadWorkspace) {
                 taskProgressDialog.setCurrentTask("Load workspace");
                 {
-                    const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
+                    const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
                     if (workspaceFileInfo.exists())
                         workspaces().loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
@@ -641,7 +641,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             connect(&archiver, &Archiver::taskStarted, &taskProgressDialog, &TaskProgressDialog::setCurrentTask);
             connect(&archiver, &Archiver::taskFinished, &taskProgressDialog, &TaskProgressDialog::setTaskFinished);
 
-            QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
+            QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
             workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 

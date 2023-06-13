@@ -112,7 +112,7 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
 
                 Workspace workspace(recentWorkspace.getFilePath());
 
-                StartPageAction recentWorkspaceStartPageAction(workspaces().getIcon(), QFileInfo(recentFilePath).baseName(), QString("Create project from %1.hws").arg(QFileInfo(recentFilePath).baseName()), workspace.getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+                StartPageAction recentWorkspaceStartPageAction(workspaces().getIcon(), QFileInfo(recentFilePath).baseName(), QString("Create project from %1.json").arg(QFileInfo(recentFilePath).baseName()), workspace.getDescriptionAction().getString(), "", [recentFilePath]() -> void {
                     projects().newProject(recentFilePath);
                 });
 

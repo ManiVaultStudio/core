@@ -256,8 +256,8 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                 fileDialog.setWindowTitle("Load Workspace");
                 fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
                 fileDialog.setFileMode(QFileDialog::ExistingFile);
-                fileDialog.setNameFilters({ "HDPS workspace files (*.hws)" });
-                fileDialog.setDefaultSuffix(".hws");
+                fileDialog.setNameFilters({ "HDPS workspace files (*.json)" });
+                fileDialog.setDefaultSuffix(".json");
                 fileDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
                 fileDialog.setMinimumHeight(400);
@@ -372,7 +372,7 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*
 
     Archiver archiver;
 
-    const QString workspaceFile("workspace.hws");
+    const QString workspaceFile("workspace.json");
 
     QFileInfo workspaceFileInfo(temporaryDirectoryPath, workspaceFile);
 
@@ -410,8 +410,8 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/, bool addToRecent
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
                 fileDialog.setWindowTitle("Export Workspace");
                 fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-                fileDialog.setNameFilters({ "HDPS workspace files (*.hws)" });
-                fileDialog.setDefaultSuffix(".hws");
+                fileDialog.setNameFilters({ "HDPS workspace files (*.json)" });
+                fileDialog.setDefaultSuffix(".json");
                 fileDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
                 fileDialog.setMinimumHeight(500);
@@ -642,7 +642,7 @@ WorkspaceLocations WorkspaceManager::getWorkspaceLocations(const WorkspaceLocati
     WorkspaceLocations workspaceLocations;
 
     if (types.testFlag(WorkspaceLocation::Type::BuiltIn)) {
-        QStringList workspaceFilter("*.hws");
+        QStringList workspaceFilter("*.json");
 
         QDir workspaceExamplesDirectory(QString("%1/examples/workspaces/").arg(qApp->applicationDirPath()));
 
