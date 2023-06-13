@@ -6,14 +6,19 @@ namespace hdps::gui {
     constexpr std::int32_t ToolbarAction::CONTENTS_MARGIN;
 #endif
 
-ToolbarAction::ToolbarAction(QObject* parent, const QString& title) :
+ToolbarAction::ToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment /*= Qt::AlignmentFlag::AlignLeft*/) :
     WidgetAction(parent, title),
+    _alignment(alignment),
     _groupAction(this, "Actions"),
     _actionItems(),
     _actionItemsMap(),
     _layoutInvalidationBlocked(false)
 {
-    setText(title);
+}
+
+Qt::AlignmentFlag ToolbarAction::getAlignment() const
+{
+    return _alignment;
 }
 
 GroupAction& ToolbarAction::getGroupAction()

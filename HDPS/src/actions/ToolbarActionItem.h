@@ -146,6 +146,7 @@ protected:
 
     friend class ToolbarAction;
     friend class HorizontalToolbarAction;
+    friend class VerticalToolbarAction;
     friend class ToolbarActionItemWidget;
 };
 

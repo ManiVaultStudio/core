@@ -15,7 +15,7 @@ namespace hdps::gui {
  */
 class HorizontalToolbarAction : public ToolbarAction
 {
-    Q_OBJECT
+    Q_OBJECT  
 
 public: // Widgets
 
@@ -57,7 +57,7 @@ public: // Widgets
 protected: // Widgets
 
     /**
-     * Get widget representation of the group action
+     * Get widget representation of the horizontal toolbar action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
@@ -71,8 +71,9 @@ public:
      * Construct with \p parent object and \p title
      * @param parent Pointer to parent object
      * @param title Title of the action
+     * @param alignment Item alignment
      */
-    Q_INVOKABLE HorizontalToolbarAction(QObject* parent, const QString& title);
+    Q_INVOKABLE HorizontalToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment = Qt::AlignmentFlag::AlignLeft);
 };
 
 }

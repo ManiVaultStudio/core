@@ -22,38 +22,21 @@ public:
     using ActionItems           = QVector<ToolbarActionItem*>;
     using ActionItemsMap        = QMap<const WidgetAction*, ToolbarActionItem*>;
 
-    /** Convenience class for blocking toolbar layout invalidation (and automatically unblocking it when the object goes out of scope) */
-    class LayoutInvalidationBlocker {
-    public:
-
-        /**
-         * Construct with \p toolbarAction
-         * @param toolbarAction Reference to toolbar action to block layout invalidation for
-         */
-        LayoutInvalidationBlocker(ToolbarAction& toolbarAction) :
-            _toolbarAction(toolbarAction)
-        {
-            //_toolbarAction.blockLayoutInvalidation();
-        }
-
-        /** Destruct and cancel blocking layout invalidation */
-        ~LayoutInvalidationBlocker()
-        {
-            //_toolbarAction.unblockLayoutInvalidation();
-        }
-
-    private:
-        ToolbarAction& _toolbarAction;  /** Reference to toolbar action to block layout invalidation for */
-    };
-
 public:
 
     /**
      * Construct with \p parent and \p title
      * @param parent Pointer to parent object
      * @param title Title of the action
+     * @param alignment Item alignment
      */
-    Q_INVOKABLE ToolbarAction(QObject* parent, const QString& title);
+    Q_INVOKABLE ToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment = Qt::AlignmentFlag::AlignLeft);
+
+    /**
+     * Get item alignment
+     * @return Item alignment
+     */
+    virtual Qt::AlignmentFlag getAlignment() const final;
 
     /**
      * Get group action
@@ -112,10 +95,11 @@ signals:
     void layoutInvalidated();
 
 private:
-    GroupAction     _groupAction;                   /** Group action which holds the actions */
-    ActionItems     _actionItems;                   /** Action items */
-    ActionItemsMap  _actionItemsMap;                /** Maps action pointer to action item pointer */
-    bool            _layoutInvalidationBlocked;     /** Whether layout invalidation is blocked or not */
+    Qt::AlignmentFlag   _alignment;                     /** Item alignment */
+    GroupAction         _groupAction;                   /** Group action which holds the actions */
+    ActionItems         _actionItems;                   /** Action items */
+    ActionItemsMap      _actionItemsMap;                /** Maps action pointer to action item pointer */
+    bool                _layoutInvalidationBlocked;     /** Whether layout invalidation is blocked or not */
 
 protected:
     static constexpr std::int32_t CONTENTS_MARGIN = 4;      /** Content margins around the toolbar */

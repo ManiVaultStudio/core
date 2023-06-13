@@ -1,19 +1,19 @@
-#include "HorizontalToolbarAction.h"
+#include "VerticalToolbarAction.h"
 
 #include <QEvent>
 #include <QResizeEvent>
 
 namespace hdps::gui {
 
-HorizontalToolbarAction::HorizontalToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment /*= Qt::AlignmentFlag::AlignLeft*/) :
-    ToolbarAction(parent, title, alignment)
-{  
-    getGroupAction().setDefaultWidgetFlags(GroupAction::Horizontal);
+VerticalToolbarAction::VerticalToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment /*= Qt::AlignmentFlag::AlignLeft*/) :
+    ToolbarAction(parent, title)
+{
+    getGroupAction().setDefaultWidgetFlags(GroupAction::Vertical);
 }
 
-HorizontalToolbarAction::Widget::Widget(QWidget* parent, HorizontalToolbarAction* horizontalToolbarAction, const std::int32_t& widgetFlags) :
-    WidgetActionWidget(parent, horizontalToolbarAction, widgetFlags),
-    _horizontalToolbarAction(horizontalToolbarAction),
+VerticalToolbarAction::Widget::Widget(QWidget* parent, VerticalToolbarAction* verticalToolbarAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, verticalToolbarAction, widgetFlags),
+    _verticalToolbarAction(verticalToolbarAction),
     _layout(),
     _toolbarLayout(),
     _toolbarWidget(),
@@ -25,30 +25,26 @@ HorizontalToolbarAction::Widget::Widget(QWidget* parent, HorizontalToolbarAction
     _timer.setSingleShot(true);
 
     _toolbarLayout.setContentsMargins(ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN);
+    _toolbarLayout.setAlignment(Qt::AlignLeft);
 
     _toolbarWidget.setLayout(&_toolbarLayout);
     
-    //_layout.setSizeConstraint(QLayout::SetFixedSize);
+    _layout.setSizeConstraint(QLayout::SetFixedSize);
     _layout.setContentsMargins(0, 0, 0, 0);
-    
-    if (_horizontalToolbarAction->getAlignment() == Qt::AlignCenter || _horizontalToolbarAction->getAlignment() == Qt::AlignRight)
-        _layout.addStretch(1);
-
+    _layout.setAlignment(Qt::AlignLeft);
     _layout.addWidget(&_toolbarWidget);
-
-    if (_horizontalToolbarAction->getAlignment() == Qt::AlignCenter)
-        _layout.addStretch(1);
-
+    _layout.addStretch(1);
+    
     setLayout(&_layout);
 
-    connect(_horizontalToolbarAction, &ToolbarAction::actionWidgetsChanged, this, &HorizontalToolbarAction::Widget::setActionWidgets);
-    connect(_horizontalToolbarAction, &ToolbarAction::layoutInvalidated, this, &Widget::updateLayout);
+    connect(_verticalToolbarAction, &ToolbarAction::actionWidgetsChanged, this, &VerticalToolbarAction::Widget::setActionWidgets);
+    connect(_verticalToolbarAction, &ToolbarAction::layoutInvalidated, this, &Widget::updateLayout);
     connect(&_timer, &QTimer::timeout, this, &Widget::updateLayout);
 
     setActionWidgets();
 }
 
-bool HorizontalToolbarAction::Widget::eventFilter(QObject* target, QEvent* event)
+bool VerticalToolbarAction::Widget::eventFilter(QObject* target, QEvent* event)
 {
     switch (event->type())
     {
@@ -76,7 +72,7 @@ bool HorizontalToolbarAction::Widget::eventFilter(QObject* target, QEvent* event
     return QWidget::eventFilter(target, event);
 }
 
-void HorizontalToolbarAction::Widget::setActionWidgets()
+void VerticalToolbarAction::Widget::setActionWidgets()
 {
     QLayoutItem* layoutItem;
 
@@ -85,14 +81,15 @@ void HorizontalToolbarAction::Widget::setActionWidgets()
         delete layoutItem;
     }
 
-    for (auto actionItem : _horizontalToolbarAction->getActionItems())
+    for (auto actionItem : _verticalToolbarAction->getActionItems())
         _toolbarLayout.addWidget(actionItem->createWidget(&_toolbarWidget));
 
     updateLayout();
 }
 
-void HorizontalToolbarAction::Widget::updateLayout()
+void VerticalToolbarAction::Widget::updateLayout()
 {
+    /*
     for (auto actionItem : _horizontalToolbarAction->getActionItems())
         if (actionItem->isChangingState()) {
             qDebug() << actionItem->getAction()->text() << "is changing state";
@@ -148,6 +145,7 @@ void HorizontalToolbarAction::Widget::updateLayout()
 
     for (auto actionItem : actionItems)
         actionItem->setState(states[actionItem]);
+    */
 }
 
 }

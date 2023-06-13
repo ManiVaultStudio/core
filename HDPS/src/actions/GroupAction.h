@@ -21,12 +21,12 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        Horizontal = 0x00001,                  /** Actions are arranged horizontally in the group */
-        Vertical = 0x00002,                  /** Actions are arranged vertically in the group */
-        Toolbar = 0x00004,                  /** Actions are arranged in a toolbar */
+        Horizontal  = 0x00001,      /** Actions are arranged horizontally in the group */
+        Vertical    = 0x00002,      /** Actions are arranged vertically in the group */
+        Toolbar     = 0x00004,      /** Actions are arranged in a toolbar */
 
-        HorizontalToolbar = Horizontal | Toolbar,     /** Actions are arranged in a horizontal toolbar */
-        VerticalToolbar = Vertical | Toolbar,       /** Actions are arranged in a vertical toolbar */
+        HorizontalToolbar   = Horizontal | Toolbar,     /** Actions are arranged in a horizontal toolbar */
+        VerticalToolbar     = Vertical | Toolbar,       /** Actions are arranged in a vertical toolbar */
 
         Default = Horizontal
     };
