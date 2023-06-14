@@ -1,16 +1,21 @@
 #include "GroupAction.h"
 #include "WidgetActionLabel.h"
 
+#include <util/Serialization.h>
+
 #include <QDebug>
 #include <QHBoxLayout>
+
+using namespace hdps::util;
 
 namespace hdps::gui {
 
 const std::uint32_t GroupAction::globalLabelWidthPercentage = 35;
 const std::uint32_t GroupAction::globalLabelWidthFixed      = 200;
 
-GroupAction::GroupAction(QObject* parent, const QString& title, const bool& expanded /*= false*/) :
+GroupAction::GroupAction(QObject* parent, const QString& title, const bool& expanded /*= false*/, const Qt::AlignmentFlag& alignment /*= Qt::AlignmentFlag::AlignLeft*/) :
     WidgetAction(parent, title),
+    _alignment(alignment),
     _expanded(expanded),
     _readOnly(false),
     _actions(),
@@ -21,6 +26,11 @@ GroupAction::GroupAction(QObject* parent, const QString& title, const bool& expa
 {
     setText(title);
     setDefaultWidgetFlags(GroupAction::Vertical);
+}
+
+Qt::AlignmentFlag GroupAction::getAlignment() const
+{
+    return _alignment;
 }
 
 void GroupAction::setExpanded(const bool& expanded)
@@ -247,6 +257,26 @@ QWidget* GroupAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
 GroupAction::WidgetFlagsMap GroupAction::getWidgetFlagsMap()
 {
     return _widgetFlagsMap;
+}
+
+void GroupAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    WidgetAction::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "Expanded");
+
+    setExpanded(variantMap["Expanded"].toBool());
+}
+
+QVariantMap GroupAction::toVariantMap() const
+{
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Expanded", isExpanded() }
+    });
+
+    return variantMap;
 }
 
 GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags) :

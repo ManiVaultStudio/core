@@ -33,12 +33,6 @@ public:
     Q_INVOKABLE ToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment = Qt::AlignmentFlag::AlignLeft);
 
     /**
-     * Get item alignment
-     * @return Item alignment
-     */
-    virtual Qt::AlignmentFlag getAlignment() const final;
-
-    /**
      * Get group action
      * @return Reference to group action
      */
@@ -56,8 +50,9 @@ public: // Actions management
      * Add \p action to the group
      * @param action Pointer to action to add
      * @param autoExpandPriority Priority with which the action should be auto-expanded
+     * @param widgetFlags Action widget flags (default flags if -1)
      */
-    virtual void addAction(WidgetAction* action, const std::int32_t& autoExpandPriority = -1) final;
+    virtual void addAction(WidgetAction* action, const std::int32_t& autoExpandPriority = -1, std::int32_t widgetFlags = -1) final;
 
     /**
      * Remove \p action from the group
@@ -95,11 +90,9 @@ signals:
     void layoutInvalidated();
 
 private:
-    Qt::AlignmentFlag   _alignment;                     /** Item alignment */
-    GroupAction         _groupAction;                   /** Group action which holds the actions */
-    ActionItems         _actionItems;                   /** Action items */
-    ActionItemsMap      _actionItemsMap;                /** Maps action pointer to action item pointer */
-    bool                _layoutInvalidationBlocked;     /** Whether layout invalidation is blocked or not */
+    GroupAction         _groupAction;       /** Group action which holds the actions */
+    ActionItems         _actionItems;       /** Action items */
+    ActionItemsMap      _actionItemsMap;    /** Maps action pointer to action item pointer */
 
 protected:
     static constexpr std::int32_t CONTENTS_MARGIN = 4;      /** Content margins around the toolbar */

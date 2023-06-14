@@ -100,8 +100,15 @@ public:
      * @param parent Pointer to parent object
      * @param title Group title
      * @param expanded Whether the group is initially expanded/collapsed
+     * @param alignment Item alignment
      */
-    Q_INVOKABLE GroupAction(QObject* parent, const QString& title, const bool& expanded = false);
+    Q_INVOKABLE GroupAction(QObject* parent, const QString& title, const bool& expanded = false, const Qt::AlignmentFlag& alignment = Qt::AlignmentFlag::AlignLeft);
+
+    /**
+     * Get item alignment
+     * @return Item alignment
+     */
+    virtual Qt::AlignmentFlag getAlignment() const final;
 
     /** Set expanded/collapsed */
     void setExpanded(const bool& expanded);
@@ -209,6 +216,20 @@ private:
     /** Sort added actions based on their sort index */
     virtual void sortActions() final;
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 signals:
 
     /**
@@ -254,11 +275,12 @@ signals:
     void labelWidthFixedChanged(const std::uint32_t& labelWidthFixed);
 
 private:
-    bool                    _expanded;              /** Whether or not the group is expanded */
-    bool                    _readOnly;              /** Whether or not the group is read-only */
-    WidgetActions           _actions;               /** Vector of pointers to widget actions in the group */
-    bool                    _showLabels;            /** Whether to show labels or not */
-    WidgetFlagsMap          _widgetFlagsMap;        /** Maps widget action pointer to widget creation flags */
+    Qt::AlignmentFlag   _alignment;         /** Item alignment */
+    bool                _expanded;          /** Whether or not the group is expanded */
+    bool                _readOnly;          /** Whether or not the group is read-only */
+    WidgetActions       _actions;           /** Vector of pointers to widget actions in the group */
+    bool                _showLabels;        /** Whether to show labels or not */
+    WidgetFlagsMap      _widgetFlagsMap;    /** Maps widget action pointer to widget creation flags */
 
 private: // Specific settings for vertical layout
     LabelSizingType     _labelSizingType;           /** Type of label sizing */

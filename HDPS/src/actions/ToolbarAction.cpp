@@ -8,17 +8,10 @@ namespace hdps::gui {
 
 ToolbarAction::ToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment /*= Qt::AlignmentFlag::AlignLeft*/) :
     WidgetAction(parent, title),
-    _alignment(alignment),
     _groupAction(this, "Actions"),
     _actionItems(),
-    _actionItemsMap(),
-    _layoutInvalidationBlocked(false)
+    _actionItemsMap()
 {
-}
-
-Qt::AlignmentFlag ToolbarAction::getAlignment() const
-{
-    return _alignment;
 }
 
 GroupAction& ToolbarAction::getGroupAction()
@@ -26,9 +19,9 @@ GroupAction& ToolbarAction::getGroupAction()
     return _groupAction;
 }
 
-void ToolbarAction::addAction(WidgetAction* action, const std::int32_t& autoExpandPriority /*= -1*/)
+void ToolbarAction::addAction(WidgetAction* action, const std::int32_t& autoExpandPriority /*= -1*/, std::int32_t widgetFlags /*= -1*/)
 {
-    _groupAction.addAction(action);
+    _groupAction.addAction(action, widgetFlags);
 
     auto actionItem = new ToolbarActionItem(this, action, ToolbarActionItem::State::Collapsed, autoExpandPriority);
 
