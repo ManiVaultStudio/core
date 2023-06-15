@@ -280,8 +280,9 @@ QMimeData* DataHierarchyModel::mimeData(const QModelIndexList& indexes) const
 
     QVector<DataHierarchyModelItem*> items;
 
-    foreach(const QModelIndex &index, indexes)
-        datasets << getItem(index, Qt::DisplayRole)->getDataHierarchyItem()->getDataset();
+    for (const auto index : indexes)
+        if (index.column() == 0)
+            datasets << getItem(index, Qt::DisplayRole)->getDataHierarchyItem()->getDataset();
 
     return new DatasetsMimeData(datasets);
 }
