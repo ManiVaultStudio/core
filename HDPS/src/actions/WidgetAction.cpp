@@ -496,12 +496,12 @@ void WidgetAction::setConnectionPermissionsToNone(bool recursive /*= false*/)
 
 void WidgetAction::setConnectionPermissionsToForceNone(bool recursive /*= false*/)
 {
-    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::ForceNone), recursive);
+    setConnectionPermissionsFlag(ConnectionPermissionFlag::ForceNone, false, recursive);
 }
 
 void WidgetAction::setConnectionPermissionsToAll(bool recursive /*= false*/)
 {
-    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::All), recursive);
+    setConnectionPermissionsFlag(ConnectionPermissionFlag::All, false, recursive);
 }
 
 void WidgetAction::cacheConnectionPermissions(bool recursive /*= false*/)
@@ -853,6 +853,11 @@ bool WidgetAction::isEnabled() const
         return false;
 
     return QWidgetAction::isEnabled();
+}
+
+bool WidgetAction::mayConnectToPublicAction(const WidgetAction* publicAction) const
+{
+    return true;
 }
 
 }

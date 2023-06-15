@@ -22,5 +22,5 @@ public:
     ModeMenu(QWidget *parent = nullptr);
 
 private:
-    hdps::gui::ToggleAction     _studioModeAction;      /** Toggle between view- and studio mode action */
+    
 };

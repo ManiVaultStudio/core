@@ -139,6 +139,7 @@ public: // Action getters
     const gui::StringsAction& getContributorsAction() const { return _contributorsAction; }
     const CompressionAction& getCompressionAction() const { return _compressionAction; }
     const gui::ProjectSplashScreenAction& getSplashScreenAction() const { return _splashScreenAction; }
+    const gui::ToggleAction& getStudioModeAction() const { return _studioModeAction; }
 
     gui::VersionAction& getApplicationVersionAction() { return _applicationVersionAction; }
     gui::VersionAction& getProjectVersionAction() { return _projectVersionAction; }
@@ -150,6 +151,7 @@ public: // Action getters
     gui::StringsAction& getContributorsAction() { return _contributorsAction; }
     CompressionAction& getCompressionAction() { return _compressionAction; }
     gui::ProjectSplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
+    gui::ToggleAction& getStudioModeAction() { return _studioModeAction; }
 
 signals:
 
@@ -172,6 +174,7 @@ private:
     gui::StringsAction              _contributorsAction;        /** Contributors action */
     CompressionAction               _compressionAction;         /** Compression action */
     gui::ProjectSplashScreenAction  _splashScreenAction;        /** Action for configuring the project splash screen */
+    gui::ToggleAction               _studioModeAction;          /** Toggle between view- and studio mode action */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

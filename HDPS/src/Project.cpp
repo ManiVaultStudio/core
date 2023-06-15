@@ -23,7 +23,8 @@ Project::Project(QObject* parent /*= nullptr*/) :
     _commentsAction(this, "Comments"),
     _contributorsAction(this, "Contributors"),
     _compressionAction(this),
-    _splashScreenAction(this, *this)
+    _splashScreenAction(this, *this),
+    _studioModeAction(this, "Studio Mode")
 {
     initialize();
 }
@@ -42,7 +43,8 @@ Project::Project(const QString& filePath, bool preview, QObject* parent /*= null
     _commentsAction(this, "Comments"),
     _contributorsAction(this, "Contributors"),
     _compressionAction(this),
-    _splashScreenAction(this, *this)
+    _splashScreenAction(this, *this),
+    _studioModeAction(this, "Studio Mode")
 {
     initialize();
 
@@ -107,6 +109,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
     _commentsAction.fromParentVariantMap(variantMap);
     _contributorsAction.fromParentVariantMap(variantMap);
     _compressionAction.fromParentVariantMap(variantMap);
+    _studioModeAction.fromParentVariantMap(variantMap);
 
     if (!preview) {
         dataHierarchy().fromParentVariantMap(variantMap);
@@ -129,6 +132,7 @@ QVariantMap Project::toVariantMap() const
     _commentsAction.insertIntoVariantMap(variantMap);
     _contributorsAction.insertIntoVariantMap(variantMap);
     _compressionAction.insertIntoVariantMap(variantMap);
+    _studioModeAction.insertIntoVariantMap(variantMap);
 
     plugins().insertIntoVariantMap(variantMap);
     dataHierarchy().insertIntoVariantMap(variantMap);
@@ -163,6 +167,24 @@ void Project::initialize()
     _contributorsAction.setDefaultWidgetFlags(StringsAction::ListView);
 
     updateContributors();
+
+    _studioModeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("pencil-ruler"));
+
+    connect(&_studioModeAction, &ToggleAction::toggled, this, [](bool toggled) -> void {
+        auto viewPlugins = plugins().getPluginsByType(plugin::Type::VIEW);
+
+        if (toggled) {
+            for (auto viewPlugin : viewPlugins)
+                viewPlugin->cacheConnectionPermissions(true);
+
+            for (auto viewPlugin : viewPlugins)
+                viewPlugin->setConnectionPermissionsToAll(true);
+        }
+        else {
+            for (auto viewPlugin : viewPlugins)
+                viewPlugin->restoreConnectionPermissions(true);
+        }
+    });
 }
 
 util::Version Project::getVersion() const

@@ -82,7 +82,7 @@ protected:
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
-public:
+protected:
 
     /**
      * Constructor
@@ -94,6 +94,8 @@ public:
      */
     Q_INVOKABLE ColorMapAction(QObject* parent, const QString& title = "", const util::ColorMap::Type& colorMapType = util::ColorMap::Type::OneDimensional, const QString& colorMap = "RdYlBu", const QString& defaultColorMap = "RdYlBu");
 
+public:
+
     /**
      * Initialize the color map action
      * @param colorMap Current color map
@@ -103,6 +105,8 @@ public:
 
     /** Gets the current color map type */
     util::ColorMap::Type getColorMapType() const;
+
+protected:
 
     /** Sets the current color map type */
     void setColorMapType(const util::ColorMap::Type& colorMapType);
@@ -229,6 +233,8 @@ protected:
     ColorMapSettingsAction      _settingsAction;                                        /** Color map settings action */
 
     friend class AbstractActionsManager;
+    friend class ColorMap1DAction;
+    friend class ColorMap2DAction;
 };
 
 }

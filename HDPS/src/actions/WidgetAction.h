@@ -323,6 +323,13 @@ public: // Connections and publishing
     virtual bool isConnected() const final;
 
     /**
+     * Get whether the action may connect to \p publicAction
+     * @param publicAction Pointer to public action
+     * @return Boolean determining whether the action may connect to \p publicAction
+     */
+    virtual bool mayConnectToPublicAction(const WidgetAction* publicAction) const;
+
+    /**
      * Publish this action so that other actions can connect to it
      * @param name Name of the published widget action (if empty, a configuration dialog will popup)
      */

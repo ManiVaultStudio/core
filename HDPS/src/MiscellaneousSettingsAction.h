@@ -29,7 +29,7 @@ public: // Action getters
     gui::ToggleAction& getIgnoreLoadingErrorsAction() { return _ignoreLoadingErrorsAction; }
 
 private:
-    gui::ToggleAction   _ignoreLoadingErrorsAction;         /** Toggle action for ignoring loading errors */
+    gui::ToggleAction   _ignoreLoadingErrorsAction;     /** Toggle action for ignoring loading errors */
 };
 
 }

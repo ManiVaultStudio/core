@@ -39,6 +39,8 @@ set(PUBLIC_EVENT_FILES
 
 set(PUBLIC_COLOR_MAP_ACTION_HEADERS
     src/actions/ColorMapAction.h
+    src/actions/ColorMap1DAction.h
+    src/actions/ColorMap2DAction.h
     src/actions/ColorMapEditor1DAction.h
     src/actions/ColorMapEditor1DEdgesGraphicsItem.h
     src/actions/ColorMapEditor1DHistogramGraphicsItem.h
@@ -55,6 +57,8 @@ set(PUBLIC_COLOR_MAP_ACTION_HEADERS
 
 set(PUBLIC_COLOR_MAP_ACTION_SOURCES
     src/actions/ColorMapAction.cpp
+    src/actions/ColorMap1DAction.cpp
+    src/actions/ColorMap2DAction.cpp
     src/actions/ColorMapEditor1DAction.cpp
     src/actions/ColorMapEditor1DEdgesGraphicsItem.cpp
     src/actions/ColorMapEditor1DHistogramGraphicsItem.cpp

@@ -99,6 +99,9 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
                 if (publicAction == firstAction->getPublicAction())
                     continue;
 
+                if (!firstAction->mayConnectToPublicAction(publicAction))
+                    continue;
+
                 auto connectAction = new QAction(publicAction->getLocation());
 
                 connectAction->setToolTip("Connect " + firstAction->text() + " to " + publicAction->text());

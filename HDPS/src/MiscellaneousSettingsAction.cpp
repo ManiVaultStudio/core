@@ -1,4 +1,5 @@
 #include "MiscellaneousSettingsAction.h"
+#include "Application.h"
 
 namespace hdps
 {
