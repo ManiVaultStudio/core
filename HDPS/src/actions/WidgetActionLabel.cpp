@@ -182,7 +182,7 @@ void WidgetActionLabel::updateNameLabel()
     auto font = _nameLabel.font();
 
     font.setUnderline(getAction()->isEnabled() && connectionEnabled);
-    font.setItalic(getAction()->mayPublish(WidgetAction::Gui) && getAction()->isConnected());
+    font.setItalic(getAction()->isConnected());
 
     _nameLabel.setFont(font);
     _nameLabel.setEnabled(getAction()->isEnabled());
