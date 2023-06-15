@@ -23,9 +23,6 @@ public:
      */
     DatasetsMimeData(Datasets datasets);
 
-    /** Destructor */
-    ~DatasetsMimeData();
-
     /**
      * Get supported mime types
      * @return List of string of supported mime types

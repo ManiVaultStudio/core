@@ -66,10 +66,13 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
 
             resetLayout();
 
-            for (auto dropRegion : _getDropRegionsFunction(dragEnterEvent->mimeData()))
+            const auto dropRegions = _getDropRegionsFunction(dragEnterEvent->mimeData());
+
+            for (auto dropRegion : dropRegions)
                 layout()->addWidget(new DropRegionContainerWidget(dropRegion, this));
 
-            dragEnterEvent->acceptProposedAction();
+            if (!dropRegions.isEmpty())
+                dragEnterEvent->acceptProposedAction();
             
             if (_dropIndicatorWidget)
                 _dropIndicatorWidget->hide();
