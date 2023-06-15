@@ -419,6 +419,10 @@ void ColorMapAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
+    variantMapMustContain(variantMap, "Type");
+
+    setColorMapType(static_cast<ColorMap::Type>(variantMap["Type"].toInt()));
+
     _currentColorMapAction.fromParentVariantMap(variantMap);
     getRangeAction(Axis::X).fromParentVariantMap(variantMap);
     getRangeAction(Axis::Y).fromParentVariantMap(variantMap);
@@ -436,6 +440,10 @@ void ColorMapAction::fromVariantMap(const QVariantMap& variantMap)
 QVariantMap ColorMapAction::toVariantMap() const
 {
     QVariantMap variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Type", static_cast<std::int32_t>(getColorMapType()) }
+    });
 
     _currentColorMapAction.insertIntoVariantMap(variantMap);
     getRangeAction(Axis::X).insertIntoVariantMap(variantMap);
