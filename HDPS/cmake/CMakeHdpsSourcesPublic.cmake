@@ -492,7 +492,7 @@ set(PUBLIC_DATASET_HEADERS
     src/LinkedData.h
     src/Dataset.h
     src/DatasetPrivate.h
-    src/DatasetMimeData.h
+    src/DatasetsMimeData.h
 )
 
 set(PUBLIC_DATASET_SOURCES
@@ -500,7 +500,7 @@ set(PUBLIC_DATASET_SOURCES
     src/LinkedData.cpp
     src/Dataset.cpp
     src/DatasetPrivate.cpp
-    src/DatasetMimeData.cpp
+    src/DatasetsMimeData.cpp
 )
 
 set(PUBLIC_DATASET_FILES
