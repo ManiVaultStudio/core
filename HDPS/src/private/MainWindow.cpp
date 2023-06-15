@@ -4,6 +4,7 @@
 #include "ProjectWidget.h"
 #include "FileMenu.h"
 #include "ViewMenu.h"
+#include "ModeMenu.h"
 #include "HelpMenu.h"
 
 #include <Application.h>
@@ -62,6 +63,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         auto fileMenuAction = menuBar()->addMenu(new FileMenu());
         auto viewMenuAction = menuBar()->addMenu(new ViewMenu());
+        auto modeMenuAction = menuBar()->addMenu(new ModeMenu());
         auto helpMenuAction = menuBar()->addMenu(new HelpMenu());
 
         auto stackedWidget      = new StackedWidget();
