@@ -234,7 +234,7 @@ namespace hdps
             // "Fix issue #34: Crash when opening scatterplot plugin", March 2020.
             if (!_positions.empty())
             {
-                glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _positions.size());
+                glDrawArraysInstanced(GL_TRIANGLES, 0, 6, (GLsizei) _positions.size());
             }
             glBindVertexArray(0);
         }
