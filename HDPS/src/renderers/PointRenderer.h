@@ -39,6 +39,7 @@ namespace hdps
             BufferObject _opacityScalarBuffer;
             BufferObject _colorBuffer;
 
+            PointArrayObject() : _handle(0), _colorScalarsRange(0, 1, 1) {}
             void init();
             void setPositions(const std::vector<Vector2f>& positions);
             void setHighlights(const std::vector<char>& highlights);
