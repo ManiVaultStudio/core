@@ -163,18 +163,18 @@ namespace hdps
             bool                        _selectionHaloEnabled               = false;
 
             /* Window properties */
-            QSize _windowSize;
+            QSize                       _windowSize;
 
             /* Rendering variables */
-            ShaderProgram _shader;
+            ShaderProgram               _shader;
 
-            PointArrayObject _gpuPoints;
-            Texture2D _colormap;
+            PointArrayObject            _gpuPoints;
+            Texture2D                   _colormap;
 
-            Matrix3f _orthoM;
-            Bounds _bounds = Bounds(-1, 1, -1, 1);
+            Matrix3f                    _orthoM;
+            Bounds                      _bounds                             = Bounds(-1, 1, -1, 1);
 
-            std::int32_t    _numSelectedPoints;     /** Number of selected (highlighted points) */
+            std::int32_t                _numSelectedPoints                  = 0;     /** Number of selected (highlighted points) */
         };
 
     } // namespace gui
