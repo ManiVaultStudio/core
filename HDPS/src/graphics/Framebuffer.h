@@ -12,6 +12,14 @@ namespace hdps
     class Framebuffer : protected QOpenGLFunctions_3_3_Core
     {
     public:
+        Framebuffer() :
+            _handle(0),
+            colorTexture{ nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr },
+            depthTexture(nullptr)
+        {
+
+        }
+
         void create()
         {
             initializeOpenGLFunctions();
