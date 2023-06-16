@@ -43,7 +43,7 @@ namespace hdps
             void init();
             void setPositions(const std::vector<Vector2f>& positions);
             void setHighlights(const std::vector<char>& highlights);
-            void setScalars(const std::vector<float>& scalars);
+            void setScalars(const std::vector<float>& scalars, bool adjustColorMapRange);
             void setSizeScalars(const std::vector<float>& scalars);
             void setOpacityScalars(const std::vector<float>& scalars);
             void setColors(const std::vector<Vector3f>& colors);
@@ -116,7 +116,7 @@ namespace hdps
         public:
             void setData(const std::vector<Vector2f>& points);
             void setHighlights(const std::vector<char>& highlights, const std::int32_t& numSelectedPoints);
-            void setColorChannelScalars(const std::vector<float>& scalars);
+            void setColorChannelScalars(const std::vector<float>& scalars, bool adjustColorMapRange = true);
             void setSizeChannelScalars(const std::vector<float>& scalars);
             void setOpacityChannelScalars(const std::vector<float>& scalars);
             void setColors(const std::vector<Vector3f>& colors);

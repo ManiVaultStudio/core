@@ -112,25 +112,28 @@ namespace hdps
             _dirtyHighlights = true;
         }
 
-        void PointArrayObject::setScalars(const std::vector<float>& scalars)
+        void PointArrayObject::setScalars(const std::vector<float>& scalars, bool adjustColorMapRange)
         {
-            _colorScalarsRange.x = std::numeric_limits<float>::max();
-            _colorScalarsRange.y = -std::numeric_limits<float>::max();
-
-            // Determine scalar range
-            for (const float& scalar : scalars)
+            if (adjustColorMapRange)
             {
-                if (scalar < _colorScalarsRange.x)
-                    _colorScalarsRange.x = scalar;
+                _colorScalarsRange.x = std::numeric_limits<float>::max();
+                _colorScalarsRange.y = -std::numeric_limits<float>::max();
 
-                if (scalar > _colorScalarsRange.y)
-                    _colorScalarsRange.y = scalar;
+                // Determine scalar range
+                for (const float& scalar : scalars)
+                {
+                    if (scalar < _colorScalarsRange.x)
+                        _colorScalarsRange.x = scalar;
+
+                    if (scalar > _colorScalarsRange.y)
+                        _colorScalarsRange.y = scalar;
+                }
+
+                _colorScalarsRange.z = _colorScalarsRange.y - _colorScalarsRange.x;
+
+                if (_colorScalarsRange.z < 1e-07)
+                    _colorScalarsRange.z = static_cast<float>(1e-07);
             }
-
-            _colorScalarsRange.z = _colorScalarsRange.y - _colorScalarsRange.x;
-
-            if (_colorScalarsRange.z < 1e-07)
-                _colorScalarsRange.z = static_cast<float>(1e-07);
 
             _colorScalars = scalars;
 
@@ -257,9 +260,9 @@ namespace hdps
             _numSelectedPoints = numSelectedPoints;
         }
 
-        void PointRenderer::setColorChannelScalars(const std::vector<float>& scalars)
+        void PointRenderer::setColorChannelScalars(const std::vector<float>& scalars, bool adjustColorMapRange)
         {
-            _gpuPoints.setScalars(scalars);
+            _gpuPoints.setScalars(scalars, adjustColorMapRange);
         }
 
         void PointRenderer::setSizeChannelScalars(const std::vector<float>& scalars)
