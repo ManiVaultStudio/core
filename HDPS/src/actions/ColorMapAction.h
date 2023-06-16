@@ -90,18 +90,16 @@ protected:
      * @param title Title of the action
      * @param colorMapType Type of color map (1D/2D)
      * @param colorMap Current color map
-     * @param defaultColorMap Default color map
      */
-    Q_INVOKABLE ColorMapAction(QObject* parent, const QString& title = "", const util::ColorMap::Type& colorMapType = util::ColorMap::Type::OneDimensional, const QString& colorMap = "RdYlBu", const QString& defaultColorMap = "RdYlBu");
+    Q_INVOKABLE ColorMapAction(QObject* parent, const QString& title = "", const util::ColorMap::Type& colorMapType = util::ColorMap::Type::OneDimensional, const QString& colorMap = "RdYlBu");
 
 public:
 
     /**
      * Initialize the color map action
      * @param colorMap Current color map
-     * @param defaultColorMap Default color map
      */
-    void initialize(const QString& colorMap = "", const QString& defaultColorMap = "");
+    void initialize(const QString& colorMap);
 
     /** Gets the current color map type */
     util::ColorMap::Type getColorMapType() const;

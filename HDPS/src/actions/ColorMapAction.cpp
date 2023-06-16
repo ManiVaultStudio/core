@@ -16,7 +16,7 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= "RdYlBu"*/, const QString& defaultColorMap /*= "RdYlBu"*/) :
+ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= "RdYlBu"*/) :
     WidgetAction(parent, "Color Map"),
     _colorMapFilterModel(this, colorMapType),
     _currentColorMapAction(this, "Current color map"),
@@ -40,7 +40,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
     setDefaultWidgetFlags(WidgetFlag::Default);
 
-    initialize(colorMap, defaultColorMap);
+    initialize(colorMap);
 
     const auto notifyColorMapImageChanged = [this]() -> void {
         emit imageChanged(getColorMapImage());
@@ -161,7 +161,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     updateRangeActionReadOnly;
 }
 
-void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString& defaultColorMap /*= ""*/)
+void ColorMapAction::initialize(const QString& colorMap)
 {
     _colorMapFilterModel.setSourceModel(ColorMapModel::getGlobalInstance());
 
@@ -179,7 +179,7 @@ void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString&
     getDiscretizeAlphaAction().setToolTip("Whether to discrete the alpha channel");
     getCustomColorMapAction().setToolTip("Customize the color map");
 
-    getCurrentColorMapAction().initialize(_colorMapFilterModel, colorMap, defaultColorMap);
+    getCurrentColorMapAction().initialize(_colorMapFilterModel, colorMap);
 
     getDataRangeAction(Axis::X).setEnabled(false);
     getDataRangeAction(Axis::Y).setEnabled(false);
