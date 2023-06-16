@@ -4,8 +4,8 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-ColorMap1DAction::ColorMap1DAction(QObject* parent, const QString& title /*= ""*/, const QString& colorMap /*= "RdYlBu"*/) :
-    ColorMapAction(parent, "Color Map", ColorMap::Type::OneDimensional, colorMap)
+ColorMap1DAction::ColorMap1DAction(QObject* parent, const QString& title, const QString& colorMap /*= "RdYlBu"*/) :
+    ColorMapAction(parent, title, ColorMap::Type::OneDimensional, colorMap)
 {
 }
 

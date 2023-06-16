@@ -91,7 +91,7 @@ protected:
      * @param colorMapType Type of color map (1D/2D)
      * @param colorMap Current color map
      */
-    Q_INVOKABLE ColorMapAction(QObject* parent, const QString& title = "", const util::ColorMap::Type& colorMapType = util::ColorMap::Type::OneDimensional, const QString& colorMap = "RdYlBu");
+    Q_INVOKABLE ColorMapAction(QObject* parent, const QString& title, const util::ColorMap::Type& colorMapType = util::ColorMap::Type::OneDimensional, const QString& colorMap = "RdYlBu");
 
 public:
 

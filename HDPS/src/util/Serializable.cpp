@@ -246,6 +246,9 @@ void Serializable::insertIntoVariantMap(QVariantMap& variantMap) const
     if (getSerializationName().isEmpty())
         throw std::runtime_error("Serialization name may not be empty");
 
+    if (variantMap.contains(getSerializationName()))
+        throw std::runtime_error(QString("%1 already exists in variant map (%2)").arg(getSerializationName()).toLatin1());
+
     variantMap.insert(getSerializationName(), toVariantMap());
 }
 

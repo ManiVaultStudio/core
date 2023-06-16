@@ -7,7 +7,7 @@ namespace hdps::gui {
 VersionAction::VersionAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
     _majorAction(this, "Major Version", 0, 100, 1),
-    _minorAction(this, "Major Version", 0, 100, 0),
+    _minorAction(this, "Minor Version", 0, 100, 0),
     _suffixAction(this, "Suffix"),
     _versionStringAction(this, "Version String"),
     _suffixCompleter()

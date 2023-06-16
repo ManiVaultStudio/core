@@ -128,7 +128,7 @@ public:
      * @param string String
      * @param defaultString Default string
      */
-    Q_INVOKABLE StringAction(QObject* parent, const QString& title = "", const QString& string = "", const QString& defaultString = "");
+    Q_INVOKABLE StringAction(QObject* parent, const QString& title, const QString& string = "", const QString& defaultString = "");
 
     /**
      * Initialize the string action

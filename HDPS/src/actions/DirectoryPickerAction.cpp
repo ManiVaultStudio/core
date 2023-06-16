@@ -6,11 +6,11 @@
 #include <QFileDialog>
 #include <QHBoxLayout>
 
-namespace hdps {
+using namespace hdps::util;
 
-namespace gui {
+namespace hdps::gui {
 
-DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& title /*= ""*/, const QString& directory /*= QString()*/, const QString& defaultDirectory /*= QString()*/) :
+DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& title, const QString& directory /*= QString()*/, const QString& defaultDirectory /*= QString()*/) :
     WidgetAction(parent, title),
     _dirModel(),
     _completer(),
@@ -120,15 +120,23 @@ bool DirectoryPickerAction::isValid() const
 
 void DirectoryPickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (variantMap.contains("value"))
-        setDirectory(variantMap["value"].toString());
+    WidgetAction::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "Value");
+
+    if (variantMap.contains("Value"))
+        setDirectory(variantMap["Value"].toString());
 }
 
 QVariantMap DirectoryPickerAction::toVariantMap() const
 {
-    return {
-        { "value", getDirectory() }
-    };
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", getDirectory() }
+    });
+
+    return variantMap;
 }
 
 QWidget* DirectoryPickerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -149,5 +157,4 @@ QWidget* DirectoryPickerAction::getWidget(QWidget* parent, const std::int32_t& w
     return widget;
 }
 
-}
 }

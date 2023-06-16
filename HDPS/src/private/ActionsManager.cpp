@@ -69,7 +69,7 @@ void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
             {
                 const auto publicActionMap      = publicActionVariant.toMap();
                 const auto publicActionTitle    = publicActionMap["Title"].toString();
-                const auto metaType             = publicActionMap["Type"].toString();
+                const auto metaType             = publicActionMap["ActionType"].toString();
 
                 if (metaType.isEmpty())
                     throw std::runtime_error(QString("Action type is not specified for %1").arg(publicActionTitle).toLatin1());

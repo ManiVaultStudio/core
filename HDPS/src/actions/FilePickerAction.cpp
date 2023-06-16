@@ -178,18 +178,19 @@ void FilePickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    //variantMapMustContain(variantMap, "Value");
+    variantMapMustContain(variantMap, "Value");
 
-    //setFilePath(variantMap["Value"].toString());
+    if (variantMap.contains("Value"))
+        setFilePath(variantMap["Value"].toString());
 }
 
 QVariantMap FilePickerAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 
-    //variantMap.insert({
-    //    { "Value", QVariant::fromValue(getFilePath()) }
-    //});
+    variantMap.insert({
+        { "Value", getFilePath() }
+    });
 
     return variantMap;
 }

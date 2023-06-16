@@ -11,7 +11,7 @@ ImageAction::ImageAction(QObject* parent, const QString& title /*= ""*/) :
     _image(),
     _filePathAction(this, "File Path"),
     _fileNameAction(this, "File Name"),
-    _filePickerAction(parent, "File Path"),
+    _filePickerAction(parent, "File Picker"),
     _previewAction(this, "Preview")
 {
     setText(title);
@@ -139,7 +139,7 @@ QWidget* ImageAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
 
 void ImageAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    Serializable::fromVariantMap(variantMap);
+    WidgetAction::fromVariantMap(variantMap);
     
     QImage image;
 
@@ -153,7 +153,7 @@ void ImageAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap ImageAction::toVariantMap() const
 {
-    auto variantMap = Serializable::toVariantMap();
+    auto variantMap = WidgetAction::toVariantMap();
 
     QByteArray previewImageByteArray;
     QBuffer previewImageBuffer(&previewImageByteArray);

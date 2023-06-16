@@ -681,7 +681,7 @@ QVariantMap WidgetAction::toVariantMap() const
     QVariantMap variantMap = Serializable::toVariantMap();
 
     variantMap.insert({
-        { "Type", QVariant::fromValue(getTypeString()) },
+        { "ActionType", QVariant::fromValue(getTypeString()) },
         { "IsEnabled", QVariant::fromValue(isEnabled()) },
         { "IsChecked", QVariant::fromValue(isChecked()) },
         { "IsVisible", QVariant::fromValue(isVisible()) },

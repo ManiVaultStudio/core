@@ -8,8 +8,8 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const QString& string /*= ""*/, const QString& defaultString /*= ""*/) :
-    WidgetAction(parent, "Title"),
+StringAction::StringAction(QObject* parent, const QString& title, const QString& string /*= ""*/, const QString& defaultString /*= ""*/) :
+    WidgetAction(parent, title),
     _string(),
     _defaultString(),
     _placeholderString(),

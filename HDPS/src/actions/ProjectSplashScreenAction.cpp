@@ -16,7 +16,7 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _enabledAction(this, "Splash screen"),
     _closeManuallyAction(this, "Close manually"),
     _durationAction(this, "Duration", 1000, 10000, 4000),
-    _animationDurationAction(this, "Duration", 10, 10000, 250),
+    _animationDurationAction(this, "Animation Duration", 10, 10000, 250),
     _animationPanAmountAction(this, "Pan Amount", 10, 100, 20),
     _backgroundColorAction(this, "Background Color", Qt::white),
     _editAction(this, "Edit"),

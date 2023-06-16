@@ -16,8 +16,8 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= "RdYlBu"*/) :
-    WidgetAction(parent, "Color Map"),
+ColorMapAction::ColorMapAction(QObject* parent, const QString& title, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= "RdYlBu"*/) :
+    WidgetAction(parent, title),
     _colorMapFilterModel(this, colorMapType),
     _currentColorMapAction(this, "Current color map"),
     _rangeAction{ DecimalRangeAction(this, "Range"), DecimalRangeAction(this, "Range (y)") },
@@ -36,7 +36,6 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     _customColorMapGroupAction(this, "Custom color map"),
     _settingsAction(*this, "Settings")
 {
-    setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
     setDefaultWidgetFlags(WidgetFlag::Default);
 
@@ -419,9 +418,9 @@ void ColorMapAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "Type");
+    variantMapMustContain(variantMap, "ColorMapType");
 
-    setColorMapType(static_cast<ColorMap::Type>(variantMap["Type"].toInt()));
+    setColorMapType(static_cast<ColorMap::Type>(variantMap["ColorMapType"].toInt()));
 
     _currentColorMapAction.fromParentVariantMap(variantMap);
     getRangeAction(Axis::X).fromParentVariantMap(variantMap);
@@ -442,7 +441,7 @@ QVariantMap ColorMapAction::toVariantMap() const
     QVariantMap variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
-        { "Type", static_cast<std::int32_t>(getColorMapType()) }
+        { "ColorMapType", static_cast<std::int32_t>(getColorMapType()) }
     });
 
     _currentColorMapAction.insertIntoVariantMap(variantMap);

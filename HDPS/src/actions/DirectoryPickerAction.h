@@ -52,7 +52,7 @@ public:
      * @param directory Directory
      * @param defaultDirectory Default directory
      */
-    DirectoryPickerAction(QObject* parent, const QString& title = "", const QString& directory = QString(), const QString& defaultDirectory = QString());
+    DirectoryPickerAction(QObject* parent, const QString& title, const QString& directory = QString(), const QString& defaultDirectory = QString());
 
     /**
      * Initialize the directory picker action

@@ -23,7 +23,7 @@ public:
      * @param title Title of the action
      * @param colorMap Current color map
      */
-    Q_INVOKABLE ColorMap1DAction(QObject* parent, const QString& title = "", const QString& colorMap = "RdYlBu");
+    Q_INVOKABLE ColorMap1DAction(QObject* parent, const QString& title, const QString& colorMap = "RdYlBu");
 };
 
 }
