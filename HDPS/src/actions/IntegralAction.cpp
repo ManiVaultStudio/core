@@ -259,7 +259,7 @@ IntegralAction::LineEditWidget::LineEditWidget(QWidget* parent, IntegralAction* 
     const auto updateText = [this, integralAction]() -> void {
         QSignalBlocker blocker(this);
 
-        setText(QString::number(integralAction->getValue()));
+        setText(integralAction->getPrefix() + ": " + QString::number(integralAction->getValue()));
     };
 
     updateText();

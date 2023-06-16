@@ -10,7 +10,7 @@ using namespace hdps::util;
 namespace hdps::gui {
 
 PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title) :
-    GroupAction(parent, "Pixel Selection"),
+    GroupAction(parent, title),
     _targetWidget(nullptr),
     _pixelSelectionTool(nullptr),
     _pixelSelectionTypes(),
@@ -36,7 +36,6 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
     _notifyDuringSelectionAction(this, "Notify during selection", true, true)
 {
-    setText("Pixel selection");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
 
     addAction(&_overlayColorAction);
@@ -89,6 +88,7 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _modifierAction.setToolTip("Type of selection modifier");
     _modifierAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionModifierType::Replace));
 
+    _modifierReplaceAction.setIcon(fontAwesome.getIcon("exchange-alt"));
     _modifierReplaceAction.setCheckable(true);
     _modifierReplaceAction.setDefaultWidgetFlags(ToggleAction::PushButton);
 

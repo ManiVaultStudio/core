@@ -280,7 +280,7 @@ DecimalAction::LineEditWidget::LineEditWidget(QWidget* parent, DecimalAction* de
     const auto updateText = [this, decimalAction]() -> void {
         QSignalBlocker blocker(this);
 
-        setText(QString::number(decimalAction->getValue(), 'f', decimalAction->getNumberOfDecimals()));
+        setText(decimalAction->getPrefix() + ": " + QString::number(decimalAction->getValue(), 'f', decimalAction->getNumberOfDecimals()));
     };
 
     updateText();

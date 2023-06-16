@@ -285,6 +285,9 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
 {
     auto layout = new QGridLayout();
 
+    if (widgetFlags & NoMargins)
+        layout->setContentsMargins(0, 0, 0, 0);
+
     const auto updateLayout = [this, layout, groupAction]() -> void {
         if (groupAction->getShowLabels()) {
             switch (groupAction->getLabelSizingType())
