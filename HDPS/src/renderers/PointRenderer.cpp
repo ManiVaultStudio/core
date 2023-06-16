@@ -432,7 +432,8 @@ namespace hdps
             if (_gpuPoints.hasColorScalars())
                 _shader.uniform3f("colorMapRange", _gpuPoints.getColorMapRange());
 
-            if (_pointEffect == PointEffect::Color || _pointEffect == PointEffect::Color2D) {
+            if (_colormap.isCreated() && (_pointEffect == PointEffect::Color || _pointEffect == PointEffect::Color2D))
+            {
                 _colormap.bind(0);
                 _shader.uniform1i("colormap", 0);
             }
