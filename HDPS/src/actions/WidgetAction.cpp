@@ -642,22 +642,22 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
 
     Serializable::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "Enabled");
-    variantMapMustContain(variantMap, "Checked");
-    variantMapMustContain(variantMap, "Visible");
+    variantMapMustContain(variantMap, "IsEnabled");
+    variantMapMustContain(variantMap, "IsChecked");
+    variantMapMustContain(variantMap, "IsVisible");
     variantMapMustContain(variantMap, "SortIndex");
     variantMapMustContain(variantMap, "ConnectionPermissions");
 
-    setEnabled(variantMap["Enabled"].toBool());
-    setChecked(variantMap["Checked"].toBool());
-    setVisible(variantMap["Visible"].toBool());
+    setEnabled(variantMap["IsEnabled"].toBool());
+    setChecked(variantMap["IsChecked"].toBool());
+    setVisible(variantMap["IsVisible"].toBool());
     setSortIndex(variantMap["SortIndex"].toInt());
 
-    if (variantMap.contains("ForceHidden"))
-        setForceHidden(variantMap["ForceHidden"].toInt());
+    if (variantMap.contains("IsForceHidden"))
+        setForceHidden(variantMap["IsForceHidden"].toInt());
 
-    if (variantMap.contains("ForceDisabled"))
-        setForceHidden(variantMap["ForceHidden"].toInt());
+    if (variantMap.contains("IsForceDisabled"))
+        setForceHidden(variantMap["IsForceHidden"].toInt());
 
     setConnectionPermissions(variantMap["ConnectionPermissions"].toInt());
 
@@ -682,15 +682,15 @@ QVariantMap WidgetAction::toVariantMap() const
 
     variantMap.insert({
         { "Type", QVariant::fromValue(getTypeString()) },
-        { "Enabled", QVariant::fromValue(isEnabled()) },
-        { "Checked", QVariant::fromValue(isChecked()) },
-        { "Visible", QVariant::fromValue(isVisible()) },
+        { "IsEnabled", QVariant::fromValue(isEnabled()) },
+        { "IsChecked", QVariant::fromValue(isChecked()) },
+        { "IsVisible", QVariant::fromValue(isVisible()) },
         { "SortIndex", QVariant::fromValue(_sortIndex) },
         { "ConnectionPermissions", QVariant::fromValue(_connectionPermissions) },
         { "IsPublic", QVariant::fromValue(isPublic()) },
         { "PublicActionID", QVariant::fromValue(_publicAction == nullptr ? "" : _publicAction->getId()) },
-        { "ForceHidden", QVariant::fromValue(getForceHidden()) },
-        { "ForceDisabled", QVariant::fromValue(getForceDisabled()) }
+        { "IsForceHidden", QVariant::fromValue(getForceHidden()) },
+        { "IsForceDisabled", QVariant::fromValue(getForceDisabled()) }
     });
 
     return variantMap;
