@@ -472,15 +472,26 @@ protected: // Drag-and-drop behavior
     QMimeData* mimeData(const QModelIndexList& indexes) const override;
 
     /**
-     * Invoked when \p mimeData is dropped
+     * Determines whether \p mimeData with \p action can be dropped on \p row and \p column with \p parent model index
      * @param mimeData Pointer to dropped mime data
-     * @param action Drop action
+     * @param dropAction Drop action
      * @param row Drop row
      * @param column Drop column
      * @param parent Drop parent index
-     * @return Boolean determining whether the drop is possible or not
+     * @return Boolean whether the drop is permitted
      */
-    bool dropMimeData(const QMimeData* mimeData, Qt::DropAction action, int row, int column, const QModelIndex& parent);
+    bool canDropMimeData(const QMimeData* mimeData, Qt::DropAction dropAction, int row, int column, const QModelIndex& parent) const override;
+
+    /**
+     * Invoked when \p mimeData is dropped
+     * @param mimeData Pointer to dropped mime data
+     * @param dropAction Drop action
+     * @param row Drop row
+     * @param column Drop column
+     * @param parent Drop parent index
+     * @return Boolean determining whether the drop is performed
+     */
+    bool dropMimeData(const QMimeData* mimeData, Qt::DropAction dropAction, int row, int column, const QModelIndex& parent) override;
 
 protected:
 

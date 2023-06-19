@@ -700,7 +700,7 @@ QStandardItem* AbstractActionsModel::getActionItem(const gui::WidgetAction* acti
 
 Qt::DropActions AbstractActionsModel::supportedDropActions() const
 {
-    return Qt::CopyAction;
+    return Qt::MoveAction;
 }
 
 Qt::DropActions AbstractActionsModel::supportedDragActions() const
@@ -721,15 +721,52 @@ QMimeData* AbstractActionsModel::mimeData(const QModelIndexList& indexes) const
     return new WidgetActionMimeData(static_cast<Item*>(itemFromIndex(indexes.first()))->getAction());
 }
 
-bool AbstractActionsModel::dropMimeData(const QMimeData* mimeData, Qt::DropAction action, int row, int column, const QModelIndex& parent)
+bool AbstractActionsModel::canDropMimeData(const QMimeData* mimeData, Qt::DropAction dropAction, int row, int column, const QModelIndex& parent) const
 {
     auto actionMimeData = dynamic_cast<const WidgetActionMimeData*>(mimeData);
 
-    if (actionMimeData) {
-        qDebug() << "===== Action dropped!";
+    if (actionMimeData == nullptr)
+        return false;
+
+    if (row >= 0 && column != 0)
+        return false;
+
+    auto action = const_cast<AbstractActionsModel*>(this)->getAction(row < 0 ? parent : index(row, 0, parent));
+
+    if (action != nullptr) {
+        if (action->isPrivate())
+            return false;
+
+        qDebug() << actionMimeData->getAction()->getTypeString() << action->getTypeString();
+
+        if (actionMimeData->getAction()->getTypeString() != action->getTypeString())
+            return false;
+    }
+        
+    return true;
+}
+
+bool AbstractActionsModel::dropMimeData(const QMimeData* mimeData, Qt::DropAction dropAction, int row, int column, const QModelIndex& parent)
+{
+    auto actionMimeData = dynamic_cast<const WidgetActionMimeData*>(mimeData);
+
+    if (actionMimeData == nullptr)
+        return false;
+
+    if (!parent.isValid()) {
+        if (actionMimeData->getAction()->isPrivate() && !actionMimeData->getAction()->isConnected()) {
+            actions().publishPrivateAction(actionMimeData->getAction());
+            return true;
+        }
+    }
+    else {
+        auto action = getAction(row < 0 ? parent : index(row, 0, parent));
+
+        if (action != nullptr)
+            actions().connectPrivateActionToPublicAction(actionMimeData->getAction(), action, true);
     }
 
-    return true;
+    return false;
 }
 
 }
