@@ -65,16 +65,16 @@ public:
     const plugin::PluginFactory* getPluginFactory() const;
 
     /**
-     * Get location of the plugin trigger action
-     * @return Location of the plugin trigger action
+     * Get menu location of the plugin trigger action
+     * @return Location of the plugin trigger action in a menu
      */
-    QString getLocation() const;
+    QString getMenuLocation() const;
 
     /**
-     * Set location of the plugin trigger action
-     * @param location Location of the plugin trigger action
+     * Set menu location of the plugin trigger action
+     * @param location Location of the plugin trigger action in a menu
      */
-    void setLocation(const QString& location);
+    void setMenuLocation(const QString& menuLocation);
 
     /**
      * Get sha of plugin kind + trigger title
@@ -118,7 +118,7 @@ private:
 
 private:
     const plugin::PluginFactory*    _pluginFactory;             /** Pointer to plugin factory */
-    QString                         _location;                  /** Determines where the plugin trigger action resides w.r.t. other plugin trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images */
+    QString                         _menuLocation;              /** Determines where the plugin trigger action resides w.r.t. other plugin trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images */
     QString                         _sha;                       /** Cryptographic hash of the plugin kind and trigger title */
     WidgetAction*                   _configurationAction;       /** Action for configuring the plugin creation */
     RequestPluginCallback           _requestPluginCallback;     /** Request plugin callback function which should create the plugin (invoked when the trigger action is triggered) */

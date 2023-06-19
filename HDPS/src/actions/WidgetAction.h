@@ -177,25 +177,25 @@ public: // Widgets
     QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags);
 
     /** Get the sort index */
-    std::int32_t getSortIndex() const;
+    virtual std::int32_t getSortIndex() const final;
 
     /**
      * Set the sort index
      * @param sortIndex Sorting index
      */
-    void setSortIndex(const std::int32_t& sortIndex);
+    virtual void setSortIndex(const std::int32_t& sortIndex) final;
 
     /**
      * Get stretch
      * @return The stretch factor
      */
-    std::int32_t getStretch() const;
+   virtual std::int32_t getStretch() const final;
 
     /**
      * Set stretch to \p stretch
      * @param stretch Stretch factor
      */
-    void setStretch(const std::int32_t& stretch);
+    virtual void setStretch(const std::int32_t& stretch) final;
 
 public: // Visibility
 
@@ -203,19 +203,19 @@ public: // Visibility
      * Get force hidden
      * @return Boolean determining whether the widget action should be forcibly hidden (regardless of the visibility setting in the base QWidgetAction class)
      */
-    bool getForceHidden() const;
+    virtual bool getForceHidden() const final;
 
     /**
      * Set force hidden to \p forceHidden
      * @param forceHidden Boolean determining whether the widget action should be forcibly hidden (regardless of the enabled visibility in the base QWidgetAction class)
      */
-    void setForceHidden(bool forceHidden);
+    virtual void setForceHidden(bool forceHidden) final;
 
     /**
      * Re-implement the isVisible() getter from the base QWidgetAction class to support the force hidden functionality
      * @return Boolean determining whether the widget action is visible or not
      */
-    bool isVisible() const;
+    virtual bool isVisible() const final;
 
 public: // Disabled
 
@@ -223,30 +223,30 @@ public: // Disabled
      * Get force disabled
      * @return Boolean determining whether the widget action should be forcibly disabled (regardless of the enabled setting in the base QWidgetAction class)
      */
-    bool getForceDisabled() const;
+    virtual bool getForceDisabled() const final;
 
     /**
      * Set force disabled to \p forceDisabled
      * @param forceDisabled Boolean determining whether the widget action should be forcibly disabled (regardless of the enabled setting in the base QWidgetAction class)
      */
-    void setForceDisabled(bool forceDisabled);
+    virtual void setForceDisabled(bool forceDisabled) final;
 
     /**
      * Re-implement the isEnabled() getter from the base QWidgetAction class to support the force disabled functionality
      * @return Boolean determining whether the widget action is enabled or not
      */
-    bool isEnabled() const;
+    virtual bool isEnabled() const final;
 
 public: // Widget flags
 
     /** Gets the default widget flags */
-    std::int32_t getDefaultWidgetFlags() const;
+    virtual std::int32_t getDefaultWidgetFlags() const final;
 
     /**
      * Set the widget flags
      * @param widgetFlags Widget flags
      */
-    void setDefaultWidgetFlags(const std::int32_t& widgetFlags);
+    virtual void setDefaultWidgetFlags(const std::int32_t& widgetFlags) final;
 
 public: // Highlighting
 
@@ -314,7 +314,7 @@ public: // Connections and publishing
      * Get whether the action is published
      * @return Boolean indicating whether the action is published
      */
-    virtual bool isPublished() const;
+    virtual bool isPublished() const final;
 
     /**
      * Get whether the action is connect to a public action
@@ -327,7 +327,7 @@ public: // Connections and publishing
      * @param publicAction Pointer to public action
      * @return Boolean determining whether the action may connect to \p publicAction
      */
-    virtual bool mayConnectToPublicAction(const WidgetAction* publicAction) const;
+    virtual bool mayConnectToPublicAction(const WidgetAction* publicAction) const final;
 
     /**
      * Publish this action so that other actions can connect to it
@@ -484,14 +484,14 @@ public: // Settings
      * Get location
      * @return Path relative to the top-level action
      */
-    QString getLocation() const;
+    virtual QString getLocation() const final;
 
     /**
      * Set settings prefix
      * @param load Whether to restore settings after setting the prefix
      * @param settingsPrefix Settings prefix
      */
-    void setSettingsPrefix(const QString& settingsPrefix, const bool& load = true);
+    virtual void setSettingsPrefix(const QString& settingsPrefix, const bool& load = true) final;
 
     /**
      * Set settings prefix in the context of a plugin (the combined settings prefix will be: Plugins/PluginKind/SettingsPrefix)
@@ -499,19 +499,19 @@ public: // Settings
      * @param plugin Pointer to plugin context
      * @param settingsPrefix Settings prefix
      */
-    void setSettingsPrefix(plugin::Plugin* plugin, const QString& settingsPrefix, const bool& load = true);
+    virtual void setSettingsPrefix(plugin::Plugin* plugin, const QString& settingsPrefix, const bool& load = true) final;
 
     /**
      * Get settings prefix
      * @return Settings prefix
      */
-    QString getSettingsPrefix() const;
+    virtual QString getSettingsPrefix() const;
 
     /** Load from settings (if the settings prefix is set) */
-    void loadFromSettings();
+    virtual void loadFromSettings() final;
 
     /** Save to settings (if the settings prefix is set) */
-    void saveToSettings();
+    virtual void saveToSettings() final;
 
     /**
      * Find child widget action of which the GUI name contains the search string
@@ -519,7 +519,7 @@ public: // Settings
      * @param recursive Whether to search recursively
      * @return Found vector of pointers to widget action(s)
      */
-    QVector<WidgetAction*> findChildren(const QString& searchString, bool recursive = true) const;
+    virtual QVector<WidgetAction*> findChildren(const QString& searchString, bool recursive = true) const final;
     
 public: // Popups
 
@@ -527,13 +527,13 @@ public: // Popups
      * Get size hint of popups (in case of collapsed actions)
      * @return Popup size hint
      */
-    QSize getPopupSizeHint() const;
+    virtual QSize getPopupSizeHint() const final;
 
     /**
      * Set size hint of popups (in case of collapsed actions)
      * @param popupSizeHint Popup size hint
      */
-    void setPopupSizeHint(const QSize& popupSizeHint);
+    virtual void setPopupSizeHint(const QSize& popupSizeHint) final;
 
 public: // Configuration flags
 
@@ -603,14 +603,23 @@ public: // State caching
      * Cache the state of a widget action under \p name in the action itself (for global presets use the presets action)
      * @param name Name to use for the cached widget action state
      */
-    void cacheState(const QString& name = "cache");
+    virtual void cacheState(const QString& name = "cache") final;
 
     /**
      * Restore the state of under \p name
      * @param name Name of the cached widget action state to restore
      * @param remove Whether to remove the cache
      */
-    void restoreState(const QString& name = "cache", bool remove = true);
+    virtual void restoreState(const QString& name = "cache", bool remove = true) final;
+
+public: // Studio mode
+    
+    /**
+     * Set studio mode to \p studioMode
+     * @param studioMode Boolean determining whether studio mode is on or off
+     * @param recursive Boolean determining whether to also apply the studio mode to child actions recursively
+     */
+    virtual void setStudioMode(bool studioMode, bool recursive = true) final;
 
 signals:
 

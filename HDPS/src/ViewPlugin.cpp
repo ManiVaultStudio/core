@@ -177,11 +177,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
         _mayFloatAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Float"));
         _mayMoveAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Move"));
     });
-
-    if (projects().getCurrentProject()->getStudioModeAction().isChecked()) {
-        cacheConnectionPermissions(true);
-        setConnectionPermissionsToAll(true);
-    }
 }
 
 void ViewPlugin::init()

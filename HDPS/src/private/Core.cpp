@@ -48,7 +48,8 @@ Core::~Core()
 
 void Core::init()
 {
-    CoreInterface::init();
+    if (isInitialized())
+        return;
 
     _actionsManager.reset(new ActionsManager());
     _pluginManager.reset(new PluginManager());
@@ -67,6 +68,8 @@ void Core::init()
     _workspaceManager->initialize();
     _projectManager->initialize();
     _settingsManager->initialize();
+
+    CoreInterface::init();
 }
 
 void Core::reset()

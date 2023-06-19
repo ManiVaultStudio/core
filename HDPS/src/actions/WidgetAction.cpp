@@ -53,7 +53,12 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     setSerializationName(title);
 
     if (core()->isInitialized())
+    {
         actions().addAction(this);
+
+        if (projects().hasProject())
+            setStudioMode(projects().getCurrentProject()->getStudioModeAction().isChecked(), false);
+    }
 }
 
 WidgetAction::~WidgetAction()
@@ -674,6 +679,9 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
 
     if (getId() != previousId)
         emit idChanged(getId());
+
+    if (core()->isInitialized() && projects().hasProject())
+        setStudioMode(projects().getCurrentProject()->getStudioModeAction().isChecked(), false);
 }
 
 QVariantMap WidgetAction::toVariantMap() const
@@ -858,6 +866,17 @@ bool WidgetAction::isEnabled() const
 bool WidgetAction::mayConnectToPublicAction(const WidgetAction* publicAction) const
 {
     return true;
+}
+
+void WidgetAction::setStudioMode(bool studioMode, bool recursive /*= true*/)
+{
+    if (studioMode) {
+        cacheConnectionPermissions(recursive);
+        setConnectionPermissionsToAll(recursive);
+    }
+    else {
+        restoreConnectionPermissions(recursive);
+    }
 }
 
 }

@@ -139,7 +139,16 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
         if (_project.isNull())
             return;
 
-        saveProject(_project->getFilePath());
+        if (_project->getStudioModeAction().isChecked()) {
+            _project->setStudioMode(false);
+            {
+                saveProject(_project->getFilePath());
+            }
+            _project->setStudioMode(true);
+        }
+        else {
+            saveProject(_project->getFilePath());
+        }
     });
 
     connect(&_saveProjectAsAction, &QAction::triggered, [this]() -> void {

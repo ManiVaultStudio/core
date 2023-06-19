@@ -68,7 +68,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     if (getAction()->isConnectionPermissionFlagSet(WidgetAction::ConnectionPermissionFlag::ForceNone))
                         break;
 
-                    if (!getAction()->mayPublish(WidgetAction::Gui) && getAction()->mayConnect(WidgetAction::Gui) && getAction()->mayDisconnect(WidgetAction::Gui))
+                    if (!getAction()->mayPublish(WidgetAction::Gui) && !getAction()->mayConnect(WidgetAction::Gui) && !getAction()->mayDisconnect(WidgetAction::Gui))
                         break;
                     
                     auto contextMenu = getAction()->getContextMenu(this);

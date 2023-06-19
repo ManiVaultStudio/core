@@ -170,21 +170,7 @@ void Project::initialize()
 
     _studioModeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("pencil-ruler"));
 
-    connect(&_studioModeAction, &ToggleAction::toggled, this, [](bool toggled) -> void {
-        auto viewPlugins = plugins().getPluginsByType(plugin::Type::VIEW);
-
-        if (toggled) {
-            for (auto viewPlugin : viewPlugins)
-                viewPlugin->cacheConnectionPermissions(true);
-
-            for (auto viewPlugin : viewPlugins)
-                viewPlugin->setConnectionPermissionsToAll(true);
-        }
-        else {
-            for (auto viewPlugin : viewPlugins)
-                viewPlugin->restoreConnectionPermissions(true);
-        }
-    });
+    connect(&_studioModeAction, &ToggleAction::toggled, this, &Project::setStudioMode);
 }
 
 util::Version Project::getVersion() const
@@ -204,6 +190,23 @@ void Project::updateContributors()
 
     if (!currentUserName.isEmpty() && !_contributorsAction.getStrings().contains(currentUserName))
         _contributorsAction.addString(currentUserName);
+}
+
+void Project::setStudioMode(bool studioMode)
+{
+    auto viewPlugins = plugins().getPluginsByType(plugin::Type::VIEW);
+
+    if (studioMode) {
+        for (auto viewPlugin : viewPlugins)
+            viewPlugin->cacheConnectionPermissions(true);
+
+        for (auto viewPlugin : viewPlugins)
+            viewPlugin->setConnectionPermissionsToAll(true);
+    }
+    else {
+        for (auto viewPlugin : viewPlugins)
+            viewPlugin->restoreConnectionPermissions(true);
+    }
 }
 
 Project::CompressionAction::CompressionAction(QObject* parent /*= nullptr*/) :

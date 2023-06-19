@@ -101,6 +101,12 @@ public: // Miscellaneous
     /** Update the contributors (adds current user if not already added) */
     void updateContributors();
 
+    /**
+     * Set studio mode to \p studioMode
+     * @param studioMode Studio mode
+     */
+    void setStudioMode(bool studioMode);
+
 public: // Serialization
 
     /**
