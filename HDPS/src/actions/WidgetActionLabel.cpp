@@ -65,7 +65,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     if (!isEnabled())
                         break;
 
-                    if (!getAction()->isConnectionPermissionFlagSet(WidgetAction::ConnectionPermissionFlag::ForceNone))
+                    if (getAction()->isConnectionPermissionFlagSet(WidgetAction::ConnectionPermissionFlag::ForceNone))
                         break;
 
                     if (!getAction()->mayPublish(WidgetAction::Gui) && getAction()->mayConnect(WidgetAction::Gui) && getAction()->mayDisconnect(WidgetAction::Gui))

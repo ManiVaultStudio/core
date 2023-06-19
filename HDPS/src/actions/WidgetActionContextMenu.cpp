@@ -61,7 +61,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
     addAction(&_editAction);
 
-    _connectAction.setVisible(allPrivate && _actions.count() == 1);
+    _connectAction.setVisible(false);
     _disconnectAllAction.setVisible(allPublic);
     _editAction.setVisible(allPublic && _actions.count() == 1);
     _removeAction.setVisible(allPublic && !_actions.isEmpty());
