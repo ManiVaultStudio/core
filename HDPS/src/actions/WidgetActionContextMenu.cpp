@@ -182,8 +182,6 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         if (privateAction->isConnected() && privateAction->mayDisconnect(WidgetAction::Gui))
             disconnectablePrivateActions << privateAction;
     
-    //qDebug() << disconnectablePrivateActions.isEmpty() << disconnectablePrivateActions;
-
     _disconnectAction.setEnabled(!disconnectablePrivateActions.isEmpty());
 
     if (privateActions.isEmpty())

@@ -420,17 +420,17 @@ bool WidgetAction::mayConnect(ConnectionContextFlag connectionContextFlags) cons
 
     switch (connectionContextFlags)
     {
-    case WidgetAction::Api:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaApi);
+        case WidgetAction::Api:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaApi);
 
-    case WidgetAction::Gui:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaGui);
+        case WidgetAction::Gui:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaGui);
 
-    case WidgetAction::ApiAndGui:
-        break;
+        case WidgetAction::ApiAndGui:
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return false;
@@ -443,17 +443,17 @@ bool WidgetAction::mayDisconnect(ConnectionContextFlag connectionContextFlags) c
 
     switch (connectionContextFlags)
     {
-    case hdps::gui::WidgetAction::Api:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi);
+        case hdps::gui::WidgetAction::Api:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi);
 
-    case hdps::gui::WidgetAction::Gui:
-        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaGui);
+        case hdps::gui::WidgetAction::Gui:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaGui);
 
-    case hdps::gui::WidgetAction::ApiAndGui:
-        break;
+        case hdps::gui::WidgetAction::ApiAndGui:
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return false;
@@ -532,8 +532,8 @@ void WidgetAction::startDrag()
     if (!mayConnect(WidgetAction::Gui))
         return;
 
-    auto drag = new QDrag(this);
-    auto mimeData = new WidgetActionMimeData(this);
+    auto drag       = new QDrag(this);
+    auto mimeData   = new WidgetActionMimeData(this);
 
     drag->setMimeData(mimeData);
     drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(QSize(12, 12)));
