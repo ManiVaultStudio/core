@@ -37,6 +37,7 @@ void WidgetActionCollapsedWidget::setAction(WidgetAction* action)
     _toolButton.addAction(getAction());
 
     const auto updateToolButton = [this]() {
+        _toolButton.setEnabled(getAction()->isEnabled());
         _toolButton.setIcon(getAction()->icon());
         _toolButton.setToolTip(getAction()->toolTip());
         _toolButton.setVisible(getAction()->isVisible());
