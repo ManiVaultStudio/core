@@ -79,9 +79,9 @@ void OptionAction::setOptions(const QStringList& options)
     }
     else {
         _defaultModel.setStringList(options);
-
-        updateCurrentIndex();
     }
+
+    _currentIndex = getOptions().contains(oldCurrentText) ? getOptions().indexOf(oldCurrentText) : -1;
 
     emit modelChanged();
 
@@ -130,7 +130,7 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
     };
 
     connect(this, &OptionAction::currentTextChanged, this, currentTextChanged);
-    
+
     connect(publicOptionAction, &OptionAction::currentTextChanged, this, [this, publicOptionAction, currentTextChanged](const QString& currentText) -> void {
         disconnect(this, &OptionAction::currentTextChanged, this, nullptr);
         {
@@ -141,7 +141,8 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
 
     connect(this, &OptionAction::modelChanged, this, updatePublicOptions);
 
-    setCurrentText(publicOptionAction->getCurrentText());
+    if (hasOption(publicOptionAction->getCurrentText()))
+        setCurrentText(publicOptionAction->getCurrentText());
 
     WidgetAction::connectToPublicAction(publicAction, recursive);
 }
@@ -161,6 +162,16 @@ void OptionAction::disconnectFromPublicAction(bool recursive)
     disconnect(this, &OptionAction::currentTextChanged, this, nullptr);
     disconnect(this, &OptionAction::modelChanged, this, nullptr);
     disconnect(publicOptionAction, &OptionAction::currentTextChanged, this, nullptr);
+
+    auto publicOptions = publicOptionAction->getOptions();
+
+    for (auto option : getOptions())
+        publicOptions.removeAll(option);
+
+    publicOptions.removeDuplicates();
+    publicOptions.sort();
+
+    publicOptionAction->setOptions(publicOptions);
 
     WidgetAction::disconnectFromPublicAction(recursive);
 }
