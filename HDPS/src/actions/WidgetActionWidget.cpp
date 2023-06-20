@@ -12,6 +12,7 @@ WidgetActionWidget::WidgetActionWidget(QWidget* parent, WidgetAction* action, co
     _widgetFlags(widgetFlags)
 {
     setAction(action);
+    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 }
 
 QSize WidgetActionWidget::sizeHint() const

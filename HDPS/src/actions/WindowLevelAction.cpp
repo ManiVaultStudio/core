@@ -15,6 +15,7 @@ WindowLevelAction::WindowLevelAction(QObject* parent, const QString& title) :
     _levelAction(this, "Level", 0.0f, 1.0f, 0.5f, 1)
 {
     setIcon(Application::getIconFont("FontAwesome").getIcon("adjust"));
+    setLabelSizingType(LabelSizingType::Auto);
 
     addAction(&_windowAction);
     addAction(&_levelAction);
