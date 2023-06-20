@@ -211,8 +211,8 @@ void Project::setStudioMode(bool studioMode)
 
 Project::CompressionAction::CompressionAction(QObject* parent /*= nullptr*/) :
     WidgetAction(parent, "Compression"),
-    _enabledAction(this, "Compression", DEFAULT_ENABLE_COMPRESSION, DEFAULT_ENABLE_COMPRESSION),
-    _levelAction(this, "Compression level", 1, 9, DEFAULT_COMPRESSION_LEVEL, DEFAULT_COMPRESSION_LEVEL)
+    _enabledAction(this, "Compression", DEFAULT_ENABLE_COMPRESSION),
+    _levelAction(this, "Compression level", 1, 9, DEFAULT_COMPRESSION_LEVEL)
 {
     _levelAction.setPrefix("Level: ");
 

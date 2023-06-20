@@ -128,14 +128,7 @@ public:
      * @param string String
      * @param defaultString Default string
      */
-    Q_INVOKABLE StringAction(QObject* parent, const QString& title, const QString& string = "", const QString& defaultString = "");
-
-    /**
-     * Initialize the string action
-     * @param string String
-     * @param defaultString Default string
-     */
-    void initialize(const QString& string = "", const QString& defaultString = "");
+    Q_INVOKABLE explicit StringAction(QObject* parent, const QString& title, const QString& string = "");
 
     /** Gets the current string */
     QString getString() const;
@@ -145,15 +138,6 @@ public:
      * @param string Current string
      */
     void setString(const QString& string);
-
-    /** Gets the default string */
-    QString getDefaultString() const;
-
-    /**
-     * Sets the default string
-     * @param defaultString Default string
-     */
-    void setDefaultString(const QString& defaultString);
 
     /** Get placeholder text */
     QString getPlaceholderString() const;
@@ -224,21 +208,6 @@ public:
      */
     void setTextElideMode(const Qt::TextElideMode& textElideMode);
 
-public: // Settings
-
-    /**
-     * Determines whether the action can be reset to its default
-     * @param recursive Check recursively
-     * @return Whether the action can be reset to its default
-     */
-    bool isResettable() override final;
-
-    /**
-     * Reset to factory default
-     * @param recursive Reset to factory default recursively
-     */
-    void reset() override final;
-
 protected: // Linking
 
     /**
@@ -277,12 +246,6 @@ signals:
     void stringChanged(const QString& string);
 
     /**
-     * Signals that the default string changed to \p defaultString
-     * @param defaultString Default string that changed
-     */
-    void defaultStringChanged(const QString& defaultString);
-
-    /**
      * Signals that the placeholder string changed to \p placeholderString
      * @param placeholderString Placeholder string that changed
      */
@@ -302,7 +265,6 @@ signals:
     
 protected:
     QString             _string;                /** Current string */
-    QString             _defaultString;         /** Default string */
     QString             _placeholderString;     /** Place holder string */
     QAction             _leadingAction;         /** Action at the leading position */
     QAction             _trailingAction;        /** Action at the trailing position */

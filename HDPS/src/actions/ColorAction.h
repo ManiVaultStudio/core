@@ -96,16 +96,8 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      * @param color Initial color
-     * @param defaultColor Default color
      */
-    Q_INVOKABLE ColorAction(QObject* parent, const QString& title, const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
-
-    /**
-     * Initialize the color action
-     * @param color Initial color
-     * @param defaultColor Default color
-     */
-    void initialize(const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
+    Q_INVOKABLE ColorAction(QObject* parent, const QString& title, const QColor& color = DEFAULT_COLOR);
 
     /** Gets the current color */
     QColor getColor() const;
@@ -115,12 +107,6 @@ public:
      * @param color Current color
      */
     void setColor(const QColor& color);
-
-    /** Gets the default color */
-    QColor getDefaultColor() const;
-
-    /** Sets the default color */
-    void setDefaultColor(const QColor& defaultColor);
 
 protected: // Linking
 
@@ -159,15 +145,8 @@ signals:
      */
     void colorChanged(const QColor& color);
 
-    /**
-     * Signals that the default color changed
-     * @param defaultColor Default color that changed
-     */
-    void defaultColorChanged(const QColor& defaultColor);
-
 protected:
-    QColor  _color;             /** Current color */
-    QColor  _defaultColor;      /** Default color */
+    QColor  _color;     /** Current color */
 
     /** Default default color */
     static const QColor DEFAULT_COLOR;

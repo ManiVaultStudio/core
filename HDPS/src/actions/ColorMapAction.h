@@ -123,15 +123,6 @@ public: // Option action wrappers
      */
     void setColorMap(const QString& colorMap);
 
-    /** Gets the default color map name */
-    QString getDefaultColorMap() const;
-
-    /**
-     * Sets the default color map name
-     * @param defaultColorMap Name of the default color map
-     */
-    void setDefaultColorMap(const QString& defaultColorMap);
-
 protected: // Linking
 
     /**

@@ -14,33 +14,30 @@ namespace hdps::gui {
     constexpr int   DecimalAction::INIT_DECIMALS;
 #endif
 
-DecimalAction::DecimalAction(QObject * parent, const QString& title, const float& minimum /*= INIT_MIN*/, const float& maximum /*= INIT_MAX*/, const float& value /*= INIT_VALUE*/, const float& defaultValue /*= INIT_DEFAULT_VALUE*/, const std::uint32_t& numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/) :
-    NumericalAction<float>(parent, title, minimum, maximum, value, defaultValue, numberOfDecimals),
+DecimalAction::DecimalAction(QObject * parent, const QString& title, float minimum /*= INIT_MIN*/, float maximum /*= INIT_MAX*/, float value /*= INIT_VALUE*/, std::uint32_t numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/) :
+    NumericalAction<float>(parent, title, minimum, maximum, value, numberOfDecimals),
     _singleStep(0.1f)
 {
     _valueChanged               = [this]() -> void { emit valueChanged(_value); };
-    _defaultValueChanged        = [this]() -> void { emit defaultValueChanged(_defaultValue); };
     _minimumChanged             = [this]() -> void { emit minimumChanged(_minimum); };
     _maximumChanged             = [this]() -> void { emit maximumChanged(_maximum); };
     _prefixChanged              = [this]() -> void { emit prefixChanged(_prefix); };
     _suffixChanged              = [this]() -> void { emit suffixChanged(_suffix); };
     _numberOfDecimalsChanged    = [this]() -> void { emit numberOfDecimalsChanged(_numberOfDecimals); };
 
-    initialize(minimum, maximum, value, defaultValue, numberOfDecimals);
+    initialize(minimum, maximum, value, numberOfDecimals);
 }
 
-void DecimalAction::initialize(const float& minimum, const float& maximum, const float& value, const float& defaultValue, const std::uint32_t& numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/)
+void DecimalAction::initialize(float minimum, float maximum, float value, std::uint32_t numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/)
 {
     _minimum            = std::min(minimum, _maximum);
     _maximum            = std::max(maximum, _minimum);
     _value              = std::max(_minimum, std::min(value, _maximum));
-    _defaultValue       = std::max(_minimum, std::min(defaultValue, _maximum));
     _numberOfDecimals   = numberOfDecimals;
 
     _minimumChanged();
     _maximumChanged();
     _valueChanged();
-    _defaultValueChanged();
 
     if (_numberOfDecimalsChanged)
         _numberOfDecimalsChanged();
@@ -51,7 +48,7 @@ float DecimalAction::getSingleStep() const
     return _singleStep;
 }
 
-void DecimalAction::setSingleStep(const float& singleStep)
+void DecimalAction::setSingleStep(float singleStep)
 {
     if (singleStep == _singleStep)
         return;
@@ -70,11 +67,11 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction, bool recur
     if (publicDecimalAction == nullptr)
         return;
 
-    connect(this, &DecimalAction::valueChanged, publicDecimalAction, [publicDecimalAction](const float& value) -> void {
+    connect(this, &DecimalAction::valueChanged, publicDecimalAction, [publicDecimalAction](float value) -> void {
         publicDecimalAction->setValue(value);
     });
 
-    connect(publicDecimalAction, &DecimalAction::valueChanged, this, [this](const float& value) -> void {
+    connect(publicDecimalAction, &DecimalAction::valueChanged, this, [this](float value) -> void {
         setValue(value);
     });
 
@@ -130,7 +127,7 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
         decimalAction->setValue(value);
     });
 
-    const auto valueString = [](const double& value, const std::uint32_t& decimals) -> QString {
+    const auto valueString = [](double value, std::uint32_t decimals) -> QString {
         return QString::number(value, 'f', decimals);
     };
 
@@ -229,7 +226,7 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
         onUpdateAction();
     });
 
-    const auto valueString = [](const double& value, const std::uint32_t& decimals) -> QString {
+    const auto valueString = [](double value, std::uint32_t decimals) -> QString {
         return QString::number(value, 'f', decimals);
     };
 
@@ -249,7 +246,7 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
         setToolTips();
     };
 
-    connect(decimalAction, &DecimalAction::valueChanged, this, [this, decimalAction, onUpdateValue](const double& value) {
+    connect(decimalAction, &DecimalAction::valueChanged, this, [this, decimalAction, onUpdateValue](float value) {
         onUpdateValue();
     });
 

@@ -31,8 +31,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _filterNameAction(this, "Name"),
     _filterColumnAction(this, "Column"),
     _filterGroupAction(this, "Filter"),
-    _filterCaseSensitiveAction(this, "Case-sensitive", false, false),
-    _filterRegularExpressionAction(this, "Regular expression", false, false),
+    _filterCaseSensitiveAction(this, "Case-sensitive", false),
+    _filterRegularExpressionAction(this, "Regular expression", false),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
     _selectAllAction(this, "Select all"),
@@ -124,7 +124,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
         columnNames << columnHeader;
 
-        auto columnVisibilityAction = new ToggleAction(this, columnHeader.isEmpty() ? QString("Column %1").arg(QString::number(columnIndex)) : columnHeader, columnVisible, columnVisible);
+        auto columnVisibilityAction = new ToggleAction(this, columnHeader.isEmpty() ? QString("Column %1").arg(QString::number(columnIndex)) : columnHeader, columnVisible);
 
         connect(columnVisibilityAction, &ToggleAction::toggled, this, [this, columnIndex, updateSelectAllCollumnsReadOnly](bool toggled) -> void {
             _treeView.setColumnHidden(columnIndex, !toggled);

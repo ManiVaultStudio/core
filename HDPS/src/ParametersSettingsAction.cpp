@@ -8,8 +8,8 @@ namespace hdps
 
 ParametersSettingsAction::ParametersSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Parameters"),
-    _askForSharedParameterNameAction(this, "Ask for shared parameter name"),
-    _confirmRemoveSharedParameterAction(this, "Confirm remove shared parameter"),
+    _askForSharedParameterNameAction(this, "Ask for shared parameter name", true),
+    _confirmRemoveSharedParameterAction(this, "Confirm remove shared parameter", true),
     _expertModeAction(this, "View in expert mode", false)
 {
     setShowLabels(false);

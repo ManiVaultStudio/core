@@ -737,8 +737,6 @@ bool AbstractActionsModel::canDropMimeData(const QMimeData* mimeData, Qt::DropAc
         if (action->isPrivate())
             return false;
 
-        qDebug() << actionMimeData->getAction()->getTypeString() << action->getTypeString();
-
         if (actionMimeData->getAction()->getTypeString() != action->getTypeString())
             return false;
     }

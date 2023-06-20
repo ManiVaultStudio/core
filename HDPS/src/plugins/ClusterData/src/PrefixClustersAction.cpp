@@ -9,7 +9,7 @@
 PrefixClustersAction::PrefixClustersAction(ClustersAction& clustersAction) :
     TriggerAction(&clustersAction, "Prefix"),
     _clustersAction(clustersAction),
-    _prefixAction(this, "Name prefix", "id_", "id_"),
+    _prefixAction(this, "Name prefix", "id_"),
     _applyAction(this, "Apply")
 {
     setText("Prefix clusters");
@@ -46,9 +46,6 @@ PrefixClustersAction::PrefixClustersAction(ClustersAction& clustersAction) :
 
         // Prefix the clusters in the model
         _clustersAction.getClustersModel().setClusterPrefix(clusterNamePrefix);
-
-        // Change prefix default string
-        _prefixAction.setDefaultString(clusterNamePrefix);
 
         // Update read only status
         updateApplyActionReadOnly();

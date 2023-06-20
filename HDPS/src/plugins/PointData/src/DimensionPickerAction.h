@@ -91,18 +91,6 @@ public:
      */
     void setCurrentDimensionName(const QString& dimensionName);
 
-    /**
-     * Set the default dimension index
-     * @param defaultDimensionIndex Default dimension index
-     */
-    void setDefaultDimensionIndex(const std::int32_t& defaultDimensionIndex);
-
-    /**
-     * Set the default dimension name
-     * @param defaultDimensionName Default dimension name
-     */
-    void setDefaultDimensionName(const QString& defaultDimensionName);
-
     /** Get search threshold */
     std::uint32_t getSearchThreshold() const;
 

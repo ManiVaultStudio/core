@@ -27,8 +27,8 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title, const Colo
     _mirrorAction{ ToggleAction(this, "Mirror horizontally"), ToggleAction(this, "Mirror vertically") },
     _mirrorGroupAction(this, "Mirror"),
     _discretizeAction(this, "Discrete"),
-    _numberOfDiscreteStepsAction(this, "Number of steps", 2, 10, 5, 5),
-    _discretizeAlphaAction(this, "Discretize alpha", false, false),
+    _numberOfDiscreteStepsAction(this, "Number of steps", 2, 10, 5),
+    _discretizeAlphaAction(this, "Discretize alpha", false),
     _settings1DAction(this, "Settings 1D"),
     _settings2DAction(this, "Settings 2D"),
     _customColorMapAction(this, "Custom color map"),
@@ -340,18 +340,6 @@ void ColorMapAction::setColorMap(const QString& colorMap)
     Q_ASSERT(!colorMap.isEmpty());
 
     _currentColorMapAction.setCurrentText(colorMap);
-}
-
-QString ColorMapAction::getDefaultColorMap() const
-{
-    return _currentColorMapAction.getDefaultText();
-}
-
-void ColorMapAction::setDefaultColorMap(const QString& defaultColorMap)
-{
-    Q_ASSERT(!defaultColorMap.isEmpty());
-
-    _currentColorMapAction.setDefaultText(defaultColorMap);
 }
 
 void ColorMapAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)

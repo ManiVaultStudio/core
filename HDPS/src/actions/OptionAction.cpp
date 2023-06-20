@@ -13,31 +13,28 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/) :
+OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/) :
     WidgetAction(parent, title),
     _defaultModel(),
     _customModel(nullptr),
     _currentIndex(-1),
-    _defaultIndex(0),
     _placeholderString()
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
-    initialize(options, currentOption, defaultOption);
+    initialize(options, currentOption);
 }
 
-void OptionAction::initialize(const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/)
+void OptionAction::initialize(const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/)
 {
     setOptions(options);
     setCurrentText(currentOption);
-    setDefaultText(defaultOption);
 }
 
 void OptionAction::initialize(QAbstractItemModel& customModel, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/)
 {
     setCustomModel(&customModel);
     setCurrentText(currentOption);
-    setDefaultText(defaultOption);
 }
 
 QStringList OptionAction::getOptions() const
@@ -243,40 +240,6 @@ void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
 
     emit currentIndexChanged(_currentIndex);
     emit currentTextChanged(getCurrentText());
-}
-
-std::int32_t OptionAction::getDefaultIndex() const
-{
-    return _defaultIndex;
-}
-
-void OptionAction::setDefaultIndex(const std::int32_t& defaultIndex)
-{
-    if (defaultIndex == _defaultIndex)
-        return;
-
-    _defaultIndex = defaultIndex;
-
-    emit defaultIndexChanged(_defaultIndex);
-}
-
-QString OptionAction::getDefaultText() const
-{
-    if (getOptions().isEmpty())
-        return "";
-
-    if (_defaultIndex < 0)
-        return "";
-
-    if (_defaultIndex >= getOptions().count())
-        return "";
-
-    return getOptions()[_defaultIndex];
-}
-
-void OptionAction::setDefaultText(const QString& defaultText)
-{
-    _defaultIndex = getOptions().indexOf(defaultText);
 }
 
 QString OptionAction::getPlaceholderString() const

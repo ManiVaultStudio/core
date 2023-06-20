@@ -376,6 +376,8 @@ void GroupsAction::Widget::updateFiltering()
                 foundActions << action;
     }
 
+    _filteredActionsAction.clear();
+
     for (auto foundAction : foundActions)
         _filteredActionsAction.addAction(foundAction);
 

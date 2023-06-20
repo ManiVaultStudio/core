@@ -279,6 +279,13 @@ QVariantMap GroupAction::toVariantMap() const
     return variantMap;
 }
 
+void GroupAction::clear()
+{
+    _actions.clear();
+
+    emit actionsChanged(_actions);
+}
+
 GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, groupAction, widgetFlags),
     _groupAction(groupAction)

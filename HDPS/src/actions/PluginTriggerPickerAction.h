@@ -122,9 +122,6 @@ public:
      */
     OptionAction& getSelectTriggerAction();
 
-    /** Resets to default (no plugin trigger selected) */
-    void reset();
-
 signals:
 
     /**

@@ -13,7 +13,7 @@ GroupDataDialog::GroupDataDialog(QWidget* parent, const hdps::Datasets& datasets
     QDialog(parent),
     _datasets(datasets),
     _groupNameAction(this, "Group name"),
-    _showDialogAction(this, "Show dialog next time", true, true)
+    _showDialogAction(this, "Show dialog next time", true)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);

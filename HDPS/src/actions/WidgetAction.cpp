@@ -704,9 +704,13 @@ QVariantMap WidgetAction::toVariantMap() const
     return variantMap;
 }
 
-bool WidgetAction::isResettable()
+bool WidgetAction::isResettable() const
 {
     return false;
+}
+
+void WidgetAction::reset()
+{
 }
 
 std::int32_t WidgetAction::getConfiguration() const

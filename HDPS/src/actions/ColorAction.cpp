@@ -11,20 +11,13 @@ namespace hdps::gui {
 
 const QColor ColorAction::DEFAULT_COLOR = Qt::gray;
 
-ColorAction::ColorAction(QObject* parent, const QString& title, const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/) :
+ColorAction::ColorAction(QObject* parent, const QString& title, const QColor& color /*= DEFAULT_COLOR*/) :
     WidgetAction(parent, title),
-    _color(),
-    _defaultColor()
+    _color()
 {
     setText(title);
-    initialize(color, defaultColor);
     setDefaultWidgetFlags(WidgetFlag::Basic);
-}
-
-void ColorAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/)
-{
     setColor(color);
-    setDefaultColor(defaultColor);
 }
 
 QColor ColorAction::getColor() const
@@ -40,21 +33,6 @@ void ColorAction::setColor(const QColor& color)
     _color = color;
 
     emit colorChanged(_color);
-}
-
-QColor ColorAction::getDefaultColor() const
-{
-    return _defaultColor;
-}
-
-void ColorAction::setDefaultColor(const QColor& defaultColor)
-{
-    if (defaultColor == _defaultColor)
-        return;
-
-    _defaultColor = defaultColor;
-
-    emit defaultColorChanged(_defaultColor);
 }
 
 void ColorAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
@@ -112,7 +90,7 @@ QVariantMap ColorAction::toVariantMap() const
 ColorAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ColorAction* colorAction) :
     WidgetActionWidget(parent, colorAction),
     _layout(),
-    _colorPickerAction(this, "Color picker", colorAction->getColor(), colorAction->getColor()),
+    _colorPickerAction(this, "Color picker", colorAction->getColor()),
     _toolButton(this, _colorPickerAction)
 {
     setAcceptDrops(true);

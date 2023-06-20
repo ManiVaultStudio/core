@@ -50,16 +50,8 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      * @param directory Directory
-     * @param defaultDirectory Default directory
      */
-    DirectoryPickerAction(QObject* parent, const QString& title, const QString& directory = QString(), const QString& defaultDirectory = QString());
-
-    /**
-     * Initialize the directory picker action
-     * @param directory Directory
-     * @param defaultDirectory Default directory
-     */
-    void initialize(const QString& directory = QString(), const QString& defaultDirectory = QString());
+    explicit DirectoryPickerAction(QObject* parent, const QString& title, const QString& directory = QString());
 
     /**
      * Get the current directory
@@ -72,18 +64,6 @@ public:
      * @param directory Current directory
      */
     void setDirectory(const QString& directory);
-
-    /**
-     * Get the default directory
-     * @return Default directory
-     */
-    QString getDefaultDirectory() const;
-
-    /**
-     * Set the default directory
-     * @param defaultDirectory Default directory
-     */
-    void setDefaultDirectory(const QString& defaultDirectory);
 
     /**
      * Get placeholder text
@@ -130,12 +110,6 @@ signals:
      * @param directory Directory that changed
      */
     void directoryChanged(const QString& directory);
-
-    /**
-     * Signals that the default directory changed
-     * @param defaultString Default directory that changed
-     */
-    void defaultDirectoryChanged(const QString& defaultDirectory);
 
     /**
      * Signals that the placeholder string changed

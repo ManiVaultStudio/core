@@ -64,7 +64,6 @@ void DimensionPickerAction::setPointsDataset(const Dataset<Points>& points)
     // And set current dimensions
     if (getNumberOfDimensions() >= 1) {
         setCurrentDimensionIndex(0);
-        setDefaultDimensionName(getCurrentDimensionName());
     }
 }
 
@@ -96,16 +95,6 @@ void DimensionPickerAction::setCurrentDimensionIndex(const std::int32_t& dimensi
 void DimensionPickerAction::setCurrentDimensionName(const QString& dimensionName)
 {
     _currentDimensionAction.setCurrentText(dimensionName);
-}
-
-void DimensionPickerAction::setDefaultDimensionIndex(const std::int32_t& defaultDimensionIndex)
-{
-    _currentDimensionAction.setDefaultIndex(defaultDimensionIndex);
-}
-
-void DimensionPickerAction::setDefaultDimensionName(const QString& defaultDimensionName)
-{
-    _currentDimensionAction.setDefaultText(defaultDimensionName);
 }
 
 std::uint32_t DimensionPickerAction::getSearchThreshold() const

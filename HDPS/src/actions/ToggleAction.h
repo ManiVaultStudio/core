@@ -100,25 +100,8 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      * @param toggled Toggled
-     * @param defaultToggled Default toggled
      */
-    Q_INVOKABLE ToggleAction(QObject* parent, const QString& title = "", const bool& toggled = false, const bool& defaultToggled = false);
-
-    /**
-     * Initialize the toggle action
-     * @param toggled Toggled
-     * @param defaultToggled Default toggled
-     */
-    void initialize(const bool& toggled = false, const bool& defaultToggled = false);
-
-    /** Gets default toggled */
-    bool getDefaultToggled() const;
-
-    /**
-     * Sets default toggled value
-     * @param defaultToggled Default toggled
-     */
-    void setDefaultToggled(const bool& defaultToggled);
+    Q_INVOKABLE ToggleAction(QObject* parent, const QString& title = "", bool toggled = false);
 
     /**
      * Overrides the base class setChecked()
@@ -147,9 +130,9 @@ public: // Serialization
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-        * Save widget action to variant map
-        * @return Variant map representation of the widget action
-        */
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
     QVariantMap toVariantMap() const override;
 
 protected: // Linking
@@ -170,20 +153,13 @@ protected: // Linking
 signals:
 
     /**
-     * Signals that the default toggled changed
-     * @param defaultToggled Default toggled that changed
-     */
-    void defaultToggledChanged(const bool& defaultToggled);
-
-    /**
      * Signals that the indeterminate value changed
      * @param indeterminate Whether the toggle action is in an indeterminate state
      */
     void indeterminateChanged(bool indeterminate);
 
 protected:
-    bool    _defaultToggled;        /** Whether toggled by default */
-    bool    _indeterminate;         /** Whether the toggle action is in an indeterminate state */
+    bool    _indeterminate;     /** Whether the toggle action is in an indeterminate state */
 
     friend class AbstractActionsManager;
 };

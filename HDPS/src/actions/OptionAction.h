@@ -116,9 +116,8 @@ public:
      * @param title Title of the action
      * @param options Options
      * @param currentOption Current option
-     * @param defaultOption Default option
      */
-    Q_INVOKABLE OptionAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QString& currentOption = "", const QString& defaultOption = "");
+    Q_INVOKABLE explicit OptionAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QString& currentOption = "");
 
     /**
      * Initialize the option action
@@ -126,7 +125,7 @@ public:
      * @param currentOption Current option
      * @param defaultOption Default option
      */
-    void initialize(const QStringList& options = QStringList(), const QString& currentOption = "", const QString& defaultOption = "");
+    void initialize(const QStringList& options = QStringList(), const QString& currentOption = "");
 
     /**
      * Initialize the option action with a custom model
@@ -172,15 +171,6 @@ public:
      */
     void setCurrentIndex(const std::int32_t& currentIndex);
 
-    /** Get the default option index */
-    std::int32_t getDefaultIndex() const;
-
-    /**
-     * Set the default option index
-     * @param defaultIndex Default option index
-     */
-    void setDefaultIndex(const std::int32_t& defaultIndex);
-
     /** Get the current option index */
     QString getCurrentText() const;
 
@@ -189,15 +179,6 @@ public:
      * @param currentText Current option text
      */
     void setCurrentText(const QString& currentText);
-
-    /** Get the default option text */
-    QString getDefaultText() const;
-
-    /**
-     * Set the default option text
-     * @param defaultText Default option text
-     */
-    void setDefaultText(const QString& defaultText);
 
     /** Get placeholder text (shown when no option selected) */
     QString getPlaceholderString() const;
@@ -265,12 +246,6 @@ signals:
     void currentIndexChanged(const std::int32_t& currentIndex);
 
     /**
-     * Signals that the default index changed
-     * @param defaultIndex Default index
-     */
-    void defaultIndexChanged(const std::int32_t& defaultIndex);
-
-    /**
      * Signals that the current text changed
      * @param currentText Current text
      */
@@ -286,7 +261,6 @@ protected:
     QStringListModel        _defaultModel;          /** Default simple string list model */
     QAbstractItemModel*     _customModel;           /** Custom item model for enriched (combobox) ui */
     std::int32_t            _currentIndex;          /** Currently selected index */
-    std::int32_t            _defaultIndex;          /** Default index */
     QString                 _placeholderString;     /** Place holder string */
 
     friend class AbstractActionsManager;

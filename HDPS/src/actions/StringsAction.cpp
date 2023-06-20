@@ -8,11 +8,10 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-StringsAction::StringsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& strings /*= QStringList()*/, const QStringList& defaultStrings /*= QStringList()*/) :
+StringsAction::StringsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& strings /*= QStringList()*/) :
     WidgetAction(parent, title),
     _category("String"),
     _strings(),
-    _defaultStrings(),
     _toolbarAction(this, "Toolbar"),
     _nameAction(&_toolbarAction, "Name"),
     _addAction(&_toolbarAction, "Add"),
@@ -20,13 +19,7 @@ StringsAction::StringsAction(QObject* parent, const QString& title /*= ""*/, con
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
-    initialize(strings, defaultStrings);
-}
-
-void StringsAction::initialize(const QStringList& strings /*= QStringList()*/, const QStringList& defaultStrings /*= QStringList()*/)
-{
     setStrings(strings);
-    setDefaultStrings(defaultStrings);
 }
 
 QStringList StringsAction::getStrings() const
@@ -44,31 +37,6 @@ void StringsAction::setStrings(const QStringList& strings)
     emit stringsChanged(_strings);
 
     saveToSettings();
-}
-
-QStringList StringsAction::getDefaultStrings() const
-{
-    return _defaultStrings;
-}
-
-void StringsAction::setDefaultStrings(const QStringList& defaultStrings)
-{
-    if (defaultStrings == _defaultStrings)
-        return;
-
-    _defaultStrings = defaultStrings;
-
-    emit defaultStringsChanged(_defaultStrings);
-}
-
-bool StringsAction::isResettable()
-{
-    return _strings != _defaultStrings;
-}
-
-void StringsAction::reset()
-{
-    setStrings(_defaultStrings);
 }
 
 void StringsAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)

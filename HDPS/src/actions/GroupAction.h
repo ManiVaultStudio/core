@@ -162,6 +162,9 @@ public: // Actions management
      */
     virtual void removeAction(WidgetAction* action) final;
 
+    /** Remove all actions */
+    virtual void clear() final;
+
     /**
      * Get actions
      * @return Vector of pointers to actions

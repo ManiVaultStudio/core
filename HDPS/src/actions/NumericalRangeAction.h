@@ -63,8 +63,8 @@ public:
      */
     void initialize(const util::NumericalRange<NumericalType>& limits, const util::NumericalRange<NumericalType>& range)
     {
-        _rangeMinAction.initialize(limits.getMinimum(), limits.getMaximum(), range.getMinimum(), range.getMinimum());
-        _rangeMaxAction.initialize(limits.getMinimum(), limits.getMaximum(), range.getMaximum(), range.getMaximum());
+        _rangeMinAction.initialize(limits.getMinimum(), limits.getMaximum(), range.getMinimum());
+        _rangeMaxAction.initialize(limits.getMinimum(), limits.getMaximum(), range.getMaximum());
     }
 
     /**

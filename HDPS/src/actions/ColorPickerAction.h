@@ -62,15 +62,9 @@ protected:
      * @param title Title of the action
      * @param color Initial color
      */
-    Q_INVOKABLE ColorPickerAction(QObject* parent, const QString& title = "", const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
+    Q_INVOKABLE ColorPickerAction(QObject* parent, const QString& title = "", const QColor& color = DEFAULT_COLOR);
 
 public:
-
-    /**
-     * Initialize the color action
-     * @param color Initial color
-     */
-    void initialize(const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
 
     /** Gets the current color */
     QColor getColor() const;
@@ -80,12 +74,6 @@ public:
      * @param color Current color
      */
     void setColor(const QColor& color);
-
-    /** Gets the default color */
-    QColor getDefaultColor() const;
-
-    /** Sets the default color */
-    void setDefaultColor(const QColor& defaultColor);
 
 protected: // Linking
 
@@ -117,8 +105,7 @@ signals:
     void defaultColorChanged(const QColor& defaultColor);
 
 protected:
-    QColor  _color;             /** Current color */
-    QColor  _defaultColor;      /** Default color */
+    QColor  _color;     /** Current color */
 
     /** Default default color */
     static const QColor DEFAULT_COLOR;

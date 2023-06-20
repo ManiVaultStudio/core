@@ -11,37 +11,15 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/) :
+ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, bool toggled /*= false*/) :
     WidgetAction(parent, title),
-    _defaultToggled(defaultToggled),
     _indeterminate(false)
 {
     setCheckable(true);
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
-    initialize(toggled, defaultToggled);
-}
-
-void ToggleAction::initialize(const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/)
-{
     setChecked(toggled);
-    setDefaultToggled(defaultToggled);
-}
-
-bool ToggleAction::getDefaultToggled() const
-{
-    return _defaultToggled;
-}
-
-void ToggleAction::setDefaultToggled(const bool& defaultToggled)
-{
-    if (defaultToggled == _defaultToggled)
-        return;
-
-    _defaultToggled = defaultToggled;
-
-    emit defaultToggledChanged(_defaultToggled);
 }
 
 void ToggleAction::setChecked(bool checked)

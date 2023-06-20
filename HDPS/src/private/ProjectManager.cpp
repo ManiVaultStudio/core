@@ -47,7 +47,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _importDataMenu(),
     _publishAction(this, "Publish"),
     _pluginManagerAction(this, "Plugin Browser..."),
-    _showStartPageAction(this, "Start Page...", true, true)
+    _showStartPageAction(this, "Start Page...", true)
 {
     _newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     _newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -385,7 +385,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 fileDialogLayout->addWidget(contributorsAction.createLabelWidget(&fileDialog), rowCount + 4, 0);
                 fileDialogLayout->addWidget(contributorsAction.createWidget(&fileDialog), rowCount + 4, 1, 1, 2);
        
-                fileDialogLayout->addWidget(disableReadOnlyAction.createWidget(&fileDialog), rowCount + 4, 1, 1, 2);
+                fileDialogLayout->addWidget(disableReadOnlyAction.createWidget(&fileDialog), rowCount + 5, 1, 1, 2);
 
                 connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())

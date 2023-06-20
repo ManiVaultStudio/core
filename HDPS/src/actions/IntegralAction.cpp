@@ -13,30 +13,27 @@ namespace hdps::gui {
     constexpr std::int32_t IntegralAction::INIT_DEFAULT_VALUE;
 #endif
 
-IntegralAction::IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum /*= INIT_MIN*/, const std::int32_t& maximum /*= INIT_MAX*/, const std::int32_t& value /*= INIT_VALUE*/, const std::int32_t& defaultValue /*= INIT_DEFAULT_VALUE*/) :
-    NumericalAction<std::int32_t>(parent, title, minimum, maximum, value, defaultValue)
+IntegralAction::IntegralAction(QObject * parent, const QString& title, std::int32_t minimum /*= INIT_MIN*/, std::int32_t maximum /*= INIT_MAX*/, std::int32_t value /*= INIT_VALUE*/) :
+    NumericalAction<std::int32_t>(parent, title, minimum, maximum, value)
 {
     _valueChanged           = [this]() -> void { emit valueChanged(_value); };
-    _defaultValueChanged    = [this]() -> void { emit defaultValueChanged(_defaultValue); };
     _minimumChanged         = [this]() -> void { emit minimumChanged(_minimum); };
     _maximumChanged         = [this]() -> void { emit maximumChanged(_maximum); };
     _prefixChanged          = [this]() -> void { emit prefixChanged(_prefix); };
     _suffixChanged          = [this]() -> void { emit suffixChanged(_suffix); };
 
-    initialize(minimum, maximum, value, defaultValue);
+    initialize(minimum, maximum, value);
 }
 
-void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue)
+void IntegralAction::initialize(std::int32_t minimum, std::int32_t maximum, std::int32_t value)
 {
     _minimum        = std::min(minimum, _maximum);
     _maximum        = std::max(maximum, _minimum);
     _value          = std::max(_minimum, std::min(value, _maximum));
-    _defaultValue   = std::max(_minimum, std::min(defaultValue, _maximum));
 
     _minimumChanged();
     _maximumChanged();
     _valueChanged();
-    _defaultValueChanged();
 }
 
 void IntegralAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
@@ -109,7 +106,7 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
         integralAction->setValue(value);
     });
 
-    const auto valueString = [](const std::int32_t& value) -> QString {
+    const auto valueString = [](std::int32_t value) -> QString {
         return QString::number(value);
     };
 
@@ -163,7 +160,7 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
     connect(integralAction, &IntegralAction::prefixChanged, this, onUpdatePrefix);
     connect(integralAction, &IntegralAction::suffixChanged, this, onUpdateSuffix);
 
-    connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](const std::int32_t& value) {
+    connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](std::int32_t value) {
         onUpdateValue();
     });
 
@@ -194,7 +191,7 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
         integralAction->setValue(value());
     });
 
-    const auto valueString = [](const std::int32_t& value) -> QString {
+    const auto valueString = [](std::int32_t value) -> QString {
         return QString::number(value);
     };
 

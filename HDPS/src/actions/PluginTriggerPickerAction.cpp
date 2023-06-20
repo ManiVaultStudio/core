@@ -88,26 +88,17 @@ void PluginTriggerPickerAction::setCurrentPluginTriggerAction(const QString& sha
             return;
         }
     }
-     
-    reset();
 }
 
 void PluginTriggerPickerAction::setCurrentPluginTriggerAction(QPointer<PluginTriggerAction> pluginTriggerAction)
 {
     if (_pluginTriggerActions.contains(pluginTriggerAction))
         _selectTriggerAction.setCurrentIndex(_pluginTriggerActions.indexOf(pluginTriggerAction) + 1);
-    else
-        reset();
 }
 
 OptionAction& PluginTriggerPickerAction::getSelectTriggerAction()
 {
     return _selectTriggerAction;
-}
-
-void PluginTriggerPickerAction::reset()
-{
-    _selectTriggerAction.setCurrentIndex(-1);
 }
 
 PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAction* pluginTriggerPickerAction, const std::int32_t& widgetFlags) :

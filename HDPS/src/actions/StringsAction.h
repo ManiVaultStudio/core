@@ -73,16 +73,8 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      * @param strings Strings
-     * @param defaultStrings Default strings
      */
-    Q_INVOKABLE StringsAction(QObject* parent, const QString& title = "", const QStringList& strings = QStringList(), const QStringList& defaultStrings = QStringList());
-
-    /**
-     * Initialize the strings action
-     * @param strings Strings
-     * @param defaultStrings Default strings
-     */
-    void initialize(const QStringList& strings = QStringList(), const QStringList& defaultStrings = QStringList());
+    Q_INVOKABLE explicit StringsAction(QObject* parent, const QString& title = "", const QStringList& strings = QStringList());
 
     /**
      * Get string category
@@ -109,18 +101,6 @@ public:
     void setStrings(const QStringList& strings);
 
     /**
-     * Get default strings
-     * @return Default strings as string list
-     */
-    QStringList getDefaultStrings() const;
-
-    /**
-     * Set default strings
-     * @param defaultStrings Default strings
-     */
-    void setDefaultStrings(const QStringList& defaultStrings);
-
-    /**
      * Add string
      * @param string String to add
      */
@@ -137,21 +117,6 @@ public:
      * @param strings Strings to remove
      */
     void removeStrings(const QStringList& strings);
-
-public: // Settings
-
-    /**
-     * Determines whether the action can be reset to its default
-     * @param recursive Check recursively
-     * @return Whether the action can be reset to its default
-     */
-    bool isResettable() override final;
-
-    /**
-     * Reset to factory default
-     * @param recursive Reset to factory default recursively
-     */
-    void reset() override final;
 
 protected: // Linking
 
@@ -197,16 +162,9 @@ signals:
      */
     void stringsChanged(const QStringList& strings);
 
-    /**
-     * Signals that the default strings changed
-     * @param defaultStrings Updated default strings
-     */
-    void defaultStringsChanged(const QStringList& defaultString);
-
 protected:
     QString                 _category;          /** Type of string */
     QStringList             _strings;           /** Current strings */
-    QStringList             _defaultStrings;    /** Default strings */
     HorizontalGroupAction   _toolbarAction;     /** Toolbar action */
     StringAction            _nameAction;        /** String name action */
     TriggerAction           _addAction;         /** Add string action */

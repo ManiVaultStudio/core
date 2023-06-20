@@ -21,7 +21,6 @@ class NumericalAction : public WidgetAction
 {
     /** Templated classes with Q_OBJECT macro are not allowed, so use std functions instead */
     using ValueChangedCB                = std::function<void()>;
-    using DefaultValueChangedCB         = std::function<void()>;
     using MinimumChangedCB              = std::function<void()>;
     using MaximumChangedCB              = std::function<void()>;
     using PrefixChangedCB               = std::function<void()>;
@@ -49,12 +48,11 @@ public:
      * @param minimum Minimum value
      * @param maximum Maximum value
      * @param value Value
-     * @param defaultValue Default value
+     * @param numberOfDecimals Number of decimals
      */
-    NumericalAction(QObject * parent, const QString& title, const NumericalType& minimum, const NumericalType& maximum, const NumericalType& value, const NumericalType& defaultValue, const std::uint32_t& numberOfDecimals = INIT_NUMBER_OF_DECIMALS) :
+    NumericalAction(QObject * parent, const QString& title, const NumericalType& minimum, NumericalType maximum, NumericalType value, std::uint32_t numberOfDecimals = INIT_NUMBER_OF_DECIMALS) :
         WidgetAction(parent, title),
         _value(),
-        _defaultValue(),
         _minimum(std::numeric_limits<NumericalType>::lowest()),
         _maximum(std::numeric_limits<NumericalType>::max()),
         _prefix(),
@@ -62,7 +60,6 @@ public:
         _numberOfDecimals(),
         _updateDuringDrag(true),
         _valueChanged(),
-        _defaultValueChanged(),
         _minimumChanged(),
         _maximumChanged(),
         _prefixChanged(),
@@ -83,7 +80,7 @@ public:
      * @param value Current value
      * @param silent Prevent notification of value change
      */
-    virtual void setValue(const NumericalType& value, const bool& silent = false) {
+    virtual void setValue(NumericalType value, bool silent = false) {
         const auto clampedValue = std::max(_minimum, std::min(value, _maximum));
 
         if (clampedValue == _value)
@@ -97,24 +94,6 @@ public:
         _valueChanged();
     }
 
-    /** Gets the default value */
-    virtual NumericalType getDefaultValue() const final {
-        return _defaultValue;
-    }
-
-    /**
-     * Sets the default value
-     * @param defaultValue Default value
-     */
-    virtual void setDefaultValue(const NumericalType& defaultValue) {
-        if (defaultValue == _defaultValue)
-            return;
-
-        _defaultValue = std::max(_minimum, std::min(defaultValue, _maximum));
-
-        _defaultValueChanged();
-    }
-
     /** Gets the minimum value */
     virtual NumericalType getMinimum() const final {
         return _minimum;
@@ -124,7 +103,7 @@ public:
      * Sets the minimum value
      * @param minimum Minimum value
      */
-    virtual void setMinimum(const NumericalType& minimum) final {
+    virtual void setMinimum(NumericalType minimum) final {
         if (minimum == _minimum)
             return;
 
@@ -142,7 +121,7 @@ public:
      * Sets the maximum value
      * @param maximum Maximum value
      */
-    virtual void setMaximum(const NumericalType& maximum) final {
+    virtual void setMaximum(NumericalType maximum) final {
         if (maximum == _maximum)
             return;
 
@@ -163,7 +142,7 @@ public:
      * Sets the value range
      * @param range Range
      */
-    virtual void setRange(const util::NumericalRange<NumericalType>& range) final {
+    virtual void setRange(util::NumericalRange<NumericalType> range) final {
         setMinimum(range.getMinimum());
         setMaximum(range.getMaximum());
     }
@@ -173,7 +152,7 @@ public:
      * @param minimum Minimum value
      * @param maximum Maximum value
      */
-    virtual void setRange(const NumericalType& minimum, const NumericalType& maximum) final {
+    virtual void setRange(NumericalType minimum, NumericalType maximum) final {
         setMinimum(minimum);
         setMaximum(maximum);
     }
@@ -223,7 +202,7 @@ public:
      * Sets the number of decimals
      * @param numberOfDecimals number of decimals
      */
-    virtual void setNumberOfDecimals(const std::uint32_t& numberOfDecimals) final {
+    virtual void setNumberOfDecimals(std::uint32_t numberOfDecimals) final {
         if (numberOfDecimals == _numberOfDecimals)
             return;
 
@@ -241,7 +220,7 @@ public:
      * Sets whether the value should update during interaction
      * @param updateDuringDrag Whether the value should update during interaction
      */
-    virtual void setUpdateDuringDrag(const bool& updateDuringDrag) final {
+    virtual void setUpdateDuringDrag(bool updateDuringDrag) final {
         if (updateDuringDrag == _updateDuringDrag)
             return;
 
@@ -271,7 +250,6 @@ public:
 
 protected: // Numerical and auxiliary data
     NumericalType       _value;                 /** Current value */
-    NumericalType       _defaultValue;          /** Default value */
     NumericalType       _minimum;               /** Minimum value */
     NumericalType       _maximum;               /** Maximum value */
     QString             _prefix;                /** Prefix string */
@@ -281,7 +259,6 @@ protected: // Numerical and auxiliary data
 
 protected: // Callbacks for implementations of the numerical action
     ValueChangedCB              _valueChanged;                  /** Callback which is called when the value changed */
-    DefaultValueChangedCB       _defaultValueChanged;           /** Callback which is called when the default value changed */
     MinimumChangedCB            _minimumChanged;                /** Callback which is called when the minimum changed */
     MaximumChangedCB            _maximumChanged;                /** Callback which is called when the maximum changed */
     PrefixChangedCB             _prefixChanged;                 /** Callback which is called when the prefix changed */

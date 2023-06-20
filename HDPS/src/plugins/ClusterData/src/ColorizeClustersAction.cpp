@@ -7,7 +7,7 @@
 ColorizeClustersAction::ColorizeClustersAction(ClustersAction& clustersAction) :
     TriggerAction(&clustersAction, "Colorize"),
     _clustersAction(clustersAction),
-    _colorByAction(this, "Color by", {"Color map", "Pseudo-random colors"}, "Color map", "Color map"),
+    _colorByAction(this, "Color by", {"Color map", "Pseudo-random colors"}, "Color map"),
     _colorMapAction(this, "Color map"),
     _randomSeedAction(this, "Random color seed"),
     _colorizeAction(this, "Colorize")

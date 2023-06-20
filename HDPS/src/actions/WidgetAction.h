@@ -475,10 +475,10 @@ public: // Settings
      * Determines whether the action can be reset to its default
      * @return Whether the action can be reset to its default
      */
-    virtual bool isResettable();
+    virtual bool isResettable() const final;
 
     /** Reset to default */
-    virtual void reset() {};
+    virtual void reset() final;
 
     /**
      * Get location

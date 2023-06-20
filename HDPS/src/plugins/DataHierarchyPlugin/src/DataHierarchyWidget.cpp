@@ -60,7 +60,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _model(this),
     _filterModel(this),
     _hierarchyWidget(this, "Dataset", _model, &_filterModel),
-    _groupingAction(this, "Selection grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled()),
+    _groupingAction(this, "Selection grouping", Application::core()->isDatasetGroupingEnabled()),
     _resetAction(this, "Reset")
 {
     auto layout = new QVBoxLayout();

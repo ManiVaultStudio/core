@@ -11,8 +11,8 @@ namespace hdps::gui {
 
 WindowLevelAction::WindowLevelAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),
-    _windowAction(this, "Window", 0.0f, 1.0f, 1.0f, 1.0f, 1),
-    _levelAction(this, "Level", 0.0f, 1.0f, 0.5f, 0.5f, 1)
+    _windowAction(this, "Window", 0.0f, 1.0f, 1.0f, 1),
+    _levelAction(this, "Level", 0.0f, 1.0f, 0.5f, 1)
 {
     setIcon(Application::getIconFont("FontAwesome").getIcon("adjust"));
 

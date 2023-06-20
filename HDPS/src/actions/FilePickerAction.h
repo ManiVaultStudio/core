@@ -54,13 +54,6 @@ public:
     Q_INVOKABLE FilePickerAction(QObject* parent, const QString& title, const QString& filePath = QString());
     
     /**
-     * Initialize the directory picker action
-     * @param filePath File path
-     * @param defaultFilePath Default file path
-     */
-    void initialize(const QString& filePath = QString(), const QString& defaultFilePath = QString());
-
-    /**
      * Get the current file path
      * @return Current file path
      */

@@ -8,10 +8,9 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-StringAction::StringAction(QObject* parent, const QString& title, const QString& string /*= ""*/, const QString& defaultString /*= ""*/) :
+StringAction::StringAction(QObject* parent, const QString& title, const QString& string /*= ""*/) :
     WidgetAction(parent, title),
     _string(),
-    _defaultString(),
     _placeholderString(),
     _leadingAction(),
     _trailingAction(),
@@ -22,16 +21,10 @@ StringAction::StringAction(QObject* parent, const QString& title, const QString&
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
-    initialize(string, defaultString);
+    setString(string);
 
     _leadingAction.setVisible(false);
     _trailingAction.setVisible(false);
-}
-
-void StringAction::initialize(const QString& string /*= ""*/, const QString& defaultString /*= ""*/)
-{
-    setString(string);
-    setDefaultString(defaultString);
 }
 
 QString StringAction::getString() const
@@ -49,21 +42,6 @@ void StringAction::setString(const QString& string)
     emit stringChanged(_string);
 
     saveToSettings();
-}
-
-QString StringAction::getDefaultString() const
-{
-    return _defaultString;
-}
-
-void StringAction::setDefaultString(const QString& defaultString)
-{
-    if (defaultString == _defaultString)
-        return;
-
-    _defaultString = defaultString;
-
-    emit defaultStringChanged(_defaultString);
 }
 
 QString StringAction::getPlaceholderString() const
@@ -149,16 +127,6 @@ void StringAction::setClearable(bool clearable)
         disconnect(&_trailingAction, &QAction::triggered, this, nullptr);
         disconnect(this, &StringAction::stringChanged, this, nullptr);
     }
-}
-
-bool StringAction::isResettable()
-{
-    return _string != _defaultString;
-}
-
-void StringAction::reset()
-{
-    setString(_defaultString);
 }
 
 void StringAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)

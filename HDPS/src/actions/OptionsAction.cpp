@@ -14,12 +14,11 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-OptionsAction::OptionsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/, const QStringList& defaultSelectedOptions /*= QStringList()*/) :
+OptionsAction::OptionsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/) :
     WidgetAction(parent, title),
     _optionsModel(),
     _selectionAction(*this),
-    _fileAction(*this),
-    _defaultSelectedOptions(defaultSelectedOptions)
+    _fileAction(*this)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -109,21 +108,6 @@ QList<int> OptionsAction::getSelectedOptionIndices() const
     return selectedOptionIndices;
 }
 
-QStringList OptionsAction::getDefaultSelectedOptions() const
-{
-    return _defaultSelectedOptions;
-}
-
-void OptionsAction::setDefaultSelectedOptions(const QStringList& defaultSelectedOptions)
-{
-    if (defaultSelectedOptions == _defaultSelectedOptions)
-        return;
-
-    _defaultSelectedOptions = defaultSelectedOptions;
-
-    emit defaultSelectedOptionsChanged(_defaultSelectedOptions);
-}
-
 bool OptionsAction::isOptionSelected(const QString& option) const
 {
     const auto matches = _optionsModel.match(_optionsModel.index(0, 0), Qt::DisplayRole, option);
@@ -167,16 +151,6 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
 
     if (getSelectedOptions() != previousSelectedOptions)
         emit selectedOptionsChanged(getSelectedOptions());
-}
-
-bool OptionsAction::isResettable()
-{
-    return getSelectedOptions() != getDefaultSelectedOptions();
-}
-
-void OptionsAction::reset()
-{
-    setSelectedOptions(getDefaultSelectedOptions());
 }
 
 void OptionsAction::connectToPublicAction(WidgetAction* publicAction, bool recursive /*= true*/)

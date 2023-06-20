@@ -10,7 +10,7 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& title, const QString& directory /*= QString()*/, const QString& defaultDirectory /*= QString()*/) :
+DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& title, const QString& directory /*= QString()*/) :
     WidgetAction(parent, title),
     _dirModel(),
     _completer(),
@@ -19,7 +19,7 @@ DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& tit
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
-    initialize(directory, defaultDirectory);
+    setDirectory(directory);
 
     _completer.setModel(&_dirModel);
 
@@ -57,14 +57,7 @@ DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& tit
 
     // Pass-through action signals
     connect(&_directoryAction, &StringAction::stringChanged, this, &DirectoryPickerAction::directoryChanged);
-    connect(&_directoryAction, &StringAction::defaultStringChanged, this, &DirectoryPickerAction::defaultDirectoryChanged);
     connect(&_directoryAction, &StringAction::placeholderStringChanged, this, &DirectoryPickerAction::placeholderStringChanged);
-}
-
-void DirectoryPickerAction::initialize(const QString& directory /*= QString()*/, const QString& defaultDirectory /*= QString()*/)
-{
-    setDirectory(directory);
-    setDefaultDirectory(defaultDirectory);
 }
 
 QString DirectoryPickerAction::getDirectory() const
@@ -80,19 +73,6 @@ void DirectoryPickerAction::setDirectory(const QString& directory)
     _directoryAction.setString(directory);
 
     saveToSettings();
-}
-
-QString DirectoryPickerAction::getDefaultDirectory() const
-{
-    return _directoryAction.getDefaultString();
-}
-
-void DirectoryPickerAction::setDefaultDirectory(const QString& defaultDirectory)
-{
-    if (defaultDirectory == getDefaultDirectory())
-        return;
-
-    _directoryAction.setDefaultString(defaultDirectory);
 }
 
 QString DirectoryPickerAction::getPlaceholderString() const

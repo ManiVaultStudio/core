@@ -191,7 +191,7 @@ public:
      * @param options Options to select from
      * @param selectedOptions Initial selected options
      */
-    Q_INVOKABLE OptionsAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QStringList& selectedOptions = QStringList(), const QStringList& defaultSelectedOptions = QStringList());
+    Q_INVOKABLE explicit OptionsAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QStringList& selectedOptions = QStringList());
 
     /**
      * Initialize the option action
@@ -251,18 +251,6 @@ public:
     QList<int> getSelectedOptionIndices() const;
 
     /**
-     * Get default selected options
-     * @return Default selected options
-     */
-    QStringList getDefaultSelectedOptions() const;
-
-    /**
-     * Set default selected options
-     * @param defaultSelectedOptions Default selected options
-     */
-    void setDefaultSelectedOptions(const QStringList& defaultSelectedOptions);
-
-    /**
      * Get whether a specific option is selected
      * @param option Name of the option to check for
      * @return Boolean indicating whether the option is selected or not
@@ -287,15 +275,6 @@ public:
      * @param selectedOptions Selected options
      */
     void setSelectedOptions(const QStringList& selectedOptions);
-
-    /**
-     * Determines whether the action can be reset to its default
-     * @return Whether the action can be reset to its default
-     */
-    bool isResettable() override;;
-
-    /** Reset to default */
-    void reset() override;
 
 protected: // Linking
 
@@ -345,17 +324,10 @@ signals:
      */
     void selectedOptionsChanged(const QStringList& selectedOptions);
 
-    /**
-     * Signals that the default selected options changed
-     * @param defaultSelectedOptions Default selected options
-     */
-    void defaultSelectedOptionsChanged(const QStringList& defaultSelectedOptions);
-
 protected:
-    QStandardItemModel      _optionsModel;              /** Options model */
-    SelectionAction         _selectionAction;           /** Selection action */
-    FileAction              _fileAction;                /** File action */
-    QStringList             _defaultSelectedOptions;    /** Default selection options */
+    QStandardItemModel      _optionsModel;      /** Options model */
+    SelectionAction         _selectionAction;   /** Selection action */
+    FileAction              _fileAction;        /** File action */
 
     friend class AbstractActionsManager;
 

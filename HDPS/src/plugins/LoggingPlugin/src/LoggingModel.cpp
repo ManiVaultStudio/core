@@ -34,7 +34,7 @@ QMap<LoggingModel::Column, QString> LoggingModel::columnNames = {
 LoggingModel::LoggingModel(QObject* parent /*= nullptr*/) :
     QAbstractItemModel(parent),
     _messageRecords(),
-    _wordWrapAction(this, "Word wrap", true, true)
+    _wordWrapAction(this, "Word wrap", true)
 {
     _wordWrapAction.setToolTip("Enables/disables word wrapping");
 

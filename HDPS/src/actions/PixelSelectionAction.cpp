@@ -14,8 +14,8 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _targetWidget(nullptr),
     _pixelSelectionTool(nullptr),
     _pixelSelectionTypes(),
-    _overlayColorAction(this, "Overlay color", QColor(255, 0, 0), QColor(255, 0, 0)),
-    _overlayOpacityAction(this, "Overlay opacity", 0.0f, 100.0f, 75.0f, 75.0f, 1),
+    _overlayColorAction(this, "Overlay color", QColor(255, 0, 0)),
+    _overlayOpacityAction(this, "Overlay opacity", 0.0f, 100.0f, 75.0f, 1),
     _typeModel(this),
     _typeAction(this, "Type"),
     _rectangleAction(this, "Rectangle"),
@@ -33,8 +33,8 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _clearSelectionAction(this, "None"),
     _selectAllAction(this, "All"),
     _invertSelectionAction(this, "Invert"),
-    _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
-    _notifyDuringSelectionAction(this, "Notify during selection", true, true)
+    _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
+    _notifyDuringSelectionAction(this, "Notify during selection", true)
 {
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
 
@@ -254,10 +254,8 @@ void PixelSelectionAction::setShortcutsEnabled(const bool& shortcutsEnabled)
 
 void PixelSelectionAction::initType()
 {
-    if (_typeModel.rowCount() > 0) {
+    if (_typeModel.rowCount() > 0)
         _typeAction.setCurrentIndex(0);
-        _typeAction.setDefaultText(0);
-    }
 
     if (_pixelSelectionTypes.contains(PixelSelectionType::Rectangle))
         _typeActionGroup.addAction(&_rectangleAction);
