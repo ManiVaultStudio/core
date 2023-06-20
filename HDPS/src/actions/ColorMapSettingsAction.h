@@ -27,8 +27,9 @@ public:
          * Constructor
          * @param parent Pointer to parent widget
          * @param colorMapSettingsAction Pointer to clusters action
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
          */
-        Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction);
+        Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction, const std::int32_t& widgetFlags);
     };
 
     /**
@@ -37,7 +38,7 @@ public:
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new Widget(parent, this);
+        return new Widget(parent, this, widgetFlags);
     };
 
 protected:

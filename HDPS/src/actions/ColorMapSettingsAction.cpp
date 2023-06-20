@@ -16,11 +16,9 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction, c
     setIcon(Application::getIconFont("FontAwesome").getIcon("sliders-h"));
 }
 
-ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction) :
-    WidgetActionWidget(parent, colorMapSettingsAction)
+ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, colorMapSettingsAction, widgetFlags)
 {
-    setFixedWidth(400);
-
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
