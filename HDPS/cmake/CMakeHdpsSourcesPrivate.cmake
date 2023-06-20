@@ -186,7 +186,6 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/LoadSystemViewMenu.h
     src/private/LoadedViewsMenu.h
     src/private/HelpMenu.h
-    src/private/ModeMenu.h
 )
 
 set(PRIVATE_APPLICATION_SOURCES
@@ -196,7 +195,6 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/LoadSystemViewMenu.cpp
     src/private/LoadedViewsMenu.cpp
     src/private/HelpMenu.cpp
-    src/private/ModeMenu.cpp
 )
 
 set(PRIVATE_APPLICATION_FILES

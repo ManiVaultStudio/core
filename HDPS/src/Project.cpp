@@ -171,6 +171,12 @@ void Project::initialize()
     _studioModeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("pencil-ruler"));
 
     connect(&_studioModeAction, &ToggleAction::toggled, this, &Project::setStudioMode);
+
+    const auto updateStudioModeActionReadOnly = [&]() -> void {
+        _studioModeAction.setEnabled(projects().hasProject());
+    };
+
+    updateStudioModeActionReadOnly();
 }
 
 util::Version Project::getVersion() const
