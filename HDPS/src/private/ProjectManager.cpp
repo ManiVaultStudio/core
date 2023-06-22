@@ -328,6 +328,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         emit projectAboutToBeOpened(*(_project.get()));
         {
+            const auto scopedState = ScopedState(this, State::OpeningProject);
+
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
 
@@ -489,11 +491,28 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
 void ProjectManager::importProject(QString filePath /*= ""*/)
 {
-    emit projectAboutToBeImported(filePath);
+    try
     {
-        openProject(filePath, true, false);
+#ifdef PROJECT_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__ << filePath;
+#endif
+
+        const auto scopedState = ScopedState(this, State::ImportingProject);
+
+        emit projectAboutToBeImported(filePath);
+        {
+            openProject(filePath, true, false);
+        }
+        emit projectImported(filePath);
     }
-    emit projectImported(filePath);
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to import project", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to import project");
+    }
 }
 
 void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& password /*= ""*/)
@@ -503,6 +522,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 #ifdef PROJECT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << filePath;
 #endif
+
+        const auto scopedState = ScopedState(this, State::SavingProject);
 
         emit projectAboutToBeSaved(*(_project.get()));
         {
@@ -689,6 +710,8 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
         if (!hasProject())
             return;
+
+        const auto scopedState = ScopedState(this, State::PublishingProject);
 
         auto& readOnlyAction        = getCurrentProject()->getReadOnlyAction();
         auto& splashScreenAction    = getCurrentProject()->getSplashScreenAction();

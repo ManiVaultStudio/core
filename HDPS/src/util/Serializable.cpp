@@ -252,4 +252,27 @@ void Serializable::insertIntoVariantMap(QVariantMap& variantMap) const
     variantMap.insert(getSerializationName(), toVariantMap());
 }
 
+//Serializable::State Serializable::getState() const
+//{
+//    return _state;
+//}
+//
+//void Serializable::setState(const State& state)
+//{
+//    if (state == _state)
+//        return;
+//
+//    _state = state;
+//}
+//
+//bool Serializable::isReading() const
+//{
+//    return _state == State::Reading;
+//}
+//
+//bool Serializable::isWriting() const
+//{
+//    return _state == State::Writing;
+//}
+
 }

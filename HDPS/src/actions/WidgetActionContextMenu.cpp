@@ -90,8 +90,6 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
             connectMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("link"));
 
-            QMap<QString, QMenu*> menus;
-
             for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
                 auto publicAction = actionsFilterModel.getAction(rowIndex);
 
@@ -104,49 +102,18 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
                 if (!firstAction->mayConnectToPublicAction(publicAction))
                     continue;
 
-                const auto titleSegments = publicAction->getLocation().split("/");
+                auto connectAction = new QAction(publicAction->getLocation());
 
-                QString menuPath, previousMenuPath = titleSegments.first();
+                connectAction->setToolTip("Connect " + firstAction->text() + " to " + publicAction->text());
 
-                for (auto titleSegment : titleSegments) {
-                    if (titleSegment != titleSegments.first() && titleSegment != titleSegments.last())
-                        menuPath += "/";
+                connect(connectAction, &QAction::triggered, this, [this, firstAction, publicAction]() -> void {
+                    hdps::actions().connectPrivateActionToPublicAction(firstAction, publicAction, true);
+                });
 
-                    menuPath += titleSegment;
-
-                    if (!menus.contains(menuPath)) {
-                        if (titleSegment == titleSegments.last()) {
-                            auto connectAction = new QAction(publicAction->text());
-
-                            connectAction->setToolTip("Connect " + firstAction->text() + " to " + publicAction->text());
-
-                            connect(connectAction, &QAction::triggered, this, [this, firstAction, publicAction]() -> void {
-                                hdps::actions().connectPrivateActionToPublicAction(firstAction, publicAction, true);
-                            });
-
-                            if (titleSegment == titleSegments.first())
-                                connectMenu->addAction(connectAction);
-                            else
-                                menus[previousMenuPath]->addAction(connectAction);
-                        }
-                        else {
-                            menus[menuPath] = new QMenu(titleSegment);
-
-                            if (titleSegment != titleSegments.first()) {
-                                {
-                                    menus[previousMenuPath]->addMenu(menus[menuPath]);
-                                }
-                            }
-                            else
-                                connectMenu->addMenu(menus[titleSegments.first()]);
-                        }
-                    }
-
-                    previousMenuPath = menuPath;
-                }
+                connectMenu->addAction(connectAction);
             }
 
-            connectMenu->setEnabled(!menus.isEmpty());
+            connectMenu->setEnabled(!connectMenu->actions().isEmpty());
 
             insertMenu(&_disconnectAction, connectMenu);
         }
