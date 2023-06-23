@@ -169,7 +169,7 @@ void Project::initialize()
     updateContributors();
 
     _studioModeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("pencil-ruler"));
-
+    
     connect(&_studioModeAction, &ToggleAction::toggled, this, &Project::setStudioMode);
 
     const auto updateStudioModeActionReadOnly = [&]() -> void {
@@ -177,6 +177,9 @@ void Project::initialize()
     };
 
     updateStudioModeActionReadOnly();
+
+    connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
+    connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
 }
 
 util::Version Project::getVersion() const
