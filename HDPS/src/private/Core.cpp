@@ -140,7 +140,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
     }
 }
 
-Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& guid /*= ""*/)
+Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/)
 {
     // Create a new plugin of the given kind
     QString rawDataName = _pluginManager->requestPlugin(kind)->getName();
@@ -149,7 +149,7 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     const plugin::RawData& rawData = requestRawData(rawDataName);
 
     // Create an initial full set and an empty selection belonging to the raw data
-    auto fullSet    = rawData.createDataSet(guid);
+    auto fullSet    = rawData.createDataSet(id);
     auto selection  = rawData.createDataSet();
 
     // Set the properties of the new sets
@@ -391,11 +391,6 @@ AbstractEventManager& Core::getEventManager()
 AbstractWorkspaceManager& Core::getWorkspaceManager()
 {
     return *_workspaceManager;
-}
-
-DataHierarchyItem& Core::getDataHierarchyItem(const QString& dataSetId)
-{
-    return _dataHierarchyManager->getItem(dataSetId);
 }
 
 bool Core::isDatasetGroupingEnabled() const

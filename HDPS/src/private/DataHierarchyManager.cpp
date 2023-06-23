@@ -155,7 +155,7 @@ DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid)
             if (dataHierarchyItem->getDatasetReference().getDatasetId() == datasetGuid)
                 return *dataHierarchyItem;
 
-        throw std::runtime_error(QString("Failed to find data hierarchy item with guid: %1").arg(datasetGuid).toStdString());
+        throw std::runtime_error(QString("Failed to find data hierarchy item with dataset ID: %1").arg(datasetGuid).toStdString());
     }
     catch (std::exception& e)
     {
@@ -202,7 +202,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         const auto pluginKind   = dataset["PluginKind"].toString();
         const auto children     = dataset["Children"].toMap();
 
-        auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent, dataset["GUID"].toString());
+        auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent, dataset["ID"].toString());
 
         loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
         loadedDataset->fromVariantMap(dataset);

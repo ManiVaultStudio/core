@@ -47,7 +47,7 @@ const DataHierarchyItem& DatasetImpl::getDataHierarchyItem() const
 
 DataHierarchyItem& DatasetImpl::getDataHierarchyItem()
 {
-    return Application::core()->getDataHierarchyItem(getId());
+    return dataHierarchy().getItem(getId());
 }
 
 hdps::Dataset<hdps::DatasetImpl> DatasetImpl::getParent() const
