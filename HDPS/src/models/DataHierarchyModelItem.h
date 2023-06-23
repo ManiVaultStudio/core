@@ -70,7 +70,7 @@ public:
     std::int32_t getNumColumns() const;
 
     /** Returns the serialized item string */
-    QString serialize() const;
+    //QString serialize() const;
 
     /**
      * Get data at column
@@ -81,10 +81,10 @@ public:
     QVariant getDataAtColumn(const std::uint32_t& column, int role = Qt::DisplayRole) const;
 
     /**
-     * Renames the dataset
-     * @param intendedDatasetName Intended new name of the dataset
+     * Renames the dataset to \p datasetName
+     * @param datasetName New name of the dataset
      */
-    void renameDataset(const QString& intendedDatasetName);
+    void renameDataset(const QString& datasetName);
 
     /**
      * Set group index

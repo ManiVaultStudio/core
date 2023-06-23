@@ -24,7 +24,7 @@ ProxyDatasetsAction::ProxyDatasetsAction(QObject* parent, const Dataset<Points>&
         _editProxyDatasetsAction.setEnabled(_points->isProxy());
     };
 
-    connect(&_points, &Dataset<Points>::dataChanged, this, updateActions);
+    connect(&_points, &Dataset<Points>::datasetChanged, this, updateActions);
 
     updateActions();
 }

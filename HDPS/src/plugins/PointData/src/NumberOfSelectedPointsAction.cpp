@@ -70,7 +70,7 @@ NumberOfSelectedPointsAction::Widget::Widget(QWidget* parent, NumberOfSelectedPo
         }
     });
 
-    connect(&numberOfSelectedPointsAction->getPoints(), &Dataset<Points>::dataSelectionChanged, this, [this]() -> void {
+    connect(&numberOfSelectedPointsAction->getPoints(), &Dataset<Points>::datasetSelectionChanged, this, [this]() -> void {
         _timer.start(LAZY_UPDATE_INTERVAL);
     });
 

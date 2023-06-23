@@ -95,7 +95,7 @@ public: // Operators
         if (rhs.isValid())
             setDataset(rhs.get());
         else
-            setDatasetGuid(rhs.getDatasetGuid());
+            setDatasetId(rhs.getDatasetId());
 
         return *this;
     }

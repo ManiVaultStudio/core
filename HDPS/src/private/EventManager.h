@@ -55,13 +55,6 @@ public:
     void notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets* ignoreDatasets = nullptr) override;
 
     /**
-     * Notify all listeners that a dataset GUI name has changed
-     * @param dataset Smart pointer to the dataset of which the GUI name changed
-     * @param previousGuiName Previous dataset name
-     */
-    void notifyDatasetGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) override;
-
-    /**
      * Notify all listeners that a dataset is locked
      * @param dataset Smart pointer to the dataset
      */

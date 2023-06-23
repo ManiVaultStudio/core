@@ -153,7 +153,7 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     auto selection  = rawData.createDataSet();
 
     // Set the properties of the new sets
-    fullSet->setGuiName(dataSetGuiName);
+    fullSet->setText(dataSetGuiName);
     fullSet->setAll(true);
 
     // Set pointer of full dataset to itself just to avoid having to be wary of this not being set
@@ -198,7 +198,7 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
         for (auto datasetToRemove : datasetsToRemove) {
 
             // Cache dataset GUID and type
-            const auto guid = datasetToRemove->getGuid();
+            const auto guid = datasetToRemove->getId();
             const auto type = datasetToRemove->getDataType();
 
             events().notifyDatasetAboutToBeRemoved(datasetToRemove);
@@ -233,7 +233,7 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
 
     // Mark the full set as derived and set the GUI name
     derivedDataset->setSourceDataSet(sourceDataset);
-    derivedDataset->setGuiName(guiName);
+    derivedDataset->setText(guiName);
 
     // Set properties of the new set
     derivedDataset->setAll(true);
@@ -261,7 +261,7 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
         *subset = *const_cast<Dataset<DatasetImpl>&>(sourceDataset);
 
         subset->setAll(false);
-        subset->setGuiName(guiName);
+        subset->setText(guiName);
 
         // Set a pointer to the original full dataset, if the source is another subset, we take their pointer
         subset->_fullDataset = sourceDataset->isFull() ? sourceDataset : sourceDataset->_fullDataset;
@@ -433,7 +433,7 @@ Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString
                 QStringList datasetNames;
 
                 for (const auto& dataset : datasets)
-                    datasetNames << dataset->getGuiName();
+                    datasetNames << dataset->text();
 
                 return createGroupDataset(datasetNames.join("+"));
             }

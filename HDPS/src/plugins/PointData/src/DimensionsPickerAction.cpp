@@ -120,7 +120,7 @@ QVariantMap DimensionsPickerAction::toVariantMap() const
     for (const auto enabledDimension : getEnabledDimensions())
         enabledDimensions << QVariant(enabledDimension);
 
-    const auto datasetId = _points.isValid() ? _points->getGuid() : "";
+    const auto datasetId = _points.isValid() ? _points->getId() : "";
     
     variantMap.insert({
         { "EnabledDimensions", enabledDimensions },
@@ -190,7 +190,7 @@ void DimensionsPickerAction::setPointsDataset(const Dataset<Points>& points)
 
     if (_points.isValid()) {
         setDimensions(_points->getNumDimensions(), _points->getDimensionNames());
-        setObjectName(QString("%1/Selection").arg(_points->getGuiName()));
+        setObjectName(QString("%1/Selection").arg(_points->text()));
     } else
         setDimensions(0, {});
 }

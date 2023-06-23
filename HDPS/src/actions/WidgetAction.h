@@ -124,7 +124,7 @@ public: // Hierarchy queries
      * Get child actions
      * @return Vector of pointers to child actions
      */
-    virtual WidgetActions getChildActions() const final;
+    virtual WidgetActions getChildren() const final;
 
     /**
      * Establish whether this action is positioned at the top of the hierarchy
@@ -236,6 +236,30 @@ public: // Disabled
      * @return Boolean determining whether the widget action is enabled or not
      */
     virtual bool isEnabled() const final;
+
+public: // Text
+
+    /**
+     * Re-implement the setText(...) setter from the base QWidgetAction class to support updating the location
+     * @param text Text to set
+     */
+    void setText(const QString& text);
+
+public: // Location
+
+    /**
+     * Get location
+     * @return Path relative to the top-level action
+     */
+    virtual QString getLocation() const final;
+
+private: // Location
+
+    /**
+     * Compute the location of the action and update the cached location if it changed
+     * @param recursive Whether to also update child actions recursively
+     */
+    virtual void updateLocation(bool recursive = true) final;
 
 public: // Widget flags
 
@@ -481,12 +505,6 @@ public: // Settings
     virtual void reset() final;
 
     /**
-     * Get location
-     * @return Path relative to the top-level action
-     */
-    virtual QString getLocation() const final;
-
-    /**
      * Set settings prefix
      * @param load Whether to restore settings after setting the prefix
      * @param settingsPrefix Settings prefix
@@ -574,7 +592,7 @@ public: // Type string
      */
     virtual QString getTypeString(bool humanFriendly = false) const final;
 
-protected:
+protected: // Widgets
 
     /**
      * Get widget representation of the action
@@ -708,6 +726,18 @@ signals:
      */
     void scopeChanged(const Scope& scope);
 
+    /**
+     * Signals that the text changed to \p text
+     * @param text Action text
+     */
+    void textChanged(const QString& text);
+
+    /**
+     * Signals that the location changed to \p location
+     * @param location The path relative to the root in string format
+     */
+    void locationChanged(const QString& location);
+
 private:
     std::int32_t                _defaultWidgetFlags;            /** Default widget flags which are used to configure newly created widget action widgets */
     std::int32_t                _sortIndex;                     /** Sort index (relative position in group items) */
@@ -724,6 +754,7 @@ private:
     QSize                       _popupSizeHint;                 /** Size hint of the popup */
     std::int32_t                _configuration;                 /** Configuration flags */
     QMap<QString, QVariant>     _cachedStates;                  /** Maps cache name to state */
+    QString                     _location;                      /** The path relative to the root in string format */
 
     friend class AbstractActionsManager;
 };

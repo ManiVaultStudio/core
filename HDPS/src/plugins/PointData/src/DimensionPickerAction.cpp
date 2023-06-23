@@ -164,7 +164,7 @@ QVariantMap DimensionPickerAction::toVariantMap() const
 
     _currentDimensionAction.insertIntoVariantMap(variantMap);
 
-    const auto datasetId = _points.isValid() ? _points->getGuid() : "";
+    const auto datasetId = _points.isValid() ? _points->getId() : "";
 
     variantMap.insert({
         { "DatasetID", datasetId }

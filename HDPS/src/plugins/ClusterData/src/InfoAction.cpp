@@ -26,9 +26,9 @@ InfoAction::InfoAction(QObject* parent, Clusters& clusters) :
         _numberOfClustersAction.setString(QString::number(_clusters->getClusters().size()));
     };
 
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetAdded));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChanged));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetSelectionChanged));
     _eventListener.registerDataEventByType(ClusterType, [this, updateActions](hdps::DataEvent* dataEvent) {
         if (!_clusters.isValid())
             return;
@@ -37,9 +37,9 @@ InfoAction::InfoAction(QObject* parent, Clusters& clusters) :
             return;
 
         switch (dataEvent->getType()) {
-            case EventType::DataAdded:
-            case EventType::DataChanged:
-            case EventType::DataSelectionChanged:
+            case EventType::DatasetAdded:
+            case EventType::DatasetChanged:
+            case EventType::DatasetSelectionChanged:
             {
                 updateActions();
                 break;

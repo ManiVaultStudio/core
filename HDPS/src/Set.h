@@ -54,14 +54,15 @@ public:
      * Constructor
      * @param core Pointer to the core
      * @param rawDataName Name of the raw data
+     * @param id Globally unique dataset identifier
      */
-    DatasetImpl(CoreInterface* core, const QString& rawDataName, const QString& guid = "");
+    DatasetImpl(CoreInterface* core, const QString& rawDataName, const QString& id = "");
 
     /** Destructor */
     virtual ~DatasetImpl();
 
     /** Performs startup initialization */
-    virtual void init();;
+    virtual void init();
 
     /**
      * Get a copy of the dataset
@@ -78,9 +79,6 @@ public:
      */
     virtual Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const = 0;
 
-    /** Get the globally unique identifier of the dataset in string format */
-    QString getGuid() const;
-
     /**
      * Get the data storage type
      * @return Data storage type
@@ -92,15 +90,6 @@ public:
      * @param type Data storage type
      */
     void setStorageType(const StorageType& storageType);
-
-    /** Get the GUI name of the dataset */
-    QString getGuiName() const;
-
-    /**
-     * Set the GUI name of the dataset
-     * @param guiName Name of the dataset in the graphical user interface
-     */
-    void setGuiName(const QString& guiName);
 
     /** Returns true if this set represents the full data and false if it's a subset */
     bool isFull() const;
@@ -319,7 +308,7 @@ public: // Operators
      * @param rhs Right-hand-side operator
      */
     const bool operator == (const DatasetImpl& rhs) const {
-        return rhs.getGuid() == _guid;
+        return rhs.getId() == getId();
     }
 
     /**
@@ -327,7 +316,7 @@ public: // Operators
      * @param rhs Right-hand-side operator
      */
     const bool operator != (const DatasetImpl& rhs) const {
-        return rhs.getGuid() != _guid;
+        return rhs.getId() != getId();
     }
 
 public: // Properties
@@ -511,7 +500,6 @@ public: // Operators
      */
     DatasetImpl& operator=(const DatasetImpl& other) {
         _storageType        = other._storageType;
-        _guiName            = other._guiName;
         _rawData            = other._rawData;
         _rawDataName        = other._rawDataName;
         _all                = other._all;
@@ -528,26 +516,24 @@ public: // Operators
     }
 
 protected:
-    CoreInterface*              _core;                      /** Pointer to core interface */
+    CoreInterface*              _core;              /** Pointer to core interface */
 
 private:
-    mutable plugin::RawData*    _rawData;                   /** Pointer to the raw data referenced in this set */
-    StorageType                 _storageType;               /** Type of storage (own raw data or act as proxy for other datasets) */
-    QString                     _guid;                      /** Globally unique dataset name */
-    QString                     _guiName;                   /** Name of the dataset in the graphical user interface */
-    QString                     _rawDataName;               /** Name of the raw data */
-    bool                        _all;                       /** Whether this is the full dataset */
-    bool                        _derived;                   /** Whether this dataset is derived from another dataset */
-    Dataset<DatasetImpl>        _sourceDataset;             /** Smart pointer to the source dataset (if any) */
-    Dataset<DatasetImpl>        _fullDataset;               /** Smart pointer to the original full dataset (if this is a subset) */
-    QMap<QString, QVariant>     _properties;                /** Properties map */
-    std::int32_t                _groupIndex;                /** Group index (sets with identical indices can for instance share selection) */
-    plugin::AnalysisPlugin*     _analysis;                  /** Pointer to analysis plugin that created the set (if any) */
-    Datasets                    _proxyMembers;              /** Member datasets in case of a proxy dataset */
-    std::vector<LinkedData>     _linkedData;                /** List of linked datasets */
-    std::int32_t                _linkedDataFlags;           /** Flags for linked data */
-    bool                        _locked;                    /** Whether the dataset is locked */
-    Dataset<DatasetImpl>        _smartPointer;              /** Smart pointer to own dataset */
+    mutable plugin::RawData*    _rawData;           /** Pointer to the raw data referenced in this set */
+    StorageType                 _storageType;       /** Type of storage (own raw data or act as proxy for other datasets) */
+    QString                     _rawDataName;       /** Name of the raw data */
+    bool                        _all;               /** Whether this is the full dataset */
+    bool                        _derived;           /** Whether this dataset is derived from another dataset */
+    Dataset<DatasetImpl>        _sourceDataset;     /** Smart pointer to the source dataset (if any) */
+    Dataset<DatasetImpl>        _fullDataset;       /** Smart pointer to the original full dataset (if this is a subset) */
+    QMap<QString, QVariant>     _properties;        /** Properties map */
+    std::int32_t                _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
+    plugin::AnalysisPlugin*     _analysis;          /** Pointer to analysis plugin that created the set (if any) */
+    Datasets                    _proxyMembers;      /** Member datasets in case of a proxy dataset */
+    std::vector<LinkedData>     _linkedData;        /** List of linked datasets */
+    std::int32_t                _linkedDataFlags;   /** Flags for linked data */
+    bool                        _locked;            /** Whether the dataset is locked */
+    Dataset<DatasetImpl>        _smartPointer;      /** Smart pointer to own dataset */
 
     friend class CoreInterface;
     friend class Core;
@@ -561,3 +547,48 @@ private:
 } // namespace hdps
 
 #endif // HDPS_DATASET_H
+
+/*
+void DataHierarchyItem::renameDataset(const QString& newGuiName)
+{
+    // DATASET_NAME
+    try {
+
+        if (!_dataset.isValid())
+            throw std::runtime_error("Dataset is invalid");
+
+        if (newGuiName.isEmpty())
+            throw std::runtime_error("New GUI name is empty");
+
+        if (newGuiName == _dataset->getGuiName())
+            return;
+
+        _dataset->setGuiName(newGuiName);
+
+        for (const auto& child : getChildren())
+            child->getDataset()->setGuiName(child->getDataset()->getGuiName());
+    }
+    catch (std::exception& e) {
+        QMessageBox::critical(nullptr, "Unable to rename dataset", e.what());
+    }
+}
+
+//void DataHierarchyItem::computeFullPathName()
+//{
+//    DataHierarchyItems parents;
+//
+//    DataHierarchyItem::getParents(*const_cast<DataHierarchyItem*>(this), parents);
+//
+//    QStringList dataHierarchyItemNames;
+//
+//    for (const auto& parent : parents)
+//        dataHierarchyItemNames << parent->getDataset()->getGuiName();
+//
+//    dataHierarchyItemNames << _dataset->getGuiName();
+//
+//    _fullPathName = dataHierarchyItemNames.join("/");
+//
+//    for (auto& child : getChildren())
+//        child->computeFullPathName();
+//}
+*/

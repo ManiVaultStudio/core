@@ -47,9 +47,9 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
         _numberComponentsPerPixelAction.setString(QString::number(_images->getNumberOfComponentsPerPixel()));
     };
 
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetAdded));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChanged));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetSelectionChanged));
     _eventListener.registerDataEventByType(ImageType, [this, updateActions](hdps::DataEvent* dataEvent) {
         if (!_images.isValid())
             return;
@@ -58,9 +58,9 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
             return;
 
         switch (dataEvent->getType()) {
-            case EventType::DataAdded:
-            case EventType::DataChanged:
-            case EventType::DataSelectionChanged:
+            case EventType::DatasetAdded:
+            case EventType::DatasetChanged:
+            case EventType::DatasetSelectionChanged:
             {
                 updateActions();
                 break;

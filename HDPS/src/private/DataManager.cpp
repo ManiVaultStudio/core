@@ -61,16 +61,16 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         if (!dataset.isValid())
             throw std::runtime_error("Dataset smart pointer is invalid");
 
-        qDebug() << "Removing" << dataset->getGuiName() << "from the data manager";
+        qDebug() << "Removing" << dataset->text() << "from the data manager";
 
-        const auto guid = dataset->getGuid();
+        const auto guid = dataset->getId();
         const auto type = dataset->getDataType();
 
         events().notifyDatasetAboutToBeRemoved(dataset);
         {
             for (auto& underiveDataset : _datasets) {
-                if (underiveDataset->isDerivedData() && underiveDataset->getSourceDataset<DatasetImpl>()->getGuid() == dataset->getGuid()) {
-                    qDebug() << "Un-derive" << underiveDataset->getGuiName();
+                if (underiveDataset->isDerivedData() && underiveDataset->getSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
+                    qDebug() << "Un-derive" << underiveDataset->text();
 
                     underiveDataset->_derived = false;
                     underiveDataset->setSourceDataSet(Dataset<DatasetImpl>());
@@ -121,7 +121,7 @@ Dataset<DatasetImpl> DataManager::getSet(const QString& datasetGuid)
             throw std::runtime_error("Dataset GUID is invalid");
 
         const auto it = std::find_if(_datasets.begin(), _datasets.end(), [datasetGuid](Dataset<DatasetImpl> dataset) -> bool {
-            return datasetGuid == dataset->getGuid();
+            return datasetGuid == dataset->getId();
         });
 
         if (it == _datasets.end())
@@ -177,7 +177,7 @@ QVariantMap DataManager::toVariantMap() const
     QVariantMap variantMap;
 
     for (const auto& dataset : _datasets)
-        variantMap[dataset->getGuid()] = dataset->toVariantMap();
+        variantMap[dataset->getId()] = dataset->toVariantMap();
 
     return variantMap;
 }

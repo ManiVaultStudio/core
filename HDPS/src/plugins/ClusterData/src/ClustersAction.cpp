@@ -40,7 +40,7 @@ void ClustersAction::setClustersDataset(Dataset<Clusters> clustersDataset)
     if (_clustersDataset.isValid()) {
 
         // Update the clusters model to reflect the changes in the clusters dataset
-        connect(&_clustersDataset, &Dataset<Clusters>::dataChanged, this, &ClustersAction::updateClustersModel);
+        connect(&_clustersDataset, &Dataset<Clusters>::datasetChanged, this, &ClustersAction::updateClustersModel);
 
         // Perform an initial update of the clusters model to reflect the state of the clusters dataset
         updateClustersModel();

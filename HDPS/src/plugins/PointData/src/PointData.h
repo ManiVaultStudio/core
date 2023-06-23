@@ -603,7 +603,7 @@ private:
         // Note that PointsType may or may not be "const".
         auto sourceData = points.getSourceDataset<Points>();
 
-        if (sourceData->getGuid() == points.getGuid() || points.isFull())
+        if (sourceData->getId() == points.getId() || points.isFull())
         {
             // In this case, this (points) is itself a source data, or it is a full set.
             // Basically just do sourceData.visitData:

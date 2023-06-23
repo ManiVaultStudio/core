@@ -22,7 +22,7 @@ GroupDataDialog::GroupDataDialog(QWidget* parent, const hdps::Datasets& datasets
     QStringList datasetNames;
 
     for (const auto& dataset : datasets)
-        datasetNames << dataset->getGuiName();
+        datasetNames << dataset->text();
 
     _groupNameAction.setString(QString("%1").arg(datasetNames.join("+")));
 

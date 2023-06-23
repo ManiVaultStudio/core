@@ -75,7 +75,7 @@ Dataset<DatasetImpl> Images::copy() const
 {
     auto images = new Images(Application::core(), getRawDataName());
 
-    images->setGuiName(getGuiName());
+    images->setText(text());
 
     return images;
 }

@@ -85,8 +85,6 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
 
     treeViewHeader->setStretchLastSection(false);
 
-    const auto toggleColumnSize = 16;
-
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::Location), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::ID), true);
     treeView.setColumnHidden(static_cast<int>(AbstractActionsModel::Column::Scope), true);

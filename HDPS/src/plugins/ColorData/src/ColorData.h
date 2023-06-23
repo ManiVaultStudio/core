@@ -52,7 +52,8 @@ public:
     Dataset<DatasetImpl> copy() const override
     {
         auto colors = new Colors(_core, getRawDataName());
-        colors->setGuiName(getGuiName());
+
+        colors->setText(text());
         colors->indices = indices;
 
         return Dataset<DatasetImpl>(colors);

@@ -37,12 +37,12 @@ EditProxyDatasetsAction::Widget::Widget(QWidget* parent, EditProxyDatasetsAction
         QStringList proxyMemberNames;
 
         for (const auto& proxyMember : editProxyDatasetsAction->getPoints()->getProxyMembers())
-            proxyMemberNames << proxyMember->getDataHierarchyItem().getFullPathName();
+            proxyMemberNames << proxyMember->getDataHierarchyItem().getLocation();
 
         listView->setModel(new QStringListModel(proxyMemberNames));
     };
 
-    connect(&editProxyDatasetsAction->getPoints(), &Dataset<Points>::dataChanged, this, updateListView);
+    connect(&editProxyDatasetsAction->getPoints(), &Dataset<Points>::datasetChanged, this, updateListView);
 
     updateListView();
 }

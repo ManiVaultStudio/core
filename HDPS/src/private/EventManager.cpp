@@ -188,27 +188,6 @@ void EventManager::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dat
     }
 }
 
-void EventManager::notifyDatasetGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName)
-{
-    try {
-
-        DataGuiNameChangedEvent dataGuiNameChangedEvent(dataset, previousGuiName);
-
-        const auto eventListeners = _eventListeners;
-
-        for (auto listener : eventListeners)
-            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                callListenerDataEvent(listener, &dataGuiNameChangedEvent);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to notify that data GUI name has changed", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to notify that data GUI name has changed");
-    }
-}
-
 void EventManager::notifyDatasetLocked(const Dataset<DatasetImpl>& dataset)
 {
     try {

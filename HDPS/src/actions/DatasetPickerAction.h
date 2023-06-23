@@ -116,22 +116,22 @@ protected:
          */
         void setShowIcon(bool showIcon);
 
-        /** Get whether to show the full path name in the GUI */
-        bool getShowFullPathName() const;
+        /** Get to show the dataset location */
+        bool getShowLocation() const;
 
         /**
          * Set whether to show the full path name in the GUI
          * @param showFullPathName Whether to show the full path name in the GUI
          */
-        void setShowFullPathName(const bool& showFullPathName);
+        void setShowLocation(bool showLocation);
 
         /** Updates the model from the datasets */
         void updateData();
 
     protected:
-        QVector<hdps::Dataset<hdps::DatasetImpl>>   _datasets;              /** Datasets from which can be picked */
-        bool                                        _showIcon;              /** Whether to show the dataset icon */
-        bool                                        _showFullPathName;      /** Whether to show the full path name */
+        QVector<hdps::Dataset<hdps::DatasetImpl>>   _datasets;          /** Datasets from which can be picked */
+        bool                                        _showIcon;          /** Whether to show the dataset icon */
+        bool                                        _showLocation;      /** Whether to show the dataset location */
     };
 
 public:
@@ -219,17 +219,17 @@ public: // Datasets model facade
         _datasetsModel.setShowIcon(showIcon);
     }
 
-    /** Get whether to show the full path name in the GUI */
-    bool getShowFullPathName() const {
-        return _datasetsModel.getShowFullPathName();
+    /** Get whether to show the location */
+    bool getShowLocation() const {
+        return _datasetsModel.getShowLocation();
     }
 
     /**
-     * Set whether to show the full path name in the GUI
-     * @param showFullPathName Whether to show the full path name in the GUI
+     * Set whether to show the location
+     * @param showLocation Boolean determining whether to show the location
      */
-    void setShowFullPathName(const bool& showFullPathName) {
-        _datasetsModel.setShowFullPathName(showFullPathName);
+    void setShowFullPathName(bool showLocation) {
+        _datasetsModel.setShowLocation(showLocation);
     }
 
 private:

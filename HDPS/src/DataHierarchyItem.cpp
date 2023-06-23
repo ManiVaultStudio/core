@@ -20,7 +20,6 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _dataset(dataset),
     _parent(),
     _children(),
-    _fullPathName(),
     _selected(false),
     _expanded(true),
     _taskDescription(""),
@@ -33,7 +32,13 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _icon(),
     _actions()
 {
-    setText(dataset->getGuiName());
+    const auto synchronizeText = [this]() -> void {
+        setText(_dataset->text());
+    };
+
+    synchronizeText();
+
+    connect(_dataset.get(), &DatasetImpl::textChanged, this, synchronizeText);
 
     if (parentDataset.isValid())
         _parent = &parentDataset->getDataHierarchyItem();
@@ -52,40 +57,6 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     });
 
     setVisible(visible);
-    computeFullPathName();
-}
-
-QString DataHierarchyItem::getGuiName() const
-{
-    return _dataset->getGuiName();
-}
-
-void DataHierarchyItem::setGuiName(const QString& guiName)
-{
-    _dataset->setGuiName(guiName);
-}
-
-void DataHierarchyItem::renameDataset(const QString& newGuiName)
-{
-    try {
-
-        if (!_dataset.isValid())
-            throw std::runtime_error("Dataset is invalid");
-
-        if (newGuiName.isEmpty())
-            throw std::runtime_error("New GUI name is empty");
-
-        if (newGuiName == _dataset->getGuiName())
-            return;
-
-        _dataset->setGuiName(newGuiName);
-
-        for (const auto& child : getChildren())
-            child->getDataset()->setGuiName(child->getDataset()->getGuiName());
-    }
-    catch (std::exception& e) {
-        QMessageBox::critical(nullptr, "Unable to rename dataset", e.what());
-    }
 }
 
 DataHierarchyItem& DataHierarchyItem::getParent() const
@@ -174,35 +145,9 @@ void DataHierarchyItem::deselect()
     setSelected(false);
 }
 
-void DataHierarchyItem::computeFullPathName()
-{
-    DataHierarchyItems parents;
-
-    DataHierarchyItem::getParents(*const_cast<DataHierarchyItem*>(this), parents);
-
-    QStringList dataHierarchyItemNames;
-
-    for (const auto& parent : parents)
-        dataHierarchyItemNames << parent->getDataset()->getGuiName();
-
-    dataHierarchyItemNames << _dataset->getGuiName();
-
-    _fullPathName = dataHierarchyItemNames.join("/");
-}
-
-QString DataHierarchyItem::getFullPathName() const
-{
-    return _fullPathName;
-}
-
 void DataHierarchyItem::addChild(DataHierarchyItem& child)
 {
     _children << &child;
-}
-
-QString DataHierarchyItem::toString() const
-{
-    return QString("DataHierarchyItem[name=%1, parent=%2, children=[%3], visible=%4, description=%5, progress=%6]").arg(_dataset->getGuiName(), _parent->getGuiName(), QString::number(_children.count()), isVisible() ? "true" : "false", _taskDescription, QString::number(_taskProgress, 'f', 1));
 }
 
 Dataset<DatasetImpl> DataHierarchyItem::getDataset()
@@ -450,7 +395,7 @@ QVariantMap DataHierarchyItem::toVariantMap() const
 
         dataHierarchyItemMap["SortIndex"] = childSortIndex;
 
-        children[child->getDataset()->getGuid()] = dataHierarchyItemMap;
+        children[child->getDataset()->getId()] = dataHierarchyItemMap;
 
         childSortIndex++;
     }
@@ -458,7 +403,7 @@ QVariantMap DataHierarchyItem::toVariantMap() const
     emit const_cast<DataHierarchyItem*>(this)->saved();
 
     return {
-        { "Name", getGuiName() },
+        { "Name", _dataset->text() },
         { "Expanded", QVariant::fromValue(_expanded) },
         { "Visible", QVariant::fromValue(isVisible()) },
         { "Dataset", _dataset->toVariantMap() },

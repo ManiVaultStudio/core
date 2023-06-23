@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication::setOrganizationName("BioVault");
     QCoreApplication::setOrganizationDomain("LUMC (LKEB) & TU Delft (CGV)");
-    QCoreApplication::setApplicationName("HDPS");
+    QCoreApplication::setApplicationName("ManiVault");
     
     // Necessary to instantiate QWebEngine from a plugin
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);

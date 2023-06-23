@@ -31,12 +31,10 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent /*= nullptr*/, const QS
         emit datasetPicked(_datasetsModel.getDataset(currentIndex));
     });
 
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
-    //_eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAboutToBeRemoved));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetAdded));
     _eventListener.registerDataEvent([this](DataEvent* dataEvent) {
         switch (dataEvent->getType()) {
-            case EventType::DataAdded:
-            //case EventType::DataAboutToBeRemoved:
+            case EventType::DatasetAdded:
                 populateDatasetsFromCore();
                 break;
         }
@@ -98,11 +96,11 @@ void DatasetPickerAction::setDatasets(Datasets datasets)
 
     for (auto& dataset : _datasetsModel.getDatasets()) {
 
-        connect(&dataset, &Dataset<DatasetImpl>::dataAboutToBeRemoved, this, [this, dataset]() {
+        connect(&dataset, &Dataset<DatasetImpl>::datasetAboutToBeRemoved, this, [this, dataset]() {
             _datasetsModel.removeDataset(dataset);
         });
 
-        connect(&dataset, &Dataset<DatasetImpl>::dataGuiNameChanged, &_datasetsModel, &DatasetsModel::updateData);
+        connect(dataset.get(), &DatasetImpl::textChanged, &_datasetsModel, &DatasetsModel::updateData);
     }
 
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
@@ -153,7 +151,7 @@ void DatasetPickerAction::setCurrentDataset(const QString& guid)
 
 QString DatasetPickerAction::getCurrentDatasetGuid() const
 {
-    return getCurrentDataset().getDatasetGuid();
+    return getCurrentDataset().getDatasetId();
 }
 
 void DatasetPickerAction::populateDatasetsFromCore()
@@ -173,7 +171,7 @@ void DatasetPickerAction::populateDatasetsFromCore()
     _datasetsModel.setDatasets(datasets);
 
     for (auto& dataset : datasets)
-        connect(&dataset, &Dataset<DatasetImpl>::dataGuiNameChanged, &_datasetsModel, &DatasetsModel::updateData);
+        connect(dataset.get(), &DatasetImpl::textChanged, &_datasetsModel, &DatasetsModel::updateData);
 
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
@@ -239,7 +237,7 @@ QVariantMap DatasetPickerAction::toVariantMap() const
 DatasetPickerAction::DatasetsModel::DatasetsModel(QObject* parent /*= nullptr*/) :
     QAbstractListModel(parent),
     _datasets(),
-    _showFullPathName(true),
+    _showLocation(true),
     _showIcon(true)
 {
 }
@@ -281,10 +279,10 @@ QVariant DatasetPickerAction::DatasetsModel::data(const QModelIndex& index, int 
             switch (column)
             {
                 case Column::Name:
-                    return dataset->getGuiName();// _showFullPathName ? dataset->getDataHierarchyItem().getFullPathName() : dataset->getGuiName();
+                    return _showLocation ? dataset->getLocation() : dataset->text();
 
                 case Column::GUID:
-                    return dataset->getGuid();
+                    return dataset->getId();
 
                 default:
                     break;
@@ -329,11 +327,11 @@ void DatasetPickerAction::DatasetsModel::addDataset(const Dataset<DatasetImpl>& 
 
     auto& addedDataset = _datasets.last();
 
-    connect(&addedDataset, &Dataset<DatasetImpl>::dataAboutToBeRemoved, this, [this, &addedDataset]() {
+    connect(&addedDataset, &Dataset<DatasetImpl>::datasetAboutToBeRemoved, this, [this, &addedDataset]() {
         removeDataset(addedDataset);
     });
 
-    connect(&addedDataset, &Dataset<DatasetImpl>::dataGuiNameChanged, this, [this, &addedDataset]() {
+    connect(addedDataset.get(), &DatasetImpl::textChanged, this, [this, &addedDataset]() {
         const auto colorDatasetRowIndex = rowIndex(addedDataset);
 
         if (colorDatasetRowIndex < 0)
@@ -388,14 +386,17 @@ void DatasetPickerAction::DatasetsModel::setShowIcon(bool showIcon)
     updateData();
 }
 
-bool DatasetPickerAction::DatasetsModel::getShowFullPathName() const
+bool DatasetPickerAction::DatasetsModel::getShowLocation() const
 {
-    return _showFullPathName;
+    return _showLocation;
 }
 
-void DatasetPickerAction::DatasetsModel::setShowFullPathName(const bool& showFullPathName)
+void DatasetPickerAction::DatasetsModel::setShowLocation(bool showLocation)
 {
-    _showFullPathName = showFullPathName;
+    if (showLocation == _showLocation)
+        return;
+
+    _showLocation = showLocation;
 
     updateData();
 }

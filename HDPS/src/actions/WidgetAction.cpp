@@ -45,12 +45,15 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _settingsPrefix(),
     _highlighting(HighlightOption::None),
     _popupSizeHint(),
-    _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default))
+    _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default)),
+    _location()
 {
     Q_ASSERT(!title.isEmpty());
 
     setText(title);
     setSerializationName(title);
+
+    updateLocation();
 
     if (core()->isInitialized())
     {
@@ -74,18 +77,18 @@ WidgetAction* WidgetAction::getParentAction() const
     return dynamic_cast<WidgetAction*>(this->parent());
 }
 
-WidgetActions WidgetAction::getChildActions() const
+WidgetActions WidgetAction::getChildren() const
 {
-    WidgetActions childActions;
+    WidgetActions children;
 
-    for (auto child : children()) {
+    for (auto child : this->children()) {
         auto childAction = dynamic_cast<WidgetAction*>(child);
 
         if (childAction)
-            childActions << childAction;
+            children << childAction;
     }
 
-    return childActions;
+    return children;
 }
 
 bool WidgetAction::isRoot() const
@@ -98,7 +101,7 @@ bool WidgetAction::isRoot() const
 
 bool WidgetAction::isLeaf() const
 {
-    return getChildActions().isEmpty();
+    return getChildren().isEmpty();
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
@@ -479,7 +482,7 @@ void WidgetAction::setConnectionPermissionsFlag(ConnectionPermissionFlag connect
     emit connectionPermissionsChanged(_connectionPermissions);
 
     if (recursive)
-        for (auto childAction : getChildActions())
+        for (auto childAction : getChildren())
             childAction->setConnectionPermissionsFlag(connectionPermissionsFlag, unset, recursive);
 }
 
@@ -490,7 +493,7 @@ void WidgetAction::setConnectionPermissions(std::int32_t connectionPermissions, 
     emit connectionPermissionsChanged(_connectionPermissions);
 
     if (recursive)
-        for (auto childAction : getChildActions())
+        for (auto childAction : getChildren())
             childAction->setConnectionPermissions(connectionPermissions, recursive);
 }
 
@@ -514,7 +517,7 @@ void WidgetAction::cacheConnectionPermissions(bool recursive /*= false*/)
     _cachedConnectionPermissions = _connectionPermissions;
 
     if (recursive)
-        for (auto childAction : getChildActions())
+        for (auto childAction : getChildren())
             childAction->cacheConnectionPermissions(recursive);
 }
 
@@ -523,7 +526,7 @@ void WidgetAction::restoreConnectionPermissions(bool recursive /*= false*/)
     setConnectionPermissions(_cachedConnectionPermissions);
 
     if (recursive)
-        for (auto childAction : getChildActions())
+        for (auto childAction : getChildren())
             childAction->restoreConnectionPermissions(recursive);
 }
 
@@ -588,19 +591,35 @@ void WidgetAction::saveToSettings()
 
 QString WidgetAction::getLocation() const
 {
-    QStringList location;
+    return _location;
+}
+
+void WidgetAction::updateLocation(bool recursive /*= true*/)
+{
+    QStringList locationSegments;
 
     auto currentParent = dynamic_cast<WidgetAction*>(parent());
 
-    location << text();
+    locationSegments << text();
 
     while (currentParent) {
-        location.insert(location.begin(), currentParent->text());
+        locationSegments.insert(locationSegments.begin(), currentParent->text());
 
         currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());
     }
 
-    return location.join("/");
+    const auto location = locationSegments.join("/");
+
+    if (location == _location)
+        return;
+
+    _location = location;
+
+    emit locationChanged(_location);
+
+    if (recursive)
+        for (const auto& child : getChildren())
+            child->updateLocation(recursive);
 }
 
 QVector<WidgetAction*> WidgetAction::findChildren(const QString& searchString, bool recursive /*= true*/) const
@@ -735,7 +754,7 @@ void WidgetAction::setConfigurationFlag(ConfigurationFlag configurationFlag, boo
     emit configurationChanged(_configuration);
 
     if (recursive) {
-        for (auto childAction : getChildActions())
+        for (auto childAction : getChildren())
             childAction->setConfigurationFlag(configurationFlag, unset, recursive);
     }
 
@@ -750,7 +769,7 @@ void WidgetAction::setConfiguration(std::int32_t configuration, bool recursive /
     emit configurationChanged(_configuration);
 
     if (recursive) {
-        for (auto childAction : getChildActions())
+        for (auto childAction : getChildren())
             childAction->setConfiguration(configuration, recursive);
     }
 }
@@ -865,6 +884,21 @@ bool WidgetAction::isEnabled() const
         return false;
 
     return QWidgetAction::isEnabled();
+}
+
+void WidgetAction::setText(const QString& text)
+{
+    if (text == this->text())
+        return;
+
+    if (text.isEmpty())
+        throw std::runtime_error("Setting widget action text to an empty string!");
+
+    QWidgetAction::setText(text);
+
+    emit textChanged(this->text());
+
+    updateLocation();
 }
 
 bool WidgetAction::mayConnectToPublicAction(const WidgetAction* publicAction) const

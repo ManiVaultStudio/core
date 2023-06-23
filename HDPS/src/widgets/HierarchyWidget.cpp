@@ -92,7 +92,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _selectionGroupAction.addAction(&_selectNoneAction);
 
     _columnsGroupAction.setText("Columns");
-    _columnsGroupAction.setToolTip(QString("Edit which %1s hierarchy columns should be visible").arg(_itemTypeName.toLower()));
+    _columnsGroupAction.setToolTip(QString("Edit which %1 columns should be visible").arg(_itemTypeName.toLower()));
     _columnsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("columns"));
     _columnsGroupAction.setShowLabels(false);
 
@@ -215,7 +215,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
         _columnsGroupAction.setEnabled(hasItems);
         _settingsGroupAction.setEnabled(hasItems);
 
-        _treeView.setHeaderHidden(_headerHidden || !hasItems);
+        //_treeView.setHeaderHidden(_headerHidden || !hasItems);
         
         updateExpandCollapseActionsReadOnly();
         updateOverlayWidget();

@@ -306,7 +306,7 @@ void Points::init()
         _dimensionsPickerGroupAction->setShowLabels(false);
         _dimensionsPickerGroupAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 
-        connect(&getSmartPointer(), &Dataset<Points>::dataChanged, this, [this]() -> void {
+        connect(&getSmartPointer(), &Dataset<Points>::datasetChanged, this, [this]() -> void {
             if (_dimensionsPickerAction == nullptr)
                 _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction, "Dimensions");
 
@@ -318,12 +318,12 @@ void Points::init()
 
     _infoAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetSelectionChanged));
     _eventListener.registerDataEventByType(PointType, [this](DataEvent* dataEvent)
     {
         switch (dataEvent->getType())
         {
-            case EventType::DataSelectionChanged:
+            case EventType::DatasetSelectionChanged:
             {
                 // Do not process our own selection changes
                 if (dataEvent->getDataset() == Dataset<Points>(this))
@@ -573,7 +573,7 @@ Dataset<DatasetImpl> Points::copy() const
 {
     auto set = new Points(Application::core(), getRawDataName());
 
-    set->setGuiName(getGuiName());
+    set->setText(text());
     set->indices = indices;
 
     return set;
@@ -708,7 +708,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
 
         pointIndexOffset += targetPoints->getNumPoints();
 
-        getDataHierarchyItem().setTaskDescription(QString("Creating mappings for %1").arg(proxyMember->getGuiName()));
+        getDataHierarchyItem().setTaskDescription(QString("Creating mappings for %1").arg(proxyMember->text()));
         getDataHierarchyItem().setTaskProgress(static_cast<float>(getProxyMembers().indexOf(proxyMember)) / static_cast<float>(getProxyMembers().count()));
 
         QCoreApplication::processEvents();

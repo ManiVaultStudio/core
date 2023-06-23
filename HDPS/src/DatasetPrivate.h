@@ -54,12 +54,12 @@ protected: // Construction/destruction
 public: // Member access and reset
 
     /** Get the globally unique identifier of the dataset */
-    QString getDatasetGuid() const;
+    QString getDatasetId() const;
 
     /** Set the globally unique identifier of the dataset
-     * @param datasetGuid Globally unique identifier of the dataset
+     * @param datasetId Globally unique identifier of the dataset
      */
-    void setDatasetGuid(const QString& datasetGuid);
+    void setDatasetId(const QString& datasetId);
 
     /**
      * Get pointer to the dataset
@@ -110,41 +110,34 @@ signals:
     void changed(DatasetImpl* dataset);
 
     /** Signals that the dataset is about to be removed */
-    void dataAboutToBeRemoved();
+    void datasetAboutToBeRemoved();
 
     /**
      * Signals that the dataset has been removed
      * @param datasetId Globally unique identifier of the dataset that is removed
      */
-    void dataRemoved(const QString& datasetId);
+    void datasetRemoved(const QString& datasetId);
 
     /** Signals that the dataset contents changed */
-    void dataChanged();
+    void datasetChanged();
 
     /** Signals that the dataset selection changed */
-    void dataSelectionChanged();
-
-    /**
-     * Signals that the dataset GUI name changed
-     * @param oldGuiName Old GUI name
-     * @param newGuiName New GUI name
-     */
-    void dataGuiNameChanged(const QString& oldGuiName, const QString& newGuiName);
+    void datasetSelectionChanged();
 
     /**
      * Signals that a dataset child is added
      * @param childDataset Smart pointer to added child dataset
      */
-    void dataChildAdded(const Dataset<DatasetImpl>& childDataset);
+    void datasetChildAdded(const Dataset<DatasetImpl>& childDataset);
 
     /**
      * Signals that a dataset child was removed
      * @param childDatasetGuid GUID of the dataset child that is removed
      */
-    void dataChildRemoved(const QString& childDatasetGuid);
+    void datasetChildRemoved(const QString& childDatasetGuid);
 
 private:
-    QString         _datasetGuid;       /** Globally unique identifier of the dataset */
+    QString         _datasetId;         /** Globally unique identifier of the dataset */
     DatasetImpl*    _dataset;           /** Pointer to the dataset (if any) */
     EventListener   _eventListener;     /** Listen to HDPS events */
 };
@@ -157,7 +150,7 @@ private:
  */
 inline bool operator == (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
 {
-    return lhs.getDatasetGuid() == rhs.getDatasetGuid();
+    return lhs.getDatasetId() == rhs.getDatasetId();
 }
 
 /**
@@ -168,7 +161,7 @@ inline bool operator == (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
  */
 inline bool operator != (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
 {
-    return lhs.getDatasetGuid() != rhs.getDatasetGuid();
+    return lhs.getDatasetId() != rhs.getDatasetId();
 }
 
 }

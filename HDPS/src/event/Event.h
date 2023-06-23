@@ -20,16 +20,15 @@ namespace util
 
 enum class EventType
 {
-    DataAdded,
-    DataChanged,
-    DataAboutToBeRemoved,
-    DataRemoved,
-    DataSelectionChanged,
-    DataGuiNameChanged,
-    DataChildAdded,
-    DataChildRemoved,
-    DataLocked,
-    DataUnlocked
+    DatasetAdded,
+    DatasetChanged,
+    DatasetAboutToBeRemoved,
+    DatasetRemoved,
+    DatasetSelectionChanged,
+    DatasetChildAdded,
+    DatasetChildRemoved,
+    DatasetLocked,
+    DatasetUnlocked
 };
 
 class HdpsEvent
@@ -109,7 +108,7 @@ public:
      * @param dataset Smart pointer to the dataset
      */
     DataAddedEvent(const Dataset<DatasetImpl>& dataset) :
-        DataEvent(EventType::DataAdded, dataset)
+        DataEvent(EventType::DatasetAdded, dataset)
     {
     }
 
@@ -157,7 +156,7 @@ public:
      * @param dataset Smart pointer to the dataset
      */
     DataChangedEvent(const Dataset<DatasetImpl>& dataset) :
-        DataEvent(EventType::DataChanged, dataset)
+        DataEvent(EventType::DatasetChanged, dataset)
     {
     }
 };
@@ -172,10 +171,10 @@ public:
 
     /**
      * Constructor
-     * @param dataset Smarty pointer to dataset
+     * @param dataset Smart pointer to dataset
      */
     DataAboutToBeRemovedEvent(const Dataset<DatasetImpl>& dataset) :
-        DataEvent(EventType::DataAboutToBeRemoved, dataset)
+        DataEvent(EventType::DatasetAboutToBeRemoved, dataset)
     {
     }
 };
@@ -194,7 +193,7 @@ public:
      * @param datasetGuid GUID of the dataset that has been removed
      */
     DataRemovedEvent(const Dataset<DatasetImpl>& dataset, const QString& datasetGuid, const DataType& dataType) :
-        DataEvent(EventType::DataRemoved, nullptr),
+        DataEvent(EventType::DatasetRemoved, nullptr),
         _datasetGuid(datasetGuid),
         _dataType(dataType)
     {
@@ -228,37 +227,9 @@ public:
      * @param dataset Smart pointer to the dataset
      */
     DataSelectionChangedEvent(const Dataset<DatasetImpl>& dataset) :
-        DataEvent(EventType::DataSelectionChanged, dataset)
+        DataEvent(EventType::DatasetSelectionChanged, dataset)
     {
     }
-};
-
-/**
- * Data GUI name changed event class
- * Data event which is emitted by the core when a dataset GUI name changed
- */
-class DataGuiNameChangedEvent : public DataEvent
-{
-public:
-
-    /**
-     * Constructor
-     * @param dataset Smart pointer to the dataset
-     * @param previousGuiName Previous GUI name
-     */
-    DataGuiNameChangedEvent(const Dataset<DatasetImpl>& dataset, const QString previousGuiName) :
-        DataEvent(EventType::DataGuiNameChanged, dataset),
-        _previousGuiName(previousGuiName)
-    {
-    }
-
-    /** Get the previous GUI name of the dataset */
-    QString getPreviousGuiName() const {
-        return _previousGuiName;
-    }
-
-protected:
-    QString     _previousGuiName;      /** Previous GUI name of the dataset */
 };
 
 /**
@@ -275,7 +246,7 @@ public:
      * @param childDataset Smart pointer to the child dataset
      */
     DataChildAddedEvent(const Dataset<DatasetImpl>& dataset, const Dataset<DatasetImpl>& childDataset) :
-        DataEvent(EventType::DataChildAdded, dataset),
+        DataEvent(EventType::DatasetChildAdded, dataset),
         _childDataset(childDataset)
     {
     }
@@ -303,7 +274,7 @@ public:
      * @param childDatasetGuid GUID of the child dataset
      */
     DataChildRemovedEvent(const Dataset<DatasetImpl>& dataset, const QString& childDatasetGuid) :
-        DataEvent(EventType::DataChildRemoved, dataset),
+        DataEvent(EventType::DatasetChildRemoved, dataset),
         _childDatasetGuid(childDatasetGuid)
     {
     }
@@ -330,7 +301,7 @@ public:
      * @param dataset Smart pointer to the dataset
      */
     DataLockedEvent(const Dataset<DatasetImpl>& dataset) :
-        DataEvent(EventType::DataLocked, dataset)
+        DataEvent(EventType::DatasetLocked, dataset)
     {
     }
 };
@@ -348,7 +319,7 @@ public:
      * @param dataset Smart pointer to the dataset
      */
     DataUnlockedEvent(const Dataset<DatasetImpl>& dataset) :
-        DataEvent(EventType::DataUnlocked, dataset)
+        DataEvent(EventType::DatasetUnlocked, dataset)
     {
     }
 };

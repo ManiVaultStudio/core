@@ -168,11 +168,11 @@ void Clusters::init()
 
     addAction(*_infoAction.get());
 
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetSelectionChanged));
     _eventListener.registerDataEventByType(ClusterType, [this](DataEvent* dataEvent) {
 
         // Only process selection changes
-        if (dataEvent->getType() != EventType::DataSelectionChanged)
+        if (dataEvent->getType() != EventType::DatasetSelectionChanged)
             return;
 
         // Do not process our own selection changes

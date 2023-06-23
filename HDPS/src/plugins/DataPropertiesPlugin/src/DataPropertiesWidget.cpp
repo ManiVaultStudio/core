@@ -29,7 +29,7 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
     connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::selectedItemsChanged);
 
-    connect(&_dataset, &Dataset<DatasetImpl>::dataRemoved, this, [this]() -> void {
+    connect(&_dataset, &Dataset<DatasetImpl>::datasetRemoved, this, [this]() -> void {
         _groupsAction.setGroupActions({});
     });
 }
@@ -64,7 +64,7 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                     return;
 
 #ifdef _DEBUG
-                qDebug().noquote() << QString("Loading %1 into data properties").arg(_dataset->getGuiName());
+                qDebug().noquote() << QString("Loading %1 into data properties").arg(_dataset->text());
 #endif
 
                 for (auto childObject : _dataset->children()) {

@@ -31,6 +31,11 @@ QString Serializable::getId() const
     return _id;
 }
 
+void Serializable::setId(const QString& id)
+{
+    _id = id;
+}
+
 QString Serializable::getSerializationName() const
 {
     return _serializationName;

@@ -387,7 +387,7 @@ protected:
     };
 
     /** Convenience class for combining action items in a row */
-    class Row : public QList<QStandardItem*>
+    class Row final : public QList<QStandardItem*>
     {
     public:
 

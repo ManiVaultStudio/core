@@ -659,7 +659,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             Application::setSerializationAborted(false);
 
             connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaving, this, [&taskProgressDialog](DataHierarchyItem& savingItem) {
-                taskProgressDialog.setCurrentTask("Exporting dataset: " + savingItem.getFullPathName());
+                taskProgressDialog.setCurrentTask("Exporting dataset: " + savingItem.getLocation());
             });
 
             projects().toJsonFile(jsonFileInfo.absoluteFilePath());

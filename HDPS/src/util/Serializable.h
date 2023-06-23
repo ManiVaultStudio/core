@@ -37,7 +37,13 @@ public:
      * Get id
      * @return Globally unique identifier of the serializable object
      */
-    virtual QString getId() const;
+    virtual QString getId() const final;
+
+    /**
+     * Set globally unique identifier (only use this function when strictly necessary and when the ramifications are understood, undefined behaviour might happen otherwise)
+     * @param id Globally unique identifier of the serializable object
+     */
+    virtual void setId(const QString& id) final;
 
     /**
      * Get serialization name
