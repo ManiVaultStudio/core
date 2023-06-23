@@ -77,6 +77,21 @@ WidgetAction* WidgetAction::getParentAction() const
     return dynamic_cast<WidgetAction*>(this->parent());
 }
 
+WidgetActions WidgetAction::getParentActions() const
+{
+    WidgetActions parentActions;
+
+    auto currentParent = dynamic_cast<WidgetAction*>(parent());
+
+    while (currentParent) {
+        parentActions << currentParent;
+
+        currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());
+    }
+
+    return parentActions;
+}
+
 WidgetActions WidgetAction::getChildren() const
 {
     WidgetActions children;
@@ -598,15 +613,10 @@ void WidgetAction::updateLocation(bool recursive /*= true*/)
 {
     QStringList locationSegments;
 
-    auto currentParent = dynamic_cast<WidgetAction*>(parent());
+    for (auto parentAction : getParentActions())
+        locationSegments << parentAction->text();
 
     locationSegments << text();
-
-    while (currentParent) {
-        locationSegments.insert(locationSegments.begin(), currentParent->text());
-
-        currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());
-    }
 
     const auto location = locationSegments.join("/");
 

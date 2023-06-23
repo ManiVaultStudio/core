@@ -121,6 +121,12 @@ public: // Hierarchy queries
     virtual WidgetAction* getParentAction() const final;
 
     /**
+     * Get parent widget actions
+     * @return Pointer to parent widget actions
+     */
+    virtual WidgetActions getParentActions() const final;
+
+    /**
      * Get child actions
      * @return Vector of pointers to child actions
      */
