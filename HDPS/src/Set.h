@@ -212,6 +212,14 @@ public:
      */
     QString getRawDataSizeHumanReadable() const;
 
+public: // Location
+
+    /**
+     * Get location
+     * @return Path relative to the top-level action
+     */
+    QString getLocation() const override;
+
 public: // Hierarchy
 
     /** Get reference to data hierarchy item */

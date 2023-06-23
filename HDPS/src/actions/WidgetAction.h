@@ -257,7 +257,7 @@ public: // Location
      * Get location
      * @return Path relative to the top-level action
      */
-    virtual QString getLocation() const final;
+    virtual QString getLocation() const;
 
 private: // Location
 

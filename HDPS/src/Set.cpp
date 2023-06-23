@@ -416,6 +416,11 @@ QString DatasetImpl::getRawDataSizeHumanReadable() const
     return util::getNoBytesHumanReadable(getRawDataSize());
 }
 
+QString DatasetImpl::getLocation() const
+{
+    return getDataHierarchyItem().getLocation();
+}
+
 QVariant DatasetImpl::getProperty(const QString& name, const QVariant& defaultValue /*= QVariant()*/) const
 {
     if (!hasProperty(name))

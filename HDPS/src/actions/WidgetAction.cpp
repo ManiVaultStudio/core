@@ -611,14 +611,8 @@ QString WidgetAction::getLocation() const
 
 void WidgetAction::updateLocation(bool recursive /*= true*/)
 {
-    QStringList locationSegments;
-
-    for (auto parentAction : getParentActions())
-        locationSegments << parentAction->text();
-
-    locationSegments << text();
-
-    const auto location = locationSegments.join("/");
+    const auto parentAction = getParentAction();
+    const auto location     = parentAction ? QString("%1/%2").arg(parentAction->getLocation(), text()) : text();
 
     if (location == _location)
         return;

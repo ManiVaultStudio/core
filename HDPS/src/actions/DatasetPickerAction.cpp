@@ -7,7 +7,7 @@
 #include <QHBoxLayout>
 
 #ifdef _DEBUG
-    #define DATASET_PICKER_ACTION_VERBOSE
+    //#define DATASET_PICKER_ACTION_VERBOSE
 #endif
 
 using namespace hdps::util;
@@ -100,7 +100,7 @@ void DatasetPickerAction::setDatasets(Datasets datasets)
             _datasetsModel.removeDataset(dataset);
         });
 
-        connect(dataset.get(), &DatasetImpl::textChanged, &_datasetsModel, &DatasetsModel::updateData);
+        connect(dataset.get(), &DatasetImpl::locationChanged, &_datasetsModel, &DatasetsModel::updateData);
     }
 
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
@@ -171,7 +171,7 @@ void DatasetPickerAction::populateDatasetsFromCore()
     _datasetsModel.setDatasets(datasets);
 
     for (auto& dataset : datasets)
-        connect(dataset.get(), &DatasetImpl::textChanged, &_datasetsModel, &DatasetsModel::updateData);
+        connect(dataset.get(), &DatasetImpl::locationChanged, &_datasetsModel, &DatasetsModel::updateData);
 
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
@@ -331,7 +331,7 @@ void DatasetPickerAction::DatasetsModel::addDataset(const Dataset<DatasetImpl>& 
         removeDataset(addedDataset);
     });
 
-    connect(addedDataset.get(), &DatasetImpl::textChanged, this, [this, &addedDataset]() {
+    connect(addedDataset.get(), &DatasetImpl::locationChanged, this, [this, &addedDataset]() {
         const auto colorDatasetRowIndex = rowIndex(addedDataset);
 
         if (colorDatasetRowIndex < 0)
