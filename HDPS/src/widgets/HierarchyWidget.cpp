@@ -126,6 +126,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
         auto columnVisibilityAction = new ToggleAction(this, columnHeader.isEmpty() ? QString("Column %1").arg(QString::number(columnIndex)) : columnHeader, columnVisible);
 
+        columnVisibilityAction->setConnectionPermissionsToForceNone();
+
         connect(columnVisibilityAction, &ToggleAction::toggled, this, [this, columnIndex, updateSelectAllCollumnsReadOnly](bool toggled) -> void {
             _treeView.setColumnHidden(columnIndex, !toggled);
             updateSelectAllCollumnsReadOnly();
@@ -184,7 +186,6 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     setLayout(layout);
 
     _treeView.setAutoFillBackground(true);
-    //_treeView.setAutoExpandDelay(300);
     _treeView.setContextMenuPolicy(Qt::CustomContextMenu);
     _treeView.setSelectionModel(&_selectionModel);
     _treeView.setDragEnabled(true);
@@ -194,8 +195,6 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _treeView.setRootIsDecorated(true);
     _treeView.setItemsExpandable(true);
     _treeView.setIconSize(QSize(14, 14));
-    //_treeView.setAnimated(true);
-    //_treeView.setUniformRowHeights(true);
     
     auto header = _treeView.header();
 
@@ -215,7 +214,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
         _columnsGroupAction.setEnabled(hasItems);
         _settingsGroupAction.setEnabled(hasItems);
 
-        //_treeView.setHeaderHidden(_headerHidden || !hasItems);
+        _treeView.setHeaderHidden(_headerHidden || !hasItems);
         
         updateExpandCollapseActionsReadOnly();
         updateOverlayWidget();
