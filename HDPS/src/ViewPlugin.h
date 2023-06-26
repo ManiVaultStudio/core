@@ -13,6 +13,7 @@
 
 namespace hdps::gui {
     class ViewPluginTriggerAction;
+    class ToolbarAction;
 }
 
 namespace hdps::plugin
@@ -35,12 +36,6 @@ public:
 
     /** Perform startup initialization */
     void init() override;
-
-    /**
-     * Set name of the object
-     * @param name Name of the object
-     */
-    void setObjectName(const QString& name);
 
     /**
      * Load one (or more) datasets in the view
@@ -98,6 +93,17 @@ public: // Title bar settings menu
      */
     gui::WidgetActions getTitleBarMenuActions();
 
+public: // Settings actions
+
+    /**
+     * Add a settings action to the view (the action widget will be docked in the view)
+     * @param settingsAction Pointer to settings action to add
+     */
+    void addSettingsAction(WidgetAction* settingsAction);
+
+    /** Get vector of pointers to settings actions */
+    gui::WidgetActions getSettingsActions() const;
+
 public: // Serialization
 
     /**
@@ -141,7 +147,7 @@ private:
     gui::PresetsAction      _presetsAction;             /** Action for managing presets */
     QKeySequence            _triggerShortcut;           /** Shortcut for triggering the plugin */
     gui::WidgetActions      _titleBarMenuActions;       /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
-    //gui::WidgetActions      _settingsActions;           /** Settings actions which are added to the end of the settings menu of the view plugin title bar */
+    gui::WidgetActions      _settingsActions;           /** Settings actions which are displayed as docking widgets in the interface */
 };
 
 class ViewPluginFactory : public PluginFactory

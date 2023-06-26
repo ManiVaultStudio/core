@@ -61,14 +61,18 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
         
     _filterNameAction.setSearchMode(true);
     _filterNameAction.setClearable(true);
+    _filterNameAction.setConnectionPermissionsToForceNone();
 
     _filterGroupAction.setText("Filtering");
     _filterGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
     _filterGroupAction.setToolTip("Adjust filtering parameters");
+    _filterGroupAction.setConnectionPermissionsToForceNone();
 
     _filterCaseSensitiveAction.setToolTip("Enable/disable search filter case-sensitive");
+    _filterCaseSensitiveAction.setConnectionPermissionsToForceNone();
 
     _filterRegularExpressionAction.setToolTip("Enable/disable search filter with regular expression");
+    _filterRegularExpressionAction.setConnectionPermissionsToForceNone();
 
     _filterGroupAction.addAction(&_filterColumnAction);
     _filterGroupAction.addAction(&_filterCaseSensitiveAction);
@@ -77,16 +81,22 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));
     _expandAllAction.setToolTip(QString("Expand all %1s in the hierarchy").arg(_itemTypeName.toLower()));
     _expandAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    _expandAllAction.setConnectionPermissionsToForceNone();
 
     _collapseAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-up"));
     _collapseAllAction.setToolTip(QString("Collapse all %1s in the hierarchy").arg(_itemTypeName.toLower()));
     _collapseAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    _collapseAllAction.setConnectionPermissionsToForceNone();
 
     _selectAllAction.setToolTip(QString("Select all %1s").arg(_itemTypeName.toLower()));
+    _selectAllAction.setConnectionPermissionsToForceNone();
+
     _selectNoneAction.setToolTip(QString("De-select all %1s").arg(_itemTypeName.toLower()));
+    _selectNoneAction.setConnectionPermissionsToForceNone();
 
     _selectionGroupAction.setText("Selection");
     _selectionGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+    _selectionGroupAction.setConnectionPermissionsToForceNone();
 
     _selectionGroupAction.addAction(&_selectAllAction);
     _selectionGroupAction.addAction(&_selectNoneAction);
@@ -95,6 +105,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _columnsGroupAction.setToolTip(QString("Edit which %1 columns should be visible").arg(_itemTypeName.toLower()));
     _columnsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("columns"));
     _columnsGroupAction.setShowLabels(false);
+    _columnsGroupAction.setConnectionPermissionsToForceNone();
 
     auto selectAllCollumns = new TriggerAction(this, "Select all");
 

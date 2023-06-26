@@ -4,10 +4,15 @@
 #include <CoreInterface.h>
 
 #include <actions/WidgetAction.h>
+#include <actions/ToolbarAction.h>
 
 #include <ViewPlugin.h>
 
 #include <util/Serialization.h>
+
+#include <DockWidgetTab.h>
+#include <DockAreaWidget.h>
+#include <DockAreaTitleBar.h>
 
 #ifdef _DEBUG
     #define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
@@ -29,7 +34,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
     _viewPluginMap(),
     _settingsMenu(),
     _helpAction(this, "Help"),
-    _cachedVisibility(false)
+    _cachedVisibility(false),
+    _dockManager(this)
 {
     active << this;
 
@@ -44,7 +50,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
     _viewPluginMap(),
     _settingsMenu(),
     _helpAction(this, "Help"),
-    _cachedVisibility(false)
+    _cachedVisibility(false),
+    _dockManager(this)
 {
     active << this;
 
@@ -212,6 +219,7 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
     if (_viewPlugin)
         variantMap["ViewPlugin"] = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin()->toVariantMap();
 
+    //variantMap["DockManager"]
     return variantMap;
 }
 
@@ -238,8 +246,52 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 
     _viewPlugin = viewPlugin;
 
+    setProperty("ViewPluginId", _viewPlugin->getId());
+
+    auto centralDockWidget = new CDockWidget("Central");
+
+    centralDockWidget->setWidget(&_viewPlugin->getWidget());
+
+    _dockManager.setCentralWidget(centralDockWidget);
+    
+    for (auto settingsAction : _viewPlugin->getSettingsActions()) {
+        auto settingsDockWidget = new CDockWidget(settingsAction->text());
+        auto settingsWidget     = settingsAction->createWidget(settingsDockWidget);
+
+        settingsWidget->setAutoFillBackground(true);
+
+        settingsDockWidget->setWidget(settingsWidget, eInsertMode::ForceNoScrollArea);
+        settingsDockWidget->setMinimumSizeHintMode(eMinimumSizeHintMode::MinimumSizeHintFromDockWidget);
+        settingsDockWidget->setAutoFillBackground(true);
+
+        _dockManager.addDockWidget(DockWidgetArea::AllDockAreas, settingsDockWidget);
+
+        auto toolbarAction = dynamic_cast<ToolbarAction*>(settingsAction);
+
+        if (toolbarAction) {
+            const auto studioModeChanged = [settingsDockWidget]() -> void {
+                const auto isInStudioMode = projects().getCurrentProject()->getStudioModeAction().isChecked();
+
+                settingsDockWidget->tabWidget()->setVisible(isInStudioMode);
+                settingsDockWidget->dockAreaWidget()->titleBar()->setVisible(isInStudioMode);
+
+                settingsDockWidget->setFeature(CDockWidget::DockWidgetClosable, isInStudioMode);
+                settingsDockWidget->setFeature(CDockWidget::DockWidgetMovable, isInStudioMode);
+                settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, isInStudioMode);
+            };
+
+            studioModeChanged();
+
+            connect(&projects().getCurrentProject()->getStudioModeAction(), &ToggleAction::toggled, this, studioModeChanged);
+        }
+        else {
+            settingsDockWidget->setFeature(CDockWidget::DockWidgetPinnable, true);
+        }
+    }
+
     setIcon(viewPlugin->getIcon());
-    setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
+    //setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
+    setWidget(&_dockManager);
     setMinimumSizeHintMode(eMinimumSizeHintMode::MinimumSizeHintFromDockWidget);
 
     const auto updateWindowTitle = [this]() -> void {

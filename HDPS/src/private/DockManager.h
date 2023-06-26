@@ -19,7 +19,7 @@
  *
  * ADS inherited dock manager class, primary purpose it to support layout serialization
  *
- * inherits ADS dock manager as protected so add/remove of dockwidgets has to pass through this class.
+ * inherits ADS dock manager as protected so add/remove of dock widgets has to pass through this class.
  *
  * @author Thomas Kroes
  */
@@ -56,13 +56,6 @@ public:
      * @return Vector of pointers to plugin dock widgets
      */
     const ViewPluginDockWidgets getViewPluginDockWidgets() const;
-
-    /**
-     * Find the dock area widget where \p widget resides
-     * @param widget Pointer to widget to look for
-     * @return Pointer to ADS dock widget area (if found, otherwise nullptr)
-     */
-    ads::CDockAreaWidget* findDockAreaWidget(QWidget* widget);
 
     /**
      * Find the dock area widget where the widget of \p viewPlugin resides

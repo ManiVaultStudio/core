@@ -34,7 +34,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     util::Serializable(),
     _defaultWidgetFlags(),
     _sortIndex(-1),
-    _stretch(0),
+    _stretch(-1),
     _forceHidden(false),
     _forceDisabled(false),
     _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::PublishViaApi) | static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaApi) | static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi)),
@@ -675,13 +675,14 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "IsVisible");
     variantMapMustContain(variantMap, "SortIndex");
     variantMapMustContain(variantMap, "ConnectionPermissions");
-    variantMapMustContain(variantMap, "Stretch");
 
     setEnabled(variantMap["IsEnabled"].toBool());
     setChecked(variantMap["IsChecked"].toBool());
     setVisible(variantMap["IsVisible"].toBool());
     setSortIndex(variantMap["SortIndex"].toInt());
-    setStretch(variantMap["Stretch"].toInt());
+
+    if (variantMap.contains("Stretch"))
+        setStretch(variantMap["Stretch"].toInt());
 
     if (variantMap.contains("IsForceHidden"))
         setForceHidden(variantMap["IsForceHidden"].toInt());

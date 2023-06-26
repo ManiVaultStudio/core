@@ -183,11 +183,6 @@ void ViewPlugin::init()
 {
 }
 
-void ViewPlugin::setObjectName(const QString& name)
-{
-    QObject::setObjectName("Plugins/View/" + name);
-}
-
 void ViewPlugin::loadData(const Datasets& datasets)
 {
     qDebug() << "Load function not implemented in view plugin implementation";
@@ -271,6 +266,9 @@ void ViewPlugin::addTitleBarMenuAction(hdps::gui::WidgetAction* action)
 {
     Q_ASSERT(action != nullptr);
 
+    if (action == nullptr)
+        return;
+
     _titleBarMenuActions << action;
 }
 
@@ -278,12 +276,30 @@ void ViewPlugin::removeTitleBarMenuAction(hdps::gui::WidgetAction* action)
 {
     Q_ASSERT(action != nullptr);
 
+    if (action == nullptr)
+        return;
+
     _titleBarMenuActions.removeOne(action);
 }
 
 hdps::gui::WidgetActions ViewPlugin::getTitleBarMenuActions()
 {
     return _titleBarMenuActions;
+}
+
+void ViewPlugin::addSettingsAction(WidgetAction* settingsAction)
+{
+    Q_ASSERT(settingsAction != nullptr);
+
+    if (settingsAction == nullptr)
+        return;
+
+    _settingsActions << settingsAction;
+}
+
+hdps::gui::WidgetActions ViewPlugin::getSettingsActions() const
+{
+    return _settingsActions;
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :

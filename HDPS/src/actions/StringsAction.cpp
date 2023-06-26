@@ -20,6 +20,14 @@ StringsAction::StringsAction(QObject* parent, const QString& title /*= ""*/, con
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
     setStrings(strings);
+
+    _toolbarAction.setShowLabels(false);
+
+    _nameAction.setStretch(1);
+
+    _toolbarAction.addAction(&_nameAction);
+    _toolbarAction.addAction(&_addAction);
+    _toolbarAction.addAction(&_removeAction);
 }
 
 QStringList StringsAction::getStrings() const
@@ -175,12 +183,6 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
 
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(&_hierarchyWidget, 1);
-
-    stringsAction->getToolbarAction().setShowLabels(false);
-
-    stringsAction->getToolbarAction().addAction(&stringsAction->getNameAction());
-    stringsAction->getToolbarAction().addAction(&stringsAction->getAddAction());
-    stringsAction->getToolbarAction().addAction(&stringsAction->getRemoveAction());
 
     if (widgetFlags & StringsAction::WidgetFlag::MayEdit)
         layout->addWidget(stringsAction->getToolbarAction().createWidget(this));

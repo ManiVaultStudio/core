@@ -57,7 +57,7 @@ WorkspaceManager::WorkspaceManager() :
     new QOpenGLWidget();
 
     //CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
-    //CDockManager::setAutoHideConfigFlags(CDockManager::DefaultAutoHideConfig);
+    CDockManager::setAutoHideConfigFlags(CDockManager::DefaultAutoHideConfig);
     //CDockManager::setAutoHideConfigFlag(CDockManager::AutoHideShowOnMouseOver, true);
 
     setObjectName("WorkspaceManager");
@@ -492,7 +492,7 @@ void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::Vie
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
     if (viewPlugin->isSystemViewPlugin())
-        _mainDockManager->addViewPluginDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _mainDockManager->findDockAreaWidget(dockToViewPlugin ? &dockToViewPlugin->getWidget() : nullptr));
+        _mainDockManager->addViewPluginDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockToViewPlugin ? _mainDockManager->findDockAreaWidget(dockToViewPlugin) : nullptr);
     else
         _viewPluginsDockManager->addViewPluginDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockToViewPlugin ? _viewPluginsDockManager->findDockAreaWidget(dockToViewPlugin) : nullptr);
 

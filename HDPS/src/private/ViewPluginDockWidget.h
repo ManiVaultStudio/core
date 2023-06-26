@@ -4,6 +4,8 @@
 
 #include <ViewPlugin.h>
 
+#include <DockManager.h>
+
 #include <QMenu>
 
 /**
@@ -112,6 +114,7 @@ private:
     QMenu                       _settingsMenu;          /** Menu for view plugin settings */
     hdps::gui::TriggerAction    _helpAction;            /** Action for triggering help */
     bool                        _cachedVisibility;      /** Cached visibility for view plugin isolation */
+    ads::CDockManager           _dockManager;
 
 protected:
     static QList<ViewPluginDockWidget*> active;  /** Loaded view plugin dock widgets */
