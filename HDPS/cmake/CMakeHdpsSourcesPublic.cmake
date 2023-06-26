@@ -135,6 +135,7 @@ set(PUBLIC_TEXTUAL_ACTIONS_FILES
 
 set(PUBLIC_GROUPING_ACTIONS_HEADERS
     src/actions/GroupAction.h
+    src/actions/StretchAction.h
     src/actions/HorizontalGroupAction.h
     src/actions/VerticalGroupAction.h
     src/actions/GroupsAction.h
@@ -149,6 +150,7 @@ set(PUBLIC_GROUPING_ACTIONS_HEADERS
 
 set(PUBLIC_GROUPING_ACTIONS_SOURCES
     src/actions/GroupAction.cpp
+    src/actions/StretchAction.cpp
     src/actions/HorizontalGroupAction.cpp
     src/actions/VerticalGroupAction.cpp
     src/actions/GroupsAction.cpp

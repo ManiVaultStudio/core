@@ -24,7 +24,6 @@ GroupAction::GroupAction(QObject* parent, const QString& title, const bool& expa
     _labelWidthPercentage(GroupAction::globalLabelWidthPercentage),
     _labelWidthFixed(GroupAction::globalLabelWidthFixed)
 {
-    setText(title);
     setDefaultWidgetFlags(GroupAction::Vertical);
 }
 
@@ -286,6 +285,19 @@ void GroupAction::clear()
     emit actionsChanged(_actions);
 }
 
+hdps::gui::StretchAction* GroupAction::addStretch(std::int32_t stretch /*= 1*/)
+{
+    auto actionStretchActionId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+
+    actionStretchActionId.truncate(6);
+
+    auto stretchAction = new StretchAction(this, QString("Stretch_%1").arg(actionStretchActionId));
+
+    addAction(stretchAction);
+
+    return stretchAction;
+}
+
 GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, groupAction, widgetFlags),
     _groupAction(groupAction)
@@ -405,6 +417,14 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
         }
 
         for (auto action : groupAction->getActions()) {
+            auto actionStretch = dynamic_cast<StretchAction*>(action);
+
+            if (actionStretch) {
+                layout->addStretch(actionStretch->getStretch());
+
+                continue;
+            }
+
             if (groupAction->getShowLabels() && !action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup))
                 layout->addWidget(action->createLabelWidget(this));
 

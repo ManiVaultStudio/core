@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WidgetAction.h"
+#include "StretchAction.h"
 
 #include <QGridLayout>
 
@@ -60,7 +61,7 @@ public: // Widgets
         VerticalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags);
 
     protected:
-        GroupAction* _groupAction;   /** Pointer to group action which created the widget */
+        GroupAction*    _groupAction;   /** Pointer to group action which created the widget */
         QGridLayout     _layout;        /** Vertical layout */
 
         friend class GroupAction;
@@ -146,6 +147,15 @@ public:
      * @param showLabels Whether the group should show labels or not
      */
     void setShowLabels(bool showLabels);
+
+public: // Stretch
+
+    /**
+     * Add stretch action to the group (this will add a stretch to the group layout in the widget)
+     * @param stretch Layout stretch
+     * @return Pointer to created stretch action (group action is owner of the action)
+     */
+    StretchAction* addStretch(std::int32_t stretch = 1);
 
 public: // Actions management
 

@@ -41,6 +41,9 @@ void ColorAction::connectToPublicAction(WidgetAction* publicAction, bool recursi
 
     Q_ASSERT(publicColorAction != nullptr);
 
+    if (publicColorAction == nullptr)
+        return;
+
     connect(this, &ColorAction::colorChanged, publicColorAction, &ColorAction::setColor);
     connect(publicColorAction, &ColorAction::colorChanged, this, &ColorAction::setColor);
 
