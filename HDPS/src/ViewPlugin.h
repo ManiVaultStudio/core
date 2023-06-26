@@ -98,8 +98,10 @@ public: // Settings actions
     /**
      * Add a settings action to the view (the action widget will be docked in the view)
      * @param settingsAction Pointer to settings action to add
+     * @param dockToSettingsActionName The name of the settings action to dock to (docked top-level if name is empty)
+     * @param dockArea Dock area in which \p dockToViewPlugin will be docked
      */
-    void addSettingsAction(WidgetAction* settingsAction);
+    void addSettingsAction(WidgetAction* settingsAction, const QString& dockToSettingsActionName = "", gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right);
 
     /** Get vector of pointers to settings actions */
     gui::WidgetActions getSettingsActions() const;

@@ -289,8 +289,6 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
         const auto numberOfSettingsDockWidgets          = settingsDockWidgets.count();
         const auto numberOfVisibleSettingsDockWidgets   = std::count_if(settingsDockWidgets.begin(), settingsDockWidgets.end(), [](CDockWidget* settingsDockWidget) { return settingsDockWidget->isVisible(); });
 
-        qDebug() << numberOfSettingsDockWidgets << numberOfVisibleSettingsDockWidgets;
-
         hideAllAction->setEnabled(numberOfVisibleSettingsDockWidgets >= 1);
         showAllAction->setEnabled(numberOfVisibleSettingsDockWidgets < numberOfSettingsDockWidgets);
     };
@@ -309,6 +307,15 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
         settingsDockWidget->setFeature(CDockWidget::DockWidgetPinnable, true);
 
         settingsDockWidgets << settingsDockWidget;
+
+
+
+
+        //settingsAction->setProperty("DockToSettingsActionName", dockToSettingsActionName);
+        //settingsAction->setProperty("DockArea", static_cast<int>(dockArea));
+
+
+
 
         _dockManager.addDockWidget(DockWidgetArea::AllDockAreas, settingsDockWidget);
 

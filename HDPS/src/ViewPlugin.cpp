@@ -287,12 +287,15 @@ hdps::gui::WidgetActions ViewPlugin::getTitleBarMenuActions()
     return _titleBarMenuActions;
 }
 
-void ViewPlugin::addSettingsAction(WidgetAction* settingsAction)
+void ViewPlugin::addSettingsAction(WidgetAction* settingsAction, const QString& dockToSettingsActionName /*= ""*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/)
 {
     Q_ASSERT(settingsAction != nullptr);
 
     if (settingsAction == nullptr)
         return;
+
+    settingsAction->setProperty("DockToSettingsActionName", dockToSettingsActionName);
+    settingsAction->setProperty("DockArea", static_cast<int>(dockArea));
 
     _settingsActions << settingsAction;
 }
