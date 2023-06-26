@@ -112,6 +112,7 @@ private:
     QString                     _viewPluginKind;        /** Kind of (view) plugin */
     QVariantMap                 _viewPluginMap;         /** View plugin cached map for deferred loading */
     QMenu                       _settingsMenu;          /** Menu for view plugin settings */
+    QMenu                       _toggleMenu;            /** Menu for toggling view plugin dock widgets */
     hdps::gui::TriggerAction    _helpAction;            /** Action for triggering help */
     bool                        _cachedVisibility;      /** Cached visibility for view plugin isolation */
     ads::CDockManager           _dockManager;

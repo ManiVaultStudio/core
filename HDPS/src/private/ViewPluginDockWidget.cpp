@@ -33,6 +33,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
     _viewPluginKind(),
     _viewPluginMap(),
     _settingsMenu(),
+    _toggleMenu("Toggle"),
     _helpAction(this, "Help"),
     _cachedVisibility(false),
     _dockManager(this)
@@ -49,6 +50,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
     _viewPluginKind(),
     _viewPluginMap(),
     _settingsMenu(),
+    _toggleMenu("Toggle"),
     _helpAction(this, "Help"),
     _cachedVisibility(false),
     _dockManager(this)
@@ -65,7 +67,11 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QVariantMap& variantMap) :
     _viewPlugin(nullptr),
     _viewPluginKind(),
     _viewPluginMap(),
-    _helpAction(this, "Help")
+    _settingsMenu(),
+    _toggleMenu("Toggle"),
+    _helpAction(this, "Help"),
+    _cachedVisibility(false),
+    _dockManager(this)
 {
     active << this;
 
@@ -88,7 +94,11 @@ QString ViewPluginDockWidget::getTypeString() const
 
 void ViewPluginDockWidget::initialize()
 {
-    _helpAction.setIcon(Application::getIconFont("FontAwesome").getIcon("question"));
+    auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    _toggleMenu.setIcon(fontAwesome.getIcon("eye"));
+
+    _helpAction.setIcon(fontAwesome.getIcon("question"));
     _helpAction.setShortcut(tr("F1"));
     _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
@@ -141,6 +151,13 @@ void ViewPluginDockWidget::initialize()
 
         if (!projectIsReadOnly)
             _settingsMenu.addAction(&_viewPlugin->getLockingAction().getLockedAction());
+
+        _settingsMenu.addSeparator();
+
+        if (projects().getCurrentProject()->getStudioModeAction().isChecked())
+            _settingsMenu.addMenu(&_toggleMenu);
+
+        _settingsMenu.addSeparator();
 
         if (!_viewPlugin->getTitleBarMenuActions().isEmpty()) {
             _settingsMenu.addSeparator();
@@ -206,6 +223,9 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
     _viewPluginKind = _viewPluginMap["Kind"].toString();
 
     loadViewPlugin();
+
+    if (variantMap.contains("DockManagerState"))
+        _dockManager.restoreState(QByteArray::fromBase64(variantMap["DockManagerState"].toString().toUtf8()));
 }
 
 QVariantMap ViewPluginDockWidget::toVariantMap() const
@@ -216,10 +236,16 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
 
     auto variantMap = DockWidget::toVariantMap();
 
-    if (_viewPlugin)
-        variantMap["ViewPlugin"] = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin()->toVariantMap();
+    if (_viewPlugin) {
+        variantMap.insert({
+            { "ViewPlugin", const_cast<ViewPluginDockWidget*>(this)->getViewPlugin()->toVariantMap() }
+        });
+    }
+       
+    variantMap.insert({
+        { "DockManagerState", QVariant::fromValue(_dockManager.saveState().toBase64()) }
+    });
 
-    //variantMap["DockManager"]
     return variantMap;
 }
 
@@ -254,39 +280,83 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 
     _dockManager.setCentralWidget(centralDockWidget);
     
+    QVector<CDockWidget*> settingsDockWidgets;
+
+    auto hideAllAction = new TriggerAction(this, "Hide All");
+    auto showAllAction = new TriggerAction(this, "Show All");
+
+    const auto updateHideShowAllActionsReadOnly = [settingsDockWidgets, hideAllAction, showAllAction](QVector<CDockWidget*> settingsDockWidgets) -> void {
+        const auto numberOfSettingsDockWidgets          = settingsDockWidgets.count();
+        const auto numberOfVisibleSettingsDockWidgets   = std::count_if(settingsDockWidgets.begin(), settingsDockWidgets.end(), [](CDockWidget* settingsDockWidget) { return settingsDockWidget->isVisible(); });
+
+        qDebug() << numberOfSettingsDockWidgets << numberOfVisibleSettingsDockWidgets;
+
+        hideAllAction->setEnabled(numberOfVisibleSettingsDockWidgets >= 1);
+        showAllAction->setEnabled(numberOfVisibleSettingsDockWidgets < numberOfSettingsDockWidgets);
+    };
+
     for (auto settingsAction : _viewPlugin->getSettingsActions()) {
         auto settingsDockWidget = new CDockWidget(settingsAction->text());
         auto settingsWidget     = settingsAction->createWidget(settingsDockWidget);
 
         settingsWidget->setAutoFillBackground(true);
 
+        settingsDockWidget->setObjectName(settingsAction->text());
         settingsDockWidget->setWidget(settingsWidget, eInsertMode::ForceNoScrollArea);
         settingsDockWidget->setMinimumSizeHintMode(eMinimumSizeHintMode::MinimumSizeHintFromDockWidget);
         settingsDockWidget->setAutoFillBackground(true);
+        settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
+        settingsDockWidget->setFeature(CDockWidget::DockWidgetPinnable, true);
+
+        settingsDockWidgets << settingsDockWidget;
 
         _dockManager.addDockWidget(DockWidgetArea::AllDockAreas, settingsDockWidget);
 
-        auto toolbarAction = dynamic_cast<ToolbarAction*>(settingsAction);
+        const auto studioModeChanged = [settingsDockWidget]() -> void {
+            const auto isInStudioMode = projects().getCurrentProject()->getStudioModeAction().isChecked();
 
-        if (toolbarAction) {
-            const auto studioModeChanged = [settingsDockWidget]() -> void {
-                const auto isInStudioMode = projects().getCurrentProject()->getStudioModeAction().isChecked();
+            settingsDockWidget->setFeature(CDockWidget::DockWidgetClosable, isInStudioMode);
+            settingsDockWidget->setFeature(CDockWidget::DockWidgetMovable, isInStudioMode);
+        };
 
-                settingsDockWidget->tabWidget()->setVisible(isInStudioMode);
-                settingsDockWidget->dockAreaWidget()->titleBar()->setVisible(isInStudioMode);
+        studioModeChanged();
 
-                settingsDockWidget->setFeature(CDockWidget::DockWidgetClosable, isInStudioMode);
-                settingsDockWidget->setFeature(CDockWidget::DockWidgetMovable, isInStudioMode);
-                settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, isInStudioMode);
-            };
+        connect(&projects().getCurrentProject()->getStudioModeAction(), &ToggleAction::toggled, this, studioModeChanged);
 
-            studioModeChanged();
+        auto toggleAction = new ToggleAction(this, settingsAction->text(), true);
 
-            connect(&projects().getCurrentProject()->getStudioModeAction(), &ToggleAction::toggled, this, studioModeChanged);
-        }
-        else {
-            settingsDockWidget->setFeature(CDockWidget::DockWidgetPinnable, true);
-        }
+        _toggleMenu.addAction(toggleAction);
+
+        connect(toggleAction, &ToggleAction::toggled, this, [this, settingsDockWidget](bool toggled) {
+            settingsDockWidget->toggleView(toggled);
+        });
+
+        connect(settingsDockWidget, &CDockWidget::viewToggled, this, [this, settingsDockWidget, settingsDockWidgets, toggleAction, updateHideShowAllActionsReadOnly](bool toggled) {
+            QSignalBlocker toggleActionBlocker(toggleAction);
+            
+            toggleAction->setChecked(toggled);
+
+            updateHideShowAllActionsReadOnly(settingsDockWidgets);
+        });
+    }
+
+    updateHideShowAllActionsReadOnly(settingsDockWidgets);
+
+    if (_viewPlugin->getSettingsActions().count() > 1) {
+        _toggleMenu.addSeparator();
+        
+        connect(hideAllAction, &TriggerAction::triggered, this, [this, settingsDockWidgets]() {
+            for (auto settingsDockWidget : settingsDockWidgets)
+                settingsDockWidget->toggleView(false);
+        });
+
+        connect(showAllAction, &TriggerAction::triggered, this, [this, settingsDockWidgets]() {
+            for (auto settingsDockWidget : settingsDockWidgets)
+                settingsDockWidget->toggleView(true);
+        });
+
+        _toggleMenu.addAction(hideAllAction);
+        _toggleMenu.addAction(showAllAction);
     }
 
     setIcon(viewPlugin->getIcon());
