@@ -287,15 +287,17 @@ hdps::gui::WidgetActions ViewPlugin::getTitleBarMenuActions()
     return _titleBarMenuActions;
 }
 
-void ViewPlugin::addSettingsAction(WidgetAction* settingsAction, const QString& dockToSettingsActionName /*= ""*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/)
+void ViewPlugin::addSettingsAction(WidgetAction* settingsAction, WidgetAction* dockToSettingsAction /*= nullptr*/, DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, bool autoHide /*= false*/, const AutoHideLocation& autoHideLocation /*= AutoHideLocation::None*/)
 {
     Q_ASSERT(settingsAction != nullptr);
 
     if (settingsAction == nullptr)
         return;
 
-    settingsAction->setProperty("DockToSettingsActionName", dockToSettingsActionName);
+    settingsAction->setProperty("DockToSettingsActionName", dockToSettingsAction != nullptr ? dockToSettingsAction->text() : "");
     settingsAction->setProperty("DockArea", static_cast<int>(dockArea));
+    settingsAction->setProperty("AutoHide", autoHide);
+    settingsAction->setProperty("AutoHideLocation", static_cast<int>(autoHideLocation));
 
     _settingsActions << settingsAction;
 }

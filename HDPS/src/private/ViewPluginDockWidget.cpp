@@ -36,7 +36,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
     _toggleMenu("Toggle"),
     _helpAction(this, "Help"),
     _cachedVisibility(false),
-    _dockManager(this)
+    _dockManager(this),
+    _settingsDockWidgetsMap()
 {
     active << this;
 
@@ -53,7 +54,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
     _toggleMenu("Toggle"),
     _helpAction(this, "Help"),
     _cachedVisibility(false),
-    _dockManager(this)
+    _dockManager(this),
+    _settingsDockWidgetsMap()
 {
     active << this;
 
@@ -71,7 +73,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QVariantMap& variantMap) :
     _toggleMenu("Toggle"),
     _helpAction(this, "Help"),
     _cachedVisibility(false),
-    _dockManager(this)
+    _dockManager(this),
+    _settingsDockWidgetsMap()
 {
     active << this;
 
@@ -279,14 +282,16 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
     centralDockWidget->setWidget(&_viewPlugin->getWidget());
 
     _dockManager.setCentralWidget(centralDockWidget);
-    
-    QVector<CDockWidget*> settingsDockWidgets;
 
     auto hideAllAction = new TriggerAction(this, "Hide All");
     auto showAllAction = new TriggerAction(this, "Show All");
 
-    const auto updateHideShowAllActionsReadOnly = [settingsDockWidgets, hideAllAction, showAllAction](QVector<CDockWidget*> settingsDockWidgets) -> void {
-        const auto numberOfSettingsDockWidgets          = settingsDockWidgets.count();
+    hideAllAction->setEnabled(true);
+    showAllAction->setEnabled(false);
+
+    const auto updateHideShowAllActionsReadOnly = [this, hideAllAction, showAllAction]() -> void {
+        const auto settingsDockWidgets                  = _settingsDockWidgetsMap.values();
+        const auto numberOfSettingsDockWidgets          = _settingsDockWidgetsMap.count();
         const auto numberOfVisibleSettingsDockWidgets   = std::count_if(settingsDockWidgets.begin(), settingsDockWidgets.end(), [](CDockWidget* settingsDockWidget) { return settingsDockWidget->isVisible(); });
 
         hideAllAction->setEnabled(numberOfVisibleSettingsDockWidgets >= 1);
@@ -306,18 +311,18 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
         settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
         settingsDockWidget->setFeature(CDockWidget::DockWidgetPinnable, true);
 
-        settingsDockWidgets << settingsDockWidget;
+        _settingsDockWidgetsMap[settingsAction->text()] = settingsDockWidget;
 
+        const auto dockToSettingsActionName = settingsAction->property("DockToSettingsActionName").toString();
 
+        CDockAreaWidget* dockAreaWidget = nullptr;
 
+        if (_settingsDockWidgetsMap.contains(dockToSettingsActionName))
+            dockAreaWidget = _settingsDockWidgetsMap[dockToSettingsActionName]->dockAreaWidget();
 
-        //settingsAction->setProperty("DockToSettingsActionName", dockToSettingsActionName);
-        //settingsAction->setProperty("DockArea", static_cast<int>(dockArea));
+        _dockManager.addDockWidget(static_cast<DockWidgetArea>(settingsAction->property("DockArea").toInt()), settingsDockWidget, dockAreaWidget);
 
-
-
-
-        _dockManager.addDockWidget(DockWidgetArea::AllDockAreas, settingsDockWidget);
+        //settingsDockWidget->setAutoHide(settingsAction->property("AutoHide").toBool(), static_cast<SideBarLocation>(settingsAction->property("AutoHideLocation").toInt()));
 
         const auto studioModeChanged = [settingsDockWidget]() -> void {
             const auto isInStudioMode = projects().getCurrentProject()->getStudioModeAction().isChecked();
@@ -338,27 +343,25 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
             settingsDockWidget->toggleView(toggled);
         });
 
-        connect(settingsDockWidget, &CDockWidget::viewToggled, this, [this, settingsDockWidget, settingsDockWidgets, toggleAction, updateHideShowAllActionsReadOnly](bool toggled) {
+        connect(settingsDockWidget, &CDockWidget::viewToggled, this, [this, settingsDockWidget, toggleAction, updateHideShowAllActionsReadOnly](bool toggled) {
             QSignalBlocker toggleActionBlocker(toggleAction);
             
             toggleAction->setChecked(toggled);
 
-            updateHideShowAllActionsReadOnly(settingsDockWidgets);
+            updateHideShowAllActionsReadOnly();
         });
     }
-
-    updateHideShowAllActionsReadOnly(settingsDockWidgets);
 
     if (_viewPlugin->getSettingsActions().count() > 1) {
         _toggleMenu.addSeparator();
         
-        connect(hideAllAction, &TriggerAction::triggered, this, [this, settingsDockWidgets]() {
-            for (auto settingsDockWidget : settingsDockWidgets)
+        connect(hideAllAction, &TriggerAction::triggered, this, [this]() {
+            for (auto settingsDockWidget : _settingsDockWidgetsMap)
                 settingsDockWidget->toggleView(false);
         });
 
-        connect(showAllAction, &TriggerAction::triggered, this, [this, settingsDockWidgets]() {
-            for (auto settingsDockWidget : settingsDockWidgets)
+        connect(showAllAction, &TriggerAction::triggered, this, [this]() {
+            for (auto settingsDockWidget : _settingsDockWidgetsMap)
                 settingsDockWidget->toggleView(true);
         });
 
@@ -367,8 +370,7 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
     }
 
     setIcon(viewPlugin->getIcon());
-    //setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
-    setWidget(&_dockManager);
+    setWidget(&_dockManager, eInsertMode::ForceNoScrollArea);
     setMinimumSizeHintMode(eMinimumSizeHintMode::MinimumSizeHintFromDockWidget);
 
     const auto updateWindowTitle = [this]() -> void {
@@ -391,23 +393,13 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 
     updateFeatures();
 
-    const auto connectToViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
-        connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
-            dockWidget->toggleView(toggled);
-        });
-    };
-
-    const auto disconnectFromViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
-        disconnect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, nullptr);
-    };
-
-    connect(this, &CDockWidget::viewToggled, this, [this, viewPlugin, connectToViewPluginVisibleAction, disconnectFromViewPluginVisibleAction](bool toggled) {
-        disconnectFromViewPluginVisibleAction(this);
-        {
-            viewPlugin->getVisibleAction().setChecked(toggled);
-        }
-        connectToViewPluginVisibleAction(this);
+    connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this](bool toggled) {
+        toggleView(toggled);
     });
 
-    connectToViewPluginVisibleAction(this);
+    connect(this, &CDockWidget::viewToggled, this, [this, viewPlugin](bool toggled) {
+        QSignalBlocker toggleActionBlocker(&viewPlugin->getVisibleAction());
+
+        viewPlugin->getVisibleAction().setChecked(toggled);
+    });
 }

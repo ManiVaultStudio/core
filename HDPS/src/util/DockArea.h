@@ -35,4 +35,13 @@ static QMap<QString, DockAreaFlag> dockAreaMap({
 
 QIcon getDockAreaIcon(DockAreaFlag dockArea);
 
+/** Auto-hide location flags */
+enum class AutoHideLocation {
+    Top,
+    Left,
+    Right,
+    Bottom,
+    None
+};
+
 }

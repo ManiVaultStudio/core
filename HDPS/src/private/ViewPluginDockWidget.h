@@ -108,14 +108,15 @@ private:
     void setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin);
 
 private:
-    hdps::plugin::ViewPlugin*   _viewPlugin;            /** Pointer to view plugin */
-    QString                     _viewPluginKind;        /** Kind of (view) plugin */
-    QVariantMap                 _viewPluginMap;         /** View plugin cached map for deferred loading */
-    QMenu                       _settingsMenu;          /** Menu for view plugin settings */
-    QMenu                       _toggleMenu;            /** Menu for toggling view plugin dock widgets */
-    hdps::gui::TriggerAction    _helpAction;            /** Action for triggering help */
-    bool                        _cachedVisibility;      /** Cached visibility for view plugin isolation */
-    ads::CDockManager           _dockManager;
+    hdps::plugin::ViewPlugin*       _viewPlugin;                /** Pointer to view plugin */
+    QString                         _viewPluginKind;            /** Kind of (view) plugin */
+    QVariantMap                     _viewPluginMap;             /** View plugin cached map for deferred loading */
+    QMenu                           _settingsMenu;              /** Menu for view plugin settings */
+    QMenu                           _toggleMenu;                /** Menu for toggling view plugin dock widgets */
+    hdps::gui::TriggerAction        _helpAction;                /** Action for triggering help */
+    bool                            _cachedVisibility;          /** Cached visibility for view plugin isolation */
+    ads::CDockManager               _dockManager;               /** Dock manager for internal docking */
+    QMap<QString, CDockWidget*>     _settingsDockWidgetsMap;    /** Created dock widgets for settings actions */
 
 protected:
     static QList<ViewPluginDockWidget*> active;  /** Loaded view plugin dock widgets */

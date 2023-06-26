@@ -98,10 +98,12 @@ public: // Settings actions
     /**
      * Add a settings action to the view (the action widget will be docked in the view)
      * @param settingsAction Pointer to settings action to add
-     * @param dockToSettingsActionName The name of the settings action to dock to (docked top-level if name is empty)
+     * @param dockToSettingsAction Pointer to the settings action to dock to (docked top-level if nullptr)
      * @param dockArea Dock area in which \p dockToViewPlugin will be docked
+     * @param autoHide Whether to pin the settings action to the border of the view plugin
+     * @param autoHideLocation Location to pin the settings action in case auto-hide is active
      */
-    void addSettingsAction(WidgetAction* settingsAction, const QString& dockToSettingsActionName = "", gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right);
+    void addSettingsAction(WidgetAction* settingsAction, WidgetAction* dockToSettingsAction = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, bool autoHide = false, const gui::AutoHideLocation& autoHideLocation = gui::AutoHideLocation::None);
 
     /** Get vector of pointers to settings actions */
     gui::WidgetActions getSettingsActions() const;
