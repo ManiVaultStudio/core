@@ -93,14 +93,14 @@ void HorizontalToolbarAction::Widget::setActionWidgets()
 
 void HorizontalToolbarAction::Widget::updateLayout()
 {
-    return;
-
+    /*
     for (auto actionItem : _horizontalToolbarAction->getActionItems()) {
         if (actionItem->isChangingState()) {
             qDebug() << actionItem->getAction()->text() << "is changing state";
             return;
         }
     }
+    */
 
     //qDebug() << "Update layout" << _toolbarWidget.sizeHint().width() << parentWidget()->width() << width();
     
