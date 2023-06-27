@@ -102,6 +102,14 @@ void AbstractActionsModel::NameItem::setData(const QVariant& value, int role /* 
     }
 }
 
+AbstractActionsModel::LocationItem::LocationItem(gui::WidgetAction* action) :
+    Item(action)
+{
+    connect(getAction(), &WidgetAction::locationChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+}
+
 QVariant AbstractActionsModel::LocationItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     if (getAction()->isPublic())

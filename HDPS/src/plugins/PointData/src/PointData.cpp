@@ -977,6 +977,19 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     setDimensionNames(dimensionNames);
 
     events().notifyDatasetChanged(this);
+
+    if (isFull()) {
+        //const auto& indicesMap = variantMap["Indices"].toMap();
+
+        //indices.resize(indicesMap["Count"].toInt());
+
+        //populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
+
+        //auto selectionSet = getSelection<Points>();
+
+        //selection["Count"] = QVariant::fromValue(this->indices.size());
+        //selection["Raw"] = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), true);
+    }
 }
 
 QVariantMap Points::toVariantMap() const
@@ -1004,10 +1017,20 @@ QVariantMap Points::toVariantMap() const
     indices["Count"]    = QVariant::fromValue(this->indices.size());
     indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), true);
 
+    QVariantMap selection;
+
+    if (isFull()) {
+        auto selectionSet = getSelection<Points>();
+
+        selection["Count"]  = QVariant::fromValue(this->indices.size());
+        selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), true);
+    }
+
     variantMap["Data"]                  = isFull() ? getRawData<PointData>().toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]        = getNumPoints();
     variantMap["Full"]                  = isFull();
     variantMap["Indices"]               = indices;
+    variantMap["Selection"]             = selection;
     variantMap["DimensionNames"]        = rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true);
     variantMap["NumberOfDimensions"]    = getNumDimensions();
 

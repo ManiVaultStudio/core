@@ -128,8 +128,11 @@ protected:
     class LocationItem final : public Item {
     public:
 
-        /** Use base action item constructor */
-        using Item::Item;
+        /**
+         * Construct with \p action
+         * @param action Pointer to action to display item for
+         */
+        LocationItem(gui::WidgetAction* action);
 
         /**
          * Get model data for \p role
