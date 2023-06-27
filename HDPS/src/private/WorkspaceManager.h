@@ -215,6 +215,7 @@ private:
     hdps::gui::TriggerAction            _importWorkspaceFromProjectAction;      /** Action for importing a workspace from a project file */
     hdps::gui::RecentFilesAction        _recentWorkspacesAction;                /** Action for saving the current workspace to file with a different path */
     QIcon                               _icon;                                  /** Manager icon */
+    QString                             _styleSheet;                            /** Dock manager style sheet */
 };
 
 }

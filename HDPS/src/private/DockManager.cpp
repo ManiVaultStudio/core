@@ -41,9 +41,6 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager::setConfigFlag(CDockManager::DockAreaHasTabsMenuButton, true);
     CDockManager::setConfigFlag(CDockManager::DockAreaDynamicTabsMenuButtonVisibility, false);
     CDockManager::setConfigFlag(CDockManager::AllTabsHaveCloseButton, true);
-    
-    //setAutoHideConfigFlag(AutoHideFeatureEnabled);
-    //setAutoHideConfigFlag(DockAreaHasAutoHideButton);
 }
 
 DockManager::~DockManager()

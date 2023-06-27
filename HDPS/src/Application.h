@@ -18,7 +18,7 @@ class CoreInterface;
  * 
  * @author Thomas Kroes
  */
-class Application : public QApplication
+class Application final : public QApplication
 {
     Q_OBJECT
 

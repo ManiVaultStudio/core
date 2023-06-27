@@ -51,7 +51,8 @@ WorkspaceManager::WorkspaceManager() :
     _editWorkspaceSettingsAction(this, "Workspace Settings..."),
     _importWorkspaceFromProjectAction(this, "Import from project"),
     _recentWorkspacesAction(this),
-    _icon()
+    _icon(),
+    _styleSheet()
 {
     // Temporary solution for https://github.com/hdps/core/issues/274
     new QOpenGLWidget();
@@ -133,6 +134,16 @@ WorkspaceManager::WorkspaceManager() :
     connect(&_recentWorkspacesAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
         loadWorkspace(filePath);
     });
+
+    QFile styleSheetFile(":/styles/ads_light.css");
+
+    styleSheetFile.open(QIODevice::ReadOnly);
+
+    QTextStream styleSheetStream(&styleSheetFile);
+
+    _styleSheet = styleSheetStream.readAll();
+
+    styleSheetFile.close();
 }
 
 void WorkspaceManager::initialize()
@@ -192,6 +203,8 @@ void WorkspaceManager::initialize()
         connect(&Application::core()->getProjectManager(), &AbstractProjectManager::projectCreated, this, [this]() -> void {
             newWorkspace();
         });
+
+        //_mainDockManager->setStyleSheet(_styleSheet);
     }
     endInitialization();
 }

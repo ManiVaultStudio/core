@@ -35,6 +35,10 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     setLayout(layout);
 
+    _openCreateProjectWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+    _recentProjectsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+    _exampleProjectsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+
     _openCreateProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

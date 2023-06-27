@@ -2,6 +2,9 @@
 
 #include <Application.h>
 #include <CoreInterface.h>
+#include <AbstractWorkspaceManager.h>
+
+#define TEST_STYLESHEET
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -47,4 +50,16 @@ void FileMenu::showEvent(QShowEvent* showEvent)
     addAction(&projects().getShowStartPageAction());
     //addSeparator();
     //addAction(&_exitApplictionAction);
+
+#if defined(_DEBUG) && defined(TEST_STYLESHEET)
+    /*
+    addSeparator();
+    
+    auto applyStyleSheetAction = new TriggerAction(this, "Apply Stylesheet");
+
+    connect(applyStyleSheetAction, &TriggerAction::triggered, &workspaces(), &AbstractWorkspaceManager::applyStyleSheet);
+
+    addAction(applyStyleSheetAction);
+    */
+#endif
 }

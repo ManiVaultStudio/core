@@ -30,6 +30,10 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     setLayout(layout);
 
+    _createProjectFromWorkspaceWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+    _createProjectFromDatasetWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+    _instructionVideosWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setItemTypeName("Item");
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getTreeView().verticalScrollBar()->setDisabled(true);
