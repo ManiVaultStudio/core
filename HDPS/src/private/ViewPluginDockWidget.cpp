@@ -307,7 +307,6 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 
         settingsDockWidget->setObjectName(settingsAction->text());
         settingsDockWidget->setWidget(settingsWidget, eInsertMode::ForceNoScrollArea);
-        settingsDockWidget->setMinimumSizeHintMode(eMinimumSizeHintMode::MinimumSizeHintFromContent);
         settingsDockWidget->setAutoFillBackground(true);
         settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
         settingsDockWidget->setFeature(CDockWidget::DockWidgetPinnable, true);

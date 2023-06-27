@@ -303,6 +303,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     selectionChanged();
     updateFilterModel();
     updateOverlayWidget();
+    updateHeaderVisibility();
 }
 
 QString HierarchyWidget::getItemTypeName() const
