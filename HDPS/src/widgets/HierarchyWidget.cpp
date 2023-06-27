@@ -224,8 +224,6 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
         _selectionGroupAction.setEnabled(hasItems);
         _columnsGroupAction.setEnabled(hasItems);
         _settingsGroupAction.setEnabled(hasItems);
-
-        _treeView.setHeaderHidden(_headerHidden || !hasItems);
         
         updateExpandCollapseActionsReadOnly();
         updateOverlayWidget();
@@ -274,10 +272,14 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     if (_filterModel) {
         connect(_filterModel, &QAbstractItemModel::rowsInserted, this, filterModelRowsChanged);
         connect(_filterModel, &QAbstractItemModel::rowsRemoved, this, filterModelRowsChanged);
+        connect(_filterModel, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateHeaderVisibility);
+        connect(_filterModel, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateHeaderVisibility);
     }
     else {
         connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateFilterModel);
         connect(&_model, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateFilterModel);
+        connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateHeaderVisibility);
+        connect(&_model, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateHeaderVisibility);
     }
 
     connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateOverlayWidget);
@@ -517,10 +519,12 @@ bool HierarchyWidget::getHeaderHidden() const
 
 void HierarchyWidget::setHeaderHidden(bool headerHidden)
 {
+    if (headerHidden == _headerHidden)
+        return;
+
     _headerHidden = headerHidden;
 
-    if (_headerHidden)
-        _treeView.setHeaderHidden(true);
+    updateHeaderVisibility();
 }
 
 void HierarchyWidget::updateFilterModel()
@@ -556,6 +560,13 @@ void HierarchyWidget::updateFilterModel()
     _filterModel->invalidate();
 
     updateOverlayWidget();
+}
+
+void HierarchyWidget::updateHeaderVisibility()
+{
+    const auto hasItems = _filterModel != nullptr ? _filterModel->rowCount() >= 1 : _model.rowCount() >= 1;
+
+    _treeView.setHeaderHidden(_headerHidden || !hasItems);
 }
 
 }

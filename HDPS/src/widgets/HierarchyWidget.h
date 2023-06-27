@@ -318,6 +318,9 @@ protected: // Item selection
     /** Deselect all selected items in the hierarchy */
     void selectNone();
 
+    /** Updates the visibility of the header */
+    void updateHeaderVisibility();
+
 private:
     
     /** Updates the overlay widget icon, title and description based on the state of the hierarchy */
