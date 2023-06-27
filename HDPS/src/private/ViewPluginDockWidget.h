@@ -69,6 +69,13 @@ public:
     ~ViewPluginDockWidget();
 
     /**
+     * Respond to \p target object events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
+     */
+    bool eventFilter(QObject* target, QEvent* event) override;
+
+    /**
      * Get string that describes the dock widget type
      * @return Type string
      */

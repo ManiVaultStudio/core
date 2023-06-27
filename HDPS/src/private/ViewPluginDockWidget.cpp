@@ -98,6 +98,9 @@ QString ViewPluginDockWidget::getTypeString() const
 
 void ViewPluginDockWidget::initialize()
 {
+    this->installEventFilter(this);
+    _dockManager.installEventFilter(this);
+
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _toggleMenu.setIcon(fontAwesome.getIcon("low-vision"));
@@ -280,7 +283,7 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 
     auto centralDockWidget = new CDockWidget("Central");
 
-    centralDockWidget->setWidget(&_viewPlugin->getWidget());
+    centralDockWidget->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
 
     _dockManager.setCentralWidget(centralDockWidget);
 
@@ -305,7 +308,6 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
         auto settingsDockWidget = new CDockWidget(settingsAction->text());
         auto settingsWidget     = new SettingsActionWidget(this, settingsAction);
 
-        settingsDockWidget->setObjectName(settingsAction->text());
         settingsDockWidget->setWidget(settingsWidget, eInsertMode::ForceNoScrollArea);
         settingsDockWidget->setAutoFillBackground(true);
         settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
@@ -391,6 +393,13 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
     }
 
     setIcon(viewPlugin->getIcon());
+
+    //auto widget = new QWidget();
+    //auto layout = new QVBoxLayout();
+
+    //layout->addWidget(&_dockManager);
+    //widget->setLayout(layout);
+
     setWidget(&_dockManager, eInsertMode::ForceNoScrollArea);
     setMinimumSizeHintMode(eMinimumSizeHintMode::MinimumSizeHintFromDockWidget);
 
@@ -423,6 +432,24 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 
         viewPlugin->getVisibleAction().setChecked(toggled);
     });
+}
+
+bool ViewPluginDockWidget::eventFilter(QObject* target, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::Resize:
+        {
+            qDebug() << size() << _dockManager.size();
+            //_dockManager.setFixedSize(static_cast<QResizeEvent*>(event)->size());
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return DockWidget::eventFilter(target, event);
 }
 
 ViewPluginDockWidget::SettingsActionWidget::SettingsActionWidget(QWidget* parent, hdps::gui::WidgetAction* settingsAction) :
