@@ -102,8 +102,9 @@ public: // Settings actions
      * @param dockArea Dock area in which \p dockToViewPlugin will be docked
      * @param autoHide Whether to pin the settings action to the border of the view plugin
      * @param autoHideLocation Location to pin the settings action in case auto-hide is active
+     * @param minimumDockWidgetSize Minimum dock widget size
      */
-    void addSettingsAction(WidgetAction* settingsAction, WidgetAction* dockToSettingsAction = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, bool autoHide = false, const gui::AutoHideLocation& autoHideLocation = gui::AutoHideLocation::None);
+    void addSettingsAction(WidgetAction* settingsAction, WidgetAction* dockToSettingsAction = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, bool autoHide = false, const gui::AutoHideLocation& autoHideLocation = gui::AutoHideLocation::Left, const QSize& minimumDockWidgetSize = QSize(256, 256));
 
     /** Get vector of pointers to settings actions */
     gui::WidgetActions getSettingsActions() const;

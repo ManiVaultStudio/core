@@ -116,7 +116,7 @@ WorkspaceManager::WorkspaceManager() :
         saveWorkspaceAs();
     });
 
-    connect(&_editWorkspaceSettingsAction, &TriggerAction::triggered, this, []() -> void {
+    connect(&_editWorkspaceSettingsAction, &TriggerAction::triggered, this, [this]() -> void {
         auto* workspaceSettingsDialog = new WorkspaceSettingsDialog();
         connect(workspaceSettingsDialog, &WorkspaceSettingsDialog::finished, workspaceSettingsDialog, &WorkspaceSettingsDialog::deleteLater);
         workspaceSettingsDialog->open();

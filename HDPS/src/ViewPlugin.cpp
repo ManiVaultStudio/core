@@ -287,7 +287,7 @@ hdps::gui::WidgetActions ViewPlugin::getTitleBarMenuActions()
     return _titleBarMenuActions;
 }
 
-void ViewPlugin::addSettingsAction(WidgetAction* settingsAction, WidgetAction* dockToSettingsAction /*= nullptr*/, DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, bool autoHide /*= false*/, const AutoHideLocation& autoHideLocation /*= AutoHideLocation::None*/)
+void ViewPlugin::addSettingsAction(WidgetAction* settingsAction, WidgetAction* dockToSettingsAction /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, bool autoHide /*= false*/, const gui::AutoHideLocation& autoHideLocation /*= gui::AutoHideLocation::Left*/, const QSize& minimumDockWidgetSize /*= QSize(256, 256)*/)
 {
     Q_ASSERT(settingsAction != nullptr);
 
@@ -298,6 +298,7 @@ void ViewPlugin::addSettingsAction(WidgetAction* settingsAction, WidgetAction* d
     settingsAction->setProperty("DockArea", static_cast<int>(dockArea));
     settingsAction->setProperty("AutoHide", autoHide);
     settingsAction->setProperty("AutoHideLocation", static_cast<int>(autoHideLocation));
+    settingsAction->setProperty("MinimumDockWidgetSize", minimumDockWidgetSize);
 
     _settingsActions << settingsAction;
 }

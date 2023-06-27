@@ -13,6 +13,7 @@
 #include <DockWidgetTab.h>
 #include <DockAreaWidget.h>
 #include <DockAreaTitleBar.h>
+#include <AutoHideDockContainer.h>
 
 #ifdef _DEBUG
     #define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
@@ -99,7 +100,7 @@ void ViewPluginDockWidget::initialize()
 {
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    _toggleMenu.setIcon(fontAwesome.getIcon("eye"));
+    _toggleMenu.setIcon(fontAwesome.getIcon("low-vision"));
 
     _helpAction.setIcon(fontAwesome.getIcon("question"));
     _helpAction.setShortcut(tr("F1"));
@@ -283,6 +284,8 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 
     _dockManager.setCentralWidget(centralDockWidget);
 
+    centralDockWidget->dockAreaWidget()->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
+
     auto hideAllAction = new TriggerAction(this, "Hide All");
     auto showAllAction = new TriggerAction(this, "Show All");
 
@@ -300,13 +303,11 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 
     for (auto settingsAction : _viewPlugin->getSettingsActions()) {
         auto settingsDockWidget = new CDockWidget(settingsAction->text());
-        auto settingsWidget     = settingsAction->createWidget(settingsDockWidget);
-
-        settingsWidget->setAutoFillBackground(true);
+        auto settingsWidget     = new SettingsActionWidget(this, settingsAction);
 
         settingsDockWidget->setObjectName(settingsAction->text());
         settingsDockWidget->setWidget(settingsWidget, eInsertMode::ForceNoScrollArea);
-        settingsDockWidget->setMinimumSizeHintMode(eMinimumSizeHintMode::MinimumSizeHintFromDockWidget);
+        settingsDockWidget->setMinimumSizeHintMode(eMinimumSizeHintMode::MinimumSizeHintFromContent);
         settingsDockWidget->setAutoFillBackground(true);
         settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
         settingsDockWidget->setFeature(CDockWidget::DockWidgetPinnable, true);
@@ -322,7 +323,28 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 
         _dockManager.addDockWidget(static_cast<DockWidgetArea>(settingsAction->property("DockArea").toInt()), settingsDockWidget, dockAreaWidget);
 
-        //settingsDockWidget->setAutoHide(settingsAction->property("AutoHide").toBool(), static_cast<SideBarLocation>(settingsAction->property("AutoHideLocation").toInt()));
+        const auto autoHide         = settingsAction->property("AutoHide").toBool();
+        const auto autoHideLocation = static_cast<SideBarLocation>(settingsAction->property("AutoHideLocation").toInt());
+
+        settingsDockWidget->setAutoHide(autoHide, autoHideLocation);
+
+        if (autoHide) {
+            switch (settingsDockWidget->autoHideDockContainer()->sideBarLocation())
+            {
+                case SideBarLocation::SideBarLeft:
+                case SideBarLocation::SideBarRight:
+                    settingsDockWidget->autoHideDockContainer()->setSize(settingsWidget->minimumSizeHint().width());
+                    break;
+
+                case SideBarLocation::SideBarTop:
+                case SideBarLocation::SideBarBottom:
+                    settingsDockWidget->autoHideDockContainer()->setSize(settingsWidget->minimumSizeHint().height());
+                    break;
+
+                default:
+                    break;
+            }
+        }
 
         const auto studioModeChanged = [settingsDockWidget]() -> void {
             const auto isInStudioMode = projects().getCurrentProject()->getStudioModeAction().isChecked();
@@ -402,4 +424,36 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 
         viewPlugin->getVisibleAction().setChecked(toggled);
     });
+}
+
+ViewPluginDockWidget::SettingsActionWidget::SettingsActionWidget(QWidget* parent, hdps::gui::WidgetAction* settingsAction) :
+    QWidget(parent),
+    _settingsAction(settingsAction)
+{
+    Q_ASSERT(settingsAction != nullptr);
+
+    if (settingsAction == nullptr)
+        return;
+
+    setAutoFillBackground(true);
+
+    auto layout = new QVBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(_settingsAction->createWidget(this));
+
+    setLayout(layout);
+}
+
+QSize ViewPluginDockWidget::SettingsActionWidget::minimumSizeHint() const
+{
+    if (_settingsAction == nullptr)
+        return {};
+
+    return _settingsAction->property("MinimumDockWidgetSize").toSize();
+}
+
+QSize ViewPluginDockWidget::SettingsActionWidget::sizeHint() const
+{
+    return minimumSizeHint();
 }

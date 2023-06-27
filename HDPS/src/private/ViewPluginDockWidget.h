@@ -19,6 +19,29 @@ class ViewPluginDockWidget final : public DockWidget
 {
     Q_OBJECT
 
+private:
+
+    /** Widget which contains a settings action widget (purpose is to provide a size hint)*/
+    class SettingsActionWidget : public QWidget {
+    public:
+
+        /**
+         * Construct with \p parent and pointer to \p settingsAction
+         * @param parent Pointer to parent widget
+         * @param settingsAction Pointer to settingsAction
+         */
+        SettingsActionWidget(QWidget* parent, hdps::gui::WidgetAction* settingsAction);
+
+        /** Override minimum size hint and derive it from the settings action widget */
+        QSize sizeHint() const override;
+
+        /** Override minimum size hint and derive it from the settings action widget */
+        QSize minimumSizeHint() const override;
+
+    private:
+        hdps::gui::WidgetAction*    _settingsAction;    /** Pointer to settings action to set the size hint for */
+    };
+
 public:
 
     /**

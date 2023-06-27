@@ -40,8 +40,7 @@ enum class AutoHideLocation {
     Top,
     Left,
     Right,
-    Bottom,
-    None
+    Bottom
 };
 
 }
