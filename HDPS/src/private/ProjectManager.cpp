@@ -348,11 +348,11 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-                fileDialog.setWindowTitle("Open Project");
+                fileDialog.setWindowTitle("Open ManiVault Project");
                 fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
                 fileDialog.setFileMode(QFileDialog::ExistingFile);
-                fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
-                fileDialog.setDefaultSuffix(".hdps");
+                fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+                fileDialog.setDefaultSuffix(".mv");
                 fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 
@@ -425,13 +425,13 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (!importDataOnly)
                 newProject();
 
-            qDebug().noquote() << "Open HDPS project from" << filePath;
+            qDebug().noquote() << "Open ManiVault project from" << filePath;
 
             Archiver archiver;
 
             QStringList tasks = archiver.getTaskNamesForDecompression(filePath) << "Import data model" << "Load workspace";
 
-            TaskProgressDialog taskProgressDialog(nullptr, tasks, "Open HDPS project from " + filePath, Application::getIconFont("FontAwesome").getIcon("folder-open"));
+            TaskProgressDialog taskProgressDialog(nullptr, tasks, "Open ManiVault project from " + filePath, Application::getIconFont("FontAwesome").getIcon("folder-open"));
 
             connect(&taskProgressDialog, &TaskProgressDialog::canceled, this, [this]() -> void {
                 Application::setSerializationAborted(true);
@@ -481,11 +481,11 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to load HDPS project", e);
+        exceptionMessageBox("Unable to load ManiVault project", e);
     }
     catch (...)
     {
-        exceptionMessageBox("Unable to load HDPS project");
+        exceptionMessageBox("Unable to load ManiVault project");
     }
 }
 
@@ -541,10 +541,10 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-                fileDialog.setWindowTitle("Save Project");
+                fileDialog.setWindowTitle("Save ManiVault Project");
                 fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-                fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
-                fileDialog.setDefaultSuffix(".hdps");
+                fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+                fileDialog.setDefaultSuffix(".mv");
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
                 fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
@@ -633,9 +633,9 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 return;
 
             if (currentProject->getCompressionAction().getEnabledAction().isChecked())
-                qDebug().noquote() << "Saving HDPS project to" << filePath << "with compression level" << currentProject->getCompressionAction().getLevelAction().getValue();
+                qDebug().noquote() << "Saving ManiVault project to" << filePath << "with compression level" << currentProject->getCompressionAction().getLevelAction().getValue();
             else
-                qDebug().noquote() << "Saving HDPS project to" << filePath << "without compression";
+                qDebug().noquote() << "Saving ManiVault project to" << filePath << "without compression";
 
             Archiver archiver;
 
@@ -643,7 +643,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             tasks << "Export data model" << "Temporary task";
 
-            TaskProgressDialog taskProgressDialog(nullptr, tasks, "Saving HDPS project to " + filePath, Application::current()->getIconFont("FontAwesome").getIcon("save"));
+            TaskProgressDialog taskProgressDialog(nullptr, tasks, "Saving ManiVault project to " + filePath, Application::current()->getIconFont("FontAwesome").getIcon("save"));
 
             taskProgressDialog.setCurrentTask("Export data model");
 
@@ -741,10 +741,10 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cloud-upload-alt"));
-                fileDialog.setWindowTitle("Publish Project");
+                fileDialog.setWindowTitle("Publish ManiVault Project");
                 fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-                fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
-                fileDialog.setDefaultSuffix(".hdps");
+                fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+                fileDialog.setDefaultSuffix(".mv");
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
                 fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
@@ -862,11 +862,11 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to publish project", e);
+        exceptionMessageBox("Unable to publish ManiVault project", e);
     }
     catch (...)
     {
-        exceptionMessageBox("Unable to publish project");
+        exceptionMessageBox("Unable to publish ManiVault project");
     }
 }
 
@@ -953,7 +953,7 @@ QImage ProjectManager::getPreviewImage(const QString& projectFilePath, const QSi
 {
     Archiver archiver;
 
-    const QString workspaceFile("workspace.hws");
+    const QString workspaceFile("workspace.json");
 
     QTemporaryDir temporaryDirectory;
 
