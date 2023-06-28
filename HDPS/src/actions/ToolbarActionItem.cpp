@@ -4,14 +4,20 @@
 
 namespace hdps::gui {
 
-ToolbarActionItem::ToolbarActionItem(QObject* parent, const WidgetAction* action, const State& state /*= State::Collapsed*/, std::int32_t autoExpandPriority /*= -1*/) :
+ToolbarActionItem::ToolbarActionItem(QObject* parent, const WidgetAction* action, std::int32_t widgetFlags, const State& state /*= State::Collapsed*/, std::int32_t autoExpandPriority /*= -1*/) :
     QObject(parent),
     _action(action),
+    _widgetFlags(widgetFlags),
     _state(state),
     _autoExpandPriority(autoExpandPriority),
     _widgetSizes(),
     _changingState(false)
 {
+}
+
+std::int32_t ToolbarActionItem::getWidgetFlags()
+{
+    return _widgetFlags;
 }
 
 std::int32_t ToolbarActionItem::getAutoExpandPriority() const
@@ -46,7 +52,7 @@ void ToolbarActionItem::setState(const State& state)
 
     _state = state;
 
-    qDebug() << __FUNCTION__ << getAction()->text() << static_cast<int>(state);
+    //qDebug() << __FUNCTION__ << getAction()->text() << static_cast<int>(state);
 
     setChangingState(true);
 

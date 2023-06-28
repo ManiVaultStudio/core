@@ -13,7 +13,6 @@ FilterClustersAction::FilterClustersAction(ClustersActionWidget* clustersActionW
     _clustersActionWidget(clustersActionWidget),
     _nameFilterAction(this, "Name filter")
 {
-    setText("Filter clusters");
     setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
 
     _nameFilterAction.setToolTip("Filter clusters by name (case-insensitive)");

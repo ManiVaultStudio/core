@@ -29,9 +29,10 @@ protected:
          * Construct with \p parent widget, pointer to \p action to display and \p state
          * @param parent Pointer to parent widget
          * @param action Pointer to action to display
+         * @param widgetFlags Flags to use in widget creation
          * @param state State in which to display the \p action
          */
-        StateWidget(QWidget* parent, WidgetAction* action, const ToolbarActionItem::State& state);
+        StateWidget(QWidget* parent, WidgetAction* action, std::int32_t widgetFlags, const ToolbarActionItem::State& state);
 
         /**
          * Overload set visible to enabled fading

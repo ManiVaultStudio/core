@@ -31,16 +31,24 @@ protected:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param horizontalToolbarAction Pointer to horizontal toolbar action that creates the widget
+     * @param action Pointer to action that creates the widget
+     * @param widgetFlags Flags to use in widget creation
+     * @param state State of the widget
      * @param autoExpandPriority Priority with which action should be auto-expanded
      */
-    ToolbarActionItem(QObject* parent, const WidgetAction* action, const State& state = State::Collapsed, std::int32_t autoExpandPriority = -1);
+    ToolbarActionItem(QObject* parent, const WidgetAction* action, std::int32_t widgetFlags, const State& state = State::Collapsed, std::int32_t autoExpandPriority = -1);
 
     /**
      * Get action
      * @return Pointer to action
      */
     const WidgetAction* getAction();
+
+    /**
+     * Get widget flags
+     * @return Flags to use in widget creation
+     */
+    std::int32_t getWidgetFlags();
 
     /**
      * Get state of the action (expanded or collapsed)
@@ -139,6 +147,7 @@ signals:
 
 protected:
     const WidgetAction* _action;                /** Pointer to horizontal toolbar action that creates the widget */
+    std::int32_t        _widgetFlags;           /** Flags to use in widget creation */
     State               _state;                 /** Whether the item is expanded or collapsed */
     std::int32_t        _autoExpandPriority;    /** Priority with which action should be auto-expanded (higher priority w.r.t. other actions means it will auto-expanded sooner) */
     QSize               _widgetSizes[2];        /** Widget sizes in collapsed and expanded state respectively */

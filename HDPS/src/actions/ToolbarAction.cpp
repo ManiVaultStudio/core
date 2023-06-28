@@ -23,7 +23,7 @@ void ToolbarAction::addAction(WidgetAction* action, const std::int32_t& autoExpa
 {
     _groupAction.addAction(action, widgetFlags);
 
-    auto actionItem = new ToolbarActionItem(this, action, ToolbarActionItem::State::Collapsed, autoExpandPriority);
+    auto actionItem = new ToolbarActionItem(this, action, widgetFlags, ToolbarActionItem::State::Collapsed, autoExpandPriority);
 
     _actionItems << actionItem;
 

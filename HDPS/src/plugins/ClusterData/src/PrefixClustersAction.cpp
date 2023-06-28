@@ -12,7 +12,6 @@ PrefixClustersAction::PrefixClustersAction(ClustersAction& clustersAction) :
     _prefixAction(this, "Name prefix", "id_"),
     _applyAction(this, "Apply")
 {
-    setText("Prefix clusters");
     setToolTip("Prefix clusters");
     setIcon(Application::getIconFont("FontAwesome").getIcon("paragraph"));
 

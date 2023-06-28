@@ -8,9 +8,9 @@ RemoveClustersAction::RemoveClustersAction(ClustersActionWidget* clustersActionW
     TriggerAction(clustersActionWidget, "Remove"),
     _clustersActionWidget(clustersActionWidget)
 {
-    setText("");
     setToolTip("Remove selected cluster(s)");
     setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
+    setDefaultWidgetFlags(TriggerAction::Icon);
 
     // Remove selected clusters when the action is triggered
     connect(this, &TriggerAction::triggered, this, [this]() {

@@ -12,7 +12,6 @@ ColorizeClustersAction::ColorizeClustersAction(ClustersAction& clustersAction) :
     _randomSeedAction(this, "Random color seed"),
     _colorizeAction(this, "Colorize")
 {
-    setText("Coloring");
     setToolTip("Colorize clusters");
     setIcon(Application::getIconFont("FontAwesome").getIcon("palette"));
 

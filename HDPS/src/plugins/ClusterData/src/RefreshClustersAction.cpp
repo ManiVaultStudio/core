@@ -10,7 +10,6 @@ RefreshClustersAction::RefreshClustersAction(ClustersActionWidget* clustersActio
     TriggerAction(clustersActionWidget, "Refresh"),
     _clustersActionWidget(clustersActionWidget)
 {
-    setText("");
     setToolTip("Refresh clusters");
     setIcon(Application::getIconFont("FontAwesome").getIcon("sync"));
 

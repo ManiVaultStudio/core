@@ -13,7 +13,6 @@ SelectClustersAction::SelectClustersAction(ClustersActionWidget* clustersActionW
     _selectNoneAction(this, "None"),
     _selectInvertAction(this, "Invert")
 {
-    setText("Select");
     setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
 
     _selectAllAction.setToolTip("Select all clusters");

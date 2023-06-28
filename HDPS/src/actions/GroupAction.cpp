@@ -232,21 +232,21 @@ void GroupAction::sortActions()
 
 QWidget* GroupAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    auto widget = new WidgetActionWidget(parent, this);
+    auto widget = new WidgetActionWidget(parent, this, widgetFlags);
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    if (widgetFlags & WidgetActionWidget::PopupLayout) {
-        layout->addWidget(new GroupAction::VerticalWidget(parent, this, widgetFlags));
-    }
-    else {
-        if (widgetFlags & WidgetFlag::Vertical)
-            layout->addWidget(new GroupAction::VerticalWidget(parent, this, widgetFlags));
+    auto modifiedWidgetFlags = widgetFlags & ~WidgetActionWidget::PopupLayout;
 
-        if (widgetFlags & WidgetFlag::Horizontal)
-            layout->addWidget(new GroupAction::HorizontalWidget(parent, this, widgetFlags));
-    }
+    if (widgetFlags & WidgetActionWidget::PopupLayout)
+        modifiedWidgetFlags |= WithMargins;
+
+    if (widgetFlags & WidgetFlag::Vertical)
+        layout->addWidget(new GroupAction::VerticalWidget(parent, this, modifiedWidgetFlags));
+
+    if (widgetFlags & WidgetFlag::Horizontal)
+        layout->addWidget(new GroupAction::HorizontalWidget(parent, this, modifiedWidgetFlags));
 
     widget->setLayout(layout);
 
@@ -406,7 +406,8 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
 
     auto layout = new QHBoxLayout();
 
-    layout->setContentsMargins(0, 0, 0, 0);
+    if (!(widgetFlags & WithMargins))
+        layout->setContentsMargins(0, 0, 0, 0);
 
     const auto updateLayout = [this, layout, groupAction]() -> void {
         QLayoutItem* layoutItem;

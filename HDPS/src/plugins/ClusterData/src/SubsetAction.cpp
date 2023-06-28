@@ -12,7 +12,6 @@ SubsetAction::SubsetAction(ClustersActionWidget* clustersActionWidget) :
     _subsetNameAction(this, "Subset name"),
     _createSubsetAction(this, "Create subset")
 {
-    setText("Create subset");
     setIcon(Application::getIconFont("FontAwesome").getIcon("crop"));
 
     _subsetNameAction.setToolTip("Name of the subset");

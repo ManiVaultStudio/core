@@ -26,6 +26,7 @@ public:
         Vertical    = 0x00002,      /** Actions are arranged vertically in the group */
         Toolbar     = 0x00004,      /** Actions are arranged in a toolbar */
         NoMargins   = 0x00010,      /** Do not apply margins to widget layout */
+        WithMargins = 0x00020,      /** Apply standard margins to widget layout */
 
         HorizontalToolbar   = Horizontal | Toolbar,     /** Actions are arranged in a horizontal toolbar */
         VerticalToolbar     = Vertical | Toolbar,       /** Actions are arranged in a vertical toolbar */

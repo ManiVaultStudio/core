@@ -128,7 +128,7 @@ void HorizontalToolbarAction::Widget::updateLayout()
     };
 
     std::sort(actionItems.begin(), actionItems.end());
-    std::reverse(actionItems.begin(), actionItems.end());
+    //std::reverse(actionItems.begin(), actionItems.end());
 
     for (auto actionItem : actionItems) {
         auto cachedStates = states;

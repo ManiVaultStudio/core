@@ -12,8 +12,8 @@ namespace hdps::gui {
 ToolbarActionItemWidget::ToolbarActionItemWidget(QWidget* parent, ToolbarActionItem& toolbarActionItem) :
     QWidget(parent),
     _toolbarActionItem(toolbarActionItem),
-    _collapsedWidget(this, const_cast<WidgetAction*>(_toolbarActionItem.getAction()), ToolbarActionItem::State::Collapsed),
-    _expandedWidget(this, const_cast<WidgetAction*>(_toolbarActionItem.getAction()), ToolbarActionItem::State::Expanded)
+    _collapsedWidget(this, const_cast<WidgetAction*>(_toolbarActionItem.getAction()), toolbarActionItem.getWidgetFlags(), ToolbarActionItem::State::Collapsed),
+    _expandedWidget(this, const_cast<WidgetAction*>(_toolbarActionItem.getAction()), toolbarActionItem.getWidgetFlags(), ToolbarActionItem::State::Expanded)
 {
     auto layout = new QHBoxLayout();
 
@@ -104,7 +104,7 @@ void ToolbarActionItemWidget::synchronizeWidgetSize(const ToolbarActionItem::Sta
     }
 }
 
-ToolbarActionItemWidget::StateWidget::StateWidget(QWidget* parent, WidgetAction* action, const ToolbarActionItem::State& state) :
+ToolbarActionItemWidget::StateWidget::StateWidget(QWidget* parent, WidgetAction* action, std::int32_t widgetFlags, const ToolbarActionItem::State& state) :
     QWidget(parent)//,
     //_widgetFader(this, this, 1.0f, 0.0f, 1.0f, 500, 1000)
 {
@@ -122,7 +122,7 @@ ToolbarActionItemWidget::StateWidget::StateWidget(QWidget* parent, WidgetAction*
             break;
 
         case ToolbarActionItem::State::Expanded:
-            widget = action->createWidget(this);
+            widget = action->createWidget(this, widgetFlags);
             break;
 
         default:
