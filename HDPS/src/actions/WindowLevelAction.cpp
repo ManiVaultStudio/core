@@ -20,8 +20,8 @@ WindowLevelAction::WindowLevelAction(QObject* parent, const QString& title) :
     addAction(&_windowAction);
     addAction(&_levelAction);
 
-    _windowAction.setPrefix("win: ");
-    _levelAction.setPrefix("lvl: ");
+    //_windowAction.setPrefix("win: ");
+    //_levelAction.setPrefix("lvl: ");
 
     _windowAction.setToolTip("Window");
     _levelAction.setToolTip("Level");

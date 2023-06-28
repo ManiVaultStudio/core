@@ -19,8 +19,6 @@ VerticalToolbarAction::Widget::Widget(QWidget* parent, VerticalToolbarAction* ve
     _toolbarWidget(),
     _timer()
 {
-    parent->installEventFilter(this);
-
     _timer.setInterval(250);
     _timer.setSingleShot(true);
 
@@ -42,34 +40,6 @@ VerticalToolbarAction::Widget::Widget(QWidget* parent, VerticalToolbarAction* ve
     connect(&_timer, &QTimer::timeout, this, &Widget::updateLayout);
 
     setActionWidgets();
-}
-
-bool VerticalToolbarAction::Widget::eventFilter(QObject* target, QEvent* event)
-{
-    switch (event->type())
-    {
-        case QEvent::Resize:
-        {
-            const auto resizeEvent = static_cast<QResizeEvent*>(event);
-
-            auto layoutDirty = resizeEvent->size().width() != resizeEvent->oldSize().width();
-
-            if (!layoutDirty)
-                break;
-
-            if (_timer.isActive())
-                _timer.stop();
-
-            _timer.start();
-
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    return QWidget::eventFilter(target, event);
 }
 
 void VerticalToolbarAction::Widget::setActionWidgets()

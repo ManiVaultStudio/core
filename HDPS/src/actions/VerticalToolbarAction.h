@@ -32,13 +32,6 @@ public: // Widgets
          */
         Widget(QWidget* parent, VerticalToolbarAction* verticalToolbarAction, const std::int32_t& widgetFlags);
 
-        /**
-         * Respond to \p target object events
-         * @param target Object of which an event occurred
-         * @param event The event that took place
-         */
-        bool eventFilter(QObject* target, QEvent* event) override;
-
     private:
 
         void setActionWidgets();
