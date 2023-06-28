@@ -102,6 +102,14 @@ public:
     }
 
     /**
+    * Return whether the texture has been allocated
+    */
+    bool isCreated()
+    {
+        return _created;
+    }
+
+    /**
     * Return the raw OpenGL texture ID.
     */
     GLuint getHandle()

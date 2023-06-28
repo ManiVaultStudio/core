@@ -39,10 +39,11 @@ namespace hdps
             BufferObject _opacityScalarBuffer;
             BufferObject _colorBuffer;
 
+            PointArrayObject() : _handle(0), _colorScalarsRange(0, 1, 1) {}
             void init();
             void setPositions(const std::vector<Vector2f>& positions);
             void setHighlights(const std::vector<char>& highlights);
-            void setScalars(const std::vector<float>& scalars);
+            void setScalars(const std::vector<float>& scalars, bool adjustColorMapRange);
             void setSizeScalars(const std::vector<float>& scalars);
             void setOpacityScalars(const std::vector<float>& scalars);
             void setColors(const std::vector<Vector3f>& colors);
@@ -115,7 +116,7 @@ namespace hdps
         public:
             void setData(const std::vector<Vector2f>& points);
             void setHighlights(const std::vector<char>& highlights, const std::int32_t& numSelectedPoints);
-            void setColorChannelScalars(const std::vector<float>& scalars);
+            void setColorChannelScalars(const std::vector<float>& scalars, bool adjustColorMapRange = true);
             void setSizeChannelScalars(const std::vector<float>& scalars);
             void setOpacityChannelScalars(const std::vector<float>& scalars);
             void setColors(const std::vector<Vector3f>& colors);
@@ -162,18 +163,18 @@ namespace hdps
             bool                        _selectionHaloEnabled               = false;
 
             /* Window properties */
-            QSize _windowSize;
+            QSize                       _windowSize;
 
             /* Rendering variables */
-            ShaderProgram _shader;
+            ShaderProgram               _shader;
 
-            PointArrayObject _gpuPoints;
-            Texture2D _colormap;
+            PointArrayObject            _gpuPoints;
+            Texture2D                   _colormap;
 
-            Matrix3f _orthoM;
-            Bounds _bounds = Bounds(-1, 1, -1, 1);
+            Matrix3f                    _orthoM;
+            Bounds                      _bounds                             = Bounds(-1, 1, -1, 1);
 
-            std::int32_t    _numSelectedPoints;     /** Number of selected (highlighted points) */
+            std::int32_t                _numSelectedPoints                  = 0;     /** Number of selected (highlighted points) */
         };
 
     } // namespace gui
