@@ -113,7 +113,9 @@ void StringAction::setClearable(bool clearable)
     if (_clearable) {
         _trailingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("times-circle"));
 
-        connect(&_trailingAction, &QAction::triggered, this, &StringAction::reset);
+        connect(&_trailingAction, &QAction::triggered, this, [this]() -> void {
+            setString("");
+        });
 
         const auto updateTrailingActionVisibility = [this]() -> void {
             _trailingAction.setVisible(!_string.isEmpty());
@@ -279,14 +281,12 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
         setPlaceholderText(stringAction->getPlaceholderString());
     };
 
-    connect(stringAction, &StringAction::stringChanged, this, &LineEditWidget::updateText);
-    connect(stringAction, &StringAction::textElideModeChanged, this, &LineEditWidget::updateText);
-
     connect(stringAction, &StringAction::placeholderStringChanged, this, updatePlaceHolderText);
 
     connect(this, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
         stringAction->setString(text);
-        });
+        setFocus(Qt::FocusReason::OtherFocusReason);
+    });
 
     const auto updateLeadingAction = [this, stringAction]() {
         if (!stringAction->getLeadingAction().isVisible())
@@ -311,37 +311,12 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
 
     connect(stringAction, &StringAction::completerChanged, this, updateCompleter);
 
-    updateText();
     updatePlaceHolderText();
     updateLeadingAction();
     updateTrailingAction();
     updateCompleter();
 
     installEventFilter(this);
-}
-
-bool StringAction::LineEditWidget::eventFilter(QObject* target, QEvent* event)
-{
-    if (event->type() == QEvent::Resize)
-        updateText();
-
-    return QLineEdit::eventFilter(target, event);
-}
-
-void StringAction::LineEditWidget::updateText()
-{
-    QSignalBlocker blocker(this);
-
-    const auto cacheCursorPosition = cursorPosition();
-
-    QFontMetrics titleMetrics(font());
-
-    if (_stringAction->getTextElideMode() == Qt::ElideNone)
-        setText(_stringAction->getString());
-    else
-        setText(titleMetrics.elidedText(_stringAction->getString(), _stringAction->getTextElideMode(), width() - 2));
-
-    setCursorPosition(cacheCursorPosition);
 }
 
 StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stringAction) :

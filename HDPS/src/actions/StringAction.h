@@ -77,18 +77,6 @@ public:
          */
         LineEditWidget(QWidget* parent, StringAction* stringAction);
 
-        /**
-         * Respond to \p target events
-         * @param target Object of which an event occurred
-         * @param event The event that took place
-         */
-        bool eventFilter(QObject* target, QEvent* event) override;
-
-    private:
-
-        /** Fetches text from the string action and computes the resultant text (taking into account text elidation) */
-        void updateText();
-
     private:
         StringAction* _stringAction;    /** Pointer to string action */
 
