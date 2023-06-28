@@ -277,10 +277,17 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
 
     connect(stringAction, &QAction::changed, this, updateToolTip);
 
-    const auto updatePlaceHolderText = [this, stringAction]() -> void {
-        setPlaceholderText(stringAction->getPlaceholderString());
+    const auto updatePlaceHolderText = [this]() -> void {
+        setPlaceholderText(_stringAction->getPlaceholderString());
     };
 
+    const auto updateText = [this]() -> void {
+        setText(_stringAction->getString());
+    };
+
+    updateText();
+
+    connect(stringAction, &StringAction::stringChanged, this, updateText);
     connect(stringAction, &StringAction::placeholderStringChanged, this, updatePlaceHolderText);
 
     connect(this, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
@@ -315,8 +322,6 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
     updateLeadingAction();
     updateTrailingAction();
     updateCompleter();
-
-    installEventFilter(this);
 }
 
 StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stringAction) :
