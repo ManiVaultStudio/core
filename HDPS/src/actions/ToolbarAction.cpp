@@ -8,7 +8,7 @@ namespace hdps::gui {
 
 ToolbarAction::ToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment /*= Qt::AlignmentFlag::AlignLeft*/) :
     WidgetAction(parent, title),
-    _groupAction(this, "Actions"),
+    _groupAction(this, "Actions", false, alignment),
     _actionItems(),
     _actionItemsMap()
 {

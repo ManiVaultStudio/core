@@ -41,7 +41,10 @@ public: // Widgets
 
     private:
 
+        /** Set action widget to display */
         void setActionWidgets();
+
+        /** Computes the states of the action widgets */
         void updateLayout();
 
     protected:
@@ -71,7 +74,7 @@ public:
      * Construct with \p parent object and \p title
      * @param parent Pointer to parent object
      * @param title Title of the action
-     * @param alignment Item alignment
+     * @param alignment Item alignment (Qt::AlignmentFlag::AlignLeft, Qt::AlignmentFlag::AlignCenter or Qt::AlignmentFlag::AlignRight)
      */
     Q_INVOKABLE HorizontalToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment = Qt::AlignmentFlag::AlignLeft);
 };

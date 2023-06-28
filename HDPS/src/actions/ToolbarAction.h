@@ -32,6 +32,8 @@ public:
      */
     Q_INVOKABLE ToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment = Qt::AlignmentFlag::AlignLeft);
 
+protected:
+
     /**
      * Get group action
      * @return Reference to group action

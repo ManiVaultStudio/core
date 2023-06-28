@@ -21,23 +21,16 @@ HorizontalToolbarAction::Widget::Widget(QWidget* parent, HorizontalToolbarAction
 {
     parent->installEventFilter(this);
 
-    _timer.setInterval(250);
+    _timer.setInterval(100);
     _timer.setSingleShot(true);
 
     _toolbarLayout.setContentsMargins(ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN);
 
     _toolbarWidget.setLayout(&_toolbarLayout);
+    _toolbarLayout.setAlignment(horizontalToolbarAction->getGroupAction().getAlignment());
     
-    _layout.setSizeConstraint(QLayout::SetFixedSize);
     _layout.setContentsMargins(0, 0, 0, 0);
-    
-    //if (_horizontalToolbarAction->getAlignment() == Qt::AlignCenter || _horizontalToolbarAction->getAlignment() == Qt::AlignRight)
-    //    _layout.addStretch(1);
-
     _layout.addWidget(&_toolbarWidget);
-
-    //if (_horizontalToolbarAction->getAlignment() == Qt::AlignCenter)
-    //    _layout.addStretch(1);
 
     setLayout(&_layout);
 

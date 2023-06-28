@@ -34,15 +34,14 @@ public: // Widgets
 
     private:
 
+        /** Set action widget to display */
         void setActionWidgets();
-        void updateLayout();
 
     protected:
         VerticalToolbarAction* _verticalToolbarAction;      /** Pointer to vertical toolbar action that creates the widget */
-        QHBoxLayout             _layout;                    /** Main layout */
-        QHBoxLayout             _toolbarLayout;             /** Toolbar layout */
+        QVBoxLayout             _layout;                    /** Main layout */
+        QVBoxLayout             _toolbarLayout;             /** Toolbar layout */
         QWidget                 _toolbarWidget;             /** Toolbar widget */
-        QTimer                  _timer;                     /** Timer to periodically update the layout */
 
         friend class VerticalToolbarAction;
     };
@@ -66,7 +65,7 @@ public:
      * @param title Title of the action
      * @param alignment Item alignment
      */
-    Q_INVOKABLE VerticalToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment = Qt::AlignmentFlag::AlignLeft);
+    Q_INVOKABLE VerticalToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment = Qt::AlignmentFlag::AlignTop);
 };
 
 }
