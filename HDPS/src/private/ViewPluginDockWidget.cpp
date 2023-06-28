@@ -372,7 +372,9 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
         });
     }
 
-    if (_viewPlugin->getSettingsActions().count() > 1) {
+    _toggleMenu.setEnabled(!_viewPlugin->getSettingsActions().isEmpty());
+
+    if (!_viewPlugin->getSettingsActions().isEmpty()) {
         _toggleMenu.addSeparator();
         
         connect(hideAllAction, &TriggerAction::triggered, this, [this]() {
