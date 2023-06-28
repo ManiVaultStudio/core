@@ -266,10 +266,10 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-                fileDialog.setWindowTitle("Load Workspace");
+                fileDialog.setWindowTitle("Load ManiVault Workspace");
                 fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
                 fileDialog.setFileMode(QFileDialog::ExistingFile);
-                fileDialog.setNameFilters({ "HDPS workspace files (*.json)" });
+                fileDialog.setNameFilters({ "ManiVault workspace files (*.json)" });
                 fileDialog.setDefaultSuffix(".json");
                 fileDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
@@ -361,10 +361,10 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*
         QFileDialog fileDialog;
 
         fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-        fileDialog.setWindowTitle("Import Workspace From Project");
+        fileDialog.setWindowTitle("Import ManiVault Workspace From Project");
         fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
         fileDialog.setFileMode(QFileDialog::ExistingFile);
-        fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
+        fileDialog.setNameFilters({ "ManiVault project files (*.hdps)" });
         fileDialog.setDefaultSuffix(".hdps");
         fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
@@ -421,9 +421,9 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/, bool addToRecent
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-                fileDialog.setWindowTitle("Export Workspace");
+                fileDialog.setWindowTitle("Export ManiVault Workspace");
                 fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-                fileDialog.setNameFilters({ "HDPS workspace files (*.json)" });
+                fileDialog.setNameFilters({ "ManiVault workspace files (*.json)" });
                 fileDialog.setDefaultSuffix(".json");
                 fileDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
@@ -508,6 +508,9 @@ void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::Vie
         _mainDockManager->addViewPluginDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockToViewPlugin ? _mainDockManager->findDockAreaWidget(dockToViewPlugin) : nullptr);
     else
         _viewPluginsDockManager->addViewPluginDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockToViewPlugin ? _viewPluginsDockManager->findDockAreaWidget(dockToViewPlugin) : nullptr);
+
+    if (projects().isOpeningProject() || projects().isOpeningProject())
+        return;
 
     viewPlugin->getPresetsAction().loadDefaultPreset();
 }

@@ -61,7 +61,8 @@ QVector<QPointer<ToggleAction>> LoadedViewsMenu::getLoadedViewsActions(bool syst
                 continue;
         }
 
-        auto action = new ToggleAction(this, viewPlugin->getKind());
+        auto action = new ToggleAction(this, viewPlugin->text());
+
         action->setIcon(viewPlugin->getVisibleAction().icon());
         action->setChecked(viewPlugin->getVisibleAction().isChecked());
 

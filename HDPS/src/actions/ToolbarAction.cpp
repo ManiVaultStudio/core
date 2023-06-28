@@ -21,6 +21,14 @@ GroupAction& ToolbarAction::getGroupAction()
 
 void ToolbarAction::addAction(WidgetAction* action, const std::int32_t& autoExpandPriority /*= -1*/, std::int32_t widgetFlags /*= -1*/)
 {
+    Q_ASSERT(action != nullptr);
+
+    if (action == nullptr)
+        return;
+
+    if (widgetFlags == -1)
+        widgetFlags = action->getDefaultWidgetFlags();
+
     _groupAction.addAction(action, widgetFlags);
 
     auto actionItem = new ToolbarActionItem(this, action, widgetFlags, ToolbarActionItem::State::Collapsed, autoExpandPriority);
