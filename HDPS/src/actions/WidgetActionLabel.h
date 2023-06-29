@@ -1,26 +1,32 @@
 #pragma once
 
-#include <QWidget>
+#include "WidgetActionViewWidget.h"
+
+#include "util/WidgetFader.h"
+
 #include <QLabel>
 
-namespace hdps {
+class QDrag;
 
-namespace gui {
+namespace hdps::gui {
 
 class WidgetAction;
 
 /**
  * Widget action label class
  *
- * Creates a custom label widget for a widget action
- * Provides linking commands:
- * - Publish an action (create a public shared action)
- * - Connect to a shared action
- * - Disconnect from a shared action
+ * Provides a label view on the action
+ * 
+ * Features:
+ * - Label of which the text, visibility and tooltip is synchronized with the action
+ * - Provide linking commands
+ *   - Publish an action (create a public shared action)
+ *   - Connect to a shared action
+ *   - Disconnect from a shared action
  * 
  * @author Thomas Kroes
  */
-class WidgetActionLabel : public QWidget
+class WidgetActionLabel : public WidgetActionViewWidget
 {
 public:
 
@@ -33,11 +39,11 @@ public:
 
     /**
      * Constructor
-     * @param widgetAction Pointer to widget action
+     * @param action Pointer to widget action
      * @param parent Pointer to parent widget
      * @param windowFlags Window flags
      */
-    explicit WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent = nullptr, const std::uint32_t& flags = ColonAfterName);
+    explicit WidgetActionLabel(WidgetAction* action, QWidget* parent = nullptr, const std::uint32_t& flags = ColonAfterName);
 
     /**
      * Respond to target object events
@@ -76,11 +82,11 @@ private:
     QString getLabelText() const;
 
 protected:
-    std::uint32_t       _flags;                 /** Configuration flags */
-    WidgetAction*       _widgetAction;          /** Pointer to widget action */
-    QLabel              _nameLabel;             /** Action name label */
-    bool                _elide;                 /** Whether to enable label elide (e.g. whether to truncate text and show an ellipsis when there is insufficient space for the text) */
+    std::uint32_t       _flags;                     /** Configuration flags */
+    QLabel              _nameLabel;                 /** Action name label */
+    bool                _elide;                     /** Whether to enable label elide (e.g. whether to truncate text and show an ellipsis when there is insufficient space for the text) */
+    QDrag*              _drag;                      /** Pointer is set during drag and drop action connection */
+    QPoint              _lastMousePressPosition;    /** Location during last mouse press event */
 };
 
-}
 }

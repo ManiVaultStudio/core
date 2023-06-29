@@ -4,6 +4,8 @@
 
 #include <ViewPlugin.h>
 
+#include <DockManager.h>
+
 #include <QMenu>
 
 /**
@@ -16,6 +18,29 @@
 class ViewPluginDockWidget final : public DockWidget
 {
     Q_OBJECT
+
+private:
+
+    /** Widget which contains a settings action widget (purpose is to provide a size hint)*/
+    class SettingsActionWidget : public QWidget {
+    public:
+
+        /**
+         * Construct with \p parent and pointer to \p settingsAction
+         * @param parent Pointer to parent widget
+         * @param settingsAction Pointer to settingsAction
+         */
+        SettingsActionWidget(QWidget* parent, hdps::gui::WidgetAction* settingsAction);
+
+        /** Override minimum size hint and derive it from the settings action widget */
+        QSize sizeHint() const override;
+
+        /** Override minimum size hint and derive it from the settings action widget */
+        QSize minimumSizeHint() const override;
+
+    private:
+        hdps::gui::WidgetAction*    _settingsAction;    /** Pointer to settings action to set the size hint for */
+    };
 
 public:
 
@@ -106,12 +131,15 @@ private:
     void setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin);
 
 private:
-    hdps::plugin::ViewPlugin*   _viewPlugin;            /** Pointer to view plugin */
-    QString                     _viewPluginKind;        /** Kind of (view) plugin */
-    QVariantMap                 _viewPluginMap;         /** View plugin cached map for deferred loading */
-    QMenu                       _settingsMenu;          /** Menu for view plugin settings */
-    hdps::gui::TriggerAction    _helpAction;            /** Action for triggering help */
-    bool                        _cachedVisibility;      /** Cached visibility for view plugin isolation */
+    hdps::plugin::ViewPlugin*       _viewPlugin;                /** Pointer to view plugin */
+    QString                         _viewPluginKind;            /** Kind of (view) plugin */
+    QVariantMap                     _viewPluginMap;             /** View plugin cached map for deferred loading */
+    QMenu                           _settingsMenu;              /** Menu for view plugin settings */
+    QMenu                           _toggleMenu;                /** Menu for toggling view plugin dock widgets */
+    hdps::gui::TriggerAction        _helpAction;                /** Action for triggering help */
+    bool                            _cachedVisibility;          /** Cached visibility for view plugin isolation */
+    ads::CDockManager               _dockManager;               /** Dock manager for internal docking */
+    QMap<QString, CDockWidget*>     _settingsDockWidgetsMap;    /** Created dock widgets for settings actions */
 
 protected:
     static QList<ViewPluginDockWidget*> active;  /** Loaded view plugin dock widgets */

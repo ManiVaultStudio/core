@@ -76,7 +76,7 @@ public:
      * @param status Status type
      * @param message Status message
      */
-    StatusAction(QObject* parent, const QString& title = "", const Status& status = Status::Undefined, const QString& message = "");
+    Q_INVOKABLE StatusAction(QObject* parent, const QString& title = "", const Status& status = Status::Undefined, const QString& message = "");
 
     /**
      * Initialize the status action
@@ -132,3 +132,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::StatusAction)
+
+inline const auto statusActionMetaTypeId = qRegisterMetaType<hdps::gui::StatusAction*>("StatusAction");

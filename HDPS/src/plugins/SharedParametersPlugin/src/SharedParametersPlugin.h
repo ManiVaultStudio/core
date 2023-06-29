@@ -1,36 +1,41 @@
 #pragma once
 
-#include "ActionsWidget.h"
+#include "PublicActionsModel.h"
+
+#include "widgets/ActionsWidget.h"
 
 #include <ViewPlugin.h>
 
+using namespace hdps;
 using namespace hdps::plugin;
+using namespace hdps::gui;
 
 /**
- * Actions  plugin
+ * Shared parameters plugin
  *
- * This plugin provides a user interface for viewing/configuring (public) actions.
+ * This plugin provides a user interface for viewing/configuring shared parameters.
  *
  * @author Thomas Kroes
  */
-class ActionsPlugin : public ViewPlugin
+class SharedParametersPlugin : public ViewPlugin
 {
     Q_OBJECT
     
 public:
-    ActionsPlugin(const PluginFactory* factory);
+    SharedParametersPlugin(const PluginFactory* factory);
     
     void init() override;
 
 private:
-    ActionsWidget     _actionsWidget;       /** Widget for interaction with (public) actions */
+    PublicActionsModel  _publicActionsModel;    /** Public actions model of the top-level public actions and their descendants */
+    ActionsWidget       _actionsWidget;         /** Widget for interaction with shared parameters */
 };
 
 class ActionsPluginFactory : public ViewPluginFactory
 {
     Q_INTERFACES(hdps::plugin::ViewPluginFactory hdps::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "nl.BioVault.ActionsPlugin" FILE "ActionsPlugin.json")
+    Q_PLUGIN_METADATA(IID "NL.ManiVault.SharedParametersPlugin" FILE "SharedParametersPlugin.json")
     
 public:
 

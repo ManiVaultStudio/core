@@ -6,7 +6,7 @@
 using namespace hdps;
 
 DimensionPickerAction::DimensionPickerAction(QObject* parent, const QString& title) :
-    WidgetAction(parent),
+    WidgetAction(parent, title),
     _points(nullptr),
     _currentDimensionAction(this, "Select dimension"),
     _searchThreshold(DEFAULT_SEARCH_THRESHOLD)
@@ -64,7 +64,6 @@ void DimensionPickerAction::setPointsDataset(const Dataset<Points>& points)
     // And set current dimensions
     if (getNumberOfDimensions() >= 1) {
         setCurrentDimensionIndex(0);
-        setDefaultDimensionName(getCurrentDimensionName());
     }
 }
 
@@ -98,16 +97,6 @@ void DimensionPickerAction::setCurrentDimensionName(const QString& dimensionName
     _currentDimensionAction.setCurrentText(dimensionName);
 }
 
-void DimensionPickerAction::setDefaultDimensionIndex(const std::int32_t& defaultDimensionIndex)
-{
-    _currentDimensionAction.setDefaultIndex(defaultDimensionIndex);
-}
-
-void DimensionPickerAction::setDefaultDimensionName(const QString& defaultDimensionName)
-{
-    _currentDimensionAction.setDefaultText(defaultDimensionName);
-}
-
 std::uint32_t DimensionPickerAction::getSearchThreshold() const
 {
     return _searchThreshold;
@@ -123,42 +112,63 @@ bool DimensionPickerAction::maySearch() const
     return _currentDimensionAction.getNumberOfOptions() >= _searchThreshold;
 }
 
-bool DimensionPickerAction::isPublic() const
+void DimensionPickerAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
-    return _currentDimensionAction.isPublic();
+    auto publicDimensionPickerAction = dynamic_cast<DimensionPickerAction*>(publicAction);
+
+    Q_ASSERT(publicDimensionPickerAction != nullptr);
+
+    if (publicDimensionPickerAction == nullptr)
+        return;
+
+    if (recursive) {
+        actions().connectPrivateActionToPublicAction(&_currentDimensionAction, &publicDimensionPickerAction->getCurrentDimensionAction(), recursive);
+    }
+
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void DimensionPickerAction::publish(const QString& name)
+void DimensionPickerAction::disconnectFromPublicAction(bool recursive)
 {
-    _currentDimensionAction.publish(name);
-}
+    if (!isConnected())
+        return;
 
-void DimensionPickerAction::connectToPublicAction(WidgetAction* publicAction)
-{
-    _currentDimensionAction.connectToPublicAction(publicAction);
+    if (recursive) {
+        actions().disconnectPrivateActionFromPublicAction(&_currentDimensionAction, recursive);
+    }
 
-    WidgetAction::connectToPublicAction(publicAction);
-}
-
-void DimensionPickerAction::disconnectFromPublicAction()
-{
-    _currentDimensionAction.disconnectFromPublicAction();
-
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void DimensionPickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
+    if (variantMap.contains("DatasetID")) {
+        const auto datasetID = variantMap["DatasetID"].toString();
+
+        if (!datasetID.isEmpty()) {
+            auto dataset = hdps::data().getSet(datasetID);
+
+            if (dataset.isValid())
+                setPointsDataset(Dataset<Points>(dataset));
+        }
+    }
+
     _currentDimensionAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap DimensionPickerAction::toVariantMap() const
 {
-    QVariantMap variantMap = WidgetAction::toVariantMap();
+    auto variantMap = WidgetAction::toVariantMap();
 
     _currentDimensionAction.insertIntoVariantMap(variantMap);
+
+    const auto datasetId = _points.isValid() ? _points->getId() : "";
+
+    variantMap.insert({
+        { "DatasetID", datasetId }
+    });
 
     return variantMap;
 }

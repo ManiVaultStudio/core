@@ -2,17 +2,16 @@
 #include "WidgetActionLabel.h"
 #include "WidgetActionCollapsedWidget.h"
 #include "WidgetActionContextMenu.h"
+#include "WidgetActionMimeData.h"
 #include "Application.h"
-#include "CoreInterface.h"
-#include "DataHierarchyItem.h"
-#include "Plugin.h"
-#include "util/Exception.h"
 #include "AbstractActionsManager.h"
+
+#include "util/Exception.h"
 
 #include <QDebug>
 #include <QMenu>
-#include <QFileDialog>
 #include <QJsonArray>
+#include <QDrag>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QEventLoop>
@@ -25,39 +24,99 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
+QMap<WidgetAction::Scope, QString> WidgetAction::scopeNames {
+    { WidgetAction::Scope::Private, "Private" },
+    { WidgetAction::Scope::Public, "Public" }
+};
+
+WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     QWidgetAction(parent),
-    util::Serializable("WidgetAction"),
+    util::Serializable(),
     _defaultWidgetFlags(),
     _sortIndex(-1),
     _stretch(-1),
-    _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
-    _isPublic(false),
+    _forceHidden(false),
+    _forceDisabled(false),
+    _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::PublishViaApi) | static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaApi) | static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi)),
+    _cachedConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None)),
+    _scope(Scope::Private),
     _publicAction(nullptr),
     _connectedActions(),
     _settingsPrefix(),
-    _highlighted(false),
-    _popupSizeHint(QSize(0, 0)),
-    _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default))
+    _highlighting(HighlightOption::None),
+    _popupSizeHint(),
+    _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default)),
+    _location()
 {
+    Q_ASSERT(!title.isEmpty());
+
+    setText(title);
+    setSerializationName(title);
+
+    updateLocation();
+
     if (core()->isInitialized())
+    {
         actions().addAction(this);
+
+        if (projects().hasProject())
+            setStudioMode(projects().getCurrentProject()->getStudioModeAction().isChecked(), false);
+    }
 }
 
 WidgetAction::~WidgetAction()
 {
-    if (core()->isInitialized())
-        actions().removeAction(this);
+    if (!core()->isInitialized())
+        return;
+
+    actions().removeAction(this);
 }
 
-QString WidgetAction::getTypeString() const
-{
-    return "";
-}
-
-WidgetAction* WidgetAction::getParentWidgetAction()
+WidgetAction* WidgetAction::getParentAction() const
 {
     return dynamic_cast<WidgetAction*>(this->parent());
+}
+
+WidgetActions WidgetAction::getParentActions() const
+{
+    WidgetActions parentActions;
+
+    auto currentParent = dynamic_cast<WidgetAction*>(parent());
+
+    while (currentParent) {
+        parentActions << currentParent;
+
+        currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());
+    }
+
+    return parentActions;
+}
+
+WidgetActions WidgetAction::getChildren() const
+{
+    WidgetActions children;
+
+    for (auto child : this->children()) {
+        auto childAction = dynamic_cast<WidgetAction*>(child);
+
+        if (childAction)
+            children << childAction;
+    }
+
+    return children;
+}
+
+bool WidgetAction::isRoot() const
+{
+    if (!getParentAction())
+        return true;
+
+    return getParentAction()->getScope() != getScope();
+}
+
+bool WidgetAction::isLeaf() const
+{
+    return getChildren().isEmpty();
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
@@ -80,7 +139,12 @@ std::int32_t WidgetAction::getSortIndex() const
 
 void WidgetAction::setSortIndex(const std::int32_t& sortIndex)
 {
+    if (sortIndex == _sortIndex)
+        return;
+
     _sortIndex = sortIndex;
+
+    emit sortIndexChanged(_sortIndex);
 }
 
 QWidget* WidgetAction::createCollapsedWidget(QWidget* parent) const
@@ -95,7 +159,7 @@ QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& wi
 
 QMenu* WidgetAction::getContextMenu(QWidget* parent /*= nullptr*/)
 {
-    return new WidgetActionContextMenu(parent, this);
+    return new WidgetActionContextMenu(parent, { this });
 }
 
 std::int32_t WidgetAction::getDefaultWidgetFlags() const
@@ -108,24 +172,70 @@ void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
     _defaultWidgetFlags = widgetFlags;
 }
 
-void WidgetAction::setHighlighted(bool highlighted)
+WidgetAction::HighlightOption WidgetAction::getHighlighting() const
 {
-    if (highlighted == _highlighted)
-        return;
-
-    _highlighted = highlighted;
-
-    emit highlightedChanged(_highlighted);
+    return _highlighting;
 }
 
 bool WidgetAction::isHighlighted() const
 {
-    return _highlighted;
+    return (_highlighting == HighlightOption::Moderate) | (_highlighting == HighlightOption::Strong);
+}
+
+void WidgetAction::setHighlighting(const HighlightOption& highlighting)
+{
+    if (highlighting == _highlighting)
+        return;
+
+    qDebug() << __FUNCTION__ << text() << static_cast<int>(highlighting);
+
+    _highlighting = highlighting;
+
+    emit highlightingChanged(_highlighting);
+}
+
+void WidgetAction::setHighlighted(bool highlighted)
+{
+    setHighlighting(highlighted ? HighlightOption::Moderate : HighlightOption::None);
+}
+
+void WidgetAction::highlight()
+{
+    setHighlighted(true);
+}
+
+void WidgetAction::unHighlight()
+{
+    setHighlighted(false);
+}
+
+WidgetAction::Scope WidgetAction::getScope() const
+{
+    return _scope;
+}
+
+bool WidgetAction::isPrivate() const
+{
+    return _scope == Scope::Private;
 }
 
 bool WidgetAction::isPublic() const
 {
-    return _isPublic;
+    return _scope == Scope::Public;
+}
+
+void WidgetAction::makePublic(bool recursive /*= true*/)
+{
+    _scope = Scope::Public;
+
+    emit scopeChanged(_scope);
+    
+    for (auto child : children()) {
+        auto widgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (widgetAction != nullptr)
+            widgetAction->makePublic(recursive);
+    }
 }
 
 bool WidgetAction::isPublished() const
@@ -147,153 +257,111 @@ bool WidgetAction::isConnected() const
 
 void WidgetAction::publish(const QString& name /*= ""*/)
 {
-    try
-    {
-        if (isPublished())
-            return;
-
-        if (name.isEmpty()) {
-            auto& fontAwesome = Application::getIconFont("FontAwesome");
-
-            QDialog publishDialog;
-
-            publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
-            publishDialog.setWindowTitle("Publish " + text() + " parameter");
-
-            auto mainLayout         = new QVBoxLayout();
-            auto parameterLayout    = new QHBoxLayout();
-            auto label              = new QLabel("Name:");
-            auto lineEdit           = new QLineEdit(text());
-
-            parameterLayout->addWidget(label);
-            parameterLayout->addWidget(lineEdit);
-
-            mainLayout->addLayout(parameterLayout);
-
-            auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-
-            dialogButtonBox->button(QDialogButtonBox::Ok)->setText("Publish");
-            dialogButtonBox->button(QDialogButtonBox::Ok)->setToolTip("Publish the parameter");
-            dialogButtonBox->button(QDialogButtonBox::Cancel)->setToolTip("Cancel publishing");
-
-            connect(dialogButtonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, &publishDialog, &QDialog::accept);
-            connect(dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, &publishDialog, &QDialog::reject);
-
-            mainLayout->addWidget(dialogButtonBox);
-
-            publishDialog.setLayout(mainLayout);
-            publishDialog.setFixedWidth(300);
-
-            const auto updateOkButtonReadOnly = [dialogButtonBox, lineEdit]() -> void {
-                dialogButtonBox->button(QDialogButtonBox::Ok)->setEnabled(!lineEdit->text().isEmpty());
-            };
-
-            connect(lineEdit, &QLineEdit::textChanged, this, updateOkButtonReadOnly);
-
-            updateOkButtonReadOnly();
-
-            publishDialog.open();
-            
-            QEventLoop eventLoop;
-            QObject::connect(&publishDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
-            eventLoop.exec();
-
-            if (publishDialog.result() != QDialog::Accepted)
-                return;
-
-            publish(lineEdit->text());
-
-        }
-        else {
-            if (isPublished())
-                throw std::runtime_error("Action is already published");
-
-            auto publicCopy = getPublicCopy();
-
-            publicCopy->_isPublic = true;
-
-            if (publicCopy == nullptr)
-                throw std::runtime_error("Public copy not created");
-
-            publicCopy->setText(name);
-
-            connectToPublicAction(publicCopy);
-
-            emit isPublishedChanged(isPublished());
-            emit isConnectedChanged(isConnected());
-        }
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to publish " + text(), e);
-    }
-    catch (...)
-    {
-        exceptionMessageBox("Unable to publish " + text());
-    }
+    hdps::actions().publishPrivateAction(this, name);
 }
 
-void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
+void WidgetAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     Q_ASSERT(publicAction != nullptr);
 
+    if (publicAction == nullptr)
+        return;
+
+#ifdef WIDGET_ACTION_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     _publicAction = publicAction;
 
-    _publicAction->connectPrivateAction(this);
+    actions().addPrivateActionToPublicAction(this, publicAction);
+
+    const auto updateReadOnly = [this]() -> void {
+        setEnabled(_publicAction->isEnabled());
+    };
+
+    updateReadOnly();
+
+    connect(_publicAction, &QAction::changed, this, updateReadOnly);
 
     emit isConnectedChanged(isConnected());
+
+    /*
+    if (recursive) {
+        for (auto child : children()) {
+            auto action = dynamic_cast<WidgetAction*>(child);
+
+            if (action == nullptr)
+                continue;
+
+            action->cacheConnectionPermissions(true);
+            action->setConnectionPermissionsToNone(true);
+        }
+    }
+    */
 }
 
 void WidgetAction::connectToPublicActionByName(const QString& publicActionName)
 {
-    Q_ASSERT(!publicActionName.isEmpty());
+    try
+    {
+        Q_ASSERT(!publicActionName.isEmpty());
 
-    if (publicActionName.isEmpty())
-        return;
+        if (publicActionName.isEmpty())
+            throw std::runtime_error("Public action name is empty");
 
-    auto& model = Application::core()->getActionsManager().getModel();
+        ActionsListModel actionsListModel(this);
 
-    const auto matches = model.match(model.index(0, 0), Qt::DisplayRole, publicActionName, -1, Qt::MatchFlag::MatchRecursive);
+        auto action = actionsListModel.getAction(publicActionName);
 
-    if (matches.count() == 1)
-        connectToPublicAction(matches.first().data(Qt::UserRole + 1).value<WidgetAction*>());
+        if (action == nullptr)
+            throw std::runtime_error(QString("Public action %1 not found in the actions database").arg(publicActionName).toLatin1());
+
+        if (!action->isPublic()) 
+            throw std::runtime_error(QString("%1 is not public").arg(publicActionName).toLatin1());
+
+        connectToPublicAction(action, true);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to connect to public action by name", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to connect to public action by name");
+    }
 }
 
-void WidgetAction::disconnectFromPublicAction()
+void WidgetAction::disconnectFromPublicAction(bool recursive)
 {
     Q_ASSERT(_publicAction != nullptr);
 
-    _publicAction->disconnectPrivateAction(this);
+    if (_publicAction == nullptr)
+        return;
+
+#ifdef WIDGET_ACTION_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    actions().removePrivateActionFromPublicAction(this, _publicAction);
+
+    disconnect(_publicAction, &QAction::changed, this, nullptr);
+
+    setEnabled(true);
 
     _publicAction = nullptr;
 
     emit isConnectedChanged(isConnected());
-}
 
-void WidgetAction::connectPrivateAction(WidgetAction* privateAction)
-{
-    Q_ASSERT(privateAction != nullptr);
+    if (recursive) {
+        for (auto child : children()) {
+            auto action = dynamic_cast<WidgetAction*>(child);
 
-#ifdef WIDGET_ACTION_VERBOSE
-    qDebug() << __FUNCTION__ << privateAction->text();
-#endif
+            if (action == nullptr)
+                continue;
 
-    _connectedActions << privateAction;
-
-    emit actionConnected(privateAction);
-
-    connect(privateAction, &WidgetAction::destroyed, this, [this, privateAction]() -> void {
-        disconnectPrivateAction(privateAction);
-    });
-}
-
-void WidgetAction::disconnectPrivateAction(WidgetAction* privateAction)
-{
-    Q_ASSERT(privateAction != nullptr);
-
-    _connectedActions.removeOne(privateAction);
-
-    emit actionDisconnected(privateAction);
+            action->restoreConnectionPermissions(true);
+        }
+    }
 }
 
 WidgetAction* WidgetAction::getPublicAction()
@@ -301,13 +369,52 @@ WidgetAction* WidgetAction::getPublicAction()
     return _publicAction;
 }
 
-const QVector<WidgetAction*> WidgetAction::getConnectedActions() const
+WidgetAction* WidgetAction::getPublicCopy() const
+{
+    try
+    {
+        auto publicCopy = static_cast<WidgetAction*>(metaObject()->newInstance(Q_ARG(QObject*, &hdps::actions()), Q_ARG(QString, text())));
+
+        if (publicCopy == nullptr)
+            throw std::runtime_error(QString("Unable to create new %1 instance using the Qt meta-object system.").arg(metaObject()->className()).toLatin1());
+
+        publicCopy->makePublic();
+        publicCopy->fromVariantMap(toVariantMap());
+        publicCopy->makeUnique();
+
+        emit publicCopy->idChanged(getId());
+
+        return publicCopy;
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Get public copy failed", e);
+
+        return nullptr;
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Get public copy failed");
+
+        return nullptr;
+    }
+}
+
+const WidgetActions WidgetAction::getConnectedActions() const
+{
+    return _connectedActions;
+}
+
+WidgetActions& WidgetAction::getConnectedActions()
 {
     return _connectedActions;
 }
 
 bool WidgetAction::mayPublish(ConnectionContextFlag connectionContextFlags) const
 {
+    if (_connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ForceNone))
+        return false;
+
     switch (connectionContextFlags)
     {
         case WidgetAction::Api:
@@ -326,9 +433,132 @@ bool WidgetAction::mayPublish(ConnectionContextFlag connectionContextFlags) cons
     return false;
 }
 
-WidgetAction* WidgetAction::getPublicCopy() const
+bool WidgetAction::mayConnect(ConnectionContextFlag connectionContextFlags) const
 {
-    return nullptr;
+    if (_connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ForceNone))
+        return false;
+
+    switch (connectionContextFlags)
+    {
+        case WidgetAction::Api:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaApi);
+
+        case WidgetAction::Gui:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaGui);
+
+        case WidgetAction::ApiAndGui:
+            break;
+
+        default:
+            break;
+    }
+
+    return false;
+}
+
+bool WidgetAction::mayDisconnect(ConnectionContextFlag connectionContextFlags) const
+{
+    if (_connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ForceNone))
+        return false;
+
+    switch (connectionContextFlags)
+    {
+        case hdps::gui::WidgetAction::Api:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi);
+
+        case hdps::gui::WidgetAction::Gui:
+            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaGui);
+
+        case hdps::gui::WidgetAction::ApiAndGui:
+            break;
+
+        default:
+            break;
+    }
+
+    return false;
+}
+
+std::int32_t WidgetAction::getConnectionPermissions() const
+{
+    return _connectionPermissions;
+}
+
+bool WidgetAction::isConnectionPermissionFlagSet(ConnectionPermissionFlag connectionPermissionsFlag)
+{
+    return _connectionPermissions & static_cast<std::int32_t>(connectionPermissionsFlag);
+}
+
+void WidgetAction::setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset /*= false*/, bool recursive /*= false*/)
+{
+    if (unset)
+        _connectionPermissions = _connectionPermissions & ~static_cast<std::int32_t>(connectionPermissionsFlag);
+    else
+        _connectionPermissions |= static_cast<std::int32_t>(connectionPermissionsFlag);
+
+    emit connectionPermissionsChanged(_connectionPermissions);
+
+    if (recursive)
+        for (auto childAction : getChildren())
+            childAction->setConnectionPermissionsFlag(connectionPermissionsFlag, unset, recursive);
+}
+
+void WidgetAction::setConnectionPermissions(std::int32_t connectionPermissions, bool recursive /*= false*/)
+{
+    _connectionPermissions = connectionPermissions;
+
+    emit connectionPermissionsChanged(_connectionPermissions);
+
+    if (recursive)
+        for (auto childAction : getChildren())
+            childAction->setConnectionPermissions(connectionPermissions, recursive);
+}
+
+void WidgetAction::setConnectionPermissionsToNone(bool recursive /*= false*/)
+{
+    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None), recursive);
+}
+
+void WidgetAction::setConnectionPermissionsToForceNone(bool recursive /*= false*/)
+{
+    setConnectionPermissionsFlag(ConnectionPermissionFlag::ForceNone, false, recursive);
+}
+
+void WidgetAction::setConnectionPermissionsToAll(bool recursive /*= false*/)
+{
+    setConnectionPermissionsFlag(ConnectionPermissionFlag::All, false, recursive);
+}
+
+void WidgetAction::cacheConnectionPermissions(bool recursive /*= false*/)
+{
+    _cachedConnectionPermissions = _connectionPermissions;
+
+    if (recursive)
+        for (auto childAction : getChildren())
+            childAction->cacheConnectionPermissions(recursive);
+}
+
+void WidgetAction::restoreConnectionPermissions(bool recursive /*= false*/)
+{
+    setConnectionPermissions(_cachedConnectionPermissions);
+
+    if (recursive)
+        for (auto childAction : getChildren())
+            childAction->restoreConnectionPermissions(recursive);
+}
+
+void WidgetAction::startDrag()
+{
+    if (!mayConnect(WidgetAction::Gui))
+        return;
+
+    auto drag       = new QDrag(this);
+    auto mimeData   = new WidgetActionMimeData(this);
+
+    drag->setMimeData(mimeData);
+    drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(QSize(12, 12)));
+
+    drag->exec();
 }
 
 void WidgetAction::setSettingsPrefix(const QString& settingsPrefix, const bool& load /*= true*/)
@@ -376,28 +606,26 @@ void WidgetAction::saveToSettings()
     Application::current()->setSetting(_settingsPrefix, toVariantMap());
 }
 
-QString WidgetAction::getSettingsPath() const
+QString WidgetAction::getLocation() const
 {
-    QStringList actionPath;
+    return _location;
+}
 
-    auto currentParent = dynamic_cast<WidgetAction*>(parent());
+void WidgetAction::updateLocation(bool recursive /*= true*/)
+{
+    const auto parentAction = getParentAction();
+    const auto location     = parentAction ? QString("%1/%2").arg(parentAction->getLocation(), text()) : text();
 
-    const auto getPathName = [](const WidgetAction* widgetAction) -> QString {
-        if (!widgetAction->objectName().isEmpty())
-            return widgetAction->objectName();
+    if (location == _location)
+        return;
 
-        return widgetAction->text();
-    };
+    _location = location;
 
-    actionPath << getPathName(this);
+    emit locationChanged(_location);
 
-    while (currentParent) {
-        actionPath.insert(actionPath.begin(), getPathName(currentParent));
-
-        currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());
-    }
-
-    return actionPath.join("/");
+    if (recursive)
+        for (const auto& child : getChildren())
+            child->updateLocation(recursive);
 }
 
 QVector<WidgetAction*> WidgetAction::findChildren(const QString& searchString, bool recursive /*= true*/) const
@@ -440,19 +668,48 @@ QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
 
 void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
 {
+    auto previousId = getId();
+
     Serializable::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "Enabled");
-    variantMapMustContain(variantMap, "Checked");
-    variantMapMustContain(variantMap, "Visible");
+    //variantMapMustContain(variantMap, "IsEnabled");
+    variantMapMustContain(variantMap, "IsChecked");
+    variantMapMustContain(variantMap, "IsVisible");
     variantMapMustContain(variantMap, "SortIndex");
     variantMapMustContain(variantMap, "ConnectionPermissions");
 
-    setEnabled(variantMap["Enabled"].toBool());
-    setChecked(variantMap["Checked"].toBool());
-    setVisible(variantMap["Visible"].toBool());
+    //setEnabled(variantMap["IsEnabled"].toBool());
+    setChecked(variantMap["IsChecked"].toBool());
+    setVisible(variantMap["IsVisible"].toBool());
     setSortIndex(variantMap["SortIndex"].toInt());
+
+    if (variantMap.contains("Stretch"))
+        setStretch(variantMap["Stretch"].toInt());
+
+    if (variantMap.contains("IsForceHidden"))
+        setForceHidden(variantMap["IsForceHidden"].toInt());
+
+    if (variantMap.contains("IsForceDisabled"))
+        setForceHidden(variantMap["IsForceHidden"].toInt());
+
     setConnectionPermissions(variantMap["ConnectionPermissions"].toInt());
+
+    if (variantMap.contains("PublicActionID")) {
+        const auto publicActionId = variantMap["PublicActionID"].toString();
+
+        if (!publicActionId.isEmpty()) {
+            const auto publicAction = actions().getAction(publicActionId);
+
+            if (publicAction)
+                connectToPublicAction(publicAction, false);
+        }
+    }
+
+    if (getId() != previousId)
+        emit idChanged(getId());
+
+    if (core()->isInitialized() && projects().hasProject())
+        setStudioMode(projects().getCurrentProject()->getStudioModeAction().isChecked(), false);
 }
 
 QVariantMap WidgetAction::toVariantMap() const
@@ -460,116 +717,32 @@ QVariantMap WidgetAction::toVariantMap() const
     QVariantMap variantMap = Serializable::toVariantMap();
 
     variantMap.insert({
-        { "Type", QVariant::fromValue(getTypeString()) },
-        { "Enabled", QVariant::fromValue(isEnabled()) },
-        { "Checked", QVariant::fromValue(isChecked()) },
-        { "Visible", QVariant::fromValue(isVisible()) },
+        { "ActionType", QVariant::fromValue(getTypeString()) },
+        //{ "IsEnabled", QVariant::fromValue(isEnabled()) },
+        { "IsChecked", QVariant::fromValue(isChecked()) },
+        { "IsVisible", QVariant::fromValue(isVisible()) },
         { "SortIndex", QVariant::fromValue(_sortIndex) },
-        { "ConnectionPermissions", QVariant::fromValue(_connectionPermissions) }
+        { "ConnectionPermissions", QVariant::fromValue(_connectionPermissions) },
+        { "IsPublic", QVariant::fromValue(isPublic()) },
+        { "PublicActionID", QVariant::fromValue(_publicAction == nullptr ? "" : _publicAction->getId()) },
+        { "IsForceHidden", QVariant::fromValue(getForceHidden()) },
+        { "IsForceDisabled", QVariant::fromValue(getForceDisabled()) },
+        { "Stretch", QVariant::fromValue(getStretch()) }
     });
 
     return variantMap;
 }
 
-QVector<WidgetAction*> WidgetAction::getChildActions()
+bool WidgetAction::isResettable() const
 {
-    QVector<WidgetAction*> childActions;
-
-    for (auto child : children()) {
-        auto childAction = dynamic_cast<WidgetAction*>(child);
-
-        if (childAction)
-            childActions << childAction;
-    }
-
-    return childActions;
-}
-
-bool WidgetAction::mayConnect(ConnectionContextFlag connectionContextFlags) const
-{
-    switch (connectionContextFlags)
-    {
-        case WidgetAction::Api:
-            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaApi);
-
-        case WidgetAction::Gui:
-            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaGui);
-
-        case WidgetAction::ApiAndGui:
-            break;
-
-        default:
-            break;
-    }
+    qDebug() << "isResettable() is not implemented in " << text();
 
     return false;
 }
 
-bool WidgetAction::mayDisconnect(ConnectionContextFlag connectionContextFlags) const
+void WidgetAction::reset()
 {
-    switch (connectionContextFlags)
-    {
-        case hdps::gui::WidgetAction::Api:
-            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi);
-
-        case hdps::gui::WidgetAction::Gui:
-            return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaGui);
-
-        case hdps::gui::WidgetAction::ApiAndGui:
-            break;
-
-        default:
-            break;
-    }
-
-    return false;
-}
-
-std::int32_t WidgetAction::getConnectionPermissions() const
-{
-    return _connectionPermissions;
-}
-
-bool WidgetAction::isConnectionPermissionFlagSet(ConnectionPermissionFlag connectionPermissionsFlag)
-{
-    return _connectionPermissions & static_cast<std::int32_t>(connectionPermissionsFlag);
-}
-
-void WidgetAction::setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset /*= false*/, bool recursive /*= false*/)
-{
-    if (unset)
-        _connectionPermissions = _connectionPermissions & ~static_cast<std::int32_t>(connectionPermissionsFlag);
-    else
-        _connectionPermissions |= static_cast<std::int32_t>(connectionPermissionsFlag);
-
-    emit connectionPermissionsChanged(_connectionPermissions);
-
-    if (recursive) {
-        for (auto childAction : getChildActions())
-            childAction->setConnectionPermissionsFlag(connectionPermissionsFlag, unset, recursive);
-    }
-}
-
-void WidgetAction::setConnectionPermissions(std::int32_t connectionPermissions, bool recursive /*= false*/)
-{
-    _connectionPermissions = connectionPermissions;
-
-    emit connectionPermissionsChanged(_connectionPermissions);
-
-    if (recursive) {
-        for (auto childAction : getChildActions())
-            childAction->setConnectionPermissions(connectionPermissions, recursive);
-    }
-}
-
-void WidgetAction::setConnectionPermissionsToNone(bool recursive /*= false*/)
-{
-    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None), recursive);
-}
-
-bool WidgetAction::isResettable()
-{
-    return false;
+    qDebug() << "reset() is not implemented in " << text();
 }
 
 std::int32_t WidgetAction::getConfiguration() const
@@ -594,7 +767,7 @@ void WidgetAction::setConfigurationFlag(ConfigurationFlag configurationFlag, boo
     emit configurationChanged(_configuration);
 
     if (recursive) {
-        for (auto childAction : getChildActions())
+        for (auto childAction : getChildren())
             childAction->setConfigurationFlag(configurationFlag, unset, recursive);
     }
 
@@ -609,9 +782,19 @@ void WidgetAction::setConfiguration(std::int32_t configuration, bool recursive /
     emit configurationChanged(_configuration);
 
     if (recursive) {
-        for (auto childAction : getChildActions())
+        for (auto childAction : getChildren())
             childAction->setConfiguration(configuration, recursive);
     }
+}
+
+QString WidgetAction::getTypeString(bool humanFriendly /*= false*/) const
+{
+    const auto className = QString(metaObject()->className());
+
+    if (humanFriendly)
+        return className.split("::").last().replace("Action", "");
+    
+    return className;
 }
 
 std::int32_t WidgetAction::getStretch() const
@@ -621,7 +804,12 @@ std::int32_t WidgetAction::getStretch() const
 
 void WidgetAction::setStretch(const std::int32_t& stretch)
 {
+    if (stretch == _stretch)
+        return;
+
     _stretch = stretch;
+
+    emit stretchChanged(_stretch);
 }
 
 void WidgetAction::cacheState(const QString& name /*= "cache"*/)
@@ -658,6 +846,87 @@ void WidgetAction::restoreState(const QString& name /*= "cache"*/, bool remove /
     catch (...)
     {
         exceptionMessageBox(exceptionMessage);
+    }
+}
+
+bool WidgetAction::getForceHidden() const
+{
+    return _forceHidden;
+}
+
+void WidgetAction::setForceHidden(bool forceHidden)
+{
+    if (forceHidden == _forceHidden)
+        return;
+
+    _forceHidden = forceHidden;
+
+    emit visibleChanged();
+    emit changed();
+    emit forceHiddenChanged(_forceHidden);
+}
+
+bool WidgetAction::isVisible() const
+{
+    if (getForceHidden())
+        return false;
+
+    return QWidgetAction::isVisible();
+}
+
+bool WidgetAction::getForceDisabled() const
+{
+    return _forceDisabled;
+}
+
+void WidgetAction::setForceDisabled(bool forceDisabled)
+{
+    if (forceDisabled == _forceDisabled)
+        return;
+
+    _forceDisabled = forceDisabled;
+
+    emit enabledChanged(isEnabled());
+    emit changed();
+    emit forceDisabledChanged(_forceDisabled);
+}
+
+bool WidgetAction::isEnabled() const
+{
+    if (getForceDisabled())
+        return false;
+
+    return QWidgetAction::isEnabled();
+}
+
+void WidgetAction::setText(const QString& text)
+{
+    if (text == this->text())
+        return;
+
+    if (text.isEmpty())
+        throw std::runtime_error("Setting widget action text to an empty string!");
+
+    QWidgetAction::setText(text);
+
+    emit textChanged(this->text());
+
+    updateLocation();
+}
+
+bool WidgetAction::mayConnectToPublicAction(const WidgetAction* publicAction) const
+{
+    return true;
+}
+
+void WidgetAction::setStudioMode(bool studioMode, bool recursive /*= true*/)
+{
+    if (studioMode) {
+        cacheConnectionPermissions(recursive);
+        setConnectionPermissionsToAll(recursive);
+    }
+    else {
+        restoreConnectionPermissions(recursive);
     }
 }
 

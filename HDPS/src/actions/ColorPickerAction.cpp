@@ -11,18 +11,12 @@ namespace gui {
 
 const QColor ColorPickerAction::DEFAULT_COLOR = Qt::gray;
 
-ColorPickerAction::ColorPickerAction(QObject* parent, const QString& title /*= ""*/, const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/) :
-    WidgetAction(parent),
+ColorPickerAction::ColorPickerAction(QObject* parent, const QString& title /*= ""*/, const QColor& color /*= DEFAULT_COLOR*/) :
+    WidgetAction(parent, title),
     _color()
 {
     setText(title);
-    initialize(color, defaultColor);
-}
-
-void ColorPickerAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/)
-{
     setColor(color);
-    setDefaultColor(defaultColor);
 }
 
 QColor ColorPickerAction::getColor() const
@@ -40,54 +34,48 @@ void ColorPickerAction::setColor(const QColor& color)
     emit colorChanged(_color);
 }
 
-QColor ColorPickerAction::getDefaultColor() const
-{
-    return _defaultColor;
-}
-
-void ColorPickerAction::setDefaultColor(const QColor& defaultColor)
-{
-    if (defaultColor == _defaultColor)
-        return;
-
-    _defaultColor = defaultColor;
-
-    emit defaultColorChanged(_defaultColor);
-}
-
-void ColorPickerAction::connectToPublicAction(WidgetAction* publicAction)
+void ColorPickerAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicColorPickerAction = dynamic_cast<ColorPickerAction*>(publicAction);
 
     Q_ASSERT(publicColorPickerAction != nullptr);
+
+    if (publicColorPickerAction == nullptr)
+        return;
 
     connect(this, &ColorPickerAction::colorChanged, publicColorPickerAction, &ColorPickerAction::setColor);
     connect(publicColorPickerAction, &ColorPickerAction::colorChanged, this, &ColorPickerAction::setColor);
 
     setColor(publicColorPickerAction->getColor());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void ColorPickerAction::disconnectFromPublicAction()
+void ColorPickerAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicColorPickerAction = dynamic_cast<ColorPickerAction*>(getPublicAction());
 
     Q_ASSERT(publicColorPickerAction != nullptr);
 
+    if (publicColorPickerAction == nullptr)
+        return;
+
     disconnect(this, &ColorPickerAction::colorChanged, publicColorPickerAction, &ColorPickerAction::setColor);
     disconnect(publicColorPickerAction, &ColorPickerAction::colorChanged, this, &ColorPickerAction::setColor);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 ColorPickerAction::Widget::Widget(QWidget* parent, ColorPickerAction* colorPickerAction) :
     WidgetActionWidget(parent, colorPickerAction),
     _layout(),
     _colorDialog(),
-    _hueAction(this, "Hue", 0, 359, colorPickerAction->getColor().hue(), colorPickerAction->getColor().hue()),
-    _saturationAction(this, "Saturation", 0, 255, colorPickerAction->getColor().saturation(), colorPickerAction->getColor().saturation()),
-    _lightnessAction(this, "Lightness", 0, 255, colorPickerAction->getColor().lightness(), colorPickerAction->getColor().lightness()),
+    _hueAction(this, "Hue", 0, 359, colorPickerAction->getColor().hue()),
+    _saturationAction(this, "Saturation", 0, 255, colorPickerAction->getColor().saturation()),
+    _lightnessAction(this, "Lightness", 0, 255, colorPickerAction->getColor().lightness()),
     _updateColorPickerAction(true)
 {
     setAcceptDrops(true);

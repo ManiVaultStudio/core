@@ -46,7 +46,7 @@ protected:
      * Constructor
      * @param colorMapAction Reference to color map action
      */
-    ColorMapViewAction(ColorMapAction& colorMapAction);
+    Q_INVOKABLE ColorMapViewAction(ColorMapAction& colorMapAction);
 
 public: // Action getters
 
@@ -61,3 +61,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::ColorMapViewAction)
+
+inline const auto colorMapViewActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapViewAction*>("ColorMapViewAction");

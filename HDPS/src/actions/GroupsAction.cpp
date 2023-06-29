@@ -7,12 +7,10 @@
 
 //#define GROUPS_ACTION_VERBOSE
 
-namespace hdps {
+namespace hdps::gui {
 
-namespace gui {
-
-GroupsAction::GroupsAction(QObject* parent /*= nullptr*/) :
-    WidgetAction(parent),
+GroupsAction::GroupsAction(QObject* parent, const QString& title) :
+    WidgetAction(parent, title),
     _groupActions(),
     _visibility()
 {
@@ -222,7 +220,7 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     WidgetActionWidget(parent, groupsAction, widgetFlags),
     _groupsAction(groupsAction),
     _layout(),
-    _filteredActionsAction(this, true),
+    _filteredActionsAction(this, "Filtered Actions", true),
     _toolbarWidget(parent),
     _toolbarLayout(),
     _filterAction(this, "Search"),
@@ -246,7 +244,7 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
 
     // Perform an initial update of the toolbar and action filtering
     updateToolbar();
-    updateFiltering();
+    //updateFiltering();
 }
 
 void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
@@ -266,7 +264,6 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
 
     // Configure toolbar layout
     _toolbarLayout.setContentsMargins(0, 2, 0, 2);
-    _toolbarLayout.setSpacing(4);
 
     // Add toolbar items
     if (widgetFlags & Filtering)
@@ -371,8 +368,7 @@ void GroupsAction::Widget::updateFiltering()
     if (!groupActions.isEmpty())
         groupActions.removeFirst();
 
-    // Found child widget actions
-    QVector<WidgetAction*> foundActions;
+    WidgetActions foundActions;
 
     for (auto groupAction : groupActions) {
         for (auto action : groupAction->getActions())
@@ -380,9 +376,12 @@ void GroupsAction::Widget::updateFiltering()
                 foundActions << action;
     }
 
-    // Update filtered actions group action
+    _filteredActionsAction.clear();
+
+    for (auto foundAction : foundActions)
+        _filteredActionsAction.addAction(foundAction);
+
     _filteredActionsAction.setExpanded(true);
-    _filteredActionsAction.setActions(foundActions);
     _filteredActionsAction.setText(foundActions.count() == 0 ? "No properties found" : QString("Found %1 proper%2").arg(QString::number(foundActions.count()), foundActions.count() == 1 ? "ty": "ties"));
 }
 
@@ -440,5 +439,4 @@ void GroupsAction::Widget::hideGroupAction(GroupAction* groupAction)
     _groupSectionTreeItems[groupAction]->setHidden(_groupsAction->isGroupActionHidden(groupAction));
 }
 
-}
 }

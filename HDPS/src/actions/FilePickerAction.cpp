@@ -11,8 +11,8 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-FilePickerAction::FilePickerAction(QObject* parent, const QString& title /*= ""*/, const QString& filePath /*= QString()*/) :
-    WidgetAction(parent),
+FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const QString& filePath /*= QString()*/) :
+    WidgetAction(parent, title),
     _dirModel(),
     _completer(),
     _filePathAction(this, "File path"),
@@ -21,7 +21,6 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title /*= ""*
     _defaultSuffix(),
     _fileType("File")
 {
-    setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
 
     _completer.setModel(&_dirModel);
@@ -163,7 +162,6 @@ QWidget* FilePickerAction::getWidget(QWidget* parent, const std::int32_t& widget
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::LineEdit)
         layout->addWidget(_filePathAction.createWidget(parent));
@@ -180,18 +178,19 @@ void FilePickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    //variantMapMustContain(variantMap, "Value");
+    variantMapMustContain(variantMap, "Value");
 
-    //setFilePath(variantMap["Value"].toString());
+    if (variantMap.contains("Value"))
+        setFilePath(variantMap["Value"].toString());
 }
 
 QVariantMap FilePickerAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 
-    //variantMap.insert({
-    //    { "Value", QVariant::fromValue(getFilePath()) }
-    //});
+    variantMap.insert({
+        { "Value", getFilePath() }
+    });
 
     return variantMap;
 }

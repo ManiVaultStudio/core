@@ -3,14 +3,11 @@
 #include <QHBoxLayout>
 #include <QMenu>
 
-namespace hdps {
+namespace hdps::gui {
 
-namespace gui {
-
-TriggerAction::TriggerAction(QObject* parent, const QString& title /*= ""*/) :
-    WidgetAction(parent)
+TriggerAction::TriggerAction(QObject* parent, const QString& title) :
+    WidgetAction(parent, title)
 {
-    setText(title);
     setDefaultWidgetFlags(WidgetFlag::Text);
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 }
@@ -48,8 +45,9 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
         if (widgetFlags & WidgetFlag::Icon) {
             setIcon(triggerAction->icon());
 
-            if ((widgetFlags & WidgetFlag::Text) == 0)
+            if ((widgetFlags & WidgetFlag::Text) == 0) {
                 setProperty("class", "square-button");
+            }
         }
 
         setToolTip(triggerAction->toolTip());
@@ -63,19 +61,6 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
     update();
 }
 
-QString TriggerAction::getTypeString() const
-{
-    return "Trigger";
-}
-
-//void TriggerAction::trigger(TriggerAction* sender /*= nullptr*/)
-//{
-//    if (sender == this)
-//        return;
-//
-//    QAction::trigger();
-//}
-
 QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     if (dynamic_cast<QMenu*>(parent))
@@ -85,7 +70,6 @@ QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     layout->addWidget(new TriggerAction::PushButtonWidget(parent, this, widgetFlags));
 
@@ -94,34 +78,37 @@ QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     return widget;
 }
 
-void TriggerAction::connectToPublicAction(WidgetAction* publicAction)
+void TriggerAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicTriggerAction = dynamic_cast<TriggerAction*>(publicAction);
 
     Q_ASSERT(publicTriggerAction != nullptr);
 
+    if (publicTriggerAction == nullptr)
+        return;
+
     connect(this, &TriggerAction::triggered, this, &TriggerAction::selfTriggered);
     connect(publicTriggerAction, &TriggerAction::triggered, this, &TriggerAction::trigger);
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void TriggerAction::disconnectFromPublicAction()
+void TriggerAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicTriggerAction = dynamic_cast<TriggerAction*>(getPublicAction());
 
     Q_ASSERT(publicTriggerAction != nullptr);
 
+    if (publicTriggerAction == nullptr)
+        return;
+
     disconnect(this, &TriggerAction::triggered, this, &TriggerAction::selfTriggered);
     disconnect(publicTriggerAction, &TriggerAction::triggered, this, &TriggerAction::trigger);
 
-    WidgetAction::disconnectFromPublicAction();
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
-hdps::gui::WidgetAction* TriggerAction::getPublicCopy() const
-{
-    return new TriggerAction(parent(), text());
-}
-
-}
 }

@@ -11,9 +11,9 @@
 
 namespace hdps::util {
 
-WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget* targetWidget) :
+WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget* targetWidget, float initialOpacity /*= 1.0f*/) :
     QObject(parent),
-    _widgetFader(this, sourceWidget, 0.0f, 0.0f, 1.0f, 120, 60),
+    _widgetFader(this, sourceWidget, initialOpacity, 0.0f, 1.0f, 120, 60),
     _sourceWidget(sourceWidget),
     _targetWidget(targetWidget)
 {
@@ -23,10 +23,6 @@ WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget
     setObjectName("WidgetOverlayer");
 
     _sourceWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
-
-    _widgetFader.setMaximumOpacity(0.35f);
-
-    _sourceWidget->show();
 
     _sourceWidget->installEventFilter(this);
     _targetWidget->installEventFilter(this);
@@ -51,31 +47,7 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
             if (dynamic_cast<QWidget*>(target) != _sourceWidget)
                 break;
 
-            if(_widgetFader.isFadedIn())
-                break;
-
-#ifdef WIDGET_OVERLAYER_VERBOSE
-            qDebug() << __FUNCTION__;
-#endif
-
-            _widgetFader.fadeIn();
-
-            break;
-        }
-
-        case QEvent::Hide:
-        {
-            if (dynamic_cast<QWidget*>(target) != _sourceWidget)
-                break;
-
-            if (_widgetFader.isFadedOut())
-                break;
-
-#ifdef WIDGET_OVERLAYER_VERBOSE
-            qDebug() << __FUNCTION__;
-#endif
-
-            _widgetFader.fadeOut();
+            _sourceWidget->raise();
 
             break;
         }

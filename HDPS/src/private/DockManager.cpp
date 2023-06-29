@@ -41,9 +41,6 @@ DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager::setConfigFlag(CDockManager::DockAreaHasTabsMenuButton, true);
     CDockManager::setConfigFlag(CDockManager::DockAreaDynamicTabsMenuButtonVisibility, false);
     CDockManager::setConfigFlag(CDockManager::AllTabsHaveCloseButton, true);
-    
-    //setAutoHideConfigFlag(AutoHideFeatureEnabled);
-    //setAutoHideConfigFlag(DockAreaHasAutoHideButton);
 }
 
 DockManager::~DockManager()
@@ -55,9 +52,7 @@ DockManager::~DockManager()
 
 ViewPluginDockWidgets DockManager::getViewPluginDockWidgets()
 {
-
     return _orderedViewPluginDockWidgets;
-   
 }
 
 const ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
@@ -65,21 +60,17 @@ const ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
     return const_cast<DockManager*>(this)->getViewPluginDockWidgets();
 }
 
-ads::CDockAreaWidget* DockManager::findDockAreaWidget(QWidget* widget)
-{
-    for (auto dockWidget : dockWidgets())
-        if (dockWidget->widget() == widget)
-            return dockWidget->dockAreaWidget();
-
-    return nullptr;
-}
-
 ads::CDockAreaWidget* DockManager::findDockAreaWidget(hdps::plugin::ViewPlugin* viewPlugin)
 {
     if (viewPlugin == nullptr)
         return nullptr;
 
-    return findDockAreaWidget(&viewPlugin->getWidget());
+    for (auto dockWidget : dockWidgets()) {
+        if (viewPlugin->getId() == dockWidget->property("ViewPluginId").toString())
+            return dockWidget->dockAreaWidget();
+    }
+
+    return nullptr;
 }
 
 void DockManager::removeViewPluginDockWidget(ViewPlugin* viewPlugin)
@@ -117,19 +108,23 @@ void DockManager::addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWi
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << objectName();
 #endif
+    
     ViewPluginDockWidget* viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(Dockwidget);
+    
     if (viewPluginDockWidget)
         _orderedViewPluginDockWidgets << viewPluginDockWidget;
+
     CDockManager::addDockWidget(area, Dockwidget, DockAreaWidget);
 }
-
 
 void DockManager::removeViewPluginDockWidget(ads::CDockWidget* Dockwidget)
 {
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << objectName();
 #endif
+    
     CDockManager::removeDockWidget(Dockwidget);
+
     _orderedViewPluginDockWidgets.removeAll(Dockwidget);
 }
 
@@ -137,7 +132,6 @@ QWidget* DockManager::getWidget()
 {
     return this;
 }
-
 
 void DockManager::fromVariantMap(const QVariantMap& variantMap)
 {

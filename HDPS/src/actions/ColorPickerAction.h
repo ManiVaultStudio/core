@@ -6,9 +6,7 @@
 #include <QVBoxLayout>
 #include <QColorDialog>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Color picker action class
@@ -64,15 +62,9 @@ protected:
      * @param title Title of the action
      * @param color Initial color
      */
-    ColorPickerAction(QObject* parent, const QString& title = "", const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
+    Q_INVOKABLE ColorPickerAction(QObject* parent, const QString& title = "", const QColor& color = DEFAULT_COLOR);
 
 public:
-
-    /**
-     * Initialize the color action
-     * @param color Initial color
-     */
-    void initialize(const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
 
     /** Gets the current color */
     QColor getColor() const;
@@ -83,22 +75,20 @@ public:
      */
     void setColor(const QColor& color);
 
-    /** Gets the default color */
-    QColor getDefaultColor() const;
-
-    /** Sets the default color */
-    void setDefaultColor(const QColor& defaultColor);
-
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
+    /**
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
+     */
+    void disconnectFromPublicAction(bool recursive) override;
 
 signals:
 
@@ -115,14 +105,17 @@ signals:
     void defaultColorChanged(const QColor& defaultColor);
 
 protected:
-    QColor  _color;             /** Current color */
-    QColor  _defaultColor;      /** Default color */
+    QColor  _color;     /** Current color */
 
     /** Default default color */
     static const QColor DEFAULT_COLOR;
 
     friend class ColorAction;
+    friend class AbstractActionsManager;
 };
 
 }
-}
+
+Q_DECLARE_METATYPE(hdps::gui::ColorPickerAction)
+
+inline const auto colorPickerActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorPickerAction*>("ColorPickerAction");

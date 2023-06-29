@@ -9,9 +9,9 @@
 namespace hdps::gui {
 
 PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon) :
-    TriggerAction(parent),
+    TriggerAction(parent, title),
     _pluginFactory(pluginFactory),
-    _location(),
+    _menuLocation(),
     _sha(),
     _configurationAction(nullptr),
     _requestPluginCallback()
@@ -28,9 +28,9 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFa
 }
 
 PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon, RequestPluginCallback requestPluginCallback) :
-    TriggerAction(parent),
+    TriggerAction(parent, title),
     _pluginFactory(pluginFactory),
-    _location(),
+    _menuLocation(),
     _sha(),
     _configurationAction(nullptr),
     _requestPluginCallback(requestPluginCallback)
@@ -42,10 +42,10 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFa
     connect(this, &TriggerAction::triggered, this, &PluginTriggerAction::requestPlugin);
 }
 
-PluginTriggerAction::PluginTriggerAction(const PluginTriggerAction& pluginTriggerAction) :
-    TriggerAction(pluginTriggerAction.parent()),
+PluginTriggerAction::PluginTriggerAction(const PluginTriggerAction& pluginTriggerAction, const QString& title) :
+    TriggerAction(pluginTriggerAction.parent(), title),
     _pluginFactory(pluginTriggerAction.getPluginFactory()),
-    _location(),
+    _menuLocation(),
     _sha(),
     _configurationAction(nullptr),
     _requestPluginCallback()
@@ -62,14 +62,14 @@ const hdps::plugin::PluginFactory* PluginTriggerAction::getPluginFactory() const
     return _pluginFactory;
 }
 
-QString PluginTriggerAction::getLocation() const
+QString PluginTriggerAction::getMenuLocation() const
 {
-    return _location;
+    return _menuLocation;
 }
 
-void PluginTriggerAction::setLocation(const QString& location)
+void PluginTriggerAction::setMenuLocation(const QString& menuLocation)
 {
-    _location = location;
+    _menuLocation = menuLocation;
 }
 
 QString PluginTriggerAction::getSha() const
@@ -101,35 +101,35 @@ void PluginTriggerAction::setText(const QString& text)
     switch (_pluginFactory->getType())
     {
         case plugin::Type::ANALYSIS:
-            _location = "Analyze";
+            _menuLocation = "Analyze";
             break;
 
         case plugin::Type::DATA:
-            _location = "Data";
+            _menuLocation = "Data";
             break;
 
         case plugin::Type::LOADER:
-            _location = "Import";
+            _menuLocation = "Import";
             break;
 
         case plugin::Type::TRANSFORMATION:
-            _location = "Transform";
+            _menuLocation = "Transform";
             break;
 
         case plugin::Type::VIEW:
-            _location = "View";
+            _menuLocation = "View";
             break;
 
         case plugin::Type::WRITER:
-            _location = "Export";
+            _menuLocation = "Export";
             break;
 
         default:
             break;
     }
 
-    _location.append("/");
-    _location.append(this->text());
+    _menuLocation.append("/");
+    _menuLocation.append(this->text());
 }
 
 void PluginTriggerAction::setRequestPluginCallback(RequestPluginCallback requestPluginCallback)

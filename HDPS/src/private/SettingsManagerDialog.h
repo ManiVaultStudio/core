@@ -33,9 +33,7 @@ public:
     }
 
 private:
-    GroupsAction    _groupsAction;              /** Groups action for all global settings sections */
-    GroupAction     _globalPathsGroupAction;    /** Group action for global paths */
-    GroupAction     _ioAction;                  /** Group action for IO related settings */
+    GroupsAction    _groupsAction;      /** Groups action for all global settings sections */
 };
 
 }

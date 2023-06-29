@@ -42,7 +42,7 @@ public:
     /** Axis enum for distinguishing between x- and y axis part of the color map (range) */
     enum class Axis {
         X = 0,      /** Along x-axis */
-        Y,          /** Along x-axis */
+        Y,          /** Along y-axis */
 
         Count
     };
@@ -82,7 +82,7 @@ protected:
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
-public:
+protected:
 
     /**
      * Constructor
@@ -90,25 +90,21 @@ public:
      * @param title Title of the action
      * @param colorMapType Type of color map (1D/2D)
      * @param colorMap Current color map
-     * @param defaultColorMap Default color map
      */
-    ColorMapAction(QObject* parent, const QString& title = "", const util::ColorMap::Type& colorMapType = util::ColorMap::Type::OneDimensional, const QString& colorMap = "RdYlBu", const QString& defaultColorMap = "RdYlBu");
+    Q_INVOKABLE ColorMapAction(QObject* parent, const QString& title, const util::ColorMap::Type& colorMapType = util::ColorMap::Type::OneDimensional, const QString& colorMap = "RdYlBu");
 
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+public:
 
     /**
      * Initialize the color map action
      * @param colorMap Current color map
-     * @param defaultColorMap Default color map
      */
-    void initialize(const QString& colorMap = "", const QString& defaultColorMap = "");
+    void initialize(const QString& colorMap);
 
     /** Gets the current color map type */
     util::ColorMap::Type getColorMapType() const;
+
+protected:
 
     /** Sets the current color map type */
     void setColorMapType(const util::ColorMap::Type& colorMapType);
@@ -127,33 +123,20 @@ public: // Option action wrappers
      */
     void setColorMap(const QString& colorMap);
 
-    /** Gets the default color map name */
-    QString getDefaultColorMap() const;
-
-    /**
-     * Sets the default color map name
-     * @param defaultColorMap Name of the default color map
-     */
-    void setDefaultColorMap(const QString& defaultColorMap);
-
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
-
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
-
-protected:  // Linking
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
     /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
      */
-    virtual WidgetAction* getPublicCopy() const override;
+    void disconnectFromPublicAction(bool recursive) override;
 
 public: // Serialization
 
@@ -237,6 +220,14 @@ protected:
     ColorMapEditor1DAction      _editor1DAction;                                        /** One-dimensional editor action */
     HorizontalGroupAction       _customColorMapGroupAction;                             /** Groups the custom color map and editor action */
     ColorMapSettingsAction      _settingsAction;                                        /** Color map settings action */
+
+    friend class AbstractActionsManager;
+    friend class ColorMap1DAction;
+    friend class ColorMap2DAction;
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::ColorMapAction)
+
+inline const auto colorMapActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapAction*>("hdps::gui::ColorMapAction");

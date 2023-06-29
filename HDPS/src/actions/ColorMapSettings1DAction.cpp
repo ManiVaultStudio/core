@@ -7,9 +7,9 @@
 
 namespace hdps::gui {
 
-ColorMapSettings1DAction::ColorMapSettings1DAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction),
-    _colorMapAction(colorMapAction)
+ColorMapSettings1DAction::ColorMapSettings1DAction(QObject* parent, const QString& title) :
+    WidgetAction(parent, title),
+    _colorMapAction(*static_cast<ColorMapAction*>(parent))
 {
     setText("1D Color Map Settings");
 }
@@ -25,7 +25,7 @@ ColorMapSettings1DAction::Widget::Widget(QWidget* parent, ColorMapSettings1DActi
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    auto groupAction = new GroupAction(this);
+    auto groupAction = new GroupAction(this, colorMapSettings1DAction->text());
 
     groupAction->setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
@@ -41,17 +41,15 @@ ColorMapSettings1DAction::Widget::Widget(QWidget* parent, ColorMapSettings1DActi
     if (colorMapAction.isConnected())
         actions << &colorMapAction.getSharedDataRangeAction(ColorMapAction::Axis::X);
     
-    actions << &colorMapAction.getMirrorAction(ColorMapAction::Axis::X);
-    actions << &colorMapAction.getDiscretizeAction();
-    actions << &colorMapAction.getNumberOfDiscreteStepsAction();
-    actions << &colorMapAction.getDiscretizeAlphaAction();
-    actions << &colorMapAction.getCustomColorMapGroupAction();
-
-    groupAction->setActions(actions);
+    groupAction->addAction(&colorMapAction.getMirrorAction(ColorMapAction::Axis::X));
+    groupAction->addAction(&colorMapAction.getDiscretizeAction());
+    groupAction->addAction(&colorMapAction.getNumberOfDiscreteStepsAction());
+    groupAction->addAction(&colorMapAction.getDiscretizeAlphaAction());
+    groupAction->addAction(&colorMapAction.getCustomColorMapGroupAction());
 
     layout->addWidget(groupAction->createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }
 
 }

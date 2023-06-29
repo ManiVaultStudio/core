@@ -5,6 +5,7 @@
 
 #include <QDebug>
 #include <QMenu>
+#include <QResizeEvent>
 
 //#define GROUP_SECTION_TREE_ITEM_VERBOSE
 
@@ -57,7 +58,7 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _overlayLayout(),
     _iconLabel()
 {
-    setFixedHeight(20);
+    setFixedHeight(22);
 
     // Get reference to the Font Awesome icon font
     auto& fontAwesome = Application::getIconFont("FontAwesome");

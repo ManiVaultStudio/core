@@ -26,6 +26,46 @@ class AbstractProjectManager : public AbstractManager
 
 public:
 
+    /** The project manager is currently */
+    enum class State {
+        Idle,                   /** Not doing anything */
+        OpeningProject,         /** Opening a project */
+        ImportingProject,       /** Importing a project */
+        SavingProject,          /** Saving a project */
+        PublishingProject       /** Publishing a project */
+    };
+
+    /** Set state for the duration of the enveloping scope, reverts to idle when the object gets out of scope */
+    class ScopedState {
+    public:
+
+        /**
+         * Construct with initialization state
+         * @param projectManager Pointer to project manager for which to set the state
+         * @param state State at scope begin (reverts to idle when the object gets out of scope)
+         */
+        ScopedState(AbstractProjectManager* projectManager, const State& state) :
+            _projectManager(projectManager),
+            _state(state)
+        {
+            Q_ASSERT(_projectManager != nullptr);
+
+            _projectManager->setState(state);
+        }
+
+        /** Revert to idle when object goes out of scope */
+        ~ScopedState()
+        {
+            _projectManager->setState(State::Idle);
+        }
+
+    private:
+        AbstractProjectManager* _projectManager;    /** Pointer to project manager for which to set the state */
+        State                   _state;             /** State during the scope */
+    };
+
+public:
+
     /**
      * Construct project manager with \p parent object
      * @param parent Pointer to parent object
@@ -128,6 +168,61 @@ public: // Menus
      */
     virtual QMenu& getImportDataMenu() = 0;
 
+public: // State
+
+    /**
+     * Get the state of the project manager
+     * @return State of the project manager
+     */
+    virtual State getState() const final {
+        return _state;
+    }
+
+    /**
+     * Set the state of the serializable object to \p state
+     * @param state State of the serializable object
+     */
+    virtual void setState(const State& state) final {
+        if (state == _state)
+            return;
+
+        _state = state;
+
+        emit stateChanged(_state);
+    }
+
+    /**
+     * Get whether the project manager is opening a project
+     * @return Boolean determining whether the project manager is opening a project
+     */
+    virtual bool isOpeningProject() const final {
+        return _state == State::OpeningProject;
+    }
+
+    /**
+     * Get whether the project manager is importing a project
+     * @return Boolean determining whether the project manager is importing a project
+     */
+    virtual bool isImportingProject() const final {
+        return _state == State::ImportingProject;
+    }
+
+    /**
+     * Get whether the project manager is saving a project
+     * @return Boolean determining whether the project manager is saving a project
+     */
+    virtual bool isSavingProject() const final {
+        return _state == State::SavingProject;
+    }
+
+    /**
+     * Get whether the project manager is publishing a project
+     * @return Boolean determining whether the project manager is publishing a project
+     */
+    virtual bool isPublishingProject() const final {
+        return _state == State::PublishingProject;
+    }
+
 public: // Action getters
 
     virtual hdps::gui::TriggerAction& getNewBlankProjectAction() = 0;
@@ -212,6 +307,15 @@ signals:
      * @param project Reference to the project that is about to be destroyed
      */
     void projectAboutToBeDestroyed(const hdps::Project& project);
+
+    /**
+     * Signals that the state of the project manager changed to \p state
+     * @param state State of the project manager
+     */
+    void stateChanged(const State& state);
+
+private:
+    State   _state;     /** Determines the state of the project manager */
 };
 
 }

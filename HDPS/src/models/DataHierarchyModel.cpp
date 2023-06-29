@@ -1,5 +1,6 @@
 #include "DataHierarchyModel.h"
 #include "DataHierarchyModelItem.h"
+#include "DatasetsMimeData.h"
 
 #include <DataHierarchyItem.h>
 
@@ -273,18 +274,17 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
     return QVariant();
 }
 
-QMimeData* DataHierarchyModel::mimeData(const QModelIndexList &indexes) const
+QMimeData* DataHierarchyModel::mimeData(const QModelIndexList& indexes) const
 {
+    Datasets datasets;
+
     QVector<DataHierarchyModelItem*> items;
 
-    foreach(const QModelIndex &index, indexes)
-        items.push_back(getItem(index, Qt::DisplayRole));
+    for (const auto index : indexes)
+        if (index.column() == 0)
+            datasets << getItem(index, Qt::DisplayRole)->getDataHierarchyItem()->getDataset();
 
-    QMimeData* mimeData = QAbstractItemModel::mimeData(indexes);
-
-    mimeData->setText(items[0]->serialize());
-
-    return mimeData;
+    return new DatasetsMimeData(datasets);
 }
 
 bool DataHierarchyModel::addDataHierarchyModelItem(const QModelIndex& parentModelIndex, hdps::DataHierarchyItem& dataHierarchyItem)

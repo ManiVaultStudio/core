@@ -1,113 +1,60 @@
 #include "DecimalRectangleAction.h"
+#include "CoreInterface.h"
 
-#include <QHBoxLayout>
+namespace hdps::gui {
 
-namespace hdps {
-
-namespace gui {
-
-DecimalRectangleAction::DecimalRectangleAction(QObject * parent, const QString& title, const QRectF& rectangle /*= QRectF()*/, const QRectF& defaultRectangle /*= QRectF()*/) :
-    RectangleAction<QRectF>(parent, title, rectangle, defaultRectangle)
+DecimalRectangleAction::DecimalRectangleAction(QObject * parent, const QString& title, const QRectF& rectangle /*= QRectF()*/) :
+    RectangleAction<QRectF, DecimalRangeAction>(parent, title, rectangle)
 {
-    _rectangleChanged           = [this]() -> void { emit rectangleChanged(_rectangle); };
-    _defaultRectangleChanged    = [this]() -> void { emit defaultRectangleChanged(_defaultRectangle); };
-
-    initialize(rectangle, defaultRectangle);
+    _rectangleChanged = [this]() -> void { emit rectangleChanged(getRectangle()); };
 }
 
-QString DecimalRectangleAction::getTypeString() const
-{
-    return "DecimalRectangle";
-}
-
-void DecimalRectangleAction::initialize(const QRectF& rectangle /*= QRectF()*/, const QRectF& defaultRectangle /*= QRectF()*/)
-{
-    _rectangle          = rectangle;
-    _defaultRectangle   = defaultRectangle;
-
-    emit rectangleChanged(_rectangle);
-    emit defaultRectangleChanged(_defaultRectangle);
-}
-
-void DecimalRectangleAction::connectToPublicAction(WidgetAction* publicAction)
+void DecimalRectangleAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicDecimalRectangleAction = dynamic_cast<DecimalRectangleAction*>(publicAction);
 
     Q_ASSERT(publicDecimalRectangleAction != nullptr);
 
-    connect(this, &DecimalRectangleAction::rectangleChanged, publicDecimalRectangleAction, &DecimalRectangleAction::setRectangle);
-    connect(publicDecimalRectangleAction, &DecimalRectangleAction::rectangleChanged, this, &DecimalRectangleAction::setRectangle);
+    if (publicDecimalRectangleAction == nullptr)
+        return;
 
-    setRectangle(publicDecimalRectangleAction->getRectangle());
+    if (recursive) {
+        actions().connectPrivateActionToPublicAction(&getRangeAction(Axis::X), &publicDecimalRectangleAction->getRangeAction(Axis::X), recursive);
+        actions().connectPrivateActionToPublicAction(&getRangeAction(Axis::Y), &publicDecimalRectangleAction->getRangeAction(Axis::Y), recursive);
+    }
 
-    WidgetAction::connectToPublicAction(publicAction);
+    RectangleAction<QRectF, DecimalRangeAction>::connectToPublicAction(publicAction, recursive);
 }
 
-void DecimalRectangleAction::disconnectFromPublicAction()
+void DecimalRectangleAction::disconnectFromPublicAction(bool recursive)
 {
-    auto publicDecimalRectangleAction = dynamic_cast<DecimalRectangleAction*>(getPublicAction());
+    if (!isConnected())
+        return;
 
-    Q_ASSERT(publicDecimalRectangleAction != nullptr);
+    if (recursive) {
+        actions().disconnectPrivateActionFromPublicAction(&getRangeAction(Axis::X), recursive);
+        actions().disconnectPrivateActionFromPublicAction(&getRangeAction(Axis::Y), recursive);
+    }
 
-    disconnect(this, &DecimalRectangleAction::rectangleChanged, publicDecimalRectangleAction, &DecimalRectangleAction::setRectangle);
-    disconnect(publicDecimalRectangleAction, &DecimalRectangleAction::rectangleChanged, this, &DecimalRectangleAction::setRectangle);
-
-    WidgetAction::disconnectFromPublicAction();
-}
-
-WidgetAction* DecimalRectangleAction::getPublicCopy() const
-{
-    return new DecimalRectangleAction(parent(), text(), _rectangle, _defaultRectangle);
+    RectangleAction<QRectF, DecimalRangeAction>::disconnectFromPublicAction(recursive);
 }
 
 void DecimalRectangleAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!variantMap.contains("Value"))
-        return;
+    RectangleAction<QRectF, DecimalRangeAction>::fromVariantMap(variantMap);
 
-    setRectangle(variantMap["Value"].toRect());
+    getRangeAction(Axis::X).fromParentVariantMap(variantMap);
+    getRangeAction(Axis::Y).fromParentVariantMap(variantMap);
 }
 
 QVariantMap DecimalRectangleAction::toVariantMap() const
 {
-    return { { "Value", _rectangle } };
+    auto variantMap = RectangleAction<QRectF, DecimalRangeAction>::toVariantMap();
+
+    getRangeAction(Axis::X).insertIntoVariantMap(variantMap);
+    getRangeAction(Axis::Y).insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
-DecimalRectangleAction::LineEditWidget::LineEditWidget(QWidget* parent, DecimalRectangleAction* integralRectangleAction) :
-    QLineEdit(parent)
-{
-    setAcceptDrops(true);
-    setObjectName("LineEdit");
-    setEnabled(false);
-
-    const auto updateString = [this, integralRectangleAction]() {
-        QSignalBlocker blocker(this);
-
-        const auto topLeft      = integralRectangleAction->getRectangle().topLeft();
-        const auto bottomRight  = integralRectangleAction->getRectangle().bottomRight();
-
-        setText(QString("[%1, %2, %3, %4]").arg(QString::number(topLeft.x(), 'f', 2), QString::number(topLeft.y(), 'f', 2), QString::number(bottomRight.x(), 'f', 2), QString::number(bottomRight.y(), 'f', 2)));
-    };
-
-    connect(integralRectangleAction, &DecimalRectangleAction::rectangleChanged, this, updateString);
-
-    updateString();
-}
-
-QWidget* DecimalRectangleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
-{
-    auto widget = new WidgetActionWidget(parent, this);
-    auto layout = new QHBoxLayout();
-
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    if (widgetFlags & WidgetFlag::LineEdit)
-        layout->addWidget(new LineEditWidget(parent, this), 1);
-
-    widget->setLayout(layout);
-
-    return widget;
-}
-
-}
 }

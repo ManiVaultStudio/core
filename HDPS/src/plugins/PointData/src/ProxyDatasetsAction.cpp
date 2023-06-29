@@ -5,7 +5,7 @@
 using namespace hdps;
 
 ProxyDatasetsAction::ProxyDatasetsAction(QObject* parent, const Dataset<Points>& points) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Proxy Datsets"),
     _points(points),
     _countAction(this, "Number of proxy datasets"),
     _editProxyDatasetsAction(this, points)

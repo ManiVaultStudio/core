@@ -8,7 +8,7 @@
 #include <QVBoxLayout>
 
 ClustersAction::ClustersAction(QObject* parent, Dataset<Clusters> clustersDataset /*= Dataset<Clusters>()*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Clusters"),
     _clustersDataset(),
     _clustersModel(),
     _colorizeClustersAction(*this),
@@ -90,5 +90,5 @@ void ClustersAction::updateClustersDataset()
 
     _clustersDataset->getClusters() = _clustersModel.getClusters();
 
-    events().notifyDatasetChanged(_clustersDataset);
+    events().notifyDatasetDataChanged(_clustersDataset);
 }

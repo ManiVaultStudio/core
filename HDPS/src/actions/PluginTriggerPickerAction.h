@@ -5,9 +5,7 @@
 #include <actions/OptionAction.h>
 #include <actions/WidgetActionCollapsedWidget.h>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Plugin trigger picker action class
@@ -124,9 +122,6 @@ public:
      */
     OptionAction& getSelectTriggerAction();
 
-    /** Resets to default (no plugin trigger selected) */
-    void reset();
-
 signals:
 
     /**
@@ -147,4 +142,7 @@ private:
 };
 
 }
-}
+
+Q_DECLARE_METATYPE(hdps::gui::PluginTriggerPickerAction)
+
+inline const auto pluginTriggerPickerActionMetaTypeId = qRegisterMetaType<hdps::gui::PluginTriggerPickerAction*>("PluginTriggerPickerAction");

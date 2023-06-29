@@ -39,7 +39,7 @@ public:
      * @param icon Icon
      * @param tooltip Tooltip of the plugin trigger action
      */
-    PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon);
+    Q_INVOKABLE PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon);
 
     /**
      * Constructor
@@ -50,13 +50,13 @@ public:
      * @param icon Icon
      * @param requestPluginCallback Callback which is invoked when the trigger action is triggered
      */
-    PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon, RequestPluginCallback requestPluginCallback);
+    Q_INVOKABLE PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon, RequestPluginCallback requestPluginCallback);
 
     /**
      * Copy constructor
      * @param pluginTriggerAction Reference to other plugin trigger action
      */
-    PluginTriggerAction(const PluginTriggerAction& pluginTriggerAction);
+    Q_INVOKABLE PluginTriggerAction(const PluginTriggerAction& pluginTriggerAction, const QString& title);
 
     /**
      * Get the plugin factory
@@ -65,16 +65,16 @@ public:
     const plugin::PluginFactory* getPluginFactory() const;
 
     /**
-     * Get location of the plugin trigger action
-     * @return Location of the plugin trigger action
+     * Get menu location of the plugin trigger action
+     * @return Location of the plugin trigger action in a menu
      */
-    QString getLocation() const;
+    QString getMenuLocation() const;
 
     /**
-     * Set location of the plugin trigger action
-     * @param location Location of the plugin trigger action
+     * Set menu location of the plugin trigger action
+     * @param location Location of the plugin trigger action in a menu
      */
-    void setLocation(const QString& location);
+    void setMenuLocation(const QString& menuLocation);
 
     /**
      * Get sha of plugin kind + trigger title
@@ -118,7 +118,7 @@ private:
 
 private:
     const plugin::PluginFactory*    _pluginFactory;             /** Pointer to plugin factory */
-    QString                         _location;                  /** Determines where the plugin trigger action resides w.r.t. other plugin trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images */
+    QString                         _menuLocation;              /** Determines where the plugin trigger action resides w.r.t. other plugin trigger actions (for instance in the data hierarchy context menu) in a path like fashion e.g. import/images */
     QString                         _sha;                       /** Cryptographic hash of the plugin kind and trigger title */
     WidgetAction*                   _configurationAction;       /** Action for configuring the plugin creation */
     RequestPluginCallback           _requestPluginCallback;     /** Request plugin callback function which should create the plugin (invoked when the trigger action is triggered) */
@@ -129,3 +129,7 @@ private:
 using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::PluginTriggerAction)
+
+inline const auto pluginTriggerActionMetaTypeId = qRegisterMetaType<hdps::gui::PluginTriggerAction*>("PluginTriggerAction");

@@ -11,25 +11,13 @@ namespace hdps::gui {
 
 const QColor ColorAction::DEFAULT_COLOR = Qt::gray;
 
-ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/) :
-    WidgetAction(parent),
-    _color(),
-    _defaultColor()
+ColorAction::ColorAction(QObject* parent, const QString& title, const QColor& color /*= DEFAULT_COLOR*/) :
+    WidgetAction(parent, title),
+    _color()
 {
     setText(title);
-    initialize(color, defaultColor);
     setDefaultWidgetFlags(WidgetFlag::Basic);
-}
-
-QString ColorAction::getTypeString() const
-{
-    return "Color";
-}
-
-void ColorAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/)
-{
     setColor(color);
-    setDefaultColor(defaultColor);
 }
 
 QColor ColorAction::getColor() const
@@ -47,50 +35,39 @@ void ColorAction::setColor(const QColor& color)
     emit colorChanged(_color);
 }
 
-QColor ColorAction::getDefaultColor() const
-{
-    return _defaultColor;
-}
-
-void ColorAction::setDefaultColor(const QColor& defaultColor)
-{
-    if (defaultColor == _defaultColor)
-        return;
-
-    _defaultColor = defaultColor;
-
-    emit defaultColorChanged(_defaultColor);
-}
-
-void ColorAction::connectToPublicAction(WidgetAction* publicAction)
+void ColorAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicColorAction = dynamic_cast<ColorAction*>(publicAction);
 
     Q_ASSERT(publicColorAction != nullptr);
+
+    if (publicColorAction == nullptr)
+        return;
 
     connect(this, &ColorAction::colorChanged, publicColorAction, &ColorAction::setColor);
     connect(publicColorAction, &ColorAction::colorChanged, this, &ColorAction::setColor);
 
     setColor(publicColorAction->getColor());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void ColorAction::disconnectFromPublicAction()
+void ColorAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicColorAction = dynamic_cast<ColorAction*>(getPublicAction());
 
     Q_ASSERT(publicColorAction != nullptr);
 
+    if (publicColorAction == nullptr)
+        return;
+
     disconnect(this, &ColorAction::colorChanged, publicColorAction, &ColorAction::setColor);
     disconnect(publicColorAction, &ColorAction::colorChanged, this, &ColorAction::setColor);
 
-    WidgetAction::disconnectFromPublicAction();
-}
-
-WidgetAction* ColorAction::getPublicCopy() const
-{
-    return new ColorAction(parent(), text(), getColor(), getDefaultColor());
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void ColorAction::fromVariantMap(const QVariantMap& variantMap)
@@ -116,7 +93,7 @@ QVariantMap ColorAction::toVariantMap() const
 ColorAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ColorAction* colorAction) :
     WidgetActionWidget(parent, colorAction),
     _layout(),
-    _colorPickerAction(this, "Color picker", colorAction->getColor(), colorAction->getColor()),
+    _colorPickerAction(this, "Color picker", colorAction->getColor()),
     _toolButton(this, _colorPickerAction)
 {
     setAcceptDrops(true);
@@ -211,7 +188,6 @@ QWidget* ColorAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::Picker)
         layout->addWidget(new PushButtonWidget(parent, this));

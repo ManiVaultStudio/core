@@ -103,12 +103,6 @@ protected:
     ProjectSplashScreenAction(QObject* parent, const Project& project);
 
     /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
-
-    /**
      * Get parent project
      * @return Reference to parent project
      */

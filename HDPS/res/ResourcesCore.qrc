@@ -1,6 +1,7 @@
 <RCC>
 	<qresource prefix="/styles">
 		<file alias="default.qss">styles/default.qss</file>
+		<file alias="ads_light.css">styles/ads_light.css</file>
 	</qresource>
 	<qresource prefix="/IconFonts">
 		<file alias="FontAwesome-5.14.otf">iconfonts/FontAwesome-5.14.otf</file>

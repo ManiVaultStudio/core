@@ -39,6 +39,8 @@ set(PUBLIC_EVENT_FILES
 
 set(PUBLIC_COLOR_MAP_ACTION_HEADERS
     src/actions/ColorMapAction.h
+    src/actions/ColorMap1DAction.h
+    src/actions/ColorMap2DAction.h
     src/actions/ColorMapEditor1DAction.h
     src/actions/ColorMapEditor1DEdgesGraphicsItem.h
     src/actions/ColorMapEditor1DHistogramGraphicsItem.h
@@ -55,6 +57,8 @@ set(PUBLIC_COLOR_MAP_ACTION_HEADERS
 
 set(PUBLIC_COLOR_MAP_ACTION_SOURCES
     src/actions/ColorMapAction.cpp
+    src/actions/ColorMap1DAction.cpp
+    src/actions/ColorMap2DAction.cpp
     src/actions/ColorMapEditor1DAction.cpp
     src/actions/ColorMapEditor1DEdgesGraphicsItem.cpp
     src/actions/ColorMapEditor1DHistogramGraphicsItem.cpp
@@ -80,6 +84,7 @@ set(PUBLIC_NUMERICAL_ACTIONS_HEADERS
     src/actions/IntegralAction.h
     src/actions/NumericalRangeAction.h
     src/actions/DecimalRangeAction.h
+    src/actions/IntegralRangeAction.h
 )
 
 set(PUBLIC_NUMERICAL_ACTIONS_SOURCES
@@ -88,6 +93,7 @@ set(PUBLIC_NUMERICAL_ACTIONS_SOURCES
     src/actions/IntegralAction.cpp
     src/actions/NumericalRangeAction.cpp
     src/actions/DecimalRangeAction.cpp
+    src/actions/IntegralRangeAction.cpp
 )
 
 set(PUBLIC_NUMERICAL_ACTIONS_FILES
@@ -129,20 +135,32 @@ set(PUBLIC_TEXTUAL_ACTIONS_FILES
 
 set(PUBLIC_GROUPING_ACTIONS_HEADERS
     src/actions/GroupAction.h
+    src/actions/StretchAction.h
     src/actions/HorizontalGroupAction.h
     src/actions/VerticalGroupAction.h
     src/actions/GroupsAction.h
     src/actions/GroupSectionTreeItem.h
     src/actions/GroupWidgetTreeItem.h
+    src/actions/ToolbarAction.h
+    src/actions/HorizontalToolbarAction.h
+    src/actions/VerticalToolbarAction.h
+    src/actions/ToolbarActionItem.h
+    src/actions/ToolbarActionItemWidget.h
 )
 
 set(PUBLIC_GROUPING_ACTIONS_SOURCES
     src/actions/GroupAction.cpp
+    src/actions/StretchAction.cpp
     src/actions/HorizontalGroupAction.cpp
     src/actions/VerticalGroupAction.cpp
     src/actions/GroupsAction.cpp
     src/actions/GroupSectionTreeItem.cpp
     src/actions/GroupWidgetTreeItem.cpp
+	src/actions/ToolbarAction.cpp
+	src/actions/HorizontalToolbarAction.cpp
+	src/actions/VerticalToolbarAction.cpp
+    src/actions/ToolbarActionItem.cpp
+    src/actions/ToolbarActionItemWidget.cpp
 )
 
 set(PUBLIC_GROUPING_ACTIONS_FILES
@@ -283,8 +301,10 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WidgetActionWidget.h
     src/actions/WidgetActionCollapsedWidget.h
     src/actions/WidgetActionLabel.h
-    src/actions/WidgetActionStateWidget.h
     src/actions/WidgetActionContextMenu.h
+    src/actions/WidgetActionViewWidget.h
+    src/actions/WidgetActionMimeData.h
+    src/actions/WidgetActionHighlightWidget.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -292,8 +312,10 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/WidgetActionWidget.cpp
     src/actions/WidgetActionCollapsedWidget.cpp
     src/actions/WidgetActionLabel.cpp
-    src/actions/WidgetActionStateWidget.cpp
     src/actions/WidgetActionContextMenu.cpp
+    src/actions/WidgetActionViewWidget.cpp
+    src/actions/WidgetActionMimeData.cpp
+    src/actions/WidgetActionHighlightWidget.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -309,8 +331,8 @@ set(PUBLIC_WIDGET_HEADERS
     src/widgets/InfoOverlayWidget.h
     src/widgets/OverlayWidget.h
     src/widgets/InfoWidget.h
-    src/widgets/ProjectEditorDialog.h
-    src/widgets/ActionHierarchyWidget.h
+    src/widgets/ViewPluginEditorDialog.h
+    src/widgets/ActionsWidget.h
     src/widgets/TaskProgressDialog.h
 )
 
@@ -322,8 +344,8 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/InfoOverlayWidget.cpp
     src/widgets/OverlayWidget.cpp
     src/widgets/InfoWidget.cpp
-    src/widgets/ProjectEditorDialog.cpp
-    src/widgets/ActionHierarchyWidget.cpp
+    src/widgets/ViewPluginEditorDialog.cpp
+    src/widgets/ActionsWidget.cpp
     src/widgets/TaskProgressDialog.cpp
     ${ACTION_HIERARCHY_SOURCES}
 )
@@ -476,6 +498,7 @@ set(PUBLIC_DATASET_HEADERS
     src/LinkedData.h
     src/Dataset.h
     src/DatasetPrivate.h
+    src/DatasetsMimeData.h
 )
 
 set(PUBLIC_DATASET_SOURCES
@@ -483,6 +506,7 @@ set(PUBLIC_DATASET_SOURCES
     src/LinkedData.cpp
     src/Dataset.cpp
     src/DatasetPrivate.cpp
+    src/DatasetsMimeData.cpp
 )
 
 set(PUBLIC_DATASET_FILES
@@ -531,35 +555,22 @@ list(APPEND PUBLIC_DATA_HIERARCHY_FILES
 )
 
 set(PUBLIC_ACTIONS_MODEL_HEADERS
-    src/models/ActionsModel.h
+    src/models/AbstractActionsModel.h
+    src/models/ActionsListModel.h
+    src/models/ActionsHierarchyModel.h
     src/models/ActionsFilterModel.h
 )
 
 set(PUBLIC_ACTIONS_MODEL_SOURCES
-    src/models/ActionsModel.cpp
+    src/models/AbstractActionsModel.cpp
+    src/models/ActionsListModel.cpp
+	src/models/ActionsHierarchyModel.cpp
     src/models/ActionsFilterModel.cpp
 )
 
 set(PUBLIC_ACTIONS_MODEL_FILES
     ${PUBLIC_ACTIONS_MODEL_HEADERS}
     ${PUBLIC_ACTIONS_MODEL_SOURCES}
-)
-
-set(PUBLIC_ACTION_HIERARCHY_MODEL_HEADERS
-    src/models/ActionHierarchyModelItem.h
-    src/models/ActionHierarchyModel.h
-    src/models/ActionHierarchyFilterModel.h
-)
-
-set(PUBLIC_ACTION_HIERARCHY_MODEL_SOURCES
-    src/models/ActionHierarchyModelItem.cpp
-    src/models/ActionHierarchyModel.cpp
-    src/models/ActionHierarchyFilterModel.cpp
-)
-
-set(PUBLIC_ACTION_HIERARCHY_MODEL_FILES
-    ${PUBLIC_ACTION_HIERARCHY_MODEL_HEADERS}
-    ${PUBLIC_ACTION_HIERARCHY_MODEL_SOURCES}
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_HEADERS
@@ -579,6 +590,23 @@ set(PUBLIC_DATA_HIERARCHY_MODEL_FILES
     ${PUBLIC_DATA_HIERARCHY_MODEL_SOURCES}
 )
 
+set(PUBLIC_GLOBAL_SETTINGS_HEADERS
+    src/GlobalSettingsGroupAction.h
+    src/ParametersSettingsAction.h
+    src/MiscellaneousSettingsAction.h
+)
+
+set(PUBLIC_GLOBAL_SETTINGS_SOURCES
+    src/GlobalSettingsGroupAction.cpp
+	src/ParametersSettingsAction.cpp
+    src/MiscellaneousSettingsAction.cpp
+)
+
+set(PUBLIC_GLOBAL_SETTINGS_FILES
+    ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
+    ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
+)
+
 set(PUBLIC_HEADERS
     ${PUBLIC_CORE_INTERFACE_HEADERS}
     ${PUBLIC_EVENT_HEADERS}
@@ -595,7 +623,6 @@ set(PUBLIC_HEADERS
     ${PUBLIC_TOOLBAR_ACTIONS_HEADERS}
     ${PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS}
     ${PUBLIC_ACTIONS_INTERNAL_HEADERS}
-    ${PUBLIC_ACTION_HIERARCHY_HEADERS}
     ${PUBLIC_WIDGET_HEADERS}
     ${PUBLIC_RENDERERS_HEADERS}
     ${PUBLIC_GRAPHICS_HEADERS}
@@ -606,8 +633,8 @@ set(PUBLIC_HEADERS
     ${PUBLIC_PROJECT_HEADERS}
     ${PUBLIC_DATA_HIERARCHY_HEADERS}
     ${PUBLIC_ACTIONS_MODEL_HEADERS}
-    ${PUBLIC_ACTION_HIERARCHY_MODEL_HEADERS}
     ${PUBLIC_DATA_HIERARCHY_MODEL_HEADERS}
+    ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
 )
 
 set(PUBLIC_SOURCES
@@ -625,7 +652,6 @@ set(PUBLIC_SOURCES
     ${PUBLIC_TOOLBAR_ACTIONS_SOURCES}
     ${PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES}
     ${PUBLIC_ACTIONS_INTERNAL_SOURCES}
-    ${PUBLIC_ACTION_HIERARCHY_SOURCES}
     ${PUBLIC_WIDGET_SOURCES}
     ${PUBLIC_RENDERERS_SOURCES}
     ${PUBLIC_GRAPHICS_SOURCES}
@@ -636,8 +662,8 @@ set(PUBLIC_SOURCES
     ${PUBLIC_DATA_HIERARCHY_SOURCES}
     ${PUBLIC_PROJECT_SOURCES}
     ${PUBLIC_ACTIONS_MODEL_SOURCES}
-    ${PUBLIC_ACTION_HIERARCHY_MODEL_SOURCES}
     ${PUBLIC_DATA_HIERARCHY_MODEL_SOURCES}
+    ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_HEADERS}
 )
 
@@ -666,5 +692,5 @@ source_group(Dataset FILES ${PUBLIC_DATASET_FILES})
 source_group(Plugin FILES ${PUBLIC_PLUGIN_FILES})
 source_group(Project FILES ${PUBLIC_PROJECT_FILES})
 source_group(Model\\Actions FILES ${PUBLIC_ACTIONS_MODEL_FILES})
-source_group(Model\\ActionHierarchy FILES ${PUBLIC_ACTION_HIERARCHY_MODEL_FILES})
 source_group(Model\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
+source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})

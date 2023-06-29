@@ -51,7 +51,8 @@ public:
     Dataset<DatasetImpl> copy() const override
     {
         auto text = new Text(_core, getRawDataName());
-        text->setGuiName(getGuiName());
+
+        text->setText(this->text());
         text->indices = indices;
         
         return text;

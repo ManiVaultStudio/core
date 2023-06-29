@@ -2,6 +2,8 @@
 #include "StartPageWidget.h"
 
 #include <QDebug>
+#include <QResizeEvent>
+
 #include <algorithm>
 
 using namespace hdps;

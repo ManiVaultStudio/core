@@ -1,10 +1,12 @@
 #pragma once
 
-#include "WidgetAction.h"
+#include "GroupAction.h"
+#include "HorizontalGroupAction.h"
+#include "NumericalRangeAction.h"
 
-namespace hdps {
+#include <QVBoxLayout>
 
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Rectangle action class
@@ -13,14 +15,21 @@ namespace gui {
  *
  * @author Thomas Kroes
  */
-template<typename RectangleType>
-class RectangleAction : public WidgetAction
+template<typename RectangleType, typename NumericalRangeActionType>
+class RectangleAction : public GroupAction
 {
+public:
+
     /** Templated classes with Q_OBJECT macro are not allowed, so use function pointers in stead */
     using RectangleChangedCB        = std::function<void()>;
-    using DefaultRectangleChangedCB = std::function<void()>;
 
-public:
+    /** Axis enum for distinguishing between x- and y axis range of the rectangle */
+    enum class Axis {
+        X = 0,  /** Along x-axis */
+        Y,      /** Along y-axis */
+
+        Count
+    };
 
     /** Describes the widget settings */
     enum WidgetFlag {
@@ -28,6 +37,51 @@ public:
 
         Default = LineEdit
     };
+
+    /** Widget class for editing the rectangle action */
+    class EditWidget : public WidgetActionWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param rectangleAction Pointer to rectangle action
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        EditWidget(QWidget* parent, RectangleAction* rectangleAction, const std::int32_t& widgetFlags) :
+            WidgetActionWidget(parent, rectangleAction, widgetFlags),
+            _groupAction(this, "Group")
+        {
+            _groupAction.setShowLabels(false);
+            
+            _groupAction.addAction(&rectangleAction->getRangeAction(Axis::X));
+            _groupAction.addAction(&rectangleAction->getRangeAction(Axis::Y));
+
+            auto layout = new QVBoxLayout();
+
+            layout->setContentsMargins(0, 0, 0, 0);
+            layout->addWidget(_groupAction.createWidget(this));
+
+            setLayout(layout);
+        }
+
+    private:
+        HorizontalGroupAction   _groupAction;       /** For displaying the ranges */
+
+        friend class RectangleAction;
+    };
+
+protected:
+
+    /**
+     * Get widget representation of the rectangle action
+     * @param parent Pointer to parent widget
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
+     */
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new EditWidget(parent, this, widgetFlags);
+    }
 
 public:
 
@@ -38,11 +92,20 @@ public:
      * @param rectangle Rectangle
      * @param defaultRectangle Default rectangle
      */
-    RectangleAction(QObject * parent, const QString& title, const RectangleType& rectangle = RectangleType(), const RectangleType& defaultRectangle = RectangleType()) :
-        WidgetAction(parent)
+    RectangleAction(QObject * parent, const QString& title, const RectangleType& rectangle = RectangleType()) :
+        GroupAction(parent, title),
+        _rangeAction{ NumericalRangeActionType(this, "X-range"), NumericalRangeActionType(this, "Y-range") }
     {
-        setText(title);
         setDefaultWidgetFlags(WidgetFlag::Default);
+
+        getRangeAction(Axis::X).setDefaultWidgetFlags(NumericalRangeActionType::MinimumSpinBox | NumericalRangeActionType::MaximumSpinBox);
+        getRangeAction(Axis::Y).setDefaultWidgetFlags(NumericalRangeActionType::MinimumSpinBox | NumericalRangeActionType::MaximumSpinBox);
+
+        getRangeAction(Axis::X).getRangeMinAction().setPrefix("xMin: ");
+        getRangeAction(Axis::X).getRangeMaxAction().setPrefix("xMax: ");
+
+        getRangeAction(Axis::Y).getRangeMinAction().setPrefix("yMin: ");
+        getRangeAction(Axis::Y).getRangeMaxAction().setPrefix("yMax: ");
     }
 
     /**
@@ -51,54 +114,38 @@ public:
      */
     RectangleType getRectangle() const
     {
-        return _rectangle;
+        RectangleType rectangle;
+
+        return rectangle;
     }
 
     /**
-     * Set rectangle
+     * Set rectangle to \p rectangle
      * @param rectangle Rectangle
      */
     void setRectangle(const RectangleType& rectangle)
     {
+        /*
         if (rectangle == _rectangle)
             return;
 
         _rectangle = rectangle;
 
         _rectangleChanged();
+        */
     }
 
-    /**
-     * Get default rectangle
-     * @return Default rectangle
-     */
-    RectangleType getDefaultRectangle() const
-    {
-        return _defaultRectangle;
-    }
+public: // Action getters
 
-    /**
-     * Set default rectangle
-     * @param defaultRectangle Default rectangle
-     */
-    void setDefaultRectangle(const RectangleType& defaultRectangle)
-    {
-        if (defaultRectangle == _defaultRectangle)
-            return;
+    NumericalRangeActionType& getRangeAction(const Axis& axis) { return _rangeAction[static_cast<int>(axis)]; }
 
-        _defaultRectangle = defaultRectangle;
+    const NumericalRangeActionType& getRangeAction(const Axis& axis) const { return _rangeAction[static_cast<int>(axis)]; }
 
-        _defaultRectangleChanged();
-    }
+private:
+    NumericalRangeActionType    _rangeAction[static_cast<int>(Axis::Count)];    /** Range actions for the x- and y axis of the rectangle */
 
 protected:
-    RectangleType   _rectangle;             /** Rectangle */
-    RectangleType   _defaultRectangle;      /** Default rectangle */
-
-protected: // Callbacks for implementations of the numerical action
-    RectangleChangedCB          _rectangleChanged;          /** Callback which is called when the rectangle changed */
-    DefaultRectangleChangedCB   _defaultRectangleChanged;   /** Callback which is called when the default rectangle changed */
+    RectangleChangedCB          _rectangleChanged;                              /** Callback which is called when the rectangle changed */
 };
 
-}
 }

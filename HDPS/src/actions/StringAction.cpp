@@ -8,10 +8,9 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const QString& string /*= ""*/, const QString& defaultString /*= ""*/) :
-    WidgetAction(parent),
+StringAction::StringAction(QObject* parent, const QString& title, const QString& string /*= ""*/) :
+    WidgetAction(parent, title),
     _string(),
-    _defaultString(),
     _placeholderString(),
     _leadingAction(),
     _trailingAction(),
@@ -22,21 +21,10 @@ StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
-    initialize(string, defaultString);
+    setString(string);
 
     _leadingAction.setVisible(false);
     _trailingAction.setVisible(false);
-}
-
-QString StringAction::getTypeString() const
-{
-    return "String";
-}
-
-void StringAction::initialize(const QString& string /*= ""*/, const QString& defaultString /*= ""*/)
-{
-    setString(string);
-    setDefaultString(defaultString);
 }
 
 QString StringAction::getString() const
@@ -54,21 +42,6 @@ void StringAction::setString(const QString& string)
     emit stringChanged(_string);
 
     saveToSettings();
-}
-
-QString StringAction::getDefaultString() const
-{
-    return _defaultString;
-}
-
-void StringAction::setDefaultString(const QString& defaultString)
-{
-    if (defaultString == _defaultString)
-        return;
-
-    _defaultString = defaultString;
-
-    emit defaultStringChanged(_defaultString);
 }
 
 QString StringAction::getPlaceholderString() const
@@ -140,7 +113,9 @@ void StringAction::setClearable(bool clearable)
     if (_clearable) {
         _trailingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("times-circle"));
 
-        connect(&_trailingAction, &QAction::triggered, this, &StringAction::reset);
+        connect(&_trailingAction, &QAction::triggered, this, [this]() -> void {
+            setString("");
+        });
 
         const auto updateTrailingActionVisibility = [this]() -> void {
             _trailingAction.setVisible(!_string.isEmpty());
@@ -156,45 +131,39 @@ void StringAction::setClearable(bool clearable)
     }
 }
 
-bool StringAction::isResettable()
-{
-    return _string != _defaultString;
-}
-
-void StringAction::reset()
-{
-    setString(_defaultString);
-}
-
-void StringAction::connectToPublicAction(WidgetAction* publicAction)
+void StringAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicStringAction = dynamic_cast<StringAction*>(publicAction);
 
     Q_ASSERT(publicStringAction != nullptr);
+
+    if (publicStringAction == nullptr)
+        return;
 
     connect(this, &StringAction::stringChanged, publicStringAction, &StringAction::setString);
     connect(publicStringAction, &StringAction::stringChanged, this, &StringAction::setString);
 
     setString(publicStringAction->getString());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void StringAction::disconnectFromPublicAction()
+void StringAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicStringAction = dynamic_cast<StringAction*>(getPublicAction());
 
     Q_ASSERT(publicStringAction != nullptr);
 
+    if (publicStringAction == nullptr)
+        return;
+
     disconnect(this, &StringAction::stringChanged, publicStringAction, &StringAction::setString);
     disconnect(publicStringAction, &StringAction::stringChanged, this, &StringAction::setString);
 
-    WidgetAction::disconnectFromPublicAction();
-}
-
-WidgetAction* StringAction::getPublicCopy() const
-{
-    return new StringAction(parent(), text(), getString(), getDefaultString());
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void StringAction::fromVariantMap(const QVariantMap& variantMap)
@@ -223,7 +192,6 @@ QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::Label)
         layout->addWidget(new StringAction::LabelWidget(parent, this));
@@ -309,18 +277,23 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
 
     connect(stringAction, &QAction::changed, this, updateToolTip);
 
-    const auto updatePlaceHolderText = [this, stringAction]() -> void {
-        setPlaceholderText(stringAction->getPlaceholderString());
+    const auto updatePlaceHolderText = [this]() -> void {
+        setPlaceholderText(_stringAction->getPlaceholderString());
     };
 
-    connect(stringAction, &StringAction::stringChanged, this, &LineEditWidget::updateText);
-    connect(stringAction, &StringAction::textElideModeChanged, this, &LineEditWidget::updateText);
+    const auto updateText = [this]() -> void {
+        setText(_stringAction->getString());
+    };
 
+    updateText();
+
+    connect(stringAction, &StringAction::stringChanged, this, updateText);
     connect(stringAction, &StringAction::placeholderStringChanged, this, updatePlaceHolderText);
 
     connect(this, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
         stringAction->setString(text);
-        });
+        setFocus(Qt::FocusReason::OtherFocusReason);
+    });
 
     const auto updateLeadingAction = [this, stringAction]() {
         if (!stringAction->getLeadingAction().isVisible())
@@ -345,37 +318,10 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
 
     connect(stringAction, &StringAction::completerChanged, this, updateCompleter);
 
-    updateText();
     updatePlaceHolderText();
     updateLeadingAction();
     updateTrailingAction();
     updateCompleter();
-
-    installEventFilter(this);
-}
-
-bool StringAction::LineEditWidget::eventFilter(QObject* target, QEvent* event)
-{
-    if (event->type() == QEvent::Resize)
-        updateText();
-
-    return QLineEdit::eventFilter(target, event);
-}
-
-void StringAction::LineEditWidget::updateText()
-{
-    QSignalBlocker blocker(this);
-
-    const auto cacheCursorPosition = cursorPosition();
-
-    QFontMetrics titleMetrics(font());
-
-    if (_stringAction->getTextElideMode() == Qt::ElideNone)
-        setText(_stringAction->getString());
-    else
-        setText(titleMetrics.elidedText(_stringAction->getString(), _stringAction->getTextElideMode(), width() - 2));
-
-    setCursorPosition(cacheCursorPosition);
 }
 
 StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stringAction) :

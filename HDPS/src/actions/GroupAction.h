@@ -1,22 +1,17 @@
 #pragma once
 
 #include "WidgetAction.h"
+#include "StretchAction.h"
 
-#include <QTreeWidget>
-#include <QResizeEvent>
-#include <QVBoxLayout>
-
-class QWidget;
-class QGridLayout;
+#include <QGridLayout>
 
 namespace hdps::gui {
 
 /**
  * Group action class
  *
- * Groups multiple actions
- * When added to a dataset, the widget is added to the data properties widget as a section
- * 
+ * Contains zero or more child actions and either displays them horizontally or vertically.
+ *
  * @author Thomas Kroes
  */
 class GroupAction : public WidgetAction
@@ -25,62 +20,98 @@ class GroupAction : public WidgetAction
 
 public:
 
-    /** Label sizing types */
+    /** Describes the widget flags */
+    enum WidgetFlag {
+        Horizontal  = 0x00001,      /** Actions are arranged horizontally in the group */
+        Vertical    = 0x00002,      /** Actions are arranged vertically in the group */
+        Toolbar     = 0x00004,      /** Actions are arranged in a toolbar */
+        NoMargins   = 0x00010,      /** Do not apply margins to widget layout */
+        WithMargins = 0x00020,      /** Apply standard margins to widget layout */
+
+        HorizontalToolbar   = Horizontal | Toolbar,     /** Actions are arranged in a horizontal toolbar */
+        VerticalToolbar     = Vertical | Toolbar,       /** Actions are arranged in a vertical toolbar */
+
+        Default = Horizontal
+    };
+
+    /** Label sizing types (in case of vertical group) */
     enum class LabelSizingType {
         Auto,           /** The widest label in the group action determines the width for the other labels */
         Percentage,     /** The label width is a percentage of the available width */
         Fixed           /** The label width is fixed width in pixels */
     };
 
-    /**
-     * Group widget class for widget action group
-     */
-    class FormWidget : public WidgetActionWidget
+public:
+
+    using WidgetFlagsMap = QMap<const WidgetAction*, std::int32_t>;
+    using WidgetFlagsList = QList<std::int32_t>;
+
+public: // Widgets
+
+    /** Widget class for arranging the groups actions vertically */
+    class VerticalWidget : public WidgetActionWidget
     {
     protected:
 
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param groupAction Pointer to group action
+         * @param groupAction Pointer to group action which creates the widget
          * @param widgetFlags Widget flags for the configuration of the widget (type)
          */
-        FormWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags);
-
-        /** Get grid layout */
-        QGridLayout* layout();
+        VerticalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags);
 
     protected:
-        QGridLayout*    _layout;        /** Main grid layout */
+        GroupAction*    _groupAction;   /** Pointer to group action which created the widget */
+        QGridLayout     _layout;        /** Vertical layout */
 
         friend class GroupAction;
     };
+
+    /** Widget class for arranging the groups actions horizontally */
+    class HorizontalWidget : public WidgetActionWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param groupAction Pointer to group action which creates the widget
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        HorizontalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags);
+
+    protected:
+        GroupAction* _groupAction;   /** Pointer to group action which created the widget */
+
+        friend class GroupAction;
+    };
+
+protected: // Widgets
 
     /**
      * Get widget representation of the group action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new FormWidget(parent, this, widgetFlags);
-    };
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param title Group title
      * @param expanded Whether the group is initially expanded/collapsed
+     * @param alignment Item alignment
      */
-    GroupAction(QObject* parent, const bool& expanded = false);
+    Q_INVOKABLE GroupAction(QObject* parent, const QString& title, const bool& expanded = false, const Qt::AlignmentFlag& alignment = Qt::AlignmentFlag::AlignLeft);
 
     /**
-     * Constructor
-     * @param parent Pointer to parent object
-     * @param widgetActions Widget actions to initialize with
-     * @param expanded Whether the group is initially expanded/collapsed
+     * Get item alignment
+     * @return Item alignment
      */
-    GroupAction(QObject* parent, WidgetActions widgetActions, const bool& expanded = false);
+    virtual Qt::AlignmentFlag getAlignment() const final;
 
     /** Set expanded/collapsed */
     void setExpanded(const bool& expanded);
@@ -118,7 +149,57 @@ public:
      */
     void setShowLabels(bool showLabels);
 
-    /** Gets the label sizing type */
+public: // Stretch
+
+    /**
+     * Add stretch action to the group (this will add a stretch to the group layout in the widget)
+     * @param stretch Layout stretch
+     * @return Pointer to created stretch action (group action is owner of the action)
+     */
+    StretchAction* addStretch(std::int32_t stretch = 1);
+
+public: // Actions management
+
+    /**
+     * Add \p action to the group
+     * @param action Pointer to action to add
+     * @param widgetFlags Action widget flags (default flags if -1)
+     */
+    virtual void addAction(WidgetAction* action, std::int32_t widgetFlags = -1) final;
+
+    /**
+     * Remove \p action from the group
+     * @param action Pointer to action to add
+     */
+    virtual void removeAction(WidgetAction* action) final;
+
+    /** Remove all actions */
+    virtual void clear() final;
+
+    /**
+     * Get actions
+     * @return Vector of pointers to actions
+     */
+    virtual WidgetActions getActions() final;
+
+    /**
+     * Get const actions
+     * @return Vector of const pointers to actions
+     */
+    virtual ConstWidgetActions getConstActions() final;
+
+    /**
+     * Get widget flags map (Maps widget action pointer to widget creation flags)
+     * @return Widget flags map
+     */
+    WidgetFlagsMap getWidgetFlagsMap();
+
+public: // Label sizing for vertical layout
+
+    /**
+     * Get the label sizing type
+     * @return Label sizing type enum
+     */
     LabelSizingType getLabelSizingType() const;
 
     /**
@@ -145,39 +226,32 @@ public:
      */
     void setLabelWidthFixed(std::uint32_t labelWidthFixed);
 
-    /**
-     * Add widget action using stream in operator
-     * @param widgetAction Reference to widget action
-     */
-    void operator << (WidgetAction& widgetAction)
-    {
-        _widgetActions << &widgetAction;
+private:
 
-        emit actionsChanged(_widgetActions);
-    }
+    /** Sort added actions based on their sort index */
+    virtual void sortActions() final;
+
+public: // Serialization
 
     /**
-     * Set actions
-     * @param widgetActions Widget actions
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
      */
-    void setActions(const WidgetActions& widgetActions = WidgetActions());
+    void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-     * Get actions
-     * @return Widget actions
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
      */
-    WidgetActions getActions();
-
-    /**
-     * Get sorted widget actions
-     * @return Vector of sorted widget actions
-     */
-    WidgetActions getSortedWidgetActions() const;
+    QVariantMap toVariantMap() const override;
 
 signals:
 
-    /** Signals that the actions changed */
-    void actionsChanged(const WidgetActions& widgetActions);
+    /**
+     * Signals that the actions changed to \p actions
+     * @param actions Update vector of pointers to actions in the group
+     */
+    void actionsChanged(const WidgetActions& actions);
 
     /** Signals that the group got expanded */
     void expanded();
@@ -186,72 +260,54 @@ signals:
     void collapsed();
 
     /**
-     * Signals that the group read-only status changed
+     * Signals that the group read-only status changed to \p readOnly
      * @param readOnly Read-only status
      */
     void readOnlyChanged(const bool& readOnly);
 
     /**
-     * Signals that the group show labels option changed
+     * Signals that the group show labels option changed to \p showLabels
      * @param showLabels Whether label are visible or not
      */
     void showLabelsChanged(const bool& showLabels);
 
     /**
-     * Signals that the label sizing type changed
+     * Signals that the label sizing type changed to \p labelSizingType
      * @param labelSizingType Label sizing type
      */
     void labelSizingTypeChanged(const LabelSizingType& labelSizingType);
 
     /**
-     * Signals that the label width in percentages changed
+     * Signals that the label width in percentages changed to \p labelWidthPercentage
      * @param labelWidthPercentage Label width in percentages
      */
     void labelWidthPercentageChanged(const std::uint32_t& labelWidthPercentage);
 
     /**
-     * Signals that the label width in fixed pixels changed
+     * Signals that the label width in fixed pixels changed to \p labelWidthFixed
      * @param labelWidthFixed Label width in fixed pixels
      */
     void labelWidthFixedChanged(const std::uint32_t& labelWidthFixed);
 
 private:
-    bool                            _expanded;                      /** Whether or not the group is expanded */
-    bool                            _readOnly;                      /** Whether or not the group is read-only */
-    WidgetActions                   _widgetActions;                 /** Widget actions */
-    bool                            _showLabels;                    /** Whether to show labels or not */
-    LabelSizingType                 _labelSizingType;               /** Type of label sizing */
-    std::uint32_t                   _labelWidthPercentage;          /** User label width in percentages [0..100] */
-    std::uint32_t                   _labelWidthFixed;               /** User label width in pixels */
+    Qt::AlignmentFlag   _alignment;         /** Item alignment */
+    bool                _expanded;          /** Whether or not the group is expanded */
+    bool                _readOnly;          /** Whether or not the group is read-only */
+    WidgetActions       _actions;           /** Vector of pointers to widget actions in the group */
+    bool                _showLabels;        /** Whether to show labels or not */
+    WidgetFlagsMap      _widgetFlagsMap;    /** Maps widget action pointer to widget creation flags */
 
-    static const std::uint32_t      globalLabelWidthPercentage;     /** Global label width in percentages */
-    static const std::uint32_t      globalLabelWidthFixed;          /** Global label width in pixels */
+private: // Specific settings for vertical layout
+    LabelSizingType     _labelSizingType;           /** Type of label sizing */
+    std::uint32_t       _labelWidthPercentage;      /** User label width in percentages [0..100] */
+    std::uint32_t       _labelWidthFixed;           /** User label width in pixels */
+
+    static const std::uint32_t          globalLabelWidthPercentage;     /** Global label width in percentages */
+    static const std::uint32_t          globalLabelWidthFixed;          /** Global label width in pixels */
 };
 
-/**
- * Print group action to console
- * @param debug Debug
- * @param groupAction Reference to group action
- */
-inline QDebug operator << (QDebug debug, const GroupAction& groupAction)
-{
-    debug << groupAction.getSettingsPath();
-
-    return debug.space();
 }
 
-/**
- * Print group action to console
- * @param debug Debug
- * @param groupAction Pointer to group action
- */
-inline QDebug operator << (QDebug debug, const GroupAction* groupAction)
-{
-    Q_ASSERT(groupAction != nullptr);
+Q_DECLARE_METATYPE(hdps::gui::GroupAction)
 
-    debug << groupAction->getSettingsPath();
-
-    return debug.space();
-}
-
-}
+inline const auto groupActionMetaTypeId = qRegisterMetaType<hdps::gui::GroupAction*>("hdps::gui::GroupAction");

@@ -20,16 +20,16 @@ namespace util
 
 enum class EventType
 {
-    DataAdded,
-    DataChanged,
-    DataAboutToBeRemoved,
-    DataRemoved,
-    DataSelectionChanged,
-    DataGuiNameChanged,
-    DataChildAdded,
-    DataChildRemoved,
-    DataLocked,
-    DataUnlocked
+    DatasetAdded,
+    DatasetDataChanged,
+    DatasetDataDimensionsChanged,
+    DatasetAboutToBeRemoved,
+    DatasetRemoved,
+    DatasetDataSelectionChanged,
+    DatasetChildAdded,
+    DatasetChildRemoved,
+    DatasetLocked,
+    DatasetUnlocked
 };
 
 class HdpsEvent
@@ -51,10 +51,10 @@ private:
 };
 
 /**
- * Data event class
+ * Dataset event class
  * Event container class for datasets
  */
-class DataEvent : public HdpsEvent
+class DatasetEvent : public HdpsEvent
 {
 public:
 
@@ -63,7 +63,7 @@ public:
      * @param eventType Type of event
      * @param dataset Smart pointer to the dataset
      */
-    DataEvent(const EventType& eventType, const Dataset<DatasetImpl>& dataset) :
+    DatasetEvent(const EventType& eventType, const Dataset<DatasetImpl>& dataset) :
         HdpsEvent(eventType),
         _dataset(dataset)
     {
@@ -97,10 +97,10 @@ protected:
 };
 
 /**
- * Data added event class
- * Data event which is emitted by the core when data is added
+ * Dataset added event class
+ * Dataset event which is emitted by the core when data is added
  */
-class DataAddedEvent : public DataEvent
+class DatasetAddedEvent : public DatasetEvent
 {
 public:
 
@@ -108,8 +108,8 @@ public:
      * Constructor
      * @param dataset Smart pointer to the dataset
      */
-    DataAddedEvent(const Dataset<DatasetImpl>& dataset) :
-        DataEvent(EventType::DataAdded, dataset)
+    DatasetAddedEvent(const Dataset<DatasetImpl>& dataset) :
+        DatasetEvent(EventType::DatasetAdded, dataset)
     {
     }
 
@@ -145,10 +145,10 @@ protected:
 };
 
 /**
- * Data changed event class
- * Data event which is emitted by the core when data has changed
+ * Dataset data changed event class
+ * Dataset event which is emitted by the core when dataset data has changed
  */
-class DataChangedEvent : public DataEvent
+class DatasetDataChangedEvent : public DatasetEvent
 {
 public:
 
@@ -156,35 +156,53 @@ public:
      * Constructor
      * @param dataset Smart pointer to the dataset
      */
-    DataChangedEvent(const Dataset<DatasetImpl>& dataset) :
-        DataEvent(EventType::DataChanged, dataset)
+    DatasetDataChangedEvent(const Dataset<DatasetImpl>& dataset) :
+        DatasetEvent(EventType::DatasetDataChanged, dataset)
     {
     }
 };
 
 /**
- * Data about to be removed event class
- * Data event which is emitted by the core when data is about to be removed
+ * Dataset data dimensions changed event class
+ * Dataset event which is emitted by the core when dataset data dimensions change
  */
-class DataAboutToBeRemovedEvent : public DataEvent
+class DatasetDataDimensionsChangedEvent : public DatasetEvent
 {
 public:
 
     /**
      * Constructor
-     * @param dataset Smarty pointer to dataset
+     * @param dataset Smart pointer to the dataset
      */
-    DataAboutToBeRemovedEvent(const Dataset<DatasetImpl>& dataset) :
-        DataEvent(EventType::DataAboutToBeRemoved, dataset)
+    DatasetDataDimensionsChangedEvent(const Dataset<DatasetImpl>& dataset) :
+        DatasetEvent(EventType::DatasetDataDimensionsChanged, dataset)
     {
     }
 };
 
 /**
- * Data removed event class
- * Data event which is emitted by the core when data has been removed
+ * Dataset about to be removed event class
+ * Dataset event which is emitted by the core when a dataset is about to be removed
  */
-class DataRemovedEvent : public DataEvent
+class DatasetAboutToBeRemovedEvent : public DatasetEvent
+{
+public:
+
+    /**
+     * Constructor
+     * @param dataset Smart pointer to dataset
+     */
+    DatasetAboutToBeRemovedEvent(const Dataset<DatasetImpl>& dataset) :
+        DatasetEvent(EventType::DatasetAboutToBeRemoved, dataset)
+    {
+    }
+};
+
+/**
+ * Dataset removed event class
+ * Dataset event which is emitted by the core when a dataset has been removed
+ */
+class DatasetRemovedEvent : public DatasetEvent
 {
 public:
 
@@ -193,8 +211,8 @@ public:
      * @param dataset Smart pointer to the dataset
      * @param datasetGuid GUID of the dataset that has been removed
      */
-    DataRemovedEvent(const Dataset<DatasetImpl>& dataset, const QString& datasetGuid, const DataType& dataType) :
-        DataEvent(EventType::DataRemoved, nullptr),
+    DatasetRemovedEvent(const Dataset<DatasetImpl>& dataset, const QString& datasetGuid, const DataType& dataType) :
+        DatasetEvent(EventType::DatasetRemoved, nullptr),
         _datasetGuid(datasetGuid),
         _dataType(dataType)
     {
@@ -216,10 +234,10 @@ protected:
 };
 
 /**
- * Data selection changed event class
- * Data event which is emitted by the core when data selection has changed
+ * Dataset data selection changed event class
+ * Dataset event which is emitted by the core when dataset data selection has changed
  */
-class DataSelectionChangedEvent : public DataEvent
+class DatasetDataSelectionChangedEvent : public DatasetEvent
 {
 public:
 
@@ -227,45 +245,17 @@ public:
      * Constructor
      * @param dataset Smart pointer to the dataset
      */
-    DataSelectionChangedEvent(const Dataset<DatasetImpl>& dataset) :
-        DataEvent(EventType::DataSelectionChanged, dataset)
+    DatasetDataSelectionChangedEvent(const Dataset<DatasetImpl>& dataset) :
+        DatasetEvent(EventType::DatasetDataSelectionChanged, dataset)
     {
     }
 };
 
 /**
- * Data GUI name changed event class
- * Data event which is emitted by the core when a dataset GUI name changed
+ * Dataset child added event class
+ * Dataset event which is emitted by the core when a child dataset is added to the dataset
  */
-class DataGuiNameChangedEvent : public DataEvent
-{
-public:
-
-    /**
-     * Constructor
-     * @param dataset Smart pointer to the dataset
-     * @param previousGuiName Previous GUI name
-     */
-    DataGuiNameChangedEvent(const Dataset<DatasetImpl>& dataset, const QString previousGuiName) :
-        DataEvent(EventType::DataGuiNameChanged, dataset),
-        _previousGuiName(previousGuiName)
-    {
-    }
-
-    /** Get the previous GUI name of the dataset */
-    QString getPreviousGuiName() const {
-        return _previousGuiName;
-    }
-
-protected:
-    QString     _previousGuiName;      /** Previous GUI name of the dataset */
-};
-
-/**
- * Data child added event class
- * Data event which is emitted by the core when a child dataset is added to the dataset
- */
-class DataChildAddedEvent : public DataEvent
+class DatasetChildAddedEvent : public DatasetEvent
 {
 public:
 
@@ -274,8 +264,8 @@ public:
      * @param dataset Smart pointer to the dataset
      * @param childDataset Smart pointer to the child dataset
      */
-    DataChildAddedEvent(const Dataset<DatasetImpl>& dataset, const Dataset<DatasetImpl>& childDataset) :
-        DataEvent(EventType::DataChildAdded, dataset),
+    DatasetChildAddedEvent(const Dataset<DatasetImpl>& dataset, const Dataset<DatasetImpl>& childDataset) :
+        DatasetEvent(EventType::DatasetChildAdded, dataset),
         _childDataset(childDataset)
     {
     }
@@ -290,10 +280,10 @@ protected:
 };
 
 /**
- * Data child removed event class
- * Data event which is emitted by the core when a child dataset is removed from the dataset
+ * Dataset child removed event class
+ * Dataset event which is emitted by the core when a child dataset is removed from the dataset
  */
-class DataChildRemovedEvent : public DataEvent
+class DatasetChildRemovedEvent : public DatasetEvent
 {
 public:
 
@@ -302,8 +292,8 @@ public:
      * @param dataset Smart pointer to the dataset
      * @param childDatasetGuid GUID of the child dataset
      */
-    DataChildRemovedEvent(const Dataset<DatasetImpl>& dataset, const QString& childDatasetGuid) :
-        DataEvent(EventType::DataChildRemoved, dataset),
+    DatasetChildRemovedEvent(const Dataset<DatasetImpl>& dataset, const QString& childDatasetGuid) :
+        DatasetEvent(EventType::DatasetChildRemoved, dataset),
         _childDatasetGuid(childDatasetGuid)
     {
     }
@@ -318,10 +308,10 @@ protected:
 };
 
 /**
- * Data locked event class
- * Data event which is emitted by the core when a dataset is locked
+ * Dataset locked event class
+ * Dataset event which is emitted by the core when a dataset became locked
  */
-class DataLockedEvent : public DataEvent
+class DatasetLockedEvent : public DatasetEvent
 {
 public:
 
@@ -329,17 +319,17 @@ public:
      * Constructor
      * @param dataset Smart pointer to the dataset
      */
-    DataLockedEvent(const Dataset<DatasetImpl>& dataset) :
-        DataEvent(EventType::DataLocked, dataset)
+    DatasetLockedEvent(const Dataset<DatasetImpl>& dataset) :
+        DatasetEvent(EventType::DatasetLocked, dataset)
     {
     }
 };
 
 /**
- * Data unlocked event class
- * Data event which is emitted by the core when a dataset is locked
+ * Dataset unlocked event class
+ * Dataset event which is emitted by the core when a dataset became unlocked
  */
-class DataUnlockedEvent : public DataEvent
+class DatasetUnlockedEvent : public DatasetEvent
 {
 public:
 
@@ -347,8 +337,8 @@ public:
      * Constructor
      * @param dataset Smart pointer to the dataset
      */
-    DataUnlockedEvent(const Dataset<DatasetImpl>& dataset) :
-        DataEvent(EventType::DataUnlocked, dataset)
+    DatasetUnlockedEvent(const Dataset<DatasetImpl>& dataset) :
+        DatasetEvent(EventType::DatasetUnlocked, dataset)
     {
     }
 };

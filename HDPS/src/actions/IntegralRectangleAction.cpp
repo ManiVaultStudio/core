@@ -1,119 +1,60 @@
 #include "IntegralRectangleAction.h"
-
-#include <QHBoxLayout>
-
-using namespace hdps::util;
+#include "CoreInterface.h"
 
 namespace hdps::gui {
 
-IntegralRectangleAction::IntegralRectangleAction(QObject * parent, const QString& title, const QRect& rectangle /*= QRect()*/, const QRect& defaultRectangle /*= QRect()*/) :
-    RectangleAction<QRect>(parent, title, rectangle, defaultRectangle)
+IntegralRectangleAction::IntegralRectangleAction(QObject* parent, const QString& title, const QRect& rectangle /*= QRect()*/) :
+    RectangleAction<QRect, IntegralRangeAction>(parent, title, rectangle)
 {
-    _rectangleChanged           = [this]() -> void { emit rectangleChanged(_rectangle); };
-    _defaultRectangleChanged    = [this]() -> void { emit defaultRectangleChanged(_defaultRectangle); };
-
-    initialize(rectangle, defaultRectangle);
+    _rectangleChanged = [this]() -> void { emit rectangleChanged(getRectangle()); };
 }
 
-QString IntegralRectangleAction::getTypeString() const
-{
-    return "IntegralRectangle";
-}
-
-void IntegralRectangleAction::initialize(const QRect& rectangle /*= QRect()*/, const QRect& defaultRectangle /*= QRect()*/)
-{
-    _rectangle          = rectangle;
-    _defaultRectangle   = defaultRectangle;
-
-    emit rectangleChanged(_rectangle);
-    emit defaultRectangleChanged(_defaultRectangle);
-}
-
-void IntegralRectangleAction::connectToPublicAction(WidgetAction* publicAction)
+void IntegralRectangleAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicIntegralRectangleAction = dynamic_cast<IntegralRectangleAction*>(publicAction);
 
     Q_ASSERT(publicIntegralRectangleAction != nullptr);
 
-    connect(this, &IntegralRectangleAction::rectangleChanged, publicIntegralRectangleAction, &IntegralRectangleAction::setRectangle);
-    connect(publicIntegralRectangleAction, &IntegralRectangleAction::rectangleChanged, this, &IntegralRectangleAction::setRectangle);
+    if (publicIntegralRectangleAction == nullptr)
+        return;
 
-    setRectangle(publicIntegralRectangleAction->getRectangle());
+    if (recursive) {
+        actions().connectPrivateActionToPublicAction(&getRangeAction(Axis::X), &publicIntegralRectangleAction->getRangeAction(Axis::X), recursive);
+        actions().connectPrivateActionToPublicAction(&getRangeAction(Axis::Y), &publicIntegralRectangleAction->getRangeAction(Axis::Y), recursive);
+    }
 
-    WidgetAction::connectToPublicAction(publicAction);
+    RectangleAction<QRect, IntegralRangeAction>::connectToPublicAction(publicAction, recursive);
 }
 
-void IntegralRectangleAction::disconnectFromPublicAction()
+void IntegralRectangleAction::disconnectFromPublicAction(bool recursive)
 {
-    auto publicIntegralRectangleAction = dynamic_cast<IntegralRectangleAction*>(getPublicAction());
+    if (!isConnected())
+        return;
 
-    Q_ASSERT(publicIntegralRectangleAction != nullptr);
+    if (recursive) {
+        actions().disconnectPrivateActionFromPublicAction(&getRangeAction(Axis::X), recursive);
+        actions().disconnectPrivateActionFromPublicAction(&getRangeAction(Axis::Y), recursive);
+    }
 
-    disconnect(this, &IntegralRectangleAction::rectangleChanged, publicIntegralRectangleAction, &IntegralRectangleAction::setRectangle);
-    disconnect(publicIntegralRectangleAction, &IntegralRectangleAction::rectangleChanged, this, &IntegralRectangleAction::setRectangle);
-
-    WidgetAction::disconnectFromPublicAction();
-}
-
-WidgetAction* IntegralRectangleAction::getPublicCopy() const
-{
-    return new IntegralRectangleAction(parent(), text(), _rectangle, _defaultRectangle);
+    RectangleAction<QRect, IntegralRangeAction>::disconnectFromPublicAction(recursive);
 }
 
 void IntegralRectangleAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    WidgetAction::fromVariantMap(variantMap);
+    RectangleAction<QRect, IntegralRangeAction>::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "Value");
-
-    setRectangle(variantMap["Value"].toRect());
+    getRangeAction(Axis::X).fromParentVariantMap(variantMap);
+    getRangeAction(Axis::Y).fromParentVariantMap(variantMap);
 }
 
 QVariantMap IntegralRectangleAction::toVariantMap() const
 {
-    auto variantMap = WidgetAction::toVariantMap();
+    auto variantMap = RectangleAction<QRect, IntegralRangeAction>::toVariantMap();
 
-    variantMap.insert({
-        { "Value", QVariant::fromValue(getRectangle()) }
-    });
+    getRangeAction(Axis::X).insertIntoVariantMap(variantMap);
+    getRangeAction(Axis::Y).insertIntoVariantMap(variantMap);
 
     return variantMap;
-}
-
-IntegralRectangleAction::LineEditWidget::LineEditWidget(QWidget* parent, IntegralRectangleAction* integralRectangleAction) :
-    QLineEdit(parent)
-{
-    setAcceptDrops(true);
-    setObjectName("LineEdit");
-    setEnabled(false);
-
-    const auto updateString = [this, integralRectangleAction]() {
-        QSignalBlocker blocker(this);
-
-        const auto topLeft      = integralRectangleAction->getRectangle().topLeft();
-        const auto bottomRight  = integralRectangleAction->getRectangle().bottomRight();
-
-        setText(QString("[%1, %2, %3, %4]").arg(QString::number(topLeft.x()), QString::number(topLeft.y()), QString::number(bottomRight.x()), QString::number(bottomRight.y())));
-    };
-
-    connect(integralRectangleAction, &IntegralRectangleAction::rectangleChanged, this, updateString);
-
-    updateString();
-}
-
-QWidget* IntegralRectangleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
-{
-    auto widget = new WidgetActionWidget(parent, this);
-    auto layout = new QHBoxLayout();
-
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    if (widgetFlags & WidgetFlag::LineEdit)
-        layout->addWidget(new LineEditWidget(parent, this), 1);
-
-    widget->setLayout(layout);
-
-    return widget;
 }
 
 }

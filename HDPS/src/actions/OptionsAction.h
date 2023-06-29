@@ -6,9 +6,7 @@
 #include <QStandardItemModel>
 #include <QComboBox>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Options widget action class
@@ -193,13 +191,7 @@ public:
      * @param options Options to select from
      * @param selectedOptions Initial selected options
      */
-    OptionsAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QStringList& selectedOptions = QStringList(), const QStringList& defaultSelectedOptions = QStringList());
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE explicit OptionsAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QStringList& selectedOptions = QStringList());
 
     /**
      * Initialize the option action
@@ -242,8 +234,9 @@ public:
     /**
      * Set the available options
      * @param options Available Options
+     * @param clearSelection Whether to clear the current selection
      */
-    void setOptions(const QStringList& options);
+    void setOptions(const QStringList& options, bool clearSelection = false);
 
     /**
      * Get selected options
@@ -252,16 +245,10 @@ public:
     QStringList getSelectedOptions() const;
 
     /**
-     * Get default selected options
-     * @return Default selected options
+     * Get selected option indices
+     * @return Selected options indices
      */
-    QStringList getDefaultSelectedOptions() const;
-
-    /**
-     * Set default selected options
-     * @param defaultSelectedOptions Default selected options
-     */
-    void setDefaultSelectedOptions(const QStringList& defaultSelectedOptions);
+    QList<int> getSelectedOptionIndices() const;
 
     /**
      * Get whether a specific option is selected
@@ -289,33 +276,20 @@ public:
      */
     void setSelectedOptions(const QStringList& selectedOptions);
 
-    /**
-     * Determines whether the action can be reset to its default
-     * @return Whether the action can be reset to its default
-     */
-    bool isResettable() override;;
-
-    /** Reset to default */
-    void reset() override;
-
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
-
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
-
-protected:  // Linking
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
     /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
      */
-    virtual WidgetAction* getPublicCopy() const override;
+    void disconnectFromPublicAction(bool recursive) override;
 
 public: // Serialization
 
@@ -350,19 +324,17 @@ signals:
      */
     void selectedOptionsChanged(const QStringList& selectedOptions);
 
-    /**
-     * Signals that the default selected options changed
-     * @param defaultSelectedOptions Default selected options
-     */
-    void defaultSelectedOptionsChanged(const QStringList& defaultSelectedOptions);
-
 protected:
-    QStandardItemModel      _optionsModel;              /** Options model */
-    SelectionAction         _selectionAction;           /** Selection action */
-    FileAction              _fileAction;                /** File action */
-    QStringList             _defaultSelectedOptions;    /** Default selection options */
+    QStandardItemModel      _optionsModel;      /** Options model */
+    SelectionAction         _selectionAction;   /** Selection action */
+    FileAction              _fileAction;        /** File action */
+
+    friend class AbstractActionsManager;
 
 };
 
 }   
-}
+
+Q_DECLARE_METATYPE(hdps::gui::OptionsAction)
+
+inline const auto optionsActionMetaTypeId = qRegisterMetaType<hdps::gui::OptionsAction*>("hdps::gui::OptionsAction");

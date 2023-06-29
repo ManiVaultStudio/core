@@ -7,9 +7,7 @@
 
 class DimensionsPickerAction;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Dimensions picker select action
@@ -82,5 +80,4 @@ protected:
     
 };
 
-}
 }

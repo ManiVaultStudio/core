@@ -20,7 +20,7 @@ QMap<PresetsAction::Column, QPair<QString, QString>> PresetsAction::columnInfo =
 });
 
 PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const QString& settingsKey /*= ""*/, const QString& presetType /*= ""*/, const QIcon& icon /*= QIcon()*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Presets"),
     _sourceAction(sourceAction),
     _settingsKey(settingsKey),
     _presetType(presetType),
@@ -32,6 +32,9 @@ PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const 
 {
     Q_ASSERT(_sourceAction != nullptr);
 
+    setText("Presets");
+    setConnectionPermissionsToForceNone(true);
+
     _editAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     _editAction.setToolTip(QString("Manage %1 presets").arg(_presetType.toLower()));
 
@@ -42,11 +45,6 @@ PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const 
     });
 
     loadPresetsFromApplicationSettings();
-}
-
-QString PresetsAction::getTypeString() const
-{
-    return "Presets";
 }
 
 QString PresetsAction::getSettingsKey() const
@@ -120,11 +118,12 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
 
         connect(choosePresetNameDialog, &ChoosePresetNameDialog::accepted, this, [this, choosePresetNameDialog]() -> void {
             savePreset(choosePresetNameDialog->getPresetNameAction().getString());
-            });
+        });
+
         connect(choosePresetNameDialog, &ChoosePresetNameDialog::finished, choosePresetNameDialog, &ChoosePresetNameDialog::deleteLater);
 
         choosePresetNameDialog->open();            
-        });
+    });
 
     menu->addAction(savePresetAction);
 
@@ -348,7 +347,7 @@ void PresetsAction::updateModel()
 
         dateTimeItem->setData(dateTime, Qt::EditRole);
 
-        const auto itemEnabled = presetName != "Default";
+        const auto itemEnabled = true;// presetName != "Default";
 
         nameItem->setEnabled(itemEnabled);
         dateTimeItem->setEnabled(itemEnabled);

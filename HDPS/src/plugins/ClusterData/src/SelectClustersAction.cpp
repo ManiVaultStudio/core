@@ -7,13 +7,12 @@
 #include <QHBoxLayout>
 
 SelectClustersAction::SelectClustersAction(ClustersActionWidget* clustersActionWidget) :
-    WidgetAction(clustersActionWidget),
+    WidgetAction(clustersActionWidget, "Select Clusters"),
     _clustersActionWidget(clustersActionWidget),
     _selectAllAction(this, "All"),
     _selectNoneAction(this, "None"),
     _selectInvertAction(this, "Invert")
 {
-    setText("Select");
     setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
 
     _selectAllAction.setToolTip("Select all clusters");
@@ -96,5 +95,5 @@ SelectClustersAction::Widget::Widget(QWidget* parent, SelectClustersAction* sele
     layout->addWidget(selectClustersAction->getSelectNoneAction().createWidget(this));
     layout->addWidget(selectClustersAction->getSelectInvertAction().createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }

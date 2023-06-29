@@ -9,6 +9,7 @@
 using namespace hdps;
 using namespace hdps::util;
 using namespace hdps::gui;
+using namespace hdps::plugin;
 
 HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent)

@@ -300,15 +300,18 @@ void Points::init()
     _infoAction = new InfoAction(this, *this);
 
     if (isFull()) {
-        _dimensionsPickerGroupAction = new GroupAction(this);
+        _dimensionsPickerGroupAction = new GroupAction(this, "Group");
 
         _dimensionsPickerGroupAction->setText("Dimensions");
         _dimensionsPickerGroupAction->setShowLabels(false);
         _dimensionsPickerGroupAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 
-        connect(&getSmartPointer(), &Dataset<Points>::dataChanged, this, [this]() -> void {
-            if (_dimensionsPickerAction == nullptr)
-                _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction);
+        connect(&getSmartPointer(), &Dataset<Points>::dataDimensionsChanged, this, [this]() -> void {
+            if (_dimensionsPickerAction == nullptr) {
+                _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction, "Dimensions");
+
+                _dimensionsPickerGroupAction->addAction(_dimensionsPickerAction);
+            }
 
             _dimensionsPickerAction->setPointsDataset(*this);
         });
@@ -316,12 +319,12 @@ void Points::init()
 
     _infoAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
-    _eventListener.registerDataEventByType(PointType, [this](DataEvent* dataEvent)
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataSelectionChanged));
+    _eventListener.registerDataEventByType(PointType, [this](DatasetEvent* dataEvent)
     {
         switch (dataEvent->getType())
         {
-            case EventType::DataSelectionChanged:
+            case EventType::DatasetDataSelectionChanged:
             {
                 // Do not process our own selection changes
                 if (dataEvent->getDataset() == Dataset<Points>(this))
@@ -353,7 +356,7 @@ void Points::init()
                 // Copy indices from source to target if the indices have changed
                 targetIndices = sourceIndices;
 
-                events().notifyDatasetSelectionChanged(this);
+                events().notifyDatasetDataSelectionChanged(this);
 
                 break;
             }
@@ -571,7 +574,7 @@ Dataset<DatasetImpl> Points::copy() const
 {
     auto set = new Points(Application::core(), getRawDataName());
 
-    set->setGuiName(getGuiName());
+    set->setText(text());
     set->indices = indices;
 
     return set;
@@ -706,7 +709,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
 
         pointIndexOffset += targetPoints->getNumPoints();
 
-        getDataHierarchyItem().setTaskDescription(QString("Creating mappings for %1").arg(proxyMember->getGuiName()));
+        getDataHierarchyItem().setTaskDescription(QString("Creating mappings for %1").arg(proxyMember->text()));
         getDataHierarchyItem().setTaskProgress(static_cast<float>(getProxyMembers().indexOf(proxyMember)) / static_cast<float>(getProxyMembers().count()));
 
         QCoreApplication::processEvents();
@@ -892,7 +895,7 @@ void Points::selectAll()
             selectionIndices.push_back(index);
     }
 
-    events().notifyDatasetSelectionChanged(this);
+    events().notifyDatasetDataSelectionChanged(this);
 }
 
 void Points::selectNone()
@@ -901,7 +904,7 @@ void Points::selectNone()
 
     selectionIndices.clear();
 
-    events().notifyDatasetSelectionChanged(this);
+    events().notifyDatasetDataSelectionChanged(this);
 }
 
 void Points::selectInvert()
@@ -920,7 +923,7 @@ void Points::selectInvert()
             selectionIndices.push_back(i);
     }
 
-    events().notifyDatasetSelectionChanged(this);
+    events().notifyDatasetDataSelectionChanged(this);
 }
 
 void Points::fromVariantMap(const QVariantMap& variantMap)
@@ -974,7 +977,23 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
     setDimensionNames(dimensionNames);
 
-    events().notifyDatasetChanged(this);
+    events().notifyDatasetDataChanged(this);
+
+    if (isFull()) {
+        const auto& selectionMap = variantMap["Selection"].toMap();
+
+        const auto count = selectionMap["Count"].toInt();
+
+        if (count > 0) {
+            auto selectionSet = getSelection<Points>();
+
+            selectionSet->indices.resize(count);
+
+            populateDataBufferFromVariantMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data());
+
+            events().notifyDatasetDataSelectionChanged(this);
+        }
+    }
 }
 
 QVariantMap Points::toVariantMap() const
@@ -1002,10 +1021,20 @@ QVariantMap Points::toVariantMap() const
     indices["Count"]    = QVariant::fromValue(this->indices.size());
     indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), true);
 
+    QVariantMap selection;
+
+    if (isFull()) {
+        auto selectionSet = getSelection<Points>();
+
+        selection["Count"]  = QVariant::fromValue(selectionSet->indices.size());
+        selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), true);
+    }
+
     variantMap["Data"]                  = isFull() ? getRawData<PointData>().toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]        = getNumPoints();
     variantMap["Full"]                  = isFull();
     variantMap["Indices"]               = indices;
+    variantMap["Selection"]             = selection;
     variantMap["DimensionNames"]        = rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true);
     variantMap["NumberOfDimensions"]    = getNumDimensions();
 

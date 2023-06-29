@@ -135,7 +135,7 @@ public:
     {
         auto clusters = new Clusters(Application::core(), getRawDataName());
 
-        clusters->setGuiName(getGuiName());
+        clusters->setText(text());
         clusters->indices = indices;
         
         return Dataset<DatasetImpl>(clusters);

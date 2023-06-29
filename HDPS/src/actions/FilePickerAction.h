@@ -50,10 +50,9 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      * @param filePath File path
-     * @param defaultFilePath Default file path
      */
-    FilePickerAction(QObject* parent, const QString& title = "", const QString& filePath = QString());
-
+    Q_INVOKABLE FilePickerAction(QObject* parent, const QString& title, const QString& filePath = QString());
+    
     /**
      * Get the current file path
      * @return Current file path
@@ -176,3 +175,7 @@ private:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::FilePickerAction)
+
+inline const auto filePickerActionMetaTypeId = qRegisterMetaType<hdps::gui::FilePickerAction*>("hdps::gui::FilePickerAction");

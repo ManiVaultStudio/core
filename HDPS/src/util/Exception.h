@@ -5,9 +5,7 @@
 
 #include <stdexcept>
 
-namespace hdps {
-
-namespace util {
+namespace hdps::util {
 
 /**
  * Create an exception message box using a title and reason
@@ -17,10 +15,8 @@ namespace util {
  */
 static void exceptionMessageBox(const QString& title, const QString& reason, QWidget* parent = nullptr)
 {
-    // Show the message box
     QMessageBox::critical(parent, title, reason);
 
-    // Print also to console
     qDebug() << title << reason;
 }
 
@@ -45,5 +41,4 @@ static void exceptionMessageBox(const QString& title, const std::exception& exce
     exceptionMessageBox(title, exception.what(), parent);
 }
 
-}
 }

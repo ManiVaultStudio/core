@@ -4,9 +4,7 @@
 
 #include <QPushButton>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Trigger action class
@@ -52,14 +50,6 @@ public:
         friend class TriggerAction;
     };
 
-public:
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
-
 protected:
 
     /**
@@ -69,24 +59,20 @@ protected:
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
-
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
-
-protected:  // Linking
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
     /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
      */
-    virtual WidgetAction* getPublicCopy() const override;
+    void disconnectFromPublicAction(bool recursive) override;
 
 public:
 
@@ -95,13 +81,18 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    TriggerAction(QObject* parent, const QString& title = "");
+    Q_INVOKABLE TriggerAction(QObject* parent, const QString& title);
 
 private:
 
     /** Invoked when this trigger action is triggered (needed to prevent circular calls of trigger()) */
     void selfTriggered();
+
+    friend class AbstractActionsManager;
 };
 
 }
-}
+
+Q_DECLARE_METATYPE(hdps::gui::TriggerAction)
+
+inline const auto triggerActionMetaTypeId = qRegisterMetaType<hdps::gui::TriggerAction*>("hdps::gui::TriggerAction");

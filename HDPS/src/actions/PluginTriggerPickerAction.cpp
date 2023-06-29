@@ -5,12 +5,10 @@
 
 #include <QHBoxLayout>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 PluginTriggerPickerAction::PluginTriggerPickerAction(QObject* parent, const QString& title /*= ""*/) :
-    TriggerAction(parent),
+    TriggerAction(parent, title),
     _pluginTriggerActions(),
     _selectTriggerAction(this, "Pick plugin")
 {
@@ -90,26 +88,17 @@ void PluginTriggerPickerAction::setCurrentPluginTriggerAction(const QString& sha
             return;
         }
     }
-     
-    reset();
 }
 
 void PluginTriggerPickerAction::setCurrentPluginTriggerAction(QPointer<PluginTriggerAction> pluginTriggerAction)
 {
     if (_pluginTriggerActions.contains(pluginTriggerAction))
         _selectTriggerAction.setCurrentIndex(_pluginTriggerActions.indexOf(pluginTriggerAction) + 1);
-    else
-        reset();
 }
 
 OptionAction& PluginTriggerPickerAction::getSelectTriggerAction()
 {
     return _selectTriggerAction;
-}
-
-void PluginTriggerPickerAction::reset()
-{
-    _selectTriggerAction.setCurrentIndex(-1);
 }
 
 PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAction* pluginTriggerPickerAction, const std::int32_t& widgetFlags) :
@@ -120,7 +109,6 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(4);
 
     layout->addWidget(pluginTriggerPickerAction->getSelectTriggerAction().createWidget(this));
     layout->addWidget(&_configurationToolButton);
@@ -143,11 +131,11 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
         const auto pluginTriggerActions  = _pluginTriggerPickerAction->getPluginTriggerActions();
 
         if (pluginTriggerPickerAction->getSelectTriggerAction().getCurrentIndex() >= 0)
-            _configurationToolButton.setWidgetAction(pluginTriggerActions[pluginTriggerPickerAction->getSelectTriggerAction().getCurrentIndex() - 1]->getConfigurationAction());
+            _configurationToolButton.setAction(pluginTriggerActions[pluginTriggerPickerAction->getSelectTriggerAction().getCurrentIndex() - 1]->getConfigurationAction());
         else
-            _configurationToolButton.setWidgetAction(nullptr);
+            _configurationToolButton.setAction(nullptr);
 
-        _configurationToolButton.setEnabled(_configurationToolButton.getWidgetAction());
+        _configurationToolButton.setEnabled(_configurationToolButton.getAction());
         _configurationToolButton.getToolButton().setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     };
 
@@ -160,5 +148,4 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
     setLayout(layout);
 }
 
-}
 }

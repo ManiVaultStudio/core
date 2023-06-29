@@ -28,7 +28,7 @@ void DataPropertiesPlugin::init()
         if (selectedItems.isEmpty())
             getWidget().setWindowTitle("Data properties");
         else
-            getWidget().setWindowTitle("Data properties: " + selectedItems.first()->getFullPathName());
+            getWidget().setWindowTitle("Data properties: " + selectedItems.first()->getLocation());
     });
 
     getWidget().setWindowTitle("Data properties");

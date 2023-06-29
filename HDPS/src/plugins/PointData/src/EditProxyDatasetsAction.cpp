@@ -8,7 +8,7 @@
 #include <QStringListModel>
 
 EditProxyDatasetsAction::EditProxyDatasetsAction(QObject* parent, const Dataset<Points>& points) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Edit Proxy Datasets"),
     _points(points)
 {
     setText("View proxy datasets");
@@ -31,13 +31,13 @@ EditProxyDatasetsAction::Widget::Widget(QWidget* parent, EditProxyDatasetsAction
 
     layout->addWidget(listView);
 
-    setPopupLayout(layout);
+    setLayout(layout);
     
     const auto updateListView = [this, editProxyDatasetsAction, listView]() -> void {
         QStringList proxyMemberNames;
 
         for (const auto& proxyMember : editProxyDatasetsAction->getPoints()->getProxyMembers())
-            proxyMemberNames << proxyMember->getDataHierarchyItem().getFullPathName();
+            proxyMemberNames << proxyMember->getDataHierarchyItem().getLocation();
 
         listView->setModel(new QStringListModel(proxyMemberNames));
     };

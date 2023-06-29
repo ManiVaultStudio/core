@@ -217,8 +217,8 @@ void LinkedData::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "TargetDataset");
     variantMapMustContain(variantMap, "Mapping");
 
-    _sourceDataSet.setDatasetGuid(variantMap["SourceDataset"].toString());
-    _targetDataSet.setDatasetGuid(variantMap["TargetDataset"].toString());
+    _sourceDataSet.setDatasetId(variantMap["SourceDataset"].toString());
+    _targetDataSet.setDatasetId(variantMap["TargetDataset"].toString());
 
     _mapping.fromVariantMap(variantMap["Mapping"].toMap());
 }
@@ -226,8 +226,8 @@ void LinkedData::fromVariantMap(const QVariantMap& variantMap)
 QVariantMap LinkedData::toVariantMap() const
 {
     return {
-        { "SourceDataset", QVariant::fromValue(_sourceDataSet.getDatasetGuid()) },
-        { "TargetDataset", QVariant::fromValue(_targetDataSet.getDatasetGuid()) },
+        { "SourceDataset", QVariant::fromValue(_sourceDataSet.getDatasetId()) },
+        { "TargetDataset", QVariant::fromValue(_targetDataSet.getDatasetId()) },
         { "Mapping", _mapping.toVariantMap() }
     };
 }

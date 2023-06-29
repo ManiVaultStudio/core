@@ -5,14 +5,13 @@
 #include "ClustersActionWidget.h"
 
 ColorizeClustersAction::ColorizeClustersAction(ClustersAction& clustersAction) :
-    TriggerAction(&clustersAction),
+    TriggerAction(&clustersAction, "Colorize"),
     _clustersAction(clustersAction),
-    _colorByAction(this, "Color by", {"Color map", "Pseudo-random colors"}, "Color map", "Color map"),
+    _colorByAction(this, "Color by", {"Color map", "Pseudo-random colors"}, "Color map"),
     _colorMapAction(this, "Color map"),
     _randomSeedAction(this, "Random color seed"),
     _colorizeAction(this, "Colorize")
 {
-    setText("Coloring");
     setToolTip("Colorize clusters");
     setIcon(Application::getIconFont("FontAwesome").getIcon("palette"));
 
@@ -88,5 +87,5 @@ ColorizeClustersAction::Widget::Widget(QWidget* parent, ColorizeClustersAction* 
     layout->addWidget(colorizeClustersAction->getRandomSeedAction().createLabelWidget(this), 2, 0);
     layout->addWidget(colorizeClustersAction->getRandomSeedAction().createWidget(this), 2, 1);
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }

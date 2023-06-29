@@ -168,11 +168,11 @@ void Clusters::init()
 
     addAction(*_infoAction.get());
 
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
-    _eventListener.registerDataEventByType(ClusterType, [this](DataEvent* dataEvent) {
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataSelectionChanged));
+    _eventListener.registerDataEventByType(ClusterType, [this](DatasetEvent* dataEvent) {
 
         // Only process selection changes
-        if (dataEvent->getType() != EventType::DataSelectionChanged)
+        if (dataEvent->getType() != EventType::DatasetDataSelectionChanged)
             return;
 
         // Do not process our own selection changes
@@ -245,7 +245,7 @@ void Clusters::fromVariantMap(const QVariantMap& variantMap)
 
     getRawData<ClusterData>().fromVariantMap(variantMap);
 
-    events().notifyDatasetChanged(this);
+    events().notifyDatasetDataChanged(this);
 }
 
 QVariantMap Clusters::toVariantMap() const
@@ -266,7 +266,7 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
     getSelection<Clusters>()->indices = indices;
 
-    events().notifyDatasetSelectionChanged(this);
+    events().notifyDatasetDataSelectionChanged(this);
 
     // Get reference to input dataset
     auto points             = getDataHierarchyItem().getParent().getDataset<Points>();
@@ -292,7 +292,7 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 
     points->setSelectionIndices(selectionIndices);
 
-    events().notifyDatasetSelectionChanged(points);
+    events().notifyDatasetDataSelectionChanged(points);
 }
 
 QStringList Clusters::getSelectionNames() const
@@ -356,14 +356,14 @@ void Clusters::selectAll()
 
     std::iota(selectionIndices.begin(), selectionIndices.end(), 0);
 
-    events().notifyDatasetSelectionChanged(this);
+    events().notifyDatasetDataSelectionChanged(this);
 }
 
 void Clusters::selectNone()
 {
     getSelectionIndices().clear();
 
-    events().notifyDatasetSelectionChanged(this);
+    events().notifyDatasetDataSelectionChanged(this);
 }
 
 void Clusters::selectInvert()
@@ -382,7 +382,7 @@ void Clusters::selectInvert()
             selectionIndices.push_back(i);
     }
 
-    events().notifyDatasetSelectionChanged(this);
+    events().notifyDatasetDataSelectionChanged(this);
 }
 
 QIcon ClusterDataFactory::getIcon(const QColor& color /*= Qt::black*/) const

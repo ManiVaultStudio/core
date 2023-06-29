@@ -7,12 +7,11 @@
 #include <QHBoxLayout>
 
 SubsetAction::SubsetAction(ClustersActionWidget* clustersActionWidget) :
-    WidgetAction(clustersActionWidget),
+    WidgetAction(clustersActionWidget, "Subset"),
     _clustersActionWidget(clustersActionWidget),
     _subsetNameAction(this, "Subset name"),
     _createSubsetAction(this, "Create subset")
 {
-    setText("Create subset");
     setIcon(Application::getIconFont("FontAwesome").getIcon("crop"));
 
     _subsetNameAction.setToolTip("Name of the subset");
@@ -68,5 +67,5 @@ SubsetAction::Widget::Widget(QWidget* parent, SubsetAction* subsetAction) :
     layout->addWidget(subsetAction->getSubsetNameAction().createWidget(this));
     layout->addWidget(subsetAction->getCreateSubsetAction().createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }

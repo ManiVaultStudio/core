@@ -11,7 +11,7 @@ namespace hdps::gui {
 #endif
 
 StatusAction::StatusAction(QObject* parent, const QString& title /*= ""*/, const Status& status /*= Status::Undefined*/, const QString& message /*= ""*/) :
-    WidgetAction(parent)
+    WidgetAction(parent, "Title")
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);

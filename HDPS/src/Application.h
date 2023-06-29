@@ -18,7 +18,7 @@ class CoreInterface;
  * 
  * @author Thomas Kroes
  */
-class Application : public QApplication
+class Application final : public QApplication
 {
     Q_OBJECT
 
@@ -53,6 +53,12 @@ public: // Miscellaneous
      * @return Pair of integers representing major and minor version number respectively
      */
     util::Version getVersion() const;
+
+    /**
+     * Get the application name
+     * @return The application name
+     */
+    static QString getName();
 
     /**
      * Get file path of the project to automatically open upon startup (if set)

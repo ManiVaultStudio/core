@@ -75,7 +75,7 @@ Dataset<DatasetImpl> Images::copy() const
 {
     auto images = new Images(Application::core(), getRawDataName());
 
-    images->setGuiName(getGuiName());
+    images->setText(text());
 
     return images;
 }
@@ -702,7 +702,7 @@ void Images::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("ImageFilePaths"))
         setImageFilePaths(variantMap["ImageFilePaths"].toStringList());
 
-    events().notifyDatasetChanged(this);
+    events().notifyDatasetDataChanged(this);
 }
 
 QVariantMap Images::toVariantMap() const

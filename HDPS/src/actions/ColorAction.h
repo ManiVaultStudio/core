@@ -96,22 +96,8 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      * @param color Initial color
-     * @param defaultColor Default color
      */
-    ColorAction(QObject* parent, const QString& title = "", const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
-
-    /**
-     * Initialize the color action
-     * @param color Initial color
-     * @param defaultColor Default color
-     */
-    void initialize(const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
+    Q_INVOKABLE ColorAction(QObject* parent, const QString& title, const QColor& color = DEFAULT_COLOR);
 
     /** Gets the current color */
     QColor getColor() const;
@@ -122,30 +108,20 @@ public:
      */
     void setColor(const QColor& color);
 
-    /** Gets the default color */
-    QColor getDefaultColor() const;
-
-    /** Sets the default color */
-    void setDefaultColor(const QColor& defaultColor);
-
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
-
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
-
-protected:  // Linking
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
     /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
      */
-    virtual WidgetAction* getPublicCopy() const override;
+    void disconnectFromPublicAction(bool recursive) override;
 
 public: // Serialization
 
@@ -169,18 +145,17 @@ signals:
      */
     void colorChanged(const QColor& color);
 
-    /**
-     * Signals that the default color changed
-     * @param defaultColor Default color that changed
-     */
-    void defaultColorChanged(const QColor& defaultColor);
-
 protected:
-    QColor  _color;             /** Current color */
-    QColor  _defaultColor;      /** Default color */
+    QColor  _color;     /** Current color */
 
     /** Default default color */
     static const QColor DEFAULT_COLOR;
+
+    friend class AbstractActionsManager;
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::ColorAction)
+
+inline const auto colorActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorAction*>("hdps::gui::ColorAction");

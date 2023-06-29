@@ -5,12 +5,11 @@
 #include "TriggerAction.h"
 
 #include <QStyledItemDelegate>
+#include <QTreeWidget>
 
 class QWidget;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 class GroupSectionTreeItem;
 
@@ -153,8 +152,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param title Title of the groups action
      */
-    GroupsAction(QObject* parent = nullptr);
+    Q_INVOKABLE GroupsAction(QObject* parent, const QString& title);
 
     ~GroupsAction();
 
@@ -317,22 +317,8 @@ protected:
     QMap<GroupAction*, bool>    _visibility;        /** Group action visibility */
 };
 
-/**
- * Print group actions to console
- * @param debug Debug
- * @param groupActions Reference to group actions
- */
-inline QDebug operator << (QDebug debug, const GroupsAction::GroupActions& groupActions)
-{
-    QStringList names;
-
-    for (const auto groupAction : groupActions)
-        names << groupAction->getSettingsPath();
-
-    debug << names.join(", ");
-
-    return debug.space();
 }
 
-}
-}
+Q_DECLARE_METATYPE(hdps::gui::GroupsAction)
+
+inline const auto groupsActionMetaTypeId = qRegisterMetaType<hdps::gui::GroupsAction*>("hdps::gui::GroupsAction");

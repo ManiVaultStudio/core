@@ -91,7 +91,7 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
         emit itemAdded(*newDataHierarchyItem);
 
         // Remove the data hierarchy item when the corresponding dataset is about to be removed
-        connect(&newDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::dataAboutToBeRemoved, this, [this, newDataHierarchyItem]() {
+        connect(&newDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this, newDataHierarchyItem]() {
             if (newDataHierarchyItem->getDatasetReference().isValid())
                 removeItem(*newDataHierarchyItem);
         });
@@ -108,11 +108,11 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
 void DataHierarchyManager::removeItem(DataHierarchyItem& dataHierarchyItem)
 {
     try {
-        qDebug() << "Removing" << dataHierarchyItem.getDataset()->getGuiName() << "from the data hierarchy";
+        qDebug() << "Removing" << dataHierarchyItem.getDataset()->text() << "from the data hierarchy";
 
         // Get dataset
         auto dataset        = dataHierarchyItem.getDataset();
-        auto datasetGuid    = dataset->getGuid();
+        auto datasetGuid    = dataset->getId();
 
         emit itemAboutToBeRemoved(dataset);
         {
@@ -152,11 +152,10 @@ DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid)
         Q_ASSERT(!datasetGuid.isEmpty());
 
         for (auto dataHierarchyItem : _items)
-            if (dataHierarchyItem->getDatasetReference().getDatasetGuid() == datasetGuid)
+            if (dataHierarchyItem->getDatasetReference().getDatasetId() == datasetGuid)
                 return *dataHierarchyItem;
 
-        QString errorMessage = QString("Failed to find data hierarchy item with guid: %1").arg(datasetGuid);
-        throw std::runtime_error(errorMessage.toStdString());
+        throw std::runtime_error(QString("Failed to find data hierarchy item with dataset ID: %1").arg(datasetGuid).toStdString());
     }
     catch (std::exception& e)
     {
@@ -203,7 +202,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         const auto pluginKind   = dataset["PluginKind"].toString();
         const auto children     = dataset["Children"].toMap();
 
-        auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent, dataset["GUID"].toString());
+        auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent, dataset["ID"].toString());
 
         loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
         loadedDataset->fromVariantMap(dataset);
@@ -260,7 +259,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         dataHierarchyItemMap["SortIndex"] = sortIndex;
 
         // Assign data hierarchy item map
-        variantMap[dataHierarchyItem->getDataset()->getGuid()] = dataHierarchyItemMap;
+        variantMap[dataHierarchyItem->getDataset()->getId()] = dataHierarchyItemMap;
 
         sortIndex++;
     }

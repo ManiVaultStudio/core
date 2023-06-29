@@ -47,9 +47,10 @@ protected:
 
     /**
      * Constructor
-     * @param colorMapAction Reference to color map action
+     * @param parent Pointer to parent object
+     * @param title Title of the action
      */
-    ColorMapSettings2DAction(ColorMapAction& colorMapAction);
+    Q_INVOKABLE ColorMapSettings2DAction(QObject* parent, const QString& title);
 
 public: // Action getters
 
@@ -63,3 +64,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::ColorMapSettings2DAction)
+
+inline const auto colorMapSettings2DActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapSettings2DAction*>("hdps::gui::ColorMapSettings2DAction");

@@ -1,6 +1,7 @@
 #include "WindowLevelAction.h"
 #include "WidgetActionLabel.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include <QGridLayout>
 
@@ -8,23 +9,26 @@ using namespace hdps;
 
 namespace hdps::gui {
 
-WindowLevelAction::WindowLevelAction(QObject* parent) :
-    WidgetAction(parent),
-    _windowAction(this, "Window", 0.0f, 1.0f, 1.0f, 1.0f, 1),
-    _levelAction(this, "Level", 0.0f, 1.0f, 0.5f, 0.5f, 1)
+WindowLevelAction::WindowLevelAction(QObject* parent, const QString& title) :
+    GroupAction(parent, title),
+    _windowAction(this, "Window", 0.0f, 1.0f, 1.0f, 1),
+    _levelAction(this, "Level", 0.0f, 1.0f, 0.5f, 1)
 {
-    setText("Window/level Settings");
     setIcon(Application::getIconFont("FontAwesome").getIcon("adjust"));
+    setLabelSizingType(LabelSizingType::Auto);
 
-    // Set tooltips
+    addAction(&_windowAction);
+    addAction(&_levelAction);
+
+    //_windowAction.setPrefix("win: ");
+    //_levelAction.setPrefix("lvl: ");
+
     _windowAction.setToolTip("Window");
     _levelAction.setToolTip("Level");
     
-    // Set decimals
     _windowAction.setNumberOfDecimals(2);
     _levelAction.setNumberOfDecimals(2);
 
-    // Set single step
     _windowAction.setSingleStep(0.05f);
     _levelAction.setSingleStep(0.05f);
 
@@ -36,18 +40,52 @@ WindowLevelAction::WindowLevelAction(QObject* parent) :
     connect(&_levelAction, &DecimalAction::valueChanged, this, windowLevelChanged);
 }
 
-WindowLevelAction::Widget::Widget(QWidget* parent, WindowLevelAction* windowLevelAction) :
-    WidgetActionWidget(parent, windowLevelAction)
+void WindowLevelAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
-    auto layout = new QGridLayout();
+    auto publicWindowLevelAction = dynamic_cast<WindowLevelAction*>(publicAction);
 
-    layout->addWidget(windowLevelAction->getWindowAction().createLabelWidget(this), 0, 0);
-    layout->addWidget(windowLevelAction->getWindowAction().createWidget(this), 0, 1);
+    Q_ASSERT(publicWindowLevelAction != nullptr);
 
-    layout->addWidget(windowLevelAction->getLevelAction().createLabelWidget(this), 1, 0);
-    layout->addWidget(windowLevelAction->getLevelAction().createWidget(this), 1, 1);
+    if (publicWindowLevelAction == nullptr)
+        return;
 
-    setPopupLayout(layout);
+    if (recursive) {
+        actions().connectPrivateActionToPublicAction(&_windowAction, &publicWindowLevelAction->getWindowAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_levelAction, &publicWindowLevelAction->getLevelAction(), recursive);
+    }
+
+    GroupAction::connectToPublicAction(publicAction, recursive);
+}
+
+void WindowLevelAction::disconnectFromPublicAction(bool recursive)
+{
+    if (!isConnected())
+        return;
+
+    if (recursive) {
+        actions().disconnectPrivateActionFromPublicAction(&_windowAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_levelAction, recursive);
+    }
+
+    GroupAction::disconnectFromPublicAction(recursive);
+}
+
+void WindowLevelAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    GroupAction::fromVariantMap(variantMap);
+
+    _windowAction.fromParentVariantMap(variantMap);
+    _levelAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap WindowLevelAction::toVariantMap() const
+{
+    auto variantMap = GroupAction::toVariantMap();
+
+    _windowAction.insertIntoVariantMap(variantMap);
+    _levelAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
 }

@@ -6,8 +6,8 @@
 
 namespace hdps::gui {
 
-WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* widgetAction) :
-    WidgetActionWidget(parent, widgetAction),
+WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* action) :
+    WidgetActionViewWidget(parent, action),
     _layout(),
     _toolButton()
 {
@@ -20,28 +20,30 @@ WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, Widget
     _layout.addWidget(&_toolButton);
 
     setLayout(&_layout);
-    setWidgetAction(widgetAction);
+    
+    setAction(action);
 }
 
-void WidgetActionCollapsedWidget::setWidgetAction(WidgetAction* widgetAction)
+void WidgetActionCollapsedWidget::setAction(WidgetAction* action)
 {
-    WidgetActionWidget::setWidgetAction(widgetAction);
+    WidgetActionViewWidget::setAction(action);
 
-    if (_widgetAction != nullptr)
-        _toolButton.removeAction(_widgetAction);
+    if (getAction() != nullptr)
+        _toolButton.removeAction(getAction());
 
-    if (widgetAction == nullptr)
+    if (getAction() == nullptr)
         return;
 
-    _toolButton.addAction(_widgetAction);
+    _toolButton.addAction(getAction());
 
-    const auto updateToolButton = [this, widgetAction]() {
-        _toolButton.setIcon(widgetAction->icon());
-        _toolButton.setToolTip(widgetAction->toolTip());
-        _toolButton.setVisible(widgetAction->isVisible());
+    const auto updateToolButton = [this]() {
+        _toolButton.setEnabled(getAction()->isEnabled());
+        _toolButton.setIcon(getAction()->icon());
+        _toolButton.setToolTip(getAction()->toolTip());
+        _toolButton.setVisible(getAction()->isVisible());
     };
 
-    connect(_widgetAction, &WidgetAction::changed, this, updateToolButton);
+    connect(getAction(), &WidgetAction::changed, this, updateToolButton);
 
     updateToolButton();
 }

@@ -59,7 +59,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    DimensionPickerAction(QObject* parent, const QString& title);
+    Q_INVOKABLE DimensionPickerAction(QObject* parent, const QString& title);
 
     /**
      * Set the points dataset from which the dimension will be picked
@@ -91,18 +91,6 @@ public:
      */
     void setCurrentDimensionName(const QString& dimensionName);
 
-    /**
-     * Set the default dimension index
-     * @param defaultDimensionIndex Default dimension index
-     */
-    void setDefaultDimensionIndex(const std::int32_t& defaultDimensionIndex);
-
-    /**
-     * Set the default dimension name
-     * @param defaultDimensionName Default dimension name
-     */
-    void setDefaultDimensionName(const QString& defaultDimensionName);
-
     /** Get search threshold */
     std::uint32_t getSearchThreshold() const;
 
@@ -115,28 +103,20 @@ public:
     /** Establishes whether the dimensions can be searched (number of options exceeds the search threshold) */
     bool maySearch() const;
 
-public: // Action publishing
-
-    /**
-     * Get whether the action is public (visible to other actions)
-     * @return Boolean indicating whether the action is public (visible to other actions)
-     */
-    bool isPublic() const override;
-
-    /**
-     * Publish this action so that other actions can connect to it
-     * @param text Name of the published widget action
-     */
-    void publish(const QString& name) override;
+protected: // Action publishing
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
+    /**
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
+     */
+    void disconnectFromPublicAction(bool recursive) override;
 
 public: // Serialization
 
@@ -177,4 +157,10 @@ protected:
 
 protected:
     static constexpr std::uint32_t DEFAULT_SEARCH_THRESHOLD = 100;     /** Default search threshold */
+
+    friend class AbstractActionsManager;
 };
+
+Q_DECLARE_METATYPE(DimensionPickerAction)
+
+inline const auto dimensionPickerActionMetaTypeId = qRegisterMetaType<DimensionPickerAction*>("DimensionPickerAction");

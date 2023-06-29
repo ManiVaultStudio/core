@@ -1,9 +1,11 @@
 #include "VariantAction.h"
 
+using namespace hdps::util;
+
 namespace hdps::gui {
 
 VariantAction::VariantAction(QObject* parent, const QString& title /*= ""*/, const QVariant& variant /*= QVariant()*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, title),
     _variant()
 {
     setText(title);
@@ -32,7 +34,7 @@ void VariantAction::setVariant(const QVariant& variant)
     saveToSettings();
 }
 
-void VariantAction::connectToPublicAction(WidgetAction* publicAction)
+void VariantAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicVariantAction = dynamic_cast<VariantAction*>(publicAction);
 
@@ -43,33 +45,45 @@ void VariantAction::connectToPublicAction(WidgetAction* publicAction)
 
     setVariant(publicVariantAction->getVariant());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void VariantAction::disconnectFromPublicAction()
+void VariantAction::disconnectFromPublicAction(bool recursive)
 {
-    auto publicStringAction = dynamic_cast<VariantAction*>(getPublicAction());
+    if (!isConnected())
+        return;
 
-    Q_ASSERT(publicStringAction != nullptr);
+    auto publicVariantAction = dynamic_cast<VariantAction*>(getPublicAction());
 
-    disconnect(this, &VariantAction::variantChanged, publicStringAction, &VariantAction::setVariant);
-    disconnect(publicStringAction, &VariantAction::variantChanged, this, &VariantAction::setVariant);
+    Q_ASSERT(publicVariantAction != nullptr);
 
-    WidgetAction::disconnectFromPublicAction();
-}
+    if (publicVariantAction == nullptr)
+        return;
 
-WidgetAction* VariantAction::getPublicCopy() const
-{
-    return new VariantAction(parent(), text(), getVariant());
+    disconnect(this, &VariantAction::variantChanged, publicVariantAction, &VariantAction::setVariant);
+    disconnect(publicVariantAction, &VariantAction::variantChanged, this, &VariantAction::setVariant);
+
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void VariantAction::fromVariantMap(const QVariantMap& variantMap)
 {
+    WidgetAction::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "Value");
+
+    setVariant(variantMap["Value"]);
 }
 
 QVariantMap VariantAction::toVariantMap() const
 {
-    return {};
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", getVariant() }
+    });
+
+    return variantMap;
 }
 
 }

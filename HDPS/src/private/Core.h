@@ -45,10 +45,10 @@ public: // Data access
      * @param kind Kind of plugin
      * @param datasetGuiName Name of the added dataset in the GUI
      * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (root if not valid)
-     * @param guid Globally unique dataset identifier (use only for deserialization)
+     * @param id Globally unique dataset identifier (use only for deserialization)
      * @return Smart pointer to the added dataset
      */
-    Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& guid = "") override;
+    Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "") override;
 
     /**
      * Removes a single dataset
@@ -113,15 +113,6 @@ public: // Data grouping
      * @return Smart pointer to created group dataset
      */
     Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "");
-
-public: // Data hierarchy
-
-    /**
-     * Get data hierarchy item by dataset GUI
-     * @param datasetGuid Globally unique identifier of the dataset
-     * @return Reference to data hierarchy item
-     */
-    DataHierarchyItem& getDataHierarchyItem(const QString& datasetGuid) override;
 
 public: // Dataset grouping
 

@@ -11,7 +11,7 @@ using namespace hdps::gui;
 
 PluginManagerFilterModel::PluginManagerFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
-    _instantiatedPluginsOnlyAction(this, "Show only instantiated plugins", true, true)
+    _instantiatedPluginsOnlyAction(this, "Show only instantiated plugins", true)
 {
     _instantiatedPluginsOnlyAction.setToolTip("Show only instantiated plugins are all available plugins");
     //_instantiatedPluginsOnlyAction.setSettingsPrefix("PluginManager/ShowInstantiatedPluginsOnly", true);

@@ -29,23 +29,23 @@ class Project final : public QObject, public hdps::util::Serializable
     public:
 
         /**
-            * Constructs from \p parent object
-            * @param parent Pointer to parent object
-            */
+         * Constructs from \p parent object
+         * @param parent Pointer to parent object
+         */
         CompressionAction(QObject* parent = nullptr);
 
     public: // Serialization
 
         /**
-            * Load compression action from variant
-            * @param Variant representation of the compression action
-            */
+         * Load compression action from variant
+         * @param Variant representation of the compression action
+         */
         void fromVariantMap(const QVariantMap& variantMap) override;
 
         /**
-            * Save compression action to variant
-            * @return Variant representation of the compression action
-            */
+         * Save compression action to variant
+         * @return Variant representation of the compression action
+         */
         QVariantMap toVariantMap() const override;
 
     public: // Action getters
@@ -58,9 +58,9 @@ class Project final : public QObject, public hdps::util::Serializable
         gui::IntegralAction     _levelAction;       /** Action to control the amount of project file compression */
 
     public:
-        static constexpr bool           DEFAULT_ENABLE_COMPRESSION = false;    /** No compression by default */
-        static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL = 2;        /** Default compression level*/
-};
+        static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
+        static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL   = 2;        /** Default compression level*/
+    };
 
 public:
 
@@ -101,6 +101,12 @@ public: // Miscellaneous
     /** Update the contributors (adds current user if not already added) */
     void updateContributors();
 
+    /**
+     * Set studio mode to \p studioMode
+     * @param studioMode Studio mode
+     */
+    void setStudioMode(bool studioMode);
+
 public: // Serialization
 
     /**
@@ -139,6 +145,7 @@ public: // Action getters
     const gui::StringsAction& getContributorsAction() const { return _contributorsAction; }
     const CompressionAction& getCompressionAction() const { return _compressionAction; }
     const gui::ProjectSplashScreenAction& getSplashScreenAction() const { return _splashScreenAction; }
+    const gui::ToggleAction& getStudioModeAction() const { return _studioModeAction; }
 
     gui::VersionAction& getApplicationVersionAction() { return _applicationVersionAction; }
     gui::VersionAction& getProjectVersionAction() { return _projectVersionAction; }
@@ -150,6 +157,7 @@ public: // Action getters
     gui::StringsAction& getContributorsAction() { return _contributorsAction; }
     CompressionAction& getCompressionAction() { return _compressionAction; }
     gui::ProjectSplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
+    gui::ToggleAction& getStudioModeAction() { return _studioModeAction; }
 
 signals:
 
@@ -172,6 +180,7 @@ private:
     gui::StringsAction              _contributorsAction;        /** Contributors action */
     CompressionAction               _compressionAction;         /** Compression action */
     gui::ProjectSplashScreenAction  _splashScreenAction;        /** Action for configuring the project splash screen */
+    gui::ToggleAction               _studioModeAction;          /** Toggle between view- and studio mode action */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

@@ -56,13 +56,13 @@ void EventListener::registerDataEvent(DataEventHandler callback)
     _dataEventHandlers.push_back(callback);
 }
 
-void EventListener::onDataEvent(DataEvent* dataEvent)
+void EventListener::onDataEvent(DatasetEvent* dataEvent)
 {
     if (!isEventTypeSupported(static_cast<std::uint32_t>(dataEvent->getType())))
         return;
 
-    if (dataEvent->getType() == EventType::DataRemoved) {
-        const auto dataRemovedEvent = static_cast<DataRemovedEvent*>(dataEvent);
+    if (dataEvent->getType() == EventType::DatasetRemoved) {
+        const auto dataRemovedEvent = static_cast<DatasetRemovedEvent*>(dataEvent);
 
         if (_dataEventHandlersById.find(dataRemovedEvent->getDatasetGuid()) != _dataEventHandlersById.end())
             _dataEventHandlersById[dataRemovedEvent->getDatasetGuid()](dataEvent);
@@ -77,8 +77,8 @@ void EventListener::onDataEvent(DataEvent* dataEvent)
     if (!dataEvent->getDataset().isValid())
         return;
 
-    if (_dataEventHandlersById.find(dataEvent->getDataset()->getGuid()) != _dataEventHandlersById.end())
-        _dataEventHandlersById[dataEvent->getDataset()->getGuid()](dataEvent);
+    if (_dataEventHandlersById.find(dataEvent->getDataset()->getId()) != _dataEventHandlersById.end())
+        _dataEventHandlersById[dataEvent->getDataset()->getId()](dataEvent);
 
     if (_dataEventHandlersByType.find(dataEvent->getDataset()->getDataType()) != _dataEventHandlersByType.end())
         _dataEventHandlersByType[dataEvent->getDataset()->getDataType()](dataEvent);

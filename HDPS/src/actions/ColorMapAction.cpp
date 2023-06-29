@@ -1,5 +1,6 @@
 #include "ColorMapAction.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include <QHBoxLayout>
 #include <QPaintEvent>
@@ -15,8 +16,8 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= "RdYlBu"*/, const QString& defaultColorMap /*= "RdYlBu"*/) :
-    WidgetAction(parent),
+ColorMapAction::ColorMapAction(QObject* parent, const QString& title, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= "RdYlBu"*/) :
+    WidgetAction(parent, title),
     _colorMapFilterModel(this, colorMapType),
     _currentColorMapAction(this, "Current color map"),
     _rangeAction{ DecimalRangeAction(this, "Range"), DecimalRangeAction(this, "Range (y)") },
@@ -26,21 +27,19 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     _mirrorAction{ ToggleAction(this, "Mirror horizontally"), ToggleAction(this, "Mirror vertically") },
     _mirrorGroupAction(this, "Mirror"),
     _discretizeAction(this, "Discrete"),
-    _numberOfDiscreteStepsAction(this, "Number of steps", 2, 10, 5, 5),
-    _discretizeAlphaAction(this, "Discretize alpha", false, false),
-    _settings1DAction(*this),
-    _settings2DAction(*this),
+    _numberOfDiscreteStepsAction(this, "Number of steps", 2, 10, 5),
+    _discretizeAlphaAction(this, "Discretize alpha", false),
+    _settings1DAction(this, "Settings 1D"),
+    _settings2DAction(this, "Settings 2D"),
     _customColorMapAction(this, "Custom color map"),
-    _editor1DAction(*this),
+    _editor1DAction(this, "Editor 1D"),
     _customColorMapGroupAction(this, "Custom color map"),
-    _settingsAction(*this)
+    _settingsAction(*this, "Settings")
 {
-    setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
     setDefaultWidgetFlags(WidgetFlag::Default);
-    setSerializationName("ColorMap");
 
-    initialize(colorMap, defaultColorMap);
+    initialize(colorMap);
 
     const auto notifyColorMapImageChanged = [this]() -> void {
         emit imageChanged(getColorMapImage());
@@ -161,28 +160,9 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     updateRangeActionReadOnly;
 }
 
-QString ColorMapAction::getTypeString() const
-{
-    return "ColorMap";
-}
-
-void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString& defaultColorMap /*= ""*/)
+void ColorMapAction::initialize(const QString& colorMap)
 {
     _colorMapFilterModel.setSourceModel(ColorMapModel::getGlobalInstance());
-
-    getCurrentColorMapAction().setSerializationName("Current");
-    getRangeAction(Axis::X).setSerializationName("RangeX");
-    getRangeAction(Axis::Y).setSerializationName("RangeY");
-    getDataRangeAction(Axis::X).setSerializationName("DataRangeX");
-    getDataRangeAction(Axis::Y).setSerializationName("DataRangeY");
-    getSharedDataRangeAction(Axis::X).setSerializationName("SharedDataRangeX");
-    getSharedDataRangeAction(Axis::Y).setSerializationName("SharedDataRangeY");
-    getMirrorAction(Axis::X).setSerializationName("MirrorX");
-    getMirrorAction(Axis::Y).setSerializationName("MirrorY");
-    getDiscretizeAction().setSerializationName("Discretize");
-    getNumberOfDiscreteStepsAction().setSerializationName("NumberOfDiscreteSteps");
-    getDiscretizeAlphaAction().setSerializationName("DiscretizeAlpha");
-    getCustomColorMapAction().setSerializationName("Custom");
 
     getCurrentColorMapAction().setToolTip("Current");
     getRangeAction(Axis::X).setToolTip("Range in the x-axis");
@@ -198,7 +178,7 @@ void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString&
     getDiscretizeAlphaAction().setToolTip("Whether to discrete the alpha channel");
     getCustomColorMapAction().setToolTip("Customize the color map");
 
-    getCurrentColorMapAction().initialize(_colorMapFilterModel, colorMap, defaultColorMap);
+    getCurrentColorMapAction().initialize(_colorMapFilterModel, colorMap);
 
     getDataRangeAction(Axis::X).setEnabled(false);
     getDataRangeAction(Axis::Y).setEnabled(false);
@@ -212,7 +192,7 @@ void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString&
     getSharedDataRangeAction(Axis::X).setDefaultWidgetFlags(DecimalRangeAction::MinimumLineEdit | DecimalRangeAction::MaximumLineEdit);
     getSharedDataRangeAction(Axis::Y).setDefaultWidgetFlags(DecimalRangeAction::MinimumLineEdit | DecimalRangeAction::MaximumLineEdit);
 
-    getEditor1DAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::AlwaysCollapsed);
+    getEditor1DAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 }
 
 hdps::util::ColorMap::Type ColorMapAction::getColorMapType() const
@@ -242,6 +222,8 @@ QImage ColorMapAction::getColorMapImage() const
     const auto filteredModelIndex = getCurrentColorMapAction().getModel()->index(getCurrentColorMapAction().getCurrentIndex(), 0);
 
     auto colorMapImage = filteredModelIndex.siblingAtColumn(static_cast<std::int32_t>(ColorMapModel::Column::Image)).data(Qt::EditRole).value<QImage>();
+
+    colorMapImage = colorMapImage.convertToFormat(QImage::Format_ARGB32);
 
     if (getCustomColorMapAction().isChecked())
         colorMapImage = getEditor1DAction().getColorMapImage();
@@ -360,19 +342,7 @@ void ColorMapAction::setColorMap(const QString& colorMap)
     _currentColorMapAction.setCurrentText(colorMap);
 }
 
-QString ColorMapAction::getDefaultColorMap() const
-{
-    return _currentColorMapAction.getDefaultText();
-}
-
-void ColorMapAction::setDefaultColorMap(const QString& defaultColorMap)
-{
-    Q_ASSERT(!defaultColorMap.isEmpty());
-
-    _currentColorMapAction.setDefaultText(defaultColorMap);
-}
-
-void ColorMapAction::connectToPublicAction(WidgetAction* publicAction)
+void ColorMapAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicColorMapAction = dynamic_cast<ColorMapAction*>(publicAction);
 
@@ -381,7 +351,8 @@ void ColorMapAction::connectToPublicAction(WidgetAction* publicAction)
     if (publicColorMapAction == nullptr)
         return;
 
-    getCurrentColorMapAction().connectToPublicAction(&publicColorMapAction->getCurrentColorMapAction());
+    if (recursive)
+        actions().connectPrivateActionToPublicAction(&_currentColorMapAction, &publicColorMapAction->getCurrentColorMapAction(), recursive);
     
     connect(&publicColorMapAction->getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, [this](const util::NumericalRange<float>& range) -> void {
         getSharedDataRangeAction(Axis::X).setRange(range);
@@ -391,50 +362,55 @@ void ColorMapAction::connectToPublicAction(WidgetAction* publicAction)
         getSharedDataRangeAction(Axis::Y).setRange(range);
     });
 
-    getMirrorAction(Axis::X).connectToPublicAction(&publicColorMapAction->getMirrorAction(Axis::X));
-    getMirrorAction(Axis::Y).connectToPublicAction(&publicColorMapAction->getMirrorAction(Axis::Y));
-    getDiscretizeAction().connectToPublicAction(&publicColorMapAction->getDiscretizeAction());
-    getNumberOfDiscreteStepsAction().connectToPublicAction(&publicColorMapAction->getNumberOfDiscreteStepsAction());
-    getDiscretizeAlphaAction().connectToPublicAction(&publicColorMapAction->getDiscretizeAlphaAction());
-    getCustomColorMapAction().connectToPublicAction(&publicColorMapAction->getCustomColorMapAction());
+    if (recursive) {
+        actions().connectPrivateActionToPublicAction(&getMirrorAction(Axis::X), &publicColorMapAction->getMirrorAction(Axis::X), recursive);
+        actions().connectPrivateActionToPublicAction(&getMirrorAction(Axis::Y), &publicColorMapAction->getMirrorAction(Axis::Y), recursive);
+        actions().connectPrivateActionToPublicAction(&_discretizeAction, &publicColorMapAction->getDiscretizeAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_numberOfDiscreteStepsAction, &publicColorMapAction->getNumberOfDiscreteStepsAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_discretizeAlphaAction, &publicColorMapAction->getDiscretizeAlphaAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_customColorMapAction, &publicColorMapAction->getCustomColorMapAction(), recursive);
+    }
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void ColorMapAction::disconnectFromPublicAction()
+void ColorMapAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicColorMapAction = dynamic_cast<ColorMapAction*>(getPublicAction());
 
     Q_ASSERT(publicColorMapAction != nullptr);
 
     if (publicColorMapAction == nullptr)
         return;
-
-    getCurrentColorMapAction().disconnectFromPublicAction();
     
     disconnect(&publicColorMapAction->getSharedDataRangeAction(Axis::X), &DecimalRangeAction::rangeChanged, this, nullptr);
     disconnect(&publicColorMapAction->getSharedDataRangeAction(Axis::Y), &DecimalRangeAction::rangeChanged, this, nullptr);
 
-    getMirrorAction(Axis::X).disconnectFromPublicAction();
-    getMirrorAction(Axis::Y).disconnectFromPublicAction();
-    getDiscretizeAction().disconnectFromPublicAction();
-    getNumberOfDiscreteStepsAction().disconnectFromPublicAction();
-    getDiscretizeAlphaAction().disconnectFromPublicAction();
-    getCustomColorMapAction().disconnectFromPublicAction();
+    if (recursive) {
+        actions().disconnectPrivateActionFromPublicAction(&_currentColorMapAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&getMirrorAction(Axis::X), recursive);
+        actions().disconnectPrivateActionFromPublicAction(&getMirrorAction(Axis::Y), recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_discretizeAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_numberOfDiscreteStepsAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_discretizeAlphaAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_customColorMapAction, recursive);
+    }
 
-    WidgetAction::disconnectFromPublicAction();
-}
-
-WidgetAction* ColorMapAction::getPublicCopy() const
-{
-    return new ColorMapAction(parent(), text(), _colorMapFilterModel.getType(), _currentColorMapAction.getCurrentText(), _currentColorMapAction.getDefaultText());
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void ColorMapAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    getCurrentColorMapAction().fromParentVariantMap(variantMap);
+    variantMapMustContain(variantMap, "ColorMapType");
+
+    setColorMapType(static_cast<ColorMap::Type>(variantMap["ColorMapType"].toInt()));
+
+    _currentColorMapAction.fromParentVariantMap(variantMap);
     getRangeAction(Axis::X).fromParentVariantMap(variantMap);
     getRangeAction(Axis::Y).fromParentVariantMap(variantMap);
     getSharedDataRangeAction(Axis::X).fromParentVariantMap(variantMap);
@@ -442,17 +418,21 @@ void ColorMapAction::fromVariantMap(const QVariantMap& variantMap)
     getLockToSharedDataRangeAction().fromParentVariantMap(variantMap);
     getMirrorAction(Axis::X).fromParentVariantMap(variantMap);
     getMirrorAction(Axis::Y).fromParentVariantMap(variantMap);
-    getDiscretizeAction().fromParentVariantMap(variantMap);
-    getNumberOfDiscreteStepsAction().fromParentVariantMap(variantMap);
-    getDiscretizeAlphaAction().fromParentVariantMap(variantMap);
-    getCustomColorMapAction().fromParentVariantMap(variantMap);
+    _discretizeAction.fromParentVariantMap(variantMap);
+    _numberOfDiscreteStepsAction.fromParentVariantMap(variantMap);
+    _discretizeAlphaAction.fromParentVariantMap(variantMap);
+    _customColorMapAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap ColorMapAction::toVariantMap() const
 {
     QVariantMap variantMap = WidgetAction::toVariantMap();
 
-    getCurrentColorMapAction().insertIntoVariantMap(variantMap);
+    variantMap.insert({
+        { "ColorMapType", static_cast<std::int32_t>(getColorMapType()) }
+    });
+
+    _currentColorMapAction.insertIntoVariantMap(variantMap);
     getRangeAction(Axis::X).insertIntoVariantMap(variantMap);
     getRangeAction(Axis::Y).insertIntoVariantMap(variantMap);
     getSharedDataRangeAction(Axis::X).insertIntoVariantMap(variantMap);
@@ -460,10 +440,10 @@ QVariantMap ColorMapAction::toVariantMap() const
     getLockToSharedDataRangeAction().insertIntoVariantMap(variantMap);
     getMirrorAction(Axis::X).insertIntoVariantMap(variantMap);
     getMirrorAction(Axis::Y).insertIntoVariantMap(variantMap);
-    getDiscretizeAction().insertIntoVariantMap(variantMap);
-    getNumberOfDiscreteStepsAction().insertIntoVariantMap(variantMap);
-    getDiscretizeAlphaAction().insertIntoVariantMap(variantMap);
-    getCustomColorMapAction().insertIntoVariantMap(variantMap);
+    _discretizeAction.insertIntoVariantMap(variantMap);
+    _numberOfDiscreteStepsAction.insertIntoVariantMap(variantMap);
+    _discretizeAlphaAction.insertIntoVariantMap(variantMap);
+    _customColorMapAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
@@ -572,7 +552,6 @@ QWidget* ColorMapAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     auto comboBoxWidget = new ComboBoxWidget(parent, &_currentColorMapAction, this);
 

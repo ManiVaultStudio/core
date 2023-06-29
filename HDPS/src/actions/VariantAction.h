@@ -25,7 +25,7 @@ public:
      * @param title Title of the action
      * @param variant Initial variant value
      */
-    VariantAction(QObject* parent, const QString& title = "", const QVariant& variant = QVariant());
+    Q_INVOKABLE VariantAction(QObject* parent, const QString& title = "", const QVariant& variant = QVariant());
 
     /**
      * Initialize the variant action
@@ -45,24 +45,20 @@ public:
      */
     void setVariant(const QVariant& variant);
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
-
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
-
-protected:  // Linking
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
     /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
      */
-    WidgetAction* getPublicCopy() const override;
+    void disconnectFromPublicAction(bool recursive) override;
 
 public: // Serialization
 
@@ -88,6 +84,12 @@ signals:
 
 protected:
     QVariant    _variant;       /** Current variant value */
+
+    friend class AbstractActionsManager;
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::VariantAction)
+
+inline const auto variantActionMetaTypeId = qRegisterMetaType<hdps::gui::VariantAction*>("VariantAction");

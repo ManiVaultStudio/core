@@ -23,8 +23,6 @@ WidgetFader::WidgetFader(QObject* parent, QWidget* targetWidget, float opacity /
 
     _targetWidget->setGraphicsEffect(&_opacityEffect);
 
-    _opacityEffect.setOpacity(opacity);
-
     _opacityAnimation.setTargetObject(&_opacityEffect);
     _opacityAnimation.setPropertyName("opacity");
 
@@ -35,42 +33,38 @@ WidgetFader::WidgetFader(QObject* parent, QWidget* targetWidget, float opacity /
         if (_opacityEffect.opacity() == _minimumOpacity)
             emit fadedOut();
     });
+
+    _opacityEffect.setOpacity(opacity);
 }
 
-void WidgetFader::fadeIn()
+void WidgetFader::fadeIn(std::int32_t duration /*= -1*/)
 {
-    if (_opacityEffect.opacity() == _maximumOpacity)
-        return;
+    setOpacity(_maximumOpacity, duration >= 0 ? duration : _fadeInDuration);
+}
 
+void WidgetFader::fadeOut(std::int32_t duration /*= -1*/)
+{
+    setOpacity(_minimumOpacity, duration >= 0 ? duration : _fadeOutDuration);
+}
+
+void WidgetFader::setOpacity(float opacity, std::uint32_t duration /*= 0*/)
+{
 #ifdef WIDGET_FADER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
-    if (_opacityAnimation.state() == QPropertyAnimation::Running)
-        _opacityAnimation.stop();
-    
-    _opacityAnimation.setDuration(_fadeInDuration);
-    _opacityAnimation.setStartValue(_opacityEffect.opacity());
-    _opacityAnimation.setEndValue(_maximumOpacity);
-    _opacityAnimation.start();
-}
+    if (duration == 0) {
+        _opacityEffect.setOpacity(opacity);
+    }
+    else {
+        if (_opacityAnimation.state() == QPropertyAnimation::Running)
+            _opacityAnimation.stop();
 
-void WidgetFader::fadeOut()
-{
-    if (_opacityEffect.opacity() == _minimumOpacity)
-        return;
-
-#ifdef WIDGET_FADER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    if (_opacityAnimation.state() == QPropertyAnimation::Running)
-        _opacityAnimation.stop();
-
-    _opacityAnimation.setDuration(_fadeOutDuration);
-    _opacityAnimation.setStartValue(_opacityEffect.opacity());
-    _opacityAnimation.setEndValue(_minimumOpacity);
-    _opacityAnimation.start();
+        _opacityAnimation.setDuration(duration);
+        _opacityAnimation.setStartValue(_opacityEffect.opacity());
+        _opacityAnimation.setEndValue(opacity);
+        _opacityAnimation.start();
+    }
 }
 
 bool WidgetFader::isFadedIn() const
@@ -135,9 +129,9 @@ void WidgetFader::setFadeOutDuration(std::int32_t fadeOutDuration)
     _fadeOutDuration = fadeOutDuration;
 }
 
-void WidgetFader::setOpacity(float opacity)
+QGraphicsOpacityEffect& WidgetFader::getOpacityEffect()
 {
-    _opacityEffect.setOpacity(opacity);
+    return _opacityEffect;
 }
 
 }

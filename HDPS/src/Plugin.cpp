@@ -11,22 +11,26 @@ namespace hdps::plugin
 {
 
 Plugin::Plugin(const PluginFactory* factory) :
-    WidgetAction(nullptr),
+    WidgetAction(nullptr, "Plugin"),
     _core(Application::core()),
     _factory(factory),
     _name(getKind() + QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _properties(),
     _eventListener(),
-    _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), QString::number(factory->getNumberOfInstances() + 1))),
+    _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), (factory->getMaximumNumberOfInstances() == 1 ? "" : QString::number(factory->getNumberOfInstances() + 1)))),
     _destroyAction(this, "Remove")
 {
+    setConnectionPermissionsFlag(WidgetAction::ConnectionPermissionFlag::ForceNone);
+
     _guiNameAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
     _guiNameAction.setPlaceHolderString("Enter plugin name here...");
+    _guiNameAction.setConnectionPermissionsToForceNone();
 
     _destroyAction.setToolTip(QString("Remove %1").arg(getGuiName()));
     _destroyAction.setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
     _destroyAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _destroyAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _destroyAction.setConnectionPermissionsToForceNone();
 
     connect(&_destroyAction, &TriggerAction::triggered, this, &Plugin::destroy);
 }

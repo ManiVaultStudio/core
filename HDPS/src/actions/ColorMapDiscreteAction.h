@@ -48,7 +48,11 @@ protected:
      * Constructor
      * @param colorMapAction Reference to owning color map action
      */
+<<<<<<< HEAD
+    Q_INVOKABLE ColorMapDiscreteAction(ColorMapSettingsAction& colorMapSettingsAction);
+=======
     ColorMapDiscreteAction(ColorMapAction& colorMapAction);
+>>>>>>> origin/master
 
 public: // Linking
 
@@ -88,3 +92,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::ColorMapDiscreteAction)
+
+inline const auto colorMapDiscreteActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapDiscreteAction*>("ColorMapDiscreteAction");

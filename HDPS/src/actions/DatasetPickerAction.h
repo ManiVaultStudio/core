@@ -116,22 +116,22 @@ protected:
          */
         void setShowIcon(bool showIcon);
 
-        /** Get whether to show the full path name in the GUI */
-        bool getShowFullPathName() const;
+        /** Get to show the dataset location */
+        bool getShowLocation() const;
 
         /**
          * Set whether to show the full path name in the GUI
          * @param showFullPathName Whether to show the full path name in the GUI
          */
-        void setShowFullPathName(const bool& showFullPathName);
+        void setShowLocation(bool showLocation);
 
         /** Updates the model from the datasets */
         void updateData();
 
     protected:
-        QVector<hdps::Dataset<hdps::DatasetImpl>>   _datasets;              /** Datasets from which can be picked */
-        bool                                        _showIcon;              /** Whether to show the dataset icon */
-        bool                                        _showFullPathName;      /** Whether to show the full path name */
+        QVector<hdps::Dataset<hdps::DatasetImpl>>   _datasets;          /** Datasets from which can be picked */
+        bool                                        _showIcon;          /** Whether to show the dataset icon */
+        bool                                        _showLocation;      /** Whether to show the dataset location */
     };
 
 public:
@@ -153,13 +153,7 @@ public:
      * @param title Title of the action
      * @param mode Picker mode
      */
-    DatasetPickerAction(QObject* parent, const QString& title, Mode mode = Mode::Automatic);
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE DatasetPickerAction(QObject* parent = nullptr, const QString& title = "", Mode mode = Mode::Automatic);
 
     /** Get current mode */
     Mode getMode() const;
@@ -225,17 +219,17 @@ public: // Datasets model facade
         _datasetsModel.setShowIcon(showIcon);
     }
 
-    /** Get whether to show the full path name in the GUI */
-    bool getShowFullPathName() const {
-        return _datasetsModel.getShowFullPathName();
+    /** Get whether to show the location */
+    bool getShowLocation() const {
+        return _datasetsModel.getShowLocation();
     }
 
     /**
-     * Set whether to show the full path name in the GUI
-     * @param showFullPathName Whether to show the full path name in the GUI
+     * Set whether to show the location
+     * @param showLocation Boolean determining whether to show the location
      */
-    void setShowFullPathName(const bool& showFullPathName) {
-        _datasetsModel.setShowFullPathName(showFullPathName);
+    void setShowFullPathName(bool showLocation) {
+        _datasetsModel.setShowLocation(showLocation);
     }
 
 private:
@@ -243,24 +237,20 @@ private:
     /** Populates the datasets from the core */
     void populateDatasetsFromCore();
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
-
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
-
-protected:  // Linking
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
     /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
      */
-    virtual WidgetAction* getPublicCopy() const override;
+    void disconnectFromPublicAction(bool recursive) override;
 
 public: // Serialization
 
@@ -295,6 +285,12 @@ protected:
     DatasetsFilterFunction      _datasetsFilterFunction;    /** Datasets filter lambda */
     DatasetsModel               _datasetsModel;             /** Datasets list model */
     hdps::EventListener         _eventListener;             /** Listen to events from the core */
+
+    friend class AbstractActionsManager;
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::DatasetPickerAction)
+
+inline const auto datasetPickerActionMetaTypeId = qRegisterMetaType<hdps::gui::DatasetPickerAction*>("hdps::gui::DatasetPickerAction");

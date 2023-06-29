@@ -237,6 +237,25 @@ public:
         emit workspaceSaved(getCurrentWorkspace()->getFilePath());
     }
 
+    /** Applies the CSS stylesheet to the dock managers 
+    virtual void applyStyleSheet() final {
+        QFile styleSheetFile(":/styles/ads_light.css");
+
+        styleSheetFile.open(QIODevice::ReadOnly);
+
+        QTextStream styleSheetStream(&styleSheetFile);
+        auto stylesheet = styleSheetStream.readAll();
+
+        styleSheetFile.close();
+
+        _mainDockManager->setStyleSheet(stylesheet);
+        auto dockManagers = findChildren<CDockManager*>();
+
+        for (auto dockManager : dockManagers)
+            dockManager->setStyleSheet(stylesheet);
+    }
+    */
+
 public: // View plugin dock widget permissions
 
     /**

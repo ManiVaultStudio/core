@@ -1,24 +1,22 @@
 #pragma once
 
-#include "WidgetActionWidget.h"
+#include "WidgetActionViewWidget.h"
 
 #include <QHBoxLayout>
 #include <QToolButton>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 class WidgetAction;
 
 /**
  * Widget action collapsed widget class
- *
- * Displays a tool button that shows the widget in a popup
  * 
+ * Displays a tool button that shows the widget in a popup
+ *
  * @author Thomas Kroes
  */
-class WidgetActionCollapsedWidget : public WidgetActionWidget
+class WidgetActionCollapsedWidget : public WidgetActionViewWidget
 {
 protected:
 
@@ -38,15 +36,15 @@ public:
     /**
      * Constructor
      * @param parent Parent widget
-     * @param widgetAction Pointer to the widget action that will be displayed in a popup
+     * @param action Pointer to the widget action that will be displayed in a popup
      */
-    WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* widgetAction);
+    WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* action);
 
     /**
-     * Set the widget action
-     * @param widgetAction Pointer to widget action
+     * Set the source action
+     * @param widgetAction Pointer to source action
      */
-    void setWidgetAction(WidgetAction* widgetAction) override;
+    void setAction(WidgetAction* action) override;
 
     /** Get reference to the tool button */
     ToolButton& getToolButton() { return _toolButton; }
@@ -58,5 +56,4 @@ private:
     friend class WidgetAction;
 };
 
-}
 }

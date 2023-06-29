@@ -51,13 +51,14 @@ WorkspaceManager::WorkspaceManager() :
     _editWorkspaceSettingsAction(this, "Workspace Settings..."),
     _importWorkspaceFromProjectAction(this, "Import from project"),
     _recentWorkspacesAction(this),
-    _icon()
+    _icon(),
+    _styleSheet()
 {
     // Temporary solution for https://github.com/hdps/core/issues/274
     new QOpenGLWidget();
 
     //CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
-    //CDockManager::setAutoHideConfigFlags(CDockManager::DefaultAutoHideConfig);
+    CDockManager::setAutoHideConfigFlags(CDockManager::DefaultAutoHideConfig);
     //CDockManager::setAutoHideConfigFlag(CDockManager::AutoHideShowOnMouseOver, true);
 
     setObjectName("WorkspaceManager");
@@ -87,7 +88,6 @@ WorkspaceManager::WorkspaceManager() :
     _editWorkspaceSettingsAction.setShortcut(QKeySequence("Ctrl+Alt+P"));
     _editWorkspaceSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
     _editWorkspaceSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
-    _editWorkspaceSettingsAction.setConnectionPermissionsToNone();
 
     _importWorkspaceFromProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
     _importWorkspaceFromProjectAction.setToolTip("Import workspace from project");
@@ -117,7 +117,7 @@ WorkspaceManager::WorkspaceManager() :
         saveWorkspaceAs();
     });
 
-    connect(&_editWorkspaceSettingsAction, &TriggerAction::triggered, this, []() -> void {
+    connect(&_editWorkspaceSettingsAction, &TriggerAction::triggered, this, [this]() -> void {
         auto* workspaceSettingsDialog = new WorkspaceSettingsDialog();
         connect(workspaceSettingsDialog, &WorkspaceSettingsDialog::finished, workspaceSettingsDialog, &WorkspaceSettingsDialog::deleteLater);
         workspaceSettingsDialog->open();
@@ -134,6 +134,16 @@ WorkspaceManager::WorkspaceManager() :
     connect(&_recentWorkspacesAction, &RecentFilesAction::triggered, this, [this](const QString& filePath) -> void {
         loadWorkspace(filePath);
     });
+
+    QFile styleSheetFile(":/styles/ads_light.css");
+
+    styleSheetFile.open(QIODevice::ReadOnly);
+
+    QTextStream styleSheetStream(&styleSheetFile);
+
+    _styleSheet = styleSheetStream.readAll();
+
+    styleSheetFile.close();
 }
 
 void WorkspaceManager::initialize()
@@ -193,6 +203,8 @@ void WorkspaceManager::initialize()
         connect(&Application::core()->getProjectManager(), &AbstractProjectManager::projectCreated, this, [this]() -> void {
             newWorkspace();
         });
+
+        //_mainDockManager->setStyleSheet(_styleSheet);
     }
     endInitialization();
 }
@@ -254,11 +266,11 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-                fileDialog.setWindowTitle("Load Workspace");
+                fileDialog.setWindowTitle("Load ManiVault Workspace");
                 fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
                 fileDialog.setFileMode(QFileDialog::ExistingFile);
-                fileDialog.setNameFilters({ "HDPS workspace files (*.hws)" });
-                fileDialog.setDefaultSuffix(".hws");
+                fileDialog.setNameFilters({ "ManiVault workspace files (*.json)" });
+                fileDialog.setDefaultSuffix(".json");
                 fileDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
                 fileDialog.setMinimumHeight(400);
@@ -270,10 +282,6 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                 descriptionAction.setEnabled(false);
                 tagsAction.setEnabled(false);
                 commentsAction.setEnabled(false);
-
-                descriptionAction.setConnectionPermissionsToNone();
-                tagsAction.setConnectionPermissionsToNone();
-                commentsAction.setConnectionPermissionsToNone();
 
                 auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
                 auto rowCount           = fileDialogLayout->rowCount();
@@ -353,10 +361,10 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*
         QFileDialog fileDialog;
 
         fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-        fileDialog.setWindowTitle("Import Workspace From Project");
+        fileDialog.setWindowTitle("Import ManiVault Workspace From Project");
         fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
         fileDialog.setFileMode(QFileDialog::ExistingFile);
-        fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
+        fileDialog.setNameFilters({ "ManiVault project files (*.hdps)" });
         fileDialog.setDefaultSuffix(".hdps");
         fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
@@ -377,7 +385,7 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*
 
     Archiver archiver;
 
-    const QString workspaceFile("workspace.hws");
+    const QString workspaceFile("workspace.json");
 
     QFileInfo workspaceFileInfo(temporaryDirectoryPath, workspaceFile);
 
@@ -413,10 +421,10 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/, bool addToRecent
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-                fileDialog.setWindowTitle("Export Workspace");
+                fileDialog.setWindowTitle("Export ManiVault Workspace");
                 fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-                fileDialog.setNameFilters({ "HDPS workspace files (*.hws)" });
-                fileDialog.setDefaultSuffix(".hws");
+                fileDialog.setNameFilters({ "ManiVault workspace files (*.json)" });
+                fileDialog.setDefaultSuffix(".json");
                 fileDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
                 fileDialog.setMinimumHeight(500);
@@ -428,17 +436,17 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/, bool addToRecent
 
                 fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount, 0);
 
-                GroupAction settingsGroupAction(this);
+                GroupAction settingsGroupAction(this, "Group");
 
                 settingsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
                 settingsGroupAction.setToolTip("Edit workspace settings");
                 settingsGroupAction.setPopupSizeHint(QSize(420, 320));
                 settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-                settingsGroupAction << currentWorkspace->getTitleAction();
-                settingsGroupAction << currentWorkspace->getDescriptionAction();
-                settingsGroupAction << currentWorkspace->getTagsAction();
-                settingsGroupAction << currentWorkspace->getCommentsAction();
+                settingsGroupAction.addAction(&currentWorkspace->getTitleAction());
+                settingsGroupAction.addAction(&currentWorkspace->getDescriptionAction());
+                settingsGroupAction.addAction(&currentWorkspace->getTagsAction());
+                settingsGroupAction.addAction(&currentWorkspace->getCommentsAction());
 
                 auto titleLayout = new QHBoxLayout();
 
@@ -497,9 +505,12 @@ void WorkspaceManager::addViewPlugin(plugin::ViewPlugin* viewPlugin, plugin::Vie
     auto viewPluginDockWidget = new ViewPluginDockWidget(viewPlugin->getGuiName(), viewPlugin);
 
     if (viewPlugin->isSystemViewPlugin())
-        _mainDockManager->addViewPluginDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, _mainDockManager->findDockAreaWidget(dockToViewPlugin ? &dockToViewPlugin->getWidget() : nullptr));
+        _mainDockManager->addViewPluginDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockToViewPlugin ? _mainDockManager->findDockAreaWidget(dockToViewPlugin) : nullptr);
     else
         _viewPluginsDockManager->addViewPluginDockWidget(static_cast<DockWidgetArea>(dockArea), viewPluginDockWidget, dockToViewPlugin ? _viewPluginsDockManager->findDockAreaWidget(dockToViewPlugin) : nullptr);
+
+    if (projects().isOpeningProject() || projects().isOpeningProject())
+        return;
 
     viewPlugin->getPresetsAction().loadDefaultPreset();
 }
@@ -647,7 +658,7 @@ WorkspaceLocations WorkspaceManager::getWorkspaceLocations(const WorkspaceLocati
     WorkspaceLocations workspaceLocations;
 
     if (types.testFlag(WorkspaceLocation::Type::BuiltIn)) {
-        QStringList workspaceFilter("*.hws");
+        QStringList workspaceFilter("*.json");
 
         QDir workspaceExamplesDirectory(QString("%1/examples/workspaces/").arg(qApp->applicationDirPath()));
 

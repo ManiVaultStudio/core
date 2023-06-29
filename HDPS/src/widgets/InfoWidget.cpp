@@ -19,7 +19,7 @@ InfoWidget::InfoWidget(QWidget* parent) :
     _foregroundColor(),
     _backgroundColor()
 {
-    setColors(Qt::lightGray, Qt::black);
+    setColors(Qt::black, Qt::lightGray);
     initialize();
 }
 

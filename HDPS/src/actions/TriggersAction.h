@@ -173,3 +173,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::TriggersAction)
+
+inline const auto triggersActionMetaTypeId = qRegisterMetaType<hdps::gui::TriggersAction*>("TriggersAction");

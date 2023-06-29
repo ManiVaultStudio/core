@@ -7,24 +7,22 @@
 namespace hdps::gui {
 
 ImageAction::ImageAction(QObject* parent, const QString& title /*= ""*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, title),
     _image(),
     _filePathAction(this, "File Path"),
     _fileNameAction(this, "File Name"),
-    _filePickerAction(parent, ""),
-    _previewAction(this)
+    _filePickerAction(parent, "File Picker"),
+    _previewAction(this, "Preview")
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Preview);
 
     _filePathAction.setEnabled(false);
     _filePathAction.setTextElideMode(Qt::ElideMiddle);
-    _filePathAction.setSerializationName("FilePath");
     _filePathAction.setStretch(1);
 
     _fileNameAction.setEnabled(false);
     _fileNameAction.setTextElideMode(Qt::ElideMiddle);
-    _fileNameAction.setSerializationName("FileName");
     _fileNameAction.setStretch(1);
 
     _filePickerAction.setPlaceHolderString("Pick image...");
@@ -111,12 +109,10 @@ ImageAction::LoaderWidget::LoaderWidget(QWidget* parent, ImageAction& imageActio
 
     _groupAction.addAction(&_imageAction.getFileNameAction());
     _groupAction.addAction(&_imageAction.getFilePickerAction());
-    //_groupAction.addAction(&_imageAction.getPreviewAction());
 
     auto layout = new QHBoxLayout();
     
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     layout->addWidget(_groupAction.createWidget(this));
 
@@ -129,7 +125,6 @@ QWidget* ImageAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::Preview)
         layout->addWidget(new ImageAction::PreviewWidget(parent, *this));
@@ -144,7 +139,7 @@ QWidget* ImageAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
 
 void ImageAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    Serializable::fromVariantMap(variantMap);
+    WidgetAction::fromVariantMap(variantMap);
     
     QImage image;
 
@@ -158,7 +153,7 @@ void ImageAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap ImageAction::toVariantMap() const
 {
-    auto variantMap = Serializable::toVariantMap();
+    auto variantMap = WidgetAction::toVariantMap();
 
     QByteArray previewImageByteArray;
     QBuffer previewImageBuffer(&previewImageByteArray);

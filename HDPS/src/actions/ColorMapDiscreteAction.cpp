@@ -8,8 +8,8 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction),
+ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapSettingsAction) :
+    WidgetAction(&colorMapSettingsAction, "Discrete"),
     _numberOfStepsAction(this, "Number of steps", 2, 10, 5, 5),
     _discretizeAlphaAction(this, "Discretize alpha", false, false)
 {

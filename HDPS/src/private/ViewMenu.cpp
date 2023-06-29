@@ -26,7 +26,8 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
 
     connect(this, &QMenu::aboutToShow, this, [this]() -> void {
         for (auto action : actions())
-            delete action;
+            if (action != &projects().getCurrentProject()->getStudioModeAction())
+                delete action;
 
         clear();
         
@@ -70,6 +71,11 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
 
         if (_options.testFlag(LoadedViewsSubMenu))
             addMenu(new LoadedViewsMenu());
+
+        if (projects().hasProject()) {
+            addSeparator();
+            addAction(&projects().getCurrentProject()->getStudioModeAction());
+        }
     });
 
     const auto updateReadOnly = [this]() -> void {
@@ -108,7 +114,7 @@ QVector<QPointer<PluginTriggerAction>> ViewMenu::getLoadViewsActions(gui::DockAr
         if (viewPluginFactory->producesSystemViewPlugins())
             continue;
             
-        pluginTriggerActions << new PluginTriggerAction(*pluginTriggerAction);
+        pluginTriggerActions << new PluginTriggerAction(*pluginTriggerAction, QString("Create %1").arg(viewPluginFactory->getKind()));
 
         ViewPlugin* dockToViewPlugin = nullptr;
 

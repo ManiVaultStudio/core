@@ -6,9 +6,7 @@
 
 class DimensionsPickerAction;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Dimensions picker miscellaneous widget action
@@ -72,5 +70,4 @@ protected:
     ToggleAction                _ignoreZeroValuesAction;                /** Ignore zero values for statistics action */
 };
 
-}
 }

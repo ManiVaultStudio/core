@@ -5,10 +5,9 @@
 #include "ClustersActionWidget.h"
 
 MergeClustersAction::MergeClustersAction(ClustersActionWidget* clustersActionWidget) :
-    TriggerAction(clustersActionWidget),
+    TriggerAction(clustersActionWidget, "Merge"),
     _clustersActionWidget(clustersActionWidget)
 {
-    setText("");
     setToolTip("Merge selected clusters into one");
     setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
 

@@ -24,14 +24,9 @@ public:
     /**
      * Construct with \p parent and \p project
      * @param parent Pointer to parent object
+     * @param title Title of the action
      */
-    VersionAction(QObject* parent);
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE VersionAction(QObject* parent, const QString& title);
 
 public: // Serialization
 
@@ -68,3 +63,7 @@ private:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::VersionAction)
+
+inline const auto versionActionMetaTypeId = qRegisterMetaType<hdps::gui::VersionAction*>("hdps::gui::VersionAction");

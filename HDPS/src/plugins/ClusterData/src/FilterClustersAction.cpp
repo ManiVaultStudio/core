@@ -9,11 +9,10 @@
 #include <QHBoxLayout>
 
 FilterClustersAction::FilterClustersAction(ClustersActionWidget* clustersActionWidget) :
-    WidgetAction(clustersActionWidget),
+    WidgetAction(clustersActionWidget, "Filter Clusters"),
     _clustersActionWidget(clustersActionWidget),
     _nameFilterAction(this, "Name filter")
 {
-    setText("Filter clusters");
     setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
 
     _nameFilterAction.setToolTip("Filter clusters by name (case-insensitive)");
@@ -50,5 +49,5 @@ FilterClustersAction::Widget::Widget(QWidget* parent, FilterClustersAction* filt
 
     layout->addWidget(filterClustersAction->getNameFilterAction().createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }

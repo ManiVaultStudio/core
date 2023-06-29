@@ -9,9 +9,7 @@
 
 class DimensionsPickerAction;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Dimensions picker filter action
@@ -71,5 +69,4 @@ protected:
     StringAction                _nameFilterAction;          /** Name filter action */
 };
 
-}
 }
