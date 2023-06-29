@@ -21,10 +21,11 @@ HorizontalToolbarAction::Widget::Widget(QWidget* parent, HorizontalToolbarAction
 {
     parent->installEventFilter(this);
 
-    _timer.setInterval(100);
+    _timer.setInterval(300);
     _timer.setSingleShot(true);
 
     _toolbarLayout.setContentsMargins(ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN, ToolbarAction::CONTENTS_MARGIN);
+    _toolbarLayout.setSpacing(0);
 
     _toolbarWidget.setLayout(&_toolbarLayout);
     _toolbarLayout.setAlignment(horizontalToolbarAction->getGroupAction().getAlignment());
@@ -128,7 +129,7 @@ void HorizontalToolbarAction::Widget::updateLayout()
     };
 
     std::sort(actionItems.begin(), actionItems.end());
-    //std::reverse(actionItems.begin(), actionItems.end());
+    std::reverse(actionItems.begin(), actionItems.end());
 
     for (auto actionItem : actionItems) {
         auto cachedStates = states;

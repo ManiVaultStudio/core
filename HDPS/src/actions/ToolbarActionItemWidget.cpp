@@ -1,6 +1,6 @@
 #include "ToolbarActionItemWidget.h"
 #include "ToolbarActionItem.h"
-#include "WidgetAction.h"
+#include "GroupAction.h"
 
 #include <QHBoxLayout>
 #include <QResizeEvent>
@@ -112,40 +112,36 @@ ToolbarActionItemWidget::StateWidget::StateWidget(QWidget* parent, WidgetAction*
 
     auto layout = new QVBoxLayout();
 
-    setStyleSheet("QWidget#StateWidget { background-color: rgba(150, 150, 150, 25); }");
+    setStyleSheet("QWidget#StateWidget { background-color: rgba(0, 0, 0, 0); }");
 
     QWidget* widget = nullptr;
 
     switch (state) {
         case ToolbarActionItem::State::Collapsed:
+        {
+            layout->setContentsMargins(2, 0, 2, 0);
             widget = action->createCollapsedWidget(this);
+            
             break;
+        }
 
         case ToolbarActionItem::State::Expanded:
+        {
+            layout->setContentsMargins(4, 0, 4, 0);
+
             widget = action->createWidget(this, widgetFlags);
+
+            if (dynamic_cast<GroupAction*>(action))
+                setStyleSheet("QWidget#StateWidget { background: linear-gradient(90deg, rgba(0,0,0,0.2) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 100%); }");
+
             break;
+        }
 
         default:
             break;
     }
 
-    /*
-    QFont labelFont("Courier", 7, 300);
-
-    QFontMetrics metrics(labelFont);
-
-    auto label = new QLabel(this);
-
-    label->setFont(labelFont);
-    label->setAlignment(Qt::AlignCenter);
-
-    if (state == ToolbarActionItem::State::Expanded)
-        label->setText(metrics.elidedText(action->text(), Qt::ElideRight, widget->width()));
-
-    layout->addWidget(label);
-    */
-
-    layout->setContentsMargins(4, 4, 4, 4);
+    
     layout->addWidget(widget);
     
     setLayout(layout);

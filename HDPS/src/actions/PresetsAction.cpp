@@ -118,17 +118,17 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
 
         connect(choosePresetNameDialog, &ChoosePresetNameDialog::accepted, this, [this, choosePresetNameDialog]() -> void {
             savePreset(choosePresetNameDialog->getPresetNameAction().getString());
-            });
+        });
+
         connect(choosePresetNameDialog, &ChoosePresetNameDialog::finished, choosePresetNameDialog, &ChoosePresetNameDialog::deleteLater);
 
         choosePresetNameDialog->open();            
-        });
+    });
 
     menu->addAction(savePresetAction);
 
     auto saveDefaultPresetAction = new QAction("Save As Default");
 
-    saveDefaultPresetAction->setEnabled(false);
     saveDefaultPresetAction->setIcon(fontAwesome.getIcon("save"));
 
     connect(saveDefaultPresetAction, &TriggerAction::triggered, this, &PresetsAction::saveDefaultPreset);

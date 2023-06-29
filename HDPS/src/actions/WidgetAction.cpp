@@ -187,6 +187,8 @@ void WidgetAction::setHighlighting(const HighlightOption& highlighting)
     if (highlighting == _highlighting)
         return;
 
+    qDebug() << __FUNCTION__ << text() << static_cast<int>(highlighting);
+
     _highlighting = highlighting;
 
     emit highlightingChanged(_highlighting);
@@ -670,13 +672,13 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
 
     Serializable::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "IsEnabled");
+    //variantMapMustContain(variantMap, "IsEnabled");
     variantMapMustContain(variantMap, "IsChecked");
     variantMapMustContain(variantMap, "IsVisible");
     variantMapMustContain(variantMap, "SortIndex");
     variantMapMustContain(variantMap, "ConnectionPermissions");
 
-    setEnabled(variantMap["IsEnabled"].toBool());
+    //setEnabled(variantMap["IsEnabled"].toBool());
     setChecked(variantMap["IsChecked"].toBool());
     setVisible(variantMap["IsVisible"].toBool());
     setSortIndex(variantMap["SortIndex"].toInt());
@@ -716,7 +718,7 @@ QVariantMap WidgetAction::toVariantMap() const
 
     variantMap.insert({
         { "ActionType", QVariant::fromValue(getTypeString()) },
-        { "IsEnabled", QVariant::fromValue(isEnabled()) },
+        //{ "IsEnabled", QVariant::fromValue(isEnabled()) },
         { "IsChecked", QVariant::fromValue(isChecked()) },
         { "IsVisible", QVariant::fromValue(isVisible()) },
         { "SortIndex", QVariant::fromValue(_sortIndex) },
