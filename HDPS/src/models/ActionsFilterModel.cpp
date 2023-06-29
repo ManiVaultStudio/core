@@ -60,38 +60,14 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     _publicRootOnlyAction.setToolTip("Filter public root or not");
     _removeFiltersAction.setToolTip("Remove all filters");
 
-    const auto selectedOptionsChanged = [this]() -> void {
-        invalidate();
+    connect(&_filterInternalUseAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
+    connect(&_filterForceHiddenAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
+    connect(&_filterForceDisabledAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
+    connect(&_filterMayPublishAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
+    connect(&_filterMayConnectAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
+    connect(&_filterMayDisconnectAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
 
-        QList<bool> resettable;
-
-        resettable << _filterInternalUseAction.isResettable();
-        resettable << _filterForceHiddenAction.isResettable();
-        resettable << _filterForceDisabledAction.isResettable();
-        resettable << _filterMayPublishAction.isResettable();
-        resettable << _filterMayConnectAction.isResettable();
-        resettable << _filterMayDisconnectAction.isResettable();
-
-        _removeFiltersAction.setEnabled(resettable.contains(true));
-    };
-
-    connect(&_filterInternalUseAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
-    connect(&_filterForceHiddenAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
-    connect(&_filterForceDisabledAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
-    connect(&_filterMayPublishAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
-    connect(&_filterMayConnectAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
-    connect(&_filterMayDisconnectAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
-
-    connect(&_removeFiltersAction, &TriggerAction::triggered, this, [this]() -> void {
-        _filterInternalUseAction.reset();
-        _filterForceHiddenAction.reset();
-        _filterForceDisabledAction.reset();
-        _filterMayPublishAction.reset();
-        _filterMayConnectAction.reset();
-        _filterMayDisconnectAction.reset();
-    });
-
-    selectedOptionsChanged();
+    invalidate();
 }
 
 bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const

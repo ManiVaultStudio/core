@@ -146,7 +146,6 @@ ActionsWidget::ActionsWidget(QWidget* parent, AbstractActionsModel& actionsModel
     filterGroupAction.addAction(&_filterModel.getFilterMayPublishAction());
     filterGroupAction.addAction(&_filterModel.getFilterMayConnectAction());
     filterGroupAction.addAction(&_filterModel.getFilterMayDisconnectAction());
-    filterGroupAction.addAction(&_filterModel.getRemoveFiltersAction());
 
     filterGroupAction.setPopupSizeHint(QSize(300, 0));
 
