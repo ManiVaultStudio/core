@@ -187,8 +187,6 @@ void WidgetAction::setHighlighting(const HighlightOption& highlighting)
     if (highlighting == _highlighting)
         return;
 
-    qDebug() << __FUNCTION__ << text() << static_cast<int>(highlighting);
-
     _highlighting = highlighting;
 
     emit highlightingChanged(_highlighting);
