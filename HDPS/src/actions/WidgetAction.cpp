@@ -733,11 +733,14 @@ QVariantMap WidgetAction::toVariantMap() const
 
 bool WidgetAction::isResettable() const
 {
+    qDebug() << "isResettable() is not implemented in " << text();
+
     return false;
 }
 
 void WidgetAction::reset()
 {
+    qDebug() << "reset() is not implemented in " << text();
 }
 
 std::int32_t WidgetAction::getConfiguration() const

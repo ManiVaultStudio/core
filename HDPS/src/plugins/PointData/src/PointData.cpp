@@ -307,8 +307,10 @@ void Points::init()
         _dimensionsPickerGroupAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 
         connect(&getSmartPointer(), &Dataset<Points>::datasetChanged, this, [this]() -> void {
-            if (_dimensionsPickerAction == nullptr)
-                _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction, "Dimensions");
+            if (_dimensionsPickerAction != nullptr)
+                return;
+            
+            _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction, "Dimensions");
 
             _dimensionsPickerGroupAction->addAction(_dimensionsPickerAction);
 
