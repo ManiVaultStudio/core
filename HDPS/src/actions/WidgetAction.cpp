@@ -767,8 +767,12 @@ void WidgetAction::setConfigurationFlag(ConfigurationFlag configurationFlag, boo
     emit configurationChanged(_configuration);
 
     if (recursive) {
-        for (auto childAction : getChildren())
-            childAction->setConfigurationFlag(configurationFlag, unset, recursive);
+        for (auto child : this->children()) {
+            auto childAction = dynamic_cast<WidgetAction*>(child);
+
+            if (childAction)
+                childAction->setConfigurationFlag(configurationFlag, unset, recursive);
+        }
     }
 
     if (flagSet != isConfigurationFlagSet(configurationFlag))
