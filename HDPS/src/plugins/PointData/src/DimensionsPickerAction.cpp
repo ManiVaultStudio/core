@@ -595,6 +595,7 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
     _tableView.verticalHeader()->hide();
     _tableView.verticalHeader()->setDefaultSectionSize(5);
 
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(&_tableView);
 
     auto toolbarLayout = new QHBoxLayout();
