@@ -100,6 +100,9 @@ void DatasetPrivate::connectNotify(const QMetaMethod& signal)
     if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataChanged))
         _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataChanged));
 
+    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataDimensionsChanged))
+        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataDimensionsChanged));
+
     if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataSelectionChanged))
         _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataSelectionChanged));
 
@@ -120,6 +123,9 @@ void DatasetPrivate::disconnectNotify(const QMetaMethod& signal)
 
     if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataChanged))
         _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataChanged));
+
+    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataDimensionsChanged))
+        _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataDimensionsChanged));
 
     if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataSelectionChanged))
         _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataSelectionChanged));
@@ -166,6 +172,16 @@ void DatasetPrivate::registerDatasetEvents()
                         break;
 
                     emit dataChanged();
+
+                    break;
+                }
+
+                case EventType::DatasetDataDimensionsChanged:
+                {
+                    if (dataEvent->getDataset().getDatasetId() != getDatasetId())
+                        break;
+
+                    emit dataDimensionsChanged();
 
                     break;
                 }

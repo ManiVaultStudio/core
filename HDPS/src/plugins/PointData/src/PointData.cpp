@@ -306,13 +306,12 @@ void Points::init()
         _dimensionsPickerGroupAction->setShowLabels(false);
         _dimensionsPickerGroupAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 
-        connect(&getSmartPointer(), &Dataset<Points>::dataChanged, this, [this]() -> void {
-            if (_dimensionsPickerAction != nullptr)
-                return;
-            
-            _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction, "Dimensions");
+        connect(&getSmartPointer(), &Dataset<Points>::dataDimensionsChanged, this, [this]() -> void {
+            if (_dimensionsPickerAction == nullptr) {
+                _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction, "Dimensions");
 
-            _dimensionsPickerGroupAction->addAction(_dimensionsPickerAction);
+                _dimensionsPickerGroupAction->addAction(_dimensionsPickerAction);
+            }
 
             _dimensionsPickerAction->setPointsDataset(*this);
         });

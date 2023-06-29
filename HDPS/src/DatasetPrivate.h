@@ -118,8 +118,11 @@ signals:
      */
     void removed(const QString& datasetId);
 
-    /** Signals that the dataset contents changed */
+    /** Signals that the dataset data changed */
     void dataChanged();
+
+    /** Signals that the dataset dimensions changed */
+    void dataDimensionsChanged();
 
     /** Signals that the dataset selection changed */
     void dataSelectionChanged();
