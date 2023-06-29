@@ -273,6 +273,7 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
 
     actions().addPrivateActionToPublicAction(this, publicAction);
 
+    /*
     const auto updateReadOnly = [this]() -> void {
         setEnabled(_publicAction->isEnabled());
     };
@@ -280,6 +281,7 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
     updateReadOnly();
 
     connect(_publicAction, &QAction::changed, this, updateReadOnly);
+    */
 
     emit isConnectedChanged(isConnected());
 
