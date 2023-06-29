@@ -105,14 +105,14 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
         }
     });
 
-    connect(&selectedIndicesAction->getPoints(), &Dataset<Points>::datasetChanged, this, [this, selectedIndicesAction]() -> void {
+    connect(&selectedIndicesAction->getPoints(), &Dataset<Points>::dataChanged, this, [this, selectedIndicesAction]() -> void {
         selectedIndicesAction->getManualUpdateAction().setChecked(selectedIndicesAction->getPoints()->getNumPoints() > MANUAL_UPDATE_THRESHOLD);
 
         if (selectedIndicesAction->getPoints()->getNumPoints() < MANUAL_UPDATE_THRESHOLD)
             _timer.start(LAZY_UPDATE_INTERVAL);
     });
 
-    connect(&selectedIndicesAction->getPoints(), &Dataset<Points>::datasetSelectionChanged, this, [this, selectedIndicesAction, updateActions]() -> void {
+    connect(&selectedIndicesAction->getPoints(), &Dataset<Points>::dataSelectionChanged, this, [this, selectedIndicesAction, updateActions]() -> void {
         if (selectedIndicesAction->getManualUpdateAction().isChecked()) {
             _dirty = true;
 

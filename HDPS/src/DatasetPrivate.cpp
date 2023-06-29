@@ -91,43 +91,43 @@ void DatasetPrivate::reset()
 
 void DatasetPrivate::connectNotify(const QMetaMethod& signal)
 {
-    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::datasetAboutToBeRemoved))
+    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::aboutToBeRemoved))
         _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetAboutToBeRemoved));
 
-    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::datasetRemoved))
+    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::removed))
         _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetRemoved));
 
-    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::datasetChanged))
-        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChanged));
+    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataChanged))
+        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataChanged));
 
-    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::datasetSelectionChanged))
-        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetSelectionChanged));
+    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataSelectionChanged))
+        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataSelectionChanged));
 
-    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::datasetChildAdded))
+    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::childAdded))
         _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChildAdded));
 
-    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::datasetChildRemoved))
+    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::childRemoved))
         _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChildRemoved));
 }
 
 void DatasetPrivate::disconnectNotify(const QMetaMethod& signal)
 {
-    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::datasetAboutToBeRemoved))
+    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::aboutToBeRemoved))
         _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetAboutToBeRemoved));
 
-    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::datasetRemoved))
+    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::removed))
         _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetRemoved));
 
-    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::datasetChanged))
-        _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChanged));
+    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataChanged))
+        _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataChanged));
 
-    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::datasetSelectionChanged))
-        _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetSelectionChanged));
+    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::dataSelectionChanged))
+        _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataSelectionChanged));
 
-    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::datasetChildAdded))
+    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::childAdded))
         _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChildAdded));
 
-    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::datasetChildRemoved))
+    if (signal == QMetaMethod::fromSignal(&DatasetPrivate::childRemoved))
         _eventListener.removeSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChildRemoved));
 }
 
@@ -135,7 +135,7 @@ void DatasetPrivate::registerDatasetEvents()
 {
     try
     {
-        _eventListener.registerDataEvent([this](DataEvent* dataEvent) {
+        _eventListener.registerDataEvent([this](DatasetEvent* dataEvent) {
             switch (dataEvent->getType()) {
 
                 case EventType::DatasetAboutToBeRemoved:
@@ -143,39 +143,39 @@ void DatasetPrivate::registerDatasetEvents()
                     if (dataEvent->getDataset().getDatasetId() != getDatasetId())
                         break;
 
-                    emit datasetAboutToBeRemoved();
+                    emit aboutToBeRemoved();
 
                     break;
                 }
 
                 case EventType::DatasetRemoved:
                 {
-                    const auto dataRemovedEvent = static_cast<DataRemovedEvent*>(dataEvent);
+                    const auto dataRemovedEvent = static_cast<DatasetRemovedEvent*>(dataEvent);
 
                     if (_datasetId != dataRemovedEvent->getDatasetGuid())
                         break;
 
                     reset();
 
-                    emit datasetRemoved(_datasetId);
+                    emit removed(_datasetId);
                 }
 
-                case EventType::DatasetChanged:
+                case EventType::DatasetDataChanged:
                 {
                     if (dataEvent->getDataset().getDatasetId() != getDatasetId())
                         break;
 
-                    emit datasetChanged();
+                    emit dataChanged();
 
                     break;
                 }
 
-                case EventType::DatasetSelectionChanged:
+                case EventType::DatasetDataSelectionChanged:
                 {
                     if (dataEvent->getDataset().getDatasetId() != getDatasetId())
                         break;
 
-                    emit datasetSelectionChanged();
+                    emit dataSelectionChanged();
 
                     break;
                 }
@@ -185,9 +185,9 @@ void DatasetPrivate::registerDatasetEvents()
                     if (dataEvent->getDataset().getDatasetId() != getDatasetId())
                         break;
 
-                    auto dataChildAddedEvent = static_cast<hdps::DataChildAddedEvent*>(dataEvent);
+                    auto dataChildAddedEvent = static_cast<hdps::DatasetChildAddedEvent*>(dataEvent);
 
-                    emit datasetChildAdded(dataChildAddedEvent->getChildDataset());
+                    emit childAdded(dataChildAddedEvent->getChildDataset());
 
                     break;
                 }
@@ -197,9 +197,9 @@ void DatasetPrivate::registerDatasetEvents()
                     if (dataEvent->getDataset().getDatasetId() != getDatasetId())
                         break;
 
-                    auto dataChildRemovedEvent = static_cast<hdps::DataChildRemovedEvent*>(dataEvent);
+                    auto dataChildRemovedEvent = static_cast<hdps::DatasetChildRemovedEvent*>(dataEvent);
 
-                    emit datasetChildRemoved(dataChildRemovedEvent->getChildDatasetGuid());
+                    emit childRemoved(dataChildRemovedEvent->getChildDatasetGuid());
 
                     break;
                 }

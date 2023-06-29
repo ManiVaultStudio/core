@@ -32,7 +32,7 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent /*= nullptr*/, const QS
     });
 
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetAdded));
-    _eventListener.registerDataEvent([this](DataEvent* dataEvent) {
+    _eventListener.registerDataEvent([this](DatasetEvent* dataEvent) {
         switch (dataEvent->getType()) {
             case EventType::DatasetAdded:
                 populateDatasetsFromCore();
@@ -96,7 +96,7 @@ void DatasetPickerAction::setDatasets(Datasets datasets)
 
     for (auto& dataset : _datasetsModel.getDatasets()) {
 
-        connect(&dataset, &Dataset<DatasetImpl>::datasetAboutToBeRemoved, this, [this, dataset]() {
+        connect(&dataset, &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this, dataset]() {
             _datasetsModel.removeDataset(dataset);
         });
 
@@ -327,7 +327,7 @@ void DatasetPickerAction::DatasetsModel::addDataset(const Dataset<DatasetImpl>& 
 
     auto& addedDataset = _datasets.last();
 
-    connect(&addedDataset, &Dataset<DatasetImpl>::datasetAboutToBeRemoved, this, [this, &addedDataset]() {
+    connect(&addedDataset, &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this, &addedDataset]() {
         removeDataset(addedDataset);
     });
 

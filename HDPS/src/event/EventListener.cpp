@@ -56,13 +56,13 @@ void EventListener::registerDataEvent(DataEventHandler callback)
     _dataEventHandlers.push_back(callback);
 }
 
-void EventListener::onDataEvent(DataEvent* dataEvent)
+void EventListener::onDataEvent(DatasetEvent* dataEvent)
 {
     if (!isEventTypeSupported(static_cast<std::uint32_t>(dataEvent->getType())))
         return;
 
     if (dataEvent->getType() == EventType::DatasetRemoved) {
-        const auto dataRemovedEvent = static_cast<DataRemovedEvent*>(dataEvent);
+        const auto dataRemovedEvent = static_cast<DatasetRemovedEvent*>(dataEvent);
 
         if (_dataEventHandlersById.find(dataRemovedEvent->getDatasetGuid()) != _dataEventHandlersById.end())
             _dataEventHandlersById[dataRemovedEvent->getDatasetGuid()](dataEvent);

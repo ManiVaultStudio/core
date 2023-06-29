@@ -110,31 +110,31 @@ signals:
     void changed(DatasetImpl* dataset);
 
     /** Signals that the dataset is about to be removed */
-    void datasetAboutToBeRemoved();
+    void aboutToBeRemoved();
 
     /**
      * Signals that the dataset has been removed
      * @param datasetId Globally unique identifier of the dataset that is removed
      */
-    void datasetRemoved(const QString& datasetId);
+    void removed(const QString& datasetId);
 
     /** Signals that the dataset contents changed */
-    void datasetChanged();
+    void dataChanged();
 
     /** Signals that the dataset selection changed */
-    void datasetSelectionChanged();
+    void dataSelectionChanged();
 
     /**
      * Signals that a dataset child is added
      * @param childDataset Smart pointer to added child dataset
      */
-    void datasetChildAdded(const Dataset<DatasetImpl>& childDataset);
+    void childAdded(const Dataset<DatasetImpl>& childDataset);
 
     /**
      * Signals that a dataset child was removed
      * @param childDatasetGuid GUID of the dataset child that is removed
      */
-    void datasetChildRemoved(const QString& childDatasetGuid);
+    void childRemoved(const QString& childDatasetGuid);
 
 private:
     QString         _datasetId;         /** Globally unique identifier of the dataset */

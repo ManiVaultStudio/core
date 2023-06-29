@@ -42,7 +42,7 @@ EditProxyDatasetsAction::Widget::Widget(QWidget* parent, EditProxyDatasetsAction
         listView->setModel(new QStringListModel(proxyMemberNames));
     };
 
-    connect(&editProxyDatasetsAction->getPoints(), &Dataset<Points>::datasetChanged, this, updateListView);
+    connect(&editProxyDatasetsAction->getPoints(), &Dataset<Points>::dataChanged, this, updateListView);
 
     updateListView();
 }

@@ -206,7 +206,7 @@ void DatasetImpl::setGroupIndex(const std::int32_t& groupIndex)
 {
     _groupIndex = groupIndex;
 
-    events().notifyDatasetSelectionChanged(this);
+    events().notifyDatasetDataSelectionChanged(this);
 }
 
 hdps::Datasets DatasetImpl::getProxyMembers() const
@@ -231,7 +231,7 @@ void DatasetImpl::setProxyMembers(const Datasets& proxyDatasets)
 
         setStorageType(StorageType::Proxy);
 
-        events().notifyDatasetChanged(this);
+        events().notifyDatasetDataChanged(this);
     }
     catch (std::exception& e)
     {

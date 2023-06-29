@@ -91,7 +91,7 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
         emit itemAdded(*newDataHierarchyItem);
 
         // Remove the data hierarchy item when the corresponding dataset is about to be removed
-        connect(&newDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::datasetAboutToBeRemoved, this, [this, newDataHierarchyItem]() {
+        connect(&newDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this, newDataHierarchyItem]() {
             if (newDataHierarchyItem->getDatasetReference().isValid())
                 removeItem(*newDataHierarchyItem);
         });

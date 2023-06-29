@@ -12,14 +12,14 @@ namespace hdps
 {
 
 class CoreInterface;
-class DataEvent;
+class DatasetEvent;
 
 class EventListener final
 {
 public:
 
     /** Event registration function signatures */
-    using DataEventHandler = std::function<void(DataEvent*)>;
+    using DataEventHandler = std::function<void(DatasetEvent*)>;
 
     // Disabled until a better solution can be found as currently it requires
     // plugins to manually unregister if they are no longer interested in a dataset.
@@ -68,7 +68,7 @@ private:
      * Invoked when a data event occurs
      * @param dataEvent Pointer to data event that occurred
      */
-    void onDataEvent(DataEvent* dataEvent);
+    void onDataEvent(DatasetEvent* dataEvent);
 
     std::unordered_map<QString, DataEventHandler>   _dataEventHandlersById;         /** Data event handlers by dataset globally unique identifier */
     std::unordered_map<DataType, DataEventHandler>  _dataEventHandlersByType;       /** Data event handlers by data type */

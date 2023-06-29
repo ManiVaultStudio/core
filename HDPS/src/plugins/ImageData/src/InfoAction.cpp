@@ -48,9 +48,9 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
     };
 
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetAdded));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetChanged));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetSelectionChanged));
-    _eventListener.registerDataEventByType(ImageType, [this, updateActions](hdps::DataEvent* dataEvent) {
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataChanged));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataSelectionChanged));
+    _eventListener.registerDataEventByType(ImageType, [this, updateActions](hdps::DatasetEvent* dataEvent) {
         if (!_images.isValid())
             return;
 
@@ -59,8 +59,8 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
 
         switch (dataEvent->getType()) {
             case EventType::DatasetAdded:
-            case EventType::DatasetChanged:
-            case EventType::DatasetSelectionChanged:
+            case EventType::DatasetDataChanged:
+            case EventType::DatasetDataSelectionChanged:
             {
                 updateActions();
                 break;
