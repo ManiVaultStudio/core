@@ -165,6 +165,12 @@ public:
     void setMode(Mode mode);
 
     /**
+     * Get datasets
+     * @return Datasets
+     */
+    hdps::Datasets getDatasets() const;
+
+    /**
      * Set the datasets from which can be picked (mode is set to Mode::Manual)
      * @param datasets Datasets from which can be picked
      */

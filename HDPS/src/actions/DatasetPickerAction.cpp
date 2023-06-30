@@ -234,6 +234,11 @@ QVariantMap DatasetPickerAction::toVariantMap() const
     return variantMap;
 }
 
+hdps::Datasets DatasetPickerAction::getDatasets() const
+{
+    return _datasetsModel.getDatasets();
+}
+
 DatasetPickerAction::DatasetsModel::DatasetsModel(QObject* parent /*= nullptr*/) :
     QAbstractListModel(parent),
     _datasets(),
