@@ -23,7 +23,7 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class PixelSelectionAction final : public GroupAction
+class PixelSelectionAction : public GroupAction
 {
     Q_OBJECT
 
