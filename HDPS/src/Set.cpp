@@ -327,6 +327,11 @@ void DatasetImpl::setStorageType(const StorageType& storageType)
     _storageType = storageType;
 }
 
+QString DatasetImpl::getGuiName() const
+{
+    return text();
+}
+
 bool DatasetImpl::isFull() const
 {
     return _all;

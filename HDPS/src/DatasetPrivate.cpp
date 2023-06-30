@@ -73,11 +73,17 @@ void DatasetPrivate::setDataset(DatasetImpl* dataset)
         reset();
     }
     else {
+        disconnect(dataset, &gui::WidgetAction::textChanged, this, nullptr);
+
         if (dataset == _dataset)
             return;
 
         _dataset        = dataset;
         _datasetId    = _dataset->getId();
+
+        connect(_dataset, &gui::WidgetAction::textChanged, this, [this]() -> void {
+            emit guiNameChanged();
+        });
 
         emit changed(_dataset);
     }

@@ -91,6 +91,9 @@ public:
      */
     void setStorageType(const StorageType& storageType);
 
+    /** Get the GUI name of the dataset */
+    QString getGuiName() const;
+
     /** Returns true if this set represents the full data and false if it's a subset */
     bool isFull() const;
 

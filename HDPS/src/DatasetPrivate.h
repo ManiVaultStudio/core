@@ -127,6 +127,9 @@ signals:
     /** Signals that the dataset selection changed */
     void dataSelectionChanged();
 
+    /** Signals that the dataset GUI name changed */
+    void guiNameChanged();
+
     /**
      * Signals that a dataset child is added
      * @param childDataset Smart pointer to added child dataset
