@@ -312,7 +312,7 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
 
         _settingsDockWidgetsMap[settingsAction->text()] = settingsDockWidget;
 
-        const auto dockToSettingsActionName = settingsAction->property("DockToSettingsActionName").toString();
+        const auto dockToSettingsActionName = settingsAction->property("DockToDockingActionName").toString();
 
         CDockAreaWidget* dockAreaWidget = nullptr;
 

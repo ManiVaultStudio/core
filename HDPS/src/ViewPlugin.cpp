@@ -287,23 +287,23 @@ hdps::gui::WidgetActions ViewPlugin::getTitleBarMenuActions()
     return _titleBarMenuActions;
 }
 
-void ViewPlugin::addSettingsAction(WidgetAction* settingsAction, WidgetAction* dockToSettingsAction /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, bool autoHide /*= false*/, const gui::AutoHideLocation& autoHideLocation /*= gui::AutoHideLocation::Left*/, const QSize& minimumDockWidgetSize /*= QSize(256, 256)*/)
+void ViewPlugin::addDockingAction(WidgetAction* dockingAction, WidgetAction* dockToDockingAction /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, bool autoHide /*= false*/, const gui::AutoHideLocation& autoHideLocation /*= gui::AutoHideLocation::Left*/, const QSize& minimumDockWidgetSize /*= QSize(256, 256)*/)
 {
-    Q_ASSERT(settingsAction != nullptr);
+    Q_ASSERT(dockingAction != nullptr);
 
-    if (settingsAction == nullptr)
+    if (dockingAction == nullptr)
         return;
 
-    settingsAction->setProperty("DockToSettingsActionName", dockToSettingsAction != nullptr ? dockToSettingsAction->text() : "");
-    settingsAction->setProperty("DockArea", static_cast<int>(dockArea));
-    settingsAction->setProperty("AutoHide", autoHide);
-    settingsAction->setProperty("AutoHideLocation", static_cast<int>(autoHideLocation));
-    settingsAction->setProperty("MinimumDockWidgetSize", minimumDockWidgetSize);
+    dockingAction->setProperty("DockToDockingActionName", dockToDockingAction != nullptr ? dockToDockingAction->text() : "");
+    dockingAction->setProperty("DockArea", static_cast<int>(dockArea));
+    dockingAction->setProperty("AutoHide", autoHide);
+    dockingAction->setProperty("AutoHideLocation", static_cast<int>(autoHideLocation));
+    dockingAction->setProperty("MinimumDockWidgetSize", minimumDockWidgetSize);
 
-    _settingsActions << settingsAction;
+    _settingsActions << dockingAction;
 }
 
-hdps::gui::WidgetActions ViewPlugin::getSettingsActions() const
+hdps::gui::WidgetActions ViewPlugin::getDockingActions() const
 {
     return _settingsActions;
 }

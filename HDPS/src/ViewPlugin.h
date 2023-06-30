@@ -96,18 +96,18 @@ public: // Title bar settings menu
 public: // Settings actions
 
     /**
-     * Add a settings action to the view (the action widget will be docked in the view)
-     * @param settingsAction Pointer to settings action to add
-     * @param dockToSettingsAction Pointer to the settings action to dock to (docked top-level if nullptr)
+     * Add a docking action to the view (the action widget will be docked in the view)
+     * @param dockingAction Pointer to docking action to add
+     * @param dockToDockingAction Pointer to the settings action to dock to (docked top-level if nullptr)
      * @param dockArea Dock area in which \p dockToViewPlugin will be docked
      * @param autoHide Whether to pin the settings action to the border of the view plugin
      * @param autoHideLocation Location to pin the settings action in case auto-hide is active
      * @param minimumDockWidgetSize Minimum dock widget size
      */
-    void addSettingsAction(WidgetAction* settingsAction, WidgetAction* dockToSettingsAction = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, bool autoHide = false, const gui::AutoHideLocation& autoHideLocation = gui::AutoHideLocation::Left, const QSize& minimumDockWidgetSize = QSize(256, 256));
+    void addDockingAction(WidgetAction* dockingAction, WidgetAction* dockToDockingAction = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, bool autoHide = false, const gui::AutoHideLocation& autoHideLocation = gui::AutoHideLocation::Left, const QSize& minimumDockWidgetSize = QSize(256, 256));
 
-    /** Get vector of pointers to settings actions */
-    gui::WidgetActions getSettingsActions() const;
+    /** Get vector of pointers to docking actions */
+    gui::WidgetActions getDockingActions() const;
 
 public: // Serialization
 
