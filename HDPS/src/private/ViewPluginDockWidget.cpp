@@ -301,7 +301,7 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
         showAllAction->setEnabled(numberOfVisibleSettingsDockWidgets < numberOfSettingsDockWidgets);
     };
 
-    for (auto settingsAction : _viewPlugin->getSettingsActions()) {
+    for (auto settingsAction : _viewPlugin->getDockingActions()) {
         auto settingsDockWidget = new CDockWidget(settingsAction->text());
         auto settingsWidget     = new SettingsActionWidget(this, settingsAction);
 
@@ -372,9 +372,9 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
         });
     }
 
-    _toggleMenu.setEnabled(!_viewPlugin->getSettingsActions().isEmpty());
+    _toggleMenu.setEnabled(!_viewPlugin->getDockingActions().isEmpty());
 
-    if (!_viewPlugin->getSettingsActions().isEmpty()) {
+    if (!_viewPlugin->getDockingActions().isEmpty()) {
         _toggleMenu.addSeparator();
         
         connect(hideAllAction, &TriggerAction::triggered, this, [this]() {
