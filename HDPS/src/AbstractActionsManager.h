@@ -10,10 +10,6 @@
 namespace hdps
 {
 
-namespace gui {
-    class WidgetAction;
-}
-
 /**
  * Abstract actions manager
  *
