@@ -1,3 +1,5 @@
+#ifndef ABSTRACT_ACTION_MANAGER_H
+#define ABSTRACT_ACTION_MANAGER_H
 #pragma once
 
 #include "AbstractManager.h"
@@ -9,10 +11,6 @@
 
 namespace hdps
 {
-
-namespace gui {
-    class WidgetAction;
-}
 
 /**
  * Abstract actions manager
@@ -186,32 +184,7 @@ public: // Linking
      * @param publicAction Pointer to public action
      * @param recursive Whether to also connect descendant child actions
      */
-    virtual void connectPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction, bool recursive) final {
-        Q_ASSERT(privateAction != nullptr);
-        Q_ASSERT(publicAction != nullptr);
-
-        if (privateAction == nullptr || publicAction == nullptr)
-            return;
-
-        try
-        {
-            if (privateAction->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::ForceNone))
-                return;
-
-            if (privateAction->isConnected() && (privateAction->getPublicAction() == publicAction))
-                throw std::runtime_error(QString("%1 is already connected to %2").arg(privateAction->getLocation(), publicAction->getLocation()).toLatin1());
-
-            privateAction->connectToPublicAction(publicAction, recursive);
-        }
-        catch (std::exception& e)
-        {
-            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateAction->text(), publicAction->text()), e);
-        }
-        catch (...)
-        {
-            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateAction->text(), publicAction->text()));
-        }
-    }
+    virtual void connectPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction, bool recursive) final;
 
     /**
      * Connect \p privateSourceAction to \p privateTargetAction
@@ -219,55 +192,14 @@ public: // Linking
      * @param privateTargetAction Pointer to private target action (private source action will be connected to published private target action)
      * @param publicActionName Name of the public action (ask for name if empty)
      */
-    virtual void connectPrivateActions(gui::WidgetAction* privateSourceAction, gui::WidgetAction* privateTargetAction, const QString& publicActionName = "") final {
-        Q_ASSERT(privateSourceAction != nullptr);
-        Q_ASSERT(privateTargetAction != nullptr);
-
-        if (privateSourceAction == nullptr || privateTargetAction == nullptr)
-            return;
-
-        try
-        {
-            privateTargetAction->publish(publicActionName);
-            privateSourceAction->connectToPublicAction(privateTargetAction->getPublicAction(), true);
-        }
-        catch (std::exception& e)
-        {
-            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateSourceAction->text(), privateTargetAction->text()), e);
-        }
-        catch (...)
-        {
-            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateSourceAction->text(), privateTargetAction->text()));
-        }
-    }
+    virtual void connectPrivateActions(gui::WidgetAction* privateSourceAction, gui::WidgetAction* privateTargetAction, const QString& publicActionName = "") final;
 
     /**
      * Disconnect \p privateAction from public action
      * @param privateAction Pointer to private action
      * @param recursive Whether to also disconnect descendant child actions
      */
-    virtual void disconnectPrivateActionFromPublicAction(gui::WidgetAction* privateAction, bool recursive) final {
-        Q_ASSERT(privateAction != nullptr);
-
-        if (privateAction == nullptr)
-            return;
-        
-        try
-        {
-            if (privateAction->isConnected())
-                privateAction->disconnectFromPublicAction(recursive);
-
-            privateAction->_publicAction = nullptr;
-        }
-        catch (std::exception& e)
-        {
-            util::exceptionMessageBox(QString("Unable to disconnect %1 to %2:").arg(privateAction->text(), privateAction->getPublicAction()->text()), e);
-        }
-        catch (...)
-        {
-            util::exceptionMessageBox(QString("Unable to disconnect %1 to %2:").arg(privateAction->text(), privateAction->getPublicAction()->text()));
-        }
-    }
+    virtual void disconnectPrivateActionFromPublicAction(gui::WidgetAction* privateAction, bool recursive) final;
 
 protected:
 
@@ -411,14 +343,7 @@ protected:
      * Make widget \p action public
      * @param action Pointer to action
      */
-    virtual void makeActionPublic(gui::WidgetAction* action) final {
-        Q_ASSERT(action != nullptr);
-
-        if (action == nullptr)
-            return;
-
-        action->makePublic();
-    }
+    virtual void makeActionPublic(gui::WidgetAction* action) final;
 
 signals:
 
@@ -491,3 +416,5 @@ protected:
 };
 
 }
+
+#endif // ABSTRACT_ACTION_MANAGER_H
