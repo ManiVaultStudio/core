@@ -1,13 +1,10 @@
 cmake_minimum_required(VERSION 3.17)
 
 set(SHARED_PARAMETERS_PLUGIN "SharedParametersPlugin")
-
 PROJECT(${SHARED_PARAMETERS_PLUGIN})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
@@ -27,6 +24,10 @@ find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 set(PLUGIN
     src/SharedParametersPlugin.h
     src/SharedParametersPlugin.cpp
+)
+
+set(PLUGIN_MOC_HEADERS
+	src/SharedParametersPlugin.h
 )
 
 set(MODELS
@@ -52,18 +53,16 @@ add_library(${SHARED_PARAMETERS_PLUGIN} SHARED ${SHARED_PARAMETERS_SOURCES})
 
 add_dependencies(${SHARED_PARAMETERS_PLUGIN} HDPS_Public)
 
+qt_wrap_cpp(SHARED_PARAMETERS_MOC ${PLUGIN_MOC_HEADERS} TARGET ${SHARED_PARAMETERS_PLUGIN})
+target_sources(${SHARED_PARAMETERS_PLUGIN} PRIVATE ${SHARED_PARAMETERS_MOC})
+
 target_include_directories(${SHARED_PARAMETERS_PLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include")
 
 target_compile_features(${SHARED_PARAMETERS_PLUGIN} PRIVATE cxx_std_17)
 
-set(HDPS_LINK_PATH "${INSTALL_DIR}/$<CONFIGURATION>/lib/")
-set(HDPS_LINK_SUFFIX $<IF:$<CXX_COMPILER_ID:MSVC>,${CMAKE_LINK_LIBRARY_SUFFIX},${CMAKE_SHARED_LIBRARY_SUFFIX}>)
-
-set(HDPS_LINK_LIBRARY "${HDPS_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${HDPS_LINK_SUFFIX}")
-
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE "${HDPS_LINK_LIBRARY}")
+target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE HDPS_Public)
 
 # Use avx if enabled and available
 check_and_set_AVX(${SHARED_PARAMETERS_PLUGIN} ${HDPS_USE_AVX})
