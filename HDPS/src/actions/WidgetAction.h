@@ -764,7 +764,8 @@ private:
     QMap<QString, QVariant>     _cachedStates;                  /** Maps cache name to state */
     QString                     _location;                      /** The path relative to the root in string format */
 
-    friend class AbstractActionsManager;
+protected:
+    friend class hdps::AbstractActionsManager;
 };
 
 }
