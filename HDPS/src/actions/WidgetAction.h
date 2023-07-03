@@ -505,9 +505,11 @@ public: // Settings
      * Determines whether the action can be reset to its default
      * @return Whether the action can be reset to its default
      */
+    [[deprecated("This method is a placeholder and not operational yet")]]
     virtual bool isResettable() const final;
 
     /** Reset to default */
+    [[deprecated("This method is a placeholder and not operational yet")]]
     virtual void reset() final;
 
     /**
