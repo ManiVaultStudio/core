@@ -71,7 +71,8 @@ public:
      * @param parent Pointer to parent object
      */
     AbstractProjectManager(QObject* parent = nullptr) :
-        AbstractManager(parent, "Project")
+        AbstractManager(parent, "Project"),
+        _state(State::Idle)
     {
     }
 
