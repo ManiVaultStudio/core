@@ -109,7 +109,9 @@ public:
      * @param dataset Smart pointer to the dataset
      */
     DatasetAddedEvent(const Dataset<DatasetImpl>& dataset) :
-        DatasetEvent(EventType::DatasetAdded, dataset)
+        DatasetEvent(EventType::DatasetAdded, dataset),
+        _parentDatasetName(""),
+        _visible(true)
     {
     }
 
