@@ -183,7 +183,7 @@ public: // Linking
      * @param recursive Whether to also connect descendant child actions
      */
     virtual void connectPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction, bool recursive) final {
-                Q_ASSERT(privateAction != nullptr);
+        Q_ASSERT(privateAction != nullptr);
         Q_ASSERT(publicAction != nullptr);
 
         if (privateAction == nullptr || publicAction == nullptr)
@@ -216,7 +216,7 @@ public: // Linking
      * @param publicActionName Name of the public action (ask for name if empty)
      */
     virtual void connectPrivateActions(gui::WidgetAction* privateSourceAction, gui::WidgetAction* privateTargetAction, const QString& publicActionName = "") final {
-                Q_ASSERT(privateSourceAction != nullptr);
+        Q_ASSERT(privateSourceAction != nullptr);
         Q_ASSERT(privateTargetAction != nullptr);
 
         if (privateSourceAction == nullptr || privateTargetAction == nullptr)
@@ -243,7 +243,7 @@ public: // Linking
      * @param recursive Whether to also disconnect descendant child actions
      */
     virtual void disconnectPrivateActionFromPublicAction(gui::WidgetAction* privateAction, bool recursive) final {
-                Q_ASSERT(privateAction != nullptr);
+        Q_ASSERT(privateAction != nullptr);
 
         if (privateAction == nullptr)
             return;
