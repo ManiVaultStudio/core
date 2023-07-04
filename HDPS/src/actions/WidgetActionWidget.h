@@ -62,7 +62,6 @@ private:
     virtual void setPopupLayout(QLayout* popupLayout) final;
 
 protected:
-    WidgetAction*       _widgetAction;      /** Pointer to widget action that will be displayed */
     std::int32_t        _widgetFlags;       /** Widget creation flags */
 };
 
