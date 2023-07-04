@@ -129,6 +129,11 @@ QVariantMap ActionsManager::toVariantMap() const
 
 void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QString& name /*= ""*/, bool recursive /*= true*/)
 {
+    Q_ASSERT(privateAction != nullptr);
+
+    if (privateAction == nullptr)
+        return;
+
     auto& askForSharedParameterNameAction = hdps::settings().getParametersSettings().getAskForSharedParameterNameAction();
 
     if (name.isEmpty()) {

@@ -191,6 +191,9 @@ public: // Linking
 
         try
         {
+            if (!privateAction->mayConnectToPublicAction(publicAction))
+                throw std::runtime_error(QString("%1 may not be connected to %2").arg(privateAction->getLocation(), publicAction->getLocation()).toStdString());
+
             if (privateAction->isConnectionPermissionFlagSet(gui::WidgetAction::ConnectionPermissionFlag::ForceNone))
                 return;
 
