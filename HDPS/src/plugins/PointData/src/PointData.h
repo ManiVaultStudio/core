@@ -332,30 +332,30 @@ public:
      * @return Size of the raw data in bytes
      */
     std::uint64_t getRawDataSize() const {
-        auto elementSize = 0u;
+        std::uint64_t elementSize = 0u;
 
         switch (_vectorHolder.getElementTypeSpecifier())
         {
             case ElementTypeSpecifier::float32:
-                elementSize = 4;
+                elementSize = 4u;
                 break;
 
             case ElementTypeSpecifier::bfloat16:
             case ElementTypeSpecifier::int16:
             case ElementTypeSpecifier::uint16:
-                elementSize = 4;
+                elementSize = 2u;
                 break;
 
             case ElementTypeSpecifier::int8:
             case ElementTypeSpecifier::uint8:
-                elementSize = 4;
+                elementSize = 1u;
                 break;
 
             default:
                 break;
         }
 
-        return getNumPoints() * getNumDimensions() * elementSize;
+        return elementSize * getNumPoints() * getNumDimensions();
     }
 
     // Similar to C++17 std::visit.
@@ -466,7 +466,7 @@ public:
     void convertData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
         _vectorHolder.convertData(data, numPoints * numDimensions);
-        _numDimensions = numDimensions;
+        _numDimensions = static_cast<std::uint32_t>(numDimensions);
     }
 
     /// Converts the specified data to the internal data, using static_cast for each data element.
@@ -476,7 +476,7 @@ public:
     void convertData(const T& inputDataContainer, const std::size_t numDimensions)
     {
         _vectorHolder.convertData(inputDataContainer.data(), inputDataContainer.size());
-        _numDimensions = numDimensions;
+        _numDimensions = static_cast<std::uint32_t>(numDimensions);
     }
 
     /// Copies the specified data into the internal data, sets the number of
@@ -501,7 +501,7 @@ public:
     void setData(const std::vector<T>& data, const std::size_t numDimensions)
     {
         _vectorHolder = VectorHolder(data);
-        _numDimensions = numDimensions;
+        _numDimensions = static_cast<unsigned int>(numDimensions);
     }
 
     /// Efficiently "moves" the data from the specified vector into the internal
@@ -511,7 +511,7 @@ public:
     void setData(std::vector<T>&& data, const std::size_t numDimensions)
     {
         _vectorHolder = VectorHolder(std::move(data));
-        _numDimensions = numDimensions;
+        _numDimensions = static_cast<unsigned int>(numDimensions);
     }
 
     void setDimensionNames(const std::vector<QString>& dimNames);
