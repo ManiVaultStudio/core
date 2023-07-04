@@ -299,7 +299,11 @@ void Points::init()
 
     _infoAction = new InfoAction(this, *this);
 
-    if (isFull()) {
+    const auto updateDimensionsPickerAction = [this]() -> void {
+        _dimensionsPickerAction->setPointsDataset(getSourceDataset<Points>());
+    };
+
+    //if (isFull()) {
         _dimensionsPickerGroupAction = new GroupAction(this, "Dimensions Group");
 
         _dimensionsPickerGroupAction->setText("Dimensions");
@@ -310,10 +314,10 @@ void Points::init()
 
         _dimensionsPickerGroupAction->addAction(_dimensionsPickerAction);
 
-        connect(&getSmartPointer(), &Dataset<Points>::dataDimensionsChanged, this, [this]() -> void {
-            _dimensionsPickerAction->setPointsDataset(*this);
-        });
-    }
+        updateDimensionsPickerAction();
+
+        connect(&getSmartPointer(), &Dataset<Points>::dataDimensionsChanged, this, updateDimensionsPickerAction);
+    //}
 
     _infoAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 
