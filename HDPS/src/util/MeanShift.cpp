@@ -385,7 +385,7 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
 
     //qDebug() << "Final clusters size (including empty clusters): " << clusters.size();
 
-    for (int i = clusters.size() - 1; i >= 0; i--)
+    for (auto i = clusters.size() - 1; i >= 0; i--)
     {
         if (clusters[i].size() == 0)
         {
