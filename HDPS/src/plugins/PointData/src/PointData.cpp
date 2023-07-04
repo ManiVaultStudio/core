@@ -300,19 +300,17 @@ void Points::init()
     _infoAction = new InfoAction(this, *this);
 
     if (isFull()) {
-        _dimensionsPickerGroupAction = new GroupAction(this, "Group");
+        _dimensionsPickerGroupAction = new GroupAction(this, "Dimensions Group");
 
         _dimensionsPickerGroupAction->setText("Dimensions");
         _dimensionsPickerGroupAction->setShowLabels(false);
         _dimensionsPickerGroupAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 
+        _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction, "Dimensions");
+
+        _dimensionsPickerGroupAction->addAction(_dimensionsPickerAction);
+
         connect(&getSmartPointer(), &Dataset<Points>::dataDimensionsChanged, this, [this]() -> void {
-            if (_dimensionsPickerAction == nullptr) {
-                _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction, "Dimensions");
-
-                _dimensionsPickerGroupAction->addAction(_dimensionsPickerAction);
-            }
-
             _dimensionsPickerAction->setPointsDataset(*this);
         });
     }

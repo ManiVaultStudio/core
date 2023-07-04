@@ -25,16 +25,6 @@ public:
 
 public:
 
-    // TODO: revisit
-    /** Widget states */
-    enum State {
-        Standard,   /** Standard representation of the action (default) */
-        Collapsed,  /** The widget is in a collapsed state and represented by a popup button */
-        Popup       /** The widget representation of the action in a popup */
-    };
-
-public:
-
     /**
      * Constructor
      * @param parent Parent widget

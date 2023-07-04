@@ -158,7 +158,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
         saveProjectAs();
     });
 
-    connect(&_editProjectSettingsAction, &TriggerAction::triggered, this, []() -> void {
+    connect(&_editProjectSettingsAction, &TriggerAction::triggered, this, [this]() -> void {
         auto* dialog = new ProjectSettingsDialog();
         connect(dialog, &ProjectSettingsDialog::finished, dialog, &ProjectSettingsDialog::deleteLater);
         dialog->open();

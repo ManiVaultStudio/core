@@ -11,7 +11,6 @@ EditProxyDatasetsAction::EditProxyDatasetsAction(QObject* parent, const Dataset<
     WidgetAction(parent, "Edit Proxy Datasets"),
     _points(points)
 {
-    setText("View proxy datasets");
     setToolTip("View proxy datasets");
     setIcon(Application::getIconFont("FontAwesome").getIcon("list"));
 }
