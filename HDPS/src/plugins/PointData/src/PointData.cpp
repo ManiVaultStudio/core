@@ -300,7 +300,7 @@ void Points::init()
     _infoAction = new InfoAction(this, *this);
 
     const auto updateDimensionsPickerAction = [this]() -> void {
-        _dimensionsPickerAction->setPointsDataset(getSourceDataset<Points>());
+        _dimensionsPickerAction->setPointsDataset(*this);
     };
 
     //if (isFull()) {
