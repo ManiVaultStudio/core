@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 
 # -----------------------------------------------------------------------------
-# Project: HDPS-core
+# Project: ManiVault-core
 # -----------------------------------------------------------------------------
 set(HDPS_CORE "hdps-core")
 project(${HDPS_CORE})
@@ -50,7 +50,7 @@ if(DEFINED ENV{HDPS_INSTALL_DIR})
         "***************************************************
         Using environment variable HDPS_INSTALL_DIR 
         $ENV{HDPS_INSTALL_DIR}
-        to indicate where the HDPS output will be installed,
+        to indicate where the ManiVault output will be installed,
         make sure the directory exists.
         ***************************************************")
         string(REPLACE "\n        " "\n" messageText "${messageText}")
@@ -62,7 +62,7 @@ endif()
 if(NOT DEFINED INSTALL_DIR)
     message(FATAL_ERROR "No install path provided! Set the cmake variable INSTALL_DIR or environment variable HDPS_INSTALL_DIR")
 else()
-    message(STATUS "Install HDPS to ${INSTALL_DIR}")
+    message(STATUS "Install ManiVault to ${INSTALL_DIR}")
 endif()
 
 
@@ -261,7 +261,7 @@ endif(MSVC)
 # Installation
 # -----------------------------------------------------------------------------
 
-# Install the HDPS executable 
+# Install the ManiVault executable 
 if(APPLE)
     set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
     set(WEBENGINEINSTALL_CMD "${CMAKE_CURRENT_SOURCE_DIR}/macos_webengineinstall.sh")
@@ -417,7 +417,7 @@ add_custom_command(TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
         -E make_directory ${INSTALL_DIR}/$<CONFIGURATION>/Plugins
 )
 
-# Install the HDPS executable
+# Install the ManiVault executable
 if(APPLE)
     add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault executable bundle"
@@ -450,6 +450,13 @@ if(NOT APPLE)
             --verbose
     )
 endif()
+
+# Install ManiVault licences
+add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault licences"
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${INSTALL_DIR}/$<CONFIGURATION>/license/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE ${INSTALL_DIR}/$<CONFIGURATION>/license/LICENSE
+)
 
 # Install examples
 add_custom_command(TARGET ${HDPS_EXE}  POST_BUILD
