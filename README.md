@@ -27,6 +27,6 @@ On success the binary and include package is available at [hdps-core in the LKEB
 
 ## License
 
-ManiVault is licensed under LGPL v3.0, refer to the [LICENSE file](https://github.com/ManiVaultStudio/core/blob/main/LICENSE) in the top level directory.
+ManiVault is licensed under LGPL v3.0, refer to the [LICENSE file](https://github.com/ManiVaultStudio/core/blob/master/LICENSE) in the top level directory.
 
 Copyright © 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
