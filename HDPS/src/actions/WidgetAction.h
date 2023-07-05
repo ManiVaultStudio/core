@@ -278,6 +278,13 @@ public: // Widget flags
      */
     virtual void setDefaultWidgetFlags(const std::int32_t& widgetFlags) final;
 
+    /**
+     * Set the widget flags
+     * @param widgetFlags Widget flags
+     * @param unset Whether to unset the default widget flag
+     */
+    virtual void setDefaultWidgetFlag(const std::int32_t& widgetFlags, bool unset = false) final;
+
 public: // Highlighting
 
     /**

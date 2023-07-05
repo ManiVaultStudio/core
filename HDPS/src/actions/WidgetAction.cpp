@@ -172,6 +172,14 @@ void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
     _defaultWidgetFlags = widgetFlags;
 }
 
+void WidgetAction::setDefaultWidgetFlag(const std::int32_t& widgetFlag, bool unset /*= false*/)
+{
+    if (unset)
+        _defaultWidgetFlags = _defaultWidgetFlags & ~static_cast<std::int32_t>(widgetFlag);
+    else
+        _defaultWidgetFlags |= static_cast<std::int32_t>(widgetFlag);
+}
+
 WidgetAction::HighlightOption WidgetAction::getHighlighting() const
 {
     return _highlighting;
