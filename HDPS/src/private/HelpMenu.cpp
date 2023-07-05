@@ -19,7 +19,8 @@ using namespace hdps::plugin;
 HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
     _aboutAction(nullptr),
-    _aboutQt(nullptr)
+    _aboutQt(nullptr),
+    _aboutThirdParties(nullptr)
 {
     setTitle("Help");
     setToolTip("ManiVault help");
