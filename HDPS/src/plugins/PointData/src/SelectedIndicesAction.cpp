@@ -52,15 +52,8 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
     _timer(),
     _dirty(false)
 {
-    auto selectedIndicesListView = new ListView();
-
-    //setMinimumWidth(0);
-    selectedIndicesListView->setFixedHeight(100);
-    //selectedIndicesListView->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-    //selectedIndicesListView->setFixedWidth(1);
-    selectedIndicesListView->setProperty("sizeHint", QSize(0, 0));
-
-    auto selectedIndicesLayout = new QVBoxLayout();
+    auto selectedIndicesListView    = new ListView();
+    auto selectedIndicesLayout      = new QVBoxLayout();
 
     selectedIndicesLayout->setContentsMargins(0, 0, 0, 0);
 
