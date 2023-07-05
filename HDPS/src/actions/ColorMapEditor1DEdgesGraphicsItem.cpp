@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "ColorMapEditor1DEdgesGraphicsItem.h"
 #include "ColorMapEditor1DNode.h"
 #include "ColorMapEditor1DWidget.h"
