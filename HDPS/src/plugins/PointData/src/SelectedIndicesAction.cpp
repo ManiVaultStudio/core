@@ -52,22 +52,21 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
     _timer(),
     _dirty(false)
 {
-    auto selectedIndicesListView = new QListView();
+    auto selectedIndicesListView = new ListView();
 
+    //setMinimumWidth(0);
     selectedIndicesListView->setFixedHeight(100);
+    //selectedIndicesListView->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+    //selectedIndicesListView->setFixedWidth(1);
+    selectedIndicesListView->setProperty("sizeHint", QSize(0, 0));
 
-    auto selectedIndicesLayout = new QHBoxLayout();
+    auto selectedIndicesLayout = new QVBoxLayout();
 
     selectedIndicesLayout->setContentsMargins(0, 0, 0, 0);
+
     selectedIndicesLayout->addWidget(selectedIndicesListView);
-
-    auto updateLayout = new QVBoxLayout();
-
-    updateLayout->addWidget(selectedIndicesAction->getUpdateAction().createWidget(this));
-    updateLayout->addWidget(selectedIndicesAction->getManualUpdateAction().createWidget(this));
-    updateLayout->addStretch(1);
-
-    selectedIndicesLayout->addLayout(updateLayout);
+    selectedIndicesLayout->addWidget(selectedIndicesAction->getUpdateAction().createWidget(this));
+    selectedIndicesLayout->addWidget(selectedIndicesAction->getManualUpdateAction().createWidget(this));
 
     setLayout(selectedIndicesLayout);
 

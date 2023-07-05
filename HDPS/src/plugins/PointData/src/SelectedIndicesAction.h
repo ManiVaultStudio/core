@@ -8,6 +8,7 @@
 #include <actions/ToggleAction.h>
 
 #include <QTimer>
+#include <QListView>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -36,6 +37,19 @@ protected:
          * @param selectedIndicesAction Pointer to selected indices action
          */
         Widget(QWidget* parent, SelectedIndicesAction* selectedIndicesAction);
+
+    protected:
+
+        /** Inherit list view to override size hint method */
+        class ListView : public QListView
+        {
+            using QListView::QListView;
+
+        public:
+
+            /** Return smallest possible size hint to avoid layout problems */
+            QSize sizeHint() const override { return QSize(0, 0); }
+        };
 
     private:
         QTimer  _timer;     /** Timer to sparingly update the number of selected points */
