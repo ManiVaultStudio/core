@@ -160,6 +160,10 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
                 TriggerAction publishAction(this, "Publish");
                 TriggerAction cancelAction(this, "Cancel");
 
+                nameAction.setConnectionPermissionsToForceNone();
+                publishAction.setConnectionPermissionsToForceNone();
+                cancelAction.setConnectionPermissionsToForceNone();
+
                 nameAction.setToolTip("Name of the shared parameter");
 
                 parameterLayout.addWidget(nameAction.createLabelWidget(&publishDialog), 0, 0);
@@ -239,6 +243,8 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
 
         return false;
     }
+
+    return false;
 }
 
 }
