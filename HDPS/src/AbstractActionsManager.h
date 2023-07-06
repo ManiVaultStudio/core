@@ -315,8 +315,6 @@ public: // Linking
         
             if (privateAction->isConnected())
                 privateAction->disconnectFromPublicAction(recursive);
-            else
-                throw std::runtime_error("Private action is not connected to a public action");
 
             privateAction->_publicAction = nullptr;
         }
