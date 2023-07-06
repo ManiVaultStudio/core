@@ -69,18 +69,10 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     if (!isEnabled())
                         break;
 
-                    if (getAction()->isConnectionPermissionFlagSet(WidgetAction::ConnectionPermissionFlag::ForceNone))
+                    if (!getAction()->mayConnect(WidgetAction::Gui))
                         break;
 
-                    if (!getAction()->mayPublish(WidgetAction::Gui) && !getAction()->mayConnect(WidgetAction::Gui) && !getAction()->mayDisconnect(WidgetAction::Gui))
-                        break;
-                    
-                    auto contextMenu = getAction()->getContextMenu(this);
-
-                    if (contextMenu->actions().isEmpty())
-                        return QWidget::eventFilter(target, event);
-
-                    contextMenu->exec(cursor().pos());
+                    getAction()->startDrag();
 
                     break;
                 }
@@ -90,10 +82,18 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     if (!isEnabled())
                         break;
 
-                    if (!getAction()->mayConnect(WidgetAction::Gui))
+                    if (getAction()->isConnectionPermissionFlagSet(WidgetAction::ConnectionPermissionFlag::ForceNone))
                         break;
 
-                    getAction()->startDrag();
+                    if (!getAction()->mayPublish(WidgetAction::Gui) && !getAction()->mayConnect(WidgetAction::Gui) && !getAction()->mayDisconnect(WidgetAction::Gui))
+                        break;
+
+                    auto contextMenu = getAction()->getContextMenu(this);
+
+                    if (contextMenu->actions().isEmpty())
+                        return QWidget::eventFilter(target, event);
+
+                    contextMenu->exec(cursor().pos());
 
                     break;
                 }

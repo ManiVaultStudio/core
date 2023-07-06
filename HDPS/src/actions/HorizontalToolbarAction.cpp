@@ -83,8 +83,14 @@ void HorizontalToolbarAction::Widget::setActionWidgets()
         delete layoutItem;
     }
 
-    for (auto actionItem : _horizontalToolbarAction->getActionItems())
-        _toolbarLayout.addWidget(actionItem->createWidget(&_toolbarWidget));
+    for (auto actionItem : _horizontalToolbarAction->getActionItems()) {
+        auto stretchAction = dynamic_cast<const StretchAction*>(actionItem->getAction());
+
+        if (stretchAction)
+            _toolbarLayout.addWidget(actionItem->createWidget(&_toolbarWidget), stretchAction->getStretch());
+        else
+            _toolbarLayout.addWidget(actionItem->createWidget(&_toolbarWidget));
+    }
 
     updateLayout();
 }

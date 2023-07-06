@@ -265,9 +265,9 @@ bool WidgetAction::isConnected() const
     return _publicAction != nullptr;
 }
 
-void WidgetAction::publish(const QString& name /*= ""*/)
+bool WidgetAction::publish(const QString& name /*= ""*/)
 {
-    hdps::actions().publishPrivateAction(this, name);
+    return hdps::actions().publishPrivateAction(this, name);
 }
 
 void WidgetAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
@@ -285,31 +285,7 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
 
     actions().addPrivateActionToPublicAction(this, publicAction);
 
-    /*
-    const auto updateReadOnly = [this]() -> void {
-        setEnabled(_publicAction->isEnabled());
-    };
-
-    updateReadOnly();
-
-    connect(_publicAction, &QAction::changed, this, updateReadOnly);
-    */
-
     emit isConnectedChanged(isConnected());
-
-    /*
-    if (recursive) {
-        for (auto child : children()) {
-            auto action = dynamic_cast<WidgetAction*>(child);
-
-            if (action == nullptr)
-                continue;
-
-            action->cacheConnectionPermissions(true);
-            action->setConnectionPermissionsToNone(true);
-        }
-    }
-    */
 }
 
 void WidgetAction::connectToPublicActionByName(const QString& publicActionName)

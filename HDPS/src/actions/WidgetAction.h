@@ -373,8 +373,9 @@ public: // Connections and publishing
     /**
      * Publish this action so that other actions can connect to it
      * @param name Name of the published widget action (if empty, a configuration dialog will popup)
+     * @return Boolean determining whether the action is successfully published or not
      */
-    virtual void publish(const QString& name = "") final;
+    virtual bool publish(const QString& name = "") final;
 
 protected: 
 

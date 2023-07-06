@@ -78,28 +78,42 @@ public:
      */
     template<typename ActionType>
     void addAction(ActionType* action) {
-        Q_ASSERT(action != nullptr);
+        try
+        {
+            Q_ASSERT(action != nullptr);
 
-        _actions << action;
+            if (action == nullptr)
+                throw std::runtime_error("Action may not be a null pointer");
 
-        emit actionAdded(action);
+            _actions << action;
 
-        connect(action, &gui::WidgetAction::scopeChanged, this, [this, action](const gui::WidgetAction::Scope& scope) -> void {
-            switch (scope)
-            {
-                case gui::WidgetAction::Scope::Public: {
-                    addPublicAction(action);
-                    break;
-                }
+            emit actionAdded(action);
+
+            connect(action, &gui::WidgetAction::scopeChanged, this, [this, action](const gui::WidgetAction::Scope& scope) -> void {
+                switch (scope)
+                {
+                    case gui::WidgetAction::Scope::Public: {
+                        addPublicAction(action);
+                        break;
+                    }
                 
-                case gui::WidgetAction::Scope::Private: {
-                    removePublicAction(action);
-                    break;
+                    case gui::WidgetAction::Scope::Private: {
+                        removePublicAction(action);
+                        break;
+                    }
                 }
-            }
-        });
+            });
 
-        addActionType(action->getTypeString());
+            addActionType(action->getTypeString());
+        }
+        catch (std::exception& e)
+        {
+            util::exceptionMessageBox("Unable to add action to actions manager", e);
+        }
+        catch (...)
+        {
+            util::exceptionMessageBox("Unable to add action to actions manager");
+        }
     }
 
     /**
@@ -108,10 +122,14 @@ public:
      */
     template<typename ActionType>
     void removeAction(ActionType* action) {
-        Q_ASSERT(action != nullptr);
-
+        
         try
         {
+            Q_ASSERT(action != nullptr);
+
+            if (action == nullptr)
+                throw std::runtime_error("Action may not be a null pointer");
+
             const auto actionId = action->getId();
 
             emit actionAboutToBeRemoved(action);
@@ -128,11 +146,11 @@ public:
         }
         catch (std::exception& e)
         {
-            util::exceptionMessageBox(QString("Unable to remove %1 from actions manager").arg(action->text()), e);
+            util::exceptionMessageBox("Unable to remove action from actions manager", e);
         }
         catch (...)
         {
-            util::exceptionMessageBox(QString("Unable to remove %1 from actions manager").arg(action->text()));
+            util::exceptionMessageBox("Unable to remove action from actions manager");
         }
     }
 
@@ -143,11 +161,25 @@ private: // Public actions
      * @param publicAction Pointer to public action
      */
     virtual void addPublicAction(gui::WidgetAction* publicAction) final {
-        Q_ASSERT(publicAction != nullptr);
+        try
+        {
+            Q_ASSERT(publicAction != nullptr);
 
-        _publicActions << publicAction;
+            if (publicAction == nullptr)
+                throw std::runtime_error("Public action may not be a null pointer");
 
-        emit publicActionAdded(publicAction);
+            _publicActions << publicAction;
+
+            emit publicActionAdded(publicAction);
+        }
+        catch (std::exception& e)
+        {
+            util::exceptionMessageBox("Unable to add public action:", e);
+        }
+        catch (...)
+        {
+            util::exceptionMessageBox("Unable to add public action:");
+        }
     }
 
     /**
@@ -155,19 +187,33 @@ private: // Public actions
      * @param publicAction Pointer to public action
      */
     virtual void removePublicAction(gui::WidgetAction* publicAction) final {
-        Q_ASSERT(publicAction != nullptr);
-
-        if (!_publicActions.contains(publicAction))
-            return;
-
-        emit publicActionAboutToBeRemoved(publicAction);
+        try
         {
-            for (auto connectedAction : publicAction->getConnectedActions())
-                disconnectPrivateActionFromPublicAction(connectedAction, true);
+            Q_ASSERT(publicAction != nullptr);
 
-            _publicActions.removeOne(publicAction);
+            if (publicAction == nullptr)
+                throw std::runtime_error("Public action may not be a null pointer");
+
+            if (!_publicActions.contains(publicAction))
+                throw std::runtime_error(QString("%1 not found").arg(publicAction->text()).toStdString());
+
+            emit publicActionAboutToBeRemoved(publicAction);
+            {
+                for (auto connectedAction : publicAction->getConnectedActions())
+                    disconnectPrivateActionFromPublicAction(connectedAction, true);
+
+                _publicActions.removeOne(publicAction);
+            }
+            emit publicActionRemoved(publicAction->getId());
         }
-        emit publicActionRemoved(publicAction->getId());
+        catch (std::exception& e)
+        {
+            util::exceptionMessageBox("Unable to remove public action:", e);
+        }
+        catch (...)
+        {
+            util::exceptionMessageBox("Unable to remove public action:");
+        }
     }
 
 public: // Linking
@@ -177,8 +223,9 @@ public: // Linking
      * @param privateAction Pointer to private action to publish
      * @param name Name of the published widget action (if empty, a name choosing dialog will popup)
      * @param recursive Whether to also publish the child actions recursively
+     * @return Boolean determining whether the action is successfully published or not
      */
-    virtual void publishPrivateAction(gui::WidgetAction* privateAction, const QString& name = "", bool recursive = true) = 0;
+    virtual bool publishPrivateAction(gui::WidgetAction* privateAction, const QString& name = "", bool recursive = true) = 0;
 
     /**
      * Connect \p privateAction to \p publicAction
@@ -187,14 +234,18 @@ public: // Linking
      * @param recursive Whether to also connect descendant child actions
      */
     virtual void connectPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction, bool recursive) final {
-        Q_ASSERT(privateAction != nullptr);
-        Q_ASSERT(publicAction != nullptr);
-
-        if (privateAction == nullptr || publicAction == nullptr)
-            return;
-
+        
         try
         {
+            Q_ASSERT(privateAction != nullptr);
+            Q_ASSERT(publicAction != nullptr);
+
+            if (privateAction == nullptr)
+                throw std::runtime_error("Private action may not be a null pointer");
+
+            if (publicAction == nullptr)
+                throw std::runtime_error("Public action may not be a null pointer");
+
             if (!privateAction->mayConnectToPublicAction(publicAction))
                 throw std::runtime_error(QString("%1 may not be connected to %2").arg(privateAction->getLocation(), publicAction->getLocation()).toStdString());
 
@@ -202,17 +253,17 @@ public: // Linking
                 return;
 
             if (privateAction->isConnected() && (privateAction->getPublicAction() == publicAction))
-                throw std::runtime_error(QString("%1 is already connected to %2").arg(privateAction->getLocation(), publicAction->getLocation()).toLatin1());
+                throw std::runtime_error(QString("%1 is already connected to %2").arg(privateAction->getLocation(), publicAction->getLocation()).toStdString());
 
             privateAction->connectToPublicAction(publicAction, recursive);
         }
         catch (std::exception& e)
         {
-            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateAction->text(), publicAction->text()), e);
+            util::exceptionMessageBox("Unable to connect private action to public action", e);
         }
         catch (...)
         {
-            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateAction->text(), publicAction->text()));
+            util::exceptionMessageBox("Unable to connect private action to public action");
         }
     }
 
@@ -223,24 +274,28 @@ public: // Linking
      * @param publicActionName Name of the public action (ask for name if empty)
      */
     virtual void connectPrivateActions(gui::WidgetAction* privateSourceAction, gui::WidgetAction* privateTargetAction, const QString& publicActionName = "") final {
-        Q_ASSERT(privateSourceAction != nullptr);
-        Q_ASSERT(privateTargetAction != nullptr);
-
-        if (privateSourceAction == nullptr || privateTargetAction == nullptr)
-            return;
 
         try
         {
-            privateTargetAction->publish(publicActionName);
-            privateSourceAction->connectToPublicAction(privateTargetAction->getPublicAction(), true);
+            Q_ASSERT(privateSourceAction != nullptr);
+            Q_ASSERT(privateTargetAction != nullptr);
+
+            if (privateSourceAction == nullptr)
+                throw std::runtime_error("Private source action may not be a null pointer");
+
+            if (privateTargetAction == nullptr)
+                throw std::runtime_error("Private target action may not be a null pointer");
+
+            if (privateTargetAction->publish(publicActionName))
+                privateSourceAction->connectToPublicAction(privateTargetAction->getPublicAction(), true);
         }
         catch (std::exception& e)
         {
-            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateSourceAction->text(), privateTargetAction->text()), e);
+            util::exceptionMessageBox("Unable to connect private actions", e);
         }
         catch (...)
         {
-            util::exceptionMessageBox(QString("Unable to connect %1 to %2:").arg(privateSourceAction->text(), privateTargetAction->text()));
+            util::exceptionMessageBox("Unable to connect private actions");
         }
     }
 
@@ -250,25 +305,28 @@ public: // Linking
      * @param recursive Whether to also disconnect descendant child actions
      */
     virtual void disconnectPrivateActionFromPublicAction(gui::WidgetAction* privateAction, bool recursive) final {
-        Q_ASSERT(privateAction != nullptr);
 
-        if (privateAction == nullptr)
-            return;
-        
         try
         {
+            Q_ASSERT(privateAction != nullptr);
+
+            if (privateAction == nullptr)
+                throw std::runtime_error("Private action may not be a null pointer");
+        
             if (privateAction->isConnected())
                 privateAction->disconnectFromPublicAction(recursive);
+            else
+                throw std::runtime_error("Private action is not connected to a public action");
 
             privateAction->_publicAction = nullptr;
         }
         catch (std::exception& e)
         {
-            util::exceptionMessageBox(QString("Unable to disconnect %1 to %2:").arg(privateAction->text(), privateAction->getPublicAction()->text()), e);
+            util::exceptionMessageBox("Unable to disconnect private action from public action:", e);
         }
         catch (...)
         {
-            util::exceptionMessageBox(QString("Unable to disconnect %1 to %2:").arg(privateAction->text(), privateAction->getPublicAction()->text()));
+            util::exceptionMessageBox("Unable to disconnect private action from public action:");
         }
     }
 
@@ -280,29 +338,33 @@ protected:
      * @param publicAction Pointer to public action
      */
     virtual void addPrivateActionToPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) final {
-        Q_ASSERT(privateAction != nullptr);
-        Q_ASSERT(publicAction != nullptr);
-
-        if (privateAction == nullptr || publicAction == nullptr)
-            return;
 
         try
         {
+            Q_ASSERT(privateAction != nullptr);
+            Q_ASSERT(publicAction != nullptr);
+
+            if (privateAction == nullptr)
+                throw std::runtime_error("Private action may not be a null pointer");
+
+            if (publicAction == nullptr)
+                throw std::runtime_error("Public action may not be a null pointer");
+
             publicAction->getConnectedActions() << privateAction;
 
             emit publicAction->actionConnected(privateAction);
 
             connect(privateAction, &gui::WidgetAction::destroyed, this, [this, privateAction, publicAction]() -> void {
                 removePrivateActionFromPublicAction(privateAction, publicAction);
-                });
+            });
         }
         catch (std::exception& e)
         {
-            util::exceptionMessageBox(QString("Unable to add %1 to %2:").arg(privateAction->text(), publicAction->text()), e);
+            util::exceptionMessageBox("Unable to add private action to public action:", e);
         }
         catch (...)
         {
-            util::exceptionMessageBox(QString("Unable to add %1 to %2:").arg(privateAction->text(), publicAction->text()));
+            util::exceptionMessageBox("Unable to add private action to public action:");
         }
     }
 
@@ -312,25 +374,29 @@ protected:
      * @param publicAction Pointer to public action
      */
     virtual void removePrivateActionFromPublicAction(gui::WidgetAction* privateAction, gui::WidgetAction* publicAction) final {
-        Q_ASSERT(privateAction != nullptr);
-        Q_ASSERT(publicAction != nullptr);
-
-        if (privateAction == nullptr || publicAction == nullptr)
-            return;
-
+        
         try
         {
+            Q_ASSERT(privateAction != nullptr);
+            Q_ASSERT(publicAction != nullptr);
+
+            if (privateAction == nullptr)
+                throw std::runtime_error("Private action may not be a null pointer");
+
+            if (publicAction == nullptr)
+                throw std::runtime_error("Public action may not be a null pointer");
+
             publicAction->getConnectedActions().removeOne(privateAction);
 
             emit publicAction->actionDisconnected(privateAction);
         }
         catch (std::exception& e)
         {
-            util::exceptionMessageBox(QString("Unable to remove %1 from %2:").arg(privateAction->text(), publicAction->text()), e);
+            util::exceptionMessageBox("Unable to remove private action from public action:", e);
         }
         catch (...)
         {
-            util::exceptionMessageBox(QString("Unable to remove %1 from %2:").arg(privateAction->text(), publicAction->text()));
+            util::exceptionMessageBox("Unable to remove private action from public action:");
         }
     }
 
