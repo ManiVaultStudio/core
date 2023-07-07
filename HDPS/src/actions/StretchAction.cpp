@@ -7,9 +7,9 @@
 namespace hdps::gui {
 
 StretchAction::StretchAction(QObject* parent, const QString& title, std::int32_t stretch /*= 1*/) :
-    WidgetAction(parent, title),
-    _stretch(stretch)
+    WidgetAction(parent, title)
 {
+    setStretch(stretch);
 }
 
 void StretchAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)

@@ -59,17 +59,6 @@ public: // Serialization
      * @return Variant map representation of the widget action
      */
     QVariantMap toVariantMap() const override;
-
-signals:
-
-    /**
-     * Signals that the layout stretch changed to \p stretch
-     * @param stretch Layout stretch
-     */
-    void stretchChanged(std::int32_t stretch);
-
-private:
-    std::int32_t    _stretch;       /** Stretch in group action layout */
 };
 
 }

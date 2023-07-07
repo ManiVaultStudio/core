@@ -64,44 +64,44 @@ void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
     qDebug() << "Loading public actions";
 #endif
     
-        variantMapMustContain(variantMap, "PublicActions");
+    variantMapMustContain(variantMap, "PublicActions");
 
-        const auto publicActionsMap = variantMap["PublicActions"].toList();
+    const auto publicActionsMap = variantMap["PublicActions"].toList();
 
-        for (const auto& publicActionVariant : publicActionsMap) {
-            try
-            {
-                const auto publicActionMap      = publicActionVariant.toMap();
-                const auto publicActionTitle    = publicActionMap["Title"].toString();
-                const auto metaType             = publicActionMap["ActionType"].toString();
+    for (const auto& publicActionVariant : publicActionsMap) {
+        try
+        {
+            const auto publicActionMap      = publicActionVariant.toMap();
+            const auto publicActionTitle    = publicActionMap["Title"].toString();
+            const auto metaType             = publicActionMap["ActionType"].toString();
 
-                if (metaType.isEmpty())
-                    throw std::runtime_error(QString("Action type is not specified for %1").arg(publicActionTitle).toLatin1());
+            if (metaType.isEmpty())
+                throw std::runtime_error(QString("Action type is not specified for %1").arg(publicActionTitle).toLatin1());
 
-                const auto metaTypeId   = QMetaType::type(metaType.toLatin1());
-                const auto metaObject   = QMetaType::metaObjectForType(metaTypeId);
+            const auto metaTypeId   = QMetaType::type(metaType.toLatin1());
+            const auto metaObject   = QMetaType::metaObjectForType(metaTypeId);
                 
-                if (!metaObject)
-                    throw std::runtime_error(QString("Meta object type '%1' for '%2' is not known. Did you forget to register the action correctly with Qt meta object system? See ToggleAction.h for an example.").arg(metaType, publicActionTitle).toLatin1());
+            if (!metaObject)
+                throw std::runtime_error(QString("Meta object type '%1' for '%2' is not known. Did you forget to register the action correctly with Qt meta object system? See ToggleAction.h for an example.").arg(metaType, publicActionTitle).toLatin1());
 
-                auto metaObjectInstance = metaObject->newInstance(Q_ARG(QObject*, this), Q_ARG(QString, publicActionTitle));
-                auto publicAction       = dynamic_cast<WidgetAction*>(metaObjectInstance);
+            auto metaObjectInstance = metaObject->newInstance(Q_ARG(QObject*, this), Q_ARG(QString, publicActionTitle));
+            auto publicAction       = dynamic_cast<WidgetAction*>(metaObjectInstance);
 
-                if (!publicAction)
-                    throw std::runtime_error(QString("Unable to create a new instance of type '%1'").arg(metaType).toLatin1());
+            if (!publicAction)
+                throw std::runtime_error(QString("Unable to create a new instance of type '%1'").arg(metaType).toLatin1());
 
-                publicAction->fromVariantMap(publicActionMap);
+            publicAction->fromVariantMap(publicActionMap);
 
-                makeActionPublic(publicAction);
-            }
-            catch (std::exception& e)
-            {
-                exceptionMessageBox("Unable to load public action:", e);
-            }
-            catch (...)
-            {
-                exceptionMessageBox("Unable to load public action:");
-            }
+            makeActionPublic(publicAction);
+        }
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to load public action:", e);
+        }
+        catch (...)
+        {
+            exceptionMessageBox("Unable to load public action:");
+        }
     }
 }
 
@@ -131,91 +131,120 @@ QVariantMap ActionsManager::toVariantMap() const
     return variantMap;
 }
 
-void ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QString& name /*= ""*/, bool recursive /*= true*/)
+bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QString& name /*= ""*/, bool recursive /*= true*/)
 {
-    Q_ASSERT(privateAction != nullptr);
+    try
+    {
+        Q_ASSERT(privateAction != nullptr);
 
-    if (privateAction == nullptr)
-        return;
+        if (privateAction == nullptr)
+            throw std::runtime_error("Supplied private action may not be a null pointer");
 
-    auto& askForSharedParameterNameAction = hdps::settings().getParametersSettings().getAskForSharedParameterNameAction();
+        auto& askForSharedParameterNameAction = hdps::settings().getParametersSettings().getAskForSharedParameterNameAction();
 
-    if (name.isEmpty()) {
-        if (askForSharedParameterNameAction.isChecked()) {
-            auto& fontAwesome = Application::getIconFont("FontAwesome");
+        if (name.isEmpty()) {
+            if (askForSharedParameterNameAction.isChecked()) {
+                auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-            QDialog publishDialog;
+                QDialog publishDialog;
 
-            publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
-            publishDialog.setWindowTitle("Publish " + privateAction->getLocation());
-            publishDialog.setMinimumWidth(400);
+                publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
+                publishDialog.setWindowTitle("Publish " + privateAction->getLocation());
+                publishDialog.setMinimumWidth(400);
 
-            QVBoxLayout mainLayout;
-            QGridLayout parameterLayout;
-            QHBoxLayout buttonsLayout;
+                QVBoxLayout mainLayout;
+                QGridLayout parameterLayout;
+                QHBoxLayout buttonsLayout;
 
-            StringAction nameAction(this, "Name", privateAction->text());
-            TriggerAction publishAction(this, "Publish");
-            TriggerAction cancelAction(this, "Cancel");
+                StringAction nameAction(this, "Name", privateAction->text());
+                TriggerAction publishAction(this, "Publish");
+                TriggerAction cancelAction(this, "Cancel");
 
-            nameAction.setToolTip("Name of the shared parameter");
+                nameAction.setConnectionPermissionsToForceNone();
+                publishAction.setConnectionPermissionsToForceNone();
+                cancelAction.setConnectionPermissionsToForceNone();
 
-            parameterLayout.addWidget(nameAction.createLabelWidget(&publishDialog), 0, 0);
-            parameterLayout.addWidget(nameAction.createWidget(&publishDialog), 0, 1);
+                nameAction.setToolTip("Name of the shared parameter");
 
-            buttonsLayout.addWidget(askForSharedParameterNameAction.createWidget(&publishDialog));
-            buttonsLayout.addSpacing(10);
-            buttonsLayout.addWidget(publishAction.createWidget(&publishDialog));
-            buttonsLayout.addWidget(cancelAction.createWidget(&publishDialog));
+                parameterLayout.addWidget(nameAction.createLabelWidget(&publishDialog), 0, 0);
+                parameterLayout.addWidget(nameAction.createWidget(&publishDialog), 0, 1);
 
-            mainLayout.addLayout(&parameterLayout);
-            mainLayout.addSpacing(10);
-            mainLayout.addLayout(&buttonsLayout);
+                buttonsLayout.addWidget(askForSharedParameterNameAction.createWidget(&publishDialog));
+                buttonsLayout.addSpacing(10);
+                buttonsLayout.addWidget(publishAction.createWidget(&publishDialog));
+                buttonsLayout.addWidget(cancelAction.createWidget(&publishDialog));
 
-            publishDialog.setLayout(&mainLayout);
+                mainLayout.addLayout(&parameterLayout);
+                mainLayout.addSpacing(10);
+                mainLayout.addLayout(&buttonsLayout);
 
-            const auto updateActionsReadOnly = [&publishAction, &nameAction]() -> void {
-                publishAction.setEnabled(!nameAction.getString().isEmpty());
-            };
+                publishDialog.setLayout(&mainLayout);
 
-            connect(&nameAction, &StringAction::stringChanged, this, updateActionsReadOnly);
-            connect(&publishAction, &TriggerAction::triggered, &publishDialog, &QDialog::accept);
-            connect(&cancelAction, &TriggerAction::triggered, &publishDialog, &QDialog::reject);
+                const auto updateActionsReadOnly = [&publishAction, &nameAction]() -> void {
+                    publishAction.setEnabled(!nameAction.getString().isEmpty());
+                };
 
-            updateActionsReadOnly();
+                connect(&nameAction, &StringAction::stringChanged, this, updateActionsReadOnly);
+                connect(&publishAction, &TriggerAction::triggered, &publishDialog, &QDialog::accept);
+                connect(&cancelAction, &TriggerAction::triggered, &publishDialog, &QDialog::reject);
 
-            publishDialog.open();
+                updateActionsReadOnly();
 
-            QEventLoop eventLoop;
+                publishDialog.open();
+
+                QEventLoop eventLoop;
             
-            QObject::connect(&publishDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                QObject::connect(&publishDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
             
-            eventLoop.exec();
+                eventLoop.exec();
 
-            if (publishDialog.result() == QDialog::Accepted)
-                publishPrivateAction(privateAction, nameAction.getString(), true);
+                switch (publishDialog.result())
+                {
+                    case QDialog::Accepted:
+                        return publishPrivateAction(privateAction, nameAction.getString(), true);
+
+                    case QDialog::Rejected:
+                        return false;
+                }
+            }
+            else {
+                return publishPrivateAction(privateAction, QString("%1_pub").arg(privateAction->text()), true);
+            }
         }
         else {
-            publishPrivateAction(privateAction, QString("%1_pub").arg(privateAction->text()), true);
+    #ifdef ACTIONS_MANAGER_VERBOSE
+            qDebug() << __FUNCTION__ << privateAction->text();
+    #endif
+
+            if (privateAction->isPublished())
+                throw std::runtime_error("Action is already published");
+
+            auto publicAction = privateAction->getPublicCopy();
+
+            publicAction->setText(name);
+
+            connectPrivateActionToPublicAction(privateAction, publicAction, true);
+
+            emit privateAction->isPublishedChanged(privateAction->isPublished());
+            emit privateAction->isConnectedChanged(privateAction->isConnected());
+
+            return true;
         }
     }
-    else {
-#ifdef ACTIONS_MANAGER_VERBOSE
-        qDebug() << __FUNCTION__ << privateAction->text();
-#endif
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to publish parameter:", e);
 
-        if (privateAction->isPublished())
-            throw std::runtime_error("Action is already published");
-
-        auto publicAction = privateAction->getPublicCopy();
-
-        publicAction->setText(name);
-
-        connectPrivateActionToPublicAction(privateAction, publicAction, true);
-
-        emit privateAction->isPublishedChanged(privateAction->isPublished());
-        emit privateAction->isConnectedChanged(privateAction->isConnected());
+        return false;
     }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to publish parameter:");
+
+        return false;
+    }
+
+    return false;
 }
 
 }
