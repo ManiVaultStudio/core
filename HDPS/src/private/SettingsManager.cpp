@@ -44,7 +44,7 @@ void SettingsManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
-    AbstractManager::initialize();
+    AbstractSettingsManager::initialize();
 }
 
 void SettingsManager::reset()

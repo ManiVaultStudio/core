@@ -262,7 +262,7 @@ void EventManager::notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset)
 
 void EventManager::initialize()
 {
-    AbstractManager::initialize();
+    AbstractEventManager::initialize();
 }
 
 void EventManager::reset()

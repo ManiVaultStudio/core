@@ -226,7 +226,7 @@ void ProjectManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
-    AbstractManager::initialize();
+    AbstractProjectManager::initialize();
 }
 
 void ProjectManager::reset()

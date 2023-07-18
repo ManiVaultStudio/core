@@ -214,7 +214,7 @@ void DataManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
-    AbstractManager::initialize();
+    AbstractDataManager::initialize();
 }
 
 DataManager::~DataManager()

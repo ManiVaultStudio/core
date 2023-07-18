@@ -25,7 +25,6 @@ DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
     AbstractDataHierarchyManager(),
     _items()
 {
-    setObjectName("Hierarchy");
 }
 
 DataHierarchyManager::~DataHierarchyManager()
@@ -39,7 +38,7 @@ void DataHierarchyManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
-    AbstractManager::initialize();
+    AbstractDataHierarchyManager::initialize();
 }
 
 void DataHierarchyManager::reset()

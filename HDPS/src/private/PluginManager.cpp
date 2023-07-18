@@ -53,7 +53,7 @@ void PluginManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
-    AbstractManager::initialize();
+    AbstractPluginManager::initialize();
 
     if (isInitialized())
         return;

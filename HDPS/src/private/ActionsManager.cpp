@@ -39,7 +39,7 @@ void ActionsManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
-    AbstractManager::initialize();
+    AbstractActionsManager::initialize();
 }
 
 void ActionsManager::reset()

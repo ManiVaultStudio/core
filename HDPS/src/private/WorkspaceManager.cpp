@@ -156,7 +156,7 @@ void WorkspaceManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
-    AbstractManager::initialize();
+    AbstractWorkspaceManager::initialize();
 
     if (isInitialized())
         return;
