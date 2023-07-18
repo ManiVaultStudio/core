@@ -33,15 +33,7 @@ using namespace hdps::gui;
 namespace hdps {
 
 Core::Core() :
-    _actionsManager(),
-    _pluginManager(),
-    _eventManager(),
-    _dataManager(),
-    _dataHierarchyManager(),
-    _workspaceManager(),
-    _projectManager(),
-    _settingsManager(),
-    _progressManager()
+    CoreInterface()
 {
     _datasetGroupingEnabled = Application::current()->getSetting("Core/DatasetGroupingEnabled", false).toBool();
 }
@@ -64,7 +56,7 @@ void Core::init()
     _workspaceManager.reset(new WorkspaceManager());
     _projectManager.reset(new ProjectManager());
     _settingsManager.reset(new SettingsManager());
-    _progressManager.reset(new ProgressManager());
+    _taskManager.reset(new TaskManager());
 
     _actionsManager->initialize();
     _pluginManager->initialize();
@@ -74,7 +66,7 @@ void Core::init()
     _workspaceManager->initialize();
     _projectManager->initialize();
     _settingsManager->initialize();
-    _progressManager->initialize();
+    _taskManager->initialize();
 
     CoreInterface::init();
 }
@@ -89,7 +81,7 @@ void Core::reset()
     _workspaceManager->reset();
     _projectManager->reset();
     _settingsManager->reset();
-    _progressManager->reset();
+    _taskManager->reset();
 }
 
 void Core::addPlugin(plugin::Plugin* plugin)
@@ -386,9 +378,9 @@ AbstractSettingsManager& Core::getSettingsManager()
     return *_settingsManager;
 }
 
-AbstractProgressManager& Core::getProgressManager()
+AbstractTaskManager& Core::getTaskManager()
 {
-    return *_progressManager;
+    return *_taskManager;
 }
 
 AbstractDataHierarchyManager& Core::getDataHierarchyManager()

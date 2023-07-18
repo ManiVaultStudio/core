@@ -16,7 +16,7 @@
 #include "WorkspaceManager.h"
 #include "ProjectManager.h"
 #include "SettingsManager.h"
-#include "ProgressManager.h"
+#include "TaskManager.h"
 
 #include <memory>
 #include <unordered_map>
@@ -142,7 +142,7 @@ public: // Managers
     AbstractWorkspaceManager& getWorkspaceManager() override;
     AbstractProjectManager& getProjectManager() override;
     AbstractSettingsManager& getSettingsManager() override;
-    AbstractProgressManager& getProgressManager() override;
+    AbstractTaskManager& getTaskManager() override;
 
 private:
     QScopedPointer<ActionsManager>          _actionsManager;            /** Actions manager for storing actions */
@@ -153,7 +153,7 @@ private:
     QScopedPointer<WorkspaceManager>        _workspaceManager;          /** Workspace manager for controlling widgets layout */
     QScopedPointer<ProjectManager>          _projectManager;            /** Manager for loading/saving projects */
     QScopedPointer<SettingsManager>         _settingsManager;           /** Manager for managing global settings */
-    QScopedPointer<ProgressManager>         _progressManager;           /** Manager for managing global progress */
+    QScopedPointer<TaskManager>             _taskManager;               /** Manager for managing global tasks */
 
     friend class DataHierarchyManager;
 };

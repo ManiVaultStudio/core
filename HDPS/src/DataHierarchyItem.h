@@ -42,7 +42,7 @@ public:
     enum class TaskStatus {
         Undefined = -1,     /** Task status is undefined */
         Idle,               /** Task is idle */
-        Running,            /** An Task is currently running */
+        Running,            /** Task is currently running */
         Finished,           /** Task has finished successfully */
         Aborted             /** Task has been aborted */
     };

@@ -16,7 +16,7 @@
 #include "AbstractWorkspaceManager.h"
 #include "AbstractProjectManager.h"
 #include "AbstractSettingsManager.h"
-#include "AbstractProgressManager.h"
+#include "AbstractTaskManager.h"
 
 #include <QString>
 
@@ -235,7 +235,7 @@ public: // Managers
     virtual AbstractWorkspaceManager& getWorkspaceManager() = 0;
     virtual AbstractProjectManager& getProjectManager() = 0;
     virtual AbstractSettingsManager& getSettingsManager() = 0;
-    virtual AbstractProgressManager& getProgressManager() = 0;
+    virtual AbstractTaskManager& getTaskManager() = 0;
 
 protected:
     bool    _initialized;               /** Boolean determining whether the core is initialized or not */
@@ -319,11 +319,11 @@ static AbstractSettingsManager& settings() {
 }
 
 /**
- * Convenience function to obtain access to the progress manager in the core
- * @return Reference to abstract progress manager
+ * Convenience function to obtain access to the task manager in the core
+ * @return Reference to abstract task manager
  */
-static AbstractProgressManager& progress() {
-    return core()->getProgressManager();
+static AbstractTaskManager& tasks() {
+    return core()->getTaskManager();
 }
 
 }

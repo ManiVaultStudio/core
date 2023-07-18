@@ -2,37 +2,37 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ProgressManager.h"
+#include "TaskManager.h"
 
 #ifdef _DEBUG
-    #define PROGRESS_MANAGER_VERBOSE
+    #define TASK_MANAGER_VERBOSE
 #endif
 
 namespace hdps
 {
 
-ProgressManager::ProgressManager(QObject* parent /*= nullptr*/) :
-    AbstractProgressManager()
+TaskManager::TaskManager(QObject* parent /*= nullptr*/) :
+    AbstractTaskManager()
 {
 }
 
-ProgressManager::~ProgressManager()
+TaskManager::~TaskManager()
 {
     reset();
 }
 
-void ProgressManager::initialize()
+void TaskManager::initialize()
 {
-#ifdef PROGRESS_MANAGER_VERBOSE
+#ifdef TASK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
-    AbstractProgressManager::initialize();
+    AbstractTaskManager::initialize();
 }
 
-void ProgressManager::reset()
+void TaskManager::reset()
 {
-#ifdef PROGRESS_MANAGER_VERBOSE
+#ifdef TASK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
@@ -40,6 +40,16 @@ void ProgressManager::reset()
     {
     }
     endReset();
+}
+
+void TaskManager::addTask(Task* task)
+{
+
+}
+
+void TaskManager::removeTask(Task* task)
+{
+
 }
 
 }

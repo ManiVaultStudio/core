@@ -4,12 +4,12 @@
 
 #pragma once
 
-#include "AbstractProgressManager.h"
+#include "AbstractTaskManager.h"
 
 namespace hdps
 {
 
-class ProgressManager final : public AbstractProgressManager
+class TaskManager final : public AbstractTaskManager
 {
 public:
 
@@ -17,16 +17,28 @@ public:
      * Construct with \p parent object
      * @param parent Pointer to parent object
      */
-    ProgressManager(QObject* parent = nullptr);
+    TaskManager(QObject* parent = nullptr);
 
     /** Reset when destructed */
-    ~ProgressManager();
+    ~TaskManager();
 
     /** Perform manager startup initialization */
     void initialize() override;
 
     /** Resets the contents of the data hierarchy manager */
     void reset() override;
+
+    /**
+     * Adds \p task to the task manager
+     * @param task Pointer to task to add
+     */
+    void addTask(Task* task) override;
+
+    /**
+     * Removes \p task from the task manager
+     * @param task Pointer to task to remove
+     */
+    void removeTask(Task* task) override;
 };
 
 }

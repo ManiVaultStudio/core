@@ -11,7 +11,7 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractWorkspaceManager.h
     src/AbstractProjectManager.h
     src/AbstractSettingsManager.h
-    src/AbstractProgressManager.h
+    src/AbstractTaskManager.h
 )
 
 set(PUBLIC_CORE_INTERFACE_SOURCES
@@ -608,6 +608,21 @@ set(PUBLIC_GLOBAL_SETTINGS_FILES
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
 )
 
+set(PUBLIC_TASK_HEADERS
+    src/Task.h
+    src/TaskHandler.h
+)
+
+set(PUBLIC_TASK_SOURCES
+    src/Task.cpp
+    src/TaskHandler.cpp
+)
+
+set(PUBLIC_TASK_FILES
+    ${PUBLIC_TASK_HEADERS}
+    ${PUBLIC_TASK_SOURCES}
+)
+
 set(PUBLIC_HEADERS
     ${PUBLIC_CORE_INTERFACE_HEADERS}
     ${PUBLIC_EVENT_HEADERS}
@@ -636,6 +651,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_ACTIONS_MODEL_HEADERS}
     ${PUBLIC_DATA_HIERARCHY_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
+    ${PUBLIC_TASK_HEADERS}
 )
 
 set(PUBLIC_SOURCES
@@ -665,6 +681,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_ACTIONS_MODEL_SOURCES}
     ${PUBLIC_DATA_HIERARCHY_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
+    ${PUBLIC_TASK_SOURCES}
     ${PUBLIC_HEADERS}
 )
 
@@ -695,3 +712,4 @@ source_group(Project FILES ${PUBLIC_PROJECT_FILES})
 source_group(Model\\Actions FILES ${PUBLIC_ACTIONS_MODEL_FILES})
 source_group(Model\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
+source_group(Task FILES ${PUBLIC_TASK_FILES})
