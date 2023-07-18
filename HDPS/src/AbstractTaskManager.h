@@ -6,6 +6,8 @@
 
 #include "AbstractManager.h"
 
+#include "actions/GroupAction.h"
+
 #ifdef _DEBUG
     #define ABSTRACT_TASK_MANAGER_VERBOSE
 #endif
@@ -36,6 +38,12 @@ public:
         AbstractManager(parent, "Task")
     {
     }
+
+    /**
+     * Get tasks group action
+     * @return Reference to group action
+     */
+    virtual gui::GroupAction& getTasksGroupAction() = 0;
 
 protected:
 

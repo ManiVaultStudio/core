@@ -12,7 +12,8 @@ namespace hdps
 {
 
 TaskManager::TaskManager(QObject* parent /*= nullptr*/) :
-    AbstractTaskManager()
+    AbstractTaskManager(),
+    _tasksGroupAction(this, "Tasks")
 {
 }
 
@@ -50,6 +51,11 @@ void TaskManager::addTask(Task* task)
 void TaskManager::removeTask(Task* task)
 {
 
+}
+
+hdps::gui::GroupAction& TaskManager::getTasksGroupAction()
+{
+    return _tasksGroupAction;
 }
 
 }

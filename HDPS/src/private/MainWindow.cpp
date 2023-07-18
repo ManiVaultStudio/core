@@ -21,6 +21,7 @@
 #include <QMessageBox>
 #include <QTimer>
 #include <QStackedWidget>
+#include <QStatusBar >
 
 #define MAIN_WINDOW_VERBOSE
 
@@ -121,6 +122,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     
         updateWindowTitle();
 
+        statusBar()->insertPermanentWidget(0, new QToolButton());
     }
 }
 

@@ -274,6 +274,8 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/LockingAction.h
     src/actions/VersionAction.h
     src/actions/ProjectSplashScreenAction.h
+    src/actions/ProgressAction.h
+    src/actions/TaskAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -290,6 +292,8 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/LockingAction.cpp
     src/actions/VersionAction.cpp
     src/actions/ProjectSplashScreenAction.cpp
+    src/actions/ProgressAction.cpp
+    src/actions/TaskAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
