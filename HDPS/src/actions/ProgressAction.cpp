@@ -22,74 +22,6 @@ ProgressAction::ProgressAction(QObject* parent, const QString& title /*= ""*/) :
     setConnectionPermissionsToForceNone(true);
 }
 
-ProgressAction::ProgressBarWidget::ProgressBarWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags) :
-    QProgressBar(parent),
-    _progressAction(progressAction)
-{
-    if (widgetFlags & WidgetFlag::Horizontal)
-        setOrientation(Qt::Horizontal);
-
-    if (widgetFlags & WidgetFlag::Vertical)
-        setOrientation(Qt::Vertical);
-
-    const auto updateMinimum = [this]() -> void {
-        setMinimum(_progressAction->getMinimum());
-    };
-
-    updateMinimum();
-
-    connect(_progressAction, &ProgressAction::minimumChanged, this, updateMinimum);
-
-    const auto updateMaximum = [this]() -> void {
-        setMaximum(_progressAction->getMaximum());
-    };
-
-    updateMaximum();
-
-    connect(_progressAction, &ProgressAction::maximumChanged, this, updateMaximum);
-
-    const auto updateValue = [this]() -> void {
-        setValue(_progressAction->getValue());
-    };
-
-    updateValue();
-
-    connect(_progressAction, &ProgressAction::valueChanged, this, updateValue);
-
-    const auto updateTextVisible = [this]() -> void {
-        setTextVisible(_progressAction->getTextVisible());
-    };
-
-    updateTextVisible();
-
-    connect(_progressAction, &ProgressAction::textVisibleChanged, this, updateTextVisible);
-
-    const auto updateTextAlignment = [this]() -> void {
-        setAlignment(_progressAction->getTextAlignment());
-    };
-
-    updateTextAlignment();
-
-    connect(_progressAction, &ProgressAction::textAlignmentChanged, this, updateTextAlignment);
-}
-
-QWidget* ProgressAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
-{
-    if (dynamic_cast<QMenu*>(parent))
-        return QWidgetAction::createWidget(parent);
-
-    auto widget = new WidgetActionWidget(parent, this);
-    auto layout = new QHBoxLayout();
-
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    layout->addWidget(new ProgressAction::ProgressBarWidget(parent, this, widgetFlags));
-
-    widget->setLayout(layout);
-
-    return widget;
-}
-
 int ProgressAction::getMinimum() const
 {
     return _minimum;
@@ -184,6 +116,141 @@ void ProgressAction::setTextFormat(const QString& textFormat)
     _textFormat = textFormat;
 
     emit textFormatChanged(_textFormat);
+}
+
+ProgressAction::BarWidget::BarWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags) :
+    QProgressBar(parent),
+    _progressAction(progressAction)
+{
+    if (widgetFlags & WidgetFlag::HorizontalBar)
+        setOrientation(Qt::Horizontal);
+
+    if (widgetFlags & WidgetFlag::VerticalBar)
+        setOrientation(Qt::Vertical);
+
+    const auto updateMinimum = [this]() -> void {
+        setMinimum(_progressAction->getMinimum());
+    };
+
+    updateMinimum();
+
+    connect(_progressAction, &ProgressAction::minimumChanged, this, updateMinimum);
+
+    const auto updateMaximum = [this]() -> void {
+        setMaximum(_progressAction->getMaximum());
+    };
+
+    updateMaximum();
+
+    connect(_progressAction, &ProgressAction::maximumChanged, this, updateMaximum);
+
+    const auto updateValue = [this]() -> void {
+        setValue(_progressAction->getValue());
+    };
+
+    updateValue();
+
+    connect(_progressAction, &ProgressAction::valueChanged, this, updateValue);
+
+    const auto updateTextVisible = [this]() -> void {
+        setTextVisible(_progressAction->getTextVisible());
+    };
+
+    updateTextVisible();
+
+    connect(_progressAction, &ProgressAction::textVisibleChanged, this, updateTextVisible);
+
+    const auto updateTextAlignment = [this]() -> void {
+        setAlignment(_progressAction->getTextAlignment());
+    };
+
+    updateTextAlignment();
+
+    connect(_progressAction, &ProgressAction::textAlignmentChanged, this, updateTextAlignment);
+}
+
+ProgressAction::LabelWidget::LabelWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags) :
+    QLabel(parent),
+    _progressAction(progressAction)
+{
+    const auto updateText = [this]() -> void {
+        setText(_progressAction->getText());
+    };
+
+    updateText();
+
+    connect(_progressAction, &ProgressAction::minimumChanged, this, updateText);
+    connect(_progressAction, &ProgressAction::maximumChanged, this, updateText);
+    connect(_progressAction, &ProgressAction::numberOfStepsChanged, this, updateText);
+    connect(_progressAction, &ProgressAction::valueChanged, this, updateText);
+    connect(_progressAction, &ProgressAction::textFormatChanged, this, updateText);
+}
+
+ProgressAction::LineEditWidget::LineEditWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags) :
+    QLineEdit(parent),
+    _progressAction(progressAction)
+{
+    setEnabled(false);
+
+    const auto updateText = [this]() -> void {
+        setText(_progressAction->getText());
+    };
+
+    updateText();
+
+    connect(_progressAction, &ProgressAction::minimumChanged, this, updateText);
+    connect(_progressAction, &ProgressAction::maximumChanged, this, updateText);
+    connect(_progressAction, &ProgressAction::numberOfStepsChanged, this, updateText);
+    connect(_progressAction, &ProgressAction::valueChanged, this, updateText);
+    connect(_progressAction, &ProgressAction::textFormatChanged, this, updateText);
+}
+
+QWidget* ProgressAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+{
+    if (dynamic_cast<QMenu*>(parent))
+        return QWidgetAction::createWidget(parent);
+
+    auto widget = new WidgetActionWidget(parent, this);
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    if ((widgetFlags & ProgressAction::WidgetFlag::HorizontalBar) || (widgetFlags & ProgressAction::WidgetFlag::VerticalBar))
+        layout->addWidget(new ProgressAction::BarWidget(parent, this, widgetFlags));
+
+    if (widgetFlags & ProgressAction::WidgetFlag::Label)
+        layout->addWidget(new ProgressAction::LabelWidget(parent, this, widgetFlags));
+
+    if (widgetFlags & ProgressAction::WidgetFlag::LineEdit)
+        layout->addWidget(new ProgressAction::LineEditWidget(parent, this, widgetFlags));
+
+    widget->setLayout(layout);
+
+    return widget;
+}
+
+int ProgressAction::getNumberOfSteps() const
+{
+    return getMaximum() - getMinimum();
+}
+
+float ProgressAction::getPercentage() const
+{
+    if (getMinimum() == getMaximum())
+        return 0.f;
+
+    return (getValue() - getMinimum()) / static_cast<float>(getNumberOfSteps());
+}
+
+QString ProgressAction::getText() const
+{
+    QString text = _textFormat;
+
+    text.replace("%p", QString::number(getPercentage(), 'f', 1));
+    text.replace("%v", QString::number(getValue()));
+    text.replace("%m", QString::number(getNumberOfSteps()));
+
+    return text;
 }
 
 }

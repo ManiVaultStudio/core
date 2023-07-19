@@ -7,6 +7,8 @@
 #include "WidgetAction.h"
 
 #include <QProgressBar>
+#include <QLabel>
+#include <QLineEdit>
 
 namespace hdps::gui {
 
@@ -25,17 +27,18 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
+        HorizontalBar   = 0x00001,  /** Widget includes a horizontal bar */
+        VerticalBar     = 0x00002,  /** Widget includes a vertical bar */
+        Label           = 0x00004,  /** Widget includes a label widget */
+        LineEdit        = 0x00008,  /** Widget includes a line edit widget */
 
-        Horizontal  = 0x00001,  /** Widget includes a horizontal progress bar */
-        Vertical    = 0x00002,  /** Widget includes a vertical progress bar */
-
-        Default = Horizontal
+        Default = HorizontalBar
     };
 
 public:
 
-    /** Progress bar widget for progress bar action */
-    class ProgressBarWidget : public QProgressBar
+    /** Bar widget for progress action */
+    class BarWidget : public QProgressBar
     {
     protected:
 
@@ -45,10 +48,48 @@ public:
          * @param progressAction Pointer to progress action
          * @param widgetFlags Widget flags
          */
-        ProgressBarWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags);
+        BarWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags);
 
     protected:
-        ProgressAction* _progressAction;      /** Pointer to progress action */
+        ProgressAction*     _progressAction;    /** Pointer to progress action */
+
+        friend class ProgressAction;
+    };
+
+    /** Label widget for progress action */
+    class LabelWidget : public QLabel
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param progressAction Pointer to progress action
+         * @param widgetFlags Widget flags
+         */
+        LabelWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags);
+
+    protected:
+        ProgressAction*     _progressAction;    /** Pointer to progress action */
+
+        friend class ProgressAction;
+    };
+
+    /** Line edit widget for progress action */
+    class LineEditWidget : public QLineEdit
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param progressAction Pointer to progress action
+         * @param widgetFlags Widget flags
+         */
+        LineEditWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags);
+
+    protected:
+        ProgressAction*     _progressAction;    /** Pointer to progress action */
 
         friend class ProgressAction;
     };
@@ -155,6 +196,24 @@ public:
      */
     void setTextFormat(const QString& textFormat);
 
+    /**
+     * Get number of steps
+     * @return Number of steps
+     */
+    int getNumberOfSteps() const;
+
+    /**
+     * Get percentage completed
+     * @return Percentage
+     */
+    float getPercentage() const;
+
+    /**
+     * Get text representation of the progress (using the text format)
+     * @return Text representation of the progress
+     */
+    QString getText() const;
+
 signals:
 
     /**
@@ -168,6 +227,12 @@ signals:
      * @param maximum Updated progress range maximum
      */
     void maximumChanged(int maximum);
+
+    /**
+     * Signals that the number of steps changed to \p numberOfSteps
+     * @param numberOfSteps Number of steps
+     */
+    void numberOfStepsChanged(int numberOfSteps);
 
     /**
      * Signals that the progress value changed to \p value
