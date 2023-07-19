@@ -151,7 +151,7 @@ public:
 
     /**
      * Set progress value to \p value
-     * @param value Progress range value
+     * @param value Progress value
      */
     void setValue(int value);
 
@@ -239,6 +239,12 @@ signals:
      * @param value Updated progress value
      */
     void valueChanged(int value);
+
+    /**
+     * Signals that the progress changed to \p percentage
+     * @param percentage Updated progress
+     */
+    void progressChanged(float progress);
 
     /**
      * Signals that text visibility changed to \p textVisible

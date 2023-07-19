@@ -16,6 +16,11 @@ class TaskHandler;
  *
  * Convenience class for managing a task.
  *
+ * Task progress can be modified in two ways:
+ *  - Setting progress directly setProgress(...)
+ *  - Setting a number of task items via setNumberOfItems(...) and flagging items as finished 
+ *    with setItemFinished(...), the percentage is then updated automatically
+ *
  * @author Thomas Kroes
  */
 class Task final : public QObject

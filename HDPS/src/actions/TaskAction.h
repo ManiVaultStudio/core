@@ -7,6 +7,7 @@
 #include "GroupAction.h"
 #include "ProgressAction.h"
 #include "TriggerAction.h"
+#include "Task.h"
 
 namespace hdps::gui {
 
@@ -41,9 +42,21 @@ public:
      */
     Q_INVOKABLE TaskAction(QObject* parent, const QString& title = "");
 
+    /**
+     * Set task to \p task
+     * @param task Pointer to task to keep track of
+     */
+    void setTask(Task* task);
+
+private:
+
+    /** Updates the read-only status of the progress and kill task actions */
+    void updateActionsReadOnly();
+
 private:
     ProgressAction      _progressAction;    /** Progress action */
     gui::TriggerAction  _killTaskAction;    /** Kill task action */
+    Task*               _task;              /**  */
 
     friend class AbstractActionsManager;
 };
