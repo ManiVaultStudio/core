@@ -126,6 +126,35 @@ public:
      */
     void setTextVisible(bool textVisible);
 
+    /**
+     * Get text alignment
+     * @return Text alignment flag
+     */
+    Qt::AlignmentFlag getTextAlignment() const;
+
+    /**
+     * Set text alignment to \p textAlignment
+     * @param textAlignment Text alignment flag
+     */
+    void setTextAlignment(Qt::AlignmentFlag textAlignment);
+
+
+    /**
+     * Get text format
+     * @return Text format string
+     */
+    QString getTextFormat() const;
+
+    /**
+     * Set text format to \p textFormat
+     * %p - is replaced by the percentage completed
+     * %v - is replaced by the current value
+     * %m - is replaced by the total number of steps
+     * The default value is "%p%"
+     * @param textFormat Text format string
+     */
+    void setTextFormat(const QString& textFormat);
+
 signals:
 
     /**
@@ -152,11 +181,25 @@ signals:
      */
     void textVisibleChanged(bool textVisible);
 
+    /**
+     * Signals that text alignment changed to \p textAlignment
+     * @param textAlignment Updated text alignment
+     */
+    void textAlignmentChanged(bool textAlignment);
+
+    /**
+     * Signals that text format changed to \p textFormat
+     * @param textFormat Updated text format
+     */
+    void textFormatChanged(const QString& textFormat);
+
 private:
-    int     _minimum;       /** Progress range minimum */
-    int     _maximum;       /** Progress range maximum */
-    int     _value;         /** Progress value */
-    bool    _textVisible;   /** Determines whether progress text is visible or not */
+    int                 _minimum;           /** Progress range minimum */
+    int                 _maximum;           /** Progress range maximum */
+    int                 _value;             /** Progress value */
+    bool                _textVisible;       /** Determines whether progress text is visible or not */
+    Qt::AlignmentFlag   _textAlignment;     /** Determines the label placement */
+    QString             _textFormat;        /** Text format string */
 
     friend class AbstractActionsManager;
 };

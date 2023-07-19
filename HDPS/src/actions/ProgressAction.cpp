@@ -14,7 +14,9 @@ ProgressAction::ProgressAction(QObject* parent, const QString& title /*= ""*/) :
     _minimum(0),
     _maximum(100),
     _value(0),
-    _textVisible(true)
+    _textVisible(true),
+    _textAlignment(Qt::AlignCenter),
+    _textFormat("%p%")
 {
     setDefaultWidgetFlags(WidgetFlag::Default);
     setConnectionPermissionsToForceNone(true);
@@ -29,9 +31,6 @@ ProgressAction::ProgressBarWidget::ProgressBarWidget(QWidget* parent, ProgressAc
 
     if (widgetFlags & WidgetFlag::Vertical)
         setOrientation(Qt::Vertical);
-
-    setAlignment(Qt::AlignCenter);
-    //setTextVisible(false);
 
     const auto updateMinimum = [this]() -> void {
         setMinimum(_progressAction->getMinimum());
@@ -56,6 +55,22 @@ ProgressAction::ProgressBarWidget::ProgressBarWidget(QWidget* parent, ProgressAc
     updateValue();
 
     connect(_progressAction, &ProgressAction::valueChanged, this, updateValue);
+
+    const auto updateTextVisible = [this]() -> void {
+        setTextVisible(_progressAction->getTextVisible());
+    };
+
+    updateTextVisible();
+
+    connect(_progressAction, &ProgressAction::textVisibleChanged, this, updateTextVisible);
+
+    const auto updateTextAlignment = [this]() -> void {
+        setAlignment(_progressAction->getTextAlignment());
+    };
+
+    updateTextAlignment();
+
+    connect(_progressAction, &ProgressAction::textAlignmentChanged, this, updateTextAlignment);
 }
 
 QWidget* ProgressAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -139,6 +154,36 @@ void ProgressAction::setTextVisible(bool textVisible)
     _textVisible = textVisible;
 
     emit textVisibleChanged(_textVisible);
+}
+
+Qt::AlignmentFlag ProgressAction::getTextAlignment() const
+{
+    return _textAlignment;
+}
+
+void ProgressAction::setTextAlignment(Qt::AlignmentFlag textAlignment)
+{
+    if (textAlignment == _textAlignment)
+        return;
+
+    _textAlignment = textAlignment;
+
+    emit textAlignmentChanged(_textAlignment);
+}
+
+QString ProgressAction::getTextFormat() const
+{
+    return _textFormat;
+}
+
+void ProgressAction::setTextFormat(const QString& textFormat)
+{
+    if (textFormat == _textFormat)
+        return;
+
+    _textFormat = textFormat;
+
+    emit textFormatChanged(_textFormat);
 }
 
 }
