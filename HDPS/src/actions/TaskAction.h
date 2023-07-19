@@ -53,6 +53,9 @@ private:
     /** Updates the read-only status of the progress and kill task actions */
     void updateActionsReadOnly();
 
+    /** Updates the progress action text format, depending on the task status */
+    void updateProgressActionTextFormat();
+
 private:
     ProgressAction      _progressAction;    /** Progress action */
     gui::TriggerAction  _killTaskAction;    /** Kill task action */

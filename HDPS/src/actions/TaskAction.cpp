@@ -26,6 +26,7 @@ TaskAction::TaskAction(QObject* parent, const QString& title /*= ""*/) :
     addAction(&_killTaskAction);
 
     updateActionsReadOnly();
+    updateProgressActionTextFormat();
 }
 
 void TaskAction::setTask(Task* task)
@@ -50,12 +51,42 @@ void TaskAction::setTask(Task* task)
 
     connect(_task, &Task::progressChanged, this, updateProgressAction);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateActionsReadOnly);
+    connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionTextFormat);
 }
 
 void TaskAction::updateActionsReadOnly()
 {
     _progressAction.setEnabled(_task == nullptr ? false : _task->isRunning());
     _killTaskAction.setEnabled(_task == nullptr ? false : (_task->isIdle() || _task->isRunning()));
+}
+
+void TaskAction::updateProgressActionTextFormat()
+{
+    if (_task == nullptr) {
+        _progressAction.setTextFormat("No task assigned...");
+    }
+    else {
+        switch (_task->getStatus())
+        {
+            case Task::Status::Idle:
+                _progressAction.setTextFormat("Idle");
+                break;
+
+            case Task::Status::Running:
+                break;
+
+            case Task::Status::Finished:
+                _progressAction.setTextFormat("Finished");
+                break;
+
+            case Task::Status::Aborted:
+                _progressAction.setTextFormat("Aborted");
+                break;
+
+            default:
+                break;
+        }
+    }
 }
 
 }

@@ -167,6 +167,14 @@ ProgressAction::BarWidget::BarWidget(QWidget* parent, ProgressAction* progressAc
     updateTextAlignment();
 
     connect(_progressAction, &ProgressAction::textAlignmentChanged, this, updateTextAlignment);
+
+    const auto updateTextFormat = [this]() -> void {
+        setFormat(_progressAction->getTextFormat());
+    };
+
+    updateTextFormat();
+
+    connect(_progressAction, &ProgressAction::textFormatChanged, this, updateTextFormat);
 }
 
 ProgressAction::LabelWidget::LabelWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags) :
