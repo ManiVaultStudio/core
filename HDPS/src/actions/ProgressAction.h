@@ -17,7 +17,7 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class ProgressAction : public WidgetAction
+class ProgressAction final : public WidgetAction
 {
     Q_OBJECT
 
@@ -70,6 +70,93 @@ public:
      * @param title Title of the action
      */
     Q_INVOKABLE ProgressAction(QObject* parent, const QString& title = "");
+
+    /**
+     * Get progress range minimum
+     * @return Progress range minimum
+     */
+    int getMinimum() const;
+
+    /**
+     * Set progress range minimum to \p minimum
+     * @param minimum Progress range minimum
+     */
+    void setMinimum(int minimum);
+
+    /**
+     * Get progress range maximum
+     * @return Progress range maximum
+     */
+    int getMaximum() const;
+
+    /**
+     * Set progress range maximum to \p maximum
+     * @param maximum Progress range maximum
+     */
+    void setMaximum(int maximum);
+
+    /**
+     * Set progress range from \p minimum to \p maximum
+     * @param minimum Progress range minimum
+     * @param maximum Progress range maximum
+     */
+    void setRange(int minimum, int maximum);
+
+    /**
+     * Get progress value
+     * @return Progress value
+     */
+    int getValue() const;
+
+    /**
+     * Set progress value to \p value
+     * @param value Progress range value
+     */
+    void setValue(int value);
+
+    /**
+     * Get whether text is visible
+     * @return Boolean determining whether text is visible
+     */
+    bool getTextVisible() const;
+
+    /**
+     * Set whether text is visible to \p textVisible
+     * @param textVisible Boolean determining whether text is visible
+     */
+    void setTextVisible(bool textVisible);
+
+signals:
+
+    /**
+     * Signals that the progress range minimum changed to \p minimum
+     * @param minimum Updated progress range minimum
+     */
+    void minimumChanged(int minimum);
+
+    /**
+     * Signals that the progress range maximum changed to \p maximum
+     * @param maximum Updated progress range maximum
+     */
+    void maximumChanged(int maximum);
+
+    /**
+     * Signals that the progress value changed to \p value
+     * @param value Updated progress value
+     */
+    void valueChanged(int value);
+
+    /**
+     * Signals that text visibility changed to \p textVisible
+     * @param textVisible Updated text visibility
+     */
+    void textVisibleChanged(bool textVisible);
+
+private:
+    int     _minimum;       /** Progress range minimum */
+    int     _maximum;       /** Progress range maximum */
+    int     _value;         /** Progress value */
+    bool    _textVisible;   /** Determines whether progress text is visible or not */
 
     friend class AbstractActionsManager;
 };

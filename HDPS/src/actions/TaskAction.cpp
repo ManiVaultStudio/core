@@ -3,38 +3,26 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "TaskAction.h"
-
-#include <QMenu>
-#include <QHBoxLayout>
+#include "Application.h"
 
 namespace hdps::gui {
 
 TaskAction::TaskAction(QObject* parent, const QString& title /*= ""*/) :
-    WidgetAction(parent, title)
+    GroupAction(parent, title),
+    _progressAction(this, "Progress"),
+    _killTaskAction(this, "Kill")
 {
-    setDefaultWidgetFlags(WidgetFlag::Default);
+    setShowLabels(false);
+    setDefaultWidgetFlags(GroupAction::Horizontal | WidgetFlag::Default);
     setConnectionPermissionsToForceNone(true);
-}
 
-QWidget* TaskAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
-{
-    if (dynamic_cast<QMenu*>(parent))
-        return QWidgetAction::createWidget(parent);
+    _progressAction.setStretch(1);
 
-    auto widget = new WidgetActionWidget(parent, this);
-    auto layout = new QHBoxLayout();
+    _killTaskAction.setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
+    _killTaskAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
-    //layout->setContentsMargins(0, 0, 0, 0);
-
-    //if (widgetFlags & WidgetFlag::CheckBox)
-    //    layout->addWidget(new ToggleAction::CheckBoxWidget(parent, this));
-
-    //if (widgetFlags & WidgetFlag::PushButton)
-    //    layout->addWidget(new ToggleAction::PushButtonWidget(parent, this, widgetFlags));
-
-    widget->setLayout(layout);
-
-    return widget;
+    addAction(&_progressAction);
+    addAction(&_killTaskAction);
 }
 
 }

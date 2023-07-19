@@ -4,7 +4,9 @@
 
 #pragma once
 
-#include "WidgetAction.h"
+#include "GroupAction.h"
+#include "ProgressAction.h"
+#include "TriggerAction.h"
 
 namespace hdps::gui {
 
@@ -15,7 +17,7 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class TaskAction : public WidgetAction
+class TaskAction : public GroupAction
 {
     Q_OBJECT
 
@@ -24,20 +26,11 @@ public:
     /** Describes the widget flags */
     enum WidgetFlag {
 
-        ProgressBar = 0x00001,  /** Widget includes a progress bar */
-        KillButton  = 0x00002,  /** Widget includes a button to kill the task */
+        ProgressBar = 0x00100,  /** Widget includes a progress bar */
+        KillButton  = 0x00200,  /** Widget includes a button to kill the task */
 
         Default = ProgressBar | KillButton
     };
-
-protected:
-
-    /**
-     * Get widget representation of the toggle action
-     * @param parent Pointer to parent widget
-     * @param widgetFlags Widget flags for the configuration of the widget (type)
-     */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 
@@ -47,6 +40,10 @@ public:
      * @param title Title of the action
      */
     Q_INVOKABLE TaskAction(QObject* parent, const QString& title = "");
+
+private:
+    ProgressAction      _progressAction;    /** Progress action */
+    gui::TriggerAction  _killTaskAction;    /** Kill task action */
 
     friend class AbstractActionsManager;
 };

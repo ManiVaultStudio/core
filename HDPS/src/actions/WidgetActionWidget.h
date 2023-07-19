@@ -24,7 +24,7 @@ public:
 
     /** Reserved widget settings */
     enum WidgetFlag {
-        PopupLayout = 0x00100,      /** Widget with popup layout */
+        PopupLayout = 0x10000,      /** Widget with popup layout */
     };
 
 public:

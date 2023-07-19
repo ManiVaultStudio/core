@@ -10,7 +10,11 @@
 namespace hdps::gui {
 
 ProgressAction::ProgressAction(QObject* parent, const QString& title /*= ""*/) :
-    WidgetAction(parent, title)
+    WidgetAction(parent, title),
+    _minimum(0),
+    _maximum(100),
+    _value(0),
+    _textVisible(true)
 {
     setDefaultWidgetFlags(WidgetFlag::Default);
     setConnectionPermissionsToForceNone(true);
@@ -23,8 +27,35 @@ ProgressAction::ProgressBarWidget::ProgressBarWidget(QWidget* parent, ProgressAc
     if (widgetFlags & WidgetFlag::Horizontal)
         setOrientation(Qt::Horizontal);
 
-    if (widgetFlags & WidgetFlag::Horizontal)
+    if (widgetFlags & WidgetFlag::Vertical)
         setOrientation(Qt::Vertical);
+
+    setAlignment(Qt::AlignCenter);
+    //setTextVisible(false);
+
+    const auto updateMinimum = [this]() -> void {
+        setMinimum(_progressAction->getMinimum());
+    };
+
+    updateMinimum();
+
+    connect(_progressAction, &ProgressAction::minimumChanged, this, updateMinimum);
+
+    const auto updateMaximum = [this]() -> void {
+        setMaximum(_progressAction->getMaximum());
+    };
+
+    updateMaximum();
+
+    connect(_progressAction, &ProgressAction::maximumChanged, this, updateMaximum);
+
+    const auto updateValue = [this]() -> void {
+        setValue(_progressAction->getValue());
+    };
+
+    updateValue();
+
+    connect(_progressAction, &ProgressAction::valueChanged, this, updateValue);
 }
 
 QWidget* ProgressAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -42,6 +73,72 @@ QWidget* ProgressAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
     widget->setLayout(layout);
 
     return widget;
+}
+
+int ProgressAction::getMinimum() const
+{
+    return _minimum;
+}
+
+void ProgressAction::setMinimum(int minimum)
+{
+    if (minimum == _minimum)
+        return;
+
+    _minimum = std::min(minimum, _maximum);
+
+    emit minimumChanged(_minimum);
+}
+
+int ProgressAction::getMaximum() const
+{
+    return _maximum;
+}
+
+void ProgressAction::setMaximum(int maximum)
+{
+    if (maximum == _maximum)
+        return;
+
+    _maximum = std::max(maximum, _minimum);
+
+    emit maximumChanged(_maximum);
+}
+
+void ProgressAction::setRange(int minimum, int maximum)
+{
+    setMinimum(minimum);
+    setMaximum(maximum);
+}
+
+int ProgressAction::getValue() const
+{
+    return _value;
+}
+
+void ProgressAction::setValue(int value)
+{
+    if (value == _value)
+        return;
+
+    _value = std::clamp(value, _minimum, _maximum);
+
+    emit valueChanged(_value);
+}
+
+bool ProgressAction::getTextVisible() const
+{
+    return _textVisible;
+}
+
+void ProgressAction::setTextVisible(bool textVisible)
+{
+    if (textVisible == _textVisible)
+        return;
+
+    _textVisible = textVisible;
+
+    emit textVisibleChanged(_textVisible);
 }
 
 }
