@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "util/Serializable.h"
+
 #include <QObject>
 #include <QBitArray>
 
@@ -23,7 +25,7 @@ class TaskHandler;
  *
  * @author Thomas Kroes
  */
-class Task final : public QObject
+class Task final : public QObject, public util::Serializable
 {
     Q_OBJECT
 
@@ -47,7 +49,7 @@ public:
     * @param status Initial status of the task
     * @param taskHandler Pointer to task handler (tasks will be displayed in the global task window when nullptr)
     */
-    Task(QObject* parent, const QString& name, const Status& status, TaskHandler* taskHandler = nullptr);
+    Task(QObject* parent, const QString& name, const Status& status = Status::Idle, TaskHandler* taskHandler = nullptr);
 
     /** Remove from task manager when destructed */
     ~Task();
@@ -96,16 +98,16 @@ public: // Status
     void setStatus(const Status& status);
 
     /** Set task status to idle */
-    void setTaskIdle();
+    void setIdle();
 
     /** Set task status to running */
-    void setTaskRunning();
+    void setRunning();
 
     /** Set task status to finished */
-    void setTaskFinished();
+    void setFinished();
 
     /** Set task status to aborted */
-    void setTaskAborted();
+    void setAborted();
 
 public: // Progress
 

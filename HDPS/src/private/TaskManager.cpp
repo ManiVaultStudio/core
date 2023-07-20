@@ -4,6 +4,10 @@
 
 #include "TaskManager.h"
 
+#include <util/Exception.h>
+
+#include <Task.h>
+
 #ifdef _DEBUG
     #define TASK_MANAGER_VERBOSE
 #endif
@@ -13,7 +17,7 @@ namespace hdps
 
 TaskManager::TaskManager(QObject* parent /*= nullptr*/) :
     AbstractTaskManager(),
-    _tasksGroupAction(this, "Tasks")
+    _tasks()
 {
 }
 
@@ -45,17 +49,61 @@ void TaskManager::reset()
 
 void TaskManager::addTask(Task* task)
 {
+    try
+    {
+#ifdef TASK_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__;
+#endif
 
+        Q_ASSERT(task != nullptr);
+
+        if (task == nullptr)
+            throw std::runtime_error("Task may not be a null pointer");
+
+        emit taskAdded(task);
+    }
+    catch (std::exception& e)
+    {
+        util::exceptionMessageBox("Unable to add task to the task manager", e);
+    }
+    catch (...)
+    {
+        util::exceptionMessageBox("Unable to add task to the task manager");
+    }
 }
 
 void TaskManager::removeTask(Task* task)
 {
+    try
+    {
+#ifdef TASK_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__;
+#endif
 
-}
+        Q_ASSERT(task != nullptr);
 
-hdps::gui::GroupAction& TaskManager::getTasksGroupAction()
-{
-    return _tasksGroupAction;
+        if (task == nullptr)
+            throw std::runtime_error("Task may not be a null pointer");
+
+        if (_tasks.contains(task))
+            throw std::runtime_error("Task not found in manager");
+
+        const auto taskId = task->getId();
+
+        emit taskAboutToBeRemoved(task);
+        {
+            _tasks.removeOne(task);
+        }
+        emit taskRemoved(taskId);
+    }
+    catch (std::exception& e)
+    {
+        util::exceptionMessageBox("Unable to remove task from the task manager", e);
+    }
+    catch (...)
+    {
+        util::exceptionMessageBox("Unable to remove task from the task manager");
+    }
 }
 
 }

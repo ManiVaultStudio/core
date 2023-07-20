@@ -153,10 +153,12 @@ set(PRIVATE_SETTINGS_MANAGER_FILES
 
 set(PRIVATE_TASK_MANAGER_HEADERS
     src/private/TaskManager.h
+    src/private/TasksAction.h
 )
 
 set(PRIVATE_TASK_MANAGER_SOURCES
     src/private/TaskManager.cpp
+    src/private/TasksAction.cpp
 )
 
 set(PRIVATE_TASK_MANAGER_FILES

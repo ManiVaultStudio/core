@@ -39,12 +39,6 @@ public:
     {
     }
 
-    /**
-     * Get tasks group action
-     * @return Reference to group action
-     */
-    virtual gui::GroupAction& getTasksGroupAction() = 0;
-
 protected:
 
     /**
@@ -60,6 +54,24 @@ protected:
     virtual void removeTask(Task* task) = 0;
 
 signals:
+
+    /**
+     * Signals that \p task is added
+     * @param task Task which is added
+     */
+    void taskAdded(Task* task);
+
+    /**
+     * Signals that \p task is about to be removed
+     * @param task Task which is about to be removed
+     */
+    void taskAboutToBeRemoved(Task* task);
+
+    /**
+     * Signals that task with \p taskId is removed
+     * @param taskId Globally unique identifier of the task which is removed
+     */
+    void taskRemoved(const QString& taskId);
 
     friend class Task;
 };

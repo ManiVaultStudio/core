@@ -9,6 +9,8 @@
 #include "FileMenu.h"
 #include "ViewMenu.h"
 #include "HelpMenu.h"
+#include "TasksAction.h"
+#include "Task.h"
 
 #include <Application.h>
 
@@ -21,7 +23,8 @@
 #include <QMessageBox>
 #include <QTimer>
 #include <QStackedWidget>
-#include <QStatusBar >
+#include <QStatusBar>
+#include <QGroupBox>
 
 #define MAIN_WINDOW_VERBOSE
 
@@ -44,6 +47,101 @@ class StackedWidget : public QStackedWidget
     {
         return currentWidget()->minimumSizeHint();
     }
+};
+
+/**
+ * Tasks popup widget class
+ *
+ * Popup widget class for showing tasks, the visibility depends on whether there are tasks running.
+ *
+ * @author Thomas Kroes
+ */
+class TasksPopupWidget : public QWidget
+{
+public:
+
+    /**
+     * Construct with \p parent widget
+     * @param parent Pointer to parent widget
+     */
+    TasksPopupWidget(QWidget* parent) :
+        QWidget(parent),
+        _tasksAction(this, "Tasks")
+    {
+        setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+        setObjectName("TasksPopupWidget");
+        setStyleSheet("QWidget#TasksPopupWidget { border: 5p solid rgb(74, 74, 74); }");
+
+        auto layout = new QVBoxLayout();
+
+        auto groupBox       = new QGroupBox("Tasks");
+        auto groupBoxLayout = new QVBoxLayout();
+
+        groupBox->setLayout(groupBoxLayout);
+
+        groupBoxLayout->setContentsMargins(0, 0, 0, 0);
+        groupBoxLayout->addWidget(_tasksAction.createWidget(this));
+
+        layout->setContentsMargins(4, 4, 4, 4);
+        layout->addWidget(groupBox);
+
+        setLayout(layout);
+
+        installEventFilter(this);
+        parent->installEventFilter(this);
+
+        connect(&tasks(), &AbstractTaskManager::taskAdded, this, [this]() -> void {
+            show();
+        });
+        
+        show();
+    }
+
+    /**
+     * Respond to \p target object events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
+     */
+    bool eventFilter(QObject* target, QEvent* event) override {
+        switch (event->type())
+        {
+            case QEvent::Resize:
+            case QEvent::Move:
+                updatePosition();
+                break;
+
+            default:
+                break;
+        }
+
+        return QWidget::eventFilter(target, event);
+    }
+
+    /**
+     * Override popup minimum size hint
+     * @return Minimum size hint
+     */
+    QSize minimumSizeHint() const override {
+        return QSize(300, 100);
+    }
+
+    /**
+     * Override popup size hint
+     * @return Size hint
+     */
+    QSize sizeHint() const override {
+        return minimumSizeHint();
+    }
+
+private:
+
+    /** Updates the position relative to the parent widget */
+    void updatePosition() {
+        setGeometry(QRect(parentWidget()->mapToGlobal(parentWidget()->rect().topRight()) - QPoint(width(), height()), size()));
+    }
+
+private:
+    TasksAction     _tasksAction;       /** Tasks group action */
 };
 
 MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
@@ -122,7 +220,15 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     
         updateWindowTitle();
 
-        statusBar()->insertPermanentWidget(0, new QToolButton());
+        auto tasksLabel         = new QPushButton();
+        auto tasksPopupWidget   = new TasksPopupWidget(tasksLabel);
+
+        tasksLabel->setEnabled(false);
+        tasksLabel->setFlat(true);
+        tasksLabel->setIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
+
+        statusBar()->setSizeGripEnabled(false);
+        statusBar()->insertPermanentWidget(0, tasksLabel);
     }
 }
 

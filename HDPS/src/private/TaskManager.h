@@ -11,6 +11,8 @@ namespace hdps
 
 class TaskManager final : public AbstractTaskManager
 {
+    Q_OBJECT
+
 public:
 
     /**
@@ -40,14 +42,8 @@ public:
      */
     void removeTask(Task* task) override;
 
-    /**
-     * Get tasks group action
-     * @return Reference to group action
-     */
-    gui::GroupAction& getTasksGroupAction() override;
-
 private:
-    gui::GroupAction    _tasksGroupAction;      /** Groups all task actions */
+    QVector<Task*>  _tasks;     /** Tasks registered */
 };
 
 }

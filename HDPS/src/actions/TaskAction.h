@@ -59,7 +59,7 @@ private:
 private:
     ProgressAction      _progressAction;    /** Progress action */
     gui::TriggerAction  _killTaskAction;    /** Kill task action */
-    Task*               _task;              /**  */
+    Task*               _task;              /** Pointer to task to keep track of */
 
     friend class AbstractActionsManager;
 };

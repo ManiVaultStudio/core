@@ -377,7 +377,12 @@ void Points::init()
 
 void Points::setData(std::nullptr_t, const std::size_t numPoints, const std::size_t numDimensions)
 {
+    const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>().getNumDimensions();
+
     getRawData<PointData>().setData(nullptr, numPoints, numDimensions);
+
+    if (notifyDimensionsChanged)
+        events().notifyDatasetDataDimensionsChanged(this);
 }
 
 void Points::extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const
