@@ -43,6 +43,12 @@ public:
     Q_INVOKABLE TaskAction(QObject* parent, const QString& title = "");
 
     /**
+     * get task
+     * @return Pointer to task to keep track of
+     */
+    Task* getTask();
+
+    /**
      * Set task to \p task
      * @param task Pointer to task to keep track of
      */

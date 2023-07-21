@@ -5,6 +5,7 @@
 #pragma once
 
 #include "AbstractManager.h"
+#include "Task.h"
 
 #include "actions/GroupAction.h"
 
@@ -14,8 +15,6 @@
 
 namespace hdps
 {
-
-class Task;
 
 /**
  * Abstract task manager class
@@ -30,6 +29,10 @@ class AbstractTaskManager : public AbstractManager
 
 public:
 
+    using Tasks = QVector<Task*>;
+
+public:
+
     /**
      * Construct progress manager with \p parent object
      * @param parent Pointer to parent object
@@ -37,6 +40,28 @@ public:
     AbstractTaskManager(QObject* parent = nullptr) :
         AbstractManager(parent, "Task")
     {
+    }
+
+    /**
+     * Get all tasks
+     * @return Vector of tasks
+     */
+    virtual Tasks getTasks() = 0;
+
+    /**
+     * Get tasks by handler type and \p status
+     * @return Vector of tasks
+     */
+    template<typename TaskHandlerType>
+    Tasks getTasksByHandlerTypeAndStatus(const Task::Status& status) {
+        Tasks tasks = getTasks();
+        Tasks tasksByHandlerType;
+
+        std::copy_if(tasks.begin(), tasks.end(), std::back_inserter(tasksByHandlerType), [status](Tasks* task) {
+            return dynamic_cast<TaskHandlerType*>(task->getHandler()) && task->getStatus() == status;
+        });
+
+        return tasks;
     }
 
 protected:

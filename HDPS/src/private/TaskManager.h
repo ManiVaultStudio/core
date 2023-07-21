@@ -31,6 +31,12 @@ public:
     void reset() override;
 
     /**
+     * Get all tasks
+     * @return Vector of tasks
+     */
+    Tasks getTasks() override;
+
+    /**
      * Adds \p task to the task manager
      * @param task Pointer to task to add
      */
@@ -43,7 +49,7 @@ public:
     void removeTask(Task* task) override;
 
 private:
-    QVector<Task*>  _tasks;     /** Tasks registered */
+    Tasks  _tasks;     /** Tasks registered */
 };
 
 }

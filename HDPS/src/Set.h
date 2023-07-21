@@ -316,24 +316,6 @@ public: // Lock
      */
     void setLocked(bool locked);
 
-public: // Operators
-
-    /**
-     * Equality operator
-     * @param rhs Right-hand-side operator
-     */
-    const bool operator == (const DatasetImpl& rhs) const {
-        return rhs.getId() == getId();
-    }
-
-    /**
-     * Inequality operator
-     * @param rhs Right-hand-side operator
-     */
-    const bool operator != (const DatasetImpl& rhs) const {
-        return rhs.getId() != getId();
-    }
-
 public: // Properties
 
     /**

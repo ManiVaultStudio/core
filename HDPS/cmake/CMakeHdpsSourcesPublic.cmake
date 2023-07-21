@@ -614,12 +614,20 @@ set(PUBLIC_GLOBAL_SETTINGS_FILES
 
 set(PUBLIC_TASK_HEADERS
     src/Task.h
-    src/TaskHandler.h
+    src/ModalTask.h
+    src/BackgroundTask.h
+    src/AbstractTaskHandler.h
+    src/ModalTaskHandler.h
+    src/BackgroundTaskHandler.h
 )
 
 set(PUBLIC_TASK_SOURCES
     src/Task.cpp
-    src/TaskHandler.cpp
+    src/ModalTask.cpp
+    src/BackgroundTask.cpp
+    src/AbstractTaskHandler.cpp
+    src/ModalTaskHandler.cpp
+    src/BackgroundTaskHandler.cpp
 )
 
 set(PUBLIC_TASK_FILES

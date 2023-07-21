@@ -47,6 +47,11 @@ void TaskManager::reset()
     endReset();
 }
 
+AbstractTaskManager::Tasks TaskManager::getTasks()
+{
+    return _tasks;
+}
+
 void TaskManager::addTask(Task* task)
 {
     try

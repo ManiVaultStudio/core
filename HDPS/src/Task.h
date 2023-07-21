@@ -11,7 +11,7 @@
 
 namespace hdps {
 
-class TaskHandler;
+class AbstractTaskHandler;
 
 /**
  * Task class
@@ -25,7 +25,7 @@ class TaskHandler;
  *
  * @author Thomas Kroes
  */
-class Task final : public QObject, public util::Serializable
+class Task : public QObject, public util::Serializable
 {
     Q_OBJECT
 
@@ -47,9 +47,9 @@ public:
     * @param parent Pointer to parent object
     * @param name Name of the task
     * @param status Initial status of the task
-    * @param taskHandler Pointer to task handler (tasks will be displayed in the global task window when nullptr)
+    * @param handler Pointer to task handler
     */
-    Task(QObject* parent, const QString& name, const Status& status = Status::Idle, TaskHandler* taskHandler = nullptr);
+    Task(QObject* parent, const QString& name, const Status& status = Status::Idle, AbstractTaskHandler* handler = nullptr);
 
     /** Remove from task manager when destructed */
     ~Task();
@@ -108,6 +108,14 @@ public: // Status
 
     /** Set task status to aborted */
     void setAborted();
+
+public:
+
+    /**
+     * Get task handler
+     * @return Pointer to task handler
+     */
+    AbstractTaskHandler* getHandler();
 
 public: // Progress
 
@@ -173,11 +181,12 @@ signals:
     void itemsChanged(const QBitArray& items);
 
 private:
-    QString     _name;          /** Task name */
-    QString     _description;   /** Task description */
-    Status      _status;        /** Task status */
-    float       _progress;      /** Task progress */
-    QBitArray   _items;         /** Task items status bit array */
+    QString                 _name;          /** Task name */
+    QString                 _description;   /** Task description */
+    Status                  _status;        /** Task status */
+    AbstractTaskHandler*    _handler;       /** Task handler */
+    float                   _progress;      /** Task progress */
+    QBitArray               _items;         /** Task items status bit array */
 };
 
 }

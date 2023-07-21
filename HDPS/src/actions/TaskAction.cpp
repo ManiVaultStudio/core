@@ -29,6 +29,11 @@ TaskAction::TaskAction(QObject* parent, const QString& title /*= ""*/) :
     updateProgressActionTextFormat();
 }
 
+Task* TaskAction::getTask()
+{
+    return _task;
+}
+
 void TaskAction::setTask(Task* task)
 {
     Q_ASSERT(task != nullptr);

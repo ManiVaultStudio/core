@@ -11,13 +11,13 @@ namespace hdps {
 class Task;
 
 /**
- * Task handler class
+ * Abstract task handler class
  *
- * Class for interacting with a task.
+ * Base handler class for interacting with a task.
  *
  * @author Thomas Kroes
  */
-class TaskHandler : public QObject
+class AbstractTaskHandler : public QObject
 {
     Q_OBJECT
 
@@ -27,7 +27,10 @@ public:
     * Construct task handler with \p parent object
     * @param parent Pointer to parent object
     */
-    TaskHandler(QObject* parent);
+    AbstractTaskHandler(QObject* parent);
+
+    /** Initializes the handler */
+    virtual void init() = 0;
 
     /**
      * Get task

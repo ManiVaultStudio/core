@@ -9,12 +9,13 @@ namespace hdps {
 
 using namespace util;
 
-Task::Task(QObject* parent, const QString& name, const Status& status /*= Status::Idle*/, TaskHandler* taskHandler /*= nullptr*/) :
+Task::Task(QObject* parent, const QString& name, const Status& status /*= Status::Idle*/, AbstractTaskHandler* handler /*= nullptr*/) :
     QObject(parent),
     Serializable(name),
     _name(name),
     _description(),
     _status(status),
+    _handler(handler),
     _progress(0.f),
     _items()
 {
@@ -109,6 +110,11 @@ void Task::setFinished()
 void Task::setAborted()
 {
     setStatus(Status::Aborted);
+}
+
+AbstractTaskHandler* Task::getHandler()
+{
+    return _handler;
 }
 
 float Task::getProgress() const
