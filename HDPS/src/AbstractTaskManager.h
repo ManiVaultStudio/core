@@ -57,7 +57,7 @@ public:
         Tasks tasks = getTasks();
         Tasks tasksByHandlerType;
 
-        std::copy_if(tasks.begin(), tasks.end(), std::back_inserter(tasksByHandlerType), [status](Tasks* task) {
+        std::copy_if(tasks.begin(), tasks.end(), std::back_inserter(tasksByHandlerType), [status](Task* task) {
             return dynamic_cast<TaskHandlerType*>(task->getHandler()) && task->getStatus() == status;
         });
 

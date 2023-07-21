@@ -9,6 +9,14 @@ namespace hdps {
 
 using namespace util;
 
+QMap<Task::Status, QString> Task::statusNames = QMap<Status, QString>({
+    { Task::Status::Undefined, "Undefined" },
+    { Task::Status::Idle, "Idle" },
+    { Task::Status::Running, "Running" },
+    { Task::Status::Finished, "Finished" },
+    { Task::Status::Aborted, "Aborted" }
+});
+
 Task::Task(QObject* parent, const QString& name, const Status& status /*= Status::Idle*/, AbstractTaskHandler* handler /*= nullptr*/) :
     QObject(parent),
     Serializable(name),
@@ -115,6 +123,16 @@ void Task::setAborted()
 AbstractTaskHandler* Task::getHandler()
 {
     return _handler;
+}
+
+void Task::setHandler(AbstractTaskHandler* handler)
+{
+    if (handler == _handler)
+        return;
+
+    _handler = handler;
+
+    emit handlerChanged(_handler);
 }
 
 float Task::getProgress() const

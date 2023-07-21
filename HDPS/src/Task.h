@@ -40,6 +40,8 @@ public:
         Aborted         /** has been aborted */
     };
 
+    static QMap<Status, QString> statusNames;
+
 public:
 
     /**
@@ -117,6 +119,12 @@ public:
      */
     AbstractTaskHandler* getHandler();
 
+    /**
+     * Set task handler to \p handler
+     * @param handler Pointer to task handler
+     */
+    void setHandler(AbstractTaskHandler* handler);
+
 public: // Progress
 
     /** Gets the task progress [0, 1] */
@@ -161,6 +169,12 @@ signals:
      * @param description Modified description
      */
     void descriptionChanged(const QString& description);
+
+    /**
+     * Signals that the task handler changed to \p handler
+     * @param handler Task handler
+     */
+    void handlerChanged(AbstractTaskHandler* handler);
 
     /**
      * Signals that the task status changed to \p status

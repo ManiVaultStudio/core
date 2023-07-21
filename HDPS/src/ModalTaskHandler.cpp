@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ModalTaskHandler.h"
+#include "ModalTask.h"
 
 #include "CoreInterface.h"
 #include "actions/TaskAction.h"
@@ -11,47 +12,58 @@ namespace hdps {
 
 using namespace gui;
 
-QDialog ModalTaskHandler::tasksDialog = QDialog();
+ModalTaskHandler::ModalTasksDialog ModalTaskHandler::modalTasksDialog = ModalTasksDialog();
 
 ModalTaskHandler::ModalTaskHandler(QObject* parent /*= nullptr*/) :
-    AbstractTaskHandler(parent),
-    _tasksGroupAction(this, "Tasks")
+    AbstractTaskHandler(parent)
+{
+}
+
+void ModalTaskHandler::init()
+{
+}
+
+ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(QWidget* parent /*= nullptr*/) :
+    QDialog(parent),
+    _modalTasks(),
+    _tasksGroupAction(this, "Modal Tasks")
 {
     connect(&tasks(), &AbstractTaskManager::taskAdded, this, [this](Task* task) -> void {
-        if (!(task->isIdle() || task->isRunning()))
-            return;
+        const auto modalTask = dynamic_cast<ModalTask*>(task);
 
-        const auto modelTaskHandler = dynamic_cast<ModalTaskHandler*>(task->getHandler());
+        if (modalTask)
+            _modalTasks << modalTask;
 
-        if (!modelTaskHandler)
-            return;
+        connect(task, &Task::statusChanged, this, &ModalTasksDialog::tasksChanged);
 
         _tasksGroupAction.addAction(new TaskAction(this, task->getName()));
 
-        if (_tasksGroupAction.getActions().count() == 1)
-            tasksDialog.open();
+        tasksChanged();
     });
-    
+
     connect(&tasks(), &AbstractTaskManager::taskAboutToBeRemoved, this, [this](Task* task) -> void {
-        if (!(task->isIdle() || task->isRunning()))
-            return;
+        const auto modalTask = dynamic_cast<ModalTask*>(task);
 
-        const auto modelTaskHandler = dynamic_cast<ModalTaskHandler*>(task->getHandler());
+        if (modalTask && _modalTasks.contains(modalTask))
+            _modalTasks.removeOne(modalTask);
 
-        if (!modelTaskHandler)
-            return;
+        disconnect(task, &Task::statusChanged, this, nullptr);
 
         for (auto action : _tasksGroupAction.getActions())
             if (task == static_cast<TaskAction*>(action)->getTask())
                 _tasksGroupAction.removeAction(action);
 
-        if (_tasksGroupAction.getActions().empty())
-            tasksDialog.close();
+        tasksChanged();
     });
 }
 
-void ModalTaskHandler::init()
+void ModalTaskHandler::ModalTasksDialog::tasksChanged()
 {
+    ModalTasks idleOrRunningModalTasks;
+
+    std::copy_if(idleOrRunningModalTasks.begin(), idleOrRunningModalTasks.end(), std::back_inserter(_modalTasks), [](Task* task) {
+        return task->getStatus() == Task::Status::Idle || task->getStatus() == Task::Status::Running;
+    });
 }
 
 }

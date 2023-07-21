@@ -8,6 +8,8 @@
 
 #include "actions/GroupAction.h"
 
+#include <QDialog>
+
 namespace hdps {
 
 /**
@@ -19,6 +21,32 @@ namespace hdps {
  */
 class ModalTaskHandler final : public AbstractTaskHandler
 {
+protected:
+
+    /** Dialog for interaction with modal tasks */
+    class ModalTasksDialog : QDialog {
+    public:
+
+        using ModalTasks = QVector<Task*>;
+
+    public:
+
+        /**
+         * Construct with \p parent widget
+         * @param parent Pointer to parent widget
+         */
+        ModalTasksDialog(QWidget* parent = nullptr);
+
+    private:
+
+        /** Executed when the number of tasks or the status of a task changes */
+        void tasksChanged();
+
+    private:
+        ModalTasks          _modalTasks;            /** Modal tasks */
+        gui::GroupAction    _tasksGroupAction;      /** Groups modal tasks */
+    };
+
 public:
 
     /**
@@ -29,12 +57,9 @@ public:
 
     /** Initializes the handler */
     void init() override;
-
+   
 private:
-    gui::GroupAction    _tasksGroupAction;      /** Groups modal tasks */
-    
-    /** Modal tasks dialog */
-    static QDialog tasksDialog;
+    static ModalTasksDialog     modalTasksDialog;   /** Modal tasks dialog */
 };
 
 }

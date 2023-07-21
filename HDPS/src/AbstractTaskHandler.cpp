@@ -13,6 +13,17 @@ AbstractTaskHandler::AbstractTaskHandler(QObject* parent /*= nullptr*/) :
 {
 }
 
+Task* AbstractTaskHandler::getTask()
+{
+    return _task;
+}
 
+void AbstractTaskHandler::setTask(Task* task)
+{
+    Q_ASSERT(task != nullptr);
+
+    if (task == nullptr)
+        return;
+}
 
 }
