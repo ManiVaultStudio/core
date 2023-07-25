@@ -27,13 +27,13 @@ public:
 
     /** Task columns */
     enum class Column {
-        Name,               /** Name of the task */
-        Progress,           /** Task progress */
-        ItemDescription,    /** Task item description */
-        ID,                 /** Globally unique identifier of the task */
-        ParentID,           /** Globally unique identifier of the parent task (empty string if not a child task) */
-        Type,               /** Task type string */
-        Status,             /** Status of the task */
+        Name,                   /** Name of the task */
+        Progress,               /** Task progress */
+        SubtaskDescription,     /** Current subtask description */
+        ID,                     /** Globally unique identifier of the task */
+        ParentID,               /** Globally unique identifier of the parent task (empty string if not a child task) */
+        Type,                   /** Task type string */
+        Status,                 /** Status of the task */
 
         Count
     };

@@ -153,7 +153,8 @@ void Task::setProgress(float progress, const QString& subtaskDescription /*= ""*
 
     emit progressChanged(_progress);
 
-    setCurrentSubtaskDescription(subtaskDescription);
+    if (!subtaskDescription.isEmpty())
+        setCurrentSubtaskDescription(subtaskDescription);
 }
 
 void Task::setNumberOfSubtasks(std::uint32_t numberOfSubtasks)

@@ -233,6 +233,7 @@ TasksModel::Row::Row(Task* task) :
 {
     append(new NameItem(task));
     append(new ProgressItem(task));
+    append(new SubTaskDescriptionItem(task));
     append(new IdItem(task));
     append(new ParentIdItem(task));
     append(new TypeItem(task));
@@ -242,6 +243,7 @@ TasksModel::Row::Row(Task* task) :
 QMap<TasksModel::Column, TasksModel::ColumHeaderInfo> TasksModel::columnInfo = QMap<TasksModel::Column, TasksModel::ColumHeaderInfo>({
     { TasksModel::Column::Name, { "Name" , "Name", "Name of the task" } },
     { TasksModel::Column::Progress, { "Progress" , "Progress", "Task progress" } },
+    { TasksModel::Column::SubtaskDescription, { "Subtask description" , "Subtask description", "Subtask description" } },
     { TasksModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the task" } },
     { TasksModel::Column::ParentID, { "Parent ID",  "Parent ID", "Globally unique identifier of the parent task" } },
     { TasksModel::Column::Type, { "Type",  "Type", "Type of task" } },
