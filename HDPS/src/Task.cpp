@@ -25,7 +25,8 @@ Task::Task(QObject* parent, const QString& name, const Status& status /*= Status
     _status(status),
     _handler(handler),
     _progress(0.f),
-    _items()
+    _subtasks(),
+    _subtasksDescriptions()
 {
     tasks().addTask(this);
 }
@@ -118,6 +119,7 @@ void Task::setFinished()
 void Task::setAborted()
 {
     setStatus(Status::Aborted);
+    setProgress(0.f);
 }
 
 AbstractTaskHandler* Task::getHandler()
@@ -140,39 +142,82 @@ float Task::getProgress() const
     return _progress;
 }
 
-void Task::setProgress(float progress)
+void Task::setProgress(float progress, const QString& subtaskDescription /*= ""*/)
 {
+    progress = std::clamp(progress, 0.f, 1.0f);
+
     if (progress == _progress)
         return;
 
     _progress = progress;
 
     emit progressChanged(_progress);
+
+    setCurrentSubtaskDescription(subtaskDescription);
 }
 
-void Task::setNumberOfItems(std::uint32_t numberOfItems)
+void Task::setNumberOfSubtasks(std::uint32_t numberOfSubtasks)
 {
-    if (numberOfItems == _items.count())
+    if (numberOfSubtasks == _subtasks.count())
         return;
 
-    _items.resize(numberOfItems);
+    _subtasks.resize(numberOfSubtasks);
+    _subtasksDescriptions.resize(numberOfSubtasks);
 
-    emit itemsChanged(_items);
+    emit subtasksChanged(_subtasks);
 }
 
-void Task::setItemFinished(std::uint32_t itemIndex)
+void Task::setSubtaskFinished(std::uint32_t subtaskIndex)
 {
-    if (itemIndex >= _items.count())
+    if (subtaskIndex >= _subtasks.count())
         return;
 
-    _items.setBit(itemIndex, true);
+    _subtasks.setBit(subtaskIndex, true);
 
-    emit itemsChanged(_items);
+    setProgress(static_cast<float>(_subtasks.count(true)) / static_cast<float>(_subtasks.count()), _subtasksDescriptions[subtaskIndex]);
+
+    emit subtasksChanged(_subtasks);
+}
+
+void Task::setSubtasksDescriptions(const QStringList& subtasksDescriptions)
+{
+    if (subtasksDescriptions == _subtasksDescriptions)
+        return;
+
+    if (subtasksDescriptions.count() != _subtasks.count())
+        setNumberOfSubtasks(subtasksDescriptions.count());
+
+    _subtasksDescriptions = subtasksDescriptions;
+
+    emit subtasksDescriptionsChanged(_subtasksDescriptions);
+}
+
+void Task::setSubtaskDescription(std::uint32_t subtaskIndex, const QString& subtaskDescription)
+{
+    if (_subtasksDescriptions.count() <= subtaskIndex)
+        return;
+
+    _subtasksDescriptions[subtaskIndex] = subtaskDescription;
+}
+
+QString Task::getCurrentSubtaskDescription() const
+{
+    return _currentSubtaskDescription;
+}
+
+void Task::setCurrentSubtaskDescription(const QString& currentSubtaskDescription)
+{
+    if (currentSubtaskDescription == _currentSubtaskDescription)
+        return;
+
+    _currentSubtaskDescription = currentSubtaskDescription;
+
+    emit currentSubtaskDescriptionChanged(currentSubtaskDescription);
 }
 
 void Task::start(std::uint32_t numberOfItems)
 {
-    setNumberOfItems(numberOfItems);
+    setNumberOfSubtasks(numberOfItems);
     setStatus(Status::Running);
 }
 

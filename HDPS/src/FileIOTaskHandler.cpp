@@ -2,40 +2,41 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ModalTaskHandler.h"
-#include "ModalTask.h"
+#include "FileIOTaskHandler.h"
+#include "FileIOTask.h"
 
 #include "CoreInterface.h"
+
 #include "actions/TaskAction.h"
 
 namespace hdps {
 
 using namespace gui;
 
-ModalTaskHandler::ModalTasksDialog ModalTaskHandler::modalTasksDialog = ModalTasksDialog();
+FileIOTaskHandler::FileIOTasksDialog FileIOTaskHandler::fileIOTasksDialog = FileIOTasksDialog();
 
-ModalTaskHandler::ModalTaskHandler(QObject* parent /*= nullptr*/) :
+FileIOTaskHandler::FileIOTaskHandler(QObject* parent /*= nullptr*/) :
     AbstractTaskHandler(parent)
 {
 }
 
-void ModalTaskHandler::init()
+void FileIOTaskHandler::init()
 {
 }
 
-ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(QWidget* parent /*= nullptr*/) :
+FileIOTaskHandler::FileIOTasksDialog::FileIOTasksDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _modalTasks(),
-    _tasksGroupAction(this, "Modal Tasks")
+    _tasksGroupAction(this, "File IO Tasks")
 {
     /*
     connect(&tasks(), &AbstractTaskManager::taskAdded, this, [this](Task* task) -> void {
-        const auto modalTask = dynamic_cast<ModalTask*>(task);
+        const auto fileIOTask = dynamic_cast<FileIOTask*>(task);
 
-        if (modalTask)
-            _modalTasks << modalTask;
+        if (fileIOTask)
+            _modalTasks << fileIOTask;
 
-        connect(task, &Task::statusChanged, this, &ModalTasksDialog::tasksChanged);
+        connect(task, &Task::statusChanged, this, &FileIOTasksDialog::tasksChanged);
 
         _tasksGroupAction.addAction(new TaskAction(this, task->getName()));
 
@@ -43,10 +44,10 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(QWidget* parent /*= nullptr
     });
 
     connect(&tasks(), &AbstractTaskManager::taskAboutToBeRemoved, this, [this](Task* task) -> void {
-        const auto modalTask = dynamic_cast<ModalTask*>(task);
+        const auto fileIOTask = dynamic_cast<FileIOTask*>(task);
 
-        if (modalTask && _modalTasks.contains(modalTask))
-            _modalTasks.removeOne(modalTask);
+        if (fileIOTask && _modalTasks.contains(fileIOTask))
+            _modalTasks.removeOne(fileIOTask);
 
         disconnect(task, &Task::statusChanged, this, nullptr);
 
@@ -59,13 +60,15 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(QWidget* parent /*= nullptr
     */
 }
 
-void ModalTaskHandler::ModalTasksDialog::tasksChanged()
+void FileIOTaskHandler::FileIOTasksDialog::tasksChanged()
 {
+    /*
     ModalTasks idleOrRunningModalTasks;
 
     std::copy_if(idleOrRunningModalTasks.begin(), idleOrRunningModalTasks.end(), std::back_inserter(_modalTasks), [](Task* task) {
         return task->getStatus() == Task::Status::Idle || task->getStatus() == Task::Status::Running;
     });
+    */
 }
 
 }

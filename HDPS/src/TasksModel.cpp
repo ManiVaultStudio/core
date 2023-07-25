@@ -4,6 +4,8 @@
 
 #include "TasksModel.h"
 
+#include <util/Exception.h>
+
 using namespace hdps::gui;
 
 #ifdef _DEBUG
@@ -12,6 +14,8 @@ using namespace hdps::gui;
 
 namespace hdps
 {
+
+using namespace util;
 
 TasksModel::HeaderItem::HeaderItem(const ColumHeaderInfo& columHeaderInfo) :
     QStandardItem(),
@@ -92,6 +96,58 @@ void TasksModel::NameItem::setData(const QVariant& value, int role /* = Qt::User
     }
 }
 
+TasksModel::ProgressItem::ProgressItem(Task* task) :
+    Item(task)
+{
+    connect(getTask(), &Task::progressChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant TasksModel::ProgressItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return getTask()->getProgress();
+
+        case Qt::DisplayRole:
+            return QString::number(data(Qt::EditRole).toFloat(), 'f', 2);
+
+        case Qt::ToolTipRole:
+            return "Task progress: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+TasksModel::SubTaskDescriptionItem::SubTaskDescriptionItem(Task* task) :
+    Item(task)
+{
+    connect(getTask(), &Task::currentSubtaskDescriptionChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant TasksModel::SubTaskDescriptionItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getTask()->getCurrentSubtaskDescription();
+
+        case Qt::ToolTipRole:
+            return "Current sub-task description: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 QVariant TasksModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
@@ -101,6 +157,23 @@ QVariant TasksModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
 
         case Qt::ToolTipRole:
             return "Task globally unique identifier: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant TasksModel::ParentIdItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getTask()->getId();
+
+        case Qt::ToolTipRole:
+            return "Parent task globally unique identifier: " + data(Qt::DisplayRole).toString();
 
         default:
             break;
@@ -128,6 +201,14 @@ QVariant TasksModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
+TasksModel::StatusItem::StatusItem(Task* task) :
+    Item(task)
+{
+    connect(getTask(), &Task::statusChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+}
+
 QVariant TasksModel::StatusItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
@@ -151,14 +232,18 @@ TasksModel::Row::Row(Task* task) :
     QList<QStandardItem*>()
 {
     append(new NameItem(task));
+    append(new ProgressItem(task));
     append(new IdItem(task));
+    append(new ParentIdItem(task));
     append(new TypeItem(task));
     append(new StatusItem(task));
 }
 
 QMap<TasksModel::Column, TasksModel::ColumHeaderInfo> TasksModel::columnInfo = QMap<TasksModel::Column, TasksModel::ColumHeaderInfo>({
     { TasksModel::Column::Name, { "Name" , "Name", "Name of the task" } },
+    { TasksModel::Column::Progress, { "Progress" , "Progress", "Task progress" } },
     { TasksModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the task" } },
+    { TasksModel::Column::ParentID, { "Parent ID",  "Parent ID", "Globally unique identifier of the parent task" } },
     { TasksModel::Column::Type, { "Type",  "Type", "Type of task" } },
     { TasksModel::Column::Status, { "Status",  "Status", "Status of the task" } }
 });
@@ -171,10 +256,53 @@ TasksModel::TasksModel(QObject* parent /*= nullptr*/) :
     for (auto column : columnInfo.keys())
         setHorizontalHeaderItem(static_cast<int>(column), new HeaderItem(columnInfo[column]));
 
-    //connect(&hdps::actions(), &AbstractActionsManager::actionAdded, this, &TasksModel::actionAddedToManager);
-    //connect(&hdps::actions(), &AbstractActionsManager::actionAboutToBeRemoved, this, &TasksModel::actionAboutToBeRemovedFromManager);
-    //connect(&hdps::actions(), &AbstractActionsManager::publicActionAdded, this, &TasksModel::publicActionAddedToManager);
-    //connect(&hdps::actions(), &AbstractActionsManager::publicActionAboutToBeRemoved, this, &TasksModel::publicActionAboutToBeRemovedFromManager);
+    connect(&tasks(), &AbstractTaskManager::taskAdded, this, &TasksModel::taskAddedToTaskManager);
+    connect(&tasks(), &AbstractTaskManager::taskAboutToBeRemoved, this, &TasksModel::taskAboutToBeRemovedFromTaskManager);
+}
+
+void TasksModel::taskAddedToTaskManager(Task* task)
+{
+    try {
+        Q_ASSERT(task != nullptr);
+
+        if (task == nullptr)
+            throw std::runtime_error("Task may not be a nullptr");
+
+        appendRow(Row(task));
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to add task to tasks model", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to add task to tasks model");
+    }
+}
+
+void TasksModel::taskAboutToBeRemovedFromTaskManager(Task* task)
+{
+    try {
+        Q_ASSERT(task != nullptr);
+
+        if (task == nullptr)
+            throw std::runtime_error("Task may not be a nullptr");
+
+        const auto matches = match(QModelIndex(), Qt::EditRole, task->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
+
+        if (matches.empty())
+            throw std::runtime_error(QString("%1 not found").arg(task->getName()).toStdString());
+
+        removeRow(matches.first().row());
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to remove task from tasks model", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to remove task from tasks model");
+    }
 }
 
 }

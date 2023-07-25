@@ -616,9 +616,11 @@ set(PUBLIC_TASK_HEADERS
     src/Task.h
     src/ModalTask.h
     src/BackgroundTask.h
+    src/FileIOTask.h
     src/AbstractTaskHandler.h
     src/ModalTaskHandler.h
     src/BackgroundTaskHandler.h
+    src/FileIOTaskHandler.h
     src/TasksModel.h
 )
 
@@ -626,9 +628,11 @@ set(PUBLIC_TASK_SOURCES
     src/Task.cpp
     src/ModalTask.cpp
     src/BackgroundTask.cpp
+    src/FileIOTask.cpp
     src/AbstractTaskHandler.cpp
     src/ModalTaskHandler.cpp
     src/BackgroundTaskHandler.cpp
+    src/FileIOTaskHandler.cpp
     src/TasksModel.cpp
 )
 

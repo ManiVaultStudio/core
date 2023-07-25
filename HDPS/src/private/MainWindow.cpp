@@ -14,6 +14,10 @@
 
 #include <Application.h>
 
+#include <widgets/HierarchyWidget.h>
+
+#include <TasksModel.h>
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QScreen>
@@ -66,28 +70,30 @@ public:
      */
     TasksPopupWidget(QWidget* parent) :
         QWidget(parent),
-        _tasksAction(this, "Tasks")
+        _tasksModel(this),
+        _tasksWidget(this, "Task", _tasksModel, nullptr, false)
     {
         setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+        setFixedSize(QSize(400, 200));
         setObjectName("TasksPopupWidget");
         setStyleSheet("QWidget#TasksPopupWidget { border: 5p solid rgb(74, 74, 74); }");
 
+        _tasksWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));
+
+        auto& treeView = _tasksWidget.getTreeView();
+
+        treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ID), true);
+        treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ParentID), true);
+
         auto layout = new QVBoxLayout();
 
-        auto groupBox       = new QGroupBox("Tasks");
-        auto groupBoxLayout = new QVBoxLayout();
-
-        groupBox->setLayout(groupBoxLayout);
-
-        groupBoxLayout->setContentsMargins(0, 0, 0, 0);
-        groupBoxLayout->addWidget(_tasksAction.createWidget(this));
-
         layout->setContentsMargins(4, 4, 4, 4);
-        layout->addWidget(groupBox);
+        layout->addWidget(&_tasksWidget);
 
         setLayout(layout);
 
         installEventFilter(this);
+
         parent->installEventFilter(this);
 
         connect(&tasks(), &AbstractTaskManager::taskAdded, this, [this]() -> void {
@@ -122,7 +128,7 @@ public:
      * @return Minimum size hint
      */
     QSize minimumSizeHint() const override {
-        return QSize(300, 100);
+        return QSize(600, 400);
     }
 
     /**
@@ -141,7 +147,8 @@ private:
     }
 
 private:
-    TasksAction     _tasksAction;       /** Tasks group action */
+    TasksModel          _tasksModel;    /** Model with all tasks in the system */
+    HierarchyWidget     _tasksWidget;   /** Show the tasks in a hierarchy widget */
 };
 
 MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :

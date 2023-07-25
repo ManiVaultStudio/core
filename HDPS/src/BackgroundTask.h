@@ -22,7 +22,7 @@ class BackgroundTask final : public Task
 public:
 
     /**
-    * Construct progress with \p parent object, \p name and initial \p status
+    * Construct task with \p parent object, \p name and initial \p status
     * @param parent Pointer to parent object
     * @param name Name of the task
     * @param status Initial status of the task

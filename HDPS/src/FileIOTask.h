@@ -9,13 +9,13 @@
 namespace hdps {
 
 /**
- * Modal task class
+ * File IO task class
  *
- * Modal tasks are foreground tasks that show their progress in a modal progress dialog.
+ * File IO tasks for controlling file IO processes that a long time (e.g. project open/save).
  *
  * @author Thomas Kroes
  */
-class ModalTask final : public Task
+class FileIOTask final : public Task
 {
     Q_OBJECT
 
@@ -27,7 +27,7 @@ public:
     * @param name Name of the task
     * @param status Initial status of the task
     */
-    ModalTask(QObject* parent, const QString& name, const Status& status = Status::Idle);
+    FileIOTask(QObject* parent, const QString& name, const Status& status = Status::Idle);
 };
 
 }

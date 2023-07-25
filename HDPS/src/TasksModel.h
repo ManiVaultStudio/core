@@ -27,10 +27,13 @@ public:
 
     /** Task columns */
     enum class Column {
-        Name,       /** Name of the task */
-        ID,         /** Globally unique identifier of the task */
-        Type,       /** Task type string */
-        Status,     /** Status of the task */
+        Name,               /** Name of the task */
+        Progress,           /** Task progress */
+        ItemDescription,    /** Task item description */
+        ID,                 /** Globally unique identifier of the task */
+        ParentID,           /** Globally unique identifier of the parent task (empty string if not a child task) */
+        Type,               /** Task type string */
+        Status,             /** Status of the task */
 
         Count
     };
@@ -112,8 +115,56 @@ protected:
         void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
     };
 
+    /** Standard model item class for displaying the task progress */
+    class ProgressItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p task
+         * @param task Pointer to task to display item for
+         */
+        ProgressItem(Task* task);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for displaying the task item description */
+    class SubTaskDescriptionItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p task
+         * @param task Pointer to task to display item for
+         */
+        SubTaskDescriptionItem(Task* task);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
     /** Standard model item class for displaying the task identifier */
     class IdItem final : public Item {
+    public:
+
+        /** Use base task item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for displaying the parent task identifier */
+    class ParentIdItem final : public Item {
     public:
 
         /** Use base task item constructor */
@@ -144,8 +195,11 @@ protected:
     class StatusItem final : public Item {
     public:
 
-        /** Use base task item constructor */
-        using Item::Item;
+        /**
+         * Construct with \p task
+         * @param task Pointer to task to display item for
+         */
+        StatusItem(Task* task);
 
         /**
          * Get model data for \p role
@@ -173,6 +227,20 @@ public:
      * @param parent Pointer to parent object
      */
     TasksModel(QObject* parent = nullptr);
+
+private:
+
+    /**
+     * Invoked when \p task is added to the task manager
+     * @param task Pointer to task that was added
+     */
+    void taskAddedToTaskManager(Task* task);
+
+    /**
+     * Invoked when \p task is about to be removed from the task manager
+     * @param task Pointer to task that is about to be removed
+     */
+    void taskAboutToBeRemovedFromTaskManager(Task* task);
 
     friend class Item;
 };

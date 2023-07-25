@@ -19,6 +19,9 @@ class AbstractTaskHandler;
  * Convenience class for managing a task.
  *
  * Task progress can be modified in two ways:
+ * 
+ * 1. By setting task progress directly setProgress(...)
+ *    
  *  - Setting progress directly setProgress(...)
  *  - Setting a number of task items via setNumberOfItems(...) and flagging items as finished 
  *    with setItemFinished(...), the percentage is then updated automatically
@@ -45,7 +48,7 @@ public:
 public:
 
     /**
-    * Construct progress with \p parent object, \p name, initial \p status and possibly a \p taskHandler
+    * Construct task with \p parent object, \p name, initial \p status and possibly a \p taskHandler
     * @param parent Pointer to parent object
     * @param name Name of the task
     * @param status Initial status of the task
@@ -132,21 +135,49 @@ public: // Progress
 
     /**
      * Sets the task progress to \p progress
-     * @param progress Task progress
+     * @param progress Task progress, clamped to [0, 1]
+     * @param subtaskDescription Subtask description associated with the progress update
      */
-    void setProgress(float progress);
+    void setProgress(float progress, const QString& subtaskDescription = "");
+
+public: // Subtasks
 
     /**
-     * Set the number of items to \p numberOfItems
-     * @param numberOfItems Number of task items
+     * Set the number of subtasks to \p numberOfSubtasks
+     * @param numberOfSubtasks Number of subtasks
      */
-    void setNumberOfItems(std::uint32_t numberOfItems);
+    void setNumberOfSubtasks(std::uint32_t numberOfSubtasks);
 
     /**
-     * Flag item with \p itemIndex as finished
-     * @param itemIndex Index of the item
+     * Flag item with \p subtaskIndex as finished
+     * @param subtaskIndex Index of the subtask
      */
-    void setItemFinished(std::uint32_t itemIndex);
+    void setSubtaskFinished(std::uint32_t subtaskIndex);
+
+    /**
+     * Set subtasks descriptions to \p subtasksDescriptions
+     * @param subtasksDescriptions Subtasks descriptions
+     */
+    void setSubtasksDescriptions(const QStringList& subtasksDescriptions);
+
+    /**
+     * Set subtask description to \p subtaskDescription for \p subtaskIndex
+     * @param subtaskIndex Subtask index to set the description for
+     * @param subtaskDescription Description of the subtask
+     */
+    void setSubtaskDescription(std::uint32_t subtaskIndex, const QString& subtaskDescription);
+
+    /**
+     * Get current subtask description
+     * @return Description of the current subtask
+     */
+    QString getCurrentSubtaskDescription() const;
+
+    /**
+     * Set current subtask description to \p currentSubtaskDescription
+     * @param currentSubtaskDescription Description of the current subtask
+     */
+    void setCurrentSubtaskDescription(const QString& currentSubtaskDescription);
 
 public: // Start
 
@@ -189,18 +220,32 @@ signals:
     void progressChanged(float progress);
 
     /**
-     * Signals that items changed to \p items
-     * @param items Modified items
+     * Signals that subtasks changed to \p subtasks
+     * @param subtasks Modified subtasks
      */
-    void itemsChanged(const QBitArray& items);
+    void subtasksChanged(const QBitArray& subtasks);
+
+    /**
+     * Signals that subtasks descriptions changed to \p subtasksDescriptions
+     * @param subtasksDescriptions Modified subtasks descriptions
+     */
+    void subtasksDescriptionsChanged(const QStringList& subtasksDescriptions);
+
+    /**
+     * Signals that current subtask description changed to \p currentSubtaskDescription
+     * @param currentSubtaskDescription Modified description of the current subtask
+     */
+    void currentSubtaskDescriptionChanged(const QString& currentSubtaskDescription);
 
 private:
-    QString                 _name;          /** Task name */
-    QString                 _description;   /** Task description */
-    Status                  _status;        /** Task status */
-    AbstractTaskHandler*    _handler;       /** Task handler */
-    float                   _progress;      /** Task progress */
-    QBitArray               _items;         /** Task items status bit array */
+    QString                 _name;                          /** Task name */
+    QString                 _description;                   /** Task description */
+    Status                  _status;                        /** Task status */
+    AbstractTaskHandler*    _handler;                       /** Task handler */
+    float                   _progress;                      /** Task progress */
+    QBitArray               _subtasks;                      /** Subtasks status */
+    QStringList             _subtasksDescriptions;          /** Subtasks descriptions */
+    QString                 _currentSubtaskDescription;     /** Current item description */
 };
 
 }
