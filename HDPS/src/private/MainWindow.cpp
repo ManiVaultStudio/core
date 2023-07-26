@@ -9,12 +9,13 @@
 #include "FileMenu.h"
 #include "ViewMenu.h"
 #include "HelpMenu.h"
-#include "TasksAction.h"
 #include "Task.h"
 
 #include <Application.h>
 
 #include <widgets/HierarchyWidget.h>
+
+#include <actions/TasksAction.h>
 
 #include <TasksModel.h>
 
@@ -70,25 +71,17 @@ public:
      */
     TasksPopupWidget(QWidget* parent) :
         QWidget(parent),
-        _tasksModel(this),
-        _tasksWidget(this, "Task", _tasksModel, nullptr, false)
+        _tasksAction(parent, "Tasks")
     {
         setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
         setFixedSize(QSize(400, 200));
         setObjectName("TasksPopupWidget");
         setStyleSheet("QWidget#TasksPopupWidget { border: 5p solid rgb(74, 74, 74); }");
 
-        _tasksWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));
-
-        auto& treeView = _tasksWidget.getTreeView();
-
-        treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ID), true);
-        treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ParentID), true);
-
         auto layout = new QVBoxLayout();
 
         layout->setContentsMargins(4, 4, 4, 4);
-        layout->addWidget(&_tasksWidget);
+        layout->addWidget(_tasksAction.createWidget(this));
 
         setLayout(layout);
 
@@ -147,8 +140,7 @@ private:
     }
 
 private:
-    TasksModel          _tasksModel;    /** Model with all tasks in the system */
-    HierarchyWidget     _tasksWidget;   /** Show the tasks in a hierarchy widget */
+    TasksAction     _tasksAction;    /** Action which shows all tasks */
 };
 
 MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :

@@ -276,6 +276,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/ProjectSplashScreenAction.h
     src/actions/ProgressAction.h
     src/actions/TaskAction.h
+    src/actions/TasksAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -294,6 +295,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/ProjectSplashScreenAction.cpp
     src/actions/ProgressAction.cpp
     src/actions/TaskAction.cpp
+    src/actions/TasksAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES

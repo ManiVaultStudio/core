@@ -65,6 +65,10 @@ TasksModel::NameItem::NameItem(Task* task) :
     connect(getTask(), &Task::nameChanged, this, [this]() -> void {
         emitDataChanged();
     });
+
+    connect(getTask(), &Task::descriptionChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant TasksModel::NameItem::data(int role /*= Qt::UserRole + 1*/) const
