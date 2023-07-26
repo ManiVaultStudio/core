@@ -24,9 +24,11 @@ Task::Task(QObject* parent, const QString& name, const Status& status /*= Status
     _description(),
     _status(status),
     _handler(handler),
+    _progressMode(ProgressMode::Manual),
     _progress(0.f),
     _subtasks(),
-    _subtasksDescriptions()
+    _subtasksDescriptions(),
+    _progressDescription()
 {
     tasks().addTask(this);
 }
@@ -137,6 +139,23 @@ void Task::setHandler(AbstractTaskHandler* handler)
     emit handlerChanged(_handler);
 }
 
+Task::ProgressMode Task::getProgressMode() const
+{
+    return _progressMode;
+}
+
+void Task::setProgressMode(const ProgressMode& progressMode)
+{
+    if (progressMode == _progressMode)
+        return;
+
+    _progressMode = progressMode;
+
+    emit progressModeChanged(_progressMode);
+
+    updateProgress();
+}
+
 float Task::getProgress() const
 {
     return _progress;
@@ -144,6 +163,9 @@ float Task::getProgress() const
 
 void Task::setProgress(float progress, const QString& subtaskDescription /*= ""*/)
 {
+    if (_progressMode != ProgressMode::Manual)
+        return;
+
     progress = std::clamp(progress, 0.f, 1.0f);
 
     if (progress == _progress)
@@ -151,37 +173,56 @@ void Task::setProgress(float progress, const QString& subtaskDescription /*= ""*
 
     _progress = progress;
 
-    emit progressChanged(_progress);
+    updateProgress();
 
     if (!subtaskDescription.isEmpty())
-        setCurrentSubtaskDescription(subtaskDescription);
+        setProgressDescription(subtaskDescription);
 }
 
 void Task::setNumberOfSubtasks(std::uint32_t numberOfSubtasks)
 {
+    if (_progressMode != ProgressMode::Subtasks)
+        return;
+
+    if (numberOfSubtasks == 0)
+        return;
+
     if (numberOfSubtasks == _subtasks.count())
         return;
 
     _subtasks.resize(numberOfSubtasks);
     _subtasksDescriptions.resize(numberOfSubtasks);
+    
+    setProgressMode(ProgressMode::Subtasks);
 
     emit subtasksChanged(_subtasks);
 }
 
 void Task::setSubtaskFinished(std::uint32_t subtaskIndex)
 {
+    if (_progressMode != ProgressMode::Subtasks)
+        return;
+
     if (subtaskIndex >= _subtasks.count())
         return;
 
     _subtasks.setBit(subtaskIndex, true);
 
-    setProgress(static_cast<float>(_subtasks.count(true)) / static_cast<float>(_subtasks.count()), _subtasksDescriptions[subtaskIndex]);
+    updateProgress();
 
     emit subtasksChanged(_subtasks);
+
+    const auto subtaskDescription = _subtasksDescriptions[subtaskIndex];
+
+    if (!subtaskDescription.isEmpty())
+        setProgressDescription(subtaskDescription);
 }
 
 void Task::setSubtasksDescriptions(const QStringList& subtasksDescriptions)
 {
+    if (_progressMode != ProgressMode::Subtasks)
+        return;
+
     if (subtasksDescriptions == _subtasksDescriptions)
         return;
 
@@ -195,31 +236,48 @@ void Task::setSubtasksDescriptions(const QStringList& subtasksDescriptions)
 
 void Task::setSubtaskDescription(std::uint32_t subtaskIndex, const QString& subtaskDescription)
 {
+    if (_progressMode != ProgressMode::Subtasks)
+        return;
+
     if (_subtasksDescriptions.count() <= subtaskIndex)
         return;
 
     _subtasksDescriptions[subtaskIndex] = subtaskDescription;
 }
 
-QString Task::getCurrentSubtaskDescription() const
+QString Task::getProgressDescription() const
 {
-    return _currentSubtaskDescription;
+    return _progressDescription;
 }
 
-void Task::setCurrentSubtaskDescription(const QString& currentSubtaskDescription)
+void Task::setProgressDescription(const QString& progressDescription)
 {
-    if (currentSubtaskDescription == _currentSubtaskDescription)
+    if (progressDescription == _progressDescription)
         return;
 
-    _currentSubtaskDescription = currentSubtaskDescription;
+    _progressDescription = progressDescription;
 
-    emit currentSubtaskDescriptionChanged(currentSubtaskDescription);
+    emit currentSubtaskDescriptionChanged(_progressDescription);
 }
 
 void Task::start(std::uint32_t numberOfItems)
 {
     setNumberOfSubtasks(numberOfItems);
     setStatus(Status::Running);
+}
+
+void Task::updateProgress()
+{
+    switch (_progressMode) {
+        case ProgressMode::Manual:
+            break;
+
+        case ProgressMode::Subtasks:
+            _progress = _subtasks.isEmpty() ? 0.f : static_cast<float>(_subtasks.count(true)) / static_cast<float>(_subtasks.count());
+            break;
+    }
+
+    emit progressChanged(_progress);
 }
 
 }

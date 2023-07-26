@@ -45,6 +45,12 @@ public:
 
     static QMap<Status, QString> statusNames;
 
+    /** Progress is tracked by: */
+    enum class ProgressMode {
+        Manual,     /** setting progress percentage manually */
+        Subtasks    /** setting a number of subtasks and flagging subtasks as finished (progress percentage is computed automatically) */
+    };
+
 public:
 
     /**
@@ -62,57 +68,57 @@ public:
 public: // Name and description
 
     /** Get task name */
-    QString getName() const;
+    virtual QString getName() const final;
 
     /**
      * Set task name to \p name
      * @param name Name of the task
      */
-    void setName(const QString& name);
+    virtual void setName(const QString& name) final;
 
     /** Gets the task description */
-    QString getDescription() const;
+    virtual QString getDescription() const final;
 
     /**
      * Sets the task description to \p description
      * @param description Task description
      */
-    void setDescription(const QString& description);
+    virtual void setDescription(const QString& description) final;
 
 public: // Status
 
     /** Get task status */
-    Status getStatus() const;
+    virtual Status getStatus() const final;
 
-    /** Check if task status is idle */
-    bool isIdle() const;
+    /** Check if task is idle */
+    virtual bool isIdle() const final;
 
-    /** Check if task status is idle */
-    bool isRunning() const;
+    /** Check if task is idle */
+    virtual bool isRunning() const final;
 
-    /** Check if task status is idle */
-    bool isFinished() const;
+    /** Check if task is idle */
+    virtual bool isFinished() const final;
 
-    /** Check if task status is idle */
-    bool isAborted() const;
+    /** Check if task is idle */
+    virtual bool isAborted() const final;
 
     /**
      * Set task status to \p status
      * @param status Task status
      */
-    void setStatus(const Status& status);
+    virtual void setStatus(const Status& status) final;
 
     /** Set task status to idle */
-    void setIdle();
+    virtual void setIdle() final;
 
     /** Set task status to running */
-    void setRunning();
+    virtual void setRunning() final;
 
     /** Set task status to finished */
-    void setFinished();
+    virtual void setFinished() final;
 
     /** Set task status to aborted */
-    void setAborted();
+    virtual void setAborted() final;
 
 public:
 
@@ -120,72 +126,97 @@ public:
      * Get task handler
      * @return Pointer to task handler
      */
-    AbstractTaskHandler* getHandler();
+    virtual AbstractTaskHandler* getHandler() final;
 
     /**
      * Set task handler to \p handler
      * @param handler Pointer to task handler
      */
-    void setHandler(AbstractTaskHandler* handler);
+    virtual void setHandler(AbstractTaskHandler* handler) final;
 
-public: // Progress
-
-    /** Gets the task progress [0, 1] */
-    float getProgress() const;
+public: // Progress mode
 
     /**
-     * Sets the task progress to \p progress
+     * Get progress mode
+     * @return Progress mode enum
+     */
+    virtual ProgressMode getProgressMode() const final;
+
+    /**
+     * Sets progress mode to to \p progressMode
+     * @param progressMode Progress mode
+     */
+    virtual void setProgressMode(const ProgressMode& progressMode) final;
+
+public: // Manual
+
+    /** Gets the task progress [0, 1] */
+    virtual float getProgress() const final;
+
+    /**
+     * Sets the task progress percentage to \p progress
+     * This method only has an effect when Task#_progressMode is set to ProgressMode::Manual
      * @param progress Task progress, clamped to [0, 1]
      * @param subtaskDescription Subtask description associated with the progress update
      */
-    void setProgress(float progress, const QString& subtaskDescription = "");
+    virtual void setProgress(float progress, const QString& subtaskDescription = "");
 
 public: // Subtasks
 
     /**
      * Set the number of subtasks to \p numberOfSubtasks
+     * This method sets the Task#_progressMode to ProgressMode::Subtasks
      * @param numberOfSubtasks Number of subtasks
      */
-    void setNumberOfSubtasks(std::uint32_t numberOfSubtasks);
+    virtual void setNumberOfSubtasks(std::uint32_t numberOfSubtasks) final;
 
     /**
-     * Flag item with \p subtaskIndex as finished
+     * Flag item with \p subtaskIndex as finished, the progress percentage will be computed automatically
+     * Assumes the number of tasks has been set prior with Task::setNumberOfSubtasks()
+     * This method only has an effect when Task#_progressMode is set to ProgressMode::Subtasks
      * @param subtaskIndex Index of the subtask
      */
-    void setSubtaskFinished(std::uint32_t subtaskIndex);
+    virtual void setSubtaskFinished(std::uint32_t subtaskIndex) final;
 
     /**
      * Set subtasks descriptions to \p subtasksDescriptions
+     * This method only has an effect when Task#_progressMode is set to ProgressMode::Subtasks
      * @param subtasksDescriptions Subtasks descriptions
      */
-    void setSubtasksDescriptions(const QStringList& subtasksDescriptions);
+    virtual void setSubtasksDescriptions(const QStringList& subtasksDescriptions) final;
 
     /**
      * Set subtask description to \p subtaskDescription for \p subtaskIndex
+     * This method only has an effect when Task#_progressMode is set to ProgressMode::Subtasks
      * @param subtaskIndex Subtask index to set the description for
      * @param subtaskDescription Description of the subtask
      */
-    void setSubtaskDescription(std::uint32_t subtaskIndex, const QString& subtaskDescription);
-
-    /**
-     * Get current subtask description
-     * @return Description of the current subtask
-     */
-    QString getCurrentSubtaskDescription() const;
-
-    /**
-     * Set current subtask description to \p currentSubtaskDescription
-     * @param currentSubtaskDescription Description of the current subtask
-     */
-    void setCurrentSubtaskDescription(const QString& currentSubtaskDescription);
-
-public: // Start
+    virtual void setSubtaskDescription(std::uint32_t subtaskIndex, const QString& subtaskDescription) final;
 
     /**
      * Starts the task and initializes with the \p numberOfItems
      * @param numberOfItems Number of task items
      */
-    void start(std::uint32_t numberOfItems);
+    virtual void start(std::uint32_t numberOfItems) final;
+
+public: // Progress description
+
+    /**
+     * Get progress description
+     * @return Progress description
+     */
+    virtual QString getProgressDescription() const final;
+
+    /**
+     * Set progress description to \p progressDescription
+     * @param progressDescription Progress description
+     */
+    virtual void setProgressDescription(const QString& progressDescription) final;
+
+private:
+
+    /** Updates the progress percentage */
+    void updateProgress();
 
 signals:
 
@@ -214,6 +245,12 @@ signals:
     void statusChanged(const Status& status);
 
     /**
+     * Signals that the task progress mode to \p progressMode
+     * @param progressMode Modified progress mode
+     */
+    void progressModeChanged(const ProgressMode& progressMode);
+
+    /**
      * Signals that the task progress changed to \p progress
      * @param progress Modified progress
      */
@@ -238,14 +275,15 @@ signals:
     void currentSubtaskDescriptionChanged(const QString& currentSubtaskDescription);
 
 private:
-    QString                 _name;                          /** Task name */
-    QString                 _description;                   /** Task description */
-    Status                  _status;                        /** Task status */
-    AbstractTaskHandler*    _handler;                       /** Task handler */
-    float                   _progress;                      /** Task progress */
-    QBitArray               _subtasks;                      /** Subtasks status */
-    QStringList             _subtasksDescriptions;          /** Subtasks descriptions */
-    QString                 _currentSubtaskDescription;     /** Current item description */
+    QString                 _name;                      /** Task name */
+    QString                 _description;               /** Task description */
+    Status                  _status;                    /** Task status */
+    AbstractTaskHandler*    _handler;                   /** Task handler */
+    ProgressMode            _progressMode;              /** The way progress is recorded */
+    float                   _progress;                  /** Task progress */
+    QBitArray               _subtasks;                  /** Subtasks status */
+    QStringList             _subtasksDescriptions;      /** Subtasks descriptions */
+    QString                 _progressDescription;       /** Current item description */
 };
 
 }

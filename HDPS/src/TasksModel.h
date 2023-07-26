@@ -29,7 +29,7 @@ public:
     enum class Column {
         Name,                   /** Name of the task */
         Progress,               /** Task progress */
-        SubtaskDescription,     /** Current subtask description */
+        ProgressDescription,    /** Progress description */
         ID,                     /** Globally unique identifier of the task */
         ParentID,               /** Globally unique identifier of the parent task (empty string if not a child task) */
         Type,                   /** Task type string */
@@ -132,15 +132,15 @@ protected:
         QVariant data(int role = Qt::UserRole + 1) const override;
     };
 
-    /** Standard model item class for displaying the task item description */
-    class SubTaskDescriptionItem final : public Item {
+    /** Standard model item class for displaying the progress description */
+    class ProgressDescriptionItem final : public Item {
     public:
 
         /**
          * Construct with \p task
          * @param task Pointer to task to display item for
          */
-        SubTaskDescriptionItem(Task* task);
+        ProgressDescriptionItem(Task* task);
 
         /**
          * Get model data for \p role
