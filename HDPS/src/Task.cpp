@@ -192,6 +192,32 @@ void Task::setProgress(float progress, const QString& subtaskDescription /*= ""*
         setProgressDescription(subtaskDescription);
 }
 
+QString Task::getProgressText() const
+{
+    switch (getStatus())
+    {
+        case Task::Status::Idle:
+            return "Idle";
+
+        case Task::Status::Running:
+            return QString("%1 %2%").arg(getProgressDescription().isEmpty() ? "" : QString("%1: ").arg(getProgressDescription()), QString::number(getProgress() * 100.f));
+
+        case Task::Status::RunningIndeterminate:
+            return getProgressDescription();
+
+        case Task::Status::Finished:
+            return "Finished";
+
+        case Task::Status::Aborted:
+            return "Aborted";
+
+        default:
+            break;
+    }
+
+    return {};
+}
+
 void Task::setNumberOfSubtasks(std::uint32_t numberOfSubtasks)
 {
     if (_progressMode != ProgressMode::Subtasks)
@@ -270,7 +296,7 @@ void Task::setProgressDescription(const QString& progressDescription)
 
     _progressDescription = progressDescription;
 
-    emit currentSubtaskDescriptionChanged(_progressDescription);
+    emit progressDescriptionChanged(_progressDescription);
 }
 
 void Task::start(std::uint32_t numberOfItems)

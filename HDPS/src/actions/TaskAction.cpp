@@ -55,6 +55,7 @@ void TaskAction::setTask(Task* task)
     updateProgressAction();
 
     connect(_task, &Task::progressChanged, this, updateProgressAction);
+    connect(_task, &Task::progressDescriptionChanged, this, &TaskAction::updateProgressActionTextFormat);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateActionsReadOnly);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionRange);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionTextFormat);
@@ -68,32 +69,10 @@ void TaskAction::updateActionsReadOnly()
 
 void TaskAction::updateProgressActionTextFormat()
 {
-    if (_task == nullptr) {
+    if (_task == nullptr)
         _progressAction.setTextFormat("No task assigned...");
-    }
-    else {
-        switch (_task->getStatus())
-        {
-            case Task::Status::Idle:
-                _progressAction.setTextFormat("Idle");
-                break;
-
-            case Task::Status::Running:
-            case Task::Status::RunningIndeterminate:
-                break;
-
-            case Task::Status::Finished:
-                _progressAction.setTextFormat("Finished");
-                break;
-
-            case Task::Status::Aborted:
-                _progressAction.setTextFormat("Aborted");
-                break;
-
-            default:
-                break;
-        }
-    }
+    else
+        _progressAction.setTextFormat(_task->getProgressText());
 }
 
 void TaskAction::updateProgressActionRange()
@@ -105,6 +84,7 @@ void TaskAction::updateProgressActionRange()
 
         case Task::Status::Running:
             _progressAction.setRange(0, 100);
+            break;
 
         case Task::Status::RunningIndeterminate:
             _progressAction.setRange(0, 0);

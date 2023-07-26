@@ -130,7 +130,7 @@ QVariant TasksModel::ProgressItem::data(int role /*= Qt::UserRole + 1*/) const
 TasksModel::ProgressDescriptionItem::ProgressDescriptionItem(Task* task) :
     Item(task)
 {
-    connect(getTask(), &Task::currentSubtaskDescriptionChanged, this, [this]() -> void {
+    connect(getTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
         emitDataChanged();
     });
 }
@@ -143,7 +143,36 @@ QVariant TasksModel::ProgressDescriptionItem::data(int role /*= Qt::UserRole + 1
             return getTask()->getProgressDescription();
 
         case Qt::ToolTipRole:
-            return "Current sub-task description: " + data(Qt::DisplayRole).toString();
+            return "Progress description: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+TasksModel::ProgressTextItem::ProgressTextItem(Task* task) :
+    Item(task)
+{
+    connect(getTask(), &Task::progressChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+
+    connect(getTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant TasksModel::ProgressTextItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getTask()->getProgressText();
+
+        case Qt::ToolTipRole:
+            return "Progress text: " + data(Qt::DisplayRole).toString();
 
         default:
             break;
@@ -242,6 +271,7 @@ TasksModel::Row::Row(Task* task) :
     append(new NameItem(task));
     append(new ProgressItem(task));
     append(new ProgressDescriptionItem(task));
+    append(new ProgressTextItem(task));
     append(new IdItem(task));
     append(new ParentIdItem(task));
     append(new TypeItem(task));
@@ -252,6 +282,7 @@ QMap<TasksModel::Column, TasksModel::ColumHeaderInfo> TasksModel::columnInfo = Q
     { TasksModel::Column::Name, { "Name" , "Name", "Name of the task" } },
     { TasksModel::Column::Progress, { "Progress" , "Progress", "Task progress" } },
     { TasksModel::Column::ProgressDescription, { "Progress description" , "Progress description", "Progress description" } },
+    { TasksModel::Column::ProgressText, { "Progress text" , "Progress text", "Progress text" } },
     { TasksModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the task" } },
     { TasksModel::Column::ParentID, { "Parent ID",  "Parent ID", "Globally unique identifier of the parent task" } },
     { TasksModel::Column::Type, { "Type",  "Type", "Type of task" } },

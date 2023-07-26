@@ -54,7 +54,8 @@ protected:
         const auto status               = static_cast<Task::Status>(index.siblingAtColumn(static_cast<int>(TasksModel::Column::Status)).data(Qt::EditRole).toInt());
         const auto progress             = static_cast<int>(index.data(Qt::EditRole).toFloat() * 100.f);
         const auto progressDescription  = index.siblingAtColumn(static_cast<int>(TasksModel::Column::ProgressDescription)).data(Qt::EditRole).toString();
-        const auto text                 = QString(" %1%2 ").arg(progressDescription, status == Task::Status::RunningIndeterminate ? "" : QString(" %1%").arg(QString::number(progress)));
+        const auto progressText         = index.siblingAtColumn(static_cast<int>(TasksModel::Column::ProgressText)).data(Qt::EditRole).toString();
+        const auto text                 = QString(" %1 ").arg(progressText);
 
         progressBarStyleOption.minimum          = 0;
         progressBarStyleOption.maximum          = status == Task::Status::RunningIndeterminate ? 0 : 100;
@@ -82,6 +83,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ID), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ParentID), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ProgressDescription), true);
+    treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ProgressText), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Type), true);
 
     treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Progress), new ProgressItemDelegate(this));

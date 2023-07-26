@@ -168,6 +168,9 @@ public: // Manual
      */
     virtual void setProgress(float progress, const QString& subtaskDescription = "");
 
+    /** Gets the task progress text */
+    virtual QString getProgressText() const final;
+
 public: // Subtasks
 
     /**
@@ -276,10 +279,10 @@ signals:
     void subtasksDescriptionsChanged(const QStringList& subtasksDescriptions);
 
     /**
-     * Signals that current subtask description changed to \p currentSubtaskDescription
-     * @param currentSubtaskDescription Modified description of the current subtask
+     * Signals that the progress description changed to \p progressDescription
+     * @param progressDescription Modified progress description
      */
-    void currentSubtaskDescriptionChanged(const QString& currentSubtaskDescription);
+    void progressDescriptionChanged(const QString& progressDescription);
 
 private:
     QString                 _name;                      /** Task name */
