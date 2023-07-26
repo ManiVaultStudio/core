@@ -36,11 +36,12 @@ public:
 
     /** Task: */
     enum class Status {
-        Undefined = -1, /** status is undefined */
-        Idle,           /** is idle */
-        Running,        /** is currently running */
-        Finished,       /** has finished successfully */
-        Aborted         /** has been aborted */
+        Undefined = -1,         /** status is undefined */
+        Idle,                   /** is idle */
+        Running,                /** is currently running */
+        RunningIndeterminate,   /** is currently running, but it's operating time is not known */
+        Finished,               /** has finished successfully */
+        Aborted                 /** has been aborted */
     };
 
     static QMap<Status, QString> statusNames;
@@ -60,7 +61,7 @@ public:
     * @param status Initial status of the task
     * @param handler Pointer to task handler
     */
-    Task(QObject* parent, const QString& name, const Status& status = Status::Idle, AbstractTaskHandler* handler = nullptr);
+    Task(QObject* parent, const QString& name, const Status& status = Status::RunningIndeterminate, AbstractTaskHandler* handler = nullptr);
 
     /** Remove from task manager when destructed */
     ~Task();
@@ -93,8 +94,11 @@ public: // Status
     /** Check if task is idle */
     virtual bool isIdle() const final;
 
-    /** Check if task is idle */
+    /** Check if task is running */
     virtual bool isRunning() const final;
+
+    /** Check if task is running indeterminate */
+    virtual bool isRunningIndeterminate() const final;
 
     /** Check if task is idle */
     virtual bool isFinished() const final;
@@ -113,6 +117,9 @@ public: // Status
 
     /** Set task status to running */
     virtual void setRunning() final;
+
+    /** Set task status to running indeterminate */
+    virtual void setRunningIndeterminate() final;
 
     /** Set task status to finished */
     virtual void setFinished() final;

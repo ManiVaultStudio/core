@@ -55,9 +55,10 @@ protected:
         const auto progress             = static_cast<int>(index.data(Qt::EditRole).toFloat() * 100.f);
         const auto progressDescription  = index.siblingAtColumn(static_cast<int>(TasksModel::Column::ProgressDescription)).data(Qt::EditRole).toString();
         const auto text                 = QString("%1 %2%").arg(progressDescription, QString::number(progress));
+        const auto status               = static_cast<Task::Status>(index.siblingAtColumn(static_cast<int>(TasksModel::Column::Status)).data(Qt::EditRole).toInt());
 
         progressBarStyleOption.minimum          = 0;
-        progressBarStyleOption.maximum          = 100;
+        progressBarStyleOption.maximum          = status == Task::Status::RunningIndeterminate ? 0 : 100;
         progressBarStyleOption.textAlignment    = Qt::AlignCenter;
         progressBarStyleOption.progress         = progress;
         progressBarStyleOption.text             = progressBarStyleOption.fontMetrics.elidedText(QString("  %1  ").arg(text), Qt::ElideMiddle, progressBarStyleOption.rect.width());

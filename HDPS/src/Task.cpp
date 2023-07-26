@@ -13,6 +13,7 @@ QMap<Task::Status, QString> Task::statusNames = QMap<Status, QString>({
     { Task::Status::Undefined, "Undefined" },
     { Task::Status::Idle, "Idle" },
     { Task::Status::Running, "Running" },
+    { Task::Status::RunningIndeterminate, "Running Indeterminate" },
     { Task::Status::Finished, "Finished" },
     { Task::Status::Aborted, "Aborted" }
 });
@@ -83,6 +84,11 @@ bool Task::isRunning() const
     return _status == Status::Running;
 }
 
+bool Task::isRunningIndeterminate() const
+{
+    return _status == Status::RunningIndeterminate;
+}
+
 bool Task::isFinished() const
 {
     return _status == Status::Finished;
@@ -111,6 +117,11 @@ void Task::setIdle()
 void Task::setRunning()
 {
     setStatus(Status::Running);
+}
+
+void Task::setRunningIndeterminate()
+{
+    setStatus(Status::RunningIndeterminate);
 }
 
 void Task::setFinished()
