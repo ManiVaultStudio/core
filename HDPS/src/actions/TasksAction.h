@@ -10,6 +10,8 @@
 
 #include <widgets/HierarchyWidget.h>
 
+namespace hdps::gui {
+
 /**
  * Tasks action class
  *
@@ -17,14 +19,14 @@
  *
  * @author Thomas Kroes
  */
-class TasksAction : public hdps::gui::WidgetAction
+class TasksAction : public WidgetAction
 {
     Q_OBJECT
 
 public:
 
     /** Tasks action widget */
-    class Widget : public hdps::gui::WidgetActionWidget
+    class Widget : public WidgetActionWidget
     {
     protected:
 
@@ -37,7 +39,7 @@ public:
         Widget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags);
 
     private:
-        hdps::gui::HierarchyWidget  _tasksWidget;   /** Show the tasks in a hierarchy widget */
+        HierarchyWidget  _tasksWidget;   /** Show the tasks in a hierarchy widget */
 
         friend class TasksAction;
     };
@@ -66,12 +68,14 @@ public:
      * Get tasks model
      * @return Reference to the task model
      */
-    hdps::TasksModel& getTasksModel();
+    TasksModel& getTasksModel();
 
 private:
-    hdps::TasksModel    _tasksModel;    /** Model with all tasks in the system */
+    TasksModel    _tasksModel;    /** Model with all tasks in the system */
 };
 
-Q_DECLARE_METATYPE(TasksAction)
+}
 
-inline const auto tasksActionMetaTypeId = qRegisterMetaType<TasksAction*>("TasksAction");
+Q_DECLARE_METATYPE(hdps::gui::TasksAction)
+
+inline const auto tasksActionMetaTypeId = qRegisterMetaType<hdps::gui::TasksAction*>("hdps::gui::TasksAction");

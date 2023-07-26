@@ -106,6 +106,8 @@ void Task::setStatus(const Status& status)
 
     _status = status;
 
+    updateProgress();
+
     emit statusChanged(_status);
 }
 
@@ -288,7 +290,33 @@ void Task::updateProgress()
             break;
     }
 
+    switch (_status)
+    {
+        case Status::Undefined:
+        case Status::Idle:
+            _progress = 0.f;
+            break;
+
+        case Status::Running:
+            break;
+
+        case Status::RunningIndeterminate:
+            _progress = 0.f;
+            break;
+
+        case Status::Finished:
+            _progress = 1.f;
+            break;
+
+        case Status::Aborted:
+            _progress = 0.f;
+            break;
+    }
+
     emit progressChanged(_progress);
+
+    if (_status == Status::Finished || _status == Status::Aborted)
+        setProgressDescription("");
 }
 
 }

@@ -56,6 +56,7 @@ void TaskAction::setTask(Task* task)
 
     connect(_task, &Task::progressChanged, this, updateProgressAction);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateActionsReadOnly);
+    connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionRange);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionTextFormat);
 }
 
@@ -78,6 +79,7 @@ void TaskAction::updateProgressActionTextFormat()
                 break;
 
             case Task::Status::Running:
+            case Task::Status::RunningIndeterminate:
                 break;
 
             case Task::Status::Finished:
@@ -92,6 +94,31 @@ void TaskAction::updateProgressActionTextFormat()
                 break;
         }
     }
+}
+
+void TaskAction::updateProgressActionRange()
+{
+    switch (_task->getStatus())
+    {
+        case Task::Status::Idle:
+            break;
+
+        case Task::Status::Running:
+            _progressAction.setRange(0, 100);
+
+        case Task::Status::RunningIndeterminate:
+            _progressAction.setRange(0, 0);
+            break;
+
+        case Task::Status::Finished:
+        case Task::Status::Aborted:
+            break;
+
+        default:
+            break;
+    }
+
+    
 }
 
 }

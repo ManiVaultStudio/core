@@ -12,8 +12,7 @@
 #include <QStyledItemDelegate>
 #include <QHeaderView>
 
-using namespace hdps;
-using namespace hdps::gui;
+namespace hdps::gui {
 
 TasksAction::TasksAction(QObject* parent, const QString& title /*= ""*/) :
     WidgetAction(parent, title),
@@ -52,16 +51,16 @@ protected:
 
         progressBarStyleOption.rect = option.rect;
 
+        const auto status               = static_cast<Task::Status>(index.siblingAtColumn(static_cast<int>(TasksModel::Column::Status)).data(Qt::EditRole).toInt());
         const auto progress             = static_cast<int>(index.data(Qt::EditRole).toFloat() * 100.f);
         const auto progressDescription  = index.siblingAtColumn(static_cast<int>(TasksModel::Column::ProgressDescription)).data(Qt::EditRole).toString();
-        const auto text                 = QString("%1 %2%").arg(progressDescription, QString::number(progress));
-        const auto status               = static_cast<Task::Status>(index.siblingAtColumn(static_cast<int>(TasksModel::Column::Status)).data(Qt::EditRole).toInt());
+        const auto text                 = QString(" %1%2 ").arg(progressDescription, status == Task::Status::RunningIndeterminate ? "" : QString(" %1%").arg(QString::number(progress)));
 
         progressBarStyleOption.minimum          = 0;
         progressBarStyleOption.maximum          = status == Task::Status::RunningIndeterminate ? 0 : 100;
         progressBarStyleOption.textAlignment    = Qt::AlignCenter;
         progressBarStyleOption.progress         = progress;
-        progressBarStyleOption.text             = progressBarStyleOption.fontMetrics.elidedText(QString("  %1  ").arg(text), Qt::ElideMiddle, progressBarStyleOption.rect.width());
+        progressBarStyleOption.text             = progressBarStyleOption.fontMetrics.elidedText(text, Qt::ElideMiddle, progressBarStyleOption.rect.width());
         progressBarStyleOption.textVisible      = true;
 
         qApp->style()->drawControl(QStyle::CE_ProgressBar, &progressBarStyleOption, painter);
@@ -72,9 +71,13 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     WidgetActionWidget(parent, tasksAction, widgetFlags),
     _tasksWidget(this, "Task", tasksAction->getTasksModel(), nullptr, false)
 {
+    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));
+
     _tasksWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));
 
     auto& treeView = _tasksWidget.getTreeView();
+
+    treeView.setRootIsDecorated(false);
 
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ID), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ParentID), true);
@@ -91,7 +94,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Progress), QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Status), QHeaderView::Fixed);
 
-    treeViewHeader->resizeSection(static_cast<int>(TasksModel::Column::Status), 70);
+    treeViewHeader->resizeSection(static_cast<int>(TasksModel::Column::Status), 130);
 
     auto layout = new QVBoxLayout();
 
@@ -99,4 +102,6 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     layout->addWidget(&_tasksWidget);
 
     setLayout(layout);
+}
+
 }

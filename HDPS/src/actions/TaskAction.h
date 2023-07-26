@@ -59,6 +59,9 @@ private:
     /** Updates the read-only status of the progress and kill task actions */
     void updateActionsReadOnly();
 
+    /** Updates the range of the progress action */
+    void updateProgressActionRange();
+
     /** Updates the progress action text format, depending on the task status */
     void updateProgressActionTextFormat();
 

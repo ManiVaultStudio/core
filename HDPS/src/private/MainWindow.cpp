@@ -66,14 +66,15 @@ class TasksPopupWidget : public QWidget
 public:
 
     /**
-     * Construct with \p parent widget
-     * @param parent Pointer to parent widget
+     * Construct with \p anchorWidget
+     * @param anchorWidget Pointer to anchor widget
      */
-    TasksPopupWidget(QWidget* parent) :
-        QWidget(parent),
-        _tasksAction(parent, "Tasks")
+    TasksPopupWidget(QWidget* anchorWidget) :
+        QWidget(),
+        _anchorWidget(anchorWidget),
+        _tasksAction(this, "Tasks")
     {
-        setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+        setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);// | Qt::WindowStaysOnTopHint);// Qt::Window);// Qt::Popup);// Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
         setFixedSize(QSize(400, 200));
         setObjectName("TasksPopupWidget");
         setStyleSheet("QWidget#TasksPopupWidget { border: 5p solid rgb(74, 74, 74); }");
@@ -87,7 +88,7 @@ public:
 
         installEventFilter(this);
 
-        parent->installEventFilter(this);
+        _anchorWidget->installEventFilter(this);
 
         connect(&tasks(), &AbstractTaskManager::taskAdded, this, [this]() -> void {
             show();
@@ -106,8 +107,13 @@ public:
         {
             case QEvent::Resize:
             case QEvent::Move:
+            {
+                if (target == this)
+                    break;
+
                 updatePosition();
                 break;
+            }
 
             default:
                 break;
@@ -136,11 +142,14 @@ private:
 
     /** Updates the position relative to the parent widget */
     void updatePosition() {
-        setGeometry(QRect(parentWidget()->mapToGlobal(parentWidget()->rect().topRight()) - QPoint(width(), height()), size()));
+        const auto globalAnchorWidgetTopRight = _anchorWidget->mapToGlobal(_anchorWidget->rect().topRight());
+        
+        setGeometry(QRect(globalAnchorWidgetTopRight - QPoint(width(), height()), size()));
     }
 
 private:
-    TasksAction     _tasksAction;    /** Action which shows all tasks */
+    QWidget*        _anchorWidget;  /** Pointer to widget from which the popup originates */
+    TasksAction     _tasksAction;   /** Action which shows all tasks */
 };
 
 MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
@@ -228,6 +237,8 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         statusBar()->setSizeGripEnabled(false);
         statusBar()->insertPermanentWidget(0, tasksLabel);
+
+        tasksPopupWidget->show();
     }
 }
 

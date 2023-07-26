@@ -210,11 +210,11 @@ TasksModel::StatusItem::StatusItem(Task* task) :
 {
     connect(getTask(), &Task::statusChanged, this, [this]() -> void {
         emitDataChanged();
+
+        const auto progressIndex = index().siblingAtColumn(static_cast<int>(Column::Progress));
+
+        emit model()->dataChanged(progressIndex, progressIndex);
     });
-
-    const auto progressIndex = index().siblingAtColumn(static_cast<int>(Column::Progress));
-
-    emit model()->dataChanged(progressIndex, progressIndex);
 }
 
 QVariant TasksModel::StatusItem::data(int role /*= Qt::UserRole + 1*/) const
