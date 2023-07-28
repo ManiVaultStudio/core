@@ -43,7 +43,8 @@ bool TasksFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) cons
         if (!key.contains(filterRegularExpression()))
             return false;
     }
-    
+    */
+
     const auto typeFilter = _typeFilterAction.getString();
 
     if (!typeFilter.isEmpty()) {
@@ -52,7 +53,7 @@ bool TasksFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) cons
         if (type != typeFilter)
             return false;
     }
-*/
+
     if (_statusFilterAction.hasSelectedOptions()) {
         const auto selectedOptions  = _statusFilterAction.getSelectedOptions();
         const auto status           = getSourceData(index, TasksModel::Column::Status, Qt::DisplayRole).toString();
