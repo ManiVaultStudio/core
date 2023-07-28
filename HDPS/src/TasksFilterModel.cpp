@@ -36,15 +36,13 @@ bool TasksFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) cons
     if (!index.isValid())
         return true;
 
-    /*
     if (filterRegularExpression().isValid()) {
         const auto key = getSourceData(index, static_cast<TasksModel::Column>(filterKeyColumn()), filterRole()).toString();
 
         if (!key.contains(filterRegularExpression()))
             return false;
     }
-    */
-
+    
     const auto typeFilter = _typeFilterAction.getString();
 
     if (!typeFilter.isEmpty()) {
