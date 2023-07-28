@@ -6,13 +6,12 @@
 #include "ModalTask.h"
 
 #include "CoreInterface.h"
-#include "actions/TaskAction.h"
 
 namespace hdps {
 
 using namespace gui;
 
-ModalTaskHandler::ModalTasksDialog ModalTaskHandler::modalTasksDialog = ModalTasksDialog();
+ModalTaskHandler::ModalTasksDialog ModalTaskHandler::modalTasksDialog = ModalTasksDialog(nullptr);
 
 ModalTaskHandler::ModalTaskHandler(QObject* parent /*= nullptr*/) :
     AbstractTaskHandler(parent)
@@ -25,47 +24,36 @@ void ModalTaskHandler::init()
 
 ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _modalTasks(),
-    _tasksGroupAction(this, "Modal Tasks")
+    _tasksAction(this, "Modal Tasks")
 {
-    /*
-    connect(&tasks(), &AbstractTaskManager::taskAdded, this, [this](Task* task) -> void {
-        const auto modalTask = dynamic_cast<ModalTask*>(task);
+    //setModal(true);
 
-        if (modalTask)
-            _modalTasks << modalTask;
+    auto layout = new QVBoxLayout();
 
-        connect(task, &Task::statusChanged, this, &ModalTasksDialog::tasksChanged);
+    layout->addWidget(_tasksAction.createWidget(this));
 
-        _tasksGroupAction.addAction(new TaskAction(this, task->getName()));
+    setLayout(layout);
 
-        tasksChanged();
-    });
+    auto& taskFilterModel = _tasksAction.getTasksFilterModel();
 
-    connect(&tasks(), &AbstractTaskManager::taskAboutToBeRemoved, this, [this](Task* task) -> void {
-        const auto modalTask = dynamic_cast<ModalTask*>(task);
+    const auto updateVisibility = [this]() -> void {
+        const auto numberOfRows = _tasksAction.getTasksModel().rowCount();
 
-        if (modalTask && _modalTasks.contains(modalTask))
-            _modalTasks.removeOne(modalTask);
+        for (int i = 0; i < numberOfRows; i++)
+            qDebug() << _tasksAction.getTasksModel().index(i, 0).data(Qt::DisplayRole).toString();
 
-        disconnect(task, &Task::statusChanged, this, nullptr);
+        if (numberOfRows == 0 && isVisible())
+            close();
 
-        for (auto action : _tasksGroupAction.getActions())
-            if (task == static_cast<TaskAction*>(action)->getTask())
-                _tasksGroupAction.removeAction(action);
+        if (numberOfRows >= 1 && !isVisible())
+            open();
+    };
 
-        tasksChanged();
-    });
-    */
-}
+    updateVisibility();
 
-void ModalTaskHandler::ModalTasksDialog::tasksChanged()
-{
-    ModalTasks idleOrRunningModalTasks;
-
-    std::copy_if(idleOrRunningModalTasks.begin(), idleOrRunningModalTasks.end(), std::back_inserter(_modalTasks), [](Task* task) {
-        return task->getStatus() == Task::Status::Idle || task->getStatus() == Task::Status::Running;
-    });
+    connect(&taskFilterModel, &QSortFilterProxyModel::rowsInserted, updateVisibility);
+    connect(&taskFilterModel, &QSortFilterProxyModel::rowsRemoved, updateVisibility);
+    connect(&taskFilterModel, &QSortFilterProxyModel::layoutChanged, updateVisibility);
 }
 
 }

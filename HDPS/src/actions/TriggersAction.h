@@ -107,7 +107,7 @@ public:
      * @param title Title of the action
      * @param triggers Vector of triggers
      */
-    TriggersAction(QObject* parent, const QString& title = "", const QVector<Trigger>& triggers = QVector<Trigger>());
+    TriggersAction(QObject* parent, const QString& title, const QVector<Trigger>& triggers = QVector<Trigger>());
 
     /**
      * Get triggers

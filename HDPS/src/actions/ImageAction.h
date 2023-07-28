@@ -92,7 +92,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    Q_INVOKABLE ImageAction(QObject* parent, const QString& title = "");
+    Q_INVOKABLE ImageAction(QObject* parent, const QString& title);
 
     /** Get the current image */
     const QImage getImage() const;

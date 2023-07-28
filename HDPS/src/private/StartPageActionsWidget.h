@@ -28,7 +28,7 @@ public:
      * @param title Title shown in the header
      * @param restyle Whether to change the style to seamlessly integrate with the start page (false for use outside of startpage widget)
      */
-    StartPageActionsWidget(QWidget* parent = nullptr, const QString& title = "", bool restyle = true);
+    StartPageActionsWidget(QWidget* parent, const QString& title, bool restyle = true);
 
     /**
      * Get layout

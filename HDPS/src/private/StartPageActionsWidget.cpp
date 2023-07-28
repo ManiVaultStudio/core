@@ -18,7 +18,7 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/, const QString& title /*= ""*/, bool restyle /*= true*/) :
+StartPageActionsWidget::StartPageActionsWidget(QWidget* parent, const QString& title, bool restyle /*= true*/) :
     QWidget(parent),
     _layout(),
     _model(this),

@@ -195,7 +195,7 @@ public:
      * @param options Options to select from
      * @param selectedOptions Initial selected options
      */
-    Q_INVOKABLE explicit OptionsAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QStringList& selectedOptions = QStringList());
+    Q_INVOKABLE explicit OptionsAction(QObject* parent, const QString& title, const QStringList& options = QStringList(), const QStringList& selectedOptions = QStringList());
 
     /**
      * Initialize the option action

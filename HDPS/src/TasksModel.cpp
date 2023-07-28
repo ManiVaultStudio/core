@@ -329,12 +329,13 @@ void TasksModel::taskAboutToBeRemovedFromTaskManager(Task* task)
         if (task == nullptr)
             throw std::runtime_error("Task may not be a nullptr");
 
-        const auto matches = match(QModelIndex(), Qt::EditRole, task->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
+        const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::EditRole, task->getId(), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
         if (matches.empty())
             throw std::runtime_error(QString("%1 not found").arg(task->getName()).toStdString());
 
-        removeRow(matches.first().row());
+        if (!removeRow(matches.first().row()))
+            throw std::runtime_error("Remove row failed");
     }
     catch (std::exception& e)
     {

@@ -40,7 +40,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    Q_INVOKABLE TaskAction(QObject* parent, const QString& title = "");
+    Q_INVOKABLE TaskAction(QObject* parent, const QString& title);
 
     /**
      * get task

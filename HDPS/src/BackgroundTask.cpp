@@ -8,8 +8,9 @@
 namespace hdps {
 
 BackgroundTask::BackgroundTask(QObject* parent, const QString& name, const Status& status /*= Status::Idle*/) :
-    Task(parent, name, status, new BackgroundTaskHandler(this))
+    Task(parent, name, status, nullptr)
 {
+    setHandler(new BackgroundTaskHandler(this));
 }
 
 }

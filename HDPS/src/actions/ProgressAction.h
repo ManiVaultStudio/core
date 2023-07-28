@@ -110,7 +110,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    Q_INVOKABLE ProgressAction(QObject* parent, const QString& title = "");
+    Q_INVOKABLE ProgressAction(QObject* parent, const QString& title);
 
     /**
      * Get progress range minimum

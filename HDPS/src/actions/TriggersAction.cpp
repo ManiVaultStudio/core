@@ -10,7 +10,7 @@
 
 namespace hdps::gui {
 
-TriggersAction::TriggersAction(QObject* parent, const QString& title /*= ""*/, const QVector<Trigger>& triggers /*= QVector<Trigger>()*/) :
+TriggersAction::TriggersAction(QObject* parent, const QString& title, const QVector<Trigger>& triggers /*= QVector<Trigger>()*/) :
     WidgetAction(parent, title)
 {
     setText(title);

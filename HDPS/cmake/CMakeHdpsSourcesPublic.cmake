@@ -624,6 +624,7 @@ set(PUBLIC_TASK_HEADERS
     src/BackgroundTaskHandler.h
     src/FileIOTaskHandler.h
     src/TasksModel.h
+    src/TasksFilterModel.h
 )
 
 set(PUBLIC_TASK_SOURCES
@@ -636,6 +637,7 @@ set(PUBLIC_TASK_SOURCES
     src/BackgroundTaskHandler.cpp
     src/FileIOTaskHandler.cpp
     src/TasksModel.cpp
+    src/TasksFilterModel.cpp
 )
 
 set(PUBLIC_TASK_FILES

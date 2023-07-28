@@ -6,7 +6,7 @@
 
 #include "AbstractTaskHandler.h"
 
-#include "actions/GroupAction.h"
+#include "actions/TasksAction.h"
 
 #include <QDialog>
 
@@ -24,11 +24,7 @@ class ModalTaskHandler final : public AbstractTaskHandler
 protected:
 
     /** Dialog for interaction with modal tasks */
-    class ModalTasksDialog : QDialog {
-    public:
-
-        using ModalTasks = QVector<Task*>;
-
+    class ModalTasksDialog : public QDialog {
     public:
 
         /**
@@ -37,14 +33,24 @@ protected:
          */
         ModalTasksDialog(QWidget* parent = nullptr);
 
-    private:
+        /**
+         * Override popup minimum size hint
+         * @return Minimum size hint
+         */
+        QSize minimumSizeHint() const override {
+            return QSize(600, 100);
+        }
 
-        /** Executed when the number of tasks or the status of a task changes */
-        void tasksChanged();
+        /**
+         * Override popup size hint
+         * @return Size hint
+         */
+        QSize sizeHint() const override {
+            return minimumSizeHint();
+        }
 
     private:
-        ModalTasks          _modalTasks;            /** Modal tasks */
-        gui::GroupAction    _tasksGroupAction;      /** Groups modal tasks */
+        gui::TasksAction    _tasksAction;   /** Tasks action */
     };
 
 public:

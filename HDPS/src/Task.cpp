@@ -32,11 +32,14 @@ Task::Task(QObject* parent, const QString& name, const Status& status /*= Status
     _progressDescription()
 {
     tasks().addTask(this);
+
+    QObject::connect(this, &QObject::destroyed, this, [this]() -> void {
+        tasks().removeTask(this);
+    });
 }
 
 Task::~Task()
 {
-    tasks().removeTask(this);
 }
 
 QString Task::getName() const
@@ -109,6 +112,8 @@ void Task::setStatus(const Status& status)
     updateProgress();
 
     emit statusChanged(_status);
+
+    QCoreApplication::processEvents();
 }
 
 void Task::setIdle()
@@ -220,8 +225,7 @@ QString Task::getProgressText() const
 
 void Task::setNumberOfSubtasks(std::uint32_t numberOfSubtasks)
 {
-    if (_progressMode != ProgressMode::Subtasks)
-        return;
+    _progressMode = ProgressMode::Subtasks;
 
     if (numberOfSubtasks == 0)
         return;
@@ -297,6 +301,8 @@ void Task::setProgressDescription(const QString& progressDescription)
     _progressDescription = progressDescription;
 
     emit progressDescriptionChanged(_progressDescription);
+
+    QCoreApplication::processEvents();
 }
 
 void Task::start(std::uint32_t numberOfItems)
@@ -343,6 +349,8 @@ void Task::updateProgress()
 
     if (_status == Status::Finished || _status == Status::Aborted)
         setProgressDescription("");
+
+    QCoreApplication::processEvents();
 }
 
 }

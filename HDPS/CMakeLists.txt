@@ -501,6 +501,7 @@ add_subdirectory(src/plugins/DataHierarchyPlugin)
 add_subdirectory(src/plugins/DataPropertiesPlugin)
 add_subdirectory(src/plugins/SharedParametersPlugin)
 add_subdirectory(src/plugins/LoggingPlugin)
+add_subdirectory(src/plugins/TasksPlugin)
 
 # Data plugins
 add_subdirectory(src/plugins/PointData)

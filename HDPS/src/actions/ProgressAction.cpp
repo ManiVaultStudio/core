@@ -9,7 +9,7 @@
 
 namespace hdps::gui {
 
-ProgressAction::ProgressAction(QObject* parent, const QString& title /*= ""*/) :
+ProgressAction::ProgressAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
     _minimum(0),
     _maximum(100),

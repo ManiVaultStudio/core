@@ -80,7 +80,7 @@ public:
      * @param status Status type
      * @param message Status message
      */
-    Q_INVOKABLE StatusAction(QObject* parent, const QString& title = "", const Status& status = Status::Undefined, const QString& message = "");
+    Q_INVOKABLE StatusAction(QObject* parent, const QString& title, const Status& status = Status::Undefined, const QString& message = "");
 
     /**
      * Initialize the status action

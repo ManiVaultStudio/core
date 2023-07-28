@@ -78,6 +78,11 @@ public:
         setFixedSize(QSize(400, 200));
         setObjectName("TasksPopupWidget");
         setStyleSheet("QWidget#TasksPopupWidget { border: 5p solid rgb(74, 74, 74); }");
+        hide();
+
+        auto& tasksFilterModel = _tasksAction.getTasksFilterModel();
+
+        tasksFilterModel.getStatusFilterAction().setSelectedOptions({ "Idle", "Running", "Running Indeterminate" });
 
         auto layout = new QVBoxLayout();
 
@@ -90,11 +95,23 @@ public:
 
         _anchorWidget->installEventFilter(this);
 
-        connect(&tasks(), &AbstractTaskManager::taskAdded, this, [this]() -> void {
-            show();
-        });
-        
-        show();
+        const auto updateVisibility = [this]() -> void {
+            const auto numberOfRows = _tasksAction.getTasksFilterModel().rowCount();
+
+            if (numberOfRows == 0 && isVisible())
+                QTimer::singleShot(250, Qt::PreciseTimer, this, [this]() -> void { hide(); });
+
+            if (numberOfRows >= 1 && !isVisible())
+                show();
+        };
+
+        updateVisibility();
+
+        auto& taskFilterModel = _tasksAction.getTasksFilterModel();
+
+        connect(&taskFilterModel, &QSortFilterProxyModel::rowsInserted, updateVisibility);
+        connect(&taskFilterModel, &QSortFilterProxyModel::rowsRemoved, updateVisibility);
+        connect(&taskFilterModel, &QSortFilterProxyModel::layoutChanged, updateVisibility);
     }
 
     /**
@@ -127,7 +144,7 @@ public:
      * @return Minimum size hint
      */
     QSize minimumSizeHint() const override {
-        return QSize(600, 400);
+        return QSize(800, 400);
     }
 
     /**
@@ -237,8 +254,6 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         statusBar()->setSizeGripEnabled(false);
         statusBar()->insertPermanentWidget(0, tasksLabel);
-
-        tasksPopupWidget->show();
     }
 }
 

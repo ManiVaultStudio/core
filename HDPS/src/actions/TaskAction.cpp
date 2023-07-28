@@ -7,7 +7,7 @@
 
 namespace hdps::gui {
 
-TaskAction::TaskAction(QObject* parent, const QString& title /*= ""*/) :
+TaskAction::TaskAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),
     _progressAction(this, "Progress"),
     _killTaskAction(this, "Kill"),

@@ -43,6 +43,8 @@ void TaskManager::reset()
 
     beginReset();
     {
+        for (auto task : _tasks)
+            removeTask(task);
     }
     endReset();
 }
@@ -64,6 +66,8 @@ void TaskManager::addTask(Task* task)
 
         if (task == nullptr)
             throw std::runtime_error("Task may not be a null pointer");
+
+        _tasks << task;
 
         emit taskAdded(task);
     }
@@ -90,7 +94,7 @@ void TaskManager::removeTask(Task* task)
         if (task == nullptr)
             throw std::runtime_error("Task may not be a null pointer");
 
-        if (_tasks.contains(task))
+        if (!_tasks.contains(task))
             throw std::runtime_error("Task not found in manager");
 
         const auto taskId = task->getId();

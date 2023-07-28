@@ -14,19 +14,27 @@
 
 namespace hdps::gui {
 
-TasksAction::TasksAction(QObject* parent, const QString& title /*= ""*/) :
+TasksAction::TasksAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
-    _tasksModel(this)
+    _tasksModel(this),
+    _tasksFilterModel(this)
 {
     setConnectionPermissionsToForceNone();
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
     setIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
     setDefaultWidgetFlag(GroupAction::Vertical);
+
+    _tasksFilterModel.setSourceModel(&_tasksModel);
 }
 
 TasksModel& TasksAction::getTasksModel()
 {
     return _tasksModel;
+}
+
+TasksFilterModel& TasksAction::getTasksFilterModel()
+{
+    return _tasksFilterModel;
 }
 
 /** Tree view item delegate class for overriding painting of toggle columns */
@@ -70,7 +78,7 @@ protected:
 
 TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, tasksAction, widgetFlags),
-    _tasksWidget(this, "Task", tasksAction->getTasksModel(), nullptr, false)
+    _tasksWidget(this, "Task", tasksAction->getTasksModel(), &tasksAction->getTasksFilterModel(), widgetFlags & Toolbar, widgetFlags & Overlay)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));
 

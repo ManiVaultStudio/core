@@ -7,6 +7,7 @@
 #include <actions/WidgetAction.h>
 
 #include <TasksModel.h>
+#include <TasksFilterModel.h>
 
 #include <widgets/HierarchyWidget.h>
 
@@ -22,6 +23,14 @@ namespace hdps::gui {
 class TasksAction : public WidgetAction
 {
     Q_OBJECT
+
+public:
+
+    /** Describes the widget flags */
+    enum WidgetFlag {
+        Toolbar     = 0x00001,  /** The widget includes a toolbar for filtering etc. */
+        Overlay     = 0x00002   /** The widget includes a toolbar for filtering etc. */
+    };
 
 public:
 
@@ -62,7 +71,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    Q_INVOKABLE TasksAction(QObject* parent, const QString& title = "");
+    Q_INVOKABLE TasksAction(QObject* parent, const QString& title);
 
     /**
      * Get tasks model
@@ -70,8 +79,15 @@ public:
      */
     TasksModel& getTasksModel();
 
+    /**
+     * Get tasks filter model
+     * @return Reference to the task filter model
+     */
+    TasksFilterModel& getTasksFilterModel();
+
 private:
-    TasksModel    _tasksModel;    /** Model with all tasks in the system */
+    TasksModel          _tasksModel;            /** Model with all tasks in the system */
+    TasksFilterModel    _tasksFilterModel;      /** Filter model for tasks */
 };
 
 }
