@@ -82,7 +82,7 @@ public:
 
         auto& tasksFilterModel = _tasksAction.getTasksFilterModel();
 
-        tasksFilterModel.getStatusFilterAction().setSelectedOptions({ "Idle", "Running", "Running Indeterminate" });
+        tasksFilterModel.getStatusFilterAction().setSelectedOptions({ "Idle", "Running", "Running Indeterminate", "Finished"});
 
         auto layout = new QVBoxLayout();
 

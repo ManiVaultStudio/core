@@ -150,20 +150,15 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
     hide();
     {
-        QStringList subtasksNames;
-
-        for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList())
-            subtasksNames << viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap()["GuiName"].toMap()["Value"].toString();
-
-        projects().getFileIOTask()->addSubtasks(subtasksNames);
-
         for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList()) {
             const auto viewPluginMap    = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap();
             const auto pluginKind       = viewPluginMap["Kind"].toString();
             const auto pluginMap        = viewPluginMap["Plugin"].toMap();
             const auto guiName          = viewPluginMap["GuiName"].toMap()["Value"].toString();
 
-            projects().getFileIOTask()->setSubtaskStarted(guiName);
+            projects().getFileIOTask()->setProgressDescription(QString("Loading %1 view").arg(guiName));
+
+            Application::processEvents();
 
             if (plugins().isPluginLoaded(pluginKind)) {
                 addViewPluginDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));

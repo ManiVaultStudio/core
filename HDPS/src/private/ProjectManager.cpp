@@ -432,11 +432,16 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             qDebug().noquote() << "Open ManiVault project from" << filePath;
 
+            getFileIOTask()->setName(QString("Open %1").arg(filePath));
             getFileIOTask()->setRunning();
 
             Archiver archiver;
 
-            const auto tasksNames = archiver.getTaskNamesForDecompression(filePath) << "Import data" << "Load workspace";
+            archiver.extractSingleFile(filePath, "workspace.json", QFileInfo(temporaryDirectoryPath, "workspace.json").absoluteFilePath());
+
+            const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
+
+            const auto tasksNames = archiver.getTaskNamesForDecompression(filePath) << "Import data" << workspaces().getViewPluginNames(workspaceFileInfo.absoluteFilePath());
 
             getFileIOTask()->setSubtasks(tasksNames);
 
@@ -455,23 +460,17 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             archiver.decompress(filePath, temporaryDirectoryPath);
 
-            getFileIOTask()->setSubtaskStarted("Import data model");
+            getFileIOTask()->setSubtaskStarted("Import data");
             {
                 projects().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
             }
             getFileIOTask()->setSubtaskFinished("Import data");
 
             if (loadWorkspace) {
-                getFileIOTask()->setSubtaskStarted("Load workspace");
-                {
-                    const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
+                if (workspaceFileInfo.exists())
+                    workspaces().loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 
-                    if (workspaceFileInfo.exists())
-                        workspaces().loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
-
-                    workspaces().setWorkspaceFilePath("");
-                }
-                getFileIOTask()->setSubtaskFinished("Load workspace");
+                workspaces().setWorkspaceFilePath("");
             }
 
             _recentProjectsAction.addRecentFilePath(filePath);
@@ -482,7 +481,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (disableReadOnlyAction.isEnabled() && disableReadOnlyAction.isChecked())
                 _project->getReadOnlyAction().setChecked(disableReadOnlyAction.isChecked());
 
-            getFileIOTask()->setFinished();
+            getFileIOTask()->setFinished(true);
 
             qDebug().noquote() << filePath << "loaded successfully";
         }
@@ -646,6 +645,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             else
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "without compression";
 
+            getFileIOTask()->setName(QString("Save to %1").arg(filePath));
             getFileIOTask()->setRunning();
 
             Archiver archiver;
@@ -693,7 +693,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             _project->setFilePath(filePath);
 
-            getFileIOTask()->setFinished();
+            getFileIOTask()->setFinished(true);
 
             qDebug().noquote() << filePath << "saved successfully";
         }

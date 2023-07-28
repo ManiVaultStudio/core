@@ -322,6 +322,12 @@ public: // IO
      */
     virtual WorkspaceLocations getWorkspaceLocations(const WorkspaceLocation::Types& types = WorkspaceLocation::Type::All) = 0;
 
+    /**
+     * Get view plugin names from \p workspaceJsonFile
+     * @param workspaceJsonFile Location of the workspace JSON file
+     */
+    virtual QStringList getViewPluginNames(const QString& workspaceJsonFile) const = 0;
+
 signals:
 
     /** Signals that a new workspace is about to be created */

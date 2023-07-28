@@ -722,4 +722,45 @@ bool WorkspaceManager::mayUnlock() const
     return false;
 }
 
+QStringList WorkspaceManager::getViewPluginNames(const QString& workspaceJsonFile) const
+{
+    QFile jsonFile(workspaceJsonFile);
+
+    if (!jsonFile.open(QIODevice::ReadOnly))
+        return {};
+
+    QByteArray data = jsonFile.readAll();
+
+    QJsonDocument jsonDocument;
+
+    jsonDocument = QJsonDocument::fromJson(data);
+
+    if (jsonDocument.isNull() || jsonDocument.isEmpty())
+        return {};
+
+    const auto variantMap       = jsonDocument.toVariant().toMap();
+    const auto workspaceMap     = variantMap["Workspace"].toMap();
+    const auto dockManagersMap  = workspaceMap["DockManagers"].toMap();
+
+    const auto getViewPluginNamesFromDockManager = [](const QVariantMap& dockManagerMap) -> QStringList {
+        QStringList viewPluginNames;
+
+        for (auto viewPluginDockWidgetVariant : dockManagerMap["ViewPluginDockWidgets"].toList()) {
+            const auto viewPluginMap = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap();
+
+            viewPluginNames << viewPluginMap["GuiName"].toMap()["Value"].toString();
+        }
+
+        return viewPluginNames;
+    };
+
+    QStringList viewPluginNames;
+
+    viewPluginNames << getViewPluginNamesFromDockManager(dockManagersMap["Main"].toMap());
+    viewPluginNames << getViewPluginNamesFromDockManager(dockManagersMap["ViewPlugins"].toMap());
+
+    return viewPluginNames;
+
+}
+
 }

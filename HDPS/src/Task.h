@@ -18,13 +18,10 @@ class AbstractTaskHandler;
  *
  * Convenience class for managing a task.
  *
- * Task progress can be modified in two ways:
- * 
- * 1. By setting task progress directly setProgress(...)
- *    
+ * Task progress can be modified in two ways see Task::setProgressMode():
  *  - Setting progress directly setProgress(...)
- *  - Setting a number of task items via setNumberOfItems(...) and flagging items as finished 
- *    with setItemFinished(...), the percentage is then updated automatically
+ *  - Setting sub tasks items via one of the overloads of Task::setSubTasks() and flagging items as finished 
+ *    with Task::setSubtaskFinished(), the percentage is then updated automatically
  *
  * @author Thomas Kroes
  */
@@ -121,8 +118,12 @@ public: // Status
     /** Set task status to running indeterminate */
     virtual void setRunningIndeterminate() final;
 
-    /** Set task status to finished */
-    virtual void setFinished() final;
+    /**
+     * Set task status to finished
+     * @param toIdleWithDelay Whether to automatically set the status to idle after \p delay
+     * @param delay Delay in milliseconds
+     */
+    virtual void setFinished(bool toIdleWithDelay = false, std::uint32_t delay = 1000) final;
 
     /** Set task status to aborted */
     virtual void setAborted() final;

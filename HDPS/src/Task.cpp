@@ -131,9 +131,16 @@ void Task::setRunningIndeterminate()
     setStatus(Status::RunningIndeterminate);
 }
 
-void Task::setFinished()
+void Task::setFinished(bool toIdleWithDelay /*= false*/, std::uint32_t delay /*= 1000*/)
 {
     setStatus(Status::Finished);
+
+    if (!toIdleWithDelay)
+        return;
+
+    QTimer::singleShot(delay, this, [this]() -> void {
+        setIdle();
+    });
 }
 
 void Task::setAborted()
@@ -232,6 +239,8 @@ void Task::setSubtasks(std::uint32_t numberOfSubtasks)
 
     if (numberOfSubtasks == _subtasks.count())
         return;
+
+    _subtasks.clear();
 
     _subtasks.resize(numberOfSubtasks);
     _subtasksNames.resize(numberOfSubtasks);

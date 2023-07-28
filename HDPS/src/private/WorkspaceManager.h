@@ -165,6 +165,12 @@ public: // IO
      */
     WorkspaceLocations getWorkspaceLocations(const WorkspaceLocation::Types& types = WorkspaceLocation::Type::All) override;
 
+    /**
+     * Get view plugin names from \p workspaceJsonFile
+     * @param workspaceJsonFile Location of the workspace JSON file
+     */
+    QStringList getViewPluginNames(const QString& workspaceJsonFile) const override;
+
 public: // Serialization
 
     /**
