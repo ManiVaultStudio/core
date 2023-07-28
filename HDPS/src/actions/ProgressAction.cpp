@@ -187,7 +187,7 @@ void ProgressAction::BarWidget::paintEvent(QPaintEvent* paintEvent)
     
     initStyleOption(&progressBarStyleOption);
 
-    progressBarStyleOption.text = progressBarStyleOption.fontMetrics.elidedText(_progressAction->getText(), Qt::ElideMiddle, progressBarStyleOption.rect.width());
+    progressBarStyleOption.text = progressBarStyleOption.fontMetrics.elidedText(QString("  %1  ").arg(_progressAction->getText()), Qt::ElideMiddle, progressBarStyleOption.rect.width());
 
     QPainter painter(this);
     

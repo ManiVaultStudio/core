@@ -99,6 +99,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ProgressText), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Type), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Status), true);
+    treeView.setTextElideMode(Qt::ElideMiddle);
 
     treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Progress), new ProgressItemDelegate(this));
 
