@@ -40,7 +40,7 @@ public:
     /** Bar widget for progress action */
     class BarWidget : public QProgressBar
     {
-    protected:
+    public:
 
         /**
          * Constructor
@@ -50,8 +50,14 @@ public:
          */
         BarWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags);
 
+        /**
+         * Override the paint event to add text elidation
+         * @param paintEvent Pointer to the paint event
+         */
+        void paintEvent(QPaintEvent* paintEvent) override;
+
     protected:
-        ProgressAction*     _progressAction;    /** Pointer to progress action */
+        ProgressAction*     _progressAction;    /** Pointer to owning progress action */
 
         friend class ProgressAction;
     };
@@ -70,7 +76,7 @@ public:
         LabelWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags);
 
     protected:
-        ProgressAction*     _progressAction;    /** Pointer to progress action */
+        ProgressAction*     _progressAction;    /** Pointer to owning progress action */
 
         friend class ProgressAction;
     };
@@ -89,7 +95,7 @@ public:
         LineEditWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags);
 
     protected:
-        ProgressAction*     _progressAction;    /** Pointer to progress action */
+        ProgressAction*     _progressAction;    /** Pointer to owning progress action */
 
         friend class ProgressAction;
     };
@@ -147,13 +153,13 @@ public:
      * Get progress value
      * @return Progress value
      */
-    int getValue() const;
+    int getProgress() const;
 
     /**
      * Set progress value to \p value
      * @param value Progress value
      */
-    void setValue(int value);
+    void setProgress(int value);
 
     /**
      * Get whether text is visible
@@ -178,7 +184,6 @@ public:
      * @param textAlignment Text alignment flag
      */
     void setTextAlignment(Qt::AlignmentFlag textAlignment);
-
 
     /**
      * Get text format

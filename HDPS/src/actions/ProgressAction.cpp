@@ -6,6 +6,8 @@
 
 #include <QMenu>
 #include <QHBoxLayout>
+#include <QStyleOptionProgressBar>
+#include <QPainter>
 
 namespace hdps::gui {
 
@@ -58,12 +60,12 @@ void ProgressAction::setRange(int minimum, int maximum)
     setMaximum(maximum);
 }
 
-int ProgressAction::getValue() const
+int ProgressAction::getProgress() const
 {
     return _value;
 }
 
-void ProgressAction::setValue(int value)
+void ProgressAction::setProgress(int value)
 {
     if (value == _value)
         return;
@@ -122,6 +124,8 @@ ProgressAction::BarWidget::BarWidget(QWidget* parent, ProgressAction* progressAc
     QProgressBar(parent),
     _progressAction(progressAction)
 {
+    setStyleSheet("QProgressBar { font-size: 9px; }");
+
     if (widgetFlags & WidgetFlag::HorizontalBar)
         setOrientation(Qt::Horizontal);
 
@@ -145,7 +149,7 @@ ProgressAction::BarWidget::BarWidget(QWidget* parent, ProgressAction* progressAc
     connect(_progressAction, &ProgressAction::maximumChanged, this, updateMaximum);
 
     const auto updateValue = [this]() -> void {
-        setValue(_progressAction->getValue());
+        setValue(_progressAction->getProgress());
     };
 
     updateValue();
@@ -175,6 +179,19 @@ ProgressAction::BarWidget::BarWidget(QWidget* parent, ProgressAction* progressAc
     updateTextFormat();
 
     connect(_progressAction, &ProgressAction::textFormatChanged, this, updateTextFormat);
+}
+
+void ProgressAction::BarWidget::paintEvent(QPaintEvent* paintEvent)
+{
+    QStyleOptionProgressBar progressBarStyleOption;
+    
+    initStyleOption(&progressBarStyleOption);
+
+    progressBarStyleOption.text = progressBarStyleOption.fontMetrics.elidedText(_progressAction->getText(), Qt::ElideMiddle, progressBarStyleOption.rect.width());
+
+    QPainter painter(this);
+    
+    style()->drawControl(QStyle::CE_ProgressBar, &progressBarStyleOption, &painter, this);
 }
 
 ProgressAction::LabelWidget::LabelWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags) :
@@ -247,7 +264,7 @@ float ProgressAction::getPercentage() const
     if (getMinimum() == getMaximum())
         return 0.f;
 
-    return (getValue() - getMinimum()) / static_cast<float>(getNumberOfSteps());
+    return 100.f * ((getProgress() - getMinimum()) / static_cast<float>(getNumberOfSteps()));
 }
 
 QString ProgressAction::getText() const
@@ -255,7 +272,7 @@ QString ProgressAction::getText() const
     QString text = _textFormat;
 
     text.replace("%p", QString::number(getPercentage(), 'f', 1));
-    text.replace("%v", QString::number(getValue()));
+    text.replace("%v", QString::number(getProgress()));
     text.replace("%m", QString::number(getNumberOfSteps()));
 
     return text;

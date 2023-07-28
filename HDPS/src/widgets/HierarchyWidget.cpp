@@ -189,7 +189,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
         
         _toolbarAction.addAction(&_expandAllAction);
         _toolbarAction.addAction(&_collapseAllAction);
-        _toolbarAction.addAction(&_selectionGroupAction);
+        //_toolbarAction.addAction(&_selectionGroupAction);
         _toolbarAction.addAction(&_columnsGroupAction);
         _toolbarAction.addAction(&_settingsGroupAction);
 

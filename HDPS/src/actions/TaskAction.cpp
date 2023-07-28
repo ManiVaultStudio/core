@@ -49,7 +49,7 @@ void TaskAction::setTask(Task* task)
     _task = task;
 
     const auto updateProgressAction = [this]() -> void {
-        _progressAction.setValue(static_cast<int>(_task->getProgress() * 100.f));
+        _progressAction.setProgress(static_cast<int>(_task->getProgress() * 100.f));
     };
 
     updateProgressAction();

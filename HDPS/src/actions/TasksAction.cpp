@@ -8,9 +8,11 @@
 #include <AbstractTaskManager.h>
 
 #include <actions/TaskAction.h>
+#include <actions/ProgressAction.h>
 
 #include <QStyledItemDelegate>
 #include <QHeaderView>
+#include <QPainter>
 
 namespace hdps::gui {
 
@@ -55,24 +57,26 @@ protected:
     /** Paints a progress bar in the cell */
     void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
     {
-        QStyleOptionProgressBar progressBarStyleOption;
-
-        progressBarStyleOption.rect = option.rect;
-
         const auto status               = static_cast<Task::Status>(index.siblingAtColumn(static_cast<int>(TasksModel::Column::Status)).data(Qt::EditRole).toInt());
         const auto progress             = static_cast<int>(index.data(Qt::EditRole).toFloat() * 100.f);
         const auto progressDescription  = index.siblingAtColumn(static_cast<int>(TasksModel::Column::ProgressDescription)).data(Qt::EditRole).toString();
-        const auto progressText         = index.siblingAtColumn(static_cast<int>(TasksModel::Column::ProgressText)).data(Qt::EditRole).toString();
-        const auto text                 = QString(" %1 ").arg(progressText);
 
-        progressBarStyleOption.minimum          = 0;
-        progressBarStyleOption.maximum          = status == Task::Status::RunningIndeterminate ? 0 : 100;
-        progressBarStyleOption.textAlignment    = Qt::AlignCenter;
-        progressBarStyleOption.progress         = progress;
-        progressBarStyleOption.text             = progressBarStyleOption.fontMetrics.elidedText(text, Qt::ElideMiddle, progressBarStyleOption.rect.width());
-        progressBarStyleOption.textVisible      = true;
+        ProgressAction progressAction(nullptr, "Progress");
 
-        qApp->style()->drawControl(QStyle::CE_ProgressBar, &progressBarStyleOption, painter);
+        progressAction.setRange(0, status == Task::Status::RunningIndeterminate ? 0 : 100);
+        progressAction.setTextFormat(QString("%1 %p%").arg(progressDescription));
+        progressAction.setProgress(progress);
+
+        auto progressWidget = ProgressAction::BarWidget(nullptr, &progressAction, 0);
+
+        progressWidget.setGeometry(option.rect);
+
+        painter->save();
+        painter->translate(option.rect.topLeft());
+
+        progressWidget.render(painter);
+        
+        painter->restore();
     }
 };
 
@@ -82,7 +86,8 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));
 
-    _tasksWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));
+    _tasksWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
+    _tasksWidget.setHeaderHidden(true);
 
     auto& treeView = _tasksWidget.getTreeView();
 
@@ -93,6 +98,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ProgressDescription), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ProgressText), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Type), true);
+    treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Status), true);
 
     treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Progress), new ProgressItemDelegate(this));
 
