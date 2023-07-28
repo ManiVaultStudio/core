@@ -10,6 +10,7 @@
 
 #include <Application.h>
 #include <CoreInterface.h>
+#include <ModalTask.h>
 
 #include <util/Exception.h>
 #include <util/Serialization.h>
@@ -51,8 +52,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _importDataMenu(),
     _publishAction(this, "Publish"),
     _pluginManagerAction(this, "Plugin Browser..."),
-    _showStartPageAction(this, "Start Page...", true),
-    _task(nullptr)
+    _showStartPageAction(this, "Start Page...", true)
 {
     _newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     _newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -228,10 +228,6 @@ void ProjectManager::initialize()
 #endif
 
     AbstractProjectManager::initialize();
-
-    _task = new hdps::FileIOTask(this, "Project IO");
-
-    _task->setProgressMode(Task::ProgressMode::Subtasks);
 }
 
 void ProjectManager::reset()
@@ -436,11 +432,15 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             qDebug().noquote() << "Open ManiVault project from" << filePath;
 
+            getFileIOTask()->setRunning();
+
             Archiver archiver;
 
-            QStringList tasks = archiver.getTaskNamesForDecompression(filePath) << "Import data" << "Load workspace";
+            const auto tasksNames = archiver.getTaskNamesForDecompression(filePath) << "Import data" << "Load workspace";
 
-            connect(_task, &Task::aborted, this, [this]() -> void {
+            getFileIOTask()->setSubtasks(tasksNames);
+
+            connect(getFileIOTask(), &Task::aborted, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was loaded");
@@ -450,19 +450,19 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 //taskProgressDialog.setCurrentTask("Importing dataset: " + loadingItem.getFullPathName());
             });
 
-            connect(&archiver, &Archiver::taskStarted, _task, &Task::setProgressDescription);
-            connect(&archiver, &Archiver::taskFinished, _task, qOverload<const QString&>(&Task::setSubtaskFinished));
+            connect(&archiver, &Archiver::taskStarted, getFileIOTask(), qOverload<const QString&>(&Task::setSubtaskStarted));
+            connect(&archiver, &Archiver::taskFinished, getFileIOTask(), qOverload<const QString&>(&Task::setSubtaskFinished));
 
             archiver.decompress(filePath, temporaryDirectoryPath);
 
-            _task->setProgressDescription("Import data model");
+            getFileIOTask()->setSubtaskStarted("Import data model");
             {
                 projects().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
             }
-            _task->setSubtaskFinished("Import data");
+            getFileIOTask()->setSubtaskFinished("Import data");
 
             if (loadWorkspace) {
-                _task->setProgressDescription("Load workspace");
+                getFileIOTask()->setSubtaskStarted("Load workspace");
                 {
                     const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
@@ -471,7 +471,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
                     workspaces().setWorkspaceFilePath("");
                 }
-                _task->setSubtaskFinished("Load workspace");
+                getFileIOTask()->setSubtaskFinished("Load workspace");
             }
 
             _recentProjectsAction.addRecentFilePath(filePath);
@@ -481,6 +481,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             if (disableReadOnlyAction.isEnabled() && disableReadOnlyAction.isChecked())
                 _project->getReadOnlyAction().setChecked(disableReadOnlyAction.isChecked());
+
+            getFileIOTask()->setFinished();
 
             qDebug().noquote() << filePath << "loaded successfully";
         }
@@ -644,9 +646,11 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             else
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "without compression";
 
+            getFileIOTask()->setRunning();
+
             Archiver archiver;
 
-            connect(_task, &Task::aborted, this, [this]() -> void {
+            connect(getFileIOTask(), &Task::aborted, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was saved");
@@ -665,19 +669,19 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             tasks << archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath);
 
             connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaving, this, [this](DataHierarchyItem& dataHierarchyItem) {
-                _task->setProgressDescription("Exporting dataset: " + dataHierarchyItem.getLocation());
+                getFileIOTask()->setProgressDescription("Exporting dataset: " + dataHierarchyItem.getLocation());
             });
 
             connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaved, this, [this](DataHierarchyItem& dataHierarchyItem) {
-                _task->setSubtaskFinished(dataHierarchyItem.getLocation());
+                getFileIOTask()->setSubtaskFinished(dataHierarchyItem.getLocation());
             });
 
             projects().toJsonFile(jsonFileInfo.absoluteFilePath());
 
-            _task->setSubtaskFinished("Export data model");
+            getFileIOTask()->setSubtaskFinished("Export data model");
 
-            connect(&archiver, &Archiver::taskStarted, _task, &Task::setProgressDescription);
-            connect(&archiver, &Archiver::taskFinished, _task, qOverload<const QString&>(&Task::setSubtaskFinished));
+            connect(&archiver, &Archiver::taskStarted, getFileIOTask(), qOverload<const QString&>(&Task::setSubtaskStarted));
+            connect(&archiver, &Archiver::taskFinished, getFileIOTask(), qOverload<const QString&>(&Task::setSubtaskFinished));
 
             QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
@@ -688,6 +692,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             _recentProjectsAction.addRecentFilePath(filePath);
 
             _project->setFilePath(filePath);
+
+            getFileIOTask()->setFinished();
 
             qDebug().noquote() << filePath << "saved successfully";
         }
@@ -982,9 +988,4 @@ QImage ProjectManager::getPreviewImage(const QString& projectFilePath, const QSi
         return Workspace::getPreviewImage(workspaceFileInfo.absoluteFilePath());
 
     return QImage();
-}
-
-FileIOTask* ProjectManager::getTask()
-{
-    return _task;
 }

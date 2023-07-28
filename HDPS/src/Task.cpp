@@ -223,9 +223,9 @@ QString Task::getProgressText() const
     return {};
 }
 
-void Task::setNumberOfSubtasks(std::uint32_t numberOfSubtasks)
+void Task::setSubtasks(std::uint32_t numberOfSubtasks)
 {
-    _progressMode = ProgressMode::Subtasks;
+    setProgressMode(ProgressMode::Subtasks);
 
     if (numberOfSubtasks == 0)
         return;
@@ -236,9 +236,39 @@ void Task::setNumberOfSubtasks(std::uint32_t numberOfSubtasks)
     _subtasks.resize(numberOfSubtasks);
     _subtasksNames.resize(numberOfSubtasks);
     
+    emit subtasksChanged(_subtasks, _subtasksNames);
+}
+
+void Task::setSubtasks(const QStringList& subtasksNames)
+{
     setProgressMode(ProgressMode::Subtasks);
 
-    emit subtasksChanged(_subtasks);
+    if (_subtasks.count() != subtasksNames.count())
+        _subtasks.resize(subtasksNames.count());
+
+    if (subtasksNames == _subtasksNames)
+        return;
+
+    _subtasksNames = subtasksNames;
+
+    emit subtasksChanged(_subtasks, _subtasksNames);
+}
+
+void Task::addSubtasks(const QStringList& subtasksNames)
+{
+    if (subtasksNames.isEmpty())
+        return;
+
+    if (_progressMode != ProgressMode::Subtasks)
+        return;
+
+    _subtasksNames << subtasksNames;
+    
+    _subtasks.resize(_subtasksNames.count());
+
+    emit subtasksChanged(_subtasks, _subtasksNames);
+
+    updateProgress();
 }
 
 void Task::setSubtaskFinished(std::uint32_t subtaskIndex)
@@ -253,7 +283,7 @@ void Task::setSubtaskFinished(std::uint32_t subtaskIndex)
 
     updateProgress();
 
-    emit subtasksChanged(_subtasks);
+    emit subtasksChanged(_subtasks, _subtasksNames);
 
     const auto subtaskDescription = _subtasksNames[subtaskIndex];
 
@@ -274,20 +304,17 @@ void Task::setSubtaskFinished(const QString& subtaskName)
     setSubtaskFinished(subtaskIndex);
 }
 
-void Task::setSubtasksNames(const QStringList& subtasksNames)
+void Task::setSubtaskStarted(const QString& subtaskName)
 {
     if (_progressMode != ProgressMode::Subtasks)
         return;
 
-    if (subtasksNames == _subtasksNames)
+    const auto subtaskIndex = getSubtaskIndex(subtaskName);
+
+    if (subtaskIndex < 0)
         return;
 
-    if (subtasksNames.count() != _subtasks.count())
-        setNumberOfSubtasks(subtasksNames.count());
-
-    _subtasksNames = subtasksNames;
-
-    emit subtasksDescriptionsChanged(_subtasksNames);
+    emit progressDescriptionChanged(_subtasksNames[subtaskIndex]);
 }
 
 void Task::setSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName)
@@ -299,6 +326,11 @@ void Task::setSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName
         return;
 
     _subtasksNames[subtaskIndex] = subtaskName;
+}
+
+QStringList Task::getSubtasksNames() const
+{
+    return _subtasksNames;
 }
 
 QString Task::getProgressDescription() const
@@ -327,12 +359,6 @@ std::int32_t Task::getSubtaskIndex(const QString& subtaskName) const
         return -1;
 
     return _subtasksNames.indexOf(subtaskName);
-}
-
-void Task::start(std::uint32_t numberOfItems)
-{
-    setNumberOfSubtasks(numberOfItems);
-    setStatus(Status::Running);
 }
 
 void Task::updateProgress()

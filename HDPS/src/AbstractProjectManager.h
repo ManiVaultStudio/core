@@ -6,6 +6,7 @@
 
 #include "AbstractManager.h"
 #include "Project.h"
+#include "FileIOTask.h"
 
 #include "actions/TriggerAction.h"
 #include "actions/RecentFilesAction.h"
@@ -16,8 +17,6 @@
 #include <QTemporaryDir>
 
 namespace hdps {
-
-class FileIOTask;
 
 /**
  * Abstract project manager class
@@ -78,7 +77,8 @@ public:
      */
     AbstractProjectManager(QObject* parent = nullptr) :
         AbstractManager(parent, "Project"),
-        _state(State::Idle)
+        _state(State::Idle),
+        _fileIOTask(nullptr)
     {
     }
 
@@ -162,10 +162,18 @@ public:
     virtual QImage getPreviewImage(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const = 0;
 
     /**
-     * Get task
+     * Get file IO task
      * @return File IO task
      */
-    virtual FileIOTask* getTask() = 0;
+    virtual FileIOTask* getFileIOTask() final {
+        if (_fileIOTask == nullptr) {
+            _fileIOTask = new FileIOTask(this, "Project File IO");
+
+            _fileIOTask->setProgressMode(Task::ProgressMode::Subtasks);
+        }
+
+        return _fileIOTask;
+    }
 
 public: // Menus
 
@@ -328,7 +336,8 @@ signals:
     void stateChanged(const State& state);
 
 private:
-    State   _state;     /** Determines the state of the project manager */
+    State       _state;         /** Determines the state of the project manager */
+    FileIOTask* _fileIOTask;    /** Task for reporting file IO operations */
 };
 
 }

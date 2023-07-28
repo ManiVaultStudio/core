@@ -65,7 +65,7 @@ public:
     void init() override;
    
 private:
-    static ModalTasksDialog     modalTasksDialog;   /** Modal tasks dialog */
+    //static ModalTasksDialog     modalTasksDialog;   /** Modal tasks dialog */
 };
 
 }

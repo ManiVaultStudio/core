@@ -5,7 +5,6 @@
 #pragma once
 
 #include <AbstractProjectManager.h>
-#include <FileIOTask.h>
 
 #include <QObject>
 #include <QPointer>
@@ -113,12 +112,6 @@ public:
      * @return Preview image
      */
     QImage getPreviewImage(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const override;
-
-    /**
-     * Get task
-     * @return File IO task
-     */
-    hdps::FileIOTask* getTask() override;
 
 public: // Serialization
 

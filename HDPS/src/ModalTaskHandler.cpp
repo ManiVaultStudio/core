@@ -11,7 +11,7 @@ namespace hdps {
 
 using namespace gui;
 
-ModalTaskHandler::ModalTasksDialog ModalTaskHandler::modalTasksDialog = ModalTasksDialog(nullptr);
+//ModalTaskHandler::ModalTasksDialog ModalTaskHandler::modalTasksDialog = ModalTasksDialog(nullptr);
 
 ModalTaskHandler::ModalTaskHandler(QObject* parent /*= nullptr*/) :
     AbstractTaskHandler(parent)

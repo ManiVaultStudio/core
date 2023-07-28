@@ -150,15 +150,25 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
     hide();
     {
+        QStringList subtasksNames;
+
+        for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList())
+            subtasksNames << viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap()["GuiName"].toMap()["Value"].toString();
+
+        projects().getFileIOTask()->addSubtasks(subtasksNames);
+
         for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList()) {
             const auto viewPluginMap    = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap();
             const auto pluginKind       = viewPluginMap["Kind"].toString();
             const auto pluginMap        = viewPluginMap["Plugin"].toMap();
+            const auto guiName          = viewPluginMap["GuiName"].toMap()["Value"].toString();
+
+            projects().getFileIOTask()->setSubtaskStarted(guiName);
 
             if (plugins().isPluginLoaded(pluginKind)) {
                 addViewPluginDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));
             } else {
-                auto notLoadedDockWidget    = new CDockWidget(QString("%1 (not loaded)").arg(viewPluginMap["GuiName"].toMap()["Value"].toString()));
+                auto notLoadedDockWidget    = new CDockWidget(QString("%1 (not loaded)").arg(guiName));
                 auto notLoadedInfoWidget    = new InfoWidget(this, Application::getIconFont("FontAwesome").getIcon("exclamation-circle"), "View not loaded", QString("We were unable to load the %1 because the plugin is not loaded properly.\nThe workspace might not behave as expected, please ensure the required plugin is loaded properly...").arg(pluginKind));
 
                 notLoadedInfoWidget->setColor(Qt::gray);
@@ -167,6 +177,8 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
                 addViewPluginDockWidget(RightDockWidgetArea, notLoadedDockWidget);
             }
+
+            projects().getFileIOTask()->setSubtaskFinished(guiName);
         }
 
         if (!restoreState(QByteArray::fromBase64(variantMap["State"].toString().toUtf8()), variantMap["Version"].toInt()))
