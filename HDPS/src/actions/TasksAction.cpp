@@ -88,6 +88,8 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
 
     _tasksWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
     _tasksWidget.setHeaderHidden(true);
+    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTypeFilterAction());
+    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getStatusFilterAction());
 
     auto& treeView = _tasksWidget.getTreeView();
 

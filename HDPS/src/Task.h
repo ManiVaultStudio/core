@@ -189,19 +189,35 @@ public: // Subtasks
     virtual void setSubtaskFinished(std::uint32_t subtaskIndex) final;
 
     /**
-     * Set subtasks descriptions to \p subtasksDescriptions
+     * Flag item with \p subtaskName as finished, the progress percentage will be computed automatically
+     * Assumes the number of tasks has been set prior with Task::setNumberOfSubtasks()
+     * If \p subtaskName is not found, the progress will not be updated (ensure that subtasks names are set with Task::setSubtasksNames() or Task::setSubtasksName())
      * This method only has an effect when Task#_progressMode is set to ProgressMode::Subtasks
-     * @param subtasksDescriptions Subtasks descriptions
+     * @param subtaskName Name of the subtask
      */
-    virtual void setSubtasksDescriptions(const QStringList& subtasksDescriptions) final;
+    virtual void setSubtaskFinished(const QString& subtaskName) final;
 
     /**
-     * Set subtask description to \p subtaskDescription for \p subtaskIndex
+     * Set subtasks names to \p subtasksNames
+     * This method only has an effect when Task#_progressMode is set to ProgressMode::Subtasks
+     * @param subtasksNames Subtasks names
+     */
+    virtual void setSubtasksNames(const QStringList& subtasksNames) final;
+
+    /**
+     * Set subtask name to \p subtaskName for \p subtaskIndex
      * This method only has an effect when Task#_progressMode is set to ProgressMode::Subtasks
      * @param subtaskIndex Subtask index to set the description for
-     * @param subtaskDescription Description of the subtask
+     * @param subtaskName Name of the subtask
      */
-    virtual void setSubtaskDescription(std::uint32_t subtaskIndex, const QString& subtaskDescription) final;
+    virtual void setSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName) final;
+
+    /**
+     * Get subtask index for \p subtaskName
+     * Returns -1 when \p subtaskName is not found or Task#_progressMode is set to ProgressMode::Manual
+     * @param subtaskName Name of the subtask
+     */
+    virtual std::int32_t getSubtaskIndex(const QString& subtaskName) const final;
 
     /**
      * Starts the task and initializes with the \p numberOfItems
@@ -254,6 +270,9 @@ signals:
      */
     void statusChanged(const Status& status);
 
+    /** Signals that the task was aborted */
+    void aborted();
+
     /**
      * Signals that the task progress mode to \p progressMode
      * @param progressMode Modified progress mode
@@ -292,7 +311,7 @@ private:
     ProgressMode            _progressMode;              /** The way progress is recorded */
     float                   _progress;                  /** Task progress */
     QBitArray               _subtasks;                  /** Subtasks status */
-    QStringList             _subtasksDescriptions;      /** Subtasks descriptions */
+    QStringList             _subtasksNames;             /** Subtasks names */
     QString                 _progressDescription;       /** Current item description */
 };
 

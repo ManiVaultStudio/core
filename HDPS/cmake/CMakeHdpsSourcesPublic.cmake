@@ -340,7 +340,6 @@ set(PUBLIC_WIDGET_HEADERS
     src/widgets/InfoWidget.h
     src/widgets/ViewPluginEditorDialog.h
     src/widgets/ActionsWidget.h
-    src/widgets/TaskProgressDialog.h
 )
 
 set(PUBLIC_WIDGET_SOURCES
@@ -353,7 +352,6 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/InfoWidget.cpp
     src/widgets/ViewPluginEditorDialog.cpp
     src/widgets/ActionsWidget.cpp
-    src/widgets/TaskProgressDialog.cpp
     ${ACTION_HIERARCHY_SOURCES}
 )
 

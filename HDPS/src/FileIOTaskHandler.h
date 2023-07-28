@@ -59,7 +59,7 @@ public:
     void init() override;
    
 private:
-    static FileIOTasksDialog     fileIOTasksDialog;   /** File IO tasks dialog */
+    //static FileIOTasksDialog     fileIOTasksDialog;   /** File IO tasks dialog */
 };
 
 }

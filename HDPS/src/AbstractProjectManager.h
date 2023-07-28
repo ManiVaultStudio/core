@@ -17,6 +17,8 @@
 
 namespace hdps {
 
+class FileIOTask;
+
 /**
  * Abstract project manager class
  *
@@ -158,6 +160,12 @@ public:
      * @return Preview image
      */
     virtual QImage getPreviewImage(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const = 0;
+
+    /**
+     * Get task
+     * @return File IO task
+     */
+    virtual FileIOTask* getTask() = 0;
 
 public: // Menus
 

@@ -217,7 +217,9 @@ QVariant TasksModel::ParentIdItem::data(int role /*= Qt::UserRole + 1*/) const
 
 QVariant TasksModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
 {
-    const auto taskTypeString = QString(getTask()->metaObject()->className());
+    auto taskTypeString = QString(getTask()->metaObject()->className());
+
+    taskTypeString.replace("hdps::", "");
 
     switch (role) {
         case Qt::EditRole:

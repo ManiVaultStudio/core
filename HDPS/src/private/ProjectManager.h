@@ -5,6 +5,7 @@
 #pragma once
 
 #include <AbstractProjectManager.h>
+#include <FileIOTask.h>
 
 #include <QObject>
 #include <QPointer>
@@ -113,6 +114,12 @@ public:
      */
     QImage getPreviewImage(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const override;
 
+    /**
+     * Get task
+     * @return File IO task
+     */
+    hdps::FileIOTask* getTask() override;
+
 public: // Serialization
 
     /**
@@ -175,4 +182,5 @@ private:
     hdps::gui::TriggerAction            _publishAction;                     /** Action for publishing the project to an end-user */
     hdps::gui::TriggerAction            _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
     hdps::gui::ToggleAction             _showStartPageAction;               /** Action for toggling the start page */
+    hdps::FileIOTask*                   _task;                              /** Task for keeping track of file IO operations (e.g project open and save) */
 };

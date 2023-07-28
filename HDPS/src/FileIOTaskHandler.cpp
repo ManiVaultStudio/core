@@ -13,7 +13,7 @@ namespace hdps {
 
 using namespace gui;
 
-FileIOTaskHandler::FileIOTasksDialog FileIOTaskHandler::fileIOTasksDialog = FileIOTasksDialog();
+//FileIOTaskHandler::FileIOTasksDialog FileIOTaskHandler::fileIOTasksDialog = FileIOTasksDialog();
 
 FileIOTaskHandler::FileIOTaskHandler(QObject* parent /*= nullptr*/) :
     AbstractTaskHandler(parent)

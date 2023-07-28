@@ -14,7 +14,7 @@
 #include <util/Exception.h>
 #include <util/Serialization.h>
 
-#include <widgets/TaskProgressDialog.h>
+#include <Set.h>
 
 #include <QFileDialog>
 #include <QStandardPaths>
@@ -51,7 +51,8 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _importDataMenu(),
     _publishAction(this, "Publish"),
     _pluginManagerAction(this, "Plugin Browser..."),
-    _showStartPageAction(this, "Start Page...", true)
+    _showStartPageAction(this, "Start Page...", true),
+    _task(nullptr)
 {
     _newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     _newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -227,6 +228,10 @@ void ProjectManager::initialize()
 #endif
 
     AbstractProjectManager::initialize();
+
+    _task = new hdps::FileIOTask(this, "Project IO");
+
+    _task->setProgressMode(Task::ProgressMode::Subtasks);
 }
 
 void ProjectManager::reset()
@@ -433,33 +438,31 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             Archiver archiver;
 
-            QStringList tasks = archiver.getTaskNamesForDecompression(filePath) << "Import data model" << "Load workspace";
+            QStringList tasks = archiver.getTaskNamesForDecompression(filePath) << "Import data" << "Load workspace";
 
-            TaskProgressDialog taskProgressDialog(nullptr, tasks, "Open ManiVault project from " + filePath, Application::getIconFont("FontAwesome").getIcon("folder-open"));
-
-            connect(&taskProgressDialog, &TaskProgressDialog::canceled, this, [this]() -> void {
+            connect(_task, &Task::aborted, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was loaded");
             });
 
-            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemLoading, this, [&taskProgressDialog](DataHierarchyItem& loadingItem) {
+            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemLoading, this, [](DataHierarchyItem& loadingItem) {
                 //taskProgressDialog.setCurrentTask("Importing dataset: " + loadingItem.getFullPathName());
             });
 
-            connect(&archiver, &Archiver::taskStarted, &taskProgressDialog, &TaskProgressDialog::setCurrentTask);
-            connect(&archiver, &Archiver::taskFinished, &taskProgressDialog, &TaskProgressDialog::setTaskFinished);
+            connect(&archiver, &Archiver::taskStarted, _task, &Task::setProgressDescription);
+            connect(&archiver, &Archiver::taskFinished, _task, qOverload<const QString&>(&Task::setSubtaskFinished));
 
             archiver.decompress(filePath, temporaryDirectoryPath);
 
-            taskProgressDialog.setCurrentTask("Import data model");
+            _task->setProgressDescription("Import data model");
             {
                 projects().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
             }
-            taskProgressDialog.setTaskFinished("Import data model");
+            _task->setSubtaskFinished("Import data");
 
             if (loadWorkspace) {
-                taskProgressDialog.setCurrentTask("Load workspace");
+                _task->setProgressDescription("Load workspace");
                 {
                     const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
@@ -468,7 +471,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
                     workspaces().setWorkspaceFilePath("");
                 }
-                taskProgressDialog.setTaskFinished("Load workspace");
+                _task->setSubtaskFinished("Load workspace");
             }
 
             _recentProjectsAction.addRecentFilePath(filePath);
@@ -643,15 +646,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             Archiver archiver;
 
-            QStringList tasks;
-
-            tasks << "Export data model" << "Temporary task";
-
-            TaskProgressDialog taskProgressDialog(nullptr, tasks, "Saving ManiVault project to " + filePath, Application::current()->getIconFont("FontAwesome").getIcon("save"));
-
-            taskProgressDialog.setCurrentTask("Export data model");
-
-            connect(&taskProgressDialog, &TaskProgressDialog::canceled, this, [this]() -> void {
+            connect(_task, &Task::aborted, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was saved");
@@ -662,18 +657,27 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
             Application::setSerializationAborted(false);
 
-            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaving, this, [&taskProgressDialog](DataHierarchyItem& savingItem) {
-                taskProgressDialog.setCurrentTask("Exporting dataset: " + savingItem.getLocation());
+            QStringList tasks;
+            
+            for (auto dataset : Application::core()->requestAllDataSets())
+                tasks << dataset->getDataHierarchyItem().getLocation();
+
+            tasks << archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath);
+
+            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaving, this, [this](DataHierarchyItem& dataHierarchyItem) {
+                _task->setProgressDescription("Exporting dataset: " + dataHierarchyItem.getLocation());
+            });
+
+            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaved, this, [this](DataHierarchyItem& dataHierarchyItem) {
+                _task->setSubtaskFinished(dataHierarchyItem.getLocation());
             });
 
             projects().toJsonFile(jsonFileInfo.absoluteFilePath());
 
-            taskProgressDialog.setTaskFinished("Export data model");
-            taskProgressDialog.addTasks(archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath));
-            taskProgressDialog.setTaskFinished("Temporary task");
+            _task->setSubtaskFinished("Export data model");
 
-            connect(&archiver, &Archiver::taskStarted, &taskProgressDialog, &TaskProgressDialog::setCurrentTask);
-            connect(&archiver, &Archiver::taskFinished, &taskProgressDialog, &TaskProgressDialog::setTaskFinished);
+            connect(&archiver, &Archiver::taskStarted, _task, &Task::setProgressDescription);
+            connect(&archiver, &Archiver::taskFinished, _task, qOverload<const QString&>(&Task::setSubtaskFinished));
 
             QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
@@ -978,4 +982,9 @@ QImage ProjectManager::getPreviewImage(const QString& projectFilePath, const QSi
         return Workspace::getPreviewImage(workspaceFileInfo.absoluteFilePath());
 
     return QImage();
+}
+
+FileIOTask* ProjectManager::getTask()
+{
+    return _task;
 }
