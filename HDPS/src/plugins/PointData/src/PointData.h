@@ -745,7 +745,12 @@ public:
     template <typename T>
     void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
+        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>().getNumDimensions();
+
         getRawData<PointData>().setData(data, numPoints, numDimensions);
+
+        if (notifyDimensionsChanged)
+            hdps::events().notifyDatasetDataDimensionsChanged(this);
     }
 
     /// Just calls the corresponding member function of its PointData.
@@ -755,14 +760,24 @@ public:
     template <typename T>
     void setData(const std::vector<T>& data, const std::size_t numDimensions)
     {
+        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>().getNumDimensions();
+
         getRawData<PointData>().setData(data, numDimensions);
+
+        if (notifyDimensionsChanged)
+            hdps::events().notifyDatasetDataDimensionsChanged(this);
     }
 
     /// Just calls the corresponding member function of its PointData.
     template <typename T>
     void setData(std::vector<T>&& data, const std::size_t numDimensions)
     {
+        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>().getNumDimensions();
+
         getRawData<PointData>().setData(std::move(data), numDimensions);
+
+        if (notifyDimensionsChanged)
+            hdps::events().notifyDatasetDataDimensionsChanged(this);
     }
 
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;

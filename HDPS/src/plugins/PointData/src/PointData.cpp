@@ -763,6 +763,8 @@ const std::vector<QString>& Points::getDimensionNames() const
 void Points::setDimensionNames(const std::vector<QString>& dimNames)
 {
     getRawData<PointData>().setDimensionNames(dimNames);
+
+    hdps::events().notifyDatasetDataDimensionsChanged(this);
 }
 
 float Points::getValueAt(const std::size_t index) const
