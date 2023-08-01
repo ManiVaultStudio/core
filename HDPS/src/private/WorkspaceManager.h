@@ -171,6 +171,12 @@ public: // IO
      */
     QStringList getViewPluginNames(const QString& workspaceJsonFile) const override;
 
+    /**
+     * Get a preview image
+     * @return Workspace manager preview image
+     */
+    QImage toPreviewImage() const override;
+
 public: // Serialization
 
     /**
@@ -201,12 +207,6 @@ private:
 
     /** Create custom icon for the manager */
     void createIcon();
-
-    /**
-     * Get a preview image
-     * @return Workspace manager preview image
-     */
-    QImage toPreviewImage() const;
 
 public: // Action getters
 

@@ -109,7 +109,7 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
                 fromWorkspaceStartPageAction.setComments(workspace.getCommentsAction().getString());
                 fromWorkspaceStartPageAction.setTags(workspace.getTagsAction().getStrings());
                 fromWorkspaceStartPageAction.setMetaData(workspaceLocation.getTypeName());
-                fromWorkspaceStartPageAction.setPreviewImage(Workspace::getPreviewImage(workspaceLocation.getFilePath()));
+                //fromWorkspaceStartPageAction.setPreviewImage(projects().getWorkspacePreview(workspaceLocation.getFilePath()));
 
                 _createProjectFromWorkspaceWidget.getModel().add(fromWorkspaceStartPageAction);
             }
@@ -131,7 +131,7 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
                 recentWorkspaceStartPageAction.setComments(workspace.getCommentsAction().getString());
                 recentWorkspaceStartPageAction.setTags(workspace.getTagsAction().getStrings());
                 recentWorkspaceStartPageAction.setMetaData(recentWorkspace.getDateTime().toString("dd/MM/yyyy hh:mm"));
-                recentWorkspaceStartPageAction.setPreviewImage(workspace.getPreviewImage(recentFilePath));
+                //recentWorkspaceStartPageAction.setPreviewImage(workspace.getPreviewImage(recentFilePath));
 
                 _createProjectFromWorkspaceWidget.getModel().add(recentWorkspaceStartPageAction);
             }
@@ -144,8 +144,6 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
             for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
                 const auto recentFilePath = recentFile.getFilePath();
 
-                QTemporaryDir temporaryDir;
-                
                 const auto projectMeta = Project::getProjectMeta(recentFilePath);
                 
                 if (projectMeta.isNull()) {
@@ -164,7 +162,7 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
                     recentProjectStartPageAction.setComments(projectMeta->getCommentsAction().getString());
                     recentProjectStartPageAction.setTags(projectMeta->getTagsAction().getStrings());
                     recentProjectStartPageAction.setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
-                    recentProjectStartPageAction.setPreviewImage(projects().getPreviewImage(recentFilePath));
+                    recentProjectStartPageAction.setPreviewImage(projects().getWorkspacePreview(recentFilePath));
                     recentProjectStartPageAction.setContributors(projectMeta->getContributorsAction().getStrings());
                 
                     _createProjectFromWorkspaceWidget.getModel().add(recentProjectStartPageAction);

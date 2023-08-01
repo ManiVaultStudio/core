@@ -147,20 +147,20 @@ public:
     virtual Project* getCurrentProject() = 0;
 
     /**
-     * Extract the project JSON file (project.json) from a compressed HDPS file (*.hdps)
-     * @param hdpsFilePath File path of the compressed HDPS file (*.hdps)
-     * @param temporaryDir Temporary directory to store the project.json file
+     * Extract \p filePath from compressed ManiVault project in \p maniVaultFilePath
+     * @param maniVaultFilePath File path of the compressed ManiVault file
+     * @param temporaryDir Temporary dir where the extracted file resides
      * @param filePath Relative file path of the file that needs to be extracted
-     * @return File path of the extracted project.json file, empty string if extraction failed
+     * @return File path of the extracted file, empty string if extraction failed
      */
-    virtual QString extractFileFromHdpsFile(const QString& hdpsFilePath, QTemporaryDir& temporaryDir, const QString& filePath) = 0;
+    virtual QString extractFileFromManiVaultProject(const QString& maniVaultFilePath, QTemporaryDir& temporaryDir, const QString& filePath) = 0;
 
     /**
-     * Get preview image of the project
+     * Get preview image of the project workspace
      * @param projectFilePath Path of the project file
      * @return Preview image
      */
-    virtual QImage getPreviewImage(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const = 0;
+    virtual QImage getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const = 0;
 
     /**
      * Get file IO task

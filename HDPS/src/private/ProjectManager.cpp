@@ -22,6 +22,7 @@
 #include <QStandardPaths>
 #include <QGridLayout>
 #include <QEventLoop>
+#include <QTemporaryDir>
 
 #include <exception>
 
@@ -928,7 +929,7 @@ hdps::Project* ProjectManager::getCurrentProject()
     return _project.get();
 }
 
-QString ProjectManager::extractFileFromHdpsFile(const QString& hdpsFilePath, QTemporaryDir& temporaryDir, const QString& filePath)
+QString ProjectManager::extractFileFromManiVaultProject(const QString& maniVaultFilePath, QTemporaryDir& temporaryDir, const QString& filePath)
 {
     const auto temporaryDirectoryPath = temporaryDir.path();
 
@@ -942,7 +943,7 @@ QString ProjectManager::extractFileFromHdpsFile(const QString& hdpsFilePath, QTe
 
     try
     {
-        archiver.extractSingleFile(hdpsFilePath, extractFilePath, extractFileInfo.absoluteFilePath());
+        archiver.extractSingleFile(maniVaultFilePath, extractFilePath, extractFileInfo.absoluteFilePath());
 
         extractedFilePath = extractFileInfo.absoluteFilePath();
     }
@@ -973,21 +974,20 @@ QVariantMap ProjectManager::toVariantMap() const
     return QVariantMap();
 }
 
-QImage ProjectManager::getPreviewImage(const QString& projectFilePath, const QSize& targetSize /*= QSize(500, 500)*/) const
+QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize /*= QSize(500, 500)*/) const
 {
-    Archiver archiver;
-
-    const QString workspaceFile("workspace.json");
-
-    QTemporaryDir temporaryDirectory;
-
-    const auto temporaryDirectoryPath = temporaryDirectory.path();
-
-    QFileInfo workspaceFileInfo(temporaryDirectoryPath, workspaceFile);
-
     try
     {
-        archiver.extractSingleFile(projectFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
+        QTemporaryDir temporaryDir;
+
+        const auto workspacePreviewFilePath = projects().extractFileFromManiVaultProject(projectFilePath, temporaryDir, "workspace.jpg");
+
+        if (workspacePreviewFilePath.isEmpty())
+            return {};
+
+        const auto image = QImage(workspacePreviewFilePath);
+        
+        return QImage(workspacePreviewFilePath, "JPG").scaled(targetSize, Qt::KeepAspectRatio);
     }
     catch (std::exception& e)
     {
@@ -998,8 +998,5 @@ QImage ProjectManager::getPreviewImage(const QString& projectFilePath, const QSi
         qDebug() << "Unable to get preview image from ManiVault project archive due to an unhandled exception";
     }
 
-    if (workspaceFileInfo.exists())
-        return Workspace::getPreviewImage(workspaceFileInfo.absoluteFilePath());
-
-    return QImage();
+    return {};
 }

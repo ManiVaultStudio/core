@@ -16,7 +16,7 @@ namespace hdps {
 /**
  * Workspace class
  *
- * TODO: Write description.
+ * Container class for all view plugins in a ManiVault project.
  *
  * @author Thomas Kroes
  */
@@ -52,15 +52,6 @@ protected:
      * @param filePath Location on disk where the workspace resides
      */
     void setFilePath(const QString& filePath);
-
-public:
-
-    /**
-     * Get preview image
-     * @param workspaceFilePath Path of the work space file
-     * @return Preview image
-     */
-    static QImage getPreviewImage(const QString& workspaceFilePath, const QSize& targetSize = QSize(500, 500));
 
 public: // Serialization
 

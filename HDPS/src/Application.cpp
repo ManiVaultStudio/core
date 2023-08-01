@@ -13,10 +13,6 @@
 
 #include <QDebug>
 #include <QMessageBox>
-#include <QTemporaryDir>
-#include <QFileDialog>
-#include <QDir>
-#include <QDateTime>
 
 using namespace hdps::gui;
 using namespace hdps::util;

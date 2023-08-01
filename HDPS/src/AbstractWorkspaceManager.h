@@ -328,6 +328,12 @@ public: // IO
      */
     virtual QStringList getViewPluginNames(const QString& workspaceJsonFile) const = 0;
 
+    /**
+     * Get a preview image
+     * @return Workspace manager preview image
+     */
+    virtual QImage toPreviewImage() const = 0;
+
 signals:
 
     /** Signals that a new workspace is about to be created */

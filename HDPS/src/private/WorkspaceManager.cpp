@@ -482,6 +482,10 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/, bool addToRecent
 
             if (addToRecentWorkspaces)
                 _recentWorkspacesAction.addRecentFilePath(getWorkspaceFilePath());
+
+            QFileInfo workspacePreviewFileInfo(QFileInfo(filePath).absoluteDir(), "workspace.jpg");
+
+            toPreviewImage().save(workspacePreviewFileInfo.absoluteFilePath());
         }
         endSaveWorkspace();
     }
@@ -553,7 +557,6 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
     getCurrentWorkspace()->fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "DockManagers");
-    variantMapMustContain(variantMap, "PreviewImage");
 
     const auto dockingManagersMap = variantMap["DockManagers"].toMap();
 
@@ -575,14 +578,8 @@ QVariantMap WorkspaceManager::toVariantMap() const
         { "ViewPlugins", _viewPluginsDockManager->toVariantMap() }
     };
 
-    QByteArray previewImageByteArray;
-    QBuffer previewImageBuffer(&previewImageByteArray);
-
-    toPreviewImage().save(&previewImageBuffer, "JPG");
-
     currentWorkspaceMap.insert({
-        { "DockManagers", dockManagers },
-        { "PreviewImage", QVariant::fromValue(previewImageByteArray.toBase64()) }
+        { "DockManagers", dockManagers }
     });
 
     return currentWorkspaceMap;
@@ -650,11 +647,6 @@ void WorkspaceManager::createIcon()
     drawWindow(QRectF(QPointF(halfSize + halfSpacing, halfSize + halfSpacing), QPointF(size - margin, size - margin)));
 
     _icon = hdps::gui::createIcon(pixmap);
-}
-
-QImage WorkspaceManager::toPreviewImage() const
-{
-    return _mainDockManager->grab().toImage();
 }
 
 WorkspaceLocations WorkspaceManager::getWorkspaceLocations(const WorkspaceLocation::Types& types /*= WorkspaceLocation::Type::All*/)
@@ -761,6 +753,11 @@ QStringList WorkspaceManager::getViewPluginNames(const QString& workspaceJsonFil
 
     return viewPluginNames;
 
+}
+
+QImage WorkspaceManager::toPreviewImage() const
+{
+    return _mainDockManager->grab().toImage();
 }
 
 }

@@ -221,7 +221,7 @@ QSharedPointer<ProjectMeta> Project::getProjectMeta(const QString& projectFilePa
 {
     QTemporaryDir temporaryDir;
 
-    const auto projectMetaJsonFilePath = projects().extractFileFromHdpsFile(projectFilePath, temporaryDir, "meta.json");
+    const auto projectMetaJsonFilePath = projects().extractFileFromManiVaultProject(projectFilePath, temporaryDir, "meta.json");
 
     if (projectMetaJsonFilePath.isEmpty())
         return {};
