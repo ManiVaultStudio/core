@@ -21,6 +21,7 @@ class QMainWindow;
 
 namespace hdps {
     class Project;
+    class ProjectMeta;
 }
 
 namespace hdps::gui {
@@ -104,15 +105,8 @@ protected:
     /**
      * Construct with \p parent and \p project
      * @param parent Pointer to parent object
-     * @param project Reference to project which owns this action
      */
-    ProjectSplashScreenAction(QObject* parent, const Project& project);
-
-    /**
-     * Get parent project
-     * @return Reference to parent project
-     */
-    const Project& getProject() const;
+    ProjectSplashScreenAction(QObject* parent);
 
 public: // Serialization
 
@@ -154,7 +148,6 @@ public:
     TaskAction& getLoadTaskAction() { return _loadTaskAction; }
     
 private:
-    const Project&      _project;                       /** Reference to project which owns this action */
     ToggleAction        _enabledAction;                 /** Action to toggle the splash screen on/off */
     ToggleAction        _closeManuallyAction;           /** Action to toggle whether the splash screen has to be closed manually */
     IntegralAction      _durationAction;                /** Action to control the display duration */
@@ -165,10 +158,11 @@ private:
     TriggerAction       _showSplashScreenAction;        /** Trigger action to show the splash screen */
     ImageAction         _projectImageAction;            /** Image action for the project image */
     ImageAction         _affiliateLogosImageAction;     /** Image action for the affiliate logo's image */
-    Dialog              _splashScreenDialog;            /** Splash screen dialog */
     TaskAction          _loadTaskAction;                /** Task action for showing load progress */
+    Dialog              _splashScreenDialog;            /** Splash screen dialog */
 
     friend class hdps::Project;
+    friend class hdps::ProjectMeta;
 };
 
 }

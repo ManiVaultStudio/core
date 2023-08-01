@@ -29,7 +29,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     _commentsAction(this, "Comments"),
     _contributorsAction(this, "Contributors"),
     _compressionAction(this),
-    _splashScreenAction(this, *this),
+    _splashScreenAction(this),
     _studioModeAction(this, "Studio Mode")
 {
     initialize();
@@ -49,7 +49,7 @@ Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
     _commentsAction(this, "Comments"),
     _contributorsAction(this, "Contributors"),
     _compressionAction(this),
-    _splashScreenAction(this, *this),
+    _splashScreenAction(this),
     _studioModeAction(this, "Studio Mode")
 {
     initialize();
@@ -100,7 +100,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
-    _splashScreenAction.fromParentVariantMap(variantMap);
+    _splashScreenAction.fromParentVariantMap(variantMap);   
     _applicationVersion.fromParentVariantMap(variantMap);
     _projectVersionAction.fromParentVariantMap(variantMap);
     _readOnlyAction.fromParentVariantMap(variantMap);

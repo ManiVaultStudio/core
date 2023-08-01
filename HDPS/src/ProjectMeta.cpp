@@ -24,15 +24,14 @@ ProjectMeta::ProjectMeta(Project* project, QObject* parent /*= nullptr*/) :
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments"),
     _contributorsAction(this, "Contributors"),
+    _splashScreenAction(this),
     _compressionAction(this)
 {
-    Q_ASSERT(_project != nullptr);
 }
 
 ProjectMeta::ProjectMeta(const QString& filePath, QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("ProjectMeta"),
-    _project(nullptr),
     _applicationVersionAction(this, "Application Version"),
     _projectVersionAction(this, "Project Version"),
     _readOnlyAction(this, "Read-only"),
@@ -41,6 +40,7 @@ ProjectMeta::ProjectMeta(const QString& filePath, QObject* parent /*= nullptr*/)
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments"),
     _contributorsAction(this, "Contributors"),
+    _splashScreenAction(this),
     _compressionAction(this)
 {
     try {

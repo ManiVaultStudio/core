@@ -69,6 +69,7 @@ public: // Action getters
     gui::StringsAction& getTagsAction() { return _tagsAction; }
     gui::StringAction& getCommentsAction() { return _commentsAction; }
     gui::StringsAction& getContributorsAction() { return _contributorsAction; }
+    gui::ProjectSplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
     ProjectCompressionAction& getCompressionAction() { return _compressionAction; }
 
 private:
@@ -81,6 +82,7 @@ private:
     gui::StringsAction              _tagsAction;                /** Tags action */
     gui::StringAction               _commentsAction;            /** Comments action */
     gui::StringsAction              _contributorsAction;        /** Contributors action */
+    gui::ProjectSplashScreenAction  _splashScreenAction;        /** Action for configuring the project splash screen */
     ProjectCompressionAction        _compressionAction;         /** Project compression action */
 };
 

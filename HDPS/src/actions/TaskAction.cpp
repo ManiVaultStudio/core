@@ -27,6 +27,8 @@ TaskAction::TaskAction(QObject* parent, const QString& title) :
 
     updateActionsReadOnly();
     updateProgressActionTextFormat();
+
+    connect(&_killTaskAction, &TriggerAction::triggered, _task, &Task::abort);
 }
 
 Task* TaskAction::getTask()
@@ -40,6 +42,8 @@ void TaskAction::setTask(Task* task)
 
     if (task == nullptr)
         return;
+
+    const auto previousTask = _task;
 
     if (_task != nullptr) {
         disconnect(_task, &Task::progressChanged, this, nullptr);
@@ -59,6 +63,8 @@ void TaskAction::setTask(Task* task)
     connect(_task, &Task::statusChanged, this, &TaskAction::updateActionsReadOnly);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionRange);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionTextFormat);
+
+    emit taskChanged(previousTask, _task);
 }
 
 void TaskAction::updateActionsReadOnly()

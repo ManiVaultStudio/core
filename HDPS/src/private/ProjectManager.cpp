@@ -200,16 +200,6 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     connect(this, &ProjectManager::projectOpened, this, updateActionsReadOnly);
     connect(this, &ProjectManager::projectSaved, this, updateActionsReadOnly);
 
-    connect(this, &ProjectManager::projectOpened, this, [this]() -> void {
-        if (!hasProject())
-            return;
-
-        auto& splashScreenAction = getCurrentProject()->getSplashScreenAction();
-
-        if (splashScreenAction.getEnabledAction().isChecked())
-            splashScreenAction.getShowSplashScreenAction().trigger();
-    });
-
     updateActionsReadOnly();
 
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
@@ -340,8 +330,6 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
 
-            const auto loadedDatasets = Application::core()->requestAllDataSets();
-
             QTemporaryDir temporaryDirectory;
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
@@ -429,6 +417,13 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
                 Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
             }
+
+            ProjectMeta projectMeta(extractFileFromManiVaultProject(filePath, temporaryDirectory, "meta.json"));
+
+            auto& splashScreenAction = projectMeta.getSplashScreenAction();
+
+            if (splashScreenAction.getEnabledAction().isChecked())
+                splashScreenAction.getShowSplashScreenAction().trigger();
 
             if (!importDataOnly)
                 newProject();

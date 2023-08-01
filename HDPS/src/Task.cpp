@@ -113,6 +113,25 @@ void Task::setStatus(const Status& status)
 
     emit statusChanged(_status);
 
+    switch (_status)
+    {
+        case Task::Status::Idle:
+        case Task::Status::Running:
+        case Task::Status::RunningIndeterminate:
+            break;
+
+        case Task::Status::Finished:
+            emit finished();
+            break;
+
+        case Task::Status::Aborted:
+            emit aborted();
+            break;
+
+        default:
+            break;
+    }
+
     QCoreApplication::processEvents();
 }
 
@@ -147,6 +166,13 @@ void Task::setAborted()
 {
     setStatus(Status::Aborted);
     setProgress(0.f);
+
+    emit aborted();
+}
+
+void Task::abort()
+{
+    setAborted();
 }
 
 AbstractTaskHandler* Task::getHandler()

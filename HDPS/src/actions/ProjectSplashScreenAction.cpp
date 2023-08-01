@@ -15,9 +15,8 @@
 
 namespace hdps::gui {
 
-ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Project& project) :
+ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent) :
     HorizontalGroupAction(parent, "Splash Screen"),
-    _project(project),
     _enabledAction(this, "Splash screen"),
     _closeManuallyAction(this, "Close manually"),
     _durationAction(this, "Duration", 1000, 10000, 4000),
@@ -26,10 +25,10 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _backgroundColorAction(this, "Background Color", Qt::white),
     _editAction(this, "Edit"),
     _showSplashScreenAction(this, "About project..."),
-    _splashScreenDialog(*this),
     _projectImageAction(this, "Project Image"),
     _affiliateLogosImageAction(this, "Affiliate Logos"),
-    _loadTaskAction(this, "Load Task")
+    _loadTaskAction(this, "Load Task"),
+    _splashScreenDialog(*this)
 {
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
@@ -91,11 +90,6 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     });
 
     connect(&_closeManuallyAction, &ToggleAction::toggled, this, updateDurationAction);
-}
-
-const Project& ProjectSplashScreenAction::getProject() const
-{
-    return _project;
 }
 
 void ProjectSplashScreenAction::fromVariantMap(const QVariantMap& variantMap)
@@ -180,8 +174,6 @@ ProjectSplashScreenAction::Dialog::Dialog(ProjectSplashScreenAction& projectSpla
         _animationState = AnimationState::Idle;
     });
 
-    auto& project = const_cast<Project&>(_projectSplashScreenAction.getProject());
-
     const auto margin = 10;
 
     _mainLayout.setContentsMargins(margin, margin, margin, margin);
@@ -191,6 +183,14 @@ ProjectSplashScreenAction::Dialog::Dialog(ProjectSplashScreenAction& projectSpla
     createBottomContent();
 
     setLayout(&_mainLayout);
+
+    /*
+    connect(&_projectSplashScreenAction.getLoadTaskAction(), &TaskAction::taskChanged, this, [](Task* previousTask, Task* task) -> void {
+        if (previousTask != nullptr) {
+            disconnect(previousTask, &Task::)
+        }
+    });
+    */
 }
 
 void ProjectSplashScreenAction::Dialog::open()
@@ -198,7 +198,7 @@ void ProjectSplashScreenAction::Dialog::open()
     _projectSplashScreenAction.getShowSplashScreenAction().setEnabled(false);
     _closeToolButton.lower();
 
-    if (!_projectSplashScreenAction.getCloseManuallyAction().isChecked()) {
+    if (!_projectSplashScreenAction.getCloseManuallyAction().isChecked() && !_projectSplashScreenAction.getLoadTaskAction().getTask()->isIdle()) {
         QTimer::singleShot(_projectSplashScreenAction.getDurationAction().getValue() - _projectSplashScreenAction.getAnimationDurationAction().getValue(), this, [this]() -> void {
             if (_opacityAnimation.currentValue().toFloat() == 1.0f)
                 fadeOut();
@@ -345,6 +345,7 @@ void ProjectSplashScreenAction::Dialog::createCenterContent()
     layout->addWidget(htmlLabel);
     
     const auto updateText = [this, htmlLabel]() -> void {
+        /*
         auto& project       = _projectSplashScreenAction.getProject();
         auto& versionAction = project.getProjectVersionAction();
 
@@ -368,14 +369,10 @@ void ProjectSplashScreenAction::Dialog::createCenterContent()
             <p>%3</p> \
             <p>%4</p> \
         ").arg(title, version, description, comments));
+        */
     };
 
     updateText();
-
-    connect(&_projectSplashScreenAction.getProject().getTitleAction(), &StringAction::stringChanged, this, updateText);
-    connect(&_projectSplashScreenAction.getProject().getProjectVersionAction().getVersionStringAction(), &StringAction::stringChanged, this, updateText);
-    connect(&_projectSplashScreenAction.getProject().getDescriptionAction(), &StringAction::stringChanged, this, updateText);
-    connect(&_projectSplashScreenAction.getProject().getCommentsAction(), &StringAction::stringChanged, this, updateText);
 
     _mainLayout.addLayout(layout);
 }
@@ -402,7 +399,7 @@ void ProjectSplashScreenAction::Dialog::createBottomContent()
     layout->addStretch(1);
 
     _mainLayout.addLayout(layout);
-    //_mainLayout.addWidget(_projectSplashScreenAction.getLoadTaskAction().createWidget(nullptr));
+    _mainLayout.addWidget(_projectSplashScreenAction.getLoadTaskAction().createWidget(this));
 }
 
 }

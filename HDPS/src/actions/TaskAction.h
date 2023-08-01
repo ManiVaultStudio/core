@@ -65,6 +65,15 @@ private:
     /** Updates the progress action text format, depending on the task status */
     void updateProgressActionTextFormat();
 
+signals:
+
+    /**
+     * Signals that the current task changed to \p task
+     * @param previousTask Pointer to previous task
+     * @param task Pointer to current task
+     */
+    void taskChanged(Task* previousTask, Task* task);
+
 private:
     ProgressAction      _progressAction;    /** Progress action */
     gui::TriggerAction  _killTaskAction;    /** Kill task action */

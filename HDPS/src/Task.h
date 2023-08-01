@@ -128,6 +128,9 @@ public: // Status
     /** Set task status to aborted */
     virtual void setAborted() final;
 
+    /** Abort the task and trigger Task::aborted() signal */
+    virtual void abort() final;
+
 public:
 
     /**
@@ -286,6 +289,9 @@ signals:
      * @param status Modified name
      */
     void statusChanged(const Status& status);
+
+    /** Signals that the task finished */
+    void finished();
 
     /** Signals that the task was aborted */
     void aborted();
