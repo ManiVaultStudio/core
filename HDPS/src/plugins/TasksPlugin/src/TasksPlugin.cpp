@@ -22,7 +22,11 @@ void TasksPlugin::init()
 
     layout->setContentsMargins(6, 6, 6, 6);
 
-    layout->addWidget(_tasksAction.createWidget(&getWidget(), TasksAction::Toolbar | TasksAction::Overlay));
+    auto tasksWidget = _tasksAction.createWidget(&getWidget(), TasksAction::Toolbar | TasksAction::Overlay);
+
+    tasksWidget->layout()->setContentsMargins(0, 0, 0, 0);
+
+    layout->addWidget(tasksWidget);
 
     getWidget().setLayout(layout);
 }

@@ -27,6 +27,7 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
     setDefaultWidgetFlag(GroupAction::Vertical);
 
     _tasksFilterModel.setSourceModel(&_tasksModel);
+    //_tasksFilterModel.setFilterKeyColumn(static_cast<int>(TasksModel::Column::Name));
 }
 
 TasksModel& TasksAction::getTasksModel()
@@ -87,25 +88,33 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));
 
     _tasksWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
-    _tasksWidget.setHeaderHidden(true);
-    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTypeFilterAction());
-    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getStatusFilterAction());
+    //_tasksWidget.setHeaderHidden(true);
+    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskTypeFilterAction());
+    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskStatusFilterAction());
+
+    _tasksWidget.getFilterColumnAction().setCurrentText("Name");
+
+    //_tasksWidget.getToolbarAction().addAction(&tasksAction->getTasksFilterModel().getTaskStatusFilterAction());
 
     auto& treeView = _tasksWidget.getTreeView();
 
     treeView.setRootIsDecorated(false);
 
+    //treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Status), true);
+    //treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Name), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ID), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ParentID), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ProgressDescription), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ProgressText), true);
-    treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Type), true);
-    treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Status), true);
-    treeView.setTextElideMode(Qt::ElideMiddle);
-
-    treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Progress), new ProgressItemDelegate(this));
+    //treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Type), true);
 
     auto treeViewHeader = treeView.header();
+
+    treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Name), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Progress), QHeaderView::Stretch);
+
+    treeView.setTextElideMode(Qt::ElideMiddle);
+    treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Progress), new ProgressItemDelegate(this));
 
     treeViewHeader->setStretchLastSection(false);
 
@@ -115,12 +124,31 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
 
     treeViewHeader->resizeSection(static_cast<int>(TasksModel::Column::Status), 130);
 
+    connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::rowsInserted, this, &TasksAction::Widget::modelChanged);
+    connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::rowsRemoved, this, &TasksAction::Widget::modelChanged);
+    connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::layoutChanged, this, &TasksAction::Widget::modelChanged);
+
+    connect(&treeView, &HierarchyWidgetTreeView::columnHiddenChanged, this, &TasksAction::Widget::modelChanged);
+    connect(&treeView, &HierarchyWidgetTreeView::expanded, this, &TasksAction::Widget::modelChanged);
+    connect(&treeView, &HierarchyWidgetTreeView::collapsed, this, &TasksAction::Widget::modelChanged);
+
+    modelChanged();
+
     auto layout = new QVBoxLayout();
 
-    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(&_tasksWidget);
 
     setLayout(layout);
+}
+
+void TasksAction::Widget::modelChanged()
+{
+    if (_tasksWidget.getModel().rowCount() <= 0)
+        return;
+
+    auto treeViewHeader = _tasksWidget.getTreeView().header();
+
+    treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
 }
 
 }

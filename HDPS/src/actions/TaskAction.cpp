@@ -28,7 +28,12 @@ TaskAction::TaskAction(QObject* parent, const QString& title) :
     updateActionsReadOnly();
     updateProgressActionTextFormat();
 
-    connect(&_killTaskAction, &TriggerAction::triggered, _task, &Task::abort);
+    connect(&_killTaskAction, &TriggerAction::triggered, this, [this]() -> void {
+        if (_task == nullptr)
+            return;
+
+        _task->abort();
+    });
 }
 
 Task* TaskAction::getTask()

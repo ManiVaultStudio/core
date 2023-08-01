@@ -27,6 +27,7 @@ public:
 
     /** Task columns */
     enum class Column {
+        Status,                 /** Status of the task */
         Name,                   /** Name of the task */
         Progress,               /** Task progress */
         ProgressDescription,    /** Progress description */
@@ -34,7 +35,6 @@ public:
         ID,                     /** Globally unique identifier of the task */
         ParentID,               /** Globally unique identifier of the parent task (empty string if not a child task) */
         Type,                   /** Task type string */
-        Status,                 /** Status of the task */
 
         Count
     };
@@ -95,6 +95,23 @@ public:
     };
 
 protected:
+
+    /** Standard model item class for displaying the task status */
+    class StatusItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p task
+         * @param task Pointer to task to display item for
+         */
+        StatusItem(Task* task);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
 
     /** Standard model item class for displaying the task name */
     class NameItem final : public Item {
@@ -201,23 +218,6 @@ protected:
 
         /** Use base task item constructor */
         using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-    };
-
-    /** Standard model item class for displaying the task status */
-    class StatusItem final : public Item {
-    public:
-
-        /**
-         * Construct with \p task
-         * @param task Pointer to task to display item for
-         */
-        StatusItem(Task* task);
 
         /**
          * Get model data for \p role

@@ -66,6 +66,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _filterNameAction.setSearchMode(true);
     _filterNameAction.setClearable(true);
     _filterNameAction.setConnectionPermissionsToForceNone();
+    _filterNameAction.setStretch(2);
 
     _filterGroupAction.setText("Filtering");
     _filterGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));

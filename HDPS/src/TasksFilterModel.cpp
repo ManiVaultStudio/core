@@ -13,18 +13,19 @@ namespace hdps
 
 TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
-    _typeFilterAction(this, "Type"),
-    _statusFilterAction(this, "Status", Task::statusNames.values(), Task::statusNames.values())
+    _taskTypeFilterAction(this, "Task Type"),
+    _taskStatusFilterAction(this, "Task Status", Task::statusNames.values(), Task::statusNames.values()),
+    _statusTypeCounts()
 {
     setRecursiveFilteringEnabled(true);
 
-    _statusFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    _taskStatusFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
 
-    connect(&_typeFilterAction, &StringAction::stringChanged, this, &TasksFilterModel::invalidate);
-    connect(&_statusFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
+    connect(&_taskTypeFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
+    connect(&_taskStatusFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
 
-    _typeFilterAction.setToolTip("Filter tasks based on their type");
-    _statusFilterAction.setToolTip("Filter tasks based on their status");
+    _taskTypeFilterAction.setToolTip("Filter tasks based on their type");
+    _taskStatusFilterAction.setToolTip("Filter tasks based on their status");
 
     invalidate();
 }
@@ -43,23 +44,18 @@ bool TasksFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) cons
             return false;
     }
     
-    const auto typeFilter = _typeFilterAction.getString();
+    const auto taskTypes    = _taskTypeFilterAction.getSelectedOptions();
+    const auto taskType     = getSourceData(index, TasksModel::Column::Type, Qt::DisplayRole).toString();
 
-    if (!typeFilter.isEmpty()) {
-        const auto type = getSourceData(index, TasksModel::Column::Type, Qt::EditRole).toString();
+    if (!taskTypes.contains(taskType))
+        return false;
 
-        if (type != typeFilter)
-            return false;
-    }
-
-    if (_statusFilterAction.hasSelectedOptions()) {
-        const auto selectedOptions  = _statusFilterAction.getSelectedOptions();
-        const auto status           = getSourceData(index, TasksModel::Column::Status, Qt::DisplayRole).toString();
-
-        if (!selectedOptions.contains(status))
-            return false;
-    }
+    const auto taskStatusTypes  = _taskStatusFilterAction.getSelectedOptions();
+    const auto statusIndex      = getSourceData(index, TasksModel::Column::Status, Qt::EditRole).toInt();
+    const auto taskStatus       = Task::statusNames[static_cast<Task::Status>(statusIndex)];
     
+    if (!taskStatusTypes.contains(taskStatus))
+        return false;
 
     return true;
 }
@@ -67,6 +63,53 @@ bool TasksFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) cons
 bool TasksFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
 {
     return lhs.data().toString() < rhs.data().toString();
+}
+
+void TasksFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
+{
+    QSortFilterProxyModel::setSourceModel(sourceModel);
+
+    connect(sourceModel, &QAbstractItemModel::rowsInserted, [this](const QModelIndex& parent, int first, int last) -> void {
+        QTimer::singleShot(50, [this, parent, first, last]() -> void {
+            auto selectedTaskTypes = _taskTypeFilterAction.getSelectedOptions();
+
+            for (int row = first; row <= last; row++) {
+                const auto status = this->sourceModel()->index(row, static_cast<int>(TasksModel::Column::Type), parent).data(Qt::DisplayRole).toString();
+
+                if (_statusTypeCounts.contains(status)) {
+                    _statusTypeCounts[status]++;
+                }
+                else {
+                    _statusTypeCounts[status] = 1;
+
+                    selectedTaskTypes << status;
+                }
+            }
+
+            _taskTypeFilterAction.setOptions(_statusTypeCounts.keys());
+            _taskTypeFilterAction.setSelectedOptions(selectedTaskTypes);
+        });
+    });
+
+    connect(sourceModel, &QAbstractItemModel::rowsRemoved, [this](const QModelIndex& parent, int first, int last) -> void {
+        QTimer::singleShot(50, [this, parent, first, last]() -> void {
+            auto selectedTaskTypes = _taskTypeFilterAction.getSelectedOptions();
+
+            for (int row = first; row <= last; row++) {
+                const auto status = this->sourceModel()->index(row, static_cast<int>(TasksModel::Column::Type), parent).data(Qt::DisplayRole).toString();
+
+                if (_statusTypeCounts.contains(status)) {
+                    if (_statusTypeCounts[status] == 1)
+                        _statusTypeCounts.remove(status);
+                    else
+                        _statusTypeCounts[status]--;
+                }
+            }
+
+            _taskTypeFilterAction.setOptions(_statusTypeCounts.keys());
+            _taskTypeFilterAction.setSelectedOptions(selectedTaskTypes);
+        });
+    });
 }
 
 QVariant TasksFilterModel::getSourceData(const QModelIndex& index, const TasksModel::Column& column, int role) const

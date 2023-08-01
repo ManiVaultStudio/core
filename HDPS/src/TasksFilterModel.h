@@ -10,6 +10,7 @@
 #include "TasksModel.h"
 
 #include <QSortFilterProxyModel>
+#include <QMap>
 
 namespace hdps
 {
@@ -45,6 +46,12 @@ public:
      */
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
 
+    /**
+     * Override to connect to source model signals
+     * @param sourceModel Pointer to source model
+     */
+    void setSourceModel(QAbstractItemModel* sourceModel) override;
+
 private:
 
     /**
@@ -58,12 +65,13 @@ private:
 
 public: // Action getters
 
-    gui::StringAction& getTypeFilterAction() { return _typeFilterAction; }
-    gui::OptionsAction& getStatusFilterAction() { return _statusFilterAction; }
+    gui::OptionsAction& getTaskTypeFilterAction() { return _taskTypeFilterAction; }
+    gui::OptionsAction& getTaskStatusFilterAction() { return _taskStatusFilterAction; }
 
 private:
-    gui::StringAction   _typeFilterAction;      /** Action for filtering by task type */
-    gui::OptionsAction  _statusFilterAction;    /** Action for filtering based on task status */
+    gui::OptionsAction              _taskTypeFilterAction;      /** Action for filtering based on task type */
+    gui::OptionsAction              _taskStatusFilterAction;    /** Action for filtering based on task status */
+    QMap<QString, std::uint32_t>    _statusTypeCounts;          /** Counts the number of task per status type */
 };
 
 }

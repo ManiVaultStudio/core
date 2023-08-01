@@ -48,6 +48,11 @@ public:
         Widget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags);
 
     private:
+
+        /** Resize sections when the model changes */
+        void modelChanged();
+
+    private:
         HierarchyWidget  _tasksWidget;   /** Show the tasks in a hierarchy widget */
 
         friend class TasksAction;

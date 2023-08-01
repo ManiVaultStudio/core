@@ -59,6 +59,65 @@ Task* TasksModel::Item::getTask() const
     return _task;
 }
 
+TasksModel::StatusItem::StatusItem(Task* task) :
+    Item(task)
+{
+    connect(getTask(), &Task::statusChanged, this, [this]() -> void {
+        emitDataChanged();
+
+        const auto progressIndex = index().siblingAtColumn(static_cast<int>(Column::Progress));
+
+        emit model()->dataChanged(progressIndex, progressIndex);
+    });
+}
+
+QVariant TasksModel::StatusItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return static_cast<int>(getTask()->getStatus());
+
+        case Qt::DisplayRole:
+            return "";
+
+        case Qt::ToolTipRole:
+            return "Task is: " + Task::statusNames[getTask()->getStatus()];
+
+        case Qt::DecorationRole:
+        {
+            auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+            switch (getTask()->getStatus())
+            {
+                case Task::Status::Idle:
+                    return fontAwesome.getIcon("clock");
+
+                case Task::Status::Running:
+                    return fontAwesome.getIcon("play");
+
+                case Task::Status::RunningIndeterminate:
+                    return fontAwesome.getIcon("play-circle");
+
+                case Task::Status::Finished:
+                    return fontAwesome.getIcon("check-circle");
+
+                case Task::Status::Aborted:
+                    return fontAwesome.getIcon("bomb");
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 TasksModel::NameItem::NameItem(Task* task) :
     Item(task)
 {
@@ -67,6 +126,10 @@ TasksModel::NameItem::NameItem(Task* task) :
     });
 
     connect(getTask(), &Task::descriptionChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+
+    connect(getTask(), &Task::statusChanged, this, [this]() -> void {
         emitDataChanged();
     });
 }
@@ -236,40 +299,10 @@ QVariant TasksModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
-TasksModel::StatusItem::StatusItem(Task* task) :
-    Item(task)
-{
-    connect(getTask(), &Task::statusChanged, this, [this]() -> void {
-        emitDataChanged();
-
-        const auto progressIndex = index().siblingAtColumn(static_cast<int>(Column::Progress));
-
-        emit model()->dataChanged(progressIndex, progressIndex);
-    });
-}
-
-QVariant TasksModel::StatusItem::data(int role /*= Qt::UserRole + 1*/) const
-{
-    switch (role) {
-        case Qt::EditRole:
-            return static_cast<int>(getTask()->getStatus());
-
-        case Qt::DisplayRole:
-            return Task::statusNames[static_cast<Task::Status>(data(Qt::EditRole).toInt())];
-
-        case Qt::ToolTipRole:
-            return "Task is: " + data(Qt::DisplayRole).toString();
-
-        default:
-            break;
-    }
-
-    return Item::data(role);
-}
-
 TasksModel::Row::Row(Task* task) :
     QList<QStandardItem*>()
 {
+    append(new StatusItem(task));
     append(new NameItem(task));
     append(new ProgressItem(task));
     append(new ProgressDescriptionItem(task));
@@ -277,18 +310,17 @@ TasksModel::Row::Row(Task* task) :
     append(new IdItem(task));
     append(new ParentIdItem(task));
     append(new TypeItem(task));
-    append(new StatusItem(task));
 }
 
 QMap<TasksModel::Column, TasksModel::ColumHeaderInfo> TasksModel::columnInfo = QMap<TasksModel::Column, TasksModel::ColumHeaderInfo>({
+    { TasksModel::Column::Status, { "",  "Status", "Status of the task" } },
     { TasksModel::Column::Name, { "Name" , "Name", "Name of the task" } },
     { TasksModel::Column::Progress, { "Progress" , "Progress", "Task progress" } },
     { TasksModel::Column::ProgressDescription, { "Progress description" , "Progress description", "Progress description" } },
     { TasksModel::Column::ProgressText, { "Progress text" , "Progress text", "Progress text" } },
     { TasksModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the task" } },
     { TasksModel::Column::ParentID, { "Parent ID",  "Parent ID", "Globally unique identifier of the parent task" } },
-    { TasksModel::Column::Type, { "Type",  "Type", "Type of task" } },
-    { TasksModel::Column::Status, { "Status",  "Status", "Status of the task" } }
+    { TasksModel::Column::Type, { "Type",  "Type", "Type of task" } }
 });
 
 TasksModel::TasksModel(QObject* parent /*= nullptr*/) :

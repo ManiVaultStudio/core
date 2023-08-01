@@ -54,121 +54,6 @@ class StackedWidget : public QStackedWidget
     }
 };
 
-/**
- * Tasks popup widget class
- *
- * Popup widget class for showing tasks, the visibility depends on whether there are tasks running.
- *
- * @author Thomas Kroes
- */
-class TasksPopupWidget : public QWidget
-{
-public:
-
-    /**
-     * Construct with \p anchorWidget
-     * @param anchorWidget Pointer to anchor widget
-     */
-    TasksPopupWidget(QWidget* anchorWidget) :
-        QWidget(),
-        _anchorWidget(anchorWidget),
-        _tasksAction(this, "Tasks")
-    {
-        setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);// | Qt::WindowStaysOnTopHint);// Qt::Window);// Qt::Popup);// Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
-        setFixedSize(QSize(400, 200));
-        setObjectName("TasksPopupWidget");
-        setStyleSheet("QWidget#TasksPopupWidget { border: 5p solid rgb(74, 74, 74); }");
-        hide();
-
-        auto& tasksFilterModel = _tasksAction.getTasksFilterModel();
-
-        tasksFilterModel.getStatusFilterAction().setSelectedOptions({ "Idle", "Running", "Running Indeterminate", "Finished"});
-
-        auto layout = new QVBoxLayout();
-
-        layout->setContentsMargins(4, 4, 4, 4);
-        layout->addWidget(_tasksAction.createWidget(this));
-
-        setLayout(layout);
-
-        installEventFilter(this);
-
-        _anchorWidget->installEventFilter(this);
-
-        const auto updateVisibility = [this]() -> void {
-            const auto numberOfRows = _tasksAction.getTasksFilterModel().rowCount();
-
-            if (numberOfRows == 0 && isVisible())
-                QTimer::singleShot(250, Qt::PreciseTimer, this, [this]() -> void { hide(); });
-
-            if (numberOfRows >= 1 && !isVisible())
-                show();
-        };
-
-        updateVisibility();
-
-        auto& taskFilterModel = _tasksAction.getTasksFilterModel();
-
-        connect(&taskFilterModel, &QSortFilterProxyModel::rowsInserted, updateVisibility);
-        connect(&taskFilterModel, &QSortFilterProxyModel::rowsRemoved, updateVisibility);
-        connect(&taskFilterModel, &QSortFilterProxyModel::layoutChanged, updateVisibility);
-    }
-
-    /**
-     * Respond to \p target object events
-     * @param target Object of which an event occurred
-     * @param event The event that took place
-     */
-    bool eventFilter(QObject* target, QEvent* event) override {
-        switch (event->type())
-        {
-            case QEvent::Resize:
-            case QEvent::Move:
-            {
-                if (target == this)
-                    break;
-
-                updatePosition();
-                break;
-            }
-
-            default:
-                break;
-        }
-
-        return QWidget::eventFilter(target, event);
-    }
-
-    /**
-     * Override popup minimum size hint
-     * @return Minimum size hint
-     */
-    QSize minimumSizeHint() const override {
-        return QSize(800, 400);
-    }
-
-    /**
-     * Override popup size hint
-     * @return Size hint
-     */
-    QSize sizeHint() const override {
-        return minimumSizeHint();
-    }
-
-private:
-
-    /** Updates the position relative to the parent widget */
-    void updatePosition() {
-        const auto globalAnchorWidgetTopRight = _anchorWidget->mapToGlobal(_anchorWidget->rect().topRight());
-        
-        setGeometry(QRect(globalAnchorWidgetTopRight - QPoint(width(), height()), size()));
-    }
-
-private:
-    QWidget*        _anchorWidget;  /** Pointer to widget from which the popup originates */
-    TasksAction     _tasksAction;   /** Action which shows all tasks */
-};
-
 MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     QMainWindow(parent),
     _core()
@@ -245,15 +130,13 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     
         updateWindowTitle();
 
-        auto tasksLabel         = new QPushButton();
-        auto tasksPopupWidget   = new TasksPopupWidget(tasksLabel);
+        auto tasksAction = new TasksAction(this, "Tasks");
 
-        tasksLabel->setEnabled(false);
-        tasksLabel->setFlat(true);
-        tasksLabel->setIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
+        tasksAction->setPopupSizeHint(QSize(500, 500));
+        tasksAction->setDefaultWidgetFlags(TasksAction::Toolbar | TasksAction::Overlay);
 
         statusBar()->setSizeGripEnabled(false);
-        statusBar()->insertPermanentWidget(0, tasksLabel);
+        statusBar()->insertPermanentWidget(0, tasksAction->createCollapsedWidget(this));
     }
 }
 
