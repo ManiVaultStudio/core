@@ -985,9 +985,12 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
         if (workspacePreviewFilePath.isEmpty())
             return {};
 
-        const auto image = QImage(workspacePreviewFilePath);
+        const auto workspacePreviewImage = QImage(workspacePreviewFilePath);
         
-        return QImage(workspacePreviewFilePath, "JPG").scaled(targetSize, Qt::KeepAspectRatio);
+        if (!workspacePreviewImage.isNull())
+            return workspacePreviewImage.scaled(targetSize, Qt::KeepAspectRatio);
+        else
+            return {};
     }
     catch (std::exception& e)
     {
