@@ -6,6 +6,9 @@
 #include "StartPageContentWidget.h"
 
 #include <Application.h>
+#include <ProjectMeta.h>
+
+#include <util/Serialization.h>
 
 #include <CoreInterface.h>
 
@@ -14,6 +17,7 @@
 
 using namespace hdps;
 using namespace hdps::gui;
+using namespace hdps::util;
 
 StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* startPageContentWidget) :
     QWidget(startPageContentWidget),
@@ -141,23 +145,30 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
                 const auto recentFilePath = recentFile.getFilePath();
 
                 QTemporaryDir temporaryDir;
-
-                const auto recentProjectJsonFilePath = projects().extractProjectFileFromHdpsFile(recentFilePath, temporaryDir);
-
-                Project project(recentProjectJsonFilePath, true);
-
-                StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.hdps in new project").arg(QFileInfo(recentFilePath).baseName()), project.getDescriptionAction().getString(), "", [recentFilePath]() -> void {
-                    projects().newBlankProject();
-                    workspaces().importWorkspaceFromProjectFile(recentFilePath);
-                });
-
-                recentProjectStartPageAction.setComments(project.getCommentsAction().getString());
-                recentProjectStartPageAction.setTags(project.getTagsAction().getStrings());
-                recentProjectStartPageAction.setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
-                recentProjectStartPageAction.setPreviewImage(projects().getPreviewImage(recentFilePath));
-                recentProjectStartPageAction.setContributors(project.getContributorsAction().getStrings());
-
-                _createProjectFromWorkspaceWidget.getModel().add(recentProjectStartPageAction);
+                
+                const auto projectMeta = Project::getProjectMeta(recentFilePath);
+                
+                if (projectMeta.isNull()) {
+                    StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.hdps in new project").arg(QFileInfo(recentFilePath).baseName()), recentFilePath, "", [recentFilePath]() -> void {
+                        projects().newBlankProject();
+                        workspaces().importWorkspaceFromProjectFile(recentFilePath);
+                    });
+                
+                    _createProjectFromWorkspaceWidget.getModel().add(recentProjectStartPageAction);
+                } else {
+                    StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.hdps in new project").arg(QFileInfo(recentFilePath).baseName()), projectMeta->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+                        projects().newBlankProject();
+                        workspaces().importWorkspaceFromProjectFile(recentFilePath);
+                    });
+                
+                    recentProjectStartPageAction.setComments(projectMeta->getCommentsAction().getString());
+                    recentProjectStartPageAction.setTags(projectMeta->getTagsAction().getStrings());
+                    recentProjectStartPageAction.setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
+                    recentProjectStartPageAction.setPreviewImage(projects().getPreviewImage(recentFilePath));
+                    recentProjectStartPageAction.setContributors(projectMeta->getContributorsAction().getStrings());
+                
+                    _createProjectFromWorkspaceWidget.getModel().add(recentProjectStartPageAction);
+                }
             }
 
             break;

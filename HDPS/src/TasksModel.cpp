@@ -79,7 +79,7 @@ QVariant TasksModel::NameItem::data(int role /*= Qt::UserRole + 1*/) const
             return getTask()->getName();
 
         case Qt::ToolTipRole:
-            return getTask()->getDescription();
+            return "Task name: " + data(Qt::DisplayRole).toString();
 
         default:
             break;

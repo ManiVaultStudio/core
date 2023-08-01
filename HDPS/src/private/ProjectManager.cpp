@@ -10,6 +10,7 @@
 
 #include <Application.h>
 #include <CoreInterface.h>
+#include <ProjectMeta.h>
 #include <ModalTask.h>
 
 #include <util/Exception.h>
@@ -397,17 +398,18 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
                         return;
-                    
-                    QTemporaryDir temporaryDir;
 
-                    Project project(extractProjectFileFromHdpsFile(filePath, temporaryDir), true);
+                    const auto projectMeta = Project::getProjectMeta(filePath);
 
-                    titleAction.setString(project.getTitleAction().getString());
-                    descriptionAction.setString(project.getDescriptionAction().getString());
-                    tagsAction.setString(project.getTagsAction().getStrings().join(", "));
-                    commentsAction.setString(project.getCommentsAction().getString());
-                    contributorsAction.setString(project.getContributorsAction().getStrings().join(","));
-                    disableReadOnlyAction.setEnabled(project.getReadOnlyAction().isChecked());
+                    if (projectMeta.isNull())
+                        return;
+
+                    titleAction.setString(projectMeta->getTitleAction().getString());
+                    descriptionAction.setString(projectMeta->getDescriptionAction().getString());
+                    tagsAction.setString(projectMeta->getTagsAction().getStrings().join(", "));
+                    commentsAction.setString(projectMeta->getCommentsAction().getString());
+                    contributorsAction.setString(projectMeta->getContributorsAction().getStrings().join(","));
+                    disableReadOnlyAction.setEnabled(projectMeta->getReadOnlyAction().isChecked());
                 });
 
                 fileDialog.open();
@@ -606,18 +608,17 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
                 //updatePassword();
 
-                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, currentProject](const QString& path) -> void {
-                    if (!QFileInfo(path).isFile())
+                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, currentProject](const QString& filePath) -> void {
+                    if (!QFileInfo(filePath).isFile())
                         return;
 
-                    QTemporaryDir temporaryDir;
+                    const auto projectMeta = Project::getProjectMeta(filePath);
 
-                    const auto projectJsonFilePath = projects().extractProjectFileFromHdpsFile(path, temporaryDir);
+                    if (projectMeta.isNull())
+                        return;
 
-                    Project project(projectJsonFilePath, true);
-
-                    currentProject->getCompressionAction().getEnabledAction().setChecked(project.getCompressionAction().getEnabledAction().isChecked());
-                    currentProject->getCompressionAction().getLevelAction().setValue(project.getCompressionAction().getLevelAction().getValue());
+                    currentProject->getCompressionAction().getEnabledAction().setChecked(projectMeta->getCompressionAction().getEnabledAction().isChecked());
+                    currentProject->getCompressionAction().getLevelAction().setValue(projectMeta->getCompressionAction().getLevelAction().getValue());
                 });
 
                 fileDialog.open();
@@ -656,7 +657,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 throw std::runtime_error("Canceled before project was saved");
             });
 
-            QFileInfo jsonFileInfo(temporaryDirectoryPath, "project.json");
+            QFileInfo projectJsonFileInfo(temporaryDirectoryPath, "project.json"), projectMetaJsonFileInfo(temporaryDirectoryPath, "meta.json");
 
             Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
             Application::setSerializationAborted(false);
@@ -676,12 +677,16 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 getFileIOTask()->setSubtaskFinished(dataHierarchyItem.getLocation());
             });
 
-            projects().toJsonFile(jsonFileInfo.absoluteFilePath());
+            projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
 
             getFileIOTask()->setSubtaskFinished("Export data model");
 
             connect(&archiver, &Archiver::taskStarted, getFileIOTask(), qOverload<const QString&>(&Task::setSubtaskStarted));
             connect(&archiver, &Archiver::taskFinished, getFileIOTask(), qOverload<const QString&>(&Task::setSubtaskFinished));
+
+            ProjectMeta projectMeta(_project.get());
+
+            projectMeta.toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
 
             QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
@@ -825,18 +830,17 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     fileDialogLayout->addLayout(titleLayout, rowCount + 2, 1, 1, 2);
                 }
                     
-                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, currentProject](const QString& path) -> void {
-                    if (!QFileInfo(path).isFile())
+                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, currentProject](const QString& filePath) -> void {
+                    if (!QFileInfo(filePath).isFile())
                         return;
 
-                    QTemporaryDir temporaryDir;
+                    const auto projectMeta = Project::getProjectMeta(filePath);
 
-                    const auto projectJsonFilePath = projects().extractProjectFileFromHdpsFile(path, temporaryDir);
+                    if (projectMeta.isNull())
+                        return;
 
-                    Project project(projectJsonFilePath, true);
-
-                    currentProject->getCompressionAction().getEnabledAction().setChecked(project.getCompressionAction().getEnabledAction().isChecked());
-                    currentProject->getCompressionAction().getLevelAction().setValue(project.getCompressionAction().getLevelAction().getValue());
+                    currentProject->getCompressionAction().getEnabledAction().setChecked(projectMeta->getCompressionAction().getEnabledAction().isChecked());
+                    currentProject->getCompressionAction().getLevelAction().setValue(projectMeta->getCompressionAction().getLevelAction().getValue());
                 });
 
                 fileDialog.open();
@@ -924,28 +928,34 @@ hdps::Project* ProjectManager::getCurrentProject()
     return _project.get();
 }
 
-QString ProjectManager::extractProjectFileFromHdpsFile(const QString& hdpsFilePath, QTemporaryDir& temporaryDir)
+QString ProjectManager::extractFileFromHdpsFile(const QString& hdpsFilePath, QTemporaryDir& temporaryDir, const QString& filePath)
 {
     const auto temporaryDirectoryPath = temporaryDir.path();
 
-    const QString projectFile("project.json");
+    const QString extractFilePath(filePath);
 
-    QFileInfo projectFileInfo(temporaryDirectoryPath, projectFile);
+    QFileInfo extractFileInfo(temporaryDirectoryPath, extractFilePath);
 
     Archiver archiver;
-    QString projectFilePath = "";
+
+    QString extractedFilePath = "";
 
     try
     {
-        archiver.extractSingleFile(hdpsFilePath, projectFile, projectFileInfo.absoluteFilePath());
-        projectFilePath = projectFileInfo.absoluteFilePath();
+        archiver.extractSingleFile(hdpsFilePath, extractFilePath, extractFileInfo.absoluteFilePath());
+
+        extractedFilePath = extractFileInfo.absoluteFilePath();
     }
-    catch (const std::runtime_error& e)
+    catch (std::exception& e)
     {
-        qDebug() << "ProjectManager: exception caught in extractProjectFileFromHdpsFile, given file path " << hdpsFilePath << ": " << e.what();
+        qDebug() << "Unable to extract file from ManiVault project archive: " << e.what();
+    }
+    catch (...)
+    {
+        qDebug() << "Unable to extract file from ManiVault project archive due to an unhandled exception";
     }
 
-    return projectFilePath;
+    return extractedFilePath;
 }
 
 void ProjectManager::fromVariantMap(const QVariantMap& variantMap)
@@ -979,9 +989,13 @@ QImage ProjectManager::getPreviewImage(const QString& projectFilePath, const QSi
     {
         archiver.extractSingleFile(projectFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
     }
-    catch (const std::runtime_error& e)
+    catch (std::exception& e)
     {
-        qDebug() << "ProjectManager: exception caught in getPreviewImage, given file path " << projectFilePath << ": " << e.what();
+        qDebug() << "Unable to get preview image from ManiVault project archive: " << e.what();
+    }
+    catch (...)
+    {
+        qDebug() << "Unable to get preview image from ManiVault project archive due to an unhandled exception";
     }
 
     if (workspaceFileInfo.exists())

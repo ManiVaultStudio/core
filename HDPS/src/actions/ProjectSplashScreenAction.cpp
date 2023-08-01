@@ -4,6 +4,7 @@
 
 #include "ProjectSplashScreenAction.h"
 #include "Project.h"
+#include "CoreInterface.h"
 
 #include <QToolButton>
 #include <QTimer>
@@ -27,7 +28,8 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _showSplashScreenAction(this, "About project..."),
     _splashScreenDialog(*this),
     _projectImageAction(this, "Project Image"),
-    _affiliateLogosImageAction(this, "Affiliate Logos")
+    _affiliateLogosImageAction(this, "Affiliate Logos"),
+    _loadTaskAction(this, "Load Task")
 {
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
@@ -71,6 +73,8 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _affiliateLogosImageAction.setDefaultWidgetFlags(ImageAction::Loader);
     _affiliateLogosImageAction.setIcon(fontAwesome.getIcon("image"));
     _affiliateLogosImageAction.setToolTip("Affiliate logos image");
+
+    _loadTaskAction.setTask(hdps::projects().getFileIOTask());
 
     addAction(&_enabledAction);
     addAction(&_editAction);
@@ -398,6 +402,7 @@ void ProjectSplashScreenAction::Dialog::createBottomContent()
     layout->addStretch(1);
 
     _mainLayout.addLayout(layout);
+    //_mainLayout.addWidget(_projectSplashScreenAction.getLoadTaskAction().createWidget(nullptr));
 }
 
 }

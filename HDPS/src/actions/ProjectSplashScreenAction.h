@@ -12,6 +12,7 @@
 #include "GroupAction.h"
 #include "ColorAction.h"
 #include "ImageAction.h"
+#include "TaskAction.h"
 
 #include <QDialog>
 #include <QPropertyAnimation>
@@ -138,6 +139,7 @@ public:
     const TriggerAction& getShowSplashScreenAction() const { return _showSplashScreenAction; }
     const ImageAction& getProjectImageAction() const { return _projectImageAction; }
     const ImageAction& getAffiliateLogosImageAction() const { return _affiliateLogosImageAction; }
+    const TaskAction& getLoadTaskAction() const { return _loadTaskAction; }
 
     ToggleAction& getEnabledAction() { return _enabledAction; }
     ToggleAction& getCloseManuallyAction() { return _closeManuallyAction; }
@@ -149,6 +151,7 @@ public:
     TriggerAction& getShowSplashScreenAction() { return _showSplashScreenAction; }
     ImageAction& getProjectImageAction() { return _projectImageAction; }
     ImageAction& getAffiliateLogosImageAction() { return _affiliateLogosImageAction; }
+    TaskAction& getLoadTaskAction() { return _loadTaskAction; }
     
 private:
     const Project&      _project;                       /** Reference to project which owns this action */
@@ -163,6 +166,7 @@ private:
     ImageAction         _projectImageAction;            /** Image action for the project image */
     ImageAction         _affiliateLogosImageAction;     /** Image action for the affiliate logo's image */
     Dialog              _splashScreenDialog;            /** Splash screen dialog */
+    TaskAction          _loadTaskAction;                /** Task action for showing load progress */
 
     friend class hdps::Project;
 };

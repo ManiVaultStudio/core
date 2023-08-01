@@ -5,6 +5,7 @@
 #pragma once
 
 #include "util/Serializable.h"
+
 #include "util/Version.h"
 
 #include "actions/StringAction.h"
@@ -13,58 +14,25 @@
 #include "actions/ProjectSplashScreenAction.h"
 #include "actions/VersionAction.h"
 
+#include "ProjectCompressionAction.h"
+
 #include "Application.h"
+#include "ProjectMeta.h"
+
+#include <QSharedPointer>
 
 namespace hdps {
 
 /**
  * Project class
  *
- * TODO: Write description.
+ * Serializable class which encapsulates the entire ManiVault project.
  *
  * @author Thomas Kroes
  */
 class Project final : public QObject, public hdps::util::Serializable
 {
     Q_OBJECT
-
-    /** Container action class for compression parameters */
-    class CompressionAction final : public gui::WidgetAction {
-    public:
-
-        /**
-         * Constructs from \p parent object
-         * @param parent Pointer to parent object
-         */
-        CompressionAction(QObject* parent = nullptr);
-
-    public: // Serialization
-
-        /**
-         * Load compression action from variant
-         * @param Variant representation of the compression action
-         */
-        void fromVariantMap(const QVariantMap& variantMap) override;
-
-        /**
-         * Save compression action to variant
-         * @return Variant representation of the compression action
-         */
-        QVariantMap toVariantMap() const override;
-
-    public: // Action getters
-
-        gui::ToggleAction& getEnabledAction() { return _enabledAction; }
-        gui::IntegralAction& getLevelAction() { return _levelAction; }
-
-    private:
-        gui::ToggleAction       _enabledAction;     /** Action to enable/disable project file compression */
-        gui::IntegralAction     _levelAction;       /** Action to control the amount of project file compression */
-
-    public:
-        static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
-        static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL   = 2;        /** Default compression level*/
-    };
 
 public:
 
@@ -77,10 +45,9 @@ public:
     /**
      * Construct project from project JSON \p filePath and \p parent 
      * @param filePath Path of the project file
-     * @param preview Only extract basic info from the project JSON file for preview purposes
      * @param parent Pointer to parent object
      */
-    Project(const QString& filePath, bool preview, QObject* parent = nullptr);
+    Project(const QString& filePath, QObject* parent = nullptr);
 
     /**
      * Get project file path
@@ -115,13 +82,6 @@ public: // Serialization
 
     /**
      * Load project from variant
-     * @param preview Only extract basic info from the project JSON file for preview purposes
-     * @param Variant representation of the project
-     */
-    void fromVariantMap(const QVariantMap& variantMap, bool preview);
-
-    /**
-     * Load project from variant
      * @param Variant representation of the project
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
@@ -131,6 +91,14 @@ public: // Serialization
      * @return Variant representation of the project
      */
     QVariantMap toVariantMap() const override;
+
+public:
+
+    /**
+     * Get shared pointer to project meta data from the compressed \p projectFilePath
+     * @return Shared pointer to project meta data (nullptr if meta data file is not found)
+     */
+    static QSharedPointer<ProjectMeta> getProjectMeta(const QString& projectFilePath);
 
 private:
 
@@ -147,7 +115,7 @@ public: // Action getters
     const gui::StringsAction& getTagsAction() const { return _tagsAction; }
     const gui::StringAction& getCommentsAction() const { return _commentsAction; }
     const gui::StringsAction& getContributorsAction() const { return _contributorsAction; }
-    const CompressionAction& getCompressionAction() const { return _compressionAction; }
+    const ProjectCompressionAction& getCompressionAction() const { return _compressionAction; }
     const gui::ProjectSplashScreenAction& getSplashScreenAction() const { return _splashScreenAction; }
     const gui::ToggleAction& getStudioModeAction() const { return _studioModeAction; }
 
@@ -159,7 +127,7 @@ public: // Action getters
     gui::StringsAction& getTagsAction() { return _tagsAction; }
     gui::StringAction& getCommentsAction() { return _commentsAction; }
     gui::StringsAction& getContributorsAction() { return _contributorsAction; }
-    CompressionAction& getCompressionAction() { return _compressionAction; }
+    ProjectCompressionAction& getCompressionAction() { return _compressionAction; }
     gui::ProjectSplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
     gui::ToggleAction& getStudioModeAction() { return _studioModeAction; }
 
@@ -174,7 +142,7 @@ signals:
 private:
     QString                         _filePath;                  /** Location on disk where the project resides */
     util::Version                   _applicationVersion;        /** Version of the application with which the project is created */
-    gui::VersionAction              _applicationVersionAction;  /** Action for storing the project version */
+    gui::VersionAction              _applicationVersionAction;  /** Action for storing the application version */
     gui::VersionAction              _projectVersionAction;      /** Action for storing the project version */
     gui::ToggleAction               _readOnlyAction;            /** Read-only action */
     gui::StringAction               _titleAction;               /** Title action */
@@ -182,7 +150,7 @@ private:
     gui::StringsAction              _tagsAction;                /** Tags action */
     gui::StringAction               _commentsAction;            /** Comments action */
     gui::StringsAction              _contributorsAction;        /** Contributors action */
-    CompressionAction               _compressionAction;         /** Compression action */
+    ProjectCompressionAction        _compressionAction;         /** Project compression action */
     gui::ProjectSplashScreenAction  _splashScreenAction;        /** Action for configuring the project splash screen */
     gui::ToggleAction               _studioModeAction;          /** Toggle between view- and studio mode action */
 

@@ -8,6 +8,8 @@
 
 #include "util/Serialization.h"
 
+#include <QTemporaryDir>
+
 using namespace hdps::gui;
 using namespace hdps::util;
 
@@ -33,7 +35,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     initialize();
 }
 
-Project::Project(const QString& filePath, bool preview, QObject* parent /*= nullptr*/) :
+Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("Project"),
     _filePath(filePath),
@@ -70,7 +72,7 @@ Project::Project(const QString& filePath, bool preview, QObject* parent /*= null
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
             throw std::runtime_error("JSON document is invalid");
 
-        fromVariantMap(jsonDocument.toVariant().toMap()["Project"].toMap(), preview);
+        fromVariantMap(jsonDocument.toVariant().toMap()["Project"].toMap());
     }
     catch (std::exception& e)
     {
@@ -96,11 +98,6 @@ void Project::setFilePath(const QString& filePath)
 
 void Project::fromVariantMap(const QVariantMap& variantMap)
 {
-    fromVariantMap(variantMap, false);
-}
-
-void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
-{
     Serializable::fromVariantMap(variantMap);
 
     _splashScreenAction.fromParentVariantMap(variantMap);
@@ -115,11 +112,9 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
     _compressionAction.fromParentVariantMap(variantMap);
     _studioModeAction.fromParentVariantMap(variantMap);
 
-    if (!preview) {
-        dataHierarchy().fromParentVariantMap(variantMap);
-        actions().fromParentVariantMap(variantMap);
-        plugins().fromParentVariantMap(variantMap);
-    }
+    dataHierarchy().fromParentVariantMap(variantMap);
+    actions().fromParentVariantMap(variantMap);
+    plugins().fromParentVariantMap(variantMap);
 }
 
 QVariantMap Project::toVariantMap() const
@@ -222,38 +217,16 @@ void Project::setStudioMode(bool studioMode)
     }
 }
 
-Project::CompressionAction::CompressionAction(QObject* parent /*= nullptr*/) :
-    WidgetAction(parent, "Compression"),
-    _enabledAction(this, "Compression", DEFAULT_ENABLE_COMPRESSION),
-    _levelAction(this, "Compression level", 1, 9, DEFAULT_COMPRESSION_LEVEL)
+QSharedPointer<ProjectMeta> Project::getProjectMeta(const QString& projectFilePath)
 {
-    _levelAction.setPrefix("Level: ");
+    QTemporaryDir temporaryDir;
 
-    const auto updateCompressionLevelReadOnly = [this]() -> void {
-        _levelAction.setEnabled(_enabledAction.isChecked());
-    };
+    const auto projectMetaJsonFilePath = projects().extractFileFromHdpsFile(projectFilePath, temporaryDir, "meta.json");
 
-    connect(&_enabledAction, &ToggleAction::toggled, this, updateCompressionLevelReadOnly);
+    if (projectMetaJsonFilePath.isEmpty())
+        return {};
 
-    updateCompressionLevelReadOnly();
-}
-
-void Project::CompressionAction::fromVariantMap(const QVariantMap& variantMap)
-{
-    WidgetAction::fromVariantMap(variantMap);
-
-    _enabledAction.fromParentVariantMap(variantMap);
-    _levelAction.fromParentVariantMap(variantMap);
-}
-
-QVariantMap Project::CompressionAction::toVariantMap() const
-{
-    QVariantMap variantMap = WidgetAction::toVariantMap();
-
-    _enabledAction.insertIntoVariantMap(variantMap);
-    _levelAction.insertIntoVariantMap(variantMap);
-
-    return variantMap;
+    return QSharedPointer<ProjectMeta>::create(projectMetaJsonFilePath);
 }
 
 }
