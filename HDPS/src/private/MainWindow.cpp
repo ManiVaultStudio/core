@@ -198,7 +198,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         tasksAction->setPopupSizeHint(QSize(500, 500));
         tasksAction->setDefaultWidgetFlags(TasksAction::Toolbar | TasksAction::Overlay);
 
-        statusBar()->setSizeGripEnabled(false);
+        statusBar()->setSizeGripEnabled(true);
         statusBar()->insertPermanentWidget(0, new StatusBarToolButton(this, tasksAction));
     }
 }

@@ -57,23 +57,21 @@ void TasksAction::updateIcon()
 
     const auto numberOfTasks = _tasksFilterModel.rowCount();
 
-    if (numberOfTasks > 0) {
-        const auto badgeRadius = 43.0;
+    const auto badgeRadius = 43.0;
 
-        painter.setPen(QPen(QColor(255, 0, 0, 255), badgeRadius, Qt::SolidLine, Qt::RoundCap));
+    painter.setPen(QPen(QColor(255, 0, 0, 255), badgeRadius, Qt::SolidLine, Qt::RoundCap));
 
-        const auto center = QPoint(tasksIconPixmapSize.width() - (badgeRadius / 2), tasksIconPixmapSize.height() - (badgeRadius / 2));
+    const auto center = QPoint(tasksIconPixmapSize.width() - (badgeRadius / 2), tasksIconPixmapSize.height() - (badgeRadius / 2));
 
-        painter.drawPoint(center);
+    painter.drawPoint(center);
 
-        painter.setPen(QPen(Qt::white));
-        painter.setFont(QFont("Arial", numberOfTasks >= 10 ? 18 : 24, 900));
+    painter.setPen(QPen(Qt::white));
+    painter.setFont(QFont("Arial", numberOfTasks >= 10 ? 18 : 24, 900));
 
-        const auto textRectangleSize = QSize(32, 32);
-        const auto textRectangle = QRectF(center - QPointF(textRectangleSize.width() / 2.f, textRectangleSize.height() / 2.f), textRectangleSize);
+    const auto textRectangleSize = QSize(32, 32);
+    const auto textRectangle = QRectF(center - QPointF(textRectangleSize.width() / 2.f, textRectangleSize.height() / 2.f), textRectangleSize);
 
-        painter.drawText(textRectangle, QString::number(numberOfTasks), QTextOption(Qt::AlignCenter));
-    }
+    painter.drawText(textRectangle, QString::number(numberOfTasks), QTextOption(Qt::AlignCenter));
 
     setIcon(createIcon(iconPixmap));
 }
@@ -120,7 +118,7 @@ protected:
 };
 
 TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags) :
-    WidgetActionWidget(parent, tasksAction, widgetFlags),
+    WidgetActionWidget(parent, tasksAction, widgetFlags | WidgetActionWidget::PopupLayout),
     _tasksWidget(this, "Task", tasksAction->getTasksModel(), &tasksAction->getTasksFilterModel(), widgetFlags & Toolbar, widgetFlags & Overlay)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));

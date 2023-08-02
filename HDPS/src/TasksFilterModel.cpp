@@ -69,6 +69,20 @@ void TasksFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
 {
     QSortFilterProxyModel::setSourceModel(sourceModel);
 
+    for (int row = 0; row < sourceModel->rowCount(); row++) {
+        const auto status = this->sourceModel()->index(row, static_cast<int>(TasksModel::Column::Type)).data(Qt::DisplayRole).toString();
+
+        if (_statusTypeCounts.contains(status)) {
+            _statusTypeCounts[status]++;
+        }
+        else {
+            _statusTypeCounts[status] = 1;
+        }
+    }
+
+    _taskTypeFilterAction.setOptions(_statusTypeCounts.keys());
+    _taskTypeFilterAction.setSelectedOptions(_statusTypeCounts.keys());
+
     connect(sourceModel, &QAbstractItemModel::rowsInserted, [this](const QModelIndex& parent, int first, int last) -> void {
         QTimer::singleShot(50, [this, parent, first, last]() -> void {
             auto selectedTaskTypes = _taskTypeFilterAction.getSelectedOptions();

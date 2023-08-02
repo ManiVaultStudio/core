@@ -333,6 +333,9 @@ TasksModel::TasksModel(QObject* parent /*= nullptr*/) :
 
     connect(&tasks(), &AbstractTaskManager::taskAdded, this, &TasksModel::taskAddedToTaskManager);
     connect(&tasks(), &AbstractTaskManager::taskAboutToBeRemoved, this, &TasksModel::taskAboutToBeRemovedFromTaskManager);
+
+    for (auto task : tasks().getTasks())
+        taskAddedToTaskManager(task);
 }
 
 void TasksModel::taskAddedToTaskManager(Task* task)
