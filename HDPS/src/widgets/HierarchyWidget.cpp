@@ -275,10 +275,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     });
 
     if (_filterModel) {
-        connect(_filterModel, &QAbstractItemModel::rowsInserted, this, filterModelRowsChanged);
-        connect(_filterModel, &QAbstractItemModel::rowsRemoved, this, filterModelRowsChanged);
-        connect(_filterModel, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateHeaderVisibility);
-        connect(_filterModel, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateHeaderVisibility);
+        connect(_filterModel, &QAbstractItemModel::layoutChanged, this, filterModelRowsChanged);
+        connect(_filterModel, &QAbstractItemModel::layoutChanged, this, &HierarchyWidget::updateHeaderVisibility);
     }
     else {
         connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateFilterModel);

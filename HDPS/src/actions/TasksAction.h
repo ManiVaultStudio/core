@@ -11,6 +11,8 @@
 
 #include <widgets/HierarchyWidget.h>
 
+#include <QPixmap>
+
 namespace hdps::gui {
 
 /**
@@ -20,7 +22,7 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class TasksAction : public WidgetAction
+class TasksAction final : public WidgetAction
 {
     Q_OBJECT
 
@@ -91,8 +93,16 @@ public:
     TasksFilterModel& getTasksFilterModel();
 
 private:
+
+    /** Updates the icon with the task count badge */
+    void updateIcon();
+
+private:
     TasksModel          _tasksModel;            /** Model with all tasks in the system */
     TasksFilterModel    _tasksFilterModel;      /** Filter model for tasks */
+    QPixmap             _tasksIconPixmap;       /** Tasks icon pixmap underlay (count badge will be drawn on top) */
+
+    static const QSize tasksIconPixmapSize;
 };
 
 }

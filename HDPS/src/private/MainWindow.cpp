@@ -30,6 +30,8 @@
 #include <QStackedWidget>
 #include <QStatusBar>
 #include <QGroupBox>
+#include <QToolButton>
+#include <QPainter>
 
 #define MAIN_WINDOW_VERBOSE
 
@@ -52,6 +54,67 @@ class StackedWidget : public QStackedWidget
     {
         return currentWidget()->minimumSizeHint();
     }
+};
+
+class StatusBarToolButton : public QToolButton
+{
+protected:
+    /**
+     * Constructor
+     * @param parent Parent widget
+     * @param action Pointer to the widget action that will be displayed in a popup
+     */
+    StatusBarToolButton(QWidget* parent, WidgetAction* action) :
+        QToolButton(parent),
+        _action(action)
+    {
+        Q_ASSERT(_action != nullptr);
+
+        setPopupMode(QToolButton::InstantPopup);
+        setStyleSheet("QToolButton::menu-indicator { image: none; }");
+        setAutoRaise(true);
+        setIconSize(QSize(18, 18));
+
+        addAction(_action);
+
+        const auto updateToolButton = [this]() {
+            setEnabled(_action->isEnabled());
+            setToolTip(_action->toolTip());
+            setVisible(_action->isVisible());
+
+            update();
+        };
+
+        updateToolButton();
+
+        connect(_action, &WidgetAction::changed, this, updateToolButton);
+    }
+
+public:
+
+    /**
+     * Paint event
+     * @param paintEvent Pointer to paint event
+     */
+    void paintEvent(QPaintEvent* paintEvent) {
+        QToolButton::paintEvent(paintEvent);
+
+        QPainter painter(this);
+
+        const auto margin   = 3;
+        const auto icon     = _action->icon();
+
+        if (icon.isNull())
+            return;
+
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.drawPixmap(QPoint(margin, margin), icon.pixmap(icon.availableSizes().first()).scaled(size() - 2 * QSize(margin, margin), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    }
+
+private:
+    WidgetAction* _action;
+
+    friend class MainWindow;
 };
 
 MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
@@ -136,7 +199,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         tasksAction->setDefaultWidgetFlags(TasksAction::Toolbar | TasksAction::Overlay);
 
         statusBar()->setSizeGripEnabled(false);
-        statusBar()->insertPermanentWidget(0, tasksAction->createCollapsedWidget(this));
+        statusBar()->insertPermanentWidget(0, new StatusBarToolButton(this, tasksAction));
     }
 }
 

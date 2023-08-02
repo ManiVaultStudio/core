@@ -10,24 +10,27 @@
 #include <actions/TaskAction.h>
 #include <actions/ProgressAction.h>
 
+#include <util/Icon.h>
+
 #include <QStyledItemDelegate>
 #include <QHeaderView>
 #include <QPainter>
 
 namespace hdps::gui {
 
+const QSize TasksAction::tasksIconPixmapSize = QSize(64, 64);
+
 TasksAction::TasksAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
     _tasksModel(this),
-    _tasksFilterModel(this)
+    _tasksFilterModel(this),
+    _tasksIconPixmap()
 {
-    setConnectionPermissionsToForceNone();
-    setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
-    setIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
-    setDefaultWidgetFlag(GroupAction::Vertical);
-
     _tasksFilterModel.setSourceModel(&_tasksModel);
-    //_tasksFilterModel.setFilterKeyColumn(static_cast<int>(TasksModel::Column::Name));
+
+    _tasksIconPixmap = Application::getIconFont("FontAwesome").getIcon("tasks").pixmap(tasksIconPixmapSize);
+
+    connect(&_tasksFilterModel, &QAbstractItemModel::layoutChanged, this, &TasksAction::updateIcon);
 }
 
 TasksModel& TasksAction::getTasksModel()
@@ -38,6 +41,41 @@ TasksModel& TasksAction::getTasksModel()
 TasksFilterModel& TasksAction::getTasksFilterModel()
 {
     return _tasksFilterModel;
+}
+
+void TasksAction::updateIcon()
+{
+    QPixmap iconPixmap(tasksIconPixmapSize);
+
+    iconPixmap.fill(Qt::transparent);
+
+    QPainter painter(&iconPixmap);
+
+    const auto scaledTasksIconPixmapSize = tasksIconPixmapSize - 0.25 * tasksIconPixmapSize;
+
+    painter.drawPixmap(QPoint(0, 0), _tasksIconPixmap.scaled(scaledTasksIconPixmapSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+    const auto numberOfTasks = _tasksFilterModel.rowCount();
+
+    if (numberOfTasks > 0) {
+        const auto badgeRadius = 43.0;
+
+        painter.setPen(QPen(QColor(255, 0, 0, 255), badgeRadius, Qt::SolidLine, Qt::RoundCap));
+
+        const auto center = QPoint(tasksIconPixmapSize.width() - (badgeRadius / 2), tasksIconPixmapSize.height() - (badgeRadius / 2));
+
+        painter.drawPoint(center);
+
+        painter.setPen(QPen(Qt::white));
+        painter.setFont(QFont("Arial", numberOfTasks >= 10 ? 18 : 24, 900));
+
+        const auto textRectangleSize = QSize(32, 32);
+        const auto textRectangle = QRectF(center - QPointF(textRectangleSize.width() / 2.f, textRectangleSize.height() / 2.f), textRectangleSize);
+
+        painter.drawText(textRectangle, QString::number(numberOfTasks), QTextOption(Qt::AlignCenter));
+    }
+
+    setIcon(createIcon(iconPixmap));
 }
 
 /** Tree view item delegate class for overriding painting of toggle columns */
