@@ -61,9 +61,9 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
             addSeparator();
 
         // the above clear() deletes all actions whose parent is this
-        _aboutAction = new TriggerAction(this, "About");
-        _aboutThirdParties = new TriggerAction(this, "About Third Parties");
-        _aboutQt = new TriggerAction(this, "About Qt");
+        _aboutAction        = new TriggerAction(this, "About");
+        _aboutThirdParties  = new TriggerAction(this, "About Third Parties");
+        _aboutQt            = new TriggerAction(this, "About Qt");
 
         connect(_aboutAction, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::about);
         connect(_aboutThirdParties, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
@@ -98,7 +98,8 @@ void HelpMenu::aboutThirdParties()
           QStringLiteral("github.com/stachenov/quazip"), 
           QStringLiteral("qt.io"));
 
-    QMessageBox* msgBox = new QMessageBox(this->parentWidget());
+    auto msgBox = new QMessageBox(this->parentWidget());
+
     msgBox->setAttribute(Qt::WA_DeleteOnClose);
     msgBox->setWindowTitle(tr("About Third Parties"));
     msgBox->setText(message);

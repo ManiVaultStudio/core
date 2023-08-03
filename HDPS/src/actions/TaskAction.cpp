@@ -79,7 +79,7 @@ void TaskAction::setTask(Task* task)
 void TaskAction::updateActionsReadOnly()
 {
     _progressAction.setEnabled(_task == nullptr ? false : _task->isRunning());
-    _killTaskAction.setEnabled(_task == nullptr ? false : (_task->isIdle() || _task->isRunning()));
+    _killTaskAction.setEnabled(_task == nullptr ? false : _task->getMayKill());
 }
 
 void TaskAction::updateProgressActionTextFormat()

@@ -310,7 +310,7 @@ QVariant TasksModel::MayKillItem::data(int role /*= Qt::UserRole + 1*/) const
             return getTask()->getMayKill();
 
         case Qt::DisplayRole:
-            return data(Qt::EditRole).toBool() ? "yes" : "no";
+            return data(Qt::EditRole).toBool() ? "Yes" : "No";
 
         case Qt::ToolTipRole:
             return QString("Task may %1be killed").arg(data(Qt::EditRole).toBool() ? "" : "not ");

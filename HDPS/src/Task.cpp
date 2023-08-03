@@ -41,7 +41,7 @@ Task::Task(QObject* parent, const QString& name, const Status& status /*= Status
     });
 
     for (auto& timer : _timers) {
-        timer.setInterval(250);
+        timer.setInterval(TASK_UPDATE_TIMER_INTERVAL);
         timer.setSingleShot(true);
     }
 
@@ -93,6 +93,14 @@ bool Task::getMayKill() const
     return _mayKill;
 }
 
+bool Task::isKillable() const
+{
+    if (!(isRunning() || isRunningIndeterminate()))
+        return false;
+
+    return getMayKill();
+}
+
 void Task::setMayKill(bool mayKill)
 {
     if (mayKill == _mayKill)
@@ -100,7 +108,8 @@ void Task::setMayKill(bool mayKill)
 
     _mayKill = mayKill;
 
-    emit mayKillChanged(_mayKill);
+    emit mayKillChanged(getMayKill());
+    emit isKillableChanged(isKillable());
 }
 
 Task::Status Task::getStatus() const
@@ -171,22 +180,28 @@ void Task::setStatus(const Status& status)
             break;
     }
 
-    QCoreApplication::processEvents();
+    emit isKillableChanged(isKillable());
 }
 
 void Task::setIdle()
 {
     setStatus(Status::Idle);
+
+    setProgressDescription("Idle");
 }
 
 void Task::setRunning()
 {
     setStatus(Status::Running);
+
+    setProgressDescription("Running");
 }
 
 void Task::setRunningIndeterminate()
 {
     setStatus(Status::RunningIndeterminate);
+
+    setProgressDescription("Running");
 }
 
 void Task::setFinished(bool toIdleWithDelay /*= false*/, std::uint32_t delay /*= 1000*/)
@@ -210,7 +225,7 @@ void Task::setFinished(bool toIdleWithDelay /*= false*/, std::uint32_t delay /*=
 
 void Task::setAborting()
 {
-    if (!_mayKill)
+    if (!getMayKill())
         return;
 
     setStatus(Status::Aborting);
@@ -219,7 +234,7 @@ void Task::setAborting()
 
 void Task::setAborted()
 {
-    if (!_mayKill)
+    if (!getMayKill())
         return;
 
     setStatus(Status::Aborted);
@@ -236,12 +251,22 @@ void Task::setAborted()
 
 void Task::kill()
 {
-    if (!_mayKill)
-        return;
+    if (getMayKill()) {
+        setAborting();
 
-    setAborting();
+        emit abort();
+    }
+    else {
+        auto messageBox = new QMessageBox(nullptr);
 
-    emit abort();
+        messageBox->setAttribute(Qt::WA_DeleteOnClose);
+        messageBox->setWindowTitle("Unable to kill task");
+        messageBox->setText(QString("<p><b>%1</b> cannot be killed because the <i>Task::aborted()</i> signal is not handled. See <a href='%2'>Task.h</a> and <a href='%3'>Task.cpp</a> for more details.</p>").arg(getName(), "https://github.com/ManiVaultStudio/core/tree/master/HDPS/src/Task.h", "https://github.com/ManiVaultStudio/core/tree/master/HDPS/src/Task.cpp"));
+        messageBox->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("exclamation-circle"));
+        messageBox->setAttribute(Qt::WA_DeleteOnClose);
+
+        messageBox->open();
+    }
 }
 
 AbstractTaskHandler* Task::getHandler()

@@ -15,6 +15,7 @@
 #include <QStyledItemDelegate>
 #include <QHeaderView>
 #include <QPainter>
+#include <QSortFilterProxyModel>
 
 namespace hdps::gui {
 
@@ -199,7 +200,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
         }
             
         for (auto task : tasks) {
-            if (!task->getMayKill())
+            if (!task->isKillable())
                 continue;
 
             killableTasks << task;
@@ -215,7 +216,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
 
         const auto actionName = QString("Kill %1 task%2").arg(QString::number(selectedRows.count()), selectedRows.count() >= 2 ? "s" : "");
 
-        contextMenu.addAction(Application::getIconFont("FontAwesome").getIcon("trash"), actionName, [killableTasks] {
+        contextMenu.addAction(Application::getIconFont("FontAwesome").getIcon("bomb"), actionName, [killableTasks] {
             for (auto killableTask : killableTasks)
                 killableTask->kill();
         });
@@ -226,11 +227,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
 
 void TasksAction::Widget::modelChanged()
 {
-    const auto rowCount = _tasksWidget.getModel().rowCount();
-
-    setEnabled(rowCount > 0);
-
-    if (rowCount <= 0)
+    if (_tasksWidget.getModel().rowCount() <= 0)
         return;
 
     auto treeViewHeader = _tasksWidget.getTreeView().header();
