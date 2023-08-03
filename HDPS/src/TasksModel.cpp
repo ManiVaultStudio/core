@@ -299,6 +299,29 @@ QVariant TasksModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
+QVariant TasksModel::MayKillItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    auto taskTypeString = QString(getTask()->metaObject()->className());
+
+    taskTypeString.replace("hdps::", "");
+
+    switch (role) {
+        case Qt::EditRole:
+            return getTask()->getMayKill();
+
+        case Qt::DisplayRole:
+            return data(Qt::EditRole).toBool() ? "yes" : "no";
+
+        case Qt::ToolTipRole:
+            return QString("Task may %1be killed").arg(data(Qt::EditRole).toBool() ? "" : "not ");
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 TasksModel::Row::Row(Task* task) :
     QList<QStandardItem*>()
 {
@@ -310,6 +333,7 @@ TasksModel::Row::Row(Task* task) :
     append(new IdItem(task));
     append(new ParentIdItem(task));
     append(new TypeItem(task));
+    append(new MayKillItem(task));
 }
 
 QMap<TasksModel::Column, TasksModel::ColumHeaderInfo> TasksModel::columnInfo = QMap<TasksModel::Column, TasksModel::ColumHeaderInfo>({
@@ -320,7 +344,8 @@ QMap<TasksModel::Column, TasksModel::ColumHeaderInfo> TasksModel::columnInfo = Q
     { TasksModel::Column::ProgressText, { "Progress text" , "Progress text", "Progress text" } },
     { TasksModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the task" } },
     { TasksModel::Column::ParentID, { "Parent ID",  "Parent ID", "Globally unique identifier of the parent task" } },
-    { TasksModel::Column::Type, { "Type",  "Type", "Type of task" } }
+    { TasksModel::Column::Type, { "Type",  "Type", "Type of task" } },
+    { TasksModel::Column::MayKill, { "May kill",  "May kill", "Whether the task may be killed or not" } }
 });
 
 TasksModel::TasksModel(QObject* parent /*= nullptr*/) :

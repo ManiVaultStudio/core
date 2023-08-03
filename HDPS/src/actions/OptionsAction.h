@@ -270,9 +270,9 @@ public:
     /**
      * Select option
      * @param option Option to select
-     * @param replaceSelection Whether to clear the current option selection
+     * @param unselect Whether to select or unselect the option
      */
-    void selectOption(const QString& option, const bool& replaceSelection = false);
+    void selectOption(const QString& option, bool unselect = false);
 
     /**
      * Set the selected options

@@ -94,8 +94,8 @@ public:
 
 private:
 
-    /** Updates the icon with the task count badge */
-    void updateIcon();
+    /** Invoked when the filter model layout changes */
+    void filterModelChanged();
 
 private:
     TasksModel          _tasksModel;            /** Model with all tasks in the system */

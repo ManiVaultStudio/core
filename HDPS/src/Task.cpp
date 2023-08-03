@@ -15,26 +15,42 @@ QMap<Task::Status, QString> Task::statusNames = QMap<Status, QString>({
     { Task::Status::Running, "Running" },
     { Task::Status::RunningIndeterminate, "Running Indeterminate" },
     { Task::Status::Finished, "Finished" },
+    { Task::Status::Aborting, "Aborting" },
     { Task::Status::Aborted, "Aborted" }
 });
 
-Task::Task(QObject* parent, const QString& name, const Status& status /*= Status::Idle*/, AbstractTaskHandler* handler /*= nullptr*/) :
+Task::Task(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/, AbstractTaskHandler* handler /*= nullptr*/) :
     QObject(parent),
     Serializable(name),
     _name(name),
     _description(),
     _status(status),
+    _mayKill(mayKill),
     _handler(handler),
     _progressMode(ProgressMode::Manual),
     _progress(0.f),
     _subtasks(),
     _subtasksNames(),
-    _progressDescription()
+    _progressDescription(),
+    _timers()
 {
     tasks().addTask(this);
 
     QObject::connect(this, &QObject::destroyed, this, [this]() -> void {
         tasks().removeTask(this);
+    });
+
+    for (auto& timer : _timers) {
+        timer.setInterval(250);
+        timer.setSingleShot(true);
+    }
+
+    connect(&getTimer(TimerType::ProgressChanged), &QTimer::timeout, this, [this]() -> void {
+        emit progressChanged(_progress);
+    });
+
+    connect(&getTimer(TimerType::ProgressDescriptionChanged), &QTimer::timeout, this, [this]() -> void {
+        emit progressDescriptionChanged(_progressDescription);
     });
 }
 
@@ -72,6 +88,21 @@ void Task::setDescription(const QString& description)
     emit descriptionChanged(_description);
 }
 
+bool Task::getMayKill() const
+{
+    return _mayKill;
+}
+
+void Task::setMayKill(bool mayKill)
+{
+    if (mayKill == _mayKill)
+        return;
+
+    _mayKill = mayKill;
+
+    emit mayKillChanged(_mayKill);
+}
+
 Task::Status Task::getStatus() const
 {
     return _status;
@@ -95,6 +126,11 @@ bool Task::isRunningIndeterminate() const
 bool Task::isFinished() const
 {
     return _status == Status::Finished;
+}
+
+bool Task::isAborting() const
+{
+    return _status == Status::Aborting;
 }
 
 bool Task::isAborted() const
@@ -122,6 +158,9 @@ void Task::setStatus(const Status& status)
 
         case Task::Status::Finished:
             emit finished();
+            break;
+
+        case Task::Status::Aborting:
             break;
 
         case Task::Status::Aborted:
@@ -154,25 +193,55 @@ void Task::setFinished(bool toIdleWithDelay /*= false*/, std::uint32_t delay /*=
 {
     setStatus(Status::Finished);
 
-    if (!toIdleWithDelay)
+    setProgressDescription("Finished");
+
+    if (toIdleWithDelay) {
+        QTimer::singleShot(delay, this, [this]() -> void {
+            setIdle();
+        });
+    }
+    else {
+        QTimer::singleShot(TASK_DESCRIPTION_DISAPPEAR_INTERVAL, [this]() {
+            setProgress(0.f);
+            setProgressDescription("");
+        });
+    }
+}
+
+void Task::setAborting()
+{
+    if (!_mayKill)
         return;
 
-    QTimer::singleShot(delay, this, [this]() -> void {
-        setIdle();
-    });
+    setStatus(Status::Aborting);
+    setProgressDescription("Aborting...");
 }
 
 void Task::setAborted()
 {
-    setStatus(Status::Aborted);
-    setProgress(0.f);
+    if (!_mayKill)
+        return;
 
+    setStatus(Status::Aborted);
+    
     emit aborted();
+
+    setProgressDescription("Aborted");
+
+    QTimer::singleShot(TASK_DESCRIPTION_DISAPPEAR_INTERVAL, [this]() {
+        setProgress(0.f);
+        setProgressDescription("");
+    });
 }
 
-void Task::abort()
+void Task::kill()
 {
-    setAborted();
+    if (!_mayKill)
+        return;
+
+    setAborting();
+
+    emit abort();
 }
 
 AbstractTaskHandler* Task::getHandler()
@@ -380,9 +449,8 @@ void Task::setProgressDescription(const QString& progressDescription)
 
     _progressDescription = progressDescription;
 
-    emit progressDescriptionChanged(_progressDescription);
-
-    QCoreApplication::processEvents();
+    if (!getTimer(TimerType::ProgressDescriptionChanged).isActive())
+        getTimer(TimerType::ProgressDescriptionChanged).start();
 }
 
 std::int32_t Task::getSubtaskIndex(const QString& subtaskName) const
@@ -430,12 +498,16 @@ void Task::updateProgress()
             break;
     }
 
-    emit progressChanged(_progress);
+    if (!getTimer(TimerType::ProgressChanged).isActive())
+        getTimer(TimerType::ProgressChanged).start();
 
     if (_status == Status::Finished || _status == Status::Aborted)
         setProgressDescription("");
+}
 
-    QCoreApplication::processEvents();
+QTimer& Task::getTimer(const TimerType& timerType)
+{
+    return _timers[static_cast<int>(timerType)];
 }
 
 }

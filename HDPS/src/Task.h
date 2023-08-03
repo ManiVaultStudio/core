@@ -8,6 +8,7 @@
 
 #include <QObject>
 #include <QBitArray>
+#include <QTimer>
 
 namespace hdps {
 
@@ -38,6 +39,7 @@ public:
         Running,                /** is currently running */
         RunningIndeterminate,   /** is currently running, but it's operating time is not known */
         Finished,               /** has finished successfully */
+        Aborting,               /** is in the process of being aborted */
         Aborted                 /** has been aborted */
     };
 
@@ -49,6 +51,16 @@ public:
         Subtasks    /** setting a number of subtasks and flagging subtasks as finished (progress percentage is computed automatically) */
     };
 
+private:
+
+    /** Timers to prevent unnecessary abundant emissions of signals */
+    enum class TimerType {
+        ProgressChanged,                /** For Task::progressChanged() signal */
+        ProgressDescriptionChanged,     /** For Task::progressDescriptionChanged() signal */
+
+        Count
+    };
+
 public:
 
     /**
@@ -56,14 +68,15 @@ public:
     * @param parent Pointer to parent object
     * @param name Name of the task
     * @param status Initial status of the task
+    * @param mayKill Boolean determining whether the task may be killed or not
     * @param handler Pointer to task handler
     */
-    Task(QObject* parent, const QString& name, const Status& status = Status::RunningIndeterminate, AbstractTaskHandler* handler = nullptr);
+    Task(QObject* parent, const QString& name, const Status& status = Status::Undefined, bool mayKill = false, AbstractTaskHandler* handler = nullptr);
 
     /** Remove from task manager when destructed */
     ~Task();
 
-public: // Name and description
+public: // Name, description and may kill
 
     /** Get task name */
     virtual QString getName() const final;
@@ -83,6 +96,15 @@ public: // Name and description
      */
     virtual void setDescription(const QString& description) final;
 
+    /** Get whether the task may be killed or not */
+    virtual bool getMayKill() const final;
+
+    /**
+     * Sets whether the task may be killed or not
+     * @param mayKill Boolean determining whether the task may be killed or not
+     */
+    virtual void setMayKill(bool mayKill) final;
+
 public: // Status
 
     /** Get task status */
@@ -97,10 +119,13 @@ public: // Status
     /** Check if task is running indeterminate */
     virtual bool isRunningIndeterminate() const final;
 
-    /** Check if task is idle */
+    /** Check if task is finished */
     virtual bool isFinished() const final;
 
-    /** Check if task is idle */
+    /** Check if task is being aborted */
+    virtual bool isAborting() const final;
+
+    /** Check if task is aborted */
     virtual bool isAborted() const final;
 
     /**
@@ -109,27 +134,30 @@ public: // Status
      */
     virtual void setStatus(const Status& status) final;
 
-    /** Set task status to idle */
+    /** Convenience method to set task status to idle */
     virtual void setIdle() final;
 
-    /** Set task status to running */
+    /** Convenience method to set task status to running */
     virtual void setRunning() final;
 
-    /** Set task status to running indeterminate */
+    /** Convenience method to set task status to running indeterminate */
     virtual void setRunningIndeterminate() final;
 
     /**
-     * Set task status to finished
+     * Convenience method to set task status to finished
      * @param toIdleWithDelay Whether to automatically set the status to idle after \p delay
      * @param delay Delay in milliseconds
      */
     virtual void setFinished(bool toIdleWithDelay = false, std::uint32_t delay = 1000) final;
 
-    /** Set task status to aborted */
+    /** Convenience method to set task status to aborting */
+    virtual void setAborting() final;
+
+    /** Convenience method to set task status to aborted */
     virtual void setAborted() final;
 
-    /** Abort the task and trigger Task::aborted() signal */
-    virtual void abort() final;
+    /** Kill the task and trigger Task::abort() signal */
+    virtual void kill() final;
 
 public:
 
@@ -264,6 +292,12 @@ private:
     /** Updates the progress percentage */
     void updateProgress();
 
+    /**
+     * Get timer by \p timerType
+     * @return Timer for \p timerType
+     */
+    QTimer& getTimer(const TimerType& timerType);
+
 signals:
 
     /**
@@ -290,10 +324,19 @@ signals:
      */
     void statusChanged(const Status& status);
 
+    /**
+     * Signals that may kill changed to \p mayKill
+     * @param mayKill Boolean determining whether the task may be killed or not
+     */
+    void mayKillChanged(bool mayKill);
+
     /** Signals that the task finished */
     void finished();
 
-    /** Signals that the task was aborted */
+    /** Signals that the task must abort */
+    void abort();
+
+    /** Signals that the task was forcefully aborted */
     void aborted();
 
     /**
@@ -322,15 +365,25 @@ signals:
     void progressDescriptionChanged(const QString& progressDescription);
 
 private:
-    QString                 _name;                      /** Task name */
-    QString                 _description;               /** Task description */
-    Status                  _status;                    /** Task status */
-    AbstractTaskHandler*    _handler;                   /** Task handler */
-    ProgressMode            _progressMode;              /** The way progress is recorded */
-    float                   _progress;                  /** Task progress */
-    QBitArray               _subtasks;                  /** Subtasks status */
-    QStringList             _subtasksNames;             /** Subtasks names */
-    QString                 _progressDescription;       /** Current item description */
+    QString                 _name;                                          /** Task name */
+    QString                 _description;                                   /** Task description */
+    Status                  _status;                                        /** Task status */
+    bool                    _mayKill;                                       /** Whether the task may be killed or not */
+    AbstractTaskHandler*    _handler;                                       /** Task handler */
+    ProgressMode            _progressMode;                                  /** The way progress is recorded */
+    float                   _progress;                                      /** Task progress */
+    QBitArray               _subtasks;                                      /** Subtasks status */
+    QStringList             _subtasksNames;                                 /** Subtasks names */
+    QString                 _progressDescription;                           /** Current item description */
+    QTimer                  _timers[static_cast<int>(TimerType::Count)];    /** Timers to prevent unnecessary abundant emissions of signals */
+
+private:
+
+    /** Single shot task progress and description timer interval */
+    static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL = 100;
+
+    /** Single shot task description disappear timer interval */
+    static constexpr std::uint32_t TASK_DESCRIPTION_DISAPPEAR_INTERVAL = 1500;
 };
 
 }

@@ -65,6 +65,9 @@ private:
     /** Updates the progress action text format, depending on the task status */
     void updateProgressActionTextFormat();
 
+    /** Updates the visibility of the task killer action */
+    void updateKillTaskActionVisibility();
+
 signals:
 
     /**

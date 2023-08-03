@@ -26,8 +26,9 @@ public:
     * @param parent Pointer to parent object
     * @param name Name of the task
     * @param status Initial status of the task
+    * @param mayKill Boolean determining whether the task may be killed or not
     */
-    ModalTask(QObject* parent, const QString& name, const Status& status = Status::Idle);
+    ModalTask(QObject* parent, const QString& name, const Status& status = Status::Undefined, bool mayKill = false);
 };
 
 }

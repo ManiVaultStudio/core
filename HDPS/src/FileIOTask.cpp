@@ -7,8 +7,8 @@
 
 namespace hdps {
 
-FileIOTask::FileIOTask(QObject* parent, const QString& name, const Status& status /*= Status::Idle*/) :
-    Task(parent, name, status, nullptr)
+FileIOTask::FileIOTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= true*/) :
+    Task(parent, name, status, mayKill, nullptr)
 {
     setHandler(new FileIOTaskHandler(this));
 }

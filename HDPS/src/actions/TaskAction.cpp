@@ -32,7 +32,7 @@ TaskAction::TaskAction(QObject* parent, const QString& title) :
         if (_task == nullptr)
             return;
 
-        _task->abort();
+        _task->kill();
     });
 }
 
@@ -53,9 +53,12 @@ void TaskAction::setTask(Task* task)
     if (_task != nullptr) {
         disconnect(_task, &Task::progressChanged, this, nullptr);
         disconnect(_task, &Task::statusChanged, this, nullptr);
+        disconnect(_task, &Task::mayKillChanged, this, nullptr);
     }
 
     _task = task;
+
+    
 
     const auto updateProgressAction = [this]() -> void {
         _progressAction.setProgress(static_cast<int>(_task->getProgress() * 100.f));
@@ -68,6 +71,7 @@ void TaskAction::setTask(Task* task)
     connect(_task, &Task::statusChanged, this, &TaskAction::updateActionsReadOnly);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionRange);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionTextFormat);
+    connect(_task, &Task::mayKillChanged, this, &TaskAction::updateKillTaskActionVisibility);
 
     emit taskChanged(previousTask, _task);
 }
@@ -110,6 +114,14 @@ void TaskAction::updateProgressActionRange()
     }
 
     
+}
+
+void TaskAction::updateKillTaskActionVisibility()
+{
+    if (_task == nullptr)
+        _killTaskAction.setVisible(false);
+    else
+        _killTaskAction.setVisible(_task->getMayKill());
 }
 
 }
