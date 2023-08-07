@@ -37,8 +37,8 @@ ClustersActionWidget::ClustersActionWidget(QWidget* parent, ClustersAction* clus
     _clustersTreeView.setRootIsDecorated(false);
     _clustersTreeView.setSelectionBehavior(QAbstractItemView::SelectRows);
     _clustersTreeView.setSelectionMode(QAbstractItemView::ExtendedSelection);
-    _clustersTreeView.setSortingEnabled(true);
-    _clustersTreeView.sortByColumn(static_cast<std::int32_t>(ClustersModel::Column::Name), Qt::SortOrder::AscendingOrder);
+    _clustersTreeView.setSortingEnabled(false);
+    _clustersTreeView.setUniformRowHeights(true);
 
     auto header = _clustersTreeView.header();
     
@@ -61,6 +61,11 @@ ClustersActionWidget::ClustersActionWidget(QWidget* parent, ClustersAction* clus
     // Clear the selection when the layout of the model changes
     connect(_clustersTreeView.model(), &QAbstractItemModel::layoutChanged, this, [this](const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint) {
         _clustersTreeView.selectionModel()->reset();
+
+        if (_clustersAction.getClustersModel().rowCount() < 100000) {
+            _clustersTreeView.setSortingEnabled(true);
+            _clustersTreeView.sortByColumn(static_cast<std::int32_t>(ClustersModel::Column::Name), Qt::SortOrder::AscendingOrder);
+        }
     });
 
     // Pick cluster color when the cluster item is double clicked

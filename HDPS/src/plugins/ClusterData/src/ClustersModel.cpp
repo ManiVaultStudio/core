@@ -265,18 +265,29 @@ QVector<Cluster>& ClustersModel::getClusters()
 
 void ClustersModel::setClusters(const QVector<Cluster>& clusters)
 {
+    // Allocate the same number of items for the modified by user column
+    _modifiedByUser.resize(clusters.count());
+
+    // And flag all clusters as unmodified
+    std::fill(_modifiedByUser.begin(), _modifiedByUser.end(), false);
+
+    emit layoutAboutToBeChanged();
+    {
+        // Assign clusters
+        _clusters = clusters;
+    }
+    emit layoutChanged();
+
+    /*
     const auto numberOfClustersChanged = clusters.size() != _clusters.size();
 
-    if (numberOfClustersChanged) {
+    //if (numberOfClustersChanged) {
 
         // Do nothing if user modified clusters may not be overridden
-        if (mayOverrideUserInput()) {
+        //if (mayOverrideUserInput()) {
 
             // Allocate the same number of items for the modified by user column
             _modifiedByUser.resize(clusters.count());
-
-            // And flag all clusters as unmodified
-            std::fill(_modifiedByUser.begin(), _modifiedByUser.end(), false);
 
             // And flag all clusters as unmodified
             std::fill(_modifiedByUser.begin(), _modifiedByUser.end(), false);
@@ -287,22 +298,23 @@ void ClustersModel::setClusters(const QVector<Cluster>& clusters)
                 _clusters = clusters;
             }
             emit layoutChanged();
-        }
-    }
-    else {
-        if (!std::equal(_clusters.begin(), _clusters.end(), clusters.begin())) {
+        //}
+    //}
+    //else {
+    //    if (!std::equal(_clusters.begin(), _clusters.end(), clusters.begin())) {
 
-            // Do nothing if user modified clusters may not be overridden
-            if (mayOverrideUserInput()) {
+    //        // Do nothing if user modified clusters may not be overridden
+    //        //if (mayOverrideUserInput()) {
 
-                // Assign clusters
-                _clusters = clusters;
+    //            // Assign clusters
+    //            _clusters = clusters;
 
-                // Notify others that the data has changed
-                emit dataChanged(index(0, 0), index(rowCount() - 1, static_cast<std::int32_t>(Column::Count) - 1));
-            }
-        }
-    }
+    //            // Notify others that the data has changed
+    //            emit dataChanged(index(0, 0), index(rowCount() - 1, static_cast<std::int32_t>(Column::Count) - 1));
+    //        //}
+    //    }
+    //}
+    */
 }
 
 void ClustersModel::removeClustersById(const QStringList& ids)

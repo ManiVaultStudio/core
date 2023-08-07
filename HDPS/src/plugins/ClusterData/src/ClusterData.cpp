@@ -83,6 +83,8 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
 
 void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 {
+    WidgetAction::fromVariantMap(variantMap);
+
     const auto dataMap = variantMap["Data"].toMap();
 
     variantMapMustContain(dataMap, "IndicesRawData");
@@ -129,7 +131,7 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
             cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
 
-            clusterIndex++;
+            ++clusterIndex;
         }
     }
     
@@ -159,6 +161,8 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap ClusterData::toVariantMap() const
 {
+    auto variantMap = WidgetAction::toVariantMap();
+
     std::vector<std::uint32_t> indices;
 
     for (const auto& cluster : _clusters)
@@ -195,12 +199,14 @@ QVariantMap ClusterData::toVariantMap() const
 
     QVariantMap clustersRawData = rawDataToVariantMap((char*)clustersByteArray.data(), clustersByteArray.size(), true);
 
-    return {
+    variantMap.insert({
         { "ClustersRawData", clustersRawData },
         { "ClustersRawDataSize", clustersByteArray.size() },
         { "IndicesRawData", indicesRawData },
         { "NumberOfIndices", QVariant::fromValue(indices.size()) }
-    };
+    });
+
+    return variantMap;
 }
 
 void Clusters::init()
