@@ -6,6 +6,7 @@
 
 #include <Application.h>
 #include <AbstractDataHierarchyManager.h>
+#include <AbstractProjectManager.h>
 #include <DataHierarchyItem.h>
 #include <Set.h>
 
@@ -40,6 +41,9 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
 void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems)
 {
+    if (projects().isOpeningProject() || projects().isImportingProject())
+        return;
+
     try
     {
         if (selectedItems.isEmpty()) {
