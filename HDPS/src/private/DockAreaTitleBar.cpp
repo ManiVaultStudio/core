@@ -18,58 +18,66 @@ using namespace hdps::util;
 using namespace hdps::gui;
 
 DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
-    CDockAreaTitleBar(dockAreaWidget)
+    CDockAreaTitleBar(dockAreaWidget),
+    _addViewPluginToolButton(new QToolButton(dockAreaWidget)),
+    _viewMenu(nullptr),
+    _loadSystemViewMenu(nullptr)
 {
-    auto addViewPluginToolButton = new QToolButton(dockAreaWidget);
-
-    addViewPluginToolButton->setToolTip(QObject::tr("Add views"));
-    addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
-    addViewPluginToolButton->setAutoRaise(true);
-    addViewPluginToolButton->setPopupMode(QToolButton::InstantPopup);
-    addViewPluginToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
-    addViewPluginToolButton->setIconSize(QSize(8, 8));
+    _addViewPluginToolButton->setToolTip(QObject::tr("Add views"));
+    _addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
+    _addViewPluginToolButton->setAutoRaise(true);
+    _addViewPluginToolButton->setPopupMode(QToolButton::InstantPopup);
+    _addViewPluginToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
+    _addViewPluginToolButton->setIconSize(QSize(8, 8));
 
     auto dockManager = dockAreaWidget->dockManager();
 
     if (dockManager->objectName() == "MainDockManager") {
-        auto loadSystemViewMenu = new LoadSystemViewMenu(nullptr, dockAreaWidget);
+        const auto addMenu = [this, dockAreaWidget]() -> void {
+            if (_loadSystemViewMenu != nullptr)
+                return;
 
-        const auto updateToolButtonReadOnly = [addViewPluginToolButton, loadSystemViewMenu]() -> void {
-            addViewPluginToolButton->setEnabled(loadSystemViewMenu->mayProducePlugins());
+            _loadSystemViewMenu = new LoadSystemViewMenu(nullptr, dockAreaWidget);
+
+            _addViewPluginToolButton->setMenu(_loadSystemViewMenu);
+        };
+
+        const auto updateToolButtonReadOnly = [this]() -> void {
+            _addViewPluginToolButton->setEnabled(_loadSystemViewMenu->mayProducePlugins());
         };
 
         connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetAdded, this, updateToolButtonReadOnly);
+        connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetAdded, this, addMenu);
         connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetRemoved, this, updateToolButtonReadOnly);
-
-        addViewPluginToolButton->setMenu(loadSystemViewMenu);
 
         updateToolButtonReadOnly();
     }
     
-    // This part causes a crash when creating the ViewMenu as dockAreaWidget is not fully initialized
-    // i.e., d->ContentsLayout is NULL and is used later to count the number of contained widgets
-    // (d->ContentsLayout->count() in CDockAreaWidget::dockWidgetsCount()
-    // It is not apparent to me where this is used, everything seems to work without
-/*    if (dockManager->objectName() == "ViewPluginsDockManager") {
-        auto loadViewMenu = new ViewMenu(nullptr, ViewMenu::LoadViewPlugins, dockAreaWidget);
+    if (dockManager->objectName() == "ViewPluginsDockManager") {
+        const auto addMenu = [this, dockAreaWidget]() -> void {
+            if (_viewMenu != nullptr)
+                return;
 
-        const auto updateToolButtonReadOnly = [addViewPluginToolButton, loadViewMenu]() -> void {
-            addViewPluginToolButton->setEnabled(loadViewMenu->mayProducePlugins());
+            _viewMenu = new ViewMenu(nullptr, ViewMenu::LoadViewPlugins, dockAreaWidget);
+
+            _addViewPluginToolButton->setMenu(_viewMenu);
+        };
+
+        const auto updateToolButtonReadOnly = [this]() -> void {
+            _addViewPluginToolButton->setEnabled(_viewMenu->mayProducePlugins());
         };
 
         connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetAdded, this, updateToolButtonReadOnly);
+        connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetAdded, this, addMenu);
         connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetRemoved, this, updateToolButtonReadOnly);
-
-        addViewPluginToolButton->setMenu(loadViewMenu);
 
         updateToolButtonReadOnly();
     }
-*/
 
-    insertWidget(indexOf(button(ads::TitleBarButtonTabsMenu)) - 1, addViewPluginToolButton);
+    insertWidget(indexOf(button(ads::TitleBarButtonTabsMenu)) - 1, _addViewPluginToolButton);
 
-    const auto updateReadOnly = [addViewPluginToolButton]() -> void {
-        addViewPluginToolButton->setVisible(!workspaces().getLockingAction().isLocked());
+    const auto updateReadOnly = [this]() -> void {
+        _addViewPluginToolButton->setVisible(!workspaces().getLockingAction().isLocked());
     };
 
     connect(&workspaces().getLockingAction().getLockedAction(), &ToggleAction::toggled, this, updateReadOnly);
