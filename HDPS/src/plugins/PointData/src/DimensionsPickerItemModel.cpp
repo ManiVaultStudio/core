@@ -146,8 +146,8 @@ namespace hdps
                 switch (static_cast<ColumnEnum>(section))
                 {
                 case ColumnEnum::Name: return tr("Name");
-                case ColumnEnum::Mean: return tr("Mean");
-                case ColumnEnum::StandardDeviation: return tr("Standard dev.");
+                case ColumnEnum::Mean: return tr("M");
+                case ColumnEnum::StandardDeviation: return tr("SD");
                 }
             }
         }
