@@ -24,12 +24,13 @@ public:
      * @param parent Pointer to parent widget
      */
     FileMenu(QWidget *parent = nullptr);
-
+    
+private:
+    
     /**
-     * Invoked when the menu is show on the screen
-     * @param showEvent Pointer to show event
+     * Populate the menu
      */
-    void showEvent(QShowEvent* showEvent) override;
+    void populate ();
 
 private:
     hdps::gui::TriggerAction    _exitApplictionAction;  /** Trigger action to exit the application */
