@@ -106,20 +106,20 @@ public: // Name, description and may kill
     virtual bool getMayKill() const final;
 
     /**
-     * Get whether the task is killable
-     * Return true when the following criteria are met:
-     *  - Task#_status is either Task::Status::Running or Task::Status::RunningIndeterminate
-     *  - Task#_mayKill is true
-     * @return Whether the task is killable
-     */
-    virtual bool isKillable() const final;
-
-    /**
      * Sets whether the task may be killed or not
      * This only has an effect when at least one slot is connected to the Task::abort() signal
      * @param mayKill Boolean determining whether the task may be killed or not
      */
     virtual void setMayKill(bool mayKill) final;
+
+    /**
+     * Get whether the task is killable
+     * Return true when the following two criteria are met:
+     *  - Task#_status is either Task::Status::Running or Task::Status::RunningIndeterminate
+     *  - Task#_mayKill is true
+     * @return Whether the task is killable
+     */
+    virtual bool isKillable() const final;
 
 public: // Status
 

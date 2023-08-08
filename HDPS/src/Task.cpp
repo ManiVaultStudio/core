@@ -93,14 +93,6 @@ bool Task::getMayKill() const
     return _mayKill;
 }
 
-bool Task::isKillable() const
-{
-    if (!(isRunning() || isRunningIndeterminate()))
-        return false;
-
-    return getMayKill();
-}
-
 void Task::setMayKill(bool mayKill)
 {
     if (mayKill == _mayKill)
@@ -110,6 +102,14 @@ void Task::setMayKill(bool mayKill)
 
     emit mayKillChanged(getMayKill());
     emit isKillableChanged(isKillable());
+}
+
+bool Task::isKillable() const
+{
+    if (!(isRunning() || isRunningIndeterminate()))
+        return false;
+
+    return getMayKill();
 }
 
 Task::Status Task::getStatus() const

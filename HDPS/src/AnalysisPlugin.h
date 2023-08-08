@@ -55,38 +55,6 @@ public:
         return Dataset<DatasetType>(_output.get<DatasetType>());
     }
 
-protected: // Status
-
-    /** Get task status */
-    DataHierarchyItem::TaskStatus getTaskStatus() const;
-
-    /**
-     * Set name of the task
-     * @param taskName Name of the task
-     */
-    void setTaskName(const QString& taskName);
-
-    /**
-     * Set the task progress
-     * @param taskProgress Progress of the task (%)
-     */
-    void setTaskProgress(const float& taskProgress);
-
-    /**
-     * Set the task description
-     * @param taskDescription Description of the task
-     */
-    void setTaskDescription(const QString& taskDescription);
-
-    /** Set the task status to running */
-    void setTaskRunning();
-
-    /** Set the task status to finished */
-    void setTaskFinished();
-
-    /** Set the task status to aborted */
-    void setTaskAborted();
-
 protected:
     Dataset<DatasetImpl>    _input;       /** Input dataset smart pointer */
     Dataset<DatasetImpl>    _output;      /** Output dataset smart pointer */

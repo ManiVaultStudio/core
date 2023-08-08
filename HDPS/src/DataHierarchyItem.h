@@ -38,17 +38,6 @@ class DataHierarchyItem final : public hdps::gui::WidgetAction
 
 public:
 
-    /** Task status enumeration */
-    enum class TaskStatus {
-        Undefined = -1,     /** Task status is undefined */
-        Idle,               /** Task is idle */
-        Running,            /** Task is currently running */
-        Finished,           /** Task has finished successfully */
-        Aborted             /** Task has been aborted */
-    };
-
-public:
-
     /**
      * Constructor
      * @param parent Pointer to parent object
@@ -198,62 +187,6 @@ public: // Expanded
      */
     void setExpanded(bool expanded);
 
-public: // Tasks
-
-    /** Get task name */
-    QString getTaskName() const;
-
-    /**
-     * Set task name
-     * @param taskName Name of the task
-     */
-    void setTaskName(const QString& taskName);
-
-    /** Get task status */
-    TaskStatus getTaskStatus() const;
-
-    /** Gets the task description */
-    QString getTaskDescription() const;
-
-    /**
-     * Sets the task description
-     * @param taskDescription Task description [0, 1]
-     */
-    void setTaskDescription(const QString& taskDescription);
-
-    /** Gets the task progress [0, 1] */
-    float getTaskProgress() const;
-
-    /**
-     * Sets the task progress
-     * @param taskProgress Task progress
-     */
-    void setTaskProgress(float taskProgress);
-
-    /**
-     * Set the number of sub tasks
-     * @param numberOfSubTasks Number of sub tasks
-     */
-    void setNumberOfSubTasks(float numberOfSubTasks);
-
-    /**
-     * Flag sub task as finished
-     * @param subTaskIndex Index of the sub task
-     */
-    void setSubTaskFinished(float subTaskIndex);
-
-    /** Convenience functions for status checking */
-    bool isIdle() const;
-    bool isRunning() const;
-    bool isFinished() const;
-    bool isAborted() const;
-
-    /** Set task status */
-    void setTaskIdle();
-    void setTaskRunning();
-    void setTaskFinished();
-    void setTaskAborted();
-
 public: // Named icons
 
     /** Get icon */
@@ -280,18 +213,6 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 signals:
-
-    /**
-     * Signals that the task description changed
-     * @param taskDescription Task description
-     */
-    void taskDescriptionChanged(const QString& taskDescription);
-
-    /**
-     * Signals that the task progress changed
-     * @param taskProgress Task progress
-     */
-    void taskProgressChanged(const float& taskProgress);
 
     /**
      * Signals that the item got selected
@@ -345,20 +266,13 @@ signals:
     void saved();
 
 protected:
-    Dataset<DatasetImpl>        _dataset;               /** Smart pointer to dataset */
-    DataHierarchyItem*          _parent;                /** Pointer to parent data hierarchy item */
-    DataHierarchyItems          _children;              /** Pointers to child items (if any) */
-    bool                        _selected;              /** Whether the hierarchy item is selected */
-    bool                        _expanded;              /** Whether the item is expanded or not (when it has children) */
-    QString                     _taskDescription;       /** Task description */
-    float                       _taskProgress;          /** Task progress */
-    QBitArray                   _subTasks;              /** Sub-tasks bit array */
-    QString                     _taskName;              /** Name of the current task */
-    TaskStatus                  _taskStatus;            /** Status of the current task */
-    QTimer                      _taskDescriptionTimer;  /** Task description timer which prevents excessive successive GUI updates */
-    QTimer                      _taskProgressTimer;     /** Task progress timer which prevents excessive GUI updates */
-    QIcon                       _icon;                  /** Icon */
-    hdps::gui::WidgetActions    _actions;               /** Widget actions */
+    Dataset<DatasetImpl>        _dataset;       /** Smart pointer to dataset */
+    DataHierarchyItem*          _parent;        /** Pointer to parent data hierarchy item */
+    DataHierarchyItems          _children;      /** Pointers to child items (if any) */
+    bool                        _selected;      /** Whether the hierarchy item is selected */
+    bool                        _expanded;      /** Whether the item is expanded or not (when it has children) */
+    QIcon                       _icon;          /** Icon */
+    hdps::gui::WidgetActions    _actions;       /** Widget actions */
 
 protected:
     friend class DataHierarchyManager;

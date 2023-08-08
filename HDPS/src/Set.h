@@ -11,6 +11,7 @@
 #include "CoreInterface.h"
 #include "actions/WidgetAction.h"
 #include "util/Miscellaneous.h"
+#include "DatasetTask.h"
 
 #include <QString>
 #include <QVector>
@@ -97,6 +98,8 @@ public:
 
     /** Get the GUI name of the dataset */
     QString getGuiName() const;
+
+    //void setText(const QString& text);
 
     /** Returns true if this set represents the full data and false if it's a subset */
     bool isFull() const;
@@ -218,6 +221,12 @@ public:
      * @return Size of the raw data in bytes in human readable string format
      */
     QString getRawDataSizeHumanReadable() const;
+
+    /**
+     * Get task
+     * @return Dataset task
+     */
+    virtual DatasetTask& getTask() final;
 
 public: // Location
 
@@ -472,6 +481,12 @@ public:
     /** Get the name of the raw data */
     QString getRawDataName() const;
 
+    /**
+     * Get dataset task
+     * @return Task for reporting progress and killing processes
+     */
+    DatasetTask& getDatasetTask();
+
 protected:
 
     /** Get raw data */
@@ -531,6 +546,7 @@ private:
     std::int32_t                _linkedDataFlags;   /** Flags for linked data */
     bool                        _locked;            /** Whether the dataset is locked */
     Dataset<DatasetImpl>        _smartPointer;      /** Smart pointer to own dataset */
+    DatasetTask                 _datasetTask;       /** Task for reporting progress and killing processes */
 
     friend class CoreInterface;
     friend class Core;
