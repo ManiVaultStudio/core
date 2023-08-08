@@ -7,6 +7,7 @@
 #include <Application.h>
 #include <CoreInterface.h>
 #include <AbstractWorkspaceManager.h>
+#include <QOperatingSystemVersion>
 
 #define TEST_STYLESHEET
 
@@ -19,21 +20,28 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
 {
     setTitle("File");
     setToolTip("File operations");
-
-    _exitApplictionAction.setShortcut(QKeySequence("Alt+F4"));
-    _exitApplictionAction.setShortcutContext(Qt::ApplicationShortcut);
-    _exitApplictionAction.setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
-    _exitApplictionAction.setToolTip("Exit HDPS");
-
-    connect(&_exitApplictionAction, &TriggerAction::triggered, this, []() -> void {
-        Application::current()->quit();
-    });
+    
+    //  Quit is by default in the app menu on macOS
+    if(QOperatingSystemVersion::currentType() != QOperatingSystemVersion::MacOS) {
+        
+        _exitApplictionAction.setShortcut(QKeySequence("Alt+F4"));
+        _exitApplictionAction.setShortcutContext(Qt::ApplicationShortcut);
+        _exitApplictionAction.setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
+        _exitApplictionAction.setToolTip("Exit HDPS");
+        
+        connect(&_exitApplictionAction, &TriggerAction::triggered, this, []() -> void {
+            Application::current()->quit();
+        });
+    }
+    
+    // macOS does not like populating the menu on show, so we rather do it explicitly here
+    populate();
 }
 
-void FileMenu::showEvent(QShowEvent* showEvent)
+void FileMenu::populate()
 {
     clear();
-
+    
     addMenu(&projects().getNewProjectMenu());
     addAction(&projects().getOpenProjectAction());
     //addAction(&projects().getImportProjectAction());
@@ -52,8 +60,12 @@ void FileMenu::showEvent(QShowEvent* showEvent)
     addAction(&settings().getEditSettingsAction());
     addSeparator();
     addAction(&projects().getShowStartPageAction());
+    
+    //  Quit is by default in the app menu on macOS
+    //if(QOperatingSystemVersion::currentType() != QOperatingSystemVersion::MacOS) {
     //addSeparator();
     //addAction(&_exitApplictionAction);
+    //}
 
 #if defined(_DEBUG) && defined(TEST_STYLESHEET)
     /*

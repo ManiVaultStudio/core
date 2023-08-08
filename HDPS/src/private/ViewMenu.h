@@ -51,6 +51,11 @@ public:
     bool mayProducePlugins() const;
 
 private:
+    
+    /**
+     * Populate the menu
+     */
+    void populate ();
 
     /**
      * Get actions for loading views
@@ -58,6 +63,7 @@ private:
      * @return Vector of actions
      */
     QVector<QPointer<hdps::gui::PluginTriggerAction>> getLoadViewsActions(hdps::gui::DockAreaFlag dockArea);
+
 
 private:
     ads::CDockAreaWidget*   _dockAreaWidget;        /** Pointer to dock area widget to which new view plugins are docked (new view plugins will be docked top-level if nullptr) */
