@@ -27,60 +27,9 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
 {
     setTitle("View");
     setToolTip("Manage view plugins");
-
-    connect(this, &QMenu::aboutToShow, this, [this]() -> void {
-        for (auto action : actions())
-            if (action != &projects().getCurrentProject()->getStudioModeAction())
-                delete action;
-
-        clear();
-        
-        if (_options.testFlag(LoadSystemViewPlugins))
-            addMenu(new LoadSystemViewMenu());
-
-        Application::processEvents();
-
-        auto separator = addSeparator();
-
-        Application::processEvents();
-
-        if (_dockAreaWidget) {
-            const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
-                auto loadViewsDockedMenu = new QMenu(gui::dockAreaMap.key(dockArea));
-
-                loadViewsDockedMenu->setIcon(getDockAreaIcon(dockArea));
-
-                for (auto action : getLoadViewsActions(dockArea))
-                    loadViewsDockedMenu->addAction(action);
-
-                return loadViewsDockedMenu;
-            };
-
-            insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Left));
-            insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Right));
-            insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Top));
-            insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Bottom));
-            insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Center));
-        }
-        else {
-            if (_options.testFlag(LoadViewPlugins)) {
-                const auto actions = getLoadViewsActions(gui::DockAreaFlag::Right);
-
-                for (auto action : actions)
-                    insertAction(_separator, action);
-            }
-        }
-
-        _separator = addSeparator();
-
-        if (_options.testFlag(LoadedViewsSubMenu))
-            addMenu(new LoadedViewsMenu());
-
-        if (projects().hasProject()) {
-            addSeparator();
-            addAction(&projects().getCurrentProject()->getStudioModeAction());
-        }
-    });
+    
+    // macOS does not like populating the menu on show, so we rather do it explicitly here
+    populate();
 
     const auto updateReadOnly = [this]() -> void {
         setEnabled(projects().hasProject() && !workspaces().getLockingAction().isLocked());
@@ -91,6 +40,61 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
     connect(&projects(), &AbstractProjectManager::projectCreated, this, updateReadOnly);
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateReadOnly);
     connect(&workspaces().getLockingAction(), &LockingAction::lockedChanged, this, updateReadOnly);
+}
+
+void ViewMenu::populate()
+{
+    for (auto action : actions())
+        if (action != &projects().getCurrentProject()->getStudioModeAction())
+            delete action;
+
+    clear();
+    
+    if (_options.testFlag(LoadSystemViewPlugins))
+        addMenu(new LoadSystemViewMenu());
+
+    Application::processEvents();
+
+    auto separator = addSeparator();
+
+    Application::processEvents();
+
+    if (_dockAreaWidget) {
+        const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
+            auto loadViewsDockedMenu = new QMenu(gui::dockAreaMap.key(dockArea));
+
+            loadViewsDockedMenu->setIcon(getDockAreaIcon(dockArea));
+
+            for (auto action : getLoadViewsActions(dockArea))
+                loadViewsDockedMenu->addAction(action);
+
+            return loadViewsDockedMenu;
+        };
+
+        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Left));
+        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Right));
+        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Top));
+        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Bottom));
+        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Center));
+    }
+    else {
+        if (_options.testFlag(LoadViewPlugins)) {
+            const auto actions = getLoadViewsActions(gui::DockAreaFlag::Right);
+
+            for (auto action : actions)
+                insertAction(_separator, action);
+        }
+    }
+
+    _separator = addSeparator();
+
+    if (_options.testFlag(LoadedViewsSubMenu))
+        addMenu(new LoadedViewsMenu());
+
+    if (projects().hasProject()) {
+        addSeparator();
+        addAction(&projects().getCurrentProject()->getStudioModeAction());
+    }
 }
 
 bool ViewMenu::mayProducePlugins() const
