@@ -10,6 +10,7 @@
 #include <util/Exception.h>
 
 #include <QStandardPaths>
+#include <QOperatingSystemVersion>
 
 using namespace hdps::gui;
 using namespace hdps::util;
@@ -27,9 +28,14 @@ SettingsManager::SettingsManager() :
     _parametersSettingsAction(this),
     _miscellaneousSettingsAction(this)
 {
-    _editSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
-    _editSettingsAction.setShortcut(QKeySequence("Ctrl+G"));
     _editSettingsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS) {
+        _editSettingsAction.setShortcut(QKeySequence("Ctrl+,"));
+        _editSettingsAction.setMenuRole(QAction::PreferencesRole);
+    } else {
+        _editSettingsAction.setShortcut(QKeySequence("Ctrl+G"));
+        _editSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+    }
         
     connect(&_editSettingsAction, &TriggerAction::triggered, this, &SettingsManager::edit);
 
