@@ -53,11 +53,7 @@ void ViewMenu::populate()
     if (_options.testFlag(LoadSystemViewPlugins))
         addMenu(new LoadSystemViewMenu());
 
-    Application::processEvents();
-
     auto separator = addSeparator();
-
-    Application::processEvents();
 
     if (_dockAreaWidget) {
         const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {

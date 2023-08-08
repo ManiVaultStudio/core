@@ -37,7 +37,7 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
             if (_loadSystemViewMenu != nullptr)
                 return;
 
-            _loadSystemViewMenu = new LoadSystemViewMenu(nullptr, dockAreaWidget);
+            _loadSystemViewMenu = new LoadSystemViewMenu(dockAreaWidget, dockAreaWidget);
 
             _addViewPluginToolButton->setMenu(_loadSystemViewMenu);
         };
@@ -48,6 +48,7 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
 
         connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetAdded, this, updateToolButtonReadOnly);
         connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetAdded, this, addMenu);
+        connect(dockAreaWidget->dockManager(), &CDockManager::stateRestored, this, addMenu);
         connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetRemoved, this, updateToolButtonReadOnly);
 
         updateToolButtonReadOnly();
@@ -58,7 +59,7 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
             if (_viewMenu != nullptr)
                 return;
 
-            _viewMenu = new ViewMenu(nullptr, ViewMenu::LoadViewPlugins, dockAreaWidget);
+            _viewMenu = new ViewMenu(dockAreaWidget, ViewMenu::LoadViewPlugins, dockAreaWidget);
 
             _addViewPluginToolButton->setMenu(_viewMenu);
         };
@@ -69,6 +70,7 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
 
         connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetAdded, this, updateToolButtonReadOnly);
         connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetAdded, this, addMenu);
+        connect(dockAreaWidget->dockManager(), &CDockManager::stateRestored, this, addMenu);
         connect(dockAreaWidget->dockManager(), &CDockManager::dockWidgetRemoved, this, updateToolButtonReadOnly);
 
         updateToolButtonReadOnly();
