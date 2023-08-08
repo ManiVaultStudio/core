@@ -60,8 +60,12 @@ void FileMenu::populate()
     addAction(&settings().getEditSettingsAction());
     addSeparator();
     addAction(&projects().getShowStartPageAction());
+    
+    //  Quit is by default in the app menu on macOS
+    //if(QOperatingSystemVersion::currentType() != QOperatingSystemVersion::MacOS) {
     //addSeparator();
     //addAction(&_exitApplictionAction);
+    //}
 
 #if defined(_DEBUG) && defined(TEST_STYLESHEET)
     /*
