@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QPainter>
+#include <QApplication>
 
 using namespace hdps::gui;
 
@@ -84,7 +85,7 @@ QFont IconFont::getFont(const int& pointSize /*= -1*/) const
     return QFont(_fontFamily, pointSize);
 }
 
-QIcon IconFont::getIcon(const QString& name, const QColor& foregroundColor/*= QColor(0, 0, 0, 255)*/, const QColor& backgroundColor/*= Qt::transparent*/) const
+QIcon IconFont::getIcon(const QString& name, const QColor& foregroundColor/*= QColor(0, 0, 0, 0)*/, const QColor& backgroundColor/*= Qt::transparent*/) const
 {
     try
     {
@@ -96,13 +97,24 @@ QIcon IconFont::getIcon(const QString& name, const QColor& foregroundColor/*= QC
 
         const auto iconRectangle    = QRect(0, 0, pixmapSize.width(), pixmapSize.height());
         const auto iconText         = getIconCharacter(name);
+        
+        QColor fontColor = foregroundColor;
+        if( fontColor == QColor(0, 0, 0, 0) ) // assume that 0 opacity means we want the system default
+        {
+            if(qApp->palette().window().color().lightnessF() < 0.5) // foreground color is light
+            {
+                fontColor = QColor(255, 255, 255, 255);
+            } else {
+                fontColor = QColor(0, 0, 0, 255);
+            }
+        }
 
         QPainter painter(&pixmap);
 
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
         painter.setRenderHint(QPainter::LosslessImageRendering, true);
-        painter.setPen(foregroundColor);
+        painter.setPen(fontColor);
         painter.setFont(getFont(100.0));
 
         QFontMetrics fontMetrics(painter.font());
