@@ -35,9 +35,11 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     connect(_aboutAction, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::about);
     
     _aboutThirdParties = new TriggerAction(this, "About Third Parties");
+    _aboutThirdParties->setMenuRole(QAction::NoRole);
     connect(_aboutThirdParties, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
     
     _aboutQt = new TriggerAction(this, "About Qt");
+    _aboutQt->setMenuRole(QAction::NoRole);
     connect(_aboutQt, &hdps::gui::TriggerAction::triggered, this, [this](bool) { QMessageBox::aboutQt(this->parentWidget(), "About Qt"); });
 
     // macOS does not like populating the menu on show, so we rather do it explicitly here
