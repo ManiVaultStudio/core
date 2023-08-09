@@ -26,7 +26,8 @@ SettingsManager::SettingsManager() :
     AbstractSettingsManager(),
     _editSettingsAction(this, "Settings..."),
     _parametersSettingsAction(this),
-    _miscellaneousSettingsAction(this)
+    _miscellaneousSettingsAction(this),
+    _applicationSettingsAction(this)
 {
     _editSettingsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS) {
