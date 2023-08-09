@@ -46,9 +46,6 @@ void ClustersAction::setClustersDataset(Dataset<Clusters> clustersDataset)
         // Update the clusters model to reflect the changes in the clusters dataset
         connect(&_clustersDataset, &Dataset<Clusters>::dataChanged, this, &ClustersAction::updateClustersModel);
 
-        // Perform an initial update of the clusters model to reflect the state of the clusters dataset
-        updateClustersModel();
-
         // Update the clusters dataset when the model data and/or layout changes
         connect(&_clustersModel, &QAbstractItemModel::dataChanged, this, &ClustersAction::updateClustersDataset);
         connect(&_clustersModel, &QAbstractItemModel::layoutChanged, this, &ClustersAction::updateClustersDataset);

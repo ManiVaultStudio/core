@@ -76,6 +76,7 @@ void PointData::setData(const std::nullptr_t, const std::size_t numPoints, const
 void PointData::setDimensionNames(const std::vector<QString>& dimNames)
 {
     _dimNames = dimNames;
+    _numDimensions = _dimNames.size();
 }
 
 float PointData::getValueAt(const std::size_t index) const
@@ -983,12 +984,18 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         return dimensionNames;
     };
 
+    
+
     std::vector<QString> dimensionNames;
 
     for (const auto dimensionName : fetchDimensionNames())
         dimensionNames.push_back(dimensionName);
 
     setDimensionNames(dimensionNames);
+
+    if (variantMap.contains("Dimensions")) {
+        _dimensionsPickerAction->fromParentVariantMap(variantMap);
+    }
 
     events().notifyDatasetDataChanged(this);
 
@@ -1050,7 +1057,8 @@ QVariantMap Points::toVariantMap() const
     variantMap["Selection"]             = selection;
     variantMap["DimensionNames"]        = rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true);
     variantMap["NumberOfDimensions"]    = getNumDimensions();
-
+    variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
+    
     return variantMap;
 }
 

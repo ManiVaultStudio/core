@@ -593,8 +593,8 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
     horizontalHeader->setDefaultAlignment(Qt::AlignLeft);
     horizontalHeader->setSortIndicator(2, Qt::DescendingOrder);
 
-    horizontalHeader->resizeSection(1, 85);
-    horizontalHeader->resizeSection(2, 85);
+    //horizontalHeader->resizeSection(1, 85);
+    //horizontalHeader->resizeSection(2, 85);
 
     _tableView.verticalHeader()->hide();
     _tableView.verticalHeader()->setDefaultSectionSize(5);
@@ -614,6 +614,10 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
     setLayout(layout);
 
     updateTableViewModel(&dimensionsPickerAction->getProxyModel());
+
+    connect(dimensionsPickerAction, &DimensionsPickerAction::selectedDimensionsChanged, this, [this]() -> void {
+        _tableView.horizontalHeader()->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+        });
 }
 
 void DimensionsPickerAction::Widget::updateTableViewModel(QAbstractItemModel* model)
@@ -623,9 +627,7 @@ void DimensionsPickerAction::Widget::updateTableViewModel(QAbstractItemModel* mo
     if (model->rowCount() == 0 || model->columnCount() == 0)
         return;
 
-    auto horizontalHeader = _tableView.horizontalHeader();
-
-    horizontalHeader->setSectionResizeMode(0, QHeaderView::Stretch);
-    horizontalHeader->setSectionResizeMode(1, QHeaderView::Interactive);
-    horizontalHeader->setSectionResizeMode(2, QHeaderView::Interactive);
+    _tableView.horizontalHeader()->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+    _tableView.horizontalHeader()->resizeSection(1, 60);
+    _tableView.horizontalHeader()->resizeSection(2, 60);
 }
