@@ -58,6 +58,16 @@ Task::~Task()
 {
 }
 
+Task* Task::getParentTask()
+{
+    return dynamic_cast<Task*>(parent());
+}
+
+bool Task::hasParentTask()
+{
+    return getParentTask() != nullptr;
+}
+
 QString Task::getName() const
 {
     return _name;

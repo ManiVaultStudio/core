@@ -76,6 +76,18 @@ public:
     /** Remove from task manager when destructed */
     ~Task();
 
+    /**
+     * Get parent task (if it has one)
+     * @return Pointer to parent task if it has, nullptr otherwise
+     */
+    virtual Task* getParentTask() final;
+
+    /**
+     * Determine whether the task has a parent task
+     * @return Boolean determining whether the task has a parent task
+     */
+    virtual bool hasParentTask() final;
+
 public: // Name, description and may kill
 
     /**

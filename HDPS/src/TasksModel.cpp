@@ -266,7 +266,7 @@ QVariant TasksModel::ParentIdItem::data(int role /*= Qt::UserRole + 1*/) const
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
-            return getTask()->getId();
+            return getTask()->hasParentTask() ? getTask()->getParentTask()->getId() : "";
 
         case Qt::ToolTipRole:
             return "Parent task globally unique identifier: " + data(Qt::DisplayRole).toString();
