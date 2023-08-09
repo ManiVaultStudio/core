@@ -21,6 +21,11 @@
         <file alias="AppBackground1024">images/AppBackground1024.png</file>
         <file alias="StartPageBackground">images/StartPageBackground.png</file>
     </qresource>
+    <qresource prefix="/Buttons">
+        <file alias="ModeDark">images/buttons/ModeDark.png</file>
+        <file alias="ModeLight">images/buttons/ModeLight.png</file>
+        <file alias="ModeSystem">images/buttons/ModeSystem.png</file>
+    </qresource>
     <qresource prefix="/">
         <file>shaders/Quad.vert</file>
         <file>shaders/DensityCompute.vert</file>
