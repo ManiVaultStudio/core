@@ -38,8 +38,17 @@ private slots:
      * Invoked when trigger _aboutThirdParties is clicked in the help menu
      */
     void aboutThirdParties();
+    
+private:
+    
+    /**
+     * Populate the menu
+     */
+    void populate ();
 
 private:
+    
+    hdps::gui::TriggerAction* _devDocAction;        /** Menu entry for ManiVault About Messagebox */
     hdps::gui::TriggerAction* _aboutAction;         /** Menu entry for ManiVault About Messagebox */
     hdps::gui::TriggerAction* _aboutQt;             /** Menu entry for Qt About Messagebox */
     hdps::gui::TriggerAction* _aboutThirdParties;   /** Menu entry for Third Party About Messagebox */

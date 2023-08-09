@@ -10,7 +10,8 @@
 #include <actions/TriggerAction.h>
 
 #include <QMessageBox> 
-#include <QStringLiteral> 
+#include <QStringLiteral>
+#include <QDesktopServices>
 
 using namespace hdps;
 using namespace hdps::util;
@@ -25,54 +26,70 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
 {
     setTitle("Help");
     setToolTip("ManiVault help");
+    
+    // initialize static actions
+    _devDocAction = new TriggerAction(this, "Developer Documentation");
+    connect(_devDocAction, &QAction::triggered, this, [this](bool) { QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio/PublicWiki", QUrl::TolerantMode)); });
+    
+    _aboutAction = new TriggerAction(this, "About ManiVault");
+    connect(_aboutAction, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::about);
+    
+    _aboutThirdParties = new TriggerAction(this, "About Third Parties");
+    _aboutThirdParties->setMenuRole(QAction::NoRole);
+    connect(_aboutThirdParties, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
+    
+    _aboutQt = new TriggerAction(this, "About Qt");
+    _aboutQt->setMenuRole(QAction::NoRole);
+    connect(_aboutQt, &hdps::gui::TriggerAction::triggered, this, [this](bool) { QMessageBox::aboutQt(this->parentWidget(), "About Qt"); });
 
-    connect(this, &QMenu::aboutToShow, this, [this]() -> void {
-        clear();
-        
-        QVector<QPointer<TriggerAction>> actions;
+    // macOS does not like populating the menu on show, so we rather do it explicitly here
+    populate();
+}
 
-        for (auto pluginFactory : plugins().getPluginFactoriesByTypes({ Type::ANALYSIS, Type::DATA, Type::LOADER, Type::WRITER, Type::TRANSFORMATION, Type::VIEW }))
-            if (pluginFactory->hasHelp() && pluginFactory->getNumberOfInstances() >= 1)
-                actions << &pluginFactory->getTriggerHelpAction();
+void HelpMenu::populate()
+{
+    addAction(_devDocAction);
+    addSeparator();
+    
+    QVector<QPointer<TriggerAction>> actions;
 
-        sortActions(actions);
+    for (auto pluginFactory : plugins().getPluginFactoriesByTypes({ Type::ANALYSIS, Type::DATA, Type::LOADER, Type::WRITER, Type::TRANSFORMATION, Type::VIEW }))
+        if (pluginFactory->hasHelp() && pluginFactory->getNumberOfInstances() >= 1)
+            actions << &pluginFactory->getTriggerHelpAction();
 
-        if (!actions.isEmpty()) {
-            auto pluginHelpMenu = new QMenu("Plugin");
+    sortActions(actions);
 
-            pluginHelpMenu->setToolTip("HDPS plugin documentation");
-            pluginHelpMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+    if (!actions.isEmpty()) {
+        auto pluginHelpMenu = new QMenu("Plugin");
 
-            for (auto action : actions)
-                pluginHelpMenu->addAction(action);
+        pluginHelpMenu->setToolTip("HDPS plugin documentation");
+        pluginHelpMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
 
-            addMenu(pluginHelpMenu);
-        }
+        for (auto action : actions)
+            pluginHelpMenu->addAction(action);
 
-        auto currentProject = projects().getCurrentProject();
+        addMenu(pluginHelpMenu);
+    }
 
-        if (currentProject && currentProject->getSplashScreenAction().getEnabledAction().isChecked()) {
-            addSeparator();
+    auto currentProject = projects().getCurrentProject();
 
-            addAction(&currentProject->getSplashScreenAction().getShowSplashScreenAction());
-        }
+    if (currentProject && currentProject->getSplashScreenAction().getEnabledAction().isChecked()) {
+        addSeparator();
 
-        if(!isEmpty())
-            addSeparator();
+        addAction(&currentProject->getSplashScreenAction().getShowSplashScreenAction());
+    }
 
-        // the above clear() deletes all actions whose parent is this
-        _aboutAction        = new TriggerAction(this, "About");
-        _aboutThirdParties  = new TriggerAction(this, "About Third Parties");
-        _aboutQt            = new TriggerAction(this, "About Qt");
+    // the above clear() deletes all actions whose parent is this
+    _aboutAction        = new TriggerAction(this, "About");
+    _aboutThirdParties  = new TriggerAction(this, "About Third Parties");
+    _aboutQt            = new TriggerAction(this, "About Qt");
 
-        connect(_aboutAction, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::about);
-        connect(_aboutThirdParties, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
-        connect(_aboutQt, &hdps::gui::TriggerAction::triggered, this, [this](bool) { QMessageBox::aboutQt(this->parentWidget(), "About Qt"); });
+    if(!isEmpty())
+        addSeparator();
 
-        addAction(_aboutAction);
-        addAction(_aboutThirdParties);
-        addAction(_aboutQt);
-    });
+    addAction(_aboutAction);
+    addAction(_aboutThirdParties);
+    addAction(_aboutQt);
 }
 
 void HelpMenu::about()
@@ -82,7 +99,7 @@ void HelpMenu::about()
             "For more information, please visit: <a href=\"http://%2/\">%2</a> </p>"
             "This software is licensed under the GNU Lesser General Public License v3.0.<br>"
             "Copyright (C) %1 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)"
-        ).arg(QStringLiteral("2023"), 
+        ).arg(QStringLiteral("2023"),
               QStringLiteral("github.com/ManiVaultStudio"))
     );
 }
@@ -94,8 +111,8 @@ void HelpMenu::aboutThirdParties()
         "&bull; Qt-Advanced-Docking-System (LGPL v2.1): <a href=\"http://%1/\">%1</a> <br>"
         "&bull; Quazip (LGPL v2.1): <a href=\"http://%2/\">%2</a> <br>"
         "&bull; Qt ((L)GPL): <a href=\"http://%3/\">%3</a> "
-    ).arg(QStringLiteral("github.com/githubuser0xFFFF/Qt-Advanced-Docking-System"), 
-          QStringLiteral("github.com/stachenov/quazip"), 
+    ).arg(QStringLiteral("github.com/githubuser0xFFFF/Qt-Advanced-Docking-System"),
+          QStringLiteral("github.com/stachenov/quazip"),
           QStringLiteral("qt.io"));
 
     auto msgBox = new QMessageBox(this->parentWidget());
