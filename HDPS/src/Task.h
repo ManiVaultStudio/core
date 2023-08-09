@@ -176,7 +176,7 @@ public: // Status
      * @param toIdleWithDelay Whether to automatically set the status to idle after \p delay
      * @param delay Delay in milliseconds
      */
-    virtual void setFinished(bool toIdleWithDelay = false, std::uint32_t delay = 1000) final;
+    virtual void setFinished(bool toIdleWithDelay = true, std::uint32_t delay = TASK_DESCRIPTION_DISAPPEAR_INTERVAL) final;
 
     /** Convenience method to set task status to aborting */
     virtual void setAborting() final;
@@ -312,8 +312,9 @@ public: // Progress description
     /**
      * Set progress description to \p progressDescription
      * @param progressDescription Progress description
+     * @param clearDelay Progress description will be cleared after this delay (do not clear if zero)
      */
-    virtual void setProgressDescription(const QString& progressDescription) final;
+    virtual void setProgressDescription(const QString& progressDescription, std::uint32_t clearDelay = 0) final;
 
 private:
 

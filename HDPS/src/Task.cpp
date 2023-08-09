@@ -197,7 +197,7 @@ void Task::setIdle()
 {
     setStatus(Status::Idle);
 
-    setProgressDescription("Idle");
+    setProgressDescription("Idle", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 }
 
 void Task::setRunning()
@@ -214,11 +214,11 @@ void Task::setRunningIndeterminate()
     setProgressDescription("Running");
 }
 
-void Task::setFinished(bool toIdleWithDelay /*= false*/, std::uint32_t delay /*= 1000*/)
+void Task::setFinished(bool toIdleWithDelay /*= true*/, std::uint32_t delay /*= TASK_DESCRIPTION_DISAPPEAR_INTERVAL*/)
 {
     setStatus(Status::Finished);
 
-    setProgressDescription("Finished");
+    setProgress(0.f);
 
     if (toIdleWithDelay) {
         QTimer::singleShot(delay, this, [this]() -> void {
@@ -226,10 +226,7 @@ void Task::setFinished(bool toIdleWithDelay /*= false*/, std::uint32_t delay /*=
         });
     }
     else {
-        QTimer::singleShot(TASK_DESCRIPTION_DISAPPEAR_INTERVAL, [this]() {
-            setProgress(0.f);
-            setProgressDescription("");
-        });
+        setProgressDescription("Finished", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
     }
 }
 
@@ -248,15 +245,11 @@ void Task::setAborted()
         return;
 
     setStatus(Status::Aborted);
-    
+    setProgress(0.f);
+
     emit aborted();
 
-    setProgressDescription("Aborted");
-
-    QTimer::singleShot(TASK_DESCRIPTION_DISAPPEAR_INTERVAL, [this]() {
-        setProgress(0.f);
-        setProgressDescription("");
-    });
+    setProgressDescription("Aborted", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 }
 
 void Task::kill()
@@ -477,7 +470,7 @@ QString Task::getProgressDescription() const
     return _progressDescription;
 }
 
-void Task::setProgressDescription(const QString& progressDescription)
+void Task::setProgressDescription(const QString& progressDescription, std::uint32_t clearDelay /*= TASK_DESCRIPTION_DISAPPEAR_INTERVAL*/)
 {
     if (progressDescription == _progressDescription)
         return;
@@ -486,6 +479,10 @@ void Task::setProgressDescription(const QString& progressDescription)
 
     if (!getTimer(TimerType::ProgressDescriptionChanged).isActive())
         getTimer(TimerType::ProgressDescriptionChanged).start();
+
+    QTimer::singleShot(clearDelay, [this]() -> void {
+        setProgressDescription("");
+    });
 }
 
 std::int32_t Task::getSubtaskIndex(const QString& subtaskName) const

@@ -46,6 +46,15 @@ protected:
      */
     virtual void setTask(Task* task) final;
 
+signals:
+    
+    /**
+     * Signals that the current task has changed to \p currentTask
+     * @param previousTask Pointer to previous task (if any)
+     * @param currentTask Pointer to current task
+     */
+    void taskChanged(Task* previousTask, Task* currentTask);
+
 private:
     Task*   _task;    /** Pointer to task to handle */
 };

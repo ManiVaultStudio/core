@@ -24,6 +24,12 @@ void AbstractTaskHandler::setTask(Task* task)
 
     if (task == nullptr)
         return;
+
+    const auto previousTask = _task;
+
+    _task = task;
+
+    emit taskChanged(previousTask, _task);
 }
 
 }

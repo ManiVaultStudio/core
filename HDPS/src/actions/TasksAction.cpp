@@ -28,7 +28,7 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
     _tasksIconPixmap()
 {
     _tasksFilterModel.setSourceModel(&_tasksModel);
-    _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "RunningIndeterminate" });
+    _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "RunningIndeterminate", "Finished" });
 
     _tasksIconPixmap = Application::getIconFont("FontAwesome").getIcon("tasks").pixmap(tasksIconPixmapSize);
 
@@ -47,6 +47,8 @@ TasksFilterModel& TasksAction::getTasksFilterModel()
 
 void TasksAction::filterModelChanged()
 {
+    qDebug() << __FUNCTION__;
+
     QPixmap iconPixmap(tasksIconPixmapSize);
 
     iconPixmap.fill(Qt::transparent);
