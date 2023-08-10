@@ -36,15 +36,21 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
             //qDebug() << "Changing Appearance to " << currentText << ".";
             if(currentText == "System")
             {
+#ifdef Q_OS_MACX
                 macSetToAutoTheme();
+#endif // Q_OS_MACX
             }
             else if(currentText == "Dark")
             {
+#ifdef Q_OS_MACX
                 macSetToDarkTheme();
+#endif // Q_OS_MACX
             }
             else if(currentText == "Light")
             {
+#ifdef Q_OS_MACX
                 macSetToLightTheme();
+#endif // Q_OS_MACX
             }
         };
         connect(_appearanceOptionAction, &gui::OptionAction::currentTextChanged, this, appearanceOptionCurrentIndexChanged);
