@@ -202,12 +202,11 @@ void WidgetActionLabel::updateNameLabel()
 void WidgetActionLabel::updateCustomStyle()
 {
     // update custome style settings
-    // Only catching the non-hovered cases here
-    // in the unlikely event that a label is hovered when the theme change occurs it would update on mouseout
-    // and the link color is the same for light and dark mode
+    // TODO: using palette() of the widget here assumes the containing widget is correct
+    // this is currently not the case, so this might need revisiting once other widgets are fully implemented
     if (getAction()->isEnabled() && isEnabled()) {
         if (getAction()->mayPublish(WidgetAction::Gui) && _nameLabel.underMouse())
-            _nameLabel.setStyleSheet("color: gray;");
+            _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(palette().link().color().name()));
         else
             _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(palette().text().color().name()));
             ;
