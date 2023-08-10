@@ -309,20 +309,7 @@ void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)
     _treeWidget.setSelectionMode(QAbstractItemView::NoSelection);
     _treeWidget.setUniformRowHeights(false);
     _treeWidget.setEditTriggers(QTreeWidget::NoEditTriggers);
-
-    // Remove border from tree widget
-    _treeWidget.setStyleSheet("QTreeWidget { border: none; }");
-
-    QStyleOption styleOption;
-
-    styleOption.initFrom(&_treeWidget);
-
-    auto palette = _treeWidget.palette();
-
-    palette.setColor(QPalette::Base, styleOption.palette.color(QPalette::Normal, QPalette::Button));
-
-    _treeWidget.setPalette(palette);
-
+    
     // Add tree widget to the layout
     _layout.addWidget(&_treeWidget);
 
@@ -333,6 +320,10 @@ void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)
     // Show/hide group section tree items when requested
     connect(_groupsAction, &GroupsAction::groupActionShown, this, &Widget::showGroupAction);
     connect(_groupsAction, &GroupsAction::groupActionHidden, this, &Widget::hideGroupAction);
+    
+    // We do all styling here
+    updateCustomStyle();
+    connect(qApp, &QApplication::paletteChanged, this, &GroupsAction::Widget::updateCustomStyle);
 }
 
 void GroupsAction::Widget::updateToolbar()
@@ -441,6 +432,17 @@ void GroupsAction::Widget::hideGroupAction(GroupAction* groupAction)
     Q_ASSERT(_groupSectionTreeItems.contains(groupAction));
 
     _groupSectionTreeItems[groupAction]->setHidden(_groupsAction->isGroupActionHidden(groupAction));
+}
+
+void GroupsAction::Widget::updateCustomStyle()
+{
+    // update custome style settings
+    auto color = QApplication::palette().color(QPalette::Normal, QPalette::Button).name();
+    QString styleSheet = QString("QTreeWidget { border: none; background-color: %1;}").arg(color);
+    
+    //_treeWidget.setPalette(palette);
+    _treeWidget.setStyleSheet(styleSheet);
+
 }
 
 }
