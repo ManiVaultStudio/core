@@ -101,7 +101,7 @@ QIcon IconFont::getIcon(const QString& name, const QColor& foregroundColor/*= QC
         QColor fontColor = foregroundColor;
         if( fontColor == QColor(0, 0, 0, 0) ) // assume that 0 opacity means we want the system default
         {
-            if(qApp->palette().window().color().lightnessF() < 0.5) // foreground color is light
+            if(qApp->palette().window().color().lightnessF() < 0.5)
             {
                 fontColor = QColor(255, 255, 255, 255);
             } else {

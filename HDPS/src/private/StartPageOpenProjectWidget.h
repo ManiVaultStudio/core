@@ -50,6 +50,12 @@ private:
 
     /** Update actions for opening example projects */
     void updateExamplesActions();
+    
+    /** Create the custom drawn icons  */
+    void createCustomIcons();
+    
+    /** Update all  custom style elements */
+    void updateCustomStyle();
 
 private:
     StartPageContentWidget*         _startPageContentWidget;    /** Non-owning pointer to start page content widget */

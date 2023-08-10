@@ -56,7 +56,6 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
 
     _iconLabel.setStyleSheet("padding-top: 3px;");
     _titleLabel.setStyleSheet("font-weight: bold;");
-    _metaDataLabel.setStyleSheet("color: dark-gray;");
 
     if (StartPageAction::isCompactView()) {
         _textLayout.addLayout(&_primaryTextLayout);
@@ -194,6 +193,9 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
     _subtitleLabel.installEventFilter(this);
     _titleLabel.installEventFilter(this);
     _metaDataLabel.installEventFilter(this);
+    
+    updateCustomStyle();
+    connect(qApp, &QApplication::paletteChanged, this, &StartPageActionDelegateEditorWidget::updateCustomStyle);
 
     updateInfoWidgetVisibility();
 }
@@ -260,6 +262,17 @@ void StartPageActionDelegateEditorWidget::updateInfoWidgetVisibility()
 
     _infoWidget.setVisible(QWidget::underMouse());
 }
+
+void StartPageActionDelegateEditorWidget::updateCustomStyle()
+{
+    QString stylesheet = "dark-grey";
+    if(qApp->palette().window().color().lightnessF() < 0.5)
+    {
+        stylesheet = "light-grey";
+    }
+    _metaDataLabel.setStyleSheet(stylesheet);
+}
+
 
 StartPageActionDelegateEditorWidget::IconLabel::IconLabel(const QIcon& icon, QWidget* parent /*= nullptr*/) :
     QLabel(parent),

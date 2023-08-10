@@ -23,7 +23,8 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/, co
     _layout(),
     _model(this),
     _filterModel(this),
-    _hierarchyWidget(this, "Item", _model, &_filterModel, true, true)
+    _hierarchyWidget(this, "Item", _model, &_filterModel, true, true),
+    _restyle(restyle)
 {
     if (!title.isEmpty())
         _layout.addWidget(StartPageContentWidget::createHeaderLabel(title, title));
@@ -74,35 +75,8 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/, co
     treeViewHeader->setStretchLastSection(false);
 
     treeViewHeader->setSectionResizeMode(static_cast<int>(StartPageActionsModel::Column::SummaryDelegate), QHeaderView::Stretch);
-
-    auto styleSheet = QString(" \
-            QTreeView::item:hover:!selected { \
-                background-color: rgba(0, 0, 0, 50); \
-            } \
-            QTreeView::item:selected { \
-                background-color: rgba(0, 0, 0, 100); \
-            } \
-    ");
-
-    if (restyle) {
-        styleSheet += QString(" \
-            QTreeView { \
-                border: none; \
-            } \
-        ");
-
-        QPalette treeViewPalette(treeView.palette());
-
-        QStyleOption styleOption;
-
-        styleOption.initFrom(&treeView);
-
-        treeViewPalette.setColor(QPalette::Base, styleOption.palette.color(QPalette::Normal, QPalette::Midlight));
-
-        treeView.setPalette(treeViewPalette);
-    }
-
-    treeView.setStyleSheet(styleSheet);
+    
+    updateCustomStyle();
 
     connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
         auto callback = index.siblingAtColumn(static_cast<int>(StartPageActionsModel::Column::ClickedCallback)).data(Qt::UserRole + 1).value<StartPageAction::ClickedCallback>();
@@ -120,6 +94,8 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/, co
         for (int rowIndex = first; rowIndex <= last; rowIndex++)
             openPersistentEditor(rowIndex);
     });
+    
+    connect(qApp, &QApplication::paletteChanged, this, &StartPageActionsWidget::updateCustomStyle);
 }
 
 QVBoxLayout& StartPageActionsWidget::getLayout()
@@ -172,4 +148,29 @@ void StartPageActionsWidget::closePersistentEditor(int rowIndex)
 
         _hierarchyWidget.getTreeView().closePersistentEditor(index);
     }
+}
+
+void StartPageActionsWidget::updateCustomStyle()
+{
+    auto styleSheet = QString(" \
+            QTreeView::item:hover:!selected { \
+                background-color: rgba(0, 0, 0, 50); \
+            } \
+            QTreeView::item:selected { \
+                background-color: rgba(0, 0, 0, 100); \
+            } \
+    ");
+    
+    auto& treeView = _hierarchyWidget.getTreeView();
+    if (_restyle) {
+        styleSheet += QString(" \
+            QTreeView { \
+                border: none; \
+            } \
+        ");
+    }
+    
+    auto color = QApplication::palette().color(QPalette::Normal, QPalette::Midlight).name();
+    styleSheet += QString("QTreeView { background-color: %1;}").arg(color);
+    treeView.setStyleSheet(styleSheet);
 }
