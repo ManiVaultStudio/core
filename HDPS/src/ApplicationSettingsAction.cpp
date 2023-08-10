@@ -5,28 +5,50 @@
 #include "ApplicationSettingsAction.h"
 #include "Application.h"
 
+#ifdef Q_OS_MACX
+#include "util/MacThemeHelper.h"
+#endif // Q_OS_MACX
+
 namespace hdps
 {
 
 ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Application"),
-    _appearanceOptionAction(this, "Appearance", QStringList({"Light", "Dark", "System"}), "System")
+    _appearanceOptionAction(nullptr)
 {
     setShowLabels(true);
     
-    _appearanceOptionAction.setDefaultWidgetFlags(gui::OptionAction::HorizontalButtons);
-    _appearanceOptionAction.setSettingsPrefix(getSettingsPrefix() + "AppearanceOption");
+    bool themesAvailable = false;
     
-    //_appearanceOptionAction.getWidget(_appearanceOptionAction, gui::OptionAction::HorizontalButtons);
+#ifdef Q_OS_MACX
+    themesAvailable = macDarkThemeAvailable();
+#endif // Q_OS_MACX
     
-    
-    //_backgroundImage(":/Images/StartPageBackground"),
-    
-    addAction(&_appearanceOptionAction);
-
-    //connect(&_expertModeAction, &ToggleAction::toggled, this, updateExpertModeActionTooltip);
-
-    //_expertModeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("user-graduate"));
+    if( themesAvailable )
+    {
+        _appearanceOptionAction = new gui::OptionAction(this, "Appearance", QStringList({"System", "Dark", "Light"}), "System");
+        _appearanceOptionAction->setDefaultWidgetFlags(gui::OptionAction::HorizontalButtons);
+        _appearanceOptionAction->setSettingsPrefix(getSettingsPrefix() + "AppearanceOption");
+            
+        addAction(_appearanceOptionAction);
+        
+        const auto appearanceOptionCurrentIndexChanged = [this](const QString& currentText) -> void {
+            //qDebug() << "Changing Appearance to " << currentText << ".";
+            if(currentText == "System")
+            {
+                macSetToAutoTheme();
+            }
+            else if(currentText == "Dark")
+            {
+                macSetToDarkTheme();
+            }
+            else if(currentText == "Light")
+            {
+                macSetToLightTheme();
+            }
+        };
+        connect(_appearanceOptionAction, &gui::OptionAction::currentTextChanged, this, appearanceOptionCurrentIndexChanged);
+    }
 }
 
 }

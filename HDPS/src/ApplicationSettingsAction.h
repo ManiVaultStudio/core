@@ -31,10 +31,10 @@ public:
 
 public: // Action getters
 
-    gui::OptionAction& getAppearanceOptionAction() { return _appearanceOptionAction; }
+    gui::OptionAction* getAppearanceOptionAction() { return _appearanceOptionAction; }
 
 private:
-    gui::OptionAction   _appearanceOptionAction;       /** Options for dark, light, or system appearance */
+    gui::OptionAction* _appearanceOptionAction;       /** Options for dark, light, or system appearance */
 };
 
 }

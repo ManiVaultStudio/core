@@ -7,6 +7,7 @@
 
 #include <QDebug>
 #include <QResizeEvent>
+#include <Application.h>
 
 #include <algorithm>
 
@@ -38,8 +39,9 @@ StartPageHeaderWidget::StartPageHeaderWidget(QWidget* parent /*= nullptr*/) :
 
     _layout.setContentsMargins(50, 25, 50, 0);
     _layout.addWidget(&_headerLabel);
-
-    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+    
+    updateCustomStyle();
+    connect(qApp, &QApplication::paletteChanged, this, &StartPageHeaderWidget::updateCustomStyle);
 }
 
 void StartPageHeaderWidget::resizeEvent(QResizeEvent* event)
@@ -66,4 +68,10 @@ void StartPageHeaderWidget::resizeIcon(const QSize& newSize)
 
         _previousHeight = newSize.height();
     }
+}
+
+void StartPageHeaderWidget::updateCustomStyle()
+{
+    // update custome style settings
+    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }

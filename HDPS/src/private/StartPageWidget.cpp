@@ -62,13 +62,16 @@ void StartPageWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPalet
 {
     Q_ASSERT(widget != nullptr);
 
-    QStyleOption styleOption;
+    //QStyleOption styleOption;
 
-    styleOption.initFrom(widget);
+    //styleOption.initFrom(widget);
+    
+    // When the palette is changed during runtime, the system is updated before the widget
+    // Therefore we translate the colorRole to a color using the global palette instead of the widget style option
+    auto color = QApplication::palette().color(QPalette::Normal, colorRole);
 
     auto palette = widget->palette();
-
-    palette.setColor(widget->backgroundRole(), styleOption.palette.color(QPalette::Normal, colorRole));
-
+    palette.setColor(widget->backgroundRole(), color);
+    
     widget->setPalette(palette);
 }
