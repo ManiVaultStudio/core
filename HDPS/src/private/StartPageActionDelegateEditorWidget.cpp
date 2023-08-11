@@ -266,7 +266,7 @@ void StartPageActionDelegateEditorWidget::updateInfoWidgetVisibility()
 void StartPageActionDelegateEditorWidget::updateCustomStyle()
 {
     QString stylesheet = "dark-grey";
-    if(qApp->palette().window().color().lightnessF() < 0.5)
+    if(qApp->palette().text().color().lightnessF() > 0.5)
     {
         stylesheet = "light-grey";
     }

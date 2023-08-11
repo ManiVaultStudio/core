@@ -101,12 +101,7 @@ void StartPageOpenProjectWidget::createIconForDefaultProject(const Qt::Alignment
     painter.setWindow(0, 0, size, size);
 
     const auto drawWindow = [&](QRectF rectangle) -> void {
-        if(qApp->palette().window().color().lightnessF() < 0.5) // foreground color is light
-        {
-            painter.setBrush(Qt::white);
-        } else {
-            painter.setBrush(Qt::black);
-        }
+        painter.setBrush(qApp->palette().text().color());
         painter.setPen(Qt::NoPen);
         painter.drawRect(rectangle);
     };
