@@ -48,21 +48,21 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _widget.addAction(&_isolateAction);
     _widget.addAction(&_helpAction);
 
-    _editorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _editorAction.setIconByName("cog");
     _editorAction.setShortcut(tr("F12"));
     _editorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _editorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _editorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
     _editorAction.setConnectionPermissionsToForceNone();
 
-    _screenshotAction.setIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
+    _screenshotAction.setIconByName("camera");
     _screenshotAction.setShortcut(tr("F2"));
     _screenshotAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
     _screenshotAction.setConnectionPermissionsToForceNone();
 
-    _isolateAction.setIcon(Application::getIconFont("FontAwesome").getIcon("crosshairs"));
+    _isolateAction.setIconByName("crosshairs");
     _isolateAction.setShortcut(tr("F3"));
     _isolateAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _isolateAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);

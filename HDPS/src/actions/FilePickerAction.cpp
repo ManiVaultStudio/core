@@ -33,7 +33,7 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const 
     _filePathAction.setCompleter(&_completer);
 
     _pickAction.setDefaultWidgetFlags(TriggerAction::Icon);
-    _pickAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+    _pickAction.setIconByName("folder-open");
     
     const auto updatePickActionToolTip = [this]() -> void {
         _pickAction.setToolTip(QString("Click to browse for %1").arg(getFileType().toLower()));

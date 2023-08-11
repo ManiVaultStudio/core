@@ -28,9 +28,9 @@ LockingAction::LockingAction(QObject* parent, const QString& what /*= ""*/, bool
 
 void LockingAction::initialize(bool locked /*= false*/)
 {
-    _lockedAction.setIcon(Application::getIconFont("FontAwesome").getIcon("lock"));
-    _lockAction.setIcon(Application::getIconFont("FontAwesome").getIcon("lock"));
-    _unlockAction.setIcon(Application::getIconFont("FontAwesome").getIcon("unlock"));
+    _lockedAction.setIconByName("lock");
+    _lockAction.setIconByName("lock");
+    _unlockAction.setIconByName("unlock");
 
     _lockAction.setToolTip("Lock");
     _unlockAction.setToolTip("Unlock");

@@ -50,7 +50,7 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _editAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _editAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _editAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
-    _editAction.setIcon(fontAwesome.getIcon("cog"));
+    _editAction.setIconByName("cog");
     _editAction.setToolTip("Edit the splash screen settings");
     _editAction.setPopupSizeHint(QSize(350, 0));
 
@@ -61,15 +61,15 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _editAction.addAction(&_backgroundColorAction);
 
     _showSplashScreenAction.setDefaultWidgetFlags(TriggerAction::Icon);
-    _showSplashScreenAction.setIcon(fontAwesome.getIcon("eye"));
+    _showSplashScreenAction.setIconByName("eye");
     _showSplashScreenAction.setToolTip("Preview the splash screen");
 
     _projectImageAction.setDefaultWidgetFlags(ImageAction::Loader);
-    _projectImageAction.setIcon(fontAwesome.getIcon("image"));
+    _projectImageAction.setIconByName("image");
     _projectImageAction.setToolTip("Project image");
 
     _affiliateLogosImageAction.setDefaultWidgetFlags(ImageAction::Loader);
-    _affiliateLogosImageAction.setIcon(fontAwesome.getIcon("image"));
+    _affiliateLogosImageAction.setIconByName("image");
     _affiliateLogosImageAction.setToolTip("Affiliate logos image");
 
     addAction(&_enabledAction);

@@ -16,7 +16,7 @@ DimensionPickerAction::DimensionPickerAction(QObject* parent, const QString& tit
     _searchThreshold(DEFAULT_SEARCH_THRESHOLD)
 {
     setText(title);
-    setIcon(Application::getIconFont("FontAwesome").getIcon("adjust"));
+    setIconByName("adjust");
 
     _currentDimensionAction.setToolTip("Current dimension");
 

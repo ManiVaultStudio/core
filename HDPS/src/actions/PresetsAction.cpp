@@ -39,7 +39,7 @@ PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const 
     setText("Presets");
     setConnectionPermissionsToForceNone(true);
 
-    _editAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _editAction.setIconByName("cog");
     _editAction.setToolTip(QString("Manage %1 presets").arg(_presetType.toLower()));
 
     connect(&_editAction, &TriggerAction::triggered, this, [this]() -> void {

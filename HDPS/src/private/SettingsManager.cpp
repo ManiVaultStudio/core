@@ -35,7 +35,7 @@ SettingsManager::SettingsManager() :
         _editSettingsAction.setMenuRole(QAction::PreferencesRole);
     } else {
         _editSettingsAction.setShortcut(QKeySequence("Ctrl+G"));
-        _editSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+        _editSettingsAction.setIconByName("cogs");
     }
         
     connect(&_editSettingsAction, &TriggerAction::triggered, this, &SettingsManager::edit);

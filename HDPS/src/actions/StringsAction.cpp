@@ -175,11 +175,11 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
     stringsAction->getNameAction().setClearable(true);
     stringsAction->getNameAction().setPlaceHolderString(QString("Enter %1 name here...").arg(stringsAction->getCategory().toLower()));
 
-    stringsAction->getAddAction().setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
+    stringsAction->getAddAction().setIconByName("plus");
     stringsAction->getAddAction().setToolTip(QString("Add entered %1").arg(stringsAction->getCategory().toLower()));
     stringsAction->getAddAction().setDefaultWidgetFlags(TriggerAction::Icon);
 
-    stringsAction->getRemoveAction().setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
+    stringsAction->getRemoveAction().setIconByName("trash");
     stringsAction->getRemoveAction().setToolTip(QString("Remove selected %1(s)").arg(stringsAction->getCategory().toLower()));
     stringsAction->getRemoveAction().setDefaultWidgetFlags(TriggerAction::Icon);
 

@@ -16,7 +16,7 @@ SubsetAction::SubsetAction(ClustersActionWidget* clustersActionWidget) :
     _subsetNameAction(this, "Subset name"),
     _createSubsetAction(this, "Create subset")
 {
-    setIcon(Application::getIconFont("FontAwesome").getIcon("crop"));
+    setIconByName("crop");
 
     _subsetNameAction.setToolTip("Name of the subset");
     _subsetNameAction.setPlaceHolderString("Enter subset name here...");

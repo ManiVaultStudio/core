@@ -29,12 +29,12 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    _publishAction.setIcon(fontAwesome.getIcon("cloud-upload-alt"));
-    _connectAction.setIcon(fontAwesome.getIcon("crosshairs"));
-    _disconnectAction.setIcon(fontAwesome.getIcon("unlink"));
-    _disconnectAllAction.setIcon(fontAwesome.getIcon("unlink"));
-    _removeAction.setIcon(fontAwesome.getIcon("trash"));
-    _editAction.setIcon(fontAwesome.getIcon("edit"));
+    _publishAction.setIconByName("cloud-upload-alt");
+    _connectAction.setIconByName("crosshairs");
+    _disconnectAction.setIconByName("unlink");
+    _disconnectAllAction.setIconByName("unlink");
+    _removeAction.setIconByName("trash");
+    _editAction.setIconByName("edit");
 
     auto firstAction = _actions.first();
 

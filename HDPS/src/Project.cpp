@@ -155,7 +155,7 @@ void Project::initialize()
     _descriptionAction.setPlaceHolderString("Enter project description here...");
     _descriptionAction.setClearable(true);
 
-    _tagsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tag"));
+    _tagsAction.setIconByName("tag");
     _tagsAction.setCategory("Tag");
     _tagsAction.setStretch(2);
 
@@ -164,7 +164,7 @@ void Project::initialize()
     _commentsAction.setStretch(2);
     _commentsAction.setDefaultWidgetFlags(StringAction::TextEdit);
 
-    _contributorsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("user"));
+    _contributorsAction.setIconByName("user");
     _contributorsAction.setCategory("Contributor");
     _contributorsAction.setEnabled(false);
     _contributorsAction.setStretch(1);
@@ -172,7 +172,7 @@ void Project::initialize()
 
     updateContributors();
 
-    _studioModeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("pencil-ruler"));
+    _studioModeAction.setIconByName("pencil-ruler");
     
     connect(&_studioModeAction, &ToggleAction::toggled, this, &Project::setStudioMode);
 

@@ -15,7 +15,7 @@ DimensionsPickerFilterAction::DimensionsPickerFilterAction(DimensionsPickerActio
     _nameFilterAction(this, "Name filter")
 {
     setText("Filter");
-    setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
+    setIconByName("filter");
 
     // Update the proxy model filter name when the name filter action string changes
     connect(&_nameFilterAction, &StringAction::stringChanged, this, [this](const QString& name) {

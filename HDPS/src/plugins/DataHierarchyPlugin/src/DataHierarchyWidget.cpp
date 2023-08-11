@@ -111,7 +111,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     treeView.setItemDelegate(new ItemDelegate());
 
-    _groupingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
+    _groupingAction.setIconByName("object-group");
     _groupingAction.setToolTip("Enable/disable dataset grouping");
 
     connect(&_groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::onGroupingActionToggled);

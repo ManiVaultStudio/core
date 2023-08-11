@@ -45,7 +45,7 @@ DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& t
     _summaryUpdateAwakeConnection()
 {
     setText("Dimensions");
-    setIcon(Application::getIconFont("FontAwesome").getIcon("columns"));
+    setIconByName("columns");
 
     _summaryAction.setEnabled(false);
 

@@ -24,7 +24,7 @@ DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerActio
     _loadExclusionAction(this, "Load exclusion")
 {
     setText("Select");
-    setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+    setIconByName("mouse-pointer");
 
     //_selectionThresholdAction.setEnabled(false);
 
@@ -36,8 +36,8 @@ DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerActio
     _saveSelectionAction.setToolTip("Save dimension selection to file");
     _loadExclusionAction.setToolTip("Load dimension exclusion selection to file");
 
-    _selectVisibleAction.setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
-    _selectNonVisibleAction.setIcon(Application::getIconFont("FontAwesome").getIcon("eye-slash"));
+    _selectVisibleAction.setIconByName("eye");
+    _selectNonVisibleAction.setIconByName("eye-slash");
 
     _selectVisibleAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _selectNonVisibleAction.setDefaultWidgetFlags(TriggerAction::Icon);

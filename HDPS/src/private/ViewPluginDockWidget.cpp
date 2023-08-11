@@ -102,11 +102,9 @@ QString ViewPluginDockWidget::getTypeString() const
 
 void ViewPluginDockWidget::initialize()
 {
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
+    _toggleMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("low-vision"));
 
-    _toggleMenu.setIcon(fontAwesome.getIcon("low-vision"));
-
-    _helpAction.setIcon(fontAwesome.getIcon("question"));
+    _helpAction.setIconByName("question");
     _helpAction.setShortcut(tr("F1"));
     _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);

@@ -40,7 +40,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title, const Colo
     _customColorMapGroupAction(this, "Custom color map"),
     _settingsAction(*this, "Settings")
 {
-    setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
+    setIconByName("paint-roller");
     setDefaultWidgetFlags(WidgetFlag::Default);
 
     initialize(colorMap);

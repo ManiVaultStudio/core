@@ -68,7 +68,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _filterNameAction.setConnectionPermissionsToForceNone();
 
     _filterGroupAction.setText("Filtering");
-    _filterGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
+    _filterGroupAction.setIconByName("filter");
     _filterGroupAction.setToolTip("Adjust filtering parameters");
     _filterGroupAction.setConnectionPermissionsToForceNone();
 
@@ -82,12 +82,12 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _filterGroupAction.addAction(&_filterCaseSensitiveAction);
     _filterGroupAction.addAction(&_filterRegularExpressionAction);
 
-    _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));
+    _expandAllAction.setIconByName("angle-double-down");
     _expandAllAction.setToolTip(QString("Expand all %1s in the hierarchy").arg(_itemTypeName.toLower()));
     _expandAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _expandAllAction.setConnectionPermissionsToForceNone();
 
-    _collapseAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-up"));
+    _collapseAllAction.setIconByName("angle-double-up");
     _collapseAllAction.setToolTip(QString("Collapse all %1s in the hierarchy").arg(_itemTypeName.toLower()));
     _collapseAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _collapseAllAction.setConnectionPermissionsToForceNone();
@@ -99,7 +99,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _selectNoneAction.setConnectionPermissionsToForceNone();
 
     _selectionGroupAction.setText("Selection");
-    _selectionGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+    _selectionGroupAction.setIconByName("mouse-pointer");
     _selectionGroupAction.setConnectionPermissionsToForceNone();
 
     _selectionGroupAction.addAction(&_selectAllAction);
@@ -107,7 +107,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
     _columnsGroupAction.setText("Columns");
     _columnsGroupAction.setToolTip(QString("Edit which %1 columns should be visible").arg(_itemTypeName.toLower()));
-    _columnsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("columns"));
+    _columnsGroupAction.setIconByName("columns");
     _columnsGroupAction.setShowLabels(false);
     _columnsGroupAction.setConnectionPermissionsToForceNone();
 
@@ -167,7 +167,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
     _settingsGroupAction.setText("Settings");
     _settingsGroupAction.setToolTip(QString("Edit %1s hierarchy settings").arg(_itemTypeName.toLower()));
-    _settingsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _settingsGroupAction.setIconByName("cog");
     _settingsGroupAction.setVisible(false);
 
     auto layout = new QVBoxLayout();
