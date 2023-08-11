@@ -38,8 +38,9 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toggleProjectFromDataAction.setSettingsPrefix("StartPage/ToggleProjectFromData");
     _toggleTutorialVideosAction.setSettingsPrefix("StartPage/ToggleTutorialVideos");
 
-    _settingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
     _settingsAction.setText("Toggle Views");
+    
+    _settingsAction.setIconByName("eye");
 
     _settingsAction.addAction(&_toggleOpenCreateProjectAction);
     _settingsAction.addAction(&_toggleRecentProjectsAction);

@@ -658,7 +658,23 @@ public: // Studio mode
      * @param recursive Boolean determining whether to also apply the studio mode to child actions recursively
      */
     virtual void setStudioMode(bool studioMode, bool recursive = true) final;
+    
+public: // Font Icon
+    
+    /**
+     * Set the icon using a icon font name (i.e., fontawesome)
+     * @param setIcon the name of the icon in fontawesome v5
+     */
+    virtual void setIconByName(QString namedIcon) final;
 
+private:
+    
+    /** refresh the icon when a icon font is used */
+    void refreshIcon();
+    
+    /** refresh the icon when a icon font is used */
+    void updateCustomStyle();
+    
 signals:
 
     /**
@@ -775,6 +791,7 @@ private:
     std::int32_t                _configuration;                 /** Configuration flags */
     QMap<QString, QVariant>     _cachedStates;                  /** Maps cache name to state */
     QString                     _location;                      /** The path relative to the root in string format */
+    QString                     _namedIcon;                     /** The name of a font awesome icon. When using this the widget can handle icon updates itself, instead of the containing view */
 
 protected:
     friend class hdps::AbstractActionsManager;
