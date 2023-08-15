@@ -150,7 +150,7 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
     hide();
     {
-        auto& task = workspaces().getCurrentWorkspace()->getTask();
+        auto& task = projects().isOpeningProject() ? projects().getCurrentProject()->getTask() : workspaces().getCurrentWorkspace()->getTask();
 
         for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList()) {
             const auto viewPluginMap    = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap();
@@ -158,7 +158,7 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
             const auto pluginMap        = viewPluginMap["Plugin"].toMap();
             const auto guiName          = viewPluginMap["GuiName"].toMap()["Value"].toString();
 
-            task.setProgressDescription(QString("Loading %1").arg(guiName));
+            //task.setProgressDescription(QString("Loading %1").arg(guiName));
 
             if (plugins().isPluginLoaded(pluginKind)) {
                 addViewPluginDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));

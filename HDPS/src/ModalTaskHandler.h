@@ -52,8 +52,8 @@ protected:
 
     private:
 
-        /** Updates the dialog title and icon from the current task */
-        void updateWindowTitleAndIcon();
+        /** Invoked when the number of modal tasks changes */
+        void numberOfModalTasksChanged();
 
     private:
         ModalTaskHandler* _modalTaskHandler;        /** Pointer to owning modal task handler */
@@ -83,9 +83,6 @@ private:
      * @return Boolean determining whether there is a modal tasks dialog live or not
      */
     bool hasDialog() const;
-
-    /** Either show or hide the modal tasks dialog, depending on the number of modal tasks etc. */
-    void updateDialogVisibility();
 
 public: // Action getters    
 

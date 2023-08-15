@@ -22,17 +22,14 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 {
     _tasksAction.setRowHeight(25);
 
-    auto& tasksFilterModel = _tasksAction.getTasksFilterModel();
+    auto& tasksModel        = _tasksAction.getTasksModel();
+    auto& tasksFilterModel  = _tasksAction.getTasksFilterModel();
 
     tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
     tasksFilterModel.getTaskTypeFilterAction().selectOption("ModalTask");
 
     const auto updateVisibility = [this, &tasksFilterModel]() -> void {
         const auto numberOfRows = tasksFilterModel.rowCount();
-
-        //qDebug() << "Number of modal tasks is" << numberOfRows;
-
-        //treeView->setFixedHeight((numberOfRows + 1) * ModalTask::tasksAction.getRowHeight());
 
         if (numberOfRows == 0 && hasDialog())
             destroyDialog();
@@ -45,6 +42,7 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateVisibility);
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibility);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::dataChanged, this, updateVisibility);
 }
 
 void ModalTaskHandler::init()
@@ -87,11 +85,6 @@ bool ModalTaskHandler::hasDialog() const
     return _modalTasksDialog != nullptr;
 }
 
-void ModalTaskHandler::updateDialogVisibility()
-{
-
-}
-
 ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTaskHandler, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _modalTaskHandler(modalTaskHandler)
@@ -114,7 +107,7 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     Q_ASSERT(treeView != nullptr);
 
     if (treeView != nullptr) {
-        treeView->setStyleSheet("QTreeView { border: none; }");
+        treeView->setStyleSheet("QTreeView { border: none; } QTreeView::item { padding-top: 15px; }");
 
         treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Name), true);
         treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Status), true);
@@ -129,13 +122,13 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
 
     auto& tasksFilterModel = _modalTaskHandler->getTasksAction().getTasksFilterModel();
 
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &ModalTasksDialog::updateWindowTitleAndIcon);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &ModalTasksDialog::updateWindowTitleAndIcon);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &ModalTasksDialog::numberOfModalTasksChanged);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &ModalTasksDialog::numberOfModalTasksChanged);
 
-    updateWindowTitleAndIcon();
+    numberOfModalTasksChanged();
 }
 
-void ModalTaskHandler::ModalTasksDialog::updateWindowTitleAndIcon()
+void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
 {
     auto& tasksAction       = _modalTaskHandler->getTasksAction();
     auto& taskFilterModel   = tasksAction.getTasksFilterModel();

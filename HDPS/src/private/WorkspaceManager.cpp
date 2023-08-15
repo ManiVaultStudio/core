@@ -299,12 +299,6 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                 fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileDialog), rowCount + 2, 0);
                 fileDialogLayout->addWidget(commentsAction.createWidget(&fileDialog), rowCount + 2, 1, 1, 2);
 
-                //QLabel label("Preview:");
-                //QLabel image("");
-
-                //fileDialogLayout->addWidget(&label, rowCount, 0);
-                //fileDialogLayout->addWidget(&image, rowCount, 1, 1, 2);
-
                 connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
                         return;
@@ -314,8 +308,6 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                     descriptionAction.setString(workspace.getDescriptionAction().getString());
                     tagsAction.setString(workspace.getTagsAction().getStrings().join(", "));
                     commentsAction.setString(workspace.getDescriptionAction().getString());
-
-                    //    image.setPixmap(QPixmap::fromImage(Workspace::getPreviewImage(filePath).scaledToWidth(650, Qt::SmoothTransformation)));
                 });
 
                 fileDialog.open();
@@ -335,20 +327,23 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                 Application::current()->setSetting("Workspaces/WorkingDirectory", QFileInfo(filePath).absolutePath());
             }
 
-            auto& task = getCurrentWorkspace()->getTask();
+            if (!projects().isOpeningProject()) {
+                auto& task = getCurrentWorkspace()->getTask();
 
-            task.setDescription(QString("Opening ManiVault workspace from %1").arg(filePath));
-            task.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-            task.setName(QString("Open %1").arg(filePath));
-            task.setSubtasks(getViewPluginNames(QFileInfo(filePath).absoluteFilePath()));
-            task.setRunning();
+                task.setDescription(QString("Opening ManiVault workspace from %1").arg(filePath));
+                task.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+                task.setName(QString("Open %1").arg(filePath));
+                task.setSubtasks(getViewPluginNames(QFileInfo(filePath).absoluteFilePath()));
+                task.setRunning();
+            }
 
             fromJsonFile(filePath);
 
             if (addToRecentWorkspaces)
                 _recentWorkspacesAction.addRecentFilePath(filePath);
 
-            task.setFinished(true);
+            if (!projects().isOpeningProject())
+                getCurrentWorkspace()->getTask().setFinished(true);
         }
         endLoadWorkspace();
     }

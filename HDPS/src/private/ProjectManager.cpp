@@ -437,21 +437,17 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             task.setName(QString("Open %1").arg(filePath));
             task.setRunning();
 
-            qDebug() << __FUNCTION__ << "A";
+            QCoreApplication::processEvents();
 
             Archiver archiver;
 
             archiver.extractSingleFile(filePath, "workspace.json", QFileInfo(temporaryDirectoryPath, "workspace.json").absoluteFilePath());
 
-            qDebug() << __FUNCTION__ << "B";
-
             const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
-            const auto tasksNames = archiver.getTaskNamesForDecompression(filePath) << "Import data";
+            const auto tasksNames = archiver.getTaskNamesForDecompression(filePath) << "Create data hierarchy" << workspaces().getViewPluginNames(workspaceFileInfo.absoluteFilePath());
 
             task.setSubtasks(tasksNames);
-
-            qDebug() << __FUNCTION__ << "C";
 
             connect(&task, &Task::aborted, this, [this]() -> void {
                 Application::setSerializationAborted(true);
@@ -459,22 +455,16 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 throw std::runtime_error("Canceled before project was loaded");
             });
 
-            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemLoading, this, [&task](DataHierarchyItem& loadingItem) {
-                task.setProgressDescription(QString("Loading %1").arg(loadingItem.getLocation()));
-            });
-
             connect(&archiver, &Archiver::taskStarted, &task, qOverload<const QString&>(&Task::setSubtaskStarted));
             connect(&archiver, &Archiver::taskFinished, &task, qOverload<const QString&>(&Task::setSubtaskFinished));
 
             archiver.decompress(filePath, temporaryDirectoryPath);
 
-            qDebug() << __FUNCTION__ << "D";
-
-            task.setSubtaskStarted("Import data");
+            task.setSubtaskStarted("Create data hierarchy");
             {
                 projects().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
             }
-            task.setSubtaskFinished("Import data");
+            task.setSubtaskFinished("Create data hierarchy");
 
             if (loadWorkspace) {
                 if (workspaceFileInfo.exists())

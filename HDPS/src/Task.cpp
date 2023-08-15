@@ -438,6 +438,8 @@ void Task::setSubtaskFinished(std::uint32_t subtaskIndex)
 
     if (!subtaskDescription.isEmpty())
         setProgressDescription(subtaskDescription);
+
+    QCoreApplication::processEvents();
 }
 
 void Task::setSubtaskFinished(const QString& subtaskName)
@@ -464,6 +466,8 @@ void Task::setSubtaskStarted(const QString& subtaskName)
         return;
 
     emit progressDescriptionChanged(_subtasksNames[subtaskIndex]);
+
+    QCoreApplication::processEvents();
 }
 
 void Task::setSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName)
