@@ -7,9 +7,9 @@
 
 namespace hdps {
 
-AbstractTaskHandler::AbstractTaskHandler(QObject* parent /*= nullptr*/) :
+AbstractTaskHandler::AbstractTaskHandler(QObject* parent, Task* task) :
     QObject(parent),
-    _task(nullptr)
+    _task(task)
 {
 }
 

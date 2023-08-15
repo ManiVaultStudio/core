@@ -7,10 +7,21 @@
 
 namespace hdps {
 
+using namespace gui;
+
+ModalTaskHandler* ModalTask::modalTaskHandler = nullptr;
+
 ModalTask::ModalTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
     Task(parent, name, status, mayKill, nullptr)
 {
-    setHandler(new ModalTaskHandler(this));
+}
+
+void ModalTask::createHandler(QObject* parent)
+{
+    if (ModalTask::modalTaskHandler != nullptr)
+        return;
+
+    ModalTask::modalTaskHandler = new ModalTaskHandler(parent);
 }
 
 }

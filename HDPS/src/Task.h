@@ -9,6 +9,7 @@
 #include <QObject>
 #include <QBitArray>
 #include <QTimer>
+#include <QIcon>
 
 namespace hdps {
 
@@ -88,7 +89,7 @@ public:
      */
     virtual bool hasParentTask() final;
 
-public: // Name, description and may kill
+public: // Name, description, icon and may kill
 
     /**
      * Get task name
@@ -110,6 +111,15 @@ public: // Name, description and may kill
      * @param description Task description
      */
     virtual void setDescription(const QString& description) final;
+
+    /** Gets the task icon */
+    virtual QIcon getIcon() const final;
+
+    /**
+     * Sets the task icon to \p icon
+     * @param icon Task icon
+     */
+    virtual void setIcon(const QIcon& icon) final;
 
     /**
      * Get whether the task may be killed or not
@@ -342,16 +352,23 @@ signals:
     void descriptionChanged(const QString& description);
 
     /**
+     * Signals that the task icon changed to \p icon
+     * @param icon Modified icon
+     */
+    void iconChanged(const QIcon& icon);
+
+    /**
      * Signals that the task handler changed to \p handler
      * @param handler Task handler
      */
     void handlerChanged(AbstractTaskHandler* handler);
 
     /**
-     * Signals that the task status changed to \p status
+     * Signals that the task status changed from \p previousStatus to \p status
+     * @param previousStatus Status before the modification
      * @param status Modified name
      */
-    void statusChanged(const Status& status);
+    void statusChanged(const Status& previousStatus, const Status& status);
 
     /**
      * Signals that may kill changed to \p mayKill
@@ -403,6 +420,7 @@ signals:
 private:
     QString                 _name;                                          /** Task name */
     QString                 _description;                                   /** Task description */
+    QIcon                   _icon;                                          /** Task icon */
     Status                  _status;                                        /** Task status */
     bool                    _mayKill;                                       /** Whether the task may be killed or not */
     AbstractTaskHandler*    _handler;                                       /** Task handler */

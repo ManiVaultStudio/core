@@ -22,8 +22,9 @@ public:
     /**
     * Construct task handler with \p parent object
     * @param parent Pointer to parent object
+    * @param task Pointer to task to handle
     */
-    BackgroundTaskHandler(QObject* parent);
+    BackgroundTaskHandler(QObject* parent, Task* task);
 
     /** Initializes the handler */
     void init() override;

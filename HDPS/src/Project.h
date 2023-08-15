@@ -14,6 +14,8 @@
 #include "actions/ProjectSplashScreenAction.h"
 #include "actions/VersionAction.h"
 
+#include "ModalTask.h"
+
 #include "ProjectCompressionAction.h"
 
 #include "Application.h"
@@ -62,6 +64,12 @@ public:
     void setFilePath(const QString& filePath);
 
 public: // Miscellaneous
+
+    /**
+     * Get task
+     * @return Modal task (for IO operations)
+     */
+    virtual ModalTask& getTask() final;
 
     /**
      * Get version of the application (major and minor version number) with which the project is created
@@ -153,6 +161,7 @@ private:
     ProjectCompressionAction        _compressionAction;         /** Project compression action */
     gui::ProjectSplashScreenAction  _splashScreenAction;        /** Action for configuring the project splash screen */
     gui::ToggleAction               _studioModeAction;          /** Toggle between view- and studio mode action */
+    ModalTask                       _task;                      /** Modal task for reporting project tasks */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

@@ -140,9 +140,9 @@ public: // Managers
     AbstractDataManager& getDataManager() override;
     AbstractDataHierarchyManager& getDataHierarchyManager() override;
     AbstractWorkspaceManager& getWorkspaceManager() override;
+    AbstractTaskManager& getTaskManager() override;
     AbstractProjectManager& getProjectManager() override;
     AbstractSettingsManager& getSettingsManager() override;
-    AbstractTaskManager& getTaskManager() override;
 
 private:
     QScopedPointer<ActionsManager>          _actionsManager;            /** Actions manager for storing actions */
@@ -151,10 +151,10 @@ private:
     QScopedPointer<DataManager>             _dataManager;               /** Data manager responsible for storing data sets and data selections */
     QScopedPointer<DataHierarchyManager>    _dataHierarchyManager;      /** Data hierarchy manager for providing a hierarchical dataset structure */
     QScopedPointer<WorkspaceManager>        _workspaceManager;          /** Workspace manager for controlling widgets layout */
+    QScopedPointer<TaskManager>             _taskManager;               /** Manager for managing global tasks */
     QScopedPointer<ProjectManager>          _projectManager;            /** Manager for loading/saving projects */
     QScopedPointer<SettingsManager>         _settingsManager;           /** Manager for managing global settings */
-    QScopedPointer<TaskManager>             _taskManager;               /** Manager for managing global tasks */
-
+    
     friend class DataHierarchyManager;
 };
 

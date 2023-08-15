@@ -8,9 +8,20 @@
 namespace hdps {
 
 DatasetTask::DatasetTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
-    Task(parent, name, status, mayKill, nullptr)
+    Task(parent, name, status, mayKill, nullptr),
+    _dataset()
 {
-    setHandler(new DatasetTaskHandler(this));
+    setHandler(new DatasetTaskHandler(this, this));
+}
+
+Dataset<DatasetImpl> DatasetTask::getDataset()
+{
+    return _dataset;
+}
+
+void DatasetTask::setDataset(Dataset<DatasetImpl> dataset)
+{
+    _dataset = dataset;
 }
 
 }

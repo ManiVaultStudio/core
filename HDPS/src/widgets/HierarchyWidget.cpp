@@ -47,7 +47,9 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _toolbarAction(this, "Toolbar")
 {
     if (_filterModel) {
-        _filterModel->setSourceModel(const_cast<QAbstractItemModel*>(&_model));
+        if (_filterModel->sourceModel() != &_model)
+            _filterModel->setSourceModel(const_cast<QAbstractItemModel*>(&_model));
+
         _treeView.setModel(_filterModel);
     }
     else {
@@ -540,6 +542,8 @@ void HierarchyWidget::updateFilterModel()
 
     _filterModel->setFilterKeyColumn(_filterColumnAction.getCurrentIndex());
 
+    auto shouldInvalidateFilterModel = false;
+
     //_filterModel->setRecursiveFilteringEnabled(!_filterNameAction.getString().isEmpty());
 
     if (_filterRegularExpressionAction.isChecked()) {
@@ -550,18 +554,28 @@ void HierarchyWidget::updateFilterModel()
         if (!_filterCaseSensitiveAction.isChecked())
             regularExpression.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
 
-        if (regularExpression.isValid())
+        if (regularExpression.isValid() && (regularExpression != _filterModel->filterRegularExpression())) {
             _filterModel->setFilterRegularExpression(regularExpression);
+
+            shouldInvalidateFilterModel = true;
+        }
     }
     else {
         const auto filterColumn = _model.headerData(_filterModel->filterKeyColumn(), Qt::Horizontal).toString().toLower();
 
         _filterNameAction.setPlaceHolderString(QString("Search for %1 by %2").arg(itemTypeNameLowered, filterColumn));
-        _filterModel->setFilterFixedString(_filterNameAction.getString());
+
+        if (QRegularExpression(_filterNameAction.getString()) != _filterModel->filterRegularExpression()) {
+            _filterModel->setFilterFixedString(_filterNameAction.getString());
+
+            shouldInvalidateFilterModel = true;
+        }
     }
 
     _filterModel->setFilterCaseSensitivity(_filterCaseSensitiveAction.isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
-    _filterModel->invalidate();
+
+    if (shouldInvalidateFilterModel)
+        _filterModel->invalidate();
 
     updateOverlayWidget();
 }

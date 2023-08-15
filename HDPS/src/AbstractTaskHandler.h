@@ -26,8 +26,9 @@ public:
     /**
     * Construct task handler with \p parent object
     * @param parent Pointer to parent object
+    * @param task Pointer to task to handle
     */
-    AbstractTaskHandler(QObject* parent);
+    AbstractTaskHandler(QObject* parent, Task* task);
 
     /** Initializes the handler */
     virtual void init() = 0;
@@ -36,7 +37,7 @@ public:
      * Get task
      * @return Pointer to task
      */
-    Task* getTask();
+    virtual Task* getTask() final;
 
 protected:
 

@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Task.h"
+#include "Dataset.h"
 
 namespace hdps {
 
@@ -29,6 +30,18 @@ public:
     * @param mayKill Boolean determining whether the task may be killed or not
     */
     DatasetTask(QObject* parent, const QString& name, const Status& status = Status::Undefined, bool mayKill = false);
+
+    /** Get the dataset that the task refers to */
+    Dataset<DatasetImpl> getDataset();
+
+    /**
+     * Set dataset to \p dataset
+     * @param dataset The dataset that the task refers to
+     */
+    void setDataset(Dataset<DatasetImpl> dataset);
+
+private:
+    Dataset<DatasetImpl>    _dataset;       /** The dataset that the task refers to */
 };
 
 }

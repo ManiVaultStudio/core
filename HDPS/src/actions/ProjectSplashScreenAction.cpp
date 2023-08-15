@@ -73,7 +73,7 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent) :
     _affiliateLogosImageAction.setIcon(fontAwesome.getIcon("image"));
     _affiliateLogosImageAction.setToolTip("Affiliate logos image");
 
-    _loadTaskAction.setTask(hdps::projects().getFileIOTask());
+    //_loadTaskAction.setTask(&hdps::projects().getTask());
 
     addAction(&_enabledAction);
     addAction(&_editAction);

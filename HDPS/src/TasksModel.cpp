@@ -4,9 +4,10 @@
 
 #include "TasksModel.h"
 
-#include <util/Exception.h>
+#include "Application.h"
+#include "CoreInterface.h"
 
-using namespace hdps::gui;
+#include <util/Exception.h>
 
 #ifdef _DEBUG
     #define TASKS_MODEL_VERBOSE

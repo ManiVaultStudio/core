@@ -11,6 +11,8 @@
 #include "actions/StringsAction.h"
 #include "actions/ToggleAction.h"
 
+#include "ModalTask.h"
+
 namespace hdps {
 
 /**
@@ -44,6 +46,12 @@ public:
      * @return Location on disk where the workspace resides
      */
     QString getFilePath() const;
+
+    /**
+     * Get task
+     * @return Modal task (for IO operations)
+     */
+    virtual ModalTask& getTask() final;
 
 protected:
 
@@ -101,6 +109,7 @@ private:
     gui::StringAction   _descriptionAction;     /** Workspace description action */
     gui::StringsAction  _tagsAction;            /** Workspace tags action */
     gui::StringAction   _commentsAction;        /** Workspace comments action */
+    ModalTask           _task;                  /** Modal task for reporting workspace tasks */
 
     friend class AbstractWorkspaceManager;
 };

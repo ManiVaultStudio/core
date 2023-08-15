@@ -6,7 +6,6 @@
 
 #include "AbstractManager.h"
 #include "Project.h"
-#include "FileIOTask.h"
 
 #include "actions/TriggerAction.h"
 #include "actions/RecentFilesAction.h"
@@ -77,8 +76,7 @@ public:
      */
     AbstractProjectManager(QObject* parent = nullptr) :
         AbstractManager(parent, "Project"),
-        _state(State::Idle),
-        _fileIOTask(nullptr)
+        _state(State::Idle)
     {
     }
 
@@ -104,7 +102,7 @@ public:
      * @param importDataOnly Whether to only import the data from the project
      * @param loadWorkspace Whether to load the workspace which is accompanied with the project
      */
-    virtual void openProject(QString filePath = "", bool importDataOnly = true, bool loadWorkspace = true) = 0;
+    virtual void openProject(QString filePath = "", bool importDataOnly = false, bool loadWorkspace = true) = 0;
 
     /**
      * Import project from \p filePath (only import the data)
@@ -161,20 +159,6 @@ public:
      * @return Preview image
      */
     virtual QImage getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const = 0;
-
-    /**
-     * Get file IO task
-     * @return File IO task
-     */
-    virtual FileIOTask* getFileIOTask() final {
-        if (_fileIOTask == nullptr) {
-            _fileIOTask = new FileIOTask(this, "Project File IO");
-
-            _fileIOTask->setProgressMode(Task::ProgressMode::Subtasks);
-        }
-
-        return _fileIOTask;
-    }
 
 public: // Menus
 
@@ -337,8 +321,7 @@ signals:
     void stateChanged(const State& state);
 
 private:
-    State       _state;         /** Determines the state of the project manager */
-    FileIOTask* _fileIOTask;    /** Task for reporting file IO operations */
+    State       _state;     /** Determines the state of the project manager */
 };
 
 }

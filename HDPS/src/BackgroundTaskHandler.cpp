@@ -6,8 +6,8 @@
 
 namespace hdps {
 
-BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent /*= nullptr*/) :
-    AbstractTaskHandler(parent)
+BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent, Task* task) :
+    AbstractTaskHandler(parent, task)
 {
 }
 

@@ -25,7 +25,8 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
     _tasksModel(this),
     _tasksFilterModel(this),
-    _tasksIconPixmap()
+    _tasksIconPixmap(),
+    _rowHeight(20)
 {
     _tasksFilterModel.setSourceModel(&_tasksModel);
     _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "RunningIndeterminate", "Finished" });
@@ -47,8 +48,6 @@ TasksFilterModel& TasksAction::getTasksFilterModel()
 
 void TasksAction::filterModelChanged()
 {
-    qDebug() << __FUNCTION__;
-
     QPixmap iconPixmap(tasksIconPixmapSize);
 
     iconPixmap.fill(Qt::transparent);
@@ -81,6 +80,16 @@ void TasksAction::filterModelChanged()
     setToolTip(QString("Tasks: %1").arg(QString::number(numberOfTasks)));
 }
 
+void TasksAction::setRowHeight(std::int32_t rowHeight)
+{
+    _rowHeight = rowHeight;
+}
+
+std::int32_t TasksAction::getRowHeight() const
+{
+    return _rowHeight;
+}
+
 /** Tree view item delegate class for showing custom task progress user interface */
 class ProgressItemDelegate : public QStyledItemDelegate {
 public:
@@ -89,9 +98,28 @@ public:
      * Construct with \p parent object
      * @param parent Pointer to parent object
      */
-    explicit ProgressItemDelegate(QObject* parent = nullptr) :
-        QStyledItemDelegate(parent)
+    explicit ProgressItemDelegate(TasksAction* tasksAction) :
+        QStyledItemDelegate(tasksAction),
+        _tasksAction(tasksAction)
     {
+    }
+
+    /**
+     * Override QItemDelegate::sizeHint() to establish fixed height
+     * @param option Style view option
+     * @param index Index to obtain the style hint for
+     */
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
+    {
+        auto modifiedOption = option;
+
+        modifiedOption.displayAlignment = Qt::AlignVCenter;
+
+        auto size = QStyledItemDelegate::sizeHint(modifiedOption, index);
+
+        size.setHeight(_tasksAction->getRowHeight());
+
+        return size;
     }
 
 protected:
@@ -111,7 +139,11 @@ protected:
 
         auto progressWidget = ProgressAction::BarWidget(nullptr, &progressAction, 0);
 
-        progressWidget.setGeometry(option.rect);
+        auto rect = option.rect;
+
+        rect.setHeight(_tasksAction->getRowHeight());
+
+        progressWidget.setGeometry(rect);
 
         painter->save();
         painter->translate(option.rect.topLeft());
@@ -120,6 +152,9 @@ protected:
         
         painter->restore();
     }
+
+private:
+    TasksAction* _tasksAction;
 };
 
 TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags) :
@@ -128,28 +163,23 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));
 
+    _tasksWidget.setObjectName("HierarchyWidget");
     _tasksWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
-    //_tasksWidget.setHeaderHidden(true);
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskTypeFilterAction());
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskStatusFilterAction());
 
     _tasksWidget.getFilterColumnAction().setCurrentText("Name");
 
-    //_tasksWidget.getToolbarAction().addAction(&tasksAction->getTasksFilterModel().getTaskStatusFilterAction());
-
     auto& treeView = _tasksWidget.getTreeView();
 
+    treeView.setObjectName("TreeView");
     treeView.setRootIsDecorated(false);
 
-    //treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Status), true);
-    //treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Name), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ID), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ParentID), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ProgressDescription), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ProgressText), true);
-    //treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Type), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::MayKill), true);
-    //treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Kill), true);
 
     auto treeViewHeader = treeView.header();
 
@@ -158,7 +188,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
 
     treeView.setTextElideMode(Qt::ElideMiddle);
 
-    treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Progress), new ProgressItemDelegate(this));
+    treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Progress), new ProgressItemDelegate(tasksAction));
 
     treeViewHeader->setStretchLastSection(false);
 

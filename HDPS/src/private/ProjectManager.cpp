@@ -430,39 +430,51 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             qDebug().noquote() << "Open ManiVault project from" << filePath;
 
-            getFileIOTask()->setName(QString("Open %1").arg(filePath));
-            getFileIOTask()->setRunning();
+            auto& task = getCurrentProject()->getTask();
+
+            task.setDescription(QString("Opening ManiVault project from %1").arg(filePath));
+            task.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+            task.setName(QString("Open %1").arg(filePath));
+            task.setRunning();
+
+            qDebug() << __FUNCTION__ << "A";
 
             Archiver archiver;
 
             archiver.extractSingleFile(filePath, "workspace.json", QFileInfo(temporaryDirectoryPath, "workspace.json").absoluteFilePath());
 
+            qDebug() << __FUNCTION__ << "B";
+
             const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
-            const auto tasksNames = archiver.getTaskNamesForDecompression(filePath) << "Import data" << workspaces().getViewPluginNames(workspaceFileInfo.absoluteFilePath());
+            const auto tasksNames = archiver.getTaskNamesForDecompression(filePath) << "Import data";
 
-            getFileIOTask()->setSubtasks(tasksNames);
+            task.setSubtasks(tasksNames);
 
-            connect(getFileIOTask(), &Task::aborted, this, [this]() -> void {
+            qDebug() << __FUNCTION__ << "C";
+
+            connect(&task, &Task::aborted, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was loaded");
             });
 
-            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemLoading, this, [](DataHierarchyItem& loadingItem) {
-                //taskProgressDialog.setCurrentTask("Importing dataset: " + loadingItem.getFullPathName());
+            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemLoading, this, [&task](DataHierarchyItem& loadingItem) {
+                task.setProgressDescription(QString("Loading %1").arg(loadingItem.getLocation()));
             });
 
-            connect(&archiver, &Archiver::taskStarted, getFileIOTask(), qOverload<const QString&>(&Task::setSubtaskStarted));
-            connect(&archiver, &Archiver::taskFinished, getFileIOTask(), qOverload<const QString&>(&Task::setSubtaskFinished));
+            connect(&archiver, &Archiver::taskStarted, &task, qOverload<const QString&>(&Task::setSubtaskStarted));
+            connect(&archiver, &Archiver::taskFinished, &task, qOverload<const QString&>(&Task::setSubtaskFinished));
 
             archiver.decompress(filePath, temporaryDirectoryPath);
 
-            getFileIOTask()->setSubtaskStarted("Import data");
+            qDebug() << __FUNCTION__ << "D";
+
+            task.setSubtaskStarted("Import data");
             {
                 projects().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
             }
-            getFileIOTask()->setSubtaskFinished("Import data");
+            task.setSubtaskFinished("Import data");
 
             if (loadWorkspace) {
                 if (workspaceFileInfo.exists())
@@ -479,7 +491,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (disableReadOnlyAction.isEnabled() && disableReadOnlyAction.isChecked())
                 _project->getReadOnlyAction().setChecked(disableReadOnlyAction.isChecked());
 
-            getFileIOTask()->setFinished(true);
+            task.setFinished(true);
 
             qDebug().noquote() << filePath << "loaded successfully";
         }
@@ -637,17 +649,21 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
+            auto& task = currentProject->getTask();
+
             if (currentProject->getCompressionAction().getEnabledAction().isChecked())
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "with compression level" << currentProject->getCompressionAction().getLevelAction().getValue();
             else
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "without compression";
 
-            getFileIOTask()->setName(QString("Save to %1").arg(filePath));
-            getFileIOTask()->setRunning();
+            task.setDescription(QString("Saving ManiVault project to %1").arg(filePath));
+            task.setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
+            task.setName(QString("Save to %1").arg(filePath));
+            task.setRunning();
 
             Archiver archiver;
 
-            connect(getFileIOTask(), &Task::aborted, this, [this]() -> void {
+            connect(&task, &Task::aborted, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was saved");
@@ -665,20 +681,20 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             tasks << archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath);
 
-            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaving, this, [this](DataHierarchyItem& dataHierarchyItem) {
-                getFileIOTask()->setProgressDescription("Exporting dataset: " + dataHierarchyItem.getLocation());
+            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaving, this, [&task](DataHierarchyItem& dataHierarchyItem) {
+                task.setProgressDescription("Exporting dataset: " + dataHierarchyItem.getLocation());
             });
 
-            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaved, this, [this](DataHierarchyItem& dataHierarchyItem) {
-                getFileIOTask()->setSubtaskFinished(dataHierarchyItem.getLocation());
+            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaved, this, [&task](DataHierarchyItem& dataHierarchyItem) {
+                task.setSubtaskFinished(dataHierarchyItem.getLocation());
             });
 
             projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
 
-            getFileIOTask()->setSubtaskFinished("Export data model");
+            task.setSubtaskFinished("Export data model");
 
-            connect(&archiver, &Archiver::taskStarted, getFileIOTask(), qOverload<const QString&>(&Task::setSubtaskStarted));
-            connect(&archiver, &Archiver::taskFinished, getFileIOTask(), qOverload<const QString&>(&Task::setSubtaskFinished));
+            connect(&archiver, &Archiver::taskStarted, &task, qOverload<const QString&>(&Task::setSubtaskStarted));
+            connect(&archiver, &Archiver::taskFinished, &task, qOverload<const QString&>(&Task::setSubtaskFinished));
 
             ProjectMeta projectMeta(_project.get());
 
@@ -694,7 +710,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             _project->setFilePath(filePath);
 
-            getFileIOTask()->setFinished(true);
+            task.setFinished(true);
 
             qDebug().noquote() << filePath << "saved successfully";
         }
@@ -858,6 +874,11 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
+
+            auto& task = currentProject->getTask();
+
+            task.setDescription(QString("Publishing ManiVault project: %1").arg(filePath));
+            task.setIcon(Application::getIconFont("FontAwesome").getIcon("cloud-upload-alt"));
                 
             auto& workspaceLockingAction = workspaces().getCurrentWorkspace()->getLockingAction();
 
@@ -956,7 +977,7 @@ QString ProjectManager::extractFileFromManiVaultProject(const QString& maniVault
 
 void ProjectManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    createProject();
+    //createProject();
 
     _project->fromVariantMap(variantMap);
 }

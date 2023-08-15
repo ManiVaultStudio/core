@@ -17,6 +17,7 @@ TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
     _taskStatusFilterAction(this, "Task Status", Task::statusNames.values(), Task::statusNames.values()),
     _statusTypeCounts()
 {
+    setDynamicSortFilter(true);
     setRecursiveFilteringEnabled(true);
 
     _taskStatusFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);

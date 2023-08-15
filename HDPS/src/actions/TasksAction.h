@@ -92,6 +92,15 @@ public:
      */
     TasksFilterModel& getTasksFilterModel();
 
+    /**
+     * Set row height to \p rowHeight
+     * @param rowHeight Row height in pixels
+     */
+    void setRowHeight(std::int32_t rowHeight);
+
+    /** Get row height */
+    std::int32_t getRowHeight() const;
+
 private:
 
     /** Invoked when the filter model layout changes */
@@ -101,6 +110,7 @@ private:
     TasksModel          _tasksModel;            /** Model with all tasks in the system */
     TasksFilterModel    _tasksFilterModel;      /** Filter model for tasks */
     QPixmap             _tasksIconPixmap;       /** Tasks icon pixmap underlay (count badge will be drawn on top) */
+    std::int32_t        _rowHeight;             /** Row height in pixels */
 
     static const QSize tasksIconPixmapSize;
 };

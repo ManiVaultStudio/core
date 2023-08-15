@@ -24,6 +24,7 @@ Task::Task(QObject* parent, const QString& name, const Status& status /*= Status
     Serializable(name),
     _name(name),
     _description(),
+    _icon(),
     _status(status),
     _mayKill(mayKill),
     _handler(handler),
@@ -47,10 +48,14 @@ Task::Task(QObject* parent, const QString& name, const Status& status /*= Status
 
     connect(&getTimer(TimerType::ProgressChanged), &QTimer::timeout, this, [this]() -> void {
         emit progressChanged(_progress);
+
+        QCoreApplication::processEvents();
     });
 
     connect(&getTimer(TimerType::ProgressDescriptionChanged), &QTimer::timeout, this, [this]() -> void {
         emit progressDescriptionChanged(_progressDescription);
+
+        QCoreApplication::processEvents();
     });
 }
 
@@ -96,6 +101,18 @@ void Task::setDescription(const QString& description)
     _description = description;
 
     emit descriptionChanged(_description);
+}
+
+QIcon Task::getIcon() const
+{
+    return _icon;
+}
+
+void Task::setIcon(const QIcon& icon)
+{
+    _icon = icon;
+
+    emit iconChanged(_icon);
 }
 
 bool Task::getMayKill() const
@@ -162,11 +179,13 @@ void Task::setStatus(const Status& status)
     if (status == _status)
         return;
 
+    const auto previousStatus = _status;
+
     _status = status;
 
     updateProgress();
 
-    emit statusChanged(_status);
+    emit statusChanged(previousStatus, _status);
 
     switch (_status)
     {
@@ -219,14 +238,12 @@ void Task::setFinished(bool toIdleWithDelay /*= true*/, std::uint32_t delay /*= 
     setStatus(Status::Finished);
 
     setProgress(0.f);
+    setProgressDescription("Finished", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 
     if (toIdleWithDelay) {
         QTimer::singleShot(delay, this, [this]() -> void {
             setIdle();
         });
-    }
-    else {
-        setProgressDescription("Finished", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
     }
 }
 
@@ -470,7 +487,7 @@ QString Task::getProgressDescription() const
     return _progressDescription;
 }
 
-void Task::setProgressDescription(const QString& progressDescription, std::uint32_t clearDelay /*= TASK_DESCRIPTION_DISAPPEAR_INTERVAL*/)
+void Task::setProgressDescription(const QString& progressDescription, std::uint32_t clearDelay /*= 0*/)
 {
     if (progressDescription == _progressDescription)
         return;
@@ -480,9 +497,11 @@ void Task::setProgressDescription(const QString& progressDescription, std::uint3
     if (!getTimer(TimerType::ProgressDescriptionChanged).isActive())
         getTimer(TimerType::ProgressDescriptionChanged).start();
 
-    QTimer::singleShot(clearDelay, [this]() -> void {
-        setProgressDescription("");
-    });
+    if (clearDelay > 0) {
+        QTimer::singleShot(clearDelay, [this]() -> void {
+            setProgressDescription("");
+        });
+    }
 }
 
 std::int32_t Task::getSubtaskIndex(const QString& subtaskName) const
@@ -534,7 +553,7 @@ void Task::updateProgress()
         getTimer(TimerType::ProgressChanged).start();
 
     if (_status == Status::Finished || _status == Status::Aborted)
-        setProgressDescription("");
+        setProgressDescription("", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 }
 
 QTimer& Task::getTimer(const TimerType& timerType)

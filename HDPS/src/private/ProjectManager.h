@@ -177,5 +177,4 @@ private:
     hdps::gui::TriggerAction            _publishAction;                     /** Action for publishing the project to an end-user */
     hdps::gui::TriggerAction            _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
     hdps::gui::ToggleAction             _showStartPageAction;               /** Action for toggling the start page */
-    hdps::FileIOTask*                   _task;                              /** Task for keeping track of file IO operations (e.g project open and save) */
 };

@@ -25,7 +25,8 @@ Workspace::Workspace(QObject* parent /*= nullptr*/) :
     _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
-    _commentsAction(this, "Comments")
+    _commentsAction(this, "Comments"),
+    _task(this, "Workspace Task")
 {
     initialize();
 }
@@ -38,7 +39,8 @@ Workspace::Workspace(const QString& filePath, QObject* parent /*= nullptr*/) :
     _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
-    _commentsAction(this, "Comments")
+    _commentsAction(this, "Comments"),
+    _task(this, "Workspace Task")
 {
     initialize();
 
@@ -133,6 +135,13 @@ void Workspace::initialize()
     connect(&workspaces().getLockingAction().getLockedAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {
         _lockingAction.setLocked(toggled);
     });
+
+    _task.setProgressMode(Task::ProgressMode::Subtasks);
+}
+
+hdps::ModalTask& Workspace::getTask()
+{
+    return _task;
 }
 
 }

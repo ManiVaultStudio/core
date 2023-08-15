@@ -15,7 +15,7 @@ namespace hdps {
 /**
  * Modal task handler class
  *
- * Interact with tasks in a modal tasks dialog.
+ * Takes care of handling modal tasks (i.e. shows them in a modal tasks dialog).
  *
  * @author Thomas Kroes
  */
@@ -24,21 +24,22 @@ class ModalTaskHandler final : public AbstractTaskHandler
 protected:
 
     /** Dialog for interaction with modal tasks */
-    class ModalTasksDialog : public QDialog {
+    class ModalTasksDialog final : public QDialog {
     public:
 
         /**
          * Construct with \p parent widget
+         * @param modalTaskHandler Pointer to owning modal task handler
          * @param parent Pointer to parent widget
          */
-        ModalTasksDialog(QWidget* parent = nullptr);
+        ModalTasksDialog(ModalTaskHandler* modalTaskHandler, QWidget* parent = nullptr);
 
         /**
          * Override popup minimum size hint
          * @return Minimum size hint
          */
         QSize minimumSizeHint() const override {
-            return QSize(600, 100);
+            return QSize(800, 0);
         }
 
         /**
@@ -50,7 +51,12 @@ protected:
         }
 
     private:
-        gui::TasksAction    _tasksAction;   /** Tasks action */
+
+        /** Updates the dialog title and icon from the current task */
+        void updateWindowTitleAndIcon();
+
+    private:
+        ModalTaskHandler* _modalTaskHandler;        /** Pointer to owning modal task handler */
     };
 
 public:
@@ -63,9 +69,32 @@ public:
 
     /** Initializes the handler */
     void init() override;
-   
+
 private:
-    //static ModalTasksDialog     modalTasksDialog;   /** Modal tasks dialog */
+
+    /** Create modal tasks dialog (initializes ModalTaskHandler#_modalTasksDialog if it is not a nullptr) */
+    void createDialog();
+
+    /** Destroys the modal tasks dialog */
+    void destroyDialog();
+
+    /**
+     * Determine whether there is a modal tasks dialog live or not
+     * @return Boolean determining whether there is a modal tasks dialog live or not
+     */
+    bool hasDialog() const;
+
+    /** Either show or hide the modal tasks dialog, depending on the number of modal tasks etc. */
+    void updateDialogVisibility();
+
+public: // Action getters    
+
+    /** Get tasks action for displaying the model tasks */
+    gui::TasksAction& getTasksAction() { return _tasksAction; };
+
+private:
+    gui::TasksAction                    _tasksAction;           /** Tasks action */
+    std::unique_ptr<ModalTasksDialog>   _modalTasksDialog;      /** Modal tasks dialog */
 };
 
 }

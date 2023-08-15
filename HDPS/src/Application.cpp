@@ -5,8 +5,10 @@
 #include "Application.h"
 
 #include "CoreInterface.h"
+
 #include "util/FontAwesome.h"
 #include "util/Exception.h"
+
 #include "actions/WidgetAction.h"
 
 #include <stdexcept>

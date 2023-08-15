@@ -654,12 +654,10 @@ set(PUBLIC_TASK_HEADERS
     src/Task.h
     src/ModalTask.h
     src/BackgroundTask.h
-    src/FileIOTask.h
     src/DatasetTask.h
     src/AbstractTaskHandler.h
     src/ModalTaskHandler.h
     src/BackgroundTaskHandler.h
-    src/FileIOTaskHandler.h
     src/DatasetTaskHandler.h
     src/TasksModel.h
     src/TasksFilterModel.h
@@ -669,12 +667,10 @@ set(PUBLIC_TASK_SOURCES
     src/Task.cpp
     src/ModalTask.cpp
     src/BackgroundTask.cpp
-    src/FileIOTask.cpp
     src/DatasetTask.cpp
     src/AbstractTaskHandler.cpp
     src/ModalTaskHandler.cpp
     src/BackgroundTaskHandler.cpp
-    src/FileIOTaskHandler.cpp
     src/DatasetTaskHandler.cpp
     src/TasksModel.cpp
     src/TasksFilterModel.cpp

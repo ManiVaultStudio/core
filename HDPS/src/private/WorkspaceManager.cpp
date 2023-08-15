@@ -335,10 +335,20 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                 Application::current()->setSetting("Workspaces/WorkingDirectory", QFileInfo(filePath).absolutePath());
             }
 
+            auto& task = getCurrentWorkspace()->getTask();
+
+            task.setDescription(QString("Opening ManiVault workspace from %1").arg(filePath));
+            task.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+            task.setName(QString("Open %1").arg(filePath));
+            task.setSubtasks(getViewPluginNames(QFileInfo(filePath).absoluteFilePath()));
+            task.setRunning();
+
             fromJsonFile(filePath);
 
             if (addToRecentWorkspaces)
                 _recentWorkspacesAction.addRecentFilePath(filePath);
+
+            task.setFinished(true);
         }
         endLoadWorkspace();
     }

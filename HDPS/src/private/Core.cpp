@@ -7,6 +7,7 @@
 #include "MainWindow.h"
 #include "PluginManager.h"
 #include "GroupDataDialog.h"
+#include "ModalTaskHandler.h"
 
 #include <LoaderPlugin.h>
 #include <WriterPlugin.h>
@@ -54,9 +55,9 @@ void Core::init()
     _dataManager.reset(new DataManager());
     _dataHierarchyManager.reset(new DataHierarchyManager());
     _workspaceManager.reset(new WorkspaceManager());
+    _taskManager.reset(new TaskManager());
     _projectManager.reset(new ProjectManager());
     _settingsManager.reset(new SettingsManager());
-    _taskManager.reset(new TaskManager());
 
     _actionsManager->initialize();
     _pluginManager->initialize();
@@ -64,9 +65,11 @@ void Core::init()
     _dataManager->initialize();
     _dataHierarchyManager->initialize();
     _workspaceManager->initialize();
+    _taskManager->initialize();
     _projectManager->initialize();
     _settingsManager->initialize();
-    _taskManager->initialize();
+    
+    ModalTask::createHandler(Application::current());
 
     CoreInterface::init();
 }
@@ -79,9 +82,9 @@ void Core::reset()
     _dataManager->reset();
     _dataHierarchyManager->reset();
     _workspaceManager->reset();
+    _taskManager->reset();
     _projectManager->reset();
     _settingsManager->reset();
-    _taskManager->reset();
 }
 
 void Core::addPlugin(plugin::Plugin* plugin)
@@ -353,9 +356,9 @@ QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& 
     return allDataSets;
 }
 
-AbstractDataManager& Core::getDataManager()
+AbstractActionsManager& Core::getActionsManager()
 {
-    return *_dataManager;
+    return *_actionsManager;
 }
 
 AbstractPluginManager& Core::getPluginManager()
@@ -363,9 +366,29 @@ AbstractPluginManager& Core::getPluginManager()
     return *_pluginManager;
 }
 
-AbstractActionsManager& Core::getActionsManager()
+AbstractEventManager& Core::getEventManager()
 {
-    return *_actionsManager;
+    return *_eventManager;
+}
+
+AbstractDataManager& Core::getDataManager()
+{
+    return *_dataManager;
+}
+
+AbstractDataHierarchyManager& Core::getDataHierarchyManager()
+{
+    return *_dataHierarchyManager;
+}
+
+AbstractWorkspaceManager& Core::getWorkspaceManager()
+{
+    return *_workspaceManager;
+}
+
+AbstractTaskManager& Core::getTaskManager()
+{
+    return *_taskManager;
 }
 
 AbstractProjectManager& Core::getProjectManager()
@@ -376,26 +399,6 @@ AbstractProjectManager& Core::getProjectManager()
 AbstractSettingsManager& Core::getSettingsManager()
 {
     return *_settingsManager;
-}
-
-AbstractTaskManager& Core::getTaskManager()
-{
-    return *_taskManager;
-}
-
-AbstractDataHierarchyManager& Core::getDataHierarchyManager()
-{
-    return *_dataHierarchyManager;
-}
-
-AbstractEventManager& Core::getEventManager()
-{
-    return *_eventManager;
-}
-
-AbstractWorkspaceManager& Core::getWorkspaceManager()
-{
-    return *_workspaceManager;
 }
 
 bool Core::isDatasetGroupingEnabled() const

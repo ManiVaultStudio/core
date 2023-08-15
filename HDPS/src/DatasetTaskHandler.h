@@ -8,6 +8,8 @@
 
 namespace hdps {
 
+class DatasetTask;
+
 /**
  * Dataset task handler class
  *
@@ -23,14 +25,17 @@ public:
     /**
     * Construct task handler with \p parent object
     * @param parent Pointer to parent object
+    * @param datasetTask Pointer to dataset task to handle
     */
-    DatasetTaskHandler(QObject* parent);
+    DatasetTaskHandler(QObject* parent, DatasetTask* datasetTask);
 
     /** Initializes the handler */
     void init() override;
    
 private:
-    //static ModalTasksDialog     modalTasksDialog;   /** Modal tasks dialog */
+
+    /** Get pointer to dataset task */
+    DatasetTask* getDatasetTask();
 };
 
 }

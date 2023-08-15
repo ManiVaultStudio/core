@@ -30,7 +30,8 @@ Project::Project(QObject* parent /*= nullptr*/) :
     _contributorsAction(this, "Contributors"),
     _compressionAction(this),
     _splashScreenAction(this),
-    _studioModeAction(this, "Studio Mode")
+    _studioModeAction(this, "Studio Mode"),
+    _task(this, "Project Task")
 {
     initialize();
 }
@@ -50,7 +51,8 @@ Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
     _contributorsAction(this, "Contributors"),
     _compressionAction(this),
     _splashScreenAction(this),
-    _studioModeAction(this, "Studio Mode")
+    _studioModeAction(this, "Studio Mode"),
+    _task(this, "Project Task")
 {
     initialize();
 
@@ -179,6 +181,13 @@ void Project::initialize()
 
     connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
+
+    _task.setProgressMode(Task::ProgressMode::Subtasks);
+}
+
+ModalTask& Project::getTask()
+{
+    return _task;
 }
 
 util::Version Project::getVersion() const

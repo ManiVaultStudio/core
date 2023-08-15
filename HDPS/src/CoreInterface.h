@@ -233,9 +233,9 @@ public: // Managers
     virtual AbstractDataManager& getDataManager() = 0;
     virtual AbstractDataHierarchyManager& getDataHierarchyManager() = 0;
     virtual AbstractWorkspaceManager& getWorkspaceManager() = 0;
+    virtual AbstractTaskManager& getTaskManager() = 0;
     virtual AbstractProjectManager& getProjectManager() = 0;
     virtual AbstractSettingsManager& getSettingsManager() = 0;
-    virtual AbstractTaskManager& getTaskManager() = 0;
 
 protected:
     bool    _initialized;               /** Boolean determining whether the core is initialized or not */
@@ -303,6 +303,14 @@ static AbstractWorkspaceManager& workspaces() {
 }
 
 /**
+ * Convenience function to obtain access to the task manager in the core
+ * @return Reference to abstract task manager
+ */
+static AbstractTaskManager& tasks() {
+    return core()->getTaskManager();
+}
+
+/**
  * Convenience function to obtain access to the project manager in the core
  * @return Reference to abstract project manager
  */
@@ -316,14 +324,6 @@ static AbstractProjectManager& projects() {
  */
 static AbstractSettingsManager& settings() {
     return core()->getSettingsManager();
-}
-
-/**
- * Convenience function to obtain access to the task manager in the core
- * @return Reference to abstract task manager
- */
-static AbstractTaskManager& tasks() {
-    return core()->getTaskManager();
 }
 
 }

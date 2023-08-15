@@ -8,6 +8,8 @@
 
 namespace hdps {
 
+class ModalTaskHandler;
+
 /**
  * Modal task class
  *
@@ -17,7 +19,7 @@ namespace hdps {
  */
 class ModalTask final : public Task
 {
-    Q_OBJECT
+    Q_OBJECT   
 
 public:
 
@@ -29,6 +31,15 @@ public:
     * @param mayKill Boolean determining whether the task may be killed or not
     */
     ModalTask(QObject* parent, const QString& name, const Status& status = Status::Undefined, bool mayKill = false);
+
+    /**
+     * Creates singleton modal task handler
+     * @param parent Pointer to parent object
+     */
+    static void createHandler(QObject* parent);
+
+private:
+    static ModalTaskHandler*    modalTaskHandler;   /** Single instance of the modal task handler for  */
 };
 
 }

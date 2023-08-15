@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "CoreInterface.h"
 #include "Task.h"
 
 #include <QStandardItemModel>
