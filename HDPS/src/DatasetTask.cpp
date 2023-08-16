@@ -4,8 +4,11 @@
 
 #include "DatasetTask.h"
 #include "DatasetTaskHandler.h"
+#include "Set.h"
 
 namespace hdps {
+
+using namespace gui;
 
 DatasetTask::DatasetTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
     Task(parent, name, status, mayKill, nullptr),
@@ -21,7 +24,19 @@ Dataset<DatasetImpl> DatasetTask::getDataset()
 
 void DatasetTask::setDataset(Dataset<DatasetImpl> dataset)
 {
+    if (_dataset.isValid())
+        disconnect(_dataset.get(), &WidgetAction::textChanged, this, nullptr);
+
     _dataset = dataset;
+
+    const auto updateName = [this]() -> void {
+        const auto datasetGuiName = _dataset->getGuiName();
+
+        setName(datasetGuiName);
+        setDescription(QString("Task for: %1").arg(datasetGuiName));
+    };
+
+    connect(_dataset.get(), &WidgetAction::textChanged, this, updateName);
 }
 
 }
