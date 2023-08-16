@@ -76,7 +76,7 @@ void PointData::setData(const std::nullptr_t, const std::size_t numPoints, const
 void PointData::setDimensionNames(const std::vector<QString>& dimNames)
 {
     _dimNames = dimNames;
-    _numDimensions = _dimNames.size();
+    _numDimensions = static_cast<unsigned int>(_dimNames.size());
 }
 
 float PointData::getValueAt(const std::size_t index) const
