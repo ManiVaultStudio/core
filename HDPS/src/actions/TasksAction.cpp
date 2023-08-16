@@ -26,7 +26,8 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
     _tasksModel(this),
     _tasksFilterModel(this),
     _tasksIconPixmap(),
-    _rowHeight(20)
+    _rowHeight(20),
+    _progressColumnMargin(0)
 {
     _tasksFilterModel.setSourceModel(&_tasksModel);
     _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "RunningIndeterminate", "Finished" });
@@ -90,6 +91,16 @@ std::int32_t TasksAction::getRowHeight() const
     return _rowHeight;
 }
 
+void TasksAction::setProgressColumnMargin(std::int32_t progressColumnMargin)
+{
+    _progressColumnMargin = progressColumnMargin;
+}
+
+std::int32_t TasksAction::getProgressColumnMargin() const
+{
+    return _progressColumnMargin;
+}
+
 /** Tree view item delegate class for showing custom task progress user interface */
 class ProgressItemDelegate : public QStyledItemDelegate {
 public:
@@ -138,10 +149,12 @@ protected:
         progressAction.setProgress(progress);
 
         auto progressWidget = ProgressAction::BarWidget(nullptr, &progressAction, 0);
+        auto rect           = option.rect;
 
-        auto rect = option.rect;
+        const auto progressColumnMargin = _tasksAction->getProgressColumnMargin();
 
-        rect.setHeight(_tasksAction->getRowHeight());
+        rect.translate(0, progressColumnMargin);
+        rect.setHeight(_tasksAction->getRowHeight() - (2 * progressColumnMargin));
 
         progressWidget.setGeometry(rect);
 

@@ -158,7 +158,7 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
             const auto pluginMap        = viewPluginMap["Plugin"].toMap();
             const auto guiName          = viewPluginMap["GuiName"].toMap()["Value"].toString();
 
-            //task.setProgressDescription(QString("Loading %1").arg(guiName));
+            task.setSubtaskStarted(QString("Loading view: %1").arg(guiName));
 
             if (plugins().isPluginLoaded(pluginKind)) {
                 addViewPluginDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));
@@ -173,7 +173,7 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
                 addViewPluginDockWidget(RightDockWidgetArea, notLoadedDockWidget);
             }
 
-            task.setSubtaskFinished(guiName);
+            task.setSubtaskFinished(QString("Loading view: %1").arg(guiName));
         }
 
         if (!restoreState(QByteArray::fromBase64(variantMap["State"].toString().toUtf8()), variantMap["Version"].toInt()))

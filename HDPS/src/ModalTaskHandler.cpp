@@ -20,7 +20,8 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     _tasksAction(this, "Tasks"),
     _modalTasksDialog()
 {
-    _tasksAction.setRowHeight(25);
+    _tasksAction.setRowHeight(30);
+    _tasksAction.setProgressColumnMargin(2);
 
     auto& tasksModel        = _tasksAction.getTasksModel();
     auto& tasksFilterModel  = _tasksAction.getTasksFilterModel();
@@ -61,6 +62,7 @@ void ModalTaskHandler::createDialog()
     _modalTasksDialog = std::make_unique<ModalTasksDialog>(this);
 
     _modalTasksDialog->open();
+    _modalTasksDialog->adjustSize();
 
     QCoreApplication::processEvents();
 }
@@ -91,10 +93,14 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
 {
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(_modalTaskHandler->getTasksAction().createWidget(this));
+    auto tasksWidget = _modalTaskHandler->getTasksAction().createWidget(this);
+
+    tasksWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+
+    layout->addWidget(tasksWidget);
 
     setLayout(layout);
-
+    
     auto hierarchyWidget = findChild<HierarchyWidget*>("HierarchyWidget");
 
     Q_ASSERT(hierarchyWidget != nullptr);
@@ -107,17 +113,16 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     Q_ASSERT(treeView != nullptr);
 
     if (treeView != nullptr) {
-        treeView->setStyleSheet("QTreeView { border: none; } QTreeView::item { padding-top: 15px; }");
+        treeView->setStyleSheet("QTreeView { border: none; }");
+        
+        treeView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        treeView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
         treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Name), true);
         treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Status), true);
         treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Type), true);
-
-        QPalette palette(treeView->palette());
-
-        palette.setColor(QPalette::Base, QWidget::palette().color(QWidget::backgroundRole()));
-
-        treeView->setPalette(palette);
+        
+        treeView->viewport()->setBackgroundRole(QPalette::Window);
     }
 
     auto& tasksFilterModel = _modalTaskHandler->getTasksAction().getTasksFilterModel();
@@ -131,12 +136,32 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
 void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
 {
     auto& tasksAction       = _modalTaskHandler->getTasksAction();
-    auto& taskFilterModel   = tasksAction.getTasksFilterModel();
+    auto& tasksModel        = tasksAction.getTasksModel();
+    auto& tasksFilterModel  = tasksAction.getTasksFilterModel();
 
-    const auto rowCount = taskFilterModel.rowCount();
+    const auto rowCount = tasksFilterModel.rowCount();
+
+    auto treeView = findChild<HierarchyWidgetTreeView*>("TreeView");
+
+    Q_ASSERT(treeView != nullptr);
+
+    if (treeView != nullptr) {
+        treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Name), rowCount == 1);
+
+        int rowsHeight = 0;
+
+        for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
+            rowsHeight += treeView->rowHeight(tasksFilterModel.index(rowIndex, 0));
+
+        treeView->setMaximumHeight(rowsHeight);
+    }
+
+    QTimer::singleShot(100, [this]() -> void {
+        adjustSize();
+    });
 
     if (rowCount == 1) {
-        const auto sourceModelIndex = taskFilterModel.mapToSource(taskFilterModel.index(0, 0));
+        const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(0, 0));
         const auto item             = dynamic_cast<TasksModel::Item*>(tasksAction.getTasksModel().itemFromIndex(sourceModelIndex));
         const auto task             = item->getTask();
 

@@ -445,7 +445,14 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
-            const auto tasksNames = archiver.getTaskNamesForDecompression(filePath) << "Create data hierarchy" << workspaces().getViewPluginNames(workspaceFileInfo.absoluteFilePath());
+            QStringList viewPluginsTaskNames;
+
+            for (const auto& viewPluginName : workspaces().getViewPluginNames(workspaceFileInfo.absoluteFilePath()))
+                viewPluginsTaskNames << QString("Loading view: %1").arg(viewPluginName);
+
+            qDebug() << viewPluginsTaskNames;
+
+            const auto tasksNames = archiver.getTaskNamesForDecompression(filePath) << "Create data hierarchy" << viewPluginsTaskNames;
 
             task.setSubtasks(tasksNames);
 

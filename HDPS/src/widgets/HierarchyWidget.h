@@ -51,6 +51,14 @@ public:
         emit columnHiddenChanged(column, hide);
     }
 
+    /**
+     * Get row height for \p index (override because the method is protected in QTreeView)
+     * @return Row height
+     */
+    int rowHeight(const QModelIndex& index) const {
+        return QTreeView::rowHeight(index);
+    }
+
 signals:
 
     /**

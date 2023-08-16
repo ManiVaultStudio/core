@@ -39,7 +39,7 @@ protected:
          * @return Minimum size hint
          */
         QSize minimumSizeHint() const override {
-            return QSize(800, 0);
+            return QSize(800, 10);
         }
 
         /**

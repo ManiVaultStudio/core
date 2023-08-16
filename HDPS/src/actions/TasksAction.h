@@ -101,6 +101,15 @@ public:
     /** Get row height */
     std::int32_t getRowHeight() const;
 
+    /**
+     * Set progress column margin to \p progressColumnMargin
+     * @param progressColumnMargin Progress column margin
+     */
+    void setProgressColumnMargin(std::int32_t progressColumnMargin);
+
+    /** Get progress column margin */
+    std::int32_t getProgressColumnMargin() const;
+
 private:
 
     /** Invoked when the filter model layout changes */
@@ -111,6 +120,7 @@ private:
     TasksFilterModel    _tasksFilterModel;      /** Filter model for tasks */
     QPixmap             _tasksIconPixmap;       /** Tasks icon pixmap underlay (count badge will be drawn on top) */
     std::int32_t        _rowHeight;             /** Row height in pixels */
+    std::int32_t        _progressColumnMargin;  /** Progress column margin */
 
     static const QSize tasksIconPixmapSize;
 };
