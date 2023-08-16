@@ -102,5 +102,5 @@ protected:
     ToggleAction        _manualUpdateAction;        /** Manual update action */
 
     /** Above this threshold, selected indices need to be updated manually */
-    static const std::int32_t MANUAL_UPDATE_THRESHOLD = 10000;
+    static const std::int32_t MANUAL_UPDATE_THRESHOLD = 1000;
 };

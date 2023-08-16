@@ -70,15 +70,16 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
 
     _timer.setSingleShot(true);
 
-    const auto lessPointsThanThreshold = [selectedIndicesAction]() -> bool {
+    const auto fewerPointsThanThreshold = [selectedIndicesAction]() -> bool {
         return selectedIndicesAction->getPoints()->getNumPoints() < MANUAL_UPDATE_THRESHOLD;
         };
 
     const auto updateListView = [this, selectedIndicesAction, selectedIndicesListView]() -> void {
         QStringList items;
+        items.reserve(selectedIndicesAction->getSelectedIndices().size());
 
         for (auto selectedIndex : selectedIndicesAction->getSelectedIndices())
-            items << QString::number(selectedIndex);
+            items.emplace_back(QString::number(selectedIndex));
 
         selectedIndicesListView->setModel(new QStringListModel(items, selectedIndicesListView));
     };
@@ -94,8 +95,8 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
 
     connect(&selectedIndicesAction->getManualUpdateAction(), &ToggleAction::toggled, this, enableUpdateTrigger);
 
-    connect(&_timer, &QTimer::timeout, this, [this, updateListView, lessPointsThanThreshold, selectedIndicesAction]() -> void {
-        if (!lessPointsThanThreshold())
+    connect(&_timer, &QTimer::timeout, this, [this, updateListView, fewerPointsThanThreshold, selectedIndicesAction]() -> void {
+        if (!fewerPointsThanThreshold())
             return;
 
         if (_timer.isActive())
@@ -106,10 +107,10 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
         }
     });
 
-    connect(&selectedIndicesAction->getPoints(), &Dataset<Points>::dataChanged, this, [this, selectedIndicesAction, lessPointsThanThreshold]() -> void {
-        selectedIndicesAction->getManualUpdateAction().setChecked(lessPointsThanThreshold());
+    connect(&selectedIndicesAction->getPoints(), &Dataset<Points>::dataChanged, this, [this, selectedIndicesAction, fewerPointsThanThreshold]() -> void {
+        selectedIndicesAction->getManualUpdateAction().setChecked(fewerPointsThanThreshold());
 
-        if (lessPointsThanThreshold())
+        if (fewerPointsThanThreshold())
             _timer.start(LAZY_UPDATE_INTERVAL);
     });
 
@@ -125,6 +126,6 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
 
     enableUpdateTrigger(selectedIndicesAction->getManualUpdateAction().isChecked());
 
-    if (lessPointsThanThreshold())
+    if (fewerPointsThanThreshold())
         updateListView();
 }
