@@ -80,7 +80,7 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
         for (auto selectedIndex : selectedIndicesAction->getSelectedIndices())
             items << QString::number(selectedIndex);
 
-        selectedIndicesListView->setModel(new QStringListModel(items));
+        selectedIndicesListView->setModel(new QStringListModel(items, selectedIndicesListView));
     };
 
     const auto enableUpdateTrigger = [this, selectedIndicesAction](bool enable) -> void {
