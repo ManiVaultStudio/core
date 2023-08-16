@@ -35,6 +35,7 @@ public:
         ParentID,               /** Globally unique identifier of the parent task (empty string if not a child task) */
         Type,                   /** Task type string */
         MayKill,                /** Task may kill boolean */
+        Kill,                   /** Column for killing a task */
 
         Count
     };
@@ -232,6 +233,23 @@ protected:
 
         /** Use base task item constructor */
         using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for killing a task */
+    class KillItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p task
+         * @param task Pointer to task to display item for
+         */
+        KillItem(Task* task);
 
         /**
          * Get model data for \p role

@@ -27,7 +27,8 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
     _tasksFilterModel(this),
     _tasksIconPixmap(),
     _rowHeight(20),
-    _progressColumnMargin(0)
+    _progressColumnMargin(0),
+    _autoHideKillCollumn(true)
 {
     _tasksFilterModel.setSourceModel(&_tasksModel);
     _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "RunningIndeterminate", "Finished" });
@@ -101,6 +102,21 @@ std::int32_t TasksAction::getProgressColumnMargin() const
     return _progressColumnMargin;
 }
 
+void TasksAction::setAutoHideKillCollumn(bool autoHideKillColumn)
+{
+    if (autoHideKillColumn == _autoHideKillCollumn)
+        return;
+
+    _autoHideKillCollumn = autoHideKillColumn;
+
+    emit autoHideKillCollumnChanged(_autoHideKillCollumn);
+}
+
+bool TasksAction::getAutoHideKillCollumn() const
+{
+    return _autoHideKillCollumn;
+}
+
 /** Tree view item delegate class for showing custom task progress user interface */
 class ProgressItemDelegate : public QStyledItemDelegate {
 public:
@@ -172,6 +188,7 @@ private:
 
 TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, tasksAction, widgetFlags),
+    _tasksAction(tasksAction),
     _tasksWidget(this, "Task", tasksAction->getTasksModel(), &tasksAction->getTasksFilterModel(), widgetFlags & Toolbar, widgetFlags & Overlay)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));
@@ -208,14 +225,16 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Name), QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Progress), QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Status), QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Kill), QHeaderView::Fixed);
 
     treeViewHeader->resizeSection(static_cast<int>(TasksModel::Column::Status), 130);
+    treeViewHeader->resizeSection(static_cast<int>(TasksModel::Column::Kill), 130);
 
     connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::rowsInserted, this, &TasksAction::Widget::modelChanged);
     connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::rowsRemoved, this, &TasksAction::Widget::modelChanged);
-    connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::layoutChanged, this, &TasksAction::Widget::modelChanged);
+    //connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::layoutChanged, this, &TasksAction::Widget::modelChanged);
 
-    connect(&treeView, &HierarchyWidgetTreeView::columnHiddenChanged, this, &TasksAction::Widget::modelChanged);
+    //connect(&treeView, &HierarchyWidgetTreeView::columnHiddenChanged, this, &TasksAction::Widget::modelChanged);
     connect(&treeView, &HierarchyWidgetTreeView::expanded, this, &TasksAction::Widget::modelChanged);
     connect(&treeView, &HierarchyWidgetTreeView::collapsed, this, &TasksAction::Widget::modelChanged);
 
@@ -226,6 +245,16 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     layout->addWidget(&_tasksWidget);
 
     setLayout(layout);
+
+    connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
+        if (static_cast<TasksModel::Column>(index.column()) != TasksModel::Column::Kill)
+            return;
+
+        const auto selectedItemIndex    = _tasksAction->getTasksFilterModel().mapToSource(index);
+        const auto taskItem             = static_cast<TasksModel::Item*>(_tasksAction->getTasksModel().itemFromIndex(selectedItemIndex));
+
+        taskItem->getTask()->kill();
+    });
 
     connect(&treeView, &QTreeView::customContextMenuRequested, [this, tasksAction](const QPoint& point) {
         const auto selectedRows = _tasksWidget.getTreeView().selectionModel()->selectedRows();
@@ -278,6 +307,9 @@ void TasksAction::Widget::modelChanged()
     auto treeViewHeader = _tasksWidget.getTreeView().header();
 
     treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+
+    if (_tasksAction->getAutoHideKillCollumn())
+        _tasksWidget.getTreeView().setColumnHidden(static_cast<int>(TasksModel::Column::Kill), _tasksAction->getTasksFilterModel().match(_tasksAction->getTasksFilterModel().index(0, static_cast<int>(TasksModel::Column::MayKill)), Qt::EditRole, true).isEmpty());
 }
 
 }

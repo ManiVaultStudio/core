@@ -55,7 +55,8 @@ public:
         void modelChanged();
 
     private:
-        HierarchyWidget  _tasksWidget;   /** Show the tasks in a hierarchy widget */
+        TasksAction*        _tasksAction;   /** Pointer to owning tasks action */
+        HierarchyWidget     _tasksWidget;   /** Show the tasks in a hierarchy widget */
 
         friend class TasksAction;
     };
@@ -110,10 +111,27 @@ public:
     /** Get progress column margin */
     std::int32_t getProgressColumnMargin() const;
 
+    /**
+     * Set auto hide kill column to \p autoHideKillColumn
+     * @param autoHideKillColumn Boolean determining whether the kill column is automatically hidden when there are no killable tasks
+     */
+    void setAutoHideKillCollumn(bool autoHideKillColumn);
+
+    /** Get auto hide kill column */
+    bool getAutoHideKillCollumn() const;
+
 private:
 
     /** Invoked when the filter model layout changes */
     void filterModelChanged();
+
+signals:
+
+    /**
+     * Signals that auto hide kill column changed to 
+     * @param autoHideKillCollumn Boolean determining whether the kill column is automatically hidden when there are no killable tasks
+     */
+    void autoHideKillCollumnChanged(bool autoHideKillCollumn);
 
 private:
     TasksModel          _tasksModel;            /** Model with all tasks in the system */
@@ -121,6 +139,7 @@ private:
     QPixmap             _tasksIconPixmap;       /** Tasks icon pixmap underlay (count badge will be drawn on top) */
     std::int32_t        _rowHeight;             /** Row height in pixels */
     std::int32_t        _progressColumnMargin;  /** Progress column margin */
+    bool                _autoHideKillCollumn;   /** When true, the kill column is automatically hidden when there are no killable tasks */
 
     static const QSize tasksIconPixmapSize;
 };

@@ -323,6 +323,62 @@ QVariant TasksModel::MayKillItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
+TasksModel::KillItem::KillItem(Task* task) :
+    Item(task)
+{
+    connect(getTask(), &Task::statusChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+
+    connect(getTask(), &Task::mayKillChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant TasksModel::KillItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            break;
+
+        case Qt::ToolTipRole:
+            return QString("Kill %1").arg(getTask()->getName());
+
+        case Qt::DecorationRole:
+        {
+            switch (getTask()->getStatus())
+            {
+                case Task::Status::Idle:
+                    break;
+
+                case Task::Status::Running:
+                case Task::Status::RunningIndeterminate:
+                {
+                    if (getTask()->getMayKill())
+                        return Application::getIconFont("FontAwesome").getIcon("times");
+
+                    break;
+                }
+
+                case Task::Status::Finished:
+                case Task::Status::Aborted:
+                    break;
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 TasksModel::Row::Row(Task* task) :
     QList<QStandardItem*>()
 {
@@ -335,6 +391,7 @@ TasksModel::Row::Row(Task* task) :
     append(new ParentIdItem(task));
     append(new TypeItem(task));
     append(new MayKillItem(task));
+    append(new KillItem(task));
 }
 
 QMap<TasksModel::Column, TasksModel::ColumHeaderInfo> TasksModel::columnInfo = QMap<TasksModel::Column, TasksModel::ColumHeaderInfo>({
@@ -346,7 +403,8 @@ QMap<TasksModel::Column, TasksModel::ColumHeaderInfo> TasksModel::columnInfo = Q
     { TasksModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the task" } },
     { TasksModel::Column::ParentID, { "Parent ID",  "Parent ID", "Globally unique identifier of the parent task" } },
     { TasksModel::Column::Type, { "Type",  "Type", "Type of task" } },
-    { TasksModel::Column::MayKill, { "May kill",  "May kill", "Whether the task may be killed or not" } }
+    { TasksModel::Column::MayKill, { "May kill",  "May kill", "Whether the task may be killed or not" } },
+    { TasksModel::Column::Kill, { "",  "Kill", "Kill the task" } }
 });
 
 TasksModel::TasksModel(QObject* parent /*= nullptr*/) :

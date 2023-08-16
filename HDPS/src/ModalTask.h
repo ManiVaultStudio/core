@@ -30,7 +30,7 @@ public:
     * @param status Initial status of the task
     * @param mayKill Boolean determining whether the task may be killed or not
     */
-    ModalTask(QObject* parent, const QString& name, const Status& status = Status::Undefined, bool mayKill = false);
+    ModalTask(QObject* parent, const QString& name, const Status& status = Status::Undefined, bool mayKill = true);
 
     /**
      * Creates singleton modal task handler
@@ -39,7 +39,7 @@ public:
     static void createHandler(QObject* parent);
 
 private:
-    static ModalTaskHandler*    modalTaskHandler;   /** Single instance of the modal task handler for  */
+    static ModalTaskHandler*    modalTaskHandler;   /** Single instance of the modal task handler for showing a modal tasks dialog when appropriate */
 };
 
 }

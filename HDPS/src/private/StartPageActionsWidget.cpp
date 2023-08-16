@@ -118,7 +118,7 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent, const QString& t
 
     connect(&_filterModel, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
         for (int rowIndex = first; rowIndex <= last; rowIndex++)
-            openPersistentEditor(rowIndex);
+            closePersistentEditor(rowIndex);
     });
 }
 

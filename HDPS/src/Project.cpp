@@ -182,6 +182,7 @@ void Project::initialize()
     connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
 
+    _task.setMayKill(false);
     _task.setProgressMode(Task::ProgressMode::Subtasks);
 }
 
