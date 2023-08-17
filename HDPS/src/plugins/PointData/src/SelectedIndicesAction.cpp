@@ -53,8 +53,7 @@ std::vector<std::uint32_t> SelectedIndicesAction::getSelectedIndices() const
 
 SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* selectedIndicesAction) :
     WidgetActionWidget(parent, selectedIndicesAction),
-    _timer(),
-    _dirty(false)
+    _timer()
 {
     auto selectedIndicesListView    = new ListView();
     auto selectedIndicesLayout      = new QVBoxLayout();
@@ -65,34 +64,41 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
     selectedIndicesLayout->addWidget(selectedIndicesAction->getUpdateAction().createWidget(this));
     selectedIndicesLayout->addWidget(selectedIndicesAction->getManualUpdateAction().createWidget(this));
 
+    selectedIndicesListView->setToolTip("Update this list manually if the data set contains more than " + QString::number(MANUAL_UPDATE_THRESHOLD) + " points");
+
     setLayout(selectedIndicesLayout);
 
     _timer.setSingleShot(true);
 
+    const auto fewerPointsThanThreshold = [selectedIndicesAction]() -> bool {
+        return selectedIndicesAction->getPoints()->getNumPoints() < MANUAL_UPDATE_THRESHOLD;
+        };
+
     const auto updateListView = [this, selectedIndicesAction, selectedIndicesListView]() -> void {
         QStringList items;
+        items.reserve(selectedIndicesAction->getSelectedIndices().size());
 
         for (auto selectedIndex : selectedIndicesAction->getSelectedIndices())
-            items << QString::number(selectedIndex);
+            items.emplace_back(QString::number(selectedIndex));
 
-        selectedIndicesListView->setModel(new QStringListModel(items));
+        selectedIndicesListView->setModel(new QStringListModel(items, selectedIndicesListView));
     };
 
-    const auto updateActions = [this, selectedIndicesAction]() -> void {
-        selectedIndicesAction->getUpdateAction().setEnabled(selectedIndicesAction->getManualUpdateAction().isChecked() && _dirty);
+    const auto enableUpdateTrigger = [this, selectedIndicesAction](bool enable) -> void {
+        selectedIndicesAction->getUpdateAction().setEnabled(enable);
     };
 
-    connect(&selectedIndicesAction->getUpdateAction(), &TriggerAction::triggered, this, [this, updateListView, updateActions]() -> void {
+    connect(&selectedIndicesAction->getUpdateAction(), &TriggerAction::triggered, this, [this, updateListView, enableUpdateTrigger]() -> void {
         updateListView();
-
-        _dirty = false;
-
-        updateActions();
+        enableUpdateTrigger(false);
     });
 
-    connect(&selectedIndicesAction->getManualUpdateAction(), &TriggerAction::triggered, this, updateActions);
+    connect(&selectedIndicesAction->getManualUpdateAction(), &ToggleAction::toggled, this, enableUpdateTrigger);
 
-    connect(&_timer, &QTimer::timeout, this, [this, updateListView]() -> void {
+    connect(&_timer, &QTimer::timeout, this, [this, updateListView, fewerPointsThanThreshold, selectedIndicesAction]() -> void {
+        if (!fewerPointsThanThreshold())
+            return;
+
         if (_timer.isActive())
             _timer.start(LAZY_UPDATE_INTERVAL);
         else {
@@ -101,28 +107,25 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
         }
     });
 
-    connect(&selectedIndicesAction->getPoints(), &Dataset<Points>::dataChanged, this, [this, selectedIndicesAction]() -> void {
-        selectedIndicesAction->getManualUpdateAction().setChecked(selectedIndicesAction->getPoints()->getNumPoints() > MANUAL_UPDATE_THRESHOLD);
+    connect(&selectedIndicesAction->getPoints(), &Dataset<Points>::dataChanged, this, [this, selectedIndicesAction, fewerPointsThanThreshold]() -> void {
+        selectedIndicesAction->getManualUpdateAction().setChecked(!fewerPointsThanThreshold());
 
-        if (selectedIndicesAction->getPoints()->getNumPoints() < MANUAL_UPDATE_THRESHOLD)
+        if (fewerPointsThanThreshold())
             _timer.start(LAZY_UPDATE_INTERVAL);
     });
 
-    connect(&selectedIndicesAction->getPoints(), &Dataset<Points>::dataSelectionChanged, this, [this, selectedIndicesAction, updateActions]() -> void {
+    connect(&selectedIndicesAction->getPoints(), &Dataset<Points>::dataSelectionChanged, this, [this, selectedIndicesAction, enableUpdateTrigger]() -> void {
         if (selectedIndicesAction->getManualUpdateAction().isChecked()) {
-            _dirty = true;
-
-            updateActions();
+            enableUpdateTrigger(true);
             return;
         }
 
         _timer.start(LAZY_UPDATE_INTERVAL);
-
-        _dirty = false;
-
-        updateActions();
+        enableUpdateTrigger(false);
     });
 
-    updateActions();
-    updateListView();
+    enableUpdateTrigger(selectedIndicesAction->getManualUpdateAction().isChecked());
+
+    if (fewerPointsThanThreshold())
+        updateListView();
 }
