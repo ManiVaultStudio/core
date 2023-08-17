@@ -108,7 +108,7 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
     });
 
     connect(&selectedIndicesAction->getPoints(), &Dataset<Points>::dataChanged, this, [this, selectedIndicesAction, fewerPointsThanThreshold]() -> void {
-        selectedIndicesAction->getManualUpdateAction().setChecked(fewerPointsThanThreshold());
+        selectedIndicesAction->getManualUpdateAction().setChecked(!fewerPointsThanThreshold());
 
         if (fewerPointsThanThreshold())
             _timer.start(LAZY_UPDATE_INTERVAL);
