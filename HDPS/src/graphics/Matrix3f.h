@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <iostream>
+
 namespace hdps
 {
     class Vector2f;
@@ -30,5 +32,7 @@ namespace hdps
     private:
         float a[9];
     };
+
+    std::ostream& operator<<(std::ostream& os, const Matrix3f& v);
 
 } // namespace hdps

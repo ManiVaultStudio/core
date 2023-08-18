@@ -72,6 +72,11 @@ namespace hdps
         return *this;
     }
 
+    std::ostream& operator<<(std::ostream& os, const Vector2f& v)
+    {
+        os << '(' << v.x << ", " << v.y << ')';
+        return os;
+    }
 
     static_assert(Vector2f{}.x == 0.0f, "Compile-time unit test");
     static_assert(Vector2f{}.y == 0.0f, "Compile-time unit test");
@@ -91,5 +96,4 @@ namespace hdps
     static_assert(Vector2f(2.0f, 3.0f) * Vector2f(1.5f, 0.5f) == Vector2f(3.0f, 1.5f), "Compile-time unit test");
     static_assert(Vector2f(2.0f, 3.0f) * 1.5f == Vector2f(3.0f, 4.5f), "Compile-time unit test");
     static_assert(Vector2f(1.0f, 2.0f) / 2.0f == Vector2f(0.5f, 1.0f), "Compile-time unit test");
-
 }
