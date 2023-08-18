@@ -210,6 +210,8 @@ void Task::setStatus(const Status& status)
     }
 
     emit isKillableChanged(isKillable());
+
+    QCoreApplication::processEvents();
 }
 
 void Task::setIdle()
@@ -420,7 +422,7 @@ void Task::addSubtasks(const QStringList& subtasksNames)
     updateProgress();
 }
 
-void Task::setSubtaskFinished(std::uint32_t subtaskIndex)
+void Task::setSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription /*= QString()*/)
 {
     if (_progressMode != ProgressMode::Subtasks)
         return;
@@ -434,15 +436,24 @@ void Task::setSubtaskFinished(std::uint32_t subtaskIndex)
 
     emit subtasksChanged(_subtasks, _subtasksNames);
 
-    const auto subtaskDescription = _subtasksNames[subtaskIndex];
+    const auto subtaskName = _subtasksNames[subtaskIndex];
 
-    if (!subtaskDescription.isEmpty())
-        setProgressDescription(subtaskDescription);
+    if (getProgress() < 1.0f) {
+        if (!progressDescription.isEmpty()) {
+            setProgressDescription(progressDescription);
+        }
+        else {
+            if (!subtaskName.isEmpty())
+                setProgressDescription(subtaskName);
+        }
+    }
+
+    emit subtaskFinished(subtaskName);
 
     QCoreApplication::processEvents();
 }
 
-void Task::setSubtaskFinished(const QString& subtaskName)
+void Task::setSubtaskFinished(const QString& subtaskName, const QString& progressDescription /*= QString()*/)
 {
     if (_progressMode != ProgressMode::Subtasks)
         return;
@@ -452,10 +463,10 @@ void Task::setSubtaskFinished(const QString& subtaskName)
     if (subtaskIndex < 0)
         return;
 
-    setSubtaskFinished(subtaskIndex);
+    setSubtaskFinished(subtaskIndex, progressDescription);
 }
 
-void Task::setSubtaskStarted(const QString& subtaskName)
+void Task::setSubtaskStarted(const QString& subtaskName, const QString& progressDescription /*= QString()*/)
 {
     if (_progressMode != ProgressMode::Subtasks)
         return;
@@ -465,7 +476,11 @@ void Task::setSubtaskStarted(const QString& subtaskName)
     if (subtaskIndex < 0)
         return;
 
-    emit progressDescriptionChanged(_subtasksNames[subtaskIndex]);
+    const auto verifiedSubtaskName = _subtasksNames[subtaskIndex];
+
+    setProgressDescription(progressDescription.isEmpty() ? verifiedSubtaskName : progressDescription);
+
+    emit subtaskStarted(verifiedSubtaskName);
 
     QCoreApplication::processEvents();
 }

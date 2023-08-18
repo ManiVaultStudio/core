@@ -269,8 +269,9 @@ public: // Subtasks
      * Assumes the number of tasks has been set prior with Task::setSubtasks()
      * This method only has an effect when Task#_progressMode is set to ProgressMode::Subtasks
      * @param subtaskIndex Index of the subtask
+     * @param progressDescription Override the default progress description when set to a non-empty string
      */
-    virtual void setSubtaskFinished(std::uint32_t subtaskIndex) final;
+    virtual void setSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription = QString()) final;
 
     /**
      * Flag item with \p subtaskName as started, the corresponding progress description will be broadcast
@@ -278,8 +279,9 @@ public: // Subtasks
      * If \p subtaskName is not found, the progress description will not be updated (ensure that subtasks names are set with Task::setSubtasksNames() or Task::setSubtasksName())
      * This method only has an effect when Task#_progressMode is set to ProgressMode::Subtasks
      * @param subtaskName Name of the subtask
+     * @param progressDescription Override the default progress description when set to a non-empty string
      */
-    virtual void setSubtaskStarted(const QString& subtaskName) final;
+    virtual void setSubtaskStarted(const QString& subtaskName, const QString& progressDescription = QString()) final;
 
     /**
      * Flag item with \p subtaskName as finished, the progress percentage will be computed automatically
@@ -287,8 +289,9 @@ public: // Subtasks
      * If \p subtaskName is not found, the progress will not be updated (ensure that subtasks names are set with Task::setSubtasksNames() or Task::setSubtasksName())
      * This method only has an effect when Task#_progressMode is set to ProgressMode::Subtasks
      * @param subtaskName Name of the subtask
+     * @param progressDescription Override the default progress description when set to a non-empty string
      */
-    virtual void setSubtaskFinished(const QString& subtaskName) final;
+    virtual void setSubtaskFinished(const QString& subtaskName, const QString& progressDescription = QString()) final;
 
     /**
      * Set subtask name to \p subtaskName for \p subtaskIndex
@@ -410,6 +413,18 @@ signals:
      * @param subtasksNames Modified subtasks names
      */
     void subtasksChanged(const QBitArray& subtasks, const QStringList& subtasksNames);
+
+    /**
+     * Signals that subtask with \p name started
+     * @param name Name of the subtask that started
+     */
+    void subtaskStarted(const QString& name);
+
+    /**
+     * Signals that subtask with \p name finished
+     * @param name Name of the subtask that finished
+     */
+    void subtaskFinished(const QString& name);
 
     /**
      * Signals that the progress description changed to \p progressDescription

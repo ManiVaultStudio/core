@@ -91,6 +91,8 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     QDialog(parent),
     _modalTaskHandler(modalTaskHandler)
 {
+    setModal(true);
+
     auto layout = new QVBoxLayout();
 
     auto tasksWidget = _modalTaskHandler->getTasksAction().createWidget(this);

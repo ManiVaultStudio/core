@@ -203,7 +203,6 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
     const auto loadDataset = [](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
         const auto dataset      = dataHierarchyItemMap["Dataset"].toMap();
         const auto pluginKind   = dataset["PluginKind"].toString();
-        const auto children     = dataset["Children"].toMap();
 
         auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent, dataset["ID"].toString());
 

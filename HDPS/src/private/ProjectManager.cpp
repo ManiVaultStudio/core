@@ -418,17 +418,17 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
             }
 
+            qDebug().noquote() << "Open ManiVault project from" << filePath;
+
+            if (!importDataOnly)
+                newProject();
+
             ProjectMeta projectMeta(extractFileFromManiVaultProject(filePath, temporaryDirectory, "meta.json"));
 
             auto& splashScreenAction = projectMeta.getSplashScreenAction();
 
             if (splashScreenAction.getEnabledAction().isChecked())
                 splashScreenAction.getShowSplashScreenAction().trigger();
-
-            if (!importDataOnly)
-                newProject();
-
-            qDebug().noquote() << "Open ManiVault project from" << filePath;
 
             auto& task = getCurrentProject()->getTask();
 
@@ -437,33 +437,30 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             task.setName(QString("Open %1").arg(filePath));
             task.setRunning();
 
-            QCoreApplication::processEvents();
-
             Archiver archiver;
-
-            archiver.extractSingleFile(filePath, "workspace.json", QFileInfo(temporaryDirectoryPath, "workspace.json").absoluteFilePath());
 
             const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
-            QStringList viewPluginsTaskNames;
+            archiver.extractSingleFile(filePath, "workspace.json", QFileInfo(temporaryDirectoryPath, "workspace.json").absoluteFilePath());
 
-            for (const auto& viewPluginName : workspaces().getViewPluginNames(workspaceFileInfo.absoluteFilePath()))
-                viewPluginsTaskNames << QString("Loading view: %1").arg(viewPluginName);
+            const auto viewPluginsTaskNames     = workspaces().getViewPluginNames(workspaceFileInfo.absoluteFilePath());
+            const auto decompressionTaskNames   = QStringList() << archiver.getTaskNamesForDecompression(filePath);
 
-            qDebug() << viewPluginsTaskNames;
+            task.setSubtasks(QStringList() << decompressionTaskNames << "Create data hierarchy" << viewPluginsTaskNames);
 
-            const auto tasksNames = archiver.getTaskNamesForDecompression(filePath) << "Create data hierarchy" << viewPluginsTaskNames;
+            connect(&archiver, &Archiver::taskStarted, this, [this](const QString& taskName) -> void {
+                getCurrentProject()->getTask().setSubtaskStarted(taskName, QString("Extracting %1").arg(taskName));
+            });
 
-            task.setSubtasks(tasksNames);
+            connect(&archiver, &Archiver::taskFinished, this, [this](const QString& taskName) -> void {
+                getCurrentProject()->getTask().setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
+            });
 
             connect(&task, &Task::aborted, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was loaded");
             });
-
-            connect(&archiver, &Archiver::taskStarted, &task, qOverload<const QString&>(&Task::setSubtaskStarted));
-            connect(&archiver, &Archiver::taskFinished, &task, qOverload<const QString&>(&Task::setSubtaskFinished));
 
             archiver.decompress(filePath, temporaryDirectoryPath);
 
@@ -489,7 +486,10 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 _project->getReadOnlyAction().setChecked(disableReadOnlyAction.isChecked());
 
             task.setFinished(true);
+            task.setFinished(true);
+            task.setFinished(true);
 
+            QCoreApplication::processEvents();
             qDebug().noquote() << filePath << "loaded successfully";
         }
         emit projectOpened(*(_project.get()));
@@ -690,8 +690,13 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             task.setSubtaskFinished("Export data model");
 
-            connect(&archiver, &Archiver::taskStarted, &task, qOverload<const QString&>(&Task::setSubtaskStarted));
-            connect(&archiver, &Archiver::taskFinished, &task, qOverload<const QString&>(&Task::setSubtaskFinished));
+            connect(&archiver, &Archiver::taskStarted, this, [this](const QString& taskName) -> void {
+                getCurrentProject()->getTask().setSubtaskStarted(taskName, QString("Compressing %1").arg(taskName));
+            });
+
+            connect(&archiver, &Archiver::taskFinished, this, [this](const QString& taskName) -> void {
+                getCurrentProject()->getTask().setSubtaskFinished(taskName, QString("%1 compressed").arg(taskName));
+            });
 
             ProjectMeta projectMeta(_project.get());
 
