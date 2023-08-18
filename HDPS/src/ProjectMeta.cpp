@@ -84,6 +84,7 @@ void ProjectMeta::fromVariantMap(const QVariantMap& variantMap)
     _tagsAction.fromParentVariantMap(variantMap);
     _commentsAction.fromParentVariantMap(variantMap);
     _contributorsAction.fromParentVariantMap(variantMap);
+    _splashScreenAction.fromParentVariantMap(variantMap);
     _compressionAction.fromParentVariantMap(variantMap);
 }
 
@@ -98,6 +99,7 @@ QVariantMap ProjectMeta::toVariantMap() const
     _project->getTagsAction().insertIntoVariantMap(variantMap);
     _project->getCommentsAction().insertIntoVariantMap(variantMap);
     _project->getContributorsAction().insertIntoVariantMap(variantMap);
+    _project->getSplashScreenAction().insertIntoVariantMap(variantMap);
     _project->getCompressionAction().insertIntoVariantMap(variantMap);
 
     return variantMap;
