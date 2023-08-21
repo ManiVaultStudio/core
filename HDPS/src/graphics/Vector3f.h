@@ -117,6 +117,6 @@ namespace hdps
         float x{}, y{}, z{};
     };
 
-    std::ostream& operator<<(std::ostream& os, const Vector2f& v);
+    std::ostream& operator<<(std::ostream& os, const Vector3f& v);
 
 } // namespace hdps
