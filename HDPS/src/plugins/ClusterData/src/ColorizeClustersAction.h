@@ -63,6 +63,9 @@ public: // Action getters
     IntegralAction& getRandomSeedAction() { return _randomSeedAction; }
     TriggerAction& getColorizeAction() { return _colorizeAction; }
 
+public slots:
+    void updateColorsInModel();
+
 protected:
     ClustersAction&     _clustersAction;        /** Reference to clusters action */
     OptionAction        _colorByAction;         /** Color by action */
