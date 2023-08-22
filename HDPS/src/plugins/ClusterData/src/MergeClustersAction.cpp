@@ -31,14 +31,14 @@ MergeClustersAction::MergeClustersAction(ClustersActionWidget* clustersActionWid
         mergeCluster->setName(QString("%1*").arg(mergeCluster->getName()));
 
         // Move cluster indices of remaining clusters into the merge cluster
-        for (auto selectedIndex : selectedRows) {
-
-            // Get pointer to cluster
-            auto cluster = static_cast<Cluster*>(_clustersActionWidget->getFilterModel().mapToSource(selectedIndex).internalPointer());
+        for (const auto& selectedIndex : selectedRows) {
 
             // Do not move merge cluster indices into itself
             if (selectedIndex == selectedRows.first())
                 continue;
+
+            // Get pointer to cluster
+            auto cluster = static_cast<Cluster*>(_clustersActionWidget->getFilterModel().mapToSource(selectedIndex).internalPointer());
 
             // Flag the cluster identifier to be removed
             clusterIdsToRemove << cluster->getId();
