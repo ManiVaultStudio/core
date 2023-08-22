@@ -64,6 +64,7 @@ public: // Action getters
     TriggerAction& getColorizeAction() { return _colorizeAction; }
 
 public slots:
+    /** When the color model or cluster number changes, update the cluster colors */
     void updateColorsInModel();
 
 protected:

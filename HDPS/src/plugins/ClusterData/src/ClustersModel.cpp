@@ -279,6 +279,8 @@ void ClustersModel::setClusters(const QVector<Cluster>& clusters)
     }
     emit layoutChanged();
 
+    assert(_clusters.size() == _modifiedByUser.size());
+
     /*
     const auto numberOfClustersChanged = clusters.size() != _clusters.size();
 
@@ -320,33 +322,30 @@ void ClustersModel::setClusters(const QVector<Cluster>& clusters)
 
 void ClustersModel::removeClustersById(const QStringList& ids)
 {
-    assert(_clusters.size() == _modifiedByUser.size());
 
+    // Identify the indices that are to be removed from the holder vectors
+    std::vector<qsizetype> rowsToBeRemoved;
+    rowsToBeRemoved.reserve(ids.size());
+    for (qsizetype i = 0; i < _clusters.size(); i++)
     {
-        // Identify the indices that are to be deleted from the holder vectors
-        std::vector<qsizetype> removedRows;
-        removedRows.reserve(ids.size());
-        for (qsizetype i = 0; i < _clusters.size(); i++)
-        {
-            for (const auto& id : ids) {
-                if (_clusters[i].getId() == id)
-                    removedRows.emplace_back(i);
-            }
+        for (const auto& id : ids) {
+            if (_clusters[i].getId() == id)
+                rowsToBeRemoved.emplace_back(i);
         }
+    }
 
-        std::sort(removedRows.begin(), removedRows.end(), std::greater<qsizetype>());
+    // Sort from larger to lower IDs, so that we erase from the back (to keep all revmove-IDs valid)
+    std::sort(rowsToBeRemoved.begin(), rowsToBeRemoved.end(), std::greater<qsizetype>());
+    assert(rowsToBeRemoved.back() < _clusters.size());
 
-        assert(removedRows.back() < _clusters.size());
+    // Remove entries from both the cluster and modifiedByUser holder 
+    for (const auto& row : rowsToBeRemoved) {
+        beginRemoveRows({}, row, row);
 
-        // Delete entries from both the cluster and modifiedByUser holder 
-        for (const auto& row : removedRows) {
-            beginRemoveRows({}, row, row);
+        _clusters.erase(_clusters.begin() + row);
+        _modifiedByUser.erase(_modifiedByUser.begin() + row);
 
-            _clusters.erase(_clusters.begin() + row);
-            _modifiedByUser.erase(_modifiedByUser.begin() + row);
-
-            endRemoveRows();
-        }
+        endRemoveRows();
     }
 
     assert(_clusters.size() == _modifiedByUser.size());
