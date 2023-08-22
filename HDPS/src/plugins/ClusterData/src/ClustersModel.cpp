@@ -150,17 +150,18 @@ bool ClustersModel::setData(const QModelIndex& index, const QVariant& value, int
                     _modifiedByUser[index.row()] = true;
                     break;
 
-                case Column::ID:
-                case Column::NumberOfIndices:
-                    break;
-
                 case Column::ModifiedByUser:
                     _modifiedByUser[index.row()] = value.toBool();
                     break;
 
+                case Column::ID:                [[fallthrough]];
+                case Column::NumberOfIndices:   [[fallthrough]];
+
                 default:
                     break;
             }
+
+            break;
         }
 
         default:
@@ -319,16 +320,36 @@ void ClustersModel::setClusters(const QVector<Cluster>& clusters)
 
 void ClustersModel::removeClustersById(const QStringList& ids)
 {
-    emit layoutAboutToBeChanged();
+    assert(_clusters.size() == _modifiedByUser.size());
+
     {
-        for (auto id : ids) {
-            _clusters.erase(std::remove_if(_clusters.begin(), _clusters.end(), [id](const Cluster& cluster) -> bool
-            {
-                return cluster.getId() == id;
-            }), _clusters.end());
+        // Identify the indices that are to be deleted from the holder vectors
+        std::vector<qsizetype> removedRows;
+        removedRows.reserve(ids.size());
+        for (qsizetype i = 0; i < _clusters.size(); i++)
+        {
+            for (const auto& id : ids) {
+                if (_clusters[i].getId() == id)
+                    removedRows.emplace_back(i);
+            }
+        }
+
+        std::sort(removedRows.begin(), removedRows.end(), std::greater<qsizetype>());
+
+        assert(removedRows.back() < _clusters.size());
+
+        // Delete entries from both the cluster and modifiedByUser holder 
+        for (const auto& row : removedRows) {
+            beginRemoveRows({}, row, row);
+
+            _clusters.erase(_clusters.begin() + row);
+            _modifiedByUser.erase(_modifiedByUser.begin() + row);
+
+            endRemoveRows();
         }
     }
-    emit layoutChanged();
+
+    assert(_clusters.size() == _modifiedByUser.size());
 }
 
 void ClustersModel::setClusterPrefix(const QString& clusterPrefix)
