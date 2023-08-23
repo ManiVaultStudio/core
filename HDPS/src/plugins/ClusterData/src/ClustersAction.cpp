@@ -62,6 +62,7 @@ void ClustersAction::removeClustersById(const QStringList& ids)
     QApplication::setOverrideCursor(Qt::WaitCursor);
     {
         _clustersModel.removeClustersById(ids);
+        updateClustersDataset();
     }
     QApplication::restoreOverrideCursor();
 }
@@ -90,6 +91,8 @@ void ClustersAction::updateClustersDataset()
         return;
 
     _clustersDataset->getClusters() = _clustersModel.getClusters();
+
+    _colorizeClustersAction.updateColorsInModel();
 
     events().notifyDatasetDataChanged(_clustersDataset);
 }

@@ -38,34 +38,11 @@ ColorizeClustersAction::ColorizeClustersAction(ClustersAction& clustersAction) :
         _randomSeedAction.setEnabled(_colorByAction.getCurrentText() == "Pseudo-random colors" && hasClusters);
     };
 
-    // Generate the cluster colors in the model
-    const auto updateColorsInModel = [this]() -> void {
-        QApplication::setOverrideCursor(Qt::WaitCursor);
-        {
-            switch (_colorByAction.getCurrentIndex())
-            {
-                // Color map
-                case 0:
-                    _clustersAction.getClustersModel().colorizeClusters(_colorMapAction.getColorMapImage());
-                    break;
-
-                // Pseudo-random colors
-                case 1:
-                    _clustersAction.getClustersModel().colorizeClusters(_randomSeedAction.getValue());
-                    break;
-
-                default:
-                    break;
-            }
-        }
-        QApplication::restoreOverrideCursor();
-    };
-
     // Update the cluster colors in the model when actions change
-    connect(&_colorByAction, &OptionAction::currentIndexChanged, this, updateColorsInModel);
-    connect(&_colorMapAction, &ColorMapAction::imageChanged, this, updateColorsInModel);
-    connect(&_randomSeedAction, &IntegralAction::valueChanged, this, updateColorsInModel);
-    connect(&_colorizeAction, &TriggerAction::triggered, this, updateColorsInModel);
+    connect(&_colorByAction, &OptionAction::currentIndexChanged, this, &ColorizeClustersAction::updateColorsInModel);
+    connect(&_colorMapAction, &ColorMapAction::imageChanged, this, &ColorizeClustersAction::updateColorsInModel);
+    connect(&_randomSeedAction, &IntegralAction::valueChanged, this, &ColorizeClustersAction::updateColorsInModel);
+    connect(&_colorizeAction, &TriggerAction::triggered, this, &ColorizeClustersAction::updateColorsInModel);
 
     // Update read only status when the model layout changes
     connect(&_clustersAction.getClustersModel(), &QAbstractItemModel::layoutChanged, this, updateReadOnly);
@@ -76,6 +53,30 @@ ColorizeClustersAction::ColorizeClustersAction(ClustersAction& clustersAction) :
     // Initialize read only status
     updateReadOnly();
 }
+
+void ColorizeClustersAction::updateColorsInModel()
+{
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    {
+        switch (_colorByAction.getCurrentIndex())
+        {
+            // Color map
+        case 0:
+            _clustersAction.getClustersModel().colorizeClusters(_colorMapAction.getColorMapImage());
+            break;
+
+            // Pseudo-random colors
+        case 1:
+            _clustersAction.getClustersModel().colorizeClusters(_randomSeedAction.getValue());
+            break;
+
+        default:
+            break;
+        }
+    }
+    QApplication::restoreOverrideCursor();
+}
+
 
 ColorizeClustersAction::Widget::Widget(QWidget* parent, ColorizeClustersAction* colorizeClustersAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, colorizeClustersAction)
