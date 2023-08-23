@@ -269,7 +269,7 @@ float ProgressAction::getPercentage() const
 
 QString ProgressAction::getText() const
 {
-    QString text = _textFormat;
+    auto text = _textFormat;
 
     text.replace("%p", QString::number(getPercentage(), 'f', 1));
     text.replace("%v", QString::number(getProgress()));

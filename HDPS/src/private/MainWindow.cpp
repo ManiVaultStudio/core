@@ -136,6 +136,8 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     if (!_core.isInitialized()) {
         _core.init();
 
+        Application::current()->getStartupTask().setSubtaskFinished("Setup main window");
+
         auto fileMenuAction = menuBar()->addMenu(new FileMenu());
         auto viewMenuAction = menuBar()->addMenu(new ViewMenu());
         auto helpMenuAction = menuBar()->addMenu(new HelpMenu());
@@ -200,6 +202,10 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         statusBar()->setSizeGripEnabled(true);
         statusBar()->insertPermanentWidget(0, new StatusBarToolButton(this, tasksAction));
+
+        emit Application::current()->mainWindowInitialized();
+
+        Application::current()->getStartupTask().setFinished();
     }
 }
 

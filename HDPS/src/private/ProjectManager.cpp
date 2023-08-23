@@ -10,7 +10,7 @@
 
 #include <Application.h>
 #include <CoreInterface.h>
-#include <ProjectMeta.h>
+#include <ProjectMetaAction.h>
 #include <ModalTask.h>
 
 #include <util/Exception.h>
@@ -219,6 +219,8 @@ void ProjectManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
+    Application::current()->getStartupTask().setSubtaskFinished("Initializing project manager");
+
     AbstractProjectManager::initialize();
 }
 
@@ -388,17 +390,17 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                     if (!QFileInfo(filePath).isFile())
                         return;
 
-                    const auto projectMeta = Project::getProjectMeta(filePath);
+                    const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(filePath);
 
-                    if (projectMeta.isNull())
+                    if (projectMetaAction.isNull())
                         return;
 
-                    titleAction.setString(projectMeta->getTitleAction().getString());
-                    descriptionAction.setString(projectMeta->getDescriptionAction().getString());
-                    tagsAction.setString(projectMeta->getTagsAction().getStrings().join(", "));
-                    commentsAction.setString(projectMeta->getCommentsAction().getString());
-                    contributorsAction.setString(projectMeta->getContributorsAction().getStrings().join(","));
-                    disableReadOnlyAction.setEnabled(projectMeta->getReadOnlyAction().isChecked());
+                    titleAction.setString(projectMetaAction->getTitleAction().getString());
+                    descriptionAction.setString(projectMetaAction->getDescriptionAction().getString());
+                    tagsAction.setString(projectMetaAction->getTagsAction().getStrings().join(", "));
+                    commentsAction.setString(projectMetaAction->getCommentsAction().getString());
+                    contributorsAction.setString(projectMetaAction->getContributorsAction().getStrings().join(","));
+                    disableReadOnlyAction.setEnabled(projectMetaAction->getReadOnlyAction().isChecked());
                 });
 
                 fileDialog.open();
@@ -423,12 +425,12 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (!importDataOnly)
                 newProject();
 
-            ProjectMeta projectMeta(extractFileFromManiVaultProject(filePath, temporaryDirectory, "meta.json"));
+            ProjectMetaAction projectMetaAction(extractFileFromManiVaultProject(filePath, temporaryDirectory, "meta.json"));
 
-            auto& splashScreenAction = projectMeta.getSplashScreenAction();
+            auto& splashScreenAction = projectMetaAction.getSplashScreenAction();
 
-            if (splashScreenAction.getEnabledAction().isChecked())
-                splashScreenAction.getShowSplashScreenAction().trigger();
+            if (splashScreenAction.getEnabledAction().isChecked() && !Application::current()->shouldOpenProjectAtStartup())
+                splashScreenAction.getOpenAction().trigger();
 
             auto& task = getCurrentProject()->getTask();
 
@@ -617,13 +619,13 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                     if (!QFileInfo(filePath).isFile())
                         return;
 
-                    const auto projectMeta = Project::getProjectMeta(filePath);
+                    const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(filePath);
 
-                    if (projectMeta.isNull())
+                    if (projectMetaAction.isNull())
                         return;
 
-                    currentProject->getCompressionAction().getEnabledAction().setChecked(projectMeta->getCompressionAction().getEnabledAction().isChecked());
-                    currentProject->getCompressionAction().getLevelAction().setValue(projectMeta->getCompressionAction().getLevelAction().getValue());
+                    currentProject->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
+                    currentProject->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
                 });
 
                 fileDialog.open();
@@ -698,9 +700,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 getCurrentProject()->getTask().setSubtaskFinished(taskName, QString("%1 compressed").arg(taskName));
             });
 
-            ProjectMeta projectMeta(_project.get());
-
-            projectMeta.toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
+            _project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
 
             QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
@@ -848,13 +848,13 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     if (!QFileInfo(filePath).isFile())
                         return;
 
-                    const auto projectMeta = Project::getProjectMeta(filePath);
+                    const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(filePath);
 
-                    if (projectMeta.isNull())
+                    if (projectMetaAction.isNull())
                         return;
 
-                    currentProject->getCompressionAction().getEnabledAction().setChecked(projectMeta->getCompressionAction().getEnabledAction().isChecked());
-                    currentProject->getCompressionAction().getLevelAction().setValue(projectMeta->getCompressionAction().getLevelAction().getValue());
+                    currentProject->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
+                    currentProject->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
                 });
 
                 fileDialog.open();

@@ -20,9 +20,10 @@ using namespace hdps::plugin;
 
 HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
+    _aboutProjectAction(nullptr),
     _aboutAction(nullptr),
-    _aboutQt(nullptr),
-    _aboutThirdParties(nullptr)
+    _aboutQtAction(nullptr),
+    _aboutThirdPartiesAction(nullptr)
 {
     setTitle("Help");
     setToolTip("ManiVault help");
@@ -31,16 +32,36 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     _devDocAction = new TriggerAction(this, "Developer Documentation");
     connect(_devDocAction, &QAction::triggered, this, [this](bool) { QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio/PublicWiki", QUrl::TolerantMode)); });
     
+    _aboutProjectAction = new TriggerAction(this, "About project");
+
+    _aboutProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("info"));
+
+    connect(_aboutProjectAction, &TriggerAction::triggered, this, []() -> void {
+        if (!projects().hasProject())
+            return;
+
+        projects().getCurrentProject()->getSplashScreenAction().getOpenAction().trigger();
+    });
+
+    const auto updateAboutProjectActionReadOnly = [this]() -> void {
+        _aboutProjectAction->setEnabled(projects().hasProject());
+    };
+
+    updateAboutProjectActionReadOnly();
+
+    connect(&projects(), &AbstractProjectManager::projectOpened, this, updateAboutProjectActionReadOnly);
+    connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateAboutProjectActionReadOnly);
+
     _aboutAction = new TriggerAction(this, "About ManiVault");
     connect(_aboutAction, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::about);
     
-    _aboutThirdParties = new TriggerAction(this, "About Third Parties");
-    _aboutThirdParties->setMenuRole(QAction::NoRole);
-    connect(_aboutThirdParties, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
+    _aboutThirdPartiesAction = new TriggerAction(this, "About Third Parties");
+    _aboutThirdPartiesAction->setMenuRole(QAction::NoRole);
+    connect(_aboutThirdPartiesAction, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
     
-    _aboutQt = new TriggerAction(this, "About Qt");
-    _aboutQt->setMenuRole(QAction::NoRole);
-    connect(_aboutQt, &hdps::gui::TriggerAction::triggered, this, [this](bool) { QMessageBox::aboutQt(this->parentWidget(), "About Qt"); });
+    _aboutQtAction = new TriggerAction(this, "About Qt");
+    _aboutQtAction->setMenuRole(QAction::NoRole);
+    connect(_aboutQtAction, &hdps::gui::TriggerAction::triggered, this, [this](bool) { QMessageBox::aboutQt(this->parentWidget(), "About Qt"); });
 
     // macOS does not like populating the menu on show, so we rather do it explicitly here
     populate();
@@ -71,25 +92,20 @@ void HelpMenu::populate()
         addMenu(pluginHelpMenu);
     }
 
-    auto currentProject = projects().getCurrentProject();
-
-    if (currentProject && currentProject->getSplashScreenAction().getEnabledAction().isChecked()) {
-        addSeparator();
-
-        addAction(&currentProject->getSplashScreenAction().getShowSplashScreenAction());
-    }
+    addSeparator();
+    addAction(_aboutProjectAction);
 
     // the above clear() deletes all actions whose parent is this
     _aboutAction        = new TriggerAction(this, "About");
-    _aboutThirdParties  = new TriggerAction(this, "About Third Parties");
-    _aboutQt            = new TriggerAction(this, "About Qt");
+    _aboutThirdPartiesAction  = new TriggerAction(this, "About Third Parties");
+    _aboutQtAction            = new TriggerAction(this, "About Qt");
 
     if(!isEmpty())
         addSeparator();
 
     addAction(_aboutAction);
-    addAction(_aboutThirdParties);
-    addAction(_aboutQt);
+    addAction(_aboutThirdPartiesAction);
+    addAction(_aboutQtAction);
 }
 
 void HelpMenu::about()

@@ -35,11 +35,14 @@ Task::Task(QObject* parent, const QString& name, const Status& status /*= Status
     _progressDescription(),
     _timers()
 {
-    tasks().addTask(this);
+    if (core() != nullptr && core()->isInitialized())
+        tasks().addTask(this);
 
-    QObject::connect(this, &QObject::destroyed, this, [this]() -> void {
-        tasks().removeTask(this);
-    });
+    if (core() != nullptr && core()->isInitialized()) {
+        QObject::connect(this, &QObject::destroyed, this, [this]() -> void {
+            tasks().removeTask(this);
+            });
+    }
 
     for (auto& timer : _timers) {
         timer.setInterval(TASK_UPDATE_TIMER_INTERVAL);
@@ -354,7 +357,7 @@ QString Task::getProgressText() const
             return "Idle";
 
         case Task::Status::Running:
-            return QString("%1 %2%").arg(getProgressDescription().isEmpty() ? "" : QString("%1: ").arg(getProgressDescription()), QString::number(getProgress() * 100.f));
+            return QString("%1 %2%").arg(getProgressDescription().isEmpty() ? "" : QString("%1: ").arg(getProgressDescription()), QString::number(getProgress() * 100.f, 'f', 1));
 
         case Task::Status::RunningIndeterminate:
             return getProgressDescription();
@@ -395,7 +398,7 @@ void Task::setSubtasks(const QStringList& subtasksNames)
     setProgressMode(ProgressMode::Subtasks);
 
     if (_subtasks.count() != subtasksNames.count())
-        _subtasks.resize(subtasksNames.count());
+        _subtasks.resize(subtasksNames.count() * 8);
 
     if (subtasksNames == _subtasksNames)
         return;
@@ -536,12 +539,14 @@ std::int32_t Task::getSubtaskIndex(const QString& subtaskName) const
 
 void Task::updateProgress()
 {
+    qDebug() << (_subtasks.size() / 8) << _subtasks.count(true);
+
     switch (_progressMode) {
         case ProgressMode::Manual:
             break;
 
         case ProgressMode::Subtasks:
-            _progress = _subtasks.isEmpty() ? 0.f : static_cast<float>(_subtasks.count(true)) / static_cast<float>(_subtasks.count());
+            _progress = _subtasks.isEmpty() ? 0.f : static_cast<float>(_subtasks.count(true)) / static_cast<float>(_subtasks.size() / 8);
             break;
     }
 

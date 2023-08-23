@@ -6,7 +6,7 @@
 #include "StartPageContentWidget.h"
 
 #include <Application.h>
-#include <ProjectMeta.h>
+#include <ProjectMetaAction.h>
 
 #include <util/Serialization.h>
 
@@ -144,7 +144,7 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
             for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
                 const auto recentFilePath = recentFile.getFilePath();
 
-                const auto projectMeta = Project::getProjectMeta(recentFilePath);
+                const auto projectMeta = Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
                 
                 if (projectMeta.isNull()) {
                     StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.hdps in new project").arg(QFileInfo(recentFilePath).baseName()), recentFilePath, "", [recentFilePath]() -> void {

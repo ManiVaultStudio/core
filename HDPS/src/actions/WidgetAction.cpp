@@ -59,7 +59,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
 
     updateLocation();
 
-    if (core()->isInitialized())
+    if (core() != nullptr && core()->isInitialized())
     {
         actions().addAction(this);
 
@@ -70,7 +70,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
 
 WidgetAction::~WidgetAction()
 {
-    if (!core()->isInitialized())
+    if (core() == nullptr || !core()->isInitialized())
         return;
 
     actions().removeAction(this);
@@ -692,7 +692,7 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
     if (getId() != previousId)
         emit idChanged(getId());
 
-    if (core()->isInitialized() && projects().hasProject())
+    if (core() != nullptr && core()->isInitialized() && projects().hasProject())
         setStudioMode(projects().getCurrentProject()->getStudioModeAction().isChecked(), false);
 }
 

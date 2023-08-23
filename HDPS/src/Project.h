@@ -11,15 +11,12 @@
 #include "actions/StringAction.h"
 #include "actions/StringsAction.h"
 #include "actions/IntegralAction.h"
-#include "actions/ProjectSplashScreenAction.h"
 #include "actions/VersionAction.h"
 
 #include "ModalTask.h"
 
-#include "ProjectCompressionAction.h"
-
 #include "Application.h"
-#include "ProjectMeta.h"
+#include "ProjectMetaAction.h"
 
 #include <QSharedPointer>
 
@@ -103,41 +100,47 @@ public: // Serialization
 public:
 
     /**
-     * Get shared pointer to project meta data from the compressed \p projectFilePath
-     * @return Shared pointer to project meta data (nullptr if meta data file is not found)
+     * Get project meta action
+     * @return Reference to project meta action
      */
-    static QSharedPointer<ProjectMeta> getProjectMeta(const QString& projectFilePath);
+    ProjectMetaAction& getProjectMetaAction();
+
+    /**
+     * Get shared pointer to project meta action from the compressed \p projectFilePath
+     * @return Shared pointer to project meta action (nullptr if not found)
+     */
+    static QSharedPointer<ProjectMetaAction> getProjectMetaActionFromProjectFilePath(const QString& projectFilePath);
 
 private:
 
     /** Startup initialization */
     void initialize();
 
-public: // Action getters
+public: // Project meta action getters facade
 
-    const gui::VersionAction& getApplicationVersionAction() const { return _applicationVersionAction; }
-    const gui::VersionAction& getProjectVersionAction() const { return _projectVersionAction; }
-    const gui::ToggleAction& getReadOnlyAction() const { return _readOnlyAction; }
-    const gui::StringAction& getTitleAction() const { return _titleAction; }
-    const gui::StringAction& getDescriptionAction() const { return _descriptionAction; }
-    const gui::StringsAction& getTagsAction() const { return _tagsAction; }
-    const gui::StringAction& getCommentsAction() const { return _commentsAction; }
-    const gui::StringsAction& getContributorsAction() const { return _contributorsAction; }
-    const ProjectCompressionAction& getCompressionAction() const { return _compressionAction; }
-    const gui::ProjectSplashScreenAction& getSplashScreenAction() const { return _splashScreenAction; }
-    const gui::ToggleAction& getStudioModeAction() const { return _studioModeAction; }
+    const gui::VersionAction& getApplicationVersionAction() const { return _projectMetaAction.getApplicationVersionAction(); }
+    const gui::VersionAction& getProjectVersionAction() const { return _projectMetaAction.getProjectVersionAction(); }
+    const gui::ToggleAction& getReadOnlyAction() const { return _projectMetaAction.getReadOnlyAction(); }
+    const gui::StringAction& getTitleAction() const { return _projectMetaAction.getTitleAction(); }
+    const gui::StringAction& getDescriptionAction() const { return _projectMetaAction.getDescriptionAction(); }
+    const gui::StringsAction& getTagsAction() const { return _projectMetaAction.getTagsAction(); }
+    const gui::StringAction& getCommentsAction() const { return _projectMetaAction.getCommentsAction(); }
+    const gui::StringsAction& getContributorsAction() const { return _projectMetaAction.getContributorsAction(); }
+    const ProjectCompressionAction& getCompressionAction() const { return _projectMetaAction.getCompressionAction(); }
+    const gui::ProjectSplashScreenAction& getSplashScreenAction() const { return _projectMetaAction.getSplashScreenAction(); }
+    const gui::ToggleAction& getStudioModeAction() const { return _projectMetaAction.getStudioModeAction(); }
 
-    gui::VersionAction& getApplicationVersionAction() { return _applicationVersionAction; }
-    gui::VersionAction& getProjectVersionAction() { return _projectVersionAction; }
-    gui::ToggleAction& getReadOnlyAction() { return _readOnlyAction; }
-    gui::StringAction& getTitleAction() { return _titleAction; }
-    gui::StringAction& getDescriptionAction() { return _descriptionAction; }
-    gui::StringsAction& getTagsAction() { return _tagsAction; }
-    gui::StringAction& getCommentsAction() { return _commentsAction; }
-    gui::StringsAction& getContributorsAction() { return _contributorsAction; }
-    ProjectCompressionAction& getCompressionAction() { return _compressionAction; }
-    gui::ProjectSplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
-    gui::ToggleAction& getStudioModeAction() { return _studioModeAction; }
+    gui::VersionAction& getApplicationVersionAction() { return _projectMetaAction.getApplicationVersionAction(); }
+    gui::VersionAction& getProjectVersionAction() { return _projectMetaAction.getProjectVersionAction(); }
+    gui::ToggleAction& getReadOnlyAction() { return _projectMetaAction.getReadOnlyAction(); }
+    gui::StringAction& getTitleAction() { return _projectMetaAction.getTitleAction(); }
+    gui::StringAction& getDescriptionAction() { return _projectMetaAction.getDescriptionAction(); }
+    gui::StringsAction& getTagsAction() { return _projectMetaAction.getTagsAction(); }
+    gui::StringAction& getCommentsAction() { return _projectMetaAction.getCommentsAction(); }
+    gui::StringsAction& getContributorsAction() { return _projectMetaAction.getContributorsAction(); }
+    ProjectCompressionAction& getCompressionAction() { return _projectMetaAction.getCompressionAction(); }
+    gui::ProjectSplashScreenAction& getSplashScreenAction() { return _projectMetaAction.getSplashScreenAction(); }
+    gui::ToggleAction& getStudioModeAction() { return _projectMetaAction.getStudioModeAction(); }
 
 signals:
 
@@ -148,20 +151,11 @@ signals:
     void filePathChanged(const QString& filePath);
 
 private:
-    QString                         _filePath;                  /** Location on disk where the project resides */
-    util::Version                   _applicationVersion;        /** Version of the application with which the project is created */
-    gui::VersionAction              _applicationVersionAction;  /** Action for storing the application version */
-    gui::VersionAction              _projectVersionAction;      /** Action for storing the project version */
-    gui::ToggleAction               _readOnlyAction;            /** Read-only action */
-    gui::StringAction               _titleAction;               /** Title action */
-    gui::StringAction               _descriptionAction;         /** Description action */
-    gui::StringsAction              _tagsAction;                /** Tags action */
-    gui::StringAction               _commentsAction;            /** Comments action */
-    gui::StringsAction              _contributorsAction;        /** Contributors action */
-    ProjectCompressionAction        _compressionAction;         /** Project compression action */
-    gui::ProjectSplashScreenAction  _splashScreenAction;        /** Action for configuring the project splash screen */
-    gui::ToggleAction               _studioModeAction;          /** Toggle between view- and studio mode action */
-    ModalTask                       _task;                      /** Modal task for reporting project tasks */
+    QString             _filePath;                  /** Location on disk where the project resides */
+    util::Version       _applicationVersion;        /** Version of the application with which the project is created */
+    ProjectMetaAction   _projectMetaAction;         /** Project meta info action (i.e. title and version) */
+    
+    ModalTask           _task;                      /** Modal task for reporting project tasks */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

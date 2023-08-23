@@ -30,11 +30,31 @@ hdps::Application::Application(int& argc, char** argv) :
     _serializationTemporaryDirectory(),
     _serializationAborted(false),
     _logger(),
-    _startupProjectFilePath()
+    _startupProjectFilePath(),
+    _startupProjectMetaAction(),
+    _startupTask(this, "Application Loading Task"),
+    _splashScreenAction(this)
 {
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));
-    
-    _logger.initialize();
+    _startupTask.setMayKill(false);
+    _startupTask.setProgressMode(Task::ProgressMode::Subtasks);
+
+    QStringList subTasks{
+        "Starting Application",
+        "Initializing actions manager",
+        "Initializing data manager",
+        "Initializing data hierarchy manager",
+        "Initializing event manager",
+        "Initializing plugin manager",
+        "Initializing project manager",
+        "Initializing settings manager",
+        "Initializing task manager",
+        "Initializing workspace manager",
+        "Setup main window"
+    };
+
+    _startupTask.setSubtasks(subTasks);
+    _startupTask.setRunning();
+    _startupTask.setSubtaskFinished("Starting Application");
 }
 
 hdps::Application* hdps::Application::current()
@@ -44,7 +64,7 @@ hdps::Application* hdps::Application::current()
         auto hdpsApplication = dynamic_cast<Application*>(instance());
 
         if (hdpsApplication == nullptr)
-            throw std::runtime_error("Current application instance is not an HDPS application");
+            throw std::runtime_error("Current application instance is not a ManiVault application");
 
         return hdpsApplication;
     }
@@ -62,8 +82,6 @@ const IconFont& hdps::Application::getIconFont(const QString& name, const std::i
 
 hdps::CoreInterface* Application::getCore()
 {
-    Q_ASSERT(_core != nullptr);
-
     return _core;
 }
 
@@ -99,6 +117,16 @@ QString Application::getStartupProjectFilePath() const
 void Application::setStartupProjectFilePath(const QString& startupProjectFilePath)
 {
     _startupProjectFilePath = startupProjectFilePath;
+}
+
+ProjectMetaAction* Application::getStartupProjectMetaAction()
+{
+    return _startupProjectMetaAction.get();
+}
+
+void Application::setStartupProjectMetaAction(ProjectMetaAction* projectMetaAction)
+{
+    _startupProjectMetaAction.reset(projectMetaAction);
 }
 
 bool Application::shouldOpenProjectAtStartup() const
@@ -139,6 +167,18 @@ bool Application::isSerializationAborted()
 void Application::setSerializationAborted(bool serializationAborted)
 {
     current()->_serializationAborted = serializationAborted;
+}
+
+void Application::initialize()
+{
+    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));
+
+    _logger.initialize();
+}
+
+BackgroundTask& Application::getStartupTask()
+{
+    return _startupTask;
 }
 
 }

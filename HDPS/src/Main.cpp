@@ -3,14 +3,19 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "private/MainWindow.h"
+#include "private/Archiver.h"
 
 #include <Application.h>
+#include <ProjectMetaAction.h>
 
 #include <QSurfaceFormat>
 #include <QStyleFactory>
 #include <QProxyStyle>
 #include <QQuickWindow>
 #include <QCommandLineParser>
+
+using namespace hdps;
+using namespace hdps::util;
 
 class NoFocusProxyStyle : public QProxyStyle {
 public:
@@ -27,6 +32,34 @@ public:
     }
 
 };
+
+ProjectMetaAction* getStartupProjectMetaAction(const QString& startupProjectFilePath)
+{
+    if (startupProjectFilePath.isEmpty())
+        throw std::runtime_error("Project file path is empty");
+
+    if (!QFileInfo(startupProjectFilePath).exists())
+        throw std::runtime_error("Project file not found");
+
+    QTemporaryDir temporaryDir;
+
+    const QString metaJsonFilePath("meta.json");
+
+    QFileInfo extractFileInfo(temporaryDir.path(), metaJsonFilePath);
+
+    Archiver archiver;
+
+    QString extractedMetaJsonFilePath = "";
+
+    archiver.extractSingleFile(startupProjectFilePath, metaJsonFilePath, extractFileInfo.absoluteFilePath());
+
+    extractedMetaJsonFilePath = extractFileInfo.absoluteFilePath();
+
+    if (!QFileInfo(extractedMetaJsonFilePath).exists())
+        throw std::runtime_error("Unable to extract meta.json");
+
+    return new ProjectMetaAction(extractedMetaJsonFilePath);
+}
 
 int main(int argc, char *argv[])
 {
@@ -62,8 +95,40 @@ int main(int argc, char *argv[])
     commandLineParser.addOption(projectOption);
     commandLineParser.process(QCoreApplication::arguments());
     
-    if (commandLineParser.isSet("project"))
-        application.setStartupProjectFilePath(commandLineParser.value("project"));
+    application.initialize();
+
+    auto showApplicationSplashScreen = true;
+
+    if (commandLineParser.isSet("project")) {
+        try {
+            const auto startupProjectFilePath = commandLineParser.value("project");
+
+            auto projectMetaAction = getStartupProjectMetaAction(startupProjectFilePath);
+
+            if (projectMetaAction != nullptr) {
+                application.setStartupProjectFilePath(startupProjectFilePath);
+                application.setStartupProjectMetaAction(projectMetaAction);
+
+                if (projectMetaAction->getSplashScreenAction().getEnabledAction().isChecked()) {
+                    projectMetaAction->getSplashScreenAction().getOpenAction().trigger();
+                    showApplicationSplashScreen = false;
+                }
+            }
+
+            Application::processEvents();
+        }
+        catch (std::exception& e)
+        {
+            qDebug() << "Unable to set startup project:" << e.what();
+        }
+        catch (...)
+        {
+            qDebug() << "Unable to set startup project due to an unhandled exception";
+        }
+    }
+    
+    if (showApplicationSplashScreen)
+        application.getSplashScreenAction().getOpenAction().trigger();
 
     application.setStyle(new NoFocusProxyStyle);
 

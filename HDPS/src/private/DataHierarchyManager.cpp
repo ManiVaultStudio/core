@@ -38,6 +38,8 @@ void DataHierarchyManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
+    Application::current()->getStartupTask().setSubtaskFinished("Initializing data hierarchy manager");
+
     AbstractDataHierarchyManager::initialize();
 }
 

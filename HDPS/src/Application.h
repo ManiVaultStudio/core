@@ -10,6 +10,10 @@
 
 #include "actions/TriggerAction.h"
 
+#include "ProjectMetaAction.h"
+#include "ApplicationSplashScreenAction.h"
+#include "BackgroundTask.h"
+
 #include <QApplication>
 #include <QSettings>
 
@@ -77,10 +81,31 @@ public: // Miscellaneous
     void setStartupProjectFilePath(const QString& startupProjectFilePath);
 
     /**
+     * Get startup project meta action
+     * @return Pointer to project meta action (non-nullptr when ManiVault starts up with a project)
+     */
+    ProjectMetaAction* getStartupProjectMetaAction();
+
+    /**
+     * Set startup project meta action to \p projectMetaAction (the application takes ownership of the pointer)
+     * @param projectMetaAction Pointer to project meta action
+     */
+    void setStartupProjectMetaAction(ProjectMetaAction* projectMetaAction);
+
+    /**
      * Get whether a project should be opened after the application starts
      * @return Boolean determining whether a project should be opened after the application starts
      */
     bool shouldOpenProjectAtStartup() const;
+
+    /** Perform one-time startup initialization */
+    void initialize();
+    
+    /**
+     * Get startup task
+     * @return Reference to task that is associated with application startup
+     */
+    BackgroundTask& getStartupTask();
 
 public: // Static resource access functions
 
@@ -143,21 +168,31 @@ public: // Serialization
      */
     static void setSerializationAborted(bool serializationAborted);
 
+public: // Action getters
+
+    gui::ApplicationSplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
+
 signals:
 
     /** Signals that the core has been become available */
     void coreSet(CoreInterface* core);
 
+    /** Signals that the main window has been fully initialized */
+    void mainWindowInitialized();
+
 protected:
-    CoreInterface*              _core;                                  /** Pointer to HDPS core */
-    const util::Version         _version;                               /** Application version */
-    IconFonts                   _iconFonts;                             /** Icon fonts resource */
-    QSettings                   _settings;                              /** Settings */
-    QString                     _serializationTemporaryDirectory;       /** Temporary directory for serialization */
-    bool                        _serializationAborted;                  /** Whether serialization was aborted */
-    util::Logger                _logger;                                /** Logger instance */
-    hdps::gui::TriggerAction*   _exitAction;                            /** Action for exiting the application */
-    QString                     _startupProjectFilePath;                /** File path of the project to automatically open upon startup (if set) */
+    CoreInterface*                      _core;                                  /** Pointer to HDPS core */
+    const util::Version                 _version;                               /** Application version */
+    IconFonts                           _iconFonts;                             /** Icon fonts resource */
+    QSettings                           _settings;                              /** Settings */
+    QString                             _serializationTemporaryDirectory;       /** Temporary directory for serialization */
+    bool                                _serializationAborted;                  /** Whether serialization was aborted */
+    util::Logger                        _logger;                                /** Logger instance */
+    gui::TriggerAction*                 _exitAction;                            /** Action for exiting the application */
+    QString                             _startupProjectFilePath;                /** File path of the project to automatically open upon startup (if set) */
+    QScopedPointer<ProjectMetaAction>   _startupProjectMetaAction;              /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
+    BackgroundTask                      _startupTask;                           /** Task that is associated with application startup */
+    gui::ApplicationSplashScreenAction  _splashScreenAction;                    /** Splash screen action */
 };
 
 }

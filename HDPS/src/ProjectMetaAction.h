@@ -4,14 +4,13 @@
 
 #pragma once
 
-#include "util/Serializable.h"
-
+#include "actions/VerticalGroupAction.h"
 #include "actions/StringAction.h"
 #include "actions/StringsAction.h"
 #include "actions/IntegralAction.h"
-#include "actions/ProjectSplashScreenAction.h"
 #include "actions/VersionAction.h"
 
+#include "ProjectSplashScreenAction.h"
 #include "ProjectCompressionAction.h"
 
 namespace hdps {
@@ -25,7 +24,7 @@ class Project;
  *
  * @author Thomas Kroes
  */
-class ProjectMeta final : public QObject, public hdps::util::Serializable
+class ProjectMetaAction final : public gui::VerticalGroupAction
 {
     Q_OBJECT
 
@@ -36,14 +35,20 @@ public:
     * @param project Pointer to source project to get the meta data from
     * @param parent Pointer to parent object
     */
-    ProjectMeta(Project* project, QObject* parent = nullptr);
+    ProjectMetaAction(Project* project, QObject* parent = nullptr);
 
     /**
      * Construct project from \p filePath and \p parent object
      * @param filePath Path of the project meta file
      * @param parent Pointer to parent object
      */
-    ProjectMeta(const QString& filePath, QObject* parent = nullptr);
+    ProjectMetaAction(const QString& filePath, QObject* parent = nullptr);
+
+    /**
+     * Get owning project
+     * @return Pointer to owning project (might be nullptr if project meta action is used in isolation)
+     */
+    Project* getProject();
 
 public: // Serialization
 
@@ -59,7 +64,24 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+private:
+
+    /** Startup initialization */
+    void initialize();
+
 public: // Action getters
+
+    const gui::VersionAction& getApplicationVersionAction() const { return _applicationVersionAction; }
+    const gui::VersionAction& getProjectVersionAction() const { return _projectVersionAction; }
+    const gui::ToggleAction& getReadOnlyAction() const { return _readOnlyAction; }
+    const gui::StringAction& getTitleAction() const { return _titleAction; }
+    const gui::StringAction& getDescriptionAction() const { return _descriptionAction; }
+    const gui::StringsAction& getTagsAction() const { return _tagsAction; }
+    const gui::StringAction& getCommentsAction() const { return _commentsAction; }
+    const gui::StringsAction& getContributorsAction() const { return _contributorsAction; }
+    const gui::ProjectSplashScreenAction& getSplashScreenAction() const { return _splashScreenAction; }
+    const gui::ToggleAction& getStudioModeAction() const { return _studioModeAction; }
+    const ProjectCompressionAction& getCompressionAction() const { return _compressionAction; }
 
     gui::VersionAction& getApplicationVersionAction() { return _applicationVersionAction; }
     gui::VersionAction& getProjectVersionAction() { return _projectVersionAction; }
@@ -70,6 +92,7 @@ public: // Action getters
     gui::StringAction& getCommentsAction() { return _commentsAction; }
     gui::StringsAction& getContributorsAction() { return _contributorsAction; }
     gui::ProjectSplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
+    gui::ToggleAction& getStudioModeAction() { return _studioModeAction; }
     ProjectCompressionAction& getCompressionAction() { return _compressionAction; }
 
 private:
@@ -83,6 +106,7 @@ private:
     gui::StringAction               _commentsAction;            /** Comments action */
     gui::StringsAction              _contributorsAction;        /** Contributors action */
     gui::ProjectSplashScreenAction  _splashScreenAction;        /** Action for configuring the project splash screen */
+    gui::ToggleAction               _studioModeAction;          /** Toggle between view- and studio mode action */
     ProjectCompressionAction        _compressionAction;         /** Project compression action */
 };
 

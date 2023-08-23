@@ -273,7 +273,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/PresetsAction.h
     src/actions/LockingAction.h
     src/actions/VersionAction.h
-    src/actions/ProjectSplashScreenAction.h
+    src/actions/AbstractSplashScreenAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -289,7 +289,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/PresetsAction.cpp
     src/actions/LockingAction.cpp
     src/actions/VersionAction.cpp
-    src/actions/ProjectSplashScreenAction.cpp
+    src/actions/AbstractSplashScreenAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
@@ -298,7 +298,6 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
 )
 
 set(PUBLIC_TASK_ACTIONS_HEADERS
-    src/actions/ProjectSplashScreenAction.h
     src/actions/ProgressAction.h
     src/actions/TaskAction.h
     src/actions/TasksAction.h
@@ -352,6 +351,7 @@ set(PUBLIC_WIDGET_HEADERS
     src/widgets/InfoWidget.h
     src/widgets/ViewPluginEditorDialog.h
     src/widgets/ActionsWidget.h
+    src/widgets/SplashScreenDialog.h
 )
 
 set(PUBLIC_WIDGET_SOURCES
@@ -364,6 +364,7 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/InfoWidget.cpp
     src/widgets/ViewPluginEditorDialog.cpp
     src/widgets/ActionsWidget.cpp
+    src/widgets/SplashScreenDialog.cpp
     ${ACTION_HIERARCHY_SOURCES}
 )
 
@@ -493,10 +494,14 @@ set(PUBLIC_UTIL_FILES
 
 set(PUBLIC_APPLICATION_HEADERS
     src/Application.h
+    src/ApplicationSplashScreenAction.h
+    src/ApplicationSplashScreenDialog.h
 )
 
 set(PUBLIC_APPLICATION_SOURCES
     src/Application.cpp
+    src/ApplicationSplashScreenAction.cpp
+    src/ApplicationSplashScreenDialog.cpp
 )
 
 set(PUBLIC_APPLICATION_FILES
@@ -506,14 +511,18 @@ set(PUBLIC_APPLICATION_FILES
 
 set(PUBLIC_PROJECT_HEADERS
     src/Project.h
-    src/ProjectMeta.h
+    src/ProjectMetaAction.h
     src/ProjectCompressionAction.h
+    src/ProjectSplashScreenAction.h
+    src/ProjectSplashScreenDialog.h
 )
 
 set(PUBLIC_PROJECT_SOURCES
     src/Project.cpp
-    src/ProjectMeta.cpp
+    src/ProjectMetaAction.cpp
     src/ProjectCompressionAction.cpp
+    src/ProjectSplashScreenAction.cpp
+    src/ProjectSplashScreenDialog.cpp
 )
 
 set(PUBLIC_PROJECT_FILES

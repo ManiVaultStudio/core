@@ -262,6 +262,8 @@ void EventManager::notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset)
 
 void EventManager::initialize()
 {
+    Application::current()->getStartupTask().setSubtaskFinished("Initializing event manager");
+
     AbstractEventManager::initialize();
 }
 

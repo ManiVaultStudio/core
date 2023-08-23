@@ -206,7 +206,7 @@ void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap)
         if (!parentVariantMap.contains(getSerializationName())) {
             const auto errorMessage = QString("%1 not found in map: %2").arg(getSerializationName());
 
-            if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
+            if (core() != nullptr && settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
                 qCritical() << errorMessage;
             else
                 throw std::runtime_error(errorMessage.toLatin1());

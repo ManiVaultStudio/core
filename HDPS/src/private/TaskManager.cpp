@@ -4,6 +4,8 @@
 
 #include "TaskManager.h"
 
+#include <Application.h>
+
 #include <util/Exception.h>
 
 #include <Task.h>
@@ -31,6 +33,8 @@ void TaskManager::initialize()
 #ifdef TASK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    Application::current()->getStartupTask().setSubtaskFinished("Initializing task manager");
 
     AbstractTaskManager::initialize();
 }

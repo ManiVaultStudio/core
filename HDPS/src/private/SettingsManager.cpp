@@ -50,6 +50,8 @@ void SettingsManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
+    Application::current()->getStartupTask().setSubtaskFinished("Initializing settings manager");
+
     AbstractSettingsManager::initialize();
 }
 

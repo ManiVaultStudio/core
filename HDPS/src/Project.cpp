@@ -20,17 +20,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     Serializable("Project"),
     _filePath(),
     _applicationVersion(Application::current()->getVersion()),
-    _applicationVersionAction(this, "Application Version"),
-    _projectVersionAction(this, "Project Version"),
-    _readOnlyAction(this, "Read-only"),
-    _titleAction(this, "Title"),
-    _descriptionAction(this, "Description"),
-    _tagsAction(this, "Tags"),
-    _commentsAction(this, "Comments"),
-    _contributorsAction(this, "Contributors"),
-    _compressionAction(this),
-    _splashScreenAction(this),
-    _studioModeAction(this, "Studio Mode"),
+    _projectMetaAction(this),    
     _task(this, "Project Task")
 {
     initialize();
@@ -41,17 +31,7 @@ Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
     Serializable("Project"),
     _filePath(filePath),
     _applicationVersion(Application::current()->getVersion()),
-    _applicationVersionAction(this, "Application Version"),
-    _projectVersionAction(this, "Project Version"),
-    _readOnlyAction(this, "Read-only"),
-    _titleAction(this, "Title"),
-    _descriptionAction(this, "Description"),
-    _tagsAction(this, "Tags"),
-    _commentsAction(this, "Comments"),
-    _contributorsAction(this, "Contributors"),
-    _compressionAction(this),
-    _splashScreenAction(this),
-    _studioModeAction(this, "Studio Mode"),
+    _projectMetaAction(this),
     _task(this, "Project Task")
 {
     initialize();
@@ -102,17 +82,17 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
-    _splashScreenAction.fromParentVariantMap(variantMap);   
-    _applicationVersion.fromParentVariantMap(variantMap);
-    _projectVersionAction.fromParentVariantMap(variantMap);
-    _readOnlyAction.fromParentVariantMap(variantMap);
-    _titleAction.fromParentVariantMap(variantMap);
-    _descriptionAction.fromParentVariantMap(variantMap);
-    _tagsAction.fromParentVariantMap(variantMap);
-    _commentsAction.fromParentVariantMap(variantMap);
-    _contributorsAction.fromParentVariantMap(variantMap);
-    _compressionAction.fromParentVariantMap(variantMap);
-    _studioModeAction.fromParentVariantMap(variantMap);
+    _projectMetaAction.getApplicationVersionAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getProjectVersionAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getReadOnlyAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getTitleAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getDescriptionAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getTagsAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getCommentsAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getContributorsAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getCompressionAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getSplashScreenAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getStudioModeAction().fromParentVariantMap(variantMap);
 
     dataHierarchy().fromParentVariantMap(variantMap);
     actions().fromParentVariantMap(variantMap);
@@ -123,67 +103,23 @@ QVariantMap Project::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
     
-    _splashScreenAction.insertIntoVariantMap(variantMap);
-    _applicationVersion.insertIntoVariantMap(variantMap);
-    _projectVersionAction.insertIntoVariantMap(variantMap);
-    _readOnlyAction.insertIntoVariantMap(variantMap);
-    _titleAction.insertIntoVariantMap(variantMap);
-    _descriptionAction.insertIntoVariantMap(variantMap);
-    _tagsAction.insertIntoVariantMap(variantMap);
-    _commentsAction.insertIntoVariantMap(variantMap);
-    _contributorsAction.insertIntoVariantMap(variantMap);
-    _compressionAction.insertIntoVariantMap(variantMap);
-    _studioModeAction.insertIntoVariantMap(variantMap);
+    _projectMetaAction.getApplicationVersionAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getProjectVersionAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getReadOnlyAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getTitleAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getDescriptionAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getTagsAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getCommentsAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getContributorsAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getCompressionAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getSplashScreenAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getStudioModeAction().insertIntoVariantMap(variantMap);
 
     plugins().insertIntoVariantMap(variantMap);
     dataHierarchy().insertIntoVariantMap(variantMap);
     actions().insertIntoVariantMap(variantMap);
 
     return variantMap;
-}
-
-void Project::initialize()
-{
-    _readOnlyAction.setToolTip("Whether the project is in read-only mode or not");
-
-    _titleAction.setPlaceHolderString("Enter project title here...");
-    _titleAction.setClearable(true);
-
-    _descriptionAction.setPlaceHolderString("Enter project description here...");
-    _descriptionAction.setClearable(true);
-
-    _tagsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tag"));
-    _tagsAction.setCategory("Tag");
-    _tagsAction.setStretch(2);
-
-    _commentsAction.setPlaceHolderString("Enter project comments here...");
-    _commentsAction.setClearable(true);
-    _commentsAction.setStretch(2);
-    _commentsAction.setDefaultWidgetFlags(StringAction::TextEdit);
-
-    _contributorsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("user"));
-    _contributorsAction.setCategory("Contributor");
-    _contributorsAction.setEnabled(false);
-    _contributorsAction.setStretch(1);
-    _contributorsAction.setDefaultWidgetFlags(StringsAction::ListView);
-
-    updateContributors();
-
-    _studioModeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("pencil-ruler"));
-    
-    connect(&_studioModeAction, &ToggleAction::toggled, this, &Project::setStudioMode);
-
-    const auto updateStudioModeActionReadOnly = [&]() -> void {
-        _studioModeAction.setEnabled(projects().hasProject());
-    };
-
-    updateStudioModeActionReadOnly();
-
-    connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
-    connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
-
-    _task.setMayKill(false);
-    _task.setProgressMode(Task::ProgressMode::Subtasks);
 }
 
 ModalTask& Project::getTask()
@@ -206,8 +142,8 @@ void Project::updateContributors()
     currentUserName = getenv("USERNAME");
 #endif
 
-    if (!currentUserName.isEmpty() && !_contributorsAction.getStrings().contains(currentUserName))
-        _contributorsAction.addString(currentUserName);
+    if (!currentUserName.isEmpty() && !_projectMetaAction.getContributorsAction().getStrings().contains(currentUserName))
+        _projectMetaAction.getContributorsAction().addString(currentUserName);
 }
 
 void Project::setStudioMode(bool studioMode)
@@ -227,7 +163,12 @@ void Project::setStudioMode(bool studioMode)
     }
 }
 
-QSharedPointer<ProjectMeta> Project::getProjectMeta(const QString& projectFilePath)
+ProjectMetaAction& Project::getProjectMetaAction()
+{
+    return _projectMetaAction;
+}
+
+QSharedPointer<ProjectMetaAction> Project::getProjectMetaActionFromProjectFilePath(const QString& projectFilePath)
 {
     QTemporaryDir temporaryDir;
 
@@ -236,7 +177,28 @@ QSharedPointer<ProjectMeta> Project::getProjectMeta(const QString& projectFilePa
     if (projectMetaJsonFilePath.isEmpty())
         return {};
 
-    return QSharedPointer<ProjectMeta>::create(projectMetaJsonFilePath);
+    return QSharedPointer<ProjectMetaAction>::create(projectMetaJsonFilePath);
+}
+
+void Project::initialize()
+{
+    updateContributors();
+
+    getStudioModeAction().setIcon(Application::getIconFont("FontAwesome").getIcon("pencil-ruler"));
+
+    connect(&getStudioModeAction(), &ToggleAction::toggled, this, &Project::setStudioMode);
+
+    const auto updateStudioModeActionReadOnly = [&]() -> void {
+        getStudioModeAction().setEnabled(projects().hasProject());
+    };
+
+    updateStudioModeActionReadOnly();
+
+    connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
+    connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
+
+    _task.setMayKill(false);
+    _task.setProgressMode(Task::ProgressMode::Subtasks);
 }
 
 }

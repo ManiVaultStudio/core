@@ -47,9 +47,9 @@ private:
     void populate ();
 
 private:
-    
-    hdps::gui::TriggerAction* _devDocAction;        /** Menu entry for ManiVault About Messagebox */
-    hdps::gui::TriggerAction* _aboutAction;         /** Menu entry for ManiVault About Messagebox */
-    hdps::gui::TriggerAction* _aboutQt;             /** Menu entry for Qt About Messagebox */
-    hdps::gui::TriggerAction* _aboutThirdParties;   /** Menu entry for Third Party About Messagebox */
+    hdps::gui::TriggerAction* _devDocAction;                /** Menu entry for ManiVault About Messagebox */
+    hdps::gui::TriggerAction* _aboutProjectAction;          /** Action for triggering the ManiVault about project splash screen */
+    hdps::gui::TriggerAction* _aboutAction;                 /** Menu entry for ManiVault About Messagebox */
+    hdps::gui::TriggerAction* _aboutQtAction;               /** Menu entry for Qt About Messagebox */
+    hdps::gui::TriggerAction* _aboutThirdPartiesAction;     /** Menu entry for Third Party About Messagebox */
 };

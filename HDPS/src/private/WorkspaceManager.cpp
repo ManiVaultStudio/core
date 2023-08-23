@@ -156,6 +156,8 @@ void WorkspaceManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
+    Application::current()->getStartupTask().setSubtaskFinished("Initializing workspace manager");
+
     AbstractWorkspaceManager::initialize();
 
     if (isInitialized())
