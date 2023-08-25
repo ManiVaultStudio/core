@@ -110,7 +110,7 @@ jobs:
 
       - name: Windows build
         if: startsWith(runner.os, 'Windows')
-        uses: hdps/github-actions/conan_windows_build@main
+        uses: ManiVaultStudio/github-actions/conan_windows_build@main
         with:
           conan-visual-version: ${{matrix.build-cversion}}
           conan-visual-runtime: ${{matrix.build-runtime}}
@@ -122,7 +122,7 @@ jobs:
 
       - name: Linux Mac build
         if: "!startsWith(runner.os, 'Windows')"
-        uses: hdps/github-actions/conan_linuxmac_build@main
+        uses: ManiVaultStudio/github-actions/conan_linuxmac_build@main
         with:
           conan-compiler: ${{matrix.build-compiler}}
           conan-cc: ${{matrix.build-cc}}
