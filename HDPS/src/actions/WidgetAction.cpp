@@ -677,6 +677,7 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
         setForceHidden(variantMap["IsForceHidden"].toInt());
 
     setConnectionPermissions(variantMap["ConnectionPermissions"].toInt());
+    cacheConnectionPermissions(true);
 
     if (variantMap.contains("PublicActionID")) {
         const auto publicActionId = variantMap["PublicActionID"].toString();
