@@ -7,6 +7,7 @@
 #include <actions/ToggleAction.h>
 
 #include <QMenu>
+#include <QSharedPointer>
 
 /**
  * Loaded views menu class
@@ -25,6 +26,11 @@ public:
      */
     LoadedViewsMenu(QWidget *parent = nullptr);
 
+    /**
+     * Populate the menu
+     */
+    void populate();
+
 private:
 
     /**
@@ -33,4 +39,8 @@ private:
      * @return Vector of actions
      */
     QVector<QPointer<hdps::gui::ToggleAction>> getLoadedViewsActions(bool systemView);
+
+private:
+    QSharedPointer<QMenu>   _loadedSystemViewsMenu;     /** Shared pointer to menu */
+
 };
