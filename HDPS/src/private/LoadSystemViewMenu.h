@@ -11,6 +11,8 @@
 #include <DockAreaWidget.h>
 
 #include <QMenu>
+#include <QMap>
+#include <QSharedPointer>
 
 /**
  * Load system menu class

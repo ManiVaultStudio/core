@@ -7,6 +7,7 @@
 #include <actions/ToggleAction.h>
 
 #include <QMenu>
+#include <QSharedPointer>
 
 /**
  * Loaded views menu class
