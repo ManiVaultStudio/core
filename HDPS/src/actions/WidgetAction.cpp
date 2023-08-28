@@ -191,7 +191,7 @@ WidgetAction::HighlightOption WidgetAction::getHighlighting() const
 
 bool WidgetAction::isHighlighted() const
 {
-    return (_highlighting == HighlightOption::Moderate) | (_highlighting == HighlightOption::Strong);
+    return (_highlighting == HighlightOption::Moderate) || (_highlighting == HighlightOption::Strong);
 }
 
 void WidgetAction::setHighlighting(const HighlightOption& highlighting)
