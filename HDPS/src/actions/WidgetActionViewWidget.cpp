@@ -61,6 +61,9 @@ void WidgetActionViewWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
     if (actionMimeData->getAction() == getAction())
         return;
 
+    if (!getAction()->mayConnect(WidgetAction::Gui))
+        return;
+
     if (actionMimeData->getAction()->getTypeString() != getAction()->getTypeString())
         return;
 

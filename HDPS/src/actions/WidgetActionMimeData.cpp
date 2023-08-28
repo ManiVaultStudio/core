@@ -26,6 +26,9 @@ WidgetActionMimeData::WidgetActionMimeData(WidgetAction* action) :
         if (!action->isEnabled())
             continue;
 
+        if (!action->mayConnect(WidgetAction::Gui))
+            continue;
+
         if (action->isHighlighted())
             action->unHighlight();
 
