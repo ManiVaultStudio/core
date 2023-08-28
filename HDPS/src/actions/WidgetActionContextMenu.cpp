@@ -74,7 +74,8 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         _removeAction.setVisible(false);
 
         if (_actions.count() == 1) {
-            _publishAction.setEnabled(firstAction->isPublished() ? false : firstAction->mayPublish(WidgetAction::ConnectionContextFlag::Api));
+            _publishAction.setEnabled(firstAction->isPublished() ? false : firstAction->mayPublish(WidgetAction::ConnectionContextFlag::Gui));
+            _disconnectAction.setEnabled(firstAction->isConnected() ? firstAction->mayDisconnect(WidgetAction::ConnectionContextFlag::Gui) : false);
 
             if (firstAction->isConnected())
                 _disconnectAction.setText(QString("Disconnect from: %1").arg(firstAction->getPublicAction()->text()));
@@ -117,7 +118,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
                 connectMenu->addAction(connectAction);
             }
 
-            connectMenu->setEnabled(!connectMenu->actions().isEmpty());
+            connectMenu->setEnabled(connectMenu->actions().isEmpty() ? false : firstAction->mayConnect(WidgetAction::ConnectionContextFlag::Gui));
 
             insertMenu(&_disconnectAction, connectMenu);
         }
