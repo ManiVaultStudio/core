@@ -25,35 +25,43 @@ LoadedViewsMenu::LoadedViewsMenu(QWidget *parent /*= nullptr*/) :
     setEnabled(!plugins().getPluginsByType(plugin::Type::VIEW).empty());
     setIcon(Application::getIconFont("FontAwesome").getIcon("low-vision"));
 
-    connect(this, &QMenu::aboutToShow, this, [this]() -> void {
-        clear();
+    _loadedSystemViewsMenu = QSharedPointer<QMenu>(new QMenu("System", this));
 
-        for (auto action : getLoadedViewsActions(false))
-            addAction(action);
+    populate();
+}
 
-        if (!actions().isEmpty())
-            addSeparator();
+void LoadedViewsMenu::populate()
+{
+    clear();
 
-        const auto loadedViewActions = getLoadedViewsActions(true);
+    for (auto& action : getLoadedViewsActions(false))
+        addAction(action);
 
-        if (!loadedViewActions.isEmpty()) {
-            auto loadedSystemViewsMenu = new QMenu("System");
+    if (!actions().isEmpty())
+        addSeparator();
 
-            for (auto loadedSystemViewAction : loadedViewActions)
-                loadedSystemViewsMenu->addAction(loadedSystemViewAction);
+    const auto loadedViewActions = getLoadedViewsActions(true);
 
-            loadedSystemViewsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+    if (!loadedViewActions.isEmpty()) {
+        setEnabled(true);
+        _loadedSystemViewsMenu->clear();
 
-            addMenu(loadedSystemViewsMenu);
-        }
-    });
+        for (auto& loadedSystemViewAction : loadedViewActions)
+            _loadedSystemViewsMenu->addAction(loadedSystemViewAction);
+
+        _loadedSystemViewsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+
+        addMenu(_loadedSystemViewsMenu.get());
+    }
+    else
+        setEnabled(false);
 }
 
 QVector<QPointer<ToggleAction>> LoadedViewsMenu::getLoadedViewsActions(bool systemView)
 {
     QVector<QPointer<ToggleAction>> actions;
 
-    for (auto plugin : plugins().getPluginsByType(plugin::Type::VIEW)) {
+    for (auto& plugin : plugins().getPluginsByType(plugin::Type::VIEW)) {
         auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
 
         if (systemView) {
