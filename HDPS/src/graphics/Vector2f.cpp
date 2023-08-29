@@ -72,6 +72,18 @@ namespace hdps
         return *this;
     }
 
+    float dot(const Vector2f& v1, const Vector2f& v2)
+    {
+        return v1.x * v2.x + v1.y * v2.y;
+    }
+
+    Vector2f normalize(const Vector2f& v)
+    {
+        float l = v.length();
+
+        return Vector2f(v.x / l, v.y / l);
+    }
+
     std::ostream& operator<<(std::ostream& os, const Vector2f& v)
     {
         os << '(' << v.x << ", " << v.y << ')';
