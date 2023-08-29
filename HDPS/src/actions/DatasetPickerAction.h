@@ -157,7 +157,7 @@ public:
      * @param title Title of the action
      * @param mode Picker mode
      */
-    Q_INVOKABLE DatasetPickerAction(QObject* parent = nullptr, const QString& title = "", Mode mode = Mode::Automatic);
+    Q_INVOKABLE DatasetPickerAction(QObject* parent, const QString& title, Mode mode = Mode::Automatic);
 
     /** Get current mode */
     Mode getMode() const;
