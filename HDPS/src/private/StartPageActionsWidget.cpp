@@ -35,10 +35,6 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/, co
 
     _filterModel.setFilterKeyColumn(static_cast<int>(StartPageActionsModel::Column::Title));
 
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
-    _hierarchyWidget.setWindowIcon(fontAwesome.getIcon("search"));
-
     _hierarchyWidget.getFilterGroupAction().setVisible(false);
     _hierarchyWidget.getCollapseAllAction().setVisible(false);
     _hierarchyWidget.getExpandAllAction().setVisible(false);
@@ -152,13 +148,18 @@ void StartPageActionsWidget::closePersistentEditor(int rowIndex)
 
 void StartPageActionsWidget::updateCustomStyle()
 {
+    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("search"));
+    
     auto styleSheet = QString(" \
-            QTreeView::item:hover:!selected { \
-                background-color: rgba(0, 0, 0, 50); \
-            } \
-            QTreeView::item:selected { \
-                background-color: rgba(0, 0, 0, 100); \
-            } \
+        QLabel { \
+            background-color: rgba(0, 0, 0, 0); \
+        } \
+        QTreeView::item:hover:!selected { \
+            background-color: rgba(0, 0, 0, 50); \
+        } \
+        QTreeView::item:selected { \
+            background-color: rgba(0, 0, 0, 100); \
+        } \
     ");
     
     auto& treeView = _hierarchyWidget.getTreeView();

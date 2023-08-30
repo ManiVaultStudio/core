@@ -163,6 +163,8 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
 
         return getTooltipHtml(metaDataHtml);
     });
+    
+    _metaDataIconLabel.setStyleSheet("background-color: rgba(0, 0, 0, 50)");
 
     _tagsIconLabel.setTooltipCallback([this, getTooltipHtml]() -> QString {
         if (!_index.isValid())

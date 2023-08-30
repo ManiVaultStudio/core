@@ -28,8 +28,6 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _openProjectWidget(this),
     _getStartedWidget(this)
 {
-    setAutoFillBackground(true);
-
     _compactViewAction.setSettingsPrefix("StartPage/ToggleCompactView");
     _toggleOpenCreateProjectAction.setSettingsPrefix("StartPage/ToggleOpenCreateProject");
     _toggleRecentProjectsAction.setSettingsPrefix("StartPage/ToggleRecentProjects");
