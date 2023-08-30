@@ -204,4 +204,11 @@ void MainWindow::checkGraphicsCapabilities()
     }
 
     ctx.doneCurrent();
+    
+    connect(qApp, &QApplication::paletteChanged, this, &MainWindow::updateStyle);
+}
+
+void MainWindow::updateStyle()
+{
+    ads::internal::repolishStyle(this, ads::internal::RepolishChildrenRecursively);
 }
