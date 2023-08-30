@@ -83,4 +83,13 @@ namespace hdps
 
         return Selection(bottomLeft, topRight);
     }
+
+    std::ostream& operator<<(std::ostream& os, const Matrix3f& m)
+    {
+        os << "[" << m[0] << ", " << m[3] << ", " << m[6] << "]\n";
+        os << "[" << m[1] << ", " << m[4] << ", " << m[7] << "]\n";
+        os << "[" << m[2] << ", " << m[5] << ", " << m[8] << "]\n";
+
+        return os;
+    }
 }

@@ -6,6 +6,8 @@
 
 #include "../graphics/Matrix3f.h"
 
+#include <algorithm>
+
 #include <QImage>
 #include <QDebug>
 #include <math.h>
@@ -389,13 +391,9 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
 
     //qDebug() << "Final clusters size (including empty clusters): " << clusters.size();
 
-    for (auto i = clusters.size() - 1; i >= 0; i--)
-    {
-        if (clusters[i].size() == 0)
-        {
-            clusters.erase(clusters.begin() + i);
-        }
-    }
+    clusters.erase(std::remove_if(clusters.begin(), clusters.end(),
+        [](const auto& pointIDs) { return pointIDs.empty(); }),
+        clusters.end());
 
     qDebug() << "Final clusters size: " << clusters.size();
 

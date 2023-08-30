@@ -75,8 +75,13 @@ void PointData::setData(const std::nullptr_t, const std::size_t numPoints, const
 
 void PointData::setDimensionNames(const std::vector<QString>& dimNames)
 {
+    if (dimNames.empty())
+        return;
+
     _dimNames = dimNames;
-    _numDimensions = _dimNames.size();
+
+    if (dimNames.size() != _numDimensions)
+        qWarning() << "PointData: Number of dimension names does not equal the number of data dimensions";
 }
 
 float PointData::getValueAt(const std::size_t index) const

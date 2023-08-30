@@ -81,6 +81,11 @@ namespace hdps
         return *this;
     }
 
+    std::ostream& operator<<(std::ostream& os, const Vector3f& v)
+    {
+        os << '(' << v.x << ", " << v.y << ", " << v.z << ')';
+        return os;
+    }
 
     static_assert(Vector3f{}.x == 0.0f, "Compile-time unit test");
     static_assert(Vector3f{}.y == 0.0f, "Compile-time unit test");
