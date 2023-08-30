@@ -24,7 +24,6 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
     _loadSystemViewMenu(nullptr)
 {
     _addViewPluginToolButton->setToolTip(QObject::tr("Add views"));
-    _addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
     _addViewPluginToolButton->setAutoRaise(true);
     _addViewPluginToolButton->setPopupMode(QToolButton::InstantPopup);
     _addViewPluginToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
@@ -85,4 +84,12 @@ DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
     connect(&workspaces().getLockingAction().getLockedAction(), &ToggleAction::toggled, this, updateReadOnly);
 
     updateReadOnly();
+    
+    updateStyle();
+    connect(qApp, &QApplication::paletteChanged, this, &DockAreaTitleBar::updateStyle);
+}
+
+void DockAreaTitleBar::updateStyle()
+{
+    _addViewPluginToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
 }
