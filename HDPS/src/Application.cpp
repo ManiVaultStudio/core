@@ -32,7 +32,7 @@ hdps::Application::Application(int& argc, char** argv) :
     _logger(),
     _startupProjectFilePath(),
     _startupProjectMetaAction(),
-    _startupTask(this, "Application Loading Task"),
+    _startupTask(this, "Load application"),
     _splashScreenAction(this)
 {
     _startupTask.setMayKill(false);
@@ -51,6 +51,9 @@ hdps::Application::Application(int& argc, char** argv) :
         "Initializing workspace manager",
         "Setup main window"
     };
+
+    //if (Application::current()->shouldOpenProjectAtStartup())
+    //    subTasks
 
     _startupTask.setSubtasks(subTasks);
     _startupTask.setRunning();

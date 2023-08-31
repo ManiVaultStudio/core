@@ -5,8 +5,11 @@
 #include "ProjectSplashScreenDialog.h"
 #include "ProjectMetaAction.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include "actions/ColorAction.h"
+
+using namespace hdps;
 
 namespace hdps::gui {
 
@@ -155,7 +158,7 @@ void ProjectSplashScreenDialog::createBottomContent()
     layout->addStretch(1);
 
     _mainLayout.addLayout(layout);
-    _mainLayout.addWidget(_projectMetaAction->getSplashScreenAction().getTaskAction().createWidget(this));
+    //_mainLayout.addWidget(projects().getCurrentProject()->getTask().getA createWidget(this));
 }
 
 }

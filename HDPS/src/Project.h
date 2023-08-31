@@ -60,6 +60,12 @@ public:
      */
     void setFilePath(const QString& filePath);
 
+    /**
+     * Get whether this is a startup project
+     * @return Boolean determining whether this project is loaded at startup of ManiVault
+     */
+    bool isStartupProject() const;
+
 public: // Miscellaneous
 
     /**
@@ -152,9 +158,9 @@ signals:
 
 private:
     QString             _filePath;                  /** Location on disk where the project resides */
+    bool                _startupProject;            /** Boolean determining whether this project is loaded at startup of ManiVault */
     util::Version       _applicationVersion;        /** Version of the application with which the project is created */
     ProjectMetaAction   _projectMetaAction;         /** Project meta info action (i.e. title and version) */
-    
     ModalTask           _task;                      /** Modal task for reporting project tasks */
 
 protected:

@@ -24,12 +24,12 @@ public:
     /**
      * Construct with \p applicationSplashScreenAction
      * @param applicationSplashScreenAction Pointer to application splash screen action
+     * @param parent Pointer to parent object
      */
     ApplicationSplashScreenDialog(ApplicationSplashScreenAction* applicationSplashScreenAction, QWidget* parent = nullptr);
 
 private:
 
-    void createTopContent();
     void createCenterContent();
     void createBottomContent();
 

@@ -19,6 +19,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("Project"),
     _filePath(),
+    _startupProject(false),
     _applicationVersion(Application::current()->getVersion()),
     _projectMetaAction(this),    
     _task(this, "Project Task")
@@ -29,11 +30,13 @@ Project::Project(QObject* parent /*= nullptr*/) :
 Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("Project"),
-    _filePath(filePath),
+    _filePath(),
+    _startupProject(),
     _applicationVersion(Application::current()->getVersion()),
     _projectMetaAction(this),
     _task(this, "Project Task")
 {
+    setFilePath(filePath);
     initialize();
 
     try {
@@ -73,9 +76,29 @@ QString Project::getFilePath() const
 
 void Project::setFilePath(const QString& filePath)
 {
-    _filePath = filePath;
+    _filePath       = filePath;
+    _startupProject = filePath == Application::current()->getStartupProjectFilePath();
 
     emit filePathChanged(_filePath);
+
+    if (isStartupProject()) {
+        connect(&_task, &Task::subtasksChanged, this, [this](const QBitArray& subtasks, const QStringList& subtasksNames) -> void {
+            Application::current()->getStartupTask().setSubtasks(subtasksNames);
+        });
+
+        connect(&_task, &Task::subtaskStarted, this, [this](const QString& subTaskName) -> void {
+            Application::current()->getStartupTask().setSubtaskStarted(subTaskName);
+        });
+
+        connect(&_task, &Task::subtaskFinished, this, [this](const QString& subTaskName) -> void {
+            Application::current()->getStartupTask().setSubtaskFinished(subTaskName);
+        });
+    }
+}
+
+bool Project::isStartupProject() const
+{
+    return _startupProject;
 }
 
 void Project::fromVariantMap(const QVariantMap& variantMap)
@@ -148,18 +171,18 @@ void Project::updateContributors()
 
 void Project::setStudioMode(bool studioMode)
 {
-    auto viewPlugins = plugins().getPluginsByType(plugin::Type::VIEW);
+    auto plugins = hdps::plugins().getPluginsByTypes({ plugin::Type::VIEW, plugin::Type::ANALYSIS });
 
     if (studioMode) {
-        for (auto viewPlugin : viewPlugins)
-            viewPlugin->cacheConnectionPermissions(true);
+        for (auto plugin : plugins)
+            plugin->cacheConnectionPermissions(true);
 
-        for (auto viewPlugin : viewPlugins)
-            viewPlugin->setConnectionPermissionsToAll(true);
+        for (auto plugin : plugins)
+            plugin->setConnectionPermissionsToAll(true);
     }
     else {
-        for (auto viewPlugin : viewPlugins)
-            viewPlugin->restoreConnectionPermissions(true);
+        for (auto plugin : plugins)
+            plugin->restoreConnectionPermissions(true);
     }
 }
 
@@ -196,7 +219,7 @@ void Project::initialize()
 
     connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
-
+        
     _task.setMayKill(false);
     _task.setProgressMode(Task::ProgressMode::Subtasks);
 }

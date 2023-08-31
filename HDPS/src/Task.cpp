@@ -41,7 +41,7 @@ Task::Task(QObject* parent, const QString& name, const Status& status /*= Status
     if (core() != nullptr && core()->isInitialized()) {
         QObject::connect(this, &QObject::destroyed, this, [this]() -> void {
             tasks().removeTask(this);
-            });
+        });
     }
 
     for (auto& timer : _timers) {
@@ -420,6 +420,7 @@ void Task::addSubtasks(const QStringList& subtasksNames)
     
     _subtasks.resize(_subtasksNames.count());
 
+    emit subtasksAdded(subtasksNames);
     emit subtasksChanged(_subtasks, _subtasksNames);
 
     updateProgress();
@@ -437,7 +438,7 @@ void Task::setSubtaskFinished(std::uint32_t subtaskIndex, const QString& progres
 
     updateProgress();
 
-    emit subtasksChanged(_subtasks, _subtasksNames);
+    //emit subtasksChanged(_subtasks, _subtasksNames);
 
     const auto subtaskName = _subtasksNames[subtaskIndex];
 
@@ -539,7 +540,7 @@ std::int32_t Task::getSubtaskIndex(const QString& subtaskName) const
 
 void Task::updateProgress()
 {
-    qDebug() << (_subtasks.size() / 8) << _subtasks.count(true);
+    //qDebug() << (_subtasks.size() / 8) << _subtasks.count(true);
 
     switch (_progressMode) {
         case ProgressMode::Manual:

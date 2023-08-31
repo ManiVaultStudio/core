@@ -37,30 +37,10 @@ ApplicationSplashScreenDialog::ApplicationSplashScreenDialog(ApplicationSplashSc
     connect(&projectSplashScreenAction.getBackgroundColorAction(), &ColorAction::colorChanged, this, updateStyleSheet);
     */
 
-    createTopContent();
     createCenterContent();
     createBottomContent();
 
     setLayout(&_mainLayout);
-}
-
-void ApplicationSplashScreenDialog::createTopContent()
-{
-    auto layout = new QHBoxLayout();
-
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    _closeToolButton.setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
-    _closeToolButton.setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
-    _closeToolButton.setAutoRaise(true);
-    _closeToolButton.setToolTip("Close the splash screen");
-
-    connect(&_closeToolButton, &QToolButton::clicked, this, &SplashScreenDialog::close);
-
-    layout->addStretch(1);
-    layout->addWidget(&_closeToolButton);
-
-    _mainLayout.addLayout(layout);
 }
 
 void ApplicationSplashScreenDialog::createCenterContent()
@@ -154,6 +134,26 @@ void ApplicationSplashScreenDialog::createBottomContent()
 
     _mainLayout.addLayout(layout);
     _mainLayout.addWidget(_applicationSplashScreenAction->getTaskAction().createWidget(this));
+
+    /*
+    const auto taskAdded = [this](const QModelIndex& parent, int first, int last) -> void {
+        auto& tasksModel        = _applicationSplashScreenAction->getTasksModel();
+        auto& tasksFilterModel  = _applicationSplashScreenAction->getTasksFilterModel();
+
+        for (int rowIndex = first; rowIndex < last; rowIndex++) {
+            const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(rowIndex, 0, parent));
+
+            auto item = static_cast<TasksModel::Item*>(_applicationSplashScreenAction->getTasksModel().itemFromIndex(sourceModelIndex));
+            auto task = item->getTask();
+
+            if (task->getName() == "Load project") {
+                qDebug() << "////////////////////// Load project task added!";
+            }
+        }
+    };
+
+    connect(&_applicationSplashScreenAction->getTasksFilterModel(), &QSortFilterProxyModel::rowsInserted, this, taskAdded);
+    */
 }
 
 }

@@ -425,11 +425,13 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (!importDataOnly)
                 newProject();
 
+            _project->setFilePath(filePath);
+
             ProjectMetaAction projectMetaAction(extractFileFromManiVaultProject(filePath, temporaryDirectory, "meta.json"));
 
             auto& splashScreenAction = projectMetaAction.getSplashScreenAction();
 
-            if (splashScreenAction.getEnabledAction().isChecked() && !Application::current()->shouldOpenProjectAtStartup())
+            if (splashScreenAction.getEnabledAction().isChecked())
                 splashScreenAction.getOpenAction().trigger();
 
             auto& task = getCurrentProject()->getTask();
@@ -480,8 +482,6 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             }
 
             _recentProjectsAction.addRecentFilePath(filePath);
-
-            _project->setFilePath(filePath);
             _project->updateContributors();
 
             if (disableReadOnlyAction.isEnabled() && disableReadOnlyAction.isChecked())

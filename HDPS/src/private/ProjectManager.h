@@ -145,7 +145,7 @@ public: // Menus
 
 private:
 
-    /** Resets the core and creates a new project */
+    /** Resets the manager and creates a new project */
     void createProject();
 
 public: // Action getters

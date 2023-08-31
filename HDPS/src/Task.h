@@ -408,6 +408,12 @@ signals:
     void progressChanged(float progress);
 
     /**
+     * Signals that subtasks with \p subtasksNames have been added
+     * @param subtasksNames Added subtasks names
+     */
+    void subtasksAdded(const QStringList& subtasksNames);
+
+    /**
      * Signals that subtasks changed to \p subtasks
      * @param subtasks Modified subtasks
      * @param subtasksNames Modified subtasks names
@@ -416,15 +422,15 @@ signals:
 
     /**
      * Signals that subtask with \p name started
-     * @param name Name of the subtask that started
+     * @param subTaskName Name of the subtask that started
      */
-    void subtaskStarted(const QString& name);
+    void subtaskStarted(const QString& subTaskName);
 
     /**
      * Signals that subtask with \p name finished
-     * @param name Name of the subtask that finished
+     * @param subTaskName Name of the subtask that finished
      */
-    void subtaskFinished(const QString& name);
+    void subtaskFinished(const QString& subTaskName);
 
     /**
      * Signals that the progress description changed to \p progressDescription

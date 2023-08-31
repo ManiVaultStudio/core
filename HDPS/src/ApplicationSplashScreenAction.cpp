@@ -9,9 +9,14 @@
 namespace hdps::gui {
 
 ApplicationSplashScreenAction::ApplicationSplashScreenAction(QObject* parent) :
-    AbstractSplashScreenAction(parent)
+    AbstractSplashScreenAction(parent)//,
+    //_tasksModel(this),
+    //_tasksFilterModel(this)
 {
     getTaskAction().setTask(&Application::current()->getStartupTask());
+
+    //_tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
+    //_tasksFilterModel.getTaskTypeFilterAction().selectOption("ModalTask");
 
     connect(&Application::current()->getStartupTask(), &Task::finished, this, [this]() -> void {
         QTimer::singleShot(1500, [this]() -> void {
@@ -24,5 +29,15 @@ SplashScreenDialog* ApplicationSplashScreenAction::getSplashScreenDialog()
 {
     return new ApplicationSplashScreenDialog(this);
 }
+
+//TasksModel& ApplicationSplashScreenAction::getTasksModel()
+//{
+//    return _tasksModel;
+//}
+//
+//TasksFilterModel& ApplicationSplashScreenAction::getTasksFilterModel()
+//{
+//    return _tasksFilterModel;
+//}
 
 }

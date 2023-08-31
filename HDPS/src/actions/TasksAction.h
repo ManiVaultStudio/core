@@ -6,8 +6,8 @@
 
 #include <actions/WidgetAction.h>
 
-#include <TasksModel.h>
-#include <TasksFilterModel.h>
+#include "TasksModel.h"
+#include "TasksFilterModel.h"
 
 #include <widgets/HierarchyWidget.h>
 

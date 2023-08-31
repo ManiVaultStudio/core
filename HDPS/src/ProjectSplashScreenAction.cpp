@@ -17,6 +17,8 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(ProjectMetaAction* projectM
     _projectImageAction(this, "Project Image"),
     _affiliateLogosImageAction(this, "Affiliate Logos")
 {
+    getTaskAction().setTask(&Application::current()->getStartupTask());
+
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
     auto& fontAwesome = Application::getIconFont("FontAwesome");
@@ -42,8 +44,6 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(ProjectMetaAction* projectM
     _affiliateLogosImageAction.setIcon(fontAwesome.getIcon("image"));
     _affiliateLogosImageAction.setToolTip("Affiliate logos image");
 
-    //_loadTaskAction.setTask(&hdps::projects().getCurrentProject()->getTask());
-    
     addAction(&_editAction);
 }
 
