@@ -28,12 +28,24 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
     setTitle("View");
     setToolTip("Manage view plugins");
     
-    // macOS does not like populating the menu on show, so we rather do it explicitly here
+    // the menu needs to be updated, e.g. for when new view actions are opened
+    connect(this, &QMenu::aboutToShow, this, &ViewMenu::populate);
+
+    // create menus once at start and re-populate them on aboutToShow
+    _loadSystemViewMenu = QSharedPointer<LoadSystemViewMenu>(new LoadSystemViewMenu(this));
+    _loadedViewsMenu = QSharedPointer<LoadedViewsMenu>(new LoadedViewsMenu(this));
+    
+    _loadViewsDockedMenus.insert(gui::DockAreaFlag::Left,   QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Left), this)));
+    _loadViewsDockedMenus.insert(gui::DockAreaFlag::Right,  QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Right), this)));
+    _loadViewsDockedMenus.insert(gui::DockAreaFlag::Top,    QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Top), this)));
+    _loadViewsDockedMenus.insert(gui::DockAreaFlag::Bottom, QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Bottom), this)));
+    _loadViewsDockedMenus.insert(gui::DockAreaFlag::Center, QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Center), this)));
+
     populate();
 
     const auto updateReadOnly = [this]() -> void {
         setEnabled(projects().hasProject() && !workspaces().getLockingAction().isLocked());
-    };
+        };
 
     updateReadOnly();
 
@@ -44,40 +56,36 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
 
 void ViewMenu::populate()
 {
-    for (auto action : actions())
-        if (action != &projects().getCurrentProject()->getStudioModeAction())
-            delete action;
-
     clear();
     
     if (_options.testFlag(LoadSystemViewPlugins))
-        addMenu(new LoadSystemViewMenu());
+    {
+        _loadSystemViewMenu->populate();
+        addMenu(_loadSystemViewMenu.get());
+    }
 
     auto separator = addSeparator();
 
     if (_dockAreaWidget) {
-        const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
-            auto loadViewsDockedMenu = new QMenu(gui::dockAreaMap.key(dockArea));
 
+        for (auto& dockArea : { gui::DockAreaFlag::Left, gui::DockAreaFlag::Right, gui::DockAreaFlag::Top, gui::DockAreaFlag::Bottom, gui::DockAreaFlag::Center })
+        {
+            auto& loadViewsDockedMenu = _loadViewsDockedMenus[dockArea];
+
+            loadViewsDockedMenu->clear();
             loadViewsDockedMenu->setIcon(getDockAreaIcon(dockArea));
 
-            for (auto action : getLoadViewsActions(dockArea))
+            for (auto& action : getLoadViewsActions(dockArea))
                 loadViewsDockedMenu->addAction(action);
 
-            return loadViewsDockedMenu;
-        };
-
-        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Left));
-        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Right));
-        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Top));
-        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Bottom));
-        insertMenu(_separator, addLoadViewsDocked(gui::DockAreaFlag::Center));
+            insertMenu(_separator, loadViewsDockedMenu.get());
+        }
     }
     else {
         if (_options.testFlag(LoadViewPlugins)) {
             const auto actions = getLoadViewsActions(gui::DockAreaFlag::Right);
 
-            for (auto action : actions)
+            for (auto& action : actions)
                 insertAction(_separator, action);
         }
     }
@@ -85,7 +93,10 @@ void ViewMenu::populate()
     _separator = addSeparator();
 
     if (_options.testFlag(LoadedViewsSubMenu))
-        addMenu(new LoadedViewsMenu());
+    {
+        _loadedViewsMenu->populate();
+        addMenu(_loadedViewsMenu.get());
+    }
 
     if (projects().hasProject()) {
         addSeparator();
@@ -95,7 +106,7 @@ void ViewMenu::populate()
 
 bool ViewMenu::mayProducePlugins() const
 {
-    for (auto pluginTriggerAction : plugins().getPluginTriggerActions(Type::VIEW)) {
+    for (auto& pluginTriggerAction : plugins().getPluginTriggerActions(Type::VIEW)) {
         auto viewPluginFactory = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
 
         if (viewPluginFactory->producesSystemViewPlugins())
@@ -112,7 +123,7 @@ QVector<QPointer<PluginTriggerAction>> ViewMenu::getLoadViewsActions(gui::DockAr
 {
     PluginTriggerActions pluginTriggerActions;
 
-    for (auto pluginTriggerAction : plugins().getPluginTriggerActions(plugin::Type::VIEW)) {
+    for (auto& pluginTriggerAction : plugins().getPluginTriggerActions(plugin::Type::VIEW)) {
         auto viewPluginFactory = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
 
         if (viewPluginFactory->producesSystemViewPlugins())

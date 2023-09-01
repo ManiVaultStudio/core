@@ -5,6 +5,7 @@
 #pragma once
 
 #include <string>
+#include <iostream>
 
 namespace hdps
 {
@@ -120,5 +121,10 @@ namespace hdps
 
         float x{}, y{};
     };
+
+    float dot(const Vector2f& v1, const Vector2f& v2);
+    Vector2f normalize(const Vector2f& v);
+
+    std::ostream& operator<<(std::ostream& os, const Vector2f& v);
 
 } // namespace hdps

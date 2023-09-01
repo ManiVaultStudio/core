@@ -96,4 +96,4 @@ protected:
 
 Q_DECLARE_METATYPE(hdps::gui::VariantAction)
 
-inline const auto variantActionMetaTypeId = qRegisterMetaType<hdps::gui::VariantAction*>("VariantAction");
+inline const auto variantActionMetaTypeId = qRegisterMetaType<hdps::gui::VariantAction*>("hdps::gui::VariantAction");

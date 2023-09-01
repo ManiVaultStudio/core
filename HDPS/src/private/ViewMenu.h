@@ -11,6 +11,10 @@
 #include <DockAreaWidget.h>
 
 #include <QMenu>
+#include <QSharedPointer>
+
+class LoadSystemViewMenu;
+class LoadedViewsMenu;
 
 /**
  * View menu class
@@ -64,9 +68,15 @@ private:
      */
     QVector<QPointer<hdps::gui::PluginTriggerAction>> getLoadViewsActions(hdps::gui::DockAreaFlag dockArea);
 
+private:
+    using MenuMap = QMap<hdps::gui::DockAreaFlag, QSharedPointer<QMenu>>;   /** Short hand for map to shared pointers of menus */
 
 private:
-    ads::CDockAreaWidget*   _dockAreaWidget;        /** Pointer to dock area widget to which new view plugins are docked (new view plugins will be docked top-level if nullptr) */
-    Options                 _options;               /** Menu options */
-    QAction*                _separator;             /** Separator */
+    ads::CDockAreaWidget*               _dockAreaWidget;        /** Pointer to dock area widget to which new view plugins are docked (new view plugins will be docked top-level if nullptr) */
+    Options                             _options;               /** Menu options */
+    QAction*                            _separator;             /** Separator */
+    QSharedPointer<LoadSystemViewMenu>  _loadSystemViewMenu;    /** Shared pointer to menu for loading system view plugins */
+    QSharedPointer<LoadedViewsMenu>     _loadedViewsMenu;       /** Shared pointer to menu for (toggling) loaded view plugins */
+    MenuMap                             _loadViewsDockedMenus;  /** Map of shared pointer to menus */
+
 };

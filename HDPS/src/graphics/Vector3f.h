@@ -5,6 +5,7 @@
 #pragma once
 
 #include <string>
+#include <iostream>
 
 namespace hdps
 {
@@ -115,5 +116,7 @@ namespace hdps
 
         float x{}, y{}, z{};
     };
+
+    std::ostream& operator<<(std::ostream& os, const Vector3f& v);
 
 } // namespace hdps
