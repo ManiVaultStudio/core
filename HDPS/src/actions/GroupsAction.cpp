@@ -249,6 +249,9 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     // Perform an initial update of the toolbar and action filtering
     updateToolbar();
     //updateFiltering();
+
+    for (auto groupAction : _groupsAction->getGroupActions())
+        addGroupAction(groupAction);
 }
 
 void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
