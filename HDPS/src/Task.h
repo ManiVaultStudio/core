@@ -20,10 +20,11 @@ class AbstractTaskHandler;
  *
  * Convenience class for managing a task.
  *
- * Task progress can be modified in two ways see Task::setProgressMode():
+ * Task progress can be determined in three ways see Task::setProgressMode():
  *  - Setting progress directly setProgress(...)
  *  - Setting sub tasks items via one of the overloads of Task::setSubTasks() and flagging items as finished 
  *    with Task::setSubtaskFinished(), the percentage is then updated automatically
+ *  - Computing the combined progress of child tasks using aggregation (makes use of Qt's parent > child relationship)
  *
  * @author Thomas Kroes
  */
@@ -49,8 +50,11 @@ public:
     /** Progress is tracked by: */
     enum class ProgressMode {
         Manual,     /** setting progress percentage manually */
-        Subtasks    /** setting a number of subtasks and flagging subtasks as finished (progress percentage is computed automatically) */
+        Subtasks,   /** setting a number of subtasks and flagging subtasks as finished (progress percentage is computed automatically) */
+        Aggregate   /** combining the progress of child tasks */
     };
+
+    using TasksPtrs = QVector<Task*>;
 
 private:
 
@@ -339,6 +343,36 @@ private:
      * @return Timer for \p timerType
      */
     QTimer& getTimer(const TimerType& timerType);
+
+protected: // Child tasks
+
+    /**
+     * Invoked when a child \p event occurs
+     * @param event Pointer to child event
+     */
+    void childEvent(QChildEvent* event) override;
+
+public: // Child tasks
+
+    /**
+     * Get child tasks
+     * @return Vector of pointer to child task(s)
+     */
+    virtual TasksPtrs getChildTasks() const final;
+
+private: // Child tasks
+
+    /**
+     * Registers \p childTask
+     * @param childTask Pointer to child task to register
+     */
+    virtual void registerChildTask(Task* childTask) final;
+
+    /**
+     * Unregisters \p childTask
+     * @param childTask Pointer to child task to unregister
+     */
+    virtual void unregisterChildTask(Task* childTask) final;
 
 signals:
 

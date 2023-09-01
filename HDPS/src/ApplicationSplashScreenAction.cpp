@@ -13,7 +13,7 @@ ApplicationSplashScreenAction::ApplicationSplashScreenAction(QObject* parent) :
     //_tasksModel(this),
     //_tasksFilterModel(this)
 {
-    getTaskAction().setTask(&Application::current()->getStartupTask());
+    //getTaskAction().setTask(&Application::current()->getStartupTask());
 
     //_tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
     //_tasksFilterModel.getTaskTypeFilterAction().selectOption("ModalTask");

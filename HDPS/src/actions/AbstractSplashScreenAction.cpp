@@ -17,8 +17,9 @@ AbstractSplashScreenAction::AbstractSplashScreenAction(QObject* parent) :
     _backgroundColorAction(this, "Background Color", Qt::white),
     _openAction(this, "Open splash screen"),
     _closeAction(this, "Close splash screen"),
-    _splashScreenDialog(),
-    _taskAction(this, "Application Startup")
+    _task(this, "Splash Screen"),
+    _taskAction(this, "Application Startup"),
+    _splashScreenDialog()
 {
     addAction(&_enabledAction);
     
@@ -56,6 +57,11 @@ AbstractSplashScreenAction::AbstractSplashScreenAction(QObject* parent) :
 
     connect(&_openAction, &TriggerAction::triggered, this, &AbstractSplashScreenAction::openSplashScreenDialog);
     connect(&_closeAction, &TriggerAction::triggered, this, &AbstractSplashScreenAction::closeSplashScreenDialog);
+}
+
+Task& AbstractSplashScreenAction::getTask()
+{
+    return _task;
 }
 
 void AbstractSplashScreenAction::openSplashScreenDialog()

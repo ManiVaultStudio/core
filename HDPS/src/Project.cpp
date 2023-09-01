@@ -79,21 +79,9 @@ void Project::setFilePath(const QString& filePath)
     _filePath       = filePath;
     _startupProject = filePath == Application::current()->getStartupProjectFilePath();
 
-    emit filePathChanged(_filePath);
-
-    if (isStartupProject()) {
-        connect(&_task, &Task::subtasksChanged, this, [this](const QBitArray& subtasks, const QStringList& subtasksNames) -> void {
-            Application::current()->getStartupTask().setSubtasks(subtasksNames);
-        });
-
-        connect(&_task, &Task::subtaskStarted, this, [this](const QString& subTaskName) -> void {
-            Application::current()->getStartupTask().setSubtaskStarted(subTaskName);
-        });
-
-        connect(&_task, &Task::subtaskFinished, this, [this](const QString& subTaskName) -> void {
-            Application::current()->getStartupTask().setSubtaskFinished(subTaskName);
-        });
+    if (_startupProject) {
     }
+    emit filePathChanged(_filePath);
 }
 
 bool Project::isStartupProject() const

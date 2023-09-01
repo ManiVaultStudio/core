@@ -5,6 +5,10 @@
 #include "Task.h"
 #include "CoreInterface.h"
 
+#ifdef _DEBUG
+    #define TASK_VERBOSE
+#endif
+
 namespace hdps {
 
 using namespace util;
@@ -547,8 +551,25 @@ void Task::updateProgress()
             break;
 
         case ProgressMode::Subtasks:
+        {
             _progress = _subtasks.isEmpty() ? 0.f : static_cast<float>(_subtasks.count(true)) / static_cast<float>(_subtasks.size() / 8);
             break;
+        }
+
+        case ProgressMode::Aggregate:
+        {
+            const auto childTasks = getChildTasks();
+
+            auto accumulatedProgress = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [](float sum, Task* childTask) -> float {
+                return sum + childTask->getProgress();
+            });
+
+            _progress = accumulatedProgress / static_cast<float>(childTasks.count());
+
+            qDebug() << "************" << _progress << childTasks.count();
+
+            break;
+        }
     }
 
     switch (_status)
@@ -584,6 +605,103 @@ void Task::updateProgress()
 QTimer& Task::getTimer(const TimerType& timerType)
 {
     return _timers[static_cast<int>(timerType)];
+}
+
+void Task::childEvent(QChildEvent* event)
+{
+    const auto numberOfChildTasks = getChildTasks().count();
+
+    switch (event->type())
+    {
+        case QEvent::ChildAdded:
+        {
+            auto childTask = dynamic_cast<Task*>(event->child());
+
+            if (childTask == nullptr)
+                break;
+
+#ifdef TASK_VERBOSE
+            qDebug() << "Child task was added";
+#endif
+
+            setProgressMode(ProgressMode::Aggregate);
+            registerChildTask(childTask);
+            updateProgress();
+
+            break;
+        }
+
+        case QEvent::ChildRemoved:
+        {
+            auto childTask = dynamic_cast<Task*>(event->child());
+
+            if (childTask == nullptr)
+                break;
+
+#ifdef TASK_VERBOSE
+            qDebug() << "Child task was removed";
+#endif
+
+            unregisterChildTask(childTask);
+            updateProgress();
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return QObject::childEvent(event);
+}
+
+Task::TasksPtrs Task::getChildTasks() const
+{
+    Task::TasksPtrs childTasksPtrs;
+
+    for (auto childObject : children()) {
+        auto childTask = dynamic_cast<Task*>(childObject);
+
+        if (childTask == nullptr)
+            continue;
+
+        childTasksPtrs << childTask;
+    }
+
+    return childTasksPtrs;
+}
+
+void Task::registerChildTask(Task* childTask)
+{
+    Q_ASSERT(childTask != nullptr);
+
+    if (childTask == nullptr)
+        return;
+
+    connect(childTask, &Task::progressChanged, this, [this](float progress) -> void {
+        if (getProgressMode() != ProgressMode::Aggregate)
+            return;
+
+        updateProgress();
+    });
+
+    connect(childTask, &Task::progressDescriptionChanged, this, [this](const QString& progressDescription) -> void {
+        if (getProgressMode() != ProgressMode::Aggregate)
+            return;
+        
+        setProgressDescription(progressDescription);
+    });
+}
+
+void Task::unregisterChildTask(Task* childTask)
+{
+    Q_ASSERT(childTask != nullptr);
+
+    if (childTask == nullptr)
+        return;
+
+    disconnect(childTask, &Task::progressChanged, this, nullptr);
+    disconnect(childTask, &Task::progressDescriptionChanged, this, nullptr);
 }
 
 }

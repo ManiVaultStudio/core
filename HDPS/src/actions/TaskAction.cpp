@@ -19,9 +19,6 @@ TaskAction::TaskAction(QObject* parent, const QString& title) :
 
     _progressAction.setStretch(1);
 
-    //_killTaskAction.setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
-    //_killTaskAction.setDefaultWidgetFlags(TriggerAction::Icon);
-
     addAction(&_progressAction);
     addAction(&_killTaskAction);
 
@@ -58,8 +55,6 @@ void TaskAction::setTask(Task* task)
 
     _task = task;
 
-    
-
     const auto updateProgressAction = [this]() -> void {
         _progressAction.setProgress(static_cast<int>(_task->getProgress() * 100.f));
     };
@@ -76,6 +71,7 @@ void TaskAction::setTask(Task* task)
     emit taskChanged(previousTask, _task);
 
     updateKillTaskActionVisibility();
+    updateProgressActionTextFormat();
 }
 
 void TaskAction::updateActionsReadOnly()
