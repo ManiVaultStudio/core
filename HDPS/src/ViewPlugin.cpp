@@ -92,7 +92,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction.setIcon(getIcon());
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
-    _visibleAction.setConnectionPermissionsToForceNone();
 
     _helpAction.setToolTip(QString("Shows %1 documentation").arg(factory->getKind()));
     _helpAction.setShortcut(tr("F1"));
@@ -151,7 +150,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
     connect(&_mayCloseAction, &ToggleAction::toggled, this, updateVisibleAction);
 
-    _visibleAction.setText(getGuiName());
+    //_visibleAction.setText(getGuiName());
 
     updateVisibleAction();
 

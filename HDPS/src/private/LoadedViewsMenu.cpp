@@ -18,7 +18,9 @@ using namespace hdps::util;
 using namespace hdps::gui;
 
 LoadedViewsMenu::LoadedViewsMenu(QWidget *parent /*= nullptr*/) :
-    QMenu(parent)
+    QMenu(parent),
+    _loadedSystemViewsMenu(),
+    _viewsToggleActions()
 {
     setTitle("Toggle");
     setToolTip("Toggle loaded view plugin visibility");
@@ -34,20 +36,36 @@ void LoadedViewsMenu::populate()
 {
     clear();
 
-    for (auto& action : getLoadedViewsActions(false))
-        addAction(action);
+    for (auto& plugin : plugins().getPluginsByType(plugin::Type::VIEW)) {
+        auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
+
+        disconnect(&viewPlugin->getVisibleAction(), &QAction::toggled, this, nullptr);
+    }
+
+    for (auto& viewToggleAction : _viewsToggleActions)
+        delete viewToggleAction.get();
+
+    auto loadedViewsAction = getLoadedViewsActions(false);
+
+    _viewsToggleActions << loadedViewsAction;
+
+    for (auto& viewToggleAction : getLoadedViewsActions(false))
+        addAction(viewToggleAction.get());
 
     if (!actions().isEmpty())
         addSeparator();
 
-    const auto loadedViewActions = getLoadedViewsActions(true);
+    const auto loadedSystemViewActions = getLoadedViewsActions(true);
 
-    if (!loadedViewActions.isEmpty()) {
+    _viewsToggleActions << loadedSystemViewActions;
+
+    if (!loadedSystemViewActions.isEmpty()) {
         setEnabled(true);
+
         _loadedSystemViewsMenu->clear();
 
-        for (auto& loadedSystemViewAction : loadedViewActions)
-            _loadedSystemViewsMenu->addAction(loadedSystemViewAction);
+        for (auto& viewToggleAction : loadedSystemViewActions)
+            _loadedSystemViewsMenu->addAction(viewToggleAction.get());
 
         _loadedSystemViewsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
 
@@ -57,9 +75,9 @@ void LoadedViewsMenu::populate()
         setEnabled(false);
 }
 
-QVector<QPointer<ToggleAction>> LoadedViewsMenu::getLoadedViewsActions(bool systemView)
+LoadedViewsMenu::ToggleActions LoadedViewsMenu::getLoadedViewsActions(bool systemView)
 {
-    QVector<QPointer<ToggleAction>> actions;
+    ToggleActions actions;
 
     for (auto& plugin : plugins().getPluginsByType(plugin::Type::VIEW)) {
         auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
@@ -73,16 +91,35 @@ QVector<QPointer<ToggleAction>> LoadedViewsMenu::getLoadedViewsActions(bool syst
                 continue;
         }
 
-        auto action = new ToggleAction(this, viewPlugin->text());
+        auto viewToggleAction = new ToggleAction(this, viewPlugin->text());
 
-        action->setIcon(viewPlugin->getVisibleAction().icon());
-        action->setChecked(viewPlugin->getVisibleAction().isChecked());
+        viewToggleAction->setIcon(viewPlugin->getVisibleAction().icon());
 
-        connect(action, &QAction::toggled, this, [viewPlugin, action]() -> void {
-            viewPlugin->getVisibleAction().toggle();
+        const auto connectViewToggleAction = [this, viewPlugin, viewToggleAction]() -> void {
+            connect(viewToggleAction, &QAction::toggled, this, [viewPlugin, viewToggleAction](bool toggled) -> void {
+                viewPlugin->getVisibleAction().toggle();
             });
+        };
 
-        actions << action;
+        const auto disconnectViewToggleAction = [this, viewToggleAction]() -> void {
+            disconnect(viewToggleAction, &QAction::toggled, this, nullptr);
+        };
+
+        const auto updateToggleActionChecked = [viewToggleAction, viewPlugin, connectViewToggleAction, disconnectViewToggleAction]() -> void {
+            disconnectViewToggleAction();
+            {
+                viewToggleAction->setChecked(viewPlugin->getVisibleAction().isChecked());
+            }
+            connectViewToggleAction();
+        };
+
+        updateToggleActionChecked();
+
+        connect(&viewPlugin->getVisibleAction(), &QAction::toggled, this, updateToggleActionChecked);
+
+        connectViewToggleAction();
+
+        actions << viewToggleAction;
     }
 
     sortActions(actions);
