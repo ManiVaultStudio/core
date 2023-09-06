@@ -5,6 +5,7 @@
 #include "ActionsManager.h"
 
 #include <Application.h>
+#include <models/ActionsListModel.h>
 #include <models/ActionsFilterModel.h>
 #include <actions/WidgetAction.h>
 #include <util/Exception.h>
@@ -131,7 +132,7 @@ QVariantMap ActionsManager::toVariantMap() const
     return variantMap;
 }
 
-bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QString& name /*= ""*/, bool recursive /*= true*/)
+bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QString& name /*= ""*/, bool recursive /*= true*/, bool allowDuplicateName /*= false*/)
 {
     try
     {
@@ -139,6 +140,24 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
 
         if (privateAction == nullptr)
             throw std::runtime_error("Supplied private action may not be a null pointer");
+
+        ActionsListModel    actionsListModel(this);
+        ActionsFilterModel  actionsFilterModel(this);
+
+        actionsFilterModel.setSourceModel(&actionsListModel);
+        actionsFilterModel.setFilterKeyColumn(static_cast<int>(ActionsListModel::Column::Name));
+        actionsFilterModel.setFilterRegularExpression(name);
+
+        const auto numberOfActionsWithDuplicateName = actionsFilterModel.rowCount();
+
+        if (numberOfActionsWithDuplicateName >= 1) {
+            const auto duplicateActionNamesMessage = QString("Found %1 action%2 with the same name").arg(QString::number(numberOfActionsWithDuplicateName), numberOfActionsWithDuplicateName == 1 ? "" : "s");
+
+            if (allowDuplicateName == false)
+                throw std::runtime_error(duplicateActionNamesMessage.toStdString());
+            else
+                qDebug() << duplicateActionNamesMessage;
+        }
 
         auto& askForSharedParameterNameAction = hdps::settings().getParametersSettings().getAskForSharedParameterNameAction();
 
