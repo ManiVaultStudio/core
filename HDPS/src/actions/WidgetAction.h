@@ -373,9 +373,10 @@ public: // Connections and publishing
     /**
      * Publish this action so that other actions can connect to it
      * @param name Name of the published widget action (if empty, a configuration dialog will popup)
+     * @param allowDuplicateName Boolean determining whether publishing will take place when a public with the same name already exists in the public actions database
      * @return Boolean determining whether the action is successfully published or not
      */
-    virtual bool publish(const QString& name = "") final;
+    virtual bool publish(const QString& name = "", bool allowDuplicateName = false) final;
 
 protected: 
 

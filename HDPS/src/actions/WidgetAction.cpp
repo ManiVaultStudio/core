@@ -265,9 +265,9 @@ bool WidgetAction::isConnected() const
     return _publicAction != nullptr;
 }
 
-bool WidgetAction::publish(const QString& name /*= ""*/)
+bool WidgetAction::publish(const QString& name /*= ""*/, bool allowDuplicateName /*= false*/)
 {
-    return hdps::actions().publishPrivateAction(this, name);
+    return hdps::actions().publishPrivateAction(this, name, true, allowDuplicateName);
 }
 
 void WidgetAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
