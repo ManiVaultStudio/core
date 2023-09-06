@@ -141,24 +141,6 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
         if (privateAction == nullptr)
             throw std::runtime_error("Supplied private action may not be a null pointer");
 
-        ActionsListModel    actionsListModel(this);
-        ActionsFilterModel  actionsFilterModel(this);
-
-        actionsFilterModel.setSourceModel(&actionsListModel);
-        actionsFilterModel.setFilterKeyColumn(static_cast<int>(ActionsListModel::Column::Name));
-        actionsFilterModel.setFilterRegularExpression(name);
-
-        const auto numberOfActionsWithDuplicateName = actionsFilterModel.rowCount();
-
-        if (numberOfActionsWithDuplicateName >= 1) {
-            const auto duplicateActionNamesMessage = QString("Found %1 action%2 with the same name").arg(QString::number(numberOfActionsWithDuplicateName), numberOfActionsWithDuplicateName == 1 ? "" : "s");
-
-            if (allowDuplicateName == false)
-                throw std::runtime_error(duplicateActionNamesMessage.toStdString());
-            else
-                qDebug() << duplicateActionNamesMessage;
-        }
-
         auto& askForSharedParameterNameAction = hdps::settings().getParametersSettings().getAskForSharedParameterNameAction();
 
         if (name.isEmpty()) {
@@ -220,20 +202,39 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
                 switch (publishDialog.result())
                 {
                     case QDialog::Accepted:
-                        return publishPrivateAction(privateAction, nameAction.getString(), true);
+                        return publishPrivateAction(privateAction, nameAction.getString(), recursive, allowDuplicateName);
 
                     case QDialog::Rejected:
                         return false;
                 }
             }
             else {
-                return publishPrivateAction(privateAction, QString("%1_pub").arg(privateAction->text()), true);
+                return publishPrivateAction(privateAction, QString("%1_pub").arg(privateAction->text()), recursive, allowDuplicateName);
             }
         }
         else {
     #ifdef ACTIONS_MANAGER_VERBOSE
             qDebug() << __FUNCTION__ << privateAction->text();
     #endif
+
+            ActionsListModel    actionsListModel(this);
+            ActionsFilterModel  actionsFilterModel(this);
+
+            actionsFilterModel.setSourceModel(&actionsListModel);
+            actionsFilterModel.setFilterKeyColumn(static_cast<int>(ActionsListModel::Column::Name));
+            actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Public" });
+            actionsFilterModel.setFilterRegularExpression(name);
+
+            const auto numberOfActionsWithDuplicateName = actionsFilterModel.rowCount();
+
+            if (numberOfActionsWithDuplicateName >= 1) {
+                const auto duplicateActionNamesMessage = QString("Found %1 action%2 with the same name").arg(QString::number(numberOfActionsWithDuplicateName), numberOfActionsWithDuplicateName == 1 ? "" : "s");
+
+                if (allowDuplicateName == false)
+                    throw std::runtime_error(duplicateActionNamesMessage.toStdString());
+                else
+                    qDebug() << duplicateActionNamesMessage;
+            }
 
             if (privateAction->isPublished())
                 throw std::runtime_error("Action is already published");
