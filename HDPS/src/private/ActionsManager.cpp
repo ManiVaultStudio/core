@@ -227,28 +227,38 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
 
             const auto numberOfActionsWithDuplicateName = actionsFilterModel.rowCount();
 
+            auto shouldPublish = false;
+
             if (numberOfActionsWithDuplicateName >= 1) {
                 const auto duplicateActionNamesMessage = QString("Found %1 action%2 with the same name").arg(QString::number(numberOfActionsWithDuplicateName), numberOfActionsWithDuplicateName == 1 ? "" : "s");
 
-                if (allowDuplicateName == false)
-                    throw std::runtime_error(duplicateActionNamesMessage.toStdString());
-                else
+                if (allowDuplicateName == false) {
+                    return false;
+                } else {
                     qDebug() << duplicateActionNamesMessage;
+
+                    shouldPublish = true;
+                }
+            }
+            else {
+                shouldPublish = true;
             }
 
-            if (privateAction->isPublished())
-                throw std::runtime_error("Action is already published");
+            if (shouldPublish == true) {
+                if (privateAction->isPublished())
+                    throw std::runtime_error("Action is already published");
 
-            auto publicAction = privateAction->getPublicCopy();
+                auto publicAction = privateAction->getPublicCopy();
 
-            publicAction->setText(name);
+                publicAction->setText(name);
 
-            connectPrivateActionToPublicAction(privateAction, publicAction, true);
+                connectPrivateActionToPublicAction(privateAction, publicAction, true);
 
-            emit privateAction->isPublishedChanged(privateAction->isPublished());
-            emit privateAction->isConnectedChanged(privateAction->isConnected());
+                emit privateAction->isPublishedChanged(privateAction->isPublished());
+                emit privateAction->isConnectedChanged(privateAction->isConnected());
 
-            return true;
+                return true;
+            }
         }
     }
     catch (std::exception& e)
