@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "Serialization.h"
@@ -18,6 +22,15 @@ class Serializable
 {
 public:
 
+    /** Determines the state of the serializable object */
+    enum class State {
+        Idle,       /** The serializable object is not being read or written */
+        Reading,    /** The serializable object is being read */
+        Writing     /** The serializable object is being written */
+    };
+
+public:
+
     /**
      * Construct with serialization name
      * @param serializationName Serialization name
@@ -28,7 +41,13 @@ public:
      * Get id
      * @return Globally unique identifier of the serializable object
      */
-    virtual QString getId() const;
+    virtual QString getId() const final;
+
+    /**
+     * Set globally unique identifier (only use this function when strictly necessary and when the ramifications are understood, undefined behaviour might happen otherwise)
+     * @param id Globally unique identifier of the serializable object
+     */
+    virtual void setId(const QString& id) final;
 
     /**
      * Get serialization name
@@ -90,7 +109,42 @@ public:
      */
     virtual void toJsonFile(const QString& filePath = "") final;
 
-protected:
+    /** Assigns a fresh new identifier to the serializable object */
+    virtual void makeUnique() final;
+
+    /**
+     * Creates a new globally unique identifier for a serializable object
+     * @return Globally unique identifier
+     */
+    static QString createId();
+
+//public: // State
+//
+//    /**
+//     * Get the state of the serializable object (the state is not automatically set)
+//     * @return State of the serializable object
+//     */
+//    virtual State getState() const final;
+//
+//    /**
+//     * Set the state of the serializable object to \p state
+//     * @param state State of the serializable object
+//     */
+//    virtual void setState(const State& state) final;
+//
+//    /**
+//     * Get whether the serializable object is currently being read
+//     * @return Whether the serializable object is currently being read
+//     */
+//    virtual bool isReading() const final;
+//
+//    /**
+//     * Get whether the serializable object is currently being written
+//     * @return Whether the serializable object is currently being written
+//     */
+//    virtual bool isWriting() const final;
+
+protected: // Serialization
 
     /**
      * Load serializable object from variant map
@@ -132,6 +186,8 @@ protected:
 private:
     QString     _id;                    /** Globally unique identifier of the serializable object */
     QString     _serializationName;     /** Serialization name */
+//    State       _state;                 /** Determines the state of the serializable object (the state is not automatically set) */
 };
 
 }
+

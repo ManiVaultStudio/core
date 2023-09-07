@@ -1,8 +1,13 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "ViewPlugin.h"
 #include "CoreInterface.h"
-#include "widgets/ProjectEditorDialog.h"
 #include "Application.h"
 #include "AbstractWorkspaceManager.h"
+
+#include "widgets/ViewPluginEditorDialog.h"
 
 #include <QWidget>
 #include <QFileDialog>
@@ -20,14 +25,15 @@ namespace hdps::plugin
 ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
     _widget(),
-    _editActionsAction(&_widget, "Edit..."),
+    _editorAction(&_widget, "Edit..."),
     _screenshotAction(&_widget, "Screenshot..."),
     _isolateAction(&_widget, "Isolate"),
-    _mayCloseAction(this, "May close", true, true),
-    _mayFloatAction(this, "May float", true, true),
-    _mayMoveAction(this, "May move", true, true),
+    _mayCloseAction(this, "May close", true),
+    _mayFloatAction(this, "May float", true),
+    _mayMoveAction(this, "May move", true),
+    _dockingOptionsAction(this, "Docking options", { "May Close", "May Float", "May Move" }),
     _lockingAction(this),
-    _visibleAction(this, "Visible", true, true),
+    _visibleAction(this, "Visible", true),
     _helpAction(this, "Trigger help"),
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
     _triggerShortcut(),
@@ -37,47 +43,51 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
     _widget.setAutoFillBackground(true);
 
-    _widget.addAction(&_editActionsAction);
+    _widget.addAction(&_editorAction);
     _widget.addAction(&_screenshotAction);
     _widget.addAction(&_isolateAction);
     _widget.addAction(&_helpAction);
 
-    _editActionsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
-    _editActionsAction.setShortcut(tr("F12"));
-    _editActionsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _editorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _editorAction.setShortcut(tr("F12"));
+    _editorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _editorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _editorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _editorAction.setConnectionPermissionsToForceNone();
 
     _screenshotAction.setIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
     _screenshotAction.setShortcut(tr("F2"));
     _screenshotAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _screenshotAction.setConnectionPermissionsToForceNone();
 
     _isolateAction.setIcon(Application::getIconFont("FontAwesome").getIcon("crosshairs"));
     _isolateAction.setShortcut(tr("F3"));
     _isolateAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _isolateAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _isolateAction.setConnectionPermissionsToForceNone();
 
-    _mayCloseAction.setSerializationName("MayClose");
     _mayCloseAction.setToolTip("Determines whether this view plugin may be closed or not");
     _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _mayCloseAction.setConnectionPermissionsToForceNone();
 
-    _mayFloatAction.setSerializationName("MayFloat");
     _mayFloatAction.setToolTip("Determines whether this view plugin may float or not");
     _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _mayFloatAction.setConnectionPermissionsToForceNone();
 
-    _mayMoveAction.setSerializationName("MayMove");
     _mayMoveAction.setToolTip("Determines whether this view plugin may be moved or not");
     _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _mayMoveAction.setConnectionPermissionsToForceNone();
 
-    _lockingAction.setSerializationName("Locking");
+    _dockingOptionsAction.setToolTip("Determines the docking options");
+    _dockingOptionsAction.setConnectionPermissionsToForceNone(true);
+
     _lockingAction.setWhat("Layout");
 
-    _visibleAction.setSerializationName("Visible");
     _visibleAction.setToolTip("Determines whether the view plugin is visible or not");
     _visibleAction.setIcon(getIcon());
     _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
@@ -88,10 +98,12 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
+    _helpAction.setConnectionPermissionsToForceNone();
 
-    connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
-        ProjectEditorDialog viewPluginEditorDialog(nullptr, this);
-        viewPluginEditorDialog.exec();
+    connect(&_editorAction, &TriggerAction::triggered, this, [this]() -> void {
+        auto* viewPluginEditorDialog = new ViewPluginEditorDialog(nullptr, this);
+        connect(viewPluginEditorDialog, &ViewPluginEditorDialog::finished, viewPluginEditorDialog, &ViewPluginEditorDialog::deleteLater);
+        viewPluginEditorDialog->open();
     });
 
     connect(&_screenshotAction, &TriggerAction::triggered, this, [this]() -> void {
@@ -117,6 +129,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
         getDestroyAction().setEnabled(!toggled);
 
+        _dockingOptionsAction.setEnabled(!toggled);
+
         updateDockWidgetPermissionsReadOnly();
     });
 
@@ -136,18 +150,40 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
     connect(&_mayCloseAction, &ToggleAction::toggled, this, updateVisibleAction);
 
-    _visibleAction.setText(getGuiName());
+    //_visibleAction.setText(getGuiName());
 
     updateVisibleAction();
+
+    const auto updateDockingOptionsAction = [this]() -> void {
+        QStringList selectedOptions;
+        
+        if (_mayCloseAction.isChecked())
+            selectedOptions << "May Close";
+
+        if (_mayFloatAction.isChecked())
+            selectedOptions << "May Float";
+
+        if (_mayMoveAction.isChecked())
+            selectedOptions << "May Move";
+
+        _dockingOptionsAction.setSelectedOptions(selectedOptions);
+    };
+
+    updateDockingOptionsAction();
+
+    connect(&_mayCloseAction, &ToggleAction::toggled, this, updateDockingOptionsAction);
+    connect(&_mayFloatAction, &ToggleAction::toggled, this, updateDockingOptionsAction);
+    connect(&_mayMoveAction, &ToggleAction::toggled, this, updateDockingOptionsAction);
+
+    connect(&_dockingOptionsAction, &OptionsAction::selectedOptionsChanged, this, [this]() -> void {
+        _mayCloseAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Close"));
+        _mayFloatAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Float"));
+        _mayMoveAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Move"));
+    });
 }
 
 void ViewPlugin::init()
 {
-}
-
-void ViewPlugin::setObjectName(const QString& name)
-{
-    QObject::setObjectName("Plugins/View/" + name);
 }
 
 void ViewPlugin::loadData(const Datasets& datasets)
@@ -167,30 +203,32 @@ bool ViewPlugin::isSystemViewPlugin() const
 
 void ViewPlugin::createScreenshot()
 {
-    QFileDialog fileDialog;
+    auto* fileDialog = new QFileDialog();
 
-    fileDialog.setWindowTitle("Save Screenshot");
-    fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
-    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setNameFilters({ "Image files (*.png)" });
-    fileDialog.setDefaultSuffix(".png");
+    fileDialog->setWindowTitle("Save Screenshot");
+    fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("camera"));
+    fileDialog->setOption(QFileDialog::DontUseNativeDialog, true);
+    fileDialog->setAcceptMode(QFileDialog::AcceptSave);
+    fileDialog->setNameFilters({ "Image files (*.png)" });
+    fileDialog->setDefaultSuffix(".png");
 
     const auto cachedDirectory = QFileInfo(Application::current()->getSetting("ScreenShot/ViewPlugin/Directory", ".").toString()).dir();
 
-    fileDialog.setDirectory(cachedDirectory);
+    fileDialog->setDirectory(cachedDirectory);
 
-    if (fileDialog.exec() == 0)
-        return;
+    connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
+        if (fileDialog->selectedFiles().count() != 1)
+            throw std::runtime_error("Only one file may be selected");
 
-    if (fileDialog.selectedFiles().count() != 1)
-        throw std::runtime_error("Only one file may be selected");
+        Application::current()->setSetting("ScreenShot/ViewPlugin/Directory", fileDialog->selectedFiles().first());
 
-    Application::current()->setSetting("ScreenShot/ViewPlugin/Directory", fileDialog.selectedFiles().first());
+        auto widgetPixmap = getWidget().grab();
 
-    auto widgetPixmap = getWidget().grab();
+        widgetPixmap.toImage().save(fileDialog->selectedFiles().first());
+        });
+    connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
-    widgetPixmap.toImage().save(fileDialog.selectedFiles().first());
+    fileDialog->open();
 }
 
 QKeySequence ViewPlugin::getTriggerShortcut() const
@@ -231,6 +269,9 @@ void ViewPlugin::addTitleBarMenuAction(hdps::gui::WidgetAction* action)
 {
     Q_ASSERT(action != nullptr);
 
+    if (action == nullptr)
+        return;
+
     _titleBarMenuActions << action;
 }
 
@@ -238,12 +279,36 @@ void ViewPlugin::removeTitleBarMenuAction(hdps::gui::WidgetAction* action)
 {
     Q_ASSERT(action != nullptr);
 
+    if (action == nullptr)
+        return;
+
     _titleBarMenuActions.removeOne(action);
 }
 
 hdps::gui::WidgetActions ViewPlugin::getTitleBarMenuActions()
 {
     return _titleBarMenuActions;
+}
+
+void ViewPlugin::addDockingAction(WidgetAction* dockingAction, WidgetAction* dockToDockingAction /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, bool autoHide /*= false*/, const gui::AutoHideLocation& autoHideLocation /*= gui::AutoHideLocation::Left*/, const QSize& minimumDockWidgetSize /*= QSize(256, 256)*/)
+{
+    Q_ASSERT(dockingAction != nullptr);
+
+    if (dockingAction == nullptr)
+        return;
+
+    dockingAction->setProperty("DockToDockingActionName", dockToDockingAction != nullptr ? dockToDockingAction->text() : "");
+    dockingAction->setProperty("DockArea", static_cast<int>(dockArea));
+    dockingAction->setProperty("AutoHide", autoHide);
+    dockingAction->setProperty("AutoHideLocation", static_cast<int>(autoHideLocation));
+    dockingAction->setProperty("MinimumDockWidgetSize", minimumDockWidgetSize);
+
+    _settingsActions << dockingAction;
+}
+
+hdps::gui::WidgetActions ViewPlugin::getDockingActions() const
+{
+    return _settingsActions;
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :

@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "SubsetAction.h"
 #include "ClusterData.h"
 #include "ClustersAction.h"
@@ -7,12 +11,11 @@
 #include <QHBoxLayout>
 
 SubsetAction::SubsetAction(ClustersActionWidget* clustersActionWidget) :
-    WidgetAction(clustersActionWidget),
+    WidgetAction(clustersActionWidget, "Subset"),
     _clustersActionWidget(clustersActionWidget),
     _subsetNameAction(this, "Subset name"),
     _createSubsetAction(this, "Create subset")
 {
-    setText("Create subset");
     setIcon(Application::getIconFont("FontAwesome").getIcon("crop"));
 
     _subsetNameAction.setToolTip("Name of the subset");
@@ -68,5 +71,5 @@ SubsetAction::Widget::Widget(QWidget* parent, SubsetAction* subsetAction) :
     layout->addWidget(subsetAction->getSubsetNameAction().createWidget(this));
     layout->addWidget(subsetAction->getCreateSubsetAction().createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }

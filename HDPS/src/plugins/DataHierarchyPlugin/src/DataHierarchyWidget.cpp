@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "DataHierarchyWidget.h"
 #include "DataHierarchyWidgetContextMenu.h"
 
@@ -60,7 +64,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _model(this),
     _filterModel(this),
     _hierarchyWidget(this, "Dataset", _model, &_filterModel),
-    _groupingAction(this, "Selection grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled()),
+    _groupingAction(this, "Selection grouping", Application::core()->isDatasetGroupingEnabled()),
     _resetAction(this, "Reset")
 {
     auto layout = new QVBoxLayout();
@@ -72,15 +76,15 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     setLayout(layout);
 
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
-    _hierarchyWidget.setNoItemsDescription("Right-click > Import to load data into HDPS");
+    _hierarchyWidget.setNoItemsDescription(QString("Right-click > Import to load data into %1").arg(Application::getName()));
     
     auto& settingsGroupAction = _hierarchyWidget.getSettingsGroupAction();
 
     settingsGroupAction.setVisible(true);
     settingsGroupAction.setShowLabels(false);
 
-    settingsGroupAction << _groupingAction;
-    settingsGroupAction << _resetAction;
+    settingsGroupAction.addAction(&_groupingAction);
+    settingsGroupAction.addAction(&_resetAction);
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
@@ -220,19 +224,19 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox(QString("Unable to add %1 to the data hierarchy tree widget").arg(dataset->getGuiName()), e);
+        exceptionMessageBox(QString("Unable to add %1 to the data hierarchy tree widget").arg(dataset->text()), e);
     }
     catch (...) {
-        exceptionMessageBox(QString("Unable to add %1 to the data hierarchy tree widget").arg(dataset->getGuiName()));
+        exceptionMessageBox(QString("Unable to add %1 to the data hierarchy tree widget").arg(dataset->text()));
     }
 }
 
 QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImpl>& dataset)
 {
-    const auto modelIndices = _model.match(_model.index(0, 1), Qt::DisplayRole, dataset->getGuid(), 1, Qt::MatchFlag::MatchRecursive);
+    const auto modelIndices = _model.match(_model.index(0, 1), Qt::DisplayRole, dataset->getId(), 1, Qt::MatchFlag::MatchRecursive);
 
     if (modelIndices.isEmpty())
-        throw new std::runtime_error(QString("'%1' not found in the data hierarchy model").arg(dataset->getGuiName()).toLatin1());
+        throw new std::runtime_error(QString("'%1' not found in the data hierarchy model").arg(dataset->text()).toLatin1());
 
     return modelIndices.first();
 }

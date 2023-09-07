@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "StringsAction.h"
 #include "Application.h"
 
@@ -8,26 +12,26 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-StringsAction::StringsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& strings /*= QStringList()*/, const QStringList& defaultStrings /*= QStringList()*/) :
-    WidgetAction(parent),
+StringsAction::StringsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& strings /*= QStringList()*/) :
+    WidgetAction(parent, title),
     _category("String"),
     _strings(),
-    _defaultStrings()
+    _toolbarAction(this, "Toolbar"),
+    _nameAction(&_toolbarAction, "Name"),
+    _addAction(&_toolbarAction, "Add"),
+    _removeAction(&_toolbarAction, "Remove")
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
-    initialize(strings, defaultStrings);
-}
-
-QString StringsAction::getTypeString() const
-{
-    return "Strings";
-}
-
-void StringsAction::initialize(const QStringList& strings /*= QStringList()*/, const QStringList& defaultStrings /*= QStringList()*/)
-{
     setStrings(strings);
-    setDefaultStrings(defaultStrings);
+
+    _toolbarAction.setShowLabels(false);
+
+    _nameAction.setStretch(1);
+
+    _toolbarAction.addAction(&_nameAction);
+    _toolbarAction.addAction(&_addAction);
+    _toolbarAction.addAction(&_removeAction);
 }
 
 QStringList StringsAction::getStrings() const
@@ -47,60 +51,39 @@ void StringsAction::setStrings(const QStringList& strings)
     saveToSettings();
 }
 
-QStringList StringsAction::getDefaultStrings() const
-{
-    return _defaultStrings;
-}
-
-void StringsAction::setDefaultStrings(const QStringList& defaultStrings)
-{
-    if (defaultStrings == _defaultStrings)
-        return;
-
-    _defaultStrings = defaultStrings;
-
-    emit defaultStringsChanged(_defaultStrings);
-}
-
-bool StringsAction::isResettable()
-{
-    return _strings != _defaultStrings;
-}
-
-void StringsAction::reset()
-{
-    setStrings(_defaultStrings);
-}
-
-void StringsAction::connectToPublicAction(WidgetAction* publicAction)
+void StringsAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicStringsAction = dynamic_cast<StringsAction*>(publicAction);
 
     Q_ASSERT(publicStringsAction != nullptr);
+
+    if (publicStringsAction == nullptr)
+        return;
 
     connect(this, &StringsAction::stringsChanged, publicStringsAction, &StringsAction::setStrings);
     connect(publicStringsAction, &StringsAction::stringsChanged, this, &StringsAction::setStrings);
 
     setStrings(publicStringsAction->getStrings());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void StringsAction::disconnectFromPublicAction()
+void StringsAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicStringsAction = dynamic_cast<StringsAction*>(getPublicAction());
 
     Q_ASSERT(publicStringsAction != nullptr);
 
+    if (publicStringsAction == nullptr)
+        return;
+
     disconnect(this, &StringsAction::stringsChanged, publicStringsAction, &StringsAction::setStrings);
     disconnect(publicStringsAction, &StringsAction::stringsChanged, this, &StringsAction::setStrings);
 
-    WidgetAction::disconnectFromPublicAction();
-}
-
-WidgetAction* StringsAction::getPublicCopy() const
-{
-    return new StringsAction(parent(), text(), getStrings(), getDefaultStrings());
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void StringsAction::fromVariantMap(const QVariantMap& variantMap)
@@ -172,12 +155,9 @@ QWidget* StringsAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
 
 StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, stringsAction, widgetFlags),
-    _model(stringsAction->icon(), this),
+    _model(this),
     _filterModel(),
-    _hierarchyWidget(this, stringsAction->getCategory(), _model, &_filterModel, false),
-    _nameAction(this, "Name"),
-    _addAction(this),
-    _removeAction(this)
+    _hierarchyWidget(this, stringsAction->getCategory(), _model, &_filterModel, false)
 {
     resize(0, 150);
 
@@ -192,40 +172,34 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
     filterGroupAction.setLabelWidthFixed(40);
     filterGroupAction.setPopupSizeHint(QSize(350, 0));
 
-    _nameAction.setClearable(true);
-    _nameAction.setPlaceHolderString(QString("Enter %1 name here...").arg(stringsAction->getCategory().toLower()));
+    stringsAction->getNameAction().setClearable(true);
+    stringsAction->getNameAction().setPlaceHolderString(QString("Enter %1 name here...").arg(stringsAction->getCategory().toLower()));
 
-    _addAction.setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
-    _addAction.setToolTip(QString("Add entered %1").arg(stringsAction->getCategory().toLower()));
+    stringsAction->getAddAction().setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
+    stringsAction->getAddAction().setToolTip(QString("Add entered %1").arg(stringsAction->getCategory().toLower()));
+    stringsAction->getAddAction().setDefaultWidgetFlags(TriggerAction::Icon);
 
-    _removeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
-    _removeAction.setToolTip(QString("Remove selected %1(s)").arg(stringsAction->getCategory().toLower()));
+    stringsAction->getRemoveAction().setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
+    stringsAction->getRemoveAction().setToolTip(QString("Remove selected %1(s)").arg(stringsAction->getCategory().toLower()));
+    stringsAction->getRemoveAction().setDefaultWidgetFlags(TriggerAction::Icon);
 
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(&_hierarchyWidget, 1);
 
-    if (widgetFlags & StringsAction::WidgetFlag::MayEdit) {
-        auto toolbarLayout = new QHBoxLayout();
-
-        toolbarLayout->addWidget(_nameAction.createWidget(this), 1);
-        toolbarLayout->addWidget(_addAction.createWidget(this, TriggerAction::Icon));
-        toolbarLayout->addWidget(_removeAction.createWidget(this, TriggerAction::Icon));
-        toolbarLayout->addWidget(_hierarchyWidget.getFilterGroupAction().createCollapsedWidget(this));
-
-        layout->addLayout(toolbarLayout);
-    }
+    if (widgetFlags & StringsAction::WidgetFlag::MayEdit)
+        layout->addWidget(stringsAction->getToolbarAction().createWidget(this));
 
     setLayout(layout);
 
-    const auto updateActions = [this]() -> void {
+    const auto updateActions = [this, stringsAction]() -> void {
         const auto selectedRows = _hierarchyWidget.getSelectionModel().selectedRows();
 
-        _nameAction.setEnabled(selectedRows.isEmpty());
+        stringsAction->getNameAction().setEnabled(selectedRows.count() <= 1);
 
         if (selectedRows.count() == 1)
-            _nameAction.setString(selectedRows.first().data(Qt::DisplayRole).toString());
+            stringsAction->getNameAction().setString(selectedRows.first().data(Qt::DisplayRole).toString());
 
         if (selectedRows.count() >= 2) {
             QStringList selected;
@@ -233,39 +207,35 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
             for (const auto& selectedRow : selectedRows)
                 selected << selectedRow.data(Qt::DisplayRole).toString();
 
-            _nameAction.setString(selected.join(", "));
+            stringsAction->getNameAction().setString(selected.join(", "));
         }
 
-        _addAction.setEnabled(selectedRows.isEmpty() && !_nameAction.getString().isEmpty());
-        _removeAction.setEnabled(!selectedRows.isEmpty());
+        stringsAction->getAddAction().setEnabled(selectedRows.isEmpty() && !stringsAction->getNameAction().getString().isEmpty());
+        stringsAction->getRemoveAction().setEnabled(!selectedRows.isEmpty());
     };
 
     const auto updateModel = [this, stringsAction, updateActions](const QStringList& strings) -> void {
-        if (strings != _model.stringList())
-            _model.setStringList(strings);
+        _model.removeRows(0, _model.rowCount());
 
-        for (int rowIndex = 0; rowIndex < _model.rowCount(); rowIndex++)
-            _model.setData(_model.index(rowIndex), stringsAction->icon(), Qt::DecorationRole);
-
-        _model.setHeaderData(0, Qt::Horizontal, "Name", Qt::UserRole);
-        _model.setHeaderData(0, Qt::Horizontal, "Name", Qt::DisplayRole);
+        for (const auto& string : strings)
+            _model.appendRow(new QStandardItem(stringsAction->icon(), string));
 
         updateActions();
     };
 
     connect(stringsAction, &StringsAction::stringsChanged, this, updateModel);
-    connect(&_nameAction, &StringAction::stringChanged, this, updateActions);
+    connect(&stringsAction->getNameAction(), &StringAction::stringChanged, this, updateActions);
 
-    connect(&_addAction, &TriggerAction::triggered, this, [this, stringsAction]() -> void {
-        if (_nameAction.getString().isEmpty())
+    connect(&stringsAction->getAddAction(), &TriggerAction::triggered, this, [this, stringsAction]() -> void {
+        if (stringsAction->getNameAction().getString().isEmpty())
             return;
 
-        stringsAction->addString(_nameAction.getString());
+        stringsAction->addString(stringsAction->getNameAction().getString());
 
-        _nameAction.setString("");
+        stringsAction->getNameAction().setString("");
     });
 
-    connect(&_removeAction, &TriggerAction::triggered, this, [this, stringsAction]() -> void {
+    connect(&stringsAction->getRemoveAction(), &TriggerAction::triggered, this, [this, stringsAction]() -> void {
         QStringList stringsToRemove;
 
         for (const auto& selectedRow : _hierarchyWidget.getSelectionModel().selectedRows())
@@ -273,12 +243,12 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
         
         stringsAction->removeStrings(stringsToRemove);
 
-        _nameAction.setString("");
+        stringsAction->getNameAction().setString("");
     });
 
-    connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, [this, updateActions](const QItemSelection& selected, const QItemSelection& deselected) -> void {
+    connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, [this, updateActions, stringsAction](const QItemSelection& selected, const QItemSelection& deselected) -> void {
         if (selected.count() == 0 && deselected.count() >= 1)
-            _nameAction.setString("");
+            stringsAction->getNameAction().setString("");
 
         updateActions();
     });
@@ -286,7 +256,7 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
     connect(&_model, &QStandardItemModel::layoutChanged, this, updateActions);
 
     const auto updateAction = [this, stringsAction]() -> void {
-        stringsAction->setStrings(_model.stringList());
+        stringsAction->setStrings(stringsAction->getStrings());
     };
 
     connect(&_model, &QAbstractItemModel::rowsInserted, this, updateAction);

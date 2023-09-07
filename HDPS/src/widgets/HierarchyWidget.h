@@ -1,9 +1,15 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
 #include "actions/GroupAction.h"
 #include "actions/ToggleAction.h"
+#include "actions/OptionAction.h"
+#include "actions/HorizontalGroupAction.h"
 
 #include "InfoOverlayWidget.h"
 
@@ -129,18 +135,18 @@ public:
     void setHeaderHidden(bool headerHidden);
 
     /**
-     * Get layout for the horizontal toolbar
-     * @return Reference to the toolbar layout
-     */
-    QHBoxLayout& getToolbarLayout();
-
-    /**
      * Get input model
      * @return Input model
      */
     const QAbstractItemModel& getModel() {
         return _model;
     }
+
+    /**
+     * Set input model to \p model
+     * @param model Input model
+     */
+    void setModel(const QAbstractItemModel& model);
 
     /**
      * Get input filter model
@@ -180,6 +186,14 @@ public:
      */
     StringAction& getFilterNameAction() {
         return _filterNameAction;
+    }
+
+    /**
+    * Get filter column action
+    * @return Reference to filter column action
+    */
+    OptionAction& getFilterColumnAction() {
+        return _filterColumnAction;
     }
 
     /**
@@ -308,6 +322,9 @@ protected: // Item selection
     /** Deselect all selected items in the hierarchy */
     void selectNone();
 
+    /** Updates the visibility of the header */
+    void updateHeaderVisibility();
+
 private:
     
     /** Updates the overlay widget icon, title and description based on the state of the hierarchy */
@@ -319,6 +336,10 @@ private:
     /** Update the filter model and related actions */
     void updateFilterModel();
 
+public: // Action getters
+
+    HorizontalGroupAction& getToolbarAction() { return _toolbarAction; }
+
 private:
     QString                             _itemTypeName;                      /** Name of the item type */
     bool                                _headerHidden;                      /** Whether the header view is visible or not */
@@ -328,8 +349,8 @@ private:
     HierarchyWidgetTreeView             _treeView;                          /** Tree view that contains the data hierarchy */
     QScopedPointer<InfoOverlayWidget>   _infoOverlayWidget;                 /** Overlay widget that show information when there are no items in the model */
     QString                             _noItemsDescription;                /** Overlay widget description when no items are loaded */
-    QHBoxLayout                         _toolbarLayout;                     /** Layout for the top toolbar */
     StringAction                        _filterNameAction;                  /** String action for filtering by name */
+    OptionAction                        _filterColumnAction;                /** Option action for choosing the filtering column */
     GroupAction                         _filterGroupAction;                 /** Filter group action */
     ToggleAction                        _filterCaseSensitiveAction;         /** Filter case-sensitive action */
     ToggleAction                        _filterRegularExpressionAction;     /** Enable filter with regular expression action */
@@ -340,6 +361,7 @@ private:
     GroupAction                         _selectionGroupAction;              /** Selection group action */
     GroupAction                         _columnsGroupAction;                /** Column visibility action */
     GroupAction                         _settingsGroupAction;               /** Settings group action */
+    HorizontalGroupAction               _toolbarAction;                     
 };
 
 }

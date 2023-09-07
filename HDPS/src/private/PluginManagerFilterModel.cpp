@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "PluginManagerFilterModel.h"
 #include "PluginManagerModel.h"
 
@@ -11,7 +15,7 @@ using namespace hdps::gui;
 
 PluginManagerFilterModel::PluginManagerFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
-    _instantiatedPluginsOnlyAction(this, "Show only instantiated plugins", true, true)
+    _instantiatedPluginsOnlyAction(this, "Show only instantiated plugins", true)
 {
     _instantiatedPluginsOnlyAction.setToolTip("Show only instantiated plugins are all available plugins");
     //_instantiatedPluginsOnlyAction.setSettingsPrefix("PluginManager/ShowInstantiatedPluginsOnly", true);

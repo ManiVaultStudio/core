@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "WidgetAction.h"
@@ -100,31 +104,8 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      * @param toggled Toggled
-     * @param defaultToggled Default toggled
      */
-    ToggleAction(QObject* parent, const QString& title = "", const bool& toggled = false, const bool& defaultToggled = false);
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
-
-    /**
-     * Initialize the toggle action
-     * @param toggled Toggled
-     * @param defaultToggled Default toggled
-     */
-    void initialize(const bool& toggled = false, const bool& defaultToggled = false);
-
-    /** Gets default toggled */
-    bool getDefaultToggled() const;
-
-    /**
-     * Sets default toggled value
-     * @param defaultToggled Default toggled
-     */
-    void setDefaultToggled(const bool& defaultToggled);
+    Q_INVOKABLE ToggleAction(QObject* parent, const QString& title = "", bool toggled = false);
 
     /**
      * Overrides the base class setChecked()
@@ -153,37 +134,27 @@ public: // Serialization
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-        * Save widget action to variant map
-        * @return Variant map representation of the widget action
-        */
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
     QVariantMap toVariantMap() const override;
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
-
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
-
-protected:  // Linking
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
     /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
      */
-    WidgetAction* getPublicCopy() const override;
+    void disconnectFromPublicAction(bool recursive) override;
 
 signals:
-
-    /**
-     * Signals that the default toggled changed
-     * @param defaultToggled Default toggled that changed
-     */
-    void defaultToggledChanged(const bool& defaultToggled);
 
     /**
      * Signals that the indeterminate value changed
@@ -192,8 +163,13 @@ signals:
     void indeterminateChanged(bool indeterminate);
 
 protected:
-    bool    _defaultToggled;        /** Whether toggled by default */
-    bool    _indeterminate;         /** Whether the toggle action is in an indeterminate state */
+    bool    _indeterminate;     /** Whether the toggle action is in an indeterminate state */
+
+    friend class AbstractActionsManager;
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::ToggleAction)
+
+inline const auto toggleActionMetaTypeId = qRegisterMetaType<hdps::gui::ToggleAction*>("hdps::gui::ToggleAction");

@@ -1,8 +1,13 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "ClustersModel.h"
 #include "ClusterData.h"
 #include "OverwriteClustersConfirmationDialog.h"
 
 #include <QPainter>
+#include <QEventLoop>
 
 using namespace hdps;
 
@@ -145,17 +150,18 @@ bool ClustersModel::setData(const QModelIndex& index, const QVariant& value, int
                     _modifiedByUser[index.row()] = true;
                     break;
 
-                case Column::ID:
-                case Column::NumberOfIndices:
-                    break;
-
                 case Column::ModifiedByUser:
                     _modifiedByUser[index.row()] = value.toBool();
                     break;
 
+                case Column::ID:                [[fallthrough]];
+                case Column::NumberOfIndices:   [[fallthrough]];
+
                 default:
                     break;
             }
+
+            break;
         }
 
         default:
@@ -260,18 +266,31 @@ QVector<Cluster>& ClustersModel::getClusters()
 
 void ClustersModel::setClusters(const QVector<Cluster>& clusters)
 {
+    // Allocate the same number of items for the modified by user column
+    _modifiedByUser.resize(clusters.count());
+
+    // And flag all clusters as unmodified
+    std::fill(_modifiedByUser.begin(), _modifiedByUser.end(), false);
+
+    emit layoutAboutToBeChanged();
+    {
+        // Assign clusters
+        _clusters = clusters;
+    }
+    emit layoutChanged();
+
+    assert(_clusters.size() == _modifiedByUser.size());
+
+    /*
     const auto numberOfClustersChanged = clusters.size() != _clusters.size();
 
-    if (numberOfClustersChanged) {
+    //if (numberOfClustersChanged) {
 
         // Do nothing if user modified clusters may not be overridden
-        if (mayOverrideUserInput()) {
+        //if (mayOverrideUserInput()) {
 
             // Allocate the same number of items for the modified by user column
             _modifiedByUser.resize(clusters.count());
-
-            // And flag all clusters as unmodified
-            std::fill(_modifiedByUser.begin(), _modifiedByUser.end(), false);
 
             // And flag all clusters as unmodified
             std::fill(_modifiedByUser.begin(), _modifiedByUser.end(), false);
@@ -282,36 +301,54 @@ void ClustersModel::setClusters(const QVector<Cluster>& clusters)
                 _clusters = clusters;
             }
             emit layoutChanged();
-        }
-    }
-    else {
-        if (!std::equal(_clusters.begin(), _clusters.end(), clusters.begin())) {
+        //}
+    //}
+    //else {
+    //    if (!std::equal(_clusters.begin(), _clusters.end(), clusters.begin())) {
 
-            // Do nothing if user modified clusters may not be overridden
-            if (mayOverrideUserInput()) {
+    //        // Do nothing if user modified clusters may not be overridden
+    //        //if (mayOverrideUserInput()) {
 
-                // Assign clusters
-                _clusters = clusters;
+    //            // Assign clusters
+    //            _clusters = clusters;
 
-                // Notify others that the data has changed
-                emit dataChanged(index(0, 0), index(rowCount() - 1, static_cast<std::int32_t>(Column::Count) - 1));
-            }
-        }
-    }
+    //            // Notify others that the data has changed
+    //            emit dataChanged(index(0, 0), index(rowCount() - 1, static_cast<std::int32_t>(Column::Count) - 1));
+    //        //}
+    //    }
+    //}
+    */
 }
 
 void ClustersModel::removeClustersById(const QStringList& ids)
 {
-    emit layoutAboutToBeChanged();
+
+    // Identify the indices that are to be removed from the holder vectors
+    std::vector<qsizetype> rowsToBeRemoved;
+    rowsToBeRemoved.reserve(ids.size());
+    for (qsizetype i = 0; i < _clusters.size(); i++)
     {
-        for (auto id : ids) {
-            _clusters.erase(std::remove_if(_clusters.begin(), _clusters.end(), [id](const Cluster& cluster) -> bool
-            {
-                return cluster.getId() == id;
-            }), _clusters.end());
+        for (const auto& id : ids) {
+            if (_clusters[i].getId() == id)
+                rowsToBeRemoved.emplace_back(i);
         }
     }
-    emit layoutChanged();
+
+    // Sort from larger to lower IDs, so that we erase from the back (to keep all revmove-IDs valid)
+    std::sort(rowsToBeRemoved.begin(), rowsToBeRemoved.end(), std::greater<qsizetype>());
+    assert(rowsToBeRemoved.back() < _clusters.size());
+
+    // Remove entries from both the cluster and modifiedByUser holder 
+    for (const auto& row : rowsToBeRemoved) {
+        beginRemoveRows({}, row, row);
+
+        _clusters.erase(_clusters.begin() + row);
+        _modifiedByUser.erase(_modifiedByUser.begin() + row);
+
+        endRemoveRows();
+    }
+
+    assert(_clusters.size() == _modifiedByUser.size());
 }
 
 void ClustersModel::setClusterPrefix(const QString& clusterPrefix)
@@ -386,7 +423,11 @@ bool ClustersModel::mayOverrideUserInput()
         OverwriteClustersConfirmationDialog overwriteClustersConfirmationDialog(nullptr, _clusters.count(), numberOfUserModifiedClusters);
 
         // Show the confirm data removal dialog
-        overwriteClustersConfirmationDialog.exec();
+        overwriteClustersConfirmationDialog.open();
+
+        QEventLoop eventLoop;
+        QObject::connect(&overwriteClustersConfirmationDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+        eventLoop.exec();
 
         // If the user accepted, the clusters may be overwritten, otherwise not
         return overwriteClustersConfirmationDialog.result() == 1 ? true : false;

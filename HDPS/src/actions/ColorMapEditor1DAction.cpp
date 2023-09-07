@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "ColorMapEditor1DAction.h"
 #include "ColorMapAction.h"
 #include "Application.h"
@@ -16,21 +20,20 @@ namespace hdps::gui {
     constexpr QSize ColorMapEditor1DAction::colorMapImageSize;
 #endif
 
-ColorMapEditor1DAction::ColorMapEditor1DAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction),
-    _colorMapAction(colorMapAction),
+ColorMapEditor1DAction::ColorMapEditor1DAction(QObject* parent, const QString& title) :
+    WidgetAction(parent, title),
+    _colorMapAction(*static_cast<ColorMapAction*>(parent)),
     _nodes(),
-    _nodeAction(*this),
+    _nodeAction(this, "Node 1D"),
     _colorMapImage(colorMapImageSize, QImage::Format::Format_ARGB32_Premultiplied)
 {
     setText("1D custom color map");
     setIcon(Application::getIconFont("FontAwesome").getIcon("chart-line"));
-    setSerializationName("Editor1D");
 
     addNode(QPointF(0.0f, 0.0f), Qt::black);
     addNode(QPointF(1.0f, 1.0f), Qt::white);
 
-    connect(&colorMapAction.getCustomColorMapAction(), &ColorMapEditor1DAction::toggled, this, &ColorMapEditor1DAction::updateColorMap);
+    connect(&_colorMapAction.getCustomColorMapAction(), &ColorMapEditor1DAction::toggled, this, &ColorMapEditor1DAction::updateColorMap);
 }
 
 QImage ColorMapEditor1DAction::getColorMapImage() const
@@ -170,18 +173,24 @@ void ColorMapEditor1DAction::updateColorMap()
     emit _colorMapAction.imageChanged(_colorMapImage);
 }
 
-void ColorMapEditor1DAction::connectToPublicAction(WidgetAction* publicAction)
+void ColorMapEditor1DAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicColorMapEditor1DAction = dynamic_cast<ColorMapEditor1DAction*>(publicAction);
 
     Q_ASSERT(publicColorMapEditor1DAction != nullptr);
 
-    WidgetAction::connectToPublicAction(publicAction);
+    if (publicColorMapEditor1DAction == nullptr)
+        return;
+
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void ColorMapEditor1DAction::disconnectFromPublicAction()
+void ColorMapEditor1DAction::disconnectFromPublicAction(bool recursive)
 {
-    WidgetAction::disconnectFromPublicAction();
+    if (!isConnected())
+        return;
+
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void ColorMapEditor1DAction::fromVariantMap(const QVariantMap& variantMap)
@@ -248,7 +257,6 @@ ColorMapEditor1DAction::Widget::Widget(QWidget* parent, ColorMapEditor1DAction* 
     auto layout         = new QVBoxLayout();
     auto toolbarLayout  = new QHBoxLayout();
 
-    toolbarLayout->setSpacing(3);
     toolbarLayout->addStretch(1);
     toolbarLayout->addWidget(_goToFirstNodeAction.createWidget(this));
     toolbarLayout->addWidget(_goToPreviousNodeAction.createWidget(this));
@@ -262,7 +270,7 @@ ColorMapEditor1DAction::Widget::Widget(QWidget* parent, ColorMapEditor1DAction* 
     layout->addLayout(toolbarLayout);
     layout->addWidget(colorMapEditor1DAction->getNodeAction().createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 
     connect(&_goToFirstNodeAction, &TriggerAction::triggered, this, [this] {
         _colorMapEditor1DWidget.selectNode(_colorMapEditor1DWidget.getNodes().first());

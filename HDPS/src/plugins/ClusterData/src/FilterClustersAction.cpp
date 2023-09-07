@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "FilterClustersAction.h"
 #include "ClusterData.h"
 #include "ClustersAction.h"
@@ -9,11 +13,10 @@
 #include <QHBoxLayout>
 
 FilterClustersAction::FilterClustersAction(ClustersActionWidget* clustersActionWidget) :
-    WidgetAction(clustersActionWidget),
+    WidgetAction(clustersActionWidget, "Filter Clusters"),
     _clustersActionWidget(clustersActionWidget),
     _nameFilterAction(this, "Name filter")
 {
-    setText("Filter clusters");
     setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
 
     _nameFilterAction.setToolTip("Filter clusters by name (case-insensitive)");
@@ -50,5 +53,5 @@ FilterClustersAction::Widget::Widget(QWidget* parent, FilterClustersAction* filt
 
     layout->addWidget(filterClustersAction->getNameFilterAction().createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }

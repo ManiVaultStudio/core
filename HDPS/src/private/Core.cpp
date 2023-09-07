@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "Core.h"
 
 #include "MainWindow.h"
@@ -16,6 +20,8 @@
 #include <util/Exception.h>
 
 #include <algorithm>
+
+#include <QEventLoop>
 
 //#define CORE_VERBOSE
 
@@ -46,7 +52,8 @@ Core::~Core()
 
 void Core::init()
 {
-    CoreInterface::init();
+    if (isInitialized())
+        return;
 
     _actionsManager.reset(new ActionsManager());
     _pluginManager.reset(new PluginManager());
@@ -65,6 +72,8 @@ void Core::init()
     _workspaceManager->initialize();
     _projectManager->initialize();
     _settingsManager->initialize();
+
+    CoreInterface::init();
 }
 
 void Core::reset()
@@ -135,7 +144,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
     }
 }
 
-Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& guid /*= ""*/)
+Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/)
 {
     // Create a new plugin of the given kind
     QString rawDataName = _pluginManager->requestPlugin(kind)->getName();
@@ -144,11 +153,11 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     const plugin::RawData& rawData = requestRawData(rawDataName);
 
     // Create an initial full set and an empty selection belonging to the raw data
-    auto fullSet    = rawData.createDataSet(guid);
+    auto fullSet    = rawData.createDataSet(id);
     auto selection  = rawData.createDataSet();
 
     // Set the properties of the new sets
-    fullSet->setGuiName(dataSetGuiName);
+    fullSet->setText(dataSetGuiName);
     fullSet->setAll(true);
 
     // Set pointer of full dataset to itself just to avoid having to be wary of this not being set
@@ -193,7 +202,7 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
         for (auto datasetToRemove : datasetsToRemove) {
 
             // Cache dataset GUID and type
-            const auto guid = datasetToRemove->getGuid();
+            const auto guid = datasetToRemove->getId();
             const auto type = datasetToRemove->getDataType();
 
             events().notifyDatasetAboutToBeRemoved(datasetToRemove);
@@ -228,7 +237,7 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
 
     // Mark the full set as derived and set the GUI name
     derivedDataset->setSourceDataSet(sourceDataset);
-    derivedDataset->setGuiName(guiName);
+    derivedDataset->setText(guiName);
 
     // Set properties of the new set
     derivedDataset->setAll(true);
@@ -256,7 +265,7 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
         *subset = *const_cast<Dataset<DatasetImpl>&>(sourceDataset);
 
         subset->setAll(false);
-        subset->setGuiName(guiName);
+        subset->setText(guiName);
 
         // Set a pointer to the original full dataset, if the source is another subset, we take their pointer
         subset->_fullDataset = sourceDataset->isFull() ? sourceDataset : sourceDataset->_fullDataset;
@@ -388,11 +397,6 @@ AbstractWorkspaceManager& Core::getWorkspaceManager()
     return *_workspaceManager;
 }
 
-DataHierarchyItem& Core::getDataHierarchyItem(const QString& dataSetId)
-{
-    return _dataHierarchyManager->getItem(dataSetId);
-}
-
 bool Core::isDatasetGroupingEnabled() const
 {
     return _datasetGroupingEnabled;
@@ -413,7 +417,13 @@ Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString
             if (Application::current()->getSetting("AskForGroupName", true).toBool()) {
                 GroupDataDialog groupDataDialog(nullptr, datasets);
 
-                if (groupDataDialog.exec() == 1)
+                groupDataDialog.open();
+
+                QEventLoop eventLoop;
+                QObject::connect(&groupDataDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                eventLoop.exec();
+
+                if (groupDataDialog.result() == QDialog::Accepted)
                     return createGroupDataset(groupDataDialog.getGroupName());
                 else
                     return Dataset<DatasetImpl>();
@@ -422,7 +432,7 @@ Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString
                 QStringList datasetNames;
 
                 for (const auto& dataset : datasets)
-                    datasetNames << dataset->getGuiName();
+                    datasetNames << dataset->text();
 
                 return createGroupDataset(datasetNames.join("+"));
             }

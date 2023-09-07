@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include <QObject>
@@ -31,11 +35,24 @@ public:
      */
     WidgetFader(QObject* parent, QWidget* targetWidget, float opacity = 0.0f, float minimumOpacity = 0.0f, float maximumOpacity = 1.0f, std::int32_t fadeInDuration = 150, std::int32_t fadeOutDuration = 150);
 
-    /** Fade in the target widget */
-    void fadeIn();
+    /**
+     * Fade in the target widget
+     * @param duration Only used if duration >= 0, otherwise uses _fadeInDuration 
+     */
+    void fadeIn(std::int32_t duration = -1);
 
-    /** Fade out the target widget */
-    void fadeOut();
+    /**
+     * Fade out the target widget
+     * @param duration Only used if duration >= 0, otherwise uses _fadeOutDuration
+     */
+    void fadeOut(std::int32_t duration = -1);
+
+    /**
+     * Set opacity
+     * @param opacity Opacity
+     * @param duration Animation duration
+     */
+    void setOpacity(float opacity, std::uint32_t duration = 0);
 
     /**
      * Get whether the target widget is faded in
@@ -67,12 +84,6 @@ public:
      */
     void setMaximumOpacity(float maximumOpacity);
 
-    /**
-     * Set opacity
-     * @param opacity Opacity
-     */
-    void setOpacity(float opacity);
-
     /** Get fade-in duration */
     std::int32_t getFadeInDuration() const;
 
@@ -90,6 +101,12 @@ public:
      * @param fadeOutDuration Fade-out duration in milliseconds
      */
     void setFadeOutDuration(std::int32_t fadeOutDuration);
+
+    /**
+     * Get opacity effect
+     * @return Reference to opacity effect
+     */
+    QGraphicsOpacityEffect& getOpacityEffect();
 
 signals:
 

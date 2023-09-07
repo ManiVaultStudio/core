@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "pointdata_export.h"
@@ -74,8 +78,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param title Title of the action
      */
-    DimensionsPickerAction(QObject* parent);
+    Q_INVOKABLE DimensionsPickerAction(QObject* parent, const QString& title);
 
     /** Destructor */
     ~DimensionsPickerAction();
@@ -240,24 +245,20 @@ protected:
     /** Update the dimension selection summary */
     void updateSummary();
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
-
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
-
-protected:  // Linking
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
     /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
      */
-    virtual WidgetAction* getPublicCopy() const;
+    void disconnectFromPublicAction(bool recursive) override;
 
 signals:
 
@@ -292,4 +293,9 @@ protected:
     QMetaObject::Connection                         _summaryUpdateAwakeConnection;      /** Update summary view when idle */
 
     friend class Widget;
+    friend class AbstractActionsManager;
 };
+
+Q_DECLARE_METATYPE(DimensionsPickerAction)
+
+inline const auto dimensionsPickerActionMetaTypeId = qRegisterMetaType<DimensionsPickerAction*>("DimensionsPickerAction");

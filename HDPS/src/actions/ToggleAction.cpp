@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "ToggleAction.h"
 
 #include <QCheckBox>
@@ -11,42 +15,15 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/) :
-    WidgetAction(parent),
-    _defaultToggled(defaultToggled),
+ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, bool toggled /*= false*/) :
+    WidgetAction(parent, title),
     _indeterminate(false)
 {
     setCheckable(true);
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
-    initialize(toggled, defaultToggled);
-}
-
-QString ToggleAction::getTypeString() const
-{
-    return "Toggle";
-}
-
-void ToggleAction::initialize(const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/)
-{
     setChecked(toggled);
-    setDefaultToggled(defaultToggled);
-}
-
-bool ToggleAction::getDefaultToggled() const
-{
-    return _defaultToggled;
-}
-
-void ToggleAction::setDefaultToggled(const bool& defaultToggled)
-{
-    if (defaultToggled == _defaultToggled)
-        return;
-
-    _defaultToggled = defaultToggled;
-
-    emit defaultToggledChanged(_defaultToggled);
 }
 
 void ToggleAction::setChecked(bool checked)
@@ -93,35 +70,39 @@ QVariantMap ToggleAction::toVariantMap() const
     return variantMap;
 }
 
-void ToggleAction::connectToPublicAction(WidgetAction* publicAction)
+void ToggleAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicToggleAction = dynamic_cast<ToggleAction*>(publicAction);
 
     Q_ASSERT(publicToggleAction != nullptr);
+
+    if (publicToggleAction == nullptr)
+        return;
 
     connect(this, &ToggleAction::toggled, publicToggleAction, &ToggleAction::setChecked);
     connect(publicToggleAction, &ToggleAction::toggled, this, &ToggleAction::setChecked);
 
     setChecked(publicToggleAction->isChecked());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void ToggleAction::disconnectFromPublicAction()
+void ToggleAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicToggleAction = dynamic_cast<ToggleAction*>(getPublicAction());
 
     Q_ASSERT(publicToggleAction != nullptr);
 
+    if (publicToggleAction == nullptr)
+        return;
+
     disconnect(this, &ToggleAction::toggled, publicToggleAction, &ToggleAction::setChecked);
     disconnect(publicToggleAction, &ToggleAction::toggled, this, &ToggleAction::setChecked);
 
-    WidgetAction::disconnectFromPublicAction();
-}
-
-WidgetAction* ToggleAction::getPublicCopy() const
-{
-    return new ToggleAction(parent(), text(), isChecked(), _defaultToggled);
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* toggleAction) :
@@ -249,7 +230,6 @@ QWidget* ToggleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::CheckBox)
         layout->addWidget(new ToggleAction::CheckBoxWidget(parent, this));

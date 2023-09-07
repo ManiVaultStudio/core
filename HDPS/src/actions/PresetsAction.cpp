@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "PresetsAction.h"
 #include "Application.h"
 
@@ -20,7 +24,7 @@ QMap<PresetsAction::Column, QPair<QString, QString>> PresetsAction::columnInfo =
 });
 
 PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const QString& settingsKey /*= ""*/, const QString& presetType /*= ""*/, const QIcon& icon /*= QIcon()*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Presets"),
     _sourceAction(sourceAction),
     _settingsKey(settingsKey),
     _presetType(presetType),
@@ -32,20 +36,19 @@ PresetsAction::PresetsAction(QObject* parent, WidgetAction* sourceAction, const 
 {
     Q_ASSERT(_sourceAction != nullptr);
 
+    setText("Presets");
+    setConnectionPermissionsToForceNone(true);
+
     _editAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     _editAction.setToolTip(QString("Manage %1 presets").arg(_presetType.toLower()));
 
     connect(&_editAction, &TriggerAction::triggered, this, [this]() -> void {
-        ManagePresetsDialog dialog(this);
-        dialog.exec();
+        auto* dialog = new ManagePresetsDialog(this);
+        connect(dialog, &ManagePresetsDialog::finished, dialog, &ManagePresetsDialog::deleteLater);
+        dialog->open();
     });
 
     loadPresetsFromApplicationSettings();
-}
-
-QString PresetsAction::getTypeString() const
-{
-    return "Presets";
 }
 
 QString PresetsAction::getSettingsKey() const
@@ -115,11 +118,16 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
     savePresetAction->setIcon(fontAwesome.getIcon("save"));
 
     connect(savePresetAction, &TriggerAction::triggered, this, [this, &fontAwesome, presetIcon]() -> void {
-        ChoosePresetNameDialog choosePresetNameDialog(this);
+        auto* choosePresetNameDialog = new ChoosePresetNameDialog(this);
 
-        if (choosePresetNameDialog.exec())
-            savePreset(choosePresetNameDialog.getPresetNameAction().getString());
+        connect(choosePresetNameDialog, &ChoosePresetNameDialog::accepted, this, [this, choosePresetNameDialog]() -> void {
+            savePreset(choosePresetNameDialog->getPresetNameAction().getString());
         });
+
+        connect(choosePresetNameDialog, &ChoosePresetNameDialog::finished, choosePresetNameDialog, &ChoosePresetNameDialog::deleteLater);
+
+        choosePresetNameDialog->open();            
+    });
 
     menu->addAction(savePresetAction);
 
@@ -272,29 +280,31 @@ void PresetsAction::importPreset()
     qDebug() << __FUNCTION__;
 #endif
 
-    QFileDialog fileDialog;
+    auto* fileDialog = new QFileDialog();
 
-    fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
-    fileDialog.setWindowTitle("Import Preset");
-    fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-    fileDialog.setFileMode(QFileDialog::ExistingFile);
-    fileDialog.setNameFilters({ "HDPS View Preset (*.hvp)" });
-    fileDialog.setDefaultSuffix(".hvp");
-    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+    fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    fileDialog->setWindowTitle("Import Preset");
+    fileDialog->setAcceptMode(QFileDialog::AcceptOpen);
+    fileDialog->setFileMode(QFileDialog::ExistingFile);
+    fileDialog->setNameFilters({ "HDPS View Preset (*.hvp)" });
+    fileDialog->setDefaultSuffix(".hvp");
+    fileDialog->setOption(QFileDialog::DontUseNativeDialog, true);
 
-    if (fileDialog.exec() == 0)
-        return;
+    connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
+        if (fileDialog->selectedFiles().count() != 1)
+            throw std::runtime_error("Only one file may be selected");
 
-    if (fileDialog.selectedFiles().count() != 1)
-        throw std::runtime_error("Only one file may be selected");
+        const auto presetFilePath = fileDialog->selectedFiles().first();
 
-    const auto presetFilePath = fileDialog.selectedFiles().first();
+        _sourceAction->fromJsonFile(presetFilePath);
 
-    _sourceAction->fromJsonFile(presetFilePath);
+        savePreset(QFileInfo(presetFilePath).baseName());
 
-    savePreset(QFileInfo(presetFilePath).baseName());
+        emit presetImported(presetFilePath);
+        });
+    connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
-    emit presetImported(presetFilePath);
+    fileDialog->open();
 }
 
 void PresetsAction::exportPreset()
@@ -303,26 +313,28 @@ void PresetsAction::exportPreset()
     qDebug() << __FUNCTION__;
 #endif
 
-    QFileDialog fileDialog;
+    auto* fileDialog = new QFileDialog();
 
-    fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
-    fileDialog.setWindowTitle("Export Preset");
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setNameFilters({ "HDPS View Preset (*.hvp)" });
-    fileDialog.setDefaultSuffix(".hvp");
-    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+    fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+    fileDialog->setWindowTitle("Export Preset");
+    fileDialog->setAcceptMode(QFileDialog::AcceptSave);
+    fileDialog->setNameFilters({ "HDPS View Preset (*.hvp)" });
+    fileDialog->setDefaultSuffix(".hvp");
+    fileDialog->setOption(QFileDialog::DontUseNativeDialog, true);
 
-    if (fileDialog.exec() == 0)
-        return;
+    connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
+        if (fileDialog->selectedFiles().count() != 1)
+            throw std::runtime_error("Only one file may be selected");
 
-    if (fileDialog.selectedFiles().count() != 1)
-        throw std::runtime_error("Only one file may be selected");
+        const auto presetFilePath = fileDialog->selectedFiles().first();
 
-    const auto presetFilePath = fileDialog.selectedFiles().first();
+        _sourceAction->toJsonFile(presetFilePath);
 
-    _sourceAction->toJsonFile(presetFilePath);
+        emit presetExported(presetFilePath);
+        });
+    connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
-    emit presetExported(presetFilePath);
+    fileDialog->open();
 }
 
 void PresetsAction::updateModel()
@@ -339,7 +351,7 @@ void PresetsAction::updateModel()
 
         dateTimeItem->setData(dateTime, Qt::EditRole);
 
-        const auto itemEnabled = presetName != "Default";
+        const auto itemEnabled = true;// presetName != "Default";
 
         nameItem->setEnabled(itemEnabled);
         dateTimeItem->setEnabled(itemEnabled);

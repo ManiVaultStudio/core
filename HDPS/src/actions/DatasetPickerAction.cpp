@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "DatasetPickerAction.h"
 #include "Application.h"
 #include "DataHierarchyItem.h"
@@ -7,7 +11,7 @@
 #include <QHBoxLayout>
 
 #ifdef _DEBUG
-    #define DATASET_PICKER_ACTION_VERBOSE
+    //#define DATASET_PICKER_ACTION_VERBOSE
 #endif
 
 using namespace hdps::util;
@@ -15,7 +19,7 @@ using namespace hdps::util;
 namespace hdps::gui {
 
 DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, Mode mode /*= Mode::Automatic*/) :
-    OptionAction(parent, "Pick dataset"),
+    OptionAction(parent, title),
     _mode(mode),
     _datasetsFilterFunction(),
     _datasetsModel(),
@@ -31,12 +35,10 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, 
         emit datasetPicked(_datasetsModel.getDataset(currentIndex));
     });
 
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
-    //_eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAboutToBeRemoved));
-    _eventListener.registerDataEvent([this](DataEvent* dataEvent) {
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetAdded));
+    _eventListener.registerDataEvent([this](DatasetEvent* dataEvent) {
         switch (dataEvent->getType()) {
-            case EventType::DataAdded:
-            //case EventType::DataAboutToBeRemoved:
+            case EventType::DatasetAdded:
                 populateDatasetsFromCore();
                 break;
         }
@@ -54,11 +56,6 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, 
         default:
             break;
     }
-}
-
-QString DatasetPickerAction::getTypeString() const
-{
-    return "Dataset";
 }
 
 DatasetPickerAction::Mode DatasetPickerAction::getMode() const
@@ -103,11 +100,11 @@ void DatasetPickerAction::setDatasets(Datasets datasets)
 
     for (auto& dataset : _datasetsModel.getDatasets()) {
 
-        connect(&dataset, &Dataset<DatasetImpl>::dataAboutToBeRemoved, this, [this, dataset]() {
+        connect(&dataset, &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this, dataset]() {
             _datasetsModel.removeDataset(dataset);
         });
 
-        connect(&dataset, &Dataset<DatasetImpl>::dataGuiNameChanged, &_datasetsModel, &DatasetsModel::updateData);
+        connect(dataset.get(), &DatasetImpl::locationChanged, &_datasetsModel, &DatasetsModel::updateData);
     }
 
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
@@ -158,7 +155,7 @@ void DatasetPickerAction::setCurrentDataset(const QString& guid)
 
 QString DatasetPickerAction::getCurrentDatasetGuid() const
 {
-    return getCurrentDataset().getDatasetGuid();
+    return getCurrentDataset().getDatasetId();
 }
 
 void DatasetPickerAction::populateDatasetsFromCore()
@@ -178,7 +175,7 @@ void DatasetPickerAction::populateDatasetsFromCore()
     _datasetsModel.setDatasets(datasets);
 
     for (auto& dataset : datasets)
-        connect(&dataset, &Dataset<DatasetImpl>::dataGuiNameChanged, &_datasetsModel, &DatasetsModel::updateData);
+        connect(dataset.get(), &DatasetImpl::locationChanged, &_datasetsModel, &DatasetsModel::updateData);
 
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
@@ -186,39 +183,39 @@ void DatasetPickerAction::populateDatasetsFromCore()
         setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
 }
 
-void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction)
+void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(publicAction);
 
     Q_ASSERT(publicDatasetPickerAction != nullptr);
+
+    if (publicDatasetPickerAction == nullptr)
+        return;
 
     connect(this, &DatasetPickerAction::datasetPicked, publicDatasetPickerAction, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
     connect(publicDatasetPickerAction, &DatasetPickerAction::datasetPicked, this, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
 
     setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void DatasetPickerAction::disconnectFromPublicAction()
+void DatasetPickerAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction());
 
     Q_ASSERT(publicDatasetPickerAction != nullptr);
 
+    if (publicDatasetPickerAction == nullptr)
+        return;
+
     disconnect(this, &DatasetPickerAction::datasetPicked, publicDatasetPickerAction, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
     disconnect(publicDatasetPickerAction, &DatasetPickerAction::datasetPicked, this, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
 
-    WidgetAction::disconnectFromPublicAction();
-}
-
-hdps::gui::WidgetAction* DatasetPickerAction::getPublicCopy() const
-{
-    auto publicCopy = new DatasetPickerAction(parent(), text());
-
-    publicCopy->setCurrentDataset(getCurrentDataset());
-    
-    return publicCopy;
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void DatasetPickerAction::fromVariantMap(const QVariantMap& variantMap)
@@ -241,10 +238,15 @@ QVariantMap DatasetPickerAction::toVariantMap() const
     return variantMap;
 }
 
+hdps::Datasets DatasetPickerAction::getDatasets() const
+{
+    return _datasetsModel.getDatasets();
+}
+
 DatasetPickerAction::DatasetsModel::DatasetsModel(QObject* parent /*= nullptr*/) :
     QAbstractListModel(parent),
     _datasets(),
-    _showFullPathName(true),
+    _showLocation(true),
     _showIcon(true)
 {
 }
@@ -286,10 +288,10 @@ QVariant DatasetPickerAction::DatasetsModel::data(const QModelIndex& index, int 
             switch (column)
             {
                 case Column::Name:
-                    return dataset->getGuiName();// _showFullPathName ? dataset->getDataHierarchyItem().getFullPathName() : dataset->getGuiName();
+                    return _showLocation ? dataset->getLocation() : dataset->text();
 
                 case Column::GUID:
-                    return dataset->getGuid();
+                    return dataset->getId();
 
                 default:
                     break;
@@ -334,11 +336,11 @@ void DatasetPickerAction::DatasetsModel::addDataset(const Dataset<DatasetImpl>& 
 
     auto& addedDataset = _datasets.last();
 
-    connect(&addedDataset, &Dataset<DatasetImpl>::dataAboutToBeRemoved, this, [this, &addedDataset]() {
+    connect(&addedDataset, &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this, &addedDataset]() {
         removeDataset(addedDataset);
     });
 
-    connect(&addedDataset, &Dataset<DatasetImpl>::dataGuiNameChanged, this, [this, &addedDataset]() {
+    connect(addedDataset.get(), &DatasetImpl::locationChanged, this, [this, &addedDataset]() {
         const auto colorDatasetRowIndex = rowIndex(addedDataset);
 
         if (colorDatasetRowIndex < 0)
@@ -393,14 +395,17 @@ void DatasetPickerAction::DatasetsModel::setShowIcon(bool showIcon)
     updateData();
 }
 
-bool DatasetPickerAction::DatasetsModel::getShowFullPathName() const
+bool DatasetPickerAction::DatasetsModel::getShowLocation() const
 {
-    return _showFullPathName;
+    return _showLocation;
 }
 
-void DatasetPickerAction::DatasetsModel::setShowFullPathName(const bool& showFullPathName)
+void DatasetPickerAction::DatasetsModel::setShowLocation(bool showLocation)
 {
-    _showFullPathName = showFullPathName;
+    if (showLocation == _showLocation)
+        return;
+
+    _showLocation = showLocation;
 
     updateData();
 }

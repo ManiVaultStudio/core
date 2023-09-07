@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "ProjectSplashScreenAction.h"
 #include "Project.h"
 
@@ -16,7 +20,7 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _enabledAction(this, "Splash screen"),
     _closeManuallyAction(this, "Close manually"),
     _durationAction(this, "Duration", 1000, 10000, 4000),
-    _animationDurationAction(this, "Duration", 10, 10000, 250),
+    _animationDurationAction(this, "Animation Duration", 10, 10000, 250),
     _animationPanAmountAction(this, "Pan Amount", 10, 100, 20),
     _backgroundColorAction(this, "Background Color", Qt::white),
     _editAction(this, "Edit"),
@@ -25,42 +29,36 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _projectImageAction(this, "Project Image"),
     _affiliateLogosImageAction(this, "Affiliate Logos")
 {
-    setSerializationName("Splash Screen");
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
     _enabledAction.setStretch(1);
     _enabledAction.setToolTip("Show splash screen at startup");
-    _enabledAction.setSerializationName("Enabled");
 
     _closeManuallyAction.setToolTip("Close manually");
-    _closeManuallyAction.setSerializationName("CloseManually");
 
     _durationAction.setToolTip("Duration of the splash screen in milliseconds");
     _durationAction.setSuffix("ms");
-    _durationAction.setSerializationName("Duration");
 
     _animationDurationAction.setToolTip("Duration of the splash screen animations in milliseconds");
     _animationDurationAction.setSuffix("ms");
-    _animationDurationAction.setSerializationName("AnimationDuration");
 
     _animationPanAmountAction.setToolTip("Amount of panning up/down during animation in pixels");
     _animationPanAmountAction.setSuffix("px");
-    _animationPanAmountAction.setSerializationName("Pan Amount");
 
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _editAction.setDefaultWidgetFlags(TriggerAction::Icon);
-    _editAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::AlwaysCollapsed);
+    _editAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _editAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
     _editAction.setIcon(fontAwesome.getIcon("cog"));
     _editAction.setToolTip("Edit the splash screen settings");
     _editAction.setPopupSizeHint(QSize(350, 0));
 
-    _editAction << _durationAction;
-    _editAction << _closeManuallyAction;
-    _editAction << _projectImageAction;
-    _editAction << _affiliateLogosImageAction;
-    _editAction << _backgroundColorAction;
+    _editAction.addAction(&_durationAction);
+    _editAction.addAction(&_closeManuallyAction);
+    _editAction.addAction(&_projectImageAction);
+    _editAction.addAction(&_affiliateLogosImageAction);
+    _editAction.addAction(&_backgroundColorAction);
 
     _showSplashScreenAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _showSplashScreenAction.setIcon(fontAwesome.getIcon("eye"));
@@ -69,12 +67,10 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _projectImageAction.setDefaultWidgetFlags(ImageAction::Loader);
     _projectImageAction.setIcon(fontAwesome.getIcon("image"));
     _projectImageAction.setToolTip("Project image");
-    _projectImageAction.setSerializationName("ProjectImage");
 
     _affiliateLogosImageAction.setDefaultWidgetFlags(ImageAction::Loader);
     _affiliateLogosImageAction.setIcon(fontAwesome.getIcon("image"));
     _affiliateLogosImageAction.setToolTip("Affiliate logos image");
-    _affiliateLogosImageAction.setSerializationName("AffiliateLogosImage");
 
     addAction(&_enabledAction);
     addAction(&_editAction);
@@ -91,11 +87,6 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     });
 
     connect(&_closeManuallyAction, &ToggleAction::toggled, this, updateDurationAction);
-}
-
-QString ProjectSplashScreenAction::getTypeString() const
-{
-    return "ProjectSplashScreen";
 }
 
 const Project& ProjectSplashScreenAction::getProject() const

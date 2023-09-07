@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "WorkspaceSettingsDialog.h"
 
 #include <AbstractWorkspaceManager.h>
@@ -16,7 +20,7 @@ using namespace hdps::gui;
 
 WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _groupAction(this),
+    _groupAction(this, "Group"),
     _okAction(this, "Ok")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
@@ -27,11 +31,11 @@ WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) 
 
     const auto workspace = workspaces().getCurrentWorkspace();
 
-    _groupAction << workspace->getTitleAction();
-    _groupAction << workspace->getDescriptionAction();
-    _groupAction << workspace->getTagsAction();
-    _groupAction << workspace->getCommentsAction();
-    _groupAction << workspaces().getLockingAction().getLockedAction();
+    _groupAction.addAction(&workspace->getTitleAction());
+    _groupAction.addAction(&workspace->getDescriptionAction());
+    _groupAction.addAction(&workspace->getTagsAction());
+    _groupAction.addAction(&workspace->getCommentsAction());
+    _groupAction.addAction(&workspaces().getLockingAction().getLockedAction());
 
     auto layout = new QVBoxLayout();
 

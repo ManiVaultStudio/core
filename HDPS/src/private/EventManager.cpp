@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "EventManager.h"
 
 #include <Application.h>
@@ -11,7 +15,7 @@ using namespace hdps::gui;
 using namespace hdps::util;
 
 #ifdef _DEBUG
-    #define EVENT_MANAGER_VERBOSE
+    //#define EVENT_MANAGER_VERBOSE
 #endif
 
 namespace hdps
@@ -35,7 +39,7 @@ void EventManager::unregisterEventListener(EventListener* eventListener)
 void EventManager::notifyDatasetAdded(const Dataset<DatasetImpl>& dataset)
 {
     try {
-        DataAddedEvent dataEvent(dataset);
+        DatasetAddedEvent dataEvent(dataset);
 
         const auto eventListeners = _eventListeners;
 
@@ -55,7 +59,7 @@ void EventManager::notifyDatasetAdded(const Dataset<DatasetImpl>& dataset)
 void EventManager::notifyDatasetAboutToBeRemoved(const Dataset<DatasetImpl>& dataset)
 {
     try {
-        DataAboutToBeRemovedEvent dataAboutToBeRemovedEvent(dataset);
+        DatasetAboutToBeRemovedEvent dataAboutToBeRemovedEvent(dataset);
 
         const auto eventListeners = _eventListeners;
 
@@ -75,7 +79,7 @@ void EventManager::notifyDatasetAboutToBeRemoved(const Dataset<DatasetImpl>& dat
 void EventManager::notifyDatasetRemoved(const QString& datasetId, const DataType& dataType)
 {
     try {
-        DataRemovedEvent dataRemovedEvent(nullptr, datasetId, dataType);
+        DatasetRemovedEvent dataRemovedEvent(nullptr, datasetId, dataType);
 
         const auto eventListeners = _eventListeners;
 
@@ -92,10 +96,10 @@ void EventManager::notifyDatasetRemoved(const QString& datasetId, const DataType
     }
 }
 
-void EventManager::notifyDatasetChanged(const Dataset<DatasetImpl>& dataset)
+void EventManager::notifyDatasetDataChanged(const Dataset<DatasetImpl>& dataset)
 {
     try {
-        DataChangedEvent dataEvent(dataset);
+        DatasetDataChangedEvent dataEvent(dataset);
 
         const auto eventListeners = _eventListeners;
 
@@ -105,14 +109,34 @@ void EventManager::notifyDatasetChanged(const Dataset<DatasetImpl>& dataset)
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to notify that data is changed", e);
+        exceptionMessageBox("Unable to notify that dataset data has changed", e);
     }
     catch (...) {
-        exceptionMessageBox("Unable to notify that data is changed");
+        exceptionMessageBox("Unable to notify that dataset data has changed");
     }
 }
 
-void EventManager::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets* ignoreDatasets /*= nullptr*/)
+void EventManager::notifyDatasetDataDimensionsChanged(const Dataset<DatasetImpl>& dataset)
+{
+    try {
+        DatasetDataDimensionsChangedEvent dataEvent(dataset);
+
+        const auto eventListeners = _eventListeners;
+
+        for (auto listener : eventListeners)
+            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+                callListenerDataEvent(listener, &dataEvent);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to notify that dataset data dimensions have changed", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to notify that dataset data dimensions have changed");
+    }
+}
+
+void EventManager::notifyDatasetDataSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets* ignoreDatasets /*= nullptr*/)
 {
     try {
         if (ignoreDatasets != nullptr && ignoreDatasets->contains(dataset))
@@ -140,10 +164,10 @@ void EventManager::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dat
             if (ignoreDatasets != nullptr && ignoreDatasets->contains(notifyDataset))
                 return;
 
-            notifyDatasetSelectionChanged(notifyDataset, ignoreDatasets);
+            notifyDatasetDataSelectionChanged(notifyDataset, ignoreDatasets);
         };
 
-        DataSelectionChangedEvent dataSelectionChangedEvent(dataset);
+        DatasetDataSelectionChangedEvent dataSelectionChangedEvent(dataset);
 
         const auto eventListeners = _eventListeners;
 
@@ -188,27 +212,6 @@ void EventManager::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dat
     }
 }
 
-void EventManager::notifyDatasetGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName)
-{
-    try {
-
-        DataGuiNameChangedEvent dataGuiNameChangedEvent(dataset, previousGuiName);
-
-        const auto eventListeners = _eventListeners;
-
-        for (auto listener : eventListeners)
-            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                callListenerDataEvent(listener, &dataGuiNameChangedEvent);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to notify that data GUI name has changed", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to notify that data GUI name has changed");
-    }
-}
-
 void EventManager::notifyDatasetLocked(const Dataset<DatasetImpl>& dataset)
 {
     try {
@@ -216,7 +219,7 @@ void EventManager::notifyDatasetLocked(const Dataset<DatasetImpl>& dataset)
         if (!dataset.isValid())
             throw std::runtime_error("Dataset is invalid");
 
-        DataLockedEvent dataLockedEvent(dataset);
+        DatasetLockedEvent dataLockedEvent(dataset);
 
         const auto eventListeners = _eventListeners;
 
@@ -240,7 +243,7 @@ void EventManager::notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset)
         if (!dataset.isValid())
             throw std::runtime_error("Dataset is invalid");
 
-        DataUnlockedEvent dataUnlockedEvent(dataset);
+        DatasetUnlockedEvent dataUnlockedEvent(dataset);
 
         const auto eventListeners = _eventListeners;
 

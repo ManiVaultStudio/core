@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "ColorMapViewAction.h"
 #include "ColorMapAction.h"
 #include "Application.h"
@@ -11,7 +15,7 @@ using namespace hdps::util;
 namespace hdps::gui {
 
 ColorMapViewAction::ColorMapViewAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction),
+    WidgetAction(&colorMapAction, "Color Map View"),
     _colorMapAction(colorMapAction)
 {
     setText("Preview");

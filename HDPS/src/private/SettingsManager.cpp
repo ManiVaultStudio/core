@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "SettingsManager.h"
 #include "SettingsManagerDialog.h"
 
@@ -6,6 +10,7 @@
 #include <util/Exception.h>
 
 #include <QStandardPaths>
+#include <QOperatingSystemVersion>
 
 using namespace hdps::gui;
 using namespace hdps::util;
@@ -20,39 +25,16 @@ namespace hdps
 SettingsManager::SettingsManager() :
     AbstractSettingsManager(),
     _editSettingsAction(this, "Settings..."),
-    _globalProjectsPathAction(this, "Projects"),
-    _globalWorkspacesPathAction(this, "Workspaces"),
-    _globalDataPathAction(this, "Data"),
-    _ignoreLoadingErrorsAction(this, "Ignore loading errors")
+    _parametersSettingsAction(this),
+    _miscellaneousSettingsAction(this)
 {
-    _editSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
-    _editSettingsAction.setShortcut(QKeySequence("Ctrl+G"));
     _editSettingsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-
-    _globalProjectsPathAction.setConnectionPermissionsToNone();
-    _globalWorkspacesPathAction.setConnectionPermissionsToNone();
-    _globalDataPathAction.setConnectionPermissionsToNone();
-
-    _globalProjectsPathAction.setSettingsPrefix("GlobalSettings/Paths/Projects", true);
-    _globalWorkspacesPathAction.setSettingsPrefix("GlobalSettings/Paths/Workspaces", true);
-    _globalDataPathAction.setSettingsPrefix("GlobalSettings/Paths/Data", true);
-    _ignoreLoadingErrorsAction.setSettingsPrefix("GlobalSettings/IO/IgnoreLoadingErrors");
-
-    const auto makeDirIfNotExist = [](const QString& pathToDirectory) -> void {
-        QDir dir(pathToDirectory);
-
-        if (!dir.exists())
-            dir.mkpath(".");
-    };
-
-    //qDebug() << QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-    //qDebug() << QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-
-    if (!QFileInfo(_globalProjectsPathAction.getDirectory()).exists()) {
-        const auto projectsDir = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first();// +"/HDPS/Projects";
-
-        makeDirIfNotExist(projectsDir);
-        _globalProjectsPathAction.setDirectory(projectsDir);
+    if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS) {
+        _editSettingsAction.setShortcut(QKeySequence("Ctrl+,"));
+        _editSettingsAction.setMenuRole(QAction::PreferencesRole);
+    } else {
+        _editSettingsAction.setShortcut(QKeySequence("Ctrl+G"));
+        _editSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
     }
         
     connect(&_editSettingsAction, &TriggerAction::triggered, this, &SettingsManager::edit);
@@ -85,9 +67,9 @@ void SettingsManager::reset()
 
 void SettingsManager::edit()
 {
-    SettingsManagerDialog settingsManagerDialog;
-
-    settingsManagerDialog.exec();
+    auto* dialog = new SettingsManagerDialog();
+    connect(dialog, &SettingsManagerDialog::finished, dialog, &SettingsManagerDialog::deleteLater);
+    dialog->open();
 }
 
 }

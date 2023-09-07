@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "util/IconFonts.h"
@@ -18,7 +22,7 @@ class CoreInterface;
  * 
  * @author Thomas Kroes
  */
-class Application : public QApplication
+class Application final : public QApplication
 {
     Q_OBJECT
 
@@ -53,6 +57,12 @@ public: // Miscellaneous
      * @return Pair of integers representing major and minor version number respectively
      */
     util::Version getVersion() const;
+
+    /**
+     * Get the application name
+     * @return The application name
+     */
+    static QString getName();
 
     /**
      * Get file path of the project to automatically open upon startup (if set)

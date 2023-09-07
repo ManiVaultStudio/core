@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "Workspace.h"
 #include "AbstractWorkspaceManager.h"
 
@@ -152,19 +156,15 @@ QImage Workspace::getPreviewImage(const QString& workspaceFilePath, const QSize&
 void Workspace::initialize()
 {
     _titleAction.setPlaceHolderString("Enter workspace title here...");
-    _titleAction.setConnectionPermissionsToNone();
     _titleAction.setClearable(true);
 
     _descriptionAction.setPlaceHolderString("Enter workspace description here...");
-    _descriptionAction.setConnectionPermissionsToNone();
     _descriptionAction.setClearable(true);
 
     _tagsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tag"));
     _tagsAction.setCategory("Tag");
-    _tagsAction.setConnectionPermissionsToNone();
 
     _commentsAction.setPlaceHolderString("Enter workspace comments here...");
-    _commentsAction.setConnectionPermissionsToNone();
     _commentsAction.setClearable(true);
     _commentsAction.setDefaultWidgetFlags(StringAction::TextEdit);
 

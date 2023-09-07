@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "NumericalAction.h"
@@ -90,43 +94,31 @@ public:
      * @param title Title of the action
      * @param minimum Minimum value
      * @param maximum Maximum value
-     * @param defaultValue Default value
      */
-    IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum = INIT_MIN, const std::int32_t& maximum = INIT_MAX, const std::int32_t& value = INIT_VALUE, const std::int32_t& defaultValue = INIT_DEFAULT_VALUE);
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE explicit IntegralAction(QObject * parent, const QString& title, std::int32_t minimum = INIT_MIN, std::int32_t maximum = INIT_MAX, std::int32_t value = INIT_VALUE);
 
     /**
      * Initialize the integral action
      * @param minimum Minimum value
      * @param maximum Maximum value
      * @param value Value
-     * @param defaultValue Default value
      */
-    void initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue);
+    void initialize(std::int32_t minimum, std::int32_t maximum, std::int32_t value);
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
-
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
-
-protected:  // Linking
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
     /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
      */
-    virtual WidgetAction* getPublicCopy() const;
+    void disconnectFromPublicAction(bool recursive) override;
 
 public: // Serialization
 
@@ -148,25 +140,25 @@ signals:
      * Signals that the current value changed
      * @param value Current value that changed
      */
-    void valueChanged(const std::int32_t& value);
+    void valueChanged(std::int32_t value);
 
     /**
      * Signals that the default value changed
      * @param defaultValue Default value that changed
      */
-    void defaultValueChanged(const std::int32_t& defaultValue);
+    void defaultValueChanged(std::int32_t defaultValue);
 
     /**
      * Signals that the minimum value changed
      * @param minimum New minimum
      */
-    void minimumChanged(const std::int32_t& minimum);
+    void minimumChanged(std::int32_t minimum);
 
     /**
      * Signals that the maximum value changed
      * @param maximum New maximum
      */
-    void maximumChanged(const std::int32_t& maximum);
+    void maximumChanged(std::int32_t maximum);
 
     /**
      * Signals that the prefix changed
@@ -181,10 +173,15 @@ signals:
     void suffixChanged(const QString& suffix);
 
 protected:
-    static constexpr std::int32_t INIT_MIN              = 0;        /** Initialization minimum value */
-    static constexpr std::int32_t INIT_MAX              = 100;      /** Initialization maximum value */
-    static constexpr std::int32_t INIT_VALUE            = 0;        /** Initialization value */
-    static constexpr std::int32_t INIT_DEFAULT_VALUE    = 0;        /** Initialization default value */
+    static constexpr std::int32_t INIT_MIN      = 0;        /** Initialization minimum value */
+    static constexpr std::int32_t INIT_MAX      = 100;      /** Initialization maximum value */
+    static constexpr std::int32_t INIT_VALUE    = 0;        /** Initialization value */
+
+    friend class AbstractActionsManager;
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::IntegralAction)
+
+inline const auto integralActionMetaTypeId = qRegisterMetaType<hdps::gui::IntegralAction*>("hdps::gui::IntegralAction");

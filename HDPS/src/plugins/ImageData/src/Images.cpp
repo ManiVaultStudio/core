@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "Images.h"
 #include "ImageData.h"
 #include "InfoAction.h"
@@ -75,7 +79,7 @@ Dataset<DatasetImpl> Images::copy() const
 {
     auto images = new Images(Application::core(), getRawDataName());
 
-    images->setGuiName(getGuiName());
+    images->setText(text());
 
     return images;
 }
@@ -702,7 +706,7 @@ void Images::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("ImageFilePaths"))
         setImageFilePaths(variantMap["ImageFilePaths"].toStringList());
 
-    events().notifyDatasetChanged(this);
+    events().notifyDatasetDataChanged(this);
 }
 
 QVariantMap Images::toVariantMap() const

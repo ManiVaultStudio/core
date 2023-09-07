@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "LoadedViewsMenu.h"
 
 #include <Application.h>
@@ -14,42 +18,68 @@ using namespace hdps::util;
 using namespace hdps::gui;
 
 LoadedViewsMenu::LoadedViewsMenu(QWidget *parent /*= nullptr*/) :
-    QMenu(parent)
+    QMenu(parent),
+    _loadedSystemViewsMenu(),
+    _viewsToggleActions()
 {
     setTitle("Toggle");
     setToolTip("Toggle loaded view plugin visibility");
     setEnabled(!plugins().getPluginsByType(plugin::Type::VIEW).empty());
     setIcon(Application::getIconFont("FontAwesome").getIcon("low-vision"));
 
-    connect(this, &QMenu::aboutToShow, this, [this]() -> void {
-        clear();
+    _loadedSystemViewsMenu = QSharedPointer<QMenu>(new QMenu("System", this));
 
-        for (auto action : getLoadedViewsActions(false))
-            addAction(action);
-
-        if (!actions().isEmpty())
-            addSeparator();
-
-        const auto loadedViewActions = getLoadedViewsActions(true);
-
-        if (!loadedViewActions.isEmpty()) {
-            auto loadedSystemViewsMenu = new QMenu("System");
-
-            for (auto loadedSystemViewAction : loadedViewActions)
-                loadedSystemViewsMenu->addAction(loadedSystemViewAction);
-
-            loadedSystemViewsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
-
-            addMenu(loadedSystemViewsMenu);
-        }
-    });
+    populate();
 }
 
-QVector<QPointer<ToggleAction>> LoadedViewsMenu::getLoadedViewsActions(bool systemView)
+void LoadedViewsMenu::populate()
 {
-    QVector<QPointer<ToggleAction>> actions;
+    clear();
 
-    for (auto plugin : plugins().getPluginsByType(plugin::Type::VIEW)) {
+    for (auto& plugin : plugins().getPluginsByType(plugin::Type::VIEW)) {
+        auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
+
+        disconnect(&viewPlugin->getVisibleAction(), &QAction::toggled, this, nullptr);
+    }
+
+    for (auto& viewToggleAction : _viewsToggleActions)
+        delete viewToggleAction.get();
+
+    auto loadedViewsAction = getLoadedViewsActions(false);
+
+    _viewsToggleActions << loadedViewsAction;
+
+    for (auto& viewToggleAction : getLoadedViewsActions(false))
+        addAction(viewToggleAction.get());
+
+    if (!actions().isEmpty())
+        addSeparator();
+
+    const auto loadedSystemViewActions = getLoadedViewsActions(true);
+
+    _viewsToggleActions << loadedSystemViewActions;
+
+    if (!loadedSystemViewActions.isEmpty()) {
+        setEnabled(true);
+
+        _loadedSystemViewsMenu->clear();
+
+        for (auto& viewToggleAction : loadedSystemViewActions)
+            _loadedSystemViewsMenu->addAction(viewToggleAction.get());
+
+        _loadedSystemViewsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+
+        addMenu(_loadedSystemViewsMenu.get());
+    }
+    else
+        setEnabled(false);
+}
+
+LoadedViewsMenu::ToggleActions LoadedViewsMenu::getLoadedViewsActions(bool systemView)
+{
+    ToggleActions actions;
+
+    for (auto& plugin : plugins().getPluginsByType(plugin::Type::VIEW)) {
         auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
 
         if (systemView) {
@@ -61,15 +91,35 @@ QVector<QPointer<ToggleAction>> LoadedViewsMenu::getLoadedViewsActions(bool syst
                 continue;
         }
 
-        auto action = new ToggleAction(this, viewPlugin->getKind());
-        action->setIcon(viewPlugin->getVisibleAction().icon());
-        action->setChecked(viewPlugin->getVisibleAction().isChecked());
+        auto viewToggleAction = new ToggleAction(this, viewPlugin->text());
 
-        connect(action, &QAction::toggled, this, [viewPlugin, action]() -> void {
-            viewPlugin->getVisibleAction().toggle();
+        viewToggleAction->setIcon(viewPlugin->getVisibleAction().icon());
+
+        const auto connectViewToggleAction = [this, viewPlugin, viewToggleAction]() -> void {
+            connect(viewToggleAction, &QAction::toggled, this, [viewPlugin, viewToggleAction](bool toggled) -> void {
+                viewPlugin->getVisibleAction().toggle();
             });
+        };
 
-        actions << action;
+        const auto disconnectViewToggleAction = [this, viewToggleAction]() -> void {
+            disconnect(viewToggleAction, &QAction::toggled, this, nullptr);
+        };
+
+        const auto updateToggleActionChecked = [viewToggleAction, viewPlugin, connectViewToggleAction, disconnectViewToggleAction]() -> void {
+            disconnectViewToggleAction();
+            {
+                viewToggleAction->setChecked(viewPlugin->getVisibleAction().isChecked());
+            }
+            connectViewToggleAction();
+        };
+
+        updateToggleActionChecked();
+
+        connect(&viewPlugin->getVisibleAction(), &QAction::toggled, this, updateToggleActionChecked);
+
+        connectViewToggleAction();
+
+        actions << viewToggleAction;
     }
 
     sortActions(actions);

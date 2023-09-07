@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "ColorMapSettingsAction.h"
 #include "ColorMapAction.h"
 #include "Application.h"
@@ -8,20 +12,17 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction),
+ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction, const QString& title) :
+    WidgetAction(&colorMapAction, title),
     _colorMapAction(colorMapAction)
 {
     setText("Settings");
     setIcon(Application::getIconFont("FontAwesome").getIcon("sliders-h"));
-    setSerializationName("Settings");
 }
 
-ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction) :
-    WidgetActionWidget(parent, colorMapSettingsAction)
+ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, colorMapSettingsAction, widgetFlags)
 {
-    setFixedWidth(400);
-
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);

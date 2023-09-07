@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "LoggingModel.h"
 
 #include <Application.h>
@@ -34,7 +38,7 @@ QMap<LoggingModel::Column, QString> LoggingModel::columnNames = {
 LoggingModel::LoggingModel(QObject* parent /*= nullptr*/) :
     QAbstractItemModel(parent),
     _messageRecords(),
-    _wordWrapAction(this, "Word wrap", true, true)
+    _wordWrapAction(this, "Word wrap", true)
 {
     _wordWrapAction.setToolTip("Enables/disables word wrapping");
 

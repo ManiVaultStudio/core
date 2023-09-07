@@ -1,10 +1,12 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
-#include <QWidget>
+#include "WidgetActionViewWidget.h"
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 class WidgetAction;
 class OverlayWidget;
@@ -16,7 +18,7 @@ class OverlayWidget;
  * 
  * @author Thomas Kroes
  */
-class WidgetActionWidget : public QWidget
+class WidgetActionWidget : public WidgetActionViewWidget
 {
 public:
 
@@ -27,50 +29,44 @@ public:
 
 public:
 
-    /** Widget states */
-    enum State {
-        Standard,   /** Standard representation of the action (default) */
-        Collapsed,  /** The widget is in a collapsed state and represented by a popup button */
-        Popup       /** The widget representation of the action in a popup */
-    };
-
-public:
-
     /**
      * Constructor
      * @param parent Parent widget
-     * @param widgetAction Pointer to the widget action that will be displayed
+     * @param action Pointer to the widget action that will be displayed
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    WidgetActionWidget(QWidget* parent, WidgetAction* widgetAction, const std::int32_t& widgetFlags = 0);
+    WidgetActionWidget(QWidget* parent, WidgetAction* action, const std::int32_t& widgetFlags = 0);
+
+public: // Popup widget related
+    
+    /**
+     * Get whether the widget is in a popup state
+     * @return Boolean determining whether the widget is in a popup state
+     */
+    virtual bool isPopup() const final;
 
     /**
-     * Get the widget action
-     * @return Pointer to widget action
+     * Override the size hint to account for popups
+     * @return Size hint
      */
-    WidgetAction* getWidgetAction();
-
-    /**
-     * Set the widget action
-     * @param widgetAction Pointer to widget action
-     */
-    virtual void setWidgetAction(WidgetAction* widgetAction);
-
     QSize sizeHint() const override;
 
-protected: // Miscellaneous
+    /**
+     * Override to allow for popup layouts
+     * @param layout Pointer to layout
+     */
+    void setLayout(QLayout* layout);
+
+private:
 
     /**
-     * Sets a popup layout
-     * @param popupLayout Pointer to popup layout
+     * Set popup layout (layout contains groupbox etc.)
+     * @param popupLayout Pointer to the popup layout
      */
-    void setPopupLayout(QLayout* popupLayout);
+    virtual void setPopupLayout(QLayout* popupLayout) final;
 
 protected:
-    WidgetAction*       _widgetAction;      /** Pointer to widget action that will be displayed */
     std::int32_t        _widgetFlags;       /** Widget creation flags */
-    OverlayWidget*      _highlightWidget;   /** Pointer to highlight widget (if any) */
 };
 
-}
 }

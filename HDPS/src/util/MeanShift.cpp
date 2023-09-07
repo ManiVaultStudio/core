@@ -1,6 +1,12 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "MeanShift.h"
 
 #include "../graphics/Matrix3f.h"
+
+#include <algorithm>
 
 #include <QImage>
 #include <QDebug>
@@ -385,13 +391,9 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
 
     //qDebug() << "Final clusters size (including empty clusters): " << clusters.size();
 
-    for (int i = clusters.size() - 1; i >= 0; i--)
-    {
-        if (clusters[i].size() == 0)
-        {
-            clusters.erase(clusters.begin() + i);
-        }
-    }
+    clusters.erase(std::remove_if(clusters.begin(), clusters.end(),
+        [](const auto& pointIDs) { return pointIDs.empty(); }),
+        clusters.end());
 
     qDebug() << "Final clusters size: " << clusters.size();
 

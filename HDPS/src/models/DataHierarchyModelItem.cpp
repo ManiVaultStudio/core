@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "DataHierarchyModelItem.h"
 
 #include <Set.h>
@@ -69,13 +73,13 @@ std::int32_t DataHierarchyModelItem::getNumColumns() const
     return static_cast<std::int32_t>(Column::_end) + 1;
 }
 
-QString DataHierarchyModelItem::serialize() const
-{
-    if (_dataHierarchyItem == nullptr)
-        return "";
-
-    return _dataHierarchyItem->getGuiName() + "\n" + _dataHierarchyItem->getDataset()->getGuid() + "\n" + _dataHierarchyItem->getDataType();
-}
+//QString DataHierarchyModelItem::serialize() const
+//{
+//    if (_dataHierarchyItem == nullptr)
+//        return "";
+//
+//    return _dataHierarchyItem->getGuiName() + "\n" + _dataHierarchyItem->getDataset()->getId() + "\n" + _dataHierarchyItem->getDataType();
+//}
 
 QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, int role /*= Qt::DisplayRole*/) const
 {
@@ -126,10 +130,10 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
             switch (static_cast<Column>(column))
             {
                 case Column::Name:
-                    return _dataHierarchyItem->getGuiName();
+                    return _dataHierarchyItem->getDataset()->text();
 
                 case Column::GUID:
-                    return _dataHierarchyItem->getDataset()->getGuid();
+                    return _dataHierarchyItem->getDataset()->getId();
 
                 case Column::Info:
                     return _dataHierarchyItem->getTaskDescription();
@@ -161,10 +165,10 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
             switch (static_cast<Column>(column))
             {
                 case Column::Name:
-                    return _dataHierarchyItem->getGuiName();
+                    return _dataHierarchyItem->getDataset()->text();
 
                 case Column::GUID:
-                    return _dataHierarchyItem->getDataset()->getGuid();
+                    return _dataHierarchyItem->getDataset()->getId();
 
                 case Column::Info:
                     return _dataHierarchyItem->getTaskDescription();
@@ -183,7 +187,7 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                     QStringList proxyDatasetNames;
 
                     for (const auto& proxyMember : _dataHierarchyItem->getDataset()->getProxyMembers())
-                        proxyDatasetNames << proxyMember->getGuiName();
+                        proxyDatasetNames << proxyMember->text();
 
                     return proxyDatasetNames.join("\n");
                 }
@@ -282,9 +286,9 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
     return QVariant();
 }
 
-void DataHierarchyModelItem::renameDataset(const QString& intendedDatasetName)
+void DataHierarchyModelItem::renameDataset(const QString& datasetName)
 {
-    _dataHierarchyItem->renameDataset(intendedDatasetName);
+    _dataHierarchyItem->getDataset()->setText(datasetName);
 }
 
 void DataHierarchyModelItem::setGroupIndex(const std::int32_t& groupIndex)

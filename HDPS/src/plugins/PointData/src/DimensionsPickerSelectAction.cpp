@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "DimensionsPickerSelectAction.h"
 #include "DimensionsPickerAction.h"
 
@@ -6,12 +10,10 @@
 #include <QFileDialog>
 #include <QLabel>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerAction& dimensionsPickerAction) :
-    WidgetAction(&dimensionsPickerAction),
+    WidgetAction(&dimensionsPickerAction, "Dimension Picker"),
     _dimensionsPickerAction(dimensionsPickerAction),
     _selectionThresholdAction(this, "Selection threshold", 0),
     _computeStatisticsAction(this, "Compute statistics"),
@@ -170,16 +172,9 @@ DimensionsPickerSelectAction::Widget::Widget(QWidget* parent, DimensionsPickerSe
 
     layout->addLayout(selectLayout);
 
-    if (widgetFlags & WidgetActionWidget::PopupLayout) {
-        setPopupLayout(layout);
-    }
-    else {
-        layout->setContentsMargins(0, 0, 0, 0);
-        setLayout(layout);
-    }
+    setLayout(layout);
 }
 
-}
 }
 
 

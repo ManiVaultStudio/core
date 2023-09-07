@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #ifndef HDPS_ASSUME_FLOAT32_POINT_DATA
 // Avoid warnings about calls to deprecated PointData member functions.
 #define HDPS_ASSUME_FLOAT32_POINT_DATA
@@ -71,7 +75,13 @@ void PointData::setData(const std::nullptr_t, const std::size_t numPoints, const
 
 void PointData::setDimensionNames(const std::vector<QString>& dimNames)
 {
+    if (dimNames.empty())
+        return;
+
     _dimNames = dimNames;
+
+    if (dimNames.size() != _numDimensions)
+        qWarning() << "PointData: Number of dimension names does not equal the number of data dimensions";
 }
 
 float PointData::getValueAt(const std::size_t index) const
@@ -299,29 +309,34 @@ void Points::init()
 
     _infoAction = new InfoAction(this, *this);
 
-    if (isFull()) {
-        _dimensionsPickerGroupAction = new GroupAction(this);
+    const auto updateDimensionsPickerAction = [this]() -> void {
+        _dimensionsPickerAction->setPointsDataset(*this);
+    };
+
+    //if (isFull()) {
+        _dimensionsPickerGroupAction = new GroupAction(this, "Dimensions Group");
 
         _dimensionsPickerGroupAction->setText("Dimensions");
         _dimensionsPickerGroupAction->setShowLabels(false);
         _dimensionsPickerGroupAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 
-        connect(&getSmartPointer(), &Dataset<Points>::dataChanged, this, [this]() -> void {
-            if (_dimensionsPickerAction == nullptr)
-                _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction);
+        _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction, "Dimensions");
 
-            _dimensionsPickerAction->setPointsDataset(*this);
-        });
-    }
+        _dimensionsPickerGroupAction->addAction(_dimensionsPickerAction);
+
+        updateDimensionsPickerAction();
+
+        connect(&getSmartPointer(), &Dataset<Points>::dataDimensionsChanged, this, updateDimensionsPickerAction);
+    //}
 
     _infoAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
-    _eventListener.registerDataEventByType(PointType, [this](DataEvent* dataEvent)
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataSelectionChanged));
+    _eventListener.registerDataEventByType(PointType, [this](DatasetEvent* dataEvent)
     {
         switch (dataEvent->getType())
         {
-            case EventType::DataSelectionChanged:
+            case EventType::DatasetDataSelectionChanged:
             {
                 // Do not process our own selection changes
                 if (dataEvent->getDataset() == Dataset<Points>(this))
@@ -353,7 +368,7 @@ void Points::init()
                 // Copy indices from source to target if the indices have changed
                 targetIndices = sourceIndices;
 
-                events().notifyDatasetSelectionChanged(this);
+                events().notifyDatasetDataSelectionChanged(this);
 
                 break;
             }
@@ -369,6 +384,8 @@ void Points::init()
 void Points::setData(std::nullptr_t, const std::size_t numPoints, const std::size_t numDimensions)
 {
     getRawData<PointData>().setData(nullptr, numPoints, numDimensions);
+
+    hdps::events().notifyDatasetDataDimensionsChanged(this);
 }
 
 void Points::extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const
@@ -571,7 +588,7 @@ Dataset<DatasetImpl> Points::copy() const
 {
     auto set = new Points(Application::core(), getRawDataName());
 
-    set->setGuiName(getGuiName());
+    set->setText(text());
     set->indices = indices;
 
     return set;
@@ -706,7 +723,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
 
         pointIndexOffset += targetPoints->getNumPoints();
 
-        getDataHierarchyItem().setTaskDescription(QString("Creating mappings for %1").arg(proxyMember->getGuiName()));
+        getDataHierarchyItem().setTaskDescription(QString("Creating mappings for %1").arg(proxyMember->text()));
         getDataHierarchyItem().setTaskProgress(static_cast<float>(getProxyMembers().indexOf(proxyMember)) / static_cast<float>(getProxyMembers().count()));
 
         QCoreApplication::processEvents();
@@ -754,6 +771,8 @@ const std::vector<QString>& Points::getDimensionNames() const
 void Points::setDimensionNames(const std::vector<QString>& dimNames)
 {
     getRawData<PointData>().setDimensionNames(dimNames);
+
+    hdps::events().notifyDatasetDataDimensionsChanged(this);
 }
 
 float Points::getValueAt(const std::size_t index) const
@@ -892,7 +911,7 @@ void Points::selectAll()
             selectionIndices.push_back(index);
     }
 
-    events().notifyDatasetSelectionChanged(this);
+    events().notifyDatasetDataSelectionChanged(this);
 }
 
 void Points::selectNone()
@@ -901,7 +920,7 @@ void Points::selectNone()
 
     selectionIndices.clear();
 
-    events().notifyDatasetSelectionChanged(this);
+    events().notifyDatasetDataSelectionChanged(this);
 }
 
 void Points::selectInvert()
@@ -920,7 +939,7 @@ void Points::selectInvert()
             selectionIndices.push_back(i);
     }
 
-    events().notifyDatasetSelectionChanged(this);
+    events().notifyDatasetDataSelectionChanged(this);
 }
 
 void Points::fromVariantMap(const QVariantMap& variantMap)
@@ -967,6 +986,8 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         return dimensionNames;
     };
 
+    
+
     std::vector<QString> dimensionNames;
 
     for (const auto dimensionName : fetchDimensionNames())
@@ -974,7 +995,27 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
     setDimensionNames(dimensionNames);
 
-    events().notifyDatasetChanged(this);
+    if (variantMap.contains("Dimensions")) {
+        _dimensionsPickerAction->fromParentVariantMap(variantMap);
+    }
+
+    events().notifyDatasetDataChanged(this);
+
+    if (isFull()) {
+        const auto& selectionMap = variantMap["Selection"].toMap();
+
+        const auto count = selectionMap["Count"].toInt();
+
+        if (count > 0) {
+            auto selectionSet = getSelection<Points>();
+
+            selectionSet->indices.resize(count);
+
+            populateDataBufferFromVariantMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data());
+
+            events().notifyDatasetDataSelectionChanged(this);
+        }
+    }
 }
 
 QVariantMap Points::toVariantMap() const
@@ -1002,13 +1043,24 @@ QVariantMap Points::toVariantMap() const
     indices["Count"]    = QVariant::fromValue(this->indices.size());
     indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), true);
 
+    QVariantMap selection;
+
+    if (isFull()) {
+        auto selectionSet = getSelection<Points>();
+
+        selection["Count"]  = QVariant::fromValue(selectionSet->indices.size());
+        selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), true);
+    }
+
     variantMap["Data"]                  = isFull() ? getRawData<PointData>().toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]        = getNumPoints();
     variantMap["Full"]                  = isFull();
     variantMap["Indices"]               = indices;
+    variantMap["Selection"]             = selection;
     variantMap["DimensionNames"]        = rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true);
     variantMap["NumberOfDimensions"]    = getNumDimensions();
-
+    variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
+    
     return variantMap;
 }
 

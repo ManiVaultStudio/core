@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "PrefixClustersAction.h"
 #include "ClusterData.h"
 #include "ClustersAction.h"
@@ -7,12 +11,11 @@
 #include <Application.h>
 
 PrefixClustersAction::PrefixClustersAction(ClustersAction& clustersAction) :
-    TriggerAction(&clustersAction),
+    TriggerAction(&clustersAction, "Prefix"),
     _clustersAction(clustersAction),
-    _prefixAction(this, "Name prefix", "id_", "id_"),
+    _prefixAction(this, "Name prefix", "id_"),
     _applyAction(this, "Apply")
 {
-    setText("Prefix clusters");
     setToolTip("Prefix clusters");
     setIcon(Application::getIconFont("FontAwesome").getIcon("paragraph"));
 
@@ -47,9 +50,6 @@ PrefixClustersAction::PrefixClustersAction(ClustersAction& clustersAction) :
         // Prefix the clusters in the model
         _clustersAction.getClustersModel().setClusterPrefix(clusterNamePrefix);
 
-        // Change prefix default string
-        _prefixAction.setDefaultString(clusterNamePrefix);
-
         // Update read only status
         updateApplyActionReadOnly();
     });
@@ -76,5 +76,5 @@ PrefixClustersAction::Widget::Widget(QWidget* parent, PrefixClustersAction* pref
     layout->addWidget(prefixClustersAction->getPrefixAction().createWidget(this));
     layout->addWidget(prefixClustersAction->getApplyAction().createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }

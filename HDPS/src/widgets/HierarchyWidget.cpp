@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "HierarchyWidget.h"
 #include "Application.h"
 
@@ -6,6 +10,7 @@
 #include <QSortFilterProxyModel>
 #include <QHeaderView>
 
+#include <stdexcept>
 #include <stdexcept>
 
 #ifdef _DEBUG
@@ -28,58 +33,83 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _infoOverlayWidget(showOverlay ? new InfoOverlayWidget(&_treeView) : nullptr),
     _noItemsDescription(""),
     _filterNameAction(this, "Name"),
-    _filterGroupAction(this),
-    _filterCaseSensitiveAction(this, "Case-sensitive", false, false),
-    _filterRegularExpressionAction(this, "Regular expression", false, false),
+    _filterColumnAction(this, "Column"),
+    _filterGroupAction(this, "Filter"),
+    _filterCaseSensitiveAction(this, "Case-sensitive", false),
+    _filterRegularExpressionAction(this, "Regular expression", false),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
     _selectAllAction(this, "Select all"),
     _selectNoneAction(this, "Select none"),
-    _selectionGroupAction(this),
-    _columnsGroupAction(this),
-    _settingsGroupAction(this)
+    _selectionGroupAction(this, "Selection"),
+    _columnsGroupAction(this, "Columns"),
+    _settingsGroupAction(this, "Settings"),
+    _toolbarAction(this, "Toolbar")
 {
+    if (_filterModel) {
+        _filterModel->setSourceModel(const_cast<QAbstractItemModel*>(&_model));
+        _treeView.setModel(_filterModel);
+    }
+    else {
+        _treeView.setModel(const_cast<QAbstractItemModel*>(&_model));
+    }
+
+    if (_infoOverlayWidget) {
+        auto& widgetFader = _infoOverlayWidget->getWidgetFader();
+
+        widgetFader.setOpacity(0.0f);
+        widgetFader.setMaximumOpacity(0.5f);
+        widgetFader.setFadeInDuration(100);
+        widgetFader.setFadeOutDuration(300);
+    }
+        
     _filterNameAction.setSearchMode(true);
     _filterNameAction.setClearable(true);
-    _filterNameAction.setConnectionPermissionsToNone();
+    _filterNameAction.setConnectionPermissionsToForceNone();
 
     _filterGroupAction.setText("Filtering");
     _filterGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
     _filterGroupAction.setToolTip("Adjust filtering parameters");
+    _filterGroupAction.setConnectionPermissionsToForceNone();
 
     _filterCaseSensitiveAction.setToolTip("Enable/disable search filter case-sensitive");
-    _filterCaseSensitiveAction.setConnectionPermissionsToNone();
+    _filterCaseSensitiveAction.setConnectionPermissionsToForceNone();
 
     _filterRegularExpressionAction.setToolTip("Enable/disable search filter with regular expression");
-    _filterRegularExpressionAction.setConnectionPermissionsToNone();
+    _filterRegularExpressionAction.setConnectionPermissionsToForceNone();
 
-    //if (_filterModel)
-    //    _filterGroupAction << _filterNameAction;
-
-    _filterGroupAction << _filterCaseSensitiveAction;
-    _filterGroupAction << _filterRegularExpressionAction;
+    _filterGroupAction.addAction(&_filterColumnAction);
+    _filterGroupAction.addAction(&_filterCaseSensitiveAction);
+    _filterGroupAction.addAction(&_filterRegularExpressionAction);
 
     _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));
     _expandAllAction.setToolTip(QString("Expand all %1s in the hierarchy").arg(_itemTypeName.toLower()));
     _expandAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    _expandAllAction.setConnectionPermissionsToForceNone();
 
     _collapseAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-up"));
     _collapseAllAction.setToolTip(QString("Collapse all %1s in the hierarchy").arg(_itemTypeName.toLower()));
     _collapseAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    _collapseAllAction.setConnectionPermissionsToForceNone();
 
     _selectAllAction.setToolTip(QString("Select all %1s").arg(_itemTypeName.toLower()));
+    _selectAllAction.setConnectionPermissionsToForceNone();
+
     _selectNoneAction.setToolTip(QString("De-select all %1s").arg(_itemTypeName.toLower()));
+    _selectNoneAction.setConnectionPermissionsToForceNone();
 
     _selectionGroupAction.setText("Selection");
     _selectionGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+    _selectionGroupAction.setConnectionPermissionsToForceNone();
 
-    _selectionGroupAction << _selectAllAction;
-    _selectionGroupAction << _selectNoneAction;
+    _selectionGroupAction.addAction(&_selectAllAction);
+    _selectionGroupAction.addAction(&_selectNoneAction);
 
     _columnsGroupAction.setText("Columns");
-    _columnsGroupAction.setToolTip(QString("Edit which %1s hierarchy columns should be visible").arg(_itemTypeName.toLower()));
+    _columnsGroupAction.setToolTip(QString("Edit which %1 columns should be visible").arg(_itemTypeName.toLower()));
     _columnsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("columns"));
     _columnsGroupAction.setShowLabels(false);
+    _columnsGroupAction.setConnectionPermissionsToForceNone();
 
     auto selectAllCollumns = new TriggerAction(this, "Select all");
 
@@ -101,22 +131,30 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
             _columnsGroupAction.getActions()[columnIndex]->setChecked(true);
     });
 
+    QStringList columnNames;
+
     for (std::int32_t columnIndex = 0; columnIndex < _model.columnCount(); columnIndex++) {
-        const auto columnVisible = !_treeView.isColumnHidden(columnIndex);
+        const auto columnVisible    = !_treeView.isColumnHidden(columnIndex);
+        const auto columnHeader     = _model.headerData(columnIndex, Qt::Horizontal, Qt::EditRole).toString();
 
-        auto columnVisibilityAction = new ToggleAction(this, _model.headerData(columnIndex, Qt::Horizontal, Qt::EditRole).toString(), columnVisible, columnVisible);
+        columnNames << columnHeader;
 
-        columnVisibilityAction->setConnectionPermissionsToNone();
+        auto columnVisibilityAction = new ToggleAction(this, columnHeader.isEmpty() ? QString("Column %1").arg(QString::number(columnIndex)) : columnHeader, columnVisible);
+
+        columnVisibilityAction->setConnectionPermissionsToForceNone();
 
         connect(columnVisibilityAction, &ToggleAction::toggled, this, [this, columnIndex, updateSelectAllCollumnsReadOnly](bool toggled) -> void {
             _treeView.setColumnHidden(columnIndex, !toggled);
             updateSelectAllCollumnsReadOnly();
         });
 
-        _columnsGroupAction << *columnVisibilityAction;
+        _columnsGroupAction.addAction(columnVisibilityAction);
     }
 
-    _columnsGroupAction << *selectAllCollumns;
+    _filterColumnAction.setOptions(columnNames);
+    _filterColumnAction.setCurrentIndex(0);
+
+    _columnsGroupAction.addAction(selectAllCollumns);
 
     connect(&_treeView, &HierarchyWidgetTreeView::columnHiddenChanged, this, [this](int column, bool hide) -> void {
         auto columnAction = _columnsGroupAction.getActions()[column];
@@ -136,37 +174,33 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    if (showToolbar) {
-        _toolbarLayout.setSpacing(3);
+    _filterGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _selectionGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _columnsGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _settingsGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
+    _toolbarAction.setShowLabels(false);
+
+    if (showToolbar) {
         if (_filterModel) {
-            _toolbarLayout.addWidget(_filterNameAction.createWidget(this), 1);
-            _toolbarLayout.addWidget(_filterGroupAction.createCollapsedWidget(this));
+            _toolbarAction.addAction(&_filterNameAction);
+            _toolbarAction.addAction(&_filterGroupAction);
         }
         
-        _toolbarLayout.addWidget(_expandAllAction.createWidget(this));
-        _toolbarLayout.addWidget(_collapseAllAction.createWidget(this));
-        _toolbarLayout.addWidget(_selectionGroupAction.createCollapsedWidget(this));
-        _toolbarLayout.addWidget(_columnsGroupAction.createCollapsedWidget(this));
-        _toolbarLayout.addWidget(_settingsGroupAction.createCollapsedWidget(this));
+        _toolbarAction.addAction(&_expandAllAction);
+        _toolbarAction.addAction(&_collapseAllAction);
+        _toolbarAction.addAction(&_selectionGroupAction);
+        _toolbarAction.addAction(&_columnsGroupAction);
+        _toolbarAction.addAction(&_settingsGroupAction);
 
-        layout->addLayout(&_toolbarLayout);
+        layout->addWidget(_toolbarAction.createWidget(this));
     }
     
     layout->addWidget(&_treeView);
 
     setLayout(layout);
 
-    if (_filterModel) {
-        _filterModel->setSourceModel(const_cast<QAbstractItemModel*>(&_model));
-        _treeView.setModel(_filterModel);
-    }
-    else {
-        _treeView.setModel(const_cast<QAbstractItemModel*>(&_model));
-    }
-
     _treeView.setAutoFillBackground(true);
-    //_treeView.setAutoExpandDelay(300);
     _treeView.setContextMenuPolicy(Qt::CustomContextMenu);
     _treeView.setSelectionModel(&_selectionModel);
     _treeView.setDragEnabled(true);
@@ -176,8 +210,6 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _treeView.setRootIsDecorated(true);
     _treeView.setItemsExpandable(true);
     _treeView.setIconSize(QSize(14, 14));
-    _treeView.setAnimated(true);
-    //_treeView.setUniformRowHeights(true);
     
     auto header = _treeView.header();
 
@@ -187,19 +219,22 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     const auto filterModelRowsChanged = [this]() -> void {
         const auto hasItems = _filterModel != nullptr ? _filterModel->rowCount() >= 1 : _model.rowCount() >= 1;
 
+        for (auto action : _toolbarAction.getActions())
+            const_cast<WidgetAction*>(action)->setEnabled(hasItems);
+
         _filterNameAction.setEnabled(_model.rowCount() >= 1);
+        _filterColumnAction.setEnabled(_model.rowCount() >= 1);
         _filterGroupAction.setEnabled(_model.rowCount() >= 1);
         _selectionGroupAction.setEnabled(hasItems);
         _columnsGroupAction.setEnabled(hasItems);
         _settingsGroupAction.setEnabled(hasItems);
-
-        _treeView.setHeaderHidden(_headerHidden || !hasItems);
         
         updateExpandCollapseActionsReadOnly();
         updateOverlayWidget();
     };
 
     connect(&_filterNameAction, &StringAction::stringChanged, this, &HierarchyWidget::updateFilterModel);
+    connect(&_filterColumnAction, &OptionAction::currentIndexChanged, this, &HierarchyWidget::updateFilterModel);
     connect(&_filterCaseSensitiveAction, &ToggleAction::toggled, this, &HierarchyWidget::updateFilterModel);
     connect(&_filterRegularExpressionAction, &ToggleAction::toggled, this, &HierarchyWidget::updateFilterModel);
     connect(&_model, &QAbstractItemModel::layoutChanged, this, &HierarchyWidget::updateFilterModel);
@@ -241,11 +276,19 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     if (_filterModel) {
         connect(_filterModel, &QAbstractItemModel::rowsInserted, this, filterModelRowsChanged);
         connect(_filterModel, &QAbstractItemModel::rowsRemoved, this, filterModelRowsChanged);
+        connect(_filterModel, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateHeaderVisibility);
+        connect(_filterModel, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateHeaderVisibility);
     }
     else {
         connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateFilterModel);
         connect(&_model, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateFilterModel);
+        connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateHeaderVisibility);
+        connect(&_model, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateHeaderVisibility);
     }
+
+    connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateOverlayWidget);
+    connect(&_model, &QAbstractItemModel::rowsRemoved, this, &HierarchyWidget::updateOverlayWidget);
+    connect(&_model, &QAbstractItemModel::layoutChanged, this, &HierarchyWidget::updateOverlayWidget);
 
     connect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
     connect(&_treeView, &QTreeView::collapsed, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
@@ -263,6 +306,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     filterModelRowsChanged();
     selectionChanged();
     updateFilterModel();
+    updateOverlayWidget();
+    updateHeaderVisibility();
 }
 
 QString HierarchyWidget::getItemTypeName() const
@@ -429,28 +474,30 @@ void HierarchyWidget::updateOverlayWidget()
     if (_infoOverlayWidget.isNull())
         return;
 
+    auto& widgetFader = _infoOverlayWidget->getWidgetFader();
+
     if (_filterModel == nullptr) {
         if (_model.rowCount() == 0) {
             _infoOverlayWidget->set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
-            _infoOverlayWidget->show();
+            widgetFader.fadeIn();
         }
         else {
-            _infoOverlayWidget->hide();
+            widgetFader.fadeOut();
         }
     }
     else {
         if (_model.rowCount() >= 1) {
             if (_filterModel->rowCount() == 0) {
                 _infoOverlayWidget->set(windowIcon(), QString("No %1s found").arg(_itemTypeName.toLower()), "Try changing the filter parameters...");
-                _infoOverlayWidget->show();
+                widgetFader.fadeIn();
             }
             else {
-                _infoOverlayWidget->hide();
+                widgetFader.fadeOut();
             }
         }
         else {
             _infoOverlayWidget->set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
-            _infoOverlayWidget->show();
+            widgetFader.fadeIn();
         }
     }
 }
@@ -461,6 +508,13 @@ void HierarchyWidget::updateExpandCollapseActionsReadOnly()
 
     _expandAllAction.setEnabled(hasItems && mayExpandAll());
     _collapseAllAction.setEnabled(hasItems && mayCollapseAll());
+
+    QModelIndex index;
+
+    const auto showExpandCollapse = mayExpandAll() || mayCollapseAll();
+
+    _expandAllAction.setVisible(showExpandCollapse);
+    _collapseAllAction.setVisible(showExpandCollapse);
 }
 
 bool HierarchyWidget::getHeaderHidden() const
@@ -470,15 +524,12 @@ bool HierarchyWidget::getHeaderHidden() const
 
 void HierarchyWidget::setHeaderHidden(bool headerHidden)
 {
+    if (headerHidden == _headerHidden)
+        return;
+
     _headerHidden = headerHidden;
 
-    if (_headerHidden)
-        _treeView.setHeaderHidden(true);
-}
-
-QHBoxLayout& HierarchyWidget::getToolbarLayout()
-{
-    return _toolbarLayout;
+    updateHeaderVisibility();
 }
 
 void HierarchyWidget::updateFilterModel()
@@ -487,6 +538,10 @@ void HierarchyWidget::updateFilterModel()
         return;
 
     const auto itemTypeNameLowered = _itemTypeName.toLower();
+
+    _filterModel->setFilterKeyColumn(_filterColumnAction.getCurrentIndex());
+
+    //_filterModel->setRecursiveFilteringEnabled(!_filterNameAction.getString().isEmpty());
 
     if (_filterRegularExpressionAction.isChecked()) {
         _filterNameAction.setPlaceHolderString(QString("Search for %1 by regular expression").arg(itemTypeNameLowered));
@@ -510,6 +565,13 @@ void HierarchyWidget::updateFilterModel()
     _filterModel->invalidate();
 
     updateOverlayWidget();
+}
+
+void HierarchyWidget::updateHeaderVisibility()
+{
+    const auto hasItems = _filterModel != nullptr ? _filterModel->rowCount() >= 1 : _model.rowCount() >= 1;
+
+    _treeView.setHeaderHidden(_headerHidden || !hasItems);
 }
 
 }

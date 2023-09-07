@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "RecentFilesAction.h"
 #include "Application.h"
 
@@ -13,7 +17,7 @@
 namespace hdps::gui {
 
 RecentFilesAction::RecentFilesAction(QObject* parent, const QString& settingsKey /*= ""*/, const QString& fileType /*= ""*/, const QString& shortcutPrefix /*= ""*/, const QIcon& icon /*= QIcon()*/) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Recent Files"),
     _settingsKey(),
     _fileType(),
     _icon(),
@@ -24,14 +28,10 @@ RecentFilesAction::RecentFilesAction(QObject* parent, const QString& settingsKey
     initialize(settingsKey, fileType, shortcutPrefix, icon);
 
     connect(&_editAction, &TriggerAction::triggered, this, [this]() -> void {
-        Dialog dialog(this);
-        dialog.exec();
+        auto* dialog = new Dialog(this);
+        connect(dialog, &Dialog::finished, dialog, &Dialog::deleteLater);
+        dialog->open();
     });
-}
-
-QString RecentFilesAction::getTypeString() const
-{
-    return "RecentFilePaths";
 }
 
 QMenu* RecentFilesAction::getMenu()

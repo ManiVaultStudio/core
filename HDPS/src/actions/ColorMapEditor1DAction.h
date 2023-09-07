@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "WidgetAction.h"
@@ -61,9 +65,10 @@ protected:
 
     /**
      * Constructor
-     * @param colorMapAction Reference to color map action
+     * @param parent Pointer to parent object
+     * @param title Title of the action
      */
-    ColorMapEditor1DAction(ColorMapAction& colorMapAction);
+    Q_INVOKABLE ColorMapEditor1DAction(QObject* parent, const QString& title);
 
 public:
 
@@ -132,16 +137,20 @@ protected:
     /** Update the color map image */
     void updateColorMap();
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
+    /**
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
+     */
+    void disconnectFromPublicAction(bool recursive) override;
 
 public: // Serialization
 
@@ -197,8 +206,12 @@ protected:
 
     static constexpr QSize colorMapImageSize = QSize(256, 1);
 
-    /** Only color map action may instantiate this class */
     friend class ColorMapAction;
+    friend class AbstractActionsManager;
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::ColorMapEditor1DAction)
+
+inline const auto colorMapEditor1DActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapEditor1DAction*>("hdps::gui::ColorMapEditor1DAction");

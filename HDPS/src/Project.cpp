@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "Project.h"
 #include "AbstractProjectManager.h"
 #include "CoreInterface.h"
@@ -14,15 +18,17 @@ Project::Project(QObject* parent /*= nullptr*/) :
     Serializable("Project"),
     _filePath(),
     _applicationVersion(Application::current()->getVersion()),
-    _applicationVersionAction(this),
-    _projectVersionAction(this),
+    _applicationVersionAction(this, "Application Version"),
+    _projectVersionAction(this, "Project Version"),
     _readOnlyAction(this, "Read-only"),
     _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments"),
     _contributorsAction(this, "Contributors"),
-    _splashScreenAction(this, *this)
+    _compressionAction(this),
+    _splashScreenAction(this, *this),
+    _studioModeAction(this, "Studio Mode")
 {
     initialize();
 }
@@ -32,15 +38,17 @@ Project::Project(const QString& filePath, bool preview, QObject* parent /*= null
     Serializable("Project"),
     _filePath(filePath),
     _applicationVersion(Application::current()->getVersion()),
-    _applicationVersionAction(this),
-    _projectVersionAction(this),
+    _applicationVersionAction(this, "Application Version"),
+    _projectVersionAction(this, "Project Version"),
     _readOnlyAction(this, "Read-only"),
     _titleAction(this, "Title"),
     _descriptionAction(this, "Description"),
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments"),
     _contributorsAction(this, "Contributors"),
-    _splashScreenAction(this, *this)
+    _compressionAction(this),
+    _splashScreenAction(this, *this),
+    _studioModeAction(this, "Studio Mode")
 {
     initialize();
 
@@ -66,7 +74,7 @@ Project::Project(const QString& filePath, bool preview, QObject* parent /*= null
     }
     catch (std::exception& e)
     {
-        qDebug() << "Unable to load project from file" << e.what();
+        qDebug() << "Unable to load project from file:" << e.what();
     }
     catch (...)
     {
@@ -105,11 +113,12 @@ void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
     _commentsAction.fromParentVariantMap(variantMap);
     _contributorsAction.fromParentVariantMap(variantMap);
     _compressionAction.fromParentVariantMap(variantMap);
+    _studioModeAction.fromParentVariantMap(variantMap);
 
     if (!preview) {
-        plugins().fromParentVariantMap(variantMap);
         dataHierarchy().fromParentVariantMap(variantMap);
         actions().fromParentVariantMap(variantMap);
+        plugins().fromParentVariantMap(variantMap);
     }
 }
 
@@ -127,6 +136,7 @@ QVariantMap Project::toVariantMap() const
     _commentsAction.insertIntoVariantMap(variantMap);
     _contributorsAction.insertIntoVariantMap(variantMap);
     _compressionAction.insertIntoVariantMap(variantMap);
+    _studioModeAction.insertIntoVariantMap(variantMap);
 
     plugins().insertIntoVariantMap(variantMap);
     dataHierarchy().insertIntoVariantMap(variantMap);
@@ -137,39 +147,43 @@ QVariantMap Project::toVariantMap() const
 
 void Project::initialize()
 {
-    _applicationVersion.setSerializationName("Application Version");
-    _projectVersionAction.setSerializationName("Project Version");
-
     _readOnlyAction.setToolTip("Whether the project is in read-only mode or not");
-    _readOnlyAction.setSerializationName("ReadOnly");
 
     _titleAction.setPlaceHolderString("Enter project title here...");
     _titleAction.setClearable(true);
-    _titleAction.setSerializationName("Title");
 
     _descriptionAction.setPlaceHolderString("Enter project description here...");
     _descriptionAction.setClearable(true);
-    _descriptionAction.setSerializationName("Description");
 
     _tagsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tag"));
     _tagsAction.setCategory("Tag");
     _tagsAction.setStretch(2);
-    _tagsAction.setSerializationName("Tags");
 
     _commentsAction.setPlaceHolderString("Enter project comments here...");
     _commentsAction.setClearable(true);
     _commentsAction.setStretch(2);
     _commentsAction.setDefaultWidgetFlags(StringAction::TextEdit);
-    _commentsAction.setSerializationName("Comments");
 
     _contributorsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("user"));
     _contributorsAction.setCategory("Contributor");
     _contributorsAction.setEnabled(false);
     _contributorsAction.setStretch(1);
     _contributorsAction.setDefaultWidgetFlags(StringsAction::ListView);
-    _contributorsAction.setSerializationName("Contributors");
-    
+
     updateContributors();
+
+    _studioModeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("pencil-ruler"));
+    
+    connect(&_studioModeAction, &ToggleAction::toggled, this, &Project::setStudioMode);
+
+    const auto updateStudioModeActionReadOnly = [&]() -> void {
+        _studioModeAction.setEnabled(projects().hasProject());
+    };
+
+    updateStudioModeActionReadOnly();
+
+    connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
+    connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
 }
 
 util::Version Project::getVersion() const
@@ -191,16 +205,28 @@ void Project::updateContributors()
         _contributorsAction.addString(currentUserName);
 }
 
-Project::CompressionAction::CompressionAction(QObject* parent /*= nullptr*/) :
-    WidgetAction(parent),
-    _enabledAction(this, "Compression", DEFAULT_ENABLE_COMPRESSION, DEFAULT_ENABLE_COMPRESSION),
-    _levelAction(this, "Compression level", 1, 9, DEFAULT_COMPRESSION_LEVEL, DEFAULT_COMPRESSION_LEVEL)
+void Project::setStudioMode(bool studioMode)
 {
-    setSerializationName("Compression");
+    auto viewPlugins = plugins().getPluginsByType(plugin::Type::VIEW);
 
-    _enabledAction.setSerializationName("Enabled");
-    _levelAction.setSerializationName("Level");
+    if (studioMode) {
+        for (auto viewPlugin : viewPlugins)
+            viewPlugin->cacheConnectionPermissions(true);
 
+        for (auto viewPlugin : viewPlugins)
+            viewPlugin->setConnectionPermissionsToAll(true);
+    }
+    else {
+        for (auto viewPlugin : viewPlugins)
+            viewPlugin->restoreConnectionPermissions(true);
+    }
+}
+
+Project::CompressionAction::CompressionAction(QObject* parent /*= nullptr*/) :
+    WidgetAction(parent, "Compression"),
+    _enabledAction(this, "Compression", DEFAULT_ENABLE_COMPRESSION),
+    _levelAction(this, "Compression level", 1, 9, DEFAULT_COMPRESSION_LEVEL)
+{
     _levelAction.setPrefix("Level: ");
 
     const auto updateCompressionLevelReadOnly = [this]() -> void {

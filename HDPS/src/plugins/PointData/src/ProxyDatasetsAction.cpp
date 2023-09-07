@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "ProxyDatasetsAction.h"
 
 #include <QHBoxLayout>
@@ -5,7 +9,7 @@
 using namespace hdps;
 
 ProxyDatasetsAction::ProxyDatasetsAction(QObject* parent, const Dataset<Points>& points) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Proxy Datsets"),
     _points(points),
     _countAction(this, "Number of proxy datasets"),
     _editProxyDatasetsAction(this, points)

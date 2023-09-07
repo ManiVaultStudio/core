@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include <QDialog>
@@ -33,9 +37,7 @@ public:
     }
 
 private:
-    GroupsAction    _groupsAction;              /** Groups action for all global settings sections */
-    GroupAction     _globalPathsGroupAction;    /** Group action for global paths */
-    GroupAction     _ioAction;                  /** Group action for IO related settings */
+    GroupsAction    _groupsAction;      /** Groups action for all global settings sections */
 };
 
 }

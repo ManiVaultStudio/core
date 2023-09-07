@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "NumberOfSelectedPointsAction.h"
 
 #include <QHBoxLayout>
@@ -5,7 +9,7 @@
 #include <QStringListModel>
 
 NumberOfSelectedPointsAction::NumberOfSelectedPointsAction(QObject* parent, const Dataset<Points>& points) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Number Of Selected Points"),
     _points(points),
     _numberOfSelectedPointsAction(this, "Number of selected points")
 {

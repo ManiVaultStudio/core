@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "ColorizeClustersAction.h"
 #include "ClustersAction.h"
 #include "ClustersFilterModel.h"
@@ -5,14 +9,13 @@
 #include "ClustersActionWidget.h"
 
 ColorizeClustersAction::ColorizeClustersAction(ClustersAction& clustersAction) :
-    TriggerAction(&clustersAction),
+    TriggerAction(&clustersAction, "Colorize"),
     _clustersAction(clustersAction),
-    _colorByAction(this, "Color by", {"Color map", "Pseudo-random colors"}, "Color map", "Color map"),
+    _colorByAction(this, "Color by", {"Color map", "Pseudo-random colors"}, "Color map"),
     _colorMapAction(this, "Color map"),
     _randomSeedAction(this, "Random color seed"),
     _colorizeAction(this, "Colorize")
 {
-    setText("Coloring");
     setToolTip("Colorize clusters");
     setIcon(Application::getIconFont("FontAwesome").getIcon("palette"));
 
@@ -35,34 +38,11 @@ ColorizeClustersAction::ColorizeClustersAction(ClustersAction& clustersAction) :
         _randomSeedAction.setEnabled(_colorByAction.getCurrentText() == "Pseudo-random colors" && hasClusters);
     };
 
-    // Generate the cluster colors in the model
-    const auto updateColorsInModel = [this]() -> void {
-        QApplication::setOverrideCursor(Qt::WaitCursor);
-        {
-            switch (_colorByAction.getCurrentIndex())
-            {
-                // Color map
-                case 0:
-                    _clustersAction.getClustersModel().colorizeClusters(_colorMapAction.getColorMapImage());
-                    break;
-
-                // Pseudo-random colors
-                case 1:
-                    _clustersAction.getClustersModel().colorizeClusters(_randomSeedAction.getValue());
-                    break;
-
-                default:
-                    break;
-            }
-        }
-        QApplication::restoreOverrideCursor();
-    };
-
     // Update the cluster colors in the model when actions change
-    connect(&_colorByAction, &OptionAction::currentIndexChanged, this, updateColorsInModel);
-    connect(&_colorMapAction, &ColorMapAction::imageChanged, this, updateColorsInModel);
-    connect(&_randomSeedAction, &IntegralAction::valueChanged, this, updateColorsInModel);
-    connect(&_colorizeAction, &TriggerAction::triggered, this, updateColorsInModel);
+    connect(&_colorByAction, &OptionAction::currentIndexChanged, this, &ColorizeClustersAction::updateColorsInModel);
+    connect(&_colorMapAction, &ColorMapAction::imageChanged, this, &ColorizeClustersAction::updateColorsInModel);
+    connect(&_randomSeedAction, &IntegralAction::valueChanged, this, &ColorizeClustersAction::updateColorsInModel);
+    connect(&_colorizeAction, &TriggerAction::triggered, this, &ColorizeClustersAction::updateColorsInModel);
 
     // Update read only status when the model layout changes
     connect(&_clustersAction.getClustersModel(), &QAbstractItemModel::layoutChanged, this, updateReadOnly);
@@ -73,6 +53,30 @@ ColorizeClustersAction::ColorizeClustersAction(ClustersAction& clustersAction) :
     // Initialize read only status
     updateReadOnly();
 }
+
+void ColorizeClustersAction::updateColorsInModel()
+{
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    {
+        switch (_colorByAction.getCurrentIndex())
+        {
+            // Color map
+        case 0:
+            _clustersAction.getClustersModel().colorizeClusters(_colorMapAction.getColorMapImage());
+            break;
+
+            // Pseudo-random colors
+        case 1:
+            _clustersAction.getClustersModel().colorizeClusters(_randomSeedAction.getValue());
+            break;
+
+        default:
+            break;
+        }
+    }
+    QApplication::restoreOverrideCursor();
+}
+
 
 ColorizeClustersAction::Widget::Widget(QWidget* parent, ColorizeClustersAction* colorizeClustersAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, colorizeClustersAction)
@@ -88,5 +92,5 @@ ColorizeClustersAction::Widget::Widget(QWidget* parent, ColorizeClustersAction* 
     layout->addWidget(colorizeClustersAction->getRandomSeedAction().createLabelWidget(this), 2, 0);
     layout->addWidget(colorizeClustersAction->getRandomSeedAction().createWidget(this), 2, 1);
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }

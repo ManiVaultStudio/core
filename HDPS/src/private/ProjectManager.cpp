@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "ProjectManager.h"
 #include "Archiver.h"
 #include "PluginManagerDialog.h"
@@ -15,6 +19,9 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QGridLayout>
+#include <QEventLoop>
+
+#include <exception>
 
 #ifdef _DEBUG
     #define PROJECT_MANAGER_VERBOSE
@@ -44,7 +51,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _importDataMenu(),
     _publishAction(this, "Publish"),
     _pluginManagerAction(this, "Plugin Browser..."),
-    _showStartPageAction(this, "Start Page...", true, true)
+    _showStartPageAction(this, "Start Page...", true)
 {
     _newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     _newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -79,7 +86,6 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _editProjectSettingsAction.setShortcut(QKeySequence("Ctrl+Shift+P"));
     _editProjectSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
     _editProjectSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
-    _editProjectSettingsAction.setConnectionPermissionsToNone();
 
     _newProjectMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
     _newProjectMenu.setTitle("New Project");
@@ -120,8 +126,9 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     });
 
     connect(&_newProjectFromWorkspaceAction, &QAction::triggered, this, [this]() -> void {
-        NewProjectDialog newProjectDialog;
-        newProjectDialog.exec();
+        auto* dialog = new NewProjectDialog();
+        connect(dialog, &NewProjectDialog::finished, dialog, &NewProjectDialog::deleteLater);
+        dialog->open();
     });
 
     connect(&_openProjectAction, &QAction::triggered, this, [this]() -> void {
@@ -136,7 +143,16 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
         if (_project.isNull())
             return;
 
-        saveProject(_project->getFilePath());
+        if (_project->getStudioModeAction().isChecked()) {
+            _project->setStudioMode(false);
+            {
+                saveProject(_project->getFilePath());
+            }
+            _project->setStudioMode(true);
+        }
+        else {
+            saveProject(_project->getFilePath());
+        }
     });
 
     connect(&_saveProjectAsAction, &QAction::triggered, [this]() -> void {
@@ -146,9 +162,10 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
         saveProjectAs();
     });
 
-    connect(&_editProjectSettingsAction, &TriggerAction::triggered, this, []() -> void {
-        ProjectSettingsDialog projectSettingsDialog;
-        projectSettingsDialog.exec();
+    connect(&_editProjectSettingsAction, &TriggerAction::triggered, this, [this]() -> void {
+        auto* dialog = new ProjectSettingsDialog();
+        connect(dialog, &ProjectSettingsDialog::finished, dialog, &ProjectSettingsDialog::deleteLater);
+        dialog->open();
     });
 
     connect(&_importDataMenu, &QMenu::aboutToShow, this, [this]() -> void {
@@ -156,6 +173,8 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
 
         for (auto pluginTriggerAction : plugins().getPluginTriggerActions(plugin::Type::LOADER))
             _importDataMenu.addAction(pluginTriggerAction);
+
+        _importDataMenu.setEnabled(!_importDataMenu.actions().isEmpty());
     });
 
     connect(&_pluginManagerAction, &TriggerAction::triggered, this, [this]() -> void {
@@ -313,6 +332,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         emit projectAboutToBeOpened(*(_project.get()));
         {
+            const auto scopedState = ScopedState(this, State::OpeningProject);
+
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
 
@@ -331,23 +352,25 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-                fileDialog.setWindowTitle("Open Project");
+                fileDialog.setWindowTitle("Open ManiVault Project");
                 fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
                 fileDialog.setFileMode(QFileDialog::ExistingFile);
-                fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
-                fileDialog.setDefaultSuffix(".hdps");
+                fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+                fileDialog.setDefaultSuffix(".mv");
                 fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 
-                StringAction titleAction(this, "Title");
-                StringAction descriptionAction(this, "Description");
-                StringAction tagsAction(this, "Tags");
-                StringAction commentsAction(this, "Comments");
+                StringAction    titleAction(this, "Title");
+                StringAction    descriptionAction(this, "Description");
+                StringAction    tagsAction(this, "Tags");
+                StringAction    commentsAction(this, "Comments");
+                StringAction    contributorsAction(this, "Contributors");
 
                 titleAction.setEnabled(false);
                 descriptionAction.setEnabled(false);
                 tagsAction.setEnabled(false);
                 commentsAction.setEnabled(false);
+                contributorsAction.setEnabled(false);
                 disableReadOnlyAction.setEnabled(false);
 
                 auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileDialog.layout());
@@ -365,7 +388,10 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileDialog), rowCount + 3, 0);
                 fileDialogLayout->addWidget(commentsAction.createWidget(&fileDialog), rowCount + 3, 1, 1, 2);
 
-                fileDialogLayout->addWidget(disableReadOnlyAction.createWidget(&fileDialog), rowCount + 4, 1, 1, 2);
+                fileDialogLayout->addWidget(contributorsAction.createLabelWidget(&fileDialog), rowCount + 4, 0);
+                fileDialogLayout->addWidget(contributorsAction.createWidget(&fileDialog), rowCount + 4, 1, 1, 2);
+       
+                fileDialogLayout->addWidget(disableReadOnlyAction.createWidget(&fileDialog), rowCount + 5, 1, 1, 2);
 
                 connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
@@ -379,11 +405,17 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                     descriptionAction.setString(project.getDescriptionAction().getString());
                     tagsAction.setString(project.getTagsAction().getStrings().join(", "));
                     commentsAction.setString(project.getCommentsAction().getString());
-
+                    contributorsAction.setString(project.getContributorsAction().getStrings().join(","));
                     disableReadOnlyAction.setEnabled(project.getReadOnlyAction().isChecked());
                 });
 
-                if (fileDialog.exec() == 0)
+                fileDialog.open();
+
+                QEventLoop eventLoop;
+                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                eventLoop.exec();
+
+                if (fileDialog.result() != QDialog::Accepted)
                     return;
 
                 if (fileDialog.selectedFiles().count() != 1)
@@ -397,13 +429,13 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (!importDataOnly)
                 newProject();
 
-            qDebug().noquote() << "Open HDPS project from" << filePath;
+            qDebug().noquote() << "Open ManiVault project from" << filePath;
 
             Archiver archiver;
 
             QStringList tasks = archiver.getTaskNamesForDecompression(filePath) << "Import data model" << "Load workspace";
 
-            TaskProgressDialog taskProgressDialog(nullptr, tasks, "Open HDPS project from " + filePath, Application::getIconFont("FontAwesome").getIcon("folder-open"));
+            TaskProgressDialog taskProgressDialog(nullptr, tasks, "Open ManiVault project from " + filePath, Application::getIconFont("FontAwesome").getIcon("folder-open"));
 
             connect(&taskProgressDialog, &TaskProgressDialog::canceled, this, [this]() -> void {
                 Application::setSerializationAborted(true);
@@ -429,7 +461,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (loadWorkspace) {
                 taskProgressDialog.setCurrentTask("Load workspace");
                 {
-                    const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
+                    const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
                     if (workspaceFileInfo.exists())
                         workspaces().loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
@@ -453,21 +485,38 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to load HDPS project", e);
+        exceptionMessageBox("Unable to load ManiVault project", e);
     }
     catch (...)
     {
-        exceptionMessageBox("Unable to load HDPS project");
+        exceptionMessageBox("Unable to load ManiVault project");
     }
 }
 
 void ProjectManager::importProject(QString filePath /*= ""*/)
 {
-    emit projectAboutToBeImported(filePath);
+    try
     {
-        openProject(filePath, true, false);
+#ifdef PROJECT_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__ << filePath;
+#endif
+
+        const auto scopedState = ScopedState(this, State::ImportingProject);
+
+        emit projectAboutToBeImported(filePath);
+        {
+            openProject(filePath, true, false);
+        }
+        emit projectImported(filePath);
     }
-    emit projectImported(filePath);
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to import project", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to import project");
+    }
 }
 
 void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& password /*= ""*/)
@@ -477,6 +526,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 #ifdef PROJECT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << filePath;
 #endif
+
+        const auto scopedState = ScopedState(this, State::SavingProject);
 
         emit projectAboutToBeSaved(*(_project.get()));
         {
@@ -494,10 +545,10 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-                fileDialog.setWindowTitle("Save Project");
+                fileDialog.setWindowTitle("Save ManiVault Project");
                 fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-                fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
-                fileDialog.setDefaultSuffix(".hdps");
+                fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+                fileDialog.setDefaultSuffix(".mv");
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
                 fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
@@ -524,17 +575,17 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
                 fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 2, 0);
 
-                GroupAction settingsGroupAction(this);
+                GroupAction settingsGroupAction(this, "Settings");
 
                 settingsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
                 settingsGroupAction.setToolTip("Edit project settings");
                 settingsGroupAction.setPopupSizeHint(QSize(420, 320));
                 settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-                settingsGroupAction << currentProject->getTitleAction();
-                settingsGroupAction << currentProject->getDescriptionAction();
-                settingsGroupAction << currentProject->getTagsAction();
-                settingsGroupAction << currentProject->getCommentsAction();
+                settingsGroupAction.addAction(&currentProject->getTitleAction());
+                settingsGroupAction.addAction(&currentProject->getDescriptionAction());
+                settingsGroupAction.addAction(&currentProject->getTagsAction());
+                settingsGroupAction.addAction(&currentProject->getCommentsAction());
 
                 auto titleLayout = new QHBoxLayout();
 
@@ -565,7 +616,14 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                     currentProject->getCompressionAction().getLevelAction().setValue(project.getCompressionAction().getLevelAction().getValue());
                 });
 
-                fileDialog.exec();
+                fileDialog.open();
+
+                QEventLoop eventLoop;
+                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                eventLoop.exec();
+
+                if (fileDialog.result() != QDialog::Accepted)
+                    return;
 
                 if (fileDialog.selectedFiles().count() != 1)
                     throw std::runtime_error("Only one file may be selected");
@@ -579,9 +637,9 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 return;
 
             if (currentProject->getCompressionAction().getEnabledAction().isChecked())
-                qDebug().noquote() << "Saving HDPS project to" << filePath << "with compression level" << currentProject->getCompressionAction().getLevelAction().getValue();
+                qDebug().noquote() << "Saving ManiVault project to" << filePath << "with compression level" << currentProject->getCompressionAction().getLevelAction().getValue();
             else
-                qDebug().noquote() << "Saving HDPS project to" << filePath << "without compression";
+                qDebug().noquote() << "Saving ManiVault project to" << filePath << "without compression";
 
             Archiver archiver;
 
@@ -589,7 +647,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             tasks << "Export data model" << "Temporary task";
 
-            TaskProgressDialog taskProgressDialog(nullptr, tasks, "Saving HDPS project to " + filePath, Application::current()->getIconFont("FontAwesome").getIcon("save"));
+            TaskProgressDialog taskProgressDialog(nullptr, tasks, "Saving ManiVault project to " + filePath, Application::current()->getIconFont("FontAwesome").getIcon("save"));
 
             taskProgressDialog.setCurrentTask("Export data model");
 
@@ -605,7 +663,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             Application::setSerializationAborted(false);
 
             connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaving, this, [&taskProgressDialog](DataHierarchyItem& savingItem) {
-                taskProgressDialog.setCurrentTask("Exporting dataset: " + savingItem.getFullPathName());
+                taskProgressDialog.setCurrentTask("Exporting dataset: " + savingItem.getLocation());
             });
 
             projects().toJsonFile(jsonFileInfo.absoluteFilePath());
@@ -617,7 +675,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             connect(&archiver, &Archiver::taskStarted, &taskProgressDialog, &TaskProgressDialog::setCurrentTask);
             connect(&archiver, &Archiver::taskFinished, &taskProgressDialog, &TaskProgressDialog::setTaskFinished);
 
-            QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.hws");
+            QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
             workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 
@@ -657,6 +715,8 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
         if (!hasProject())
             return;
 
+        const auto scopedState = ScopedState(this, State::PublishingProject);
+
         auto& readOnlyAction        = getCurrentProject()->getReadOnlyAction();
         auto& splashScreenAction    = getCurrentProject()->getSplashScreenAction();
 
@@ -685,10 +745,10 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                 QFileDialog fileDialog;
 
                 fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cloud-upload-alt"));
-                fileDialog.setWindowTitle("Publish Project");
+                fileDialog.setWindowTitle("Publish ManiVault Project");
                 fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-                fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
-                fileDialog.setDefaultSuffix(".hdps");
+                fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+                fileDialog.setDefaultSuffix(".mv");
                 fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
                 fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
@@ -729,7 +789,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
                 }
                     
-                GroupAction settingsGroupAction(this);
+                GroupAction settingsGroupAction(this, "Settings");
 
                 if (options.contains("Title")) {
                     auto& titleAction = currentProject->getTitleAction();
@@ -741,11 +801,11 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     settingsGroupAction.setPopupSizeHint(QSize(420, 0));
                     settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-                    settingsGroupAction << currentProject->getTitleAction();
-                    settingsGroupAction << currentProject->getDescriptionAction();
-                    settingsGroupAction << currentProject->getTagsAction();
-                    settingsGroupAction << currentProject->getCommentsAction();
-                    settingsGroupAction << currentProject->getSplashScreenAction();
+                    settingsGroupAction.addAction(&currentProject->getTitleAction());
+                    settingsGroupAction.addAction(&currentProject->getDescriptionAction());
+                    settingsGroupAction.addAction(&currentProject->getTagsAction());
+                    settingsGroupAction.addAction(&currentProject->getCommentsAction());
+                    settingsGroupAction.addAction(&currentProject->getSplashScreenAction());
 
                     auto titleLayout = new QHBoxLayout();
 
@@ -769,7 +829,14 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                     currentProject->getCompressionAction().getLevelAction().setValue(project.getCompressionAction().getLevelAction().getValue());
                 });
 
-                fileDialog.exec();
+                fileDialog.open();
+
+                QEventLoop eventLoop;
+                QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                eventLoop.exec();
+
+                if (fileDialog.result() != QDialog::Accepted)
+                    return;
 
                 if (fileDialog.selectedFiles().count() != 1)
                     throw std::runtime_error("Only one file may be selected");
@@ -799,11 +866,11 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to publish project", e);
+        exceptionMessageBox("Unable to publish ManiVault project", e);
     }
     catch (...)
     {
-        exceptionMessageBox("Unable to publish project");
+        exceptionMessageBox("Unable to publish ManiVault project");
     }
 }
 
@@ -856,10 +923,19 @@ QString ProjectManager::extractProjectFileFromHdpsFile(const QString& hdpsFilePa
     QFileInfo projectFileInfo(temporaryDirectoryPath, projectFile);
 
     Archiver archiver;
+    QString projectFilePath = "";
 
-    archiver.extractSingleFile(hdpsFilePath, projectFile, projectFileInfo.absoluteFilePath());
+    try
+    {
+        archiver.extractSingleFile(hdpsFilePath, projectFile, projectFileInfo.absoluteFilePath());
+        projectFilePath = projectFileInfo.absoluteFilePath();
+    }
+    catch (const std::runtime_error& e)
+    {
+        qDebug() << "ProjectManager: exception caught in extractProjectFileFromHdpsFile, given file path " << hdpsFilePath << ": " << e.what();
+    }
 
-    return projectFileInfo.absoluteFilePath();
+    return projectFilePath;
 }
 
 void ProjectManager::fromVariantMap(const QVariantMap& variantMap)
@@ -881,7 +957,7 @@ QImage ProjectManager::getPreviewImage(const QString& projectFilePath, const QSi
 {
     Archiver archiver;
 
-    const QString workspaceFile("workspace.hws");
+    const QString workspaceFile("workspace.json");
 
     QTemporaryDir temporaryDirectory;
 
@@ -889,7 +965,14 @@ QImage ProjectManager::getPreviewImage(const QString& projectFilePath, const QSi
 
     QFileInfo workspaceFileInfo(temporaryDirectoryPath, workspaceFile);
 
-    archiver.extractSingleFile(projectFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
+    try
+    {
+        archiver.extractSingleFile(projectFilePath, workspaceFile, workspaceFileInfo.absoluteFilePath());
+    }
+    catch (const std::runtime_error& e)
+    {
+        qDebug() << "ProjectManager: exception caught in getPreviewImage, given file path " << projectFilePath << ": " << e.what();
+    }
 
     if (workspaceFileInfo.exists())
         return Workspace::getPreviewImage(workspaceFileInfo.absoluteFilePath());

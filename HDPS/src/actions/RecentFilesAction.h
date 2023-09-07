@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "WidgetAction.h"
@@ -182,13 +186,7 @@ public:
      * @param shortcutPrefix Prefix of the shortcut
      * @param icon Icon in menu
      */
-    RecentFilesAction(QObject* parent, const QString& settingsKey = "", const QString& fileType = "", const QString& shortcutPrefix = "", const QIcon& icon = QIcon());
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE RecentFilesAction(QObject* parent, const QString& settingsKey = "", const QString& fileType = "", const QString& shortcutPrefix = "", const QIcon& icon = QIcon());
 
     /**
      * Initializes the action
@@ -291,3 +289,7 @@ private:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::RecentFilesAction)
+
+inline const auto recentFilesActionMetaTypeId = qRegisterMetaType<hdps::gui::RecentFilesAction*>("RecentFilesAction");

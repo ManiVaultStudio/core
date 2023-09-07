@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include <RawData.h>
@@ -52,7 +56,8 @@ public:
     Dataset<DatasetImpl> copy() const override
     {
         auto colors = new Colors(_core, getRawDataName());
-        colors->setGuiName(getGuiName());
+
+        colors->setText(text());
         colors->indices = indices;
 
         return Dataset<DatasetImpl>(colors);

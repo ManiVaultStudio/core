@@ -1,8 +1,12 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include <actions/TriggerAction.h>
 #include <actions/OptionAction.h>
-#include <actions/ColorMapAction.h>
+#include <actions/ColorMap1DAction.h>
 #include <actions/IntegralAction.h>
 #include <actions/TriggerAction.h>
 
@@ -59,10 +63,14 @@ public: // Action getters
     IntegralAction& getRandomSeedAction() { return _randomSeedAction; }
     TriggerAction& getColorizeAction() { return _colorizeAction; }
 
+public slots:
+    /** When the color model or cluster number changes, update the cluster colors */
+    void updateColorsInModel();
+
 protected:
     ClustersAction&     _clustersAction;        /** Reference to clusters action */
     OptionAction        _colorByAction;         /** Color by action */
-    ColorMapAction      _colorMapAction;        /** Color map action */
+    ColorMap1DAction    _colorMapAction;        /** Color map action */
     IntegralAction      _randomSeedAction;      /** Random seed action for random color generation */
     TriggerAction       _colorizeAction;        /** Colorize action */
 };

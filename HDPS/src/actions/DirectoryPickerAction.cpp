@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "DirectoryPickerAction.h"
 
 #include <Application.h>
@@ -6,12 +10,12 @@
 #include <QFileDialog>
 #include <QHBoxLayout>
 
-namespace hdps {
+using namespace hdps::util;
 
-namespace gui {
+namespace hdps::gui {
 
-DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& title /*= ""*/, const QString& directory /*= QString()*/, const QString& defaultDirectory /*= QString()*/) :
-    WidgetAction(parent),
+DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& title, const QString& directory /*= QString()*/) :
+    WidgetAction(parent, title),
     _dirModel(),
     _completer(),
     _directoryAction(this, "Directory"),
@@ -19,7 +23,7 @@ DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& tit
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
-    initialize(directory, defaultDirectory);
+    setDirectory(directory);
 
     _completer.setModel(&_dirModel);
 
@@ -57,14 +61,7 @@ DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& tit
 
     // Pass-through action signals
     connect(&_directoryAction, &StringAction::stringChanged, this, &DirectoryPickerAction::directoryChanged);
-    connect(&_directoryAction, &StringAction::defaultStringChanged, this, &DirectoryPickerAction::defaultDirectoryChanged);
     connect(&_directoryAction, &StringAction::placeholderStringChanged, this, &DirectoryPickerAction::placeholderStringChanged);
-}
-
-void DirectoryPickerAction::initialize(const QString& directory /*= QString()*/, const QString& defaultDirectory /*= QString()*/)
-{
-    setDirectory(directory);
-    setDefaultDirectory(defaultDirectory);
 }
 
 QString DirectoryPickerAction::getDirectory() const
@@ -80,19 +77,6 @@ void DirectoryPickerAction::setDirectory(const QString& directory)
     _directoryAction.setString(directory);
 
     saveToSettings();
-}
-
-QString DirectoryPickerAction::getDefaultDirectory() const
-{
-    return _directoryAction.getDefaultString();
-}
-
-void DirectoryPickerAction::setDefaultDirectory(const QString& defaultDirectory)
-{
-    if (defaultDirectory == getDefaultDirectory())
-        return;
-
-    _directoryAction.setDefaultString(defaultDirectory);
 }
 
 QString DirectoryPickerAction::getPlaceholderString() const
@@ -120,15 +104,23 @@ bool DirectoryPickerAction::isValid() const
 
 void DirectoryPickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (variantMap.contains("value"))
-        setDirectory(variantMap["value"].toString());
+    WidgetAction::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "Value");
+
+    if (variantMap.contains("Value"))
+        setDirectory(variantMap["Value"].toString());
 }
 
 QVariantMap DirectoryPickerAction::toVariantMap() const
 {
-    return {
-        { "value", getDirectory() }
-    };
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert({
+        { "Value", getDirectory() }
+    });
+
+    return variantMap;
 }
 
 QWidget* DirectoryPickerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -137,7 +129,6 @@ QWidget* DirectoryPickerAction::getWidget(QWidget* parent, const std::int32_t& w
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::LineEdit)
         layout->addWidget(_directoryAction.createWidget(parent));
@@ -150,5 +141,4 @@ QWidget* DirectoryPickerAction::getWidget(QWidget* parent, const std::int32_t& w
     return widget;
 }
 
-}
 }

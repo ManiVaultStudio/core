@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "pointdata_export.h"
@@ -332,30 +336,30 @@ public:
      * @return Size of the raw data in bytes
      */
     std::uint64_t getRawDataSize() const {
-        auto elementSize = 0u;
+        std::uint64_t elementSize = 0u;
 
         switch (_vectorHolder.getElementTypeSpecifier())
         {
             case ElementTypeSpecifier::float32:
-                elementSize = 4;
+                elementSize = 4u;
                 break;
 
             case ElementTypeSpecifier::bfloat16:
             case ElementTypeSpecifier::int16:
             case ElementTypeSpecifier::uint16:
-                elementSize = 4;
+                elementSize = 2u;
                 break;
 
             case ElementTypeSpecifier::int8:
             case ElementTypeSpecifier::uint8:
-                elementSize = 4;
+                elementSize = 1u;
                 break;
 
             default:
                 break;
         }
 
-        return getNumPoints() * getNumDimensions() * elementSize;
+        return elementSize * getNumPoints() * getNumDimensions();
     }
 
     // Similar to C++17 std::visit.
@@ -466,7 +470,7 @@ public:
     void convertData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
         _vectorHolder.convertData(data, numPoints * numDimensions);
-        _numDimensions = numDimensions;
+        _numDimensions = static_cast<std::uint32_t>(numDimensions);
     }
 
     /// Converts the specified data to the internal data, using static_cast for each data element.
@@ -476,7 +480,7 @@ public:
     void convertData(const T& inputDataContainer, const std::size_t numDimensions)
     {
         _vectorHolder.convertData(inputDataContainer.data(), inputDataContainer.size());
-        _numDimensions = numDimensions;
+        _numDimensions = static_cast<std::uint32_t>(numDimensions);
     }
 
     /// Copies the specified data into the internal data, sets the number of
@@ -501,7 +505,7 @@ public:
     void setData(const std::vector<T>& data, const std::size_t numDimensions)
     {
         _vectorHolder = VectorHolder(data);
-        _numDimensions = numDimensions;
+        _numDimensions = static_cast<unsigned int>(numDimensions);
     }
 
     /// Efficiently "moves" the data from the specified vector into the internal
@@ -511,7 +515,7 @@ public:
     void setData(std::vector<T>&& data, const std::size_t numDimensions)
     {
         _vectorHolder = VectorHolder(std::move(data));
-        _numDimensions = numDimensions;
+        _numDimensions = static_cast<unsigned int>(numDimensions);
     }
 
     void setDimensionNames(const std::vector<QString>& dimNames);
@@ -603,7 +607,7 @@ private:
         // Note that PointsType may or may not be "const".
         auto sourceData = points.getSourceDataset<Points>();
 
-        if (sourceData->getGuid() == points.getGuid() || points.isFull())
+        if (sourceData->getId() == points.getId() || points.isFull())
         {
             // In this case, this (points) is itself a source data, or it is a full set.
             // Basically just do sourceData.visitData:
@@ -741,7 +745,12 @@ public:
     template <typename T>
     void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
+        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>().getNumDimensions();
+
         getRawData<PointData>().setData(data, numPoints, numDimensions);
+
+        if (notifyDimensionsChanged)
+            hdps::events().notifyDatasetDataDimensionsChanged(this);
     }
 
     /// Just calls the corresponding member function of its PointData.
@@ -751,14 +760,24 @@ public:
     template <typename T>
     void setData(const std::vector<T>& data, const std::size_t numDimensions)
     {
+        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>().getNumDimensions();
+
         getRawData<PointData>().setData(data, numDimensions);
+
+        if (notifyDimensionsChanged)
+            hdps::events().notifyDatasetDataDimensionsChanged(this);
     }
 
     /// Just calls the corresponding member function of its PointData.
     template <typename T>
     void setData(std::vector<T>&& data, const std::size_t numDimensions)
     {
+        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>().getNumDimensions();
+
         getRawData<PointData>().setData(std::move(data), numDimensions);
+
+        if (notifyDimensionsChanged)
+            hdps::events().notifyDatasetDataDimensionsChanged(this);
     }
 
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;

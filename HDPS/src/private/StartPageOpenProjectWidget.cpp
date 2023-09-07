@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "StartPageOpenProjectWidget.h"
 #include "StartPageContentWidget.h"
 #include "Archiver.h"
@@ -35,6 +39,10 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     setLayout(layout);
 
+    _openCreateProjectWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+    _recentProjectsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+    _exampleProjectsWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+
     _openCreateProjectWidget.getHierarchyWidget().getFilterNameAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().getFilterGroupAction().setVisible(false);
     _openCreateProjectWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -42,7 +50,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _recentProjectsWidget.getHierarchyWidget().setItemTypeName("Recent Project");
     _exampleProjectsWidget.getHierarchyWidget().setItemTypeName("Example Project");
 
-    _recentProjectsWidget.getHierarchyWidget().getToolbarLayout().addWidget(_recentProjectsAction.getEditAction().createWidget(this, TriggerAction::Icon));
+    _recentProjectsWidget.getHierarchyWidget().getToolbarAction().addAction(&_recentProjectsAction);
 
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("file"));
 

@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include <util/DockArea.h>
@@ -7,6 +11,8 @@
 #include <DockAreaWidget.h>
 
 #include <QMenu>
+#include <QMap>
+#include <QSharedPointer>
 
 /**
  * Load system menu class
@@ -32,6 +38,11 @@ public:
      */
     bool mayProducePlugins() const;
 
+    /**
+     * Populate the menu
+     */
+    void populate();
+
 private:
 
     /**
@@ -42,5 +53,10 @@ private:
     QVector<QPointer<hdps::gui::TriggerAction>> getLoadSystemViewsActions(hdps::gui::DockAreaFlag dockArea = hdps::gui::DockAreaFlag::None);
 
 private:
-    ads::CDockAreaWidget*   _dockAreaWidget;      /** Pointer to dock area widget to which new view plugins are docked (new view plugins will be docked top-level if nullptr) */
+    using MenuMap = QMap<hdps::gui::DockAreaFlag, QSharedPointer<QMenu>>;   /** Short hand for map to shared pointers of menus */
+
+private:
+    ads::CDockAreaWidget*   _dockAreaWidget;        /** Pointer to dock area widget to which new view plugins are docked (new view plugins will be docked top-level if nullptr) */
+    MenuMap                 _loadViewsDockedMenus;  /** Map of shared pointer to menus */
+
 };

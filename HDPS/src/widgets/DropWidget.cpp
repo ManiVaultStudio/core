@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "DropWidget.h"
 #include "Application.h"
 
@@ -66,10 +70,13 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
 
             resetLayout();
 
-            for (auto dropRegion : _getDropRegionsFunction(dragEnterEvent->mimeData()))
+            const auto dropRegions = _getDropRegionsFunction(dragEnterEvent->mimeData());
+
+            for (auto dropRegion : dropRegions)
                 layout()->addWidget(new DropRegionContainerWidget(dropRegion, this));
 
-            dragEnterEvent->acceptProposedAction();
+            if (!dropRegions.isEmpty())
+                dragEnterEvent->acceptProposedAction();
             
             if (_dropIndicatorWidget)
                 _dropIndicatorWidget->hide();
@@ -185,14 +192,10 @@ void DropWidget::resetLayout()
 DropWidget::DropRegionContainerWidget::DropRegionContainerWidget(DropRegion* dropRegion, QWidget* parent) :
     QWidget(parent),
     _dropRegion(dropRegion),
-    _opacityEffect(new QGraphicsOpacityEffect(this)),
-    _opacityAnimation(new QPropertyAnimation(_opacityEffect, "opacity"))
+    _widgetFader(this, this)
 {
     setAutoFillBackground(true);
     setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-    setGraphicsEffect(_opacityEffect);
-
-    _opacityAnimation->setDuration(200);
 
     dropRegion->setParent(this);
 
@@ -214,16 +217,7 @@ DropWidget::DropRegion* DropWidget::DropRegionContainerWidget::getDropRegion()
 
 void DropWidget::DropRegionContainerWidget::setHighLight(const bool& highlight /*= false*/)
 {
-    const auto targetOpacity = highlight ? 0.98 : 0.8;
-
-    if (_opacityEffect->opacity() != targetOpacity)
-        _opacityEffect->setOpacity(targetOpacity);
-
-    /*
-    _opacityAnimation->setStartValue(_opacityEffect->opacity());
-    _opacityAnimation->setEndValue(targetOpacity);
-    _opacityAnimation->start();
-    */
+    _widgetFader.setOpacity(highlight ? 0.8f : 0.4f, 0);
 }
 
 DropWidget::DropRegion::DropRegion(QObject* parent, QWidget* widget, const Dropped& dropped /*= Dropped()*/) :

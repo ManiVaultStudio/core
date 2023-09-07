@@ -1,8 +1,10 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "AbstractSettingsManager.h"
-
-#include <actions/GroupAction.h>
 
 namespace hdps
 {
@@ -28,17 +30,16 @@ public:
 public: // Action getters
 
     gui::TriggerAction& getEditSettingsAction() override { return _editSettingsAction; }
-    gui::DirectoryPickerAction& getGlobalProjectsPathAction() override { return _globalProjectsPathAction; }
-    gui::DirectoryPickerAction& getGlobalWorkspacesPathAction() override { return _globalWorkspacesPathAction; }
-    gui::DirectoryPickerAction& getGlobalDataPathAction() override { return _globalDataPathAction; }
-    gui::ToggleAction& getIgnoreLoadingErrorsAction() override { return _ignoreLoadingErrorsAction; }
+
+public: // Global settings actions
+
+    ParametersSettingsAction& getParametersSettings() override { return _parametersSettingsAction; };
+    MiscellaneousSettingsAction& getMiscellaneousSettings() override { return _miscellaneousSettingsAction; };
 
 private:
     gui::TriggerAction          _editSettingsAction;            /** Action for triggering the settings dialog */
-    gui::DirectoryPickerAction  _globalProjectsPathAction;      /** Directory picker action for global projects directory  */
-    gui::DirectoryPickerAction  _globalWorkspacesPathAction;    /** Directory picker action for global workspaces directory  */
-    gui::DirectoryPickerAction  _globalDataPathAction;          /** Directory picker action for global data directory  */
-    gui::ToggleAction           _ignoreLoadingErrorsAction;     /** Toggle action for ignoring loading errors */
+    ParametersSettingsAction    _parametersSettingsAction;      /** Parameters global settings */
+    MiscellaneousSettingsAction _miscellaneousSettingsAction;   /** Miscellaneous global settings */
 };
 
 }

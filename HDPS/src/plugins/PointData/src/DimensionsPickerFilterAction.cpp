@@ -1,14 +1,16 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "DimensionsPickerFilterAction.h"
 #include "DimensionsPickerAction.h"
 
 #include <Application.h>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 DimensionsPickerFilterAction::DimensionsPickerFilterAction(DimensionsPickerAction& dimensionsPickerAction) :
-    WidgetAction(&dimensionsPickerAction),
+    WidgetAction(&dimensionsPickerAction, "Filter"),
     _dimensionsPickerAction(dimensionsPickerAction),
     _nameFilterAction(this, "Name filter")
 {
@@ -47,14 +49,7 @@ DimensionsPickerFilterAction::Widget::Widget(QWidget* parent, DimensionsPickerFi
     layout->addWidget(dimensionsPickerFilterAction->getNameFilterAction().createLabelWidget(this));
     layout->addWidget(dimensionsPickerFilterAction->getNameFilterAction().createWidget(this));
 
-    if (widgetFlags & WidgetActionWidget::PopupLayout) {
-        setPopupLayout(layout);
-    }
-    else {
-        layout->setContentsMargins(0, 0, 0, 0);
-        setLayout(layout);
-    }
+    setLayout(layout);
 }
 
-}
 }

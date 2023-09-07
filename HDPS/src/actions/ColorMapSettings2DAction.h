@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "ColorMapViewAction.h"
@@ -47,9 +51,10 @@ protected:
 
     /**
      * Constructor
-     * @param colorMapAction Reference to color map action
+     * @param parent Pointer to parent object
+     * @param title Title of the action
      */
-    ColorMapSettings2DAction(ColorMapAction& colorMapAction);
+    Q_INVOKABLE ColorMapSettings2DAction(QObject* parent, const QString& title);
 
 public: // Action getters
 
@@ -63,3 +68,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::ColorMapSettings2DAction)
+
+inline const auto colorMapSettings2DActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapSettings2DAction*>("hdps::gui::ColorMapSettings2DAction");

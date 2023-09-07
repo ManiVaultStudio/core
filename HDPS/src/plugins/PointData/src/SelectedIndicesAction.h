@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "actions/Actions.h"
@@ -8,6 +12,7 @@
 #include <actions/ToggleAction.h>
 
 #include <QTimer>
+#include <QListView>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -37,9 +42,21 @@ protected:
          */
         Widget(QWidget* parent, SelectedIndicesAction* selectedIndicesAction);
 
+    protected:
+
+        /** Inherit list view to override size hint method */
+        class ListView : public QListView
+        {
+            using QListView::QListView;
+
+        public:
+
+            /** Return smallest possible size hint to avoid layout problems */
+            QSize sizeHint() const override { return QSize(0, 0); }
+        };
+
     private:
         QTimer  _timer;     /** Timer to sparingly update the number of selected points */
-        bool    _dirty;     /** Whether the current selected indices display is dirty or not */
 
         static const std::int32_t LAZY_UPDATE_INTERVAL = 500;
     };
@@ -85,5 +102,5 @@ protected:
     ToggleAction        _manualUpdateAction;        /** Manual update action */
 
     /** Above this threshold, selected indices need to be updated manually */
-    static const std::int32_t MANUAL_UPDATE_THRESHOLD = 10000;
+    static const std::int32_t MANUAL_UPDATE_THRESHOLD = 1000;
 };

@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include <QObject>
@@ -67,6 +71,7 @@ public:
 
     /**
      * Extracts a file
+     * Might throw a std::runtime_error exception if an error occurs during extraction
      * @param compressedFilePath File path of the compressed input file
      * @param sourceFileName File name of the compressed source file
      * @param targetFilePath Path of the extracted target file

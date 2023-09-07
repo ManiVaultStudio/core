@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "WidgetAction.h"
@@ -77,18 +81,6 @@ public:
          */
         LineEditWidget(QWidget* parent, StringAction* stringAction);
 
-        /**
-         * Respond to \p target events
-         * @param target Object of which an event occurred
-         * @param event The event that took place
-         */
-        bool eventFilter(QObject* target, QEvent* event) override;
-
-    private:
-
-        /** Fetches text from the string action and computes the resultant text (taking into account text elidation) */
-        void updateText();
-
     private:
         StringAction* _stringAction;    /** Pointer to string action */
 
@@ -128,20 +120,7 @@ public:
      * @param string String
      * @param defaultString Default string
      */
-    StringAction(QObject* parent, const QString& title = "", const QString& string = "", const QString& defaultString = "");
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
-
-    /**
-     * Initialize the string action
-     * @param string String
-     * @param defaultString Default string
-     */
-    void initialize(const QString& string = "", const QString& defaultString = "");
+    Q_INVOKABLE explicit StringAction(QObject* parent, const QString& title, const QString& string = "");
 
     /** Gets the current string */
     QString getString() const;
@@ -151,15 +130,6 @@ public:
      * @param string Current string
      */
     void setString(const QString& string);
-
-    /** Gets the default string */
-    QString getDefaultString() const;
-
-    /**
-     * Sets the default string
-     * @param defaultString Default string
-     */
-    void setDefaultString(const QString& defaultString);
 
     /** Get placeholder text */
     QString getPlaceholderString() const;
@@ -230,39 +200,20 @@ public:
      */
     void setTextElideMode(const Qt::TextElideMode& textElideMode);
 
-public: // Settings
-
-    /**
-     * Determines whether the action can be reset to its default
-     * @param recursive Check recursively
-     * @return Whether the action can be reset to its default
-     */
-    bool isResettable() override final;
-
-    /**
-     * Reset to factory default
-     * @param recursive Reset to factory default recursively
-     */
-    void reset() override final;
-
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
-
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
-
-protected:  // Linking
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
     /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
      */
-    WidgetAction* getPublicCopy() const override;
+    void disconnectFromPublicAction(bool recursive) override;
 
 public: // Serialization
 
@@ -287,12 +238,6 @@ signals:
     void stringChanged(const QString& string);
 
     /**
-     * Signals that the default string changed to \p defaultString
-     * @param defaultString Default string that changed
-     */
-    void defaultStringChanged(const QString& defaultString);
-
-    /**
      * Signals that the placeholder string changed to \p placeholderString
      * @param placeholderString Placeholder string that changed
      */
@@ -312,7 +257,6 @@ signals:
     
 protected:
     QString             _string;                /** Current string */
-    QString             _defaultString;         /** Default string */
     QString             _placeholderString;     /** Place holder string */
     QAction             _leadingAction;         /** Action at the leading position */
     QAction             _trailingAction;        /** Action at the trailing position */
@@ -320,6 +264,12 @@ protected:
     bool                _searchMode;            /** Whether the string action is in search mode */
     bool                _clearable;             /** Whether the string can be cleared by clicking the trailing action */
     Qt::TextElideMode   _textElideMode;         /** Text elide mode */
+
+    friend class AbstractActionsManager;
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::StringAction)
+
+inline const auto stringActionMetaTypeId = qRegisterMetaType<hdps::gui::StringAction*>("hdps::gui::StringAction");

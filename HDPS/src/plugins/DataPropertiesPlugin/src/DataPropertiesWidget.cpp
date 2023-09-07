@@ -1,7 +1,12 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "DataPropertiesWidget.h"
 
 #include <Application.h>
 #include <AbstractDataHierarchyManager.h>
+#include <AbstractProjectManager.h>
 #include <DataHierarchyItem.h>
 #include <Set.h>
 
@@ -15,7 +20,7 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     QWidget(parent),
     _dataset(),
     _layout(),
-    _groupsAction(parent),
+    _groupsAction(parent, "Groups"),
     _groupsActionWidget(nullptr)
 {
     setAutoFillBackground(true);
@@ -29,13 +34,16 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
     connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::selectedItemsChanged);
 
-    connect(&_dataset, &Dataset<DatasetImpl>::dataRemoved, this, [this]() -> void {
+    connect(&_dataset, &Dataset<DatasetImpl>::removed, this, [this]() -> void {
         _groupsAction.setGroupActions({});
     });
 }
 
 void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems)
 {
+    if (projects().isOpeningProject() || projects().isImportingProject())
+        return;
+
     try
     {
         if (selectedItems.isEmpty()) {
@@ -64,7 +72,7 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                     return;
 
 #ifdef _DEBUG
-                qDebug().noquote() << QString("Loading %1 into data properties").arg(_dataset->getGuiName());
+                qDebug().noquote() << QString("Loading %1 into data properties").arg(_dataset->text());
 #endif
 
                 for (auto childObject : _dataset->children()) {
@@ -82,9 +90,8 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                 for (const auto& selectedItem : selectedItems)
                     datasets << selectedItem->getDataset();
 
-                auto groupAction = new GroupAction(nullptr, true);
+                auto groupAction = new GroupAction(nullptr, "Actions", true);
 
-                groupAction->setText("Actions");
                 groupAction->setToolTip("Actions for the current selection");
                 groupAction->setShowLabels(false);
 

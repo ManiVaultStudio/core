@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "DimensionsPickerAction.h"
 #include "PointData.h"
 
@@ -28,8 +32,8 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-DimensionsPickerAction::DimensionsPickerAction(QObject* parent) :
-    WidgetAction(parent),
+DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& title) :
+    WidgetAction(parent, title),
     _points(nullptr),
     _holder(),
     _itemModel(new DimensionsPickerItemModel(_holder)),
@@ -80,6 +84,19 @@ DimensionsPickerAction::~DimensionsPickerAction()
 
 void DimensionsPickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
+    WidgetAction::fromVariantMap(variantMap);
+
+    if (variantMap.contains("DatasetID")) {
+        const auto datasetID = variantMap["DatasetID"].toString();
+
+        if (!datasetID.isEmpty()) {
+            auto dataset = hdps::data().getSet(datasetID);
+
+            if (dataset.isValid())
+                setPointsDataset(Dataset<Points>(dataset));
+        }
+    }
+
     if (variantMap.contains("EnabledDimensions")) {
 
         const auto enabledDimensions = variantMap["EnabledDimensions"].toList();
@@ -100,12 +117,21 @@ void DimensionsPickerAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap DimensionsPickerAction::toVariantMap() const
 {
+    auto variantMap = WidgetAction::toVariantMap();
+
     QVariantList enabledDimensions;
 
     for (const auto enabledDimension : getEnabledDimensions())
         enabledDimensions << QVariant(enabledDimension);
 
-    return { { "EnabledDimensions", enabledDimensions} };
+    const auto datasetId = _points.isValid() ? _points->getId() : "";
+    
+    variantMap.insert({
+        { "EnabledDimensions", enabledDimensions },
+        { "DatasetID", datasetId }
+    });
+
+    return variantMap;
 }
 
 void DimensionsPickerAction::setDimensions(const std::uint32_t numDimensions, const std::vector<QString>& names)
@@ -166,8 +192,11 @@ void DimensionsPickerAction::setPointsDataset(const Dataset<Points>& points)
 {
     _points = points;
 
-    setDimensions(_points->getNumDimensions(), _points->getDimensionNames());
-    setObjectName(QString("%1/Selection").arg(_points->getGuiName()));
+    if (_points.isValid()) {
+        setDimensions(_points->getNumDimensions(), _points->getDimensionNames());
+        setObjectName(QString("%1/Selection").arg(_points->text()));
+    } else
+        setDimensions(0, {});
 }
 
 DimensionsPickerHolder& DimensionsPickerAction::getHolder()
@@ -502,11 +531,14 @@ void DimensionsPickerAction::updateSummary()
     _summaryAction.setString(tr("%1 available, %2 visible, %3 selected").arg(numberOfDimensions).arg(numberOfVisibleDimensions).arg(holder.getNumberOfSelectedDimensions()));
 }
 
-void DimensionsPickerAction::connectToPublicAction(WidgetAction* publicAction)
+void DimensionsPickerAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicDimensionsPickerAction = dynamic_cast<DimensionsPickerAction*>(publicAction);
 
     Q_ASSERT(publicDimensionsPickerAction != nullptr);
+
+    if (publicDimensionsPickerAction == nullptr)
+        return;
 
     connect(this, &DimensionsPickerAction::selectedDimensionsChanged, publicDimensionsPickerAction, [publicDimensionsPickerAction](const QVector<std::int32_t>& dimensionIndices) -> void {
         publicDimensionsPickerAction->selectDimensions(dimensionIndices);
@@ -518,29 +550,25 @@ void DimensionsPickerAction::connectToPublicAction(WidgetAction* publicAction)
 
     selectDimensions(publicDimensionsPickerAction->getSelectedDimensions());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void DimensionsPickerAction::disconnectFromPublicAction()
+void DimensionsPickerAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicDimensionsPickerAction = dynamic_cast<DimensionsPickerAction*>(getPublicAction());
 
     Q_ASSERT(publicDimensionsPickerAction != nullptr);
 
+    if (publicDimensionsPickerAction == nullptr)
+        return;
+
     disconnect(this, &DimensionsPickerAction::selectedDimensionsChanged, publicDimensionsPickerAction, nullptr);
     disconnect(publicDimensionsPickerAction, &DimensionsPickerAction::selectedDimensionsChanged, this, nullptr);
 
-    WidgetAction::disconnectFromPublicAction();
-}
-
-WidgetAction* DimensionsPickerAction::getPublicCopy() const
-{
-    auto dimensionsPickerActionCopy = new DimensionsPickerAction(nullptr);
-
-    dimensionsPickerActionCopy->setPointsDataset(_points);
-    dimensionsPickerActionCopy->selectDimensions(getSelectedDimensions());
-
-    return dimensionsPickerActionCopy;
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* dimensionsPickerAction, const std::int32_t& widgetFlags) :
@@ -565,12 +593,13 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
     horizontalHeader->setDefaultAlignment(Qt::AlignLeft);
     horizontalHeader->setSortIndicator(2, Qt::DescendingOrder);
 
-    horizontalHeader->resizeSection(1, 85);
-    horizontalHeader->resizeSection(2, 85);
+    //horizontalHeader->resizeSection(1, 85);
+    //horizontalHeader->resizeSection(2, 85);
 
     _tableView.verticalHeader()->hide();
     _tableView.verticalHeader()->setDefaultSectionSize(5);
 
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(&_tableView);
 
     auto toolbarLayout = new QHBoxLayout();
@@ -582,15 +611,13 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
 
     layout->addLayout(toolbarLayout);
 
-    if (widgetFlags & PopupLayout) {
-        setPopupLayout(layout);
-    }
-    else {
-        layout->setContentsMargins(0, 0, 0, 0);
-        setLayout(layout);
-    }
+    setLayout(layout);
 
     updateTableViewModel(&dimensionsPickerAction->getProxyModel());
+
+    connect(dimensionsPickerAction, &DimensionsPickerAction::selectedDimensionsChanged, this, [this]() -> void {
+        _tableView.horizontalHeader()->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+        });
 }
 
 void DimensionsPickerAction::Widget::updateTableViewModel(QAbstractItemModel* model)
@@ -600,9 +627,7 @@ void DimensionsPickerAction::Widget::updateTableViewModel(QAbstractItemModel* mo
     if (model->rowCount() == 0 || model->columnCount() == 0)
         return;
 
-    auto horizontalHeader = _tableView.horizontalHeader();
-
-    horizontalHeader->setSectionResizeMode(0, QHeaderView::Stretch);
-    horizontalHeader->setSectionResizeMode(1, QHeaderView::Interactive);
-    horizontalHeader->setSectionResizeMode(2, QHeaderView::Interactive);
+    _tableView.horizontalHeader()->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+    _tableView.horizontalHeader()->resizeSection(1, 60);
+    _tableView.horizontalHeader()->resizeSection(2, 60);
 }

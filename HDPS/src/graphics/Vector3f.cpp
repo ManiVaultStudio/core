@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "Vector3f.h"
 
 #include <cmath>
@@ -77,6 +81,11 @@ namespace hdps
         return *this;
     }
 
+    std::ostream& operator<<(std::ostream& os, const Vector3f& v)
+    {
+        os << '(' << v.x << ", " << v.y << ", " << v.z << ')';
+        return os;
+    }
 
     static_assert(Vector3f{}.x == 0.0f, "Compile-time unit test");
     static_assert(Vector3f{}.y == 0.0f, "Compile-time unit test");

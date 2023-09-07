@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "AbstractManager.h"
@@ -15,7 +19,7 @@ class DatasetImpl;
  *
  * @author Thomas Kroes
  */
-class AbstractEventManager : public AbstractManager
+class AbstractEventManager : protected AbstractManager
 {
     Q_OBJECT
 
@@ -50,24 +54,23 @@ public:
     virtual void notifyDatasetRemoved(const QString& datasetGuid, const DataType& dataType) = 0;
 
     /**
-     * Notify listeners that a dataset has changed
+     * Notify listeners that a dataset has changed data
      * @param dataset Smart pointer to the dataset of which the data changed
      */
-    virtual void notifyDatasetChanged(const Dataset<DatasetImpl>& dataset) = 0;
+    virtual void notifyDatasetDataChanged(const Dataset<DatasetImpl>& dataset) = 0;
 
     /**
-     * Notify listeners that dataset selection has changed
-     * @param dataset Smart pointer to the dataset of which the selection changed
+     * Notify listeners that a dataset has changed data dimensions
+     * @param dataset Smart pointer to the dataset of which the data dimensions changed
+     */
+    virtual void notifyDatasetDataDimensionsChanged(const Dataset<DatasetImpl>& dataset) = 0;
+
+    /**
+     * Notify listeners that dataset data selection has changed
+     * @param dataset Smart pointer to the dataset of which the data selection changed
      * @param ignoreDatasets Pointer to datasets that should be ignored during notification
      */
-    virtual void notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets* ignoreDatasets = nullptr) = 0;
-
-    /**
-     * Notify all listeners that a dataset GUI name has changed
-     * @param dataset Smart pointer to the dataset of which the GUI name changed
-     * @param previousGuiName Previous dataset name
-     */
-    virtual void notifyDatasetGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) = 0;
+    virtual void notifyDatasetDataSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets* ignoreDatasets = nullptr) = 0;
 
     /**
      * Notify all listeners that a dataset is locked
@@ -100,7 +103,7 @@ protected:
      * @param eventListener Pointer to event listener
      * @param dataEvent Pointer to data event
      */
-    void callListenerDataEvent(EventListener* eventListener, DataEvent* dataEvent) {
+    void callListenerDataEvent(EventListener* eventListener, DatasetEvent* dataEvent) {
         Q_ASSERT(eventListener != nullptr);
         Q_ASSERT(dataEvent != nullptr);
 

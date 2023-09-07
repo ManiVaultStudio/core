@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 
 // Its own header file:
 #include "DimensionsPickerItemModel.h"
@@ -142,8 +146,8 @@ namespace hdps
                 switch (static_cast<ColumnEnum>(section))
                 {
                 case ColumnEnum::Name: return tr("Name");
-                case ColumnEnum::Mean: return tr("Mean");
-                case ColumnEnum::StandardDeviation: return tr("Standard dev.");
+                case ColumnEnum::Mean: return tr("M");
+                case ColumnEnum::StandardDeviation: return tr("SD");
                 }
             }
         }

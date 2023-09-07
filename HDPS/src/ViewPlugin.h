@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "util/DockArea.h"
@@ -13,6 +17,7 @@
 
 namespace hdps::gui {
     class ViewPluginTriggerAction;
+    class ToolbarAction;
 }
 
 namespace hdps::plugin
@@ -35,12 +40,6 @@ public:
 
     /** Perform startup initialization */
     void init() override;
-
-    /**
-     * Set name of the object
-     * @param name Name of the object
-     */
-    void setObjectName(const QString& name);
 
     /**
      * Load one (or more) datasets in the view
@@ -98,6 +97,22 @@ public: // Title bar settings menu
      */
     gui::WidgetActions getTitleBarMenuActions();
 
+public: // Settings actions
+
+    /**
+     * Add a docking action to the view (the action widget will be docked in the view)
+     * @param dockingAction Pointer to docking action to add
+     * @param dockToDockingAction Pointer to the settings action to dock to (docked top-level if nullptr)
+     * @param dockArea Dock area in which \p dockToViewPlugin will be docked
+     * @param autoHide Whether to pin the settings action to the border of the view plugin
+     * @param autoHideLocation Location to pin the settings action in case auto-hide is active
+     * @param minimumDockWidgetSize Minimum dock widget size
+     */
+    void addDockingAction(WidgetAction* dockingAction, WidgetAction* dockToDockingAction = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, bool autoHide = false, const gui::AutoHideLocation& autoHideLocation = gui::AutoHideLocation::Left, const QSize& minimumDockWidgetSize = QSize(256, 256));
+
+    /** Get vector of pointers to docking actions */
+    gui::WidgetActions getDockingActions() const;
+
 public: // Serialization
 
     /**
@@ -114,12 +129,13 @@ public: // Serialization
 
 public: // Action getters
 
-    gui::TriggerAction& getEditActionsAction() { return _editActionsAction; }
+    gui::TriggerAction& getEditorAction() { return _editorAction; }
     gui::TriggerAction& getScreenshotAction() { return _screenshotAction; }
     gui::ToggleAction& getIsolateAction() { return _isolateAction; }
     gui::ToggleAction& getMayCloseAction() { return _mayCloseAction; }
     gui::ToggleAction& getMayFloatAction() { return _mayFloatAction; }
     gui::ToggleAction& getMayMoveAction() { return _mayMoveAction; }
+    gui::OptionsAction& getDockingOptionsAction() { return _dockingOptionsAction; }
     gui::LockingAction& getLockingAction() { return _lockingAction; }
     gui::ToggleAction& getVisibleAction() { return _visibleAction; }
     gui::TriggerAction& getHelpAction() { return _helpAction; }
@@ -127,18 +143,20 @@ public: // Action getters
 
 private:
     QWidget                 _widget;                    /** Widget representation of the plugin */
-    gui::TriggerAction      _editActionsAction;         /** Trigger action to start editing the view plugin action hierarchy */
+    gui::TriggerAction      _editorAction;              /** Trigger action to start the view plugin editor */
     gui::TriggerAction      _screenshotAction;          /** Trigger action to create a screenshot */
     gui::ToggleAction       _isolateAction;             /** Toggle action to toggle view isolation (when toggled, all other view plugins are temporarily closed) */
     gui::ToggleAction       _mayCloseAction;            /** Action for toggling whether the view plugin may be closed */
     gui::ToggleAction       _mayFloatAction;            /** Action for toggling whether the view plugin may float */
     gui::ToggleAction       _mayMoveAction;             /** Action for toggling whether the view plugin may be moved */
+    gui::OptionsAction      _dockingOptionsAction;      /** Action for toggling docking options */
     gui::LockingAction      _lockingAction;             /** Action for toggling whether the view plugin is locked */
     gui::ToggleAction       _visibleAction;             /** Action which determines whether the view plugin is visible or not */
     gui::TriggerAction      _helpAction;                /** Action which triggers documentation */
     gui::PresetsAction      _presetsAction;             /** Action for managing presets */
     QKeySequence            _triggerShortcut;           /** Shortcut for triggering the plugin */
     gui::WidgetActions      _titleBarMenuActions;       /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
+    gui::WidgetActions      _settingsActions;           /** Settings actions which are displayed as docking widgets in the interface */
 };
 
 class ViewPluginFactory : public PluginFactory

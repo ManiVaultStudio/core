@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include <QMessageBox>
@@ -5,9 +9,7 @@
 
 #include <stdexcept>
 
-namespace hdps {
-
-namespace util {
+namespace hdps::util {
 
 /**
  * Create an exception message box using a title and reason
@@ -17,10 +19,8 @@ namespace util {
  */
 static void exceptionMessageBox(const QString& title, const QString& reason, QWidget* parent = nullptr)
 {
-    // Show the message box
     QMessageBox::critical(parent, title, reason);
 
-    // Print also to console
     qDebug() << title << reason;
 }
 
@@ -45,5 +45,4 @@ static void exceptionMessageBox(const QString& title, const std::exception& exce
     exceptionMessageBox(title, exception.what(), parent);
 }
 
-}
 }

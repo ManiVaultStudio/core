@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "IntegralAction.h"
 
 #include <QHBoxLayout>
@@ -13,38 +17,30 @@ namespace hdps::gui {
     constexpr std::int32_t IntegralAction::INIT_DEFAULT_VALUE;
 #endif
 
-IntegralAction::IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum /*= INIT_MIN*/, const std::int32_t& maximum /*= INIT_MAX*/, const std::int32_t& value /*= INIT_VALUE*/, const std::int32_t& defaultValue /*= INIT_DEFAULT_VALUE*/) :
-    NumericalAction<std::int32_t>(parent, title, minimum, maximum, value, defaultValue)
+IntegralAction::IntegralAction(QObject * parent, const QString& title, std::int32_t minimum /*= INIT_MIN*/, std::int32_t maximum /*= INIT_MAX*/, std::int32_t value /*= INIT_VALUE*/) :
+    NumericalAction<std::int32_t>(parent, title, minimum, maximum, value)
 {
     _valueChanged           = [this]() -> void { emit valueChanged(_value); };
-    _defaultValueChanged    = [this]() -> void { emit defaultValueChanged(_defaultValue); };
     _minimumChanged         = [this]() -> void { emit minimumChanged(_minimum); };
     _maximumChanged         = [this]() -> void { emit maximumChanged(_maximum); };
     _prefixChanged          = [this]() -> void { emit prefixChanged(_prefix); };
     _suffixChanged          = [this]() -> void { emit suffixChanged(_suffix); };
 
-    initialize(minimum, maximum, value, defaultValue);
+    initialize(minimum, maximum, value);
 }
 
-QString IntegralAction::getTypeString() const
-{
-    return "Integral";
-}
-
-void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue)
+void IntegralAction::initialize(std::int32_t minimum, std::int32_t maximum, std::int32_t value)
 {
     _minimum        = std::min(minimum, _maximum);
     _maximum        = std::max(maximum, _minimum);
     _value          = std::max(_minimum, std::min(value, _maximum));
-    _defaultValue   = std::max(_minimum, std::min(defaultValue, _maximum));
 
     _minimumChanged();
     _maximumChanged();
     _valueChanged();
-    _defaultValueChanged();
 }
 
-void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
+void IntegralAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicIntegralAction = dynamic_cast<IntegralAction*>(publicAction);
 
@@ -52,14 +48,6 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
 
     if (publicIntegralAction == nullptr)
         return;
-
-    connect(this, &IntegralAction::minimumChanged, publicIntegralAction, [publicIntegralAction](const std::int32_t& minimum) -> void {
-        publicIntegralAction->setMinimum(minimum);
-    });
-
-    connect(this, &IntegralAction::maximumChanged, publicIntegralAction, [publicIntegralAction](const std::int32_t& maximum) -> void {
-        publicIntegralAction->setMaximum(maximum);
-    });
 
     connect(this, &IntegralAction::valueChanged, publicIntegralAction, [publicIntegralAction](const std::int32_t& value) -> void {
         publicIntegralAction->setValue(value);
@@ -69,15 +57,16 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
         setValue(value);
     });
 
-    setMinimum(publicIntegralAction->getMinimum());
-    setMaximum(publicIntegralAction->getMaximum());
     setValue(publicIntegralAction->getValue());
 
-    WidgetAction::connectToPublicAction(publicAction);
+    WidgetAction::connectToPublicAction(publicAction, recursive);
 }
 
-void IntegralAction::disconnectFromPublicAction()
+void IntegralAction::disconnectFromPublicAction(bool recursive)
 {
+    if (!isConnected())
+        return;
+
     auto publicIntegralAction = dynamic_cast<IntegralAction*>(getPublicAction());
 
     Q_ASSERT(publicIntegralAction != nullptr);
@@ -85,17 +74,10 @@ void IntegralAction::disconnectFromPublicAction()
     if (publicIntegralAction == nullptr)
         return;
 
-    disconnect(this, &IntegralAction::minimumChanged, publicIntegralAction, nullptr);
-    disconnect(this, &IntegralAction::maximumChanged, publicIntegralAction, nullptr);
     disconnect(this, &IntegralAction::valueChanged, publicIntegralAction, nullptr);
     disconnect(publicIntegralAction, &IntegralAction::valueChanged, this, nullptr);
 
-    WidgetAction::disconnectFromPublicAction();
-}
-
-WidgetAction* IntegralAction::getPublicCopy() const
-{
-    return new IntegralAction(parent(), text(), std::numeric_limits<std::int32_t>::lowest(), std::numeric_limits<std::int32_t>::max(), getValue(), getDefaultValue());
+    WidgetAction::disconnectFromPublicAction(recursive);
 }
 
 void IntegralAction::fromVariantMap(const QVariantMap& variantMap)
@@ -128,7 +110,7 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
         integralAction->setValue(value);
     });
 
-    const auto valueString = [](const std::int32_t& value) -> QString {
+    const auto valueString = [](std::int32_t value) -> QString {
         return QString::number(value);
     };
 
@@ -182,7 +164,7 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
     connect(integralAction, &IntegralAction::prefixChanged, this, onUpdatePrefix);
     connect(integralAction, &IntegralAction::suffixChanged, this, onUpdateSuffix);
 
-    connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](const std::int32_t& value) {
+    connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](std::int32_t value) {
         onUpdateValue();
     });
 
@@ -213,7 +195,7 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
         integralAction->setValue(value());
     });
 
-    const auto valueString = [](const std::int32_t& value) -> QString {
+    const auto valueString = [](std::int32_t value) -> QString {
         return QString::number(value);
     };
 
@@ -278,12 +260,13 @@ IntegralAction::LineEditWidget::LineEditWidget(QWidget* parent, IntegralAction* 
     const auto updateText = [this, integralAction]() -> void {
         QSignalBlocker blocker(this);
 
-        setText(QString("%1 %2").arg(integralAction->getPrefix(), QString::number(integralAction->getValue())));
+        setText(integralAction->getPrefix() + QString::number(integralAction->getValue()));
     };
 
     updateText();
 
     connect(integralAction, &IntegralAction::valueChanged, this, updateText);
+    connect(integralAction, &IntegralAction::prefixChanged, this, updateText);
 
     connect(this, &QLineEdit::textChanged, this, [integralAction](const QString& text) -> void {
         integralAction->setValue(text.toInt());

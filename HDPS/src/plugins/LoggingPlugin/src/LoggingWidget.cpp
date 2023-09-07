@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "LoggingWidget.h"
 
 #include <Application.h>
@@ -42,15 +46,15 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
 
     settingsGroupAction.setVisible(true);
 
-    settingsGroupAction << _model.getWordWrapAction();
-    settingsGroupAction << _findLogFileAction;
+    settingsGroupAction.addAction(&_model.getWordWrapAction());
+    settingsGroupAction.addAction(&_findLogFileAction);
 
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
 
     filterGroupAction.setLabelWidthFixed(60);
     filterGroupAction.setPopupSizeHint(QSize(340, 10));
 
-    filterGroupAction << _filterModel.getFilterTypeAction();
+    filterGroupAction.addAction(&_filterModel.getFilterTypeAction());
     
     _findLogFileAction.setToolTip("Find the location where the log file resides");
 

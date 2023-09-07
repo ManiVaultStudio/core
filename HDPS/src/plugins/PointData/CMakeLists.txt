@@ -5,10 +5,9 @@ PROJECT(${POINTDATA})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
 
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
@@ -54,6 +53,10 @@ set(POINTS_HEADERS
     src/CreateSetFromSelectionAction.h
 )
 
+set(PLUGIN_MOC_HEADERS
+	src/PointData.h
+)
+
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
 set(BFLOAT_HEADER
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/biovault_bfloat16/biovault_bfloat16.h
@@ -97,7 +100,8 @@ source_group(Actions FILES ${ACTIONS_SOURCES})
 
 add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
 
-add_dependencies(${POINTDATA} HDPS_Public)
+qt_wrap_cpp(POINTDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${POINTDATA})
+target_sources(${POINTDATA} PRIVATE ${POINTDATA_MOC})
 
 target_include_directories(${POINTDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 target_include_directories(${POINTDATA} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/)
@@ -113,17 +117,12 @@ file(GLOB EXPORT_HEADER_FILE_NAME
     RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*_export.h)
 list(APPEND POINTS_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME})
 
-set(HDPS_LINK_PATH "${INSTALL_DIR}/$<CONFIGURATION>/lib")
-set(HDPS_LINK_SUFFIX $<IF:$<CXX_COMPILER_ID:MSVC>,${CMAKE_LINK_LIBRARY_SUFFIX},${CMAKE_SHARED_LIBRARY_SUFFIX}>)
-
-set(HDPS_LINK_LIBRARY "${HDPS_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${HDPS_LINK_SUFFIX}")
-
 target_link_libraries(${POINTDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${POINTDATA} PRIVATE "${HDPS_LINK_LIBRARY}")
+target_link_libraries(${POINTDATA} PRIVATE HDPS_Public)
 
 # Use avx if enabled and available
-check_and_set_AVX(${POINTDATA} ${USE_AVX})
+check_and_set_AVX(${POINTDATA} ${HDPS_USE_AVX})
 
 if(UNIX AND NOT APPLE)
    find_package(TBB REQUIRED)
@@ -144,7 +143,7 @@ install(FILES "${BFLOAT_HEADER}" DESTINATION "${INSTALL_DIR}/$<CONFIGURATION>/in
 
 # PointData is needed to build other plugins - install it now.
 add_custom_command(TARGET ${POINTDATA} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}"
+    COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>

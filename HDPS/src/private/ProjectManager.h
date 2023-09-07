@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include <AbstractProjectManager.h>
@@ -98,7 +102,7 @@ public:
      * Extract the project JSON file (project.json) from a compressed HDPS file (*.hdps)
      * @param hdpsFilePath File path of the compressed HDPS file (*.hdps)
      * @param temporaryDir Temporary directory to store the project.json file
-     * @return File path of the extracted project.json file
+     * @return File path of the extracted project.json file, empty string if extraction failed
      */
     QString extractProjectFileFromHdpsFile(const QString& hdpsFilePath, QTemporaryDir& temporaryDir) override;
 

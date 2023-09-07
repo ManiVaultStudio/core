@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "WidgetAction.h"
@@ -8,14 +12,12 @@
 #include <QStringListModel>
 #include <QAbstractProxyModel>
 #include <QItemSelection>
+#include <QPushButton>
 
 class QWidget;
-class QPushButton;
 class QAbstractListModel;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 /**
  * Option widget action class
@@ -36,6 +38,7 @@ public:
         LineEdit            = 0x00002,      /** The widget includes a searchable line edit widget */
         HorizontalButtons   = 0x00004,      /** The widget includes a push button for each option in a horizontal layout */
         VerticalButtons     = 0x00008,      /** The widget includes a push button for each option in a vertical layout */
+        Clearable           = 0x00010,      /** The widget includes a push button to clear the selection (current index is set to minus one) */
 
         Default = ComboBox
     };
@@ -117,15 +120,8 @@ public:
      * @param title Title of the action
      * @param options Options
      * @param currentOption Current option
-     * @param defaultOption Default option
      */
-    OptionAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QString& currentOption = "", const QString& defaultOption = "");
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE explicit OptionAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QString& currentOption = "");
 
     /**
      * Initialize the option action
@@ -133,7 +129,7 @@ public:
      * @param currentOption Current option
      * @param defaultOption Default option
      */
-    void initialize(const QStringList& options = QStringList(), const QString& currentOption = "", const QString& defaultOption = "");
+    void initialize(const QStringList& options = QStringList(), const QString& currentOption = "");
 
     /**
      * Initialize the option action with a custom model
@@ -179,15 +175,6 @@ public:
      */
     void setCurrentIndex(const std::int32_t& currentIndex);
 
-    /** Get the default option index */
-    std::int32_t getDefaultIndex() const;
-
-    /**
-     * Set the default option index
-     * @param defaultIndex Default option index
-     */
-    void setDefaultIndex(const std::int32_t& defaultIndex);
-
     /** Get the current option index */
     QString getCurrentText() const;
 
@@ -196,15 +183,6 @@ public:
      * @param currentText Current option text
      */
     void setCurrentText(const QString& currentText);
-
-    /** Get the default option text */
-    QString getDefaultText() const;
-
-    /**
-     * Set the default option text
-     * @param defaultText Default option text
-     */
-    void setDefaultText(const QString& defaultText);
 
     /** Get placeholder text (shown when no option selected) */
     QString getPlaceholderString() const;
@@ -221,24 +199,20 @@ public:
     /** Get the used item model */
     const QAbstractItemModel* getModel() const;
 
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
-
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
-
-protected:  // Linking
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
     /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
      */
-    virtual WidgetAction* getPublicCopy() const override;
+    void disconnectFromPublicAction(bool recursive) override;
 
 public: // Serialization
 
@@ -276,12 +250,6 @@ signals:
     void currentIndexChanged(const std::int32_t& currentIndex);
 
     /**
-     * Signals that the default index changed
-     * @param defaultIndex Default index
-     */
-    void defaultIndexChanged(const std::int32_t& defaultIndex);
-
-    /**
      * Signals that the current text changed
      * @param currentText Current text
      */
@@ -297,9 +265,13 @@ protected:
     QStringListModel        _defaultModel;          /** Default simple string list model */
     QAbstractItemModel*     _customModel;           /** Custom item model for enriched (combobox) ui */
     std::int32_t            _currentIndex;          /** Currently selected index */
-    std::int32_t            _defaultIndex;          /** Default index */
     QString                 _placeholderString;     /** Place holder string */
+
+    friend class AbstractActionsManager;
 };
 
 }
-}
+
+Q_DECLARE_METATYPE(hdps::gui::OptionAction)
+
+inline const auto optionActionMetaTypeId = qRegisterMetaType<hdps::gui::OptionAction*>("hdps::gui::OptionAction");

@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "InfoAction.h"
 #include "Application.h"
 #include "event/Event.h"
@@ -6,7 +10,7 @@ using namespace hdps;
 using namespace hdps::gui;
 
 InfoAction::InfoAction(QObject* parent, Images& images) :
-    GroupAction(parent, true),
+    GroupAction(parent, "Group", true),
     _images(&images),
     _typeAction(this, "Image collection type"),
     _numberOfImagesAction(this, "Number of images"),
@@ -15,6 +19,12 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
     _numberComponentsPerPixelAction(this, "Number of components per pixel")
 {
     setText("Info");
+
+    addAction(&_typeAction);
+    addAction(&_numberOfImagesAction);
+    addAction(&_imageResolutionAction);
+    addAction(&_numberOfPixelsAction);
+    addAction(&_numberComponentsPerPixelAction);
 
     _typeAction.setEnabled(false);
     _numberOfImagesAction.setEnabled(false);
@@ -41,10 +51,10 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
         _numberComponentsPerPixelAction.setString(QString::number(_images->getNumberOfComponentsPerPixel()));
     };
 
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
-    _eventListener.registerDataEventByType(ImageType, [this, updateActions](hdps::DataEvent* dataEvent) {
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetAdded));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataChanged));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataSelectionChanged));
+    _eventListener.registerDataEventByType(ImageType, [this, updateActions](hdps::DatasetEvent* dataEvent) {
         if (!_images.isValid())
             return;
 
@@ -52,9 +62,9 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
             return;
 
         switch (dataEvent->getType()) {
-            case EventType::DataAdded:
-            case EventType::DataChanged:
-            case EventType::DataSelectionChanged:
+            case EventType::DatasetAdded:
+            case EventType::DatasetDataChanged:
+            case EventType::DatasetDataSelectionChanged:
             {
                 updateActions();
                 break;

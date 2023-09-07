@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "RefreshClustersAction.h"
 #include "ClusterData.h"
 #include "ClustersAction.h"
@@ -7,10 +11,9 @@
 #include <Application.h>
 
 RefreshClustersAction::RefreshClustersAction(ClustersActionWidget* clustersActionWidget) :
-    TriggerAction(clustersActionWidget),
+    TriggerAction(clustersActionWidget, "Refresh"),
     _clustersActionWidget(clustersActionWidget)
 {
-    setText("");
     setToolTip("Refresh clusters");
     setIcon(Application::getIconFont("FontAwesome").getIcon("sync"));
 

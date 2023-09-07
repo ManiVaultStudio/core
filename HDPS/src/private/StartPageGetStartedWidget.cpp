@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "StartPageGetStartedWidget.h"
 #include "StartPageContentWidget.h"
 
@@ -30,6 +34,10 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     setLayout(layout);
 
+    _createProjectFromWorkspaceWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+    _createProjectFromDatasetWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+    _instructionVideosWidget.getHierarchyWidget().getFilterColumnAction().setCurrentText("Title");
+
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     _createProjectFromWorkspaceWidget.getHierarchyWidget().setItemTypeName("Item");
     _createProjectFromWorkspaceWidget.getHierarchyWidget().getTreeView().verticalScrollBar()->setDisabled(true);
@@ -52,7 +60,7 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     connect(&_workspaceLocationTypeAction, &OptionAction::currentIndexChanged, this, &StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions);
 
-    _createProjectFromWorkspaceWidget.getHierarchyWidget().getToolbarLayout().addWidget(_workspaceLocationTypeAction.createWidget(this));
+    _createProjectFromWorkspaceWidget.getHierarchyWidget().getToolbarAction().addAction(&_workspaceLocationTypeAction);
 
     _recentWorkspacesAction.initialize("Manager/Workspace/Recent", "Workspace", "Ctrl+Alt", Application::getIconFont("FontAwesome").getIcon("clock"));
     _recentProjectsAction.initialize("Manager/Project/Recent", "Project", "Ctrl", Application::getIconFont("FontAwesome").getIcon("clock"));
@@ -112,7 +120,7 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
 
                 Workspace workspace(recentWorkspace.getFilePath());
 
-                StartPageAction recentWorkspaceStartPageAction(workspaces().getIcon(), QFileInfo(recentFilePath).baseName(), QString("Create project from %1.hws").arg(QFileInfo(recentFilePath).baseName()), workspace.getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+                StartPageAction recentWorkspaceStartPageAction(workspaces().getIcon(), QFileInfo(recentFilePath).baseName(), QString("Create project from %1.json").arg(QFileInfo(recentFilePath).baseName()), workspace.getDescriptionAction().getString(), "", [recentFilePath]() -> void {
                     projects().newProject(recentFilePath);
                 });
 

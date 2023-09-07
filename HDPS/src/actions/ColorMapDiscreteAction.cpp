@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "ColorMapDiscreteAction.h"
 #include "ColorMapAction.h"
 
@@ -8,8 +12,8 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction),
+ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapSettingsAction) :
+    WidgetAction(&colorMapSettingsAction, "Discrete"),
     _numberOfStepsAction(this, "Number of steps", 2, 10, 5, 5),
     _discretizeAlphaAction(this, "Discretize alpha", false, false)
 {

@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "DataPropertiesPlugin.h"
 
 #include <Application.h>
@@ -28,7 +32,7 @@ void DataPropertiesPlugin::init()
         if (selectedItems.isEmpty())
             getWidget().setWindowTitle("Data properties");
         else
-            getWidget().setWindowTitle("Data properties: " + selectedItems.first()->getFullPathName());
+            getWidget().setWindowTitle("Data properties: " + selectedItems.first()->getLocation());
     });
 
     getWidget().setWindowTitle("Data properties");

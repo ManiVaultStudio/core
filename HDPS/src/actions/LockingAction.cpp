@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "LockingAction.h"
 
 #include "Application.h"
@@ -9,24 +13,17 @@ using namespace hdps::util;
 namespace hdps::gui {
 
 LockingAction::LockingAction(QObject* parent, const QString& what /*= ""*/, bool locked /*= false*/) :
-    GroupAction(parent),
-    _lockedAction(this),
-    _lockAction(this),
-    _unlockAction(this)
+    GroupAction(parent, "Locking"),
+    _lockedAction(this, "Locked"),
+    _lockAction(this, "Lock"),
+    _unlockAction(this, "Unlock")
 {
     setCheckable(true);
     setText("Locking");
     initialize(locked);
     updateActionsText();
 
-    setSerializationName("Locking");
-
-    _lockedAction.setSerializationName("Locked");
-}
-
-QString LockingAction::getTypeString() const
-{
-    return "Locking";
+    setConnectionPermissionsToForceNone(true);
 }
 
 void LockingAction::initialize(bool locked /*= false*/)

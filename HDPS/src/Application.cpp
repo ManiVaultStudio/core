@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "Application.h"
 
 #include "CoreInterface.h"
@@ -82,6 +86,11 @@ hdps::CoreInterface* Application::core()
 util::Version Application::getVersion() const
 {
     return _version;
+}
+
+QString Application::getName()
+{
+    return "ManiVault";
 }
 
 QString Application::getStartupProjectFilePath() const

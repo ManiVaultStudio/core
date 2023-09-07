@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "DataType.h"
@@ -28,7 +32,7 @@ using DataHierarchyItems = QVector<DataHierarchyItem*>;
  *
  * @author Thomas Kroes
  */
-class DataHierarchyItem : public hdps::gui::WidgetAction
+class DataHierarchyItem final : public hdps::gui::WidgetAction
 {
     Q_OBJECT
 
@@ -57,21 +61,6 @@ public:
 
     /** Destructor */
     ~DataHierarchyItem() = default;
-
-    /** Get the dataset GUI name */
-    QString getGuiName() const;
-
-    /**
-     * Set the dataset GUI name
-     * @param guiName GUI name of the dataset
-     */
-    void setGuiName(const QString& guiName);
-
-    /**
-     * Renames the GUI name of the dataset
-     * @param newGuiName New GUI name of the dataset
-     */
-    void renameDataset(const QString& newGuiName);
 
     /** Get reference to parent hierarchy item */
     DataHierarchyItem& getParent() const;
@@ -104,6 +93,8 @@ public:
      */
     void setVisible(bool visible);
 
+public: // Selection
+
     /** Gets whether the hierarchy item is selected */
     bool isSelected() const;
 
@@ -119,12 +110,6 @@ public:
     /** De-selects the hierarchy item */
     void deselect();
 
-    /** Compute the full path name of the data hierarchy item (separated by forward slashes) */
-    void computeFullPathName();
-
-    /** Get the full path name of the data hierarchy item (separated by forward slashes) */
-    QString getFullPathName() const;
-
 protected:
 
     /** Set reference to parent hierarchy item */
@@ -139,9 +124,6 @@ public: // Hierarchy
     void addChild(DataHierarchyItem& child);
 
 public: // Miscellaneous
-
-    /** Gets the string representation of the hierarchy item */
-    QString toString() const;
 
     /** Get the dataset */
     Dataset<DatasetImpl> getDataset();
@@ -366,7 +348,6 @@ protected:
     Dataset<DatasetImpl>        _dataset;               /** Smart pointer to dataset */
     DataHierarchyItem*          _parent;                /** Pointer to parent data hierarchy item */
     DataHierarchyItems          _children;              /** Pointers to child items (if any) */
-    QString                     _fullPathName;          /** The full hierarchy path name of the data hierarchy item */
     bool                        _selected;              /** Whether the hierarchy item is selected */
     bool                        _expanded;              /** Whether the item is expanded or not (when it has children) */
     QString                     _taskDescription;       /** Task description */
@@ -389,17 +370,5 @@ protected:
     /** Single shot message disappear timer interval */
     static constexpr std::uint32_t MESSAGE_DISAPPEAR_INTERVAL = 1500;
 };
-
-/**
- * Print data hierarchy item to the console
- * @param debug Debug
- * @param dataHierarchyItem Data hierarchy item
- */
-inline QDebug operator << (QDebug debug, const DataHierarchyItem& dataHierarchyItem)
-{
-    debug.nospace() << dataHierarchyItem.toString();
-
-    return debug.space();
-}
 
 }

@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "ColorMapSettings2DAction.h"
 #include "ColorMapAction.h"
 #include "Application.h"
@@ -6,9 +10,9 @@
 
 namespace hdps::gui {
 
-ColorMapSettings2DAction::ColorMapSettings2DAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction),
-    _colorMapAction(colorMapAction)
+ColorMapSettings2DAction::ColorMapSettings2DAction(QObject* parent, const QString& title) :
+    WidgetAction(parent, title),
+    _colorMapAction(*static_cast<ColorMapAction*>(parent))
 {
     setText("2D Color Map Settings");
 }
@@ -25,7 +29,7 @@ ColorMapSettings2DAction::Widget::Widget(QWidget* parent, ColorMapSettings2DActi
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    auto groupAction = new GroupAction(this);
+    auto groupAction = new GroupAction(this, colorMapSettings2DAction->text());
 
     groupAction->setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
@@ -45,17 +49,15 @@ ColorMapSettings2DAction::Widget::Widget(QWidget* parent, ColorMapSettings2DActi
         actions << &colorMapAction.getSharedDataRangeAction(ColorMapAction::Axis::Y);
     }
 
-    actions << &colorMapAction.getMirrorGroupAction();
-    actions << &colorMapAction.getDiscretizeAction();
-    actions << &colorMapAction.getNumberOfDiscreteStepsAction();
-    actions << &colorMapAction.getDiscretizeAlphaAction();
-    actions << &_colorMapViewAction;
-
-    groupAction->setActions(actions);
+    groupAction->addAction(&colorMapAction.getMirrorGroupAction());
+    groupAction->addAction(&colorMapAction.getDiscretizeAction());
+    groupAction->addAction(&colorMapAction.getNumberOfDiscreteStepsAction());
+    groupAction->addAction(&colorMapAction.getDiscretizeAlphaAction());
+    groupAction->addAction(&_colorMapViewAction);
 
     layout->addWidget(groupAction->createWidget(this));
 
-    setPopupLayout(layout);
+    setLayout(layout);
 }
 
 }

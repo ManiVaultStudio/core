@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "GroupDataDialog.h"
 
 #include <Application.h>
@@ -13,7 +17,7 @@ GroupDataDialog::GroupDataDialog(QWidget* parent, const hdps::Datasets& datasets
     QDialog(parent),
     _datasets(datasets),
     _groupNameAction(this, "Group name"),
-    _showDialogAction(this, "Show dialog next time", true, true)
+    _showDialogAction(this, "Show dialog next time", true)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);
@@ -22,7 +26,7 @@ GroupDataDialog::GroupDataDialog(QWidget* parent, const hdps::Datasets& datasets
     QStringList datasetNames;
 
     for (const auto& dataset : datasets)
-        datasetNames << dataset->getGuiName();
+        datasetNames << dataset->text();
 
     _groupNameAction.setString(QString("%1").arg(datasetNames.join("+")));
 

@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include <actions/TriggerAction.h>
@@ -20,12 +24,13 @@ public:
      * @param parent Pointer to parent widget
      */
     FileMenu(QWidget *parent = nullptr);
-
+    
+private:
+    
     /**
-     * Invoked when the menu is show on the screen
-     * @param showEvent Pointer to show event
+     * Populate the menu
      */
-    void showEvent(QShowEvent* showEvent) override;
+    void populate ();
 
 private:
     hdps::gui::TriggerAction    _exitApplictionAction;  /** Trigger action to exit the application */

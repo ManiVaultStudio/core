@@ -1,11 +1,13 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include <QMap>
 #include <QAbstractListModel>
 
-namespace hdps {
-
-namespace util {
+namespace hdps::util {
 
 /** Pixel selection types enum */
 enum class PixelSelectionType
@@ -60,14 +62,14 @@ enum class PixelSelectionModifierType
 {
     Replace,        /** Replace selection */
     Add,            /** Add to selection */
-    Remove          /** Remove from selection */
+    Subtract        /** Subtract from selection */
 };
 
 /** Maps pixel selection modifier name to modifier enum and vice versa */
 static const QMap<PixelSelectionModifierType, QString> pixelSelectionModifiers = {
     { PixelSelectionModifierType::Replace, "Replace" },
     { PixelSelectionModifierType::Add, "Add" },
-    { PixelSelectionModifierType::Remove, "Remove" }
+    { PixelSelectionModifierType::Subtract, "Subtract" }
 };
 
 /**
@@ -101,12 +103,17 @@ class PixelSelectionTypeModel : public QAbstractListModel {
 public:
     
     /**
-     * Constructor
-     * @param pixelSelectionTypes Allowed pixel selection types
+     * Construct with \p parent
      * @param parent Pointer to parent object
      */
-    PixelSelectionTypeModel(const PixelSelectionTypes& pixelSelectionTypes, QObject* parent = nullptr);
+    PixelSelectionTypeModel(QObject* parent = nullptr);
     
+    /**
+     * Set pixel selection types
+     * @param pixelSelectionTypes Allowed pixel selection types
+     */
+    void setPixelSelectionTypes(const PixelSelectionTypes& pixelSelectionTypes);
+
     /**
      * Returns the number of pixel selection types in the model
      * @param parent Parent index
@@ -130,5 +137,4 @@ protected:
     PixelSelectionTypes     _pixelSelectionTypes;       /** Allowed pixel selection types */
 };
 
-}
 }

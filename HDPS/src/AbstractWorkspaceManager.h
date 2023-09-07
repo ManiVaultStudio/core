@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "AbstractManager.h"
@@ -236,6 +240,25 @@ public:
 
         emit workspaceSaved(getCurrentWorkspace()->getFilePath());
     }
+
+    /** Applies the CSS stylesheet to the dock managers 
+    virtual void applyStyleSheet() final {
+        QFile styleSheetFile(":/styles/ads_light.css");
+
+        styleSheetFile.open(QIODevice::ReadOnly);
+
+        QTextStream styleSheetStream(&styleSheetFile);
+        auto stylesheet = styleSheetStream.readAll();
+
+        styleSheetFile.close();
+
+        _mainDockManager->setStyleSheet(stylesheet);
+        auto dockManagers = findChildren<CDockManager*>();
+
+        for (auto dockManager : dockManagers)
+            dockManager->setStyleSheet(stylesheet);
+    }
+    */
 
 public: // View plugin dock widget permissions
 

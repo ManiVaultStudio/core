@@ -1,14 +1,16 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "DimensionsPickerMiscellaneousAction.h"
 #include "DimensionsPickerAction.h"
 
 #include <Application.h>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 DimensionsPickerMiscellaneousAction::DimensionsPickerMiscellaneousAction(DimensionsPickerAction& dimensionsPickerAction) :
-    WidgetAction(&dimensionsPickerAction),
+    WidgetAction(&dimensionsPickerAction, "Miscellaneous"),
     _dimensionsPickerAction(dimensionsPickerAction),
     _showOnlySelectedDimensionsAction(this, "Show only selected dimensions"),
     _applyExclusionListAction(this, "Apply exclusion list"),
@@ -42,13 +44,7 @@ DimensionsPickerMiscellaneousAction::Widget::Widget(QWidget* parent, DimensionsP
     layout->addWidget(dimensionsPickerMiscellaneousAction->getApplyExclusionListAction().createWidget(this, ToggleAction::CheckBox));
     layout->addWidget(dimensionsPickerMiscellaneousAction->getIgnoreZeroValuesAction().createWidget(this, ToggleAction::CheckBox));
 
-    if (widgetFlags & WidgetActionWidget::PopupLayout) {
-        setPopupLayout(layout);
-    }
-    else {
-        layout->setContentsMargins(0, 0, 0, 0);
-        setLayout(layout);
-    }
+    setLayout(layout);
 }
-}
+
 }

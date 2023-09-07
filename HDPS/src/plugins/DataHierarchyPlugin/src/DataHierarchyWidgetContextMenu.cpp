@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "DataHierarchyWidgetContextMenu.h"
 
 #include <Application.h>
@@ -48,7 +52,7 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
     QMap<QString, QMenu*> menus;
 
     for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(pluginType, _datasets)) {
-        const auto titleSegments = pluginTriggerAction->getLocation().split("/");
+        const auto titleSegments = pluginTriggerAction->getMenuLocation().split("/");
 
         QString menuPath, previousMenuPath = titleSegments.first();
 

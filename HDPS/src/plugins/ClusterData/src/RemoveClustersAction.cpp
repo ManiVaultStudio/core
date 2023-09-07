@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "RemoveClustersAction.h"
 #include "ClustersAction.h"
 #include "ClustersFilterModel.h"
@@ -5,12 +9,12 @@
 #include "ClustersActionWidget.h"
 
 RemoveClustersAction::RemoveClustersAction(ClustersActionWidget* clustersActionWidget) :
-    TriggerAction(clustersActionWidget),
+    TriggerAction(clustersActionWidget, "Remove"),
     _clustersActionWidget(clustersActionWidget)
 {
-    setText("");
     setToolTip("Remove selected cluster(s)");
     setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
+    setDefaultWidgetFlags(TriggerAction::Icon);
 
     // Remove selected clusters when the action is triggered
     connect(this, &TriggerAction::triggered, this, [this]() {

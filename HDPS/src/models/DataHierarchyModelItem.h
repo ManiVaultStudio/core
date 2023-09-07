@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include <QObject>
@@ -70,7 +74,7 @@ public:
     std::int32_t getNumColumns() const;
 
     /** Returns the serialized item string */
-    QString serialize() const;
+    //QString serialize() const;
 
     /**
      * Get data at column
@@ -81,10 +85,10 @@ public:
     QVariant getDataAtColumn(const std::uint32_t& column, int role = Qt::DisplayRole) const;
 
     /**
-     * Renames the dataset
-     * @param intendedDatasetName Intended new name of the dataset
+     * Renames the dataset to \p datasetName
+     * @param datasetName New name of the dataset
      */
-    void renameDataset(const QString& intendedDatasetName);
+    void renameDataset(const QString& datasetName);
 
     /**
      * Set group index

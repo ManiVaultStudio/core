@@ -1,14 +1,23 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "AbstractActionsManager.h"
 
-#include <models/ActionsModel.h>
-
-#include <QList>
+#include <models/ActionsListModel.h>
 
 namespace hdps
 {
 
+/**
+ * Actions manager
+ *
+ * Extends the abstract actions manager class and adds functionality for serialization and action publishing
+ *
+ * @author Thomas Kroes
+ */
 class ActionsManager final : public AbstractActionsManager
 {
     Q_OBJECT
@@ -28,22 +37,14 @@ public:
     void reset() override;
 
     /**
-     * Add action to the model
-     * @param action Pointer to action
+     * Publish \p privateAction so that other private actions can connect to it
+     * @param privateAction Pointer to private action to publish
+     * @param name Name of the published widget action (if empty, a name choosing dialog will popup)
+     * @param recursive Whether to also publish the child actions recursively
+     * @param allowDuplicateName Boolean determining whether publishing will take place when a public with the same name already exists in the public actions database
+     * @return Boolean determining whether the action is successfully published or not
      */
-    void addAction(gui::WidgetAction* action) override;
-
-    /**
-     * Remove action from the model
-     * @param action Pointer to action
-     */
-    void removeAction(gui::WidgetAction* action) override;
-
-    /**
-     * Get model which is associated with the manager
-     * @return Reference to an abstract item model inherited model class
-     */
-    const QAbstractItemModel& getModel() const override;
+    bool publishPrivateAction(gui::WidgetAction* privateAction, const QString& name = "", bool recursive = true, bool allowDuplicateName = false) override;
 
 public: // Serialization
 
@@ -58,10 +59,6 @@ public: // Serialization
      * @return Variant map representation of the manager
      */
     QVariantMap toVariantMap() const override;
-
-private:
-    gui::WidgetActions  _actions;   /** Keep track of allocated actions */
-    ActionsModel        _model;     /** Actions model */
 };
 
 }

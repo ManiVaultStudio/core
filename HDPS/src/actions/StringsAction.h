@@ -1,11 +1,18 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "WidgetAction.h"
+
+#include "actions/HorizontalGroupAction.h"
 
 #include "widgets/HierarchyWidget.h"
 
 #include <QStringListModel>
 #include <QSortFilterProxyModel>
+#include <QStandardItemModel>
 
 namespace hdps::gui {
 
@@ -38,46 +45,6 @@ public:
     {
     protected:
 
-        /** Qt native string list model does not support icons, this class solves that for the strings action */
-        class IconStringListModel final : public QStringListModel {
-        public:
-
-            /**
-             * Construct string list model from \p icon and \p parent object
-             * @param icon Global model icon
-             * @param parent Pointer to parent object
-             */
-            explicit IconStringListModel(const QIcon& icon, QObject* parent = nullptr) :
-                QStringListModel(parent),
-                _icon(icon)
-            {
-            }
-
-            /**
-             * Override string list model to also support data decoration role
-             * @param index Index to fetch the data for
-             * @param role Data role
-             * @return Data in variant form
-             */
-            QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
-                switch (role) {
-                    case Qt::DisplayRole:
-                    case Qt::EditRole:
-                        return QStringListModel::data(index, role);
-
-                    case Qt::DecorationRole:
-                        return _icon;
-                }
-
-                return QVariant();
-            }
-
-        private:
-            const QIcon   _icon;  /** Global icon */
-        };
-
-    protected:
-
         /**
          * Constructor
          * @param parent Pointer to parent widget
@@ -87,12 +54,9 @@ public:
         ListWidget(QWidget* parent, StringsAction* stringsAction, const std::int32_t& widgetFlags);
 
     private:
-        IconStringListModel     _model;             /** Strings model */
+        QStandardItemModel      _model;             /** Strings model */
         QSortFilterProxyModel   _filterModel;       /** Strings filter model */
         HierarchyWidget         _hierarchyWidget;   /** Hierarchy widget for show the strings */
-        StringAction            _nameAction;        /** String name action */
-        TriggerAction           _addAction;         /** Add string action */
-        TriggerAction           _removeAction;      /** Remove string action */
 
         friend class StringsAction;
     };
@@ -113,22 +77,8 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      * @param strings Strings
-     * @param defaultStrings Default strings
      */
-    StringsAction(QObject* parent, const QString& title = "", const QStringList& strings = QStringList(), const QStringList& defaultStrings = QStringList());
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
-
-    /**
-     * Initialize the strings action
-     * @param strings Strings
-     * @param defaultStrings Default strings
-     */
-    void initialize(const QStringList& strings = QStringList(), const QStringList& defaultStrings = QStringList());
+    Q_INVOKABLE explicit StringsAction(QObject* parent, const QString& title = "", const QStringList& strings = QStringList());
 
     /**
      * Get string category
@@ -155,18 +105,6 @@ public:
     void setStrings(const QStringList& strings);
 
     /**
-     * Get default strings
-     * @return Default strings as string list
-     */
-    QStringList getDefaultStrings() const;
-
-    /**
-     * Set default strings
-     * @param defaultStrings Default strings
-     */
-    void setDefaultStrings(const QStringList& defaultStrings);
-
-    /**
      * Add string
      * @param string String to add
      */
@@ -184,39 +122,20 @@ public:
      */
     void removeStrings(const QStringList& strings);
 
-public: // Settings
-
-    /**
-     * Determines whether the action can be reset to its default
-     * @param recursive Check recursively
-     * @return Whether the action can be reset to its default
-     */
-    bool isResettable() override final;
-
-    /**
-     * Reset to factory default
-     * @param recursive Reset to factory default recursively
-     */
-    void reset() override final;
-
-public: // Linking
+protected: // Linking
 
     /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
      */
-    void connectToPublicAction(WidgetAction* publicAction) override;
-
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
-
-protected:  // Linking
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
     /**
-     * Get public copy of the action (other compatible actions can connect to it)
-     * @return Pointer to public copy of the action
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
      */
-    WidgetAction* getPublicCopy() const override;
+    void disconnectFromPublicAction(bool recursive) override;
 
 public: // Serialization
 
@@ -232,6 +151,13 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+public: // Action getters
+
+    StringAction& getNameAction() { return _nameAction; }
+    TriggerAction& getAddAction() { return _addAction; }
+    TriggerAction& getRemoveAction() { return _removeAction; }
+    HorizontalGroupAction& getToolbarAction() { return _toolbarAction; }
+
 signals:
 
     /**
@@ -240,16 +166,19 @@ signals:
      */
     void stringsChanged(const QStringList& strings);
 
-    /**
-     * Signals that the default strings changed
-     * @param defaultStrings Updated default strings
-     */
-    void defaultStringsChanged(const QStringList& defaultString);
-
 protected:
-    QString         _category;          /** Type of string */
-    QStringList     _strings;           /** Current strings */
-    QStringList     _defaultStrings;    /** Default strings */
+    QString                 _category;          /** Type of string */
+    QStringList             _strings;           /** Current strings */
+    HorizontalGroupAction   _toolbarAction;     /** Toolbar action */
+    StringAction            _nameAction;        /** String name action */
+    TriggerAction           _addAction;         /** Add string action */
+    TriggerAction           _removeAction;      /** Remove string action */
+
+    friend class AbstractActionsManager;
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::StringsAction)
+
+inline const auto stringsActionMetaTypeId = qRegisterMetaType<hdps::gui::StringsAction*>("hdps::gui::StringsAction");

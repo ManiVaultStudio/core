@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "FilePickerAction.h"
 
 #include <Application.h>
@@ -11,8 +15,8 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-FilePickerAction::FilePickerAction(QObject* parent, const QString& title /*= ""*/, const QString& filePath /*= QString()*/) :
-    WidgetAction(parent),
+FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const QString& filePath /*= QString()*/) :
+    WidgetAction(parent, title),
     _dirModel(),
     _completer(),
     _filePathAction(this, "File path"),
@@ -21,7 +25,6 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title /*= ""*
     _defaultSuffix(),
     _fileType("File")
 {
-    setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
 
     _completer.setModel(&_dirModel);
@@ -52,29 +55,32 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title /*= ""*
     connect(&_filePathAction, &StringAction::stringChanged, this, updateStatusAction);
 
     connect(&_pickAction, &TriggerAction::triggered, this, [this]() {
-        QFileDialog fileDialog;
+        auto* fileDialog = new QFileDialog();
 
-        fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-        fileDialog.setWindowTitle(QString("Open %1").arg(getFileType()));
-        fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-        fileDialog.setFileMode(QFileDialog::ExistingFile);
-        fileDialog.setNameFilters(getNameFilters());
-        fileDialog.setDefaultSuffix(getDefaultSuffix());
-        fileDialog.setDirectory(Application::current()->getSetting(getSettingsPrefix(), QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
-        fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+        fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+        fileDialog->setWindowTitle(QString("Open %1").arg(getFileType()));
+        fileDialog->setAcceptMode(QFileDialog::AcceptOpen);
+        fileDialog->setFileMode(QFileDialog::ExistingFile);
+        fileDialog->setNameFilters(getNameFilters());
+        fileDialog->setDefaultSuffix(getDefaultSuffix());
+        fileDialog->setDirectory(Application::current()->getSetting(getSettingsPrefix(), QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+        fileDialog->setOption(QFileDialog::DontUseNativeDialog, true);
 
-        if (fileDialog.exec() == 0)
-            return;
+		connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
+            if (fileDialog->selectedFiles().count() != 1)
+                throw std::runtime_error("Only one file may be selected");
 
-        if (fileDialog.selectedFiles().count() != 1)
-            throw std::runtime_error("Only one file may be selected");
+            const auto filePath = fileDialog->selectedFiles().first();
 
-        const auto filePath = fileDialog.selectedFiles().first();
+            setFilePath(filePath);
 
-        setFilePath(filePath);
+            if (!getSettingsPrefix().isEmpty())
+                Application::current()->setSetting(getSettingsPrefix(), QFileInfo(filePath).absolutePath());
+			});
+        connect(fileDialog, &QFileDialog::finished, fileDialog, &QFileDialog::deleteLater);
 
-        if (!getSettingsPrefix().isEmpty())
-            Application::current()->setSetting(getSettingsPrefix(), QFileInfo(filePath).absolutePath());
+        fileDialog->open();
+
     });
 
     connect(&_filePathAction, &StringAction::stringChanged, this, &FilePickerAction::filePathChanged);
@@ -160,7 +166,6 @@ QWidget* FilePickerAction::getWidget(QWidget* parent, const std::int32_t& widget
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::LineEdit)
         layout->addWidget(_filePathAction.createWidget(parent));
@@ -177,18 +182,19 @@ void FilePickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    //variantMapMustContain(variantMap, "Value");
+    variantMapMustContain(variantMap, "Value");
 
-    //setFilePath(variantMap["Value"].toString());
+    if (variantMap.contains("Value"))
+        setFilePath(variantMap["Value"].toString());
 }
 
 QVariantMap FilePickerAction::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 
-    //variantMap.insert({
-    //    { "Value", QVariant::fromValue(getFilePath()) }
-    //});
+    variantMap.insert({
+        { "Value", getFilePath() }
+    });
 
     return variantMap;
 }

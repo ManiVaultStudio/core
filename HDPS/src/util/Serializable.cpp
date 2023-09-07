@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "Serializable.h"
 #include "Application.h"
 #include "CoreInterface.h"
@@ -21,7 +25,7 @@ using namespace hdps::gui;
 namespace hdps::util {
 
 Serializable::Serializable(const QString& name /*= ""*/) :
-    _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
+    _id(createId()),
     _serializationName(name)
 {
 }
@@ -29,6 +33,11 @@ Serializable::Serializable(const QString& name /*= ""*/) :
 QString Serializable::getId() const
 {
     return _id;
+}
+
+void Serializable::setId(const QString& id)
+{
+    _id = id;
 }
 
 QString Serializable::getSerializationName() const
@@ -138,6 +147,16 @@ void Serializable::toJsonFile(const QString& filePath /*= ""*/)
     }
 }
 
+void Serializable::makeUnique()
+{
+    _id = createId();
+}
+
+QString Serializable::createId()
+{
+    return QUuid::createUuid().toString(QUuid::WithoutBraces);
+}
+
 void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap& variantMap)
 {
 #ifdef SERIALIZABLE_VERBOSE
@@ -168,7 +187,7 @@ void Serializable::fromVariantMap(Serializable& serializable, const QVariantMap&
     if (!variantMap.contains(key)) {
         const auto errorMessage = QString("%1 not found in map: %2").arg(key);
 
-        if (settings().getIgnoreLoadingErrorsAction().isChecked())
+        if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
             qCritical() << errorMessage; 
         else
             throw std::runtime_error(errorMessage.toLatin1());
@@ -187,7 +206,7 @@ void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap)
         if (!parentVariantMap.contains(getSerializationName())) {
             const auto errorMessage = QString("%1 not found in map: %2").arg(getSerializationName());
 
-            if (settings().getIgnoreLoadingErrorsAction().isChecked())
+            if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
                 qCritical() << errorMessage;
             else
                 throw std::runtime_error(errorMessage.toLatin1());
@@ -236,7 +255,33 @@ void Serializable::insertIntoVariantMap(QVariantMap& variantMap) const
     if (getSerializationName().isEmpty())
         throw std::runtime_error("Serialization name may not be empty");
 
+    if (variantMap.contains(getSerializationName()))
+        throw std::runtime_error(QString("%1 already exists in variant map (%2)").arg(getSerializationName()).toLatin1());
+
     variantMap.insert(getSerializationName(), toVariantMap());
 }
+
+//Serializable::State Serializable::getState() const
+//{
+//    return _state;
+//}
+//
+//void Serializable::setState(const State& state)
+//{
+//    if (state == _state)
+//        return;
+//
+//    _state = state;
+//}
+//
+//bool Serializable::isReading() const
+//{
+//    return _state == State::Reading;
+//}
+//
+//bool Serializable::isWriting() const
+//{
+//    return _state == State::Writing;
+//}
 
 }

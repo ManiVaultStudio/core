@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "PixelSelectionTool.h"
 #include "Application.h"
 
@@ -755,7 +759,7 @@ void PixelSelectionTool::paint()
                     shapePainter.drawText(textRectangle, hdps::Application::getIconFont("FontAwesome").getIconCharacter("plus-circle"), QTextOption(Qt::AlignCenter));
                     break;
 
-                case PixelSelectionModifierType::Remove:
+                case PixelSelectionModifierType::Subtract:
                     shapePainter.setPen(_penLineForeGround);
                     shapePainter.drawText(textRectangle, hdps::Application::getIconFont("FontAwesome").getIconCharacter("minus-circle"), QTextOption(Qt::AlignCenter));
                     break;

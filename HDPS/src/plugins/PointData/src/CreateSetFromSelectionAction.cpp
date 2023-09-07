@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "CreateSetFromSelectionAction.h"
 
 #include <Application.h>
@@ -7,7 +11,7 @@
 using namespace hdps;
 
 CreateSetFromSelectionAction::CreateSetFromSelectionAction(QObject* parent, const Dataset<Points>& points) :
-    WidgetAction(parent),
+    WidgetAction(parent, "Create Set From Selection"),
     _points(points),
     _nameAction(this, "Name"),
     _createAction(this, "Create")

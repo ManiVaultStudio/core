@@ -1,13 +1,17 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "VersionAction.h"
 
 #include <QStringListModel>
 
 namespace hdps::gui {
 
-VersionAction::VersionAction(QObject* parent) :
-    HorizontalGroupAction(parent, "Version"),
+VersionAction::VersionAction(QObject* parent, const QString& title) :
+    HorizontalGroupAction(parent, title),
     _majorAction(this, "Major Version", 0, 100, 1),
-    _minorAction(this, "Major Version", 0, 100, 0),
+    _minorAction(this, "Minor Version", 0, 100, 0),
     _suffixAction(this, "Suffix"),
     _versionStringAction(this, "Version String"),
     _suffixCompleter()
@@ -24,18 +28,15 @@ VersionAction::VersionAction(QObject* parent) :
     _majorAction.setPrefix("major: ");
     _majorAction.setToolTip("Major version number");
     _majorAction.setStretch(1);
-    _majorAction.setSerializationName("Major");
 
     _minorAction.setPrefix("minor: ");
     _minorAction.setToolTip("Minor version number");
     _minorAction.setStretch(1);
-    _majorAction.setSerializationName("Minor");
 
     _suffixAction.setPlaceHolderString("Enter suffix here...");
     _suffixAction.setClearable(true);
     _suffixAction.setStretch(3);
     _suffixAction.setCompleter(&_suffixCompleter);
-    _suffixAction.setSerializationName("Suffix");
 
     _suffixCompleter.setModel(new QStringListModel({ "Alpha", "Beta", "Release Candidate", "Pre-release", "alpha", "beta", "rc", "pre-release" }));
 
@@ -48,11 +49,6 @@ VersionAction::VersionAction(QObject* parent) :
     connect(&_majorAction, &IntegralAction::valueChanged, this, updateVersionStringAction);
     connect(&_minorAction, &IntegralAction::valueChanged, this, updateVersionStringAction);
     connect(&_suffixAction, &StringAction::stringChanged, this, updateVersionStringAction);
-}
-
-QString VersionAction::getTypeString() const
-{
-    return "Version";
 }
 
 void VersionAction::fromVariantMap(const QVariantMap& variantMap)

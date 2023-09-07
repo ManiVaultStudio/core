@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "AbstractEventManager.h"
@@ -42,24 +46,23 @@ public:
     void notifyDatasetRemoved(const QString& datasetGuid, const DataType& dataType) override;
 
     /**
-     * Notify listeners that a dataset has changed
+     * Notify listeners that a dataset has changed data
      * @param dataset Smart pointer to the dataset of which the data changed
      */
-    void notifyDatasetChanged(const Dataset<DatasetImpl>& dataset) override;
+    void notifyDatasetDataChanged(const Dataset<DatasetImpl>& dataset) override;
 
     /**
-     * Notify listeners that dataset selection has changed
-     * @param dataset Smart pointer to the dataset of which the selection changed
+     * Notify listeners that a dataset has changed data dimensions
+     * @param dataset Smart pointer to the dataset of which the data dimensions changed
+     */
+    void notifyDatasetDataDimensionsChanged(const Dataset<DatasetImpl>& dataset) override;
+
+    /**
+     * Notify listeners that dataset data selection has changed
+     * @param dataset Smart pointer to the dataset of which the data selection changed
      * @param ignoreDatasets Pointer to datasets that should be ignored during notification
      */
-    void notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets* ignoreDatasets = nullptr) override;
-
-    /**
-     * Notify all listeners that a dataset GUI name has changed
-     * @param dataset Smart pointer to the dataset of which the GUI name changed
-     * @param previousGuiName Previous dataset name
-     */
-    void notifyDatasetGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) override;
+    void notifyDatasetDataSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets* ignoreDatasets = nullptr) override;
 
     /**
      * Notify all listeners that a dataset is locked

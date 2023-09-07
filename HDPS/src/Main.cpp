@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "private/MainWindow.h"
 
 #include <Application.h>
@@ -28,7 +32,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication::setOrganizationName("BioVault");
     QCoreApplication::setOrganizationDomain("LUMC (LKEB) & TU Delft (CGV)");
-    QCoreApplication::setApplicationName("HDPS");
+    QCoreApplication::setApplicationName("ManiVault");
     
     // Necessary to instantiate QWebEngine from a plugin
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);

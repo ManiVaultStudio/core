@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "LoadSystemViewMenu.h"
 #include "PluginManager.h"
 #include "ViewPluginDockWidget.h"
@@ -24,39 +28,46 @@ LoadSystemViewMenu::LoadSystemViewMenu(QWidget *parent /*= nullptr*/, ads::CDock
     //setEnabled(mayProducePlugins());
     setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
 
-    connect(this, &QMenu::aboutToShow, this, [this]() -> void {
-        clear();
+    _loadViewsDockedMenus.insert(gui::DockAreaFlag::Left, QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Left), this)));
+    _loadViewsDockedMenus.insert(gui::DockAreaFlag::Right, QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Right), this)));
+    _loadViewsDockedMenus.insert(gui::DockAreaFlag::Top, QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Top), this)));
+    _loadViewsDockedMenus.insert(gui::DockAreaFlag::Bottom, QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Bottom), this)));
+    _loadViewsDockedMenus.insert(gui::DockAreaFlag::Center, QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Center), this)));
 
-        if (_dockAreaWidget) {
-            const auto addLoadViewsDocked = [&](gui::DockAreaFlag dockArea) -> QMenu* {
-                auto loadViewsDockedMenu = new QMenu(gui::dockAreaMap.key(dockArea));
+    populate();
+}
 
-                loadViewsDockedMenu->setIcon(getDockAreaIcon(dockArea));
+void LoadSystemViewMenu::populate()
+{
+    clear();
 
-                for (auto action : getLoadSystemViewsActions(dockArea))
-                    loadViewsDockedMenu->addAction(action);
+    if (_dockAreaWidget) {
 
-                return loadViewsDockedMenu;
-            };
+        for (auto& dockArea : { gui::DockAreaFlag::Left, gui::DockAreaFlag::Right, gui::DockAreaFlag::Top, gui::DockAreaFlag::Bottom, gui::DockAreaFlag::Center })
+        {
+            auto& loadViewsDockedMenu = _loadViewsDockedMenus[dockArea];
 
-            addMenu(addLoadViewsDocked(gui::DockAreaFlag::Left));
-            addMenu(addLoadViewsDocked(gui::DockAreaFlag::Right));
-            addMenu(addLoadViewsDocked(gui::DockAreaFlag::Top));
-            addMenu(addLoadViewsDocked(gui::DockAreaFlag::Bottom));
-            addMenu(addLoadViewsDocked(gui::DockAreaFlag::Center));
+            loadViewsDockedMenu->clear();
+            loadViewsDockedMenu->setIcon(getDockAreaIcon(dockArea));
+
+            for (auto& action : getLoadSystemViewsActions(dockArea))
+                loadViewsDockedMenu->addAction(action);
+
+            addMenu(loadViewsDockedMenu.get());
         }
-        else {
-            const auto actions = getLoadSystemViewsActions();
+    }
+    else {
+        const auto actions = getLoadSystemViewsActions();
 
-            for (auto action : actions)
-                addAction(action);
-        }
-    });
+        for (auto& action : actions)
+            addAction(action);
+    }
+
 }
 
 bool LoadSystemViewMenu::mayProducePlugins() const
 {
-    for (auto pluginTriggerAction : plugins().getPluginTriggerActions(Type::VIEW)) {
+    for (auto& pluginTriggerAction : plugins().getPluginTriggerActions(Type::VIEW)) {
         auto viewPluginFactory = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
 
         if (!viewPluginFactory->producesSystemViewPlugins())
@@ -75,7 +86,7 @@ QVector<QPointer<TriggerAction>> LoadSystemViewMenu::getLoadSystemViewsActions(h
 
     auto pluginTriggerActions = plugins().getPluginTriggerActions(Type::VIEW);
 
-    for (auto pluginTriggerAction : pluginTriggerActions) {
+    for (auto& pluginTriggerAction : pluginTriggerActions) {
         auto viewPluginFactory = dynamic_cast<const ViewPluginFactory*>(pluginTriggerAction->getPluginFactory());
 
         if (!viewPluginFactory->producesSystemViewPlugins())

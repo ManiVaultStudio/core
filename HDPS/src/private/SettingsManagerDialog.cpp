@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "SettingsManagerDialog.h"
 
 #include <Application.h>
@@ -14,9 +18,7 @@ namespace hdps::gui {
 
 SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _groupsAction(this),
-    _globalPathsGroupAction(this, true),
-    _ioAction(this, true)
+    _groupsAction(this, "Groups")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
     setModal(true);
@@ -28,20 +30,8 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
 
     layout->addWidget(_groupsAction.createWidget(this));
 
-    _globalPathsGroupAction.setText("Paths");
-    _globalPathsGroupAction.setLabelWidthPercentage(20);
-
-    _globalPathsGroupAction << settings().getGlobalProjectsPathAction();
-    _globalPathsGroupAction << settings().getGlobalWorkspacesPathAction();
-    _globalPathsGroupAction << settings().getGlobalDataPathAction();
-
-    _ioAction.setText("IO");
-    _ioAction.setShowLabels(false);
-
-    _ioAction << settings().getIgnoreLoadingErrorsAction();
-
-    //_groupsAction.addGroupAction(&_globalPathsGroupAction);
-    _groupsAction.addGroupAction(&_ioAction);
+    _groupsAction.addGroupAction(&hdps::settings().getParametersSettings());
+    _groupsAction.addGroupAction(&hdps::settings().getMiscellaneousSettings());
 }
 
 QSize SettingsManagerDialog::sizeHint() const

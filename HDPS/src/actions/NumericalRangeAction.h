@@ -1,6 +1,10 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
-#include "WidgetAction.h"
+#include "GroupAction.h"
 
 #include "util/NumericalRange.h"
 
@@ -14,7 +18,7 @@ namespace hdps::gui {
  * @author Thomas Kroes
  */
 template<typename NumericalType, typename NumericalActionType>
-class NumericalRangeAction : public WidgetAction
+class NumericalRangeAction : public GroupAction
 {
     /** Templated classes with Q_OBJECT macro are not allowed, so use std functions instead */
     using LimitsChangedCB   = std::function<void()>;
@@ -43,19 +47,15 @@ public:
      * @param range Range
      */
     NumericalRangeAction(QObject* parent, const QString& title, const util::NumericalRange<NumericalType>& limits, const util::NumericalRange<NumericalType>& range) :
-        WidgetAction(parent),
-        _rangeMinAction(this, "Range Minimum"),
-        _rangeMaxAction(this, "Range Maximum")
+        GroupAction(parent, title),
+        _rangeMinAction(this, "Minimum"),
+        _rangeMaxAction(this, "Maximum")
     {
         setText(title);
-        setSerializationName("Range");
         setDefaultWidgetFlags(WidgetFlag::Default);
 
-        _rangeMinAction.setSerializationName("Min");
-        _rangeMaxAction.setSerializationName("Max");
-
-        _rangeMinAction.setPrefix("Min:");
-        _rangeMaxAction.setPrefix("Max:");
+        _rangeMinAction.setPrefix("min: ");
+        _rangeMaxAction.setPrefix("max: ");
 
         initialize(limits, range);
     }
@@ -67,8 +67,8 @@ public:
      */
     void initialize(const util::NumericalRange<NumericalType>& limits, const util::NumericalRange<NumericalType>& range)
     {
-        _rangeMinAction.initialize(limits.getMinimum(), limits.getMaximum(), range.getMinimum(), range.getMinimum());
-        _rangeMaxAction.initialize(limits.getMinimum(), limits.getMaximum(), range.getMaximum(), range.getMaximum());
+        _rangeMinAction.initialize(limits.getMinimum(), limits.getMaximum(), range.getMinimum());
+        _rangeMaxAction.initialize(limits.getMinimum(), limits.getMaximum(), range.getMaximum());
     }
 
     /**

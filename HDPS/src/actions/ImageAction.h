@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "WidgetAction.h"
@@ -88,7 +92,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    ImageAction(QObject* parent, const QString& title = "");
+    Q_INVOKABLE ImageAction(QObject* parent, const QString& title = "");
 
     /** Get the current image */
     const QImage getImage() const;
@@ -143,3 +147,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::ImageAction)
+
+inline const auto imageActionMetaTypeId = qRegisterMetaType<hdps::gui::ImageAction*>("hdps::gui::ImageAction");

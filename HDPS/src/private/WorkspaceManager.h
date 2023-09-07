@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "DockManager.h"
@@ -215,6 +219,7 @@ private:
     hdps::gui::TriggerAction            _importWorkspaceFromProjectAction;      /** Action for importing a workspace from a project file */
     hdps::gui::RecentFilesAction        _recentWorkspacesAction;                /** Action for saving the current workspace to file with a different path */
     QIcon                               _icon;                                  /** Manager icon */
+    QString                             _styleSheet;                            /** Dock manager style sheet */
 };
 
 }

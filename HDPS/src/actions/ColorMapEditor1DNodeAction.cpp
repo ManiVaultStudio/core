@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "ColorMapEditor1DNodeAction.h"
 #include "ColorMapEditor1DNode.h"
 #include "ColorMapEditor1DAction.h"
@@ -11,13 +15,13 @@ namespace hdps {
 
 namespace gui {
 
-ColorMapEditor1DNodeAction::ColorMapEditor1DNodeAction(ColorMapEditor1DAction& colorMapEditor1DAction) :
-    WidgetAction(&colorMapEditor1DAction),
-    _colorMapEditor1DAction(colorMapEditor1DAction),
+ColorMapEditor1DNodeAction::ColorMapEditor1DNodeAction(QObject* parent, const QString& title) :
+    WidgetAction(parent, title),
+    _colorMapEditor1DAction(*static_cast<ColorMapEditor1DAction*>(parent)),
     _currentNode(nullptr),
     _colorAction(this, "Color", Qt::yellow),
-    _opacityAction(this, "Intensity", 0.0f, 100.0f, 0.0f, 0.0f, 0),
-    _valueAction(this, "Value", 0.0f, 100.0f, 0.0f, 0.0f, 2)
+    _opacityAction(this, "Intensity", 0.0f, 100.0f, 0.0f, 0),
+    _valueAction(this, "Value", 0.0f, 100.0f, 0.0f, 2)
 {
     _colorAction.setEnabled(false);
     _opacityAction.setEnabled(false);
@@ -114,8 +118,8 @@ void ColorMapEditor1DNodeAction::nodeChanged()
     const auto normalizedCoordinate = _currentNode->getNormalizedCoordinate();
     const auto limits               = _currentNode->getLimits();
 
-    _colorAction.initialize(_currentNode->getColor(), _currentNode->getColor());
-    _valueAction.initialize(normalizedValueToRange(limits.left()), normalizedValueToRange(limits.right()), normalizedValueToRange(normalizedCoordinate.x()), normalizedValueToRange(normalizedCoordinate.x()), 2);
+    _colorAction.setColor(_currentNode->getColor());
+    _valueAction.initialize(normalizedValueToRange(limits.left()), normalizedValueToRange(limits.right()), normalizedValueToRange(normalizedCoordinate.x()), 2);
     _opacityAction.setValue(normalizedCoordinate.y() * 100.0f);
 }
 

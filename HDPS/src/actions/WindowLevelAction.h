@@ -1,6 +1,10 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
-#include "actions/WidgetAction.h"
+#include "actions/GroupAction.h"
 #include "actions/DecimalAction.h"
 
 namespace hdps::gui {
@@ -12,46 +16,47 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class WindowLevelAction : public WidgetAction
+class WindowLevelAction : public GroupAction
 {
-Q_OBJECT
-
-public:
-
-    /** Widget class for settings action */
-    class Widget : public WidgetActionWidget
-    {
-    protected:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         * @param windowLevelAction Pointer to window level action
-         */
-        Widget(QWidget* parent, WindowLevelAction* windowLevelAction);
-
-    protected:
-        friend class WindowLevelAction;
-    };
-
-protected:
-
-    /**
-     * Get widget representation of the window & level action
-     * @param parent Pointer to parent widget
-     * @param widgetFlags Widget flags for the configuration of the widget (type)
-     */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new Widget(parent, this);
-    };
+    Q_OBJECT
 
 public:
 
     /** 
      * Constructor
      * @param parent Pointer to parent object
+     * @param title Title of the action
      */
-    WindowLevelAction(QObject* parent);
+    Q_INVOKABLE WindowLevelAction(QObject* parent, const QString& title);
+
+protected: // Linking
+
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
+     */
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
+
+    /**
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
+     */
+    void disconnectFromPublicAction(bool recursive) override;
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
 
 public: /** Action getters */
 
@@ -66,6 +71,12 @@ signals:
 protected:
     DecimalAction   _windowAction;      /** Window action */
     DecimalAction   _levelAction;       /** Level action */
+
+    friend class AbstractActionsManager;
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::WindowLevelAction)
+
+inline const auto windowLevelActionMetaTypeId = qRegisterMetaType<hdps::gui::WindowLevelAction*>("hdps::gui::WindowLevelAction");

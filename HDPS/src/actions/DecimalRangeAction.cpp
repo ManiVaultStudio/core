@@ -1,5 +1,10 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "DecimalRangeAction.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include <QDebug>
 #include <QHBoxLayout>
@@ -71,7 +76,7 @@ QWidget* DecimalRangeAction::getWidget(QWidget* parent, const std::int32_t& widg
     return widget;
 }
 
-void DecimalRangeAction::connectToPublicAction(WidgetAction* publicAction)
+void DecimalRangeAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
 {
     auto publicDecimalRangeAction = dynamic_cast<DecimalRangeAction*>(publicAction);
 
@@ -80,42 +85,38 @@ void DecimalRangeAction::connectToPublicAction(WidgetAction* publicAction)
     if (publicDecimalRangeAction == nullptr)
         return;
 
-    getRangeMinAction().connectToPublicAction(&publicDecimalRangeAction->getRangeMinAction());
-    getRangeMaxAction().connectToPublicAction(&publicDecimalRangeAction->getRangeMaxAction());
+    if (recursive) {
+        actions().connectPrivateActionToPublicAction(&_rangeMinAction, &publicDecimalRangeAction->getRangeMinAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_rangeMaxAction, &publicDecimalRangeAction->getRangeMaxAction(), recursive);
+    }
+
+    NumericalRangeAction::connectToPublicAction(publicAction, recursive);
 }
 
-void DecimalRangeAction::disconnectFromPublicAction()
+void DecimalRangeAction::disconnectFromPublicAction(bool recursive)
 {
-    getRangeMinAction().disconnectFromPublicAction();
-    getRangeMaxAction().disconnectFromPublicAction();
-}
+    if (!isConnected())
+        return;
 
-WidgetAction* DecimalRangeAction::getPublicCopy() const
-{
-    return new DecimalRangeAction(parent(), text(), getLimits(), getRange());
+    if (recursive) {
+        actions().disconnectPrivateActionFromPublicAction(&_rangeMinAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_rangeMaxAction, recursive);
+    }
+    
+    NumericalRangeAction::disconnectFromPublicAction(recursive);
 }
 
 DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags /*= 0*/) :
     WidgetActionWidget(parent, decimalRangeAction, widgetFlags)
 {
-    if (widgetFlags & PopupLayout) {
-        auto layout = new QHBoxLayout();
+    auto layout = new QHBoxLayout();
 
-        layout->addWidget(decimalRangeAction->getRangeMinAction().createWidget(this, DecimalAction::SpinBox));
-        layout->addWidget(decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::SpinBox));
+    layout->setContentsMargins(0, 0, 0, 0);
 
-        setPopupLayout(layout);
-    }
-    else {
-        auto layout = new QHBoxLayout();
+    layout->addWidget(decimalRangeAction->getRangeMinAction().createWidget(this, DecimalAction::SpinBox));
+    layout->addWidget(decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::SpinBox));
 
-        layout->setContentsMargins(0, 0, 0, 0);
-
-        layout->addWidget(decimalRangeAction->getRangeMinAction().createWidget(this, DecimalAction::SpinBox));
-        layout->addWidget(decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::SpinBox));
-
-        setLayout(layout);
-    }
+    setLayout(layout);
 }
 
 }

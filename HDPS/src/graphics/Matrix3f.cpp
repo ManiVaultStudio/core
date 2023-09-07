@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "Matrix3f.h"
 
 #include "Vector2f.h"
@@ -78,5 +82,14 @@ namespace hdps
         Vector2f topRight = *this * s.topRight();
 
         return Selection(bottomLeft, topRight);
+    }
+
+    std::ostream& operator<<(std::ostream& os, const Matrix3f& m)
+    {
+        os << "[" << m[0] << ", " << m[3] << ", " << m[6] << "]\n";
+        os << "[" << m[1] << ", " << m[4] << ", " << m[7] << "]\n";
+        os << "[" << m[2] << ", " << m[5] << ", " << m[8] << "]\n";
+
+        return os;
     }
 }

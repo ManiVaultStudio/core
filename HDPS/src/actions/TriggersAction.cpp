@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "TriggersAction.h"
 
 #include <QPushButton>
@@ -7,7 +11,7 @@
 namespace hdps::gui {
 
 TriggersAction::TriggersAction(QObject* parent, const QString& title /*= ""*/, const QVector<Trigger>& triggers /*= QVector<Trigger>()*/) :
-    WidgetAction(parent)
+    WidgetAction(parent, title)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -80,12 +84,7 @@ TriggersAction::Widget::Widget(QWidget* parent, TriggersAction* triggersAction, 
     const auto applyLayout = [&](QLayout* layout) {
         layout->setContentsMargins(0, 0, 0, 0);
 
-        if (widgetFlags & PopupLayout)
-            setPopupLayout(layout);
-        else {
-            layout->setContentsMargins(0, 0, 0, 0);
-            setLayout(layout);
-        }
+        setLayout(layout);
     };
 
     if (widgetFlags & Horizontal) {

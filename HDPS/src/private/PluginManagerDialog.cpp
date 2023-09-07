@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #include "PluginManagerDialog.h"
 
 #include <Application.h>
@@ -49,7 +53,7 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
     _hierarchyWidget.setWindowIcon(pluginIcon);
     _hierarchyWidget.getTreeView().setRootIsDecorated(true);
 
-    _hierarchyWidget.getFilterGroupAction() << _filterModel.getInstantiatedPluginsOnlyAction();
+    _hierarchyWidget.getFilterGroupAction().addAction(&_filterModel.getInstantiatedPluginsOnlyAction());
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
@@ -116,7 +120,7 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
 
 void PluginManagerDialog::create()
 {
-    PluginManagerDialog loadedPluginsDialog;
-
-    loadedPluginsDialog.exec();
+    auto* loadedPluginsDialog = new PluginManagerDialog();
+    connect(loadedPluginsDialog, &PluginManagerDialog::finished, loadedPluginsDialog, &PluginManagerDialog::deleteLater);
+    loadedPluginsDialog->open();
 }

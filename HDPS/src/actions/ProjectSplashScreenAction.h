@@ -1,6 +1,11 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "HorizontalGroupAction.h"
+#include "VerticalGroupAction.h"
 #include "ToggleAction.h"
 #include "IntegralAction.h"
 #include "TriggerAction.h"
@@ -103,12 +108,6 @@ protected:
     ProjectSplashScreenAction(QObject* parent, const Project& project);
 
     /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
-
-    /**
      * Get parent project
      * @return Reference to parent project
      */
@@ -159,7 +158,7 @@ private:
     IntegralAction      _animationDurationAction;       /** Action to control the duration of the fade in/out animations */
     IntegralAction      _animationPanAmountAction;      /** Action to control the amount of up/down panning of animations */
     ColorAction         _backgroundColorAction;         /** Action to control the background color of the splash screen */
-    GroupAction         _editAction;                    /** Group action for editing the splash screen */
+    VerticalGroupAction _editAction;                    /** Vertical group action for editing the splash screen */
     TriggerAction       _showSplashScreenAction;        /** Trigger action to show the splash screen */
     ImageAction         _projectImageAction;            /** Image action for the project image */
     ImageAction         _affiliateLogosImageAction;     /** Image action for the affiliate logo's image */

@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
 #pragma once
 
 #include "WidgetAction.h"
@@ -144,13 +148,7 @@ public:
      * @param presetType Type of preset
      * @param icon Icon in menu
      */
-    PresetsAction(QObject* parent, WidgetAction* sourceAction, const QString& settingsKey = "", const QString& presetType = "", const QIcon& icon = QIcon());
-
-    /**
-     * Get type string
-     * @return Widget action type in string format
-     */
-    QString getTypeString() const override;
+    Q_INVOKABLE PresetsAction(QObject* parent, WidgetAction* sourceAction, const QString& settingsKey = "", const QString& presetType = "", const QIcon& icon = QIcon());
 
     /**
      * Get settings key
@@ -311,3 +309,7 @@ private:
 };
 
 }
+
+Q_DECLARE_METATYPE(hdps::gui::PresetsAction)
+
+inline const auto presetsActionMetaTypeId = qRegisterMetaType<hdps::gui::PresetsAction*>("PresetsAction");
