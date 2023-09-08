@@ -207,18 +207,18 @@ void Project::updateContributors()
 
 void Project::setStudioMode(bool studioMode)
 {
-    auto viewPlugins = plugins().getPluginsByType(plugin::Type::VIEW);
+    auto plugins = hdps::plugins().getPluginsByTypes();  // by default gets all plugin types
 
     if (studioMode) {
-        for (auto viewPlugin : viewPlugins)
-            viewPlugin->cacheConnectionPermissions(true);
+        for (auto plugin : plugins)
+            plugin->cacheConnectionPermissions(true);
 
-        for (auto viewPlugin : viewPlugins)
-            viewPlugin->setConnectionPermissionsToAll(true);
+        for (auto plugin : plugins)
+            plugin->setConnectionPermissionsToAll(true);
     }
     else {
-        for (auto viewPlugin : viewPlugins)
-            viewPlugin->restoreConnectionPermissions(true);
+        for (auto plugin : plugins)
+            plugin->restoreConnectionPermissions(true);
     }
 }
 
