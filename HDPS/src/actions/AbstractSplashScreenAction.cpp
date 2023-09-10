@@ -17,12 +17,14 @@ AbstractSplashScreenAction::AbstractSplashScreenAction(QObject* parent) :
     _backgroundColorAction(this, "Background Color", Qt::white),
     _openAction(this, "Open splash screen"),
     _closeAction(this, "Close splash screen"),
-    _task(this, "Splash Screen"),
-    _taskAction(this, "Application Startup"),
+    _task(this, "Loading ManiVault Studio"),
+    _taskAction(this, "ManiVault"),
     _splashScreenDialog()
 {
     addAction(&_enabledAction);
     
+    _taskAction.setTask(&_task);
+
     //auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _enabledAction.setStretch(1);

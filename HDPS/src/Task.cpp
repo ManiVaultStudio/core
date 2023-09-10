@@ -246,14 +246,30 @@ void Task::setFinished(bool toIdleWithDelay /*= true*/, std::uint32_t delay /*= 
 {
     setStatus(Status::Finished);
 
-    setProgress(0.f);
     setProgressDescription("Finished", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 
+    /*
     if (toIdleWithDelay) {
         QTimer::singleShot(delay, this, [this]() -> void {
             setIdle();
         });
     }
+    */
+}
+
+void Task::setFinished(const QString& progressDescription, bool toIdleWithDelay /*= true*/, std::uint32_t delay /*= TASK_DESCRIPTION_DISAPPEAR_INTERVAL*/)
+{
+    setStatus(Status::Finished);
+
+    setProgressDescription(progressDescription, TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
+
+    /*
+    if (toIdleWithDelay) {
+        QTimer::singleShot(delay, this, [this]() -> void {
+            setIdle();
+        });
+    }
+    */
 }
 
 void Task::setAborting()
@@ -340,7 +356,7 @@ void Task::setProgress(float progress, const QString& subtaskDescription /*= ""*
     if (_progressMode != ProgressMode::Manual)
         return;
 
-    progress = std::clamp(progress, 0.f, 1.0f);
+    progress = std::clamp(progress, 0.f, 1.f);
 
     if (progress == _progress)
         return;
@@ -361,13 +377,18 @@ QString Task::getProgressText() const
             return "Idle";
 
         case Task::Status::Running:
-            return QString("%1 %2%").arg(getProgressDescription().isEmpty() ? "" : QString("%1: ").arg(getProgressDescription()), QString::number(getProgress() * 100.f, 'f', 1));
+        {
+            if (_progress == 0.f)
+                return _name;
+            else
+                return QString("%1 %2%").arg(getProgressDescription().isEmpty() ? "" : QString("%1: ").arg(getProgressDescription()), QString::number(getProgress() * 100.f, 'f', 1));
+        }
 
         case Task::Status::RunningIndeterminate:
             return getProgressDescription();
 
         case Task::Status::Finished:
-            return "Finished";
+            return QString("%1 finished").arg(getName());
 
         case Task::Status::Aborted:
             return "Aborted";
@@ -446,7 +467,7 @@ void Task::setSubtaskFinished(std::uint32_t subtaskIndex, const QString& progres
 
     const auto subtaskName = _subtasksNames[subtaskIndex];
 
-    if (getProgress() < 1.0f) {
+    if (getProgress() < 1.f) {
         if (!progressDescription.isEmpty()) {
             setProgressDescription(progressDescription);
         }
@@ -566,8 +587,6 @@ void Task::updateProgress()
 
             _progress = accumulatedProgress / static_cast<float>(childTasks.count());
 
-            qDebug() << "************" << _progress << childTasks.count();
-
             break;
         }
     }
@@ -626,6 +645,7 @@ void Task::childEvent(QChildEvent* event)
 
             setProgressMode(ProgressMode::Aggregate);
             registerChildTask(childTask);
+            updateStatus();
             updateProgress();
 
             break;
@@ -643,6 +663,7 @@ void Task::childEvent(QChildEvent* event)
 #endif
 
             unregisterChildTask(childTask);
+            updateStatus();
             updateProgress();
 
             break;
@@ -678,6 +699,14 @@ void Task::registerChildTask(Task* childTask)
     if (childTask == nullptr)
         return;
 
+    connect(childTask, &Task::statusChanged, this, [this](const Status& previousStatus, const Status& status) -> void {
+        if (getProgressMode() != ProgressMode::Aggregate)
+            return;
+
+        updateStatus();
+        updateProgress();
+    });
+
     connect(childTask, &Task::progressChanged, this, [this](float progress) -> void {
         if (getProgressMode() != ProgressMode::Aggregate)
             return;
@@ -700,8 +729,32 @@ void Task::unregisterChildTask(Task* childTask)
     if (childTask == nullptr)
         return;
 
+    disconnect(childTask, &Task::statusChanged, this, nullptr);
     disconnect(childTask, &Task::progressChanged, this, nullptr);
     disconnect(childTask, &Task::progressDescriptionChanged, this, nullptr);
+}
+
+void Task::updateStatus()
+{
+    if (_progressMode != ProgressMode::Aggregate)
+        return;
+
+    const auto childTasks = getChildTasks();
+
+    const auto countStatus = [&childTasks](const Status& status) -> std::size_t {
+        return std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [status](std::size_t count, Task* childTask) -> std::size_t {
+            return count + (childTask->getStatus() == status ? 1 : 0);
+        });
+    };
+
+    if (countStatus(Status::Running) >= 1 || countStatus(Status::RunningIndeterminate) >= 1)
+        setRunning();
+
+    if (countStatus(Status::Idle) == childTasks.count())
+        setIdle();
+
+    if (countStatus(Status::Finished) == childTasks.count())
+        setFinished(false);
 }
 
 }

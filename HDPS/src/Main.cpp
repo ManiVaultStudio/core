@@ -83,18 +83,6 @@ int main(int argc, char *argv[])
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 
     hdps::Application application(argc, argv);
-    
-    BackgroundTask loadManiVaultTask(&application, "Load ManiVaultStudio");
-
-    loadManiVaultTask.setRunning();
-
-    application.getSplashScreenAction().getTaskAction().setTask(&loadManiVaultTask);
-
-    application.getStartupTask().setParent(&loadManiVaultTask);
-
-    BackgroundTask loadApplicationTask(&application, "Load Project");
-
-    loadApplicationTask.setParent(&loadManiVaultTask);
 
     QCommandLineParser commandLineParser;
 

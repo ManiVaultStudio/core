@@ -487,11 +487,6 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (disableReadOnlyAction.isEnabled() && disableReadOnlyAction.isChecked())
                 _project->getReadOnlyAction().setChecked(disableReadOnlyAction.isChecked());
 
-            task.setFinished(true);
-            task.setFinished(true);
-            task.setFinished(true);
-
-            QCoreApplication::processEvents();
             qDebug().noquote() << filePath << "loaded successfully";
         }
         emit projectOpened(*(_project.get()));

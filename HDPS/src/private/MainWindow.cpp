@@ -198,8 +198,6 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         statusBar()->setSizeGripEnabled(true);
         statusBar()->insertPermanentWidget(0, new StatusBarToolButton(this, tasksAction));
 
-        //Application::current()->getStartupTask().setFinished();
-
         if (Application::current()->shouldOpenProjectAtStartup()) {
             projects().openProject(Application::current()->getStartupProjectFilePath());
         }
@@ -207,6 +205,9 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         updateWindowTitle();
 
         emit Application::current()->mainWindowInitialized();
+
+        Application::current()->getStartupTask().setSubtaskFinished("Loading ManiVault Studio");
+        Application::current()->getStartupTask().setFinished("ManiVault Studio Loaded", true, 500);
     }
 }
 

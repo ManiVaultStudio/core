@@ -32,14 +32,11 @@ hdps::Application::Application(int& argc, char** argv) :
     _logger(),
     _startupProjectFilePath(),
     _startupProjectMetaAction(),
-    _startupTask(this, "Load application"),
+    _startupTask(this, "Load ManiVault Studio"),
     _splashScreenAction(this)
 {
-    _startupTask.setMayKill(false);
-    _startupTask.setProgressMode(Task::ProgressMode::Subtasks);
-
     QStringList subTasks{
-        "Starting Application",
+        "Loading ManiVault Studio",
         "Initializing actions manager",
         "Initializing data manager",
         "Initializing data hierarchy manager",
@@ -52,12 +49,12 @@ hdps::Application::Application(int& argc, char** argv) :
         "Setup main window"
     };
 
-    //if (Application::current()->shouldOpenProjectAtStartup())
-    //    subTasks
-
+    _startupTask.setMayKill(false);
+    _startupTask.setProgressMode(Task::ProgressMode::Subtasks);
     _startupTask.setSubtasks(subTasks);
     _startupTask.setRunning();
-    _startupTask.setSubtaskFinished("Starting Application");
+    _startupTask.setSubtaskStarted("Starting Application");
+    _startupTask.setParent(&_splashScreenAction.getTask());
 }
 
 hdps::Application* hdps::Application::current()

@@ -192,6 +192,14 @@ public: // Status
      */
     virtual void setFinished(bool toIdleWithDelay = true, std::uint32_t delay = TASK_DESCRIPTION_DISAPPEAR_INTERVAL) final;
 
+    /**
+     * Convenience method to set task status to finished and use a custom progress description
+     * @param progressDescription Override the default progress description when set to a non-empty string
+     * @param toIdleWithDelay Whether to automatically set the status to idle after \p delay
+     * @param delay Delay in milliseconds
+     */
+    virtual void setFinished(const QString& progressDescription, bool toIdleWithDelay = true, std::uint32_t delay = TASK_DESCRIPTION_DISAPPEAR_INTERVAL) final;
+
     /** Convenience method to set task status to aborting */
     virtual void setAborting() final;
 
@@ -373,6 +381,12 @@ private: // Child tasks
      * @param childTask Pointer to child task to unregister
      */
     virtual void unregisterChildTask(Task* childTask) final;
+
+    /**
+     * Update status of the task
+     * This method only has an effect when Task#_progressMode is set to ProgressMode::Aggregate
+     */
+    virtual void updateStatus() final;
 
 signals:
 
