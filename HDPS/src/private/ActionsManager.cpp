@@ -5,6 +5,7 @@
 #include "ActionsManager.h"
 
 #include <Application.h>
+#include <models/ActionsListModel.h>
 #include <models/ActionsFilterModel.h>
 #include <actions/WidgetAction.h>
 #include <util/Exception.h>
@@ -133,7 +134,7 @@ QVariantMap ActionsManager::toVariantMap() const
     return variantMap;
 }
 
-bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QString& name /*= ""*/, bool recursive /*= true*/)
+bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QString& name /*= ""*/, bool recursive /*= true*/, bool allowDuplicateName /*= false*/)
 {
     try
     {
@@ -203,14 +204,14 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
                 switch (publishDialog.result())
                 {
                     case QDialog::Accepted:
-                        return publishPrivateAction(privateAction, nameAction.getString(), true);
+                        return publishPrivateAction(privateAction, nameAction.getString(), recursive, allowDuplicateName);
 
                     case QDialog::Rejected:
                         return false;
                 }
             }
             else {
-                return publishPrivateAction(privateAction, QString("%1_pub").arg(privateAction->text()), true);
+                return publishPrivateAction(privateAction, QString("%1_pub").arg(privateAction->text()), recursive, allowDuplicateName);
             }
         }
         else {
@@ -218,19 +219,48 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
             qDebug() << __FUNCTION__ << privateAction->text();
     #endif
 
-            if (privateAction->isPublished())
-                throw std::runtime_error("Action is already published");
+            ActionsListModel    actionsListModel(this);
+            ActionsFilterModel  actionsFilterModel(this);
 
-            auto publicAction = privateAction->getPublicCopy();
+            actionsFilterModel.setSourceModel(&actionsListModel);
+            actionsFilterModel.setFilterKeyColumn(static_cast<int>(ActionsListModel::Column::Name));
+            actionsFilterModel.getScopeFilterAction().setSelectedOptions({ "Public" });
+            actionsFilterModel.setFilterRegularExpression(name);
 
-            publicAction->setText(name);
+            const auto numberOfActionsWithDuplicateName = actionsFilterModel.rowCount();
 
-            connectPrivateActionToPublicAction(privateAction, publicAction, true);
+            auto shouldPublish = false;
 
-            emit privateAction->isPublishedChanged(privateAction->isPublished());
-            emit privateAction->isConnectedChanged(privateAction->isConnected());
+            if (numberOfActionsWithDuplicateName >= 1) {
+                const auto duplicateActionNamesMessage = QString("Found %1 action%2 with the same name").arg(QString::number(numberOfActionsWithDuplicateName), numberOfActionsWithDuplicateName == 1 ? "" : "s");
 
-            return true;
+                if (allowDuplicateName == false) {
+                    return false;
+                } else {
+                    qDebug() << duplicateActionNamesMessage;
+
+                    shouldPublish = true;
+                }
+            }
+            else {
+                shouldPublish = true;
+            }
+
+            if (shouldPublish == true) {
+                if (privateAction->isPublished())
+                    throw std::runtime_error("Action is already published");
+
+                auto publicAction = privateAction->getPublicCopy();
+
+                publicAction->setText(name);
+
+                connectPrivateActionToPublicAction(privateAction, publicAction, true);
+
+                emit privateAction->isPublishedChanged(privateAction->isPublished());
+                emit privateAction->isConnectedChanged(privateAction->isConnected());
+
+                return true;
+            }
         }
     }
     catch (std::exception& e)

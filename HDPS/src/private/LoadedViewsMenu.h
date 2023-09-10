@@ -7,7 +7,7 @@
 #include <actions/ToggleAction.h>
 
 #include <QMenu>
-#include <QSharedPointer>
+#include <QPointer>
 
 /**
  * Loaded views menu class
@@ -18,6 +18,9 @@
  */
 class LoadedViewsMenu : public QMenu
 {
+protected:
+    using ToggleActions = QVector<QPointer<hdps::gui::ToggleAction>>;
+
 public:
 
     /**
@@ -36,11 +39,12 @@ private:
     /**
      * Get actions for loaded views
      * @param systemView Whether to include system views or normal views
-     * @return Vector of actions
+     * @return Vector of smart pointers to actions
      */
-    QVector<QPointer<hdps::gui::ToggleAction>> getLoadedViewsActions(bool systemView);
+    ToggleActions getLoadedViewsActions(bool systemView);
 
 private:
-    QSharedPointer<QMenu>   _loadedSystemViewsMenu;     /** Shared pointer to menu */
+    QSharedPointer<QMenu>   _loadedSystemViewsMenu;         /** Shared pointer to menu */
+    ToggleActions           _viewsToggleActions;     /** Keep track of allocated view toggle actions and remove the actions upon re-population of the menu */
 
 };
