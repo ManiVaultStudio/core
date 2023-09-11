@@ -27,6 +27,7 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     _additionalEditorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _additionalEditorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _additionalEditorAction.setConnectionPermissionsToForceNone();
+    _additionalEditorAction.setEnabled(false);
 
     connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesPlugin::selectedItemsChanged);
 
@@ -47,11 +48,14 @@ void DataPropertiesPlugin::selectedItemsChanged(DataHierarchyItems selectedItems
         return;
 
     if (selectedItems.isEmpty()) {
+        _dataset = nullptr;
+        _additionalEditorAction.setEnabled(false);
         return;
     }
 
     // Save reference to currently selected dataset
     _dataset = selectedItems.first()->getDataset();
+    _additionalEditorAction.setEnabled(true);
 }
 
 void DataPropertiesPlugin::init()
