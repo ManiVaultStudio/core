@@ -153,7 +153,12 @@ void ViewPluginDockWidget::initialize()
             _settingsMenu.addAction(&_viewPlugin->getDestroyAction());
 
         if (!_viewPlugin->getLockingAction().isLocked() && !projectIsReadOnly)
+        {
             _settingsMenu.addAction(&_viewPlugin->getEditorAction());
+
+            if(_viewPlugin->getAdditionalEditorAction() != nullptr)
+                _settingsMenu.addAction(_viewPlugin->getAdditionalEditorAction());
+        }
 
         _settingsMenu.addSeparator();
 

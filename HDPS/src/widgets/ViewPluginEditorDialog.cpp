@@ -24,19 +24,41 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* view
     _actionsWidget(this, _actionsHierarchyModel),
     _settingsAction(this, "Settings")
 {
-    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setWindowTitle(QString("Edit (%1) settings").arg(viewPlugin->text()));
-    setMinimumSize(QSize(640, 480));
-
-    auto layout = new QVBoxLayout();
-    
-    layout->addWidget(&_actionsWidget);
 
     _settingsAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
     _settingsAction.addAction(&viewPlugin->getLockingAction().getLockedAction());
     _settingsAction.addAction(&viewPlugin->getDockingOptionsAction());
     _settingsAction.addAction(&viewPlugin->getGuiNameAction());
+
+    init();
+}
+
+ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, WidgetAction* rootAction) :
+    QDialog(parent),
+    _groupsAction(this, "Groups"),
+    _actionsListModel(this, rootAction),
+    _actionsHierarchyModel(this, rootAction),
+    _actionsWidget(this, _actionsHierarchyModel),
+    _settingsAction(this, "Settings")
+{
+    setWindowTitle(QString("Edit plugin settings"));
+
+    init();
+}
+
+
+void ViewPluginEditorDialog::init()
+{
+    setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    setMinimumSize(QSize(640, 480));
+
+    auto layout = new QVBoxLayout();
+
+    layout->addWidget(&_actionsWidget);
+
+    _settingsAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
     layout->addWidget(_settingsAction.createWidget(this));
 
@@ -49,6 +71,7 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* view
     connect(dialogButtonBox, &QDialogButtonBox::accepted, this, &ViewPluginEditorDialog::accept);
 
     _actionsWidget.getFilterModel().getPublicRootOnlyAction().setChecked(false);
+
 }
 
 }

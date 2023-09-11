@@ -141,6 +141,8 @@ public: // Action getters
     gui::TriggerAction& getHelpAction() { return _helpAction; }
     gui::PresetsAction& getPresetsAction() { return _presetsAction; }
 
+    virtual gui::TriggerAction* getAdditionalEditorAction() { return nullptr; }
+
 private:
     QWidget                 _widget;                    /** Widget representation of the plugin */
     gui::TriggerAction      _editorAction;              /** Trigger action to start the view plugin editor */

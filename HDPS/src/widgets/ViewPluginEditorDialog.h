@@ -40,6 +40,8 @@ public:
      */
     ViewPluginEditorDialog(QWidget* parent, hdps::plugin::ViewPlugin* viewPlugin);
 
+    ViewPluginEditorDialog(QWidget* parent, hdps::gui::WidgetAction* rootAction);
+
     /** Get preferred size */
     QSize sizeHint() const override {
         return QSize(800, 600);
@@ -49,6 +51,9 @@ public:
     QSize minimumSizeHint() const override {
         return sizeHint();
     }
+
+private:
+    void init();
 
 private:
     GroupsAction            _groupsAction;              /** Groups action */
