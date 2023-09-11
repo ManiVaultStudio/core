@@ -5,6 +5,7 @@
 #include "Project.h"
 #include "AbstractProjectManager.h"
 #include "CoreInterface.h"
+#include "Set.h"
 
 #include "util/Serialization.h"
 
@@ -208,6 +209,7 @@ void Project::updateContributors()
 void Project::setStudioMode(bool studioMode)
 {
     auto plugins = hdps::plugins().getPluginsByTypes();  // by default gets all plugin types
+    auto& datasets = hdps::data().allSets();
 
     if (studioMode) {
         for (auto plugin : plugins)
@@ -215,11 +217,26 @@ void Project::setStudioMode(bool studioMode)
 
         for (auto plugin : plugins)
             plugin->setConnectionPermissionsToAll(true);
+
+        for (auto& dataset : datasets)
+        {
+            for (auto& action : dataset.get()->getActions())
+                action->cacheConnectionPermissions(true);
+
+            for (auto& action : dataset.get()->getActions())
+                action->setConnectionPermissionsToAll(true);
+        }
+
     }
     else {
         for (auto plugin : plugins)
             plugin->restoreConnectionPermissions(true);
+
+        for (auto& dataset : datasets)
+            for (auto& action : dataset.get()->getActions())
+                action->restoreConnectionPermissions(true);
     }
+
 }
 
 Project::CompressionAction::CompressionAction(QObject* parent /*= nullptr*/) :
