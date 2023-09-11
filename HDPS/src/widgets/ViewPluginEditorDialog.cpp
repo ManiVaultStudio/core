@@ -71,7 +71,6 @@ void ViewPluginEditorDialog::init()
     connect(dialogButtonBox, &QDialogButtonBox::accepted, this, &ViewPluginEditorDialog::accept);
 
     _actionsWidget.getFilterModel().getPublicRootOnlyAction().setChecked(false);
-
 }
 
 }

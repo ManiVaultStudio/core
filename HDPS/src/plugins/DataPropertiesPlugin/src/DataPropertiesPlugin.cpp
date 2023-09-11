@@ -17,18 +17,23 @@ using namespace hdps;
 DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _dataPropertiesWidget(nullptr),
-    _editorAction(this, "Edit dataset actions..."),
+    _additionalEditorAction(this, "Edit dataset actions..."),
     _dataset()
 {
-    getWidget().addAction(&_editorAction);
+    getWidget().addAction(&_additionalEditorAction);
 
-    _editorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
-    _editorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _editorAction.setConnectionPermissionsToForceNone();
+    _additionalEditorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+    _additionalEditorAction.setShortcut(tr("F11"));
+    _additionalEditorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _additionalEditorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _additionalEditorAction.setConnectionPermissionsToForceNone();
 
     connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesPlugin::selectedItemsChanged);
 
-    connect(&_editorAction, &TriggerAction::triggered, this, [this]() -> void {
+    connect(&_additionalEditorAction, &TriggerAction::triggered, this, [this]() -> void {
+        if (!_dataset.isValid())
+            return;
+
         auto* viewPluginEditorDialog = new hdps::gui::ViewPluginEditorDialog(nullptr, dynamic_cast<WidgetAction*>(_dataset.get()->getActions().first()->parent()));
         connect(viewPluginEditorDialog, &hdps::gui::ViewPluginEditorDialog::finished, viewPluginEditorDialog, &hdps::gui::ViewPluginEditorDialog::deleteLater);
         viewPluginEditorDialog->open();
@@ -45,6 +50,7 @@ void DataPropertiesPlugin::selectedItemsChanged(DataHierarchyItems selectedItems
         return;
     }
 
+    // Save reference to currently selected dataset
     _dataset = selectedItems.first()->getDataset();
 }
 

@@ -29,7 +29,7 @@ public:
 
 public: // Action getters
 
-    gui::TriggerAction* getAdditionalEditorAction() override { return &_editorAction; }
+    gui::TriggerAction* getAdditionalEditorAction() override { return &_additionalEditorAction; }
 
 protected:
 
@@ -41,8 +41,8 @@ protected:
 
 private:
     DataPropertiesWidget    _dataPropertiesWidget;      /** Data properties widget */
-    gui::TriggerAction      _editorAction;              /** Trigger action to start the view plugin editor */
-    Dataset<DatasetImpl>    _dataset;                   /** Smart point to current dataset */
+    gui::TriggerAction      _additionalEditorAction;    /** Trigger action to start the data set editor */
+    Dataset<DatasetImpl>    _dataset;                   /** Smart pointer to currently selected dataset */
 };
 
 class DataPropertiesPluginFactory : public ViewPluginFactory

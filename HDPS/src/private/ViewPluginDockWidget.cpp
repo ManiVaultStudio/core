@@ -154,8 +154,10 @@ void ViewPluginDockWidget::initialize()
 
         if (!_viewPlugin->getLockingAction().isLocked() && !projectIsReadOnly)
         {
+            // edit trigger for plugin actions (viewer plugin)
             _settingsMenu.addAction(&_viewPlugin->getEditorAction());
 
+            // edit trigger for dataset actions (e.g. analysis plugin actions, used in the DataPropertiesPlugin)
             if(_viewPlugin->getAdditionalEditorAction() != nullptr)
                 _settingsMenu.addAction(_viewPlugin->getAdditionalEditorAction());
         }
