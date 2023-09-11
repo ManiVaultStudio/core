@@ -35,23 +35,9 @@ Project::Project(QObject* parent /*= nullptr*/) :
 }
 
 Project::Project(const QString& filePath, bool preview, QObject* parent /*= nullptr*/) :
-    QObject(parent),
-    Serializable("Project"),
-    _filePath(filePath),
-    _applicationVersion(Application::current()->getVersion()),
-    _applicationVersionAction(this, "Application Version"),
-    _projectVersionAction(this, "Project Version"),
-    _readOnlyAction(this, "Read-only"),
-    _titleAction(this, "Title"),
-    _descriptionAction(this, "Description"),
-    _tagsAction(this, "Tags"),
-    _commentsAction(this, "Comments"),
-    _contributorsAction(this, "Contributors"),
-    _compressionAction(this),
-    _splashScreenAction(this, *this),
-    _studioModeAction(this, "Studio Mode")
+    Project(parent)
 {
-    initialize();
+    _filePath = filePath;
 
     try {
         if (!QFileInfo(_filePath).exists())
