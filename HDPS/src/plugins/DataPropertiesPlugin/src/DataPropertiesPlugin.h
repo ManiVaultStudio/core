@@ -43,7 +43,6 @@ private:
     DataPropertiesWidget    _dataPropertiesWidget;      /** Data properties widget */
     gui::TriggerAction      _editorAction;              /** Trigger action to start the view plugin editor */
     Dataset<DatasetImpl>    _dataset;                   /** Smart point to current dataset */
-    gui::WidgetAction       _action;                    /** Helper action that serves as parent for all data action groups */
 };
 
 class DataPropertiesPluginFactory : public ViewPluginFactory
