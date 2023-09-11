@@ -18,7 +18,8 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _dataPropertiesWidget(nullptr),
     _editorAction(this, "Edit Plugin..."),
-    _dataset()
+    _dataset(),
+    _action(this, "Dataset Analysis & Transform Actions")
 {
     getWidget().addAction(&_editorAction);
 
@@ -29,7 +30,8 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesPlugin::selectedItemsChanged);
 
     connect(&_editorAction, &TriggerAction::triggered, this, [this]() -> void {
-        auto* viewPluginEditorDialog = new hdps::gui::ViewPluginEditorDialog(nullptr, _dataset.get()->getActions().first());
+        //auto* viewPluginEditorDialog = new hdps::gui::ViewPluginEditorDialog(nullptr, _dataset.get()->getActions().first());
+        auto* viewPluginEditorDialog = new hdps::gui::ViewPluginEditorDialog(nullptr, &_action);
         connect(viewPluginEditorDialog, &hdps::gui::ViewPluginEditorDialog::finished, viewPluginEditorDialog, &hdps::gui::ViewPluginEditorDialog::deleteLater);
         viewPluginEditorDialog->open();
         });
@@ -46,6 +48,12 @@ void DataPropertiesPlugin::selectedItemsChanged(DataHierarchyItems selectedItems
     }
 
     _dataset = selectedItems.first()->getDataset();
+
+    if (_dataset.get()->getActions().isEmpty())
+        return;
+
+    for (auto& action : _dataset.get()->getActions())
+        action->setParent(&_action);
 }
 
 void DataPropertiesPlugin::init()
