@@ -6,9 +6,14 @@
 
 #include <Application.h>
 
+#include <actions/TriggerAction.h>
+
+#include <ModalTask.h>
+
 Q_PLUGIN_METADATA(IID "nl.BioVault.DataHierarchyPlugin")
 
 using namespace hdps;
+using namespace hdps::gui;
 
 DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
@@ -26,7 +31,18 @@ void DataHierarchyPlugin::init()
 
     getWidget().setLayout(layout);
 
-    //auto testSingleModalTask
+    auto testSingleModalTask = new TriggerAction(this, "Test single modal task");
+
+    connect(testSingleModalTask, &TriggerAction::triggered, this, [this]() -> void {
+        auto modalTask = new ModalTask(this, "Modal Task");
+
+        
+        modalTask->setRunningIndeterminate();
+
+        //modalTask.setProgressMode(Task::ProgressMode::Subtasks);
+    });
+
+    layout->addWidget(testSingleModalTask->createWidget(&getWidget()));
 }
 
 DataHierarchyPluginFactory::DataHierarchyPluginFactory() :

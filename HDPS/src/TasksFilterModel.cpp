@@ -13,9 +13,9 @@ namespace hdps
 
 TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
-    _taskTypeFilterAction(this, "Task Type"),
-    _taskScopeFilterAction(this, "Task Scope", Task::scopeNames.values(), Task::scopeNames.values()),
-    _taskStatusFilterAction(this, "Task Status", Task::statusNames.values(), Task::statusNames.values()),
+    _taskTypeFilterAction(this, "Type"),
+    _taskScopeFilterAction(this, "Scope", Task::scopeNames.values(), Task::scopeNames.values()),
+    _taskStatusFilterAction(this, "Status", Task::statusNames.values(), Task::statusNames.values()),
     _statusTypeCounts()
 {
     setDynamicSortFilter(true);

@@ -125,6 +125,20 @@ private:
     /** Invoked when the filter model layout changes */
     void filterModelChanged();
 
+    /**
+     * Open any progress editor which has not been opened yet in the filtered tasks view recursively
+     * @param itemView Item view to set the persistent editors for
+     * @param parent Parent model index
+     */
+    void openPersistentProgressEditorsRecursively(QAbstractItemView& itemView, const QModelIndex& parent = QModelIndex());
+
+    /**
+     * Close any progress editor in the filtered tasks view recursively
+     * @param itemView Item view to set the persistent editors for
+     * @param parent Parent model index
+     */
+    void closePersistentProgressEditorsRecursively(QAbstractItemView& itemView, const QModelIndex& parent = QModelIndex());
+
 signals:
 
     /**

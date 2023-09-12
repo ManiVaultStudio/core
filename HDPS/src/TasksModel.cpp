@@ -165,13 +165,18 @@ void TasksModel::NameItem::setData(const QVariant& value, int role /* = Qt::User
 }
 
 TasksModel::ProgressItem::ProgressItem(Task* task) :
-    Item(task)
+    Item(task, true),
+    _progressAction(this, "Progress")
 {
     connect(getTask(), &Task::progressChanged, this, [this]() -> void {
         emitDataChanged();
     });
 
     connect(getTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+
+    connect(getTask(), &Task::statusChanged, this, [this]() -> void {
         emitDataChanged();
     });
 }
@@ -426,6 +431,7 @@ TasksModel::Row::Row(Task* task) :
     append(new IdItem(task));
     append(new ParentIdItem(task));
     append(new TypeItem(task));
+    append(new ScopeItem(task));
     append(new MayKillItem(task));
     append(new KillItem(task));
 }
@@ -439,6 +445,7 @@ QMap<TasksModel::Column, TasksModel::ColumHeaderInfo> TasksModel::columnInfo = Q
     { TasksModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the task" } },
     { TasksModel::Column::ParentID, { "Parent ID",  "Parent ID", "Globally unique identifier of the parent task" } },
     { TasksModel::Column::Type, { "Type",  "Type", "Type of task" } },
+    { TasksModel::Column::Scope, { "Scope",  "Scope", "Task scope" } },
     { TasksModel::Column::MayKill, { "May kill",  "May kill", "Whether the task may be killed or not" } },
     { TasksModel::Column::Kill, { "",  "Kill", "Kill the task" } }
 });

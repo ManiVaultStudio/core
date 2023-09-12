@@ -6,6 +6,8 @@
 
 #include "Task.h"
 
+#include "actions/ProgressAction.h"
+
 #include <QStandardItemModel>
 
 namespace hdps
@@ -135,6 +137,8 @@ protected:
         void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
     };
 
+public:
+
     /** Standard model item class for displaying the task progress */
     class ProgressItem final : public Item {
     public:
@@ -150,7 +154,20 @@ protected:
          * @return Data for \p role in variant form
          */
         QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get progress action
+         * @return Progress action for item delegate
+         */
+        gui::ProgressAction& getProgressAction() {
+            return _progressAction;
+        }
+
+    private:
+        gui::ProgressAction  _progressAction;        /** Progress action for item delegate */
     };
+
+protected:
 
     /** Standard model item class for displaying the progress description */
     class ProgressDescriptionItem final : public Item {

@@ -117,6 +117,32 @@ bool TasksAction::getAutoHideKillCollumn() const
     return _autoHideKillCollumn;
 }
 
+void TasksAction::openPersistentProgressEditorsRecursively(QAbstractItemView& itemView, const QModelIndex& parent /*= QModelIndex()*/)
+{
+    for (int rowIndex = 0; rowIndex < _tasksFilterModel.rowCount(parent); ++rowIndex) {
+        const auto index = _tasksFilterModel.index(rowIndex, 0, parent);
+
+        if (!itemView.isPersistentEditorOpen(index))
+            itemView.openPersistentEditor(index.siblingAtColumn(static_cast<int>(TasksModel::Column::Progress)));
+
+        if (_tasksFilterModel.hasChildren(index))
+            openPersistentProgressEditorsRecursively(itemView, index);
+    }
+}
+
+void TasksAction::closePersistentProgressEditorsRecursively(QAbstractItemView& itemView, const QModelIndex& parent /*= QModelIndex()*/)
+{
+    for (int rowIndex = 0; rowIndex < _tasksFilterModel.rowCount(parent); ++rowIndex) {
+        const auto index = _tasksFilterModel.index(rowIndex, 0, parent);
+
+        if (!itemView.isPersistentEditorOpen(index))
+            itemView.closePersistentEditor(index.siblingAtColumn(static_cast<int>(TasksModel::Column::Progress)));
+
+        if (_tasksFilterModel.hasChildren(index))
+            closePersistentProgressEditorsRecursively(itemView, index);
+    }
+}
+
 /** Tree view item delegate class for showing custom task progress user interface */
 class ProgressItemDelegate : public QStyledItemDelegate {
 public:
@@ -131,59 +157,47 @@ public:
     {
     }
 
-    /**
-     * Override QItemDelegate::sizeHint() to establish fixed height
-     * @param option Style view option
-     * @param index Index to obtain the style hint for
-     */
-    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
-    {
-        auto modifiedOption = option;
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
+        auto progressAction = getProgressAction(index);
 
-        modifiedOption.displayAlignment = Qt::AlignVCenter;
+        if (progressAction == nullptr)
+            return nullptr;
 
-        auto size = QStyledItemDelegate::sizeHint(modifiedOption, index);
-
-        size.setHeight(_tasksAction->getRowHeight());
-
-        return size;
+        return progressAction->createWidget(parent);
     }
+    
+    void setEditorData(QWidget* editor, const QModelIndex& index) const override {
+        auto progressAction = getProgressAction(index);
 
-protected:
+        if (progressAction == nullptr)
+            return;
 
-    /** Paints a progress bar in the cell */
-    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
-    {
         const auto status               = static_cast<Task::Status>(index.siblingAtColumn(static_cast<int>(TasksModel::Column::Status)).data(Qt::EditRole).toInt());
         const auto progress             = static_cast<int>(index.data(Qt::EditRole).toFloat() * 100.f);
         const auto progressDescription  = index.siblingAtColumn(static_cast<int>(TasksModel::Column::ProgressDescription)).data(Qt::EditRole).toString();
 
-        ProgressAction progressAction(nullptr, "Progress");
+        progressAction->setRange(0, status == Task::Status::RunningIndeterminate ? 0 : 100);
+        progressAction->setTextFormat(status == Task::Status::Running || status == Task::Status::RunningIndeterminate ? QString("%1 %p%").arg(progressDescription) : progressDescription);
+        progressAction->setProgress(progress);
+    }
 
-        progressAction.setRange(0, status == Task::Status::RunningIndeterminate ? 0 : 100);
-        progressAction.setTextFormat(status == Task::Status::Running || status == Task::Status::RunningIndeterminate ? QString("%1 %p%").arg(progressDescription) : progressDescription);
-        progressAction.setProgress(progress);
-
-        auto progressWidget = ProgressAction::BarWidget(nullptr, &progressAction, 0);
-        auto rect           = option.rect;
-
-        const auto progressColumnMargin = _tasksAction->getProgressColumnMargin();
-
-        rect.translate(0, progressColumnMargin);
-        rect.setHeight(_tasksAction->getRowHeight() - (2 * progressColumnMargin));
-
-        progressWidget.setGeometry(rect);
-
-        painter->save();
-        painter->translate(option.rect.topLeft());
-
-        progressWidget.render(painter);
-        
-        painter->restore();
+    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex&/*index*/) const {
+        editor->setGeometry(option.rect);
     }
 
 private:
-    TasksAction* _tasksAction;
+
+    ProgressAction* getProgressAction(const QModelIndex& index) const {
+        auto item = _tasksAction->getTasksModel().itemFromIndex(_tasksAction->getTasksFilterModel().mapToSource(index).siblingAtColumn(static_cast<int>(TasksModel::Column::Progress)));
+
+        if (item == nullptr)
+            return nullptr;
+
+        return &(dynamic_cast<TasksModel::ProgressItem*>(item)->getProgressAction());
+    }
+
+private:
+    TasksAction*    _tasksAction;
 };
 
 TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags) :
@@ -196,6 +210,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     _tasksWidget.setObjectName("HierarchyWidget");
     _tasksWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskTypeFilterAction());
+    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskScopeFilterAction());
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskStatusFilterAction());
 
     _tasksWidget.getFilterColumnAction().setCurrentText("Name");
@@ -209,6 +224,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ParentID), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ProgressDescription), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ProgressText), true);
+    treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Scope), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::MayKill), true);
 
     auto treeViewHeader = treeView.header();
@@ -219,7 +235,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     treeView.setTextElideMode(Qt::ElideMiddle);
 
     treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Progress), new ProgressItemDelegate(tasksAction));
-
+    
     treeViewHeader->setStretchLastSection(false);
 
     treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Name), QHeaderView::Stretch);
@@ -230,7 +246,13 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     treeViewHeader->resizeSection(static_cast<int>(TasksModel::Column::Status), 130);
     treeViewHeader->resizeSection(static_cast<int>(TasksModel::Column::Kill), 130);
 
-    connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::rowsInserted, this, &TasksAction::Widget::modelChanged);
+    _tasksAction->openPersistentProgressEditorsRecursively(treeView);
+
+    connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
+        _tasksAction->openPersistentProgressEditorsRecursively(_tasksWidget.getTreeView(), parent);
+        modelChanged();
+    });
+
     connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::rowsRemoved, this, &TasksAction::Widget::modelChanged);
     //connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::layoutChanged, this, &TasksAction::Widget::modelChanged);
 
