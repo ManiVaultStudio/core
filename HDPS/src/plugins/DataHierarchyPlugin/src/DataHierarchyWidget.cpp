@@ -22,6 +22,7 @@
 #include <QLabel>
 #include <QStyledItemDelegate>
 #include <QStyleOptionViewItem>
+#include <QScopedPointer>
 
 #include <stdexcept>
 
@@ -138,16 +139,20 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     });
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {
-        const auto selectedRows = _hierarchyWidget.getSelectedRows();
 
-        Datasets datasets;
+        auto createContextMenu = [this, position]() -> void {
+            Datasets datasets;
 
-        for (const auto& selectedRow : selectedRows)
-            datasets << _model.getItem(selectedRow, Qt::DisplayRole)->getDataHierarchyItem()->getDataset();
+            for (const auto& selectedRow : _hierarchyWidget.getSelectedRows())
+                datasets << _model.getItem(selectedRow, Qt::DisplayRole)->getDataHierarchyItem()->getDataset();
 
-        auto datasetsContextMenu = new DataHierarchyWidgetContextMenu(this, datasets);
+            QScopedPointer<DataHierarchyWidgetContextMenu> datasetsContextMenu(new DataHierarchyWidgetContextMenu(this, datasets));
+            datasetsContextMenu->exec(_hierarchyWidget.getTreeView().viewport()->mapToGlobal(position));
 
-        datasetsContextMenu->exec(_hierarchyWidget.getTreeView().viewport()->mapToGlobal(position));
+            };
+
+        // Get around possible signal-execution order complications
+        QTimer::singleShot(10, createContextMenu);
     });
 
     for (const auto topLevelItem : Application::core()->getDataHierarchyManager().getTopLevelItems())
