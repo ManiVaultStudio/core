@@ -17,8 +17,8 @@ using namespace hdps;
 DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _dataPropertiesWidget(nullptr),
-    _additionalEditorAction(this, "Edit dataset actions..."),
-    _dataset()
+    _additionalEditorAction(this, "Edit dataset parameters..."),
+    _dataset(nullptr)
 {
     getWidget().addAction(&_additionalEditorAction);
 
@@ -29,13 +29,14 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     _additionalEditorAction.setConnectionPermissionsToForceNone();
     _additionalEditorAction.setEnabled(false);
 
-    connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesPlugin::selectedItemsChanged);
+    connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesPlugin::selectedItemsChanged, Qt::DirectConnection);
 
     connect(&_additionalEditorAction, &TriggerAction::triggered, this, [this]() -> void {
+        
         if (!_dataset.isValid())
             return;
 
-        auto* viewPluginEditorDialog = new hdps::gui::ViewPluginEditorDialog(nullptr, dynamic_cast<WidgetAction*>(_dataset.get()->getActions().first()->parent()));
+        auto* viewPluginEditorDialog = new hdps::gui::ViewPluginEditorDialog(nullptr, dynamic_cast<WidgetAction*>(_dataset.get()));
         connect(viewPluginEditorDialog, &hdps::gui::ViewPluginEditorDialog::finished, viewPluginEditorDialog, &hdps::gui::ViewPluginEditorDialog::deleteLater);
         viewPluginEditorDialog->open();
         });
