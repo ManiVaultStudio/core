@@ -36,23 +36,32 @@ public:
 
     /** Task: */
     enum class Status {
-        Undefined = -1,         /** status is undefined */
-        Idle,                   /** is idle */
-        Running,                /** is currently running */
-        RunningIndeterminate,   /** is currently running, but it's operating time is not known */
-        Finished,               /** has finished successfully */
-        Aborting,               /** is in the process of being aborted */
-        Aborted                 /** has been aborted */
+        Undefined = -1,         /** ...status is undefined */
+        Idle,                   /** ...is idle */
+        Running,                /** ...is currently running */
+        RunningIndeterminate,   /** ...is currently running, but it's operating time is not known */
+        Finished,               /** ...has finished successfully */
+        Aborting,               /** ...is in the process of being aborted */
+        Aborted                 /** ...has been aborted */
     };
 
     static QMap<Status, QString> statusNames;
 
     /** Progress is tracked by: */
     enum class ProgressMode {
-        Manual,     /** setting progress percentage manually */
-        Subtasks,   /** setting a number of subtasks and flagging subtasks as finished (progress percentage is computed automatically) */
-        Aggregate   /** combining the progress of child tasks */
+        Manual,     /** ...setting progress percentage manually */
+        Subtasks,   /** ...setting a number of subtasks and flagging subtasks as finished (progress percentage is computed automatically) */
+        Aggregate   /** ...combining the progress of child tasks */
     };
+
+    /** Task: */
+    enum class Scope {
+        Background,     /** ...will run in the background (not visible by default but can be revealed in the tasks view plugin) */
+        ForeGround,     /** ...will run in the foreground (tasks with this scope will automatically appear in a tasks popup when running) */
+        Modal           /** ...will run modally (tasks with this scope will automatically appear in a modal tasks dialog when the needed) */
+    };
+
+    static QMap<Scope, QString> scopeNames;
 
     using TasksPtrs = QVector<Task*>;
 
@@ -236,6 +245,20 @@ public: // Progress mode
      * @param progressMode Progress mode
      */
     virtual void setProgressMode(const ProgressMode& progressMode) final;
+
+public: // Scope
+
+    /**
+     * Get scope
+     * @return Scope enum
+     */
+    virtual Scope getScope() const final;
+    
+    /**
+     * Sets scope to to \p scope
+     * @param scope Scope enum
+     */
+    virtual void setScope(const Scope& scope) final;
 
 public: // Manual
 
@@ -444,10 +467,16 @@ signals:
     void aborted();
 
     /**
-     * Signals that the task progress mode to \p progressMode
+     * Signals that the task progress mode changed to \p progressMode
      * @param progressMode Modified progress mode
      */
     void progressModeChanged(const ProgressMode& progressMode);
+
+    /**
+     * Signals that the task scope changed to \p scope
+     * @param scope Modified scope
+     */
+    void scopeChanged(const Scope& scope);
 
     /**
      * Signals that the task progress changed to \p progress
@@ -494,6 +523,7 @@ private:
     bool                    _mayKill;                                       /** Whether the task may be killed or not */
     AbstractTaskHandler*    _handler;                                       /** Task handler */
     ProgressMode            _progressMode;                                  /** The way progress is recorded */
+    Scope                   _scope;                                         /** The (gui) scope in which the task will present itself to the user */
     float                   _progress;                                      /** Task progress */
     QBitArray               _subtasks;                                      /** Subtasks status */
     QStringList             _subtasksNames;                                 /** Subtasks names */
@@ -503,7 +533,7 @@ private:
 private:
 
     /** Single shot task progress and description timer interval */
-    static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL = 100;
+    static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL = 10;
 
     /** Single shot task description disappear timer interval */
     static constexpr std::uint32_t TASK_DESCRIPTION_DISAPPEAR_INTERVAL = 1500;

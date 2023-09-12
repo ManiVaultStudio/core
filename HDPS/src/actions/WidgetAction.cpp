@@ -151,7 +151,7 @@ void WidgetAction::setSortIndex(const std::int32_t& sortIndex)
     emit sortIndexChanged(_sortIndex);
 }
 
-QWidget* WidgetAction::createCollapsedWidget(QWidget* parent) const
+QWidget* WidgetAction::createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags /*= 0*/) const
 {
     return new WidgetActionCollapsedWidget(parent, const_cast<WidgetAction*>(this));
 }

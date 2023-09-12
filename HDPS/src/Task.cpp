@@ -23,6 +23,12 @@ QMap<Task::Status, QString> Task::statusNames = QMap<Status, QString>({
     { Task::Status::Aborted, "Aborted" }
 });
 
+QMap<Task::Scope, QString> Task::scopeNames = QMap<Scope, QString>({
+    { Task::Scope::Background, "Background" },
+    { Task::Scope::ForeGround, "ForeGround" },
+    { Task::Scope::Modal, "Modal" }
+});
+
 Task::Task(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/, AbstractTaskHandler* handler /*= nullptr*/) :
     QObject(parent),
     Serializable(name),
@@ -33,6 +39,7 @@ Task::Task(QObject* parent, const QString& name, const Status& status /*= Status
     _mayKill(mayKill),
     _handler(handler),
     _progressMode(ProgressMode::Manual),
+    _scope(Scope::ForeGround),
     _progress(0.f),
     _subtasks(),
     _subtasksNames(),
@@ -248,13 +255,11 @@ void Task::setFinished(bool toIdleWithDelay /*= true*/, std::uint32_t delay /*= 
 
     setProgressDescription("Finished", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 
-    /*
     if (toIdleWithDelay) {
         QTimer::singleShot(delay, this, [this]() -> void {
             setIdle();
         });
     }
-    */
 }
 
 void Task::setFinished(const QString& progressDescription, bool toIdleWithDelay /*= true*/, std::uint32_t delay /*= TASK_DESCRIPTION_DISAPPEAR_INTERVAL*/)
@@ -263,13 +268,11 @@ void Task::setFinished(const QString& progressDescription, bool toIdleWithDelay 
 
     setProgressDescription(progressDescription, TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 
-    /*
     if (toIdleWithDelay) {
         QTimer::singleShot(delay, this, [this]() -> void {
             setIdle();
         });
     }
-    */
 }
 
 void Task::setAborting()
@@ -346,6 +349,21 @@ void Task::setProgressMode(const ProgressMode& progressMode)
     updateProgress();
 }
 
+Task::Scope Task::getScope() const
+{
+    return _scope;
+}
+
+void Task::setScope(const Scope& scope)
+{
+    if (scope == _scope)
+        return;
+
+    _scope = scope;
+
+    emit scopeChanged(_scope);
+}
+
 float Task::getProgress() const
 {
     return _progress;
@@ -407,15 +425,14 @@ void Task::setSubtasks(std::uint32_t numberOfSubtasks)
     if (numberOfSubtasks == 0)
         return;
 
-    if (numberOfSubtasks == _subtasks.count())
-        return;
-
     _subtasks.clear();
 
     _subtasks.resize(numberOfSubtasks);
     _subtasksNames.resize(numberOfSubtasks);
     
     emit subtasksChanged(_subtasks, _subtasksNames);
+
+    updateProgress();
 }
 
 void Task::setSubtasks(const QStringList& subtasksNames)
@@ -431,6 +448,8 @@ void Task::setSubtasks(const QStringList& subtasksNames)
     _subtasksNames = subtasksNames;
 
     emit subtasksChanged(_subtasks, _subtasksNames);
+
+    updateProgress();
 }
 
 void Task::addSubtasks(const QStringList& subtasksNames)

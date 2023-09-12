@@ -160,9 +160,10 @@ public: // Widgets
     /**
      * Create collapsed widget
      * @param parent Parent widget
+     * @param widgetFlags Collapsed widget configuration flags
      * @return Pointer to collapsed widget
      */
-    virtual QWidget* createCollapsedWidget(QWidget* parent) const final;
+    virtual QWidget* createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags = 0) const final;
 
     /**
      * Create label widget

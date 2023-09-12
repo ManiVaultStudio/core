@@ -33,7 +33,8 @@ public:
         ProgressText,           /** Progress text */
         ID,                     /** Globally unique identifier of the task */
         ParentID,               /** Globally unique identifier of the parent task (empty string if not a child task) */
-        Type,                   /** Task type string */
+        Type,                   /** Task type */
+        Scope,                  /** Task scope */
         MayKill,                /** Task may kill boolean */
         Kill,                   /** Column for killing a task */
 
@@ -219,6 +220,23 @@ protected:
 
         /** Use base task item constructor */
         using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for displaying the task scope */
+    class ScopeItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p task
+         * @param task Pointer to task to display item for
+         */
+        ScopeItem(Task* task);
 
         /**
          * Get model data for \p role

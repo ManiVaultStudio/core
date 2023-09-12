@@ -18,10 +18,9 @@ ApplicationSplashScreenAction::ApplicationSplashScreenAction(QObject* parent) :
     //_tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
     //_tasksFilterModel.getTaskTypeFilterAction().selectOption("ModalTask");
 
-    connect(&Application::current()->getStartupTask(), &Task::finished, this, [this]() -> void {
-        QTimer::singleShot(1500, [this]() -> void {
+    connect(&Application::current()->getStartupTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
+        if (previousStatus == Task::Status::Finished && status == Task::Status::Idle)
             AbstractSplashScreenAction::closeSplashScreenDialog();
-        });
     });
 }
 

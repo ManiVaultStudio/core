@@ -653,7 +653,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             task.setDescription(QString("Saving ManiVault project to %1").arg(filePath));
             task.setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
             task.setName(QString("Save to %1").arg(filePath));
-            task.setRunning();
+            task.setProgressMode(Task::ProgressMode::Subtasks);
 
             Archiver archiver;
 
@@ -669,37 +669,31 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             Application::setSerializationAborted(false);
 
             QStringList tasks;
-            
-            for (auto dataset : Application::core()->requestAllDataSets())
-                tasks << dataset->getDataHierarchyItem().getLocation();
-
-            tasks << archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath);
-
-            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaving, this, [&task](DataHierarchyItem& dataHierarchyItem) {
-                task.setProgressDescription("Exporting dataset: " + dataHierarchyItem.getLocation());
-            });
-
-            connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemSaved, this, [&task](DataHierarchyItem& dataHierarchyItem) {
-                task.setSubtaskFinished(dataHierarchyItem.getLocation());
-            });
 
             projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
 
-            task.setSubtaskFinished("Export data model");
+            qDebug() << tasks;
 
             connect(&archiver, &Archiver::taskStarted, this, [this](const QString& taskName) -> void {
-                getCurrentProject()->getTask().setSubtaskStarted(taskName, QString("Compressing %1").arg(taskName));
+                qDebug() << taskName << "started";
+                //getCurrentProject()->getTask().setSubtaskStarted(taskName, QString("Compressing %1").arg(taskName));
             });
 
             connect(&archiver, &Archiver::taskFinished, this, [this](const QString& taskName) -> void {
+                qDebug() << taskName << "finished";
                 getCurrentProject()->getTask().setSubtaskFinished(taskName, QString("%1 compressed").arg(taskName));
             });
 
             _project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
-
+            
             QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
             workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
+
+            tasks << archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath);
+
+            task.setSubtasks(tasks);
+            task.setRunning();
 
             archiver.compressDirectory(temporaryDirectoryPath, filePath, true, currentProject->getCompressionAction().getEnabledAction().isChecked() ? currentProject->getCompressionAction().getLevelAction().getValue() : 0, password);
 
@@ -707,7 +701,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             _project->setFilePath(filePath);
 
-            task.setFinished(true);
+            task.setFinished();
 
             qDebug().noquote() << filePath << "saved successfully";
         }

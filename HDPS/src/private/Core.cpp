@@ -159,6 +159,9 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     fullSet->setText(dataSetGuiName);
     fullSet->setAll(true);
 
+    fullSet->getTask().setName(dataSetGuiName);
+    selection->getTask().setName(QString("%1_selection").arg(dataSetGuiName));
+
     // Set pointer of full dataset to itself just to avoid having to be wary of this not being set
     fullSet->_fullDataset = fullSet;
 

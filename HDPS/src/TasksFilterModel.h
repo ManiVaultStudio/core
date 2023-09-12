@@ -63,13 +63,23 @@ private:
      */
     QVariant getSourceData(const QModelIndex& index, const TasksModel::Column& column, int role) const;
 
+    /**
+     * Extract task types from row range and add them to the task types action when they do not exist yet
+     * @param parent Parent row index
+     * @param first Index of the first row
+     * @param last Index of the last row
+     */
+    void addTaskTypesForRows(const QModelIndex& parent, int first, int last);
+
 public: // Action getters
 
     gui::OptionsAction& getTaskTypeFilterAction() { return _taskTypeFilterAction; }
+    gui::OptionsAction& getTaskScopeFilterAction() { return _taskScopeFilterAction; }
     gui::OptionsAction& getTaskStatusFilterAction() { return _taskStatusFilterAction; }
 
 private:
     gui::OptionsAction              _taskTypeFilterAction;      /** Action for filtering based on task type */
+    gui::OptionsAction              _taskScopeFilterAction;     /** Action for filtering based on task scope */
     gui::OptionsAction              _taskStatusFilterAction;    /** Action for filtering based on task status */
     QMap<QString, std::uint32_t>    _statusTypeCounts;          /** Counts the number of task per status type */
 };

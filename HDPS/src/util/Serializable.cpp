@@ -16,7 +16,7 @@
 #include <QUuid>
 
 #ifdef _DEBUG
-    #define SERIALIZABLE_VERBOSE
+    //#define SERIALIZABLE_VERBOSE
 #endif
 
 using namespace hdps;

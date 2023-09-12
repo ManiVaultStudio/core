@@ -32,11 +32,11 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     const auto updateVisibility = [this, &tasksFilterModel]() -> void {
         const auto numberOfRows = tasksFilterModel.rowCount();
 
-        //if (numberOfRows == 0 && hasDialog())
-        //    destroyDialog();
+        if (numberOfRows == 0 && hasDialog())
+            destroyDialog();
 
-        //if (numberOfRows >= 1 && !hasDialog())
-        //    createDialog();
+        if (numberOfRows >= 1 && !hasDialog())
+            createDialog();
     };
 
     updateVisibility();

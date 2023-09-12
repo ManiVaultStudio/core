@@ -14,13 +14,19 @@
 
 namespace hdps::gui {
 
-WidgetActionViewWidget::WidgetActionViewWidget(QWidget* parent, WidgetAction* action) :
+WidgetActionViewWidget::WidgetActionViewWidget(QWidget* parent, WidgetAction* action, std::int32_t widgetFlags /*= 0*/) :
     QWidget(parent),
     _action(nullptr),
+    _widgetFlags(widgetFlags),
     _highlightWidget(new WidgetActionHighlightWidget(this, action)),
     _cachedHighlighting(0)
 {
     setAcceptDrops(true);
+}
+
+WidgetAction* WidgetActionViewWidget::getAction()
+{
+    return _action;
 }
 
 void WidgetActionViewWidget::setAction(WidgetAction* action)
@@ -46,9 +52,9 @@ void WidgetActionViewWidget::setAction(WidgetAction* action)
     update();
 }
 
-WidgetAction* WidgetActionViewWidget::getAction()
+std::int32_t WidgetActionViewWidget::getWidgetFlags() const
 {
-    return _action;
+    return _widgetFlags;
 }
 
 void WidgetActionViewWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)

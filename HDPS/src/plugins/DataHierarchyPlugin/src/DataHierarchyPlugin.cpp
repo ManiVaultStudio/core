@@ -25,6 +25,8 @@ void DataHierarchyPlugin::init()
     layout->addWidget(&_dataHierarchyWidget);
 
     getWidget().setLayout(layout);
+
+    //auto testSingleModalTask
 }
 
 DataHierarchyPluginFactory::DataHierarchyPluginFactory() :

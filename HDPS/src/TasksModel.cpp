@@ -170,6 +170,10 @@ TasksModel::ProgressItem::ProgressItem(Task* task) :
     connect(getTask(), &Task::progressChanged, this, [this]() -> void {
         emitDataChanged();
     });
+
+    connect(getTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant TasksModel::ProgressItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -285,6 +289,9 @@ QVariant TasksModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
 
     taskTypeString.replace("hdps::", "");
 
+    if (taskTypeString == "")
+        qDebug() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
@@ -292,6 +299,35 @@ QVariant TasksModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
 
         case Qt::ToolTipRole:
             return "Task type: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+TasksModel::ScopeItem::ScopeItem(Task* task) :
+    Item(task, false)
+{
+    connect(getTask(), &Task::scopeChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant TasksModel::ScopeItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    auto taskScopeString = Task::scopeNames[getTask()->getScope()];
+
+    switch (role) {
+        case Qt::EditRole:
+            return static_cast<std::int32_t>(getTask()->getScope());
+
+        case Qt::DisplayRole:
+            return taskScopeString;
+
+        case Qt::ToolTipRole:
+            return "Task scope: " + data(Qt::DisplayRole).toString();
 
         default:
             break;

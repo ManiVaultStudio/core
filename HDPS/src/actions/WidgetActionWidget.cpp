@@ -11,9 +11,8 @@
 
 namespace hdps::gui {
 
-WidgetActionWidget::WidgetActionWidget(QWidget* parent, WidgetAction* action, const std::int32_t& widgetFlags /*= 0*/) :
-    WidgetActionViewWidget(parent, action),
-    _widgetFlags(widgetFlags)
+WidgetActionWidget::WidgetActionWidget(QWidget* parent, WidgetAction* action,  std::int32_t widgetFlags /*= 0*/) :
+    WidgetActionViewWidget(parent, action, widgetFlags)
 {
     setAction(action);
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
@@ -21,7 +20,7 @@ WidgetActionWidget::WidgetActionWidget(QWidget* parent, WidgetAction* action, co
 
 QSize WidgetActionWidget::sizeHint() const
 {
-    if (_widgetFlags & WidgetFlag::PopupLayout) {
+    if (getWidgetFlags() & WidgetFlag::PopupLayout) {
         auto popupSizeHint = const_cast<WidgetActionWidget*>(this)->getAction()->getPopupSizeHint();
 
         if (!popupSizeHint.isNull())
@@ -47,35 +46,40 @@ void WidgetActionWidget::setPopupLayout(QLayout* popupLayout)
 
     WidgetActionViewWidget::setLayout(mainLayout);
 
-    auto groupBox = new QGroupBox(getAction()->text());
+    if (getWidgetFlags() & WidgetActionViewWidget::NoGroupBoxInPopupLayout) {
+        mainLayout->addLayout(popupLayout);
+    }
+    else {
+        auto groupBox = new QGroupBox(getAction()->text());
 
-    groupBox->setLayout(popupLayout);
-    groupBox->setCheckable(getAction()->isCheckable());
+        groupBox->setLayout(popupLayout);
+        groupBox->setCheckable(getAction()->isCheckable());
 
-    mainLayout->addWidget(groupBox);
+        mainLayout->addWidget(groupBox);
 
-    const auto update = [this, groupBox]() -> void {
-        QSignalBlocker blocker(getAction());
+        const auto update = [this, groupBox]() -> void {
+            QSignalBlocker blocker(getAction());
 
-        groupBox->setTitle(getAction()->text());
-        groupBox->setToolTip(getAction()->text());
-        groupBox->setChecked(getAction()->isChecked());
-    };
+            groupBox->setTitle(getAction()->text());
+            groupBox->setToolTip(getAction()->text());
+            groupBox->setChecked(getAction()->isChecked());
+        };
 
-    connect(groupBox, &QGroupBox::toggled, this, [this](bool toggled) {
-        getAction()->setChecked(toggled);
-    });
+        connect(groupBox, &QGroupBox::toggled, this, [this](bool toggled) {
+            getAction()->setChecked(toggled);
+        });
 
-    connect(getAction(), &WidgetAction::changed, this, [update]() {
+        connect(getAction(), &WidgetAction::changed, this, [update]() {
+            update();
+        });
+
         update();
-    });
-
-    update();
+    }
 }
 
 bool WidgetActionWidget::isPopup() const
 {
-    return _widgetFlags & PopupLayout;
+    return getWidgetFlags() & PopupLayout;
 }
 
 }
