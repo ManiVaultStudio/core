@@ -20,7 +20,6 @@
 #include <QStandardPaths>
 #include <QGridLayout>
 #include <QEventLoop>
-#include <QScopedPointer>
 
 #include <exception>
 
@@ -400,14 +399,14 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                     
                     QTemporaryDir temporaryDir;
 
-                    QScopedPointer<Project> project(new Project(extractProjectFileFromHdpsFile(filePath, temporaryDir), true));
+                    Project project(extractProjectFileFromHdpsFile(filePath, temporaryDir), true);
 
-                    titleAction.setString(project->getTitleAction().getString());
-                    descriptionAction.setString(project->getDescriptionAction().getString());
-                    tagsAction.setString(project->getTagsAction().getStrings().join(", "));
-                    commentsAction.setString(project->getCommentsAction().getString());
-                    contributorsAction.setString(project->getContributorsAction().getStrings().join(","));
-                    disableReadOnlyAction.setEnabled(project->getReadOnlyAction().isChecked());
+                    titleAction.setString(project.getTitleAction().getString());
+                    descriptionAction.setString(project.getDescriptionAction().getString());
+                    tagsAction.setString(project.getTagsAction().getStrings().join(", "));
+                    commentsAction.setString(project.getCommentsAction().getString());
+                    contributorsAction.setString(project.getContributorsAction().getStrings().join(","));
+                    disableReadOnlyAction.setEnabled(project.getReadOnlyAction().isChecked());
                 });
 
                 fileDialog.open();
@@ -611,10 +610,10 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
                     const auto projectJsonFilePath = projects().extractProjectFileFromHdpsFile(path, temporaryDir);
 
-                    QScopedPointer<Project> project(new Project(projectJsonFilePath, true));
+                    Project project(projectJsonFilePath, true);
 
-                    currentProject->getCompressionAction().getEnabledAction().setChecked(project->getCompressionAction().getEnabledAction().isChecked());
-                    currentProject->getCompressionAction().getLevelAction().setValue(project->getCompressionAction().getLevelAction().getValue());
+                    currentProject->getCompressionAction().getEnabledAction().setChecked(project.getCompressionAction().getEnabledAction().isChecked());
+                    currentProject->getCompressionAction().getLevelAction().setValue(project.getCompressionAction().getLevelAction().getValue());
                 });
 
                 fileDialog.open();
@@ -824,10 +823,10 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
                     const auto projectJsonFilePath = projects().extractProjectFileFromHdpsFile(path, temporaryDir);
 
-                    QScopedPointer<Project> project(new Project(projectJsonFilePath, true));
+                    Project project(projectJsonFilePath, true);
 
-                    currentProject->getCompressionAction().getEnabledAction().setChecked(project->getCompressionAction().getEnabledAction().isChecked());
-                    currentProject->getCompressionAction().getLevelAction().setValue(project->getCompressionAction().getLevelAction().getValue());
+                    currentProject->getCompressionAction().getEnabledAction().setChecked(project.getCompressionAction().getEnabledAction().isChecked());
+                    currentProject->getCompressionAction().getLevelAction().setValue(project.getCompressionAction().getLevelAction().getValue());
                 });
 
                 fileDialog.open();
