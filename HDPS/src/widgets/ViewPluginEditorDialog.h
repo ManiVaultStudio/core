@@ -34,11 +34,18 @@ class ViewPluginEditorDialog : public QDialog
 public:
 
     /**
-     * Constructor
+     * Constructor for plugin-attached actions
      * @param parent Pointer to parent widget
      * @param viewPlugin Pointer to view plugin to edit
      */
     ViewPluginEditorDialog(QWidget* parent, hdps::plugin::ViewPlugin* viewPlugin);
+
+    /**
+     * Constructor for dataset-attached actions
+     * @param parent Pointer to parent widget
+     * @param rootAction Pointer to parent action of all actions to be displayed
+     */
+    ViewPluginEditorDialog(QWidget* parent, hdps::gui::WidgetAction* rootAction);
 
     /** Get preferred size */
     QSize sizeHint() const override {
@@ -49,6 +56,10 @@ public:
     QSize minimumSizeHint() const override {
         return sizeHint();
     }
+
+private:
+    /** Setup function common to all constructor */
+    void init();
 
 private:
     GroupsAction            _groupsAction;              /** Groups action */

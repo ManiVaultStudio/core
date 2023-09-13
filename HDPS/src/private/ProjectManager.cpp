@@ -162,7 +162,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
         saveProjectAs();
     });
 
-    connect(&_editProjectSettingsAction, &TriggerAction::triggered, this, [this]() -> void {
+    connect(&_editProjectSettingsAction, &TriggerAction::triggered, this, [this](bool checked) -> void {
         auto* dialog = new ProjectSettingsDialog();
         connect(dialog, &ProjectSettingsDialog::finished, dialog, &ProjectSettingsDialog::deleteLater);
         dialog->open();
@@ -171,13 +171,13 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     connect(&_importDataMenu, &QMenu::aboutToShow, this, [this]() -> void {
         _importDataMenu.clear();
 
-        for (auto pluginTriggerAction : plugins().getPluginTriggerActions(plugin::Type::LOADER))
+        for (auto& pluginTriggerAction : plugins().getPluginTriggerActions(plugin::Type::LOADER))
             _importDataMenu.addAction(pluginTriggerAction);
 
         _importDataMenu.setEnabled(!_importDataMenu.actions().isEmpty());
     });
 
-    connect(&_pluginManagerAction, &TriggerAction::triggered, this, [this]() -> void {
+    connect(&_pluginManagerAction, &TriggerAction::triggered, this, [this](bool checked) -> void {
         PluginManagerDialog::create();
     });
 
