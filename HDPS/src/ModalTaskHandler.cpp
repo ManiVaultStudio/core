@@ -92,6 +92,7 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     _modalTaskHandler(modalTaskHandler)
 {
     setModal(true);
+    setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
 
     auto layout = new QVBoxLayout();
 
@@ -128,6 +129,9 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     }
 
     auto& tasksFilterModel = _modalTaskHandler->getTasksAction().getTasksFilterModel();
+
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, []() -> void { qDebug() << "Modal task inserted"; });
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, []() -> void { qDebug() << "Modal task removed"; });
 
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &ModalTasksDialog::numberOfModalTasksChanged);
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &ModalTasksDialog::numberOfModalTasksChanged);
