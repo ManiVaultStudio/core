@@ -482,6 +482,7 @@ void Task::setSubtaskFinished(std::uint32_t subtaskIndex, const QString& progres
 
     updateProgress();
 
+    qDebug() << subtaskIndex << _progress;
     //emit subtasksChanged(_subtasks, _subtasksNames);
 
     const auto subtaskName = _subtasksNames[subtaskIndex];
@@ -565,7 +566,7 @@ void Task::setProgressDescription(const QString& progressDescription, std::uint3
         getTimer(TimerType::ProgressDescriptionChanged).start();
 
     if (clearDelay > 0) {
-        QTimer::singleShot(clearDelay, [this]() -> void {
+        QTimer::singleShot(clearDelay, this, [this]() -> void {
             setProgressDescription("");
         });
     }

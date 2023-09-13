@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     commandLineParser.addHelpOption();
     commandLineParser.addVersionOption();
 
-    QCommandLineOption projectOption({ "p","project" }, "File path of the project to load upon startup", "project");
+    QCommandLineOption projectOption({ "p", "project" }, "File path of the project to load upon startup", "project");
 
     commandLineParser.addOption(projectOption);
     commandLineParser.process(QCoreApplication::arguments());

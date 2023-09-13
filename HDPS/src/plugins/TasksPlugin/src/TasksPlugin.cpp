@@ -6,9 +6,22 @@
 
 #include <Application.h>
 
+#include <actions/GroupAction.h>
+#include <actions/OptionAction.h>
+#include <actions/TriggerAction.h>
+
 Q_PLUGIN_METADATA(IID "NL.ManiVault.TasksPlugin")
 
 using namespace hdps;
+
+#ifdef _DEBUG
+
+QMap<TasksPlugin::TestMode, QString> TasksPlugin::testModeNames = QMap<TasksPlugin::TestMode, QString>({
+    { TasksPlugin::TestMode::ModalRunningIndeterminate, "ModalRunningIndeterminate" },
+    { TasksPlugin::TestMode::ModalSubtasks, "ModalSubtasks" }
+});
+
+#endif
 
 TasksPlugin::TasksPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
@@ -29,7 +42,39 @@ void TasksPlugin::init()
     layout->addWidget(tasksWidget);
 
     getWidget().setLayout(layout);
+
+#ifdef _DEBUG
+    addTestSuite();
+#endif
 }
+
+#ifdef _DEBUG
+
+void TasksPlugin::addTestSuite()
+{
+    auto testModalTaskGroupAction   = new GroupAction(this, "Test Modal Task");
+    auto modalTaskTestTypeAction    = new OptionAction(this, "Modal Task Test Type", testModeNames.values());
+    auto modalTaskStartTestAction   = new TriggerAction(this, "Start Test");
+
+    testModalTaskGroupAction->addAction(modalTaskTestTypeAction);
+    testModalTaskGroupAction->addAction(modalTaskStartTestAction);
+
+    getWidget().layout()->addWidget(testModalTaskGroupAction->createWidget(&getWidget()));
+
+    connect(modalTaskStartTestAction, &TriggerAction::triggered, this, [this, modalTaskTestTypeAction]() -> void {
+        switch (static_cast<TestMode>(modalTaskTestTypeAction->getCurrentIndex()))
+        {
+            case TestMode::ModalRunningIndeterminate:
+                new ModalRunningIndeterminateTester(this, modalTaskTestTypeAction->getCurrentText());
+                break;
+
+            case TestMode::ModalSubtasks:
+                new ModalRunningIndeterminateTester(this, modalTaskTestTypeAction->getCurrentText());
+                break;
+        }
+    });
+}
+#endif
 
 TasksPluginFactory::TasksPluginFactory() :
     ViewPluginFactory(true)

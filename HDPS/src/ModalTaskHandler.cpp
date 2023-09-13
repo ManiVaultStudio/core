@@ -30,6 +30,9 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     tasksFilterModel.getTaskTypeFilterAction().selectOption("ModalTask");
 
     const auto updateVisibility = [this, &tasksFilterModel]() -> void {
+        if (projects().hasProject() && (projects().isOpeningProject() || projects().isImportingProject()))
+            return;
+
         const auto numberOfRows = tasksFilterModel.rowCount();
 
         if (numberOfRows == 0 && hasDialog())
@@ -78,7 +81,6 @@ void ModalTaskHandler::destroyDialog()
 #endif
 
     _modalTasksDialog.close();
-    //_modalTasksDialog.reset();
 
     QCoreApplication::processEvents();
 }
@@ -90,10 +92,19 @@ bool ModalTaskHandler::hasDialog() const
 
 ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTaskHandler, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
-    _modalTaskHandler(modalTaskHandler)
+    _modalTaskHandler(modalTaskHandler),
+    _processEventsTimer()
 {
     setWindowModality(Qt::ApplicationModal);
     setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
+
+    connect(&_processEventsTimer, &QTimer::timeout, this, [this]() -> void {
+        if (isVisible())
+            QCoreApplication::processEvents();
+    });
+
+    _processEventsTimer.setInterval(100);
+    _processEventsTimer.start();
 
     auto layout = new QVBoxLayout();
 

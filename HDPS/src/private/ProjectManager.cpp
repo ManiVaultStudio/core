@@ -481,6 +481,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 workspaces().setWorkspaceFilePath("");
             }
 
+            task.setFinished();
+
             _recentProjectsAction.addRecentFilePath(filePath);
             _project->updateContributors();
 

@@ -9,6 +9,7 @@
 #include "actions/TasksAction.h"
 
 #include <QDialog>
+#include <QTimer>
 
 namespace hdps {
 
@@ -56,7 +57,8 @@ protected:
         void numberOfModalTasksChanged();
 
     private:
-        ModalTaskHandler* _modalTaskHandler;        /** Pointer to owning modal task handler */
+        ModalTaskHandler*   _modalTaskHandler;      /** Pointer to owning modal task handler */
+        QTimer              _processEventsTimer;    /** Periodically call QCoreAppliation::processEvents() to warrant interactivity of the dialog */
     };
 
 public:
