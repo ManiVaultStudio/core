@@ -90,8 +90,8 @@ public: // Action getters
     gui::TasksAction& getTasksAction() { return _tasksAction; };
 
 private:
-    gui::TasksAction                    _tasksAction;           /** Tasks action */
-    std::unique_ptr<ModalTasksDialog>   _modalTasksDialog;      /** Modal tasks dialog */
+    gui::TasksAction    _tasksAction;           /** Tasks action */
+    ModalTasksDialog    _modalTasksDialog;      /** Modal tasks dialog */
 };
 
 }

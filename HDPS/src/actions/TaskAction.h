@@ -60,6 +60,12 @@ public:
      */
     ProgressAction& getProgressAction();
 
+    /**
+     * Get kill task action
+     * @return Reference to built-in trigger action for killing the task
+     */
+    gui::TriggerAction& getKillTaskAction();
+
 private:
 
     /** Updates the read-only status of the progress and kill task actions */

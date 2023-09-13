@@ -16,7 +16,8 @@ TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
     _taskTypeFilterAction(this, "Type"),
     _taskScopeFilterAction(this, "Scope", Task::scopeNames.values(), Task::scopeNames.values()),
     _taskStatusFilterAction(this, "Status", Task::statusNames.values(), Task::statusNames.values()),
-    _statusTypeCounts()
+    _statusTypeCounts(),
+    _rowCount(0)
 {
     setDynamicSortFilter(true);
     setRecursiveFilteringEnabled(true);
@@ -125,6 +126,33 @@ void TasksFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
     });
 
     addTaskTypesForRows(QModelIndex(), 0, sourceModel->rowCount() - 1);
+
+    //const auto rowsAboutToBeInsertedOrRemoved = [this](const QModelIndex& parent, int first, int last) -> void {
+    //    const auto previousRowCount = _rowCount;
+    //    const auto currentRowCount = rowCount(parent);
+
+    //    if (currentRowCount == previousRowCount)
+    //        return;
+
+    //    emit rowCountChanged(parent, previousRowCount, currentRowCount);
+    //};
+
+    //const auto rowsInsertedOrRemoved = [this](const QModelIndex& parent, int first, int last) -> void {
+    //    invalidate();
+
+    //    const auto previousRowCount = _rowCount;
+    //    const auto currentRowCount  = rowCount(parent);
+
+    //    if (currentRowCount == previousRowCount)
+    //        return;
+
+    //    emit rowCountChanged(parent, previousRowCount, currentRowCount);
+
+    //    _rowCount = rowCount(parent);
+    //};
+
+    //connect(sourceModel, &QAbstractItemModel::rowsInserted, this, rowsInsertedOrRemoved);
+    //connect(sourceModel, &QAbstractItemModel::rowsRemoved, this, rowsInsertedOrRemoved);
 }
 
 QVariant TasksFilterModel::getSourceData(const QModelIndex& index, const TasksModel::Column& column, int role) const

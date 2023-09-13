@@ -12,9 +12,8 @@ using namespace gui;
 ModalTaskHandler* ModalTask::modalTaskHandler = nullptr;
 
 ModalTask::ModalTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= true*/) :
-    Task(parent, name, status, mayKill, nullptr)
+    Task(parent, name, Scope::Modal, status, mayKill, nullptr)
 {
-    setScope(Scope::Modal);
 }
 
 void ModalTask::createHandler(QObject* parent)

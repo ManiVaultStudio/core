@@ -18,7 +18,7 @@ using namespace gui;
 ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),
     _tasksAction(this, "Tasks"),
-    _modalTasksDialog()
+    _modalTasksDialog(this)
 {
     _tasksAction.setRowHeight(30);
     _tasksAction.setProgressColumnMargin(2);
@@ -41,6 +41,9 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
     updateVisibility();
 
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, []() -> void { qDebug() << "Modal task inserted"; });
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, []() -> void { qDebug() << "Modal task removed"; });
+
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateVisibility);
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibility);
     connect(&tasksFilterModel, &QSortFilterProxyModel::dataChanged, this, updateVisibility);
@@ -59,10 +62,8 @@ void ModalTaskHandler::createDialog()
     qDebug() << __FUNCTION__;
 #endif
 
-    _modalTasksDialog = std::make_unique<ModalTasksDialog>(this);
-
-    _modalTasksDialog->open();
-    _modalTasksDialog->adjustSize();
+    _modalTasksDialog.show();
+    //_modalTasksDialog.adjustSize();
 
     QCoreApplication::processEvents();
 }
@@ -76,22 +77,22 @@ void ModalTaskHandler::destroyDialog()
     qDebug() << __FUNCTION__;
 #endif
 
-    _modalTasksDialog->close();
-    _modalTasksDialog.reset();
+    _modalTasksDialog.close();
+    //_modalTasksDialog.reset();
 
     QCoreApplication::processEvents();
 }
 
 bool ModalTaskHandler::hasDialog() const
 {
-    return _modalTasksDialog != nullptr;
+    return _modalTasksDialog.isVisible();
 }
 
 ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTaskHandler, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _modalTaskHandler(modalTaskHandler)
 {
-    setModal(true);
+    setWindowModality(Qt::ApplicationModal);
     setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
 
     auto layout = new QVBoxLayout();
@@ -130,8 +131,6 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
 
     auto& tasksFilterModel = _modalTaskHandler->getTasksAction().getTasksFilterModel();
 
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, []() -> void { qDebug() << "Modal task inserted"; });
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, []() -> void { qDebug() << "Modal task removed"; });
 
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &ModalTasksDialog::numberOfModalTasksChanged);
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &ModalTasksDialog::numberOfModalTasksChanged);
@@ -147,6 +146,10 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
 
     const auto rowCount = tasksFilterModel.rowCount();
 
+    if (rowCount == 0)
+        return;
+
+    /*
     auto treeView = findChild<HierarchyWidgetTreeView*>("TreeView");
 
     Q_ASSERT(treeView != nullptr);
@@ -161,10 +164,11 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
 
         treeView->setMaximumHeight(rowsHeight);
     }
+    */
 
-    QTimer::singleShot(100, [this]() -> void {
-        adjustSize();
-    });
+    //QTimer::singleShot(100, [this]() -> void {
+    //    adjustSize();
+    //});
 
     if (rowCount == 1) {
         const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(0, 0));

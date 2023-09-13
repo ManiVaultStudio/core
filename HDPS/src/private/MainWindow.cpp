@@ -190,6 +190,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
             connect(&projects().getCurrentProject()->getReadOnlyAction(), &ToggleAction::toggled, this, updateMenuVisibility);
         });
 
+        /*
         auto tasksAction = new TasksAction(this, "Tasks");
 
         tasksAction->setPopupSizeHint(QSize(500, 500));
@@ -197,6 +198,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         statusBar()->setSizeGripEnabled(true);
         statusBar()->insertPermanentWidget(0, new StatusBarToolButton(this, tasksAction));
+        */
 
         if (Application::current()->shouldOpenProjectAtStartup()) {
             projects().openProject(Application::current()->getStartupProjectFilePath());

@@ -82,9 +82,6 @@ void TaskAction::updateActionsReadOnly()
 
 void TaskAction::updateProgressActionTextFormat()
 {
-    if (_task != nullptr)
-        qDebug() << "===================" << _task->getProgressText();
-
     if (_task == nullptr)
         _progressAction.setTextFormat("No task assigned...");
     else
@@ -126,6 +123,11 @@ void TaskAction::updateKillTaskActionVisibility()
 ProgressAction& TaskAction::getProgressAction()
 {
     return _progressAction;
+}
+
+TriggerAction& TaskAction::getKillTaskAction()
+{
+    return _killTaskAction;
 }
 
 }

@@ -47,12 +47,15 @@ QVariant TasksModel::HeaderItem::data(int role /*= Qt::UserRole + 1*/) const
 TasksModel::Item::Item(Task* task, bool editable /*= false*/) :
     QStandardItem(),
     QObject(),
-    _task(task)
+    _task(task),
+    _taskAction(this, "Task")
 {
     Q_ASSERT(_task != nullptr);
 
     setEditable(editable);
     setDropEnabled(true);
+
+    _taskAction.setTask(getTask());
 }
 
 Task* TasksModel::Item::getTask() const
@@ -165,11 +168,8 @@ void TasksModel::NameItem::setData(const QVariant& value, int role /* = Qt::User
 }
 
 TasksModel::ProgressItem::ProgressItem(Task* task) :
-    Item(task, true),
-    _taskAction(this, "Task")
+    Item(task, true)
 {
-    _taskAction.setTask(getTask());
-
     connect(getTask(), &Task::progressChanged, this, [this]() -> void {
         emitDataChanged();
     });
@@ -296,9 +296,6 @@ QVariant TasksModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
 
     taskTypeString.replace("hdps::", "");
 
-    if (taskTypeString == "")
-        qDebug() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
@@ -387,33 +384,6 @@ QVariant TasksModel::KillItem::data(int role /*= Qt::UserRole + 1*/) const
 
         case Qt::ToolTipRole:
             return QString("Kill %1").arg(getTask()->getName());
-
-        case Qt::DecorationRole:
-        {
-            switch (getTask()->getStatus())
-            {
-                case Task::Status::Idle:
-                    break;
-
-                case Task::Status::Running:
-                case Task::Status::RunningIndeterminate:
-                {
-                    if (getTask()->getMayKill())
-                        return Application::getIconFont("FontAwesome").getIcon("times");
-
-                    break;
-                }
-
-                case Task::Status::Finished:
-                case Task::Status::Aborted:
-                    break;
-
-                default:
-                    break;
-            }
-
-            break;
-        }
 
         default:
             break;

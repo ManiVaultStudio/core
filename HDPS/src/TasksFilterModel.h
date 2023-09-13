@@ -24,6 +24,8 @@ namespace hdps
  */
 class TasksFilterModel final : public QSortFilterProxyModel
 {
+    Q_OBJECT
+
 public:
 
     /** Construct with parent \p parent object
@@ -71,6 +73,16 @@ private:
      */
     void addTaskTypesForRows(const QModelIndex& parent, int first, int last);
 
+signals:
+    
+    /**
+     * Signals that the number of rows changed from \p previousRowCount to \p currentRowCount
+     * @param parent Parent row index of which the number of rows changed
+     * @param previousRowCount Previous number of rows
+     * @param currentRowCount Current number of rows
+     */
+    void rowCountChanged(const QModelIndex& parent, std::int32_t previousRowCount, std::int32_t currentRowCount);
+
 public: // Action getters
 
     gui::OptionsAction& getTaskTypeFilterAction() { return _taskTypeFilterAction; }
@@ -82,6 +94,7 @@ private:
     gui::OptionsAction              _taskScopeFilterAction;     /** Action for filtering based on task scope */
     gui::OptionsAction              _taskStatusFilterAction;    /** Action for filtering based on task status */
     QMap<QString, std::uint32_t>    _statusTypeCounts;          /** Counts the number of task per status type */
+    std::uint32_t                   _rowCount;                  /** Current number of rows */
 };
 
 }

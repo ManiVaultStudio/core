@@ -94,8 +94,17 @@ public:
          */
         Task* getTask() const;
 
+        /**
+         * Get task action
+         * @return Task action for use in item delegate (its built-in progress action)
+         */
+        gui::TaskAction& getTaskAction() {
+            return _taskAction;
+        }
+
     private:
-        Task*   _task;  /** Pointer to task to display item for */
+        Task*               _task;          /** Pointer to task to display item for */
+        gui::TaskAction     _taskAction;    /** Task action for use in item delegate (its built-in progress action) */
     };
 
 protected:
@@ -154,17 +163,6 @@ public:
          * @return Data for \p role in variant form
          */
         QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get task action
-         * @return Task action for use in item delegate (its built-in progress action)
-         */
-        gui::TaskAction& getTaskAction() {
-            return _taskAction;
-        }
-
-    private:
-        gui::TaskAction  _taskAction;        /** Task action for use in item delegate (its built-in progress action) */
     };
 
 protected:
