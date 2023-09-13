@@ -20,14 +20,14 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     _additionalEditorAction(this, "Edit dataset parameters..."),
     _dataset(nullptr)
 {
-    getWidget().addAction(&_additionalEditorAction);
-
     _additionalEditorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
     _additionalEditorAction.setShortcut(tr("F11"));
     _additionalEditorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _additionalEditorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _additionalEditorAction.setConnectionPermissionsToForceNone();
     _additionalEditorAction.setEnabled(false);
+
+    addTitleBarMenuAction(&_additionalEditorAction);
 
     connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesPlugin::selectedItemsChanged, Qt::DirectConnection);
 

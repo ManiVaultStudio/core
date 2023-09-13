@@ -27,10 +27,6 @@ public:
     
     void init() override;
 
-public: // Action getters
-
-    gui::TriggerAction* getAdditionalEditorAction() override { return &_additionalEditorAction; }
-
 protected:
 
     /**
