@@ -6,7 +6,7 @@
 
 #include "Task.h"
 
-#include "actions/ProgressAction.h"
+#include "actions/TaskAction.h"
 
 #include <QStandardItemModel>
 
@@ -156,15 +156,15 @@ public:
         QVariant data(int role = Qt::UserRole + 1) const override;
 
         /**
-         * Get progress action
-         * @return Progress action for item delegate
+         * Get task action
+         * @return Task action for use in item delegate (its built-in progress action)
          */
-        gui::ProgressAction& getProgressAction() {
-            return _progressAction;
+        gui::TaskAction& getTaskAction() {
+            return _taskAction;
         }
 
     private:
-        gui::ProgressAction  _progressAction;        /** Progress action for item delegate */
+        gui::TaskAction  _taskAction;        /** Task action for use in item delegate (its built-in progress action) */
     };
 
 protected:

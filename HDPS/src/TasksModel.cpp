@@ -166,8 +166,10 @@ void TasksModel::NameItem::setData(const QVariant& value, int role /* = Qt::User
 
 TasksModel::ProgressItem::ProgressItem(Task* task) :
     Item(task, true),
-    _progressAction(this, "Progress")
+    _taskAction(this, "Task")
 {
+    _taskAction.setTask(getTask());
+
     connect(getTask(), &Task::progressChanged, this, [this]() -> void {
         emitDataChanged();
     });

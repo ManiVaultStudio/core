@@ -193,7 +193,7 @@ private:
         if (item == nullptr)
             return nullptr;
 
-        return &(dynamic_cast<TasksModel::ProgressItem*>(item)->getProgressAction());
+        return &(dynamic_cast<TasksModel::ProgressItem*>(item)->getTaskAction().getProgressAction());
     }
 
 private:

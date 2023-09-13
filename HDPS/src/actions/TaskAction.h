@@ -54,6 +54,12 @@ public:
      */
     void setTask(Task* task);
 
+    /**
+     * Get progress action
+     * @return Reference to built-in progress action
+     */
+    ProgressAction& getProgressAction();
+
 private:
 
     /** Updates the read-only status of the progress and kill task actions */

@@ -123,4 +123,9 @@ void TaskAction::updateKillTaskActionVisibility()
         _killTaskAction.setVisible(_task->getMayKill());
 }
 
+ProgressAction& TaskAction::getProgressAction()
+{
+    return _progressAction;
+}
+
 }
