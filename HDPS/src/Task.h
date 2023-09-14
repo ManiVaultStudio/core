@@ -67,10 +67,11 @@ public:
 
 private:
 
-    /** Timers to prevent unnecessary abundant emissions of signals */
+    /** Timers for various purposes: */
     enum class TimerType {
         ProgressChanged,                /** For Task::progressChanged() signal */
         ProgressDescriptionChanged,     /** For Task::progressDescriptionChanged() signal */
+        ToIdleWithDelay,                /** To automatically switch to Task::Status::Idle after a short delay when setting task status to Task::Status::Finished */
 
         Count
     };

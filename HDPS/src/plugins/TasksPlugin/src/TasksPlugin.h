@@ -57,7 +57,7 @@ private:
     
 
 private:
-    TasksAction     _tasksAction;   /** Tasks action for displaying and interacting with the tasks in the system */
+    //TasksAction     _tasksAction;   /** Tasks action for displaying and interacting with the tasks in the system */
 };
 
 class TasksPluginFactory : public ViewPluginFactory
@@ -125,10 +125,9 @@ public:
             deleteLater();
         });
 
-        connect(&getModalTask(), &Task::finished, this, [this]() -> void {
-            qDebug() << getModalTask().getName() << "has finished";
-
-            deleteLater();
+        connect(&getModalTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
+            //if (status == Task::Status::Idle)
+                //deleteLater();
         });
 
         run();
@@ -142,8 +141,10 @@ public:
 
             _tasks.removeFirst();
 
-            if (_tasks.isEmpty())
+            if (_tasks.isEmpty()) {
+                getTimer().stop();
                 getModalTask().setFinished();
+            }
         });
 
         getTimer().setInterval(1000);

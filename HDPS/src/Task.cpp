@@ -55,10 +55,12 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
         });
     }
 
-    for (auto& timer : _timers) {
-        timer.setInterval(TASK_UPDATE_TIMER_INTERVAL);
+    for (auto& timer : _timers)
         timer.setSingleShot(true);
-    }
+
+    _timers[static_cast<int>(TimerType::ProgressChanged)].setInterval(TASK_UPDATE_TIMER_INTERVAL);
+    _timers[static_cast<int>(TimerType::ProgressDescriptionChanged)].setInterval(TASK_UPDATE_TIMER_INTERVAL);
+    _timers[static_cast<int>(TimerType::ToIdleWithDelay)].setInterval(TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 
     connect(&getTimer(TimerType::ProgressChanged), &QTimer::timeout, this, [this]() -> void {
         emit progressChanged(_progress);
@@ -71,10 +73,16 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
 
         QCoreApplication::processEvents();
     });
+
+    connect(&getTimer(TimerType::ToIdleWithDelay), &QTimer::timeout, this, [this]() -> void {
+        setIdle();
+    });
 }
 
 Task::~Task()
 {
+    for (auto& timer : _timers)
+        timer.stop();
 }
 
 Task* Task::getParentTask()
@@ -255,11 +263,8 @@ void Task::setFinished(bool toIdleWithDelay /*= true*/, std::uint32_t delay /*= 
 
     setProgressDescription("Finished", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 
-    if (toIdleWithDelay) {
-        QTimer::singleShot(delay, this, [this]() -> void {
-            setIdle();
-        });
-    }
+    if (toIdleWithDelay)
+        getTimer(TimerType::ToIdleWithDelay).start();
 }
 
 void Task::setFinished(const QString& progressDescription, bool toIdleWithDelay /*= true*/, std::uint32_t delay /*= TASK_DESCRIPTION_DISAPPEAR_INTERVAL*/)
@@ -268,11 +273,8 @@ void Task::setFinished(const QString& progressDescription, bool toIdleWithDelay 
 
     setProgressDescription(progressDescription, TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 
-    if (toIdleWithDelay) {
-        QTimer::singleShot(delay, this, [this]() -> void {
-            setIdle();
-        });
-    }
+    if (toIdleWithDelay)
+        getTimer(TimerType::ToIdleWithDelay).start();
 }
 
 void Task::setAborting()

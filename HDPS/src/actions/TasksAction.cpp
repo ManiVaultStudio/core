@@ -279,9 +279,6 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
 
     auto treeViewHeader = treeView.header();
 
-    treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Name), QHeaderView::Stretch);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Progress), QHeaderView::Stretch);
-
     treeView.setTextElideMode(Qt::ElideMiddle);
 
     treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Progress), new ProgressItemDelegate(tasksAction));
@@ -297,19 +294,18 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     treeViewHeader->resizeSection(static_cast<int>(TasksModel::Column::Status), 130);
     //treeViewHeader->resizeSection(static_cast<int>(TasksModel::Column::Kill), 130);
 
-    _tasksAction->openPersistentProgressEditorsRecursively(treeView);
-
     connect(&tasksAction->getTasksFilterModel(), &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
+        qDebug() << "QSortFilterProxyModel::rowsInserted";
         _tasksAction->openPersistentProgressEditorsRecursively(_tasksWidget.getTreeView(), parent);
-        modelChanged();
+        //modelChanged();
     });
 
-    connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::rowsRemoved, this, &TasksAction::Widget::modelChanged);
+    //connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::rowsRemoved, this, &TasksAction::Widget::modelChanged);
     //connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::layoutChanged, this, &TasksAction::Widget::modelChanged);
 
     //connect(&treeView, &HierarchyWidgetTreeView::columnHiddenChanged, this, &TasksAction::Widget::modelChanged);
-    connect(&treeView, &HierarchyWidgetTreeView::expanded, this, &TasksAction::Widget::modelChanged);
-    connect(&treeView, &HierarchyWidgetTreeView::collapsed, this, &TasksAction::Widget::modelChanged);
+    //connect(&treeView, &HierarchyWidgetTreeView::expanded, this, &TasksAction::Widget::modelChanged);
+    //connect(&treeView, &HierarchyWidgetTreeView::collapsed, this, &TasksAction::Widget::modelChanged);
 
     modelChanged();
 
@@ -370,6 +366,8 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
 
         contextMenu.exec(QCursor::pos());
     });
+
+    //_tasksAction->openPersistentProgressEditorsRecursively(treeView);
 }
 
 void TasksAction::Widget::modelChanged()

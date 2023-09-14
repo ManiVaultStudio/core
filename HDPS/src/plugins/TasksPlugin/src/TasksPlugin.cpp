@@ -24,8 +24,8 @@ QMap<TasksPlugin::TestMode, QString> TasksPlugin::testModeNames = QMap<TasksPlug
 #endif
 
 TasksPlugin::TasksPlugin(const PluginFactory* factory) :
-    ViewPlugin(factory),
-    _tasksAction(this, "Tasks")
+    ViewPlugin(factory)//,
+    //_tasksAction(this, "Tasks")
 {
 }
 
@@ -35,11 +35,11 @@ void TasksPlugin::init()
 
     layout->setContentsMargins(6, 6, 6, 6);
 
-    auto tasksWidget = _tasksAction.createWidget(&getWidget(), TasksAction::Toolbar | TasksAction::Overlay);
+    //auto tasksWidget = _tasksAction.createWidget(&getWidget(), TasksAction::Toolbar | TasksAction::Overlay);
 
-    tasksWidget->layout()->setContentsMargins(0, 0, 0, 0);
+    //tasksWidget->layout()->setContentsMargins(0, 0, 0, 0);
 
-    layout->addWidget(tasksWidget);
+    //layout->addWidget(tasksWidget);
 
     getWidget().setLayout(layout);
 
@@ -53,8 +53,10 @@ void TasksPlugin::init()
 void TasksPlugin::addTestSuite()
 {
     auto testModalTaskGroupAction   = new GroupAction(this, "Test Modal Task");
-    auto modalTaskTestTypeAction    = new OptionAction(this, "Modal Task Test Type", testModeNames.values());
+    auto modalTaskTestTypeAction    = new OptionAction(this, "Modal Task Test Type", testModeNames.values(), testModeNames.values().first());
     auto modalTaskStartTestAction   = new TriggerAction(this, "Start Test");
+
+    modalTaskTestTypeAction->setPlaceHolderString("<Pick Type>");
 
     testModalTaskGroupAction->addAction(modalTaskTestTypeAction);
     testModalTaskGroupAction->addAction(modalTaskStartTestAction);

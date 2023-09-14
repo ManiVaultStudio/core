@@ -151,8 +151,9 @@ void TasksFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
     //    _rowCount = rowCount(parent);
     //};
 
-    //connect(sourceModel, &QAbstractItemModel::rowsInserted, this, rowsInsertedOrRemoved);
-    //connect(sourceModel, &QAbstractItemModel::rowsRemoved, this, rowsInsertedOrRemoved);
+    connect(sourceModel, &QAbstractItemModel::rowsInserted, this, &TasksFilterModel::invalidate);
+    connect(sourceModel, &QAbstractItemModel::rowsRemoved, this, &TasksFilterModel::invalidate);
+    connect(sourceModel, &QAbstractItemModel::dataChanged, this, &TasksFilterModel::invalidate);
 }
 
 QVariant TasksFilterModel::getSourceData(const QModelIndex& index, const TasksModel::Column& column, int role) const
