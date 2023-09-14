@@ -8,7 +8,7 @@
 #include "CoreInterface.h"
 
 #ifdef _DEBUG
-    #define MODAL_TASK_HANDLER_VERBOSE
+    //#define MODAL_TASK_HANDLER_VERBOSE
 #endif
 
 namespace hdps {
@@ -44,12 +44,18 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
     updateVisibility();
 
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, []() -> void { qDebug() << "Modal task inserted"; });
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, []() -> void { qDebug() << "Modal task removed"; });
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
+        for (int rowIndex = first; rowIndex <= last; rowIndex++)
+            qDebug() << _tasksAction.getTasksFilterModel().index(rowIndex, static_cast<int>(TasksModel::Column::Name), parent).data(Qt::DisplayRole).toString() << "inserted";
+    });
+
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
+        for (int rowIndex = first; rowIndex <= last; rowIndex++)
+            qDebug() << _tasksAction.getTasksFilterModel().index(rowIndex, static_cast<int>(TasksModel::Column::Name), parent).data(Qt::DisplayRole).toString() << "removed";
+    });
 
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateVisibility);
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibility);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::dataChanged, this, updateVisibility);
 }
 
 void ModalTaskHandler::init()

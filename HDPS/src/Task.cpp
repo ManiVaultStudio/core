@@ -263,8 +263,10 @@ void Task::setFinished(bool toIdleWithDelay /*= true*/, std::uint32_t delay /*= 
 
     setProgressDescription("Finished", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 
-    if (toIdleWithDelay)
+    if (toIdleWithDelay) {
+        getTimer(TimerType::ToIdleWithDelay).setInterval(delay);
         getTimer(TimerType::ToIdleWithDelay).start();
+    }
 }
 
 void Task::setFinished(const QString& progressDescription, bool toIdleWithDelay /*= true*/, std::uint32_t delay /*= TASK_DESCRIPTION_DISAPPEAR_INTERVAL*/)
@@ -273,8 +275,10 @@ void Task::setFinished(const QString& progressDescription, bool toIdleWithDelay 
 
     setProgressDescription(progressDescription, TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 
-    if (toIdleWithDelay)
+    if (toIdleWithDelay) {
+        getTimer(TimerType::ToIdleWithDelay).setInterval(delay);
         getTimer(TimerType::ToIdleWithDelay).start();
+    }
 }
 
 void Task::setAborting()

@@ -262,6 +262,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskTypeFilterAction());
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskScopeFilterAction());
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskStatusFilterAction());
+    _tasksWidget.setHeaderHidden(false);
 
     _tasksWidget.getFilterColumnAction().setCurrentText("Name");
 
@@ -269,6 +270,9 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
 
     treeView.setObjectName("TreeView");
     treeView.setRootIsDecorated(false);
+
+    treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Progress), new ProgressItemDelegate(tasksAction));
+    treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Kill), new KillTaskItemDelegate(tasksAction));
 
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ID), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ParentID), true);
@@ -280,24 +284,34 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     auto treeViewHeader = treeView.header();
 
     treeView.setTextElideMode(Qt::ElideMiddle);
-
-    treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Progress), new ProgressItemDelegate(tasksAction));
-    treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Kill), new KillTaskItemDelegate(tasksAction));
     
     treeViewHeader->setStretchLastSection(false);
 
     treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Name), QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Progress), QHeaderView::Stretch);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Status), QHeaderView::Fixed);
+    //treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Status), QHeaderView::Fixed);
     //treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Kill), QHeaderView::Fixed);
 
-    treeViewHeader->resizeSection(static_cast<int>(TasksModel::Column::Status), 130);
+    //treeViewHeader->resizeSection(static_cast<int>(TasksModel::Column::Status), 130);
     //treeViewHeader->resizeSection(static_cast<int>(TasksModel::Column::Kill), 130);
 
-    connect(&tasksAction->getTasksFilterModel(), &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
-        qDebug() << "QSortFilterProxyModel::rowsInserted";
-        _tasksAction->openPersistentProgressEditorsRecursively(_tasksWidget.getTreeView(), parent);
-        //modelChanged();
+    connect(&tasksAction->getTasksFilterModel(), &QSortFilterProxyModel::layoutChanged, this, [this]() -> void {
+        _tasksAction->openPersistentProgressEditorsRecursively(_tasksWidget.getTreeView());
+    });
+
+    connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
+        for (int rowIndex = first; rowIndex <= last; rowIndex++) {
+            const auto index = _tasksAction->getTasksFilterModel().index(rowIndex, 0, parent);
+
+            const auto persistentEditorsIndexes = QModelIndexList({
+                index.siblingAtColumn(static_cast<int>(TasksModel::Column::Progress)),
+                index.siblingAtColumn(static_cast<int>(TasksModel::Column::Kill))
+                });
+
+            for (const auto& persistentEditorIndex : persistentEditorsIndexes)
+                if (_tasksWidget.getTreeView().isPersistentEditorOpen(persistentEditorIndex))
+                    _tasksWidget.getTreeView().closePersistentEditor(persistentEditorIndex);
+        }
     });
 
     //connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::rowsRemoved, this, &TasksAction::Widget::modelChanged);
@@ -307,7 +321,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     //connect(&treeView, &HierarchyWidgetTreeView::expanded, this, &TasksAction::Widget::modelChanged);
     //connect(&treeView, &HierarchyWidgetTreeView::collapsed, this, &TasksAction::Widget::modelChanged);
 
-    modelChanged();
+    //modelChanged();
 
     auto layout = new QVBoxLayout();
 
