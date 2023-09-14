@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "TasksPlugin.h"
+#include "AbstractTaskTester.h"
 
 #include <Application.h>
 
@@ -13,20 +14,13 @@
 Q_PLUGIN_METADATA(IID "NL.ManiVault.TasksPlugin")
 
 using namespace hdps;
-
-#ifdef _DEBUG
-
-QMap<TasksPlugin::TestMode, QString> TasksPlugin::testModeNames = QMap<TasksPlugin::TestMode, QString>({
-    { TasksPlugin::TestMode::ModalRunningIndeterminate, "ModalRunningIndeterminate" },
-    { TasksPlugin::TestMode::ModalSubtasks, "ModalSubtasks" }
-});
-
-#endif
+using namespace hdps::util;
 
 TasksPlugin::TasksPlugin(const PluginFactory* factory) :
     ViewPlugin(factory)//,
     //_tasksAction(this, "Tasks")
 {
+    AbstractTaskTester::registerTester("ModalTaskTestRunningIndeterminate");
 }
 
 void TasksPlugin::init()
@@ -53,7 +47,7 @@ void TasksPlugin::init()
 void TasksPlugin::addTestSuite()
 {
     auto testModalTaskGroupAction   = new GroupAction(this, "Test Modal Task");
-    auto modalTaskTestTypeAction    = new OptionAction(this, "Modal Task Test Type", testModeNames.values(), testModeNames.values().first());
+    auto modalTaskTestTypeAction    = new OptionAction(this, "Modal Task Test Type", AbstractTaskTester::getTesterNames(), AbstractTaskTester::getTesterNames().first());
     auto modalTaskStartTestAction   = new TriggerAction(this, "Start Test");
 
     modalTaskTestTypeAction->setPlaceHolderString("<Pick Type>");
@@ -64,16 +58,29 @@ void TasksPlugin::addTestSuite()
     getWidget().layout()->addWidget(testModalTaskGroupAction->createWidget(&getWidget()));
 
     connect(modalTaskStartTestAction, &TriggerAction::triggered, this, [this, modalTaskTestTypeAction]() -> void {
-        switch (static_cast<TestMode>(modalTaskTestTypeAction->getCurrentIndex()))
-        {
-            case TestMode::ModalRunningIndeterminate:
-                new ModalRunningIndeterminateTester(this, modalTaskTestTypeAction->getCurrentText());
-                break;
+        try {
+            const auto metaType     = modalTaskTestTypeAction->getCurrentText();
+            const auto metaTypeId   = QMetaType::type(metaType.toLatin1());
+            const auto metaObject   = QMetaType::metaObjectForType(metaTypeId);
 
-            case TestMode::ModalSubtasks:
-                new ModalRunningIndeterminateTester(this, modalTaskTestTypeAction->getCurrentText());
-                break;
+            if (!metaObject)
+                throw std::runtime_error(QString("Meta object type '%1' is not registered. Did you forget to register the tester correctly with the Qt meta object system?").arg(metaType).toLatin1());
+
+            auto metaObjectInstance = metaObject->newInstance(Q_ARG(QObject*, this), Q_ARG(QString, metaType));
+            auto taskTester         = dynamic_cast<AbstractTaskTester*>(metaObjectInstance);
+
+            if (!taskTester)
+                throw std::runtime_error(QString("Unable to create a new instance of type '%1'").arg(metaType).toLatin1());
         }
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to create task tester:", e);
+        }
+        catch (...)
+        {
+            exceptionMessageBox("Unable to create task tester:");
+        }
+
     });
 }
 #endif

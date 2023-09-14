@@ -8,8 +8,6 @@
 
 #include <actions/TasksAction.h>
 
-#include <ModalTask.h>
-
 using namespace hdps;
 using namespace hdps::plugin;
 using namespace hdps::gui;
@@ -26,17 +24,6 @@ class TasksPlugin : public ViewPlugin
     Q_OBJECT
     
 public:
-
-#ifdef _DEBUG
-
-    enum class TestMode {
-        ModalRunningIndeterminate,
-        ModalSubtasks,
-    };
-
-    static QMap<TestMode, QString> testModeNames;
-
-#endif
 
     /**
      * Construct with \p factory
@@ -84,75 +71,3 @@ public:
      */
     ViewPlugin* produce() override;
 };
-
-#ifdef _DEBUG
-
-class AbstractTaskTester : public QObject
-{
-public:
-    AbstractTaskTester(QObject* parent, const QString& name, const Task::Status& status = Task::Status::Idle) :
-        _modalTask(parent, name, status)
-    {
-        
-    }
-
-    virtual void run() = 0;
-
-    ModalTask& getModalTask() {
-        return _modalTask;
-    }
-
-    QTimer& getTimer() {
-        return _timer;
-    }
-
-private:
-    ModalTask   _modalTask;
-    QTimer      _timer;
-};
-
-class ModalRunningIndeterminateTester : public AbstractTaskTester
-{
-public:
-    ModalRunningIndeterminateTester(QObject* parent, const QString& name, const Task::Status& status = Task::Status::Idle) :
-        AbstractTaskTester(parent, name, status),
-        _tasks({ "Task A", "Task B", "Task C", "Task D", "Task E" })
-    {
-        connect(&getModalTask(), &Task::aborted, this, [this]() -> void {
-            qDebug() << getModalTask().getName() << "has aborted";
-
-            getTimer().stop();
-            deleteLater();
-        });
-
-        connect(&getModalTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
-            //if (status == Task::Status::Idle)
-                //deleteLater();
-        });
-
-        run();
-    }
-
-    void run() override {
-        getModalTask().setRunningIndeterminate();
-
-        connect(&getTimer(), &QTimer::timeout, this, [&]() -> void {
-            getModalTask().setProgressDescription(_tasks.first());
-
-            _tasks.removeFirst();
-
-            if (_tasks.isEmpty()) {
-                getTimer().stop();
-                getModalTask().setFinished();
-            }
-        });
-
-        getTimer().setInterval(1000);
-        getTimer().start();
-    }
-
-private:
-    QStringList _tasks;
-};
-
-#endif
