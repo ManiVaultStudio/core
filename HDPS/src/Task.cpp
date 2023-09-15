@@ -25,12 +25,12 @@ QMap<Task::Status, QString> Task::statusNames = QMap<Status, QString>({
 
 QMap<Task::Scope, QString> Task::scopeNames = QMap<Scope, QString>({
     { Task::Scope::Background, "Background" },
-    { Task::Scope::ForeGround, "ForeGround" },
+    { Task::Scope::Foreground, "Foreground" },
     { Task::Scope::Modal, "Modal" }
 });
 
 Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::Background*/, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/, AbstractTaskHandler* handler /*= nullptr*/) :
-    QObject(parent),
+    QObject(nullptr),
     Serializable(name),
     _name(name),
     _description(),
@@ -46,14 +46,10 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
     _progressDescription(),
     _timers()
 {
+    setParent(parent);
+
     if (core() != nullptr && core()->isInitialized())
         tasks().addTask(this);
-
-    if (core() != nullptr && core()->isInitialized()) {
-        QObject::connect(this, &QObject::destroyed, this, [this]() -> void {
-            tasks().removeTask(this);
-        });
-    }
 
     for (auto& timer : _timers)
         timer.setSingleShot(true);
@@ -83,6 +79,9 @@ Task::~Task()
 {
     for (auto& timer : _timers)
         timer.stop();
+
+    if (core() != nullptr && core()->isInitialized())
+        tasks().removeTask(this);
 }
 
 Task* Task::getParentTask()
@@ -205,7 +204,7 @@ void Task::setStatus(const Status& status)
 
     _status = status;
 
-    updateProgress();
+    computeProgress();
 
     emit statusChanged(previousStatus, _status);
 
@@ -352,7 +351,10 @@ void Task::setProgressMode(const ProgressMode& progressMode)
 
     emit progressModeChanged(_progressMode);
 
-    updateProgress();
+    if (_progressMode == ProgressMode::Aggregate)
+        setProgressDescription(getName());
+
+    computeProgress();
 }
 
 Task::Scope Task::getScope() const
@@ -386,8 +388,6 @@ void Task::setProgress(float progress, const QString& subtaskDescription /*= ""*
         return;
 
     _progress = progress;
-
-    updateProgress();
 
     if (!subtaskDescription.isEmpty())
         setProgressDescription(subtaskDescription);
@@ -438,7 +438,7 @@ void Task::setSubtasks(std::uint32_t numberOfSubtasks)
     
     emit subtasksChanged(_subtasks, _subtasksNames);
 
-    updateProgress();
+    computeProgress();
 }
 
 void Task::setSubtasks(const QStringList& subtasksNames)
@@ -455,7 +455,7 @@ void Task::setSubtasks(const QStringList& subtasksNames)
 
     emit subtasksChanged(_subtasks, _subtasksNames);
 
-    updateProgress();
+    computeProgress();
 }
 
 void Task::addSubtasks(const QStringList& subtasksNames)
@@ -473,7 +473,7 @@ void Task::addSubtasks(const QStringList& subtasksNames)
     emit subtasksAdded(subtasksNames);
     emit subtasksChanged(_subtasks, _subtasksNames);
 
-    updateProgress();
+    computeProgress();
 }
 
 void Task::setSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription /*= QString()*/)
@@ -486,21 +486,19 @@ void Task::setSubtaskFinished(std::uint32_t subtaskIndex, const QString& progres
 
     _subtasks.setBit(subtaskIndex, true);
 
-    updateProgress();
+    computeProgress();
 
-    qDebug() << subtaskIndex << _progress;
+    //qDebug() << subtaskIndex << _progress;
     //emit subtasksChanged(_subtasks, _subtasksNames);
 
     const auto subtaskName = _subtasksNames[subtaskIndex];
 
-    if (getProgress() < 1.f) {
-        if (!progressDescription.isEmpty()) {
-            setProgressDescription(progressDescription);
-        }
-        else {
-            if (!subtaskName.isEmpty())
-                setProgressDescription(subtaskName);
-        }
+    if (!progressDescription.isEmpty()) {
+        setProgressDescription(progressDescription);
+    }
+    else {
+        if (!subtaskName.isEmpty())
+            setProgressDescription(subtaskName);
     }
 
     emit subtaskFinished(subtaskName);
@@ -519,25 +517,6 @@ void Task::setSubtaskFinished(const QString& subtaskName, const QString& progres
         return;
 
     setSubtaskFinished(subtaskIndex, progressDescription);
-}
-
-void Task::setSubtaskStarted(const QString& subtaskName, const QString& progressDescription /*= QString()*/)
-{
-    if (_progressMode != ProgressMode::Subtasks)
-        return;
-
-    const auto subtaskIndex = getSubtaskIndex(subtaskName);
-
-    if (subtaskIndex < 0)
-        return;
-
-    const auto verifiedSubtaskName = _subtasksNames[subtaskIndex];
-
-    setProgressDescription(progressDescription.isEmpty() ? verifiedSubtaskName : progressDescription);
-
-    emit subtaskStarted(verifiedSubtaskName);
-
-    QCoreApplication::processEvents();
 }
 
 void Task::setSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName)
@@ -568,8 +547,13 @@ void Task::setProgressDescription(const QString& progressDescription, std::uint3
 
     _progressDescription = progressDescription;
 
-    if (!getTimer(TimerType::ProgressDescriptionChanged).isActive())
+    if (!getTimer(TimerType::ProgressDescriptionChanged).isActive()) {
+        emit progressDescriptionChanged(_progressDescription);
+
+        QCoreApplication::processEvents();
+
         getTimer(TimerType::ProgressDescriptionChanged).start();
+    }
 
     if (clearDelay > 0) {
         QTimer::singleShot(clearDelay, this, [this]() -> void {
@@ -589,9 +573,11 @@ std::int32_t Task::getSubtaskIndex(const QString& subtaskName) const
     return _subtasksNames.indexOf(subtaskName);
 }
 
-void Task::updateProgress()
+void Task::computeProgress()
 {
-    //qDebug() << (_subtasks.size() / 8) << _subtasks.count(true);
+//#ifdef TASK_VERBOSE
+//    qDebug() << __FUNCTION__ << getName();
+//#endif
 
     switch (_progressMode) {
         case ProgressMode::Manual:
@@ -640,8 +626,13 @@ void Task::updateProgress()
             break;
     }
 
-    if (!getTimer(TimerType::ProgressChanged).isActive())
+    if (!getTimer(TimerType::ProgressChanged).isActive()) {
+        emit progressChanged(_progress);
+
+        QCoreApplication::processEvents();
+
         getTimer(TimerType::ProgressChanged).start();
+    }
 
     if (_status == Status::Finished || _status == Status::Aborted)
         setProgressDescription("", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
@@ -671,8 +662,8 @@ void Task::childEvent(QChildEvent* event)
 
             setProgressMode(ProgressMode::Aggregate);
             registerChildTask(childTask);
-            updateStatus();
-            updateProgress();
+            updateAggregateStatus();
+            computeProgress();
 
             break;
         }
@@ -689,8 +680,8 @@ void Task::childEvent(QChildEvent* event)
 #endif
 
             unregisterChildTask(childTask);
-            updateStatus();
-            updateProgress();
+            updateAggregateStatus();
+            computeProgress();
 
             break;
         }
@@ -729,23 +720,18 @@ void Task::registerChildTask(Task* childTask)
         if (getProgressMode() != ProgressMode::Aggregate)
             return;
 
-        updateStatus();
-        updateProgress();
+        updateAggregateStatus();
+        computeProgress();
     });
 
     connect(childTask, &Task::progressChanged, this, [this](float progress) -> void {
         if (getProgressMode() != ProgressMode::Aggregate)
             return;
 
-        updateProgress();
+        computeProgress();
     });
 
-    connect(childTask, &Task::progressDescriptionChanged, this, [this](const QString& progressDescription) -> void {
-        if (getProgressMode() != ProgressMode::Aggregate)
-            return;
-        
-        setProgressDescription(progressDescription);
-    });
+    updateAggregateStatus();
 }
 
 void Task::unregisterChildTask(Task* childTask)
@@ -757,10 +743,10 @@ void Task::unregisterChildTask(Task* childTask)
 
     disconnect(childTask, &Task::statusChanged, this, nullptr);
     disconnect(childTask, &Task::progressChanged, this, nullptr);
-    disconnect(childTask, &Task::progressDescriptionChanged, this, nullptr);
+    //disconnect(childTask, &Task::progressDescriptionChanged, this, nullptr);
 }
 
-void Task::updateStatus()
+void Task::updateAggregateStatus()
 {
     if (_progressMode != ProgressMode::Aggregate)
         return;

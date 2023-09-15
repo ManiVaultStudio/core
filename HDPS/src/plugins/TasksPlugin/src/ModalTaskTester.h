@@ -20,3 +20,37 @@ public:
 private:
     hdps::ModalTask   _modalTask;
 };
+
+class ModalTaskTesterSubtasks : public ModalTaskTester
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE ModalTaskTesterSubtasks(QObject* parent, const QString& name);
+
+    void run() override;
+
+private:
+    QStringList _tasks;
+};
+
+Q_DECLARE_METATYPE(ModalTaskTesterSubtasks)
+
+inline const auto modalTaskTesterSubtasksMetaTypeId = qRegisterMetaType<ModalTaskTesterSubtasks*>("ModalTaskTesterSubtasks");
+
+class ModalTaskTesterAggregate : public ModalTaskTester
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE ModalTaskTesterAggregate(QObject* parent, const QString& name);
+
+    void run() override;
+
+private:
+    QVector<TaskRunner*>   _childTaskRunners;
+};
+
+Q_DECLARE_METATYPE(ModalTaskTesterAggregate)
+
+inline const auto modalTaskTesterAggregateMetaTypeId = qRegisterMetaType<ModalTaskTesterAggregate*>("ModalTaskTesterAggregate");

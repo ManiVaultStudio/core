@@ -10,16 +10,6 @@ ModalTaskTestRunningIndeterminate::ModalTaskTestRunningIndeterminate(QObject* pa
     ModalTaskTester(parent, name),
     _tasks({ "Task A", "Task B", "Task C", "Task D", "Task E" })
 {
-    connect(getTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
-        if (status == Task::Status::Aborting) {
-            qDebug() << getTask()->getName() << "is aborting";
-
-            getTimer().stop();
-
-            deleteLater();
-        }
-    });
-
     run();
 }
 

@@ -4,8 +4,6 @@
 
 #include "AbstractTaskTester.h"
 
-#include <Task.h>
-
 using namespace hdps;
 
 QStringList AbstractTaskTester::testerNames = QStringList();

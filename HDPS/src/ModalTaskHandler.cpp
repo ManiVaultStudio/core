@@ -104,6 +104,7 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     setWindowModality(Qt::ApplicationModal);
     setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
 
+    /*
     connect(&_processEventsTimer, &QTimer::timeout, this, [this]() -> void {
         if (isVisible())
             QCoreApplication::processEvents();
@@ -111,6 +112,7 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
 
     _processEventsTimer.setInterval(100);
     _processEventsTimer.start();
+    */
 
     auto layout = new QVBoxLayout();
 

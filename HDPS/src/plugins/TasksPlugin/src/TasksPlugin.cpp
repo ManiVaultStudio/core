@@ -21,6 +21,8 @@ TasksPlugin::TasksPlugin(const PluginFactory* factory) :
     //_tasksAction(this, "Tasks")
 {
     AbstractTaskTester::registerTester("ModalTaskTestRunningIndeterminate");
+    AbstractTaskTester::registerTester("ModalTaskTesterSubtasks");
+    AbstractTaskTester::registerTester("ModalTaskTesterAggregate");
 }
 
 void TasksPlugin::init()

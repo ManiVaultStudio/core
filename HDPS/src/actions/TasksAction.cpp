@@ -196,7 +196,7 @@ private:
         if (item == nullptr)
             return nullptr;
 
-        return &(dynamic_cast<TasksModel::Item*>(item)->getTaskAction().getProgressAction());
+        return &(dynamic_cast<TasksModel::ProgressItem*>(item)->getTaskAction().getProgressAction());
     }
 
 private:
@@ -238,12 +238,12 @@ private:
      * @return Pointer to task killer action
      */
     TriggerAction* getKillTaskAction(const QModelIndex& index) const {
-        auto item = _tasksAction->getTasksModel().itemFromIndex(_tasksAction->getTasksFilterModel().mapToSource(index).siblingAtColumn(static_cast<int>(TasksModel::Column::Kill)));
+        auto item = _tasksAction->getTasksModel().itemFromIndex(_tasksAction->getTasksFilterModel().mapToSource(index).siblingAtColumn(static_cast<int>(TasksModel::Column::Progress)));
 
         if (item == nullptr)
             return nullptr;
 
-        return &(dynamic_cast<TasksModel::Item*>(item)->getTaskAction().getKillTaskAction());
+        return &(dynamic_cast<TasksModel::ProgressItem*>(item)->getTaskAction().getKillTaskAction());
     }
 
 private:

@@ -57,7 +57,7 @@ public:
     /** Task: */
     enum class Scope {
         Background,     /** ...will run in the background (not visible by default but can be revealed in the tasks view plugin) */
-        ForeGround,     /** ...will run in the foreground (tasks with this scope will automatically appear in a tasks popup when running) */
+        Foreground,     /** ...will run in the foreground (tasks with this scope will automatically appear in a tasks popup when running) */
         Modal           /** ...will run modally (tasks with this scope will automatically appear in a modal tasks dialog when the needed) */
     };
 
@@ -311,16 +311,6 @@ public: // Subtasks
     virtual void setSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription = QString()) final;
 
     /**
-     * Flag item with \p subtaskName as started, the corresponding progress description will be broadcast
-     * Assumes the number of tasks has been set prior with Task::setSubtasks()
-     * If \p subtaskName is not found, the progress description will not be updated (ensure that subtasks names are set with Task::setSubtasksNames() or Task::setSubtasksName())
-     * This method only has an effect when Task#_progressMode is set to ProgressMode::Subtasks
-     * @param subtaskName Name of the subtask
-     * @param progressDescription Override the default progress description when set to a non-empty string
-     */
-    virtual void setSubtaskStarted(const QString& subtaskName, const QString& progressDescription = QString()) final;
-
-    /**
      * Flag item with \p subtaskName as finished, the progress percentage will be computed automatically
      * Assumes the number of tasks has been set prior with Task::setSubtasks()
      * If \p subtaskName is not found, the progress will not be updated (ensure that subtasks names are set with Task::setSubtasksNames() or Task::setSubtasksName())
@@ -368,8 +358,8 @@ public: // Progress description
 
 private:
 
-    /** Updates the progress percentage */
-    void updateProgress();
+    /** Computes the progress percentage depending on the type of task */
+    void computeProgress();
 
     /**
      * Get timer by \p timerType
@@ -377,7 +367,7 @@ private:
      */
     QTimer& getTimer(const TimerType& timerType);
 
-protected: // Child tasks
+protected: // For aggregate task
 
     /**
      * Invoked when a child \p event occurs
@@ -385,7 +375,7 @@ protected: // Child tasks
      */
     void childEvent(QChildEvent* event) override;
 
-public: // Child tasks
+public: // For aggregate task
 
     /**
      * Get child tasks
@@ -393,7 +383,7 @@ public: // Child tasks
      */
     virtual TasksPtrs getChildTasks() const final;
 
-private: // Child tasks
+private: // For aggregate task
 
     /**
      * Registers \p childTask
@@ -408,10 +398,10 @@ private: // Child tasks
     virtual void unregisterChildTask(Task* childTask) final;
 
     /**
-     * Update status of the task
+     * Update status of aggregate task
      * This method only has an effect when Task#_progressMode is set to ProgressMode::Aggregate
      */
-    virtual void updateStatus() final;
+    virtual void updateAggregateStatus() final;
 
 signals:
 

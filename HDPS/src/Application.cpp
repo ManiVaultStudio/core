@@ -53,7 +53,6 @@ hdps::Application::Application(int& argc, char** argv) :
     _startupTask.setProgressMode(Task::ProgressMode::Subtasks);
     _startupTask.setSubtasks(subTasks);
     _startupTask.setRunning();
-    _startupTask.setSubtaskStarted("Starting Application");
     _startupTask.setParent(&_splashScreenAction.getTask());
 }
 

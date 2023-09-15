@@ -452,10 +452,6 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             task.setSubtasks(QStringList() << decompressionTaskNames << "Create data hierarchy" << viewPluginsTaskNames);
 
-            connect(&archiver, &Archiver::taskStarted, this, [this](const QString& taskName) -> void {
-                getCurrentProject()->getTask().setSubtaskStarted(taskName, QString("Extracting %1").arg(taskName));
-            });
-
             connect(&archiver, &Archiver::taskFinished, this, [this](const QString& taskName) -> void {
                 getCurrentProject()->getTask().setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
             });
@@ -468,10 +464,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             archiver.decompress(filePath, temporaryDirectoryPath);
 
-            task.setSubtaskStarted("Create data hierarchy");
-            {
-                projects().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
-            }
+            projects().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
+            
             task.setSubtaskFinished("Create data hierarchy");
 
             if (loadWorkspace) {

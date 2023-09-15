@@ -62,14 +62,14 @@ void TaskManager::addTask(Task* task)
 {
     try
     {
-#ifdef TASK_MANAGER_VERBOSE
-        qDebug() << __FUNCTION__;
-#endif
-
         Q_ASSERT(task != nullptr);
 
         if (task == nullptr)
             throw std::runtime_error("Task may not be a null pointer");
+
+#ifdef TASK_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__ << task->getName();
+#endif
 
         _tasks << task;
 
@@ -89,10 +89,6 @@ void TaskManager::removeTask(Task* task)
 {
     try
     {
-#ifdef TASK_MANAGER_VERBOSE
-        qDebug() << __FUNCTION__;
-#endif
-
         Q_ASSERT(task != nullptr);
 
         if (task == nullptr)
@@ -100,6 +96,10 @@ void TaskManager::removeTask(Task* task)
 
         if (!_tasks.contains(task))
             throw std::runtime_error("Task not found in manager");
+
+#ifdef TASK_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__ << task->getName();
+#endif
 
         const auto taskId = task->getId();
 

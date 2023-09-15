@@ -158,8 +158,6 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
             const auto pluginMap        = viewPluginMap["Plugin"].toMap();
             const auto guiName          = viewPluginMap["GuiName"].toMap()["Value"].toString();
 
-            task.setSubtaskStarted(guiName, QString("Loading view: %1").arg(guiName));
-
             if (plugins().isPluginLoaded(pluginKind)) {
                 addViewPluginDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));
             } else {
