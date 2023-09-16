@@ -103,8 +103,7 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
 {
     setWindowModality(Qt::ApplicationModal);
     setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
-
-    /*
+    
     connect(&_processEventsTimer, &QTimer::timeout, this, [this]() -> void {
         if (isVisible())
             QCoreApplication::processEvents();
@@ -112,7 +111,6 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
 
     _processEventsTimer.setInterval(100);
     _processEventsTimer.start();
-    */
 
     auto layout = new QVBoxLayout();
 
@@ -141,9 +139,9 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
         treeView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         treeView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-        treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Name), true);
-        treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Status), true);
-        treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Type), true);
+        //treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Name), true);
+        //treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Status), true);
+        //treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Type), true);
         
         treeView->viewport()->setBackgroundRole(QPalette::Window);
     }

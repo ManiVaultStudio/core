@@ -8,49 +8,18 @@
 
 #include <ModalTask.h>
 
-class ModalTaskTester : public AbstractTaskTester
-{
-public:
-    ModalTaskTester(QObject* parent, const QString& name);
-
-    void run() override;;
-
-    hdps::Task* getTask() override;
-
-private:
-    hdps::ModalTask   _modalTask;
-};
-
-class ModalTaskTesterSubtasks : public ModalTaskTester
+class ModalTaskTester final : public AbstractTaskTester
 {
     Q_OBJECT
 
 public:
-    Q_INVOKABLE ModalTaskTesterSubtasks(QObject* parent, const QString& name);
-
-    void run() override;
+    Q_INVOKABLE ModalTaskTester(QObject* parent, const QString& name);
 
 private:
-    QStringList _tasks;
+    void testRunningIndeterminate();
+    void testAggregation();
 };
 
-Q_DECLARE_METATYPE(ModalTaskTesterSubtasks)
+Q_DECLARE_METATYPE(ModalTaskTester)
 
-inline const auto modalTaskTesterSubtasksMetaTypeId = qRegisterMetaType<ModalTaskTesterSubtasks*>("ModalTaskTesterSubtasks");
-
-class ModalTaskTesterAggregate : public ModalTaskTester
-{
-    Q_OBJECT
-
-public:
-    Q_INVOKABLE ModalTaskTesterAggregate(QObject* parent, const QString& name);
-
-    void run() override;
-
-private:
-    QVector<TaskRunner*>   _childTaskRunners;
-};
-
-Q_DECLARE_METATYPE(ModalTaskTesterAggregate)
-
-inline const auto modalTaskTesterAggregateMetaTypeId = qRegisterMetaType<ModalTaskTesterAggregate*>("ModalTaskTesterAggregate");
+inline const auto modalTaskTesterMetaTypeId = qRegisterMetaType<ModalTaskTester*>("ModalTaskTester");

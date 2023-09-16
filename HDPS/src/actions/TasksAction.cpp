@@ -269,7 +269,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     auto& treeView = _tasksWidget.getTreeView();
 
     treeView.setObjectName("TreeView");
-    treeView.setRootIsDecorated(false);
+    treeView.setRootIsDecorated(true);
 
     treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Progress), new ProgressItemDelegate(tasksAction));
     treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Kill), new KillTaskItemDelegate(tasksAction));
@@ -284,6 +284,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     auto treeViewHeader = treeView.header();
 
     treeView.setTextElideMode(Qt::ElideMiddle);
+    treeView.setItemsExpandable(true);
     
     treeViewHeader->setStretchLastSection(false);
 

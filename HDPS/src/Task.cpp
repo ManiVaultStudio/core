@@ -20,6 +20,7 @@ QMap<Task::Status, QString> Task::statusNames = QMap<Status, QString>({
     { Task::Status::RunningIndeterminate, "Running Indeterminate" },
     { Task::Status::Finished, "Finished" },
     { Task::Status::Aborting, "Aborting" },
+    { Task::Status::AboutToBeAborted, "About to be aborted" },
     { Task::Status::Aborted, "Aborted" }
 });
 
@@ -73,6 +74,26 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
     connect(&getTimer(TimerType::ToIdleWithDelay), &QTimer::timeout, this, [this]() -> void {
         setIdle();
     });
+
+    connect(this, &Task::privateSetStatusSignal, this, &Task::privateSetStatus);
+    connect(this, &Task::privateSetIdleSignal, this, &Task::privateSetIdle);
+    connect(this, &Task::privateSetRunningSignal, this, &Task::privateSetRunning);
+    connect(this, &Task::privateSetRunningIndeterminateSignal, this, &Task::privateSetRunningIndeterminate);
+    connect(this, qOverload<bool, std::uint32_t, QPrivateSignal>(&Task::privateSetFinishedSignal), this, qOverload<bool, std::uint32_t>(&Task::privateSetFinished));
+    connect(this, qOverload<const QString&, bool, std::uint32_t, QPrivateSignal>(&Task::privateSetFinishedSignal), this, qOverload<const QString&, bool, std::uint32_t>(&Task::privateSetFinished));
+    connect(this, &Task::privateSetAboutToBeAbortedSignal, this, &Task::privateSetAboutToBeAborted);
+    connect(this, &Task::privateSetAbortingSignal, this, &Task::privateSetAborting);
+    connect(this, &Task::privateSetAbortedSignal, this, &Task::privateSetAborted);
+    connect(this, &Task::privateKillSignal, this, &Task::privateKill);
+    connect(this, &Task::privateSetProgressModeSignal, this, &Task::privateSetProgressMode);
+    connect(this, &Task::privateSetScopeSignal, this, &Task::privateSetScope);
+    connect(this, &Task::privateSetProgressSignal, this, &Task::privateSetProgress);
+    connect(this, qOverload<std::uint32_t, QPrivateSignal>(&Task::privateSetSubtasksSignal), this, qOverload<std::uint32_t>(&Task::privateSetSubtasks));
+    connect(this, qOverload<const QStringList&, QPrivateSignal>(&Task::privateSetSubtasksSignal), this, qOverload<const QStringList&>(&Task::privateSetSubtasks));
+    connect(this, qOverload<std::uint32_t, const QString&, QPrivateSignal>(&Task::privateSetSubtaskFinishedSignal), this, qOverload<std::uint32_t, const QString&>(&Task::privateSetSubtaskFinished));
+    connect(this, qOverload<const QString&, const QString&, QPrivateSignal>(&Task::privateSetSubtaskFinishedSignal), this, qOverload<const QString&, const QString&>(&Task::privateSetSubtaskFinished));
+    connect(this, &Task::privateSetSubtaskNameSignal, this, &Task::privateSetSubtaskName);
+    connect(this, &Task::privateSetProgressDescriptionSignal, this, &Task::privateSetProgressDescription);
 }
 
 Task::~Task()
@@ -185,6 +206,11 @@ bool Task::isFinished() const
     return _status == Status::Finished;
 }
 
+bool Task::isAboutToBeAborted() const
+{
+    return _status == Status::AboutToBeAborted;
+}
+
 bool Task::isAborting() const
 {
     return _status == Status::Aborting;
@@ -197,129 +223,52 @@ bool Task::isAborted() const
 
 void Task::setStatus(const Status& status)
 {
-    if (status == _status)
-        return;
-
-    const auto previousStatus = _status;
-
-    _status = status;
-
-    computeProgress();
-
-    emit statusChanged(previousStatus, _status);
-
-    switch (_status)
-    {
-        case Task::Status::Idle:
-        case Task::Status::Running:
-        case Task::Status::RunningIndeterminate:
-            break;
-
-        case Task::Status::Finished:
-            emit finished();
-            break;
-
-        case Task::Status::Aborting:
-            break;
-
-        case Task::Status::Aborted:
-            emit aborted();
-            break;
-
-        default:
-            break;
-    }
-
-    emit isKillableChanged(isKillable());
-
-    QCoreApplication::processEvents();
+    emit privateSetStatusSignal(status, QPrivateSignal());
 }
 
 void Task::setIdle()
 {
-    setStatus(Status::Idle);
-
-    setProgressDescription("Idle", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
+    emit privateSetIdleSignal(QPrivateSignal());
 }
 
 void Task::setRunning()
 {
-    setStatus(Status::Running);
-
-    setProgressDescription("Running");
+    emit privateSetRunningSignal(QPrivateSignal());
 }
 
 void Task::setRunningIndeterminate()
 {
-    setStatus(Status::RunningIndeterminate);
-
-    setProgressDescription("Running");
+    emit privateSetRunningIndeterminateSignal(QPrivateSignal());
 }
 
 void Task::setFinished(bool toIdleWithDelay /*= true*/, std::uint32_t delay /*= TASK_DESCRIPTION_DISAPPEAR_INTERVAL*/)
 {
-    setStatus(Status::Finished);
-
-    setProgressDescription("Finished", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
-
-    if (toIdleWithDelay) {
-        getTimer(TimerType::ToIdleWithDelay).setInterval(delay);
-        getTimer(TimerType::ToIdleWithDelay).start();
-    }
+    emit privateSetFinishedSignal(hasParentTask() ? false : toIdleWithDelay, delay, QPrivateSignal());
 }
 
 void Task::setFinished(const QString& progressDescription, bool toIdleWithDelay /*= true*/, std::uint32_t delay /*= TASK_DESCRIPTION_DISAPPEAR_INTERVAL*/)
 {
-    setStatus(Status::Finished);
+    emit privateSetFinishedSignal(progressDescription, hasParentTask() ? false : toIdleWithDelay, delay, QPrivateSignal());
+}
 
-    setProgressDescription(progressDescription, TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
-
-    if (toIdleWithDelay) {
-        getTimer(TimerType::ToIdleWithDelay).setInterval(delay);
-        getTimer(TimerType::ToIdleWithDelay).start();
-    }
+void Task::setAboutToBeAborted()
+{
+    emit privateSetAboutToBeAbortedSignal(QPrivateSignal());
 }
 
 void Task::setAborting()
 {
-    if (!getMayKill())
-        return;
-
-    setStatus(Status::Aborting);
-    setProgressDescription("Aborting...");
+    emit privateSetAbortingSignal(QPrivateSignal());
 }
 
 void Task::setAborted()
 {
-    if (!getMayKill())
-        return;
-
-    setStatus(Status::Aborted);
-    setProgress(0.f);
-
-    emit aborted();
-
-    setProgressDescription("Aborted", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
+    emit privateSetAbortedSignal(QPrivateSignal());
 }
 
-void Task::kill()
+void Task::kill(bool recursive /*= true*/)
 {
-    if (getMayKill()) {
-        setAborting();
-
-        emit abort();
-    }
-    else {
-        auto messageBox = new QMessageBox(nullptr);
-
-        messageBox->setAttribute(Qt::WA_DeleteOnClose);
-        messageBox->setWindowTitle("Unable to kill task");
-        messageBox->setText(QString("<p><b>%1</b> cannot be killed because the <i>Task::aborted()</i> signal is not handled. See <a href='%2'>Task.h</a> and <a href='%3'>Task.cpp</a> for more details.</p>").arg(getName(), "https://github.com/ManiVaultStudio/core/tree/master/HDPS/src/Task.h", "https://github.com/ManiVaultStudio/core/tree/master/HDPS/src/Task.cpp"));
-        messageBox->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("exclamation-circle"));
-        messageBox->setAttribute(Qt::WA_DeleteOnClose);
-
-        messageBox->open();
-    }
+    emit privateKillSignal(recursive, QPrivateSignal());
 }
 
 AbstractTaskHandler* Task::getHandler()
@@ -344,17 +293,7 @@ Task::ProgressMode Task::getProgressMode() const
 
 void Task::setProgressMode(const ProgressMode& progressMode)
 {
-    if (progressMode == _progressMode)
-        return;
-
-    _progressMode = progressMode;
-
-    emit progressModeChanged(_progressMode);
-
-    if (_progressMode == ProgressMode::Aggregate)
-        setProgressDescription(getName());
-
-    computeProgress();
+    emit privateSetProgressModeSignal(progressMode, QPrivateSignal());
 }
 
 Task::Scope Task::getScope() const
@@ -364,12 +303,7 @@ Task::Scope Task::getScope() const
 
 void Task::setScope(const Scope& scope)
 {
-    if (scope == _scope)
-        return;
-
-    _scope = scope;
-
-    emit scopeChanged(_scope);
+    emit privateSetScopeSignal(scope, QPrivateSignal());
 }
 
 float Task::getProgress() const
@@ -379,18 +313,7 @@ float Task::getProgress() const
 
 void Task::setProgress(float progress, const QString& subtaskDescription /*= ""*/)
 {
-    if (_progressMode != ProgressMode::Manual)
-        return;
-
-    progress = std::clamp(progress, 0.f, 1.f);
-
-    if (progress == _progress)
-        return;
-
-    _progress = progress;
-
-    if (!subtaskDescription.isEmpty())
-        setProgressDescription(subtaskDescription);
+    emit privateSetProgressSignal(progress, subtaskDescription, QPrivateSignal());
 }
 
 QString Task::getProgressText() const
@@ -414,8 +337,14 @@ QString Task::getProgressText() const
         case Task::Status::Finished:
             return QString("%1 finished").arg(getName());
 
+        case Task::Status::AboutToBeAborted:
+            return QString("%1 is about to be aborted").arg(getName());
+
+        case Task::Status::Aborting:
+            return QString("%1 is aborting").arg(getName());
+
         case Task::Status::Aborted:
-            return "Aborted";
+            return QString("%1 is aborted").arg(getName());
 
         default:
             break;
@@ -426,108 +355,27 @@ QString Task::getProgressText() const
 
 void Task::setSubtasks(std::uint32_t numberOfSubtasks)
 {
-    setProgressMode(ProgressMode::Subtasks);
-
-    if (numberOfSubtasks == 0)
-        return;
-
-    _subtasks.clear();
-
-    _subtasks.resize(numberOfSubtasks);
-    _subtasksNames.resize(numberOfSubtasks);
-    
-    emit subtasksChanged(_subtasks, _subtasksNames);
-
-    computeProgress();
+    emit privateSetSubtasksSignal(numberOfSubtasks, QPrivateSignal());
 }
 
 void Task::setSubtasks(const QStringList& subtasksNames)
 {
-    setProgressMode(ProgressMode::Subtasks);
-
-    if (_subtasks.count() != subtasksNames.count())
-        _subtasks.resize(subtasksNames.count() * 8);
-
-    if (subtasksNames == _subtasksNames)
-        return;
-
-    _subtasksNames = subtasksNames;
-
-    emit subtasksChanged(_subtasks, _subtasksNames);
-
-    computeProgress();
-}
-
-void Task::addSubtasks(const QStringList& subtasksNames)
-{
-    if (subtasksNames.isEmpty())
-        return;
-
-    if (_progressMode != ProgressMode::Subtasks)
-        return;
-
-    _subtasksNames << subtasksNames;
-    
-    _subtasks.resize(_subtasksNames.count());
-
-    emit subtasksAdded(subtasksNames);
-    emit subtasksChanged(_subtasks, _subtasksNames);
-
-    computeProgress();
+    emit privateSetSubtasksSignal(subtasksNames, QPrivateSignal());
 }
 
 void Task::setSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription /*= QString()*/)
 {
-    if (_progressMode != ProgressMode::Subtasks)
-        return;
-
-    if (subtaskIndex >= _subtasks.count())
-        return;
-
-    _subtasks.setBit(subtaskIndex, true);
-
-    computeProgress();
-
-    //qDebug() << subtaskIndex << _progress;
-    //emit subtasksChanged(_subtasks, _subtasksNames);
-
-    const auto subtaskName = _subtasksNames[subtaskIndex];
-
-    if (!progressDescription.isEmpty()) {
-        setProgressDescription(progressDescription);
-    }
-    else {
-        if (!subtaskName.isEmpty())
-            setProgressDescription(subtaskName);
-    }
-
-    emit subtaskFinished(subtaskName);
-
-    QCoreApplication::processEvents();
+    emit privateSetSubtaskFinishedSignal(subtaskIndex, progressDescription, QPrivateSignal());
 }
 
 void Task::setSubtaskFinished(const QString& subtaskName, const QString& progressDescription /*= QString()*/)
 {
-    if (_progressMode != ProgressMode::Subtasks)
-        return;
-
-    const auto subtaskIndex = getSubtaskIndex(subtaskName);
-
-    if (subtaskIndex < 0)
-        return;
-
-    setSubtaskFinished(subtaskIndex, progressDescription);
+    emit privateSetSubtaskFinishedSignal(subtaskName, progressDescription, QPrivateSignal());
 }
 
 void Task::setSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName)
 {
-    if (_progressMode != ProgressMode::Subtasks)
-        return;
-
-    if (_subtasksNames.count() <= subtaskIndex)
-        return;
-
-    _subtasksNames[subtaskIndex] = subtaskName;
+    emit privateSetSubtaskNameSignal(subtaskIndex, subtaskName, QPrivateSignal());
 }
 
 QStringList Task::getSubtasksNames() const
@@ -542,24 +390,7 @@ QString Task::getProgressDescription() const
 
 void Task::setProgressDescription(const QString& progressDescription, std::uint32_t clearDelay /*= 0*/)
 {
-    if (progressDescription == _progressDescription)
-        return;
-
-    _progressDescription = progressDescription;
-
-    if (!getTimer(TimerType::ProgressDescriptionChanged).isActive()) {
-        emit progressDescriptionChanged(_progressDescription);
-
-        QCoreApplication::processEvents();
-
-        getTimer(TimerType::ProgressDescriptionChanged).start();
-    }
-
-    if (clearDelay > 0) {
-        QTimer::singleShot(clearDelay, this, [this]() -> void {
-            setProgressDescription("");
-        });
-    }
+    emit privateSetProgressDescriptionSignal(progressDescription, clearDelay, QPrivateSignal());
 }
 
 std::int32_t Task::getSubtaskIndex(const QString& subtaskName) const
@@ -607,7 +438,6 @@ void Task::computeProgress()
     {
         case Status::Undefined:
         case Status::Idle:
-            _progress = 0.f;
             break;
 
         case Status::Running:
@@ -635,7 +465,7 @@ void Task::computeProgress()
     }
 
     if (_status == Status::Finished || _status == Status::Aborted)
-        setProgressDescription("", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
+        privateSetProgressDescription("", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 }
 
 QTimer& Task::getTimer(const TimerType& timerType)
@@ -693,7 +523,7 @@ void Task::childEvent(QChildEvent* event)
     return QObject::childEvent(event);
 }
 
-Task::TasksPtrs Task::getChildTasks() const
+hdps::Task::TasksPtrs Task::getChildTasks(bool recursively /*= false*/) const 
 {
     Task::TasksPtrs childTasksPtrs;
 
@@ -704,6 +534,9 @@ Task::TasksPtrs Task::getChildTasks() const
             continue;
 
         childTasksPtrs << childTask;
+        
+        if (recursively)
+            childTasksPtrs << childTask->getChildTasks();
     }
 
     return childTasksPtrs;
@@ -760,13 +593,318 @@ void Task::updateAggregateStatus()
     };
 
     if (countStatus(Status::Running) >= 1 || countStatus(Status::RunningIndeterminate) >= 1)
-        setRunning();
+        privateSetRunning();
 
-    if (countStatus(Status::Idle) == childTasks.count())
-        setIdle();
+    //if (countStatus(Status::Idle) == childTasks.count())
+    //    privateSetIdle();
 
-    if (countStatus(Status::Finished) == childTasks.count())
-        setFinished(false);
+    if (countStatus(Status::Finished) == childTasks.count()) {
+        auto tasksToSetToIdle = getChildTasks();
+
+        std::reverse(tasksToSetToIdle.begin(), tasksToSetToIdle.end());
+
+        for (auto taskToSetToIdle : tasksToSetToIdle)
+            taskToSetToIdle->setIdle();
+
+        privateSetFinished(!hasParentTask());
+    }
+}
+
+void Task::privateSetStatus(const Status& status)
+{
+    if (status == _status)
+        return;
+
+    const auto previousStatus = _status;
+
+    _status = status;
+
+    computeProgress();
+
+    emit statusChanged(previousStatus, _status);
+
+    switch (_status)
+    {
+        case Task::Status::Idle:
+            emit idle();
+            break;
+
+        case Task::Status::Running:
+            emit running();
+            break;
+
+        case Task::Status::RunningIndeterminate:
+            emit runningIndeterminate();
+            break;
+
+        case Task::Status::Finished:
+            emit finished();
+            break;
+
+        case Task::Status::AboutToBeAborted:
+            emit isAboutToBeAborted();
+            break;
+
+        case Task::Status::Aborting:
+            emit isAborting();
+            break;
+
+        case Task::Status::Aborted:
+            emit isAborted();
+            break;
+
+        default:
+            break;
+    }
+
+    emit isKillableChanged(isKillable());
+
+    QCoreApplication::processEvents();
+}
+
+void Task::privateSetIdle()
+{
+    privateSetStatus(Status::Idle);
+
+    privateSetProgressDescription("Idle", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
+}
+
+void Task::privateSetRunning()
+{
+    privateSetStatus(Status::Running);
+
+    privateSetProgressDescription("Running");
+}
+
+void Task::privateSetRunningIndeterminate()
+{
+    privateSetStatus(Status::RunningIndeterminate);
+
+    privateSetProgressDescription("Running");
+}
+
+void Task::privateSetFinished(bool toIdleWithDelay, std::uint32_t delay)
+{
+    privateSetStatus(Status::Finished);
+
+    privateSetProgressDescription("Finished", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
+
+    if (toIdleWithDelay) {
+        getTimer(TimerType::ToIdleWithDelay).setInterval(delay);
+        getTimer(TimerType::ToIdleWithDelay).start();
+    }
+}
+
+void Task::privateSetFinished(const QString& progressDescription, bool toIdleWithDelay, std::uint32_t delay)
+{
+    privateSetStatus(Status::Finished);
+
+    privateSetProgressDescription(progressDescription, TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
+
+    if (toIdleWithDelay) {
+        getTimer(TimerType::ToIdleWithDelay).setInterval(delay);
+        getTimer(TimerType::ToIdleWithDelay).start();
+    }
+}
+
+void Task::privateSetAboutToBeAborted()
+{
+    emit isAboutToBeAborted();
+}
+
+void Task::privateSetAborting()
+{
+    if (!getMayKill())
+        return;
+
+    privateSetStatus(Status::Aborting);
+    privateSetProgressDescription("Aborting...");
+
+    emit isAborting();
+}
+
+void Task::privateSetAborted()
+{
+    if (!getMayKill())
+        return;
+
+    privateSetStatus(Status::Aborted);
+    privateSetProgressDescription("Aborted", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
+
+    setProgress(0.f);
+
+    emit isAborted();
+}
+
+void Task::privateKill(bool recursive /*= true*/)
+{
+#ifdef TASK_VERBOSE
+    qDebug() << __FUNCTION__ << getName();
+#endif
+
+    if (getMayKill()) {
+        privateSetAboutToBeAborted();
+        privateSetAborting();
+        {
+            emit requestAbort();
+        }
+        privateSetAborted();
+    }
+
+    auto tasksToKill = getChildTasks(true);
+
+    std::reverse(tasksToKill.begin(), tasksToKill.end());
+
+    for (auto taskToKill : tasksToKill)
+        taskToKill->kill();
+}
+
+void Task::privateSetProgressMode(const ProgressMode& progressMode)
+{
+    if (progressMode == _progressMode)
+        return;
+
+    _progressMode = progressMode;
+
+    emit progressModeChanged(_progressMode);
+
+    if (_progressMode == ProgressMode::Aggregate)
+        privateSetProgressDescription(getName());
+
+    computeProgress();
+}
+
+void Task::privateSetScope(const Scope& scope)
+{
+    if (scope == _scope)
+        return;
+
+    _scope = scope;
+
+    emit scopeChanged(_scope);
+}
+
+void Task::privateSetProgress(float progress, const QString& subtaskDescription)
+{
+    if (_progressMode != ProgressMode::Manual)
+        return;
+
+    progress = std::clamp(progress, 0.f, 1.f);
+
+    if (progress == _progress)
+        return;
+
+    _progress = progress;
+
+    if (!subtaskDescription.isEmpty())
+        privateSetProgressDescription(subtaskDescription);
+}
+
+void Task::privateSetSubtasks(std::uint32_t numberOfSubtasks)
+{
+    privateSetProgressMode(ProgressMode::Subtasks);
+
+    if (numberOfSubtasks == 0)
+        return;
+
+    _subtasks.clear();
+
+    _subtasks.resize(numberOfSubtasks);
+    _subtasksNames.resize(numberOfSubtasks);
+
+    emit subtasksChanged(_subtasks, _subtasksNames);
+
+    computeProgress();
+}
+
+void Task::privateSetSubtasks(const QStringList& subtasksNames)
+{
+    privateSetProgressMode(ProgressMode::Subtasks);
+
+    if (_subtasks.count() != subtasksNames.count())
+        _subtasks.resize(subtasksNames.count() * 8);
+
+    if (subtasksNames == _subtasksNames)
+        return;
+
+    _subtasksNames = subtasksNames;
+
+    emit subtasksChanged(_subtasks, _subtasksNames);
+
+    computeProgress();
+}
+
+void Task::privateSetSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription)
+{
+    if (_progressMode != ProgressMode::Subtasks)
+        return;
+
+    if (subtaskIndex >= _subtasks.count())
+        return;
+
+    _subtasks.setBit(subtaskIndex, true);
+
+    computeProgress();
+
+    const auto subtaskName = _subtasksNames[subtaskIndex];
+
+    if (!progressDescription.isEmpty()) {
+        privateSetProgressDescription(progressDescription);
+    }
+    else {
+        if (!subtaskName.isEmpty())
+            privateSetProgressDescription(subtaskName);
+    }
+
+    emit subtaskFinished(subtaskName);
+
+    QCoreApplication::processEvents();
+}
+
+void Task::privateSetSubtaskFinished(const QString& subtaskName, const QString& progressDescription /*= QString()*/)
+{
+    if (_progressMode != ProgressMode::Subtasks)
+        return;
+
+    const auto subtaskIndex = getSubtaskIndex(subtaskName);
+
+    if (subtaskIndex < 0)
+        return;
+
+    privateSetSubtaskFinished(subtaskIndex, progressDescription);
+}
+
+void Task::privateSetSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName)
+{
+    if (_progressMode != ProgressMode::Subtasks)
+        return;
+
+    if (_subtasksNames.count() <= subtaskIndex)
+        return;
+
+    _subtasksNames[subtaskIndex] = subtaskName;
+}
+
+void Task::privateSetProgressDescription(const QString& progressDescription, std::uint32_t clearDelay /*= 0*/)
+{
+    if (progressDescription == _progressDescription)
+        return;
+
+    _progressDescription = progressDescription;
+
+    if (!getTimer(TimerType::ProgressDescriptionChanged).isActive()) {
+        emit progressDescriptionChanged(_progressDescription);
+
+        QCoreApplication::processEvents();
+
+        getTimer(TimerType::ProgressDescriptionChanged).start();
+    }
+
+    if (clearDelay > 0) {
+        QTimer::singleShot(clearDelay, this, [this]() -> void {
+            privateSetProgressDescription("");
+        });
+    }
 }
 
 }

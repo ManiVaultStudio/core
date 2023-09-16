@@ -63,13 +63,13 @@ Task* TasksModel::Item::getTask() const
 TasksModel::StatusItem::StatusItem(Task* task) :
     Item(task)
 {
-    //connect(getTask(), &Task::statusChanged, this, [this]() -> void {
-    //    emitDataChanged();
+    connect(getTask(), &Task::statusChanged, this, [this]() -> void {
+        emitDataChanged();
 
-    //    const auto progressIndex = index().siblingAtColumn(static_cast<int>(Column::Progress));
+        const auto progressIndex = index().siblingAtColumn(static_cast<int>(Column::Progress));
 
-    //    emit model()->dataChanged(progressIndex, progressIndex);
-    //});
+        emit model()->dataChanged(progressIndex, progressIndex);
+    });
 }
 
 QVariant TasksModel::StatusItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -122,17 +122,17 @@ QVariant TasksModel::StatusItem::data(int role /*= Qt::UserRole + 1*/) const
 TasksModel::NameItem::NameItem(Task* task) :
     Item(task)
 {
-    //connect(getTask(), &Task::nameChanged, this, [this]() -> void {
-    //    emitDataChanged();
-    //});
+    connect(getTask(), &Task::nameChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 
-    //connect(getTask(), &Task::descriptionChanged, this, [this]() -> void {
-    //    emitDataChanged();
-    //});
+    connect(getTask(), &Task::descriptionChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 
-    //connect(getTask(), &Task::statusChanged, this, [this]() -> void {
-    //    emitDataChanged();
-    //});
+    connect(getTask(), &Task::statusChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant TasksModel::NameItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -170,17 +170,17 @@ TasksModel::ProgressItem::ProgressItem(Task* task) :
 {
     _taskAction.setTask(getTask());
 
-    //connect(getTask(), &Task::progressChanged, this, [this]() -> void {
-    //    emitDataChanged();
-    //});
+    connect(getTask(), &Task::progressChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 
-    //connect(getTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
-    //    emitDataChanged();
-    //});
+    connect(getTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 
-    //connect(getTask(), &Task::statusChanged, this, [this]() -> void {
-    //    emitDataChanged();
-    //});
+    connect(getTask(), &Task::statusChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant TasksModel::ProgressItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -205,9 +205,9 @@ QVariant TasksModel::ProgressItem::data(int role /*= Qt::UserRole + 1*/) const
 TasksModel::ProgressDescriptionItem::ProgressDescriptionItem(Task* task) :
     Item(task)
 {
-    //connect(getTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
-    //    emitDataChanged();
-    //});
+    connect(getTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant TasksModel::ProgressDescriptionItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -230,13 +230,13 @@ QVariant TasksModel::ProgressDescriptionItem::data(int role /*= Qt::UserRole + 1
 TasksModel::ProgressTextItem::ProgressTextItem(Task* task) :
     Item(task)
 {
-    //connect(getTask(), &Task::progressChanged, this, [this]() -> void {
-    //    emitDataChanged();
-    //});
+    connect(getTask(), &Task::progressChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 
-    //connect(getTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
-    //    emitDataChanged();
-    //});
+    connect(getTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant TasksModel::ProgressTextItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -314,9 +314,9 @@ QVariant TasksModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
 TasksModel::ScopeItem::ScopeItem(Task* task) :
     Item(task, false)
 {
-    //connect(getTask(), &Task::scopeChanged, this, [this]() -> void {
-    //    emitDataChanged();
-    //});
+    connect(getTask(), &Task::scopeChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant TasksModel::ScopeItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -366,13 +366,13 @@ QVariant TasksModel::MayKillItem::data(int role /*= Qt::UserRole + 1*/) const
 TasksModel::KillItem::KillItem(Task* task) :
     Item(task)
 {
-    //connect(getTask(), &Task::statusChanged, this, [this]() -> void {
-    //    emitDataChanged();
-    //});
+    connect(getTask(), &Task::statusChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 
-    //connect(getTask(), &Task::mayKillChanged, this, [this]() -> void {
-    //    emitDataChanged();
-    //});
+    connect(getTask(), &Task::mayKillChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant TasksModel::KillItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -445,7 +445,24 @@ void TasksModel::taskAddedToTaskManager(Task* task)
         if (task == nullptr)
             throw std::runtime_error("Task may not be a nullptr");
 
-        appendRow(Row(task));
+        if (task->hasParentTask()) {
+            const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::EditRole, task->getParentTask()->getId(), -1, Qt::MatchExactly | Qt::MatchRecursive);
+
+            if (matches.empty())
+                throw std::runtime_error(QString(" %1 not found").arg(task->getParentTask()->getName()).toStdString());
+
+            auto parentItem = itemFromIndex(matches.first().siblingAtColumn(0));
+
+            Q_ASSERT(parentItem != nullptr);
+
+            if (parentItem == nullptr)
+                throw std::runtime_error("Parent standard item may not be a nullptr");
+
+            parentItem->appendRow(Row(task));
+        }
+        else {
+            appendRow(Row(task));
+        }
     }
     catch (std::exception& e)
     {

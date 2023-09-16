@@ -19,11 +19,6 @@ void AbstractTaskTester::registerTester(const QString taskTesterName)
     AbstractTaskTester::testerNames << taskTesterName;
 }
 
-QTimer& AbstractTaskTester::getTimer()
-{
-    return _timer;
-}
-
 QStringList AbstractTaskTester::getTesterNames()
 {
     return testerNames;

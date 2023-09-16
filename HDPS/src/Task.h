@@ -41,6 +41,7 @@ public:
         Running,                /** ...is currently running */
         RunningIndeterminate,   /** ...is currently running, but it's operating time is not known */
         Finished,               /** ...has finished successfully */
+        AboutToBeAborted,       /** ...is about to be aborted */
         Aborting,               /** ...is in the process of being aborted */
         Aborted                 /** ...has been aborted */
     };
@@ -91,6 +92,8 @@ public:
 
     /** Remove from task manager when destructed */
     ~Task();
+
+public: // Parent-child
 
     /**
      * Get parent task (if it has one)
@@ -175,6 +178,9 @@ public: // Status
     /** Check if task is finished */
     virtual bool isFinished() const final;
 
+    /** Check if task is about to be aborted */
+    virtual bool isAboutToBeAborted() const final;
+
     /** Check if task is being aborted */
     virtual bool isAborting() const final;
 
@@ -198,7 +204,7 @@ public: // Status
 
     /**
      * Convenience method to set task status to finished
-     * @param toIdleWithDelay Whether to automatically set the status to idle after \p delay
+     * @param toIdleWithDelay Whether to automatically set the status to idle after \p delay (does not have an effect if it is a child task)
      * @param delay Delay in milliseconds
      */
     virtual void setFinished(bool toIdleWithDelay = true, std::uint32_t delay = TASK_DESCRIPTION_DISAPPEAR_INTERVAL) final;
@@ -206,10 +212,13 @@ public: // Status
     /**
      * Convenience method to set task status to finished and use a custom progress description
      * @param progressDescription Override the default progress description when set to a non-empty string
-     * @param toIdleWithDelay Whether to automatically set the status to idle after \p delay
+     * @param toIdleWithDelay Whether to automatically set the status to idle after \p delay (does not have an effect if it is a child task)
      * @param delay Delay in milliseconds
      */
     virtual void setFinished(const QString& progressDescription, bool toIdleWithDelay = true, std::uint32_t delay = TASK_DESCRIPTION_DISAPPEAR_INTERVAL) final;
+
+    /** Convenience method to set task status to about to be aborted */
+    virtual void setAboutToBeAborted() final;
 
     /** Convenience method to set task status to aborting */
     virtual void setAborting() final;
@@ -217,8 +226,11 @@ public: // Status
     /** Convenience method to set task status to aborted */
     virtual void setAborted() final;
 
-    /** Kill the task and trigger Task::abort() signal */
-    virtual void kill() final;
+    /**
+     * Kill the task and trigger Task::abort() signal
+     * @param recursive Boolean determining whether to also kill chill tasks recursively
+     */
+    virtual void kill(bool recursive = true) final;
 
 public:
 
@@ -293,13 +305,6 @@ public: // Subtasks
      * @param subtasksNames Subtasks names
      */
     virtual void setSubtasks(const QStringList& subtasksNames) final;
-
-    /**
-     * Initializes the subtasks with \p subtasksNames
-     * This method only has an effect when Task#_progressMode is set to ProgressMode::Subtasks
-     * @param subtasksNames Subtasks names to add
-     */
-    virtual void addSubtasks(const QStringList& subtasksNames) final;
 
     /**
      * Flag item with \p subtaskIndex as finished, the progress percentage will be computed automatically
@@ -379,9 +384,10 @@ public: // For aggregate task
 
     /**
      * Get child tasks
+     * @param recursively Whether to get child tasks recursively
      * @return Vector of pointer to child task(s)
      */
-    virtual TasksPtrs getChildTasks() const final;
+    virtual TasksPtrs getChildTasks(bool recursively = false) const final;
 
 private: // For aggregate task
 
@@ -402,6 +408,28 @@ private: // For aggregate task
      * This method only has an effect when Task#_progressMode is set to ProgressMode::Aggregate
      */
     virtual void updateAggregateStatus() final;
+
+private:
+
+    void privateSetStatus(const Status& status);
+    void privateSetIdle();
+    void privateSetRunning();
+    void privateSetRunningIndeterminate();
+    void privateSetFinished(bool toIdleWithDelay = true, std::uint32_t delay = TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
+    void privateSetFinished(const QString& progressDescription, bool toIdleWithDelay = true, std::uint32_t delay = TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
+    void privateSetAboutToBeAborted();
+    void privateSetAborting();
+    void privateSetAborted();
+    void privateKill(bool recursive = true);
+    void privateSetProgressMode(const ProgressMode& progressMode);
+    void privateSetScope(const Scope& scope);
+    void privateSetProgress(float progress, const QString& subtaskDescription);
+    void privateSetSubtasks(std::uint32_t numberOfSubtasks);
+    void privateSetSubtasks(const QStringList& subtasksNames);
+    void privateSetSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription);
+    void privateSetSubtaskFinished(const QString& subtaskName, const QString& progressDescription);
+    void privateSetSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName);
+    void privateSetProgressDescription(const QString& progressDescription, std::uint32_t clearDelay = 0);
 
 signals:
 
@@ -448,15 +476,29 @@ signals:
      */
     void isKillableChanged(bool killable);
 
+    /** Signals that the task became idle */
+    void idle();
+
+    /** Signals that the task started running */
+    void running();
+
+    /** Signals that the task started running indeterminately */
+    void runningIndeterminate();
 
     /** Signals that the task finished */
     void finished();
 
-    /** Signals that the task must abort */
-    void abort();
+    /** Signals that the task is about to be aborted */
+    void aboutToBeAborted();
 
-    /** Signals that the task was forcefully aborted */
+    /** Signals that the task is aborting */
+    void aborting();
+
+    /** Signals that the task is aborted */
     void aborted();
+
+    /** Requests the involved task algorithms to abort their work */
+    void requestAbort();
 
     /**
      * Signals that the task progress mode changed to \p progressMode
@@ -506,6 +548,26 @@ signals:
      * @param progressDescription Modified progress description
      */
     void progressDescriptionChanged(const QString& progressDescription);
+
+    void privateSetStatusSignal(const Status& status, QPrivateSignal);
+    void privateSetIdleSignal(QPrivateSignal);
+    void privateSetRunningSignal(QPrivateSignal);
+    void privateSetRunningIndeterminateSignal(QPrivateSignal);
+    void privateSetFinishedSignal(bool toIdleWithDelay, std::uint32_t delay, QPrivateSignal);
+    void privateSetFinishedSignal(const QString& progressDescription, bool toIdleWithDelay, std::uint32_t delay, QPrivateSignal);
+    void privateSetAboutToBeAbortedSignal(QPrivateSignal);
+    void privateSetAbortingSignal(QPrivateSignal);
+    void privateSetAbortedSignal(QPrivateSignal);
+    void privateKillSignal(bool, QPrivateSignal);
+    void privateSetProgressModeSignal(const ProgressMode& progressMode, QPrivateSignal);
+    void privateSetScopeSignal(const Scope& scope, QPrivateSignal);
+    void privateSetProgressSignal(float progress, const QString& subtaskDescription, QPrivateSignal);
+    void privateSetSubtasksSignal(std::uint32_t numberOfSubtasks, QPrivateSignal);
+    void privateSetSubtasksSignal(const QStringList& subtasksNames, QPrivateSignal);
+    void privateSetSubtaskFinishedSignal(std::uint32_t subtaskIndex, const QString& progressDescription, QPrivateSignal);
+    void privateSetSubtaskFinishedSignal(const QString& subtaskName, const QString& progressDescription, QPrivateSignal);
+    void privateSetSubtaskNameSignal(std::uint32_t subtaskIndex, const QString& subtaskName, QPrivateSignal);
+    void privateSetProgressDescriptionSignal(const QString& progressDescription, std::uint32_t clearDelay, QPrivateSignal);
 
 private:
     QString                 _name;                                          /** Task name */

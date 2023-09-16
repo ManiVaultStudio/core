@@ -10,7 +10,7 @@ namespace hdps::gui {
 TaskAction::TaskAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),
     _progressAction(this, "Progress"),
-    _killTaskAction(this, "Kill"),
+    _killTaskAction(this, "Cancel"),
     _task(nullptr)
 {
     setShowLabels(false);
@@ -18,6 +18,9 @@ TaskAction::TaskAction(QObject* parent, const QString& title) :
     setConnectionPermissionsToForceNone(true);
 
     _progressAction.setStretch(1);
+
+    //_killTaskAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    //_killTaskAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cross"));
 
     addAction(&_progressAction);
     addAction(&_killTaskAction);
@@ -70,14 +73,16 @@ void TaskAction::setTask(Task* task)
 
     emit taskChanged(previousTask, _task);
 
+    updateActionsReadOnly();
     updateKillTaskActionVisibility();
     updateProgressActionTextFormat();
+    updateProgressActionRange();
 }
 
 void TaskAction::updateActionsReadOnly()
 {
     _progressAction.setEnabled(_task == nullptr ? false : _task->isRunning());
-    _killTaskAction.setEnabled(_task == nullptr ? false : _task->getMayKill());
+    _killTaskAction.setEnabled(_task == nullptr ? false : _task->isKillable());
 }
 
 void TaskAction::updateProgressActionTextFormat()

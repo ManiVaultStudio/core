@@ -26,8 +26,6 @@ set(PLUGIN
     src/AbstractTaskTester.cpp
     src/ModalTaskTester.h
     src/ModalTaskTester.cpp
-    src/ModalTaskTestRunningIndeterminate.h
-    src/ModalTaskTestRunningIndeterminate.cpp
     src/TasksPlugin.h
     src/TasksPlugin.cpp
 )
@@ -35,7 +33,6 @@ set(PLUGIN
 set(PLUGIN_MOC_HEADERS
     src/AbstractTaskTester.h
     src/ModalTaskTester.h
-    src/ModalTaskTestRunningIndeterminate.h
 	src/TasksPlugin.h
 )
 

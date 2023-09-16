@@ -456,7 +456,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 getCurrentProject()->getTask().setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
             });
 
-            connect(&task, &Task::aborted, this, [this]() -> void {
+            connect(&task, &Task::requestAbort, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was loaded");

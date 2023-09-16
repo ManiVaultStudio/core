@@ -20,19 +20,13 @@ public:
     Q_INVOKABLE AbstractTaskTester(QObject* parent, const QString& name);
 
     virtual void run() {};
-    virtual hdps::Task* getTask() {
-        return nullptr;
-    };
 
     static void registerTester(const QString taskTesterName);
-
-    QTimer& getTimer();
 
     static QStringList getTesterNames();
 
 private:
     QString     _name;
-    QTimer      _timer;
 
 protected:
     static QStringList testerNames;
