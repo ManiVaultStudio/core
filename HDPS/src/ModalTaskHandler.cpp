@@ -44,16 +44,6 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
     updateVisibility();
 
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
-        for (int rowIndex = first; rowIndex <= last; rowIndex++)
-            qDebug() << _tasksAction.getTasksFilterModel().index(rowIndex, static_cast<int>(TasksModel::Column::Name), parent).data(Qt::DisplayRole).toString() << "inserted";
-    });
-
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
-        for (int rowIndex = first; rowIndex <= last; rowIndex++)
-            qDebug() << _tasksAction.getTasksFilterModel().index(rowIndex, static_cast<int>(TasksModel::Column::Name), parent).data(Qt::DisplayRole).toString() << "removed";
-    });
-
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateVisibility);
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibility);
 }
@@ -102,7 +92,12 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     _processEventsTimer()
 {
     setWindowModality(Qt::ApplicationModal);
-    setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
+    
+    setWindowFlag(Qt::Dialog);
+    //setWindowFlag(Qt::CustomizeWindowHint);
+    setWindowFlag(Qt::WindowCloseButtonHint, false);
+    setWindowFlag(Qt::WindowTitleHint);
+    setWindowFlag(Qt::WindowStaysOnTopHint);
     
     connect(&_processEventsTimer, &QTimer::timeout, this, [this]() -> void {
         if (isVisible())
@@ -187,17 +182,22 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
     //    adjustSize();
     //});
 
+    const auto clockIcon = Application::getIconFont("FontAwesome").getIcon("clock");
+
     if (rowCount == 1) {
         const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(0, 0));
         const auto item             = dynamic_cast<TasksModel::Item*>(tasksAction.getTasksModel().itemFromIndex(sourceModelIndex));
         const auto task             = item->getTask();
+        const auto taskName         = task->getName();
+        const auto taskDescription  = task->getDescription();
+        const auto taskIcon         = task->getIcon();
 
-        setWindowTitle(task->getDescription());
-        setWindowIcon(task->getIcon());
+        setWindowTitle(taskDescription.isEmpty() ? QString("Waiting for %1 to complete...").arg(taskName) : task->getDescription());
+        setWindowIcon(taskIcon.isNull() ? clockIcon : taskIcon);
     }
     else {
         setWindowTitle(QString("Waiting for %1 tasks to complete...").arg(QString::number(rowCount)));
-        setWindowIcon(Application::getIconFont("FontAwesome").getIcon("hourglass-half"));
+        setWindowIcon(clockIcon);
     }
 }
 

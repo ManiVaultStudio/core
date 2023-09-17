@@ -18,6 +18,7 @@ public:
 private:
     void testRunningIndeterminate();
     void testAggregation();
+    void testPerformance();
 };
 
 Q_DECLARE_METATYPE(ModalTaskTester)

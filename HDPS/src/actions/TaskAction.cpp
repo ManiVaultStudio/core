@@ -51,12 +51,24 @@ void TaskAction::setTask(Task* task)
     const auto previousTask = _task;
 
     if (_task != nullptr) {
+        disconnect(_task, &Task::nameChanged, this, nullptr);
         disconnect(_task, &Task::progressChanged, this, nullptr);
         disconnect(_task, &Task::statusChanged, this, nullptr);
         disconnect(_task, &Task::mayKillChanged, this, nullptr);
     }
 
     _task = task;
+    
+    const auto updateCancelTaskAction = [this]() -> void {
+        Q_ASSERT(_task != nullptr);
+
+        if (_task == nullptr)
+            return;
+
+        _killTaskAction.setToolTip(QString("Cancel %1").arg(_task->getName()));
+    };
+
+    updateCancelTaskAction();
 
     const auto updateProgressAction = [this]() -> void {
         _progressAction.setProgress(static_cast<int>(_task->getProgress() * 100.f));
@@ -64,6 +76,8 @@ void TaskAction::setTask(Task* task)
 
     updateProgressAction();
 
+    connect(_task, &Task::nameChanged, this, updateCancelTaskAction);
+    connect(_task, &Task::progressChanged, this, &TaskAction::updateProgressActionTextFormat);
     connect(_task, &Task::progressChanged, this, updateProgressAction);
     connect(_task, &Task::progressDescriptionChanged, this, &TaskAction::updateProgressActionTextFormat);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateActionsReadOnly);

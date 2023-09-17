@@ -409,7 +409,7 @@ private: // For aggregate task
      */
     virtual void updateAggregateStatus() final;
 
-private:
+private: // Private setters (these call private signals under the hood, an essential part to make cross thread task usage possible)
 
     void privateSetStatus(const Status& status);
     void privateSetIdle();
@@ -549,6 +549,10 @@ signals:
      */
     void progressDescriptionChanged(const QString& progressDescription);
 
+    /**
+     * The signals below are private signals and can/should only be called from within this Task class
+     * These signals provide a way to make cross thread task usage possible
+     */
     void privateSetStatusSignal(const Status& status, QPrivateSignal);
     void privateSetIdleSignal(QPrivateSignal);
     void privateSetRunningSignal(QPrivateSignal);
@@ -587,7 +591,7 @@ private:
 private:
 
     /** Single shot task progress and description timer interval */
-    static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL = 10;
+    static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL = 250;
 
     /** Single shot task description disappear timer interval */
     static constexpr std::uint32_t TASK_DESCRIPTION_DISAPPEAR_INTERVAL = 1500;

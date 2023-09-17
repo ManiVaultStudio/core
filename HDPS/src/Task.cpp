@@ -332,7 +332,7 @@ QString Task::getProgressText() const
         }
 
         case Task::Status::RunningIndeterminate:
-            return getProgressDescription();
+            return QString("%1: %2").arg(getName(), getProgressDescription());
 
         case Task::Status::Finished:
             return QString("%1 finished").arg(getName());
@@ -564,6 +564,13 @@ void Task::registerChildTask(Task* childTask)
         computeProgress();
     });
 
+    connect(childTask, &Task::progressDescriptionChanged, this, [this](const QString& progressDescription) -> void {
+        if (getProgressMode() != ProgressMode::Aggregate)
+            return;
+
+        privateSetProgressDescription(QString("%1: %2").arg(getName(), progressDescription));
+    });
+
     updateAggregateStatus();
 }
 
@@ -576,7 +583,7 @@ void Task::unregisterChildTask(Task* childTask)
 
     disconnect(childTask, &Task::statusChanged, this, nullptr);
     disconnect(childTask, &Task::progressChanged, this, nullptr);
-    //disconnect(childTask, &Task::progressDescriptionChanged, this, nullptr);
+    disconnect(childTask, &Task::progressDescriptionChanged, this, nullptr);
 }
 
 void Task::updateAggregateStatus()
@@ -672,15 +679,11 @@ void Task::privateSetIdle()
 void Task::privateSetRunning()
 {
     privateSetStatus(Status::Running);
-
-    privateSetProgressDescription("Running");
 }
 
 void Task::privateSetRunningIndeterminate()
 {
     privateSetStatus(Status::RunningIndeterminate);
-
-    privateSetProgressDescription("Running");
 }
 
 void Task::privateSetFinished(bool toIdleWithDelay, std::uint32_t delay)
@@ -738,11 +741,18 @@ void Task::privateSetAborted()
 
 void Task::privateKill(bool recursive /*= true*/)
 {
-#ifdef TASK_VERBOSE
-    qDebug() << __FUNCTION__ << getName();
-#endif
+    auto tasksToKill = getChildTasks();
+
+    std::reverse(tasksToKill.begin(), tasksToKill.end());
+
+    for (auto taskToKill : tasksToKill)
+        taskToKill->kill();
 
     if (getMayKill()) {
+#ifdef TASK_VERBOSE
+        qDebug() << __FUNCTION__ << getName();
+#endif
+
         privateSetAboutToBeAborted();
         privateSetAborting();
         {
@@ -750,13 +760,6 @@ void Task::privateKill(bool recursive /*= true*/)
         }
         privateSetAborted();
     }
-
-    auto tasksToKill = getChildTasks(true);
-
-    std::reverse(tasksToKill.begin(), tasksToKill.end());
-
-    for (auto taskToKill : tasksToKill)
-        taskToKill->kill();
 }
 
 void Task::privateSetProgressMode(const ProgressMode& progressMode)

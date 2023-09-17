@@ -13,6 +13,7 @@ ModalTaskTester::ModalTaskTester(QObject* parent, const QString& name) :
 {
     testRunningIndeterminate();
     testAggregation();
+    testPerformance();
 }
 
 void ModalTaskTester::testRunningIndeterminate()
@@ -122,7 +123,7 @@ void ModalTaskTester::testAggregation()
             "Task 8",
             "Task 9",
             "Task 10"
-            }, 700, childTaskA);
+            }, 502, childTaskA);
 
         auto childTaskAB = addChildTask("AB", {
             "Task 1",
@@ -135,7 +136,7 @@ void ModalTaskTester::testAggregation()
             "Task 8",
             "Task 9",
             "Task 10"
-            }, 850, childTaskA);
+            }, 497, childTaskA);
 
         auto childTaskBA = addChildTask("BA", {
             "Task 1",
@@ -148,7 +149,7 @@ void ModalTaskTester::testAggregation()
             "Task 8",
             "Task 9",
             "Task 10"
-            }, 950, childTaskB);
+            }, 1505, childTaskB);
 
         auto childTaskBB = addChildTask("BB", {
             "Task 1",
@@ -161,7 +162,62 @@ void ModalTaskTester::testAggregation()
             "Task 8",
             "Task 9",
             "Task 10"
-            }, 800, childTaskB);
+            }, 1491, childTaskB);
+
+        auto childTaskIndeterminate = new ModalTask(aggregateModalTask, "Indeterminate");
+
+        childTaskIndeterminate->setRunningIndeterminate();
+
+        QTimer::singleShot(10000, [childTaskIndeterminate]() -> void {
+            if (childTaskIndeterminate->isAborting() || childTaskIndeterminate->isAborted())
+                return;
+
+            childTaskIndeterminate->setFinished();
+        });
+
+        eventLoop.exec();
+    });
+}
+
+void ModalTaskTester::testPerformance()
+{
+    TaskRunner::createAndRun(this, [this](TaskRunner* taskRunner) -> void {
+        QEventLoop eventLoop(taskRunner);
+
+        auto performanceModalTask = new ModalTask(taskRunner, "Performance", Task::Status::Running);
+
+        const auto numberOfSubTasks = 10000;
+
+        QStringList subtasks;
+
+        subtasks.reserve(numberOfSubTasks);
+
+        for (int subtaskIndex = 0; subtaskIndex < numberOfSubTasks; subtaskIndex++)
+            subtasks << QString("Subtask: %1").arg(QString::number(subtaskIndex));
+
+        performanceModalTask->setSubtasks(subtasks);
+
+        QTimer timer;
+
+        timer.setInterval(1);
+
+        connect(performanceModalTask, &ModalTask::requestAbort, &timer, &QTimer::stop);
+
+        connect(&timer, &QTimer::timeout, [&]() -> void {
+            if (!subtasks.isEmpty()) {
+                const auto subtaskName = subtasks.first();
+
+                subtasks.removeFirst();
+
+                performanceModalTask->setSubtaskFinished(subtaskName);
+            }
+            else {
+                timer.stop();
+                performanceModalTask->setFinished();
+            }
+            });
+
+        timer.start();
 
         eventLoop.exec();
     });
