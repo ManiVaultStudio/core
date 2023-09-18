@@ -60,6 +60,12 @@ Task* TasksModel::Item::getTask() const
     return _task;
 }
 
+TasksModel::ExpandCollapseItem::ExpandCollapseItem(Task* task) :
+    Item(task)
+{
+    setSizeHint(QSize(0, 0));
+}
+
 TasksModel::StatusItem::StatusItem(Task* task) :
     Item(task)
 {
@@ -239,6 +245,33 @@ TasksModel::ProgressTextItem::ProgressTextItem(Task* task) :
     });
 }
 
+TasksModel::ProgressModeItem::ProgressModeItem(Task* task) :
+    Item(task)
+{
+    connect(getTask(), &Task::progressModeChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant TasksModel::ProgressModeItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return static_cast<int>(getTask()->getProgressMode());
+
+        case Qt::DisplayRole:
+            return Task::progressModeNames[static_cast<Task::ProgressMode>(data(Qt::EditRole).toInt())];
+
+        case Qt::ToolTipRole:
+            return "Progress mode: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 QVariant TasksModel::ProgressTextItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
@@ -395,11 +428,13 @@ QVariant TasksModel::KillItem::data(int role /*= Qt::UserRole + 1*/) const
 TasksModel::Row::Row(Task* task) :
     QList<QStandardItem*>()
 {
+    append(new ExpandCollapseItem(task));
     append(new StatusItem(task));
     append(new NameItem(task));
     append(new ProgressItem(task));
     append(new ProgressDescriptionItem(task));
     append(new ProgressTextItem(task));
+    append(new ProgressModeItem(task));
     append(new IdItem(task));
     append(new ParentIdItem(task));
     append(new TypeItem(task));
@@ -409,11 +444,13 @@ TasksModel::Row::Row(Task* task) :
 }
 
 QMap<TasksModel::Column, TasksModel::ColumHeaderInfo> TasksModel::columnInfo = QMap<TasksModel::Column, TasksModel::ColumHeaderInfo>({
+    { TasksModel::Column::ExpandCollapse, { "",  "", "Expand/collapse" } },
     { TasksModel::Column::Status, { "",  "Status", "Status of the task" } },
     { TasksModel::Column::Name, { "Name" , "Name", "Name of the task" } },
     { TasksModel::Column::Progress, { "Progress" , "Progress", "Task progress" } },
     { TasksModel::Column::ProgressDescription, { "Progress description" , "Progress description", "Progress description" } },
     { TasksModel::Column::ProgressText, { "Progress text" , "Progress text", "Progress text" } },
+    { TasksModel::Column::ProgressMode, { "Progress mode" , "Progress mode", "Progress mode" } },
     { TasksModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the task" } },
     { TasksModel::Column::ParentID, { "Parent ID",  "Parent ID", "Globally unique identifier of the parent task" } },
     { TasksModel::Column::Type, { "Type",  "Type", "Type of task" } },
@@ -451,7 +488,7 @@ void TasksModel::taskAddedToTaskManager(Task* task)
             if (matches.empty())
                 throw std::runtime_error(QString(" %1 not found").arg(task->getParentTask()->getName()).toStdString());
 
-            auto parentItem = itemFromIndex(matches.first().siblingAtColumn(0));
+            auto parentItem = itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::ExpandCollapse)));
 
             Q_ASSERT(parentItem != nullptr);
 

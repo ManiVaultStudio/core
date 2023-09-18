@@ -51,8 +51,8 @@ public:
 
     private:
 
-        /** Resize sections when the model changes */
-        void modelChanged();
+        /** Updates the tree view in response to changes in the tasks filter model */
+        void updateTreeView();
 
     private:
         TasksAction*        _tasksAction;   /** Pointer to owning tasks action */
@@ -138,6 +138,12 @@ private:
      * @param parent Parent model index
      */
     void closePersistentProgressEditorsRecursively(QAbstractItemView& itemView, const QModelIndex& parent = QModelIndex());
+
+    /**
+     * get whether any aggregate tasks are displayed
+     * @return Boolean determining whether there are any aggregate tasks are displayed
+     */
+    bool hasAgregateTasks() const;
 
 signals:
 

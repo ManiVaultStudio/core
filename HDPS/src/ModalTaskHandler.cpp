@@ -94,7 +94,6 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     setWindowModality(Qt::ApplicationModal);
     
     setWindowFlag(Qt::Dialog);
-    //setWindowFlag(Qt::CustomizeWindowHint);
     setWindowFlag(Qt::WindowCloseButtonHint, false);
     setWindowFlag(Qt::WindowTitleHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
@@ -135,8 +134,8 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
         treeView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
         //treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Name), true);
-        //treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Status), true);
-        //treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Type), true);
+        treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Status), true);
+        treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Type), true);
         
         treeView->viewport()->setBackgroundRole(QPalette::Window);
     }

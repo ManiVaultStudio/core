@@ -21,7 +21,7 @@ void ModalTaskTester::testRunningIndeterminate()
     TaskRunner::createAndRun(this, [this](TaskRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto indeterminateModalTask = new ModalTask(taskRunner, "Indeterminate", Task::Status::RunningIndeterminate);
+        auto indeterminateTask = new ModalTask(taskRunner, "Indeterminate Task", Task::Status::RunningIndeterminate);
 
         auto subtasks = QStringList({
             "Step 1",
@@ -40,7 +40,7 @@ void ModalTaskTester::testRunningIndeterminate()
 
         timer.setInterval(1000);
 
-        connect(indeterminateModalTask, &ModalTask::requestAbort, &timer, &QTimer::stop);
+        connect(indeterminateTask, &ModalTask::requestAbort, &timer, &QTimer::stop);
 
         connect(&timer, &QTimer::timeout, [&]() -> void {
             if (!subtasks.isEmpty()) {
@@ -48,11 +48,11 @@ void ModalTaskTester::testRunningIndeterminate()
 
                 subtasks.removeFirst();
 
-                indeterminateModalTask->setProgressDescription(subtaskName);
+                indeterminateTask->setProgressDescription(subtaskName);
             }
             else {
                 timer.stop();
-                indeterminateModalTask->setFinished();
+                indeterminateTask->setFinished();
             }
         });
 
@@ -67,7 +67,7 @@ void ModalTaskTester::testAggregation()
     TaskRunner::createAndRun(this, [this](TaskRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto aggregateModalTask = new ModalTask(taskRunner, "Aggregate Modal Task");
+        auto aggregateTask = new ModalTask(taskRunner, "Aggregate Task");
 
         QMap<QString, QTimer*> timers;
 
@@ -109,8 +109,8 @@ void ModalTaskTester::testAggregation()
             return childTask;
         };
 
-        auto childTaskA = addChildTask("A", {}, 0, aggregateModalTask);
-        auto childTaskB = addChildTask("B", {}, 0, aggregateModalTask);
+        auto childTaskA = addChildTask("A", {}, 0, aggregateTask);
+        auto childTaskB = addChildTask("B", {}, 0, aggregateTask);
 
         auto childTaskAA = addChildTask("AA", {
             "Task 1",
@@ -164,7 +164,7 @@ void ModalTaskTester::testAggregation()
             "Task 10"
             }, 1491, childTaskB);
 
-        auto childTaskIndeterminate = new ModalTask(aggregateModalTask, "Indeterminate");
+        auto childTaskIndeterminate = new ModalTask(aggregateTask, "Indeterminate");
 
         childTaskIndeterminate->setRunningIndeterminate();
 
@@ -184,7 +184,7 @@ void ModalTaskTester::testPerformance()
     TaskRunner::createAndRun(this, [this](TaskRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto performanceModalTask = new ModalTask(taskRunner, "Performance", Task::Status::Running);
+        auto performanceTask = new ModalTask(taskRunner, "Performance Task", Task::Status::Running);
 
         const auto numberOfSubTasks = 10000;
 
@@ -195,13 +195,13 @@ void ModalTaskTester::testPerformance()
         for (int subtaskIndex = 0; subtaskIndex < numberOfSubTasks; subtaskIndex++)
             subtasks << QString("Subtask: %1").arg(QString::number(subtaskIndex));
 
-        performanceModalTask->setSubtasks(subtasks);
+        performanceTask->setSubtasks(subtasks);
 
         QTimer timer;
 
         timer.setInterval(1);
 
-        connect(performanceModalTask, &ModalTask::requestAbort, &timer, &QTimer::stop);
+        connect(performanceTask, &ModalTask::requestAbort, &timer, &QTimer::stop);
 
         connect(&timer, &QTimer::timeout, [&]() -> void {
             if (!subtasks.isEmpty()) {
@@ -209,11 +209,11 @@ void ModalTaskTester::testPerformance()
 
                 subtasks.removeFirst();
 
-                performanceModalTask->setSubtaskFinished(subtaskName);
+                performanceTask->setSubtaskFinished(subtaskName);
             }
             else {
                 timer.stop();
-                performanceModalTask->setFinished();
+                performanceTask->setFinished();
             }
             });
 

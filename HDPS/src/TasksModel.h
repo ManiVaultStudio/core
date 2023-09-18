@@ -28,11 +28,13 @@ public:
 
     /** Task columns */
     enum class Column {
+        ExpandCollapse,         /** Sole purpose is for expand/collapse */
         Status,                 /** Status of the task */
         Name,                   /** Name of the task */
         Progress,               /** Task progress */
         ProgressDescription,    /** Progress description */
         ProgressText,           /** Progress text */
+        ProgressMode,           /** Progress mode (manual, subtasks or aggregate) */
         ID,                     /** Globally unique identifier of the task */
         ParentID,               /** Globally unique identifier of the parent task (empty string if not a child task) */
         Type,                   /** Task type */
@@ -99,6 +101,17 @@ public:
     };
 
 protected:
+
+    /** Standard model item class for expand/collapse */
+    class ExpandCollapseItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p task
+         * @param task Pointer to task to display item for
+         */
+        ExpandCollapseItem(Task* task);
+    };
 
     /** Standard model item class for displaying the task status */
     class StatusItem final : public Item {
@@ -195,6 +208,23 @@ protected:
          * @param task Pointer to task to display item for
          */
         ProgressTextItem(Task* task);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for displaying the progress mode */
+    class ProgressModeItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p task
+         * @param task Pointer to task to display item for
+         */
+        ProgressModeItem(Task* task);
 
         /**
          * Get model data for \p role

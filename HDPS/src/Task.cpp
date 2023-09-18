@@ -24,6 +24,12 @@ QMap<Task::Status, QString> Task::statusNames = QMap<Status, QString>({
     { Task::Status::Aborted, "Aborted" }
 });
 
+QMap<Task::ProgressMode, QString> Task::progressModeNames = QMap<ProgressMode, QString>({
+    { Task::ProgressMode::Manual, "Manual" },
+    { Task::ProgressMode::Subtasks, "Subtasks" },
+    { Task::ProgressMode::Aggregate, "Aggregate" }
+});
+
 QMap<Task::Scope, QString> Task::scopeNames = QMap<Scope, QString>({
     { Task::Scope::Background, "Background" },
     { Task::Scope::Foreground, "Foreground" },

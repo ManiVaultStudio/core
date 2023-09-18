@@ -46,6 +46,7 @@ public:
         Aborted                 /** ...has been aborted */
     };
 
+    /** Couples status enum value to status name string */
     static QMap<Status, QString> statusNames;
 
     /** Progress is tracked by: */
@@ -55,6 +56,9 @@ public:
         Aggregate   /** ...combining the progress of child tasks */
     };
 
+    /** Couples scope enum value to scope name string */
+    static QMap<ProgressMode, QString> progressModeNames;
+
     /** Task: */
     enum class Scope {
         Background,     /** ...will run in the background (not visible by default but can be revealed in the tasks view plugin) */
@@ -62,6 +66,7 @@ public:
         Modal           /** ...will run modally (tasks with this scope will automatically appear in a modal tasks dialog when the needed) */
     };
 
+    /** Couples scope enum value to scope name string */
     static QMap<Scope, QString> scopeNames;
 
     using TasksPtrs = QVector<Task*>;
