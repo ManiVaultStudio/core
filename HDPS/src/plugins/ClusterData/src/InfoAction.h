@@ -8,7 +8,7 @@
 #include "ClusterData.h"
 #include "ClustersAction.h"
 
-#include "actions/Actions.h"
+#include "actions/StringAction.h"
 #include "event/EventListener.h"
 
 namespace hdps {
