@@ -119,6 +119,13 @@ public:
     /** Remove from task manager when destructed */
     ~Task();
 
+    /**
+     * Get type (class) name (using QMetaObject)
+     * @param humanFriendly Whether to include the task namespace or not
+     * @return Task type name
+     */
+    virtual QString getTypeName(bool humanFriendly) const final;
+
 public: // Parent-child
 
     /**

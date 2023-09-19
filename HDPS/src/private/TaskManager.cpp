@@ -19,7 +19,8 @@ namespace hdps
 
 TaskManager::TaskManager(QObject* parent /*= nullptr*/) :
     AbstractTaskManager(),
-    _tasks()
+    _tasks(),
+    _overallBackgroundTask(this, "Background Tasks")
 {
 }
 
@@ -37,6 +38,8 @@ void TaskManager::initialize()
     Application::current()->getStartupTask().setSubtaskFinished("Initializing task manager");
 
     AbstractTaskManager::initialize();
+
+    addTask(&_overallBackgroundTask);
 }
 
 void TaskManager::reset()
@@ -56,6 +59,11 @@ void TaskManager::reset()
 AbstractTaskManager::Tasks TaskManager::getTasks()
 {
     return _tasks;
+}
+
+BackgroundTask& TaskManager::getOverallBackgroundTask()
+{
+    return _overallBackgroundTask;
 }
 
 void TaskManager::addTask(Task* task)

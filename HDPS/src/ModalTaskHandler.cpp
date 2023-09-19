@@ -27,7 +27,7 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     auto& tasksFilterModel  = _tasksAction.getTasksFilterModel();
 
     tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
-    tasksFilterModel.getTaskTypeFilterAction().selectOption("ModalTask");
+    tasksFilterModel.getTaskTypeFilterAction().setSelectedOptions({ "ModalTask" });
 
     const auto updateVisibility = [this, &tasksFilterModel]() -> void {
         if (projects().hasProject() && (projects().isOpeningProject() || projects().isImportingProject()))

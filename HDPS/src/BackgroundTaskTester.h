@@ -9,12 +9,12 @@
 namespace hdps
 {
 
-class ModalTaskTester final : public AbstractTaskTester
+class BackgroundTaskTester final : public AbstractTaskTester
 {
     Q_OBJECT
 
 public:
-    Q_INVOKABLE ModalTaskTester(QObject* parent, const QString& name);
+    Q_INVOKABLE BackgroundTaskTester(QObject* parent, const QString& name);
 
 private:
     void testRunningIndeterminate();
@@ -24,6 +24,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(hdps::ModalTaskTester)
+Q_DECLARE_METATYPE(hdps::BackgroundTaskTester)
 
-inline const auto modalTaskTesterMetaTypeId = qRegisterMetaType<hdps::ModalTaskTester*>("hdps::ModalTaskTester");
+inline const auto backgroundTaskTesterMetaTypeId = qRegisterMetaType<hdps::BackgroundTaskTester*>("hdps::BackgroundTaskTester");

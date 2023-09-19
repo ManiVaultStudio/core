@@ -5,6 +5,7 @@
 #pragma once
 
 #include "AbstractTaskManager.h"
+#include "BackgroundTask.h"
 
 namespace hdps
 {
@@ -37,6 +38,12 @@ public:
     Tasks getTasks() override;
 
     /**
+     * Get overall background task
+     * @return Smart pointer to aggregate background task which combines all background tasks in the system
+     */
+    BackgroundTask& getOverallBackgroundTask() override;
+
+    /**
      * Adds \p task to the task manager
      * @param task Pointer to task to add
      */
@@ -49,7 +56,8 @@ public:
     void removeTask(Task* task) override;
 
 private:
-    Tasks  _tasks;     /** Tasks registered */
+    Tasks           _tasks;                     /** Tasks registered */
+    BackgroundTask  _overallBackgroundTask;     /** Aggregate background task which combines all background tasks in the system */
 };
 
 }

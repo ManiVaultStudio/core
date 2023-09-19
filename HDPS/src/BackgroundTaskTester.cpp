@@ -2,29 +2,30 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "ModalTaskTester.h"
+#include "BackgroundTaskTester.h"
 #include "TaskTesterRunner.h"
-#include "ModalTask.h"
+#include "BackgroundTask.h"
+#include "CoreInterface.h"
 
 #include <QEventLoop>
 
 namespace hdps
 {
 
-ModalTaskTester::ModalTaskTester(QObject* parent, const QString& name) :
+BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name) :
     AbstractTaskTester(parent, name)
 {
-    testRunningIndeterminate();
-    testAggregation();
+    //testRunningIndeterminate();
+    //testAggregation();
     testPerformance();
 }
 
-void ModalTaskTester::testRunningIndeterminate()
+void BackgroundTaskTester::testRunningIndeterminate()
 {
     TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto indeterminateTask = new ModalTask(taskRunner, "Indeterminate Task", nullptr, Task::Status::RunningIndeterminate);
+        auto indeterminateTask = new BackgroundTask(taskRunner, "Indeterminate Task", nullptr, Task::Status::RunningIndeterminate);
 
         auto subtasks = QStringList({
             "Step 1",
@@ -43,7 +44,7 @@ void ModalTaskTester::testRunningIndeterminate()
 
         timer.setInterval(1000);
 
-        connect(indeterminateTask, &ModalTask::requestAbort, &timer, &QTimer::stop);
+        connect(indeterminateTask, &BackgroundTask::requestAbort, &timer, &QTimer::stop);
 
         connect(&timer, &QTimer::timeout, [&]() -> void {
             if (!subtasks.isEmpty()) {
@@ -65,17 +66,17 @@ void ModalTaskTester::testRunningIndeterminate()
     });
 }
 
-void ModalTaskTester::testAggregation()
+void BackgroundTaskTester::testAggregation()
 {
     TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto aggregateTask = new ModalTask(taskRunner, "Aggregate Task");
+        auto aggregateTask = new BackgroundTask(taskRunner, "Aggregate Task");
 
         QMap<QString, QTimer*> timers;
 
         const auto addChildTask = [this, taskRunner, &timers](const QString& name, QStringList tasks, int interval, Task* parentTask = nullptr) -> Task* {
-            auto childTask = new ModalTask(taskRunner, name, parentTask);
+            auto childTask = new BackgroundTask(taskRunner, name, parentTask);
 
             if (!tasks.isEmpty()) {
                 childTask->setSubtasks(tasks);
@@ -87,7 +88,7 @@ void ModalTaskTester::testAggregation()
 
                 timer->setInterval(interval);
 
-                connect(childTask, &ModalTask::requestAbort, timer, &QTimer::stop);
+                connect(childTask, &BackgroundTask::requestAbort, timer, &QTimer::stop);
 
                 connect(timer, &QTimer::timeout, [timer, childTask, &tasks]() -> void {
                     if (!tasks.isEmpty()) {
@@ -167,7 +168,7 @@ void ModalTaskTester::testAggregation()
             "Task 10"
             }, 1491, childTaskB);
 
-        auto childTaskIndeterminate = new ModalTask(aggregateTask, "Indeterminate");
+        auto childTaskIndeterminate = new BackgroundTask(aggregateTask, "Indeterminate");
 
         childTaskIndeterminate->setRunningIndeterminate();
 
@@ -182,12 +183,12 @@ void ModalTaskTester::testAggregation()
     });
 }
 
-void ModalTaskTester::testPerformance()
+void BackgroundTaskTester::testPerformance()
 {
     TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto performanceTask = new ModalTask(taskRunner, "Performance Task", nullptr, Task::Status::Running);
+        auto performanceTask = new BackgroundTask(taskRunner, "Performance Task", &tasks().getOverallBackgroundTask(), Task::Status::Running);
 
         const auto numberOfSubTasks = 10000;
 
@@ -204,7 +205,7 @@ void ModalTaskTester::testPerformance()
 
         timer.setInterval(1);
 
-        connect(performanceTask, &ModalTask::requestAbort, &timer, &QTimer::stop);
+        connect(performanceTask, &BackgroundTask::requestAbort, &timer, &QTimer::stop);
 
         connect(&timer, &QTimer::timeout, [&]() -> void {
             if (!subtasks.isEmpty()) {

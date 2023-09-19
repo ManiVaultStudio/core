@@ -58,7 +58,8 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
     if (core() != nullptr && core()->isInitialized())
         tasks().addTask(this);
 
-    setParentTask(parentTask);
+    if (parentTask)
+        setParentTask(parentTask);
 
     for (auto& timer : _timers)
         timer.setSingleShot(true);
@@ -116,6 +117,16 @@ Task::~Task()
         tasks().removeTask(this);
 }
 
+QString Task::getTypeName(bool humanFriendly /*= true*/) const
+{
+    auto typeString = QString(metaObject()->className());
+
+    if (humanFriendly)
+        typeString.replace("hdps::", "");
+
+    return typeString;
+}
+
 Task* Task::getParentTask()
 {
     return _parentTask;
@@ -128,6 +139,9 @@ void Task::setParentTask(Task* parentTask)
 
         if (parentTask == _parentTask)
             return;
+
+        if (parentTask && (parentTask->getTypeName() != getTypeName()))
+            throw std::runtime_error(QString("Type mismatch: child type is %1 and parent type is %2").arg(getTypeName(), parentTask->getTypeName()).toStdString());
 
         _parentTask = parentTask;
 

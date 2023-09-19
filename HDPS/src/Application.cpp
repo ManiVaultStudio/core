@@ -33,7 +33,6 @@ hdps::Application::Application(int& argc, char** argv) :
     _startupProjectFilePath(),
     _startupProjectMetaAction(),
     _startupTask(this, "Load ManiVault Studio"),
-    _overallBackgroundTask(this, "Background Tasks"),
     _splashScreenAction(this)
 {
     QStringList subTasks{
@@ -176,14 +175,9 @@ void Application::initialize()
     _logger.initialize();
 }
 
-BackgroundTask& Application::getStartupTask()
+Task& Application::getStartupTask()
 {
     return _startupTask;
-}
-
-BackgroundTask& Application::getOverallBackgroundTask()
-{
-    return _overallBackgroundTask;
 }
 
 }

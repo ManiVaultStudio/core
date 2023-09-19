@@ -44,7 +44,7 @@ private:
     
 
 private:
-    //TasksAction     _tasksAction;   /** Tasks action for displaying and interacting with the tasks in the system */
+    TasksAction     _tasksAction;   /** Tasks action for displaying and interacting with the tasks in the system */
 };
 
 class TasksPluginFactory : public ViewPluginFactory

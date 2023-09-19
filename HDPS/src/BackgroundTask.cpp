@@ -4,12 +4,17 @@
 
 #include "BackgroundTask.h"
 #include "BackgroundTaskHandler.h"
+#include "Application.h"
+#include "CoreInterface.h"
 
 namespace hdps {
 
 BackgroundTask::BackgroundTask(QObject* parent, const QString& name, Task* parentTask /*= nullptr*/, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
     Task(parent, name, Scope::Background, parentTask, status, mayKill, nullptr)
 {
+    if (core() != nullptr && core()->isInitialized() && parentTask == nullptr)
+        setParentTask(&tasks().getOverallBackgroundTask());
+
     setHandler(new BackgroundTaskHandler(this, this));
 }
 

@@ -666,6 +666,7 @@ set(PUBLIC_TASK_HEADERS
     src/ModalTask.h
     src/ModalTaskTester.h
     src/BackgroundTask.h
+    src/BackgroundTaskTester.h
     src/DatasetTask.h
     src/AbstractTaskHandler.h
     src/ModalTaskHandler.h
@@ -682,6 +683,7 @@ set(PUBLIC_TASK_SOURCES
     src/ModalTask.cpp
 	src/ModalTaskTester.cpp
     src/BackgroundTask.cpp
+    src/BackgroundTaskTester.cpp
     src/DatasetTask.cpp
     src/AbstractTaskHandler.cpp
     src/ModalTaskHandler.cpp

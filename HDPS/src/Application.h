@@ -105,13 +105,7 @@ public: // Miscellaneous
      * Get startup task
      * @return Reference to task that is associated with application startup
      */
-    BackgroundTask& getStartupTask();
-
-    /**
-     * Get overall background task
-     * @return Reference to aggregate background task which combines all background tasks in the system
-     */
-    BackgroundTask& getOverallBackgroundTask();
+    Task& getStartupTask();
 
 public: // Static resource access functions
 
@@ -197,8 +191,7 @@ protected:
     gui::TriggerAction*                     _exitAction;                            /** Action for exiting the application */
     QString                                 _startupProjectFilePath;                /** File path of the project to automatically open upon startup (if set) */
     QScopedPointer<ProjectMetaAction>       _startupProjectMetaAction;              /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
-    BackgroundTask                          _startupTask;                           /** Task that is associated with application startup */
-    BackgroundTask                          _overallBackgroundTask;                 /** Aggregate background task which combines all background tasks in the system */
+    Task                                    _startupTask;                           /** Task that is associated with application startup */
     gui::ApplicationSplashScreenAction      _splashScreenAction;                    /** Splash screen action */
 };
 

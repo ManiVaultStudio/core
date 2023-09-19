@@ -325,9 +325,7 @@ QVariant TasksModel::ParentIdItem::data(int role /*= Qt::UserRole + 1*/) const
 
 QVariant TasksModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
 {
-    auto taskTypeString = QString(getTask()->metaObject()->className());
-
-    taskTypeString.replace("hdps::", "");
+    const auto taskTypeString = getTask()->getTypeName(true);
 
     switch (role) {
         case Qt::EditRole:
@@ -486,7 +484,7 @@ void TasksModel::taskAddedToTaskManager(Task* task)
             const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::EditRole, task->getParentTask()->getId(), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
             if (matches.empty())
-                throw std::runtime_error(QString(" %1 not found").arg(task->getParentTask()->getName()).toStdString());
+                throw std::runtime_error(QString("%1 not found").arg(task->getParentTask()->getName()).toStdString());
 
             auto parentItem = itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::ExpandCollapse)));
 

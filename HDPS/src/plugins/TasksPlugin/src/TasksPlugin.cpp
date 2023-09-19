@@ -18,10 +18,11 @@ using namespace hdps;
 using namespace hdps::util;
 
 TasksPlugin::TasksPlugin(const PluginFactory* factory) :
-    ViewPlugin(factory)//,
-    //_tasksAction(this, "Tasks")
+    ViewPlugin(factory),
+    _tasksAction(this, "Tasks")
 {
-    AbstractTaskTester::registerTester("ModalTaskTester");
+    AbstractTaskTester::registerTester("hdps::ModalTaskTester");
+    AbstractTaskTester::registerTester("hdps::BackgroundTaskTester");
 }
 
 void TasksPlugin::init()
@@ -30,11 +31,11 @@ void TasksPlugin::init()
 
     layout->setContentsMargins(6, 6, 6, 6);
 
-    //auto tasksWidget = _tasksAction.createWidget(&getWidget(), TasksAction::Toolbar | TasksAction::Overlay);
+    auto tasksWidget = _tasksAction.createWidget(&getWidget(), TasksAction::Toolbar | TasksAction::Overlay);
 
-    //tasksWidget->layout()->setContentsMargins(0, 0, 0, 0);
+    tasksWidget->layout()->setContentsMargins(0, 0, 0, 0);
 
-    //layout->addWidget(tasksWidget);
+    layout->addWidget(tasksWidget);
 
     getWidget().setLayout(layout);
 
