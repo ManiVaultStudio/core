@@ -146,6 +146,70 @@ public:
     }
 
     /**
+     * Set left rectangle value to to \p left
+     * @param left New left rectangle value
+     */
+    void setValueLeft(typename NumericalRangeActionType::ValueType left)
+    {
+        if (left == _rectangle.left())
+            return;
+
+        _rectangle.setLeft(left);
+
+        getRangeAction(Axis::X).setLimitsMinimum(left);
+        getRangeAction(Axis::X).setMinimum(left);
+
+        _rectangleChanged();
+    }
+
+    /**
+     * Set right rectangle value to to \p right
+     * @param right New right rectangle value
+     */
+    void setValueRight(typename NumericalRangeActionType::ValueType right)
+    {
+        if (right == _rectangle.right())
+            return;
+
+        _rectangle.setRight(right);
+
+        getRangeAction(Axis::X).setLimitsMaximum(right);
+        getRangeAction(Axis::X).setMaximum(right);
+
+        _rectangleChanged();
+    }
+
+    /**
+     * Set bottom rectangle value to to \p bottom
+     * @param bottom New bottom rectangle value
+     */
+    void setValueBottom(typename NumericalRangeActionType::ValueType bottom)
+    {
+        if (bottom == _rectangle.bottom())
+            return;
+
+        _rectangle.setBottom(bottom);
+
+        getRangeAction(Axis::Y).setLimitsMinimum(bottom);
+        getRangeAction(Axis::Y).setMinimum(bottom);
+
+        _rectangleChanged();
+    }
+
+    /**
+     * Set top rectangle value to to \p top
+     * @param top New top rectangle value
+     */
+    void setValueTop(typename NumericalRangeActionType::ValueType top)
+    {
+        if (top == _rectangle.top())
+            return;
+
+        _rectangle.setTop(top);
+
+        getRangeAction(Axis::Y).setLimitMaximum(top);
+        getRangeAction(Axis::Y).setMaximum(top);
+
         _rectangleChanged();
     }
 
