@@ -191,12 +191,16 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         });
 
         auto tasksAction = new TasksAction(this, "Tasks");
+        auto overallBackgroundTaskAction = new TaskAction(this, "Background Tasks");
 
         tasksAction->setPopupSizeHint(QSize(500, 500));
         tasksAction->setDefaultWidgetFlags(TasksAction::Toolbar | TasksAction::Overlay | WidgetActionWidget::PopupLayout);
 
+        overallBackgroundTaskAction->setTask(&Application::current()->getOverallBackgroundTask());
+
         statusBar()->setSizeGripEnabled(true);
-        statusBar()->insertPermanentWidget(0, new StatusBarToolButton(this, tasksAction));
+        statusBar()->insertPermanentWidget(0, overallBackgroundTaskAction->createWidget(this));
+        statusBar()->insertPermanentWidget(1, new StatusBarToolButton(this, tasksAction));
 
         if (Application::current()->shouldOpenProjectAtStartup()) {
             projects().openProject(Application::current()->getStartupProjectFilePath());

@@ -107,6 +107,12 @@ public: // Miscellaneous
      */
     BackgroundTask& getStartupTask();
 
+    /**
+     * Get overall background task
+     * @return Reference to aggregate background task which combines all background tasks in the system
+     */
+    BackgroundTask& getOverallBackgroundTask();
+
 public: // Static resource access functions
 
     /**
@@ -181,18 +187,19 @@ signals:
     void mainWindowInitialized();
 
 protected:
-    CoreInterface*                      _core;                                  /** Pointer to HDPS core */
-    const util::Version                 _version;                               /** Application version */
-    IconFonts                           _iconFonts;                             /** Icon fonts resource */
-    QSettings                           _settings;                              /** Settings */
-    QString                             _serializationTemporaryDirectory;       /** Temporary directory for serialization */
-    bool                                _serializationAborted;                  /** Whether serialization was aborted */
-    util::Logger                        _logger;                                /** Logger instance */
-    gui::TriggerAction*                 _exitAction;                            /** Action for exiting the application */
-    QString                             _startupProjectFilePath;                /** File path of the project to automatically open upon startup (if set) */
-    QScopedPointer<ProjectMetaAction>   _startupProjectMetaAction;              /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
-    BackgroundTask                      _startupTask;                           /** Task that is associated with application startup */
-    gui::ApplicationSplashScreenAction  _splashScreenAction;                    /** Splash screen action */
+    CoreInterface*                          _core;                                  /** Pointer to HDPS core */
+    const util::Version                     _version;                               /** Application version */
+    IconFonts                               _iconFonts;                             /** Icon fonts resource */
+    QSettings                               _settings;                              /** Settings */
+    QString                                 _serializationTemporaryDirectory;       /** Temporary directory for serialization */
+    bool                                    _serializationAborted;                  /** Whether serialization was aborted */
+    util::Logger                            _logger;                                /** Logger instance */
+    gui::TriggerAction*                     _exitAction;                            /** Action for exiting the application */
+    QString                                 _startupProjectFilePath;                /** File path of the project to automatically open upon startup (if set) */
+    QScopedPointer<ProjectMetaAction>       _startupProjectMetaAction;              /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
+    BackgroundTask                          _startupTask;                           /** Task that is associated with application startup */
+    BackgroundTask                          _overallBackgroundTask;                 /** Aggregate background task which combines all background tasks in the system */
+    gui::ApplicationSplashScreenAction      _splashScreenAction;                    /** Splash screen action */
 };
 
 }
