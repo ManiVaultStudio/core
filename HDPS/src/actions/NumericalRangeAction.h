@@ -127,9 +127,6 @@ public:
         if (range == getRange())
             return;
 
-        QSignalBlocker rangeMinActionBlocker(&_rangeMinAction);
-        QSignalBlocker rangeMaxActionBlocker(&_rangeMaxAction);
-
         _rangeMinAction.setValue(range.getMinimum());
         _rangeMaxAction.setValue(range.getMaximum());
 
