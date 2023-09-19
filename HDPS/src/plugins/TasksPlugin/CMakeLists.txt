@@ -22,17 +22,11 @@ file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
 find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 set(PLUGIN
-    src/AbstractTaskTester.h
-    src/AbstractTaskTester.cpp
-    src/ModalTaskTester.h
-    src/ModalTaskTester.cpp
     src/TasksPlugin.h
     src/TasksPlugin.cpp
 )
 
 set(PLUGIN_MOC_HEADERS
-    src/AbstractTaskTester.h
-    src/ModalTaskTester.h
 	src/TasksPlugin.h
 )
 

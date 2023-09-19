@@ -661,7 +661,10 @@ set(PUBLIC_GLOBAL_SETTINGS_FILES
 
 set(PUBLIC_TASK_HEADERS
     src/Task.h
+    src/TaskTesterRunner.h
+	src/AbstractTaskTester.h
     src/ModalTask.h
+    src/ModalTaskTester.h
     src/BackgroundTask.h
     src/DatasetTask.h
     src/AbstractTaskHandler.h
@@ -674,7 +677,10 @@ set(PUBLIC_TASK_HEADERS
 
 set(PUBLIC_TASK_SOURCES
     src/Task.cpp
+    src/TaskTesterRunner.cpp
+    src/AbstractTaskTester.cpp
     src/ModalTask.cpp
+	src/ModalTaskTester.cpp
     src/BackgroundTask.cpp
     src/DatasetTask.cpp
     src/AbstractTaskHandler.cpp

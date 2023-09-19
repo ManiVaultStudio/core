@@ -3,10 +3,12 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ModalTaskTester.h"
+#include "TaskTesterRunner.h"
 
 #include <QEventLoop>
 
-using namespace hdps;
+namespace hdps
+{
 
 ModalTaskTester::ModalTaskTester(QObject* parent, const QString& name) :
     AbstractTaskTester(parent, name)
@@ -18,7 +20,7 @@ ModalTaskTester::ModalTaskTester(QObject* parent, const QString& name) :
 
 void ModalTaskTester::testRunningIndeterminate()
 {
-    TaskRunner::createAndRun(this, [this](TaskRunner* taskRunner) -> void {
+    TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
         auto indeterminateTask = new ModalTask(taskRunner, "Indeterminate Task", nullptr, Task::Status::RunningIndeterminate);
@@ -64,7 +66,7 @@ void ModalTaskTester::testRunningIndeterminate()
 
 void ModalTaskTester::testAggregation()
 {
-    TaskRunner::createAndRun(this, [this](TaskRunner* taskRunner) -> void {
+    TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
         auto aggregateTask = new ModalTask(taskRunner, "Aggregate Task");
@@ -181,7 +183,7 @@ void ModalTaskTester::testAggregation()
 
 void ModalTaskTester::testPerformance()
 {
-    TaskRunner::createAndRun(this, [this](TaskRunner* taskRunner) -> void {
+    TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
         auto performanceTask = new ModalTask(taskRunner, "Performance Task", nullptr, Task::Status::Running);
@@ -221,4 +223,6 @@ void ModalTaskTester::testPerformance()
 
         eventLoop.exec();
     });
+}
+
 }
