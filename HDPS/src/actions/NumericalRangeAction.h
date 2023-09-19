@@ -170,7 +170,7 @@ public:
      * @param limitsMaximum Limits maximum
      */
     void setLimitsMaximum(NumericalType limitsMaximum) {
-        if (limitsMaximum == _rangeMaxAction.getMinimum())
+        if (limitsMaximum == _rangeMaxAction.getMaximum())
             return;
 
         _rangeMaxAction.setMaximum(limitsMaximum);
