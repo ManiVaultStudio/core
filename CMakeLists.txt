@@ -10,7 +10,7 @@ set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
 
 # Other user-facing options
 option(HDPS_USE_GTEST "Use GoogleTest" OFF)
-option(HDPS_USE_AVX "Use AVX if available - by default OFF" OFF)
+option(MV_USE_AVX "Use AVX if available - by default OFF" OFF)
 
 if (HDPS_USE_GTEST)
     enable_testing()
