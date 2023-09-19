@@ -25,6 +25,7 @@ class NumericalRangeAction : public GroupAction
     using RangeChangedCB    = std::function<void()>;
 
 public:
+    using ValueType = NumericalType;
 
     /** Describes the widget settings */
     enum WidgetFlag {
