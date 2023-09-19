@@ -1,4 +1,4 @@
-# source files for target HDPS_PRIVATE_LIB
+# source files for target MV_PRIVATE_LIB
 
 set(PRIVATE_CORE_HEADERS
     src/private/Core.h

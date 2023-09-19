@@ -1,4 +1,4 @@
-# resource files for target HDPS_EXE
+# resource files for target MV_EXE
 
 set(QRESOURCES
     res/ResourcesCore.qrc

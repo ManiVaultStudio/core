@@ -2,7 +2,7 @@
 # Check for and link to AVX instruction sets
 # -----------------------------------------------------------------------------
 macro(check_and_set_AVX target useavx)
-	message(STATUS "Set instruction sets for ${target}, HDPS_USE_AVX is ${useavx}")
+	message(STATUS "Set instruction sets for ${target}, MV_USE_AVX is ${useavx}")
 	
 	if(${useavx})
 		# Use cmake hardware checks to see whether AVX should be activated
