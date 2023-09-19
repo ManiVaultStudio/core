@@ -153,6 +153,7 @@ public:
             return;
 
         _rangeMinAction.setMinimum(limitsMinimum);
+        _rangeMaxAction.setMinimum(limitsMinimum);
 
         _limitsChanged();
     }
@@ -173,6 +174,7 @@ public:
         if (limitsMaximum == _rangeMaxAction.getMaximum())
             return;
 
+        _rangeMinAction.setMaximum(limitsMaximum);
         _rangeMaxAction.setMaximum(limitsMaximum);
 
         _limitsChanged();
@@ -192,6 +194,9 @@ public:
             return;
 
         _rangeMinAction.setMinimum(limits.getMinimum());
+        _rangeMaxAction.setMinimum(limits.getMinimum());
+
+        _rangeMinAction.setMaximum(limits.getMaximum());
         _rangeMaxAction.setMaximum(limits.getMaximum());
 
         _limitsChanged();
