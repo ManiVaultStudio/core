@@ -98,7 +98,8 @@ public:
      */
     RectangleAction(QObject * parent, const QString& title, const RectangleType& rectangle = RectangleType()) :
         GroupAction(parent, title),
-        _rangeAction{ NumericalRangeActionType(this, "X-range"), NumericalRangeActionType(this, "Y-range") }
+        _rangeAction{ NumericalRangeActionType(this, "X-range"), NumericalRangeActionType(this, "Y-range") },
+        _rectangle()
     {
         setDefaultWidgetFlags(WidgetFlag::Default);
 
@@ -118,9 +119,7 @@ public:
      */
     RectangleType getRectangle() const
     {
-        RectangleType rectangle;
-
-        return rectangle;
+        return _rectangle;
     }
 
     /**
@@ -129,14 +128,25 @@ public:
      */
     void setRectangle(const RectangleType& rectangle)
     {
-        /*
         if (rectangle == _rectangle)
             return;
 
         _rectangle = rectangle;
 
+        const util::NumericalRange<NumericalRangeActionType::ValueType> rangeX = { static_cast<NumericalRangeActionType::ValueType>(_rectangle.left()), static_cast<NumericalRangeActionType::ValueType>(_rectangle.right()) };
+        const util::NumericalRange<NumericalRangeActionType::ValueType> rangeY = { static_cast<NumericalRangeActionType::ValueType>(_rectangle.bottom()), static_cast<NumericalRangeActionType::ValueType>(_rectangle.top()) };
+
+        getRangeAction(Axis::X).setLimits(rangeX);
+        getRangeAction(Axis::X).setRange(rangeX);
+
+        getRangeAction(Axis::Y).setLimits(rangeY);
+        getRangeAction(Axis::Y).setRange(rangeY);
+
         _rectangleChanged();
-        */
+    }
+
+    /**
+        _rectangleChanged();
     }
 
 public: // Action getters
@@ -150,6 +160,7 @@ private:
 
 protected:
     RectangleChangedCB          _rectangleChanged;                              /** Callback which is called when the rectangle changed */
+    RectangleType               _rectangle;                                     /** Rectanlge values (left, right, top, bottom) */
 };
 
 }
