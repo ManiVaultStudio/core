@@ -36,8 +36,8 @@ QMap<Task::Scope, QString> Task::scopeNames = QMap<Scope, QString>({
     { Task::Scope::Modal, "Modal" }
 });
 
-Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::Background*/, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/, AbstractTaskHandler* handler /*= nullptr*/) :
-    QObject(nullptr),
+Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::Background*/, Task* parentTask /*= nullptr*/, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/, AbstractTaskHandler* handler /*= nullptr*/) :
+    QObject(parent),
     Serializable(name),
     _name(name),
     _description(),
@@ -51,12 +51,14 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
     _subtasks(),
     _subtasksNames(),
     _progressDescription(),
-    _timers()
+    _timers(),
+    _parentTask(nullptr),
+    _childTasks()
 {
-    setParent(parent);
-
     if (core() != nullptr && core()->isInitialized())
         tasks().addTask(this);
+
+    setParentTask(parentTask);
 
     for (auto& timer : _timers)
         timer.setSingleShot(true);
@@ -104,6 +106,9 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
 
 Task::~Task()
 {
+    if (hasParentTask())
+        getParentTask()->removeChildTask(this);
+
     for (auto& timer : _timers)
         timer.stop();
 
@@ -113,12 +118,117 @@ Task::~Task()
 
 Task* Task::getParentTask()
 {
-    return dynamic_cast<Task*>(parent());
+    return _parentTask;
+}
+
+void Task::setParentTask(Task* parentTask)
+{
+    try {
+        const auto previousParentTask = _parentTask;
+
+        if (parentTask == _parentTask)
+            return;
+
+        _parentTask = parentTask;
+
+        if (previousParentTask)
+            previousParentTask->removeChildTask(this);
+
+        if (_parentTask)
+            _parentTask->addChildTask(this);
+
+        emit parentTaskChanged(previousParentTask, _parentTask);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox(QString("Unable to set parent task for %1").arg(getName()), e);
+    }
+    catch (...) {
+        exceptionMessageBox(QString("Unable to set parent task for %1").arg(getName()));
+    }
 }
 
 bool Task::hasParentTask()
 {
     return getParentTask() != nullptr;
+}
+
+Task::TasksPtrs Task::getChildTasks(bool recursively /*= false*/) const
+{
+    auto childTasks = _childTasks;
+
+    if (recursively)
+        for (auto childTask : _childTasks)
+            childTasks << childTask->getChildTasks(recursively);
+
+    return _childTasks;
+}
+
+void Task::addChildTask(Task* childTask)
+{
+    try {
+        Q_ASSERT(childTask != nullptr);
+
+        if (childTask == nullptr)
+            throw std::runtime_error("Supplied task pointer is a nullptr");
+
+        if (_childTasks.contains(childTask))
+            throw std::runtime_error(QString("%1 already is a child of %2").arg(childTask->getName(), getName()).toStdString());
+
+        _childTasks << childTask;
+
+#ifdef TASK_VERBOSE
+        qDebug() << "Child task" << childTask->getName() << "added to" << getName();
+#endif
+
+        setProgressMode(ProgressMode::Aggregate);
+        registerChildTask(childTask);
+        updateAggregateStatus();
+        computeProgress();
+
+        emit childTaskAdded(childTask);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox(QString("Unable to add child task to %1").arg(getName()), e);
+    }
+    catch (...) {
+        exceptionMessageBox(QString("Unable to add child task to %1").arg(getName()));
+    }
+}
+
+void Task::removeChildTask(Task* childTask)
+{
+    try {
+        Q_ASSERT(childTask != nullptr);
+
+        if (childTask == nullptr)
+            throw std::runtime_error("Supplied task pointer is a nullptr");
+
+        if (_childTasks.contains(childTask))
+            throw std::runtime_error(QString("%1 is not a child of %2").arg(childTask->getName(), getName()).toStdString());
+
+        emit childTaskAboutToBeRemoved(childTask);
+        {
+            _childTasks.removeOne(childTask);
+
+#ifdef TASK_VERBOSE
+            qDebug() << "Child task" << childTask->getName() << "removed from" << getName();
+#endif
+
+            unregisterChildTask(childTask);
+            updateAggregateStatus();
+            computeProgress();
+        }
+        emit childTaskRemoved(childTask);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox(QString("Unable to remove child task from %1").arg(getName()), e);
+    }
+    catch (...) {
+        exceptionMessageBox(QString("Unable to remove child task from %1").arg(getName()));
+    }
 }
 
 QString Task::getName() const
@@ -477,75 +587,6 @@ void Task::computeProgress()
 QTimer& Task::getTimer(const TimerType& timerType)
 {
     return _timers[static_cast<int>(timerType)];
-}
-
-void Task::childEvent(QChildEvent* event)
-{
-    const auto numberOfChildTasks = getChildTasks().count();
-
-    switch (event->type())
-    {
-        case QEvent::ChildAdded:
-        {
-            auto childTask = dynamic_cast<Task*>(event->child());
-
-            if (childTask == nullptr)
-                break;
-
-#ifdef TASK_VERBOSE
-            qDebug() << "Child task was added";
-#endif
-
-            setProgressMode(ProgressMode::Aggregate);
-            registerChildTask(childTask);
-            updateAggregateStatus();
-            computeProgress();
-
-            break;
-        }
-
-        case QEvent::ChildRemoved:
-        {
-            auto childTask = dynamic_cast<Task*>(event->child());
-
-            if (childTask == nullptr)
-                break;
-
-#ifdef TASK_VERBOSE
-            qDebug() << "Child task was removed";
-#endif
-
-            unregisterChildTask(childTask);
-            updateAggregateStatus();
-            computeProgress();
-
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    return QObject::childEvent(event);
-}
-
-hdps::Task::TasksPtrs Task::getChildTasks(bool recursively /*= false*/) const 
-{
-    Task::TasksPtrs childTasksPtrs;
-
-    for (auto childObject : children()) {
-        auto childTask = dynamic_cast<Task*>(childObject);
-
-        if (childTask == nullptr)
-            continue;
-
-        childTasksPtrs << childTask;
-        
-        if (recursively)
-            childTasksPtrs << childTask->getChildTasks();
-    }
-
-    return childTasksPtrs;
 }
 
 void Task::registerChildTask(Task* childTask)

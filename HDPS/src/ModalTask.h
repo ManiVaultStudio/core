@@ -27,10 +27,11 @@ public:
     * Construct task with \p parent object, \p name and initial \p status
     * @param parent Pointer to parent object
     * @param name Name of the task
+    * @param parentTask Pointer to parent task this will determine the placement in the task hierarchy as reflected in the user interface
     * @param status Initial status of the task
     * @param mayKill Boolean determining whether the task may be killed or not
     */
-    ModalTask(QObject* parent, const QString& name, const Status& status = Status::Undefined, bool mayKill = true);
+    ModalTask(QObject* parent, const QString& name, Task* parentTask = nullptr, const Status& status = Status::Undefined, bool mayKill = true);
 
     /**
      * Creates singleton modal task handler

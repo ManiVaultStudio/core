@@ -20,12 +20,25 @@ class AbstractTaskHandler;
  *
  * Convenience class for managing a task.
  *
- * Task progress can be determined in three ways see Task::setProgressMode():
+ * Task progress can be determined in three ways (see Task::setProgressMode() and Task::getProgressMode()):
  *  - Setting progress directly setProgress(...)
  *  - Setting sub tasks items via one of the overloads of Task::setSubTasks() and flagging items as finished 
  *    with Task::setSubtaskFinished(), the percentage is then updated automatically
- *  - Computing the combined progress of child tasks using aggregation (makes use of Qt's parent > child relationship)
- *
+ *  - Computing the combined progress of child tasks using aggregation (initialize with parent task or use Task::setParentTask())
+ * 
+ * Tasks have a scope which defines how the content is presented in the user interface (see Task::setScope() and Task::getScope())
+ *  - All background tasks are aggregated into one overarching task and presented in the status bar
+ *  - Foreground tasks automatically show up in a popup at the right of the status bar 
+ *  - Modal tasks show up in a modal tasks dialog which blocks all other user interaction
+ * 
+ * There is no need to create a user interface to kill tasks, all scopes have controls to kill a task. Connect to the Task::requestAbort() signal
+ * to be notified when a task was aborted so that further action can be taken.
+ * 
+ * Special notes:
+ *  - Tasks should work cross threads (this has only been tested using QThread though)
+ *  - For a more detail exploration of all tasks in the system, a tasks view system plugin is available
+ *  - In case of a tasks hierarchy, all task objects should be in the same QThread context 
+ * 
  * @author Thomas Kroes
  */
 class Task : public QObject, public util::Serializable
@@ -85,15 +98,23 @@ private:
 public:
 
     /**
-    * Construct task with \p parent object, \p name, initial \p status and possibly a \p taskHandler
-    * @param parent Pointer to parent object
-    * @param name Name of the task
-    * @param scope Scope of the task
-    * @param status Initial status of the task
-    * @param mayKill Boolean determining whether the task may be killed or not
-    * @param handler Pointer to task handler
-    */
-    Task(QObject* parent, const QString& name, const Scope& scope = Scope::Background, const Status& status = Status::Undefined, bool mayKill = false, AbstractTaskHandler* handler = nullptr);
+     * Construct task with \p parent object, \p name, \p parentTask, initial \p status and possibly a \p taskHandler
+     * 
+     * There is a deliberate separation between \p parent QObject and \p parentTask in the constructor because:
+     *  - The \p parent parameter simply denotes the position of the task in the QObject hierarchy and has nothing to do with the task hierarchy.
+     *  - The \p parentTask pointer is used to denote the position of the initialized task in a task hierarchy.
+     * 
+     * Note: Within a task hierarchy, all tasks QObject::parent() objects should reside in the same thread (this is not the case for Task#_parentTask though).
+     * 
+     * @param parent Pointer to parent object (all task objects must reside in the same thread)
+     * @param name Name of the task
+     * @param scope Scope of the task
+     * @param parentTask Pointer to parent task this will determine the placement in the task hierarchy as reflected in the user interface
+     * @param status Initial status of the task
+     * @param mayKill Boolean determining whether the task may be killed or not
+     * @param handler Pointer to task handler
+     */
+    Task(QObject* parent, const QString& name, const Scope& scope = Scope::Background, Task* parentTask = nullptr, const Status& status = Status::Undefined, bool mayKill = false, AbstractTaskHandler* handler = nullptr);
 
     /** Remove from task manager when destructed */
     ~Task();
@@ -107,10 +128,37 @@ public: // Parent-child
     virtual Task* getParentTask() final;
 
     /**
+     * Set parent task to \p parentTask
+     * @param parentTask Pointer to parent task
+     */
+    virtual void setParentTask(Task* parentTask) final;
+
+    /**
      * Determine whether the task has a parent task
      * @return Boolean determining whether the task has a parent task
      */
     virtual bool hasParentTask() final;
+
+    /**
+     * Get child tasks
+     * @param recursively Whether to get child tasks recursively
+     * @return Vector of pointer to child tasks
+     */
+    virtual TasksPtrs getChildTasks(bool recursively = false) const final;
+
+protected: // Parent-child
+
+    /**
+     * Adds \p childTask to children
+     * @param childTask Pointer to child task to add
+     */
+    virtual void addChildTask(Task* childTask);
+
+    /**
+     * Removes \p childTask from children
+     * @param childTask Pointer to child task to remove
+     */
+    virtual void removeChildTask(Task* childTask);
 
 public: // Name, description, icon and may kill
 
@@ -263,7 +311,7 @@ public: // Progress mode
      * Sets progress mode to to \p progressMode
      * @param progressMode Progress mode
      */
-    virtual void setProgressMode(const ProgressMode& progressMode) final;
+    void setProgressMode(const ProgressMode& progressMode);
 
 public: // Scope
 
@@ -377,36 +425,19 @@ private:
      */
     QTimer& getTimer(const TimerType& timerType);
 
-protected: // For aggregate task
-
-    /**
-     * Invoked when a child \p event occurs
-     * @param event Pointer to child event
-     */
-    void childEvent(QChildEvent* event) override;
-
-public: // For aggregate task
-
-    /**
-     * Get child tasks
-     * @param recursively Whether to get child tasks recursively
-     * @return Vector of pointer to child task(s)
-     */
-    virtual TasksPtrs getChildTasks(bool recursively = false) const final;
-
 private: // For aggregate task
 
     /**
      * Registers \p childTask
      * @param childTask Pointer to child task to register
      */
-    virtual void registerChildTask(Task* childTask) final;
+    void registerChildTask(Task* childTask);
 
     /**
      * Unregisters \p childTask
      * @param childTask Pointer to child task to unregister
      */
-    virtual void unregisterChildTask(Task* childTask) final;
+    void unregisterChildTask(Task* childTask);
 
     /**
      * Update status of aggregate task
@@ -555,6 +586,31 @@ signals:
     void progressDescriptionChanged(const QString& progressDescription);
 
     /**
+     * Signals that the parent task changed from \p previousParentTask to \p currentParentTask
+     * @param previousParentTask Pointer to previous parent task (maybe nullptr)
+     * @param currentParentTask Pointer to previous parent task (maybe nullptr)
+     */
+    void parentTaskChanged(Task* previousParentTask, Task* currentParentTask);
+
+    /**
+     * Signals that \p childTask has been added
+     * @param childTask Pointer to child task that was added
+     */
+    void childTaskAdded(Task* childTask);
+
+    /**
+     * Signals that \p childTask is about to be removed from the list of children
+     * @param childTask Pointer to child task that is about to be removed from the list of children
+     */
+    void childTaskAboutToBeRemoved(Task* childTask);
+
+    /**
+     * Signals that \p childTask has been removed from the list of children
+     * @param childTask Pointer to child task that has been removed from the list of children
+     */
+    void childTaskRemoved(Task* childTask);
+
+    /**
      * The signals below are private signals and can/should only be called from within this Task class
      * These signals provide a way to make cross thread task usage possible
      */
@@ -592,6 +648,8 @@ private:
     QStringList             _subtasksNames;                                 /** Subtasks names */
     QString                 _progressDescription;                           /** Current item description */
     QTimer                  _timers[static_cast<int>(TimerType::Count)];    /** Timers to prevent unnecessary abundant emissions of signals */
+    Task*                   _parentTask;                                    /** Pointer to the parent task */
+    TasksPtrs               _childTasks;                                    /** Pointers to child tasks */
 
 private:
 

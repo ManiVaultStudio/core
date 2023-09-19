@@ -21,7 +21,7 @@ void ModalTaskTester::testRunningIndeterminate()
     TaskRunner::createAndRun(this, [this](TaskRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto indeterminateTask = new ModalTask(taskRunner, "Indeterminate Task", Task::Status::RunningIndeterminate);
+        auto indeterminateTask = new ModalTask(taskRunner, "Indeterminate Task", nullptr, Task::Status::RunningIndeterminate);
 
         auto subtasks = QStringList({
             "Step 1",
@@ -72,7 +72,7 @@ void ModalTaskTester::testAggregation()
         QMap<QString, QTimer*> timers;
 
         const auto addChildTask = [this, taskRunner, &timers](const QString& name, QStringList tasks, int interval, Task* parentTask = nullptr) -> Task* {
-            auto childTask = new ModalTask(parentTask, name);
+            auto childTask = new ModalTask(taskRunner, name, parentTask);
 
             if (!tasks.isEmpty()) {
                 childTask->setSubtasks(tasks);
@@ -184,7 +184,7 @@ void ModalTaskTester::testPerformance()
     TaskRunner::createAndRun(this, [this](TaskRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto performanceTask = new ModalTask(taskRunner, "Performance Task", Task::Status::Running);
+        auto performanceTask = new ModalTask(taskRunner, "Performance Task", nullptr, Task::Status::Running);
 
         const auto numberOfSubTasks = 10000;
 
