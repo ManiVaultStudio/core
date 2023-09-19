@@ -130,8 +130,8 @@ public:
         QSignalBlocker rangeMinActionBlocker(&_rangeMinAction);
         QSignalBlocker rangeMaxActionBlocker(&_rangeMaxAction);
 
-        _rangeMinAction.initialize(range.getMinimum(), range.getMaximum(), range.getMinimum(), range.getMinimum());
-        _rangeMaxAction.initialize(range.getMinimum(), range.getMaximum(), range.getMaximum(), range.getMaximum());
+        _rangeMinAction.setValue(range.getMinimum());
+        _rangeMaxAction.setValue(range.getMaximum());
 
         _rangeChanged();
     }
