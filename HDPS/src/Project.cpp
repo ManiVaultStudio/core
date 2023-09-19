@@ -80,7 +80,7 @@ void Project::setFilePath(const QString& filePath)
     _startupProject = filePath == Application::current()->getStartupProjectFilePath();
 
     if (_startupProject)
-        _task.setParent(&Application::current()->getSplashScreenAction().getTask());
+        _task.setParentTask(&Application::current()->getSplashScreenAction().getTask());
 
     emit filePathChanged(_filePath);
 }
