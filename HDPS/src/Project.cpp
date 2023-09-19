@@ -134,7 +134,7 @@ QVariantMap Project::toVariantMap() const
     return variantMap;
 }
 
-ModalTask& Project::getTask()
+Task& Project::getTask()
 {
     return _task;
 }

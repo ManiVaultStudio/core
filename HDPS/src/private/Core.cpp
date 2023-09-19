@@ -7,7 +7,8 @@
 #include "MainWindow.h"
 #include "PluginManager.h"
 #include "GroupDataDialog.h"
-#include "ModalTaskHandler.h"
+#include "ModalTask.h"
+#include "ForegroundTask.h"
 
 #include <LoaderPlugin.h>
 #include <WriterPlugin.h>
@@ -70,6 +71,7 @@ void Core::init()
     _settingsManager->initialize();
     
     ModalTask::createHandler(Application::current());
+    ForegroundTask::createHandler(Application::current());
 
     CoreInterface::init();
 }

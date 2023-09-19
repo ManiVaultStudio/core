@@ -662,15 +662,18 @@ set(PUBLIC_GLOBAL_SETTINGS_FILES
 set(PUBLIC_TASK_HEADERS
     src/Task.h
     src/TaskTesterRunner.h
+	src/AbstractTaskHandler.h
 	src/AbstractTaskTester.h
     src/ModalTask.h
     src/ModalTaskTester.h
+	src/ModalTaskHandler.h
     src/BackgroundTask.h
     src/BackgroundTaskTester.h
+	src/BackgroundTaskHandler.h
+	src/ForegroundTask.h
+    src/ForegroundTaskTester.h
+	src/ForegroundTaskHandler.h
     src/DatasetTask.h
-    src/AbstractTaskHandler.h
-    src/ModalTaskHandler.h
-    src/BackgroundTaskHandler.h
     src/DatasetTaskHandler.h
     src/TasksModel.h
     src/TasksFilterModel.h
@@ -679,16 +682,19 @@ set(PUBLIC_TASK_HEADERS
 set(PUBLIC_TASK_SOURCES
     src/Task.cpp
     src/TaskTesterRunner.cpp
+	src/AbstractTaskHandler.cpp
     src/AbstractTaskTester.cpp
     src/ModalTask.cpp
 	src/ModalTaskTester.cpp
+	src/ModalTaskHandler.cpp
     src/BackgroundTask.cpp
     src/BackgroundTaskTester.cpp
+	src/BackgroundTaskHandler.cpp
+	src/ForegroundTask.cpp
+    src/ForegroundTaskTester.cpp
+	src/ForegroundTaskHandler.cpp
     src/DatasetTask.cpp
-    src/AbstractTaskHandler.cpp
-    src/ModalTaskHandler.cpp
-    src/BackgroundTaskHandler.cpp
-    src/DatasetTaskHandler.cpp
+	src/DatasetTaskHandler.cpp
     src/TasksModel.cpp
     src/TasksFilterModel.cpp
 )

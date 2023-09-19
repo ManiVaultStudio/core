@@ -23,6 +23,7 @@ TasksPlugin::TasksPlugin(const PluginFactory* factory) :
 {
     AbstractTaskTester::registerTester("hdps::ModalTaskTester");
     AbstractTaskTester::registerTester("hdps::BackgroundTaskTester");
+    AbstractTaskTester::registerTester("hdps::ForegroundTaskTester");
 }
 
 void TasksPlugin::init()

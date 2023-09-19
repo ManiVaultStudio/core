@@ -19,6 +19,9 @@
 
 #include <TasksModel.h>
 
+#include <ForegroundTask.h>
+#include <ForegroundTaskHandler.h>
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QScreen>
@@ -201,6 +204,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         statusBar()->setSizeGripEnabled(true);
         statusBar()->insertPermanentWidget(0, overallBackgroundTaskAction->createWidget(this));
         statusBar()->insertPermanentWidget(1, new StatusBarToolButton(this, tasksAction));
+        statusBar()->insertPermanentWidget(1, new StatusBarToolButton(this, &ForegroundTask::getHandler()->getTasksAction()));
 
         if (Application::current()->shouldOpenProjectAtStartup()) {
             projects().openProject(Application::current()->getStartupProjectFilePath());

@@ -124,7 +124,7 @@ public:
      * @param humanFriendly Whether to include the task namespace or not
      * @return Task type name
      */
-    virtual QString getTypeName(bool humanFriendly) const final;
+    virtual QString getTypeName(bool humanFriendly = true) const final;
 
 public: // Parent-child
 
