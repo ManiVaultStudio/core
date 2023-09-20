@@ -15,7 +15,7 @@ if(MSVC)
 endif(MSVC)
 
 # Get the env path and allow the user to change it
-set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
+set(INSTALL_DIR $ENV{MV_INSTALL_DIR} CACHE PATH "The ManiVault Install Directoy")
 # Normalize the incoming install path
 file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
 
