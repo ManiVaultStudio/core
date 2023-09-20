@@ -116,7 +116,7 @@ target_link_libraries(${CLUSTERDATA} PRIVATE HDPS_Public)
 target_link_libraries(${CLUSTERDATA} PRIVATE PointData)
 
 # Use avx if enabled and available
-check_and_set_AVX(${CLUSTERDATA} ${HDPS_USE_AVX})
+check_and_set_AVX(${CLUSTERDATA} ${MV_USE_AVX})
 
 set_target_properties(${CLUSTERDATA} PROPERTIES PUBLIC_HEADER "${CLUSTER_HEADERS}")
 
