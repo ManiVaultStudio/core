@@ -22,6 +22,8 @@ namespace hdps::gui {
 template<typename RectangleType, typename NumericalRangeActionType>
 class RectangleAction : public GroupAction
 {
+    typedef typename NumericalRangeActionType::ValueType NumValType;
+    using ValueRange = util::NumericalRange<NumValType>;
 public:
 
     /** Templated classes with Q_OBJECT macro are not allowed, so use function pointers in stead */
@@ -98,7 +100,7 @@ public:
      */
     RectangleAction(QObject * parent, const QString& title, const RectangleType& rectangle = RectangleType()) :
         GroupAction(parent, title),
-        _rangeAction{ NumericalRangeActionType(this, "X-range"), NumericalRangeActionType(this, "Y-range") },
+        _rangeAction{ NumericalRangeActionType(this, "X-range", ValueRange(std::numeric_limits<NumValType>::lowest(), std::numeric_limits<NumValType>::max())), NumericalRangeActionType(this, "Y-range", ValueRange(std::numeric_limits<NumValType>::lowest(), std::numeric_limits<NumValType>::max())) },
         _rectangle()
     {
         setDefaultWidgetFlags(WidgetFlag::Default);
@@ -133,14 +135,8 @@ public:
 
         _rectangle = rectangle;
 
-        const util::NumericalRange<NumericalRangeActionType::ValueType> rangeX = { static_cast<NumericalRangeActionType::ValueType>(_rectangle.left()), static_cast<NumericalRangeActionType::ValueType>(_rectangle.right()) };
-        const util::NumericalRange<NumericalRangeActionType::ValueType> rangeY = { static_cast<NumericalRangeActionType::ValueType>(_rectangle.bottom()), static_cast<NumericalRangeActionType::ValueType>(_rectangle.top()) };
-
-        getRangeAction(Axis::X).setLimits(rangeX);
-        getRangeAction(Axis::X).setRange(rangeX);
-
-        getRangeAction(Axis::Y).setLimits(rangeY);
-        getRangeAction(Axis::Y).setRange(rangeY);
+        getRangeAction(Axis::X).setRange(ValueRange(static_cast<NumValType>(_rectangle.left()), static_cast<NumValType>(_rectangle.right())));
+        getRangeAction(Axis::Y).setRange(ValueRange(static_cast<NumValType>(_rectangle.bottom()), static_cast<NumValType>(_rectangle.top())));
 
         _rectangleChanged();
     }
@@ -155,8 +151,6 @@ public:
             return;
 
         _rectangle.setLeft(left);
-
-        getRangeAction(Axis::X).setLimitsMinimum(left);
         getRangeAction(Axis::X).setMinimum(left);
 
         _rectangleChanged();
@@ -172,8 +166,6 @@ public:
             return;
 
         _rectangle.setRight(right);
-
-        getRangeAction(Axis::X).setLimitsMaximum(right);
         getRangeAction(Axis::X).setMaximum(right);
 
         _rectangleChanged();
@@ -189,8 +181,6 @@ public:
             return;
 
         _rectangle.setBottom(bottom);
-
-        getRangeAction(Axis::Y).setLimitsMinimum(bottom);
         getRangeAction(Axis::Y).setMinimum(bottom);
 
         _rectangleChanged();
@@ -206,8 +196,6 @@ public:
             return;
 
         _rectangle.setTop(top);
-
-        getRangeAction(Axis::Y).setLimitMaximum(top);
         getRangeAction(Axis::Y).setMaximum(top);
 
         _rectangleChanged();
