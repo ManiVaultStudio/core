@@ -200,6 +200,30 @@ public: // Name, description, icon and may kill
     virtual void setIcon(const QIcon& icon) final;
 
     /**
+     * Get whether the task is enabled or not
+     * @return Boolean determining whether the task is enabled or not
+     */
+    virtual bool getEnabled() const final;
+
+    /**
+     * Sets whether the task is enabled or not
+     * @param enabled Boolean determining whether the task is enabled or not
+     */
+    virtual void setEnabled(bool enabled) final;
+
+    /**
+     * Get whether the task is visible or not
+     * @return Boolean determining whether the task is visible or not
+     */
+    virtual bool getVisible() const final;
+
+    /**
+     * Sets whether the task is visible or not
+     * @param visible Boolean determining whether the task is visible or not
+     */
+    virtual void setVisible(bool visible) final;
+
+    /**
      * Get whether the task may be killed or not
      * @return Whether the task may be killed or not
      */
@@ -454,6 +478,8 @@ private: // For aggregate task
 
 private: // Private setters (these call private signals under the hood, an essential part to make cross thread task usage possible)
 
+    void privateSetEnabled(bool enabled);
+    void privateSetVisible(bool visible);
     void privateSetStatus(const Status& status);
     void privateSetIdle();
     void privateSetRunning();
@@ -493,6 +519,18 @@ signals:
      * @param icon Modified icon
      */
     void iconChanged(const QIcon& icon);
+
+    /**
+     * Signals that the task enabled state changed to \p enabled
+     * @param enabled Whether the task is enabled
+     */
+    void enabledChanged(bool enabled);
+
+    /**
+     * Signals that the task visibility changed to \p visible
+     * @param visible Whether the task is visible in the user interface
+     */
+    void visibilityChanged(bool visible);
 
     /**
      * Signals that the task handler changed to \p handler
@@ -621,6 +659,8 @@ signals:
      * The signals below are private signals and can/should only be called from within this Task class
      * These signals provide a way to make cross thread task usage possible
      */
+    void privateSetEnabledSignal(bool enabled, QPrivateSignal);
+    void privateSetVisibleSignal(bool visible, QPrivateSignal);
     void privateSetStatusSignal(const Status& status, QPrivateSignal);
     void privateSetIdleSignal(QPrivateSignal);
     void privateSetRunningSignal(QPrivateSignal);
@@ -645,6 +685,8 @@ private:
     QString                 _name;                                          /** Task name */
     QString                 _description;                                   /** Task description */
     QIcon                   _icon;                                          /** Task icon */
+    bool                    _enabled;                                       /** Whether the task is enabled, disabled tasks are not included in task aggregation */
+    bool                    _visible;                                       /** Whether the task is visible in the user interface */
     Status                  _status;                                        /** Task status */
     bool                    _mayKill;                                       /** Whether the task may be killed or not */
     AbstractTaskHandler*    _handler;                                       /** Task handler */

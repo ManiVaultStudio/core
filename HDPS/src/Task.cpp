@@ -42,6 +42,8 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
     _name(name),
     _description(),
     _icon(),
+    _enabled(true),
+    _visible(true),
     _status(status),
     _mayKill(mayKill),
     _handler(handler),
@@ -84,6 +86,8 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
         setIdle();
     });
 
+    connect(this, &Task::privateSetEnabledSignal, this, &Task::privateSetEnabled);
+    connect(this, &Task::privateSetVisibleSignal, this, &Task::privateSetVisible);
     connect(this, &Task::privateSetStatusSignal, this, &Task::privateSetStatus);
     connect(this, &Task::privateSetIdleSignal, this, &Task::privateSetIdle);
     connect(this, &Task::privateSetRunningSignal, this, &Task::privateSetRunning);
@@ -285,6 +289,26 @@ void Task::setIcon(const QIcon& icon)
     _icon = icon;
 
     emit iconChanged(_icon);
+}
+
+bool Task::getEnabled() const
+{
+    return _enabled;
+}
+
+void Task::setEnabled(bool enabled)
+{
+    emit privateSetEnabledSignal(enabled, QPrivateSignal());
+}
+
+bool Task::getVisible() const
+{
+    return _visible;
+}
+
+void Task::setVisible(bool visible)
+{
+    emit privateSetVisibleSignal(visible, QPrivateSignal());
 }
 
 bool Task::getMayKill() const
@@ -676,6 +700,26 @@ void Task::updateAggregateStatus()
 
         privateSetFinished(!hasParentTask());
     }
+}
+
+void Task::privateSetEnabled(bool enabled)
+{
+    if (enabled == _enabled)
+        return;
+
+    _enabled = enabled;
+
+    emit enabledChanged(_enabled);
+}
+
+void Task::privateSetVisible(bool visible)
+{
+    if (visible == _visible)
+        return;
+
+    _visible = visible;
+
+    emit visibilityChanged(_visible);
 }
 
 void Task::privateSetStatus(const Status& status)
