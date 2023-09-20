@@ -112,7 +112,7 @@ list(APPEND CLUSTER_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAM
 
 target_link_libraries(${CLUSTERDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${CLUSTERDATA} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${CLUSTERDATA} PRIVATE HDPS_Public)
+target_link_libraries(${CLUSTERDATA} PRIVATE ${MV_PUBLIC_LIB})
 target_link_libraries(${CLUSTERDATA} PRIVATE PointData)
 
 # Use avx if enabled and available

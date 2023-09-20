@@ -51,7 +51,7 @@ source_group(Aux FILES ${AUX})
 
 add_library(${SHARED_PARAMETERS_PLUGIN} SHARED ${SHARED_PARAMETERS_SOURCES})
 
-add_dependencies(${SHARED_PARAMETERS_PLUGIN} HDPS_Public)
+add_dependencies(${SHARED_PARAMETERS_PLUGIN} ${MV_PUBLIC_LIB})
 
 qt_wrap_cpp(SHARED_PARAMETERS_MOC ${PLUGIN_MOC_HEADERS} TARGET ${SHARED_PARAMETERS_PLUGIN})
 target_sources(${SHARED_PARAMETERS_PLUGIN} PRIVATE ${SHARED_PARAMETERS_MOC})
@@ -62,7 +62,7 @@ target_compile_features(${SHARED_PARAMETERS_PLUGIN} PRIVATE cxx_std_17)
 
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE HDPS_Public)
+target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use avx if enabled and available
 check_and_set_AVX(${SHARED_PARAMETERS_PLUGIN} ${MV_USE_AVX})
