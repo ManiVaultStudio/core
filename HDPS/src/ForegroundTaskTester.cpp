@@ -17,7 +17,7 @@ ForegroundTaskTester::ForegroundTaskTester(QObject* parent, const QString& name)
 {
     testRunningIndeterminate();
     //testAggregation();
-    //testPerformance();
+    testPerformance();
 }
 
 void ForegroundTaskTester::testRunningIndeterminate()
@@ -188,7 +188,7 @@ void ForegroundTaskTester::testPerformance()
     TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto performanceTask = new ForegroundTask(taskRunner, "Performance Task", &tasks().getOverallBackgroundTask(), Task::Status::Running);
+        auto performanceTask = new ForegroundTask(taskRunner, "Performance Task", nullptr, Task::Status::Running);
 
         const auto numberOfSubTasks = 10000;
 

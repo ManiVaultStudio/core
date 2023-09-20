@@ -44,8 +44,8 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
     updateVisibility();
 
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateVisibility);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibility);
+    //connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateVisibility);
+    //connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibility);
 }
 
 void ModalTaskHandler::init()

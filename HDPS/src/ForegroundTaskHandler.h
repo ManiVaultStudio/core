@@ -13,12 +13,64 @@ namespace hdps {
 /**
  * Foreground task handler class
  *
- * Creates the popup interface that displays running foreground tasks.
+ * Contains a specialized tasks action that displays running foreground tasks.
  *
  * @author Thomas Kroes
  */
 class ForegroundTaskHandler final : public AbstractTaskHandler
 {
+public:
+
+    /**
+     * Foreground tasks action class
+     *
+     * Tasks action for showing foreground tasks in a customized popup interface.
+     *
+     * @author Thomas Kroes
+     */
+    class ForegroundTasksAction : public gui::WidgetAction
+    {
+    public:
+
+        /** Widget class for foreground tasks action */
+        class Widget : public gui::WidgetActionWidget {
+        public:
+
+            /**
+             * Constructor
+             * @param parent Pointer to parent widget
+             * @param foregroundTasksAction Pointer to foreground tasks action
+             * @param widgetFlags Widget flags for the configuration of the widget (type)
+             */
+            Widget(QWidget* parent, ForegroundTasksAction* foregroundTasksAction, const std::int32_t& widgetFlags);
+        };
+
+        /**
+         * Get widget representation of the foreground tasks action
+         * @param parent Pointer to parent widget
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+            return new Widget(parent, this, widgetFlags);
+        };
+
+    public:
+
+        /**
+         * Initialize with pointer to \p parent object and \p title
+         * @param parent Pointer to parent object
+         * @param title Action title
+         */
+        ForegroundTasksAction(QObject* parent, const QString& title);
+
+    protected: // Action getters
+
+        gui::TasksAction& getTasksAction() { return _tasksAction; }
+
+    private:
+        gui::TasksAction    _tasksAction;       /** Tasks action which will be configured to show running foreground tasks */
+    };
+
 public:
 
     /**
@@ -30,10 +82,12 @@ public:
     /** Initializes the handler */
     void init() override;
 
-    gui::TasksAction& getTasksAction() { return _tasksAction; }
+public: // Action getters
+
+    ForegroundTasksAction& getForegroundTasksAction() { return _foregroundTasksAction; }
 
 private:
-    gui::TasksAction    _tasksAction;   /** Tasks action for showing foreground tasks */
+    ForegroundTasksAction    _foregroundTasksAction;   /** Tasks action for showing foreground tasks */
 };
 
 }

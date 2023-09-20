@@ -204,7 +204,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         statusBar()->setSizeGripEnabled(true);
         statusBar()->insertPermanentWidget(0, overallBackgroundTaskAction->createWidget(this));
         statusBar()->insertPermanentWidget(1, new StatusBarToolButton(this, tasksAction));
-        statusBar()->insertPermanentWidget(1, new StatusBarToolButton(this, &ForegroundTask::getHandler()->getTasksAction()));
+        statusBar()->insertPermanentWidget(1, new StatusBarToolButton(this, &ForegroundTask::getHandler()->getForegroundTasksAction()));
 
         if (Application::current()->shouldOpenProjectAtStartup()) {
             projects().openProject(Application::current()->getStartupProjectFilePath());

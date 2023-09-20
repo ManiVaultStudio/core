@@ -340,6 +340,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
 
     setLayout(layout);
 
+    /*
     connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
         if (static_cast<TasksModel::Column>(index.column()) != TasksModel::Column::Kill)
             return;
@@ -349,6 +350,8 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
 
         taskItem->getTask()->kill();
     });
+
+    */
 
     _tasksAction->openPersistentProgressEditorsRecursively(treeView);
 }

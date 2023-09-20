@@ -40,6 +40,7 @@ void TaskManager::initialize()
     AbstractTaskManager::initialize();
 
     addTask(&_overallBackgroundTask);
+    addTask(&Application::current()->getSplashScreenAction().getTask());
 }
 
 void TaskManager::reset()

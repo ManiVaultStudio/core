@@ -22,7 +22,7 @@ namespace hdps::gui {
  *
  * @author Thomas Kroes
  */
-class TasksAction final : public WidgetAction
+class TasksAction : public WidgetAction
 {
     Q_OBJECT
 
