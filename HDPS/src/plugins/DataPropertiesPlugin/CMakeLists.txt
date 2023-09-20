@@ -39,9 +39,9 @@ set(AUX
 )
 
 set(DATAPROPERTIES_SOURCES
-	${PLUGIN}
-	${WIDGETS}
-	${AUX}
+    ${PLUGIN}
+    ${WIDGETS}
+    ${AUX}
 )
 
 source_group(Plugin FILES ${PLUGIN})
@@ -71,10 +71,10 @@ install(TARGETS ${DATAPROPERTIESPLUGIN}
 )
 
 add_custom_command(TARGET ${DATAPROPERTIESPLUGIN} POST_BUILD
-	COMMAND ${CMAKE_COMMAND}
-	--install ${CMAKE_CURRENT_BINARY_DIR}
-	--config $<CONFIGURATION>
-	--prefix ${INSTALL_DIR}/$<CONFIGURATION>
+    COMMAND ${CMAKE_COMMAND}
+    --install ${CMAKE_CURRENT_BINARY_DIR}
+    --config $<CONFIGURATION>
+    --prefix ${INSTALL_DIR}/$<CONFIGURATION>
 )
 
 # Automatically set the debug environment (command + working directory) for MSVC
