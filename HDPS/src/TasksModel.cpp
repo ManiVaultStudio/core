@@ -498,7 +498,7 @@ TasksModel::Row::Row(Task* task) :
 }
 
 QMap<TasksModel::Column, TasksModel::ColumHeaderInfo> TasksModel::columnInfo = QMap<TasksModel::Column, TasksModel::ColumHeaderInfo>({
-    { TasksModel::Column::ExpandCollapse, { "",  "", "Expand/collapse" } },
+    { TasksModel::Column::ExpandCollapse, { "",  "Root", "Expand/collapse" } },
     { TasksModel::Column::Status, { "",  "Status", "Status of the task" } },
     { TasksModel::Column::Name, { "Name" , "Name", "Name of the task" } },
     { TasksModel::Column::Enabled, { "" , "Enabled", "Whether the task is enabled or not" } },
