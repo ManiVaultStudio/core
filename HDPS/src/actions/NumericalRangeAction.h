@@ -25,7 +25,6 @@ class NumericalRangeAction : public GroupAction
     using RangeChangedCB    = std::function<void()>;
 
 public:
-    using ValueType = NumericalType;
 
     /** Describes the widget settings */
     enum WidgetFlag {
@@ -127,8 +126,11 @@ public:
         if (range == getRange())
             return;
 
-        _rangeMinAction.setValue(range.getMinimum());
-        _rangeMaxAction.setValue(range.getMaximum());
+        QSignalBlocker rangeMinActionBlocker(&_rangeMinAction);
+        QSignalBlocker rangeMaxActionBlocker(&_rangeMaxAction);
+
+        _rangeMinAction.initialize(range.getMinimum(), range.getMaximum(), range.getMinimum(), range.getMinimum());
+        _rangeMaxAction.initialize(range.getMinimum(), range.getMaximum(), range.getMaximum(), range.getMaximum());
 
         _rangeChanged();
     }
@@ -150,7 +152,6 @@ public:
             return;
 
         _rangeMinAction.setMinimum(limitsMinimum);
-        _rangeMaxAction.setMinimum(limitsMinimum);
 
         _limitsChanged();
     }
@@ -168,10 +169,9 @@ public:
      * @param limitsMaximum Limits maximum
      */
     void setLimitsMaximum(NumericalType limitsMaximum) {
-        if (limitsMaximum == _rangeMaxAction.getMaximum())
+        if (limitsMaximum == _rangeMaxAction.getMinimum())
             return;
 
-        _rangeMinAction.setMaximum(limitsMaximum);
         _rangeMaxAction.setMaximum(limitsMaximum);
 
         _limitsChanged();
@@ -191,9 +191,6 @@ public:
             return;
 
         _rangeMinAction.setMinimum(limits.getMinimum());
-        _rangeMaxAction.setMinimum(limits.getMinimum());
-
-        _rangeMinAction.setMaximum(limits.getMaximum());
         _rangeMaxAction.setMaximum(limits.getMaximum());
 
         _limitsChanged();

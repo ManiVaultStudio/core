@@ -79,24 +79,7 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction, bool recur
         setValue(value);
     });
 
-    connect(this, &DecimalAction::minimumChanged, publicDecimalAction, [publicDecimalAction](const float& value) -> void {
-        publicDecimalAction->setMinimum(value);
-        });
-
-    connect(publicDecimalAction, &DecimalAction::minimumChanged, [this](const float& value) -> void {
-        setMinimum(value);
-        });
-
-    connect(this, &DecimalAction::maximumChanged, publicDecimalAction, [publicDecimalAction](const float& value) -> void {
-        publicDecimalAction->setMaximum(value);
-        });
-
-    connect(publicDecimalAction, &DecimalAction::maximumChanged, [this](const float& value) -> void {
-        setMaximum(value);
-        });
-
     setValue(publicDecimalAction->getValue());
-    setRange(publicDecimalAction->getRange());
 
     WidgetAction::connectToPublicAction(publicAction, recursive);
 }
@@ -115,10 +98,6 @@ void DecimalAction::disconnectFromPublicAction(bool recursive)
 
     disconnect(this, &DecimalAction::valueChanged, publicDecimalAction, nullptr);
     disconnect(publicDecimalAction, &DecimalAction::valueChanged, this, nullptr);
-    disconnect(this, &DecimalAction::minimumChanged, publicDecimalAction, nullptr);
-    disconnect(publicDecimalAction, &DecimalAction::minimumChanged, this, nullptr);
-    disconnect(this, &DecimalAction::maximumChanged, publicDecimalAction, nullptr);
-    disconnect(publicDecimalAction, &DecimalAction::maximumChanged, this, nullptr);
 
     WidgetAction::disconnectFromPublicAction(recursive);
 }
@@ -128,12 +107,8 @@ void DecimalAction::fromVariantMap(const QVariantMap& variantMap)
     WidgetAction::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "Value");
-    variantMapMustContain(variantMap, "Minimum");
-    variantMapMustContain(variantMap, "Maximum");
 
     setValue(static_cast<float>(variantMap["Value"].toDouble()));
-    setValue(static_cast<float>(variantMap["Minimum"].toDouble()));
-    setValue(static_cast<float>(variantMap["Maximum"].toDouble()));
 }
 
 QVariantMap DecimalAction::toVariantMap() const
@@ -141,10 +116,7 @@ QVariantMap DecimalAction::toVariantMap() const
     auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
-        { "Value", QVariant::fromValue(static_cast<double>(getValue())) },
-        { "Minimum", QVariant::fromValue(static_cast<double>(getMinimum())) },
-        { "Maximum", QVariant::fromValue(static_cast<double>(getMaximum())) }
-
+        { "Value", QVariant::fromValue(static_cast<double>(getValue())) }
     });
 
     return variantMap;
