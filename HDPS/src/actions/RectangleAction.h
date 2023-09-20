@@ -98,7 +98,8 @@ public:
      */
     RectangleAction(QObject * parent, const QString& title, const RectangleType& rectangle = RectangleType()) :
         GroupAction(parent, title),
-        _rangeAction{ NumericalRangeActionType(this, "X-range"), NumericalRangeActionType(this, "Y-range") }
+        _rangeAction{ NumericalRangeActionType(this, "X-range"), NumericalRangeActionType(this, "Y-range") },
+        _rectangle()
     {
         setDefaultWidgetFlags(WidgetFlag::Default);
 
@@ -118,9 +119,7 @@ public:
      */
     RectangleType getRectangle() const
     {
-        RectangleType rectangle;
-
-        return rectangle;
+        return _rectangle;
     }
 
     /**
@@ -129,14 +128,89 @@ public:
      */
     void setRectangle(const RectangleType& rectangle)
     {
-        /*
         if (rectangle == _rectangle)
             return;
 
         _rectangle = rectangle;
 
+        const util::NumericalRange<NumericalRangeActionType::ValueType> rangeX = { static_cast<NumericalRangeActionType::ValueType>(_rectangle.left()), static_cast<NumericalRangeActionType::ValueType>(_rectangle.right()) };
+        const util::NumericalRange<NumericalRangeActionType::ValueType> rangeY = { static_cast<NumericalRangeActionType::ValueType>(_rectangle.bottom()), static_cast<NumericalRangeActionType::ValueType>(_rectangle.top()) };
+
+        getRangeAction(Axis::X).setLimits(rangeX);
+        getRangeAction(Axis::X).setRange(rangeX);
+
+        getRangeAction(Axis::Y).setLimits(rangeY);
+        getRangeAction(Axis::Y).setRange(rangeY);
+
         _rectangleChanged();
-        */
+    }
+
+    /**
+     * Set left rectangle value to to \p left
+     * @param left New left rectangle value
+     */
+    void setValueLeft(typename NumericalRangeActionType::ValueType left)
+    {
+        if (left == _rectangle.left())
+            return;
+
+        _rectangle.setLeft(left);
+
+        getRangeAction(Axis::X).setLimitsMinimum(left);
+        getRangeAction(Axis::X).setMinimum(left);
+
+        _rectangleChanged();
+    }
+
+    /**
+     * Set right rectangle value to to \p right
+     * @param right New right rectangle value
+     */
+    void setValueRight(typename NumericalRangeActionType::ValueType right)
+    {
+        if (right == _rectangle.right())
+            return;
+
+        _rectangle.setRight(right);
+
+        getRangeAction(Axis::X).setLimitsMaximum(right);
+        getRangeAction(Axis::X).setMaximum(right);
+
+        _rectangleChanged();
+    }
+
+    /**
+     * Set bottom rectangle value to to \p bottom
+     * @param bottom New bottom rectangle value
+     */
+    void setValueBottom(typename NumericalRangeActionType::ValueType bottom)
+    {
+        if (bottom == _rectangle.bottom())
+            return;
+
+        _rectangle.setBottom(bottom);
+
+        getRangeAction(Axis::Y).setLimitsMinimum(bottom);
+        getRangeAction(Axis::Y).setMinimum(bottom);
+
+        _rectangleChanged();
+    }
+
+    /**
+     * Set top rectangle value to to \p top
+     * @param top New top rectangle value
+     */
+    void setValueTop(typename NumericalRangeActionType::ValueType top)
+    {
+        if (top == _rectangle.top())
+            return;
+
+        _rectangle.setTop(top);
+
+        getRangeAction(Axis::Y).setLimitMaximum(top);
+        getRangeAction(Axis::Y).setMaximum(top);
+
+        _rectangleChanged();
     }
 
 public: // Action getters
@@ -150,6 +224,7 @@ private:
 
 protected:
     RectangleChangedCB          _rectangleChanged;                              /** Callback which is called when the rectangle changed */
+    RectangleType               _rectangle;                                     /** Rectanlge values (left, right, top, bottom) */
 };
 
 }
