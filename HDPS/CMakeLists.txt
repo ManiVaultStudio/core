@@ -395,28 +395,28 @@ add_custom_command(TARGET ${MV_PUBLIC_LIB} POST_BUILD
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component MVPUBLIC_HEADERS
-        --prefix ${INSTALL_DIR}
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault public link library"
     COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component MVPUBLIC_LINKLIB
-        --prefix ${INSTALL_DIR}
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake config files"
     COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component MVPUBLIC_PACKAGE
-        --prefix ${INSTALL_DIR}
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake target files"
     COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component MVPUBLIC_TARGET
-        --prefix ${INSTALL_DIR}
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
     # If no plugin directory exsists, ManiVault might try to import 
     # any library in the executable directory as a plugin
