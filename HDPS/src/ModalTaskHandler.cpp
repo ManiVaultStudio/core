@@ -30,9 +30,6 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     tasksFilterModel.getTaskTypeFilterAction().setSelectedOptions({ "ModalTask" });
 
     const auto updateVisibility = [this, &tasksFilterModel]() -> void {
-        if (projects().hasProject() && (projects().isOpeningProject() || projects().isImportingProject()))
-            return;
-
         const auto numberOfRows = tasksFilterModel.rowCount();
 
         if (numberOfRows == 0 && hasDialog())
@@ -44,8 +41,9 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
     updateVisibility();
 
-    //connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateVisibility);
-    //connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibility);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateVisibility);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibility);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::dataChanged, this, updateVisibility);
 }
 
 void ModalTaskHandler::init()

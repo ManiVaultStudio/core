@@ -433,9 +433,9 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (splashScreenAction.getEnabledAction().isChecked())
                 splashScreenAction.getOpenAction().trigger();
 
-            Application::current()->getTask(Application::TaskType::LoadApplication)->setName(QString("Loading %1").arg(QFileInfo(filePath).fileName()));
+            //Application::current()->getTask(Application::TaskType::LoadApplication)->setName(QString("Loading %1").arg(QFileInfo(filePath).fileName()));
 
-            auto& task = getCurrentProject()->getTask();
+            auto& task = _project->getTask();
 
             task.setDescription(QString("Opening ManiVault project from %1").arg(filePath));
             task.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
@@ -454,7 +454,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             task.setSubtasks(QStringList() << decompressionTaskNames << "Create data hierarchy" << viewPluginsTaskNames);
 
             connect(&archiver, &Archiver::taskFinished, this, [this](const QString& taskName) -> void {
-                getCurrentProject()->getTask().setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
+                _project->getTask().setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
             });
 
             connect(&task, &Task::requestAbort, this, [this]() -> void {
@@ -479,6 +479,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             task.setFinished();
 
             _recentProjectsAction.addRecentFilePath(filePath);
+
             _project->updateContributors();
 
             if (disableReadOnlyAction.isEnabled() && disableReadOnlyAction.isChecked())

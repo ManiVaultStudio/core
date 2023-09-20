@@ -133,7 +133,7 @@ QVariantMap Project::toVariantMap() const
 
 Task& Project::getTask()
 {
-    if (projects().isOpeningProject() || projects().isImportingProject())
+    if (isStartupProject())
         return *Application::current()->getTask(Application::TaskType::LoadProject);
 
     return _task;

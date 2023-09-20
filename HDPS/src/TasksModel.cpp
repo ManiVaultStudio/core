@@ -532,8 +532,6 @@ TasksModel::TasksModel(QObject* parent /*= nullptr*/) :
 
 void TasksModel::taskAddedToTaskManager(Task* task)
 {
-    qDebug() << task->getName() << task->getId();
-
     try {
         Q_ASSERT(task != nullptr);
 
@@ -541,8 +539,6 @@ void TasksModel::taskAddedToTaskManager(Task* task)
             throw std::runtime_error("Task may not be a nullptr");
 
         if (task->hasParentTask()) {
-            qDebug() << task->getParentTask()->getId();
-
             const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::EditRole, task->getParentTask()->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
 
             if (matches.isEmpty())

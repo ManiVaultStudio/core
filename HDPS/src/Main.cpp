@@ -103,25 +103,31 @@ int main(int argc, char *argv[])
         try {
             const auto startupProjectFilePath = commandLineParser.value("project");
 
-            auto projectMetaAction = getStartupProjectMetaAction(startupProjectFilePath);
+            if (QFileInfo(startupProjectFilePath).exists()) {
+                auto projectMetaAction = getStartupProjectMetaAction(startupProjectFilePath);
 
-            if (projectMetaAction != nullptr) {
-                application.setStartupProjectFilePath(startupProjectFilePath);
-                application.setStartupProjectMetaAction(projectMetaAction);
-                application.getTask(Application::TaskType::LoadProject)->setName(QString("Loading %1").arg(QFileInfo(startupProjectFilePath).fileName()));
+                if (projectMetaAction != nullptr) {
+                    application.setStartupProjectFilePath(startupProjectFilePath);
+                    application.setStartupProjectMetaAction(projectMetaAction);
+                    application.getTask(Application::TaskType::LoadProject)->setName(QString("Loading %1").arg(QFileInfo(startupProjectFilePath).fileName()));
+                }
             }
-
-            QCoreApplication::processEvents();
+            else {
+                throw std::runtime_error(QString("%1 does not exist").arg(startupProjectFilePath).toStdString());
+            }
         }
         catch (std::exception& e)
         {
-            qDebug() << "Unable to set startup project:" << e.what();
+            qDebug() << "Unable to load startup project:" << e.what();
         }
         catch (...)
         {
-            qDebug() << "Unable to set startup project due to an unhandled exception";
+            qDebug() << "Unable to load startup project due to an unhandled exception";
         }
     }
+    
+    if (!application.shouldOpenProjectAtStartup())
+        application.getTask(Application::TaskType::LoadProject)->setEnabled(false);
     
     if (showApplicationSplashScreen)
         application.getSplashScreenAction().getOpenAction().trigger();

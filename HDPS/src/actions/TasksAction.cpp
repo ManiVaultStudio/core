@@ -304,6 +304,8 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::ExpandCollapse), QHeaderView::ResizeToContents);
     treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Status), QHeaderView::ResizeToContents);
     treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Name), QHeaderView::ResizeToContents);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Enabled), QHeaderView::ResizeToContents);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Visible), QHeaderView::ResizeToContents);
     treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::Progress), QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::ProgressDescription), QHeaderView::ResizeToContents);
     treeViewHeader->setSectionResizeMode(static_cast<int>(TasksModel::Column::ProgressText), QHeaderView::ResizeToContents);
@@ -362,8 +364,6 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
 
 void TasksAction::Widget::updateTreeView()
 {
-    qDebug() << __FUNCTION__ << _tasksAction->getTasksFilterModel().rowCount();
-
     auto& treeView = _tasksWidget.getTreeView();
 
     treeView.setRootIsDecorated(_tasksAction->hasAgregateTasks());

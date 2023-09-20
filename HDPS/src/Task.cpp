@@ -590,11 +590,18 @@ void Task::computeProgress()
         {
             const auto childTasks = getChildTasks();
 
-            auto accumulatedProgress = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [](float sum, Task* childTask) -> float {
+            std::int32_t numberOfEnabledChildTasks = 0;
+
+            auto accumulatedProgress = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [&numberOfEnabledChildTasks](float sum, Task* childTask) -> float {
+                if (!childTask->getEnabled())
+                    return sum;
+
+                numberOfEnabledChildTasks++;
+
                 return sum + childTask->getProgress();
             });
 
-            _progress = accumulatedProgress / static_cast<float>(childTasks.count());
+            _progress = accumulatedProgress / static_cast<float>(numberOfEnabledChildTasks);
 
             break;
         }
@@ -702,8 +709,18 @@ void Task::updateAggregateStatus()
 
     const auto childTasks = getChildTasks();
 
+    const auto numberOfEnabledChildTasks = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [](std::size_t count, Task* childTask) -> std::size_t {
+        if (!childTask->getEnabled())
+            return count;
+
+        return count + 1;
+    });
+
     const auto countStatus = [&childTasks](const Status& status) -> std::size_t {
         return std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [status](std::size_t count, Task* childTask) -> std::size_t {
+            if (!childTask->getEnabled())
+                return count;
+
             return count + (childTask->getStatus() == status ? 1 : 0);
         });
     };
@@ -714,7 +731,7 @@ void Task::updateAggregateStatus()
     //if (countStatus(Status::Idle) == childTasks.count())
     //    privateSetIdle();
 
-    if (countStatus(Status::Finished) == childTasks.count()) {
+    if (countStatus(Status::Finished) == numberOfEnabledChildTasks) {
         auto tasksToSetToIdle = getChildTasks();
 
         std::reverse(tasksToSetToIdle.begin(), tasksToSetToIdle.end());
