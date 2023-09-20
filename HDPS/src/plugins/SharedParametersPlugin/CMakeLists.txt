@@ -65,7 +65,7 @@ target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE HDPS_Public)
 
 # Use avx if enabled and available
-check_and_set_AVX(${SHARED_PARAMETERS_PLUGIN} ${HDPS_USE_AVX})
+check_and_set_AVX(${SHARED_PARAMETERS_PLUGIN} ${MV_USE_AVX})
 
 install(TARGETS ${SHARED_PARAMETERS_PLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
@@ -82,5 +82,5 @@ add_custom_command(TARGET ${SHARED_PARAMETERS_PLUGIN} POST_BUILD
 # Automatically set the debug environment (command + working directory) for MSVC
 if(MSVC)
     set_property(TARGET ${SHARED_PARAMETERS_PLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
-    set_property(TARGET ${SHARED_PARAMETERS_PLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/HDPS.exe,${INSTALL_DIR}/release/HDPS.exe>)
+    set_property(TARGET ${SHARED_PARAMETERS_PLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/${MV_EXE}.exe,${INSTALL_DIR}/release/${MV_EXE}.exe>)
 endif()
