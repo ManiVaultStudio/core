@@ -57,24 +57,7 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction, bool recu
         setValue(value);
     });
 
-    connect(this, &IntegralAction::minimumChanged, publicIntegralAction, [publicIntegralAction](const int32_t& value) -> void {
-        publicIntegralAction->setMinimum(value);
-    });
-
-    connect(publicIntegralAction, &IntegralAction::minimumChanged, [this](const int32_t& value) -> void {
-        setMinimum(value);
-    });
-
-    connect(this, &IntegralAction::maximumChanged, publicIntegralAction, [publicIntegralAction](const int32_t& value) -> void {
-        publicIntegralAction->setMaximum(value);
-    });
-
-    connect(publicIntegralAction, &IntegralAction::maximumChanged, [this](const int32_t& value) -> void {
-        setMaximum(value);
-    });
-
     setValue(publicIntegralAction->getValue());
-    setRange(publicIntegralAction->getRange());
 
     WidgetAction::connectToPublicAction(publicAction, recursive);
 }
@@ -93,10 +76,6 @@ void IntegralAction::disconnectFromPublicAction(bool recursive)
 
     disconnect(this, &IntegralAction::valueChanged, publicIntegralAction, nullptr);
     disconnect(publicIntegralAction, &IntegralAction::valueChanged, this, nullptr);
-    disconnect(this, &IntegralAction::minimumChanged, publicIntegralAction, nullptr);
-    disconnect(publicIntegralAction, &IntegralAction::minimumChanged, this, nullptr);
-    disconnect(this, &IntegralAction::maximumChanged, publicIntegralAction, nullptr);
-    disconnect(publicIntegralAction, &IntegralAction::maximumChanged, this, nullptr);
 
     WidgetAction::disconnectFromPublicAction(recursive);
 }
@@ -106,12 +85,8 @@ void IntegralAction::fromVariantMap(const QVariantMap& variantMap)
     WidgetAction::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "Value");
-    variantMapMustContain(variantMap, "Minimum");
-    variantMapMustContain(variantMap, "Maximum");
 
     setValue(variantMap["Value"].toInt());
-    setValue(variantMap["Minimum"].toInt());
-    setValue(variantMap["Maximum"].toInt());
 }
 
 QVariantMap IntegralAction::toVariantMap() const
@@ -119,9 +94,7 @@ QVariantMap IntegralAction::toVariantMap() const
     auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
-        { "Value", QVariant::fromValue(getValue()) },
-        { "Minimum", QVariant::fromValue(getMinimum()) },
-        { "Maximum", QVariant::fromValue(getMaximum()) }
+        { "Value", QVariant::fromValue(getValue()) }
     });
 
     return variantMap;
