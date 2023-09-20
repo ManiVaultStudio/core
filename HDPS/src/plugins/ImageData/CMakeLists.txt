@@ -70,7 +70,7 @@ list(APPEND IMAGE_DATA_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_
 
 target_link_libraries(${IMAGEDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${IMAGEDATA} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${IMAGEDATA} PRIVATE HDPS_Public)
+target_link_libraries(${IMAGEDATA} PRIVATE ${MV_PUBLIC_LIB})
 target_link_libraries(${IMAGEDATA} PRIVATE PointData)
 target_link_libraries(${IMAGEDATA} PRIVATE ClusterData)
 

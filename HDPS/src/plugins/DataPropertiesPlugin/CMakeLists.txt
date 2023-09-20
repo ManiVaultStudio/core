@@ -60,7 +60,7 @@ target_compile_features(${DATAPROPERTIESPLUGIN} PRIVATE cxx_std_17)
 target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE Qt6::Core)
 target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE HDPS_Public)
+target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use avx if enabled and available
 check_and_set_AVX(${DATAPROPERTIESPLUGIN} ${MV_USE_AVX})

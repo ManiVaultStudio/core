@@ -61,7 +61,7 @@ target_compile_features(${DATAHIERARCHYPLUGIN} PRIVATE cxx_std_17)
 
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE HDPS_Public)
+target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use avx if enabled and available
 check_and_set_AVX(${DATAHIERARCHYPLUGIN} ${MV_USE_AVX})

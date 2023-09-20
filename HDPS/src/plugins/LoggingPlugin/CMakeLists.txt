@@ -68,7 +68,7 @@ target_compile_features(${LOGGINGPLUGIN} PRIVATE cxx_std_17)
 
 target_link_libraries(${LOGGINGPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${LOGGINGPLUGIN} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${LOGGINGPLUGIN} PRIVATE HDPS_Public)
+target_link_libraries(${LOGGINGPLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use avx if enabled and available
 check_and_set_AVX(${LOGGINGPLUGIN} ${MV_USE_AVX})

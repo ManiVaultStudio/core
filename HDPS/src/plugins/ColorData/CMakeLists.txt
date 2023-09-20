@@ -47,7 +47,7 @@ target_compile_features(${COLORDATA} PRIVATE cxx_std_17)
 
 target_link_libraries(${COLORDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${COLORDATA} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${COLORDATA} PRIVATE HDPS_Public)
+target_link_libraries(${COLORDATA} PRIVATE ${MV_PUBLIC_LIB})
 
 set_target_properties(${COLORDATA} PROPERTIES PUBLIC_HEADER "${COLORDATA_HEADERS}")
 

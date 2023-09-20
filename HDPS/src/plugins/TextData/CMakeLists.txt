@@ -47,7 +47,7 @@ target_compile_features(${TEXTDATA} PRIVATE cxx_std_17)
 
 target_link_libraries(${TEXTDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${TEXTDATA} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${TEXTDATA} PRIVATE HDPS_Public)
+target_link_libraries(${TEXTDATA} PRIVATE ${MV_PUBLIC_LIB})
 
 set_target_properties(${TEXTDATA} PROPERTIES PUBLIC_HEADER "${TEXTDATA_HEADERS}")
 

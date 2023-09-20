@@ -119,7 +119,7 @@ list(APPEND POINTS_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME
 
 target_link_libraries(${POINTDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${POINTDATA} PRIVATE HDPS_Public)
+target_link_libraries(${POINTDATA} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use avx if enabled and available
 check_and_set_AVX(${POINTDATA} ${MV_USE_AVX})
