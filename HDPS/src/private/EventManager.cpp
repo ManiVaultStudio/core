@@ -4,8 +4,6 @@
 
 #include "EventManager.h"
 
-#include <Application.h>
-
 #include <util/Exception.h>
 
 #include <Set.h>
@@ -262,8 +260,6 @@ void EventManager::notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset)
 
 void EventManager::initialize()
 {
-    Application::current()->getStartupTask().setSubtaskFinished("Initializing event manager");
-
     AbstractEventManager::initialize();
 }
 

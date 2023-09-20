@@ -79,9 +79,6 @@ void Project::setFilePath(const QString& filePath)
     _filePath       = filePath;
     _startupProject = filePath == Application::current()->getStartupProjectFilePath();
 
-    if (_startupProject)
-        _task.setParentTask(&Application::current()->getSplashScreenAction().getTask());
-
     emit filePathChanged(_filePath);
 }
 
@@ -136,6 +133,9 @@ QVariantMap Project::toVariantMap() const
 
 Task& Project::getTask()
 {
+    if (projects().isOpeningProject() || projects().isImportingProject())
+        return *Application::current()->getTask(Application::TaskType::LoadProject);
+
     return _task;
 }
 

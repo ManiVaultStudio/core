@@ -170,6 +170,60 @@ void TasksModel::NameItem::setData(const QVariant& value, int role /* = Qt::User
     }
 }
 
+TasksModel::EnabledItem::EnabledItem(Task* task) :
+    Item(task)
+{
+    connect(getTask(), &Task::enabledChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant TasksModel::EnabledItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return getTask()->getEnabled();
+
+        case Qt::DisplayRole:
+            return data(Qt::EditRole).toBool() ? "Yes" : "No";
+
+        case Qt::ToolTipRole:
+            return QString("Task is %1enabled").arg(data(Qt::EditRole).toBool() ? "" : "not ");
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+TasksModel::VisibleItem::VisibleItem(Task* task) :
+    Item(task)
+{
+    connect(getTask(), &Task::visibileChanged, this, [this]() -> void {
+        emitDataChanged();
+        });
+}
+
+QVariant TasksModel::VisibleItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return getTask()->getVisible();
+
+        case Qt::DisplayRole:
+            return data(Qt::EditRole).toBool() ? "Yes" : "No";
+
+        case Qt::ToolTipRole:
+            return QString("Task is %1visible").arg(data(Qt::EditRole).toBool() ? "" : "not ");
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 TasksModel::ProgressItem::ProgressItem(Task* task) :
     Item(task, true),
     _taskAction(this, "Task")
@@ -429,6 +483,8 @@ TasksModel::Row::Row(Task* task) :
     append(new ExpandCollapseItem(task));
     append(new StatusItem(task));
     append(new NameItem(task));
+    append(new EnabledItem(task));
+    append(new VisibleItem(task));
     append(new ProgressItem(task));
     append(new ProgressDescriptionItem(task));
     append(new ProgressTextItem(task));
@@ -445,6 +501,8 @@ QMap<TasksModel::Column, TasksModel::ColumHeaderInfo> TasksModel::columnInfo = Q
     { TasksModel::Column::ExpandCollapse, { "",  "", "Expand/collapse" } },
     { TasksModel::Column::Status, { "",  "Status", "Status of the task" } },
     { TasksModel::Column::Name, { "Name" , "Name", "Name of the task" } },
+    { TasksModel::Column::Enabled, { "" , "Enabled", "Whether the task is enabled or not" } },
+    { TasksModel::Column::Visible, { "" , "Visible", "Whether the task is visible or not" } },
     { TasksModel::Column::Progress, { "Progress" , "Progress", "Task progress" } },
     { TasksModel::Column::ProgressDescription, { "Progress description" , "Progress description", "Progress description" } },
     { TasksModel::Column::ProgressText, { "Progress text" , "Progress text", "Progress text" } },
@@ -474,6 +532,8 @@ TasksModel::TasksModel(QObject* parent /*= nullptr*/) :
 
 void TasksModel::taskAddedToTaskManager(Task* task)
 {
+    qDebug() << task->getName() << task->getId();
+
     try {
         Q_ASSERT(task != nullptr);
 
@@ -481,9 +541,11 @@ void TasksModel::taskAddedToTaskManager(Task* task)
             throw std::runtime_error("Task may not be a nullptr");
 
         if (task->hasParentTask()) {
-            const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::EditRole, task->getParentTask()->getId(), -1, Qt::MatchExactly | Qt::MatchRecursive);
+            qDebug() << task->getParentTask()->getId();
 
-            if (matches.empty())
+            const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::EditRole, task->getParentTask()->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
+
+            if (matches.isEmpty())
                 throw std::runtime_error(QString("%1 not found").arg(task->getParentTask()->getName()).toStdString());
 
             auto parentItem = itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::ExpandCollapse)));
@@ -512,6 +574,9 @@ void TasksModel::taskAddedToTaskManager(Task* task)
 void TasksModel::taskAboutToBeRemovedFromTaskManager(Task* task)
 {
     try {
+        if (!tasks().getTasks().contains(task))
+            return;
+
         Q_ASSERT(task != nullptr);
 
         if (task == nullptr)

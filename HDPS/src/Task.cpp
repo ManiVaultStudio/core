@@ -103,6 +103,8 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
     connect(this, &Task::privateSetProgressSignal, this, &Task::privateSetProgress);
     connect(this, qOverload<std::uint32_t, QPrivateSignal>(&Task::privateSetSubtasksSignal), this, qOverload<std::uint32_t>(&Task::privateSetSubtasks));
     connect(this, qOverload<const QStringList&, QPrivateSignal>(&Task::privateSetSubtasksSignal), this, qOverload<const QStringList&>(&Task::privateSetSubtasks));
+    connect(this, qOverload<std::uint32_t, const QString&, QPrivateSignal>(&Task::privateSetSubtaskStartedSignal), this, qOverload<std::uint32_t, const QString&>(&Task::privateSetSubtaskStarted));
+    connect(this, qOverload<const QString&, const QString&, QPrivateSignal>(&Task::privateSetSubtaskStartedSignal), this, qOverload<const QString&, const QString&>(&Task::privateSetSubtaskStarted));
     connect(this, qOverload<std::uint32_t, const QString&, QPrivateSignal>(&Task::privateSetSubtaskFinishedSignal), this, qOverload<std::uint32_t, const QString&>(&Task::privateSetSubtaskFinished));
     connect(this, qOverload<const QString&, const QString&, QPrivateSignal>(&Task::privateSetSubtaskFinishedSignal), this, qOverload<const QString&, const QString&>(&Task::privateSetSubtaskFinished));
     connect(this, &Task::privateSetSubtaskNameSignal, this, &Task::privateSetSubtaskName);
@@ -482,7 +484,7 @@ QString Task::getProgressText() const
             if (_progress == 0.f)
                 return _name;
             else
-                return QString("%1 %2%").arg(getProgressDescription().isEmpty() ? "" : QString("%1: ").arg(getProgressDescription()), QString::number(getProgress() * 100.f, 'f', 1));
+                return QString("%1 %2%").arg(getProgressDescription().isEmpty() ? "" : QString("%1").arg(getProgressDescription()), QString::number(getProgress() * 100.f, 'f', 1));
         }
 
         case Task::Status::RunningIndeterminate:
@@ -515,6 +517,16 @@ void Task::setSubtasks(std::uint32_t numberOfSubtasks)
 void Task::setSubtasks(const QStringList& subtasksNames)
 {
     emit privateSetSubtasksSignal(subtasksNames, QPrivateSignal());
+}
+
+void Task::setSubtaskStarted(std::uint32_t subtaskIndex, const QString& progressDescription /*= QString()*/)
+{
+    emit privateSetSubtaskStartedSignal(subtaskIndex, progressDescription, QPrivateSignal());
+}
+
+void Task::setSubtaskStarted(const QString& subtaskName, const QString& progressDescription /*= QString()*/)
+{
+    emit privateSetSubtaskStartedSignal(subtaskName, progressDescription, QPrivateSignal());
 }
 
 void Task::setSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription /*= QString()*/)
@@ -653,7 +665,19 @@ void Task::registerChildTask(Task* childTask)
         if (getProgressMode() != ProgressMode::Aggregate)
             return;
 
-        privateSetProgressDescription(QString("%1: %2").arg(getName(), progressDescription));
+        auto combinedProgressDescription = QString("%1: %2").arg(getName(), progressDescription);
+
+        /*
+        if (!hasParentTask()) {
+            auto segments = combinedProgressDescription.split(": ");
+
+            segments.removeLast();
+
+            combinedProgressDescription = segments.join(": ");
+        }
+        */
+
+        privateSetProgressDescription(combinedProgressDescription);
     });
 
     updateAggregateStatus();
@@ -719,7 +743,7 @@ void Task::privateSetVisible(bool visible)
 
     _visible = visible;
 
-    emit visibilityChanged(_visible);
+    emit visibileChanged(_visible);
 }
 
 void Task::privateSetStatus(const Status& status)
@@ -940,6 +964,38 @@ void Task::privateSetSubtasks(const QStringList& subtasksNames)
     emit subtasksChanged(_subtasks, _subtasksNames);
 
     computeProgress();
+}
+
+void Task::privateSetSubtaskStarted(std::uint32_t subtaskIndex, const QString& progressDescription)
+{
+    if (_progressMode != ProgressMode::Subtasks)
+        return;
+
+    if (subtaskIndex >= _subtasks.count())
+        return;
+
+    const auto subtaskName = _subtasksNames[subtaskIndex];
+
+    if (progressDescription.isEmpty())
+        privateSetProgressDescription(subtaskName);
+    else
+        privateSetProgressDescription(progressDescription);
+}
+
+void Task::privateSetSubtaskStarted(const QString& subtaskName, const QString& progressDescription)
+{
+    if (_progressMode != ProgressMode::Subtasks)
+        return;
+
+    const auto subtaskIndex = getSubtaskIndex(subtaskName);
+
+    if (subtaskIndex < 0)
+        return;
+
+    if (progressDescription.isEmpty())
+        privateSetProgressDescription(subtaskName);
+    else
+        privateSetProgressDescription(progressDescription);
 }
 
 void Task::privateSetSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription)

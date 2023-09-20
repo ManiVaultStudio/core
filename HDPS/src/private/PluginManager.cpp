@@ -4,7 +4,6 @@
 
 #include "PluginManager.h"
 
-#include <Application.h>
 #include <PluginFactory.h>
 #include <LoaderPlugin.h>
 #include <WriterPlugin.h>
@@ -52,8 +51,6 @@ void PluginManager::initialize()
 #ifdef PLUGIN_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
-
-    Application::current()->getStartupTask().setSubtaskFinished("Initializing plugin manager");
 
     AbstractPluginManager::initialize();
 

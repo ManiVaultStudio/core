@@ -13,7 +13,7 @@ BackgroundTask::BackgroundTask(QObject* parent, const QString& name, Task* paren
     Task(parent, name, Scope::Background, parentTask, status, mayKill, nullptr)
 {
     if (core() != nullptr && core()->isInitialized() && parentTask == nullptr)
-        setParentTask(&tasks().getOverallBackgroundTask());
+        setParentTask(Application::current()->getTask(Application::TaskType::OverallBackground));
 
     setHandler(new BackgroundTaskHandler(this, this));
 }

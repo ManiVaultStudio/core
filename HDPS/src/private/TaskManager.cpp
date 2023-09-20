@@ -19,8 +19,7 @@ namespace hdps
 
 TaskManager::TaskManager(QObject* parent /*= nullptr*/) :
     AbstractTaskManager(),
-    _tasks(),
-    _overallBackgroundTask(this, "Background Tasks")
+    _tasks()
 {
 }
 
@@ -35,12 +34,12 @@ void TaskManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
-    Application::current()->getStartupTask().setSubtaskFinished("Initializing task manager");
-
     AbstractTaskManager::initialize();
 
-    addTask(&_overallBackgroundTask);
-    addTask(&Application::current()->getSplashScreenAction().getTask());
+    addTask(Application::current()->getTask(Application::TaskType::OverallBackground));
+    addTask(Application::current()->getTask(Application::TaskType::LoadApplication));
+    addTask(Application::current()->getTask(Application::TaskType::LoadGUI));
+    addTask(Application::current()->getTask(Application::TaskType::LoadProject));
 }
 
 void TaskManager::reset()
@@ -60,11 +59,6 @@ void TaskManager::reset()
 AbstractTaskManager::Tasks TaskManager::getTasks()
 {
     return _tasks;
-}
-
-BackgroundTask& TaskManager::getOverallBackgroundTask()
-{
-    return _overallBackgroundTask;
 }
 
 void TaskManager::addTask(Task* task)
@@ -104,7 +98,7 @@ void TaskManager::removeTask(Task* task)
             throw std::runtime_error("Task may not be a null pointer");
 
         if (!_tasks.contains(task))
-            throw std::runtime_error("Task not found in manager");
+            throw std::runtime_error(QString("%1 not found in manager").arg(task->getName()).toStdString());
 
 #ifdef TASK_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << task->getName();

@@ -9,16 +9,9 @@
 namespace hdps::gui {
 
 ApplicationSplashScreenAction::ApplicationSplashScreenAction(QObject* parent) :
-    AbstractSplashScreenAction(parent)//,
-    //_tasksModel(this),
-    //_tasksFilterModel(this)
+    AbstractSplashScreenAction(parent)
 {
-    //getTaskAction().setTask(&Application::current()->getStartupTask());
-
-    //_tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
-    //_tasksFilterModel.getTaskTypeFilterAction().selectOption("ModalTask");
-
-    connect(&Application::current()->getStartupTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
+    connect(Application::current()->getTask(Application::TaskType::LoadApplication), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
         if (previousStatus == Task::Status::Finished && status == Task::Status::Idle)
             AbstractSplashScreenAction::closeSplashScreenDialog();
     });
@@ -28,15 +21,5 @@ SplashScreenDialog* ApplicationSplashScreenAction::getSplashScreenDialog()
 {
     return new ApplicationSplashScreenDialog(this);
 }
-
-//TasksModel& ApplicationSplashScreenAction::getTasksModel()
-//{
-//    return _tasksModel;
-//}
-//
-//TasksFilterModel& ApplicationSplashScreenAction::getTasksFilterModel()
-//{
-//    return _tasksFilterModel;
-//}
 
 }

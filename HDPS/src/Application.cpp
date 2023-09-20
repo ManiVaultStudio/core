@@ -32,28 +32,30 @@ hdps::Application::Application(int& argc, char** argv) :
     _logger(),
     _startupProjectFilePath(),
     _startupProjectMetaAction(),
-    _startupTask(this, "Load ManiVault Studio"),
+    _tasks{
+        new Task(this, "Loading ManiVault"),
+        new Task(this, "Loading GUI"),
+        new Task(this, "Loading Project"),
+        new BackgroundTask(this, "Overall Background")
+    },
     _splashScreenAction(this)
 {
     QStringList subTasks{
-        "Loading ManiVault Studio",
-        "Initializing actions manager",
-        "Initializing data manager",
-        "Initializing data hierarchy manager",
-        "Initializing event manager",
-        "Initializing plugin manager",
-        "Initializing project manager",
-        "Initializing settings manager",
-        "Initializing task manager",
-        "Initializing workspace manager",
-        "Setup main window"
+        "Initializing Icon Fonts",
+        "Initializing Logger",
+        "Initializing Managers",
+        "Initializing GUI"
     };
 
-    _startupTask.setMayKill(false);
-    _startupTask.setProgressMode(Task::ProgressMode::Subtasks);
-    _startupTask.setSubtasks(subTasks);
-    _startupTask.setRunning();
-    _startupTask.setParentTask(&_splashScreenAction.getTask());
+    getTask(TaskType::LoadGUI)->setParentTask(getTask(TaskType::LoadApplication));
+    getTask(TaskType::LoadProject)->setParentTask(getTask(TaskType::LoadApplication));
+
+    auto loadGuiTask = getTask(TaskType::LoadGUI);
+
+    loadGuiTask->setMayKill(false);
+    loadGuiTask->setProgressMode(Task::ProgressMode::Subtasks);
+    loadGuiTask->setSubtasks(subTasks);
+    loadGuiTask->setRunning();
 }
 
 hdps::Application* hdps::Application::current()
@@ -170,14 +172,22 @@ void Application::setSerializationAborted(bool serializationAborted)
 
 void Application::initialize()
 {
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));
+    Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskStarted("Initializing Icon Fonts");
+    {
+        _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));
+    }
+    Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskFinished("Initializing Icon Fonts");
 
-    _logger.initialize();
+    Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskStarted("Initializing Logger");
+    {
+        _logger.initialize();
+    }
+    Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskFinished("Initializing Logger");
 }
 
-Task& Application::getStartupTask()
+Task* Application::getTask(const TaskType& taskType)
 {
-    return _startupTask;
+    return _tasks[static_cast<int>(taskType)];
 }
 
 }

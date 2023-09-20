@@ -5,7 +5,6 @@
 #include "DataManager.h"
 #include "RawData.h"
 #include "DataHierarchyItem.h"
-#include "Application.h"
 
 #include "util/Exception.h"
 
@@ -213,8 +212,6 @@ void DataManager::initialize()
 #ifdef DATA_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
-
-    Application::current()->getStartupTask().setSubtaskFinished("Initializing data manager");
 
     AbstractDataManager::initialize();
 }

@@ -108,15 +108,10 @@ int main(int argc, char *argv[])
             if (projectMetaAction != nullptr) {
                 application.setStartupProjectFilePath(startupProjectFilePath);
                 application.setStartupProjectMetaAction(projectMetaAction);
-                application.getSplashScreenAction().getTask();
-
-                if (projectMetaAction->getSplashScreenAction().getEnabledAction().isChecked()) {
-                    //projectMetaAction->getSplashScreenAction().getOpenAction().trigger();
-                    //showApplicationSplashScreen = false;
-                }
+                application.getTask(Application::TaskType::LoadProject)->setName(QString("Loading %1").arg(QFileInfo(startupProjectFilePath).fileName()));
             }
 
-            Application::processEvents();
+            QCoreApplication::processEvents();
         }
         catch (std::exception& e)
         {

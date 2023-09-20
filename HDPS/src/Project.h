@@ -161,7 +161,7 @@ private:
     bool                _startupProject;            /** Boolean determining whether this project is loaded at startup of ManiVault */
     util::Version       _applicationVersion;        /** Version of the application with which the project is created */
     ProjectMetaAction   _projectMetaAction;         /** Project meta info action (i.e. title and version) */
-    Task                _task;                      /** Modal task for reporting project tasks */
+    ModalTask           _task;                      /** Modal task for reporting project tasks */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

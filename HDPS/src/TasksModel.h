@@ -31,6 +31,8 @@ public:
         ExpandCollapse,         /** Sole purpose is for expand/collapse */
         Status,                 /** Status of the task */
         Name,                   /** Name of the task */
+        Enabled,                /** Whether the task is enabled, disabled tasks are not included in task aggregation */
+        Visible,                /** Whether the task is visible in the user interface */
         Progress,               /** Task progress */
         ProgressDescription,    /** Progress description */
         ProgressText,           /** Progress text */
@@ -148,6 +150,40 @@ protected:
 
         /** Set model data to \p value for \p role */
         void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
+    };
+
+    /** Standard model item class for displaying whether the task is enabled or not */
+    class EnabledItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p task
+         * @param task Pointer to task to display item for
+         */
+        EnabledItem(Task* task);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
+
+    /** Standard model item class for displaying whether the task is visible or not */
+    class VisibleItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p task
+         * @param task Pointer to task to display item for
+         */
+        VisibleItem(Task* task);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
     };
 
 public:

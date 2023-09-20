@@ -29,6 +29,7 @@ SettingsManager::SettingsManager() :
     _miscellaneousSettingsAction(this)
 {
     _editSettingsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+
     if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS) {
         _editSettingsAction.setShortcut(QKeySequence("Ctrl+,"));
         _editSettingsAction.setMenuRole(QAction::PreferencesRole);
@@ -49,8 +50,6 @@ void SettingsManager::initialize()
 #ifdef SETTINGS_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
-
-    Application::current()->getStartupTask().setSubtaskFinished("Initializing settings manager");
 
     AbstractSettingsManager::initialize();
 }

@@ -39,12 +39,6 @@ public:
     /** Get an instance of a splash screen dialog */
     virtual SplashScreenDialog* getSplashScreenDialog() = 0;
 
-    /**
-     * Get splash screen task
-     * @return Reference to splash screen task
-     */
-    virtual Task& getTask() final;
-
 protected:
 
     /** Open screen dialog and set AbstractSplashScreenAction#_splashScreenDialog accordingly */
@@ -98,7 +92,6 @@ private:
     ColorAction                         _backgroundColorAction;         /** Action to control the background color of the splash screen */
     TriggerAction                       _openAction;                    /** Trigger action to show the splash screen */
     TriggerAction                       _closeAction;                   /** Trigger action to manually close the splash screen */
-    Task                                _task;                          /** Splash screen task */
     TaskAction                          _taskAction;                    /** Task action for showing load progress */
     QScopedPointer<SplashScreenDialog>  _splashScreenDialog;            /** Splash screen dialog */
 };

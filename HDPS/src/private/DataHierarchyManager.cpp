@@ -6,7 +6,6 @@
 #include "DataManager.h"
 
 #include <util/Exception.h>
-#include <Application.h>
 
 #include <QMessageBox>
 
@@ -37,8 +36,6 @@ void DataHierarchyManager::initialize()
 #ifdef DATA_HIERARCHY_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
-
-    Application::current()->getStartupTask().setSubtaskFinished("Initializing data hierarchy manager");
 
     AbstractDataHierarchyManager::initialize();
 }

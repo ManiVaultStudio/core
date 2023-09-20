@@ -391,6 +391,24 @@ public: // Subtasks
     virtual void setSubtasks(const QStringList& subtasksNames) final;
 
     /**
+     * Flag item with \p subtaskIndex as started
+     * Assumes the number of tasks has been set prior with Task::setSubtasks()
+     * This method only has an effect when Task#_progressMode is set to ProgressMode::Subtasks
+     * @param subtaskIndex Index of the subtask
+     * @param progressDescription Override the default progress description when set to a non-empty string
+     */
+    virtual void setSubtaskStarted(std::uint32_t subtaskIndex, const QString& progressDescription = QString()) final;
+
+    /**
+     * Flag item with \p subtaskName as started
+     * Assumes the number of tasks has been set prior with Task::setSubtasks()
+     * This method only has an effect when Task#_progressMode is set to ProgressMode::Subtasks
+     * @param subtaskName Name of the subtask
+     * @param progressDescription Override the default progress description when set to a non-empty string
+     */
+    virtual void setSubtaskStarted(const QString& subtaskName, const QString& progressDescription = QString()) final;
+
+    /**
      * Flag item with \p subtaskIndex as finished, the progress percentage will be computed automatically
      * Assumes the number of tasks has been set prior with Task::setSubtasks()
      * This method only has an effect when Task#_progressMode is set to ProgressMode::Subtasks
@@ -495,6 +513,8 @@ private: // Private setters (these call private signals under the hood, an essen
     void privateSetProgress(float progress, const QString& subtaskDescription);
     void privateSetSubtasks(std::uint32_t numberOfSubtasks);
     void privateSetSubtasks(const QStringList& subtasksNames);
+    void privateSetSubtaskStarted(std::uint32_t subtaskIndex, const QString& progressDescription);
+    void privateSetSubtaskStarted(const QString& subtaskName, const QString& progressDescription);
     void privateSetSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription);
     void privateSetSubtaskFinished(const QString& subtaskName, const QString& progressDescription);
     void privateSetSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName);
@@ -530,7 +550,7 @@ signals:
      * Signals that the task visibility changed to \p visible
      * @param visible Whether the task is visible in the user interface
      */
-    void visibilityChanged(bool visible);
+    void visibileChanged(bool visible);
 
     /**
      * Signals that the task handler changed to \p handler
@@ -676,6 +696,8 @@ signals:
     void privateSetProgressSignal(float progress, const QString& subtaskDescription, QPrivateSignal);
     void privateSetSubtasksSignal(std::uint32_t numberOfSubtasks, QPrivateSignal);
     void privateSetSubtasksSignal(const QStringList& subtasksNames, QPrivateSignal);
+    void privateSetSubtaskStartedSignal(std::uint32_t subtaskIndex, const QString& progressDescription, QPrivateSignal);
+    void privateSetSubtaskStartedSignal(const QString& subtaskName, const QString& progressDescription, QPrivateSignal);
     void privateSetSubtaskFinishedSignal(std::uint32_t subtaskIndex, const QString& progressDescription, QPrivateSignal);
     void privateSetSubtaskFinishedSignal(const QString& subtaskName, const QString& progressDescription, QPrivateSignal);
     void privateSetSubtaskNameSignal(std::uint32_t subtaskIndex, const QString& subtaskName, QPrivateSignal);

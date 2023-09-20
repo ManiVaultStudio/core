@@ -188,7 +188,7 @@ void BackgroundTaskTester::testPerformance()
     TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto performanceTask = new BackgroundTask(taskRunner, "Performance Task", &tasks().getOverallBackgroundTask(), Task::Status::Running);
+        auto performanceTask = new BackgroundTask(taskRunner, "Performance Task", Application::current()->getTask(Application::TaskType::OverallBackground), Task::Status::Running);
 
         const auto numberOfSubTasks = 10000;
 

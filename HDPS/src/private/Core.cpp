@@ -50,6 +50,8 @@ void Core::init()
     if (isInitialized())
         return;
 
+    Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskStarted("Initializing Managers");
+
     _actionsManager.reset(new ActionsManager());
     _pluginManager.reset(new PluginManager());
     _eventManager.reset(new EventManager());
@@ -70,6 +72,8 @@ void Core::init()
     _projectManager->initialize();
     _settingsManager->initialize();
     
+    Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskFinished("Initializing Managers");
+
     ModalTask::createHandler(Application::current());
     ForegroundTask::createHandler(Application::current());
 

@@ -17,13 +17,12 @@ AbstractSplashScreenAction::AbstractSplashScreenAction(QObject* parent) :
     _backgroundColorAction(this, "Background Color", Qt::white),
     _openAction(this, "Open splash screen"),
     _closeAction(this, "Close splash screen"),
-    _task(this, "Loading ManiVault Studio"),
     _taskAction(this, "ManiVault"),
     _splashScreenDialog()
 {
     addAction(&_enabledAction);
     
-    _taskAction.setTask(&_task);
+    _taskAction.setTask(Application::current()->getTask(Application::TaskType::LoadApplication));
 
     //auto& fontAwesome = Application::getIconFont("FontAwesome");
 
@@ -59,11 +58,6 @@ AbstractSplashScreenAction::AbstractSplashScreenAction(QObject* parent) :
 
     connect(&_openAction, &TriggerAction::triggered, this, &AbstractSplashScreenAction::openSplashScreenDialog);
     connect(&_closeAction, &TriggerAction::triggered, this, &AbstractSplashScreenAction::closeSplashScreenDialog);
-}
-
-Task& AbstractSplashScreenAction::getTask()
-{
-    return _task;
 }
 
 void AbstractSplashScreenAction::openSplashScreenDialog()

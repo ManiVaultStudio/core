@@ -8,7 +8,6 @@
 #include "ProjectSettingsDialog.h"
 #include "NewProjectDialog.h"
 
-#include <Application.h>
 #include <CoreInterface.h>
 #include <ProjectMetaAction.h>
 #include <ModalTask.h>
@@ -219,8 +218,6 @@ void ProjectManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
-    Application::current()->getStartupTask().setSubtaskFinished("Initializing project manager");
-
     AbstractProjectManager::initialize();
 }
 
@@ -406,7 +403,9 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 fileDialog.open();
 
                 QEventLoop eventLoop;
+                
                 QObject::connect(&fileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                
                 eventLoop.exec();
 
                 if (fileDialog.result() != QDialog::Accepted)
@@ -433,6 +432,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             if (splashScreenAction.getEnabledAction().isChecked())
                 splashScreenAction.getOpenAction().trigger();
+
+            Application::current()->getTask(Application::TaskType::LoadApplication)->setName(QString("Loading %1").arg(QFileInfo(filePath).fileName()));
 
             auto& task = getCurrentProject()->getTask();
 

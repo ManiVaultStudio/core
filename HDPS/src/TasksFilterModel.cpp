@@ -16,6 +16,8 @@ TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
     _taskTypeFilterAction(this, "Type"),
     _taskScopeFilterAction(this, "Scope", Task::scopeNames.values(), Task::scopeNames.values()),
     _taskStatusFilterAction(this, "Status", Task::statusNames.values(), Task::statusNames.values()),
+    _hideDisabledTasksFilterAction(this, "Hide disabled tasks", true),
+    _hideHiddenTasksFilterAction(this, "Hide hidden tasks", true),
     _statusTypeCounts(),
     _rowCount(0)
 {
@@ -27,10 +29,14 @@ TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
     connect(&_taskTypeFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
     connect(&_taskScopeFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
     connect(&_taskStatusFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
+    connect(&_hideDisabledTasksFilterAction, &ToggleAction::toggled, this, &TasksFilterModel::invalidate);
+    connect(&_hideHiddenTasksFilterAction, &ToggleAction::toggled, this, &TasksFilterModel::invalidate);
 
     _taskTypeFilterAction.setToolTip("Filter tasks based on their type");
     _taskScopeFilterAction.setToolTip("Filter tasks based on their scope");
     _taskStatusFilterAction.setToolTip("Filter tasks based on their status");
+    _hideDisabledTasksFilterAction.setToolTip("Hide or show disabled tasks");
+    _hideHiddenTasksFilterAction.setToolTip("Hide or show hidden tasks");
 
     invalidate();
 }
@@ -67,6 +73,17 @@ bool TasksFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) cons
     
     if (!taskStatusTypes.contains(taskStatus))
         return false;
+
+    const auto taskIsEnabled = getSourceData(index, TasksModel::Column::Enabled, Qt::EditRole).toBool();
+
+    if (_hideDisabledTasksFilterAction.isChecked() && !taskIsEnabled)
+        return false;
+
+    const auto taskIsVisible = getSourceData(index, TasksModel::Column::Visible, Qt::EditRole).toBool();
+
+    if (_hideHiddenTasksFilterAction.isChecked() && !taskIsVisible)
+        return false;
+
 
     return true;
 }
@@ -127,30 +144,6 @@ void TasksFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
 
     addTaskTypesForRows(QModelIndex(), 0, sourceModel->rowCount() - 1);
 
-    //const auto rowsAboutToBeInsertedOrRemoved = [this](const QModelIndex& parent, int first, int last) -> void {
-    //    const auto previousRowCount = _rowCount;
-    //    const auto currentRowCount = rowCount(parent);
-
-    //    if (currentRowCount == previousRowCount)
-    //        return;
-
-    //    emit rowCountChanged(parent, previousRowCount, currentRowCount);
-    //};
-
-    //const auto rowsInsertedOrRemoved = [this](const QModelIndex& parent, int first, int last) -> void {
-    //    invalidate();
-
-    //    const auto previousRowCount = _rowCount;
-    //    const auto currentRowCount  = rowCount(parent);
-
-    //    if (currentRowCount == previousRowCount)
-    //        return;
-
-    //    emit rowCountChanged(parent, previousRowCount, currentRowCount);
-
-    //    _rowCount = rowCount(parent);
-    //};
-
     connect(sourceModel, &QAbstractItemModel::rowsInserted, this, &TasksFilterModel::invalidate);
     connect(sourceModel, &QAbstractItemModel::rowsRemoved, this, &TasksFilterModel::invalidate);
     //connect(sourceModel, &QAbstractItemModel::dataChanged, this, &TasksFilterModel::invalidate);
@@ -175,11 +168,6 @@ void TasksFilterModel::addTaskTypesForRows(const QModelIndex& parent, int first,
             _statusTypeCounts[taskType] = 1;
 
             selectedTaskTypes << taskType;
-
-            //if (taskType == "")
-            //    __debugbreak();
-
-            //qDebug() << taskType;
         }
     }
 

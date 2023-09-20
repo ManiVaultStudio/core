@@ -17,7 +17,7 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(ProjectMetaAction* projectM
     _projectImageAction(this, "Project Image"),
     _affiliateLogosImageAction(this, "Affiliate Logos")
 {
-    getTaskAction().setTask(&Application::current()->getStartupTask());
+    getTaskAction().setTask(Application::current()->getTask(Application::TaskType::LoadApplication));
 
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 

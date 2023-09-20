@@ -139,7 +139,9 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     if (!_core.isInitialized()) {
         _core.init();
 
-        Application::current()->getStartupTask().setSubtaskFinished("Setup main window");
+        auto loadGuiTask = Application::current()->getTask(Application::TaskType::LoadGUI);
+
+        loadGuiTask->setSubtaskStarted("Initializing GUI");
 
         auto fileMenuAction = menuBar()->addMenu(new FileMenu());
         auto viewMenuAction = menuBar()->addMenu(new ViewMenu());
@@ -199,23 +201,23 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         tasksAction->setPopupSizeHint(QSize(500, 500));
         tasksAction->setDefaultWidgetFlags(TasksAction::Toolbar | TasksAction::Overlay | WidgetActionWidget::PopupLayout);
 
-        overallBackgroundTaskAction->setTask(&tasks().getOverallBackgroundTask());
+        overallBackgroundTaskAction->setTask(Application::current()->getTask(Application::TaskType::OverallBackground));
 
         statusBar()->setSizeGripEnabled(true);
         statusBar()->insertPermanentWidget(0, overallBackgroundTaskAction->createWidget(this));
         statusBar()->insertPermanentWidget(1, new StatusBarToolButton(this, tasksAction));
         statusBar()->insertPermanentWidget(1, new StatusBarToolButton(this, &ForegroundTask::getHandler()->getForegroundTasksAction()));
 
-        if (Application::current()->shouldOpenProjectAtStartup()) {
+        loadGuiTask->setSubtaskFinished("Initializing GUI");
+
+        if (Application::current()->shouldOpenProjectAtStartup())
             projects().openProject(Application::current()->getStartupProjectFilePath());
-        }
     
         updateWindowTitle();
 
         emit Application::current()->mainWindowInitialized();
-
-        Application::current()->getStartupTask().setSubtaskFinished("Loading ManiVault Studio");
-        Application::current()->getStartupTask().setFinished("ManiVault Studio Loaded", true, 500);
+        
+        loadGuiTask->setFinished("ManiVault Loaded", true, 1000);
     }
 }
 

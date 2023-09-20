@@ -270,6 +270,8 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskTypeFilterAction());
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskScopeFilterAction());
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskStatusFilterAction());
+    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getHideDisabledTasksFilterAction());
+    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getHideHiddenTasksFilterAction());
     _tasksWidget.setHeaderHidden(false);
 
     _tasksWidget.getFilterColumnAction().setCurrentText("Name");
@@ -282,11 +284,13 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Progress), new ProgressItemDelegate(tasksAction));
     treeView.setItemDelegateForColumn(static_cast<int>(TasksModel::Column::Kill), new KillTaskItemDelegate(tasksAction));
 
-    treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ID), true);
-    treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ParentID), true);
+    treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Enabled), true);
+    treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Visible), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ProgressDescription), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ProgressText), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ProgressMode), true);
+    treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ID), true);
+    treeView.setColumnHidden(static_cast<int>(TasksModel::Column::ParentID), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::Scope), true);
     treeView.setColumnHidden(static_cast<int>(TasksModel::Column::MayKill), true);
 

@@ -6,9 +6,6 @@
 
 #include "actions/AbstractSplashScreenAction.h"
 
-//#include "TasksModel.h"
-//#include "TasksFilterModel.h"
-
 namespace hdps::gui {
 
 /**
@@ -31,22 +28,6 @@ public:
 
     /** Get an instance of a splash screen dialog */
     SplashScreenDialog* getSplashScreenDialog() override;
-
-    /**
-     * Get tasks model
-     * @return Reference to the task model
-     */
-    //TasksModel& getTasksModel();
-
-    /**
-     * Get tasks filter model
-     * @return Reference to the task filter model
-     */
-    //TasksFilterModel& getTasksFilterModel();
-
-private:
-    //TasksModel          _tasksModel;            /** Model with all tasks in the system */
-    //TasksFilterModel    _tasksFilterModel;      /** Filter model for tasks model */
 };
 
 }

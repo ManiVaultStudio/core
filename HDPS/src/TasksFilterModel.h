@@ -6,6 +6,7 @@
 
 #include "actions/StringAction.h"
 #include "actions/OptionsAction.h"
+#include "actions/ToggleAction.h"
 
 #include "TasksModel.h"
 
@@ -88,13 +89,17 @@ public: // Action getters
     gui::OptionsAction& getTaskTypeFilterAction() { return _taskTypeFilterAction; }
     gui::OptionsAction& getTaskScopeFilterAction() { return _taskScopeFilterAction; }
     gui::OptionsAction& getTaskStatusFilterAction() { return _taskStatusFilterAction; }
+    gui::ToggleAction& getHideDisabledTasksFilterAction() { return _hideDisabledTasksFilterAction; }
+    gui::ToggleAction& getHideHiddenTasksFilterAction() { return _hideHiddenTasksFilterAction; }
 
 private:
-    gui::OptionsAction              _taskTypeFilterAction;      /** Action for filtering based on task type */
-    gui::OptionsAction              _taskScopeFilterAction;     /** Action for filtering based on task scope */
-    gui::OptionsAction              _taskStatusFilterAction;    /** Action for filtering based on task status */
-    QMap<QString, std::uint32_t>    _statusTypeCounts;          /** Counts the number of task per status type */
-    std::uint32_t                   _rowCount;                  /** Current number of rows */
+    gui::OptionsAction              _taskTypeFilterAction;              /** Action for filtering based on task type */
+    gui::OptionsAction              _taskScopeFilterAction;             /** Action for filtering based on task scope */
+    gui::OptionsAction              _taskStatusFilterAction;            /** Action for filtering based on task status */
+    gui::ToggleAction               _hideDisabledTasksFilterAction;     /** Action for hiding disabled tasks */
+    gui::ToggleAction               _hideHiddenTasksFilterAction;       /** Action for hiding hidden tasks */
+    QMap<QString, std::uint32_t>    _statusTypeCounts;                  /** Counts the number of task per status type */
+    std::uint32_t                   _rowCount;                          /** Current number of rows */
 };
 
 }

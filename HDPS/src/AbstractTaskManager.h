@@ -7,18 +7,12 @@
 #include "AbstractManager.h"
 #include "Task.h"
 
-#include "actions/GroupAction.h"
-
-#include <QSharedPointer>
-
 #ifdef _DEBUG
     #define ABSTRACT_TASK_MANAGER_VERBOSE
 #endif
 
 namespace hdps
 {
-
-class BackgroundTask;
 
 /**
  * Abstract task manager class
@@ -51,12 +45,6 @@ public:
      * @return Vector of tasks
      */
     virtual Tasks getTasks() = 0;
-
-    /**
-     * Get overall background task
-     * @return Smart pointer to aggregate background task which combines all background tasks in the system
-     */
-    virtual BackgroundTask& getOverallBackgroundTask() = 0;
 
     /**
      * Get tasks by handler type and \p status
