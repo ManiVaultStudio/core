@@ -18,7 +18,7 @@ set(quazip_file_base ${CMAKE_SHARED_LIBRARY_PREFIX}${quazip_name}$<IF:$<CONFIG:D
 set(quazip_lib_name ${INSTALL_DIR}/$<CONFIGURATION>/lib/${quazip_file_base}.${quazip_ver_major}.${quazip_ver_minor})
 set(quazip_symlink_name ${INSTALL_DIR}/$<CONFIGURATION>/lib/${quazip_file_base}.${quazip_ver})
 
-add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
+add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E create_symlink ${quazip_lib_name} ${quazip_symlink_name}
 )
 
