@@ -26,7 +26,7 @@ set(PLUGIN
 )
 
 set(PLUGIN_MOC_HEADERS
-	src/LoggingPlugin.h
+    src/LoggingPlugin.h
 )
 
 set(MODEL
@@ -46,10 +46,10 @@ set(AUX
 )
 
 set(LOGGING_SOURCES
-	${PLUGIN}
-	${MODEL}
-	${WIDGETS}
-	${AUX}
+    ${PLUGIN}
+    ${MODEL}
+    ${WIDGETS}
+    ${AUX}
 )
 
 source_group(Plugin FILES ${PLUGIN})
@@ -79,10 +79,10 @@ install(TARGETS ${LOGGINGPLUGIN}
 )
 
 add_custom_command(TARGET ${LOGGINGPLUGIN} POST_BUILD
-	COMMAND ${CMAKE_COMMAND}
-	--install ${CMAKE_CURRENT_BINARY_DIR}
-	--config $<CONFIGURATION>
-	--prefix ${INSTALL_DIR}/$<CONFIGURATION>
+    COMMAND ${CMAKE_COMMAND}
+    --install ${CMAKE_CURRENT_BINARY_DIR}
+    --config $<CONFIGURATION>
+    --prefix ${INSTALL_DIR}/$<CONFIGURATION>
 )
 
 # Automatically set the debug environment (command + working directory) for MSVC

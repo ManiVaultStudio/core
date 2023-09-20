@@ -54,7 +54,7 @@ set(POINTS_HEADERS
 )
 
 set(PLUGIN_MOC_HEADERS
-	src/PointData.h
+    src/PointData.h
 )
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects

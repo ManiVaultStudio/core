@@ -26,7 +26,7 @@ set(PLUGIN
 )
 
 set(PLUGIN_MOC_HEADERS
-	src/DataHierarchyPlugin.h
+    src/DataHierarchyPlugin.h
 )
 
 set(WIDGETS
@@ -41,9 +41,9 @@ set(AUX
 )
 
 set(DATAHIERARCHY_SOURCES
-	${PLUGIN}
-	${WIDGETS}
-	${AUX}
+    ${PLUGIN}
+    ${WIDGETS}
+    ${AUX}
 )
 
 source_group(Plugin FILES ${PLUGIN})
@@ -72,10 +72,10 @@ install(TARGETS ${DATAHIERARCHYPLUGIN}
 )
 
 add_custom_command(TARGET ${DATAHIERARCHYPLUGIN} POST_BUILD
-	COMMAND ${CMAKE_COMMAND}
-	--install ${CMAKE_CURRENT_BINARY_DIR}
-	--config $<CONFIGURATION>
-	--prefix ${INSTALL_DIR}/$<CONFIGURATION>
+    COMMAND ${CMAKE_COMMAND}
+    --install ${CMAKE_CURRENT_BINARY_DIR}
+    --config $<CONFIGURATION>
+    --prefix ${INSTALL_DIR}/$<CONFIGURATION>
 )
 
 # Automatically set the debug environment (command + working directory) for MSVC

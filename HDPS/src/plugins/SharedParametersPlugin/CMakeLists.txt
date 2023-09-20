@@ -27,7 +27,7 @@ set(PLUGIN
 )
 
 set(PLUGIN_MOC_HEADERS
-	src/SharedParametersPlugin.h
+    src/SharedParametersPlugin.h
 )
 
 set(MODELS
@@ -40,9 +40,9 @@ set(AUX
 )
 
 set(SHARED_PARAMETERS_SOURCES
-	${PLUGIN}
-	${MODELS}
-	${AUX}
+    ${PLUGIN}
+    ${MODELS}
+    ${AUX}
 )
 
 source_group(Plugin FILES ${PLUGIN})
