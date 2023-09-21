@@ -88,5 +88,5 @@ add_custom_command(TARGET ${LOGGINGPLUGIN} POST_BUILD
 # Automatically set the debug environment (command + working directory) for MSVC
 if(MSVC)
     set_property(TARGET ${LOGGINGPLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
-    set_property(TARGET ${LOGGINGPLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/${MV_EXE}.exe,${INSTALL_DIR}/release/${MV_EXE}.exe>)
+    set_property(TARGET ${LOGGINGPLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/${MV_APPLICATION_NAME}.exe,${INSTALL_DIR}/release/${MV_APPLICATION_NAME}.exe>)
 endif()
