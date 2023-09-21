@@ -205,8 +205,8 @@ class HdpsCoreConan(ConanFile):
         if self.settings.os == "Macos" and not self.options["macos_bundle"]:
             # remove the bundle before packaging -
             # it contains the complete QtWebEngine > 1GB
-            shutil.rmtree(str(pathlib.Path(self.install_dir, "Debug/HDPS.app")))
-            shutil.rmtree(str(pathlib.Path(self.install_dir, "Release/HDPS.app")))
+            shutil.rmtree(str(pathlib.Path(self.install_dir, "Debug/ManiVault Studio.app")))
+            shutil.rmtree(str(pathlib.Path(self.install_dir, "Release/ManiVault Studio.app")))
 
         # Add the pdb files next to the libs for debug linking
         if tools.os_info.is_windows:
