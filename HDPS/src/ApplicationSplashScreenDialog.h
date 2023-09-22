@@ -36,7 +36,6 @@ private:
 private:
     ApplicationSplashScreenAction*  _applicationSplashScreenAction;     /** Pointer to owning application splash screen action */
     QVBoxLayout                     _mainLayout;                        /** Main vertical layout */
-    QToolButton                     _closeToolButton;                   /** Button for forcefully closing the splash screen */
 
     friend class ProjectSplashScreenAction;
 };

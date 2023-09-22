@@ -947,6 +947,8 @@ void Task::privateSetProgress(float progress, const QString& subtaskDescription)
 
     if (!subtaskDescription.isEmpty())
         privateSetProgressDescription(subtaskDescription);
+
+    QCoreApplication::processEvents();
 }
 
 void Task::privateSetSubtasks(std::uint32_t numberOfSubtasks)
@@ -964,6 +966,8 @@ void Task::privateSetSubtasks(std::uint32_t numberOfSubtasks)
     emit subtasksChanged(_subtasks, _subtasksNames);
 
     computeProgress();
+
+    QCoreApplication::processEvents();
 }
 
 void Task::privateSetSubtasks(const QStringList& subtasksNames)
@@ -981,6 +985,8 @@ void Task::privateSetSubtasks(const QStringList& subtasksNames)
     emit subtasksChanged(_subtasks, _subtasksNames);
 
     computeProgress();
+
+    QCoreApplication::processEvents();
 }
 
 void Task::privateSetSubtaskStarted(std::uint32_t subtaskIndex, const QString& progressDescription)
@@ -997,6 +1003,8 @@ void Task::privateSetSubtaskStarted(std::uint32_t subtaskIndex, const QString& p
         privateSetProgressDescription(subtaskName);
     else
         privateSetProgressDescription(progressDescription);
+
+    QCoreApplication::processEvents();
 }
 
 void Task::privateSetSubtaskStarted(const QString& subtaskName, const QString& progressDescription)
@@ -1013,6 +1021,8 @@ void Task::privateSetSubtaskStarted(const QString& subtaskName, const QString& p
         privateSetProgressDescription(subtaskName);
     else
         privateSetProgressDescription(progressDescription);
+
+    QCoreApplication::processEvents();
 }
 
 void Task::privateSetSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription)

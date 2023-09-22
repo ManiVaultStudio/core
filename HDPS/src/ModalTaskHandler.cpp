@@ -27,7 +27,7 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     auto& tasksFilterModel  = _tasksAction.getTasksFilterModel();
 
     tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
-    tasksFilterModel.getTaskTypeFilterAction().setSelectedOptions({ "ModalTask" });
+    tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Modal" });
 
     const auto updateVisibility = [this, &tasksFilterModel]() -> void {
         const auto numberOfRows = tasksFilterModel.rowCount();
@@ -37,6 +37,8 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
         if (numberOfRows >= 1 && !hasDialog())
             createDialog();
+
+        QCoreApplication::processEvents();
     };
 
     updateVisibility();

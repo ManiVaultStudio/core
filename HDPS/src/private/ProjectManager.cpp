@@ -544,8 +544,6 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
 
-            auto currentProject = getCurrentProject();
-
             if (filePath.isEmpty()) {
 
                 QFileDialog fileDialog;
@@ -569,15 +567,15 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
                 auto compressionLayout = new QHBoxLayout();
 
-                compressionLayout->addWidget(currentProject->getCompressionAction().getEnabledAction().createWidget(&fileDialog));
-                compressionLayout->addWidget(currentProject->getCompressionAction().getLevelAction().createWidget(&fileDialog), 1);
+                compressionLayout->addWidget(_project->getCompressionAction().getEnabledAction().createWidget(&fileDialog));
+                compressionLayout->addWidget(_project->getCompressionAction().getLevelAction().createWidget(&fileDialog), 1);
                 
                 fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
                 
                 //fileDialogLayout->addWidget(&passwordProtectedCheckBox, ++rowCount, 0);
                 //fileDialogLayout->addWidget(&passwordLineEdit, rowCount, 1);
 
-                auto& titleAction = currentProject->getTitleAction();
+                auto& titleAction = _project->getTitleAction();
 
                 fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 2, 0);
 
@@ -588,10 +586,10 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 settingsGroupAction.setPopupSizeHint(QSize(420, 320));
                 settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-                settingsGroupAction.addAction(&currentProject->getTitleAction());
-                settingsGroupAction.addAction(&currentProject->getDescriptionAction());
-                settingsGroupAction.addAction(&currentProject->getTagsAction());
-                settingsGroupAction.addAction(&currentProject->getCommentsAction());
+                settingsGroupAction.addAction(&_project->getTitleAction());
+                settingsGroupAction.addAction(&_project->getDescriptionAction());
+                settingsGroupAction.addAction(&_project->getTagsAction());
+                settingsGroupAction.addAction(&_project->getCommentsAction());
 
                 auto titleLayout = new QHBoxLayout();
 
@@ -608,7 +606,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
                 //updatePassword();
 
-                connect(&fileDialog, &QFileDialog::currentChanged, this, [this, currentProject](const QString& filePath) -> void {
+                connect(&fileDialog, &QFileDialog::currentChanged, this, [this](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
                         return;
 
@@ -617,8 +615,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                     if (projectMetaAction.isNull())
                         return;
 
-                    currentProject->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
-                    currentProject->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
+                    _project->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
+                    _project->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
                 });
 
                 fileDialog.open();
@@ -641,10 +639,10 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
-            auto& task = currentProject->getTask();
+            auto& task = _project->getTask();
 
-            if (currentProject->getCompressionAction().getEnabledAction().isChecked())
-                qDebug().noquote() << "Saving ManiVault project to" << filePath << "with compression level" << currentProject->getCompressionAction().getLevelAction().getValue();
+            if (_project->getCompressionAction().getEnabledAction().isChecked())
+                qDebug().noquote() << "Saving ManiVault project to" << filePath << "with compression level" << _project->getCompressionAction().getLevelAction().getValue();
             else
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "without compression";
 
@@ -654,6 +652,14 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             task.setProgressMode(Task::ProgressMode::Subtasks);
 
             Archiver archiver;
+
+            connect(&archiver, &Archiver::taskStarted, this, [this](const QString& taskName) -> void {
+                _project->getTask().setSubtaskStarted(taskName, QString("Compressing %1").arg(taskName));
+            });
+
+            connect(&archiver, &Archiver::taskFinished, this, [this](const QString& taskName) -> void {
+                _project->getTask().setSubtaskFinished(taskName, QString("%1 compressed").arg(taskName));
+            });
 
             connect(&task, &Task::aborted, this, [this]() -> void {
                 Application::setSerializationAborted(true);
@@ -668,19 +674,15 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             QStringList tasks;
 
+            auto exportTask     = new ModalTask(this, "Export", &task);
+            auto compressTask   = new ModalTask(this, "Compress", &task);
+
+            exportTask->setRunning();
+
             projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
 
-            qDebug() << tasks;
-
-            connect(&archiver, &Archiver::taskStarted, this, [this](const QString& taskName) -> void {
-                qDebug() << taskName << "started";
-                //getCurrentProject()->getTask().setSubtaskStarted(taskName, QString("Compressing %1").arg(taskName));
-            });
-
-            connect(&archiver, &Archiver::taskFinished, this, [this](const QString& taskName) -> void {
-                qDebug() << taskName << "finished";
-                getCurrentProject()->getTask().setSubtaskFinished(taskName, QString("%1 compressed").arg(taskName));
-            });
+            exportTask->setProgress(1.f);
+            exportTask->setFinished();
 
             _project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
             
@@ -693,7 +695,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             task.setSubtasks(tasks);
             task.setRunning();
 
-            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, currentProject->getCompressionAction().getEnabledAction().isChecked() ? currentProject->getCompressionAction().getLevelAction().getValue() : 0, password);
+            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, _project->getCompressionAction().getEnabledAction().isChecked() ? _project->getCompressionAction().getLevelAction().getValue() : 0, password);
 
             _recentProjectsAction.addRecentFilePath(filePath);
 

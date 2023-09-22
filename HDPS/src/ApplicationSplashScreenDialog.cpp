@@ -13,8 +13,7 @@ namespace hdps::gui {
 ApplicationSplashScreenDialog::ApplicationSplashScreenDialog(ApplicationSplashScreenAction* applicationSplashScreenAction, QWidget* parent /*= nullptr*/) :
     SplashScreenDialog(parent),
     _applicationSplashScreenAction(applicationSplashScreenAction),
-    _mainLayout(),
-    _closeToolButton()
+    _mainLayout()
 {
     Q_ASSERT(_applicationSplashScreenAction != nullptr);
 
@@ -134,26 +133,6 @@ void ApplicationSplashScreenDialog::createBottomContent()
 
     _mainLayout.addLayout(layout);
     _mainLayout.addWidget(_applicationSplashScreenAction->getTaskAction().createWidget(this));
-
-    /*
-    const auto taskAdded = [this](const QModelIndex& parent, int first, int last) -> void {
-        auto& tasksModel        = _applicationSplashScreenAction->getTasksModel();
-        auto& tasksFilterModel  = _applicationSplashScreenAction->getTasksFilterModel();
-
-        for (int rowIndex = first; rowIndex < last; rowIndex++) {
-            const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(rowIndex, 0, parent));
-
-            auto item = static_cast<TasksModel::Item*>(_applicationSplashScreenAction->getTasksModel().itemFromIndex(sourceModelIndex));
-            auto task = item->getTask();
-
-            if (task->getName() == "Load project") {
-                qDebug() << "////////////////////// Load project task added!";
-            }
-        }
-    };
-
-    connect(&_applicationSplashScreenAction->getTasksFilterModel(), &QSortFilterProxyModel::rowsInserted, this, taskAdded);
-    */
 }
 
 }
