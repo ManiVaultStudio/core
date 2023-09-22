@@ -646,12 +646,14 @@ set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/GlobalSettingsGroupAction.h
     src/ParametersSettingsAction.h
     src/MiscellaneousSettingsAction.h
+    src/TasksSettingsAction.h
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_SOURCES
     src/GlobalSettingsGroupAction.cpp
 	src/ParametersSettingsAction.cpp
     src/MiscellaneousSettingsAction.cpp
+    src/TasksSettingsAction.cpp
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_FILES

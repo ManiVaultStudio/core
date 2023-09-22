@@ -91,6 +91,20 @@ protected:
         updateToolButton();
 
         connect(_action, &WidgetAction::changed, this, updateToolButton);
+
+        /*
+        auto popupWidget = new QWidget(this);
+
+        //popupWidget->setWindowFlag(Qt::Popup);
+        //popupWidget->setWindowFlag(Qt::Window);
+
+        auto popupLayout = new QVBoxLayout();
+
+        popupLayout->addWidget(new QPushButton("Test"));
+        popupWidget->setLayout(popupLayout);
+        popupWidget->raise();
+        popupWidget->show();
+        */
     }
 
 public:
@@ -205,8 +219,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         statusBar()->setSizeGripEnabled(true);
         statusBar()->insertPermanentWidget(0, overallBackgroundTaskAction->createWidget(this));
-        statusBar()->insertPermanentWidget(1, new StatusBarToolButton(this, tasksAction));
-        statusBar()->insertPermanentWidget(1, new StatusBarToolButton(this, &ForegroundTask::getHandler()->getForegroundTasksAction()));
+        statusBar()->insertPermanentWidget(1, &ForegroundTask::getHandler()->getStatusBarButton());
 
         loadGuiTask->setSubtaskFinished("Initializing GUI");
 

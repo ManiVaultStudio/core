@@ -7,6 +7,13 @@
 #include "AbstractTaskHandler.h"
 
 #include "actions/TasksAction.h"
+#include "actions/ToggleAction.h"
+
+#include <QToolButton>
+#include <QMenu>
+#include <QGraphicsOpacityEffect>
+
+class QMainWindow;
 
 namespace hdps {
 
@@ -21,54 +28,56 @@ class ForegroundTaskHandler final : public AbstractTaskHandler
 {
 public:
 
-    /**
-     * Foreground tasks action class
-     *
-     * Tasks action for showing foreground tasks in a customized popup interface.
-     *
-     * @author Thomas Kroes
-     */
-    class ForegroundTasksAction : public gui::WidgetAction
-    {
+    class StatusBarButton : public QToolButton {
     public:
-
-        /** Widget class for foreground tasks action */
-        class Widget : public gui::WidgetActionWidget {
-        public:
-
-            /**
-             * Constructor
-             * @param parent Pointer to parent widget
-             * @param foregroundTasksAction Pointer to foreground tasks action
-             * @param widgetFlags Widget flags for the configuration of the widget (type)
-             */
-            Widget(QWidget* parent, ForegroundTasksAction* foregroundTasksAction, const std::int32_t& widgetFlags);
-        };
+        StatusBarButton(QWidget* parent = nullptr);
 
         /**
-         * Get widget representation of the foreground tasks action
-         * @param parent Pointer to parent widget
-         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         * Paint event
+         * @param paintEvent Pointer to paint event
          */
-        QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-            return new Widget(parent, this, widgetFlags);
-        };
+        void paintEvent(QPaintEvent* paintEvent);
 
-    public:
+    public: // Action getters
 
-        /**
-         * Initialize with pointer to \p parent object and \p title
-         * @param parent Pointer to parent object
-         * @param title Action title
-         */
-        ForegroundTasksAction(QObject* parent, const QString& title);
-
-    protected: // Action getters
-
-        gui::TasksAction& getTasksAction() { return _tasksAction; }
+        gui::ToggleAction& getSeeThroughAction() { return _seeThroughAction; }
 
     private:
-        gui::TasksAction    _tasksAction;       /** Tasks action which will be configured to show running foreground tasks */
+        QMenu               _menu;                  /** Popup menu attached to the tool button */
+        gui::ToggleAction   _seeThroughAction;
+    };
+
+protected:
+
+    class PopupWidget : public QWidget {
+    public:
+        PopupWidget(StatusBarButton* statusBarButton, QWidget* parent = nullptr);
+
+        /**
+         * Respond to target object events
+         * @param target Object of which an event occurred
+         * @param event The event that took place
+         */
+        bool eventFilter(QObject* target, QEvent* event) override;
+
+        QSize sizeHint() const override;
+
+    private:
+
+        /** Overlays the tasks icon with a badge which reflects the number of foreground tasks */
+        void updateStatusBarButtonIcon();
+        
+        QMainWindow* getMainWindow();
+
+        void synchronizeWithAnchor();
+
+    private:
+        StatusBarButton*        _statusBarButton;
+        gui::TasksAction        _tasksAction;           /** Tasks action which will be configured to show running foreground tasks */
+        QPixmap                 _tasksIconPixmap;       /** Tasks icon pixmap underlay (count badge will be drawn on top) */
+        QGraphicsOpacityEffect  _opacityEffect;         /** Effect for modulating label opacity */
+
+        static const QSize iconPixmapSize;
     };
 
 public:
@@ -82,12 +91,11 @@ public:
     /** Initializes the handler */
     void init() override;
 
-public: // Action getters
-
-    ForegroundTasksAction& getForegroundTasksAction() { return _foregroundTasksAction; }
+    StatusBarButton& getStatusBarButton() { return _statusBarButton; }
 
 private:
-    ForegroundTasksAction    _foregroundTasksAction;   /** Tasks action for showing foreground tasks */
+    StatusBarButton     _statusBarButton;
+    PopupWidget         _popupWidget;
 };
 
 }
