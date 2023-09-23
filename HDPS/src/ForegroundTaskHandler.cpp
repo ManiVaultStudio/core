@@ -157,7 +157,7 @@ ForegroundTaskHandler::PopupWidget::PopupWidget(StatusBarButton* statusBarButton
 
     connect(&_statusBarButton->getSeeThroughAction(), &ToggleAction::toggled, this, updateOpacityEffect);
 
-    synchronizeWithAnchor();
+    synchronizeWithStatusBarButton();
 
     installEventFilter(this);
     _statusBarButton->installEventFilter(this);
@@ -178,7 +178,7 @@ bool ForegroundTaskHandler::PopupWidget::eventFilter(QObject* target, QEvent* ev
         case QEvent::Move:
         {
             if (targetWidget == _statusBarButton || targetWidget == getMainWindow())
-                synchronizeWithAnchor();
+                synchronizeWithStatusBarButton();
 
             break;
         }
@@ -186,7 +186,7 @@ bool ForegroundTaskHandler::PopupWidget::eventFilter(QObject* target, QEvent* ev
         case QEvent::Resize:
         {
             if (targetWidget == this)
-                synchronizeWithAnchor();
+                synchronizeWithStatusBarButton();
 
             break;
         }
@@ -240,7 +240,7 @@ QMainWindow* ForegroundTaskHandler::PopupWidget::getMainWindow()
     return nullptr;
 }
 
-void ForegroundTaskHandler::PopupWidget::synchronizeWithAnchor()
+void ForegroundTaskHandler::PopupWidget::synchronizeWithStatusBarButton()
 {
     move(_statusBarButton->mapToGlobal(QPoint(_statusBarButton->width(), 0)) - QPoint(width(), height()));
 }

@@ -20,7 +20,7 @@ namespace hdps {
 /**
  * Foreground task handler class
  *
- * Contains a specialized tasks action that displays running foreground tasks.
+ * Contains a bespoke tool button for the application that displays running foreground tasks in a popup.
  *
  * @author Thomas Kroes
  */
@@ -28,13 +28,19 @@ class ForegroundTaskHandler final : public AbstractTaskHandler
 {
 public:
 
+    /* Custom tool button class with a popup widget attached to it which show the foreground task(s) */
     class StatusBarButton : public QToolButton {
     public:
+
+        /**
+         * Construct with \p parent widget
+         * @param parent Pointer to parent widget
+         */
         StatusBarButton(QWidget* parent = nullptr);
 
         /**
-         * Paint event
-         * @param paintEvent Pointer to paint event
+         * Override paint event to customize control drawing
+         * @param paintEvent Pointer to paint event that occurred
          */
         void paintEvent(QPaintEvent* paintEvent);
 
@@ -44,13 +50,19 @@ public:
 
     private:
         QMenu               _menu;                  /** Popup menu attached to the tool button */
-        gui::ToggleAction   _seeThroughAction;
+        gui::ToggleAction   _seeThroughAction;      /** Toggle see-through on and off */
     };
 
 protected:
 
+    /** Popup widget which show the foreground tasks, it opens and closes depending on availability of foreground tasks */
     class PopupWidget : public QWidget {
     public:
+
+        /**
+         * Construct with \p statusBarButton and \p parent widget
+         * @param parent Pointer to parent widget
+         */
         PopupWidget(StatusBarButton* statusBarButton, QWidget* parent = nullptr);
 
         /**
@@ -60,6 +72,10 @@ protected:
          */
         bool eventFilter(QObject* target, QEvent* event) override;
 
+        /**
+         * Override size hint to make widget shrink
+         * @return Size hint
+         */
         QSize sizeHint() const override;
 
     private:
@@ -67,12 +83,17 @@ protected:
         /** Overlays the tasks icon with a badge which reflects the number of foreground tasks */
         void updateStatusBarButtonIcon();
         
+        /**
+         * Get pointer to the main window
+         * @return Pointer to the application main window
+         */
         QMainWindow* getMainWindow();
 
-        void synchronizeWithAnchor();
+        /** Synchronize the position with the position of the status bar button */
+        void synchronizeWithStatusBarButton();
 
     private:
-        StatusBarButton*        _statusBarButton;
+        StatusBarButton*        _statusBarButton;       /** Pointer to the status bar button to which the popup widget is attached */
         gui::TasksAction        _tasksAction;           /** Tasks action which will be configured to show running foreground tasks */
         QPixmap                 _tasksIconPixmap;       /** Tasks icon pixmap underlay (count badge will be drawn on top) */
         QGraphicsOpacityEffect  _opacityEffect;         /** Effect for modulating label opacity */
@@ -91,11 +112,13 @@ public:
     /** Initializes the handler */
     void init() override;
 
+public: // Action getters
+
     StatusBarButton& getStatusBarButton() { return _statusBarButton; }
 
 private:
-    StatusBarButton     _statusBarButton;
-    PopupWidget         _popupWidget;
+    StatusBarButton     _statusBarButton;       /** Status bar button which can be added to a status bar (has a popup widget which shows the foreground tasks) */
+    PopupWidget         _popupWidget;           /** Popup widget which show the foreground tasks */
 };
 
 }
