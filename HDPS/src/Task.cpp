@@ -86,6 +86,9 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
         setIdle();
     });
 
+    connect(this, &Task::privateSetNameSignal, this, &Task::privateSetName);
+    connect(this, &Task::privateSetDescriptionSignal, this, &Task::privateSetDescription);
+    connect(this, &Task::privateSetIconSignal, this, &Task::privateSetIcon);
     connect(this, &Task::privateSetEnabledSignal, this, &Task::privateSetEnabled);
     connect(this, &Task::privateSetVisibleSignal, this, &Task::privateSetVisible);
     connect(this, &Task::privateSetStatusSignal, this, &Task::privateSetStatus);
@@ -258,12 +261,7 @@ QString Task::getName() const
 
 void Task::setName(const QString& name)
 {
-    if (name == _name)
-        return;
-
-    _name = name;
-
-    emit nameChanged(_name);
+    emit privateSetNameSignal(name, QPrivateSignal());
 }
 
 QString Task::getDescription() const
@@ -273,12 +271,7 @@ QString Task::getDescription() const
 
 void Task::setDescription(const QString& description)
 {
-    if (description == _description)
-        return;
-
-    _description = description;
-
-    emit descriptionChanged(_description);
+    emit privateSetDescriptionSignal(description, QPrivateSignal());
 }
 
 QIcon Task::getIcon() const
@@ -288,9 +281,7 @@ QIcon Task::getIcon() const
 
 void Task::setIcon(const QIcon& icon)
 {
-    _icon = icon;
-
-    emit iconChanged(_icon);
+    emit privateSetIconSignal(icon, QPrivateSignal());
 }
 
 bool Task::getEnabled() const
@@ -741,6 +732,33 @@ void Task::updateAggregateStatus()
 
         privateSetFinished(!hasParentTask());
     }
+}
+
+void Task::privateSetName(const QString& name)
+{
+    if (name == _name)
+        return;
+
+    _name = name;
+
+    emit nameChanged(_name);
+}
+
+void Task::privateSetDescription(const QString& description)
+{
+    if (description == _description)
+        return;
+
+    _description = description;
+
+    emit descriptionChanged(_description);
+}
+
+void Task::privateSetIcon(const QIcon& icon)
+{
+    _icon = icon;
+
+    emit iconChanged(_icon);
 }
 
 void Task::privateSetEnabled(bool enabled)
