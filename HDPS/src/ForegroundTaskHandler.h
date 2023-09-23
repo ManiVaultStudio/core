@@ -92,11 +92,14 @@ protected:
         /** Synchronize the position with the position of the status bar button */
         void synchronizeWithStatusBarButton();
 
+        /** Removes all existing task widget layout items */
+        void cleanLayout();
+
     private:
         StatusBarButton*        _statusBarButton;       /** Pointer to the status bar button to which the popup widget is attached */
         gui::TasksAction        _tasksAction;           /** Tasks action which will be configured to show running foreground tasks */
         QPixmap                 _tasksIconPixmap;       /** Tasks icon pixmap underlay (count badge will be drawn on top) */
-        QGraphicsOpacityEffect  _opacityEffect;         /** Effect for modulating label opacity */
+        QMap<Task*, QWidget*>   _widgetsMap;            /** Maps task to allocated widget */
 
         static const QSize iconPixmapSize;
     };

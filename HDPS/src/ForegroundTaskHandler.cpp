@@ -63,8 +63,7 @@ ForegroundTaskHandler::PopupWidget::PopupWidget(StatusBarButton* statusBarButton
     QWidget(parent),
     _statusBarButton(statusBarButton),
     _tasksAction(this, "Foreground Tasks"),
-    _tasksIconPixmap(Application::getIconFont("FontAwesome").getIcon("tasks").pixmap(iconPixmapSize)),
-    _opacityEffect(this)
+    _tasksIconPixmap(Application::getIconFont("FontAwesome").getIcon("tasks").pixmap(iconPixmapSize))
 {
     Q_ASSERT(_statusBarButton != nullptr);
 
@@ -72,43 +71,14 @@ ForegroundTaskHandler::PopupWidget::PopupWidget(StatusBarButton* statusBarButton
         return;
 
     setObjectName("ForegroundTasksPopupWidget");
-    setGraphicsEffect(&_opacityEffect);
     setWindowFlag(Qt::FramelessWindowHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
     setStyleSheet(QString("QWidget#ForegroundTasksPopupWidget { border: 1px solid %1; }").arg(palette().color(QPalette::Normal, QPalette::Mid).name(QColor::HexRgb)));
 
     auto layout = new QVBoxLayout();
 
-    layout->setContentsMargins(4, 4, 4, 4);
+    //layout->setContentsMargins(4, 4, 4, 4);
 
-    auto tasksWidget = _tasksAction.createWidget(this);
-
-    layout->addWidget(tasksWidget);
-
-    auto hierarchyWidget = findChild<HierarchyWidget*>("HierarchyWidget");
-
-    Q_ASSERT(hierarchyWidget != nullptr);
-
-    if (hierarchyWidget != nullptr)
-        hierarchyWidget->setHeaderHidden(true);
-
-    auto treeView = findChild<QTreeView*>("TreeView");
-
-    Q_ASSERT(treeView != nullptr);
-
-    if (treeView != nullptr) {
-        treeView->setStyleSheet("QTreeView { border: none; }");
-
-        treeView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        treeView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-        treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Name), true);
-        treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Status), true);
-        treeView->setColumnHidden(static_cast<int>(TasksModel::Column::Type), true);
-
-        treeView->viewport()->setBackgroundRole(QPalette::Window);
-    }
-    
     setLayout(layout);
     
     auto& tasksModel        = _tasksAction.getTasksModel();
@@ -117,7 +87,7 @@ ForegroundTaskHandler::PopupWidget::PopupWidget(StatusBarButton* statusBarButton
     tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
     tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
 
-    const auto updateVisibility = [this, &tasksFilterModel]() -> void {
+    const auto updateVisibility = [this, &tasksModel, &tasksFilterModel]() -> void {
         const auto numberOfForegroundTasks = tasksFilterModel.rowCount();
 
         if (numberOfForegroundTasks == 0 && isVisible())
@@ -125,6 +95,47 @@ ForegroundTaskHandler::PopupWidget::PopupWidget(StatusBarButton* statusBarButton
 
         if (numberOfForegroundTasks >= 1 && !isVisible() && !settings().getTasksSettingsAction().getHideForegroundTasksPopupAction().isChecked())
             show();
+
+        cleanLayout();
+
+        QVector<Task*> currentTasks;
+
+        for (int rowIndex = 0; rowIndex < numberOfForegroundTasks; ++rowIndex) {
+            const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(rowIndex, static_cast<int>(TasksModel::Column::Progress)));
+
+            if (!sourceModelIndex.isValid())
+                continue;
+
+            auto progressItem = dynamic_cast<TasksModel::ProgressItem*>(tasksModel.itemFromIndex(sourceModelIndex));
+
+            Q_ASSERT(progressItem != nullptr);
+
+            if (progressItem == nullptr)
+                continue;
+
+            currentTasks << progressItem->getTask();
+
+            QWidget* taskWidget = nullptr;
+
+            if (!_widgetsMap.contains(progressItem->getTask())) {
+                _widgetsMap[progressItem->getTask()] = progressItem->getTaskAction().createWidget(this);
+            }
+            else {
+                taskWidget = _widgetsMap[progressItem->getTask()];
+            }
+            
+            this->layout()->addWidget(_widgetsMap[progressItem->getTask()]);
+        }
+
+        for (auto task : _widgetsMap.keys()) {
+            if (currentTasks.contains(task))
+                continue;
+
+            delete _widgetsMap[task];
+            _widgetsMap.remove(task);
+        }
+
+        adjustSize();
 
         updateStatusBarButtonIcon();
 
@@ -135,9 +146,8 @@ ForegroundTaskHandler::PopupWidget::PopupWidget(StatusBarButton* statusBarButton
 
     updateVisibility();
 
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateVisibility);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, updateVisibility);
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibility);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::dataChanged, this, updateVisibility);
 
     connect(&settings().getTasksSettingsAction().getHideForegroundTasksPopupAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {
         if (toggled) {
@@ -148,14 +158,6 @@ ForegroundTaskHandler::PopupWidget::PopupWidget(StatusBarButton* statusBarButton
                 show();
         }
     });
-
-    const auto updateOpacityEffect = [this]() -> void {
-        _opacityEffect.setOpacity(_statusBarButton->getSeeThroughAction().isChecked() ? 0.5f : 1.f);
-    };
-
-    updateOpacityEffect();
-
-    connect(&_statusBarButton->getSeeThroughAction(), &ToggleAction::toggled, this, updateOpacityEffect);
 
     synchronizeWithStatusBarButton();
 
@@ -247,7 +249,15 @@ void ForegroundTaskHandler::PopupWidget::synchronizeWithStatusBarButton()
 
 QSize ForegroundTaskHandler::PopupWidget::sizeHint() const
 {
-    return QSize(0, 0);
+    return QSize(500, 0);
+}
+
+void ForegroundTaskHandler::PopupWidget::cleanLayout()
+{
+    QLayoutItem* item;
+
+    while ((item = this->layout()->takeAt(0)) != 0)
+        delete item;
 }
 
 }
