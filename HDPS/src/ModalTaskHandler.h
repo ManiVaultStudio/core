@@ -56,9 +56,13 @@ protected:
         /** Invoked when the number of modal tasks changes */
         void numberOfModalTasksChanged();
 
+        /** Removes all existing task widget layout items */
+        void cleanLayout();
+
     private:
-        ModalTaskHandler*   _modalTaskHandler;      /** Pointer to owning modal task handler */
-        QTimer              _processEventsTimer;    /** Periodically call QCoreAppliation::processEvents() to warrant interactivity of the dialog */
+        ModalTaskHandler*       _modalTaskHandler;      /** Pointer to owning modal task handler */
+        QTimer                  _deferPopulateTimer;    /** Wait for a small amount of time before populating the layout */
+        QMap<Task*, QWidget*>   _widgetsMap;            /** Maps task to allocated widget */
     };
 
 public:
@@ -74,17 +78,8 @@ public:
 
 private:
 
-    /** Create modal tasks dialog (initializes ModalTaskHandler#_modalTasksDialog if it is not a nullptr) */
-    void createDialog();
-
-    /** Destroys the modal tasks dialog */
-    void destroyDialog();
-
-    /**
-     * Determine whether there is a modal tasks dialog live or not
-     * @return Boolean determining whether there is a modal tasks dialog live or not
-     */
-    bool hasDialog() const;
+    /** Shows the modal tasks dialog (if there are any modal tasks to display) */
+    void showDialog();
 
 public: // Action getters    
 
@@ -94,6 +89,7 @@ public: // Action getters
 private:
     gui::TasksAction    _tasksAction;           /** Tasks action */
     ModalTasksDialog    _modalTasksDialog;      /** Modal tasks dialog */
+    QTimer              _deferShowTimer;        /** Wait for a small amount of time before showing the dialog */
 };
 
 }

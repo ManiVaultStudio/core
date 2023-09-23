@@ -33,7 +33,7 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
     _autoHideKillCollumn(true)
 {
     _tasksFilterModel.setSourceModel(&_tasksModel);
-    _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "RunningIndeterminate", "Finished" });
+    _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
 
     _tasksIconPixmap = Application::getIconFont("FontAwesome").getIcon("tasks").pixmap(tasksIconPixmapSize);
 

@@ -16,7 +16,7 @@ ForegroundTaskTester::ForegroundTaskTester(QObject* parent, const QString& name)
     AbstractTaskTester(parent, name)
 {
     testRunningIndeterminate();
-    //testAggregation();
+    testAggregation();
     testPerformance();
 }
 
@@ -73,6 +73,8 @@ void ForegroundTaskTester::testAggregation()
 
         auto aggregateTask = new ForegroundTask(taskRunner, "Aggregate Task");
 
+        aggregateTask->setMayKill(true);
+
         QMap<QString, QTimer*> timers;
 
         const auto addChildTask = [this, taskRunner, &timers](const QString& name, QStringList tasks, int interval, Task* parentTask = nullptr) -> Task* {
@@ -113,7 +115,10 @@ void ForegroundTaskTester::testAggregation()
             return childTask;
         };
 
+        
         auto childTaskA = addChildTask("A", {}, 0, aggregateTask);
+
+        /*
         auto childTaskB = addChildTask("B", {}, 0, aggregateTask);
 
         auto childTaskAA = addChildTask("AA", {
@@ -178,6 +183,7 @@ void ForegroundTaskTester::testAggregation()
 
             childTaskIndeterminate->setFinished();
         });
+        */
 
         eventLoop.exec();
     });
@@ -189,6 +195,8 @@ void ForegroundTaskTester::testPerformance()
         QEventLoop eventLoop(taskRunner);
 
         auto performanceTask = new ForegroundTask(taskRunner, "Performance Task", nullptr, Task::Status::Running);
+
+        performanceTask->setMayKill(true);
 
         const auto numberOfSubTasks = 10000;
 

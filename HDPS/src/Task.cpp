@@ -86,6 +86,7 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
         setIdle();
     });
 
+    connect(this, &Task::privateSetParentTaskSignal, this, &Task::privateSetParentTask);
     connect(this, &Task::privateSetNameSignal, this, &Task::privateSetName);
     connect(this, &Task::privateSetDescriptionSignal, this, &Task::privateSetDescription);
     connect(this, &Task::privateSetIconSignal, this, &Task::privateSetIcon);
@@ -143,32 +144,7 @@ Task* Task::getParentTask()
 
 void Task::setParentTask(Task* parentTask)
 {
-    try {
-        const auto previousParentTask = _parentTask;
-
-        if (parentTask == _parentTask)
-            return;
-
-        if (parentTask && (parentTask->getTypeName() != getTypeName()))
-            throw std::runtime_error(QString("Type mismatch: child type is %1 and parent type is %2").arg(getTypeName(), parentTask->getTypeName()).toStdString());
-
-        _parentTask = parentTask;
-
-        if (previousParentTask)
-            previousParentTask->removeChildTask(this);
-
-        if (_parentTask)
-            _parentTask->addChildTask(this);
-
-        emit parentTaskChanged(previousParentTask, _parentTask);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox(QString("Unable to set parent task for %1").arg(getName()), e);
-    }
-    catch (...) {
-        exceptionMessageBox(QString("Unable to set parent task for %1").arg(getName()));
-    }
+    emit privateSetParentTaskSignal(parentTask, QPrivateSignal());
 }
 
 bool Task::hasParentTask()
@@ -731,6 +707,36 @@ void Task::updateAggregateStatus()
             taskToSetToIdle->setIdle();
 
         privateSetFinished(!hasParentTask());
+    }
+}
+
+void Task::privateSetParentTask(Task* parentTask)
+{
+    try {
+        const auto previousParentTask = _parentTask;
+
+        if (parentTask == _parentTask)
+            return;
+
+        if (parentTask && (parentTask->getTypeName() != getTypeName()))
+            throw std::runtime_error(QString("Type mismatch: child type is %1 and parent type is %2").arg(getTypeName(), parentTask->getTypeName()).toStdString());
+
+        _parentTask = parentTask;
+
+        if (previousParentTask)
+            previousParentTask->removeChildTask(this);
+
+        if (_parentTask)
+            _parentTask->addChildTask(this);
+
+        emit parentTaskChanged(previousParentTask, _parentTask);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox(QString("Unable to set parent task for %1").arg(getName()), e);
+    }
+    catch (...) {
+        exceptionMessageBox(QString("Unable to set parent task for %1").arg(getName()));
     }
 }
 

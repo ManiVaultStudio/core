@@ -95,11 +95,15 @@ protected:
         /** Removes all existing task widget layout items */
         void cleanLayout();
 
+        /** Invoked when the number of foreground changes */
+        void numberOfForegroundTasksChanged();
+
     private:
         StatusBarButton*        _statusBarButton;       /** Pointer to the status bar button to which the popup widget is attached */
         gui::TasksAction        _tasksAction;           /** Tasks action which will be configured to show running foreground tasks */
         QPixmap                 _tasksIconPixmap;       /** Tasks icon pixmap underlay (count badge will be drawn on top) */
         QMap<Task*, QWidget*>   _widgetsMap;            /** Maps task to allocated widget */
+        QTimer                  _deferPopulateTimer;    /** Wait for a small amount of time before populating the layout */
 
         static const QSize iconPixmapSize;
     };
