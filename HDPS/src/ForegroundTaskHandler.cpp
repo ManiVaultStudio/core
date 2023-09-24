@@ -109,6 +109,7 @@ ForegroundTaskHandler::PopupWidget::PopupWidget(ForegroundTaskHandler* foregroun
     connect(&_minimumDurationTimer, &QTimer::timeout, this, &PopupWidget::numberOfForegroundTasksChanged);
 
     connect(&tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, numberOfForegroundTasksChangedDeferred);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, numberOfForegroundTasksChangedDeferred);
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, numberOfForegroundTasksChangedDeferred);
 
     connect(&settings().getTasksSettingsAction().getHideForegroundTasksPopupAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {

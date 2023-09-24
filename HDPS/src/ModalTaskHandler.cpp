@@ -87,6 +87,7 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     auto& tasksFilterModel = _modalTaskHandler->getTasksAction().getTasksFilterModel();
 
     connect(&tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, &ModalTasksDialog::numberOfModalTasksChanged);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &ModalTasksDialog::numberOfModalTasksChanged);
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &ModalTasksDialog::numberOfModalTasksChanged);
 
     numberOfModalTasksChanged();
@@ -149,6 +150,8 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
     setFixedHeight(sizeHint().height());
 
     const auto clockIcon = Application::getIconFont("FontAwesome").getIcon("clock");
+
+    qDebug() << __FUNCTION__ << numberOfModalTasks;
 
     if (numberOfModalTasks == 1) {
         const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(0, 0));

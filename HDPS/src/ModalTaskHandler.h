@@ -35,22 +35,6 @@ protected:
          */
         ModalTasksDialog(ModalTaskHandler* modalTaskHandler, QWidget* parent = nullptr);
 
-        ///**
-        // * Override popup minimum size hint
-        // * @return Minimum size hint
-        // */
-        //QSize minimumSizeHint() const override {
-        //    return QSize(800, 10);
-        //}
-
-        ///**
-        // * Override popup size hint
-        // * @return Size hint
-        // */
-        //QSize sizeHint() const override {
-        //    return minimumSizeHint();
-        //}
-
     private:
 
         /** Invoked when the number of modal tasks changes */
