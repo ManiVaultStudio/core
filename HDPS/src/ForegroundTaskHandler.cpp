@@ -22,7 +22,6 @@ ForegroundTaskHandler::ForegroundTaskHandler(QObject* parent) :
     _statusBarButton(),
     _popupWidget(this, &_statusBarButton)
 {
-    
 }
 
 void ForegroundTaskHandler::init()

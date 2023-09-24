@@ -23,8 +23,15 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     _tasksAction.setRowHeight(30);
     _tasksAction.setProgressColumnMargin(2);
 
-    _deferShowTimer.setSingleShot(true);
-    _deferShowTimer.setInterval(250);
+    _minimumDurationTimer.setSingleShot(true);
+    
+    const auto updateMinimumDurationTimer = [this]() -> void {
+        _minimumDurationTimer.setInterval(getMinimumDuration());
+    };
+
+    updateMinimumDurationTimer();
+
+    connect(this, &AbstractTaskHandler::minimumDurationChanged, this, updateMinimumDurationTimer);
 
     auto& tasksModel        = _tasksAction.getTasksModel();
     auto& tasksFilterModel  = _tasksAction.getTasksFilterModel();
@@ -32,39 +39,32 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
     tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Modal" });
 
-    const auto updateVisibility = [this, &tasksFilterModel]() -> void {
-        const auto numberOfRows = tasksFilterModel.rowCount();
+    const auto updateVisibilityDeferred = [this]() -> void {
+        if (_modalTasksDialog.isHidden() && !_minimumDurationTimer.isActive())
+            _minimumDurationTimer.start();
 
-        if (numberOfRows == 0 && _modalTasksDialog.isVisible())
-            _modalTasksDialog.close();
-
-        if (numberOfRows >= 1 && !_modalTasksDialog.isVisible()) {
-            if (!_deferShowTimer.isActive()) {
-                _deferShowTimer.start();
-            }
-            else {
-                _deferShowTimer.stop();
-                _deferShowTimer.start();
-            }
-        }
-
-        QCoreApplication::processEvents();
+        if (_modalTasksDialog.isVisible())
+            updateDialogVisibility();
     };
 
-    updateVisibility();
+    connect(&_minimumDurationTimer, &QTimer::timeout, this, &ModalTaskHandler::updateDialogVisibility);
 
-    connect(&_deferShowTimer, &QTimer::timeout, this, &ModalTaskHandler::showDialog);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, updateVisibility);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibility);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, updateVisibilityDeferred);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibilityDeferred);
 }
 
 void ModalTaskHandler::init()
 {
 }
 
-void ModalTaskHandler::showDialog()
+void ModalTaskHandler::updateDialogVisibility()
 {
-    if (_tasksAction.getTasksFilterModel().rowCount() >= 1)
+    const auto numberOfModalTasks = _tasksAction.getTasksFilterModel().rowCount();
+
+    if (numberOfModalTasks == 0 && _modalTasksDialog.isVisible())
+        _modalTasksDialog.close();
+
+    if (numberOfModalTasks >= 1 && !_modalTasksDialog.isVisible())
         _modalTasksDialog.show();
 }
 
@@ -73,31 +73,21 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     _modalTaskHandler(modalTaskHandler)
 {
     setWindowModality(Qt::ApplicationModal);
-    
+
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
+    setFixedWidth(1000);
+
     setWindowFlag(Qt::Dialog);
     setWindowFlag(Qt::WindowCloseButtonHint, false);
     setWindowFlag(Qt::WindowTitleHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
     
-    _deferPopulateTimer.setSingleShot(true);
-    _deferPopulateTimer.setInterval(250);
-
     setLayout(new QVBoxLayout());
     
     auto& tasksFilterModel = _modalTaskHandler->getTasksAction().getTasksFilterModel();
 
-    const auto numberOfModalTasksChangedDeferred = [this]() -> void {
-        if (!_deferPopulateTimer.isActive()) {
-            _deferPopulateTimer.start();
-        } else {
-            _deferPopulateTimer.stop();
-            _deferPopulateTimer.start();
-        }
-    };
-
-    connect(&_deferPopulateTimer, &QTimer::timeout, this, &ModalTasksDialog::numberOfModalTasksChanged);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, numberOfModalTasksChangedDeferred);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, numberOfModalTasksChangedDeferred);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, &ModalTasksDialog::numberOfModalTasksChanged);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &ModalTasksDialog::numberOfModalTasksChanged);
 
     numberOfModalTasksChanged();
 }
@@ -153,6 +143,10 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
     }
 
     adjustSize();
+
+    QCoreApplication::processEvents();
+
+    setFixedHeight(sizeHint().height());
 
     const auto clockIcon = Application::getIconFont("FontAwesome").getIcon("clock");
 

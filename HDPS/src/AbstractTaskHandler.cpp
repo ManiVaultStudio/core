@@ -10,7 +10,7 @@ namespace hdps {
 AbstractTaskHandler::AbstractTaskHandler(QObject* parent, Task* task) :
     QObject(parent),
     _task(task),
-    _minimumDuration(250)
+    _minimumDuration(1500)
 {
 }
 

@@ -35,21 +35,21 @@ protected:
          */
         ModalTasksDialog(ModalTaskHandler* modalTaskHandler, QWidget* parent = nullptr);
 
-        /**
-         * Override popup minimum size hint
-         * @return Minimum size hint
-         */
-        QSize minimumSizeHint() const override {
-            return QSize(800, 10);
-        }
+        ///**
+        // * Override popup minimum size hint
+        // * @return Minimum size hint
+        // */
+        //QSize minimumSizeHint() const override {
+        //    return QSize(800, 10);
+        //}
 
-        /**
-         * Override popup size hint
-         * @return Size hint
-         */
-        QSize sizeHint() const override {
-            return minimumSizeHint();
-        }
+        ///**
+        // * Override popup size hint
+        // * @return Size hint
+        // */
+        //QSize sizeHint() const override {
+        //    return minimumSizeHint();
+        //}
 
     private:
 
@@ -60,9 +60,8 @@ protected:
         void cleanLayout();
 
     private:
-        ModalTaskHandler*       _modalTaskHandler;      /** Pointer to owning modal task handler */
-        QTimer                  _deferPopulateTimer;    /** Wait for a small amount of time before populating the layout */
-        QMap<Task*, QWidget*>   _widgetsMap;            /** Maps task to allocated widget */
+        ModalTaskHandler*       _modalTaskHandler;  /** Pointer to owning modal task handler */
+        QMap<Task*, QWidget*>   _widgetsMap;        /** Maps task to allocated widget */
     };
 
 public:
@@ -78,8 +77,8 @@ public:
 
 private:
 
-    /** Shows the modal tasks dialog (if there are any modal tasks to display) */
-    void showDialog();
+    /** Updates the visibility of the modal tasks dialog */
+    void updateDialogVisibility();
 
 public: // Action getters    
 
@@ -89,7 +88,7 @@ public: // Action getters
 private:
     gui::TasksAction    _tasksAction;           /** Tasks action */
     ModalTasksDialog    _modalTasksDialog;      /** Modal tasks dialog */
-    QTimer              _deferShowTimer;        /** Wait for a small amount of time before showing the dialog */
+    QTimer              _minimumDurationTimer;  /** Wait for a small amount of time before showing the UI */
 };
 
 }
