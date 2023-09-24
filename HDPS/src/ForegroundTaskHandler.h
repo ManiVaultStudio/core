@@ -11,7 +11,6 @@
 
 #include <QToolButton>
 #include <QMenu>
-#include <QGraphicsOpacityEffect>
 
 class QMainWindow;
 

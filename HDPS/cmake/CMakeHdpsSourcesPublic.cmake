@@ -679,6 +679,7 @@ set(PUBLIC_TASK_HEADERS
     src/DatasetTaskHandler.h
     src/TasksModel.h
     src/TasksFilterModel.h
+    src/TasksPopupWidget.h
 )
 
 set(PUBLIC_TASK_SOURCES
@@ -699,6 +700,7 @@ set(PUBLIC_TASK_SOURCES
 	src/DatasetTaskHandler.cpp
     src/TasksModel.cpp
     src/TasksFilterModel.cpp
+    src/TasksPopupWidget.cpp
 )
 
 set(PUBLIC_TASK_FILES

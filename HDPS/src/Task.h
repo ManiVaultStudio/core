@@ -497,6 +497,8 @@ private: // For aggregate task
 private: // Private setters (these call private signals under the hood, an essential part to make cross thread task usage possible)
 
     void privateSetParentTask(Task* parentTask);
+    void privateAddChildTask(Task* childTask);
+    void privateRemoveChildTask(Task* childTask);
     void privateSetName(const QString& name);
     void privateSetDescription(const QString& description);
     void privateSetIcon(const QIcon& icon);
@@ -684,6 +686,8 @@ signals:
      * These signals provide a way to make cross thread task usage possible
      */
     void privateSetParentTaskSignal(Task* parentTask, QPrivateSignal);
+    void privateAddChildTaskSignal(Task* childTask, QPrivateSignal);
+    void privateRemoveChildTaskSignal(Task* childTask, QPrivateSignal);
     void privateSetNameSignal(const QString& name, QPrivateSignal);
     void privateSetDescriptionSignal(const QString& description, QPrivateSignal);
     void privateSetIconSignal(const QIcon& icon, QPrivateSignal);

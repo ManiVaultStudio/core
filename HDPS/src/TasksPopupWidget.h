@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
+#pragma once
+
+#include "AbstractTaskHandler.h"
+
+#include "actions/TasksAction.h"
+
+class QToolButton;
+class QMainWindow;
+
+namespace hdps {
+
+/**
+ * Tasks popup widget class 
+ *
+ * Shows tasks in a popup window.
+ *
+ * @author Thomas Kroes
+ */
+class TasksPopupWidget : public QWidget {
+public:
+
+    /**
+     * Construct with pointer to the owning \p taskHandler \p statusBarButton and \p parent widget
+     * @param taskHandler Pointer to the owning task handler
+     * @param toolButton Pointer to associated tool button (to which the popup is anchored)
+     * @param parent Pointer to parent widget
+     */
+    TasksPopupWidget(AbstractTaskHandler* taskHandler, QToolButton* toolButton, QWidget* parent = nullptr);
+
+    /**
+     * Respond to target object events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
+     */
+    bool eventFilter(QObject* target, QEvent* event) override;
+
+    /**
+     * Override size hint to make widget shrink
+     * @return Size hint
+     */
+    QSize sizeHint() const override;
+
+private:
+
+    /** Overlays the tasks icon with a badge which reflects the number of tasks */
+    void updateToolButtonIcon();
+    
+    /** Synchronize the position with the position of the tool button */
+    void synchronizeWithToolButton();
+
+    /**
+     * Get pointer to the main window
+     * @return Pointer to the application main window
+     */
+    QMainWindow* getMainWindow();
+
+    /** Removes all existing task widget layout items */
+    void cleanLayout();
+
+    /** Invoked when the number of tasks changes */
+    void numberOfTasksChanged();
+
+private:
+    AbstractTaskHandler*    _taskHandler;               /** Pointer to the owning task handler */
+    QToolButton*            _toolButton;                /** Pointer to associated tool button (to which the popup is anchored) */
+    gui::TasksAction        _tasksAction;               /** Tasks action which contains the tasks to be displayed */
+    QPixmap                 _tasksIconPixmap;           /** Tasks icon pixmap underlay (count badge will be drawn on top) */
+    QMap<Task*, QWidget*>   _widgetsMap;                /** Maps task to allocated widget */
+    QTimer                  _minimumDurationTimer;      /** Wait for a small amount of time before showing the UI */
+
+    static const QSize iconPixmapSize;
+};
+
+}

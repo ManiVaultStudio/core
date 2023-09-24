@@ -16,3 +16,17 @@ void BackgroundTaskHandler::init()
 }
 
 }
+
+//connect(&settings().getTasksSettingsAction().getHideForegroundTasksPopupAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {
+//    if (toggled) {
+//        close();
+//    }
+//    else {
+//        if (_tasksAction.getTasksFilterModel().rowCount() >= 1 && isHidden())
+//            show();
+//    }
+//    });
+
+
+//tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
+//tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });

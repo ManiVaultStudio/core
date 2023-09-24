@@ -15,9 +15,79 @@ namespace hdps
 BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name) :
     AbstractTaskTester(parent, name)
 {
-    //testRunningIndeterminate();
-    //testAggregation();
-    testPerformance();
+    TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
+        QEventLoop eventLoop(taskRunner);
+
+        QMap<QString, QTimer*> timers;
+
+        const auto addChildTask = [this, &timers](const QString& name, QStringList tasks, int interval, Task* parentTask = nullptr) -> Task* {
+            auto childTask = new BackgroundTask(nullptr, name, parentTask);
+
+            if (!tasks.isEmpty()) {
+                childTask->setSubtasks(tasks);
+                childTask->setRunning();
+
+                auto timer = new QTimer();
+
+                timers[name] = timer;
+
+                timer->setInterval(interval);
+
+                connect(childTask, &BackgroundTask::requestAbort, timer, &QTimer::stop);
+
+                connect(timer, &QTimer::timeout, [timer, childTask, &tasks]() -> void {
+                    if (!tasks.isEmpty()) {
+                        const auto subtaskName = tasks.first();
+
+                        tasks.removeFirst();
+
+                        childTask->setSubtaskFinished(subtaskName);
+                    }
+                    else {
+                        timer->stop();
+                        childTask->setFinished();
+                    }
+                    });
+
+                timer->start();
+            }
+            else {
+                childTask->setRunning();
+            }
+
+            return childTask;
+        };
+
+        auto overallBackgroundTask = nullptr;// Application::current()->getTask(Application::TaskType::OverallBackground);
+
+        auto childTaskA = addChildTask("Reading large file", {
+            "Task 1",
+            "Task 2",
+            "Task 3",
+            "Task 4",
+            "Task 5",
+            "Task 6",
+            "Task 7",
+            "Task 8",
+            "Task 9",
+            "Task 10"
+            }, 502, overallBackgroundTask);
+
+        auto childTaskB = addChildTask("Updating ManiVault", {
+            "Task 1",
+            "Task 2",
+            "Task 3",
+            "Task 4",
+            "Task 5",
+            "Task 6",
+            "Task 7",
+            "Task 8",
+            "Task 9",
+            "Task 10"
+            }, 497, overallBackgroundTask);
+
+        eventLoop.exec();
+    });
 }
 
 void BackgroundTaskTester::testRunningIndeterminate()
@@ -25,7 +95,7 @@ void BackgroundTaskTester::testRunningIndeterminate()
     TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto indeterminateTask = new BackgroundTask(taskRunner, "Indeterminate Task", nullptr, Task::Status::RunningIndeterminate);
+        auto indeterminateTask = new BackgroundTask(taskRunner, "Indeterminate Task", Application::current()->getTask(Application::TaskType::OverallBackground), Task::Status::RunningIndeterminate);
 
         auto subtasks = QStringList({
             "Step 1",
@@ -68,119 +138,7 @@ void BackgroundTaskTester::testRunningIndeterminate()
 
 void BackgroundTaskTester::testAggregation()
 {
-    TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
-        QEventLoop eventLoop(taskRunner);
 
-        auto aggregateTask = new BackgroundTask(taskRunner, "Aggregate Task");
-
-        QMap<QString, QTimer*> timers;
-
-        const auto addChildTask = [this, taskRunner, &timers](const QString& name, QStringList tasks, int interval, Task* parentTask = nullptr) -> Task* {
-            auto childTask = new BackgroundTask(taskRunner, name, parentTask);
-
-            if (!tasks.isEmpty()) {
-                childTask->setSubtasks(tasks);
-                childTask->setRunning();
-
-                auto timer = new QTimer();
-
-                timers[name] = timer;
-
-                timer->setInterval(interval);
-
-                connect(childTask, &BackgroundTask::requestAbort, timer, &QTimer::stop);
-
-                connect(timer, &QTimer::timeout, [timer, childTask, &tasks]() -> void {
-                    if (!tasks.isEmpty()) {
-                        const auto subtaskName = tasks.first();
-
-                        tasks.removeFirst();
-
-                        childTask->setSubtaskFinished(subtaskName);
-                    }
-                    else {
-                        timer->stop();
-                        childTask->setFinished();
-                    }
-                    });
-
-                timer->start();
-            }
-            else {
-                childTask->setRunning();
-            }
-
-            return childTask;
-        };
-
-        auto childTaskA = addChildTask("A", {}, 0, aggregateTask);
-        auto childTaskB = addChildTask("B", {}, 0, aggregateTask);
-
-        auto childTaskAA = addChildTask("AA", {
-            "Task 1",
-            "Task 2",
-            "Task 3",
-            "Task 4",
-            "Task 5",
-            "Task 6",
-            "Task 7",
-            "Task 8",
-            "Task 9",
-            "Task 10"
-            }, 502, childTaskA);
-
-        auto childTaskAB = addChildTask("AB", {
-            "Task 1",
-            "Task 2",
-            "Task 3",
-            "Task 4",
-            "Task 5",
-            "Task 6",
-            "Task 7",
-            "Task 8",
-            "Task 9",
-            "Task 10"
-            }, 497, childTaskA);
-
-        auto childTaskBA = addChildTask("BA", {
-            "Task 1",
-            "Task 2",
-            "Task 3",
-            "Task 4",
-            "Task 5",
-            "Task 6",
-            "Task 7",
-            "Task 8",
-            "Task 9",
-            "Task 10"
-            }, 1505, childTaskB);
-
-        auto childTaskBB = addChildTask("BB", {
-            "Task 1",
-            "Task 2",
-            "Task 3",
-            "Task 4",
-            "Task 5",
-            "Task 6",
-            "Task 7",
-            "Task 8",
-            "Task 9",
-            "Task 10"
-            }, 1491, childTaskB);
-
-        auto childTaskIndeterminate = new BackgroundTask(aggregateTask, "Indeterminate");
-
-        childTaskIndeterminate->setRunningIndeterminate();
-
-        QTimer::singleShot(10000, [childTaskIndeterminate]() -> void {
-            if (childTaskIndeterminate->isAborting() || childTaskIndeterminate->isAborted())
-                return;
-
-            childTaskIndeterminate->setFinished();
-        });
-
-        eventLoop.exec();
-    });
 }
 
 void BackgroundTaskTester::testPerformance()
@@ -188,7 +146,9 @@ void BackgroundTaskTester::testPerformance()
     TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto performanceTask = new BackgroundTask(taskRunner, "Performance Task", Application::current()->getTask(Application::TaskType::OverallBackground), Task::Status::Running);
+        auto overallBackgroundTask  = Application::current()->getTask(Application::TaskType::OverallBackground);
+        
+        BackgroundTask performanceTask(nullptr, "Performance Task", nullptr, Task::Status::Running);
 
         const auto numberOfSubTasks = 10000;
 
@@ -199,13 +159,13 @@ void BackgroundTaskTester::testPerformance()
         for (int subtaskIndex = 0; subtaskIndex < numberOfSubTasks; subtaskIndex++)
             subtasks << QString("Subtask: %1").arg(QString::number(subtaskIndex));
 
-        performanceTask->setSubtasks(subtasks);
+        performanceTask.setSubtasks(subtasks);
 
         QTimer timer;
 
         timer.setInterval(1);
 
-        connect(performanceTask, &BackgroundTask::requestAbort, &timer, &QTimer::stop);
+        connect(&performanceTask, &BackgroundTask::requestAbort, &timer, &QTimer::stop);
 
         connect(&timer, &QTimer::timeout, [&]() -> void {
             if (!subtasks.isEmpty()) {
@@ -213,11 +173,11 @@ void BackgroundTaskTester::testPerformance()
 
                 subtasks.removeFirst();
 
-                performanceTask->setSubtaskFinished(subtaskName);
+                performanceTask.setSubtaskFinished(subtaskName);
             }
             else {
                 timer.stop();
-                performanceTask->setFinished();
+                performanceTask.setFinished();
             }
             });
 

@@ -60,9 +60,6 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
     if (core() != nullptr && core()->isInitialized())
         tasks().addTask(this);
 
-    if (parentTask)
-        setParentTask(parentTask);
-
     for (auto& timer : _timers)
         timer.setSingleShot(true);
 
@@ -87,6 +84,8 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
     });
 
     connect(this, &Task::privateSetParentTaskSignal, this, &Task::privateSetParentTask);
+    connect(this, &Task::privateAddChildTaskSignal, this, &Task::privateAddChildTask);
+    connect(this, &Task::privateRemoveChildTaskSignal, this, &Task::privateRemoveChildTask);
     connect(this, &Task::privateSetNameSignal, this, &Task::privateSetName);
     connect(this, &Task::privateSetDescriptionSignal, this, &Task::privateSetDescription);
     connect(this, &Task::privateSetIconSignal, this, &Task::privateSetIcon);
@@ -113,6 +112,9 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
     connect(this, qOverload<const QString&, const QString&, QPrivateSignal>(&Task::privateSetSubtaskFinishedSignal), this, qOverload<const QString&, const QString&>(&Task::privateSetSubtaskFinished));
     connect(this, &Task::privateSetSubtaskNameSignal, this, &Task::privateSetSubtaskName);
     connect(this, &Task::privateSetProgressDescriptionSignal, this, &Task::privateSetProgressDescription);
+
+    if (parentTask)
+        setParentTask(parentTask);
 }
 
 Task::~Task()
@@ -165,69 +167,12 @@ Task::TasksPtrs Task::getChildTasks(bool recursively /*= false*/) const
 
 void Task::addChildTask(Task* childTask)
 {
-    try {
-        Q_ASSERT(childTask != nullptr);
-
-        if (childTask == nullptr)
-            throw std::runtime_error("Supplied task pointer is a nullptr");
-
-        if (_childTasks.contains(childTask))
-            throw std::runtime_error(QString("%1 already is a child of %2").arg(childTask->getName(), getName()).toStdString());
-
-        _childTasks << childTask;
-
-#ifdef TASK_VERBOSE
-        qDebug() << "Child task" << childTask->getName() << "added to" << getName();
-#endif
-
-        setProgressMode(ProgressMode::Aggregate);
-        registerChildTask(childTask);
-        updateAggregateStatus();
-        computeProgress();
-
-        emit childTaskAdded(childTask);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox(QString("Unable to add child task to %1").arg(getName()), e);
-    }
-    catch (...) {
-        exceptionMessageBox(QString("Unable to add child task to %1").arg(getName()));
-    }
+    emit privateAddChildTaskSignal(childTask, QPrivateSignal());
 }
 
 void Task::removeChildTask(Task* childTask)
 {
-    try {
-        Q_ASSERT(childTask != nullptr);
-
-        if (childTask == nullptr)
-            throw std::runtime_error("Supplied task pointer is a nullptr");
-
-        if (_childTasks.contains(childTask))
-            throw std::runtime_error(QString("%1 is not a child of %2").arg(childTask->getName(), getName()).toStdString());
-
-        emit childTaskAboutToBeRemoved(childTask);
-        {
-            _childTasks.removeOne(childTask);
-
-#ifdef TASK_VERBOSE
-            qDebug() << "Child task" << childTask->getName() << "removed from" << getName();
-#endif
-
-            unregisterChildTask(childTask);
-            updateAggregateStatus();
-            computeProgress();
-        }
-        emit childTaskRemoved(childTask);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox(QString("Unable to remove child task from %1").arg(getName()), e);
-    }
-    catch (...) {
-        exceptionMessageBox(QString("Unable to remove child task from %1").arg(getName()));
-    }
+    emit privateRemoveChildTaskSignal(childTask, QPrivateSignal());
 }
 
 QString Task::getName() const
@@ -737,6 +682,73 @@ void Task::privateSetParentTask(Task* parentTask)
     }
     catch (...) {
         exceptionMessageBox(QString("Unable to set parent task for %1").arg(getName()));
+    }
+}
+
+void Task::privateAddChildTask(Task* childTask)
+{
+    try {
+        Q_ASSERT(childTask != nullptr);
+
+        if (childTask == nullptr)
+            throw std::runtime_error("Supplied task pointer is a nullptr");
+
+        if (_childTasks.contains(childTask))
+            throw std::runtime_error(QString("%1 already is a child of %2").arg(childTask->getName(), getName()).toStdString());
+
+        _childTasks << childTask;
+
+#ifdef TASK_VERBOSE
+        qDebug() << "Child task" << childTask->getName() << "added to" << getName();
+#endif
+
+        setProgressMode(ProgressMode::Aggregate);
+        registerChildTask(childTask);
+        updateAggregateStatus();
+        computeProgress();
+
+        emit childTaskAdded(childTask);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox(QString("Unable to add child task to %1").arg(getName()), e);
+    }
+    catch (...) {
+        exceptionMessageBox(QString("Unable to add child task to %1").arg(getName()));
+    }
+}
+
+void Task::privateRemoveChildTask(Task* childTask)
+{
+    try {
+        Q_ASSERT(childTask != nullptr);
+
+        if (childTask == nullptr)
+            throw std::runtime_error("Supplied task pointer is a nullptr");
+
+        if (_childTasks.contains(childTask))
+            throw std::runtime_error(QString("%1 is not a child of %2").arg(childTask->getName(), getName()).toStdString());
+
+        emit childTaskAboutToBeRemoved(childTask);
+        {
+            _childTasks.removeOne(childTask);
+
+#ifdef TASK_VERBOSE
+            qDebug() << "Child task" << childTask->getName() << "removed from" << getName();
+#endif
+
+            unregisterChildTask(childTask);
+            updateAggregateStatus();
+            computeProgress();
+        }
+        emit childTaskRemoved(childTask);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox(QString("Unable to remove child task from %1").arg(getName()), e);
+    }
+    catch (...) {
+        exceptionMessageBox(QString("Unable to remove child task from %1").arg(getName()));
     }
 }
 
