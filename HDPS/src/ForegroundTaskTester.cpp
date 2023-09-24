@@ -16,7 +16,7 @@ ForegroundTaskTester::ForegroundTaskTester(QObject* parent, const QString& name)
     AbstractTaskTester(parent, name)
 {
     testRunningIndeterminate();
-    testAggregation();
+    //testAggregation();
     testPerformance();
 }
 

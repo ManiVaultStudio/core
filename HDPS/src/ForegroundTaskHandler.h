@@ -60,10 +60,12 @@ protected:
     public:
 
         /**
-         * Construct with \p statusBarButton and \p parent widget
+         * Construct with pointer to the owning \p foregroundTaskHandler \p statusBarButton and \p parent widget
+         * @param foregroundTaskHandler Pointer to the owning foreground task handler
+         * @param statusBarButton Pointer to associated status bar button
          * @param parent Pointer to parent widget
          */
-        PopupWidget(StatusBarButton* statusBarButton, QWidget* parent = nullptr);
+        PopupWidget(ForegroundTaskHandler* foregroundTaskHandler, StatusBarButton* statusBarButton, QWidget* parent = nullptr);
 
         /**
          * Respond to target object events
@@ -99,11 +101,12 @@ protected:
         void numberOfForegroundTasksChanged();
 
     private:
-        StatusBarButton*        _statusBarButton;       /** Pointer to the status bar button to which the popup widget is attached */
-        gui::TasksAction        _tasksAction;           /** Tasks action which will be configured to show running foreground tasks */
-        QPixmap                 _tasksIconPixmap;       /** Tasks icon pixmap underlay (count badge will be drawn on top) */
-        QMap<Task*, QWidget*>   _widgetsMap;            /** Maps task to allocated widget */
-        QTimer                  _deferPopulateTimer;    /** Wait for a small amount of time before populating the layout */
+        ForegroundTaskHandler*  _foregroundTaskHandler;     /** Pointer to the owning foreground task handler */
+        StatusBarButton*        _statusBarButton;           /** Pointer to the status bar button to which the popup widget is attached */
+        gui::TasksAction        _tasksAction;               /** Tasks action which will be configured to show running foreground tasks */
+        QPixmap                 _tasksIconPixmap;           /** Tasks icon pixmap underlay (count badge will be drawn on top) */
+        QMap<Task*, QWidget*>   _widgetsMap;                /** Maps task to allocated widget */
+        QTimer                  _minimumDurationTimer;      /** Wait for a small amount of time before showing the UI */
 
         static const QSize iconPixmapSize;
     };

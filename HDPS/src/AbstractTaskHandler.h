@@ -39,6 +39,18 @@ public:
      */
     virtual Task* getTask() final;
 
+    /**
+     * Get the minimum duration
+     * @return Minimum duration before the handler displays a tasks UI
+     */
+    std::uint32_t getMinimumDuration() const;
+
+    /**
+     * Set the minimum duration
+     * @param minimumDuration Minimum duration before the handler displays a tasks UI
+     */
+    void setMinimumDuration(std::uint32_t minimumDuration);
+
 protected:
 
     /**
@@ -50,14 +62,22 @@ protected:
 signals:
     
     /**
-     * Signals that the current task has changed to \p currentTask
+     * Signals that the current task has changed from \p previousTask to \p currentTask
      * @param previousTask Pointer to previous task (if any)
      * @param currentTask Pointer to current task
      */
     void taskChanged(Task* previousTask, Task* currentTask);
 
+    /**
+     * Signals that the minimum duration changed from \p previousMinimumDuration to \p currentMinimumDuration
+     * @param previousMinimumDuration Previous minimum duration
+     * @param currentMinimumDuration Current minimum duration
+     */
+    void minimumDurationChanged(std::uint32_t previousMinimumDuration, std::uint32_t currentMinimumDuration);
+
 private:
-    Task*   _task;    /** Pointer to task to handle */
+    Task*           _task;              /** Pointer to task to handle */
+    std::uint32_t   _minimumDuration;   /** Minimum duration before the handler displays a tasks UI */
 };
 
 }

@@ -20,7 +20,7 @@ const QSize ForegroundTaskHandler::PopupWidget::iconPixmapSize = QSize(64, 64);
 ForegroundTaskHandler::ForegroundTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),
     _statusBarButton(),
-    _popupWidget(&_statusBarButton)
+    _popupWidget(this, &_statusBarButton)
 {
     
 }
@@ -59,12 +59,18 @@ void ForegroundTaskHandler::StatusBarButton::paintEvent(QPaintEvent* paintEvent)
     painter.drawPixmap(QPoint(margin, margin), icon.pixmap(icon.availableSizes().first()).scaled(size() - 2 * QSize(margin, margin), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
-ForegroundTaskHandler::PopupWidget::PopupWidget(StatusBarButton* statusBarButton, QWidget* parent /*= nullptr*/) :
+ForegroundTaskHandler::PopupWidget::PopupWidget(ForegroundTaskHandler* foregroundTaskHandler, StatusBarButton* statusBarButton, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
+    _foregroundTaskHandler(foregroundTaskHandler),
     _statusBarButton(statusBarButton),
     _tasksAction(this, "Foreground Tasks"),
     _tasksIconPixmap(Application::getIconFont("FontAwesome").getIcon("tasks").pixmap(iconPixmapSize))
 {
+    Q_ASSERT(_foregroundTaskHandler != nullptr);
+
+    if (!_foregroundTaskHandler)
+        return;
+
     Q_ASSERT(_statusBarButton != nullptr);
 
     if (!_statusBarButton)
@@ -75,8 +81,15 @@ ForegroundTaskHandler::PopupWidget::PopupWidget(StatusBarButton* statusBarButton
     setWindowFlag(Qt::WindowStaysOnTopHint);
     setStyleSheet(QString("QWidget#ForegroundTasksPopupWidget { border: 1px solid %1; }").arg(palette().color(QPalette::Normal, QPalette::Mid).name(QColor::HexRgb)));
 
-    _deferPopulateTimer.setSingleShot(true);
-    _deferPopulateTimer.setInterval(500);
+    _minimumDurationTimer.setSingleShot(true);
+    
+    const auto updateMinimumDurationTimer = [this]() -> void {
+        _minimumDurationTimer.setInterval(_foregroundTaskHandler->getMinimumDuration());
+    };
+
+    updateMinimumDurationTimer();
+
+    connect(_foregroundTaskHandler, &AbstractTaskHandler::minimumDurationChanged, this, updateMinimumDurationTimer);
 
     setLayout(new QVBoxLayout());
     
@@ -87,18 +100,17 @@ ForegroundTaskHandler::PopupWidget::PopupWidget(StatusBarButton* statusBarButton
     tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
 
     const auto numberOfForegroundTasksChangedDeferred = [this]() -> void {
-        if (!_deferPopulateTimer.isActive()) {
-            _deferPopulateTimer.start();
-        }
-        else {
-            _deferPopulateTimer.stop();
-            _deferPopulateTimer.start();
-        }
+        if (isHidden() && !_minimumDurationTimer.isActive())
+            _minimumDurationTimer.start();
+
+        if (isVisible())
+            numberOfForegroundTasksChanged();
     };
 
-    connect(&_deferPopulateTimer, &QTimer::timeout, this, &PopupWidget::numberOfForegroundTasksChanged);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, &PopupWidget::numberOfForegroundTasksChanged);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &PopupWidget::numberOfForegroundTasksChanged);
+    connect(&_minimumDurationTimer, &QTimer::timeout, this, &PopupWidget::numberOfForegroundTasksChanged);
+
+    connect(&tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, numberOfForegroundTasksChangedDeferred);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, numberOfForegroundTasksChangedDeferred);
 
     connect(&settings().getTasksSettingsAction().getHideForegroundTasksPopupAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {
         if (toggled) {
