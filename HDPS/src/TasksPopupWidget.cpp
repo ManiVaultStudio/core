@@ -187,11 +187,15 @@ void TasksPopupWidget::numberOfTasksChanged()
         QWidget* taskWidget = nullptr;
 
         if (!_widgetsMap.contains(progressItem->getTask())) {
-            _widgetsMap[progressItem->getTask()] = progressItem->getTaskAction().createWidget(this);
+            taskWidget = progressItem->getTaskAction().createWidget(this);
+
+            _widgetsMap[progressItem->getTask()] = taskWidget;
         }
         else {
             taskWidget = _widgetsMap[progressItem->getTask()];
         }
+
+        taskWidget->setFixedHeight(18);
 
         layout()->addWidget(_widgetsMap[progressItem->getTask()]);
     }

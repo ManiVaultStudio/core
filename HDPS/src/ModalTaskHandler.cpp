@@ -47,6 +47,7 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     connect(&_minimumDurationTimer, &QTimer::timeout, this, &ModalTaskHandler::updateDialogVisibility);
 
     connect(&_tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, updateVisibilityDeferred);
+    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateVisibilityDeferred);
     connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibilityDeferred);
 }
 
@@ -54,7 +55,21 @@ void ModalTaskHandler::updateDialogVisibility()
 {
     const auto numberOfModalTasks = getTasksFilterModel().rowCount();
 
-    qDebug() << __FUNCTION__ << numberOfModalTasks;
+    for (int rowIndex = 0; rowIndex < numberOfModalTasks; ++rowIndex) {
+        const auto sourceModelIndex = getTasksFilterModel().mapToSource(getTasksFilterModel().index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Progress)));
+
+        if (!sourceModelIndex.isValid())
+            continue;
+
+        auto progressItem = dynamic_cast<AbstractTasksModel::ProgressItem*>(tasks().getTreeModel()->itemFromIndex(sourceModelIndex));
+
+        Q_ASSERT(progressItem != nullptr);
+
+        if (progressItem == nullptr)
+            continue;
+
+        qDebug() << "    "  << __FUNCTION__ << progressItem->getTask()->getName();
+    }
 
     if (numberOfModalTasks == 0 && _modalTasksDialog.isVisible())
         _modalTasksDialog.close();
