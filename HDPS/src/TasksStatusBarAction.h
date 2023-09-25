@@ -49,10 +49,16 @@ protected:
         public:
 
             /**
-             * Construct with \p parent widget
+             * Construct with pointer to owning \p tasksStatusBarAction \p parent widget
+             * @param tasksStatusBarAction Pointer to owning tasks status bar action
              * @param parent Pointer to parent widget
              */
-            ToolButton(QWidget* parent = nullptr);
+            ToolButton(TasksStatusBarAction* tasksStatusBarAction, QWidget* parent = nullptr);
+
+            void paintEvent(QPaintEvent* paintEvent) override;
+
+        private:
+            TasksStatusBarAction* _tasksStatusBarAction;
         };
 
     public:
@@ -60,7 +66,7 @@ protected:
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param tasksStatusBarAction Pointer to tasks status bar action
+         * @param tasksStatusBarAction Pointer to owning tasks status bar action
          * @param widgetFlags Widget flags for the configuration of the widget
          */
         Widget(QWidget* parent, TasksStatusBarAction* tasksStatusBarAction, std::int32_t widgetFlags);

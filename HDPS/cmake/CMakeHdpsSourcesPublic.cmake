@@ -682,7 +682,6 @@ set(PUBLIC_TASK_HEADERS
     src/TasksListModel.h
     src/TasksFilterModel.h
     src/TasksPopupWidget.h
-    src/BackgroundTasksStatusBarAction.h
     src/TasksStatusBarAction.h
 )
 
@@ -707,7 +706,6 @@ set(PUBLIC_TASK_SOURCES
     src/TasksListModel.cpp
     src/TasksFilterModel.cpp
     src/TasksPopupWidget.cpp
-    src/BackgroundTasksStatusBarAction.cpp
     src/TasksStatusBarAction.cpp
 )
 

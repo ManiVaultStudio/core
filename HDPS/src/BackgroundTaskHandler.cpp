@@ -21,6 +21,8 @@ BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
     _tasksStatusBarAction.setPopupMode(TasksStatusBarAction::PopupMode::Hover);
     _tasksStatusBarAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
+    _statusBarAction.setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
+
     _statusBarAction.addAction(&_overallBackgroundTaskAction);
     _statusBarAction.addAction(&_tasksStatusBarAction);
 

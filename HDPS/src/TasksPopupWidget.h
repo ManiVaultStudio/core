@@ -47,6 +47,8 @@ public:
      */
     QSize sizeHint() const override;
 
+    void setIcon(const QIcon& icon);
+
 private:
 
     /** Overlays the icon with a badge which reflects the number of tasks */

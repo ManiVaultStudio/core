@@ -20,7 +20,7 @@ TasksPopupWidget::TasksPopupWidget(gui::TasksStatusBarAction& tasksStatusBarActi
     QWidget(parent),
     _tasksStatusBarAction(tasksStatusBarAction),
     _anchorWidget(anchorWidget),
-    _tasksIconPixmap(Application::getIconFont("FontAwesome").getIcon("tasks").pixmap(iconPixmapSize))
+    _tasksIconPixmap(tasksStatusBarAction.icon().pixmap(iconPixmapSize))
 {
     setObjectName("TasksPopupWidget");
     setWindowFlag(Qt::FramelessWindowHint);
@@ -210,6 +210,11 @@ void TasksPopupWidget::numberOfTasksChanged()
 
     if (_anchorWidget)
         _anchorWidget->setToolTip(QString("%1 task(s)").arg(QString::number(numberOfTasks)));
+}
+
+void TasksPopupWidget::setIcon(const QIcon& icon)
+{
+    _tasksIconPixmap = icon.pixmap(iconPixmapSize);
 }
 
 }

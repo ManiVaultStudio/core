@@ -9,21 +9,13 @@
 #include "FileMenu.h"
 #include "ViewMenu.h"
 #include "HelpMenu.h"
-//#include "Task.h"
 
 #include <Application.h>
-
-//#include <widgets/HierarchyWidget.h>
-
-//#include <actions/TasksAction.h>
-
-//#include <TasksModel.h>
 
 #include <ForegroundTask.h>
 #include <ForegroundTaskHandler.h>
 #include <BackgroundTask.h>
 #include <BackgroundTaskHandler.h>
-#include <BackgroundTasksStatusBarAction.h>
 
 #include <QDebug>
 #include <QMessageBox>
@@ -32,12 +24,8 @@
 #include <QOpenGLFunctions>
 #include <QOffscreenSurface>
 #include <QMessageBox>
-//#include <QTimer>
 #include <QStackedWidget>
 #include <QStatusBar>
-//#include <QGroupBox>
-//#include <QToolButton>
-//#include <QPainter>
 
 #define MAIN_WINDOW_VERBOSE
 

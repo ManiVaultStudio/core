@@ -6,6 +6,7 @@
 #include "Application.h"
 
 #include <QPainter>
+#include <QPaintEvent>
 
 namespace hdps::gui {
 
@@ -18,12 +19,14 @@ TasksStatusBarAction::TasksStatusBarAction(AbstractTasksModel& tasksModel, QObje
     _popupForceHidden(false)
 {
     _tasksFilterModel.setSourceModel(&_tasksModel);
+
+    setIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
 }
 
 TasksStatusBarAction::Widget::Widget(QWidget* parent, TasksStatusBarAction* tasksStatusBarAction, std::int32_t widgetFlags) :
     WidgetActionWidget(parent, tasksStatusBarAction, widgetFlags),
     _tasksStatusBarAction(tasksStatusBarAction),
-    _toolButton(this),
+    _toolButton(_tasksStatusBarAction, this),
     _tasksPopupWidget(*tasksStatusBarAction, &_toolButton)
 {
     auto layout = new QVBoxLayout();
@@ -149,12 +152,27 @@ TasksFilterModel& TasksStatusBarAction::getTasksFilterModel()
     return _tasksFilterModel;
 }
 
-TasksStatusBarAction::Widget::ToolButton::ToolButton(QWidget* parent /*= nullptr*/) :
-    QToolButton(parent)
+TasksStatusBarAction::Widget::ToolButton::ToolButton(TasksStatusBarAction* tasksStatusBarAction, QWidget* parent /*= nullptr*/) :
+    QToolButton(parent),
+    _tasksStatusBarAction(tasksStatusBarAction)
 {
     setAutoRaise(true);
     setStyleSheet("QToolButton::menu-indicator { image: none; }");
-    //setIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
+}
+
+void TasksStatusBarAction::Widget::ToolButton::paintEvent(QPaintEvent* paintEvent)
+{
+    QPainter painter(this);
+
+    const auto margin   = 4;
+    const auto icon     = _tasksStatusBarAction->icon();
+    const auto height   = paintEvent->rect().size().height();
+    const auto rect     = QSize(height, height);
+
+    if (icon.isNull())
+        return;
+
+    painter.drawPixmap(QPoint(margin, margin), icon.pixmap(rect - 2 * QSize(margin, margin)));// .scaled(size() - 2 * QSize(margin, margin), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 }
