@@ -7,6 +7,7 @@
 #include "DataPropertiesWidget.h"
 
 #include <ViewPlugin.h>
+#include <actions/TriggerAction.h>
 
 using namespace hdps::plugin;
 
@@ -26,8 +27,18 @@ public:
     
     void init() override;
 
+protected:
+
+    /**
+     * Callback when is called when the selected items in the data hierarchy changes
+     * @param datasetId Globally unique identifier of the dataset
+     */
+    void selectedItemsChanged(DataHierarchyItems selectedItems);
+
 private:
     DataPropertiesWidget    _dataPropertiesWidget;      /** Data properties widget */
+    gui::TriggerAction      _additionalEditorAction;    /** Trigger action to start the data set editor */
+    Dataset<DatasetImpl>    _dataset;                   /** Smart pointer to currently selected dataset */
 };
 
 class DataPropertiesPluginFactory : public ViewPluginFactory

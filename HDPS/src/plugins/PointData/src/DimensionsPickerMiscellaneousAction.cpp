@@ -7,6 +7,8 @@
 
 #include <Application.h>
 
+#include <QVBoxLayout>
+
 namespace hdps::gui {
 
 DimensionsPickerMiscellaneousAction::DimensionsPickerMiscellaneousAction(DimensionsPickerAction& dimensionsPickerAction) :

@@ -4,7 +4,8 @@
 
 #pragma once
 
-#include "actions/Actions.h"
+#include "actions/StringAction.h"
+#include "actions/TriggerAction.h"
 
 using namespace hdps;
 using namespace hdps::gui;

@@ -5,6 +5,7 @@
 #include "Project.h"
 #include "AbstractProjectManager.h"
 #include "CoreInterface.h"
+#include "Set.h"
 
 #include "util/Serialization.h"
 
@@ -34,23 +35,9 @@ Project::Project(QObject* parent /*= nullptr*/) :
 }
 
 Project::Project(const QString& filePath, bool preview, QObject* parent /*= nullptr*/) :
-    QObject(parent),
-    Serializable("Project"),
-    _filePath(filePath),
-    _applicationVersion(Application::current()->getVersion()),
-    _applicationVersionAction(this, "Application Version"),
-    _projectVersionAction(this, "Project Version"),
-    _readOnlyAction(this, "Read-only"),
-    _titleAction(this, "Title"),
-    _descriptionAction(this, "Description"),
-    _tagsAction(this, "Tags"),
-    _commentsAction(this, "Comments"),
-    _contributorsAction(this, "Contributors"),
-    _compressionAction(this),
-    _splashScreenAction(this, *this),
-    _studioModeAction(this, "Studio Mode")
+    Project(parent)
 {
-    initialize();
+    _filePath = filePath;
 
     try {
         if (!QFileInfo(_filePath).exists())
@@ -207,19 +194,35 @@ void Project::updateContributors()
 
 void Project::setStudioMode(bool studioMode)
 {
-    auto viewPlugins = plugins().getPluginsByType(plugin::Type::VIEW);
+    auto plugins = hdps::plugins().getPluginsByTypes();  // by default gets all plugin types
+    auto& datasets = hdps::data().allSets();
 
     if (studioMode) {
-        for (auto viewPlugin : viewPlugins)
-            viewPlugin->cacheConnectionPermissions(true);
+        for (auto plugin : plugins)
+            plugin->cacheConnectionPermissions(true);
 
-        for (auto viewPlugin : viewPlugins)
-            viewPlugin->setConnectionPermissionsToAll(true);
+        for (auto plugin : plugins)
+            plugin->setConnectionPermissionsToAll(true);
+
+        for (auto& dataset : datasets)
+        {
+            for (auto& action : dataset.get()->getActions())
+                action->cacheConnectionPermissions(true);
+
+            for (auto& action : dataset.get()->getActions())
+                action->setConnectionPermissionsToAll(true);
+        }
+
     }
     else {
-        for (auto viewPlugin : viewPlugins)
-            viewPlugin->restoreConnectionPermissions(true);
+        for (auto plugin : plugins)
+            plugin->restoreConnectionPermissions(true);
+
+        for (auto& dataset : datasets)
+            for (auto& action : dataset.get()->getActions())
+                action->restoreConnectionPermissions(true);
     }
+
 }
 
 Project::CompressionAction::CompressionAction(QObject* parent /*= nullptr*/) :

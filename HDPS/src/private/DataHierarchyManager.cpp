@@ -228,11 +228,11 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         sortedItems.resize(variantMap.count());
 
         // Sort the items
-        for (auto variant : variantMap.values())
+        for (const auto& variant : variantMap.values())
             sortedItems[variant.toMap()["SortIndex"].toInt()] = variant.toMap();
 
         // Add items in intended order
-        for (auto item : sortedItems)
+        for (const auto& item : sortedItems)
             loadDataHierarchyItem(item["Children"].toMap(), loadDataset(item, item["Name"].toString(), parent));
     };
 

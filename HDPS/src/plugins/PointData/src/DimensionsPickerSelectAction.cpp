@@ -9,6 +9,7 @@
 
 #include <QFileDialog>
 #include <QLabel>
+#include <QVBoxLayout>
 
 namespace hdps::gui {
 
