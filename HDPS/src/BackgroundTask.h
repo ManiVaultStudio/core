@@ -8,6 +8,8 @@
 
 namespace hdps {
 
+class BackgroundTaskHandler;
+
 /**
  * Background task class
  *
@@ -30,6 +32,21 @@ public:
     * @param mayKill Boolean determining whether the task may be killed or not
     */
     BackgroundTask(QObject* parent, const QString& name, Task* parentTask = nullptr, const Status& status = Status::Undefined, bool mayKill = false);
+
+    /**
+     * Creates singleton background task handler
+     * @param parent Pointer to parent object
+     */
+    static void createHandler(QObject* parent);
+
+    /**
+     * Get handler
+     * @return Pointer to background task handler
+     */
+    static BackgroundTaskHandler* getHandler() { return BackgroundTask::backgroundTaskHandler; }
+
+private:
+    static BackgroundTaskHandler* backgroundTaskHandler;   /** Single instance of the background task handler */
 };
 
 }

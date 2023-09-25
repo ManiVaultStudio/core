@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "TasksModel.h"
+#include "AbstractTasksModel.h"
 
 #include "Application.h"
 #include "CoreInterface.h"
@@ -10,7 +10,7 @@
 #include <util/Exception.h>
 
 #ifdef _DEBUG
-    #define TASKS_MODEL_VERBOSE
+    #define ABSTRACT_TASKS_MODEL_VERBOSE
 #endif
 
 namespace hdps
@@ -18,13 +18,13 @@ namespace hdps
 
 using namespace util;
 
-TasksModel::HeaderItem::HeaderItem(const ColumHeaderInfo& columHeaderInfo) :
+AbstractTasksModel::HeaderItem::HeaderItem(const ColumHeaderInfo& columHeaderInfo) :
     QStandardItem(),
     _columHeaderInfo(columHeaderInfo)
 {
 }
 
-QVariant TasksModel::HeaderItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::HeaderItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role)
     {
@@ -44,7 +44,7 @@ QVariant TasksModel::HeaderItem::data(int role /*= Qt::UserRole + 1*/) const
     return QVariant();
 }
 
-TasksModel::Item::Item(Task* task, bool editable /*= false*/) :
+AbstractTasksModel::Item::Item(Task* task, bool editable /*= false*/) :
     QStandardItem(),
     QObject(),
     _task(task)
@@ -55,18 +55,18 @@ TasksModel::Item::Item(Task* task, bool editable /*= false*/) :
     setDropEnabled(true);
 }
 
-Task* TasksModel::Item::getTask() const
+Task* AbstractTasksModel::Item::getTask() const
 {
     return _task;
 }
 
-TasksModel::ExpandCollapseItem::ExpandCollapseItem(Task* task) :
+AbstractTasksModel::ExpandCollapseItem::ExpandCollapseItem(Task* task) :
     Item(task)
 {
     setSizeHint(QSize(0, 0));
 }
 
-TasksModel::StatusItem::StatusItem(Task* task) :
+AbstractTasksModel::StatusItem::StatusItem(Task* task) :
     Item(task)
 {
     connect(getTask(), &Task::statusChanged, this, [this]() -> void {
@@ -78,7 +78,7 @@ TasksModel::StatusItem::StatusItem(Task* task) :
     });
 }
 
-QVariant TasksModel::StatusItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::StatusItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -125,7 +125,7 @@ QVariant TasksModel::StatusItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
-TasksModel::NameItem::NameItem(Task* task) :
+AbstractTasksModel::NameItem::NameItem(Task* task) :
     Item(task)
 {
     connect(getTask(), &Task::nameChanged, this, [this]() -> void {
@@ -141,7 +141,7 @@ TasksModel::NameItem::NameItem(Task* task) :
     });
 }
 
-QVariant TasksModel::NameItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::NameItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -158,7 +158,7 @@ QVariant TasksModel::NameItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
-void TasksModel::NameItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
+void AbstractTasksModel::NameItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
 {
     switch (role) {
         case Qt::EditRole:
@@ -170,7 +170,7 @@ void TasksModel::NameItem::setData(const QVariant& value, int role /* = Qt::User
     }
 }
 
-TasksModel::EnabledItem::EnabledItem(Task* task) :
+AbstractTasksModel::EnabledItem::EnabledItem(Task* task) :
     Item(task)
 {
     connect(getTask(), &Task::enabledChanged, this, [this]() -> void {
@@ -178,7 +178,7 @@ TasksModel::EnabledItem::EnabledItem(Task* task) :
     });
 }
 
-QVariant TasksModel::EnabledItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::EnabledItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -197,7 +197,7 @@ QVariant TasksModel::EnabledItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
-TasksModel::VisibleItem::VisibleItem(Task* task) :
+AbstractTasksModel::VisibleItem::VisibleItem(Task* task) :
     Item(task)
 {
     connect(getTask(), &Task::visibileChanged, this, [this]() -> void {
@@ -205,7 +205,7 @@ TasksModel::VisibleItem::VisibleItem(Task* task) :
         });
 }
 
-QVariant TasksModel::VisibleItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::VisibleItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -224,7 +224,7 @@ QVariant TasksModel::VisibleItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
-TasksModel::ProgressItem::ProgressItem(Task* task) :
+AbstractTasksModel::ProgressItem::ProgressItem(Task* task) :
     Item(task, true),
     _taskAction(this, "Task")
 {
@@ -243,7 +243,7 @@ TasksModel::ProgressItem::ProgressItem(Task* task) :
     });
 }
 
-QVariant TasksModel::ProgressItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::ProgressItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -262,7 +262,7 @@ QVariant TasksModel::ProgressItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
-TasksModel::ProgressDescriptionItem::ProgressDescriptionItem(Task* task) :
+AbstractTasksModel::ProgressDescriptionItem::ProgressDescriptionItem(Task* task) :
     Item(task)
 {
     connect(getTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
@@ -270,7 +270,7 @@ TasksModel::ProgressDescriptionItem::ProgressDescriptionItem(Task* task) :
     });
 }
 
-QVariant TasksModel::ProgressDescriptionItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::ProgressDescriptionItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -287,7 +287,7 @@ QVariant TasksModel::ProgressDescriptionItem::data(int role /*= Qt::UserRole + 1
     return Item::data(role);
 }
 
-TasksModel::ProgressTextItem::ProgressTextItem(Task* task) :
+AbstractTasksModel::ProgressTextItem::ProgressTextItem(Task* task) :
     Item(task)
 {
     connect(getTask(), &Task::progressChanged, this, [this]() -> void {
@@ -299,7 +299,7 @@ TasksModel::ProgressTextItem::ProgressTextItem(Task* task) :
     });
 }
 
-TasksModel::ProgressModeItem::ProgressModeItem(Task* task) :
+AbstractTasksModel::ProgressModeItem::ProgressModeItem(Task* task) :
     Item(task)
 {
     connect(getTask(), &Task::progressModeChanged, this, [this]() -> void {
@@ -307,7 +307,7 @@ TasksModel::ProgressModeItem::ProgressModeItem(Task* task) :
     });
 }
 
-QVariant TasksModel::ProgressModeItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::ProgressModeItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -326,7 +326,7 @@ QVariant TasksModel::ProgressModeItem::data(int role /*= Qt::UserRole + 1*/) con
     return Item::data(role);
 }
 
-QVariant TasksModel::ProgressTextItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::ProgressTextItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -343,7 +343,7 @@ QVariant TasksModel::ProgressTextItem::data(int role /*= Qt::UserRole + 1*/) con
     return Item::data(role);
 }
 
-QVariant TasksModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -360,7 +360,7 @@ QVariant TasksModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
-QVariant TasksModel::ParentIdItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::ParentIdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -377,7 +377,7 @@ QVariant TasksModel::ParentIdItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
-QVariant TasksModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     const auto taskTypeString = getTask()->getTypeName(true);
 
@@ -396,7 +396,7 @@ QVariant TasksModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
-TasksModel::ScopeItem::ScopeItem(Task* task) :
+AbstractTasksModel::ScopeItem::ScopeItem(Task* task) :
     Item(task, false)
 {
     connect(getTask(), &Task::scopeChanged, this, [this]() -> void {
@@ -404,7 +404,7 @@ TasksModel::ScopeItem::ScopeItem(Task* task) :
     });
 }
 
-QVariant TasksModel::ScopeItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::ScopeItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     auto taskScopeString = Task::scopeNames[getTask()->getScope()];
 
@@ -425,7 +425,7 @@ QVariant TasksModel::ScopeItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
-QVariant TasksModel::MayKillItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::MayKillItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     auto taskTypeString = QString(getTask()->metaObject()->className());
 
@@ -448,7 +448,7 @@ QVariant TasksModel::MayKillItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
-TasksModel::KillItem::KillItem(Task* task) :
+AbstractTasksModel::KillItem::KillItem(Task* task) :
     Item(task)
 {
     connect(getTask(), &Task::statusChanged, this, [this]() -> void {
@@ -460,7 +460,7 @@ TasksModel::KillItem::KillItem(Task* task) :
     });
 }
 
-QVariant TasksModel::KillItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::KillItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -477,7 +477,7 @@ QVariant TasksModel::KillItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
-TasksModel::Row::Row(Task* task) :
+AbstractTasksModel::Row::Row(Task* task) :
     QList<QStandardItem*>()
 {
     append(new ExpandCollapseItem(task));
@@ -497,103 +497,31 @@ TasksModel::Row::Row(Task* task) :
     append(new KillItem(task));
 }
 
-QMap<TasksModel::Column, TasksModel::ColumHeaderInfo> TasksModel::columnInfo = QMap<TasksModel::Column, TasksModel::ColumHeaderInfo>({
-    { TasksModel::Column::ExpandCollapse, { "",  "Root", "Expand/collapse" } },
-    { TasksModel::Column::Status, { "",  "Status", "Status of the task" } },
-    { TasksModel::Column::Name, { "Name" , "Name", "Name of the task" } },
-    { TasksModel::Column::Enabled, { "" , "Enabled", "Whether the task is enabled or not" } },
-    { TasksModel::Column::Visible, { "" , "Visible", "Whether the task is visible or not" } },
-    { TasksModel::Column::Progress, { "Progress" , "Progress", "Task progress" } },
-    { TasksModel::Column::ProgressDescription, { "Progress description" , "Progress description", "Progress description" } },
-    { TasksModel::Column::ProgressText, { "Progress text" , "Progress text", "Progress text" } },
-    { TasksModel::Column::ProgressMode, { "Progress mode" , "Progress mode", "Progress mode" } },
-    { TasksModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the task" } },
-    { TasksModel::Column::ParentID, { "Parent ID",  "Parent ID", "Globally unique identifier of the parent task" } },
-    { TasksModel::Column::Type, { "Type",  "Type", "Type of task" } },
-    { TasksModel::Column::Scope, { "Scope",  "Scope", "Task scope" } },
-    { TasksModel::Column::MayKill, { "May kill",  "May kill", "Whether the task may be killed or not" } },
-    { TasksModel::Column::Kill, { "",  "Kill", "Kill the task" } }
+QMap<AbstractTasksModel::Column, AbstractTasksModel::ColumHeaderInfo> AbstractTasksModel::columnInfo = QMap<AbstractTasksModel::Column, AbstractTasksModel::ColumHeaderInfo>({
+    { AbstractTasksModel::Column::ExpandCollapse, { "",  "Root", "Expand/collapse" } },
+    { AbstractTasksModel::Column::Status, { "",  "Status", "Status of the task" } },
+    { AbstractTasksModel::Column::Name, { "Name" , "Name", "Name of the task" } },
+    { AbstractTasksModel::Column::Enabled, { "" , "Enabled", "Whether the task is enabled or not" } },
+    { AbstractTasksModel::Column::Visible, { "" , "Visible", "Whether the task is visible or not" } },
+    { AbstractTasksModel::Column::Progress, { "Progress" , "Progress", "Task progress" } },
+    { AbstractTasksModel::Column::ProgressDescription, { "Progress description" , "Progress description", "Progress description" } },
+    { AbstractTasksModel::Column::ProgressText, { "Progress text" , "Progress text", "Progress text" } },
+    { AbstractTasksModel::Column::ProgressMode, { "Progress mode" , "Progress mode", "Progress mode" } },
+    { AbstractTasksModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the task" } },
+    { AbstractTasksModel::Column::ParentID, { "Parent ID",  "Parent ID", "Globally unique identifier of the parent task" } },
+    { AbstractTasksModel::Column::Type, { "Type",  "Type", "Type of task" } },
+    { AbstractTasksModel::Column::Scope, { "Scope",  "Scope", "Task scope" } },
+    { AbstractTasksModel::Column::MayKill, { "May kill",  "May kill", "Whether the task may be killed or not" } },
+    { AbstractTasksModel::Column::Kill, { "",  "Kill", "Kill the task" } }
 });
 
-TasksModel::TasksModel(QObject* parent /*= nullptr*/) :
+AbstractTasksModel::AbstractTasksModel(QObject* parent /*= nullptr*/) :
     QStandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
 
     for (auto column : columnInfo.keys())
         setHorizontalHeaderItem(static_cast<int>(column), new HeaderItem(columnInfo[column]));
-
-    connect(&tasks(), &AbstractTaskManager::taskAdded, this, &TasksModel::taskAddedToTaskManager);
-    connect(&tasks(), &AbstractTaskManager::taskAboutToBeRemoved, this, &TasksModel::taskAboutToBeRemovedFromTaskManager);
-
-    for (auto task : tasks().getTasks())
-        taskAddedToTaskManager(task);
-}
-
-void TasksModel::taskAddedToTaskManager(Task* task)
-{
-    try {
-        Q_ASSERT(task != nullptr);
-
-        if (task == nullptr)
-            throw std::runtime_error("Task may not be a nullptr");
-
-        if (task->hasParentTask()) {
-            const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::EditRole, task->getParentTask()->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
-
-            if (matches.isEmpty())
-                throw std::runtime_error(QString("%1 not found").arg(task->getParentTask()->getName()).toStdString());
-
-            auto parentItem = itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::ExpandCollapse)));
-
-            Q_ASSERT(parentItem != nullptr);
-
-            if (parentItem == nullptr)
-                throw std::runtime_error("Parent standard item may not be a nullptr");
-
-            parentItem->appendRow(Row(task));
-        }
-        else {
-            appendRow(Row(task));
-        }
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to add task to tasks model", e);
-    }
-    catch (...)
-    {
-        exceptionMessageBox("Unable to add task to tasks model");
-    }
-}
-
-void TasksModel::taskAboutToBeRemovedFromTaskManager(Task* task)
-{
-    try {
-        if (!tasks().getTasks().contains(task))
-            return;
-
-        Q_ASSERT(task != nullptr);
-
-        if (task == nullptr)
-            throw std::runtime_error("Task may not be a nullptr");
-
-        const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::EditRole, task->getId(), -1, Qt::MatchExactly | Qt::MatchRecursive);
-
-        if (matches.empty())
-            throw std::runtime_error(QString("%1 not found").arg(task->getName()).toStdString());
-
-        if (!removeRow(matches.first().row()))
-            throw std::runtime_error("Remove row failed");
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to remove task from tasks model", e);
-    }
-    catch (...)
-    {
-        exceptionMessageBox("Unable to remove task from tasks model");
-    }
 }
 
 }

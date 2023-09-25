@@ -15,11 +15,6 @@ class BackgroundTaskTester final : public AbstractTaskTester
 
 public:
     Q_INVOKABLE BackgroundTaskTester(QObject* parent, const QString& name);
-
-private:
-    void testRunningIndeterminate();
-    void testAggregation();
-    void testPerformance();
 };
 
 }

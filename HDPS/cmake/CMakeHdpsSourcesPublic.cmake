@@ -677,9 +677,13 @@ set(PUBLIC_TASK_HEADERS
 	src/ForegroundTaskHandler.h
     src/DatasetTask.h
     src/DatasetTaskHandler.h
-    src/TasksModel.h
+    src/AbstractTasksModel.h
+    src/TasksTreeModel.h
+    src/TasksListModel.h
     src/TasksFilterModel.h
     src/TasksPopupWidget.h
+    src/BackgroundTasksStatusBarAction.h
+    src/TasksStatusBarAction.h
 )
 
 set(PUBLIC_TASK_SOURCES
@@ -698,9 +702,13 @@ set(PUBLIC_TASK_SOURCES
 	src/ForegroundTaskHandler.cpp
     src/DatasetTask.cpp
 	src/DatasetTaskHandler.cpp
-    src/TasksModel.cpp
+    src/AbstractTasksModel.cpp
+    src/TasksTreeModel.cpp
+    src/TasksListModel.cpp
     src/TasksFilterModel.cpp
     src/TasksPopupWidget.cpp
+    src/BackgroundTasksStatusBarAction.cpp
+    src/TasksStatusBarAction.cpp
 )
 
 set(PUBLIC_TASK_FILES

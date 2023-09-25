@@ -516,7 +516,7 @@ private: // Private setters (these call private signals under the hood, an essen
     void privateKill(bool recursive = true);
     void privateSetProgressMode(const ProgressMode& progressMode);
     void privateSetScope(const Scope& scope);
-    void privateSetProgress(float progress, const QString& subtaskDescription);
+    void privateSetProgress(float progress, const QString& subtaskDescription = "");
     void privateSetSubtasks(std::uint32_t numberOfSubtasks);
     void privateSetSubtasks(const QStringList& subtasksNames);
     void privateSetSubtaskStarted(std::uint32_t subtaskIndex, const QString& progressDescription);

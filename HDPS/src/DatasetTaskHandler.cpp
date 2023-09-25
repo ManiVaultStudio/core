@@ -58,10 +58,6 @@ DatasetTaskHandler::DatasetTaskHandler(QObject* parent, DatasetTask* datasetTask
     });
 }
 
-void DatasetTaskHandler::init()
-{
-}
-
 DatasetTask* DatasetTaskHandler::getDatasetTask()
 {
     return static_cast<DatasetTask*>(getTask());

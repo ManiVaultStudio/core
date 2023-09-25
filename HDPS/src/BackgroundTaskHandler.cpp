@@ -3,30 +3,32 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "BackgroundTaskHandler.h"
+#include "Application.h"
+
+using namespace hdps::gui;
 
 namespace hdps {
 
-BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent, Task* task) :
-    AbstractTaskHandler(parent, task)
+BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
+    AbstractTaskHandler(parent, nullptr),
+    _tasksListModel(this),
+    _overallBackgroundTaskAction(this, "Overall Background Task"),
+    _tasksStatusBarAction(_tasksListModel, this, "Tasks Status Bar"),
+    _statusBarAction(this, "Status Bar Group")
 {
+    _overallBackgroundTaskAction.setStretch(1);
+
+    _tasksStatusBarAction.setPopupMode(TasksStatusBarAction::PopupMode::Hover);
+    _tasksStatusBarAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
+
+    _statusBarAction.addAction(&_overallBackgroundTaskAction);
+    _statusBarAction.addAction(&_tasksStatusBarAction);
+
+    auto& tasksFilterModel = _tasksStatusBarAction.getTasksFilterModel();
+
+    tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Background" });
+    tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished" });
+    tasksFilterModel.getParentTaskFilterAction().setString(Application::current()->getTask(Application::TaskType::OverallBackground)->getId());
 }
 
-void BackgroundTaskHandler::init()
-{
 }
-
-}
-
-//connect(&settings().getTasksSettingsAction().getHideForegroundTasksPopupAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {
-//    if (toggled) {
-//        close();
-//    }
-//    else {
-//        if (_tasksAction.getTasksFilterModel().rowCount() >= 1 && isHidden())
-//            show();
-//    }
-//    });
-
-
-//tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
-//tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });

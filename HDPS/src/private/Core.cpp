@@ -76,6 +76,7 @@ void Core::init()
 
     ModalTask::createHandler(Application::current());
     ForegroundTask::createHandler(Application::current());
+    BackgroundTask::createHandler(Application::current());
 
     CoreInterface::init();
 }

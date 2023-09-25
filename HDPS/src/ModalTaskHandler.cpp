@@ -53,10 +53,6 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibilityDeferred);
 }
 
-void ModalTaskHandler::init()
-{
-}
-
 void ModalTaskHandler::updateDialogVisibility()
 {
     const auto numberOfModalTasks = _tasksAction.getTasksFilterModel().rowCount();
@@ -109,12 +105,12 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
     QVector<Task*> currentTasks;
 
     for (int rowIndex = 0; rowIndex < numberOfModalTasks; ++rowIndex) {
-        const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(rowIndex, static_cast<int>(TasksModel::Column::Progress)));
+        const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Progress)));
 
         if (!sourceModelIndex.isValid())
             continue;
 
-        auto progressItem = dynamic_cast<TasksModel::ProgressItem*>(tasksModel.itemFromIndex(sourceModelIndex));
+        auto progressItem = dynamic_cast<AbstractTasksModel::ProgressItem*>(tasksModel.itemFromIndex(sourceModelIndex));
 
         Q_ASSERT(progressItem != nullptr);
 
@@ -151,11 +147,9 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
 
     const auto clockIcon = Application::getIconFont("FontAwesome").getIcon("clock");
 
-    qDebug() << __FUNCTION__ << numberOfModalTasks;
-
     if (numberOfModalTasks == 1) {
         const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(0, 0));
-        const auto item             = dynamic_cast<TasksModel::Item*>(tasksAction.getTasksModel().itemFromIndex(sourceModelIndex));
+        const auto item             = dynamic_cast<AbstractTasksModel::Item*>(tasksAction.getTasksModel().itemFromIndex(sourceModelIndex));
         const auto task             = item->getTask();
         const auto taskName         = task->getName();
         const auto taskDescription  = task->getDescription();

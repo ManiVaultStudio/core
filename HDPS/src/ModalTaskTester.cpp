@@ -75,7 +75,9 @@ void ModalTaskTester::testAggregation()
         QMap<QString, QTimer*> timers;
 
         const auto addChildTask = [this, taskRunner, &timers](const QString& name, QStringList tasks, int interval, Task* parentTask = nullptr) -> Task* {
-            auto childTask = new ModalTask(taskRunner, name, parentTask);
+            auto childTask = new ModalTask(nullptr, name);
+
+            childTask->setParentTask(parentTask);
 
             if (!tasks.isEmpty()) {
                 childTask->setSubtasks(tasks);
@@ -114,69 +116,6 @@ void ModalTaskTester::testAggregation()
 
         auto childTaskA = addChildTask("A", {}, 0, aggregateTask);
         auto childTaskB = addChildTask("B", {}, 0, aggregateTask);
-
-        auto childTaskAA = addChildTask("AA", {
-            "Task 1",
-            "Task 2",
-            "Task 3",
-            "Task 4",
-            "Task 5",
-            "Task 6",
-            "Task 7",
-            "Task 8",
-            "Task 9",
-            "Task 10"
-            }, 502, childTaskA);
-
-        auto childTaskAB = addChildTask("AB", {
-            "Task 1",
-            "Task 2",
-            "Task 3",
-            "Task 4",
-            "Task 5",
-            "Task 6",
-            "Task 7",
-            "Task 8",
-            "Task 9",
-            "Task 10"
-            }, 497, childTaskA);
-
-        auto childTaskBA = addChildTask("BA", {
-            "Task 1",
-            "Task 2",
-            "Task 3",
-            "Task 4",
-            "Task 5",
-            "Task 6",
-            "Task 7",
-            "Task 8",
-            "Task 9",
-            "Task 10"
-            }, 1505, childTaskB);
-
-        auto childTaskBB = addChildTask("BB", {
-            "Task 1",
-            "Task 2",
-            "Task 3",
-            "Task 4",
-            "Task 5",
-            "Task 6",
-            "Task 7",
-            "Task 8",
-            "Task 9",
-            "Task 10"
-            }, 1491, childTaskB);
-
-        auto childTaskIndeterminate = new ModalTask(aggregateTask, "Indeterminate");
-
-        childTaskIndeterminate->setRunningIndeterminate();
-
-        QTimer::singleShot(10000, [childTaskIndeterminate]() -> void {
-            if (childTaskIndeterminate->isAborting() || childTaskIndeterminate->isAborted())
-                return;
-
-            childTaskIndeterminate->setFinished();
-        });
 
         eventLoop.exec();
     });

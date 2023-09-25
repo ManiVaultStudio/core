@@ -31,7 +31,6 @@ public:
 
 private:
     void testRunningIndeterminate();
-    void testAggregation();
     void testPerformance();
 };
 

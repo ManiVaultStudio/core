@@ -20,7 +20,7 @@ namespace hdps
  *
  * @author Thomas Kroes
  */
-class TasksModel : public QStandardItemModel
+class AbstractTasksModel : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -377,21 +377,7 @@ public:
      * Construct with \p parent object
      * @param parent Pointer to parent object
      */
-    TasksModel(QObject* parent = nullptr);
-
-private:
-
-    /**
-     * Invoked when \p task is added to the task manager
-     * @param task Pointer to task that was added
-     */
-    void taskAddedToTaskManager(Task* task);
-
-    /**
-     * Invoked when \p task is about to be removed from the task manager
-     * @param task Pointer to task that is about to be removed
-     */
-    void taskAboutToBeRemovedFromTaskManager(Task* task);
+    AbstractTasksModel(QObject* parent = nullptr);
 
     friend class Item;
 };

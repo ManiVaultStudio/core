@@ -6,6 +6,10 @@
 
 #include <QObject>
 
+namespace hdps::gui {
+    class WidgetAction;
+}
+
 namespace hdps {
 
 class Task;
@@ -30,9 +34,6 @@ public:
     */
     AbstractTaskHandler(QObject* parent, Task* task);
 
-    /** Initializes the handler */
-    virtual void init() = 0;
-
     /**
      * Get task
      * @return Pointer to task
@@ -50,6 +51,12 @@ public:
      * @param minimumDuration Minimum duration before the handler displays a tasks UI
      */
     void setMinimumDuration(std::uint32_t minimumDuration);
+
+    /**
+     * Get status bar action
+     * @return Pointer to status bar widget action
+     */
+    virtual gui::WidgetAction* getStatusBarAction() = 0;
 
 protected:
 

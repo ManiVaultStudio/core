@@ -56,8 +56,11 @@ public:
     */
     ModalTaskHandler(QObject* parent);
 
-    /** Initializes the handler */
-    void init() override;
+    /**
+     * Get status bar action
+     * @return Pointer to status bar widget action
+     */
+    gui::WidgetAction* getStatusBarAction() override { return nullptr; }
 
 private:
 

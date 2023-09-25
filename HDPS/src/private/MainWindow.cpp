@@ -9,18 +9,21 @@
 #include "FileMenu.h"
 #include "ViewMenu.h"
 #include "HelpMenu.h"
-#include "Task.h"
+//#include "Task.h"
 
 #include <Application.h>
 
-#include <widgets/HierarchyWidget.h>
+//#include <widgets/HierarchyWidget.h>
 
-#include <actions/TasksAction.h>
+//#include <actions/TasksAction.h>
 
-#include <TasksModel.h>
+//#include <TasksModel.h>
 
 #include <ForegroundTask.h>
 #include <ForegroundTaskHandler.h>
+#include <BackgroundTask.h>
+#include <BackgroundTaskHandler.h>
+#include <BackgroundTasksStatusBarAction.h>
 
 #include <QDebug>
 #include <QMessageBox>
@@ -29,12 +32,12 @@
 #include <QOpenGLFunctions>
 #include <QOffscreenSurface>
 #include <QMessageBox>
-#include <QTimer>
+//#include <QTimer>
 #include <QStackedWidget>
 #include <QStatusBar>
-#include <QGroupBox>
-#include <QToolButton>
-#include <QPainter>
+//#include <QGroupBox>
+//#include <QToolButton>
+//#include <QPainter>
 
 #define MAIN_WINDOW_VERBOSE
 
@@ -134,17 +137,11 @@ void MainWindow::showEvent(QShowEvent* showEvent)
             connect(&projects().getCurrentProject()->getReadOnlyAction(), &ToggleAction::toggled, this, updateMenuVisibility);
         });
 
-        auto tasksAction = new TasksAction(this, "Tasks");
-        auto overallBackgroundTaskAction = new TaskAction(this, "Background Tasks");
+        statusBar()->setSizeGripEnabled(false);
 
-        tasksAction->setPopupSizeHint(QSize(500, 500));
-        tasksAction->setDefaultWidgetFlags(TasksAction::Toolbar | TasksAction::Overlay | WidgetActionWidget::PopupLayout);
-
-        overallBackgroundTaskAction->setTask(Application::current()->getTask(Application::TaskType::OverallBackground));
-
-        statusBar()->setSizeGripEnabled(true);
-        statusBar()->insertPermanentWidget(0, overallBackgroundTaskAction->createWidget(this));
-        statusBar()->insertPermanentWidget(1, &ForegroundTask::getHandler()->getStatusBarButton());
+        statusBar()->insertPermanentWidget(0, new QWidget(this), 3);
+        statusBar()->insertPermanentWidget(1, BackgroundTask::getHandler()->getStatusBarAction()->createWidget(this), 2);
+        statusBar()->insertPermanentWidget(2, ForegroundTask::getHandler()->getStatusBarAction()->createWidget(this));
 
         loadGuiTask->setSubtaskFinished("Initializing GUI");
 

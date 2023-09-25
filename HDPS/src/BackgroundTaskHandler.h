@@ -5,8 +5,11 @@
 #pragma once
 
 #include "AbstractTaskHandler.h"
+#include "TasksStatusBarAction.h"
+#include "TasksListModel.h"
 
-#include "actions/WidgetAction.h"
+#include "actions/TaskAction.h"
+#include "actions/HorizontalGroupAction.h"
 
 namespace hdps {
 
@@ -19,69 +22,49 @@ namespace hdps {
  */
 class BackgroundTaskHandler final : public AbstractTaskHandler
 {
-protected:
+public:
 
-    /**
-     * Foreground tasks action class
-     *
-     * Tasks action for showing foreground tasks in a customized popup interface.
-     *
-     * @author Thomas Kroes
-     */
-    class StatusBarAction : public gui::WidgetAction
-    {
-        class StatusBarButton : public QToolButton {
-        public:
+    /* Custom tool button class with a popup widget attached to it which shows the background task(s) */
+    class StatusBarButton : public QToolButton {
+    public:
 
-            /** Widget class for foreground tasks action */
-            class Widget : public gui::WidgetActionWidget {
-            public:
+        /**
+         * Construct with \p parent widget
+         * @param parent Pointer to parent widget
+         */
+        StatusBarButton(QWidget* parent = nullptr);
 
-                /**
-                 * Constructor
-                 * @param parent Pointer to parent widget
-                 * @param foregroundTasksAction Pointer to foreground tasks action
-                 * @param widgetFlags Widget flags for the configuration of the widget (type)
-                 */
-                Widget(QWidget* parent, ForegroundTasksAction* foregroundTasksAction, const std::int32_t& widgetFlags);
-            };
-            StatusBarButton(QWidget* parent = nullptr);
-
-            /**
-             * Get widget representation of the foreground tasks action
-             * @param parent Pointer to parent widget
-             * @param widgetFlags Widget flags for the configuration of the widget (type)
-             * Paint event
-             * @param paintEvent Pointer to paint event
-             */
-            QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-                return new Widget(parent, this, widgetFlags);
-            };
-            void paintEvent(QPaintEvent* paintEvent);
-
-        public: // Action getters
-
-            gui::ToggleAction& getSeeThroughAction() { return _seeThroughAction; }
-
-        private:
-            QMenu               _menu;                  /** Popup menu attached to the tool button */
-            gui::ToggleAction   _seeThroughAction;
-        };
+        /**
+         * Override paint event to customize control drawing
+         * @param paintEvent Pointer to paint event that occurred
+         */
+        void paintEvent(QPaintEvent* paintEvent);
+    };
 
 public:
 
     /**
     * Construct task handler with \p parent object
     * @param parent Pointer to parent object
-    * @param task Pointer to task to handle
     */
-    BackgroundTaskHandler(QObject* parent, Task* task);
+    BackgroundTaskHandler(QObject* parent);
 
-    /** Initializes the handler */
-    void init() override;
+    /**
+     * Get status bar action
+     * @return Pointer to status bar widget action
+     */
+    gui::WidgetAction* getStatusBarAction() override { return &_statusBarAction; }
+
+public: // Action getters
+
+    gui::TaskAction& getOverallBackgroundTaskAction() { return _overallBackgroundTaskAction; }
+    gui::TasksStatusBarAction& getTasksStatusBarAction() { return _tasksStatusBarAction; }
 
 private:
-    friend class QMainWindow;
+    TasksListModel              _tasksListModel;
+    gui::TaskAction             _overallBackgroundTaskAction;
+    gui::TasksStatusBarAction   _tasksStatusBarAction;
+    gui::HorizontalGroupAction  _statusBarAction;
 };
 
 }

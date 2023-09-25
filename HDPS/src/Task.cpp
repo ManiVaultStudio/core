@@ -523,7 +523,12 @@ void Task::computeProgress()
     {
         case Status::Undefined:
         case Status::Idle:
+        {
+            if (getProgressMode() != ProgressMode::Aggregate)
+                _progress = 0.f;
+
             break;
+        }
 
         case Status::Running:
             break;
@@ -640,8 +645,8 @@ void Task::updateAggregateStatus()
     if (countStatus(Status::Running) >= 1 || countStatus(Status::RunningIndeterminate) >= 1)
         privateSetRunning();
 
-    //if (countStatus(Status::Idle) == childTasks.count())
-    //    privateSetIdle();
+    if (countStatus(Status::Idle) == childTasks.count())
+        privateSetProgress(0.f);
 
     if (countStatus(Status::Finished) == numberOfEnabledChildTasks) {
         auto tasksToSetToIdle = getChildTasks();
@@ -969,7 +974,7 @@ void Task::privateSetScope(const Scope& scope)
     emit scopeChanged(_scope);
 }
 
-void Task::privateSetProgress(float progress, const QString& subtaskDescription)
+void Task::privateSetProgress(float progress, const QString& subtaskDescription /*= ""*/)
 {
     if (_progressMode != ProgressMode::Manual)
         return;

@@ -4,19 +4,22 @@
 
 #pragma once
 
-#include "AbstractTaskHandler.h"
+#include <QWidget>
 
 #include "actions/TasksAction.h"
 
-class QToolButton;
 class QMainWindow;
 
-namespace hdps {
+namespace hdps::gui {
+
+class TasksStatusBarAction;
 
 /**
  * Tasks popup widget class 
  *
  * Shows tasks in a popup window.
+ * 
+ * The popup widget can be attached to an anchor widget, or it can act standalone.
  *
  * @author Thomas Kroes
  */
@@ -24,12 +27,12 @@ class TasksPopupWidget : public QWidget {
 public:
 
     /**
-     * Construct with pointer to the owning \p taskHandler \p statusBarButton and \p parent widget
-     * @param taskHandler Pointer to the owning task handler
-     * @param toolButton Pointer to associated tool button (to which the popup is anchored)
+     * Construct with pointer to the \p anchorWidget, a \p minimumDuration and \p parent widget
+     * @param anchorWidget If set, the popup widget will stick to the upper left corner of the anchor widget (right-aligned)
      * @param parent Pointer to parent widget
+     * @param minimumDuration Only show the popup when there is at least one task that last longer that this duration
      */
-    TasksPopupWidget(AbstractTaskHandler* taskHandler, QToolButton* toolButton, QWidget* parent = nullptr);
+    TasksPopupWidget(gui::TasksStatusBarAction& tasksStatusBarAction, QWidget* anchorWidget = nullptr, QWidget* parent = nullptr, std::uint32_t minimumDuration = 250);
 
     /**
      * Respond to target object events
@@ -46,11 +49,11 @@ public:
 
 private:
 
-    /** Overlays the tasks icon with a badge which reflects the number of tasks */
-    void updateToolButtonIcon();
+    /** Overlays the icon with a badge which reflects the number of tasks */
+    void updateIcon();
     
-    /** Synchronize the position with the position of the tool button */
-    void synchronizeWithToolButton();
+    /** Synchronize the position with the position of the anchor widget (if one is set) */
+    void synchronizeWithAnchorWidget();
 
     /**
      * Get pointer to the main window
@@ -65,12 +68,11 @@ private:
     void numberOfTasksChanged();
 
 private:
-    AbstractTaskHandler*    _taskHandler;               /** Pointer to the owning task handler */
-    QToolButton*            _toolButton;                /** Pointer to associated tool button (to which the popup is anchored) */
-    gui::TasksAction        _tasksAction;               /** Tasks action which contains the tasks to be displayed */
-    QPixmap                 _tasksIconPixmap;           /** Tasks icon pixmap underlay (count badge will be drawn on top) */
-    QMap<Task*, QWidget*>   _widgetsMap;                /** Maps task to allocated widget */
-    QTimer                  _minimumDurationTimer;      /** Wait for a small amount of time before showing the UI */
+    gui::TasksStatusBarAction&  _tasksStatusBarAction;      /** Tasks status bar action which contains the tasks to be displayed */
+    QWidget*                    _anchorWidget;              /** If set, the popup widget will stick to the upper left corner of the anchor widget (right-aligned) */
+    QPixmap                     _tasksIconPixmap;           /** Tasks icon pixmap underlay (count badge will be drawn on top) */
+    QMap<Task*, QWidget*>       _widgetsMap;                /** Maps task to allocated widget */
+    QTimer                      _minimumDurationTimer;      /** Wait for a small amount of time before showing the UI */
 
     static const QSize iconPixmapSize;
 };

@@ -19,7 +19,6 @@ class DatasetTask;
  */
 class DatasetTaskHandler final : public AbstractTaskHandler
 {
-
 public:
 
     /**
@@ -29,9 +28,12 @@ public:
     */
     DatasetTaskHandler(QObject* parent, DatasetTask* datasetTask);
 
-    /** Initializes the handler */
-    void init() override;
-   
+    /**
+     * Get status bar action
+     * @return Pointer to status bar widget action
+     */
+    gui::WidgetAction* getStatusBarAction() override { return nullptr; }
+
 private:
 
     /** Get pointer to dataset task */

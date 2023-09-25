@@ -58,132 +58,36 @@ BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name)
             return childTask;
         };
 
-        auto overallBackgroundTask = nullptr;// Application::current()->getTask(Application::TaskType::OverallBackground);
-
         auto childTaskA = addChildTask("Reading large file", {
-            "Task 1",
-            "Task 2",
-            "Task 3",
-            "Task 4",
-            "Task 5",
-            "Task 6",
-            "Task 7",
-            "Task 8",
-            "Task 9",
-            "Task 10"
-            }, 502, overallBackgroundTask);
+            "Import file 1",
+            "Import file 2",
+            "Import file 3",
+            "Import file 4",
+            "Import file 5",
+            "Import file 6",
+            "Import file 7",
+            "Import file 8",
+            "Import file 9",
+            "Import file 10"
+            }, 502);
 
         auto childTaskB = addChildTask("Updating ManiVault", {
-            "Task 1",
-            "Task 2",
-            "Task 3",
-            "Task 4",
-            "Task 5",
-            "Task 6",
-            "Task 7",
-            "Task 8",
-            "Task 9",
-            "Task 10"
-            }, 497, overallBackgroundTask);
+            "Downloading update 1",
+            "Downloading update 2",
+            "Downloading update 3",
+            "Downloading update 4",
+            "Downloading update 5",
+            "Downloading update 6",
+            "Downloading update 7",
+            "Downloading update 8",
+            "Downloading update 9",
+            "Downloading update 10"
+            }, 850);
 
         eventLoop.exec();
-    });
-}
 
-void BackgroundTaskTester::testRunningIndeterminate()
-{
-    TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
-        QEventLoop eventLoop(taskRunner);
-
-        auto indeterminateTask = new BackgroundTask(taskRunner, "Indeterminate Task", Application::current()->getTask(Application::TaskType::OverallBackground), Task::Status::RunningIndeterminate);
-
-        auto subtasks = QStringList({
-            "Step 1",
-            "Step 2",
-            "Step 3",
-            "Step 4",
-            "Step 5",
-            "Step 6",
-            "Step 7",
-            "Step 8",
-            "Step 9",
-            "Step 10"
-        });
-
-        QTimer timer;
-
-        timer.setInterval(1000);
-
-        connect(indeterminateTask, &BackgroundTask::requestAbort, &timer, &QTimer::stop);
-
-        connect(&timer, &QTimer::timeout, [&]() -> void {
-            if (!subtasks.isEmpty()) {
-                const auto subtaskName = subtasks.first();
-
-                subtasks.removeFirst();
-
-                indeterminateTask->setProgressDescription(subtaskName);
-            }
-            else {
-                timer.stop();
-                indeterminateTask->setFinished();
-            }
-        });
-
-        timer.start();
-
-        eventLoop.exec();
-    });
-}
-
-void BackgroundTaskTester::testAggregation()
-{
-
-}
-
-void BackgroundTaskTester::testPerformance()
-{
-    TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
-        QEventLoop eventLoop(taskRunner);
-
-        auto overallBackgroundTask  = Application::current()->getTask(Application::TaskType::OverallBackground);
-        
-        BackgroundTask performanceTask(nullptr, "Performance Task", nullptr, Task::Status::Running);
-
-        const auto numberOfSubTasks = 10000;
-
-        QStringList subtasks;
-
-        subtasks.reserve(numberOfSubTasks);
-
-        for (int subtaskIndex = 0; subtaskIndex < numberOfSubTasks; subtaskIndex++)
-            subtasks << QString("Subtask: %1").arg(QString::number(subtaskIndex));
-
-        performanceTask.setSubtasks(subtasks);
-
-        QTimer timer;
-
-        timer.setInterval(1);
-
-        connect(&performanceTask, &BackgroundTask::requestAbort, &timer, &QTimer::stop);
-
-        connect(&timer, &QTimer::timeout, [&]() -> void {
-            if (!subtasks.isEmpty()) {
-                const auto subtaskName = subtasks.first();
-
-                subtasks.removeFirst();
-
-                performanceTask.setSubtaskFinished(subtaskName);
-            }
-            else {
-                timer.stop();
-                performanceTask.setFinished();
-            }
-            });
-
-        timer.start();
-
-        eventLoop.exec();
+        delete childTaskA;
+        delete childTaskB;
     });
 }
 

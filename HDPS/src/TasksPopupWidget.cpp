@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "TasksPopupWidget.h"
+#include "TasksStatusBarAction.h"
 #include "Application.h"
 
 #include "util/Icon.h"
@@ -11,48 +12,28 @@
 #include <QMainWindow>
 #include <QToolButton>
 
-using namespace hdps::gui;
-
-namespace hdps {
+namespace hdps::gui {
 
 const QSize TasksPopupWidget::iconPixmapSize = QSize(64, 64);
 
-TasksPopupWidget::TasksPopupWidget(AbstractTaskHandler* taskHandler, QToolButton* toolButton, QWidget* parent /*= nullptr*/) :
+TasksPopupWidget::TasksPopupWidget(gui::TasksStatusBarAction& tasksStatusBarAction, QWidget* anchorWidget /*= nullptr*/, QWidget* parent /*= nullptr*/, std::uint32_t minimumDuration /*= 250*/) :
     QWidget(parent),
-    _taskHandler(taskHandler),
-    _toolButton(toolButton),
-    _tasksAction(this, "Foreground Tasks"),
+    _tasksStatusBarAction(tasksStatusBarAction),
+    _anchorWidget(anchorWidget),
     _tasksIconPixmap(Application::getIconFont("FontAwesome").getIcon("tasks").pixmap(iconPixmapSize))
 {
-    Q_ASSERT(_taskHandler != nullptr);
-
-    if (!_taskHandler)
-        return;
-
-    Q_ASSERT(_toolButton != nullptr);
-
-    if (!_toolButton)
-        return;
-
-    setObjectName("ForegroundTasksPopupWidget");
+    setObjectName("TasksPopupWidget");
     setWindowFlag(Qt::FramelessWindowHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
-    setStyleSheet(QString("QWidget#ForegroundTasksPopupWidget { border: 1px solid %1; }").arg(palette().color(QPalette::Normal, QPalette::Mid).name(QColor::HexRgb)));
+    setStyleSheet(QString("QWidget#TasksPopupWidget { border: 1px solid %1; }").arg(palette().color(QPalette::Normal, QPalette::Mid).name(QColor::HexRgb)));
 
     _minimumDurationTimer.setSingleShot(true);
-
-    const auto updateMinimumDurationTimer = [this]() -> void {
-        _minimumDurationTimer.setInterval(_taskHandler->getMinimumDuration());
-    };
-
-    updateMinimumDurationTimer();
-
-    connect(_taskHandler, &AbstractTaskHandler::minimumDurationChanged, this, updateMinimumDurationTimer);
+    _minimumDurationTimer.setInterval(minimumDuration);
 
     setLayout(new QVBoxLayout());
 
-    auto& tasksModel        = _tasksAction.getTasksModel();
-    auto& tasksFilterModel  = _tasksAction.getTasksFilterModel();
+    auto& tasksModel        = _tasksStatusBarAction.getTasksModel();
+    auto& tasksFilterModel  = _tasksStatusBarAction.getTasksFilterModel();
 
     const auto numberOfTasksChangedDeferred = [this]() -> void {
         if (isHidden() && !_minimumDurationTimer.isActive())
@@ -68,13 +49,15 @@ TasksPopupWidget::TasksPopupWidget(AbstractTaskHandler* taskHandler, QToolButton
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, numberOfTasksChangedDeferred);
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, numberOfTasksChangedDeferred);
 
-    synchronizeWithToolButton();
-    updateToolButtonIcon();
+    synchronizeWithAnchorWidget();
+    updateIcon();
     numberOfTasksChanged();
 
-    installEventFilter(this);
-    _toolButton->installEventFilter(this);
-    getMainWindow()->installEventFilter(this);
+    if (_anchorWidget) {
+        installEventFilter(this);
+        _anchorWidget->installEventFilter(this);
+        getMainWindow()->installEventFilter(this);
+    }
 }
 
 bool TasksPopupWidget::eventFilter(QObject* target, QEvent* event)
@@ -88,8 +71,8 @@ bool TasksPopupWidget::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::Move:
         {
-            if (targetWidget == _toolButton || targetWidget == getMainWindow())
-                synchronizeWithToolButton();
+            if (targetWidget == _anchorWidget || targetWidget == getMainWindow())
+                synchronizeWithAnchorWidget();
 
             break;
         }
@@ -97,7 +80,7 @@ bool TasksPopupWidget::eventFilter(QObject* target, QEvent* event)
         case QEvent::Resize:
         {
             if (targetWidget == this)
-                synchronizeWithToolButton();
+                synchronizeWithAnchorWidget();
 
             break;
         }
@@ -109,7 +92,7 @@ bool TasksPopupWidget::eventFilter(QObject* target, QEvent* event)
     return QObject::eventFilter(target, event);
 }
 
-void TasksPopupWidget::updateToolButtonIcon()
+void TasksPopupWidget::updateIcon()
 {
     QPixmap iconPixmap(iconPixmapSize);
 
@@ -121,7 +104,7 @@ void TasksPopupWidget::updateToolButtonIcon()
 
     painter.drawPixmap(QPoint(0, 0), _tasksIconPixmap.scaled(scaledTasksIconPixmapSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
-    const auto numberOfTasks = _tasksAction.getTasksFilterModel().rowCount();
+    const auto numberOfTasks = _tasksStatusBarAction.getTasksFilterModel().rowCount();
 
     const auto badgeRadius = 43.0;
 
@@ -139,12 +122,15 @@ void TasksPopupWidget::updateToolButtonIcon()
 
     painter.drawText(textRectangle, QString::number(numberOfTasks), QTextOption(Qt::AlignCenter));
 
-    _toolButton->setIcon(createIcon(iconPixmap));
+    _tasksStatusBarAction.setIcon(createIcon(iconPixmap));
 }
 
-void TasksPopupWidget::synchronizeWithToolButton()
+void TasksPopupWidget::synchronizeWithAnchorWidget()
 {
-    move(_toolButton->mapToGlobal(QPoint(_toolButton->width(), 0)) - QPoint(width(), height()));
+    if (_anchorWidget == nullptr)
+        return;
+
+    move(_anchorWidget->mapToGlobal(QPoint(_anchorWidget->width(), 0)) - QPoint(width(), height()));
 }
 
 QMainWindow* TasksPopupWidget::getMainWindow()
@@ -171,28 +157,25 @@ void TasksPopupWidget::cleanLayout()
 
 void TasksPopupWidget::numberOfTasksChanged()
 {
-    auto& tasksModel = _tasksAction.getTasksModel();
-    auto& tasksFilterModel = _tasksAction.getTasksFilterModel();
+    auto& tasksModel        = _tasksStatusBarAction.getTasksModel();
+    auto& tasksFilterModel  = _tasksStatusBarAction.getTasksFilterModel();
 
     const auto numberOfTasks = tasksFilterModel.rowCount();
 
     if (numberOfTasks == 0 && isVisible())
         close();
 
-    if (numberOfTasks >= 1 && !isVisible() && !isEnabled())
-        show();
-
     cleanLayout();
 
     QVector<Task*> currentTasks;
 
     for (int rowIndex = 0; rowIndex < numberOfTasks; ++rowIndex) {
-        const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(rowIndex, static_cast<int>(TasksModel::Column::Progress)));
+        const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Progress)));
 
         if (!sourceModelIndex.isValid())
             continue;
 
-        auto progressItem = dynamic_cast<TasksModel::ProgressItem*>(tasksModel.itemFromIndex(sourceModelIndex));
+        auto progressItem = dynamic_cast<AbstractTasksModel::ProgressItem*>(tasksModel.itemFromIndex(sourceModelIndex));
 
         Q_ASSERT(progressItem != nullptr);
 
@@ -223,9 +206,10 @@ void TasksPopupWidget::numberOfTasksChanged()
 
     adjustSize();
 
-    updateToolButtonIcon();
+    updateIcon();
 
-    _toolButton->setToolTip(QString("%1 task(s)").arg(QString::number(numberOfTasks)));
+    if (_anchorWidget)
+        _anchorWidget->setToolTip(QString("%1 task(s)").arg(QString::number(numberOfTasks)));
 }
 
 }

@@ -18,6 +18,7 @@ TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
     _taskStatusFilterAction(this, "Status", Task::statusNames.values(), Task::statusNames.values()),
     _hideDisabledTasksFilterAction(this, "Hide disabled tasks", true),
     _hideHiddenTasksFilterAction(this, "Hide hidden tasks", true),
+    _parentTaskFilterAction(this, "Parent task identifier"),
     _statusTypeCounts(),
     _rowCount(0)
 {
@@ -31,12 +32,14 @@ TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
     connect(&_taskStatusFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
     connect(&_hideDisabledTasksFilterAction, &ToggleAction::toggled, this, &TasksFilterModel::invalidate);
     connect(&_hideHiddenTasksFilterAction, &ToggleAction::toggled, this, &TasksFilterModel::invalidate);
+    connect(&_parentTaskFilterAction, &StringAction::stringChanged, this, &TasksFilterModel::invalidate);
 
     _taskTypeFilterAction.setToolTip("Filter tasks based on their type");
     _taskScopeFilterAction.setToolTip("Filter tasks based on their scope");
     _taskStatusFilterAction.setToolTip("Filter tasks based on their status");
     _hideDisabledTasksFilterAction.setToolTip("Hide or show disabled tasks");
     _hideHiddenTasksFilterAction.setToolTip("Hide or show hidden tasks");
+    _parentTaskFilterAction.setToolTip("Show only tasks of which the parent identifier matches");
 
     invalidate();
 }
@@ -49,41 +52,47 @@ bool TasksFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) cons
         return true;
 
     if (filterRegularExpression().isValid()) {
-        const auto key = getSourceData(index, static_cast<TasksModel::Column>(filterKeyColumn()), filterRole()).toString();
+        const auto key = getSourceData(index, static_cast<AbstractTasksModel::Column>(filterKeyColumn()), filterRole()).toString();
 
         if (!key.contains(filterRegularExpression()))
             return false;
     }
     
     const auto taskTypes    = _taskTypeFilterAction.getSelectedOptions();
-    const auto taskType     = getSourceData(index, TasksModel::Column::Type, Qt::DisplayRole).toString();
+    const auto taskType     = getSourceData(index, AbstractTasksModel::Column::Type, Qt::DisplayRole).toString();
 
     if (!taskTypes.contains(taskType))
         return false;
 
     const auto taskScopes   = _taskScopeFilterAction.getSelectedOptions();
-    const auto taskScope    = getSourceData(index, TasksModel::Column::Scope, Qt::DisplayRole).toString();
+    const auto taskScope    = getSourceData(index, AbstractTasksModel::Column::Scope, Qt::DisplayRole).toString();
 
     if (!taskScopes.contains(taskScope))
         return false;
 
     const auto taskStatusTypes  = _taskStatusFilterAction.getSelectedOptions();
-    const auto statusIndex      = getSourceData(index, TasksModel::Column::Status, Qt::EditRole).toInt();
+    const auto statusIndex      = getSourceData(index, AbstractTasksModel::Column::Status, Qt::EditRole).toInt();
     const auto taskStatus       = Task::statusNames[static_cast<Task::Status>(statusIndex)];
     
     if (!taskStatusTypes.contains(taskStatus))
         return false;
 
-    const auto taskIsEnabled = getSourceData(index, TasksModel::Column::Enabled, Qt::EditRole).toBool();
+    const auto taskIsEnabled = getSourceData(index, AbstractTasksModel::Column::Enabled, Qt::EditRole).toBool();
 
     if (_hideDisabledTasksFilterAction.isChecked() && !taskIsEnabled)
         return false;
 
-    const auto taskIsVisible = getSourceData(index, TasksModel::Column::Visible, Qt::EditRole).toBool();
+    const auto taskIsVisible = getSourceData(index, AbstractTasksModel::Column::Visible, Qt::EditRole).toBool();
 
     if (_hideHiddenTasksFilterAction.isChecked() && !taskIsVisible)
         return false;
 
+    const auto filterParentTask = _parentTaskFilterAction.getString();
+    const auto parentTask       = getSourceData(index, AbstractTasksModel::Column::ParentID, Qt::EditRole).toString();
+
+    if (!filterParentTask.isEmpty())
+        if (parentTask != filterParentTask)
+            return false;
 
     return true;
 }
@@ -103,7 +112,7 @@ void TasksFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
     QSortFilterProxyModel::setSourceModel(sourceModel);
 
     for (int row = 0; row < sourceModel->rowCount(); row++) {
-        const auto status = this->sourceModel()->index(row, static_cast<int>(TasksModel::Column::Type)).data(Qt::DisplayRole).toString();
+        const auto status = this->sourceModel()->index(row, static_cast<int>(AbstractTasksModel::Column::Type)).data(Qt::DisplayRole).toString();
 
         if (_statusTypeCounts.contains(status)) {
             _statusTypeCounts[status]++;
@@ -127,7 +136,7 @@ void TasksFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
             auto selectedTaskTypes = _taskTypeFilterAction.getSelectedOptions();
 
             for (int row = first; row <= last; row++) {
-                const auto status = this->sourceModel()->index(row, static_cast<int>(TasksModel::Column::Type), parent).data(Qt::DisplayRole).toString();
+                const auto status = this->sourceModel()->index(row, static_cast<int>(AbstractTasksModel::Column::Type), parent).data(Qt::DisplayRole).toString();
 
                 if (_statusTypeCounts.contains(status)) {
                     if (_statusTypeCounts[status] == 1)
@@ -149,7 +158,7 @@ void TasksFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
     //connect(sourceModel, &QAbstractItemModel::dataChanged, this, &TasksFilterModel::invalidate);
 }
 
-QVariant TasksFilterModel::getSourceData(const QModelIndex& index, const TasksModel::Column& column, int role) const
+QVariant TasksFilterModel::getSourceData(const QModelIndex& index, const AbstractTasksModel::Column& column, int role) const
 {
     return sourceModel()->data(index.siblingAtColumn(static_cast<int>(column)), role);
 }
@@ -159,7 +168,7 @@ void TasksFilterModel::addTaskTypesForRows(const QModelIndex& parent, int first,
     auto selectedTaskTypes = _taskTypeFilterAction.getSelectedOptions();
 
     for (int row = first; row <= last; row++) {
-        const auto taskType = sourceModel()->index(row, static_cast<int>(TasksModel::Column::Type), parent).data(Qt::DisplayRole).toString();
+        const auto taskType = sourceModel()->index(row, static_cast<int>(AbstractTasksModel::Column::Type), parent).data(Qt::DisplayRole).toString();
 
         if (_statusTypeCounts.contains(taskType)) {
             _statusTypeCounts[taskType]++;

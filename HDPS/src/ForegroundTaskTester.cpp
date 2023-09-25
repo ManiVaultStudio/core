@@ -16,7 +16,6 @@ ForegroundTaskTester::ForegroundTaskTester(QObject* parent, const QString& name)
     AbstractTaskTester(parent, name)
 {
     testRunningIndeterminate();
-    //testAggregation();
     testPerformance();
 }
 
@@ -61,129 +60,6 @@ void ForegroundTaskTester::testRunningIndeterminate()
         });
 
         timer.start();
-
-        eventLoop.exec();
-    });
-}
-
-void ForegroundTaskTester::testAggregation()
-{
-    TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
-        QEventLoop eventLoop(taskRunner);
-
-        auto aggregateTask = new ForegroundTask(taskRunner, "Aggregate Task");
-
-        aggregateTask->setMayKill(true);
-
-        QMap<QString, QTimer*> timers;
-
-        const auto addChildTask = [this, taskRunner, &timers](const QString& name, QStringList tasks, int interval, Task* parentTask = nullptr) -> Task* {
-            auto childTask = new ForegroundTask(taskRunner, name, parentTask);
-
-            if (!tasks.isEmpty()) {
-                childTask->setSubtasks(tasks);
-                childTask->setRunning();
-
-                auto timer = new QTimer();
-
-                timers[name] = timer;
-
-                timer->setInterval(interval);
-
-                connect(childTask, &ForegroundTask::requestAbort, timer, &QTimer::stop);
-
-                connect(timer, &QTimer::timeout, [timer, childTask, &tasks]() -> void {
-                    if (!tasks.isEmpty()) {
-                        const auto subtaskName = tasks.first();
-
-                        tasks.removeFirst();
-
-                        childTask->setSubtaskFinished(subtaskName);
-                    }
-                    else {
-                        timer->stop();
-                        childTask->setFinished();
-                    }
-                    });
-
-                timer->start();
-            }
-            else {
-                childTask->setRunning();
-            }
-
-            return childTask;
-        };
-
-        
-        auto childTaskA = addChildTask("A", {}, 0, aggregateTask);
-
-        /*
-        auto childTaskB = addChildTask("B", {}, 0, aggregateTask);
-
-        auto childTaskAA = addChildTask("AA", {
-            "Task 1",
-            "Task 2",
-            "Task 3",
-            "Task 4",
-            "Task 5",
-            "Task 6",
-            "Task 7",
-            "Task 8",
-            "Task 9",
-            "Task 10"
-            }, 502, childTaskA);
-
-        auto childTaskAB = addChildTask("AB", {
-            "Task 1",
-            "Task 2",
-            "Task 3",
-            "Task 4",
-            "Task 5",
-            "Task 6",
-            "Task 7",
-            "Task 8",
-            "Task 9",
-            "Task 10"
-            }, 497, childTaskA);
-
-        auto childTaskBA = addChildTask("BA", {
-            "Task 1",
-            "Task 2",
-            "Task 3",
-            "Task 4",
-            "Task 5",
-            "Task 6",
-            "Task 7",
-            "Task 8",
-            "Task 9",
-            "Task 10"
-            }, 1505, childTaskB);
-
-        auto childTaskBB = addChildTask("BB", {
-            "Task 1",
-            "Task 2",
-            "Task 3",
-            "Task 4",
-            "Task 5",
-            "Task 6",
-            "Task 7",
-            "Task 8",
-            "Task 9",
-            "Task 10"
-            }, 1491, childTaskB);
-
-        auto childTaskIndeterminate = new ForegroundTask(aggregateTask, "Indeterminate");
-
-        childTaskIndeterminate->setRunningIndeterminate();
-
-        QTimer::singleShot(10000, [childTaskIndeterminate]() -> void {
-            if (childTaskIndeterminate->isAborting() || childTaskIndeterminate->isAborted())
-                return;
-
-            childTaskIndeterminate->setFinished();
-        });
-        */
 
         eventLoop.exec();
     });

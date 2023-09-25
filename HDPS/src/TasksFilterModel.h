@@ -7,8 +7,9 @@
 #include "actions/StringAction.h"
 #include "actions/OptionsAction.h"
 #include "actions/ToggleAction.h"
+#include "actions/StringAction.h"
 
-#include "TasksModel.h"
+#include "AbstractTasksModel.h"
 
 #include <QSortFilterProxyModel>
 #include <QMap>
@@ -64,7 +65,7 @@ private:
      * @param role Data role
      * @return Data in variant form
      */
-    QVariant getSourceData(const QModelIndex& index, const TasksModel::Column& column, int role) const;
+    QVariant getSourceData(const QModelIndex& index, const AbstractTasksModel::Column& column, int role) const;
 
     /**
      * Extract task types from row range and add them to the task types action when they do not exist yet
@@ -91,6 +92,7 @@ public: // Action getters
     gui::OptionsAction& getTaskStatusFilterAction() { return _taskStatusFilterAction; }
     gui::ToggleAction& getHideDisabledTasksFilterAction() { return _hideDisabledTasksFilterAction; }
     gui::ToggleAction& getHideHiddenTasksFilterAction() { return _hideHiddenTasksFilterAction; }
+    gui::StringAction& getParentTaskFilterAction() { return _parentTaskFilterAction; }
 
 private:
     gui::OptionsAction              _taskTypeFilterAction;              /** Action for filtering based on task type */
@@ -98,6 +100,7 @@ private:
     gui::OptionsAction              _taskStatusFilterAction;            /** Action for filtering based on task status */
     gui::ToggleAction               _hideDisabledTasksFilterAction;     /** Action for hiding disabled tasks */
     gui::ToggleAction               _hideHiddenTasksFilterAction;       /** Action for hiding hidden tasks */
+    gui::StringAction               _parentTaskFilterAction;            /** Action for filtering on parent task */
     QMap<QString, std::uint32_t>    _statusTypeCounts;                  /** Counts the number of task per status type */
     std::uint32_t                   _rowCount;                          /** Current number of rows */
 };
