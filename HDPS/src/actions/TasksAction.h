@@ -6,7 +6,6 @@
 
 #include <actions/WidgetAction.h>
 
-#include "TasksTreeModel.h"
 #include "TasksFilterModel.h"
 
 #include <widgets/HierarchyWidget.h>
@@ -82,12 +81,6 @@ public:
     Q_INVOKABLE TasksAction(QObject* parent, const QString& title);
 
     /**
-     * Get tasks model
-     * @return Reference to the task model
-     */
-    TasksTreeModel& getTasksModel();
-
-    /**
      * Get tasks filter model
      * @return Reference to the task filter model
      */
@@ -154,7 +147,6 @@ signals:
     void autoHideKillCollumnChanged(bool autoHideKillCollumn);
 
 private:
-    TasksTreeModel      _tasksModel;            /** Model with all tasks in the system */
     TasksFilterModel    _tasksFilterModel;      /** Filter model for tasks */
     QPixmap             _tasksIconPixmap;       /** Tasks icon pixmap underlay (count badge will be drawn on top) */
     std::int32_t        _rowHeight;             /** Row height in pixels */

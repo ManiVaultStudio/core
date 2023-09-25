@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "TasksAction.h"
+#include "TasksTreeModel.h"
 
 #include <CoreInterface.h>
 #include <AbstractTaskManager.h>
@@ -25,24 +26,18 @@ const QSize TasksAction::tasksIconPixmapSize = QSize(64, 64);
 
 TasksAction::TasksAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
-    _tasksModel(this),
     _tasksFilterModel(this),
     _tasksIconPixmap(),
     _rowHeight(20),
     _progressColumnMargin(0),
     _autoHideKillCollumn(true)
 {
-    _tasksFilterModel.setSourceModel(&_tasksModel);
+    _tasksFilterModel.setSourceModel(tasks().getTreeModel());
     _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
 
     _tasksIconPixmap = Application::getIconFont("FontAwesome").getIcon("tasks").pixmap(tasksIconPixmapSize);
 
     connect(&_tasksFilterModel, &QAbstractItemModel::layoutChanged, this, &TasksAction::filterModelChanged);
-}
-
-TasksTreeModel& TasksAction::getTasksModel()
-{
-    return _tasksModel;
 }
 
 TasksFilterModel& TasksAction::getTasksFilterModel()
@@ -199,7 +194,7 @@ private:
      * @return Pointer to progress action
      */
     ProgressAction* getProgressAction(const QModelIndex& index) const {
-        auto item = _tasksAction->getTasksModel().itemFromIndex(_tasksAction->getTasksFilterModel().mapToSource(index).siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)));
+        auto item = tasks().getTreeModel()->itemFromIndex(_tasksAction->getTasksFilterModel().mapToSource(index).siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)));
 
         if (item == nullptr)
             return nullptr;
@@ -246,7 +241,7 @@ private:
      * @return Pointer to task killer action
      */
     TriggerAction* getKillTaskAction(const QModelIndex& index) const {
-        auto item = _tasksAction->getTasksModel().itemFromIndex(_tasksAction->getTasksFilterModel().mapToSource(index).siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)));
+        auto item = tasks().getTreeModel()->itemFromIndex(_tasksAction->getTasksFilterModel().mapToSource(index).siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)));
 
         if (item == nullptr)
             return nullptr;
@@ -261,7 +256,7 @@ private:
 TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, tasksAction, widgetFlags),
     _tasksAction(tasksAction),
-    _tasksWidget(this, "Task", tasksAction->getTasksModel(), &tasksAction->getTasksFilterModel(), widgetFlags & Toolbar, widgetFlags & Overlay)
+    _tasksWidget(this, "Task", *tasks().getTreeModel(), &tasksAction->getTasksFilterModel(), widgetFlags & Toolbar, widgetFlags & Overlay)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));
 
@@ -345,19 +340,6 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     layout->addWidget(&_tasksWidget);
 
     setLayout(layout);
-
-    /*
-    connect(&treeView, &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
-        if (static_cast<TasksModel::Column>(index.column()) != TasksModel::Column::Kill)
-            return;
-
-        const auto selectedItemIndex    = _tasksAction->getTasksFilterModel().mapToSource(index);
-        const auto taskItem             = static_cast<TasksModel::Item*>(_tasksAction->getTasksModel().itemFromIndex(selectedItemIndex));
-
-        taskItem->getTask()->kill();
-    });
-
-    */
 
     _tasksAction->openPersistentProgressEditorsRecursively(treeView);
 }

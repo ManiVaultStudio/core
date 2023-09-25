@@ -3,7 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "BackgroundTaskHandler.h"
+#include "TasksListModel.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 using namespace hdps::gui;
 
@@ -11,9 +13,8 @@ namespace hdps {
 
 BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),
-    _tasksListModel(this),
     _overallBackgroundTaskAction(this, "Overall Background Task"),
-    _tasksStatusBarAction(_tasksListModel, this, "Tasks Status Bar"),
+    _tasksStatusBarAction(*tasks().getListModel(), this, "Tasks Status Bar"),
     _statusBarAction(this, "Status Bar Group")
 {
     _overallBackgroundTaskAction.setStretch(1);

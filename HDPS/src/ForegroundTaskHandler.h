@@ -6,7 +6,6 @@
 
 #include "AbstractTaskHandler.h"
 #include "TasksStatusBarAction.h"
-#include "TasksTreeModel.h"
 
 #include "actions/HorizontalGroupAction.h"
 
@@ -40,7 +39,6 @@ public: // Action getters
     gui::TasksStatusBarAction& getTasksStatusBarAction() { return _tasksStatusBarAction; }
 
 private:
-    TasksTreeModel              _tasksTreeModel;
     gui::TasksStatusBarAction   _tasksStatusBarAction;
     gui::HorizontalGroupAction  _statusBarAction;
 };

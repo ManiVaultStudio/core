@@ -5,6 +5,7 @@
 #pragma once
 
 #include "AbstractTaskHandler.h"
+#include "TasksFilterModel.h"
 
 #include "actions/TasksAction.h"
 
@@ -61,19 +62,20 @@ public:
      * @return Pointer to status bar widget action
      */
     gui::WidgetAction* getStatusBarAction() override { return nullptr; }
+    
+    /**
+     * Get tasks filter model
+     * @return Reference to the tasks filter model which filters the tasks tree model instance
+     */
+    TasksFilterModel& getTasksFilterModel();
 
 private:
 
     /** Updates the visibility of the modal tasks dialog */
     void updateDialogVisibility();
 
-public: // Action getters    
-
-    /** Get tasks action for displaying the model tasks */
-    gui::TasksAction& getTasksAction() { return _tasksAction; };
-
 private:
-    gui::TasksAction    _tasksAction;           /** Tasks action */
+    TasksFilterModel    _tasksFilterModel;
     ModalTasksDialog    _modalTasksDialog;      /** Modal tasks dialog */
     QTimer              _minimumDurationTimer;  /** Wait for a small amount of time before showing the UI */
 };

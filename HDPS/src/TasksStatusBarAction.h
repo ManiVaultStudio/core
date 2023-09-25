@@ -5,8 +5,9 @@
 #pragma once
 
 #include "actions/WidgetAction.h"
-#include "actions/TasksAction.h"
 
+#include "AbstractTasksModel.h"
+#include "TasksFilterModel.h"
 #include "TasksPopupWidget.h"
 
 #include <QToolButton>

@@ -6,7 +6,6 @@
 
 #include "AbstractTaskHandler.h"
 #include "TasksStatusBarAction.h"
-#include "TasksListModel.h"
 
 #include "actions/TaskAction.h"
 #include "actions/HorizontalGroupAction.h"
@@ -22,25 +21,6 @@ namespace hdps {
  */
 class BackgroundTaskHandler final : public AbstractTaskHandler
 {
-public:
-
-    /* Custom tool button class with a popup widget attached to it which shows the background task(s) */
-    class StatusBarButton : public QToolButton {
-    public:
-
-        /**
-         * Construct with \p parent widget
-         * @param parent Pointer to parent widget
-         */
-        StatusBarButton(QWidget* parent = nullptr);
-
-        /**
-         * Override paint event to customize control drawing
-         * @param paintEvent Pointer to paint event that occurred
-         */
-        void paintEvent(QPaintEvent* paintEvent);
-    };
-
 public:
 
     /**
@@ -61,7 +41,6 @@ public: // Action getters
     gui::TasksStatusBarAction& getTasksStatusBarAction() { return _tasksStatusBarAction; }
 
 private:
-    TasksListModel              _tasksListModel;
     gui::TaskAction             _overallBackgroundTaskAction;
     gui::TasksStatusBarAction   _tasksStatusBarAction;
     gui::HorizontalGroupAction  _statusBarAction;

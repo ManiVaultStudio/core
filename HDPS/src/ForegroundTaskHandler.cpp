@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ForegroundTaskHandler.h"
+#include "TasksTreeModel.h"
 #include "Application.h"
 #include "CoreInterface.h"
 
@@ -12,8 +13,7 @@ namespace hdps {
 
 ForegroundTaskHandler::ForegroundTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),
-    _tasksTreeModel(this),
-    _tasksStatusBarAction(_tasksTreeModel, this, "Foreground Tasks"),
+    _tasksStatusBarAction(*tasks().getTreeModel(), this, "Foreground Tasks"),
     _statusBarAction(this, "Status Bar Group")
 {
     _tasksStatusBarAction.setPopupMode(TasksStatusBarAction::PopupMode::Automatic);
@@ -37,23 +37,5 @@ ForegroundTaskHandler::ForegroundTaskHandler(QObject* parent) :
 
     connect(&settings().getTasksSettingsAction().getHideForegroundTasksPopupAction(), &ToggleAction::toggled, this, hideForegroundTasksPopupChanged);
 }
-
-/*
-void ForegroundTaskHandler::StatusBarButton::paintEvent(QPaintEvent* paintEvent)
-{
-    QToolButton::paintEvent(paintEvent);
-
-    QPainter painter(this);
-
-    const auto margin   = 3;
-    const auto icon     = this->icon();
-
-    if (icon.isNull())
-        return;
-
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.drawPixmap(QPoint(margin, margin), icon.pixmap(icon.availableSizes().first()).scaled(size() - 2 * QSize(margin, margin), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-}
-*/
 
 }
