@@ -91,6 +91,7 @@ private:
     enum class TimerType {
         ProgressChanged,                /** For Task::progressChanged() signal */
         ProgressDescriptionChanged,     /** For Task::progressDescriptionChanged() signal */
+        ProgressTextChanged,            /** For Task::progressTextChanged() signal */
         ToIdleWithDelay,                /** To automatically switch to Task::Status::Idle after a short delay when setting task status to Task::Status::Finished */
 
         Count
@@ -365,9 +366,6 @@ public: // Manual
      */
     virtual void setProgress(float progress, const QString& subtaskDescription = "");
 
-    /** Gets the task progress text */
-    virtual QString getProgressText() const final;
-
 public: // Subtasks
 
     /**
@@ -442,7 +440,7 @@ public: // Subtasks
      */
     virtual std::int32_t getSubtaskIndex(const QString& subtaskName) const final;
 
-public: // Progress description and text formatter
+public: // Progress description
 
     /**
      * Get progress description
@@ -457,6 +455,11 @@ public: // Progress description and text formatter
      */
     virtual void setProgressDescription(const QString& progressDescription, std::uint32_t clearDelay = 0) final;
 
+public: // Progress text
+
+    /** Gets the task progress text */
+    virtual QString getProgressText() const final;
+
     /**
      * Set progress text formatter to \p progressTextFormatter
      * @param progressTextFormatter Progress formatter function
@@ -465,8 +468,16 @@ public: // Progress description and text formatter
 
 private:
 
-    /** Computes the progress percentage depending on the type of task */
-    void computeProgress();
+    /** Gets the standard task progress text */
+    virtual QString getStandardProgressText() const final;
+
+private:
+
+    /** Updates the progress percentage depending on the task settings */
+    void updateProgress();
+
+    /** Updates the progress text depending on the task settings */
+    void updateProgressText();
 
     /**
      * Get timer by \p timerType
@@ -658,6 +669,12 @@ signals:
     void progressDescriptionChanged(const QString& progressDescription);
 
     /**
+     * Signals that the progress text changed to \p progressText
+     * @param progressText Current progress text
+     */
+    void progressTextChanged(const QString& progressText);
+
+    /**
      * Signals that the parent task changed from \p previousParentTask to \p currentParentTask
      * @param previousParentTask Pointer to previous parent task (maybe nullptr)
      * @param currentParentTask Pointer to previous parent task (maybe nullptr)
@@ -735,6 +752,7 @@ private:
     QTimer                  _timers[static_cast<int>(TimerType::Count)];    /** Timers to prevent unnecessary abundant emissions of signals */
     Task*                   _parentTask;                                    /** Pointer to the parent task */
     TasksPtrs               _childTasks;                                    /** Pointers to child tasks */
+    QString                 _progressText;                                  /** Progress text */
     ProgressTextFormatter   _progressTextFormatter;                         /** Progress text formatter function (overrides Task::getProgressText() when set) */
 private:
 

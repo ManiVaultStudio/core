@@ -61,21 +61,6 @@ BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
     };
 
     Application::current()->getTask(Application::TaskType::OverallBackground)->setProgressTextFormatter(overallBackgroundTaskTextFormatter);
-    /*
-    
-
-    if (numberOfBackroundTasks == 0) {
-        _overallBackgroundTaskAction.getProgressAction().setOverrideTextFormat("No background task(s)");
-    }
-    else {
-        _overallBackgroundTaskAction.getProgressAction().setOverrideTextFormat(QString("%1 background task(s) %p%").arg(numberOfBackroundTasks));
-    }
-    updateProgressActionTextFormat();
-
-    connect(&tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, updateProgressActionTextFormat);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateProgressActionTextFormat);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateProgressActionTextFormat);
-    */
 }
 
 }

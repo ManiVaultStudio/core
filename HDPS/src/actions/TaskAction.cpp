@@ -53,6 +53,7 @@ void TaskAction::setTask(Task* task)
     if (_task != nullptr) {
         disconnect(_task, &Task::nameChanged, this, nullptr);
         disconnect(_task, &Task::progressChanged, this, nullptr);
+        disconnect(_task, &Task::progressTextChanged, this, nullptr);
         disconnect(_task, &Task::statusChanged, this, nullptr);
         disconnect(_task, &Task::mayKillChanged, this, nullptr);
     }
@@ -77,9 +78,8 @@ void TaskAction::setTask(Task* task)
     updateProgressAction();
 
     connect(_task, &Task::nameChanged, this, updateCancelTaskAction);
-    connect(_task, &Task::progressChanged, this, &TaskAction::updateProgressActionTextFormat);
     connect(_task, &Task::progressChanged, this, updateProgressAction);
-    connect(_task, &Task::progressDescriptionChanged, this, &TaskAction::updateProgressActionTextFormat);
+    connect(_task, &Task::progressTextChanged, this, &TaskAction::updateProgressActionTextFormat);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateActionsReadOnly);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionRange);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionTextFormat);
