@@ -187,7 +187,7 @@ public:
 
     /**
      * Get text format
-     * @return Text format string
+     * @return ProgressAction#_textFormat when ProgressAction#_overrideTextFormat is empty, otherwise ProgressAction#_overrideTextFormat
      */
     QString getTextFormat() const;
 
@@ -200,6 +200,22 @@ public:
      * @param textFormat Text format string
      */
     void setTextFormat(const QString& textFormat);
+
+    /**
+     * Get override text format
+     * @return Override text format string
+     */
+    QString getOverrideTextFormat() const;
+
+    /**
+     * Set override text format to \p overrideTextFormat
+     * %p - is replaced by the percentage completed
+     * %v - is replaced by the current value
+     * %m - is replaced by the total number of steps
+     * The default value is "%p%"
+     * @param overrideTextFormat Override text format string
+     */
+    void setOverrideTextFormat(const QString& overrideTextFormat);
 
     /**
      * Get number of steps
@@ -264,18 +280,27 @@ signals:
     void textAlignmentChanged(bool textAlignment);
 
     /**
-     * Signals that text format changed to \p textFormat
-     * @param textFormat Updated text format
+     * Signals that the text format changed from \p previousTextFormat to \p currentTextFormat
+     * @param previousTextFormat Previous text format
+     * @param currentTextFormat Current text format
      */
-    void textFormatChanged(const QString& textFormat);
+    void textFormatChanged(const QString& previousTextFormat, const QString& currentTextFormat);
+
+    /**
+     * Signals that the override text format changed from \p previousOverrideTextFormat to \p currentOverrideTextFormat
+     * @param previousOverrideTextFormat Previous override text format
+     * @param currentOverrideTextFormat Current override text format
+     */
+    void overrideTextFormatChanged(const QString& previousOverrideTextFormat, const QString& currentOverrideTextFormat);
 
 private:
-    int                 _minimum;           /** Progress range minimum */
-    int                 _maximum;           /** Progress range maximum */
-    int                 _value;             /** Progress value */
-    bool                _textVisible;       /** Determines whether progress text is visible or not */
-    Qt::AlignmentFlag   _textAlignment;     /** Determines the label placement */
-    QString             _textFormat;        /** Text format string */
+    int                 _minimum;               /** Progress range minimum */
+    int                 _maximum;               /** Progress range maximum */
+    int                 _value;                 /** Progress value */
+    bool                _textVisible;           /** Determines whether progress text is visible or not */
+    Qt::AlignmentFlag   _textAlignment;         /** Determines the label placement */
+    QString             _textFormat;            /** Text format string */
+    QString             _overrideTextFormat;    /** Override text format string (when set, it overrides ProgressAction#_textFormat) */
 
     friend class AbstractActionsManager;
 };

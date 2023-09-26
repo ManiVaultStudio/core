@@ -83,6 +83,7 @@ public:
     static QMap<Scope, QString> scopeNames;
 
     using TasksPtrs = QVector<Task*>;
+    using ProgressTextFormatter = std::function<QString(Task&)>;
 
 private:
 
@@ -448,7 +449,7 @@ public: // Subtasks
      */
     virtual std::int32_t getSubtaskIndex(const QString& subtaskName) const final;
 
-public: // Progress description
+public: // Progress description and text formatter
 
     /**
      * Get progress description
@@ -462,6 +463,12 @@ public: // Progress description
      * @param clearDelay Progress description will be cleared after this delay (do not clear if zero)
      */
     virtual void setProgressDescription(const QString& progressDescription, std::uint32_t clearDelay = 0) final;
+
+    /**
+     * Set progress text formatter to \p progressTextFormatter
+     * @param progressTextFormatter Progress formatter function
+     */
+    virtual void setProgressTextFormatter(const ProgressTextFormatter& progressTextFormatter) final;
 
 private:
 
@@ -525,6 +532,7 @@ private: // Private setters (these call private signals under the hood, an essen
     void privateSetSubtaskFinished(const QString& subtaskName, const QString& progressDescription);
     void privateSetSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName);
     void privateSetProgressDescription(const QString& progressDescription, std::uint32_t clearDelay = 0);
+    void privateSetProgressTextFormatter(const ProgressTextFormatter& progressTextFormatter);
 
 signals:
 
@@ -714,6 +722,7 @@ signals:
     void privateSetSubtaskFinishedSignal(const QString& subtaskName, const QString& progressDescription, QPrivateSignal);
     void privateSetSubtaskNameSignal(std::uint32_t subtaskIndex, const QString& subtaskName, QPrivateSignal);
     void privateSetProgressDescriptionSignal(const QString& progressDescription, std::uint32_t clearDelay, QPrivateSignal);
+    void privateSetProgressTextFormatterSignal(const ProgressTextFormatter& progressTextFormatter, QPrivateSignal);
 
 private:
     QString                 _name;                                          /** Task name */
@@ -733,7 +742,7 @@ private:
     QTimer                  _timers[static_cast<int>(TimerType::Count)];    /** Timers to prevent unnecessary abundant emissions of signals */
     Task*                   _parentTask;                                    /** Pointer to the parent task */
     TasksPtrs               _childTasks;                                    /** Pointers to child tasks */
-
+    ProgressTextFormatter   _progressTextFormatter;                         /** Progress text formatter function (overrides Task::getProgressText() when set) */
 private:
 
     /** Single shot task progress and description timer interval */

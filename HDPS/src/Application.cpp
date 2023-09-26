@@ -49,6 +49,7 @@ hdps::Application::Application(int& argc, char** argv) :
 
     getTask(TaskType::LoadGUI)->setParentTask(getTask(TaskType::LoadApplication));
     getTask(TaskType::LoadProject)->setParentTask(getTask(TaskType::LoadApplication));
+    getTask(TaskType::OverallBackground)->setMayKill(false);
 
     auto loadGuiTask = getTask(TaskType::LoadGUI);
 

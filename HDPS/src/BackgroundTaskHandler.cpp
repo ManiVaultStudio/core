@@ -32,6 +32,50 @@ BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
     tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Background" });
     tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished" });
     tasksFilterModel.getParentTaskFilterAction().setString(Application::current()->getTask(Application::TaskType::OverallBackground)->getId());
+
+    const auto overallBackgroundTaskTextFormatter = [this](Task& task) -> QString {
+        const auto numberOfChildBackgroundTasks = task.getChildTasks().count();
+
+        switch (task.getStatus())
+        {
+            case Task::Status::Idle:
+                return "No background tasks";
+
+            case Task::Status::Running:
+            case Task::Status::RunningIndeterminate:
+                return QString("%1 task%2 running in the background %3%").arg(QString::number(numberOfChildBackgroundTasks), numberOfChildBackgroundTasks == 1 ? "" : "s", QString::number(task.getProgress() * 100.f, 'f', 1));
+
+            case Task::Status::Finished:
+                return QString("All background tasks have finished");
+
+            case Task::Status::AboutToBeAborted:
+            case Task::Status::Aborting:
+            case Task::Status::Aborted:
+                return {};
+
+            default:
+                break;
+        }
+
+        return {};
+    };
+
+    Application::current()->getTask(Application::TaskType::OverallBackground)->setProgressTextFormatter(overallBackgroundTaskTextFormatter);
+    /*
+    
+
+    if (numberOfBackroundTasks == 0) {
+        _overallBackgroundTaskAction.getProgressAction().setOverrideTextFormat("No background task(s)");
+    }
+    else {
+        _overallBackgroundTaskAction.getProgressAction().setOverrideTextFormat(QString("%1 background task(s) %p%").arg(numberOfBackroundTasks));
+    }
+    updateProgressActionTextFormat();
+
+    connect(&tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, updateProgressActionTextFormat);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateProgressActionTextFormat);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateProgressActionTextFormat);
+    */
 }
 
 }

@@ -107,6 +107,9 @@ void ProgressAction::setTextAlignment(Qt::AlignmentFlag textAlignment)
 
 QString ProgressAction::getTextFormat() const
 {
+    if (!_overrideTextFormat.isEmpty())
+        return _overrideTextFormat;
+
     return _textFormat;
 }
 
@@ -115,9 +118,28 @@ void ProgressAction::setTextFormat(const QString& textFormat)
     if (textFormat == _textFormat)
         return;
 
+    const auto previousTextFormat = _textFormat;
+
     _textFormat = textFormat;
 
-    emit textFormatChanged(_textFormat);
+    emit textFormatChanged(previousTextFormat, _textFormat);
+}
+
+QString ProgressAction::getOverrideTextFormat() const
+{
+    return _overrideTextFormat;
+}
+
+void ProgressAction::setOverrideTextFormat(const QString& overrideTextFormat)
+{
+    if (overrideTextFormat == _overrideTextFormat)
+        return;
+
+    const auto previousOverrideTextFormat = _overrideTextFormat;
+
+    _overrideTextFormat = overrideTextFormat;
+
+    emit overrideTextFormatChanged(previousOverrideTextFormat, _overrideTextFormat);
 }
 
 ProgressAction::BarWidget::BarWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags) :
@@ -179,6 +201,7 @@ ProgressAction::BarWidget::BarWidget(QWidget* parent, ProgressAction* progressAc
     updateTextFormat();
 
     connect(_progressAction, &ProgressAction::textFormatChanged, this, updateTextFormat);
+    connect(_progressAction, &ProgressAction::overrideTextFormatChanged, this, updateTextFormat);
 }
 
 void ProgressAction::BarWidget::paintEvent(QPaintEvent* paintEvent)

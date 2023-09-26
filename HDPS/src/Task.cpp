@@ -112,6 +112,7 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
     connect(this, qOverload<const QString&, const QString&, QPrivateSignal>(&Task::privateSetSubtaskFinishedSignal), this, qOverload<const QString&, const QString&>(&Task::privateSetSubtaskFinished));
     connect(this, &Task::privateSetSubtaskNameSignal, this, &Task::privateSetSubtaskName);
     connect(this, &Task::privateSetProgressDescriptionSignal, this, &Task::privateSetProgressDescription);
+    connect(this, &Task::privateSetProgressTextFormatterSignal, this, &Task::privateSetProgressTextFormatter);
 
     if (parentTask)
         setParentTask(parentTask);
@@ -386,6 +387,9 @@ void Task::setProgress(float progress, const QString& subtaskDescription /*= ""*
 
 QString Task::getProgressText() const
 {
+    if (_progressTextFormatter)
+        return const_cast<Task*>(this)->_progressTextFormatter(*const_cast<Task*>(this));
+
     switch (getStatus())
     {
         case Task::Status::Idle:
@@ -469,6 +473,11 @@ QString Task::getProgressDescription() const
 void Task::setProgressDescription(const QString& progressDescription, std::uint32_t clearDelay /*= 0*/)
 {
     emit privateSetProgressDescriptionSignal(progressDescription, clearDelay, QPrivateSignal());
+}
+
+void Task::setProgressTextFormatter(const ProgressTextFormatter& progressTextFormatter)
+{
+    emit privateSetProgressTextFormatterSignal(progressTextFormatter, QPrivateSignal());
 }
 
 std::int32_t Task::getSubtaskIndex(const QString& subtaskName) const
@@ -1137,6 +1146,11 @@ void Task::privateSetProgressDescription(const QString& progressDescription, std
             privateSetProgressDescription("");
         });
     }
+}
+
+void Task::privateSetProgressTextFormatter(const ProgressTextFormatter& progressTextFormatter)
+{
+    _progressTextFormatter = progressTextFormatter;
 }
 
 }
