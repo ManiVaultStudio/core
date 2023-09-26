@@ -20,6 +20,7 @@ ForegroundTaskHandler::ForegroundTaskHandler(QObject* parent) :
     _tasksStatusBarAction.getMenu().addAction(&settings().getTasksSettingsAction().getHideForegroundTasksPopupAction());
 
     _statusBarAction.addAction(&_tasksStatusBarAction);
+    _statusBarAction.setShowLabels(false);
 
     auto& tasksFilterModel = _tasksStatusBarAction.getTasksFilterModel();
 

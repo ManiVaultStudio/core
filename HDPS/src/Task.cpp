@@ -161,15 +161,23 @@ bool Task::hasParentTask()
     return getParentTask() != nullptr;
 }
 
-Task::TasksPtrs Task::getChildTasks(bool recursively /*= false*/) const
+hdps::Task::TasksPtrs Task::getChildTasks(bool recursively /*= false*/, const Scopes& scopes /*= Scopes()*/, const Statuses& statuses /*= Statuses()*/) const
 {
-    auto childTasks = _childTasks;
+    TasksPtrs childTasks;
+    
+    for (auto childTask : _childTasks) {
+        const auto filterInScope    = scopes.isEmpty() ? true : scopes.contains(childTask->getScope());
+        const auto filterInstatus   = statuses.isEmpty() ? true : statuses.contains(childTask->getStatus());
+
+        if (filterInScope && filterInstatus)
+            childTasks << childTask;
+    }
 
     if (recursively)
         for (auto childTask : _childTasks)
             childTasks << childTask->getChildTasks(recursively);
 
-    return _childTasks;
+    return childTasks;
 }
 
 void Task::addChildTask(Task* childTask)
@@ -455,8 +463,11 @@ QString Task::getStandardProgressText() const
 {
     switch (getStatus())
     {
+        case Task::Status::Undefined:
+            return "Undefined status";
+
         case Task::Status::Idle:
-            return "Idle";
+            return QString("%1 is idle").arg(getName());
 
         case Task::Status::Running:
         {
@@ -517,12 +528,15 @@ void Task::updateProgress()
 
         case ProgressMode::Aggregate:
         {
-            const auto childTasks = getChildTasks();
+            const auto childTasks = getChildTasks(false, { getScope() }, { Status::Running, Status::RunningIndeterminate });
 
             std::int32_t numberOfEnabledChildTasks = 0;
 
             auto accumulatedProgress = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [&numberOfEnabledChildTasks](float sum, Task* childTask) -> float {
                 if (!childTask->getEnabled())
+                    return sum;
+
+                if (!(childTask->isRunning() || childTask->isRunningIndeterminate()))
                     return sum;
 
                 numberOfEnabledChildTasks++;
@@ -594,8 +608,6 @@ void Task::updateProgressText()
 
         getTimer(TimerType::ProgressTextChanged).start();
     }
-
-        emit progressTextChanged(_progressText);
 }
 
 QTimer& Task::getTimer(const TimerType& timerType)
@@ -688,8 +700,8 @@ void Task::updateAggregateStatus()
     if (countStatus(Status::Idle) == childTasks.count())
         privateSetProgress(0.f);
 
-    if (countStatus(Status::Finished) == numberOfEnabledChildTasks) {
-        auto tasksToSetToIdle = getChildTasks();
+    if (countStatus(Status::Finished) >= 1 && countStatus(Status::Running) == 0 && countStatus(Status::RunningIndeterminate) == 0) {
+        auto tasksToSetToIdle = getChildTasks(false, { getScope() }, { Status::Finished });
 
         std::reverse(tasksToSetToIdle.begin(), tasksToSetToIdle.end());
 

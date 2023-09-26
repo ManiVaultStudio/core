@@ -84,6 +84,8 @@ public:
 
     using TasksPtrs = QVector<Task*>;
     using ProgressTextFormatter = std::function<QString(Task&)>;
+    using Scopes = QVector<Scope>;
+    using Statuses = QVector<Status>;
 
 private:
 
@@ -142,11 +144,13 @@ public: // Parent-child
     virtual bool hasParentTask() final;
 
     /**
-     * Get child tasks
+     * Get child tasks \p recursively, for \p scopes and \p statuses
      * @param recursively Whether to get child tasks recursively
+     * @param scopes Filter scopes (includes all scopes when empty)
+     * @param statuses Filter status (includes all statuses when empty)
      * @return Vector of pointer to child tasks
      */
-    virtual TasksPtrs getChildTasks(bool recursively = false) const final;
+    virtual TasksPtrs getChildTasks(bool recursively = false, const Scopes& scopes = Scopes(), const Statuses& statuses = Statuses()) const final;
 
 protected: // Parent-child
 

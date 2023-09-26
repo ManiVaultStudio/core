@@ -23,6 +23,7 @@ BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
     _tasksStatusBarAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
     _statusBarAction.setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
+    _statusBarAction.setShowLabels(false);
 
     _statusBarAction.addAction(&_overallBackgroundTaskAction);
     _statusBarAction.addAction(&_tasksStatusBarAction);
@@ -34,16 +35,16 @@ BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
     tasksFilterModel.getParentTaskFilterAction().setString(Application::current()->getTask(Application::TaskType::OverallBackground)->getId());
 
     const auto overallBackgroundTaskTextFormatter = [this](Task& task) -> QString {
-        const auto numberOfChildBackgroundTasks = task.getChildTasks().count();
+        const auto numberOfChildBackgroundTasks = task.getChildTasks(false, { Task::Scope::Background}, { Task::Status::Running, Task::Status::RunningIndeterminate }).count();
 
         switch (task.getStatus())
         {
             case Task::Status::Idle:
-                return "No background tasks";
+                return "No tasks running in the background";
 
             case Task::Status::Running:
             case Task::Status::RunningIndeterminate:
-                return QString("%1 task%2 running in the background %3%").arg(QString::number(numberOfChildBackgroundTasks), numberOfChildBackgroundTasks == 1 ? "" : "s", QString::number(task.getProgress() * 100.f, 'f', 1));
+                return QString("%1 task%2 %3 running in the background %4%").arg(QString::number(numberOfChildBackgroundTasks), numberOfChildBackgroundTasks == 1 ? "" : "s", numberOfChildBackgroundTasks == 1 ? "is" : "are", QString::number(task.getProgress() * 100.f, 'f', 1));
 
             case Task::Status::Finished:
                 return QString("All background tasks have finished");
