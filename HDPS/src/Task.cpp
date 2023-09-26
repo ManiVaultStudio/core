@@ -36,7 +36,7 @@ QMap<Task::Scope, QString> Task::scopeNames = QMap<Scope, QString>({
     { Task::Scope::Modal, "Modal" }
 });
 
-Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::Background*/, Task* parentTask /*= nullptr*/, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/, AbstractTaskHandler* handler /*= nullptr*/) :
+Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::Background*/, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/, AbstractTaskHandler* handler /*= nullptr*/) :
     QObject(parent),
     Serializable(name),
     _name(name),
@@ -113,9 +113,6 @@ Task::Task(QObject* parent, const QString& name, const Scope& scope /*= Scope::B
     connect(this, &Task::privateSetSubtaskNameSignal, this, &Task::privateSetSubtaskName);
     connect(this, &Task::privateSetProgressDescriptionSignal, this, &Task::privateSetProgressDescription);
     connect(this, &Task::privateSetProgressTextFormatterSignal, this, &Task::privateSetProgressTextFormatter);
-
-    if (parentTask)
-        setParentTask(parentTask);
 }
 
 Task::~Task()

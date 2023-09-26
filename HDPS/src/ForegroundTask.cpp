@@ -9,8 +9,8 @@ namespace hdps {
 
 ForegroundTaskHandler* ForegroundTask::foregroundTaskHandler = nullptr;
 
-ForegroundTask::ForegroundTask(QObject* parent, const QString& name, Task* parentTask /*= nullptr*/, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
-    Task(parent, name, Scope::Foreground, parentTask, status, mayKill, nullptr)
+ForegroundTask::ForegroundTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
+    Task(parent, name, Scope::Foreground, status, mayKill, nullptr)
 {
 }
 

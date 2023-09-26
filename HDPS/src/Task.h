@@ -99,23 +99,16 @@ private:
 public:
 
     /**
-     * Construct task with \p parent object, \p name, \p parentTask, initial \p status and possibly a \p taskHandler
+     * Construct task with \p parent object, \p name, initial \p status, whether the task may be killed \p mayKill and possibly a \p taskHandler
      * 
-     * There is a deliberate separation between \p parent QObject and \p parentTask in the constructor because:
-     *  - The \p parent parameter simply denotes the position of the task in the QObject hierarchy and has nothing to do with the task hierarchy.
-     *  - The \p parentTask pointer is used to denote the position of the initialized task in a task hierarchy.
-     * 
-     * Note: Within a task hierarchy, all tasks QObject::parent() objects should reside in the same thread (this is not the case for Task#_parentTask though).
-     * 
-     * @param parent Pointer to parent object (all task objects must reside in the same thread)
+     * @param parent Pointer to parent object (simply denotes the position of the task in the QObject hierarchy and has nothing to do with the task hierarchy)
      * @param name Name of the task
      * @param scope Scope of the task
-     * @param parentTask Pointer to parent task this will determine the placement in the task hierarchy as reflected in the user interface
      * @param status Initial status of the task
      * @param mayKill Boolean determining whether the task may be killed or not
      * @param handler Pointer to task handler
      */
-    Task(QObject* parent, const QString& name, const Scope& scope = Scope::Background, Task* parentTask = nullptr, const Status& status = Status::Undefined, bool mayKill = false, AbstractTaskHandler* handler = nullptr);
+    Task(QObject* parent, const QString& name, const Scope& scope = Scope::Background, const Status& status = Status::Undefined, bool mayKill = false, AbstractTaskHandler* handler = nullptr);
 
     /** Remove from task manager when destructed */
     ~Task();

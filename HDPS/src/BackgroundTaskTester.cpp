@@ -20,8 +20,8 @@ BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name)
 
         QMap<QString, QTimer*> timers;
 
-        const auto addChildTask = [this, &timers](const QString& name, QStringList tasks, int interval, Task* parentTask = nullptr) -> Task* {
-            auto childTask = new BackgroundTask(nullptr, name, parentTask);
+        const auto addChildTask = [this, &timers](const QString& name, QStringList tasks, int interval) -> Task* {
+            auto childTask = new BackgroundTask(nullptr, name);
 
             if (!tasks.isEmpty()) {
                 childTask->setSubtasks(tasks);

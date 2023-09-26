@@ -24,7 +24,7 @@ void ForegroundTaskTester::testRunningIndeterminate()
     TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto indeterminateTask = new ForegroundTask(taskRunner, "Indeterminate Task", nullptr, Task::Status::RunningIndeterminate);
+        auto indeterminateTask = new ForegroundTask(taskRunner, "Indeterminate Task", Task::Status::RunningIndeterminate);
 
         auto subtasks = QStringList({
             "Step 1",
@@ -70,7 +70,7 @@ void ForegroundTaskTester::testPerformance()
     TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto performanceTask = new ForegroundTask(taskRunner, "Performance Task", nullptr, Task::Status::Running);
+        auto performanceTask = new ForegroundTask(taskRunner, "Performance Task", Task::Status::Running);
 
         performanceTask->setMayKill(true);
 

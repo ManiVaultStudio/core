@@ -11,10 +11,10 @@ namespace hdps {
 
 BackgroundTaskHandler* BackgroundTask::backgroundTaskHandler = nullptr;
 
-BackgroundTask::BackgroundTask(QObject* parent, const QString& name, Task* parentTask /*= nullptr*/, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
-    Task(parent, name, Scope::Background, parentTask, status, mayKill, nullptr)
+BackgroundTask::BackgroundTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
+    Task(parent, name, Scope::Background, status, mayKill, nullptr)
 {
-    if (core() != nullptr && core()->isInitialized() && parentTask == nullptr)
+    if (core() != nullptr && core()->isInitialized())
         setParentTask(Application::current()->getTask(Application::TaskType::OverallBackground));
 }
 

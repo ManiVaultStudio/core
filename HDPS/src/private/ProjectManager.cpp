@@ -674,8 +674,11 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             QStringList tasks;
 
-            auto exportTask     = new ModalTask(this, "Export", &task);
-            auto compressTask   = new ModalTask(this, "Compress", &task);
+            auto exportTask     = new ModalTask(this, "Export");
+            auto compressTask   = new ModalTask(this, "Compress");
+
+            exportTask->setParentTask(&task);
+            compressTask->setParentTask(&task);
 
             exportTask->setRunning();
 
