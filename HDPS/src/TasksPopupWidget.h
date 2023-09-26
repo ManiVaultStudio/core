@@ -70,11 +70,11 @@ private:
     void numberOfTasksChanged();
 
 private:
-    gui::TasksStatusBarAction&  _tasksStatusBarAction;      /** Tasks status bar action which contains the tasks to be displayed */
-    QWidget*                    _anchorWidget;              /** If set, the popup widget will stick to the upper left corner of the anchor widget (right-aligned) */
-    QPixmap                     _tasksIconPixmap;           /** Tasks icon pixmap underlay (count badge will be drawn on top) */
-    QMap<Task*, QWidget*>       _widgetsMap;                /** Maps task to allocated widget */
-    QTimer                      _minimumDurationTimer;      /** Wait for a small amount of time before showing the UI */
+    gui::TasksStatusBarAction&      _tasksStatusBarAction;      /** Tasks status bar action which contains the tasks to be displayed */
+    QWidget*                        _anchorWidget;              /** If set, the popup widget will stick to the upper left corner of the anchor widget (right-aligned) */
+    QPixmap                         _tasksIconPixmap;           /** Tasks icon pixmap underlay (count badge will be drawn on top) */
+    QMap<Task*, QVector<QWidget*>>  _widgetsMap;                /** Maps task to allocated widget */
+    QTimer                          _minimumDurationTimer;      /** Wait for a small amount of time before showing the UI */
 
     static const QSize iconPixmapSize;
 };

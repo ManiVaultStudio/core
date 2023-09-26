@@ -5,6 +5,7 @@
 #include "TasksPopupWidget.h"
 #include "TasksStatusBarAction.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include "util/Icon.h"
 
@@ -30,7 +31,7 @@ TasksPopupWidget::TasksPopupWidget(gui::TasksStatusBarAction& tasksStatusBarActi
     _minimumDurationTimer.setSingleShot(true);
     _minimumDurationTimer.setInterval(minimumDuration);
 
-    setLayout(new QVBoxLayout());
+    setLayout(new QGridLayout());
 
     auto& tasksModel        = _tasksStatusBarAction.getTasksModel();
     auto& tasksFilterModel  = _tasksStatusBarAction.getTasksFilterModel();
@@ -184,27 +185,30 @@ void TasksPopupWidget::numberOfTasksChanged()
 
         currentTasks << progressItem->getTask();
 
-        QWidget* taskWidget = nullptr;
-
         if (!_widgetsMap.contains(progressItem->getTask())) {
-            taskWidget = progressItem->getTaskAction().createWidget(this);
+            auto labelWidget    = new QLabel(progressItem->getTask()->getName() + ":");
+            auto progressWidget = progressItem->getTaskAction().createWidget(this);
+            
+            progressWidget->setFixedHeight(18);
 
-            _widgetsMap[progressItem->getTask()] = taskWidget;
+            _widgetsMap[progressItem->getTask()] = { labelWidget, progressWidget };
         }
-        else {
-            taskWidget = _widgetsMap[progressItem->getTask()];
-        }
 
-        taskWidget->setFixedHeight(18);
+        auto gridLayout = static_cast<QGridLayout*>(layout());
 
-        layout()->addWidget(_widgetsMap[progressItem->getTask()]);
+        const auto rowCount = gridLayout->rowCount();
+
+        gridLayout->addWidget(_widgetsMap[progressItem->getTask()][0], rowCount, 0);
+        gridLayout->addWidget(_widgetsMap[progressItem->getTask()][1], rowCount, 1);
     }
 
     for (auto task : _widgetsMap.keys()) {
         if (currentTasks.contains(task))
             continue;
 
-        delete _widgetsMap[task];
+        for (auto widget : _widgetsMap[task])
+            delete widget;
+
         _widgetsMap.remove(task);
     }
 

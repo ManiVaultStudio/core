@@ -50,7 +50,7 @@ void TasksPlugin::init()
 void TasksPlugin::addTestSuite()
 {
     auto testModalTaskGroupAction   = new GroupAction(this, "Test Modal Task");
-    auto modalTaskTestTypeAction    = new OptionAction(this, "Modal Task Test Type", AbstractTaskTester::getTesterNames(), AbstractTaskTester::getTesterNames().first());
+    auto modalTaskTestTypeAction    = new OptionAction(this, "Task Test Type", AbstractTaskTester::getTesterNames(), AbstractTaskTester::getTesterNames().first());
     auto modalTaskStartTestAction   = new TriggerAction(this, "Start Test");
 
     modalTaskTestTypeAction->setPlaceHolderString("<Pick Type>");

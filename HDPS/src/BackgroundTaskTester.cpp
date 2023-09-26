@@ -23,8 +23,6 @@ BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name)
         const auto addChildTask = [this, &timers](const QString& name, QStringList tasks, int interval) -> Task* {
             auto childTask = new BackgroundTask(nullptr, name);
 
-            //childTask->setParentTask(Application::current()->getTask(Application::TaskType::OverallBackground));
-
             if (!tasks.isEmpty()) {
                 childTask->setSubtasks(tasks);
                 childTask->setRunning();
@@ -49,7 +47,7 @@ BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name)
                         timer->stop();
                         childTask->setFinished();
                     }
-                    });
+                });
 
                 timer->start();
             }
@@ -87,9 +85,6 @@ BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name)
             }, 850);
 
         eventLoop.exec();
-
-        delete childTaskA;
-        delete childTaskB;
     });
 }
 

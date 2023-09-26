@@ -19,9 +19,6 @@ TaskAction::TaskAction(QObject* parent, const QString& title) :
 
     _progressAction.setStretch(1);
 
-    //_killTaskAction.setDefaultWidgetFlags(TriggerAction::Icon);
-    //_killTaskAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cross"));
-
     addAction(&_progressAction);
     addAction(&_killTaskAction);
 
