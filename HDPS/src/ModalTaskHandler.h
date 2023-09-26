@@ -45,8 +45,8 @@ protected:
         void cleanLayout();
 
     private:
-        ModalTaskHandler*       _modalTaskHandler;  /** Pointer to owning modal task handler */
-        QMap<Task*, QWidget*>   _widgetsMap;        /** Maps task to allocated widget */
+        ModalTaskHandler*               _modalTaskHandler;  /** Pointer to owning modal task handler */
+        QMap<Task*, QVector<QWidget*>>  _widgetsMap;        /** Maps task to allocated widget */
     };
 
 public:

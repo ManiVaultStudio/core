@@ -15,22 +15,9 @@ namespace hdps
 ModalTaskTester::ModalTaskTester(QObject* parent, const QString& name) :
     AbstractTaskTester(parent, name)
 {
-    auto modalTask = new ModalTask(this, "New modal task");
-    
-
-    auto childModalTask = new ModalTask(this, "Child modal task");
-
-    childModalTask->setParentTask(modalTask);
-
-    childModalTask->setRunning();
-    childModalTask->setRunning();
-    childModalTask->setIdle();
-    childModalTask->setRunning();
-    childModalTask->setFinished();
-
-    //testRunningIndeterminate();
+    testRunningIndeterminate();
     //testAggregation();
-    //testPerformance();
+    testPerformance();
 }
 
 void ModalTaskTester::testRunningIndeterminate()

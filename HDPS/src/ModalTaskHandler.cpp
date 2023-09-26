@@ -46,8 +46,6 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
     connect(&_minimumDurationTimer, &QTimer::timeout, this, &ModalTaskHandler::updateDialogVisibility);
 
-    //connect(&_tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, [updateVisibilityDeferred]() { qDebug() << "    QSortFilterProxyModel::layoutChanged"; });
-    //connect(tasks().getTreeModel(), &QStandardItemModel::rowsInserted, this, [this, updateVisibilityDeferred]() { qDebug() << "    QStandardItemModel::rowsInserted";   });
     connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this, updateVisibilityDeferred]() { qDebug() << "    QSortFilterProxyModel::rowsInserted"; updateDialogVisibility();  });
     connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, [this, updateVisibilityDeferred]() { qDebug() << "    QSortFilterProxyModel::rowsRemoved"; updateDialogVisibility(); });
 }
@@ -55,24 +53,6 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 void ModalTaskHandler::updateDialogVisibility()
 {
     const auto numberOfModalTasks = getTasksFilterModel().rowCount();
-
-    qDebug() << "    " << __FUNCTION__ << numberOfModalTasks;
-
-    for (int rowIndex = 0; rowIndex < numberOfModalTasks; ++rowIndex) {
-        const auto sourceModelIndex = getTasksFilterModel().mapToSource(getTasksFilterModel().index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Progress)));
-
-        if (!sourceModelIndex.isValid())
-            continue;
-
-        auto progressItem = dynamic_cast<AbstractTasksModel::ProgressItem*>(tasks().getTreeModel()->itemFromIndex(sourceModelIndex));
-
-        Q_ASSERT(progressItem != nullptr);
-
-        if (progressItem == nullptr)
-            continue;
-
-        qDebug() << "        "  << __FUNCTION__ << progressItem->getTask()->getName();
-    }
 
     if (numberOfModalTasks == 0 && _modalTasksDialog.isVisible())
         _modalTasksDialog.close();
@@ -100,7 +80,7 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     setWindowFlag(Qt::WindowTitleHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
     
-    setLayout(new QVBoxLayout());
+    setLayout(new QGridLayout());
     
     auto& tasksFilterModel = _modalTaskHandler->getTasksFilterModel();
 
@@ -115,8 +95,6 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
     auto& tasksFilterModel = _modalTaskHandler->getTasksFilterModel();
 
     const auto numberOfModalTasks = tasksFilterModel.rowCount();
-
-    qDebug() << __FUNCTION__ << numberOfModalTasks;
 
     cleanLayout();
 
@@ -137,23 +115,30 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
 
         currentTasks << progressItem->getTask();
 
-        QWidget* taskWidget = nullptr;
-
         if (!_widgetsMap.contains(progressItem->getTask())) {
-            _widgetsMap[progressItem->getTask()] = progressItem->getTaskAction().createWidget(this);
-        }
-        else {
-            taskWidget = _widgetsMap[progressItem->getTask()];
+            auto labelWidget    = new QLabel(progressItem->getTask()->getName() + ":");
+            auto progressWidget = progressItem->getTaskAction().createWidget(this);
+
+            progressWidget->setFixedHeight(25);
+
+            _widgetsMap[progressItem->getTask()] = { labelWidget, progressWidget };
         }
 
-        layout()->addWidget(_widgetsMap[progressItem->getTask()]);
+        auto gridLayout = static_cast<QGridLayout*>(layout());
+
+        const auto rowCount = gridLayout->rowCount();
+
+        gridLayout->addWidget(_widgetsMap[progressItem->getTask()][0], rowCount, 0);
+        gridLayout->addWidget(_widgetsMap[progressItem->getTask()][1], rowCount, 1);
     }
 
     for (auto task : _widgetsMap.keys()) {
         if (currentTasks.contains(task))
             continue;
 
-        delete _widgetsMap[task];
+        for (auto widget : _widgetsMap[task])
+            delete widget;
+
         _widgetsMap.remove(task);
     }
 
