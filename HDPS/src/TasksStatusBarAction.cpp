@@ -10,11 +10,12 @@
 
 namespace hdps::gui {
 
-TasksStatusBarAction::TasksStatusBarAction(AbstractTasksModel& tasksModel, QObject* parent, const QString& title, const PopupMode& popupMode /*= PopupMode::OnClick*/) :
+TasksStatusBarAction::TasksStatusBarAction(AbstractTasksModel& tasksModel, QObject* parent, const QString& title, const PopupMode& popupMode /*= PopupMode::Click*/, const Task::Scope& taskScope /*= Task::Scope::Foreground*/) :
     WidgetAction(parent, title),
     _tasksModel(tasksModel),
     _tasksFilterModel(this),
     _popupMode(popupMode),
+    _taskScope(taskScope),
     _menu(),
     _popupForceHidden(false)
 {
@@ -152,6 +153,11 @@ TasksFilterModel& TasksStatusBarAction::getTasksFilterModel()
     return _tasksFilterModel;
 }
 
+Task::Scope TasksStatusBarAction::getTaskScope() const
+{
+    return _taskScope;
+}
+
 TasksStatusBarAction::Widget::ToolButton::ToolButton(TasksStatusBarAction* tasksStatusBarAction, QWidget* parent /*= nullptr*/) :
     QToolButton(parent),
     _tasksStatusBarAction(tasksStatusBarAction)
@@ -172,7 +178,7 @@ void TasksStatusBarAction::Widget::ToolButton::paintEvent(QPaintEvent* paintEven
     if (icon.isNull())
         return;
 
-    painter.drawPixmap(QPoint(margin, margin), icon.pixmap(rect - 2 * QSize(margin, margin)));// .scaled(size() - 2 * QSize(margin, margin), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    painter.drawPixmap(QPoint(margin, margin), icon.pixmap(rect - 2 * QSize(margin, margin)));
 }
 
 }

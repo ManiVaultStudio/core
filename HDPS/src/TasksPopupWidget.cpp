@@ -213,7 +213,7 @@ void TasksPopupWidget::numberOfTasksChanged()
     updateIcon();
 
     if (_anchorWidget)
-        _anchorWidget->setToolTip(QString("%1 task(s)").arg(QString::number(numberOfTasks)));
+        _anchorWidget->setToolTip(QString("%1 %2 task(s)").arg(QString::number(numberOfTasks), Task::scopeNames[_tasksStatusBarAction.getTaskScope()].toLower()));
 }
 
 void TasksPopupWidget::setIcon(const QIcon& icon)
