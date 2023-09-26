@@ -27,7 +27,6 @@ TasksTreeModel::TasksTreeModel(QObject* parent /*= nullptr*/) :
         setHorizontalHeaderItem(static_cast<int>(column), new HeaderItem(columnInfo[column]));
 
     connect(&tasks(), &AbstractTaskManager::taskAdded, this, &TasksTreeModel::taskAddedToTaskManager);
-    connect(&tasks(), &AbstractTaskManager::taskAboutToBeRemoved, this, &TasksTreeModel::taskAboutToBeRemovedFromTaskManager);
 
     for (auto task : tasks().getTasks())
         taskAddedToTaskManager(task);
@@ -81,34 +80,6 @@ void TasksTreeModel::taskAddedToTaskManager(Task* task)
     catch (...)
     {
         exceptionMessageBox("Unable to add task to tasks tree model");
-    }
-}
-
-void TasksTreeModel::taskAboutToBeRemovedFromTaskManager(Task* task)
-{
-    try {
-        if (!tasks().getTasks().contains(task))
-            return;
-
-        Q_ASSERT(task != nullptr);
-
-        if (task == nullptr)
-            throw std::runtime_error("Task may not be a nullptr");
-
-        auto taskItem = itemFromTask(task);
-
-        if (!removeRow(taskItem->row(), taskItem->parent() ? taskItem->parent()->index() : QModelIndex()))
-            throw std::runtime_error("Remove row failed");
-
-        disconnect(task, &Task::parentTaskChanged, this, nullptr);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to remove task from tasks tree model", e);
-    }
-    catch (...)
-    {
-        exceptionMessageBox("Unable to remove task from tasks tree model");
     }
 }
 

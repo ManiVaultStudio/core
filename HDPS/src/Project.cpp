@@ -155,21 +155,12 @@ void Project::updateContributors()
 
 void Project::setStudioMode(bool studioMode)
 {
-<<<<<<< HEAD
-    auto plugins = hdps::plugins().getPluginsByTypes({ plugin::Type::VIEW, plugin::Type::ANALYSIS });
-=======
     auto plugins = hdps::plugins().getPluginsByTypes();  // by default gets all plugin types
     auto& datasets = hdps::data().allSets();
->>>>>>> origin/master
 
     if (studioMode) {
         for (auto plugin : plugins)
             plugin->cacheConnectionPermissions(true);
-<<<<<<< HEAD
-
-        for (auto plugin : plugins)
-            plugin->setConnectionPermissionsToAll(true);
-=======
 
         for (auto plugin : plugins)
             plugin->setConnectionPermissionsToAll(true);
@@ -182,19 +173,14 @@ void Project::setStudioMode(bool studioMode)
             for (auto& action : dataset.get()->getActions())
                 action->setConnectionPermissionsToAll(true);
         }
-
->>>>>>> origin/master
     }
     else {
         for (auto plugin : plugins)
             plugin->restoreConnectionPermissions(true);
-<<<<<<< HEAD
-=======
 
         for (auto& dataset : datasets)
             for (auto& action : dataset.get()->getActions())
                 action->restoreConnectionPermissions(true);
->>>>>>> origin/master
     }
 
 }

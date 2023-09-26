@@ -522,6 +522,8 @@ AbstractTasksModel::AbstractTasksModel(QObject* parent /*= nullptr*/) :
 
     for (auto column : columnInfo.keys())
         setHorizontalHeaderItem(static_cast<int>(column), new HeaderItem(columnInfo[column]));
+
+    connect(&tasks(), &AbstractTaskManager::taskAboutToBeRemoved, this, &TasksTreeModel::taskAboutToBeRemovedFromTaskManager);
 }
 
 QStandardItem* AbstractTasksModel::itemFromTask(Task* task) const
@@ -539,6 +541,34 @@ QStandardItem* AbstractTasksModel::itemFromTask(Task* task) const
         throw std::runtime_error("Parent standard item may not be a nullptr");
 
     return item;
+}
+
+void AbstractTasksModel::taskAboutToBeRemovedFromTaskManager(Task* task)
+{
+    try {
+        if (!tasks().getTasks().contains(task))
+            return;
+
+        Q_ASSERT(task != nullptr);
+
+        if (task == nullptr)
+            throw std::runtime_error("Task may not be a nullptr");
+
+        auto taskItem = itemFromTask(task);
+
+        if (!removeRow(taskItem->row(), taskItem->parent() ? taskItem->parent()->index() : QModelIndex()))
+            throw std::runtime_error("Remove row failed");
+
+        disconnect(task, &Task::parentTaskChanged, this, nullptr);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to remove task from tasks tree model", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to remove task from tasks tree model");
+    }
 }
 
 }

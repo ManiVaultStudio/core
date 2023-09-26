@@ -35,12 +35,6 @@ private:
      * @param task Pointer to task that was added
      */
     void taskAddedToTaskManager(Task* task);
-
-    /**
-     * Invoked when \p task is about to be removed from the task manager
-     * @param task Pointer to task that is about to be removed
-     */
-    void taskAboutToBeRemovedFromTaskManager(Task* task);
 };
 
 }

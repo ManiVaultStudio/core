@@ -385,6 +385,14 @@ public:
      */
     QStandardItem* itemFromTask(Task* task) const;
 
+private:
+
+    /**
+     * Invoked when \p task is about to be removed from the task manager
+     * @param task Pointer to task that is about to be removed
+     */
+    void taskAboutToBeRemovedFromTaskManager(Task* task);
+
     friend class Item;
 };
 

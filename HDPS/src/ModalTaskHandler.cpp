@@ -104,7 +104,6 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     
     auto& tasksFilterModel = _modalTaskHandler->getTasksFilterModel();
 
-    connect(&tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, &ModalTasksDialog::numberOfModalTasksChanged);
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &ModalTasksDialog::numberOfModalTasksChanged);
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &ModalTasksDialog::numberOfModalTasksChanged);
 
