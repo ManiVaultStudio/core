@@ -10,7 +10,7 @@
 
 namespace hdps::gui {
 
-TasksStatusBarAction::TasksStatusBarAction(AbstractTasksModel& tasksModel, QObject* parent, const QString& title, const PopupMode& popupMode /*= PopupMode::Click*/, const Task::Scope& taskScope /*= Task::Scope::Foreground*/) :
+TasksStatusBarAction::TasksStatusBarAction(AbstractTasksModel& tasksModel, QObject* parent, const QString& title, const QIcon& icon /*= QIcon()*/, const PopupMode& popupMode /*= PopupMode::Click*/, const Task::Scope& taskScope /*= Task::Scope::Foreground*/) :
     WidgetAction(parent, title),
     _tasksModel(tasksModel),
     _tasksFilterModel(this),
@@ -21,7 +21,7 @@ TasksStatusBarAction::TasksStatusBarAction(AbstractTasksModel& tasksModel, QObje
 {
     _tasksFilterModel.setSourceModel(&_tasksModel);
 
-    setIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
+    setIcon(icon);
 }
 
 TasksStatusBarAction::Widget::Widget(QWidget* parent, TasksStatusBarAction* tasksStatusBarAction, std::int32_t widgetFlags) :

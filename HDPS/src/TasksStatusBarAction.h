@@ -105,7 +105,7 @@ public:
      * @param title Title of the action
      * @param taskScope Scope of the task
      */
-    TasksStatusBarAction(AbstractTasksModel& tasksModel, QObject* parent, const QString& title, const PopupMode& popupMode = PopupMode::Click, const Task::Scope& taskScope = Task::Scope::Foreground);
+    TasksStatusBarAction(AbstractTasksModel& tasksModel, QObject* parent, const QString& title, const QIcon& icon = QIcon(), const PopupMode& popupMode = PopupMode::Click, const Task::Scope& taskScope = Task::Scope::Foreground);
 
     PopupMode getPopupMode() const;
 

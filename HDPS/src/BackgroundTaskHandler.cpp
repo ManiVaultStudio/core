@@ -14,7 +14,7 @@ namespace hdps {
 BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),
     _overallBackgroundTaskAction(this, "Overall Background Task"),
-    _tasksStatusBarAction(*tasks().getListModel(), this, "Tasks Status Bar"),
+    _tasksStatusBarAction(*tasks().getListModel(), this, "Tasks Status Bar", Application::getIconFont("FontAwesome").getIcon("window-maximize"), TasksStatusBarAction::PopupMode::Hover, Task::Scope::Background),
     _statusBarAction(this, "Status Bar Group")
 {
     _overallBackgroundTaskAction.setStretch(1);
