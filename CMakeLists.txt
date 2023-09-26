@@ -2,11 +2,11 @@
 
 cmake_minimum_required(VERSION 3.17)
 
-set(HDPS_MAIN "hdps-main")
-PROJECT(${HDPS_MAIN})
+set(MV_MAIN "mv-main")
+PROJECT(${MV_MAIN})
 
 # Get the env path and allow the user to change it
-set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
+set(INSTALL_DIR $ENV{MV_INSTALL_DIR} CACHE PATH "The ManiVault Install Directoy")
 
 # Other user-facing options
 option(HDPS_USE_GTEST "Use GoogleTest" OFF)
