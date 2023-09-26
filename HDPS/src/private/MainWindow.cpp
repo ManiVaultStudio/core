@@ -86,7 +86,13 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         setCentralWidget(stackedWidget);
 
-        const auto updateWindowTitle = [&]() -> void {
+        statusBar()->setSizeGripEnabled(false);
+
+        statusBar()->insertPermanentWidget(0, new QWidget(this), 3);
+        statusBar()->insertPermanentWidget(1, BackgroundTask::getHandler()->getStatusBarAction()->createWidget(this), 2);
+        statusBar()->insertPermanentWidget(2, ForegroundTask::getHandler()->getStatusBarAction()->createWidget(this));
+
+        const auto projectChanged = [this]() -> void {
             if (!projects().hasProject()) {
                 setWindowTitle("ManiVault");
             }
@@ -98,12 +104,14 @@ void MainWindow::showEvent(QShowEvent* showEvent)
                 else
                     setWindowTitle(QString("%1 - ManiVault").arg(projectFilePath));
             }
+
+            statusBar()->setVisible(projects().hasProject());
         };
 
-        connect(&projects(), &ProjectManager::projectCreated, this, updateWindowTitle);
-        connect(&projects(), &ProjectManager::projectDestroyed, this, updateWindowTitle);
-        connect(&projects(), &ProjectManager::projectOpened, this, updateWindowTitle);
-        connect(&projects(), &ProjectManager::projectSaved, this, updateWindowTitle);
+        connect(&projects(), &ProjectManager::projectCreated, this, projectChanged);
+        connect(&projects(), &ProjectManager::projectDestroyed, this, projectChanged);
+        connect(&projects(), &ProjectManager::projectOpened, this, projectChanged);
+        connect(&projects(), &ProjectManager::projectSaved, this, projectChanged);
 
         const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget]() -> void {
             if (projects().getShowStartPageAction().isChecked())
@@ -125,18 +133,12 @@ void MainWindow::showEvent(QShowEvent* showEvent)
             connect(&projects().getCurrentProject()->getReadOnlyAction(), &ToggleAction::toggled, this, updateMenuVisibility);
         });
 
-        statusBar()->setSizeGripEnabled(false);
-
-        statusBar()->insertPermanentWidget(0, new QWidget(this), 3);
-        statusBar()->insertPermanentWidget(1, BackgroundTask::getHandler()->getStatusBarAction()->createWidget(this), 2);
-        statusBar()->insertPermanentWidget(2, ForegroundTask::getHandler()->getStatusBarAction()->createWidget(this));
-
         loadGuiTask->setSubtaskFinished("Initializing GUI");
 
         if (Application::current()->shouldOpenProjectAtStartup())
             projects().openProject(Application::current()->getStartupProjectFilePath());
     
-        updateWindowTitle();
+        projectChanged();
 
         emit Application::current()->mainWindowInitialized();
         
