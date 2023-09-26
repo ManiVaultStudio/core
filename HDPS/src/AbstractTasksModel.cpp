@@ -524,4 +524,21 @@ AbstractTasksModel::AbstractTasksModel(QObject* parent /*= nullptr*/) :
         setHorizontalHeaderItem(static_cast<int>(column), new HeaderItem(columnInfo[column]));
 }
 
+QStandardItem* AbstractTasksModel::itemFromTask(Task* task) const
+{
+    const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::EditRole, task->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
+
+    if (matches.isEmpty())
+        throw std::runtime_error(QString("%1 not found").arg(task->getParentTask()->getName()).toStdString());
+
+    auto item = itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::ExpandCollapse)));
+
+    Q_ASSERT(item != nullptr);
+
+    if (item == nullptr)
+        throw std::runtime_error("Parent standard item may not be a nullptr");
+
+    return item;
+}
+
 }

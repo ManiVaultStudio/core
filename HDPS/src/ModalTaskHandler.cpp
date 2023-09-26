@@ -46,14 +46,17 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
     connect(&_minimumDurationTimer, &QTimer::timeout, this, &ModalTaskHandler::updateDialogVisibility);
 
-    connect(&_tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, updateVisibilityDeferred);
-    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateVisibilityDeferred);
-    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibilityDeferred);
+    //connect(&_tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, [updateVisibilityDeferred]() { qDebug() << "    QSortFilterProxyModel::layoutChanged"; });
+    //connect(tasks().getTreeModel(), &QStandardItemModel::rowsInserted, this, [this, updateVisibilityDeferred]() { qDebug() << "    QStandardItemModel::rowsInserted";   });
+    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this, updateVisibilityDeferred]() { qDebug() << "    QSortFilterProxyModel::rowsInserted"; updateDialogVisibility();  });
+    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, [this, updateVisibilityDeferred]() { qDebug() << "    QSortFilterProxyModel::rowsRemoved"; updateDialogVisibility(); });
 }
 
 void ModalTaskHandler::updateDialogVisibility()
 {
     const auto numberOfModalTasks = getTasksFilterModel().rowCount();
+
+    qDebug() << "    " << __FUNCTION__ << numberOfModalTasks;
 
     for (int rowIndex = 0; rowIndex < numberOfModalTasks; ++rowIndex) {
         const auto sourceModelIndex = getTasksFilterModel().mapToSource(getTasksFilterModel().index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Progress)));
@@ -68,7 +71,7 @@ void ModalTaskHandler::updateDialogVisibility()
         if (progressItem == nullptr)
             continue;
 
-        qDebug() << "    "  << __FUNCTION__ << progressItem->getTask()->getName();
+        qDebug() << "        "  << __FUNCTION__ << progressItem->getTask()->getName();
     }
 
     if (numberOfModalTasks == 0 && _modalTasksDialog.isVisible())
@@ -114,8 +117,7 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
 
     const auto numberOfModalTasks = tasksFilterModel.rowCount();
 
-    if (numberOfModalTasks == 0)
-        return;
+    qDebug() << __FUNCTION__ << numberOfModalTasks;
 
     cleanLayout();
 
@@ -165,15 +167,15 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
     const auto clockIcon = Application::getIconFont("FontAwesome").getIcon("clock");
 
     if (numberOfModalTasks == 1) {
-        const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(0, 0));
-        const auto item             = dynamic_cast<AbstractTasksModel::Item*>(tasks().getTreeModel()->itemFromIndex(sourceModelIndex));
-        const auto task             = item->getTask();
-        const auto taskName         = task->getName();
-        const auto taskDescription  = task->getDescription();
-        const auto taskIcon         = task->getIcon();
+        //const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(0, 0));
+        //const auto item             = dynamic_cast<AbstractTasksModel::Item*>(tasks().getTreeModel()->itemFromIndex(sourceModelIndex));
+        //const auto task             = item->getTask();
+        //const auto taskName         = task->getName();
+        //const auto taskDescription  = task->getDescription();
+        //const auto taskIcon         = task->getIcon();
 
-        setWindowTitle(taskDescription.isEmpty() ? QString("Waiting for %1 to complete...").arg(taskName) : task->getDescription());
-        setWindowIcon(taskIcon.isNull() ? clockIcon : taskIcon);
+        //setWindowTitle(taskDescription.isEmpty() ? QString("Waiting for %1 to complete...").arg(taskName) : task->getDescription());
+        //setWindowIcon(taskIcon.isNull() ? clockIcon : taskIcon);
     }
     else {
         setWindowTitle(QString("Waiting for %1 tasks to complete...").arg(QString::number(numberOfModalTasks)));

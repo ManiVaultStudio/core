@@ -5,6 +5,7 @@
 #include "ModalTaskTester.h"
 #include "TaskTesterRunner.h"
 #include "ModalTask.h"
+#include "BackgroundTask.h"
 
 #include <QEventLoop>
 
@@ -14,9 +15,22 @@ namespace hdps
 ModalTaskTester::ModalTaskTester(QObject* parent, const QString& name) :
     AbstractTaskTester(parent, name)
 {
-    testRunningIndeterminate();
+    auto modalTask = new ModalTask(this, "New modal task");
+    
+
+    auto childModalTask = new ModalTask(this, "Child modal task");
+
+    childModalTask->setParentTask(modalTask);
+
+    childModalTask->setRunning();
+    childModalTask->setRunning();
+    childModalTask->setIdle();
+    childModalTask->setRunning();
+    childModalTask->setFinished();
+
+    //testRunningIndeterminate();
     //testAggregation();
-    testPerformance();
+    //testPerformance();
 }
 
 void ModalTaskTester::testRunningIndeterminate()

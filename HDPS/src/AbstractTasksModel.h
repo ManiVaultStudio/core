@@ -379,6 +379,12 @@ public:
      */
     AbstractTasksModel(QObject* parent = nullptr);
 
+    /**
+     * Get item from \p task
+     * @return Pointer to found item, nullptr otherwise
+     */
+    QStandardItem* itemFromTask(Task* task) const;
+
     friend class Item;
 };
 

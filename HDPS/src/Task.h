@@ -82,10 +82,10 @@ public:
     /** Couples scope enum value to scope name string */
     static QMap<Scope, QString> scopeNames;
 
-    using TasksPtrs = QVector<Task*>;
+    using TasksPtrs             = QVector<Task*>;
     using ProgressTextFormatter = std::function<QString(Task&)>;
-    using Scopes = QVector<Scope>;
-    using Statuses = QVector<Status>;
+    using Scopes                = QVector<Scope>;
+    using Statuses              = QVector<Status>;
 
 private:
 

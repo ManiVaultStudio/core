@@ -10,7 +10,7 @@
 #include <util/Exception.h>
 
 #ifdef _DEBUG
-    #define TASKS_MODEL_VERBOSE
+    #define TASKS_TREE_MODEL_VERBOSE
 #endif
 
 namespace hdps
@@ -41,24 +41,38 @@ void TasksTreeModel::taskAddedToTaskManager(Task* task)
         if (task == nullptr)
             throw std::runtime_error("Task may not be a nullptr");
 
-        if (task->hasParentTask()) {
-            const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::EditRole, task->getParentTask()->getId(), 1, Qt::MatchExactly | Qt::MatchRecursive);
-
-            if (matches.isEmpty())
-                throw std::runtime_error(QString("%1 not found").arg(task->getParentTask()->getName()).toStdString());
-
-            auto parentItem = itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::ExpandCollapse)));
-
-            Q_ASSERT(parentItem != nullptr);
-
-            if (parentItem == nullptr)
-                throw std::runtime_error("Parent standard item may not be a nullptr");
-
-            parentItem->appendRow(Row(task));
-        }
-        else {
+        if (task->hasParentTask())
+            itemFromTask(task->getParentTask())->appendRow(Row(task));
+        else
             appendRow(Row(task));
-        }
+
+        connect(task, &Task::parentTaskChanged, this, [this, task](Task* previousParentTask, Task* currentParentTask) -> void {
+            try {
+                auto taskItem = itemFromTask(task);
+
+#ifdef TASKS_TREE_MODEL_VERBOSE
+                qDebug() << __FUNCTION__ << task->getName() << currentParentTask->getName();
+#endif
+
+                if (previousParentTask)
+                    removeRow(taskItem->row(), itemFromTask(previousParentTask)->index());
+                else
+                    removeRow(taskItem->row(), QModelIndex());
+
+                if (currentParentTask)
+                    itemFromTask(task->getParentTask())->appendRow(Row(task));
+                else
+                    appendRow(Row(task));
+            }
+            catch (std::exception& e)
+            {
+                exceptionMessageBox("Unable to re-parent task", e);
+            }
+            catch (...)
+            {
+                exceptionMessageBox("Unable to re-parent task");
+            }
+        });
     }
     catch (std::exception& e)
     {
@@ -81,13 +95,12 @@ void TasksTreeModel::taskAboutToBeRemovedFromTaskManager(Task* task)
         if (task == nullptr)
             throw std::runtime_error("Task may not be a nullptr");
 
-        const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::EditRole, task->getId(), -1, Qt::MatchExactly | Qt::MatchRecursive);
+        auto taskItem = itemFromTask(task);
 
-        if (matches.empty())
-            throw std::runtime_error(QString("%1 not found").arg(task->getName()).toStdString());
-
-        if (!removeRow(matches.first().row()))
+        if (!removeRow(taskItem->row(), taskItem->parent() ? taskItem->parent()->index() : QModelIndex()))
             throw std::runtime_error("Remove row failed");
+
+        disconnect(task, &Task::parentTaskChanged, this, nullptr);
     }
     catch (std::exception& e)
     {
