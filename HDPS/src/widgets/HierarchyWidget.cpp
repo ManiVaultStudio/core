@@ -11,7 +11,6 @@
 #include <QHeaderView>
 
 #include <stdexcept>
-#include <stdexcept>
 
 #ifdef _DEBUG
     #define HIERARCHY_WIDGET_VERBOSE

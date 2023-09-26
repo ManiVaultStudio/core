@@ -3,7 +3,6 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "DimensionsPickerAction.h"
-#include "PointData.h"
 
 #include "Application.h"
 

@@ -7,6 +7,8 @@
 #include <Application.h>
 #include <CoreInterface.h>
 #include <AbstractDataHierarchyManager.h>
+#include <widgets/ViewPluginEditorDialog.h>
+#include <Set.h>
 
 Q_PLUGIN_METADATA(IID "nl.BioVault.DataPropertiesPlugin")
 
@@ -14,8 +16,47 @@ using namespace hdps;
 
 DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
-    _dataPropertiesWidget(nullptr)
+    _dataPropertiesWidget(nullptr),
+    _additionalEditorAction(this, "Edit dataset parameters..."),
+    _dataset(nullptr)
 {
+    _additionalEditorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+    _additionalEditorAction.setShortcut(tr("F11"));
+    _additionalEditorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _additionalEditorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _additionalEditorAction.setConnectionPermissionsToForceNone();
+    _additionalEditorAction.setEnabled(false);
+
+    addTitleBarMenuAction(&_additionalEditorAction);
+
+    connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesPlugin::selectedItemsChanged, Qt::DirectConnection);
+
+    connect(&_additionalEditorAction, &TriggerAction::triggered, this, [this]() -> void {
+        
+        if (!_dataset.isValid())
+            return;
+
+        auto* viewPluginEditorDialog = new hdps::gui::ViewPluginEditorDialog(nullptr, dynamic_cast<WidgetAction*>(_dataset.get()));
+        connect(viewPluginEditorDialog, &hdps::gui::ViewPluginEditorDialog::finished, viewPluginEditorDialog, &hdps::gui::ViewPluginEditorDialog::deleteLater);
+        viewPluginEditorDialog->open();
+        });
+
+}
+
+void DataPropertiesPlugin::selectedItemsChanged(DataHierarchyItems selectedItems)
+{
+    if (projects().isOpeningProject() || projects().isImportingProject())
+        return;
+
+    if (selectedItems.isEmpty()) {
+        _dataset = nullptr;
+        _additionalEditorAction.setEnabled(false);
+        return;
+    }
+
+    // Save reference to currently selected dataset
+    _dataset = selectedItems.first()->getDataset();
+    _additionalEditorAction.setEnabled(true);
 }
 
 void DataPropertiesPlugin::init()

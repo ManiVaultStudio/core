@@ -5,6 +5,7 @@
 #include "Project.h"
 #include "AbstractProjectManager.h"
 #include "CoreInterface.h"
+#include "Set.h"
 
 #include "util/Serialization.h"
 
@@ -28,13 +29,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
 }
 
 Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
-    QObject(parent),
-    Serializable("Project"),
-    _filePath(),
-    _startupProject(),
-    _applicationVersion(Application::current()->getVersion()),
-    _projectMetaAction(this),
-    _task(this, "Project Task")
+    Project(parent)
 {
     setFilePath(filePath);
     initialize();
@@ -160,19 +155,48 @@ void Project::updateContributors()
 
 void Project::setStudioMode(bool studioMode)
 {
+<<<<<<< HEAD
     auto plugins = hdps::plugins().getPluginsByTypes({ plugin::Type::VIEW, plugin::Type::ANALYSIS });
+=======
+    auto plugins = hdps::plugins().getPluginsByTypes();  // by default gets all plugin types
+    auto& datasets = hdps::data().allSets();
+>>>>>>> origin/master
 
     if (studioMode) {
         for (auto plugin : plugins)
             plugin->cacheConnectionPermissions(true);
+<<<<<<< HEAD
 
         for (auto plugin : plugins)
             plugin->setConnectionPermissionsToAll(true);
+=======
+
+        for (auto plugin : plugins)
+            plugin->setConnectionPermissionsToAll(true);
+
+        for (auto& dataset : datasets)
+        {
+            for (auto& action : dataset.get()->getActions())
+                action->cacheConnectionPermissions(true);
+
+            for (auto& action : dataset.get()->getActions())
+                action->setConnectionPermissionsToAll(true);
+        }
+
+>>>>>>> origin/master
     }
     else {
         for (auto plugin : plugins)
             plugin->restoreConnectionPermissions(true);
+<<<<<<< HEAD
+=======
+
+        for (auto& dataset : datasets)
+            for (auto& action : dataset.get()->getActions())
+                action->restoreConnectionPermissions(true);
+>>>>>>> origin/master
     }
+
 }
 
 ProjectMetaAction& Project::getProjectMetaAction()
