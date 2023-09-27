@@ -100,6 +100,11 @@ ColorPickerAction::Widget::Widget(QWidget* parent, ColorPickerAction* colorPicke
     auto colorPickerWidget      = getWidgetFromColorDialog("QColorPicker");
     auto colorLuminanceWidget   = getWidgetFromColorDialog("QColorLuminancePicker");
 
+    if(colorPickerWidget == nullptr)
+        colorPickerWidget = getWidgetFromColorDialog("QtPrivate::QColorPicker");
+    if(colorLuminanceWidget == nullptr)
+        colorLuminanceWidget = getWidgetFromColorDialog("QtPrivate::QColorLuminancePicker");
+
     colorPickerWidget->setFixedSize(250, 150);
 
     auto pickersLayout = new QHBoxLayout();

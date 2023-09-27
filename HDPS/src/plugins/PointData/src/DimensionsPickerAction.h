@@ -6,6 +6,8 @@
 
 #include "pointdata_export.h"
 
+#include "PointData.h"
+
 #include "DimensionsPickerHolder.h"
 #include "DimensionsPickerItemModel.h"
 #include "DimensionsPickerProxyModel.h"
@@ -16,7 +18,7 @@
 
 #include "ModelResetter.h"
 
-#include "actions/Actions.h"
+#include "actions/StringAction.h"
 
 #include <QTableView>
 
@@ -24,7 +26,6 @@ using namespace hdps;
 using namespace hdps::gui;
 
 class QMenu;
-class Points;
 
 /**
  * Dimensions picker action class

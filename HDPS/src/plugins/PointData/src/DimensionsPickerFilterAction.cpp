@@ -7,6 +7,8 @@
 
 #include <Application.h>
 
+#include <QHBoxLayout>
+
 namespace hdps::gui {
 
 DimensionsPickerFilterAction::DimensionsPickerFilterAction(DimensionsPickerAction& dimensionsPickerAction) :

@@ -146,7 +146,8 @@ public:
      * Set input model to \p model
      * @param model Input model
      */
-    void setModel(const QAbstractItemModel& model);
+    // TODO: to be implemented
+    // void setModel(const QAbstractItemModel& model);
 
     /**
      * Get input filter model
