@@ -31,7 +31,7 @@ BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
     auto& tasksFilterModel = _tasksStatusBarAction.getTasksFilterModel();
 
     tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Background" });
-    tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished" });
+    tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
     tasksFilterModel.getParentTaskFilterAction().setString(Application::current()->getTask(Application::TaskType::OverallBackground)->getId());
 
     const auto overallBackgroundTaskTextFormatter = [this](Task& task) -> QString {

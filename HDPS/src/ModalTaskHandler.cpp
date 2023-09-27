@@ -33,7 +33,7 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
     connect(this, &AbstractTaskHandler::minimumDurationChanged, this, updateMinimumDurationTimer);
 
-    _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
+    _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished", "Aborting" });
     _tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Modal" });
 
     const auto updateVisibilityDeferred = [this]() -> void {
@@ -88,10 +88,13 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &ModalTasksDialog::numberOfModalTasksChanged);
 
     numberOfModalTasksChanged();
+    updateWindowTitleAndIcon();
 }
 
 void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
 {
+    updateWindowTitleAndIcon();
+
     auto& tasksFilterModel = _modalTaskHandler->getTasksFilterModel();
 
     const auto numberOfModalTasks = tasksFilterModel.rowCount();
@@ -147,6 +150,21 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
     QCoreApplication::processEvents();
 
     setFixedHeight(sizeHint().height());
+}
+
+void ModalTaskHandler::ModalTasksDialog::cleanLayout()
+{
+    QLayoutItem* item;
+
+    while ((item = this->layout()->takeAt(0)) != 0)
+        delete item;
+}
+
+void ModalTaskHandler::ModalTasksDialog::updateWindowTitleAndIcon()
+{
+    auto& tasksFilterModel = _modalTaskHandler->getTasksFilterModel();
+
+    const auto numberOfModalTasks = tasksFilterModel.rowCount();
 
     const auto clockIcon = Application::getIconFont("FontAwesome").getIcon("clock");
 
@@ -165,14 +183,6 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
         setWindowTitle(QString("Waiting for %1 tasks to complete...").arg(QString::number(numberOfModalTasks)));
         setWindowIcon(clockIcon);
     }
-}
-
-void ModalTaskHandler::ModalTasksDialog::cleanLayout()
-{
-    QLayoutItem* item;
-
-    while ((item = this->layout()->takeAt(0)) != 0)
-        delete item;
 }
 
 }

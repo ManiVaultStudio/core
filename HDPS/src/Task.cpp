@@ -1051,9 +1051,12 @@ void Task::privateSetSubtasks(std::uint32_t numberOfSubtasks)
     if (numberOfSubtasks == 0)
         return;
 
-    _subtasks.clear();
+    const auto numberOfBits = numberOfSubtasks * 8;
 
-    _subtasks.resize(numberOfSubtasks);
+    _subtasks.clear();
+    _subtasks.resize(numberOfBits);
+    _subtasks.fill(false, numberOfBits);
+
     _subtasksNames.resize(numberOfSubtasks);
 
     emit subtasksChanged(_subtasks, _subtasksNames);
@@ -1065,11 +1068,10 @@ void Task::privateSetSubtasks(const QStringList& subtasksNames)
 {
     privateSetProgressMode(ProgressMode::Subtasks);
 
-    if (_subtasks.count() != subtasksNames.count())
-        _subtasks.resize(subtasksNames.count() * 8);
+    const auto numberOfBits = subtasksNames.count() * 8;
 
-    if (subtasksNames == _subtasksNames)
-        return;
+    _subtasks.resize(numberOfBits);
+    _subtasks.fill(false, numberOfBits);
 
     _subtasksNames = subtasksNames;
 

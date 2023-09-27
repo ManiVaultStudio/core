@@ -44,6 +44,9 @@ protected:
         /** Removes all existing task widget layout items */
         void cleanLayout();
 
+        /** Update the window title and icon */
+        void updateWindowTitleAndIcon();
+
     private:
         ModalTaskHandler*               _modalTaskHandler;  /** Pointer to owning modal task handler */
         QMap<Task*, QVector<QWidget*>>  _widgetsMap;        /** Maps task to allocated widget */
