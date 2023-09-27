@@ -46,8 +46,8 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
     connect(&_minimumDurationTimer, &QTimer::timeout, this, &ModalTaskHandler::updateDialogVisibility);
 
-    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this, updateVisibilityDeferred]() { qDebug() << "    QSortFilterProxyModel::rowsInserted"; updateDialogVisibility();  });
-    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, [this, updateVisibilityDeferred]() { qDebug() << "    QSortFilterProxyModel::rowsRemoved"; updateDialogVisibility(); });
+    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &ModalTaskHandler::updateDialogVisibility);
+    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &ModalTaskHandler::updateDialogVisibility);
 }
 
 void ModalTaskHandler::updateDialogVisibility()
@@ -151,15 +151,15 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
     const auto clockIcon = Application::getIconFont("FontAwesome").getIcon("clock");
 
     if (numberOfModalTasks == 1) {
-        //const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(0, 0));
-        //const auto item             = dynamic_cast<AbstractTasksModel::Item*>(tasks().getTreeModel()->itemFromIndex(sourceModelIndex));
-        //const auto task             = item->getTask();
-        //const auto taskName         = task->getName();
-        //const auto taskDescription  = task->getDescription();
-        //const auto taskIcon         = task->getIcon();
+        const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(0, 0));
+        const auto item             = dynamic_cast<AbstractTasksModel::Item*>(tasks().getTreeModel()->itemFromIndex(sourceModelIndex));
+        const auto task             = item->getTask();
+        const auto taskName         = task->getName();
+        const auto taskDescription  = task->getDescription();
+        const auto taskIcon         = task->getIcon();
 
-        //setWindowTitle(taskDescription.isEmpty() ? QString("Waiting for %1 to complete...").arg(taskName) : task->getDescription());
-        //setWindowIcon(taskIcon.isNull() ? clockIcon : taskIcon);
+        setWindowTitle(taskDescription.isEmpty() ? QString("Waiting for %1 to complete...").arg(taskName) : task->getDescription());
+        setWindowIcon(taskIcon.isNull() ? clockIcon : taskIcon);
     }
     else {
         setWindowTitle(QString("Waiting for %1 tasks to complete...").arg(QString::number(numberOfModalTasks)));

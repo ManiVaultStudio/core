@@ -15,9 +15,9 @@ namespace hdps
 ModalTaskTester::ModalTaskTester(QObject* parent, const QString& name) :
     AbstractTaskTester(parent, name)
 {
-    testRunningIndeterminate();
-    //testAggregation();
-    testPerformance();
+    //testRunningIndeterminate();
+    testAggregation();
+    //testPerformance();
 }
 
 void ModalTaskTester::testRunningIndeterminate()
@@ -96,8 +96,10 @@ void ModalTaskTester::testAggregation()
                     if (!tasks.isEmpty()) {
                         const auto subtaskName = tasks.first();
 
-                        tasks.removeFirst();
-
+                        childTask->setSubtaskStarted(subtaskName);
+                        {
+                            tasks.removeFirst();
+                        }
                         childTask->setSubtaskFinished(subtaskName);
                     }
                     else {
@@ -115,8 +117,31 @@ void ModalTaskTester::testAggregation()
             return childTask;
         };
 
-        auto childTaskA = addChildTask("A", {}, 0);
-        auto childTaskB = addChildTask("B", {}, 0);
+        auto childTaskA = addChildTask("A", {
+            "Child Task 1",
+            "Child Task 2",
+            "Child Task 3",
+            "Child Task 4",
+            "Child Task 5",
+            "Child Task 6",
+            "Child Task 7",
+            "Child Task 8",
+            "Child Task 9",
+            "Child Task 10"
+        }, 450);
+
+        auto childTaskB = addChildTask("B", {
+            "Child Task 1",
+            "Child Task 2",
+            "Child Task 3",
+            "Child Task 4",
+            "Child Task 5",
+            "Child Task 6",
+            "Child Task 7",
+            "Child Task 8",
+            "Child Task 9",
+            "Child Task 10"
+        }, 300);
 
         eventLoop.exec();
     });
