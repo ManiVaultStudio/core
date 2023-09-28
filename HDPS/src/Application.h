@@ -9,9 +9,9 @@
 #include "util/Version.h"
 
 #include "actions/TriggerAction.h"
+#include "actions/SplashScreenAction.h"
 
 #include "ProjectMetaAction.h"
-#include "ApplicationSplashScreenAction.h"
 #include "BackgroundTask.h"
 
 #include <QApplication>
@@ -37,7 +37,7 @@ public:
         LoadApplication = 0,        /** Process of loading the application (may also include loading a project) */
         LoadGUI,                    /** Loading the application GUI */
         LoadProject,                /** Loading a startup project */
-        OverallBackground,          /** Task for aggregated overal background tasks */
+        OverallBackground,          /** Task for aggregated overall background tasks */
 
         Count
     };
@@ -185,7 +185,7 @@ public: // Tasks
 
 public: // Action getters
 
-    gui::ApplicationSplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
+    //gui::SplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
 
 signals:
 
@@ -196,18 +196,18 @@ signals:
     void mainWindowInitialized();
 
 protected:
-    CoreInterface*                          _core;                                          /** Pointer to HDPS core */
-    const util::Version                     _version;                                       /** Application version */
-    IconFonts                               _iconFonts;                                     /** Icon fonts resource */
-    QSettings                               _settings;                                      /** Settings */
-    QString                                 _serializationTemporaryDirectory;               /** Temporary directory for serialization */
-    bool                                    _serializationAborted;                          /** Whether serialization was aborted */
-    util::Logger                            _logger;                                        /** Logger instance */
-    gui::TriggerAction*                     _exitAction;                                    /** Action for exiting the application */
-    QString                                 _startupProjectFilePath;                        /** File path of the project to automatically open upon startup (if set) */
-    QScopedPointer<ProjectMetaAction>       _startupProjectMetaAction;                      /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
-    Task*                                   _tasks[static_cast<int>(TaskType::Count)];      /** Application-related tasks */
-    gui::ApplicationSplashScreenAction      _splashScreenAction;                            /** Splash screen action */
+    CoreInterface*                      _core;                                          /** Pointer to HDPS core */
+    const util::Version                 _version;                                       /** Application version */
+    IconFonts                           _iconFonts;                                     /** Icon fonts resource */
+    QSettings                           _settings;                                      /** Settings */
+    QString                             _serializationTemporaryDirectory;               /** Temporary directory for serialization */
+    bool                                _serializationAborted;                          /** Whether serialization was aborted */
+    util::Logger                        _logger;                                        /** Logger instance */
+    gui::TriggerAction*                 _exitAction;                                    /** Action for exiting the application */
+    QString                             _startupProjectFilePath;                        /** File path of the project to automatically open upon startup (if set) */
+    QScopedPointer<ProjectMetaAction>   _startupProjectMetaAction;                      /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
+    Task*                               _tasks[static_cast<int>(TaskType::Count)];      /** Application-related tasks */
+    //gui::SplashScreenAction             _splashScreenAction;                            /** Splash screen action */
 };
 
 }

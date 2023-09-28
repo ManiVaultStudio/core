@@ -6,6 +6,10 @@
 
 #include <QDebug>
 
+#ifdef _DEBUG
+    #define TASKS_FILTER_MODEL_VERBOSE
+#endif
+
 using namespace hdps::gui;
 
 namespace hdps
@@ -109,6 +113,10 @@ void TasksFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
     if (sourceModel == nullptr)
         return;
 
+#ifdef TASKS_FILTER_MODEL_VERBOSE
+    qDebug() <<  this << __FUNCTION__ << sourceModel;
+#endif
+
     QSortFilterProxyModel::setSourceModel(sourceModel);
 
     for (int row = 0; row < sourceModel->rowCount(); row++) {
@@ -125,13 +133,35 @@ void TasksFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
     _taskTypeFilterAction.setOptions(_statusTypeCounts.keys());
     _taskTypeFilterAction.setSelectedOptions(_statusTypeCounts.keys());
 
-    connect(sourceModel, &QAbstractItemModel::rowsInserted, [this](const QModelIndex& parent, int first, int last) -> void {
+    addTaskTypesForRows(QModelIndex(), 0, sourceModel->rowCount() - 1);
+
+    connect(sourceModel, &QStandardItemModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
+#ifdef TASKS_FILTER_MODEL_VERBOSE
+        for (int rowIndex = first; rowIndex <= last; rowIndex++) {
+            const auto sourceModelIndex = this->sourceModel()->index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name), parent);
+
+            qDebug() << this->sourceModel() << sourceModelIndex.data(Qt::EditRole).toString() << "inserted" << sourceModelIndex << "into" << parent;
+        } 
+#endif
+        
+        invalidate();
+
         QTimer::singleShot(50, [this, parent, first, last]() -> void {
             addTaskTypesForRows(parent, first, last);
         });
     });
 
-    connect(sourceModel, &QAbstractItemModel::rowsRemoved, [this](const QModelIndex& parent, int first, int last) -> void {
+    connect(sourceModel, &QStandardItemModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
+#ifdef TASKS_FILTER_MODEL_VERBOSE
+        for (int rowIndex = first; rowIndex <= last; rowIndex++) {
+            const auto sourceModelIndex = this->sourceModel()->index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name), parent);
+
+            qDebug() << this->sourceModel() << sourceModelIndex.data(Qt::EditRole).toString() << "removed" << sourceModelIndex << "from" << parent;
+        }
+#endif
+
+        invalidate();
+
         QTimer::singleShot(50, [this, parent, first, last]() -> void {
             auto selectedTaskTypes = _taskTypeFilterAction.getSelectedOptions();
 
@@ -151,10 +181,40 @@ void TasksFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
         });
     });
 
-    addTaskTypesForRows(QModelIndex(), 0, sourceModel->rowCount() - 1);
+    connect(this, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
+#ifdef TASKS_FILTER_MODEL_VERBOSE
+        for (int rowIndex = first; rowIndex <= last; rowIndex++) {
+            const auto sourceModelIndex = index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name), parent);
 
-    connect(sourceModel, &QAbstractItemModel::rowsInserted, this, &TasksFilterModel::invalidate);
-    connect(sourceModel, &QAbstractItemModel::rowsRemoved, this, &TasksFilterModel::invalidate);
+            qDebug() << this << sourceModelIndex.data(Qt::EditRole).toString() << "inserted" << sourceModelIndex << "into" << parent;
+        }
+#endif
+    });
+
+    /*
+    connect(this, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
+#ifdef TASKS_FILTER_MODEL_VERBOSE
+        for (int rowIndex = first; rowIndex <= last; rowIndex++) {
+            const auto sourceModelIndex = index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name), parent);
+
+            qDebug() << this << sourceModelIndex.data(Qt::EditRole).toString() << "removed" << sourceModelIndex << "from" << parent;
+        }
+#endif
+    });
+
+    connect(this, &QSortFilterProxyModel::layoutAboutToBeChanged, this, [this]() -> void {
+#ifdef TASKS_FILTER_MODEL_VERBOSE
+        qDebug() << this << "layoutAboutToBeChanged";
+#endif
+    });
+
+    connect(this, &QSortFilterProxyModel::layoutChanged, this, [this]() -> void {
+#ifdef TASKS_FILTER_MODEL_VERBOSE
+        qDebug() << this << "layoutChanged";
+#endif
+    });
+    */
+
     //connect(sourceModel, &QAbstractItemModel::dataChanged, this, &TasksFilterModel::invalidate);
 }
 

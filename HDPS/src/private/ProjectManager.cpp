@@ -430,7 +430,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             auto& splashScreenAction = projectMetaAction.getSplashScreenAction();
 
-            if (splashScreenAction.getEnabledAction().isChecked())
+            if (splashScreenAction.getEnabledAction().isChecked() && !_project->isStartupProject())
                 splashScreenAction.getOpenAction().trigger();
 
             //Application::current()->getTask(Application::TaskType::LoadApplication)->setName(QString("Loading %1").arg(QFileInfo(filePath).fileName()));

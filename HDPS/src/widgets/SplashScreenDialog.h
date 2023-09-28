@@ -9,7 +9,13 @@
 #include <QToolButton>
 #include <QPropertyAnimation>
 
+namespace hdps {
+    class ProjectMetaAction;
+}
+
 namespace hdps::gui {
+
+class SplashScreenAction;
 
 /**
  * Splash screen dialog base class
@@ -40,15 +46,7 @@ public:
      * @param panAmount The amount of panning in the y-direction during show and hide
      * @param animationDuration The duration of the animations in milliseconds
      */
-    SplashScreenDialog(QWidget* parent, std::int32_t autoHideTimeout = DEFAULT_AUTO_HIDE_TIMEOUT, std::uint32_t panAmount = DEFAULT_PAN_AMOUNT, std::uint32_t animationDuration = DEFAULT_ANIMATION_DURATION);
-
-    /**
-     * Initializes the splash screen dialog with some configuration parameters
-     * @param autoHideTimeout Splash screen auto-hide trigger duration (active when duration > 0)
-     * @param panAmount The amount of panning in the y-direction during show and hide
-     * @param animationDuration The duration of the animations in milliseconds
-     */
-    void initialize(std::int32_t autoHideTimeout = DEFAULT_AUTO_HIDE_TIMEOUT, std::uint32_t panAmount = DEFAULT_PAN_AMOUNT, std::uint32_t animationDuration = DEFAULT_ANIMATION_DURATION);
+    SplashScreenDialog(SplashScreenAction& splashScreenAction, QWidget* parent = nullptr, std::int32_t autoHideTimeout = DEFAULT_AUTO_HIDE_TIMEOUT, std::uint32_t panAmount = DEFAULT_PAN_AMOUNT, std::uint32_t animationDuration = DEFAULT_ANIMATION_DURATION);
 
     /** Override open() for custom behavior */
     void open() override final;
@@ -61,12 +59,6 @@ public:
 
     /** Override the reject in order to fade out the dialog  */
     void reject() override final;
-
-    /**
-     * Set background image to \p backgroundImage
-     * @param backgroundImage Background image
-     */
-    void setBackgroundImage(const QPixmap& backgroundImage);
 
     /**
      * Invoked when the dialog is painted
@@ -82,20 +74,26 @@ private:
     /** Fade the dialog out and accept */
     void fadeOut();
     
+    void createTopContent();
+    void createCenterContent();
+    void createBottomContent();
+
 private:
+    SplashScreenAction& _splashScreenAction;
     QPropertyAnimation  _opacityAnimation;      /** Property animation for controlling window opacity */
     QPropertyAnimation  _positionAnimation;     /** Property animation for controlling window position */
     AnimationState      _animationState;        /** Animation state */
     std::int32_t        _autoHideTimeout;       /** Splash screen auto-hide trigger duration (active when duration > 0) */
     std::uint32_t       _panAmount;             /** The amount of panning in the y-direction during show and hide */
     std::uint32_t       _animationDuration;     /** The duration of the animations in milliseconds */
+    QPixmap             _logoImage;             /** Logo image */
     QPixmap             _backgroundImage;       /** Background image */
+    QVBoxLayout         _mainLayout;
+    QToolButton         _closeToolButton;       /** Button for forcefully closing the splash screen */
 
     static const std::int32_t DEFAULT_AUTO_HIDE_TIMEOUT     = 0;
     static const std::uint32_t DEFAULT_PAN_AMOUNT           = 300;
     static const std::uint32_t DEFAULT_ANIMATION_DURATION   = 1000;
-
-    friend class ProjectSplashScreenAction;
 };
 
 }

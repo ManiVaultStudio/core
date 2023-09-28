@@ -26,19 +26,21 @@ TasksTreeModel::TasksTreeModel(QObject* parent /*= nullptr*/) :
     for (auto column : columnInfo.keys())
         setHorizontalHeaderItem(static_cast<int>(column), new HeaderItem(columnInfo[column]));
 
-    connect(&tasks(), &AbstractTaskManager::taskAdded, this, &TasksTreeModel::taskAddedToTaskManager);
-
     for (auto task : tasks().getTasks())
-        taskAddedToTaskManager(task);
+        addTask(task);
 }
 
-void TasksTreeModel::taskAddedToTaskManager(Task* task)
+void TasksTreeModel::addTask(Task* task)
 {
     try {
         Q_ASSERT(task != nullptr);
 
         if (task == nullptr)
             throw std::runtime_error("Task may not be a nullptr");
+
+#ifdef TASKS_TREE_MODEL_VERBOSE
+        qDebug() << "TasksTreeModel: Add task:" << task->getName();
+#endif
 
         if (task->hasParentTask())
             itemFromTask(task->getParentTask())->appendRow(Row(task));
@@ -50,7 +52,7 @@ void TasksTreeModel::taskAddedToTaskManager(Task* task)
                 auto taskItem = itemFromTask(task);
 
 #ifdef TASKS_TREE_MODEL_VERBOSE
-                qDebug() << __FUNCTION__ << task->getName() << currentParentTask->getName();
+                qDebug() << "TasksTreeModel:" << task->getName() << "parent changed to"  << currentParentTask->getName();
 #endif
 
                 if (previousParentTask)

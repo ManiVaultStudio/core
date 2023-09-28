@@ -133,7 +133,7 @@ public: // Project meta action getters facade
     const gui::StringAction& getCommentsAction() const { return _projectMetaAction.getCommentsAction(); }
     const gui::StringsAction& getContributorsAction() const { return _projectMetaAction.getContributorsAction(); }
     const ProjectCompressionAction& getCompressionAction() const { return _projectMetaAction.getCompressionAction(); }
-    const gui::ProjectSplashScreenAction& getSplashScreenAction() const { return _projectMetaAction.getSplashScreenAction(); }
+    const gui::SplashScreenAction& getSplashScreenAction() const { return _projectMetaAction.getSplashScreenAction(); }
     const gui::ToggleAction& getStudioModeAction() const { return _projectMetaAction.getStudioModeAction(); }
 
     gui::VersionAction& getApplicationVersionAction() { return _projectMetaAction.getApplicationVersionAction(); }
@@ -145,7 +145,7 @@ public: // Project meta action getters facade
     gui::StringAction& getCommentsAction() { return _projectMetaAction.getCommentsAction(); }
     gui::StringsAction& getContributorsAction() { return _projectMetaAction.getContributorsAction(); }
     ProjectCompressionAction& getCompressionAction() { return _projectMetaAction.getCompressionAction(); }
-    gui::ProjectSplashScreenAction& getSplashScreenAction() { return _projectMetaAction.getSplashScreenAction(); }
+    gui::SplashScreenAction& getSplashScreenAction() { return _projectMetaAction.getSplashScreenAction(); }
     gui::ToggleAction& getStudioModeAction() { return _projectMetaAction.getStudioModeAction(); }
 
 signals:

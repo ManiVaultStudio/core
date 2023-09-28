@@ -147,7 +147,7 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
 
     adjustSize();
 
-    QCoreApplication::processEvents();
+    //QCoreApplication::processEvents();
 
     setFixedHeight(sizeHint().height());
 }

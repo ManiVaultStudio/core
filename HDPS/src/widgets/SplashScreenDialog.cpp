@@ -18,30 +18,37 @@
 
 namespace hdps::gui {
 
-SplashScreenDialog::SplashScreenDialog(QWidget* parent, std::int32_t autoHideTimeout /*= DEFAULT_AUTO_HIDE_TIMEOUT*/, std::uint32_t panAmount /*= DEFAULT_PAN_AMOUNT*/, std::uint32_t animationDuration /*= DEFAULT_ANIMATION_DURATION*/) :
+SplashScreenDialog::SplashScreenDialog(SplashScreenAction& splashScreenAction, QWidget* parent /*= nullptr*/, std::int32_t autoHideTimeout /*= DEFAULT_AUTO_HIDE_TIMEOUT*/, std::uint32_t panAmount /*= DEFAULT_PAN_AMOUNT*/, std::uint32_t animationDuration /*= DEFAULT_ANIMATION_DURATION*/) :
     QDialog(parent),
+    _splashScreenAction(splashScreenAction),
     _opacityAnimation(this, "windowOpacity", this),
     _positionAnimation(this, "pos", this),
     _animationState(AnimationState::Idle),
     _autoHideTimeout(),
     _panAmount(),
-    _animationDuration()
+    _animationDuration(),
+    _logoImage(":/Icons/AppIcon256"),
+    _backgroundImage(":/Images/SplashScreenBackground"),
+    _closeToolButton()
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    setWindowFlags(Qt::FramelessWindowHint | Qt::Window | Qt::WindowStaysOnTopHint); // | Qt::Popup
+    setWindowFlags(Qt::FramelessWindowHint | Qt::Window | Qt::WindowStaysOnTopHint);
     setFixedSize(QSize(640, 480));
 
-    initialize(autoHideTimeout, panAmount, animationDuration);
-}
-
-void SplashScreenDialog::initialize(std::int32_t autoHideTimeout /*= DEFAULT_AUTO_HIDE_TIMEOUT*/, std::uint32_t panAmount /*= DEFAULT_PAN_AMOUNT*/, std::uint32_t animationDuration /*= DEFAULT_ANIMATION_DURATION*/)
-{
     _autoHideTimeout    = autoHideTimeout;
     _panAmount          = panAmount;
     _animationDuration  = std::min(static_cast<std::int32_t>(animationDuration), _autoHideTimeout / 2);
 
     _opacityAnimation.setDuration(_animationDuration);
     _positionAnimation.setDuration(_animationDuration);
+    
+    _backgroundImage = _backgroundImage.scaled(_backgroundImage.size() / 5, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    createTopContent();
+    createCenterContent();
+    createBottomContent();
+
+    setLayout(&_mainLayout);
 }
 
 void SplashScreenDialog::open()
@@ -100,23 +107,16 @@ void SplashScreenDialog::reject()
         QDialog::reject();
 }
 
-void SplashScreenDialog::setBackgroundImage(const QPixmap& backgroundImage)
-{
-    _backgroundImage = backgroundImage;
-
-    update();
-}
-
 void SplashScreenDialog::paintEvent(QPaintEvent* paintEvent)
 {
     QPainter painter(this);
 
     //painter.setBackground(QBrush(_projectSplashScreenAction.getBackgroundColorAction().getColor()));
 
-    auto centerOfWidget = rect().center();
-    auto pixmapRectangle = _backgroundImage.rect();
+    auto centerOfWidget     = rect().center();
+    auto pixmapRectangle    = _backgroundImage.rect();
 
-    pixmapRectangle.moveCenter(centerOfWidget - QPoint(200, 0));
+    pixmapRectangle.moveCenter(centerOfWidget);
 
     painter.setOpacity(0.5);
     painter.drawPixmap(pixmapRectangle.topLeft(), _backgroundImage);
@@ -196,5 +196,129 @@ void SplashScreenDialog::fadeOut()
     _positionAnimation.setEndValue(position + QPoint(0, _panAmount));
     _positionAnimation.start();
 }
+
+void SplashScreenDialog::createTopContent()
+{
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    _closeToolButton.setVisible(_splashScreenAction.getMayClose());
+    _closeToolButton.setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
+    _closeToolButton.setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
+    _closeToolButton.setAutoRaise(true);
+    _closeToolButton.setToolTip("Close the splash screen");
+
+    auto sizePolicy = _closeToolButton.sizePolicy();
+    
+    sizePolicy.setRetainSizeWhenHidden(true);
+    
+    _closeToolButton.setSizePolicy(sizePolicy);
+
+    connect(&_closeToolButton, &QToolButton::clicked, this, &SplashScreenDialog::close);
+
+    layout->addStretch(1);
+    layout->addWidget(&_closeToolButton);
+
+    _mainLayout.addLayout(layout);
+}
+
+void SplashScreenDialog::createCenterContent()
+{
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(20, 5, 20, 5);
+    layout->setSpacing(50);
+    layout->setAlignment(Qt::AlignTop);
+
+    auto imageLabel = new QLabel();
+    auto htmlLabel  = new QLabel();
+
+    imageLabel->setFixedSize(200, 200);
+    imageLabel->setScaledContents(true);
+
+    htmlLabel->setWordWrap(true);
+    htmlLabel->setTextFormat(Qt::RichText);
+    htmlLabel->setOpenExternalLinks(true);
+    htmlLabel->setAlignment(Qt::AlignTop);
+
+    layout->addWidget(imageLabel);
+    layout->addWidget(htmlLabel);
+
+    auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
+
+    if (projectMetaAction) {
+        auto& splashScreenAction = projectMetaAction->getSplashScreenAction();
+
+        imageLabel->setPixmap(QPixmap::fromImage(splashScreenAction.getProjectImageAction().getImage()));
+
+        auto& versionAction = projectMetaAction->getProjectVersionAction();
+        auto title          = projectMetaAction->getTitleAction().getString();
+        auto version        = QString("%1.%2 <i>%3</i>").arg(QString::number(versionAction.getMajorAction().getValue()), QString::number(versionAction.getMinorAction().getValue()), versionAction.getSuffixAction().getString().toLower());
+        auto description    = projectMetaAction->getDescriptionAction().getString();
+        auto comments       = projectMetaAction->getCommentsAction().getString();
+
+        if (title.isEmpty())
+            title = "Untitled Project";
+
+        if (description.isEmpty())
+            description = "No description";
+
+        if (comments.isEmpty())
+            comments = "No comments";
+
+        htmlLabel->setText(QString(" \
+            <p style='font-size: 20pt; font-weight: bold;'><span>%1</span></p> \
+            <p style='font-weight: bold;'>Version: %2</p> \
+            <p>%3</p> \
+            <p>%4</p> \
+            <p></p> \
+            <p>This application is built with <a href='https://www.manivault.studio/'>ManiVault Studio</a></p> \
+        ").arg(title, version, description, comments));
+    }
+    else {
+        imageLabel->setPixmap(_logoImage);
+
+        const auto applicationVersion   = Application::current()->getVersion();
+        const auto versionString        = QString("%1.%2").arg(QString::number(applicationVersion.getMajor()), QString::number(applicationVersion.getMinor()));
+
+        htmlLabel->setText(QString(" \
+            <p style='font-size: 20pt; font-weight: bold;'><span style='color: rgb(102, 159, 178)'>ManiVault</span> <span style='color: rgb(162, 141, 208)'>Studio</span></p> \
+            <p>Version: %2</p> \
+            <p><i>An extensible open-source visual analytics framework for analyzing high-dimensional data</i></p> \
+        ").arg(versionString));
+    }
+
+    _mainLayout.addLayout(layout);
+}
+
+void SplashScreenDialog::createBottomContent()
+{
+    _mainLayout.addStretch(1);
+
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(20, 20, 20, 20);
+
+    auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
+
+    if (projectMetaAction) {
+        auto& splashScreenAction = projectMetaAction->getSplashScreenAction();
+
+        auto affiliateLogosImageLabel = new QLabel();
+
+        affiliateLogosImageLabel->setPixmap(QPixmap::fromImage(splashScreenAction.getAffiliateLogosImageAction().getImage().scaledToHeight(60, Qt::SmoothTransformation)));
+
+        layout->addWidget(affiliateLogosImageLabel);
+    }
+
+    layout->addStretch(1);
+
+    _mainLayout.addLayout(layout);
+
+    if (Application::current()->getTask(Application::TaskType::LoadApplication)->isRunning())
+        _mainLayout.addWidget(_splashScreenAction.getTaskAction().createWidget(this));
+}
+
 
 }

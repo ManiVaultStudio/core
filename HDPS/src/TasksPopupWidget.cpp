@@ -13,6 +13,10 @@
 #include <QMainWindow>
 #include <QToolButton>
 
+#ifdef _DEBUG
+    #define TASKS_POPUP_WIDGET_VERBOSE
+#endif
+
 namespace hdps::gui {
 
 const QSize TasksPopupWidget::iconPixmapSize = QSize(64, 64);
@@ -33,9 +37,9 @@ TasksPopupWidget::TasksPopupWidget(gui::TasksStatusBarAction& tasksStatusBarActi
 
     setLayout(new QGridLayout());
 
-    auto& tasksModel        = _tasksStatusBarAction.getTasksModel();
-    auto& tasksFilterModel  = _tasksStatusBarAction.getTasksFilterModel();
+    auto& tasksFilterModel = _tasksStatusBarAction.getTasksFilterModel();
 
+    /*
     const auto numberOfTasksChangedDeferred = [this]() -> void {
         if (isHidden() && !_minimumDurationTimer.isActive())
             _minimumDurationTimer.start();
@@ -45,13 +49,29 @@ TasksPopupWidget::TasksPopupWidget(gui::TasksStatusBarAction& tasksStatusBarActi
     };
 
     connect(&_minimumDurationTimer, &QTimer::timeout, this, &TasksPopupWidget::numberOfTasksChanged);
+    */
 
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, numberOfTasksChangedDeferred);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, numberOfTasksChangedDeferred);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
+#ifdef TASKS_POPUP_WIDGET_VERBOSE
+        for (int rowIndex = first; rowIndex < last; rowIndex++)
+            qDebug() << "TasksPopupWidget: " << _tasksStatusBarAction.getTasksFilterModel().index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name)).data(Qt::DisplayRole).toString() << " inserted into TasksFilterModel";
+#endif
+
+        updateContents();
+    });
+
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
+#ifdef TASKS_POPUP_WIDGET_VERBOSE
+        for (int rowIndex = first; rowIndex < last; rowIndex++)
+            qDebug() << "TasksPopupWidget: " << _tasksStatusBarAction.getTasksFilterModel().index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name)).data(Qt::DisplayRole).toString() << " removed from TasksFilterModel";
+#endif
+
+        updateContents();
+    });
 
     synchronizeWithAnchorWidget();
     updateIcon();
-    numberOfTasksChanged();
+    updateContents();
 
     if (_anchorWidget) {
         installEventFilter(this);
@@ -155,8 +175,11 @@ void TasksPopupWidget::cleanLayout()
         delete item;
 }
 
-void TasksPopupWidget::numberOfTasksChanged()
+void TasksPopupWidget::updateContents()
 {
+    if (isHidden())
+        return;
+
     auto& tasksModel        = _tasksStatusBarAction.getTasksModel();
     auto& tasksFilterModel  = _tasksStatusBarAction.getTasksFilterModel();
 

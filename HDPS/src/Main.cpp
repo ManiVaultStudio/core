@@ -97,6 +97,8 @@ int main(int argc, char *argv[])
     
     application.initialize();
 
+    SplashScreenAction splashscreenAction(&application, false);
+
     auto showApplicationSplashScreen = true;
 
     if (commandLineParser.isSet("project")) {
@@ -107,6 +109,8 @@ int main(int argc, char *argv[])
                 auto projectMetaAction = getStartupProjectMetaAction(startupProjectFilePath);
 
                 if (projectMetaAction != nullptr) {
+                    splashscreenAction.setProjectMetaAction(projectMetaAction);
+
                     application.setStartupProjectFilePath(startupProjectFilePath);
                     application.setStartupProjectMetaAction(projectMetaAction);
                     application.getTask(Application::TaskType::LoadProject)->setName(QString("Loading %1").arg(QFileInfo(startupProjectFilePath).fileName()));
@@ -130,7 +134,7 @@ int main(int argc, char *argv[])
         application.getTask(Application::TaskType::LoadProject)->setEnabled(false);
     
     if (showApplicationSplashScreen)
-        application.getSplashScreenAction().getOpenAction().trigger();
+        splashscreenAction.getOpenAction().trigger();
 
     application.setStyle(new NoFocusProxyStyle);
 

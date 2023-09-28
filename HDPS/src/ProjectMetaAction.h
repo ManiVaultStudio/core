@@ -9,8 +9,8 @@
 #include "actions/StringsAction.h"
 #include "actions/IntegralAction.h"
 #include "actions/VersionAction.h"
+#include "actions/SplashScreenAction.h"
 
-#include "ProjectSplashScreenAction.h"
 #include "ProjectCompressionAction.h"
 
 namespace hdps {
@@ -79,7 +79,7 @@ public: // Action getters
     const gui::StringsAction& getTagsAction() const { return _tagsAction; }
     const gui::StringAction& getCommentsAction() const { return _commentsAction; }
     const gui::StringsAction& getContributorsAction() const { return _contributorsAction; }
-    const gui::ProjectSplashScreenAction& getSplashScreenAction() const { return _splashScreenAction; }
+    const gui::SplashScreenAction& getSplashScreenAction() const { return _splashScreenAction; }
     const gui::ToggleAction& getStudioModeAction() const { return _studioModeAction; }
     const ProjectCompressionAction& getCompressionAction() const { return _compressionAction; }
 
@@ -91,23 +91,23 @@ public: // Action getters
     gui::StringsAction& getTagsAction() { return _tagsAction; }
     gui::StringAction& getCommentsAction() { return _commentsAction; }
     gui::StringsAction& getContributorsAction() { return _contributorsAction; }
-    gui::ProjectSplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
+    gui::SplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
     gui::ToggleAction& getStudioModeAction() { return _studioModeAction; }
     ProjectCompressionAction& getCompressionAction() { return _compressionAction; }
 
 private:
-    Project*                        _project;                   /** Pointer to source project to get the meta data from */
-    gui::VersionAction              _applicationVersionAction;  /** Action for storing the application version */
-    gui::VersionAction              _projectVersionAction;      /** Action for storing the project version */
-    gui::ToggleAction               _readOnlyAction;            /** Read-only action */
-    gui::StringAction               _titleAction;               /** Title action */
-    gui::StringAction               _descriptionAction;         /** Description action */
-    gui::StringsAction              _tagsAction;                /** Tags action */
-    gui::StringAction               _commentsAction;            /** Comments action */
-    gui::StringsAction              _contributorsAction;        /** Contributors action */
-    gui::ProjectSplashScreenAction  _splashScreenAction;        /** Action for configuring the project splash screen */
-    gui::ToggleAction               _studioModeAction;          /** Toggle between view- and studio mode action */
-    ProjectCompressionAction        _compressionAction;         /** Project compression action */
+    Project*                    _project;                   /** Pointer to source project to get the meta data from */
+    gui::VersionAction          _applicationVersionAction;  /** Action for storing the application version */
+    gui::VersionAction          _projectVersionAction;      /** Action for storing the project version */
+    gui::ToggleAction           _readOnlyAction;            /** Read-only action */
+    gui::StringAction           _titleAction;               /** Title action */
+    gui::StringAction           _descriptionAction;         /** Description action */
+    gui::StringsAction          _tagsAction;                /** Tags action */
+    gui::StringAction           _commentsAction;            /** Comments action */
+    gui::StringsAction          _contributorsAction;        /** Contributors action */
+    gui::SplashScreenAction     _splashScreenAction;        /** Action for configuring the project splash screen */
+    gui::ToggleAction           _studioModeAction;          /** Toggle between view- and studio mode action */
+    ProjectCompressionAction    _compressionAction;         /** Project compression action */
 };
 
 }

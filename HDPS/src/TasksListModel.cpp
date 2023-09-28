@@ -10,7 +10,7 @@
 #include <util/Exception.h>
 
 #ifdef _DEBUG
-    #define TASKS_MODEL_VERBOSE
+    #define TASKS_LIST_MODEL_VERBOSE
 #endif
 
 namespace hdps
@@ -26,13 +26,11 @@ TasksListModel::TasksListModel(QObject* parent /*= nullptr*/) :
     for (auto column : columnInfo.keys())
         setHorizontalHeaderItem(static_cast<int>(column), new HeaderItem(columnInfo[column]));
 
-    connect(&tasks(), &AbstractTaskManager::taskAdded, this, &TasksListModel::taskAddedToTaskManager);
-
     for (auto task : tasks().getTasks())
-        taskAddedToTaskManager(task);
+        addTask(task);
 }
 
-void TasksListModel::taskAddedToTaskManager(Task* task)
+void TasksListModel::addTask(Task* task)
 {
     try {
         Q_ASSERT(task != nullptr);

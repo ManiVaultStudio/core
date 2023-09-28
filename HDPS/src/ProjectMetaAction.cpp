@@ -23,10 +23,11 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
     _tagsAction(this, "Tags"),
     _commentsAction(this, "Comments"),
     _contributorsAction(this, "Contributors"),
-    _splashScreenAction(this),
+    _splashScreenAction(this, true),
     _studioModeAction(this, "Studio Mode"),
     _compressionAction(this)
 {
+    _splashScreenAction.setProjectMetaAction(this);
 }
 
 ProjectMetaAction::ProjectMetaAction(const QString& filePath, QObject* parent /*= nullptr*/) :
@@ -44,6 +45,8 @@ ProjectMetaAction::ProjectMetaAction(const QString& filePath, QObject* parent /*
     _studioModeAction(this, "Studio Mode"),
     _compressionAction(this)
 {
+    _splashScreenAction.setProjectMetaAction(this);
+
     try {
         if (!QFileInfo(filePath).exists())
             throw std::runtime_error("File does not exist");

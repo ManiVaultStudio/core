@@ -8,6 +8,10 @@
 #include <QPainter>
 #include <QPaintEvent>
 
+#ifdef _DEBUG
+    #define TASKS_STATUS_BAR_ACTION_VERBOSE
+#endif
+
 namespace hdps::gui {
 
 TasksStatusBarAction::TasksStatusBarAction(AbstractTasksModel& tasksModel, QObject* parent, const QString& title, const QIcon& icon /*= QIcon()*/, const PopupMode& popupMode /*= PopupMode::Click*/, const Task::Scope& taskScope /*= Task::Scope::Foreground*/) :
@@ -47,26 +51,55 @@ TasksStatusBarAction::Widget::Widget(QWidget* parent, TasksStatusBarAction* task
         _toolButton.setPopupMode(QToolButton::InstantPopup);
     }
 
-    auto& tasksModel        = _tasksStatusBarAction->getTasksModel();
-    auto& tasksFilterModel  = _tasksStatusBarAction->getTasksFilterModel();
+    auto& tasksFilterModel = _tasksStatusBarAction->getTasksFilterModel();
 
     const auto numberOfTasksChanged = [this, &tasksFilterModel]() -> void {
-        if (_tasksStatusBarAction->getPopupMode() == PopupMode::Automatic && !_tasksStatusBarAction->getPopupForceHidden()) {
-            const auto numberOfTasks = tasksFilterModel.rowCount();
-            
-            if (numberOfTasks == 0 && _tasksPopupWidget.isVisible())
-                _tasksPopupWidget.close();
+        const auto numberOfTasks = tasksFilterModel.rowCount();
 
-            if (numberOfTasks >= 1 && !_tasksPopupWidget.isVisible())
+#ifdef TASKS_STATUS_BAR_ACTION_VERBOSE
+        qDebug() << "TasksStatusBarAction: Tasks filter model number of rows changed to " << numberOfTasks;
+#endif
+
+        if (_tasksStatusBarAction->getPopupMode() == PopupMode::Automatic && !_tasksStatusBarAction->getPopupForceHidden()) {
+            if (numberOfTasks == 0 && _tasksPopupWidget.isVisible()) {
+#ifdef TASKS_STATUS_BAR_ACTION_VERBOSE
+                qDebug() << "TasksStatusBarAction: Close tasks popup widget";
+#endif
+
+                _tasksPopupWidget.close();
+            }
+
+            if (numberOfTasks >= 1 && !_tasksPopupWidget.isVisible()) {
+#ifdef TASKS_STATUS_BAR_ACTION_VERBOSE
+                qDebug() << "TasksStatusBarAction: Open tasks popup widget";
+
+#endif
+
+                _tasksPopupWidget.updateContents();
                 _tasksPopupWidget.show();
+            }
         }
     };
 
     numberOfTasksChanged();
 
-    connect(&tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, numberOfTasksChanged);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, numberOfTasksChanged);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, numberOfTasksChanged);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this, numberOfTasksChanged](const QModelIndex& parent, int first, int last) -> void {
+#ifdef TASKS_STATUS_BAR_ACTION_VERBOSE
+        for (int rowIndex = first; rowIndex < last; rowIndex++)
+            qDebug() << "TasksStatusBarAction: " << _tasksStatusBarAction->getTasksFilterModel().index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name)).data(Qt::DisplayRole).toString() << " inserted into TasksFilterModel";
+#endif
+
+        numberOfTasksChanged();
+    });
+
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, [this, numberOfTasksChanged](const QModelIndex& parent, int first, int last) -> void {
+#ifdef TASKS_STATUS_BAR_ACTION_VERBOSE
+        for (int rowIndex = first; rowIndex < last; rowIndex++)
+            qDebug() << "TasksStatusBarAction: " << _tasksStatusBarAction->getTasksFilterModel().index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name)).data(Qt::DisplayRole).toString() << " removed from TasksFilterModel";
+#endif
+
+        numberOfTasksChanged();
+    });
 
     const auto updateToolButtonIcon = [this]() -> void {
         _toolButton.setIcon(_tasksStatusBarAction->icon());

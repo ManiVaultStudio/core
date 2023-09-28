@@ -388,10 +388,16 @@ public:
 private:
 
     /**
-     * Invoked when \p task is about to be removed from the task manager
-     * @param task Pointer to task that is about to be removed
+     * Add \p task to the model (this method is called when a task is added to the manager)
+     * @param task Pointer to task to add
      */
-    void taskAboutToBeRemovedFromTaskManager(Task* task);
+    virtual void addTask(Task* task) = 0;
+
+    /**
+     * Remove \p task from the model (this method is called when a task is about to be removed from the manager)
+     * @param task Pointer to task to remove
+     */
+    virtual void removeTask(Task* task) final;
 
     friend class Item;
 };

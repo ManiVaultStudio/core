@@ -273,7 +273,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/PresetsAction.h
     src/actions/LockingAction.h
     src/actions/VersionAction.h
-    src/actions/AbstractSplashScreenAction.h
+    src/actions/SplashScreenAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -289,7 +289,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/PresetsAction.cpp
     src/actions/LockingAction.cpp
     src/actions/VersionAction.cpp
-    src/actions/AbstractSplashScreenAction.cpp
+    src/actions/SplashScreenAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
@@ -494,14 +494,10 @@ set(PUBLIC_UTIL_FILES
 
 set(PUBLIC_APPLICATION_HEADERS
     src/Application.h
-    src/ApplicationSplashScreenAction.h
-    src/ApplicationSplashScreenDialog.h
 )
 
 set(PUBLIC_APPLICATION_SOURCES
     src/Application.cpp
-    src/ApplicationSplashScreenAction.cpp
-    src/ApplicationSplashScreenDialog.cpp
 )
 
 set(PUBLIC_APPLICATION_FILES
@@ -513,16 +509,12 @@ set(PUBLIC_PROJECT_HEADERS
     src/Project.h
     src/ProjectMetaAction.h
     src/ProjectCompressionAction.h
-    src/ProjectSplashScreenAction.h
-    src/ProjectSplashScreenDialog.h
 )
 
 set(PUBLIC_PROJECT_SOURCES
     src/Project.cpp
     src/ProjectMetaAction.cpp
     src/ProjectCompressionAction.cpp
-    src/ProjectSplashScreenAction.cpp
-    src/ProjectSplashScreenDialog.cpp
 )
 
 set(PUBLIC_PROJECT_FILES

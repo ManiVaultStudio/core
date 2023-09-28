@@ -24,7 +24,7 @@ namespace hdps {
 hdps::Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
     _core(nullptr),
-    _version({ 3, 0 }),
+    _version({ 1, 0 }),
     _iconFonts(),
     _settings(),
     _serializationTemporaryDirectory(),
@@ -37,8 +37,7 @@ hdps::Application::Application(int& argc, char** argv) :
         new Task(this, "Loading GUI"),
         new Task(this, "Loading Project"),
         new BackgroundTask(this, "Overall Background")
-    },
-    _splashScreenAction(this)
+    }
 {
     QStringList subTasks{
         "Initializing Icon Fonts",

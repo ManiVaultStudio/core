@@ -31,10 +31,10 @@ public:
 private:
 
     /**
-     * Invoked when \p task is added to the task manager
-     * @param task Pointer to task that was added
+     * Add \p task to the tasks tree model
+     * @param task Pointer to task to added
      */
-    void taskAddedToTaskManager(Task* task);
+    void addTask(Task* task) override;
 };
 
 }

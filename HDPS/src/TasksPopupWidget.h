@@ -49,6 +49,11 @@ public:
 
     void setIcon(const QIcon& icon);
 
+protected:
+
+    /** Update the contents of the popup (automatically invoked when the number of tasks changes) */
+    void updateContents();
+
 private:
 
     /** Overlays the icon with a badge which reflects the number of tasks */
@@ -66,9 +71,6 @@ private:
     /** Removes all existing task widget layout items */
     void cleanLayout();
 
-    /** Invoked when the number of tasks changes */
-    void numberOfTasksChanged();
-
 private:
     gui::TasksStatusBarAction&      _tasksStatusBarAction;      /** Tasks status bar action which contains the tasks to be displayed */
     QWidget*                        _anchorWidget;              /** If set, the popup widget will stick to the upper left corner of the anchor widget (right-aligned) */
@@ -77,6 +79,8 @@ private:
     QTimer                          _minimumDurationTimer;      /** Wait for a small amount of time before showing the UI */
 
     static const QSize iconPixmapSize;
+
+    friend class TasksStatusBarAction;
 };
 
 }

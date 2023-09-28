@@ -8,6 +8,7 @@
 #include "CoreInterface.h"
 
 #include <QEventLoop>
+#include <QSharedPointer>
 
 namespace hdps
 {
@@ -24,7 +25,7 @@ void ForegroundTaskTester::testRunningIndeterminate()
     TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto indeterminateTask = new ForegroundTask(taskRunner, "Indeterminate Task", Task::Status::RunningIndeterminate);
+        auto indeterminateTask = std::make_unique<ForegroundTask>(taskRunner, "Indeterminate Task", Task::Status::RunningIndeterminate);
 
         auto subtasks = QStringList({
             "Step 1",
@@ -43,7 +44,7 @@ void ForegroundTaskTester::testRunningIndeterminate()
 
         timer.setInterval(1000);
 
-        connect(indeterminateTask, &ForegroundTask::requestAbort, &timer, &QTimer::stop);
+        connect(indeterminateTask.get(), &ForegroundTask::requestAbort, &timer, &QTimer::stop);
 
         connect(&timer, &QTimer::timeout, [&]() -> void {
             if (!subtasks.isEmpty()) {
