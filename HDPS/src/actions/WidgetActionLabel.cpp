@@ -40,6 +40,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
 
     setLayout(layout);
 
+    _nameLabel.setObjectName("Label");
     _nameLabel.setText(getLabelText());
     _nameLabel.setAlignment(Qt::AlignRight);
     _nameLabel.setStyleSheet("QLabel { color: black; }");

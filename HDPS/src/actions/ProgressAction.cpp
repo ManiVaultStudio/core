@@ -146,6 +146,7 @@ ProgressAction::BarWidget::BarWidget(QWidget* parent, ProgressAction* progressAc
     QProgressBar(parent),
     _progressAction(progressAction)
 {
+    setObjectName("ProgressBar");
     setStyleSheet("QProgressBar { font-size: 10px; }");
 
     if (widgetFlags & WidgetFlag::HorizontalBar)

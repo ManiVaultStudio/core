@@ -76,7 +76,7 @@ TasksPopupWidget::TasksPopupWidget(gui::TasksStatusBarAction& tasksStatusBarActi
     if (_anchorWidget) {
         installEventFilter(this);
         _anchorWidget->installEventFilter(this);
-        getMainWindow()->installEventFilter(this);
+        Application::getMainWindow()->installEventFilter(this);
     }
 }
 
@@ -91,7 +91,7 @@ bool TasksPopupWidget::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::Move:
         {
-            if (targetWidget == _anchorWidget || targetWidget == getMainWindow())
+            if (targetWidget == _anchorWidget || targetWidget == Application::getMainWindow())
                 synchronizeWithAnchorWidget();
 
             break;
@@ -151,15 +151,6 @@ void TasksPopupWidget::synchronizeWithAnchorWidget()
         return;
 
     move(_anchorWidget->mapToGlobal(QPoint(_anchorWidget->width(), 0)) - QPoint(width(), height()));
-}
-
-QMainWindow* TasksPopupWidget::getMainWindow()
-{
-    foreach(QWidget * widget, qApp->topLevelWidgets())
-        if (auto mainWindow = qobject_cast<QMainWindow*>(widget))
-            return mainWindow;
-
-    return nullptr;
 }
 
 QSize TasksPopupWidget::sizeHint() const

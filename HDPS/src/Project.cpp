@@ -126,11 +126,8 @@ QVariantMap Project::toVariantMap() const
     return variantMap;
 }
 
-Task& Project::getTask()
+ModalTask& Project::getTask()
 {
-    if (isStartupProject())
-        return *Application::current()->getTask(Application::TaskType::LoadProject);
-
     return _task;
 }
 
@@ -218,9 +215,6 @@ void Project::initialize()
 
     connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
-        
-    _task.setMayKill(false);
-    _task.setProgressMode(Task::ProgressMode::Subtasks);
 }
 
 }

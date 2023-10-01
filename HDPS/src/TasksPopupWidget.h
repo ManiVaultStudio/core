@@ -62,12 +62,6 @@ private:
     /** Synchronize the position with the position of the anchor widget (if one is set) */
     void synchronizeWithAnchorWidget();
 
-    /**
-     * Get pointer to the main window
-     * @return Pointer to the application main window
-     */
-    QMainWindow* getMainWindow();
-
     /** Removes all existing task widget layout items */
     void cleanLayout();
 

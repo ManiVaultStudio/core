@@ -72,7 +72,7 @@ public: // Miscellaneous
      * Get task
      * @return Modal task (for IO operations)
      */
-    virtual Task& getTask() final;
+    virtual ModalTask& getTask() final;
 
     /**
      * Get version of the application (major and minor version number) with which the project is created

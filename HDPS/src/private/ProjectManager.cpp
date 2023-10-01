@@ -428,19 +428,16 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             ProjectMetaAction projectMetaAction(extractFileFromManiVaultProject(filePath, temporaryDirectory, "meta.json"));
 
-            auto& splashScreenAction = projectMetaAction.getSplashScreenAction();
-
-            if (splashScreenAction.getEnabledAction().isChecked() && !_project->isStartupProject())
-                splashScreenAction.getOpenAction().trigger();
-
-            //Application::current()->getTask(Application::TaskType::LoadApplication)->setName(QString("Loading %1").arg(QFileInfo(filePath).fileName()));
-
             auto& task = _project->getTask();
-
+            
+            //task.setParentTask(_project->isStartupProject() ? Application::current()->getTask(Application::TaskType::LoadProject) : nullptr);
+            task.setName("Open Project");
             task.setDescription(QString("Opening ManiVault project from %1").arg(filePath));
             task.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-            task.setName(QString("Open %1").arg(filePath));
-            task.setRunning();
+            task.setMayKill(false);
+            task.setProgressMode(Task::ProgressMode::Subtasks);
+
+            QCoreApplication::processEvents();
 
             Archiver archiver;
 
@@ -452,13 +449,14 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             const auto decompressionTaskNames   = QStringList() << archiver.getTaskNamesForDecompression(filePath);
 
             task.setSubtasks(QStringList() << decompressionTaskNames << "Create data hierarchy" << viewPluginsTaskNames);
+            task.setRunning();
 
-            connect(&archiver, &Archiver::taskStarted, this, [this](const QString& taskName) -> void {
-                _project->getTask().setSubtaskStarted(taskName, QString("extracting %1").arg(taskName));
+            connect(&archiver, &Archiver::taskStarted, this, [this, &task](const QString& taskName) -> void {
+                task.setSubtaskStarted(taskName, QString("extracting %1").arg(taskName));
             });
 
-            connect(&archiver, &Archiver::taskFinished, this, [this](const QString& taskName) -> void {
-                _project->getTask().setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
+            connect(&archiver, &Archiver::taskFinished, this, [this, &task](const QString& taskName) -> void {
+                task.setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
             });
 
             connect(&task, &Task::requestAbort, this, [this]() -> void {

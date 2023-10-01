@@ -6,6 +6,8 @@
 #include "ProjectMetaAction.h"
 #include "Application.h"
 
+#include "widgets/SplashScreenWidget.h"
+
 namespace hdps::gui {
 
 SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*/) :
@@ -23,7 +25,7 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _openAction(this, "Open splash screen"),
     _closeAction(this, "Close splash screen"),
     _taskAction(this, "ManiVault"),
-    _splashScreenDialog()
+    _splashScreenWidget()
 {
     addAction(&_enabledAction);
     addAction(&_editAction);
@@ -90,13 +92,17 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
 
     connect(&_closeManuallyAction, &ToggleAction::toggled, this, updateDurationAction);
 
-    connect(&_openAction, &TriggerAction::triggered, this, &SplashScreenAction::showSplashScreenDialog);
-    connect(&_closeAction, &TriggerAction::triggered, this, &SplashScreenAction::closeSplashScreenDialog);
+    connect(&_openAction, &TriggerAction::triggered, this, &SplashScreenAction::showSplashScreenWidget);
+    connect(&_closeAction, &TriggerAction::triggered, this, &SplashScreenAction::closeSplashScreenWidget);
 
     connect(Application::current()->getTask(Application::TaskType::LoadApplication), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
         if (previousStatus == Task::Status::Finished && status == Task::Status::Idle)
-            closeSplashScreenDialog();
+            closeSplashScreenWidget();
     });
+}
+
+SplashScreenAction::~SplashScreenAction()
+{
 }
 
 bool SplashScreenAction::getMayClose() const
@@ -114,25 +120,27 @@ void SplashScreenAction::setProjectMetaAction(ProjectMetaAction* projectMetaActi
     _projectMetaAction = projectMetaAction;
 }
 
-void SplashScreenAction::showSplashScreenDialog()
+void SplashScreenAction::showSplashScreenWidget()
 {
-    if (_splashScreenDialog.get())
-        return;
+    if (_splashScreenWidget.isNull()) {
+        _splashScreenWidget = new SplashScreenWidget(*this, nullptr);
 
-    _splashScreenDialog = std::make_unique<SplashScreenDialog>(*this);
-
-    _splashScreenDialog->open();
-
-    QCoreApplication::processEvents();
+        connect(_splashScreenWidget, &QWidget::destroyed, this, [this]() -> void {
+            _splashScreenWidget.clear();
+        });
+    }
+        
+    _splashScreenWidget->showAnimated();
 }
 
-void SplashScreenAction::closeSplashScreenDialog()
+void SplashScreenAction::closeSplashScreenWidget()
 {
-    if (!_splashScreenDialog.get())
+    if (_splashScreenWidget.isNull())
         return;
 
-    _splashScreenDialog->close();
-    _splashScreenDialog.reset();
+    _splashScreenWidget->closeAnimated();
+
+    _splashScreenWidget.clear();
 }
 
 void SplashScreenAction::fromVariantMap(const QVariantMap& variantMap)

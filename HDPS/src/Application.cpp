@@ -15,6 +15,7 @@
 
 #include <QDebug>
 #include <QMessageBox>
+#include <QMainWindow>
 
 using namespace hdps::gui;
 using namespace hdps::util;
@@ -31,7 +32,7 @@ hdps::Application::Application(int& argc, char** argv) :
     _serializationAborted(false),
     _logger(),
     _startupProjectFilePath(),
-    _startupProjectMetaAction(),
+    _startupProjectMetaAction(nullptr),
     _tasks{
         new Task(this, "Loading ManiVault"),
         new Task(this, "Loading GUI"),
@@ -122,12 +123,12 @@ void Application::setStartupProjectFilePath(const QString& startupProjectFilePat
 
 ProjectMetaAction* Application::getStartupProjectMetaAction()
 {
-    return _startupProjectMetaAction.get();
+    return _startupProjectMetaAction;
 }
 
 void Application::setStartupProjectMetaAction(ProjectMetaAction* projectMetaAction)
 {
-    _startupProjectMetaAction.reset(projectMetaAction);
+    _startupProjectMetaAction = projectMetaAction;
 }
 
 bool Application::shouldOpenProjectAtStartup() const
@@ -188,6 +189,15 @@ void Application::initialize()
 Task* Application::getTask(const TaskType& taskType)
 {
     return _tasks[static_cast<int>(taskType)];
+}
+
+QMainWindow* Application::getMainWindow()
+{
+    foreach(QWidget* widget, qApp->topLevelWidgets())
+        if (auto mainWindow = qobject_cast<QMainWindow*>(widget))
+            return mainWindow;
+
+    return nullptr;
 }
 
 }

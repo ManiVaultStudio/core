@@ -186,34 +186,34 @@ void TasksFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
         for (int rowIndex = first; rowIndex <= last; rowIndex++) {
             const auto sourceModelIndex = index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name), parent);
 
-            qDebug() << this << sourceModelIndex.data(Qt::EditRole).toString() << "inserted" << sourceModelIndex << "into" << parent;
+            qDebug() << "TasksFilterModel::rowsInserted" << sourceModelIndex.data(Qt::EditRole).toString() << "inserted" << sourceModelIndex << "into" << parent;
         }
 #endif
     });
 
-    /*
     connect(this, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
 #ifdef TASKS_FILTER_MODEL_VERBOSE
         for (int rowIndex = first; rowIndex <= last; rowIndex++) {
             const auto sourceModelIndex = index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name), parent);
 
-            qDebug() << this << sourceModelIndex.data(Qt::EditRole).toString() << "removed" << sourceModelIndex << "from" << parent;
+            qDebug() << "TasksFilterModel::rowsAboutToBeRemoved" << sourceModelIndex.data(Qt::EditRole).toString() << "removed" << sourceModelIndex << "from" << parent;
         }
 #endif
     });
 
-    connect(this, &QSortFilterProxyModel::layoutAboutToBeChanged, this, [this]() -> void {
+    connect(sourceModel, &QSortFilterProxyModel::layoutAboutToBeChanged, this, [this]() -> void {
 #ifdef TASKS_FILTER_MODEL_VERBOSE
-        qDebug() << this << "layoutAboutToBeChanged";
+        qDebug() << "TasksFilterModel::layoutAboutToBeChanged";
 #endif
     });
 
-    connect(this, &QSortFilterProxyModel::layoutChanged, this, [this]() -> void {
+    connect(sourceModel, &QSortFilterProxyModel::layoutChanged, this, [this]() -> void {
 #ifdef TASKS_FILTER_MODEL_VERBOSE
-        qDebug() << this << "layoutChanged";
+        qDebug() << "TasksFilterModel::layoutChanged";
 #endif
+
+        invalidate();
     });
-    */
 
     //connect(sourceModel, &QAbstractItemModel::dataChanged, this, &TasksFilterModel::invalidate);
 }

@@ -351,7 +351,7 @@ set(PUBLIC_WIDGET_HEADERS
     src/widgets/InfoWidget.h
     src/widgets/ViewPluginEditorDialog.h
     src/widgets/ActionsWidget.h
-    src/widgets/SplashScreenDialog.h
+    src/widgets/SplashScreenWidget.h
 )
 
 set(PUBLIC_WIDGET_SOURCES
@@ -364,7 +364,7 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/InfoWidget.cpp
     src/widgets/ViewPluginEditorDialog.cpp
     src/widgets/ActionsWidget.cpp
-    src/widgets/SplashScreenDialog.cpp
+    src/widgets/SplashScreenWidget.cpp
     ${ACTION_HIERARCHY_SOURCES}
 )
 

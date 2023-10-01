@@ -721,7 +721,7 @@ void Task::privateSetParentTask(Task* parentTask)
             return;
 
         if (parentTask && (parentTask->getTypeName() != getTypeName()))
-            throw std::runtime_error(QString("Type mismatch: child type is %1 and parent type is %2").arg(getTypeName(), parentTask->getTypeName()).toStdString());
+            qDebug() << QString("Type mismatch: child type is %1 and parent type is %2").arg(getTypeName(), parentTask->getTypeName());
 
         _parentTask = parentTask;
 

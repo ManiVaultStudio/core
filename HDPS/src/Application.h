@@ -9,17 +9,18 @@
 #include "util/Version.h"
 
 #include "actions/TriggerAction.h"
-#include "actions/SplashScreenAction.h"
 
-#include "ProjectMetaAction.h"
 #include "BackgroundTask.h"
 
 #include <QApplication>
 #include <QSettings>
 
+class QMainWindow;
+
 namespace hdps {
 
 class CoreInterface;
+class ProjectMetaAction;
 
 /**
  * HDPS application class
@@ -183,9 +184,9 @@ public: // Tasks
      */
     Task* getTask(const TaskType& taskType);
 
-public: // Action getters
+public: // Statics
 
-    //gui::SplashScreenAction& getSplashScreenAction() { return _splashScreenAction; }
+    static QMainWindow* getMainWindow();
 
 signals:
 
@@ -205,7 +206,7 @@ protected:
     util::Logger                        _logger;                                        /** Logger instance */
     gui::TriggerAction*                 _exitAction;                                    /** Action for exiting the application */
     QString                             _startupProjectFilePath;                        /** File path of the project to automatically open upon startup (if set) */
-    QScopedPointer<ProjectMetaAction>   _startupProjectMetaAction;                      /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
+    ProjectMetaAction*                  _startupProjectMetaAction;                      /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
     Task*                               _tasks[static_cast<int>(TaskType::Count)];      /** Application-related tasks */
     //gui::SplashScreenAction             _splashScreenAction;                            /** Splash screen action */
 };

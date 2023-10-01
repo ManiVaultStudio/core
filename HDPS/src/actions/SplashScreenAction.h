@@ -11,9 +11,7 @@
 #include "actions/TaskAction.h"
 #include "actions/ImageAction.h"
 
-#include "Task.h"
-
-#include "widgets/SplashScreenDialog.h"
+#include <QPointer>
 
 namespace hdps {
     class ProjectMetaAction;
@@ -21,6 +19,7 @@ namespace hdps {
 
 namespace hdps::gui {
 
+class SplashScreenWidget;
 
 /**
  * Splash screen action class
@@ -41,13 +40,20 @@ public:
      */
     SplashScreenAction(QObject* parent, bool mayClose = false);
 
+    /**
+     * Destructor
+     * A destructor is mandatory here because of the SplashScreenAction#_splashScreenDialog QScopePointer
+     * https://doc.qt.io/qt-6/qscopedpointer.html#forward-declared-pointers
+     */
+    ~SplashScreenAction();
+
     bool getMayClose() const;
 
     ProjectMetaAction* getProjectMetaAction();
     void setProjectMetaAction(ProjectMetaAction* projectMetaAction);
 
-    void showSplashScreenDialog();
-    void closeSplashScreenDialog();
+    void showSplashScreenWidget();
+    void closeSplashScreenWidget();
 
 public: // Serialization
 
@@ -62,6 +68,11 @@ public: // Serialization
      * @return Variant representation of the project
      */
     QVariantMap toVariantMap() const override;
+
+private:
+    
+    /** https://doc.qt.io/qt-6/qscopedpointer.html#forward-declared-pointers */
+    Q_DISABLE_COPY(SplashScreenAction)
 
 public: // Action getters
 
@@ -90,20 +101,20 @@ public: // Action getters
     TaskAction& getTaskAction() { return _taskAction; }
 
 private:
-    bool                                    _mayClose;
-    ProjectMetaAction*                      _projectMetaAction;
-    ToggleAction                            _enabledAction;                 /** Action to toggle the splash screen on/off */
-    ToggleAction                            _closeManuallyAction;           /** Action to toggle whether the splash screen has to be closed manually */
-    IntegralAction                          _durationAction;                /** Action to control the display duration */
-    IntegralAction                          _animationDurationAction;       /** Action to control the duration of the fade in/out animations */
-    IntegralAction                          _animationPanAmountAction;      /** Action to control the amount of up/down panning of animations */
-    ImageAction                             _projectImageAction;            /** Image action for the project image */
-    ImageAction                             _affiliateLogosImageAction;     /** Image action for the affiliate logo's image */
-    VerticalGroupAction                     _editAction;                    /** Vertical group action for editing the splash screen */
-    TriggerAction                           _openAction;                    /** Trigger action to show the splash screen */
-    TriggerAction                           _closeAction;                   /** Trigger action to manually close the splash screen */
-    TaskAction                              _taskAction;                    /** Task action for showing load progress */
-    std::unique_ptr<SplashScreenDialog>     _splashScreenDialog;            /** Splash screen dialog */
+    bool                            _mayClose;
+    ProjectMetaAction*              _projectMetaAction;
+    ToggleAction                    _enabledAction;                 /** Action to toggle the splash screen on/off */
+    ToggleAction                    _closeManuallyAction;           /** Action to toggle whether the splash screen has to be closed manually */
+    IntegralAction                  _durationAction;                /** Action to control the display duration */
+    IntegralAction                  _animationDurationAction;       /** Action to control the duration of the fade in/out animations */
+    IntegralAction                  _animationPanAmountAction;      /** Action to control the amount of up/down panning of animations */
+    ImageAction                     _projectImageAction;            /** Image action for the project image */
+    ImageAction                     _affiliateLogosImageAction;     /** Image action for the affiliate logo's image */
+    VerticalGroupAction             _editAction;                    /** Vertical group action for editing the splash screen */
+    TriggerAction                   _openAction;                    /** Trigger action to show the splash screen */
+    TriggerAction                   _closeAction;                   /** Trigger action to manually close the splash screen */
+    TaskAction                      _taskAction;                    /** Task action for showing load progress */
+    QPointer<SplashScreenWidget>    _splashScreenWidget;            /** Splash screen dialog */
 };
 
 }

@@ -54,6 +54,10 @@ void ModalTaskHandler::updateDialogVisibility()
 {
     const auto numberOfModalTasks = getTasksFilterModel().rowCount();
 
+#ifdef MODAL_TASK_HANDLER_VERBOSE
+    qDebug() << __FUNCTION__ << numberOfModalTasks;
+#endif
+
     if (numberOfModalTasks == 0 && _modalTasksDialog.isVisible())
         _modalTasksDialog.close();
 
