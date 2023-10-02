@@ -37,9 +37,10 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
     setAttribute(Qt::WA_TranslucentBackground);
     setWindowOpacity(0.0);
 
-    _backgroundImage = _backgroundImage.scaled(_backgroundImage.size() / 5, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    if (!_backgroundImage.isNull())
+        _backgroundImage = _backgroundImage.scaled(_backgroundImage.size() / 5, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-    createHeader();
+    createToolbar();
     createBody();
     createFooter();
 
@@ -196,13 +197,13 @@ void SplashScreenWidget::closeAnimated()
     deleteLater();
 }
 
-void SplashScreenWidget::createHeader()
+void SplashScreenWidget::createToolbar()
 {
     const auto margin       = 10;
     const auto fixedSize    = 25;
 
     _closeToolButton.setFixedSize(fixedSize, fixedSize);
-    _closeToolButton.setVisible(_splashScreenAction.getMayClose());
+    _closeToolButton.setVisible(_splashScreenAction.getMayCloseSplashScreenWidget());
     _closeToolButton.setIcon(Application::getIconFont("FontAwesome").getIcon("times"));
     _closeToolButton.setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
     _closeToolButton.setAutoRaise(true);
@@ -268,19 +269,19 @@ void SplashScreenWidget::createBody()
     }
     else {
         imageLabel->setPixmap(_logoImage);
-        imageLabel->setToolTip(SplashScreenWidget::getCopyrightTooltip());
+        imageLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
 
         const auto applicationVersion   = Application::current()->getVersion();
         const auto versionString        = QString("%1.%2").arg(QString::number(applicationVersion.getMajor()), QString::number(applicationVersion.getMinor()));
 
         htmlLabel->setText(QString(" \
             <div> \
-                <p style='font-size: 20pt; font-weight: bold;'><span style='color: rgb(102, 159, 178)'>ManiVault</span> <span style='color: rgb(162, 141, 208)'>Studio<sup>&copy;</sup></span></p> \
+                <p style='font-size: 20pt; font-weight: bold;'><span style='color: rgb(102, 159, 178)'>ManiVault</span> <span style='color: rgb(162, 141, 208)'>Studio<sup style='font-size: 12pt; font-weight: bold;'>&copy;</sup></span></p> \
                 <p style='font-weight: bold; color: %5;'>Version: %2</p> \
                 <p style='color: %2;'><i>An extensible open-source visual analytics framework for analyzing high-dimensional data</i></p> \
             </div> \
         ").arg(versionString, bodyColor));
-        htmlLabel->setToolTip(SplashScreenWidget::getCopyrightTooltip());
+        htmlLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
     }
 
     rightColumn->addStretch(1);
@@ -325,7 +326,7 @@ void SplashScreenWidget::createFooter()
         builtWithWidgetLayout->addWidget(builtWithLabel);
 
         builtWithWidget->setLayout(builtWithWidgetLayout);
-        builtWithWidget->setToolTip(SplashScreenWidget::getCopyrightTooltip());
+        builtWithWidget->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
 
         imagesLayout->addWidget(affiliateLogosImageLabel);
         imagesLayout->addStretch(1);
@@ -340,8 +341,8 @@ void SplashScreenWidget::createFooter()
         auto taskActionLabelWidget  = new ElidedLabel("", this);
         auto taskActionWidget       = _splashScreenAction.getTaskAction().createWidget(this);
 
-        taskActionLabelWidget->setStyleSheet("color: rgb(170, 170, 170); padding-left: 5px; padding-right: 5px; padding-bottom: 2px;");
-        
+        taskActionLabelWidget->setStyleSheet("color: rgb(170, 170, 170); padding-bottom: 2px;");
+
         connect(_splashScreenAction.getTaskAction().getTask(), &Task::progressDescriptionChanged, taskActionLabelWidget, &ElidedLabel::setText);
 
         taskActionWidget->setFixedSize(200, 7);
@@ -370,6 +371,8 @@ void SplashScreenWidget::createFooter()
 
         (taskActionWidget->findChild<QProgressBar*>("ProgressBar"))->setStyleSheet(progressBarStyleSheet);
 
+        progressWidgetLayout->setContentsMargins(15, 9, 15, 9);
+        progressWidgetLayout->setSpacing(15);
         progressWidgetLayout->addWidget(taskActionLabelWidget, 1);
         progressWidgetLayout->addWidget(taskActionWidget);
 
@@ -392,9 +395,9 @@ bool SplashScreenWidget::shouldDisplayProjectInfo() const
     return _splashScreenAction.getEnabledAction().isChecked() && _splashScreenAction.getProjectMetaAction();
 }
 
-QString SplashScreenWidget::getCopyrightTooltip()
+QString SplashScreenWidget::getCopyrightNoticeTooltip()
 {
-    return "<html>Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)</html>";
+    return "Copyright (c); 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)";
 }
 
 }

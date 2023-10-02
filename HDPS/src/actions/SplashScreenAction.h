@@ -35,10 +35,11 @@ class SplashScreenAction : public HorizontalGroupAction
 public:
 
     /**
-     * Construct with \p parent object
+     * Construct with \p parent object and optional parameter to control whether the user can close the splash screen widget with a close tool button
      * @param parent Pointer to parent object
+     * @param mayCloseSplashScreenWidget Whether the user can close the splash screen widget with a close tool button
      */
-    SplashScreenAction(QObject* parent, bool mayClose = false);
+    SplashScreenAction(QObject* parent, bool mayCloseSplashScreenWidget = false);
 
     /**
      * Destructor
@@ -47,24 +48,46 @@ public:
      */
     ~SplashScreenAction();
 
-    bool getMayClose() const;
+protected:
 
+    /**
+     * Get may close splash screen widget
+     * @return Whether the user can close the splash screen widget with a close tool button
+     */
+    bool getMayCloseSplashScreenWidget() const;
+
+public:
+
+    /**
+     * Get project meta action
+     * @return Pointer to project meta action, nullptr if not available
+     */
     ProjectMetaAction* getProjectMetaAction();
+
+    /**
+     * Get project meta action to \p projectMetaAction
+     * @param projectMetaAction Pointer to project meta action
+     */
     void setProjectMetaAction(ProjectMetaAction* projectMetaAction);
 
+protected:
+
+    /** Shows the splash screen and animates its opacity and position */
     void showSplashScreenWidget();
+
+    /** Animates the splash screen widget's opacity and position and afterwards closes it */
     void closeSplashScreenWidget();
 
 public: // Serialization
 
     /**
-     * Load splash screen from variant
+     * Load splash screen action from variant
      * @param Variant representation of the project
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-     * Save splash screen to variant
+     * Save splash screen action to variant
      * @return Variant representation of the project
      */
     QVariantMap toVariantMap() const override;
@@ -77,10 +100,6 @@ private:
 public: // Action getters
 
     const ToggleAction& getEnabledAction() const { return _enabledAction; }
-    const ToggleAction& getCloseManuallyAction() const { return _closeManuallyAction; }
-    const IntegralAction& getDurationAction() const { return _durationAction; }
-    const IntegralAction& getAnimationDurationAction() const { return _animationDurationAction; }
-    const IntegralAction& getAnimationPanAmountAction() const { return _animationPanAmountAction; }
     const TriggerAction& getOpenAction() const { return _openAction; }
     const TriggerAction& getCloseAction() const { return _closeAction; }
     const VerticalGroupAction& getEditAction() const { return _editAction; }
@@ -89,10 +108,6 @@ public: // Action getters
     const TaskAction& getTaskAction() const { return _taskAction; }
 
     ToggleAction& getEnabledAction() { return _enabledAction; }
-    ToggleAction& getCloseManuallyAction() { return _closeManuallyAction; }
-    IntegralAction& getDurationAction() { return _durationAction; }
-    IntegralAction& getAnimationDurationAction() { return _animationDurationAction; }
-    IntegralAction& getAnimationPanAmountAction() { return _animationPanAmountAction; }
     TriggerAction& getOpenAction() { return _openAction; }
     TriggerAction& getCloseAction() { return _closeAction; }
     VerticalGroupAction& getEditAction() { return _editAction; }
@@ -101,13 +116,9 @@ public: // Action getters
     TaskAction& getTaskAction() { return _taskAction; }
 
 private:
-    bool                            _mayClose;
-    ProjectMetaAction*              _projectMetaAction;
+    bool                            _mayCloseSplashScreenWidget;    /** Whether the user can close the splash screen widget with a close tool button */
+    ProjectMetaAction*              _projectMetaAction;             /** Pointer to project meta action (used by the splash screen widget to display project information) */
     ToggleAction                    _enabledAction;                 /** Action to toggle the splash screen on/off */
-    ToggleAction                    _closeManuallyAction;           /** Action to toggle whether the splash screen has to be closed manually */
-    IntegralAction                  _durationAction;                /** Action to control the display duration */
-    IntegralAction                  _animationDurationAction;       /** Action to control the duration of the fade in/out animations */
-    IntegralAction                  _animationPanAmountAction;      /** Action to control the amount of up/down panning of animations */
     ImageAction                     _projectImageAction;            /** Image action for the project image */
     ImageAction                     _affiliateLogosImageAction;     /** Image action for the affiliate logo's image */
     VerticalGroupAction             _editAction;                    /** Vertical group action for editing the splash screen */
@@ -115,6 +126,9 @@ private:
     TriggerAction                   _closeAction;                   /** Trigger action to manually close the splash screen */
     TaskAction                      _taskAction;                    /** Task action for showing load progress */
     QPointer<SplashScreenWidget>    _splashScreenWidget;            /** Splash screen dialog */
+
+    friend class SplashScreenWidget;
+    friend class ProjectMetaAction;
 };
 
 }

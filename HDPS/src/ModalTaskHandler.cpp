@@ -52,6 +52,9 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
 void ModalTaskHandler::updateDialogVisibility()
 {
+    if (projects().isOpeningProject() || projects().isOpeningProject())
+        return;
+
     const auto numberOfModalTasks = getTasksFilterModel().rowCount();
 
 #ifdef MODAL_TASK_HANDLER_VERBOSE
