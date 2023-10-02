@@ -106,12 +106,12 @@ int main(int argc, char *argv[])
             const auto startupProjectFilePath = commandLineParser.value("project");
 
             if (QFileInfo(startupProjectFilePath).exists()) {
+                application.setStartupProjectFilePath(startupProjectFilePath);
+
                 auto projectMetaAction = getStartupProjectMetaAction(startupProjectFilePath);
 
                 if (projectMetaAction != nullptr) {
                     splashscreenAction.setProjectMetaAction(projectMetaAction);
-
-                    application.setStartupProjectFilePath(startupProjectFilePath);
                     application.setStartupProjectMetaAction(projectMetaAction);
                     application.getTask(Application::TaskType::LoadProject)->setName(QString("Loading %1").arg(QFileInfo(startupProjectFilePath).fileName()));
                 }

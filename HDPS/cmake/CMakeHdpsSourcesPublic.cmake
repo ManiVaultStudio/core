@@ -352,6 +352,7 @@ set(PUBLIC_WIDGET_HEADERS
     src/widgets/ViewPluginEditorDialog.h
     src/widgets/ActionsWidget.h
     src/widgets/SplashScreenWidget.h
+    src/widgets/ElidedLabel.h
 )
 
 set(PUBLIC_WIDGET_SOURCES
@@ -365,6 +366,7 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/ViewPluginEditorDialog.cpp
     src/widgets/ActionsWidget.cpp
     src/widgets/SplashScreenWidget.cpp
+    src/widgets/ElidedLabel.cpp
     ${ACTION_HIERARCHY_SOURCES}
 )
 

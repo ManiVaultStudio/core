@@ -34,7 +34,7 @@ hdps::Application::Application(int& argc, char** argv) :
     _startupProjectFilePath(),
     _startupProjectMetaAction(nullptr),
     _tasks{
-        new Task(this, "Loading ManiVault"),
+        new Task(this, "Loading"),
         new Task(this, "Loading GUI"),
         new Task(this, "Loading Project"),
         new BackgroundTask(this, "Overall Background")

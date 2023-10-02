@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later 
 // A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+// Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "SplashScreenWidget.h"
 #include "ProjectMetaAction.h"
@@ -238,10 +238,11 @@ void SplashScreenWidget::createBody()
     leftColumn->addWidget(imageLabel);
     rightColumn->addWidget(htmlLabel);
 
-    auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
+    const auto bodyColor = "rgb(50, 50, 50)";
 
-    if (projectMetaAction) {
-        auto& splashScreenAction = projectMetaAction->getSplashScreenAction();
+    if (shouldDisplayProjectInfo()) {
+        auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
+        auto& splashScreenAction = _splashScreenAction.getProjectMetaAction()->getSplashScreenAction();
 
         imageLabel->setPixmap(QPixmap::fromImage(splashScreenAction.getProjectImageAction().getImage().scaledToHeight(SplashScreenWidget::logoSize, Qt::SmoothTransformation)));
 
@@ -255,52 +256,44 @@ void SplashScreenWidget::createBody()
             title = QFileInfo(projects().getCurrentProject()->getFilePath()).fileName();
 
         htmlLabel->setText(QString(" \
-            <p style='font-size: 20pt; font-weight: bold; color: rgb(25, 25, 25);'><span>%1</span></p> \
-            <p style='font-weight: bold;'>Version: %2</p> \
-            <p>%3</p> \
-            <p>%4</p> \
-        ").arg(title, version, description, comments));
+            <div style='color: %5;'> \
+                <p style='font-size: 20pt; font-weight: bold; color: rgb(25, 25, 25);'><span>%1</span></p> \
+                <p style='font-weight: bold;'>Version: %2</p> \
+                <p>%3</p> \
+                <p>%4</p> \
+            </div> \
+        ").arg(title, version, description, comments, bodyColor));
     }
     else {
         imageLabel->setPixmap(_logoImage);
+        imageLabel->setToolTip(SplashScreenWidget::getCopyrightTooltip());
 
         const auto applicationVersion   = Application::current()->getVersion();
         const auto versionString        = QString("%1.%2").arg(QString::number(applicationVersion.getMajor()), QString::number(applicationVersion.getMinor()));
 
         htmlLabel->setText(QString(" \
             <div> \
-                <p style='font-size: 20pt; font-weight: bold;'><span style='color: rgb(102, 159, 178)'>ManiVault</span> <span style='color: rgb(162, 141, 208)'>Studio</span></p> \
-                <p style='font-weight: bold;'>Version: %2</p> \
-                <p><i>An extensible open-source visual analytics framework for analyzing high-dimensional data</i></p> \
+                <p style='font-size: 20pt; font-weight: bold;'><span style='color: rgb(102, 159, 178)'>ManiVault</span> <span style='color: rgb(162, 141, 208)'>Studio<sup>&copy;</sup></span></p> \
+                <p style='font-weight: bold; color: %5;'>Version: %2</p> \
+                <p style='color: %2;'><i>An extensible open-source visual analytics framework for analyzing high-dimensional data</i></p> \
             </div> \
-        ").arg(versionString));
+        ").arg(versionString, bodyColor));
+        htmlLabel->setToolTip(SplashScreenWidget::getCopyrightTooltip());
     }
 
-    auto copyrightNoticeLabel = new QLabel();
-
-    copyrightNoticeLabel->setTextFormat(Qt::RichText);
-    copyrightNoticeLabel->setOpenExternalLinks(true);
-    copyrightNoticeLabel->setWordWrap(true);
-    copyrightNoticeLabel->setText("<span style='font-size: 7pt; color: gray;'>Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)</span>");
-
     rightColumn->addStretch(1);
-    rightColumn->addWidget(copyrightNoticeLabel);
 
-    _frameLayout.addLayout(columnsLayout);
+    _frameLayout.addLayout(columnsLayout, 1);
 }
 
 void SplashScreenWidget::createFooter()
 {
-    _frameLayout.addStretch(1);
-
-    auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
-
-    if (projectMetaAction) {
+    if (shouldDisplayProjectInfo()) {
         auto imagesLayout = new QHBoxLayout();
 
-        imagesLayout->setContentsMargins(SplashScreenWidget::margin, SplashScreenWidget::margin, SplashScreenWidget::margin, SplashScreenWidget::margin);
+        imagesLayout->setContentsMargins(SplashScreenWidget::margin, SplashScreenWidget::margin / 2, SplashScreenWidget::margin, SplashScreenWidget::margin / 2);
 
-        auto& splashScreenAction = projectMetaAction->getSplashScreenAction();
+        auto& splashScreenAction = _splashScreenAction.getProjectMetaAction()->getSplashScreenAction();
 
         auto affiliateLogosImageLabel = new QLabel();
 
@@ -321,7 +314,7 @@ void SplashScreenWidget::createFooter()
             <div style='margin-left: 10px; font-family: --bs-font-sans-serif'> \
                 <span style='font-size: 10pt; font-weight: bold; color: rgb(162, 141, 208);'>Built with</span> \
                 <br> \
-                <span style='font-size: 12pt; font-weight: bold; color: rgb(102, 159, 178); padding: 0px;'>ManiVault Studio</span> \
+                <span style='font-size: 12pt; font-weight: bold; color: rgb(102, 159, 178); padding: 0px;'>ManiVault Studio<sup>&copy;</sup></span> \
             </div> \
         "));
 
@@ -330,6 +323,7 @@ void SplashScreenWidget::createFooter()
         builtWithWidgetLayout->addWidget(builtWithLabel);
 
         builtWithWidget->setLayout(builtWithWidgetLayout);
+        builtWithWidget->setToolTip(SplashScreenWidget::getCopyrightTooltip());
 
         imagesLayout->addWidget(affiliateLogosImageLabel);
         imagesLayout->addStretch(1);
@@ -341,14 +335,14 @@ void SplashScreenWidget::createFooter()
     if (Application::current()->getTask(Application::TaskType::LoadApplication)->isRunning()) {
         auto progressWidget         = new QWidget();
         auto progressWidgetLayout   = new QHBoxLayout();
-        auto taskActionLabelWidget  = new QLabel("Loading...");
+        auto taskActionLabelWidget  = _splashScreenAction.getTaskAction().createLabelWidget(this);
         auto taskActionWidget       = _splashScreenAction.getTaskAction().createWidget(this);
 
         taskActionLabelWidget->setStyleSheet("color: rgb(170, 170, 170); padding-left: 5px;");
+        
+        //connect(_splashScreenAction.getTaskAction().getTask(), &Task::progressDescriptionChanged, taskActionLabelWidget, &QLabel::setText);
 
-        connect(_splashScreenAction.getTaskAction().getTask(), &Task::progressDescriptionChanged, taskActionLabelWidget, &QLabel::setText);
-
-        taskActionWidget->setFixedHeight(7);
+        taskActionWidget->setFixedSize(300, 7);
 
         const auto borderRadius = 2;
 
@@ -375,7 +369,7 @@ void SplashScreenWidget::createFooter()
         (taskActionWidget->findChild<QProgressBar*>("ProgressBar"))->setStyleSheet(progressBarStyleSheet);
 
         progressWidgetLayout->addWidget(taskActionLabelWidget, 1);
-        progressWidgetLayout->addWidget(taskActionWidget, 1);
+        progressWidgetLayout->addWidget(taskActionWidget);
 
         progressWidget->setAutoFillBackground(true);
         progressWidget->setObjectName("ProgressWidget");
@@ -389,6 +383,16 @@ void SplashScreenWidget::createFooter()
 
         _frameLayout.addWidget(progressWidget);
     }
+}
+
+bool SplashScreenWidget::shouldDisplayProjectInfo() const
+{
+    return _splashScreenAction.getEnabledAction().isChecked() && _splashScreenAction.getProjectMetaAction();
+}
+
+QString SplashScreenWidget::getCopyrightTooltip()
+{
+    return "<html>Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)</html>";
 }
 
 }

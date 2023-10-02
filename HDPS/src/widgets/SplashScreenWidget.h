@@ -50,6 +50,10 @@ private:
     void createBody();
     void createFooter();
 
+    bool shouldDisplayProjectInfo() const;
+
+    static QString getCopyrightTooltip();
+
 private:
     SplashScreenAction& _splashScreenAction;
     QPixmap             _logoImage;             /** Logo image */
