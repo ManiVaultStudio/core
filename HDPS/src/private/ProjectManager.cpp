@@ -430,7 +430,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             auto& task = _project->getTask();
             
-            //task.setParentTask(_project->isStartupProject() ? Application::current()->getTask(Application::TaskType::LoadProject) : nullptr);
+            task.setParentTask(_project->isStartupProject() ? Application::current()->getTask(Application::TaskType::LoadProject) : nullptr);
             task.setName("Open Project");
             task.setDescription(QString("Opening ManiVault project from %1").arg(filePath));
             task.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));

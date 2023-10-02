@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
                 if (projectMetaAction != nullptr) {
                     splashscreenAction.setProjectMetaAction(projectMetaAction);
                     application.setStartupProjectMetaAction(projectMetaAction);
-                    application.getTask(Application::TaskType::LoadProject)->setName(QString("Loading %1").arg(QFileInfo(startupProjectFilePath).fileName()));
+                    application.getTask(Application::TaskType::LoadProject)->setName(QString("%1").arg(QFileInfo(startupProjectFilePath).fileName()));
                 }
             }
             else {

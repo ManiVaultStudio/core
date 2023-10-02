@@ -26,9 +26,9 @@ void ElidedLabel::setText(const QString& fullText)
 
 void ElidedLabel::resizeEvent(QResizeEvent* resizeEvent)
 {
-    QWidget::resizeEvent(resizeEvent);
+    QLabel::resizeEvent(resizeEvent);
     
-    if (!_elide)
+    if (!getElide())
         return;
 
     elide();
@@ -64,13 +64,13 @@ void ElidedLabel::setElide(bool elide)
 
 void ElidedLabel::elide()
 {
-    if (!_elide) {
-        setText(_fullText);
+    if (!getElide()) {
+        QLabel::setText(_fullText);
     }
     else {
         QFontMetrics metrics(font());
 
-        setText(metrics.elidedText(_fullText, _textElideMode, width()));
+        QLabel::setText(metrics.elidedText(_fullText, _textElideMode, width()));
     }    
 }
 

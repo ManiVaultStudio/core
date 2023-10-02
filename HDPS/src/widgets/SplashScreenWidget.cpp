@@ -9,6 +9,8 @@
 
 #include "actions/SplashScreenAction.h"
 
+#include "widgets/ElidedLabel.h"
+
 #include <QScreen>
 #include <QPainter>
 #include <QPainterPath>
@@ -335,14 +337,14 @@ void SplashScreenWidget::createFooter()
     if (Application::current()->getTask(Application::TaskType::LoadApplication)->isRunning()) {
         auto progressWidget         = new QWidget();
         auto progressWidgetLayout   = new QHBoxLayout();
-        auto taskActionLabelWidget  = _splashScreenAction.getTaskAction().createLabelWidget(this);
+        auto taskActionLabelWidget  = new ElidedLabel("", this);
         auto taskActionWidget       = _splashScreenAction.getTaskAction().createWidget(this);
 
-        taskActionLabelWidget->setStyleSheet("color: rgb(170, 170, 170); padding-left: 5px;");
+        taskActionLabelWidget->setStyleSheet("color: rgb(170, 170, 170); padding-left: 5px; padding-right: 5px; padding-bottom: 2px;");
         
-        //connect(_splashScreenAction.getTaskAction().getTask(), &Task::progressDescriptionChanged, taskActionLabelWidget, &QLabel::setText);
+        connect(_splashScreenAction.getTaskAction().getTask(), &Task::progressDescriptionChanged, taskActionLabelWidget, &ElidedLabel::setText);
 
-        taskActionWidget->setFixedSize(300, 7);
+        taskActionWidget->setFixedSize(200, 7);
 
         const auto borderRadius = 2;
 

@@ -7,7 +7,7 @@
 #include <QDebug>
 
 #ifdef _DEBUG
-    #define TASKS_FILTER_MODEL_VERBOSE
+    //#define TASKS_FILTER_MODEL_VERBOSE
 #endif
 
 using namespace hdps::gui;

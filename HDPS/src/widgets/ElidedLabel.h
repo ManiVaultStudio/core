@@ -56,8 +56,6 @@ public:
      */
     void setElide(bool elide);
 
-    
-
 private:
 
     /** Truncates the label text */
