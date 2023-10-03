@@ -14,8 +14,8 @@
 
 namespace hdps {
 
-FontAwesome::FontAwesome(const std::uint32_t& majorVersion /*= 5*/, const std::uint32_t& minorVersion /*= 14*/) :
-    IconFont("FontAwesome", majorVersion, minorVersion),
+FontAwesome::FontAwesome(const std::uint32_t& majorVersion /*= 5*/, const std::uint32_t& minorVersion /*= 14*/, bool defaultFont /*= false*/) :
+    IconFont("FontAwesome", majorVersion, minorVersion, defaultFont),
     _metaDataResource(QString(":/IconFonts/%1.json").arg(getFullName()))
 {
     initialize();

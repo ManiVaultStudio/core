@@ -35,8 +35,9 @@ public: // Construction/destruction
      * Constructor
      * @param majorVersion Major version number
      * @param minorVersion Minor version number
+     * @param defaultFont Boolean determining whether this font is default when no version is specified
      */
-    FontAwesome(const std::uint32_t& majorVersion = 5, const std::uint32_t& minorVersion = 14);
+    FontAwesome(const std::uint32_t& majorVersion = 5, const std::uint32_t& minorVersion = 14, bool defaultFont = false);
 
     /** Destructor */
     ~FontAwesome() {};

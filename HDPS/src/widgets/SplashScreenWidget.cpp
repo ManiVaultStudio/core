@@ -303,6 +303,29 @@ void SplashScreenWidget::createBody()
         ").arg(versionString, bodyColor));
 
         htmlLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
+
+        const auto getExternalLinkWidget = [this](const QIcon& icon, const QString& text) -> QWidget* {
+            auto externalLinkWidget         = new QWidget();
+            auto externalLinkWidgetLayout   = new QHBoxLayout();
+            auto iconLabel                  = new QLabel();
+            auto textLabel                  = new QLabel(text);
+
+            iconLabel->setAlignment(Qt::AlignCenter);
+            //iconLabel->setStyleSheet("padding-top: 6px;");
+            iconLabel->setPixmap(icon.pixmap(QSize(16, 16)));
+
+            externalLinkWidgetLayout->addWidget(iconLabel);
+            externalLinkWidgetLayout->addWidget(textLabel, 1);
+
+            externalLinkWidget->setLayout(externalLinkWidgetLayout);
+
+            return externalLinkWidget;
+        };
+
+        auto& fontAwesome = Application::getIconFont("FontAwesome", 6, 4);
+
+        rightColumn->addWidget(getExternalLinkWidget(fontAwesome.getIcon("exclamation-circle"), "Contribute to ManiVault on Github"));
+        rightColumn->addWidget(getExternalLinkWidget(fontAwesome.getIcon("discord"), "Get in touch on our Discord"));
     }
 
     leftColumn->addStretch(1);
@@ -325,7 +348,11 @@ void SplashScreenWidget::createBody()
         auto copyrightNoticeLabel = new QLabel();
 
         copyrightNoticeLabel->setAlignment(Qt::AlignBottom);
-        copyrightNoticeLabel->setText("<p style='color: rgba(0, 0, 0, 80); font-size: 7pt;'>Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)</p>");
+        copyrightNoticeLabel->setWordWrap(true);
+        copyrightNoticeLabel->setText("<p style='color: rgba(0, 0, 0, 80); font-size: 8pt;'> \
+            This software is licensed under the GNU Lesser General Public License v3.0.<br> \
+            Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)</p>"
+        );
 
         const auto rowCount = bodyLayout->rowCount();
 

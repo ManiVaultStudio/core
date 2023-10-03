@@ -6,6 +6,8 @@
 	<qresource prefix="/IconFonts">
 		<file alias="FontAwesome-5.14.otf">iconfonts/FontAwesome-5.14.otf</file>
 		<file alias="FontAwesome-5.14.json">iconfonts/FontAwesome-5.14.json</file>
+		<file alias="FontAwesome-6.4.otf">iconfonts/FontAwesome-6.4.otf</file>
+		<file alias="FontAwesome-6.4.json">iconfonts/FontAwesome-6.4.json</file>
 	</qresource>
     <qresource prefix="/Icons">
         <file alias="AppIcon32">icons/AppIcon32.png</file>

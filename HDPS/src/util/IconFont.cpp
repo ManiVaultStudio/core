@@ -16,13 +16,14 @@ using namespace hdps::gui;
 
 namespace hdps {
 
-IconFont::IconFont(const QString& name, const std::uint32_t& majorVersion, const std::uint32_t& minorVersion) :
+IconFont::IconFont(const QString& name, const std::uint32_t& majorVersion, const std::uint32_t& minorVersion, bool defaultFont /*= false*/) :
     _name(name),
     _majorVersion(majorVersion),
     _minorVersion(minorVersion),
     _fontResourceName(QString(":/IconFonts/%1.otf").arg(getFullName())),
     _fontFamily(),
-    _characters()
+    _characters(),
+    _defaultFont(defaultFont)
 {
     try
     {
@@ -131,6 +132,16 @@ QIcon IconFont::getIcon(const QString& name, const QColor& foregroundColor/*= QC
         QMessageBox::critical(nullptr, "Unable to retrieve icon", e.what());
         return QIcon();
     }
+}
+
+bool IconFont::isDefaultFont() const
+{
+    return _defaultFont;
+}
+
+void IconFont::setDefaultFont(bool defaultFont)
+{
+    _defaultFont = defaultFont;
 }
 
 void IconFont::initialize()
