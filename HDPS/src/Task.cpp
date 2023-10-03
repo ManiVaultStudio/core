@@ -161,11 +161,14 @@ bool Task::hasParentTask()
     return getParentTask() != nullptr;
 }
 
-hdps::Task::TasksPtrs Task::getChildTasks(bool recursively /*= false*/, const Scopes& scopes /*= Scopes()*/, const Statuses& statuses /*= Statuses()*/) const
+hdps::Task::TasksPtrs Task::getChildTasks(bool recursively /*= false*/, const Scopes& scopes /*= Scopes()*/, const Statuses& statuses /*= Statuses()*/, bool enabledOnly /*= true*/) const
 {
     TasksPtrs childTasks;
     
     for (auto childTask : _childTasks) {
+        if (enabledOnly && !childTask->getEnabled())
+            continue;
+
         const auto filterInScope    = scopes.isEmpty() ? true : scopes.contains(childTask->getScope());
         const auto filterInstatus   = statuses.isEmpty() ? true : statuses.contains(childTask->getStatus());
 

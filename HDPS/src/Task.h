@@ -148,9 +148,10 @@ public: // Parent-child
      * @param recursively Whether to get child tasks recursively
      * @param scopes Filter scopes (includes all scopes when empty)
      * @param statuses Filter status (includes all statuses when empty)
+     * @param enabledOnly Filter out tasks which are disabled
      * @return Vector of pointer to child tasks
      */
-    virtual TasksPtrs getChildTasks(bool recursively = false, const Scopes& scopes = Scopes(), const Statuses& statuses = Statuses()) const final;
+    virtual TasksPtrs getChildTasks(bool recursively = false, const Scopes& scopes = Scopes(), const Statuses& statuses = Statuses(), bool enabledOnly = true) const final;
 
 protected: // Parent-child
 

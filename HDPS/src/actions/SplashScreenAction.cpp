@@ -57,7 +57,7 @@ QLabel* SplashScreenAction::Alert::getIconLabel(QWidget* parent /*= nullptr*/) c
 
     iconLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     iconLabel->setAlignment(Qt::AlignTop | Qt::AlignRight);
-    iconLabel->setStyleSheet("padding-top: 5px;");
+    iconLabel->setStyleSheet("padding-top: 6px;");
     iconLabel->setPixmap(_icon.pixmap(QSize(24, 24)));
 
     return iconLabel;

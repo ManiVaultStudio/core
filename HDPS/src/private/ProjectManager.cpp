@@ -428,10 +428,9 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             ProjectMetaAction projectMetaAction(extractFileFromManiVaultProject(filePath, temporaryDirectory, "meta.json"));
 
-            auto& task = _project->getTask();
+            ModalTask task(this, "Open Project");
             
-            task.setParentTask(_project->isStartupProject() ? Application::current()->getTask(Application::TaskType::LoadProject) : nullptr);
-            task.setName("Open Project");
+            //task.setParentTask(_project->isStartupProject() ? Application::current()->getTask(Application::TaskType::LoadProject) : nullptr);
             task.setDescription(QString("Opening ManiVault project from %1").arg(filePath));
             task.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
             task.setMayKill(false);
@@ -641,7 +640,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
-            auto& task = _project->getTask();
+            ModalTask task(this, QString("Save to %1").arg(filePath));
 
             if (_project->getCompressionAction().getEnabledAction().isChecked())
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "with compression level" << _project->getCompressionAction().getLevelAction().getValue();
@@ -650,7 +649,6 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             task.setDescription(QString("Saving ManiVault project to %1").arg(filePath));
             task.setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
-            task.setName(QString("Save to %1").arg(filePath));
             task.setProgressMode(Task::ProgressMode::Subtasks);
 
             Archiver archiver;

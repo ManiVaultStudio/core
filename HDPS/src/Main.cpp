@@ -111,8 +111,6 @@ int main(int argc, char *argv[])
 
     SplashScreenAction splashscreenAction(&application, false);
 
-    auto showApplicationSplashScreen = true;
-
     if (commandLineParser.isSet("project")) {
         try {
             const auto startupProjectFilePath = commandLineParser.value("project");
@@ -125,19 +123,21 @@ int main(int argc, char *argv[])
 
                 if (projectMetaAction != nullptr) {
                     splashscreenAction.setProjectMetaAction(projectMetaAction);
+                    splashscreenAction.fromVariantMap(projectMetaAction->getSplashScreenAction().toVariantMap());
+
                     application.setStartupProjectMetaAction(projectMetaAction);
                     application.getTask(Application::TaskType::LoadProject)->setName(QString("%1").arg(QFileInfo(startupProjectFilePath).fileName()));
                 }
                 else {
                     splashscreenAction.addAlert(SplashScreenAction::Alert::info(QString("\
-                    No project meta info found for <b>%1</b>. \
-                    Re-configure the project when loaded and save the project to solve the problem. \
+                    No project meta info found for project <b>%1</b>. \
+                    Re-configure the project settings and save the project to solve the problem. \
                 ").arg(startupProjectFileInfo.fileName())));
                 }
             }
             else {
                 splashscreenAction.addAlert(SplashScreenAction::Alert::warning(QString("\
-                    Unable to load <b>%1</b> at startup: file not found! \
+                    Unable to load <b>%1</b> at startup, the file does not exist. \
                     Provide an exisiting project file path when using <b>-p</b>/<b>--project</b> ManiVault<sup>&copy;</sup> command line parameters. \
                 ").arg(startupProjectFilePath)));
             }
@@ -155,8 +155,7 @@ int main(int argc, char *argv[])
     if (!application.shouldOpenProjectAtStartup())
         application.getTask(Application::TaskType::LoadProject)->setEnabled(false);
     
-    if (showApplicationSplashScreen)
-        splashscreenAction.getOpenAction().trigger();
+    splashscreenAction.getOpenAction().trigger();
 
     application.setStyle(new NoFocusProxyStyle);
 

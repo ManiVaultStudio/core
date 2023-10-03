@@ -234,17 +234,17 @@ void SplashScreenWidget::createBody()
     leftColumn->setAlignment(Qt::AlignTop);
     rightColumn->setAlignment(Qt::AlignTop);
 
-    auto imageLabel = new QLabel();
-    auto htmlLabel  = new QLabel();
+    auto projectLogoLabel   = new QLabel();
+    auto htmlLabel          = new QLabel();
 
-    imageLabel->setScaledContents(true);
-    imageLabel->setFixedSize(SplashScreenWidget::logoSize, SplashScreenWidget::logoSize);
+    projectLogoLabel->setScaledContents(true);
+    projectLogoLabel->setFixedSize(SplashScreenWidget::logoSize, SplashScreenWidget::logoSize);
 
     htmlLabel->setWordWrap(true);
     htmlLabel->setTextFormat(Qt::RichText);
     htmlLabel->setOpenExternalLinks(true);
 
-    leftColumn->addWidget(imageLabel);
+    leftColumn->addWidget(projectLogoLabel);
     rightColumn->addWidget(htmlLabel);
 
     const auto bodyColor = "rgb(50, 50, 50)";
@@ -253,7 +253,10 @@ void SplashScreenWidget::createBody()
         auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
         auto& splashScreenAction = _splashScreenAction.getProjectMetaAction()->getSplashScreenAction();
 
-        imageLabel->setPixmap(QPixmap::fromImage(splashScreenAction.getProjectImageAction().getImage().scaledToHeight(SplashScreenWidget::logoSize, Qt::SmoothTransformation)));
+        const auto projectLogoPixmap = QPixmap::fromImage(splashScreenAction.getProjectImageAction().getImage());
+
+        if (!projectLogoPixmap.isNull())
+            projectLogoLabel->setPixmap(projectLogoPixmap.scaledToHeight(SplashScreenWidget::logoSize, Qt::SmoothTransformation));
 
         auto& versionAction = projectMetaAction->getProjectVersionAction();
         auto title          = projectMetaAction->getTitleAction().getString();
@@ -274,8 +277,8 @@ void SplashScreenWidget::createBody()
         ").arg(title, version, description, comments, bodyColor));
     }
     else {
-        imageLabel->setPixmap(_logoImage);
-        imageLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
+        projectLogoLabel->setPixmap(_logoImage);
+        projectLogoLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
 
         const auto applicationVersion   = Application::current()->getVersion();
         const auto versionString        = QString("%1.%2").arg(QString::number(applicationVersion.getMajor()), QString::number(applicationVersion.getMinor()));
@@ -312,7 +315,7 @@ void SplashScreenWidget::createFooter()
     if (shouldDisplayProjectInfo()) {
         auto imagesLayout = new QHBoxLayout();
 
-        imagesLayout->setContentsMargins(SplashScreenWidget::margin, SplashScreenWidget::margin / 2, SplashScreenWidget::margin, SplashScreenWidget::margin / 2);
+        imagesLayout->setContentsMargins(SplashScreenWidget::margin, SplashScreenWidget::margin / 2, SplashScreenWidget::margin, 30);
 
         auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
 
@@ -320,7 +323,10 @@ void SplashScreenWidget::createFooter()
 
         auto affiliateLogosImageLabel = new QLabel();
 
-        affiliateLogosImageLabel->setPixmap(QPixmap::fromImage(splashScreenAction.getAffiliateLogosImageAction().getImage().scaledToHeight(SplashScreenWidget::footerImagesHeight, Qt::SmoothTransformation)));
+        const auto affiliatesLogosPixmap = QPixmap::fromImage(splashScreenAction.getAffiliateLogosImageAction().getImage());
+
+        if (!affiliatesLogosPixmap.isNull())
+            affiliateLogosImageLabel->setPixmap(affiliatesLogosPixmap.scaledToHeight(SplashScreenWidget::footerImagesHeight, Qt::SmoothTransformation));
 
         auto builtWithWidget        = new QWidget();
         auto builtWithWidgetLayout  = new QHBoxLayout();
