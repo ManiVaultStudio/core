@@ -17,6 +17,7 @@
 #include <QEventLoop>
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
+#include <QGraphicsDropShadowEffect>
 
 #ifdef _DEBUG
     #define SPLASH_SCREEN_WIDGET_VERBOSE
@@ -29,13 +30,22 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
     _splashScreenAction(splashScreenAction),
     _logoImage(":/Icons/AppIcon256"),
     _backgroundImage(":/Images/SplashScreenBackground"),
-    _closeToolButton(this)
+    _roundedFrame(),
+    _roundedFrameLayout(),
+    _closeToolButton(&_roundedFrame),
+    _dropShadowEffect()
 {
     setObjectName("SplashScreenWidget");
     setWindowFlags(Qt::FramelessWindowHint | Qt::Window | Qt::WindowStaysOnTopHint);
-    setFixedSize(QSize(SplashScreenWidget::fixedWidth, SplashScreenWidget::fixedHeight));
+    setFixedSize(QSize(SplashScreenWidget::fixedWidth + (2 * SplashScreenWidget::shadowMargin), SplashScreenWidget::fixedHeight + (2 * SplashScreenWidget::shadowMargin)));
     setAttribute(Qt::WA_TranslucentBackground);
     setWindowOpacity(0.0);
+
+    _dropShadowEffect.setColor(QColor(0, 0, 0, 50));
+    _dropShadowEffect.setBlurRadius(7);
+    _dropShadowEffect.setOffset(7);
+    
+    setGraphicsEffect(&_dropShadowEffect);
 
     if (!_backgroundImage.isNull())
         _backgroundImage = _backgroundImage.scaled(_backgroundImage.size() / 5, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -46,14 +56,14 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
 
     auto mainLayout = new QVBoxLayout();
 
-    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setContentsMargins(SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin);
     mainLayout->addWidget(&_roundedFrame);
 
-    _frameLayout.setContentsMargins(0, 0, 0, 0);
+    _roundedFrameLayout.setContentsMargins(0, 0, 0, 0);
 
     _roundedFrame.setObjectName("RoundedFrame");
     _roundedFrame.setContentsMargins(0, 0, 0, 0);
-    _roundedFrame.setLayout(&_frameLayout);
+    _roundedFrame.setLayout(&_roundedFrameLayout);
 
     setLayout(mainLayout);
 
@@ -73,10 +83,10 @@ void SplashScreenWidget::paintEvent(QPaintEvent* paintEvent)
 
     painter.setRenderHint(QPainter::Antialiasing);
 
-    auto backgroundRect = rect();
+    auto backgroundRect = rect().marginsRemoved(QMargins(SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin));
 
     if (Application::current()->getTask(Application::TaskType::LoadApplication)->isRunning())
-        backgroundRect.setHeight(height() - SplashScreenWidget::frameRadius);
+        backgroundRect.setHeight(height() - SplashScreenWidget::frameRadius - (2 * SplashScreenWidget::shadowMargin));
 
     QPainterPath path;
 
@@ -103,15 +113,16 @@ void SplashScreenWidget::paintEvent(QPaintEvent* paintEvent)
     painter.setBrush(backgroundImageBrush);
     painter.drawPath(path);
 
-    QLinearGradient overlayGradient(0, 0, 0, height());
+    QLinearGradient overlayGradient(0, 0, 0, height() - (2 * SplashScreenWidget::shadowMargin));
 
     overlayGradient.setColorAt(0.0, QColor(255, 255, 255, 0));
-    //overlayGradient.setColorAt(0.5, QColor(255, 255, 255, 255));
     overlayGradient.setColorAt(1.0, QColor(255, 255, 255, 255));
 
     painter.setOpacity(1.0);
     painter.setBrush(overlayGradient);
     painter.drawPath(path);
+
+    _closeToolButton.raise();
 }
 
 void SplashScreenWidget::showAnimated()
@@ -208,8 +219,8 @@ void SplashScreenWidget::createToolbar()
     _closeToolButton.setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
     _closeToolButton.setAutoRaise(true);
     _closeToolButton.setToolTip("Close the splash screen");
-    _closeToolButton.setIconSize(QSize(14, 14));
-    _closeToolButton.move(width() - fixedSize - margin, margin);
+    _closeToolButton.setIconSize(QSize(20, 20));
+    _closeToolButton.move(width() - (2 * SplashScreenWidget::shadowMargin) - fixedSize - margin, margin);
 
     connect(&_closeToolButton, &QToolButton::clicked, this, &SplashScreenWidget::closeAnimated);
 }
@@ -307,7 +318,7 @@ void SplashScreenWidget::createBody()
         }
     }
 
-    _frameLayout.addLayout(bodyLayout, 1);
+    _roundedFrameLayout.addLayout(bodyLayout, 1);
 }
 
 void SplashScreenWidget::createFooter()
@@ -360,7 +371,7 @@ void SplashScreenWidget::createFooter()
         imagesLayout->addStretch(1);
         imagesLayout->addWidget(builtWithWidget);
 
-        _frameLayout.addLayout(imagesLayout);
+        _roundedFrameLayout.addLayout(imagesLayout);
     }
 
     if (Application::current()->getTask(Application::TaskType::LoadApplication)->isRunning()) {
@@ -414,7 +425,7 @@ void SplashScreenWidget::createFooter()
 
         progressWidget->setLayout(progressWidgetLayout);
 
-        _frameLayout.addWidget(progressWidget);
+        _roundedFrameLayout.addWidget(progressWidget);
     }
 }
 

@@ -8,6 +8,7 @@
 #include <QVBoxLayout>
 #include <QToolButton>
 #include <QFrame>
+#include <QGraphicsDropShadowEffect >
 
 namespace hdps::gui {
 
@@ -67,12 +68,13 @@ private: // Splash screen content
     static QString getCopyrightNoticeTooltip();
 
 private:
-    SplashScreenAction&     _splashScreenAction;    /** Reference to owning splashScreenAction */
-    QPixmap                 _logoImage;             /** Logo image */
-    QPixmap                 _backgroundImage;       /** Background image */
-    QFrame                  _roundedFrame;          /** Frame with rounded edges */
-    QVBoxLayout             _frameLayout;           /** Layout for the rounded frame */
-    QToolButton             _closeToolButton;       /** Button for forcefully closing the splash screen */
+    SplashScreenAction&         _splashScreenAction;    /** Reference to owning splashScreenAction */
+    QPixmap                     _logoImage;             /** Logo image */
+    QPixmap                     _backgroundImage;       /** Background image */
+    QFrame                      _roundedFrame;          /** Frame with rounded edges */
+    QVBoxLayout                 _roundedFrameLayout;    /** Layout for the rounded frame */
+    QToolButton                 _closeToolButton;       /** Button for forcefully closing the splash screen */
+    QGraphicsDropShadowEffect   _dropShadowEffect;      /** For adding a drop shadow to the splash screen widget */
 
     static const std::uint32_t fixedWidth           = 640;      /** Widget fixed width */
     static const std::uint32_t fixedHeight          = 480;      /** Widget fixed height */
@@ -82,6 +84,8 @@ private:
     static const std::uint32_t frameRadius          = 7;        /** CSS radius of SplashScreenWidget#_roundedFrame */
     static const std::uint32_t animationDuration    = 300;      /** Duration of the show and close animations */
     static const std::uint32_t panAmount            = 15;       /** The amount of up/down panning to do during the animations */
+    static const std::uint32_t shadowMargin         = 20;       /** Extra margins allocated for drop shadow */
+    static const std::uint32_t maxBlurRadius        = 20.0;     /** Maximum blur radius */
 };
 
 }

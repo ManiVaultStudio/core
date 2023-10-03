@@ -44,7 +44,7 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     });
 
     const auto updateAboutProjectActionReadOnly = [this]() -> void {
-        _aboutProjectAction->setEnabled(projects().hasProject());
+        _aboutProjectAction->setVisible(projects().hasProject());
     };
 
     updateAboutProjectActionReadOnly();
@@ -96,9 +96,9 @@ void HelpMenu::populate()
     addAction(_aboutProjectAction);
 
     // the above clear() deletes all actions whose parent is this
-    _aboutAction        = new TriggerAction(this, "About");
-    _aboutThirdPartiesAction  = new TriggerAction(this, "About Third Parties");
-    _aboutQtAction            = new TriggerAction(this, "About Qt");
+    _aboutAction                = new TriggerAction(this, "About");
+    _aboutThirdPartiesAction    = new TriggerAction(this, "About Third Parties");
+    _aboutQtAction              = new TriggerAction(this, "About Qt");
 
     if(!isEmpty())
         addSeparator();

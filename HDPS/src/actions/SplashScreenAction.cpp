@@ -159,6 +159,11 @@ bool SplashScreenAction::getMayCloseSplashScreenWidget() const
     return _mayCloseSplashScreenWidget;
 }
 
+void SplashScreenAction::setMayCloseSplashScreenWidget(bool mayCloseSplashScreenWidget)
+{
+    _mayCloseSplashScreenWidget = mayCloseSplashScreenWidget;
+}
+
 ProjectMetaAction* SplashScreenAction::getProjectMetaAction()
 {
     return _projectMetaAction;

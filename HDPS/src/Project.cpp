@@ -201,6 +201,8 @@ QSharedPointer<ProjectMetaAction> Project::getProjectMetaActionFromProjectFilePa
 
 void Project::initialize()
 {
+    getProjectMetaAction().getSplashScreenAction().setMayCloseSplashScreenWidget(true);
+
     updateContributors();
 
     getStudioModeAction().setIcon(Application::getIconFont("FontAwesome").getIcon("pencil-ruler"));

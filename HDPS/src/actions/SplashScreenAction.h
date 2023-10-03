@@ -138,13 +138,17 @@ public:
      */
     Alerts getAlerts() const;
 
-protected:
-
     /**
      * Get may close splash screen widget
      * @return Whether the user can close the splash screen widget with a close tool button
      */
     bool getMayCloseSplashScreenWidget() const;
+
+    /**
+     * Set may close splash screen widget
+     * @param mayCloseSplashScreenWidget Whether the user can close the splash screen widget with a close tool button
+     */
+    void setMayCloseSplashScreenWidget(bool mayCloseSplashScreenWidget);
 
 public:
 
