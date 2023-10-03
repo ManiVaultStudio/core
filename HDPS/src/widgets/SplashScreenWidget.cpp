@@ -208,6 +208,7 @@ void SplashScreenWidget::createToolbar()
     _closeToolButton.setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
     _closeToolButton.setAutoRaise(true);
     _closeToolButton.setToolTip("Close the splash screen");
+    _closeToolButton.setIconSize(QSize(14, 14));
     _closeToolButton.move(width() - fixedSize - margin, margin);
 
     connect(&_closeToolButton, &QToolButton::clicked, this, &SplashScreenWidget::closeAnimated);
@@ -215,15 +216,20 @@ void SplashScreenWidget::createToolbar()
 
 void SplashScreenWidget::createBody()
 {
-    auto columnsLayout  = new QHBoxLayout();
+    auto bodyLayout     = new QGridLayout();
     auto leftColumn     = new QVBoxLayout();
+    auto middleColumn   = new QVBoxLayout();
     auto rightColumn    = new QVBoxLayout();
 
-    columnsLayout->setContentsMargins(SplashScreenWidget::margin, SplashScreenWidget::margin, SplashScreenWidget::margin, SplashScreenWidget::margin);
-    columnsLayout->setSpacing(50);
-    columnsLayout->setAlignment(Qt::AlignTop);
-    columnsLayout->addLayout(leftColumn);
-    columnsLayout->addLayout(rightColumn);
+    bodyLayout->setContentsMargins(SplashScreenWidget::margin, SplashScreenWidget::margin, SplashScreenWidget::margin, shouldDisplayProjectInfo() ? SplashScreenWidget::margin : SplashScreenWidget::margin / 2);
+    bodyLayout->setSpacing(10);
+    bodyLayout->setAlignment(Qt::AlignTop);
+    bodyLayout->setColumnStretch(2, 1);
+    bodyLayout->setColumnMinimumWidth(1, 25);
+
+    bodyLayout->addLayout(leftColumn, 0, 0);
+    bodyLayout->addLayout(middleColumn, 0, 1);
+    bodyLayout->addLayout(rightColumn, 0, 2);
 
     leftColumn->setAlignment(Qt::AlignTop);
     rightColumn->setAlignment(Qt::AlignTop);
@@ -284,9 +290,21 @@ void SplashScreenWidget::createBody()
         htmlLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
     }
 
+    leftColumn->addStretch(1);
     rightColumn->addStretch(1);
 
-    _frameLayout.addLayout(columnsLayout, 1);
+    if (!_splashScreenAction.getAlerts().isEmpty()) {
+        for (const auto& alert : _splashScreenAction.getAlerts()) {
+            if (alert.getType() != SplashScreenAction::Alert::Type::Debug) {
+                const auto rowCount = bodyLayout->rowCount();
+
+                bodyLayout->addWidget(alert.getIconLabel(this), rowCount, 1);
+                bodyLayout->addWidget(alert.getMessageLabel(this), rowCount, 2);
+            }
+        }
+    }
+
+    _frameLayout.addLayout(bodyLayout, 1);
 }
 
 void SplashScreenWidget::createFooter()
@@ -296,7 +314,9 @@ void SplashScreenWidget::createFooter()
 
         imagesLayout->setContentsMargins(SplashScreenWidget::margin, SplashScreenWidget::margin / 2, SplashScreenWidget::margin, SplashScreenWidget::margin / 2);
 
-        auto& splashScreenAction = _splashScreenAction.getProjectMetaAction()->getSplashScreenAction();
+        auto projectMetaAction = _splashScreenAction.getProjectMetaAction();
+
+        auto& splashScreenAction = projectMetaAction->getSplashScreenAction();
 
         auto affiliateLogosImageLabel = new QLabel();
 
@@ -312,14 +332,16 @@ void SplashScreenWidget::createFooter()
         logoLabel->setScaledContents(true);
         logoLabel->setPixmap(_logoImage);
 
+        const auto& applicationVersionAction = projectMetaAction->getApplicationVersionAction();
+
         builtWithLabel->setTextFormat(Qt::RichText);
         builtWithLabel->setText(QString(" \
             <div style='margin-left: 10px; font-family: --bs-font-sans-serif'> \
                 <span style='font-size: 10pt; font-weight: bold; color: rgb(162, 141, 208);'>Built with</span> \
                 <br> \
-                <span style='font-size: 12pt; font-weight: bold; color: rgb(102, 159, 178); padding: 0px;'>ManiVault Studio<sup>&copy;</sup></span> \
+                <span style='font-size: 12pt; font-weight: bold; color: rgb(102, 159, 178); padding: 0px;'>ManiVault Studio v%1<sup>&copy;</sup></span> \
             </div> \
-        "));
+        ").arg(applicationVersionAction.getVersionStringAction().getString()));
 
         builtWithWidgetLayout->setContentsMargins(0, 0, 0, 0);
         builtWithWidgetLayout->addWidget(logoLabel);

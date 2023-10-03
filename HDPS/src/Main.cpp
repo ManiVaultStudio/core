@@ -35,30 +35,42 @@ public:
 
 ProjectMetaAction* getStartupProjectMetaAction(const QString& startupProjectFilePath)
 {
-    if (startupProjectFilePath.isEmpty())
-        throw std::runtime_error("Project file path is empty");
+    try {
+        if (startupProjectFilePath.isEmpty())
+            throw std::runtime_error("Project file path is empty");
 
-    if (!QFileInfo(startupProjectFilePath).exists())
-        throw std::runtime_error("Project file not found");
+        if (!QFileInfo(startupProjectFilePath).exists())
+            throw std::runtime_error("Project file not found");
 
-    QTemporaryDir temporaryDir;
+        QTemporaryDir temporaryDir;
 
-    const QString metaJsonFilePath("meta.json");
+        const QString metaJsonFilePath("meta.json");
 
-    QFileInfo extractFileInfo(temporaryDir.path(), metaJsonFilePath);
+        QFileInfo extractFileInfo(temporaryDir.path(), metaJsonFilePath);
 
-    Archiver archiver;
+        Archiver archiver;
 
-    QString extractedMetaJsonFilePath = "";
+        QString extractedMetaJsonFilePath = "";
 
-    archiver.extractSingleFile(startupProjectFilePath, metaJsonFilePath, extractFileInfo.absoluteFilePath());
+        archiver.extractSingleFile(startupProjectFilePath, metaJsonFilePath, extractFileInfo.absoluteFilePath());
 
-    extractedMetaJsonFilePath = extractFileInfo.absoluteFilePath();
+        extractedMetaJsonFilePath = extractFileInfo.absoluteFilePath();
 
-    if (!QFileInfo(extractedMetaJsonFilePath).exists())
-        throw std::runtime_error("Unable to extract meta.json");
+        if (!QFileInfo(extractedMetaJsonFilePath).exists())
+            throw std::runtime_error("Unable to extract meta.json");
 
-    return new ProjectMetaAction(extractedMetaJsonFilePath);
+        return new ProjectMetaAction(extractedMetaJsonFilePath);
+    }
+    catch (std::exception& e)
+    {
+        qDebug() << "Unable to extract project meta data from" << startupProjectFilePath << e.what();
+    }
+    catch (...)
+    {
+        qDebug() << "Unable to extract project meta data from" << startupProjectFilePath << "due to an unhandled exception";
+    }
+
+    return nullptr;
 }
 
 int main(int argc, char *argv[])
@@ -104,8 +116,9 @@ int main(int argc, char *argv[])
     if (commandLineParser.isSet("project")) {
         try {
             const auto startupProjectFilePath = commandLineParser.value("project");
+            const auto startupProjectFileInfo = QFileInfo(startupProjectFilePath);
 
-            if (QFileInfo(startupProjectFilePath).exists()) {
+            if (startupProjectFileInfo.exists()) {
                 application.setStartupProjectFilePath(startupProjectFilePath);
 
                 auto projectMetaAction = getStartupProjectMetaAction(startupProjectFilePath);
@@ -115,9 +128,18 @@ int main(int argc, char *argv[])
                     application.setStartupProjectMetaAction(projectMetaAction);
                     application.getTask(Application::TaskType::LoadProject)->setName(QString("%1").arg(QFileInfo(startupProjectFilePath).fileName()));
                 }
+                else {
+                    splashscreenAction.addAlert(SplashScreenAction::Alert::info(QString("\
+                    No project meta info found for <b>%1</b>. \
+                    Re-configure the project when loaded and save the project to solve the problem. \
+                ").arg(startupProjectFileInfo.fileName())));
+                }
             }
             else {
-                throw std::runtime_error(QString("%1 does not exist").arg(startupProjectFilePath).toStdString());
+                splashscreenAction.addAlert(SplashScreenAction::Alert::warning(QString("\
+                    Unable to load <b>%1</b> at startup: file not found! \
+                    Provide an exisiting project file path when using <b>-p</b>/<b>--project</b> ManiVault<sup>&copy;</sup> command line parameters. \
+                ").arg(startupProjectFilePath)));
             }
         }
         catch (std::exception& e)

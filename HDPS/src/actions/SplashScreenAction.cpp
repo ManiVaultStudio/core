@@ -10,6 +10,72 @@
 
 namespace hdps::gui {
 
+SplashScreenAction::Alert SplashScreenAction::Alert::info(const QString& message)
+{
+    const auto color = QColor::fromHsv(220, 200, 150);
+
+    return Alert(Type::Info, Application::getIconFont("FontAwesome").getIcon("info-circle", color), message, color);
+}
+
+SplashScreenAction::Alert SplashScreenAction::Alert::debug(const QString& message)
+{
+    const auto color = QColor::fromHsv(125, 200, 150);
+
+    return Alert(Type::Debug, Application::getIconFont("FontAwesome").getIcon("bug", color), message, color);
+}
+
+SplashScreenAction::Alert SplashScreenAction::Alert::warning(const QString& message)
+{
+    const auto color = QColor::fromHsv(0, 200, 150);
+
+    return Alert(Type::Warning, Application::getIconFont("FontAwesome").getIcon("exclamation-circle", color), message, color);
+}
+
+SplashScreenAction::Alert::Type SplashScreenAction::Alert::getType() const
+{
+    return _type;
+}
+
+QIcon SplashScreenAction::Alert::getIcon() const
+{
+    return _icon;
+}
+
+QString SplashScreenAction::Alert::getMessage() const
+{
+    return _message;
+}
+
+QColor SplashScreenAction::Alert::getColor() const
+{
+    return _color;
+}
+
+QLabel* SplashScreenAction::Alert::getIconLabel(QWidget* parent /*= nullptr*/) const
+{
+    auto iconLabel = new QLabel();
+
+    iconLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    iconLabel->setAlignment(Qt::AlignTop | Qt::AlignRight);
+    iconLabel->setStyleSheet("padding-top: 5px;");
+    iconLabel->setPixmap(_icon.pixmap(QSize(24, 24)));
+
+    return iconLabel;
+}
+
+QLabel* SplashScreenAction::Alert::getMessageLabel(QWidget* parent /*= nullptr*/) const
+{
+    auto messageLabel = new QLabel();
+
+    messageLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    messageLabel->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    messageLabel->setStyleSheet(QString("color: %1; margin-top: 1px;").arg(_color.name(QColor::HexRgb)));
+    messageLabel->setWordWrap(true);
+    messageLabel->setText(_message);
+
+    return messageLabel;
+}
+
 SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*/) :
     HorizontalGroupAction(parent, "Splash Screen"),
     _mayCloseSplashScreenWidget(mayClose),
@@ -21,7 +87,8 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _openAction(this, "Open splash screen"),
     _closeAction(this, "Close splash screen"),
     _taskAction(this, "ManiVault"),
-    _splashScreenWidget()
+    _splashScreenWidget(),
+    _alerts()
 {
     addAction(&_enabledAction);
     addAction(&_editAction);
@@ -75,6 +142,16 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
 
 SplashScreenAction::~SplashScreenAction()
 {
+}
+
+void SplashScreenAction::addAlert(const Alert& alert)
+{
+    _alerts << alert;
+}
+
+SplashScreenAction::Alerts SplashScreenAction::getAlerts() const
+{
+    return _alerts;
 }
 
 bool SplashScreenAction::getMayCloseSplashScreenWidget() const
