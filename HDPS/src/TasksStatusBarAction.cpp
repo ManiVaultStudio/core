@@ -57,13 +57,13 @@ TasksStatusBarAction::Widget::Widget(QWidget* parent, TasksStatusBarAction* task
         const auto numberOfTasks = tasksFilterModel.rowCount();
 
 #ifdef TASKS_STATUS_BAR_ACTION_VERBOSE
-        qDebug() << "TasksStatusBarAction: Tasks filter model number of rows changed to " << numberOfTasks;
+        qDebug() << _tasksStatusBarAction->text() << "Tasks filter model number of rows changed to " << numberOfTasks;
 #endif
 
         if (_tasksStatusBarAction->getPopupMode() == PopupMode::Automatic && !_tasksStatusBarAction->getPopupForceHidden()) {
             if (numberOfTasks == 0 && _tasksPopupWidget.isVisible()) {
 #ifdef TASKS_STATUS_BAR_ACTION_VERBOSE
-                qDebug() << "TasksStatusBarAction: Close tasks popup widget";
+                qDebug() << _tasksStatusBarAction->text() << "close tasks popup widget";
 #endif
 
                 _tasksPopupWidget.close();
@@ -71,7 +71,7 @@ TasksStatusBarAction::Widget::Widget(QWidget* parent, TasksStatusBarAction* task
 
             if (numberOfTasks >= 1 && !_tasksPopupWidget.isVisible()) {
 #ifdef TASKS_STATUS_BAR_ACTION_VERBOSE
-                qDebug() << "TasksStatusBarAction: Open tasks popup widget";
+                qDebug() << _tasksStatusBarAction->text() << "open tasks popup widget";
 
 #endif
 
@@ -86,7 +86,7 @@ TasksStatusBarAction::Widget::Widget(QWidget* parent, TasksStatusBarAction* task
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this, numberOfTasksChanged](const QModelIndex& parent, int first, int last) -> void {
 #ifdef TASKS_STATUS_BAR_ACTION_VERBOSE
         for (int rowIndex = first; rowIndex < last; rowIndex++)
-            qDebug() << "TasksStatusBarAction: " << _tasksStatusBarAction->getTasksFilterModel().index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name)).data(Qt::DisplayRole).toString() << " inserted into TasksFilterModel";
+            qDebug() << _tasksStatusBarAction->text() << _tasksStatusBarAction->getTasksFilterModel().index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name)).data(Qt::DisplayRole).toString() << " inserted into TasksFilterModel";
 #endif
 
         numberOfTasksChanged();
@@ -95,7 +95,7 @@ TasksStatusBarAction::Widget::Widget(QWidget* parent, TasksStatusBarAction* task
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, [this, numberOfTasksChanged](const QModelIndex& parent, int first, int last) -> void {
 #ifdef TASKS_STATUS_BAR_ACTION_VERBOSE
         for (int rowIndex = first; rowIndex < last; rowIndex++)
-            qDebug() << "TasksStatusBarAction: " << _tasksStatusBarAction->getTasksFilterModel().index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name)).data(Qt::DisplayRole).toString() << " removed from TasksFilterModel";
+            qDebug() << _tasksStatusBarAction->text() << _tasksStatusBarAction->getTasksFilterModel().index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name)).data(Qt::DisplayRole).toString() << " removed from TasksFilterModel";
 #endif
 
         numberOfTasksChanged();

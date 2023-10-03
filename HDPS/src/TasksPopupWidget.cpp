@@ -170,8 +170,12 @@ void TasksPopupWidget::cleanLayout()
 
 void TasksPopupWidget::updateContents()
 {
-    if (isHidden())
-        return;
+#ifdef TASKS_POPUP_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    //if (isHidden())
+    //    return;
 
     auto& tasksModel        = _tasksStatusBarAction.getTasksModel();
     auto& tasksFilterModel  = _tasksStatusBarAction.getTasksFilterModel();
