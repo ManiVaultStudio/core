@@ -301,6 +301,7 @@ void SplashScreenWidget::createBody()
                 <p style='color: %2;'><i>An extensible open-source visual analytics framework for analyzing high-dimensional data</i></p> \
             </div> \
         ").arg(versionString, bodyColor));
+
         htmlLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
     }
 
@@ -319,6 +320,18 @@ void SplashScreenWidget::createBody()
     }
 
     _roundedFrameLayout.addLayout(bodyLayout, 1);
+
+    if (!shouldDisplayProjectInfo()) {
+        auto copyrightNoticeLabel = new QLabel();
+
+        copyrightNoticeLabel->setAlignment(Qt::AlignBottom);
+        copyrightNoticeLabel->setText("<p style='color: rgba(0, 0, 0, 80); font-size: 7pt;'>Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)</p>");
+
+        const auto rowCount = bodyLayout->rowCount();
+
+        bodyLayout->setRowStretch(rowCount, 1);
+        bodyLayout->addWidget(copyrightNoticeLabel, rowCount, 0, 1, 3);
+    }
 }
 
 void SplashScreenWidget::createFooter()
