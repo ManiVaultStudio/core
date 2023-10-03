@@ -50,12 +50,6 @@ public:
      */
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
 
-    /**
-     * Override to connect to source model signals
-     * @param sourceModel Pointer to source model
-     */
-    void setSourceModel(QAbstractItemModel* sourceModel) override;
-
 private:
 
     /**

@@ -25,7 +25,9 @@ TasksPopupWidget::TasksPopupWidget(gui::TasksStatusBarAction& tasksStatusBarActi
     QWidget(parent),
     _tasksStatusBarAction(tasksStatusBarAction),
     _anchorWidget(anchorWidget),
-    _tasksIconPixmap(tasksStatusBarAction.icon().pixmap(iconPixmapSize))
+    _tasksIconPixmap(tasksStatusBarAction.icon().pixmap(iconPixmapSize)),
+    _widgetsMap(),
+    _minimumDurationTimer()
 {
     setObjectName("TasksPopupWidget");
     setWindowFlag(Qt::FramelessWindowHint);
