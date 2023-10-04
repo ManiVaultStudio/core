@@ -64,6 +64,12 @@ public:
         void mousePressEvent(QMouseEvent* event);
 
     private:
+        
+        /**
+         * Establish whether external linking is enabled
+         * @return Boolean determining whether external linking is enabled
+         */
+        bool isExternalLinkingEnabled() const;
 
         /** Updates the CSS style */
         void updateStyle();

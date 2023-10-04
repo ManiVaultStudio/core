@@ -255,6 +255,8 @@ void SplashScreenWidget::createBody()
     bodyLayout->addLayout(middleColumn, 0, 1);
     bodyLayout->addLayout(rightColumn, 0, 2);
 
+    bodyLayout->setRowStretch(0, 1);
+
     leftColumn->setAlignment(Qt::AlignTop);
     rightColumn->setAlignment(Qt::AlignTop);
 
@@ -270,6 +272,8 @@ void SplashScreenWidget::createBody()
 
     leftColumn->addWidget(projectLogoLabel);
     rightColumn->addWidget(htmlLabel);
+
+    rightColumn->setSpacing(8);
 
     const auto bodyColor = "rgb(50, 50, 50)";
 
@@ -319,6 +323,9 @@ void SplashScreenWidget::createBody()
 
         auto& fontAwesome = Application::getIconFont("FontAwesome", 6, 4);
 
+        rightColumn->addStretch(1);
+
+        rightColumn->addWidget(new ExternalLinkWidget("globe", "Visit our website", QUrl("https://www.manivault.studio/")));
         rightColumn->addWidget(new ExternalLinkWidget("github", "Contribute to ManiVault on Github", QUrl("https://github.com/manivaultstudio")));
         rightColumn->addWidget(new ExternalLinkWidget("discord", "Get in touch on our Discord", QUrl("https://discord.gg/pVxmC2cSzA")));
     }
@@ -345,14 +352,11 @@ void SplashScreenWidget::createBody()
         copyrightNoticeLabel->setAlignment(Qt::AlignBottom);
         copyrightNoticeLabel->setWordWrap(true);
         copyrightNoticeLabel->setText("<p style='color: rgba(0, 0, 0, 80); font-size: 8pt;'> \
-            This software is licensed under the GNU Lesser General Public License v3.0.<br> \
+            This software is licensed under the GNU Lesser General Public License v3.0. \
             Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)</p>"
         );
 
-        const auto rowCount = bodyLayout->rowCount();
-
-        bodyLayout->setRowStretch(rowCount, 1);
-        bodyLayout->addWidget(copyrightNoticeLabel, rowCount, 0, 1, 3);
+        bodyLayout->addWidget(copyrightNoticeLabel, bodyLayout->rowCount(), 0, 1, 3);
     }
 }
 
@@ -487,7 +491,7 @@ SplashScreenWidget::ExternalLinkWidget::ExternalLinkWidget(const QString& fontAw
     iconLabel->setFont(fontAwesome.getFont());
     iconLabel->setAlignment(Qt::AlignCenter);
 
-    layout->setContentsMargins(2, 2, 2, 2);
+    layout->setContentsMargins(2, 0, 2, 0);
 
     layout->addWidget(iconLabel);
     layout->addWidget(textLabel, 1);
@@ -518,10 +522,25 @@ void SplashScreenWidget::ExternalLinkWidget::mousePressEvent(QMouseEvent* event)
     QDesktopServices::openUrl(_externalLink);
 }
 
-void SplashScreenWidget::ExternalLinkWidget::updateStyle()
+bool SplashScreenWidget::ExternalLinkWidget::isExternalLinkingEnabled() const
 {
-    setStyleSheet(QString("color: %1").arg(underMouse() ? "gray" : "black"));
+    if (core() == nullptr)
+        return false;
+
+    if (!core()->isInitialized())
+        return false;
+
+    if (projects().isOpeningProject() || projects().isImportingProject())
+        return false;
+
+    return true;
 }
 
+void SplashScreenWidget::ExternalLinkWidget::updateStyle()
+{
+    const auto shouldHighlight = isExternalLinkingEnabled() && underMouse();
+
+    setStyleSheet(QString("color: %1").arg(shouldHighlight ? "gray" : "black"));
+}
 
 }
