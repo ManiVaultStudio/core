@@ -175,8 +175,17 @@ void Application::initialize()
 {
     Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskStarted("Initializing Icon Fonts");
     {
-        _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, true)));
-        _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 4)));
+        _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, {
+            ":/IconFonts/FontAwesomeBrandsRegular-5.14.otf",
+            ":/IconFonts/FontAwesomeRegular-5.14.otf",
+            ":/IconFonts/FontAwesomeSolid-5.14.otf"
+        }, true)));
+
+        _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 4, {
+            ":/IconFonts/FontAwesomeBrandsRegular-6.4.otf",
+            ":/IconFonts/FontAwesomeRegular-6.4.otf",
+            ":/IconFonts/FontAwesomeSolid-6.4.otf"
+        })));
     }
     Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskFinished("Initializing Icon Fonts");
 

@@ -18,6 +18,7 @@
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
 #include <QGraphicsDropShadowEffect>
+#include <QDesktopServices>
 
 #ifdef _DEBUG
     #define SPLASH_SCREEN_WIDGET_VERBOSE
@@ -33,7 +34,8 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
     _roundedFrame(),
     _roundedFrameLayout(),
     _closeToolButton(&_roundedFrame),
-    _dropShadowEffect()
+    _dropShadowEffect(),
+    _processEventsTimer()
 {
     setObjectName("SplashScreenWidget");
     setWindowFlags(Qt::FramelessWindowHint | Qt::Window | Qt::WindowStaysOnTopHint);
@@ -75,6 +77,17 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
     ").arg(SplashScreenWidget::frameRadius));
 
     _closeToolButton.raise();
+
+    connect(&_processEventsTimer, &QTimer::timeout, this, []() -> void {
+        QCoreApplication::processEvents();
+    });
+
+    _processEventsTimer.start(10);
+}
+
+SplashScreenWidget::~SplashScreenWidget()
+{
+    _processEventsTimer.stop();
 }
 
 void SplashScreenWidget::paintEvent(QPaintEvent* paintEvent)
@@ -304,28 +317,10 @@ void SplashScreenWidget::createBody()
 
         htmlLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
 
-        const auto getExternalLinkWidget = [this](const QIcon& icon, const QString& text) -> QWidget* {
-            auto externalLinkWidget         = new QWidget();
-            auto externalLinkWidgetLayout   = new QHBoxLayout();
-            auto iconLabel                  = new QLabel();
-            auto textLabel                  = new QLabel(text);
-
-            iconLabel->setAlignment(Qt::AlignCenter);
-            //iconLabel->setStyleSheet("padding-top: 6px;");
-            iconLabel->setPixmap(icon.pixmap(QSize(16, 16)));
-
-            externalLinkWidgetLayout->addWidget(iconLabel);
-            externalLinkWidgetLayout->addWidget(textLabel, 1);
-
-            externalLinkWidget->setLayout(externalLinkWidgetLayout);
-
-            return externalLinkWidget;
-        };
-
         auto& fontAwesome = Application::getIconFont("FontAwesome", 6, 4);
 
-        rightColumn->addWidget(getExternalLinkWidget(fontAwesome.getIcon("exclamation-circle"), "Contribute to ManiVault on Github"));
-        rightColumn->addWidget(getExternalLinkWidget(fontAwesome.getIcon("discord"), "Get in touch on our Discord"));
+        rightColumn->addWidget(new ExternalLinkWidget("github", "Contribute to ManiVault on Github", QUrl("https://github.com/manivaultstudio")));
+        rightColumn->addWidget(new ExternalLinkWidget("discord", "Get in touch on our Discord", QUrl("https://discord.gg/pVxmC2cSzA")));
     }
 
     leftColumn->addStretch(1);
@@ -478,5 +473,55 @@ QString SplashScreenWidget::getCopyrightNoticeTooltip()
 {
     return "Copyright (c); 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)";
 }
+
+SplashScreenWidget::ExternalLinkWidget::ExternalLinkWidget(const QString& fontAwesomeIconName, const QString& text, const QUrl& externalLink, QWidget* parent /*= nullptr*/) :
+    QWidget(parent),
+    _externalLink(externalLink)
+{
+    auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    auto layout     = new QHBoxLayout();
+    auto iconLabel  = new QLabel(fontAwesome.getIconCharacter(fontAwesomeIconName));
+    auto textLabel  = new QLabel(text);
+
+    iconLabel->setFont(fontAwesome.getFont());
+    iconLabel->setAlignment(Qt::AlignCenter);
+
+    layout->setContentsMargins(2, 2, 2, 2);
+
+    layout->addWidget(iconLabel);
+    layout->addWidget(textLabel, 1);
+
+    setLayout(layout);
+
+    updateStyle();
+}
+
+void SplashScreenWidget::ExternalLinkWidget::enterEvent(QEnterEvent* event)
+{
+    QWidget::enterEvent(event);
+
+    updateStyle();
+}
+
+void SplashScreenWidget::ExternalLinkWidget::leaveEvent(QEvent* event)
+{
+    QWidget::leaveEvent(event);
+
+    updateStyle();
+}
+
+void SplashScreenWidget::ExternalLinkWidget::mousePressEvent(QMouseEvent* event)
+{
+    QWidget::mousePressEvent(event);
+
+    QDesktopServices::openUrl(_externalLink);
+}
+
+void SplashScreenWidget::ExternalLinkWidget::updateStyle()
+{
+    setStyleSheet(QString("color: %1").arg(underMouse() ? "gray" : "black"));
+}
+
 
 }

@@ -44,16 +44,14 @@ const hdps::IconFont& IconFonts::getIconFont(const QString& name, const std::int
             return *(filtered.last().get());
         }
         else {
-            Fonts filtered;
+            for (auto iconFont : _iconFonts[name]) {
+                qDebug() << name << iconFont->getMajorVersion() << iconFont->getMinorVersion();
 
-            std::copy_if(_iconFonts[name].begin(), _iconFonts[name].end(), std::back_inserter(filtered), [&majorVersion, &minorVersion](auto iconFont) {
-                return iconFont->getMajorVersion() == majorVersion && iconFont->getMinorVersion() == minorVersion;
-            });
+                if (iconFont->getMajorVersion() == majorVersion && iconFont->getMinorVersion() == minorVersion)
+                    return *iconFont;
+            }
 
-            if (filtered.isEmpty())
-                throw IconFontNotFoundException(name, majorVersion, minorVersion);
-
-            return *(filtered.last().get());
+            throw IconFontNotFoundException(name, majorVersion, minorVersion);
         }
     }   
 }

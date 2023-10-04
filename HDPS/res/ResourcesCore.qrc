@@ -4,9 +4,13 @@
 		<file alias="ads_light.css">styles/ads_light.css</file>
 	</qresource>
 	<qresource prefix="/IconFonts">
-		<file alias="FontAwesome-5.14.otf">iconfonts/FontAwesome-5.14.otf</file>
+		<file alias="FontAwesomeBrandsRegular-5.14.otf">iconfonts/FontAwesomeBrandsRegular-5.14.otf</file>
+		<file alias="FontAwesomeRegular-5.14.otf">iconfonts/FontAwesomeRegular-5.14.otf</file>
+		<file alias="FontAwesomeSolid-5.14.otf">iconfonts/FontAwesomeSolid-5.14.otf</file>
 		<file alias="FontAwesome-5.14.json">iconfonts/FontAwesome-5.14.json</file>
-		<file alias="FontAwesome-6.4.otf">iconfonts/FontAwesome-6.4.otf</file>
+		<file alias="FontAwesomeBrandsRegular-6.4.otf">iconfonts/FontAwesomeBrandsRegular-6.4.otf</file>
+		<file alias="FontAwesomeRegular-6.4.otf">iconfonts/FontAwesomeRegular-6.4.otf</file>
+		<file alias="FontAwesomeSolid-6.4.otf">iconfonts/FontAwesomeSolid-6.4.otf</file>
 		<file alias="FontAwesome-6.4.json">iconfonts/FontAwesome-6.4.json</file>
 	</qresource>
     <qresource prefix="/Icons">

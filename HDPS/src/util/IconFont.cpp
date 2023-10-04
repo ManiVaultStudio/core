@@ -16,26 +16,27 @@ using namespace hdps::gui;
 
 namespace hdps {
 
-IconFont::IconFont(const QString& name, const std::uint32_t& majorVersion, const std::uint32_t& minorVersion, bool defaultFont /*= false*/) :
+IconFont::IconFont(const QString& name, const std::uint32_t& majorVersion, const std::uint32_t& minorVersion, const QStringList& fontResourceNames, bool defaultFont /*= false*/) :
     _name(name),
     _majorVersion(majorVersion),
     _minorVersion(minorVersion),
-    _fontResourceName(QString(":/IconFonts/%1.otf").arg(getFullName())),
     _fontFamily(),
     _characters(),
     _defaultFont(defaultFont)
 {
     try
     {
-        const auto result = QFontDatabase::addApplicationFont(_fontResourceName);
+        for (const auto& fontResourceName : fontResourceNames) {
+            const auto result = QFontDatabase::addApplicationFont(fontResourceName);
 
-        if (result < 0) {
-            throw std::runtime_error(QString("Unable to load %1").arg(getFullName()).toStdString().c_str());
-        }
-        else {
-            qDebug() << "Loaded" << getFullName() << QFontDatabase::applicationFontFamilies(result);
+            if (result < 0) {
+                throw std::runtime_error(QString("Unable to load %1").arg(getFullName()).toStdString().c_str());
+            }
+            else {
+                qDebug() << "Loaded" << getFullName() << QFontDatabase::applicationFontFamilies(result);
 
-            _fontFamily = QFontDatabase::applicationFontFamilies(result).first();
+                _fontFamily = QFontDatabase::applicationFontFamilies(result).first();
+            }
         }
     }
     catch (std::exception& e)

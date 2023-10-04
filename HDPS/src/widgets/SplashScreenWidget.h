@@ -8,7 +8,8 @@
 #include <QVBoxLayout>
 #include <QToolButton>
 #include <QFrame>
-#include <QGraphicsDropShadowEffect >
+#include <QGraphicsDropShadowEffect>
+#include <QTimer>
 
 namespace hdps::gui {
 
@@ -31,12 +32,57 @@ class SplashScreenWidget : public QWidget
 {
 public:
 
+    /** Widget class for adding an external link on the splash screen widget */
+    class ExternalLinkWidget : public QWidget {
+    public:
+
+        /**
+         * Construct with \p fontAwesomeIconName, descriptive \p text, \p externalLink and pointer to \p parent widget
+         * @param fontAwesomeIconName Name of the Font Awesome icon
+         * @param text Descriptive text
+         * @param externalLink URL of the external website
+         * @param parent Pointer to parent widget
+         */
+        ExternalLinkWidget(const QString& fontAwesomeIconName, const QString& text, const QUrl& externalLink, QWidget* parent = nullptr);
+
+        /**
+         * Invoked when the mouse enters the widget
+         * @param event Pointer to event that occurred
+         */
+        void enterEvent(QEnterEvent* event) override;
+
+        /**
+         * Invoked when the mouse leaves the widget
+         * @param event Pointer to event that occurred
+         */
+        void leaveEvent(QEvent* event) override;
+        
+        /**
+         * Invoked when the mouse presses the widget
+         * @param event Pointer to event that occurred
+         */
+        void mousePressEvent(QMouseEvent* event);
+
+    private:
+
+        /** Updates the CSS style */
+        void updateStyle();
+
+    private:
+        const QUrl&     _externalLink;      /** URL of the website to visit when the widget is pressed */
+    };
+
+public:
+
     /**
      * Construct with reference to owning \p splashScreenAction and optional pointer to \p parent widget
      * @param splashScreenAction Reference to owning splashScreenAction
      * @param parent Pointer to parent widget
      */
     SplashScreenWidget(SplashScreenAction& splashScreenAction, QWidget* parent = nullptr);
+
+    /** Destructor */
+    ~SplashScreenWidget();
 
     /**
      * Invoked when the dialog is painted (used to draw the background)
@@ -75,6 +121,7 @@ private:
     QVBoxLayout                 _roundedFrameLayout;    /** Layout for the rounded frame */
     QToolButton                 _closeToolButton;       /** Button for forcefully closing the splash screen */
     QGraphicsDropShadowEffect   _dropShadowEffect;      /** For adding a drop shadow to the splash screen widget */
+    QTimer                      _processEventsTimer;    /** Timer to keep the splash screen widget somewhat responsive */
 
     static const std::uint32_t fixedWidth           = 640;      /** Widget fixed width */
     static const std::uint32_t fixedHeight          = 480;      /** Widget fixed height */
