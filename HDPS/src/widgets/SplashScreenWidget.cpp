@@ -471,7 +471,7 @@ bool SplashScreenWidget::shouldDisplayProjectInfo() const
 
 QString SplashScreenWidget::getCopyrightNoticeTooltip()
 {
-    return "Copyright (c); 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)";
+    return "This software is licensed under the GNU Lesser General Public License v3.0.<br>Copyright (c) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)";
 }
 
 SplashScreenWidget::ExternalLinkWidget::ExternalLinkWidget(const QString& fontAwesomeIconName, const QString& text, const QUrl& externalLink, QWidget* parent /*= nullptr*/) :
