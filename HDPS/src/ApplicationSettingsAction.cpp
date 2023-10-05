@@ -21,7 +21,10 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     bool themesAvailable = false;
     
 #ifdef Q_OS_MACX
-    themesAvailable = macDarkThemeAvailable();
+    //themesAvailable = macDarkThemeAvailable();
+    // Temporary no option is provided, instead we fix for the light theme.
+    // While changing the theme works, there is still a number of icons that do not work on dark theme.
+    macSetToLightTheme();
 #endif // Q_OS_MACX
     
     if( themesAvailable )

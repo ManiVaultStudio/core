@@ -47,3 +47,21 @@ void macSetToAutoTheme()
         [NSApp setAppearance:nil];
     }
 }
+
+
+void fixCurrentTheme()
+{
+    if (__builtin_available(macOS 10.14, *))
+    {
+        auto appearance = [NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:
+                        @[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]];
+        if([appearance isEqualToString:NSAppearanceNameDarkAqua])
+        {
+            [NSApp setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameDarkAqua]];
+        }
+        else
+        {
+            [NSApp setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameAqua]];
+        }
+    }
+}
