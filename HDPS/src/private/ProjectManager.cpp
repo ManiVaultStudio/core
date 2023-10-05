@@ -428,13 +428,24 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             ProjectMetaAction projectMetaAction(extractFileFromManiVaultProject(filePath, temporaryDirectory, "meta.json"));
 
-            ModalTask task(this, "Open Project");
+            std::unique_ptr<ModalTask> openTask;
+
+            auto getTask = [this, &openTask]() -> Task* {
+                if (_project->isStartupProject())
+                    return &_project->getStartupTask();
+
+                if (openTask == nullptr)
+                    openTask = std::make_unique<ModalTask>(this, "Open Project");
+
+                return openTask.get();
+            };
+
+            auto task = getTask();
             
-            //task.setParentTask(_project->isStartupProject() ? Application::current()->getTask(Application::TaskType::LoadProject) : nullptr);
-            task.setDescription(QString("Opening ManiVault project from %1").arg(filePath));
-            task.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-            task.setMayKill(false);
-            task.setProgressMode(Task::ProgressMode::Subtasks);
+            task->setDescription(QString("Opening ManiVault project from %1").arg(filePath));
+            task->setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+            task->setMayKill(false);
+            task->setProgressMode(Task::ProgressMode::Subtasks);
 
             QCoreApplication::processEvents();
 
@@ -443,22 +454,25 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
             archiver.extractSingleFile(filePath, "workspace.json", QFileInfo(temporaryDirectoryPath, "workspace.json").absoluteFilePath());
-
+            
+            /*
             const auto viewPluginsTaskNames     = workspaces().getViewPluginNames(workspaceFileInfo.absoluteFilePath());
+            */
+
             const auto decompressionTaskNames   = QStringList() << archiver.getTaskNamesForDecompression(filePath);
 
-            task.setSubtasks(QStringList() << decompressionTaskNames << "Create data hierarchy" << viewPluginsTaskNames);
-            task.setRunning();
+            task->setSubtasks(QStringList() << decompressionTaskNames << "Create data hierarchy");// << viewPluginsTaskNames);
+            task->setRunning();
 
-            connect(&archiver, &Archiver::taskStarted, this, [this, &task](const QString& taskName) -> void {
-                task.setSubtaskStarted(taskName, QString("extracting %1").arg(taskName));
+            connect(&archiver, &Archiver::taskStarted, this, [&task](const QString& taskName) -> void {
+                task->setSubtaskStarted(taskName, QString("extracting %1").arg(taskName));
             });
 
-            connect(&archiver, &Archiver::taskFinished, this, [this, &task](const QString& taskName) -> void {
-                task.setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
+            connect(&archiver, &Archiver::taskFinished, this, [&task](const QString& taskName) -> void {
+                task->setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
             });
 
-            connect(&task, &Task::requestAbort, this, [this]() -> void {
+            connect(task, &Task::requestAbort, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was loaded");
@@ -468,7 +482,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             projects().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
             
-            task.setSubtaskFinished("Create data hierarchy");
+            task->setSubtaskFinished("Create data hierarchy");
 
             if (loadWorkspace) {
                 if (workspaceFileInfo.exists())
@@ -477,7 +491,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 workspaces().setWorkspaceFilePath("");
             }
 
-            task.setFinished();
+            task->setFinished();
 
             _recentProjectsAction.addRecentFilePath(filePath);
 
@@ -640,28 +654,21 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
-            ModalTask task(this, QString("Save to %1").arg(filePath));
+            ModalTask saveProjectTask(this, "Save Project");
 
             if (_project->getCompressionAction().getEnabledAction().isChecked())
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "with compression level" << _project->getCompressionAction().getLevelAction().getValue();
             else
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "without compression";
 
-            task.setDescription(QString("Saving ManiVault project to %1").arg(filePath));
-            task.setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
-            task.setProgressMode(Task::ProgressMode::Subtasks);
+            saveProjectTask.setMayKill(true);
+            saveProjectTask.setDescription(QString("Saving ManiVault project to %1").arg(filePath));
+            saveProjectTask.setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
+            saveProjectTask.setProgressMode(Task::ProgressMode::Subtasks);
 
             Archiver archiver;
 
-            connect(&archiver, &Archiver::taskStarted, this, [this](const QString& taskName) -> void {
-                _project->getTask().setSubtaskStarted(taskName, QString("Compressing %1").arg(taskName));
-            });
-
-            connect(&archiver, &Archiver::taskFinished, this, [this](const QString& taskName) -> void {
-                _project->getTask().setSubtaskFinished(taskName, QString("%1 compressed").arg(taskName));
-            });
-
-            connect(&task, &Task::aborted, this, [this]() -> void {
+            connect(&saveProjectTask, &Task::aborted, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was saved");
@@ -672,39 +679,53 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
             Application::setSerializationAborted(false);
 
-            QStringList tasks;
+            ModalTask exportTask(this, "Export");
+            ModalTask compressTask(this, "Compress");
 
-            auto exportTask     = new ModalTask(this, "Export");
-            auto compressTask   = new ModalTask(this, "Compress");
+            exportTask.setParentTask(&saveProjectTask);
+            compressTask.setParentTask(&saveProjectTask);
 
-            exportTask->setParentTask(&task);
-            compressTask->setParentTask(&task);
+            exportTask.setProgressMode(Task::ProgressMode::Subtasks);
+            exportTask.setSubtasks({ "project.json", "meta.json" });
+            exportTask.setRunning();
 
-            exportTask->setRunning();
+            exportTask.setSubtaskStarted("project.json");
+            {
+                projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
+            }
+            exportTask.setSubtaskFinished("project.json");
 
-            projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
+            exportTask.setSubtaskStarted("meta.json");
+            {
+                _project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
+            }
+            exportTask.setSubtaskFinished("meta.json");
 
-            exportTask->setProgress(1.f);
-            exportTask->setFinished();
-
-            _project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
+            exportTask.setFinished();
             
             QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
             workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 
-            tasks << archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath);
+            compressTask.setProgressMode(Task::ProgressMode::Subtasks);
+            compressTask.setSubtasks(archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath));
+            compressTask.setRunning();
 
-            task.setSubtasks(tasks);
-            task.setRunning();
+            connect(&archiver, &Archiver::taskStarted, this, [&compressTask](const QString& taskName) -> void {
+                compressTask.setSubtaskStarted(taskName, QString("Compressing %1").arg(taskName));
+            });
+
+            connect(&archiver, &Archiver::taskFinished, this, [&compressTask](const QString& taskName) -> void {
+                compressTask.setSubtaskFinished(taskName, QString("%1 compressed").arg(taskName));
+            });
 
             archiver.compressDirectory(temporaryDirectoryPath, filePath, true, _project->getCompressionAction().getEnabledAction().isChecked() ? _project->getCompressionAction().getLevelAction().getValue() : 0, password);
+
+            compressTask.setFinished();
 
             _recentProjectsAction.addRecentFilePath(filePath);
 
             _project->setFilePath(filePath);
-
-            task.setFinished();
 
             qDebug().noquote() << filePath << "saved successfully";
         }
@@ -869,11 +890,6 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
-            auto& task = currentProject->getTask();
-
-            task.setDescription(QString("Publishing ManiVault project: %1").arg(filePath));
-            task.setIcon(Application::getIconFont("FontAwesome").getIcon("cloud-upload-alt"));
-                
             auto& workspaceLockingAction = workspaces().getCurrentWorkspace()->getLockingAction();
 
             const auto cacheWorkspaceLocked = workspaceLockingAction.isLocked();

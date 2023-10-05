@@ -180,10 +180,9 @@ void ModalTaskHandler::ModalTasksDialog::updateWindowTitleAndIcon()
         const auto item             = dynamic_cast<AbstractTasksModel::Item*>(tasks().getTreeModel()->itemFromIndex(sourceModelIndex));
         const auto task             = item->getTask();
         const auto taskName         = task->getName();
-        const auto taskDescription  = task->getDescription();
         const auto taskIcon         = task->getIcon();
 
-        setWindowTitle(taskDescription.isEmpty() ? QString("Waiting for %1 to complete...").arg(taskName) : task->getDescription());
+        setWindowTitle(QString("Waiting for %1 to complete...").arg(taskName));
         setWindowIcon(taskIcon.isNull() ? clockIcon : taskIcon);
     }
     else {

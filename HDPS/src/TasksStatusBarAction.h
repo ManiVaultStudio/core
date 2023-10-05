@@ -105,13 +105,13 @@ public:
      * @param title Title of the action
      * @param taskScope Scope of the task
      */
-    TasksStatusBarAction(AbstractTasksModel& tasksModel, QObject* parent, const QString& title, const QIcon& icon = QIcon(), const PopupMode& popupMode = PopupMode::Click, const Task::Scope& taskScope = Task::Scope::Foreground);
+    TasksStatusBarAction(AbstractTasksModel& tasksModel, QObject* parent, const QString& title, const QIcon& icon = QIcon(), const PopupMode& popupMode = PopupMode::Click, const Task::GuiScope& taskScope = Task::GuiScope::Foreground);
 
     PopupMode getPopupMode() const;
 
     void setPopupMode(const PopupMode& popupMode);
 
-    Task::Scope getTaskScope() const;
+    Task::GuiScope getTaskScope() const;
 
     QMenu& getMenu();
 
@@ -129,7 +129,7 @@ private:
     AbstractTasksModel& _tasksModel;
     TasksFilterModel    _tasksFilterModel;
     PopupMode           _popupMode;
-    Task::Scope         _taskScope;
+    Task::GuiScope      _taskGuiScope;
     QMenu               _menu;
     bool                _popupForceHidden;
 };

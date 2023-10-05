@@ -106,7 +106,6 @@ void DockManager::reset()
         removeViewPluginDockWidget(viewPluginDockWidget);
 }
 
-
 void DockManager::addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* Dockwidget, ads::CDockAreaWidget* DockAreaWidget)
 {
 #ifdef DOCK_MANAGER_VERBOSE
@@ -150,7 +149,7 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
     hide();
     {
-        auto& task = projects().isOpeningProject() ? projects().getCurrentProject()->getTask() : workspaces().getCurrentWorkspace()->getTask();
+        auto& task = projects().isOpeningProject() ? projects().getCurrentProject()->getStartupTask() : workspaces().getCurrentWorkspace()->getTask();
 
         for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList()) {
             const auto viewPluginMap    = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap();

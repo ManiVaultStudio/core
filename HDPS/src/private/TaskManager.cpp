@@ -11,7 +11,7 @@
 #include <Task.h>
 
 #ifdef _DEBUG
-    #define TASK_MANAGER_VERBOSE
+    //#define TASK_MANAGER_VERBOSE
 #endif
 
 namespace hdps

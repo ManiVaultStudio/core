@@ -152,9 +152,6 @@ int main(int argc, char *argv[])
         }
     }
     
-    if (!application.shouldOpenProjectAtStartup())
-        application.getTask(Application::TaskType::LoadProject)->setEnabled(false);
-    
     splashScreenAction.getOpenAction().trigger();
 
     application.setStyle(new NoFocusProxyStyle);

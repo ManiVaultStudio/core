@@ -208,7 +208,6 @@ protected:
     QString                             _startupProjectFilePath;                        /** File path of the project to automatically open upon startup (if set) */
     ProjectMetaAction*                  _startupProjectMetaAction;                      /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
     Task*                               _tasks[static_cast<int>(TaskType::Count)];      /** Application-related tasks */
-    //gui::SplashScreenAction             _splashScreenAction;                            /** Splash screen action */
 };
 
 }

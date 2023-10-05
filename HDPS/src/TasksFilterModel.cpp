@@ -18,7 +18,7 @@ namespace hdps
 TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
     _taskTypeFilterAction(this, "Type"),
-    _taskScopeFilterAction(this, "Scope", Task::scopeNames.values(), Task::scopeNames.values()),
+    _taskGuiScopeFilterAction(this, "GUI Scope", Task::guiScopeNames.values(), Task::guiScopeNames.values()),
     _taskStatusFilterAction(this, "Status", Task::statusNames.values(), Task::statusNames.values()),
     _hideDisabledTasksFilterAction(this, "Hide disabled tasks", true),
     _hideHiddenTasksFilterAction(this, "Hide hidden tasks", true),
@@ -29,21 +29,21 @@ TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
     setDynamicSortFilter(true);
     setRecursiveFilteringEnabled(true);
 
-    _taskTypeFilterAction.initialize({ "BackgroundTask", "DatasetTask", "ForegroundTask", "ModalTask" }, { "BackgroundTask", "DatasetTask", "ForegroundTask", "ModalTask" });
+    const auto taskTypes = QStringList({ "Task", "BackgroundTask", "DatasetTask", "ForegroundTask", "ModalTask" });
 
-    _taskScopeFilterAction.initialize({ "Background", "Foreground", "Modal" }, { "Background", "Foreground", "Modal" });
+    _taskTypeFilterAction.initialize(taskTypes, taskTypes);
 
     _taskStatusFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
 
     connect(&_taskTypeFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
-    connect(&_taskScopeFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
+    connect(&_taskGuiScopeFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
     connect(&_taskStatusFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
     connect(&_hideDisabledTasksFilterAction, &ToggleAction::toggled, this, &TasksFilterModel::invalidate);
     connect(&_hideHiddenTasksFilterAction, &ToggleAction::toggled, this, &TasksFilterModel::invalidate);
     connect(&_parentTaskFilterAction, &StringAction::stringChanged, this, &TasksFilterModel::invalidate);
 
     _taskTypeFilterAction.setToolTip("Filter tasks based on their type");
-    _taskScopeFilterAction.setToolTip("Filter tasks based on their scope");
+    _taskGuiScopeFilterAction.setToolTip("Filter tasks based on their GUI scope");
     _taskStatusFilterAction.setToolTip("Filter tasks based on their status");
     _hideDisabledTasksFilterAction.setToolTip("Hide or show disabled tasks");
     _hideHiddenTasksFilterAction.setToolTip("Hide or show hidden tasks");
@@ -72,10 +72,10 @@ bool TasksFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) cons
     if (!taskTypes.contains(taskType))
         return false;
 
-    const auto taskScopes   = _taskScopeFilterAction.getSelectedOptions();
-    const auto taskScope    = getSourceData(index, AbstractTasksModel::Column::Scope, Qt::DisplayRole).toString();
+    const auto taskGuiScopes   = _taskGuiScopeFilterAction.getSelectedOptions();
+    const auto taskGuiScope    = getSourceData(index, AbstractTasksModel::Column::GuiScope, Qt::DisplayRole).toString();
 
-    if (!taskScopes.contains(taskScope))
+    if (!taskGuiScopes.contains(taskGuiScope))
         return false;
 
     const auto taskStatusTypes  = _taskStatusFilterAction.getSelectedOptions();

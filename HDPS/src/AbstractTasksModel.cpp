@@ -396,24 +396,24 @@ QVariant AbstractTasksModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) con
     return Item::data(role);
 }
 
-AbstractTasksModel::ScopeItem::ScopeItem(Task* task) :
+AbstractTasksModel::GuiScopeItem::GuiScopeItem(Task* task) :
     Item(task, false)
 {
-    connect(getTask(), &Task::scopeChanged, this, [this]() -> void {
+    connect(getTask(), &Task::guiScopeChanged, this, [this]() -> void {
         emitDataChanged();
     });
 }
 
-QVariant AbstractTasksModel::ScopeItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractTasksModel::GuiScopeItem::data(int role /*= Qt::UserRole + 1*/) const
 {
-    auto taskScopeString = Task::scopeNames[getTask()->getScope()];
+    auto taskGuiScopeString = Task::guiScopeNames[getTask()->getGuiScope()];
 
     switch (role) {
         case Qt::EditRole:
-            return static_cast<std::int32_t>(getTask()->getScope());
+            return static_cast<std::int32_t>(getTask()->getGuiScope());
 
         case Qt::DisplayRole:
-            return taskScopeString;
+            return taskGuiScopeString;
 
         case Qt::ToolTipRole:
             return "Task scope: " + data(Qt::DisplayRole).toString();
@@ -492,7 +492,7 @@ AbstractTasksModel::Row::Row(Task* task) :
     append(new IdItem(task));
     append(new ParentIdItem(task));
     append(new TypeItem(task));
-    append(new ScopeItem(task));
+    append(new GuiScopeItem(task));
     append(new MayKillItem(task));
     append(new KillItem(task));
 }
@@ -510,7 +510,7 @@ QMap<AbstractTasksModel::Column, AbstractTasksModel::ColumHeaderInfo> AbstractTa
     { AbstractTasksModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the task" } },
     { AbstractTasksModel::Column::ParentID, { "Parent ID",  "Parent ID", "Globally unique identifier of the parent task" } },
     { AbstractTasksModel::Column::Type, { "Type",  "Type", "Type of task" } },
-    { AbstractTasksModel::Column::Scope, { "Scope",  "Scope", "Task scope" } },
+    { AbstractTasksModel::Column::GuiScope, { "GUI Scope",  "GUI Scope", "Task GUI scope" } },
     { AbstractTasksModel::Column::MayKill, { "May kill",  "May kill", "Whether the task may be killed or not" } },
     { AbstractTasksModel::Column::Kill, { "",  "Kill", "Kill the task" } }
 });

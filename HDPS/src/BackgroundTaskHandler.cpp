@@ -14,7 +14,7 @@ namespace hdps {
 BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),
     _overallBackgroundTaskAction(this, "Overall Background Task"),
-    _tasksStatusBarAction(*tasks().getListModel(), this, "Background tasks", Application::getIconFont("FontAwesome").getIcon("window-maximize"), TasksStatusBarAction::PopupMode::Hover, Task::Scope::Background),
+    _tasksStatusBarAction(*tasks().getListModel(), this, "Background tasks", Application::getIconFont("FontAwesome").getIcon("window-maximize"), TasksStatusBarAction::PopupMode::Hover, Task::GuiScope::Background),
     _statusBarAction(this, "Status Bar Group")
 {
     _overallBackgroundTaskAction.setStretch(1);
@@ -35,7 +35,7 @@ BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
     tasksFilterModel.getParentTaskFilterAction().setString(Application::current()->getTask(Application::TaskType::OverallBackground)->getId());
 
     const auto overallBackgroundTaskTextFormatter = [this](Task& task) -> QString {
-        const auto numberOfChildBackgroundTasks = task.getChildTasks(false, { Task::Scope::Background}, { Task::Status::Running, Task::Status::RunningIndeterminate }).count();
+        const auto numberOfChildBackgroundTasks = task.getChildTasks(false, { Task::GuiScope::Background}, { Task::Status::Running, Task::Status::RunningIndeterminate }).count();
 
         switch (task.getStatus())
         {

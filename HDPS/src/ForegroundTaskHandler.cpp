@@ -13,7 +13,7 @@ namespace hdps {
 
 ForegroundTaskHandler::ForegroundTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),
-    _tasksStatusBarAction(*tasks().getTreeModel(), this, "Foreground Tasks", Application::getIconFont("FontAwesome").getIcon("tasks"), TasksStatusBarAction::PopupMode::Automatic, Task::Scope::Foreground),
+    _tasksStatusBarAction(*tasks().getTreeModel(), this, "Foreground Tasks", Application::getIconFont("FontAwesome").getIcon("tasks"), TasksStatusBarAction::PopupMode::Automatic, Task::GuiScope::Foreground),
     _statusBarAction(this, "Status Bar Group")
 {
     _tasksStatusBarAction.setPopupMode(TasksStatusBarAction::PopupMode::Automatic);

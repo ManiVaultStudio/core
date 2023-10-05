@@ -69,10 +69,10 @@ public:
 public: // Miscellaneous
 
     /**
-     * Get task
-     * @return Modal task (for IO operations)
+     * Get startup task
+     * @return Startup task
      */
-    virtual ModalTask& getTask() final;
+    virtual Task& getStartupTask() final;
 
     /**
      * Get version of the application (major and minor version number) with which the project is created
@@ -161,7 +161,7 @@ private:
     bool                _startupProject;            /** Boolean determining whether this project is loaded at startup of ManiVault */
     util::Version       _applicationVersion;        /** Version of the application with which the project is created */
     ProjectMetaAction   _projectMetaAction;         /** Project meta info action (i.e. title and version) */
-    ModalTask           _task;                      /** Modal task for reporting project tasks */
+    Task                _startupTask;               /** Startup task for loading a project */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

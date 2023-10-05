@@ -14,12 +14,12 @@
 
 namespace hdps::gui {
 
-TasksStatusBarAction::TasksStatusBarAction(AbstractTasksModel& tasksModel, QObject* parent, const QString& title, const QIcon& icon /*= QIcon()*/, const PopupMode& popupMode /*= PopupMode::Click*/, const Task::Scope& taskScope /*= Task::Scope::Foreground*/) :
+TasksStatusBarAction::TasksStatusBarAction(AbstractTasksModel& tasksModel, QObject* parent, const QString& title, const QIcon& icon /*= QIcon()*/, const PopupMode& popupMode /*= PopupMode::Click*/, const Task::GuiScope& taskScope /*= Task::GuiScope::Foreground*/) :
     WidgetAction(parent, title),
     _tasksModel(tasksModel),
     _tasksFilterModel(this),
     _popupMode(popupMode),
-    _taskScope(taskScope),
+    _taskGuiScope(taskScope),
     _menu(),
     _popupForceHidden(false)
 {
@@ -186,9 +186,9 @@ TasksFilterModel& TasksStatusBarAction::getTasksFilterModel()
     return _tasksFilterModel;
 }
 
-Task::Scope TasksStatusBarAction::getTaskScope() const
+Task::GuiScope TasksStatusBarAction::getTaskScope() const
 {
-    return _taskScope;
+    return _taskGuiScope;
 }
 
 TasksStatusBarAction::Widget::ToolButton::ToolButton(TasksStatusBarAction* tasksStatusBarAction, QWidget* parent /*= nullptr*/) :

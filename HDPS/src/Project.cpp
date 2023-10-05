@@ -23,7 +23,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     _startupProject(false),
     _applicationVersion(Application::current()->getVersion()),
     _projectMetaAction(this),    
-    _task(this, "Project Task")
+    _startupTask(this, "Open Project")
 {
     initialize();
 }
@@ -126,9 +126,9 @@ QVariantMap Project::toVariantMap() const
     return variantMap;
 }
 
-ModalTask& Project::getTask()
+Task& Project::getStartupTask()
 {
-    return _task;
+    return _startupTask;
 }
 
 util::Version Project::getVersion() const
@@ -217,6 +217,8 @@ void Project::initialize()
 
     connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
+
+    _startupTask.setParentTask(Application::current()->getTask(Application::TaskType::LoadProject));
 }
 
 }

@@ -73,18 +73,19 @@ public:
     static QMap<ProgressMode, QString> progressModeNames;
 
     /** Task: */
-    enum class Scope {
+    enum class GuiScope {
+        None,           /** ...has no explicit GUI handlers that show it in the gui (the task can still be observed in the tasks plugin) */
         Background,     /** ...will run in the background (not visible by default but can be revealed in the tasks view plugin) */
         Foreground,     /** ...will run in the foreground (tasks with this scope will automatically appear in a tasks popup when running) */
         Modal           /** ...will run modally (tasks with this scope will automatically appear in a modal tasks dialog when the needed) */
     };
 
     /** Couples scope enum value to scope name string */
-    static QMap<Scope, QString> scopeNames;
+    static QMap<GuiScope, QString> guiScopeNames;
 
     using TasksPtrs             = QVector<Task*>;
     using ProgressTextFormatter = std::function<QString(Task&)>;
-    using Scopes                = QVector<Scope>;
+    using GuiScopes             = QVector<GuiScope>;
     using Statuses              = QVector<Status>;
 
 private:
@@ -106,12 +107,12 @@ public:
      * 
      * @param parent Pointer to parent object (simply denotes the position of the task in the QObject hierarchy and has nothing to do with the task hierarchy)
      * @param name Name of the task
-     * @param scope Scope of the task
+     * @param guiScope GUI scope of the task
      * @param status Initial status of the task
      * @param mayKill Boolean determining whether the task may be killed or not
      * @param handler Pointer to task handler
      */
-    Task(QObject* parent, const QString& name, const Scope& scope = Scope::Background, const Status& status = Status::Undefined, bool mayKill = false, AbstractTaskHandler* handler = nullptr);
+    Task(QObject* parent, const QString& name, const GuiScope& guiScope = GuiScope::None, const Status& status = Status::Undefined, bool mayKill = false, AbstractTaskHandler* handler = nullptr);
 
     /** Remove from task manager when destructed */
     ~Task();
@@ -151,7 +152,7 @@ public: // Parent-child
      * @param enabledOnly Filter out tasks which are disabled
      * @return Vector of pointer to child tasks
      */
-    virtual TasksPtrs getChildTasks(bool recursively = false, const Scopes& scopes = Scopes(), const Statuses& statuses = Statuses(), bool enabledOnly = true) const final;
+    virtual TasksPtrs getChildTasks(bool recursively = false, const GuiScopes& guiScopes = GuiScopes(), const Statuses& statuses = Statuses(), bool enabledOnly = true) const final;
 
 protected: // Parent-child
 
@@ -344,19 +345,19 @@ public: // Progress mode
      */
     void setProgressMode(const ProgressMode& progressMode);
 
-public: // Scope
+public: // GUI scope
 
     /**
-     * Get scope
-     * @return Scope enum
+     * Get GUI scope
+     * @return GUI scope enum
      */
-    virtual Scope getScope() const final;
+    virtual GuiScope getGuiScope() const final;
     
     /**
-     * Sets scope to to \p scope
-     * @param scope Scope enum
+     * Sets GUI scope to to \p guiScope
+     * @param guiScope GUI scope enum
      */
-    virtual void setScope(const Scope& scope) final;
+    virtual void setGuiScope(const GuiScope& guiScope) final;
 
 public: // Manual
 
@@ -531,7 +532,7 @@ private: // Private setters (these call private signals under the hood, an essen
     void privateSetAborted();
     void privateKill(bool recursive = true);
     void privateSetProgressMode(const ProgressMode& progressMode);
-    void privateSetScope(const Scope& scope);
+    void privateSetGuiScope(const GuiScope& guiScope);
     void privateSetProgress(float progress, const QString& subtaskDescription = "");
     void privateSetSubtasks(std::uint32_t numberOfSubtasks);
     void privateSetSubtasks(const QStringList& subtasksNames);
@@ -631,10 +632,10 @@ signals:
     void progressModeChanged(const ProgressMode& progressMode);
 
     /**
-     * Signals that the task scope changed to \p scope
-     * @param scope Modified scope
+     * Signals that the task GUI scope changed to \p guiScope
+     * @param guiScope Modified GUI scope
      */
-    void scopeChanged(const Scope& scope);
+    void guiScopeChanged(const GuiScope& guiScope);
 
     /**
      * Signals that the task progress changed to \p progress
@@ -727,7 +728,7 @@ signals:
     void privateSetAbortedSignal(QPrivateSignal);
     void privateKillSignal(bool, QPrivateSignal);
     void privateSetProgressModeSignal(const ProgressMode& progressMode, QPrivateSignal);
-    void privateSetScopeSignal(const Scope& scope, QPrivateSignal);
+    void privateSetGuiScopeSignal(const GuiScope& guiScope, QPrivateSignal);
     void privateSetProgressSignal(float progress, const QString& subtaskDescription, QPrivateSignal);
     void privateSetSubtasksSignal(std::uint32_t numberOfSubtasks, QPrivateSignal);
     void privateSetSubtasksSignal(const QStringList& subtasksNames, QPrivateSignal);
@@ -749,7 +750,7 @@ private:
     bool                    _mayKill;                                       /** Whether the task may be killed or not */
     AbstractTaskHandler*    _handler;                                       /** Task handler */
     ProgressMode            _progressMode;                                  /** The way progress is recorded */
-    Scope                   _scope;                                         /** The (gui) scope in which the task will present itself to the user */
+    GuiScope                _guiScope;                                      /** The gui scope in which the task will present itself to the user */
     float                   _progress;                                      /** Task progress */
     QBitArray               _subtasks;                                      /** Subtasks status */
     QStringList             _subtasksNames;                                 /** Subtasks names */

@@ -40,7 +40,7 @@ public:
         ID,                     /** Globally unique identifier of the task */
         ParentID,               /** Globally unique identifier of the parent task (empty string if not a child task) */
         Type,                   /** Task type */
-        Scope,                  /** Task scope */
+        GuiScope,               /** Task GUI scope */
         MayKill,                /** Task may kill boolean */
         Kill,                   /** Column for killing a task */
 
@@ -311,15 +311,15 @@ protected:
         QVariant data(int role = Qt::UserRole + 1) const override;
     };
 
-    /** Standard model item class for displaying the task scope */
-    class ScopeItem final : public Item {
+    /** Standard model item class for displaying the task GUI scope */
+    class GuiScopeItem final : public Item {
     public:
 
         /**
          * Construct with \p task
          * @param task Pointer to task to display item for
          */
-        ScopeItem(Task* task);
+        GuiScopeItem(Task* task);
 
         /**
          * Get model data for \p role

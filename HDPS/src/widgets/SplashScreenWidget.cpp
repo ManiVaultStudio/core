@@ -351,7 +351,7 @@ void SplashScreenWidget::createBody()
 
         copyrightNoticeLabel->setAlignment(Qt::AlignBottom);
         copyrightNoticeLabel->setWordWrap(true);
-        copyrightNoticeLabel->setText("<p style='color: rgba(0, 0, 0, 80); font-size: 8pt;'> \
+        copyrightNoticeLabel->setText("<p style='color: rgba(0, 0, 0, 80); font-size: 7pt;'> \
             This software is licensed under the GNU Lesser General Public License v3.0. \
             Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)</p>"
         );
