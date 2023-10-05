@@ -433,8 +433,14 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Version.h
     src/util/DockWidgetPermission.h
     src/util/NumericalRange.h
+)
+
+if(APPLE)
+set(PUBLIC_UTIL_HEADERS
+	${PUBLIC_UTIL_HEADERS}
     src/util/MacThemeHelper.h
 )
+endif()
 
 set(PUBLIC_UTIL_SOURCES
     src/util/Miscellaneous.cpp
@@ -468,8 +474,14 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Version.cpp
     src/util/DockWidgetPermission.cpp
     src/util/NumericalRange.cpp
+)
+
+if(APPLE)
+set(PUBLIC_UTIL_SOURCES
+	${PUBLIC_UTIL_SOURCES}
     src/util/MacThemeHelper.mm
 )
+endif()
 
 set(PUBLIC_UTIL_FILES
     ${PUBLIC_UTIL_HEADERS}    
