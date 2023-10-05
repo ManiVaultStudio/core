@@ -42,15 +42,15 @@ include(CMakeCheckSetAVX)
 # Normalize the incoming install path
 file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
 
-if(DEFINED ENV{HDPS_INSTALL_DIR})
-    set(ENV_HDPS_INSTALL_DIR "$ENV{HDPS_INSTALL_DIR}")
-    file(TO_CMAKE_PATH ${ENV_HDPS_INSTALL_DIR} ENV_HDPS_INSTALL_DIR)
+if(DEFINED ENV{MV_INSTALL_DIR})
+    set(ENV_MV_INSTALL_DIR "$ENV{MV_INSTALL_DIR}")
+    file(TO_CMAKE_PATH ${ENV_MV_INSTALL_DIR} ENV_MV_INSTALL_DIR)
 
-    if ("${INSTALL_DIR}" STREQUAL "${ENV_HDPS_INSTALL_DIR}")
+    if ("${INSTALL_DIR}" STREQUAL "${ENV_MV_INSTALL_DIR}")
         set(messageText 
         "***************************************************
-        Using environment variable HDPS_INSTALL_DIR 
-        $ENV{HDPS_INSTALL_DIR}
+        Using environment variable MV_INSTALL_DIR 
+        $ENV{MV_INSTALL_DIR}
         to indicate where the ManiVault output will be installed,
         make sure the directory exists.
         ***************************************************")
@@ -61,7 +61,7 @@ if(DEFINED ENV{HDPS_INSTALL_DIR})
 endif()
 
 if(NOT DEFINED INSTALL_DIR)
-    message(FATAL_ERROR "No install path provided! Set the cmake variable INSTALL_DIR or environment variable HDPS_INSTALL_DIR")
+    message(FATAL_ERROR "No install path provided! Set the cmake variable INSTALL_DIR or environment variable MV_INSTALL_DIR")
 else()
     message(STATUS "Install ManiVault to ${INSTALL_DIR}")
 endif()

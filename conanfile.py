@@ -19,7 +19,7 @@ class HdpsCoreConan(ConanFile):
     Packages both RELEASE and DEBUG.
     Uses rules_support (github.com/hdps/rulessupport) to derive
     versioninfo based on the branch naming convention
-    as described in https://github.com/hdps/core/wiki/Branch-naming-rules
+    as described in https://github.com/ManiVaultStudio/core/wiki/Branch-naming-rules
     """
 
     name = "hdps-core"
@@ -29,7 +29,7 @@ class HdpsCoreConan(ConanFile):
     # topics can get used for searches, GitHub topics, Bintray tags etc.
     # Add here keywords about the library
     topics = ("conan", "analysis", "n-dimensional", "plugin")
-    url = "https://github.com/hdps/core"
+    url = "https://github.com/ManiVaultStudio/core"
     branch = "develop"  # should come from profile
     author = "B. van Lew <b.van_lew@lumc.nl>"
     license = (
@@ -172,11 +172,11 @@ class HdpsCoreConan(ConanFile):
             pathlib.Path(self.__get_git_path(), "__last_build_folder.txt"),
             self.build_folder,
         )
-        # If the user has no preference in HDPS_INSTALL_DIR simply set the install dir
-        if not os.environ.get("HDPS_INSTALL_DIR", None):
-            os.environ["HDPS_INSTALL_DIR"] = os.path.join(self.build_folder, "install")
-        print("HDPS_INSTALL_DIR: ", os.environ["HDPS_INSTALL_DIR"])
-        self.install_dir = os.environ["HDPS_INSTALL_DIR"]
+        # If the user has no preference in MV_INSTALL_DIR simply set the install dir
+        if not os.environ.get("MV_INSTALL_DIR", None):
+            os.environ["MV_INSTALL_DIR"] = os.path.join(self.build_folder, "install")
+        print("MV_INSTALL_DIR: ", os.environ["MV_INSTALL_DIR"])
+        self.install_dir = os.environ["MV_INSTALL_DIR"]
 
         cmake = self._configure_cmake()
         cmake.build(build_type="Debug")
@@ -189,11 +189,11 @@ class HdpsCoreConan(ConanFile):
     def package(self):
         # if just running package
         if self.install_dir is None:
-            if not os.environ.get("HDPS_INSTALL_DIR", None):
-                os.environ["HDPS_INSTALL_DIR"] = os.path.join(
+            if not os.environ.get("MV_INSTALL_DIR", None):
+                os.environ["MV_INSTALL_DIR"] = os.path.join(
                     self.build_folder, "install"
                 )
-            self.install_dir = os.environ["HDPS_INSTALL_DIR"]
+            self.install_dir = os.environ["MV_INSTALL_DIR"]
 
         print("Packaging install dir: ", self.install_dir)
         print("Options macos: ", self.options["macos_bundle"])
