@@ -564,7 +564,7 @@ void Task::updateProgress()
 
         case ProgressMode::Aggregate:
         {
-            const auto childTasks = getChildTasksForStatuses(false, true, { Status::Running, Status::RunningIndeterminate });
+            const auto childTasks = getChildTasksForStatuses(false, true, { Status::Undefined, Status::Idle, Status::Running, Status::RunningIndeterminate });
 
             auto accumulatedProgress = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [](float sum, Task* childTask) -> float {
                 return sum + childTask->getProgress();
@@ -798,7 +798,7 @@ void Task::privateRemoveChildTask(Task* childTask)
         if (childTask == nullptr)
             throw std::runtime_error("Supplied task pointer is a nullptr");
 
-        if (_childTasks.contains(childTask))
+        if (!_childTasks.contains(childTask))
             throw std::runtime_error(QString("%1 is not a child of %2").arg(childTask->getName(), getName()).toStdString());
 
         emit childTaskAboutToBeRemoved(childTask);

@@ -69,10 +69,22 @@ public:
 public: // Miscellaneous
 
     /**
-     * Get startup task
-     * @return Startup task
+     * Get serialization task
+     * @return Task for reporting the progress of project serialization (Project#_dataSerializationTask and Project#_workspaceSerializationTask are its children)
      */
-    virtual Task& getStartupTask() final;
+    virtual Task& getSerializationTask() final;
+
+    /**
+     * Get data serialization task
+     * @return Task for reporting the progress of data serialization
+     */
+    virtual Task& getDataSerializationTask() final;
+
+    /**
+     * Get workspace serialization task
+     * @return Task for reporting the progress of workspace serialization
+     */
+    virtual Task& getWorkspaceSerializationTask() final;
 
     /**
      * Get version of the application (major and minor version number) with which the project is created
@@ -157,11 +169,13 @@ signals:
     void filePathChanged(const QString& filePath);
 
 private:
-    QString             _filePath;                  /** Location on disk where the project resides */
-    bool                _startupProject;            /** Boolean determining whether this project is loaded at startup of ManiVault */
-    util::Version       _applicationVersion;        /** Version of the application with which the project is created */
-    ProjectMetaAction   _projectMetaAction;         /** Project meta info action (i.e. title and version) */
-    Task                _startupTask;               /** Startup task for loading a project */
+    QString             _filePath;                      /** Location on disk where the project resides */
+    bool                _startupProject;                /** Boolean determining whether this project is loaded at startup of ManiVault */
+    util::Version       _applicationVersion;            /** Version of the application with which the project is created */
+    ProjectMetaAction   _projectMetaAction;             /** Project meta info action (i.e. title and version) */
+    Task                _serializationTask;             /** Task for reporting the progress of project serialization (Project#_dataSerializationTask and Project#_workspaceSerializationTask are its children) */
+    Task                _dataSerializationTask;         /** Task for reporting the progress of data serialization */
+    Task                _workspaceSerializationTask;    /** Task for reporting the progress of workspace serialization */
 
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

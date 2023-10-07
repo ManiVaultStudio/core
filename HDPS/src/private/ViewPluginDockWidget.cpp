@@ -222,6 +222,15 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
 
     DockWidget::fromVariantMap(variantMap);
 
+    auto serializationTask = ViewPlugin::getSerializationTask(variantMap["ID"].toString());
+
+    serializationTask->setRunning();
+
+    const auto viewPluginMap    = variantMap["ViewPlugin"].toMap();
+    const auto guiName          = viewPluginMap["GuiName"].toMap()["Value"].toString();
+
+    serializationTask->setProgressDescription(QString("Load %1").arg(guiName));
+
     variantMapMustContain(variantMap, "ViewPlugin");
 
     _viewPluginMap = variantMap["ViewPlugin"].toMap();
@@ -234,6 +243,11 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
 
     if (variantMap.contains("DockManagerState"))
         _dockManager.restoreState(QByteArray::fromBase64(variantMap["DockManagerState"].toString().toUtf8()));
+
+    serializationTask->setProgress(1.f);
+
+    if (!(serializationTask->isFinished() || serializationTask->isAborted()))
+        serializationTask->setFinished();
 }
 
 QVariantMap ViewPluginDockWidget::toVariantMap() const

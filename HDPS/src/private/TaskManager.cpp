@@ -40,6 +40,8 @@ void TaskManager::initialize()
     addTask(Application::current()->getTask(Application::TaskType::LoadApplication));
     addTask(Application::current()->getTask(Application::TaskType::LoadGUI));
     addTask(Application::current()->getTask(Application::TaskType::LoadProject));
+    addTask(Application::current()->getTask(Application::TaskType::LoadProjectData));
+    addTask(Application::current()->getTask(Application::TaskType::LoadProjectWorkspace));
 }
 
 void TaskManager::reset()

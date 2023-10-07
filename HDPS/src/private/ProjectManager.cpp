@@ -428,24 +428,16 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             ProjectMetaAction projectMetaAction(extractFileFromManiVaultProject(filePath, temporaryDirectory, "meta.json"));
 
-            std::unique_ptr<ModalTask> openTask;
+            if (!_project->isStartupProject())
+                _project->getSerializationTask().setGuiScope(Task::GuiScope::Modal);
 
-            auto getTask = [this, &openTask]() -> Task* {
-                if (_project->isStartupProject())
-                    return &_project->getStartupTask();
-
-                if (openTask == nullptr)
-                    openTask = std::make_unique<ModalTask>(this, "Open Project");
-
-                return openTask.get();
-            };
-
-            auto task = getTask();
+            auto& dataSerializationTask = _project->getDataSerializationTask();
             
-            task->setDescription(QString("Opening ManiVault project from %1").arg(filePath));
-            task->setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-            task->setMayKill(false);
-            task->setProgressMode(Task::ProgressMode::Subtasks);
+            dataSerializationTask.setDescription(QString("Opening ManiVault project from %1").arg(filePath));
+            dataSerializationTask.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+            dataSerializationTask.setMayKill(false);
+            dataSerializationTask.setProgressMode(Task::ProgressMode::Subtasks);
+            dataSerializationTask.setRunning();
 
             QCoreApplication::processEvents();
 
@@ -455,24 +447,19 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             archiver.extractSingleFile(filePath, "workspace.json", QFileInfo(temporaryDirectoryPath, "workspace.json").absoluteFilePath());
             
-            /*
-            const auto viewPluginsTaskNames     = workspaces().getViewPluginNames(workspaceFileInfo.absoluteFilePath());
-            */
-
             const auto decompressionTaskNames   = QStringList() << archiver.getTaskNamesForDecompression(filePath);
 
-            task->setSubtasks(QStringList() << decompressionTaskNames << "Create data hierarchy");// << viewPluginsTaskNames);
-            //task->setRunning();
+            dataSerializationTask.setSubtasks(QStringList() << decompressionTaskNames << "Create data hierarchy");
 
-            connect(&archiver, &Archiver::taskStarted, this, [&task](const QString& taskName) -> void {
-                task->setSubtaskStarted(taskName, QString("extracting %1").arg(taskName));
+            connect(&archiver, &Archiver::taskStarted, this, [this](const QString& taskName) -> void {
+                _project->getDataSerializationTask().setSubtaskStarted(taskName, QString("extracting %1").arg(taskName));
             });
 
-            connect(&archiver, &Archiver::taskFinished, this, [&task](const QString& taskName) -> void {
-                task->setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
+            connect(&archiver, &Archiver::taskFinished, this, [this](const QString& taskName) -> void {
+                _project->getDataSerializationTask().setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
             });
 
-            connect(task, &Task::requestAbort, this, [this]() -> void {
+            connect(&dataSerializationTask, &Task::requestAbort, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was loaded");
@@ -482,7 +469,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             projects().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
             
-            task->setSubtaskFinished("Create data hierarchy");
+            dataSerializationTask.setSubtaskFinished("Create data hierarchy");
 
             if (loadWorkspace) {
                 if (workspaceFileInfo.exists())
@@ -491,7 +478,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 workspaces().setWorkspaceFilePath("");
             }
 
-            task->setFinished();
+            dataSerializationTask.setFinished();
 
             _recentProjectsAction.addRecentFilePath(filePath);
 

@@ -149,7 +149,8 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
     hide();
     {
-        auto& task = projects().isOpeningProject() ? projects().getCurrentProject()->getStartupTask() : workspaces().getCurrentWorkspace()->getTask();
+        for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList())
+            ViewPlugin::preRegisterSerializationTask(this, viewPluginDockWidgetVariant.toMap()["ID"].toString());
 
         for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList()) {
             const auto viewPluginMap    = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap();
@@ -169,8 +170,6 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
                 addViewPluginDockWidget(RightDockWidgetArea, notLoadedDockWidget);
             }
-
-            task.setSubtaskFinished(guiName, QString("%1 loaded").arg(guiName));
         }
 
         if (!restoreState(QByteArray::fromBase64(variantMap["State"].toString().toUtf8()), variantMap["Version"].toInt()))

@@ -33,12 +33,14 @@ class Application final : public QApplication
 
 public:
 
-    /** Type of task */
+    /** Task for monitoring the progress of: */
     enum class TaskType {
-        LoadApplication = 0,        /** Process of loading the application (may also include loading a project) */
-        LoadGUI,                    /** Loading the application GUI */
-        LoadProject,                /** Loading a startup project */
-        OverallBackground,          /** Task for aggregated overall background tasks */
+        LoadApplication = 0,        /** ...of the application loading (contains LoadGUI task and LoadProject task) */
+        LoadGUI,                    /** ...loading the application GUI */
+        LoadProject,                /** ...loading a project (if there is one, contains LoadProjectData task and LoadProjectWorkspace task) */
+        LoadProjectData,            /** ...loading project data (if there is a startup project) */
+        LoadProjectWorkspace,       /** ...loading project workspace (if there is a startup project) */
+        OverallBackground,          /** ...aggregated overall background tasks */
 
         Count
     };

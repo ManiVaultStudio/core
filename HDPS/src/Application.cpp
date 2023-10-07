@@ -35,8 +35,10 @@ hdps::Application::Application(int& argc, char** argv) :
     _startupProjectMetaAction(nullptr),
     _tasks{
         new Task(this, "Loading"),
-        new Task(this, "Loading GUI"),
+        new Task(this, "Setting up GUI"),
         new Task(this, "Loading Project"),
+        new Task(this, "Loading project data"),
+        new Task(this, "Loading project workspace"),
         new BackgroundTask(this, "Overall Background")
     }
 {
@@ -49,6 +51,8 @@ hdps::Application::Application(int& argc, char** argv) :
 
     getTask(TaskType::LoadGUI)->setParentTask(getTask(TaskType::LoadApplication));
     getTask(TaskType::LoadProject)->setParentTask(getTask(TaskType::LoadApplication));
+    getTask(TaskType::LoadProjectData)->setParentTask(getTask(TaskType::LoadProject));
+    getTask(TaskType::LoadProjectWorkspace)->setParentTask(getTask(TaskType::LoadProject));
     getTask(TaskType::OverallBackground)->setMayKill(false);
 
     auto loadGuiTask = getTask(TaskType::LoadGUI);
@@ -57,6 +61,10 @@ hdps::Application::Application(int& argc, char** argv) :
     loadGuiTask->setProgressMode(Task::ProgressMode::Subtasks);
     loadGuiTask->setSubtasks(subTasks);
     loadGuiTask->setRunning();
+
+    auto loadProjectTask = getTask(TaskType::LoadProject);
+
+    loadProjectTask->setEnabled(false);
 }
 
 hdps::Application* hdps::Application::current()
