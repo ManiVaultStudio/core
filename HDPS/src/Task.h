@@ -130,29 +130,55 @@ public: // Parent-child
      * Get parent task (if it has one)
      * @return Pointer to parent task if it has, nullptr otherwise
      */
-    virtual Task* getParentTask() final;
+    Task* getParentTask();
 
     /**
      * Set parent task to \p parentTask
      * @param parentTask Pointer to parent task
      */
-    virtual void setParentTask(Task* parentTask) final;
+    void setParentTask(Task* parentTask);
 
     /**
      * Determine whether the task has a parent task
      * @return Boolean determining whether the task has a parent task
      */
-    virtual bool hasParentTask() final;
+    bool hasParentTask();
 
     /**
-     * Get child tasks \p recursively, for \p scopes and \p statuses
+     * Get child tasks
      * @param recursively Whether to get child tasks recursively
-     * @param scopes Filter scopes (includes all scopes when empty)
-     * @param statuses Filter status (includes all statuses when empty)
      * @param enabledOnly Filter out tasks which are disabled
+     * @return Vector of pointers to child tasks
+     */
+    TasksPtrs getChildTasks(bool recursively = false, bool enabledOnly = true) const;
+
+    /**
+     * Get child tasks for \p statuses
+     * @param recursively Whether to get child tasks recursively
+     * @param enabledOnly Filter out tasks which are disabled
+     * @param status Filter on task status
      * @return Vector of pointer to child tasks
      */
-    virtual TasksPtrs getChildTasks(bool recursively = false, const GuiScopes& guiScopes = GuiScopes(), const Statuses& statuses = Statuses(), bool enabledOnly = true) const final;
+    TasksPtrs getChildTasksForStatuses(bool recursively = false, bool enabledOnly = true, const Statuses& statuses = Statuses()) const;
+
+    /**
+     * Get child tasks for \p guiScopes
+     * @param recursively Whether to get child tasks recursively
+     * @param enabledOnly Filter out tasks which are disabled
+     * @param guiScopes Filter on task GUI scope
+     * @return Vector of pointer to child tasks
+     */
+    TasksPtrs getChildTasksForGuiScopes(bool recursively = false, bool enabledOnly = true, const GuiScopes& guiScopes = GuiScopes()) const;
+
+    /**
+     * Get child tasks for \p guiScopes and \p statuses 
+     * @param recursively Whether to get child tasks recursively
+     * @param enabledOnly Filter out tasks which are disabled
+     * @param guiScopes Filter on task GUI scope
+     * @param statuses Filter on task status
+     * @return Vector of pointer to child tasks
+     */
+    TasksPtrs getChildTasksForGuiScopesAndStatuses(bool recursively = false, bool enabledOnly = true, const GuiScopes& guiScopes = GuiScopes(), const Statuses& statuses = Statuses()) const;
 
 protected: // Parent-child
 

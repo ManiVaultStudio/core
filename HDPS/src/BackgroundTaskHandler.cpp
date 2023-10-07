@@ -35,7 +35,7 @@ BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
     tasksFilterModel.getParentTaskFilterAction().setString(Application::current()->getTask(Application::TaskType::OverallBackground)->getId());
 
     const auto overallBackgroundTaskTextFormatter = [this](Task& task) -> QString {
-        const auto numberOfChildBackgroundTasks = task.getChildTasks(false, { Task::GuiScope::Background}, { Task::Status::Running, Task::Status::RunningIndeterminate }).count();
+        const auto numberOfChildTasks = task.getChildTasksForGuiScopesAndStatuses(false, true, { Task::GuiScope::Background }, { Task::Status::Running, Task::Status::RunningIndeterminate }).count();
 
         switch (task.getStatus())
         {
@@ -45,7 +45,7 @@ BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
 
             case Task::Status::Running:
             case Task::Status::RunningIndeterminate:
-                return QString("%1 task%2 %3 running in the background %4%").arg(QString::number(numberOfChildBackgroundTasks), numberOfChildBackgroundTasks == 1 ? "" : "s", numberOfChildBackgroundTasks == 1 ? "is" : "are", QString::number(task.getProgress() * 100.f, 'f', 1));
+                return QString("%1 task%2 %3 running in the background %4%").arg(QString::number(numberOfChildTasks), numberOfChildTasks == 1 ? "" : "s", numberOfChildTasks == 1 ? "is" : "are", QString::number(task.getProgress() * 100.f, 'f', 1));
 
             case Task::Status::Finished:
                 return QString("All background tasks have finished");

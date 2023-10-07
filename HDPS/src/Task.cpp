@@ -165,7 +165,7 @@ bool Task::hasParentTask()
     return getParentTask() != nullptr;
 }
 
-hdps::Task::TasksPtrs Task::getChildTasks(bool recursively /*= false*/, const GuiScopes& guiScopes /*= GuiScopes()*/, const Statuses& statuses /*= Statuses()*/, bool enabledOnly /*= true*/) const
+Task::TasksPtrs Task::getChildTasks(bool recursively /*= false*/, bool enabledOnly /*= true*/) const
 {
     TasksPtrs childTasks;
     
@@ -173,16 +173,45 @@ hdps::Task::TasksPtrs Task::getChildTasks(bool recursively /*= false*/, const Gu
         if (enabledOnly && !childTask->getEnabled())
             continue;
 
-        const auto filterInGuiScope = guiScopes.isEmpty() ? true : guiScopes.contains(childTask->getGuiScope());
-        const auto filterInstatus   = statuses.isEmpty() ? true : statuses.contains(childTask->getStatus());
-
-        if (filterInGuiScope && filterInstatus)
-            childTasks << childTask;
+        childTasks << childTask;
     }
 
     if (recursively)
         for (auto childTask : _childTasks)
-            childTasks << childTask->getChildTasks(recursively);
+            childTasks << childTask->getChildTasks(recursively, enabledOnly);
+
+    return childTasks;
+}
+
+Task::TasksPtrs Task::getChildTasksForStatuses(bool recursively /*= false*/, bool enabledOnly /*= true*/, const Statuses& statuses /*= Statuses()*/) const
+{
+    auto childTasks = getChildTasks(recursively, enabledOnly);
+
+    childTasks.erase(std::remove_if(childTasks.begin(), childTasks.end(), [&statuses](Task* task) -> bool {
+        return !statuses.contains(task->getStatus());
+    }), childTasks.end());
+
+    return childTasks;
+}
+
+Task::TasksPtrs Task::getChildTasksForGuiScopes(bool recursively /*= false*/, bool enabledOnly /*= true*/, const GuiScopes& guiScopes /*= GuiScopes()*/) const
+{
+    auto childTasks = getChildTasks(recursively, enabledOnly);
+
+    childTasks.erase(std::remove_if(childTasks.begin(), childTasks.end(), [&guiScopes](Task* task) -> bool {
+        return !guiScopes.contains(task->getGuiScope());
+    }), childTasks.end());
+
+    return childTasks;
+}
+
+Task::TasksPtrs Task::getChildTasksForGuiScopesAndStatuses(bool recursively /*= false*/, bool enabledOnly /*= true*/, const GuiScopes& guiScopes /*= GuiScopes()*/, const Statuses& statuses /*= Statuses()*/) const
+{
+    auto childTasks = getChildTasks(recursively, enabledOnly);
+
+    childTasks.erase(std::remove_if(childTasks.begin(), childTasks.end(), [&guiScopes, &statuses](Task* task) -> bool {
+        return !guiScopes.contains(task->getGuiScope()) || !statuses.contains(task->getStatus());
+    }), childTasks.end());
 
     return childTasks;
 }
@@ -535,24 +564,14 @@ void Task::updateProgress()
 
         case ProgressMode::Aggregate:
         {
-            const auto childTasks = getChildTasks(false, { getGuiScope() }, { Status::Running, Status::RunningIndeterminate });
+            const auto childTasks = getChildTasksForStatuses(false, true, { Status::Running, Status::RunningIndeterminate });
 
-            std::int32_t numberOfEnabledChildTasks = 0;
-
-            auto accumulatedProgress = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [&numberOfEnabledChildTasks](float sum, Task* childTask) -> float {
-                if (!childTask->getEnabled())
-                    return sum;
-
-                if (!(childTask->isRunning() || childTask->isRunningIndeterminate()))
-                    return sum;
-
-                numberOfEnabledChildTasks++;
-
+            auto accumulatedProgress = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [](float sum, Task* childTask) -> float {
                 return sum + childTask->getProgress();
             });
 
-            _progress = accumulatedProgress / static_cast<float>(numberOfEnabledChildTasks);
-
+            _progress = accumulatedProgress / static_cast<float>(childTasks.size());
+            
             break;
         }
     }
@@ -683,32 +702,21 @@ void Task::updateAggregateStatus()
     if (_progressMode != ProgressMode::Aggregate)
         return;
 
-    const auto childTasks = getChildTasks();
+    const auto childTasks           = getChildTasks();
+    const auto numberOfChildTasks   = childTasks.size();
 
-    const auto numberOfEnabledChildTasks = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [](std::size_t count, Task* childTask) -> std::size_t {
-        if (!childTask->getEnabled())
-            return count;
-
-        return count + 1;
-    });
-
-    const auto countStatus = [&childTasks](const Status& status) -> std::size_t {
-        return std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [status](std::size_t count, Task* childTask) -> std::size_t {
-            if (!childTask->getEnabled())
-                return count;
-
-            return count + (childTask->getStatus() == status ? 1 : 0);
-        });
+    const auto countStatus = [this, &childTasks](const Status& status) -> std::size_t {
+        return getChildTasksForStatuses(false, true, { status }).count();
     };
-
+    
     if (countStatus(Status::Running) >= 1 || countStatus(Status::RunningIndeterminate) >= 1)
         privateSetRunning();
 
-    if (countStatus(Status::Idle) == childTasks.count())
+    if (countStatus(Status::Idle) == numberOfChildTasks)
         privateSetProgress(0.f);
 
     if (countStatus(Status::Finished) >= 1 && countStatus(Status::Running) == 0 && countStatus(Status::RunningIndeterminate) == 0) {
-        auto tasksToSetToIdle = getChildTasks(false, { getGuiScope() }, { Status::Finished });
+        auto tasksToSetToIdle = getChildTasksForStatuses(false, true, { Status::Finished });
 
         std::reverse(tasksToSetToIdle.begin(), tasksToSetToIdle.end());
 

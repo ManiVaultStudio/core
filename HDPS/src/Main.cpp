@@ -119,6 +119,8 @@ int main(int argc, char *argv[])
             if (startupProjectFileInfo.exists()) {
                 application.setStartupProjectFilePath(startupProjectFilePath);
 
+                application.getTask(Application::TaskType::LoadProject)->setEnabled(true);
+
                 auto projectMetaAction = getStartupProjectMetaAction(startupProjectFilePath);
 
                 if (projectMetaAction != nullptr) {

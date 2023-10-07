@@ -45,8 +45,6 @@ const hdps::IconFont& IconFonts::getIconFont(const QString& name, const std::int
         }
         else {
             for (auto iconFont : _iconFonts[name]) {
-                qDebug() << name << iconFont->getMajorVersion() << iconFont->getMinorVersion();
-
                 if (iconFont->getMajorVersion() == majorVersion && iconFont->getMinorVersion() == minorVersion)
                     return *iconFont;
             }

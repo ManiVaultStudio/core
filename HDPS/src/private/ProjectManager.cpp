@@ -462,7 +462,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             const auto decompressionTaskNames   = QStringList() << archiver.getTaskNamesForDecompression(filePath);
 
             task->setSubtasks(QStringList() << decompressionTaskNames << "Create data hierarchy");// << viewPluginsTaskNames);
-            task->setRunning();
+            //task->setRunning();
 
             connect(&archiver, &Archiver::taskStarted, this, [&task](const QString& taskName) -> void {
                 task->setSubtaskStarted(taskName, QString("extracting %1").arg(taskName));

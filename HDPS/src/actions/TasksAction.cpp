@@ -310,20 +310,34 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::MayKill), QHeaderView::ResizeToContents);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::Kill), QHeaderView::ResizeToContents);
 
-    connect(&tasksAction->getTasksFilterModel(), &QSortFilterProxyModel::layoutChanged, this, [this]() -> void {
+    connect(&tasksAction->getTasksFilterModel(), &QSortFilterProxyModel::rowsInserted, this, [this]() -> void {
+        qDebug() << "Tasks filter model: rows inserted";
+
         _tasksAction->openPersistentProgressEditorsRecursively(_tasksWidget.getTreeView());
 
         QCoreApplication::processEvents();
     });
 
-    connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
+    connect(&tasksAction->getTasksFilterModel(), &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this]() -> void {
+        qDebug() << "Tasks filter model: rows about to be removed";
+    });
+
+    /*
+    connect(&tasksAction->getTasksFilterModel(), &QSortFilterProxyModel::layoutChanged, this, [this]() -> void {
+        _tasksAction->openPersistentProgressEditorsRecursively(_tasksWidget.getTreeView());
+
+        QCoreApplication::processEvents();
+    });
+    */
+
+    connect(&tasksAction->getTasksFilterModel(), &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
         for (int rowIndex = first; rowIndex <= last; rowIndex++) {
             const auto index = _tasksAction->getTasksFilterModel().index(rowIndex, 0, parent);
 
             const auto persistentEditorsIndexes = QModelIndexList({
                 index.siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)),
                 index.siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Kill))
-                });
+            });
 
             for (const auto& persistentEditorIndex : persistentEditorsIndexes)
                 if (_tasksWidget.getTreeView().isPersistentEditorOpen(persistentEditorIndex))
