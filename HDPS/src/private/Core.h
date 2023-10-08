@@ -36,8 +36,8 @@ public:
 
 public:
 
-    /** Initializes all core managers */
-    void init() override;
+    /** Initializes the core */
+    void initialize() override;
 
     /** Resets the entire core implementation */
     void reset() override;

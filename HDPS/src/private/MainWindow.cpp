@@ -67,7 +67,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     QMainWindow::showEvent(showEvent);
 
     if (!_core.isInitialized()) {
-        _core.init();
+        _core.initialize();
 
         auto loadGuiTask = Application::current()->getTask(Application::TaskType::LoadGUI);
 

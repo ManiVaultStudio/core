@@ -8,6 +8,8 @@
 
 #include "actions/LockingAction.h"
 
+#include "Task.h"
+
 #include <QObject>
 #include <QDebug>
 #include <QIcon>
@@ -32,6 +34,33 @@ class AbstractManager : public QObject, public util::Serializable
 
 public:
 
+    /** Subtask type */
+    enum class SubtaskType {
+        Initialize,
+        Reset
+    };
+
+    /**
+     * Get subtask name for \p subtaskType
+     * @param subtaskType Type of subtask
+     */
+    QString getSubtaskName(const SubtaskType& subtaskType) const {
+        switch (subtaskType) {
+            case SubtaskType::Initialize:
+                return QString("Initialize %1").arg(getSerializationName());
+
+            case SubtaskType::Reset:
+                return QString("Reset %1").arg(getSerializationName());
+
+            default:
+                break;
+        }
+
+        return "";
+    }
+
+public:
+
     /**
      * Construct manager with \p parent object and \p name
      * @param parent Pointer to parent object
@@ -41,7 +70,8 @@ public:
         QObject(parent),
         Serializable(name),
         _initialized(false),
-        _lockingAction(nullptr)
+        _lockingAction(nullptr),
+        _task(this, name)
     {
     }
 
@@ -57,6 +87,8 @@ public:
 #endif
 
         emit managerAboutToBeReset();
+
+        _task.setSubtasks({ });
     }
 
     /** Resets the contents of the manager */
@@ -144,8 +176,9 @@ signals:
     void managerReset();
 
 private:
-    bool                _initialized;       /** Whether the manager is initialized or not */
-    gui::LockingAction* _lockingAction;     /** Manager locking action */
+    bool                    _initialized;       /** Whether the manager is initialized or not */
+    gui::LockingAction*     _lockingAction;     /** Manager locking action */
+    Task                    _task;              /** Task for reporting progress during initialization and reset operations */
 };
 
 }

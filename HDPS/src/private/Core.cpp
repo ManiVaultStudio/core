@@ -45,40 +45,42 @@ Core::~Core()
     _pluginManager.reset();
 }
 
-void Core::init()
+void Core::initialize()
 {
     if (isInitialized())
         return;
 
-    Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskStarted("Initializing Managers");
+    CoreInterface::setAboutToBeInitialized();
+    {
+        Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskStarted("Initializing Managers");
 
-    _actionsManager.reset(new ActionsManager());
-    _pluginManager.reset(new PluginManager());
-    _eventManager.reset(new EventManager());
-    _dataManager.reset(new DataManager());
-    _dataHierarchyManager.reset(new DataHierarchyManager());
-    _taskManager.reset(new TaskManager());
-    _workspaceManager.reset(new WorkspaceManager());
-    _projectManager.reset(new ProjectManager());
-    _settingsManager.reset(new SettingsManager());
+        _actionsManager.reset(new ActionsManager());
+        _pluginManager.reset(new PluginManager());
+        _eventManager.reset(new EventManager());
+        _dataManager.reset(new DataManager());
+        _dataHierarchyManager.reset(new DataHierarchyManager());
+        _taskManager.reset(new TaskManager());
+        _workspaceManager.reset(new WorkspaceManager());
+        _projectManager.reset(new ProjectManager());
+        _settingsManager.reset(new SettingsManager());
 
-    _actionsManager->initialize();
-    _pluginManager->initialize();
-    _eventManager->initialize();
-    _dataManager->initialize();
-    _dataHierarchyManager->initialize();
-    _taskManager->initialize();
-    _workspaceManager->initialize();
-    _projectManager->initialize();
-    _settingsManager->initialize();
-    
-    Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskFinished("Initializing Managers");
+        _actionsManager->initialize();
+        _pluginManager->initialize();
+        _eventManager->initialize();
+        _dataManager->initialize();
+        _dataHierarchyManager->initialize();
+        _taskManager->initialize();
+        _workspaceManager->initialize();
+        _projectManager->initialize();
+        _settingsManager->initialize();
 
-    ModalTask::createHandler(Application::current());
-    ForegroundTask::createHandler(Application::current());
-    BackgroundTask::createHandler(Application::current());
+        Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskFinished("Initializing Managers");
 
-    CoreInterface::init();
+        ModalTask::createHandler(Application::current());
+        ForegroundTask::createHandler(Application::current());
+        BackgroundTask::createHandler(Application::current());
+    }
+    CoreInterface::setInitialized();
 }
 
 void Core::reset()

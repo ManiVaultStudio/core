@@ -19,6 +19,7 @@
 #include "AbstractSettingsManager.h"
 
 #include <QString>
+#include <QObject>
 
 #include <vector>
 #include <functional>
@@ -49,8 +50,10 @@ namespace hdps
         using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
     }
 
-class CoreInterface
+class CoreInterface : public QObject
 {
+Q_OBJECT
+
 public:
 
     /** Default constructor */
@@ -61,9 +64,25 @@ public:
     }
     
     /** Initializes all core managers */
-    virtual void init() {
-        _initialized = true;
+    virtual void setAboutToBeInitialized() final {
+        qDebug() << "ManiVault core about to be initialized";
+
+        emit aboutToBeInitialized();
     };
+
+    /** Initializes the core */
+    virtual void initialize() {
+        qDebug() << "ManiVault core initializing...";
+    };
+
+    /** Flag the core as initialized */
+    virtual void setInitialized() final {
+        _initialized = true;
+
+        qDebug() << "ManiVault core initialized";
+
+        emit initialized();
+    }
 
     /** Resets the entire core implementation */
     virtual void reset() = 0;
@@ -236,6 +255,14 @@ public: // Managers
     virtual AbstractWorkspaceManager& getWorkspaceManager() = 0;
     virtual AbstractProjectManager& getProjectManager() = 0;
     virtual AbstractSettingsManager& getSettingsManager() = 0;
+
+signals:
+
+    /** Invoked when the core is about to be initialized */
+    void aboutToBeInitialized();
+
+    /** Invoked when the core has been initialized */
+    void initialized();
 
 protected:
     bool    _initialized;               /** Boolean determining whether the core is initialized or not */
