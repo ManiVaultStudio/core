@@ -10,7 +10,7 @@
 
 namespace hdps::gui {
 
-ImageAction::ImageAction(QObject* parent, const QString& title /*= ""*/) :
+ImageAction::ImageAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
     _image(),
     _filePathAction(this, "File Path"),

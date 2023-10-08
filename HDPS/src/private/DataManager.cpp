@@ -5,7 +5,6 @@
 #include "DataManager.h"
 #include "RawData.h"
 #include "DataHierarchyItem.h"
-#include "Application.h"
 
 #include "util/Exception.h"
 
@@ -16,7 +15,7 @@
 using namespace hdps::util;
 
 #ifdef _DEBUG
-    #define DATA_MANAGER_VERBOSE
+    //#define DATA_MANAGER_VERBOSE
 #endif
 
 namespace hdps
@@ -214,7 +213,13 @@ void DataManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
-    AbstractManager::initialize();
+    AbstractDataManager::initialize();
+
+    if (isInitialized())
+        return;
+
+    beginInitialization();
+    endInitialization();
 }
 
 DataManager::~DataManager()

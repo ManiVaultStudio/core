@@ -10,6 +10,7 @@
 
 #include "ParametersSettingsAction.h"
 #include "MiscellaneousSettingsAction.h"
+#include "TasksSettingsAction.h"
 
 namespace hdps
 {
@@ -47,6 +48,7 @@ public: // Global settings actions
 
     virtual ParametersSettingsAction& getParametersSettings() = 0;
     virtual MiscellaneousSettingsAction& getMiscellaneousSettings() = 0;
+    virtual TasksSettingsAction& getTasksSettingsAction() = 0;
 };
 
 }

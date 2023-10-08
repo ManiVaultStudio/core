@@ -383,9 +383,12 @@ void Points::init()
 
 void Points::setData(std::nullptr_t, const std::size_t numPoints, const std::size_t numDimensions)
 {
+    const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>().getNumDimensions();
+
     getRawData<PointData>().setData(nullptr, numPoints, numDimensions);
 
-    hdps::events().notifyDatasetDataDimensionsChanged(this);
+    if (notifyDimensionsChanged)
+        events().notifyDatasetDataDimensionsChanged(this);
 }
 
 void Points::extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const
@@ -684,8 +687,8 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
 {
     DatasetImpl::setProxyMembers(proxyMembers);
 
-    getDataHierarchyItem().setTaskName("Creating proxy");
-    getDataHierarchyItem().setTaskRunning();
+    getTask().setName("Creating proxy");
+    getTask().setRunning();
 
     auto pointIndexOffset = 0u;
 
@@ -723,13 +726,13 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
 
         pointIndexOffset += targetPoints->getNumPoints();
 
-        getDataHierarchyItem().setTaskDescription(QString("Creating mappings for %1").arg(proxyMember->text()));
-        getDataHierarchyItem().setTaskProgress(static_cast<float>(getProxyMembers().indexOf(proxyMember)) / static_cast<float>(getProxyMembers().count()));
+        getTask().setProgressDescription(QString("Creating mappings for %1").arg(proxyMember->text()));
+        getTask().setProgress(static_cast<float>(getProxyMembers().indexOf(proxyMember)) / static_cast<float>(getProxyMembers().count()));
 
         QCoreApplication::processEvents();
     }
 
-    getDataHierarchyItem().setTaskFinished();
+    getTask().setFinished();
 }
 
 InfoAction& Points::getInfoAction()

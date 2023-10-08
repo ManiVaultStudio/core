@@ -121,7 +121,7 @@ public:
      * @param options Options
      * @param currentOption Current option
      */
-    Q_INVOKABLE explicit OptionAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QString& currentOption = "");
+    Q_INVOKABLE explicit OptionAction(QObject* parent, const QString& title, const QStringList& options = QStringList(), const QString& currentOption = "");
 
     /**
      * Initialize the option action

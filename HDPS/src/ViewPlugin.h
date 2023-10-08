@@ -14,6 +14,7 @@
 #include "actions/PresetsAction.h"
 
 #include "Plugin.h"
+#include "Task.h"
 
 namespace hdps::gui {
     class ViewPluginTriggerAction;
@@ -36,7 +37,7 @@ public:
     ViewPlugin(const PluginFactory* factory);
 
     /** Destructor */
-    ~ViewPlugin() = default;
+    ~ViewPlugin();
 
     /** Perform startup initialization */
     void init() override;

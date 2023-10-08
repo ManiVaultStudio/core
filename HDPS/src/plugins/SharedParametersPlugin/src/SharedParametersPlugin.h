@@ -35,7 +35,7 @@ private:
     ActionsWidget       _actionsWidget;         /** Widget for interaction with shared parameters */
 };
 
-class ActionsPluginFactory : public ViewPluginFactory
+class SharedParametersPluginFactory : public ViewPluginFactory
 {
     Q_INTERFACES(hdps::plugin::ViewPluginFactory hdps::plugin::PluginFactory)
     Q_OBJECT
@@ -44,7 +44,7 @@ class ActionsPluginFactory : public ViewPluginFactory
 public:
 
     /** Constructor */
-    ActionsPluginFactory();
+    SharedParametersPluginFactory();
 
     /**
      * Get plugin icon

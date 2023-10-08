@@ -19,7 +19,7 @@ class DatasetImpl;
  *
  * @author Thomas Kroes
  */
-class AbstractEventManager : protected AbstractManager
+class AbstractEventManager : public AbstractManager
 {
     Q_OBJECT
 

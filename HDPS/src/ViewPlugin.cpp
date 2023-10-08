@@ -37,7 +37,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _helpAction(this, "Trigger help"),
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
     _triggerShortcut(),
-    _titleBarMenuActions()
+    _titleBarMenuActions(),
+    _settingsActions()
 {
     setText(getGuiName());
 
@@ -180,6 +181,10 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
         _mayFloatAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Float"));
         _mayMoveAction.setChecked(_dockingOptionsAction.getSelectedOptions().contains("May Move"));
     });
+}
+
+ViewPlugin::~ViewPlugin()
+{
 }
 
 void ViewPlugin::init()

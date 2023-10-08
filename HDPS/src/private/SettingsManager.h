@@ -35,11 +35,13 @@ public: // Global settings actions
 
     ParametersSettingsAction& getParametersSettings() override { return _parametersSettingsAction; };
     MiscellaneousSettingsAction& getMiscellaneousSettings() override { return _miscellaneousSettingsAction; };
+    TasksSettingsAction& getTasksSettingsAction() override { return _tasksSettingsAction; };
 
 private:
     gui::TriggerAction          _editSettingsAction;            /** Action for triggering the settings dialog */
     ParametersSettingsAction    _parametersSettingsAction;      /** Parameters global settings */
     MiscellaneousSettingsAction _miscellaneousSettingsAction;   /** Miscellaneous global settings */
+    TasksSettingsAction         _tasksSettingsAction;           /** Tasks global settings */
 };
 
 }

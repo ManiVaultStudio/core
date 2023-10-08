@@ -12,7 +12,7 @@
 #include "util/DockWidgetPermission.h"
 
 #ifdef _DEBUG
-    #define ABSTRACT_WORKSPACE_MANAGER_VERBOSE
+    //#define ABSTRACT_WORKSPACE_MANAGER_VERBOSE
 #endif
 
 namespace hdps
@@ -321,6 +321,18 @@ public: // IO
      * @return List of workspace locations
      */
     virtual WorkspaceLocations getWorkspaceLocations(const WorkspaceLocation::Types& types = WorkspaceLocation::Type::All) = 0;
+
+    /**
+     * Get view plugin names from \p workspaceJsonFile
+     * @param workspaceJsonFile Location of the workspace JSON file
+     */
+    virtual QStringList getViewPluginNames(const QString& workspaceJsonFile) const = 0;
+
+    /**
+     * Get a preview image
+     * @return Workspace manager preview image
+     */
+    virtual QImage toPreviewImage() const = 0;
 
 signals:
 

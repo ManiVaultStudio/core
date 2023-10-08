@@ -28,8 +28,10 @@ public: // Construction/destruction
      * @param name Name of the icon font
      * @param majorVersion Major version number
      * @param minorVersion Minor version number
+     * @param fontResourceNames Names of the font resources
+     * @param defaultFont Boolean determining whether this font is default when no version is specified
      */
-    IconFont(const QString& name, const std::uint32_t& majorVersion, const std::uint32_t& minorVersion);
+    IconFont(const QString& name, const std::uint32_t& majorVersion, const std::uint32_t& minorVersion, const QStringList& fontResourceNames, bool defaultFont = false);
 
 public: // Getters
 
@@ -70,6 +72,18 @@ public: // Getters
      */
     QIcon getIcon(const QString& name, const QColor& foregroundColor = QColor(0, 0, 0, 255), const QColor& backgroundColor = Qt::transparent) const;
 
+    /**
+     * Determine if this is the default font
+     * @return Boolean determining whether this font is default when no version is specified
+     */
+    bool isDefaultFont() const;
+
+    /**
+     * Set default font to \p defaultFont
+     * @param defaultFont Boolean determining whether this font is default when no version is specified
+     */
+    void setDefaultFont(bool defaultFont);
+
 public: // Initialization
 
     /**
@@ -91,9 +105,9 @@ protected:
     QString                     _name;                  /** Name of the icon font */
     std::uint32_t               _majorVersion;          /** Major version of the icon font */
     std::uint32_t               _minorVersion;          /** Minor version of the icon font */
-    QString                     _fontResourceName;      /** Resource name of the icon font */
     QString                     _fontFamily;            /** Loaded font family */
     QMap<QString, QString>      _characters;            /** Maps icon name to icon character (unicode) */
+    bool                        _defaultFont;           /** Whether this font is default when no version is specified */
 };
 
 /**

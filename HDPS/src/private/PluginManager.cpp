@@ -3,8 +3,8 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PluginManager.h"
+#include "Core.h"
 
-#include <Application.h>
 #include <PluginFactory.h>
 #include <LoaderPlugin.h>
 #include <WriterPlugin.h>
@@ -13,9 +13,8 @@
 #include <TransformationPlugin.h>
 #include <RawData.h>
 #include <PluginType.h>
-#include <util/Serialization.h>
 
-#include "MainWindow.h"
+#include <util/Serialization.h>
 
 #include <QDebug>
 #include <QPluginLoader>
@@ -28,7 +27,7 @@
 #include <assert.h>
 
 #ifdef _DEBUG
-    #define PLUGIN_MANAGER_VERBOSE
+    //#define PLUGIN_MANAGER_VERBOSE
 #endif
 
 namespace hdps {
@@ -53,7 +52,7 @@ void PluginManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
-    AbstractManager::initialize();
+    AbstractPluginManager::initialize();
 
     if (isInitialized())
         return;

@@ -26,13 +26,6 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _children(),
     _selected(false),
     _expanded(true),
-    _taskDescription(""),
-    _taskProgress(0.0),
-    _subTasks(),
-    _taskName(""),
-    _taskStatus(TaskStatus::Idle),
-    _taskDescriptionTimer(),
-    _taskProgressTimer(),
     _icon(),
     _actions()
 {
@@ -48,18 +41,6 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
         _parent = &parentDataset->getDataHierarchyItem();
 
     setIcon(getDataset()->getIcon());
-
-    _taskDescriptionTimer.setSingleShot(true);
-    _taskProgressTimer.setSingleShot(true);
-
-    connect(&_taskDescriptionTimer, &QTimer::timeout, [this]() {
-        emit taskDescriptionChanged(_taskDescription);
-    });
-
-    connect(&_taskProgressTimer, &QTimer::timeout, [this]() {
-        emit taskProgressChanged(getTaskProgress());
-    });
-
     setVisible(visible);
 }
 
@@ -117,11 +98,6 @@ void DataHierarchyItem::setVisible(bool visible)
     WidgetAction::setVisible(visible);
 
     emit visibilityChanged(isVisible());
-}
-
-QString DataHierarchyItem::getTaskDescription() const
-{
-    return _taskDescription;
 }
 
 bool DataHierarchyItem::isSelected() const
@@ -213,7 +189,6 @@ bool DataHierarchyItem::getLocked() const
 void DataHierarchyItem::setLocked(const bool& locked)
 {
     _dataset->setLocked(locked);
-   
 }
 
 bool DataHierarchyItem::isExpanded() const
@@ -226,141 +201,6 @@ void DataHierarchyItem::setExpanded(bool expanded)
     _expanded = expanded;
 
     emit expandedChanged(_expanded);
-}
-
-QString DataHierarchyItem::getTaskName() const
-{
-    return _taskName;
-}
-
-void DataHierarchyItem::setTaskName(const QString& taskName)
-{
-    if (taskName == _taskName)
-        return;
-
-    _taskName = taskName;
-}
-
-hdps::DataHierarchyItem::TaskStatus DataHierarchyItem::getTaskStatus() const
-{
-    return _taskStatus;
-}
-
-bool DataHierarchyItem::isIdle() const
-{
-    return _taskStatus == TaskStatus::Idle;
-}
-
-void DataHierarchyItem::setTaskDescription(const QString& taskDescription)
-{
-    if (taskDescription == _taskDescription)
-        return;
-
-    _taskDescription = taskDescription;
-
-    if (!_taskDescriptionTimer.isActive())
-        _taskDescriptionTimer.start(TASK_UPDATE_TIMER_INTERVAL);
-}
-
-float DataHierarchyItem::getTaskProgress() const
-{
-    if (!_subTasks.isEmpty())
-        return static_cast<float>(_subTasks.count(true)) / static_cast<float>(_subTasks.size());
-
-    return _taskProgress;
-}
-
-void DataHierarchyItem::setTaskProgress(float taskProgress)
-{
-    if (taskProgress == _taskProgress)
-        return;
-
-    _taskProgress = taskProgress;
-
-    if (!_taskProgressTimer.isActive())
-        _taskProgressTimer.start(TASK_UPDATE_TIMER_INTERVAL);
-}
-
-void DataHierarchyItem::setNumberOfSubTasks(float numberOfSubTasks)
-{
-    _subTasks.resize(numberOfSubTasks);
-}
-
-void DataHierarchyItem::setSubTaskFinished(float subTaskIndex)
-{
-    try {
-        _subTasks.setBit(subTaskIndex, true);
-
-        if (!_taskProgressTimer.isActive())
-            _taskProgressTimer.start(TASK_UPDATE_TIMER_INTERVAL);
-
-        QCoreApplication::processEvents();
-    }
-    catch (...) {
-        qDebug() << "Unable to set flag sub task as finished";
-    }
-}
-
-bool DataHierarchyItem::isRunning() const
-{
-    return _taskStatus == TaskStatus::Running;
-}
-
-bool DataHierarchyItem::isFinished() const
-{
-    return _taskStatus == TaskStatus::Finished;
-}
-
-bool DataHierarchyItem::isAborted() const
-{
-    return _taskStatus == TaskStatus::Aborted;
-}
-
-void DataHierarchyItem::setTaskIdle()
-{
-    _taskStatus = TaskStatus::Idle;
-}
-
-void DataHierarchyItem::setTaskRunning()
-{
-    _taskStatus = TaskStatus::Running;
-
-    setLocked(true);
-}
-
-void DataHierarchyItem::setTaskFinished()
-{
-    if (_taskStatus == TaskStatus::Aborted)
-        return;
-
-    _taskStatus = TaskStatus::Finished;
-
-    _subTasks.fill(false);
-
-    setTaskDescription(QString("%1 finished").arg(_taskName));
-
-    QTimer::singleShot(MESSAGE_DISAPPEAR_INTERVAL, [this]() {
-        setTaskProgress(0.0f);
-        setTaskDescription("");
-    });
-
-    setLocked(false);
-}
-
-void DataHierarchyItem::setTaskAborted()
-{
-    _taskStatus = TaskStatus::Aborted;
-
-    _subTasks.fill(false);
-
-    setTaskDescription(QString("%1 aborted").arg(_taskName));
-
-    QTimer::singleShot(MESSAGE_DISAPPEAR_INTERVAL, [this]() {
-        setTaskProgress(0.0f);
-        setTaskDescription("");
-    });
-
-    setLocked(false);
 }
 
 QIcon DataHierarchyItem::getIcon() const

@@ -78,7 +78,7 @@ public:
      * @param title Title of the action
      * @param strings Strings
      */
-    Q_INVOKABLE explicit StringsAction(QObject* parent, const QString& title = "", const QStringList& strings = QStringList());
+    Q_INVOKABLE explicit StringsAction(QObject* parent, const QString& title, const QStringList& strings = QStringList());
 
     /**
      * Get string category

@@ -35,7 +35,7 @@ PrefixClustersAction::PrefixClustersAction(ClustersAction& clustersAction) :
 
     // Update read only status of apply action
     const auto updateApplyActionReadOnly = [this]() -> void {
-        _applyAction.setEnabled(!_clustersAction.getClustersModel().doAllClusterNamesStartWith(_prefixAction.getString()) || _prefixAction.isResettable());
+        _applyAction.setEnabled(!_clustersAction.getClustersModel().doAllClusterNamesStartWith(_prefixAction.getString()));
     };
 
     // Update read only status of apply action when the prefix string changes

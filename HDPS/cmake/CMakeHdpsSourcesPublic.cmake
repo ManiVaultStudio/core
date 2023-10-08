@@ -11,6 +11,7 @@ set(PUBLIC_CORE_INTERFACE_HEADERS
     src/AbstractWorkspaceManager.h
     src/AbstractProjectManager.h
     src/AbstractSettingsManager.h
+    src/AbstractTaskManager.h
 )
 
 set(PUBLIC_CORE_INTERFACE_SOURCES
@@ -272,7 +273,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/PresetsAction.h
     src/actions/LockingAction.h
     src/actions/VersionAction.h
-    src/actions/ProjectSplashScreenAction.h
+    src/actions/SplashScreenAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -288,12 +289,29 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/PresetsAction.cpp
     src/actions/LockingAction.cpp
     src/actions/VersionAction.cpp
-    src/actions/ProjectSplashScreenAction.cpp
+    src/actions/SplashScreenAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
     ${PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS}    
     ${PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES}
+)
+
+set(PUBLIC_TASK_ACTIONS_HEADERS
+    src/actions/ProgressAction.h
+    src/actions/TaskAction.h
+    src/actions/TasksAction.h
+)
+
+set(PUBLIC_TASK_ACTIONS_SOURCES
+    src/actions/ProgressAction.cpp
+    src/actions/TaskAction.cpp
+    src/actions/TasksAction.cpp
+)
+
+set(PUBLIC_TASK_ACTIONS_FILES
+    ${PUBLIC_TASK_ACTIONS_HEADERS}    
+    ${PUBLIC_TASK_ACTIONS_SOURCES}
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_HEADERS
@@ -333,7 +351,8 @@ set(PUBLIC_WIDGET_HEADERS
     src/widgets/InfoWidget.h
     src/widgets/ViewPluginEditorDialog.h
     src/widgets/ActionsWidget.h
-    src/widgets/TaskProgressDialog.h
+    src/widgets/SplashScreenWidget.h
+    src/widgets/ElidedLabel.h
 )
 
 set(PUBLIC_WIDGET_SOURCES
@@ -346,7 +365,8 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/InfoWidget.cpp
     src/widgets/ViewPluginEditorDialog.cpp
     src/widgets/ActionsWidget.cpp
-    src/widgets/TaskProgressDialog.cpp
+    src/widgets/SplashScreenWidget.cpp
+    src/widgets/ElidedLabel.cpp
     ${ACTION_HIERARCHY_SOURCES}
 )
 
@@ -476,19 +496,45 @@ set(PUBLIC_UTIL_FILES
 
 set(PUBLIC_APPLICATION_HEADERS
     src/Application.h
-    src/Project.h
-    src/Workspace.h
 )
 
 set(PUBLIC_APPLICATION_SOURCES
     src/Application.cpp
-    src/Project.cpp
-    src/Workspace.cpp
 )
 
 set(PUBLIC_APPLICATION_FILES
     ${PUBLIC_APPLICATION_HEADERS}
     ${PUBLIC_APPLICATION_SOURCES}
+)
+
+set(PUBLIC_PROJECT_HEADERS
+    src/Project.h
+    src/ProjectMetaAction.h
+    src/ProjectCompressionAction.h
+)
+
+set(PUBLIC_PROJECT_SOURCES
+    src/Project.cpp
+    src/ProjectMetaAction.cpp
+    src/ProjectCompressionAction.cpp
+)
+
+set(PUBLIC_PROJECT_FILES
+    ${PUBLIC_PROJECT_HEADERS}
+    ${PUBLIC_PROJECT_SOURCES}
+)
+
+set(PUBLIC_WORKSPACE_HEADERS
+    src/Workspace.h
+)
+
+set(PUBLIC_WORKSPACE_SOURCES
+    src/Workspace.cpp
+)
+
+set(PUBLIC_WORKSPACE_FILES
+    ${PUBLIC_WORKSPACE_HEADERS}
+    ${PUBLIC_WORKSPACE_SOURCES}
 )
 
 set(PUBLIC_DATASET_HEADERS
@@ -594,17 +640,72 @@ set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/GlobalSettingsGroupAction.h
     src/ParametersSettingsAction.h
     src/MiscellaneousSettingsAction.h
+    src/TasksSettingsAction.h
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_SOURCES
     src/GlobalSettingsGroupAction.cpp
 	src/ParametersSettingsAction.cpp
     src/MiscellaneousSettingsAction.cpp
+    src/TasksSettingsAction.cpp
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_FILES
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
+)
+
+set(PUBLIC_TASK_HEADERS
+    src/Task.h
+    src/TaskTesterRunner.h
+	src/AbstractTaskHandler.h
+	src/AbstractTaskTester.h
+    src/ModalTask.h
+    src/ModalTaskTester.h
+	src/ModalTaskHandler.h
+    src/BackgroundTask.h
+    src/BackgroundTaskTester.h
+	src/BackgroundTaskHandler.h
+	src/ForegroundTask.h
+    src/ForegroundTaskTester.h
+	src/ForegroundTaskHandler.h
+    src/DatasetTask.h
+    src/DatasetTaskHandler.h
+    src/AbstractTasksModel.h
+    src/TasksTreeModel.h
+    src/TasksListModel.h
+    src/TasksFilterModel.h
+    src/TasksPopupWidget.h
+    src/TasksStatusBarAction.h
+)
+
+set(PUBLIC_TASK_SOURCES
+    src/Task.cpp
+    src/TaskTesterRunner.cpp
+	src/AbstractTaskHandler.cpp
+    src/AbstractTaskTester.cpp
+    src/ModalTask.cpp
+	src/ModalTaskTester.cpp
+	src/ModalTaskHandler.cpp
+    src/BackgroundTask.cpp
+    src/BackgroundTaskTester.cpp
+	src/BackgroundTaskHandler.cpp
+	src/ForegroundTask.cpp
+    src/ForegroundTaskTester.cpp
+	src/ForegroundTaskHandler.cpp
+    src/DatasetTask.cpp
+	src/DatasetTaskHandler.cpp
+    src/AbstractTasksModel.cpp
+    src/TasksTreeModel.cpp
+    src/TasksListModel.cpp
+    src/TasksFilterModel.cpp
+    src/TasksPopupWidget.cpp
+    src/TasksStatusBarAction.cpp
+)
+
+set(PUBLIC_TASK_FILES
+    ${PUBLIC_TASK_HEADERS}
+    ${PUBLIC_TASK_SOURCES}
 )
 
 set(PUBLIC_HEADERS
@@ -622,19 +723,22 @@ set(PUBLIC_HEADERS
     ${PUBLIC_FILE_ACTIONS_HEADERS}
     ${PUBLIC_TOOLBAR_ACTIONS_HEADERS}
     ${PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS}
+    ${PUBLIC_TASK_ACTIONS_HEADERS}
     ${PUBLIC_ACTIONS_INTERNAL_HEADERS}
     ${PUBLIC_WIDGET_HEADERS}
     ${PUBLIC_RENDERERS_HEADERS}
     ${PUBLIC_GRAPHICS_HEADERS}
     ${PUBLIC_UTIL_HEADERS}
     ${PUBLIC_APPLICATION_HEADERS}
+	${PUBLIC_PROJECT_HEADERS}
+	${PUBLIC_WORKSPACE_HEADERS}
     ${PUBLIC_DATASET_HEADERS}
     ${PUBLIC_PLUGIN_HEADERS}
-    ${PUBLIC_PROJECT_HEADERS}
     ${PUBLIC_DATA_HIERARCHY_HEADERS}
     ${PUBLIC_ACTIONS_MODEL_HEADERS}
     ${PUBLIC_DATA_HIERARCHY_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
+    ${PUBLIC_TASK_HEADERS}
 )
 
 set(PUBLIC_SOURCES
@@ -651,19 +755,22 @@ set(PUBLIC_SOURCES
     ${PUBLIC_FILE_ACTIONS_SOURCES}
     ${PUBLIC_TOOLBAR_ACTIONS_SOURCES}
     ${PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES}
+    ${PUBLIC_TASK_ACTIONS_SOURCES}
     ${PUBLIC_ACTIONS_INTERNAL_SOURCES}
     ${PUBLIC_WIDGET_SOURCES}
     ${PUBLIC_RENDERERS_SOURCES}
     ${PUBLIC_GRAPHICS_SOURCES}
     ${PUBLIC_UTIL_SOURCES}
     ${PUBLIC_APPLICATION_SOURCES}
+    ${PUBLIC_PROJECT_SOURCES}
+    ${PUBLIC_WORKSPACE_SOURCES}
     ${PUBLIC_DATASET_SOURCES}
     ${PUBLIC_PLUGIN_SOURCES}
     ${PUBLIC_DATA_HIERARCHY_SOURCES}
-    ${PUBLIC_PROJECT_SOURCES}
     ${PUBLIC_ACTIONS_MODEL_SOURCES}
     ${PUBLIC_DATA_HIERARCHY_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
+    ${PUBLIC_TASK_SOURCES}
     ${PUBLIC_HEADERS}
 )
 
@@ -681,12 +788,15 @@ source_group(Actions\\Toggle FILES ${PUBLIC_TOGGLE_ACTIONS_FILES})
 source_group(Actions\\File FILES ${PUBLIC_FILE_ACTIONS_FILES})
 source_group(Actions\\Toolbar FILES ${PUBLIC_TOOLBAR_ACTIONS_FILES})
 source_group(Actions\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_ACTIONS_FILES})
+source_group(Actions\\Task FILES ${PUBLIC_TASK_ACTIONS_FILES})
 source_group(Actions\\Internal FILES ${PUBLIC_ACTIONS_INTERNAL_FILES})
 source_group(Widgets FILES ${PUBLIC_WIDGET_FILES})
 source_group(Renderers FILES ${PUBLIC_RENDERERS_FILES})
 source_group(Graphics FILES ${PUBLIC_GRAPHICS_FILES})
 source_group(Util FILES ${PUBLIC_UTIL_FILES})
 source_group(Application FILES ${PUBLIC_APPLICATION_FILES})
+source_group(Project FILES ${PUBLIC_PROJECT_FILES})
+source_group(Workspace FILES ${PUBLIC_WORKSPACE_FILES})
 source_group(DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_FILES})
 source_group(Dataset FILES ${PUBLIC_DATASET_FILES})
 source_group(Plugin FILES ${PUBLIC_PLUGIN_FILES})
@@ -694,3 +804,4 @@ source_group(Project FILES ${PUBLIC_PROJECT_FILES})
 source_group(Model\\Actions FILES ${PUBLIC_ACTIONS_MODEL_FILES})
 source_group(Model\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
+source_group(Task FILES ${PUBLIC_TASK_FILES})

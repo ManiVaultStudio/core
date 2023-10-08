@@ -129,7 +129,7 @@ QStringList Archiver::getTaskNamesForDirectoryCompression(const QString& directo
 
     // Add file paths of the files directly below the directory
     for (const auto fileInDirectory : filesInDirectory.entryList(QDir::Files | QDir::NoDotAndDotDot))
-        taskNames << "Packing " + fileInDirectory;
+        taskNames << fileInDirectory;
 
     // For scanning subdirectories in the directory
     QDir subDirectoriesInDirectory(directory);
@@ -151,13 +151,7 @@ QStringList Archiver::getTaskNamesForDecompression(const QString& compressedFile
     if (!zip.open(QuaZip::mdUnzip))
         throw std::runtime_error("Unable to open ZIP file");
 
-    QStringList taskNames;
-
-    // Prefix task names
-    for (const auto& fileName : zip.getFileNameList())
-        taskNames << "Unpacking " + fileName;
-
-    return taskNames;
+    return zip.getFileNameList();
 }
 
 void Archiver::extractSingleFile(const QString& compressedFilePath, const QString& sourceFileName, const QString& targetFilePath, const QString& password /*= ""*/)
@@ -256,8 +250,7 @@ void Archiver::compressSubDirectory(QuaZip* parentZip, const QString& directory,
 
 void Archiver::compressFile(QuaZip* zip, const QString& sourceFilePath, const QString& compressedFilePath, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/)
 {
-    // Establish task name
-    const auto taskName = "Packing " + compressedFilePath;
+    const auto taskName = compressedFilePath;
 
     // Notify others that a task started
     emit taskStarted(taskName);
@@ -319,7 +312,7 @@ void Archiver::compressFile(QuaZip* zip, const QString& sourceFilePath, const QS
 void Archiver::extractFile(QuaZip* zip, const QString& compressedFilePath, const QString& targetFilePath, const QString& password /*= ""*/)
 {
     // Establish task name
-    const auto taskName = "Unpacking " + QFileInfo(targetFilePath).fileName();
+    const auto taskName = QFileInfo(targetFilePath).fileName();
 
     // Notify others that a task started
     emit taskStarted(taskName);

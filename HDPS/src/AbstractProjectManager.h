@@ -102,7 +102,7 @@ public:
      * @param importDataOnly Whether to only import the data from the project
      * @param loadWorkspace Whether to load the workspace which is accompanied with the project
      */
-    virtual void openProject(QString filePath = "", bool importDataOnly = true, bool loadWorkspace = true) = 0;
+    virtual void openProject(QString filePath = "", bool importDataOnly = false, bool loadWorkspace = true) = 0;
 
     /**
      * Import project from \p filePath (only import the data)
@@ -145,19 +145,20 @@ public:
     virtual Project* getCurrentProject() = 0;
 
     /**
-     * Extract the project JSON file (project.json) from a compressed HDPS file (*.hdps)
-     * @param hdpsFilePath File path of the compressed HDPS file (*.hdps)
-     * @param temporaryDir Temporary directory to store the project.json file
-     * @return File path of the extracted project.json file
+     * Extract \p filePath from compressed ManiVault project in \p maniVaultFilePath
+     * @param maniVaultFilePath File path of the compressed ManiVault file
+     * @param temporaryDir Temporary dir where the extracted file resides
+     * @param filePath Relative file path of the file that needs to be extracted
+     * @return File path of the extracted file, empty string if extraction failed
      */
-    virtual QString extractProjectFileFromHdpsFile(const QString& hdpsFilePath, QTemporaryDir& temporaryDir) = 0;
+    virtual QString extractFileFromManiVaultProject(const QString& maniVaultFilePath, QTemporaryDir& temporaryDir, const QString& filePath) = 0;
 
     /**
-     * Get preview image of the project
+     * Get preview image of the project workspace
      * @param projectFilePath Path of the project file
      * @return Preview image
      */
-    virtual QImage getPreviewImage(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const = 0;
+    virtual QImage getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const = 0;
 
 public: // Menus
 
@@ -320,7 +321,7 @@ signals:
     void stateChanged(const State& state);
 
 private:
-    State   _state;     /** Determines the state of the project manager */
+    State       _state;     /** Determines the state of the project manager */
 };
 
 }

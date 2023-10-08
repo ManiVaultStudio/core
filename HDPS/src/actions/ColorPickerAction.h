@@ -66,7 +66,7 @@ protected:
      * @param title Title of the action
      * @param color Initial color
      */
-    Q_INVOKABLE ColorPickerAction(QObject* parent, const QString& title = "", const QColor& color = DEFAULT_COLOR);
+    Q_INVOKABLE ColorPickerAction(QObject* parent, const QString& title, const QColor& color = DEFAULT_COLOR);
 
 public:
 

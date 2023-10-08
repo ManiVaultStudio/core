@@ -18,7 +18,7 @@
 #include <QSplitter>
 
 #ifdef _DEBUG
-    #define DOCK_MANAGER_VERBOSE
+    //#define DOCK_MANAGER_VERBOSE
 #endif
 
 using namespace ads;
@@ -30,7 +30,8 @@ using namespace hdps::util;
 
 DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
-    Serializable("Dock manager")
+    Serializable("Dock manager"),
+    _serializationTask(this, "Dock Manager")
 {
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
@@ -106,7 +107,6 @@ void DockManager::reset()
         removeViewPluginDockWidget(viewPluginDockWidget);
 }
 
-
 void DockManager::addViewPluginDockWidget(ads::DockWidgetArea area, ads::CDockWidget* Dockwidget, ads::CDockAreaWidget* DockAreaWidget)
 {
 #ifdef DOCK_MANAGER_VERBOSE
@@ -150,15 +150,21 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
     hide();
     {
-        for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList()) {
+        const auto viewPluginDockWidgetsList = variantMap["ViewPluginDockWidgets"].toList();
+
+        for (auto viewPluginDockWidgetVariant : viewPluginDockWidgetsList)
+            ViewPluginDockWidget::preRegisterSerializationTask(this, viewPluginDockWidgetVariant.toMap()["ID"].toString(), this);
+
+        for (auto viewPluginDockWidgetVariant : viewPluginDockWidgetsList) {
             const auto viewPluginMap    = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap();
             const auto pluginKind       = viewPluginMap["Kind"].toString();
             const auto pluginMap        = viewPluginMap["Plugin"].toMap();
+            const auto guiName          = viewPluginMap["GuiName"].toMap()["Value"].toString();
 
             if (plugins().isPluginLoaded(pluginKind)) {
                 addViewPluginDockWidget(RightDockWidgetArea, new ViewPluginDockWidget(viewPluginDockWidgetVariant.toMap()));
             } else {
-                auto notLoadedDockWidget    = new CDockWidget(QString("%1 (not loaded)").arg(viewPluginMap["GuiName"].toMap()["Value"].toString()));
+                auto notLoadedDockWidget    = new CDockWidget(QString("%1 (not loaded)").arg(guiName));
                 auto notLoadedInfoWidget    = new InfoWidget(this, Application::getIconFont("FontAwesome").getIcon("exclamation-circle"), "View not loaded", QString("We were unable to load the %1 because the plugin is not loaded properly.\nThe workspace might not behave as expected, please ensure the required plugin is loaded properly...").arg(pluginKind));
 
                 notLoadedInfoWidget->setColor(Qt::gray);
@@ -168,6 +174,9 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
                 addViewPluginDockWidget(RightDockWidgetArea, notLoadedDockWidget);
             }
         }
+
+        if (viewPluginDockWidgetsList.isEmpty())
+            _serializationTask.setFinished();
 
         if (!restoreState(QByteArray::fromBase64(variantMap["State"].toString().toUtf8()), variantMap["Version"].toInt()))
             qCritical() << "Unable to restore state from" << objectName();
@@ -194,4 +203,9 @@ QVariantMap DockManager::toVariantMap() const
     });
 
     return variantMap;
+}
+
+Task& DockManager::getSerializationTask()
+{
+    return _serializationTask;
 }

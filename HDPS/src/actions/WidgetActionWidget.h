@@ -22,20 +22,13 @@ class WidgetActionWidget : public WidgetActionViewWidget
 {
 public:
 
-    /** Reserved widget settings */
-    enum WidgetFlag {
-        PopupLayout = 0x00100,      /** Widget with popup layout */
-    };
-
-public:
-
     /**
      * Constructor
      * @param parent Parent widget
      * @param action Pointer to the widget action that will be displayed
-     * @param widgetFlags Widget flags for the configuration of the widget (type)
+     * @param widgetFlags Widget flags for the configuration of the widget
      */
-    WidgetActionWidget(QWidget* parent, WidgetAction* action, const std::int32_t& widgetFlags = 0);
+    WidgetActionWidget(QWidget* parent, WidgetAction* action, std::int32_t widgetFlags = 0);
 
 public: // Popup widget related
     
@@ -64,9 +57,6 @@ private:
      * @param popupLayout Pointer to the popup layout
      */
     virtual void setPopupLayout(QLayout* popupLayout) final;
-
-protected:
-    std::int32_t        _widgetFlags;       /** Widget creation flags */
 };
 
 }

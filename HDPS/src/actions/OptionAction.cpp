@@ -17,7 +17,7 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/) :
+OptionAction::OptionAction(QObject* parent, const QString& title, const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/) :
     WidgetAction(parent, title),
     _defaultModel(),
     _customModel(nullptr),

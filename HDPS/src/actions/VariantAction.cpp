@@ -8,7 +8,7 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-VariantAction::VariantAction(QObject* parent, const QString& title /*= ""*/, const QVariant& variant /*= QVariant()*/) :
+VariantAction::VariantAction(QObject* parent, const QString& title, const QVariant& variant /*= QVariant()*/) :
     WidgetAction(parent, title),
     _variant()
 {

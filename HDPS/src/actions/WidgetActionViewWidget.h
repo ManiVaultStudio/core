@@ -22,12 +22,21 @@ class WidgetActionViewWidget : public QWidget
 {
 public:
 
+    /** Reserved widget view flags */
+    enum WidgetFlag {
+        PopupLayout                 = 0x10000,      /** Widget with popup layout */
+        NoGroupBoxInPopupLayout     = 0x20000       /** Prevent groupbox in popup layout */
+    };
+
+public:
+
     /**
      * Constructor
      * @param parent Parent widget
      * @param action Pointer to the  action that will be displayed
+     * @param widgetFlags Widget flags for the configuration of the widget
      */
-    WidgetActionViewWidget(QWidget* parent, WidgetAction* action);
+    WidgetActionViewWidget(QWidget* parent, WidgetAction* action, std::int32_t widgetFlags = 0);
 
     /**
      * Get the source action
@@ -40,6 +49,12 @@ public:
      * @param widgetAction Pointer to source action
      */
     virtual void setAction(WidgetAction* widgetAction);
+
+    /**
+     * Get widget flags
+     * @return Widget flags
+     */
+    std::int32_t getWidgetFlags() const;
 
 protected: // Drag-and-drop events
 
@@ -63,6 +78,7 @@ protected: // Drag-and-drop events
 
 private:
     WidgetAction*                   _action;                /** Pointer to action that will be displayed */
+    std::int32_t                    _widgetFlags;           /** Widget creation flags */
     WidgetActionHighlightWidget*    _highlightWidget;       /** Pointer to highlight widget */
     std::int32_t                    _cachedHighlighting;    /** Cached highlighting */
 };

@@ -21,7 +21,7 @@
 #include <QEventLoop>
 
 #ifdef _DEBUG
-    #define WIDGET_ACTION_VERBOSE
+    //#define WIDGET_ACTION_VERBOSE
 #endif
 
 using namespace hdps::util;
@@ -59,7 +59,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
 
     updateLocation();
 
-    if (core()->isInitialized())
+    if (core() != nullptr && core()->isInitialized())
     {
         actions().addAction(this);
 
@@ -70,7 +70,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
 
 WidgetAction::~WidgetAction()
 {
-    if (!core()->isInitialized())
+    if (core() == nullptr || !core()->isInitialized())
         return;
 
     actions().removeAction(this);
@@ -151,7 +151,7 @@ void WidgetAction::setSortIndex(const std::int32_t& sortIndex)
     emit sortIndexChanged(_sortIndex);
 }
 
-QWidget* WidgetAction::createCollapsedWidget(QWidget* parent) const
+QWidget* WidgetAction::createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags /*= 0*/) const
 {
     return new WidgetActionCollapsedWidget(parent, const_cast<WidgetAction*>(this));
 }
@@ -693,7 +693,7 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
     if (getId() != previousId)
         emit idChanged(getId());
 
-    if (core()->isInitialized() && projects().hasProject())
+    if (core() != nullptr && core()->isInitialized() && projects().hasProject())
         setStudioMode(projects().getCurrentProject()->getStudioModeAction().isChecked(), false);
 }
 

@@ -29,7 +29,7 @@ public:
      * @param title Title of the action
      * @param variant Initial variant value
      */
-    Q_INVOKABLE VariantAction(QObject* parent, const QString& title = "", const QVariant& variant = QVariant());
+    Q_INVOKABLE VariantAction(QObject* parent, const QString& title, const QVariant& variant = QVariant());
 
     /**
      * Initialize the variant action
