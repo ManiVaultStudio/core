@@ -36,6 +36,9 @@ public:
 
 public:
 
+    /** Creates the core managers */
+    void createManagers() override;
+
     /** Initializes the core */
     void initialize() override;
 

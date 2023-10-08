@@ -158,7 +158,6 @@ private:
     QKeySequence            _triggerShortcut;           /** Shortcut for triggering the plugin */
     gui::WidgetActions      _titleBarMenuActions;       /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
     gui::WidgetActions      _settingsActions;           /** Settings actions which are displayed as docking widgets in the interface */
-    Task                    _serializationTask;         /** For reporting serialization progress */
 };
 
 class ViewPluginFactory : public PluginFactory

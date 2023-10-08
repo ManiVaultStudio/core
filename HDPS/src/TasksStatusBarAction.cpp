@@ -9,7 +9,7 @@
 #include <QPaintEvent>
 
 #ifdef _DEBUG
-    #define TASKS_STATUS_BAR_ACTION_VERBOSE
+    //#define TASKS_STATUS_BAR_ACTION_VERBOSE
 #endif
 
 namespace hdps::gui {

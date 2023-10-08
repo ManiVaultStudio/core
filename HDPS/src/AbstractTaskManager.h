@@ -38,7 +38,7 @@ public:
      * @param parent Pointer to parent object
      */
     AbstractTaskManager(QObject* parent = nullptr) :
-        AbstractManager(parent, "Task"),
+        AbstractManager(parent, "Tasks"),
         _tasksTreeModel(nullptr),
         _tasksListModel(nullptr)
     {

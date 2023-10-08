@@ -439,6 +439,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             auto& dataSerializationTask = _project->getDataSerializationTask();
             
+            dataSerializationTask.setName("Loading Project");
             dataSerializationTask.setDescription(QString("Opening ManiVault project from %1").arg(filePath));
             dataSerializationTask.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
             dataSerializationTask.setMayKill(false);

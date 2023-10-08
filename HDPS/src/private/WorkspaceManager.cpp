@@ -188,6 +188,9 @@ void WorkspaceManager::initialize()
         _mainDockManager->setObjectName("MainDockManager");
         _viewPluginsDockManager->setObjectName("ViewPluginsDockManager");
 
+        _mainDockManager->getSerializationTask().setName("Main Dock Manager");
+        _viewPluginsDockManager->getSerializationTask().setName("View Plugins Dock Manager");
+
         auto viewPluginsDockArea = _mainDockManager->setCentralWidget(_viewPluginsDockWidget.get());
 
         viewPluginsDockArea->setAllowedAreas(DockWidgetArea::NoDockWidgetArea);
@@ -559,6 +562,9 @@ Workspace* WorkspaceManager::getCurrentWorkspace()
 
 void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 {
+    _mainDockManager->getSerializationTask().setName("Loading main dock manager");
+    _viewPluginsDockManager->getSerializationTask().setName("Loading view plugins manager");
+
     getCurrentWorkspace()->fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "DockManagers");
@@ -576,6 +582,9 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap WorkspaceManager::toVariantMap() const
 {
+    _mainDockManager->getSerializationTask().setName("Saving main dock manager");
+    _viewPluginsDockManager->getSerializationTask().setName("Saving view plugins manager");
+
     auto currentWorkspaceMap = getCurrentWorkspace()->toVariantMap();
 
     QVariantMap dockManagers{

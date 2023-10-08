@@ -572,12 +572,12 @@ void Task::updateProgress()
 
         case ProgressMode::Aggregate:
         {
-            const auto childTasks = getChildTasksForStatuses(false, true, { Status::Undefined, Status::Idle, Status::Running, Status::RunningIndeterminate });
+            const auto childTasks = getChildTasksForStatuses(false, true, { Status::Undefined, Status::Idle, Status::Running, Status::RunningIndeterminate, Status::Finished });
 
-            //QStringList childTasksNames;
+            QStringList childTasksNames;
 
-            //for (auto childTask : getChildTasks())
-            //    childTasksNames << childTask->getName() << statusNames[childTask->getStatus()];
+            for (auto childTask : getChildTasks())
+                childTasksNames << childTask->getName() << statusNames[childTask->getStatus()];
 
             //if (getName() == "Load workspace")
             //    qDebug() << getName() << childTasksNames;
@@ -729,8 +729,6 @@ void Task::updateAggregateStatus()
         return getChildTasksForStatuses(false, true, { status }).count();
     };
     
-    qDebug() << getName() << numberOfChildTasks << getNumberOfChildTaskWithStatus(Status::Finished);
-
     if (getNumberOfChildTaskWithStatus(Status::Running) >= 1 || getNumberOfChildTaskWithStatus(Status::RunningIndeterminate) >= 1)
         privateSetRunning();
 
@@ -745,7 +743,8 @@ void Task::updateAggregateStatus()
         //for (auto taskToSetToIdle : tasksToSetToIdle)
         //    taskToSetToIdle->setIdle();
 
-        privateSetFinished(!hasParentTask());
+        privateSetStatus(Status::Finished);
+        //privateSetFinished(!hasParentTask());
     }
 }
 
@@ -968,7 +967,8 @@ void Task::privateSetFinished(bool toIdleWithDelay, std::uint32_t delay)
 {
     privateSetStatus(Status::Finished);
 
-    privateSetProgressDescription("Finished", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
+    if (!hasParentTask())
+        privateSetProgressDescription("Finished", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 
     if (toIdleWithDelay) {
         getTimer(TimerType::ToIdleWithDelay).setInterval(delay);

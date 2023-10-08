@@ -23,9 +23,9 @@ Project::Project(QObject* parent /*= nullptr*/) :
     _startupProject(false),
     _applicationVersion(Application::current()->getVersion()),
     _projectMetaAction(this),    
-    _serializationTask(this, "Load project"),
-    _dataSerializationTask(this, "Load data"),
-    _workspaceSerializationTask(this, "Load workspace")
+    _serializationTask(this, "*Loading project"),
+    _dataSerializationTask(this, "*Loading project data"),
+    _workspaceSerializationTask(this, "*Loading workspace")
 {
     initialize();
 }
@@ -130,7 +130,7 @@ QVariantMap Project::toVariantMap() const
 
 Task& Project::getSerializationTask()
 {
-    if (isStartupProject())
+    if (Application::current()->shouldOpenProjectAtStartup())
         return *Application::current()->getTask(Application::TaskType::LoadProject);
 
     return _serializationTask;
@@ -138,7 +138,7 @@ Task& Project::getSerializationTask()
 
 Task& Project::getDataSerializationTask()
 {
-    if (isStartupProject())
+    if (Application::current()->shouldOpenProjectAtStartup())
         return *Application::current()->getTask(Application::TaskType::LoadProjectData);
 
     return _dataSerializationTask;
@@ -146,7 +146,7 @@ Task& Project::getDataSerializationTask()
 
 Task& Project::getWorkspaceSerializationTask()
 {
-    if (isStartupProject())
+    if (Application::current()->shouldOpenProjectAtStartup())
         return *Application::current()->getTask(Application::TaskType::LoadProjectWorkspace);
 
     return _workspaceSerializationTask;
@@ -239,8 +239,8 @@ void Project::initialize()
     connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
 
-    _dataSerializationTask.setParentTask(&_serializationTask);
-    _workspaceSerializationTask.setParentTask(&_serializationTask);
+    //_dataSerializationTask.setParentTask(&_serializationTask);
+    //_workspaceSerializationTask.setParentTask(&_serializationTask);
 }
 
 }

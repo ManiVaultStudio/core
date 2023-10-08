@@ -150,10 +150,12 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
     hide();
     {
-        for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList())
+        const auto viewPluginDockWidgetsList = variantMap["ViewPluginDockWidgets"].toList();
+
+        for (auto viewPluginDockWidgetVariant : viewPluginDockWidgetsList)
             ViewPluginDockWidget::preRegisterSerializationTask(this, viewPluginDockWidgetVariant.toMap()["ID"].toString(), this);
 
-        for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList()) {
+        for (auto viewPluginDockWidgetVariant : viewPluginDockWidgetsList) {
             const auto viewPluginMap    = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap();
             const auto pluginKind       = viewPluginMap["Kind"].toString();
             const auto pluginMap        = viewPluginMap["Plugin"].toMap();
@@ -172,6 +174,9 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
                 addViewPluginDockWidget(RightDockWidgetArea, notLoadedDockWidget);
             }
         }
+
+        if (viewPluginDockWidgetsList.isEmpty())
+            _serializationTask.setFinished();
 
         if (!restoreState(QByteArray::fromBase64(variantMap["State"].toString().toUtf8()), variantMap["Version"].toInt()))
             qCritical() << "Unable to restore state from" << objectName();

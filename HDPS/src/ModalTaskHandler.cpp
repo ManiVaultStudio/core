@@ -9,7 +9,7 @@
 #include "CoreInterface.h"
 
 #ifdef _DEBUG
-    //#define MODAL_TASK_HANDLER_VERBOSE
+    #define MODAL_TASK_HANDLER_VERBOSE
 #endif
 
 namespace hdps {

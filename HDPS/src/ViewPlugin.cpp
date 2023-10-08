@@ -38,8 +38,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
     _triggerShortcut(),
     _titleBarMenuActions(),
-    _settingsActions(),
-    _serializationTask(this, "Serialization")
+    _settingsActions()
 {
     setText(getGuiName());
 

@@ -239,7 +239,6 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
     serializationTask->setName(QString("Loading %1").arg(guiName));
     serializationTask->setSubtasks({ loadViewPluginSubtask, restoreViewPluginSubtask });
     serializationTask->setRunning();
-    serializationTask->setProgressDescription("-------");
 
     serializationTask->setSubtaskStarted(loadViewPluginSubtask);
     {

@@ -60,71 +60,6 @@ Task* AbstractTasksModel::Item::getTask() const
     return _task;
 }
 
-AbstractTasksModel::ExpandCollapseItem::ExpandCollapseItem(Task* task) :
-    Item(task)
-{
-    setSizeHint(QSize(0, 0));
-}
-
-AbstractTasksModel::StatusItem::StatusItem(Task* task) :
-    Item(task)
-{
-    connect(getTask(), &Task::statusChanged, this, [this]() -> void {
-        emitDataChanged();
-
-        const auto progressIndex = index().siblingAtColumn(static_cast<int>(Column::Progress));
-
-        emit model()->dataChanged(progressIndex, progressIndex);
-    });
-}
-
-QVariant AbstractTasksModel::StatusItem::data(int role /*= Qt::UserRole + 1*/) const
-{
-    switch (role) {
-        case Qt::EditRole:
-            return static_cast<int>(getTask()->getStatus());
-
-        case Qt::DisplayRole:
-            return "";
-
-        case Qt::ToolTipRole:
-            return "Task is: " + Task::statusNames[getTask()->getStatus()];
-
-        case Qt::DecorationRole:
-        {
-            auto& fontAwesome = Application::getIconFont("FontAwesome");
-
-            switch (getTask()->getStatus())
-            {
-                case Task::Status::Idle:
-                    return fontAwesome.getIcon("clock");
-
-                case Task::Status::Running:
-                    return fontAwesome.getIcon("play");
-
-                case Task::Status::RunningIndeterminate:
-                    return fontAwesome.getIcon("play-circle");
-
-                case Task::Status::Finished:
-                    return fontAwesome.getIcon("check-circle");
-
-                case Task::Status::Aborted:
-                    return fontAwesome.getIcon("bomb");
-
-                default:
-                    break;
-            }
-
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    return Item::data(role);
-}
-
 AbstractTasksModel::NameItem::NameItem(Task* task) :
     Item(task)
 {
@@ -297,6 +232,65 @@ AbstractTasksModel::ProgressTextItem::ProgressTextItem(Task* task) :
     connect(getTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
         emitDataChanged();
     });
+}
+
+AbstractTasksModel::StatusItem::StatusItem(Task* task) :
+    Item(task)
+{
+    connect(getTask(), &Task::statusChanged, this, [this]() -> void {
+        emitDataChanged();
+
+        const auto progressIndex = index().siblingAtColumn(static_cast<int>(Column::Progress));
+
+        emit model()->dataChanged(progressIndex, progressIndex);
+    });
+}
+
+QVariant AbstractTasksModel::StatusItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return static_cast<int>(getTask()->getStatus());
+
+        case Qt::DisplayRole:
+            return "";
+
+        case Qt::ToolTipRole:
+            return "Task is: " + Task::statusNames[getTask()->getStatus()];
+
+        case Qt::DecorationRole:
+        {
+            auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+            switch (getTask()->getStatus())
+            {
+                case Task::Status::Idle:
+                    return fontAwesome.getIcon("clock");
+
+                case Task::Status::Running:
+                    return fontAwesome.getIcon("play");
+
+                case Task::Status::RunningIndeterminate:
+                    return fontAwesome.getIcon("play-circle");
+
+                case Task::Status::Finished:
+                    return fontAwesome.getIcon("check-circle");
+
+                case Task::Status::Aborted:
+                    return fontAwesome.getIcon("bomb");
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
 }
 
 AbstractTasksModel::ProgressModeItem::ProgressModeItem(Task* task) :
@@ -480,14 +474,13 @@ QVariant AbstractTasksModel::KillItem::data(int role /*= Qt::UserRole + 1*/) con
 AbstractTasksModel::Row::Row(Task* task) :
     QList<QStandardItem*>()
 {
-    append(new ExpandCollapseItem(task));
-    append(new StatusItem(task));
     append(new NameItem(task));
     append(new EnabledItem(task));
     append(new VisibleItem(task));
     append(new ProgressItem(task));
     append(new ProgressDescriptionItem(task));
     append(new ProgressTextItem(task));
+    append(new StatusItem(task));
     append(new ProgressModeItem(task));
     append(new IdItem(task));
     append(new ParentIdItem(task));
@@ -498,14 +491,13 @@ AbstractTasksModel::Row::Row(Task* task) :
 }
 
 QMap<AbstractTasksModel::Column, AbstractTasksModel::ColumHeaderInfo> AbstractTasksModel::columnInfo = QMap<AbstractTasksModel::Column, AbstractTasksModel::ColumHeaderInfo>({
-    { AbstractTasksModel::Column::ExpandCollapse, { "",  "Root", "Expand/collapse" } },
-    { AbstractTasksModel::Column::Status, { "",  "Status", "Status of the task" } },
     { AbstractTasksModel::Column::Name, { "Name" , "Name", "Name of the task" } },
     { AbstractTasksModel::Column::Enabled, { "" , "Enabled", "Whether the task is enabled or not" } },
     { AbstractTasksModel::Column::Visible, { "" , "Visible", "Whether the task is visible or not" } },
     { AbstractTasksModel::Column::Progress, { "Progress" , "Progress", "Task progress" } },
     { AbstractTasksModel::Column::ProgressDescription, { "Progress description" , "Progress description", "Progress description" } },
     { AbstractTasksModel::Column::ProgressText, { "Progress text" , "Progress text", "Progress text" } },
+    { AbstractTasksModel::Column::Status, { "",  "Status", "Status of the task" } },
     { AbstractTasksModel::Column::ProgressMode, { "Progress mode" , "Progress mode", "Progress mode" } },
     { AbstractTasksModel::Column::ID, { "ID",  "ID", "Globally unique identifier of the task" } },
     { AbstractTasksModel::Column::ParentID, { "Parent ID",  "Parent ID", "Globally unique identifier of the parent task" } },
@@ -534,7 +526,7 @@ QStandardItem* AbstractTasksModel::itemFromTask(Task* task) const
     if (matches.isEmpty())
         throw std::runtime_error(QString("%1 not found").arg(task->getParentTask()->getName()).toStdString());
 
-    auto item = itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::ExpandCollapse)));
+    auto item = itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::Name)));
 
     Q_ASSERT(item != nullptr);
 

@@ -47,10 +47,10 @@ public:
     QString getSubtaskName(const SubtaskType& subtaskType) const {
         switch (subtaskType) {
             case SubtaskType::Initialize:
-                return QString("Initialize %1").arg(getSerializationName());
+                return QString("Initialize %1 manager").arg(getSerializationName());
 
             case SubtaskType::Reset:
-                return QString("Reset %1").arg(getSerializationName());
+                return QString("Reset %1 manager").arg(getSerializationName());
 
             default:
                 break;

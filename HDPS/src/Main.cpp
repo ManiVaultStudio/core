@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
 
     application.setCore(&core);
 
+    core.createManagers();
     core.initialize();
 
     QCommandLineParser commandLineParser;
@@ -134,7 +135,6 @@ int main(int argc, char *argv[])
                     splashScreenAction.fromVariantMap(projectMetaAction->getSplashScreenAction().toVariantMap());
 
                     application.setStartupProjectMetaAction(projectMetaAction);
-                    application.getTask(Application::TaskType::LoadProject)->setName(QString("%1").arg(QFileInfo(startupProjectFilePath).fileName()));
                 }
                 else {
                     splashScreenAction.addAlert(SplashScreenAction::Alert::info(QString("\
@@ -162,6 +162,8 @@ int main(int argc, char *argv[])
         }
     }
     
+    qDebug() << "Show splash screen";
+
     splashScreenAction.getOpenAction().trigger();
 
     application.setStyle(new NoFocusProxyStyle);

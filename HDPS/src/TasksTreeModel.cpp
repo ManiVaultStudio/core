@@ -32,17 +32,12 @@ TasksTreeModel::TasksTreeModel(QObject* parent /*= nullptr*/) :
         return task->hasParentTask();
     }), topLevelTasks.end());
     
-    std::function<void(Task* task)> addTaskRecursively;
+    for (auto topLevelTask : topLevelTasks) {
+        addTask(topLevelTask);
 
-    addTaskRecursively = [this, &addTaskRecursively](Task* task) -> void {
-        addTask(task);
-
-        for (auto childTask : task->getChildTasks())
-            addTaskRecursively(childTask);
-    };
-
-    for (auto topLevelTask : topLevelTasks)
-        addTaskRecursively(topLevelTask);
+        for (auto childTask : topLevelTask->getChildTasks(true, false))
+            addTask(childTask);
+    }
 }
 
 void TasksTreeModel::addTask(Task* task)

@@ -80,7 +80,10 @@ public:
     {
     }
     
-    /** Initializes all core managers */
+    /** Creates the core managers */
+    virtual void createManagers() = 0;
+
+    /** Set core about to be initialized */
     virtual void setAboutToBeInitialized() final {
         qDebug() << "ManiVault core about to be initialized";
 

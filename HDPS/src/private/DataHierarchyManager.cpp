@@ -196,7 +196,6 @@ DataHierarchyItems DataHierarchyManager::getTopLevelItems()
     return topLevelItems;
 }
 
-// TODO
 void DataHierarchyManager::selectItems(DataHierarchyItems& selectedItems)
 {
     emit selectedItemsChanged(selectedItems);
@@ -204,7 +203,11 @@ void DataHierarchyManager::selectItems(DataHierarchyItems& selectedItems)
 
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    // Load dataset from variant and add to the data hierarchy manager
+    auto& dataSerializationTask = projects().getCurrentProject()->getDataSerializationTask();
+
+    dataSerializationTask.setName("Loading data");
+    dataSerializationTask.setRunning();
+
     const auto loadDataset = [](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
         const auto dataset      = dataHierarchyItemMap["Dataset"].toMap();
         const auto pluginKind   = dataset["PluginKind"].toString();
@@ -224,54 +227,53 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         if (Application::isSerializationAborted())
             return;
 
-        // Sorted data hierarchy items (according to their sort index)
         QVector<QVariantMap> sortedItems;
 
-        // Allocate items
         sortedItems.resize(variantMap.count());
 
-        // Sort the items
         for (const auto& variant : variantMap.values())
             sortedItems[variant.toMap()["SortIndex"].toInt()] = variant.toMap();
 
-        // Add items in intended order
         for (const auto& item : sortedItems)
             loadDataHierarchyItem(item["Children"].toMap(), loadDataset(item, item["Name"].toString(), parent));
     };
 
     loadDataHierarchyItem(variantMap, Dataset<DatasetImpl>());
+
+    dataSerializationTask.setFinished();
 }
 
 QVariantMap DataHierarchyManager::toVariantMap() const
 {
-    if (_items.isEmpty())
-        return QVariantMap();
+    if (!_items.isEmpty()) {
+        auto& dataSerializationTask = projects().getCurrentProject()->getDataSerializationTask();
+        
+        dataSerializationTask.setName("Saving data");
+        dataSerializationTask.setRunning();
 
-    QVariantMap variantMap;
+        QVariantMap variantMap;
 
-    // Root items sort index
-    std::uint32_t sortIndex = 0;
+        std::uint32_t sortIndex = 0;
 
-    // Export root data hierarchy items
-    for (auto dataHierarchyItem : _items) {
+        for (auto dataHierarchyItem : _items) {
+            if (dataHierarchyItem->hasParent())
+                continue;
 
-        // Only process root data hierarchy item
-        if (dataHierarchyItem->hasParent())
-            continue;
+            auto dataHierarchyItemMap = dataHierarchyItem->toVariantMap();
 
-        // Get map of data hierarchy item
-        auto dataHierarchyItemMap = dataHierarchyItem->toVariantMap();
+            dataHierarchyItemMap["SortIndex"] = sortIndex;
 
-        // Add sort index
-        dataHierarchyItemMap["SortIndex"] = sortIndex;
+            variantMap[dataHierarchyItem->getDataset()->getId()] = dataHierarchyItemMap;
 
-        // Assign data hierarchy item map
-        variantMap[dataHierarchyItem->getDataset()->getId()] = dataHierarchyItemMap;
+            sortIndex++;
+        }
 
-        sortIndex++;
+        dataSerializationTask.setFinished();
+
+        return variantMap;
     }
 
-    return variantMap;
+    return {};
 }
 
 }

@@ -45,6 +45,23 @@ Core::~Core()
     getPluginManager().reset();
 }
 
+void Core::createManagers()
+{
+    _managers.resize(static_cast<int>(ManagerType::Count));
+
+    _managers[static_cast<int>(ManagerType::Actions)]       = new ActionsManager();
+    _managers[static_cast<int>(ManagerType::Plugins)]       = new PluginManager();
+    _managers[static_cast<int>(ManagerType::Events)]        = new EventManager();
+    _managers[static_cast<int>(ManagerType::Data)]          = new DataManager();
+    _managers[static_cast<int>(ManagerType::DataHierarchy)] = new DataHierarchyManager();
+    _managers[static_cast<int>(ManagerType::Tasks)]         = new TaskManager();
+    _managers[static_cast<int>(ManagerType::Workspaces)]    = new WorkspaceManager();
+    _managers[static_cast<int>(ManagerType::Projects)]      = new ProjectManager();
+    _managers[static_cast<int>(ManagerType::Settings)]      = new SettingsManager();
+
+    CoreInterface::setManagersCreated();
+}
+
 void Core::initialize()
 {
     if (isInitialized())
@@ -52,20 +69,6 @@ void Core::initialize()
 
     CoreInterface::setAboutToBeInitialized();
     {
-        _managers.resize(static_cast<int>(ManagerType::Count));
-        
-        _managers[static_cast<int>(ManagerType::Actions)]       = new ActionsManager();
-        _managers[static_cast<int>(ManagerType::Plugins)]       = new PluginManager();
-        _managers[static_cast<int>(ManagerType::Events)]        = new EventManager();
-        _managers[static_cast<int>(ManagerType::Data)]          = new DataManager();
-        _managers[static_cast<int>(ManagerType::DataHierarchy)] = new DataHierarchyManager();
-        _managers[static_cast<int>(ManagerType::Tasks)]         = new TaskManager();
-        _managers[static_cast<int>(ManagerType::Workspaces)]    = new WorkspaceManager();
-        _managers[static_cast<int>(ManagerType::Projects)]      = new ProjectManager();
-        _managers[static_cast<int>(ManagerType::Settings)]      = new SettingsManager();
-
-        CoreInterface::setManagersCreated();
-
         auto loadApplicationCoreManagersTask = Application::current()->getTask(Application::TaskType::LoadApplicationCoreManagers);
 
         for (auto& manager : _managers) {

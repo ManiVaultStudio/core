@@ -296,14 +296,13 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     
     treeViewHeader->setStretchLastSection(false);
 
-    treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::ExpandCollapse), QHeaderView::ResizeToContents);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::Status), QHeaderView::ResizeToContents);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::Name), QHeaderView::ResizeToContents);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::Enabled), QHeaderView::ResizeToContents);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::Visible), QHeaderView::ResizeToContents);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::Progress), QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::ProgressDescription), QHeaderView::ResizeToContents);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::ProgressText), QHeaderView::ResizeToContents);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::Status), QHeaderView::ResizeToContents);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::ID), QHeaderView::ResizeToContents);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::ParentID), QHeaderView::ResizeToContents);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::Type), QHeaderView::ResizeToContents);
@@ -349,7 +348,7 @@ void TasksAction::Widget::updateTreeView()
     auto& treeView = _tasksWidget.getTreeView();
 
     treeView.setRootIsDecorated(_tasksAction->hasAgregateTasks());
-    treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::ExpandCollapse), !_tasksAction->hasAgregateTasks());
+    //treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::ExpandCollapse), !_tasksAction->hasAgregateTasks());
 
     auto treeViewHeader = treeView.header();
 
