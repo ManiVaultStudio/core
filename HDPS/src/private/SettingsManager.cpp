@@ -53,6 +53,12 @@ void SettingsManager::initialize()
 #endif
 
     AbstractSettingsManager::initialize();
+
+    if (isInitialized())
+        return;
+
+    beginInitialization();
+    endInitialization();
 }
 
 void SettingsManager::reset()

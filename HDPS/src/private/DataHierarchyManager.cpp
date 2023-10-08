@@ -38,6 +38,12 @@ void DataHierarchyManager::initialize()
 #endif
 
     AbstractDataHierarchyManager::initialize();
+
+    if (isInitialized())
+        return;
+
+    beginInitialization();
+    endInitialization();
 }
 
 void DataHierarchyManager::reset()

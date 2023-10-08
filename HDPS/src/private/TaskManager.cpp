@@ -11,7 +11,7 @@
 #include <Task.h>
 
 #ifdef _DEBUG
-    #define TASK_MANAGER_VERBOSE
+    //#define TASK_MANAGER_VERBOSE
 #endif
 
 namespace hdps
@@ -35,6 +35,12 @@ void TaskManager::initialize()
 #endif
 
     AbstractTaskManager::initialize();
+
+    if (isInitialized())
+        return;
+
+    beginInitialization();
+    endInitialization();
 }
 
 void TaskManager::reset()

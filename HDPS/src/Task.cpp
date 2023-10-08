@@ -664,7 +664,7 @@ void Task::registerChildTask(Task* childTask)
         if (getProgressMode() != ProgressMode::Aggregate)
             return;
 
-        qDebug() << statusNames[childTask->getStatus()] << "status changed to" << statusNames[status];
+        qDebug() << childTask->getName() << "status changed to" << statusNames[status];
 
         updateAggregateStatus();
         updateProgress();
@@ -683,13 +683,13 @@ void Task::registerChildTask(Task* childTask)
 
         auto combinedProgressDescription = progressDescription;// QString("%1: %2").arg(getName(), progressDescription);
 
-        QStringList childTasksNames;
+        //QStringList childTasksNames;
 
-        for (auto childTask : getChildTasks())
-            childTasksNames << childTask->getName() << statusNames[childTask->getStatus()];
+        //for (auto childTask : getChildTasks())
+        //    childTasksNames << childTask->getName() << statusNames[childTask->getStatus()];
         
-        if (getName() == "Loading Project")
-            qDebug() << "*********************" << childTasksNames;
+        //if (getName() == "Loading Project")
+        //    qDebug() << "*********************" << childTasksNames;
 
         /*
         if (!hasParentTask()) {
@@ -703,8 +703,6 @@ void Task::registerChildTask(Task* childTask)
 
         privateSetProgressDescription(combinedProgressDescription);
     });
-
-    updateAggregateStatus();
 }
 
 void Task::unregisterChildTask(Task* childTask)
@@ -727,17 +725,19 @@ void Task::updateAggregateStatus()
     const auto childTasks           = getChildTasks();
     const auto numberOfChildTasks   = childTasks.size();
 
-    const auto countStatus = [this, &childTasks](const Status& status) -> std::size_t {
+    const auto getNumberOfChildTaskWithStatus = [this, &childTasks](const Status& status) -> std::size_t {
         return getChildTasksForStatuses(false, true, { status }).count();
     };
     
-    if (countStatus(Status::Running) >= 1 || countStatus(Status::RunningIndeterminate) >= 1)
+    //qDebug() << getName() << numberOfChildTasks << countStatus(Status::Running);
+
+    if (getNumberOfChildTaskWithStatus(Status::Running) >= 1 || getNumberOfChildTaskWithStatus(Status::RunningIndeterminate) >= 1)
         privateSetRunning();
 
-    if (countStatus(Status::Idle) == numberOfChildTasks)
+    if (getNumberOfChildTaskWithStatus(Status::Idle) == numberOfChildTasks)
         privateSetProgress(0.f);
 
-    if (countStatus(Status::Finished) >= 1 && countStatus(Status::Running) == 0 && countStatus(Status::RunningIndeterminate) == 0) {
+    if (getNumberOfChildTaskWithStatus(Status::Finished) == numberOfChildTasks) {//1 && getNumberOfChildTaskWithStatus(Status::Running) == 0 && getNumberOfChildTaskWithStatus(Status::RunningIndeterminate) == 0) {
         auto tasksToSetToIdle = getChildTasksForStatuses(false, true, { Status::Finished });
 
         std::reverse(tasksToSetToIdle.begin(), tasksToSetToIdle.end());
@@ -793,7 +793,7 @@ void Task::privateAddChildTask(Task* childTask)
         _childTasks << childTask;
 
 #ifdef TASK_VERBOSE
-        qDebug() << "Child task" << childTask->getName() << "added to" << getName();
+        //qDebug() << "Child task" << childTask->getName() << "added to" << getName();
 #endif
 
         setProgressMode(ProgressMode::Aggregate);

@@ -41,6 +41,12 @@ void ActionsManager::initialize()
 #endif
 
     AbstractActionsManager::initialize();
+
+    if (isInitialized())
+        return;
+
+    beginInitialization();
+    endInitialization();
 }
 
 void ActionsManager::reset()

@@ -219,6 +219,12 @@ void ProjectManager::initialize()
 #endif
 
     AbstractProjectManager::initialize();
+
+    if (isInitialized())
+        return;
+
+    beginInitialization();
+    endInitialization();
 }
 
 void ProjectManager::reset()

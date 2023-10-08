@@ -214,6 +214,12 @@ void DataManager::initialize()
 #endif
 
     AbstractDataManager::initialize();
+
+    if (isInitialized())
+        return;
+
+    beginInitialization();
+    endInitialization();
 }
 
 DataManager::~DataManager()
