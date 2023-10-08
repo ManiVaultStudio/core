@@ -4,6 +4,8 @@
 
 #include "ForegroundTask.h"
 #include "ForegroundTaskHandler.h"
+#include "Application.h"
+#include "CoreInterface.h"
 
 namespace hdps {
 
@@ -12,6 +14,7 @@ ForegroundTaskHandler* ForegroundTask::foregroundTaskHandler = nullptr;
 ForegroundTask::ForegroundTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
     Task(parent, name, GuiScope::Foreground, status, mayKill, nullptr)
 {
+    connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) { createHandler(Application::current()); });
 }
 
 void ForegroundTask::createHandler(QObject* parent)

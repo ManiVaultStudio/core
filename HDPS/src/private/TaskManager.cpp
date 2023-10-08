@@ -11,7 +11,7 @@
 #include <Task.h>
 
 #ifdef _DEBUG
-    //#define TASK_MANAGER_VERBOSE
+    #define TASK_MANAGER_VERBOSE
 #endif
 
 namespace hdps
@@ -35,13 +35,6 @@ void TaskManager::initialize()
 #endif
 
     AbstractTaskManager::initialize();
-
-    addTask(Application::current()->getTask(Application::TaskType::OverallBackground));
-    addTask(Application::current()->getTask(Application::TaskType::LoadApplication));
-    addTask(Application::current()->getTask(Application::TaskType::LoadGUI));
-    addTask(Application::current()->getTask(Application::TaskType::LoadProject));
-    addTask(Application::current()->getTask(Application::TaskType::LoadProjectData));
-    addTask(Application::current()->getTask(Application::TaskType::LoadProjectWorkspace));
 }
 
 void TaskManager::reset()

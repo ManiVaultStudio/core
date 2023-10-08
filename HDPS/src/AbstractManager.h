@@ -71,7 +71,7 @@ public:
         Serializable(name),
         _initialized(false),
         _lockingAction(nullptr),
-        _task(this, name)
+        _task(nullptr)
     {
     }
 
@@ -79,6 +79,12 @@ public:
     virtual void initialize() {
         _lockingAction = new gui::LockingAction(this, getSerializationName());
     };
+
+    /** Create task for reporting progress during initialization and reset operations */
+    virtual void createTask() final {
+        if (_task == nullptr)
+            _task = new Task(this, getSerializationName());
+    }
 
     /** Begin reset operation */
     virtual void beginReset() final {
@@ -88,11 +94,20 @@ public:
 
         emit managerAboutToBeReset();
 
-        _task.setSubtasks({ });
+        _task->setSubtasks({ getSubtaskName(SubtaskType::Reset) });
+        _task->setRunning();
+        _task->setSubtaskStarted({ getSubtaskName(SubtaskType::Reset) });
     }
 
     /** Resets the contents of the manager */
-    virtual void reset() = 0;
+    virtual void reset() {
+#ifdef ABSTRACT_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__;
+#endif
+
+        if (!isInitialized())
+            qDebug() << getSerializationName() << "not initialized";
+    }
 
     /** End reset operation */
     virtual void endReset() final {
@@ -101,6 +116,9 @@ public:
 #endif
 
         emit managerReset();
+
+        _task->setSubtaskFinished({ getSubtaskName(SubtaskType::Reset) });
+        _task->setFinished();
     }
 
     /** Begin the initialization process */
@@ -109,7 +127,16 @@ public:
         qDebug() << __FUNCTION__;
 #endif
 
-        emit managerAboutToBeInitialized();
+        if (isInitialized()) {
+            qDebug() << getSerializationName() << "already initialized";
+        }
+        else {
+            emit managerAboutToBeInitialized();
+
+            _task->setSubtasks({ getSubtaskName(SubtaskType::Initialize) });
+            _task->setRunning();
+            _task->setSubtaskStarted({ getSubtaskName(SubtaskType::Initialize) });
+        }
     }
 
     /** End the initialization process */
@@ -121,6 +148,9 @@ public:
         _initialized = true;
 
         emit managerInitialized();
+
+        _task->setSubtaskFinished({ getSubtaskName(SubtaskType::Initialize) });
+        _task->setFinished();
     }
 
     /**
@@ -137,6 +167,14 @@ public:
      */
     virtual QIcon getIcon() const {
         return QIcon();
+    }
+
+    /**
+     * Get task
+     * @return Pointer to task for reporting progress during initialization and reset operations
+     */
+    virtual Task* getTask() final {
+        return _task;
     }
 
 public: // Action getters
@@ -178,7 +216,7 @@ signals:
 private:
     bool                    _initialized;       /** Whether the manager is initialized or not */
     gui::LockingAction*     _lockingAction;     /** Manager locking action */
-    Task                    _task;              /** Task for reporting progress during initialization and reset operations */
+    Task*                   _task;              /** Task for reporting progress during initialization and reset operations */
 };
 
 }

@@ -42,7 +42,7 @@ Core::Core() :
 
 Core::~Core()
 {
-    _pluginManager.reset();
+    getPluginManager().reset();
 }
 
 void Core::initialize()
@@ -52,48 +52,37 @@ void Core::initialize()
 
     CoreInterface::setAboutToBeInitialized();
     {
-        Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskStarted("Initializing Managers");
+        _managers.resize(static_cast<int>(ManagerType::Count));
+        
+        _managers[static_cast<int>(ManagerType::Actions)]       = new ActionsManager();
+        _managers[static_cast<int>(ManagerType::Plugins)]       = new PluginManager();
+        _managers[static_cast<int>(ManagerType::Events)]        = new EventManager();
+        _managers[static_cast<int>(ManagerType::Data)]          = new DataManager();
+        _managers[static_cast<int>(ManagerType::DataHierarchy)] = new DataHierarchyManager();
+        _managers[static_cast<int>(ManagerType::Tasks)]         = new TaskManager();
+        _managers[static_cast<int>(ManagerType::Workspaces)]    = new WorkspaceManager();
+        _managers[static_cast<int>(ManagerType::Projects)]      = new ProjectManager();
+        _managers[static_cast<int>(ManagerType::Settings)]      = new SettingsManager();
 
-        _actionsManager.reset(new ActionsManager());
-        _pluginManager.reset(new PluginManager());
-        _eventManager.reset(new EventManager());
-        _dataManager.reset(new DataManager());
-        _dataHierarchyManager.reset(new DataHierarchyManager());
-        _taskManager.reset(new TaskManager());
-        _workspaceManager.reset(new WorkspaceManager());
-        _projectManager.reset(new ProjectManager());
-        _settingsManager.reset(new SettingsManager());
+        CoreInterface::setManagersCreated();
 
-        _actionsManager->initialize();
-        _pluginManager->initialize();
-        _eventManager->initialize();
-        _dataManager->initialize();
-        _dataHierarchyManager->initialize();
-        _taskManager->initialize();
-        _workspaceManager->initialize();
-        _projectManager->initialize();
-        _settingsManager->initialize();
+        auto loadApplicationCoreManagersTask = Application::current()->getTask(Application::TaskType::LoadApplicationCoreManagers);
 
-        Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskFinished("Initializing Managers");
+        for (auto& manager : _managers) {
+            manager->createTask();
+            manager->getTask()->setParentTask(loadApplicationCoreManagersTask);
+        }
 
-        ModalTask::createHandler(Application::current());
-        ForegroundTask::createHandler(Application::current());
-        BackgroundTask::createHandler(Application::current());
+        for (auto& manager : _managers)
+            manager->initialize();
     }
     CoreInterface::setInitialized();
 }
 
 void Core::reset()
 {
-    _actionsManager->reset();
-    _pluginManager->reset();
-    _eventManager->reset();
-    _dataManager->reset();
-    _dataHierarchyManager->reset();
-    _workspaceManager->reset();
-    _taskManager->reset();
-    _projectManager->reset();
-    _settingsManager->reset();
+    for (auto& manager : _managers)
+        manager->reset();
 }
 
 void Core::addPlugin(plugin::Plugin* plugin)
@@ -103,7 +92,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
         // If the plugin is RawData, then add it to the data manager
         case plugin::Type::DATA:
         {
-            _dataManager->addRawData(dynamic_cast<plugin::RawData*>(plugin));
+            getDataManager().addRawData(dynamic_cast<plugin::RawData*>(plugin));
             break;
         }
 
@@ -155,7 +144,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
 Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/)
 {
     // Create a new plugin of the given kind
-    QString rawDataName = _pluginManager->requestPlugin(kind)->getName();
+    QString rawDataName = getPluginManager().requestPlugin(kind)->getName();
 
     // Request it from the core
     const plugin::RawData& rawData = requestRawData(rawDataName);
@@ -175,12 +164,12 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     fullSet->_fullDataset = fullSet;
 
     // Add them to the data manager
-    _dataManager->addSet(fullSet);
+    getDataManager().addSet(fullSet);
 
-    _dataManager->addSelection(rawDataName, selection);
+    getDataManager().addSelection(rawDataName, selection);
 
     // Add the dataset to the hierarchy manager and select the dataset
-    _dataHierarchyManager->addItem(fullSet, const_cast<Dataset<DatasetImpl>&>(parentDataset));
+    getDataHierarchyManager().addItem(fullSet, const_cast<Dataset<DatasetImpl>&>(parentDataset));
     //_dataHierarchyManager->selectItems(DataHierarchyItems({ &fullSet->getDataHierarchyItem() }));
 
     // Initialize the dataset (e.g. setup default actions for info)
@@ -204,7 +193,7 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
         Datasets datasetsToRemove{ dataset };
 
         // Get children in a top-down manner
-        for (auto child : _dataHierarchyManager->getChildren(dataset->getDataHierarchyItem()))
+        for (auto child : getDataHierarchyManager().getChildren(dataset->getDataHierarchyItem()))
             datasetsToRemove << child->getDataset();
 
         // Remove datasets bottom-up (this prevents issues with the data hierarchy manager)
@@ -218,7 +207,7 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
 
             events().notifyDatasetAboutToBeRemoved(datasetToRemove);
             {
-                _dataManager->removeDataset(datasetToRemove);
+                getDataManager().removeDataset(datasetToRemove);
             }
             events().notifyDatasetRemoved(guid, type);
         }
@@ -238,7 +227,7 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
     const auto dataType = sourceDataset->getDataType();
 
     // Create a new plugin of the given kind
-    QString pluginName = _pluginManager->requestPlugin(dataType._type)->getName();
+    QString pluginName = getPluginManager().requestPlugin(dataType._type)->getName();
 
     // Request it from the core
     plugin::RawData& rawData = requestRawData(pluginName);
@@ -254,10 +243,10 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
     derivedDataset->setAll(true);
     
     // Add them to the data manager
-    _dataManager->addSet(*derivedDataset);
+    getDataManager().addSet(*derivedDataset);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager->addItem(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
+    getDataHierarchyManager().addItem(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
 
     // Initialize the dataset (e.g. setup default actions for info)
     derivedDataset->init();
@@ -282,10 +271,10 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
         subset->_fullDataset = sourceDataset->isFull() ? sourceDataset : sourceDataset->_fullDataset;
 
         // Add the set the core and publish the name of the set to all plug-ins
-        _dataManager->addSet(*subset);
+        getDataManager().addSet(*subset);
 
         // Add the dataset to the hierarchy manager
-        _dataHierarchyManager->addItem(subset, const_cast<Dataset<DatasetImpl>&>(parentDataset), visible);
+        getDataHierarchyManager().addItem(subset, const_cast<Dataset<DatasetImpl>&>(parentDataset), visible);
 
         // Notify listeners that data was added
         events().notifyDatasetAdded(*subset);
@@ -310,7 +299,7 @@ plugin::RawData& Core::requestRawData(const QString& name)
 {
     try
     {
-        return _dataManager->getRawData(name);
+        return getDataManager().getRawData(name);
     }
     catch (std::exception& e)
     {
@@ -325,7 +314,7 @@ Dataset<DatasetImpl> Core::requestDataset(const QString& dataSetId)
 {
     try
     {
-        return Dataset<DatasetImpl>(_dataManager->getSet(dataSetId));
+        return Dataset<DatasetImpl>(getDataManager().getSet(dataSetId));
     }
     catch (std::exception& e)
     {
@@ -344,7 +333,7 @@ QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& 
 
     try
     {
-        const auto& datasets = _dataManager->allSets();
+        const auto& datasets = getDataManager().allSets();
 
         for (const auto dataset : datasets) {
             if (dataTypes.isEmpty()) {
@@ -368,49 +357,54 @@ QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& 
     return allDataSets;
 }
 
+AbstractManager* Core::getManager(const ManagerType& managerType)
+{
+    return _managers[static_cast<int>(managerType)];
+}
+
 AbstractActionsManager& Core::getActionsManager()
 {
-    return *_actionsManager;
+    return *static_cast<AbstractActionsManager*>(getManager(ManagerType::Actions));
 }
 
 AbstractPluginManager& Core::getPluginManager()
 {
-    return *_pluginManager;
+    return *static_cast<AbstractPluginManager*>(getManager(ManagerType::Plugins));
 }
 
 AbstractEventManager& Core::getEventManager()
 {
-    return *_eventManager;
+    return *static_cast<AbstractEventManager*>(getManager(ManagerType::Events));
 }
 
 AbstractDataManager& Core::getDataManager()
 {
-    return *_dataManager;
+    return *static_cast<AbstractDataManager*>(getManager(ManagerType::Data));
 }
 
 AbstractDataHierarchyManager& Core::getDataHierarchyManager()
 {
-    return *_dataHierarchyManager;
+    return *static_cast<AbstractDataHierarchyManager*>(getManager(ManagerType::DataHierarchy));
 }
 
 AbstractWorkspaceManager& Core::getWorkspaceManager()
 {
-    return *_workspaceManager;
+    return *static_cast<AbstractWorkspaceManager*>(getManager(ManagerType::Workspaces));
 }
 
 AbstractTaskManager& Core::getTaskManager()
 {
-    return *_taskManager;
+    return *static_cast<AbstractTaskManager*>(getManager(ManagerType::Tasks));
 }
 
 AbstractProjectManager& Core::getProjectManager()
 {
-    return *_projectManager;
+    return *static_cast<AbstractProjectManager*>(getManager(ManagerType::Projects));
 }
 
 AbstractSettingsManager& Core::getSettingsManager()
 {
-    return *_settingsManager;
+    return *static_cast<AbstractSettingsManager*>(getManager(ManagerType::Settings));
 }
 
 bool Core::isDatasetGroupingEnabled() const
@@ -470,7 +464,7 @@ Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString
 
 Dataset<DatasetImpl> Core::requestSelection(const QString& name)
 {
-    return Dataset<DatasetImpl>(_dataManager->getSelection(name));
+    return Dataset<DatasetImpl>(getDataManager().getSelection(name));
 }
 
 void Core::setDatasetGroupingEnabled(const bool& datasetGroupingEnabled)

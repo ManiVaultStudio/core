@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PluginManager.h"
+#include "Core.h"
 
 #include <PluginFactory.h>
 #include <LoaderPlugin.h>
@@ -12,9 +13,8 @@
 #include <TransformationPlugin.h>
 #include <RawData.h>
 #include <PluginType.h>
-#include <util/Serialization.h>
 
-#include "MainWindow.h"
+#include <util/Serialization.h>
 
 #include <QDebug>
 #include <QPluginLoader>

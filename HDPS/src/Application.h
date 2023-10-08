@@ -10,7 +10,7 @@
 
 #include "actions/TriggerAction.h"
 
-#include "BackgroundTask.h"
+#include "Task.h"
 
 #include <QApplication>
 #include <QSettings>
@@ -35,12 +35,14 @@ public:
 
     /** Task for monitoring the progress of: */
     enum class TaskType {
-        LoadApplication = 0,        /** ...of the application loading (contains LoadGUI task and LoadProject task) */
-        LoadGUI,                    /** ...loading the application GUI */
-        LoadProject,                /** ...loading a project (if there is one, contains LoadProjectData task and LoadProjectWorkspace task) */
-        LoadProjectData,            /** ...loading project data (if there is a startup project) */
-        LoadProjectWorkspace,       /** ...loading project workspace (if there is a startup project) */
-        OverallBackground,          /** ...aggregated overall background tasks */
+        LoadApplication = 0,            /** ...of the application loading (contains LoadCore, LoadGUI and LoadProject task) */
+        LoadApplicationCore,            /** ...loading the core (contains LoadManagers task) */
+        LoadApplicationCoreManagers,    /** ...loading the application managers */
+        LoadApplicationGUI,             /** ...loading the application GUI */
+        LoadProject,                    /** ...loading a project (if there is one, contains LoadProjectData task and LoadProjectWorkspace task) */
+        LoadProjectData,                /** ...loading project data (if there is a startup project) */
+        LoadProjectWorkspace,           /** ...loading project workspace (if there is a startup project) */
+        OverallBackground,              /** ...aggregated overall background task */
 
         Count
     };
@@ -192,24 +194,45 @@ public: // Statics
 
 signals:
 
-    /** Signals that the core has been become available */
-    void coreSet(CoreInterface* core);
+    /**
+     * Signals that the core has been assigned successfully to \p core
+     * @param core Pointer to core instance
+     */
+    void coreAssigned(CoreInterface* core);
+
+    /**
+     * Invoked when the core is about to be initialized (re-broadcasts corresponding \p core signal)
+     * @param core Pointer to core instance
+     */
+    void coreAboutToBeInitialized(CoreInterface* core);
+
+    /**
+     * Invoked when the core has been initialized (re-broadcasts corresponding \p core signal)
+     * @param core Pointer to core instance
+     */
+    void coreInitialized(CoreInterface* core);
+
+    /**
+     * Invoked when the core managers have been created (re-broadcasts corresponding \p core signal)
+     * @param core Pointer to core instance
+     */
+    void coreManagersCreated(CoreInterface* core);
 
     /** Signals that the main window has been fully initialized */
     void mainWindowInitialized();
 
 protected:
-    CoreInterface*                      _core;                                          /** Pointer to HDPS core */
-    const util::Version                 _version;                                       /** Application version */
-    IconFonts                           _iconFonts;                                     /** Icon fonts resource */
-    QSettings                           _settings;                                      /** Settings */
-    QString                             _serializationTemporaryDirectory;               /** Temporary directory for serialization */
-    bool                                _serializationAborted;                          /** Whether serialization was aborted */
-    util::Logger                        _logger;                                        /** Logger instance */
-    gui::TriggerAction*                 _exitAction;                                    /** Action for exiting the application */
-    QString                             _startupProjectFilePath;                        /** File path of the project to automatically open upon startup (if set) */
-    ProjectMetaAction*                  _startupProjectMetaAction;                      /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
-    Task*                               _tasks[static_cast<int>(TaskType::Count)];      /** Application-related tasks */
+    CoreInterface*          _core;                              /** Pointer to HDPS core */
+    const util::Version     _version;                           /** Application version */
+    IconFonts               _iconFonts;                         /** Icon fonts resource */
+    QSettings               _settings;                          /** Settings */
+    QString                 _serializationTemporaryDirectory;   /** Temporary directory for serialization */
+    bool                    _serializationAborted;              /** Whether serialization was aborted */
+    util::Logger            _logger;                            /** Logger instance */
+    gui::TriggerAction*     _exitAction;                        /** Action for exiting the application */
+    QString                 _startupProjectFilePath;            /** File path of the project to automatically open upon startup (if set) */
+    ProjectMetaAction*      _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
+    QVector<Task*>          _tasks;                             /** Application-related tasks */
 };
 
 }

@@ -10,7 +10,7 @@
 #include <util/Exception.h>
 
 #ifdef _DEBUG
-    #define ABSTRACT_TASKS_MODEL_VERBOSE
+    //#define ABSTRACT_TASKS_MODEL_VERBOSE
 #endif
 
 namespace hdps

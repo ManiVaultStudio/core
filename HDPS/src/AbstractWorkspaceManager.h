@@ -12,7 +12,7 @@
 #include "util/DockWidgetPermission.h"
 
 #ifdef _DEBUG
-    #define ABSTRACT_WORKSPACE_MANAGER_VERBOSE
+    //#define ABSTRACT_WORKSPACE_MANAGER_VERBOSE
 #endif
 
 namespace hdps

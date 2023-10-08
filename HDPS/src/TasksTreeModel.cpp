@@ -26,8 +26,23 @@ TasksTreeModel::TasksTreeModel(QObject* parent /*= nullptr*/) :
     for (auto column : columnInfo.keys())
         setHorizontalHeaderItem(static_cast<int>(column), new HeaderItem(columnInfo[column]));
 
-    for (auto task : tasks().getTasks())
+    auto topLevelTasks = tasks().getTasks();
+
+    topLevelTasks.erase(std::find_if(topLevelTasks.begin(), topLevelTasks.end(), [](Task* task) -> bool {
+        return task->hasParentTask();
+    }), topLevelTasks.end());
+    
+    std::function<void(Task* task)> addTaskRecursively;
+
+    addTaskRecursively = [this, &addTaskRecursively](Task* task) -> void {
         addTask(task);
+
+        for (auto childTask : task->getChildTasks())
+            addTaskRecursively(childTask);
+    };
+
+    for (auto topLevelTask : topLevelTasks)
+        addTaskRecursively(topLevelTask);
 }
 
 void TasksTreeModel::addTask(Task* task)

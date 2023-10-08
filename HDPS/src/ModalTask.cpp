@@ -4,6 +4,8 @@
 
 #include "ModalTask.h"
 #include "ModalTaskHandler.h"
+#include "Application.h"
+#include "CoreInterface.h"
 
 namespace hdps {
 
@@ -14,6 +16,7 @@ ModalTaskHandler* ModalTask::modalTaskHandler = nullptr;
 ModalTask::ModalTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= true*/) :
     Task(parent, name, GuiScope::Modal, status, mayKill, nullptr)
 {
+    connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) { createHandler(Application::current()); });
 }
 
 void ModalTask::createHandler(QObject* parent)

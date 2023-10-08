@@ -52,7 +52,24 @@ namespace hdps
 
 class CoreInterface : public QObject
 {
-Q_OBJECT
+    Q_OBJECT
+
+public:
+
+    /** Enumeration for distinguishing manager types */
+    enum class ManagerType {
+        Actions = 0,        /** Actions manager for storing actions */
+        Plugins,            /** Plugin manager responsible for loading plug-ins and adding them to the core */
+        Events,             /** Event manager for emitting global events */
+        Data,               /** Data manager responsible for storing data sets and data selections */
+        DataHierarchy,      /** Data hierarchy manager for providing a hierarchical dataset structure */
+        Tasks,              /** Manager for managing global tasks */
+        Workspaces,         /** Workspace manager for controlling widgets layout */
+        Projects,           /** Manager for loading/saving projects */
+        Settings,           /** Manager for managing global settings */
+
+        Count
+    };
 
 public:
 
@@ -82,6 +99,13 @@ public:
         qDebug() << "ManiVault core initialized";
 
         emit initialized();
+    }
+
+    /** Flag the core managers as created */
+    virtual void setManagersCreated() final {
+        qDebug() << "ManiVault core managers created";
+
+        emit managersCreated();
     }
 
     /** Resets the entire core implementation */
@@ -245,7 +269,9 @@ public: // Dataset grouping
     virtual void setDatasetGroupingEnabled(const bool& datasetGroupingEnabled) = 0;
 
 public: // Managers
-    
+
+    virtual AbstractManager* getManager(const ManagerType& managerType) = 0;
+
     virtual AbstractActionsManager& getActionsManager() = 0;
     virtual AbstractPluginManager& getPluginManager() = 0;
     virtual AbstractEventManager& getEventManager() = 0;
@@ -263,6 +289,9 @@ signals:
 
     /** Invoked when the core has been initialized */
     void initialized();
+
+    /** Invoked when the core managers have been created */
+    void managersCreated();
 
 protected:
     bool    _initialized;               /** Boolean determining whether the core is initialized or not */

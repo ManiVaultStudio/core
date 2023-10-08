@@ -3,9 +3,11 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "Application.h"
-
 #include "CoreInterface.h"
+#include "BackgroundTask.h"
+#include "AbstractManager.h"
 
+#include "util/IconFonts.h"
 #include "util/FontAwesome.h"
 #include "util/Exception.h"
 
@@ -22,7 +24,7 @@ using namespace hdps::util;
 
 namespace hdps {
 
-hdps::Application::Application(int& argc, char** argv) :
+Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
     _core(nullptr),
     _version({ 1, 0 }),
@@ -32,42 +34,45 @@ hdps::Application::Application(int& argc, char** argv) :
     _serializationAborted(false),
     _logger(),
     _startupProjectFilePath(),
-    _startupProjectMetaAction(nullptr),
-    _tasks{
-        new Task(this, "Loading"),
-        new Task(this, "Setting up GUI"),
-        new Task(this, "Loading Project"),
-        new Task(this, "Loading project data"),
-        new Task(this, "Loading project workspace"),
-        new BackgroundTask(this, "Overall Background")
-    }
+    _startupProjectMetaAction(nullptr)
 {
-    QStringList subTasks{
-        "Initializing Icon Fonts",
-        "Initializing Logger",
-        "Initializing Managers",
-        "Initializing GUI"
-    };
+    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, {
+            ":/IconFonts/FontAwesomeBrandsRegular-5.14.otf",
+            ":/IconFonts/FontAwesomeRegular-5.14.otf",
+            ":/IconFonts/FontAwesomeSolid-5.14.otf"
+    }, true)));
 
-    getTask(TaskType::LoadGUI)->setParentTask(getTask(TaskType::LoadApplication));
-    getTask(TaskType::LoadProject)->setParentTask(getTask(TaskType::LoadApplication));
-    getTask(TaskType::LoadProjectData)->setParentTask(getTask(TaskType::LoadProject));
-    getTask(TaskType::LoadProjectWorkspace)->setParentTask(getTask(TaskType::LoadProject));
-    getTask(TaskType::OverallBackground)->setMayKill(false);
+    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 4, {
+        ":/IconFonts/FontAwesomeBrandsRegular-6.4.otf",
+        ":/IconFonts/FontAwesomeRegular-6.4.otf",
+        ":/IconFonts/FontAwesomeSolid-6.4.otf"
+    })));
 
-    auto loadGuiTask = getTask(TaskType::LoadGUI);
+    connect(this, &Application::coreManagersCreated, this, [this](CoreInterface* core) {
+        _tasks << new Task(this, "Loading");
+        _tasks << new Task(this, "Loading Core");
+        _tasks << new Task(this, "Loading Core Managers");
+        _tasks << new Task(this, "Loading GUI");
+        _tasks << new Task(this, "Loading Project");
+        _tasks << new Task(this, "Loading project data");
+        _tasks << new Task(this, "Loading project workspace");
+        _tasks << new BackgroundTask(this, "Overall Background");
 
-    loadGuiTask->setMayKill(false);
-    loadGuiTask->setProgressMode(Task::ProgressMode::Subtasks);
-    loadGuiTask->setSubtasks(subTasks);
-    loadGuiTask->setRunning();
+        for (auto task : _tasks)
+            task->setMayKill(false);
 
-    auto loadProjectTask = getTask(TaskType::LoadProject);
+        getTask(TaskType::LoadApplicationCore)->setParentTask(getTask(TaskType::LoadApplication));
+        getTask(TaskType::LoadApplicationCoreManagers)->setParentTask(getTask(TaskType::LoadApplicationCore));
+        getTask(TaskType::LoadApplicationGUI)->setParentTask(getTask(TaskType::LoadApplication));
+        getTask(TaskType::LoadProject)->setParentTask(getTask(TaskType::LoadApplication));
+        getTask(TaskType::LoadProjectData)->setParentTask(getTask(TaskType::LoadProject));
+        getTask(TaskType::LoadProjectWorkspace)->setParentTask(getTask(TaskType::LoadProject));
 
-    loadProjectTask->setEnabled(false);
+        getTask(TaskType::LoadProject)->setEnabled(false);
+    });
 }
 
-hdps::Application* hdps::Application::current()
+Application* Application::current()
 {
     try
     {
@@ -85,7 +90,7 @@ hdps::Application* hdps::Application::current()
     }
 }
 
-const IconFont& hdps::Application::getIconFont(const QString& name, const std::int32_t& majorVersion /*= -1*/, const std::int32_t& minorVersion /*= -1*/)
+const IconFont& Application::getIconFont(const QString& name, const std::int32_t& majorVersion /*= -1*/, const std::int32_t& minorVersion /*= -1*/)
 {
     return current()->_iconFonts.getIconFont(name, majorVersion, minorVersion);
 }
@@ -99,9 +104,21 @@ void Application::setCore(CoreInterface* core)
 {
     Q_ASSERT(core != nullptr);
 
-    _core = core;
+    if (core == nullptr)
+        return;
 
-    emit coreSet(_core);
+    if (_core == nullptr) {
+        _core = core;
+
+        emit coreAssigned(_core);
+
+        connect(core, &CoreInterface::aboutToBeInitialized, this, [this]() -> void { emit coreAboutToBeInitialized(_core); });
+        connect(core, &CoreInterface::initialized, this, [this]() -> void { emit coreInitialized(_core); });
+        connect(core, &CoreInterface::managersCreated, this, [this]() -> void { emit coreManagersCreated(_core); });
+    }
+    else {
+        qDebug() << "Cannot assign core to application, core is already assigned";
+    }
 }
 
 hdps::CoreInterface* Application::core()
@@ -181,27 +198,7 @@ void Application::setSerializationAborted(bool serializationAborted)
 
 void Application::initialize()
 {
-    Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskStarted("Initializing Icon Fonts");
-    {
-        _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, {
-            ":/IconFonts/FontAwesomeBrandsRegular-5.14.otf",
-            ":/IconFonts/FontAwesomeRegular-5.14.otf",
-            ":/IconFonts/FontAwesomeSolid-5.14.otf"
-        }, true)));
-
-        _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 4, {
-            ":/IconFonts/FontAwesomeBrandsRegular-6.4.otf",
-            ":/IconFonts/FontAwesomeRegular-6.4.otf",
-            ":/IconFonts/FontAwesomeSolid-6.4.otf"
-        })));
-    }
-    Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskFinished("Initializing Icon Fonts");
-
-    Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskStarted("Initializing Logger");
-    {
-        _logger.initialize();
-    }
-    Application::current()->getTask(Application::TaskType::LoadGUI)->setSubtaskFinished("Initializing Logger");
+    _logger.initialize();
 }
 
 Task* Application::getTask(const TaskType& taskType)

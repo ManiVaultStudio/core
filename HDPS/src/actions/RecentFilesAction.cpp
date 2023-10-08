@@ -147,8 +147,6 @@ void RecentFilesAction::Model::loadFromSettings()
 {
     setRowCount(0);
 
-    auto mainWindow = Application::topLevelWidgets().first();
-
     for (auto action : _actions)
         delete action;
 
@@ -176,11 +174,6 @@ void RecentFilesAction::Model::loadFromSettings()
 
         recentFilePathAction->setIcon(_recentFilesAction->getIcon());
 
-        if (!_recentFilesAction->getShortcutPrefix().isEmpty())
-            recentFilePathAction->setShortcut(QKeySequence(QString("%1+%2").arg(_recentFilesAction->getShortcutPrefix(), QString::number(shortcutIndex))));
-
-        mainWindow->addAction(recentFilePathAction);
-        
         connect(recentFilePathAction, &TriggerAction::triggered, this, [this, filePath]() -> void {
             emit _recentFilesAction->triggered(filePath);
         });

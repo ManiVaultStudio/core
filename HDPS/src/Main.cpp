@@ -4,6 +4,7 @@
 
 #include "private/MainWindow.h"
 #include "private/Archiver.h"
+#include "private/Core.h"
 
 #include <Application.h>
 #include <ProjectMetaAction.h>
@@ -13,6 +14,7 @@
 #include <QProxyStyle>
 #include <QQuickWindow>
 #include <QCommandLineParser>
+#include <QTemporaryDir>
 
 using namespace hdps;
 using namespace hdps::util;
@@ -88,7 +90,13 @@ int main(int argc, char *argv[])
 
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 
-    hdps::Application application(argc, argv);
+    Application application(argc, argv);
+
+    Core core;
+
+    application.setCore(&core);
+
+    core.initialize();
 
     QCommandLineParser commandLineParser;
 

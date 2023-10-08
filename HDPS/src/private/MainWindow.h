@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "Core.h"
-
 #include <QMainWindow>
 
 class MainWindow : public QMainWindow
@@ -19,18 +17,6 @@ public:
      * @param parent Parent widget
      */
     MainWindow(QWidget* parent = nullptr);
-
-    /**
-     * Callback invoked when the window shows
-     * @param closeEvent Close event
-     */
-    void showEvent(QShowEvent* showEvent) override;
-
-    /**
-     * Callback invoked when the window closes
-     * @param closeEvent Close event
-     */
-    void closeEvent(QCloseEvent* closeEvent) override;
 
 private: // Window geometry persistence
 
@@ -64,5 +50,7 @@ public: // Miscellaneous
     void checkGraphicsCapabilities();
 
 private:
-    hdps::Core  _core;  /** Instance of the core */
+
+    /** Sets up the GUI */
+    void initialize();
 };
