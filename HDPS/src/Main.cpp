@@ -36,12 +36,6 @@ public:
 ProjectMetaAction* getStartupProjectMetaAction(const QString& startupProjectFilePath)
 {
     try {
-        if (startupProjectFilePath.isEmpty())
-            throw std::runtime_error("Project file path is empty");
-
-        if (!QFileInfo(startupProjectFilePath).exists())
-            throw std::runtime_error("Project file not found");
-
         QTemporaryDir temporaryDir;
 
         const QString metaJsonFilePath("meta.json");
@@ -63,11 +57,11 @@ ProjectMetaAction* getStartupProjectMetaAction(const QString& startupProjectFile
     }
     catch (std::exception& e)
     {
-        qDebug() << "Unable to extract project meta data from" << startupProjectFilePath << e.what();
+        qDebug() << "No meta data available, please re-save the project to solve the problem"  << e.what();
     }
     catch (...)
     {
-        qDebug() << "Unable to extract project meta data from" << startupProjectFilePath << "due to an unhandled exception";
+        qDebug() << "No meta data available due to an unhandled problem, please re-save the project to solve the problem";
     }
 
     return nullptr;
@@ -114,11 +108,16 @@ int main(int argc, char *argv[])
     if (commandLineParser.isSet("project")) {
         try {
             const auto startupProjectFilePath = commandLineParser.value("project");
+
+            if (startupProjectFilePath.isEmpty())
+                throw std::runtime_error("Project file path is empty");
+
             const auto startupProjectFileInfo = QFileInfo(startupProjectFilePath);
 
             if (startupProjectFileInfo.exists()) {
-                application.setStartupProjectFilePath(startupProjectFilePath);
+                qDebug() << "Loading startup project from" << startupProjectFilePath;
 
+                application.setStartupProjectFilePath(startupProjectFilePath);
                 application.getTask(Application::TaskType::LoadProject)->setEnabled(true);
 
                 auto projectMetaAction = getStartupProjectMetaAction(startupProjectFilePath);
@@ -142,6 +141,8 @@ int main(int argc, char *argv[])
                     Unable to load <b>%1</b> at startup, the file does not exist. \
                     Provide an exisiting project file path when using <b>-p</b>/<b>--project</b> ManiVault<sup>&copy;</sup> command line parameters. \
                 ").arg(startupProjectFilePath)));
+
+                throw std::runtime_error("Project file not found");
             }
         }
         catch (std::exception& e)

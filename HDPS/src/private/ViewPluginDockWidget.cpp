@@ -21,7 +21,7 @@
 #include <AutoHideDockContainer.h>
 
 #ifdef _DEBUG
-    #define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
+    //#define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
 #endif
 
 using namespace ads;

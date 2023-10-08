@@ -11,6 +11,10 @@
 #include <QObject>
 #include <QString>
 
+#ifdef _DEBUG
+    #define ABSTRACT_DATA_HIERARCHY_MANAGER_VERBOSE
+#endif
+
 namespace hdps
 {
 

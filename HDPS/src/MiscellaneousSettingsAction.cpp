@@ -10,7 +10,7 @@ namespace hdps
 
 MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Miscellaneous"),
-    _ignoreLoadingErrorsAction(this, "Ignore loading errors", true, true)
+    _ignoreLoadingErrorsAction(this, "Ignore loading errors", true)
 {
     setShowLabels(false);
 
