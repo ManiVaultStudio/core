@@ -664,7 +664,7 @@ void Task::registerChildTask(Task* childTask)
         if (getProgressMode() != ProgressMode::Aggregate)
             return;
 
-        qDebug() << childTask->getName() << "status changed to" << statusNames[status];
+        //qDebug() << childTask->getName() << "status changed to" << statusNames[status];
 
         updateAggregateStatus();
         updateProgress();
@@ -729,7 +729,7 @@ void Task::updateAggregateStatus()
         return getChildTasksForStatuses(false, true, { status }).count();
     };
     
-    //qDebug() << getName() << numberOfChildTasks << countStatus(Status::Running);
+    qDebug() << getName() << numberOfChildTasks << getNumberOfChildTaskWithStatus(Status::Finished);
 
     if (getNumberOfChildTaskWithStatus(Status::Running) >= 1 || getNumberOfChildTaskWithStatus(Status::RunningIndeterminate) >= 1)
         privateSetRunning();

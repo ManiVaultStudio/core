@@ -16,8 +16,6 @@ BackgroundTask::BackgroundTask(QObject* parent, const QString& name, const Statu
 {
     if (core() != nullptr && core()->isInitialized())
         setParentTask(Application::current()->getTask(Application::TaskType::OverallBackground));
-
-    connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) { createHandler(Application::current()); });
 }
 
 void BackgroundTask::createHandler(QObject* parent)

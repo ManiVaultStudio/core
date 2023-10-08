@@ -5,6 +5,7 @@
 #include "Application.h"
 #include "CoreInterface.h"
 #include "BackgroundTask.h"
+#include "ForegroundTask.h"
 #include "AbstractManager.h"
 
 #include "util/IconFonts.h"
@@ -68,7 +69,12 @@ Application::Application(int& argc, char** argv) :
         getTask(TaskType::LoadProjectData)->setParentTask(getTask(TaskType::LoadProject));
         getTask(TaskType::LoadProjectWorkspace)->setParentTask(getTask(TaskType::LoadProject));
 
-        getTask(TaskType::LoadProject)->setEnabled(false);
+        getTask(TaskType::LoadProject)->setEnabled(shouldOpenProjectAtStartup());
+    });
+
+    connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) {
+        BackgroundTask::createHandler(Application::current());
+        ForegroundTask::createHandler(Application::current());
     });
 }
 

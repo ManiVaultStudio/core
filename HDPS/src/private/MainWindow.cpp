@@ -63,8 +63,84 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
 
     restoreWindowGeometryFromSettings();
+}
 
-    connect(Application::current(), &Application::coreInitialized, this, &MainWindow::initialize);
+void MainWindow::showEvent(QShowEvent* showEvent)
+{
+    auto loadGuiTask = Application::current()->getTask(Application::TaskType::LoadApplicationGUI);
+
+    loadGuiTask->setSubtaskStarted("Initializing GUI");
+
+    auto fileMenuAction = menuBar()->addMenu(new FileMenu());
+    auto viewMenuAction = menuBar()->addMenu(new ViewMenu());
+    auto helpMenuAction = menuBar()->addMenu(new HelpMenu());
+
+    auto stackedWidget      = new StackedWidget();
+    auto projectWidget      = new ProjectWidget();
+    auto startPageWidget    = new StartPageWidget(projectWidget);
+
+    stackedWidget->addWidget(startPageWidget);
+    stackedWidget->addWidget(projectWidget);
+
+    setCentralWidget(stackedWidget);
+
+    statusBar()->setSizeGripEnabled(false);
+
+    statusBar()->insertPermanentWidget(0, new QWidget(this), 3);
+    statusBar()->insertPermanentWidget(1, BackgroundTask::getHandler()->getStatusBarAction()->createWidget(this), 2);
+    statusBar()->insertPermanentWidget(2, ForegroundTask::getHandler()->getStatusBarAction()->createWidget(this));
+
+    const auto projectChanged = [this]() -> void {
+        if (!projects().hasProject()) {
+            setWindowTitle("ManiVault");
+        }
+        else {
+            const auto projectFilePath = projects().getCurrentProject()->getFilePath();
+
+            if (projectFilePath.isEmpty())
+                setWindowTitle("Unsaved - ManiVault");
+            else
+                setWindowTitle(QString("%1 - ManiVault").arg(projectFilePath));
+        }
+
+        statusBar()->setVisible(projects().hasProject());
+    };
+
+    connect(&projects(), &AbstractProjectManager::projectCreated, this, projectChanged);
+    connect(&projects(), &AbstractProjectManager::projectDestroyed, this, projectChanged);
+    connect(&projects(), &AbstractProjectManager::projectOpened, this, projectChanged);
+    connect(&projects(), &AbstractProjectManager::projectSaved, this, projectChanged);
+
+    const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget]() -> void {
+        if (projects().getShowStartPageAction().isChecked())
+            stackedWidget->setCurrentWidget(startPageWidget);
+        else
+            stackedWidget->setCurrentWidget(projectWidget);
+    };
+
+    connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
+
+    const auto updateMenuVisibility = [fileMenuAction, viewMenuAction]() -> void {
+        const auto projectIsReadOnly = projects().getCurrentProject()->getReadOnlyAction().isChecked();
+
+        fileMenuAction->setVisible(!projectIsReadOnly);
+        viewMenuAction->setVisible(!projectIsReadOnly);
+    };
+
+    connect(&projects(), &AbstractProjectManager::projectCreated, this, [this, updateMenuVisibility]() -> void {
+        connect(&projects().getCurrentProject()->getReadOnlyAction(), &ToggleAction::toggled, this, updateMenuVisibility);
+        });
+
+    loadGuiTask->setSubtaskFinished("Initializing GUI");
+
+    if (Application::current()->shouldOpenProjectAtStartup())
+        projects().openProject(Application::current()->getStartupProjectFilePath());
+
+    projectChanged();
+
+    emit Application::current()->mainWindowInitialized();
+
+    loadGuiTask->setFinished();
 }
 
 void MainWindow::moveEvent(QMoveEvent* moveEvent)
@@ -143,82 +219,4 @@ void MainWindow::checkGraphicsCapabilities()
     }
 
     ctx.doneCurrent();
-}
-
-void MainWindow::initialize()
-{
-    auto loadGuiTask = Application::current()->getTask(Application::TaskType::LoadApplicationGUI);
-
-    loadGuiTask->setSubtaskStarted("Initializing GUI");
-
-    auto fileMenuAction = menuBar()->addMenu(new FileMenu());
-    auto viewMenuAction = menuBar()->addMenu(new ViewMenu());
-    auto helpMenuAction = menuBar()->addMenu(new HelpMenu());
-
-    auto stackedWidget = new StackedWidget();
-    auto projectWidget = new ProjectWidget();
-    auto startPageWidget = new StartPageWidget(projectWidget);
-
-    stackedWidget->addWidget(startPageWidget);
-    stackedWidget->addWidget(projectWidget);
-
-    setCentralWidget(stackedWidget);
-
-    statusBar()->setSizeGripEnabled(false);
-
-    statusBar()->insertPermanentWidget(0, new QWidget(this), 3);
-    statusBar()->insertPermanentWidget(1, BackgroundTask::getHandler()->getStatusBarAction()->createWidget(this), 2);
-    statusBar()->insertPermanentWidget(2, ForegroundTask::getHandler()->getStatusBarAction()->createWidget(this));
-
-    const auto projectChanged = [this]() -> void {
-        if (!projects().hasProject()) {
-            setWindowTitle("ManiVault");
-        }
-        else {
-            const auto projectFilePath = projects().getCurrentProject()->getFilePath();
-
-            if (projectFilePath.isEmpty())
-                setWindowTitle("Unsaved - ManiVault");
-            else
-                setWindowTitle(QString("%1 - ManiVault").arg(projectFilePath));
-        }
-
-        statusBar()->setVisible(projects().hasProject());
-    };
-
-    connect(&projects(), &AbstractProjectManager::projectCreated, this, projectChanged);
-    connect(&projects(), &AbstractProjectManager::projectDestroyed, this, projectChanged);
-    connect(&projects(), &AbstractProjectManager::projectOpened, this, projectChanged);
-    connect(&projects(), &AbstractProjectManager::projectSaved, this, projectChanged);
-
-    const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget]() -> void {
-        if (projects().getShowStartPageAction().isChecked())
-            stackedWidget->setCurrentWidget(startPageWidget);
-        else
-            stackedWidget->setCurrentWidget(projectWidget);
-    };
-
-    connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
-
-    const auto updateMenuVisibility = [fileMenuAction, viewMenuAction]() -> void {
-        const auto projectIsReadOnly = projects().getCurrentProject()->getReadOnlyAction().isChecked();
-
-        fileMenuAction->setVisible(!projectIsReadOnly);
-        viewMenuAction->setVisible(!projectIsReadOnly);
-    };
-
-    connect(&projects(), &AbstractProjectManager::projectCreated, this, [this, updateMenuVisibility]() -> void {
-        connect(&projects().getCurrentProject()->getReadOnlyAction(), &ToggleAction::toggled, this, updateMenuVisibility);
-    });
-
-    loadGuiTask->setSubtaskFinished("Initializing GUI");
-
-    if (Application::current()->shouldOpenProjectAtStartup())
-        projects().openProject(Application::current()->getStartupProjectFilePath());
-
-    projectChanged();
-
-    emit Application::current()->mainWindowInitialized();
-
-    loadGuiTask->setFinished();
 }

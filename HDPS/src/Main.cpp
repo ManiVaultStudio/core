@@ -32,7 +32,6 @@ public:
 
         QProxyStyle::drawPrimitive(element, option, painter, widget);
     }
-
 };
 
 ProjectMetaAction* getStartupProjectMetaAction(const QString& startupProjectFilePath)

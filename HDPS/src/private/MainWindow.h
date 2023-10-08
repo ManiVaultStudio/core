@@ -18,6 +18,12 @@ public:
      */
     MainWindow(QWidget* parent = nullptr);
 
+    /**
+     * Invoked when the window is shown
+     * @param showEvent Show event that occurred
+     */
+    void showEvent(QShowEvent* showEvent) override;
+
 private: // Window geometry persistence
 
     /**
