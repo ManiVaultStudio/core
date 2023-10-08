@@ -31,7 +31,7 @@
 #include <exception>
 
 #ifdef _DEBUG
-    #define WORKSPACE_MANAGER_VERBOSE
+    //#define WORKSPACE_MANAGER_VERBOSE
 #endif
 
 using namespace ads;
@@ -206,9 +206,14 @@ void WorkspaceManager::initialize()
 
         connect(&Application::core()->getProjectManager(), &AbstractProjectManager::projectCreated, this, [this]() -> void {
             newWorkspace();
+
+            auto workspaceSerializationTask = &projects().getCurrentProject()->getWorkspaceSerializationTask();
+
+            _mainDockManager->getSerializationTask().setParentTask(workspaceSerializationTask);
+            _viewPluginsDockManager->getSerializationTask().setParentTask(workspaceSerializationTask);
         });
 
-        //_mainDockManager->setStyleSheet(_styleSheet);
+
     }
     endInitialization();
 }
@@ -329,9 +334,9 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
 
             auto& workspaceSerializationTask = projects().getCurrentProject()->getWorkspaceSerializationTask();
 
+            workspaceSerializationTask.setName("Load workspace");
             workspaceSerializationTask.setDescription(QString("Opening ManiVault workspace from %1").arg(filePath));
             workspaceSerializationTask.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-            workspaceSerializationTask.setName(QString("Open %1").arg(filePath));
 
             fromJsonFile(filePath);
 

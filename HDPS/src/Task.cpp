@@ -60,8 +60,10 @@ Task::Task(QObject* parent, const QString& name, const GuiScope& guiScope /*= Gu
     _progressText(),
     _progressTextFormatter()
 {
-    if (core() != nullptr && core()->isInitialized())
+    if (core() != nullptr)
         tasks().addTask(this);
+    else
+        qDebug() << "Cannot add task to the manager because the core has not been initialized yet.";
 
     for (auto& timer : _timers)
         timer.setSingleShot(true);
@@ -187,7 +189,7 @@ Task::TasksPtrs Task::getChildTasksForStatuses(bool recursively /*= false*/, boo
 {
     auto childTasks = getChildTasks(recursively, enabledOnly);
 
-    childTasks.erase(std::remove_if(childTasks.begin(), childTasks.end(), [&statuses](Task* task) -> bool {
+    childTasks.erase(std::find_if(childTasks.begin(), childTasks.end(), [&statuses](Task* task) -> bool {
         return !statuses.contains(task->getStatus());
     }), childTasks.end());
 
@@ -198,7 +200,7 @@ Task::TasksPtrs Task::getChildTasksForGuiScopes(bool recursively /*= false*/, bo
 {
     auto childTasks = getChildTasks(recursively, enabledOnly);
 
-    childTasks.erase(std::remove_if(childTasks.begin(), childTasks.end(), [&guiScopes](Task* task) -> bool {
+    childTasks.erase(std::find_if(childTasks.begin(), childTasks.end(), [&guiScopes](Task* task) -> bool {
         return !guiScopes.contains(task->getGuiScope());
     }), childTasks.end());
 
@@ -209,7 +211,7 @@ Task::TasksPtrs Task::getChildTasksForGuiScopesAndStatuses(bool recursively /*= 
 {
     auto childTasks = getChildTasks(recursively, enabledOnly);
 
-    childTasks.erase(std::remove_if(childTasks.begin(), childTasks.end(), [&guiScopes, &statuses](Task* task) -> bool {
+    childTasks.erase(std::find_if(childTasks.begin(), childTasks.end(), [&guiScopes, &statuses](Task* task) -> bool {
         return !guiScopes.contains(task->getGuiScope()) || !statuses.contains(task->getStatus());
     }), childTasks.end());
 
@@ -566,6 +568,14 @@ void Task::updateProgress()
         {
             const auto childTasks = getChildTasksForStatuses(false, true, { Status::Undefined, Status::Idle, Status::Running, Status::RunningIndeterminate });
 
+            //QStringList childTasksNames;
+
+            //for (auto childTask : getChildTasks())
+            //    childTasksNames << childTask->getName() << statusNames[childTask->getStatus()];
+
+            //if (getName() == "Load workspace")
+            //    qDebug() << getName() << childTasksNames;
+
             auto accumulatedProgress = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [](float sum, Task* childTask) -> float {
                 return sum + childTask->getProgress();
             });
@@ -580,12 +590,7 @@ void Task::updateProgress()
     {
         case Status::Undefined:
         case Status::Idle:
-        {
-            if (getProgressMode() != ProgressMode::Aggregate)
-                _progress = 0.f;
-
             break;
-        }
 
         case Status::Running:
             break;
@@ -610,9 +615,6 @@ void Task::updateProgress()
 
         getTimer(TimerType::ProgressChanged).start();
     }
-
-    if (_status == Status::Finished || _status == Status::Aborted)
-        privateSetProgressDescription("", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 }
 
 void Task::updateProgressText()
@@ -648,6 +650,10 @@ void Task::registerChildTask(Task* childTask)
     if (childTask == nullptr)
         return;
 
+#ifdef TASK_VERBOSE
+    qDebug() << "*****"  << __FUNCTION__ << getName() << childTask->getName();
+#endif
+
     connect(childTask, &Task::statusChanged, this, [this](const Status& previousStatus, const Status& status) -> void {
         if (getProgressMode() != ProgressMode::Aggregate)
             return;
@@ -667,7 +673,15 @@ void Task::registerChildTask(Task* childTask)
         if (getProgressMode() != ProgressMode::Aggregate)
             return;
 
-        auto combinedProgressDescription = QString("%1: %2").arg(getName(), progressDescription);
+        auto combinedProgressDescription = progressDescription;// QString("%1: %2").arg(getName(), progressDescription);
+
+        QStringList childTasksNames;
+
+        for (auto childTask : getChildTasks())
+            childTasksNames << childTask->getName() << statusNames[childTask->getStatus()];
+        
+        if (getName() == "Loading Project")
+            qDebug() << "*********************" << childTasksNames;
 
         /*
         if (!hasParentTask()) {
@@ -720,8 +734,8 @@ void Task::updateAggregateStatus()
 
         std::reverse(tasksToSetToIdle.begin(), tasksToSetToIdle.end());
 
-        for (auto taskToSetToIdle : tasksToSetToIdle)
-            taskToSetToIdle->setIdle();
+        //for (auto taskToSetToIdle : tasksToSetToIdle)
+        //    taskToSetToIdle->setIdle();
 
         privateSetFinished(!hasParentTask());
     }
@@ -927,6 +941,7 @@ void Task::privateSetStatus(const Status& status)
 void Task::privateSetIdle()
 {
     privateSetStatus(Status::Idle);
+    privateSetProgress(0.f);
 
     privateSetProgressDescription("Idle", TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
 }

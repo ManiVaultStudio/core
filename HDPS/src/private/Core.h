@@ -139,8 +139,8 @@ public: // Managers
     AbstractEventManager& getEventManager() override;
     AbstractDataManager& getDataManager() override;
     AbstractDataHierarchyManager& getDataHierarchyManager() override;
-    AbstractWorkspaceManager& getWorkspaceManager() override;
     AbstractTaskManager& getTaskManager() override;
+    AbstractWorkspaceManager& getWorkspaceManager() override;
     AbstractProjectManager& getProjectManager() override;
     AbstractSettingsManager& getSettingsManager() override;
 
@@ -150,8 +150,8 @@ private:
     QScopedPointer<EventManager>            _eventManager;              /** Event manager for emitting global events */
     QScopedPointer<DataManager>             _dataManager;               /** Data manager responsible for storing data sets and data selections */
     QScopedPointer<DataHierarchyManager>    _dataHierarchyManager;      /** Data hierarchy manager for providing a hierarchical dataset structure */
-    QScopedPointer<WorkspaceManager>        _workspaceManager;          /** Workspace manager for controlling widgets layout */
     QScopedPointer<TaskManager>             _taskManager;               /** Manager for managing global tasks */
+    QScopedPointer<WorkspaceManager>        _workspaceManager;          /** Workspace manager for controlling widgets layout */
     QScopedPointer<ProjectManager>          _projectManager;            /** Manager for loading/saving projects */
     QScopedPointer<SettingsManager>         _settingsManager;           /** Manager for managing global settings */
     

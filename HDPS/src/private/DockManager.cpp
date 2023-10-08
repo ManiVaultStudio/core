@@ -18,7 +18,7 @@
 #include <QSplitter>
 
 #ifdef _DEBUG
-    #define DOCK_MANAGER_VERBOSE
+    //#define DOCK_MANAGER_VERBOSE
 #endif
 
 using namespace ads;
@@ -30,7 +30,8 @@ using namespace hdps::util;
 
 DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
-    Serializable("Dock manager")
+    Serializable("Dock manager"),
+    _serializationTask(this, "Dock Manager")
 {
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
@@ -150,7 +151,7 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
     hide();
     {
         for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList())
-            ViewPlugin::preRegisterSerializationTask(this, viewPluginDockWidgetVariant.toMap()["ID"].toString());
+            ViewPluginDockWidget::preRegisterSerializationTask(this, viewPluginDockWidgetVariant.toMap()["ID"].toString(), this);
 
         for (auto viewPluginDockWidgetVariant : variantMap["ViewPluginDockWidgets"].toList()) {
             const auto viewPluginMap    = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap();
@@ -197,4 +198,9 @@ QVariantMap DockManager::toVariantMap() const
     });
 
     return variantMap;
+}
+
+Task& DockManager::getSerializationTask()
+{
+    return _serializationTask;
 }

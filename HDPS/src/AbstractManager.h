@@ -13,7 +13,7 @@
 #include <QIcon>
 
 #ifdef _DEBUG
-    #define ABSTRACT_MANAGER_VERBOSE
+    //#define ABSTRACT_MANAGER_VERBOSE
 #endif
 
 namespace hdps

@@ -142,7 +142,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         emit Application::current()->mainWindowInitialized();
         
-        loadGuiTask->setFinished("ManiVault Loaded", true, 1000);
+        loadGuiTask->setFinished();
     }
 }
 

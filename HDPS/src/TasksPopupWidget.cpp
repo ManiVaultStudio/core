@@ -14,7 +14,7 @@
 #include <QToolButton>
 
 #ifdef _DEBUG
-    #define TASKS_POPUP_WIDGET_VERBOSE
+    //#define TASKS_POPUP_WIDGET_VERBOSE
 #endif
 
 namespace hdps::gui {

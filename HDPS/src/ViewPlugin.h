@@ -78,23 +78,6 @@ public:
      */
     virtual void setTriggerShortcut(const QKeySequence& keySequence) final;
 
-public: // Serialization task
-
-    /**
-     * Create a view plugin serialization task (even if no instance is yet available)
-     * This is needed by the workspace manager for proper progress reporting
-     * @param parent Pointer to parent object
-     * @param viewPluginId Globally unique identifier of the view plugin
-     */
-    static void preRegisterSerializationTask(QObject* parent, const QString& viewPluginId);
-
-    /**
-     * Get serialization task for \p viewPluginId
-     * @param viewPluginId Globally unique identifier of the view plugin
-     * @return Pointer to task, nullptr if not found
-     */
-    static Task* getSerializationTask(const QString& viewPluginId);
-
 public: // Title bar settings menu
 
     /**
@@ -145,9 +128,6 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-    /** Get serialization task */
-    Task* getSerializationTask();
-
 public: // Action getters
 
     gui::TriggerAction& getEditorAction() { return _editorAction; }
@@ -178,12 +158,7 @@ private:
     QKeySequence            _triggerShortcut;           /** Shortcut for triggering the plugin */
     gui::WidgetActions      _titleBarMenuActions;       /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
     gui::WidgetActions      _settingsActions;           /** Settings actions which are displayed as docking widgets in the interface */
-    
-    /**
-     * Map view plugin GUID to serialization task
-     * A serialization task is there to report progress during ViewPlugin::fromVariantMap() and ViewPlugin::toVariantMap()
-     */
-    static QMap<QString, Task*>  serializationTasks;
+    Task                    _serializationTask;         /** For reporting serialization progress */
 };
 
 class ViewPluginFactory : public PluginFactory

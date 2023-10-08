@@ -26,7 +26,7 @@
 #include <exception>
 
 #ifdef _DEBUG
-    #define PROJECT_MANAGER_VERBOSE
+    //#define PROJECT_MANAGER_VERBOSE
 #endif
 
 using namespace hdps;

@@ -13,10 +13,10 @@
 #include "AbstractDataManager.h"
 #include "AbstractDataHierarchyManager.h"
 #include "AbstractEventManager.h"
+#include "AbstractTaskManager.h"
 #include "AbstractWorkspaceManager.h"
 #include "AbstractProjectManager.h"
 #include "AbstractSettingsManager.h"
-#include "AbstractTaskManager.h"
 
 #include <QString>
 
@@ -232,8 +232,8 @@ public: // Managers
     virtual AbstractEventManager& getEventManager() = 0;
     virtual AbstractDataManager& getDataManager() = 0;
     virtual AbstractDataHierarchyManager& getDataHierarchyManager() = 0;
-    virtual AbstractWorkspaceManager& getWorkspaceManager() = 0;
     virtual AbstractTaskManager& getTaskManager() = 0;
+    virtual AbstractWorkspaceManager& getWorkspaceManager() = 0;
     virtual AbstractProjectManager& getProjectManager() = 0;
     virtual AbstractSettingsManager& getSettingsManager() = 0;
 

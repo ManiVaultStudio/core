@@ -57,8 +57,8 @@ void Core::init()
     _eventManager.reset(new EventManager());
     _dataManager.reset(new DataManager());
     _dataHierarchyManager.reset(new DataHierarchyManager());
-    _workspaceManager.reset(new WorkspaceManager());
     _taskManager.reset(new TaskManager());
+    _workspaceManager.reset(new WorkspaceManager());
     _projectManager.reset(new ProjectManager());
     _settingsManager.reset(new SettingsManager());
 
@@ -67,8 +67,8 @@ void Core::init()
     _eventManager->initialize();
     _dataManager->initialize();
     _dataHierarchyManager->initialize();
-    _workspaceManager->initialize();
     _taskManager->initialize();
+    _workspaceManager->initialize();
     _projectManager->initialize();
     _settingsManager->initialize();
     

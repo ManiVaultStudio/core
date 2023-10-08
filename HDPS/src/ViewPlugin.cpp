@@ -22,8 +22,6 @@ using namespace hdps::util;
 namespace hdps::plugin
 {
 
-QMap<QString, Task*> ViewPlugin::serializationTasks = QMap<QString, Task*>();
-
 ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
     _widget(),
@@ -40,7 +38,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
     _triggerShortcut(),
     _titleBarMenuActions(),
-    _settingsActions()
+    _settingsActions(),
+    _serializationTask(this, "Serialization")
 {
     setText(getGuiName());
 
@@ -103,13 +102,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
     _helpAction.setConnectionPermissionsToForceNone();
 
-    auto serializationTask = getSerializationTask();
-
-    serializationTask->setParent(this);
-    serializationTask->setName(getGuiNameAction().getString());
-    serializationTask->setMayKill(false);
-    serializationTask->setParentTask(&projects().getCurrentProject()->getSerializationTask());
-
     connect(&_editorAction, &TriggerAction::triggered, this, [this]() -> void {
         auto* viewPluginEditorDialog = new ViewPluginEditorDialog(nullptr, this);
         connect(viewPluginEditorDialog, &ViewPluginEditorDialog::finished, viewPluginEditorDialog, &ViewPluginEditorDialog::deleteLater);
@@ -152,7 +144,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
     connect(&getGuiNameAction(), &StringAction::stringChanged, this, [this](const QString& guiName) -> void {
         _widget.setWindowTitle(guiName);
-        getSerializationTask()->setName(guiName);
     });
 
     const auto updateVisibleAction = [this]() -> void {
@@ -195,7 +186,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
 ViewPlugin::~ViewPlugin()
 {
-    serializationTasks.remove(getId());
 }
 
 void ViewPlugin::init()
@@ -325,34 +315,6 @@ void ViewPlugin::addDockingAction(WidgetAction* dockingAction, WidgetAction* doc
 hdps::gui::WidgetActions ViewPlugin::getDockingActions() const
 {
     return _settingsActions;
-}
-
-void ViewPlugin::preRegisterSerializationTask(QObject* parent, const QString& viewPluginId)
-{
-    if (viewPluginId.isEmpty())
-        return;
-
-    auto serializationTask = new Task(parent, "View plugin");
-
-    serializationTasks[viewPluginId] = serializationTask;
-
-    serializationTask->setParentTask(&projects().getCurrentProject()->getWorkspaceSerializationTask());
-}
-
-Task* ViewPlugin::getSerializationTask()
-{
-    if (!serializationTasks.contains(getId()))
-        preRegisterSerializationTask(this, getId());
-
-    return serializationTasks[getId()];
-}
-
-Task* ViewPlugin::getSerializationTask(const QString& viewPluginId)
-{
-    if (serializationTasks.contains(viewPluginId))
-        return serializationTasks[viewPluginId];
-
-    return nullptr;
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :

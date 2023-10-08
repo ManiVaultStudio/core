@@ -29,8 +29,8 @@ namespace hdps
  * system view plugins are docked.
  * 
  * It uses two ADS dock managers:
- * - One for the main layout (\p _dockManager) 
- * - One for the docking of non-system view plugins in the central area dock widget (\p _viewPluginsDockManager)
+ * - One for the main layout (WorkspaceManager#_dockManager) 
+ * - One for the docking of non-system view plugins in the central area dock widget (WorkspaceManager#_viewPluginsDockManager)
  * 
  * @author Thomas Kroes
  */

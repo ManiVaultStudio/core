@@ -8,6 +8,7 @@
 #include "ViewPluginDockWidget.h"
 
 #include <ViewPlugin.h>
+#include <Task.h>
 
 #include <util/Serializable.h>
 
@@ -101,8 +102,14 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+    /** Get task for reporting serialization progress */
+    hdps::Task& getSerializationTask();
+
     friend class ViewPluginsDockWidget;
     friend class QPointer<DockManager>;
+
+private:
+    hdps::Task    _serializationTask;         /** For reporting serialization progress */
 
 private:
     ViewPluginDockWidgets _orderedViewPluginDockWidgets; /* the ViewPluginDockWidgets in the order in which they were created */

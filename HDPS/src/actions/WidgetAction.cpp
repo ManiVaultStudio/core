@@ -21,7 +21,7 @@
 #include <QEventLoop>
 
 #ifdef _DEBUG
-    #define WIDGET_ACTION_VERBOSE
+    //#define WIDGET_ACTION_VERBOSE
 #endif
 
 using namespace hdps::util;

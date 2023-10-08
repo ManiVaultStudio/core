@@ -27,7 +27,7 @@
 #include <assert.h>
 
 #ifdef _DEBUG
-    #define PLUGIN_MANAGER_VERBOSE
+    //#define PLUGIN_MANAGER_VERBOSE
 #endif
 
 namespace hdps {

@@ -16,7 +16,7 @@
 #include <QVBoxLayout>
 
 #ifdef _DEBUG
-    #define VIEW_PLUGINS_DOCK_WIDGET_VERBOSE
+    //#define VIEW_PLUGINS_DOCK_WIDGET_VERBOSE
 #endif
 
 using namespace ads;

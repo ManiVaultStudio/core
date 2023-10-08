@@ -16,7 +16,7 @@ using namespace hdps::gui;
 using namespace hdps::util;
 
 #ifdef _DEBUG
-    #define SETTINGS_MANAGER_VERBOSE
+    //#define SETTINGS_MANAGER_VERBOSE
 #endif
 
 namespace hdps

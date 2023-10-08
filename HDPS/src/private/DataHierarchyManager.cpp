@@ -14,7 +14,7 @@
 using namespace hdps::util;
 
 #ifdef _DEBUG
-    #define DATA_HIERARCHY_MANAGER_VERBOSE
+    //#define DATA_HIERARCHY_MANAGER_VERBOSE
 #endif
 
 namespace hdps
