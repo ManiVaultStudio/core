@@ -189,9 +189,11 @@ Task::TasksPtrs Task::getChildTasksForStatuses(bool recursively /*= false*/, boo
 {
     auto childTasks = getChildTasks(recursively, enabledOnly);
 
-    childTasks.erase(std::find_if(childTasks.begin(), childTasks.end(), [&statuses](Task* task) -> bool {
-        return !statuses.contains(task->getStatus());
-    }), childTasks.end());
+    auto iterator = std::remove_if(childTasks.begin(), childTasks.end(), [&statuses](Task* childTask) -> bool {
+        return !statuses.contains(childTask->getStatus());
+    });
+
+    childTasks.erase(iterator, childTasks.end());
 
     return childTasks;
 }
@@ -200,9 +202,11 @@ Task::TasksPtrs Task::getChildTasksForGuiScopes(bool recursively /*= false*/, bo
 {
     auto childTasks = getChildTasks(recursively, enabledOnly);
 
-    childTasks.erase(std::find_if(childTasks.begin(), childTasks.end(), [&guiScopes](Task* task) -> bool {
+    auto iterator = std::remove_if(childTasks.begin(), childTasks.end(), [&guiScopes](Task* task) -> bool {
         return !guiScopes.contains(task->getGuiScope());
-    }), childTasks.end());
+    });
+
+    childTasks.erase(iterator, childTasks.end());
 
     return childTasks;
 }
@@ -211,9 +215,11 @@ Task::TasksPtrs Task::getChildTasksForGuiScopesAndStatuses(bool recursively /*= 
 {
     auto childTasks = getChildTasks(recursively, enabledOnly);
 
-    childTasks.erase(std::find_if(childTasks.begin(), childTasks.end(), [&guiScopes, &statuses](Task* task) -> bool {
+    auto iterator = std::remove_if(childTasks.begin(), childTasks.end(), [&guiScopes, &statuses](Task* task) -> bool {
         return !guiScopes.contains(task->getGuiScope()) || !statuses.contains(task->getStatus());
-    }), childTasks.end());
+    });
+
+    childTasks.erase(iterator, childTasks.end());
 
     return childTasks;
 }
@@ -651,12 +657,14 @@ void Task::registerChildTask(Task* childTask)
         return;
 
 #ifdef TASK_VERBOSE
-    qDebug() << "*****"  << __FUNCTION__ << getName() << childTask->getName();
+    //qDebug() << "*****"  << __FUNCTION__ << getName() << childTask->getName();
 #endif
 
-    connect(childTask, &Task::statusChanged, this, [this](const Status& previousStatus, const Status& status) -> void {
+    connect(childTask, &Task::statusChanged, this, [this, childTask](const Status& previousStatus, const Status& status) -> void {
         if (getProgressMode() != ProgressMode::Aggregate)
             return;
+
+        qDebug() << statusNames[childTask->getStatus()] << "status changed to" << statusNames[status];
 
         updateAggregateStatus();
         updateProgress();
