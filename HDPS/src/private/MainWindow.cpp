@@ -225,5 +225,13 @@ void MainWindow::checkGraphicsCapabilities()
 
 void MainWindow::updateStyle()
 {
-    ads::internal::repolishStyle(this, ads::internal::RepolishChildrenRecursively);
+    this->style()->unpolish(this);
+    this->style()->polish(this);
+
+    QList<QWidget*> Children = this->findChildren<QWidget*>(QString(), Qt::FindChildrenRecursively);
+    for (auto Widget : Children)
+    {
+        Widget->style()->unpolish(Widget);
+        Widget->style()->polish(Widget);
+    }
 }
