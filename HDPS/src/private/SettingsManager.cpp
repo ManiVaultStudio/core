@@ -16,7 +16,7 @@ using namespace hdps::gui;
 using namespace hdps::util;
 
 #ifdef _DEBUG
-    #define SETTINGS_MANAGER_VERBOSE
+    //#define SETTINGS_MANAGER_VERBOSE
 #endif
 
 namespace hdps
@@ -27,9 +27,11 @@ SettingsManager::SettingsManager() :
     _editSettingsAction(this, "Settings..."),
     _parametersSettingsAction(this),
     _miscellaneousSettingsAction(this),
+    _tasksSettingsAction(this),
     _applicationSettingsAction(this)
 {
     _editSettingsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+
     if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS) {
         _editSettingsAction.setShortcut(QKeySequence("Ctrl+,"));
         _editSettingsAction.setMenuRole(QAction::PreferencesRole);
@@ -51,7 +53,13 @@ void SettingsManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
-    AbstractManager::initialize();
+    AbstractSettingsManager::initialize();
+
+    if (isInitialized())
+        return;
+
+    beginInitialization();
+    endInitialization();
 }
 
 void SettingsManager::reset()

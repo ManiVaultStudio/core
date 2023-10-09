@@ -6,9 +6,10 @@
 
 #include <Application.h>
 
-Q_PLUGIN_METADATA(IID "nl.BioVault.DataHierarchyPlugin")
+Q_PLUGIN_METADATA(IID "nl.ManiVault.DataHierarchyPlugin")
 
 using namespace hdps;
+using namespace hdps::gui;
 
 DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),

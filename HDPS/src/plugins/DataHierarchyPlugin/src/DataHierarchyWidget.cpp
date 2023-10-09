@@ -175,11 +175,11 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
 
         _model.addDataHierarchyModelItem(parentModelIndex, dataHierarchyItem);
 
-        connect(&dataHierarchyItem, &DataHierarchyItem::taskDescriptionChanged, this, [this, dataset](QString description) {
-            _model.setData(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Info), description);
+        connect(&dataHierarchyItem.getDataset()->getTask(), &DatasetTask::progressDescriptionChanged, this, [this, dataset](const QString& progressDescription) {
+            _model.setData(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Info), progressDescription);
         });
 
-        connect(&dataHierarchyItem, &DataHierarchyItem::taskProgressChanged, this, [this, dataset](float progress) {
+        connect(&dataHierarchyItem.getDataset()->getTask(), &DatasetTask::progressChanged, this, [this, dataset](float progress) {
             _model.setData(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Progress), progress);
             _model.setData(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::IsAnalyzing), progress > 0.0f);
         });

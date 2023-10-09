@@ -10,12 +10,17 @@
 
 #include "actions/TriggerAction.h"
 
+#include "Task.h"
+
 #include <QApplication>
 #include <QSettings>
+
+class QMainWindow;
 
 namespace hdps {
 
 class CoreInterface;
+class ProjectMetaAction;
 
 /**
  * HDPS application class
@@ -25,6 +30,22 @@ class CoreInterface;
 class Application final : public QApplication
 {
     Q_OBJECT
+
+public:
+
+    /** Task for monitoring the progress of: */
+    enum class TaskType {
+        LoadApplication = 0,            /** ...of the application loading (contains LoadCore, LoadGUI and LoadProject task) */
+        LoadApplicationCore,            /** ...loading the core (contains LoadManagers task) */
+        LoadApplicationCoreManagers,    /** ...loading the application managers */
+        LoadApplicationGUI,             /** ...loading the application GUI */
+        LoadProject,                    /** ...loading a project (if there is one, contains LoadProjectData task and LoadProjectWorkspace task) */
+        LoadProjectData,                /** ...loading project data (if there is a startup project) */
+        LoadProjectWorkspace,           /** ...loading project workspace (if there is a startup project) */
+        OverallBackground,              /** ...aggregated overall background task */
+
+        Count
+    };
 
 public: // Construction
 
@@ -77,11 +98,26 @@ public: // Miscellaneous
     void setStartupProjectFilePath(const QString& startupProjectFilePath);
 
     /**
+     * Get startup project meta action
+     * @return Pointer to project meta action (non-nullptr when ManiVault starts up with a project)
+     */
+    ProjectMetaAction* getStartupProjectMetaAction();
+
+    /**
+     * Set startup project meta action to \p projectMetaAction (the application takes ownership of the pointer)
+     * @param projectMetaAction Pointer to project meta action
+     */
+    void setStartupProjectMetaAction(ProjectMetaAction* projectMetaAction);
+
+    /**
      * Get whether a project should be opened after the application starts
      * @return Boolean determining whether a project should be opened after the application starts
      */
     bool shouldOpenProjectAtStartup() const;
 
+    /** Perform one-time startup initialization */
+    void initialize();
+    
 public: // Static resource access functions
 
     /**
@@ -143,21 +179,60 @@ public: // Serialization
      */
     static void setSerializationAborted(bool serializationAborted);
 
+public: // Tasks
+
+    /**
+     * Get task for \p taskType
+     * @param taskType Type of task
+     * @return Reference to task of specified type
+     */
+    Task* getTask(const TaskType& taskType);
+
+public: // Statics
+
+    static QMainWindow* getMainWindow();
+
 signals:
 
-    /** Signals that the core has been become available */
-    void coreSet(CoreInterface* core);
+    /**
+     * Signals that the core has been assigned successfully to \p core
+     * @param core Pointer to core instance
+     */
+    void coreAssigned(CoreInterface* core);
+
+    /**
+     * Invoked when the core is about to be initialized (re-broadcasts corresponding \p core signal)
+     * @param core Pointer to core instance
+     */
+    void coreAboutToBeInitialized(CoreInterface* core);
+
+    /**
+     * Invoked when the core has been initialized (re-broadcasts corresponding \p core signal)
+     * @param core Pointer to core instance
+     */
+    void coreInitialized(CoreInterface* core);
+
+    /**
+     * Invoked when the core managers have been created (re-broadcasts corresponding \p core signal)
+     * @param core Pointer to core instance
+     */
+    void coreManagersCreated(CoreInterface* core);
+
+    /** Signals that the main window has been fully initialized */
+    void mainWindowInitialized();
 
 protected:
-    CoreInterface*              _core;                                  /** Pointer to HDPS core */
-    const util::Version         _version;                               /** Application version */
-    IconFonts                   _iconFonts;                             /** Icon fonts resource */
-    QSettings                   _settings;                              /** Settings */
-    QString                     _serializationTemporaryDirectory;       /** Temporary directory for serialization */
-    bool                        _serializationAborted;                  /** Whether serialization was aborted */
-    util::Logger                _logger;                                /** Logger instance */
-    hdps::gui::TriggerAction*   _exitAction;                            /** Action for exiting the application */
-    QString                     _startupProjectFilePath;                /** File path of the project to automatically open upon startup (if set) */
+    CoreInterface*          _core;                              /** Pointer to HDPS core */
+    const util::Version     _version;                           /** Application version */
+    IconFonts               _iconFonts;                         /** Icon fonts resource */
+    QSettings               _settings;                          /** Settings */
+    QString                 _serializationTemporaryDirectory;   /** Temporary directory for serialization */
+    bool                    _serializationAborted;              /** Whether serialization was aborted */
+    util::Logger            _logger;                            /** Logger instance */
+    gui::TriggerAction*     _exitAction;                        /** Action for exiting the application */
+    QString                 _startupProjectFilePath;            /** File path of the project to automatically open upon startup (if set) */
+    ProjectMetaAction*      _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
+    QVector<Task*>          _tasks;                             /** Application-related tasks */
 };
 
 }

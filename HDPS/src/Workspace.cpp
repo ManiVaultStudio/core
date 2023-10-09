@@ -110,49 +110,6 @@ QVariantMap Workspace::toVariantMap() const
     return variantMap;
 }
 
-QImage Workspace::getPreviewImage(const QString& workspaceFilePath, const QSize& targetSize /*= QSize(500, 500)*/)
-{
-    QImage previewImage;
-
-    try {
-        if (!QFileInfo(workspaceFilePath).exists())
-            throw std::runtime_error("File does not exist");
-
-        QFile workspaceJsonFile(workspaceFilePath);
-
-        if (!workspaceJsonFile.open(QIODevice::ReadOnly))
-            throw std::runtime_error("Unable to open file for reading");
-
-        QByteArray workspaceByteArray = workspaceJsonFile.readAll();
-
-        QJsonDocument jsonDocument;
-
-        jsonDocument = QJsonDocument::fromJson(workspaceByteArray);
-
-        if (jsonDocument.isNull() || jsonDocument.isEmpty())
-            throw std::runtime_error("JSON document is invalid");
-
-        const auto workspaceVariantMap = jsonDocument.toVariant().toMap()["Workspace"].toMap();
-
-        previewImage.loadFromData(QByteArray::fromBase64(workspaceVariantMap["PreviewImage"].toByteArray()));
-
-        if (targetSize.isValid())
-            return previewImage.scaled(targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        else
-            return previewImage;
-    }
-    catch (std::exception& e)
-    {
-        qDebug() << "Unable to retrieve preview image from workspace file" << e.what();
-    }
-    catch (...)
-    {
-        qDebug() << "Unable to retrieve preview image from workspace file";
-    }
-
-    return previewImage;
-}
-
 void Workspace::initialize()
 {
     _titleAction.setPlaceHolderString("Enter workspace title here...");

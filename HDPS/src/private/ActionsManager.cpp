@@ -18,7 +18,7 @@ using namespace hdps::gui;
 using namespace hdps::util;
 
 #ifdef _DEBUG
-    #define ACTIONS_MANAGER_VERBOSE
+    //#define ACTIONS_MANAGER_VERBOSE
 #endif
 
 namespace hdps
@@ -40,7 +40,13 @@ void ActionsManager::initialize()
     qDebug() << __FUNCTION__;
 #endif
 
-    AbstractManager::initialize();
+    AbstractActionsManager::initialize();
+
+    if (isInitialized())
+        return;
+
+    beginInitialization();
+    endInitialization();
 }
 
 void ActionsManager::reset()

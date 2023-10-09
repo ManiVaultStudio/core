@@ -55,17 +55,17 @@ void SharedParametersPlugin::init()
     getWidget().setLayout(layout);
 }
 
-ActionsPluginFactory::ActionsPluginFactory() :
+SharedParametersPluginFactory::SharedParametersPluginFactory() :
     ViewPluginFactory(true)
 {
 }
 
-QIcon ActionsPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+QIcon SharedParametersPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
     return Application::getIconFont("FontAwesome").getIcon("cloud", color);
 }
 
-ViewPlugin* ActionsPluginFactory::produce()
+ViewPlugin* SharedParametersPluginFactory::produce()
 {
     return new SharedParametersPlugin(this);
 }

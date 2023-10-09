@@ -18,7 +18,7 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/, const QString& title /*= ""*/, bool restyle /*= true*/) :
+StartPageActionsWidget::StartPageActionsWidget(QWidget* parent, const QString& title, bool restyle /*= true*/) :
     QWidget(parent),
     _layout(),
     _model(this),
@@ -88,7 +88,7 @@ StartPageActionsWidget::StartPageActionsWidget(QWidget* parent /*= nullptr*/, co
 
     connect(&_filterModel, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
         for (int rowIndex = first; rowIndex <= last; rowIndex++)
-            openPersistentEditor(rowIndex);
+            closePersistentEditor(rowIndex);
     });
     
     connect(qApp, &QApplication::paletteChanged, this, &StartPageActionsWidget::updateCustomStyle);

@@ -183,6 +183,24 @@ protected: // Serialization
      */
     static void insertIntoVariantMap(const Serializable& serializable, QVariantMap& variantMap);
 
+public: // Operators
+
+    /**
+     * Equality operator
+     * @param rhs Right-hand-side operator
+     */
+    const bool operator == (const Serializable& rhs) const {
+        return rhs.getId() == getId();
+    }
+    
+    /**
+     * Inequality operator
+     * @param rhs Right-hand-side operator
+     */
+    const bool operator != (const Serializable& rhs) const {
+        return rhs.getId() != getId();
+    }
+
 private:
     QString     _id;                    /** Globally unique identifier of the serializable object */
     QString     _serializationName;     /** Serialization name */

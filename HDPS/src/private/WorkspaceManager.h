@@ -29,8 +29,8 @@ namespace hdps
  * system view plugins are docked.
  * 
  * It uses two ADS dock managers:
- * - One for the main layout (\p _dockManager) 
- * - One for the docking of non-system view plugins in the central area dock widget (\p _viewPluginsDockManager)
+ * - One for the main layout (WorkspaceManager#_dockManager) 
+ * - One for the docking of non-system view plugins in the central area dock widget (WorkspaceManager#_viewPluginsDockManager)
  * 
  * @author Thomas Kroes
  */
@@ -165,6 +165,18 @@ public: // IO
      */
     WorkspaceLocations getWorkspaceLocations(const WorkspaceLocation::Types& types = WorkspaceLocation::Type::All) override;
 
+    /**
+     * Get view plugin names from \p workspaceJsonFile
+     * @param workspaceJsonFile Location of the workspace JSON file
+     */
+    QStringList getViewPluginNames(const QString& workspaceJsonFile) const override;
+
+    /**
+     * Get a preview image
+     * @return Workspace manager preview image
+     */
+    QImage toPreviewImage() const override;
+
 public: // Serialization
 
     /**
@@ -195,12 +207,6 @@ private:
 
     /** Create custom icon for the manager */
     void createIcon();
-
-    /**
-     * Get a preview image
-     * @return Workspace manager preview image
-     */
-    QImage toPreviewImage() const;
 
 public: // Action getters
 

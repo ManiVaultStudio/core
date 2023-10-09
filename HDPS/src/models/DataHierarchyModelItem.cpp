@@ -86,6 +86,8 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
     if (_dataHierarchyItem == nullptr)
         return QVariant();
 
+    DatasetTask& datasetTask = _dataHierarchyItem->getDataset()->getTask();
+
     switch (role)
     {
         case Qt::DisplayRole:
@@ -104,7 +106,7 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                     return editValue;
 
                 case Column::Progress:
-                    return _dataHierarchyItem->isRunning() ? QString("%1%").arg(QString::number(editValue.toFloat(), 'f', 1)) : "";
+                    return datasetTask.isRunning() ? QString("%1%").arg(QString::number(editValue.toFloat(), 'f', 1)) : "";
 
                 case Column::GroupIndex:
                     return editValue.toInt() >= 0 ? editValue : "";
@@ -136,10 +138,10 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                     return _dataHierarchyItem->getDataset()->getId();
 
                 case Column::Info:
-                    return _dataHierarchyItem->getTaskDescription();
+                    return datasetTask.getDescription();
 
                 case Column::Progress:
-                    return _dataHierarchyItem->isRunning() ? 100.0f * _dataHierarchyItem->getTaskProgress() : 0.0f;
+                    return datasetTask.isRunning() ? 100.0f * datasetTask.getProgress() : 0.0f;
 
                 case Column::GroupIndex:
                     return _dataHierarchyItem->getDataset()->getGroupIndex();
@@ -171,10 +173,10 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                     return _dataHierarchyItem->getDataset()->getId();
 
                 case Column::Info:
-                    return _dataHierarchyItem->getTaskDescription();
+                    return _dataHierarchyItem->getDataset()->getTask().getDescription();
 
                 case Column::Progress:
-                    return _dataHierarchyItem->isRunning() ? 100.0f * _dataHierarchyItem->getTaskProgress() : 0.0f;
+                    return datasetTask.isRunning() ? 100.0f * datasetTask.getProgress() : 0.0f;
 
                 case Column::GroupIndex:
                     return _dataHierarchyItem->getDataset()->getGroupIndex();
@@ -230,7 +232,7 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
 
                 case Column::IsAnalyzing:
                 {
-                    if (_dataHierarchyItem->isRunning())
+                    if (datasetTask.isRunning())
                         return fontAwesome.getIcon("microchip");
 
                     break;

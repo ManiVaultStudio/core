@@ -7,10 +7,14 @@
 #include "DockWidget.h"
 
 #include <ViewPlugin.h>
+#include <Task.h>
 
 #include <DockManager.h>
 
 #include <QMenu>
+#include <QMap>
+
+class DockManager;
 
 /**
  * View plugin dock widget class
@@ -118,6 +122,22 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+    /**
+     * Create a view plugin dock widget serialization task for \p viewPluginDockWidgetId (even if no instance is yet available)
+     * This is needed by the workspace manager for proper progress reporting
+     * @param parent Pointer to parent object
+     * @param viewPluginDockWidgetId Globally unique identifier of the view plugin dock widget
+     * @param dockManager Pointer to owning dock manager instance
+     */
+    static void preRegisterSerializationTask(QObject* parent, const QString& viewPluginDockWidgetId, DockManager* dockManager);
+
+    /**
+     * Get serialization task for \p viewPluginDockWidgetId
+     * @param viewPluginDockWidgetId Globally unique identifier of the view plugin dock widget
+     * @return Pointer to task, nullptr if not found
+     */
+    static hdps::Task* getSerializationTask(const QString& viewPluginDockWidgetId);
+
 public: // View plugin isolation
 
     /** Caches the visibility */
@@ -147,6 +167,12 @@ private:
 
 protected:
     static QList<ViewPluginDockWidget*> active;  /** Loaded view plugin dock widgets */
+
+    /**
+     * Map view plugin dock widget identifier to serialization task
+     * A serialization task is there to report progress during ViewPluginDockWidget::fromVariantMap() and ViewPluginDockWidget::toVariantMap()
+     */
+    static QMap<QString, hdps::Task*>  serializationTasks;
 
     friend class ViewPluginsDockWidget;
     friend class WorkspaceManager;

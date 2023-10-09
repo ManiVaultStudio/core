@@ -9,6 +9,7 @@
 
 #include <Application.h>
 #include <CoreInterface.h>
+#include <ProjectMetaAction.h>
 
 #include <util/Icon.h>
 
@@ -178,23 +179,28 @@ void StartPageOpenProjectWidget::updateRecentActions()
     for (const auto& recentFile : _recentProjectsAction.getRecentFiles()) {
         const auto recentFilePath = recentFile.getFilePath();
 
-        QTemporaryDir temporaryDir;
+        const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
 
-        const auto recentProjectJsonFilePath = projects().extractProjectFileFromHdpsFile(recentFilePath, temporaryDir);
+        if (projectMetaAction.isNull()) {
+            StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), recentFilePath, recentFilePath, "", [recentFilePath]() -> void {
+                projects().openProject(recentFilePath);
+            });
 
-        Project project(recentProjectJsonFilePath, true);
+            _recentProjectsWidget.getModel().add(recentProjectStartPageAction);
+        }
+        else {
+            StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), recentFilePath, projectMetaAction->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+                projects().openProject(recentFilePath);
+            });
 
-        StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), recentFilePath, project.getDescriptionAction().getString(), "", [recentFilePath]() -> void {
-            projects().openProject(recentFilePath);
-        });
+            recentProjectStartPageAction.setComments(projectMetaAction->getCommentsAction().getString());
+            recentProjectStartPageAction.setTags(projectMetaAction->getTagsAction().getStrings());
+            recentProjectStartPageAction.setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
+            recentProjectStartPageAction.setPreviewImage(projects().getWorkspacePreview(recentFilePath));
+            recentProjectStartPageAction.setContributors(projectMetaAction->getContributorsAction().getStrings());
 
-        recentProjectStartPageAction.setComments(project.getCommentsAction().getString());
-        recentProjectStartPageAction.setTags(project.getTagsAction().getStrings());
-        recentProjectStartPageAction.setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
-        recentProjectStartPageAction.setPreviewImage(projects().getPreviewImage(recentFilePath));
-        recentProjectStartPageAction.setContributors(project.getContributorsAction().getStrings());
-
-        _recentProjectsWidget.getModel().add(recentProjectStartPageAction);
+            _recentProjectsWidget.getModel().add(recentProjectStartPageAction);
+        }
     }
 }
 
@@ -204,7 +210,7 @@ void StartPageOpenProjectWidget::updateExamplesActions()
 
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    QStringList projectFilter("*.hdps");
+    QStringList projectFilter("*.mv");
 
     QDir exampleProjectsDirectory(QString("%1/examples/projects").arg(qApp->applicationDirPath()));
 
@@ -213,22 +219,27 @@ void StartPageOpenProjectWidget::updateExamplesActions()
     for (const auto& exampleProject : exampleProjects) {
         const auto exampleProjectFilePath = QString("%1/examples/projects/%2").arg(qApp->applicationDirPath(), exampleProject);
 
-        QTemporaryDir temporaryDir;
+        const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(exampleProjectFilePath);
 
-        const auto exampleProjectJsonFilePath = projects().extractProjectFileFromHdpsFile(exampleProjectFilePath, temporaryDir);
+        if (projectMetaAction.isNull()) {
+            StartPageAction exampleProjectStartPageAction(fontAwesome.getIcon("file-prescription"), QFileInfo(exampleProjectFilePath).baseName(), exampleProjectFilePath, exampleProjectFilePath, "", [exampleProjectFilePath]() -> void {
+                projects().openProject(exampleProjectFilePath);
+            });
 
-        Project project(exampleProjectJsonFilePath, true);
+            _exampleProjectsWidget.getModel().add(exampleProjectStartPageAction);
+        }
+        else {
+            StartPageAction exampleProjectStartPageAction(fontAwesome.getIcon("file-prescription"), projectMetaAction->getTitleAction().getString(), exampleProjectFilePath, projectMetaAction->getDescriptionAction().getString(), "", [exampleProjectFilePath]() -> void {
+                projects().openProject(exampleProjectFilePath);
+            });
 
-        StartPageAction exampleProjectStartPageAction(fontAwesome.getIcon("file-prescription"), project.getTitleAction().getString(), exampleProjectFilePath, project.getDescriptionAction().getString(), "", [exampleProjectFilePath]() -> void {
-            projects().openProject(exampleProjectFilePath);
-        });
+            exampleProjectStartPageAction.setComments(projectMetaAction->getCommentsAction().getString());
+            exampleProjectStartPageAction.setTags(projectMetaAction->getTagsAction().getStrings());
+            exampleProjectStartPageAction.setPreviewImage(projects().getWorkspacePreview(exampleProjectFilePath));
+            exampleProjectStartPageAction.setContributors(projectMetaAction->getContributorsAction().getStrings());
 
-        exampleProjectStartPageAction.setComments(project.getCommentsAction().getString());
-        exampleProjectStartPageAction.setTags(project.getTagsAction().getStrings());
-        exampleProjectStartPageAction.setPreviewImage(projects().getPreviewImage(exampleProjectFilePath));
-        exampleProjectStartPageAction.setContributors(project.getContributorsAction().getStrings());
-
-        _exampleProjectsWidget.getModel().add(exampleProjectStartPageAction);
+            _exampleProjectsWidget.getModel().add(exampleProjectStartPageAction);
+        }
     }
 }
 

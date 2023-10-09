@@ -207,7 +207,6 @@ hdps::util::ColorMap::Type ColorMapAction::getColorMapType() const
 void ColorMapAction::setColorMapType(const util::ColorMap::Type& colorMapType)
 {
     _colorMapFilterModel.setType(colorMapType);
-    _currentColorMapAction.reset();
 
     emit typeChanged(colorMapType);
     emit imageChanged(getColorMapImage());

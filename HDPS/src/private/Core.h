@@ -16,6 +16,7 @@
 #include "WorkspaceManager.h"
 #include "ProjectManager.h"
 #include "SettingsManager.h"
+#include "TaskManager.h"
 
 #include <memory>
 #include <unordered_map>
@@ -35,8 +36,11 @@ public:
 
 public:
 
-    /** Initializes all core managers */
-    void init() override;
+    /** Creates the core managers */
+    void createManagers() override;
+
+    /** Initializes the core */
+    void initialize() override;
 
     /** Resets the entire core implementation */
     void reset() override;
@@ -132,26 +136,22 @@ public:
     void addPlugin(plugin::Plugin* plugin);
 
 public: // Managers
-    
+
+    AbstractManager* getManager(const ManagerType& managerType) override;
+
     AbstractActionsManager& getActionsManager() override;
     AbstractPluginManager& getPluginManager() override;
     AbstractEventManager& getEventManager() override;
     AbstractDataManager& getDataManager() override;
     AbstractDataHierarchyManager& getDataHierarchyManager() override;
+    AbstractTaskManager& getTaskManager() override;
     AbstractWorkspaceManager& getWorkspaceManager() override;
-    AbstractProjectManager& getProjectManager();
-    AbstractSettingsManager& getSettingsManager();
+    AbstractProjectManager& getProjectManager() override;
+    AbstractSettingsManager& getSettingsManager() override;
 
 private:
-    QScopedPointer<ActionsManager>          _actionsManager;            /** Actions manager for storing actions */
-    QScopedPointer<PluginManager>           _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core */
-    QScopedPointer<EventManager>            _eventManager;              /** Event manager for emitting global events */
-    QScopedPointer<DataManager>             _dataManager;               /** Data manager responsible for storing data sets and data selections */
-    QScopedPointer<DataHierarchyManager>    _dataHierarchyManager;      /** Data hierarchy manager for providing a hierarchical dataset structure */
-    QScopedPointer<WorkspaceManager>        _workspaceManager;          /** Workspace manager for controlling widgets layout */
-    QScopedPointer<ProjectManager>          _projectManager;            /** Manager for loading/saving projects */
-    QScopedPointer<SettingsManager>         _settingsManager;           /** Manager for managing global settings */
-
+    QVector<AbstractManager*>   _managers;      /** All managers in the core */
+    
     friend class DataHierarchyManager;
 };
 

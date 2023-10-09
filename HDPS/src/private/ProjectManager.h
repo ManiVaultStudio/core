@@ -8,9 +8,10 @@
 
 #include <QObject>
 #include <QPointer>
+#include <QTemporaryDir>
 
 /**
- * Project class
+ * Project manager class
  *
  * Class for managing the creation/loading/saving of projects and contains a single project instance.
  *
@@ -99,19 +100,20 @@ public:
     hdps::Project* getCurrentProject() override;
 
     /**
-     * Extract the project JSON file (project.json) from a compressed HDPS file (*.hdps)
-     * @param hdpsFilePath File path of the compressed HDPS file (*.hdps)
-     * @param temporaryDir Temporary directory to store the project.json file
-     * @return File path of the extracted project.json file, empty string if extraction failed
+     * Extract \p filePath from compressed ManiVault project in \p maniVaultFilePath
+     * @param maniVaultFilePath File path of the compressed ManiVault file
+     * @param temporaryDir Temporary dir where the extracted file resides
+     * @param filePath Relative file path of the file that needs to be extracted
+     * @return File path of the extracted file, empty string if extraction failed
      */
-    QString extractProjectFileFromHdpsFile(const QString& hdpsFilePath, QTemporaryDir& temporaryDir) override;
+    QString extractFileFromManiVaultProject(const QString& maniVaultFilePath, QTemporaryDir& temporaryDir, const QString& filePath) override;
 
     /**
-     * Get preview image of the project
+     * Get preview image of the project workspace
      * @param projectFilePath Path of the project file
      * @return Preview image
      */
-    QImage getPreviewImage(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const override;
+    QImage getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const override;
 
 public: // Serialization
 
@@ -143,7 +145,7 @@ public: // Menus
 
 private:
 
-    /** Resets the core and creates a new project */
+    /** Resets the manager and creates a new project */
     void createProject();
 
 public: // Action getters

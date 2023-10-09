@@ -105,7 +105,7 @@ public:
      * @param title Title of the action
      * @param toggled Toggled
      */
-    Q_INVOKABLE ToggleAction(QObject* parent, const QString& title = "", bool toggled = false);
+    Q_INVOKABLE ToggleAction(QObject* parent, const QString& title, bool toggled = false);
 
     /**
      * Overrides the base class setChecked()

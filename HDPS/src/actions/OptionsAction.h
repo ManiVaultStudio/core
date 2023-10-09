@@ -195,7 +195,7 @@ public:
      * @param options Options to select from
      * @param selectedOptions Initial selected options
      */
-    Q_INVOKABLE explicit OptionsAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QStringList& selectedOptions = QStringList());
+    Q_INVOKABLE explicit OptionsAction(QObject* parent, const QString& title, const QStringList& options = QStringList(), const QStringList& selectedOptions = QStringList());
 
     /**
      * Initialize the option action
@@ -270,9 +270,9 @@ public:
     /**
      * Select option
      * @param option Option to select
-     * @param replaceSelection Whether to clear the current option selection
+     * @param unselect Whether to select or unselect the option
      */
-    void selectOption(const QString& option, const bool& replaceSelection = false);
+    void selectOption(const QString& option, bool unselect = false);
 
     /**
      * Set the selected options

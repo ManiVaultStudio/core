@@ -16,6 +16,11 @@ IconFonts::IconFonts() :
 
 const hdps::IconFont& IconFonts::getIconFont(const QString& name, const std::int32_t& majorVersion /*= -1*/, const std::int32_t& minorVersion /*= -1*/) const
 {
+    if (majorVersion < 0 && minorVersion < 0)
+        for (auto iconFont : _iconFonts[name])
+            if (iconFont->isDefaultFont())
+                return *iconFont;
+
     if (majorVersion < 0) {
         if (minorVersion >= 0)
             throw IconFontNotFoundException(name, majorVersion, minorVersion);
@@ -39,16 +44,12 @@ const hdps::IconFont& IconFonts::getIconFont(const QString& name, const std::int
             return *(filtered.last().get());
         }
         else {
-            Fonts filtered;
+            for (auto iconFont : _iconFonts[name]) {
+                if (iconFont->getMajorVersion() == majorVersion && iconFont->getMinorVersion() == minorVersion)
+                    return *iconFont;
+            }
 
-            std::copy_if(_iconFonts[name].begin(), _iconFonts[name].end(), std::back_inserter(filtered), [&majorVersion, &minorVersion](auto iconFont) {
-                return iconFont->getMajorVersion() == majorVersion && iconFont->getMinorVersion() == minorVersion;
-            });
-
-            if (filtered.isEmpty())
-                throw IconFontNotFoundException(name, majorVersion, minorVersion);
-
-            return *(filtered.last().get());
+            throw IconFontNotFoundException(name, majorVersion, minorVersion);
         }
     }   
 }
@@ -80,9 +81,14 @@ void IconFonts::add(const QSharedPointer<IconFont>& iconFont)
 {
     try
     {
+        if (iconFont->isDefaultFont()) {
+            for (auto font : _iconFonts[iconFont->getName()])
+                font->setDefaultFont(false);
+        }
+        
         _iconFonts[iconFont->getName()].append(iconFont);
 
-        std::sort(_iconFonts[iconFont->getName()].begin(), _iconFonts[iconFont->getName()].end(), [] (auto iconFontA, auto iconFontB) {
+        std::sort(_iconFonts[iconFont->getName()].begin(), _iconFonts[iconFont->getName()].end(), [](auto iconFontA, auto iconFontB) {
             if (iconFontA->getMajorVersion() == iconFontB->getMajorVersion() && iconFontA->getMinorVersion() < iconFontB->getMinorVersion())
                 return true;
 

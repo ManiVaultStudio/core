@@ -5,6 +5,7 @@
 #include "DataHierarchyModel.h"
 #include "DataHierarchyModelItem.h"
 #include "DatasetsMimeData.h"
+#include "Set.h"
 
 #include <DataHierarchyItem.h>
 
@@ -49,11 +50,11 @@ bool DataHierarchyModel::setData(const QModelIndex& index, const QVariant& value
             break;
 
         case DataHierarchyModelItem::Column::Info:
-            dataHierarchyModelItem->getDataHierarchyItem()->setTaskDescription(value.toString());
+            dataHierarchyModelItem->getDataHierarchyItem()->getDataset()->getTask().setDescription(value.toString());
             break;
 
         case DataHierarchyModelItem::Column::Progress:
-            dataHierarchyModelItem->getDataHierarchyItem()->setTaskProgress(value.toFloat());
+            dataHierarchyModelItem->getDataHierarchyItem()->getDataset()->getTask().setProgress(value.toFloat());
             break;
 
         case DataHierarchyModelItem::Column::GroupIndex:

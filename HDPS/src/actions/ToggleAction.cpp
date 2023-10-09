@@ -15,7 +15,7 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, bool toggled /*= false*/) :
+ToggleAction::ToggleAction(QObject* parent, const QString& title, bool toggled /*= false*/) :
     WidgetAction(parent, title),
     _indeterminate(false)
 {

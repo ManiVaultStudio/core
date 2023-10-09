@@ -59,7 +59,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Plugin trigger picker title
      */
-    PluginTriggerPickerAction(QObject* parent, const QString& title = "");
+    PluginTriggerPickerAction(QObject* parent, const QString& title);
 
     /**
      * Establishes the plugin trigger actions for \p pluginType and \p datasets

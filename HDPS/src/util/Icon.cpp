@@ -8,9 +8,7 @@
 #include <QApplication>
 #include <QPalette>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps::gui {
 
 QIcon createIcon(const QPixmap& pixmap, const QList<QSize>& pixmapSizes /*= defaultIconPixmapSizes*/)
 {
@@ -114,5 +112,4 @@ QIcon combineIconsHorizontally(const QVector<QIcon>& icons)
     return createIcon(pixmap);
 }
 
-}
 }

@@ -14,7 +14,7 @@ namespace hdps::gui {
     constexpr std::int32_t StatusAction::MESSAGE_DISAPPEAR_INTERVAL;
 #endif
 
-StatusAction::StatusAction(QObject* parent, const QString& title /*= ""*/, const Status& status /*= Status::Undefined*/, const QString& message /*= ""*/) :
+StatusAction::StatusAction(QObject* parent, const QString& title, const Status& status /*= Status::Undefined*/, const QString& message /*= ""*/) :
     WidgetAction(parent, "Title")
 {
     setText(title);

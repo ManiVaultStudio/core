@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ViewPluginDockWidget.h"
+#include "DockManager.h"
 
 #include <Application.h>
 #include <CoreInterface.h>
@@ -20,7 +21,7 @@
 #include <AutoHideDockContainer.h>
 
 #ifdef _DEBUG
-    #define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
+    //#define VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
 #endif
 
 using namespace ads;
@@ -31,6 +32,8 @@ using namespace hdps::util;
 using namespace hdps::gui;
 
 QList<ViewPluginDockWidget*> ViewPluginDockWidget::active = QList<ViewPluginDockWidget*>();
+
+QMap<QString, Task*> ViewPluginDockWidget::serializationTasks = QMap<QString, Task*>();
 
 ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidget* parent /*= nullptr*/) :
     DockWidget(title, parent),
@@ -93,6 +96,8 @@ ViewPluginDockWidget::~ViewPluginDockWidget()
 #ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
     qDebug() << __FUNCTION__ << windowTitle();
 #endif
+
+    serializationTasks.remove(getId());
 }
 
 QString ViewPluginDockWidget::getTypeString() const
@@ -220,18 +225,42 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
 
     DockWidget::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "ViewPlugin");
+    const auto viewPluginDockWidgetId   = variantMap["ID"].toString();
+    const auto viewPluginMap            = variantMap["ViewPlugin"].toMap();
+    const auto guiName                  = viewPluginMap["GuiName"].toMap()["Value"].toString();
 
-    _viewPluginMap = variantMap["ViewPlugin"].toMap();
+    auto serializationTask = ViewPluginDockWidget::getSerializationTask(viewPluginDockWidgetId);
 
-    variantMapMustContain(_viewPluginMap, "Kind");
+    const auto loadViewPluginSubtask    = QString("Loading %1 plugin").arg(guiName);
+    const auto restoreViewPluginSubtask = QString("Restoring %1 GUI").arg(guiName);
 
-    _viewPluginKind = _viewPluginMap["Kind"].toString();
+    serializationTask->setName(QString("Loading %1").arg(guiName));
+    serializationTask->setSubtasks({ loadViewPluginSubtask, restoreViewPluginSubtask });
+    serializationTask->setRunning();
 
-    loadViewPlugin();
+    serializationTask->setSubtaskStarted(loadViewPluginSubtask);
+    {
+        variantMapMustContain(variantMap, "ViewPlugin");
 
-    if (variantMap.contains("DockManagerState"))
-        _dockManager.restoreState(QByteArray::fromBase64(variantMap["DockManagerState"].toString().toUtf8()));
+        _viewPluginMap = variantMap["ViewPlugin"].toMap();
+
+        variantMapMustContain(_viewPluginMap, "Kind");
+
+        _viewPluginKind = _viewPluginMap["Kind"].toString();
+
+        loadViewPlugin();
+    }
+    serializationTask->setSubtaskFinished(loadViewPluginSubtask);
+
+    serializationTask->setSubtaskStarted(restoreViewPluginSubtask);
+    {
+        if (variantMap.contains("DockManagerState"))
+            _dockManager.restoreState(QByteArray::fromBase64(variantMap["DockManagerState"].toString().toUtf8()));
+    }
+    serializationTask->setSubtaskFinished(restoreViewPluginSubtask);
+
+    serializationTask->setProgress(1.f);
+    serializationTask->setFinished(false);
 }
 
 QVariantMap ViewPluginDockWidget::toVariantMap() const
@@ -263,6 +292,27 @@ void ViewPluginDockWidget::cacheVisibility()
 void ViewPluginDockWidget::restoreVisibility()
 {
     toggleView(_cachedVisibility);
+}
+
+void ViewPluginDockWidget::preRegisterSerializationTask(QObject* parent, const QString& viewPluginDockWidgetId, DockManager* dockManager)
+{
+    if (viewPluginDockWidgetId.isEmpty())
+        return;
+
+    auto serializationTask = new Task(parent, "View plugin Dock Widget");
+
+    serializationTask->setMayKill(false);
+    serializationTask->setParentTask(&dockManager->getSerializationTask());
+
+    serializationTasks[viewPluginDockWidgetId] = serializationTask;
+}
+
+Task* ViewPluginDockWidget::getSerializationTask(const QString& viewPluginDockWidgetId)
+{
+    if (serializationTasks.contains(viewPluginDockWidgetId))
+        return serializationTasks[viewPluginDockWidgetId];
+
+    return nullptr;
 }
 
 void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)

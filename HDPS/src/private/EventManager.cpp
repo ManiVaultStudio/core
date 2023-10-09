@@ -4,8 +4,6 @@
 
 #include "EventManager.h"
 
-#include <Application.h>
-
 #include <util/Exception.h>
 
 #include <Set.h>
@@ -262,7 +260,17 @@ void EventManager::notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset)
 
 void EventManager::initialize()
 {
-    AbstractManager::initialize();
+#ifdef EVENT_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    AbstractEventManager::initialize();
+
+    if (isInitialized())
+        return;
+
+    beginInitialization();
+    endInitialization();
 }
 
 void EventManager::reset()

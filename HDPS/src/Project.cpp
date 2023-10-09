@@ -9,6 +9,8 @@
 
 #include "util/Serialization.h"
 
+#include <QTemporaryDir>
+
 using namespace hdps::gui;
 using namespace hdps::util;
 
@@ -18,26 +20,21 @@ Project::Project(QObject* parent /*= nullptr*/) :
     QObject(parent),
     Serializable("Project"),
     _filePath(),
+    _startupProject(false),
     _applicationVersion(Application::current()->getVersion()),
-    _applicationVersionAction(this, "Application Version"),
-    _projectVersionAction(this, "Project Version"),
-    _readOnlyAction(this, "Read-only"),
-    _titleAction(this, "Title"),
-    _descriptionAction(this, "Description"),
-    _tagsAction(this, "Tags"),
-    _commentsAction(this, "Comments"),
-    _contributorsAction(this, "Contributors"),
-    _compressionAction(this),
-    _splashScreenAction(this, *this),
-    _studioModeAction(this, "Studio Mode")
+    _projectMetaAction(this),    
+    _serializationTask(this, "*Loading project"),
+    _dataSerializationTask(this, "*Loading project data"),
+    _workspaceSerializationTask(this, "*Loading workspace")
 {
     initialize();
 }
 
-Project::Project(const QString& filePath, bool preview, QObject* parent /*= nullptr*/) :
+Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
     Project(parent)
 {
-    _filePath = filePath;
+    setFilePath(filePath);
+    initialize();
 
     try {
         if (!QFileInfo(_filePath).exists())
@@ -57,7 +54,7 @@ Project::Project(const QString& filePath, bool preview, QObject* parent /*= null
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
             throw std::runtime_error("JSON document is invalid");
 
-        fromVariantMap(jsonDocument.toVariant().toMap()["Project"].toMap(), preview);
+        fromVariantMap(jsonDocument.toVariant().toMap()["Project"].toMap());
     }
     catch (std::exception& e)
     {
@@ -76,54 +73,53 @@ QString Project::getFilePath() const
 
 void Project::setFilePath(const QString& filePath)
 {
-    _filePath = filePath;
+    _filePath       = filePath;
+    _startupProject = filePath == Application::current()->getStartupProjectFilePath();
 
     emit filePathChanged(_filePath);
 }
 
-void Project::fromVariantMap(const QVariantMap& variantMap)
+bool Project::isStartupProject() const
 {
-    fromVariantMap(variantMap, false);
+    return _startupProject;
 }
 
-void Project::fromVariantMap(const QVariantMap& variantMap, bool preview)
+void Project::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
-    _splashScreenAction.fromParentVariantMap(variantMap);
-    _applicationVersion.fromParentVariantMap(variantMap);
-    _projectVersionAction.fromParentVariantMap(variantMap);
-    _readOnlyAction.fromParentVariantMap(variantMap);
-    _titleAction.fromParentVariantMap(variantMap);
-    _descriptionAction.fromParentVariantMap(variantMap);
-    _tagsAction.fromParentVariantMap(variantMap);
-    _commentsAction.fromParentVariantMap(variantMap);
-    _contributorsAction.fromParentVariantMap(variantMap);
-    _compressionAction.fromParentVariantMap(variantMap);
-    _studioModeAction.fromParentVariantMap(variantMap);
+    _projectMetaAction.getApplicationVersionAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getProjectVersionAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getReadOnlyAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getTitleAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getDescriptionAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getTagsAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getCommentsAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getContributorsAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getCompressionAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getSplashScreenAction().fromParentVariantMap(variantMap);
+    _projectMetaAction.getStudioModeAction().fromParentVariantMap(variantMap);
 
-    if (!preview) {
-        dataHierarchy().fromParentVariantMap(variantMap);
-        actions().fromParentVariantMap(variantMap);
-        plugins().fromParentVariantMap(variantMap);
-    }
+    dataHierarchy().fromParentVariantMap(variantMap);
+    actions().fromParentVariantMap(variantMap);
+    plugins().fromParentVariantMap(variantMap);
 }
 
 QVariantMap Project::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
     
-    _splashScreenAction.insertIntoVariantMap(variantMap);
-    _applicationVersion.insertIntoVariantMap(variantMap);
-    _projectVersionAction.insertIntoVariantMap(variantMap);
-    _readOnlyAction.insertIntoVariantMap(variantMap);
-    _titleAction.insertIntoVariantMap(variantMap);
-    _descriptionAction.insertIntoVariantMap(variantMap);
-    _tagsAction.insertIntoVariantMap(variantMap);
-    _commentsAction.insertIntoVariantMap(variantMap);
-    _contributorsAction.insertIntoVariantMap(variantMap);
-    _compressionAction.insertIntoVariantMap(variantMap);
-    _studioModeAction.insertIntoVariantMap(variantMap);
+    _projectMetaAction.getApplicationVersionAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getProjectVersionAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getReadOnlyAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getTitleAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getDescriptionAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getTagsAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getCommentsAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getContributorsAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getCompressionAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getSplashScreenAction().insertIntoVariantMap(variantMap);
+    _projectMetaAction.getStudioModeAction().insertIntoVariantMap(variantMap);
 
     plugins().insertIntoVariantMap(variantMap);
     dataHierarchy().insertIntoVariantMap(variantMap);
@@ -132,45 +128,28 @@ QVariantMap Project::toVariantMap() const
     return variantMap;
 }
 
-void Project::initialize()
+Task& Project::getSerializationTask()
 {
-    _readOnlyAction.setToolTip("Whether the project is in read-only mode or not");
+    if (Application::current()->shouldOpenProjectAtStartup())
+        return *Application::current()->getTask(Application::TaskType::LoadProject);
 
-    _titleAction.setPlaceHolderString("Enter project title here...");
-    _titleAction.setClearable(true);
+    return _serializationTask;
+}
 
-    _descriptionAction.setPlaceHolderString("Enter project description here...");
-    _descriptionAction.setClearable(true);
+Task& Project::getDataSerializationTask()
+{
+    if (Application::current()->shouldOpenProjectAtStartup())
+        return *Application::current()->getTask(Application::TaskType::LoadProjectData);
 
-    _tagsAction.setIconByName("tag");
-    _tagsAction.setCategory("Tag");
-    _tagsAction.setStretch(2);
+    return _dataSerializationTask;
+}
 
-    _commentsAction.setPlaceHolderString("Enter project comments here...");
-    _commentsAction.setClearable(true);
-    _commentsAction.setStretch(2);
-    _commentsAction.setDefaultWidgetFlags(StringAction::TextEdit);
+Task& Project::getWorkspaceSerializationTask()
+{
+    if (Application::current()->shouldOpenProjectAtStartup())
+        return *Application::current()->getTask(Application::TaskType::LoadProjectWorkspace);
 
-    _contributorsAction.setIconByName("user");
-    _contributorsAction.setCategory("Contributor");
-    _contributorsAction.setEnabled(false);
-    _contributorsAction.setStretch(1);
-    _contributorsAction.setDefaultWidgetFlags(StringsAction::ListView);
-
-    updateContributors();
-
-    _studioModeAction.setIconByName("pencil-ruler");
-    
-    connect(&_studioModeAction, &ToggleAction::toggled, this, &Project::setStudioMode);
-
-    const auto updateStudioModeActionReadOnly = [&]() -> void {
-        _studioModeAction.setEnabled(projects().hasProject());
-    };
-
-    updateStudioModeActionReadOnly();
-
-    connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
-    connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
+    return _workspaceSerializationTask;
 }
 
 util::Version Project::getVersion() const
@@ -188,8 +167,8 @@ void Project::updateContributors()
     currentUserName = getenv("USERNAME");
 #endif
 
-    if (!currentUserName.isEmpty() && !_contributorsAction.getStrings().contains(currentUserName))
-        _contributorsAction.addString(currentUserName);
+    if (!currentUserName.isEmpty() && !_projectMetaAction.getContributorsAction().getStrings().contains(currentUserName))
+        _projectMetaAction.getContributorsAction().addString(currentUserName);
 }
 
 void Project::setStudioMode(bool studioMode)
@@ -212,7 +191,6 @@ void Project::setStudioMode(bool studioMode)
             for (auto& action : dataset.get()->getActions())
                 action->setConnectionPermissionsToAll(true);
         }
-
     }
     else {
         for (auto plugin : plugins)
@@ -225,38 +203,44 @@ void Project::setStudioMode(bool studioMode)
 
 }
 
-Project::CompressionAction::CompressionAction(QObject* parent /*= nullptr*/) :
-    WidgetAction(parent, "Compression"),
-    _enabledAction(this, "Compression", DEFAULT_ENABLE_COMPRESSION),
-    _levelAction(this, "Compression level", 1, 9, DEFAULT_COMPRESSION_LEVEL)
+ProjectMetaAction& Project::getProjectMetaAction()
 {
-    _levelAction.setPrefix("Level: ");
+    return _projectMetaAction;
+}
 
-    const auto updateCompressionLevelReadOnly = [this]() -> void {
-        _levelAction.setEnabled(_enabledAction.isChecked());
+QSharedPointer<ProjectMetaAction> Project::getProjectMetaActionFromProjectFilePath(const QString& projectFilePath)
+{
+    QTemporaryDir temporaryDir;
+
+    const auto projectMetaJsonFilePath = projects().extractFileFromManiVaultProject(projectFilePath, temporaryDir, "meta.json");
+
+    if (projectMetaJsonFilePath.isEmpty())
+        return {};
+
+    return QSharedPointer<ProjectMetaAction>::create(projectMetaJsonFilePath);
+}
+
+void Project::initialize()
+{
+    getProjectMetaAction().getSplashScreenAction().setMayCloseSplashScreenWidget(true);
+
+    updateContributors();
+
+    getStudioModeAction().setIcon(Application::getIconFont("FontAwesome").getIcon("pencil-ruler"));
+
+    connect(&getStudioModeAction(), &ToggleAction::toggled, this, &Project::setStudioMode);
+
+    const auto updateStudioModeActionReadOnly = [&]() -> void {
+        getStudioModeAction().setEnabled(projects().hasProject());
     };
 
-    connect(&_enabledAction, &ToggleAction::toggled, this, updateCompressionLevelReadOnly);
+    updateStudioModeActionReadOnly();
 
-    updateCompressionLevelReadOnly();
-}
+    connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
+    connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
 
-void Project::CompressionAction::fromVariantMap(const QVariantMap& variantMap)
-{
-    WidgetAction::fromVariantMap(variantMap);
-
-    _enabledAction.fromParentVariantMap(variantMap);
-    _levelAction.fromParentVariantMap(variantMap);
-}
-
-QVariantMap Project::CompressionAction::toVariantMap() const
-{
-    QVariantMap variantMap = WidgetAction::toVariantMap();
-
-    _enabledAction.insertIntoVariantMap(variantMap);
-    _levelAction.insertIntoVariantMap(variantMap);
-
-    return variantMap;
+    //_dataSerializationTask.setParentTask(&_serializationTask);
+    //_workspaceSerializationTask.setParentTask(&_serializationTask);
 }
 
 }

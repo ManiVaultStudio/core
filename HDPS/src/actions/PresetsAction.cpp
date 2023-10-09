@@ -13,7 +13,7 @@
 #include <QStringListModel>
 
 #ifdef _DEBUG
-    #define PRESETS_ACTION_VERBOSE
+    //#define PRESETS_ACTION_VERBOSE
 #endif
 
 namespace hdps::gui {

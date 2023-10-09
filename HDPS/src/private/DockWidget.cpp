@@ -29,10 +29,6 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     Serializable(title),
     _settingsToolButton(nullptr)
 {
-#ifdef DOCK_WIDGET_VERBOSE
-    qDebug() << __FUNCTION__ << title;
-#endif
-
     setObjectName(getId());
     setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromContent);
 

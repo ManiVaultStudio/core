@@ -13,11 +13,13 @@
 #include "AbstractDataManager.h"
 #include "AbstractDataHierarchyManager.h"
 #include "AbstractEventManager.h"
+#include "AbstractTaskManager.h"
 #include "AbstractWorkspaceManager.h"
 #include "AbstractProjectManager.h"
 #include "AbstractSettingsManager.h"
 
 #include <QString>
+#include <QObject>
 
 #include <vector>
 #include <functional>
@@ -48,8 +50,27 @@ namespace hdps
         using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
     }
 
-class CoreInterface
+class CoreInterface : public QObject
 {
+    Q_OBJECT
+
+public:
+
+    /** Enumeration for distinguishing manager types */
+    enum class ManagerType {
+        Actions = 0,        /** Actions manager for storing actions */
+        Plugins,            /** Plugin manager responsible for loading plug-ins and adding them to the core */
+        Events,             /** Event manager for emitting global events */
+        Data,               /** Data manager responsible for storing data sets and data selections */
+        DataHierarchy,      /** Data hierarchy manager for providing a hierarchical dataset structure */
+        Tasks,              /** Manager for managing global tasks */
+        Workspaces,         /** Workspace manager for controlling widgets layout */
+        Projects,           /** Manager for loading/saving projects */
+        Settings,           /** Manager for managing global settings */
+
+        Count
+    };
+
 public:
 
     /** Default constructor */
@@ -59,10 +80,36 @@ public:
     {
     }
     
-    /** Initializes all core managers */
-    virtual void init() {
-        _initialized = true;
+    /** Creates the core managers */
+    virtual void createManagers() = 0;
+
+    /** Set core about to be initialized */
+    virtual void setAboutToBeInitialized() final {
+        qDebug() << "ManiVault core about to be initialized";
+
+        emit aboutToBeInitialized();
     };
+
+    /** Initializes the core */
+    virtual void initialize() {
+        qDebug() << "ManiVault core initializing...";
+    };
+
+    /** Flag the core as initialized */
+    virtual void setInitialized() final {
+        _initialized = true;
+
+        qDebug() << "ManiVault core initialized";
+
+        emit initialized();
+    }
+
+    /** Flag the core managers as created */
+    virtual void setManagersCreated() final {
+        qDebug() << "ManiVault core managers created";
+
+        emit managersCreated();
+    }
 
     /** Resets the entire core implementation */
     virtual void reset() = 0;
@@ -225,15 +272,29 @@ public: // Dataset grouping
     virtual void setDatasetGroupingEnabled(const bool& datasetGroupingEnabled) = 0;
 
 public: // Managers
-    
+
+    virtual AbstractManager* getManager(const ManagerType& managerType) = 0;
+
     virtual AbstractActionsManager& getActionsManager() = 0;
     virtual AbstractPluginManager& getPluginManager() = 0;
     virtual AbstractEventManager& getEventManager() = 0;
     virtual AbstractDataManager& getDataManager() = 0;
     virtual AbstractDataHierarchyManager& getDataHierarchyManager() = 0;
+    virtual AbstractTaskManager& getTaskManager() = 0;
     virtual AbstractWorkspaceManager& getWorkspaceManager() = 0;
     virtual AbstractProjectManager& getProjectManager() = 0;
     virtual AbstractSettingsManager& getSettingsManager() = 0;
+
+signals:
+
+    /** Invoked when the core is about to be initialized */
+    void aboutToBeInitialized();
+
+    /** Invoked when the core has been initialized */
+    void initialized();
+
+    /** Invoked when the core managers have been created */
+    void managersCreated();
 
 protected:
     bool    _initialized;               /** Boolean determining whether the core is initialized or not */
@@ -298,6 +359,14 @@ static AbstractDataHierarchyManager& dataHierarchy() {
  */
 static AbstractWorkspaceManager& workspaces() {
     return core()->getWorkspaceManager();
+}
+
+/**
+ * Convenience function to obtain access to the task manager in the core
+ * @return Reference to abstract task manager
+ */
+static AbstractTaskManager& tasks() {
+    return core()->getTaskManager();
 }
 
 /**

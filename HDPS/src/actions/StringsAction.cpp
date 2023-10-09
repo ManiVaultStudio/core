@@ -12,7 +12,7 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-StringsAction::StringsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& strings /*= QStringList()*/) :
+StringsAction::StringsAction(QObject* parent, const QString& title, const QStringList& strings /*= QStringList()*/) :
     WidgetAction(parent, title),
     _category("String"),
     _strings(),

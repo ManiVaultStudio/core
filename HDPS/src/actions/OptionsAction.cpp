@@ -18,7 +18,7 @@ using namespace hdps::util;
 
 namespace hdps::gui {
 
-OptionsAction::OptionsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/) :
+OptionsAction::OptionsAction(QObject* parent, const QString& title, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/) :
     WidgetAction(parent, title),
     _optionsModel(),
     _selectionAction(*this),
@@ -131,12 +131,12 @@ bool OptionsAction::hasSelectedOptions() const
     return false;
 }
 
-void OptionsAction::selectOption(const QString& option, const bool& replaceSelection /*= false*/)
+void OptionsAction::selectOption(const QString& option, bool unselect /*= false*/)
 {
     const auto matches = _optionsModel.match(_optionsModel.index(0, 0), Qt::DisplayRole, option);
 
     if (!matches.isEmpty())
-        _optionsModel.item(matches.first().row())->setData(Qt::Checked, Qt::CheckStateRole);
+        _optionsModel.item(matches.first().row())->setData(unselect ? Qt::Unchecked : Qt::Checked, Qt::CheckStateRole);
 }
 
 void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
