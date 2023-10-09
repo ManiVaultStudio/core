@@ -332,8 +332,8 @@ void SplashScreenWidget::createBody()
         rightColumn->addStretch(1);
 
         rightColumn->addWidget(new ExternalLinkWidget("globe", "Visit our website", QUrl("https://www.manivault.studio/")));
-        rightColumn->addWidget(new ExternalLinkWidget("github", "Contribute to ManiVault on Github", QUrl("https://github.com/manivaultstudio")));
-        rightColumn->addWidget(new ExternalLinkWidget("discord", "Get in touch on our Discord", QUrl("https://discord.gg/pVxmC2cSzA")));
+        rightColumn->addWidget(new ExternalLinkWidget("globe", "Contribute to ManiVault on Github", QUrl("https://github.com/manivaultstudio")));
+        rightColumn->addWidget(new ExternalLinkWidget("globe", "Get in touch on our Discord", QUrl("https://discord.gg/pVxmC2cSzA")));
     }
 
     leftColumn->addStretch(1);
