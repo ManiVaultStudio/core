@@ -42,10 +42,16 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
     setFixedSize(QSize(SplashScreenWidget::fixedWidth + (2 * SplashScreenWidget::shadowMargin), SplashScreenWidget::fixedHeight + (2 * SplashScreenWidget::shadowMargin)));
     setAttribute(Qt::WA_TranslucentBackground);
     setWindowOpacity(0.0);
-
+    
+#ifdef Q_OS_MACX // adjust the shadow to resemble the macOS system shadows a bit more
+    _dropShadowEffect.setColor(QColor(0, 0, 0, 100));
+    _dropShadowEffect.setBlurRadius(50);
+    _dropShadowEffect.setOffset(0);
+#else
     _dropShadowEffect.setColor(QColor(0, 0, 0, 50));
     _dropShadowEffect.setBlurRadius(7);
     _dropShadowEffect.setOffset(7);
+#endif
     
     setGraphicsEffect(&_dropShadowEffect);
 
