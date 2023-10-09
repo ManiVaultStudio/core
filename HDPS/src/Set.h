@@ -9,9 +9,13 @@
 #include "Dataset.h"
 #include "LinkedData.h"
 #include "CoreInterface.h"
+
+#include "DatasetTask.h"
+#include "ForegroundTask.h"
+#include "ModalTask.h"
+
 #include "actions/WidgetAction.h"
 #include "util/Miscellaneous.h"
-#include "DatasetTask.h"
 
 #include <QString>
 #include <QVector>
@@ -221,12 +225,6 @@ public:
      * @return Size of the raw data in bytes in human readable string format
      */
     QString getRawDataSizeHumanReadable() const;
-
-    /**
-     * Get task
-     * @return Dataset task
-     */
-    virtual DatasetTask& getTask() final;
 
 public: // Location
 
@@ -481,11 +479,25 @@ public:
     /** Get the name of the raw data */
     QString getRawDataName() const;
 
+public: // Task access
+
     /**
      * Get dataset task
-     * @return Task for reporting progress and killing processes
+     * @return Task for display in the data hierarchy
      */
     DatasetTask& getDatasetTask();
+
+    /**
+     * Get foreground task
+     * @return Task for display in the foreground tasks popup of the status bar
+     */
+    ForegroundTask& getForegroundTask();
+
+    /**
+     * Get modal task
+     * @return Task for display in the modal tasks dialog
+     */
+    ModalTask& getModalTask();
 
 protected:
 
@@ -546,7 +558,9 @@ private:
     std::int32_t                _linkedDataFlags;   /** Flags for linked data */
     bool                        _locked;            /** Whether the dataset is locked */
     Dataset<DatasetImpl>        _smartPointer;      /** Smart pointer to own dataset */
-    DatasetTask                 _datasetTask;       /** Task for reporting progress and killing processes */
+    DatasetTask                 _datasetTask;       /** Task for display in the data hierarchy*/
+    ForegroundTask              _foregroundTask;    /** Task for display in the foreground tasks popup of the status bar */
+    ModalTask                   _modalTask;         /** Task for display in the modal tasks dialog */
 
     friend class CoreInterface;
     friend class Core;

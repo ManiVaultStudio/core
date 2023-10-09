@@ -50,11 +50,11 @@ bool DataHierarchyModel::setData(const QModelIndex& index, const QVariant& value
             break;
 
         case DataHierarchyModelItem::Column::Info:
-            dataHierarchyModelItem->getDataHierarchyItem()->getDataset()->getTask().setDescription(value.toString());
+            dataHierarchyModelItem->getDataHierarchyItem()->getDataset()->getDatasetTask().setDescription(value.toString());
             break;
 
         case DataHierarchyModelItem::Column::Progress:
-            dataHierarchyModelItem->getDataHierarchyItem()->getDataset()->getTask().setProgress(value.toFloat());
+            dataHierarchyModelItem->getDataHierarchyItem()->getDataset()->getDatasetTask().setProgress(value.toFloat());
             break;
 
         case DataHierarchyModelItem::Column::GroupIndex:
