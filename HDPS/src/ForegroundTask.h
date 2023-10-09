@@ -39,10 +39,10 @@ public:
     static void createHandler(QObject* parent);
 
     /**
-     * Get handler
+     * Get global handler
      * @return Pointer to foreground task handler
      */
-    static ForegroundTaskHandler* getHandler() { return ForegroundTask::foregroundTaskHandler; }
+    static ForegroundTaskHandler* getGlobalHandler() { return ForegroundTask::foregroundTaskHandler; }
 
 private:
     static ForegroundTaskHandler* foregroundTaskHandler;   /** Single instance of the foreground task handler (popup action in the main window status bar) */

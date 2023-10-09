@@ -87,8 +87,8 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     statusBar()->setSizeGripEnabled(false);
 
     statusBar()->insertPermanentWidget(0, new QWidget(this), 3);
-    statusBar()->insertPermanentWidget(1, BackgroundTask::getHandler()->getStatusBarAction()->createWidget(this), 2);
-    statusBar()->insertPermanentWidget(2, ForegroundTask::getHandler()->getStatusBarAction()->createWidget(this));
+    statusBar()->insertPermanentWidget(1, BackgroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this), 2);
+    statusBar()->insertPermanentWidget(2, ForegroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this));
 
     const auto projectChanged = [this]() -> void {
         if (!projects().hasProject()) {

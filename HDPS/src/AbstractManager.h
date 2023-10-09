@@ -36,8 +36,10 @@ public:
 
     /** Subtask type */
     enum class SubtaskType {
-        Initialize,
-        Reset
+        Resetting,
+        Reset,
+        Initializing,
+        Initialized
     };
 
     /**
@@ -46,11 +48,17 @@ public:
      */
     QString getSubtaskName(const SubtaskType& subtaskType) const {
         switch (subtaskType) {
-            case SubtaskType::Initialize:
-                return QString("Initialize %1 manager").arg(getSerializationName());
+            case SubtaskType::Initializing:
+                return QString("Initializing %1 manager").arg(getSerializationName());
+
+            case SubtaskType::Initialized:
+                return QString("%1 manager initialized").arg(getSerializationName());
+
+            case SubtaskType::Resetting:
+                return QString("Resetting %1 manager").arg(getSerializationName());
 
             case SubtaskType::Reset:
-                return QString("Reset %1 manager").arg(getSerializationName());
+                return QString("%1 manager reset").arg(getSerializationName());
 
             default:
                 break;
@@ -94,9 +102,9 @@ public:
 
         emit managerAboutToBeReset();
 
-        _task->setSubtasks({ getSubtaskName(SubtaskType::Reset) });
+        _task->setSubtasks({ getSubtaskName(SubtaskType::Resetting), getSubtaskName(SubtaskType::Reset) });
         _task->setRunning();
-        _task->setSubtaskStarted({ getSubtaskName(SubtaskType::Reset) });
+        _task->setSubtaskStarted({ getSubtaskName(SubtaskType::Resetting) });
     }
 
     /** Resets the contents of the manager */
@@ -133,9 +141,9 @@ public:
         else {
             emit managerAboutToBeInitialized();
 
-            _task->setSubtasks({ getSubtaskName(SubtaskType::Initialize) });
+            _task->setSubtasks({ getSubtaskName(SubtaskType::Initializing), getSubtaskName(SubtaskType::Initialized) });
             _task->setRunning();
-            _task->setSubtaskStarted({ getSubtaskName(SubtaskType::Initialize) });
+            _task->setSubtaskStarted({ getSubtaskName(SubtaskType::Initializing) });
         }
     }
 
@@ -149,7 +157,7 @@ public:
 
         emit managerInitialized();
 
-        _task->setSubtaskFinished({ getSubtaskName(SubtaskType::Initialize) });
+        _task->setSubtaskFinished({ getSubtaskName(SubtaskType::Initialized) });
         _task->setFinished();
     }
 

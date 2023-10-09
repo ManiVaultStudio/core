@@ -39,10 +39,10 @@ public:
     static void createHandler(QObject* parent);
 
     /**
-     * Get handler
+     * Get global handler
      * @return Pointer to background task handler
      */
-    static BackgroundTaskHandler* getHandler() { return BackgroundTask::backgroundTaskHandler; }
+    static BackgroundTaskHandler* getGlobalHandler() { return BackgroundTask::backgroundTaskHandler; }
 
 private:
     static BackgroundTaskHandler* backgroundTaskHandler;   /** Single instance of the background task handler */
