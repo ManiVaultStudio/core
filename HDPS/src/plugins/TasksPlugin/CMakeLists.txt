@@ -14,7 +14,7 @@ if(MSVC)
 endif(MSVC)
 
 # Get the env path and allow the user to change it
-set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The ManiVault Install Directoy")
+set(INSTALL_DIR $ENV{MV_INSTALL_DIR} CACHE PATH "The ManiVault Install Directoy")
 
 # Normalize the incoming install path
 file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
@@ -35,8 +35,8 @@ set(AUX
 )
 
 set(TASKS_SOURCES
-	${PLUGIN}
-	${AUX}
+    ${PLUGIN}
+    ${AUX}
 )
 
 source_group(Plugin FILES ${PLUGIN})
@@ -44,7 +44,7 @@ source_group(Aux FILES ${AUX})
 
 add_library(${TASKS_PLUGIN} SHARED ${TASKS_SOURCES})
 
-add_dependencies(${TASKS_PLUGIN} HDPS_Public)
+add_dependencies(${TASKS_PLUGIN} ${MV_PUBLIC_LIB})
 
 qt_wrap_cpp(TASKS_MOC ${PLUGIN_MOC_HEADERS} TARGET ${TASKS_PLUGIN})
 target_sources(${TASKS_PLUGIN} PRIVATE ${TASKS_MOC})
@@ -55,10 +55,10 @@ target_compile_features(${TASKS_PLUGIN} PRIVATE cxx_std_17)
 
 target_link_libraries(${TASKS_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${TASKS_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${TASKS_PLUGIN} PRIVATE HDPS_Public)
+target_link_libraries(${TASKS_PLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use avx if enabled and available
-check_and_set_AVX(${TASKS_PLUGIN} ${HDPS_USE_AVX})
+check_and_set_AVX(${TASKS_PLUGIN} ${MV_USE_AVX})
 
 install(TARGETS ${TASKS_PLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
@@ -75,5 +75,5 @@ add_custom_command(TARGET ${TASKS_PLUGIN} POST_BUILD
 # Automatically set the debug environment (command + working directory) for MSVC
 if(MSVC)
     set_property(TARGET ${TASKS_PLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
-    set_property(TARGET ${TASKS_PLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/HDPS.exe,${INSTALL_DIR}/release/HDPS.exe>)
+    set_property(TARGET ${TASKS_PLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/${MV_APPLICATION_NAME}.exe,${INSTALL_DIR}/release/${MV_APPLICATION_NAME}.exe>)
 endif()
