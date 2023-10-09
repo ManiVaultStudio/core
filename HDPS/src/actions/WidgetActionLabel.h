@@ -84,6 +84,13 @@ private:
      * @return Label text
      */
     QString getLabelText() const;
+    
+private slots:
+    
+    /**
+     * Update custom theme parts not caught by the system itself
+     */
+    void updateCustomStyle() ;
 
 protected:
     std::uint32_t       _flags;                     /** Configuration flags */

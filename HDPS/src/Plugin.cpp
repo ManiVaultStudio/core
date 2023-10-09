@@ -31,7 +31,7 @@ Plugin::Plugin(const PluginFactory* factory) :
     _guiNameAction.setConnectionPermissionsToForceNone();
 
     _destroyAction.setToolTip(QString("Remove %1").arg(getGuiName()));
-    _destroyAction.setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
+    _destroyAction.setIconByName("trash");
     _destroyAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
     _destroyAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
     _destroyAction.setConnectionPermissionsToForceNone();

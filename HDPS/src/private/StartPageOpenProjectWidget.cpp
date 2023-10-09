@@ -4,6 +4,7 @@
 
 #include "StartPageOpenProjectWidget.h"
 #include "StartPageContentWidget.h"
+#include "StartPageActionsModel.h"
 #include "Archiver.h"
 
 #include <Application.h>
@@ -57,10 +58,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     connect(&_recentProjectsAction, &RecentFilesAction::recentFilesChanged, this, &StartPageOpenProjectWidget::updateRecentActions);
 
-    createIconForDefaultProject(Qt::AlignLeft, _leftAlignedIcon);
-    createIconForDefaultProject(Qt::AlignLeft, _leftAlignedLoggingIcon, true);
-    createIconForDefaultProject(Qt::AlignRight, _rightAlignedIcon);
-    createIconForDefaultProject(Qt::AlignRight, _rightAlignedLoggingIcon, true);
+    createCustomIcons();
 
     const auto toggleViews = [this]() -> void {
         _openCreateProjectWidget.setVisible(_startPageContentWidget->getToggleOpenCreateProjectAction().isChecked());
@@ -73,6 +71,8 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     connect(&_startPageContentWidget->getToggleExampleProjectsAction(), &ToggleAction::toggled, this, toggleViews);
 
     toggleViews();
+    
+    connect(qApp, &QApplication::paletteChanged, this, &StartPageOpenProjectWidget::updateCustomStyle);
 }
 
 void StartPageOpenProjectWidget::updateActions()
@@ -102,7 +102,7 @@ void StartPageOpenProjectWidget::createIconForDefaultProject(const Qt::Alignment
     painter.setWindow(0, 0, size, size);
 
     const auto drawWindow = [&](QRectF rectangle) -> void {
-        painter.setBrush(Qt::black);
+        painter.setBrush(qApp->palette().text().color());
         painter.setPen(Qt::NoPen);
         painter.drawRect(rectangle);
     };
@@ -241,4 +241,18 @@ void StartPageOpenProjectWidget::updateExamplesActions()
             _exampleProjectsWidget.getModel().add(exampleProjectStartPageAction);
         }
     }
+}
+
+void StartPageOpenProjectWidget::createCustomIcons()
+{
+    createIconForDefaultProject(Qt::AlignLeft, _leftAlignedIcon);
+    createIconForDefaultProject(Qt::AlignLeft, _leftAlignedLoggingIcon, true);
+    createIconForDefaultProject(Qt::AlignRight, _rightAlignedIcon);
+    createIconForDefaultProject(Qt::AlignRight, _rightAlignedLoggingIcon, true);
+}
+
+void StartPageOpenProjectWidget::updateCustomStyle()
+{
+    createCustomIcons();
+    updateActions();
 }

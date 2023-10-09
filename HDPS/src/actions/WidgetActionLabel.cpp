@@ -43,13 +43,15 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
     _nameLabel.setObjectName("Label");
     _nameLabel.setText(getLabelText());
     _nameLabel.setAlignment(Qt::AlignRight);
-    _nameLabel.setStyleSheet("QLabel { color: black; }");
 
     connect(getAction(), &WidgetAction::changed, this, &WidgetActionLabel::updateNameLabel);
 
     updateNameLabel();
 
     _nameLabel.installEventFilter(this);
+    
+    updateCustomStyle();
+    connect(qApp, &QApplication::paletteChanged, this, &WidgetActionLabel::updateCustomStyle);
 }
 
 bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
@@ -109,7 +111,8 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                 break;
 
             if (isEnabled() && (getAction()->mayPublish(WidgetAction::Gui) || getAction()->mayConnect(WidgetAction::Gui) || getAction()->mayDisconnect(WidgetAction::Gui)))
-                _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(palette().highlight().color().name()));
+                // changed highlight to link as it is more readable in dark theme
+                _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(palette().link().color().name()));
             
             break;
         }
@@ -120,7 +123,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                 break;
 
             if (isEnabled() && (getAction()->mayPublish(WidgetAction::Gui) || getAction()->mayConnect(WidgetAction::Gui) || getAction()->mayDisconnect(WidgetAction::Gui)))
-                _nameLabel.setStyleSheet("QLabel { color: black; }");
+                _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(palette().text().color().name()));
 
             break;
         }
@@ -193,12 +196,19 @@ void WidgetActionLabel::updateNameLabel()
     _nameLabel.setEnabled(getAction()->isEnabled());
     _nameLabel.setToolTip(getAction()->toolTip());
     _nameLabel.setVisible(getAction()->isVisible());
+    
+    updateCustomStyle();
+}
 
+void WidgetActionLabel::updateCustomStyle()
+{
+    // update custome style settings
     if (getAction()->isEnabled() && isEnabled()) {
         if (getAction()->mayPublish(WidgetAction::Gui) && _nameLabel.underMouse())
-            _nameLabel.setStyleSheet("color: gray;");
+            _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(qApp->palette().link().color().name()));
         else
-            _nameLabel.setStyleSheet("color: black;");
+            _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(qApp->palette().text().color().name()));
+            ;
     } else {
         _nameLabel.setStyleSheet("color: gray;");
     }

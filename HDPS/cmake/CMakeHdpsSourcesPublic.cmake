@@ -455,6 +455,13 @@ set(PUBLIC_UTIL_HEADERS
     src/util/NumericalRange.h
 )
 
+if(APPLE)
+set(PUBLIC_UTIL_HEADERS
+	${PUBLIC_UTIL_HEADERS}
+    src/util/MacThemeHelper.h
+)
+endif()
+
 set(PUBLIC_UTIL_SOURCES
     src/util/Miscellaneous.cpp
     src/util/FileUtil.cpp
@@ -488,6 +495,13 @@ set(PUBLIC_UTIL_SOURCES
     src/util/DockWidgetPermission.cpp
     src/util/NumericalRange.cpp
 )
+
+if(APPLE)
+set(PUBLIC_UTIL_SOURCES
+	${PUBLIC_UTIL_SOURCES}
+    src/util/MacThemeHelper.mm
+)
+endif()
 
 set(PUBLIC_UTIL_FILES
     ${PUBLIC_UTIL_HEADERS}    
@@ -641,6 +655,7 @@ set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/ParametersSettingsAction.h
     src/MiscellaneousSettingsAction.h
     src/TasksSettingsAction.h
+    src/ApplicationSettingsAction.h
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_SOURCES
@@ -648,6 +663,7 @@ set(PUBLIC_GLOBAL_SETTINGS_SOURCES
 	src/ParametersSettingsAction.cpp
     src/MiscellaneousSettingsAction.cpp
     src/TasksSettingsAction.cpp
+    src/ApplicationSettingsAction.cpp
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_FILES

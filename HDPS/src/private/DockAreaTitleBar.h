@@ -28,6 +28,11 @@ public:
      * @param dockAreaWidget Pointer to owning dock area widget
      */
     DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget);
+    
+public: // Themes
+    
+    /** refresh the widget and its children according to new style */
+    void updateStyle();
 
 private:
     QToolButton*            _addViewPluginToolButton;   /** Tool button which is added to the dock area title bar to add new (system) views */

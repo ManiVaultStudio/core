@@ -49,6 +49,11 @@ private: // Window geometry persistence
      * @param coverage Fraction of the total screen size
      */
     void setDefaultWindowGeometry(const float& coverage = 0.7f);
+    
+public: // Themes
+    
+    /** refresh the widget and its children according to new style */
+    void updateStyle();
 
 public: // Miscellaneous
 

@@ -28,10 +28,6 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _openProjectWidget(this),
     _getStartedWidget(this)
 {
-    setAutoFillBackground(true);
-
-    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
-
     _compactViewAction.setSettingsPrefix("StartPage/ToggleCompactView");
     _toggleOpenCreateProjectAction.setSettingsPrefix("StartPage/ToggleOpenCreateProject");
     _toggleRecentProjectsAction.setSettingsPrefix("StartPage/ToggleRecentProjects");
@@ -40,8 +36,9 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toggleProjectFromDataAction.setSettingsPrefix("StartPage/ToggleProjectFromData");
     _toggleTutorialVideosAction.setSettingsPrefix("StartPage/ToggleTutorialVideos");
 
-    _settingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
     _settingsAction.setText("Toggle Views");
+    
+    _settingsAction.setIconByName("eye");
 
     _settingsAction.addAction(&_toggleOpenCreateProjectAction);
     _settingsAction.addAction(&_toggleRecentProjectsAction);
@@ -66,6 +63,9 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     setLayout(&_mainLayout);
 
     connect(&_compactViewAction, &ToggleAction::toggled, this, &StartPageContentWidget::updateActions);
+    
+    updateCustomStyle();
+    connect(qApp, &QApplication::paletteChanged, this, &StartPageContentWidget::updateCustomStyle);
 }
 
 QLabel* StartPageContentWidget::createHeaderLabel(const QString& title, const QString& tooltip)
@@ -85,4 +85,11 @@ void StartPageContentWidget::updateActions()
 
     _openProjectWidget.updateActions();
     _getStartedWidget.updateActions();
+}
+
+void StartPageContentWidget::updateCustomStyle()
+{
+    // update custome style settings
+    // qDebug() << "StartPageContentWidget: Palette Changed!";
+    StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }

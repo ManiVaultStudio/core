@@ -54,6 +54,13 @@ public: // Action getters
     const hdps::gui::ToggleAction& getToggleProjectFromWorkspaceAction() const { return _toggleProjectFromWorkspaceAction; }
     const hdps::gui::ToggleAction& getToggleProjectFromDataAction() const { return _toggleProjectFromDataAction; }
     const hdps::gui::ToggleAction& getToggleTutorialVideosAction() const { return _toggleTutorialVideosAction; }
+        
+private slots:
+    
+    /**
+     * Update custom theme parts not caught by the system itself
+     */
+    void updateCustomStyle() ;
 
 private:
     QVBoxLayout                 _mainLayout;                        /** Main layout */

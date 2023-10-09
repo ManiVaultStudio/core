@@ -38,14 +38,14 @@ Application::Application(int& argc, char** argv) :
     _startupProjectMetaAction(nullptr)
 {
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, {
-            ":/IconFonts/FontAwesomeBrandsRegular-5.14.otf",
-            ":/IconFonts/FontAwesomeRegular-5.14.otf",
+            //":/IconFonts/FontAwesomeBrandsRegular-5.14.otf",
+            //":/IconFonts/FontAwesomeRegular-5.14.otf",
             ":/IconFonts/FontAwesomeSolid-5.14.otf"
     }, true)));
 
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 4, {
-        ":/IconFonts/FontAwesomeBrandsRegular-6.4.otf",
-        ":/IconFonts/FontAwesomeRegular-6.4.otf",
+        //":/IconFonts/FontAwesomeBrandsRegular-6.4.otf",
+        //":/IconFonts/FontAwesomeRegular-6.4.otf",
         ":/IconFonts/FontAwesomeSolid-6.4.otf"
     })));
 

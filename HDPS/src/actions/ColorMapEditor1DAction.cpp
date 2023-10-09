@@ -28,7 +28,7 @@ ColorMapEditor1DAction::ColorMapEditor1DAction(QObject* parent, const QString& t
     _colorMapImage(colorMapImageSize, QImage::Format::Format_ARGB32_Premultiplied)
 {
     setText("1D custom color map");
-    setIcon(Application::getIconFont("FontAwesome").getIcon("chart-line"));
+    setIconByName("chart-line");
 
     addNode(QPointF(0.0f, 0.0f), Qt::black);
     addNode(QPointF(1.0f, 1.0f), Qt::white);
@@ -248,11 +248,11 @@ ColorMapEditor1DAction::Widget::Widget(QWidget* parent, ColorMapEditor1DAction* 
 
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    _goToFirstNodeAction.setIcon(fontAwesome.getIcon("angle-double-left"));
-    _goToPreviousNodeAction.setIcon(fontAwesome.getIcon("angle-left"));
-    _goToNextNodeAction.setIcon(fontAwesome.getIcon("angle-right"));
-    _goToLastNodeAction.setIcon(fontAwesome.getIcon("angle-double-right"));
-    _removeNodeAction.setIcon(fontAwesome.getIcon("trash"));
+    _goToFirstNodeAction.setIconByName("angle-double-left");
+    _goToPreviousNodeAction.setIconByName("angle-left");
+    _goToNextNodeAction.setIconByName("angle-right");
+    _goToLastNodeAction.setIconByName("angle-double-right");
+    _removeNodeAction.setIconByName("trash");
 
     auto layout         = new QVBoxLayout();
     auto toolbarLayout  = new QHBoxLayout();

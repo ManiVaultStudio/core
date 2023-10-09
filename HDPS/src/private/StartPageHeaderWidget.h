@@ -43,7 +43,14 @@ private:
      * @param newSize new icon width and height
      */
     void resizeIcon(const QSize& newSize);
-
+    
+private slots:
+    
+    /**
+     * Update custom theme parts not caught by the system itself
+     */
+    void updateCustomStyle() ;
+    
 protected:
     QVBoxLayout     _layout;        /** Main layout */
     QLabel          _headerLabel;   /** Header label */

@@ -13,7 +13,7 @@ MergeClustersAction::MergeClustersAction(ClustersActionWidget* clustersActionWid
     _clustersActionWidget(clustersActionWidget)
 {
     setToolTip("Merge selected clusters into one");
-    setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
+    setIconByName("object-group");
 
     // Merge selected clusters when the action is triggered
     connect(this, &TriggerAction::triggered, this, [this]() {

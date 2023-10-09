@@ -126,7 +126,12 @@ public:
          * @param groupAction Pointer to the group action
          */
         void hideGroupAction(GroupAction* groupAction);
-
+        
+        /**
+         * Update custom theme parts not caught by the system itself
+         */
+        void updateCustomStyle() ;
+        
     protected:
         GroupsAction*                                   _groupsAction;                  /** Pointer to groups action */
         QVBoxLayout                                     _layout;                        /** Main layout */

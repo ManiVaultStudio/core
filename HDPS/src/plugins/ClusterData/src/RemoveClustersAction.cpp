@@ -13,7 +13,7 @@ RemoveClustersAction::RemoveClustersAction(ClustersActionWidget* clustersActionW
     _clustersActionWidget(clustersActionWidget)
 {
     setToolTip("Remove selected cluster(s)");
-    setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
+    setIconByName("trash");
     setDefaultWidgetFlags(TriggerAction::Icon);
 
     // Remove selected clusters when the action is triggered

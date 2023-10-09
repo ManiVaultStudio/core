@@ -219,4 +219,19 @@ void MainWindow::checkGraphicsCapabilities()
     }
 
     ctx.doneCurrent();
+    
+    connect(qApp, &QApplication::paletteChanged, this, &MainWindow::updateStyle);
+}
+
+void MainWindow::updateStyle()
+{
+    this->style()->unpolish(this);
+    this->style()->polish(this);
+
+    QList<QWidget*> Children = this->findChildren<QWidget*>(QString(), Qt::FindChildrenRecursively);
+    for (auto Widget : Children)
+    {
+        Widget->style()->unpolish(Widget);
+        Widget->style()->polish(Widget);
+    }
 }

@@ -118,7 +118,7 @@ void Workspace::initialize()
     _descriptionAction.setPlaceHolderString("Enter workspace description here...");
     _descriptionAction.setClearable(true);
 
-    _tagsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tag"));
+    _tagsAction.setIconByName("tag");
     _tagsAction.setCategory("Tag");
 
     _commentsAction.setPlaceHolderString("Enter workspace comments here...");

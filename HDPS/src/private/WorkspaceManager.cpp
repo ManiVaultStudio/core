@@ -71,29 +71,29 @@ WorkspaceManager::WorkspaceManager() :
 
     _resetWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+R"));
     _resetWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
-    _resetWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("undo"));
+    _resetWorkspaceAction.setIconByName("undo");
     _resetWorkspaceAction.setToolTip("Reset the current workspace");
 
     _importWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+I"));
     _importWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
-    _importWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    _importWorkspaceAction.setIconByName("file-import");
     _importWorkspaceAction.setToolTip("Open workspace from disk");
 
     _exportWorkspaceAction.setShortcut(QKeySequence("Ctrl+Alt+E"));
     _exportWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
-    _exportWorkspaceAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+    _exportWorkspaceAction.setIconByName("file-export");
     _exportWorkspaceAction.setToolTip("Export workspace to disk");
 
     _exportWorkspaceAsAction.setShortcut(QKeySequence("Ctrl+Alt+Shift+E"));
     _exportWorkspaceAsAction.setShortcutContext(Qt::ApplicationShortcut);
-    _exportWorkspaceAsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+    _exportWorkspaceAsAction.setIconByName("file-export");
     _exportWorkspaceAsAction.setToolTip("Export workspace under a new file to disk");
 
     _editWorkspaceSettingsAction.setShortcut(QKeySequence("Ctrl+Alt+P"));
     _editWorkspaceSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
-    _editWorkspaceSettingsAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _editWorkspaceSettingsAction.setIconByName("cog");
 
-    _importWorkspaceFromProjectAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
+    _importWorkspaceFromProjectAction.setIconByName("file-archive");
     _importWorkspaceFromProjectAction.setToolTip("Import workspace from project");
 
     auto mainWindow = Application::topLevelWidgets().first();
@@ -450,7 +450,7 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/, bool addToRecent
 
                 GroupAction settingsGroupAction(this, "Group");
 
-                settingsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+                settingsGroupAction.setIconByName("cog");
                 settingsGroupAction.setToolTip("Edit workspace settings");
                 settingsGroupAction.setPopupSizeHint(QSize(420, 320));
                 settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);

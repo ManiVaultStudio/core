@@ -37,7 +37,7 @@ ParametersSettingsAction::ParametersSettingsAction(QObject* parent) :
 
     connect(&_expertModeAction, &ToggleAction::toggled, this, updateExpertModeActionTooltip);
 
-    _expertModeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("user-graduate"));
+    _expertModeAction.setIconByName("user-graduate");
 }
 
 }

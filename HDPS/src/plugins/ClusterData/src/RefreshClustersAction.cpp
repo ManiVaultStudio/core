@@ -15,7 +15,7 @@ RefreshClustersAction::RefreshClustersAction(ClustersActionWidget* clustersActio
     _clustersActionWidget(clustersActionWidget)
 {
     setToolTip("Refresh clusters");
-    setIcon(Application::getIconFont("FontAwesome").getIcon("sync"));
+    setIconByName("sync");
 
     // Request a refresh from the clusters action when the action is triggered
     connect(this, &TriggerAction::triggered, this, [this]() {

@@ -40,7 +40,7 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
     _notifyDuringSelectionAction(this, "Notify during selection", true)
 {
-    setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+    setIconByName("mouse-pointer");
 
     addAction(&_overlayColorAction);
     addAction(&_overlayOpacityAction);
@@ -92,16 +92,16 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     _modifierAction.setToolTip("Type of selection modifier");
     _modifierAction.setCurrentIndex(static_cast<std::int32_t>(PixelSelectionModifierType::Replace));
 
-    _modifierReplaceAction.setIcon(fontAwesome.getIcon("exchange-alt"));
+    _modifierReplaceAction.setIconByName("exchange-alt");
     _modifierReplaceAction.setCheckable(true);
     _modifierReplaceAction.setDefaultWidgetFlags(ToggleAction::PushButton);
 
-    _modifierAddAction.setIcon(fontAwesome.getIcon("plus"));
+    _modifierAddAction.setIconByName("plus");
     _modifierAddAction.setToolTip("Add items to the existing selection");
     _modifierAddAction.setCheckable(true);
     _modifierAddAction.setDefaultWidgetFlags(ToggleAction::PushButton);
 
-    _modifierSubtractAction.setIcon(fontAwesome.getIcon("minus"));
+    _modifierSubtractAction.setIconByName("minus");
     _modifierSubtractAction.setToolTip("Remove items from the existing selection");
     _modifierSubtractAction.setDefaultWidgetFlags(ToggleAction::PushButton);
     _modifierSubtractAction.setCheckable(true);
