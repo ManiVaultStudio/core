@@ -42,10 +42,16 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
     setFixedSize(QSize(SplashScreenWidget::fixedWidth + (2 * SplashScreenWidget::shadowMargin), SplashScreenWidget::fixedHeight + (2 * SplashScreenWidget::shadowMargin)));
     setAttribute(Qt::WA_TranslucentBackground);
     setWindowOpacity(0.0);
-
+    
+#ifdef Q_OS_MACX // adjust the shadow to resemble the macOS system shadows a bit more
+    _dropShadowEffect.setColor(QColor(0, 0, 0, 100));
+    _dropShadowEffect.setBlurRadius(50);
+    _dropShadowEffect.setOffset(0);
+#else
     _dropShadowEffect.setColor(QColor(0, 0, 0, 50));
     _dropShadowEffect.setBlurRadius(7);
     _dropShadowEffect.setOffset(7);
+#endif
     
     setGraphicsEffect(&_dropShadowEffect);
 
@@ -326,8 +332,8 @@ void SplashScreenWidget::createBody()
         rightColumn->addStretch(1);
 
         rightColumn->addWidget(new ExternalLinkWidget("globe", "Visit our website", QUrl("https://www.manivault.studio/")));
-        rightColumn->addWidget(new ExternalLinkWidget("github", "Contribute to ManiVault on Github", QUrl("https://github.com/manivaultstudio")));
-        rightColumn->addWidget(new ExternalLinkWidget("discord", "Get in touch on our Discord", QUrl("https://discord.gg/pVxmC2cSzA")));
+        rightColumn->addWidget(new ExternalLinkWidget("globe", "Contribute to ManiVault on Github", QUrl("https://github.com/manivaultstudio")));
+        rightColumn->addWidget(new ExternalLinkWidget("globe", "Get in touch on our Discord", QUrl("https://discord.gg/pVxmC2cSzA")));
     }
 
     leftColumn->addStretch(1);

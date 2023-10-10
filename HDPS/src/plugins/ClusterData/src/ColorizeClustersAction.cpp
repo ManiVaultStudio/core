@@ -17,7 +17,7 @@ ColorizeClustersAction::ColorizeClustersAction(ClustersAction& clustersAction) :
     _colorizeAction(this, "Colorize")
 {
     setToolTip("Colorize clusters");
-    setIcon(Application::getIconFont("FontAwesome").getIcon("palette"));
+    setIconByName("palette");
 
     // Do not update when dragging the pseudo-random seed slider
     _randomSeedAction.setUpdateDuringDrag(false);

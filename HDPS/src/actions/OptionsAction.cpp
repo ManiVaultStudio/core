@@ -341,7 +341,7 @@ OptionsAction::SelectionAction::SelectionAction(OptionsAction& optionsAction) :
 
     setText("Selection");
     setToolTip("Change selection");
-    setIcon(fontAwesome.getIcon("mouse-pointer"));
+    setIconByName("mouse-pointer");
 
     const auto updateReadOnly = [this]() -> void {
         _selectAllAction.setEnabled(_optionsAction.getSelectedOptions().count() < _optionsAction.getOptions().count());
@@ -386,11 +386,9 @@ OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
     _loadSelectionAction(this, "Load selection"),
     _saveSelectionAction(this, "Save selection")
 {
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
     setText("File");
     setToolTip("Load/save selection");
-    setIcon(fontAwesome.getIcon("file"));
+    setIconByName("file");
 
     const auto updateReadOnly = [this]() -> void {
         _loadSelectionAction.setEnabled(_optionsAction.getOptions().count() >= 1);

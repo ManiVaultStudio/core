@@ -50,7 +50,8 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _highlighting(HighlightOption::None),
     _popupSizeHint(),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default)),
-    _location()
+    _location(),
+    _namedIcon("")
 {
     Q_ASSERT(!title.isEmpty());
 
@@ -66,6 +67,8 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
         if (projects().hasProject())
             setStudioMode(projects().getCurrentProject()->getStudioModeAction().isChecked(), false);
     }
+    
+    connect(qApp, &QApplication::paletteChanged, this, &WidgetAction::updateCustomStyle);
 }
 
 WidgetAction::~WidgetAction()
@@ -915,6 +918,26 @@ void WidgetAction::setStudioMode(bool studioMode, bool recursive /*= true*/)
     else {
         restoreConnectionPermissions(recursive);
     }
+}
+
+void WidgetAction::setIconByName(QString namedIcon)
+{
+    _namedIcon = namedIcon;
+    refreshIcon();
+}
+
+void WidgetAction::refreshIcon()
+{
+    if(_namedIcon != "")
+    {
+        setIcon(Application::getIconFont("FontAwesome").getIcon(_namedIcon));
+    }
+}
+
+void WidgetAction::updateCustomStyle()
+{
+    // update custome style settings
+    refreshIcon();
 }
 
 }

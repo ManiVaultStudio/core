@@ -17,7 +17,7 @@ PrefixClustersAction::PrefixClustersAction(ClustersAction& clustersAction) :
     _applyAction(this, "Apply")
 {
     setToolTip("Prefix clusters");
-    setIcon(Application::getIconFont("FontAwesome").getIcon("paragraph"));
+    setIconByName("paragraph");
 
     // Set cluster prefix in model
     _clustersAction.getClustersModel().setClusterPrefix(_prefixAction.getString());

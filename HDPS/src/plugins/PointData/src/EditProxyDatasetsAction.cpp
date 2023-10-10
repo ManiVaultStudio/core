@@ -16,7 +16,7 @@ EditProxyDatasetsAction::EditProxyDatasetsAction(QObject* parent, const Dataset<
     _points(points)
 {
     setToolTip("View proxy datasets");
-    setIcon(Application::getIconFont("FontAwesome").getIcon("list"));
+    setIconByName("list");
 }
 
 hdps::Dataset<Points>& EditProxyDatasetsAction::getPoints()

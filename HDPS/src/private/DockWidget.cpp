@@ -34,7 +34,6 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
 
     _settingsToolButton = new QToolButton();
 
-    _settingsToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("bars"));
     _settingsToolButton->setToolTip("Adjust view settings");
     _settingsToolButton->setAutoRaise(true);
     _settingsToolButton->setIconSize(QSize(14, 14));
@@ -42,7 +41,10 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     _settingsToolButton->setPopupMode(QToolButton::InstantPopup);
     _settingsToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
     _settingsToolButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
+    
+    updateStyle();
+    connect(qApp, &QApplication::paletteChanged, this, &DockWidget::updateStyle);
+    
     dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertSpacing(1, 5);
     dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertWidget(2, _settingsToolButton, Qt::AlignCenter);
 }
@@ -99,4 +101,9 @@ QVariantMap DockWidget::toVariantMap() const
     });
 
     return variantMap;
+}
+
+void DockWidget::updateStyle()
+{
+    _settingsToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("bars"));
 }

@@ -26,7 +26,7 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
         
         _exitApplictionAction.setShortcut(QKeySequence("Alt+F4"));
         _exitApplictionAction.setShortcutContext(Qt::ApplicationShortcut);
-        _exitApplictionAction.setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
+        _exitApplictionAction.setIconByName("sign-out-alt");
         _exitApplictionAction.setToolTip("Exit HDPS");
         
         connect(&_exitApplictionAction, &TriggerAction::triggered, this, []() -> void {

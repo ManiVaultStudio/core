@@ -17,7 +17,7 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction, c
     _colorMapAction(colorMapAction)
 {
     setText("Settings");
-    setIcon(Application::getIconFont("FontAwesome").getIcon("sliders-h"));
+    setIconByName("sliders-h");
 }
 
 ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction, const std::int32_t& widgetFlags) :

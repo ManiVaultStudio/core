@@ -17,7 +17,7 @@ FilterClustersAction::FilterClustersAction(ClustersActionWidget* clustersActionW
     _clustersActionWidget(clustersActionWidget),
     _nameFilterAction(this, "Name filter")
 {
-    setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
+    setIconByName("filter");
 
     _nameFilterAction.setToolTip("Filter clusters by name (case-insensitive)");
     _nameFilterAction.setPlaceHolderString("Filter by name...");

@@ -108,9 +108,12 @@ private:
 
     /** Update all text labels and takes care of elidation */
     void updateTextLabels();
-
+    
     /** Show the info widget when mouse hovered */
     void updateInfoWidgetVisibility();
+    
+    /** update custom styles */
+    void updateCustomStyle();
 
 private:
     QPersistentModelIndex       _index;                     /** Editor model index */

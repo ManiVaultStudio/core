@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QMenu>
 #include <QResizeEvent>
+#include <QOperatingSystemVersion>
 
 //#define GROUP_SECTION_TREE_ITEM_VERBOSE
 
@@ -62,7 +63,12 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _overlayLayout(),
     _iconLabel()
 {
-    setFixedHeight(22);
+    auto isMacOS = QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS;
+    
+    // on macOS the buttons look extremely squished and foreign with fixed height
+    if(!isMacOS) {
+        setFixedHeight(22);
+    }
 
     // Get reference to the Font Awesome icon font
     auto& fontAwesome = Application::getIconFont("FontAwesome");
@@ -75,7 +81,11 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _overlayLayout.addStretch(1);
 
     _iconLabel.setAlignment(Qt::AlignCenter);
-    _iconLabel.setFont(fontAwesome.getFont(7));
+    if(isMacOS) {
+        _iconLabel.setFont(fontAwesome.getFont());
+    } else {
+        _iconLabel.setFont(fontAwesome.getFont(7));
+    }
 
     // Install event filter to synchronize overlay widget size with push button size
     installEventFilter(this);

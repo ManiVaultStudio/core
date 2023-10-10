@@ -67,10 +67,14 @@ private:
      * @param rowIndex Index of the row for which to close the persistent editor
      */
     void closePersistentEditor(int rowIndex);
+    
+    /** Update all  custom style elements */
+    void updateCustomStyle();
 
 private:
     QVBoxLayout                     _layout;            /** Main layout */
     StartPageActionsModel           _model;             /** Model which contains start page actions */
     StartPageActionsFilterModel     _filterModel;       /** Model for filtering and sorting start page actions */
     hdps::gui::HierarchyWidget      _hierarchyWidget;   /** Widget for displaying the actions */
+    bool                            _restyle;           /** Remember whether the restyle flag was set upon creation */
 };

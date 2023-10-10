@@ -78,6 +78,11 @@ public: // Serialization
      * @return Variant representation of the widget action
      */
     QVariantMap toVariantMap() const override;
+    
+public: // Themes
+    
+    /** refresh the widget and its children according to new style */
+    void updateStyle();
 
 private:
     QToolButton*    _settingsToolButton;    /** Pointer to settings tool button (located in the dock widget tab bar) */

@@ -26,7 +26,7 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, 
     _eventListener()
 {
     setText(title);
-    setIcon(Application::getIconFont("FontAwesome").getIcon("database"));
+    setIconByName("database");
     setToolTip("Pick a dataset");
     setCustomModel(&_datasetsModel);
     setPlaceHolderString("--choose dataset--");

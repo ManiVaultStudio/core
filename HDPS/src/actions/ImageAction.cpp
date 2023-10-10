@@ -37,7 +37,7 @@ ImageAction::ImageAction(QObject* parent, const QString& title) :
     _filePickerAction.getPickAction().setDefaultWidgetFlags(TriggerAction::Icon);
 
     _previewAction.setDefaultWidgetFlags(TriggerAction::Icon);
-    _previewAction.setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
+    _previewAction.setIconByName("eye");
 
     connect(&_filePickerAction, &FilePickerAction::filePathChanged, this, [this](const QString& filePath) -> void {
         loadImage(filePath);
