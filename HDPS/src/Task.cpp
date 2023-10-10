@@ -990,7 +990,7 @@ void Task::privateSetFinished(const QString& progressDescription, bool toIdleWit
 
 void Task::privateSetAboutToBeAborted()
 {
-    emit isAboutToBeAborted();
+    emit aboutToBeAborted();
 }
 
 void Task::privateSetAborting()
@@ -1001,7 +1001,7 @@ void Task::privateSetAborting()
     privateSetStatus(Status::Aborting);
     privateSetProgressDescription("Aborting...");
 
-    emit isAborting();
+    emit aborting();
 }
 
 void Task::privateSetAborted()
@@ -1014,17 +1014,19 @@ void Task::privateSetAborted()
 
     setProgress(0.f);
 
-    emit isAborted();
+    emit aborted();
 }
 
 void Task::privateKill(bool recursive /*= true*/)
 {
-    auto tasksToKill = getChildTasks();
+    if (recursive) {
+        auto tasksToKill = getChildTasks();
 
-    std::reverse(tasksToKill.begin(), tasksToKill.end());
+        std::reverse(tasksToKill.begin(), tasksToKill.end());
 
-    for (auto taskToKill : tasksToKill)
-        taskToKill->kill();
+        for (auto taskToKill : tasksToKill)
+            taskToKill->kill();
+    }
 
     if (getMayKill()) {
 #ifdef TASK_VERBOSE
