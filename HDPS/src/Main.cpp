@@ -9,6 +9,9 @@
 #include <Application.h>
 #include <ProjectMetaAction.h>
 
+#include <ModalTask.h>
+#include <ModalTaskHandler.h>
+
 #include <QSurfaceFormat>
 #include <QStyleFactory>
 #include <QProxyStyle>
@@ -125,6 +128,8 @@ int main(int argc, char *argv[])
             if (startupProjectFileInfo.exists()) {
                 qDebug() << "Loading startup project from" << startupProjectFilePath;
 
+                ModalTask::getGlobalHandler()->setEnabled(false);
+
                 application.setStartupProjectFilePath(startupProjectFilePath);
                 application.getTask(Application::TaskType::LoadProject)->setEnabled(true);
 
@@ -138,9 +143,9 @@ int main(int argc, char *argv[])
                 }
                 else {
                     splashScreenAction.addAlert(SplashScreenAction::Alert::info(QString("\
-                    No project meta info found for project <b>%1</b>. \
-                    Re-configure the project settings and save the project to solve the problem. \
-                ").arg(startupProjectFileInfo.fileName())));
+                        No project meta info found for project <b>%1</b>. \
+                        Re-configure the project settings and save the project to solve the problem. \
+                    ").arg(startupProjectFileInfo.fileName())));
                 }
             }
             else {
@@ -164,7 +169,7 @@ int main(int argc, char *argv[])
     
     qDebug() << "Show splash screen";
 
-    splashScreenAction.getOpenAction().trigger();
+    //splashScreenAction.getOpenAction().trigger();
 
     application.setStyle(new NoFocusProxyStyle);
 

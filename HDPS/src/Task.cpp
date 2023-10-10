@@ -1270,7 +1270,7 @@ void Task::privateSetProgressTextFormatter(const ProgressTextFormatter& progress
 
 void Task::privateEmitProgressChanged()
 {
-    qDebug() << __FUNCTION__ << getProgress();
+    //qDebug() << __FUNCTION__ << getProgress();
 
     emit progressChanged(getProgress());
 
@@ -1279,7 +1279,7 @@ void Task::privateEmitProgressChanged()
 
 void Task::privateEmitProgressDescriptionChanged()
 {
-    qDebug() << __FUNCTION__ << getProgressDescription();
+    //qDebug() << __FUNCTION__ << getProgressDescription();
 
     emit progressDescriptionChanged(getProgressDescription());
 
@@ -1288,7 +1288,7 @@ void Task::privateEmitProgressDescriptionChanged()
 
 void Task::privateEmitProgressTextChanged()
 {
-    qDebug() << __FUNCTION__ << getProgressText();
+    //qDebug() << __FUNCTION__ << getProgressText();
 
     emit progressTextChanged(getProgressText());
 

@@ -40,7 +40,7 @@ public:
 
     /**
      * Get global handler
-     * @return Pointer to foreground task handler
+     * @return Pointer to global foreground task handler
      */
     static ForegroundTaskHandler* getGlobalHandler() { return ForegroundTask::foregroundTaskHandler; }
 

@@ -53,6 +53,18 @@ public:
     void setMinimumDuration(std::uint32_t minimumDuration);
 
     /**
+     * Get enabled
+     * @return Boolean determining whether the task handler is enabled or not
+     */
+    bool getEnabled() const;
+
+    /**
+     * Set enabled to \p enabled
+     * @param enabled Minimum duration before the handler displays a tasks UI
+     */
+    void setEnabled(bool enabled);
+
+    /**
      * Get status bar action
      * @return Pointer to status bar widget action
      */
@@ -82,9 +94,16 @@ signals:
      */
     void minimumDurationChanged(std::uint32_t previousMinimumDuration, std::uint32_t currentMinimumDuration);
 
+    /**
+     * Signals that enabled changed to \p enabled
+     * @param enabled Boolean determining whether the task handler is enabled or not
+     */
+    void enabledChanged(bool enabled);
+
 private:
     Task*           _task;              /** Pointer to task to handle */
     std::uint32_t   _minimumDuration;   /** Minimum duration before the handler displays a tasks UI */
+    bool            _enabled;           /** Boolean determining whether the task handler is enabled or not */
 };
 
 }

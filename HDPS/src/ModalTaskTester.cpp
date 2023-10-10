@@ -44,7 +44,10 @@ void ModalTaskTester::testRunningIndeterminate()
 
         timer.setInterval(1000);
 
-        connect(indeterminateTask, &ModalTask::requestAbort, &timer, &QTimer::stop);
+        connect(indeterminateTask, &ModalTask::requestAbort, this, [this, &timer, indeterminateTask]() -> void {
+            timer.stop();
+            indeterminateTask->setAborted();
+        });
 
         connect(&timer, &QTimer::timeout, [&]() -> void {
             if (!subtasks.isEmpty()) {
@@ -90,7 +93,10 @@ void ModalTaskTester::testAggregation()
 
                 timer->setInterval(interval);
 
-                connect(childTask, &ModalTask::requestAbort, timer, &QTimer::stop);
+                connect(childTask, &ModalTask::requestAbort, this, [this, timer, childTask]() -> void {
+                    timer->stop();
+                    childTask->setAborted();
+                });
 
                 connect(timer, &QTimer::timeout, [timer, childTask, &tasks]() -> void {
                     if (!tasks.isEmpty()) {
@@ -169,7 +175,10 @@ void ModalTaskTester::testPerformance()
 
         timer.setInterval(1);
 
-        connect(performanceTask, &ModalTask::requestAbort, &timer, &QTimer::stop);
+        connect(performanceTask, &ModalTask::requestAbort, this, [this, &timer, performanceTask]() -> void {
+            timer.stop();
+            performanceTask->setAborted();
+        });
 
         connect(&timer, &QTimer::timeout, [&]() -> void {
             if (!subtasks.isEmpty()) {

@@ -10,7 +10,8 @@ namespace hdps {
 AbstractTaskHandler::AbstractTaskHandler(QObject* parent, Task* task) :
     QObject(parent),
     _task(task),
-    _minimumDuration(250)
+    _minimumDuration(250),
+    _enabled(true)
 {
 }
 
@@ -34,6 +35,21 @@ void AbstractTaskHandler::setMinimumDuration(std::uint32_t minimumDuration)
     _minimumDuration = minimumDuration;
 
     emit minimumDurationChanged(previousMinimumDuration, _minimumDuration);
+}
+
+bool AbstractTaskHandler::getEnabled() const
+{
+    return _enabled;
+}
+
+void AbstractTaskHandler::setEnabled(bool enabled)
+{
+    if (enabled == _enabled)
+        return;
+
+    _enabled = enabled;
+
+    emit enabledChanged(_enabled);
 }
 
 void AbstractTaskHandler::setTask(Task* task)

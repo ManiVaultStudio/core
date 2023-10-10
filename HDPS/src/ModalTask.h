@@ -38,6 +38,12 @@ public:
      */
     static void createHandler(QObject* parent);
 
+    /**
+     * Get global handler
+     * @return Pointer to global modal task handler
+     */
+    static ModalTaskHandler* getGlobalHandler() { return ModalTask::modalTaskHandler; }
+
 private:
     static ModalTaskHandler*    modalTaskHandler;   /** Single instance of the modal task handler for showing a modal tasks dialog when appropriate */
 };

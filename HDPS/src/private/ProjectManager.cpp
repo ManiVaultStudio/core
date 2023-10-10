@@ -10,7 +10,9 @@
 
 #include <CoreInterface.h>
 #include <ProjectMetaAction.h>
+
 #include <ModalTask.h>
+#include <ModalTaskHandler.h>
 
 #include <util/Exception.h>
 #include <util/Serialization.h>
@@ -493,6 +495,9 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             if (disableReadOnlyAction.isEnabled() && disableReadOnlyAction.isChecked())
                 _project->getReadOnlyAction().setChecked(disableReadOnlyAction.isChecked());
+
+            if (_project->isStartupProject())
+                ModalTask::getGlobalHandler()->setEnabled(true);
 
             qDebug().noquote() << filePath << "loaded successfully";
         }

@@ -75,6 +75,7 @@ Application::Application(int& argc, char** argv) :
     connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) {
         BackgroundTask::createHandler(Application::current());
         ForegroundTask::createHandler(Application::current());
+        ModalTask::createHandler(Application::current());
     });
 }
 
