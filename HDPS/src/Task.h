@@ -95,7 +95,7 @@ private:
         ProgressChanged,                /** For Task::progressChanged() signal */
         ProgressDescriptionChanged,     /** For Task::progressDescriptionChanged() signal */
         ProgressTextChanged,            /** For Task::progressTextChanged() signal */
-        ToIdleWithDelay,                /** To automatically switch to Task::Status::Idle after a short delay when setting task status to Task::Status::Finished */
+        DeferredStatus,                 /** To automatically switch to a new (_deferredStatus) task status after a short delay */
 
         Count
     };
@@ -299,10 +299,12 @@ public: // Status
     virtual bool isAborted() const final;
 
     /**
-     * Set task status to \p status
+     * Set task status to \p status and possibly switch to \p deferredStatus when the \p deferredStatusDelay is non-zero
      * @param status Task status
+     * @param deferredStatusDelay After this delay, the status will be set to \p deferredStatus
+     * @param deferredStatus Will be set to this status after \p deferredStatusDelay
      */
-    virtual void setStatus(const Status& status) final;
+    virtual void setStatus(const Status& status, std::uint32_t deferredStatusDelay = 0, const Status& deferredStatus = Status::Idle) final;
 
     /** Convenience method to set task status to idle */
     virtual void setIdle() final;
@@ -318,7 +320,7 @@ public: // Status
      * @param toIdleWithDelay Whether to automatically set the status to idle after \p delay (does not have an effect if it is a child task)
      * @param delay Delay in milliseconds
      */
-    virtual void setFinished(bool toIdleWithDelay = true, std::uint32_t delay = TASK_DESCRIPTION_DISAPPEAR_INTERVAL) final;
+    virtual void setFinished(bool toIdleWithDelay = true, std::uint32_t delay = DEFERRED_STATUS_DELAY_INTERVAL) final;
 
     /**
      * Convenience method to set task status to finished and use a custom progress description
@@ -547,7 +549,7 @@ private: // Private setters (these call private signals under the hood, an essen
     void privateSetIcon(const QIcon& icon);
     void privateSetEnabled(bool enabled);
     void privateSetVisible(bool visible);
-    void privateSetStatus(const Status& status);
+    void privateSetStatus(const Status& status, std::uint32_t deferredStatusDelay = 0, const Status& deferredStatus = Status::Idle);
     void privateSetIdle();
     void privateSetRunning();
     void privateSetRunningIndeterminate();
@@ -568,7 +570,14 @@ private: // Private setters (these call private signals under the hood, an essen
     void privateSetSubtaskFinished(const QString& subtaskName, const QString& progressDescription);
     void privateSetSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName);
     void privateSetProgressDescription(const QString& progressDescription, std::uint32_t clearDelay = 0);
+    void privateSetProgressText(const QString& progressText, std::uint32_t clearDelay = 0);
     void privateSetProgressTextFormatter(const ProgressTextFormatter& progressTextFormatter);
+
+private:
+
+    void privateEmitProgressChanged();
+    void privateEmitProgressDescriptionChanged();
+    void privateEmitProgressTextChanged();
 
 signals:
 
@@ -743,7 +752,7 @@ signals:
     void privateSetIconSignal(const QIcon& icon, QPrivateSignal);
     void privateSetEnabledSignal(bool enabled, QPrivateSignal);
     void privateSetVisibleSignal(bool visible, QPrivateSignal);
-    void privateSetStatusSignal(const Status& status, QPrivateSignal);
+    void privateSetStatusSignal(const Status& status, std::uint32_t deferredStatusDelay, const Status& deferredStatus, QPrivateSignal);
     void privateSetIdleSignal(QPrivateSignal);
     void privateSetRunningSignal(QPrivateSignal);
     void privateSetRunningIndeterminateSignal(QPrivateSignal);
@@ -773,6 +782,7 @@ private:
     bool                    _enabled;                                       /** Whether the task is enabled, disabled tasks are not included in task aggregation */
     bool                    _visible;                                       /** Whether the task is visible in the user interface */
     Status                  _status;                                        /** Task status */
+    Status                  _deferredStatus;                                /** Deferred task status set when the deferred status timer times out */
     bool                    _mayKill;                                       /** Whether the task may be killed or not */
     AbstractTaskHandler*    _handler;                                       /** Task handler */
     ProgressMode            _progressMode;                                  /** The way progress is recorded */
@@ -786,13 +796,11 @@ private:
     TasksPtrs               _childTasks;                                    /** Pointers to child tasks */
     QString                 _progressText;                                  /** Progress text */
     ProgressTextFormatter   _progressTextFormatter;                         /** Progress text formatter function (overrides Task::getProgressText() when set) */
+
 private:
-
-    /** Single shot task progress and description timer interval */
-    static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL = 250;
-
-    /** Single shot task description disappear timer interval */
-    static constexpr std::uint32_t TASK_DESCRIPTION_DISAPPEAR_INTERVAL = 1500;
+    static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL           = 250;      /** Single shot task progress and description timer interval */
+    static constexpr std::uint32_t TASK_DESCRIPTION_DISAPPEAR_INTERVAL  = 1500;     /** Single shot task description disappear timer interval */
+    static constexpr std::uint32_t DEFERRED_STATUS_DELAY_INTERVAL       = 1500;     /** Single shot deferred status delay timer interval */
 };
 
 }
