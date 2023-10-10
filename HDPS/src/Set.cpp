@@ -311,6 +311,8 @@ DatasetImpl::DatasetImpl(CoreInterface* core, const QString& rawDataName, const 
 {
     if (!id.isEmpty())
         Serializable::setId(id);
+
+    _datasetTask.setDataset(this);
 }
 
 DatasetImpl::~DatasetImpl()
