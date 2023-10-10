@@ -67,5 +67,5 @@ void StartPageWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPalet
     QString color = QApplication::palette().color(QPalette::Normal, colorRole).name();
     
     //widget->setPalette(palette);
-    widget->setStyleSheet("background-color: " + color);
+    widget->setStyleSheet("QWidget#StartPageHeaderWidget, QWidget#StartPageContentWidget { background-color: " + color + "}");
 }

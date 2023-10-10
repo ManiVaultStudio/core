@@ -64,6 +64,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
 
     connect(&_compactViewAction, &ToggleAction::toggled, this, &StartPageContentWidget::updateActions);
     
+    setObjectName("StartPageContentWidget");
     updateCustomStyle();
     connect(qApp, &QApplication::paletteChanged, this, &StartPageContentWidget::updateCustomStyle);
 }
@@ -90,6 +91,5 @@ void StartPageContentWidget::updateActions()
 void StartPageContentWidget::updateCustomStyle()
 {
     // update custome style settings
-    // qDebug() << "StartPageContentWidget: Palette Changed!";
     StartPageWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }

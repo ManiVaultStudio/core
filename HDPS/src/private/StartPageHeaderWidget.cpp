@@ -40,6 +40,7 @@ StartPageHeaderWidget::StartPageHeaderWidget(QWidget* parent /*= nullptr*/) :
     _layout.setContentsMargins(50, 25, 50, 0);
     _layout.addWidget(&_headerLabel);
     
+    setObjectName("StartPageHeaderWidget");
     updateCustomStyle();
     connect(qApp, &QApplication::paletteChanged, this, &StartPageHeaderWidget::updateCustomStyle);
 }
