@@ -18,6 +18,8 @@ if(MSVC)
     set(LINK_TYPE STATIC)
 endif(MSVC)
 
+message(STATUS "ManiVault Install dir: ${MV_INSTALL_DIR}")
+
 # -----------------------------------------------------------------------------
 # CMake Settings
 # -----------------------------------------------------------------------------
