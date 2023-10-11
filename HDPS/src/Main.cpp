@@ -11,9 +11,10 @@
 #include <QProxyStyle>
 #include <QQuickWindow>
 #include <QCommandLineParser>
+#include <filesystem>
 
 #ifndef _DEBUG
-//#pragma comment(linker, "/SUBSYSTEM:WINDOWS")
+#pragma comment(linker, "/SUBSYSTEM:WINDOWS")
 #endif
 class NoFocusProxyStyle : public QProxyStyle {
 public:
@@ -33,9 +34,14 @@ public:
 
 int main(int argc, char *argv[])
 {
+    std::filesystem::path applicationPath(argv[0]);
+    std::string f = applicationPath.stem().string();
+    QString applicationName = f.c_str();
+    if (applicationName.isEmpty())
+        applicationName = "ManiVault";
     QCoreApplication::setOrganizationName("BioVault");
     QCoreApplication::setOrganizationDomain("LUMC (LKEB) & TU Delft (CGV)");
-    QCoreApplication::setApplicationName("ManiVault");
+    QCoreApplication::setApplicationName(applicationName);
     
     // Necessary to instantiate QWebEngine from a plugin
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
@@ -64,9 +70,21 @@ int main(int argc, char *argv[])
 
     commandLineParser.addOption(projectOption);
     commandLineParser.process(QCoreApplication::arguments());
-    
+
+    QString iconPath;
     if (commandLineParser.isSet("project"))
-        application.setStartupProjectFilePath(commandLineParser.value("project"));
+    {
+        QSettings settings;
+        settings.clear();
+        QString projectPath = commandLineParser.value("project");
+        application.setStartupProjectFilePath(projectPath);
+        iconPath = projectPath + "i";
+        if (!QFileInfo::exists(iconPath))
+        {
+            qDebug() << "file not found: " << iconPath;
+            iconPath.clear();
+        }
+    }
 
     application.setStyle(new NoFocusProxyStyle);
 
@@ -78,14 +96,21 @@ int main(int argc, char *argv[])
 
     qApp->setStyleSheet(styleSheet);
 
+    
     QIcon appIcon;
-
-    appIcon.addFile(":/Icons/AppIcon32");
-    appIcon.addFile(":/Icons/AppIcon64");
-    appIcon.addFile(":/Icons/AppIcon128");
-    appIcon.addFile(":/Icons/AppIcon256");
-    appIcon.addFile(":/Icons/AppIcon512");
-    appIcon.addFile(":/Icons/AppIcon1024");
+    if(iconPath.isEmpty())
+    {
+        appIcon.addFile(":/Icons/AppIcon32");
+        appIcon.addFile(":/Icons/AppIcon64");
+        appIcon.addFile(":/Icons/AppIcon128");
+        appIcon.addFile(":/Icons/AppIcon256");
+        appIcon.addFile(":/Icons/AppIcon512");
+        appIcon.addFile(":/Icons/AppIcon1024");
+    }
+    else
+    {
+        appIcon = QIcon(iconPath);
+    }
 
     application.setWindowIcon(appIcon);
 

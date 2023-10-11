@@ -80,7 +80,8 @@ void MainWindow::showEvent(QShowEvent* showEvent)
                 if (projectIsReadOnly)
                 {
                     const auto updateTitle = [this]() -> void {
-                        setWindowTitle(projects().getCurrentProject()->getTitleAction().getString());
+                        QString title = projects().getCurrentProject()->getTitleAction().getString();
+                            setWindowTitle(title);
                     };
                     connect(&(projects().getCurrentProject()->getTitleAction()), &StringAction::stringChanged, this, updateTitle);
                 }
@@ -102,6 +103,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         if (Application::current()->shouldOpenProjectAtStartup())
         {
             setCentralWidget(projectWidget);
+            connect(&projects(), &ProjectManager::projectOpened, this, updateWindowTitle);
         }
         else
         {

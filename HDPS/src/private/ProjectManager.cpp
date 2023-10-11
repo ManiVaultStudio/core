@@ -429,22 +429,13 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (!importDataOnly)
                 newProject();
 
-            if (!Application::current()->shouldOpenProjectAtStartup())
-                qDebug().noquote() << "Opening" << filePath;
-            else
-                qDebug().noquote() << "Open ManiVault project from" << filePath;
+            qDebug().noquote() << "Opening " << filePath;
 
             Archiver archiver;
 
             QStringList tasks = archiver.getTaskNamesForDecompression(filePath) << "Import data model" << "Load workspace";
 
-            QString taskMesg = "Open ManiVault project from " + filePath;;
-            if (!Application::current()->shouldOpenProjectAtStartup())
-            {
-                taskMesg = "Opening " + filePath;
-            }
-           
-            TaskProgressDialog taskProgressDialog(nullptr, tasks, taskMesg, Application::getIconFont("FontAwesome").getIcon("folder-open"));
+            TaskProgressDialog taskProgressDialog(nullptr, tasks, QString("Opening ") + filePath, Application::getIconFont("FontAwesome").getIcon("folder-open"));
 
             connect(&taskProgressDialog, &TaskProgressDialog::canceled, this, [this]() -> void {
                 Application::setSerializationAborted(true);
