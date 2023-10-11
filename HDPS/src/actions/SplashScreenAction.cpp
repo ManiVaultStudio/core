@@ -98,13 +98,11 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     _editAction.addAction(&_projectImageAction);
     _editAction.addAction(&_affiliateLogosImageAction);
 
-    getTaskAction().setTask(Application::current()->getTask(Application::TaskType::LoadApplication));
+    getTaskAction().setTask(&Application::current()->getStartupTask());
 
     setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
 
     auto& fontAwesome = Application::getIconFont("FontAwesome");
-
-    _taskAction.setTask(Application::current()->getTask(Application::TaskType::LoadApplication));
 
     _enabledAction.setStretch(1);
     _enabledAction.setToolTip("Show splash screen at startup");
@@ -134,7 +132,7 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     connect(&_openAction, &TriggerAction::triggered, this, &SplashScreenAction::showSplashScreenWidget);
     connect(&_closeAction, &TriggerAction::triggered, this, &SplashScreenAction::closeSplashScreenWidget);
 
-    connect(Application::current()->getTask(Application::TaskType::LoadApplication), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
+    connect(&Application::current()->getStartupTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
         if (previousStatus == Task::Status::Running && status == Task::Status::Finished)
             closeSplashScreenWidget();
     });

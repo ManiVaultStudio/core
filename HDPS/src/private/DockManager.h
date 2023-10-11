@@ -88,6 +88,17 @@ public:
     /** get as QWidget pointer*/
     QWidget* getWidget();
 
+public: // Serialization task
+
+    /** Get task for reporting serialization progress */
+    hdps::Task* getSerializationTask();
+
+    /**
+     * Set task for reporting serialization progress to \p serializationTask
+     * @param serializationTask Pointer to serialization task
+     */
+    void setSerializationTask(hdps::Task* serializationTask);
+
 public: // Serialization
 
     /**
@@ -102,14 +113,11 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-    /** Get task for reporting serialization progress */
-    hdps::Task& getSerializationTask();
-
     friend class ViewPluginsDockWidget;
     friend class QPointer<DockManager>;
 
 private:
-    hdps::Task    _serializationTask;         /** For reporting serialization progress */
+    hdps::Task*    _serializationTask;         /** For reporting serialization progress */
 
 private:
     ViewPluginDockWidgets _orderedViewPluginDockWidgets; /* the ViewPluginDockWidgets in the order in which they were created */

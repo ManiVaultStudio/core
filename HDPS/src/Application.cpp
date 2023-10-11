@@ -35,7 +35,8 @@ Application::Application(int& argc, char** argv) :
     _serializationAborted(false),
     _logger(),
     _startupProjectFilePath(),
-    _startupProjectMetaAction(nullptr)
+    _startupProjectMetaAction(nullptr),
+    _startupTask(this, "Load ManiVault")
 {
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, {
             //":/IconFonts/FontAwesomeBrandsRegular-5.14.otf",
@@ -48,29 +49,6 @@ Application::Application(int& argc, char** argv) :
         //":/IconFonts/FontAwesomeRegular-6.4.otf",
         ":/IconFonts/FontAwesomeSolid-6.4.otf"
     })));
-
-    connect(this, &Application::coreManagersCreated, this, [this](CoreInterface* core) {
-        _tasks << new Task(this, "Loading");
-        _tasks << new Task(this, "Loading Core");
-        _tasks << new Task(this, "Loading Core Managers");
-        _tasks << new Task(this, "Loading GUI");
-        _tasks << new Task(this, "Loading Project");
-        _tasks << new Task(this, "Loading project data");
-        _tasks << new Task(this, "Loading project workspace");
-        _tasks << new BackgroundTask(this, "Overall Background");
-
-        for (auto task : _tasks)
-            task->setMayKill(false);
-
-        getTask(TaskType::LoadApplicationCore)->setParentTask(getTask(TaskType::LoadApplication));
-        getTask(TaskType::LoadApplicationCoreManagers)->setParentTask(getTask(TaskType::LoadApplicationCore));
-        getTask(TaskType::LoadApplicationGUI)->setParentTask(getTask(TaskType::LoadApplication));
-        getTask(TaskType::LoadProject)->setParentTask(getTask(TaskType::LoadApplication));
-        getTask(TaskType::LoadProjectData)->setParentTask(getTask(TaskType::LoadProject));
-        getTask(TaskType::LoadProjectWorkspace)->setParentTask(getTask(TaskType::LoadProject));
-
-        getTask(TaskType::LoadProject)->setEnabled(shouldOpenProjectAtStartup());
-    });
 
     connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) {
         BackgroundTask::createHandler(Application::current());
@@ -208,11 +186,6 @@ void Application::initialize()
     _logger.initialize();
 }
 
-Task* Application::getTask(const TaskType& taskType)
-{
-    return _tasks[static_cast<int>(taskType)];
-}
-
 QMainWindow* Application::getMainWindow()
 {
     foreach(QWidget* widget, qApp->topLevelWidgets())
@@ -220,6 +193,11 @@ QMainWindow* Application::getMainWindow()
             return mainWindow;
 
     return nullptr;
+}
+
+ApplicationStartupTask& Application::getStartupTask()
+{
+    return _startupTask;
 }
 
 }

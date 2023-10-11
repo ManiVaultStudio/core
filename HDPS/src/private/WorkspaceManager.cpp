@@ -188,8 +188,10 @@ void WorkspaceManager::initialize()
         _mainDockManager->setObjectName("MainDockManager");
         _viewPluginsDockManager->setObjectName("ViewPluginsDockManager");
 
-        _mainDockManager->getSerializationTask().setName("Main Dock Manager");
-        _viewPluginsDockManager->getSerializationTask().setName("View Plugins Dock Manager");
+        auto& projectSerializationTask = projects().getProjectSerializationTask();
+
+        _mainDockManager->setSerializationTask(&projectSerializationTask.getSystemViewPluginsTask());
+        _viewPluginsDockManager->setSerializationTask(&projectSerializationTask.getViewPluginsTask());
 
         auto viewPluginsDockArea = _mainDockManager->setCentralWidget(_viewPluginsDockWidget.get());
 
@@ -209,14 +211,7 @@ void WorkspaceManager::initialize()
 
         connect(&Application::core()->getProjectManager(), &AbstractProjectManager::projectCreated, this, [this]() -> void {
             newWorkspace();
-
-            auto workspaceSerializationTask = &projects().getCurrentProject()->getWorkspaceSerializationTask();
-
-            _mainDockManager->getSerializationTask().setParentTask(workspaceSerializationTask);
-            _viewPluginsDockManager->getSerializationTask().setParentTask(workspaceSerializationTask);
         });
-
-
     }
     endInitialization();
 }
@@ -335,7 +330,7 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                 Application::current()->setSetting("Workspaces/WorkingDirectory", QFileInfo(filePath).absolutePath());
             }
 
-            auto& workspaceSerializationTask = projects().getCurrentProject()->getWorkspaceSerializationTask();
+            auto& workspaceSerializationTask = projects().getProjectSerializationTask().getWorkspaceTask();
 
             workspaceSerializationTask.setName("Load workspace");
             workspaceSerializationTask.setDescription(QString("Opening ManiVault workspace from %1").arg(filePath));
@@ -562,8 +557,10 @@ Workspace* WorkspaceManager::getCurrentWorkspace()
 
 void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    _mainDockManager->getSerializationTask().setName("Loading main dock manager");
-    _viewPluginsDockManager->getSerializationTask().setName("Loading view plugins manager");
+    auto& projectSerializationTask = projects().getProjectSerializationTask();
+    
+    projectSerializationTask.getSystemViewPluginsTask().setName("Load system view plugins");
+    projectSerializationTask.getViewPluginsTask().setName("Load view plugins");
 
     getCurrentWorkspace()->fromVariantMap(variantMap);
 
@@ -582,8 +579,10 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap WorkspaceManager::toVariantMap() const
 {
-    _mainDockManager->getSerializationTask().setName("Saving main dock manager");
-    _viewPluginsDockManager->getSerializationTask().setName("Saving view plugins manager");
+    auto& projectSerializationTask = projects().getProjectSerializationTask();
+
+    projectSerializationTask.getSystemViewPluginsTask().setName("Save system view plugins dock manager");
+    projectSerializationTask.getViewPluginsTask().setName("Save view plugins manager");
 
     auto currentWorkspaceMap = getCurrentWorkspace()->toVariantMap();
 

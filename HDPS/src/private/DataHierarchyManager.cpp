@@ -203,10 +203,10 @@ void DataHierarchyManager::selectItems(DataHierarchyItems& selectedItems)
 
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    auto& dataSerializationTask = projects().getCurrentProject()->getDataSerializationTask();
+    auto& projectDataSerializationTask = projects().getProjectSerializationTask();
 
-    dataSerializationTask.setName("Loading data");
-    dataSerializationTask.setRunning();
+    projectDataSerializationTask.setName("Loading data");
+    projectDataSerializationTask.setRunning();
 
     const auto loadDataset = [](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
         const auto dataset      = dataHierarchyItemMap["Dataset"].toMap();
@@ -240,16 +240,16 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
     loadDataHierarchyItem(variantMap, Dataset<DatasetImpl>());
 
-    dataSerializationTask.setFinished();
+    projectDataSerializationTask.setFinished();
 }
 
 QVariantMap DataHierarchyManager::toVariantMap() const
 {
     if (!_items.isEmpty()) {
-        auto& dataSerializationTask = projects().getCurrentProject()->getDataSerializationTask();
+        auto& projectDataSerializationTask = projects().getProjectSerializationTask();
         
-        dataSerializationTask.setName("Saving data");
-        dataSerializationTask.setRunning();
+        projectDataSerializationTask.setName("Saving project data");
+        projectDataSerializationTask.setRunning();
 
         QVariantMap variantMap;
 
@@ -268,7 +268,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
             sortIndex++;
         }
 
-        dataSerializationTask.setFinished();
+        projectDataSerializationTask.setFinished();
 
         return variantMap;
     }

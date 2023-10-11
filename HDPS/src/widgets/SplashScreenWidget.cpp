@@ -104,7 +104,7 @@ void SplashScreenWidget::paintEvent(QPaintEvent* paintEvent)
 
     auto backgroundRect = rect().marginsRemoved(QMargins(SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin, SplashScreenWidget::shadowMargin));
 
-    if (Application::current()->getTask(Application::TaskType::LoadApplication)->isRunning())
+    if (Application::current()->getStartupTask().isRunning())
         backgroundRect.setHeight(height() - SplashScreenWidget::frameRadius - (2 * SplashScreenWidget::shadowMargin));
 
     QPainterPath path;
@@ -112,7 +112,7 @@ void SplashScreenWidget::paintEvent(QPaintEvent* paintEvent)
     path.setFillRule(Qt::WindingFill);
     path.addRoundedRect(backgroundRect, SplashScreenWidget::frameRadius, SplashScreenWidget::frameRadius);
 
-    if (Application::current()->getTask(Application::TaskType::LoadApplication)->isRunning()) {
+    if (Application::current()->getStartupTask().isRunning()) {
         qreal squareSize = backgroundRect.height() / 2;
 
         path.addRect(QRect(backgroundRect.left(), backgroundRect.top() + backgroundRect.height() - squareSize, squareSize, squareSize));
@@ -419,7 +419,7 @@ void SplashScreenWidget::createFooter()
         _roundedFrameLayout.addLayout(imagesLayout);
     }
 
-    if (Application::current()->getTask(Application::TaskType::LoadApplication)->isRunning()) {
+    if (Application::current()->getStartupTask().isRunning()) {
         auto progressWidget         = new QWidget();
         auto progressWidgetLayout   = new QHBoxLayout();
         auto taskActionLabelWidget  = new ElidedLabel("", this);

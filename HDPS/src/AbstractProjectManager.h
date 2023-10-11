@@ -6,6 +6,7 @@
 
 #include "AbstractManager.h"
 #include "Project.h"
+#include "ProjectSerializationTask.h"
 
 #include "actions/TriggerAction.h"
 #include "actions/RecentFilesAction.h"
@@ -68,6 +69,13 @@ public:
         State                   _state;             /** State during the scope */
     };
 
+    /** Task for monitoring the progress of: */
+    enum class ProjectSerializationTaskType {
+        ProjectSerialization,
+        ProjectDataSerialization,
+        ProjectWorkspaceSerialization
+    };
+
 public:
 
     /**
@@ -76,7 +84,8 @@ public:
      */
     AbstractProjectManager(QObject* parent = nullptr) :
         AbstractManager(parent, "Project"),
-        _state(State::Idle)
+        _state(State::Idle),
+        _projectSerializationTask(this, "Project serialization")
     {
     }
 
@@ -159,6 +168,16 @@ public:
      * @return Preview image
      */
     virtual QImage getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const = 0;
+
+    /** Get task for project serialization */
+    ProjectSerializationTask& getProjectSerializationTask() {
+        auto application = Application::current();
+
+        if (application->shouldOpenProjectAtStartup())
+            return application->getStartupTask().getLoadProjectTask();
+
+        return _projectSerializationTask;
+    }
 
 public: // Menus
 
@@ -321,7 +340,8 @@ signals:
     void stateChanged(const State& state);
 
 private:
-    State       _state;     /** Determines the state of the project manager */
+    State                       _state;                         /** Determines the state of the project manager */
+    ProjectSerializationTask    _projectSerializationTask;      /** Task for project serialization */
 };
 
 }

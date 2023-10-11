@@ -69,11 +69,11 @@ void Core::initialize()
 
     CoreInterface::setAboutToBeInitialized();
     {
-        auto loadApplicationCoreManagersTask = Application::current()->getTask(Application::TaskType::LoadApplicationCoreManagers);
+        auto& loadCoreManagersTask = Application::current()->getStartupTask().getLoadCoreManagersTask();
 
         for (auto& manager : _managers) {
             manager->createTask();
-            manager->getTask()->setParentTask(loadApplicationCoreManagersTask);
+            manager->getTask()->setParentTask(&loadCoreManagersTask);
         }
 
         for (auto& manager : _managers)

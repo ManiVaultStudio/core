@@ -31,7 +31,7 @@ using namespace hdps::util;
 DockManager::DockManager(QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
     Serializable("Dock manager"),
-    _serializationTask(this, "Dock Manager")
+    _serializationTask(nullptr)
 {
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
@@ -152,6 +152,9 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
     {
         const auto viewPluginDockWidgetsList = variantMap["ViewPluginDockWidgets"].toList();
 
+        if (viewPluginDockWidgetsList.isEmpty())
+            _serializationTask->setEnabled(false);
+
         for (auto viewPluginDockWidgetVariant : viewPluginDockWidgetsList)
             ViewPluginDockWidget::preRegisterSerializationTask(this, viewPluginDockWidgetVariant.toMap()["ID"].toString(), this);
 
@@ -176,10 +179,12 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
         }
 
         if (viewPluginDockWidgetsList.isEmpty())
-            _serializationTask.setFinished();
+            _serializationTask->setFinished();
 
         if (!restoreState(QByteArray::fromBase64(variantMap["State"].toString().toUtf8()), variantMap["Version"].toInt()))
             qCritical() << "Unable to restore state from" << objectName();
+
+        //ViewPluginDockWidget::removeAllSerializationTasks();
     }
     show();
 }
@@ -190,12 +195,17 @@ QVariantMap DockManager::toVariantMap() const
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
+    for (auto viewPluginDockWidget : getViewPluginDockWidgets())
+        ViewPluginDockWidget::preRegisterSerializationTask(const_cast<DockManager*>(this), getId(), const_cast<DockManager*>(this));
+
     auto variantMap = Serializable::toVariantMap();
 
     QVariantList viewPluginDockWidgetsList;
 
     for (auto viewPluginDockWidget : getViewPluginDockWidgets())
         viewPluginDockWidgetsList << viewPluginDockWidget->toVariantMap();
+
+    ViewPluginDockWidget::removeAllSerializationTasks();
 
     variantMap.insert({
         { "State", QVariant::fromValue(saveState().toBase64()) },
@@ -205,7 +215,12 @@ QVariantMap DockManager::toVariantMap() const
     return variantMap;
 }
 
-Task& DockManager::getSerializationTask()
+Task* DockManager::getSerializationTask()
 {
     return _serializationTask;
+}
+
+void DockManager::setSerializationTask(hdps::Task* serializationTask)
+{
+    _serializationTask = serializationTask;
 }

@@ -115,20 +115,6 @@ public:
      */
     QImage getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const override;
 
-public: // Serialization
-
-    /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
-
-    /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
-     */
-    QVariantMap toVariantMap() const override;
-
 public: // Menus
 
     /**
@@ -147,6 +133,20 @@ private:
 
     /** Resets the manager and creates a new project */
     void createProject();
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+    
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
 
 public: // Action getters
 

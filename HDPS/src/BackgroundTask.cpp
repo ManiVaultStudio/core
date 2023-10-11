@@ -14,8 +14,8 @@ BackgroundTaskHandler* BackgroundTask::backgroundTaskHandler = nullptr;
 BackgroundTask::BackgroundTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
     Task(parent, name, GuiScope::Background, status, mayKill, nullptr)
 {
-    if (core() != nullptr && core()->isInitialized())
-        setParentTask(Application::current()->getTask(Application::TaskType::OverallBackground));
+    //if (core() != nullptr && core()->isInitialized())
+    //    setParentTask(Application::current()->getTask(Application::TaskType::OverallBackground));
 }
 
 void BackgroundTask::createHandler(QObject* parent)
@@ -25,7 +25,7 @@ void BackgroundTask::createHandler(QObject* parent)
 
     BackgroundTask::backgroundTaskHandler = new BackgroundTaskHandler(parent);
 
-    backgroundTaskHandler->getOverallBackgroundTaskAction().setTask(Application::current()->getTask(Application::TaskType::OverallBackground));
+    //backgroundTaskHandler->getOverallBackgroundTaskAction().setTask(Application::current()->getTask(Application::TaskType::OverallBackground));
 }
 
 }

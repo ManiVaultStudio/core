@@ -22,10 +22,7 @@ Project::Project(QObject* parent /*= nullptr*/) :
     _filePath(),
     _startupProject(false),
     _applicationVersion(Application::current()->getVersion()),
-    _projectMetaAction(this),    
-    _serializationTask(this, "*Loading project"),
-    _dataSerializationTask(this, "*Loading project data"),
-    _workspaceSerializationTask(this, "*Loading workspace")
+    _projectMetaAction(this)
 {
     initialize();
 }
@@ -128,30 +125,6 @@ QVariantMap Project::toVariantMap() const
     return variantMap;
 }
 
-Task& Project::getSerializationTask()
-{
-    if (Application::current()->shouldOpenProjectAtStartup())
-        return *Application::current()->getTask(Application::TaskType::LoadProject);
-
-    return _serializationTask;
-}
-
-Task& Project::getDataSerializationTask()
-{
-    if (Application::current()->shouldOpenProjectAtStartup())
-        return *Application::current()->getTask(Application::TaskType::LoadProjectData);
-
-    return _dataSerializationTask;
-}
-
-Task& Project::getWorkspaceSerializationTask()
-{
-    if (Application::current()->shouldOpenProjectAtStartup())
-        return *Application::current()->getTask(Application::TaskType::LoadProjectWorkspace);
-
-    return _workspaceSerializationTask;
-}
-
 util::Version Project::getVersion() const
 {
     return _applicationVersion;
@@ -238,9 +211,6 @@ void Project::initialize()
 
     connect(&projects(), &AbstractProjectManager::projectCreated, this, updateStudioModeActionReadOnly);
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateStudioModeActionReadOnly);
-
-    //_dataSerializationTask.setParentTask(&_serializationTask);
-    //_workspaceSerializationTask.setParentTask(&_serializationTask);
 }
 
 }

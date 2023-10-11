@@ -52,6 +52,8 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
 void ModalTaskHandler::updateDialogVisibility()
 {
+    return;
+
     if (!getEnabled())
         return;
 

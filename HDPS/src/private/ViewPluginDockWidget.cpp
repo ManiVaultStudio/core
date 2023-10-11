@@ -231,10 +231,10 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
 
     auto serializationTask = ViewPluginDockWidget::getSerializationTask(viewPluginDockWidgetId);
 
-    const auto loadViewPluginSubtask    = QString("Loading %1 plugin").arg(guiName);
-    const auto restoreViewPluginSubtask = QString("Restoring %1 GUI").arg(guiName);
+    const auto loadViewPluginSubtask    = QString("Load %1").arg(guiName);
+    const auto restoreViewPluginSubtask = QString("Create %1 GUI").arg(guiName);
 
-    serializationTask->setName(QString("Loading %1").arg(guiName));
+    serializationTask->setName(QString("Load %1").arg(guiName));
     serializationTask->setSubtasks({ loadViewPluginSubtask, restoreViewPluginSubtask });
     serializationTask->setRunning();
 
@@ -259,7 +259,6 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
     }
     serializationTask->setSubtaskFinished(restoreViewPluginSubtask);
 
-    serializationTask->setProgress(1.f);
     serializationTask->setFinished(false);
 }
 
@@ -269,17 +268,26 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
     qDebug() << __FUNCTION__;
 #endif
 
+    auto viewPlugin         = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin();
+    auto serializationTask  = ViewPluginDockWidget::getSerializationTask(viewPlugin->getId());
+
+    serializationTask->setName(QString("Saving %1").arg(viewPlugin->text()));
+    serializationTask->setRunning(QString("Saving %1").arg(viewPlugin->text()));
+
     auto variantMap = DockWidget::toVariantMap();
 
     if (_viewPlugin) {
         variantMap.insert({
-            { "ViewPlugin", const_cast<ViewPluginDockWidget*>(this)->getViewPlugin()->toVariantMap() }
+            { "ViewPlugin", viewPlugin->toVariantMap() }
         });
     }
        
     variantMap.insert({
         { "DockManagerState", QVariant::fromValue(_dockManager.saveState().toBase64()) }
     });
+
+    serializationTask->setProgress(1.f);
+    serializationTask->setFinished(QString("%1 saved").arg(viewPlugin->text()));
 
     return variantMap;
 }
@@ -302,7 +310,7 @@ void ViewPluginDockWidget::preRegisterSerializationTask(QObject* parent, const Q
     auto serializationTask = new Task(parent, "View plugin Dock Widget");
 
     serializationTask->setMayKill(false);
-    serializationTask->setParentTask(&dockManager->getSerializationTask());
+    serializationTask->setParentTask(dockManager->getSerializationTask());
 
     serializationTasks[viewPluginDockWidgetId] = serializationTask;
 }
@@ -313,6 +321,14 @@ Task* ViewPluginDockWidget::getSerializationTask(const QString& viewPluginDockWi
         return serializationTasks[viewPluginDockWidgetId];
 
     return nullptr;
+}
+
+void ViewPluginDockWidget::removeAllSerializationTasks()
+{
+    for (auto serializationTask : serializationTasks.values())
+        delete serializationTask;
+
+    serializationTasks.clear();
 }
 
 void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)

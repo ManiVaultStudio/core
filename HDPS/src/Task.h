@@ -301,43 +301,66 @@ public: // Status
     /**
      * Set task status to \p status and possibly switch to \p deferredStatus when the \p deferredStatusDelay is non-zero
      * @param status Task status
+     * @param progressDescription When set to a non-empty string, it overrides the default string
      * @param deferredStatusDelay After this delay, the status will be set to \p deferredStatus
      * @param deferredStatus Will be set to this status after \p deferredStatusDelay
      */
-    virtual void setStatus(const Status& status, std::uint32_t deferredStatusDelay = 0, const Status& deferredStatus = Status::Idle) final;
+    virtual void setStatus(const Status& status, const QString& progressDescription = "", std::uint32_t deferredStatusDelay = 0, const Status& deferredStatus = Status::Idle) final;
 
-    /** Convenience method to set task status to idle */
-    virtual void setIdle() final;
+    /**
+     * Convenience method to set task status to undefined
+     * @param progressDescription When set to a non-empty string, it overrides the default 'Undefined' string
+     */
+    virtual void setUndefined(const QString& progressDescription = "") final;
 
-    /** Convenience method to set task status to running */
-    virtual void setRunning() final;
+    /**
+     * Convenience method to set task status to idle
+     * @param progressDescription When set to a non-empty string, it overrides the default 'Idle' string
+     */
+    virtual void setIdle(const QString& progressDescription = "") final;
 
-    /** Convenience method to set task status to running indeterminate */
-    virtual void setRunningIndeterminate() final;
+    /**
+     * Convenience method to set task status to running
+     * @param progressDescription When set to a non-empty string, it overrides the default 'Running' string
+     */
+    virtual void setRunning(const QString& progressDescription = "") final;
+
+    /**
+     * Convenience method to set task status to running indeterminate
+     * @param progressDescription When set to a non-empty string, it overrides the default 'Running indeterminate' string
+     */
+    virtual void setRunningIndeterminate(const QString& progressDescription = "") final;
 
     /**
      * Convenience method to set task status to finished
-     * @param toIdleWithDelay Whether to automatically set the status to idle after \p delay (does not have an effect if it is a child task)
-     * @param delay Delay in milliseconds
+     * @param toIdleDelay Delay in milliseconds after which the status will be set to idle (when \p toIdleDelay > 0)
      */
-    virtual void setFinished(bool toIdleWithDelay = true, std::uint32_t delay = DEFERRED_STATUS_DELAY_INTERVAL) final;
+    virtual void setFinished(std::uint32_t toIdleDelay = DEFERRED_STATUS_DELAY_INTERVAL) final;
 
     /**
      * Convenience method to set task status to finished and use a custom progress description
-     * @param progressDescription Override the default progress description when set to a non-empty string
-     * @param toIdleWithDelay Whether to automatically set the status to idle after \p delay (does not have an effect if it is a child task)
-     * @param delay Delay in milliseconds
+     * @param progressDescription When set to a non-empty string, it overrides the default 'Finished' string
+     * @param toIdleDelay Delay in milliseconds after which the status will be set to idle (when \p toIdleDelay > 0)
      */
-    virtual void setFinished(const QString& progressDescription, bool toIdleWithDelay = true, std::uint32_t delay = TASK_DESCRIPTION_DISAPPEAR_INTERVAL) final;
+    virtual void setFinished(const QString& progressDescription, std::uint32_t toIdleDelay = DEFERRED_STATUS_DELAY_INTERVAL) final;
 
-    /** Convenience method to set task status to about to be aborted */
-    virtual void setAboutToBeAborted() final;
+    /**
+     * Convenience method to set task status to about to be aborted
+     * @param progressDescription When set to a non-empty string, it overrides the default 'About to be aborted' string
+     */
+    virtual void setAboutToBeAborted(const QString& progressDescription = "") final;
 
-    /** Convenience method to set task status to aborting */
-    virtual void setAborting() final;
+    /**
+     * Convenience method to set task status to aborting
+     * @param progressDescription When set to a non-empty string, it overrides the default 'Aborting' string
+     */
+    virtual void setAborting(const QString& progressDescription = "") final;
 
-    /** Convenience method to set task status to aborted */
-    virtual void setAborted() final;
+    /**
+     * Convenience method to set task status to aborted
+     * @param progressDescription When set to a non-empty string, it overrides the default 'Aborted' string
+     */
+    virtual void setAborted(const QString& progressDescription = "") final;
 
     /**
      * Kill the task and trigger Task::abort() signal
@@ -549,15 +572,16 @@ private: // Private setters (these call private signals under the hood, an essen
     void privateSetIcon(const QIcon& icon);
     void privateSetEnabled(bool enabled);
     void privateSetVisible(bool visible);
-    void privateSetStatus(const Status& status, std::uint32_t deferredStatusDelay = 0, const Status& deferredStatus = Status::Idle);
-    void privateSetIdle();
-    void privateSetRunning();
-    void privateSetRunningIndeterminate();
-    void privateSetFinished(bool toIdleWithDelay = true, std::uint32_t delay = TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
-    void privateSetFinished(const QString& progressDescription, bool toIdleWithDelay = true, std::uint32_t delay = TASK_DESCRIPTION_DISAPPEAR_INTERVAL);
-    void privateSetAboutToBeAborted();
-    void privateSetAborting();
-    void privateSetAborted();
+    void privateSetStatus(const Status& status, const QString& progressDescription = "", std::uint32_t deferredStatusDelay = 0, const Status& deferredStatus = Status::Idle);
+    void privateSetUndefined(const QString& progressDescription = "");
+    void privateSetIdle(const QString& progressDescription = "");
+    void privateSetRunning(const QString& progressDescription = "");
+    void privateSetRunningIndeterminate(const QString& progressDescription = "");
+    void privateSetFinished(std::uint32_t toIdleDelay = 0);
+    void privateSetFinished(const QString& progressDescription, std::uint32_t toIdleDelay = 0);
+    void privateSetAboutToBeAborted(const QString& progressDescription = "");
+    void privateSetAborting(const QString& progressDescription = "");
+    void privateSetAborted(const QString& progressDescription = "");
     void privateKill(bool recursive = true);
     void privateSetProgressMode(const ProgressMode& progressMode);
     void privateSetGuiScope(const GuiScope& guiScope);
@@ -636,26 +660,29 @@ signals:
      */
     void isKillableChanged(bool killable);
 
+    /** Signals that the task status changed to undefined */
+    void statusChangedToUndefined();
+
     /** Signals that the task became idle */
-    void idle();
+    void statusChangedToIdle();
 
     /** Signals that the task started running */
-    void running();
+    void statusChangedToRunning();
 
     /** Signals that the task started running indeterminately */
-    void runningIndeterminate();
+    void statusChangedToRunningIndeterminate();
 
     /** Signals that the task finished */
-    void finished();
+    void statusChangedToFinished();
 
     /** Signals that the task is about to be aborted */
-    void aboutToBeAborted();
+    void statusChangedToAboutToBeAborted();
 
     /** Signals that the task is aborting */
-    void aborting();
+    void statusChangedToAborting();
 
     /** Signals that the task is aborted */
-    void aborted();
+    void statusChangedToAborted();
 
     /** Requests the involved task algorithms to abort their work */
     void requestAbort();
@@ -752,15 +779,16 @@ signals:
     void privateSetIconSignal(const QIcon& icon, QPrivateSignal);
     void privateSetEnabledSignal(bool enabled, QPrivateSignal);
     void privateSetVisibleSignal(bool visible, QPrivateSignal);
-    void privateSetStatusSignal(const Status& status, std::uint32_t deferredStatusDelay, const Status& deferredStatus, QPrivateSignal);
-    void privateSetIdleSignal(QPrivateSignal);
-    void privateSetRunningSignal(QPrivateSignal);
-    void privateSetRunningIndeterminateSignal(QPrivateSignal);
-    void privateSetFinishedSignal(bool toIdleWithDelay, std::uint32_t delay, QPrivateSignal);
-    void privateSetFinishedSignal(const QString& progressDescription, bool toIdleWithDelay, std::uint32_t delay, QPrivateSignal);
-    void privateSetAboutToBeAbortedSignal(QPrivateSignal);
-    void privateSetAbortingSignal(QPrivateSignal);
-    void privateSetAbortedSignal(QPrivateSignal);
+    void privateSetStatusSignal(const Status& status, const QString& progressDescription, std::uint32_t deferredStatusDelay, const Status& deferredStatus, QPrivateSignal);
+    void privateSetUndefinedSignal(const QString& progressDescription, QPrivateSignal);
+    void privateSetIdleSignal(const QString& progressDescription, QPrivateSignal);
+    void privateSetRunningSignal(const QString& progressDescription, QPrivateSignal);
+    void privateSetRunningIndeterminateSignal(const QString& progressDescription, QPrivateSignal);
+    void privateSetFinishedSignal(std::uint32_t toIdleDelay, QPrivateSignal);
+    void privateSetFinishedSignal(const QString& progressDescription, std::uint32_t toIdleDelay, QPrivateSignal);
+    void privateSetAboutToBeAbortedSignal(const QString& progressDescription, QPrivateSignal);
+    void privateSetAbortingSignal(const QString& progressDescription, QPrivateSignal);
+    void privateSetAbortedSignal(const QString& progressDescription, QPrivateSignal);
     void privateKillSignal(bool, QPrivateSignal);
     void privateSetProgressModeSignal(const ProgressMode& progressMode, QPrivateSignal);
     void privateSetGuiScopeSignal(const GuiScope& guiScope, QPrivateSignal);

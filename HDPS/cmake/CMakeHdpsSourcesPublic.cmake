@@ -510,10 +510,12 @@ set(PUBLIC_UTIL_FILES
 
 set(PUBLIC_APPLICATION_HEADERS
     src/Application.h
+    src/ApplicationStartupTask.h
 )
 
 set(PUBLIC_APPLICATION_SOURCES
     src/Application.cpp
+    src/ApplicationStartupTask.cpp
 )
 
 set(PUBLIC_APPLICATION_FILES
@@ -525,12 +527,14 @@ set(PUBLIC_PROJECT_HEADERS
     src/Project.h
     src/ProjectMetaAction.h
     src/ProjectCompressionAction.h
+    src/ProjectSerializationTask.h
 )
 
 set(PUBLIC_PROJECT_SOURCES
     src/Project.cpp
     src/ProjectMetaAction.cpp
     src/ProjectCompressionAction.cpp
+    src/ProjectSerializationTask.cpp
 )
 
 set(PUBLIC_PROJECT_FILES

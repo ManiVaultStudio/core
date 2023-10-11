@@ -30,6 +30,7 @@ BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
 
     auto& tasksFilterModel = _tasksStatusBarAction.getTasksFilterModel();
 
+    /*
     tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Background" });
     tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
     tasksFilterModel.getParentTaskFilterAction().setString(Application::current()->getTask(Application::TaskType::OverallBackground)->getId());
@@ -63,6 +64,7 @@ BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
     };
 
     Application::current()->getTask(Application::TaskType::OverallBackground)->setProgressTextFormatter(overallBackgroundTaskTextFormatter);
+    */
 }
 
 }

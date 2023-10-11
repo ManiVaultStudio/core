@@ -112,8 +112,6 @@ int main(int argc, char *argv[])
     commandLineParser.addOption(projectOption);
     commandLineParser.process(QCoreApplication::arguments());
     
-    application.initialize();
-
     SplashScreenAction splashScreenAction(&application, false);
 
     if (commandLineParser.isSet("project")) {
@@ -131,7 +129,8 @@ int main(int argc, char *argv[])
                 ModalTask::getGlobalHandler()->setEnabled(false);
 
                 application.setStartupProjectFilePath(startupProjectFilePath);
-                application.getTask(Application::TaskType::LoadProject)->setEnabled(true);
+                
+                application.getStartupTask().getLoadProjectTask().setEnabled(true);
 
                 auto projectMetaAction = getStartupProjectMetaAction(startupProjectFilePath);
 
@@ -167,9 +166,9 @@ int main(int argc, char *argv[])
         }
     }
     
-    qDebug() << "Show splash screen";
-
     //splashScreenAction.getOpenAction().trigger();
+
+    application.initialize();
 
     application.setStyle(new NoFocusProxyStyle);
 
@@ -179,7 +178,7 @@ int main(int argc, char *argv[])
 
     QString styleSheet = QLatin1String(styleSheetFile.readAll());
 
-    qApp->setStyleSheet(styleSheet);
+    application.setStyleSheet(styleSheet);
 
     QIcon appIcon;
 

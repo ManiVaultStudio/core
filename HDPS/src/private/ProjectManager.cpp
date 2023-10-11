@@ -436,17 +436,15 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             ProjectMetaAction projectMetaAction(extractFileFromManiVaultProject(filePath, temporaryDirectory, "meta.json"));
 
-            if (!_project->isStartupProject())
-                _project->getSerializationTask().setGuiScope(Task::GuiScope::Modal);
-
-            auto& dataSerializationTask = _project->getDataSerializationTask();
+            auto& projectSerializationTask          = projects().getProjectSerializationTask();
+            auto& projectDataSerializationTask      = projectSerializationTask.getDataTask();
+            auto& projectWorkspaceSerializationTask = projectSerializationTask.getWorkspaceTask();
             
-            dataSerializationTask.setName("Loading Project");
-            dataSerializationTask.setDescription(QString("Opening ManiVault project from %1").arg(filePath));
-            dataSerializationTask.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-            dataSerializationTask.setMayKill(false);
-            dataSerializationTask.setProgressMode(Task::ProgressMode::Subtasks);
-            dataSerializationTask.setRunning();
+            projectDataSerializationTask.setDescription(QString("Opening ManiVault project from %1").arg(filePath));
+            projectDataSerializationTask.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+            projectDataSerializationTask.setMayKill(false);
+            projectDataSerializationTask.setProgressMode(Task::ProgressMode::Subtasks);
+            projectDataSerializationTask.setRunning();
 
             QCoreApplication::processEvents();
 
@@ -458,17 +456,17 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             
             const auto decompressionTaskNames   = QStringList() << archiver.getTaskNamesForDecompression(filePath);
 
-            dataSerializationTask.setSubtasks(QStringList() << decompressionTaskNames << "Create data hierarchy");
+            projectDataSerializationTask.setSubtasks(QStringList() << decompressionTaskNames << "Create data hierarchy");
 
-            connect(&archiver, &Archiver::taskStarted, this, [this](const QString& taskName) -> void {
-                _project->getDataSerializationTask().setSubtaskStarted(taskName, QString("extracting %1").arg(taskName));
+            connect(&archiver, &Archiver::taskStarted, this, [this, &projectDataSerializationTask](const QString& taskName) -> void {
+                projectDataSerializationTask.setSubtaskStarted(taskName, QString("extracting %1").arg(taskName));
             });
 
-            connect(&archiver, &Archiver::taskFinished, this, [this](const QString& taskName) -> void {
-                _project->getDataSerializationTask().setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
+            connect(&archiver, &Archiver::taskFinished, this, [this, &projectDataSerializationTask](const QString& taskName) -> void {
+                projectDataSerializationTask.setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
             });
 
-            connect(&dataSerializationTask, &Task::requestAbort, this, [this]() -> void {
+            connect(&projectDataSerializationTask, &Task::requestAbort, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was loaded");
@@ -478,7 +476,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             projects().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
             
-            dataSerializationTask.setSubtaskFinished("Create data hierarchy");
+            projectDataSerializationTask.setSubtaskFinished("Create data hierarchy");
 
             if (loadWorkspace) {
                 if (workspaceFileInfo.exists())
@@ -487,7 +485,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 workspaces().setWorkspaceFilePath("");
             }
 
-            dataSerializationTask.setFinished();
+            projectDataSerializationTask.setFinished();
 
             _recentProjectsAction.addRecentFilePath(filePath);
 
@@ -667,7 +665,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             Archiver archiver;
 
-            connect(&saveProjectTask, &Task::aborted, this, [this]() -> void {
+            connect(&saveProjectTask, &Task::requestAbort, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was saved");
@@ -914,31 +912,6 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
     }
 }
 
-QMenu& ProjectManager::getNewProjectMenu()
-{
-    return _newProjectMenu;
-}
-
-QMenu& ProjectManager::getImportDataMenu()
-{
-    return _importDataMenu;
-}
-
-void ProjectManager::createProject()
-{
-    emit projectAboutToBeCreated();
-    {
-        reset();
-
-        _project.reset(new Project());
-    }
-    emit projectCreated(*(_project.get()));
-
-    _showStartPageAction.setChecked(false);
-
-    workspaces().reset();
-}
-
 bool ProjectManager::hasProject() const
 {
     return getCurrentProject() != nullptr;
@@ -984,21 +957,6 @@ QString ProjectManager::extractFileFromManiVaultProject(const QString& maniVault
     return extractedFilePath;
 }
 
-void ProjectManager::fromVariantMap(const QVariantMap& variantMap)
-{
-    //createProject();
-
-    _project->fromVariantMap(variantMap);
-}
-
-QVariantMap ProjectManager::toVariantMap() const
-{
-    if (hasProject())
-        return _project->toVariantMap();
-
-    return QVariantMap();
-}
-
 QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize /*= QSize(500, 500)*/) const
 {
     try
@@ -1027,4 +985,42 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
     }
 
     return {};
+}
+
+QMenu& ProjectManager::getNewProjectMenu()
+{
+    return _newProjectMenu;
+}
+
+QMenu& ProjectManager::getImportDataMenu()
+{
+    return _importDataMenu;
+}
+
+void ProjectManager::createProject()
+{
+    emit projectAboutToBeCreated();
+    {
+        reset();
+
+        _project.reset(new Project());
+    }
+    emit projectCreated(*(_project.get()));
+
+    _showStartPageAction.setChecked(false);
+
+    workspaces().reset();
+}
+
+void ProjectManager::fromVariantMap(const QVariantMap& variantMap)
+{
+    _project->fromVariantMap(variantMap);
+}
+
+QVariantMap ProjectManager::toVariantMap() const
+{
+    if (hasProject())
+        return _project->toVariantMap();
+
+    return QVariantMap();
 }

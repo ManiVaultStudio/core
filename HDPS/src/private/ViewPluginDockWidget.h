@@ -138,6 +138,9 @@ public: // Serialization
      */
     static hdps::Task* getSerializationTask(const QString& viewPluginDockWidgetId);
 
+    /** Removes all tasks which where created with ViewPluginDockWidget::preRegisterSerializationTask(...) */
+    static void removeAllSerializationTasks();
+
 public: // View plugin isolation
 
     /** Caches the visibility */

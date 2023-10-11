@@ -67,9 +67,9 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
 
 void MainWindow::showEvent(QShowEvent* showEvent)
 {
-    auto loadGuiTask = Application::current()->getTask(Application::TaskType::LoadApplicationGUI);
+    auto& loadGuiTask = Application::current()->getStartupTask().getLoadGuiTask();
 
-    loadGuiTask->setSubtaskStarted("Initializing GUI");
+    loadGuiTask.setSubtaskStarted("Initializing GUI");
 
     auto fileMenuAction = menuBar()->addMenu(new FileMenu());
     auto viewMenuAction = menuBar()->addMenu(new ViewMenu());
@@ -131,7 +131,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         connect(&projects().getCurrentProject()->getReadOnlyAction(), &ToggleAction::toggled, this, updateMenuVisibility);
         });
 
-    loadGuiTask->setSubtaskFinished("Initializing GUI");
+    loadGuiTask.setSubtaskFinished("Initializing GUI");
 
     if (Application::current()->shouldOpenProjectAtStartup())
         projects().openProject(Application::current()->getStartupProjectFilePath());
@@ -140,7 +140,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
     emit Application::current()->mainWindowInitialized();
 
-    loadGuiTask->setFinished();
+    loadGuiTask.setFinished();
 }
 
 void MainWindow::moveEvent(QMoveEvent* moveEvent)

@@ -44,7 +44,10 @@ void ForegroundTaskTester::testRunningIndeterminate()
 
         timer.setInterval(1000);
 
-        connect(indeterminateTask.get(), &ForegroundTask::requestAbort, &timer, &QTimer::stop);
+        connect(indeterminateTask.get(), &ModalTask::requestAbort, this, [this, &timer, &indeterminateTask]() -> void {
+            timer.stop();
+            indeterminateTask->setAborted();
+        });
 
         connect(&timer, &QTimer::timeout, [&]() -> void {
             if (!subtasks.isEmpty()) {
@@ -71,7 +74,7 @@ void ForegroundTaskTester::testPerformance()
     TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
-        auto performanceTask = new ForegroundTask(taskRunner, "Performance Task", Task::Status::Running);
+        auto performanceTask = std::make_unique<ForegroundTask>(taskRunner, "Performance Task", Task::Status::Running);
 
         performanceTask->setMayKill(true);
 
@@ -90,7 +93,10 @@ void ForegroundTaskTester::testPerformance()
 
         timer.setInterval(1);
 
-        connect(performanceTask, &ForegroundTask::requestAbort, &timer, &QTimer::stop);
+        connect(performanceTask.get(), &ModalTask::requestAbort, this, [this, &timer, &performanceTask]() -> void {
+            timer.stop();
+            performanceTask->setAborted();
+        });
 
         connect(&timer, &QTimer::timeout, [&]() -> void {
             if (!subtasks.isEmpty()) {
