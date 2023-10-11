@@ -51,6 +51,7 @@ Application::Application(int& argc, char** argv) :
     })));
 
     connect(Application::current(), &Application::coreManagersCreated, this, [this](CoreInterface* core) {
+        qDebug() << "ApplicationStartupTask";
         _startupTask = new ApplicationStartupTask(this, "Load ManiVault");
     });
 

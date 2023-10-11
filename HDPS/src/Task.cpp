@@ -276,15 +276,9 @@ bool Task::getMayKill() const
     return _mayKill;
 }
 
-void Task::setMayKill(bool mayKill)
+void Task::setMayKill(bool mayKill, bool recursive /*= false*/)
 {
-    if (mayKill == _mayKill)
-        return;
-
-    _mayKill = mayKill;
-
-    emit mayKillChanged(getMayKill());
-    emit isKillableChanged(isKillable());
+    emit privateSetMayKillSignal(mayKill, recursive, QPrivateSignal());
 }
 
 bool Task::isKillable() const
@@ -747,8 +741,10 @@ void Task::privateSetParentTask(Task* parentTask)
         if (parentTask == _parentTask)
             return;
 
+        /*
         if (parentTask && (parentTask->getTypeName() != getTypeName()))
             qDebug() << QString("Type mismatch: child type is %1 and parent type is %2").arg(getTypeName(), parentTask->getTypeName());
+        */
 
         _parentTask = parentTask;
 
@@ -885,6 +881,21 @@ void Task::privateSetVisible(bool visible)
     _visible = visible;
 
     emit visibileChanged(_visible);
+}
+
+void Task::privateSetMayKill(bool mayKill, bool recursive /*= false*/)
+{
+    if (mayKill == _mayKill)
+        return;
+
+    _mayKill = mayKill;
+
+    if (recursive)
+        for (auto childTask : getChildTasks(true, false))
+            childTask->setMayKill(mayKill, recursive);
+
+    emit mayKillChanged(getMayKill());
+    emit isKillableChanged(isKillable());
 }
 
 void Task::privateSetStatus(const Status& status, const QString& progressDescription /*= ""*/, std::uint32_t deferredStatusDelay /*= 0*/, const Status& deferredStatus /*= Status::Idle*/)

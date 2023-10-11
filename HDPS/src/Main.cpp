@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
         }
     }
     
-    //splashScreenAction.getOpenAction().trigger();
+    splashScreenAction.getOpenAction().trigger();
 
     application.initialize();
 

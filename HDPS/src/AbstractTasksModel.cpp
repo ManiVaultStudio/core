@@ -61,10 +61,15 @@ Task* AbstractTasksModel::Item::getTask() const
 }
 
 AbstractTasksModel::NameItem::NameItem(Task* task) :
-    Item(task)
+    Item(task),
+    _stringAction(this, "Name")
 {
-    connect(getTask(), &Task::nameChanged, this, [this]() -> void {
+    _stringAction.setString(task->getName() + ":");
+
+    connect(getTask(), &Task::nameChanged, this, [this](const QString& name) -> void {
         emitDataChanged();
+
+        _stringAction.setString(name + ":");
     });
 
     connect(getTask(), &Task::descriptionChanged, this, [this]() -> void {

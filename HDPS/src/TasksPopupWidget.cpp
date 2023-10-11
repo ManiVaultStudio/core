@@ -189,31 +189,36 @@ void TasksPopupWidget::updateContents()
 
     QVector<Task*> currentTasks;
 
-    for (int rowIndex = 0; rowIndex < numberOfTasks; ++rowIndex) {
-        const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Progress)));
+    auto gridLayout = static_cast<QGridLayout*>(layout());
 
-        if (!sourceModelIndex.isValid())
+    gridLayout->setColumnStretch(1, 1);
+
+    for (int rowIndex = 0; rowIndex < numberOfTasks; ++rowIndex) {
+        const auto nameSourceModelIndex     = tasksFilterModel.mapToSource(tasksFilterModel.index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name)));
+        const auto progressSourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Progress)));
+
+        if (!nameSourceModelIndex.isValid() || !progressSourceModelIndex.isValid())
             continue;
 
-        auto progressItem = dynamic_cast<AbstractTasksModel::ProgressItem*>(tasksModel.itemFromIndex(sourceModelIndex));
+        auto nameItem       = dynamic_cast<AbstractTasksModel::NameItem*>(tasksModel.itemFromIndex(nameSourceModelIndex));
+        auto progressItem   = dynamic_cast<AbstractTasksModel::ProgressItem*>(tasksModel.itemFromIndex(progressSourceModelIndex));
 
+        Q_ASSERT(nameItem != nullptr);
         Q_ASSERT(progressItem != nullptr);
 
-        if (progressItem == nullptr)
+        if (nameItem == nullptr || progressItem == nullptr)
             continue;
 
         currentTasks << progressItem->getTask();
 
         if (!_widgetsMap.contains(progressItem->getTask())) {
-            auto labelWidget    = new QLabel(progressItem->getTask()->getName() + ":");
+            auto labelWidget    = nameItem->getStringAction().createWidget(this, StringAction::Label);
             auto progressWidget = progressItem->getTaskAction().createWidget(this);
             
             progressWidget->setFixedHeight(18);
 
             _widgetsMap[progressItem->getTask()] = { labelWidget, progressWidget };
         }
-
-        auto gridLayout = static_cast<QGridLayout*>(layout());
 
         const auto rowCount = gridLayout->rowCount();
 

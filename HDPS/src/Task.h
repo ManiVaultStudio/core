@@ -259,10 +259,10 @@ public: // Name, description, icon and may kill
 
     /**
      * Sets whether the task may be killed or not
-     * This only has an effect when at least one slot is connected to the Task::abort() signal
      * @param mayKill Boolean determining whether the task may be killed or not
+     * @param recursive Whether to set all descendants to \p mayKill as well
      */
-    virtual void setMayKill(bool mayKill) final;
+    virtual void setMayKill(bool mayKill, bool recursive = false) final;
 
     /**
      * Get whether the task is killable
@@ -573,6 +573,7 @@ private: // Private setters (these call private signals under the hood, an essen
     void privateSetIcon(const QIcon& icon);
     void privateSetEnabled(bool enabled, bool recursive = false);
     void privateSetVisible(bool visible);
+    void privateSetMayKill(bool mayKill, bool recursive = false);
     void privateSetStatus(const Status& status, const QString& progressDescription = "", std::uint32_t deferredStatusDelay = 0, const Status& deferredStatus = Status::Idle);
     void privateSetUndefined(const QString& progressDescription = "");
     void privateSetIdle(const QString& progressDescription = "");
@@ -780,6 +781,7 @@ signals:
     void privateSetIconSignal(const QIcon& icon, QPrivateSignal);
     void privateSetEnabledSignal(bool enabled, bool recursive, QPrivateSignal);
     void privateSetVisibleSignal(bool visible, QPrivateSignal);
+    void privateSetMayKillSignal(bool mayKill, bool recursive, QPrivateSignal);
     void privateSetStatusSignal(const Status& status, const QString& progressDescription, std::uint32_t deferredStatusDelay, const Status& deferredStatus, QPrivateSignal);
     void privateSetUndefinedSignal(const QString& progressDescription, QPrivateSignal);
     void privateSetIdleSignal(const QString& progressDescription, QPrivateSignal);

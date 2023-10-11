@@ -6,6 +6,7 @@
 
 #include "Task.h"
 
+#include "actions/StringAction.h"
 #include "actions/TaskAction.h"
 
 #include <QStandardItemModel>
@@ -101,7 +102,7 @@ public:
         Task*   _task;      /** Pointer to task to display item for */
     };
 
-protected:
+public:
 
     /** Standard model item class for displaying the task name */
     class NameItem final : public Item {
@@ -121,7 +122,20 @@ protected:
 
         /** Set model data to \p value for \p role */
         void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
+
+        /**
+         * Get string action
+         * @return String action for use in item delegates
+         */
+        gui::StringAction& getStringAction() {
+            return _stringAction;
+        }
+
+    private:
+        gui::StringAction   _stringAction;    /** String action for use in item delegates */
     };
+
+protected:
 
     /** Standard model item class for displaying whether the task is enabled or not */
     class EnabledItem final : public Item {
