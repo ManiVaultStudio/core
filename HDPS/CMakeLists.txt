@@ -37,37 +37,6 @@ include(CMakePackageConfigHelpers)
 include(CMakeCheckSetAVX)
 
 # -----------------------------------------------------------------------------
-# Set install directory
-# -----------------------------------------------------------------------------
-# Normalize the incoming install path
-file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
-
-if(DEFINED ENV{MV_INSTALL_DIR})
-    set(ENV_MV_INSTALL_DIR "$ENV{MV_INSTALL_DIR}")
-    file(TO_CMAKE_PATH ${ENV_MV_INSTALL_DIR} ENV_MV_INSTALL_DIR)
-
-    if ("${INSTALL_DIR}" STREQUAL "${ENV_MV_INSTALL_DIR}")
-        set(messageText 
-        "***************************************************
-        Using environment variable MV_INSTALL_DIR 
-        $ENV{MV_INSTALL_DIR}
-        to indicate where the ManiVault output will be installed,
-        make sure the directory exists.
-        ***************************************************")
-        string(REPLACE "\n        " "\n" messageText "${messageText}")
-        message(STATUS "${messageText}")
-    endif()
-
-endif()
-
-if(NOT DEFINED INSTALL_DIR)
-    message(FATAL_ERROR "No install path provided! Set the cmake variable INSTALL_DIR or environment variable MV_INSTALL_DIR")
-else()
-    message(STATUS "Install ManiVault to ${INSTALL_DIR}")
-endif()
-
-
-# -----------------------------------------------------------------------------
 # Apple settings
 # -----------------------------------------------------------------------------
 if(APPLE)
@@ -106,7 +75,7 @@ if(UNIX AND NOT APPLE)
     # (but later on when installing)
     set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
-    set(CMAKE_INSTALL_RPATH "${INSTALL_DIR}/$<CONFIGURATION>/lib")
+    set(CMAKE_INSTALL_RPATH "${MV_INSTALL_DIR}/$<CONFIGURATION>/lib")
 
     # add the automatically determined parts of the RPATH
     # which point to directories outside the build tree to the install RPATH
@@ -270,7 +239,7 @@ endif(MSVC)
 
 # Install the ManiVault executable 
 if(APPLE)
-    set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
+    set(BUNDLE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
     set(WEBENGINEINSTALL_CMD "${CMAKE_CURRENT_SOURCE_DIR}/macos_webengineinstall.sh")
     install(TARGETS ${MV_EXE}
         RUNTIME DESTINATION bin COMPONENT MACOS_BUNDLE
@@ -283,7 +252,7 @@ if(APPLE)
         #	RESULT_VARIABLE retval
             COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    \"${INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.${ADS_VERSION}.dylib\" 
+                    \"${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.${ADS_VERSION}.dylib\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                     \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" 
@@ -327,7 +296,7 @@ foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
     if("${STRIPPED_PUBLIC_HEADER}" STREQUAL "${PUBLIC_HEADER}")
         set(STRIPPED_PUBLIC_HEADER "")
     endif()
-    set(HEADER_DEST "${INSTALL_DIR}/$<CONFIGURATION>/include/${STRIPPED_PUBLIC_HEADER}")
+    set(HEADER_DEST "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${STRIPPED_PUBLIC_HEADER}")
 
     # Install the header file while preserving the folder structure
     install(FILES ${PUBLIC_HEADER} DESTINATION ${HEADER_DEST} COMPONENT MVPUBLIC_HEADERS)
@@ -395,33 +364,33 @@ add_custom_command(TARGET ${MV_PUBLIC_LIB} POST_BUILD
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component MVPUBLIC_HEADERS
-        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
         --verbose
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault public link library"
     COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
         --component MVPUBLIC_LINKLIB
-        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
         --verbose
     # COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake config files"
     # COMMAND ${CMAKE_COMMAND}
         # --install ${CMAKE_BINARY_DIR}
         # --config $<CONFIGURATION>
         # --component MVPUBLIC_PACKAGE
-        # --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        # --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
         # --verbose
     # COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake target files"
     # COMMAND ${CMAKE_COMMAND}
         # --install ${CMAKE_BINARY_DIR}
         # --config $<CONFIGURATION>
         # --component MVPUBLIC_TARGET
-        # --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        # --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
         # --verbose
     # If no plugin directory exsists, ManiVault might try to import 
     # any library in the executable directory as a plugin
     COMMAND ${CMAKE_COMMAND}
-        -E make_directory ${INSTALL_DIR}/$<CONFIGURATION>/Plugins
+        -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/Plugins
 )
 
 # Install the ManiVault executable
@@ -432,7 +401,7 @@ if(APPLE)
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
             --component MACOS_BUNDLE
-            --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
+            --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>/
     )
 elseif(UNIX)
     add_custom_command(TARGET ${MV_PRIVATE_LIB} POST_BUILD
@@ -441,7 +410,7 @@ elseif(UNIX)
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
             --component MVPRIVATE_LINKLIB
-            --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+            --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
             --verbose
     )
 endif()
@@ -453,7 +422,7 @@ if(NOT APPLE)
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION>
             --component MV_EXECUTABLE
-            --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+            --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
             --verbose
     )
 endif()
@@ -461,8 +430,8 @@ endif()
 # Install ManiVault licences
 add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault licences"
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${INSTALL_DIR}/$<CONFIGURATION>/license/
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE ${INSTALL_DIR}/$<CONFIGURATION>/license/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/LICENSE
 )
 
 # Install examples
@@ -470,15 +439,15 @@ add_custom_command(TARGET ${MV_EXE}  POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault examples"
     COMMAND ${CMAKE_COMMAND} -E $<IF:$<VERSION_LESS:${CMAKE_VERSION},3.26.0>,copy_directory,copy_directory_if_different>  # copy_directory_if_different is only available starting 3.26
             ${CMAKE_CURRENT_SOURCE_DIR}/res/examples
-            ${INSTALL_DIR}/$<CONFIGURATION>/examples
+            ${MV_INSTALL_DIR}/$<CONFIGURATION>/examples
 )
 
 # Install dependency runtime libraries
 # on windows, the DLLs should be placed in the same directory as the executable
 add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking> ${INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
 )
 
 if(UNIX AND NOT APPLE)
@@ -493,10 +462,10 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} 
         --install ${CMAKE_CURRENT_BINARY_DIR}/external/advanced_docking
         --config $<CONFIGURATION> 
-        --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
+        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>/
         --component license
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${INSTALL_DIR}/$<CONFIGURATION>/license/quazip
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/external/quazip/COPYING ${INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/external/quazip/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
 )
 
 # -----------------------------------------------------------------------------
@@ -524,6 +493,6 @@ add_subdirectory(src/plugins/ImageData)
 
 # Automatically set the debug environment (command + working directory) for MSVC
 if(MSVC)
-    set_property(TARGET ${MV_EXE} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY  $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
-    set_property(TARGET ${MV_EXE} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/${MV_APPLICATION_NAME}.exe,${INSTALL_DIR}/release/${MV_APPLICATION_NAME}.exe>)
+    set_property(TARGET ${MV_EXE} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY  $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/debug,${MV_INSTALL_DIR}/release>)
+    set_property(TARGET ${MV_EXE} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/debug/${MV_APPLICATION_NAME}.exe,${MV_INSTALL_DIR}/release/${MV_APPLICATION_NAME}.exe>)
 endif()
