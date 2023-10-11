@@ -20,37 +20,67 @@ using namespace hdps::plugin;
 
 HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
+    _devDocAction((nullptr)),
     _aboutAction(nullptr),
     _aboutQt(nullptr),
     _aboutThirdParties(nullptr)
 {
     setTitle("Help");
-    setToolTip("ManiVault help");
+
     
-    // initialize static actions
-    _devDocAction = new TriggerAction(this, "Developer Documentation");
-    connect(_devDocAction, &QAction::triggered, this, [this](bool) { QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio/PublicWiki", QUrl::TolerantMode)); });
     
-    _aboutAction = new TriggerAction(this, "About ManiVault");
-    connect(_aboutAction, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::about);
-    
-    _aboutThirdParties = new TriggerAction(this, "About Third Parties");
+}
+
+void HelpMenu::initialize()
+{
+    auto currentProject = projects().getCurrentProject();
+    bool readOnlyProject = currentProject && currentProject->getReadOnlyAction().isChecked();
+
+    if (readOnlyProject)
+    {
+        setToolTip(currentProject->getTitleAction().getString() + " help");
+    }
+    else
+    {
+        setToolTip("ManiVault help");
+
+        // initialize static actions
+        _devDocAction = new TriggerAction(this, "Developer Documentation");
+        connect(_devDocAction, &QAction::triggered, this, [this](bool) { QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio/PublicWiki", QUrl::TolerantMode)); });
+
+        _aboutAction = new TriggerAction(this, "About ManiVault");
+        connect(_aboutAction, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::about);
+
+        _aboutQt = new TriggerAction(this, "About Qt");
+        _aboutQt->setMenuRole(QAction::NoRole);
+        connect(_aboutQt, &hdps::gui::TriggerAction::triggered, this, [this](bool) { QMessageBox::aboutQt(this->parentWidget(), "About Qt"); });
+
+
+    }
+
+    _aboutThirdParties = new TriggerAction(this, "About Third Parties...");
     _aboutThirdParties->setMenuRole(QAction::NoRole);
     connect(_aboutThirdParties, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
-    
-    _aboutQt = new TriggerAction(this, "About Qt");
-    _aboutQt->setMenuRole(QAction::NoRole);
-    connect(_aboutQt, &hdps::gui::TriggerAction::triggered, this, [this](bool) { QMessageBox::aboutQt(this->parentWidget(), "About Qt"); });
 
     // macOS does not like populating the menu on show, so we rather do it explicitly here
     populate();
 }
 
+
 void HelpMenu::populate()
 {
-    addAction(_devDocAction);
-    addSeparator();
-    
+
+    auto currentProject = projects().getCurrentProject();
+    bool readOnlyProject = currentProject && currentProject->getReadOnlyAction().isChecked();
+
+    if (_devDocAction)
+    {
+        addAction(_devDocAction);
+        addSeparator();
+    }
+
+
+
     QVector<QPointer<TriggerAction>> actions;
 
     for (auto& pluginFactory : plugins().getPluginFactoriesByTypes({ Type::ANALYSIS, Type::DATA, Type::LOADER, Type::WRITER, Type::TRANSFORMATION, Type::VIEW }))
@@ -59,19 +89,20 @@ void HelpMenu::populate()
 
     sortActions(actions);
 
-    if (!actions.isEmpty()) {
-        auto pluginHelpMenu = new QMenu("Plugin");
+    if (!readOnlyProject)
+    {
+        if (!actions.isEmpty()) {
+            auto pluginHelpMenu = new QMenu("Plugin");
 
-        pluginHelpMenu->setToolTip("HDPS plugin documentation");
-        pluginHelpMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+            pluginHelpMenu->setToolTip("ManiVault plugin documentation");
+            pluginHelpMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
 
-        for (auto action : actions)
-            pluginHelpMenu->addAction(action);
+            for (auto action : actions)
+                pluginHelpMenu->addAction(action);
 
-        addMenu(pluginHelpMenu);
+            addMenu(pluginHelpMenu);
+        }
     }
-
-    auto currentProject = projects().getCurrentProject();
 
     if (currentProject && currentProject->getSplashScreenAction().getEnabledAction().isChecked()) {
         addSeparator();
@@ -82,9 +113,20 @@ void HelpMenu::populate()
     if(!isEmpty())
         addSeparator();
 
-    addAction(_aboutAction);
-    addAction(_aboutThirdParties);
-    addAction(_aboutQt);
+    if(_aboutAction)
+    {
+        addAction(_aboutAction);
+    }
+
+    if(_aboutThirdParties)
+    {
+        addAction(_aboutThirdParties);
+    }
+    
+    if (_aboutQt)
+    {
+        addAction(_aboutQt);
+    }
 }
 
 void HelpMenu::about()

@@ -12,6 +12,9 @@
 #include <QQuickWindow>
 #include <QCommandLineParser>
 
+#ifndef _DEBUG
+//#pragma comment(linker, "/SUBSYSTEM:WINDOWS")
+#endif
 class NoFocusProxyStyle : public QProxyStyle {
 public:
     NoFocusProxyStyle(QStyle *baseStyle = 0) :

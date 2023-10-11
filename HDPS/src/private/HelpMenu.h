@@ -39,8 +39,13 @@ private slots:
      */
     void aboutThirdParties();
     
-private:
-    
+public:
+
+    /**
+     * Initialize the menu
+     */
+     void initialize();
+
     /**
      * Populate the menu
      */

@@ -64,6 +64,11 @@ ProjectSplashScreenAction::ProjectSplashScreenAction(QObject* parent, const Proj
     _showSplashScreenAction.setIcon(fontAwesome.getIcon("eye"));
     _showSplashScreenAction.setToolTip("Preview the splash screen");
 
+    const auto updateShowSplashScreenActionTitle = [this]() -> void {
+        _showSplashScreenAction.setText(QString("About ") + _project.getTitleAction().getString() + QString("..."));
+    };
+    connect(&(_project.getTitleAction()), &StringAction::stringChanged, this, updateShowSplashScreenActionTitle);
+
     _projectImageAction.setDefaultWidgetFlags(ImageAction::Loader);
     _projectImageAction.setIcon(fontAwesome.getIcon("image"));
     _projectImageAction.setToolTip("Project image");

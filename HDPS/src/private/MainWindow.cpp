@@ -66,44 +66,68 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         auto fileMenuAction = menuBar()->addMenu(new FileMenu());
         auto viewMenuAction = menuBar()->addMenu(new ViewMenu());
-        auto helpMenuAction = menuBar()->addMenu(new HelpMenu());
+        auto helpMenu = new HelpMenu();
+        helpMenu->setObjectName("HelpMenu");
+        auto helpMenuAction = menuBar()->addMenu(helpMenu); // help menu should be created after plugins are loaded
 
-        auto stackedWidget      = new StackedWidget();
-        auto projectWidget      = new ProjectWidget();
-        auto startPageWidget    = new StartPageWidget(projectWidget);
-
-        stackedWidget->addWidget(startPageWidget);
-        stackedWidget->addWidget(projectWidget);
-
-        setCentralWidget(stackedWidget);
 
         const auto updateWindowTitle = [&]() -> void {
             if (!projects().hasProject()) {
                 setWindowTitle("ManiVault");
             }
             else {
-                const auto projectFilePath = projects().getCurrentProject()->getFilePath();
-
-                if (projectFilePath.isEmpty())
-                    setWindowTitle("Unsaved - ManiVault");
+                const auto projectIsReadOnly = projects().getCurrentProject()->getReadOnlyAction().isChecked();
+                if (projectIsReadOnly)
+                {
+                    const auto updateTitle = [this]() -> void {
+                        setWindowTitle(projects().getCurrentProject()->getTitleAction().getString());
+                    };
+                    connect(&(projects().getCurrentProject()->getTitleAction()), &StringAction::stringChanged, this, updateTitle);
+                }
                 else
-                    setWindowTitle(QString("%1 - ManiVault").arg(projectFilePath));
+                {
+                    const auto projectFilePath = projects().getCurrentProject()->getFilePath();
+
+                    if (projectFilePath.isEmpty())
+                        setWindowTitle("Unsaved - ManiVault");
+                    else
+                        setWindowTitle(QString("%1 - ManiVault").arg(projectFilePath));
+                }
             }
         };
 
-        connect(&projects(), &ProjectManager::projectCreated, this, updateWindowTitle);
-        connect(&projects(), &ProjectManager::projectDestroyed, this, updateWindowTitle);
-        connect(&projects(), &ProjectManager::projectOpened, this, updateWindowTitle);
-        connect(&projects(), &ProjectManager::projectSaved, this, updateWindowTitle);
+       
+        auto projectWidget = new ProjectWidget();
 
-        const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget]() -> void {
-            if (projects().getShowStartPageAction().isChecked())
-                stackedWidget->setCurrentWidget(startPageWidget);
-            else
-                stackedWidget->setCurrentWidget(projectWidget);
-        };
+        if (Application::current()->shouldOpenProjectAtStartup())
+        {
+            setCentralWidget(projectWidget);
+        }
+        else
+        {
+            auto stackedWidget = new StackedWidget();
+            auto startPageWidget = new StartPageWidget(projectWidget);
 
-        connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
+            stackedWidget->addWidget(startPageWidget);
+            stackedWidget->addWidget(projectWidget);
+
+            setCentralWidget(stackedWidget);
+
+            connect(&projects(), &ProjectManager::projectCreated, this, updateWindowTitle);
+            connect(&projects(), &ProjectManager::projectDestroyed, this, updateWindowTitle);
+            connect(&projects(), &ProjectManager::projectOpened, this, updateWindowTitle);
+            connect(&projects(), &ProjectManager::projectSaved, this, updateWindowTitle);
+
+            const auto toggleStartPage = [this, stackedWidget, projectWidget, startPageWidget]() -> void {
+                if (projects().getShowStartPageAction().isChecked())
+                    stackedWidget->setCurrentWidget(startPageWidget);
+                else
+                    stackedWidget->setCurrentWidget(projectWidget);
+            };
+
+            connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, toggleStartPage);
+        }
+       
 
         const auto updateMenuVisibility = [fileMenuAction, viewMenuAction]() -> void {
             const auto projectIsReadOnly = projects().getCurrentProject()->getReadOnlyAction().isChecked();
@@ -118,7 +142,8 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         if (Application::current()->shouldOpenProjectAtStartup())
             projects().openProject(Application::current()->getStartupProjectFilePath());
-    
+
+        helpMenu->initialize();
         updateWindowTitle();
 
     }
