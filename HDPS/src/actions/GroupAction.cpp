@@ -125,13 +125,16 @@ void GroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -
 
     sortActions();
 
-    connect(action, &WidgetAction::configurationFlagToggled, this, [&](const WidgetAction::ConfigurationFlag& configurationFlag, bool set) -> void {
-        // only some configuration flags require an update
-        switch (configurationFlag) {
-        case WidgetAction::ConfigurationFlag::NoLabelInGroup:        [[fallthrough]];
-        case WidgetAction::ConfigurationFlag::ForceCollapsedInGroup:
-            emit actionsChanged(getActions());
-        }
+    QList<std::int32_t> configurationFlagsRequireUpdate{
+        static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::NoLabelInGroup),
+        static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup)
+    };
+
+    connect(action, &WidgetAction::configurationFlagToggled, this, [&, configurationFlagsRequireUpdate](const WidgetAction::ConfigurationFlag& configurationFlag, bool set) -> void {
+        if (!configurationFlagsRequireUpdate.contains(static_cast<std::int32_t>(configurationFlag)))
+            return;
+
+        emit actionsChanged(getActions());
     });
 
     connect(action, &WidgetAction::sortIndexChanged, this, [&](std::int32_t sortIndex) -> void {
