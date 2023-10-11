@@ -13,11 +13,12 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
-# Get the env path and allow the user to change it
-set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The ManiVault Install Directoy")
-
-# Normalize the incoming install path
-file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
+# Check if the directory to the ManiVault installation has been provided
+if(NOT DEFINED MV_INSTALL_DIR)
+    set(MV_INSTALL_DIR "" CACHE PATH "Directory where ManiVault is installed")
+    message(FATAL_ERROR "Please set MV_INSTALL_DIR to the directory where ManiVault is installed")
+endif()
+file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 
 find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
@@ -27,7 +28,7 @@ set(PLUGIN
 )
 
 set(PLUGIN_MOC_HEADERS
-	src/SharedParametersPlugin.h
+    src/SharedParametersPlugin.h
 )
 
 set(MODELS
@@ -40,9 +41,9 @@ set(AUX
 )
 
 set(SHARED_PARAMETERS_SOURCES
-	${PLUGIN}
-	${MODELS}
-	${AUX}
+    ${PLUGIN}
+    ${MODELS}
+    ${AUX}
 )
 
 source_group(Plugin FILES ${PLUGIN})
@@ -51,21 +52,21 @@ source_group(Aux FILES ${AUX})
 
 add_library(${SHARED_PARAMETERS_PLUGIN} SHARED ${SHARED_PARAMETERS_SOURCES})
 
-add_dependencies(${SHARED_PARAMETERS_PLUGIN} HDPS_Public)
+add_dependencies(${SHARED_PARAMETERS_PLUGIN} ${MV_PUBLIC_LIB})
 
 qt_wrap_cpp(SHARED_PARAMETERS_MOC ${PLUGIN_MOC_HEADERS} TARGET ${SHARED_PARAMETERS_PLUGIN})
 target_sources(${SHARED_PARAMETERS_PLUGIN} PRIVATE ${SHARED_PARAMETERS_MOC})
 
-target_include_directories(${SHARED_PARAMETERS_PLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include")
+target_include_directories(${SHARED_PARAMETERS_PLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include")
 
 target_compile_features(${SHARED_PARAMETERS_PLUGIN} PRIVATE cxx_std_17)
 
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE HDPS_Public)
+target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use avx if enabled and available
-check_and_set_AVX(${SHARED_PARAMETERS_PLUGIN} ${HDPS_USE_AVX})
+check_and_set_AVX(${SHARED_PARAMETERS_PLUGIN} ${MV_USE_AVX})
 
 install(TARGETS ${SHARED_PARAMETERS_PLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
@@ -76,11 +77,11 @@ add_custom_command(TARGET ${SHARED_PARAMETERS_PLUGIN} POST_BUILD
 	COMMAND "${CMAKE_COMMAND}"
 	--install ${CMAKE_CURRENT_BINARY_DIR}
 	--config $<CONFIGURATION>
-	--prefix ${INSTALL_DIR}/$<CONFIGURATION>
+	--prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
 )
 
 # Automatically set the debug environment (command + working directory) for MSVC
 if(MSVC)
-    set_property(TARGET ${SHARED_PARAMETERS_PLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
-    set_property(TARGET ${SHARED_PARAMETERS_PLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/HDPS.exe,${INSTALL_DIR}/release/HDPS.exe>)
+    set_property(TARGET ${SHARED_PARAMETERS_PLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/debug,${MV_INSTALL_DIR}/release>)
+    set_property(TARGET ${SHARED_PARAMETERS_PLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/debug/${MV_APPLICATION_NAME}.exe,${MV_INSTALL_DIR}/release/${MV_APPLICATION_NAME}.exe>)
 endif()

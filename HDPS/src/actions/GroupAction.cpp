@@ -130,7 +130,7 @@ void GroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -
         static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup)
     };
 
-    connect(action, &WidgetAction::configurationFlagToggled, this, [&](const WidgetAction::ConfigurationFlag& configurationFlag, bool set) -> void {
+    connect(action, &WidgetAction::configurationFlagToggled, this, [&, configurationFlagsRequireUpdate](const WidgetAction::ConfigurationFlag& configurationFlag, bool set) -> void {
         if (!configurationFlagsRequireUpdate.contains(static_cast<std::int32_t>(configurationFlag)))
             return;
 

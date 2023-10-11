@@ -2,15 +2,19 @@
 
 cmake_minimum_required(VERSION 3.17)
 
-set(HDPS_MAIN "hdps-main")
-PROJECT(${HDPS_MAIN})
+set(MV_MAIN "mv-main")
+PROJECT(${MV_MAIN})
 
-# Get the env path and allow the user to change it
-set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
+# Ask the user to set a ManiVault installation directory
+if(NOT DEFINED MV_INSTALL_DIR)
+    set(MV_INSTALL_DIR "" CACHE PATH "Directory where ManiVault is, or should be installed")
+    message(FATAL_ERROR "Please set MV_INSTALL_DIR to the directory where ManiVault is, or should be installed")
+endif()
+file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 
 # Other user-facing options
 option(HDPS_USE_GTEST "Use GoogleTest" OFF)
-option(HDPS_USE_AVX "Use AVX if available - by default OFF" OFF)
+option(MV_USE_AVX "Use AVX if available - by default OFF" OFF)
 
 if (HDPS_USE_GTEST)
     enable_testing()

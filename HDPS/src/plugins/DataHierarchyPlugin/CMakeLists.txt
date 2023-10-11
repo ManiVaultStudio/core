@@ -13,10 +13,12 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
-# Get the env path and allow the user to change it
-set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
-# Normalize the incoming install path
-file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
+# Check if the directory to the ManiVault installation has been provided
+if(NOT DEFINED MV_INSTALL_DIR)
+    set(MV_INSTALL_DIR "" CACHE PATH "Directory where ManiVault is installed")
+    message(FATAL_ERROR "Please set MV_INSTALL_DIR to the directory where ManiVault is installed")
+endif()
+file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 
 find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
@@ -26,7 +28,7 @@ set(PLUGIN
 )
 
 set(PLUGIN_MOC_HEADERS
-	src/DataHierarchyPlugin.h
+    src/DataHierarchyPlugin.h
 )
 
 set(WIDGETS
@@ -41,9 +43,9 @@ set(AUX
 )
 
 set(DATAHIERARCHY_SOURCES
-	${PLUGIN}
-	${WIDGETS}
-	${AUX}
+    ${PLUGIN}
+    ${WIDGETS}
+    ${AUX}
 )
 
 source_group(Plugin FILES ${PLUGIN})
@@ -55,16 +57,16 @@ add_library(${DATAHIERARCHYPLUGIN} SHARED ${DATAHIERARCHY_SOURCES})
 qt_wrap_cpp(DATAHIERARCHY_MOC ${PLUGIN_MOC_HEADERS} TARGET ${DATAHIERARCHYPLUGIN})
 target_sources(${DATAHIERARCHYPLUGIN} PRIVATE ${DATAHIERARCHY_MOC})
 
-target_include_directories(${DATAHIERARCHYPLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
+target_include_directories(${DATAHIERARCHYPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 target_compile_features(${DATAHIERARCHYPLUGIN} PRIVATE cxx_std_17)
 
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE HDPS_Public)
+target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use avx if enabled and available
-check_and_set_AVX(${DATAHIERARCHYPLUGIN} ${HDPS_USE_AVX})
+check_and_set_AVX(${DATAHIERARCHYPLUGIN} ${MV_USE_AVX})
 
 install(TARGETS ${DATAHIERARCHYPLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
@@ -72,14 +74,14 @@ install(TARGETS ${DATAHIERARCHYPLUGIN}
 )
 
 add_custom_command(TARGET ${DATAHIERARCHYPLUGIN} POST_BUILD
-	COMMAND ${CMAKE_COMMAND}
-	--install ${CMAKE_CURRENT_BINARY_DIR}
-	--config $<CONFIGURATION>
-	--prefix ${INSTALL_DIR}/$<CONFIGURATION>
+    COMMAND ${CMAKE_COMMAND}
+    --install ${CMAKE_CURRENT_BINARY_DIR}
+    --config $<CONFIGURATION>
+    --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
 )
 
 # Automatically set the debug environment (command + working directory) for MSVC
 if(MSVC)
-    set_property(TARGET ${DATAHIERARCHYPLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
-    set_property(TARGET ${DATAHIERARCHYPLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/HDPS.exe,${INSTALL_DIR}/release/HDPS.exe>)
+    set_property(TARGET ${DATAHIERARCHYPLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/debug,${MV_INSTALL_DIR}/release>)
+    set_property(TARGET ${DATAHIERARCHYPLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/debug/${MV_APPLICATION_NAME}.exe,${MV_INSTALL_DIR}/release/${MV_APPLICATION_NAME}.exe>)
 endif()

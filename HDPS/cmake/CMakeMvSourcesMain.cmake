@@ -1,4 +1,4 @@
-# source files for target HDPS_EXE
+# source files for target MV_EXE
 
 set( MAIN_SOURCES
     src/Main.cpp

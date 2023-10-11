@@ -13,10 +13,12 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
-# Get the env path and allow the user to change it
-set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
-# Normalize the incoming install path
-file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
+# Check if the directory to the ManiVault installation has been provided
+if(NOT DEFINED MV_INSTALL_DIR)
+    set(MV_INSTALL_DIR "" CACHE PATH "Directory where ManiVault is installed")
+    message(FATAL_ERROR "Please set MV_INSTALL_DIR to the directory where ManiVault is installed")
+endif()
+file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 
 find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
@@ -97,7 +99,7 @@ add_library(${CLUSTERDATA} SHARED ${CLUSTERD_SOURCES} ${ACTIONS_SOURCES} ${MODEL
 qt_wrap_cpp(CLUSTERDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${CLUSTERDATA})
 target_sources(${CLUSTERDATA} PRIVATE ${CLUSTERDATA_MOC})
 
-target_include_directories(${CLUSTERDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
+target_include_directories(${CLUSTERDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 target_compile_features(${CLUSTERDATA} PRIVATE cxx_std_17)
 
@@ -112,11 +114,11 @@ list(APPEND CLUSTER_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAM
 
 target_link_libraries(${CLUSTERDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${CLUSTERDATA} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${CLUSTERDATA} PRIVATE HDPS_Public)
+target_link_libraries(${CLUSTERDATA} PRIVATE ${MV_PUBLIC_LIB})
 target_link_libraries(${CLUSTERDATA} PRIVATE PointData)
 
 # Use avx if enabled and available
-check_and_set_AVX(${CLUSTERDATA} ${HDPS_USE_AVX})
+check_and_set_AVX(${CLUSTERDATA} ${MV_USE_AVX})
 
 set_target_properties(${CLUSTERDATA} PROPERTIES PUBLIC_HEADER "${CLUSTER_HEADERS}")
 
@@ -131,5 +133,5 @@ add_custom_command(TARGET ${CLUSTERDATA} POST_BUILD
     COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
-        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
 )

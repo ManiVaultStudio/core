@@ -1,4 +1,4 @@
-# source files for target HDPS_PUBLIC_LIB
+# source files for target MV_PUBLIC_LIB
 
 set(PUBLIC_CORE_INTERFACE_HEADERS
     src/CoreInterface.h

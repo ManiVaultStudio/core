@@ -13,10 +13,12 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
-# Get the env path and allow the user to change it
-set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR} CACHE PATH "The HDPS Install Directoy")
-# Normalize the incoming install path
-file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
+# Check if the directory to the ManiVault installation has been provided
+if(NOT DEFINED MV_INSTALL_DIR)
+    set(MV_INSTALL_DIR "" CACHE PATH "Directory where ManiVault is installed")
+    message(FATAL_ERROR "Please set MV_INSTALL_DIR to the directory where ManiVault is installed")
+endif()
+file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 
 find_package(Qt6 COMPONENTS Widgets REQUIRED)
 
@@ -54,7 +56,7 @@ set(POINTS_HEADERS
 )
 
 set(PLUGIN_MOC_HEADERS
-	src/PointData.h
+    src/PointData.h
 )
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
@@ -103,7 +105,7 @@ add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
 qt_wrap_cpp(POINTDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${POINTDATA})
 target_sources(${POINTDATA} PRIVATE ${POINTDATA_MOC})
 
-target_include_directories(${POINTDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
+target_include_directories(${POINTDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 target_include_directories(${POINTDATA} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/)
 
 target_compile_features(${POINTDATA} PRIVATE cxx_std_17)
@@ -119,10 +121,10 @@ list(APPEND POINTS_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME
 
 target_link_libraries(${POINTDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${POINTDATA} PRIVATE HDPS_Public)
+target_link_libraries(${POINTDATA} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use avx if enabled and available
-check_and_set_AVX(${POINTDATA} ${HDPS_USE_AVX})
+check_and_set_AVX(${POINTDATA} ${MV_USE_AVX})
 
 if(UNIX AND NOT APPLE)
    find_package(TBB REQUIRED)
@@ -139,14 +141,14 @@ install(TARGETS ${POINTDATA}
 )
 
 # Copy the external biovault_bfloat16 header into its own subfolder - cmake's install PUBLIC_HEADER flattens all subdirs
-install(FILES "${BFLOAT_HEADER}" DESTINATION "${INSTALL_DIR}/$<CONFIGURATION>/include/biovault_bfloat16/")
+install(FILES "${BFLOAT_HEADER}" DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/biovault_bfloat16/")
 
 # PointData is needed to build other plugins - install it now.
 add_custom_command(TARGET ${POINTDATA} POST_BUILD
     COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
-        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
 )
 
 if (HDPS_USE_GTEST)
