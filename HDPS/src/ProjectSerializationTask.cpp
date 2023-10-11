@@ -13,7 +13,7 @@ ProjectSerializationTask::ProjectSerializationTask(QObject* parent, const QStrin
     _systemViewPluginsTask(this, "Load system view plugins"),
     _viewPluginsTask(this, "Load view plugins")
 {
-    _workspaceTask.setMayKill(false);
+    setMayKill(false, true);
 
     _dataTask.setParentTask(this);
     _workspaceTask.setParentTask(this);

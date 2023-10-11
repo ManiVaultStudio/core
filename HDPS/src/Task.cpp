@@ -90,6 +90,7 @@ Task::Task(QObject* parent, const QString& name, const GuiScope& guiScope /*= Gu
     connect(this, &Task::privateSetIconSignal, this, &Task::privateSetIcon);
     connect(this, &Task::privateSetEnabledSignal, this, &Task::privateSetEnabled);
     connect(this, &Task::privateSetVisibleSignal, this, &Task::privateSetVisible);
+    connect(this, &Task::privateSetMayKillSignal, this, &Task::privateSetMayKill);
     connect(this, &Task::privateSetStatusSignal, this, &Task::privateSetStatus);
     connect(this, &Task::privateSetIdleSignal, this, &Task::privateSetIdle);
     connect(this, &Task::privateSetRunningSignal, this, &Task::privateSetRunning);
