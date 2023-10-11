@@ -144,7 +144,16 @@ class HdpsCoreConan(ConanFile):
         qt_root = str(list(qtpath.glob("**/Qt6Config.cmake"))[0].parents[3].as_posix())
         tc.variables["CMAKE_PREFIX_PATH"] = f"{qt_root}"
         #tc.variables["Qt6_ROOT"] = qt_root
-
+        
+        # Set the installation directory for ManiVault based on the MV_INSTALL_DIR environment variable
+        # or if none is specified, set it to the build/install dir.
+        if not os.environ.get("MV_INSTALL_DIR", None):
+            os.environ["MV_INSTALL_DIR"] = os.path.join(self.build_folder, "install")
+        print("MV_INSTALL_DIR: ", os.environ["MV_INSTALL_DIR"])
+        self.install_dir = pathlib.Path(os.environ["MV_INSTALL_DIR"]).as_posix()
+        # Give the installation directory to CMake
+        tc.variables["MV_INSTALL_DIR"] = self.install_dir
+        
         zlibpath = pathlib.Path(self.deps_cpp_info["zlib"].rootpath).as_posix()
         tc.variables["ZLIB_ROOT"] = zlibpath
 
@@ -172,11 +181,6 @@ class HdpsCoreConan(ConanFile):
             pathlib.Path(self.__get_git_path(), "__last_build_folder.txt"),
             self.build_folder,
         )
-        # If the user has no preference in MV_INSTALL_DIR simply set the install dir
-        if not os.environ.get("MV_INSTALL_DIR", None):
-            os.environ["MV_INSTALL_DIR"] = os.path.join(self.build_folder, "install")
-        print("MV_INSTALL_DIR: ", os.environ["MV_INSTALL_DIR"])
-        self.install_dir = os.environ["MV_INSTALL_DIR"]
 
         cmake = self._configure_cmake()
         cmake.build(build_type="Debug")
