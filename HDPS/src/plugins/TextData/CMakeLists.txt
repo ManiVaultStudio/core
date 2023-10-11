@@ -13,10 +13,11 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
-# Get the env path and allow the user to change it
-set(INSTALL_DIR $ENV{MV_INSTALL_DIR} CACHE PATH "The ManiVault Install Directoy")
-# Normalize the incoming install path
-file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
+# Check if the directory to the ManiVault installation has been provided
+if(NOT DEFINED MV_INSTALL_DIR)
+    set(MV_INSTALL_DIR "" CACHE PATH "Directory where ManiVault is installed")
+    message(FATAL_ERROR "Please set MV_INSTALL_DIR to the directory where ManiVault is installed")
+endif()
 
 find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
@@ -41,7 +42,7 @@ add_library(${TEXTDATA} SHARED ${TEXTDATA_SOURCES})
 qt_wrap_cpp(TEXTDATA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${TEXTDATA})
 target_sources(${TEXTDATA} PRIVATE ${TEXTDATA_MOC})
 
-target_include_directories(${TEXTDATA} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
+target_include_directories(${TEXTDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 target_compile_features(${TEXTDATA} PRIVATE cxx_std_17)
 
@@ -62,5 +63,5 @@ add_custom_command(TARGET ${TEXTDATA} POST_BUILD
     COMMAND ${CMAKE_COMMAND}
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
-        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
 )

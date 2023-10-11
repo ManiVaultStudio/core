@@ -15,8 +15,8 @@ string(REGEX MATCH "^([0-9]+)\\.([0-9]+)\\.([0-9]+)" QUAZIP_VER_MATCH ${quazip_v
 set(quazip_ver_major ${CMAKE_MATCH_1})
 set(quazip_ver_minor ${CMAKE_MATCH_2})
 set(quazip_file_base ${CMAKE_SHARED_LIBRARY_PREFIX}${quazip_name}$<IF:$<CONFIG:DEBUG>,d,>${CMAKE_SHARED_LIBRARY_SUFFIX})
-set(quazip_lib_name ${INSTALL_DIR}/$<CONFIGURATION>/lib/${quazip_file_base}.${quazip_ver_major}.${quazip_ver_minor})
-set(quazip_symlink_name ${INSTALL_DIR}/$<CONFIGURATION>/lib/${quazip_file_base}.${quazip_ver})
+set(quazip_lib_name ${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/${quazip_file_base}.${quazip_ver_major}.${quazip_ver_minor})
+set(quazip_symlink_name ${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/${quazip_file_base}.${quazip_ver})
 
 add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E create_symlink ${quazip_lib_name} ${quazip_symlink_name}
