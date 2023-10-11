@@ -85,6 +85,8 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
+    projects().getProjectSerializationTask().setName("Load project");
+
     _projectMetaAction.getApplicationVersionAction().fromParentVariantMap(variantMap);
     _projectMetaAction.getProjectVersionAction().fromParentVariantMap(variantMap);
     _projectMetaAction.getReadOnlyAction().fromParentVariantMap(variantMap);
@@ -104,6 +106,8 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap Project::toVariantMap() const
 {
+    projects().getProjectSerializationTask().setName("Save project");
+
     auto variantMap = Serializable::toVariantMap();
     
     _projectMetaAction.getApplicationVersionAction().insertIntoVariantMap(variantMap);

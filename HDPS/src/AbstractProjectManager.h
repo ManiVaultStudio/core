@@ -85,7 +85,7 @@ public:
     AbstractProjectManager(QObject* parent = nullptr) :
         AbstractManager(parent, "Project"),
         _state(State::Idle),
-        _projectSerializationTask(this, "Project serialization")
+        _projectSerializationTask(this, "Load project")
     {
     }
 
