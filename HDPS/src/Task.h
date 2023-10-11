@@ -235,8 +235,9 @@ public: // Name, description, icon and may kill
     /**
      * Sets whether the task is enabled or not
      * @param enabled Boolean determining whether the task is enabled or not
+     * @param recursive Whether to set all descendants to \p enabled as well
      */
-    virtual void setEnabled(bool enabled) final;
+    virtual void setEnabled(bool enabled, bool recursive = false) final;
 
     /**
      * Get whether the task is visible or not
@@ -570,7 +571,7 @@ private: // Private setters (these call private signals under the hood, an essen
     void privateSetName(const QString& name);
     void privateSetDescription(const QString& description);
     void privateSetIcon(const QIcon& icon);
-    void privateSetEnabled(bool enabled);
+    void privateSetEnabled(bool enabled, bool recursive = false);
     void privateSetVisible(bool visible);
     void privateSetStatus(const Status& status, const QString& progressDescription = "", std::uint32_t deferredStatusDelay = 0, const Status& deferredStatus = Status::Idle);
     void privateSetUndefined(const QString& progressDescription = "");
@@ -777,7 +778,7 @@ signals:
     void privateSetNameSignal(const QString& name, QPrivateSignal);
     void privateSetDescriptionSignal(const QString& description, QPrivateSignal);
     void privateSetIconSignal(const QIcon& icon, QPrivateSignal);
-    void privateSetEnabledSignal(bool enabled, QPrivateSignal);
+    void privateSetEnabledSignal(bool enabled, bool recursive, QPrivateSignal);
     void privateSetVisibleSignal(bool visible, QPrivateSignal);
     void privateSetStatusSignal(const Status& status, const QString& progressDescription, std::uint32_t deferredStatusDelay, const Status& deferredStatus, QPrivateSignal);
     void privateSetUndefinedSignal(const QString& progressDescription, QPrivateSignal);

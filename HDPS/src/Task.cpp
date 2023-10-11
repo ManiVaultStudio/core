@@ -64,7 +64,7 @@ Task::Task(QObject* parent, const QString& name, const GuiScope& guiScope /*= Gu
     if (core() != nullptr)
         tasks().addTask(this);
     else
-        qDebug() << "Cannot add task to the manager because the core has not been initialized yet.";
+        qDebug() << "Cannot add" << name << "to the manager because the core has not been initialized yet.";
 
     for (auto& timer : _timers)
         timer.setSingleShot(true);
@@ -256,9 +256,9 @@ bool Task::getEnabled() const
     return _enabled;
 }
 
-void Task::setEnabled(bool enabled)
+void Task::setEnabled(bool enabled, bool recursive /*= false*/)
 {
-    emit privateSetEnabledSignal(enabled, QPrivateSignal());
+    emit privateSetEnabledSignal(enabled, recursive, QPrivateSignal());
 }
 
 bool Task::getVisible() const
@@ -863,12 +863,16 @@ void Task::privateSetIcon(const QIcon& icon)
     emit iconChanged(_icon);
 }
 
-void Task::privateSetEnabled(bool enabled)
+void Task::privateSetEnabled(bool enabled, bool recursive /*= false*/)
 {
     if (enabled == _enabled)
         return;
 
     _enabled = enabled;
+
+    if (recursive)
+        for (auto childTask : getChildTasks(true, false))
+            childTask->setEnabled(enabled, recursive);
 
     emit enabledChanged(_enabled);
 }

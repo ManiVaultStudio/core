@@ -36,7 +36,7 @@ Application::Application(int& argc, char** argv) :
     _logger(),
     _startupProjectFilePath(),
     _startupProjectMetaAction(nullptr),
-    _startupTask(this, "Load ManiVault")
+    _startupTask(nullptr)
 {
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, {
             //":/IconFonts/FontAwesomeBrandsRegular-5.14.otf",
@@ -49,6 +49,10 @@ Application::Application(int& argc, char** argv) :
         //":/IconFonts/FontAwesomeRegular-6.4.otf",
         ":/IconFonts/FontAwesomeSolid-6.4.otf"
     })));
+
+    connect(Application::current(), &Application::coreManagersCreated, this, [this](CoreInterface* core) {
+        _startupTask = new ApplicationStartupTask(this, "Load ManiVault");
+    });
 
     connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) {
         BackgroundTask::createHandler(Application::current());
@@ -197,7 +201,7 @@ QMainWindow* Application::getMainWindow()
 
 ApplicationStartupTask& Application::getStartupTask()
 {
-    return _startupTask;
+    return *_startupTask;
 }
 
 }

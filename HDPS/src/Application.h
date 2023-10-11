@@ -210,7 +210,7 @@ protected:
     gui::TriggerAction*     _exitAction;                        /** Action for exiting the application */
     QString                 _startupProjectFilePath;            /** File path of the project to automatically open upon startup (if set) */
     ProjectMetaAction*      _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
-    ApplicationStartupTask  _startupTask;                       /** Application startup task */
+    ApplicationStartupTask* _startupTask;                       /** Application startup task */
 };
 
 }

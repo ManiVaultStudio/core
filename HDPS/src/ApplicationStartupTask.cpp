@@ -23,10 +23,7 @@ ApplicationStartupTask::ApplicationStartupTask(QObject* parent, const QString& n
     _loadProjectTask.setEnabled(false);
 
     connect(this, &Task::statusChangedToFinished, this, [this]() -> void {
-        setEnabled(false);
-
-        for (auto childTask : getChildTasks(true, false))
-            childTask->setEnabled(false);
+        setEnabled(false, true);
     });
 }
 
