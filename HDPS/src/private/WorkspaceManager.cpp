@@ -328,20 +328,12 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
                 filePath = fileDialog.selectedFiles().first();
 
                 Application::current()->setSetting("Workspaces/WorkingDirectory", QFileInfo(filePath).absolutePath());
-            }
-
-            auto& workspaceSerializationTask = projects().getProjectSerializationTask().getWorkspaceTask();
-
-            workspaceSerializationTask.setName("Load workspace");
-            workspaceSerializationTask.setDescription(QString("Opening ManiVault workspace from %1").arg(filePath));
-            workspaceSerializationTask.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+            }           
 
             fromJsonFile(filePath);
 
             if (addToRecentWorkspaces)
                 _recentWorkspacesAction.addRecentFilePath(filePath);
-
-            workspaceSerializationTask.setFinished(true);
         }
         endLoadWorkspace();
     }

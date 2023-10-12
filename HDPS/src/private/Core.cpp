@@ -161,12 +161,8 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     fullSet->setAll(true);
 
     fullSet->getDatasetTask().setName(dataSetGuiName);
-    fullSet->getForegroundTask().setName(dataSetGuiName);
-    fullSet->getModalTask().setName(dataSetGuiName);
 
     selection->getDatasetTask().setName(QString("%1_selection").arg(dataSetGuiName));
-    selection->getForegroundTask().setName(QString("%1_selection").arg(dataSetGuiName));
-    selection->getModalTask().setName(QString("%1_selection").arg(dataSetGuiName));
 
     // Set pointer of full dataset to itself just to avoid having to be wary of this not being set
     fullSet->_fullDataset = fullSet;

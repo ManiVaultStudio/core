@@ -22,6 +22,14 @@ class ProjectSerializationTask final : public Task
 
 public:
 
+    /** Serialization mode */
+    enum class Mode {
+        Load,
+        Save
+    };
+
+public:
+
     /**
     * Construct task with \p parent object, \p name and initial \p status
     * @param parent Pointer to parent object
@@ -31,15 +39,33 @@ public:
     */
     ProjectSerializationTask(QObject* parent, const QString& name, const Status& status = Status::Undefined, bool mayKill = false);
 
+    /** Get serialization mode */
+    Mode getMode() const;
+
+    /**
+     * Set serialization mode to \p mode
+     * @param mode Serialization mode
+     */
+    void setMode(const Mode& mode);
+
+    /** Set mode to load */
+    void setToLoad();
+
+    /** Set mode to save */
+    void setToSave();
+
 public: // Task getters
 
     ModalTask& getDataTask();               /** Get task for serializing the project data */
+    ModalTask& getCompressionTask();        /** Get task for compression of the project data */
     ModalTask& getWorkspaceTask();          /** Get task for serializing the workspace */
     ModalTask& getSystemViewPluginsTask();  /** Get task for serializing the system view plugins */
     ModalTask& getViewPluginsTask();        /** Get task for serializing the view plugins */
 
 private:
+    Mode        _mode;                      /** Serialization mode */
     ModalTask   _dataTask;                  /** Task for serializing the project data */
+    ModalTask   _compressionTask;           /** Task for compression of the project data */
     ModalTask   _workspaceTask;             /** Task for serializing the workspace */
     ModalTask   _systemViewPluginsTask;     /** Task for serializing the system view plugins */
     ModalTask   _viewPluginsTask;           /** Task for serializing the view plugins */

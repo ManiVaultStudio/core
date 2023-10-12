@@ -438,8 +438,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             auto& projectSerializationTask          = projects().getProjectSerializationTask();
             auto& projectDataSerializationTask      = projectSerializationTask.getDataTask();
-            auto& projectWorkspaceSerializationTask = projectSerializationTask.getWorkspaceTask();
             
+            projectSerializationTask.setToLoad();
             projectSerializationTask.setEnabled(true, true);
             projectSerializationTask.setDescription(QString("Opening ManiVault project from %1").arg(filePath));
             projectSerializationTask.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
@@ -650,21 +650,23 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
-            ModalTask saveProjectTask(this, "Save Project");
-
             if (_project->getCompressionAction().getEnabledAction().isChecked())
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "with compression level" << _project->getCompressionAction().getLevelAction().getValue();
             else
                 qDebug().noquote() << "Saving ManiVault project to" << filePath << "without compression";
 
-            saveProjectTask.setMayKill(true);
-            saveProjectTask.setDescription(QString("Saving ManiVault project to %1").arg(filePath));
-            saveProjectTask.setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
-            saveProjectTask.setProgressMode(Task::ProgressMode::Subtasks);
+            auto& projectSerializationTask  = projects().getProjectSerializationTask();
+            auto& compressionTask           = projectSerializationTask.getCompressionTask();
+
+            projectSerializationTask.setToSave();
+            projectSerializationTask.setEnabled(true, true);
+            projectSerializationTask.setDescription(QString("Saving ManiVault project to %1").arg(filePath));
+            projectSerializationTask.setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
+            projectSerializationTask.setProgressMode(Task::ProgressMode::Subtasks);
 
             Archiver archiver;
 
-            connect(&saveProjectTask, &Task::requestAbort, this, [this]() -> void {
+            connect(&projectSerializationTask, &Task::requestAbort, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was saved");
@@ -675,49 +677,29 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
             Application::setSerializationAborted(false);
 
-            ModalTask exportTask(this, "Export");
-            ModalTask compressTask(this, "Compress");
-
-            exportTask.setParentTask(&saveProjectTask);
-            compressTask.setParentTask(&saveProjectTask);
-
-            exportTask.setProgressMode(Task::ProgressMode::Subtasks);
-            exportTask.setSubtasks({ "project.json", "meta.json" });
-            exportTask.setRunning();
-
-            exportTask.setSubtaskStarted("project.json");
-            {
-                projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
-            }
-            exportTask.setSubtaskFinished("project.json");
-
-            exportTask.setSubtaskStarted("meta.json");
-            {
-                _project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
-            }
-            exportTask.setSubtaskFinished("meta.json");
-
-            exportTask.setFinished();
+            projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
+            
+            _project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
             
             QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
             workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 
-            compressTask.setProgressMode(Task::ProgressMode::Subtasks);
-            compressTask.setSubtasks(archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath));
-            compressTask.setRunning();
+            compressionTask.setProgressMode(Task::ProgressMode::Subtasks);
+            compressionTask.setSubtasks(archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath));
+            compressionTask.setRunning();
 
-            connect(&archiver, &Archiver::taskStarted, this, [&compressTask](const QString& taskName) -> void {
-                compressTask.setSubtaskStarted(taskName, QString("Compressing %1").arg(taskName));
+            connect(&archiver, &Archiver::taskStarted, this, [&compressionTask](const QString& taskName) -> void {
+                compressionTask.setSubtaskStarted(taskName, QString("Compressing %1").arg(taskName));
             });
 
-            connect(&archiver, &Archiver::taskFinished, this, [&compressTask](const QString& taskName) -> void {
-                compressTask.setSubtaskFinished(taskName, QString("%1 compressed").arg(taskName));
+            connect(&archiver, &Archiver::taskFinished, this, [&compressionTask](const QString& taskName) -> void {
+                compressionTask.setSubtaskFinished(taskName, QString("%1 compressed").arg(taskName));
             });
 
             archiver.compressDirectory(temporaryDirectoryPath, filePath, true, _project->getCompressionAction().getEnabledAction().isChecked() ? _project->getCompressionAction().getLevelAction().getValue() : 0, password);
 
-            compressTask.setFinished();
+            compressionTask.setFinished();
 
             _recentProjectsAction.addRecentFilePath(filePath);
 

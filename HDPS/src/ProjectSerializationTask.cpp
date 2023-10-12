@@ -8,23 +8,68 @@ namespace hdps {
 
 ProjectSerializationTask::ProjectSerializationTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
     Task(parent, name, GuiScope::Modal, status, mayKill, nullptr),
-    _dataTask(this, "Load data"),
-    _workspaceTask(this, "Load workspace"),
-    _systemViewPluginsTask(this, "Load system view plugins"),
-    _viewPluginsTask(this, "Load view plugins")
+    _mode(Mode::Load),
+    _dataTask(this, ""),
+    _compressionTask(this, ""),
+    _workspaceTask(this, ""),
+    _systemViewPluginsTask(this, ""),
+    _viewPluginsTask(this, "")
 {
     setStatus(Task::Status::Idle, "", true);
     setEnabled(false, true);
+    setMode(_mode);
 
     _dataTask.setParentTask(this);
+    _compressionTask.setParentTask(this);
     _workspaceTask.setParentTask(this);
     _systemViewPluginsTask.setParentTask(&_workspaceTask);
     _viewPluginsTask.setParentTask(&_workspaceTask);
 }
 
+ProjectSerializationTask::Mode ProjectSerializationTask::getMode() const
+{
+    return _mode;
+}
+
+void ProjectSerializationTask::setMode(const Mode& mode)
+{
+    switch (mode)
+    {
+        case Mode::Load:
+        {
+            _dataTask.setName("Load data");
+            _compressionTask.setName("De-compress data");
+            _workspaceTask.setName("Load workspace");
+            _systemViewPluginsTask.setName("Load system view plugins");
+            _viewPluginsTask.setName("Load view plugins");
+
+            break;
+        }
+
+        case Mode::Save:
+        {
+            _dataTask.setName("Save data");
+            _compressionTask.setName("Compress data");
+            _workspaceTask.setName("Save workspace");
+            _systemViewPluginsTask.setName("Save system view plugins");
+            _viewPluginsTask.setName("Save view plugins");
+
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
 ModalTask& ProjectSerializationTask::getDataTask()
 {
     return _dataTask;
+}
+
+ModalTask& ProjectSerializationTask::getCompressionTask()
+{
+    return _compressionTask;
 }
 
 ModalTask& ProjectSerializationTask::getWorkspaceTask()
@@ -40,6 +85,16 @@ ModalTask& ProjectSerializationTask::getSystemViewPluginsTask()
 ModalTask& ProjectSerializationTask::getViewPluginsTask()
 {
     return _viewPluginsTask;
+}
+
+void ProjectSerializationTask::setToLoad()
+{
+    setMode(Mode::Load);
+}
+
+void ProjectSerializationTask::setToSave()
+{
+    setMode(Mode::Save);
 }
 
 }

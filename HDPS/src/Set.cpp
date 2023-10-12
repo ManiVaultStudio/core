@@ -305,9 +305,7 @@ DatasetImpl::DatasetImpl(CoreInterface* core, const QString& rawDataName, const 
     _linkedDataFlags(LinkedDataFlag::SendReceive),
     _locked(false),
     _smartPointer(this),
-    _datasetTask(this, ""),
-    _foregroundTask(this, ""),
-    _modalTask(this, "")
+    _datasetTask(this, "")
 {
     if (!id.isEmpty())
         Serializable::setId(id);
@@ -440,16 +438,6 @@ QString DatasetImpl::getRawDataSizeHumanReadable() const
 DatasetTask& DatasetImpl::getDatasetTask()
 {
     return _datasetTask;
-}
-
-ForegroundTask& DatasetImpl::getForegroundTask()
-{
-    return _foregroundTask;
-}
-
-ModalTask& DatasetImpl::getModalTask()
-{
-    return _modalTask;
 }
 
 QString DatasetImpl::getLocation() const

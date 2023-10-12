@@ -487,18 +487,6 @@ public: // Task access
      */
     DatasetTask& getDatasetTask();
 
-    /**
-     * Get foreground task
-     * @return Task for display in the foreground tasks popup of the status bar
-     */
-    ForegroundTask& getForegroundTask();
-
-    /**
-     * Get modal task
-     * @return Task for display in the modal tasks dialog
-     */
-    ModalTask& getModalTask();
-
 protected:
 
     /** Get raw data */
@@ -559,8 +547,6 @@ private:
     bool                        _locked;            /** Whether the dataset is locked */
     Dataset<DatasetImpl>        _smartPointer;      /** Smart pointer to own dataset */
     DatasetTask                 _datasetTask;       /** Task for display in the data hierarchy*/
-    ForegroundTask              _foregroundTask;    /** Task for display in the foreground tasks popup of the status bar */
-    ModalTask                   _modalTask;         /** Task for display in the modal tasks dialog */
 
     friend class CoreInterface;
     friend class Core;
