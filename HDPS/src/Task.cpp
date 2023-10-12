@@ -348,11 +348,15 @@ void Task::setIdle()
 void Task::setRunning()
 {
     emit privateSetRunningSignal(QPrivateSignal());
+
+    setProgressDescription(getName());
 }
 
 void Task::setRunningIndeterminate()
 {
     emit privateSetRunningIndeterminateSignal(QPrivateSignal());
+
+    setProgressDescription(getName());
 }
 
 void Task::setFinished()
@@ -501,12 +505,7 @@ QString Task::getStandardProgressText() const
             return "Idle";
 
         case Task::Status::Running:
-        {
-            if (_progress == 0.f)
-                return _name;
-            else
-                return QString("%1 %2%").arg(getProgressDescription().isEmpty() ? "" : QString("%1").arg(getProgressDescription()), QString::number(getProgress() * 100.f, 'f', 1));
-        }
+            return QString("%1 %2%").arg(getProgressDescription().isEmpty() ? "" : QString("%1").arg(getProgressDescription()), QString::number(getProgress() * 100.f, 'f', 1));
 
         case Task::Status::RunningIndeterminate:
             return QString("%1: %2").arg(getName(), getProgressDescription());

@@ -456,11 +456,13 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 QCoreApplication::processEvents();
             });
 
+            /*
             connect(&archiver, &Archiver::taskFinished, this, [this, &compressionTask](const QString& taskName) -> void {
                 compressionTask.setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
 
                 QCoreApplication::processEvents();
             });
+            */
 
             connect(&projectSerializationTask, &Task::requestAbort, this, [this]() -> void {
                 Application::setSerializationAborted(true);

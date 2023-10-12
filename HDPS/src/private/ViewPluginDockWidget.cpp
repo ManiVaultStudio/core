@@ -235,29 +235,20 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
     const auto restoreViewPluginSubtask = QString("Create %1 GUI").arg(guiName);
 
     serializationTask->setName(QString("Load %1").arg(guiName));
-    serializationTask->setSubtasks({ loadViewPluginSubtask, restoreViewPluginSubtask });
     serializationTask->setRunning();
 
-    serializationTask->setSubtaskStarted(loadViewPluginSubtask);
-    {
-        variantMapMustContain(variantMap, "ViewPlugin");
+    variantMapMustContain(variantMap, "ViewPlugin");
 
-        _viewPluginMap = variantMap["ViewPlugin"].toMap();
+    _viewPluginMap = variantMap["ViewPlugin"].toMap();
 
-        variantMapMustContain(_viewPluginMap, "Kind");
+    variantMapMustContain(_viewPluginMap, "Kind");
 
-        _viewPluginKind = _viewPluginMap["Kind"].toString();
+    _viewPluginKind = _viewPluginMap["Kind"].toString();
 
-        loadViewPlugin();
-    }
-    serializationTask->setSubtaskFinished(loadViewPluginSubtask);
+    loadViewPlugin();
 
-    serializationTask->setSubtaskStarted(restoreViewPluginSubtask);
-    {
-        if (variantMap.contains("DockManagerState"))
-            _dockManager.restoreState(QByteArray::fromBase64(variantMap["DockManagerState"].toString().toUtf8()));
-    }
-    serializationTask->setSubtaskFinished(restoreViewPluginSubtask);
+    if (variantMap.contains("DockManagerState"))
+        _dockManager.restoreState(QByteArray::fromBase64(variantMap["DockManagerState"].toString().toUtf8()));
 
     serializationTask->setFinished();
 }
