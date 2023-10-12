@@ -10,7 +10,7 @@
 #include <util/Exception.h>
 
 #ifdef _DEBUG
-    //#define TASKS_TREE_MODEL_VERBOSE
+    #define TASKS_TREE_MODEL_VERBOSE
 #endif
 
 namespace hdps
@@ -28,10 +28,14 @@ TasksTreeModel::TasksTreeModel(QObject* parent /*= nullptr*/) :
 
     auto topLevelTasks = tasks().getTasks();
 
-    topLevelTasks.erase(std::find_if(topLevelTasks.begin(), topLevelTasks.end(), [](Task* task) -> bool {
+    qDebug() << "Number of tasks" << topLevelTasks.size();
+
+    auto iterator = std::remove_if(topLevelTasks.begin(), topLevelTasks.end(), [](Task* task) -> bool {
         return task->hasParentTask();
-    }), topLevelTasks.end());
-    
+    });
+
+    topLevelTasks.erase(iterator, topLevelTasks.end());
+
     for (auto topLevelTask : topLevelTasks) {
         addTask(topLevelTask);
 

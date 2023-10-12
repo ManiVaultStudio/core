@@ -29,7 +29,7 @@ TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
     setDynamicSortFilter(true);
     setRecursiveFilteringEnabled(true);
 
-    const auto taskTypes = QStringList({ "Task", "BackgroundTask", "DatasetTask", "ForegroundTask", "ModalTask" });
+    const auto taskTypes = QStringList({ "Task", "BackgroundTask", "DatasetTask", "ForegroundTask", "ModalTask", "ProjectSerializationTask", "ApplicationStartupTask"});
 
     _taskTypeFilterAction.initialize(taskTypes, taskTypes);
 

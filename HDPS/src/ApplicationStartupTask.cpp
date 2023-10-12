@@ -15,8 +15,6 @@ ApplicationStartupTask::ApplicationStartupTask(QObject* parent, const QString& n
     _loadGuiTask(this, "Load GUI"),
     _loadProjectTask(this, "Load project")
 {
-    setMayKill(false, true);
-
     _loadCoreTask.setParentTask(this);
     _loadCoreManagersTask.setParentTask(&_loadCoreTask);
     _loadGuiTask.setParentTask(this);
