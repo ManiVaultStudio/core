@@ -95,6 +95,7 @@ private:
         ProgressChanged,                /** For Task::progressChanged() signal */
         ProgressDescriptionChanged,     /** For Task::progressDescriptionChanged() signal */
         ProgressTextChanged,            /** For Task::progressTextChanged() signal */
+        DeferredStatus,                 /** To set task status to deferred */
 
         Count
     };
@@ -310,6 +311,14 @@ public: // Status
      * @param recursive Whether to set all descendants statuses as well
      */
     virtual void setStatus(const Status& status, bool recursive = false) final;
+
+    /**
+     * Set task status deferred to \p status, possibly \p recursively and after \p delay
+     * @param status Deferred task status
+     * @param recursive Whether to set all descendants statuses as well
+     * @param delay Delay after which the deferred task status is set
+     */
+    virtual void setStatusDeferred(const Status& status, bool recursive = false, std::uint32_t delay = DEFERRED_TASK_STATUS_INTERVAL) final;
 
     /** Convenience method to set task status to undefined */
     virtual void setUndefined() final;
@@ -554,6 +563,7 @@ private: // Private setters (these call private signals under the hood, an essen
     void privateSetMayKill(bool mayKill, bool recursive = false);
     void privateReset(bool recursive = false);
     void privateSetStatus(const Status& status, bool recursive = false);
+    void privateSetStatusDeferred(const Status& status, bool recursive = false, std::uint32_t delay = DEFERRED_TASK_STATUS_INTERVAL);
     void privateSetUndefined();
     void privateSetIdle();
     void privateSetRunning();
@@ -763,6 +773,7 @@ signals:
     void privateSetMayKillSignal(bool mayKill, bool recursive, QPrivateSignal);
     void privateResetSignal(bool recursive, QPrivateSignal);
     void privateSetStatusSignal(const Status& status, bool recursive, QPrivateSignal);
+    void privateSetStatusDeferredSignal(const Status& status, bool recursive, std::uint32_t delay, QPrivateSignal);
     void privateSetUndefinedSignal(QPrivateSignal);
     void privateSetIdleSignal(QPrivateSignal);
     void privateSetRunningSignal(QPrivateSignal);
@@ -793,6 +804,8 @@ private:
     bool                    _enabled;                                       /** Whether the task is enabled, disabled tasks are not included in task aggregation */
     bool                    _visible;                                       /** Whether the task is visible in the user interface */
     Status                  _status;                                        /** Task status */
+    Status                  _deferredStatus;                                /** Task status which is set after a delay */
+    bool                    _deferredStatusRecursive;                       /** Whether to set the task status deferred recursively */
     bool                    _mayKill;                                       /** Whether the task may be killed or not */
     AbstractTaskHandler*    _handler;                                       /** Task handler */
     ProgressMode            _progressMode;                                  /** The way progress is recorded */
@@ -810,6 +823,7 @@ private:
 private:
     static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL           = 250;      /** Single shot task progress and description timer interval */
     static constexpr std::uint32_t TASK_DESCRIPTION_DISAPPEAR_INTERVAL  = 1500;     /** Single shot task description disappear timer interval */
+    static constexpr std::uint32_t DEFERRED_TASK_STATUS_INTERVAL        = 1500;     /** Delay after which the deferred task status is set */
 };
 
 }

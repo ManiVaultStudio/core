@@ -46,6 +46,8 @@ Task::Task(QObject* parent, const QString& name, const GuiScope& guiScope /*= Gu
     _enabled(true),
     _visible(true),
     _status(status),
+    _deferredStatus(Status::Undefined),
+    _deferredStatusRecursive(false),
     _mayKill(mayKill),
     _handler(handler),
     _progressMode(ProgressMode::Manual),
@@ -71,10 +73,15 @@ Task::Task(QObject* parent, const QString& name, const GuiScope& guiScope /*= Gu
     _timers[static_cast<int>(TimerType::ProgressChanged)].setInterval(TASK_UPDATE_TIMER_INTERVAL);
     _timers[static_cast<int>(TimerType::ProgressDescriptionChanged)].setInterval(TASK_UPDATE_TIMER_INTERVAL);
     _timers[static_cast<int>(TimerType::ProgressTextChanged)].setInterval(TASK_UPDATE_TIMER_INTERVAL);
+    _timers[static_cast<int>(TimerType::DeferredStatus)].setInterval(DEFERRED_TASK_STATUS_INTERVAL);
 
     connect(&getTimer(TimerType::ProgressChanged), &QTimer::timeout, this, &Task::privateEmitProgressChanged);
     connect(&getTimer(TimerType::ProgressDescriptionChanged), &QTimer::timeout, this, &Task::privateEmitProgressDescriptionChanged);
     connect(&getTimer(TimerType::ProgressTextChanged), &QTimer::timeout, this, &Task::privateEmitProgressTextChanged);
+    
+    connect(&getTimer(TimerType::DeferredStatus), &QTimer::timeout, this, [this]() -> void {
+        setStatus(_deferredStatus, _deferredStatusRecursive);
+    });
     
     connect(this, &Task::privateSetParentTaskSignal, this, &Task::privateSetParentTask);
     connect(this, &Task::privateAddChildTaskSignal, this, &Task::privateAddChildTask);
@@ -86,6 +93,7 @@ Task::Task(QObject* parent, const QString& name, const GuiScope& guiScope /*= Gu
     connect(this, &Task::privateSetVisibleSignal, this, &Task::privateSetVisible);
     connect(this, &Task::privateSetMayKillSignal, this, &Task::privateSetMayKill);
     connect(this, &Task::privateSetStatusSignal, this, &Task::privateSetStatus);
+    connect(this, &Task::privateSetStatusDeferredSignal, this, &Task::privateSetStatusDeferred);
     connect(this, &Task::privateResetSignal, this, &Task::privateReset);
     connect(this, &Task::privateSetIdleSignal, this, &Task::privateSetIdle);
     connect(this, &Task::privateSetRunningSignal, this, &Task::privateSetRunning);
@@ -333,6 +341,11 @@ bool Task::isAborted() const
 void Task::setStatus(const Status& status, bool recursive /*= false*/)
 {
     emit privateSetStatusSignal(status, recursive, QPrivateSignal());
+}
+
+void Task::setStatusDeferred(const Status& status, bool recursive /*= false*/, std::uint32_t delay /*= DEFERRED_TASK_STATUS_INTERVAL*/)
+{
+    emit privateSetStatusDeferredSignal(status, recursive, delay, QPrivateSignal());
 }
 
 void Task::setUndefined()
@@ -1010,6 +1023,14 @@ void Task::privateSetStatus(const Status& status, bool recursive /*= false*/)
             childTask->setStatus(status, recursive);
 }
 
+void Task::privateSetStatusDeferred(const Status& status, bool recursive /*= false*/, std::uint32_t delay /*= DEFERRED_TASK_STATUS_INTERVAL*/)
+{
+    _deferredStatus             = status;
+    _deferredStatusRecursive    = recursive;
+
+    getTimer(TimerType::DeferredStatus).start(delay);
+}
+
 void Task::privateSetUndefined()
 {
     privateSetStatus(Status::Undefined);
@@ -1033,6 +1054,9 @@ void Task::privateSetRunningIndeterminate()
 void Task::privateSetFinished()
 {
     privateSetStatus(Status::Finished);
+
+    if (!hasParentTask())
+        privateSetStatusDeferred(Status::Idle, false, DEFERRED_TASK_STATUS_INTERVAL);
 }
 
 void Task::privateSetAboutToBeAborted()
