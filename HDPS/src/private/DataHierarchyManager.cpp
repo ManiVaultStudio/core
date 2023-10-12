@@ -205,19 +205,39 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
     auto& projectDataSerializationTask = projects().getProjectSerializationTask().getDataTask();
 
-    projectDataSerializationTask.setName("Loading data");
+    QStringList subtasks;
+
+    const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &subtasks](const QVariantMap& variantMap) -> void {
+        for (const auto& variant : variantMap.values()) {
+            enumerateDatasetNames(variant.toMap()["Children"].toMap());
+
+            const auto dataset      = variant.toMap()["Dataset"].toMap();
+            const auto datasetName  = dataset["Name"].toString();
+
+            subtasks << datasetName;
+        }
+    };
+
+    enumerateDatasetNames(variantMap);
+
+    projectDataSerializationTask.setSubtasks(subtasks);
     projectDataSerializationTask.setRunning();
 
-    const auto loadDataset = [](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
+    const auto loadDataset = [&projectDataSerializationTask](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
         const auto dataset      = dataHierarchyItemMap["Dataset"].toMap();
+        const auto datasetName  = dataset["Name"].toString();
         const auto pluginKind   = dataset["PluginKind"].toString();
 
+        projectDataSerializationTask.setSubtaskStarted(datasetName, QString("Loading %1").arg(datasetName));
+        
         auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent, dataset["ID"].toString());
-
+        
         loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
         loadedDataset->fromVariantMap(dataset);
-
+        
         events().notifyDatasetAdded(loadedDataset);
+        
+        projectDataSerializationTask.setSubtaskFinished(datasetName, QString("%1 loaded").arg(datasetName));
 
         return loadedDataset;
     };
@@ -248,7 +268,12 @@ QVariantMap DataHierarchyManager::toVariantMap() const
     if (!_items.isEmpty()) {
         auto& projectDataSerializationTask = projects().getProjectSerializationTask().getDataTask();
         
-        projectDataSerializationTask.setName("Saving project data");
+        QStringList subtasks;
+
+        for (auto dataHierarchyItem : _items)
+            subtasks << dataHierarchyItem->getDataset()->getGuiName();
+
+        projectDataSerializationTask.setSubtasks(subtasks);
         projectDataSerializationTask.setRunning();
 
         QVariantMap variantMap;
@@ -259,7 +284,13 @@ QVariantMap DataHierarchyManager::toVariantMap() const
             if (dataHierarchyItem->hasParent())
                 continue;
 
+            const auto datasetName = dataHierarchyItem->getDataset()->getGuiName();
+
+            projectDataSerializationTask.setSubtaskStarted(datasetName, QString("Saving %1").arg(datasetName));
+
             auto dataHierarchyItemMap = dataHierarchyItem->toVariantMap();
+
+            projectDataSerializationTask.setSubtaskFinished(datasetName, QString("%1 saved").arg(datasetName));
 
             dataHierarchyItemMap["SortIndex"] = sortIndex;
 

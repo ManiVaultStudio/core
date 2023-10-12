@@ -269,7 +269,7 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
 #endif
 
     auto viewPlugin         = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin();
-    auto serializationTask  = ViewPluginDockWidget::getSerializationTask(viewPlugin->getId());
+    auto serializationTask  = ViewPluginDockWidget::getSerializationTask(getId());
 
     serializationTask->setName(QString("Saving %1").arg(viewPlugin->text()));
     serializationTask->setRunning(QString("Saving %1").arg(viewPlugin->text()));
