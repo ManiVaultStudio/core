@@ -440,13 +440,9 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             auto& projectDataSerializationTask      = projectSerializationTask.getDataTask();
             auto& projectWorkspaceSerializationTask = projectSerializationTask.getWorkspaceTask();
             
-            projectDataSerializationTask.setDescription(QString("Opening ManiVault project from %1").arg(filePath));
-            projectDataSerializationTask.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-            projectDataSerializationTask.setMayKill(false);
-            projectDataSerializationTask.setProgressMode(Task::ProgressMode::Subtasks);
-            projectDataSerializationTask.setRunning();
-
-            QCoreApplication::processEvents();
+            projectSerializationTask.setEnabled(true, true);
+            projectSerializationTask.setDescription(QString("Opening ManiVault project from %1").arg(filePath));
+            projectSerializationTask.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
 
             Archiver archiver;
 
@@ -457,6 +453,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             const auto decompressionTaskNames   = QStringList() << archiver.getTaskNamesForDecompression(filePath);
 
             projectDataSerializationTask.setSubtasks(QStringList() << decompressionTaskNames << "Create data hierarchy");
+            projectDataSerializationTask.setRunning();
 
             connect(&archiver, &Archiver::taskStarted, this, [this, &projectDataSerializationTask](const QString& taskName) -> void {
                 projectDataSerializationTask.setSubtaskStarted(taskName, QString("extracting %1").arg(taskName));
@@ -496,6 +493,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             if (_project->isStartupProject())
                 ModalTask::getGlobalHandler()->setEnabled(true);
+
+            projectSerializationTask.setEnabled(false, true);
 
             qDebug().noquote() << filePath << "loaded successfully";
         }

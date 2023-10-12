@@ -28,7 +28,7 @@ namespace hdps {
 Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
     _core(nullptr),
-    _version({ 1, 0 }),
+    _version({ 0, 9 }),
     _iconFonts(),
     _settings(),
     _serializationTemporaryDirectory(),

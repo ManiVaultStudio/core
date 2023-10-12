@@ -203,7 +203,7 @@ void DataHierarchyManager::selectItems(DataHierarchyItems& selectedItems)
 
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    auto& projectDataSerializationTask = projects().getProjectSerializationTask();
+    auto& projectDataSerializationTask = projects().getProjectSerializationTask().getDataTask();
 
     projectDataSerializationTask.setName("Loading data");
     projectDataSerializationTask.setRunning();
@@ -246,7 +246,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 QVariantMap DataHierarchyManager::toVariantMap() const
 {
     if (!_items.isEmpty()) {
-        auto& projectDataSerializationTask = projects().getProjectSerializationTask();
+        auto& projectDataSerializationTask = projects().getProjectSerializationTask().getDataTask();
         
         projectDataSerializationTask.setName("Saving project data");
         projectDataSerializationTask.setRunning();

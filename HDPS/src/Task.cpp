@@ -563,19 +563,13 @@ void Task::updateProgress()
         {
             const auto childTasks = getChildTasksForStatuses(false, true, { Status::Undefined, Status::Idle, Status::Running, Status::RunningIndeterminate, Status::Finished });
 
-            QStringList childTasksNames;
+            if (!childTasks.isEmpty()) {
+                auto accumulatedProgress = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [](float sum, Task* childTask) -> float {
+                    return sum + childTask->getProgress();
+                });
 
-            for (auto childTask : getChildTasks())
-                childTasksNames << childTask->getName() << statusNames[childTask->getStatus()];
-
-            //if (getName() == "Load workspace")
-            //    qDebug() << getName() << childTasksNames;
-
-            auto accumulatedProgress = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [](float sum, Task* childTask) -> float {
-                return sum + childTask->getProgress();
-            });
-
-            _progress = accumulatedProgress / static_cast<float>(childTasks.size());
+                _progress = accumulatedProgress / static_cast<float>(childTasks.size());
+            }
             
             break;
         }
@@ -645,6 +639,9 @@ void Task::registerChildTask(Task* childTask)
 
     connect(childTask, &Task::statusChanged, this, [this, childTask](const Status& previousStatus, const Status& status) -> void {
         if (getProgressMode() != ProgressMode::Aggregate)
+            return;
+
+        if (previousStatus == Status::Finished && status == Status::Idle)
             return;
 
         //qDebug() << childTask->getName() << "status changed to" << statusNames[status];
@@ -726,11 +723,10 @@ void Task::updateAggregateStatus()
 
         std::reverse(tasksToSetToIdle.begin(), tasksToSetToIdle.end());
 
-        //for (auto taskToSetToIdle : tasksToSetToIdle)
-        //    taskToSetToIdle->setIdle();
+        for (auto taskToSetToIdle : tasksToSetToIdle)
+            taskToSetToIdle->setIdle();
 
-        privateSetStatus(Status::Finished);
-        //privateSetFinished(!hasParentTask());
+        privateSetFinished();
     }
 }
 
