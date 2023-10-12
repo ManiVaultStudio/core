@@ -22,6 +22,8 @@ ApplicationStartupTask::ApplicationStartupTask(QObject* parent, const QString& n
 
     _loadProjectTask.setEnabled(false);
 
+    setStatus(Task::Status::Idle, "", true);
+
     connect(this, &Task::statusChangedToFinished, this, [this]() -> void {
         setEnabled(false, true);
     });
