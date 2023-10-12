@@ -39,7 +39,7 @@ protected:
     private:
 
         /** Invoked when the number of modal tasks changes */
-        void numberOfModalTasksChanged();
+        void updateLayout();
 
         /** Removes all existing task widget layout items */
         void cleanLayout();

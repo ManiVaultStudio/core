@@ -43,16 +43,20 @@ public:
     Mode getMode() const;
 
     /**
-     * Set serialization mode to \p mode
+     * Set serialization mode to \p mode, with \p projectFilePath
      * @param mode Serialization mode
+     * @param projectFilePath File path of the project to load/save
      */
-    void setMode(const Mode& mode);
+    void setMode(const Mode& mode, const QString& projectFilePath);
 
-    /** Set mode to load */
-    void setToLoad();
+    /**
+     * Start loading
+     * @param projectFilePath File path of the project which is loading
+     */
+    void startLoad(const QString& projectFilePath);
 
     /** Set mode to save */
-    void setToSave();
+    void startSave(const QString& projectFilePath);
 
 public: // Task getters
 

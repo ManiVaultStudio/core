@@ -436,13 +436,10 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             ProjectMetaAction projectMetaAction(extractFileFromManiVaultProject(filePath, temporaryDirectory, "meta.json"));
 
-            auto& projectSerializationTask          = projects().getProjectSerializationTask();
-            auto& projectDataSerializationTask      = projectSerializationTask.getDataTask();
-            
-            projectSerializationTask.setToLoad();
-            projectSerializationTask.setEnabled(true, true);
-            projectSerializationTask.setDescription(QString("Opening ManiVault project from %1").arg(filePath));
-            projectSerializationTask.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+            auto& projectSerializationTask      = projects().getProjectSerializationTask();
+            auto& compressionTask               = projectSerializationTask.getCompressionTask();
+
+            projectSerializationTask.startLoad(filePath);
 
             Archiver archiver;
 
@@ -450,20 +447,22 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             archiver.extractSingleFile(filePath, "workspace.json", QFileInfo(temporaryDirectoryPath, "workspace.json").absoluteFilePath());
             
-            const auto decompressionTaskNames   = QStringList() << archiver.getTaskNamesForDecompression(filePath);
+            compressionTask.setSubtasks(archiver.getTaskNamesForDecompression(filePath));
+            compressionTask.setRunning();
 
-            projectDataSerializationTask.setSubtasks(QStringList() << decompressionTaskNames << "Create data hierarchy");
-            projectDataSerializationTask.setRunning();
+            connect(&archiver, &Archiver::taskStarted, this, [this, &compressionTask](const QString& taskName) -> void {
+                compressionTask.setSubtaskStarted(taskName, QString("extracting %1").arg(taskName));
 
-            connect(&archiver, &Archiver::taskStarted, this, [this, &projectDataSerializationTask](const QString& taskName) -> void {
-                projectDataSerializationTask.setSubtaskStarted(taskName, QString("extracting %1").arg(taskName));
+                QCoreApplication::processEvents();
             });
 
-            connect(&archiver, &Archiver::taskFinished, this, [this, &projectDataSerializationTask](const QString& taskName) -> void {
-                projectDataSerializationTask.setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
+            connect(&archiver, &Archiver::taskFinished, this, [this, &compressionTask](const QString& taskName) -> void {
+                compressionTask.setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
+
+                QCoreApplication::processEvents();
             });
 
-            connect(&projectDataSerializationTask, &Task::requestAbort, this, [this]() -> void {
+            connect(&projectSerializationTask, &Task::requestAbort, this, [this]() -> void {
                 Application::setSerializationAborted(true);
 
                 throw std::runtime_error("Canceled before project was loaded");
@@ -471,18 +470,16 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             archiver.decompress(filePath, temporaryDirectoryPath);
 
+            compressionTask.setFinished();
+
             projects().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
             
-            projectDataSerializationTask.setSubtaskFinished("Create data hierarchy");
-
             if (loadWorkspace) {
                 if (workspaceFileInfo.exists())
                     workspaces().loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 
                 workspaces().setWorkspaceFilePath("");
             }
-
-            projectDataSerializationTask.setFinished();
 
             _recentProjectsAction.addRecentFilePath(filePath);
 
@@ -493,8 +490,6 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             if (_project->isStartupProject())
                 ModalTask::getGlobalHandler()->setEnabled(true);
-
-            projectSerializationTask.setEnabled(false, true);
 
             qDebug().noquote() << filePath << "loaded successfully";
         }
@@ -658,11 +653,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             auto& projectSerializationTask  = projects().getProjectSerializationTask();
             auto& compressionTask           = projectSerializationTask.getCompressionTask();
 
-            projectSerializationTask.setToSave();
-            projectSerializationTask.setEnabled(true, true);
-            projectSerializationTask.setDescription(QString("Saving ManiVault project to %1").arg(filePath));
-            projectSerializationTask.setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
-            projectSerializationTask.setProgressMode(Task::ProgressMode::Subtasks);
+            projectSerializationTask.startSave(filePath);
 
             Archiver archiver;
 
@@ -685,7 +676,6 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 
-            compressionTask.setProgressMode(Task::ProgressMode::Subtasks);
             compressionTask.setSubtasks(archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath));
             compressionTask.setRunning();
 

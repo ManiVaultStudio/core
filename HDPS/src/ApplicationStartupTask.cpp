@@ -22,9 +22,15 @@ ApplicationStartupTask::ApplicationStartupTask(QObject* parent, const QString& n
 
     _loadProjectTask.setEnabled(false);
 
-    setStatus(Task::Status::Idle, "", true);
+    setStatus(Task::Status::Idle);
 
     connect(this, &Task::statusChangedToFinished, this, [this]() -> void {
+        QTimer::singleShot(1500, this, [this]() -> void {
+            setIdle();
+            });
+    });
+
+    connect(this, &Task::statusChangedToIdle, this, [this]() -> void {
         setEnabled(false, true);
     });
 }

@@ -259,7 +259,7 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
     }
     serializationTask->setSubtaskFinished(restoreViewPluginSubtask);
 
-    serializationTask->setFinished(false);
+    serializationTask->setFinished();
 }
 
 QVariantMap ViewPluginDockWidget::toVariantMap() const
@@ -272,7 +272,7 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
     auto serializationTask  = ViewPluginDockWidget::getSerializationTask(getId());
 
     serializationTask->setName(QString("Saving %1").arg(viewPlugin->text()));
-    serializationTask->setRunning(QString("Saving %1").arg(viewPlugin->text()));
+    serializationTask->setRunning();
 
     auto variantMap = DockWidget::toVariantMap();
 
@@ -286,8 +286,7 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
         { "DockManagerState", QVariant::fromValue(_dockManager.saveState().toBase64()) }
     });
 
-    serializationTask->setProgress(1.f);
-    serializationTask->setFinished(QString("%1 saved").arg(viewPlugin->text()));
+    serializationTask->setFinished();
 
     return variantMap;
 }

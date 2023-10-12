@@ -212,9 +212,9 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
             enumerateDatasetNames(variant.toMap()["Children"].toMap());
 
             const auto dataset      = variant.toMap()["Dataset"].toMap();
-            const auto datasetName  = dataset["Name"].toString();
+            const auto datasetId    = dataset["ID"].toString();
 
-            subtasks << datasetName;
+            subtasks << datasetId;
         }
     };
 
@@ -225,10 +225,11 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
     const auto loadDataset = [&projectDataSerializationTask](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
         const auto dataset      = dataHierarchyItemMap["Dataset"].toMap();
+        const auto datasetId    = dataset["ID"].toString();
         const auto datasetName  = dataset["Name"].toString();
         const auto pluginKind   = dataset["PluginKind"].toString();
 
-        projectDataSerializationTask.setSubtaskStarted(datasetName, QString("Loading %1").arg(datasetName));
+        projectDataSerializationTask.setSubtaskStarted(datasetId, QString("Loading %1").arg(datasetName));
         
         auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent, dataset["ID"].toString());
         
@@ -237,7 +238,9 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         
         events().notifyDatasetAdded(loadedDataset);
         
-        projectDataSerializationTask.setSubtaskFinished(datasetName, QString("%1 loaded").arg(datasetName));
+        projectDataSerializationTask.setSubtaskFinished(datasetId, QString("%1 loaded").arg(datasetName));
+
+        QCoreApplication::processEvents();
 
         return loadedDataset;
     };

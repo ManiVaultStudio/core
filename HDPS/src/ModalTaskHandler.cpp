@@ -9,7 +9,7 @@
 #include "CoreInterface.h"
 
 #ifdef _DEBUG
-    #define MODAL_TASK_HANDLER_VERBOSE
+    //#define MODAL_TASK_HANDLER_VERBOSE
 #endif
 
 namespace hdps {
@@ -21,6 +21,8 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     _tasksFilterModel(),
     _modalTasksDialog(this)
 {
+    setMinimumDuration(0);
+
     _tasksFilterModel.setSourceModel(tasks().getTreeModel());
 
     _minimumDurationTimer.setSingleShot(true);
@@ -37,17 +39,26 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     _tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Modal" });
 
     const auto updateVisibilityDeferred = [this]() -> void {
-        if (_modalTasksDialog.isHidden() && !_minimumDurationTimer.isActive())
-            _minimumDurationTimer.start();
-
-        if (_modalTasksDialog.isVisible())
+        if (_modalTasksDialog.isHidden()) {
+            if (!_minimumDurationTimer.isActive())
+                _minimumDurationTimer.start();
+        }
+        else {
             updateDialogVisibility();
+        }
     };
 
     connect(&_minimumDurationTimer, &QTimer::timeout, this, &ModalTaskHandler::updateDialogVisibility);
 
-    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &ModalTaskHandler::updateDialogVisibility);
-    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &ModalTaskHandler::updateDialogVisibility);
+    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this, updateVisibilityDeferred](const QModelIndex& parent, int first, int last) -> void {
+        if (parent == QModelIndex())
+            updateVisibilityDeferred();
+    });
+
+    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, [this, updateVisibilityDeferred](const QModelIndex& parent, int first, int last) -> void {
+        if (parent == QModelIndex())
+            updateVisibilityDeferred();
+    });
 }
 
 void ModalTaskHandler::updateDialogVisibility()
@@ -66,6 +77,8 @@ void ModalTaskHandler::updateDialogVisibility()
 
     if (numberOfModalTasks >= 1 && !_modalTasksDialog.isVisible())
         _modalTasksDialog.show();
+
+    QCoreApplication::processEvents();
 }
 
 TasksFilterModel& ModalTaskHandler::getTasksFilterModel()
@@ -91,14 +104,21 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     
     auto& tasksFilterModel = _modalTaskHandler->getTasksFilterModel();
 
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &ModalTasksDialog::numberOfModalTasksChanged);
-    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &ModalTasksDialog::numberOfModalTasksChanged);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
+        if (parent == QModelIndex())
+            updateLayout();
+    });
 
-    numberOfModalTasksChanged();
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
+        if (parent == QModelIndex())
+            updateLayout();
+    });
+
+    updateLayout();
     updateWindowTitleAndIcon();
 }
 
-void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
+void ModalTaskHandler::ModalTasksDialog::updateLayout()
 {
     updateWindowTitleAndIcon();
 
@@ -154,7 +174,7 @@ void ModalTaskHandler::ModalTasksDialog::numberOfModalTasksChanged()
 
     adjustSize();
 
-    //QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
 
     setFixedHeight(sizeHint().height());
 }

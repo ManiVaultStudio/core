@@ -549,11 +549,6 @@ Workspace* WorkspaceManager::getCurrentWorkspace()
 
 void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    auto& projectSerializationTask = projects().getProjectSerializationTask();
-    
-    projectSerializationTask.getSystemViewPluginsTask().setName("Load system view plugins");
-    projectSerializationTask.getViewPluginsTask().setName("Load view plugins");
-
     getCurrentWorkspace()->fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "DockManagers");
@@ -571,11 +566,6 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap WorkspaceManager::toVariantMap() const
 {
-    auto& projectSerializationTask = projects().getProjectSerializationTask();
-
-    projectSerializationTask.getSystemViewPluginsTask().setName("Save system view plugins dock manager");
-    projectSerializationTask.getViewPluginsTask().setName("Save view plugins manager");
-
     auto currentWorkspaceMap = getCurrentWorkspace()->toVariantMap();
 
     QVariantMap dockManagers{
