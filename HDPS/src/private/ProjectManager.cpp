@@ -42,6 +42,7 @@ using namespace hdps::gui;
 #endif
 
 ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
+    AbstractProjectManager(parent),
     _project(),
     _newBlankProjectAction(this, "Blank"),
     _newProjectFromWorkspaceAction(this, "From Workspace..."),
@@ -451,18 +452,16 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             compressionTask.setRunning();
 
             connect(&archiver, &Archiver::taskStarted, this, [this, &compressionTask](const QString& taskName) -> void {
-                compressionTask.setSubtaskStarted(taskName, QString("extracting %1").arg(taskName));
+                compressionTask.setSubtaskStarted(taskName, QString("Extracting: %1").arg(taskName));
 
                 QCoreApplication::processEvents();
             });
 
-            /*
             connect(&archiver, &Archiver::taskFinished, this, [this, &compressionTask](const QString& taskName) -> void {
-                compressionTask.setSubtaskFinished(taskName, QString("%1 extracted").arg(taskName));
+                compressionTask.setSubtaskFinished(taskName, QString("Extracting: %1").arg(taskName));
 
                 QCoreApplication::processEvents();
             });
-            */
 
             connect(&projectSerializationTask, &Task::requestAbort, this, [this]() -> void {
                 Application::setSerializationAborted(true);

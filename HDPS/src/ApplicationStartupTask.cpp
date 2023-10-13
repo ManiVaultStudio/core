@@ -27,7 +27,7 @@ ApplicationStartupTask::ApplicationStartupTask(QObject* parent, const QString& n
     connect(this, &Task::statusChangedToFinished, this, [this]() -> void {
         QTimer::singleShot(1500, this, [this]() -> void {
             setIdle();
-            });
+        });
     });
 
     connect(this, &Task::statusChangedToIdle, this, [this]() -> void {

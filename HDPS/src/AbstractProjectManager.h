@@ -85,7 +85,7 @@ public:
     AbstractProjectManager(QObject* parent = nullptr) :
         AbstractManager(parent, "Project"),
         _state(State::Idle),
-        _projectSerializationTask(this, "Load project")
+        _projectSerializationTask(this, "Project serialization")
     {
     }
 
@@ -156,7 +156,7 @@ public:
     /**
      * Extract \p filePath from compressed ManiVault project in \p maniVaultFilePath
      * @param maniVaultFilePath File path of the compressed ManiVault file
-     * @param temporaryDir Temporary dir where the extracted file resides
+     * @param temporaryDir Temporary directory where the extracted file resides
      * @param filePath Relative file path of the file that needs to be extracted
      * @return File path of the extracted file, empty string if extraction failed
      */

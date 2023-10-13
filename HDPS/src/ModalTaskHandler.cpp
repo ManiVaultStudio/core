@@ -22,6 +22,7 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     _modalTasksDialog(this)
 {
     setMinimumDuration(0);
+    setEnabled(false);
 
     _tasksFilterModel.setSourceModel(tasks().getTreeModel());
 

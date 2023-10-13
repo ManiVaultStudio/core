@@ -231,10 +231,7 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
 
     auto serializationTask = ViewPluginDockWidget::getSerializationTask(viewPluginDockWidgetId);
 
-    const auto loadViewPluginSubtask    = QString("Load %1").arg(guiName);
-    const auto restoreViewPluginSubtask = QString("Create %1 GUI").arg(guiName);
-
-    serializationTask->setName(QString("Load %1").arg(guiName));
+    serializationTask->setName(QString("Loading view plugin: %1").arg(guiName));
     serializationTask->setRunning();
 
     variantMapMustContain(variantMap, "ViewPlugin");
@@ -262,7 +259,7 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
     auto viewPlugin         = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin();
     auto serializationTask  = ViewPluginDockWidget::getSerializationTask(getId());
 
-    serializationTask->setName(QString("Saving %1").arg(viewPlugin->text()));
+    serializationTask->setName(QString("Saving view plugin: %1").arg(viewPlugin->text()));
     serializationTask->setRunning();
 
     auto variantMap = DockWidget::toVariantMap();

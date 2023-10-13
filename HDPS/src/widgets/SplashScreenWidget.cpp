@@ -419,7 +419,7 @@ void SplashScreenWidget::createFooter()
         _roundedFrameLayout.addLayout(imagesLayout);
     }
 
-    if (Application::current()->getStartupTask().isRunning()) {
+    if (Application::current()->getStartupTask().getEnabled()) {
         auto progressWidget         = new QWidget();
         auto progressWidgetLayout   = new QHBoxLayout();
         auto taskActionLabelWidget  = new ElidedLabel("", this);

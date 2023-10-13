@@ -229,7 +229,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         const auto datasetName  = dataset["Name"].toString();
         const auto pluginKind   = dataset["PluginKind"].toString();
 
-        projectDataSerializationTask.setSubtaskStarted(datasetId, QString("Loading %1").arg(datasetName));
+        projectDataSerializationTask.setSubtaskStarted(datasetId, QString("Loading dataset: %1").arg(datasetName));
         
         auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent, dataset["ID"].toString());
         
@@ -238,7 +238,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         
         events().notifyDatasetAdded(loadedDataset);
         
-        projectDataSerializationTask.setSubtaskFinished(datasetId, QString("%1 loaded").arg(datasetName));
+        projectDataSerializationTask.setSubtaskFinished(datasetId, QString("Loading dataset: %1").arg(datasetName));
 
         QCoreApplication::processEvents();
 

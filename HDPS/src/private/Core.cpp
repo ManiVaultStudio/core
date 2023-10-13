@@ -71,13 +71,25 @@ void Core::initialize()
     {
         auto& loadCoreManagersTask = Application::current()->getStartupTask().getLoadCoreManagersTask();
 
-        for (auto& manager : _managers) {
-            manager->createTask();
-            manager->getTask()->setParentTask(&loadCoreManagersTask);
-        }
+        QStringList subtasks;
 
         for (auto& manager : _managers)
-            manager->initialize();
+            subtasks << manager->getSerializationName();
+
+        loadCoreManagersTask.setSubtasks(subtasks);
+        loadCoreManagersTask.setRunning();
+
+        for (auto& manager : _managers) {
+            loadCoreManagersTask.setSubtaskStarted(manager->getSerializationName(), "Initializing " + manager->getSerializationName().toLower() + " manager");
+            {
+                manager->initialize();
+            }
+            loadCoreManagersTask.setSubtaskFinished(manager->getSerializationName(), "Initializing " + manager->getSerializationName().toLower() + " manager");
+
+            QCoreApplication::processEvents();
+        }
+        
+        loadCoreManagersTask.setFinished();
     }
     CoreInterface::setInitialized();
 }

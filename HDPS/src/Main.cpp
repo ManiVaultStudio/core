@@ -99,7 +99,6 @@ int main(int argc, char *argv[])
     application.setCore(&core);
 
     core.createManagers();
-    core.initialize();
 
     QCommandLineParser commandLineParser;
 
@@ -126,7 +125,7 @@ int main(int argc, char *argv[])
             if (startupProjectFileInfo.exists()) {
                 qDebug() << "Loading startup project from" << startupProjectFilePath;
 
-                ModalTask::getGlobalHandler()->setEnabled(false);
+                //ModalTask::getGlobalHandler()->setEnabled(false);
 
                 application.setStartupProjectFilePath(startupProjectFilePath);
                 
@@ -166,7 +165,11 @@ int main(int argc, char *argv[])
         }
     }
     
-    //splashScreenAction.getOpenAction().trigger();
+    splashScreenAction.getOpenAction().trigger();
+
+    core.initialize();
+
+    QCoreApplication::processEvents();
 
     application.initialize();
 

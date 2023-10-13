@@ -34,41 +34,6 @@ class AbstractManager : public QObject, public util::Serializable
 
 public:
 
-    /** Subtask type */
-    enum class SubtaskType {
-        Resetting,
-        Reset,
-        Initializing,
-        Initialized
-    };
-
-    /**
-     * Get subtask name for \p subtaskType
-     * @param subtaskType Type of subtask
-     */
-    QString getSubtaskName(const SubtaskType& subtaskType) const {
-        switch (subtaskType) {
-            case SubtaskType::Initializing:
-                return QString("Initializing %1 manager").arg(getSerializationName());
-
-            case SubtaskType::Initialized:
-                return QString("%1 manager initialized").arg(getSerializationName());
-
-            case SubtaskType::Resetting:
-                return QString("Resetting %1 manager").arg(getSerializationName());
-
-            case SubtaskType::Reset:
-                return QString("%1 manager reset").arg(getSerializationName());
-
-            default:
-                break;
-        }
-
-        return "";
-    }
-
-public:
-
     /**
      * Construct manager with \p parent object and \p name
      * @param parent Pointer to parent object
@@ -78,8 +43,7 @@ public:
         QObject(parent),
         Serializable(name),
         _initialized(false),
-        _lockingAction(nullptr),
-        _task(nullptr)
+        _lockingAction(nullptr)
     {
     }
 
@@ -88,12 +52,6 @@ public:
         _lockingAction = new gui::LockingAction(this, getSerializationName());
     };
 
-    /** Create task for reporting progress during initialization and reset operations */
-    virtual void createTask() final {
-        if (_task == nullptr)
-            _task = new Task(this, getSerializationName());
-    }
-
     /** Begin reset operation */
     virtual void beginReset() final {
 #ifdef ABSTRACT_MANAGER_VERBOSE
@@ -101,10 +59,6 @@ public:
 #endif
 
         emit managerAboutToBeReset();
-
-        _task->setSubtasks({ getSubtaskName(SubtaskType::Resetting), getSubtaskName(SubtaskType::Reset) });
-        _task->setRunning();
-        _task->setSubtaskStarted({ getSubtaskName(SubtaskType::Resetting) });
     }
 
     /** Resets the contents of the manager */
@@ -122,11 +76,8 @@ public:
 #ifdef ABSTRACT_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
-
+        
         emit managerReset();
-
-        _task->setSubtaskFinished({ getSubtaskName(SubtaskType::Reset) });
-        _task->setFinished();
     }
 
     /** Begin the initialization process */
@@ -140,10 +91,6 @@ public:
         }
         else {
             emit managerAboutToBeInitialized();
-
-            _task->setSubtasks({ getSubtaskName(SubtaskType::Initializing), getSubtaskName(SubtaskType::Initialized) });
-            _task->setRunning();
-            _task->setSubtaskStarted({ getSubtaskName(SubtaskType::Initializing) });
         }
     }
 
@@ -156,9 +103,6 @@ public:
         _initialized = true;
 
         emit managerInitialized();
-
-        _task->setSubtaskFinished({ getSubtaskName(SubtaskType::Initialized) });
-        _task->setFinished();
     }
 
     /**
@@ -175,14 +119,6 @@ public:
      */
     virtual QIcon getIcon() const {
         return QIcon();
-    }
-
-    /**
-     * Get task
-     * @return Pointer to task for reporting progress during initialization and reset operations
-     */
-    virtual Task* getTask() final {
-        return _task;
     }
 
 public: // Action getters
@@ -222,9 +158,8 @@ signals:
     void managerReset();
 
 private:
-    bool                    _initialized;       /** Whether the manager is initialized or not */
-    gui::LockingAction*     _lockingAction;     /** Manager locking action */
-    Task*                   _task;              /** Task for reporting progress during initialization and reset operations */
+    bool                    _initialized;           /** Whether the manager is initialized or not */
+    gui::LockingAction*     _lockingAction;         /** Manager locking action */
 };
 
 }
