@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 
                 application.setStartupProjectFilePath(startupProjectFilePath);
                 
-                application.getStartupTask().getLoadProjectTask().setEnabled(true);
+                application.getStartupTask().getLoadProjectTask().setEnabled(true, true);
 
                 auto projectMetaAction = getStartupProjectMetaAction(startupProjectFilePath);
 
@@ -169,9 +169,14 @@ int main(int argc, char *argv[])
 
     core.initialize();
 
-    QCoreApplication::processEvents();
-
     application.initialize();
+
+    auto& loadGuiTask = application.getStartupTask().getLoadGuiTask();
+
+    loadGuiTask.setSubtasks({ "Apply styles", "Create main window", "Initializing start page" });
+    loadGuiTask.setRunning();
+
+    loadGuiTask.setSubtaskStarted("Apply styles");
 
     application.setStyle(new NoFocusProxyStyle);
 
@@ -182,6 +187,8 @@ int main(int argc, char *argv[])
     QString styleSheet = QLatin1String(styleSheetFile.readAll());
 
     application.setStyleSheet(styleSheet);
+
+    loadGuiTask.setSubtaskFinished("Apply styles");
 
     QIcon appIcon;
 
@@ -194,7 +201,15 @@ int main(int argc, char *argv[])
 
     application.setWindowIcon(appIcon);
 
+    loadGuiTask.setSubtaskStarted("Create main window");
+
+    QCoreApplication::processEvents();
+
     MainWindow mainWindow;
+
+    loadGuiTask.setSubtaskFinished("Create main window");
+
+    QCoreApplication::processEvents();
 
     mainWindow.show();
 

@@ -492,10 +492,13 @@ SplashScreenWidget::ExternalLinkWidget::ExternalLinkWidget(const QString& fontAw
 
     auto layout     = new QHBoxLayout();
     auto iconLabel  = new QLabel(fontAwesome.getIconCharacter(fontAwesomeIconName));
-    auto textLabel  = new QLabel(text);
+    auto textLabel = new QLabel(QString("<a href='%1' style='color: gray'>%2</a>").arg(externalLink.toString(), text));
 
     iconLabel->setFont(fontAwesome.getFont());
     iconLabel->setAlignment(Qt::AlignCenter);
+
+    textLabel->setTextFormat(Qt::RichText);
+    textLabel->setOpenExternalLinks(true);
 
     layout->setContentsMargins(2, 0, 2, 0);
 
@@ -521,32 +524,11 @@ void SplashScreenWidget::ExternalLinkWidget::leaveEvent(QEvent* event)
     updateStyle();
 }
 
-void SplashScreenWidget::ExternalLinkWidget::mousePressEvent(QMouseEvent* event)
-{
-    QWidget::mousePressEvent(event);
-
-    QDesktopServices::openUrl(_externalLink);
-}
-
-bool SplashScreenWidget::ExternalLinkWidget::isExternalLinkingEnabled() const
-{
-    if (core() == nullptr)
-        return false;
-
-    if (!core()->isInitialized())
-        return false;
-
-    if (projects().isOpeningProject() || projects().isImportingProject())
-        return false;
-
-    return true;
-}
-
 void SplashScreenWidget::ExternalLinkWidget::updateStyle()
 {
-    const auto shouldHighlight = isExternalLinkingEnabled() && underMouse();
+    const auto shouldHighlight = underMouse();
 
-    setStyleSheet(QString("color: %1").arg(shouldHighlight ? "gray" : "black"));
+    setStyleSheet(QString("color: %1").arg(shouldHighlight ? "black" : "gray"));
 }
 
 }

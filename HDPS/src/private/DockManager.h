@@ -44,9 +44,10 @@ public:
     
     /**
      * Constructs a dock manager derived from the advanced docking system
+     * @param name Name of the dock manager
      * @param parent Pointer to parent widget
      */
-    DockManager(QWidget* parent = nullptr);
+    DockManager(const QString& name, QWidget* parent = nullptr);
 
     /** Destructor */
     ~DockManager();
@@ -117,7 +118,8 @@ public: // Serialization
     friend class QPointer<DockManager>;
 
 private:
-    hdps::Task*    _serializationTask;         /** For reporting serialization progress */
+    hdps::Task*     _serializationTask;     /** For reporting serialization progress */
+    hdps::Task      _layoutTask;            /** For reporting layout progress */
 
 private:
     ViewPluginDockWidgets _orderedViewPluginDockWidgets; /* the ViewPluginDockWidgets in the order in which they were created */

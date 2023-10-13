@@ -76,6 +76,7 @@ void TaskAction::setTask(Task* task)
 
     connect(_task, &Task::nameChanged, this, updateKillTaskAction);
     connect(_task, &Task::progressChanged, this, updateProgressAction);
+    connect(_task, &Task::progressChanged, this, &TaskAction::updateProgressActionTextFormat);
     connect(_task, &Task::progressTextChanged, this, &TaskAction::updateProgressActionTextFormat);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateActionsReadOnly);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionRange);

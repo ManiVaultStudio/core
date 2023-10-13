@@ -244,8 +244,12 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
 
     loadViewPlugin();
 
+    QCoreApplication::processEvents();
+
     if (variantMap.contains("DockManagerState"))
         _dockManager.restoreState(QByteArray::fromBase64(variantMap["DockManagerState"].toString().toUtf8()));
+
+    QCoreApplication::processEvents();
 
     serializationTask->setFinished();
 }

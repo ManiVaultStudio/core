@@ -8,6 +8,8 @@
 #include "ModalTask.h"
 #include "ModalTaskHandler.h"
 
+#include <QFileInfo>
+
 namespace hdps {
 
 ApplicationStartupTask::ApplicationStartupTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
@@ -22,12 +24,17 @@ ApplicationStartupTask::ApplicationStartupTask(QObject* parent, const QString& n
     _loadGuiTask.setParentTask(this);
     _loadProjectTask.setParentTask(this);
 
-    _loadProjectTask.setEnabled(false);
+    _loadProjectTask.setEnabled(false, true);
 
-    setStatus(Task::Status::Idle);
+    setStatus(Task::Status::Idle, true);
 
     connect(this, &Task::statusChangedToFinished, this, [this]() -> void {
-        QTimer::singleShot(1500, this, [this]() -> void {
+        if (Application::current()->shouldOpenProjectAtStartup())
+            setProgressDescription("Loaded " + QFileInfo(Application::current()->getStartupProjectFilePath()).fileName());
+        else
+            setProgressDescription("ManiVault Studio loaded...");
+
+        QTimer::singleShot(2500, this, [this]() -> void {
             setIdle();
 
             ModalTask::getGlobalHandler()->setEnabled(true);

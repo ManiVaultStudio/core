@@ -57,20 +57,8 @@ public:
          */
         void leaveEvent(QEvent* event) override;
         
-        /**
-         * Invoked when the mouse presses the widget
-         * @param event Pointer to event that occurred
-         */
-        void mousePressEvent(QMouseEvent* event);
-
     private:
         
-        /**
-         * Establish whether external linking is enabled
-         * @return Boolean determining whether external linking is enabled
-         */
-        bool isExternalLinkingEnabled() const;
-
         /** Updates the CSS style */
         void updateStyle();
 
@@ -136,7 +124,7 @@ private:
     static const std::uint32_t footerImagesHeight   = 40;       /** Maximum size of the footer content images */
     static const std::uint32_t frameRadius          = 7;        /** CSS radius of SplashScreenWidget#_roundedFrame */
     static const std::uint32_t animationDuration    = 300;      /** Duration of the show and close animations */
-    static const std::uint32_t panAmount            = 15;       /** The amount of up/down panning to do during the animations */
+    static const std::uint32_t panAmount            = 25;       /** The amount of up/down panning to do during the animations */
     static const std::uint32_t shadowMargin         = 20;       /** Extra margins allocated for drop shadow */
     static const std::uint32_t maxBlurRadius        = 20.0;     /** Maximum blur radius */
 };

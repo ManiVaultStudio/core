@@ -28,10 +28,11 @@ using namespace hdps::plugin;
 using namespace hdps::gui;
 using namespace hdps::util;
 
-DockManager::DockManager(QWidget* parent /*= nullptr*/) :
+DockManager::DockManager(const QString& name, QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
     Serializable("Dock manager"),
-    _serializationTask(nullptr)
+    _serializationTask(nullptr),
+    _layoutTask(this, "Load " + name.toLower() + " layout")
 {
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
@@ -150,6 +151,8 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
     hide();
     {
+        //qDebug() << _serializationTask->getChildTasks();
+
         const auto viewPluginDockWidgetsList = variantMap["ViewPluginDockWidgets"].toList();
 
         for (auto viewPluginDockWidgetVariant : viewPluginDockWidgetsList)
@@ -173,13 +176,18 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
                 addViewPluginDockWidget(RightDockWidgetArea, notLoadedDockWidget);
             }
+
+            QCoreApplication::processEvents();
         }
 
-        if (viewPluginDockWidgetsList.isEmpty())
-            _serializationTask->setFinished();
+        _layoutTask.setRunning();
+        {
+            if (!restoreState(QByteArray::fromBase64(variantMap["State"].toString().toUtf8()), variantMap["Version"].toInt()))
+                qCritical() << "Unable to restore state from" << objectName();
+        }
+        _layoutTask.setFinished();
 
-        if (!restoreState(QByteArray::fromBase64(variantMap["State"].toString().toUtf8()), variantMap["Version"].toInt()))
-            qCritical() << "Unable to restore state from" << objectName();
+        _serializationTask->setFinished();
 
         ViewPluginDockWidget::removeAllSerializationTasks();
     }
@@ -223,5 +231,15 @@ Task* DockManager::getSerializationTask()
 
 void DockManager::setSerializationTask(hdps::Task* serializationTask)
 {
+    Q_ASSERT(serializationTask != nullptr);
+
+    if (serializationTask == nullptr)
+        return;
+
+    if (serializationTask == _serializationTask)
+        return;
+
     _serializationTask = serializationTask;
+
+    _layoutTask.setParentTask(_serializationTask);
 }

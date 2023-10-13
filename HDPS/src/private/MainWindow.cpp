@@ -69,11 +69,11 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 {
     auto& loadGuiTask = Application::current()->getStartupTask().getLoadGuiTask();
 
-    loadGuiTask.setRunning();
-
     auto fileMenuAction = menuBar()->addMenu(new FileMenu());
     auto viewMenuAction = menuBar()->addMenu(new ViewMenu());
     auto helpMenuAction = menuBar()->addMenu(new HelpMenu());
+
+    loadGuiTask.setSubtaskStarted("Initializing start page");
 
     auto stackedWidget      = new StackedWidget();
     auto projectWidget      = new ProjectWidget();
@@ -83,6 +83,8 @@ void MainWindow::showEvent(QShowEvent* showEvent)
     stackedWidget->addWidget(projectWidget);
 
     setCentralWidget(stackedWidget);
+
+    loadGuiTask.setSubtaskFinished("Initializing start page");
 
     statusBar()->setSizeGripEnabled(false);
 
@@ -131,14 +133,14 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         connect(&projects().getCurrentProject()->getReadOnlyAction(), &ToggleAction::toggled, this, updateMenuVisibility);
     });
 
+    loadGuiTask.setFinished();
+
     if (Application::current()->shouldOpenProjectAtStartup())
         projects().openProject(Application::current()->getStartupProjectFilePath());
 
     projectChanged();
 
     emit Application::current()->mainWindowInitialized();
-
-    loadGuiTask.setFinished();
 }
 
 void MainWindow::moveEvent(QMoveEvent* moveEvent)

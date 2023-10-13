@@ -133,7 +133,7 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
     connect(&_closeAction, &TriggerAction::triggered, this, &SplashScreenAction::closeSplashScreenWidget);
 
     connect(&Application::current()->getStartupTask(), &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
-        if (previousStatus == Task::Status::Running && status == Task::Status::Finished)
+        if (previousStatus == Task::Status::Finished && status == Task::Status::Idle)
             closeSplashScreenWidget();
     });
 }

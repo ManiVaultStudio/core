@@ -181,8 +181,8 @@ void WorkspaceManager::initialize()
 
         getLockingAction().setWhat("Layout");
 
-        _mainDockManager        = new DockManager();
-        _viewPluginsDockManager = new DockManager();
+        _mainDockManager        = new DockManager("System view plugins");
+        _viewPluginsDockManager = new DockManager("View plugins");
         _viewPluginsDockWidget  = new ViewPluginsDockWidget(_viewPluginsDockManager);
 
         _mainDockManager->setObjectName("MainDockManager");

@@ -5,6 +5,8 @@
 #include "ProjectSerializationTask.h"
 #include "Application.h"
 
+#include <QFileInfo>
+
 namespace hdps {
 
 ProjectSerializationTask::ProjectSerializationTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
@@ -22,7 +24,7 @@ ProjectSerializationTask::ProjectSerializationTask(QObject* parent, const QStrin
     _systemViewPluginsTask.setParentTask(&_workspaceTask);
     _viewPluginsTask.setParentTask(&_workspaceTask);
 
-    setEnabled(false, true);
+    //setEnabled(false, true);
 
     if (!hasParentTask()) {
         connect(this, &Task::statusChangedToFinished, this, [this]() -> void {
@@ -48,10 +50,13 @@ void ProjectSerializationTask::setMode(const Mode& mode, const QString& projectF
     setEnabled(true, true);
     reset(true);
 
+    const auto projectFileName = QFileInfo(projectFilePath).fileName();
+
     switch (mode)
     {
         case Mode::Load:
         {
+            setName("Load " + projectFileName);
             setDescription("Loading ManiVault project from " + projectFilePath);
             setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
 
@@ -66,6 +71,7 @@ void ProjectSerializationTask::setMode(const Mode& mode, const QString& projectF
 
         case Mode::Save:
         {
+            setName("Save " + projectFileName);
             setDescription("Saving ManiVault project to " + projectFilePath);
             setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
 

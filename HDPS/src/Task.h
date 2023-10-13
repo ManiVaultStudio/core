@@ -91,14 +91,14 @@ public:
 private:
 
     /** Timers for various purposes: */
-    enum class TimerType {
-        ProgressChanged,                /** For Task::progressChanged() signal */
-        ProgressDescriptionChanged,     /** For Task::progressDescriptionChanged() signal */
-        ProgressTextChanged,            /** For Task::progressTextChanged() signal */
-        DeferredStatus,                 /** To set task status to deferred */
+    //enum class TimerType {
+    //    ProgressChanged,                /** For Task::progressChanged() signal */
+    //    ProgressDescriptionChanged,     /** For Task::progressDescriptionChanged() signal */
+    //    ProgressTextChanged,            /** For Task::progressTextChanged() signal */
+    //    DeferredStatus,                 /** To set task status to deferred */
 
-        Count
-    };
+    //    Count
+    //};
 
 public:
 
@@ -528,7 +528,7 @@ private:
      * Get timer by \p timerType
      * @return Timer for \p timerType
      */
-    QTimer& getTimer(const TimerType& timerType);
+    //QTimer& getTimer(const TimerType& timerType);
 
 private: // For aggregate task
 
@@ -814,7 +814,7 @@ private:
     QBitArray               _subtasks;                                      /** Subtasks status */
     QStringList             _subtasksNames;                                 /** Subtasks names */
     QString                 _progressDescription;                           /** Current item description */
-    QTimer                  _timers[static_cast<int>(TimerType::Count)];    /** Timers to prevent unnecessary abundant emissions of signals */
+    //QTimer                  _timers[static_cast<int>(TimerType::Count)];    /** Timers to prevent unnecessary abundant emissions of signals */
     Task*                   _parentTask;                                    /** Pointer to the parent task */
     TasksPtrs               _childTasks;                                    /** Pointers to child tasks */
     QString                 _progressText;                                  /** Progress text */
