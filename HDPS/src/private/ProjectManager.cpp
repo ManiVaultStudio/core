@@ -684,11 +684,9 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 compressionTask.setSubtaskStarted(taskName, QString("Compressing %1").arg(taskName));
             });
 
-            /*
             connect(&archiver, &Archiver::taskFinished, this, [&compressionTask](const QString& taskName) -> void {
-                compressionTask.setSubtaskFinished(taskName, QString("%1 compressed").arg(taskName));
+                compressionTask.setSubtaskFinished(taskName, QString("Compressing %1").arg(taskName));
             });
-            */
 
             archiver.compressDirectory(temporaryDirectoryPath, filePath, true, _project->getCompressionAction().getEnabledAction().isChecked() ? _project->getCompressionAction().getLevelAction().getValue() : 0, password);
 

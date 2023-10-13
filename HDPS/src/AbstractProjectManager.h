@@ -173,7 +173,7 @@ public:
     ProjectSerializationTask& getProjectSerializationTask() {
         auto application = Application::current();
 
-        if (application->shouldOpenProjectAtStartup())
+        if (application->getStartupTask().isRunning())
             return application->getStartupTask().getLoadProjectTask();
 
         return _projectSerializationTask;

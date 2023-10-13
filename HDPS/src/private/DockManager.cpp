@@ -200,6 +200,8 @@ QVariantMap DockManager::toVariantMap() const
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
+    _serializationTask->setEnabled(true);
+
     for (auto viewPluginDockWidget : getViewPluginDockWidgets())
         ViewPluginDockWidget::preRegisterSerializationTask(const_cast<DockManager*>(this), viewPluginDockWidget->getId(), const_cast<DockManager*>(this));
 
@@ -210,12 +212,14 @@ QVariantMap DockManager::toVariantMap() const
     for (auto viewPluginDockWidget : getViewPluginDockWidgets())
         viewPluginDockWidgetsList << viewPluginDockWidget->toVariantMap();
 
-    ViewPluginDockWidget::removeAllSerializationTasks();
-
-    variantMap.insert({
-        { "State", QVariant::fromValue(saveState().toBase64()) },
-        { "ViewPluginDockWidgets", viewPluginDockWidgetsList }
-    });
+    const_cast<DockManager*>(this)->_layoutTask.setRunning();
+    {
+        variantMap.insert({
+            { "State", QVariant::fromValue(saveState().toBase64()) },
+            { "ViewPluginDockWidgets", viewPluginDockWidgetsList }
+        });
+    }
+    const_cast<DockManager*>(this)->_layoutTask.setFinished();
 
     _serializationTask->setFinished();
 

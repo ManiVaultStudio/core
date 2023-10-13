@@ -273,7 +273,9 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
             { "ViewPlugin", viewPlugin->toVariantMap() }
         });
     }
-       
+    
+    QCoreApplication::processEvents();
+
     variantMap.insert({
         { "DockManagerState", QVariant::fromValue(_dockManager.saveState().toBase64()) }
     });

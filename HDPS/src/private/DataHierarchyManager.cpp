@@ -274,7 +274,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         QStringList subtasks;
 
         for (auto dataHierarchyItem : _items)
-            subtasks << dataHierarchyItem->getDataset()->getGuiName();
+            subtasks << dataHierarchyItem->getDataset()->getId();
 
         projectDataSerializationTask.setSubtasks(subtasks);
         projectDataSerializationTask.setRunning();
@@ -289,11 +289,13 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
             const auto datasetName = dataHierarchyItem->getDataset()->getGuiName();
 
-            projectDataSerializationTask.setSubtaskStarted(datasetName, QString("Saving %1").arg(datasetName));
+            projectDataSerializationTask.setSubtaskStarted(dataHierarchyItem->getDataset()->getId(), QString("Saving %1").arg(datasetName));
 
             auto dataHierarchyItemMap = dataHierarchyItem->toVariantMap();
 
-            projectDataSerializationTask.setSubtaskFinished(datasetName, QString("%1 saved").arg(datasetName));
+            QCoreApplication::processEvents();
+
+            projectDataSerializationTask.setSubtaskFinished(dataHierarchyItem->getDataset()->getId(), QString("Saving %1").arg(datasetName));
 
             dataHierarchyItemMap["SortIndex"] = sortIndex;
 

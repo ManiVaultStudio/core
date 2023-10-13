@@ -24,17 +24,12 @@ ProjectSerializationTask::ProjectSerializationTask(QObject* parent, const QStrin
     _systemViewPluginsTask.setParentTask(&_workspaceTask);
     _viewPluginsTask.setParentTask(&_workspaceTask);
 
-    //setEnabled(false, true);
-
     if (!hasParentTask()) {
         connect(this, &Task::statusChangedToFinished, this, [this]() -> void {
             QTimer::singleShot(1500, this, [this]() -> void {
                 setIdle();
+                setEnabled(false, true);
             });
-        });
-
-        connect(this, &Task::statusChangedToIdle, this, [this]() -> void {
-            setEnabled(false, true);
         });
     }
 }
@@ -46,7 +41,7 @@ ProjectSerializationTask::Mode ProjectSerializationTask::getMode() const
 
 void ProjectSerializationTask::setMode(const Mode& mode, const QString& projectFilePath)
 {
-    setStatus(Task::Status::Idle);
+    setStatus(Task::Status::Idle, true);
     setEnabled(true, true);
     reset(true);
 

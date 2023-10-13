@@ -877,6 +877,10 @@ void Task::privateReset(bool recursive /*= false*/)
 
 void Task::privateSetStatus(const Status& status, bool recursive /*= false*/)
 {
+    if (recursive)
+        for (auto childTask : getChildTasks(true, false))
+            childTask->setStatus(status, recursive);
+
     if (status == _status)
         return;
 
@@ -973,10 +977,6 @@ void Task::privateSetStatus(const Status& status, bool recursive /*= false*/)
     
     emit statusChanged(previousStatus, _status);
     emit isKillableChanged(isKillable());
-    
-    if (recursive)
-        for (auto childTask : getChildTasks(true, false))
-            childTask->setStatus(status, recursive);
 }
 
 void Task::privateSetStatusDeferred(const Status& status, bool recursive /*= false*/, std::uint32_t delay /*= DEFERRED_TASK_STATUS_INTERVAL*/)
