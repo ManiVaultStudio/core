@@ -5,6 +5,8 @@
 #include "ApplicationStartupTask.h"
 #include "Application.h"
 #include "CoreInterface.h"
+#include "ModalTask.h"
+#include "ModalTaskHandler.h"
 
 namespace hdps {
 
@@ -27,6 +29,8 @@ ApplicationStartupTask::ApplicationStartupTask(QObject* parent, const QString& n
     connect(this, &Task::statusChangedToFinished, this, [this]() -> void {
         QTimer::singleShot(1500, this, [this]() -> void {
             setIdle();
+
+            ModalTask::getGlobalHandler()->setEnabled(true);
         });
     });
 

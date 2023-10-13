@@ -69,7 +69,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 {
     auto& loadGuiTask = Application::current()->getStartupTask().getLoadGuiTask();
 
-    loadGuiTask.setSubtaskStarted("Initializing GUI");
+    loadGuiTask.setRunning();
 
     auto fileMenuAction = menuBar()->addMenu(new FileMenu());
     auto viewMenuAction = menuBar()->addMenu(new ViewMenu());
@@ -129,9 +129,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
     connect(&projects(), &AbstractProjectManager::projectCreated, this, [this, updateMenuVisibility]() -> void {
         connect(&projects().getCurrentProject()->getReadOnlyAction(), &ToggleAction::toggled, this, updateMenuVisibility);
-        });
-
-    loadGuiTask.setSubtaskFinished("Initializing GUI");
+    });
 
     if (Application::current()->shouldOpenProjectAtStartup())
         projects().openProject(Application::current()->getStartupProjectFilePath());
