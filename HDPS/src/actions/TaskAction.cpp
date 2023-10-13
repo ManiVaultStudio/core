@@ -11,7 +11,8 @@ TaskAction::TaskAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),
     _progressAction(this, "Progress"),
     _killTaskAction(this, "Cancel"),
-    _task(nullptr)
+    _task(nullptr),
+    _timers()
 {
     setShowLabels(false);
     setDefaultWidgetFlags(GroupAction::Horizontal | WidgetFlag::Default);
@@ -31,6 +32,15 @@ TaskAction::TaskAction(QObject* parent, const QString& title) :
 
         _task->kill();
     });
+
+    for (auto& timer : _timers)
+        timer.setSingleShot(true);
+
+    _timers[static_cast<int>(TimerType::ProgressChanged)].setInterval(250);
+    _timers[static_cast<int>(TimerType::ProgressTextChanged)].setInterval(250);
+
+    connect(&getTimer(TimerType::ProgressChanged), &QTimer::timeout, this, &TaskAction::updateProgressActionProgress);
+    connect(&getTimer(TimerType::ProgressTextChanged), &QTimer::timeout, this, &TaskAction::updateProgressActionTextFormat);
 }
 
 Task* TaskAction::getTask()
@@ -68,16 +78,22 @@ void TaskAction::setTask(Task* task)
 
     updateKillTaskAction();
 
-    const auto updateProgressAction = [this]() -> void {
-        _progressAction.setProgress(static_cast<int>(_task->getProgress() * 100.f));
-    };
-
-    updateProgressAction();
-
     connect(_task, &Task::nameChanged, this, updateKillTaskAction);
-    connect(_task, &Task::progressChanged, this, updateProgressAction);
-    connect(_task, &Task::progressChanged, this, &TaskAction::updateProgressActionTextFormat);
-    connect(_task, &Task::progressTextChanged, this, &TaskAction::updateProgressActionTextFormat);
+
+    connect(_task, &Task::progressChanged, this, [this]() -> void {
+        if (!getTimer(TimerType::ProgressChanged).isActive()) {
+            updateProgressActionProgress();
+            getTimer(TimerType::ProgressChanged).start();
+        }
+    });
+
+    connect(_task, &Task::progressTextChanged, this, [this]() -> void {
+        if (!getTimer(TimerType::ProgressTextChanged).isActive()) {
+            updateProgressActionTextFormat();
+            getTimer(TimerType::ProgressTextChanged).start();
+        }
+    });
+
     connect(_task, &Task::statusChanged, this, &TaskAction::updateActionsReadOnly);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionRange);
     connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionTextFormat);
@@ -86,15 +102,21 @@ void TaskAction::setTask(Task* task)
     emit taskChanged(previousTask, _task);
 
     updateActionsReadOnly();
-    updateKillTaskActionVisibility();
+    updateProgressActionProgress();
     updateProgressActionTextFormat();
     updateProgressActionRange();
+    updateKillTaskActionVisibility();
 }
 
 void TaskAction::updateActionsReadOnly()
 {
     _progressAction.setEnabled(_task == nullptr ? false : _task->isRunning());
     _killTaskAction.setEnabled(_task == nullptr ? false : _task->isKillable());
+}
+
+void TaskAction::updateProgressActionProgress()
+{
+    _progressAction.setProgress(static_cast<int>(_task->getProgress() * 100.f));
 }
 
 void TaskAction::updateProgressActionTextFormat()
@@ -136,6 +158,11 @@ void TaskAction::updateKillTaskActionVisibility()
         _killTaskAction.setVisible(false);
     else
         _killTaskAction.setVisible(_task->getMayKill());
+}
+
+QTimer& TaskAction::getTimer(const TimerType& timerType)
+{
+    return _timers[static_cast<int>(timerType)];
 }
 
 ProgressAction& TaskAction::getProgressAction()

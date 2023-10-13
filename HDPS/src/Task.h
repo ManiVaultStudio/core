@@ -88,18 +88,6 @@ public:
     using GuiScopes             = QVector<GuiScope>;
     using Statuses              = QVector<Status>;
 
-private:
-
-    /** Timers for various purposes: */
-    //enum class TimerType {
-    //    ProgressChanged,                /** For Task::progressChanged() signal */
-    //    ProgressDescriptionChanged,     /** For Task::progressDescriptionChanged() signal */
-    //    ProgressTextChanged,            /** For Task::progressTextChanged() signal */
-    //    DeferredStatus,                 /** To set task status to deferred */
-
-    //    Count
-    //};
-
 public:
 
     /**
@@ -524,12 +512,6 @@ private:
     /** Updates the progress text depending on the task settings */
     void updateProgressText();
 
-    /**
-     * Get timer by \p timerType
-     * @return Timer for \p timerType
-     */
-    //QTimer& getTimer(const TimerType& timerType);
-
 private: // For aggregate task
 
     /**
@@ -806,6 +788,7 @@ private:
     Status                  _status;                                        /** Task status */
     Status                  _deferredStatus;                                /** Task status which is set after a delay */
     bool                    _deferredStatusRecursive;                       /** Whether to set the task status deferred recursively */
+    QTimer                  _deferredStatusTimer;                           /** Deferred status setter timer */
     bool                    _mayKill;                                       /** Whether the task may be killed or not */
     AbstractTaskHandler*    _handler;                                       /** Task handler */
     ProgressMode            _progressMode;                                  /** The way progress is recorded */
@@ -814,7 +797,6 @@ private:
     QBitArray               _subtasks;                                      /** Subtasks status */
     QStringList             _subtasksNames;                                 /** Subtasks names */
     QString                 _progressDescription;                           /** Current item description */
-    //QTimer                  _timers[static_cast<int>(TimerType::Count)];    /** Timers to prevent unnecessary abundant emissions of signals */
     Task*                   _parentTask;                                    /** Pointer to the parent task */
     TasksPtrs               _childTasks;                                    /** Pointers to child tasks */
     QString                 _progressText;                                  /** Progress text */

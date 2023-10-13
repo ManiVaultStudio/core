@@ -6,7 +6,7 @@
 #include "CoreInterface.h"
 
 #ifdef _DEBUG
-    #define TASK_VERBOSE
+    //#define TASK_VERBOSE
 #endif
 
 namespace hdps {
@@ -48,6 +48,7 @@ Task::Task(QObject* parent, const QString& name, const GuiScope& guiScope /*= Gu
     _status(status),
     _deferredStatus(Status::Undefined),
     _deferredStatusRecursive(false),
+    _deferredStatusTimer(),
     _mayKill(mayKill),
     _handler(handler),
     _progressMode(ProgressMode::Manual),
@@ -56,7 +57,6 @@ Task::Task(QObject* parent, const QString& name, const GuiScope& guiScope /*= Gu
     _subtasks(),
     _subtasksNames(),
     _progressDescription(),
-    //_timers(),
     _parentTask(nullptr),
     _childTasks(),
     _progressText(),
@@ -66,22 +66,6 @@ Task::Task(QObject* parent, const QString& name, const GuiScope& guiScope /*= Gu
         tasks().addTask(this);
     else
         qDebug() << "Cannot add" << name << "to the manager because the core has not been initialized yet.";
-
-    //for (auto& timer : _timers)
-    //    timer.setSingleShot(true);
-
-    //_timers[static_cast<int>(TimerType::ProgressChanged)].setInterval(TASK_UPDATE_TIMER_INTERVAL);
-    //_timers[static_cast<int>(TimerType::ProgressDescriptionChanged)].setInterval(TASK_UPDATE_TIMER_INTERVAL);
-    //_timers[static_cast<int>(TimerType::ProgressTextChanged)].setInterval(TASK_UPDATE_TIMER_INTERVAL);
-    //_timers[static_cast<int>(TimerType::DeferredStatus)].setInterval(DEFERRED_TASK_STATUS_INTERVAL);
-
-    //connect(&getTimer(TimerType::ProgressChanged), &QTimer::timeout, this, &Task::privateEmitProgressChanged);
-    //connect(&getTimer(TimerType::ProgressDescriptionChanged), &QTimer::timeout, this, &Task::privateEmitProgressDescriptionChanged);
-    //connect(&getTimer(TimerType::ProgressTextChanged), &QTimer::timeout, this, &Task::privateEmitProgressTextChanged);
-    
-    //connect(&getTimer(TimerType::DeferredStatus), &QTimer::timeout, this, [this]() -> void {
-    //    setStatus(_deferredStatus, _deferredStatusRecursive);
-    //});
     
     connect(this, &Task::privateSetParentTaskSignal, this, &Task::privateSetParentTask);
     connect(this, &Task::privateAddChildTaskSignal, this, &Task::privateAddChildTask);
@@ -116,6 +100,10 @@ Task::Task(QObject* parent, const QString& name, const GuiScope& guiScope /*= Gu
     connect(this, &Task::privateSetSubtaskNameSignal, this, &Task::privateSetSubtaskName);
     connect(this, &Task::privateSetProgressDescriptionSignal, this, &Task::privateSetProgressDescription);
     connect(this, &Task::privateSetProgressTextFormatterSignal, this, &Task::privateSetProgressTextFormatter);
+    
+    connect(&_deferredStatusTimer, &QTimer::timeout, this, [this]() -> void {
+        setStatus(_deferredStatus, _deferredStatusRecursive);
+    });
 }
 
 Task::~Task()
@@ -126,8 +114,7 @@ Task::~Task()
     for (auto childTask : _childTasks)
         childTask->setParentTask(nullptr);
 
-    //for (auto& timer : _timers)
-    //    timer.stop();
+    _deferredStatusTimer.stop();
 
     if (core() != nullptr && core()->isInitialized())
         tasks().removeTask(this);
@@ -574,9 +561,6 @@ void Task::updateProgress()
         {
             const auto childTasks = getChildTasksForStatuses(false, true, { Status::Undefined, Status::Idle, Status::Running, Status::RunningIndeterminate, Status::Finished });
 
-            if (getName() == "Load WashingtonMall.mv")
-                qDebug() << "************" << getName() << childTasks.size();
-
             if (!childTasks.isEmpty()) {
                 auto accumulatedProgress = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [](float sum, Task* childTask) -> float {
                     return sum + childTask->getProgress();
@@ -630,11 +614,6 @@ void Task::updateProgressText()
     privateEmitProgressTextChanged();
 }
 
-//QTimer& Task::getTimer(const TimerType& timerType)
-//{
-//    return _timers[static_cast<int>(timerType)];
-//}
-
 void Task::registerChildTask(Task* childTask)
 {
     Q_ASSERT(childTask != nullptr);
@@ -643,7 +622,7 @@ void Task::registerChildTask(Task* childTask)
         return;
 
 #ifdef TASK_VERBOSE
-    //qDebug() << "*****"  << __FUNCTION__ << getName() << childTask->getName();
+    qDebug() << "*****"  << __FUNCTION__ << getName() << childTask->getName();
 #endif
 
     connect(childTask, &Task::statusChanged, this, [this, childTask](const Status& previousStatus, const Status& status) -> void {
@@ -664,9 +643,6 @@ void Task::registerChildTask(Task* childTask)
             return;
 
         //qDebug() << "------------------" << getName() << getProgress();
-
-        if (getName() == "Load WashingtonMall.mv")
-            qDebug() << "------------------" << getName() << getProgress() << progress;
 
         updateProgress();
         updateProgressText();
@@ -765,7 +741,7 @@ void Task::privateAddChildTask(Task* childTask)
         _childTasks << childTask;
 
 #ifdef TASK_VERBOSE
-        //qDebug() << "Child task" << childTask->getName() << "added to" << getName();
+        qDebug() << "Child task" << childTask->getName() << "added to" << getName();
 #endif
 
         setProgressMode(ProgressMode::Aggregate);
@@ -1008,7 +984,7 @@ void Task::privateSetStatusDeferred(const Status& status, bool recursive /*= fal
     _deferredStatus             = status;
     _deferredStatusRecursive    = recursive;
 
-    //getTimer(TimerType::DeferredStatus).start(delay);
+    _deferredStatusTimer.start(delay);
 }
 
 void Task::privateSetUndefined()
@@ -1035,8 +1011,8 @@ void Task::privateSetFinished()
 {
     privateSetStatus(Status::Finished);
 
-    //if (!hasParentTask())
-    //    privateSetStatusDeferred(Status::Idle, false, DEFERRED_TASK_STATUS_INTERVAL);
+    if (!hasParentTask())
+        privateSetStatusDeferred(Status::Idle, false, DEFERRED_TASK_STATUS_INTERVAL);
 }
 
 void Task::privateSetAboutToBeAborted()
@@ -1062,7 +1038,7 @@ void Task::privateKill(bool recursive /*= true*/)
         std::reverse(tasksToKill.begin(), tasksToKill.end());
 
         for (auto taskToKill : tasksToKill)
-            taskToKill->kill();
+            taskToKill->privateKill();
     }
 
     if (getMayKill() && (isRunning() || isRunningIndeterminate())) {
@@ -1260,8 +1236,6 @@ void Task::privateSetProgressDescription(const QString& progressDescription, std
     //        privateSetProgressDescription("");
     //    });
     //}
-
-    //privateSetProgressText(QString("%1 %2%").arg(getProgressDescription().isEmpty() ? "" : QString("%1").arg(getProgressDescription()), QString::number(getProgress() * 100.f, 'f', 1)));
 
     updateProgressText();
 }

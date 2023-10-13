@@ -27,6 +27,8 @@ void ModalTaskTester::testRunningIndeterminate()
 
         auto indeterminateTask = new ModalTask(taskRunner, "Indeterminate Task", Task::Status::RunningIndeterminate);
 
+        indeterminateTask->setMayKill(true);
+
         auto subtasks = QStringList({
             "Step 1",
             "Step 2",
@@ -82,6 +84,7 @@ void ModalTaskTester::testAggregation()
             auto childTask = new ModalTask(nullptr, name);
 
             childTask->setParentTask(aggregateTask);
+            childTask->setMayKill(true);
 
             if (!tasks.isEmpty()) {
                 childTask->setSubtasks(tasks);
@@ -160,6 +163,8 @@ void ModalTaskTester::testPerformance()
 
         auto performanceTask = new ModalTask(taskRunner, "Performance Task", Task::Status::Running);
 
+        performanceTask->setMayKill(true);
+
         const auto numberOfSubTasks = 10000;
 
         QStringList subtasks;
@@ -173,7 +178,7 @@ void ModalTaskTester::testPerformance()
 
         QTimer timer;
 
-        timer.setInterval(1);
+        timer.setInterval(10);
 
         connect(performanceTask, &ModalTask::requestAbort, this, [this, &timer, performanceTask]() -> void {
             timer.stop();
@@ -183,6 +188,8 @@ void ModalTaskTester::testPerformance()
         connect(&timer, &QTimer::timeout, [&]() -> void {
             if (!subtasks.isEmpty()) {
                 const auto subtaskName = subtasks.first();
+
+                performanceTask->setSubtaskStarted(subtaskName);
 
                 subtasks.removeFirst();
 

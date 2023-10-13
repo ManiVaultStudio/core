@@ -33,6 +33,14 @@ public:
         Default = ProgressBar | KillButton
     };
 
+    /** Timers for avoiding redundant (GUI) updates: */
+    enum class TimerType {
+        ProgressChanged,        /** For Task::progressChanged() signal */
+        ProgressTextChanged,    /** For Task::progressTextChanged() signal */
+
+        Count
+    };
+
 public:
 
     /**
@@ -74,11 +82,19 @@ private:
     /** Updates the range of the progress action */
     void updateProgressActionRange();
 
+    void updateProgressActionProgress();
+
     /** Updates the progress action text format, depending on the task status */
     void updateProgressActionTextFormat();
 
     /** Updates the visibility of the task killer action */
     void updateKillTaskActionVisibility();
+
+    /**
+     * Get timer by \p timerType
+     * @return Timer for \p timerType
+     */
+     QTimer& getTimer(const TimerType& timerType);
 
 signals:
 
@@ -90,10 +106,11 @@ signals:
     void taskChanged(Task* previousTask, Task* task);
 
 private:
-    ProgressAction      _progressAction;    /** Progress action */
-    gui::TriggerAction  _killTaskAction;    /** Kill task action */
-    Task*               _task;              /** Pointer to task to keep track of */
-
+    ProgressAction      _progressAction;                                /** Progress action */
+    gui::TriggerAction  _killTaskAction;                                /** Kill task action */
+    Task*               _task;                                          /** Pointer to task to keep track of */
+    QTimer              _timers[static_cast<int>(TimerType::Count)];    /** Timers to prevent redundant (GUI) updates */
+    
     friend class AbstractActionsManager;
 };
 
