@@ -7,7 +7,7 @@
 #include "RectangleAction.h"
 #include "IntegralRangeAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Integral rectangle action class
@@ -72,6 +72,6 @@ signals:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::IntegralRectangleAction)
+Q_DECLARE_METATYPE(mv::gui::IntegralRectangleAction)
 
-inline const auto integralRectangleActionMetaTypeId = qRegisterMetaType<hdps::gui::IntegralRectangleAction*>("hdps::gui::IntegralRectangleAction");
+inline const auto integralRectangleActionMetaTypeId = qRegisterMetaType<mv::gui::IntegralRectangleAction*>("mv::gui::IntegralRectangleAction");

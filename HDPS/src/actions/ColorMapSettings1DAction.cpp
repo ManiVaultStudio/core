@@ -9,7 +9,7 @@
 
 #include <QVBoxLayout>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ColorMapSettings1DAction::ColorMapSettings1DAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),

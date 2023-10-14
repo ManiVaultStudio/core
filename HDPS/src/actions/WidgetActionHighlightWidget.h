@@ -8,7 +8,7 @@
 
 #include "WidgetAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Widget action highlight class

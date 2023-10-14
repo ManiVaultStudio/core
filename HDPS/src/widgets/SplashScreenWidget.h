@@ -11,7 +11,7 @@
 #include <QGraphicsDropShadowEffect>
 #include <QTimer>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 class SplashScreenAction;
 

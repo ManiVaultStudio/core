@@ -11,10 +11,10 @@
 
 #include <QTemporaryDir>
 
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv::gui;
+using namespace mv::util;
 
-namespace hdps {
+namespace mv {
 
 Project::Project(QObject* parent /*= nullptr*/) :
     QObject(parent),
@@ -150,8 +150,8 @@ void Project::updateContributors()
 
 void Project::setStudioMode(bool studioMode)
 {
-    auto plugins = hdps::plugins().getPluginsByTypes();  // by default gets all plugin types
-    auto& datasets = hdps::data().allSets();
+    auto plugins = mv::plugins().getPluginsByTypes();  // by default gets all plugin types
+    auto& datasets = mv::data().allSets();
 
     if (studioMode) {
         for (auto plugin : plugins)

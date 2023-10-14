@@ -13,7 +13,7 @@
     #define ABSTRACT_TASK_MANAGER_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 /**

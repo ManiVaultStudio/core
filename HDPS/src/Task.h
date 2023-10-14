@@ -11,7 +11,7 @@
 #include <QTimer>
 #include <QIcon>
 
-namespace hdps {
+namespace mv {
 
 class AbstractTaskHandler;
 

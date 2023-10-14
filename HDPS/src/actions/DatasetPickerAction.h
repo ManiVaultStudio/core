@@ -13,7 +13,7 @@
 
 #include <QAbstractListModel>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Dataset picker action class
@@ -60,7 +60,7 @@ protected:
          * @param parent Parent model index
          * @return Row index of the dataset
          */
-        int rowIndex(const hdps::Dataset<hdps::DatasetImpl>& dataset) const;
+        int rowIndex(const mv::Dataset<mv::DatasetImpl>& dataset) const;
 
         /**
          * Get the number of columns
@@ -81,32 +81,32 @@ protected:
          * Get datasets
          * @return Vector of smart pointers to datasets
          */
-        const QVector<hdps::Dataset<hdps::DatasetImpl>>& getDatasets() const;
+        const QVector<mv::Dataset<mv::DatasetImpl>>& getDatasets() const;
 
         /**
          * Get dataset at the specified row index
          * @param rowIndex Index of the row
          * @return Smart pointer to dataset
          */
-        hdps::Dataset<hdps::DatasetImpl> getDataset(const std::int32_t& rowIndex) const;
+        mv::Dataset<mv::DatasetImpl> getDataset(const std::int32_t& rowIndex) const;
 
         /**
          * Set datasets (resets the model)
          * @param datasets Vector of smart pointers to datasets
          */
-        void setDatasets(const QVector<hdps::Dataset<hdps::DatasetImpl>>& datasets);
+        void setDatasets(const QVector<mv::Dataset<mv::DatasetImpl>>& datasets);
 
         /**
          * Add dataset
          * @param dataset Smart pointer to dataset
          */
-        void addDataset(const hdps::Dataset<hdps::DatasetImpl>& dataset);
+        void addDataset(const mv::Dataset<mv::DatasetImpl>& dataset);
 
         /**
          * Remove specific dataset
          * @param dataset Smart pointer to dataset
          */
-        void removeDataset(const hdps::Dataset<hdps::DatasetImpl>& dataset);
+        void removeDataset(const mv::Dataset<mv::DatasetImpl>& dataset);
 
         /** Remove all datasets from the model */
         void removeAllDatasets();
@@ -133,7 +133,7 @@ protected:
         void updateData();
 
     protected:
-        QVector<hdps::Dataset<hdps::DatasetImpl>>   _datasets;          /** Datasets from which can be picked */
+        QVector<mv::Dataset<mv::DatasetImpl>>   _datasets;          /** Datasets from which can be picked */
         bool                                        _showIcon;          /** Whether to show the dataset icon */
         bool                                        _showLocation;      /** Whether to show the dataset location */
     };
@@ -147,7 +147,7 @@ public:
     };
 
     /** Filter function signature, the input are all datasets in the core and it returns the filtered datasets */
-    using DatasetsFilterFunction = std::function<hdps::Datasets(const hdps::Datasets&)>;
+    using DatasetsFilterFunction = std::function<mv::Datasets(const mv::Datasets&)>;
 
 public:
 
@@ -172,13 +172,13 @@ public:
      * Get datasets
      * @return Datasets
      */
-    hdps::Datasets getDatasets() const;
+    mv::Datasets getDatasets() const;
 
     /**
      * Set the datasets from which can be picked (mode is set to Mode::Manual)
      * @param datasets Datasets from which can be picked
      */
-    void setDatasets(hdps::Datasets datasets);
+    void setDatasets(mv::Datasets datasets);
 
     /**
      * Set datasets filter function (mode is set to Mode::Automatic)
@@ -187,11 +187,11 @@ public:
     void setDatasetsFilterFunction(const DatasetsFilterFunction& datasetsFilterFunction);
 
     /** Get the current dataset */
-    hdps::Dataset<hdps::DatasetImpl> getCurrentDataset() const;
+    mv::Dataset<mv::DatasetImpl> getCurrentDataset() const;
 
     /** Get the current dataset */
     template<typename DatasetType>
-    hdps::Dataset<DatasetType> getCurrentDataset() const
+    mv::Dataset<DatasetType> getCurrentDataset() const
     {
         return getCurrentDataset();
     }
@@ -200,7 +200,7 @@ public:
      * Set the current dataset
      * @param currentDataset Smart pointer to current dataset
      */
-    void setCurrentDataset(hdps::Dataset<hdps::DatasetImpl> currentDataset);
+    void setCurrentDataset(mv::Dataset<mv::DatasetImpl> currentDataset);
 
     /**
      * Set the current dataset by \p guid
@@ -282,25 +282,25 @@ signals:
      * Signals that a dataset has been picked
      * @param Smart pointer to picked dataset
      */
-    void datasetPicked(hdps::Dataset<hdps::DatasetImpl> pickedDataset);
+    void datasetPicked(mv::Dataset<mv::DatasetImpl> pickedDataset);
 
     /**
      * Signals that selectable datasets changed
      * @param Selectable datasets
      */
-    void datasetsChanged(hdps::Datasets datasets);
+    void datasetsChanged(mv::Datasets datasets);
 
 protected:
     Mode                        _mode;                      /** Picker mode (e.g. manual or automatic) */
     DatasetsFilterFunction      _datasetsFilterFunction;    /** Datasets filter lambda */
     DatasetsModel               _datasetsModel;             /** Datasets list model */
-    hdps::EventListener         _eventListener;             /** Listen to events from the core */
+    mv::EventListener         _eventListener;             /** Listen to events from the core */
 
     friend class AbstractActionsManager;
 };
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::DatasetPickerAction)
+Q_DECLARE_METATYPE(mv::gui::DatasetPickerAction)
 
-inline const auto datasetPickerActionMetaTypeId = qRegisterMetaType<hdps::gui::DatasetPickerAction*>("hdps::gui::DatasetPickerAction");
+inline const auto datasetPickerActionMetaTypeId = qRegisterMetaType<mv::gui::DatasetPickerAction*>("mv::gui::DatasetPickerAction");

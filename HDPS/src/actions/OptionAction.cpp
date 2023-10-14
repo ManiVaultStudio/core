@@ -13,9 +13,9 @@
 #include <QListView>
 #include <QStylePainter>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 OptionAction::OptionAction(QObject* parent, const QString& title, const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/) :
     WidgetAction(parent, title),

@@ -30,14 +30,14 @@ namespace std {
 }
 #endif
 
-namespace hdps
+namespace mv
 {
 
 namespace plugin {
     class RawData;
 }
 
-class DataManager final : public hdps::AbstractDataManager
+class DataManager final : public mv::AbstractDataManager
 {
     Q_OBJECT
 
@@ -142,4 +142,4 @@ private:
     std::unordered_map<QString, Dataset<DatasetImpl>> _selections;
 };
 
-} // namespace hdps
+} // namespace mv

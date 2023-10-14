@@ -5,7 +5,7 @@
 #include "DecimalRectangleAction.h"
 #include "CoreInterface.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 DecimalRectangleAction::DecimalRectangleAction(QObject * parent, const QString& title, const QRectF& rectangle /*= QRectF()*/) :
     RectangleAction<QRectF, DecimalRangeAction>(parent, title, rectangle)

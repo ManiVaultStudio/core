@@ -9,7 +9,7 @@
 #include <QVBoxLayout>
 #include <QGroupBox>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 WidgetActionWidget::WidgetActionWidget(QWidget* parent, WidgetAction* action,  std::int32_t widgetFlags /*= 0*/) :
     WidgetActionViewWidget(parent, action, widgetFlags)

@@ -14,7 +14,7 @@
 #include <QDialog>
 #include <QCompleter>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Presets action class
@@ -310,6 +310,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::PresetsAction)
+Q_DECLARE_METATYPE(mv::gui::PresetsAction)
 
-inline const auto presetsActionMetaTypeId = qRegisterMetaType<hdps::gui::PresetsAction*>("PresetsAction");
+inline const auto presetsActionMetaTypeId = qRegisterMetaType<mv::gui::PresetsAction*>("PresetsAction");

@@ -12,7 +12,7 @@
 
 Q_PLUGIN_METADATA(IID "nl.BioVault.DataPropertiesPlugin")
 
-using namespace hdps;
+using namespace mv;
 
 DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
@@ -36,8 +36,8 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
         if (!_dataset.isValid())
             return;
 
-        auto* viewPluginEditorDialog = new hdps::gui::ViewPluginEditorDialog(nullptr, dynamic_cast<WidgetAction*>(_dataset.get()));
-        connect(viewPluginEditorDialog, &hdps::gui::ViewPluginEditorDialog::finished, viewPluginEditorDialog, &hdps::gui::ViewPluginEditorDialog::deleteLater);
+        auto* viewPluginEditorDialog = new mv::gui::ViewPluginEditorDialog(nullptr, dynamic_cast<WidgetAction*>(_dataset.get()));
+        connect(viewPluginEditorDialog, &mv::gui::ViewPluginEditorDialog::finished, viewPluginEditorDialog, &mv::gui::ViewPluginEditorDialog::deleteLater);
         viewPluginEditorDialog->open();
         });
 

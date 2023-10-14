@@ -9,9 +9,9 @@
 
 #include "Images.h"
 
-using namespace hdps;
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv;
+using namespace mv::gui;
+using namespace mv::util;
 
 /**
  * Info action class
@@ -40,5 +40,5 @@ protected:
     StringAction            _imageResolutionAction;             /** Image resolution action */
     StringAction            _numberOfPixelsAction;              /** Number of pixels per image action */
     StringAction            _numberComponentsPerPixelAction;    /** Number of components action */
-    hdps::EventListener     _eventListener;                     /** Listen to HDPS events */
+    mv::EventListener     _eventListener;                     /** Listen to HDPS events */
 };

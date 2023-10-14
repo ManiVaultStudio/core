@@ -27,12 +27,12 @@
 
 //#define CORE_VERBOSE
 
-using namespace hdps;
-using namespace hdps::util;
-using namespace hdps::plugin;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::util;
+using namespace mv::plugin;
+using namespace mv::gui;
 
-namespace hdps {
+namespace mv {
 
 Core::Core() :
     CoreInterface()

@@ -4,7 +4,7 @@
 
 #include "BufferObject.h"
 
-namespace hdps
+namespace mv
 {
 
 BufferObject::BufferObject()
@@ -33,4 +33,4 @@ void BufferObject::destroy()
     glDeleteBuffers(1, &_object);
 }
 
-} // namespace hdps
+} // namespace mv

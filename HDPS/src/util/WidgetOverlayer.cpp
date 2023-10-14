@@ -13,7 +13,7 @@
     #define WIDGET_OVERLAYER_VERBOSE
 #endif
 
-namespace hdps::util {
+namespace mv::util {
 
 WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget* targetWidget, float initialOpacity /*= 1.0f*/) :
     QObject(parent),
@@ -63,7 +63,7 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
     return QObject::eventFilter(target, event);
 }
 
-hdps::util::WidgetFader& WidgetOverlayer::getWidgetFader()
+mv::util::WidgetFader& WidgetOverlayer::getWidgetFader()
 {
     return _widgetFader;
 }

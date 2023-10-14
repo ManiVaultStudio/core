@@ -8,7 +8,7 @@
 
 #include <QTimer>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Horizontal toolbar action class
@@ -85,6 +85,6 @@ public:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::HorizontalToolbarAction)
+Q_DECLARE_METATYPE(mv::gui::HorizontalToolbarAction)
 
-inline const auto horizontalToolbarActionMetaTypeId = qRegisterMetaType<hdps::gui::HorizontalToolbarAction*>("hdps::gui::HorizontalToolbarAction");
+inline const auto horizontalToolbarActionMetaTypeId = qRegisterMetaType<mv::gui::HorizontalToolbarAction*>("mv::gui::HorizontalToolbarAction");

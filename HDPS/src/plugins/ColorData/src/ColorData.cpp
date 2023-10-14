@@ -10,7 +10,7 @@
 
 Q_PLUGIN_METADATA(IID "nl.lumc.ColorData")
 
-using namespace hdps;
+using namespace mv;
 
 ColorData::~ColorData(void)
 {
@@ -85,14 +85,14 @@ void Colors::selectInvert()
 
 QIcon ColorDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return hdps::Application::getIconFont("FontAwesome").getIcon("palette", color);
+    return mv::Application::getIconFont("FontAwesome").getIcon("palette", color);
 }
 
 // =============================================================================
 // Factory
 // =============================================================================
 
-hdps::plugin::RawData* ColorDataFactory::produce()
+mv::plugin::RawData* ColorDataFactory::produce()
 {
     return new ColorData(this);
 }

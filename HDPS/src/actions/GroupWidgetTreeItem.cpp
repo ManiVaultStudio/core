@@ -14,7 +14,7 @@
 
 //#define GROUP_WIDGET_TREE_ITEM_VERBOSE
 
-namespace hdps {
+namespace mv {
 
 namespace gui {
 

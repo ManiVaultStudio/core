@@ -8,7 +8,7 @@
 
 #include <QAbstractListModel>
 
-namespace hdps {
+namespace mv {
 
 namespace gui {
     class WidgetAction;
@@ -66,7 +66,7 @@ public: // Miscellaneous
      * Set widget action
      * @param widgetAction Pointer to widget action to retrieve the presets for
      */
-    void setWidgetAction(hdps::gui::WidgetAction* widgetAction);
+    void setWidgetAction(mv::gui::WidgetAction* widgetAction);
 
 private:
     QVector<Preset>     _presets;     /** Preset names */

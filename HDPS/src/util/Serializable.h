@@ -9,7 +9,7 @@
 #include <QString>
 #include <QJsonDocument>
 
-namespace hdps::util {
+namespace mv::util {
 
 /**
  * Serializable class

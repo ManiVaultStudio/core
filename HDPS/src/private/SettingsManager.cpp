@@ -12,14 +12,14 @@
 #include <QStandardPaths>
 #include <QOperatingSystemVersion>
 
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv::gui;
+using namespace mv::util;
 
 #ifdef _DEBUG
     //#define SETTINGS_MANAGER_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 SettingsManager::SettingsManager() :

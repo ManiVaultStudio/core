@@ -8,7 +8,7 @@
 #include <QHBoxLayout>
 #include <QBuffer>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ImageAction::ImageAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),

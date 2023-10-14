@@ -36,12 +36,12 @@
 
 using namespace ads;
 
-using namespace hdps;
-using namespace hdps::plugin;
-using namespace hdps::util;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::plugin;
+using namespace mv::util;
+using namespace mv::gui;
 
-namespace hdps
+namespace mv
 {
 
 WorkspaceManager::WorkspaceManager() :
@@ -646,7 +646,7 @@ void WorkspaceManager::createIcon()
     drawWindow(QRectF(QPointF(halfSize + halfSpacing, margin), QPointF(size - margin, halfSize - halfSpacing)));
     drawWindow(QRectF(QPointF(halfSize + halfSpacing, halfSize + halfSpacing), QPointF(size - margin, size - margin)));
 
-    _icon = hdps::gui::createIcon(pixmap);
+    _icon = mv::gui::createIcon(pixmap);
 }
 
 WorkspaceLocations WorkspaceManager::getWorkspaceLocations(const WorkspaceLocation::Types& types /*= WorkspaceLocation::Type::All*/)
@@ -699,7 +699,7 @@ void WorkspaceManager::setViewPluginDockWidgetPermissionsGlobally(const util::Do
 bool WorkspaceManager::mayLock() const
 {
     for (auto plugin : plugins().getPluginsByType(plugin::Type::VIEW))
-        if (!dynamic_cast<hdps::plugin::ViewPlugin*>(plugin)->getLockingAction().isLocked())
+        if (!dynamic_cast<mv::plugin::ViewPlugin*>(plugin)->getLockingAction().isLocked())
             return true;
 
     return false;
@@ -708,7 +708,7 @@ bool WorkspaceManager::mayLock() const
 bool WorkspaceManager::mayUnlock() const
 {
     for (auto plugin : plugins().getPluginsByType(plugin::Type::VIEW))
-        if (dynamic_cast<hdps::plugin::ViewPlugin*>(plugin)->getLockingAction().isLocked())
+        if (dynamic_cast<mv::plugin::ViewPlugin*>(plugin)->getLockingAction().isLocked())
             return true;
 
     return false;

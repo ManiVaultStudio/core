@@ -8,9 +8,9 @@
 
 #include <QVBoxLayout>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction, const QString& title) :
     WidgetAction(&colorMapAction, title),

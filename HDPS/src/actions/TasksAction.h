@@ -12,7 +12,7 @@
 
 #include <QPixmap>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Tasks action class
@@ -158,6 +158,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::TasksAction)
+Q_DECLARE_METATYPE(mv::gui::TasksAction)
 
-inline const auto tasksActionMetaTypeId = qRegisterMetaType<hdps::gui::TasksAction*>("hdps::gui::TasksAction");
+inline const auto tasksActionMetaTypeId = qRegisterMetaType<mv::gui::TasksAction*>("mv::gui::TasksAction");

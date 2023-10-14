@@ -8,7 +8,7 @@
 #include <QDebug>
 #include <QPainter>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* action) :
     WidgetActionViewWidget(parent, action),

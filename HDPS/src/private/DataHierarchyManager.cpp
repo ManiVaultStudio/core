@@ -11,13 +11,13 @@
 
 #include <stdexcept>
 
-using namespace hdps::util;
+using namespace mv::util;
 
 #ifdef _DEBUG
     //#define DATA_HIERARCHY_MANAGER_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
@@ -174,7 +174,7 @@ DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid)
     }
 }
 
-hdps::DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive /*= true*/)
+mv::DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive /*= true*/)
 {
     auto children = dataHierarchyItem.getChildren();
 

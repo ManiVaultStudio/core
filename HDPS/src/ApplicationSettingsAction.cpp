@@ -9,7 +9,7 @@
 #include "util/MacThemeHelper.h"
 #endif // Q_OS_MACX
 
-namespace hdps
+namespace mv
 {
 
 ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :

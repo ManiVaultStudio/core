@@ -10,9 +10,9 @@
     //#define TASKS_FILTER_MODEL_VERBOSE
 #endif
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
-namespace hdps
+namespace mv
 {
 
 TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :

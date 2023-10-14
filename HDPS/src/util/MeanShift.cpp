@@ -14,7 +14,7 @@
 #include <float.h>
 //#define MEANSHIFT_IMAGE_DEBUG
 
-namespace hdps
+namespace mv
 {
 
 Matrix3f createProjectionMatrix(QRectF bounds)
@@ -428,4 +428,4 @@ Texture2D& MeanShift::getMeanShiftTexture()
     return _meanshiftTexture;
 }
 
-} // namespace hdps
+} // namespace mv

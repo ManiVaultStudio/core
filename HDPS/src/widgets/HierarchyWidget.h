@@ -20,7 +20,7 @@
 
 class QSortFilterProxyModel;
 
-namespace hdps::gui
+namespace mv::gui
 {
 
 class HierarchyWidget;

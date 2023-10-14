@@ -14,7 +14,7 @@
     #define DATASET_PRIVATE_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 using namespace util;
@@ -211,7 +211,7 @@ void DatasetPrivate::registerDatasetEvents()
                     if (dataEvent->getDataset().getDatasetId() != getDatasetId())
                         break;
 
-                    auto dataChildAddedEvent = static_cast<hdps::DatasetChildAddedEvent*>(dataEvent);
+                    auto dataChildAddedEvent = static_cast<mv::DatasetChildAddedEvent*>(dataEvent);
 
                     emit childAdded(dataChildAddedEvent->getChildDataset());
 
@@ -223,7 +223,7 @@ void DatasetPrivate::registerDatasetEvents()
                     if (dataEvent->getDataset().getDatasetId() != getDatasetId())
                         break;
 
-                    auto dataChildRemovedEvent = static_cast<hdps::DatasetChildRemovedEvent*>(dataEvent);
+                    auto dataChildRemovedEvent = static_cast<mv::DatasetChildRemovedEvent*>(dataEvent);
 
                     emit childRemoved(dataChildRemovedEvent->getChildDatasetGuid());
 

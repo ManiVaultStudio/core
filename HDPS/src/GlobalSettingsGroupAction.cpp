@@ -4,7 +4,7 @@
 
 #include "GlobalSettingsGroupAction.h"
 
-namespace hdps
+namespace mv
 {
 
 using namespace gui;

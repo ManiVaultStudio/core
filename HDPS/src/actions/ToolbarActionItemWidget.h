@@ -11,7 +11,7 @@
 #include <QWidget>
 #include <QPointer>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Toolbar action item widget class

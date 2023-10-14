@@ -19,8 +19,8 @@
 class Cluster;
 class Clusters;
 
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv::gui;
+using namespace mv::util;
 
 /**
  * Clusters action class

@@ -10,7 +10,7 @@
 
 #include <QStandardItemModel>
 
-namespace hdps
+namespace mv
 {
 
 /**

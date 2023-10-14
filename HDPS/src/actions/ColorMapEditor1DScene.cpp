@@ -8,7 +8,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
 
-namespace hdps {
+namespace mv {
 
 namespace gui {
 

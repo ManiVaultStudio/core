@@ -41,8 +41,8 @@ public:
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
 
 public:
-    hdps::gui::OptionsAction& getFilterTypesAction() { return _filterTypesAction; }
+    mv::gui::OptionsAction& getFilterTypesAction() { return _filterTypesAction; }
 
 private:
-    hdps::gui::OptionsAction    _filterTypesAction;      /** Workspace filter types action */
+    mv::gui::OptionsAction    _filterTypesAction;      /** Workspace filter types action */
 };

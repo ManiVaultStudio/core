@@ -11,7 +11,7 @@
 
 #define DEFAULT_MAX_BLOCK_SIZE std::numeric_limits<std::int32_t>::max() / 2
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 

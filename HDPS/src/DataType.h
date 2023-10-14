@@ -8,7 +8,7 @@
 #include <QString>
 #include <QList>
 
-namespace hdps
+namespace mv
 {
     namespace Plugin {
         class RawData;
@@ -44,13 +44,13 @@ namespace hdps
     };
 
     using DataTypes = QVector<DataType>;
-} // namespace hdps
+} // namespace mv
 
 namespace std {
     template<>
-    struct hash<hdps::DataType>
+    struct hash<mv::DataType>
     {
-        std::size_t operator()(const hdps::DataType& dataType) const
+        std::size_t operator()(const mv::DataType& dataType) const
         {
             return std::hash<std::string>()(dataType._type.toStdString());
             //return qHash(dataType._type); // For some reason this doesn't work

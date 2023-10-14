@@ -12,7 +12,7 @@
 #include <QLabel>
 #include <QImage>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Image widget action class (WIP)
@@ -148,6 +148,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::ImageAction)
+Q_DECLARE_METATYPE(mv::gui::ImageAction)
 
-inline const auto imageActionMetaTypeId = qRegisterMetaType<hdps::gui::ImageAction*>("hdps::gui::ImageAction");
+inline const auto imageActionMetaTypeId = qRegisterMetaType<mv::gui::ImageAction*>("mv::gui::ImageAction");

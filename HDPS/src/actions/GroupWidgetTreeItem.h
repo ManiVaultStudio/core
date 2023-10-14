@@ -11,7 +11,7 @@
 
 class QWidget;
 
-namespace hdps {
+namespace mv {
 
 namespace gui {
 

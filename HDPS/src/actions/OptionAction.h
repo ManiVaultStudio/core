@@ -17,7 +17,7 @@
 class QWidget;
 class QAbstractListModel;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Option widget action class
@@ -272,6 +272,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::OptionAction)
+Q_DECLARE_METATYPE(mv::gui::OptionAction)
 
-inline const auto optionActionMetaTypeId = qRegisterMetaType<hdps::gui::OptionAction*>("hdps::gui::OptionAction");
+inline const auto optionActionMetaTypeId = qRegisterMetaType<mv::gui::OptionAction*>("mv::gui::OptionAction");

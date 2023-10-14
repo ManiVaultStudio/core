@@ -8,9 +8,9 @@
     //#define PUBLIC_ACTIONS_MODEL_VERBOSE
 #endif
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
-namespace hdps
+namespace mv
 {
 
 PublicActionsModel::PublicActionsModel(QObject* parent) :

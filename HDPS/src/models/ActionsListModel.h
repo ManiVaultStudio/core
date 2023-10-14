@@ -6,7 +6,7 @@
 
 #include "AbstractActionsModel.h"
 
-namespace hdps
+namespace mv
 {
 
 /**

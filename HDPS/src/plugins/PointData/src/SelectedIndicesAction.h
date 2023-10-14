@@ -12,9 +12,9 @@
 #include <QTimer>
 #include <QListView>
 
-using namespace hdps;
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv;
+using namespace mv::gui;
+using namespace mv::util;
 
 /**
  * Selected indices action class

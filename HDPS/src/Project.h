@@ -20,7 +20,7 @@
 
 #include <QSharedPointer>
 
-namespace hdps {
+namespace mv {
 
 /**
  * Project class
@@ -29,7 +29,7 @@ namespace hdps {
  *
  * @author Thomas Kroes
  */
-class Project final : public QObject, public hdps::util::Serializable
+class Project final : public QObject, public mv::util::Serializable
 {
     Q_OBJECT
 

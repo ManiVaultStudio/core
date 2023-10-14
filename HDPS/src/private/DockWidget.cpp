@@ -20,9 +20,9 @@
 
 using namespace ads;
 
-using namespace hdps;
-using namespace hdps::util;
-using namespace hdps::plugin;
+using namespace mv;
+using namespace mv::util;
+using namespace mv::plugin;
 
 DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     CDockWidget(title, parent),

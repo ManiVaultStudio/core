@@ -17,7 +17,7 @@
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
 
-namespace hdps
+namespace mv
 {
 
 namespace gui

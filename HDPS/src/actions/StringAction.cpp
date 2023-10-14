@@ -8,9 +8,9 @@
 #include <QHBoxLayout>
 #include <QCompleter>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 StringAction::StringAction(QObject* parent, const QString& title, const QString& string /*= ""*/) :
     WidgetAction(parent, title),

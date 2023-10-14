@@ -11,8 +11,8 @@
 
 class QAction;
 
-using namespace hdps;
-using namespace hdps::plugin;
+using namespace mv;
+using namespace mv::plugin;
 
 /**
  * Data hierarchy widget context menu

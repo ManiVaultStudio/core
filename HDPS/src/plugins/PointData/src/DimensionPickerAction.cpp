@@ -7,7 +7,7 @@
 
 #include <QHBoxLayout>
 
-using namespace hdps;
+using namespace mv;
 
 DimensionPickerAction::DimensionPickerAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
@@ -152,7 +152,7 @@ void DimensionPickerAction::fromVariantMap(const QVariantMap& variantMap)
         const auto datasetID = variantMap["DatasetID"].toString();
 
         if (!datasetID.isEmpty()) {
-            auto dataset = hdps::data().getSet(datasetID);
+            auto dataset = mv::data().getSet(datasetID);
 
             if (dataset.isValid())
                 setPointsDataset(Dataset<Points>(dataset));

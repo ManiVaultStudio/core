@@ -6,7 +6,7 @@
 
 #include "AbstractTaskTester.h"
 
-namespace hdps
+namespace mv
 {
 
 class BackgroundTaskTester final : public AbstractTaskTester
@@ -19,6 +19,6 @@ public:
 
 }
 
-Q_DECLARE_METATYPE(hdps::BackgroundTaskTester)
+Q_DECLARE_METATYPE(mv::BackgroundTaskTester)
 
-inline const auto backgroundTaskTesterMetaTypeId = qRegisterMetaType<hdps::BackgroundTaskTester*>("hdps::BackgroundTaskTester");
+inline const auto backgroundTaskTesterMetaTypeId = qRegisterMetaType<mv::BackgroundTaskTester*>("mv::BackgroundTaskTester");

@@ -10,7 +10,7 @@
 
 #include "TriggerAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 class ColorMapAction;
 
@@ -212,6 +212,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::ColorMapEditor1DAction)
+Q_DECLARE_METATYPE(mv::gui::ColorMapEditor1DAction)
 
-inline const auto colorMapEditor1DActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapEditor1DAction*>("hdps::gui::ColorMapEditor1DAction");
+inline const auto colorMapEditor1DActionMetaTypeId = qRegisterMetaType<mv::gui::ColorMapEditor1DAction*>("mv::gui::ColorMapEditor1DAction");

@@ -6,7 +6,7 @@
 
 #include <QDebug>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ElidedLabel::ElidedLabel(const QString& text, QWidget* parent /*= nullptr*/, const Qt::TextElideMode& textElideMode /*= Qt::ElideMiddle*/) :
     QLabel(parent),

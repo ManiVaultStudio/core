@@ -10,7 +10,7 @@
 
 #include <QVBoxLayout>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Rectangle action class

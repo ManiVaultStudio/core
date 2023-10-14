@@ -10,11 +10,11 @@
 #include "PluginType.h"
 #include "Dataset.h"
 
-namespace hdps::plugin {
+namespace mv::plugin {
     class PluginFactory;
 }
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Plugin trigger action class
@@ -134,6 +134,6 @@ using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::PluginTriggerAction)
+Q_DECLARE_METATYPE(mv::gui::PluginTriggerAction)
 
-inline const auto pluginTriggerActionMetaTypeId = qRegisterMetaType<hdps::gui::PluginTriggerAction*>("PluginTriggerAction");
+inline const auto pluginTriggerActionMetaTypeId = qRegisterMetaType<mv::gui::PluginTriggerAction*>("PluginTriggerAction");

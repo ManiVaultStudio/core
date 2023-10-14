@@ -7,7 +7,7 @@
 #include <AbstractPluginManager.h>
 #include <PluginFactory.h>
 
-namespace hdps {
+namespace mv {
 
 using namespace plugin;
 

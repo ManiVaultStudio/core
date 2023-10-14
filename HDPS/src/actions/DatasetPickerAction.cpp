@@ -14,9 +14,9 @@
     //#define DATASET_PICKER_ACTION_VERBOSE
 #endif
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, Mode mode /*= Mode::Automatic*/) :
     OptionAction(parent, title),
@@ -192,8 +192,8 @@ void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction, bool
     if (publicDatasetPickerAction == nullptr)
         return;
 
-    connect(this, &DatasetPickerAction::datasetPicked, publicDatasetPickerAction, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
-    connect(publicDatasetPickerAction, &DatasetPickerAction::datasetPicked, this, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
+    connect(this, &DatasetPickerAction::datasetPicked, publicDatasetPickerAction, qOverload<mv::Dataset<mv::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
+    connect(publicDatasetPickerAction, &DatasetPickerAction::datasetPicked, this, qOverload<mv::Dataset<mv::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
 
     setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
 
@@ -212,8 +212,8 @@ void DatasetPickerAction::disconnectFromPublicAction(bool recursive)
     if (publicDatasetPickerAction == nullptr)
         return;
 
-    disconnect(this, &DatasetPickerAction::datasetPicked, publicDatasetPickerAction, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
-    disconnect(publicDatasetPickerAction, &DatasetPickerAction::datasetPicked, this, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
+    disconnect(this, &DatasetPickerAction::datasetPicked, publicDatasetPickerAction, qOverload<mv::Dataset<mv::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
+    disconnect(publicDatasetPickerAction, &DatasetPickerAction::datasetPicked, this, qOverload<mv::Dataset<mv::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
 
     WidgetAction::disconnectFromPublicAction(recursive);
 }
@@ -238,7 +238,7 @@ QVariantMap DatasetPickerAction::toVariantMap() const
     return variantMap;
 }
 
-hdps::Datasets DatasetPickerAction::getDatasets() const
+mv::Datasets DatasetPickerAction::getDatasets() const
 {
     return _datasetsModel.getDatasets();
 }
@@ -355,7 +355,7 @@ void DatasetPickerAction::DatasetsModel::addDataset(const Dataset<DatasetImpl>& 
     });
 }
 
-void DatasetPickerAction::DatasetsModel::removeDataset(const hdps::Dataset<hdps::DatasetImpl>& dataset)
+void DatasetPickerAction::DatasetsModel::removeDataset(const mv::Dataset<mv::DatasetImpl>& dataset)
 {
     const auto datasetRowIndex = rowIndex(dataset);
 

@@ -14,7 +14,7 @@
 
 #include <quazip/JlCompress.h>
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 

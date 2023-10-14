@@ -11,8 +11,8 @@
 
 #include <algorithm>
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 StartPageHeaderWidget::StartPageHeaderWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),

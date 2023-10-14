@@ -8,7 +8,7 @@
 #include <CoreInterface.h>
 #include <Workspace.h>
 
-using namespace hdps;
+using namespace mv;
 
 #ifdef _DEBUG
     #define WORKSPACE_INVENTORY_MODEL_VERBOSE

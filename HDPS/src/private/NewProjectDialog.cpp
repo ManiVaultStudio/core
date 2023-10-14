@@ -15,8 +15,8 @@
     #define NEW_PROJECT_DIALOG_VERBOSE
 #endif
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),

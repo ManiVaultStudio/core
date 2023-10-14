@@ -4,6 +4,6 @@
 
 #include "Event.h"
 
-namespace hdps
+namespace mv
 {
 }

@@ -9,7 +9,7 @@
 #include <QLabel>
 #include <QHBoxLayout>
 
-namespace hdps {
+namespace mv {
 
 namespace gui {
 

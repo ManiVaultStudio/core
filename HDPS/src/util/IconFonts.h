@@ -13,7 +13,7 @@
 
 #include "IconFont.h"
 
-namespace hdps {
+namespace mv {
 
 /**
  * Icon fonts utility class

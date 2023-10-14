@@ -12,7 +12,7 @@
 
 #include <unordered_map>
 
-namespace hdps
+namespace mv
 {
 
 EventListener::EventListener()

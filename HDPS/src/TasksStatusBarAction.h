@@ -13,11 +13,11 @@
 #include <QToolButton>
 #include <QMenu>
 
-namespace hdps {
+namespace mv {
     class AbstractTasksModel;
 }
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Background tasks status bar action class

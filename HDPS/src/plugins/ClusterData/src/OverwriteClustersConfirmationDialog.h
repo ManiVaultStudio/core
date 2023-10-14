@@ -9,7 +9,7 @@
 
 #include <QDialog>
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
 /**
  * Overwrite clusters confirmation dialog class

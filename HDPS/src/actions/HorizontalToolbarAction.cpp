@@ -7,7 +7,7 @@
 #include <QEvent>
 #include <QResizeEvent>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 HorizontalToolbarAction::HorizontalToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment /*= Qt::AlignmentFlag::AlignLeft*/) :
     ToolbarAction(parent, title, alignment)

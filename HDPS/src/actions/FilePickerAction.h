@@ -15,7 +15,7 @@
 
 class QWidget;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * File picker action class
@@ -180,6 +180,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::FilePickerAction)
+Q_DECLARE_METATYPE(mv::gui::FilePickerAction)
 
-inline const auto filePickerActionMetaTypeId = qRegisterMetaType<hdps::gui::FilePickerAction*>("hdps::gui::FilePickerAction");
+inline const auto filePickerActionMetaTypeId = qRegisterMetaType<mv::gui::FilePickerAction*>("mv::gui::FilePickerAction");

@@ -10,7 +10,7 @@
 
 #include <actions/Actions.h>
 
-using namespace hdps;
+using namespace mv;
 
 /**
  * Clusters model class

@@ -7,7 +7,7 @@
 #include <QHBoxLayout>
 #include <QMenu>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 TriggerAction::TriggerAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title)

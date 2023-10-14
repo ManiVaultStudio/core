@@ -4,10 +4,10 @@
 
 #include "ProjectCompressionAction.h"
 
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv::gui;
+using namespace mv::util;
 
-namespace hdps {
+namespace mv {
 
 ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/) :
     GroupAction(parent, "ProjectCompression"),

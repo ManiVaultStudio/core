@@ -18,9 +18,9 @@
 
 class Points;
 
-const hdps::DataType ImageType = hdps::DataType(QString("Images"));
+const mv::DataType ImageType = mv::DataType(QString("Images"));
 
-class IMAGEDATA_EXPORT ImageData : public hdps::plugin::RawData
+class IMAGEDATA_EXPORT ImageData : public mv::plugin::RawData
 {
 public:
     enum Type
@@ -52,7 +52,7 @@ public:
     }
 
 public:
-    ImageData(const hdps::plugin::PluginFactory* factory);
+    ImageData(const mv::plugin::PluginFactory* factory);
 
     void init() override;
 
@@ -111,7 +111,7 @@ public:
      * @param guid Globally unique dataset identifier (use only for deserialization)
      * @return Smart pointer to dataset
      */
-    hdps::Dataset<hdps::DatasetImpl> createDataSet(const QString& guid = "") const override;
+    mv::Dataset<mv::DatasetImpl> createDataSet(const QString& guid = "") const override;
 
 private:
     Type                _type;                          /** Image collection type e.g. stack or sequence */
@@ -123,9 +123,9 @@ private:
     QStringList         _dimensionNames;                /** Dimension names */
 };
 
-class ImageDataFactory : public hdps::plugin::RawDataFactory
+class ImageDataFactory : public mv::plugin::RawDataFactory
 {
-    Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
+    Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "nl.BioVault.ImageData" FILE "ImageData.json")
 
@@ -140,5 +140,5 @@ public:
      */
     QIcon getIcon(const QColor& color = Qt::black) const override;
 
-    hdps::plugin::RawData* produce() override;
+    mv::plugin::RawData* produce() override;
 };

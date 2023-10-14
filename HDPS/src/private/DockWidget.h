@@ -21,7 +21,7 @@ class QToolButton;
  *
  * @author Thomas Kroes
  */
-class DockWidget : public ads::CDockWidget, public hdps::util::Serializable
+class DockWidget : public ads::CDockWidget, public mv::util::Serializable
 {
     Q_OBJECT
 

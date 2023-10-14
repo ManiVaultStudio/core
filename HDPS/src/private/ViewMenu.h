@@ -66,10 +66,10 @@ private:
      * @param dockArea Dock area to dock to
      * @return Vector of actions
      */
-    QVector<QPointer<hdps::gui::PluginTriggerAction>> getLoadViewsActions(hdps::gui::DockAreaFlag dockArea);
+    QVector<QPointer<mv::gui::PluginTriggerAction>> getLoadViewsActions(mv::gui::DockAreaFlag dockArea);
 
 private:
-    using MenuMap = QMap<hdps::gui::DockAreaFlag, QSharedPointer<QMenu>>;   /** Short hand for map to shared pointers of menus */
+    using MenuMap = QMap<mv::gui::DockAreaFlag, QSharedPointer<QMenu>>;   /** Short hand for map to shared pointers of menus */
 
 private:
     ads::CDockAreaWidget*               _dockAreaWidget;        /** Pointer to dock area widget to which new view plugins are docked (new view plugins will be docked top-level if nullptr) */

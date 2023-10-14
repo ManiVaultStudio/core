@@ -6,7 +6,7 @@
 
 #include "AbstractTasksModel.h"
 
-namespace hdps
+namespace mv
 {
 
 /**

@@ -20,12 +20,12 @@ namespace
     {
         int argc = 0;
         QApplication dummyApplication(argc, nullptr);
-        hdps::gui::MainWindow mainWindow;
+        mv::gui::MainWindow mainWindow;
         testCoreFunction(mainWindow.getCore());
     }
 
 
-    auto& addPointsToCore(hdps::CoreInterface& core, const char* const name)
+    auto& addPointsToCore(mv::CoreInterface& core, const char* const name)
     {
         return dynamic_cast<Points&>(core.requestData(
             core.addData(QString::fromLatin1("Points"), QString::fromLatin1(name))));
@@ -51,7 +51,7 @@ namespace
 
 GTEST_TEST(Points, hasZeroPointsAndOneDimensionByDefault)
 {
-    testCore([](hdps::CoreInterface& core)
+    testCore([](mv::CoreInterface& core)
         {
             const auto& defaultPoints = addPointsToCore(core, "defaultPoints");
 
@@ -63,7 +63,7 @@ GTEST_TEST(Points, hasZeroPointsAndOneDimensionByDefault)
 
 GTEST_TEST(Points, visitDataAllowsAccessToAnyRandomSubset)
 {
-    testCore([](hdps::CoreInterface& core)
+    testCore([](mv::CoreInterface& core)
         {
             auto& fullPoints = addPointsToCore(core, "fullPoints");
 

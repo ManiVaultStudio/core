@@ -10,9 +10,9 @@
 #include <QGroupBox>
 #include <QLabel>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ColorMapViewAction::ColorMapViewAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction, "Color Map View"),

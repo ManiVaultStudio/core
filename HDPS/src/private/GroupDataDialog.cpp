@@ -10,10 +10,10 @@
 #include <QGridLayout>
 #include <QDialogButtonBox>
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
-GroupDataDialog::GroupDataDialog(QWidget* parent, const hdps::Datasets& datasets) :
+GroupDataDialog::GroupDataDialog(QWidget* parent, const mv::Datasets& datasets) :
     QDialog(parent),
     _datasets(datasets),
     _groupNameAction(this, "Group name"),

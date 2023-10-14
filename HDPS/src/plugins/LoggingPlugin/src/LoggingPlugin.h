@@ -8,7 +8,7 @@
 
 #include <ViewPlugin.h>
 
-using namespace hdps::plugin;
+using namespace mv::plugin;
 
 /**
  * Logging view plugin
@@ -43,7 +43,7 @@ private:
  */
 class LoggingPluginFactory : public ViewPluginFactory
 {
-    Q_INTERFACES(hdps::plugin::ViewPluginFactory hdps::plugin::PluginFactory)
+    Q_INTERFACES(mv::plugin::ViewPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "nl.BioVault.LoggingPlugin" FILE "LoggingPlugin.json")
     

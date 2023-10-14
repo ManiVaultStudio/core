@@ -21,10 +21,10 @@
 
 Q_PLUGIN_METADATA(IID "hdps.ClusterData")
 
-using namespace hdps::util;
+using namespace mv::util;
 
-ClusterData::ClusterData(const hdps::plugin::PluginFactory* factory) :
-    hdps::plugin::RawData(factory, ClusterType)
+ClusterData::ClusterData(const mv::plugin::PluginFactory* factory) :
+    mv::plugin::RawData(factory, ClusterType)
 {
 }
 
@@ -437,7 +437,7 @@ QIcon ClusterDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
     return Application::getIconFont("FontAwesome").getIcon("th-large", color);
 }
 
-hdps::plugin::RawData* ClusterDataFactory::produce()
+mv::plugin::RawData* ClusterDataFactory::produce()
 {
     return new ClusterData(this);
 }

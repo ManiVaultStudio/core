@@ -7,8 +7,8 @@
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 class ClustersActionWidget;
 
@@ -19,12 +19,12 @@ class ClustersActionWidget;
  *
  * @author Thomas Kroes
  */
-class SubsetAction : public hdps::gui::WidgetAction
+class SubsetAction : public mv::gui::WidgetAction
 {
 protected:
 
     /** Widget class for creating subsets based on selected clusters */
-    class Widget : public hdps::gui::WidgetActionWidget {
+    class Widget : public mv::gui::WidgetActionWidget {
     public:
 
         /**

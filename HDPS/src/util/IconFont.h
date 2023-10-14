@@ -10,7 +10,7 @@
 #include <QMap>
 #include <QDebug>
 
-namespace hdps {
+namespace mv {
 
 /**
  * Icon font utility class

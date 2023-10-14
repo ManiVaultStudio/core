@@ -17,7 +17,7 @@
  *
  * @author Thomas Kroes
  */
-class ProjectManager final : public hdps::AbstractProjectManager
+class ProjectManager final : public mv::AbstractProjectManager
 {
     Q_OBJECT
 
@@ -91,13 +91,13 @@ public:
      * Get current project
      * @return Pointer to current project (nullptr if no project is loaded)
      */
-    const hdps::Project* getCurrentProject() const override;
+    const mv::Project* getCurrentProject() const override;
 
     /**
      * Get current project
      * @return Pointer to current project (nullptr if no project is loaded)
      */
-    hdps::Project* getCurrentProject() override;
+    mv::Project* getCurrentProject() override;
 
     /**
      * Extract \p filePath from compressed ManiVault project in \p maniVaultFilePath
@@ -150,31 +150,31 @@ public: // Serialization
 
 public: // Action getters
 
-    hdps::gui::TriggerAction& getNewBlankProjectAction() override { return _newBlankProjectAction; }
-    hdps::gui::TriggerAction& getNewProjectFromWorkspaceAction() override { return _newProjectFromWorkspaceAction; }
-    hdps::gui::TriggerAction& getOpenProjectAction() override { return _openProjectAction; }
-    hdps::gui::TriggerAction& getImportProjectAction() override { return _importProjectAction; };
-    hdps::gui::TriggerAction& getSaveProjectAction() override { return _saveProjectAction; }
-    hdps::gui::TriggerAction& getSaveProjectAsAction() override { return _saveProjectAsAction; }
-    hdps::gui::TriggerAction& getEditProjectSettingsAction() override { return _editProjectSettingsAction; }
-    hdps::gui::RecentFilesAction& getRecentProjectsAction() override { return _recentProjectsAction; }
-    hdps::gui::TriggerAction& getPublishAction() override { return _publishAction; }
-    hdps::gui::TriggerAction& getPluginManagerAction() override { return _pluginManagerAction; }
-    hdps::gui::ToggleAction& getShowStartPageAction() override { return _showStartPageAction; }
+    mv::gui::TriggerAction& getNewBlankProjectAction() override { return _newBlankProjectAction; }
+    mv::gui::TriggerAction& getNewProjectFromWorkspaceAction() override { return _newProjectFromWorkspaceAction; }
+    mv::gui::TriggerAction& getOpenProjectAction() override { return _openProjectAction; }
+    mv::gui::TriggerAction& getImportProjectAction() override { return _importProjectAction; };
+    mv::gui::TriggerAction& getSaveProjectAction() override { return _saveProjectAction; }
+    mv::gui::TriggerAction& getSaveProjectAsAction() override { return _saveProjectAsAction; }
+    mv::gui::TriggerAction& getEditProjectSettingsAction() override { return _editProjectSettingsAction; }
+    mv::gui::RecentFilesAction& getRecentProjectsAction() override { return _recentProjectsAction; }
+    mv::gui::TriggerAction& getPublishAction() override { return _publishAction; }
+    mv::gui::TriggerAction& getPluginManagerAction() override { return _pluginManagerAction; }
+    mv::gui::ToggleAction& getShowStartPageAction() override { return _showStartPageAction; }
 
 private:
-    QScopedPointer<hdps::Project>       _project;                           /** Current project */
-    hdps::gui::TriggerAction            _newBlankProjectAction;             /** Action for creating a blank project (without view plugins and data) */
-    hdps::gui::TriggerAction            _newProjectFromWorkspaceAction;     /** Action for creating a new project from a workspace */
-    hdps::gui::TriggerAction            _openProjectAction;                 /** Action for opening a project */
-    hdps::gui::TriggerAction            _importProjectAction;               /** Action for importing a project */
-    hdps::gui::TriggerAction            _saveProjectAction;                 /** Action for saving a project */
-    hdps::gui::TriggerAction            _saveProjectAsAction;               /** Action for saving a project under a new name */
-    hdps::gui::TriggerAction            _editProjectSettingsAction;         /** Action for triggering the project settings dialog */
-    hdps::gui::RecentFilesAction        _recentProjectsAction;              /** Menu for loading recent projects */
+    QScopedPointer<mv::Project>       _project;                           /** Current project */
+    mv::gui::TriggerAction            _newBlankProjectAction;             /** Action for creating a blank project (without view plugins and data) */
+    mv::gui::TriggerAction            _newProjectFromWorkspaceAction;     /** Action for creating a new project from a workspace */
+    mv::gui::TriggerAction            _openProjectAction;                 /** Action for opening a project */
+    mv::gui::TriggerAction            _importProjectAction;               /** Action for importing a project */
+    mv::gui::TriggerAction            _saveProjectAction;                 /** Action for saving a project */
+    mv::gui::TriggerAction            _saveProjectAsAction;               /** Action for saving a project under a new name */
+    mv::gui::TriggerAction            _editProjectSettingsAction;         /** Action for triggering the project settings dialog */
+    mv::gui::RecentFilesAction        _recentProjectsAction;              /** Menu for loading recent projects */
     QMenu                               _newProjectMenu;                    /** Menu for creating a new project */
     QMenu                               _importDataMenu;                    /** Menu for importing data */
-    hdps::gui::TriggerAction            _publishAction;                     /** Action for publishing the project to an end-user */
-    hdps::gui::TriggerAction            _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
-    hdps::gui::ToggleAction             _showStartPageAction;               /** Action for toggling the start page */
+    mv::gui::TriggerAction            _publishAction;                     /** Action for publishing the project to an end-user */
+    mv::gui::TriggerAction            _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
+    mv::gui::ToggleAction             _showStartPageAction;               /** Action for toggling the start page */
 };

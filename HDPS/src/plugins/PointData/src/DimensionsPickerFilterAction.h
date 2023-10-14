@@ -13,7 +13,7 @@
 
 class DimensionsPickerAction;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Dimensions picker filter action

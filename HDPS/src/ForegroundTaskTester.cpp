@@ -10,7 +10,7 @@
 #include <QEventLoop>
 #include <QSharedPointer>
 
-namespace hdps
+namespace mv
 {
 
 ForegroundTaskTester::ForegroundTaskTester(QObject* parent, const QString& name) :

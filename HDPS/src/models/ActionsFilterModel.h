@@ -12,7 +12,7 @@
 #include <QSortFilterProxyModel>
 #include <QCompleter>
 
-namespace hdps
+namespace mv
 {
 
 /**

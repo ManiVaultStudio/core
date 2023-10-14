@@ -15,7 +15,7 @@
 
 #include "Vector2f.h"
 
-namespace hdps
+namespace mv
 {
     class Bounds
     {

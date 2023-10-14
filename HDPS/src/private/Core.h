@@ -22,7 +22,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace hdps {
+namespace mv {
 
 class Core : public CoreInterface
 {

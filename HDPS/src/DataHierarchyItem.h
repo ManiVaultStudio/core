@@ -17,7 +17,7 @@
 #include <QBitArray>
 #include <QVector>
 
-namespace hdps
+namespace mv
 {
 
 class DatasetImpl;
@@ -32,7 +32,7 @@ using DataHierarchyItems = QVector<DataHierarchyItem*>;
  *
  * @author Thomas Kroes
  */
-class DataHierarchyItem final : public hdps::gui::WidgetAction
+class DataHierarchyItem final : public mv::gui::WidgetAction
 {
     Q_OBJECT
 
@@ -144,10 +144,10 @@ public: // Miscellaneous
 public: // Actions
 
     /** Add action */
-    void addAction(hdps::gui::WidgetAction& widgetAction);
+    void addAction(mv::gui::WidgetAction& widgetAction);
 
     /** Returns list of shared action widgets*/
-    hdps::gui::WidgetActions getActions() const;
+    mv::gui::WidgetActions getActions() const;
 
     /**
      * Get the context menu
@@ -224,7 +224,7 @@ signals:
      * Signals that a widget action was added
      * @param widgetAction Widget action that was added
      */
-    void actionAdded(hdps::gui::WidgetAction& widgetAction);
+    void actionAdded(mv::gui::WidgetAction& widgetAction);
 
     /** Signals that the set icon has changed */
     void iconChanged();
@@ -272,7 +272,7 @@ protected:
     bool                        _selected;      /** Whether the hierarchy item is selected */
     bool                        _expanded;      /** Whether the item is expanded or not (when it has children) */
     QIcon                       _icon;          /** Icon */
-    hdps::gui::WidgetActions    _actions;       /** Widget actions */
+    mv::gui::WidgetActions    _actions;       /** Widget actions */
 
 protected:
     friend class DataHierarchyManager;

@@ -16,7 +16,7 @@
 #include <QAction>
 #include <QPointer>
 
-namespace hdps
+namespace mv
 {
     class DatasetImpl;
 
@@ -126,8 +126,8 @@ public:
      * Get the data types that the plugin supports
      * @return Supported data types
      */
-    virtual hdps::DataTypes supportedDataTypes() const {
-        return hdps::DataTypes();
+    virtual mv::DataTypes supportedDataTypes() const {
+        return mv::DataTypes();
     }
 
     /**
@@ -213,8 +213,8 @@ using PluginFactoryPtrs = std::vector<plugin::PluginFactory*>;
 
 } // namespace plugin
 
-} // namespace hdps
+} // namespace mv
 
-Q_DECLARE_INTERFACE(hdps::plugin::PluginFactory, "hdps.PluginFactory")
+Q_DECLARE_INTERFACE(mv::plugin::PluginFactory, "hdps.PluginFactory")
 
 #endif // HDPS_PLUGINFACTORY_H

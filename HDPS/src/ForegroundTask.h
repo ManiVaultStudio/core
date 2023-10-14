@@ -6,7 +6,7 @@
 
 #include "Task.h"
 
-namespace hdps {
+namespace mv {
 
 class ForegroundTaskHandler;
 

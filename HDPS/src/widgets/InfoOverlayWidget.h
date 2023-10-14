@@ -11,7 +11,7 @@
 #include <QWidget>
 #include <QLabel>
 
-namespace hdps::gui
+namespace mv::gui
 {
 
 /**
@@ -49,7 +49,7 @@ public:
     util::WidgetFader& getWidgetFader();
 
 private:
-    hdps::util::WidgetOverlayer     _widgetOverlayer;      /** Utility for layering on top of the target widget */
+    mv::util::WidgetOverlayer     _widgetOverlayer;      /** Utility for layering on top of the target widget */
 };
 
 }

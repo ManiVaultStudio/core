@@ -13,7 +13,7 @@
 #include <map>
 #include <vector>
 
-namespace hdps
+namespace mv
 {
 
 class DatasetImpl;

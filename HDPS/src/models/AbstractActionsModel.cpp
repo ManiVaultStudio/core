@@ -10,13 +10,13 @@
 
 #include "models/ActionsListModel.h"
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
 #ifdef _DEBUG
     //#define ABSTRACT_ACTIONS_MODEL_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 AbstractActionsModel::HeaderItem::HeaderItem(const ColumHeaderInfo& columHeaderInfo) :
@@ -56,7 +56,7 @@ AbstractActionsModel::Item::Item(gui::WidgetAction* action, bool editable /*= fa
     setDropEnabled(true);
 }
 
-QPointer<hdps::gui::WidgetAction> AbstractActionsModel::Item::getAction() const
+QPointer<mv::gui::WidgetAction> AbstractActionsModel::Item::getAction() const
 {
     return _action;
 }
@@ -643,10 +643,10 @@ AbstractActionsModel::AbstractActionsModel(QObject* parent /*= nullptr*/) :
     for (auto column : columnInfo.keys())
         setHorizontalHeaderItem(static_cast<int>(column), new HeaderItem(columnInfo[column]));
 
-    connect(&hdps::actions(), &AbstractActionsManager::actionAdded, this, &AbstractActionsModel::actionAddedToManager);
-    connect(&hdps::actions(), &AbstractActionsManager::actionAboutToBeRemoved, this, &AbstractActionsModel::actionAboutToBeRemovedFromManager);
-    connect(&hdps::actions(), &AbstractActionsManager::publicActionAdded, this, &AbstractActionsModel::publicActionAddedToManager);
-    connect(&hdps::actions(), &AbstractActionsManager::publicActionAboutToBeRemoved, this, &AbstractActionsModel::publicActionAboutToBeRemovedFromManager);
+    connect(&mv::actions(), &AbstractActionsManager::actionAdded, this, &AbstractActionsModel::actionAddedToManager);
+    connect(&mv::actions(), &AbstractActionsManager::actionAboutToBeRemoved, this, &AbstractActionsModel::actionAboutToBeRemovedFromManager);
+    connect(&mv::actions(), &AbstractActionsManager::publicActionAdded, this, &AbstractActionsModel::publicActionAddedToManager);
+    connect(&mv::actions(), &AbstractActionsManager::publicActionAboutToBeRemoved, this, &AbstractActionsModel::publicActionAboutToBeRemovedFromManager);
 }
 
 Qt::ItemFlags AbstractActionsModel::flags(const QModelIndex& index) const

@@ -8,7 +8,7 @@
 
 #include "actions/OptionAction.h"
 
-namespace hdps
+namespace mv
 {
 
 /**

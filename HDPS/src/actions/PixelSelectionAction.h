@@ -18,7 +18,7 @@
 
 class QWidget;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Pixel selection action class
@@ -176,6 +176,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::PixelSelectionAction)
+Q_DECLARE_METATYPE(mv::gui::PixelSelectionAction)
 
-inline const auto pixelSelectionActionMetaTypeId = qRegisterMetaType<hdps::gui::PixelSelectionAction*>("hdps::gui::PixelSelectionAction");
+inline const auto pixelSelectionActionMetaTypeId = qRegisterMetaType<mv::gui::PixelSelectionAction*>("mv::gui::PixelSelectionAction");

@@ -24,7 +24,7 @@
 #include <vector>
 #include <functional>
 
-namespace hdps
+namespace mv
 {
     class DatasetImpl;
     class DataType;

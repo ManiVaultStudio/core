@@ -15,9 +15,9 @@
 
 #include <QString>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps
+namespace mv
 {
 namespace plugin
 {
@@ -71,8 +71,8 @@ public:
 
 } // namespace plugin
 
-} // namespace hdps
+} // namespace mv
 
-Q_DECLARE_INTERFACE(hdps::plugin::WriterPluginFactory, "hdps.WriterPluginFactory")
+Q_DECLARE_INTERFACE(mv::plugin::WriterPluginFactory, "hdps.WriterPluginFactory")
 
 #endif // HDPS_WRITERPLUGIN_H

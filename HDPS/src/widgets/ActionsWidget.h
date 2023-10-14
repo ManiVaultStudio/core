@@ -13,7 +13,7 @@
 
 class QMenu;
 
-namespace hdps::gui
+namespace mv::gui
 {
 
 /**

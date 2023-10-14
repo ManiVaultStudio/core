@@ -22,7 +22,7 @@
  * View           - A plugin to display a dataset on screen.
  */
 
-namespace hdps
+namespace mv
 {
 namespace plugin
 {
@@ -43,6 +43,6 @@ namespace plugin
 
 } // namespace plugin
 
-} // namespace hdps
+} // namespace mv
 
 #endif // HDPS_PLUGINTYPE_H

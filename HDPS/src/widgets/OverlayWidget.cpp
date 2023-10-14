@@ -12,7 +12,7 @@
     #define OVERLAY_WIDGET_VERBOSE
 #endif
 
-namespace hdps::gui
+namespace mv::gui
 {
 
 OverlayWidget::OverlayWidget(QWidget* parent, float initialOpacity /*= 1.0f*/) :
@@ -21,7 +21,7 @@ OverlayWidget::OverlayWidget(QWidget* parent, float initialOpacity /*= 1.0f*/) :
 {
 }
 
-hdps::util::WidgetOverlayer& OverlayWidget::getWidgetOverlayer()
+mv::util::WidgetOverlayer& OverlayWidget::getWidgetOverlayer()
 {
     return _widgetOverlayer;
 }

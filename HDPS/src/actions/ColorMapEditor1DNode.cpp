@@ -11,7 +11,7 @@
     #define COLOR_MAP_EDITOR_1D_NODE_VERBOSE
 #endif
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ColorMapEditor1DNode::ColorMapEditor1DNode(ColorMapEditor1DAction& colorMapEditor1DAction, const QPointF& normalizedCoordinate, const QColor& color /*= Qt::gray*/) :
     QObject(&colorMapEditor1DAction),

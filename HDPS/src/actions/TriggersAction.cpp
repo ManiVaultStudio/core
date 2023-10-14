@@ -8,7 +8,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 TriggersAction::TriggersAction(QObject* parent, const QString& title, const QVector<Trigger>& triggers /*= QVector<Trigger>()*/) :
     WidgetAction(parent, title)

@@ -5,7 +5,7 @@
 #include "ColorMapFilterModel.h"
 #include "ColorMapModel.h"
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 
@@ -21,7 +21,7 @@ bool ColorMapFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) c
     return static_cast<int>(_type) == sourceModel()->data(index, Qt::EditRole).toInt();
 }
 
-hdps::util::ColorMap::Type ColorMapFilterModel::getType() const
+mv::util::ColorMap::Type ColorMapFilterModel::getType() const
 {
     return _type;
 }

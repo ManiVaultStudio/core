@@ -11,7 +11,7 @@
 class QWidget;
 class QPushButton;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Numerical action class

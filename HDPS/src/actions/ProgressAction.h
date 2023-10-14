@@ -10,7 +10,7 @@
 #include <QLabel>
 #include <QLineEdit>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Progress action class
@@ -307,6 +307,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::ProgressAction)
+Q_DECLARE_METATYPE(mv::gui::ProgressAction)
 
-inline const auto progressActionMetaTypeId = qRegisterMetaType<hdps::gui::ProgressAction*>("hdps::gui::ProgressAction");
+inline const auto progressActionMetaTypeId = qRegisterMetaType<mv::gui::ProgressAction*>("mv::gui::ProgressAction");

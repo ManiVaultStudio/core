@@ -6,7 +6,7 @@
 
 #include "AbstractSettingsManager.h"
 
-namespace hdps
+namespace mv
 {
 
 class SettingsManager final : public AbstractSettingsManager

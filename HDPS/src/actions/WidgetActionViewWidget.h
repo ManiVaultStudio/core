@@ -6,7 +6,7 @@
 
 #include <QWidget>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 class WidgetAction;
 class WidgetActionHighlightWidget;

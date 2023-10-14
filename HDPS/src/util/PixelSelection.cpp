@@ -12,7 +12,7 @@
 #include <QPainterPath>
 #include <QtMath>
 
-namespace hdps::util {
+namespace mv::util {
 
 QIcon getPixelSelectionTypeIcon(const PixelSelectionType& selectionType)
 {

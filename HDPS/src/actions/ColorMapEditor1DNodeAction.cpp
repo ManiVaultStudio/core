@@ -11,7 +11,7 @@
 #include <QGridLayout>
 #include <QSpinBox>
 
-namespace hdps {
+namespace mv {
 
 namespace gui {
 

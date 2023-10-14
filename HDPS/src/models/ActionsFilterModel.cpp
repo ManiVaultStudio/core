@@ -8,9 +8,9 @@
 
 #include <QDebug>
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
-namespace hdps
+namespace mv
 {
 
 ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :

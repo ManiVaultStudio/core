@@ -28,8 +28,8 @@
 #endif
 #endif
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
@@ -89,7 +89,7 @@ void DimensionsPickerAction::fromVariantMap(const QVariantMap& variantMap)
         const auto datasetID = variantMap["DatasetID"].toString();
 
         if (!datasetID.isEmpty()) {
-            auto dataset = hdps::data().getSet(datasetID);
+            auto dataset = mv::data().getSet(datasetID);
 
             if (dataset.isValid())
                 setPointsDataset(Dataset<Points>(dataset));

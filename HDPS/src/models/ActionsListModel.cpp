@@ -5,13 +5,13 @@
 #include "ActionsListModel.h"
 #include "AbstractActionsManager.h"
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
 #ifdef _DEBUG
     #define ACTIONS_LIST_MODEL_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 ActionsListModel::ActionsListModel(QObject* parent, gui::WidgetAction* rootAction /*= nullptr*/) :
@@ -27,7 +27,7 @@ void ActionsListModel::initialize()
         addAction(_rootAction);
     }
     else {
-        for (auto action : hdps::actions().getActions())
+        for (auto action : mv::actions().getActions())
             addAction(action);
     }
 }

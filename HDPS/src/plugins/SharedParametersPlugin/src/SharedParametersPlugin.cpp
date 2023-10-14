@@ -8,7 +8,7 @@
 
 Q_PLUGIN_METADATA(IID "NL.ManiVault.SharedParametersPlugin")
 
-using namespace hdps;
+using namespace mv;
 
 SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
@@ -17,7 +17,7 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
 {
     _actionsWidget.getFilterModel().getPublicRootOnlyAction().setChecked(true);
 
-    auto& exportMode = hdps::settings().getParametersSettings().getExpertModeAction();
+    auto& exportMode = mv::settings().getParametersSettings().getExpertModeAction();
 
     const auto updateRootOnly = [this, &exportMode]() -> void {
         _actionsWidget.getFilterModel().getPublicRootOnlyAction().setChecked(!exportMode.isChecked());
@@ -25,7 +25,7 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
 
     updateRootOnly();
 
-    connect(&hdps::settings().getParametersSettings().getExpertModeAction(), &ToggleAction::toggled, this, updateRootOnly);
+    connect(&mv::settings().getParametersSettings().getExpertModeAction(), &ToggleAction::toggled, this, updateRootOnly);
 
     auto& hierarchyWidget = _actionsWidget.getHierarchyWidget();
 
@@ -41,7 +41,7 @@ SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
 
     hierarchyWidget.getFilterGroupAction().setPopupSizeHint(QSize(350, 0));
 
-    hierarchyWidget.getToolbarAction().addAction(&hdps::settings().getParametersSettings().getExpertModeAction(), ToggleAction::PushButtonIcon);
+    hierarchyWidget.getToolbarAction().addAction(&mv::settings().getParametersSettings().getExpertModeAction(), ToggleAction::PushButtonIcon);
 }
 
 void SharedParametersPlugin::init()

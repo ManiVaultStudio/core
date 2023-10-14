@@ -12,7 +12,7 @@
 #include <QDebug>
 #include <QOpenGLVersionFunctionsFactory>
 
-namespace hdps
+namespace mv
 {
 
 namespace
@@ -76,7 +76,7 @@ namespace
     {
         QOpenGLFunctions_3_3_Core* f = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_3_3_Core>(QOpenGLContext::currentContext());;
 
-        QString source = hdps::util::loadFileContents(path);
+        QString source = mv::util::loadFileContents(path);
         if (source.isEmpty()) return false;
 
         std::string ssource = source.toStdString();

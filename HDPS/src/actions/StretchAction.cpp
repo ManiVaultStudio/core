@@ -4,7 +4,7 @@
 
 #include "StretchAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 StretchAction::StretchAction(QObject* parent, const QString& title, std::int32_t stretch /*= 1*/) :
     WidgetAction(parent, title)

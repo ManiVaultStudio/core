@@ -17,7 +17,7 @@
 
 class QMainWindow;
 
-namespace hdps {
+namespace mv {
 
 class CoreInterface;
 class ProjectMetaAction;
@@ -42,7 +42,7 @@ public: // Construction
 
 public: // Miscellaneous
 
-    /** Returns a pointer to the current HDPS application (if the current application derives from hdps::Application) */
+    /** Returns a pointer to the current HDPS application (if the current application derives from mv::Application) */
     static Application* current();
 
     /** Get pointer to the core */

@@ -14,16 +14,16 @@
 
 Q_PLUGIN_METADATA(IID "NL.ManiVault.TasksPlugin")
 
-using namespace hdps;
-using namespace hdps::util;
+using namespace mv;
+using namespace mv::util;
 
 TasksPlugin::TasksPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
     _tasksAction(this, "Tasks")
 {
-    AbstractTaskTester::registerTester("hdps::ModalTaskTester");
-    AbstractTaskTester::registerTester("hdps::BackgroundTaskTester");
-    AbstractTaskTester::registerTester("hdps::ForegroundTaskTester");
+    AbstractTaskTester::registerTester("mv::ModalTaskTester");
+    AbstractTaskTester::registerTester("mv::BackgroundTaskTester");
+    AbstractTaskTester::registerTester("mv::ForegroundTaskTester");
 }
 
 void TasksPlugin::init()

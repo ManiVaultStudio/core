@@ -10,7 +10,7 @@
 
 class QWidget;
 
-namespace hdps::util {
+namespace mv::util {
 
 /**
  * Widget overlayer utility class

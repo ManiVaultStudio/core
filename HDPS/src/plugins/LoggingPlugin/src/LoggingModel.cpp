@@ -21,9 +21,9 @@
     #define LOGGING_MODEL_VERBOSE
 #endif
 
-using namespace hdps;
-using namespace hdps::util;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::util;
+using namespace mv::gui;
 
 QMap<LoggingModel::Column, QString> LoggingModel::columnNames = {
     { Column::Number, "Number" },

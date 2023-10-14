@@ -15,7 +15,7 @@
     //#define ABSTRACT_WORKSPACE_MANAGER_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 /** Workspace location which consists of a workspace title, file path and location type */
@@ -343,7 +343,7 @@ signals:
      * Signals that \p workspace is created
      * @param workspace Reference to the created workspace
      */
-    void workspaceCreated(const hdps::Workspace& workspace);
+    void workspaceCreated(const mv::Workspace& workspace);
 
     /**
      * Signals that a workspace is about to be loaded from \p filePath

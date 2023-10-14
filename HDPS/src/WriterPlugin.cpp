@@ -5,7 +5,7 @@
 #include "WriterPlugin.h"
 #include "Application.h"
 
-namespace hdps
+namespace mv
 {
 namespace plugin
 {

@@ -9,7 +9,7 @@
 
 #include <QGridLayout>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Group action class
@@ -308,6 +308,6 @@ private: // Specific settings for vertical layout
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::GroupAction)
+Q_DECLARE_METATYPE(mv::gui::GroupAction)
 
-inline const auto groupActionMetaTypeId = qRegisterMetaType<hdps::gui::GroupAction*>("hdps::gui::GroupAction");
+inline const auto groupActionMetaTypeId = qRegisterMetaType<mv::gui::GroupAction*>("mv::gui::GroupAction");

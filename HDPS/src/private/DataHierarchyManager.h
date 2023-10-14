@@ -12,9 +12,9 @@
 #include <QMap>
 #include <QString>
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
-namespace hdps
+namespace mv
 {
 
 class DataHierarchyManager final : public AbstractDataHierarchyManager

@@ -4,7 +4,7 @@
 
 #pragma once
 
-namespace hdps
+namespace mv
 {
 namespace util
 {
@@ -13,4 +13,4 @@ float lerp(float v0, float v1, float t);
 
 } // namespace util
 
-} // namespace hdps
+} // namespace mv

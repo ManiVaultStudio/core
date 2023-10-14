@@ -5,7 +5,7 @@
 #pragma once
 #include <QSortFilterProxyModel>
 
-namespace hdps
+namespace mv
 {
     class DimensionsPickerHolder;
 

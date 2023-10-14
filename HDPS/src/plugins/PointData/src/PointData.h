@@ -25,9 +25,9 @@
 #include <utility> // For tuple.
 #include <vector>
 
-using namespace hdps::plugin;
+using namespace mv::plugin;
 
-namespace hdps
+namespace mv
 {
     // From "graphics/Vector2f.h"
     class Vector2f;
@@ -41,7 +41,7 @@ namespace hdps
 // Data Type
 // =============================================================================
 
-const hdps::DataType PointType = hdps::DataType(QString("Points"));
+const mv::DataType PointType = mv::DataType(QString("Points"));
 
 class InfoAction;
 class DimensionsPickerAction;
@@ -51,7 +51,7 @@ class ClusterAction;
 // Raw Data
 // =============================================================================
 
-class POINTDATA_EXPORT PointData : public hdps::plugin::RawData
+class POINTDATA_EXPORT PointData : public mv::plugin::RawData
 {
 private:
 
@@ -325,7 +325,7 @@ public:
 
     void init() override;
 
-    hdps::Dataset<hdps::DatasetImpl> createDataSet(const QString& guid = "") const override;
+    mv::Dataset<mv::DatasetImpl> createDataSet(const QString& guid = "") const override;
 
     unsigned int getNumPoints() const;
 
@@ -383,8 +383,8 @@ public:
     }
 
     void extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
-    void extractFullDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
-    void extractDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const;
+    void extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
+    void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const;
 
     template <typename ResultContainer, typename DimensionIndices>
     void populateFullDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
@@ -557,7 +557,7 @@ private:
 // Point Set
 // =============================================================================
 
-class POINTDATA_EXPORT Points : public hdps::DatasetImpl
+class POINTDATA_EXPORT Points : public mv::DatasetImpl
 {
 private:
     /* Private helper function for visitData. Helps to reduces duplicate
@@ -579,7 +579,7 @@ private:
                             return index;
                         };
 
-                        return functionObject(hdps::makePointDataRangeOfFullSet(
+                        return functionObject(mv::makePointDataRangeOfFullSet(
                             begin, end, numberOfDimensions, indexFunction));
                     }
                     else
@@ -591,7 +591,7 @@ private:
                             return *indexIterator;
                         };
 
-                        return functionObject(hdps::makePointDataRangeOfSubset(
+                        return functionObject(mv::makePointDataRangeOfSubset(
                             begin, points.indices, numberOfDimensions, indexFunction));
                     }
                 });
@@ -629,7 +629,7 @@ private:
                         };
 
                         // Its source data is a full set, so it is sufficient to use its own (points) indices.
-                        return functionObject(hdps::makePointDataRangeOfSubset(
+                        return functionObject(mv::makePointDataRangeOfSubset(
                             begin, points.indices, points.getNumDimensions(), indexFunction));
                     });
             }
@@ -646,7 +646,7 @@ private:
                 return sourceData->template visitFromBeginToEnd<ReturnType>(
                     [&points, functionObject, indexFunction](const auto begin, const auto end) -> ReturnType
                     {
-                        return functionObject(hdps::makePointDataRangeOfSubset(
+                        return functionObject(mv::makePointDataRangeOfSubset(
                             begin, points.indices, points.getNumDimensions(), indexFunction));
                     });
             }
@@ -654,7 +654,7 @@ private:
     }
 
 public:
-    Points(hdps::CoreInterface* core, QString dataName, const QString& guid = "");
+    Points(mv::CoreInterface* core, QString dataName, const QString& guid = "");
     ~Points() override;
 
     void init() override;
@@ -750,7 +750,7 @@ public:
         getRawData<PointData>().setData(data, numPoints, numDimensions);
 
         if (notifyDimensionsChanged)
-            hdps::events().notifyDatasetDataDimensionsChanged(this);
+            mv::events().notifyDatasetDataDimensionsChanged(this);
     }
 
     /// Just calls the corresponding member function of its PointData.
@@ -765,7 +765,7 @@ public:
         getRawData<PointData>().setData(data, numDimensions);
 
         if (notifyDimensionsChanged)
-            hdps::events().notifyDatasetDataDimensionsChanged(this);
+            mv::events().notifyDatasetDataDimensionsChanged(this);
     }
 
     /// Just calls the corresponding member function of its PointData.
@@ -777,12 +777,12 @@ public:
         getRawData<PointData>().setData(std::move(data), numDimensions);
 
         if (notifyDimensionsChanged)
-            hdps::events().notifyDatasetDataDimensionsChanged(this);
+            mv::events().notifyDatasetDataDimensionsChanged(this);
     }
 
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
 
-    void extractDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
+    void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
 
     /// Populates the specified result container with the data for the
     /// dimensions specified by the dimension indices.
@@ -795,7 +795,7 @@ public:
             std::size_t offset = 0;
 
             for (auto proxyMember : getProxyMembers()) {
-                auto points = hdps::Dataset<Points>(proxyMember);
+                auto points = mv::Dataset<Points>(proxyMember);
 
                 ResultContainer proxyPointsData;
 
@@ -864,7 +864,7 @@ public:
      * @param proxyDatasets Candidate proxy datasets
      * @return Boolean indicating whether a proxy dataset may be created with candidate \p proxyDatasets
      */
-    bool mayProxy(const hdps::Datasets& proxyDatasets) const override;
+    bool mayProxy(const mv::Datasets& proxyDatasets) const override;
 
     unsigned int getNumPoints() const
     {
@@ -872,7 +872,7 @@ public:
             auto numberOfPoints = 0;
 
             for (auto proxyMember : getProxyMembers())
-                numberOfPoints += hdps::Dataset<Points>(proxyMember)->getNumPoints();
+                numberOfPoints += mv::Dataset<Points>(proxyMember)->getNumPoints();
 
             return numberOfPoints;
         }
@@ -885,7 +885,7 @@ public:
     unsigned int getNumDimensions() const
     {
         if (isProxy()) {
-            return hdps::Dataset<Points>(getProxyMembers().first())->getNumDimensions();
+            return mv::Dataset<Points>(getProxyMembers().first())->getNumDimensions();
         }
         else {
             return getRawData<PointData>().getNumDimensions();
@@ -923,7 +923,7 @@ public:
      * Get a copy of the dataset
      * @return Smart pointer to copy of dataset
      */
-    hdps::Dataset<hdps::DatasetImpl> copy() const override;
+    mv::Dataset<mv::DatasetImpl> copy() const override;
 
     /**
      * Create subset from the current selection and specify where the subset will be placed in the data hierarchy
@@ -932,7 +932,7 @@ public:
      * @param visible Whether the subset will be visible in the UI
      * @return Smart pointer to the created subset
      */
-    hdps::Dataset<hdps::DatasetImpl> createSubsetFromSelection(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
+    mv::Dataset<mv::DatasetImpl> createSubsetFromSelection(const QString& guiName, const mv::Dataset<mv::DatasetImpl>& parentDataSet = mv::Dataset<mv::DatasetImpl>(), const bool& visible = true) const override;
 
     /**
      * Create subset from the current selection and specify where the subset will be placed in the data hierarchy.
@@ -942,7 +942,7 @@ public:
      * @param visible Whether the subset will be visible in the UI
      * @return Smart pointer to the created subset
      */
-    hdps::Dataset<hdps::DatasetImpl> createSubsetFromVisibleSelection(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const;
+    mv::Dataset<mv::DatasetImpl> createSubsetFromVisibleSelection(const QString& guiName, const mv::Dataset<mv::DatasetImpl>& parentDataSet = mv::Dataset<mv::DatasetImpl>(), const bool& visible = true) const;
 
     /**
      * Get set icon
@@ -955,12 +955,12 @@ public:
      * Set the proxy member datasets (automatically sets the dataset type to Type::Proxy)
      * @param proxyMembers Proxy member datasets
      */
-    void setProxyMembers(const hdps::Datasets& proxyMembers) override;
+    void setProxyMembers(const mv::Datasets& proxyMembers) override;
 
 public: // Action getters
 
     InfoAction& getInfoAction();
-    hdps::gui::GroupAction& getDimensionsPickerGroupAction();
+    mv::gui::GroupAction& getDimensionsPickerGroupAction();
     DimensionsPickerAction& getDimensionsPickerAction();
 
 public: // Selection
@@ -1025,9 +1025,9 @@ public:
     std::vector<unsigned int> indices;
 
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
-    hdps::gui::GroupAction*     _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
+    mv::gui::GroupAction*     _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
     DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
-    hdps::EventListener         _eventListener;                 /** Listen to HDPS events */
+    mv::EventListener         _eventListener;                 /** Listen to HDPS events */
 };
 
 // =============================================================================
@@ -1036,7 +1036,7 @@ public:
 
 class PointDataFactory : public RawDataFactory
 {
-    Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
+    Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
         Q_OBJECT
         Q_PLUGIN_METADATA(IID   "hdps.PointData"
             FILE  "PointData.json")
@@ -1052,5 +1052,5 @@ public:
      */
     QIcon getIcon(const QColor& color = Qt::black) const override;
 
-    hdps::plugin::RawData* produce() override;
+    mv::plugin::RawData* produce() override;
 };

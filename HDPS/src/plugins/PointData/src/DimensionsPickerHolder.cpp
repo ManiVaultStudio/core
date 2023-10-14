@@ -19,7 +19,7 @@ namespace
 
 } // End of unnamed namespace
 
-namespace hdps
+namespace mv
 {
     DimensionsPickerHolder::DimensionsPickerHolder(const unsigned numberOfDimensions) :
         _enabledDimensions(makeArrayOfTrueValues(numberOfDimensions)),
@@ -117,4 +117,4 @@ namespace hdps
         return std::vector<bool>(enabledDimensions, enabledDimensions + _numberOfDimensions);
     }
 
-} // namespace hdps
+} // namespace mv

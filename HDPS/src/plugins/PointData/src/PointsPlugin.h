@@ -14,7 +14,7 @@
 #include <QVariant>
 #include <vector>
 
-using namespace hdps::plugin;
+using namespace mv::plugin;
 
 // =============================================================================
 // View
@@ -28,7 +28,7 @@ public:
 
     void init() override;
 
-    hdps::Set* createSet() const override;
+    mv::Set* createSet() const override;
 
     unsigned int getNumPoints() const;
 
@@ -69,10 +69,10 @@ private:
     QMap<QString, QVariant> _properties;
 };
 
-class IndexSet : public hdps::Set
+class IndexSet : public mv::Set
 {
 public:
-    IndexSet(hdps::CoreInterface* core, QString dataName) : Set(core, dataName) { }
+    IndexSet(mv::CoreInterface* core, QString dataName) : Set(core, dataName) { }
     ~IndexSet() override { }
 
     PointsPlugin& getData() const
@@ -91,7 +91,7 @@ public:
 
 class PointsPluginFactory : public RawDataFactory
 {
-    Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
+    Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
         Q_OBJECT
         Q_PLUGIN_METADATA(IID   "nl.tudelft.PointsPlugin"
             FILE  "PointsPlugin.json")

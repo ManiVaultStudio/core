@@ -9,9 +9,9 @@
 
 #include <actions/StringAction.h>
 
-using namespace hdps;
-using namespace hdps::util;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::util;
+using namespace mv::gui;
 
 /**
  * Proxy datasets action class
@@ -27,7 +27,7 @@ class ProxyDatasetsAction : public WidgetAction
 protected:
 
     /** Widget class for proxy datasets action */
-    class Widget : public hdps::gui::WidgetActionWidget {
+    class Widget : public mv::gui::WidgetActionWidget {
     public:
 
         /**

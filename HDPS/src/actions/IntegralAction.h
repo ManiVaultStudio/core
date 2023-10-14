@@ -14,7 +14,7 @@
 class QWidget;
 class QPushButton;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Integral widget action class
@@ -182,6 +182,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::IntegralAction)
+Q_DECLARE_METATYPE(mv::gui::IntegralAction)
 
-inline const auto integralActionMetaTypeId = qRegisterMetaType<hdps::gui::IntegralAction*>("hdps::gui::IntegralAction");
+inline const auto integralActionMetaTypeId = qRegisterMetaType<mv::gui::IntegralAction*>("mv::gui::IntegralAction");

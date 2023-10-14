@@ -8,7 +8,7 @@
 #include "CoreInterface.h"
 #include "Set.h"
 
-namespace hdps {
+namespace mv {
 
 using namespace gui;
 

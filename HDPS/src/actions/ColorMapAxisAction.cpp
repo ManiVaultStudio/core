@@ -11,9 +11,9 @@
 #include <QGridLayout>
 #include <QGroupBox>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsAction, const QString& title) :
     WidgetAction(&colorMapSettingsAction, "Axis"),

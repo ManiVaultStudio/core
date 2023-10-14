@@ -7,9 +7,9 @@
 #include "Application.h"
 #include "CoreInterface.h"
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
-namespace hdps {
+namespace mv {
 
 ForegroundTaskHandler::ForegroundTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),

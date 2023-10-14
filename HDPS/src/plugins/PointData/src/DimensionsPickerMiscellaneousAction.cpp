@@ -9,7 +9,7 @@
 
 #include <QVBoxLayout>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 DimensionsPickerMiscellaneousAction::DimensionsPickerMiscellaneousAction(DimensionsPickerAction& dimensionsPickerAction) :
     WidgetAction(&dimensionsPickerAction, "Miscellaneous"),

@@ -26,10 +26,10 @@
 
 using namespace ads;
 
-using namespace hdps;
-using namespace hdps::plugin;
-using namespace hdps::util;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::plugin;
+using namespace mv::util;
+using namespace mv::gui;
 
 QList<ViewPluginDockWidget*> ViewPluginDockWidget::active = QList<ViewPluginDockWidget*>();
 
@@ -324,7 +324,7 @@ void ViewPluginDockWidget::removeAllSerializationTasks()
     serializationTasks.clear();
 }
 
-void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
+void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 {
 #ifdef VIEW_PLUGIN_DOCK_WIDGET_VERBOSE
     qDebug() << __FUNCTION__;
@@ -489,7 +489,7 @@ void ViewPluginDockWidget::setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin)
     });
 }
 
-ViewPluginDockWidget::SettingsActionWidget::SettingsActionWidget(QWidget* parent, hdps::gui::WidgetAction* settingsAction) :
+ViewPluginDockWidget::SettingsActionWidget::SettingsActionWidget(QWidget* parent, mv::gui::WidgetAction* settingsAction) :
     QWidget(parent),
     _settingsAction(settingsAction)
 {

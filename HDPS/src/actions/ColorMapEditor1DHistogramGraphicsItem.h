@@ -6,7 +6,7 @@
 
 #include <QGraphicsItem>
 
-namespace hdps {
+namespace mv {
 
 namespace gui {
 

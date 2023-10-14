@@ -10,7 +10,7 @@
 #include "actions/TaskAction.h"
 #include "actions/HorizontalGroupAction.h"
 
-namespace hdps {
+namespace mv {
 
 /**
  * Background task handler class

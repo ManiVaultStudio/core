@@ -4,7 +4,7 @@
 
 #include "Version.h"
 
-namespace hdps::util {
+namespace mv::util {
 
 Version::Version(std::int32_t major, std::int32_t minor) :
     QPair<std::int32_t, std::int32_t>({ major, minor }),

@@ -14,7 +14,7 @@
     #define START_PAGE_ACTION_DELEGATE_EDITOR_WIDGET_VERBOSE
 #endif
 
-using namespace hdps;
+using namespace mv;
 
 StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),

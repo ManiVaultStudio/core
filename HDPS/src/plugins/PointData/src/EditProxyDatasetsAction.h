@@ -6,9 +6,9 @@
 
 #include "PointData.h"
 
-using namespace hdps;
-using namespace hdps::util;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::util;
+using namespace mv::gui;
 
 /**
  * Edit proxy datasets action class

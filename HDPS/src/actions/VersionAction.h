@@ -10,7 +10,7 @@
 
 #include <QCompleter>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Version action class
@@ -68,6 +68,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::VersionAction)
+Q_DECLARE_METATYPE(mv::gui::VersionAction)
 
-inline const auto versionActionMetaTypeId = qRegisterMetaType<hdps::gui::VersionAction*>("hdps::gui::VersionAction");
+inline const auto versionActionMetaTypeId = qRegisterMetaType<mv::gui::VersionAction*>("mv::gui::VersionAction");

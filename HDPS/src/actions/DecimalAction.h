@@ -13,7 +13,7 @@
 class QWidget;
 class QPushButton;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Decimal action class
@@ -202,6 +202,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::DecimalAction)
+Q_DECLARE_METATYPE(mv::gui::DecimalAction)
 
-inline const auto decimalActionMetaTypeId = qRegisterMetaType<hdps::gui::DecimalAction*>("hdps::gui::DecimalAction");
+inline const auto decimalActionMetaTypeId = qRegisterMetaType<mv::gui::DecimalAction*>("mv::gui::DecimalAction");

@@ -9,9 +9,9 @@
 
 #include <QGridLayout>
 
-using namespace hdps;
+using namespace mv;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 WindowLevelAction::WindowLevelAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),

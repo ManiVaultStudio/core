@@ -8,7 +8,7 @@
 
 class QWidget;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Variant widget action class
@@ -94,6 +94,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::VariantAction)
+Q_DECLARE_METATYPE(mv::gui::VariantAction)
 
-inline const auto variantActionMetaTypeId = qRegisterMetaType<hdps::gui::VariantAction*>("hdps::gui::VariantAction");
+inline const auto variantActionMetaTypeId = qRegisterMetaType<mv::gui::VariantAction*>("mv::gui::VariantAction");

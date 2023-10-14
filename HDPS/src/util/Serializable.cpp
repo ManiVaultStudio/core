@@ -19,10 +19,10 @@
     //#define SERIALIZABLE_VERBOSE
 #endif
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
-namespace hdps::util {
+namespace mv::util {
 
 Serializable::Serializable(const QString& name /*= ""*/) :
     _id(createId()),

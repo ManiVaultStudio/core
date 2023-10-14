@@ -6,7 +6,7 @@
 
 #include "Renderer.h"
 
-namespace hdps
+namespace mv
 {
     class ImageRenderer : public Renderer
     {
@@ -18,4 +18,4 @@ namespace hdps
     private:
         ShaderProgram _shader;
     };
-} // namespace hdps
+} // namespace mv

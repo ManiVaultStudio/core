@@ -14,7 +14,7 @@
 
 class QAction;
 
-namespace hdps::util
+namespace mv::util
 {
 
 /**

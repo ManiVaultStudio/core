@@ -16,7 +16,7 @@
 #include <QMenu>
 #include <QTemporaryDir>
 
-namespace hdps {
+namespace mv {
 
 /**
  * Abstract project manager class
@@ -250,17 +250,17 @@ public: // State
 
 public: // Action getters
 
-    virtual hdps::gui::TriggerAction& getNewBlankProjectAction() = 0;
-    virtual hdps::gui::TriggerAction& getNewProjectFromWorkspaceAction() = 0;
-    virtual hdps::gui::TriggerAction& getOpenProjectAction() = 0;
-    virtual hdps::gui::TriggerAction& getImportProjectAction() = 0;
-    virtual hdps::gui::TriggerAction& getSaveProjectAction() = 0;
-    virtual hdps::gui::TriggerAction& getSaveProjectAsAction() = 0;
-    virtual hdps::gui::TriggerAction& getEditProjectSettingsAction() = 0;
-    virtual hdps::gui::RecentFilesAction& getRecentProjectsAction() = 0;
-    virtual hdps::gui::TriggerAction& getPublishAction() = 0;
-    virtual hdps::gui::TriggerAction& getPluginManagerAction() = 0;
-    virtual hdps::gui::ToggleAction& getShowStartPageAction() = 0;
+    virtual mv::gui::TriggerAction& getNewBlankProjectAction() = 0;
+    virtual mv::gui::TriggerAction& getNewProjectFromWorkspaceAction() = 0;
+    virtual mv::gui::TriggerAction& getOpenProjectAction() = 0;
+    virtual mv::gui::TriggerAction& getImportProjectAction() = 0;
+    virtual mv::gui::TriggerAction& getSaveProjectAction() = 0;
+    virtual mv::gui::TriggerAction& getSaveProjectAsAction() = 0;
+    virtual mv::gui::TriggerAction& getEditProjectSettingsAction() = 0;
+    virtual mv::gui::RecentFilesAction& getRecentProjectsAction() = 0;
+    virtual mv::gui::TriggerAction& getPublishAction() = 0;
+    virtual mv::gui::TriggerAction& getPluginManagerAction() = 0;
+    virtual mv::gui::ToggleAction& getShowStartPageAction() = 0;
 
 signals:
 
@@ -271,7 +271,7 @@ signals:
      * Signals that \p project is created
      * @param project Reference to the created project
      */
-    void projectCreated(const hdps::Project& project);
+    void projectCreated(const mv::Project& project);
 
     /**
      * Signals that project with \p projectId is destroyed
@@ -283,13 +283,13 @@ signals:
      * Signals that \p project is about to be opened
      * @param project Reference to the project that is about to be opened
      */
-    void projectAboutToBeOpened(const hdps::Project& project);
+    void projectAboutToBeOpened(const mv::Project& project);
 
     /**
      * Signals that \p project is opened
      * @param project Reference to the project that is opened
      */
-    void projectOpened(const hdps::Project& project);
+    void projectOpened(const mv::Project& project);
 
     /**
      * Signals that a project is about to be imported from \p filePath
@@ -307,31 +307,31 @@ signals:
      * Signals that \p project is about to be saved
      * @param project Reference to the project that is about to be saved
      */
-    void projectAboutToBeSaved(const hdps::Project& project);
+    void projectAboutToBeSaved(const mv::Project& project);
 
     /**
      * Signals that \p project is saved
      * @param project Reference to the saved project
      */
-    void projectSaved(const hdps::Project& project);
+    void projectSaved(const mv::Project& project);
 
     /**
      * Signals that \p project is about to be published
      * @param project Reference to the project that is about to be published
      */
-    void projectAboutToBePublished(const hdps::Project& project);
+    void projectAboutToBePublished(const mv::Project& project);
 
     /**
      * Signals that \p project is published
      * @param project Reference to the published project
      */
-    void projectPublished(const hdps::Project& project);
+    void projectPublished(const mv::Project& project);
 
     /**
      * Signals that \p project is about to be destroyed
      * @param project Reference to the project that is about to be destroyed
      */
-    void projectAboutToBeDestroyed(const hdps::Project& project);
+    void projectAboutToBeDestroyed(const mv::Project& project);
 
     /**
      * Signals that the state of the project manager changed to \p state

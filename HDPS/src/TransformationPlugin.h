@@ -9,7 +9,7 @@
 #include "DataHierarchyItem.h"
 #include "Set.h"
 
-namespace hdps
+namespace mv
 {
 
 namespace plugin
@@ -81,4 +81,4 @@ public:
 
 }
 
-Q_DECLARE_INTERFACE(hdps::plugin::TransformationPluginFactory, "hdps.TransformationPluginFactory")
+Q_DECLARE_INTERFACE(mv::plugin::TransformationPluginFactory, "hdps.TransformationPluginFactory")

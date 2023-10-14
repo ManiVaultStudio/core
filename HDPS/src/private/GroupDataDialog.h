@@ -28,7 +28,7 @@ public:
      * @param parent Pointer to parent widget
      * @param datasets Datasets for grouping
      */
-    GroupDataDialog(QWidget* parent, const hdps::Datasets& datasets);
+    GroupDataDialog(QWidget* parent, const mv::Datasets& datasets);
 
     /** Get preferred size */
     QSize sizeHint() const override {
@@ -47,7 +47,7 @@ public:
     QString getGroupName() const;
 
 protected:
-    hdps::Datasets              _datasets;              /** Datasets for grouping */
-    hdps::gui::StringAction     _groupNameAction;       /** Group name action */
-    hdps::gui::ToggleAction     _showDialogAction;      /** Whether to show the name dialog next time */
+    mv::Datasets              _datasets;              /** Datasets for grouping */
+    mv::gui::StringAction     _groupNameAction;       /** Group name action */
+    mv::gui::ToggleAction     _showDialogAction;      /** Whether to show the name dialog next time */
 };

@@ -11,7 +11,7 @@
 
 //#define GROUPS_ACTION_VERBOSE
 
-namespace hdps::gui {
+namespace mv::gui {
 
 GroupsAction::GroupsAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),

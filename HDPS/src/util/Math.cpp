@@ -4,7 +4,7 @@
 
 #include "Math.h"
 
-namespace hdps
+namespace mv
 {
 namespace util
 {
@@ -16,4 +16,4 @@ namespace util
 
 } // namespace util
 
-} // namespace hdps
+} // namespace mv

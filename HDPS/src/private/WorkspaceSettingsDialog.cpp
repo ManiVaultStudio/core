@@ -15,8 +15,8 @@
     #define WORKSPACE_SETTINGS_DIALOG_VERBOSE
 #endif
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 WorkspaceSettingsDialog::WorkspaceSettingsDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),

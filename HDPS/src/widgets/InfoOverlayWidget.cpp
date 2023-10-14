@@ -10,7 +10,7 @@
     #define INFO_OVERLAY_WIDGET_VERBOSE
 #endif
 
-namespace hdps::gui
+namespace mv::gui
 {
 
 InfoOverlayWidget::InfoOverlayWidget(QWidget* parent) :
@@ -28,7 +28,7 @@ InfoOverlayWidget::InfoOverlayWidget(QWidget* parent, const QIcon& icon, const Q
     setColors(foregroundColor, backgroundColor);
 }
 
-hdps::util::WidgetFader& InfoOverlayWidget::getWidgetFader()
+mv::util::WidgetFader& InfoOverlayWidget::getWidgetFader()
 {
     return _widgetOverlayer.getWidgetFader();
 }

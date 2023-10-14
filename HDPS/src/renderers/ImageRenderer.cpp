@@ -4,7 +4,7 @@
 
 #include "ImageRenderer.h"
 
-namespace hdps
+namespace mv
 {
     void ImageRenderer::init()
     {

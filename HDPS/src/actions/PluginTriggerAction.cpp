@@ -10,7 +10,7 @@
 
 #include <QCryptographicHash>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFactory* pluginFactory, const QString& title, const QString& tooltip, const QIcon& icon) :
     TriggerAction(parent, title),
@@ -61,7 +61,7 @@ PluginTriggerAction::PluginTriggerAction(const PluginTriggerAction& pluginTrigge
     connect(this, &TriggerAction::triggered, this, &PluginTriggerAction::requestPlugin);
 }
 
-const hdps::plugin::PluginFactory* PluginTriggerAction::getPluginFactory() const
+const mv::plugin::PluginFactory* PluginTriggerAction::getPluginFactory() const
 {
     return _pluginFactory;
 }

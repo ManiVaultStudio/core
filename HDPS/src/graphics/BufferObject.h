@@ -8,7 +8,7 @@
 
 #include <vector>
 
-namespace hdps
+namespace mv
 {
 
 class BufferObject : protected QOpenGLFunctions_3_3_Core
@@ -30,4 +30,4 @@ private:
     GLuint _object;
 };
 
-} // namespace hdps
+} // namespace mv

@@ -13,7 +13,7 @@
 #include <QSortFilterProxyModel>
 #include <QDialog>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /** Recent file utility class (contains file path and date time) */
 class RecentFile final {
@@ -290,6 +290,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::RecentFilesAction)
+Q_DECLARE_METATYPE(mv::gui::RecentFilesAction)
 
-inline const auto recentFilesActionMetaTypeId = qRegisterMetaType<hdps::gui::RecentFilesAction*>("RecentFilesAction");
+inline const auto recentFilesActionMetaTypeId = qRegisterMetaType<mv::gui::RecentFilesAction*>("RecentFilesAction");

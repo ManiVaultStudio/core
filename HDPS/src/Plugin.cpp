@@ -9,9 +9,9 @@
     #define PLUGIN_VERBOSE
 #endif
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
-namespace hdps::plugin
+namespace mv::plugin
 {
 
 Plugin::Plugin(const PluginFactory* factory) :
@@ -46,7 +46,7 @@ Plugin::~Plugin()
 #endif
 }
 
-const hdps::plugin::PluginFactory* Plugin::getFactory() const
+const mv::plugin::PluginFactory* Plugin::getFactory() const
 {
     return _factory;
 }
@@ -71,7 +71,7 @@ QString Plugin::getKind() const
     return _factory->getKind();
 }
 
-hdps::plugin::Type Plugin::getType() const
+mv::plugin::Type Plugin::getType() const
 {
     return _factory->getType();
 }
@@ -86,7 +86,7 @@ bool Plugin::hasHelp()
     return const_cast<PluginFactory*>(_factory)->hasHelp();
 }
 
-hdps::gui::TriggerAction& Plugin::getTriggerHelpAction()
+mv::gui::TriggerAction& Plugin::getTriggerHelpAction()
 {
     return const_cast<PluginFactory*>(_factory)->getTriggerHelpAction();
 }

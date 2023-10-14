@@ -4,7 +4,7 @@
 
 #include "HorizontalGroupAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 HorizontalGroupAction::HorizontalGroupAction(QObject* parent, const QString& title, const bool& expanded /*= false*/) :
     GroupAction(parent, title, expanded)

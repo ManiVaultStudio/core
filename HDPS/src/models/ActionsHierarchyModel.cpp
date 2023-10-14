@@ -4,13 +4,13 @@
 
 #include "ActionsHierarchyModel.h"
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
 #ifdef _DEBUG
     #define ACTIONS_HIERARCHY_MODEL_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 ActionsHierarchyModel::ActionsHierarchyModel(QObject* parent, gui::WidgetAction* rootAction /*= nullptr*/) :

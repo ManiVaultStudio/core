@@ -8,7 +8,7 @@
 #include <cstddef> // For size_t
 #include <cassert>
 
-namespace hdps
+namespace mv
 {
     template <typename RandomAccessIteratorType>
     class RandomAccessRange

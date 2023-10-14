@@ -10,7 +10,7 @@
 #include <QVBoxLayout>
 #include <QColorDialog>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Color picker action class
@@ -120,6 +120,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::ColorPickerAction)
+Q_DECLARE_METATYPE(mv::gui::ColorPickerAction)
 
-inline const auto colorPickerActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorPickerAction*>("ColorPickerAction");
+inline const auto colorPickerActionMetaTypeId = qRegisterMetaType<mv::gui::ColorPickerAction*>("ColorPickerAction");

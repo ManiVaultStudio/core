@@ -9,7 +9,7 @@
 
 #include <cmath>
 
-namespace hdps
+namespace mv
 {
     Matrix3f::Matrix3f() {
         setIdentity();

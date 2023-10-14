@@ -5,7 +5,7 @@
 #include "AbstractTaskHandler.h"
 #include "Task.h"
 
-namespace hdps {
+namespace mv {
 
 AbstractTaskHandler::AbstractTaskHandler(QObject* parent, Task* task) :
     QObject(parent),

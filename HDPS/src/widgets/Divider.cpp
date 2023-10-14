@@ -4,7 +4,7 @@
 
 #include "Divider.h"
 
-namespace hdps {
+namespace mv {
 
 namespace gui {
 

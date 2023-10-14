@@ -6,11 +6,11 @@
 
 #include <QObject>
 
-namespace hdps::gui {
+namespace mv::gui {
     class WidgetAction;
 }
 
-namespace hdps {
+namespace mv {
 
 class Task;
 

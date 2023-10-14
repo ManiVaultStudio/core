@@ -10,7 +10,7 @@
 
 #include <QString>
 
-namespace hdps
+namespace mv
 {
     struct StatisticsPerDimension
     {
@@ -62,4 +62,4 @@ namespace hdps
         std::vector<bool> getEnabledDimensions() const;
     };
 
-} // namespace hdps
+} // namespace mv

@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <string>
 
-namespace hdps
+namespace mv
 {
 class Vector3f;
 class Matrix3f;

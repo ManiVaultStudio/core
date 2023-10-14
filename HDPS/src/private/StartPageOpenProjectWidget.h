@@ -62,7 +62,7 @@ private:
     StartPageActionsWidget          _openCreateProjectWidget;   /** Actions widget for open and create project action */
     StartPageActionsWidget          _recentProjectsWidget;      /** Actions widget for existing projects action */
     StartPageActionsWidget          _exampleProjectsWidget;     /** Actions widget for example projects action */
-    hdps::gui::RecentFilesAction    _recentProjectsAction;      /** Action for recent projects */
+    mv::gui::RecentFilesAction    _recentProjectsAction;      /** Action for recent projects */
     QIcon                           _leftAlignedIcon;           /** Icon for left-aligned default project */
     QIcon                           _leftAlignedLoggingIcon;    /** Icon for left-aligned default project with logging */
     QIcon                           _rightAlignedIcon;          /** Icon for right-aligned default project */

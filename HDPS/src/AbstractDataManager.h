@@ -22,7 +22,7 @@ namespace std {
 }
 #endif
 
-namespace hdps
+namespace mv
 {
 
 class DatasetImpl;

@@ -6,7 +6,7 @@
 
 class QAbstractItemModel;
 
-namespace hdps
+namespace mv
 {
     // Takes care of calling itemModel.beginResetModel (in its explicit
     // constructor and itemModel.endResetModel (in its destructor).

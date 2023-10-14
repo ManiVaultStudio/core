@@ -16,9 +16,9 @@
 #include <QDebug>
 #include <QPainter>
 
-using namespace hdps;
-using namespace hdps::util;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::util;
+using namespace mv::gui;
 
 StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* startPageContentWidget) :
     QWidget(startPageContentWidget),
@@ -120,7 +120,7 @@ void StartPageOpenProjectWidget::createIconForDefaultProject(const Qt::Alignment
     if (alignment == Qt::AlignLeft)
         finalPixmap = pixmap.transformed(QTransform().scale(-1, 1));
 
-    icon = hdps::gui::createIcon(finalPixmap);
+    icon = mv::gui::createIcon(finalPixmap);
 }
 
 void StartPageOpenProjectWidget::updateOpenCreateActions()

@@ -14,7 +14,7 @@
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Strings widget action class
@@ -179,6 +179,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::StringsAction)
+Q_DECLARE_METATYPE(mv::gui::StringsAction)
 
-inline const auto stringsActionMetaTypeId = qRegisterMetaType<hdps::gui::StringsAction*>("hdps::gui::StringsAction");
+inline const auto stringsActionMetaTypeId = qRegisterMetaType<mv::gui::StringsAction*>("mv::gui::StringsAction");

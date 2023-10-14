@@ -4,7 +4,7 @@
 
 #include "VerticalToolbarAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 VerticalToolbarAction::VerticalToolbarAction(QObject* parent, const QString& title, const Qt::AlignmentFlag& alignment /*= Qt::AlignmentFlag::AlignTo*/) :
     ToolbarAction(parent, title)

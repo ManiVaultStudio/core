@@ -10,7 +10,7 @@
 #include <QColor>
 #include <QPointF>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 class ColorMapEditor1DAction;
 

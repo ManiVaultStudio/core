@@ -9,7 +9,7 @@
 #include <QCheckBox>
 #include <QPushButton>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Toggle action class
@@ -170,6 +170,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::ToggleAction)
+Q_DECLARE_METATYPE(mv::gui::ToggleAction)
 
-inline const auto toggleActionMetaTypeId = qRegisterMetaType<hdps::gui::ToggleAction*>("hdps::gui::ToggleAction");
+inline const auto toggleActionMetaTypeId = qRegisterMetaType<mv::gui::ToggleAction*>("mv::gui::ToggleAction");

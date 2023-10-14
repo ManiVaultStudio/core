@@ -16,9 +16,9 @@
 #include <numeric>
 #include <math.h>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ColorMapAction::ColorMapAction(QObject* parent, const QString& title, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= "RdYlBu"*/) :
     WidgetAction(parent, title),
@@ -199,7 +199,7 @@ void ColorMapAction::initialize(const QString& colorMap)
     getEditor1DAction().setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 }
 
-hdps::util::ColorMap::Type ColorMapAction::getColorMapType() const
+mv::util::ColorMap::Type ColorMapAction::getColorMapType() const
 {
     return _colorMapFilterModel.getType();
 }

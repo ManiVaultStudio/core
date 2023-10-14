@@ -14,7 +14,7 @@
 #include <QSortFilterProxyModel>
 #include <QMap>
 
-namespace hdps
+namespace mv
 {
 
 /**

@@ -8,13 +8,13 @@
 #include <CoreInterface.h>
 #include <AbstractPluginManager.h>
 
-using namespace hdps;
+using namespace mv;
 
 #ifdef _DEBUG
     #define PLUGIN_MANAGER_MODEL_VERBOSE
 #endif
 
-Q_DECLARE_METATYPE(hdps::plugin::Plugin*);
+Q_DECLARE_METATYPE(mv::plugin::Plugin*);
 
 QMap<PluginManagerModel::Column, QPair<QString, QString>> PluginManagerModel::columns = QMap<PluginManagerModel::Column, QPair<QString, QString>>({
     { PluginManagerModel::Column::Name, { "Name", "Item name (plugin type, factory name or plugin name)" }},

@@ -13,9 +13,9 @@
 #include <QToolButton>
 
 using namespace ads;
-using namespace hdps;
-using namespace hdps::util;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::util;
+using namespace mv::gui;
 
 DockAreaTitleBar::DockAreaTitleBar(ads::CDockAreaWidget* dockAreaWidget) :
     CDockAreaTitleBar(dockAreaWidget),

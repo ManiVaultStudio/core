@@ -6,7 +6,7 @@
 
 #include <QImage>
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 

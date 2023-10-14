@@ -15,7 +15,7 @@
     #define ABSTRACT_DATA_HIERARCHY_MANAGER_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 /**

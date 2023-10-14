@@ -8,7 +8,7 @@
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
 
-namespace hdps::util {
+namespace mv::util {
 
 /**
  * Widget fader utility class

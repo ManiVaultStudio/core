@@ -6,7 +6,7 @@
 
 #include "AbstractTaskManager.h"
 
-namespace hdps
+namespace mv
 {
 
 class TaskManager final : public AbstractTaskManager

@@ -7,7 +7,7 @@
 #include <string>
 #include <iostream>
 
-namespace hdps
+namespace mv
 {
     class Vector2f
     {
@@ -127,4 +127,4 @@ namespace hdps
 
     std::ostream& operator<<(std::ostream& os, const Vector2f& v);
 
-} // namespace hdps
+} // namespace mv

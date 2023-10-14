@@ -13,7 +13,7 @@ class QMimeData;
 class QGraphicsOpacityEffect;
 class QPropertyAnimation;
 
-namespace hdps
+namespace mv
 {
 
 namespace gui

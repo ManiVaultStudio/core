@@ -8,7 +8,7 @@
 
 #include <models/ActionsListModel.h>
 
-namespace hdps
+namespace mv
 {
 
 /**

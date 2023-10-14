@@ -7,7 +7,7 @@
 #include "NumericalRangeAction.h"
 #include "DecimalAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Decimal range action class
@@ -102,6 +102,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::DecimalRangeAction)
+Q_DECLARE_METATYPE(mv::gui::DecimalRangeAction)
 
-inline const auto decimalRangeActionMetaTypeId = qRegisterMetaType<hdps::gui::DecimalRangeAction*>("hdps::gui::DecimalRangeAction");
+inline const auto decimalRangeActionMetaTypeId = qRegisterMetaType<mv::gui::DecimalRangeAction*>("mv::gui::DecimalRangeAction");

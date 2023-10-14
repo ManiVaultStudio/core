@@ -13,10 +13,10 @@
 
 #include <stdexcept>
 
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv::gui;
+using namespace mv::util;
 
-namespace hdps
+namespace mv
 {
 
 DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/, const bool& selected /*= false*/) :
@@ -135,7 +135,7 @@ Dataset<DatasetImpl> DataHierarchyItem::getDataset()
     return _dataset;
 }
 
-Dataset<hdps::DatasetImpl>& DataHierarchyItem::getDatasetReference()
+Dataset<mv::DatasetImpl>& DataHierarchyItem::getDatasetReference()
 {
     return _dataset;
 }

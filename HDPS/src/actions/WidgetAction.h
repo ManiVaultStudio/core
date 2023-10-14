@@ -14,7 +14,7 @@
 class QLabel;
 class QMenu;
 
-namespace hdps {
+namespace mv {
 
 class DataHierarchyItem;
 class Application;
@@ -796,7 +796,7 @@ private:
     QString                     _namedIcon;                     /** The name of a font awesome icon. When using this the widget can handle icon updates itself, instead of the containing view */
 
 protected:
-    friend class hdps::AbstractActionsManager;
+    friend class mv::AbstractActionsManager;
 };
 
 }

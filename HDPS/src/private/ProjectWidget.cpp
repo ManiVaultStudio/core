@@ -10,7 +10,7 @@
 
 #include <QVBoxLayout>
 
-using namespace hdps;
+using namespace mv;
 
 ProjectWidget::ProjectWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent)

@@ -10,8 +10,8 @@
 
 Q_PLUGIN_METADATA(IID "nl.BioVault.LoggingPlugin")
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 LoggingPlugin::LoggingPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),

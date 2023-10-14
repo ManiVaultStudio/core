@@ -5,7 +5,7 @@
 #include "TasksSettingsAction.h"
 #include "Application.h"
 
-namespace hdps
+namespace mv
 {
 
 TasksSettingsAction::TasksSettingsAction(QObject* parent) :

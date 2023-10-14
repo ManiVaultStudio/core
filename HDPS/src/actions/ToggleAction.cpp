@@ -11,9 +11,9 @@
 #include <QLabel>
 #include <QEvent>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ToggleAction::ToggleAction(QObject* parent, const QString& title, bool toggled /*= false*/) :
     WidgetAction(parent, title),

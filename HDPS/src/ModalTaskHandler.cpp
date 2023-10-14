@@ -12,7 +12,7 @@
     //#define MODAL_TASK_HANDLER_VERBOSE
 #endif
 
-namespace hdps {
+namespace mv {
 
 using namespace gui;
 

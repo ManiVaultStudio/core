@@ -17,11 +17,11 @@
 
 Q_PLUGIN_METADATA(IID "nl.BioVault.ImageData")
 
-using namespace hdps;
-using namespace hdps::util;
+using namespace mv;
+using namespace mv::util;
 
-ImageData::ImageData(const hdps::plugin::PluginFactory* factory) :
-    hdps::plugin::RawData(factory, ImageType),
+ImageData::ImageData(const mv::plugin::PluginFactory* factory) :
+    mv::plugin::RawData(factory, ImageType),
     _type(Type::Undefined),
     _numberOfImages(0),
     _imageOffset(),
@@ -93,10 +93,10 @@ Dataset<DatasetImpl> ImageData::createDataSet(const QString& guid /*= ""*/) cons
 
 QIcon ImageDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return hdps::Application::getIconFont("FontAwesome").getIcon("images", color);
+    return mv::Application::getIconFont("FontAwesome").getIcon("images", color);
 }
 
-hdps::plugin::RawData* ImageDataFactory::produce()
+mv::plugin::RawData* ImageDataFactory::produce()
 {
     return new ImageData(this);
 }

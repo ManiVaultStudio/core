@@ -15,7 +15,7 @@
 
 #include "../graphics/Shader.h"
 
-namespace hdps
+namespace mv
 {
     class Renderer : protected QOpenGLFunctions_3_3_Core
     {

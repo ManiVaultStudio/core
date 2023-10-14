@@ -6,7 +6,7 @@
 
 #include "WidgetAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 class ColorMapAction;
 
@@ -66,6 +66,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::ColorMapViewAction)
+Q_DECLARE_METATYPE(mv::gui::ColorMapViewAction)
 
-inline const auto colorMapViewActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapViewAction*>("ColorMapViewAction");
+inline const auto colorMapViewActionMetaTypeId = qRegisterMetaType<mv::gui::ColorMapViewAction*>("ColorMapViewAction");

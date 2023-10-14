@@ -11,7 +11,7 @@
     //#define PLUGIN_MANAGER_FILTER_MODEL_VERBOSE
 #endif
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
 PluginManagerFilterModel::PluginManagerFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),

@@ -7,7 +7,7 @@
 #include <QWidget>
 #include <QLabel>
 
-namespace hdps::gui
+namespace mv::gui
 {
 
 /**

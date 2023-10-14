@@ -13,11 +13,11 @@
 
 #include <QPointer>
 
-namespace hdps {
+namespace mv {
     class ProjectMetaAction;
 }
 
-namespace hdps::gui {
+namespace mv::gui {
 
 class SplashScreenWidget;
 

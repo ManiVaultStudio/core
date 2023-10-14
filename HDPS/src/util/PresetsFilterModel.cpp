@@ -5,7 +5,7 @@
 #include "PresetsFilterModel.h"
 #include "PresetsModel.h"
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 

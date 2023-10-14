@@ -16,12 +16,12 @@
 #include "Plugin.h"
 #include "Task.h"
 
-namespace hdps::gui {
+namespace mv::gui {
     class ViewPluginTriggerAction;
     class ToolbarAction;
 }
 
-namespace hdps::plugin
+namespace mv::plugin
 {
 
 class ViewPlugin : public Plugin
@@ -215,4 +215,4 @@ private:
 
 }
 
-Q_DECLARE_INTERFACE(hdps::plugin::ViewPluginFactory, "hdps.ViewPluginFactory")
+Q_DECLARE_INTERFACE(mv::plugin::ViewPluginFactory, "hdps.ViewPluginFactory")

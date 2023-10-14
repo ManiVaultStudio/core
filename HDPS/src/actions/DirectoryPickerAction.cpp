@@ -10,9 +10,9 @@
 #include <QFileDialog>
 #include <QHBoxLayout>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& title, const QString& directory /*= QString()*/) :
     WidgetAction(parent, title),

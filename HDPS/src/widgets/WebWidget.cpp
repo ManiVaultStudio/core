@@ -14,7 +14,7 @@
 
 #include <cassert>
 
-namespace hdps
+namespace mv
 {
 namespace gui
 {
@@ -65,7 +65,7 @@ QWebEnginePage* WebWidget::getPage()
 void WebWidget::setPage(QString htmlPath, QString basePath)
 {
     //assert(_webView->settings()->testAttribute(QWebSettings::JavascriptEnabled));
-    QString html = hdps::util::loadFileContents(htmlPath);
+    QString html = mv::util::loadFileContents(htmlPath);
 
     _webView->setHtml(html, QUrl(basePath));
 }
@@ -82,4 +82,4 @@ void WebWidget::js_debug(QString text)
 
 } // namespace gui
 
-} // namespace hdps
+} // namespace mv

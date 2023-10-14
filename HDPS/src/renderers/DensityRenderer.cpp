@@ -4,7 +4,7 @@
 
 #include "DensityRenderer.h"
 
-namespace hdps
+namespace mv
 {
     namespace gui
     {
@@ -54,7 +54,7 @@ namespace hdps
             return _densityComputation.getMaxDensity();
         }
 
-        hdps::Vector3f DensityRenderer::getColorMapRange() const
+        mv::Vector3f DensityRenderer::getColorMapRange() const
         {
             return Vector3f(0.0f, _densityComputation.getMaxDensity(), _densityComputation.getMaxDensity());
         }
@@ -169,4 +169,4 @@ namespace hdps
 
     } // namespace gui
 
-} // namespace hdps
+} // namespace mv
