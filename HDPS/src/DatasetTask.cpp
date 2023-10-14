@@ -11,7 +11,7 @@ namespace hdps {
 using namespace gui;
 
 DatasetTask::DatasetTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
-    Task(parent, name, GuiScope::Background, status, mayKill, nullptr),
+    Task(parent, name, GuiScopes{ GuiScope::DataHierarchy, GuiScope::Foreground }, status, mayKill, nullptr),
     _dataset()
 {
     setHandler(new DatasetTaskHandler(this, this));

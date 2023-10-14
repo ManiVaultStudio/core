@@ -10,7 +10,7 @@
 namespace hdps {
 
 ProjectSerializationTask::ProjectSerializationTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
-    Task(parent, name, GuiScope::Modal, status, mayKill, nullptr),
+    Task(parent, name, { GuiScope::Modal }, status, mayKill, nullptr),
     _mode(Mode::Load),
     _dataTask(this, "Data serialization"),
     _compressionTask(this, "Compression serialization"),

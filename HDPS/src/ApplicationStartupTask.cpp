@@ -13,7 +13,7 @@
 namespace hdps {
 
 ApplicationStartupTask::ApplicationStartupTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
-    Task(parent, name, GuiScope::None, status, mayKill, nullptr),
+    Task(parent, name, GuiScopes{ GuiScope::None }, status, mayKill, nullptr),
     _loadCoreTask(this, "Load core"),
     _loadCoreManagersTask(this, "Load core managers"),
     _loadGuiTask(this, "Load GUI"),

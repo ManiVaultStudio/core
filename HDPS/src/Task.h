@@ -74,10 +74,11 @@ public:
 
     /** Task: */
     enum class GuiScope {
-        None,           /** ...has no explicit GUI handlers that show it in the gui (the task can still be observed in the tasks plugin) */
-        Background,     /** ...will run in the background (not visible by default but can be revealed in the tasks view plugin) */
-        Foreground,     /** ...will run in the foreground (tasks with this scope will automatically appear in a tasks popup when running) */
-        Modal           /** ...will run modally (tasks with this scope will automatically appear in a modal tasks dialog when the needed) */
+        None,               /** ...has no explicit GUI handlers that show it in the gui (the task can still be observed in the tasks plugin) */
+        Background,         /** ...will run in the background (not visible by default but can be revealed in the tasks view plugin) */
+        Foreground,         /** ...will run in the foreground (tasks with this scope will automatically appear in a tasks popup when running) */
+        Modal,              /** ...will run modally (tasks with this scope will automatically appear in a modal tasks dialog when the needed) */
+        DataHierarchy,      /** ...will be displayed in the data hierarchy */
     };
 
     /** Couples scope enum value to scope name string */
@@ -95,12 +96,12 @@ public:
      * 
      * @param parent Pointer to parent object (simply denotes the position of the task in the QObject hierarchy and has nothing to do with the task hierarchy)
      * @param name Name of the task
-     * @param guiScope GUI scope of the task
+     * @param guiScopes GUI scopes of the task
      * @param status Initial status of the task
      * @param mayKill Boolean determining whether the task may be killed or not
      * @param handler Pointer to task handler
      */
-    Task(QObject* parent, const QString& name, const GuiScope& guiScope = GuiScope::None, const Status& status = Status::Undefined, bool mayKill = false, AbstractTaskHandler* handler = nullptr);
+    Task(QObject* parent, const QString& name, const GuiScopes& guiScopes = { GuiScope::None }, const Status& status = Status::Undefined, bool mayKill = false, AbstractTaskHandler* handler = nullptr);
 
     /** Remove from task manager when destructed */
     ~Task();
@@ -366,19 +367,32 @@ public: // Progress mode
      */
     void setProgressMode(const ProgressMode& progressMode);
 
-public: // GUI scope
+public: // GUI scopes
 
     /**
-     * Get GUI scope
-     * @return GUI scope enum
+     * Get GUI scopes
+     * @return GUI scopes
      */
-    virtual GuiScope getGuiScope() const final;
+    virtual GuiScopes getGuiScopes() const final;
     
     /**
-     * Sets GUI scope to to \p guiScope
+     * Sets GUI scopes to \p guiScopes
      * @param guiScope GUI scope enum
      */
-    virtual void setGuiScope(const GuiScope& guiScope) final;
+    virtual void setGuiScopes(const GuiScopes& guiScopes) final;
+
+    /**
+     * Function to establish whether at lease one GUI scope is present in both \p guiScopesA and \p guiScopesB
+     * @param guiScopesA GUI scopes A
+     * @param guiScopesB GUI scopes B
+     */
+    static bool doGuiScopesOverlap(const GuiScopes& guiScopesA, const GuiScopes& guiScopesB);
+
+    /**
+     * Convert \p guiScopes to string list
+     * @return String list of gui scopes
+     */
+    static QStringList guiScopesToStringlist(const GuiScopes& guiScopes);
 
 public: // Manual
 
@@ -556,7 +570,7 @@ private: // Private setters (these call private signals under the hood, an essen
     void privateSetAborted();
     void privateKill(bool recursive = true);
     void privateSetProgressMode(const ProgressMode& progressMode);
-    void privateSetGuiScope(const GuiScope& guiScope);
+    void privateSetGuiScopes(const GuiScopes& guiScopes);
     void privateResetProgress(bool recursive = false);
     void privateSetProgress(float progress, const QString& subtaskDescription = "");
     void privateSetSubtasks(std::uint32_t numberOfSubtasks);
@@ -667,10 +681,10 @@ signals:
     void progressModeChanged(const ProgressMode& progressMode);
 
     /**
-     * Signals that the task GUI scope changed to \p guiScope
-     * @param guiScope Modified GUI scope
+     * Signals that the task GUI scopes changed to \p guiScopes
+     * @param guiScopes Modified GUI scopes
      */
-    void guiScopeChanged(const GuiScope& guiScope);
+    void guiScopesChanged(const GuiScopes& guiScopes);
 
     /**
      * Signals that the task progress changed to \p progress
@@ -766,7 +780,7 @@ signals:
     void privateSetAbortedSignal(QPrivateSignal);
     void privateKillSignal(bool, QPrivateSignal);
     void privateSetProgressModeSignal(const ProgressMode& progressMode, QPrivateSignal);
-    void privateSetGuiScopeSignal(const GuiScope& guiScope, QPrivateSignal);
+    void privateSetGuiScopesSignal(const GuiScopes& guiScopes, QPrivateSignal);
     void privateResetProgressSignal(bool recursive, QPrivateSignal);
     void privateSetProgressSignal(float progress, const QString& subtaskDescription, QPrivateSignal);
     void privateSetSubtasksSignal(std::uint32_t numberOfSubtasks, QPrivateSignal);
@@ -792,7 +806,7 @@ private:
     bool                    _mayKill;                                       /** Whether the task may be killed or not */
     AbstractTaskHandler*    _handler;                                       /** Task handler */
     ProgressMode            _progressMode;                                  /** The way progress is recorded */
-    GuiScope                _guiScope;                                      /** The gui scope in which the task will present itself to the user */
+    GuiScopes               _guiScopes;                                      /** The gui scope(s) in which the task will present itself to the user */
     float                   _progress;                                      /** Task progress */
     QBitArray               _subtasks;                                      /** Subtasks status */
     QStringList             _subtasksNames;                                 /** Subtasks names */

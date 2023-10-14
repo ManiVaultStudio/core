@@ -33,6 +33,8 @@ TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
 
     _taskTypeFilterAction.initialize(taskTypes, taskTypes);
 
+    _taskTypeFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    _taskGuiScopeFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     _taskStatusFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
 
     connect(&_taskTypeFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
@@ -69,13 +71,16 @@ bool TasksFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) cons
     const auto taskTypes    = _taskTypeFilterAction.getSelectedOptions();
     const auto taskType     = getSourceData(index, AbstractTasksModel::Column::Type, Qt::DisplayRole).toString();
 
-    if (!taskTypes.contains(taskType))
+    if (_taskTypeFilterAction.hasSelectedOptions() && !taskTypes.contains(taskType))
         return false;
 
-    const auto taskGuiScopes   = _taskGuiScopeFilterAction.getSelectedOptions();
-    const auto taskGuiScope    = getSourceData(index, AbstractTasksModel::Column::GuiScope, Qt::DisplayRole).toString();
+    const auto taskGuiScopesSelection   = _taskGuiScopeFilterAction.getSelectedOptions();
+    const auto taskGuiScopes            = getSourceData(index, AbstractTasksModel::Column::GuiScopes, Qt::EditRole).toStringList();
 
-    if (!taskGuiScopes.contains(taskGuiScope))
+    auto taskGuiScopesSelectionSet  = QSet(taskGuiScopesSelection.begin(), taskGuiScopesSelection.end());
+    auto taskGuiScopesSet           = QSet(taskGuiScopes.begin(), taskGuiScopes.end());
+
+    if (_taskGuiScopeFilterAction.hasSelectedOptions() && taskGuiScopesSelectionSet.intersect(taskGuiScopesSet).isEmpty())
         return false;
 
     const auto taskStatusTypes  = _taskStatusFilterAction.getSelectedOptions();

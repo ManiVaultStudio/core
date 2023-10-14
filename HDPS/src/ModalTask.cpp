@@ -14,7 +14,7 @@ using namespace gui;
 ModalTaskHandler* ModalTask::modalTaskHandler = nullptr;
 
 ModalTask::ModalTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
-    Task(parent, name, GuiScope::Modal, status, mayKill, nullptr)
+    Task(parent, name, GuiScopes{ GuiScope::Modal }, status, mayKill, nullptr)
 {
     connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) { createHandler(Application::current()); });
 }

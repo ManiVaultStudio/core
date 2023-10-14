@@ -34,10 +34,11 @@ QMap<Task::GuiScope, QString> Task::guiScopeNames = QMap<GuiScope, QString>({
     { Task::GuiScope::None, "None" },
     { Task::GuiScope::Background, "Background" },
     { Task::GuiScope::Foreground, "Foreground" },
-    { Task::GuiScope::Modal, "Modal" }
+    { Task::GuiScope::Modal, "Modal" },
+    { Task::GuiScope::DataHierarchy, "DataHierarchy" }
 });
 
-Task::Task(QObject* parent, const QString& name, const GuiScope& guiScope /*= GuiScope::None*/, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/, AbstractTaskHandler* handler /*= nullptr*/) :
+Task::Task(QObject* parent, const QString& name, const GuiScopes& guiScopes /*= { GuiScope::None }*/, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/, AbstractTaskHandler* handler /*= nullptr*/) :
     QObject(parent),
     Serializable(name),
     _name(name),
@@ -52,7 +53,7 @@ Task::Task(QObject* parent, const QString& name, const GuiScope& guiScope /*= Gu
     _mayKill(mayKill),
     _handler(handler),
     _progressMode(ProgressMode::Manual),
-    _guiScope(guiScope),
+    _guiScopes(guiScopes),
     _progress(0.f),
     _subtasks(),
     _subtasksNames(),
@@ -88,7 +89,7 @@ Task::Task(QObject* parent, const QString& name, const GuiScope& guiScope /*= Gu
     connect(this, &Task::privateSetAbortedSignal, this, &Task::privateSetAborted);
     connect(this, &Task::privateKillSignal, this, &Task::privateKill);
     connect(this, &Task::privateSetProgressModeSignal, this, &Task::privateSetProgressMode);
-    connect(this, &Task::privateSetGuiScopeSignal, this, &Task::privateSetGuiScope);
+    connect(this, &Task::privateSetGuiScopesSignal, this, &Task::privateSetGuiScopes);
     connect(this, &Task::privateResetProgressSignal, this, &Task::privateResetProgress);
     connect(this, &Task::privateSetProgressSignal, this, &Task::privateSetProgress);
     connect(this, qOverload<std::uint32_t, QPrivateSignal>(&Task::privateSetSubtasksSignal), this, qOverload<std::uint32_t>(&Task::privateSetSubtasks));
@@ -180,8 +181,8 @@ Task::TasksPtrs Task::getChildTasksForGuiScopes(bool recursively /*= false*/, bo
 {
     auto childTasks = getChildTasks(recursively, enabledOnly);
 
-    auto iterator = std::remove_if(childTasks.begin(), childTasks.end(), [&guiScopes](Task* task) -> bool {
-        return !guiScopes.contains(task->getGuiScope());
+    auto iterator = std::remove_if(childTasks.begin(), childTasks.end(), [this, &guiScopes](Task* task) -> bool {
+        return !doGuiScopesOverlap(task->getGuiScopes(), _guiScopes);
     });
 
     childTasks.erase(iterator, childTasks.end());
@@ -193,8 +194,8 @@ Task::TasksPtrs Task::getChildTasksForGuiScopesAndStatuses(bool recursively /*= 
 {
     auto childTasks = getChildTasks(recursively, enabledOnly);
 
-    auto iterator = std::remove_if(childTasks.begin(), childTasks.end(), [&guiScopes, &statuses](Task* task) -> bool {
-        return !guiScopes.contains(task->getGuiScope()) || !statuses.contains(task->getStatus());
+    auto iterator = std::remove_if(childTasks.begin(), childTasks.end(), [this, &guiScopes, &statuses](Task* task) -> bool {
+        return !doGuiScopesOverlap(task->getGuiScopes(), _guiScopes) || !statuses.contains(task->getStatus());
     });
 
     childTasks.erase(iterator, childTasks.end());
@@ -409,14 +410,33 @@ void Task::setProgressMode(const ProgressMode& progressMode)
     emit privateSetProgressModeSignal(progressMode, QPrivateSignal());
 }
 
-Task::GuiScope Task::getGuiScope() const
+Task::GuiScopes Task::getGuiScopes() const
 {
-    return _guiScope;
+    return _guiScopes;
 }
 
-void Task::setGuiScope(const GuiScope& guiScope)
+void Task::setGuiScopes(const GuiScopes& guiScopes)
 {
-    emit privateSetGuiScopeSignal(guiScope, QPrivateSignal());
+    emit privateSetGuiScopesSignal(guiScopes, QPrivateSignal());
+}
+
+bool Task::doGuiScopesOverlap(const GuiScopes& guiScopesA, const GuiScopes& guiScopesB)
+{
+    for (const auto& guiScopeA : guiScopesA)
+        if (guiScopesB.contains(guiScopeA))
+            return true;
+
+    return false;
+}
+
+QStringList Task::guiScopesToStringlist(const GuiScopes& guiScopes)
+{
+    QStringList guiScopesStringList;
+
+    for (const auto& guiScope : guiScopes)
+        guiScopesStringList << Task::guiScopeNames[guiScope];
+
+    return guiScopesStringList;
 }
 
 float Task::getProgress() const
@@ -621,18 +641,12 @@ void Task::registerChildTask(Task* childTask)
     if (childTask == nullptr)
         return;
 
-#ifdef TASK_VERBOSE
-    qDebug() << "*****"  << __FUNCTION__ << getName() << childTask->getName();
-#endif
-
     connect(childTask, &Task::statusChanged, this, [this, childTask](const Status& previousStatus, const Status& status) -> void {
         if (getProgressMode() != ProgressMode::Aggregate)
             return;
 
         //if (previousStatus == Status::Finished && status == Status::Idle)
         //    return;
-
-        //qDebug() << childTask->getName() << "status changed to" << statusNames[status];
 
         updateAggregateStatus();
         updateProgress();
@@ -641,8 +655,6 @@ void Task::registerChildTask(Task* childTask)
     connect(childTask, &Task::progressChanged, this, [this](float progress) -> void {
         if (getProgressMode() != ProgressMode::Aggregate)
             return;
-
-        //qDebug() << "------------------" << getName() << getProgress();
 
         updateProgress();
         updateProgressText();
@@ -1068,14 +1080,14 @@ void Task::privateSetProgressMode(const ProgressMode& progressMode)
     updateProgress();
 }
 
-void Task::privateSetGuiScope(const GuiScope& guiScope)
+void Task::privateSetGuiScopes(const GuiScopes& guiScopes)
 {
-    if (guiScope == _guiScope)
+    if (guiScopes == _guiScopes)
         return;
 
-    _guiScope = guiScope;
+    _guiScopes = guiScopes;
 
-    emit guiScopeChanged(_guiScope);
+    emit guiScopesChanged(_guiScopes);
 }
 
 void Task::privateResetProgress(bool recursive /*= false*/)

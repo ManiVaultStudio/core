@@ -286,7 +286,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::ProgressMode), true);
     treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::ID), true);
     treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::ParentID), true);
-    treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::GuiScope), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::GuiScopes), true);
     treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::MayKill), true);
 
     auto treeViewHeader = treeView.header();
