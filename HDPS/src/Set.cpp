@@ -305,12 +305,12 @@ DatasetImpl::DatasetImpl(CoreInterface* core, const QString& rawDataName, const 
     _linkedDataFlags(LinkedDataFlag::SendReceive),
     _locked(false),
     _smartPointer(this),
-    _datasetTask(this, "")
+    _task(this, "")
 {
     if (!id.isEmpty())
         Serializable::setId(id);
 
-    _datasetTask.setDataset(this);
+    _task.setDataset(this);
 }
 
 DatasetImpl::~DatasetImpl()
@@ -435,9 +435,9 @@ QString DatasetImpl::getRawDataSizeHumanReadable() const
     return util::getNoBytesHumanReadable(getRawDataSize());
 }
 
-DatasetTask& DatasetImpl::getDatasetTask()
+DatasetTask& DatasetImpl::getTask()
 {
-    return _datasetTask;
+    return _task;
 }
 
 QString DatasetImpl::getLocation() const

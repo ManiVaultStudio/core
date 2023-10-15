@@ -482,10 +482,10 @@ public:
 public: // Task access
 
     /**
-     * Get dataset task
-     * @return Task for display in the data hierarchy
+     * Get task
+     * @return Task for display in the data hierarchy and foreground
      */
-    DatasetTask& getDatasetTask();
+    DatasetTask& getTask();
 
 protected:
 
@@ -546,7 +546,7 @@ private:
     std::int32_t                _linkedDataFlags;   /** Flags for linked data */
     bool                        _locked;            /** Whether the dataset is locked */
     Dataset<DatasetImpl>        _smartPointer;      /** Smart pointer to own dataset */
-    DatasetTask                 _datasetTask;       /** Task for display in the data hierarchy*/
+    DatasetTask                 _task;              /** Task for display in the data hierarchy and foreground */
 
     friend class CoreInterface;
     friend class Core;

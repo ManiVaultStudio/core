@@ -687,8 +687,8 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
 {
     DatasetImpl::setProxyMembers(proxyMembers);
 
-    getDatasetTask().setName("Creating proxy");
-    getDatasetTask().setRunning();
+    getTask().setName("Creating proxy");
+    getTask().setRunning();
 
     auto pointIndexOffset = 0u;
 
@@ -726,13 +726,13 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
 
         pointIndexOffset += targetPoints->getNumPoints();
 
-        getDatasetTask().setProgressDescription(QString("Creating mappings for %1").arg(proxyMember->text()));
-        getDatasetTask().setProgress(static_cast<float>(getProxyMembers().indexOf(proxyMember)) / static_cast<float>(getProxyMembers().count()));
+        getTask().setProgressDescription(QString("Creating mappings for %1").arg(proxyMember->text()));
+        getTask().setProgress(static_cast<float>(getProxyMembers().indexOf(proxyMember)) / static_cast<float>(getProxyMembers().count()));
 
         QCoreApplication::processEvents();
     }
 
-    getDatasetTask().setFinished();
+    getTask().setFinished();
 }
 
 InfoAction& Points::getInfoAction()
