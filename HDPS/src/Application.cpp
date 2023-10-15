@@ -51,7 +51,6 @@ Application::Application(int& argc, char** argv) :
     })));
 
     connect(Application::current(), &Application::coreManagersCreated, this, [this](CoreInterface* core) {
-        qDebug() << "ApplicationStartupTask";
         _startupTask = new ApplicationStartupTask(this, "Load ManiVault");
     });
 
@@ -66,12 +65,13 @@ Application* Application::current()
 {
     try
     {
-        auto hdpsApplication = dynamic_cast<Application*>(instance());
+        auto applicationInstance    = instance();
+        auto maniVaultApplication   = dynamic_cast<Application*>(applicationInstance);
 
-        if (hdpsApplication == nullptr)
+        if (maniVaultApplication == nullptr)
             throw std::runtime_error("Current application instance is not a ManiVault application");
 
-        return hdpsApplication;
+        return maniVaultApplication;
     }
     catch (std::exception& e)
     {
