@@ -10,7 +10,7 @@
 #include <QIcon>
 #include <QMap>
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 

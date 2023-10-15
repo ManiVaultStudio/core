@@ -7,7 +7,7 @@
 #include "GroupAction.h"
 #include "ToolbarActionItem.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Toolbar action class
@@ -106,6 +106,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::ToolbarAction)
+Q_DECLARE_METATYPE(mv::gui::ToolbarAction)
 
-inline const auto toolbarActionMetaTypeId = qRegisterMetaType<hdps::gui::ToolbarAction*>("hdps::gui::ToolbarAction");
+inline const auto toolbarActionMetaTypeId = qRegisterMetaType<mv::gui::ToolbarAction*>("mv::gui::ToolbarAction");

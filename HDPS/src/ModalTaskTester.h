@@ -6,7 +6,7 @@
 
 #include "AbstractTaskTester.h"
 
-namespace hdps
+namespace mv
 {
 
 class ModalTaskTester final : public AbstractTaskTester
@@ -24,6 +24,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(hdps::ModalTaskTester)
+Q_DECLARE_METATYPE(mv::ModalTaskTester)
 
-inline const auto modalTaskTesterMetaTypeId = qRegisterMetaType<hdps::ModalTaskTester*>("hdps::ModalTaskTester");
+inline const auto modalTaskTesterMetaTypeId = qRegisterMetaType<mv::ModalTaskTester*>("mv::ModalTaskTester");

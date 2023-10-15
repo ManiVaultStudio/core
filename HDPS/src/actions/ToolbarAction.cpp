@@ -4,7 +4,7 @@
 
 #include "ToolbarAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 #if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
     constexpr std::int32_t ToolbarAction::CONTENTS_MARGIN;

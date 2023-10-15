@@ -16,7 +16,7 @@
 #include <QStringList>
 #include <QDir>
 
-namespace hdps
+namespace mv
 {
 
 namespace plugin {

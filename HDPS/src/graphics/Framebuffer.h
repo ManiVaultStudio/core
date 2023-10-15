@@ -11,7 +11,7 @@
 #include <vector>
 #include <QDebug>
 
-namespace hdps
+namespace mv
 {
     class Framebuffer : protected QOpenGLFunctions_3_3_Core
     {
@@ -106,4 +106,4 @@ namespace hdps
 
         std::vector<GLenum> drawBuffers;
     };
-} // namespace hdps
+} // namespace mv

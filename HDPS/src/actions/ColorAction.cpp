@@ -9,9 +9,9 @@
 #include <QPainter>
 #include <QStyleOption>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 const QColor ColorAction::DEFAULT_COLOR = Qt::gray;
 

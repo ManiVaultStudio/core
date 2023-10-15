@@ -9,7 +9,7 @@
 #include <actions/GroupsAction.h>
 #include <actions/GroupAction.h>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Settings manager dialog class

@@ -13,7 +13,7 @@
 #include <QTimer>
 #include <QMimeData>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= nullptr*/, const std::uint32_t& flags /*= ColonAfterName*/) :
     WidgetActionViewWidget(parent, action),

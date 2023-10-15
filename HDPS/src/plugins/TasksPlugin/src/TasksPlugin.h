@@ -8,9 +8,9 @@
 
 #include <actions/TasksAction.h>
 
-using namespace hdps;
-using namespace hdps::plugin;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::plugin;
+using namespace mv::gui;
 
 /**
  * Tasks plugin
@@ -49,7 +49,7 @@ private:
 
 class TasksPluginFactory : public ViewPluginFactory
 {
-    Q_INTERFACES(hdps::plugin::ViewPluginFactory hdps::plugin::PluginFactory)
+    Q_INTERFACES(mv::plugin::ViewPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "NL.ManiVault.TasksPlugin" FILE "TasksPlugin.json")
     

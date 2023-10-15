@@ -8,7 +8,7 @@
 
 #include <QPair>
 
-namespace hdps::util {
+namespace mv::util {
 
 /** Class for representing version with major- and minor version number */
 class Version final : public QPair<std::int32_t, std::int32_t>, public Serializable {

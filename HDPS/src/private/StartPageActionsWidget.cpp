@@ -15,8 +15,8 @@
     //#define START_PAGE_ACTIONS_WIDGET_VERBOSE
 #endif
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 StartPageActionsWidget::StartPageActionsWidget(QWidget* parent, const QString& title, bool restyle /*= true*/) :
     QWidget(parent),

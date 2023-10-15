@@ -4,6 +4,6 @@
 
 #include "Exception.h"
 
-namespace hdps::util {
+namespace mv::util {
 
 }

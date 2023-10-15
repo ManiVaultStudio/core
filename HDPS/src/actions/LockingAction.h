@@ -8,7 +8,7 @@
 #include "ToggleAction.h"
 #include "TriggerAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Locked action class
@@ -103,6 +103,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::LockingAction)
+Q_DECLARE_METATYPE(mv::gui::LockingAction)
 
-inline const auto lockingActionMetaTypeId = qRegisterMetaType<hdps::gui::LockingAction*>("LockingAction");
+inline const auto lockingActionMetaTypeId = qRegisterMetaType<mv::gui::LockingAction*>("LockingAction");

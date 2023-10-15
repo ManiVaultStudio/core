@@ -10,7 +10,7 @@
 #include <QMenu>
 #include <QDialog>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 class WidgetAction;
 

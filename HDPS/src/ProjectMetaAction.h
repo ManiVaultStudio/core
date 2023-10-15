@@ -13,7 +13,7 @@
 
 #include "ProjectCompressionAction.h"
 
-namespace hdps {
+namespace mv {
 
 class Project;
 

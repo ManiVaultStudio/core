@@ -16,8 +16,8 @@
 #include <QAbstractEventDispatcher>
 #include <QMessageBox>
 
-using namespace hdps;
-using namespace hdps::util;
+using namespace mv;
+using namespace mv::util;
 
 LoggingWidget::LoggingWidget(QWidget* parent) :
     QWidget(parent),
@@ -104,7 +104,7 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
     connect(&_findLogFileAction, &QAction::triggered, [this](bool) {
         const auto filePath = Logger::GetFilePathName();
 
-        if (!hdps::util::ShowFileInFolder(filePath))
+        if (!mv::util::ShowFileInFolder(filePath))
             QMessageBox::information(this, QObject::tr("Log file not found"), QObject::tr("The log file is not found:\n%1").arg(filePath));
         });
 }

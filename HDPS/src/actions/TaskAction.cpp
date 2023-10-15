@@ -5,7 +5,7 @@
 #include "TaskAction.h"
 #include "Application.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 TaskAction::TaskAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),

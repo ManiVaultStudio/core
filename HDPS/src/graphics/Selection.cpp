@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-namespace hdps
+namespace mv
 {
     Selection::Selection(Vector2f start, Vector2f end)
     {
@@ -53,4 +53,4 @@ namespace hdps
     static_assert(Selection{}.topRight() == Vector2f{}, "Compile-time unit test");
     static_assert(Selection{}.contains(Vector2f{}), "Compile-time unit test");
 
-} // namespace hdps
+} // namespace mv

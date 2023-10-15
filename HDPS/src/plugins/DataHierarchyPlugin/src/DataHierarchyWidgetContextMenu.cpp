@@ -16,9 +16,9 @@
 
 #include <stdexcept>
 
-using namespace hdps;
-using namespace hdps::util;
-using namespace hdps::plugin;
+using namespace mv;
+using namespace mv::util;
+using namespace mv::plugin;
 
 DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, Datasets datasets) :
     QMenu(parent),
@@ -91,8 +91,8 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
         }
     }
             
-    //menus["Analyze"]->setTitle(hdps::plugin::getPluginTypeName(pluginType));
-    //menus["Analyze"]->setIcon(hdps::plugin::getPluginTypeIcon(pluginType));
+    //menus["Analyze"]->setTitle(mv::plugin::getPluginTypeName(pluginType));
+    //menus["Analyze"]->setIcon(mv::plugin::getPluginTypeIcon(pluginType));
 }
 
 QAction* DataHierarchyWidgetContextMenu::getGroupAction()

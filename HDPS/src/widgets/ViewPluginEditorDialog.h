@@ -14,13 +14,13 @@
 
 #include <QDialog>
 
-namespace hdps {
+namespace mv {
     namespace plugin {
         class ViewPlugin;
     }
 }
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * View plugin editor dialog class
@@ -38,14 +38,14 @@ public:
      * @param parent Pointer to parent widget
      * @param viewPlugin Pointer to view plugin to edit
      */
-    ViewPluginEditorDialog(QWidget* parent, hdps::plugin::ViewPlugin* viewPlugin);
+    ViewPluginEditorDialog(QWidget* parent, mv::plugin::ViewPlugin* viewPlugin);
 
     /**
      * Constructor for dataset-attached actions
      * @param parent Pointer to parent widget
      * @param rootAction Pointer to parent action of all actions to be displayed
      */
-    ViewPluginEditorDialog(QWidget* parent, hdps::gui::WidgetAction* rootAction);
+    ViewPluginEditorDialog(QWidget* parent, mv::gui::WidgetAction* rootAction);
 
     /** Get preferred size */
     QSize sizeHint() const override {

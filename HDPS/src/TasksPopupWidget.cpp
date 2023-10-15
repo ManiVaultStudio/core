@@ -17,7 +17,7 @@
     //#define TASKS_POPUP_WIDGET_VERBOSE
 #endif
 
-namespace hdps::gui {
+namespace mv::gui {
 
 const QSize TasksPopupWidget::iconPixmapSize = QSize(64, 64);
 

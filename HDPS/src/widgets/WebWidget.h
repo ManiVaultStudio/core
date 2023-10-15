@@ -13,7 +13,7 @@ class QWebEngineView;
 class QWebEnginePage;
 class QWebChannel;
 
-namespace hdps
+namespace mv
 {
 namespace gui
 {
@@ -73,4 +73,4 @@ private:
 
 } // namespace gui
 
-} // namespace hdps
+} // namespace mv

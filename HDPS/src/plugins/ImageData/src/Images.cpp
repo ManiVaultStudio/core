@@ -17,9 +17,9 @@
 
 #include <QDebug>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-Images::Images(hdps::CoreInterface* core, QString dataName, const QString& guid /*= ""*/) :
+Images::Images(mv::CoreInterface* core, QString dataName, const QString& guid /*= ""*/) :
     DatasetImpl(core, dataName, guid),
     _indices(),
     _imageData(nullptr),
@@ -47,7 +47,7 @@ void Images::init()
 
 }
 
-std::tuple<hdps::Dataset<hdps::DatasetImpl>, hdps::Dataset<Images>> Images::addImageDataset(QString datasetGuiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const QString pluginKind /*= "Points"*/)
+std::tuple<mv::Dataset<mv::DatasetImpl>, mv::Dataset<Images>> Images::addImageDataset(QString datasetGuiName, const mv::Dataset<mv::DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const QString pluginKind /*= "Points"*/)
 {
     // default to point type
     QString pkind = "Points";
@@ -64,7 +64,7 @@ std::tuple<hdps::Dataset<hdps::DatasetImpl>, hdps::Dataset<Images>> Images::addI
     auto points = Application::core()->addDataset<ptype>(pkind, datasetGuiName, parentDataSet);
     events().notifyDatasetAdded(points);
 
-    hdps::Dataset<Images> images = Application::core()->addDataset<Images>("Images", "images", Dataset<DatasetImpl>(*points));
+    mv::Dataset<Images> images = Application::core()->addDataset<Images>("Images", "images", Dataset<DatasetImpl>(*points));
     events().notifyDatasetAdded(images);
 
     return { points, images };
@@ -156,7 +156,7 @@ QRect Images::getVisibleRectangle() const
 
 QIcon Images::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return hdps::Application::getIconFont("FontAwesome").getIcon("images", color);
+    return mv::Application::getIconFont("FontAwesome").getIcon("images", color);
 }
 
 std::vector<std::uint32_t>& Images::getSelectionIndices()

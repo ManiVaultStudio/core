@@ -7,7 +7,7 @@
 #include "RectangleAction.h"
 #include "DecimalRangeAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Decimal rectangle action class
@@ -72,6 +72,6 @@ signals:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::DecimalRectangleAction)
+Q_DECLARE_METATYPE(mv::gui::DecimalRectangleAction)
 
-inline const auto decimalRectangleActionMetaTypeId = qRegisterMetaType<hdps::gui::DecimalRectangleAction*>("hdps::gui::DecimalRectangleAction");
+inline const auto decimalRectangleActionMetaTypeId = qRegisterMetaType<mv::gui::DecimalRectangleAction*>("mv::gui::DecimalRectangleAction");

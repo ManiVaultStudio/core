@@ -39,14 +39,14 @@ protected:
      * Add a data hierarchy to the tree widget
      * @param dataHierarchyItem Reference to the data hierarchy item
      */
-    void addDataHierarchyItem(hdps::DataHierarchyItem& dataHierarchyItem);
+    void addDataHierarchyItem(mv::DataHierarchyItem& dataHierarchyItem);
 
     /**
      * Get model index of the dataset
      * @param dataset Smart pointer to dataset
      * @return Dataset model index
      */
-    QModelIndex getModelIndexByDataset(const hdps::Dataset<hdps::DatasetImpl>& dataset);
+    QModelIndex getModelIndexByDataset(const mv::Dataset<mv::DatasetImpl>& dataset);
 
 protected:
 
@@ -62,7 +62,7 @@ protected:
 private:
     DataHierarchyModel          _model;                 /** Model containing data to be displayed in the hierarchy */
     DataHierarchyFilterModel    _filterModel;           /** Data hierarchy filter model */
-    hdps::gui::HierarchyWidget  _hierarchyWidget;       /** Widget for displaying hierarchy */
-    hdps::gui::ToggleAction     _groupingAction;        /** Data grouping action */
-    hdps::gui::TriggerAction    _resetAction;           /** Reset all action */
+    mv::gui::HierarchyWidget  _hierarchyWidget;       /** Widget for displaying hierarchy */
+    mv::gui::ToggleAction     _groupingAction;        /** Data grouping action */
+    mv::gui::TriggerAction    _resetAction;           /** Reset all action */
 };

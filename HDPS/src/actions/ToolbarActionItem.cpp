@@ -6,7 +6,7 @@
 #include "ToolbarActionItemWidget.h"
 #include "WidgetAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ToolbarActionItem::ToolbarActionItem(QObject* parent, const WidgetAction* action, std::int32_t widgetFlags, const State& state /*= State::Collapsed*/, std::int32_t autoExpandPriority /*= -1*/) :
     QObject(parent),

@@ -9,7 +9,7 @@
 
 #include "PointView.h"
 
-namespace hdps
+namespace mv
 {
     template <typename ValueIteratorType, typename IndexIteratorType, typename IndexFunctionType>
     class PointDataIterator

@@ -9,7 +9,7 @@
 #include <QPainter>
 #include <QEventLoop>
 
-using namespace hdps;
+using namespace mv;
 
 ClustersModel::ClustersModel(QObject* parent /*= nullptr*/) :
     QAbstractListModel(parent),

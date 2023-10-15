@@ -6,7 +6,7 @@
 
 #include <limits>
 
-namespace hdps
+namespace mv
 {
     const Bounds Bounds::Max = Bounds (
         std::numeric_limits<float>::infinity(),

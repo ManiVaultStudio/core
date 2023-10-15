@@ -10,7 +10,7 @@
     #define WORKSPACE_INVENTORY_FILTER_MODEL_VERBOSE
 #endif
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
 WorkspaceInventoryFilterModel::WorkspaceInventoryFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),

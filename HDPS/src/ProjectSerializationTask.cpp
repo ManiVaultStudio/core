@@ -7,7 +7,7 @@
 
 #include <QFileInfo>
 
-namespace hdps {
+namespace mv {
 
 ProjectSerializationTask::ProjectSerializationTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
     Task(parent, name, { GuiScope::Modal }, status, mayKill, nullptr),

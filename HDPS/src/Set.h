@@ -25,7 +25,7 @@
 
 #define DATASET_IMPL_VERBOSE
 
-namespace hdps
+namespace mv
 {
 
 class CoreInterface;
@@ -417,10 +417,10 @@ public: // Grouping
 public: // Actions
 
     /** Returns list of shared action widgets*/
-    void addAction(hdps::gui::WidgetAction& widgetAction);
+    void addAction(mv::gui::WidgetAction& widgetAction);
 
     /** Returns list of shared action widgets*/
-    hdps::gui::WidgetActions getActions() const;
+    mv::gui::WidgetActions getActions() const;
 
     /**
      * Get the context menu
@@ -437,11 +437,11 @@ public: // Actions
 
 public: // Linked data
 
-    void addLinkedData(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping);
+    void addLinkedData(const mv::Dataset<DatasetImpl>& targetDataSet, mv::SelectionMap& mapping);
 
-    const std::vector<hdps::LinkedData>& getLinkedData() const;
+    const std::vector<mv::LinkedData>& getLinkedData() const;
 
-    std::vector<hdps::LinkedData>& getLinkedData();
+    std::vector<mv::LinkedData>& getLinkedData();
 
     /**
      * Get flags for linked data
@@ -557,6 +557,6 @@ private:
     friend class SmartDataset;
 };
 
-} // namespace hdps
+} // namespace mv
 
 #endif

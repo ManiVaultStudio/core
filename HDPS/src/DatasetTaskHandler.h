@@ -6,7 +6,7 @@
 
 #include "AbstractTaskHandler.h"
 
-namespace hdps {
+namespace mv {
 
 class DatasetTask;
 

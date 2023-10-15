@@ -13,7 +13,7 @@
 
 #include <exception>
 
-namespace hdps {
+namespace mv {
 
 namespace plugin {
 
@@ -104,20 +104,20 @@ public:
      * @param datasets Vector of input datasets
      * @return Vector of plugin trigger actions
      */
-    gui::PluginTriggerActions getPluginTriggerActions(const hdps::Datasets& datasets) const override;
+    gui::PluginTriggerActions getPluginTriggerActions(const mv::Datasets& datasets) const override;
 
     /**
      * Get plugin trigger actions given \p dataTypes
      * @param datasetTypes Vector of input data types
      * @return Vector of plugin trigger actions
      */
-    gui::PluginTriggerActions getPluginTriggerActions(const hdps::DataTypes& dataTypes) const override;
+    gui::PluginTriggerActions getPluginTriggerActions(const mv::DataTypes& dataTypes) const override;
 };
 
 } // namespace plugin
 
-} // namespace hdps
+} // namespace mv
 
-Q_DECLARE_INTERFACE(hdps::plugin::LoaderPluginFactory, "hdps.LoaderPluginFactory")
+Q_DECLARE_INTERFACE(mv::plugin::LoaderPluginFactory, "hdps.LoaderPluginFactory")
 
 #endif // HDPS_LOADERPLUGIN_H

@@ -7,7 +7,7 @@
 #include <QPair>
 #include <algorithm>
 
-namespace hdps::util {
+namespace mv::util {
 
 /**
  * Numerical range class

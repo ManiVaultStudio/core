@@ -14,8 +14,8 @@
 #include <QMenu>
 #include <QHeaderView>
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 #ifdef _DEBUG
     #define PLUGIN_MANAGER_DIALOG_VERBOSE

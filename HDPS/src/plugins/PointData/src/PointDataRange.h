@@ -10,7 +10,7 @@
 
 #include <iterator> // For begin and end.
 
-namespace hdps
+namespace mv
 {
     /* A PointDataRange is a random access range between two iterators of type PointDataIterator.
     */

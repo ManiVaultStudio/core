@@ -12,11 +12,11 @@
 #include <exception>
 #include <mutex>
 
-namespace hdps {
+namespace mv {
     class Application;
 }
 
-namespace hdps::util
+namespace mv::util
 {
 
 struct MessageRecord
@@ -62,9 +62,9 @@ private:
     MessageRecords  _messageRecords;    /** Messages recorded since the instantiation of the logger */
     std::mutex      _mutex;             /** Prevent race conditions */
 
-    friend class hdps::Application;
+    friend class mv::Application;
 };
 
 }
 
-#define HDPS_LOG_EXCEPTION(stdException) qCritical().noquote() << ::hdps::Logger::ExceptionToText(stdException)
+#define HDPS_LOG_EXCEPTION(stdException) qCritical().noquote() << ::mv::Logger::ExceptionToText(stdException)

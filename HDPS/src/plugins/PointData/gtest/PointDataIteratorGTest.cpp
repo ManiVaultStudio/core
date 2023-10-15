@@ -11,13 +11,13 @@
 #include <vector>
 
 // Test template instantiations for the most common template arguments:
-template class hdps::PointDataIterator<float*, const unsigned*, unsigned(*)(const unsigned*)>;
-template class hdps::PointDataIterator<std::vector<float>::iterator, const unsigned*, unsigned(*)(const unsigned*)>;
-template class hdps::PointDataIterator<std::vector<float>::iterator, std::vector<unsigned>::const_iterator, unsigned(*)(std::vector<unsigned>::const_iterator)>;
-template class hdps::PointDataIterator<std::vector<float>::const_iterator, const unsigned*, unsigned(*)(const unsigned*)>;
-template class hdps::PointDataIterator<std::vector<float>::const_iterator, std::vector<unsigned>::const_iterator, unsigned(*)(std::vector<unsigned>::const_iterator)>;
+template class mv::PointDataIterator<float*, const unsigned*, unsigned(*)(const unsigned*)>;
+template class mv::PointDataIterator<std::vector<float>::iterator, const unsigned*, unsigned(*)(const unsigned*)>;
+template class mv::PointDataIterator<std::vector<float>::iterator, std::vector<unsigned>::const_iterator, unsigned(*)(std::vector<unsigned>::const_iterator)>;
+template class mv::PointDataIterator<std::vector<float>::const_iterator, const unsigned*, unsigned(*)(const unsigned*)>;
+template class mv::PointDataIterator<std::vector<float>::const_iterator, std::vector<unsigned>::const_iterator, unsigned(*)(std::vector<unsigned>::const_iterator)>;
 
-using hdps::PointDataIterator;
+using mv::PointDataIterator;
 
 
 TEST(PointDataIterator, satisfiesRandomAccessIteratorRequirements)

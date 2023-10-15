@@ -11,7 +11,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-namespace hdps
+namespace mv
 {
 namespace util
 {

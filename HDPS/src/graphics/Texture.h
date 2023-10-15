@@ -19,7 +19,7 @@
 #include <QImage>
 #include <QRgb>
 
-namespace hdps
+namespace mv
 {
 
 /**
@@ -197,4 +197,4 @@ public:
     }
 };
 
-} // namespace hdps
+} // namespace mv

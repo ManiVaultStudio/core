@@ -16,7 +16,7 @@
     #define COLOR_MAP_EDITOR_1D_HISTOGRAM_GRAPHICS_ITEM_VERBOSE
 #endif
 
-namespace hdps {
+namespace mv {
 
 namespace gui {
 

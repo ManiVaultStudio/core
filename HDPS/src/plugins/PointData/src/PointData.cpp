@@ -35,7 +35,7 @@ Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
 // PointData
 // =============================================================================
 
-using namespace hdps::util;
+using namespace mv::util;
 
 PointData::~PointData(void)
 {
@@ -47,9 +47,9 @@ void PointData::init()
 
 }
 
-hdps::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) const
+mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return hdps::Dataset<DatasetImpl>(new Points(Application::core(), getName(), guid));
+    return mv::Dataset<DatasetImpl>(new Points(Application::core(), getName(), guid));
 }
 
 unsigned int PointData::getNumPoints() const
@@ -250,7 +250,7 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
 }
 
 
-void PointData::extractFullDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
+void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
 {
     CheckDimensionIndex(dimensionIndex1);
     CheckDimensionIndex(dimensionIndex2);
@@ -271,7 +271,7 @@ void PointData::extractFullDataForDimensions(std::vector<hdps::Vector2f>& result
 }
 
 
-void PointData::extractDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const
+void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const
 {
     CheckDimensionIndex(dimensionIndex1);
     CheckDimensionIndex(dimensionIndex2);
@@ -291,8 +291,8 @@ void PointData::extractDataForDimensions(std::vector<hdps::Vector2f>& result, co
         });
 }
 
-Points::Points(hdps::CoreInterface* core, QString dataName, const QString& guid /*= ""*/) :
-    hdps::DatasetImpl(core, dataName, guid),
+Points::Points(mv::CoreInterface* core, QString dataName, const QString& guid /*= ""*/) :
+    mv::DatasetImpl(core, dataName, guid),
     _infoAction(nullptr),
     _dimensionsPickerGroupAction(nullptr),
     _dimensionsPickerAction(nullptr)
@@ -403,7 +403,7 @@ void Points::extractDataForDimension(std::vector<float>& result, const int dimen
         auto pointIndexOffset = 0u;
 
         for (auto proxyMember : getProxyMembers()) {
-            auto points = hdps::Dataset<Points>(proxyMember);
+            auto points = mv::Dataset<Points>(proxyMember);
 
             std::vector<float> proxyPoints;
 
@@ -421,7 +421,7 @@ void Points::extractDataForDimension(std::vector<float>& result, const int dimen
     }
 }
 
-void Points::extractDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
+void Points::extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
 {
     if (isProxy()) {
         result.resize(getNumPoints());
@@ -429,9 +429,9 @@ void Points::extractDataForDimensions(std::vector<hdps::Vector2f>& result, const
         auto pointIndexOffset = 0u;
 
         for (auto proxyMember : getProxyMembers()) {
-            auto points = hdps::Dataset<Points>(proxyMember);
+            auto points = mv::Dataset<Points>(proxyMember);
 
-            std::vector<hdps::Vector2f> proxyPoints;
+            std::vector<mv::Vector2f> proxyPoints;
 
             proxyPoints.resize(points->getNumPoints());
 
@@ -644,7 +644,7 @@ Dataset<DatasetImpl> Points::createSubsetFromVisibleSelection(const QString& gui
 
 QIcon Points::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return hdps::Application::getIconFont("FontAwesome").getIcon("database", color);
+    return mv::Application::getIconFont("FontAwesome").getIcon("database", color);
 
     /*
     const auto size = QSize(100, 100);
@@ -740,7 +740,7 @@ InfoAction& Points::getInfoAction()
     return *_infoAction;
 }
 
-hdps::gui::GroupAction& Points::getDimensionsPickerGroupAction()
+mv::gui::GroupAction& Points::getDimensionsPickerGroupAction()
 {
     if (!isFull())
         return getFullDataset<Points>()->getDimensionsPickerGroupAction();
@@ -764,7 +764,7 @@ std::vector<std::uint32_t>& Points::getSelectionIndices()
 const std::vector<QString>& Points::getDimensionNames() const
 {
     if (isProxy()) {
-        return hdps::Dataset<Points>(getProxyMembers().first())->getDimensionNames();
+        return mv::Dataset<Points>(getProxyMembers().first())->getDimensionNames();
     }
     else {
         return getRawData<PointData>().getDimensionNames();
@@ -775,7 +775,7 @@ void Points::setDimensionNames(const std::vector<QString>& dimNames)
 {
     getRawData<PointData>().setDimensionNames(dimNames);
 
-    hdps::events().notifyDatasetDataDimensionsChanged(this);
+    mv::events().notifyDatasetDataDimensionsChanged(this);
 }
 
 float Points::getValueAt(const std::size_t index) const
@@ -861,7 +861,7 @@ void Points::resolveLinkedData(bool force /*= false*/)
         return;
 
     // Check for linked data in this dataset and resolve them
-    for (hdps::LinkedData& linkedData : getLinkedData())
+    for (mv::LinkedData& linkedData : getLinkedData())
         resolveLinkedPointData(linkedData, getSelection<Points>()->indices, nullptr);
 }
 
@@ -1076,7 +1076,7 @@ QIcon PointDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
     return Application::getIconFont("FontAwesome").getIcon("circle", color);
 }
 
-hdps::plugin::RawData* PointDataFactory::produce()
+mv::plugin::RawData* PointDataFactory::produce()
 {
     return new PointData(this);
 }

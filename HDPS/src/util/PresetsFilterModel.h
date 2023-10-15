@@ -6,7 +6,7 @@
 
 #include <QSortFilterProxyModel>
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 

@@ -6,8 +6,8 @@
 #include "Application.h"
 #include "event/Event.h"
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 InfoAction::InfoAction(QObject* parent, Images& images) :
     GroupAction(parent, "Group", true),
@@ -54,7 +54,7 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetAdded));
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataChanged));
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DatasetDataSelectionChanged));
-    _eventListener.registerDataEventByType(ImageType, [this, updateActions](hdps::DatasetEvent* dataEvent) {
+    _eventListener.registerDataEventByType(ImageType, [this, updateActions](mv::DatasetEvent* dataEvent) {
         if (!_images.isValid())
             return;
 

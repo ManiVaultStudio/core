@@ -7,7 +7,7 @@
 
 #include <QPainter>
 
-namespace hdps::gui
+namespace mv::gui
 {
 
 QIcon getDockAreaIcon(DockAreaFlag dockArea)

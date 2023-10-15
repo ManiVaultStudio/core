@@ -10,9 +10,9 @@
 #include <QSettings>
 #include <QString>
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
-namespace hdps {
+namespace mv {
 
 namespace plugin {
 

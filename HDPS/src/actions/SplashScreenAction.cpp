@@ -8,7 +8,7 @@
 
 #include "widgets/SplashScreenWidget.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 SplashScreenAction::Alert SplashScreenAction::Alert::info(const QString& message)
 {

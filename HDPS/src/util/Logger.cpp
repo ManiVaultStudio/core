@@ -26,7 +26,7 @@
 #include <string>
 #include <typeinfo>
 
-using namespace hdps;
+using namespace mv;
 
 namespace
 {
@@ -243,7 +243,7 @@ namespace
                 logFile.GetOutputStream()
                     << messageNumber
                     << separator << MakeNullPrintable(context.category, "<category>")
-                    << separator << hdps::util::Logger::getMessageTypeName(type).toStdString()
+                    << separator << mv::util::Logger::getMessageTypeName(type).toStdString()
                     << separator << context.version
                     << separator << MakeNullPrintable(context.file, "<file>")
                     << separator << context.line
@@ -256,7 +256,7 @@ namespace
 
 }   // namespace
 
-namespace hdps::util {
+namespace mv::util {
 
 QMap<QtMsgType, QString> Logger::messageTypeNames = {
     { QtDebugMsg, "Debug" },

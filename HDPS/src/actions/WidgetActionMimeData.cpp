@@ -4,7 +4,7 @@
 
 #include "WidgetActionMimeData.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 WidgetActionMimeData::WidgetActionMimeData(WidgetAction* action) :
     QMimeData(),

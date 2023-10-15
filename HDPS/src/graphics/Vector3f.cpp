@@ -6,7 +6,7 @@
 
 #include <cmath>
 
-namespace hdps
+namespace mv
 {
     void Vector3f::set(float x, float y, float z)
     {

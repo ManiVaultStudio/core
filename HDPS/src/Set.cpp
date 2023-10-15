@@ -16,10 +16,10 @@
 
 #include <QPainter>
 
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv::gui;
+using namespace mv::util;
 
-namespace hdps
+namespace mv
 {
 
 void DatasetImpl::makeSubsetOf(Dataset<DatasetImpl> fullDataset)
@@ -54,7 +54,7 @@ DataHierarchyItem& DatasetImpl::getDataHierarchyItem()
     return dataHierarchy().getItem(getId());
 }
 
-hdps::Dataset<hdps::DatasetImpl> DatasetImpl::getParent() const
+mv::Dataset<mv::DatasetImpl> DatasetImpl::getParent() const
 {
     return getDataHierarchyItem().getParent().getDataset();
 }
@@ -70,7 +70,7 @@ QVector<Dataset<DatasetImpl>> DatasetImpl::getChildren(const QVector<DataType>& 
     return children;
 }
 
-QVector<hdps::Dataset<hdps::DatasetImpl>> DatasetImpl::getChildren(const DataType& filterDataType)
+QVector<mv::Dataset<mv::DatasetImpl>> DatasetImpl::getChildren(const DataType& filterDataType)
 {
     return getChildren(QVector<DataType>({ filterDataType }));
 }
@@ -116,7 +116,7 @@ void DatasetImpl::setAnalysis(plugin::AnalysisPlugin* analysis)
     _analysis = analysis;
 }
 
-hdps::plugin::AnalysisPlugin* DatasetImpl::getAnalysis()
+mv::plugin::AnalysisPlugin* DatasetImpl::getAnalysis()
 {
     return _analysis;
 }
@@ -142,7 +142,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         _sourceDataset = getParent();
 
     if (!full)
-        _fullDataset = getParent()->getFullDataset<hdps::DatasetImpl>();
+        _fullDataset = getParent()->getFullDataset<mv::DatasetImpl>();
 
     setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
 
@@ -213,7 +213,7 @@ void DatasetImpl::setGroupIndex(const std::int32_t& groupIndex)
     events().notifyDatasetDataSelectionChanged(this);
 }
 
-hdps::Datasets DatasetImpl::getProxyMembers() const
+mv::Datasets DatasetImpl::getProxyMembers() const
 {
     return _proxyMembers;
 }
@@ -261,14 +261,14 @@ bool DatasetImpl::isProxy() const
     return !_proxyMembers.isEmpty();
 }
 
-void DatasetImpl::addAction(hdps::gui::WidgetAction& widgetAction)
+void DatasetImpl::addAction(mv::gui::WidgetAction& widgetAction)
 {
     widgetAction.setParent(this);
 
     getDataHierarchyItem().addAction(widgetAction);
 }
 
-hdps::gui::WidgetActions DatasetImpl::getActions() const
+mv::gui::WidgetActions DatasetImpl::getActions() const
 {
     return getDataHierarchyItem().getActions();
 }
@@ -283,7 +283,7 @@ void DatasetImpl::populateContextMenu(QMenu* contextMenu)
     return getDataHierarchyItem().populateContextMenu(contextMenu);
 }
 
-void DatasetImpl::addLinkedData(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping)
+void DatasetImpl::addLinkedData(const mv::Dataset<DatasetImpl>& targetDataSet, mv::SelectionMap& mapping)
 {
     _linkedData.emplace_back(toSmartPointer(), targetDataSet);
     _linkedData.back().setMapping(mapping);
@@ -321,7 +321,7 @@ void DatasetImpl::init()
 {
 }
 
-hdps::DatasetImpl::StorageType DatasetImpl::getStorageType() const
+mv::DatasetImpl::StorageType DatasetImpl::getStorageType() const
 {
     return _storageType;
 }
@@ -356,7 +356,7 @@ bool DatasetImpl::isDerivedData() const
     return _derived;
 }
 
-hdps::DataType DatasetImpl::getDataType() const
+mv::DataType DatasetImpl::getDataType() const
 {
     return Application::core()->requestRawData(getRawDataName()).getDataType();
 }
@@ -367,17 +367,17 @@ void DatasetImpl::setSourceDataSet(const Dataset<DatasetImpl>& dataset)
     _derived = true;
 }
 
-hdps::Dataset<hdps::DatasetImpl> DatasetImpl::getSelection() const
+mv::Dataset<mv::DatasetImpl> DatasetImpl::getSelection() const
 {
     return Application::core()->requestSelection(getSourceDataset<DatasetImpl>()->getRawDataName());
 }
 
-hdps::Dataset<hdps::DatasetImpl>& DatasetImpl::getSmartPointer()
+mv::Dataset<mv::DatasetImpl>& DatasetImpl::getSmartPointer()
 {
     return _smartPointer;
 }
 
-hdps::Dataset<hdps::DatasetImpl> DatasetImpl::toSmartPointer() const
+mv::Dataset<mv::DatasetImpl> DatasetImpl::toSmartPointer() const
 {
     return Dataset<DatasetImpl>(const_cast<DatasetImpl*>(this));
 }
@@ -397,12 +397,12 @@ QIcon DatasetImpl::getIcon(StorageType storageType, const QColor& color /*= Qt::
     return QIcon();
 }
 
-const std::vector<hdps::LinkedData>& DatasetImpl::getLinkedData() const
+const std::vector<mv::LinkedData>& DatasetImpl::getLinkedData() const
 {
     return _linkedData;
 }
 
-std::vector<hdps::LinkedData>& DatasetImpl::getLinkedData()
+std::vector<mv::LinkedData>& DatasetImpl::getLinkedData()
 {
     return _linkedData;
 }

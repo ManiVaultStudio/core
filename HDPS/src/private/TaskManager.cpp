@@ -14,7 +14,7 @@
     //#define TASK_MANAGER_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 TaskManager::TaskManager(QObject* parent /*= nullptr*/) :

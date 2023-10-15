@@ -9,7 +9,7 @@
 
 class DataHierarchyModelItem;
 
-namespace hdps {
+namespace mv {
     class DataHierarchyItem;
 }
 
@@ -106,7 +106,7 @@ public:
      * @param parentModelIndex Model index of the parent data hierarchy item 
      * @param dataHierarchyItem Reference to the data hierarchy item
      */
-    bool addDataHierarchyModelItem(const QModelIndex& parentModelIndex, hdps::DataHierarchyItem& dataHierarchyItem);
+    bool addDataHierarchyModelItem(const QModelIndex& parentModelIndex, mv::DataHierarchyItem& dataHierarchyItem);
 
     /**
      * Remove a data hierarchy item from the model

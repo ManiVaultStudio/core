@@ -8,7 +8,7 @@
 
 #include <QHBoxLayout>
 
-using namespace hdps;
+using namespace mv;
 
 CreateSetFromSelectionAction::CreateSetFromSelectionAction(QObject* parent, const Dataset<Points>& points) :
     WidgetAction(parent, "Create Set From Selection"),

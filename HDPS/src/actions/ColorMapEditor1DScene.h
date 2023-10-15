@@ -8,7 +8,7 @@
 
 class QGraphicsSceneMouseEvent;
 
-namespace hdps {
+namespace mv {
 
 namespace gui {
 

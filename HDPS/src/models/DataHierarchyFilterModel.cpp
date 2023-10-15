@@ -7,7 +7,7 @@
 
 #include <QDebug>
 
-using namespace hdps;
+using namespace mv;
 
 DataHierarchyFilterModel::DataHierarchyFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),

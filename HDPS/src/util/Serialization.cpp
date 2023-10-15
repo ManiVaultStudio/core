@@ -11,7 +11,7 @@
 
 #include <math.h>
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 

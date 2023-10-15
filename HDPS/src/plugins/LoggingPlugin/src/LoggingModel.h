@@ -13,7 +13,7 @@
 #include <deque>
 #include <cstdint>
 
-namespace hdps::util {
+namespace mv::util {
     struct MessageRecord;
 }
 
@@ -64,7 +64,7 @@ public:
 
 public: // Action getters
 
-    hdps::gui::ToggleAction& getWordWrapAction() { return _wordWrapAction; }
+    mv::gui::ToggleAction& getWordWrapAction() { return _wordWrapAction; }
 
 private:
 
@@ -113,6 +113,6 @@ private:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
 private:
-    std::deque<const hdps::util::MessageRecord*>    _messageRecords;    /** Logged message records */
-    hdps::gui::ToggleAction                         _wordWrapAction;    /** Action for toggling word wrap */
+    std::deque<const mv::util::MessageRecord*>    _messageRecords;    /** Logged message records */
+    mv::gui::ToggleAction                         _wordWrapAction;    /** Action for toggling word wrap */
 };

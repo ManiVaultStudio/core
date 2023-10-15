@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-namespace hdps
+namespace mv
 {
     class Vector2f;
     class Selection;
@@ -35,4 +35,4 @@ namespace hdps
 
     std::ostream& operator<<(std::ostream& os, const Matrix3f& v);
 
-} // namespace hdps
+} // namespace mv

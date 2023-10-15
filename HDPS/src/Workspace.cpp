@@ -12,10 +12,10 @@
 
 #include <QBuffer>
 
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv::gui;
+using namespace mv::util;
 
-namespace hdps {
+namespace mv {
 
 Workspace::Workspace(QObject* parent /*= nullptr*/) :
     QObject(parent),
@@ -127,7 +127,7 @@ void Workspace::initialize()
 
     connect(&_lockingAction.getLockedAction(), &ToggleAction::toggled, this, [this]() -> void {
         for (auto plugin : plugins().getPluginsByType(plugin::Type::VIEW))
-            dynamic_cast<hdps::plugin::ViewPlugin*>(plugin)->getLockingAction().setLocked(_lockingAction.isLocked());
+            dynamic_cast<mv::plugin::ViewPlugin*>(plugin)->getLockingAction().setLocked(_lockingAction.isLocked());
     });
 
     connect(&workspaces().getLockingAction().getLockedAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {

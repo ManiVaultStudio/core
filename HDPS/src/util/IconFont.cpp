@@ -13,9 +13,9 @@
 #include <QPainter>
 #include <QApplication>
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
-namespace hdps {
+namespace mv {
 
 IconFont::IconFont(const QString& name, const std::uint32_t& majorVersion, const std::uint32_t& minorVersion, const QStringList& fontResourceNames, bool defaultFont /*= false*/) :
     _name(name),

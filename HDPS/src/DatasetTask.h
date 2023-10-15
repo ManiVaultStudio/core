@@ -7,7 +7,7 @@
 #include "Task.h"
 #include "Dataset.h"
 
-namespace hdps {
+namespace mv {
 
 /**
  * Dataset task class

@@ -8,7 +8,7 @@
 
 #include <QAbstractListModel>
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 

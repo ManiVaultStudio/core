@@ -4,9 +4,9 @@
 
 #include "VariantAction.h"
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 VariantAction::VariantAction(QObject* parent, const QString& title, const QVariant& variant /*= QVariant()*/) :
     WidgetAction(parent, title),

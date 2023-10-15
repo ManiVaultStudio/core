@@ -8,7 +8,7 @@
 
 #include <QMimeData>
 
-namespace hdps {
+namespace mv {
 
 /**
  * Datasets mime data class

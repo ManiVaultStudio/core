@@ -14,7 +14,7 @@
     #define RECENT_FILE_PATHS_ACTION_VERBOSE
 #endif
 
-namespace hdps::gui {
+namespace mv::gui {
 
 RecentFilesAction::RecentFilesAction(QObject* parent, const QString& settingsKey /*= ""*/, const QString& fileType /*= ""*/, const QString& shortcutPrefix /*= ""*/, const QIcon& icon /*= QIcon()*/) :
     WidgetAction(parent, "Recent Files"),

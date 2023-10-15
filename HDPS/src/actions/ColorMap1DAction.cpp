@@ -4,9 +4,9 @@
 
 #include "ColorMap1DAction.h"
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ColorMap1DAction::ColorMap1DAction(QObject* parent, const QString& title, const QString& colorMap /*= "RdYlBu"*/) :
     ColorMapAction(parent, title, ColorMap::Type::OneDimensional, colorMap)

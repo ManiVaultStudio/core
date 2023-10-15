@@ -15,7 +15,7 @@
 
 class QWidget;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Directory picker action class
@@ -130,6 +130,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::DirectoryPickerAction)
+Q_DECLARE_METATYPE(mv::gui::DirectoryPickerAction)
 
-inline const auto directoryPickerActionMetaTypeId = qRegisterMetaType<hdps::gui::DirectoryPickerAction*>("hdps::gui::DirectoryPickerAction");
+inline const auto directoryPickerActionMetaTypeId = qRegisterMetaType<mv::gui::DirectoryPickerAction*>("mv::gui::DirectoryPickerAction");

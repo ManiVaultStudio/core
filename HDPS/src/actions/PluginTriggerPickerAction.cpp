@@ -9,7 +9,7 @@
 
 #include <QHBoxLayout>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 PluginTriggerPickerAction::PluginTriggerPickerAction(QObject* parent, const QString& title) :
     TriggerAction(parent, title),

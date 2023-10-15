@@ -10,7 +10,7 @@
 
 class QMainWindow;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 class TasksStatusBarAction;
 

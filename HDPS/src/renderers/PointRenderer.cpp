@@ -8,7 +8,7 @@
 
 #include <QDebug>
 
-namespace hdps
+namespace mv
 {
     namespace gui
     {
@@ -316,7 +316,7 @@ namespace hdps
             _pointSettings._scalingMode = scalingMode;
         }
 
-        hdps::gui::PointSelectionDisplayMode PointRenderer::getSelectionDisplayMode() const
+        mv::gui::PointSelectionDisplayMode PointRenderer::getSelectionDisplayMode() const
         {
             return _selectionDisplayMode;
         }
@@ -326,7 +326,7 @@ namespace hdps
             _selectionDisplayMode = selectionDisplayMode;
         }
 
-        hdps::Vector3f PointRenderer::getSelectionOutlineColor() const
+        mv::Vector3f PointRenderer::getSelectionOutlineColor() const
         {
             return _selectionOutlineColor;
         }
@@ -453,7 +453,7 @@ namespace hdps
             _gpuPoints.destroy();
         }
 
-        hdps::Vector3f PointRenderer::getColorMapRange() const
+        mv::Vector3f PointRenderer::getColorMapRange() const
         {
             return _gpuPoints.getColorMapRange();
         }
@@ -465,4 +465,4 @@ namespace hdps
 
     } // namespace gui
 
-} // namespace hdps
+} // namespace mv

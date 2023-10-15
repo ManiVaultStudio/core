@@ -14,10 +14,10 @@
 
 #include <util/Miscellaneous.h>
 
-using namespace hdps;
-using namespace hdps::plugin;
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv;
+using namespace mv::plugin;
+using namespace mv::gui;
+using namespace mv::util;
 
 LoadSystemViewMenu::LoadSystemViewMenu(QWidget *parent /*= nullptr*/, ads::CDockAreaWidget* dockAreaWidget /*= nullptr*/) :
     QMenu(parent),
@@ -80,7 +80,7 @@ bool LoadSystemViewMenu::mayProducePlugins() const
     return false;
 }
 
-QVector<QPointer<TriggerAction>> LoadSystemViewMenu::getLoadSystemViewsActions(hdps::gui::DockAreaFlag dockArea /*= hdps::gui::DockAreaFlag::None*/)
+QVector<QPointer<TriggerAction>> LoadSystemViewMenu::getLoadSystemViewsActions(mv::gui::DockAreaFlag dockArea /*= mv::gui::DockAreaFlag::None*/)
 {
     QVector<QPointer<TriggerAction>> actions;
 

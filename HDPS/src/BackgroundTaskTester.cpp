@@ -9,7 +9,7 @@
 
 #include <QEventLoop>
 
-namespace hdps
+namespace mv
 {
 
 BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name) :

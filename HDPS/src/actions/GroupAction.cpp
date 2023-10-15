@@ -10,9 +10,9 @@
 #include <QDebug>
 #include <QHBoxLayout>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 const std::uint32_t GroupAction::globalLabelWidthPercentage = 35;
 const std::uint32_t GroupAction::globalLabelWidthFixed      = 200;
@@ -289,7 +289,7 @@ void GroupAction::clear()
     emit actionsChanged(_actions);
 }
 
-hdps::gui::StretchAction* GroupAction::addStretch(std::int32_t stretch /*= 1*/)
+mv::gui::StretchAction* GroupAction::addStretch(std::int32_t stretch /*= 1*/)
 {
     auto actionStretchActionId = QUuid::createUuid().toString(QUuid::WithoutBraces);
 

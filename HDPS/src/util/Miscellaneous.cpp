@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace hdps::util
+namespace mv::util
 {
 
 QString getIntegerCountHumanReadable(const float& count)

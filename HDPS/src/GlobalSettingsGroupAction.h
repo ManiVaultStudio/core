@@ -6,7 +6,7 @@
 
 #include "actions/GroupAction.h"
 
-namespace hdps
+namespace mv
 {
 
 /**
@@ -16,7 +16,7 @@ namespace hdps
  *
  * @author Thomas Kroes
  */
-class GlobalSettingsGroupAction : public hdps::gui::GroupAction
+class GlobalSettingsGroupAction : public mv::gui::GroupAction
 {
 public:
 

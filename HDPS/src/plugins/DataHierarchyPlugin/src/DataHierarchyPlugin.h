@@ -8,7 +8,7 @@
 
 #include <ViewPlugin.h>
 
-using namespace hdps::plugin;
+using namespace mv::plugin;
 
 /**
  * Data hierarchy view plugin
@@ -37,7 +37,7 @@ private:
 
 class DataHierarchyPluginFactory : public ViewPluginFactory
 {
-    Q_INTERFACES(hdps::plugin::ViewPluginFactory hdps::plugin::PluginFactory)
+    Q_INTERFACES(mv::plugin::ViewPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "nl.BioVault.DataHierarchyPlugin" FILE "DataHierarchyPlugin.json")
     

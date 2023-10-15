@@ -9,7 +9,7 @@
 
 #include <QString>
 
-namespace hdps {
+namespace mv {
     class DatasetImpl;
 
 namespace plugin {
@@ -72,4 +72,4 @@ public:
 }
 }
 
-Q_DECLARE_INTERFACE(hdps::plugin::RawDataFactory, "hdps.RawDataFactory")
+Q_DECLARE_INTERFACE(mv::plugin::RawDataFactory, "hdps.RawDataFactory")

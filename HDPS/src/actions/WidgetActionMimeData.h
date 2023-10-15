@@ -11,7 +11,7 @@
 
 #include <QMimeData>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Widget action mime data class

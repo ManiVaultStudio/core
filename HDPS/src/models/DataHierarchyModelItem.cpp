@@ -12,8 +12,8 @@
 #include <QPainter>
 #include <QMenu>
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 DataHierarchyModelItem::DataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem, DataHierarchyModelItem* parent /*= nullptr*/) :
     QObject(parent),
@@ -209,7 +209,7 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
 
         case Qt::DecorationRole:
         {
-            auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
+            auto& fontAwesome = mv::Application::getIconFont("FontAwesome");
 
             switch (static_cast<Column>(column))
             {

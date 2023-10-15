@@ -6,7 +6,7 @@
 
 #include <QString>
 
-namespace hdps
+namespace mv
 {
 namespace util
 {

@@ -9,7 +9,7 @@
 #include <actions/OptionAction.h>
 #include <actions/WidgetActionCollapsedWidget.h>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Plugin trigger picker action class
@@ -147,6 +147,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::PluginTriggerPickerAction)
+Q_DECLARE_METATYPE(mv::gui::PluginTriggerPickerAction)
 
-inline const auto pluginTriggerPickerActionMetaTypeId = qRegisterMetaType<hdps::gui::PluginTriggerPickerAction*>("PluginTriggerPickerAction");
+inline const auto pluginTriggerPickerActionMetaTypeId = qRegisterMetaType<mv::gui::PluginTriggerPickerAction*>("PluginTriggerPickerAction");

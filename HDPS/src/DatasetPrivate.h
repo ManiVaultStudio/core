@@ -9,7 +9,7 @@
 
 #include <QString>
 
-namespace hdps
+namespace mv
 {
 
 class DatasetImpl;

@@ -33,5 +33,5 @@ private:
     void populate ();
 
 private:
-    hdps::gui::TriggerAction    _exitApplictionAction;  /** Trigger action to exit the application */
+    mv::gui::TriggerAction    _exitApplictionAction;  /** Trigger action to exit the application */
 };

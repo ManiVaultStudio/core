@@ -14,7 +14,7 @@
     #define COLOR_MAP_EDITOR_1D_ACTION
 #endif
 
-namespace hdps::gui {
+namespace mv::gui {
 
 #if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
     constexpr QSize ColorMapEditor1DAction::colorMapImageSize;
@@ -102,7 +102,7 @@ ColorMapEditor1DNode* ColorMapEditor1DAction::getNextNode(ColorMapEditor1DNode* 
     return _nodes.last();
 }
 
-const hdps::gui::ColorMapEditor1DAction::Histogram& ColorMapEditor1DAction::getHistogram() const
+const mv::gui::ColorMapEditor1DAction::Histogram& ColorMapEditor1DAction::getHistogram() const
 {
     return _histogram;
 }

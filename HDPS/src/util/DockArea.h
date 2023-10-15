@@ -8,7 +8,7 @@
 #include <QString>
 #include <QIcon>
 
-namespace hdps::gui
+namespace mv::gui
 {
 
 /** Dock area flags */

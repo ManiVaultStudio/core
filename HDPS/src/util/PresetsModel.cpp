@@ -4,7 +4,7 @@
 
 #include "PresetsModel.h"
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 
@@ -79,7 +79,7 @@ QVariant PresetsModel::data(const QModelIndex& index, int role /* = Qt::DisplayR
     return QVariant();
 }
 
-void PresetsModel::setWidgetAction(hdps::gui::WidgetAction* widgetAction)
+void PresetsModel::setWidgetAction(mv::gui::WidgetAction* widgetAction)
 {
 }
 

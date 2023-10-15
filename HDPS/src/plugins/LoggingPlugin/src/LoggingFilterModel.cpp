@@ -9,8 +9,8 @@
 
 #include <QDebug>
 
-using namespace hdps::util;
-using namespace hdps::gui;
+using namespace mv::util;
+using namespace mv::gui;
 
 LoggingFilterModel::LoggingFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),

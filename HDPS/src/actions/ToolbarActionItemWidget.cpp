@@ -11,7 +11,7 @@
 #include <QCoreApplication>
 #include <QLabel>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ToolbarActionItemWidget::ToolbarActionItemWidget(QWidget* parent, ToolbarActionItem& toolbarActionItem) :
     QWidget(parent),

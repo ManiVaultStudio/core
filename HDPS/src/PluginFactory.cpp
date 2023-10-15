@@ -6,7 +6,7 @@
 #include "Set.h"
 #include "actions/PluginTriggerAction.h"
 
-namespace hdps
+namespace mv
 {
 
 using namespace gui;
@@ -38,7 +38,7 @@ void PluginFactory::setKind(const QString& kind)
     _pluginTriggerAction.setText(_kind);
 }
 
-hdps::plugin::Type PluginFactory::getType() const
+mv::plugin::Type PluginFactory::getType() const
 {
     return _type;
 }
@@ -56,7 +56,7 @@ bool PluginFactory::hasHelp()
     return false;
 }
 
-hdps::gui::TriggerAction& PluginFactory::getTriggerHelpAction()
+mv::gui::TriggerAction& PluginFactory::getTriggerHelpAction()
 {
     return _triggerHelpAction;
 }
@@ -91,7 +91,7 @@ bool PluginFactory::mayProduce() const
     return _numberOfInstances < _maximumNumberOfInstances;
 }
 
-hdps::gui::PluginTriggerAction& PluginFactory::getPluginTriggerAction()
+mv::gui::PluginTriggerAction& PluginFactory::getPluginTriggerAction()
 {
     return _pluginTriggerAction;
 }

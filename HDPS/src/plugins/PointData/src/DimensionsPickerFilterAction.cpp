@@ -9,7 +9,7 @@
 
 #include <QHBoxLayout>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 DimensionsPickerFilterAction::DimensionsPickerFilterAction(DimensionsPickerAction& dimensionsPickerAction) :
     WidgetAction(&dimensionsPickerAction, "Filter"),

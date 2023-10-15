@@ -7,11 +7,11 @@
 #include <QPainter>
 #include <QDirIterator>
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 
-hdps::util::ColorMapModel* ColorMapModel::globalInstance = nullptr;
+mv::util::ColorMapModel* ColorMapModel::globalInstance = nullptr;
 
 ColorMapModel::ColorMapModel(QObject* parent /*= nullptr*/) :
     QAbstractListModel(parent),
@@ -182,7 +182,7 @@ const ColorMap* ColorMapModel::getColorMap(const int& row) const
     return &_colorMaps.at(row);
 }
 
-hdps::util::ColorMapModel* ColorMapModel::getGlobalInstance()
+mv::util::ColorMapModel* ColorMapModel::getGlobalInstance()
 {
     if (globalInstance == nullptr)
         globalInstance = new ColorMapModel();

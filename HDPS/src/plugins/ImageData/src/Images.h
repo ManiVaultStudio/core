@@ -19,7 +19,7 @@
 #include <vector>
 #include <tuple>
 
-using namespace hdps::plugin;
+using namespace mv::plugin;
 
 class InfoAction;
 
@@ -30,7 +30,7 @@ class InfoAction;
  *
  * @author Thomas Kroes
  */
-class IMAGEDATA_EXPORT Images : public hdps::DatasetImpl
+class IMAGEDATA_EXPORT Images : public mv::DatasetImpl
 {
 public: // Construction
 
@@ -40,7 +40,7 @@ public: // Construction
      * @param dataName Name of the dataset
      * @param guid Globally unique dataset identifier (use only for deserialization)
      */
-    Images(hdps::CoreInterface* core, QString dataName, const QString& guid = "");
+    Images(mv::CoreInterface* core, QString dataName, const QString& guid = "");
 
     /** Initializes the dataset */
     void init() override;
@@ -57,7 +57,7 @@ public: // Construction
      * @param parentDataSet Smart pointer to the parent dataset in the data hierarchy (root if smart pointer is not valid)
      * @param pluginKind Either "Points" (default) or "Cluster" to define the data type of the raw value data set
      */
-    static std::tuple<hdps::Dataset<hdps::DatasetImpl>, hdps::Dataset<Images>> addImageDataset(QString datasetGuiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), QString pluginKind = "Points");
+    static std::tuple<mv::Dataset<mv::DatasetImpl>, mv::Dataset<Images>> addImageDataset(QString datasetGuiName, const mv::Dataset<mv::DatasetImpl>& parentDataSet = mv::Dataset<mv::DatasetImpl>(), QString pluginKind = "Points");
 
 public: // Subsets
 
@@ -68,12 +68,12 @@ public: // Subsets
      * @param visible Whether the subset will be visible in the UI
      * @return Smart pointer to the created subset
      */
-    hdps::Dataset<hdps::DatasetImpl> createSubsetFromSelection(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
+    mv::Dataset<mv::DatasetImpl> createSubsetFromSelection(const QString& guiName, const mv::Dataset<mv::DatasetImpl>& parentDataSet = mv::Dataset<mv::DatasetImpl>(), const bool& visible = true) const override;
 
 public: // Image retrieval functions
 
     /** Obtain a copy of this dataset */
-    hdps::Dataset<hdps::DatasetImpl> copy() const override;
+    mv::Dataset<mv::DatasetImpl> copy() const override;
 
     /** Gets the image collection type e.g. stack or sequence */
     ImageData::Type getType() const;

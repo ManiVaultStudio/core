@@ -9,7 +9,7 @@
 #include "actions/DecimalAction.h"
 #include "actions/ColorAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 class ColorMapEditor1DNode;
 class ColorMapEditor1DAction;
@@ -88,6 +88,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::ColorMapEditor1DNodeAction)
+Q_DECLARE_METATYPE(mv::gui::ColorMapEditor1DNodeAction)
 
-inline const auto colorMapEditor1DNodeActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapEditor1DNodeAction*>("hdps::gui::ColorMapEditor1DNodeAction");
+inline const auto colorMapEditor1DNodeActionMetaTypeId = qRegisterMetaType<mv::gui::ColorMapEditor1DNodeAction*>("mv::gui::ColorMapEditor1DNodeAction");

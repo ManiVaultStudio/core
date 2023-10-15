@@ -14,7 +14,7 @@
 
 #include <QOffscreenSurface>
 
-namespace hdps
+namespace mv
 {
 
 class GaussianTexture : public Texture2D
@@ -71,4 +71,4 @@ private:
     bool _needsDensityMapUpdate;
 };
 
-} // namespace hdps
+} // namespace mv

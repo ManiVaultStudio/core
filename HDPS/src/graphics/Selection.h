@@ -6,7 +6,7 @@
 
 #include "Vector2f.h"
 
-namespace hdps
+namespace mv
 {
     class Selection
     {
@@ -90,4 +90,4 @@ namespace hdps
         float _left{}, _right{}, _bottom{}, _top{};
     };
 
-} // namespace hdps
+} // namespace mv

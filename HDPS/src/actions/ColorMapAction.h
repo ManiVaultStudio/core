@@ -20,7 +20,7 @@
 #include "ColorMapEditor1DAction.h"
 #include "ColorMapSettingsAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Color map action class
@@ -232,6 +232,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::ColorMapAction)
+Q_DECLARE_METATYPE(mv::gui::ColorMapAction)
 
-inline const auto colorMapActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapAction*>("hdps::gui::ColorMapAction");
+inline const auto colorMapActionMetaTypeId = qRegisterMetaType<mv::gui::ColorMapAction*>("mv::gui::ColorMapAction");

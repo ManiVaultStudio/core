@@ -53,6 +53,6 @@ public:
 private:
     PluginManagerModel          _model;                 /** Plugin manager model (interfaces with a plugin manager) */
     PluginManagerFilterModel    _filterModel;           /** Sorting and filtering model for the plugin manager model */
-    hdps::gui::HierarchyWidget  _hierarchyWidget;       /** Widget for displaying the loaded plugins */
-    hdps::gui::TriggerAction    _okAction;              /** Action for exiting the dialog */
+    mv::gui::HierarchyWidget  _hierarchyWidget;       /** Widget for displaying the loaded plugins */
+    mv::gui::TriggerAction    _okAction;              /** Action for exiting the dialog */
 };

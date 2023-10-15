@@ -13,7 +13,7 @@
 
 #include <QDebug>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions actions) :
     QMenu(parent),
@@ -112,7 +112,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
                 connectAction->setToolTip("Connect " + firstAction->text() + " to " + publicAction->text());
 
                 connect(connectAction, &QAction::triggered, this, [this, firstAction, publicAction]() -> void {
-                    hdps::actions().connectPrivateActionToPublicAction(firstAction, publicAction, true);
+                    mv::actions().connectPrivateActionToPublicAction(firstAction, publicAction, true);
                 });
 
                 connectMenu->addAction(connectAction);
@@ -149,7 +149,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         connect(&_removeAction, &TriggerAction::triggered, this, [this, publicActions]() -> void {
             auto removePublicActions = true;
 
-            if (hdps::settings().getParametersSettings().getConfirmRemoveSharedParameterAction().isChecked()) {
+            if (mv::settings().getParametersSettings().getConfirmRemoveSharedParameterAction().isChecked()) {
                 ConfirmRemovePublicActionDialog confirmRemovePublicActionDialog(this, publicActions);
 
                 if (confirmRemovePublicActionDialog.exec() == QDialog::Rejected)
@@ -159,7 +159,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
             if (removePublicActions) {
                 for (auto publicAction : publicActions) {
                     for (auto connectedAction : publicAction->getConnectedActions())
-                        hdps::actions().disconnectPrivateActionFromPublicAction(connectedAction, true);
+                        mv::actions().disconnectPrivateActionFromPublicAction(connectedAction, true);
 
                     delete publicAction;
                 }
@@ -199,7 +199,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     }
 
     connect(&_publishAction, &TriggerAction::triggered, this, [this]() -> void {
-        hdps::actions().publishPrivateAction(_actions.first());
+        mv::actions().publishPrivateAction(_actions.first());
     });
 
     connect(&_connectAction, &TriggerAction::triggered, this, [this]() -> void {
@@ -212,14 +212,14 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
     connect(&_disconnectAction, &TriggerAction::triggered, this, [this]() -> void {
         for (auto action : _actions)
             if (action->isPrivate())
-                hdps::actions().disconnectPrivateActionFromPublicAction(action, true);
+                mv::actions().disconnectPrivateActionFromPublicAction(action, true);
             
     });
 
     connect(&_disconnectAllAction, &TriggerAction::triggered, this, [this]() -> void {
         for (auto publicAction : _actions)
             for (auto connectedPrivateAction : publicAction->getConnectedActions())
-                hdps::actions().disconnectPrivateActionFromPublicAction(connectedPrivateAction, true);
+                mv::actions().disconnectPrivateActionFromPublicAction(connectedPrivateAction, true);
     });
 
     connect(&_editAction, &TriggerAction::triggered, this, [this]() -> void {
@@ -276,7 +276,7 @@ WidgetActionContextMenu::ConfirmRemovePublicActionDialog::ConfirmRemovePublicAct
 
     auto buttonsLayout = new QHBoxLayout();
 
-    buttonsLayout->addWidget(hdps::settings().getParametersSettings().getConfirmRemoveSharedParameterAction().createWidget(this));
+    buttonsLayout->addWidget(mv::settings().getParametersSettings().getConfirmRemoveSharedParameterAction().createWidget(this));
     buttonsLayout->addSpacing(10);
     buttonsLayout->addWidget(_removeAction.createWidget(this));
     buttonsLayout->addWidget(_cancelAction.createWidget(this));

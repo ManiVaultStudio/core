@@ -4,6 +4,6 @@
 
 #include "NumericalRangeAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 }

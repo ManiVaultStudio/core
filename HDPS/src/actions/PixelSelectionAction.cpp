@@ -9,9 +9,9 @@
 #include <QKeyEvent>
 #include <QMenu>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),
@@ -50,7 +50,7 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title
     addAction(&_brushRadiusAction);
     addAction(&_notifyDuringSelectionAction);
 
-    const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
+    const auto& fontAwesome = mv::Application::getIconFont("FontAwesome");
 
     _overlayColorAction.setToolTip("Selection color");
 

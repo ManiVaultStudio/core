@@ -20,16 +20,16 @@
 
 #include <vector>
 
-using namespace hdps;
+using namespace mv;
 
-const hdps::DataType ClusterType = hdps::DataType(QString("Clusters"));
+const mv::DataType ClusterType = mv::DataType(QString("Clusters"));
 
 class InfoAction;
 
-class CLUSTERDATA_EXPORT ClusterData : public hdps::plugin::RawData
+class CLUSTERDATA_EXPORT ClusterData : public mv::plugin::RawData
 {
 public:
-    ClusterData(const hdps::plugin::PluginFactory* factory);
+    ClusterData(const mv::plugin::PluginFactory* factory);
     ~ClusterData(void) override;
 
     void init() override;
@@ -238,9 +238,9 @@ public: // Serialization
 // Factory
 // =============================================================================
 
-class ClusterDataFactory : public hdps::plugin::RawDataFactory
+class ClusterDataFactory : public mv::plugin::RawDataFactory
 {
-    Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
+    Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "hdps.ClusterData"
                       FILE  "ClusterData.json")
@@ -256,7 +256,7 @@ public:
      */
     QIcon getIcon(const QColor& color = Qt::black) const override;
 
-    hdps::plugin::RawData* produce() override;
+    mv::plugin::RawData* produce() override;
 
 
 };

@@ -5,7 +5,7 @@
 #include "TransformationPlugin.h"
 #include "Application.h"
 
-namespace hdps
+namespace mv
 {
 
 namespace plugin
@@ -18,7 +18,7 @@ TransformationPlugin::TransformationPlugin(const PluginFactory* factory) :
 
 }
 
-hdps::Datasets TransformationPlugin::getInputDatasets() const
+mv::Datasets TransformationPlugin::getInputDatasets() const
 {
     return _inputDatasets;
 }

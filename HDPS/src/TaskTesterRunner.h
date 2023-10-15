@@ -8,7 +8,7 @@
 #include <QThread>
 #include <QDebug>
 
-namespace hdps
+namespace mv
 {
 
 class TaskTesterRunnerPrivate : public  QObject

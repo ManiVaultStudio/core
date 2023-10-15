@@ -15,9 +15,9 @@
 #include <QDebug>
 #include <QScrollBar>
 
-using namespace hdps;
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv;
+using namespace mv::gui;
+using namespace mv::util;
 
 StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* startPageContentWidget) :
     QWidget(startPageContentWidget),
@@ -55,9 +55,9 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     _createProjectFromDatasetWidget.getHierarchyWidget().setItemTypeName("Importer");
     _instructionVideosWidget.getHierarchyWidget().setItemTypeName("Instruction video");
 
-    _workspaceLocationTypesModel.appendRow(new QStandardItem(hdps::Application::getIconFont("FontAwesome").getIcon("industry"), "Built-in Workspace"));
-    _workspaceLocationTypesModel.appendRow(new QStandardItem(hdps::Application::getIconFont("FontAwesome").getIcon("clock"), "Recent Workspace"));
-    _workspaceLocationTypesModel.appendRow(new QStandardItem(hdps::Application::getIconFont("FontAwesome").getIcon("clock"), "Recent Project"));
+    _workspaceLocationTypesModel.appendRow(new QStandardItem(mv::Application::getIconFont("FontAwesome").getIcon("industry"), "Built-in Workspace"));
+    _workspaceLocationTypesModel.appendRow(new QStandardItem(mv::Application::getIconFont("FontAwesome").getIcon("clock"), "Recent Workspace"));
+    _workspaceLocationTypesModel.appendRow(new QStandardItem(mv::Application::getIconFont("FontAwesome").getIcon("clock"), "Recent Project"));
     
     _workspaceLocationTypeAction.setCustomModel(&_workspaceLocationTypesModel);
     _workspaceLocationTypeAction.setCurrentIndex(static_cast<std::int32_t>(FromWorkspaceType::BuiltIn));

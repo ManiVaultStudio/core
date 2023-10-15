@@ -10,7 +10,7 @@
 #include <QHBoxLayout>
 #include <QToolButton>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Color widget action class
@@ -160,6 +160,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::ColorAction)
+Q_DECLARE_METATYPE(mv::gui::ColorAction)
 
-inline const auto colorActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorAction*>("hdps::gui::ColorAction");
+inline const auto colorActionMetaTypeId = qRegisterMetaType<mv::gui::ColorAction*>("mv::gui::ColorAction");

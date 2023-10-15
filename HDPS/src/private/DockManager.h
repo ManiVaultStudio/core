@@ -28,7 +28,7 @@
  *
  * @author Thomas Kroes
  */
-class DockManager : protected ads::CDockManager, public hdps::util::Serializable
+class DockManager : protected ads::CDockManager, public mv::util::Serializable
 {
     Q_OBJECT
 
@@ -69,13 +69,13 @@ public:
      * @param viewPlugin Pointer to view plugin that holds the widget
      * @return Pointer to ADS dock widget area (if found, otherwise nullptr)
      */
-    ads::CDockAreaWidget* findDockAreaWidget(hdps::plugin::ViewPlugin* viewPlugin);
+    ads::CDockAreaWidget* findDockAreaWidget(mv::plugin::ViewPlugin* viewPlugin);
 
     /**
      * Remove \p viewPlugin from the dock manager
      * @param viewPlugin Pointer to the view plugin to remove
      */
-    void removeViewPluginDockWidget(hdps::plugin::ViewPlugin * viewPlugin);
+    void removeViewPluginDockWidget(mv::plugin::ViewPlugin * viewPlugin);
 
     /** Resets the docking layout to defaults */
     void reset();
@@ -92,13 +92,13 @@ public:
 public: // Serialization task
 
     /** Get task for reporting serialization progress */
-    hdps::Task* getSerializationTask();
+    mv::Task* getSerializationTask();
 
     /**
      * Set task for reporting serialization progress to \p serializationTask
      * @param serializationTask Pointer to serialization task
      */
-    void setSerializationTask(hdps::Task* serializationTask);
+    void setSerializationTask(mv::Task* serializationTask);
 
 public: // Serialization
 
@@ -118,8 +118,8 @@ public: // Serialization
     friend class QPointer<DockManager>;
 
 private:
-    hdps::Task*     _serializationTask;     /** For reporting serialization progress */
-    hdps::Task      _layoutTask;            /** For reporting layout progress */
+    mv::Task*     _serializationTask;     /** For reporting serialization progress */
+    mv::Task      _layoutTask;            /** For reporting layout progress */
 
 private:
     ViewPluginDockWidgets _orderedViewPluginDockWidgets; /* the ViewPluginDockWidgets in the order in which they were created */

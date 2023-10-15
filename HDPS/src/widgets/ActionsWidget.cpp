@@ -16,9 +16,9 @@
 #include <QScrollBar>
 #include <QMenu>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui
+namespace mv::gui
 {
 
 /** Tree view item delegate class for overriding painting of toggle columns */
@@ -216,7 +216,7 @@ bool ActionsWidget::eventFilter(QObject* target, QEvent* event)
     return QObject::eventFilter(target, event);
 }
 
-hdps::ActionsFilterModel& ActionsWidget::getFilterModel()
+mv::ActionsFilterModel& ActionsWidget::getFilterModel()
 {
     return _filterModel;
 }

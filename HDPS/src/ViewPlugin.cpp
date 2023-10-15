@@ -16,10 +16,10 @@
     #define VIEW_PLUGIN_VERBOSE
 #endif
 
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv::gui;
+using namespace mv::util;
 
-namespace hdps::plugin
+namespace mv::plugin
 {
 
 ViewPlugin::ViewPlugin(const PluginFactory* factory) :
@@ -270,7 +270,7 @@ QVariantMap ViewPlugin::toVariantMap() const
     return variantMap;
 }
 
-void ViewPlugin::addTitleBarMenuAction(hdps::gui::WidgetAction* action)
+void ViewPlugin::addTitleBarMenuAction(mv::gui::WidgetAction* action)
 {
     Q_ASSERT(action != nullptr);
 
@@ -280,7 +280,7 @@ void ViewPlugin::addTitleBarMenuAction(hdps::gui::WidgetAction* action)
     _titleBarMenuActions << action;
 }
 
-void ViewPlugin::removeTitleBarMenuAction(hdps::gui::WidgetAction* action)
+void ViewPlugin::removeTitleBarMenuAction(mv::gui::WidgetAction* action)
 {
     Q_ASSERT(action != nullptr);
 
@@ -290,7 +290,7 @@ void ViewPlugin::removeTitleBarMenuAction(hdps::gui::WidgetAction* action)
     _titleBarMenuActions.removeOne(action);
 }
 
-hdps::gui::WidgetActions ViewPlugin::getTitleBarMenuActions()
+mv::gui::WidgetActions ViewPlugin::getTitleBarMenuActions()
 {
     return _titleBarMenuActions;
 }
@@ -311,7 +311,7 @@ void ViewPlugin::addDockingAction(WidgetAction* dockingAction, WidgetAction* doc
     _settingsActions << dockingAction;
 }
 
-hdps::gui::WidgetActions ViewPlugin::getDockingActions() const
+mv::gui::WidgetActions ViewPlugin::getDockingActions() const
 {
     return _settingsActions;
 }

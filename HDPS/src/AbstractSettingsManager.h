@@ -13,7 +13,7 @@
 #include "TasksSettingsAction.h"
 #include "ApplicationSettingsAction.h"
 
-namespace hdps
+namespace mv
 {
 
 /**

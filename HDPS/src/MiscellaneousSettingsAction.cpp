@@ -5,7 +5,7 @@
 #include "MiscellaneousSettingsAction.h"
 #include "Application.h"
 
-namespace hdps
+namespace mv
 {
 
 MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :

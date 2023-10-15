@@ -13,7 +13,7 @@
 
 #include "../graphics/Vector2f.h"
 
-namespace hdps
+namespace mv
 {
 
 class MeanShift : protected QOpenGLFunctions_3_3_Core
@@ -62,4 +62,4 @@ private:
     std::vector<int> _clusterIdsOriginal;
 };
 
-} // namespace hdps
+} // namespace mv

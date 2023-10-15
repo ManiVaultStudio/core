@@ -5,7 +5,7 @@
 #include "IntegralRectangleAction.h"
 #include "CoreInterface.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 IntegralRectangleAction::IntegralRectangleAction(QObject* parent, const QString& title, const QRect& rectangle /*= QRect()*/) :
     RectangleAction<QRect, IntegralRangeAction>(parent, title, rectangle)

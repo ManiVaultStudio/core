@@ -10,23 +10,23 @@
 #include <QString>
 #include <vector>
 
-using namespace hdps;
-using namespace hdps::plugin;
+using namespace mv;
+using namespace mv::plugin;
 
 // =============================================================================
 // Data Type
 // =============================================================================
 
-const hdps::DataType TextType = hdps::DataType(QString("Text"));
+const mv::DataType TextType = mv::DataType(QString("Text"));
 
 // =============================================================================
 // Raw Data
 // =============================================================================
 
-class TextData : public hdps::plugin::RawData
+class TextData : public mv::plugin::RawData
 {
 public:
-    TextData(PluginFactory* factory) : hdps::plugin::RawData(factory, TextType) { }
+    TextData(PluginFactory* factory) : mv::plugin::RawData(factory, TextType) { }
     ~TextData(void) override;
     
     void init() override;
@@ -45,7 +45,7 @@ private:
 class Text : public DatasetImpl
 {
 public:
-    Text(hdps::CoreInterface* core, QString dataName, const QString& guid = "") :
+    Text(mv::CoreInterface* core, QString dataName, const QString& guid = "") :
         DatasetImpl(core, dataName, guid)
     {
     }
@@ -126,7 +126,7 @@ public: // Selection
 
 class TextDataFactory : public RawDataFactory
 {
-    Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
+    Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "hdps.TextData"
                       FILE  "TextData.json")
@@ -142,5 +142,5 @@ public:
      */
     QIcon getIcon(const QColor& color = Qt::black) const override;
 
-    hdps::plugin::RawData* produce() override;
+    mv::plugin::RawData* produce() override;
 };

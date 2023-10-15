@@ -12,7 +12,7 @@
 #include <QDialog>
 #include <QTimer>
 
-namespace hdps {
+namespace mv {
 
 /**
  * Modal task handler class

@@ -7,7 +7,7 @@
 #include "Task.h"
 #include "ModalTask.h"
 
-namespace hdps {
+namespace mv {
 
 /**
  * Project serialization task class

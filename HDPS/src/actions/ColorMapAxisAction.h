@@ -9,7 +9,7 @@
 #include "ToggleAction.h"
 #include "TriggerAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 class ColorMapSettingsAction;
 
@@ -27,7 +27,7 @@ class ColorMapAxisAction : public WidgetAction
 public:
 
     /** Widget class for color map axis action */
-    class Widget : public hdps::gui::WidgetActionWidget {
+    class Widget : public mv::gui::WidgetActionWidget {
     public:
 
         /**
@@ -96,6 +96,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::ColorMapAxisAction)
+Q_DECLARE_METATYPE(mv::gui::ColorMapAxisAction)
 
-inline const auto colorMapAxisActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapAxisAction*>("ColorMapAxisAction");
+inline const auto colorMapAxisActionMetaTypeId = qRegisterMetaType<mv::gui::ColorMapAxisAction*>("ColorMapAxisAction");

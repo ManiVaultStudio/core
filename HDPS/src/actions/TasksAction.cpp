@@ -20,7 +20,7 @@
 #include <QPainter>
 #include <QSortFilterProxyModel>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 const QSize TasksAction::tasksIconPixmapSize = QSize(64, 64);
 

@@ -4,7 +4,7 @@
 
 #include "TaskTesterRunner.h"
 
-namespace hdps
+namespace mv
 {
 
 TaskTesterRunner::TaskTesterRunner(QObject* parent, RunFunction runFunction) :

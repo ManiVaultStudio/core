@@ -6,7 +6,7 @@
 
 #include <QStringListModel>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 VersionAction::VersionAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),

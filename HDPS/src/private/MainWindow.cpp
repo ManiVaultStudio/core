@@ -34,8 +34,8 @@
     #define MAIN_WINDOW_VERBOSE
 #endif
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 /** 
  * Custom StackedWidget class to store the start page and project page widgets

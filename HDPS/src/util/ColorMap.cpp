@@ -4,7 +4,7 @@
 
 #include "ColorMap.h"
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 

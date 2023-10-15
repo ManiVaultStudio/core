@@ -31,7 +31,7 @@ namespace
 
 }  // End of namespace.
 
-namespace hdps
+namespace mv
 {
     // Explicit constructor.
     ModelResetter::ModelResetter(QAbstractItemModel* const arg)
@@ -75,5 +75,5 @@ namespace hdps
         }
     }
 
-} // namespace hdps
+} // namespace mv
 

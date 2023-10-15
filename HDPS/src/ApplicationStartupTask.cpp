@@ -10,7 +10,7 @@
 
 #include <QFileInfo>
 
-namespace hdps {
+namespace mv {
 
 ApplicationStartupTask::ApplicationStartupTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
     Task(parent, name, GuiScopes{ GuiScope::None }, status, mayKill, nullptr),

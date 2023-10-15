@@ -38,7 +38,7 @@ private:
          * @param parent Pointer to parent widget
          * @param settingsAction Pointer to settingsAction
          */
-        SettingsActionWidget(QWidget* parent, hdps::gui::WidgetAction* settingsAction);
+        SettingsActionWidget(QWidget* parent, mv::gui::WidgetAction* settingsAction);
 
         /** Override minimum size hint and derive it from the settings action widget */
         QSize sizeHint() const override;
@@ -47,7 +47,7 @@ private:
         QSize minimumSizeHint() const override;
 
     private:
-        hdps::gui::WidgetAction*    _settingsAction;    /** Pointer to settings action to set the size hint for */
+        mv::gui::WidgetAction*    _settingsAction;    /** Pointer to settings action to set the size hint for */
     };
 
 public:
@@ -65,7 +65,7 @@ public:
      * @param viewPlugin Pointer to view plugin
      * @param parent Pointer to parent widget
      */
-    ViewPluginDockWidget(const QString& title, hdps::plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
+    ViewPluginDockWidget(const QString& title, mv::plugin::ViewPlugin* viewPlugin, QWidget* parent = nullptr);
 
     /**
      * Construct view plugin dock from \p variantMap
@@ -92,7 +92,7 @@ public:
      * Get the view plugin
      * @return Pointer to view plugin (might be nullptr)
      */
-    hdps::plugin::ViewPlugin* getViewPlugin();
+    mv::plugin::ViewPlugin* getViewPlugin();
 
     /** Restores the view plugin state */
     void restoreViewPluginState();
@@ -136,7 +136,7 @@ public: // Serialization
      * @param viewPluginDockWidgetId Globally unique identifier of the view plugin dock widget
      * @return Pointer to task, nullptr if not found
      */
-    static hdps::Task* getSerializationTask(const QString& viewPluginDockWidgetId);
+    static mv::Task* getSerializationTask(const QString& viewPluginDockWidgetId);
 
     /** Removes all tasks which where created with ViewPluginDockWidget::preRegisterSerializationTask(...) */
     static void removeAllSerializationTasks();
@@ -155,15 +155,15 @@ private:
      * Assign \p viewPlugin to dock widget (configures the dock widget properties and sets the dock widget widget)
      * @param viewPlugin Pointer to view plugin
      */
-    void setViewPlugin(hdps::plugin::ViewPlugin* viewPlugin);
+    void setViewPlugin(mv::plugin::ViewPlugin* viewPlugin);
 
 private:
-    hdps::plugin::ViewPlugin*       _viewPlugin;                /** Pointer to view plugin */
+    mv::plugin::ViewPlugin*       _viewPlugin;                /** Pointer to view plugin */
     QString                         _viewPluginKind;            /** Kind of (view) plugin */
     QVariantMap                     _viewPluginMap;             /** View plugin cached map for deferred loading */
     QMenu                           _settingsMenu;              /** Menu for view plugin settings */
     QMenu                           _toggleMenu;                /** Menu for toggling view plugin dock widgets */
-    hdps::gui::TriggerAction        _helpAction;                /** Action for triggering help */
+    mv::gui::TriggerAction        _helpAction;                /** Action for triggering help */
     bool                            _cachedVisibility;          /** Cached visibility for view plugin isolation */
     ads::CDockManager               _dockManager;               /** Dock manager for internal docking */
     QMap<QString, CDockWidget*>     _settingsDockWidgetsMap;    /** Created dock widgets for settings actions */
@@ -175,7 +175,7 @@ protected:
      * Map view plugin dock widget identifier to serialization task
      * A serialization task is there to report progress during ViewPluginDockWidget::fromVariantMap() and ViewPluginDockWidget::toVariantMap()
      */
-    static QMap<QString, hdps::Task*>  serializationTasks;
+    static QMap<QString, mv::Task*>  serializationTasks;
 
     friend class ViewPluginsDockWidget;
     friend class WorkspaceManager;

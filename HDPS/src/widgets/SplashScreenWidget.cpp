@@ -24,7 +24,7 @@
     #define SPLASH_SCREEN_WIDGET_VERBOSE
 #endif
 
-namespace hdps::gui {
+namespace mv::gui {
 
 SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, QWidget* parent /*= nullptr*/) :
     QWidget(parent),

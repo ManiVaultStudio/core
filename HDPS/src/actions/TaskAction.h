@@ -9,7 +9,7 @@
 #include "TriggerAction.h"
 #include "Task.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Task action class
@@ -116,6 +116,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::TaskAction)
+Q_DECLARE_METATYPE(mv::gui::TaskAction)
 
-inline const auto taskActionMetaTypeId = qRegisterMetaType<hdps::gui::TaskAction*>("hdps::gui::TaskAction");
+inline const auto taskActionMetaTypeId = qRegisterMetaType<mv::gui::TaskAction*>("mv::gui::TaskAction");

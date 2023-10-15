@@ -13,7 +13,7 @@
     //#define ABSTRACT_TASKS_MODEL_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 using namespace util;
@@ -428,7 +428,7 @@ QVariant AbstractTasksModel::MayKillItem::data(int role /*= Qt::UserRole + 1*/) 
 {
     auto taskTypeString = QString(getTask()->metaObject()->className());
 
-    taskTypeString.replace("hdps::", "");
+    taskTypeString.replace("mv::", "");
 
     switch (role) {
         case Qt::EditRole:

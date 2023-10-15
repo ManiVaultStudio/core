@@ -12,7 +12,7 @@
 #include <QPainterPath>
 #include <QtMath>
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 
@@ -756,12 +756,12 @@ void PixelSelectionTool::paint()
 
                 case PixelSelectionModifierType::Add:
                     shapePainter.setPen(_penLineForeGround);
-                    shapePainter.drawText(textRectangle, hdps::Application::getIconFont("FontAwesome").getIconCharacter("plus-circle"), QTextOption(Qt::AlignCenter));
+                    shapePainter.drawText(textRectangle, mv::Application::getIconFont("FontAwesome").getIconCharacter("plus-circle"), QTextOption(Qt::AlignCenter));
                     break;
 
                 case PixelSelectionModifierType::Subtract:
                     shapePainter.setPen(_penLineForeGround);
-                    shapePainter.drawText(textRectangle, hdps::Application::getIconFont("FontAwesome").getIconCharacter("minus-circle"), QTextOption(Qt::AlignCenter));
+                    shapePainter.drawText(textRectangle, mv::Application::getIconFont("FontAwesome").getIconCharacter("minus-circle"), QTextOption(Qt::AlignCenter));
                     break;
 
                 default:

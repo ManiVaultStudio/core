@@ -6,7 +6,7 @@
 
 #include "IconFont.h"
 
-namespace hdps {
+namespace mv {
 
 /**
  * Font Awesome icon font class

@@ -5,7 +5,7 @@
 #include "PluginType.h"
 #include "Application.h"
 
-namespace hdps::plugin
+namespace mv::plugin
 {
 
 QString getPluginTypeName(const Type& type)

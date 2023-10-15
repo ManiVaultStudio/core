@@ -37,5 +37,5 @@ public:
 
 private:
     StartPageActionsWidget      _workspacesWidget;          /** Actions widget for selecting a workspace and creating a project */
-    hdps::gui::TriggerAction    _cancelAction;              /** Action for exiting the dialog without creating a new project */
+    mv::gui::TriggerAction    _cancelAction;              /** Action for exiting the dialog without creating a new project */
 };

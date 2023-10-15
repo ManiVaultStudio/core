@@ -9,7 +9,7 @@
 
 class QMenu;
 
-namespace hdps {
+namespace mv {
     class DataHierarchyItem;
 }
 
@@ -42,7 +42,7 @@ public:
      * @param dataHierarchyItem Pointer to data hierarchy item
      * @param parent Parent (if any)
      */
-    explicit DataHierarchyModelItem(hdps::DataHierarchyItem* dataHierarchyItem, DataHierarchyModelItem* parent = nullptr);
+    explicit DataHierarchyModelItem(mv::DataHierarchyItem* dataHierarchyItem, DataHierarchyModelItem* parent = nullptr);
 
     /** Destructor */
     virtual ~DataHierarchyModelItem();
@@ -100,7 +100,7 @@ public:
      * Get corresponding data hierarchy item
      * @return Pointer to data hierarchy item
      */
-    hdps::DataHierarchyItem* getDataHierarchyItem();
+    mv::DataHierarchyItem* getDataHierarchyItem();
 
     /** Get whether the item is visible or not */
     bool isVisible() const;
@@ -116,5 +116,5 @@ protected:
 protected:
     DataHierarchyModelItem*     _parent;                /** Pointer to parent item */
     PluginHierarchyItems        _children;              /** Pointers to child items */
-    hdps::DataHierarchyItem*    _dataHierarchyItem;     /** Pointer to data hierarchy item*/
+    mv::DataHierarchyItem*    _dataHierarchyItem;     /** Pointer to data hierarchy item*/
 };

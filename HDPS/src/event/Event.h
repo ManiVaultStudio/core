@@ -11,7 +11,7 @@
 
 #include <stdexcept>
 
-namespace hdps
+namespace mv
 {
 class DatasetImpl;
 

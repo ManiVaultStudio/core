@@ -8,7 +8,7 @@
 #include "actions/ToggleAction.h"
 #include "actions/IntegralAction.h"
 
-namespace hdps {
+namespace mv {
 
 /**
  * Project compression class 

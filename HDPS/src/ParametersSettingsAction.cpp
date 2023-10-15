@@ -5,9 +5,9 @@
 #include "ParametersSettingsAction.h"
 #include "Application.h"
 
-using namespace hdps::gui;
+using namespace mv::gui;
 
-namespace hdps
+namespace mv
 {
 
 ParametersSettingsAction::ParametersSettingsAction(QObject* parent) :

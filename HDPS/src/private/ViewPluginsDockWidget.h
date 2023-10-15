@@ -59,7 +59,7 @@ public: // Cache and restore visibility for view plugin isolation
      * @param viewPlugin View plugin to isolate
      * @param isolate Whether to isolate the view plugin or not
      */
-    static void isolate(hdps::plugin::ViewPlugin* viewPlugin, bool isolate);
+    static void isolate(mv::plugin::ViewPlugin* viewPlugin, bool isolate);
 
     /** Caches the visibility of each view plugin */
     static void cacheVisibility();

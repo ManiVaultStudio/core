@@ -7,7 +7,7 @@
 #include "Task.h"
 #include "ProjectSerializationTask.h"
 
-namespace hdps {
+namespace mv {
 
 /**
  * Application startup task class

@@ -19,7 +19,7 @@
 class LoadedViewsMenu : public QMenu
 {
 protected:
-    using ToggleActions = QVector<QPointer<hdps::gui::ToggleAction>>;
+    using ToggleActions = QVector<QPointer<mv::gui::ToggleAction>>;
 
 public:
 

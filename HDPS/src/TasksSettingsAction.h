@@ -8,7 +8,7 @@
 
 #include "actions/ToggleAction.h"
 
-namespace hdps
+namespace mv
 {
 
 /**

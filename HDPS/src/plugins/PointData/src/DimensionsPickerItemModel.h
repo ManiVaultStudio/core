@@ -6,7 +6,7 @@
 #include <QAbstractItemModel>
 #include <memory> // For unique_ptr
 
-namespace hdps
+namespace mv
 {
     class DimensionsPickerHolder;
 

@@ -7,7 +7,7 @@
 #include "Application.h"
 #include "CoreInterface.h"
 
-namespace hdps {
+namespace mv {
 
 using namespace gui;
 

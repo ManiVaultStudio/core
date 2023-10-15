@@ -4,7 +4,7 @@
 
 #include "ColorSpace.h"
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 

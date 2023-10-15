@@ -8,7 +8,7 @@
 
 #include "util/NumericalRange.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Numerical range action base class

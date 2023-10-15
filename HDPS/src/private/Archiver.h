@@ -11,7 +11,7 @@
 
 class QuaZip;
 
-namespace hdps::util {
+namespace mv::util {
 
 /**
  * Archiver class

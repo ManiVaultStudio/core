@@ -7,7 +7,7 @@
 #include <QMap>
 #include <QString>
 
-namespace hdps::util
+namespace mv::util
 {
 
 /** Dock widget permission */

@@ -8,7 +8,7 @@
 #include <cstddef> // For size_t
 #include <cassert>
 
-namespace hdps
+namespace mv
 {
     /* Allows iterating over the values of a single point from a point data buffer.
     Supports using a range-based for-loop, like `for (auto& value: pointView)`.

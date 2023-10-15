@@ -8,7 +8,7 @@
 
 #include <QGridLayout>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Stretch action class
@@ -63,6 +63,6 @@ public: // Serialization
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::StretchAction)
+Q_DECLARE_METATYPE(mv::gui::StretchAction)
 
-inline const auto stretchActionMetaTypeId = qRegisterMetaType<hdps::gui::StretchAction*>("hdps::gui::StretchAction");
+inline const auto stretchActionMetaTypeId = qRegisterMetaType<mv::gui::StretchAction*>("mv::gui::StretchAction");

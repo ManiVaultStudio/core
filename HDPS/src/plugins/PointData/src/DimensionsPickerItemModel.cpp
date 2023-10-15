@@ -23,7 +23,7 @@ namespace
 
 }
 
-namespace hdps
+namespace mv
 {
 
     DimensionsPickerItemModel::DimensionsPickerItemModel(
@@ -159,4 +159,4 @@ namespace hdps
 
     }
 
-} // namespace hdps
+} // namespace mv

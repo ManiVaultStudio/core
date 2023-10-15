@@ -29,7 +29,7 @@ QIcon TextDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
     return Application::getIconFont("FontAwesome").getIcon("font", color);
 }
 
-hdps::plugin::RawData* TextDataFactory::produce()
+mv::plugin::RawData* TextDataFactory::produce()
 {
     return new TextData(this);
 }

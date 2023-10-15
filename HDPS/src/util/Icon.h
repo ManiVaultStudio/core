@@ -10,7 +10,7 @@
 #include <QMap>
 #include <QDebug>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 static const QList<QSize> defaultIconPixmapSizes = QList({QSize(64, 64), QSize(32, 32), QSize(24, 24), QSize(16, 16), QSize(8, 8) });
 

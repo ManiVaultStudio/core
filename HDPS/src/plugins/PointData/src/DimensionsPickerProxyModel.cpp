@@ -17,7 +17,7 @@ namespace
 {
 }
 
-namespace hdps
+namespace mv
 {
 
     DimensionsPickerProxyModel::DimensionsPickerProxyModel(const DimensionsPickerHolder& holder) :
@@ -103,4 +103,4 @@ namespace hdps
         _filterShouldAcceptOnlySelected = arg;
     }
 
-} // namespace hdps
+} // namespace mv

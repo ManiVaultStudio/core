@@ -4,7 +4,7 @@
 
 #include "DatasetsMimeData.h"
 
-namespace hdps {
+namespace mv {
 
 DatasetsMimeData::DatasetsMimeData(Datasets datasets) :
     QMimeData(),

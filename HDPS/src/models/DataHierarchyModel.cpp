@@ -12,7 +12,7 @@
 #include <QDebug>
 #include <QIcon>
 
-using namespace hdps;
+using namespace mv;
 
 DataHierarchyModel::DataHierarchyModel(QObject* parent) :
     QAbstractItemModel(parent),
@@ -286,7 +286,7 @@ QMimeData* DataHierarchyModel::mimeData(const QModelIndexList& indexes) const
     return new DatasetsMimeData(datasets);
 }
 
-bool DataHierarchyModel::addDataHierarchyModelItem(const QModelIndex& parentModelIndex, hdps::DataHierarchyItem& dataHierarchyItem)
+bool DataHierarchyModel::addDataHierarchyModelItem(const QModelIndex& parentModelIndex, mv::DataHierarchyItem& dataHierarchyItem)
 {
     auto parentItem = !parentModelIndex.isValid() ? _rootItem : getItem(parentModelIndex, Qt::DisplayRole);
 

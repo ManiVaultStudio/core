@@ -98,7 +98,7 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                 QVector<WidgetAction*> triggerActions;
 
                 const auto createPluginTypeActionsGroup = [datasets, &groupActions, groupAction, &triggerActions](const plugin::Type& type) -> void {
-                    for (auto pluginTriggerAction : hdps::Application::core()->getPluginManager().getPluginTriggerActions(type, datasets)) {
+                    for (auto pluginTriggerAction : mv::Application::core()->getPluginManager().getPluginTriggerActions(type, datasets)) {
                         switch (type)
                         {
                             case plugin::Type::VIEW:        pluginTriggerAction->setText(QString("View %1").arg(pluginTriggerAction->text()));      break;
@@ -118,7 +118,7 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                 auto groupDataAction = new TriggerAction(groupAction, "Group data");
 
                 connect(groupDataAction, &TriggerAction::triggered, this, [datasets]() -> void {
-                    hdps::Application::core()->groupDatasets(datasets);
+                    mv::Application::core()->groupDatasets(datasets);
                 });
 
                 triggerActions << groupDataAction;

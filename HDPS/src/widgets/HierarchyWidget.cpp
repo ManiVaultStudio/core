@@ -16,9 +16,9 @@
     #define HIERARCHY_WIDGET_VERBOSE
 #endif
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui
+namespace mv::gui
 {
 
 HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, const QAbstractItemModel& model, QSortFilterProxyModel* filterModel /*= nullptr*/, bool showToolbar /*= true*/, bool showOverlay /*= true*/) :

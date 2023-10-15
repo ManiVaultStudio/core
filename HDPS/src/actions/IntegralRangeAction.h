@@ -7,7 +7,7 @@
 #include "NumericalRangeAction.h"
 #include "IntegralAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Integral range action class
@@ -101,6 +101,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::IntegralRangeAction)
+Q_DECLARE_METATYPE(mv::gui::IntegralRangeAction)
 
-inline const auto integralRangeActionMetaTypeId = qRegisterMetaType<hdps::gui::IntegralRangeAction*>("hdps::gui::IntegralRangeAction");
+inline const auto integralRangeActionMetaTypeId = qRegisterMetaType<mv::gui::IntegralRangeAction*>("mv::gui::IntegralRangeAction");

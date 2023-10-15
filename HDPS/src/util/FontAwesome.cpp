@@ -12,7 +12,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-namespace hdps {
+namespace mv {
 
 FontAwesome::FontAwesome(const std::uint32_t& majorVersion, const std::uint32_t& minorVersion, const QStringList& fontResourceNames, bool defaultFont /*= false*/) :
     IconFont("FontAwesome", majorVersion, minorVersion, fontResourceNames, defaultFont),

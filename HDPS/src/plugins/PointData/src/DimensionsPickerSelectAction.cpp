@@ -11,7 +11,7 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerAction& dimensionsPickerAction) :
     WidgetAction(&dimensionsPickerAction, "Dimension Picker"),

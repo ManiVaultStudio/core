@@ -31,9 +31,9 @@
     //#define PROJECT_MANAGER_VERBOSE
 #endif
 
-using namespace hdps;
-using namespace hdps::util;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::util;
+using namespace mv::gui;
 
 // Definition needed for pre C++17 gcc and clang
 #if (__cplusplus < 201703L)
@@ -889,12 +889,12 @@ bool ProjectManager::hasProject() const
     return getCurrentProject() != nullptr;
 }
 
-const hdps::Project* ProjectManager::getCurrentProject() const
+const mv::Project* ProjectManager::getCurrentProject() const
 {
     return _project.get();
 }
 
-hdps::Project* ProjectManager::getCurrentProject()
+mv::Project* ProjectManager::getCurrentProject()
 {
     return _project.get();
 }

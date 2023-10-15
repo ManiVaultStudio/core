@@ -8,7 +8,7 @@
 #include "IntegralAction.h"
 #include "ToggleAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 class ColorMapAction;
 
@@ -97,6 +97,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::ColorMapDiscreteAction)
+Q_DECLARE_METATYPE(mv::gui::ColorMapDiscreteAction)
 
-inline const auto colorMapDiscreteActionMetaTypeId = qRegisterMetaType<hdps::gui::ColorMapDiscreteAction*>("ColorMapDiscreteAction");
+inline const auto colorMapDiscreteActionMetaTypeId = qRegisterMetaType<mv::gui::ColorMapDiscreteAction*>("ColorMapDiscreteAction");

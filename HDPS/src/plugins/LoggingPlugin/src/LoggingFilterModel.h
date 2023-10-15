@@ -40,8 +40,8 @@ public:
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
 
 public:
-    hdps::gui::OptionsAction& getFilterTypeAction() { return _filterTypeAction; }
+    mv::gui::OptionsAction& getFilterTypeAction() { return _filterTypeAction; }
 
 private:
-    hdps::gui::OptionsAction    _filterTypeAction;          /** Options action for filtering log record item type */
+    mv::gui::OptionsAction    _filterTypeAction;          /** Options action for filtering log record item type */
 };

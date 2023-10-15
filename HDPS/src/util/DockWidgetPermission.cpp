@@ -4,6 +4,6 @@
 
 #include "DockWidgetPermission.h"
 
-namespace hdps::util
+namespace mv::util
 {
 }

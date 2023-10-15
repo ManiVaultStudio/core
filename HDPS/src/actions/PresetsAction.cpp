@@ -16,7 +16,7 @@
     //#define PRESETS_ACTION_VERBOSE
 #endif
 
-namespace hdps::gui {
+namespace mv::gui {
 
 QMap<PresetsAction::Column, QPair<QString, QString>> PresetsAction::columnInfo = QMap<PresetsAction::Column, QPair<QString, QString>>({
     { PresetsAction::Column::Name, { "Name", "Preset name" }},

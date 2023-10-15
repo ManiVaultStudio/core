@@ -11,13 +11,13 @@
 #include "actions/StringAction.h"
 #include "event/EventListener.h"
 
-namespace hdps {
+namespace mv {
     class CoreInterface;
 }
 
-using namespace hdps;
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv;
+using namespace mv::gui;
+using namespace mv::util;
 
 /**
  * Info action class
@@ -47,5 +47,5 @@ protected:
     Dataset<Clusters>       _clusters;                  /** Clusters dataset smart pointer */
     StringAction            _numberOfClustersAction;    /** Number of points action */
     ClustersAction          _clustersAction;            /** Clusters action */
-    hdps::EventListener     _eventListener;             /** Listen to HDPS events */
+    mv::EventListener     _eventListener;             /** Listen to HDPS events */
 };

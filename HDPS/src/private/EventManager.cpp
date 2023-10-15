@@ -9,14 +9,14 @@
 #include <Set.h>
 #include <LinkedData.h>
 
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv::gui;
+using namespace mv::util;
 
 #ifdef _DEBUG
     //#define EVENT_MANAGER_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 EventManager::EventManager() :

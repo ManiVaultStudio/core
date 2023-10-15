@@ -9,7 +9,7 @@
 
 #include <QEventLoop>
 
-namespace hdps
+namespace mv
 {
 
 ModalTaskTester::ModalTaskTester(QObject* parent, const QString& name) :

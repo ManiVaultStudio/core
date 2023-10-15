@@ -11,7 +11,7 @@
     #define INFO_WIDGET_VERBOSE
 #endif
 
-namespace hdps::gui
+namespace mv::gui
 {
 
 InfoWidget::InfoWidget(QWidget* parent) :

@@ -8,13 +8,13 @@
 #include <CoreInterface.h>
 #include <QVBoxLayout>
 
-using namespace hdps;
+using namespace mv;
 
 #ifdef _DEBUG
     #define SETTINGS_MANAGER_DIALOG_VERBOSE
 #endif
 
-namespace hdps::gui {
+namespace mv::gui {
 
 SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
@@ -30,10 +30,10 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
 
     layout->addWidget(_groupsAction.createWidget(this));
 
-    _groupsAction.addGroupAction(&hdps::settings().getParametersSettings());
-    _groupsAction.addGroupAction(&hdps::settings().getMiscellaneousSettings());
-    _groupsAction.addGroupAction(&hdps::settings().getTasksSettingsAction());
-    _groupsAction.addGroupAction(&hdps::settings().getApplicationSettings());
+    _groupsAction.addGroupAction(&mv::settings().getParametersSettings());
+    _groupsAction.addGroupAction(&mv::settings().getMiscellaneousSettings());
+    _groupsAction.addGroupAction(&mv::settings().getTasksSettingsAction());
+    _groupsAction.addGroupAction(&mv::settings().getApplicationSettings());
 }
 
 QSize SettingsManagerDialog::sizeHint() const

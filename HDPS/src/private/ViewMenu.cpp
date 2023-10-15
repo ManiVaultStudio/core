@@ -14,10 +14,10 @@
 
 #include <util/Miscellaneous.h>
 
-using namespace hdps;
-using namespace hdps::plugin;
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv;
+using namespace mv::plugin;
+using namespace mv::gui;
+using namespace mv::util;
 
 ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Option::Default*/, ads::CDockAreaWidget* dockAreaWidget /*= nullptr*/) :
     QMenu(parent),

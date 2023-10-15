@@ -10,7 +10,7 @@
 
 class QPushButton;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Triggers action class
@@ -178,6 +178,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::TriggersAction)
+Q_DECLARE_METATYPE(mv::gui::TriggersAction)
 
-inline const auto triggersActionMetaTypeId = qRegisterMetaType<hdps::gui::TriggersAction*>("TriggersAction");
+inline const auto triggersActionMetaTypeId = qRegisterMetaType<mv::gui::TriggersAction*>("TriggersAction");

@@ -6,7 +6,7 @@
 
 #include <QHBoxLayout>
 
-using namespace hdps;
+using namespace mv;
 
 ProxyDatasetsAction::ProxyDatasetsAction(QObject* parent, const Dataset<Points>& points) :
     WidgetAction(parent, "Proxy Datsets"),

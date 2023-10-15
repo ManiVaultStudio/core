@@ -8,9 +8,9 @@
 #include <QVBoxLayout>
 #include <QGroupBox>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapSettingsAction) :
     WidgetAction(&colorMapSettingsAction, "Discrete"),

@@ -11,7 +11,7 @@
     //#define WIDGET_FADER_VERBOSE
 #endif
 
-namespace hdps::util {
+namespace mv::util {
 
 WidgetFader::WidgetFader(QObject* parent, QWidget* targetWidget, float opacity /*= 0.0f*/, float minimumOpacity /*= 0.0f*/, float maximumOpacity /*= 1.0f*/, std::int32_t fadeInDuration /*= 150*/, std::int32_t fadeOutDuration /*= 150*/) :
     QObject(parent),

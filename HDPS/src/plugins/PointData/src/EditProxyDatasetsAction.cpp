@@ -19,7 +19,7 @@ EditProxyDatasetsAction::EditProxyDatasetsAction(QObject* parent, const Dataset<
     setIconByName("list");
 }
 
-hdps::Dataset<Points>& EditProxyDatasetsAction::getPoints()
+mv::Dataset<Points>& EditProxyDatasetsAction::getPoints()
 {
     return _points;
 }

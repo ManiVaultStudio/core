@@ -8,7 +8,7 @@
 #include <QApplication>
 #include <QPalette>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 QIcon createIcon(const QPixmap& pixmap, const QList<QSize>& pixmapSizes /*= defaultIconPixmapSizes*/)
 {

@@ -11,7 +11,7 @@
 
 #include <memory>
 
-namespace hdps
+namespace mv
 {
 
 namespace plugin
@@ -87,6 +87,6 @@ public:
 
 } // namespace plugin
 
-} // namespace hdps
+} // namespace mv
 
-Q_DECLARE_INTERFACE(hdps::plugin::AnalysisPluginFactory, "hdps.AnalysisPluginFactory")
+Q_DECLARE_INTERFACE(mv::plugin::AnalysisPluginFactory, "hdps.AnalysisPluginFactory")

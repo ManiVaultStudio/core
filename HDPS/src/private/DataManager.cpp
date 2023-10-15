@@ -12,13 +12,13 @@
 #include <iostream>
 #include <stdexcept>
 
-using namespace hdps::util;
+using namespace mv::util;
 
 #ifdef _DEBUG
     //#define DATA_MANAGER_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 DataManager::DataManager() :

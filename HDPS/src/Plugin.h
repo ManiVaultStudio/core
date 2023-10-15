@@ -20,10 +20,10 @@
 
 class QMenu;
 
-namespace hdps::plugin
+namespace mv::plugin
 {
 
-class Plugin : public hdps::gui::WidgetAction
+class Plugin : public mv::gui::WidgetAction
 {
 public:
     Plugin(const PluginFactory* factory);

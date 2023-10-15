@@ -30,7 +30,7 @@
     //#define PLUGIN_MANAGER_VERBOSE
 #endif
 
-namespace hdps {
+namespace mv {
 
 using namespace util;
 using namespace plugin;
@@ -160,7 +160,7 @@ bool PluginManager::isPluginLoaded(const QString& kind) const
     return _pluginFactories.keys().contains(kind);
 }
 
-hdps::plugin::PluginFactory* PluginManager::getPluginFactory(const QString& pluginKind) const
+mv::plugin::PluginFactory* PluginManager::getPluginFactory(const QString& pluginKind) const
 {
     if (!isPluginLoaded(pluginKind))
         return nullptr;
@@ -323,9 +323,9 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets datas
     }
 }
 
-hdps::plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, Datasets datasets /*= Datasets()*/)
+mv::plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, Datasets datasets /*= Datasets()*/)
 {
-    auto viewPlugin = dynamic_cast<hdps::plugin::ViewPlugin*>(requestPlugin(kind, datasets));
+    auto viewPlugin = dynamic_cast<mv::plugin::ViewPlugin*>(requestPlugin(kind, datasets));
 
     if (viewPlugin)
         Application::core()->getWorkspaceManager().addViewPlugin(viewPlugin, dockToViewPlugin, dockArea);
@@ -437,7 +437,7 @@ QStringList PluginManager::getPluginKindsByPluginTypes(const plugin::Types& plug
     return pluginKinds;
 }
 
-hdps::gui::PluginTriggerActions PluginManager::getPluginTriggerActions(const plugin::Type& pluginType) const
+mv::gui::PluginTriggerActions PluginManager::getPluginTriggerActions(const plugin::Type& pluginType) const
 {
     PluginTriggerActions pluginProducerActions;
 

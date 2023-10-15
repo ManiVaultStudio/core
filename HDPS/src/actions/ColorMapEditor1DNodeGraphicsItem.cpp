@@ -18,7 +18,7 @@
     #define COLOR_MAP_EDITOR_1D_NODE_GRAPHICS_ITEM_VERBOSE
 #endif
 
-namespace hdps {
+namespace mv {
 
 namespace gui {
 
@@ -56,7 +56,7 @@ ColorMapEditor1DNodeGraphicsItem::ColorMapEditor1DNodeGraphicsItem(ColorMapEdito
     updatePos();
 }
 
-hdps::gui::ColorMapEditor1DNode& ColorMapEditor1DNodeGraphicsItem::getNode()
+mv::gui::ColorMapEditor1DNode& ColorMapEditor1DNodeGraphicsItem::getNode()
 {
     return _node;
 }
@@ -123,7 +123,7 @@ void ColorMapEditor1DNodeGraphicsItem::pressed(QGraphicsSceneMouseEvent* event) 
     this->mousePressEvent(event);
 }
 
-hdps::gui::ColorMapEditor1DWidget& ColorMapEditor1DNodeGraphicsItem::getColorMapEditor1DWidget()
+mv::gui::ColorMapEditor1DWidget& ColorMapEditor1DNodeGraphicsItem::getColorMapEditor1DWidget()
 {
     return _colorMapEditor1DWidget;
 }

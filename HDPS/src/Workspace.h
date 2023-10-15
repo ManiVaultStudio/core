@@ -11,7 +11,7 @@
 #include "actions/StringsAction.h"
 #include "actions/ToggleAction.h"
 
-namespace hdps {
+namespace mv {
 
 /**
  * Workspace class
@@ -20,7 +20,7 @@ namespace hdps {
  *
  * @author Thomas Kroes
  */
-class Workspace final : public QObject, public hdps::util::Serializable
+class Workspace final : public QObject, public mv::util::Serializable
 {
     Q_OBJECT
 

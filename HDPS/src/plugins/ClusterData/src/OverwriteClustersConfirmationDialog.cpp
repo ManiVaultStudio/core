@@ -9,7 +9,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
-using namespace hdps;
+using namespace mv;
 
 OverwriteClustersConfirmationDialog::OverwriteClustersConfirmationDialog(QWidget* parent, std::uint32_t numberOfUserClusters, std::uint32_t numberOfUserModifiedClusters) :
     QDialog(parent),

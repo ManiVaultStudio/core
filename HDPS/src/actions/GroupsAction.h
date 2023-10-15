@@ -13,7 +13,7 @@
 
 class QWidget;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 class GroupSectionTreeItem;
 
@@ -328,6 +328,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::GroupsAction)
+Q_DECLARE_METATYPE(mv::gui::GroupsAction)
 
-inline const auto groupsActionMetaTypeId = qRegisterMetaType<hdps::gui::GroupsAction*>("hdps::gui::GroupsAction");
+inline const auto groupsActionMetaTypeId = qRegisterMetaType<mv::gui::GroupsAction*>("mv::gui::GroupsAction");

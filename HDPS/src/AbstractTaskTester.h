@@ -9,7 +9,7 @@
 #include <QObject>
 #include <QStringList>
 
-namespace hdps
+namespace mv
 {
 
 class AbstractTaskTester : public QObject

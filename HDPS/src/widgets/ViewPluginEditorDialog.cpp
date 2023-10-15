@@ -11,10 +11,10 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 
-using namespace hdps;
-using namespace hdps::plugin;
+using namespace mv;
+using namespace mv::plugin;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* viewPlugin) :
     QDialog(parent),

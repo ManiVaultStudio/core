@@ -13,7 +13,7 @@
     //#define TASKS_TREE_MODEL_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 using namespace util;

@@ -12,7 +12,7 @@
     //#define TASKS_STATUS_BAR_ACTION_VERBOSE
 #endif
 
-namespace hdps::gui {
+namespace mv::gui {
 
 TasksStatusBarAction::TasksStatusBarAction(AbstractTasksModel& tasksModel, QObject* parent, const QString& title, const QIcon& icon /*= QIcon()*/, const PopupMode& popupMode /*= PopupMode::Click*/, const Task::GuiScope& taskScope /*= Task::GuiScope::Foreground*/) :
     WidgetAction(parent, title),

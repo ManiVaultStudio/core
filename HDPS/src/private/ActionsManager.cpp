@@ -14,14 +14,14 @@
 #include <QLineEdit>
 #include <QDialogButtonBox>
 
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv::gui;
+using namespace mv::util;
 
 #ifdef _DEBUG
     //#define ACTIONS_MANAGER_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 ActionsManager::ActionsManager() :
@@ -147,7 +147,7 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
         if (privateAction == nullptr)
             throw std::runtime_error("Supplied private action may not be a null pointer");
 
-        auto& askForSharedParameterNameAction = hdps::settings().getParametersSettings().getAskForSharedParameterNameAction();
+        auto& askForSharedParameterNameAction = mv::settings().getParametersSettings().getAskForSharedParameterNameAction();
 
         if (name.isEmpty()) {
             if (askForSharedParameterNameAction.isChecked()) {

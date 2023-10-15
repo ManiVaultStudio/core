@@ -4,7 +4,7 @@
 
 #include "WidgetActionHighlightWidget.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 WidgetActionHighlightWidget::WidgetActionHighlightWidget(QWidget* parent, WidgetAction* action) :
     OverlayWidget(parent, 0.0f),

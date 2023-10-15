@@ -8,9 +8,9 @@
 #include <QHBoxLayout>
 #include <QStandardItemModel>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 StringsAction::StringsAction(QObject* parent, const QString& title, const QStringList& strings /*= QStringList()*/) :
     WidgetAction(parent, title),

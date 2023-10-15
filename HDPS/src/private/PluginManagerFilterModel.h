@@ -41,11 +41,11 @@ public:
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
 
 public:
-    hdps::gui::ToggleAction& getInstantiatedPluginsOnlyAction() { return _instantiatedPluginsOnlyAction; }
+    mv::gui::ToggleAction& getInstantiatedPluginsOnlyAction() { return _instantiatedPluginsOnlyAction; }
 
 private:
     bool hasPluginInstances(const QModelIndex& index, int level = 0) const;
 
 private:
-    hdps::gui::ToggleAction     _instantiatedPluginsOnlyAction;      /** Show only instantiated plugins */
+    mv::gui::ToggleAction     _instantiatedPluginsOnlyAction;      /** Show only instantiated plugins */
 };

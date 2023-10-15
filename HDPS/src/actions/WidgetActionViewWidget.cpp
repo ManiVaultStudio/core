@@ -12,7 +12,7 @@
 #include <QDragEnterEvent>
 #include <QDragLeaveEvent>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 WidgetActionViewWidget::WidgetActionViewWidget(QWidget* parent, WidgetAction* action, std::int32_t widgetFlags /*= 0*/) :
     QWidget(parent),
@@ -105,13 +105,13 @@ void WidgetActionViewWidget::dropEvent(QDropEvent* dropEvent)
         return;
 
     if (actionMimeData->getAction()->isPublic()) {
-        hdps::actions().connectPrivateActionToPublicAction(getAction(), actionMimeData->getAction(), true);
+        mv::actions().connectPrivateActionToPublicAction(getAction(), actionMimeData->getAction(), true);
     }
     else {
         if (getAction()->isConnected())
-            hdps::actions().connectPrivateActionToPublicAction(actionMimeData->getAction(), getAction()->getPublicAction(), true);
+            mv::actions().connectPrivateActionToPublicAction(actionMimeData->getAction(), getAction()->getPublicAction(), true);
         else
-            hdps::actions().connectPrivateActions(actionMimeData->getAction(), getAction());
+            mv::actions().connectPrivateActions(actionMimeData->getAction(), getAction());
     }
 }
 

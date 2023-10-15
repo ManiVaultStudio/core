@@ -12,7 +12,7 @@
 #include <functional>
 #include <vector>
 
-namespace hdps
+namespace mv
 {
 
 class CoreInterface;

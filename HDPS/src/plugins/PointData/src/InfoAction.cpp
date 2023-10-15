@@ -6,9 +6,9 @@
 
 #include <util/Miscellaneous.h>
 
-using namespace hdps;
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv;
+using namespace mv::gui;
+using namespace mv::util;
 
 InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
     GroupAction(parent, "Group", true),

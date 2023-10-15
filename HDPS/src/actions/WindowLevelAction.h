@@ -7,7 +7,7 @@
 #include "actions/GroupAction.h"
 #include "actions/DecimalAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Window/level settings action class
@@ -77,6 +77,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::WindowLevelAction)
+Q_DECLARE_METATYPE(mv::gui::WindowLevelAction)
 
-inline const auto windowLevelActionMetaTypeId = qRegisterMetaType<hdps::gui::WindowLevelAction*>("hdps::gui::WindowLevelAction");
+inline const auto windowLevelActionMetaTypeId = qRegisterMetaType<mv::gui::WindowLevelAction*>("mv::gui::WindowLevelAction");

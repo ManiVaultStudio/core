@@ -7,8 +7,8 @@
 #include <actions/WidgetAction.h>
 #include <actions/StringAction.h>
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 class ClustersActionWidget;
 

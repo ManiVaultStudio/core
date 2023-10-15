@@ -6,7 +6,7 @@
 
 #include "GroupAction.h"
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Vertical group action class
@@ -32,6 +32,6 @@ public:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::VerticalGroupAction)
+Q_DECLARE_METATYPE(mv::gui::VerticalGroupAction)
 
-inline const auto verticalGroupActionMetaTypeId = qRegisterMetaType<hdps::gui::VerticalGroupAction*>("hdps::gui::VerticalGroupAction");
+inline const auto verticalGroupActionMetaTypeId = qRegisterMetaType<mv::gui::VerticalGroupAction*>("mv::gui::VerticalGroupAction");

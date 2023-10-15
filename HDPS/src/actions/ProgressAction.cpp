@@ -9,7 +9,7 @@
 #include <QStyleOptionProgressBar>
 #include <QPainter>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 ProgressAction::ProgressAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),

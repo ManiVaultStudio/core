@@ -24,9 +24,9 @@
     //#define WIDGET_ACTION_VERBOSE
 #endif
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 QMap<WidgetAction::Scope, QString> WidgetAction::scopeNames {
     { WidgetAction::Scope::Private, "Private" },
@@ -270,7 +270,7 @@ bool WidgetAction::isConnected() const
 
 bool WidgetAction::publish(const QString& name /*= ""*/, bool allowDuplicateName /*= false*/)
 {
-    return hdps::actions().publishPrivateAction(this, name, true, allowDuplicateName);
+    return mv::actions().publishPrivateAction(this, name, true, allowDuplicateName);
 }
 
 void WidgetAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
@@ -364,7 +364,7 @@ WidgetAction* WidgetAction::getPublicCopy() const
 {
     try
     {
-        auto publicCopy = static_cast<WidgetAction*>(metaObject()->newInstance(Q_ARG(QObject*, &hdps::actions()), Q_ARG(QString, text())));
+        auto publicCopy = static_cast<WidgetAction*>(metaObject()->newInstance(Q_ARG(QObject*, &mv::actions()), Q_ARG(QString, text())));
 
         if (publicCopy == nullptr)
             throw std::runtime_error(QString("Unable to create new %1 instance using the Qt meta-object system.").arg(metaObject()->className()).toLatin1());
@@ -454,13 +454,13 @@ bool WidgetAction::mayDisconnect(ConnectionContextFlag connectionContextFlags) c
 
     switch (connectionContextFlags)
     {
-        case hdps::gui::WidgetAction::Api:
+        case mv::gui::WidgetAction::Api:
             return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi);
 
-        case hdps::gui::WidgetAction::Gui:
+        case mv::gui::WidgetAction::Gui:
             return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaGui);
 
-        case hdps::gui::WidgetAction::ApiAndGui:
+        case mv::gui::WidgetAction::ApiAndGui:
             break;
 
         default:

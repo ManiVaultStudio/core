@@ -6,9 +6,9 @@
 
 #include <QHBoxLayout>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 #if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
     constexpr float DecimalAction::INIT_MIN;

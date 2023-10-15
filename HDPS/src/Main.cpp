@@ -19,8 +19,8 @@
 #include <QCommandLineParser>
 #include <QTemporaryDir>
 
-using namespace hdps;
-using namespace hdps::util;
+using namespace mv;
+using namespace mv::util;
 
 class NoFocusProxyStyle : public QProxyStyle {
 public:

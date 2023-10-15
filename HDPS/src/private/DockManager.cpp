@@ -23,10 +23,10 @@
 
 using namespace ads;
 
-using namespace hdps;
-using namespace hdps::plugin;
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv;
+using namespace mv::plugin;
+using namespace mv::gui;
+using namespace mv::util;
 
 DockManager::DockManager(const QString& name, QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
@@ -66,7 +66,7 @@ const ViewPluginDockWidgets DockManager::getViewPluginDockWidgets() const
     return const_cast<DockManager*>(this)->getViewPluginDockWidgets();
 }
 
-ads::CDockAreaWidget* DockManager::findDockAreaWidget(hdps::plugin::ViewPlugin* viewPlugin)
+ads::CDockAreaWidget* DockManager::findDockAreaWidget(mv::plugin::ViewPlugin* viewPlugin)
 {
     if (viewPlugin == nullptr)
         return nullptr;
@@ -233,7 +233,7 @@ Task* DockManager::getSerializationTask()
     return _serializationTask;
 }
 
-void DockManager::setSerializationTask(hdps::Task* serializationTask)
+void DockManager::setSerializationTask(mv::Task* serializationTask)
 {
     Q_ASSERT(serializationTask != nullptr);
 

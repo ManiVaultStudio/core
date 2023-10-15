@@ -8,8 +8,8 @@
 #include <QListView>
 #include <QSet>
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 SelectedIndicesAction::SelectedIndicesAction(QObject* parent, const Dataset<Points>& points) :
     WidgetAction(parent, "Selected Indices"),

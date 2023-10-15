@@ -8,9 +8,9 @@
 
 #include <QDebug>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 LockingAction::LockingAction(QObject* parent, const QString& what /*= ""*/, bool locked /*= false*/) :
     GroupAction(parent, "Locking"),

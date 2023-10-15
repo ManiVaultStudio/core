@@ -9,7 +9,7 @@
     //#define TASK_VERBOSE
 #endif
 
-namespace hdps {
+namespace mv {
 
 using namespace util;
 
@@ -126,7 +126,7 @@ QString Task::getTypeName(bool humanFriendly /*= true*/) const
     auto typeString = QString(metaObject()->className());
 
     if (humanFriendly)
-        typeString.replace("hdps::", "");
+        typeString.replace("mv::", "");
 
     return typeString;
 }

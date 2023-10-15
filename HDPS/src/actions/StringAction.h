@@ -13,7 +13,7 @@
 class QWidget;
 class QCompleter;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * String widget action class
@@ -270,6 +270,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::StringAction)
+Q_DECLARE_METATYPE(mv::gui::StringAction)
 
-inline const auto stringActionMetaTypeId = qRegisterMetaType<hdps::gui::StringAction*>("hdps::gui::StringAction");
+inline const auto stringActionMetaTypeId = qRegisterMetaType<mv::gui::StringAction*>("mv::gui::StringAction");

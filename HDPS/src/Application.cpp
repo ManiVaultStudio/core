@@ -20,10 +20,10 @@
 #include <QMessageBox>
 #include <QMainWindow>
 
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv::gui;
+using namespace mv::util;
 
-namespace hdps {
+namespace mv {
 
 Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
@@ -85,7 +85,7 @@ const IconFont& Application::getIconFont(const QString& name, const std::int32_t
     return current()->_iconFonts.getIconFont(name, majorVersion, minorVersion);
 }
 
-hdps::CoreInterface* Application::getCore()
+mv::CoreInterface* Application::getCore()
 {
     return _core;
 }
@@ -111,7 +111,7 @@ void Application::setCore(CoreInterface* core)
     }
 }
 
-hdps::CoreInterface* Application::core()
+mv::CoreInterface* Application::core()
 {
     return current()->getCore();
 }

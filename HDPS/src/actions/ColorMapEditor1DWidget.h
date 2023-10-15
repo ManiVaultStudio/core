@@ -11,7 +11,7 @@
 #include <QResizeEvent>
 #include <QGraphicsView>
 
-namespace hdps {
+namespace mv {
 
 namespace gui {
 

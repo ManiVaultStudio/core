@@ -11,9 +11,9 @@
 #include <QHBoxLayout>
 #include <QStandardPaths>
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps::gui {
+namespace mv::gui {
 
 FilePickerAction::FilePickerAction(QObject* parent, const QString& title, const QString& filePath /*= QString()*/) :
     WidgetAction(parent, title),

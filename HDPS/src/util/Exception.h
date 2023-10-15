@@ -9,7 +9,7 @@
 
 #include <stdexcept>
 
-namespace hdps::util {
+namespace mv::util {
 
 /**
  * Create an exception message box using a title and reason

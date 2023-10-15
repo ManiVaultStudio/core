@@ -9,7 +9,7 @@
 
 #include "actions/HorizontalGroupAction.h"
 
-namespace hdps {
+namespace mv {
 
 /**
  * Foreground task handler class

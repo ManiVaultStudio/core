@@ -5,9 +5,9 @@
 #include "LinkedData.h"
 #include "Set.h"
 
-using namespace hdps::util;
+using namespace mv::util;
 
-namespace hdps
+namespace mv
 {
 
 SelectionMap::SelectionMap(Type type /*= Indexed*/) :

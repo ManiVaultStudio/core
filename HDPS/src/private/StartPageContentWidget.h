@@ -47,13 +47,13 @@ public:
 
 public: // Action getters
 
-    const hdps::gui::ToggleAction& getCompactViewAction() const { return _compactViewAction; }
-    const hdps::gui::ToggleAction& getToggleOpenCreateProjectAction() const { return _toggleOpenCreateProjectAction; }
-    const hdps::gui::ToggleAction& getToggleRecentProjectsAction() const { return _toggleRecentProjectsAction; }
-    const hdps::gui::ToggleAction& getToggleExampleProjectsAction() const { return _toggleExampleProjectsAction; }
-    const hdps::gui::ToggleAction& getToggleProjectFromWorkspaceAction() const { return _toggleProjectFromWorkspaceAction; }
-    const hdps::gui::ToggleAction& getToggleProjectFromDataAction() const { return _toggleProjectFromDataAction; }
-    const hdps::gui::ToggleAction& getToggleTutorialVideosAction() const { return _toggleTutorialVideosAction; }
+    const mv::gui::ToggleAction& getCompactViewAction() const { return _compactViewAction; }
+    const mv::gui::ToggleAction& getToggleOpenCreateProjectAction() const { return _toggleOpenCreateProjectAction; }
+    const mv::gui::ToggleAction& getToggleRecentProjectsAction() const { return _toggleRecentProjectsAction; }
+    const mv::gui::ToggleAction& getToggleExampleProjectsAction() const { return _toggleExampleProjectsAction; }
+    const mv::gui::ToggleAction& getToggleProjectFromWorkspaceAction() const { return _toggleProjectFromWorkspaceAction; }
+    const mv::gui::ToggleAction& getToggleProjectFromDataAction() const { return _toggleProjectFromDataAction; }
+    const mv::gui::ToggleAction& getToggleTutorialVideosAction() const { return _toggleTutorialVideosAction; }
         
 private slots:
     
@@ -66,14 +66,14 @@ private:
     QVBoxLayout                 _mainLayout;                        /** Main layout */
     QHBoxLayout                 _collumnsLayout;                    /** Columns layout */
     QHBoxLayout                 _toolbarLayout;                     /** Toolbar layout */
-    hdps::gui::ToggleAction     _compactViewAction;                 /** Toggle compact view on/off */
-    hdps::gui::ToggleAction     _toggleOpenCreateProjectAction;     /** Toggle open and create project section */
-    hdps::gui::ToggleAction     _toggleRecentProjectsAction;        /** Toggle recent projects section */
-    hdps::gui::ToggleAction     _toggleExampleProjectsAction;       /** Toggle example projects section */
-    hdps::gui::ToggleAction     _toggleProjectFromWorkspaceAction;  /** Toggle project from workspace section */
-    hdps::gui::ToggleAction     _toggleProjectFromDataAction;       /** Toggle project from data section */
-    hdps::gui::ToggleAction     _toggleTutorialVideosAction;        /** Toggle tutorial videos section */
-    hdps::gui::GroupAction      _settingsAction;                    /** Settings action */
+    mv::gui::ToggleAction     _compactViewAction;                 /** Toggle compact view on/off */
+    mv::gui::ToggleAction     _toggleOpenCreateProjectAction;     /** Toggle open and create project section */
+    mv::gui::ToggleAction     _toggleRecentProjectsAction;        /** Toggle recent projects section */
+    mv::gui::ToggleAction     _toggleExampleProjectsAction;       /** Toggle example projects section */
+    mv::gui::ToggleAction     _toggleProjectFromWorkspaceAction;  /** Toggle project from workspace section */
+    mv::gui::ToggleAction     _toggleProjectFromDataAction;       /** Toggle project from data section */
+    mv::gui::ToggleAction     _toggleTutorialVideosAction;        /** Toggle tutorial videos section */
+    mv::gui::GroupAction      _settingsAction;                    /** Settings action */
     StartPageOpenProjectWidget  _openProjectWidget;                 /** Left column widget for opening existing projects */
     StartPageGetStartedWidget   _getStartedWidget;                  /** Right column widget for getting started operations */
 

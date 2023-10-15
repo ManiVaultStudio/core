@@ -13,10 +13,10 @@
 #include <QStringLiteral>
 #include <QDesktopServices>
 
-using namespace hdps;
-using namespace hdps::util;
-using namespace hdps::gui;
-using namespace hdps::plugin;
+using namespace mv;
+using namespace mv::util;
+using namespace mv::gui;
+using namespace mv::plugin;
 
 HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
@@ -53,15 +53,15 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateAboutProjectActionReadOnly);
 
     _aboutAction = new TriggerAction(this, "About ManiVault");
-    connect(_aboutAction, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::about);
+    connect(_aboutAction, &mv::gui::TriggerAction::triggered, this, &HelpMenu::about);
     
     _aboutThirdPartiesAction = new TriggerAction(this, "About Third Parties");
     _aboutThirdPartiesAction->setMenuRole(QAction::NoRole);
-    connect(_aboutThirdPartiesAction, &hdps::gui::TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
+    connect(_aboutThirdPartiesAction, &mv::gui::TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
     
     _aboutQtAction = new TriggerAction(this, "About Qt");
     _aboutQtAction->setMenuRole(QAction::NoRole);
-    connect(_aboutQtAction, &hdps::gui::TriggerAction::triggered, this, [this](bool) { QMessageBox::aboutQt(this->parentWidget(), "About Qt"); });
+    connect(_aboutQtAction, &mv::gui::TriggerAction::triggered, this, [this](bool) { QMessageBox::aboutQt(this->parentWidget(), "About Qt"); });
 
     // macOS does not like populating the menu on show, so we rather do it explicitly here
     populate();

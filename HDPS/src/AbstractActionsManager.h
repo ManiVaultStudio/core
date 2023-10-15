@@ -15,7 +15,7 @@
     #define ABSTRACT_ACTIONS_MANAGER_VERBOSE
 #endif
 
-namespace hdps
+namespace mv
 {
 
 /**

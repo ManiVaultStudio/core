@@ -11,9 +11,9 @@
 
 #include <QWidget>
 
-using namespace hdps;
-using namespace hdps::util;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::util;
+using namespace mv::gui;
 
 /**
  * Data properties widget class

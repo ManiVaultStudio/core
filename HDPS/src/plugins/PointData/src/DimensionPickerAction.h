@@ -11,9 +11,9 @@
 
 #include "pointdata_export.h"
 
-using namespace hdps;
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv;
+using namespace mv::gui;
+using namespace mv::util;
 
 /**
  * Dimension picker action class

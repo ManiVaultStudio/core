@@ -8,7 +8,7 @@
 
 #include <event/EventListener.h>
 
-namespace hdps
+namespace mv
 {
 
 class EventManager final : public AbstractEventManager

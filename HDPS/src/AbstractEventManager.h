@@ -7,7 +7,7 @@
 #include "AbstractManager.h"
 #include "Dataset.h"
 
-namespace hdps
+namespace mv
 {
 
 class DatasetImpl;

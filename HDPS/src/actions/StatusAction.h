@@ -8,7 +8,7 @@
 
 #include <QLineEdit>
 
-namespace hdps::gui {
+namespace mv::gui {
 
 /**
  * Status action class
@@ -137,6 +137,6 @@ protected:
 
 }
 
-Q_DECLARE_METATYPE(hdps::gui::StatusAction)
+Q_DECLARE_METATYPE(mv::gui::StatusAction)
 
-inline const auto statusActionMetaTypeId = qRegisterMetaType<hdps::gui::StatusAction*>("StatusAction");
+inline const auto statusActionMetaTypeId = qRegisterMetaType<mv::gui::StatusAction*>("StatusAction");

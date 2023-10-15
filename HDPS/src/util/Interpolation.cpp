@@ -4,7 +4,7 @@
 
 #include "Interpolation.h"
 
-namespace hdps {
+namespace mv {
 
 namespace util {
 

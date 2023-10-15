@@ -10,18 +10,18 @@
 #include <QColor>
 #include <vector>
 
-using namespace hdps;
+using namespace mv;
 
-const hdps::DataType ColorType = hdps::DataType(QString("Colors"));
+const mv::DataType ColorType = mv::DataType(QString("Colors"));
 
 // =============================================================================
 // Raw Data
 // =============================================================================
 
-class ColorData : public hdps::plugin::RawData
+class ColorData : public mv::plugin::RawData
 {
 public:
-    ColorData(const hdps::plugin::PluginFactory* factory) : hdps::plugin::RawData(factory, ColorType) { }
+    ColorData(const mv::plugin::PluginFactory* factory) : mv::plugin::RawData(factory, ColorType) { }
     ~ColorData(void) override;
     
     void init() override;
@@ -39,7 +39,7 @@ private:
     std::vector<QColor> _colors;
 };
 
-class Colors : public hdps::DatasetImpl
+class Colors : public mv::DatasetImpl
 {
 public:
     Colors(CoreInterface* core, QString dataName, const QString& guid = "") :
@@ -123,9 +123,9 @@ public: // Selection
 // Factory
 // =============================================================================
 
-class ColorDataFactory : public hdps::plugin::RawDataFactory
+class ColorDataFactory : public mv::plugin::RawDataFactory
 {
-    Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
+    Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "nl.lumc.ColorData"
                       FILE  "ColorData.json")
@@ -141,5 +141,5 @@ public:
      */
     QIcon getIcon(const QColor& color = Qt::black) const override;
 
-    hdps::plugin::RawData* produce() override;
+    mv::plugin::RawData* produce() override;
 };

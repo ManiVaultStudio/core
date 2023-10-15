@@ -20,8 +20,8 @@
 #include <QItemSelectionModel>
 #include <QTreeView>
 
-using namespace hdps::gui;
-using namespace hdps::util;
+using namespace mv::gui;
+using namespace mv::util;
 
 class ClustersAction;
 
