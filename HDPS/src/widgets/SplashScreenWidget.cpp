@@ -332,7 +332,7 @@ void SplashScreenWidget::createBody()
         rightColumn->addStretch(1);
 
         rightColumn->addWidget(new ExternalLinkWidget("globe", "Visit our website", QUrl("https://www.manivault.studio/")));
-        rightColumn->addWidget(new ExternalLinkWidget("globe", "Contribute to ManiVault on Github", QUrl("https://github.com/manivaultstudio")));
+        rightColumn->addWidget(new ExternalLinkWidget("globe", "Contribute to ManiVault on Github", QUrl("https://github.com/ManiVaultStudio")));
         rightColumn->addWidget(new ExternalLinkWidget("globe", "Get in touch on our Discord", QUrl("https://discord.gg/pVxmC2cSzA")));
     }
 
@@ -358,7 +358,7 @@ void SplashScreenWidget::createBody()
         copyrightNoticeLabel->setAlignment(Qt::AlignBottom);
         copyrightNoticeLabel->setWordWrap(true);
         copyrightNoticeLabel->setText("<p style='color: rgba(0, 0, 0, 80); font-size: 7pt;'> \
-            This software is licensed under the GNU Lesser General Public License v3.0. \
+            This software is licensed under the GNU Lesser General Public License v3.0.<br> \
             Copyright &copy; 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)</p>"
         );
 
