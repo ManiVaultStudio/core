@@ -13,11 +13,13 @@ namespace mv {
 
 BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),
+    _overallBackgroundTask(this, "Background tasks", false),
     _overallBackgroundTaskAction(this, "Overall Background Task"),
     _tasksStatusBarAction(*tasks().getListModel(), this, "Background tasks", Application::getIconFont("FontAwesome").getIcon("window-maximize"), TasksStatusBarAction::PopupMode::Hover, Task::GuiScope::Background),
     _statusBarAction(this, "Status Bar Group")
 {
     _overallBackgroundTaskAction.setStretch(1);
+    _overallBackgroundTaskAction.setTask(&_overallBackgroundTask);
 
     _tasksStatusBarAction.setPopupMode(TasksStatusBarAction::PopupMode::Hover);
     _tasksStatusBarAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
@@ -30,10 +32,9 @@ BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
 
     auto& tasksFilterModel = _tasksStatusBarAction.getTasksFilterModel();
 
-    /*
     tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Background" });
     tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
-    tasksFilterModel.getParentTaskFilterAction().setString(Application::current()->getTask(Application::TaskType::OverallBackground)->getId());
+    tasksFilterModel.getParentTaskFilterAction().setString(_overallBackgroundTask.getId());
 
     const auto overallBackgroundTaskTextFormatter = [this](Task& task) -> QString {
         const auto numberOfChildTasks = task.getChildTasksForGuiScopesAndStatuses(false, true, { Task::GuiScope::Background }, { Task::Status::Running, Task::Status::RunningIndeterminate }).count();
@@ -63,8 +64,12 @@ BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
         return {};
     };
 
-    Application::current()->getTask(Application::TaskType::OverallBackground)->setProgressTextFormatter(overallBackgroundTaskTextFormatter);
-    */
+    _overallBackgroundTask.setProgressTextFormatter(overallBackgroundTaskTextFormatter);
+}
+
+mv::BackgroundTask& BackgroundTaskHandler::getOverallBackgroundTask()
+{
+    return _overallBackgroundTask;
 }
 
 }

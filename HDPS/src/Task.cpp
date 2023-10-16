@@ -90,6 +90,8 @@ Task::Task(QObject* parent, const QString& name, const GuiScopes& guiScopes /*= 
     connect(this, &Task::privateKillSignal, this, &Task::privateKill);
     connect(this, &Task::privateSetProgressModeSignal, this, &Task::privateSetProgressMode);
     connect(this, &Task::privateSetGuiScopesSignal, this, &Task::privateSetGuiScopes);
+    connect(this, &Task::privateAddGuiScopeSignal, this, &Task::privateAddGuiScope);
+    connect(this, &Task::privateRemoveGuiScopeSignal, this, &Task::privateRemoveGuiScope);
     connect(this, &Task::privateResetProgressSignal, this, &Task::privateResetProgress);
     connect(this, &Task::privateSetProgressSignal, this, &Task::privateSetProgress);
     connect(this, qOverload<std::uint32_t, QPrivateSignal>(&Task::privateSetSubtasksSignal), this, qOverload<std::uint32_t>(&Task::privateSetSubtasks));
@@ -420,6 +422,16 @@ void Task::setGuiScopes(const GuiScopes& guiScopes)
     emit privateSetGuiScopesSignal(guiScopes, QPrivateSignal());
 }
 
+void Task::addGuiScopes(const GuiScope& guiScope)
+{
+
+}
+
+void Task::removeGuiScopes(const GuiScope& guiScope)
+{
+
+}
+
 bool Task::doGuiScopesOverlap(const GuiScopes& guiScopesA, const GuiScopes& guiScopesB)
 {
     for (const auto& guiScopeA : guiScopesA)
@@ -714,6 +726,11 @@ void Task::privateSetParentTask(Task* parentTask)
 
         if (parentTask == _parentTask)
             return;
+
+        if (parentTask != nullptr) {
+            if (getId() == parentTask->getId())
+                return;
+        }
 
         /*
         if (parentTask && (parentTask->getTypeName() != getTypeName()))
@@ -1086,6 +1103,26 @@ void Task::privateSetGuiScopes(const GuiScopes& guiScopes)
         return;
 
     _guiScopes = guiScopes;
+
+    emit guiScopesChanged(_guiScopes);
+}
+
+void Task::privateAddGuiScope(const GuiScope& guiScope)
+{
+    if (_guiScopes.contains(guiScope))
+        return;
+
+    _guiScopes << guiScope;
+
+    emit guiScopesChanged(_guiScopes);
+}
+
+void Task::privateRemoveGuiScope(const GuiScope& guiScope)
+{
+    if (!_guiScopes.contains(guiScope))
+        return;
+
+    _guiScopes.remove(guiScope);
 
     emit guiScopesChanged(_guiScopes);
 }

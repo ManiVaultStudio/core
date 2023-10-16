@@ -6,6 +6,7 @@
 
 #include "AbstractTaskHandler.h"
 #include "TasksStatusBarAction.h"
+#include "BackgroundTask.h"
 
 #include "actions/TaskAction.h"
 #include "actions/HorizontalGroupAction.h"
@@ -15,7 +16,7 @@ namespace mv {
 /**
  * Background task handler class
  *
- * Interact with tasks in a main window status bar popup window.
+ * Interact with tasks in a main window status bar pop up window.
  *
  * @author Thomas Kroes
  */
@@ -35,15 +36,22 @@ public:
      */
     gui::WidgetAction* getStatusBarAction() override { return &_statusBarAction; }
 
+    /**
+     * Get overall background task
+     * @return Aggregate background task to which all other background tasks are (in)directly parented
+     */
+    BackgroundTask& getOverallBackgroundTask();
+
 public: // Action getters
 
     gui::TaskAction& getOverallBackgroundTaskAction() { return _overallBackgroundTaskAction; }
     gui::TasksStatusBarAction& getTasksStatusBarAction() { return _tasksStatusBarAction; }
 
 private:
-    gui::TaskAction             _overallBackgroundTaskAction;
-    gui::TasksStatusBarAction   _tasksStatusBarAction;
-    gui::HorizontalGroupAction  _statusBarAction;
+    BackgroundTask              _overallBackgroundTask;         /** Aggregate background task to which all other background tasks are (in)directly parented */
+    gui::TaskAction             _overallBackgroundTaskAction;   /** For showing a task progress action in the status bar */
+    gui::TasksStatusBarAction   _tasksStatusBarAction;          /** Status bar action which show the number of background tasks */
+    gui::HorizontalGroupAction  _statusBarAction;               /** Combines the overall background task action and the tasks status bar action */
 };
 
 }

@@ -10,6 +10,7 @@
 #include <QBitArray>
 #include <QTimer>
 #include <QIcon>
+#include <QSet>
 
 namespace mv {
 
@@ -86,7 +87,7 @@ public:
 
     using TasksPtrs             = QVector<Task*>;
     using ProgressTextFormatter = std::function<QString(Task&)>;
-    using GuiScopes             = QVector<GuiScope>;
+    using GuiScopes             = QSet<GuiScope>;
     using Statuses              = QVector<Status>;
 
 public:
@@ -382,6 +383,18 @@ public: // GUI scopes
     virtual void setGuiScopes(const GuiScopes& guiScopes) final;
 
     /**
+     * Add \p guiScope to the GUI scopes set
+     * @param guiScope GUI scope to add
+     */
+    virtual void addGuiScopes(const GuiScope& guiScope) final;
+
+    /**
+     * Remove \p guiScope from the GUI scopes set
+     * @param guiScope GUI scope to remove
+     */
+    virtual void removeGuiScopes(const GuiScope& guiScope) final;
+
+    /**
      * Function to establish whether at lease one GUI scope is present in both \p guiScopesA and \p guiScopesB
      * @param guiScopesA GUI scopes A
      * @param guiScopesB GUI scopes B
@@ -571,6 +584,8 @@ private: // Private setters (these call private signals under the hood, an essen
     void privateKill(bool recursive = true);
     void privateSetProgressMode(const ProgressMode& progressMode);
     void privateSetGuiScopes(const GuiScopes& guiScopes);
+    void privateAddGuiScope(const GuiScope& guiScope);
+    void privateRemoveGuiScope(const GuiScope& guiScope);
     void privateResetProgress(bool recursive = false);
     void privateSetProgress(float progress, const QString& subtaskDescription = "");
     void privateSetSubtasks(std::uint32_t numberOfSubtasks);
@@ -781,6 +796,8 @@ signals:
     void privateKillSignal(bool, QPrivateSignal);
     void privateSetProgressModeSignal(const ProgressMode& progressMode, QPrivateSignal);
     void privateSetGuiScopesSignal(const GuiScopes& guiScopes, QPrivateSignal);
+    void privateAddGuiScopeSignal(const GuiScope& guiScope, QPrivateSignal);
+    void privateRemoveGuiScopeSignal(const GuiScope& guiScope, QPrivateSignal);
     void privateResetProgressSignal(bool recursive, QPrivateSignal);
     void privateSetProgressSignal(float progress, const QString& subtaskDescription, QPrivateSignal);
     void privateSetSubtasksSignal(std::uint32_t numberOfSubtasks, QPrivateSignal);
