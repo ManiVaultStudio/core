@@ -163,6 +163,20 @@ public: // Configuration flags
      */
     virtual void setConfiguration(std::int32_t configuration, bool recursive = false) final;
 
+public: // Weight
+
+    /** 
+     * Get weight
+     * @return Get relative size of the progress interval this task occupies when it is a child task
+     */
+    virtual float getWeight() const;
+
+    /**
+     * Set weight
+     * @param weight Relative size of the progress interval this task occupies when it is a child task
+     */
+    virtual void setWeight(float weight);
+
 public: // Parent-child
 
     /**
@@ -916,6 +930,7 @@ signals:
 
 private:
     std::int32_t            _configuration;                                 /** Configuration flags */
+    float                   _weight;                                        /** Relative size of the progress interval this task occupies when it is a child task */
     QString                 _name;                                          /** Task name */
     QString                 _description;                                   /** Task description */
     QIcon                   _icon;                                          /** Task icon */

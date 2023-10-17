@@ -28,8 +28,6 @@ TasksTreeModel::TasksTreeModel(QObject* parent /*= nullptr*/) :
 
     auto topLevelTasks = tasks().getTasks();
 
-    qDebug() << "Number of tasks" << topLevelTasks.size();
-
     auto iterator = std::remove_if(topLevelTasks.begin(), topLevelTasks.end(), [](Task* task) -> bool {
         return task->hasParentTask();
     });

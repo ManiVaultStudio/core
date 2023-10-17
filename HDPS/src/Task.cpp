@@ -42,6 +42,7 @@ Task::Task(QObject* parent, const QString& name, const GuiScopes& guiScopes /*= 
     QObject(parent),
     Serializable(name),
     _configuration(0),
+    _weight(1.f),
     _name(name),
     _description(),
     _icon(),
@@ -196,6 +197,18 @@ void Task::setConfiguration(std::int32_t configuration, bool recursive /*= false
         for (auto childTask : getChildTasks())
             childTask->setConfiguration(configuration, recursive);
     }
+}
+
+float Task::getWeight() const
+{
+    return _weight;
+}
+
+void Task::setWeight(float weight)
+{
+    _weight = std::max(0.01f, weight);
+
+    updateProgress();
 }
 
 Task* Task::getParentTask()
@@ -693,11 +706,17 @@ void Task::updateProgress()
             const auto childTasks = getChildTasksForStatuses(false, true, { Status::Undefined, Status::Idle, Status::Running, Status::RunningIndeterminate, Status::Finished });
 
             if (!childTasks.isEmpty()) {
-                auto accumulatedProgress = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [](float sum, Task* childTask) -> float {
-                    return sum + childTask->getProgress();
+                float interval = 0.f;
+
+                auto accumulatedProgress = std::accumulate(childTasks.begin(), childTasks.end(), 0.f, [&interval](float sum, Task* childTask) -> float {
+                    const auto& weight = childTask->getWeight();
+
+                    interval += weight;
+
+                    return sum + (weight * childTask->getProgress());
                 });
 
-                _progress = accumulatedProgress / static_cast<float>(childTasks.size());
+                _progress = accumulatedProgress / interval;
             }
 
             break;
@@ -796,8 +815,6 @@ void Task::updateAggregateStatus()
     if (_progressMode != ProgressMode::Aggregate)
         return;
 
-    qDebug() << getName() << isConfigurationFlagSet(ConfigurationFlag::OverrideAggregateStatus);
-
     if (isConfigurationFlagSet(ConfigurationFlag::OverrideAggregateStatus))
         return;
 
@@ -817,9 +834,8 @@ void Task::updateAggregateStatus()
     if (getNumberOfChildTaskWithStatus(Status::Aborted) == numberOfEnabledChildTasks)
         privateSetAborted();
 
-    if (getNumberOfChildTaskWithStatus(Status::Finished) >= 1 && getNumberOfChildTaskWithStatus(Status::Finished) == numberOfEnabledChildTasks) {
+    if (getNumberOfChildTaskWithStatus(Status::Finished) >= 1 && getNumberOfChildTaskWithStatus(Status::Finished) == numberOfEnabledChildTasks)
         privateSetFinished();
-    }
 
     updateProgress();
 }
