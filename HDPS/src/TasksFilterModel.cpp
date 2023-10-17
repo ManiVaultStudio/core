@@ -20,6 +20,7 @@ TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
     _taskTypeFilterAction(this, "Type"),
     _taskGuiScopeFilterAction(this, "GUI Scope", Task::guiScopeNames.values(), Task::guiScopeNames.values()),
     _taskStatusFilterAction(this, "Status", Task::statusNames.values(), Task::statusNames.values()),
+    _topLevelTasksOnlyAction(this, "Top-level tasks only", false),
     _hideDisabledTasksFilterAction(this, "Hide disabled tasks", true),
     _hideHiddenTasksFilterAction(this, "Hide hidden tasks", true),
     _parentTaskFilterAction(this, "Parent task identifier"),
@@ -40,6 +41,7 @@ TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
     connect(&_taskTypeFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
     connect(&_taskGuiScopeFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
     connect(&_taskStatusFilterAction, &OptionsAction::selectedOptionsChanged, this, &TasksFilterModel::invalidate);
+    connect(&_topLevelTasksOnlyAction, &ToggleAction::toggled, this, &TasksFilterModel::invalidate);
     connect(&_hideDisabledTasksFilterAction, &ToggleAction::toggled, this, &TasksFilterModel::invalidate);
     connect(&_hideHiddenTasksFilterAction, &ToggleAction::toggled, this, &TasksFilterModel::invalidate);
     connect(&_parentTaskFilterAction, &StringAction::stringChanged, this, &TasksFilterModel::invalidate);
@@ -47,6 +49,7 @@ TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
     _taskTypeFilterAction.setToolTip("Filter tasks based on their type");
     _taskGuiScopeFilterAction.setToolTip("Filter tasks based on their GUI scope");
     _taskStatusFilterAction.setToolTip("Filter tasks based on their status");
+    _topLevelTasksOnlyAction.setToolTip("When checked shows top-level tasks only");
     _hideDisabledTasksFilterAction.setToolTip("Hide or show disabled tasks");
     _hideHiddenTasksFilterAction.setToolTip("Hide or show hidden tasks");
     _parentTaskFilterAction.setToolTip("Show only tasks of which the parent identifier matches");
@@ -89,6 +92,10 @@ bool TasksFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) cons
     
     if (!taskStatusTypes.contains(taskStatus))
         return false;
+
+    if (_topLevelTasksOnlyAction.isChecked())
+        if (parent != QModelIndex())
+            return false;
 
     const auto taskIsEnabled = getSourceData(index, AbstractTasksModel::Column::Enabled, Qt::EditRole).toBool();
 

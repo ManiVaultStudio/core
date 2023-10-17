@@ -8,6 +8,12 @@
 
 #include <actions/TasksAction.h>
 
+#ifdef _DEBUG
+#define TEST_SUITE
+#endif
+
+//#define TEST_SUITE
+
 using namespace mv;
 using namespace mv::plugin;
 using namespace mv::gui;
@@ -36,7 +42,7 @@ public:
 private:
     
     
-#ifdef _DEBUG
+#ifdef TEST_SUITE
 
     /** Adds GUI for testing various actions (visible in debug mode only) */
     void addTestSuite();

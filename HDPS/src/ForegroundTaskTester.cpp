@@ -91,7 +91,7 @@ void ForegroundTaskTester::testPerformance()
 
         QTimer timer;
 
-        timer.setInterval(1);
+        timer.setInterval(100);
 
         connect(performanceTask.get(), &ModalTask::requestAbort, this, [this, &timer, &performanceTask]() -> void {
             timer.stop();
