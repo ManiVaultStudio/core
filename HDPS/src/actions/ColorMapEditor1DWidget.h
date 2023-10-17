@@ -45,7 +45,7 @@ public:
      * Invoked when the widget is shown 
      * @param Pointer to show event
      */
-    void showEvent(QShowEvent* event);
+    void showEvent(QShowEvent* event) override;
 
     /**
      * Respond to target object events
