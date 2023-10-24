@@ -84,15 +84,17 @@ public: // Action getters
     gui::OptionsAction& getTaskTypeFilterAction() { return _taskTypeFilterAction; }
     gui::OptionsAction& getTaskScopeFilterAction() { return _taskGuiScopeFilterAction; }
     gui::OptionsAction& getTaskStatusFilterAction() { return _taskStatusFilterAction; }
+    gui::ToggleAction& getTopLevelTasksOnlyAction() { return _topLevelTasksOnlyAction; }
     gui::ToggleAction& getHideDisabledTasksFilterAction() { return _hideDisabledTasksFilterAction; }
     gui::ToggleAction& getHideHiddenTasksFilterAction() { return _hideHiddenTasksFilterAction; }
     gui::StringAction& getParentTaskFilterAction() { return _parentTaskFilterAction; }
 
 private:
     gui::OptionsAction              _taskTypeFilterAction;              /** Action for filtering based on task type */
-    gui::OptionsAction              _taskGuiScopeFilterAction;             /** Action for filtering based on task scope */
+    gui::OptionsAction              _taskGuiScopeFilterAction;          /** Action for filtering based on task scope */
     gui::OptionsAction              _taskStatusFilterAction;            /** Action for filtering based on task status */
     gui::ToggleAction               _hideDisabledTasksFilterAction;     /** Action for hiding disabled tasks */
+    gui::ToggleAction               _topLevelTasksOnlyAction;           /** Action for toggling top-level tasks only */
     gui::ToggleAction               _hideHiddenTasksFilterAction;       /** Action for hiding hidden tasks */
     gui::StringAction               _parentTaskFilterAction;            /** Action for filtering on parent task */
     QMap<QString, std::uint32_t>    _statusTypeCounts;                  /** Counts the number of task per status type */

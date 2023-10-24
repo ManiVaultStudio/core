@@ -11,11 +11,11 @@ namespace mv {
 
 BackgroundTaskHandler* BackgroundTask::backgroundTaskHandler = nullptr;
 
-BackgroundTask::BackgroundTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
+BackgroundTask::BackgroundTask(QObject* parent, const QString& name, bool parentToOverallBackgroundTask /*= true*/, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
     Task(parent, name, GuiScopes{ GuiScope::Background }, status, mayKill, nullptr)
 {
-    //if (core() != nullptr && core()->isInitialized())
-    //    setParentTask(Application::current()->getTask(Application::TaskType::OverallBackground));
+    if (parentToOverallBackgroundTask)
+        setParentTask(&BackgroundTask::backgroundTaskHandler->getOverallBackgroundTask());
 }
 
 void BackgroundTask::createHandler(QObject* parent)
@@ -24,8 +24,6 @@ void BackgroundTask::createHandler(QObject* parent)
         return;
 
     BackgroundTask::backgroundTaskHandler = new BackgroundTaskHandler(parent);
-
-    //backgroundTaskHandler->getOverallBackgroundTaskAction().setTask(Application::current()->getTask(Application::TaskType::OverallBackground));
 }
 
 }

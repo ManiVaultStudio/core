@@ -26,6 +26,7 @@ ForegroundTaskHandler::ForegroundTaskHandler(QObject* parent) :
 
     tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
     tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
+    tasksFilterModel.getTopLevelTasksOnlyAction().setChecked(true);
 
     const auto hideForegroundTasksPopupChanged = [this]() -> void {
         const auto hideForegroundTasksPopup = settings().getTasksSettingsAction().getHideForegroundTasksPopupAction().isChecked();

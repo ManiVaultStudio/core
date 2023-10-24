@@ -10,6 +10,7 @@
 #include <QBitArray>
 #include <QTimer>
 #include <QIcon>
+#include <QSet>
 
 namespace mv {
 
@@ -46,6 +47,13 @@ class Task : public QObject, public util::Serializable
     Q_OBJECT
 
 public:
+
+    /** Describes the configuration options */
+    enum class ConfigurationFlag {
+        OverrideAggregateStatus = 0x00001,      /** Status is not automatically based on child tasks but will be set manually */
+
+        Default = 0
+    };
 
     /** Task: */
     enum class Status {
@@ -86,8 +94,20 @@ public:
 
     using TasksPtrs             = QVector<Task*>;
     using ProgressTextFormatter = std::function<QString(Task&)>;
-    using GuiScopes             = QVector<GuiScope>;
+    using GuiScopes             = QSet<GuiScope>;
     using Statuses              = QVector<Status>;
+
+private:
+
+    /** Timers for various purposes: */
+    enum class TimerType {
+        EmitProgressChanged,                /** For reducing the number of emissions of the Task::progressChanged() signal */
+        EmitProgressDescriptionChanged,     /** For reducing the number of emissions of the Task::progressDescriptionChanged() signal */
+        EmitProgressTextChanged,            /** For reducing the number of emissions of the Task::progressTextChanged() signal */
+        DeferredStatus,                     /** To set task to status deferred */
+
+        Count
+    };
 
 public:
 
@@ -112,6 +132,50 @@ public:
      * @return Task type name
      */
     virtual QString getTypeName(bool humanFriendly = true) const final;
+
+public: // Configuration flags
+
+    /**
+     * Get configuration
+     * @return Configuration
+     */
+    virtual std::int32_t getConfiguration() const final;
+
+    /**
+     * Check whether \p configurationFlag is set or not
+     * @param configurationFlag Configuration flag
+     * @return Boolean determining whether \p configurationFlag is set or not
+     */
+    virtual bool isConfigurationFlagSet(ConfigurationFlag configurationFlag) const final;
+
+    /**
+     * Set configuration flag
+     * @param configurationFlag Configuration flag to set
+     * @param unset Whether to unset the \p configurationFlag flag
+     * @param recursive Whether to recursively set child child configuration flag
+     */
+    virtual void setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset = false, bool recursive = false) final;
+
+    /**
+     * Set configuration
+     * @param configuration Configuration value
+     * @param recursive Whether to recursively set child child configuration flag
+     */
+    virtual void setConfiguration(std::int32_t configuration, bool recursive = false) final;
+
+public: // Weight
+
+    /** 
+     * Get weight
+     * @return Get relative size of the progress interval this task occupies when it is a child task
+     */
+    virtual float getWeight() const;
+
+    /**
+     * Set weight
+     * @param weight Relative size of the progress interval this task occupies when it is a child task
+     */
+    virtual void setWeight(float weight);
 
 public: // Parent-child
 
@@ -382,6 +446,18 @@ public: // GUI scopes
     virtual void setGuiScopes(const GuiScopes& guiScopes) final;
 
     /**
+     * Add \p guiScope to the GUI scopes set
+     * @param guiScope GUI scope to add
+     */
+    virtual void addGuiScope(const GuiScope& guiScope) final;
+
+    /**
+     * Remove \p guiScope from the GUI scopes set
+     * @param guiScope GUI scope to remove
+     */
+    virtual void removeGuiScope(const GuiScope& guiScope) final;
+
+    /**
      * Function to establish whether at lease one GUI scope is present in both \p guiScopesA and \p guiScopesB
      * @param guiScopesA GUI scopes A
      * @param guiScopesB GUI scopes B
@@ -412,6 +488,21 @@ public: // Manual
      * @param recursive Boolean determining whether to also set the descendant tasks
      */
     virtual void resetProgress(bool recursive = false);
+
+public: // Timers
+
+    /**
+     * Get timer by \p timerType
+     * @return Timer for \p timerType
+     */
+    QTimer& getTimer(const TimerType& timerType);
+
+    /**
+     * Set timer \p interval for \p timerType
+     * @param timerType Type of timer to set \p interval for
+     * @param interval Interval for \p timerType
+     */
+    void setTimerInterval(const TimerType& timerType, std::uint32_t interval);
 
 public: // Subtasks
 
@@ -481,11 +572,30 @@ public: // Subtasks
     virtual QStringList getSubtasksNames() const final;
 
     /**
+     * Get subtask name for \p subtaskIndex
+     * @param subtaskIndex Index of the subtask
+     * @return Subtasks name for \p subtaskIndex, empty string if not found
+     */
+    virtual QString getSubtasksName(std::uint32_t subtaskIndex) const final;
+
+    /**
      * Get subtask index for \p subtaskName
      * Returns -1 when \p subtaskName is not found or Task#_progressMode is set to ProgressMode::Manual
      * @param subtaskName Name of the subtask
      */
     virtual std::int32_t getSubtaskIndex(const QString& subtaskName) const final;
+
+    /**
+     * Get subtask name prefix
+     * @return String to prefix unnamed subtasks with
+     */
+    virtual QString getSubtaskNamePrefix() const final;
+
+    /**
+     * Set subtask name prefix to \p subtaskNamePrefix
+     * @param subtaskNamePrefix String to prefix unnamed subtasks with
+     */
+    virtual void setSubtaskNamePrefix(const QString& subtaskNamePrefix) final;
 
 public: // Progress description
 
@@ -571,6 +681,8 @@ private: // Private setters (these call private signals under the hood, an essen
     void privateKill(bool recursive = true);
     void privateSetProgressMode(const ProgressMode& progressMode);
     void privateSetGuiScopes(const GuiScopes& guiScopes);
+    void privateAddGuiScope(const GuiScope& guiScope);
+    void privateRemoveGuiScope(const GuiScope& guiScope);
     void privateResetProgress(bool recursive = false);
     void privateSetProgress(float progress, const QString& subtaskDescription = "");
     void privateSetSubtasks(std::uint32_t numberOfSubtasks);
@@ -597,6 +709,19 @@ signals:
      * @param name Modified name
      */
     void nameChanged(const QString& name);
+
+    /**
+     * Signals that \p configurationFlag is \p set
+     * @param configurationFlag Toggled configuration flag
+     * @param set Whether the flag was set or unset
+     */
+    void configurationFlagToggled(const ConfigurationFlag& configurationFlag, bool set);
+
+    /**
+     * Signals that the configuration changed
+     * @param configuration New configuration
+     */
+    void configurationChanged(std::int32_t configuration);
 
     /**
      * Signals that the task description changed to \p description
@@ -712,10 +837,18 @@ signals:
     void subtaskStarted(const QString& subTaskName);
 
     /**
-     * Signals that subtask with \p name finished
-     * @param subTaskName Name of the subtask that finished
+     * Signals that subtask with \p subtaskIndex finished
+     * @param subtaskIndex Index of the subtask that finished
+     * @param subtaskName Name of the subtask that finished (set when Task#_subtasksNames is set)
      */
-    void subtaskFinished(const QString& subTaskName);
+    void subtaskFinished(std::uint32_t subtaskIndex, const QString& subtaskName = "");
+
+    /**
+     * Signals that subtask name prefix changed from \p previousSubtaskNamePrefix to \p currentSubtaskNamePrefix
+     * @param previousSubtaskNamePrefix Previous subtask name prefix
+     * @param currentSubtaskNamePrefix Current subtask name prefix
+     */
+    void subtaskNamePrefixChanged(const QString& previousSubtaskNamePrefix, const QString& currentSubtaskNamePrefix);
 
     /**
      * Signals that the progress description changed to \p progressDescription
@@ -781,6 +914,8 @@ signals:
     void privateKillSignal(bool, QPrivateSignal);
     void privateSetProgressModeSignal(const ProgressMode& progressMode, QPrivateSignal);
     void privateSetGuiScopesSignal(const GuiScopes& guiScopes, QPrivateSignal);
+    void privateAddGuiScopeSignal(const GuiScope& guiScope, QPrivateSignal);
+    void privateRemoveGuiScopeSignal(const GuiScope& guiScope, QPrivateSignal);
     void privateResetProgressSignal(bool recursive, QPrivateSignal);
     void privateSetProgressSignal(float progress, const QString& subtaskDescription, QPrivateSignal);
     void privateSetSubtasksSignal(std::uint32_t numberOfSubtasks, QPrivateSignal);
@@ -794,6 +929,8 @@ signals:
     void privateSetProgressTextFormatterSignal(const ProgressTextFormatter& progressTextFormatter, QPrivateSignal);
 
 private:
+    std::int32_t            _configuration;                                 /** Configuration flags */
+    float                   _weight;                                        /** Relative size of the progress interval this task occupies when it is a child task */
     QString                 _name;                                          /** Task name */
     QString                 _description;                                   /** Task description */
     QIcon                   _icon;                                          /** Task icon */
@@ -802,14 +939,15 @@ private:
     Status                  _status;                                        /** Task status */
     Status                  _deferredStatus;                                /** Task status which is set after a delay */
     bool                    _deferredStatusRecursive;                       /** Whether to set the task status deferred recursively */
-    QTimer                  _deferredStatusTimer;                           /** Deferred status setter timer */
     bool                    _mayKill;                                       /** Whether the task may be killed or not */
     AbstractTaskHandler*    _handler;                                       /** Task handler */
     ProgressMode            _progressMode;                                  /** The way progress is recorded */
-    GuiScopes               _guiScopes;                                      /** The gui scope(s) in which the task will present itself to the user */
+    GuiScopes               _guiScopes;                                     /** The gui scope(s) in which the task will present itself to the user */
     float                   _progress;                                      /** Task progress */
+    QTimer                  _timers[static_cast<int>(TimerType::Count)];    /** Timers to prevent unnecessary abundant emissions of various signals */
     QBitArray               _subtasks;                                      /** Subtasks status */
     QStringList             _subtasksNames;                                 /** Subtasks names */
+    QString                 _subtaskNamePrefix;                             /** String to prefix unnamed subtasks with */
     QString                 _progressDescription;                           /** Current item description */
     Task*                   _parentTask;                                    /** Pointer to the parent task */
     TasksPtrs               _childTasks;                                    /** Pointers to child tasks */
@@ -817,9 +955,8 @@ private:
     ProgressTextFormatter   _progressTextFormatter;                         /** Progress text formatter function (overrides Task::getProgressText() when set) */
 
 private:
-    static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL           = 250;      /** Single shot task progress and description timer interval */
-    static constexpr std::uint32_t TASK_DESCRIPTION_DISAPPEAR_INTERVAL  = 1500;     /** Single shot task description disappear timer interval */
-    static constexpr std::uint32_t DEFERRED_TASK_STATUS_INTERVAL        = 1500;     /** Delay after which the deferred task status is set */
+    static constexpr std::uint32_t EMIT_CHANGED_TIMER_INTERVAL      = 100;      /** Single shot task progress and description timer interval */
+    static constexpr std::uint32_t DEFERRED_TASK_STATUS_INTERVAL    = 1500;     /** Delay after which the deferred task status is set */
 };
 
 }

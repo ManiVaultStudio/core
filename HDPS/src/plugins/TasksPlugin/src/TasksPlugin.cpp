@@ -40,12 +40,12 @@ void TasksPlugin::init()
 
     getWidget().setLayout(layout);
 
-#ifdef _DEBUG
+#ifdef TEST_SUITE
     addTestSuite();
 #endif
 }
 
-#ifdef _DEBUG
+#ifdef TEST_SUITE
 
 void TasksPlugin::addTestSuite()
 {

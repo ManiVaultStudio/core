@@ -265,6 +265,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskTypeFilterAction());
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskScopeFilterAction());
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskStatusFilterAction());
+    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTopLevelTasksOnlyAction());
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getHideDisabledTasksFilterAction());
     _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getHideHiddenTasksFilterAction());
     _tasksWidget.setHeaderHidden(false);
