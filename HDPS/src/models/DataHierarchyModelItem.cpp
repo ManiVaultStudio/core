@@ -138,7 +138,7 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                     return _dataHierarchyItem->getDataset()->getId();
 
                 case Column::Info:
-                    return datasetTask.getDescription();
+                    return datasetTask.getProgressDescription();
 
                 case Column::Progress:
                     return datasetTask.isRunning() ? 100.0f * datasetTask.getProgress() : 0.0f;
