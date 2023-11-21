@@ -452,125 +452,6 @@ void Points::extractDataForDimensions(std::vector<mv::Vector2f>& result, const i
     }
 }
 
-void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
-{
-    //Timer timer(__FUNCTION__);
-
-    if (isProxy()) {
-        globalIndices.resize(getNumPoints(), 0);
-        std::iota(globalIndices.begin(), globalIndices.end(), 0);
-    }
-    else {
-        auto currentDataset = toSmartPointer<Points>();
-
-        std::queue<Dataset<Points>> subsetChain;
-
-        // Walk back in the chain of derived data until we find the original source
-        while (currentDataset->isDerivedData())
-        {
-            // If the current set is a subset then store it on the stack to traverse later
-            if (!isFull())
-            {
-                subsetChain.push(currentDataset);
-            }
-            currentDataset = getSourceDataset<Points>();
-        }
-
-        // We now have a non-derived dataset bound, push it if its also a subset
-        if (!currentDataset->isFull())
-            subsetChain.push(currentDataset);
-
-        // Traverse down the stack applying indexing
-        globalIndices.resize(getNumPoints(), 0);
-        std::iota(globalIndices.begin(), globalIndices.end(), 0);
-
-        while (!subsetChain.empty())
-        {
-            const Points& subset = *subsetChain.front();
-            subsetChain.pop();
-
-            for (int i = 0; i < globalIndices.size(); i++)
-            {
-                globalIndices[i] = subset.indices[globalIndices[i]];
-            }
-        }
-    }
-}
-
-void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const
-{
-    //Timer timer(__FUNCTION__);
-
-    // Find the global indices of this dataset
-    std::vector<unsigned int> localGlobalIndices;
-    getGlobalIndices(localGlobalIndices);
-
-    if (isProxy()) {
-        selected.resize(getNumPoints(), false);
-
-        for (const auto& selectionIndex : selectionIndices) {
-            selected[localGlobalIndices[selectionIndex]] = true;
-        }
-    }
-    else {
-
-        // In an array the size of the full raw data, mark selected points as true
-        std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
-
-        for (const unsigned int& selectionIndex : selectionIndices)
-            globalSelection[selectionIndex] = true;
-
-        // For all local points find out which are selected
-        selected.resize(localGlobalIndices.size(), false);
-        for (int i = 0; i < localGlobalIndices.size(); i++)
-        {
-            if (globalSelection[localGlobalIndices[i]])
-                selected[i] = true;
-        }
-    }
-}
-
-void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const
-{
-    //Timer timer(__FUNCTION__);
-
-    if (isProxy()) {
-        localSelectionIndices = getSelection<Points>()->indices;
-    }
-    else {
-        auto selection = getSelection<Points>();
-
-        // Find the global indices of this dataset
-        std::vector<unsigned int> localGlobalIndices;
-        getGlobalIndices(localGlobalIndices);
-
-        // In an array the size of the full raw data, mark selected points as true
-        std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
-        for (const unsigned int& selectionIndex : selection->indices)
-            globalSelection[selectionIndex] = true;
-
-        // For all local points find out which are selected
-        std::vector<bool> selected(localGlobalIndices.size(), false);
-        int indexCount = 0;
-        for (int i = 0; i < localGlobalIndices.size(); i++)
-        {
-            if (globalSelection[localGlobalIndices[i]])
-            {
-                selected[i] = true;
-                indexCount++;
-            }
-        }
-
-        localSelectionIndices.resize(indexCount);
-        int c = 0;
-        for (int i = 0; i < selected.size(); i++)
-        {
-            if (selected[i])
-                localSelectionIndices[c++] = i;
-        }
-    }
-}
-
 bool Points::mayProxy(const Datasets& proxyDatasets) const
 {
     if (!DatasetImpl::mayProxy(proxyDatasets))
@@ -735,6 +616,132 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
     getTask().setFinished();
 }
 
+/* -------------------------------------------------------------------------- */
+/*                            Index transformation                            */
+/* -------------------------------------------------------------------------- */
+
+void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
+{
+    if (isProxy())
+    {
+        globalIndices.resize(getNumPoints(), 0);
+        std::iota(globalIndices.begin(), globalIndices.end(), 0);
+        return;
+    }
+
+    // Traverse the chain of datasets back to the original source data
+    // Any subsets traversed along the way are stored in the a subset chain
+    std::vector<Dataset<Points>> subsetChain;
+    {
+        auto currentDataset = toSmartPointer<Points>();
+
+        // Walk back in the chain of derived data until we find the original source
+        while (currentDataset->isDerivedData())
+        {
+            // If the current set is a subset then store it on the stack to traverse later
+            if (!currentDataset->isFull())
+                subsetChain.push_back(currentDataset);
+
+            currentDataset = currentDataset->getNextSourceDataset<Points>();
+        }
+
+        // We now have a non-derived dataset bound, push it if its also a subset
+        if (!currentDataset->isFull())
+            subsetChain.push_back(currentDataset);
+    }
+
+    // Find the original global indices of this dataset by transforming them
+    // step by step traversing through the chain of subsets
+    {
+        globalIndices.resize(getNumPoints(), 0);
+        std::iota(globalIndices.begin(), globalIndices.end(), 0);
+
+        for (const Dataset<Points>& subset : subsetChain)
+        {
+            for (int i = 0; i < globalIndices.size(); i++)
+                globalIndices[i] = subset->indices[globalIndices[i]];
+        }
+    }
+}
+
+void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const
+{
+    //Timer timer(__FUNCTION__);
+
+    // Find the global indices of this dataset
+    std::vector<unsigned int> localGlobalIndices;
+    getGlobalIndices(localGlobalIndices);
+
+    if (isProxy()) {
+        selected.resize(getNumPoints(), false);
+
+        for (const auto& selectionIndex : selectionIndices) {
+            selected[localGlobalIndices[selectionIndex]] = true;
+        }
+    }
+    else {
+
+        // In an array the size of the full raw data, mark selected points as true
+        std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
+
+        for (const unsigned int& selectionIndex : selectionIndices)
+            globalSelection[selectionIndex] = true;
+
+        // For all local points find out which are selected
+        selected.resize(localGlobalIndices.size(), false);
+        for (int i = 0; i < localGlobalIndices.size(); i++)
+        {
+            if (globalSelection[localGlobalIndices[i]])
+                selected[i] = true;
+        }
+    }
+}
+
+void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const
+{
+    if (isProxy())
+    {
+        localSelectionIndices = getSelection<Points>()->indices;
+        return;
+    }
+
+
+    auto selection = getSelection<Points>();
+
+    // Find the global indices of this dataset
+    std::vector<unsigned int> localGlobalIndices;
+    getGlobalIndices(localGlobalIndices);
+
+    // In an array the size of the full raw data, mark selected points as true
+    std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
+    for (const unsigned int& selectionIndex : selection->indices)
+        globalSelection[selectionIndex] = true;
+
+    // For all local points find out which are selected
+    std::vector<bool> selected(localGlobalIndices.size(), false);
+    int indexCount = 0;
+    for (int i = 0; i < localGlobalIndices.size(); i++)
+    {
+        if (globalSelection[localGlobalIndices[i]])
+        {
+            selected[i] = true;
+            indexCount++;
+        }
+    }
+
+    localSelectionIndices.resize(indexCount);
+    int c = 0;
+    for (int i = 0; i < selected.size(); i++)
+    {
+        if (selected[i])
+            localSelectionIndices[c++] = i;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                               Action getters                               */
+/* -------------------------------------------------------------------------- */
+
 InfoAction& Points::getInfoAction()
 {
     return *_infoAction;
@@ -755,6 +762,10 @@ DimensionsPickerAction& Points::getDimensionsPickerAction()
 
 	return *_dimensionsPickerAction;
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                 Selection                                  */
+/* -------------------------------------------------------------------------- */
 
 std::vector<std::uint32_t>& Points::getSelectionIndices()
 {

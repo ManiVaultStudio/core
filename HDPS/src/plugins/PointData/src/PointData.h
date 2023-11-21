@@ -831,24 +831,6 @@ public:
         getRawData<PointData>().populateDataForDimensions(resultContainer, dimensionIndices, indices);
     }
 
-    /**
-     * Get the indices over the original source data that this dataset
-     * indexes into through being a subset or derived data or a combination.
-     * @param globalIndices Resulting vector of global indices into the original raw data
-     */
-    void getGlobalIndices(std::vector<unsigned int>& globalIndices) const;
-
-    /**
-     * Passing a vector of global selection indices, returns a vector of booleans
-     * describing which indices of this dataset are selected. A locally selected 
-     * point will have true in its corresponding index, and false if not.
-     * @param Vector of global selection indices
-     * @param Boolean vector of locally selected points
-     */
-    void selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const;
-
-    void getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const;
-
     unsigned int getNumRawPoints() const
     {
         if (isProxy()) {
@@ -956,6 +938,26 @@ public:
      * @param proxyMembers Proxy member datasets
      */
     void setProxyMembers(const mv::Datasets& proxyMembers) override;
+
+public: // Index transformation
+    /**
+     * Get the indices over the original source data that this dataset
+     * indexes into through being a subset or derived data or a combination.
+     * @param globalIndices Resulting vector of global indices into the original raw data
+     */
+    void getGlobalIndices(std::vector<unsigned int>& globalIndices) const;
+
+    /**
+     * Passing a vector of global selection indices, returns a vector of booleans
+     * describing which indices of this dataset are selected. A locally selected
+     * point will have true in its corresponding index, and false if not.
+     * @param Vector of global selection indices
+     * @param Boolean vector of locally selected points
+     */
+    void selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const;
+
+    void getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const;
+
 
 public: // Action getters
 

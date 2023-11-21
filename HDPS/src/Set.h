@@ -126,6 +126,18 @@ public:
         return Dataset<DatasetType>(_sourceDataset->getSourceDataset<DatasetType>());
     }
 
+    /** Get source dataset if the given set is derived */
+    template<typename DatasetType>
+    Dataset<DatasetType> getNextSourceDataset() const {
+        if (!isDerivedData())
+            return toSmartPointer<DatasetType>();
+
+        if (!_sourceDataset.isValid())
+            return toSmartPointer<DatasetType>();
+
+        return _sourceDataset;
+    }
+
     /**
      * Marks this dataset as derived and sets the source dataset globally unique identifier
      * @param dataset Smart pointer to the source dataset
