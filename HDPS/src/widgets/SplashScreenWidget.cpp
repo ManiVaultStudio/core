@@ -181,8 +181,10 @@ void SplashScreenWidget::showAnimated()
     connect(animationGroup, &QParallelAnimationGroup::finished, &eventLoop, &QEventLoop::quit);
 
     animationGroup->start();
-
-    eventLoop.exec();
+    
+    while(animationGroup->state() == QAbstractAnimation::Running) {
+      QApplication::processEvents();
+    }
 }
 
 void SplashScreenWidget::closeAnimated()
