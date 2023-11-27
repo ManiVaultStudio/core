@@ -613,6 +613,11 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
         QCoreApplication::processEvents();
     }
 
+    if (!getProxyMembers().isEmpty()) {
+        setDimensionNames(Dataset<Points>(getProxyMembers().first())->getDimensionNames());
+        events().notifyDatasetDataDimensionsChanged(this);
+    }
+
     getTask().setFinished();
 }
 
