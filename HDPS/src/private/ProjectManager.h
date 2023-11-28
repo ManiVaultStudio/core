@@ -172,8 +172,8 @@ private:
     mv::gui::TriggerAction            _saveProjectAsAction;               /** Action for saving a project under a new name */
     mv::gui::TriggerAction            _editProjectSettingsAction;         /** Action for triggering the project settings dialog */
     mv::gui::RecentFilesAction        _recentProjectsAction;              /** Menu for loading recent projects */
-    QMenu                               _newProjectMenu;                    /** Menu for creating a new project */
-    QMenu                               _importDataMenu;                    /** Menu for importing data */
+    QMenu                             _newProjectMenu;                    /** Menu for creating a new project */
+    QMenu                             _importDataMenu;                    /** Menu for importing data */
     mv::gui::TriggerAction            _publishAction;                     /** Action for publishing the project to an end-user */
     mv::gui::TriggerAction            _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
     mv::gui::ToggleAction             _showStartPageAction;               /** Action for toggling the start page */

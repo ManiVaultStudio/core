@@ -55,6 +55,8 @@ void ProjectSerializationTask::setMode(const Mode& mode, const QString& projectF
             setDescription("Loading ManiVault project from " + projectFilePath);
             setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
 
+            _dataTask.setEnabled(true);
+
             _dataTask.setName("Load data");
             _compressionTask.setName("De-compress data");
             _workspaceTask.setName("Load workspace");
@@ -69,6 +71,8 @@ void ProjectSerializationTask::setMode(const Mode& mode, const QString& projectF
             setName("Save " + projectFileName);
             setDescription("Saving ManiVault project to " + projectFilePath);
             setIcon(Application::getIconFont("FontAwesome").getIcon("file-archive"));
+
+            _dataTask.setEnabled(false);
 
             _dataTask.setName("Save data");
             _compressionTask.setName("Compress data");
