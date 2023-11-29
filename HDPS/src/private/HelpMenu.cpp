@@ -52,17 +52,6 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     connect(&projects(), &AbstractProjectManager::projectOpened, this, updateAboutProjectActionReadOnly);
     connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateAboutProjectActionReadOnly);
 
-    _aboutAction = new TriggerAction(this, "About ManiVault");
-    connect(_aboutAction, &mv::gui::TriggerAction::triggered, this, &HelpMenu::about);
-    
-    _aboutThirdPartiesAction = new TriggerAction(this, "About Third Parties");
-    _aboutThirdPartiesAction->setMenuRole(QAction::NoRole);
-    connect(_aboutThirdPartiesAction, &mv::gui::TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
-    
-    _aboutQtAction = new TriggerAction(this, "About Qt");
-    _aboutQtAction->setMenuRole(QAction::NoRole);
-    connect(_aboutQtAction, &mv::gui::TriggerAction::triggered, this, [this](bool) { QMessageBox::aboutQt(this->parentWidget(), "About Qt"); });
-
     // macOS does not like populating the menu on show, so we rather do it explicitly here
     populate();
 }
@@ -99,6 +88,17 @@ void HelpMenu::populate()
     _aboutAction                = new TriggerAction(this, "About");
     _aboutThirdPartiesAction    = new TriggerAction(this, "About Third Parties");
     _aboutQtAction              = new TriggerAction(this, "About Qt");
+
+    _aboutThirdPartiesAction->setMenuRole(QAction::NoRole);
+    _aboutQtAction->setMenuRole(QAction::NoRole);
+
+    connect(_aboutAction, &mv::gui::TriggerAction::triggered, this, &HelpMenu::about);
+
+    connect(_aboutThirdPartiesAction, &mv::gui::TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
+
+    connect(_aboutQtAction, &mv::gui::TriggerAction::triggered, this, [this](bool) {
+        QMessageBox::aboutQt(this->parentWidget(), "About Qt");
+    });
 
     if(!isEmpty())
         addSeparator();
