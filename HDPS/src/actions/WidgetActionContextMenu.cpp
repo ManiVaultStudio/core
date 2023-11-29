@@ -296,11 +296,21 @@ WidgetActionContextMenu::EditActionDialog::EditActionDialog(QWidget* parent, Wid
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("edit"));
     setWindowTitle(QString("Edit %1").arg(_action.text()));
 
+    _action.cacheConnectionPermissions(true);
+    _action.setConnectionPermissionsToForceNone(true);
+
     auto layout = new QVBoxLayout();
 
     layout->addWidget(_action.createWidget(this));
 
     setLayout(layout);
+}
+
+void WidgetActionContextMenu::EditActionDialog::closeEvent(QCloseEvent* event)
+{
+    _action.restoreConnectionPermissions(true);
+
+    QDialog::closeEvent(event);
 }
 
 }
