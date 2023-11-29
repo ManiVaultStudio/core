@@ -65,6 +65,12 @@ protected:
          */
         EditActionDialog(QWidget* parent, WidgetAction& action);
 
+        /**
+         * Invoked when the dialog is closed
+         * @param event Pointer to the close event
+         */
+        void closeEvent(QCloseEvent* event);
+
     private:
         WidgetAction&   _action;      /** Reference of widget action to edit */
     };
