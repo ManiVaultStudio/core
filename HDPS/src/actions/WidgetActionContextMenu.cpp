@@ -301,7 +301,19 @@ WidgetActionContextMenu::EditActionDialog::EditActionDialog(QWidget* parent, Wid
 
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(_action.createWidget(this));
+    auto actionWidget = _action.createWidget(this);
+
+    layout->addWidget(actionWidget);
+
+    if (actionWidget->layout() == nullptr) {
+        auto editLayout         = new QVBoxLayout();
+        auto notEditableLabel   = new QLabel("Not editable");
+
+        editLayout->setContentsMargins(0, 0, 0, 0);
+        editLayout->addWidget(notEditableLabel);
+
+        actionWidget->setLayout(editLayout);
+    }
 
     setLayout(layout);
 }
