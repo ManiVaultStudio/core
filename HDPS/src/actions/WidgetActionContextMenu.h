@@ -6,6 +6,7 @@
 
 #include "actions/TriggerAction.h"
 #include "actions/StringsAction.h"
+#include "actions/VerticalGroupAction.h"
 
 #include <QMenu>
 #include <QDialog>
@@ -53,17 +54,17 @@ protected:
         TriggerAction   _cancelAction;      /** Reject when triggered */
     };
 
-    /** Dialog class for editing an action */
-    class EditActionDialog : public QDialog
+    /** Dialog class for editing one ore more actions */
+    class EditActionsDialog : public QDialog
     {
     public:
 
         /**
-         * Construct with \p parent widget and edit \p action
+         * Construct with \p parent widget and edit widget \p actions
          * @param parent Pointer to parent widget (if any)
-         * @param action Reference to edit action
+         * @param action Widget actions to edit
          */
-        EditActionDialog(QWidget* parent, WidgetAction& action);
+        EditActionsDialog(QWidget* parent, WidgetActions actions);
 
         /**
          * Invoked when the dialog is closed
@@ -72,7 +73,8 @@ protected:
         void closeEvent(QCloseEvent* event);
 
     private:
-        WidgetAction&   _action;      /** Reference of widget action to edit */
+        WidgetActions           _actions;               /** Widget actions to edit */
+        VerticalGroupAction     _actionsGroupAction;    /** Vertical group action */
     };
 
 private:

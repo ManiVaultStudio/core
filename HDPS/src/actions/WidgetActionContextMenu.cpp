@@ -67,7 +67,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
     _connectAction.setVisible(false);
     _disconnectAllAction.setVisible(allPublic);
-    _editAction.setVisible(allPublic && _actions.count() == 1);
+    _editAction.setVisible(!_actions.isEmpty());
     _removeAction.setVisible(allPublic && !_actions.isEmpty());
 
     if (allPrivate) {
@@ -226,9 +226,9 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
         if (_actions.isEmpty())
             return;
 
-        EditActionDialog editActionDialog(this, *_actions.first());
+        EditActionsDialog editActionsDialog(this, _actions);
 
-        editActionDialog.exec();
+        editActionsDialog.exec();
     });
 }
 
@@ -289,38 +289,58 @@ WidgetActionContextMenu::ConfirmRemovePublicActionDialog::ConfirmRemovePublicAct
     connect(&_cancelAction, &TriggerAction::triggered, this, &QDialog::reject);
 }
 
-WidgetActionContextMenu::EditActionDialog::EditActionDialog(QWidget* parent, WidgetAction& action) :
+WidgetActionContextMenu::EditActionsDialog::EditActionsDialog(QWidget* parent, WidgetActions actions) :
     QDialog(parent),
-    _action(action)
+    _actions(actions),
+    _actionsGroupAction(this, "Actions")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("edit"));
-    setWindowTitle(QString("Edit %1").arg(_action.text()));
+    setWindowTitle(QString("Edit %1").arg(actions.count() == 1 ? _actions.first()->text() : QString("%1 parameters").arg(QString::number(_actions.count()))));
 
-    _action.cacheConnectionPermissions(true);
-    _action.setConnectionPermissionsToForceNone(true);
+    auto layout = new QGridLayout();
 
-    auto layout = new QVBoxLayout();
+    layout->addWidget(_actionsGroupAction.createWidget(this));
 
-    auto actionWidget = _action.createWidget(this);
+    //parametersLayout->setContentsMargins(0, 0, 0, 0);
 
-    layout->addWidget(actionWidget);
+    for (auto action : _actions) {
+        if (action->isPublic()) {
+            action->cacheConnectionPermissions(true);
+            action->setConnectionPermissionsToForceNone(true);
+        }
+        
+        _actionsGroupAction.addAction(action);
 
-    if (actionWidget->layout() == nullptr) {
-        auto editLayout         = new QVBoxLayout();
-        auto notEditableLabel   = new QLabel("Not editable");
+        /*
+        auto actionWidget = action->createWidget(this);
+        
+        const auto rowCount = parametersLayout->rowCount();
 
-        editLayout->setContentsMargins(0, 0, 0, 0);
-        editLayout->addWidget(notEditableLabel);
+        if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup))
+            parametersLayout->addWidget(action->createLabelWidget(this), rowCount, 0);
 
-        actionWidget->setLayout(editLayout);
+        parametersLayout->addWidget(actionWidget, rowCount, 1);
+
+        if (actionWidget->layout() == nullptr) {
+            auto editLayout         = new QVBoxLayout();
+            auto notEditableLabel   = new QLabel("Not editable");
+
+            editLayout->setContentsMargins(0, 0, 0, 0);
+            editLayout->addWidget(notEditableLabel);
+
+            actionWidget->setLayout(editLayout);
+        }
+        */
     }
 
     setLayout(layout);
 }
 
-void WidgetActionContextMenu::EditActionDialog::closeEvent(QCloseEvent* event)
+void WidgetActionContextMenu::EditActionsDialog::closeEvent(QCloseEvent* event)
 {
-    _action.restoreConnectionPermissions(true);
+    for (auto action : _actions)
+        if (action->isPublic())
+            action->restoreConnectionPermissions(true);
 
     QDialog::closeEvent(event);
 }

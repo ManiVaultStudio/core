@@ -381,10 +381,19 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
 
             const auto widgetFlags = groupAction->getWidgetFlagsMap()[action];
 
-            if (widgetFlags >= 0)
-                layout->addWidget(action->createWidget(this, widgetFlags), numRows, 1);
-            else
-                layout->addWidget(action->createWidget(this), numRows, 1);
+            auto actionWidget = widgetFlags >= 0 ? action->createWidget(this, widgetFlags) : action->createWidget(this);
+
+            if (actionWidget->layout() == nullptr) {
+                auto editLayout         = new QVBoxLayout();
+                auto notEditableLabel   = new QLabel("Not editable");
+
+                editLayout->setContentsMargins(0, 0, 0, 0);
+                editLayout->addWidget(notEditableLabel);
+
+                actionWidget->setLayout(editLayout);
+            }
+
+            layout->addWidget(actionWidget, numRows, 1);
 
             if (action->getStretch() >= 0)
                 layout->setRowStretch(numRows, action->getStretch());
