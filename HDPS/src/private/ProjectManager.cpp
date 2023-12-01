@@ -23,7 +23,6 @@
 #include <QStandardPaths>
 #include <QGridLayout>
 #include <QEventLoop>
-#include <QTemporaryDir>
 
 #include <exception>
 
@@ -338,7 +337,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
 
-            QTemporaryDir temporaryDirectory;
+            TemporaryDir temporaryDirectory;
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
 
@@ -547,7 +546,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
 
-            QTemporaryDir temporaryDirectory;
+            TemporaryDir temporaryDirectory;
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
 
@@ -742,7 +741,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
 
-            QTemporaryDir temporaryDirectory;
+            TemporaryDir temporaryDirectory;
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
 
@@ -899,7 +898,7 @@ mv::Project* ProjectManager::getCurrentProject()
     return _project.get();
 }
 
-QString ProjectManager::extractFileFromManiVaultProject(const QString& maniVaultFilePath, QTemporaryDir& temporaryDir, const QString& filePath)
+QString ProjectManager::extractFileFromManiVaultProject(const QString& maniVaultFilePath, TemporaryDir& temporaryDir, const QString& filePath)
 {
     const auto temporaryDirectoryPath = temporaryDir.path();
 
@@ -933,7 +932,7 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
 {
     try
     {
-        QTemporaryDir temporaryDir;
+        TemporaryDir temporaryDir;
 
         const auto workspacePreviewFilePath = projects().extractFileFromManiVaultProject(projectFilePath, temporaryDir, "workspace.jpg");
 

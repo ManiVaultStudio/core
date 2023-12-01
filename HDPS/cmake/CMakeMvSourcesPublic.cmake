@@ -453,6 +453,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Version.h
     src/util/DockWidgetPermission.h
     src/util/NumericalRange.h
+    src/util/TemporaryDir.h
 )
 
 if(APPLE)
@@ -494,6 +495,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Version.cpp
     src/util/DockWidgetPermission.cpp
     src/util/NumericalRange.cpp
+    src/util/TemporaryDir.cpp
 )
 
 if(APPLE)

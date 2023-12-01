@@ -12,9 +12,10 @@
 #include "actions/RecentFilesAction.h"
 #include "actions/ToggleAction.h"
 
+#include "util/TemporaryDir.h"
+
 #include <QObject>
 #include <QMenu>
-#include <QTemporaryDir>
 
 namespace mv {
 
@@ -160,7 +161,7 @@ public:
      * @param filePath Relative file path of the file that needs to be extracted
      * @return File path of the extracted file, empty string if extraction failed
      */
-    virtual QString extractFileFromManiVaultProject(const QString& maniVaultFilePath, QTemporaryDir& temporaryDir, const QString& filePath) = 0;
+    virtual QString extractFileFromManiVaultProject(const QString& maniVaultFilePath, mv::util::TemporaryDir& temporaryDir, const QString& filePath) = 0;
 
     /**
      * Get preview image of the project workspace

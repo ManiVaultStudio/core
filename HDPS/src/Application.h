@@ -42,6 +42,9 @@ public: // Construction
 
 public: // Miscellaneous
 
+    /** Get the globally unique identifier of the application instance */
+    QString getId() const;
+
     /** Returns a pointer to the current HDPS application (if the current application derives from mv::Application) */
     static Application* current();
 
@@ -200,6 +203,7 @@ signals:
     void mainWindowInitialized();
 
 protected:
+    QString                 _id;                                /** Globally unique identifier of the application instance */
     CoreInterface*          _core;                              /** Pointer to HDPS core */
     const util::Version     _version;                           /** Application version */
     IconFonts               _iconFonts;                         /** Icon fonts resource */

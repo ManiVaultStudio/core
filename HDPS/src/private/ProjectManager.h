@@ -8,7 +8,6 @@
 
 #include <QObject>
 #include <QPointer>
-#include <QTemporaryDir>
 
 /**
  * Project manager class
@@ -106,7 +105,7 @@ public:
      * @param filePath Relative file path of the file that needs to be extracted
      * @return File path of the extracted file, empty string if extraction failed
      */
-    QString extractFileFromManiVaultProject(const QString& maniVaultFilePath, QTemporaryDir& temporaryDir, const QString& filePath) override;
+    QString extractFileFromManiVaultProject(const QString& maniVaultFilePath, mv::util::TemporaryDir& temporaryDir, const QString& filePath) override;
 
     /**
      * Get preview image of the project workspace

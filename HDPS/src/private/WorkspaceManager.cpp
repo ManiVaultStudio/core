@@ -10,20 +10,19 @@
 #include "Archiver.h"
 #include "WorkspaceSettingsDialog.h"
 
-#include <Application.h>
-#include <CoreInterface.h>
+#include "Application.h"
+#include "CoreInterface.h"
 
-#include <actions/StringsAction.h>
+#include "actions/StringsAction.h"
 
-#include <util/Serialization.h>
-#include <util/Icon.h>
+#include "util/Serialization.h"
+#include "util/Icon.h"
 
 #include <QMainWindow>
 #include <QToolButton>
 #include <QPainter>
 #include <QFileDialog>
 #include <QStandardPaths>
-#include <QTemporaryDir>
 #include <QBuffer>
 #include <QOpenGLWidget>
 #include <QEventLoop>
@@ -344,7 +343,7 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
 
 void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
 {
-    QTemporaryDir temporaryDirectory;
+    TemporaryDir temporaryDirectory;
 
     const auto temporaryDirectoryPath = temporaryDirectory.path();
 

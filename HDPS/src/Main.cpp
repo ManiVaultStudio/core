@@ -6,6 +6,8 @@
 #include "private/Archiver.h"
 #include "private/Core.h"
 
+#include "util/TemporaryDir.h"
+
 #include <Application.h>
 #include <ProjectMetaAction.h>
 
@@ -17,7 +19,6 @@
 #include <QProxyStyle>
 #include <QQuickWindow>
 #include <QCommandLineParser>
-#include <QTemporaryDir>
 
 using namespace mv;
 using namespace mv::util;
@@ -40,7 +41,7 @@ public:
 ProjectMetaAction* getStartupProjectMetaAction(const QString& startupProjectFilePath)
 {
     try {
-        QTemporaryDir temporaryDir;
+        TemporaryDir temporaryDir;
 
         const QString metaJsonFilePath("meta.json");
 

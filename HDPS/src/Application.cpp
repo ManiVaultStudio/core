@@ -19,6 +19,8 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QMainWindow>
+#include <QUuid>
+#include <QDir>
 
 using namespace mv::gui;
 using namespace mv::util;
@@ -27,6 +29,7 @@ namespace mv {
 
 Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
+    _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _core(nullptr),
     _version({ 0, 9 }),
     _iconFonts(),
@@ -38,6 +41,12 @@ Application::Application(int& argc, char** argv) :
     _startupProjectMetaAction(nullptr),
     _startupTask(nullptr)
 {
+    const auto tempDirectory = QDir::cleanPath(QDir::tempPath() + QDir::separator() + "ManiVault" + QDir::separator() + _id);
+
+    QDir dir(tempDirectory);
+
+    dir.mkdir(tempDirectory);
+
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, {
             //":/IconFonts/FontAwesomeBrandsRegular-5.14.otf",
             //":/IconFonts/FontAwesomeRegular-5.14.otf",
@@ -203,6 +212,11 @@ QMainWindow* Application::getMainWindow()
 ApplicationStartupTask& Application::getStartupTask()
 {
     return *_startupTask;
+}
+
+QString Application::getId() const
+{
+    return _id;
 }
 
 }
