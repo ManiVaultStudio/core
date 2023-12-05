@@ -159,8 +159,20 @@ public: // Serialization
      */
     static void setSerializationAborted(bool serializationAborted);
 
-    /** Goes over all sub-directories of temp/ManiVault and removes them if not locked */
-    static void cleanTemporaryDirectory();
+private:
+
+    /**
+     * Get string list of stale ManiVault temporary directories in the OS temporary directory
+     * Stale in this context means that the <os_temp_dir>/ManiVault.<app_session_id>.<temp_dir_id>/app.lock is not locked
+     * and the directory can be safely removed (because it is not in use by the ManiVault application).
+     * @return List of stale temporary ManiVault directories
+     */
+    static QStringList getStaleTemporaryDirectories();
+
+public:
+
+    /** Removes all directories in the OS temporary director which staart with ManiVault.* and which are not locked by the OS */
+    static void removeStaleTemporaryDirectories();
 
     /**
      * Get temporary dir

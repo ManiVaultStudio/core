@@ -13,14 +13,18 @@ namespace mv
 TemporaryFilesSettingsAction::TemporaryFilesSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Temporary Files"),
     _applicationTemporaryDirAction(this, "Application temporary directory", Application::current()->getTemporaryDir().path()),
-    _removeStaleTemporaryDirectoriesAction(this, "Remove stale temporary directories")
+    _staleTemporaryDirectoriesAction(this, "Stale temporary directories"),
+    _removeStaleTemporaryDirectoriesAction(this, "Remove stale temporary directories"),
+    _staleTemporaryDirectoriesGroupAction(this, "Stale temporary directories")
 {
     _applicationTemporaryDirAction.setEnabled(false);
 
-    addAction(&_removeStaleTemporaryDirectoriesAction);
-    addAction(&_applicationTemporaryDirAction);
+    addAction(&_staleTemporaryDirectoriesGroupAction);
 
-    connect(&_removeStaleTemporaryDirectoriesAction, &TriggerAction::triggered, this, []() -> void { Application::current()->cleanTemporaryDirectory(); });
+    _staleTemporaryDirectoriesGroupAction.addAction(&_staleTemporaryDirectoriesAction);
+    _staleTemporaryDirectoriesGroupAction.addAction(&_removeStaleTemporaryDirectoriesAction);
+
+    connect(&_removeStaleTemporaryDirectoriesAction, &TriggerAction::triggered, this, []() -> void { Application::current()->removeStaleTemporaryDirectories(); });
 }
 
 }

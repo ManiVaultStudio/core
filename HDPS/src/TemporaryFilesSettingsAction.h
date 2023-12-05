@@ -7,7 +7,9 @@
 #include "GlobalSettingsGroupAction.h"
 
 #include "actions/StringAction.h"
+#include "actions/StringsAction.h"
 #include "actions/TriggerAction.h"
+#include "actions/GroupAction.h"
 
 namespace mv
 {
@@ -36,7 +38,9 @@ public: // Action getters
 
 private:
     gui::StringAction   _applicationTemporaryDirAction;             /** String action for the application temporary dir */
+    gui::StringsAction  _staleTemporaryDirectoriesAction;           /** Action which lists stale temporary directories */
     gui::TriggerAction  _removeStaleTemporaryDirectoriesAction;     /** Action which triggers the cleanup of stale temporary directories */
+    gui::GroupAction    _staleTemporaryDirectoriesGroupAction;      /** Action for working with stale temporary directories */
 };
 
 }
