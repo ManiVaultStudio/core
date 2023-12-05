@@ -40,7 +40,7 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     _groupsAction.addGroupAction(&mv::settings().getApplicationSettings());
 #endif
 
-    _groupsAction.addGroupAction(&mv::settings().getTemporaryFilesSettingsAction());
+    _groupsAction.addGroupAction(&mv::settings().getTemporaryDirectoriesSettingsAction());
 }
 
 QSize SettingsManagerDialog::sizeHint() const

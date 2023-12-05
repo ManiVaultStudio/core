@@ -30,7 +30,7 @@ SettingsManager::SettingsManager() :
     _miscellaneousSettingsAction(this),
     _tasksSettingsAction(this),
     _applicationSettingsAction(this),
-    _temporaryFilesSettingsAction(this)
+    _temporaryDirectoriesSettingsAction(this)
 {
     _editSettingsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 

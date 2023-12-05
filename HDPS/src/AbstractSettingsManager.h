@@ -12,7 +12,7 @@
 #include "MiscellaneousSettingsAction.h"
 #include "TasksSettingsAction.h"
 #include "ApplicationSettingsAction.h"
-#include "TemporaryFilesSettingsAction.h"
+#include "TemporaryDirectoriesSettingsAction.h"
 
 namespace mv
 {
@@ -52,7 +52,7 @@ public: // Global settings actions
     virtual MiscellaneousSettingsAction& getMiscellaneousSettings() = 0;
     virtual TasksSettingsAction& getTasksSettingsAction() = 0;
     virtual ApplicationSettingsAction& getApplicationSettings() = 0;
-    virtual TemporaryFilesSettingsAction& getTemporaryFilesSettingsAction() = 0;
+    virtual TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() = 0;
 };
 
 }

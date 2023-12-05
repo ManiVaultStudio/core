@@ -205,6 +205,11 @@ QString Application::getId() const
     return _id;
 }
 
+const QTemporaryDir& Application::getTemporaryDir() const
+{
+    return _temporaryDir;
+}
+
 void Application::removeStaleTemporaryDirectories()
 {
     const auto staleTemporaryDirectories = Application::getStaleTemporaryDirectories();
@@ -246,11 +251,6 @@ void Application::removeStaleTemporaryDirectories()
     qDebug() << "Removed" << numberOfRemovedSessions << QString("ManiVault application temporary director%1").arg(numberOfRemovedSessions == 1 ? "y" : "ies");
 }
 
-const QTemporaryDir& Application::getTemporaryDir() const
-{
-    return _temporaryDir;
-}
-
 QStringList Application::getStaleTemporaryDirectories()
 {
     QStringList staleTemporaryDirectories;
@@ -266,13 +266,15 @@ QStringList Application::getStaleTemporaryDirectories()
         QLockFile lockFile(QDir::cleanPath(QDir::tempPath() + QDir::separator() + session + QDir::separator() + "app.lock"));
 
         const auto sessionSegments      = session.split(".");
-        const auto isCurrentApplication = sessionSegments.count() > 2 & Application::current()->getId().startsWith(sessionSegments[1]);
+        const auto isCurrentApplication = sessionSegments.count() > 2 && Application::current()->getId().startsWith(sessionSegments[1]);
 
         if (isCurrentApplication)
             continue;
 
-        if (lockFile.tryLock(150))
+        if (lockFile.tryLock(150)) {
             staleTemporaryDirectories << QDir::cleanPath(QDir::tempPath() + QDir::separator() + session);
+            lockFile.unlock();
+        }
     }
 
     return staleTemporaryDirectories;

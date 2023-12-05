@@ -660,7 +660,7 @@ set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/MiscellaneousSettingsAction.h
     src/TasksSettingsAction.h
     src/ApplicationSettingsAction.h
-    src/TemporaryFilesSettingsAction.h
+    src/TemporaryDirectoriesSettingsAction.h
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_SOURCES
@@ -669,7 +669,7 @@ set(PUBLIC_GLOBAL_SETTINGS_SOURCES
     src/MiscellaneousSettingsAction.cpp
     src/TasksSettingsAction.cpp
     src/ApplicationSettingsAction.cpp
-    src/TemporaryFilesSettingsAction.cpp
+    src/TemporaryDirectoriesSettingsAction.cpp
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_FILES
