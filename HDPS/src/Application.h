@@ -14,6 +14,8 @@
 
 #include <QApplication>
 #include <QSettings>
+#include <QTemporaryDir>
+#include <QLockFile>
 
 class QMainWindow;
 
@@ -23,7 +25,7 @@ class CoreInterface;
 class ProjectMetaAction;
 
 /**
- * HDPS application class
+ * ManiVault (Studio) application class
  * 
  * @author Thomas Kroes
  */
@@ -45,7 +47,7 @@ public: // Miscellaneous
     /** Get the globally unique identifier of the application instance */
     QString getId() const;
 
-    /** Returns a pointer to the current HDPS application (if the current application derives from mv::Application) */
+    /** Returns a pointer to the current ManiVault application (if the current application derives from mv::Application) */
     static Application* current();
 
     /** Get pointer to the core */
@@ -146,18 +148,6 @@ public: // Logging
 public: // Serialization
 
     /**
-     * Get serialization temporary directory
-     * @return Serialization temporary directory
-     */
-    static QString getSerializationTemporaryDirectory();
-
-    /**
-     * Set serialization temporary directory to \p serializationTemporaryDirectory
-     * @param serializationTemporaryDirectory Serialization temporary directory
-     */
-    static void setSerializationTemporaryDirectory(const QString& serializationTemporaryDirectory);
-
-    /**
      * Get whether serialization was aborted
      * @return Boolean indicating whether serialization was aborted
      */
@@ -169,17 +159,26 @@ public: // Serialization
      */
     static void setSerializationAborted(bool serializationAborted);
 
+    /**
+     * Get global temporary directory path
+     * @return Global temporary directory path in string format
+     */
+    static QString getGlobalTemporayDirectoryPath();
+
+    /** Goes over all sub-directories of temp/ManiVault and removes them if not locked */
+    static void cleanTemporaryDirectory();
+
+    /**
+     * Get temporary dir
+     * @return Directory where application temporary files reside
+     */
+    const QTemporaryDir& getTemporaryDir() const;
+
 public: // Statics
 
     static QMainWindow* getMainWindow();
 
 signals:
-
-    /**
-     * Signals that the core has been assigned successfully to \p core
-     * @param core Pointer to core instance
-     */
-    void coreAssigned(CoreInterface* core);
 
     /**
      * Invoked when the core is about to be initialized (re-broadcasts corresponding \p core signal)
@@ -199,12 +198,9 @@ signals:
      */
     void coreManagersCreated(CoreInterface* core);
 
-    /** Signals that the main window has been fully initialized */
-    void mainWindowInitialized();
-
 protected:
     QString                 _id;                                /** Globally unique identifier of the application instance */
-    CoreInterface*          _core;                              /** Pointer to HDPS core */
+    CoreInterface*          _core;                              /** Pointer to the ManiVault core */
     const util::Version     _version;                           /** Application version */
     IconFonts               _iconFonts;                         /** Icon fonts resource */
     QSettings               _settings;                          /** Settings */
@@ -215,6 +211,8 @@ protected:
     QString                 _startupProjectFilePath;            /** File path of the project to automatically open upon startup (if set) */
     ProjectMetaAction*      _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
     ApplicationStartupTask* _startupTask;                       /** Application startup task */
+    QTemporaryDir           _temporaryDir;                      /** Directory where application temporary files reside */
+    QLockFile               _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
 };
 
 }

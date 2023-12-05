@@ -37,13 +37,15 @@ public: // Global settings actions
     MiscellaneousSettingsAction& getMiscellaneousSettings() override { return _miscellaneousSettingsAction; };
     TasksSettingsAction& getTasksSettingsAction() override { return _tasksSettingsAction; };
     ApplicationSettingsAction& getApplicationSettings() override { return _applicationSettingsAction; };
+    TemporaryFilesSettingsAction& getTemporaryFilesSettingsAction() override { return _temporaryFilesSettingsAction; };
 
 private:
-    gui::TriggerAction          _editSettingsAction;            /** Action for triggering the settings dialog */
-    ParametersSettingsAction    _parametersSettingsAction;      /** Parameters global settings */
-    MiscellaneousSettingsAction _miscellaneousSettingsAction;   /** Miscellaneous global settings */
-    TasksSettingsAction         _tasksSettingsAction;           /** Tasks global settings */
-    ApplicationSettingsAction   _applicationSettingsAction;     /** Application global settings */
+    gui::TriggerAction              _editSettingsAction;            /** Action for triggering the settings dialog */
+    ParametersSettingsAction        _parametersSettingsAction;      /** Parameters global settings */
+    MiscellaneousSettingsAction     _miscellaneousSettingsAction;   /** Miscellaneous global settings */
+    TasksSettingsAction             _tasksSettingsAction;           /** Tasks global settings */
+    ApplicationSettingsAction       _applicationSettingsAction;     /** Application global settings */
+    TemporaryFilesSettingsAction    _temporaryFilesSettingsAction;  /** Temporary files global settings */
 };
 
 }

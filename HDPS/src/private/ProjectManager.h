@@ -101,11 +101,11 @@ public:
     /**
      * Extract \p filePath from compressed ManiVault project in \p maniVaultFilePath
      * @param maniVaultFilePath File path of the compressed ManiVault file
-     * @param temporaryDir Temporary dir where the extracted file resides
+     * @param temporaryDir Temporary directory where the extracted file resides
      * @param filePath Relative file path of the file that needs to be extracted
      * @return File path of the extracted file, empty string if extraction failed
      */
-    QString extractFileFromManiVaultProject(const QString& maniVaultFilePath, mv::util::TemporaryDir& temporaryDir, const QString& filePath) override;
+    QString extractFileFromManiVaultProject(const QString& maniVaultFilePath, const QTemporaryDir& temporaryDir, const QString& filePath) override;
 
     /**
      * Get preview image of the project workspace

@@ -233,7 +233,7 @@ StringAction::LabelWidget::LabelWidget(QWidget* parent, StringAction* stringActi
     setObjectName("Label");
 
     const auto updateToolTip = [this, stringAction]() -> void {
-        setToolTip(stringAction->toolTip());
+        setToolTip(stringAction->getString());
     };
 
     updateToolTip();
@@ -274,7 +274,7 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
     setAcceptDrops(true);
 
     const auto updateToolTip = [this, stringAction]() -> void {
-        setToolTip(stringAction->toolTip());
+        setToolTip(stringAction->getString());
     };
 
     updateToolTip();
@@ -335,7 +335,7 @@ StringAction::TextEditWidget::TextEditWidget(QWidget* parent, StringAction* stri
     setAcceptDrops(true);
     
     const auto updateToolTip = [this, stringAction]() -> void {
-        setToolTip(stringAction->toolTip());
+        setToolTip(stringAction->getString());
     };
 
     updateToolTip();

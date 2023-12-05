@@ -343,11 +343,10 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
 
 void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
 {
-    TemporaryDir temporaryDirectory;
+    QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "ImportWorkspace"));
 
     const auto temporaryDirectoryPath = temporaryDirectory.path();
 
-    Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
     Application::setSerializationAborted(false);
 
     if (projectFilePath.isEmpty()) {
@@ -357,8 +356,8 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*
         fileDialog.setWindowTitle("Import ManiVault Workspace From Project");
         fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
         fileDialog.setFileMode(QFileDialog::ExistingFile);
-        fileDialog.setNameFilters({ "ManiVault project files (*.hdps)" });
-        fileDialog.setDefaultSuffix(".hdps");
+        fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+        fileDialog.setDefaultSuffix(".mv");
         fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
         fileDialog.open();

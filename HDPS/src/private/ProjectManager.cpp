@@ -337,11 +337,10 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
 
-            TemporaryDir temporaryDirectory;
+            QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject"));
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
 
-            Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
             Application::setSerializationAborted(false);
 
             ToggleAction disableReadOnlyAction(this, "Allow edit of published project");
@@ -546,7 +545,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
 
-            TemporaryDir temporaryDirectory;
+            QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "SaveProject"));
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
 
@@ -665,7 +664,6 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             QFileInfo projectJsonFileInfo(temporaryDirectoryPath, "project.json"), projectMetaJsonFileInfo(temporaryDirectoryPath, "meta.json");
 
-            Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
             Application::setSerializationAborted(false);
 
             projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
@@ -741,7 +739,7 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
 
-            TemporaryDir temporaryDirectory;
+            QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "PublishProject"));
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
 
@@ -898,7 +896,7 @@ mv::Project* ProjectManager::getCurrentProject()
     return _project.get();
 }
 
-QString ProjectManager::extractFileFromManiVaultProject(const QString& maniVaultFilePath, TemporaryDir& temporaryDir, const QString& filePath)
+QString ProjectManager::extractFileFromManiVaultProject(const QString& maniVaultFilePath, const QTemporaryDir& temporaryDir, const QString& filePath)
 {
     const auto temporaryDirectoryPath = temporaryDir.path();
 
@@ -932,7 +930,7 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
 {
     try
     {
-        TemporaryDir temporaryDir;
+        QTemporaryDir temporaryDir(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "WorkspacePreview"));
 
         const auto workspacePreviewFilePath = projects().extractFileFromManiVaultProject(projectFilePath, temporaryDir, "workspace.jpg");
 

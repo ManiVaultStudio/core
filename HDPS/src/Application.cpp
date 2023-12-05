@@ -39,13 +39,11 @@ Application::Application(int& argc, char** argv) :
     _logger(),
     _startupProjectFilePath(),
     _startupProjectMetaAction(nullptr),
-    _startupTask(nullptr)
+    _startupTask(nullptr),
+    _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg(Application::getName(), _id.mid(0, 6)))),
+    _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock"))
 {
-    const auto tempDirectory = QDir::cleanPath(QDir::tempPath() + QDir::separator() + "ManiVault" + QDir::separator() + _id);
-
-    QDir dir(tempDirectory);
-
-    dir.mkdir(tempDirectory);
+    _lockFile.lock();
 
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, {
             //":/IconFonts/FontAwesomeBrandsRegular-5.14.otf",
@@ -108,8 +106,6 @@ void Application::setCore(CoreInterface* core)
 
     if (_core == nullptr) {
         _core = core;
-
-        emit coreAssigned(_core);
 
         connect(core, &CoreInterface::aboutToBeInitialized, this, [this]() -> void { emit coreAboutToBeInitialized(_core); });
         connect(core, &CoreInterface::initialized, this, [this]() -> void { emit coreInitialized(_core); });
@@ -175,16 +171,6 @@ Logger& Application::getLogger()
     return current()->_logger;
 }
 
-QString Application::getSerializationTemporaryDirectory()
-{
-    return current()->_serializationTemporaryDirectory;
-}
-
-void Application::setSerializationTemporaryDirectory(const QString& serializationTemporaryDirectory)
-{
-    current()->_serializationTemporaryDirectory = serializationTemporaryDirectory;
-}
-
 bool Application::isSerializationAborted()
 {
     return current()->_serializationAborted;
@@ -217,6 +203,57 @@ ApplicationStartupTask& Application::getStartupTask()
 QString Application::getId() const
 {
     return _id;
+}
+
+QString Application::getGlobalTemporayDirectoryPath()
+{
+    return QDir::cleanPath(QDir::tempPath() + QDir::separator() + Application::getName());
+}
+
+void Application::cleanTemporaryDirectory()
+{
+    qDebug() << "Clean temporary directories for ManiVault application sessions";
+
+    auto temporaryDir = QDir(QDir::tempPath());
+
+    temporaryDir.setFilter(QDir::Dirs);
+    temporaryDir.setNameFilters({ "ManiVault.*" });
+
+    const auto sessions = temporaryDir.entryList();
+
+    qDebug() << "Found" << sessions.count() << "temporary directories for ManiVault application sessions";
+
+    for (const auto& session : sessions) {
+        QLockFile lockFile(QDir::cleanPath(session + QDir::separator() + "app.lock"));
+
+        if (lockFile.tryLock(150)) {
+            try
+            {
+                qDebug() << "Removing" << session;
+
+                QDir sessionDir(session);
+
+                sessionDir.removeRecursively();
+            }
+            catch (std::exception& e)
+            {
+                exceptionMessageBox("Unable to remove the ManiVault application session", e);
+            }
+            catch (...) {
+                exceptionMessageBox("Unable to remove the ManiVault application session");
+            }
+
+            lockFile.unlock();
+        }
+        else {
+            qDebug() << session << "is locked so it cannot be removed at this point. Close the application or restart the OS to remove it.";
+        }
+    }
+}
+
+const QTemporaryDir& Application::getTemporaryDir() const
+{
+    return _temporaryDir;
 }
 
 }

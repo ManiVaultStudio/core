@@ -453,7 +453,6 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Version.h
     src/util/DockWidgetPermission.h
     src/util/NumericalRange.h
-    src/util/TemporaryDir.h
 )
 
 if(APPLE)
@@ -495,7 +494,6 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Version.cpp
     src/util/DockWidgetPermission.cpp
     src/util/NumericalRange.cpp
-    src/util/TemporaryDir.cpp
 )
 
 if(APPLE)
@@ -662,6 +660,7 @@ set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/MiscellaneousSettingsAction.h
     src/TasksSettingsAction.h
     src/ApplicationSettingsAction.h
+    src/TemporaryFilesSettingsAction.h
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_SOURCES
@@ -670,6 +669,7 @@ set(PUBLIC_GLOBAL_SETTINGS_SOURCES
     src/MiscellaneousSettingsAction.cpp
     src/TasksSettingsAction.cpp
     src/ApplicationSettingsAction.cpp
+    src/TemporaryFilesSettingsAction.cpp
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_FILES

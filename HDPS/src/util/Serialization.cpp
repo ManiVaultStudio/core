@@ -108,7 +108,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
             // File name and path of the external binary file in the temporary directory
             const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + ".bin";
-            const auto filePath = QDir::toNativeSeparators(Application::getSerializationTemporaryDirectory() + "/" + fileName);
+            const auto filePath = QDir::toNativeSeparators(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + fileName));
 
             // Save the raw data to binary file
             saveRawDataToBinaryFile(&bytes[offset], blockSize, filePath);
@@ -157,7 +157,7 @@ void populateDataBufferFromVariantMap (const QVariantMap& variantMap, const char
         const auto size     = map["Size"].value<uint64_t>();
 
         if (map.contains("URI")) {
-            loadRawDataFromBinaryFile(&bytes[offset], size, QDir::toNativeSeparators(Application::getSerializationTemporaryDirectory() + "/" + map["URI"].toString()));
+            loadRawDataFromBinaryFile(&bytes[offset], size, QDir::toNativeSeparators(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + map["URI"].toString())));
         }
 
         if (map.contains("Data")) {
