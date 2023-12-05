@@ -32,11 +32,11 @@ public:
 public: // Action getters
 
     gui::StringAction& getApplicationTemporaryDirAction() { return _applicationTemporaryDirAction; }
-    gui::TriggerAction& getCleanManiVaultTemporaryDirAction() { return _cleanManiVaultTemporaryDirAction; }
+    gui::TriggerAction& getRemoveStaleTemporaryDirectoriesAction() { return _removeStaleTemporaryDirectoriesAction; }
 
 private:
-    gui::StringAction   _applicationTemporaryDirAction;     /** String action for the application temporary dir */
-    gui::TriggerAction  _cleanManiVaultTemporaryDirAction;  /** Action which triggers the cleanup of the ManiVault temporary dir */
+    gui::StringAction   _applicationTemporaryDirAction;             /** String action for the application temporary dir */
+    gui::TriggerAction  _removeStaleTemporaryDirectoriesAction;     /** Action which triggers the cleanup of stale temporary directories */
 };
 
 }

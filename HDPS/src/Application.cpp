@@ -216,32 +216,41 @@ void Application::cleanTemporaryDirectory()
 
     qDebug() << "Found" << sessions.count() << "candidate temporary ManiVault directories for removal";
 
+    int numberOfRemovedSessions = 0;
+
     for (const auto& session : sessions) {
         QLockFile lockFile(QDir::cleanPath(QDir::tempPath() + QDir::separator() + session + QDir::separator() + "app.lock"));
 
         if (lockFile.tryLock(150)) {
             try
             {
+                lockFile.unlock();
+
                 qDebug() << "Removing" << session;
 
-                QDir sessionDir(session);
+                const auto sessionDirPath = QDir::cleanPath(QDir::tempPath() + QDir::separator() + session);
 
-                sessionDir.removeRecursively();
+                QDir sessionDir(sessionDirPath);
+
+                if (!sessionDir.removeRecursively())
+                    throw std::runtime_error(QString("Unable to remove %1").arg(sessionDirPath).toStdString());
+
+                ++numberOfRemovedSessions;
             }
             catch (std::exception& e)
             {
-                exceptionMessageBox("Unable to remove the ManiVault application session", e);
+                exceptionMessageBox("Unable to remove the ManiVault application temporary directory", e);
             }
             catch (...) {
-                exceptionMessageBox("Unable to remove the ManiVault application session");
+                exceptionMessageBox("Unable to remove the ManiVault application temporary directory");
             }
-
-            lockFile.unlock();
         }
         else {
-            qDebug() << session << "is locked so it cannot be removed at this point. Close the application or restart the OS to remove it.";
+            qDebug() << session << "is locked so it cannot be removed at this point. Restart the OS to remove it.";
         }
     }
+
+    qDebug() << "Removed" << numberOfRemovedSessions << QString("ManiVault application temporary director%1").arg(numberOfRemovedSessions == 1 ? "y" : "ies");
 }
 
 const QTemporaryDir& Application::getTemporaryDir() const
