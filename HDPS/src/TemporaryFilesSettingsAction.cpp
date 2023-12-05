@@ -12,22 +12,15 @@ namespace mv
 
 TemporaryFilesSettingsAction::TemporaryFilesSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Temporary Files"),
-    _applicationSessionIdAction(this, "Application session ID", Application::current()->getId()),
     _applicationTemporaryDirAction(this, "Application temporary directory", Application::current()->getTemporaryDir().path()),
     _cleanManiVaultTemporaryDirAction(this, "Clean ManiVault temporary directory")
 {
     _applicationTemporaryDirAction.setEnabled(false);
 
-#ifdef _DEBUG
-    _applicationSessionIdAction.setEnabled(false);
-
-    addAction(&_applicationSessionIdAction);
     addAction(&_cleanManiVaultTemporaryDirAction);
+    addAction(&_applicationTemporaryDirAction);
 
     connect(&_cleanManiVaultTemporaryDirAction, &TriggerAction::triggered, this, []() -> void { Application::current()->cleanTemporaryDirectory(); });
-#endif
-
-    addAction(&_applicationTemporaryDirAction);
 }
 
 }

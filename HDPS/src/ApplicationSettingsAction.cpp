@@ -14,12 +14,15 @@ namespace mv
 
 ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Application"),
-    _appearanceOptionAction(nullptr)
+    _applicationSessionIdAction(this, "Application session ID", Application::current()->getId()),
+    _appearanceOptionAction(this, "Appearance", QStringList({ "System", "Dark", "Light" }), "System")
 {
-    setShowLabels(true);
-    
+    _applicationSessionIdAction.setEnabled(false);
+
+    addAction(&_applicationSessionIdAction);
+
     bool themesAvailable = false;
-    
+
 #ifdef Q_OS_MACX
     themesAvailable = macDarkThemeAvailable();
     // Temporary no option is provided, instead we fix for the light theme.
@@ -27,16 +30,14 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     //macSetToLightTheme();
 #endif // Q_OS_MACX
     
-    if( themesAvailable )
+    if (themesAvailable)
     {
-        _appearanceOptionAction = new gui::OptionAction(this, "Appearance", QStringList({"System", "Dark", "Light"}), "System");
-        _appearanceOptionAction->setDefaultWidgetFlags(gui::OptionAction::HorizontalButtons);
-        _appearanceOptionAction->setSettingsPrefix(getSettingsPrefix() + "AppearanceOption");
+        _appearanceOptionAction.setDefaultWidgetFlags(gui::OptionAction::HorizontalButtons);
+        _appearanceOptionAction.setSettingsPrefix(getSettingsPrefix() + "AppearanceOption");
             
-        addAction(_appearanceOptionAction);
+        addAction(&_appearanceOptionAction);
         
         const auto appearanceOptionCurrentIndexChanged = [this](const QString& currentText) -> void {
-            //qDebug() << "Changing Appearance to " << currentText << ".";
             if(currentText == "System")
             {
 #ifdef Q_OS_MACX
@@ -56,7 +57,8 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
 #endif // Q_OS_MACX
             }
         };
-        connect(_appearanceOptionAction, &gui::OptionAction::currentTextChanged, this, appearanceOptionCurrentIndexChanged);
+
+        connect(&_appearanceOptionAction, &gui::OptionAction::currentTextChanged, this, appearanceOptionCurrentIndexChanged);
     }
 }
 

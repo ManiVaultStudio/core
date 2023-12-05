@@ -31,12 +31,10 @@ public:
 
 public: // Action getters
 
-    gui::StringAction& getApplicationSessionIdAction() { return _applicationSessionIdAction; }
     gui::StringAction& getApplicationTemporaryDirAction() { return _applicationTemporaryDirAction; }
     gui::TriggerAction& getCleanManiVaultTemporaryDirAction() { return _cleanManiVaultTemporaryDirAction; }
 
 private:
-    gui::StringAction   _applicationSessionIdAction;        /** String action for the application session ID */
     gui::StringAction   _applicationTemporaryDirAction;     /** String action for the application temporary dir */
     gui::TriggerAction  _cleanManiVaultTemporaryDirAction;  /** Action which triggers the cleanup of the ManiVault temporary dir */
 };

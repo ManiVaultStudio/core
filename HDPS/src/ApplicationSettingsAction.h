@@ -6,6 +6,7 @@
 
 #include "GlobalSettingsGroupAction.h"
 
+#include "actions/StringAction.h"
 #include "actions/OptionAction.h"
 
 namespace mv
@@ -31,10 +32,12 @@ public:
 
 public: // Action getters
 
-    gui::OptionAction* getAppearanceOptionAction() { return _appearanceOptionAction; }
+    gui::StringAction& getApplicationSessionIdAction() { return _applicationSessionIdAction; }
+    gui::OptionAction& getAppearanceOptionAction() { return _appearanceOptionAction; }
 
 private:
-    gui::OptionAction* _appearanceOptionAction;       /** Options for dark, light, or system appearance */
+    gui::StringAction   _applicationSessionIdAction;    /** String action for the application session ID */
+    gui::OptionAction   _appearanceOptionAction;        /** Options action for dark, light, or system appearance */
 };
 
 }

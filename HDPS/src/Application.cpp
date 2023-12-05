@@ -205,15 +205,8 @@ QString Application::getId() const
     return _id;
 }
 
-QString Application::getGlobalTemporayDirectoryPath()
-{
-    return QDir::cleanPath(QDir::tempPath() + QDir::separator() + Application::getName());
-}
-
 void Application::cleanTemporaryDirectory()
 {
-    qDebug() << "Clean temporary directories for ManiVault application sessions";
-
     auto temporaryDir = QDir(QDir::tempPath());
 
     temporaryDir.setFilter(QDir::Dirs);
@@ -221,10 +214,10 @@ void Application::cleanTemporaryDirectory()
 
     const auto sessions = temporaryDir.entryList();
 
-    qDebug() << "Found" << sessions.count() << "temporary directories for ManiVault application sessions";
+    qDebug() << "Found" << sessions.count() << "candidate temporary ManiVault directories for removal";
 
     for (const auto& session : sessions) {
-        QLockFile lockFile(QDir::cleanPath(session + QDir::separator() + "app.lock"));
+        QLockFile lockFile(QDir::cleanPath(QDir::tempPath() + QDir::separator() + session + QDir::separator() + "app.lock"));
 
         if (lockFile.tryLock(150)) {
             try

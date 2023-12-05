@@ -159,12 +159,6 @@ public: // Serialization
      */
     static void setSerializationAborted(bool serializationAborted);
 
-    /**
-     * Get global temporary directory path
-     * @return Global temporary directory path in string format
-     */
-    static QString getGlobalTemporayDirectoryPath();
-
     /** Goes over all sub-directories of temp/ManiVault and removes them if not locked */
     static void cleanTemporaryDirectory();
 
