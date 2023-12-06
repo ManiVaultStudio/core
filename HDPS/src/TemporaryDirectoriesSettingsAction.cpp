@@ -42,8 +42,6 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     _staleTemporaryDirectoriesGroupAction.addAction(&_staleTemporaryDirectoriesAction);
     _staleTemporaryDirectoriesGroupAction.addAction(&_removeStaleTemporaryDirectoriesAction);
 
-    connect(&_removeStaleTemporaryDirectoriesAction, &TriggerAction::triggered, this, []() -> void { Application::current()->removeStaleTemporaryDirectories(); });
-
     const auto updateStaleTemporaryDirectories = [this]() -> void {
         const auto staleTemporaryDirectories = Application::current()->getStaleTemporaryDirectories();
 
@@ -54,6 +52,11 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     };
 
     updateStaleTemporaryDirectories();
+
+    connect(&_removeStaleTemporaryDirectoriesAction, &TriggerAction::triggered, this, [updateStaleTemporaryDirectories]() -> void {
+        Application::current()->removeStaleTemporaryDirectories();
+        updateStaleTemporaryDirectories();
+    });
 
     connect(&_rescanForStaleTemporaryDirectoriesAction, &TriggerAction::triggered, this, updateStaleTemporaryDirectories);
 }

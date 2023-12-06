@@ -219,32 +219,23 @@ void Application::removeStaleTemporaryDirectories()
     int numberOfRemovedSessions = 0;
 
     for (const auto& staleTemporaryDirectory : staleTemporaryDirectories) {
-        QLockFile lockFile(staleTemporaryDirectory);
-
-        if (lockFile.tryLock(150)) {
-            try
-            {
-                lockFile.unlock();
-
-                qDebug() << "Removing" << staleTemporaryDirectory;
-
-                QDir sessionDir(staleTemporaryDirectory);
-
-                if (!sessionDir.removeRecursively())
-                    throw std::runtime_error(QString("Unable to remove %1").arg(staleTemporaryDirectory).toStdString());
-
-                ++numberOfRemovedSessions;
-            }
-            catch (std::exception& e)
-            {
-                exceptionMessageBox("Unable to remove the ManiVault application temporary directory", e);
-            }
-            catch (...) {
-                exceptionMessageBox("Unable to remove the ManiVault application temporary directory");
-            }
+        try
+        {
+            qDebug() << "Removing" << staleTemporaryDirectory;
+        
+            QDir sessionDir(staleTemporaryDirectory);
+        
+            if (!sessionDir.removeRecursively())
+                throw std::runtime_error(QString("Unable to remove %1").arg(staleTemporaryDirectory).toStdString());
+        
+            ++numberOfRemovedSessions;
         }
-        else {
-            qDebug() << staleTemporaryDirectory << "is locked so it cannot be removed at this point. Close the application or restart the OS to remove it.";
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to remove the ManiVault application temporary directory", e);
+        }
+        catch (...) {
+            exceptionMessageBox("Unable to remove the ManiVault application temporary directory");
         }
     }
 
@@ -263,18 +254,27 @@ QStringList Application::getStaleTemporaryDirectories()
     const auto sessions = temporaryDir.entryList();
 
     for (const auto& session : sessions) {
-        QLockFile lockFile(QDir::cleanPath(QDir::tempPath() + QDir::separator() + session + QDir::separator() + "app.lock"));
-
-        const auto sessionSegments      = session.split(".");
-        const auto isCurrentApplication = sessionSegments.count() > 2 && Application::current()->getId().startsWith(sessionSegments[1]);
+        const auto lockInfoFilePath         = QDir::cleanPath(QDir::tempPath() + QDir::separator() + session + QDir::separator() + "app.lock");
+        const auto sessionSegments          = session.split(".");
+        const auto isCurrentApplication     = sessionSegments.count() > 2 && Application::current()->getId().startsWith(sessionSegments[1]);
+        const auto staleTemporaryDirectory  = QDir::cleanPath(QDir::tempPath() + QDir::separator() + session);
 
         if (isCurrentApplication)
             continue;
 
-        if (lockFile.tryLock(150)) {
-            staleTemporaryDirectories << QDir::cleanPath(QDir::tempPath() + QDir::separator() + session);
-            lockFile.unlock();
+        if (QFileInfo(lockInfoFilePath).exists()) {
+            QLockFile lockFile(lockInfoFilePath);
+
+            if (lockFile.tryLock(150)) {
+                staleTemporaryDirectories << staleTemporaryDirectory;
+
+                lockFile.unlock();
+            }
         }
+        else {
+            staleTemporaryDirectories << staleTemporaryDirectory;
+        }
+        
     }
 
     return staleTemporaryDirectories;
