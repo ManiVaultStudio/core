@@ -4,8 +4,13 @@ cmake_minimum_required(VERSION 3.17)
 # Project: ManiVault-core
 # -----------------------------------------------------------------------------
 set(MV_CORE "mv-core")
-project(${MV_CORE})
-set(version 0.9.0)
+
+set(MV_VERSION_MAJOR 0)
+set(MV_VERSION_MINOR 9)
+set(MV_VERSION_PATCH 0)
+set(MV_VERSION "${MV_VERSION_MAJOR}.${MV_VERSION_MINOR}.${MV_VERSION_PATCH}")
+
+project(${MV_CORE} VERSION ${MV_VERSION})
 
 # These three targets defined in this CMakeLists.txt
 set(MV_APPLICATION_NAME "ManiVault Studio")  # Name of the executable
@@ -18,6 +23,7 @@ if(MSVC)
     set(LINK_TYPE STATIC)
 endif(MSVC)
 
+message(STATUS "ManiVault version ${MV_VERSION}")
 message(STATUS "ManiVault Install dir: ${MV_INSTALL_DIR}")
 
 # -----------------------------------------------------------------------------
@@ -37,6 +43,9 @@ include(CMakePackageConfigHelpers)
 
 # Test hardware avx capabilities
 include(CMakeCheckSetAVX)
+
+# create a file that defines MV_VERSION_MAJOR, etc
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManiVaultVersion.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h" @ONLY)
 
 # -----------------------------------------------------------------------------
 # Apple settings
@@ -167,6 +176,8 @@ set_target_properties(${MV_PUBLIC_LIB} PROPERTIES PROJECT_LABEL "MV_Public")
 # Set the library output name different to the target name
 set_target_properties(${MV_PUBLIC_LIB} PROPERTIES OUTPUT_NAME "MV_Public")
 
+set_target_properties(${MV_PUBLIC_LIB} PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
+
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_17)
@@ -214,6 +225,9 @@ add_executable(${MV_EXE} MACOSX_BUNDLE WIN32
 )
 
 set_target_properties(${MV_EXE} PROPERTIES OUTPUT_NAME ${MV_APPLICATION_NAME})
+
+set_target_properties(${MV_EXE} PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
+
 target_compile_features(${MV_EXE} PRIVATE cxx_std_17)
 
 # find libraries relative to the executable in the macOS .app tree
