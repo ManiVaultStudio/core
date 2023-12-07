@@ -99,6 +99,7 @@ endif(MSVC)
 # Dependencies
 # -----------------------------------------------------------------------------
 
+# Qt
 find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
@@ -112,7 +113,7 @@ message(STATUS "Using Qt Advanced Docking System version ${ADS_VERSION}")
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external/advanced_docking)
 
-# File compression LIBRARY
+# File compression: ZLib
 if (WIN32)
     if(NOT DEFINED ZLIB_ROOT)
         message(FATAL_ERROR "You need to define ZLIB_ROOT, pointing to a zlib installation")
@@ -128,14 +129,22 @@ elseif (APPLE)
 
 else()
     find_package(ZLIB REQUIRED)
-    message(STATUS "Using zlib at ${ZLIB_INCLUDE_DIRS}")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.26")
+        message(STATUS "Using zlib version ${ZLIB_VERSION}")
+    else()
+        message(STATUS "Using zlib version ${ZLIB_VERSION_STRING}")
+    endif()
 endif()
 
+# File compression: QuaZip
 set(QUAZIP_QT_MAJOR_VERSION 6)
 set(QUAZIP_BZIP2 OFF CACHE BOOL "Enables BZIP2 compression")  # we use ZLIB, not BZIP
+set(CMAKE_MESSAGE_LOG_LEVEL "WARNING")                        # prevent some status messages from quazip
 add_subdirectory(external/quazip)
-
-
+set(CMAKE_MESSAGE_LOG_LEVEL "STATUS")
+get_target_property(QuaZip_VERSION QuaZip VERSION)
+message(STATUS "Using QuaZip version ${QuaZip_VERSION}")
+ 
 # -----------------------------------------------------------------------------
 # Source files
 # -----------------------------------------------------------------------------
