@@ -176,8 +176,6 @@ set_target_properties(${MV_PUBLIC_LIB} PROPERTIES PROJECT_LABEL "MV_Public")
 # Set the library output name different to the target name
 set_target_properties(${MV_PUBLIC_LIB} PROPERTIES OUTPUT_NAME "MV_Public")
 
-set_target_properties(${MV_PUBLIC_LIB} PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
-
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_17)
@@ -225,8 +223,6 @@ add_executable(${MV_EXE} MACOSX_BUNDLE WIN32
 )
 
 set_target_properties(${MV_EXE} PROPERTIES OUTPUT_NAME ${MV_APPLICATION_NAME})
-
-set_target_properties(${MV_EXE} PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
 
 target_compile_features(${MV_EXE} PRIVATE cxx_std_17)
 
@@ -280,12 +276,14 @@ if(APPLE)
         #	RESULT_VARIABLE retval
             COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    \"${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/libqt6advanceddocking.${ADS_VERSION}.dylib\" 
+                    \$<TARGET_FILE:qt6advanceddocking>\" 
+                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                    \$<TARGET_FILE:QuaZip>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                     \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
-                    
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                     \"$<TARGET_FILE:${MV_PRIVATE_LIB}>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
@@ -453,14 +451,21 @@ if(NOT APPLE)
             --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
             --verbose
     )
-endif()
 
-# Install ManiVault licences
-add_custom_command(TARGET ${MV_EXE} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault licences"
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/LICENSE
-)
+    # Install dependency runtime libraries
+    # on windows, the DLLs should be placed in the same directory as the executable
+    add_custom_command(TARGET ${MV_EXE} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qt6advanceddocking> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+    )
+
+    # Create symlink with slightly different name required on some linux distributions
+    if(UNIX)
+        include(CMakeQuaZipSymlink)
+        create_quazip_symlink()
+    endif()
+endif()
 
 # Install examples
 add_custom_command(TARGET ${MV_EXE}  POST_BUILD
@@ -470,23 +475,16 @@ add_custom_command(TARGET ${MV_EXE}  POST_BUILD
             ${MV_INSTALL_DIR}/$<CONFIGURATION>/examples
 )
 
-# Install dependency runtime libraries
-# on windows, the DLLs should be placed in the same directory as the executable
+# Install ManiVault licenses
 add_custom_command(TARGET ${MV_EXE} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qt6advanceddocking> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault licenses"
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/LICENSE
 )
 
-if(UNIX AND NOT APPLE)
-    # Creat symlink with slightly different name required on some linux distributions
-    include(CMakeQuaZipSymlink)
-    create_quazip_symlink()
-endif()
-
-# Install dependency licences
+# Install dependency licenses
 add_custom_command(TARGET ${MV_EXE} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licences"
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses"
     COMMAND ${CMAKE_COMMAND} 
         --install ${CMAKE_CURRENT_BINARY_DIR}/external/advanced_docking
         --config $<CONFIGURATION> 
