@@ -33,6 +33,33 @@ class Application final : public QApplication
 {
     Q_OBJECT
 
+public:
+
+    /** Class for managing ManiVault application temporary directories */
+    class TemporaryDirs final : public QObject {
+    public:
+
+        /**
+         * Construct with pointer to /p parent object
+         * @param parent Pointer to parent object
+         */
+        TemporaryDirs(QObject* parent);
+        
+        /**
+         * Get stale ManiVault temporary directories in the OS temporary directory
+         * Stale in this context means that the <os_temp_dir>/ManiVault.<app_session_id>.<temp_dir_id>/app.lock is not locked
+         * and the directory can be safely removed because it is not in use by another (ManiVault) application.
+         * @return List of stale ManiVault application temporary directories
+         */
+        QStringList getStale();
+
+        /** Removes all directories in the OS temporary directory (ManiVault.<app_session_id>.<temp_dir_id>) and which are not locked by the OS */
+        void removeStale();
+
+    private:
+        ModalTask   _task;      /** Task for reporting removal progress */
+    };
+
 public: // Construction
 
     /**
@@ -166,15 +193,10 @@ public: // Serialization
     const QTemporaryDir& getTemporaryDir() const;
 
     /**
-     * Get string list of stale ManiVault temporary directories in the OS temporary directory
-     * Stale in this context means that the <os_temp_dir>/ManiVault.<app_session_id>.<temp_dir_id>/app.lock is not locked
-     * and the directory can be safely removed (because it is not in use by the ManiVault application).
-     * @return List of stale temporary ManiVault directories
+     * Get ManiVault application temporary directories
+     * @return Reference to temporary directories
      */
-    static QStringList getStaleTemporaryDirectories();
-
-    /** Removes all directories in the OS temporary director which staart with ManiVault.* and which are not locked by the OS */
-    static void removeStaleTemporaryDirectories();
+    TemporaryDirs& getTemporaryDirectories();
 
 public: // Statics
 
@@ -201,20 +223,21 @@ signals:
     void coreManagersCreated(CoreInterface* core);
 
 protected:
-    QString                 _id;                                /** Globally unique identifier of the application instance */
-    CoreInterface*          _core;                              /** Pointer to the ManiVault core */
-    const util::Version     _version;                           /** Application version */
-    IconFonts               _iconFonts;                         /** Icon fonts resource */
-    QSettings               _settings;                          /** Settings */
-    QString                 _serializationTemporaryDirectory;   /** Temporary directory for serialization */
-    bool                    _serializationAborted;              /** Whether serialization was aborted */
-    util::Logger            _logger;                            /** Logger instance */
-    gui::TriggerAction*     _exitAction;                        /** Action for exiting the application */
-    QString                 _startupProjectFilePath;            /** File path of the project to automatically open upon startup (if set) */
-    ProjectMetaAction*      _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
-    ApplicationStartupTask* _startupTask;                       /** Application startup task */
-    QTemporaryDir           _temporaryDir;                      /** Directory where application temporary files reside */
-    QLockFile               _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
+    QString                     _id;                                /** Globally unique identifier of the application instance */
+    CoreInterface*              _core;                              /** Pointer to the ManiVault core */
+    const util::Version         _version;                           /** Application version */
+    IconFonts                   _iconFonts;                         /** Icon fonts resource */
+    QSettings                   _settings;                          /** Settings */
+    QString                     _serializationTemporaryDirectory;   /** Temporary directory for serialization */
+    bool                        _serializationAborted;              /** Whether serialization was aborted */
+    util::Logger                _logger;                            /** Logger instance */
+    gui::TriggerAction*         _exitAction;                        /** Action for exiting the application */
+    QString                     _startupProjectFilePath;            /** File path of the project to automatically open upon startup (if set) */
+    ProjectMetaAction*          _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
+    ApplicationStartupTask*     _startupTask;                       /** Application startup task */
+    QTemporaryDir               _temporaryDir;                      /** Directory where application temporary files reside */
+    TemporaryDirs               _temporaryDirs;                     /** ManiVault application temporary directories manager */
+    QLockFile                   _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
 };
 
 }

@@ -41,6 +41,7 @@ Application::Application(int& argc, char** argv) :
     _startupProjectMetaAction(nullptr),
     _startupTask(nullptr),
     _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg(Application::getName(), _id.mid(0, 6)))),
+    _temporaryDirs(this),
     _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock"))
 {
     _lockFile.lock();
@@ -210,39 +211,19 @@ const QTemporaryDir& Application::getTemporaryDir() const
     return _temporaryDir;
 }
 
-void Application::removeStaleTemporaryDirectories()
+Application::TemporaryDirs& Application::getTemporaryDirectories()
 {
-    const auto staleTemporaryDirectories = Application::getStaleTemporaryDirectories();
-
-    qDebug() << "Found" << staleTemporaryDirectories.count() << QString("stale temporary ManiVault director%1 eligible for removal").arg(staleTemporaryDirectories.count() == 1 ? "y" : "ies");
-
-    int numberOfRemovedSessions = 0;
-
-    for (const auto& staleTemporaryDirectory : staleTemporaryDirectories) {
-        try
-        {
-            qDebug() << "Removing" << staleTemporaryDirectory;
-        
-            QDir sessionDir(staleTemporaryDirectory);
-        
-            if (!sessionDir.removeRecursively())
-                throw std::runtime_error(QString("Unable to remove %1").arg(staleTemporaryDirectory).toStdString());
-        
-            ++numberOfRemovedSessions;
-        }
-        catch (std::exception& e)
-        {
-            exceptionMessageBox("Unable to remove the ManiVault application temporary directory", e);
-        }
-        catch (...) {
-            exceptionMessageBox("Unable to remove the ManiVault application temporary directory");
-        }
-    }
-
-    qDebug() << "Removed" << numberOfRemovedSessions << QString("ManiVault application temporary director%1").arg(numberOfRemovedSessions == 1 ? "y" : "ies");
+    return _temporaryDirs;
 }
 
-QStringList Application::getStaleTemporaryDirectories()
+Application::TemporaryDirs::TemporaryDirs(QObject* parent) :
+    QObject(parent),
+    _task(this, "Remove stale ManiVault temporary directories")
+{
+    _task.setGuiScopes({ Task::GuiScope::Modal, Task::GuiScope::Foreground });
+}
+
+QStringList Application::TemporaryDirs::getStale()
 {
     QStringList staleTemporaryDirectories;
 
@@ -274,10 +255,50 @@ QStringList Application::getStaleTemporaryDirectories()
         else {
             staleTemporaryDirectories << staleTemporaryDirectory;
         }
-        
     }
 
     return staleTemporaryDirectories;
+}
+
+void Application::TemporaryDirs::removeStale()
+{
+    const auto staleTemporaryDirectories = getStale();
+
+    qDebug() << "Found" << staleTemporaryDirectories.count() << QString("stale temporary ManiVault director%1 eligible for removal").arg(staleTemporaryDirectories.count() == 1 ? "y" : "ies");
+
+    int numberOfRemovedSessions = 0;
+
+    _task.setSubtasks(staleTemporaryDirectories);
+    _task.setRunning();
+
+    for (const auto& staleTemporaryDirectory : staleTemporaryDirectories) {
+        try
+        {
+            _task.setSubtaskStarted(staleTemporaryDirectory, QString("Removing %1").arg(staleTemporaryDirectory));
+            {
+                qDebug() << "Removing" << staleTemporaryDirectory;
+
+                QDir sessionDir(staleTemporaryDirectory);
+
+                if (!sessionDir.removeRecursively())
+                    throw std::runtime_error(QString("Unable to remove %1").arg(staleTemporaryDirectory).toStdString());
+
+                ++numberOfRemovedSessions;
+            }
+            _task.setSubtaskFinished(staleTemporaryDirectory, QString("Removed %1").arg(staleTemporaryDirectory));
+        }
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to remove the ManiVault application temporary directory", e);
+        }
+        catch (...) {
+            exceptionMessageBox("Unable to remove the ManiVault application temporary directory");
+        }
+    }
+
+    qDebug() << "Removed" << numberOfRemovedSessions << QString("ManiVault application temporary director%1").arg(numberOfRemovedSessions == 1 ? "y" : "ies");
+
+    _task.setFinished();
 }
 
 }

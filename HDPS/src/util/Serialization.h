@@ -11,9 +11,7 @@
 
 #define DEFAULT_MAX_BLOCK_SIZE std::numeric_limits<std::int32_t>::max() / 2
 
-namespace mv {
-
-namespace util {
+namespace mv::util {
 
 /**
  * Save raw data to binary file on disk
@@ -54,5 +52,4 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, const char*
  */
 void variantMapMustContain(const QVariantMap& variantMap, const QString& key);
 
-}
 }

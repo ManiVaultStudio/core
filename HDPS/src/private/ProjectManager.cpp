@@ -339,6 +339,10 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject"));
 
+            temporaryDirectory.setAutoRemove(false);
+
+            setTemporaryDirPath(TemporaryDirType::Open, temporaryDirectory.path());
+
             const auto temporaryDirectoryPath = temporaryDirectory.path();
 
             Application::setSerializationAborted(false);
@@ -490,6 +494,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (_project->isStartupProject())
                 ModalTask::getGlobalHandler()->setEnabled(true);
 
+            unsetTemporaryDirPath(TemporaryDirType::Open);
+
             qDebug().noquote() << filePath << "loaded successfully";
         }
         emit projectOpened(*(_project.get()));
@@ -548,6 +554,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "SaveProject"));
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
+
+            setTemporaryDirPath(TemporaryDirType::Save, temporaryDirectory.path());
 
             if (filePath.isEmpty()) {
 
@@ -668,6 +676,10 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
             
+            int* bogusPointer = nullptr;
+
+            *bogusPointer = 118;
+
             _project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
             
             QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
@@ -692,6 +704,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             _recentProjectsAction.addRecentFilePath(filePath);
 
             _project->setFilePath(filePath);
+
+            unsetTemporaryDirPath(TemporaryDirType::Save);
 
             qDebug().noquote() << filePath << "saved successfully";
         }
@@ -740,6 +754,8 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                 throw std::runtime_error("Project file path may not be a directory");
 
             QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "PublishProject"));
+
+            setTemporaryDirPath(TemporaryDirType::Publish, temporaryDirectory.path());
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
 
@@ -865,6 +881,8 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                 saveProject(filePath, passwordAction.getString());
             }
             workspaceLockingAction.setLocked(cacheWorkspaceLocked);
+
+            unsetTemporaryDirPath(TemporaryDirType::Publish);
         }
         emit projectPublished(*(_project.get()));
         
