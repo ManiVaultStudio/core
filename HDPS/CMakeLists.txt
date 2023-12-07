@@ -104,8 +104,11 @@ find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidge
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
-# Qt Advanced docking system, set version manually
-set(ADS_VERSION 4.0.1)
+message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
+
+# Qt Advanced docking system
+set(ADS_VERSION 4.2.1)
+message(STATUS "Using Qt Advanced Docking System version ${ADS_VERSION}")
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external/advanced_docking)
 
@@ -182,14 +185,14 @@ target_link_libraries(${MV_PRIVATE_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_PRIVATE_LIB} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_PRIVATE_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_PRIVATE_LIB} PRIVATE Qt6::OpenGLWidgets)
-target_link_libraries(${MV_PRIVATE_LIB} PRIVATE qtadvanceddocking)
+target_link_libraries(${MV_PRIVATE_LIB} PRIVATE qt6advanceddocking)
 target_link_libraries(${MV_PRIVATE_LIB} PRIVATE QuaZip)
 target_link_libraries(${MV_PRIVATE_LIB} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use avx if enabled and available
 check_and_set_AVX(${MV_PRIVATE_LIB} ${MV_USE_AVX})
 
-add_dependencies(${MV_PRIVATE_LIB} ${MV_PUBLIC_LIB} QuaZip qtadvanceddocking)
+add_dependencies(${MV_PRIVATE_LIB} ${MV_PUBLIC_LIB} QuaZip qt6advanceddocking)
 
 # -----------------------------------------------------------------------------
 # Target MV_EXE
@@ -215,7 +218,7 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
-target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking)
+target_link_libraries(${MV_EXE} PRIVATE qt6advanceddocking)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
@@ -224,7 +227,7 @@ target_link_libraries(${MV_EXE} PRIVATE ${MV_PRIVATE_LIB})
 # Use avx if enabled and available
 check_and_set_AVX(${MV_EXE} ${MV_USE_AVX})
 
-add_dependencies(${MV_EXE} ${MV_PUBLIC_LIB} ${MV_PRIVATE_LIB} QuaZip qtadvanceddocking)
+add_dependencies(${MV_EXE} ${MV_PUBLIC_LIB} ${MV_PRIVATE_LIB} QuaZip qt6advanceddocking)
 
 if(MSVC)
     set_target_properties(${MV_EXE} PROPERTIES
@@ -254,7 +257,7 @@ if(APPLE)
         #	RESULT_VARIABLE retval
             COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    \"${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.${ADS_VERSION}.dylib\" 
+                    \"${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/libqt6advanceddocking.${ADS_VERSION}.dylib\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                     \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" 
@@ -448,7 +451,7 @@ add_custom_command(TARGET ${MV_EXE}  POST_BUILD
 # on windows, the DLLs should be placed in the same directory as the executable
 add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qt6advanceddocking> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
     COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
 )
 
