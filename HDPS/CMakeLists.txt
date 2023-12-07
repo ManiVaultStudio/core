@@ -276,7 +276,7 @@ if(APPLE)
         #	RESULT_VARIABLE retval
             COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    \"${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/libqt6advanceddocking.${ADS_VERSION}.dylib\" 
+                    \$<TARGET_FILE:qt6advanceddocking>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                     \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" 
