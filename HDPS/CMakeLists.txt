@@ -176,8 +176,6 @@ set_target_properties(${MV_PUBLIC_LIB} PROPERTIES PROJECT_LABEL "MV_Public")
 # Set the library output name different to the target name
 set_target_properties(${MV_PUBLIC_LIB} PROPERTIES OUTPUT_NAME "MV_Public")
 
-set_target_properties(${MV_PUBLIC_LIB} PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
-
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_17)
@@ -225,8 +223,6 @@ add_executable(${MV_EXE} MACOSX_BUNDLE WIN32
 )
 
 set_target_properties(${MV_EXE} PROPERTIES OUTPUT_NAME ${MV_APPLICATION_NAME})
-
-set_target_properties(${MV_EXE} PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
 
 target_compile_features(${MV_EXE} PRIVATE cxx_std_17)
 
