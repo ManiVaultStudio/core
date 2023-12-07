@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.17)
 # -----------------------------------------------------------------------------
 set(MV_CORE "mv-core")
 project(${MV_CORE})
-set(version 1.0.0)
+set(version 0.9.0)
 
 # These three targets defined in this CMakeLists.txt
 set(MV_APPLICATION_NAME "ManiVault Studio")  # Name of the executable
