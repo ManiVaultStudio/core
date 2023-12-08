@@ -68,7 +68,7 @@ public:
         }
 
     private:
-        Task    _task;     /** Task for reporting progress */
+        Task  _task;     /** Task for reporting clean-up progress in the background */
     };
 
 public: // Construction
@@ -207,7 +207,7 @@ public: // Serialization
      * Get ManiVault application temporary directories
      * @return Reference to temporary directories
      */
-    TemporaryDirs& getTemporaryDirectories();
+    TemporaryDirs& getTemporaryDirs();
 
 public: // Statics
 

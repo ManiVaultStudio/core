@@ -61,7 +61,9 @@ Application::Application(int& argc, char** argv) :
     connect(Application::current(), &Application::coreManagersCreated, this, [this](CoreInterface* core) {
         _startupTask = new ApplicationStartupTask(this, "Load ManiVault");
 
-        _temporaryDirs.getTask().addToTaskManager();
+        auto& temporaryDirsTask = _temporaryDirs.getTask();
+
+        temporaryDirsTask.addToTaskManager();
     });
 
     connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) {
@@ -213,7 +215,7 @@ const QTemporaryDir& Application::getTemporaryDir() const
     return _temporaryDir;
 }
 
-Application::TemporaryDirs& Application::getTemporaryDirectories()
+Application::TemporaryDirs& Application::getTemporaryDirs()
 {
     return _temporaryDirs;
 }
@@ -222,7 +224,7 @@ Application::TemporaryDirs::TemporaryDirs(QObject* parent) :
     QObject(parent),
     _task(this, "Remove stale ManiVault temporary directories")
 {
-    _task.setGuiScopes({ Task::GuiScope::Modal, Task::GuiScope::Foreground });
+    _task.setGuiScopes({ Task::GuiScope::Background });
 }
 
 QStringList Application::TemporaryDirs::getStale()
@@ -270,37 +272,39 @@ void Application::TemporaryDirs::removeStale(const QStringList& stale /*= QStrin
 
     int numberOfRemovedSessions = 0;
 
-    QStringList selectedStaleTemporaryDirectories;
+    QStringList selectedStaleTemporaryDirs;
 
     if (!stale.isEmpty()) {
         for (const auto& staleTemporaryDirectory : staleTemporaryDirectories)
             if (stale.contains(staleTemporaryDirectory))
-                selectedStaleTemporaryDirectories << staleTemporaryDirectory;
+                selectedStaleTemporaryDirs << staleTemporaryDirectory;
     }
     else {
-        selectedStaleTemporaryDirectories = staleTemporaryDirectories;
+        selectedStaleTemporaryDirs = staleTemporaryDirectories;
     }
 
-    _task.setSubtasks(selectedStaleTemporaryDirectories);
+    _task.setSubtasks(selectedStaleTemporaryDirs);
     _task.setRunning();
 
     processEvents();
 
-    for (const auto& selectedStaleTemporaryDirectory : selectedStaleTemporaryDirectories) {
+    for (const auto& selectedStaleTemporaryDir : selectedStaleTemporaryDirs) {
         try
         {
-            _task.setSubtaskStarted(selectedStaleTemporaryDirectory, QString("Removing %1").arg(selectedStaleTemporaryDirectory));
-            {
-                qDebug() << "Removing" << selectedStaleTemporaryDirectory;
+            const auto dirName = selectedStaleTemporaryDir.split("/").last();
 
-                QDir sessionDir(selectedStaleTemporaryDirectory);
+            _task.setSubtaskStarted(selectedStaleTemporaryDir, QString("Removing %1").arg(dirName));
+            {
+                qDebug() << "Removing" << selectedStaleTemporaryDir;
+
+                QDir sessionDir(selectedStaleTemporaryDir);
 
                 if (!sessionDir.removeRecursively())
-                    throw std::runtime_error(QString("Unable to remove %1").arg(selectedStaleTemporaryDirectory).toStdString());
+                    throw std::runtime_error(QString("Unable to remove %1").arg(selectedStaleTemporaryDir).toStdString());
 
                 ++numberOfRemovedSessions;
             }
-            _task.setSubtaskFinished(selectedStaleTemporaryDirectory, QString("Removed %1").arg(selectedStaleTemporaryDirectory));
+            _task.setSubtaskFinished(selectedStaleTemporaryDir, QString("Removed %1").arg(dirName));
 
             processEvents();
         }

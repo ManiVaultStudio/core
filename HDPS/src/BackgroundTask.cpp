@@ -26,4 +26,9 @@ void BackgroundTask::createHandler(QObject* parent)
     BackgroundTask::backgroundTaskHandler = new BackgroundTaskHandler(parent);
 }
 
+BackgroundTask& BackgroundTask::getOverallBackgroundTask()
+{
+    return BackgroundTask::backgroundTaskHandler->getOverallBackgroundTask();
+}
+
 }

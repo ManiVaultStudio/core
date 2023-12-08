@@ -8,6 +8,7 @@
 
 #include <Application.h>
 #include <ProjectMetaAction.h>
+#include <BackgroundTask.h>
 
 #include <QSurfaceFormat>
 #include <QStyleFactory>
@@ -161,6 +162,13 @@ int main(int argc, char *argv[])
     }
     
     splashScreenAction.getOpenAction().trigger();
+
+    if (settings().getTemporaryDirectoriesSettingsAction().getRemoveStaleTemporaryDirsAtStartupAction().isChecked()) {
+        application.getTemporaryDirs().getTask().setParentTask(&application.getStartupTask());
+        application.getTemporaryDirs().removeStale();
+        
+        settings().getTemporaryDirectoriesSettingsAction().getScanForStaleTemporaryDirectoriesAction().trigger();
+    }
 
     core.initialize();
 

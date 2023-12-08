@@ -11,9 +11,10 @@ namespace mv
 {
 
 TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* parent) :
-    GlobalSettingsGroupAction(parent, "Temporary Files"),
+    GlobalSettingsGroupAction(parent, "Temporary"),
     _applicationTemporaryDirAction(this, "Application temporary directory", Application::current()->getTemporaryDir().path()),
-    _rescanForStaleTemporaryDirectoriesAction(this, "Refresh"),
+    _removeStaleTemporaryDirsAtStartupAction(this, "Remove stale temporary directories at startup"),
+    _scanForStaleTemporaryDirectoriesAction(this, "Refresh"),
     _selectStaleTemporaryDirectoriesAction(this, "Stale temporary directories"),
     _removeStaleTemporaryDirectoriesAction(this, "Remove all stale"),
     _staleTemporaryDirectoriesGroupAction(this, "Stale temporary directories")
@@ -21,11 +22,15 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     _applicationTemporaryDirAction.setEnabled(false);
 
     addAction(&_applicationTemporaryDirAction);
+    addAction(&_removeStaleTemporaryDirsAtStartupAction);
     addAction(&_staleTemporaryDirectoriesGroupAction);
 
-    _rescanForStaleTemporaryDirectoriesAction.setToolTip("Rescan for stale temporary directories");
-    _rescanForStaleTemporaryDirectoriesAction.setDefaultWidgetFlags(TriggerAction::Icon);
-    _rescanForStaleTemporaryDirectoriesAction.setIconByName("redo");
+    _removeStaleTemporaryDirsAtStartupAction.setSettingsPrefix(getSettingsPrefix() + "RAS");
+    _removeStaleTemporaryDirsAtStartupAction.setToolTip("Remove stale temporary directories when ManiVault starts up");
+
+    _scanForStaleTemporaryDirectoriesAction.setToolTip("Rescan for stale temporary directories");
+    _scanForStaleTemporaryDirectoriesAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    _scanForStaleTemporaryDirectoriesAction.setIconByName("redo");
 
     _selectStaleTemporaryDirectoriesAction.setToolTip("Summary of stale temporary directories");
     _selectStaleTemporaryDirectoriesAction.setIconByName("list");
@@ -38,12 +43,12 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
 
     _staleTemporaryDirectoriesGroupAction.setShowLabels(false);
 
-    _staleTemporaryDirectoriesGroupAction.addAction(&_rescanForStaleTemporaryDirectoriesAction);
+    _staleTemporaryDirectoriesGroupAction.addAction(&_scanForStaleTemporaryDirectoriesAction);
     _staleTemporaryDirectoriesGroupAction.addAction(&_selectStaleTemporaryDirectoriesAction);
     _staleTemporaryDirectoriesGroupAction.addAction(&_removeStaleTemporaryDirectoriesAction);
 
     const auto updateRemoveStaleTemporaryDirectoriesAction = [this]() -> void {
-        if (Application::current()->getTemporaryDirectories().getStale().isEmpty())
+        if (Application::current()->getTemporaryDirs().getStale().isEmpty())
             _removeStaleTemporaryDirectoriesAction.setText("No stale temporary directories");
         else {
             if (_selectStaleTemporaryDirectoriesAction.getSelectedOptions().isEmpty())
@@ -56,13 +61,13 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     };
 
     connect(&_removeStaleTemporaryDirectoriesAction, &TriggerAction::triggered, this, [this]() -> void {
-        Application::current()->getTemporaryDirectories().removeStale(_selectStaleTemporaryDirectoriesAction.getSelectedOptions());
+        Application::current()->getTemporaryDirs().removeStale(_selectStaleTemporaryDirectoriesAction.getSelectedOptions());
 
-        _rescanForStaleTemporaryDirectoriesAction.trigger();
+        _scanForStaleTemporaryDirectoriesAction.trigger();
     });
 
-    connect(&_rescanForStaleTemporaryDirectoriesAction, &TriggerAction::triggered, this, [this, updateRemoveStaleTemporaryDirectoriesAction]() -> void {
-        const auto staleTemporaryDirectories = Application::current()->getTemporaryDirectories().getStale();
+    connect(&_scanForStaleTemporaryDirectoriesAction, &TriggerAction::triggered, this, [this, updateRemoveStaleTemporaryDirectoriesAction]() -> void {
+        const auto staleTemporaryDirectories = Application::current()->getTemporaryDirs().getStale();
 
         _selectStaleTemporaryDirectoriesAction.setOptions(staleTemporaryDirectories);
         _selectStaleTemporaryDirectoriesAction.setSelectedOptions(staleTemporaryDirectories);
@@ -79,7 +84,7 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
         updateRemoveStaleTemporaryDirectoriesAction();
     });
 
-    _rescanForStaleTemporaryDirectoriesAction.trigger();
+    _scanForStaleTemporaryDirectoriesAction.trigger();
 }
 
 }
