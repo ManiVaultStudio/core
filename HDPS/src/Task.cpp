@@ -1471,10 +1471,14 @@ void Task::addToTaskManager()
 
 void Task::privateAddToTaskManager()
 {
-    if (core() != nullptr)
+    if (core() != nullptr) {
         tasks().addTask(this);
-    else
+    }
+    else {
+#ifdef _DEBUG
         qDebug() << "Cannot add task" << getName() << "to the task manager because the core has not been initialized yet.";
+#endif
+    }
 }
 
 }

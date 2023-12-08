@@ -270,29 +270,37 @@ void Application::TemporaryDirs::removeStale(const QStringList& stale /*= QStrin
 
     int numberOfRemovedSessions = 0;
 
-    _task.setSubtasks(staleTemporaryDirectories);
+    QStringList selectedStaleTemporaryDirectories;
+
+    if (!stale.isEmpty()) {
+        for (const auto& staleTemporaryDirectory : staleTemporaryDirectories)
+            if (stale.contains(staleTemporaryDirectory))
+                selectedStaleTemporaryDirectories << staleTemporaryDirectory;
+    }
+    else {
+        selectedStaleTemporaryDirectories = staleTemporaryDirectories;
+    }
+
+    _task.setSubtasks(selectedStaleTemporaryDirectories);
     _task.setRunning();
 
     processEvents();
 
-    for (const auto& staleTemporaryDirectory : staleTemporaryDirectories) {
-        if (!stale.isEmpty() && !stale.contains(staleTemporaryDirectory))
-            continue;
-
+    for (const auto& selectedStaleTemporaryDirectory : selectedStaleTemporaryDirectories) {
         try
         {
-            _task.setSubtaskStarted(staleTemporaryDirectory, QString("Removing %1").arg(staleTemporaryDirectory));
+            _task.setSubtaskStarted(selectedStaleTemporaryDirectory, QString("Removing %1").arg(selectedStaleTemporaryDirectory));
             {
-                qDebug() << "Removing" << staleTemporaryDirectory;
+                qDebug() << "Removing" << selectedStaleTemporaryDirectory;
 
-                QDir sessionDir(staleTemporaryDirectory);
+                QDir sessionDir(selectedStaleTemporaryDirectory);
 
                 if (!sessionDir.removeRecursively())
-                    throw std::runtime_error(QString("Unable to remove %1").arg(staleTemporaryDirectory).toStdString());
+                    throw std::runtime_error(QString("Unable to remove %1").arg(selectedStaleTemporaryDirectory).toStdString());
 
                 ++numberOfRemovedSessions;
             }
-            _task.setSubtaskFinished(staleTemporaryDirectory, QString("Removed %1").arg(staleTemporaryDirectory));
+            _task.setSubtaskFinished(selectedStaleTemporaryDirectory, QString("Removed %1").arg(selectedStaleTemporaryDirectory));
 
             processEvents();
         }
