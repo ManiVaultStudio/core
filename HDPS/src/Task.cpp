@@ -66,10 +66,7 @@ Task::Task(QObject* parent, const QString& name, const GuiScopes& guiScopes /*= 
     _progressText(),
     _progressTextFormatter()
 {
-    if (core() != nullptr)
-        tasks().addTask(this);
-    else
-        qDebug() << "Cannot add" << name << "to the manager because the core has not been initialized yet.";
+    privateAddToTaskManager();
     
     for (auto& timer : _timers)
         timer.setSingleShot(true);
@@ -1461,6 +1458,23 @@ void Task::privateEmitProgressTextChanged()
     }
 
     //QCoreApplication::processEvents();
+}
+
+void Task::addToTaskManager()
+{
+#ifdef _DEBUG
+    qDebug().noquote() << QString("Manually adding %1 to the task manager (only do this if automatic addition fails)").arg(getName());
+#endif
+
+    privateAddToTaskManager();
+}
+
+void Task::privateAddToTaskManager()
+{
+    if (core() != nullptr)
+        tasks().addTask(this);
+    else
+        qDebug() << "Cannot add task" << getName() << "to the task manager because the core has not been initialized yet.";
 }
 
 }

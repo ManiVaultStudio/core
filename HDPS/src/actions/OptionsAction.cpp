@@ -469,6 +469,19 @@ OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
     updateReadOnly();
 }
 
+QWidget* OptionsAction::FileAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+{
+    auto widget = new WidgetActionWidget(parent, this, widgetFlags);
+    auto layout = new QHBoxLayout();
+
+    if (!widget->isPopup())
+        layout->setContentsMargins(0, 0, 0, 0);
+
+    layout->addWidget(new Widget(parent, this));
+
+    return widget;
+}
+
 OptionsAction::FileAction::Widget::Widget(QWidget* parent, FileAction* fileAction) :
     WidgetActionWidget(parent, fileAction)
 {

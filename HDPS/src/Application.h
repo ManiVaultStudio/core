@@ -47,17 +47,28 @@ public:
         
         /**
          * Get stale ManiVault temporary directories in the OS temporary directory
-         * Stale in this context means that the <os_temp_dir>/ManiVault.<app_session_id>.<temp_dir_id>/app.lock is not locked
+         * Stale in this context means that the <os_temp_dir>/ManiVault.<app_session_id>.<temp_dir_id>/app.lock is not locked or missing
          * and the directory can be safely removed because it is not in use by another (ManiVault) application.
          * @return List of stale ManiVault application temporary directories
          */
         QStringList getStale();
 
-        /** Removes all directories in the OS temporary directory (ManiVault.<app_session_id>.<temp_dir_id>) and which are not locked by the OS */
-        void removeStale();
+        /**
+         * Removes stale directories in the OS temporary directory (ManiVault.<app_session_id>.<temp_dir_id>) and which are not locked by the OS
+         * @stale Stale directories to remove, removes all stale when empty
+         */
+        void removeStale(const QStringList& stale = QStringList());
+
+        /**
+         * Get progress task
+         * @return Reference to progress task
+         */
+        Task& getTask() {
+            return _task;
+        }
 
     private:
-        ModalTask   _task;      /** Task for reporting removal progress */
+        Task    _task;     /** Task for reporting progress */
     };
 
 public: // Construction

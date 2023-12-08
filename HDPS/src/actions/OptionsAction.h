@@ -171,9 +171,7 @@ protected:
          * @param parent Pointer to parent widget
          * @param widgetFlags Widget flags for the configuration of the widget (type)
          */
-        QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-            return new Widget(parent, this);
-        };
+        QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;;
 
     public: // Action getters
 

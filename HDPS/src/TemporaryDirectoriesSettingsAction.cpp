@@ -14,7 +14,7 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     GlobalSettingsGroupAction(parent, "Temporary Files"),
     _applicationTemporaryDirAction(this, "Application temporary directory", Application::current()->getTemporaryDir().path()),
     _rescanForStaleTemporaryDirectoriesAction(this, "Refresh"),
-    _staleTemporaryDirectoriesAction(this, "Stale temporary directories"),
+    _selectStaleTemporaryDirectoriesAction(this, "Stale temporary directories"),
     _removeStaleTemporaryDirectoriesAction(this, "Remove all stale"),
     _staleTemporaryDirectoriesGroupAction(this, "Stale temporary directories")
 {
@@ -27,11 +27,11 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     _rescanForStaleTemporaryDirectoriesAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _rescanForStaleTemporaryDirectoriesAction.setIconByName("redo");
 
-    _staleTemporaryDirectoriesAction.setToolTip("Summary of stale temporary directories");
-    _staleTemporaryDirectoriesAction.setIconByName("list");
-    _staleTemporaryDirectoriesAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _staleTemporaryDirectoriesAction.setDefaultWidgetFlags(StringsAction::ListView);
-    _staleTemporaryDirectoriesAction.setPopupSizeHint(QSize(640, 100));
+    _selectStaleTemporaryDirectoriesAction.setToolTip("Summary of stale temporary directories");
+    _selectStaleTemporaryDirectoriesAction.setIconByName("list");
+    _selectStaleTemporaryDirectoriesAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _selectStaleTemporaryDirectoriesAction.setDefaultWidgetFlag(OptionsAction::Selection);
+    _selectStaleTemporaryDirectoriesAction.setPopupSizeHint(QSize(640, 100));
 
     _removeStaleTemporaryDirectoriesAction.setToolTip("Remove all stale temporary directories");
     _removeStaleTemporaryDirectoriesAction.setStretch(1);
@@ -39,27 +39,31 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     _staleTemporaryDirectoriesGroupAction.setShowLabels(false);
 
     _staleTemporaryDirectoriesGroupAction.addAction(&_rescanForStaleTemporaryDirectoriesAction);
-    _staleTemporaryDirectoriesGroupAction.addAction(&_staleTemporaryDirectoriesAction);
+    _staleTemporaryDirectoriesGroupAction.addAction(&_selectStaleTemporaryDirectoriesAction);
     _staleTemporaryDirectoriesGroupAction.addAction(&_removeStaleTemporaryDirectoriesAction);
 
     const auto updateStaleTemporaryDirectories = [this]() -> void {
         const auto staleTemporaryDirectories = Application::current()->getTemporaryDirectories().getStale();
 
-        _staleTemporaryDirectoriesAction.setStrings(staleTemporaryDirectories);
+        if (staleTemporaryDirectories != _selectStaleTemporaryDirectoriesAction.getOptions()) {
+            _selectStaleTemporaryDirectoriesAction.setOptions(staleTemporaryDirectories);
+            _selectStaleTemporaryDirectoriesAction.setSelectedOptions(staleTemporaryDirectories);
+        }
 
-        _staleTemporaryDirectoriesAction.setEnabled(!staleTemporaryDirectories.isEmpty());
-        _removeStaleTemporaryDirectoriesAction.setEnabled(!staleTemporaryDirectories.isEmpty());
+        _selectStaleTemporaryDirectoriesAction.setEnabled(!staleTemporaryDirectories.isEmpty());
+        _removeStaleTemporaryDirectoriesAction.setEnabled(!_selectStaleTemporaryDirectoriesAction.getSelectedOptions().isEmpty());
     };
 
     updateStaleTemporaryDirectories();
 
-    connect(&_removeStaleTemporaryDirectoriesAction, &TriggerAction::triggered, this, [updateStaleTemporaryDirectories]() -> void {
-        Application::current()->getTemporaryDirectories().removeStale();
+    connect(&_removeStaleTemporaryDirectoriesAction, &TriggerAction::triggered, this, [this, updateStaleTemporaryDirectories]() -> void {
+        Application::current()->getTemporaryDirectories().removeStale(_selectStaleTemporaryDirectoriesAction.getSelectedOptions());
 
         updateStaleTemporaryDirectories();
     });
 
     connect(&_rescanForStaleTemporaryDirectoriesAction, &TriggerAction::triggered, this, updateStaleTemporaryDirectories);
+    connect(&_selectStaleTemporaryDirectoriesAction, &OptionsAction::selectedOptionsChanged, this, updateStaleTemporaryDirectories);
 }
 
 }

@@ -60,6 +60,8 @@ Application::Application(int& argc, char** argv) :
 
     connect(Application::current(), &Application::coreManagersCreated, this, [this](CoreInterface* core) {
         _startupTask = new ApplicationStartupTask(this, "Load ManiVault");
+
+        _temporaryDirs.getTask().addToTaskManager();
     });
 
     connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) {
@@ -260,7 +262,7 @@ QStringList Application::TemporaryDirs::getStale()
     return staleTemporaryDirectories;
 }
 
-void Application::TemporaryDirs::removeStale()
+void Application::TemporaryDirs::removeStale(const QStringList& stale /*= QStringList()*/)
 {
     const auto staleTemporaryDirectories = getStale();
 
@@ -271,7 +273,12 @@ void Application::TemporaryDirs::removeStale()
     _task.setSubtasks(staleTemporaryDirectories);
     _task.setRunning();
 
+    processEvents();
+
     for (const auto& staleTemporaryDirectory : staleTemporaryDirectories) {
+        if (!stale.isEmpty() && !stale.contains(staleTemporaryDirectory))
+            continue;
+
         try
         {
             _task.setSubtaskStarted(staleTemporaryDirectory, QString("Removing %1").arg(staleTemporaryDirectory));
@@ -286,6 +293,8 @@ void Application::TemporaryDirs::removeStale()
                 ++numberOfRemovedSessions;
             }
             _task.setSubtaskFinished(staleTemporaryDirectory, QString("Removed %1").arg(staleTemporaryDirectory));
+
+            processEvents();
         }
         catch (std::exception& e)
         {
