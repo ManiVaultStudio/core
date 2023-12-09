@@ -7,6 +7,7 @@
 #include "BackgroundTask.h"
 #include "ForegroundTask.h"
 #include "AbstractManager.h"
+#include "ManiVaultVersion.h"
 
 #include "util/IconFonts.h"
 #include "util/FontAwesome.h"
@@ -31,7 +32,7 @@ Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
     _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _core(nullptr),
-    _version({ 0, 9 }),
+    _version({ MV_VERSION_MAJOR, MV_VERSION_MINOR }),
     _iconFonts(),
     _settings(),
     _serializationTemporaryDirectory(),

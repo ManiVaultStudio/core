@@ -4,8 +4,13 @@ cmake_minimum_required(VERSION 3.17)
 # Project: ManiVault-core
 # -----------------------------------------------------------------------------
 set(MV_CORE "mv-core")
-project(${MV_CORE})
-set(version 1.0.0)
+
+set(MV_VERSION_MAJOR 0)
+set(MV_VERSION_MINOR 9)
+set(MV_VERSION_PATCH 0)
+set(MV_VERSION "${MV_VERSION_MAJOR}.${MV_VERSION_MINOR}.${MV_VERSION_PATCH}")
+
+project(${MV_CORE} VERSION ${MV_VERSION})
 
 # These three targets defined in this CMakeLists.txt
 set(MV_APPLICATION_NAME "ManiVault Studio")  # Name of the executable
@@ -18,6 +23,7 @@ if(MSVC)
     set(LINK_TYPE STATIC)
 endif(MSVC)
 
+message(STATUS "ManiVault version ${MV_VERSION}")
 message(STATUS "ManiVault Install dir: ${MV_INSTALL_DIR}")
 
 # -----------------------------------------------------------------------------
@@ -37,6 +43,9 @@ include(CMakePackageConfigHelpers)
 
 # Test hardware avx capabilities
 include(CMakeCheckSetAVX)
+
+# create a file that defines MV_VERSION_MAJOR, etc
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManiVaultVersion.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h" @ONLY)
 
 # -----------------------------------------------------------------------------
 # Apple settings
@@ -99,17 +108,21 @@ endif(MSVC)
 # Dependencies
 # -----------------------------------------------------------------------------
 
+# Qt
 find_package(Qt6 6.3 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
-# Qt Advanced docking system, set version manually
-set(ADS_VERSION 4.0.1)
+message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
+
+# Qt Advanced docking system
+set(ADS_VERSION 4.2.1)
+message(STATUS "Using Qt Advanced Docking System version ${ADS_VERSION}")
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external/advanced_docking)
 
-# File compression LIBRARY
+# File compression: ZLib
 if (WIN32)
     if(NOT DEFINED ZLIB_ROOT)
         message(FATAL_ERROR "You need to define ZLIB_ROOT, pointing to a zlib installation")
@@ -125,14 +138,22 @@ elseif (APPLE)
 
 else()
     find_package(ZLIB REQUIRED)
-    message(STATUS "Using zlib at ${ZLIB_INCLUDE_DIRS}")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.26")
+        message(STATUS "Using zlib version ${ZLIB_VERSION}")
+    else()
+        message(STATUS "Using zlib version ${ZLIB_VERSION_STRING}")
+    endif()
 endif()
 
+# File compression: QuaZip
 set(QUAZIP_QT_MAJOR_VERSION 6)
 set(QUAZIP_BZIP2 OFF CACHE BOOL "Enables BZIP2 compression")  # we use ZLIB, not BZIP
+set(CMAKE_MESSAGE_LOG_LEVEL "WARNING")                        # prevent some status messages from quazip
 add_subdirectory(external/quazip)
-
-
+set(CMAKE_MESSAGE_LOG_LEVEL "STATUS")
+get_target_property(QuaZip_VERSION QuaZip VERSION)
+message(STATUS "Using QuaZip version ${QuaZip_VERSION}")
+ 
 # -----------------------------------------------------------------------------
 # Source files
 # -----------------------------------------------------------------------------
@@ -182,14 +203,14 @@ target_link_libraries(${MV_PRIVATE_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_PRIVATE_LIB} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_PRIVATE_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_PRIVATE_LIB} PRIVATE Qt6::OpenGLWidgets)
-target_link_libraries(${MV_PRIVATE_LIB} PRIVATE qtadvanceddocking)
+target_link_libraries(${MV_PRIVATE_LIB} PRIVATE qt6advanceddocking)
 target_link_libraries(${MV_PRIVATE_LIB} PRIVATE QuaZip)
 target_link_libraries(${MV_PRIVATE_LIB} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use avx if enabled and available
 check_and_set_AVX(${MV_PRIVATE_LIB} ${MV_USE_AVX})
 
-add_dependencies(${MV_PRIVATE_LIB} ${MV_PUBLIC_LIB} QuaZip qtadvanceddocking)
+add_dependencies(${MV_PRIVATE_LIB} ${MV_PUBLIC_LIB} QuaZip qt6advanceddocking)
 
 # -----------------------------------------------------------------------------
 # Target MV_EXE
@@ -202,6 +223,7 @@ add_executable(${MV_EXE} MACOSX_BUNDLE WIN32
 )
 
 set_target_properties(${MV_EXE} PROPERTIES OUTPUT_NAME ${MV_APPLICATION_NAME})
+
 target_compile_features(${MV_EXE} PRIVATE cxx_std_17)
 
 # find libraries relative to the executable in the macOS .app tree
@@ -215,7 +237,7 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
-target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking)
+target_link_libraries(${MV_EXE} PRIVATE qt6advanceddocking)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
@@ -224,7 +246,7 @@ target_link_libraries(${MV_EXE} PRIVATE ${MV_PRIVATE_LIB})
 # Use avx if enabled and available
 check_and_set_AVX(${MV_EXE} ${MV_USE_AVX})
 
-add_dependencies(${MV_EXE} ${MV_PUBLIC_LIB} ${MV_PRIVATE_LIB} QuaZip qtadvanceddocking)
+add_dependencies(${MV_EXE} ${MV_PUBLIC_LIB} ${MV_PRIVATE_LIB} QuaZip qt6advanceddocking)
 
 if(MSVC)
     set_target_properties(${MV_EXE} PROPERTIES
@@ -254,12 +276,14 @@ if(APPLE)
         #	RESULT_VARIABLE retval
             COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    \"${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.${ADS_VERSION}.dylib\" 
+                    \$<TARGET_FILE:qt6advanceddocking>\" 
+                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                    \$<TARGET_FILE:QuaZip>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                     \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
-                    
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                     \"$<TARGET_FILE:${MV_PRIVATE_LIB}>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
@@ -427,14 +451,21 @@ if(NOT APPLE)
             --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
             --verbose
     )
-endif()
 
-# Install ManiVault licences
-add_custom_command(TARGET ${MV_EXE} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault licences"
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/LICENSE
-)
+    # Install dependency runtime libraries
+    # on windows, the DLLs should be placed in the same directory as the executable
+    add_custom_command(TARGET ${MV_EXE} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qt6advanceddocking> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+    )
+
+    # Create symlink with slightly different name required on some linux distributions
+    if(UNIX)
+        include(CMakeQuaZipSymlink)
+        create_quazip_symlink()
+    endif()
+endif()
 
 # Install examples
 add_custom_command(TARGET ${MV_EXE}  POST_BUILD
@@ -444,23 +475,16 @@ add_custom_command(TARGET ${MV_EXE}  POST_BUILD
             ${MV_INSTALL_DIR}/$<CONFIGURATION>/examples
 )
 
-# Install dependency runtime libraries
-# on windows, the DLLs should be placed in the same directory as the executable
+# Install ManiVault licenses
 add_custom_command(TARGET ${MV_EXE} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:QuaZip> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault licenses"
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/LICENSE
 )
 
-if(UNIX AND NOT APPLE)
-    # Creat symlink with slightly different name required on some linux distributions
-    include(CMakeQuaZipSymlink)
-    create_quazip_symlink()
-endif()
-
-# Install dependency licences
+# Install dependency licenses
 add_custom_command(TARGET ${MV_EXE} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licences"
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses"
     COMMAND ${CMAKE_COMMAND} 
         --install ${CMAKE_CURRENT_BINARY_DIR}/external/advanced_docking
         --config $<CONFIGURATION> 
