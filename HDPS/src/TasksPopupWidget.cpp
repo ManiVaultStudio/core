@@ -30,8 +30,11 @@ TasksPopupWidget::TasksPopupWidget(gui::TasksStatusBarAction& tasksStatusBarActi
     _minimumDurationTimer()
 {
     setObjectName("TasksPopupWidget");
+    
     setWindowFlag(Qt::FramelessWindowHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
+    setWindowFlag(Qt::SubWindow);
+
     setStyleSheet(QString("QWidget#TasksPopupWidget { border: 1px solid %1; }").arg(palette().color(QPalette::Normal, QPalette::Mid).name(QColor::HexRgb)));
 
     _minimumDurationTimer.setSingleShot(true);
@@ -91,6 +94,7 @@ bool TasksPopupWidget::eventFilter(QObject* target, QEvent* event)
 
     switch (event->type())
     {
+        case QEvent::Show:
         case QEvent::Move:
         {
             if (targetWidget == _anchorWidget || targetWidget == Application::getMainWindow())
@@ -152,7 +156,12 @@ void TasksPopupWidget::synchronizeWithAnchorWidget()
     if (_anchorWidget == nullptr)
         return;
 
-    move(_anchorWidget->mapToGlobal(QPoint(_anchorWidget->width(), 0)) - QPoint(width(), height()));
+    const auto offset = QPoint(width(), height());
+
+    if (_anchorWidget->isVisible())
+        move(_anchorWidget->mapToGlobal(QPoint(_anchorWidget->width(), 0)) - offset);
+    else
+        move(Application::getMainWindow()->geometry().bottomRight() - offset - QPoint(5, 5));
 }
 
 QSize TasksPopupWidget::sizeHint() const
