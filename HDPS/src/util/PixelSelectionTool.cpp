@@ -163,7 +163,7 @@ void PixelSelectionTool::setChanged()
 
 void PixelSelectionTool::update()
 {
-    //paint();
+    paint();
 }
 
 void PixelSelectionTool::setAreaPixmap(const QPixmap& areaPixmap)
@@ -233,8 +233,8 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
             _shapePixmap    = QPixmap(resizeEvent->size());
             _areaPixmap     = QPixmap(resizeEvent->size());
 
-            //_shapePixmap.fill(Qt::transparent);
-            //_areaPixmap.fill(Qt::transparent);
+            _shapePixmap.fill(Qt::transparent);
+            _areaPixmap.fill(Qt::transparent);
 
             shouldPaint = true;
 
