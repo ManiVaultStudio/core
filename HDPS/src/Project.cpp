@@ -9,8 +9,6 @@
 
 #include "util/Serialization.h"
 
-#include <QTemporaryDir>
-
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -187,9 +185,7 @@ ProjectMetaAction& Project::getProjectMetaAction()
 
 QSharedPointer<ProjectMetaAction> Project::getProjectMetaActionFromProjectFilePath(const QString& projectFilePath)
 {
-    QTemporaryDir temporaryDir;
-
-    const auto projectMetaJsonFilePath = projects().extractFileFromManiVaultProject(projectFilePath, temporaryDir, "meta.json");
+    const auto projectMetaJsonFilePath = projects().extractFileFromManiVaultProject(projectFilePath, Application::current()->getTemporaryDir(), "meta.json");
 
     if (projectMetaJsonFilePath.isEmpty())
         return {};

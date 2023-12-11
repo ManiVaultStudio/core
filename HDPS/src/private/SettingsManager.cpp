@@ -10,6 +10,7 @@
 #include <util/Exception.h>
 
 #include <QStandardPaths>
+#include <QMainWindow>
 #include <QOperatingSystemVersion>
 
 using namespace mv::gui;
@@ -28,7 +29,8 @@ SettingsManager::SettingsManager() :
     _parametersSettingsAction(this),
     _miscellaneousSettingsAction(this),
     _tasksSettingsAction(this),
-    _applicationSettingsAction(this)
+    _applicationSettingsAction(this),
+    _temporaryDirectoriesSettingsAction(this)
 {
     _editSettingsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
@@ -76,9 +78,11 @@ void SettingsManager::reset()
 
 void SettingsManager::edit()
 {
-    auto* dialog = new SettingsManagerDialog();
-    connect(dialog, &SettingsManagerDialog::finished, dialog, &SettingsManagerDialog::deleteLater);
-    dialog->open();
+    auto* settingsManagerDialog = new SettingsManagerDialog(Application::getMainWindow());
+
+    connect(settingsManagerDialog, &SettingsManagerDialog::finished, settingsManagerDialog, &SettingsManagerDialog::deleteLater);
+    
+    settingsManagerDialog->open();
 }
 
 }

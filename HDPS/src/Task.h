@@ -403,7 +403,7 @@ public: // Status
      */
     virtual void kill(bool recursive = true) final;
 
-public:
+public: // Handler
 
     /**
      * Get task handler
@@ -701,6 +701,22 @@ private:
     void privateEmitProgressChanged();
     void privateEmitProgressDescriptionChanged();
     void privateEmitProgressTextChanged();
+
+public: // Advanced (only use methods if consequences are understood)
+
+    /**
+     * Adds this task to the task manager
+     * Under normal circumstances, tasks are automatically added to the task manager during construction.
+     * In some cases, the task manager is not yet present then and therefor this method allows to
+     * manually add this task to the task manager at a later point in time.
+     * Only use this in edge-cases!
+     */
+    void addToTaskManager();
+
+private: // Task manager
+
+    /** Add this task to the task manager */
+    void privateAddToTaskManager();
 
 signals:
 

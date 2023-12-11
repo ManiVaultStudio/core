@@ -40,6 +40,28 @@ public:
         PublishingProject       /** Publishing a project */
     };
 
+    /** Temporary directory in which temporary files are saved during: */
+    enum class TemporaryDirType {
+        Open,       /** Opening of a project */
+        Save,       /** Saving of a project */
+        Publish     /** Publishing of a project */
+    };
+
+    /**
+     * Get temporary dir type name
+     * @param temporaryDirType Temporary directory type
+     * @return Temporary directory type name for \p temporaryDirType
+     */
+    static QString getTemporaryDirTypeName(const TemporaryDirType& temporaryDirType) {
+        static QMap<TemporaryDirType, QString> temporaryDirTypeNames{
+            { TemporaryDirType::Open, "Open" },
+            { TemporaryDirType::Save, "Save" },
+            { TemporaryDirType::Publish, "Publish" }
+        };
+        
+        return temporaryDirTypeNames[temporaryDirType];
+    };
+
     /** Set state for the duration of the enveloping scope, reverts to idle when the object gets out of scope */
     class ScopedState {
     public:
@@ -85,7 +107,8 @@ public:
     AbstractProjectManager(QObject* parent = nullptr) :
         AbstractManager(parent, "Project"),
         _state(State::Idle),
-        _projectSerializationTask(this, "Project serialization")
+        _projectSerializationTask(this, "Project serialization"),
+        _temporaryDirPaths()
     {
     }
 
@@ -153,6 +176,46 @@ public:
      */
     virtual Project* getCurrentProject() = 0;
 
+public: // Temporary directories
+
+    /**
+     * Get path to the temporary directory of \p temporaryDirType
+     * Throws an exception if not found and returns the path to the application temporary directory as a fall-back
+     * @param temporaryDirType Type of temporary directory, see AbstractProjectManager#TemporaryDirType
+     * @return Path of the temporary directory
+     */
+    const QString getTemporaryDirPath(const TemporaryDirType& temporaryDirType) const {
+        if (_temporaryDirPaths.contains(temporaryDirType)) {
+            return _temporaryDirPaths[temporaryDirType];
+        }
+        else {
+            throw std::runtime_error(QString("Temporary directory path for project %1 does not exist").arg(getTemporaryDirTypeName(temporaryDirType).toLower()).toStdString());
+
+            return Application::current()->getTemporaryDir().path();
+        }
+    }
+
+protected: // Temporary directories
+
+    /**
+     * Set path to the temporary directory of \p temporaryDirType to \p temporaryDirPath
+     * @param temporaryDirType Type of temporary directory, see AbstractProjectManager#TemporaryDirType
+     * @param temporaryDirPath Path of the temporary directory
+     */
+    void setTemporaryDirPath(const TemporaryDirType& temporaryDirType, const QString& temporaryDirPath) {
+        _temporaryDirPaths[temporaryDirType] = temporaryDirPath;
+    }
+
+    /**
+     * Unset path to the temporary directory of \p temporaryDirType
+     * @param temporaryDirType Type of temporary directory, see AbstractProjectManager#TemporaryDirType
+     */
+    void unsetTemporaryDirPath(const TemporaryDirType& temporaryDirType) {
+        _temporaryDirPaths.remove(temporaryDirType);
+    }
+
+public:
+
     /**
      * Extract \p filePath from compressed ManiVault project in \p maniVaultFilePath
      * @param maniVaultFilePath File path of the compressed ManiVault file
@@ -160,7 +223,7 @@ public:
      * @param filePath Relative file path of the file that needs to be extracted
      * @return File path of the extracted file, empty string if extraction failed
      */
-    virtual QString extractFileFromManiVaultProject(const QString& maniVaultFilePath, QTemporaryDir& temporaryDir, const QString& filePath) = 0;
+    virtual QString extractFileFromManiVaultProject(const QString& maniVaultFilePath, const QTemporaryDir& temporaryDir, const QString& filePath) = 0;
 
     /**
      * Get preview image of the project workspace
@@ -340,8 +403,9 @@ signals:
     void stateChanged(const State& state);
 
 private:
-    State                       _state;                         /** Determines the state of the project manager */
-    ProjectSerializationTask    _projectSerializationTask;      /** Task for project serialization */
+    State                               _state;                         /** Determines the state of the project manager */
+    ProjectSerializationTask            _projectSerializationTask;      /** Task for project serialization */
+    QMap<TemporaryDirType, QString>     _temporaryDirPaths;                 /** Temporary directories for file open/save etc. */
 };
 
 }

@@ -10,20 +10,19 @@
 #include "Archiver.h"
 #include "WorkspaceSettingsDialog.h"
 
-#include <Application.h>
-#include <CoreInterface.h>
+#include "Application.h"
+#include "CoreInterface.h"
 
-#include <actions/StringsAction.h>
+#include "actions/StringsAction.h"
 
-#include <util/Serialization.h>
-#include <util/Icon.h>
+#include "util/Serialization.h"
+#include "util/Icon.h"
 
 #include <QMainWindow>
 #include <QToolButton>
 #include <QPainter>
 #include <QFileDialog>
 #include <QStandardPaths>
-#include <QTemporaryDir>
 #include <QBuffer>
 #include <QOpenGLWidget>
 #include <QEventLoop>
@@ -344,11 +343,10 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
 
 void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
 {
-    QTemporaryDir temporaryDirectory;
+    QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "ImportWorkspace"));
 
     const auto temporaryDirectoryPath = temporaryDirectory.path();
 
-    Application::setSerializationTemporaryDirectory(temporaryDirectoryPath);
     Application::setSerializationAborted(false);
 
     if (projectFilePath.isEmpty()) {
@@ -358,8 +356,8 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*
         fileDialog.setWindowTitle("Import ManiVault Workspace From Project");
         fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
         fileDialog.setFileMode(QFileDialog::ExistingFile);
-        fileDialog.setNameFilters({ "ManiVault project files (*.hdps)" });
-        fileDialog.setDefaultSuffix(".hdps");
+        fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+        fileDialog.setDefaultSuffix(".mv");
         fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
         fileDialog.open();

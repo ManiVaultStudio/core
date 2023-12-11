@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "Serialization.h"
+#include "CoreInterface.h"
 #include "Application.h"
 
 #include <QUuid>
@@ -11,9 +12,7 @@
 
 #include <math.h>
 
-namespace mv {
-
-namespace util {
+namespace mv::util {
 
 void saveRawDataToBinaryFile(const char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath)
 {
@@ -108,7 +107,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
             // File name and path of the external binary file in the temporary directory
             const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + ".bin";
-            const auto filePath = QDir::toNativeSeparators(Application::getSerializationTemporaryDirectory() + "/" + fileName);
+            const auto filePath = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save) + QDir::separator() + fileName);
 
             // Save the raw data to binary file
             saveRawDataToBinaryFile(&bytes[offset], blockSize, filePath);
@@ -136,7 +135,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
     return rawData;
 }
 
-void populateDataBufferFromVariantMap (const QVariantMap& variantMap, const char* bytes)
+void populateDataBufferFromVariantMap(const QVariantMap& variantMap, const char* bytes)
 {
     variantMapMustContain(variantMap, "BlockSize");
     variantMapMustContain(variantMap, "Blocks");
@@ -156,9 +155,8 @@ void populateDataBufferFromVariantMap (const QVariantMap& variantMap, const char
         const auto offset   = map["Offset"].value<uint64_t>();
         const auto size     = map["Size"].value<uint64_t>();
 
-        if (map.contains("URI")) {
-            loadRawDataFromBinaryFile(&bytes[offset], size, QDir::toNativeSeparators(Application::getSerializationTemporaryDirectory() + "/" + map["URI"].toString()));
-        }
+        if (map.contains("URI"))
+            loadRawDataFromBinaryFile(&bytes[offset], size, QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Open) + QDir::separator() + map["URI"].toString()));
 
         if (map.contains("Data")) {
             const auto data         = map["Data"].toString();
@@ -176,5 +174,4 @@ void variantMapMustContain(const QVariantMap& variantMap, const QString& key)
         throw std::runtime_error(QString("%1 not found in map: %2").arg(key, variantMap.keys().join(", ")).toLatin1());
 }
 
-}
 }

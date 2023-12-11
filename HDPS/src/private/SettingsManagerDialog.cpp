@@ -21,8 +21,10 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     _groupsAction(this, "Groups")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
-    setModal(true);
+    setWindowModality(Qt::ApplicationModal);
+    setWindowFlag(Qt::WindowStaysOnTopHint);
     setWindowTitle("Settings");
+    setMinimumWidth(800);
 
     auto layout = new QVBoxLayout();
 
@@ -33,7 +35,12 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     _groupsAction.addGroupAction(&mv::settings().getParametersSettings());
     _groupsAction.addGroupAction(&mv::settings().getMiscellaneousSettings());
     _groupsAction.addGroupAction(&mv::settings().getTasksSettingsAction());
+
+#ifdef Q_OS_MACX
     _groupsAction.addGroupAction(&mv::settings().getApplicationSettings());
+#endif
+
+    _groupsAction.addGroupAction(&mv::settings().getTemporaryDirectoriesSettingsAction());
 }
 
 QSize SettingsManagerDialog::sizeHint() const

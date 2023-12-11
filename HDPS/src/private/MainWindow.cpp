@@ -142,8 +142,6 @@ void MainWindow::showEvent(QShowEvent* showEvent)
             projects().openProject(Application::current()->getStartupProjectFilePath());
 
         projectChanged();
-
-        emit Application::current()->mainWindowInitialized();
     }
 }
 

@@ -20,6 +20,8 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QMainWindow>
+#include <QUuid>
+#include <QDir>
 
 using namespace mv::gui;
 using namespace mv::util;
@@ -28,6 +30,7 @@ namespace mv {
 
 Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
+    _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _core(nullptr),
     _version({ MV_VERSION_MAJOR, MV_VERSION_MINOR }),
     _iconFonts(),
@@ -37,8 +40,13 @@ Application::Application(int& argc, char** argv) :
     _logger(),
     _startupProjectFilePath(),
     _startupProjectMetaAction(nullptr),
-    _startupTask(nullptr)
+    _startupTask(nullptr),
+    _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg(Application::getName(), _id.mid(0, 6)))),
+    _temporaryDirs(this),
+    _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock"))
 {
+    _lockFile.lock();
+
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14, {
             //":/IconFonts/FontAwesomeBrandsRegular-5.14.otf",
             //":/IconFonts/FontAwesomeRegular-5.14.otf",
@@ -53,6 +61,10 @@ Application::Application(int& argc, char** argv) :
 
     connect(Application::current(), &Application::coreManagersCreated, this, [this](CoreInterface* core) {
         _startupTask = new ApplicationStartupTask(this, "Load ManiVault");
+
+        auto& temporaryDirsTask = _temporaryDirs.getTask();
+
+        temporaryDirsTask.addToTaskManager();
     });
 
     connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) {
@@ -100,8 +112,6 @@ void Application::setCore(CoreInterface* core)
 
     if (_core == nullptr) {
         _core = core;
-
-        emit coreAssigned(_core);
 
         connect(core, &CoreInterface::aboutToBeInitialized, this, [this]() -> void { emit coreAboutToBeInitialized(_core); });
         connect(core, &CoreInterface::initialized, this, [this]() -> void { emit coreInitialized(_core); });
@@ -167,16 +177,6 @@ Logger& Application::getLogger()
     return current()->_logger;
 }
 
-QString Application::getSerializationTemporaryDirectory()
-{
-    return current()->_serializationTemporaryDirectory;
-}
-
-void Application::setSerializationTemporaryDirectory(const QString& serializationTemporaryDirectory)
-{
-    current()->_serializationTemporaryDirectory = serializationTemporaryDirectory;
-}
-
 bool Application::isSerializationAborted()
 {
     return current()->_serializationAborted;
@@ -204,6 +204,123 @@ QMainWindow* Application::getMainWindow()
 ApplicationStartupTask& Application::getStartupTask()
 {
     return *_startupTask;
+}
+
+QString Application::getId() const
+{
+    return _id;
+}
+
+const QTemporaryDir& Application::getTemporaryDir() const
+{
+    return _temporaryDir;
+}
+
+Application::TemporaryDirs& Application::getTemporaryDirs()
+{
+    return _temporaryDirs;
+}
+
+Application::TemporaryDirs::TemporaryDirs(QObject* parent) :
+    QObject(parent),
+    _task(this, "Remove stale ManiVault temporary directories")
+{
+    _task.setGuiScopes({ Task::GuiScope::Background });
+}
+
+QStringList Application::TemporaryDirs::getStale()
+{
+    QStringList staleTemporaryDirectories;
+
+    auto temporaryDir = QDir(QDir::tempPath());
+
+    temporaryDir.setFilter(QDir::Dirs);
+    temporaryDir.setNameFilters({ "ManiVault.*" });
+
+    const auto sessions = temporaryDir.entryList();
+
+    for (const auto& session : sessions) {
+        const auto lockInfoFilePath         = QDir::cleanPath(QDir::tempPath() + QDir::separator() + session + QDir::separator() + "app.lock");
+        const auto sessionSegments          = session.split(".");
+        const auto isCurrentApplication     = sessionSegments.count() > 2 && Application::current()->getId().startsWith(sessionSegments[1]);
+        const auto staleTemporaryDirectory  = QDir::cleanPath(QDir::tempPath() + QDir::separator() + session);
+
+        if (isCurrentApplication)
+            continue;
+
+        if (QFileInfo(lockInfoFilePath).exists()) {
+            QLockFile lockFile(lockInfoFilePath);
+
+            if (lockFile.tryLock(150)) {
+                staleTemporaryDirectories << staleTemporaryDirectory;
+
+                lockFile.unlock();
+            }
+        }
+        else {
+            staleTemporaryDirectories << staleTemporaryDirectory;
+        }
+    }
+
+    return staleTemporaryDirectories;
+}
+
+void Application::TemporaryDirs::removeStale(const QStringList& stale /*= QStringList()*/)
+{
+    const auto staleTemporaryDirectories = getStale();
+
+    qDebug() << "Found" << staleTemporaryDirectories.count() << QString("stale temporary ManiVault director%1 eligible for removal").arg(staleTemporaryDirectories.count() == 1 ? "y" : "ies");
+
+    int numberOfRemovedSessions = 0;
+
+    QStringList selectedStaleTemporaryDirs;
+
+    if (!stale.isEmpty()) {
+        for (const auto& staleTemporaryDirectory : staleTemporaryDirectories)
+            if (stale.contains(staleTemporaryDirectory))
+                selectedStaleTemporaryDirs << staleTemporaryDirectory;
+    }
+    else {
+        selectedStaleTemporaryDirs = staleTemporaryDirectories;
+    }
+
+    _task.setSubtasks(selectedStaleTemporaryDirs);
+    _task.setRunning();
+
+    processEvents();
+
+    for (const auto& selectedStaleTemporaryDir : selectedStaleTemporaryDirs) {
+        try
+        {
+            const auto dirName = selectedStaleTemporaryDir.split("/").last();
+
+            _task.setSubtaskStarted(selectedStaleTemporaryDir, QString("Removing %1").arg(dirName));
+            {
+                qDebug() << "Removing" << selectedStaleTemporaryDir;
+
+                QDir sessionDir(selectedStaleTemporaryDir);
+
+                if (!sessionDir.removeRecursively())
+                    throw std::runtime_error(QString("Unable to remove %1").arg(selectedStaleTemporaryDir).toStdString());
+
+                ++numberOfRemovedSessions;
+            }
+            _task.setSubtaskFinished(selectedStaleTemporaryDir, QString("Removed %1").arg(dirName));
+
+            processEvents();
+        }
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to remove the ManiVault application temporary directory", e);
+        }
+        catch (...) {
+            exceptionMessageBox("Unable to remove the ManiVault application temporary directory");
+        }
+    }
+
+    qDebug() << "Removed" << numberOfRemovedSessions << QString("ManiVault application temporary director%1").arg(numberOfRemovedSessions == 1 ? "y" : "ies");
+
+    _task.setFinished();
 }
 
 }

@@ -8,9 +8,7 @@
 
 #include <Application.h>
 #include <ProjectMetaAction.h>
-
-#include <ModalTask.h>
-#include <ModalTaskHandler.h>
+#include <BackgroundTask.h>
 
 #include <QSurfaceFormat>
 #include <QStyleFactory>
@@ -40,11 +38,9 @@ public:
 ProjectMetaAction* getStartupProjectMetaAction(const QString& startupProjectFilePath)
 {
     try {
-        QTemporaryDir temporaryDir;
-
         const QString metaJsonFilePath("meta.json");
 
-        QFileInfo extractFileInfo(temporaryDir.path(), metaJsonFilePath);
+        QFileInfo extractFileInfo(Application::current()->getTemporaryDir().path(), metaJsonFilePath);
 
         Archiver archiver;
 
@@ -166,6 +162,13 @@ int main(int argc, char *argv[])
     }
     
     splashScreenAction.getOpenAction().trigger();
+
+    if (settings().getTemporaryDirectoriesSettingsAction().getRemoveStaleTemporaryDirsAtStartupAction().isChecked()) {
+        application.getTemporaryDirs().getTask().setParentTask(&application.getStartupTask());
+        application.getTemporaryDirs().removeStale();
+        
+        settings().getTemporaryDirectoriesSettingsAction().getScanForStaleTemporaryDirectoriesAction().trigger();
+    }
 
     core.initialize();
 

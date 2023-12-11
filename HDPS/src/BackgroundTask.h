@@ -34,6 +34,12 @@ public:
     BackgroundTask(QObject* parent, const QString& name, bool parentToOverallBackgroundTask = true, const Status& status = Status::Undefined, bool mayKill = false);
 
     /**
+     * Get overall background task
+     * @return Aggregate background task to which all other background tasks are (in)directly parented
+     */
+    static BackgroundTask& getOverallBackgroundTask();
+
+    /**
      * Creates singleton background task handler
      * @param parent Pointer to parent object
      */
