@@ -93,7 +93,7 @@ LoadedViewsMenu::ToggleActions LoadedViewsMenu::getLoadedViewsActions(bool syste
 
         auto viewToggleAction = new ToggleAction(this, viewPlugin->text());
 
-        viewToggleAction->setIcon(viewPlugin->getVisibleAction().icon());
+        //viewToggleAction->setIcon(viewPlugin->getVisibleAction().icon());
 
         const auto connectViewToggleAction = [this, viewPlugin, viewToggleAction]() -> void {
             connect(viewToggleAction, &QAction::toggled, this, [viewPlugin, viewToggleAction](bool toggled) -> void {
