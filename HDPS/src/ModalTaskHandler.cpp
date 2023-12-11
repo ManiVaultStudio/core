@@ -5,8 +5,11 @@
 #include "ModalTaskHandler.h"
 #include "TasksTreeModel.h"
 #include "ModalTask.h"
+#include "Application.h"
 
 #include "CoreInterface.h"
+
+#include <QMainWindow>
 
 #ifdef _DEBUG
     //#define MODAL_TASK_HANDLER_VERBOSE
@@ -76,8 +79,12 @@ void ModalTaskHandler::updateDialogVisibility()
     if (numberOfModalTasks == 0 && _modalTasksDialog.isVisible())
         _modalTasksDialog.close();
 
-    if (numberOfModalTasks >= 1 && !_modalTasksDialog.isVisible())
+    if (numberOfModalTasks >= 1 && !_modalTasksDialog.isVisible()) {
+        const auto mainWindowGeometry = Application::getMainWindow()->geometry();
+
+        _modalTasksDialog.move(mainWindowGeometry.center() - _modalTasksDialog.rect().center());
         _modalTasksDialog.show();
+    }
 
     QCoreApplication::processEvents();
 }
@@ -100,7 +107,8 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     setWindowFlag(Qt::WindowCloseButtonHint, false);
     setWindowFlag(Qt::WindowTitleHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
-    
+    //setWindowFlag(Qt::SubWindow);
+
     setLayout(new QGridLayout());
     
     auto& tasksFilterModel = _modalTaskHandler->getTasksFilterModel();
