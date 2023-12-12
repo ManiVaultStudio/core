@@ -243,15 +243,15 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     createToolbar(widgetFlags);
     createTreeWidget(widgetFlags);
 
-    // Add filtering action to the groups action and hide by default
-    _groupsAction->addGroupAction(&_filteredActionsAction, false);
-
     // Perform an initial update of the toolbar and action filtering
     updateToolbar();
     //updateFiltering();
 
     for (auto groupAction : _groupsAction->getGroupActions())
         addGroupAction(groupAction);
+
+    // Add filtering action to the groups action and hide by default
+    _groupsAction->addGroupAction(&_filteredActionsAction, false);
 }
 
 void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
