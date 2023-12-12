@@ -91,20 +91,20 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeViewHeader->setStretchLastSection(false);
     treeViewHeader->setMinimumSectionSize(18);
 
-    treeViewHeader->resizeSection(DataHierarchyModel::Column::Name, 180);
-    treeViewHeader->resizeSection(DataHierarchyModel::Column::GroupIndex, 60);
-    treeViewHeader->resizeSection(DataHierarchyModel::Column::Progress, 45);
-    treeViewHeader->resizeSection(DataHierarchyModel::Column::IsGroup, treeViewHeader->minimumSectionSize());
-    treeViewHeader->resizeSection(DataHierarchyModel::Column::IsAnalyzing, treeViewHeader->minimumSectionSize());
-    treeViewHeader->resizeSection(DataHierarchyModel::Column::IsLocked, treeViewHeader->minimumSectionSize());
+    //treeViewHeader->resizeSection(DataHierarchyModel::Column::Name, 180);
+    //treeViewHeader->resizeSection(DataHierarchyModel::Column::GroupIndex, 60);
+    //treeViewHeader->resizeSection(DataHierarchyModel::Column::Progress, 45);
+    //treeViewHeader->resizeSection(DataHierarchyModel::Column::IsGroup, treeViewHeader->minimumSectionSize());
+    //treeViewHeader->resizeSection(DataHierarchyModel::Column::IsAnalyzing, treeViewHeader->minimumSectionSize());
+    //treeViewHeader->resizeSection(DataHierarchyModel::Column::IsLocked, treeViewHeader->minimumSectionSize());
 
-    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::Name, QHeaderView::Interactive);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::ID, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::GroupIndex, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::Progress, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsGroup, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsAnalyzing, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsLocked, QHeaderView::Fixed);
+    //treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::Name, QHeaderView::Interactive);
+    //treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::ID, QHeaderView::Fixed);
+    //treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::GroupIndex, QHeaderView::Fixed);
+    //treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::Progress, QHeaderView::Fixed);
+    //treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsGroup, QHeaderView::Fixed);
+    //treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsAnalyzing, QHeaderView::Fixed);
+    //treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsLocked, QHeaderView::Fixed);
 
     treeView.setItemDelegate(new ItemDelegate());
 
@@ -134,24 +134,22 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         //Application::core()->getDataHierarchyManager().selectItems(dataHierarchyItems);
     });
 
-    /*
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {
 
         auto createContextMenu = [this, position]() -> void {
             Datasets datasets;
 
             for (const auto& selectedRow : _hierarchyWidget.getSelectedRows())
-                datasets << _model.getItem(selectedRow, Qt::DisplayRole)->getDataHierarchyItem()->getDataset();
+                datasets << _model.getItem(selectedRow)->getDataset();
 
             QScopedPointer<DataHierarchyWidgetContextMenu> datasetsContextMenu(new DataHierarchyWidgetContextMenu(this, datasets));
             datasetsContextMenu->exec(_hierarchyWidget.getTreeView().viewport()->mapToGlobal(position));
 
-            };
+        };
 
         // Get around possible signal-execution order complications
         QTimer::singleShot(10, createContextMenu);
     });
-    */
 
     for (const auto topLevelItem : Application::core()->getDataHierarchyManager().getTopLevelItems())
         addDataHierarchyItem(*topLevelItem);
@@ -161,6 +159,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
 void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem)
 {
+    _model.addDataHierarchyItem(&dataHierarchyItem);
+
     /*
     auto dataset = dataHierarchyItem.getDataset();
 

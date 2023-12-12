@@ -11,6 +11,8 @@
 
 namespace mv {
 
+class DataHierarchyItem;
+
 /**
  * Data hierarchy model class
  *
@@ -61,7 +63,7 @@ public:
          * return Dataset to display item for
          */
         const Dataset<DatasetImpl>& getDataset() const;
-    
+
     private:
         Dataset<DatasetImpl>    _dataset;   /** Pointer to dataset to display item for */
     };
@@ -86,6 +88,25 @@ protected:
 
         /** Set model data to \p value for \p role */
         void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Name";
+
+                case Qt::ToolTipRole:
+                    return "Name of the dataset";
+            }
+
+            return {};
+        }
     };
 
     /** Standard model item class for displaying the dataset identifier */
@@ -103,18 +124,46 @@ protected:
          * @return Data for \p role in variant form
          */
         QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "ID";
+
+                case Qt::ToolTipRole:
+                    return "The globally unique identifier of the dataset";
+            }
+
+            return {};
+        }
+    };
+
+    /** Convenience class for combining dataset items in a row */
+    class Row final : public QList<QStandardItem*>
+    {
+    public:
+
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         */
+        Row(Dataset<DatasetImpl> dataset);
     };
 
 public:
 
     /**
-     * Constructor
+     * Construct with \p parent object
      * @param parent Pointer to parent object
      */
     explicit DataHierarchyModel(QObject* parent = nullptr);
-
-    /** Destructor */
-    ~DataHierarchyModel();
 
     /** Get supported drag actions */
     Qt::DropActions supportedDragActions() const override;
@@ -141,12 +190,16 @@ public:
      */
     QMimeData* mimeData(const QModelIndexList &indexes) const override;
 
+    template<typename ItemType = Item>
+    ItemType* getItem(const QModelIndex& modelIndex) {
+        return dynamic_cast<ItemType*>(itemFromIndex(modelIndex));
+    }
+
     /**
-     * Add a data hierarchy item to the model
-     * @param parentModelIndex Model index of the parent data hierarchy item 
-     * @param dataHierarchyItem Reference to the data hierarchy item
+     * Add \p dataHierarchyItem to the model
+     * @param dataHierarchyItem Pointer to the data hierarchy item
      */
-    //bool addDataHierarchyModelItem(const QModelIndex& parentModelIndex, mv::DataHierarchyItem& dataHierarchyItem);
+    void addDataHierarchyItem(DataHierarchyItem* dataHierarchyItem);
 
     /**
      * Remove a data hierarchy item from the model
