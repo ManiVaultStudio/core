@@ -4,21 +4,83 @@
 
 #pragma once
 
-#include <QAbstractItemModel>
+#include "Dataset.h"
+
+#include <QStandardItemModel>
 #include <QMimeData>
 
 class DataHierarchyModelItem;
 
 namespace mv {
-    class DataHierarchyItem;
-}
 
 /**
  * Underlying data model for a data hierarchy tree
  */
-class DataHierarchyModel : public QAbstractItemModel
+class DataHierarchyModel : public QStandardItemModel
 {
     Q_OBJECT
+
+public:
+
+    /** Base standard model item class for dataset */
+    class Item : public QStandardItem, public QObject {
+    public:
+    
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         * @param editable Whether the model item is editable or not
+         */
+        Item(Dataset<DatasetImpl> dataset, bool editable = false);
+    
+        /**
+         * Get action
+         * return Pointer to action to display item for
+         */
+        Dataset<DatasetImpl>& getDataset() const;
+    
+    private:
+        Dataset<DatasetImpl>    _dataset;   /** Pointer to dataset to display item for */
+    };
+
+protected:
+
+    /** Standard model item class for interacting with the dataset name */
+    class NameItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         */
+        NameItem(Dataset<DatasetImpl> dataset);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /** Set model data to \p value for \p role */
+        void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
+    };
+
+    /** Standard model item class for displaying the dataset identifier */
+    class IdItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         */
+        IdItem(Dataset<DatasetImpl> dataset);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+    };
 
 public:
 
@@ -117,3 +179,5 @@ public:
 private:
     DataHierarchyModelItem*     _rootItem;      /** Root node of the data hierarchy */
 };
+
+}

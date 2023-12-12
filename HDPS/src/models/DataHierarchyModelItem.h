@@ -22,8 +22,8 @@ public:
 
     /** Columns */
     enum Column {
-        Name,           /** Name of the dataset */
-        GUID,           /** Globally unique dataset identifier */
+        //Name,           /** Name of the dataset */
+        //GUID,           /** Globally unique dataset identifier */
         Info,           /** Info (e.g. to report progress) */
         Progress,       /** Task progress in percentage */
         GroupIndex,     /** Dataset group index */

@@ -12,7 +12,7 @@
 #include <QDebug>
 #include <QIcon>
 
-using namespace mv;
+namespace mv {
 
 DataHierarchyModel::DataHierarchyModel(QObject* parent) :
     QAbstractItemModel(parent),
@@ -317,4 +317,79 @@ bool DataHierarchyModel::removeDataHierarchyModelItem(const QModelIndex& modelIn
     endRemoveRows();
 
     return true;
+}
+
+DataHierarchyModel::Item::Item(Dataset<DatasetImpl> dataset, bool editable /*= false*/) :
+    QStandardItem(),
+    QObject()
+{
+}
+
+Dataset<DatasetImpl> DataHierarchyModel::Item::getDataset() const
+{
+    return _dataset;
+}
+
+DataHierarchyModel::NameItem::NameItem(Dataset<DatasetImpl> dataset) :
+    Item(dataset, true)
+{
+    connect(&getDataset(), &Dataset<DatasetImpl>::guiNameChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant DataHierarchyModel::NameItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getDataset()->getGuiName();
+
+        case Qt::ToolTipRole:
+            return QString("Dataset name: %1").arg(data(Qt::DisplayRole).toString());
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+void DataHierarchyModel::NameItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
+{
+    switch (role) {
+        case Qt::EditRole:
+            getDataset()->setText(value.toString());
+            break;
+
+        default:
+            Item::setData(value, role);
+    }
+}
+
+DataHierarchyModel::IdItem::IdItem(Dataset<DatasetImpl> dataset) :
+    Item(dataset)
+{
+    connect(getDataset().get(), &gui::WidgetAction::idChanged, this, [this](const QString& id) -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant DataHierarchyModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getDataset()->getId();
+
+        case Qt::ToolTipRole:
+            return "Dataset identifier: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 }
