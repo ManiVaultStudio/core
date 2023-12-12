@@ -1463,7 +1463,7 @@ void Task::privateEmitProgressTextChanged()
 void Task::addToTaskManager()
 {
 #ifdef _DEBUG
-    qDebug().noquote() << QString("Manually adding %1 to the task manager (only do this if automatic addition fails)").arg(getName());
+    qDebug() << "Manually adding" << getName() << "to the task manager(only do this if automatic addition fails)";
 #endif
 
     privateAddToTaskManager();
