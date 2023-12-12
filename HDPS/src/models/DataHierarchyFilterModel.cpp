@@ -2,12 +2,15 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
+#include "DataHierarchyModel.h"
 #include "DataHierarchyFilterModel.h"
-#include "DataHierarchyModelItem.h"
+#include "Dataset.h"
+#include "Set.h"
+#include "DataHierarchyItem.h"
 
 #include <QDebug>
 
-using namespace mv;
+namespace mv {
 
 DataHierarchyFilterModel::DataHierarchyFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
@@ -18,14 +21,16 @@ DataHierarchyFilterModel::DataHierarchyFilterModel(QObject* parent /*= nullptr*/
 
 bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
+    auto sourceStandardItemModel = static_cast<QStandardItemModel*>(sourceModel());
+
     const auto index = sourceModel()->index(row, 0, parent);
 
     if (!index.isValid())
         return true;
 
-    auto modelItem = static_cast<DataHierarchyModelItem*>(index.internalPointer());
+    auto modelItem = static_cast<DataHierarchyModel::Item*>(sourceStandardItemModel->itemFromIndex(index));
 
-    if (_filterHidden && !modelItem->isVisible())
+    if (_filterHidden && !modelItem->getDataset()->getDataHierarchyItem().isVisible())
         return false;
 
     if (filterRegularExpression().isValid()) {
@@ -49,4 +54,6 @@ void DataHierarchyFilterModel::setFilterHidden(bool filterHidden)
     _filterHidden = filterHidden;
 
     invalidate();
+}
+
 }

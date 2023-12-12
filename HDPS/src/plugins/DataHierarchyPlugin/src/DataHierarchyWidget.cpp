@@ -11,8 +11,6 @@
 #include <Set.h>
 #include <Dataset.h>
 #include <PluginFactory.h>
-#include <AbstractDataHierarchyManager.h>
-#include <widgets/Divider.h>
 #include <actions/PluginTriggerAction.h>
 
 #include <QDebug>
@@ -22,7 +20,6 @@
 #include <QLabel>
 #include <QStyledItemDelegate>
 #include <QStyleOptionViewItem>
-#include <QScopedPointer>
 
 #include <stdexcept>
 
@@ -55,7 +52,7 @@ protected:
     {
         QStyledItemDelegate::initStyleOption(option, index);
 
-        if (index.siblingAtColumn(DataHierarchyModelItem::Column::IsLocked).data(Qt::EditRole).toBool())
+        if (index.siblingAtColumn(DataHierarchyModel::Column::IsLocked).data(Qt::EditRole).toBool())
             option->state &= ~QStyle::State_Enabled;
     }
 };
@@ -94,21 +91,20 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeViewHeader->setStretchLastSection(false);
     treeViewHeader->setMinimumSectionSize(18);
 
-    treeViewHeader->resizeSection(DataHierarchyModelItem::Column::Name, 180);
-    treeViewHeader->resizeSection(DataHierarchyModelItem::Column::GroupIndex, 60);
-    treeViewHeader->resizeSection(DataHierarchyModelItem::Column::Progress, 45);
-    treeViewHeader->resizeSection(DataHierarchyModelItem::Column::IsGroup, treeViewHeader->minimumSectionSize());
-    treeViewHeader->resizeSection(DataHierarchyModelItem::Column::IsAnalyzing, treeViewHeader->minimumSectionSize());
-    treeViewHeader->resizeSection(DataHierarchyModelItem::Column::IsLocked, treeViewHeader->minimumSectionSize());
+    treeViewHeader->resizeSection(DataHierarchyModel::Column::Name, 180);
+    treeViewHeader->resizeSection(DataHierarchyModel::Column::GroupIndex, 60);
+    treeViewHeader->resizeSection(DataHierarchyModel::Column::Progress, 45);
+    treeViewHeader->resizeSection(DataHierarchyModel::Column::IsGroup, treeViewHeader->minimumSectionSize());
+    treeViewHeader->resizeSection(DataHierarchyModel::Column::IsAnalyzing, treeViewHeader->minimumSectionSize());
+    treeViewHeader->resizeSection(DataHierarchyModel::Column::IsLocked, treeViewHeader->minimumSectionSize());
 
-    treeViewHeader->setSectionResizeMode(DataHierarchyModelItem::Column::Name, QHeaderView::Interactive);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModelItem::Column::GUID, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModelItem::Column::GroupIndex, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModelItem::Column::Info, QHeaderView::Stretch);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModelItem::Column::Progress, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModelItem::Column::IsGroup, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModelItem::Column::IsAnalyzing, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModelItem::Column::IsLocked, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::Name, QHeaderView::Interactive);
+    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::ID, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::GroupIndex, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::Progress, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsGroup, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsAnalyzing, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsLocked, QHeaderView::Fixed);
 
     treeView.setItemDelegate(new ItemDelegate());
 
@@ -126,18 +122,19 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::itemAboutToBeRemoved, this, [this](const Dataset<DatasetImpl>& dataset) {
         _hierarchyWidget.getSelectionModel().clear();
 
-        _model.removeDataHierarchyModelItem(getModelIndexByDataset(dataset));
+        //_model.removeDataHierarchyModelItem(getModelIndexByDataset(dataset));
     });
 
     connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
-        DataHierarchyItems dataHierarchyItems;
+        //DataHierarchyItems dataHierarchyItems;
 
-        for (const auto& index : _hierarchyWidget.getSelectedRows())
-            dataHierarchyItems << _model.getItem(index, Qt::DisplayRole)->getDataHierarchyItem();
+        //for (const auto& index : _hierarchyWidget.getSelectedRows())
+        //    dataHierarchyItems << _model.getItem(index, Qt::DisplayRole)->getDataHierarchyItem();
 
-        Application::core()->getDataHierarchyManager().selectItems(dataHierarchyItems);
+        //Application::core()->getDataHierarchyManager().selectItems(dataHierarchyItems);
     });
 
+    /*
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {
 
         auto createContextMenu = [this, position]() -> void {
@@ -154,6 +151,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         // Get around possible signal-execution order complications
         QTimer::singleShot(10, createContextMenu);
     });
+    */
 
     for (const auto topLevelItem : Application::core()->getDataHierarchyManager().getTopLevelItems())
         addDataHierarchyItem(*topLevelItem);
@@ -163,6 +161,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
 void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem)
 {
+    /*
     auto dataset = dataHierarchyItem.getDataset();
 
     try {
@@ -208,24 +207,22 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
             emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name));
         });
 
-        /*
-        const auto setModelItemExpansion = [this](const QModelIndex& modelIndex, bool expanded) -> void {
-            //if (!modelIndex.isValid() || (expanded == _hierarchyWidget.getTreeView().isExpanded(modelIndex)))
-            //    return;
+        //const auto setModelItemExpansion = [this](const QModelIndex& modelIndex, bool expanded) -> void {
+        //    //if (!modelIndex.isValid() || (expanded == _hierarchyWidget.getTreeView().isExpanded(modelIndex)))
+        //    //    return;
 
-            _hierarchyWidget.getTreeView().expand(modelIndex);
+        //    _hierarchyWidget.getTreeView().expand(modelIndex);
 
-            QCoreApplication::processEvents();
-        };
+        //    QCoreApplication::processEvents();
+        //};
 
-        connect(&dataHierarchyItem, &DataHierarchyItem::expandedChanged, this, [this, dataset, setModelItemExpansion](bool expanded) {
-            setModelItemExpansion(getModelIndexByDataset(dataset), expanded);
-        });
+        //connect(&dataHierarchyItem, &DataHierarchyItem::expandedChanged, this, [this, dataset, setModelItemExpansion](bool expanded) {
+        //    setModelItemExpansion(getModelIndexByDataset(dataset), expanded);
+        //});
 
-        setModelItemExpansion(getModelIndexByDataset(dataset), dataHierarchyItem.isExpanded());
+        //setModelItemExpansion(getModelIndexByDataset(dataset), dataHierarchyItem.isExpanded());
 
-        _hierarchyWidget.getTreeView().expand(getModelIndexByDataset(dataset));
-        */
+        //_hierarchyWidget.getTreeView().expand(getModelIndexByDataset(dataset));
     }
     catch (std::exception& e)
     {
@@ -234,6 +231,7 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
     catch (...) {
         exceptionMessageBox(QString("Unable to add %1 to the data hierarchy tree widget").arg(dataset->text()));
     }
+    */
 }
 
 QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImpl>& dataset)
@@ -255,8 +253,8 @@ void DataHierarchyWidget::onGroupingActionToggled(const bool& toggled)
 
 void DataHierarchyWidget::updateColumnsVisibility()
 {
-    auto& treeView = _hierarchyWidget.getTreeView();
+    //auto& treeView = _hierarchyWidget.getTreeView();
 
-    treeView.setColumnHidden(DataHierarchyModelItem::Column::GUID, true);
-    treeView.setColumnHidden(DataHierarchyModelItem::Column::GroupIndex, !_groupingAction.isChecked());
+    //treeView.setColumnHidden(DataHierarchyModelItem::Column::GUID, true);
+    //treeView.setColumnHidden(DataHierarchyModelItem::Column::GroupIndex, !_groupingAction.isChecked());
 }

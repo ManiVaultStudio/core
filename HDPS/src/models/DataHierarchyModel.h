@@ -9,16 +9,33 @@
 #include <QStandardItemModel>
 #include <QMimeData>
 
-class DataHierarchyModelItem;
-
 namespace mv {
 
 /**
- * Underlying data model for a data hierarchy tree
+ * Data hierarchy model class
+ *
+ * Standard item model for managing the data hierarchy
+ *
+ * @author Thomas Kroes
  */
 class DataHierarchyModel : public QStandardItemModel
 {
     Q_OBJECT
+
+public:
+
+    /** Dataset columns */
+    enum Column {
+        Name,           /** Name of the dataset */
+        ID,             /** Globally unique dataset identifier */
+        Progress,       /** Task progress in percentage */
+        GroupIndex,     /** Dataset group index */
+        IsGroup,        /** Whether the dataset is composed of other datasets */
+        IsAnalyzing,    /** Whether an analysis is taking place on the dataset */
+        IsLocked,       /** Whether the dataset is locked */
+
+        Count
+    };
 
 public:
 
@@ -34,10 +51,16 @@ public:
         Item(Dataset<DatasetImpl> dataset, bool editable = false);
     
         /**
-         * Get action
-         * return Pointer to action to display item for
+         * Get dataset
+         * return Dataset to display item for
          */
-        Dataset<DatasetImpl>& getDataset() const;
+        Dataset<DatasetImpl>& getDataset();
+
+        /**
+         * Get dataset
+         * return Dataset to display item for
+         */
+        const Dataset<DatasetImpl>& getDataset() const;
     
     private:
         Dataset<DatasetImpl>    _dataset;   /** Pointer to dataset to display item for */
@@ -93,60 +116,15 @@ public:
     /** Destructor */
     ~DataHierarchyModel();
 
-    /**
-     * Mandatory override for QAbstractItemModel.
-     */
-    QVariant data(const QModelIndex& index, int role) const override;
-
-    /**
-     * Sets the data value for the given model index and data role
-     * @param index Model index
-     * @param value Data value in variant form
-     * @param role Data role
-     * @return Whether the data was properly set or not
-     */
-    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
-
-    /**
-     * Mandatory override for QAbstractItemModel. Provides an index associated
-     * to a particular data item at location (row, column).
-     */
-    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
-
-    /**
-     * Mandatory override for QAbstractItemModel. Returns the index of the parent
-     * of this item. If this item is not a child, an invalid index is returned.
-     */
-    QModelIndex parent(const QModelIndex& index) const override;
-
-    /**
-     * Mandatory override for QAbstractItemModel.
-     * Returns the number of children of this parent item.
-     */
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-
-    /**
-     * Mandatory override for QAbstractItemModel.
-     * Returns number of columns associated with this parent item.
-     */
-    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-
     /** Get supported drag actions */
     Qt::DropActions supportedDragActions() const override;
-
-   /**
-    * Get data hierarchy model item
-    * @param index Model index of the item
-    * @param role Data role
-    */
-    DataHierarchyModelItem* getItem(const QModelIndex& index, int role) const;
 
     /**
      * Get item flags
      * @param index Model index
      * @return Item flags
      */
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    //Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     /**
      * Get header data
@@ -168,16 +146,13 @@ public:
      * @param parentModelIndex Model index of the parent data hierarchy item 
      * @param dataHierarchyItem Reference to the data hierarchy item
      */
-    bool addDataHierarchyModelItem(const QModelIndex& parentModelIndex, mv::DataHierarchyItem& dataHierarchyItem);
+    //bool addDataHierarchyModelItem(const QModelIndex& parentModelIndex, mv::DataHierarchyItem& dataHierarchyItem);
 
     /**
      * Remove a data hierarchy item from the model
      * @param parentModelIndex Model index of the parent data hierarchy item
      */
-    bool removeDataHierarchyModelItem(const QModelIndex& modelIndex);
-
-private:
-    DataHierarchyModelItem*     _rootItem;      /** Root node of the data hierarchy */
+    //bool removeDataHierarchyModelItem(const QModelIndex& modelIndex);
 };
 
 }

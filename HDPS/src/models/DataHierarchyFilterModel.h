@@ -6,6 +6,8 @@
 
 #include <QSortFilterProxyModel>
 
+namespace mv {
+
 /**
  * Data hierarchy filter model class
  *
@@ -35,3 +37,5 @@ public:
 private:
     bool    _filterHidden;        /** Whether hidden datasets are show or not */
 };
+
+}
