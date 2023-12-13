@@ -339,7 +339,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject"));
 
-            temporaryDirectory.setAutoRemove(false);
+            //temporaryDirectory.setAutoRemove(false);
 
             setTemporaryDirPath(TemporaryDirType::Open, temporaryDirectory.path());
 
@@ -676,10 +676,6 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
             
-            int* bogusPointer = nullptr;
-
-            *bogusPointer = 118;
-
             _project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
             
             QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
