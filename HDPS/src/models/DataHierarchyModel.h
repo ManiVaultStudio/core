@@ -150,6 +150,81 @@ protected:
         }
     };
 
+    /** Standard model item class for displaying the dataset task progress */
+    class ProgressItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         */
+        ProgressItem(Dataset<DatasetImpl> dataset);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "";
+
+                case Qt::ToolTipRole:
+                    return "The dataset task progress";
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the dataset group index */
+    class GroupIndexItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         */
+        GroupIndexItem(Dataset<DatasetImpl> dataset);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /** Set model data to \p value for \p role */
+        void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "";
+
+                case Qt::ToolTipRole:
+                    return "The dataset group index";
+            }
+
+            return {};
+        }
+    };
+
     /** Convenience class for combining dataset items in a row */
     class Row final : public QList<QStandardItem*>
     {

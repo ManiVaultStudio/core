@@ -16,7 +16,8 @@ namespace mv {
 
 DataHierarchyModel::Item::Item(Dataset<DatasetImpl> dataset, bool editable /*= false*/) :
     QStandardItem(),
-    QObject()
+    QObject(),
+    _dataset(dataset)
 {
 }
 
@@ -33,8 +34,9 @@ const Dataset<DatasetImpl>& DataHierarchyModel::Item::getDataset() const
 DataHierarchyModel::NameItem::NameItem(Dataset<DatasetImpl> dataset) :
     Item(dataset, true)
 {
-    connect(&getDataset(), &Dataset<DatasetImpl>::changed, this, &Item::refreshData);
-    connect(&getDataset(), &Dataset<DatasetImpl>::guiNameChanged, this, &Item::refreshData);
+    connect(&getDataset(), &Dataset<DatasetImpl>::guiNameChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant DataHierarchyModel::NameItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -93,6 +95,73 @@ QVariant DataHierarchyModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
     }
 
     return Item::data(role);
+}
+
+DataHierarchyModel::ProgressItem::ProgressItem(Dataset<DatasetImpl> dataset) :
+    Item(dataset)
+{
+    connect(getDataset().get(), &gui::WidgetAction::idChanged, this, [this](const QString& id) -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant DataHierarchyModel::ProgressItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return getDataset().isValid() ? const_cast<Dataset<DatasetImpl>&>(getDataset())->getTask().getProgress() : .0f;
+
+        case Qt::DisplayRole:
+            return QString::number(data(Qt::EditRole).toFloat());
+
+        case Qt::ToolTipRole:
+            return "Dataset task progress: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+DataHierarchyModel::GroupIndexItem::GroupIndexItem(Dataset<DatasetImpl> dataset) :
+    Item(dataset)
+{
+}
+
+QVariant DataHierarchyModel::GroupIndexItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return getDataset().isValid() ? getDataset()->getGroupIndex() : -1;
+
+        case Qt::DisplayRole:
+            return QString::number(data(Qt::EditRole).toInt());
+
+        case Qt::ToolTipRole:
+            return "Dataset group index: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+void DataHierarchyModel::GroupIndexItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
+{
+    switch (role) {
+        case Qt::EditRole:
+        {
+            if (getDataset().isValid())
+                getDataset()->setGroupIndex(value.toInt());
+
+            break;
+        }
+
+        default:
+            Item::setData(value, role);
+    }
 }
 
 DataHierarchyModel::DataHierarchyModel(QObject* parent) :
@@ -206,6 +275,8 @@ DataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
 {
     append(new NameItem(dataset));
     append(new IdItem(dataset));
+    append(new ProgressItem(dataset));
+    append(new GroupIndexItem(dataset));
 }
 
 }

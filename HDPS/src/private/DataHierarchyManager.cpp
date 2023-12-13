@@ -67,26 +67,6 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
         // Create new data hierarchy item
         const auto newDataHierarchyItem = new DataHierarchyItem(parentDataset.isValid() ? &parentDataset->getDataHierarchyItem() : static_cast<QObject*>(this), dataset, parentDataset, visible);
 
-        // Pass-through loading signal
-        connect(newDataHierarchyItem, &DataHierarchyItem::loading, this, [this, newDataHierarchyItem]() {
-            emit itemLoading(*newDataHierarchyItem);
-        });
-
-        // Pass-through loaded signal
-        connect(newDataHierarchyItem, &DataHierarchyItem::loaded, this, [this, newDataHierarchyItem]() {
-            emit itemLoaded(*newDataHierarchyItem);
-        });
-
-        // Pass-through saving signal
-        connect(newDataHierarchyItem, &DataHierarchyItem::saving, this, [this, newDataHierarchyItem]() {
-            emit itemSaving(*newDataHierarchyItem);
-        });
-
-        // Pass-through saved signal
-        connect(newDataHierarchyItem, &DataHierarchyItem::saved, this, [this, newDataHierarchyItem]() {
-            emit itemSaved(*newDataHierarchyItem);
-        });
-
         _items << newDataHierarchyItem;
 
         // Add child item if the parent is valid
