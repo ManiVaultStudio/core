@@ -64,6 +64,11 @@ public:
          */
         const Dataset<DatasetImpl>& getDataset() const;
 
+        /** Refreshes the data display */
+        void refreshData() {
+            emitDataChanged();
+        }
+
     private:
         Dataset<DatasetImpl>    _dataset;   /** Pointer to dataset to display item for */
     };

@@ -33,9 +33,8 @@ const Dataset<DatasetImpl>& DataHierarchyModel::Item::getDataset() const
 DataHierarchyModel::NameItem::NameItem(Dataset<DatasetImpl> dataset) :
     Item(dataset, true)
 {
-    connect(&getDataset(), &Dataset<DatasetImpl>::guiNameChanged, this, [this]() -> void {
-        emitDataChanged();
-    });
+    connect(&getDataset(), &Dataset<DatasetImpl>::changed, this, &Item::refreshData);
+    connect(&getDataset(), &Dataset<DatasetImpl>::guiNameChanged, this, &Item::refreshData);
 }
 
 QVariant DataHierarchyModel::NameItem::data(int role /*= Qt::UserRole + 1*/) const
