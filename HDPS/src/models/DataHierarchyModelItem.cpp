@@ -279,7 +279,7 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
         }
 
         case Qt::ForegroundRole:
-            return _dataHierarchyItem->getLocked() ? QColor(Qt::gray) : QColor(Qt::black);
+            return _dataHierarchyItem->getLocked() ? QApplication::palette().color(QPalette::Disabled, QPalette::Text).name() : QApplication::palette().color(QPalette::Normal, QPalette::Text).name();
 
         default:
             break;
