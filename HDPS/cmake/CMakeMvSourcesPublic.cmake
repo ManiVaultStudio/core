@@ -638,13 +638,11 @@ set(PUBLIC_ACTIONS_MODEL_FILES
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_HEADERS
-    src/models/DataHierarchyModelItem.h
     src/models/DataHierarchyModel.h
     src/models/DataHierarchyFilterModel.h
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_SOURCES
-    src/models/DataHierarchyModelItem.cpp
     src/models/DataHierarchyModel.cpp
     src/models/DataHierarchyFilterModel.cpp
 )

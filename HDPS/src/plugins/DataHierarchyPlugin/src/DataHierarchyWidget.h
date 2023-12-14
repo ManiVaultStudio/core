@@ -33,6 +33,22 @@ public:
      */
     DataHierarchyWidget(QWidget* parent);
 
+    /**
+     * Get model
+     * @return Reference to the data hierarchy model
+     */
+    mv::DataHierarchyModel& getModel() {
+        return _model;
+    }
+
+    /**
+     * Get filter model
+     * @return Reference to the data hierarchy filter model
+     */
+    mv::DataHierarchyFilterModel& getFilterModel() {
+        return _filterModel;
+    }
+
 protected:
 
     /**

@@ -19,6 +19,25 @@ DataHierarchyModel::Item::Item(Dataset<DatasetImpl> dataset, bool editable /*= f
     QObject(),
     _dataset(dataset)
 {
+    Q_ASSERT(_dataset.isValid());
+}
+
+QVariant DataHierarchyModel::Item::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::ForegroundRole:
+        {
+            if (_dataset.isValid())
+                break;
+
+            return _dataset->isLocked() ? QApplication::palette().color(QPalette::Disabled, QPalette::Text).name() : QApplication::palette().color(QPalette::Normal, QPalette::Text).name();
+        }
+
+        default:
+            break;
+    }
+
+    return QStandardItem::data(role);
 }
 
 Dataset<DatasetImpl>& DataHierarchyModel::Item::getDataset()
@@ -48,6 +67,14 @@ QVariant DataHierarchyModel::NameItem::data(int role /*= Qt::UserRole + 1*/) con
 
         case Qt::ToolTipRole:
             return QString("Dataset name: %1").arg(data(Qt::DisplayRole).toString());
+
+        case Qt::DecorationRole:
+        {
+            if (!getDataset().isValid())
+                break;
+
+            return getDataset()->getDataHierarchyItem().getIcon();
+        }
 
         default:
             break;
@@ -98,9 +125,20 @@ QVariant DataHierarchyModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
 }
 
 DataHierarchyModel::ProgressItem::ProgressItem(Dataset<DatasetImpl> dataset) :
-    Item(dataset)
+    Item(dataset),
+    _taskAction(this, "Task")
 {
-    connect(getDataset().get(), &gui::WidgetAction::idChanged, this, [this](const QString& id) -> void {
+    _taskAction.setTask(getDatasetTask());
+
+    connect(getDatasetTask(), &Task::progressChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+
+    connect(getDatasetTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+
+    connect(getDatasetTask(), &Task::statusChanged, this, [this]() -> void {
         emitDataChanged();
     });
 }
@@ -141,6 +179,9 @@ QVariant DataHierarchyModel::GroupIndexItem::data(int role /*= Qt::UserRole + 1*
         case Qt::ToolTipRole:
             return "Dataset group index: " + data(Qt::DisplayRole).toString();
 
+        case Qt::TextAlignmentRole:
+            return static_cast<std::int32_t>(Qt::AlignVCenter | Qt::AlignRight);
+
         default:
             break;
     }
@@ -162,6 +203,79 @@ void DataHierarchyModel::GroupIndexItem::setData(const QVariant& value, int role
         default:
             Item::setData(value, role);
     }
+}
+
+DataHierarchyModel::IsGroupItem::IsGroupItem(Dataset<DatasetImpl> dataset) :
+    Item(dataset)
+{
+}
+
+QVariant DataHierarchyModel::IsGroupItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        {
+            if (!getDataset().isValid())
+                break;
+
+            return getDataset()->isProxy();
+        }
+
+        case Qt::DisplayRole:
+            return data(Qt::EditRole).toBool() ? "yes" : "no";
+
+        case Qt::ToolTipRole:
+            return "Dataset is a group: " + data(Qt::DisplayRole).toString();
+
+        case Qt::DecorationRole:
+        {
+            if (!getDataset().isValid())
+                break;
+
+            if (getDataset()->isProxy())
+                return Application::getIconFont("FontAwesome").getIcon("object-group");
+        }
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+DataHierarchyModel::IsLockedItem::IsLockedItem(Dataset<DatasetImpl> dataset) :
+    Item(dataset)
+{
+    connect(&getDataset()->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, [this](bool locked) -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant DataHierarchyModel::IsLockedItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        {
+            if (!getDataset().isValid())
+                break;
+
+            return getDataset()->isLocked();
+        }
+
+        case Qt::DisplayRole:
+            return data(Qt::EditRole).toBool() ? "yes" : "no";
+
+        case Qt::ToolTipRole:
+            return "Dataset is a locked: " + data(Qt::DisplayRole).toString();
+
+        case Qt::DecorationRole:
+            return data(Qt::EditRole).toBool() ? Application::getIconFont("FontAwesome").getIcon("lock") : QIcon();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
 }
 
 DataHierarchyModel::DataHierarchyModel(QObject* parent) :
@@ -277,6 +391,8 @@ DataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
     append(new IdItem(dataset));
     append(new ProgressItem(dataset));
     append(new GroupIndexItem(dataset));
+    append(new IsGroupItem(dataset));
+    append(new IsLockedItem(dataset));
 }
 
 }

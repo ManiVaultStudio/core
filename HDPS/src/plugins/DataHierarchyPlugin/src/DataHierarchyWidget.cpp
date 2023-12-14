@@ -6,7 +6,6 @@
 #include "DataHierarchyWidgetContextMenu.h"
 
 #include <models/DataHierarchyModel.h>
-#include <models/DataHierarchyModelItem.h>
 #include <Application.h>
 #include <Set.h>
 #include <Dataset.h>
@@ -37,12 +36,45 @@ class ItemDelegate : public QStyledItemDelegate {
 public:
 
     /**
-     * Constructor
-     * @param parent Pointer to parent object
+     * Construct with owning parent \p dataHierarchyWidget
+     * @param parent Pointer to owning parent data hierarchy widget
      */
-    explicit ItemDelegate(QObject* parent = nullptr) :
-        QStyledItemDelegate(parent)
+    explicit ItemDelegate(DataHierarchyWidget* dataHierarchyWidget) :
+        QStyledItemDelegate(dataHierarchyWidget),
+        _dataHierarchyWidget(dataHierarchyWidget)
     {
+        Q_ASSERT(dataHierarchyWidget != nullptr);
+    }
+
+    /**
+     * Creates custom editor with \p parent widget style \p option and model \p index
+     * @param parent Pointer to parent widget
+     * @param option Style option
+     * @param index Model index to create the editor for
+     * @return Pointer to widget if progress column, nullptr otherwise
+     */
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
+        if (static_cast<DataHierarchyModel::Column>(index.column()) != DataHierarchyModel::Column::Progress)
+            return nullptr;
+
+        auto progressAction = getProgressAction(index);
+
+        if (progressAction == nullptr)
+            return nullptr;
+
+        return progressAction->createWidget(parent);
+    }
+
+    /**
+     * Update \p editor widget geometry when the cell geometry changes
+     * @param option Style option
+     * @param index Model index of the cell that changed
+     */
+    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex&/*index*/) const {
+        if (editor == nullptr)
+            return;
+
+        editor->setGeometry(option.rect);
     }
 
 protected:
@@ -55,6 +87,25 @@ protected:
         if (index.siblingAtColumn(DataHierarchyModel::Column::IsLocked).data(Qt::EditRole).toBool())
             option->state &= ~QStyle::State_Enabled;
     }
+
+private:
+
+    /**
+     * Get progress action for model \p index
+     * @param index Model index to retrieve the progress action for
+     * @return Pointer to progress action
+     */
+    ProgressAction* getProgressAction(const QModelIndex& index) const {
+        auto item = _dataHierarchyWidget->getModel().itemFromIndex(_dataHierarchyWidget->getFilterModel().mapToSource(index).siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)));
+
+        if (item == nullptr)
+            return nullptr;
+
+        return &(dynamic_cast<AbstractTasksModel::ProgressItem*>(item)->getTaskAction().getProgressAction());
+    }
+
+private:
+    DataHierarchyWidget* _dataHierarchyWidget;  /** Pointer to owning data hierarchy widget */
 };
 
 DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :

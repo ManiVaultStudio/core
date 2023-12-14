@@ -51,7 +51,13 @@ public:
          * @param editable Whether the model item is editable or not
          */
         Item(Dataset<DatasetImpl> dataset, bool editable = false);
-    
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
         /**
          * Get dataset
          * return Dataset to display item for
@@ -184,6 +190,25 @@ protected:
 
             return {};
         }
+
+        /**
+         * Get dataset task
+         * @return Reference to dataset task
+         */
+        Task& getDatasetTask() {
+            return getDataset()->getTask();
+        }
+
+        /**
+         * Get task action
+         * @return Task action for use in item delegate (its built-in progress action)
+         */
+        gui::TaskAction& getTaskAction() {
+            return _taskAction;
+        }
+
+    private:
+        gui::TaskAction     _taskAction;    /** Task action for use in item delegate (uses its built-in progress action) */
     };
 
     /** Standard model item class for displaying the dataset group index */
@@ -219,6 +244,78 @@ protected:
 
                 case Qt::ToolTipRole:
                     return "The dataset group index";
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying whether the dataset belongs to a group */
+    class IsGroupItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         */
+        IsGroupItem(Dataset<DatasetImpl> dataset);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "";
+
+                case Qt::ToolTipRole:
+                    return "Whether the dataset belongs to a group";
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying whether the dataset is locked */
+    class IsLockedItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         */
+        IsLockedItem(Dataset<DatasetImpl> dataset);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "";
+
+                case Qt::ToolTipRole:
+                    return "Whether the dataset is locked";
             }
 
             return {};

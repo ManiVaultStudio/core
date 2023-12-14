@@ -198,7 +198,7 @@ public:
         }
 
     private:
-        gui::TaskAction     _taskAction;    /** Task action for use in item delegate (its built-in progress action) */
+        gui::TaskAction     _taskAction;    /** Task action for use in item delegate (uses its built-in progress action) */
     };
 
 protected:
