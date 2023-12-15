@@ -50,14 +50,14 @@ private:
     QAction* getGroupAction();
 
     /**
-     * Get action for dataset(s) locking
-     * @return Pointer to action for dataset(s) locking
+     * Get menu for dataset(s) locking
+     * @return Pointer to menu for dataset(s) locking
      */
     QMenu* getLockMenu();
 
     /**
-     * Get action for dataset(s) unlocking
-     * @return Pointer to action for dataset(s) unlocking
+     * Get menu for dataset(s) unlocking
+     * @return Pointer to menu for dataset(s) unlocking
      */
     QMenu* getUnlockMenu();
 

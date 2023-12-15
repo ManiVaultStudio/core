@@ -8,7 +8,9 @@
 #include <CoreInterface.h>
 #include <Dataset.h>
 #include <Set.h>
+
 #include <actions/PluginTriggerAction.h>
+#include <actions/TriggerAction.h>
 
 #include <QDebug>
 #include <QMenu>
@@ -19,6 +21,7 @@
 using namespace mv;
 using namespace mv::util;
 using namespace mv::plugin;
+using namespace mv::gui;
 
 DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, Datasets datasets) :
     QMenu(parent),
@@ -45,6 +48,25 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
         addMenu(getLockMenu());
         addMenu(getUnlockMenu());
     }
+
+    addSeparator();
+    
+    auto removeDatasetsAction = new TriggerAction(this, QString("Remove dataset%1").arg(_datasets.count() >= 2 ? "s" : ""));
+
+    removeDatasetsAction->setIconByName("trash");
+
+    connect(removeDatasetsAction, &TriggerAction::triggered, this, [this]() -> void {
+        Datasets datasetsToRemove;
+
+        for (const auto& candidateDataset : _datasets)
+            if (!candidateDataset->getDataHierarchyItem().isChildOf(_datasets))
+                datasetsToRemove << candidateDataset;
+
+        for (auto datasetToRemove : datasetsToRemove)
+            qDebug() << "datasetToRemove" << datasetToRemove->getGuiName();
+    });
+
+    addAction(removeDatasetsAction);
 }
 
 void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginType)

@@ -56,10 +56,23 @@ public:
 
     /**
      * Walks up the hierarchy of the data hierarchy item and returns all parents
-     * @param dataHierarchyItem Item to fetch the parents for
-     * @param parents Item parents
+     * @return Parents items
      */
-    static void getParents(DataHierarchyItem& dataHierarchyItem, DataHierarchyItems& parents);
+    DataHierarchyItems getParents();
+
+    /**
+     * Determine whether the data hierarchy item is a child of \p dataHierarchyItem
+     * @param dataHierarchyItem Possible parent data hierarchy item
+     * @return Boolean determining if \p dataHierarchyItem is a parent
+     */
+    bool isChildOf(DataHierarchyItem& dataHierarchyItem);
+
+    /**
+     * Determine whether the data hierarchy item is a child of one or more \p dataHierarchyItems
+     * @param dataHierarchyItems Possible parent data hierarchy items
+     * @return Boolean determining if it is a child of one or more \p dataHierarchyItems
+     */
+    bool isChildOf(DataHierarchyItems dataHierarchyItems);
 
     /** Returns whether the data hierarchy item has a parent */
     bool hasParent() const;

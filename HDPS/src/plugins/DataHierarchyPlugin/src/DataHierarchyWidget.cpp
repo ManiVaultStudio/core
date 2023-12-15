@@ -226,12 +226,12 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     });
 
     connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
-        //DataHierarchyItems dataHierarchyItems;
+        DataHierarchyItems dataHierarchyItems;
 
-        //for (const auto& index : _hierarchyWidget.getSelectedRows())
-        //    dataHierarchyItems << _model.getItem(index, Qt::DisplayRole)->getDataHierarchyItem();
+        for (const auto& index : _hierarchyWidget.getSelectedRows())
+            dataHierarchyItems << &dataHierarchy().getItem(index.siblingAtColumn(static_cast<int>(DataHierarchyModel::Column::DatasetId)).data(Qt::EditRole).toString());
 
-        //Application::core()->getDataHierarchyManager().selectItems(dataHierarchyItems);
+        dataHierarchy().selectItems(dataHierarchyItems);
     });
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {
@@ -330,11 +330,6 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
     catch (...) {
         exceptionMessageBox(QString("Unable to add %1 to the data hierarchy tree widget").arg(dataset->text()));
     }
-
-}
-
-void DataHierarchyWidget::removeDataHierarchyItem(mv::DataHierarchyItem& dataHierarchyItem)
-{
 
 }
 */
