@@ -122,27 +122,25 @@ message(STATUS "Using Qt Advanced Docking System version ${ADS_VERSION}")
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external/advanced_docking)
 
-# File compression: ZLib
-if (WIN32)
-    if(NOT DEFINED ZLIB_ROOT)
-        message(FATAL_ERROR "You need to define ZLIB_ROOT, pointing to a zlib installation")
-    else()
-        message(STATUS "Using zlib at ${ZLIB_ROOT}")
-    endif()
-
-elseif (APPLE)
+# File compression: ZLib, a dependency for QuaZip
+if(APPLE)
     message(STATUS "********Using brew zlib for QUAZIP *********")
 
     find_program(BREW_BIN brew)
     execute_process(COMMAND ${BREW_BIN} install pkg-config) 
+endif()
 
+find_package(ZLIB)
+
+if(ZLIB_FOUND)
+    message(STATUS "Using zlib version ${ZLIB_VERSION_STRING}")
 else()
-    find_package(ZLIB REQUIRED)
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.26")
-        message(STATUS "Using zlib version ${ZLIB_VERSION}")
-    else()
-        message(STATUS "Using zlib version ${ZLIB_VERSION_STRING}")
+    set(ZLIB_ERROR_MSG "You need to define ZLIB_ROOT, pointing to a zlib installation")
+    if (LINUX)
+        set(ZLIB_ERROR_MSG "You need to install zlib, e.g. (on Ubuntu) apt install zlib1g")
     endif()
+
+    message(FATAL_ERROR ${ZLIB_ERROR_MSG})
 endif()
 
 # File compression: QuaZip
