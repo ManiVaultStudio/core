@@ -49,7 +49,7 @@ DataHierarchyItem& DataHierarchyItem::getParent() const
     return *_parent;
 }
 
-DataHierarchyItems DataHierarchyItem::getParents()
+DataHierarchyItems DataHierarchyItem::getParents() const
 {
     DataHierarchyItems parentDataHierarchyItems{ &getParent() };
 
@@ -59,12 +59,12 @@ DataHierarchyItems DataHierarchyItem::getParents()
     return parentDataHierarchyItems;
 }
 
-bool DataHierarchyItem::isChildOf(DataHierarchyItem& dataHierarchyItem)
+bool DataHierarchyItem::isChildOf(DataHierarchyItem& dataHierarchyItem) const
 {
     return getParents().contains(&dataHierarchyItem);
 }
 
-bool DataHierarchyItem::isChildOf(DataHierarchyItems dataHierarchyItems)
+bool DataHierarchyItem::isChildOf(DataHierarchyItems dataHierarchyItems) const
 {
     for (auto dataHierarchyItem : dataHierarchyItems)
         if (isChildOf(*dataHierarchyItem))

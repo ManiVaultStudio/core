@@ -25,7 +25,7 @@ using namespace mv::gui;
 
 DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, Datasets datasets) :
     QMenu(parent),
-    _datasets(datasets)
+    _selectedDatasets(datasets)
 {
     addMenusForPluginType(plugin::Type::ANALYSIS);
     addMenusForPluginType(plugin::Type::LOADER);
@@ -35,8 +35,8 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
 
     QSet<DataType> dataTypes;
 
-    for (const auto& dataset : _datasets)
-        dataTypes.insert(dataset->getDataType());
+    for (const auto& selectedDataset : _selectedDatasets)
+        dataTypes.insert(selectedDataset->getDataType());
 
     if (datasets.count() >= 2 && dataTypes.count() == 1) {
         addSeparator();
@@ -51,19 +51,24 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
 
     addSeparator();
     
-    auto removeDatasetsAction = new TriggerAction(this, QString("Remove dataset%1").arg(_datasets.count() >= 2 ? "s" : ""));
+    auto removeDatasetsAction = new TriggerAction(this, QString("Remove dataset%1").arg(_selectedDatasets.count() >= 2 ? "s" : ""));
 
     removeDatasetsAction->setIconByName("trash");
 
     connect(removeDatasetsAction, &TriggerAction::triggered, this, [this]() -> void {
         Datasets datasetsToRemove;
 
-        for (const auto& candidateDataset : _datasets)
-            if (!candidateDataset->getDataHierarchyItem().isChildOf(_datasets))
-                datasetsToRemove << candidateDataset;
+        DataHierarchyItems selectedDataHierarchyItems;
+
+        for (auto& selectedDataset : _selectedDatasets)
+            selectedDataHierarchyItems << &selectedDataset->getDataHierarchyItem();
+
+        for (auto& selectedDataset : _selectedDatasets)
+            if (!selectedDataset->getDataHierarchyItem().isChildOf(selectedDataHierarchyItems))
+                datasetsToRemove << selectedDataset;
 
         for (auto datasetToRemove : datasetsToRemove)
-            qDebug() << "datasetToRemove" << datasetToRemove->getGuiName();
+            mv::data().removeDataset(datasetToRemove);
     });
 
     addAction(removeDatasetsAction);
@@ -73,7 +78,7 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
 {
     QMap<QString, QMenu*> menus;
 
-    for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(pluginType, _datasets)) {
+    for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(pluginType, _selectedDatasets)) {
         const auto titleSegments = pluginTriggerAction->getMenuLocation().split("/");
 
         QString menuPath, previousMenuPath = titleSegments.first();
@@ -125,7 +130,7 @@ QAction* DataHierarchyWidgetContextMenu::getGroupAction()
     groupDataAction->setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
 
     connect(groupDataAction, &QAction::triggered, [this]() -> void {
-        Application::core()->groupDatasets(_datasets);
+        Application::core()->groupDatasets(_selectedDatasets);
     });
 
     return groupDataAction;
@@ -158,10 +163,10 @@ QMenu* DataHierarchyWidgetContextMenu::getLockMenu()
     auto lockSelectedAction = new QAction("Selected");
 
     lockSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
-    lockSelectedAction->setEnabled(!_datasets.isEmpty());
+    lockSelectedAction->setEnabled(!_selectedDatasets.isEmpty());
 
     connect(lockSelectedAction, &QAction::triggered, this, [this]() -> void {
-        for (auto dataset : _datasets)
+        for (auto dataset : _selectedDatasets)
             dataset->lock();
     });
 
@@ -197,10 +202,10 @@ QMenu* DataHierarchyWidgetContextMenu::getUnlockMenu()
     auto unlockSelectedAction = new QAction("Selected");
 
     unlockSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
-    unlockSelectedAction->setEnabled(!_datasets.isEmpty());
+    unlockSelectedAction->setEnabled(!_selectedDatasets.isEmpty());
 
     connect(unlockSelectedAction, &QAction::triggered, this, [this]() -> void {
-        for (auto dataset : _datasets)
+        for (auto dataset : _selectedDatasets)
             dataset->unlock();
         });
 

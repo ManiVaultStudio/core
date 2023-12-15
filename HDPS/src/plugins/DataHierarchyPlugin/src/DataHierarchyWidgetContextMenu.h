@@ -17,7 +17,7 @@ using namespace mv::plugin;
 /**
  * Data hierarchy widget context menu
  * 
- * Constructs a data hierarchy widget context menu based on the current datasets selection
+ * Constructs a data hierarchy widget context menu based on the current dataset selection
  * 
  * @author Thomas Kroes
  */
@@ -28,11 +28,11 @@ class DataHierarchyWidgetContextMenu : public QMenu
 public:
 
     /**
-     * Constructor
+     * Construct with \p parent widget and \p selectedDatasets
      * @param parent Parent widget
      * @param selectedDatasets Selected datasets in the data hierarchy widget
      */
-    DataHierarchyWidgetContextMenu(QWidget* parent, Datasets datasets);
+    DataHierarchyWidgetContextMenu(QWidget* parent, Datasets selectedDatasets);
 
 private:
 
@@ -62,5 +62,5 @@ private:
     QMenu* getUnlockMenu();
 
 private:
-    Datasets        _datasets;      /** Selected datasets in the data hierarchy widget */
+    Datasets    _selectedDatasets;      /** Selected datasets in the data hierarchy widget */
 };
