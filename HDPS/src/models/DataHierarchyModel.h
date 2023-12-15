@@ -5,6 +5,10 @@
 #pragma once
 
 #include "Dataset.h"
+#include "Task.h"
+#include "Set.h"
+
+#include "actions/TaskAction.h"
 
 #include <QStandardItemModel>
 #include <QMimeData>
@@ -29,11 +33,10 @@ public:
     /** Dataset columns */
     enum Column {
         Name,           /** Name of the dataset */
-        ID,             /** Globally unique dataset identifier */
+        DatasetId,      /** Globally unique dataset identifier */
         Progress,       /** Task progress in percentage */
         GroupIndex,     /** Dataset group index */
         IsGroup,        /** Whether the dataset is composed of other datasets */
-        IsAnalyzing,    /** Whether an analysis is taking place on the dataset */
         IsLocked,       /** Whether the dataset is locked */
 
         Count
@@ -50,7 +53,7 @@ public:
          * @param dataset Pointer to dataset to display item for
          * @param editable Whether the model item is editable or not
          */
-        Item(Dataset<DatasetImpl> dataset, bool editable = false);
+        Item(Dataset<DatasetImpl> DataHierarchyItem, bool editable = false);
 
         /**
          * Get model data for \p role
@@ -121,14 +124,14 @@ protected:
     };
 
     /** Standard model item class for displaying the dataset identifier */
-    class IdItem final : public Item {
+    class DatasetIdItem final : public Item {
     public:
 
         /**
          * Construct with \p dataset
          * @param dataset Pointer to dataset to display item for
          */
-        IdItem(Dataset<DatasetImpl> dataset);
+        DatasetIdItem(Dataset<DatasetImpl> dataset);
 
         /**
          * Get model data for \p role
@@ -146,7 +149,7 @@ protected:
             switch (role) {
                 case Qt::DisplayRole:
                 case Qt::EditRole:
-                    return "ID";
+                    return "Dataset ID";
 
                 case Qt::ToolTipRole:
                     return "The globally unique identifier of the dataset";
@@ -155,6 +158,8 @@ protected:
             return {};
         }
     };
+
+public:
 
     /** Standard model item class for displaying the dataset task progress */
     class ProgressItem final : public Item {
@@ -207,9 +212,18 @@ protected:
             return _taskAction;
         }
 
+        /**
+         * Create delegate editor widget as child of \p parent
+         * @param parent Pointer to delegate parent
+         * @return Pointer to created delegate editor widget
+         */
+        QWidget* createDelegateEditorWidget(QWidget* parent);
+
     private:
         gui::TaskAction     _taskAction;    /** Task action for use in item delegate (uses its built-in progress action) */
     };
+
+protected:
 
     /** Standard model item class for displaying the dataset group index */
     class GroupIndexItem final : public Item {
@@ -367,22 +381,29 @@ public:
      */
     QMimeData* mimeData(const QModelIndexList &indexes) const override;
 
+    /**
+     * Get item of \p ItemType by \p modelIndex
+     * @param modelIndex Item model index
+     * @return Pointer to item
+     */
     template<typename ItemType = Item>
     ItemType* getItem(const QModelIndex& modelIndex) {
         return dynamic_cast<ItemType*>(itemFromIndex(modelIndex));
     }
 
+private:
+
     /**
      * Add \p dataHierarchyItem to the model
-     * @param dataHierarchyItem Pointer to the data hierarchy item
+     * @param dataHierarchyItem Reference to the data hierarchy item
      */
-    void addDataHierarchyItem(DataHierarchyItem* dataHierarchyItem);
+    void addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem);
 
     /**
      * Remove a data hierarchy item from the model
      * @param parentModelIndex Model index of the parent data hierarchy item
      */
-    //bool removeDataHierarchyModelItem(const QModelIndex& modelIndex);
+     //bool removeDataHierarchyModelItem(const QModelIndex& modelIndex);
 };
 
 }

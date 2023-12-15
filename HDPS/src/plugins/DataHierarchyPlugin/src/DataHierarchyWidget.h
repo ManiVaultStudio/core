@@ -49,13 +49,15 @@ public:
         return _filterModel;
     }
 
-protected:
-
     /**
-     * Add a data hierarchy to the tree widget
-     * @param dataHierarchyItem Reference to the data hierarchy item
+     * Get hierarchy widget
+     * @return Reference to the hierarchy widget
      */
-    void addDataHierarchyItem(mv::DataHierarchyItem& dataHierarchyItem);
+    mv::gui::HierarchyWidget& getHierarchyWidget() {
+        return _hierarchyWidget;
+    }
+
+protected:
 
     /**
      * Get model index of the dataset

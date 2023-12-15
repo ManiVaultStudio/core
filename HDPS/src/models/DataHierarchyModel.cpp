@@ -7,12 +7,15 @@
 #include "DatasetsMimeData.h"
 #include "Set.h"
 
-#include <DataHierarchyItem.h>
+#include "DataHierarchyItem.h"
+#include "util/Exception.h"
 
 #include <QDebug>
 #include <QIcon>
 
 namespace mv {
+
+using namespace util;
 
 DataHierarchyModel::Item::Item(Dataset<DatasetImpl> dataset, bool editable /*= false*/) :
     QStandardItem(),
@@ -20,6 +23,10 @@ DataHierarchyModel::Item::Item(Dataset<DatasetImpl> dataset, bool editable /*= f
     _dataset(dataset)
 {
     Q_ASSERT(_dataset.isValid());
+
+    connect(&getDataset()->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, [this](bool locked) -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant DataHierarchyModel::Item::data(int role /*= Qt::UserRole + 1*/) const
@@ -99,7 +106,7 @@ void DataHierarchyModel::NameItem::setData(const QVariant& value, int role /* = 
     }
 }
 
-DataHierarchyModel::IdItem::IdItem(Dataset<DatasetImpl> dataset) :
+DataHierarchyModel::DatasetIdItem::DatasetIdItem(Dataset<DatasetImpl> dataset) :
     Item(dataset)
 {
     connect(getDataset().get(), &gui::WidgetAction::idChanged, this, [this](const QString& id) -> void {
@@ -107,7 +114,7 @@ DataHierarchyModel::IdItem::IdItem(Dataset<DatasetImpl> dataset) :
     });
 }
 
-QVariant DataHierarchyModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant DataHierarchyModel::DatasetIdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -128,17 +135,17 @@ DataHierarchyModel::ProgressItem::ProgressItem(Dataset<DatasetImpl> dataset) :
     Item(dataset),
     _taskAction(this, "Task")
 {
-    _taskAction.setTask(getDatasetTask());
+    _taskAction.setTask(&getDatasetTask());
 
-    connect(getDatasetTask(), &Task::progressChanged, this, [this]() -> void {
+    connect(&getDatasetTask(), &Task::progressChanged, this, [this]() -> void {
         emitDataChanged();
     });
 
-    connect(getDatasetTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
+    connect(&getDatasetTask(), &Task::progressDescriptionChanged, this, [this]() -> void {
         emitDataChanged();
     });
 
-    connect(getDatasetTask(), &Task::statusChanged, this, [this]() -> void {
+    connect(&getDatasetTask(), &Task::statusChanged, this, [this]() -> void {
         emitDataChanged();
     });
 }
@@ -150,7 +157,7 @@ QVariant DataHierarchyModel::ProgressItem::data(int role /*= Qt::UserRole + 1*/)
             return getDataset().isValid() ? const_cast<Dataset<DatasetImpl>&>(getDataset())->getTask().getProgress() : .0f;
 
         case Qt::DisplayRole:
-            return QString::number(data(Qt::EditRole).toFloat());
+            break;
 
         case Qt::ToolTipRole:
             return "Dataset task progress: " + data(Qt::DisplayRole).toString();
@@ -160,6 +167,11 @@ QVariant DataHierarchyModel::ProgressItem::data(int role /*= Qt::UserRole + 1*/)
     }
 
     return Item::data(role);
+}
+
+QWidget* DataHierarchyModel::ProgressItem::createDelegateEditorWidget(QWidget* parent)
+{
+    return _taskAction.getProgressAction().createWidget(parent);
 }
 
 DataHierarchyModel::GroupIndexItem::GroupIndexItem(Dataset<DatasetImpl> dataset) :
@@ -246,9 +258,6 @@ QVariant DataHierarchyModel::IsGroupItem::data(int role /*= Qt::UserRole + 1*/) 
 DataHierarchyModel::IsLockedItem::IsLockedItem(Dataset<DatasetImpl> dataset) :
     Item(dataset)
 {
-    connect(&getDataset()->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, [this](bool locked) -> void {
-        emitDataChanged();
-    });
 }
 
 QVariant DataHierarchyModel::IsLockedItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -263,7 +272,7 @@ QVariant DataHierarchyModel::IsLockedItem::data(int role /*= Qt::UserRole + 1*/)
         }
 
         case Qt::DisplayRole:
-            return data(Qt::EditRole).toBool() ? "yes" : "no";
+            break;
 
         case Qt::ToolTipRole:
             return "Dataset is a locked: " + data(Qt::DisplayRole).toString();
@@ -278,9 +287,32 @@ QVariant DataHierarchyModel::IsLockedItem::data(int role /*= Qt::UserRole + 1*/)
     return Item::data(role);
 }
 
+DataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
+    QList<QStandardItem*>()
+{
+    append(new NameItem(dataset));
+    append(new DatasetIdItem(dataset));
+    append(new ProgressItem(dataset));
+    append(new GroupIndexItem(dataset));
+    append(new IsGroupItem(dataset));
+    append(new IsLockedItem(dataset));
+}
+
 DataHierarchyModel::DataHierarchyModel(QObject* parent) :
     QStandardItemModel(parent)
 {
+    setColumnCount(static_cast<int>(Column::Count));
+
+    connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAdded, this, [this](DataHierarchyItem& dataHierarchyItem) -> void {
+        addDataHierarchyItem(dataHierarchyItem);
+    });
+
+    connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAboutToBeRemoved, this, [this](const Dataset<DatasetImpl>& dataset) {
+        //removeDataHierarchyItem(dataset->getDataHierarchyItem());
+    });
+
+    for (const auto topLevelItem : dataHierarchy().getTopLevelItems())
+        addDataHierarchyItem(*topLevelItem);
 }
 
 Qt::DropActions DataHierarchyModel::supportedDragActions() const
@@ -315,8 +347,20 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
         case Column::Name:
             return NameItem::headerData(orientation, role);
 
-        case Column::ID:
-            return IdItem::headerData(orientation, role);
+        case Column::DatasetId:
+            return DatasetIdItem::headerData(orientation, role);
+
+        case Column::Progress:
+            return ProgressItem::headerData(orientation, role);
+
+        case Column::GroupIndex:
+            return GroupIndexItem::headerData(orientation, role);
+
+        case Column::IsGroup:
+            return IsGroupItem::headerData(orientation, role);
+
+        case Column::IsLocked:
+            return IsLockedItem::headerData(orientation, role);
 
         default:
             break;
@@ -336,41 +380,31 @@ QMimeData* DataHierarchyModel::mimeData(const QModelIndexList& indexes) const
     return new DatasetsMimeData(datasets);
 }
 
-void DataHierarchyModel::addDataHierarchyItem(DataHierarchyItem* dataHierarchyItem)
+void DataHierarchyModel::addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem)
 {
-    Q_ASSERT(dataHierarchyItem != nullptr);
+    try {
+        if (dataHierarchyItem.hasParent()) {
+            const auto matches = match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getParent().getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive);
 
-    if (!dataHierarchyItem)
-        return;
+            if (matches.isEmpty())
+                throw std::runtime_error("Parent data hierarchy item not found in model");
 
-    if (dataHierarchyItem->hasParent()) {
-
+            itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::Name)))->appendRow(Row(dataHierarchyItem.getDatasetReference()));
+        }
+        else {
+            appendRow(Row(dataHierarchyItem.getDatasetReference()));
+        }
     }
-    else {
-        appendRow(Row(dataHierarchyItem->getDatasetReference()));
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to add data hierarchy item to the data hierarchy model", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to add data hierarchy item to the data hierarchy model");
     }
 }
 
-//bool DataHierarchyModel::addDataHierarchyModelItem(const QModelIndex& parentModelIndex, mv::DataHierarchyItem& dataHierarchyItem)
-//{
-//    auto parentItem = !parentModelIndex.isValid() ? _rootItem : getItem(parentModelIndex, Qt::DisplayRole);
-//
-//    emit layoutAboutToBeChanged();
-//    {
-//        beginInsertRows(parentModelIndex, rowCount(parentModelIndex), rowCount(parentModelIndex) + 1);
-//        {
-//            parentItem->addChild(new DataHierarchyModelItem(&dataHierarchyItem));
-//        }
-//        endInsertRows();
-//    }
-//    emit layoutChanged();
-//
-//    for (auto child : dataHierarchyItem.getChildren())
-//        addDataHierarchyModelItem(index(rowCount(parentModelIndex) - 1, 0, parentModelIndex), *child);
-//
-//    return true;
-//}
-//
 //bool DataHierarchyModel::removeDataHierarchyModelItem(const QModelIndex& modelIndex)
 //{
 //    auto dataHierarchyModelItem = static_cast<DataHierarchyModelItem*>(modelIndex.internalPointer());
@@ -384,137 +418,4 @@ void DataHierarchyModel::addDataHierarchyItem(DataHierarchyItem* dataHierarchyIt
 //    return true;
 //}
 
-DataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
-    QList<QStandardItem*>()
-{
-    append(new NameItem(dataset));
-    append(new IdItem(dataset));
-    append(new ProgressItem(dataset));
-    append(new GroupIndexItem(dataset));
-    append(new IsGroupItem(dataset));
-    append(new IsLockedItem(dataset));
 }
-
-}
-
-
-
-//QVariant DataHierarchyModel::data(const QModelIndex& index, int role) const
-//{
-//    if (!index.isValid())
-//        return QVariant();
-//
-//    auto item = static_cast<DataHierarchyModelItem*>(index.internalPointer());
-//
-//    return item->getDataAtColumn(index.column(), role);
-//}
-//
-//bool DataHierarchyModel::setData(const QModelIndex& index, const QVariant& value, int role /*= Qt::EditRole*/)
-//{
-//    const auto column = static_cast<DataHierarchyModelItem::Column>(index.column());
-//
-//    auto dataHierarchyModelItem = static_cast<DataHierarchyModelItem*>((void*)index.internalPointer());
-//    
-//    switch (column) {
-//        case DataHierarchyModelItem::Column::Name:
-//            dataHierarchyModelItem->renameDataset(value.toString());
-//            break;
-//
-//        case DataHierarchyModelItem::Column::GUID:
-//        case DataHierarchyModelItem::Column::Info:
-//        case DataHierarchyModelItem::Column::Progress:
-//            break;
-//
-//        case DataHierarchyModelItem::Column::GroupIndex:
-//            dataHierarchyModelItem->setGroupIndex(value.toInt());
-//            break;
-//
-//        case DataHierarchyModelItem::Column::IsGroup:
-//        case DataHierarchyModelItem::Column::IsAnalyzing:
-//        case DataHierarchyModelItem::Column::IsLocked:
-//            break;
-//
-//        default:
-//            break;
-//    }
-//
-//    emit dataChanged(index, index);
-//
-//    return true;
-//}
-//
-
-//if (orientation == Qt::Horizontal) {
-//    switch (role) {
-//        case Qt::DisplayRole:
-//        {
-//            switch (static_cast<Column>(section))
-//            {
-//                case Column::Progress:
-//                    return "Progress";
-//
-//                default:
-//                    break;
-//            }
-//
-//            break;
-//        }
-//
-//        case Qt::EditRole:
-//        {
-//            switch (static_cast<Column>(section))
-//            {
-//                case Column::Progress:
-//                    return "Progress";
-//
-//                case Column::GroupIndex:
-//                    return "Group ID";
-//
-//                case Column::IsGroup:
-//                    return "Is group";
-//
-//                case Column::IsAnalyzing:
-//                    return "Is analyzing";
-//
-//                case Column::IsLocked:
-//                    return "Is locked";
-//
-//                default:
-//                    break;
-//            }
-//
-//            break;
-//        }
-//
-//        case Qt::ToolTipRole:
-//        {
-//            const auto iconSize = QSize(14, 14);
-//
-//            switch (static_cast<Column>(section))
-//            {
-//                case Column::Progress:
-//                    return "Task progress";
-//
-//                case Column::GroupIndex:
-//                    return "Dataset group index";
-//
-//                case Column::IsGroup:
-//                    return "Whether the dataset is composed of other datasets";
-//
-//                case Column::IsAnalyzing:
-//                    return "Whether an analysis is taking place on the dataset";
-//
-//                case Column::IsLocked:
-//                    return "Whether the dataset is locked";
-//
-//                default:
-//                    break;
-//            }
-//
-//            break;
-//        }
-//
-//        default:
-//            break;
-//    }
-//}
