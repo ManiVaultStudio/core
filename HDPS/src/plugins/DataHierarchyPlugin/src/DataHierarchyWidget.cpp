@@ -55,13 +55,15 @@ public:
         setLayout(layout);
 
         updateEditorWidgetVisibility();
+        updateEditorWidgetReadOnly();
 
         connect(_progressItem->getTaskAction().getTask(), &Task::statusChanged, this, &ProgressItemDelegateEditorWidget::updateEditorWidgetVisibility);
+        connect(&_progressItem->getDataset()->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, &ProgressItemDelegateEditorWidget::updateEditorWidgetReadOnly);
     }
 
 private:
 
-    /** Updates the editor widget based on the dataset task status */
+    /** Updates the editor widget visibility based on the dataset task status */
     void updateEditorWidgetVisibility() {
         const auto datasetTaskStatus = _progressItem->getDatasetTask().getStatus();
 
@@ -69,6 +71,11 @@ private:
             _progressEditorWidget->setVisible(true);
         else
             _progressEditorWidget->setVisible(false);
+    }
+
+    /** Updates the editor widget read-only state based on the dataset task status */
+    void updateEditorWidgetReadOnly() {
+        setEnabled(!_progressItem->getDataset()->isLocked());
     }
 
 private:

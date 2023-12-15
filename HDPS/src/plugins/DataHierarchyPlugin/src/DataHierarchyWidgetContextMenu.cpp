@@ -23,9 +23,9 @@ using namespace mv::util;
 using namespace mv::plugin;
 using namespace mv::gui;
 
-DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, Datasets datasets) :
+DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, Datasets selectedDatasets) :
     QMenu(parent),
-    _selectedDatasets(datasets)
+    _selectedDatasets(selectedDatasets)
 {
     addMenusForPluginType(plugin::Type::ANALYSIS);
     addMenusForPluginType(plugin::Type::LOADER);
@@ -38,7 +38,7 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
     for (const auto& selectedDataset : _selectedDatasets)
         dataTypes.insert(selectedDataset->getDataType());
 
-    if (datasets.count() >= 2 && dataTypes.count() == 1) {
+    if (_selectedDatasets.count() >= 2 && dataTypes.count() == 1) {
         addSeparator();
         addAction(getGroupAction());
     }
@@ -49,29 +49,31 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
         addMenu(getUnlockMenu());
     }
 
-    addSeparator();
-    
-    auto removeDatasetsAction = new TriggerAction(this, QString("Remove dataset%1").arg(_selectedDatasets.count() >= 2 ? "s" : ""));
+    if (!_selectedDatasets.isEmpty()) {
+        addSeparator();
 
-    removeDatasetsAction->setIconByName("trash");
+        auto removeDatasetsAction = new TriggerAction(this, QString("Remove dataset%1").arg(_selectedDatasets.count() >= 2 ? "s" : ""));
 
-    connect(removeDatasetsAction, &TriggerAction::triggered, this, [this]() -> void {
-        Datasets datasetsToRemove;
+        removeDatasetsAction->setIconByName("trash");
 
-        DataHierarchyItems selectedDataHierarchyItems;
+        connect(removeDatasetsAction, &TriggerAction::triggered, this, [this]() -> void {
+            Datasets datasetsToRemove;
 
-        for (auto& selectedDataset : _selectedDatasets)
-            selectedDataHierarchyItems << &selectedDataset->getDataHierarchyItem();
+            DataHierarchyItems selectedDataHierarchyItems;
 
-        for (auto& selectedDataset : _selectedDatasets)
-            if (!selectedDataset->getDataHierarchyItem().isChildOf(selectedDataHierarchyItems))
-                datasetsToRemove << selectedDataset;
+            for (auto& selectedDataset : _selectedDatasets)
+                selectedDataHierarchyItems << &selectedDataset->getDataHierarchyItem();
 
-        for (auto datasetToRemove : datasetsToRemove)
-            mv::data().removeDataset(datasetToRemove);
-    });
+            for (auto& selectedDataset : _selectedDatasets)
+                if (!selectedDataset->getDataHierarchyItem().isChildOf(selectedDataHierarchyItems))
+                    datasetsToRemove << selectedDataset;
 
-    addAction(removeDatasetsAction);
+            for (auto datasetToRemove : datasetsToRemove)
+                mv::data().removeDataset(datasetToRemove);
+        });
+
+        addAction(removeDatasetsAction);
+    }
 }
 
 void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginType)

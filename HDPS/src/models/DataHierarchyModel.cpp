@@ -234,7 +234,7 @@ QVariant DataHierarchyModel::IsGroupItem::data(int role /*= Qt::UserRole + 1*/) 
         }
 
         case Qt::DisplayRole:
-            return data(Qt::EditRole).toBool() ? "yes" : "no";
+            break;
 
         case Qt::ToolTipRole:
             return "Dataset is a group: " + data(Qt::DisplayRole).toString();
