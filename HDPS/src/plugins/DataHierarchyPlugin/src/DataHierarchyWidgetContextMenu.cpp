@@ -121,7 +121,7 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
     }
             
     //menus["Analyze"]->setTitle(mv::plugin::getPluginTypeName(pluginType));
-    //menus["Analyze"]->setIcon(mv::plugin::getPluginTypeIcon(pluginType));
+    //menus["Import"]->setIcon(mv::plugin::getPluginTypeIcon(pluginType));
 }
 
 QAction* DataHierarchyWidgetContextMenu::getGroupAction()

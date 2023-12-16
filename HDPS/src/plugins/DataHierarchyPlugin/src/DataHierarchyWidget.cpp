@@ -45,6 +45,11 @@ public:
         _progressItem(progressItem),
         _progressEditorWidget(nullptr)
     {
+        Q_ASSERT(progressItem != nullptr);
+
+        if (progressItem == nullptr)
+            return;
+
         _progressEditorWidget = progressItem->getTaskAction().getProgressAction().createWidget(this);
 
         auto layout = new QVBoxLayout();
@@ -75,7 +80,8 @@ private:
 
     /** Updates the editor widget read-only state based on the dataset task status */
     void updateEditorWidgetReadOnly() {
-        setEnabled(!_progressItem->getDataset()->isLocked());
+        qDebug() << __FUNCTION__ << _progressItem->getDataset()->getGuiName() << _progressItem->getDataset()->isLocked();
+        _progressEditorWidget->setEnabled(!_progressItem->getDataset()->isLocked());
     }
 
 private:

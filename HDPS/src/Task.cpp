@@ -1463,7 +1463,7 @@ void Task::privateEmitProgressTextChanged()
 void Task::addToTaskManager()
 {
 #ifdef _DEBUG
-    qDebug() << "Manually adding" << getName() << "to the task manager (this approach is off-label)";
+    qDebug() << "Manually adding task" << getName() << "to the task manager (this approach is off-label)";
 #endif
 
     privateAddToTaskManager();
