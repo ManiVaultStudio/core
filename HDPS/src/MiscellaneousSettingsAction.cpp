@@ -10,13 +10,16 @@ namespace mv
 
 MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Miscellaneous"),
-    _ignoreLoadingErrorsAction(this, "Ignore loading errors", true)
+    _ignoreLoadingErrorsAction(this, "Ignore loading errors", true),
+    _confirmDatasetsRemovalAction(this, "Ask for permission to remove dataset(s)", true)
 {
     setShowLabels(false);
 
     addAction(&_ignoreLoadingErrorsAction);
+    addAction(&_confirmDatasetsRemovalAction);
 
     _ignoreLoadingErrorsAction.setSettingsPrefix(getSettingsPrefix() + "IgnoreLoadingErrors");
+    _confirmDatasetsRemovalAction.setSettingsPrefix(getSettingsPrefix() + "AskPermissionRemoval");
 }
 
 }

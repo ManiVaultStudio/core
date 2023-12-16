@@ -8,7 +8,10 @@
 #include <actions/TriggerAction.h>
 #include <actions/HorizontalGroupAction.h>
 
+#include <widgets/HierarchyWidget.h>
+
 #include <QDialog>
+#include <QStandardItemModel>
 
 using namespace mv::gui;
 
@@ -24,14 +27,14 @@ class ConfirmDatasetsRemovalDialog : public QDialog
 public:
 
     /**
-     * Construct with \p parent widget
+     * Construct with pointer to \p parent widget
      * @param parent Pointer to parent widget
      */
-    ConfirmDatasetsRemovalDialog(QWidget* parent);
+    ConfirmDatasetsRemovalDialog(QWidget* parent = nullptr);
 
     /** Get preferred size */
     QSize sizeHint() const override {
-        return QSize(350, 150);
+        return QSize(400, 400);
     }
 
     /** Get minimum size hint*/
@@ -40,8 +43,9 @@ public:
     }
 
 protected:
-    //ToggleAction    _alwaysAskPermissionAction;       /** Whether to always ask permission prior to removing datasets */
-    TriggerAction           _removeAction;              /** Trigger action to remove the dataset (s) */
-    TriggerAction           _cancelAction;              /** Trigger action to cancel the removal and the dialog */
-    HorizontalGroupAction   _buttonsGroupAction;        /** Group action to layout out the previous buttons horizontally */
+    QStandardItemModel      _datasetsToRemoveModel;         /** Hierarchical model which contains all datasets which need to be removed */
+    HierarchyWidget         _datasetsHierarchyWidget;       /** Hierarchy widget for showing the model contents */
+    TriggerAction           _removeAction;                  /** Trigger action to remove the dataset (s) */
+    TriggerAction           _cancelAction;                  /** Trigger action to cancel the removal and the dialog */
+    HorizontalGroupAction   _buttonsGroupAction;            /** Group action to layout out the previous buttons horizontally */
 };

@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ConfirmDatasetsRemovalDialog.h"
+#include "CoreInterface.h"
 
 #include <Application.h>
 
@@ -11,8 +12,10 @@
 
 using namespace mv;
 
-ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(QWidget* parent) :
+ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
+    _datasetsToRemoveModel(),
+    _datasetsHierarchyWidget(this, "Dataset", _datasetsToRemoveModel, nullptr, false),
     _removeAction(this, "Remove"),
     _cancelAction(this, "Cancel"),
     _buttonsGroupAction(this, "Buttons group")
@@ -21,9 +24,12 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(QWidget* parent) :
     setWindowTitle("About to remove dataset(s)");
     setModal(true);
 
-    //// Check whether to show the dialog again or not
-    //_alwaysAskPermissionAction.setChecked(true);
+    _datasetsHierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
 
+    _removeAction.setToolTip("Remove the dataset(s)");
+    _cancelAction.setToolTip("Do not remove the dataset(s) and quit this dialog");
+
+    _buttonsGroupAction.addAction(&settings().getMiscellaneousSettings().getConfirmDatasetsRemovalAction());
     _buttonsGroupAction.addStretch();
     _buttonsGroupAction.addAction(&_removeAction);
     _buttonsGroupAction.addAction(&_cancelAction);
@@ -32,18 +38,9 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(QWidget* parent) :
 
     setLayout(layout);
 
-    //// Ask for confirmation question
-    //const auto confirmationQuestion = QString("You made changes to %1 cluster%2, would you like to discard these changes?").arg(QString::number(numberOfUserModifiedClusters), numberOfUserModifiedClusters > 1 ? "s" : "");
-
-    //layout->addWidget(new QLabel(confirmationQuestion));
-
-    layout->addStretch(1);
+    layout->addWidget(&_datasetsHierarchyWidget);
     layout->addWidget(_buttonsGroupAction.createWidget(this));
 
-    //connect(&_alwaysAskPermissionAction, &ToggleAction::toggled, this, [this](bool toggled) {
-    //    Application::current()->setSetting("OverwriteClustersAskConfirmation", toggled);
-    //});
-
-    //connect(&_discardAction, &TriggerAction::triggered, this, &OverwriteClustersConfirmationDialog::accept);
-    //connect(&_cancelAction, &TriggerAction::triggered, this, &OverwriteClustersConfirmationDialog::reject);
+    connect(&_removeAction, &TriggerAction::triggered, this, &ConfirmDatasetsRemovalDialog::accept);
+    connect(&_cancelAction, &TriggerAction::triggered, this, &ConfirmDatasetsRemovalDialog::reject);
 }
