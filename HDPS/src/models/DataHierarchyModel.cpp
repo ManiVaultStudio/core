@@ -383,6 +383,9 @@ QMimeData* DataHierarchyModel::mimeData(const QModelIndexList& indexes) const
 void DataHierarchyModel::addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem)
 {
     try {
+        if (!match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive).isEmpty())
+            return;
+
         if (dataHierarchyItem.hasParent()) {
             const auto matches = match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getParent().getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive);
 
@@ -394,6 +397,9 @@ void DataHierarchyModel::addDataHierarchyItem(DataHierarchyItem& dataHierarchyIt
         else {
             appendRow(Row(dataHierarchyItem.getDatasetReference()));
         }
+
+        for (auto childDataHierarchyItem : dataHierarchyItem.getChildren(true))
+            addDataHierarchyItem(*childDataHierarchyItem);
     }
     catch (std::exception& e)
     {

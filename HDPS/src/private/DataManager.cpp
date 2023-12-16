@@ -69,9 +69,14 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 
         qDebug() << "Removing" << dataset->text() << "from the data manager";
 
-        ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog(Application::getMainWindow());
+        if (settings().getMiscellaneousSettings().getConfirmDatasetsRemovalAction().isChecked()) {
+            ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog(Application::getMainWindow());
 
-        qDebug() << confirmDatasetsRemovalDialog.exec();
+            if (confirmDatasetsRemovalDialog.exec() == QDialog::Rejected)
+                return;
+        }
+
+        return;
 
         const auto guid = dataset->getId();
         const auto type = dataset->getDataType();
