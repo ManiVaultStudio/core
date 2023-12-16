@@ -6,6 +6,7 @@
 
 #include "GroupAction.h"
 #include "ToolbarActionItem.h"
+#include "StretchAction.h"
 
 namespace mv::gui {
 
@@ -65,6 +66,13 @@ public: // Actions management
      * @param action Pointer to action to add
      */
     virtual void removeAction(WidgetAction* action) final;
+
+    /**
+     * Add stretch action to the group with \p stretch factor
+     * @param stretch Stretch factor
+     * @return Pointer to stretch action (the toolbar remains the owner)
+     */
+    virtual StretchAction* addStretch(std::int32_t stretch = 1) final;
 
     /**
      * Get actions

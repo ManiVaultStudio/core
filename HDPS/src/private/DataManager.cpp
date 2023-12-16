@@ -5,8 +5,11 @@
 #include "DataManager.h"
 #include "RawData.h"
 #include "DataHierarchyItem.h"
+#include "ConfirmDatasetsRemovalDialog.h"
 
 #include "util/Exception.h"
+
+#include <QMainWindow>
 
 #include <cassert>
 #include <iostream>
@@ -65,6 +68,10 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
             throw std::runtime_error("Dataset smart pointer is invalid");
 
         qDebug() << "Removing" << dataset->text() << "from the data manager";
+
+        ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog(Application::getMainWindow());
+
+        qDebug() << confirmDatasetsRemovalDialog.exec();
 
         const auto guid = dataset->getId();
         const auto type = dataset->getDataType();

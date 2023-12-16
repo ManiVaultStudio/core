@@ -121,6 +121,16 @@ public:
         return QIcon();
     }
 
+public:
+
+    /**
+     * Get manager settings prefix
+     * @return Settings manager prefix
+     */
+    virtual QString getSettingsPrefix() const final {
+        return QString("Managers/%1/").arg(getSerializationName());
+    }
+
 public: // Action getters
 
     gui::LockingAction& getLockingAction() { return *_lockingAction; }

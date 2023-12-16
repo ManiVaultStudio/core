@@ -66,6 +66,15 @@ void ToolbarAction::removeAction(WidgetAction* action)
     }
 }
 
+StretchAction* ToolbarAction::addStretch(std::int32_t stretch /*= 1*/)
+{
+    auto stretchAction = new StretchAction(this, "Stretch", stretch);
+
+    addAction(stretchAction);
+
+    return stretchAction;
+}
+
 WidgetActions ToolbarAction::getActions()
 {
     return _groupAction.getActions();
