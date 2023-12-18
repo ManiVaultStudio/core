@@ -26,7 +26,6 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _children(),
     _selected(false),
     _expanded(true),
-    _icon(),
     _actions()
 {
     const auto synchronizeText = [this]() -> void {
@@ -222,16 +221,6 @@ void DataHierarchyItem::setExpanded(bool expanded)
     _expanded = expanded;
 
     emit expandedChanged(_expanded);
-}
-
-QIcon DataHierarchyItem::getIcon() const
-{
-    return _icon;
-}
-
-void DataHierarchyItem::setIcon(const QIcon& icon)
-{
-    _icon = icon;
 }
 
 void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)

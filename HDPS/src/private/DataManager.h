@@ -77,10 +77,19 @@ public:
     void addSelection(const QString& dataName, Dataset<DatasetImpl> selection) override;
 
     /**
-     * Removes a Dataset, other datasets derived from this dataset are converted to non-derived data (notifies listeners)
+     * Remove \p dataset from the manager
+     * Other datasets derived from this dataset are converted to non-derived data
      * @param dataset Smart pointer to dataset to remove
      */
     void removeDataset(Dataset<DatasetImpl> dataset) override;
+
+    /**
+     * Remove \p dataset supervised (using a user interface)
+     * Interface allows the user to select which descendants should be removed
+     * This method calls AbstractDataManager::removeDataset()
+     * @param dataset Smart pointer to dataset to remove
+     */
+    void removeDatasetSupervised(Dataset<DatasetImpl> dataset) override;
 
     /**
      * Get raw data by name

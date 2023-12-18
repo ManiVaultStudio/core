@@ -217,17 +217,6 @@ public: // Expanded
      */
     void setExpanded(bool expanded);
 
-public: // Named icons
-
-    /** Get icon */
-    QIcon getIcon() const;
-
-    /**
-     * Set icon
-     * @param icon Icon
-     */
-    void setIcon(const QIcon& icon);
-
 public: // Serialization
 
     /**
@@ -301,18 +290,18 @@ protected:
     DataHierarchyItems          _children;      /** Pointers to child items (if any) */
     bool                        _selected;      /** Whether the hierarchy item is selected */
     bool                        _expanded;      /** Whether the item is expanded or not (when it has children) */
-    QIcon                       _icon;          /** Icon */
-    mv::gui::WidgetActions    _actions;       /** Widget actions */
+    //QIcon                       _icon;          /** Icon */
+    mv::gui::WidgetActions      _actions;       /** Widget actions */
 
 protected:
     friend class DataHierarchyManager;
     friend class DataManager;
 
     /** Single shot task update timer interval */
-    static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL = 100;
+    //static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL = 100;
 
     /** Single shot message disappear timer interval */
-    static constexpr std::uint32_t MESSAGE_DISAPPEAR_INTERVAL = 1500;
+    //static constexpr std::uint32_t MESSAGE_DISAPPEAR_INTERVAL = 1500;
 };
 
 }

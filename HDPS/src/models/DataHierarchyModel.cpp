@@ -82,7 +82,7 @@ QVariant DataHierarchyModel::NameItem::data(int role /*= Qt::UserRole + 1*/) con
             if (!getDataset().isValid())
                 break;
 
-            return getDataset()->getDataHierarchyItem().getIcon();
+            return getDataset()->getIcon();
         }
 
         default:

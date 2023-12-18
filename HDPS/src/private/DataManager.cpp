@@ -64,30 +64,12 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 {
     try
     {
+#ifdef _DEBUG
+        qDebug() << "Remove" << dataset->text() << "from the data manager";
+#endif
+
         if (!dataset.isValid())
             throw std::runtime_error("Dataset smart pointer is invalid");
-
-        qDebug() << "Removing" << dataset->text() << "from the data manager";
-
-        DataHierarchyItems dataHierarchyItems{ &dataset->getDataHierarchyItem() };
-
-        dataHierarchyItems << dataset->getDataHierarchyItem().getChildren(true);
-
-        std::sort(dataHierarchyItems.begin(), dataHierarchyItems.end(), [](auto dataHierarchyItemA, auto dataHierarchyItemB) -> bool {
-            return dataHierarchyItemA->getDepth() < dataHierarchyItemB->getDepth();
-        });
-
-        for (auto dataHierarchyItem : dataHierarchyItems)
-            qDebug() << dataHierarchyItem->text();
-
-        if (settings().getMiscellaneousSettings().getConfirmDatasetsRemovalAction().isChecked()) {
-            ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog(Application::getMainWindow());
-
-            if (confirmDatasetsRemovalDialog.exec() == QDialog::Rejected)
-                return;
-        }
-
-        return;
 
         const auto guid = dataset->getId();
         const auto type = dataset->getDataType();
@@ -117,6 +99,45 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
     }
     catch (...) {
         exceptionMessageBox("Unable to remove dataset");
+    }
+}
+
+void DataManager::removeDatasetSupervised(Dataset<DatasetImpl> dataset)
+{
+    try {
+#ifdef _DEBUG
+        qDebug() << "Remove" << dataset->text() << "from the data manager supervised";
+#endif
+
+        if (!dataset.isValid())
+            throw std::runtime_error("Dataset smart pointer is invalid");
+
+        if (settings().getMiscellaneousSettings().getConfirmDatasetsRemovalAction().isChecked()) {
+            ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog(Application::getMainWindow());
+
+            if (confirmDatasetsRemovalDialog.exec() == QDialog::Rejected)
+                return;
+        }
+
+        DataHierarchyItems dataHierarchyItems{ &dataset->getDataHierarchyItem() };
+
+        dataHierarchyItems << dataset->getDataHierarchyItem().getChildren(true);
+
+        std::sort(dataHierarchyItems.begin(), dataHierarchyItems.end(), [](auto dataHierarchyItemA, auto dataHierarchyItemB) -> bool {
+            return dataHierarchyItemA->getDepth() < dataHierarchyItemB->getDepth();
+        });
+
+        std::reverse(dataHierarchyItems.begin(), dataHierarchyItems.end());
+
+        for (auto dataHierarchyItem : dataHierarchyItems)
+            removeDataset(dataHierarchyItem->getDataset());
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to remove dataset supervised", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to remove dataset supervised");
     }
 }
 
