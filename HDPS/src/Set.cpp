@@ -56,16 +56,18 @@ DataHierarchyItem& DatasetImpl::getDataHierarchyItem()
 
 mv::Dataset<mv::DatasetImpl> DatasetImpl::getParent() const
 {
-    return getDataHierarchyItem().getParent().getDataset();
+    if (!getDataHierarchyItem().hasParent())
+        return {};
+
+    return getDataHierarchyItem().getParent()->getDataset();
 }
 
-QVector<Dataset<DatasetImpl>> DatasetImpl::getChildren(const QVector<DataType>& dataTypes /*= QVector<DataType>()*/) const
+QVector<Dataset<DatasetImpl>> DatasetImpl::getChildren(const QVector<DataType>& dataTypes /*= QVector<DataType>()*/, bool recursively /*= true*/) const
 {
     QVector<Dataset<DatasetImpl>> children;
 
-    for (auto dataHierarchyChild : getDataHierarchyItem().getChildren())
-        if (dataTypes.contains(dataHierarchyChild->getDataType()))
-            children << dataHierarchyChild->getDataset();
+    for (auto dataHierarchyChild : getDataHierarchyItem().getChildren(true))
+        children << dataHierarchyChild->getDataset();
 
     return children;
 }
@@ -438,6 +440,16 @@ QString DatasetImpl::getRawDataSizeHumanReadable() const
 DatasetTask& DatasetImpl::getTask()
 {
     return _task;
+}
+
+void DatasetImpl::setAboutToBeRemoved(bool aboutToBeRemoved /*= true*/)
+{
+    _aboutToBeRemoved = aboutToBeRemoved;
+}
+
+bool DatasetImpl::isAboutToBeRemoved() const
+{
+    return _aboutToBeRemoved;
 }
 
 QString DatasetImpl::getLocation() const

@@ -123,7 +123,7 @@ public:
      */
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
         if (static_cast<DataHierarchyModel::Column>(index.column()) != DataHierarchyModel::Column::Progress)
-            return nullptr;
+            return QStyledItemDelegate::createEditor(parent, option, index);
 
         const auto sourceModelIndex = _dataHierarchyWidget->getFilterModel().mapToSource(index);
         const auto progressItem     = static_cast<DataHierarchyModel::ProgressItem*>(_dataHierarchyWidget->getModel().itemFromIndex(sourceModelIndex));

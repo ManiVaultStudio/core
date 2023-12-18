@@ -69,6 +69,17 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 
         qDebug() << "Removing" << dataset->text() << "from the data manager";
 
+        DataHierarchyItems dataHierarchyItems{ &dataset->getDataHierarchyItem() };
+
+        dataHierarchyItems << dataset->getDataHierarchyItem().getChildren(true);
+
+        std::sort(dataHierarchyItems.begin(), dataHierarchyItems.end(), [](auto dataHierarchyItemA, auto dataHierarchyItemB) -> bool {
+            return dataHierarchyItemA->getDepth() < dataHierarchyItemB->getDepth();
+        });
+
+        for (auto dataHierarchyItem : dataHierarchyItems)
+            qDebug() << dataHierarchyItem->text();
+
         if (settings().getMiscellaneousSettings().getConfirmDatasetsRemovalAction().isChecked()) {
             ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog(Application::getMainWindow());
 
@@ -80,6 +91,8 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 
         const auto guid = dataset->getId();
         const auto type = dataset->getDataType();
+
+        dataset->setAboutToBeRemoved();
 
         events().notifyDatasetAboutToBeRemoved(dataset);
         {

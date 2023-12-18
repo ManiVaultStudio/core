@@ -24,6 +24,8 @@ DataHierarchyModel::Item::Item(Dataset<DatasetImpl> dataset, bool editable /*= f
 {
     Q_ASSERT(_dataset.isValid());
 
+    setEditable(editable);
+
     connect(&getDataset()->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, [this](bool locked) -> void {
         emitDataChanged();
     });
@@ -320,26 +322,6 @@ Qt::DropActions DataHierarchyModel::supportedDragActions() const
     return Qt::CopyAction | Qt::MoveAction;
 }
 
-//Qt::ItemFlags DataHierarchyModel::flags(const QModelIndex& index) const
-//{
-//    if (!index.isValid())
-//        return Qt::NoItemFlags;
-//
-//    auto itemFlags = Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
-//
-//    auto dataHierarchyModelItem = static_cast<DataHierarchyModelItem*>(index.internalPointer());
-//
-//    const auto itemIsLocked = dataHierarchyModelItem->getDataAtColumn(DataHierarchyModelItem::Column::IsLocked, Qt::EditRole).toBool();
-//
-//    if (!itemIsLocked && static_cast<DataHierarchyModelItem::Column>(index.column()) == DataHierarchyModelItem::Column::Name)
-//        itemFlags |= Qt::ItemIsEditable;
-//
-//    if (!itemIsLocked && static_cast<DataHierarchyModelItem::Column>(index.column()) == DataHierarchyModelItem::Column::GroupIndex)
-//        itemFlags |= Qt::ItemIsEditable;
-//
-//    return itemFlags;
-//}
-
 QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     switch (static_cast<Column>(section))
@@ -387,7 +369,7 @@ void DataHierarchyModel::addDataHierarchyItem(DataHierarchyItem& dataHierarchyIt
             return;
 
         if (dataHierarchyItem.hasParent()) {
-            const auto matches = match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getParent().getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive);
+            const auto matches = match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getParent()->getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive);
 
             if (matches.isEmpty())
                 throw std::runtime_error("Parent data hierarchy item not found in model");

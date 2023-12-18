@@ -186,8 +186,10 @@ public:
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
                 case Qt::DisplayRole:
-                case Qt::EditRole:
                     return "";
+
+                case Qt::EditRole:
+                    return "Task progress";
 
                 case Qt::ToolTipRole:
                     return "The dataset task progress";
@@ -253,8 +255,10 @@ protected:
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
                 case Qt::DisplayRole:
-                case Qt::EditRole:
                     return "";
+
+                case Qt::EditRole:
+                    return "Group index";
 
                 case Qt::ToolTipRole:
                     return "The dataset group index";
@@ -289,8 +293,10 @@ protected:
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
                 case Qt::DisplayRole:
-                case Qt::EditRole:
                     return "";
+
+                case Qt::EditRole:
+                    return "Is group";
 
                 case Qt::ToolTipRole:
                     return "Whether the dataset belongs to a group";
@@ -325,8 +331,10 @@ protected:
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
                 case Qt::DisplayRole:
-                case Qt::EditRole:
                     return "";
+
+                case Qt::EditRole:
+                    return "Is locked";
 
                 case Qt::ToolTipRole:
                     return "Whether the dataset is locked";
@@ -358,13 +366,6 @@ public:
 
     /** Get supported drag actions */
     Qt::DropActions supportedDragActions() const override;
-
-    /**
-     * Get item flags
-     * @param index Model index
-     * @return Item flags
-     */
-    //Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     /**
      * Get header data

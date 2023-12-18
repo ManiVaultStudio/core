@@ -41,8 +41,8 @@ void Images::init()
     addAction(*_infoAction.get());
 
     // parent data set must be valid and derived from either point or cluster data
-    if (!getDataHierarchyItem().getParent().getDataset<DatasetImpl>().isValid() ||
-        !(getDataHierarchyItem().getParent().getDataType() == PointType || getDataHierarchyItem().getParent().getDataType() == ClusterType))
+    if (!getDataHierarchyItem().getParent()->getDataset<DatasetImpl>().isValid() ||
+        !(getDataHierarchyItem().getParent()->getDataType() == PointType || getDataHierarchyItem().getParent()->getDataType() == ClusterType))
         qCritical() << "Images: warning: image data set must be derived from points or clusters.";
 
 }
@@ -258,7 +258,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
     try
     {
         // Get smart pointer to parent dataset
-        auto parentDataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
+        auto parentDataset = getDataHierarchyItem().getParent()->getDataset<DatasetImpl>();
 
         // Generate selection data for points
         if (parentDataset->getDataType() == PointType) {
@@ -384,7 +384,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
 void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
     // Get smart pointer to parent dataset
-    auto parentDataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
+    auto parentDataset = getDataHierarchyItem().getParent()->getDataset<DatasetImpl>();
 
     if (parentDataset->getDataType() == PointType) {
 

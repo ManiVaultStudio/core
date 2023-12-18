@@ -44,17 +44,19 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     setVisible(visible);
 }
 
-DataHierarchyItem& DataHierarchyItem::getParent() const
+DataHierarchyItem* DataHierarchyItem::getParent() const
 {
-    return *_parent;
+    return _parent;
 }
 
 DataHierarchyItems DataHierarchyItem::getParents() const
 {
-    DataHierarchyItems parentDataHierarchyItems{ &getParent() };
+    DataHierarchyItems parentDataHierarchyItems;
 
-    if (hasParent())
-        parentDataHierarchyItems << getParent().getParents();
+    if (hasParent()) {
+        parentDataHierarchyItems << getParent();
+        parentDataHierarchyItems << getParent()->getParents();
+    }
 
     return parentDataHierarchyItems;
 }
@@ -83,25 +85,30 @@ bool DataHierarchyItem::hasParent() const
     return _parent != nullptr;
 }
 
-DataHierarchyItems DataHierarchyItem::getChildren(const bool& recursive /*= false*/) const
+DataHierarchyItems DataHierarchyItem::getChildren(const bool& recursively /*= false*/) const
 {
     auto children = _children;
 
-    if (recursive)
+    if (recursively)
         for (auto child : _children)
-            children << child->getChildren(recursive);
+            children << child->getChildren(recursively);
 
     return children;
 }
 
-std::uint32_t DataHierarchyItem::getNumberOfChildren() const
+std::uint32_t DataHierarchyItem::getNumberOfChildren(const bool& recursively /*= false*/) const
 {
-    return _children.count();
+    return getChildren(recursively).count();
 }
 
 bool DataHierarchyItem::hasChildren() const
 {
     return getNumberOfChildren() > 0;
+}
+
+std::int32_t DataHierarchyItem::getDepth() const
+{
+    return getParents().count();
 }
 
 void DataHierarchyItem::setVisible(bool visible)

@@ -51,8 +51,11 @@ public:
     /** Destructor */
     ~DataHierarchyItem() = default;
 
-    /** Get reference to parent hierarchy item */
-    DataHierarchyItem& getParent() const;
+    /**
+     * Get pointer to parent hierarchy item
+     * @return Pointer to parent hierarchy item if there is a parent otherwise nullptr
+     */
+    DataHierarchyItem* getParent() const;
 
     /**
      * Walks up the hierarchy of the data hierarchy item and returns all parents
@@ -78,16 +81,30 @@ public:
     bool hasParent() const;
 
     /**
-     * Gets the names of the children name
-     * @param recursive Recursive
+     * Get children, possibly \p recursively
+     * @param recursively Get all descendants
+     * @return Children
      */
-    DataHierarchyItems getChildren(const bool& recursive = false) const;
+    DataHierarchyItems getChildren(const bool& recursively = false) const;
 
-    /** Gets the number of children */
-    std::uint32_t getNumberOfChildren() const;
+    /**
+     * Get number of children, possibly \p recursively
+     * @param recursively Count recursively
+     * @returm Number of children
+     */
+    std::uint32_t getNumberOfChildren(const bool& recursively = false) const;
 
-    /** Establishes whether the item has any children */
+    /**
+     * Establishes whether the item has any children
+     * @return Boolean determining whether the item has any children
+     */
     bool hasChildren() const;
+
+    /**
+     * Get the depth of the data hierarchy item
+     * @return Item depth (root starts at zero)
+     */
+    std::int32_t getDepth() const;
 
     /**
      * Set visibility

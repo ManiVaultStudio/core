@@ -265,10 +265,11 @@ public: // Hierarchy
 
     /**
      * Get child datasets (if any) of the specified type(s)
-     * @param dataTypes Dataset type(s) to filter out
+     * @param dataTypes Dataset type(s) to filter out (no filtering if \p dataTypes is empty)
+     * @param recursively Whether to collect children recursively
      * @return Child datasets of the dataset type(s)
      */
-    QVector<Dataset<DatasetImpl>> getChildren(const QVector<DataType>& dataTypes = QVector<DataType>()) const;
+    QVector<Dataset<DatasetImpl>> getChildren(const QVector<DataType>& dataTypes = QVector<DataType>(), bool recursively = true) const;
 
     /**
      * Get child datasets (if any) of the specified type
@@ -499,6 +500,20 @@ public: // Task access
      */
     DatasetTask& getTask();
 
+public: // Removal
+
+    /**
+     * Set about to be removed to \p aboutToBeRemoved
+     * @param aboutToBeRemoved Boolean determining whether the set is in the process of being removed
+     */
+    void setAboutToBeRemoved(bool aboutToBeRemoved = true);
+
+    /**
+     * Get whether the set is in the process of being removed
+     * @return Boolean determining whether the set is in the process of being removed
+     */
+    bool isAboutToBeRemoved() const;
+
 protected:
 
     /** Get raw data */
@@ -535,30 +550,32 @@ public: // Operators
         _proxyMembers       = other._proxyMembers;
         _linkedData         = other._linkedData;
         _linkedDataFlags    = other._linkedDataFlags;
+        _aboutToBeRemoved   = other._aboutToBeRemoved;
 
         return *this;
     }
 
 protected:
-    CoreInterface*              _core;              /** Pointer to core interface */
+    CoreInterface*              _core;                  /** Pointer to core interface */
 
 private:
-    mutable plugin::RawData*    _rawData;           /** Pointer to the raw data referenced in this set */
-    StorageType                 _storageType;       /** Type of storage (own raw data or act as proxy for other datasets) */
-    QString                     _rawDataName;       /** Name of the raw data */
-    bool                        _all;               /** Whether this is the full dataset */
-    bool                        _derived;           /** Whether this dataset is derived from another dataset */
-    Dataset<DatasetImpl>        _sourceDataset;     /** Smart pointer to the source dataset (if any) */
-    Dataset<DatasetImpl>        _fullDataset;       /** Smart pointer to the original full dataset (if this is a subset) */
-    QMap<QString, QVariant>     _properties;        /** Properties map */
-    std::int32_t                _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
-    plugin::AnalysisPlugin*     _analysis;          /** Pointer to analysis plugin that created the set (if any) */
-    Datasets                    _proxyMembers;      /** Member datasets in case of a proxy dataset */
-    std::vector<LinkedData>     _linkedData;        /** List of linked datasets */
-    std::int32_t                _linkedDataFlags;   /** Flags for linked data */
-    bool                        _locked;            /** Whether the dataset is locked */
-    Dataset<DatasetImpl>        _smartPointer;      /** Smart pointer to own dataset */
-    DatasetTask                 _task;              /** Task for display in the data hierarchy and foreground */
+    mutable plugin::RawData*    _rawData;               /** Pointer to the raw data referenced in this set */
+    StorageType                 _storageType;           /** Type of storage (own raw data or act as proxy for other datasets) */
+    QString                     _rawDataName;           /** Name of the raw data */
+    bool                        _all;                   /** Whether this is the full dataset */
+    bool                        _derived;               /** Whether this dataset is derived from another dataset */
+    Dataset<DatasetImpl>        _sourceDataset;         /** Smart pointer to the source dataset (if any) */
+    Dataset<DatasetImpl>        _fullDataset;           /** Smart pointer to the original full dataset (if this is a subset) */
+    QMap<QString, QVariant>     _properties;            /** Properties map */
+    std::int32_t                _groupIndex;            /** Group index (sets with identical indices can for instance share selection) */
+    plugin::AnalysisPlugin*     _analysis;              /** Pointer to analysis plugin that created the set (if any) */
+    Datasets                    _proxyMembers;          /** Member datasets in case of a proxy dataset */
+    std::vector<LinkedData>     _linkedData;            /** List of linked datasets */
+    std::int32_t                _linkedDataFlags;       /** Flags for linked data */
+    bool                        _locked;                /** Whether the dataset is locked */
+    Dataset<DatasetImpl>        _smartPointer;          /** Smart pointer to own dataset */
+    DatasetTask                 _task;                  /** Task for display in the data hierarchy and foreground */
+    bool                        _aboutToBeRemoved;      /** Boolean determining whether the set is in the process of being removed */
 
     friend class CoreInterface;
     friend class Core;

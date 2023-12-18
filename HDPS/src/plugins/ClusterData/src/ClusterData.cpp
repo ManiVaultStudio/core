@@ -316,7 +316,7 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
     events().notifyDatasetDataSelectionChanged(this);
 
     // Get reference to input dataset
-    auto points             = getDataHierarchyItem().getParent().getDataset<Points>();
+    auto points             = getDataHierarchyItem().getParent()->getDataset<Points>();
     auto selection          = points->getSelection<Points>();
     auto selectionIndices   = selection->indices;
 
