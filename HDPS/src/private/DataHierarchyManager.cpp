@@ -60,9 +60,11 @@ void DataHierarchyManager::reset()
 
 void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/)
 {
-    //qDebug() << "Adding" << dataset->getGuiName() << "to the data hierarchy";
-
     try {
+
+#ifdef _DEBUG
+        qDebug() << "Add" << dataset->text() << "to the data hierarchy manager";
+#endif
 
         // Create new data hierarchy item
         const auto newDataHierarchyItem = new DataHierarchyItem(parentDataset.isValid() ? &parentDataset->getDataHierarchyItem() : static_cast<QObject*>(this), dataset, parentDataset, visible);
@@ -98,13 +100,15 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
 void DataHierarchyManager::removeItem(DataHierarchyItem& dataHierarchyItem)
 {
     try {
-        qDebug() << "Removing" << dataHierarchyItem.getDataset()->text() << "from the data hierarchy";
 
-        // Get dataset
+#ifdef _DEBUG
+        qDebug() << "Remove" << dataHierarchyItem.getDataset()->text() << "from the data hierarchy manager";
+#endif
+
         auto dataset        = dataHierarchyItem.getDataset();
         auto datasetGuid    = dataset->getId();
 
-        emit itemAboutToBeRemoved(dataset);
+        emit itemAboutToBeRemoved(dataHierarchyItem);
         {
             _items.removeOne(&dataHierarchyItem);
 

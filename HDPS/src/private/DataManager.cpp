@@ -39,6 +39,11 @@ void DataManager::addSet(const Dataset<DatasetImpl>& dataset)
 {
     try
     {
+
+#ifdef _DEBUG
+        qDebug() << "Add" << dataset->text() << "to the data manager";
+#endif
+
         if (!dataset.isValid())
             throw std::runtime_error("Dataset smart pointer is invalid");
 
@@ -48,10 +53,10 @@ void DataManager::addSet(const Dataset<DatasetImpl>& dataset)
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to add dataset", e);
+        exceptionMessageBox("Unable to add dataset to the data manager", e);
     }
     catch (...) {
-        exceptionMessageBox("Unable to add dataset");
+        exceptionMessageBox("Unable to add dataset to the data manager");
     }
 }
 
@@ -64,6 +69,7 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 {
     try
     {
+
 #ifdef _DEBUG
         qDebug() << "Remove" << dataset->text() << "from the data manager";
 #endif
@@ -79,6 +85,7 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         events().notifyDatasetAboutToBeRemoved(dataset);
         {
             for (auto& underiveDataset : _datasets) {
+                qDebug() << "Un-derived" << underiveDataset->getGuiName();
                 if (underiveDataset->isDerivedData() && underiveDataset->getSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
                     qDebug() << "Un-derive" << underiveDataset->text();
 
@@ -95,10 +102,10 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to remove dataset", e);
+        exceptionMessageBox("Unable to remove dataset from the data manager", e);
     }
     catch (...) {
-        exceptionMessageBox("Unable to remove dataset");
+        exceptionMessageBox("Unable to remove dataset from the data manager");
     }
 }
 

@@ -59,12 +59,6 @@ public: // Data access
     Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "") override;
 
     /**
-     * Removes a single dataset
-     * @param dataset Smart pointer to the dataset to remove
-     */
-    void removeDataset(Dataset<DatasetImpl> dataset) override final;
-
-    /**
      * Creates a dataset derived from a source dataset.
      * @param guiName GUI name for the new dataset from the core
      * @param sourceDataset Smart pointer to the source dataset from which this dataset will be derived

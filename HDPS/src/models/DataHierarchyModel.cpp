@@ -306,15 +306,15 @@ DataHierarchyModel::DataHierarchyModel(QObject* parent) :
     setColumnCount(static_cast<int>(Column::Count));
 
     connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAdded, this, [this](DataHierarchyItem& dataHierarchyItem) -> void {
-        addDataHierarchyItem(dataHierarchyItem);
+        addDataHierarchyModelItem(dataHierarchyItem);
     });
 
-    connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAboutToBeRemoved, this, [this](const Dataset<DatasetImpl>& dataset) {
-        //removeDataHierarchyItem(dataset->getDataHierarchyItem());
+    connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAboutToBeRemoved, this, [this](DataHierarchyItem& dataHierarchyItem) {
+        removeDataHierarchyModelItem(dataHierarchyItem);
     });
 
     for (const auto topLevelItem : dataHierarchy().getTopLevelItems())
-        addDataHierarchyItem(*topLevelItem);
+        addDataHierarchyModelItem(*topLevelItem);
 }
 
 Qt::DropActions DataHierarchyModel::supportedDragActions() const
@@ -362,9 +362,14 @@ QMimeData* DataHierarchyModel::mimeData(const QModelIndexList& indexes) const
     return new DatasetsMimeData(datasets);
 }
 
-void DataHierarchyModel::addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem)
+void DataHierarchyModel::addDataHierarchyModelItem(DataHierarchyItem& dataHierarchyItem)
 {
     try {
+
+#ifdef _DEBUG
+        qDebug() << __FUNCTION__;
+#endif
+
         if (!match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive).isEmpty())
             return;
 
@@ -381,7 +386,7 @@ void DataHierarchyModel::addDataHierarchyItem(DataHierarchyItem& dataHierarchyIt
         }
 
         for (auto childDataHierarchyItem : dataHierarchyItem.getChildren(true))
-            addDataHierarchyItem(*childDataHierarchyItem);
+            addDataHierarchyModelItem(*childDataHierarchyItem);
     }
     catch (std::exception& e)
     {
@@ -393,17 +398,42 @@ void DataHierarchyModel::addDataHierarchyItem(DataHierarchyItem& dataHierarchyIt
     }
 }
 
-//bool DataHierarchyModel::removeDataHierarchyModelItem(const QModelIndex& modelIndex)
-//{
-//    auto dataHierarchyModelItem = static_cast<DataHierarchyModelItem*>(modelIndex.internalPointer());
-//
-//    beginRemoveRows(modelIndex.parent(), modelIndex.row(), modelIndex.row());
-//    {
-//        delete dataHierarchyModelItem;
-//    }
-//    endRemoveRows();
-//
-//    return true;
-//}
+void DataHierarchyModel::removeDataHierarchyModelItem(DataHierarchyItem& dataHierarchyItem)
+{
+    try {
+
+#ifdef _DEBUG
+        qDebug() << __FUNCTION__;
+#endif
+
+        const auto matches = match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive);
+
+        if (matches.isEmpty())
+            throw std::runtime_error(QString("%1 not found in model").arg(dataHierarchyItem.getDataset()->getGuiName()).toStdString());
+
+        auto item = itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::Name)));
+
+        if (item == nullptr)
+            throw std::runtime_error("QStandardItemModel::itemFromIndex() returned nullptr");
+
+        bool removeRowsResult = false;
+
+        if (item->parent())
+            removeRowsResult = removeRows(item->row(), 1, item->parent()->index());
+        else
+            removeRowsResult = removeRows(item->row(), 1);
+
+        if (!removeRowsResult)
+            throw std::runtime_error("QStandardItemModel::removeRows() failed");
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to remove data hierarchy item from the data hierarchy model", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to remove data hierarchy item from the data hierarchy model");
+    }
+}
 
 }

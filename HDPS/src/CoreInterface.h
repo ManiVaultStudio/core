@@ -136,12 +136,6 @@ public: // Data access
     virtual Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "") = 0;
 
     /**
-     * Removes a single dataset
-     * @param dataset Smart pointer to the dataset to remove
-     */
-    virtual void removeDataset(Dataset<DatasetImpl> dataset) = 0;
-
-    /**
      * Requests the plugin manager to create new RawData of the given kind
      * The manager will add the raw data to the core and return the unique name of the data set linked with the raw data
      * @param kind Kind of plugin

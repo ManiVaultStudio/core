@@ -194,49 +194,6 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     return fullSet;
 }
 
-void Core::removeDataset(Dataset<DatasetImpl> dataset)
-{
-    try
-    {
-        // Except when the smart pointer to the dataset is invalid
-        if (!dataset.isValid())
-            throw std::runtime_error("Dataset is invalid");
-
-#ifdef CORE_VERBOSE
-        qDebug() << "Removing" << dataset->getGuiName() << "from the core";
-#endif
-
-        Datasets datasetsToRemove{ dataset };
-
-        // Get children in a top-down manner
-        for (auto child : getDataHierarchyManager().getChildren(dataset->getDataHierarchyItem()))
-            datasetsToRemove << child->getDataset();
-
-        // Remove datasets bottom-up (this prevents issues with the data hierarchy manager)
-        std::reverse(datasetsToRemove.begin(), datasetsToRemove.end());
-
-        for (auto datasetToRemove : datasetsToRemove) {
-
-            // Cache dataset GUID and type
-            const auto guid = datasetToRemove->getId();
-            const auto type = datasetToRemove->getDataType();
-
-            events().notifyDatasetAboutToBeRemoved(datasetToRemove);
-            {
-                getDataManager().removeDataset(datasetToRemove);
-            }
-            events().notifyDatasetRemoved(guid, type);
-        }
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to remove dataset", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to remove dataset");
-    }
-}
-
 Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)
 {
     // Get the data type of the source dataset

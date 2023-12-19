@@ -108,16 +108,16 @@ public: // Serialization
 signals:
 
     /**
-     * Signals that a hierarchy item is added to the hierarchy manager
+     * Signals that \p dataHierarchyItem is added to the hierarchy manager
      * @param dataHierarchyItem Reference to added data hierarchy item
      */
     void itemAdded(DataHierarchyItem& dataHierarchyItem);
 
     /**
-     * Signals that a hierarchy item is about to be removed from the hierarchy manager
-     * @param dataset Smart pointer to the about to be removed dataset
+     * Signals that \p dataHierarchyItem is about to be removed from the hierarchy manager
+     * @param dataHierarchyItem Reference to data hierarchy item which is about to be removed
      */
-    void itemAboutToBeRemoved(const Dataset<DatasetImpl>& dataset);
+    void itemAboutToBeRemoved(DataHierarchyItem& dataHierarchyItem);
 
     /**
      * Signals that a hierarchy item is removed from the hierarchy manager

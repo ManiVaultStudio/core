@@ -396,15 +396,15 @@ private:
 
     /**
      * Add \p dataHierarchyItem to the model
-     * @param dataHierarchyItem Reference to the data hierarchy item
+     * @param dataHierarchyItem Reference to the data hierarchy item to add
      */
-    void addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem);
+    void addDataHierarchyModelItem(DataHierarchyItem& dataHierarchyItem);
 
     /**
-     * Remove a data hierarchy item from the model
-     * @param parentModelIndex Model index of the parent data hierarchy item
+     * Remove \p dataHierarchyItem from the model
+     * @param dataHierarchyItem Reference to the data hierarchy item to remove
      */
-     //bool removeDataHierarchyModelItem(const QModelIndex& modelIndex);
+     void removeDataHierarchyModelItem(DataHierarchyItem& dataHierarchyItem);
 };
 
 }
