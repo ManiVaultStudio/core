@@ -64,8 +64,9 @@ public:
      * @param dataset Dataset to added
      * @param parentDataset Parent dataset (if any)
      * @param visible Whether \p dataset should be visible or not
+     * @param notify Whether to notify the core that a dataset is added
      */
-    virtual void addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true) = 0;
+    virtual void addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true, bool notify = true) = 0;
 
     /**
      * Add \p selection to the data manager

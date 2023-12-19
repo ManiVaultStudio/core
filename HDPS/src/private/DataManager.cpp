@@ -52,7 +52,7 @@ void DataManager::addRawData(plugin::RawData* rawData)
     }
 }
 
-void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible /*= true*/)
+void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible /*= true*/, bool notify /*= true*/)
 {
     try
     {
@@ -65,6 +65,9 @@ void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> 
             throw std::runtime_error("Dataset smart pointer is invalid");
 
         _datasets.push_back(dataset);
+
+        if (notify)
+            events().notifyDatasetAdded(dataset);
 
         emit datasetAdded(dataset, parentDataset, visible);
     }
@@ -100,10 +103,7 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         dataset->setAboutToBeRemoved();
 
         for (auto& underiveDataset : _datasets) {
-            qDebug() << underiveDataset.isValid() << underiveDataset->getSourceDataset<DatasetImpl>().isValid();
             if (underiveDataset->isDerivedData() && underiveDataset->getSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
-                qDebug() << "Un-derive" << underiveDataset->text();
-
                 underiveDataset->_derived = false;
                 underiveDataset->setSourceDataSet(Dataset<DatasetImpl>());
             }
@@ -112,6 +112,8 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         events().notifyDatasetAboutToBeRemoved(dataset);
         {
             emit datasetAboutToBeRemoved(dataset);
+
+            delete dataset.get();
 
             _datasets.removeOne(dataset);
 

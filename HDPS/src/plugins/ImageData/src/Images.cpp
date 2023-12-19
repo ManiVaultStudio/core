@@ -62,10 +62,8 @@ std::tuple<mv::Dataset<mv::DatasetImpl>, mv::Dataset<Images>> Images::addImageDa
         qCritical() << "Images::addImageDataset: warning: pluginKind must be Points or Cluster - defaulting to Points. Given: " << pluginKind;
 
     auto points = Application::core()->addDataset<ptype>(pkind, datasetGuiName, parentDataSet);
-    events().notifyDatasetAdded(points);
 
     mv::Dataset<Images> images = Application::core()->addDataset<Images>("Images", "images", Dataset<DatasetImpl>(*points));
-    events().notifyDatasetAdded(images);
 
     return { points, images };
 }

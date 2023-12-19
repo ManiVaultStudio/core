@@ -242,16 +242,8 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
         // Set a pointer to the original full dataset, if the source is another subset, we take their pointer
         subset->_fullDataset = sourceDataset->isFull() ? sourceDataset : sourceDataset->_fullDataset;
 
-        // Add the set the core and publish the name of the set to all plug-ins
         data().addDataset(subset, parentDataset, visible);
 
-        // Add the dataset to the hierarchy manager TODO
-        //getDataHierarchyManager().addItem(subset, const_cast<Dataset<DatasetImpl>&>(parentDataset), visible);
-
-        // Notify listeners that data was added
-        events().notifyDatasetAdded(*subset);
-
-        // Initialize the dataset (e.g. setup default actions for info)
         subset->init();
 
         return subset;
@@ -264,7 +256,7 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
         exceptionMessageBox("Unable to create subset from selection");
     }
 
-    return Dataset<DatasetImpl>();
+    return {};
 }
 
 plugin::RawData& Core::requestRawData(const QString& name)
@@ -296,7 +288,7 @@ Dataset<DatasetImpl> Core::requestDataset(const QString& dataSetId)
         exceptionMessageBox("Unable to request dataset by identifier");
     }
 
-    return Dataset<DatasetImpl>();
+    return {};
 }
 
 QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& dataTypes /*= QVector<DataType>()*/)

@@ -122,13 +122,14 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
 #endif
 
         const auto newDataHierarchyItem = new DataHierarchyItem(parentDataset.isValid() ? &parentDataset->getDataHierarchyItem() : static_cast<QObject*>(this), dataset, parentDataset, visible);
+        //const auto newDataHierarchyItem = new DataHierarchyItem(this, dataset, parentDataset, visible);
 
         _items << newDataHierarchyItem;
 
         if (parentDataset.isValid())
             parentDataset->getDataHierarchyItem().addChild(dataset->getDataHierarchyItem());
 
-        dataset->setParent(newDataHierarchyItem);
+        //dataset->setParent(newDataHierarchyItem);
 
         emit itemAdded(*newDataHierarchyItem);
     }
@@ -216,9 +217,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         
         loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
         loadedDataset->fromVariantMap(dataset);
-        
-        events().notifyDatasetAdded(loadedDataset);
-        
+
         projectDataSerializationTask.setSubtaskFinished(datasetId, QString("Loading dataset: %1").arg(datasetName));
 
         QCoreApplication::processEvents();

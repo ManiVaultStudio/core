@@ -242,21 +242,15 @@ void DataHierarchyItem::setExpanded(bool expanded)
 
 void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
 {
-    emit loading();
-    {
-        variantMapMustContain(variantMap, "Expanded");
-        variantMapMustContain(variantMap, "Visible");
+    variantMapMustContain(variantMap, "Expanded");
+    variantMapMustContain(variantMap, "Visible");
 
-        setExpanded(variantMap["Expanded"].toBool());
-        setVisible(variantMap["Visible"].toBool());
-    }
-    emit loaded();
+    setExpanded(variantMap["Expanded"].toBool());
+    setVisible(variantMap["Visible"].toBool());
 }
 
 QVariantMap DataHierarchyItem::toVariantMap() const
 {
-    emit const_cast<DataHierarchyItem*>(this)->saving();
-
     QVariantMap variantMap, children;
 
     std::uint32_t childSortIndex = 0;
@@ -270,8 +264,6 @@ QVariantMap DataHierarchyItem::toVariantMap() const
 
         childSortIndex++;
     }
-
-    emit const_cast<DataHierarchyItem*>(this)->saved();
 
     return {
         { "Name", _dataset->text() },

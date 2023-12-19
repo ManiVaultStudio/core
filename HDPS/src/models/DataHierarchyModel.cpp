@@ -305,13 +305,8 @@ DataHierarchyModel::DataHierarchyModel(QObject* parent) :
 {
     setColumnCount(static_cast<int>(Column::Count));
 
-    connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAdded, this, [this](DataHierarchyItem& dataHierarchyItem) -> void {
-        addDataHierarchyModelItem(dataHierarchyItem);
-    });
-
-    connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAboutToBeRemoved, this, [this](DataHierarchyItem& dataHierarchyItem) {
-        removeDataHierarchyModelItem(dataHierarchyItem);
-    });
+    connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAdded, this, &DataHierarchyModel::addDataHierarchyModelItem);
+    connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAboutToBeRemoved, this, &DataHierarchyModel::removeDataHierarchyModelItem);
 
     for (const auto topLevelItem : dataHierarchy().getTopLevelItems())
         addDataHierarchyModelItem(*topLevelItem);
@@ -367,7 +362,7 @@ void DataHierarchyModel::addDataHierarchyModelItem(DataHierarchyItem& dataHierar
     try {
 
 #ifdef _DEBUG
-        qDebug() << "Add item" << dataHierarchyItem.getDataset()->getGuiName() << "to the data hierarchy model";
+        qDebug() << "Add dataset" << dataHierarchyItem.getDataset()->getGuiName() << "to the data hierarchy model";
 #endif
 
         if (!match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive).isEmpty())
@@ -379,10 +374,10 @@ void DataHierarchyModel::addDataHierarchyModelItem(DataHierarchyItem& dataHierar
             if (matches.isEmpty())
                 throw std::runtime_error("Parent data hierarchy item not found in model");
 
-            itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::Name)))->appendRow(Row(dataHierarchyItem.getDatasetReference()));
+            itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::Name)))->appendRow(Row(dataHierarchyItem.getDataset()));
         }
         else {
-            appendRow(Row(dataHierarchyItem.getDatasetReference()));
+            appendRow(Row(dataHierarchyItem.getDataset()));
         }
 
         for (auto childDataHierarchyItem : dataHierarchyItem.getChildren(true))
@@ -403,7 +398,7 @@ void DataHierarchyModel::removeDataHierarchyModelItem(DataHierarchyItem& dataHie
     try {
 
 #ifdef _DEBUG
-        qDebug() << "Remove item" << dataHierarchyItem.getDataset()->getGuiName() << "from the data hierarchy model";
+        qDebug() << "Remove dataset" << dataHierarchyItem.getDataset()->getGuiName() << "from the data hierarchy model";
 #endif
 
         const auto matches = match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive);

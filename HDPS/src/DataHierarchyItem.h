@@ -278,36 +278,17 @@ signals:
      */
     void expandedChanged(bool expanded);
 
-    /** Signals that the data hierarchy item is being loaded */
-    void loading();
-
-    /** Signals that the data hierarchy item has been loaded */
-    void loaded();
-
-    /** Signals that the data hierarchy item is being saved */
-    void saving();
-
-    /** Signals that the data hierarchy item has been saved */
-    void saved();
-
 protected:
     Dataset<DatasetImpl>        _dataset;       /** Smart pointer to dataset */
     DataHierarchyItem*          _parent;        /** Pointer to parent data hierarchy item */
     DataHierarchyItems          _children;      /** Pointers to child items (if any) */
     bool                        _selected;      /** Whether the hierarchy item is selected */
     bool                        _expanded;      /** Whether the item is expanded or not (when it has children) */
-    //QIcon                       _icon;          /** Icon */
     mv::gui::WidgetActions      _actions;       /** Widget actions */
 
 protected:
     friend class DataHierarchyManager;
     friend class DataManager;
-
-    /** Single shot task update timer interval */
-    //static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL = 100;
-
-    /** Single shot message disappear timer interval */
-    //static constexpr std::uint32_t MESSAGE_DISAPPEAR_INTERVAL = 1500;
 };
 
 }
