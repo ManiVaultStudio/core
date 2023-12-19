@@ -54,23 +54,25 @@ public:
     }
 
     /**
-     * Add raw data to the data manager
-     * @param rawData Pointer to the raw data
+     * Add \p rawData to the data manager
+     * @param rawData Pointer to the raw data to add
      */
     virtual void addRawData(plugin::RawData* rawData) = 0;
 
     /**
-     * Add data set to the data manager
-     * @param dataset Smart pointer to the dataset
+     * Add \p dataset to the data manager
+     * @param dataset Dataset to added
+     * @param parentDataset Parent dataset (if any)
+     * @param visible Whether \p dataset should be visible or not
      */
-    virtual void addSet(const Dataset<DatasetImpl>& dataset) = 0;
+    virtual void addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true) = 0;
 
     /**
-     * Add selection to the data manager
-     * @param dataName Name of the raw data
+     * Add \p selection to the data manager
+     * @param rawDataName Name of the raw data
      * @param selection Smart pointer to selection dataset
      */
-    virtual void addSelection(const QString& dataName, Dataset<DatasetImpl> selection) = 0;
+    virtual void addSelection(const QString& rawDataName, Dataset<DatasetImpl> selection) = 0;
 
     /**
      * Remove \p dataset from the manager
@@ -109,6 +111,34 @@ public:
 
     /** Get all sets from the data manager */
     virtual const QVector<Dataset<DatasetImpl>>& allSets() const = 0;
+
+signals:
+
+    /**
+     * Signals that \p rawData is added to the data manager
+     * @param rawData Pointer to raw data that was added
+     */
+    void rawDataAdded(plugin::RawData* rawData);
+
+    /**
+     * Signals that \p dataset is added to the data manager
+     * @param dataset Dataset that was added
+     * @param parentDataset Parent dataset (if any)
+     * @param visible Whether \p dataset should be visible or not
+     */
+    void datasetAdded(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true);
+
+    /**
+     * Signals that \p dataset is about to be removed from the data manager
+     * @param dataset Dataset which is about to be removed
+     */
+    void datasetAboutToBeRemoved(Dataset<DatasetImpl> dataset);
+
+    /**
+     * Signals that dataset with \p datasetGuid is removed from the data manager
+     * @param datasetGuid GUID of the removed dataset
+     */
+    void datasetRemoved(const QString& datasetGuid);
 };
 
 }

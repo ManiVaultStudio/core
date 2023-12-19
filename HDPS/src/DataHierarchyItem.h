@@ -49,7 +49,7 @@ public:
     DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true, const bool& selected = false);
 
     /** Destructor */
-    ~DataHierarchyItem() = default;
+    ~DataHierarchyItem();
 
     /**
      * Get pointer to parent hierarchy item
@@ -133,6 +133,12 @@ protected:
 
     /** Set reference to parent hierarchy item */
     void setParent(DataHierarchyItem& parent);
+
+    /**
+     * Remove \p dataHierarchyItem from the list of children
+     * @param dataHierarchyItem Pointer to data hierarchy item to remove
+     */
+    void removeChild(DataHierarchyItem* dataHierarchyItem);
 
 public: // Hierarchy
 

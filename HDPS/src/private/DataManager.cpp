@@ -25,17 +25,19 @@ namespace mv
 {
 
 DataManager::DataManager() :
-	AbstractDataManager()
+    AbstractDataManager()
 {
-	setObjectName("Datasets");
+    setObjectName("Datasets");
 }
 
 void DataManager::addRawData(plugin::RawData* rawData)
 {
     _rawDataMap.emplace(rawData->getName(), std::unique_ptr<plugin::RawData>(rawData));
+
+    emit rawDataAdded(rawData);
 }
 
-void DataManager::addSet(const Dataset<DatasetImpl>& dataset)
+void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true)
 {
     try
     {
@@ -49,7 +51,8 @@ void DataManager::addSet(const Dataset<DatasetImpl>& dataset)
 
         _datasets.push_back(dataset);
 
-        emit dataChanged();
+        emit datasetAdded(dataset, parentDataset, visible);
+
     }
     catch (std::exception& e)
     {
@@ -84,8 +87,10 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 
         events().notifyDatasetAboutToBeRemoved(dataset);
         {
+            emit datasetAboutToBeRemoved(dataset);
+
             for (auto& underiveDataset : _datasets) {
-                qDebug() << "Un-derived" << underiveDataset->getGuiName();
+                qDebug() << underiveDataset.isValid() << underiveDataset->getSourceDataset<DatasetImpl>().isValid();
                 if (underiveDataset->isDerivedData() && underiveDataset->getSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
                     qDebug() << "Un-derive" << underiveDataset->text();
 
@@ -95,10 +100,10 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
             }
 
             _datasets.removeOne(dataset);
+
+            emit datasetRemoved(guid);
         }
         events().notifyDatasetRemoved(guid, type);
-
-        emit dataChanged();
     }
     catch (std::exception& e)
     {

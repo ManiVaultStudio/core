@@ -28,7 +28,7 @@ class CoreInterface;
  *
  * @author T. Kroes
  */
-template<typename DatasetType>
+template<typename DatasetType = DatasetImpl>
 class Dataset : public DatasetPrivate
 {
 public: // Construction

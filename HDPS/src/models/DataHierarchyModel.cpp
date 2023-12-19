@@ -367,7 +367,7 @@ void DataHierarchyModel::addDataHierarchyModelItem(DataHierarchyItem& dataHierar
     try {
 
 #ifdef _DEBUG
-        qDebug() << __FUNCTION__;
+        qDebug() << "Add" << dataHierarchyItem.getDataset()->text() << "to the data hierarchy model";
 #endif
 
         if (!match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive).isEmpty())
@@ -403,7 +403,7 @@ void DataHierarchyModel::removeDataHierarchyModelItem(DataHierarchyItem& dataHie
     try {
 
 #ifdef _DEBUG
-        qDebug() << __FUNCTION__;
+        qDebug() << "Remove" << dataHierarchyItem.getDataset()->text() << "from the data hierarchy model";
 #endif
 
         const auto matches = match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive);

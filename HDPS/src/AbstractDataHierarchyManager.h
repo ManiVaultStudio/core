@@ -41,23 +41,6 @@ public:
     }
 
     /**
-     * Add a dataset to the hierarchy
-     * @param dataset Smart pointer to dataset
-     * @param parentDataset Smart pointer to parent dataset (if any)
-     * @param visible Whether the dataset is visible in the gui
-     */
-    virtual void addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true) = 0;
-
-    /**
-     * Removes a data hierarchy item (and its children recursively) from the data hierarchy
-     * @param dataHierarchyItem Reference to data hierarchy item
-     */
-    virtual void removeItem(DataHierarchyItem& dataHierarchyItem) = 0;
-
-    /** Removes all items from the data hierarchy manager in a top-down manner */
-    virtual void removeAllItems() = 0;
-
-    /**
      * Get hierarchy item by dataset globally unique identifier
      * @param datasetGuid Dataset GUID
      * @return Reference to data hierarchy item
@@ -91,6 +74,25 @@ public:
      */
     virtual void selectItems(DataHierarchyItems& selectedItems) = 0;
 
+protected:
+
+    /**
+     * Add a dataset to the hierarchy
+     * @param dataset Smart pointer to dataset
+     * @param parentDataset Smart pointer to parent dataset (if any)
+     * @param visible Whether the dataset is visible in the gui
+     */
+    virtual void addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true) = 0;
+
+    /**
+     * Removes data hierarchy for \p dataset from the data hierarchy
+     * @param dataset Dataset to remove the data hierarchy item for
+     */
+    virtual void removeItem(Dataset<DatasetImpl> dataset) = 0;
+
+    /** Removes all items from the data hierarchy manager in a top-down manner */
+    virtual void removeAllItems() = 0;
+
 public: // Serialization
 
     /**
@@ -121,9 +123,9 @@ signals:
 
     /**
      * Signals that a hierarchy item is removed from the hierarchy manager
-     * @param datasetGui GUID of the removed dataset
+     * @param datasetGuid GUID of the removed dataset
      */
-    void itemRemoved(const QString& datasetGui);
+    void itemRemoved(const QString& datasetGuid);
 
     /**
      * Signals that a data hierarchy item is being loaded

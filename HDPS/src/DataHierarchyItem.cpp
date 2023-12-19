@@ -43,6 +43,12 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     setVisible(visible);
 }
 
+DataHierarchyItem::~DataHierarchyItem()
+{
+    if (hasParent())
+        getParent()->removeChild(this);
+}
+
 DataHierarchyItem* DataHierarchyItem::getParent() const
 {
     return _parent;
@@ -93,6 +99,17 @@ DataHierarchyItems DataHierarchyItem::getChildren(const bool& recursively /*= fa
             children << child->getChildren(recursively);
 
     return children;
+}
+
+void DataHierarchyItem::removeChild(DataHierarchyItem* dataHierarchyItem)
+{
+    Q_ASSERT(dataHierarchyItem != nullptr);
+
+    if (dataHierarchyItem == nullptr)
+        return;
+
+    if (_children.contains(dataHierarchyItem))
+        _children.removeOne(dataHierarchyItem);
 }
 
 std::uint32_t DataHierarchyItem::getNumberOfChildren(const bool& recursively /*= false*/) const

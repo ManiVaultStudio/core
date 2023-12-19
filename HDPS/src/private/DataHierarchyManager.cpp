@@ -24,6 +24,8 @@ DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
     AbstractDataHierarchyManager(),
     _items()
 {
+    connect(&data(), &AbstractDataManager::datasetAdded, this, &DataHierarchyManager::addItem);
+    connect(&data(), &AbstractDataManager::datasetAboutToBeRemoved, this, &DataHierarchyManager::removeItem);
 }
 
 DataHierarchyManager::~DataHierarchyManager()
@@ -56,82 +58,6 @@ void DataHierarchyManager::reset()
     {
     }
     endReset();
-}
-
-void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/)
-{
-    try {
-
-#ifdef _DEBUG
-        qDebug() << "Add" << dataset->text() << "to the data hierarchy manager";
-#endif
-
-        // Create new data hierarchy item
-        const auto newDataHierarchyItem = new DataHierarchyItem(parentDataset.isValid() ? &parentDataset->getDataHierarchyItem() : static_cast<QObject*>(this), dataset, parentDataset, visible);
-
-        _items << newDataHierarchyItem;
-
-        // Add child item if the parent is valid
-        if (parentDataset.isValid())
-            parentDataset->getDataHierarchyItem().addChild(dataset->getDataHierarchyItem());
-
-        dataset->setParent(newDataHierarchyItem);
-
-        // Notify others that an item is added
-        emit itemAdded(*newDataHierarchyItem);
-
-        // Remove the data hierarchy item when the corresponding dataset is about to be removed
-        connect(&newDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this, newDataHierarchyItem]() {
-            if (!newDataHierarchyItem->getDatasetReference().isValid())
-                return;
-
-            removeItem(*newDataHierarchyItem);
-        });
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to add dataset to the data hierarchy manager", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to add dataset to the data hierarchy manager");
-    }
-}
-
-void DataHierarchyManager::removeItem(DataHierarchyItem& dataHierarchyItem)
-{
-    try {
-
-#ifdef _DEBUG
-        qDebug() << "Remove" << dataHierarchyItem.getDataset()->text() << "from the data hierarchy manager";
-#endif
-
-        auto dataset        = dataHierarchyItem.getDataset();
-        auto datasetGuid    = dataset->getId();
-
-        emit itemAboutToBeRemoved(dataHierarchyItem);
-        {
-            _items.removeOne(&dataHierarchyItem);
-
-            //delete &dataHierarchyItem;
-        }
-        emit itemRemoved(datasetGuid);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to remove item(s) from the data hierarchy manager", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to remove item(s) from the data hierarchy manager");
-    }
-}
-
-void DataHierarchyManager::removeAllItems()
-{
-    const auto dataHierarchyItems = _items;
-
-    for (auto dataHierarchyItem : dataHierarchyItems)
-        if (!dataHierarchyItem->hasParent())
-            removeItem(*dataHierarchyItem);
 }
 
 const DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid) const
@@ -185,6 +111,86 @@ DataHierarchyItems DataHierarchyManager::getTopLevelItems()
 void DataHierarchyManager::selectItems(DataHierarchyItems& selectedItems)
 {
     emit selectedItemsChanged(selectedItems);
+}
+
+void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/)
+{
+    try {
+
+#ifdef _DEBUG
+        qDebug() << "Add" << dataset->text() << "to the data hierarchy manager";
+#endif
+
+        // Create new data hierarchy item
+        const auto newDataHierarchyItem = new DataHierarchyItem(parentDataset.isValid() ? &parentDataset->getDataHierarchyItem() : static_cast<QObject*>(this), dataset, parentDataset, visible);
+
+        _items << newDataHierarchyItem;
+
+        // Add child item if the parent is valid
+        if (parentDataset.isValid())
+            parentDataset->getDataHierarchyItem().addChild(dataset->getDataHierarchyItem());
+
+        dataset->setParent(newDataHierarchyItem);
+
+        // Notify others that an item is added
+        emit itemAdded(*newDataHierarchyItem);
+
+        // Remove the data hierarchy item when the corresponding dataset is about to be removed
+        //connect(&newDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this, newDataHierarchyItem]() {
+        //    if (!newDataHierarchyItem->getDatasetReference().isValid())
+        //        return;
+
+        //    removeItem(*newDataHierarchyItem);
+        //});
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to add dataset to the data hierarchy manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to add dataset to the data hierarchy manager");
+    }
+}
+
+void DataHierarchyManager::removeItem(Dataset<DatasetImpl> dataset)
+{
+    try {
+
+        if (!dataset.isValid())
+            throw std::runtime_error("Dataset smart pointer is invalid");
+
+#ifdef _DEBUG
+        qDebug() << "Remove" << dataset->text() << "from the data hierarchy manager";
+#endif
+
+        auto& dataHierarchyItem = dataset->getDataHierarchyItem();
+
+        auto datasetGuid = dataset->getId();
+
+        emit itemAboutToBeRemoved(dataHierarchyItem);
+        {
+            _items.removeOne(&dataHierarchyItem);
+
+            delete &dataHierarchyItem;
+        }
+        emit itemRemoved(datasetGuid);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to remove item(s) from the data hierarchy manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to remove item(s) from the data hierarchy manager");
+    }
+}
+
+void DataHierarchyManager::removeAllItems()
+{
+    const auto dataHierarchyItems = _items;
+
+    for (auto dataHierarchyItem : dataHierarchyItems)
+        if (!dataHierarchyItem->hasParent())
+            removeItem(dataHierarchyItem->getDataset());
 }
 
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)

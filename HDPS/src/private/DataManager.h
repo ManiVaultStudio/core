@@ -58,23 +58,25 @@ public:
     void reset() override;
 
     /**
-     * Add raw data to the data manager
-     * @param rawData Pointer to the raw data
+     * Add \p rawData to the data manager
+     * @param rawData Pointer to the raw data to add
      */
     void addRawData(plugin::RawData* rawData) override;
 
     /**
-     * Add data set to the data manager
-     * @param dataset Smart pointer to the dataset
+     * Add \p dataset to the data manager
+     * @param dataset Dataset to added
+     * @param parentDataset Parent dataset (if any)
+     * @param visible Whether \p dataset should be visible or not
      */
-    void addSet(const Dataset<DatasetImpl>& dataset) override;
+    void addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true) override;
 
     /**
-     * Add selection to the data manager
-     * @param dataName Name of the raw data
+     * Add \p selection to the data manager
+     * @param rawDataName Name of the raw data
      * @param selection Smart pointer to selection dataset
      */
-    void addSelection(const QString& dataName, Dataset<DatasetImpl> selection) override;
+    void addSelection(const QString& rawDataName, Dataset<DatasetImpl> selection) override;
 
     /**
      * Remove \p dataset from the manager
@@ -127,9 +129,6 @@ public: // Serialization
      * @return Variant representation of the widget action
      */
     QVariantMap toVariantMap() const override;
-
-signals:
-    void dataChanged();
 
 private:
 
