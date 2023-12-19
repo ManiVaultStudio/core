@@ -159,7 +159,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
 Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/)
 {
     // Create a new plugin of the given kind
-    QString rawDataName = getPluginManager().requestPlugin(kind)->getName();
+    QString rawDataName = plugins().requestPlugin(kind)->getName();
 
     // Request it from the core
     const plugin::RawData& rawData = requestRawData(rawDataName);
@@ -180,12 +180,11 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     fullSet->_fullDataset = fullSet;
 
     // Add them to the data manager
-    getDataManager().addSet(fullSet);
+    data().addDataset(fullSet, parentDataset);
+    data().addSelection(rawDataName, selection);
 
-    getDataManager().addSelection(rawDataName, selection);
-
-    // Add the dataset to the hierarchy manager and select the dataset
-    getDataHierarchyManager().addItem(fullSet, const_cast<Dataset<DatasetImpl>&>(parentDataset));
+    // Add the dataset to the hierarchy manager and select the dataset TODO
+    //getDataHierarchyManager().addItem(fullSet, const_cast<Dataset<DatasetImpl>&>(parentDataset));
     //_dataHierarchyManager->selectItems(DataHierarchyItems({ &fullSet->getDataHierarchyItem() }));
 
     // Initialize the dataset (e.g. setup default actions for info)
@@ -216,10 +215,10 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
     derivedDataset->setAll(true);
     
     // Add them to the data manager
-    getDataManager().addSet(*derivedDataset);
+    data().addDataset(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
 
-    // Add the dataset to the hierarchy manager
-    getDataHierarchyManager().addItem(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
+    // Add the dataset to the hierarchy manager TODO
+    //getDataHierarchyManager().addItem(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
 
     // Initialize the dataset (e.g. setup default actions for info)
     derivedDataset->init();
@@ -244,10 +243,10 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
         subset->_fullDataset = sourceDataset->isFull() ? sourceDataset : sourceDataset->_fullDataset;
 
         // Add the set the core and publish the name of the set to all plug-ins
-        getDataManager().addSet(*subset);
+        data().addDataset(subset, parentDataset, visible);
 
-        // Add the dataset to the hierarchy manager
-        getDataHierarchyManager().addItem(subset, const_cast<Dataset<DatasetImpl>&>(parentDataset), visible);
+        // Add the dataset to the hierarchy manager TODO
+        //getDataHierarchyManager().addItem(subset, const_cast<Dataset<DatasetImpl>&>(parentDataset), visible);
 
         // Notify listeners that data was added
         events().notifyDatasetAdded(*subset);

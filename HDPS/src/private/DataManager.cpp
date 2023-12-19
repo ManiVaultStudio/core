@@ -32,18 +32,33 @@ DataManager::DataManager() :
 
 void DataManager::addRawData(plugin::RawData* rawData)
 {
-    _rawDataMap.emplace(rawData->getName(), std::unique_ptr<plugin::RawData>(rawData));
+    try
+    {
 
-    emit rawDataAdded(rawData);
+#ifdef _DEBUG
+        qDebug() << "Add raw data" << rawData->getName() << "to the the data manager";
+#endif
+
+        _rawDataMap.emplace(rawData->getName(), std::unique_ptr<plugin::RawData>(rawData));
+
+        emit rawDataAdded(rawData);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to add raw data to the data manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to add raw data to the data manager");
+    }
 }
 
-void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true)
+void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible /*= true*/)
 {
     try
     {
 
 #ifdef _DEBUG
-        qDebug() << "Add" << dataset->text() << "to the data manager";
+        qDebug() << "Add dataset" << dataset->getGuiName() << "to the data manager";
 #endif
 
         if (!dataset.isValid())
@@ -52,7 +67,6 @@ void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> 
         _datasets.push_back(dataset);
 
         emit datasetAdded(dataset, parentDataset, visible);
-
     }
     catch (std::exception& e)
     {
@@ -74,7 +88,7 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
     {
 
 #ifdef _DEBUG
-        qDebug() << "Remove" << dataset->text() << "from the data manager";
+        qDebug() << "Remove dataset" << dataset->getGuiName() << "from the data manager";
 #endif
 
         if (!dataset.isValid())
@@ -85,19 +99,19 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 
         dataset->setAboutToBeRemoved();
 
+        for (auto& underiveDataset : _datasets) {
+            qDebug() << underiveDataset.isValid() << underiveDataset->getSourceDataset<DatasetImpl>().isValid();
+            if (underiveDataset->isDerivedData() && underiveDataset->getSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
+                qDebug() << "Un-derive" << underiveDataset->text();
+
+                underiveDataset->_derived = false;
+                underiveDataset->setSourceDataSet(Dataset<DatasetImpl>());
+            }
+        }
+
         events().notifyDatasetAboutToBeRemoved(dataset);
         {
             emit datasetAboutToBeRemoved(dataset);
-
-            for (auto& underiveDataset : _datasets) {
-                qDebug() << underiveDataset.isValid() << underiveDataset->getSourceDataset<DatasetImpl>().isValid();
-                if (underiveDataset->isDerivedData() && underiveDataset->getSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
-                    qDebug() << "Un-derive" << underiveDataset->text();
-
-                    underiveDataset->_derived = false;
-                    underiveDataset->setSourceDataSet(Dataset<DatasetImpl>());
-                }
-            }
 
             _datasets.removeOne(dataset);
 
@@ -118,7 +132,7 @@ void DataManager::removeDatasetSupervised(Dataset<DatasetImpl> dataset)
 {
     try {
 #ifdef _DEBUG
-        qDebug() << "Remove" << dataset->text() << "from the data manager supervised";
+        qDebug() << "Remove dataset" << dataset->text() << "from the data manager supervised";
 #endif
 
         if (!dataset.isValid())

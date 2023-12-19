@@ -367,7 +367,7 @@ void DataHierarchyModel::addDataHierarchyModelItem(DataHierarchyItem& dataHierar
     try {
 
 #ifdef _DEBUG
-        qDebug() << "Add" << dataHierarchyItem.getDataset()->text() << "to the data hierarchy model";
+        qDebug() << "Add item" << dataHierarchyItem.getDataset()->getGuiName() << "to the data hierarchy model";
 #endif
 
         if (!match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive).isEmpty())
@@ -390,11 +390,11 @@ void DataHierarchyModel::addDataHierarchyModelItem(DataHierarchyItem& dataHierar
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to add data hierarchy item to the data hierarchy model", e);
+        exceptionMessageBox("Unable to add item to the data hierarchy model", e);
     }
     catch (...)
     {
-        exceptionMessageBox("Unable to add data hierarchy item to the data hierarchy model");
+        exceptionMessageBox("Unable to add item to the data hierarchy model");
     }
 }
 
@@ -403,7 +403,7 @@ void DataHierarchyModel::removeDataHierarchyModelItem(DataHierarchyItem& dataHie
     try {
 
 #ifdef _DEBUG
-        qDebug() << "Remove" << dataHierarchyItem.getDataset()->text() << "from the data hierarchy model";
+        qDebug() << "Remove item" << dataHierarchyItem.getDataset()->getGuiName() << "from the data hierarchy model";
 #endif
 
         const auto matches = match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive);
@@ -428,11 +428,11 @@ void DataHierarchyModel::removeDataHierarchyModelItem(DataHierarchyItem& dataHie
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to remove data hierarchy item from the data hierarchy model", e);
+        exceptionMessageBox("Unable to remove item from the data hierarchy model", e);
     }
     catch (...)
     {
-        exceptionMessageBox("Unable to remove data hierarchy item from the data hierarchy model");
+        exceptionMessageBox("Unable to remove item from the data hierarchy model");
     }
 }
 

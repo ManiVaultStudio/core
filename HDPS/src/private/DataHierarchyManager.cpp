@@ -118,30 +118,19 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
     try {
 
 #ifdef _DEBUG
-        qDebug() << "Add" << dataset->text() << "to the data hierarchy manager";
+        qDebug() << "Add dataset" << dataset->getGuiName() << "to the data hierarchy manager";
 #endif
 
-        // Create new data hierarchy item
         const auto newDataHierarchyItem = new DataHierarchyItem(parentDataset.isValid() ? &parentDataset->getDataHierarchyItem() : static_cast<QObject*>(this), dataset, parentDataset, visible);
 
         _items << newDataHierarchyItem;
 
-        // Add child item if the parent is valid
         if (parentDataset.isValid())
             parentDataset->getDataHierarchyItem().addChild(dataset->getDataHierarchyItem());
 
         dataset->setParent(newDataHierarchyItem);
 
-        // Notify others that an item is added
         emit itemAdded(*newDataHierarchyItem);
-
-        // Remove the data hierarchy item when the corresponding dataset is about to be removed
-        //connect(&newDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this, newDataHierarchyItem]() {
-        //    if (!newDataHierarchyItem->getDatasetReference().isValid())
-        //        return;
-
-        //    removeItem(*newDataHierarchyItem);
-        //});
     }
     catch (std::exception& e)
     {
@@ -160,7 +149,7 @@ void DataHierarchyManager::removeItem(Dataset<DatasetImpl> dataset)
             throw std::runtime_error("Dataset smart pointer is invalid");
 
 #ifdef _DEBUG
-        qDebug() << "Remove" << dataset->text() << "from the data hierarchy manager";
+        qDebug() << "Remove dataset" << dataset->getGuiName() << "from the data hierarchy manager";
 #endif
 
         auto& dataHierarchyItem = dataset->getDataHierarchyItem();
@@ -177,10 +166,10 @@ void DataHierarchyManager::removeItem(Dataset<DatasetImpl> dataset)
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to remove item(s) from the data hierarchy manager", e);
+        exceptionMessageBox("Unable to remove item from the data hierarchy manager", e);
     }
     catch (...) {
-        exceptionMessageBox("Unable to remove item(s) from the data hierarchy manager");
+        exceptionMessageBox("Unable to remove item from the data hierarchy manager");
     }
 }
 
