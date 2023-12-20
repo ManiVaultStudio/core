@@ -9,6 +9,8 @@
 
 #include "util/Exception.h"
 
+#include <ModalTask.h>
+
 #include <QMainWindow>
 
 #include <cassert>
@@ -188,8 +190,21 @@ void DataManager::removeDatasetSupervised(Dataset<DatasetImpl> dataset)
 
         std::reverse(dataHierarchyItems.begin(), dataHierarchyItems.end());
 
-        for (auto dataHierarchyItem : dataHierarchyItems)
-            removeDataset(dataHierarchyItem->getDataset());
+        auto task = ModalTask(this, "Remove dataset(s)", Task::Status::Running);
+
+        task.setSubtasks(dataHierarchyItems.count());
+
+        for (auto dataHierarchyItem : dataHierarchyItems) {
+            const auto datasetIndex = dataHierarchyItems.indexOf(dataHierarchyItem);
+
+            task.setSubtaskStarted(datasetIndex);
+            {
+                removeDataset(dataHierarchyItem->getDataset());
+            }
+            task.setSubtaskFinished(datasetIndex);
+        }
+
+        task.setFinished();
     }
     catch (std::exception& e)
     {
