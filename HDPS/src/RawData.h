@@ -46,6 +46,18 @@ public:
      */
     virtual Dataset<DatasetImpl> createDataSet(const QString& guid = "") const = 0;
 
+    /**
+     * Get amount of data occupied by the raw data
+     * @return Size of the raw data in bytes
+     */
+    virtual std::uint64_t getRawDataSize() const {
+#ifdef _DEBUG
+        qDebug() << __FUNCTION__ << "not implemented in derived class";
+#endif
+
+        return {};
+    }
+
 private:
     DataType    _dataType;  /** Type of data */
 };

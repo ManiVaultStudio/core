@@ -42,8 +42,8 @@ private:
 class Colors : public mv::DatasetImpl
 {
 public:
-    Colors(CoreInterface* core, QString dataName, const QString& guid = "") :
-        DatasetImpl(core, dataName, guid)
+    Colors(QString dataName, const QString& guid = "") :
+        DatasetImpl(dataName, guid)
     {
     }
 
@@ -55,7 +55,7 @@ public:
      */
     Dataset<DatasetImpl> copy() const override
     {
-        auto colors = new Colors(_core, getRawDataName());
+        auto colors = new Colors(getRawDataName());
 
         colors->setText(text());
         colors->indices = indices;

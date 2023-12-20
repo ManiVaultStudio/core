@@ -149,7 +149,7 @@ void Project::updateContributors()
 void Project::setStudioMode(bool studioMode)
 {
     auto plugins    = mv::plugins().getPluginsByTypes();  // by default gets all plugin types
-    auto datasets   = mv::data().allSets();
+    auto datasets   = mv::data().getAllDatasets();
 
     if (studioMode) {
         for (auto plugin : plugins)

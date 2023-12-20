@@ -60,12 +60,11 @@ public:
 public:
 
     /**
-     * Constructor
-     * @param core Pointer to the core
+     * Construct with \p rawDataName and possibly initialize with \p id
      * @param rawDataName Name of the raw data
      * @param id Globally unique dataset identifier
      */
-    DatasetImpl(CoreInterface* core, const QString& rawDataName, const QString& id = "");
+    DatasetImpl(const QString& rawDataName, const QString& id = "");
 
     /** Destructor */
     virtual ~DatasetImpl();
@@ -174,7 +173,7 @@ public:
      */
     template<typename DatasetType>
     Dataset<DatasetType> getSelection() const {
-        return _core->requestSelection<DatasetType>(getSourceDataset<DatasetImpl>()->getRawDataName());
+        return mv::data().getSelection<DatasetType>(getSourceDataset<DatasetImpl>()->getRawDataName());
     }
 
     /**
@@ -516,13 +515,16 @@ public: // Removal
 
 protected:
 
-    /** Get raw data */
+    /**
+     * Get raw data for \p DataType 
+     * @return Pointer to raw data of \p DataType 
+     */
     template <class DataType>
-    DataType& getRawData() const {
+    DataType* getRawData() const {
         if (_rawData == nullptr)
-            _rawData = &dynamic_cast<DataType&>(_core->requestRawData(getRawDataName()));
+            _rawData = dynamic_cast<DataType*>(mv::data().getRawData(getRawDataName()));
 
-        return *static_cast<DataType*>(_rawData);
+        return static_cast<DataType*>(_rawData);
     }
 
     /**

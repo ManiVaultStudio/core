@@ -180,7 +180,7 @@ void EventManager::notifyDatasetDataSelectionChanged(const Dataset<DatasetImpl>&
             for (auto proxyMember : dataset->getProxyMembers())
                 callNotifyDatasetSelectionChanged(proxyMember->getSourceDataset<DatasetImpl>());
 
-        for (auto candidateDataset : core()->requestAllDataSets()) {
+        for (auto candidateDataset : mv::data().getAllDatasets()) {
 
             if (ignoreDatasets != nullptr && ignoreDatasets->contains(candidateDataset))
                 continue;

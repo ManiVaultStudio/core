@@ -43,7 +43,7 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
         addAction(getGroupAction());
     }
 
-    if (!Application::core()->requestAllDataSets().isEmpty()) {
+    if (!mv::data().getAllDatasets().isEmpty()) {
         addSeparator();
         addMenu(getLockMenu());
         addMenu(getUnlockMenu());
@@ -147,7 +147,7 @@ QMenu* DataHierarchyWidgetContextMenu::getLockMenu()
     auto lockAllAction = new QAction("All");
 
     connect(lockAllAction, &QAction::triggered, this, [this]() -> void {
-        for (auto dataset : Application::core()->requestAllDataSets())
+        for (auto dataset : mv::data().getAllDatasets())
             dataset->lock();
     });
 
@@ -155,12 +155,12 @@ QMenu* DataHierarchyWidgetContextMenu::getLockMenu()
 
     QVector<bool> locked;
 
-    for (auto dataset : Application::core()->requestAllDataSets())
+    for (auto dataset : mv::data().getAllDatasets())
         locked << dataset->isLocked();
 
     const auto numberOfLockedDatasets = std::accumulate(locked.begin(), locked.end(), 0);
 
-    lockMenu->setEnabled(numberOfLockedDatasets < Application::core()->requestAllDataSets().size());
+    lockMenu->setEnabled(numberOfLockedDatasets < mv::data().getAllDatasets().size());
 
     auto lockSelectedAction = new QAction("Selected");
 
@@ -187,7 +187,7 @@ QMenu* DataHierarchyWidgetContextMenu::getUnlockMenu()
 
     QVector<bool> locked;
 
-    for (auto dataset : Application::core()->requestAllDataSets())
+    for (auto dataset : mv::data().getAllDatasets())
         locked << dataset->isLocked();
 
     const auto numberOfLockedDatasets = std::accumulate(locked.begin(), locked.end(), 0);
@@ -197,7 +197,7 @@ QMenu* DataHierarchyWidgetContextMenu::getUnlockMenu()
     auto unlockAllAction = new QAction("All");
 
     connect(unlockAllAction, &QAction::triggered, this, [this]() -> void {
-        for (auto dataset : Application::core()->requestAllDataSets())
+        for (auto dataset : mv::data().getAllDatasets())
             dataset->unlock();
     });
 

@@ -197,56 +197,6 @@ public: // Data access
         return createSubsetFromSelection(selection, sourceDataset, guiName, parentDataset, visible);
     }
 
-    /**
-     * Requests a dataset from the core by dataset GUID (if no such instance can be found a fatal error is thrown)
-     * @param datasetGuid GUID of the dataset
-     * @return Smart pointer to the dataset
-     */
-    virtual Dataset<DatasetImpl> requestDataset(const QString& datasetGuid) = 0;
-
-    /**
-     * Requests a dataset of a specific type from the core by dataset GUID, if no such instance can be found a fatal error is thrown
-     * @param datasetGuid GUID of the dataset
-     * @return Smart pointer to the dataset
-     */
-    template<typename DatasetType>
-    Dataset<DatasetType> requestDataset(const QString& datasetGuid)
-    {
-        return Dataset<DatasetType>(requestDataset(datasetGuid));
-    }
-
-    /**
-     * Returns all data sets that are present in the core, filtered by data type(s)
-     * Returns all data sets in case of an empty filter
-     * @param dataTypes Data types to filter
-     * @return Vector of references to datasets
-     */
-    virtual QVector<Dataset<DatasetImpl>> requestAllDataSets(const QVector<DataType>& dataTypes = QVector<DataType>()) = 0;
-
-protected: // Data access
-
-    /**
-     * Requests an instance of a data type plugin from the core which has the same unique name as the given parameter, if no such instance can be found a fatal error is thrown
-     * @param datasetName Name of the dataset
-     */
-    virtual plugin::RawData& requestRawData(const QString& datasetName) = 0;
-
-    /**
-     * Request a selection from the data manager by its corresponding raw data name.
-     * @param rawdataName Name of the raw data
-     */
-    virtual Dataset<DatasetImpl> requestSelection(const QString& rawDataName) = 0;
-
-    /**
-     * Request a selection from the data manager by its corresponding raw data name.
-     * @param rawdataName Name of the raw data
-     */
-    template<typename DatasetType>
-    Dataset<DatasetType> requestSelection(const QString& rawDataName)
-    {
-        return Dataset<DatasetType>(dynamic_cast<DatasetType*>(requestSelection(rawDataName).get()));
-    }
-
 public: // Data grouping
 
     /**

@@ -53,11 +53,28 @@ public:
     {
     }
 
+public: // Raw data
+
     /**
      * Add \p rawData to the data manager
      * @param rawData Pointer to the raw data to add
      */
     virtual void addRawData(plugin::RawData* rawData) = 0;
+
+    /**
+     * Get raw data by \p rawDataName
+     * @param rawDataName Name of the raw data
+     * @return Pointer to raw data if found, nullptr otherwise
+     */
+    virtual plugin::RawData* getRawData(const QString& rawDataName) = 0;
+
+    /**
+     * Get raw data names
+     * @retun Raw data names list
+     */
+    virtual QStringList& getRawDataNames() const = 0;
+
+public: // Datasets
 
     /**
      * Add \p dataset to the data manager
@@ -67,13 +84,6 @@ public:
      * @param notify Whether to notify the core that a dataset is added
      */
     virtual void addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true, bool notify = true) = 0;
-
-    /**
-     * Add \p selection to the data manager
-     * @param rawDataName Name of the raw data
-     * @param selection Smart pointer to selection dataset
-     */
-    virtual void addSelection(const QString& rawDataName, Dataset<DatasetImpl> selection) = 0;
 
     /**
      * Remove \p dataset from the manager
@@ -91,27 +101,70 @@ public:
     virtual void removeDatasetSupervised(Dataset<DatasetImpl> dataset) = 0;
 
     /**
-     * Get raw data by name
-     * @param name Name of the raw data
-     */
-    virtual plugin::RawData& getRawData(const QString& name) = 0;
-
-    /**
      * Get dataset by \p datasetId
      * @param datasetId GUID of the dataset
      * @return Smart pointer to the dataset
      */
-    virtual Dataset<DatasetImpl> getSet(const QString& datasetId) = 0;
+    virtual Dataset<DatasetImpl> getDataset(const QString& datasetId) = 0;
 
     /**
-     * Get selection by \p rawDataName
+     * Get a dataset of a specific type by \p datasetId
+     * @param datasetId GUID of the dataset
+     * @return Smart pointer to the dataset of the specified type
+     */
+    template<typename DatasetType>
+    Dataset<DatasetType> getDataset(const QString& datasetId) {
+        return Dataset<DatasetType>(getDataset(datasetId));
+    }
+
+    /**
+     * Get all datasets for \p dataTypes
+     * @param dataTypes Data types filter
+     * @return Smart pointers to datasets
+     */
+    virtual Datasets getAllDatasets(const std::vector<DataType>& dataTypes = std::vector<DataType>()) const = 0;
+
+public: // Selections
+
+    /**
+     * Add \p selection on \p rawDataName to the data manager
+     * @param rawDataName Name of the raw data
+     * @param selection Smart pointer to selection dataset
+     */
+    virtual void addSelection(const QString& rawDataName, Dataset<DatasetImpl> selection) = 0;
+
+protected:
+
+    /**
+     * Remove \p selection from the data manager
+     * @param rawDataName Name of the selection raw data
+     */
+    virtual void removeSelection(const QString& rawDataName) = 0;
+
+public:
+
+    /**
+     * Get selection dataset by \p rawDataName
      * @param rawDataName Name of the raw data
      * @return Smart pointer to the selection dataset
      */
     virtual Dataset<DatasetImpl> getSelection(const QString& rawDataName) = 0;
 
-    /** Get all sets from the data manager */
-    virtual QVector<Dataset<DatasetImpl>> allSets() const = 0;
+    /**
+     * Get a selection of \p DatasetType by \p rawDataName
+     * @param rawdataName Name of the raw data
+     * @return Smart pointer to the selection dataset
+     */
+    template<typename DatasetType>
+    Dataset<DatasetType> getSelection(const QString& rawDataName) {
+        return Dataset<DatasetType>(dynamic_cast<DatasetType*>(getSelection(rawDataName).get()));
+    }
+
+    /**
+     * Get all selection datasets
+     * @return Smart pointers to selection datasets
+     */
+    virtual Datasets getAllSelections() = 0;
 
 signals:
 
@@ -120,6 +173,12 @@ signals:
      * @param rawData Pointer to raw data that was added
      */
     void rawDataAdded(plugin::RawData* rawData);
+
+    /**
+     * Signals that raw data with \p rawDataId is removed from the data manager
+     * @param rawData Pointer to raw data that was added
+     */
+    void rawDataRemoved(const QString& rawDataId);
 
     /**
      * Signals that \p dataset is added to the data manager
@@ -136,10 +195,28 @@ signals:
     void datasetAboutToBeRemoved(Dataset<DatasetImpl> dataset);
 
     /**
-     * Signals that dataset with \p datasetGuid is removed from the data manager
-     * @param datasetGuid GUID of the removed dataset
+     * Signals that dataset with \p datasetId is removed from the data manager
+     * @param datasetId GUID of the removed dataset
      */
-    void datasetRemoved(const QString& datasetGuid);
+    void datasetRemoved(const QString& datasetId);
+
+    /**
+     * Signals that \p selection dataset is added to the data manager
+     * @param selection Selection dataset that was added
+     */
+    void selectionAdded(Dataset<DatasetImpl> selection);
+
+    /**
+     * Signals that \p selection dataset is about to be removed from the data manager
+     * @param selection Selection dataset that is about to be removed
+     */
+    void selectionAboutToBeRemoved(Dataset<DatasetImpl> selection);
+
+    /**
+     * Signals that selection dataset with \p selectionId is removed from the data manager
+     * @param selectionId GUID of the removed selection dataset
+     */
+    void selectionRemoved(const QString& selectionId);
 };
 
 }

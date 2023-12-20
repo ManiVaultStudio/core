@@ -19,15 +19,15 @@
 
 using namespace mv::util;
 
-Images::Images(mv::CoreInterface* core, QString dataName, const QString& guid /*= ""*/) :
-    DatasetImpl(core, dataName, guid),
+Images::Images(QString dataName, const QString& guid /*= ""*/) :
+    DatasetImpl(dataName, guid),
     _indices(),
     _imageData(nullptr),
     _infoAction(),
     _visibleRectangle(),
     _maskData()
 {
-    _imageData = &getRawData<ImageData>();
+    _imageData = getRawData<ImageData>();
 
     setLinkedDataFlags(0);
 }
@@ -75,7 +75,7 @@ Dataset<DatasetImpl> Images::createSubsetFromSelection(const QString& guiName, c
 
 Dataset<DatasetImpl> Images::copy() const
 {
-    auto images = new Images(Application::core(), getRawDataName());
+    auto images = new Images(getRawDataName());
 
     images->setText(text());
 
@@ -684,13 +684,13 @@ void Images::fromVariantMap(const QVariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
 
-    auto& imageData = getRawData<ImageData>();
+    auto imageData = getRawData<ImageData>();
 
     if (variantMap.contains("TypeIndex"))
-        getRawData<ImageData>().setType(static_cast<ImageData::Type>(variantMap["TypeIndex"].toInt()));
+        getRawData<ImageData>()->setType(static_cast<ImageData::Type>(variantMap["TypeIndex"].toInt()));
 
     if (variantMap.contains("NumberOfImages"))
-        getRawData<ImageData>().setNumberImages(variantMap["NumberOfImages"].toInt());
+        getRawData<ImageData>()->setNumberImages(variantMap["NumberOfImages"].toInt());
 
     if (variantMap.contains("ImageSize")) {
         const auto imageSize = variantMap["ImageSize"].toMap();

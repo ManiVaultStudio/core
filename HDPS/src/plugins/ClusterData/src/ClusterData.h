@@ -94,8 +94,8 @@ private:
 class CLUSTERDATA_EXPORT Clusters : public DatasetImpl
 {
 public:
-    Clusters(CoreInterface* core, QString dataName, const QString& guid = "") :
-        DatasetImpl(core, dataName, guid)
+    Clusters(QString dataName, const QString& guid = "") :
+        DatasetImpl(dataName, guid)
     {
     }
 
@@ -105,12 +105,12 @@ public:
 
     QVector<Cluster>& getClusters()
     {
-        return getRawData<ClusterData>().getClusters();
+        return getRawData<ClusterData>()->getClusters();
     }
 
     const QVector<Cluster>& getClusters() const
     {
-        return getRawData<ClusterData>().getClusters();
+        return getRawData<ClusterData>()->getClusters();
     }
 
     /**
@@ -137,7 +137,7 @@ public:
      */
     Dataset<DatasetImpl> copy() const override
     {
-        auto clusters = new Clusters(Application::core(), getRawDataName());
+        auto clusters = new Clusters(getRawDataName());
 
         clusters->setText(text());
         clusters->indices = indices;

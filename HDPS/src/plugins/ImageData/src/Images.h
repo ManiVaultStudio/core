@@ -36,11 +36,10 @@ public: // Construction
 
     /**
      * Constructor
-     * @param core Pointer to core interface
      * @param dataName Name of the dataset
      * @param guid Globally unique dataset identifier (use only for deserialization)
      */
-    Images(mv::CoreInterface* core, QString dataName, const QString& guid = "");
+    Images(QString dataName, const QString& guid = "");
 
     /** Initializes the dataset */
     void init() override;

@@ -49,7 +49,7 @@ void PointData::init()
 
 mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return mv::Dataset<DatasetImpl>(new Points(Application::core(), getName(), guid));
+    return mv::Dataset<DatasetImpl>(new Points(getName(), guid));
 }
 
 unsigned int PointData::getNumPoints() const
@@ -291,8 +291,8 @@ void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, cons
         });
 }
 
-Points::Points(mv::CoreInterface* core, QString dataName, const QString& guid /*= ""*/) :
-    mv::DatasetImpl(core, dataName, guid),
+Points::Points(QString dataName, const QString& guid /*= ""*/) :
+    mv::DatasetImpl(dataName, guid),
     _infoAction(nullptr),
     _dimensionsPickerGroupAction(nullptr),
     _dimensionsPickerAction(nullptr)
@@ -383,9 +383,9 @@ void Points::init()
 
 void Points::setData(std::nullptr_t, const std::size_t numPoints, const std::size_t numDimensions)
 {
-    const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>().getNumDimensions();
+    const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
 
-    getRawData<PointData>().setData(nullptr, numPoints, numDimensions);
+    getRawData<PointData>()->setData(nullptr, numPoints, numDimensions);
 
     if (notifyDimensionsChanged)
         events().notifyDatasetDataDimensionsChanged(this);
@@ -417,7 +417,7 @@ void Points::extractDataForDimension(std::vector<float>& result, const int dimen
         }
     }
     else {
-        getRawData<PointData>().extractFullDataForDimension(result, dimensionIndex);
+        getRawData<PointData>()->extractFullDataForDimension(result, dimensionIndex);
     }
 }
 
@@ -443,12 +443,12 @@ void Points::extractDataForDimensions(std::vector<mv::Vector2f>& result, const i
         }
     }
     else {
-        const auto& rawPointData = getRawData<PointData>();
+        const auto rawPointData = getRawData<PointData>();
 
         if (isFull())
-            rawPointData.extractFullDataForDimensions(result, dimensionIndex1, dimensionIndex2);
+            rawPointData->extractFullDataForDimensions(result, dimensionIndex1, dimensionIndex2);
         else
-            rawPointData.extractDataForDimensions(result, dimensionIndex1, dimensionIndex2, indices);
+            rawPointData->extractDataForDimensions(result, dimensionIndex1, dimensionIndex2, indices);
     }
 }
 
@@ -470,7 +470,7 @@ bool Points::mayProxy(const Datasets& proxyDatasets) const
 
 Dataset<DatasetImpl> Points::copy() const
 {
-    auto set = new Points(Application::core(), getRawDataName());
+    auto set = new Points(getRawDataName());
 
     set->setText(text());
     set->indices = indices;
@@ -783,25 +783,25 @@ const std::vector<QString>& Points::getDimensionNames() const
         return mv::Dataset<Points>(getProxyMembers().first())->getDimensionNames();
     }
     else {
-        return getRawData<PointData>().getDimensionNames();
+        return getRawData<PointData>()->getDimensionNames();
     }
 }
 
 void Points::setDimensionNames(const std::vector<QString>& dimNames)
 {
-    getRawData<PointData>().setDimensionNames(dimNames);
+    getRawData<PointData>()->setDimensionNames(dimNames);
 
     mv::events().notifyDatasetDataDimensionsChanged(this);
 }
 
 float Points::getValueAt(const std::size_t index) const
 {
-    return getRawData<PointData>().getValueAt(index);
+    return getRawData<PointData>()->getValueAt(index);
 }
 
 void Points::setValueAt(const std::size_t index, const float newValue)
 {
-    getRawData<PointData>().setValueAt(index, newValue);
+    getRawData<PointData>()->setValueAt(index, newValue);
 }
 
 void resolveLinkedPointData(LinkedData& linkedData, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr)
@@ -971,7 +971,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     setAll(variantMap["Full"].toBool());
 
     if (isFull())
-        getRawData<PointData>().fromVariantMap(variantMap);
+        getRawData<PointData>()->fromVariantMap(variantMap);
 
     if (!isFull()) {
         makeSubsetOf(getFullDataset<Points>());
@@ -1071,7 +1071,7 @@ QVariantMap Points::toVariantMap() const
         selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), true);
     }
 
-    variantMap["Data"]                  = isFull() ? getRawData<PointData>().toVariantMap() : QVariantMap();
+    variantMap["Data"]                  = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]        = getNumPoints();
     variantMap["Full"]                  = isFull();
     variantMap["Indices"]               = indices;

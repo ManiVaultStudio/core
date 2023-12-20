@@ -52,6 +52,39 @@ void DataManager::addRawData(plugin::RawData* rawData)
     }
 }
 
+plugin::RawData* DataManager::getRawData(const QString& rawDataName)
+{
+    try
+    {
+        if (rawDataName.isEmpty())
+            throw std::runtime_error("Raw data name is invalid");
+
+        if (_rawDataMap.find(rawDataName) == _rawDataMap.end())
+            throw std::runtime_error("Raw data not found");
+
+        return _rawDataMap[rawDataName].get();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get raw data from data manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get raw data from data manager");
+    }
+
+    return {};
+}
+
+QStringList& DataManager::getRawDataNames() const
+{
+    QStringList rawDataNames;
+
+    for (const auto& [key, _] : _rawDataMap)
+        rawDataNames << key;
+
+    return rawDataNames;
+}
+
 void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible /*= true*/, bool notify /*= true*/)
 {
     try
@@ -64,7 +97,7 @@ void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> 
         if (!dataset.isValid())
             throw std::runtime_error("Dataset smart pointer is invalid");
 
-        _datasets.emplace(dataset->getId(), std::unique_ptr<DatasetImpl>(dataset.get()));
+        _datasetsMap.emplace(dataset->getId(), std::unique_ptr<DatasetImpl>(dataset.get()));
 
         if (notify)
             events().notifyDatasetAdded(dataset);
@@ -80,11 +113,6 @@ void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> 
     }
 }
 
-void DataManager::addSelection(const QString& dataName, Dataset<DatasetImpl> selection)
-{
-    _selections.emplace(dataName, std::unique_ptr<DatasetImpl>(selection.get()));
-}
-
 void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 {
     try
@@ -97,12 +125,12 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         if (!dataset.isValid())
             throw std::runtime_error("Dataset smart pointer is invalid");
 
-        const auto datasetId    = dataset->getId();
-        const auto datasetType  = dataset->getDataType();
+        const auto datasetId = dataset->getId();
+        const auto datasetType = dataset->getDataType();
 
         dataset->setAboutToBeRemoved();
 
-        for (auto& [datasetId, underiveDataset] : _datasets) {
+        for (auto& [datasetId, underiveDataset] : _datasetsMap) {
             if (underiveDataset->isDerivedData() && underiveDataset->getSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
                 underiveDataset->_derived = false;
                 underiveDataset->setSourceDataSet(Dataset<DatasetImpl>());
@@ -112,14 +140,14 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         events().notifyDatasetAboutToBeRemoved(dataset);
         {
             emit datasetAboutToBeRemoved(dataset);
+            {
+                const auto it = _datasetsMap.find(datasetId);
 
-            const auto it = _datasets.find(datasetId);
+                if (it == _datasetsMap.end())
+                    throw std::runtime_error(QString("Dataset with id %1 not found in database").arg(dataset->getId()).toStdString());
 
-            if (it == _datasets.end())
-                throw std::runtime_error(QString("Dataset with id %1 not found in database").arg(dataset->getId()).toStdString());
-
-            _datasets.erase(it);
-
+                _datasetsMap.erase(it);
+            }
             emit datasetRemoved(datasetId);
         }
         events().notifyDatasetRemoved(datasetId, datasetType);
@@ -172,38 +200,17 @@ void DataManager::removeDatasetSupervised(Dataset<DatasetImpl> dataset)
     }
 }
 
-plugin::RawData& DataManager::getRawData(const QString& name)
-{
-    try
-    {
-        if (name.isEmpty())
-            throw std::runtime_error("Raw data name is invalid");
-
-        if (_rawDataMap.find(name) == _rawDataMap.end())
-            throw std::runtime_error("Raw data not found");
-
-        return *_rawDataMap[name];
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to get raw data from data manager", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to get raw data from data manager");
-    }
-}
-
-Dataset<DatasetImpl> DataManager::getSet(const QString& datasetId)
+Dataset<DatasetImpl> DataManager::getDataset(const QString& datasetId)
 {
     try
     {
         if (datasetId.isEmpty())
             throw std::runtime_error("Dataset GUID is invalid");
 
-        if (_datasets.find(datasetId) == _datasets.end())
+        if (_datasetsMap.find(datasetId) == _datasetsMap.end())
             throw std::runtime_error(QString("Dataset with id %1 not found in database").arg(datasetId).toStdString());
 
-        return _datasets[datasetId].get();
+        return _datasetsMap[datasetId].get();
     }
     catch (std::exception& e)
     {
@@ -216,6 +223,56 @@ Dataset<DatasetImpl> DataManager::getSet(const QString& datasetId)
     return {};
 }
 
+Datasets DataManager::getAllDatasets(const std::vector<DataType>& dataTypes /*= std::vector<DataType>()*/) const
+{
+    QVector<Dataset<DatasetImpl>> allDatasets;
+
+    for (auto& [datasetId, dataset] : _datasetsMap) {
+        if (dataTypes.empty()) {
+            allDatasets << dataset.get();
+        }
+        else {
+            if (std::find(dataTypes.begin(), dataTypes.end(), dataset->getDataType()) != dataTypes.end())
+                allDatasets << dataset.get();
+        }
+    }
+
+    return allDatasets;
+}
+
+void DataManager::addSelection(const QString& rawDataName, Dataset<DatasetImpl> selection)
+{
+    _selectionsMap.emplace(rawDataName, std::unique_ptr<DatasetImpl>(selection.get()));
+
+    emit selectionAdded(selection);
+}
+
+void DataManager::removeSelection(const QString& rawDataName)
+{
+    try
+    {
+        const auto it = _selectionsMap.find(rawDataName);
+
+        if (it == _datasetsMap.end())
+            throw std::runtime_error(QString("Dataset with raw data name %1 not found").arg(rawDataName).toStdString());
+
+        const auto selectionId = _datasetsMap[rawDataName]->getId();
+
+        emit selectionAboutToBeRemoved(_selectionsMap[rawDataName].get());
+        {
+            _selectionsMap.erase(it);
+        }
+        emit selectionRemoved(selectionId);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to remove selection dataset from data manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to remove selection dataset from data manager");
+    }
+}
+
 Dataset<DatasetImpl> DataManager::getSelection(const QString& rawDataName)
 {
     try
@@ -223,10 +280,10 @@ Dataset<DatasetImpl> DataManager::getSelection(const QString& rawDataName)
         if (rawDataName.isEmpty())
             throw std::runtime_error("Raw data name is invalid");
 
-        if (_selections.find(rawDataName) == _selections.end())
+        if (_selectionsMap.find(rawDataName) == _selectionsMap.end())
             throw std::runtime_error(QString("Selection set not found for raw data %1").arg(rawDataName).toStdString());
 
-        return _selections[rawDataName].get();
+        return _selectionsMap[rawDataName].get();
     }
     catch (std::exception& e)
     {
@@ -239,14 +296,14 @@ Dataset<DatasetImpl> DataManager::getSelection(const QString& rawDataName)
     return {};
 }
 
-QVector<Dataset<DatasetImpl>> DataManager::allSets() const
+Datasets DataManager::getAllSelections()
 {
-    QVector<Dataset<DatasetImpl>> datasets;
+    QVector<Dataset<DatasetImpl>> selections;
 
-    for (auto& [datasetId, dataset] : _datasets)
-        datasets << dataset.get();
+    for (auto& [datasetId, dataset] : _selectionsMap)
+        selections << dataset.get();
 
-    return datasets;
+    return selections;
 }
 
 void DataManager::fromVariantMap(const QVariantMap& variantMap)
@@ -257,7 +314,7 @@ QVariantMap DataManager::toVariantMap() const
 {
     QVariantMap variantMap;
 
-    for (auto& [datasetId, dataset] : _datasets)
+    for (auto& [datasetId, dataset] : _datasetsMap)
         variantMap[dataset->getId()] = dataset->toVariantMap();
 
     return variantMap;

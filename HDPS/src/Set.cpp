@@ -27,7 +27,7 @@ void DatasetImpl::makeSubsetOf(Dataset<DatasetImpl> fullDataset)
     _rawDataName = fullDataset->_rawDataName;
 
     if (!_rawDataName.isEmpty())
-        _rawData = &Application::core()->requestRawData(getRawDataName());
+        _rawData = mv::data().getRawData(getRawDataName());
 
     _fullDataset = fullDataset;
 
@@ -152,7 +152,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         Datasets proxyMembers;
 
         for (const auto& proxyMemberGuid : variantMap["ProxyMembers"].toStringList())
-            proxyMembers << Application::core()->requestDataset(proxyMemberGuid);
+            proxyMembers << mv::data().getDataset(proxyMemberGuid);
 
         setProxyMembers(proxyMembers);
     }
@@ -291,9 +291,8 @@ void DatasetImpl::addLinkedData(const mv::Dataset<DatasetImpl>& targetDataSet, m
     _linkedData.back().setMapping(mapping);
 }
 
-DatasetImpl::DatasetImpl(CoreInterface* core, const QString& rawDataName, const QString& id /*= ""*/) :
+DatasetImpl::DatasetImpl(const QString& rawDataName, const QString& id /*= ""*/) :
     WidgetAction(nullptr, "Set"),
-    _core(core),
     _storageType(StorageType::Owner),
     _rawData(nullptr),
     _rawDataName(rawDataName),
@@ -360,7 +359,7 @@ bool DatasetImpl::isDerivedData() const
 
 mv::DataType DatasetImpl::getDataType() const
 {
-    return Application::core()->requestRawData(getRawDataName()).getDataType();
+    return mv::data().getRawData(getRawDataName())->getDataType();
 }
 
 void DatasetImpl::setSourceDataSet(const Dataset<DatasetImpl>& dataset)
@@ -371,7 +370,7 @@ void DatasetImpl::setSourceDataSet(const Dataset<DatasetImpl>& dataset)
 
 mv::Dataset<mv::DatasetImpl> DatasetImpl::getSelection() const
 {
-    return Application::core()->requestSelection(getSourceDataset<DatasetImpl>()->getRawDataName());
+    return mv::data().getSelection(getSourceDataset<DatasetImpl>()->getRawDataName());
 }
 
 mv::Dataset<mv::DatasetImpl>& DatasetImpl::getSmartPointer()

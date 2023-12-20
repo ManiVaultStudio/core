@@ -78,35 +78,6 @@ public: // Data access
      */
     Dataset<DatasetImpl> createSubsetFromSelection(const Dataset<DatasetImpl>& selection, const Dataset<DatasetImpl>& sourceDataset, const QString& guiName, const Dataset<DatasetImpl>& parentDataset, const bool& visible = true) override;
 
-    /**
-     * Requests a dataset from the core by dataset GUID (if no such instance can be found a fatal error is thrown)
-     * @param datasetGuid GUID of the dataset
-     * @return Smart pointer to the dataset
-     */
-    Dataset<DatasetImpl> requestDataset(const QString& datasetGuid) override;
-
-    /**
-     * Returns all data sets that are present in the core, filtered by data type(s)
-     * Returns all data sets in case of an empty filter
-     * @param dataTypes Data types to filter
-     * @return Vector of references to datasets
-     */
-    QVector<Dataset<DatasetImpl>> requestAllDataSets(const QVector<DataType>& dataTypes = QVector<DataType>()) override;
-
-protected: // Data access
-
-    /**
-     * Requests an instance of a data type plugin from the core which has the same unique name as the given parameter, if no such instance can be found a fatal error is thrown
-     * @param datasetName Name of the dataset
-     */
-    plugin::RawData& requestRawData(const QString& name) override;
-
-    /**
-     * Request a selection from the data manager by its corresponding raw data name.
-     * @param rawdataName Name of the raw data
-     */
-    Dataset<DatasetImpl> requestSelection(const QString& rawDataName) override;
-
 public: // Data grouping
 
     /**

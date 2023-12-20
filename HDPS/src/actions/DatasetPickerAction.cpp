@@ -167,7 +167,7 @@ void DatasetPickerAction::populateDatasetsFromCore()
     qDebug() << __FUNCTION__;
 #endif
 
-    auto datasets = Application::core()->requestAllDataSets();
+    auto datasets = mv::data().getAllDatasets();
 
     if (_datasetsFilterFunction)
         datasets = _datasetsFilterFunction(datasets);

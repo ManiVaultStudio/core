@@ -61,7 +61,7 @@ void DatasetPrivate::setDatasetId(const QString& datasetId)
 DatasetImpl* DatasetPrivate::getDataset()
 {
     if (_dataset == nullptr && !_datasetId.isEmpty())
-        _dataset = Application::core()->requestDataset(_datasetId).get();
+        _dataset = data().getDataset(_datasetId).get();
 
     return _dataset;
 }

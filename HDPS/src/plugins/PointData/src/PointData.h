@@ -335,7 +335,7 @@ public:
      * Get amount of data occupied by the raw data
      * @return Size of the raw data in bytes
      */
-    std::uint64_t getRawDataSize() const {
+    std::uint64_t getRawDataSize() const override {
         std::uint64_t elementSize = 0u;
 
         switch (_vectorHolder.getElementTypeSpecifier())
@@ -654,7 +654,7 @@ private:
     }
 
 public:
-    Points(mv::CoreInterface* core, QString dataName, const QString& guid = "");
+    Points(QString dataName, const QString& guid = "");
     ~Points() override;
 
     void init() override;
@@ -664,7 +664,7 @@ public:
     template <typename ReturnType = void, typename FunctionObject>
     ReturnType constVisitFromBeginToEnd(FunctionObject functionObject) const
     {
-        return getRawData<PointData>().constVisitFromBeginToEnd<ReturnType>(functionObject);
+        return getRawData<PointData>()->constVisitFromBeginToEnd<ReturnType>(functionObject);
     }
 
     /// Convenience member function, just calling constVisitFromBeginToEnd.
@@ -837,7 +837,7 @@ public:
             return getNumPoints();
         }
         else {
-            return getRawData<PointData>().getNumPoints();
+            return getRawData<PointData>()->getNumPoints();
         }
     }
 
@@ -859,7 +859,7 @@ public:
             return numberOfPoints;
         }
         else {
-            if (isFull()) return getRawData<PointData>().getNumPoints();
+            if (isFull()) return getRawData<PointData>()->getNumPoints();
                 else return static_cast<std::uint32_t>(indices.size());
         }
     }
@@ -870,7 +870,7 @@ public:
             return mv::Dataset<Points>(getProxyMembers().first())->getNumDimensions();
         }
         else {
-            return getRawData<PointData>().getNumDimensions();
+            return getRawData<PointData>()->getNumDimensions();
         }
     }
 
@@ -886,7 +886,7 @@ public:
         if (isProxy())
             return 0;
         else
-            return getRawData<PointData>().getRawDataSize();
+            return getRawData<PointData>()->getRawDataSize();
     }
 
     // Returns the value of the element at the specified position in the current

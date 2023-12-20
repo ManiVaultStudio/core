@@ -50,6 +50,7 @@ public:
      */
     DataManager();
 
+    /** Empty the data manager upon destruction */
     ~DataManager();
 
     /** Perform manager startup initialization */
@@ -58,11 +59,28 @@ public:
     /** Resets the contents of the data manager */
     void reset() override;
 
+public: // Raw data
+
     /**
-     * Add \p rawData to the data manager
+     * Add \p rawData
      * @param rawData Pointer to the raw data to add
      */
     void addRawData(plugin::RawData* rawData) override;
+
+    /**
+     * Get raw data by \p rawDataName
+     * @param rawDataName Name of the raw data
+     * @return Pointer to raw data if found, nullptr otherwise
+     */
+    plugin::RawData* getRawData(const QString& rawDataName) override;
+
+    /**
+     * Get raw data names
+     * @retun Raw data names list
+     */
+    QStringList& getRawDataNames() const override;
+
+public: // Datasets
 
     /**
      * Add \p dataset to the data manager
@@ -72,13 +90,6 @@ public:
      * @param notify Whether to notify the core that a dataset is added
      */
     void addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true, bool notify = true) override;
-
-    /**
-     * Add \p selection to the data manager
-     * @param rawDataName Name of the raw data
-     * @param selection Smart pointer to selection dataset
-     */
-    void addSelection(const QString& rawDataName, Dataset<DatasetImpl> selection) override;
 
     /**
      * Remove \p dataset from the manager
@@ -96,17 +107,37 @@ public:
     void removeDatasetSupervised(Dataset<DatasetImpl> dataset) override;
 
     /**
-     * Get raw data by name
-     * @param name Name of the raw data
-     */
-    plugin::RawData& getRawData(const QString& name) override;
-
-    /**
      * Get dataset by \p datasetId
      * @param datasetId GUID of the dataset
      * @return Smart pointer to the dataset
      */
-    Dataset<DatasetImpl> getSet(const QString& datasetId) override;
+    Dataset<DatasetImpl> getDataset(const QString& datasetId) override;
+
+    /**
+     * Get all datasets for \p dataTypes
+     * @param dataTypes Data types filter
+     * @return Smart pointers to datasets
+     */
+    Datasets getAllDatasets(const std::vector<DataType>& dataTypes = std::vector<DataType>()) const override;
+
+public: // Selections
+
+    /**
+     * Add \p selection on \p rawDataName to the data manager
+     * @param rawDataName Name of the raw data
+     * @param selection Smart pointer to selection dataset
+     */
+    void addSelection(const QString& rawDataName, Dataset<DatasetImpl> selection) override;
+
+protected:
+
+    /**
+     * Remove \p selection from the data manager
+     * @param rawDataName Name of the selection raw data
+     */
+    void removeSelection(const QString& rawDataName) override;
+
+public:
 
     /**
      * Get selection by \p rawDataName
@@ -115,8 +146,11 @@ public:
      */
     Dataset<DatasetImpl> getSelection(const QString& rawDataName) override;
 
-    /** Get all sets from the data manager */
-    QVector<Dataset<DatasetImpl>> allSets() const override;
+    /**
+     * Get all selection datasets
+     * @return Smart pointers to selection datasets
+     */
+    Datasets getAllSelections() override;
 
 public: // Serialization
 
@@ -133,14 +167,9 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-
-    /**
-     * Stores all raw data in the system. Raw data is stored by the name
-     * retrieved from their Plugin::getName() function.
-     */
-    std::unordered_map<QString, std::unique_ptr<plugin::RawData>>   _rawDataMap;
-    std::map<QString, std::unique_ptr<DatasetImpl>>                 _datasets;
-    std::map<QString, std::unique_ptr<DatasetImpl>>                 _selections;
+    std::unordered_map<QString, std::unique_ptr<plugin::RawData>>   _rawDataMap;        /** Maps raw data name to raw data plugin pointer */
+    std::map<QString, std::unique_ptr<DatasetImpl>>                 _datasetsMap;       /** Maps raw data name to dataset pointer */
+    std::map<QString, std::unique_ptr<DatasetImpl>>                 _selectionsMap;     /** Maps dataset ID to dataset pointer */
 };
 
 }

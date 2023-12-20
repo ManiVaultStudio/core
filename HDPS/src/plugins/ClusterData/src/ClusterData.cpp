@@ -38,7 +38,7 @@ void ClusterData::init()
 
 Dataset<DatasetImpl> ClusterData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return Dataset<DatasetImpl>(new Clusters(Application::core(), getName(), guid));
+    return Dataset<DatasetImpl>(new Clusters(getName(), guid));
 }
 
 QVector<Cluster>& ClusterData::getClusters()
@@ -246,17 +246,17 @@ void Clusters::init()
 
 void Clusters::addCluster(Cluster& cluster)
 {
-    getRawData<ClusterData>().addCluster(cluster);
+    getRawData<ClusterData>()->addCluster(cluster);
 }
 
 void Clusters::removeClusterById(const QString& id)
 {
-    getRawData<ClusterData>().removeClusterById(id);
+    getRawData<ClusterData>()->removeClusterById(id);
 }
 
 void Clusters::removeClustersById(const QStringList& ids)
 {
-    getRawData<ClusterData>().removeClustersById(ids);
+    getRawData<ClusterData>()->removeClustersById(ids);
 }
 
 QIcon Clusters::getIcon(const QColor& color /*= Qt::black*/) const
@@ -290,7 +290,7 @@ void Clusters::fromVariantMap(const QVariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
 
-    getRawData<ClusterData>().fromVariantMap(variantMap);
+    getRawData<ClusterData>()->fromVariantMap(variantMap);
 
     events().notifyDatasetDataChanged(this);
 }
@@ -299,7 +299,7 @@ QVariantMap Clusters::toVariantMap() const
 {
     auto variantMap = DatasetImpl::toVariantMap();
 
-    variantMap["Data"] = getRawData<ClusterData>().toVariantMap();
+    variantMap["Data"] = getRawData<ClusterData>()->toVariantMap();
 
     return variantMap;
 }
@@ -364,7 +364,7 @@ void Clusters::setSelectionNames(const QStringList& clusterNames)
     for (const auto& clusterName : clusterNames) {
 
         // Get cluster index
-        const auto clusterIndex = getRawData<ClusterData>().getClusterIndex(clusterName);
+        const auto clusterIndex = getRawData<ClusterData>()->getClusterIndex(clusterName);
 
         if (clusterIndex >= 0)
             selectionIndices.push_back(clusterIndex);

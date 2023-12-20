@@ -161,12 +161,11 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     // Create a new plugin of the given kind
     QString rawDataName = plugins().requestPlugin(kind)->getName();
 
-    // Request it from the core
-    const plugin::RawData& rawData = requestRawData(rawDataName);
+    const auto rawData = mv::data().getRawData(rawDataName);
 
     // Create an initial full set and an empty selection belonging to the raw data
-    auto fullSet    = rawData.createDataSet(id);
-    auto selection  = rawData.createDataSet();
+    auto fullSet    = rawData->createDataSet(id);
+    auto selection  = rawData->createDataSet();
 
     // Set the properties of the new sets
     fullSet->setText(dataSetGuiName);
@@ -179,15 +178,9 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     // Set pointer of full dataset to itself just to avoid having to be wary of this not being set
     fullSet->_fullDataset = fullSet;
 
-    // Add them to the data manager
-    data().addDataset(fullSet, parentDataset);
-    data().addSelection(rawDataName, selection);
+    mv::data().addDataset(fullSet, parentDataset);
+    mv::data().addSelection(rawDataName, selection);
 
-    // Add the dataset to the hierarchy manager and select the dataset TODO
-    //getDataHierarchyManager().addItem(fullSet, const_cast<Dataset<DatasetImpl>&>(parentDataset));
-    //_dataHierarchyManager->selectItems(DataHierarchyItems({ &fullSet->getDataHierarchyItem() }));
-
-    // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
 
     return fullSet;
@@ -201,11 +194,10 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
     // Create a new plugin of the given kind
     QString pluginName = getPluginManager().requestPlugin(dataType._type)->getName();
 
-    // Request it from the core
-    plugin::RawData& rawData = requestRawData(pluginName);
+    auto rawData = mv::data().getRawData(pluginName);
 
     // Create an initial full set, but no selection because it is shared with the source data
-    auto derivedDataset = rawData.createDataSet();
+    auto derivedDataset = rawData->createDataSet();
 
     // Mark the full set as derived and set the GUI name
     derivedDataset->setSourceDataSet(sourceDataset);
@@ -213,14 +205,9 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
 
     // Set properties of the new set
     derivedDataset->setAll(true);
-    
-    // Add them to the data manager
-    data().addDataset(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
 
-    // Add the dataset to the hierarchy manager TODO
-    //getDataHierarchyManager().addItem(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
+    mv::data().addDataset(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
 
-    // Initialize the dataset (e.g. setup default actions for info)
     derivedDataset->init();
 
     return Dataset<DatasetImpl>(*derivedDataset);
@@ -242,7 +229,7 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
         // Set a pointer to the original full dataset, if the source is another subset, we take their pointer
         subset->_fullDataset = sourceDataset->isFull() ? sourceDataset : sourceDataset->_fullDataset;
 
-        data().addDataset(subset, parentDataset, visible);
+        mv::data().addDataset(subset, parentDataset, visible);
 
         subset->init();
 
@@ -257,68 +244,6 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
     }
 
     return {};
-}
-
-plugin::RawData& Core::requestRawData(const QString& name)
-{
-    try
-    {
-        return getDataManager().getRawData(name);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to request raw data", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to request raw data");
-    }
-}
-
-Dataset<DatasetImpl> Core::requestDataset(const QString& dataSetId)
-{
-    try
-    {
-        return Dataset<DatasetImpl>(getDataManager().getSet(dataSetId));
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to request dataset by identifier", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to request dataset by identifier");
-    }
-
-    return {};
-}
-
-QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& dataTypes /*= QVector<DataType>()*/)
-{
-    QVector<Dataset<DatasetImpl>> allDataSets;
-
-    try
-    {
-        const auto& datasets = data().allSets();
-
-        for (const auto dataset : datasets) {
-            if (dataTypes.isEmpty()) {
-                allDataSets << dataset;
-            }
-            else {
-                for (const auto& dataType : dataTypes)
-                    if (dataset->getDataType() == dataType)
-                        allDataSets << dataset;
-            }
-        }
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to request all datasets", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to request all datasets");
-    }
-
-    return allDataSets;
 }
 
 AbstractManager* Core::getManager(const ManagerType& managerType)
@@ -424,11 +349,6 @@ Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString
     }
         
     return Dataset<DatasetImpl>();
-}
-
-Dataset<DatasetImpl> Core::requestSelection(const QString& name)
-{
-    return Dataset<DatasetImpl>(getDataManager().getSelection(name));
 }
 
 void Core::setDatasetGroupingEnabled(const bool& datasetGroupingEnabled)
