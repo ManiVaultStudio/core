@@ -97,21 +97,21 @@ public:
     virtual plugin::RawData& getRawData(const QString& name) = 0;
 
     /**
-     * Get dataset by dataset GUID
-     * @param datasetGuid GUID of the dataset
+     * Get dataset by \p datasetId
+     * @param datasetId GUID of the dataset
      * @return Smart pointer to the dataset
      */
-    virtual Dataset<DatasetImpl> getSet(const QString& datasetGuid) = 0;
+    virtual Dataset<DatasetImpl> getSet(const QString& datasetId) = 0;
 
     /**
-     * Get selection by data name
-     * @param dataName Name of the data
+     * Get selection by \p rawDataName
+     * @param rawDataName Name of the raw data
      * @return Smart pointer to the selection dataset
      */
-    virtual Dataset<DatasetImpl> getSelection(const QString& dataName) = 0;
+    virtual Dataset<DatasetImpl> getSelection(const QString& rawDataName) = 0;
 
     /** Get all sets from the data manager */
-    virtual const QVector<Dataset<DatasetImpl>>& allSets() const = 0;
+    virtual QVector<Dataset<DatasetImpl>> allSets() const = 0;
 
 signals:
 

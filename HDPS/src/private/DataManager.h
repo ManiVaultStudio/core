@@ -12,6 +12,7 @@
 #include <QString>
 
 #include <string>
+#include <map>
 #include <unordered_map>    // Data is stored in maps
 #include <memory>           // Data is stored in unique pointers
 #include <exception>        // Used for defining custom exceptions
@@ -101,21 +102,21 @@ public:
     plugin::RawData& getRawData(const QString& name) override;
 
     /**
-     * Get dataset by dataset GUID
-     * @param datasetGuid GUID of the dataset
+     * Get dataset by \p datasetId
+     * @param datasetId GUID of the dataset
      * @return Smart pointer to the dataset
      */
-    Dataset<DatasetImpl> getSet(const QString& datasetGuid) override;
+    Dataset<DatasetImpl> getSet(const QString& datasetId) override;
 
     /**
-     * Get selection by data name
-     * @param dataName Name of the data
+     * Get selection by \p rawDataName
+     * @param rawDataName Name of the raw data
      * @return Smart pointer to the selection dataset
      */
-    Dataset<DatasetImpl> getSelection(const QString& dataName) override;
+    Dataset<DatasetImpl> getSelection(const QString& rawDataName) override;
 
     /** Get all sets from the data manager */
-    const QVector<Dataset<DatasetImpl>>& allSets() const override;
+    QVector<Dataset<DatasetImpl>> allSets() const override;
 
 public: // Serialization
 
@@ -137,18 +138,9 @@ private:
      * Stores all raw data in the system. Raw data is stored by the name
      * retrieved from their Plugin::getName() function.
      */
-    std::unordered_map<QString, std::unique_ptr<plugin::RawData>> _rawDataMap;
-
-    /**
-     * Stores all data sets in the system
-     */
-    QVector<Dataset<DatasetImpl>> _datasets;
-
-    /**
-    * Stores selection sets on all data plug-ins
-    * NOTE: Can't be a QMap because it doesn't support move semantics of unique_ptr
-    */
-    std::unordered_map<QString, Dataset<DatasetImpl>> _selections;
+    std::unordered_map<QString, std::unique_ptr<plugin::RawData>>   _rawDataMap;
+    std::map<QString, std::unique_ptr<DatasetImpl>>                 _datasets;
+    std::map<QString, std::unique_ptr<DatasetImpl>>                 _selections;
 };
 
-} // namespace mv
+}

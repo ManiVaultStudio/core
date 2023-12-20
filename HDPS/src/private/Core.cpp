@@ -297,7 +297,7 @@ QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& 
 
     try
     {
-        const auto& datasets = getDataManager().allSets();
+        const auto& datasets = data().allSets();
 
         for (const auto dataset : datasets) {
             if (dataTypes.isEmpty()) {
