@@ -8,28 +8,11 @@
 
 #include <AbstractDataManager.h>
 
-#include <QObject> // To support signals
-#include <QString>
-
-#include <string>
 #include <map>
-#include <unordered_map>    // Data is stored in maps
-#include <memory>           // Data is stored in unique pointers
-#include <exception>        // Used for defining custom exceptions
-#include <functional>       // Necessary for hash function
-
-// Qt 5.14.1 has a std::hash<QString> specialization and defines the following macro.
-// Qt 5.12.4 does not! See also https://bugreports.qt.io/browse/QTBUG-33428
-#ifndef QT_SPECIALIZE_STD_HASH_TO_CALL_QHASH
-// Hash specialization for QString so we can use it as a key in the data maps
-namespace std {
-    template<> struct hash<QString> {
-        std::size_t operator()(const QString& s) const {
-            return qHash(s);
-        }
-    };
-}
-#endif
+#include <unordered_map>
+#include <memory>
+#include <exception>
+#include <functional>
 
 namespace mv
 {
@@ -62,13 +45,21 @@ public:
 public: // Raw data
 
     /**
-     * Add \p rawData
+     * Add \p rawData to the data manager (ownership remains with the plugin manager)
      * @param rawData Pointer to the raw data to add
      */
     void addRawData(plugin::RawData* rawData) override;
 
+protected:
+
     /**
-     * Get raw data by \p rawDataName
+     * Remove raw data by \p rawDataName from the data manager
+     * @param rawDataName Name of the raw data to remove
+     */
+    void removeRawData(const QString& rawDataName) override;
+
+    /**
+     * Get raw data by \p rawDataName (ownership remains with the plugin manager)
      * @param rawDataName Name of the raw data
      * @return Pointer to raw data if found, nullptr otherwise
      */
@@ -78,7 +69,7 @@ public: // Raw data
      * Get raw data names
      * @retun Raw data names list
      */
-    QStringList& getRawDataNames() const override;
+    QStringList getRawDataNames() const override;
 
 public: // Datasets
 
@@ -167,9 +158,9 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    std::unordered_map<QString, std::unique_ptr<plugin::RawData>>   _rawDataMap;        /** Maps raw data name to raw data plugin pointer */
-    std::map<QString, std::unique_ptr<DatasetImpl>>                 _datasetsMap;       /** Maps raw data name to dataset pointer */
-    std::map<QString, std::unique_ptr<DatasetImpl>>                 _selectionsMap;     /** Maps dataset ID to dataset pointer */
+    std::unordered_map<QString, plugin::RawData*>       _rawDataMap;        /** Maps raw data name to raw data plugin shared pointer (the plugins are owned by the plugin manager) */
+    std::map<QString, std::unique_ptr<DatasetImpl>>     _datasetsMap;       /** Maps raw data name to dataset pointer */
+    std::map<QString, std::unique_ptr<DatasetImpl>>     _selectionsMap;     /** Maps dataset ID to dataset pointer */
 };
 
 }

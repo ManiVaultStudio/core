@@ -5,22 +5,22 @@
 #pragma once
 
 #include "AbstractManager.h"
-#include "Plugin.h"
-#include "PluginFactory.h"
-#include "ViewPlugin.h"
 
 #include "actions/PluginTriggerAction.h"
+
+#include "util/DockArea.h"
 
 #include <QObject>
 #include <QString>
 #include <QStringList>
-#include <QDir>
 
 namespace mv
 {
 
 namespace plugin {
+    class Plugin;
     class PluginFactory;
+    class ViewPlugin;
 }
 
 /**
@@ -61,7 +61,7 @@ public: // Plugin creation/destruction
      * Create a plugin of \p kind with input \p datasets
      * @param kind Kind of plugin (name of the plugin)
      * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-     * @return Pointer to created plugin (nullptr if creation failed)
+     * @return Pointer to created plugin, nullptr if creation failed
      */
     virtual plugin::Plugin* requestPlugin(const QString& kind, Datasets datasets = Datasets()) = 0;
 
@@ -69,11 +69,10 @@ public: // Plugin creation/destruction
      * Create a plugin of \p kind with \p inputDatasets
      * @param kind Kind of plugin (name of the plugin)
      * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-     * @return Pointer to created plugin of plugin type (nullptr if creation failed)
+     * @return Pointer of \p PluginType to created plugin, nullptr if creation failed
      */
     template<typename PluginType>
-    PluginType* requestPlugin(const QString& kind, Datasets datasets = Datasets())
-    {
+    PluginType* requestPlugin(const QString& kind, const Datasets& datasets) {
         return dynamic_cast<PluginType*>(requestPlugin(kind, datasets));
     }
 
@@ -82,7 +81,7 @@ public: // Plugin creation/destruction
      * @param kind Kind of plugin (name of the plugin)
      * @param dockToViewPlugin View plugin instance to dock to
      * @param dockArea Dock area to dock in
-     * @return Pointer to created view plugin (nullptr if creation failed)
+     * @return Pointer of view plugin type to created view plugin, nullptr if creation failed
      */
     virtual plugin::ViewPlugin* requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, Datasets datasets = Datasets()) = 0;
 
@@ -106,21 +105,21 @@ public: // Plugin factory
      * @param pluginType Plugin type
      * @return Vector of pointers to plugin factories
      */
-    virtual plugin::PluginFactoryPtrs getPluginFactoriesByType(const plugin::Type& pluginType) const = 0;
+    virtual std::vector<plugin::PluginFactory*> getPluginFactoriesByType(const plugin::Type& pluginType) const = 0;
 
     /**
      * Get plugin factories for \p pluginTypes (by default it gets all plugins factories for all types)
      * @param pluginTypes Plugin types
      * @return Vector of pointers to plugin factories of \p pluginTypes
      */
-    virtual plugin::PluginFactoryPtrs getPluginFactoriesByTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const = 0;
+    virtual std::vector<plugin::PluginFactory*> getPluginFactoriesByTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const = 0;
 
     /**
      * Get plugin instances for \p pluginFactory
      * @param pluginFactory Pointer to plugin factory
      * @return Vector of pointers to plugin instances
      */
-    virtual plugin::PluginPtrs getPluginsByFactory(const plugin::PluginFactory* pluginFactory) const = 0;
+    virtual std::vector<plugin::Plugin*> getPluginsByFactory(const plugin::PluginFactory* pluginFactory) const = 0;
 
 public: // Plugin getters
 
@@ -129,14 +128,14 @@ public: // Plugin getters
      * @param pluginType Plugin type
      * @return Vector of pointers to plugin instances
      */
-    virtual plugin::PluginPtrs getPluginsByType(const plugin::Type& pluginType) const = 0;
+    virtual std::vector<plugin::Plugin*> getPluginsByType(const plugin::Type& pluginType) const = 0;
 
     /**
      * Get plugin instances for \p pluginTypes (by default it gets all plugins for all types)
      * @param pluginTypes Plugin types
      * @return Vector of pointers to plugin instances of \p pluginTypes
      */
-    virtual plugin::PluginPtrs getPluginsByTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const = 0;
+    virtual std::vector<plugin::Plugin*> getPluginsByTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const = 0;
 
     /**
      * Get plugin kinds by plugin type(s)

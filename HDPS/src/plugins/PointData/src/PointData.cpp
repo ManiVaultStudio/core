@@ -520,7 +520,7 @@ Dataset<DatasetImpl> Points::createSubsetFromVisibleSelection(const QString& gui
 
     subsetSelection->indices = localSelectionIndices;
 
-    return _core->createSubsetFromSelection(subsetSelection, toSmartPointer(), guiName, parentDataSet, visible);
+    return mv::core()->createSubsetFromSelection(subsetSelection, toSmartPointer(), guiName, parentDataSet, visible);
 }
 
 QIcon Points::getIcon(const QColor& color /*= Qt::black*/) const

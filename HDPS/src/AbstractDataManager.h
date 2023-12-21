@@ -6,9 +6,6 @@
 
 #include "AbstractManager.h"
 
-#include <QObject>
-#include <QString>
-
 // Qt 5.14.1 has a std::hash<QString> specialization and defines the following macro.
 // Qt 5.12.4 does not! See also https://bugreports.qt.io/browse/QTBUG-33428
 #ifndef QT_SPECIALIZE_STD_HASH_TO_CALL_QHASH
@@ -36,7 +33,7 @@ namespace plugin {
  *
  * Base abstract data manager class for managing datasets.
  *
- * @author Thomas Kroes
+ * @author Thomas Kroes and Julian Thijssen
  */
 class AbstractDataManager : public AbstractManager
 {
@@ -56,10 +53,20 @@ public:
 public: // Raw data
 
     /**
-     * Add \p rawData to the data manager
+     * Add \p rawData to the data manager (ownership remains with the plugin manager)
      * @param rawData Pointer to the raw data to add
      */
     virtual void addRawData(plugin::RawData* rawData) = 0;
+
+protected:
+
+    /**
+     * Remove raw data by \p rawDataName from the data manager
+     * @param rawDataName Name of the raw data to remove
+     */
+    virtual void removeRawData(const QString& rawDataName) = 0;
+
+public:
 
     /**
      * Get raw data by \p rawDataName
@@ -69,10 +76,20 @@ public: // Raw data
     virtual plugin::RawData* getRawData(const QString& rawDataName) = 0;
 
     /**
+     * Get raw data by \p rawDataName
+     * @param rawDataName Name of the raw data
+     * @return Pointer of \p RawDataType to raw data if found, nullptr otherwise
+     */
+    template<typename RawDataType>
+    RawDataType* getRawData(const QString& rawDataName) {
+        return dynamic_cast<RawDataType*>(getRawData(rawDataName));
+    }
+
+    /**
      * Get raw data names
      * @retun Raw data names list
      */
-    virtual QStringList& getRawDataNames() const = 0;
+    virtual QStringList getRawDataNames() const = 0;
 
 public: // Datasets
 
@@ -173,6 +190,12 @@ signals:
      * @param rawData Pointer to raw data that was added
      */
     void rawDataAdded(plugin::RawData* rawData);
+
+    /**
+     * Signals that \p rawData is about to be removed from the data manager
+     * @param rawData Pointer to raw data that is about to be removed
+     */
+    void rawDataAboutToBeRemoved(plugin::RawData* rawData);
 
     /**
      * Signals that raw data with \p rawDataId is removed from the data manager

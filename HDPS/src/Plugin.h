@@ -34,7 +34,7 @@ public:
      * Can be implemented to initialize the plugin to a certain state.
      * This function gets called when the plugin is first instantiated.
      */
-    virtual void init() = 0;
+    virtual void init() {};
 
     /**
      * Get the plugin factory for the plugin
@@ -161,10 +161,5 @@ protected:
 
     friend class PluginFactory;
 };
-
-using Plugins = QVector<QPointer<plugin::Plugin*>>;
-using UniquePtrPlugin = std::unique_ptr<plugin::Plugin>;
-using UniquePtrsPlugin = std::vector<UniquePtrPlugin>;
-using PluginPtrs = std::vector<plugin::Plugin*>;
 
 }

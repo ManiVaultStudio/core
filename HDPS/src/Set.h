@@ -540,9 +540,9 @@ public: // Operators
      * @param other Reference to assign from
      */
     DatasetImpl& operator=(const DatasetImpl& other) {
-        _storageType        = other._storageType;
         _rawData            = other._rawData;
         _rawDataName        = other._rawDataName;
+        _storageType        = other._storageType;
         _all                = other._all;
         _derived            = other._derived;
         _sourceDataset      = other._sourceDataset;
@@ -557,13 +557,10 @@ public: // Operators
         return *this;
     }
 
-protected:
-    CoreInterface*              _core;                  /** Pointer to core interface */
-
 private:
     mutable plugin::RawData*    _rawData;               /** Pointer to the raw data referenced in this set */
-    StorageType                 _storageType;           /** Type of storage (own raw data or act as proxy for other datasets) */
     QString                     _rawDataName;           /** Name of the raw data */
+    StorageType                 _storageType;           /** Type of storage (own raw data or act as proxy for other datasets) */
     bool                        _all;                   /** Whether this is the full dataset */
     bool                        _derived;               /** Whether this dataset is derived from another dataset */
     Dataset<DatasetImpl>        _sourceDataset;         /** Smart pointer to the source dataset (if any) */
@@ -583,11 +580,8 @@ private:
     friend class Core;
     friend class DataManager;
     friend class EventListener;
-
-    template<typename DatasetType>
-    friend class SmartDataset;
 };
 
-} // namespace mv
+}
 
 #endif

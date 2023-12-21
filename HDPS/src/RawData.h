@@ -82,6 +82,7 @@ public:
 };
 
 }
+
 }
 
-Q_DECLARE_INTERFACE(mv::plugin::RawDataFactory, "hdps.RawDataFactory")
+Q_DECLARE_INTERFACE(mv::plugin::RawDataFactory, "ManiVault.RawDataFactory")

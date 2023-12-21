@@ -3,28 +3,30 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "DataManager.h"
-#include "RawData.h"
-#include "DataHierarchyItem.h"
 #include "ConfirmDatasetsRemovalDialog.h"
 
-#include "util/Exception.h"
+#include <util/Exception.h>
 
 #include <ModalTask.h>
-
-#include <QMainWindow>
+#include <RawData.h>
+#include <DataHierarchyItem.h>
 
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
 
+#include <QMainWindow>
+
 using namespace mv::util;
 
 #ifdef _DEBUG
-    //#define DATA_MANAGER_VERBOSE
+    #define DATA_MANAGER_VERBOSE
 #endif
 
 namespace mv
 {
+
+using namespace plugin;
 
 DataManager::DataManager() :
     AbstractDataManager()
@@ -32,16 +34,21 @@ DataManager::DataManager() :
     setObjectName("Datasets");
 }
 
+DataManager::~DataManager()
+{
+    reset();
+}
+
 void DataManager::addRawData(plugin::RawData* rawData)
 {
     try
     {
 
-#ifdef _DEBUG
+#ifdef DATA_MANAGER_VERBOSE
         qDebug() << "Add raw data" << rawData->getName() << "to the the data manager";
 #endif
 
-        _rawDataMap.emplace(rawData->getName(), std::unique_ptr<plugin::RawData>(rawData));
+        _rawDataMap.emplace(rawData->getName(), rawData);
 
         emit rawDataAdded(rawData);
     }
@@ -51,6 +58,32 @@ void DataManager::addRawData(plugin::RawData* rawData)
     }
     catch (...) {
         exceptionMessageBox("Unable to add raw data to the data manager");
+    }
+}
+
+void DataManager::removeRawData(const QString& rawDataName)
+{
+    try
+    {
+        const auto it = _rawDataMap.find(rawDataName);
+
+        if (it == _rawDataMap.end())
+            throw std::runtime_error(QString("Raw data with name %1 not found").arg(rawDataName).toStdString());
+
+        emit rawDataAboutToBeRemoved(_rawDataMap[rawDataName]);
+        {
+            plugins().destroyPlugin(_rawDataMap[rawDataName]);
+
+            _rawDataMap.erase(it);
+        }
+        emit rawDataRemoved(rawDataName);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to remove raw data from data manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to remove raw data from data manager");
     }
 }
 
@@ -64,7 +97,7 @@ plugin::RawData* DataManager::getRawData(const QString& rawDataName)
         if (_rawDataMap.find(rawDataName) == _rawDataMap.end())
             throw std::runtime_error("Raw data not found");
 
-        return _rawDataMap[rawDataName].get();
+        return _rawDataMap[rawDataName];
     }
     catch (std::exception& e)
     {
@@ -77,12 +110,12 @@ plugin::RawData* DataManager::getRawData(const QString& rawDataName)
     return {};
 }
 
-QStringList& DataManager::getRawDataNames() const
+QStringList DataManager::getRawDataNames() const
 {
     QStringList rawDataNames;
 
-    for (const auto& [key, _] : _rawDataMap)
-        rawDataNames << key;
+    for (const auto& [rawDataName, rawData] : _rawDataMap)
+        rawDataNames << rawDataName;
 
     return rawDataNames;
 }
@@ -92,7 +125,7 @@ void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> 
     try
     {
 
-#ifdef _DEBUG
+#ifdef DATA_MANAGER_VERBOSE
         qDebug() << "Add dataset" << dataset->getGuiName() << "to the data manager";
 #endif
 
@@ -120,15 +153,16 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
     try
     {
 
-#ifdef _DEBUG
+#ifdef DATA_MANAGER_VERBOSE
         qDebug() << "Remove dataset" << dataset->getGuiName() << "from the data manager";
 #endif
 
         if (!dataset.isValid())
             throw std::runtime_error("Dataset smart pointer is invalid");
 
-        const auto datasetId = dataset->getId();
-        const auto datasetType = dataset->getDataType();
+        const auto datasetId        = dataset->getId();
+        const auto datasetType      = dataset->getDataType();
+        const auto rawDatasetName   = dataset->getRawDataName();
 
         dataset->setAboutToBeRemoved();
 
@@ -153,6 +187,9 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
             emit datasetRemoved(datasetId);
         }
         events().notifyDatasetRemoved(datasetId, datasetType);
+
+        removeRawData(rawDatasetName);
+        removeSelection(rawDatasetName);
     }
     catch (std::exception& e)
     {
@@ -166,7 +203,7 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 void DataManager::removeDatasetSupervised(Dataset<DatasetImpl> dataset)
 {
     try {
-#ifdef _DEBUG
+#ifdef DATA_MANAGER_VERBOSE
         qDebug() << "Remove dataset" << dataset->text() << "from the data manager supervised";
 #endif
 
@@ -174,7 +211,7 @@ void DataManager::removeDatasetSupervised(Dataset<DatasetImpl> dataset)
             throw std::runtime_error("Dataset smart pointer is invalid");
 
         if (settings().getMiscellaneousSettings().getConfirmDatasetsRemovalAction().isChecked()) {
-            ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog(Application::getMainWindow());
+            ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog;
 
             if (confirmDatasetsRemovalDialog.exec() == QDialog::Rejected)
                 return;
@@ -195,16 +232,21 @@ void DataManager::removeDatasetSupervised(Dataset<DatasetImpl> dataset)
         task.setSubtasks(dataHierarchyItems.count());
 
         for (auto dataHierarchyItem : dataHierarchyItems) {
-            const auto datasetIndex = dataHierarchyItems.indexOf(dataHierarchyItem);
+            const auto datasetIndex     = dataHierarchyItems.indexOf(dataHierarchyItem);
+            const auto datasetGuiName   = dataHierarchyItem->getDataset()->getGuiName();
 
-            task.setSubtaskStarted(datasetIndex);
+            task.setSubtaskStarted(datasetIndex, QString("Removing %1").arg(datasetGuiName));
             {
                 removeDataset(dataHierarchyItem->getDataset());
             }
-            task.setSubtaskFinished(datasetIndex);
+            task.setSubtaskFinished(datasetIndex, QString("Removed %1").arg(datasetGuiName));
         }
 
         task.setFinished();
+
+        qDebug() << "Raw data count:" << _rawDataMap.size();
+        qDebug() << "Datasets count:" << _datasetsMap.size();
+        qDebug() << "Selection count:" << _selectionsMap.size();
     }
     catch (std::exception& e)
     {
@@ -268,10 +310,10 @@ void DataManager::removeSelection(const QString& rawDataName)
     {
         const auto it = _selectionsMap.find(rawDataName);
 
-        if (it == _datasetsMap.end())
+        if (it == _selectionsMap.end())
             throw std::runtime_error(QString("Dataset with raw data name %1 not found").arg(rawDataName).toStdString());
 
-        const auto selectionId = _datasetsMap[rawDataName]->getId();
+        const auto selectionId = _selectionsMap[rawDataName]->getId();
 
         emit selectionAboutToBeRemoved(_selectionsMap[rawDataName].get());
         {
@@ -369,11 +411,6 @@ void DataManager::initialize()
 
     beginInitialization();
     endInitialization();
-}
-
-DataManager::~DataManager()
-{
-    reset();
 }
 
 }

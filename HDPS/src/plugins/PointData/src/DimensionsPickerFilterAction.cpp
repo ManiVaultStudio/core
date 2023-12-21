@@ -29,7 +29,9 @@ DimensionsPickerFilterAction::DimensionsPickerFilterAction(DimensionsPickerActio
     _nameFilterAction.getTrailingAction().setIcon(Application::getIconFont("FontAwesome").getIcon("times-circle"));
 
     // Reset the name filter when the trailing action is triggered
-    connect(&_nameFilterAction.getTrailingAction(), &QAction::triggered, &_nameFilterAction, &StringAction::reset);
+    connect(&_nameFilterAction.getTrailingAction(), &QAction::triggered, this, [this]() -> void {
+        _nameFilterAction.setString("");
+    });
 
     // Update the name filter trailing action visibility based on the name filter
     const auto updateTrailingActionVisibility = [this]() {

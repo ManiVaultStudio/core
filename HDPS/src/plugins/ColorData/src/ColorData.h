@@ -71,7 +71,7 @@ public:
      * @return Smart pointer to the created subset
      */
     Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const override {
-        return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
+        return mv::core()->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
 
     /**
