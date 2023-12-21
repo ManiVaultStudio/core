@@ -100,62 +100,6 @@ void Core::reset()
         manager->reset();
 }
 
-void Core::addPlugin(plugin::Plugin* plugin)
-{
-    switch (plugin->getType())
-    {
-        // If the plugin is RawData, then add it to the data manager
-        case plugin::Type::DATA:
-        {
-            getDataManager().addRawData(dynamic_cast<plugin::RawData*>(plugin));
-            break;
-        }
-
-        case plugin::Type::VIEW:
-            break;
-    }
-
-    // Initialize the plugin after it has been added to the core
-    plugin->init();
-
-    switch (plugin->getType())
-    {
-        case plugin::Type::ANALYSIS:
-        {
-            auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
-
-            if (analysisPlugin)
-                events().notifyDatasetAdded(analysisPlugin->getOutputDataset());
-
-            break;
-        }
-
-        case plugin::Type::LOADER:
-        {
-            try
-            {
-                dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
-            }
-            catch (plugin::DataLoadException e)
-            {
-                QMessageBox messageBox;
-                messageBox.critical(0, "Error", e.what());
-                messageBox.setFixedSize(500, 200);
-            }
-
-            break;
-        }
-
-        case plugin::Type::WRITER:
-        {
-            dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
-
-            break;
-        }
-
-    }
-}
-
 Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/)
 {
     // Create a new plugin of the given kind

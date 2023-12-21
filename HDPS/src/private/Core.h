@@ -95,11 +95,6 @@ public: // Dataset grouping
     /** Get whether dataset grouping is enabled or not */
     void setDatasetGroupingEnabled(const bool& datasetGroupingEnabled) override;
 
-public:
-
-    /** Adds the given plugin to the list of plugins kept by the core */
-    void addPlugin(plugin::Plugin* plugin);
-
 public: // Managers
 
     AbstractManager* getManager(const ManagerType& managerType) override;

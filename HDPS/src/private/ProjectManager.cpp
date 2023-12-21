@@ -984,6 +984,8 @@ void ProjectManager::createProject()
 {
     emit projectAboutToBeCreated();
     {
+        mv::data().reset();
+
         reset();
 
         _project.reset(new Project());

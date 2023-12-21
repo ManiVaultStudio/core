@@ -26,6 +26,11 @@ namespace mv::plugin
 class Plugin : public mv::gui::WidgetAction
 {
 public:
+
+    /**
+     * Construct with pointer to plugin \p factory
+     * @param factory Pointer to plugin factory
+     */
     Plugin(const PluginFactory* factory);
 
     virtual ~Plugin();

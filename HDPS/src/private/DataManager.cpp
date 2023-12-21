@@ -385,15 +385,21 @@ void DataManager::reset()
 
     beginReset();
     {
-        //for (std::pair<QString, Dataset<DatasetImpl>> selection : _selections) {
-            //delete selection.second
-        //}
+        /*
+        _datasetsMap.clear();
 
-        //for (auto& dataset : _datasets)
-        //    removeDataset(dataset);
+        DataHierarchyItems dataHierarchyItems;
+        
+        for (const auto& dataset : _datasetsMap);
 
-        _rawDataMap.clear();
+        dataHierarchyItems << dataset->getDataHierarchyItem().getChildren(true);
 
+        std::sort(dataHierarchyItems.begin(), dataHierarchyItems.end(), [](auto dataHierarchyItemA, auto dataHierarchyItemB) -> bool {
+            return dataHierarchyItemA->getDepth() < dataHierarchyItemB->getDepth();
+        });
+
+        std::reverse(dataHierarchyItems.begin(), dataHierarchyItems.end());
+        */
     }
     endReset();
 }

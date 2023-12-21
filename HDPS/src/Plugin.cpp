@@ -44,6 +44,8 @@ Plugin::~Plugin()
 #ifdef PLUGIN_VERBOSE
     qDebug() << __FUNCTION__ << getGuiName();
 #endif
+
+    const_cast<PluginFactory*>(_factory)->setNumberOfInstances(_factory->getNumberOfInstances() - 1);
 }
 
 const mv::plugin::PluginFactory* Plugin::getFactory() const

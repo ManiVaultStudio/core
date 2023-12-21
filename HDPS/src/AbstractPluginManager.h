@@ -76,6 +76,16 @@ public: // Plugin creation/destruction
         return dynamic_cast<PluginType*>(requestPlugin(kind, datasets));
     }
 
+private:
+
+    /**
+     * Add \p plugin to the data manager
+     * @param plugin Pointer to the plugin to add
+     */
+    virtual void addPlugin(plugin::Plugin* plugin) = 0;
+
+public:
+
     /**
      * Create a view plugin plugin of \p kind and dock it to \p dockToViewPlugin at \p dockArea
      * @param kind Kind of plugin (name of the plugin)

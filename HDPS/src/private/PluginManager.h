@@ -56,6 +56,16 @@ public: // Plugin creation/destruction
      */
     plugin::ViewPlugin* requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, Datasets datasets = Datasets()) override;
 
+private:
+
+    /**
+     * Add \p plugin to the data manager
+     * @param plugin Pointer to the plugin to add
+     */
+    void addPlugin(plugin::Plugin* plugin) override;
+
+public:
+
     /**
      * Destroy \p plugin
      * @param plugin Pointer to the plugin that is to be destroyed
@@ -196,8 +206,8 @@ protected:
     QStringList resolveDependencies(QDir pluginDir) const;
 
 private:
-    QHash<QString, PluginFactory*>                      _pluginFactories;   /** All loaded plugin factories */
-    std::map<QString, std::unique_ptr<plugin::Plugin>>  _pluginsMap;        /** Maps plugin identifier to plugin instance */
+    QHash<QString, PluginFactory*>                  _pluginFactories;   /** All loaded plugin factories */
+    std::vector<std::unique_ptr<plugin::Plugin>>    _plugins;           /** Vector of plugin instances */
 };
 
 }

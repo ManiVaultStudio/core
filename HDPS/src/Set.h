@@ -62,7 +62,7 @@ public:
     /**
      * Construct with \p rawDataName and possibly initialize with \p id
      * @param rawDataName Name of the raw data
-     * @param id Globally unique dataset identifier
+     * @param id Globally unique dataset identifier, if empty an new ID will be generated
      */
     DatasetImpl(const QString& rawDataName, const QString& id = "");
 

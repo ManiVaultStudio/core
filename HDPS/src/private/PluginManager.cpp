@@ -27,7 +27,7 @@
 #include <assert.h>
 
 #ifdef _DEBUG
-    //#define PLUGIN_MANAGER_VERBOSE
+    #define PLUGIN_MANAGER_VERBOSE
 #endif
 
 namespace mv {
@@ -72,14 +72,16 @@ void PluginManager::reset()
 
     beginReset();
     {
-        for (const auto& [_, plugin] : _pluginsMap)
-            destroyPlugin(plugin.get());
     }
     endReset();
 }
 
 void PluginManager::loadPlugins()
 {
+#ifdef PLUGIN_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
 	QDir pluginDir(qApp->applicationDirPath());
     
 #if defined(Q_OS_WIN)
@@ -168,6 +170,10 @@ mv::plugin::PluginFactory* PluginManager::getPluginFactory(const QString& plugin
 
 QStringList PluginManager::resolveDependencies(QDir pluginDir) const
 {
+#ifdef PLUGIN_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     // Map keeping track of the list of plugin kinds on which a plugin is dependent
     QMap<QString, QStringList> dependencies;
     // List of plugin kinds which have had their dependencies resolved
@@ -267,14 +273,18 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets datas
 {
     try
     {
+#ifdef PLUGIN_MANAGER_VERBOSE
+        qDebug() << __FUNCTION__ << kind;
+#endif
+
         if (!_pluginFactories.keys().contains(kind))
             throw std::runtime_error("Unrecognized plugin kind");
 
         auto pluginFactory  = _pluginFactories[kind];
         auto pluginInstance = pluginFactory->produce();
 
-        if (!pluginInstance)
-            return nullptr;
+        if (pluginInstance == nullptr)
+            throw std::runtime_error(QString("Unable to produce plugin of kind %1").arg(kind).toStdString());
 
         pluginFactory->setNumberOfInstances(pluginFactory->getNumberOfInstances() + 1);
 
@@ -303,11 +313,11 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets datas
                 break;
         }
 
-        dynamic_cast<Core*>(Application::core())->addPlugin(pluginInstance);
+        addPlugin(pluginInstance);
 
-        qDebug() << "Added plugin" << pluginInstance->getKind() << "with version" << pluginInstance->getVersion();
+        qDebug() << "Added plugin" << pluginInstance->getKind() << "with version" << pluginInstance->getVersion() << "and ID" << pluginInstance->getId();
 
-        _pluginsMap.emplace(pluginInstance->getId(), pluginInstance);
+        _plugins.push_back(std::move(std::unique_ptr<plugin::Plugin>(pluginInstance)));
 
         emit pluginAdded(pluginInstance);
 
@@ -315,15 +325,22 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets datas
     }
     catch (std::exception& e)
     {
-        QMessageBox::warning(nullptr, "ManiVault", QString("Unable to create plugin: %1").arg(e.what()));
-
-        return nullptr;
+        exceptionMessageBox("Unable to create plugin", e);
     }
+    catch (...) {
+        exceptionMessageBox("Unable to create plugin");
+    }
+
+    return {};
 }
 
 plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, Datasets datasets /*= Datasets()*/)
 {
-    const auto viewPlugin = dynamic_cast<ViewPlugin*>(requestPlugin(kind, datasets));
+#ifdef PLUGIN_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << kind;
+#endif
+
+    const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(requestPlugin(kind, datasets));
 
     if (viewPlugin != nullptr)
         mv::workspaces().addViewPlugin(viewPlugin, dockToViewPlugin, dockArea);
@@ -331,9 +348,74 @@ plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin
     return viewPlugin;
 }
 
+void PluginManager::addPlugin(plugin::Plugin* plugin)
+{
+    Q_ASSERT(plugin != nullptr);
+
+    if (plugin == nullptr)
+        return;
+
+#ifdef PLUGIN_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__ << plugin->getGuiName();
+#endif
+
+    try
+    {
+        switch (plugin->getType())
+        {
+            case plugin::Type::DATA:
+            {
+                mv::data().addRawData(dynamic_cast<plugin::RawData*>(plugin));
+                break;
+            }
+
+            case plugin::Type::VIEW:
+                break;
+        }
+
+        plugin->init();
+
+        switch (plugin->getType())
+        {
+            case plugin::Type::ANALYSIS:
+            {
+                auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
+
+                if (analysisPlugin)
+                    events().notifyDatasetAdded(analysisPlugin->getOutputDataset());
+
+                break;
+            }
+
+            case plugin::Type::LOADER:
+            {
+                dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
+                break;
+            }
+
+            case plugin::Type::WRITER:
+            {
+                dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
+                break;
+            }
+
+        }
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to add plugin", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to add plugin");
+    }
+}
+
 void PluginManager::destroyPlugin(plugin::Plugin* plugin)
 {
     Q_ASSERT(plugin != nullptr);
+
+    if (plugin == nullptr)
+        return;
 
 #ifdef PLUGIN_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << plugin->getGuiName();
@@ -345,16 +427,14 @@ void PluginManager::destroyPlugin(plugin::Plugin* plugin)
 
         emit pluginAboutToBeDestroyed(plugin);
         {
-            auto pluginFactory = _pluginFactories[plugin->getKind()];
+            const auto it = std::find_if(_plugins.begin(), _plugins.end(), [pluginId](const auto& pluginPtr) -> bool {
+                return pluginId == pluginPtr->getId();
+            });
 
-            pluginFactory->setNumberOfInstances(pluginFactory->getNumberOfInstances() - 1);
+            if (it == _plugins.end())
+                throw std::runtime_error(QString("Plugin %1 (%2) not found").arg(plugin->getGuiName(), plugin->getId()).toStdString());
 
-            const auto it = _pluginsMap.find(plugin->getId());
-
-            if (it == _pluginsMap.end())
-                throw std::runtime_error(QString("Plugin %1 with %2 not found").arg(plugin->getGuiName(), plugin->getId()).toStdString());
-
-            _pluginsMap.erase(it);
+            _plugins.erase(it);
         }
         emit pluginDestroyed(pluginId);
     }
@@ -406,7 +486,7 @@ std::vector<plugin::Plugin*> PluginManager::getPluginsByType(const plugin::Type&
 {
     std::vector<plugin::Plugin*> pluginsByType;
 
-    for (const auto& [id, plugin] : const_cast<PluginManager*>(this)->_pluginsMap)
+    for (const auto& plugin : const_cast<PluginManager*>(this)->_plugins)
         if (pluginType == plugin->getType())
             pluginsByType.push_back(plugin.get());
 
