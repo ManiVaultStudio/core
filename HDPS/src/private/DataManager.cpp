@@ -132,7 +132,7 @@ void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> 
         if (!dataset.isValid())
             throw std::runtime_error("Dataset smart pointer is invalid");
 
-        _datasetsMap.emplace(dataset->getId(), std::unique_ptr<DatasetImpl>(dataset.get()));
+        _datasets.push_back(std::unique_ptr<DatasetImpl>(dataset.get()));
 
         if (notify)
             events().notifyDatasetAdded(dataset);
@@ -166,7 +166,7 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 
         dataset->setAboutToBeRemoved();
 
-        for (auto& [datasetId, underiveDataset] : _datasetsMap) {
+        for (const auto& underiveDataset : _datasets) {
             if (underiveDataset->isDerivedData() && underiveDataset->getSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
                 underiveDataset->_derived = false;
                 underiveDataset->setSourceDataSet(Dataset<DatasetImpl>());
@@ -177,12 +177,14 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         {
             emit datasetAboutToBeRemoved(dataset);
             {
-                const auto it = _datasetsMap.find(datasetId);
+                const auto it = std::find_if(_datasets.begin(), _datasets.end(), [datasetId](const auto& datasetPtr) -> bool {
+                    return datasetId == datasetPtr->getId();
+                });
 
-                if (it == _datasetsMap.end())
+                if (it == _datasets.end())
                     throw std::runtime_error(QString("Dataset with id %1 not found in database").arg(dataset->getId()).toStdString());
 
-                _datasetsMap.erase(it);
+                _datasets.erase(it);
             }
             emit datasetRemoved(datasetId);
         }
@@ -200,23 +202,24 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
     }
 }
 
-void DataManager::removeDatasetSupervised(Dataset<DatasetImpl> dataset)
+void DataManager::removeDatasets(Datasets datasets)
 {
     try {
 #ifdef DATA_MANAGER_VERBOSE
-        qDebug() << "Remove dataset" << dataset->text() << "from the data manager supervised";
+        qDebug() << "Remove datasets from the data manager supervised";
 #endif
 
-        if (!dataset.isValid())
-            throw std::runtime_error("Dataset smart pointer is invalid");
+        //if (!dataset.isValid())
+        //    throw std::runtime_error("Dataset smart pointer is invalid");
 
         if (settings().getMiscellaneousSettings().getConfirmDatasetsRemovalAction().isChecked()) {
-            ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog;
+            ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog(datasets);
 
             if (confirmDatasetsRemovalDialog.exec() == QDialog::Rejected)
                 return;
         }
 
+        /*
         DataHierarchyItems dataHierarchyItems{ &dataset->getDataHierarchyItem() };
 
         dataHierarchyItems << dataset->getDataHierarchyItem().getChildren(true);
@@ -243,10 +246,13 @@ void DataManager::removeDatasetSupervised(Dataset<DatasetImpl> dataset)
         }
 
         task.setFinished();
+        */
 
+#ifdef DATA_MANAGER_VERBOSE
         qDebug() << "Raw data count:" << _rawDataMap.size();
-        qDebug() << "Datasets count:" << _datasetsMap.size();
-        qDebug() << "Selection count:" << _selectionsMap.size();
+        qDebug() << "Datasets count:" << _datasets.size();
+        qDebug() << "Selection count:" << _selections.size();
+#endif
     }
     catch (std::exception& e)
     {
@@ -264,10 +270,14 @@ Dataset<DatasetImpl> DataManager::getDataset(const QString& datasetId)
         if (datasetId.isEmpty())
             throw std::runtime_error("Dataset GUID is invalid");
 
-        if (_datasetsMap.find(datasetId) == _datasetsMap.end())
+        const auto it = std::find_if(_datasets.begin(), _datasets.end(), [datasetId](const auto& datasetPtr) -> bool {
+            return datasetId == datasetPtr->getId();
+        });
+
+        if (it == _datasets.end())
             throw std::runtime_error(QString("Dataset with id %1 not found in database").arg(datasetId).toStdString());
 
-        return _datasetsMap[datasetId].get();
+        return (*it).get();
     }
     catch (std::exception& e)
     {
@@ -284,7 +294,7 @@ Datasets DataManager::getAllDatasets(const std::vector<DataType>& dataTypes /*= 
 {
     QVector<Dataset<DatasetImpl>> allDatasets;
 
-    for (auto& [datasetId, dataset] : _datasetsMap) {
+    for (const auto& dataset : _datasets) {
         if (dataTypes.empty()) {
             allDatasets << dataset.get();
         }
@@ -299,7 +309,7 @@ Datasets DataManager::getAllDatasets(const std::vector<DataType>& dataTypes /*= 
 
 void DataManager::addSelection(const QString& rawDataName, Dataset<DatasetImpl> selection)
 {
-    _selectionsMap.emplace(rawDataName, std::unique_ptr<DatasetImpl>(selection.get()));
+    _selections.push_back(std::unique_ptr<DatasetImpl>(selection.get()));
 
     emit selectionAdded(selection);
 }
@@ -308,16 +318,19 @@ void DataManager::removeSelection(const QString& rawDataName)
 {
     try
     {
-        const auto it = _selectionsMap.find(rawDataName);
+        const auto it = std::find_if(_selections.begin(), _selections.end(), [rawDataName](const auto& selectionPtr) -> bool {
+            return rawDataName == selectionPtr->getRawDataName();
+        });
 
-        if (it == _selectionsMap.end())
-            throw std::runtime_error(QString("Dataset with raw data name %1 not found").arg(rawDataName).toStdString());
+        if (it == _selections.end())
+            throw std::runtime_error(QString("Selection dataset with raw data name %1 not found").arg(rawDataName).toStdString());
 
-        const auto selectionId = _selectionsMap[rawDataName]->getId();
+        const auto selection    = (*it).get();
+        const auto selectionId  = selection->getId();
 
-        emit selectionAboutToBeRemoved(_selectionsMap[rawDataName].get());
+        emit selectionAboutToBeRemoved(selection);
         {
-            _selectionsMap.erase(it);
+            _selections.erase(it);
         }
         emit selectionRemoved(selectionId);
     }
@@ -337,10 +350,14 @@ Dataset<DatasetImpl> DataManager::getSelection(const QString& rawDataName)
         if (rawDataName.isEmpty())
             throw std::runtime_error("Raw data name is invalid");
 
-        if (_selectionsMap.find(rawDataName) == _selectionsMap.end())
+        const auto it = std::find_if(_selections.begin(), _selections.end(), [rawDataName](const auto& selectionPtr) -> bool {
+            return rawDataName == selectionPtr->getRawDataName();
+        });
+
+        if (it == _selections.end())
             throw std::runtime_error(QString("Selection set not found for raw data %1").arg(rawDataName).toStdString());
 
-        return _selectionsMap[rawDataName].get();
+        return (*it).get();
     }
     catch (std::exception& e)
     {
@@ -357,7 +374,7 @@ Datasets DataManager::getAllSelections()
 {
     QVector<Dataset<DatasetImpl>> selections;
 
-    for (auto& [datasetId, dataset] : _selectionsMap)
+    for (const auto& dataset : _selections)
         selections << dataset.get();
 
     return selections;
@@ -371,7 +388,7 @@ QVariantMap DataManager::toVariantMap() const
 {
     QVariantMap variantMap;
 
-    for (auto& [datasetId, dataset] : _datasetsMap)
+    for (auto& dataset : _datasets)
         variantMap[dataset->getId()] = dataset->toVariantMap();
 
     return variantMap;
@@ -385,21 +402,19 @@ void DataManager::reset()
 
     beginReset();
     {
-        /*
-        _datasetsMap.clear();
-
         DataHierarchyItems dataHierarchyItems;
         
-        for (const auto& dataset : _datasetsMap);
-
-        dataHierarchyItems << dataset->getDataHierarchyItem().getChildren(true);
+        for (auto& dataset : _datasets)
+            dataHierarchyItems << &dataset->getDataHierarchyItem();
 
         std::sort(dataHierarchyItems.begin(), dataHierarchyItems.end(), [](auto dataHierarchyItemA, auto dataHierarchyItemB) -> bool {
             return dataHierarchyItemA->getDepth() < dataHierarchyItemB->getDepth();
         });
 
         std::reverse(dataHierarchyItems.begin(), dataHierarchyItems.end());
-        */
+
+        for (auto dataHierarchyItem : dataHierarchyItems)
+            removeDataset(dataHierarchyItem->getDataset());
     }
     endReset();
 }

@@ -83,19 +83,34 @@ public: // Datasets
     void addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true, bool notify = true) override;
 
     /**
-     * Remove \p dataset from the manager
-     * Other datasets derived from this dataset are converted to non-derived data
+     * Remove \p dataset from the data manager
+     * If necessary, other datasets derived from the dataset are
+     * converted to non-derived data. Datasets which may not be 
+     * un-derived will be automatically removed if their parent dataset
+     * is removed.
      * @param dataset Smart pointer to dataset to remove
      */
     void removeDataset(Dataset<DatasetImpl> dataset) override;
 
     /**
-     * Remove \p dataset supervised (using a user interface)
-     * Interface allows the user to select which descendants should be removed
-     * This method calls AbstractDataManager::removeDataset()
+     * Remove \p datasets from the data manager
+     *
+     * Removal consists of:
+     * 1. Creating a list of top-level datasets from \p datasets.
+     * 2. Add all descendants of each top-level dataset to this list.
+     * 3. Show dialog which allows users to choose which of the datasets
+     *    from the list should be removed (this dialog can be turned off
+     *    in the dialog itself or in the global settings).
+     * 4. If the user goes ahead with the removal, the datasets are
+     *    removed in a bottom-up fashion.
+     *
+     * If necessary, other datasets derived from one of the datasets
+     * in the list are converted to non-derived data. Datasets which may not
+     * be un-derived will be automatically removed if their parent dataset
+     * is removed.
      * @param dataset Smart pointer to dataset to remove
      */
-    void removeDatasetSupervised(Dataset<DatasetImpl> dataset) override;
+    void removeDatasets(Datasets datasets) override;
 
     /**
      * Get dataset by \p datasetId
@@ -158,9 +173,9 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    std::unordered_map<QString, plugin::RawData*>       _rawDataMap;        /** Maps raw data name to raw data plugin shared pointer (the plugins are owned by the plugin manager) */
-    std::map<QString, std::unique_ptr<DatasetImpl>>     _datasetsMap;       /** Maps raw data name to dataset pointer */
-    std::map<QString, std::unique_ptr<DatasetImpl>>     _selectionsMap;     /** Maps dataset ID to dataset pointer */
+    std::unordered_map<QString, plugin::RawData*>   _rawDataMap;    /** Maps raw data name to raw data plugin shared pointer (the plugins are owned by the plugin manager) */
+    std::vector<std::unique_ptr<DatasetImpl>>       _datasets;      /** Vector of pointers to datasets */
+    std::vector<std::unique_ptr<DatasetImpl>>       _selections;    /** Vector of pointers to selection datasets */
 };
 
 }

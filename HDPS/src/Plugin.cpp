@@ -42,7 +42,7 @@ Plugin::Plugin(const PluginFactory* factory) :
 Plugin::~Plugin()
 {
 #ifdef PLUGIN_VERBOSE
-    qDebug() << __FUNCTION__ << getGuiName();
+    qDebug() << "Removed plugin" << getGuiName();
 #endif
 
     const_cast<PluginFactory*>(_factory)->setNumberOfInstances(_factory->getNumberOfInstances() - 1);

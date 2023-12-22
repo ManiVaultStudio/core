@@ -317,7 +317,7 @@ DatasetImpl::DatasetImpl(const QString& rawDataName, const QString& id /*= ""*/)
 DatasetImpl::~DatasetImpl()
 {
 #ifdef _DEBUG
-    qDebug() << __FUNCTION__ << getGuiName();
+    qDebug() << "Removed dataset" << getGuiName();
 #endif
 }
 

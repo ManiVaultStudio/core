@@ -74,7 +74,7 @@ bool DataHierarchyItem::isChildOf(DataHierarchyItem& dataHierarchyItem) const
 bool DataHierarchyItem::isChildOf(DataHierarchyItems dataHierarchyItems) const
 {
     for (auto dataHierarchyItem : dataHierarchyItems)
-        if (isChildOf(*dataHierarchyItem))
+        if (dataHierarchyItem != this && isChildOf(*dataHierarchyItem))
             return true;
 
     return false;

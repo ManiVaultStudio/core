@@ -79,7 +79,7 @@ void PluginManager::reset()
 void PluginManager::loadPlugins()
 {
 #ifdef PLUGIN_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
+    qDebug() << "Loading plugin factories";
 #endif
 
 	QDir pluginDir(qApp->applicationDirPath());
@@ -171,7 +171,7 @@ mv::plugin::PluginFactory* PluginManager::getPluginFactory(const QString& plugin
 QStringList PluginManager::resolveDependencies(QDir pluginDir) const
 {
 #ifdef PLUGIN_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
+    qDebug() << "Resolving plugin dependencies";
 #endif
 
     // Map keeping track of the list of plugin kinds on which a plugin is dependent
@@ -273,10 +273,6 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets datas
 {
     try
     {
-#ifdef PLUGIN_MANAGER_VERBOSE
-        qDebug() << __FUNCTION__ << kind;
-#endif
-
         if (!_pluginFactories.keys().contains(kind))
             throw std::runtime_error("Unrecognized plugin kind");
 
@@ -336,10 +332,6 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets datas
 
 plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, Datasets datasets /*= Datasets()*/)
 {
-#ifdef PLUGIN_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__ << kind;
-#endif
-
     const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(requestPlugin(kind, datasets));
 
     if (viewPlugin != nullptr)
@@ -356,7 +348,7 @@ void PluginManager::addPlugin(plugin::Plugin* plugin)
         return;
 
 #ifdef PLUGIN_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__ << plugin->getGuiName();
+    qDebug() << "Add plugin to manager" << plugin->getGuiName();
 #endif
 
     try
@@ -418,7 +410,7 @@ void PluginManager::destroyPlugin(plugin::Plugin* plugin)
         return;
 
 #ifdef PLUGIN_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__ << plugin->getGuiName();
+    qDebug() << "Destroy plugin" << plugin->getGuiName();
 #endif
 
     try

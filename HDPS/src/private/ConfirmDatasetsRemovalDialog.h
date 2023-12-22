@@ -4,11 +4,16 @@
 
 #pragma once
 
+#include "DatasetsToRemoveModel.h"
+#include "DatasetsToRemoveFilterModel.h"
+
 #include <actions/ToggleAction.h>
 #include <actions/TriggerAction.h>
 #include <actions/HorizontalGroupAction.h>
 
 #include <widgets/HierarchyWidget.h>
+
+#include <Dataset.h>
 
 #include <QDialog>
 #include <QStandardItemModel>
@@ -28,9 +33,10 @@ public:
 
     /**
      * Construct with pointer to \p parent widget
+     * @param selectedDatasets Selected datasets
      * @param parent Pointer to parent widget
      */
-    ConfirmDatasetsRemovalDialog(QWidget* parent = nullptr);
+    ConfirmDatasetsRemovalDialog(mv::Datasets selectedDatasets, QWidget* parent = nullptr);
 
     /** Get preferred size */
     QSize sizeHint() const override {
@@ -43,9 +49,11 @@ public:
     }
 
 protected:
-    QStandardItemModel      _datasetsToRemoveModel;         /** Hierarchical model which contains all datasets which need to be removed */
-    HierarchyWidget         _datasetsHierarchyWidget;       /** Hierarchy widget for showing the model contents */
-    TriggerAction           _removeAction;                  /** Trigger action to remove the dataset (s) */
-    TriggerAction           _cancelAction;                  /** Trigger action to cancel the removal and the dialog */
-    HorizontalGroupAction   _buttonsGroupAction;            /** Group action to layout out the previous buttons horizontally */
+    mv::Datasets                    _selectedDatasets;              /** Selected datasets, these will be used as a basis for the dataset selection tree */
+    DatasetsToRemoveModel           _datasetsToRemoveModel;         /** Hierarchical model which contains all datasets which need to be removed */
+    DatasetsToRemoveFilterModel     _datasetsToRemoveFilterModel;   /** Filter model for the model above */
+    HierarchyWidget                 _datasetsHierarchyWidget;       /** Hierarchy widget for showing the model contents */
+    TriggerAction                   _removeAction;                  /** Trigger action to remove the dataset (s) */
+    TriggerAction                   _cancelAction;                  /** Trigger action to cancel the removal and the dialog */
+    HorizontalGroupAction           _buttonsGroupAction;            /** Group action to layout out the previous buttons horizontally */
 };

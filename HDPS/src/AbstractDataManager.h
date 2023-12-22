@@ -103,19 +103,34 @@ public: // Datasets
     virtual void addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true, bool notify = true) = 0;
 
     /**
-     * Remove \p dataset from the manager
-     * Other datasets derived from this dataset are converted to non-derived data
+     * Remove \p dataset from the data manager
+     * If necessary, other datasets derived from the dataset are
+     * converted to non-derived data. Datasets which may not be
+     * un-derived will be automatically removed if their parent dataset
+     * is removed.
      * @param dataset Smart pointer to dataset to remove
      */
     virtual void removeDataset(Dataset<DatasetImpl> dataset) = 0;
 
     /**
-     * Remove \p dataset supervised (using a user interface)
-     * Interface allows the user to select which descendants should be removed
-     * This method calls AbstractDataManager::removeDataset()
+     * Remove \p datasets from the data manager
+     *
+     * Removal consists of:
+     * 1. Creating a list of top-level datasets from \p datasets.
+     * 2. Add all descendants of each top-level dataset to this list.
+     * 3. Show dialog which allows users to choose which of the datasets
+     *    from the list should be removed (this dialog can be turned off
+     *    in the dialog itself or in the global settings).
+     * 4. If the user goes ahead with the removal, the datasets are
+     *    removed in a bottom-up fashion.
+     *
+     * If necessary, other datasets derived from one of the datasets
+     * in the list are converted to non-derived data. Datasets which may not
+     * be un-derived will be automatically removed if their parent dataset
+     * is removed.
      * @param dataset Smart pointer to dataset to remove
      */
-    virtual void removeDatasetSupervised(Dataset<DatasetImpl> dataset) = 0;
+    virtual void removeDatasets(Datasets datasets) = 0;
 
     /**
      * Get dataset by \p datasetId

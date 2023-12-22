@@ -3,19 +3,22 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ConfirmDatasetsRemovalDialog.h"
-#include "CoreInterface.h"
 
+#include <CoreInterface.h>
 #include <Application.h>
+#include <Set.h>
 
 #include <QVBoxLayout>
 #include <QLabel>
 
 using namespace mv;
 
-ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(QWidget* parent /*= nullptr*/) :
+ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selectedDatasets, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
+    _selectedDatasets(selectedDatasets),
     _datasetsToRemoveModel(),
-    _datasetsHierarchyWidget(this, "Dataset", _datasetsToRemoveModel, nullptr, false),
+    _datasetsToRemoveFilterModel(),
+    _datasetsHierarchyWidget(this, "Dataset", _datasetsToRemoveModel, &_datasetsToRemoveFilterModel),
     _removeAction(this, "Remove"),
     _cancelAction(this, "Cancel"),
     _buttonsGroupAction(this, "Buttons group")
@@ -25,6 +28,8 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(QWidget* parent /*= n
     setModal(true);
 
     _datasetsHierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
+
+    _datasetsHierarchyWidget.getTreeView().setColumnHidden(static_cast<int>(DatasetsToRemoveModel::Column::DatasetId), true);
 
     _removeAction.setToolTip("Remove the dataset(s)");
     _cancelAction.setToolTip("Do not remove the dataset(s) and quit this dialog");
@@ -43,4 +48,6 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(QWidget* parent /*= n
 
     connect(&_removeAction, &TriggerAction::triggered, this, &ConfirmDatasetsRemovalDialog::accept);
     connect(&_cancelAction, &TriggerAction::triggered, this, &ConfirmDatasetsRemovalDialog::reject);
+
+    _datasetsToRemoveModel.setSelectedDatasets(_selectedDatasets);
 }

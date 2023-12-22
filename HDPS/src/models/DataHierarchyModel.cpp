@@ -7,7 +7,6 @@
 #include "DatasetsMimeData.h"
 #include "Set.h"
 
-#include "DataHierarchyItem.h"
 #include "util/Exception.h"
 
 #include <QDebug>
@@ -343,7 +342,7 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
             break;
     }
 
-    return QVariant();
+    return {};
 }
 
 QMimeData* DataHierarchyModel::mimeData(const QModelIndexList& indexes) const

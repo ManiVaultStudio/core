@@ -68,8 +68,7 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
                 if (!selectedDataset->getDataHierarchyItem().isChildOf(selectedDataHierarchyItems))
                     datasetsToRemove << selectedDataset;
 
-            for (auto datasetToRemove : datasetsToRemove)
-                mv::data().removeDatasetSupervised(datasetToRemove);
+            mv::data().removeDatasets(datasetsToRemove);
         });
 
         addAction(removeDatasetsAction);

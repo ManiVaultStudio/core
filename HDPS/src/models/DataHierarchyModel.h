@@ -24,7 +24,7 @@ class DataHierarchyItem;
  *
  * @author Thomas Kroes
  */
-class DataHierarchyModel : public QStandardItemModel
+class DataHierarchyModel final : public QStandardItemModel
 {
     Q_OBJECT
 
