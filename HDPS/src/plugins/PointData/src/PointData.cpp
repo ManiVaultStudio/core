@@ -49,7 +49,7 @@ void PointData::init()
 
 mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return mv::Dataset<DatasetImpl>(new Points(getName(), guid));
+    return mv::Dataset<DatasetImpl>(new Points(getName(), true, guid));
 }
 
 unsigned int PointData::getNumPoints() const
@@ -291,8 +291,8 @@ void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, cons
         });
 }
 
-Points::Points(QString dataName, const QString& guid /*= ""*/) :
-    mv::DatasetImpl(dataName, guid),
+Points::Points(QString dataName, bool mayUnderive /*= true*/, const QString& guid /*= ""*/) :
+    mv::DatasetImpl(dataName, mayUnderive, guid),
     _infoAction(nullptr),
     _dimensionsPickerGroupAction(nullptr),
     _dimensionsPickerAction(nullptr)

@@ -94,8 +94,8 @@ private:
 class CLUSTERDATA_EXPORT Clusters : public DatasetImpl
 {
 public:
-    Clusters(QString dataName, const QString& guid = "") :
-        DatasetImpl(dataName, guid)
+    Clusters(QString dataName, bool mayUnderive = false, const QString& guid = "") :
+        DatasetImpl(dataName, mayUnderive, guid)
     {
     }
 

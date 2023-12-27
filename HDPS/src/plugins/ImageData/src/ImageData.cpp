@@ -88,7 +88,7 @@ void ImageData::setNumberImages(const std::uint32_t& numberOfImages)
 
 Dataset<DatasetImpl> ImageData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return Dataset<DatasetImpl>(new Images(getName(), guid));
+    return Dataset<DatasetImpl>(new Images(getName(), false, guid));
 }
 
 QIcon ImageDataFactory::getIcon(const QColor& color /*= Qt::black*/) const

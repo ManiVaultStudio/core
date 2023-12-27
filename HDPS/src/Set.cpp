@@ -291,7 +291,7 @@ void DatasetImpl::addLinkedData(const mv::Dataset<DatasetImpl>& targetDataSet, m
     _linkedData.back().setMapping(mapping);
 }
 
-DatasetImpl::DatasetImpl(const QString& rawDataName, const QString& id /*= ""*/) :
+DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/, const QString& id /*= ""*/) :
     WidgetAction(nullptr, "Set"),
     _storageType(StorageType::Owner),
     _rawData(nullptr),
@@ -306,7 +306,8 @@ DatasetImpl::DatasetImpl(const QString& rawDataName, const QString& id /*= ""*/)
     _linkedDataFlags(LinkedDataFlag::SendReceive),
     _locked(false),
     _smartPointer(this),
-    _task(this, "")
+    _task(this, ""),
+    _mayUnderive(mayUnderive)
 {
     if (!id.isEmpty())
         Serializable::setId(id);
@@ -358,6 +359,11 @@ bool DatasetImpl::isFull() const
 bool DatasetImpl::isDerivedData() const
 {
     return _derived;
+}
+
+bool DatasetImpl::mayUnderive() const
+{
+    return _mayUnderive;
 }
 
 mv::DataType DatasetImpl::getDataType() const

@@ -42,8 +42,8 @@ private:
 class Colors : public mv::DatasetImpl
 {
 public:
-    Colors(QString dataName, const QString& guid = "") :
-        DatasetImpl(dataName, guid)
+    Colors(QString dataName, bool mayUnderive = true, const QString& guid = "") :
+        DatasetImpl(dataName, mayUnderive, guid)
     {
     }
 

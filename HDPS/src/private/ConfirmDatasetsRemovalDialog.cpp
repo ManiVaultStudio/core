@@ -19,6 +19,7 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
     _datasetsToRemoveModel(),
     _datasetsToRemoveFilterModel(),
     _datasetsHierarchyWidget(this, "Dataset", _datasetsToRemoveModel, &_datasetsToRemoveFilterModel),
+    _togglesGroupAction(this, "Toggles"),
     _removeAction(this, "Remove"),
     _cancelAction(this, "Cancel"),
     _buttonsGroupAction(this, "Buttons group")
@@ -27,9 +28,18 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
     setWindowTitle("About to remove dataset(s)");
     setModal(true);
 
+    connect(&_datasetsToRemoveModel.getAdvancedAction(), &ToggleAction::toggled, &_datasetsToRemoveFilterModel, &DatasetsToRemoveFilterModel::invalidate);
+
     _datasetsHierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
 
-    _datasetsHierarchyWidget.getTreeView().setColumnHidden(static_cast<int>(DatasetsToRemoveModel::Column::DatasetId), true);
+    _togglesGroupAction.addAction(&_datasetsToRemoveModel.getKeepChildrenAction());
+    _togglesGroupAction.addAction(&_datasetsToRemoveModel.getAdvancedAction());
+
+    auto& treeView = _datasetsHierarchyWidget.getTreeView();
+
+    treeView.setColumnHidden(static_cast<int>(DatasetsToRemoveModel::Column::DatasetId), true);
+    treeView.setColumnHidden(static_cast<int>(DatasetsToRemoveModel::Column::Visible), true);
+    treeView.setColumnHidden(static_cast<int>(DatasetsToRemoveModel::Column::Enabled), true);
 
     _removeAction.setToolTip("Remove the dataset(s)");
     _cancelAction.setToolTip("Do not remove the dataset(s) and quit this dialog");
@@ -43,6 +53,7 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
 
     setLayout(layout);
 
+    layout->addWidget(_togglesGroupAction.createWidget(this));
     layout->addWidget(&_datasetsHierarchyWidget);
     layout->addWidget(_buttonsGroupAction.createWidget(this));
 

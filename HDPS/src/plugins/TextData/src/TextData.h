@@ -45,8 +45,8 @@ private:
 class Text : public DatasetImpl
 {
 public:
-    Text(QString dataName, const QString& guid = "") :
-        DatasetImpl(dataName, guid)
+    Text(QString dataName, bool mayUnderive = true, const QString& guid = "") :
+        DatasetImpl(dataName, mayUnderive, guid)
     {
     }
 

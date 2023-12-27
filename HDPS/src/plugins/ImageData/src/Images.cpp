@@ -19,8 +19,8 @@
 
 using namespace mv::util;
 
-Images::Images(QString dataName, const QString& guid /*= ""*/) :
-    DatasetImpl(dataName, guid),
+Images::Images(QString dataName, bool mayUnderive /*= true*/, const QString& guid /*= ""*/) :
+    DatasetImpl(dataName, mayUnderive, guid),
     _indices(),
     _imageData(nullptr),
     _infoAction(),

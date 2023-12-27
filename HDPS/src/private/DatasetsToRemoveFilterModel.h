@@ -6,6 +6,8 @@
 
 #include <QSortFilterProxyModel>
 
+class DatasetsToRemoveModel;
+
 /**
  * Datasets to remove filter model class
  *
@@ -27,4 +29,12 @@ public:
      * @param parent Parent index
      */
     bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
+
+private:
+
+    /**
+     * Get datasets to remove model
+     * @return Source model cast as datasets source model
+     */
+    DatasetsToRemoveModel* getDatasetsToRemoveModel() const;
 };

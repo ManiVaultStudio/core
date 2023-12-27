@@ -654,7 +654,7 @@ private:
     }
 
 public:
-    Points(QString dataName, const QString& guid = "");
+    Points(QString dataName, bool mayUnderive = true, const QString& guid = "");
     ~Points() override;
 
     void init() override;

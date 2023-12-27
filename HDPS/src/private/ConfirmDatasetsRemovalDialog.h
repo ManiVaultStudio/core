@@ -7,7 +7,6 @@
 #include "DatasetsToRemoveModel.h"
 #include "DatasetsToRemoveFilterModel.h"
 
-#include <actions/ToggleAction.h>
 #include <actions/TriggerAction.h>
 #include <actions/HorizontalGroupAction.h>
 
@@ -25,14 +24,13 @@ using namespace mv::gui;
  *
  * Dialog for asking confirmation prior to removing of datasets
  *
- * @author Thomas Kroes
- */
+ * @author Thomas Kroes */
 class ConfirmDatasetsRemovalDialog : public QDialog
 {
 public:
 
     /**
-     * Construct with pointer to \p parent widget
+     * Construct with \p selectedDatasets and pointer to \p parent widget
      * @param selectedDatasets Selected datasets
      * @param parent Pointer to parent widget
      */
@@ -52,6 +50,7 @@ protected:
     mv::Datasets                    _selectedDatasets;              /** Selected datasets, these will be used as a basis for the dataset selection tree */
     DatasetsToRemoveModel           _datasetsToRemoveModel;         /** Hierarchical model which contains all datasets which need to be removed */
     DatasetsToRemoveFilterModel     _datasetsToRemoveFilterModel;   /** Filter model for the model above */
+    HorizontalGroupAction           _togglesGroupAction;            /** Groups previous two toggle actions */
     HierarchyWidget                 _datasetsHierarchyWidget;       /** Hierarchy widget for showing the model contents */
     TriggerAction                   _removeAction;                  /** Trigger action to remove the dataset (s) */
     TriggerAction                   _cancelAction;                  /** Trigger action to cancel the removal and the dialog */

@@ -4,8 +4,10 @@
 
 #pragma once
 
-#include "Dataset.h"
-#include "Set.h"
+#include <Dataset.h>
+#include <Set.h>
+
+#include <actions/ToggleAction.h>
 
 #include <QStandardItemModel>
 
@@ -28,6 +30,8 @@ public:
     enum Column {
         Name,           /** Name of the dataset */
         DatasetId,      /** Globally unique dataset identifier */
+        Visible,        /** Visibility of the item */
+        Enabled,        /** Read-only status of the item */
 
         Count
     };
@@ -39,17 +43,25 @@ public:
     public:
     
         /**
-         * Construct with \p dataset
+         * Construct with pointer to \p dataset, reference to owning \p datasetsToRemoveModel and \p editable toggle
          * @param dataset Pointer to dataset to display item for
          * @param editable Whether the model item is editable or not
          */
-        Item(mv::Dataset<mv::DatasetImpl> DataHierarchyItem, bool editable = false);
+        Item(mv::Dataset<mv::DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel, bool editable = false);
 
         /**
          * Get model data for \p role
          * @return Data for \p role in variant form
          */
         QVariant data(int role = Qt::UserRole + 1) const override;
+
+    protected:
+
+        /**
+         * Get datasets remove model
+         * return Reference to dataset remove model
+         */
+        DatasetsToRemoveModel& getDatasetRemoveModel();
 
         /**
          * Get dataset
@@ -69,58 +81,27 @@ public:
         }
 
     private:
-        mv::Dataset<mv::DatasetImpl>    _dataset;   /** Pointer to dataset to display item for */
+
+        /** Update item read-only state */
+        void updateReadOnly();
+
+    private:
+        DatasetsToRemoveModel&          _datasetsToRemoveModel;     /** * Reference to owning datasets to remove model */
+        mv::Dataset<mv::DatasetImpl>    _dataset;                   /** Pointer to dataset to display item for */
     };
 
-protected:
-
-    /** Standard model item class for displaying the dataset identifier */
-    class DatasetIdItem final : public Item {
-    public:
-
-        /**
-         * Construct with \p dataset
-         * @param dataset Pointer to dataset to display item for
-         */
-        DatasetIdItem(mv::Dataset<mv::DatasetImpl> dataset);
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-                case Qt::DisplayRole:
-                case Qt::EditRole:
-                    return "Dataset ID";
-
-                case Qt::ToolTipRole:
-                    return "The globally unique identifier of the dataset";
-            }
-
-            return {};
-        }
-    };
-
-protected:
+private:
 
     /** Standard model item class for interacting with the dataset name */
     class NameItem final : public Item {
     public:
 
         /**
-         * Construct with \p dataset
+         * Construct with pointer to \p dataset and reference to owning \p datasetsToRemoveModel
          * @param dataset Pointer to dataset to display item for
+         * @param datasetsToRemoveModel Reference to owning \p datasetsToRemoveModel
          */
-        NameItem(mv::Dataset<mv::DatasetImpl> dataset);
+        NameItem(mv::Dataset<mv::DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel);
 
         /**
          * Get model data for \p role
@@ -151,16 +132,142 @@ protected:
         }
     };
 
+    /** Standard model item class for displaying the dataset identifier */
+    class DatasetIdItem final : public Item {
+    public:
+
+        /**
+         * Construct with pointer to \p dataset and reference to owning \p datasetsToRemoveModel
+         * @param dataset Pointer to dataset to display item for
+         * @param datasetsToRemoveModel Reference to owning \p datasetsToRemoveModel
+         */
+        DatasetIdItem(mv::Dataset<mv::DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Dataset ID";
+
+                case Qt::ToolTipRole:
+                    return "The globally unique identifier of the dataset";
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for storing the item visibility */
+    class VisibleItem final : public Item {
+    public:
+
+        /**
+         * Construct with pointer to \p dataset and reference to owning \p datasetsToRemoveModel
+         * @param dataset Pointer to dataset to display item for
+         * @param datasetsToRemoveModel Reference to owning \p datasetsToRemoveModel
+         */
+        VisibleItem(mv::Dataset<mv::DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Visible";
+
+                case Qt::ToolTipRole:
+                    return "Whether the item is visible or not";
+            }
+
+            return {};
+        }
+
+    private:
+
+        /** Update item visibility */
+        void updateVisibility();
+
+    private:
+        bool    _visible;       /** Whether the item is visible or not */
+    };
+
+    /** Standard model item class for storing the item read-only state */
+    class EnabledItem final : public Item {
+    public:
+
+        /**
+         * Construct with pointer to \p dataset and reference to owning \p datasetsToRemoveModel
+         * @param dataset Pointer to dataset to display item for
+         * @param datasetsToRemoveModel Reference to owning \p datasetsToRemoveModel
+         */
+        EnabledItem(mv::Dataset<mv::DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Enabled";
+
+                case Qt::ToolTipRole:
+                    return "Whether the item is enabled or not";
+            }
+
+            return {};
+        }
+
+    
+    private:
+        bool    _visible;       /** Whether the item is visible or not */
+    };
+
+protected:
+
     /** Convenience class for combining dataset items in a row */
     class Row final : public QList<QStandardItem*>
     {
     public:
 
         /**
-         * Construct with \p dataset
+         * Construct with pointer to \p dataset and reference to owning \p datasetsToRemoveModel
          * @param dataset Pointer to dataset to display item for
+         * @param datasetsToRemoveModel Reference to owning \p datasetsToRemoveModel
          */
-        Row(mv::Dataset<mv::DatasetImpl> dataset);
+        Row(mv::Dataset<mv::DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel);
     };
 
 public:
@@ -204,4 +311,16 @@ private:
      * @param selectedDatasets Selected datasets
      */
     void addDataset(mv::Dataset<mv::DatasetImpl> dataset, mv::Datasets selectedDatasets);
+
+public: // Action getters
+
+    mv::gui::ToggleAction& getKeepChildrenAction() { return _keepChildrenAction; }
+    mv::gui::ToggleAction& getAdvancedAction() { return _advancedAction; }
+
+    const mv::gui::ToggleAction& getKeepChildrenAction() const { return _keepChildrenAction; }
+    const mv::gui::ToggleAction& getAdvancedAction() const { return _advancedAction; }
+
+private:
+    mv::gui::ToggleAction    _keepChildrenAction;    /** Toggle between keeping children or removing all children */
+    mv::gui::ToggleAction    _advancedAction;        /** Toggle between advanced and top-level removal mode */
 };

@@ -62,9 +62,10 @@ public:
     /**
      * Construct with \p rawDataName and possibly initialize with \p id
      * @param rawDataName Name of the raw data
+     * @param mayUnderive Whether the dataset may be un-derived, if not it should always co-exist with its source
      * @param id Globally unique dataset identifier, if empty an new ID will be generated
      */
-    DatasetImpl(const QString& rawDataName, const QString& id = "");
+    explicit DatasetImpl(const QString& rawDataName, bool mayUnderive = true, const QString& id = "");
 
     /** Destructor */
     virtual ~DatasetImpl();
@@ -109,6 +110,9 @@ public:
 
     /** Returns whether the dataset is derived */
     bool isDerivedData() const;
+
+    /** Returns whether the dataset may be un-derived, if not it should always co-exist with its source */
+    bool mayUnderive() const;
 
     /** Returns the data type of the raw data associated with this dataset */
     DataType getDataType() const;
@@ -565,6 +569,7 @@ private:
     bool                        _derived;               /** Whether this dataset is derived from another dataset */
     Dataset<DatasetImpl>        _sourceDataset;         /** Smart pointer to the source dataset (if any) */
     Dataset<DatasetImpl>        _fullDataset;           /** Smart pointer to the original full dataset (if this is a subset) */
+    bool                        _mayUnderive;           /** Whether a dataset may be un-derived, if not it should always co-exist with its source */
     QMap<QString, QVariant>     _properties;            /** Properties map */
     std::int32_t                _groupIndex;            /** Group index (sets with identical indices can for instance share selection) */
     plugin::AnalysisPlugin*     _analysis;              /** Pointer to analysis plugin that created the set (if any) */
