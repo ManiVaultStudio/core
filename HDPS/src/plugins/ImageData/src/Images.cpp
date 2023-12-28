@@ -19,7 +19,7 @@
 
 using namespace mv::util;
 
-Images::Images(QString dataName, bool mayUnderive /*= true*/, const QString& guid /*= ""*/) :
+Images::Images(QString dataName, bool mayUnderive /*= false*/, const QString& guid /*= ""*/) :
     DatasetImpl(dataName, mayUnderive, guid),
     _indices(),
     _imageData(nullptr),

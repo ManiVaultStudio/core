@@ -28,6 +28,7 @@ DatasetsToRemoveModel::Item::Item(Dataset<DatasetImpl> dataset, DatasetsToRemove
     updateReadOnly();
 
     connect(&getDatasetRemoveModel().getKeepChildrenAction(), &ToggleAction::toggled, this, &Item::updateReadOnly);
+    connect(&getDatasetRemoveModel().getAdvancedAction(), &ToggleAction::toggled, this, &Item::updateReadOnly);
 }
 
 QVariant DatasetsToRemoveModel::Item::data(int role /*= Qt::UserRole + 1*/) const
@@ -73,7 +74,7 @@ void DatasetsToRemoveModel::Item::updateReadOnly()
     const auto hasParent = nameItem->parent() != nullptr;
 
     if (getDatasetRemoveModel().getKeepChildrenAction().isChecked())
-        setEnabled(true);
+        setEnabled(getDataset()->mayUnderive());
     else
         setEnabled(!hasParent);
 
@@ -83,8 +84,11 @@ void DatasetsToRemoveModel::Item::updateReadOnly()
 DatasetsToRemoveModel::NameItem::NameItem(Dataset<DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel) :
     Item(dataset, datasetsToRemoveModel, true)
 {
-    setCheckable(true);
-    setCheckState(Qt::Checked);
+    setCheckable(dataset->mayUnderive());
+
+    updateCheckState();
+
+    connect(&getDatasetRemoveModel().getKeepChildrenAction(), &ToggleAction::toggled, this, &NameItem::updateCheckState);
 
     connect(&getDataset(), &Dataset<DatasetImpl>::guiNameChanged, this, [this]() -> void {
         emitDataChanged();
@@ -132,6 +136,12 @@ void DatasetsToRemoveModel::NameItem::setData(const QVariant& value, int role /*
     }
 }
 
+void DatasetsToRemoveModel::NameItem::updateCheckState()
+{
+    if (getDatasetRemoveModel().getKeepChildrenAction().isChecked())
+        setCheckState(Qt::Checked);
+}
+
 DatasetsToRemoveModel::DatasetIdItem::DatasetIdItem(Dataset<DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel) :
     Item(dataset, datasetsToRemoveModel)
 {
@@ -163,6 +173,7 @@ DatasetsToRemoveModel::VisibleItem::VisibleItem(mv::Dataset<mv::DatasetImpl> dat
     updateVisibility();
 
     connect(&getDatasetRemoveModel().getKeepChildrenAction(), &ToggleAction::toggled, this, &VisibleItem::updateVisibility);
+    connect(&getDatasetRemoveModel().getAdvancedAction(), &ToggleAction::toggled, this, &VisibleItem::updateVisibility);
 }
 
 QVariant DatasetsToRemoveModel::VisibleItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -207,7 +218,7 @@ DatasetsToRemoveModel::Row::Row(Dataset<DatasetImpl> dataset, DatasetsToRemoveMo
 DatasetsToRemoveModel::DatasetsToRemoveModel(QObject* parent) :
     QStandardItemModel(parent),
     _keepChildrenAction(this, "Keep children", true),
-    _advancedAction(this, "Advanced", true)
+    _advancedAction(this, "Advanced", false)
 {
     setColumnCount(static_cast<int>(Column::Count));
 
@@ -224,6 +235,12 @@ QVariant DatasetsToRemoveModel::headerData(int section, Qt::Orientation orientat
 
         case Column::DatasetId:
             return DatasetIdItem::headerData(orientation, role);
+
+        case Column::Visible:
+            return VisibleItem::headerData(orientation, role);
+
+        case Column::Enabled:
+            return EnabledItem::headerData(orientation, role);
 
         default:
             break;
@@ -259,12 +276,14 @@ void DatasetsToRemoveModel::setSelectedDatasets(mv::Datasets selectedDatasets)
         for (auto descendantDataHierarchyItem : topLevelDatasetToRemove->getDataHierarchyItem().getChildren(true))
             descendantDatasetsToRemove << descendantDataHierarchyItem->getDataset();
 
+    printDatasets("Descendant datasets to remove", descendantDatasetsToRemove);
+
     for (auto topLevelDatasetToRemove : topLevelDatasetsToRemove)
         topLevelSelectedDataHierarchyItems << &topLevelDatasetToRemove->getDataHierarchyItem();
 
-    descendantDatasetsToRemove.erase(std::remove_if(descendantDatasetsToRemove.begin(), descendantDatasetsToRemove.end(), [selectedDataHierarchyItems](auto descendantDatasetToRemove) -> bool {
-        return descendantDatasetToRemove->getDataHierarchyItem().isChildOf(selectedDataHierarchyItems);
-    }));
+    //descendantDatasetsToRemove.erase(std::remove_if(descendantDatasetsToRemove.begin(), descendantDatasetsToRemove.end(), [selectedDataHierarchyItems](auto descendantDatasetToRemove) -> bool {
+    //    return descendantDatasetToRemove->getDataHierarchyItem().isChildOf(selectedDataHierarchyItems);
+    //}));
 
     datasetsToRemove << topLevelDatasetsToRemove << descendantDatasetsToRemove;
 

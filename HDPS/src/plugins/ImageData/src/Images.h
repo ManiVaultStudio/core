@@ -40,7 +40,7 @@ public: // Construction
      * @param mayUnderive Whether the dataset may be un-derived, if not it should always co-exist with its source
      * @param guid Globally unique dataset identifier (use only for deserialization)
      */
-    Images(QString dataName, bool mayUnderive = true, const QString& guid = "");
+    Images(QString dataName, bool mayUnderive = false, const QString& guid = "");
 
     /** Initializes the dataset */
     void init() override;

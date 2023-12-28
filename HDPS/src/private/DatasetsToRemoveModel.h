@@ -130,6 +130,11 @@ private:
 
             return {};
         }
+
+    private:
+
+        /** Update item checked state */
+        void updateCheckState();
     };
 
     /** Standard model item class for displaying the dataset identifier */
