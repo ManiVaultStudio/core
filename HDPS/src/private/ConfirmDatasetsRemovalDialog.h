@@ -46,6 +46,13 @@ public:
         return sizeHint();
     }
 
+    /**
+     * Get datasets to remove (these are the datasets checked/selected in the selection tree)
+     * Facade method for ConfirmDatasetsRemovalDialog#_datasetsToRemoveModel
+     * @return Datasets to remove (bottom-up)
+     */
+    mv::Datasets getDatasetsToRemove() const;
+
 protected:
     mv::Datasets                    _selectedDatasets;              /** Selected datasets, these will be used as a basis for the dataset selection tree */
     DatasetsToRemoveModel           _datasetsToRemoveModel;         /** Hierarchical model which contains all datasets which need to be removed */

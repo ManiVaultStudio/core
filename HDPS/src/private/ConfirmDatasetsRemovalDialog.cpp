@@ -10,6 +10,7 @@
 
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QHeaderView>
 
 using namespace mv;
 
@@ -28,7 +29,23 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
     setWindowTitle("About to remove dataset(s)");
     setModal(true);
 
-    connect(&_datasetsToRemoveModel.getAdvancedAction(), &ToggleAction::toggled, &_datasetsToRemoveFilterModel, &DatasetsToRemoveFilterModel::invalidate);
+    connect(&_datasetsToRemoveModel.getAdvancedAction(), &ToggleAction::toggled, this, [this]() -> void {
+        _datasetsHierarchyWidget.getTreeView().expandAll();
+        _datasetsToRemoveFilterModel.invalidate();
+    });
+
+    const auto resizeSections = [this]() -> void {
+        qDebug() << "resizeSections";
+
+        if (_datasetsToRemoveFilterModel.rowCount() <= 0)
+            return;
+
+        _datasetsHierarchyWidget.getTreeView().header()->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+    };
+
+    connect(&_datasetsToRemoveFilterModel, &QAbstractItemModel::rowsInserted, this, resizeSections);
+    connect(&_datasetsToRemoveFilterModel, &QAbstractItemModel::rowsRemoved, this, resizeSections);
+    connect(&_datasetsToRemoveFilterModel, &QAbstractItemModel::layoutChanged, this, resizeSections);
 
     _datasetsHierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
 
@@ -39,7 +56,13 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
 
     treeView.setColumnHidden(static_cast<int>(DatasetsToRemoveModel::Column::DatasetId), true);
     treeView.setColumnHidden(static_cast<int>(DatasetsToRemoveModel::Column::Visible), true);
-    treeView.setColumnHidden(static_cast<int>(DatasetsToRemoveModel::Column::Enabled), true);
+
+    auto treeViewHeader = treeView.header();
+
+    treeViewHeader->setStretchLastSection(false);
+
+    treeViewHeader->setSectionResizeMode(static_cast<int>(DatasetsToRemoveModel::Column::Name), QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(static_cast<int>(DatasetsToRemoveModel::Column::DatasetId), QHeaderView::Stretch);
 
     _removeAction.setToolTip("Remove the dataset(s)");
     _cancelAction.setToolTip("Do not remove the dataset(s) and quit this dialog");
@@ -60,5 +83,10 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
     connect(&_removeAction, &TriggerAction::triggered, this, &ConfirmDatasetsRemovalDialog::accept);
     connect(&_cancelAction, &TriggerAction::triggered, this, &ConfirmDatasetsRemovalDialog::reject);
 
-    _datasetsToRemoveModel.setSelectedDatasets(_selectedDatasets);
+    _datasetsToRemoveModel.setDatasets(_selectedDatasets);
+}
+
+mv::Datasets ConfirmDatasetsRemovalDialog::getDatasetsToRemove() const
+{
+    return _datasetsToRemoveModel.getDatasetsToRemove();
 }

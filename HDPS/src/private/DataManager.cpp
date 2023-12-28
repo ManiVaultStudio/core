@@ -168,10 +168,19 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 
         for (const auto& underiveDataset : _datasets) {
             if (underiveDataset->isDerivedData() && underiveDataset->getSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
-                underiveDataset->_derived = false;
-                underiveDataset->setSourceDataSet(Dataset<DatasetImpl>());
+                if (underiveDataset->mayUnderive()) {
+                    underiveDataset->_derived = false;
+                    underiveDataset->setSourceDataSet(Dataset<DatasetImpl>());
+                }
+                else {
+                    removeDataset(underiveDataset.get());
+                }
             }
         }
+
+        for (const auto dataHierarchyItem : dataset->getDataHierarchyItem().getChildren())
+            if (!dataHierarchyItem->getDataset()->mayUnderive())
+                removeDataset(dataHierarchyItem->getDataset());
 
         events().notifyDatasetAboutToBeRemoved(dataset);
         {
@@ -209,44 +218,55 @@ void DataManager::removeDatasets(Datasets datasets)
         qDebug() << "Remove datasets from the data manager supervised";
 #endif
 
-        //if (!dataset.isValid())
-        //    throw std::runtime_error("Dataset smart pointer is invalid");
+        if (datasets.isEmpty())
+            throw std::runtime_error("No datasets to remove");
+
+        Datasets datasetsToRemove;
 
         if (settings().getMiscellaneousSettings().getConfirmDatasetsRemovalAction().isChecked()) {
             ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog(datasets);
 
             if (confirmDatasetsRemovalDialog.exec() == QDialog::Rejected)
                 return;
+
+            datasetsToRemove = confirmDatasetsRemovalDialog.getDatasetsToRemove();
+        }
+        else {
+            DataHierarchyItems dataHierarchyItems;
+
+            for (const auto& dataset : datasets)
+                dataHierarchyItems << dataset->getDataHierarchyItem().getChildren();
+
+            dataHierarchyItems.erase(std::unique(dataHierarchyItems.begin(), dataHierarchyItems.end()), dataHierarchyItems.end());
+
+            std::sort(dataHierarchyItems.begin(), dataHierarchyItems.end(), [](auto dataHierarchyItemA, auto dataHierarchyItemB) -> bool {
+                return dataHierarchyItemA->getDepth() < dataHierarchyItemB->getDepth();
+            });
+
+            std::reverse(dataHierarchyItems.begin(), dataHierarchyItems.end());
+
+            for (const auto& dataHierarchyItem : dataHierarchyItems)
+                datasetsToRemove << dataHierarchyItem->getDataset();
         }
 
-        /*
-        DataHierarchyItems dataHierarchyItems{ &dataset->getDataHierarchyItem() };
+        if (!datasetsToRemove.isEmpty()) {
+            auto task = ModalTask(this, "Remove dataset(s)", Task::Status::Running);
 
-        dataHierarchyItems << dataset->getDataHierarchyItem().getChildren(true);
+            task.setSubtasks(datasetsToRemove.count());
 
-        std::sort(dataHierarchyItems.begin(), dataHierarchyItems.end(), [](auto dataHierarchyItemA, auto dataHierarchyItemB) -> bool {
-            return dataHierarchyItemA->getDepth() < dataHierarchyItemB->getDepth();
-        });
+            for (const auto& datasetToRemove : datasetsToRemove) {
+                const auto datasetIndex     = datasetsToRemove.indexOf(datasetToRemove);
+                const auto datasetGuiName   = datasetToRemove->getGuiName();
 
-        std::reverse(dataHierarchyItems.begin(), dataHierarchyItems.end());
-
-        auto task = ModalTask(this, "Remove dataset(s)", Task::Status::Running);
-
-        task.setSubtasks(dataHierarchyItems.count());
-
-        for (auto dataHierarchyItem : dataHierarchyItems) {
-            const auto datasetIndex     = dataHierarchyItems.indexOf(dataHierarchyItem);
-            const auto datasetGuiName   = dataHierarchyItem->getDataset()->getGuiName();
-
-            task.setSubtaskStarted(datasetIndex, QString("Removing %1").arg(datasetGuiName));
-            {
-                removeDataset(dataHierarchyItem->getDataset());
+                task.setSubtaskStarted(datasetIndex, QString("Removing %1").arg(datasetGuiName));
+                {
+                    removeDataset(datasetToRemove);
+                }
+                task.setSubtaskFinished(datasetIndex, QString("Removed %1").arg(datasetGuiName));
             }
-            task.setSubtaskFinished(datasetIndex, QString("Removed %1").arg(datasetGuiName));
-        }
 
-        task.setFinished();
-        */
+            task.setFinished();
+        }
 
 #ifdef DATA_MANAGER_VERBOSE
         qDebug() << "Raw data count:" << _rawDataMap.size();

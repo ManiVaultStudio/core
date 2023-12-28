@@ -31,7 +31,7 @@ public:
         Name,           /** Name of the dataset */
         DatasetId,      /** Globally unique dataset identifier */
         Visible,        /** Visibility of the item */
-        Enabled,        /** Read-only status of the item */
+        Info,           /** Item info */
 
         Count
     };
@@ -48,6 +48,9 @@ public:
          * @param editable Whether the model item is editable or not
          */
         Item(mv::Dataset<mv::DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel, bool editable = false);
+
+        /** Remove from Item#allItems when destructed */
+        ~Item();
 
         /**
          * Get model data for \p role
@@ -88,6 +91,11 @@ public:
     private:
         DatasetsToRemoveModel&          _datasetsToRemoveModel;     /** * Reference to owning datasets to remove model */
         mv::Dataset<mv::DatasetImpl>    _dataset;                   /** Pointer to dataset to display item for */
+
+    protected:
+        static QList<Item*> allItems;
+
+        friend class DatasetsToRemoveModel;
     };
 
 private:
@@ -219,8 +227,8 @@ private:
         bool    _visible;       /** Whether the item is visible or not */
     };
 
-    /** Standard model item class for storing the item read-only state */
-    class EnabledItem final : public Item {
+    /** Standard model item class for storing the item info */
+    class InfoItem final : public Item {
     public:
 
         /**
@@ -228,7 +236,7 @@ private:
          * @param dataset Pointer to dataset to display item for
          * @param datasetsToRemoveModel Reference to owning \p datasetsToRemoveModel
          */
-        EnabledItem(mv::Dataset<mv::DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel);
+        InfoItem(mv::Dataset<mv::DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel);
 
         /**
          * Get model data for \p role
@@ -245,17 +253,19 @@ private:
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
                 case Qt::DisplayRole:
+                    return "";
+
                 case Qt::EditRole:
-                    return "Enabled";
+                    return "Info";
 
                 case Qt::ToolTipRole:
-                    return "Whether the item is enabled or not";
+                    return "Additional info about the dataset in the context of removal";
             }
 
             return {};
         }
 
-    
+
     private:
         bool    _visible;       /** Whether the item is visible or not */
     };
@@ -293,10 +303,16 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     /**
-     * Set selected datasets to \p selectedDatasets and build the model
-     * @param selectedDatasets Selected datasets
+     * Set datasets to \p datasets and build the model
+     * @param datasets Datasets
      */
-    void setSelectedDatasets(mv::Datasets selectedDatasets);
+    void setDatasets(mv::Datasets datasets);
+
+    /**
+     * Get datasets to remove (these are the datasets checked/selected in the selection tree)
+     * @return Datasets to remove (bottom-up)
+     */
+    mv::Datasets getDatasetsToRemove() const;
 
     /**
      * Get item of \p ItemType by \p modelIndex
