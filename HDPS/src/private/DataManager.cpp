@@ -178,9 +178,12 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
             }
         }
 
-        for (const auto dataHierarchyItem : dataset->getDataHierarchyItem().getChildren())
+        for (const auto dataHierarchyItem : dataset->getDataHierarchyItem().getChildren()) {
             if (!dataHierarchyItem->getDataset()->mayUnderive())
                 removeDataset(dataHierarchyItem->getDataset());
+            else
+                dataHierarchyItem->setParent(nullptr);
+        }
 
         events().notifyDatasetAboutToBeRemoved(dataset);
         {
@@ -211,7 +214,7 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
     }
 }
 
-void DataManager::removeDatasets(Datasets datasets)
+void DataManager::removeDatasets(Datasets datasets, bool supervised /*= false*/)
 {
     try {
 #ifdef DATA_MANAGER_VERBOSE
@@ -223,7 +226,7 @@ void DataManager::removeDatasets(Datasets datasets)
 
         Datasets datasetsToRemove;
 
-        if (settings().getMiscellaneousSettings().getConfirmDatasetsRemovalAction().isChecked()) {
+        if (supervised) {
             ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog(datasets);
 
             if (confirmDatasetsRemovalDialog.exec() == QDialog::Rejected)

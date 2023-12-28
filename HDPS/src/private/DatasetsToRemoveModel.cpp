@@ -148,7 +148,7 @@ void DatasetsToRemoveModel::NameItem::setData(const QVariant& value, int role /*
 
         case Qt::CheckStateRole:
         {
-            Item::setData(getDataset()->mayUnderive() ? value : Qt::Unchecked, role);
+            Item::setData(getDataset()->mayUnderive() ? value : Qt::Checked, role);
 
             if (hasChildren()) {
                 const auto numberOfChildren = rowCount();

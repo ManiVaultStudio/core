@@ -67,7 +67,6 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
     _removeAction.setToolTip("Remove the dataset(s)");
     _cancelAction.setToolTip("Do not remove the dataset(s) and quit this dialog");
 
-    _buttonsGroupAction.addAction(&settings().getMiscellaneousSettings().getConfirmDatasetsRemovalAction());
     _buttonsGroupAction.addStretch();
     _buttonsGroupAction.addAction(&_removeAction);
     _buttonsGroupAction.addAction(&_cancelAction);

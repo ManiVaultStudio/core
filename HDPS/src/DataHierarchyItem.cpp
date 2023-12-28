@@ -49,9 +49,21 @@ DataHierarchyItem::~DataHierarchyItem()
         getParent()->removeChild(this);
 }
 
+bool DataHierarchyItem::hasParent() const
+{
+    return _parent != nullptr;
+}
+
 DataHierarchyItem* DataHierarchyItem::getParent() const
 {
     return _parent;
+}
+
+void DataHierarchyItem::setParent(DataHierarchyItem* parent)
+{
+    _parent = parent;
+
+    emit parentChanged(_parent);
 }
 
 DataHierarchyItems DataHierarchyItem::getParents() const
@@ -78,16 +90,6 @@ bool DataHierarchyItem::isChildOf(DataHierarchyItems dataHierarchyItems) const
             return true;
 
     return false;
-}
-
-void DataHierarchyItem::setParent(DataHierarchyItem& parent)
-{
-    _parent = &parent;
-}
-
-bool DataHierarchyItem::hasParent() const
-{ 
-    return _parent != nullptr;
 }
 
 DataHierarchyItems DataHierarchyItem::getChildren(const bool& recursively /*= false*/) const

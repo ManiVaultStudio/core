@@ -52,26 +52,22 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
     if (!_selectedDatasets.isEmpty()) {
         addSeparator();
 
-        auto removeDatasetsAction = new TriggerAction(this, QString("Remove dataset%1").arg(_selectedDatasets.count() >= 2 ? "s" : ""));
+        auto removeDatasetsAction           = new TriggerAction(this, QString("Remove dataset%1").arg(_selectedDatasets.count() >= 2 ? "s" : ""));
+        auto removeDatasetsSupervisedAction = new TriggerAction(this, QString("Remove dataset%1...").arg(_selectedDatasets.count() >= 2 ? "s" : ""));
 
         removeDatasetsAction->setIconByName("trash");
+        removeDatasetsSupervisedAction->setIconByName("trash");
 
         connect(removeDatasetsAction, &TriggerAction::triggered, this, [this]() -> void {
-            Datasets datasetsToRemove;
+            mv::data().removeDatasets(_selectedDatasets);
+        });
 
-            DataHierarchyItems selectedDataHierarchyItems;
-
-            for (auto& selectedDataset : _selectedDatasets)
-                selectedDataHierarchyItems << &selectedDataset->getDataHierarchyItem();
-
-            for (auto& selectedDataset : _selectedDatasets)
-                if (!selectedDataset->getDataHierarchyItem().isChildOf(selectedDataHierarchyItems))
-                    datasetsToRemove << selectedDataset;
-
-            mv::data().removeDatasets(datasetsToRemove);
+        connect(removeDatasetsSupervisedAction, &TriggerAction::triggered, this, [this]() -> void {
+            mv::data().removeDatasets(_selectedDatasets, true);
         });
 
         addAction(removeDatasetsAction);
+        addAction(removeDatasetsSupervisedAction);
     }
 }
 

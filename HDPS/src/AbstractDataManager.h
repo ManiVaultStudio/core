@@ -118,19 +118,19 @@ public: // Datasets
      * Removal consists of:
      * 1. Creating a list of top-level datasets from \p datasets.
      * 2. Add all descendants of each top-level dataset to this list.
-     * 3. Show dialog which allows users to choose which of the datasets
+     * 3. Possibly show dialog which allows users to choose which of the datasets
      *    from the list should be removed (this dialog can be turned off
      *    in the dialog itself or in the global settings).
-     * 4. If the user goes ahead with the removal, the datasets are
-     *    removed in a bottom-up fashion.
+     * 4. Datasets are then removed in a bottom-up fashion.
      *
      * If necessary, other datasets derived from one of the datasets
      * in the list are converted to non-derived data. Datasets which may not
      * be un-derived will be automatically removed if their parent dataset
      * is removed.
      * @param dataset Smart pointer to dataset to remove
+     * @param supervised Whether to remove datasets supervised (with UI guidance)
      */
-    virtual void removeDatasets(Datasets datasets) = 0;
+    virtual void removeDatasets(Datasets datasets, bool supervised = false) = 0;
 
     /**
      * Get dataset by \p datasetId

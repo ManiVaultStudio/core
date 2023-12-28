@@ -121,17 +121,18 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
         qDebug() << "Add dataset" << dataset->getGuiName() << "to the data hierarchy manager";
 #endif
 
-        const auto newDataHierarchyItem = new DataHierarchyItem(parentDataset.isValid() ? &parentDataset->getDataHierarchyItem() : static_cast<QObject*>(this), dataset, parentDataset, visible);
-        //const auto newDataHierarchyItem = new DataHierarchyItem(this, dataset, parentDataset, visible);
+        const auto dataHierarchyItem = new DataHierarchyItem(parentDataset.isValid() ? &parentDataset->getDataHierarchyItem() : static_cast<QObject*>(this), dataset, parentDataset, visible);
 
-        _items << newDataHierarchyItem;
+        _items << dataHierarchyItem;
 
         if (parentDataset.isValid())
             parentDataset->getDataHierarchyItem().addChild(dataset->getDataHierarchyItem());
 
-        //dataset->setParent(newDataHierarchyItem);
+        connect(dataHierarchyItem, &DataHierarchyItem::parentChanged, this, [this, dataHierarchyItem]() -> void {
+            emit itemParentChanged(*dataHierarchyItem);
+        });
 
-        emit itemAdded(*newDataHierarchyItem);
+        emit itemAdded(*dataHierarchyItem);
     }
     catch (std::exception& e)
     {

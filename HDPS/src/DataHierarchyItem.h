@@ -51,11 +51,20 @@ public:
     /** Destructor */
     ~DataHierarchyItem();
 
+    /** Returns whether the data hierarchy item has a parent */
+    bool hasParent() const;
+
     /**
      * Get pointer to parent hierarchy item
      * @return Pointer to parent hierarchy item if there is a parent otherwise nullptr
      */
     DataHierarchyItem* getParent() const;
+
+    /**
+     * Set pointer to parent hierarchy item to \p parent
+     * @return Pointer to parent hierarchy item (root item if nullptr)
+     */
+    void setParent(DataHierarchyItem* parent);
 
     /**
      * Walks up the hierarchy of the data hierarchy item and returns all parents
@@ -76,9 +85,6 @@ public:
      * @return Boolean determining if it is a child of one or more \p dataHierarchyItems
      */
     bool isChildOf(DataHierarchyItems dataHierarchyItems) const;
-
-    /** Returns whether the data hierarchy item has a parent */
-    bool hasParent() const;
 
     /**
      * Get children, possibly \p recursively
@@ -130,9 +136,6 @@ public: // Selection
     void deselect();
 
 protected:
-
-    /** Set reference to parent hierarchy item */
-    void setParent(DataHierarchyItem& parent);
 
     /**
      * Remove \p dataHierarchyItem from the list of children
@@ -277,6 +280,12 @@ signals:
      * @param expanded Whether the item is expanded or not
      */
     void expandedChanged(bool expanded);
+
+    /**
+     * Signals that the parent changed to \p parent
+     * @param parent Pointer to parent data hierarch item (might be nullptr)
+     */
+    void parentChanged(DataHierarchyItem* parent);
 
 protected:
     Dataset<DatasetImpl>        _dataset;       /** Smart pointer to dataset */

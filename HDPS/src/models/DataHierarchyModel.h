@@ -405,6 +405,12 @@ private:
      * @param dataHierarchyItem Reference to the data hierarchy item to remove
      */
      void removeDataHierarchyModelItem(DataHierarchyItem& dataHierarchyItem);
+
+     /**
+     * Re-parent \p dataHierarchyItem
+     * @param dataHierarchyItem Reference to the data hierarchy item of which the parent changed
+     */
+     void reparentDataHierarchyModelItem(DataHierarchyItem& dataHierarchyItem);
 };
 
 }

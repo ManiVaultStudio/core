@@ -306,6 +306,7 @@ DataHierarchyModel::DataHierarchyModel(QObject* parent) :
 
     connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAdded, this, &DataHierarchyModel::addDataHierarchyModelItem);
     connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAboutToBeRemoved, this, &DataHierarchyModel::removeDataHierarchyModelItem);
+    connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemParentChanged, this, &DataHierarchyModel::removeDataHierarchyModelItem);
 
     for (const auto topLevelItem : dataHierarchy().getTopLevelItems())
         addDataHierarchyModelItem(*topLevelItem);
@@ -427,6 +428,27 @@ void DataHierarchyModel::removeDataHierarchyModelItem(DataHierarchyItem& dataHie
     catch (...)
     {
         exceptionMessageBox("Unable to remove item from the data hierarchy model");
+    }
+}
+
+void DataHierarchyModel::reparentDataHierarchyModelItem(DataHierarchyItem& dataHierarchyItem)
+{
+    try {
+
+#ifdef _DEBUG
+        qDebug() << "Re-parent dataset" << dataHierarchyItem.getDataset()->getGuiName();
+#endif
+
+        removeDataHierarchyModelItem(dataHierarchyItem);
+        addDataHierarchyModelItem(dataHierarchyItem);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to re-parent data hierarchy model item", e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to re-parent data hierarchy model item");
     }
 }
 

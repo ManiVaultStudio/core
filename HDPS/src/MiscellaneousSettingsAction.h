@@ -31,11 +31,9 @@ public:
 public: // Action getters
 
     gui::ToggleAction& getIgnoreLoadingErrorsAction() { return _ignoreLoadingErrorsAction; }
-    gui::ToggleAction& getConfirmDatasetsRemovalAction() { return _confirmDatasetsRemovalAction; }
 
 private:
     gui::ToggleAction   _ignoreLoadingErrorsAction;     /** Toggle action for ignoring loading errors */
-    gui::ToggleAction   _confirmDatasetsRemovalAction;  /** Toggle action to determine whether to ask for permission prior to removing datasets */
 };
 
 }

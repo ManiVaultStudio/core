@@ -122,10 +122,16 @@ signals:
     void itemAboutToBeRemoved(DataHierarchyItem& dataHierarchyItem);
 
     /**
-     * Signals that a hierarchy item is removed from the hierarchy manager
-     * @param datasetGuid GUID of the removed dataset
+     * Signals that hierarchy item \p datasetId is removed from the hierarchy manager
+     * @param datasetId GUID of the removed dataset
      */
-    void itemRemoved(const QString& datasetGuid);
+    void itemRemoved(const QString& datasetId);
+
+    /**
+     * Signals that the parent of \p dataHierarchyItem changed
+     * @param dataHierarchyItem Reference to data hierarchy item of which the parent changed
+     */
+    void itemParentChanged(DataHierarchyItem& dataHierarchyItem);
 
     /**
      * Signals that the selected items changed
