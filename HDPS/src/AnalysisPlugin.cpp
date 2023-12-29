@@ -31,6 +31,25 @@ void AnalysisPlugin::setInputDataset(Dataset<DatasetImpl> inputDataset)
 void AnalysisPlugin::setOutputDataset(Dataset<DatasetImpl> outputDataset)
 {
     _output = outputDataset;
+    outputDataset->setAnalysis(this);
+}
+
+void AnalysisPlugin::fromVariantMap(const QVariantMap& variantMap)
+{
+    Plugin::fromVariantMap(variantMap);
+
+    mv::util::variantMapMustContain(variantMap, "inputDatasetGUID");
+    mv::util::variantMapMustContain(variantMap, "outputDatasetGUID");
+}
+
+QVariantMap AnalysisPlugin::toVariantMap() const
+{
+    auto variantMap = Plugin::toVariantMap();
+
+    variantMap["inputDatasetGUID"] = _input->getId();
+    variantMap["outputDatasetGUID"] = _output->getId();
+
+    return variantMap;
 }
 
 QIcon AnalysisPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
