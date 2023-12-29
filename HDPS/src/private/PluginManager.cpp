@@ -272,7 +272,7 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
     return resolvedOrderedPluginNames;
 }
 
-plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets datasets /*= Datasets()*/)
+plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets inputDatasets /*= Datasets()*/, Datasets outputDatasets /*= Datasets()*/)
 {
     try
     {
@@ -291,19 +291,19 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets datas
             case plugin::Type::ANALYSIS: {
                 auto analysisPlugin = dynamic_cast<AnalysisPlugin*>(pluginInstance);
 
-                for (auto dataset : datasets)
-                    dataset->setAnalysis(analysisPlugin);
+                if (!inputDatasets.isEmpty())
+                    analysisPlugin->setInputDataset(inputDatasets.first());
 
-                if (!datasets.isEmpty())
-                    analysisPlugin->setInputDataset(datasets.first());
+                if (!outputDatasets.isEmpty())
+                    analysisPlugin->setOutputDataset(outputDatasets.first());
 
                 break;
             }
             case plugin::Type::WRITER: {
                 auto writerPlugin = dynamic_cast<WriterPlugin*>(pluginInstance);
 
-                if (!datasets.isEmpty())
-                    writerPlugin->setInputDataset(datasets.first());
+                if (!inputDatasets.isEmpty())
+                    writerPlugin->setInputDataset(inputDatasets.first());
 
                 break;
             }

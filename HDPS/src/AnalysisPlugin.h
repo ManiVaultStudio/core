@@ -55,6 +55,20 @@ public:
         return Dataset<DatasetType>(_output.get<DatasetType>());
     }
 
+public: // Serialization
+
+    /**
+     * Load view plugin from variant
+     * @param Variant representation of the view plugin
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save view plugin to variant
+     * @return Variant representation of the view plugin
+     */
+    QVariantMap toVariantMap() const override;
+
 protected:
     Dataset<DatasetImpl>    _input;       /** Input dataset smart pointer */
     Dataset<DatasetImpl>    _output;      /** Output dataset smart pointer */

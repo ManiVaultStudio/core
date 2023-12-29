@@ -137,8 +137,9 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     setText(variantMap["Name"].toString());
     setLocked(variantMap["Locked"].toBool());
 
-    _derived    = variantMap["Derived"].toBool();
-    bool full   = variantMap["Full"].toBool();
+    _derived            = variantMap["Derived"].toBool();
+    bool full           = variantMap["Full"].toBool();
+    bool hasAnalysis    = variantMap["HasAnalysis"].toBool();
 
     if (_derived)
         _sourceDataset = getParent();
@@ -157,12 +158,26 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         setProxyMembers(proxyMembers);
     }
 
-    for (auto linkedDataVariant : variantMap["LinkedData"].toList()) {
+    for (const auto& linkedDataVariant : variantMap["LinkedData"].toList()) {
         LinkedData linkedData;
 
         linkedData.fromVariantMap(linkedDataVariant.toMap());
 
         getLinkedData().push_back(linkedData);
+    }
+
+    if (hasAnalysis)
+    {
+        auto analysisPluginMap = variantMap["Analysis"].toMap();
+
+        variantMapMustContain(analysisPluginMap, "Kind");
+        variantMapMustContain(analysisPluginMap, "inputDatasetGUID");
+        variantMapMustContain(analysisPluginMap, "outputDatasetGUID");
+
+        auto analysisPluginKind = analysisPluginMap["Kind"].toString();
+
+        _analysis = dynamic_cast<plugin::AnalysisPlugin*>(plugins().requestPlugin(analysisPluginKind, { mv::data().getSet(analysisPluginMap["inputDatasetGUID"].toString()) }, { mv::data().getSet(analysisPluginMap["outputDatasetGUID"].toString()) }));
+        _analysis->fromVariantMap(analysisPluginMap);
     }
 }
 
