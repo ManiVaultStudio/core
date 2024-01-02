@@ -128,16 +128,13 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "Name");
     variantMapMustContain(variantMap, "Locked");
     variantMapMustContain(variantMap, "Derived");
-    variantMapMustContain(variantMap, "HasAnalysis");
-    variantMapMustContain(variantMap, "Analysis");
     variantMapMustContain(variantMap, "LinkedData");
 
     setText(variantMap["Name"].toString());
     setLocked(variantMap["Locked"].toBool());
 
-    _derived            = variantMap["Derived"].toBool();
-    bool full           = variantMap["Full"].toBool();
-    bool hasAnalysis    = variantMap["HasAnalysis"].toBool();
+    _derived    = variantMap["Derived"].toBool();
+    bool full   = variantMap["Full"].toBool();
 
     if (_derived)
         _sourceDataset = getParent();
@@ -163,34 +160,15 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
         getLinkedData().push_back(linkedData);
     }
-
-    if (hasAnalysis)
-    {
-        auto analysisPluginMap = variantMap["Analysis"].toMap();
-
-        variantMapMustContain(analysisPluginMap, "Kind");
-        variantMapMustContain(analysisPluginMap, "inputDatasetGUID");
-        variantMapMustContain(analysisPluginMap, "outputDatasetGUID");
-
-        auto analysisPluginKind = analysisPluginMap["Kind"].toString();
-
-        _analysis = dynamic_cast<plugin::AnalysisPlugin*>(plugins().requestPlugin(analysisPluginKind, { mv::data().getSet(analysisPluginMap["inputDatasetGUID"].toString()) }, { mv::data().getSet(analysisPluginMap["outputDatasetGUID"].toString()) }));
-        _analysis->fromVariantMap(analysisPluginMap);
-    }
 }
 
 QVariantMap DatasetImpl::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 
-    QVariantMap analysisMap;
-
-    if (_analysis)
-        analysisMap = _analysis->toVariantMap();
-
     QStringList proxyMemberGuids;
 
-    for (auto proxyMember : _proxyMembers)
+    for (const auto& proxyMember : _proxyMembers)
         proxyMemberGuids << proxyMember->getId();
 
     QVariantList linkedData;
@@ -208,8 +186,6 @@ QVariantMap DatasetImpl::toVariantMap() const
         { "PluginVersion", QVariant::fromValue(_rawData->getVersion()) },
         { "Derived", QVariant::fromValue(isDerivedData()) },
         { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
-        { "HasAnalysis", QVariant::fromValue(_analysis != nullptr) },
-        { "Analysis", analysisMap },
         { "LinkedData", linkedData }
     });
 
@@ -242,7 +218,7 @@ void DatasetImpl::setProxyMembers(const Datasets& proxyDatasets)
             throw std::runtime_error("Proxy dataset requires at least one input dataset");
         }
 
-        for (auto proxyDataset : proxyDatasets)
+        for (const auto& proxyDataset : proxyDatasets)
             if (proxyDataset->getDataType() != getDataType())
                 throw std::runtime_error("All datasets should be of the same data type");
 
@@ -264,7 +240,7 @@ void DatasetImpl::setProxyMembers(const Datasets& proxyDatasets)
 
 bool DatasetImpl::mayProxy(const Datasets& proxyDatasets) const
 {
-    for (auto proxyDataset : proxyDatasets)
+    for (const auto& proxyDataset : proxyDatasets)
         if (proxyDataset->getDataType() != getDataType())
             return false;
 

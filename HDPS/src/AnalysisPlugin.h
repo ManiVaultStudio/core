@@ -35,24 +35,53 @@ public:
      * Set input dataset smart pointer
      * @param inputDataset Smart pointer to the input dataset
      */
-    void setInputDataset(Dataset<DatasetImpl> inputDataset);
+    void setInputDataset(const Dataset<DatasetImpl>& inputDataset);
+
+    /**
+     * Set input datasets smart pointers
+     * @param inputDatasets Vector of smart pointers to the input datasets
+     */
+    void setInputDatasets(const Datasets& inputDatasets);
 
     /** Get input dataset smart pointer */
     template<typename DatasetType = DatasetImpl>
     Dataset<DatasetType> getInputDataset() {
-        return Dataset<DatasetType>(_input.get<DatasetType>());
+        if (_input.size() > 0)
+            return Dataset<DatasetType>(_input[0].get<DatasetType>());
+        else
+            return Dataset<DatasetImpl>();
+
+    }
+
+    /** Get input dataset smart pointer vector */
+    Datasets getInputDatasets() {
+        return _input;
     }
 
     /**
      * Set output dataset smart pointer
      * @param outputDataset Smart pointer to output dataset
      */
-    void setOutputDataset(Dataset<DatasetImpl> outputDataset);
+    void setOutputDataset(const Dataset<DatasetImpl>& outputDataset);
+
+    /**
+     * Set output datasets smart pointers
+     * @param outputDatasets Vector of smart pointers to output datasets
+     */
+    void setOutputDatasets(const Datasets& outputDatasets);
 
     /** Get output dataset smart pointer */
     template<typename DatasetType = DatasetImpl>
     Dataset<DatasetType> getOutputDataset() {
-        return Dataset<DatasetType>(_output.get<DatasetType>());
+        if (_output.size() > 0)
+            return Dataset<DatasetType>(_output[0].get<DatasetType>());
+        else
+            return Dataset<DatasetImpl>();
+    }
+
+    /** Get output dataset smart pointers */
+    Datasets getOutputDatasets() {
+        return _output;
     }
 
 public: // Serialization
@@ -70,8 +99,12 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 protected:
-    Dataset<DatasetImpl>    _input;       /** Input dataset smart pointer */
-    Dataset<DatasetImpl>    _output;      /** Output dataset smart pointer */
+    /** Returns whether any output dataset is given */
+    bool outputDataInit() const { return _output.size() > 0; }
+
+protected:
+    Datasets    _input;       /** Input datasets smart pointers */
+    Datasets    _output;      /** Output datasets smart pointers */
 };
 
 class AnalysisPluginFactory : public PluginFactory
