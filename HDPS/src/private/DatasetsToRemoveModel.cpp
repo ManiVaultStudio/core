@@ -86,12 +86,15 @@ void DatasetsToRemoveModel::Item::updateReadOnly()
 
     const auto hasParent = nameItem->parent() != nullptr;
 
-    qDebug() << getDataset()->getGuiName() << hasParent;
-
-    if (getDatasetRemoveModel().getKeepChildrenAction().isChecked())
-        setEnabled(getDataset()->mayUnderive());
-    else
+    if (getDatasetRemoveModel().getKeepChildrenAction().isChecked()) {
+        if (getDataset()->mayUnderive())
+            setEnabled(true);
+        else
+            setEnabled(hasParent ? nameItem->parent()->checkState() == Qt::Unchecked : true);
+    }
+    else {
         setEnabled(!hasParent);
+    }
 
     emitDataChanged();
 }
@@ -148,13 +151,26 @@ void DatasetsToRemoveModel::NameItem::setData(const QVariant& value, int role /*
 
         case Qt::CheckStateRole:
         {
-            Item::setData(getDataset()->mayUnderive() ? value : Qt::Checked, role);
+            auto parentItem = QStandardItem::parent();
+
+            if (getDataset()->mayUnderive())
+                Item::setData(value, role);
+            else
+                Item::setData((parentItem && (parentItem->checkState() == Qt::Unchecked)) ? Qt::Checked : value, role);
 
             if (hasChildren()) {
                 const auto numberOfChildren = rowCount();
 
-                for (int childIndex = 0; childIndex < numberOfChildren; ++childIndex)
-                    child(childIndex)->setData(value, role);
+                for (int childIndex = 0; childIndex < numberOfChildren; ++childIndex) {
+                    auto childNameItem = static_cast<Item*>(child(childIndex));
+
+                    childNameItem->updateReadOnly();
+                    childNameItem->setData(value, role);
+
+                    auto childInfoItem = static_cast<Item*>(child(childIndex, static_cast<int>(Column::Info)));
+
+                    childInfoItem->emitDataChanged();
+                }
             }
 
             break;
@@ -245,10 +261,14 @@ DatasetsToRemoveModel::InfoItem::InfoItem(mv::Dataset<mv::DatasetImpl> dataset, 
 
 QVariant DatasetsToRemoveModel::InfoItem::data(int role /*= Qt::UserRole + 1*/) const
 {
+    auto parentItem = QStandardItem::parent();
+
+    const auto showInfo = !getDataset()->mayUnderive() && parentItem && parentItem->checkState() == Qt::Checked;
+
     switch (role) {
         case Qt::DecorationRole:
         {
-            if (!getDataset()->mayUnderive())
+            if (showInfo)
                 return Application::getIconFont("FontAwesome").getIcon("info-circle");
 
             break;
@@ -256,8 +276,8 @@ QVariant DatasetsToRemoveModel::InfoItem::data(int role /*= Qt::UserRole + 1*/) 
 
         case Qt::ToolTipRole:
         {
-            if (!getDataset()->mayUnderive())
-                return "Item must co-exists with its parent dataset";
+            if (showInfo)
+                return "Dataset must co-exists with its parent dataset and therefore must also be removed";
 
             break;
         }
@@ -316,13 +336,13 @@ void DatasetsToRemoveModel::setDatasets(mv::Datasets datasets)
 {
     Item::allItems.clear();
 
-    const auto printDatasets = [](QString message, Datasets datasets) -> void {
-        qDebug() << "";
-        qDebug() << message;
+    //const auto printDatasets = [](QString message, Datasets datasets) -> void {
+    //    qDebug() << "";
+    //    qDebug() << message;
 
-        for (auto dataset : datasets)
-            qDebug() << dataset->getGuiName();
-    };
+    //    for (auto dataset : datasets)
+    //        qDebug() << dataset->getGuiName();
+    //};
 
     DataHierarchyItems selectedDataHierarchyItems, topLevelSelectedDataHierarchyItems;
 
@@ -335,30 +355,30 @@ void DatasetsToRemoveModel::setDatasets(mv::Datasets datasets)
         if (!topLevelDatasetCandidate->getDataHierarchyItem().isChildOf(selectedDataHierarchyItems))
             topLevelDatasetsToRemove << topLevelDatasetCandidate;
 
-    printDatasets("Top-level datasets to remove", topLevelDatasetsToRemove);
+    //printDatasets("Top-level datasets to remove", topLevelDatasetsToRemove);
 
     for (auto topLevelDatasetToRemove : topLevelDatasetsToRemove)
         for (auto descendantDataHierarchyItem : topLevelDatasetToRemove->getDataHierarchyItem().getChildren(true))
             descendantDatasetsToRemove << descendantDataHierarchyItem->getDataset();
 
-    printDatasets("Descendant datasets to remove", descendantDatasetsToRemove);
+    //printDatasets("Descendant datasets to remove", descendantDatasetsToRemove);
 
     for (auto topLevelDatasetToRemove : topLevelDatasetsToRemove)
         topLevelSelectedDataHierarchyItems << &topLevelDatasetToRemove->getDataHierarchyItem();
 
     datasetsToRemove << topLevelDatasetsToRemove << descendantDatasetsToRemove;
 
-    printDatasets("Datasets to remove", datasetsToRemove);
+    //printDatasets("Datasets to remove", datasetsToRemove);
 
     std::sort(datasetsToRemove.begin(), datasetsToRemove.end(), [](auto datasetA, auto datasetB) -> bool {
         return datasetA->getDataHierarchyItem().getDepth() < datasetB->getDataHierarchyItem().getDepth();
     });
 
-    printDatasets("Depth-sorted datasets to remove", datasetsToRemove);
+    //printDatasets("Depth-sorted datasets to remove", datasetsToRemove);
 
     datasetsToRemove.erase(std::unique(datasetsToRemove.begin(), datasetsToRemove.end()), datasetsToRemove.end());
 
-    printDatasets("After removing duplicates", datasetsToRemove);
+    //printDatasets("After removing duplicates", datasetsToRemove);
 
     for (auto topLevelDatasetToRemove : topLevelDatasetsToRemove)
         appendRow(Row(topLevelDatasetToRemove, *this));
@@ -374,7 +394,7 @@ void DatasetsToRemoveModel::setDatasets(mv::Datasets datasets)
 
     std::reverse(datasetsToRemove.begin(), datasetsToRemove.end());
 
-    printDatasets("After reversing", datasetsToRemove);
+    //printDatasets("After reversing", datasetsToRemove);
 }
 
 void DatasetsToRemoveModel::addDataset(Dataset<DatasetImpl> dataset, mv::Datasets selectedDatasets)

@@ -138,18 +138,18 @@ public: // Selection
 protected:
 
     /**
-     * Remove \p dataHierarchyItem from the list of children
-     * @param dataHierarchyItem Pointer to data hierarchy item to remove
+     * Remove \p dataHierarchyItem from the children
+     * @param dataHierarchyItem Pointer to child data hierarchy item to remove
      */
     void removeChild(DataHierarchyItem* dataHierarchyItem);
 
 public: // Hierarchy
 
     /**
-     * Add a child
-     * @param child Reference to child data hierarchy item
+     * Add \p dataHierarchyItem as a child item
+     * @param dataHierarchyItem Pointer to child data hierarchy item to add
      */
-    void addChild(DataHierarchyItem& child);
+    void addChild(DataHierarchyItem* dataHierarchyItem);
 
 public: // Miscellaneous
 

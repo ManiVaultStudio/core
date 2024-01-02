@@ -306,7 +306,7 @@ DataHierarchyModel::DataHierarchyModel(QObject* parent) :
 
     connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAdded, this, &DataHierarchyModel::addDataHierarchyModelItem);
     connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAboutToBeRemoved, this, &DataHierarchyModel::removeDataHierarchyModelItem);
-    connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemParentChanged, this, &DataHierarchyModel::removeDataHierarchyModelItem);
+    connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemParentChanged, this, &DataHierarchyModel::reparentDataHierarchyModelItem);
 
     for (const auto topLevelItem : dataHierarchy().getTopLevelItems())
         addDataHierarchyModelItem(*topLevelItem);

@@ -380,7 +380,7 @@ public:
      * For the given item indices return the MIME data intended to pass information
      * in the case of e.g. dragging or dropping data.
      */
-    QMimeData* mimeData(const QModelIndexList &indexes) const override;
+    QMimeData* mimeData(const QModelIndexList& indexes) const override;
 
     /**
      * Get item of \p ItemType by \p modelIndex

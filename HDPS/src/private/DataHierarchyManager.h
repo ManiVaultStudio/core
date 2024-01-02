@@ -36,18 +36,18 @@ public:
     void reset() override;
 
     /**
-     * Get hierarchy item by dataset globally unique identifier
-     * @param datasetGuid Dataset GUID
+     * Get hierarchy item by \p datasetId
+     * @param datasetId Dataset GUID
      * @return Reference to data hierarchy item
      */
-    const DataHierarchyItem& getItem(const QString& datasetGuid) const override;
+    const DataHierarchyItem& getItem(const QString& datasetId) const override;
 
     /**
-     * Get hierarchy item by dataset globally unique identifier
-     * @param datasetGuid Dataset GUID
+     * Get hierarchy item by \p datasetId
+     * @param datasetId Dataset GUID
      * @return Reference to data hierarchy item
      */
-    DataHierarchyItem& getItem(const QString& datasetGuid) override;
+    DataHierarchyItem& getItem(const QString& datasetId) override;
 
     /**
      * Get dataset children
@@ -103,7 +103,7 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    DataHierarchyItems    _items;           /** Shared pointers to data hierarchy items */
+    std::vector<std::unique_ptr<DataHierarchyItem>>     _items;      /** Unique pointers to data hierarchy items */
 };
 
 }

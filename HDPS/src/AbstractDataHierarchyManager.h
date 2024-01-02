@@ -41,15 +41,15 @@ public:
     }
 
     /**
-     * Get hierarchy item by dataset globally unique identifier
-     * @param datasetGuid Dataset GUID
+     * Get hierarchy item by \p datasetId
+     * @param datasetId Dataset GUID
      * @return Reference to data hierarchy item
      */
-    virtual const DataHierarchyItem& getItem(const QString& datasetGuid) const = 0;
+    virtual const DataHierarchyItem& getItem(const QString& datasetId) const = 0;
 
     /**
-     * Get hierarchy item by dataset globally unique identifier
-     * @param datasetGuid Dataset GUID
+     * Get hierarchy item by \p datasetId
+     * @param datasetId Dataset GUID
      * @return Reference to data hierarchy item
      */
     virtual DataHierarchyItem& getItem(const QString& datasetGuid) = 0;

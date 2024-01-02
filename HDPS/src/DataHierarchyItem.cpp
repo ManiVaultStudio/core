@@ -45,8 +45,13 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
 
 DataHierarchyItem::~DataHierarchyItem()
 {
+    QObject::setParent(nullptr);
+
     if (hasParent())
         getParent()->removeChild(this);
+
+    for (auto child : _children)
+        child->setParent(nullptr);
 }
 
 bool DataHierarchyItem::hasParent() const
@@ -61,7 +66,14 @@ DataHierarchyItem* DataHierarchyItem::getParent() const
 
 void DataHierarchyItem::setParent(DataHierarchyItem* parent)
 {
+    if (_parent != nullptr) {
+        _parent->removeChild(this);
+    }
+
     _parent = parent;
+
+    if (_parent != nullptr)
+        _parent->addChild(this);
 
     emit parentChanged(_parent);
 }
@@ -164,9 +176,9 @@ void DataHierarchyItem::deselect()
     setSelected(false);
 }
 
-void DataHierarchyItem::addChild(DataHierarchyItem& child)
+void DataHierarchyItem::addChild(DataHierarchyItem* dataHierarchyItem)
 {
-    _children << &child;
+    _children << dataHierarchyItem;
 }
 
 Dataset<DatasetImpl> DataHierarchyItem::getDataset()
