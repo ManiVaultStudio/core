@@ -23,31 +23,52 @@ void AnalysisPlugin::setObjectName(const QString& name)
     QObject::setObjectName("Plugins/Analysis/" + name);
 }
 
-void AnalysisPlugin::setInputDataset(Dataset<DatasetImpl> inputDataset)
+void AnalysisPlugin::setInputDataset(const Dataset<DatasetImpl>& inputDataset)
 {
-    _input = inputDataset;
+    setInputDatasets({ inputDataset });
 }
 
-void AnalysisPlugin::setOutputDataset(Dataset<DatasetImpl> outputDataset)
+void AnalysisPlugin::setInputDatasets(const Datasets& inputDatasets)
 {
-    _output = outputDataset;
-    outputDataset->setAnalysis(this);
+    _input = inputDatasets;
+}
+
+void AnalysisPlugin::setOutputDataset(const Dataset<DatasetImpl>& outputDataset)
+{
+    setOutputDatasets({ outputDataset });
+}
+
+void AnalysisPlugin::setOutputDatasets(const Datasets& outputDatasets)
+{
+    _output = outputDatasets;
+
+    for(auto& output : _output)
+        output->setAnalysis(this);
 }
 
 void AnalysisPlugin::fromVariantMap(const QVariantMap& variantMap)
 {
     Plugin::fromVariantMap(variantMap);
 
-    mv::util::variantMapMustContain(variantMap, "inputDatasetGUID");
-    mv::util::variantMapMustContain(variantMap, "outputDatasetGUID");
+    // _input and _output are set before fromVariantMap is called 
+    // in PluginManager::requestPlugin()
+    // since they might be used in the init() function
 }
 
 QVariantMap AnalysisPlugin::toVariantMap() const
 {
     auto variantMap = Plugin::toVariantMap();
 
-    variantMap["inputDatasetGUID"] = _input->getId();
-    variantMap["outputDatasetGUID"] = _output->getId();
+    QVariantList inputDatasetsGUIDs, outputDatasetsGUIDs;
+
+    for (auto& input : _input)
+        inputDatasetsGUIDs << input->getId();
+
+    for (auto& output : _output)
+        outputDatasetsGUIDs << output->getId();
+
+    variantMap["inputDatasetsGUIDs"] = inputDatasetsGUIDs;
+    variantMap["outputDatasetsGUIDs"] = outputDatasetsGUIDs;
 
     return variantMap;
 }
