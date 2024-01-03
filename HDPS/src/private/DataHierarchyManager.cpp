@@ -124,7 +124,7 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
         qDebug() << "Add dataset" << dataset->getGuiName() << "to the data hierarchy manager";
 #endif
 
-        const auto dataHierarchyItem = new DataHierarchyItem(parentDataset.isValid() ? &parentDataset->getDataHierarchyItem() : static_cast<QObject*>(this), dataset, parentDataset, visible);
+        const auto dataHierarchyItem = new DataHierarchyItem(dataset, parentDataset, visible);
 
         _items.push_back(std::unique_ptr<DataHierarchyItem>(dataHierarchyItem));
 

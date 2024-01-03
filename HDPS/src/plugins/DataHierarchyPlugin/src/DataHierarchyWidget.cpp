@@ -198,6 +198,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeView.setItemDelegate(new ItemDelegate(this));
 
     treeView.setColumnHidden(static_cast<int>(DataHierarchyModel::Column::DatasetId), true);
+    treeView.setColumnHidden(static_cast<int>(DataHierarchyModel::Column::SourceDatasetId), true);
     treeView.setColumnHidden(static_cast<int>(DataHierarchyModel::Column::GroupIndex), true);
 
     auto treeViewHeader = treeView.header();
@@ -209,6 +210,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeViewHeader->resizeSection(DataHierarchyModel::Column::GroupIndex, 60);
     treeViewHeader->resizeSection(DataHierarchyModel::Column::IsGroup, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(DataHierarchyModel::Column::IsLocked, treeViewHeader->minimumSectionSize());
+    treeViewHeader->resizeSection(DataHierarchyModel::Column::IsDerived, treeViewHeader->minimumSectionSize());
 
     treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::Name, QHeaderView::Interactive);
     treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::DatasetId, QHeaderView::Fixed);

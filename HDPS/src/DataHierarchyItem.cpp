@@ -19,8 +19,8 @@ using namespace mv::util;
 namespace mv
 {
 
-DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/, const bool& selected /*= false*/) :
-    WidgetAction(parent, "Data Hierarchy Item"),
+DataHierarchyItem::DataHierarchyItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/, const bool& selected /*= false*/) :
+    WidgetAction(nullptr, "Data Hierarchy Item"),
     _dataset(dataset),
     _parent(),
     _children(),
@@ -45,8 +45,6 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
 
 DataHierarchyItem::~DataHierarchyItem()
 {
-    QObject::setParent(nullptr);
-
     if (hasParent())
         getParent()->removeChild(this);
 

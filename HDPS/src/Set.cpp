@@ -374,7 +374,7 @@ mv::DataType DatasetImpl::getDataType() const
 void DatasetImpl::setSourceDataSet(const Dataset<DatasetImpl>& dataset)
 {
     _sourceDataset = dataset;
-    _derived = true;
+    _derived = _sourceDataset.isValid();
 }
 
 mv::Dataset<mv::DatasetImpl> DatasetImpl::getSelection() const

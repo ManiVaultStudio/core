@@ -40,13 +40,12 @@ public:
 
     /**
      * Constructor
-     * @param parent Pointer to parent object
      * @param dataset Smart pointer to dataset
      * @param parentDataset Smart pointer to parent dataset (if any)
      * @param visible Whether the dataset is visible
      * @param selected Whether the dataset is selected
      */
-    DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true, const bool& selected = false);
+    DataHierarchyItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true, const bool& selected = false);
 
     /** Destructor */
     ~DataHierarchyItem();
@@ -60,11 +59,15 @@ public:
      */
     DataHierarchyItem* getParent() const;
 
+protected:
+
     /**
      * Set pointer to parent hierarchy item to \p parent
      * @return Pointer to parent hierarchy item (root item if nullptr)
      */
     void setParent(DataHierarchyItem* parent);
+
+public:
 
     /**
      * Walks up the hierarchy of the data hierarchy item and returns all parents

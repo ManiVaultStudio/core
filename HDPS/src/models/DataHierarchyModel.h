@@ -32,12 +32,14 @@ public:
 
     /** Dataset columns */
     enum Column {
-        Name,           /** Name of the dataset */
-        DatasetId,      /** Globally unique dataset identifier */
-        Progress,       /** Task progress in percentage */
-        GroupIndex,     /** Dataset group index */
-        IsGroup,        /** Whether the dataset is composed of other datasets */
-        IsLocked,       /** Whether the dataset is locked */
+        Name,               /** Name of the dataset */
+        DatasetId,          /** Globally unique dataset identifier */
+        SourceDatasetId,    /** Globally unique dataset identifier of the source dataset (if this dataset is derived) */
+        Progress,           /** Task progress in percentage */
+        GroupIndex,         /** Dataset group index */
+        IsGroup,            /** Whether the dataset is composed of other datasets */
+        IsLocked,           /** Whether the dataset is locked */
+        IsDerived,          /** Whether the dataset is derived from another dataset */
 
         Count
     };
@@ -153,6 +155,39 @@ protected:
 
                 case Qt::ToolTipRole:
                     return "The globally unique identifier of the dataset";
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the source dataset identifier */
+    class SourceDatasetIdItem final : public Item {
+    public:
+
+        /** Use base item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Source Dataset ID";
+
+                case Qt::ToolTipRole:
+                    return "The globally unique identifier of the source dataset";
             }
 
             return {};
@@ -310,11 +345,8 @@ protected:
     class IsLockedItem final : public Item {
     public:
 
-        /**
-         * Construct with \p dataset
-         * @param dataset Pointer to dataset to display item for
-         */
-        IsLockedItem(Dataset<DatasetImpl> dataset);
+        /** Use base item constructor */
+        using Item::Item;
 
         /**
          * Get model data for \p role
@@ -338,6 +370,41 @@ protected:
 
                 case Qt::ToolTipRole:
                     return "Whether the dataset is locked";
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying whether the dataset is derived from another dataset */
+    class IsDerivedItem final : public Item {
+    public:
+
+        /** Use base item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                    return "";
+
+                case Qt::EditRole:
+                    return "Is derived";
+
+                case Qt::ToolTipRole:
+                    return "Whether the dataset is derived from another dataset";
             }
 
             return {};

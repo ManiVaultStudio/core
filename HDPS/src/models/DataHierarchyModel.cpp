@@ -132,6 +132,25 @@ QVariant DataHierarchyModel::DatasetIdItem::data(int role /*= Qt::UserRole + 1*/
     return Item::data(role);
 }
 
+QVariant DataHierarchyModel::SourceDatasetIdItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    const auto sourceDataset = getDataset()->getSourceDataset<DatasetImpl>();
+
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getDataset()->isDerivedData() ? sourceDataset->getId() : "";
+
+        case Qt::ToolTipRole:
+            return "Source dataset identifier: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 DataHierarchyModel::ProgressItem::ProgressItem(Dataset<DatasetImpl> dataset) :
     Item(dataset),
     _taskAction(this, "Task")
@@ -256,11 +275,6 @@ QVariant DataHierarchyModel::IsGroupItem::data(int role /*= Qt::UserRole + 1*/) 
     return Item::data(role);
 }
 
-DataHierarchyModel::IsLockedItem::IsLockedItem(Dataset<DatasetImpl> dataset) :
-    Item(dataset)
-{
-}
-
 QVariant DataHierarchyModel::IsLockedItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
@@ -288,15 +302,44 @@ QVariant DataHierarchyModel::IsLockedItem::data(int role /*= Qt::UserRole + 1*/)
     return Item::data(role);
 }
 
+QVariant DataHierarchyModel::IsDerivedItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        {
+            if (!getDataset().isValid())
+                break;
+
+            return getDataset()->isDerivedData();
+        }
+
+        case Qt::DisplayRole:
+            break;
+
+        case Qt::ToolTipRole:
+            return QString("Dataset derived: %1").arg(data(Qt::EditRole).toBool() ? "yes" : "no");
+
+        case Qt::DecorationRole:
+            return data(Qt::EditRole).toBool() ? Application::getIconFont("FontAwesome").getIcon("square-root-alt") : QIcon();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 DataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
     QList<QStandardItem*>()
 {
     append(new NameItem(dataset));
     append(new DatasetIdItem(dataset));
+    append(new SourceDatasetIdItem(dataset));
     append(new ProgressItem(dataset));
     append(new GroupIndexItem(dataset));
     append(new IsGroupItem(dataset));
     append(new IsLockedItem(dataset));
+    append(new IsDerivedItem(dataset));
 }
 
 DataHierarchyModel::DataHierarchyModel(QObject* parent) :
@@ -327,6 +370,9 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
         case Column::DatasetId:
             return DatasetIdItem::headerData(orientation, role);
 
+        case Column::SourceDatasetId:
+            return SourceDatasetIdItem::headerData(orientation, role);
+
         case Column::Progress:
             return ProgressItem::headerData(orientation, role);
 
@@ -338,6 +384,9 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
 
         case Column::IsLocked:
             return IsLockedItem::headerData(orientation, role);
+
+        case Column::IsDerived:
+            return IsDerivedItem::headerData(orientation, role);
 
         default:
             break;
