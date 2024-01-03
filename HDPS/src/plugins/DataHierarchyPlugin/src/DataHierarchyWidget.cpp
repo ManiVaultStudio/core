@@ -158,7 +158,7 @@ protected:
 
         auto item = static_cast<DataHierarchyModel::Item*>(_dataHierarchyWidget->getModel().itemFromIndex(_dataHierarchyWidget->getFilterModel().mapToSource(index)));
 
-        if (item->getDataset()->isLocked())
+        if (item->getDataset()->isLocked() || index.column() >= static_cast<int>(DataHierarchyModel::Column::IsGroup))
             option->state &= ~QStyle::State_Enabled;
     }
 

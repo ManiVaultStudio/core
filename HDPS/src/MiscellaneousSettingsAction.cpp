@@ -10,13 +10,22 @@ namespace mv
 
 MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Miscellaneous"),
-    _ignoreLoadingErrorsAction(this, "Ignore loading errors", true)
+    _ignoreLoadingErrorsAction(this, "Ignore loading errors", true),
+    _askConfirmationBeforeRemovingDatasetsAction(this, "Ask confirmation before removing datasets", true),
+    _keepDescendantsAfterRemovalAction(this, "Keep descendants after removal", true)
 {
     setShowLabels(false);
 
     addAction(&_ignoreLoadingErrorsAction);
+    addAction(&_askConfirmationBeforeRemovingDatasetsAction);
+    addAction(&_keepDescendantsAfterRemovalAction);
+
+    _askConfirmationBeforeRemovingDatasetsAction.setToolTip("Ask confirmation prior to removal of datasets");
+    _keepDescendantsAfterRemovalAction.setToolTip("Keep descendants after removal datasets (if possible, the lifetime of some datasets is bound to its parent)");
 
     _ignoreLoadingErrorsAction.setSettingsPrefix(getSettingsPrefix() + "IgnoreLoadingErrors");
+    _askConfirmationBeforeRemovingDatasetsAction.setSettingsPrefix(getSettingsPrefix() + "AskConfirmationBeforeRemovingDatasets");
+    _keepDescendantsAfterRemovalAction.setSettingsPrefix(getSettingsPrefix() + "KeepDescendantsAfterRemoval");
 }
 
 }

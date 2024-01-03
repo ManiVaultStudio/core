@@ -9,6 +9,7 @@
 
 #include <actions/TriggerAction.h>
 #include <actions/HorizontalGroupAction.h>
+#include <actions/VerticalGroupAction.h>
 
 #include <widgets/HierarchyWidget.h>
 
@@ -62,4 +63,5 @@ protected:
     TriggerAction                   _removeAction;                  /** Trigger action to remove the dataset (s) */
     TriggerAction                   _cancelAction;                  /** Trigger action to cancel the removal and the dialog */
     HorizontalGroupAction           _buttonsGroupAction;            /** Group action to layout out the previous buttons horizontally */
+    VerticalGroupAction             _settingsGroupAction;           /**  */
 };

@@ -31,9 +31,13 @@ public:
 public: // Action getters
 
     gui::ToggleAction& getIgnoreLoadingErrorsAction() { return _ignoreLoadingErrorsAction; }
+    gui::ToggleAction& getAskConfirmationBeforeRemovingDatasetsAction() { return _askConfirmationBeforeRemovingDatasetsAction; }
+    gui::ToggleAction& getKeepDescendantsAfterRemovalAction() { return _keepDescendantsAfterRemovalAction; }
 
 private:
-    gui::ToggleAction   _ignoreLoadingErrorsAction;     /** Toggle action for ignoring loading errors */
+    gui::ToggleAction   _ignoreLoadingErrorsAction;                     /** Toggle between asking for ignoring loading errors or not */
+    gui::ToggleAction   _askConfirmationBeforeRemovingDatasetsAction;   /** Toggle between asking permission before removing datasets or not */
+    gui::ToggleAction   _keepDescendantsAfterRemovalAction;             /** Toggle between keeping descendants after removal (if possible) or not */
 };
 
 }

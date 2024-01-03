@@ -214,61 +214,65 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
     }
 }
 
-void DataManager::removeDatasets(Datasets datasets, bool supervised /*= false*/)
+void DataManager::removeDatasets(Datasets datasets)
 {
     try {
 #ifdef DATA_MANAGER_VERBOSE
-        qDebug() << "Remove datasets from the data manager supervised";
+        qDebug() << "Remove datasets from the data manager";
 #endif
 
         if (datasets.isEmpty())
             throw std::runtime_error("No datasets to remove");
 
-        Datasets datasetsToRemove;
+        DataHierarchyItems selectedDataHierarchyItems;
 
-        if (supervised) {
+        for (auto& dataset : datasets)
+            selectedDataHierarchyItems << &dataset->getDataHierarchyItem();
+
+        Datasets topLevelDatasets;
+
+        for (const auto& dataset : datasets)
+            if (!dataset->getDataHierarchyItem().isChildOf(selectedDataHierarchyItems))
+                topLevelDatasets << dataset;
+
+        for (auto topLevelDataset : topLevelDatasets)
+            qDebug() << topLevelDataset->getGuiName();
+
+        DataHierarchyItems descendantDataHierarchyItems;
+
+        for (auto topLevelDataset : topLevelDatasets)
+            descendantDataHierarchyItems << topLevelDataset->getDataHierarchyItem().getChildren(true);
+
+        if (descendantDataHierarchyItems.isEmpty()) {
+            for (auto topLevelDataset : topLevelDatasets)
+                removeDataset(topLevelDataset);
+        }
+        else {
             ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog(datasets);
 
             if (confirmDatasetsRemovalDialog.exec() == QDialog::Rejected)
                 return;
 
-            datasetsToRemove = confirmDatasetsRemovalDialog.getDatasetsToRemove();
-        }
-        else {
-            DataHierarchyItems dataHierarchyItems;
+            auto datasetsToRemove = confirmDatasetsRemovalDialog.getDatasetsToRemove();
 
-            for (const auto& dataset : datasets)
-                dataHierarchyItems << dataset->getDataHierarchyItem().getChildren();
+            if (!datasetsToRemove.isEmpty()) {
+                auto task = ModalTask(this, "Remove dataset(s)", Task::Status::Running);
 
-            dataHierarchyItems.erase(std::unique(dataHierarchyItems.begin(), dataHierarchyItems.end()), dataHierarchyItems.end());
+                task.setSubtasks(datasetsToRemove.count());
 
-            std::sort(dataHierarchyItems.begin(), dataHierarchyItems.end(), [](auto dataHierarchyItemA, auto dataHierarchyItemB) -> bool {
-                return dataHierarchyItemA->getDepth() < dataHierarchyItemB->getDepth();
-            });
+                for (const auto& datasetToRemove : datasetsToRemove) {
+                    const auto datasetIndex = datasetsToRemove.indexOf(datasetToRemove);
+                    const auto datasetGuiName = datasetToRemove->getGuiName();
 
-            std::reverse(dataHierarchyItems.begin(), dataHierarchyItems.end());
-
-            for (const auto& dataHierarchyItem : dataHierarchyItems)
-                datasetsToRemove << dataHierarchyItem->getDataset();
-        }
-
-        if (!datasetsToRemove.isEmpty()) {
-            auto task = ModalTask(this, "Remove dataset(s)", Task::Status::Running);
-
-            task.setSubtasks(datasetsToRemove.count());
-
-            for (const auto& datasetToRemove : datasetsToRemove) {
-                const auto datasetIndex     = datasetsToRemove.indexOf(datasetToRemove);
-                const auto datasetGuiName   = datasetToRemove->getGuiName();
-
-                task.setSubtaskStarted(datasetIndex, QString("Removing %1").arg(datasetGuiName));
-                {
-                    removeDataset(datasetToRemove);
+                    task.setSubtaskStarted(datasetIndex, QString("Removing %1").arg(datasetGuiName));
+                    {
+                        removeDataset(datasetToRemove);
+                    }
+                    task.setSubtaskFinished(datasetIndex, QString("Removed %1").arg(datasetGuiName));
                 }
-                task.setSubtaskFinished(datasetIndex, QString("Removed %1").arg(datasetGuiName));
-            }
 
-            task.setFinished();
+                task.setFinished();
+            }
         }
 
 #ifdef DATA_MANAGER_VERBOSE

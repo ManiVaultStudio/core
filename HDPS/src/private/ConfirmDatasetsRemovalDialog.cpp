@@ -23,7 +23,8 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
     _togglesGroupAction(this, "Toggles"),
     _removeAction(this, "Remove"),
     _cancelAction(this, "Cancel"),
-    _buttonsGroupAction(this, "Buttons group")
+    _buttonsGroupAction(this, "Buttons group"),
+    _settingsGroupAction(this, "Settings")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
     setWindowTitle("About to remove dataset(s)");
