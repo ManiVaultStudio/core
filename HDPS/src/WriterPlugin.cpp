@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "WriterPlugin.h"
+
 #include "Application.h"
 
 namespace mv
@@ -17,9 +18,14 @@ WriterPlugin::WriterPlugin(const PluginFactory* factory) :
 
 }
 
-void WriterPlugin::setInputDataset(Dataset<DatasetImpl> inputDataset)
+void WriterPlugin::setInputDataset(const Dataset<DatasetImpl>& inputDataset)
 {
-    _input = inputDataset;
+    setInputDatasets({ inputDataset });
+}
+
+void WriterPlugin::setInputDatasets(const Datasets& inputDatasets)
+{
+    _input = inputDatasets;
 }
 
 WriterPluginFactory::WriterPluginFactory() :

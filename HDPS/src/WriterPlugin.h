@@ -37,16 +37,30 @@ public:
      * Set input dataset smart pointer
      * @param inputDataset Smart pointer to input dataset
      */
-    void setInputDataset(Dataset<DatasetImpl> inputDataset);
+    void setInputDataset(const Dataset<DatasetImpl>& inputDataset);
+
+    /**
+     * Set input datasets smart pointers
+     * @param inputDatasets Vector of smart pointers to the input datasets
+     */
+    void setInputDatasets(const Datasets& inputDatasets);
 
     /** Get input dataset smart pointer */
     template<typename DatasetType = DatasetImpl>
     Dataset<DatasetType> getInputDataset() {
-        return Dataset<DatasetType>(_input.get<DatasetType>());
+        if (_input.size() > 0)
+            return Dataset<DatasetType>(_input[0].get<DatasetType>());
+        else
+            return Dataset<DatasetImpl>();
+    }
+
+    /** Get input dataset smart pointer vector */
+    Datasets getInputDatasets() {
+        return _input;
     }
 
 protected:
-    Dataset<DatasetImpl>    _input;     /** Input dataset smart pointer */
+    Datasets    _input;     /** Input datasets smart pointers */
 };
 
 
