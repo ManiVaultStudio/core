@@ -128,15 +128,37 @@ bool WidgetAction::isLeaf() const
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
 {
-    if (parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent()))
-        return getWidget(parent, _defaultWidgetFlags | WidgetActionWidget::PopupLayout);
+    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
 
-    return getWidget(parent, _defaultWidgetFlags);
+    return getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    return getWidget(parent, widgetFlags);
+    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
+
+    auto widget = getWidget(parent, isInPopupMode ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
+
+    Q_ASSERT(widget != nullptr);
+
+    if (widget != nullptr && _widgetConfigurationFunction)
+        _widgetConfigurationFunction(this, widget);
+
+    return widget;
+}
+
+QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction)
+{
+    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
+
+    auto widget = getWidget(parent, isInPopupMode ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
+
+    Q_ASSERT(widget != nullptr);
+
+    if (widget != nullptr)
+        widgetConfigurationFunction(this, widget);
+
+    return widget;
 }
 
 std::int32_t WidgetAction::getSortIndex() const
@@ -800,6 +822,13 @@ void WidgetAction::setStretch(const std::int32_t& stretch)
     _stretch = stretch;
 
     emit stretchChanged(_stretch);
+}
+
+void WidgetAction::setWidgetConfigurationFunction(const WidgetConfigurationFunction& widgetConfigurationFunction)
+{
+    _widgetConfigurationFunction = widgetConfigurationFunction;
+
+    emit widgetConfigurationFunctionChanged(_widgetConfigurationFunction);
 }
 
 void WidgetAction::cacheState(const QString& name /*= "cache"*/)
