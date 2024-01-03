@@ -4,8 +4,9 @@
 
 #include "TreeAction.h"
 
+#include "widgets/HierarchyWidget.h"
+
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QMenu>
 
 #include <QAbstractItemModel>
@@ -21,14 +22,35 @@ TreeAction::TreeAction(QObject* parent, const QString& title) :
     setDefaultWidgetFlags(WidgetFlag::FilterToolbar);
 }
 
+void TreeAction::initialize(QAbstractItemModel* model, QSortFilterProxyModel* filterModel, const QString& itemTypeName)
+{
+    Q_ASSERT(model != nullptr);
+
+    if (model == nullptr)
+        return;
+
+    _model          = model;
+    _filterModel    = filterModel;
+    _itemTypeName   = itemTypeName;
+}
+
 TreeAction::Widget::Widget(QWidget* parent, TreeAction* treeAction, const std::int32_t& widgetFlags) :
     QWidget(parent),
-    _treeAction(treeAction),
-    _hierarchyWidget(this, "Item", *treeAction->getModel(), treeAction->getFilterModel())
+    _treeAction(treeAction)
 {
+    Q_ASSERT(treeAction != nullptr);
+
+    if (treeAction == nullptr)
+        return;
+
+    Q_ASSERT(treeAction->getModel() != nullptr);
+
+    if (treeAction->getModel() == nullptr)
+        return;
+
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(&_hierarchyWidget);
+    layout->addWidget(new HierarchyWidget(this, _treeAction->getItemTypeName(), *_treeAction->getModel(), _treeAction->getFilterModel()));
 
     setLayout(layout);
 }
@@ -39,7 +61,7 @@ QWidget* TreeAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
         return QWidgetAction::createWidget(parent);
 
     auto widget = new WidgetActionWidget(parent, this);
-    auto layout = new QHBoxLayout();
+    auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
 

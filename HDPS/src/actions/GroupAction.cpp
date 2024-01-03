@@ -112,7 +112,7 @@ void GroupAction::setShowLabels(bool showLabels)
     emit showLabelsChanged(_showLabels);
 }
 
-void GroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -1*/)
+void GroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -1*/, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/)
 {
     Q_ASSERT(action != nullptr);
 
@@ -121,7 +121,8 @@ void GroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -
 
     _actions << action;
 
-    _widgetFlagsMap[action] = widgetFlags;
+    _widgetFlagsMap[action]                     = widgetFlags;
+    _widgetConfigurationFunctionsMap[action]    = widgetConfigurationFunction;
 
     sortActions();
 
@@ -160,6 +161,9 @@ void GroupAction::removeAction(WidgetAction* action)
 
     if (_widgetFlagsMap.contains(action))
         _widgetFlagsMap.remove(action);
+
+    if (_widgetConfigurationFunctionsMap.contains(action))
+        _widgetConfigurationFunctionsMap.remove(action);
 
     disconnect(action, &WidgetAction::configurationFlagToggled, this, nullptr);
     disconnect(action, &WidgetAction::sortIndexChanged, this, nullptr);
@@ -260,6 +264,11 @@ QWidget* GroupAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
 GroupAction::WidgetFlagsMap GroupAction::getWidgetFlagsMap()
 {
     return _widgetFlagsMap;
+}
+
+GroupAction::WidgetConfigurationFunctionsMap GroupAction::getWidgetConfigurationFunctionsMap()
+{
+    return _widgetConfigurationFunctionsMap;
 }
 
 void GroupAction::fromVariantMap(const QVariantMap& variantMap)

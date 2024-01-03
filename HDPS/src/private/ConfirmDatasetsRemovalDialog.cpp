@@ -51,7 +51,14 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
 
     _datasetsHierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
 
-    _settingsGroupAction.addAction(&_treeAction);
+    _treeAction.initialize(&_datasetsToRemoveModel, &_datasetsToRemoveFilterModel, "dataset");
+
+    _settingsGroupAction.setIconByName("cog");
+    _settingsGroupAction.setShowLabels(false);
+    _settingsGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+
+    _settingsGroupAction.addAction(&_treeAction, -1, [](WidgetAction* action, QWidget* widget) -> void {
+    });
 
     _togglesGroupAction.addAction(&_datasetsToRemoveModel.getKeepChildrenAction());
     _togglesGroupAction.addAction(&_datasetsToRemoveModel.getAdvancedAction());
@@ -72,6 +79,7 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
     _removeAction.setToolTip("Remove the dataset(s)");
     _cancelAction.setToolTip("Do not remove the dataset(s) and quit this dialog");
 
+    _buttonsGroupAction.addAction(&settings().getMiscellaneousSettings().getAskConfirmationBeforeRemovingDatasetsAction());
     _buttonsGroupAction.addStretch();
     _buttonsGroupAction.addAction(&_removeAction);
     _buttonsGroupAction.addAction(&_cancelAction);

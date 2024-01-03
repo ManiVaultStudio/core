@@ -6,8 +6,6 @@
 
 #include "WidgetAction.h"
 
-#include "widgets/HierarchyWidget.h"
-
 #include <QWidget>
 
 class QAbstractItemModel;
@@ -48,8 +46,7 @@ public:
         Widget(QWidget* parent, TreeAction* treeAction, const std::int32_t& widgetFlags);
 
     protected:
-        TreeAction*         _treeAction;        /** Pointer to tree action */
-        HierarchyWidget     _hierarchyWidget;   /** Hierarchy widget for displaying the model */
+        TreeAction*     _treeAction;    /** Pointer to tree action */
 
         friend class TreeAction;
     };
@@ -73,6 +70,14 @@ public:
     Q_INVOKABLE TreeAction(QObject* parent, const QString& title);
 
     /**
+     * Initializes the tree action with a pointer to a \p model, possibly a \p filterModel and \p itemTypeName
+     * @param model Pointer to model
+     * @param filterModel Pointer to filter model (maybe nullptr)
+     * @param itemTypeName Item type name string
+     */
+    void initialize(QAbstractItemModel* model, QSortFilterProxyModel* filterModel, const QString& itemTypeName);
+
+    /**
      * Get model
      * @return Pointer to model (maybe nullptr)
      */
@@ -88,9 +93,18 @@ public:
         return _filterModel;
     }
 
+    /**
+     * Get item type name
+     * @return Item type name string
+     */
+    QString getItemTypeName() {
+        return _itemTypeName;
+    }
+
 private:
-    QAbstractItemModel*     _model;         /** Pointer to model */
-    QSortFilterProxyModel*  _filterModel;   /** Pointer to filter model */
+    QAbstractItemModel*     _model;             /** Pointer to model */
+    QSortFilterProxyModel*  _filterModel;       /** Pointer to filter model */
+    QString                 _itemTypeName;      /** String that describes an individual model item type */
 
     friend class AbstractActionsManager;
 };
