@@ -59,7 +59,7 @@ public: // Actions management
      * @param autoExpandPriority Priority with which the action should be auto-expanded
      * @param widgetFlags Action widget flags (default flags if -1)
      */
-    virtual void addAction(WidgetAction* action, const std::int32_t& autoExpandPriority = -1, std::int32_t widgetFlags = -1) final;
+    virtual void addAction(WidgetAction* action, const std::int32_t& autoExpandPriority = -1, std::int32_t widgetFlags = -1, WidgetConfigurationFunction widgetConfigurationFunction = WidgetConfigurationFunction()) final;
 
     /**
      * Remove \p action from the group

@@ -162,8 +162,9 @@ public: // Widgets
      * Create widget with pointer to \p parent widget and \p widgetFlags
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags
+     * @return Pointer to created widget
      */
-    virtual QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags);
+    virtual QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags) final;
 
     /**
      * Create widget with pointer to \p parent widget, \p widgetFlags and \p widgetConfigurationFunction
@@ -173,6 +174,14 @@ public: // Widgets
      * @return Pointer to created widget
      */
     virtual QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction) final;
+
+    /**
+     * Create widget with pointer to \p parent widget and \p widgetConfigurationFunction
+     * @param parent Parent widget
+     * @param widgetConfigurationFunction Configuration function to run after the widget is created (replaces WidgetAction#_widgetConfigurationFunction)
+     * @return Pointer to created widget
+     */
+    virtual QWidget* createWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction) final;
 
     /**
      * Create collapsed widget

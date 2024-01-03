@@ -388,9 +388,10 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
                 layout->addWidget(labelWidget, numRows, 0);
             }
 
-            const auto widgetFlags = groupAction->getWidgetFlagsMap()[action];
+            const auto widgetFlags                  = groupAction->getWidgetFlagsMap()[action];
+            const auto widgetConfigurationFunction  = groupAction->getWidgetConfigurationFunctionsMap()[action];
 
-            auto actionWidget = widgetFlags >= 0 ? action->createWidget(this, widgetFlags) : action->createWidget(this);
+            auto actionWidget = widgetFlags >= 0 ? action->createWidget(this, widgetFlags, widgetConfigurationFunction) : action->createWidget(this, widgetConfigurationFunction);
 
             if (actionWidget->layout() == nullptr) {
                 auto editLayout         = new QVBoxLayout();

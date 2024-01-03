@@ -155,7 +155,21 @@ QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetF
 
     Q_ASSERT(widget != nullptr);
 
-    if (widget != nullptr)
+    if (widget != nullptr && widgetConfigurationFunction)
+        widgetConfigurationFunction(this, widget);
+
+    return widget;
+}
+
+QWidget* WidgetAction::createWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction)
+{
+    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
+
+    auto widget = getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
+
+    Q_ASSERT(widget != nullptr);
+
+    if (widget != nullptr && widgetConfigurationFunction)
         widgetConfigurationFunction(this, widget);
 
     return widget;

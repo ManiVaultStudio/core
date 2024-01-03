@@ -58,23 +58,27 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
     _settingsGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
     _settingsGroupAction.addAction(&_treeAction, -1, [](WidgetAction* action, QWidget* widget) -> void {
+        auto treeView = widget->findChild<QTreeView*>("TreeView");
+
+        Q_ASSERT(treeView != nullptr);
+
+        if (treeView == nullptr)
+            return;
+
+        treeView->setColumnHidden(static_cast<int>(DatasetsToRemoveModel::Column::DatasetId), true);
+        treeView->setColumnHidden(static_cast<int>(DatasetsToRemoveModel::Column::Visible), true);
+
+        auto treeViewHeader = treeView->header();
+
+        treeViewHeader->setStretchLastSection(false);
+
+        treeViewHeader->setSectionResizeMode(static_cast<int>(DatasetsToRemoveModel::Column::Name), QHeaderView::Stretch);
+        treeViewHeader->setSectionResizeMode(static_cast<int>(DatasetsToRemoveModel::Column::DatasetId), QHeaderView::Stretch);
     });
 
     _togglesGroupAction.addAction(&_datasetsToRemoveModel.getKeepChildrenAction());
     _togglesGroupAction.addAction(&_datasetsToRemoveModel.getAdvancedAction());
     _togglesGroupAction.addAction(&_settingsGroupAction);
-
-    auto& treeView = _datasetsHierarchyWidget.getTreeView();
-
-    treeView.setColumnHidden(static_cast<int>(DatasetsToRemoveModel::Column::DatasetId), true);
-    treeView.setColumnHidden(static_cast<int>(DatasetsToRemoveModel::Column::Visible), true);
-
-    auto treeViewHeader = treeView.header();
-
-    treeViewHeader->setStretchLastSection(false);
-
-    treeViewHeader->setSectionResizeMode(static_cast<int>(DatasetsToRemoveModel::Column::Name), QHeaderView::Stretch);
-    treeViewHeader->setSectionResizeMode(static_cast<int>(DatasetsToRemoveModel::Column::DatasetId), QHeaderView::Stretch);
 
     _removeAction.setToolTip("Remove the dataset(s)");
     _cancelAction.setToolTip("Do not remove the dataset(s) and quit this dialog");
