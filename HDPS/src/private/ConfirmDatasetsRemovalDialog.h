@@ -10,6 +10,7 @@
 #include <actions/TriggerAction.h>
 #include <actions/HorizontalGroupAction.h>
 #include <actions/VerticalGroupAction.h>
+#include <actions/TreeAction.h>
 
 #include <widgets/HierarchyWidget.h>
 
@@ -64,4 +65,5 @@ protected:
     TriggerAction                   _cancelAction;                  /** Trigger action to cancel the removal and the dialog */
     HorizontalGroupAction           _buttonsGroupAction;            /** Group action to layout out the previous buttons horizontally */
     VerticalGroupAction             _settingsGroupAction;           /**  */
+    TreeAction                      _treeAction;                    /** Tree action for manual removal selection */
 };

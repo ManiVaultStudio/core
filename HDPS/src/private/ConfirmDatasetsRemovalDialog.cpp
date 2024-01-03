@@ -24,7 +24,8 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
     _removeAction(this, "Remove"),
     _cancelAction(this, "Cancel"),
     _buttonsGroupAction(this, "Buttons group"),
-    _settingsGroupAction(this, "Settings")
+    _settingsGroupAction(this, "Settings"),
+    _treeAction(this, "Select datasets")
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
     setWindowTitle("About to remove dataset(s)");
@@ -50,8 +51,11 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
 
     _datasetsHierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
 
+    _settingsGroupAction.addAction(&_treeAction);
+
     _togglesGroupAction.addAction(&_datasetsToRemoveModel.getKeepChildrenAction());
     _togglesGroupAction.addAction(&_datasetsToRemoveModel.getAdvancedAction());
+    _togglesGroupAction.addAction(&_settingsGroupAction);
 
     auto& treeView = _datasetsHierarchyWidget.getTreeView();
 

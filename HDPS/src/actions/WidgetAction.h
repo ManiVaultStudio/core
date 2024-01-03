@@ -31,6 +31,7 @@ class WidgetAction;
 
 using WidgetActions = QVector<WidgetAction*>;
 using ConstWidgetActions = QVector<const WidgetAction*>;
+//using WidgetConfigFn = std::function<<>>;
 
 /**
  * Widget action class
