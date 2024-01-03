@@ -296,7 +296,7 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets input
                 auto writerPlugin = dynamic_cast<WriterPlugin*>(pluginInstance);
 
                 if (!inputDatasets.isEmpty())
-                    writerPlugin->setInputDataset(inputDatasets.first());
+                    writerPlugin->setInputDatasets(inputDatasets);
 
                 break;
             }
