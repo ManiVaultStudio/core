@@ -3,7 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "DataManager.h"
-#include "ConfirmDatasetsRemovalDialog.h"
+#include "RemoveDatasetsDialog.h"
 
 #include <util/Exception.h>
 
@@ -247,12 +247,10 @@ void DataManager::removeDatasets(Datasets datasets)
         }
         else {
             if (settings().getMiscellaneousSettings().getAskConfirmationBeforeRemovingDatasetsAction().isChecked()) {
-                ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog(datasets);
+                RemoveDatasetsDialog removeDatasetsDialog(datasets);
 
-                if (confirmDatasetsRemovalDialog.exec() == QDialog::Rejected)
-                    return;
-
-                datasetsToRemove = confirmDatasetsRemovalDialog.getDatasetsToRemove();
+                if (removeDatasetsDialog.exec() == QDialog::Accepted)
+                    datasetsToRemove = removeDatasetsDialog.getDatasetsToRemove();
             }
             else {
                 DatasetsToRemoveModel datasetsToRemoveModel;

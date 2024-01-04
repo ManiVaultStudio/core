@@ -392,3 +392,9 @@ void DatasetsToRemoveModel::setKeepDescendantsForAllNameItems()
     for (auto& row : Row::allRows)
         row.setKeepDescendants(settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction().isChecked());
 }
+
+void DatasetsToRemoveModel::checkAll()
+{
+    for (auto& row : Row::allRows)
+        row.getNameItem()->setCheckState(Qt::Checked);
+}

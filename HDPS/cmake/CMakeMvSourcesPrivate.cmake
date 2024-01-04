@@ -67,14 +67,14 @@ set(PRIVATE_PLUGIN_MANAGER_FILES
 
 set(PRIVATE_DATA_MANAGER_HEADERS
     src/private/DataManager.h
-    src/private/ConfirmDatasetsRemovalDialog.h
+    src/private/RemoveDatasetsDialog.h
     src/private/DatasetsToRemoveModel.h
     src/private/DatasetsToRemoveFilterModel.h
 )
 
 set(PRIVATE_DATA_MANAGER_SOURCES
     src/private/DataManager.cpp
-    src/private/ConfirmDatasetsRemovalDialog.cpp
+    src/private/RemoveDatasetsDialog.cpp
     src/private/DatasetsToRemoveModel.cpp
     src/private/DatasetsToRemoveFilterModel.cpp
 )

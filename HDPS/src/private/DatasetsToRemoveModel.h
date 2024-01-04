@@ -296,6 +296,9 @@ public:
         return dynamic_cast<ItemType*>(itemFromIndex(modelIndex));
     }
 
+    /** Check all items */
+    void checkAll();
+
 private:
 
     /**
