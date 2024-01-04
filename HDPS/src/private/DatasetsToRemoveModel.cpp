@@ -35,8 +35,7 @@ DatasetsToRemoveModel::Item::Item(Dataset<DatasetImpl> dataset, DatasetsToRemove
 
     updateReadOnly();
 
-    connect(&getDatasetRemoveModel().getKeepChildrenAction(), &ToggleAction::toggled, this, &Item::updateReadOnly);
-    connect(&getDatasetRemoveModel().getAdvancedAction(), &ToggleAction::toggled, this, &Item::updateReadOnly);
+    connect(&settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction(), &ToggleAction::toggled, this, &Item::updateReadOnly);
 }
 
 DatasetsToRemoveModel::Item::~Item()
@@ -86,7 +85,7 @@ void DatasetsToRemoveModel::Item::updateReadOnly()
 
     const auto hasParent = nameItem->parent() != nullptr;
 
-    if (getDatasetRemoveModel().getKeepChildrenAction().isChecked()) {
+    if (settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction().isChecked()) {
         if (getDataset()->mayUnderive())
             setEnabled(true);
         else
@@ -106,7 +105,7 @@ DatasetsToRemoveModel::NameItem::NameItem(Dataset<DatasetImpl> dataset, Datasets
 
     updateCheckState();
 
-    connect(&getDatasetRemoveModel().getKeepChildrenAction(), &ToggleAction::toggled, this, &NameItem::updateCheckState);
+    connect(&settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction(), &ToggleAction::toggled, this, &NameItem::updateCheckState);
 
     connect(&getDataset(), &Dataset<DatasetImpl>::guiNameChanged, this, [this]() -> void {
         emitDataChanged();
@@ -184,7 +183,7 @@ void DatasetsToRemoveModel::NameItem::setData(const QVariant& value, int role /*
 void DatasetsToRemoveModel::NameItem::updateCheckState()
 {
     if (getDataset()->mayUnderive())
-        setCheckState(getDatasetRemoveModel().getKeepChildrenAction().isChecked() ? (QStandardItem::parent() == nullptr ? Qt::Checked : Qt::Unchecked) : Qt::Checked);
+        setCheckState(settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction().isChecked() ? (QStandardItem::parent() == nullptr ? Qt::Checked : Qt::Unchecked) : Qt::Checked);
     else
         setCheckState(Qt::Checked);
 }
@@ -219,8 +218,7 @@ DatasetsToRemoveModel::VisibleItem::VisibleItem(mv::Dataset<mv::DatasetImpl> dat
 {
     updateVisibility();
 
-    connect(&getDatasetRemoveModel().getKeepChildrenAction(), &ToggleAction::toggled, this, &VisibleItem::updateVisibility);
-    connect(&getDatasetRemoveModel().getAdvancedAction(), &ToggleAction::toggled, this, &VisibleItem::updateVisibility);
+    connect(&settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction(), &ToggleAction::toggled, this, &VisibleItem::updateVisibility);
 }
 
 QVariant DatasetsToRemoveModel::VisibleItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -249,7 +247,7 @@ void DatasetsToRemoveModel::VisibleItem::updateVisibility()
 
     auto nameItem = model()->itemFromIndex(index().siblingAtColumn(static_cast<int>(Column::Name)));
 
-    _visible = getDatasetRemoveModel().getAdvancedAction().isChecked() ? true : !nameItem->parent();
+    //_visible = getDatasetRemoveModel().getAdvancedAction().isChecked() ? true : !nameItem->parent();
 
     emitDataChanged();
 }
@@ -299,14 +297,9 @@ DatasetsToRemoveModel::Row::Row(Dataset<DatasetImpl> dataset, DatasetsToRemoveMo
 }
 
 DatasetsToRemoveModel::DatasetsToRemoveModel(QObject* parent) :
-    QStandardItemModel(parent),
-    _keepChildrenAction(this, "Keep children", false),
-    _advancedAction(this, "Advanced", false)
+    QStandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
-
-    _keepChildrenAction.setToolTip("If checked, children will not be removed and become orphans (placed at the root of the hierarchy)");
-    _advancedAction.setToolTip("Whether to enable advanced remove configuration");
 }
 
 QVariant DatasetsToRemoveModel::headerData(int section, Qt::Orientation orientation, int role) const

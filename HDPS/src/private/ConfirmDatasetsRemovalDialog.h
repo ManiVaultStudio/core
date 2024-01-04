@@ -7,12 +7,12 @@
 #include "DatasetsToRemoveModel.h"
 #include "DatasetsToRemoveFilterModel.h"
 
+#include <actions/VerticalGroupAction.h>
+#include <actions/StringAction.h>
+#include <actions/OptionAction.h>
 #include <actions/TriggerAction.h>
 #include <actions/HorizontalGroupAction.h>
-#include <actions/VerticalGroupAction.h>
 #include <actions/TreeAction.h>
-
-#include <widgets/HierarchyWidget.h>
 
 #include <Dataset.h>
 
@@ -40,7 +40,7 @@ public:
 
     /** Get preferred size */
     QSize sizeHint() const override {
-        return QSize(400, 400);
+        return QSize(400, 0);
     }
 
     /** Get minimum size hint*/
@@ -59,11 +59,12 @@ protected:
     mv::Datasets                    _selectedDatasets;              /** Selected datasets, these will be used as a basis for the dataset selection tree */
     DatasetsToRemoveModel           _datasetsToRemoveModel;         /** Hierarchical model which contains all datasets which need to be removed */
     DatasetsToRemoveFilterModel     _datasetsToRemoveFilterModel;   /** Filter model for the model above */
-    HorizontalGroupAction           _togglesGroupAction;            /** Groups previous two toggle actions */
-    HierarchyWidget                 _datasetsHierarchyWidget;       /** Hierarchy widget for showing the model contents */
+    VerticalGroupAction             _mainGroupAction;               /** Main group action layout */
+    StringAction                    _messageAction;                 /** Message action */
+    HorizontalGroupAction           _modusGroupAction;              /** Group action for selecting and configuring removal modus */
+    VerticalGroupAction             _configureModusGroupAction;     /** Vertical group action for configuring the modus */
+    TreeAction                      _selectDatasetsAction;          /** Tree action for dataset selection */
+    HorizontalGroupAction           _buttonsGroupAction;            /** Group action to layout out the previous buttons horizontally */
     TriggerAction                   _removeAction;                  /** Trigger action to remove the dataset (s) */
     TriggerAction                   _cancelAction;                  /** Trigger action to cancel the removal and the dialog */
-    HorizontalGroupAction           _buttonsGroupAction;            /** Group action to layout out the previous buttons horizontally */
-    VerticalGroupAction             _settingsGroupAction;           /**  */
-    TreeAction                      _treeAction;                    /** Tree action for manual removal selection */
 };

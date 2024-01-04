@@ -45,6 +45,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _settingsGroupAction(this, "Settings"),
     _toolbarAction(this, "Toolbar")
 {
+    setObjectName("HierarchyWidget");
+
     if (_filterModel) {
         if (_filterModel->sourceModel() != &_model)
             _filterModel->setSourceModel(const_cast<QAbstractItemModel*>(&_model));

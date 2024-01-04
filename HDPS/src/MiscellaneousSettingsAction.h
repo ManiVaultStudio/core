@@ -7,6 +7,7 @@
 #include "GlobalSettingsGroupAction.h"
 
 #include "actions/ToggleAction.h"
+#include "actions/OptionAction.h"
 
 namespace mv
 {
@@ -37,7 +38,7 @@ public: // Action getters
 private:
     gui::ToggleAction   _ignoreLoadingErrorsAction;                     /** Toggle between asking for ignoring loading errors or not */
     gui::ToggleAction   _askConfirmationBeforeRemovingDatasetsAction;   /** Toggle between asking permission before removing datasets or not */
-    gui::ToggleAction   _keepDescendantsAfterRemovalAction;             /** Toggle between keeping descendants after removal (if possible) or not */
+    gui::ToggleAction   _keepDescendantsAfterRemovalAction;             /** Toggle between asking permission before removing datasets or not */
 };
 
 }

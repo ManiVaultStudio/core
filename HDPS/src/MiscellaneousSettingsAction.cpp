@@ -18,14 +18,12 @@ MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
 
     addAction(&_ignoreLoadingErrorsAction);
     addAction(&_askConfirmationBeforeRemovingDatasetsAction);
-    addAction(&_keepDescendantsAfterRemovalAction);
 
     _askConfirmationBeforeRemovingDatasetsAction.setToolTip("Ask confirmation prior to removal of datasets");
-    _keepDescendantsAfterRemovalAction.setToolTip("Keep descendants after removal datasets (if possible, the lifetime of some datasets is bound to its parent)");
+    _keepDescendantsAfterRemovalAction.setToolTip("If checked, descendants will not be removed and become orphans (placed at the root of the hierarchy)");
 
     _ignoreLoadingErrorsAction.setSettingsPrefix(getSettingsPrefix() + "IgnoreLoadingErrors");
     _askConfirmationBeforeRemovingDatasetsAction.setSettingsPrefix(getSettingsPrefix() + "AskConfirmationBeforeRemovingDatasets");
-    _keepDescendantsAfterRemovalAction.setSettingsPrefix(getSettingsPrefix() + "KeepDescendantsAfterRemoval");
 }
 
 }

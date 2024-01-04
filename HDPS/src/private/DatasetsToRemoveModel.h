@@ -7,8 +7,6 @@
 #include <Dataset.h>
 #include <Set.h>
 
-#include <actions/ToggleAction.h>
-
 #include <QStandardItemModel>
 
 class DataHierarchyItem;
@@ -332,16 +330,4 @@ private:
      * @param selectedDatasets Selected datasets
      */
     void addDataset(mv::Dataset<mv::DatasetImpl> dataset, mv::Datasets selectedDatasets);
-
-public: // Action getters
-
-    mv::gui::ToggleAction& getKeepChildrenAction() { return _keepChildrenAction; }
-    mv::gui::ToggleAction& getAdvancedAction() { return _advancedAction; }
-
-    const mv::gui::ToggleAction& getKeepChildrenAction() const { return _keepChildrenAction; }
-    const mv::gui::ToggleAction& getAdvancedAction() const { return _advancedAction; }
-
-private:
-    mv::gui::ToggleAction    _keepChildrenAction;    /** Toggle between keeping children or removing all children */
-    mv::gui::ToggleAction    _advancedAction;        /** Toggle between advanced and top-level removal mode */
 };

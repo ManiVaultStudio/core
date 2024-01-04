@@ -32,9 +32,6 @@ bool DatasetsToRemoveFilterModel::filterAcceptsRow(int row, const QModelIndex& p
         if (!sourceModel()->data(index, filterRole()).toString().contains(filterRegularExpression()))
             return false;
 
-    if (!getDatasetsToRemoveModel()->getAdvancedAction().isChecked() && parent.isValid())
-        return false;
-
     const auto visible = index.siblingAtColumn(static_cast<int>(DatasetsToRemoveModel::Column::Visible)).data(Qt::EditRole).toBool();
 
     if (!visible)
