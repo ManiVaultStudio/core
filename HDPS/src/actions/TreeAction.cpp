@@ -50,6 +50,8 @@ TreeAction::Widget::Widget(QWidget* parent, TreeAction* treeAction, const std::i
 
     auto layout = new QVBoxLayout();
 
+    layout->setContentsMargins(0, 0, 0, 0);
+
     layout->addWidget(new HierarchyWidget(this, _treeAction->getItemTypeName(), *_treeAction->getModel(), _treeAction->getFilterModel()));
 
     setLayout(layout);

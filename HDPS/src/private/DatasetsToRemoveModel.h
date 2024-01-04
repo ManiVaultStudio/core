@@ -28,7 +28,6 @@ public:
     enum Column {
         Name,           /** Name of the dataset */
         DatasetId,      /** Globally unique dataset identifier */
-        Visible,        /** Visibility of the item */
         Info,           /** Item info */
 
         Count
@@ -43,11 +42,12 @@ public:
         /**
          * Construct with pointer to \p dataset, reference to owning \p datasetsToRemoveModel and \p editable toggle
          * @param dataset Pointer to dataset to display item for
+         * @param datasetsToRemoveModel Datasets to remove model
          * @param editable Whether the model item is editable or not
          */
         Item(mv::Dataset<mv::DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel, bool editable = false);
 
-        /** Remove from Item#allItems when destructed */
+        /** Remove row from Row#allRows when destructed */
         ~Item();
 
         /**
@@ -55,6 +55,9 @@ public:
          * @return Data for \p role in variant form
          */
         QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /** Performs initialization after the item has been added to the model */
+        virtual void initialize();
 
     protected:
 
@@ -91,8 +94,6 @@ public:
         mv::Dataset<mv::DatasetImpl>    _dataset;                   /** Pointer to dataset to display item for */
 
     protected:
-        static QList<Item*> allItems;
-
         friend class DatasetsToRemoveModel;
     };
 
@@ -115,9 +116,6 @@ private:
          */
         QVariant data(int role = Qt::UserRole + 1) const override;
 
-        /** Set model data to \p value for \p role */
-        void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
-
         /**
          * Get header data for \p orientation and \p role
          * @param orientation Horizontal/vertical
@@ -137,10 +135,11 @@ private:
             return {};
         }
 
-    private:
-
-        /** Update item checked state */
-        void updateCheckState();
+        /**
+         * Set keep descendants to \p keepDescendants
+         * @param keepDescendants Whether to keep descendants or not
+         */
+        void setKeepDescendants(bool keepDescendants);
     };
 
     /** Standard model item class for displaying the dataset identifier */
@@ -178,51 +177,6 @@ private:
 
             return {};
         }
-    };
-
-    /** Standard model item class for storing the item visibility */
-    class VisibleItem final : public Item {
-    public:
-
-        /**
-         * Construct with pointer to \p dataset and reference to owning \p datasetsToRemoveModel
-         * @param dataset Pointer to dataset to display item for
-         * @param datasetsToRemoveModel Reference to owning \p datasetsToRemoveModel
-         */
-        VisibleItem(mv::Dataset<mv::DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel);
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-                case Qt::DisplayRole:
-                case Qt::EditRole:
-                    return "Visible";
-
-                case Qt::ToolTipRole:
-                    return "Whether the item is visible or not";
-            }
-
-            return {};
-        }
-
-    private:
-
-        /** Update item visibility */
-        void updateVisibility();
-
-    private:
-        bool    _visible;       /** Whether the item is visible or not */
     };
 
     /** Standard model item class for storing the item info */
@@ -281,6 +235,26 @@ protected:
          * @param datasetsToRemoveModel Reference to owning \p datasetsToRemoveModel
          */
         Row(mv::Dataset<mv::DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel);
+
+        /**
+         * Get name item
+         * @return Pointer to name item
+         */
+        NameItem* getNameItem();
+
+        /** Update read-only status for all items */
+        void updateReadOnly();
+
+        /**
+         * Set keep descendants to \p keepDescendants for the name item
+         * @param keepDescendants Whether to keep descendants or not
+         */
+        void setKeepDescendants(bool keepDescendants);
+
+    protected:
+        static std::vector<Row> allRows;
+
+        friend class DatasetsToRemoveModel;
     };
 
 public:
@@ -330,4 +304,13 @@ private:
      * @param selectedDatasets Selected datasets
      */
     void addDataset(mv::Dataset<mv::DatasetImpl> dataset, mv::Datasets selectedDatasets);
+
+    /** Updates the read-only state of all name items */
+    void updateAllNameItemsReadOnly();
+
+    /**
+     * Set keep descendants to \p keepDescendants for all name items
+     * @param keepDescendants Whether to keep descendants or not
+     */
+    void setKeepDescendantsForAllNameItems();
 };

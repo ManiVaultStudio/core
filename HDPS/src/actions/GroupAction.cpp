@@ -395,7 +395,7 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
 
             if (actionWidget->layout() == nullptr) {
                 auto editLayout         = new QVBoxLayout();
-                auto notEditableLabel   = new QLabel("Not editable");
+                auto notEditableLabel   = new QLabel("");
 
                 editLayout->setContentsMargins(0, 0, 0, 0);
                 editLayout->addWidget(notEditableLabel);

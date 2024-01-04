@@ -18,7 +18,7 @@
 #include <Dataset.h>
 
 #include <QDialog>
-#include <QStandardItemModel>
+#include <QTimer>
 
 using namespace mv::gui;
 
@@ -41,7 +41,7 @@ public:
 
     /** Get preferred size */
     QSize sizeHint() const override {
-        return QSize(400, 0);
+        return QSize(400, 250);
     }
 
     /** Get minimum size hint*/
@@ -62,11 +62,12 @@ protected:
     DatasetsToRemoveFilterModel     _datasetsToRemoveFilterModel;   /** Filter model for the model above */
     VerticalGroupAction             _mainGroupAction;               /** Main group action layout */
     StringAction                    _messageAction;                 /** Message action */
-    LabelProxyAction                _keepDescendantsAction;         /**  */
-    HorizontalGroupAction           _modusGroupAction;              /** Group action for selecting and configuring removal modus */
+    OptionAction                    _descendantsModeAction;         /**  */
     VerticalGroupAction             _selectDatasetsGroupAction;     /** Vertical group action for configuring the modus */
     TreeAction                      _selectDatasetsAction;          /** Tree action for dataset selection */
-    HorizontalGroupAction           _buttonsGroupAction;            /** Group action to layout out the previous buttons horizontally */
+    HorizontalGroupAction           _bottomHorizontalGroupAction;            /** Group action to layout out the previous buttons horizontally */
+    ToggleAction                    _showAgainAction;               /**  */
     TriggerAction                   _removeAction;                  /** Trigger action to remove the dataset (s) */
     TriggerAction                   _cancelAction;                  /** Trigger action to cancel the removal and the dialog */
+    QTimer                          _updateRemoveActionTimer;       /**  */
 };

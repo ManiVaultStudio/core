@@ -235,44 +235,54 @@ void DataManager::removeDatasets(Datasets datasets)
             if (!dataset->getDataHierarchyItem().isChildOf(selectedDataHierarchyItems))
                 topLevelDatasets << dataset;
 
-        for (auto topLevelDataset : topLevelDatasets)
-            qDebug() << topLevelDataset->getGuiName();
-
         DataHierarchyItems descendantDataHierarchyItems;
 
         for (auto topLevelDataset : topLevelDatasets)
             descendantDataHierarchyItems << topLevelDataset->getDataHierarchyItem().getChildren(true);
 
+        Datasets datasetsToRemove;
+
         if (descendantDataHierarchyItems.isEmpty()) {
-            for (auto topLevelDataset : topLevelDatasets)
-                removeDataset(topLevelDataset);
+            datasetsToRemove = topLevelDatasets;
         }
         else {
-            ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog(datasets);
+            if (settings().getMiscellaneousSettings().getAskConfirmationBeforeRemovingDatasetsAction().isChecked()) {
+                ConfirmDatasetsRemovalDialog confirmDatasetsRemovalDialog(datasets);
 
-            if (confirmDatasetsRemovalDialog.exec() == QDialog::Rejected)
-                return;
+                if (confirmDatasetsRemovalDialog.exec() == QDialog::Rejected)
+                    return;
 
-            auto datasetsToRemove = confirmDatasetsRemovalDialog.getDatasetsToRemove();
-
-            if (!datasetsToRemove.isEmpty()) {
-                auto task = ModalTask(this, "Remove dataset(s)", Task::Status::Running);
-
-                task.setSubtasks(datasetsToRemove.count());
-
-                for (const auto& datasetToRemove : datasetsToRemove) {
-                    const auto datasetIndex = datasetsToRemove.indexOf(datasetToRemove);
-                    const auto datasetGuiName = datasetToRemove->getGuiName();
-
-                    task.setSubtaskStarted(datasetIndex, QString("Removing %1").arg(datasetGuiName));
-                    {
-                        removeDataset(datasetToRemove);
-                    }
-                    task.setSubtaskFinished(datasetIndex, QString("Removed %1").arg(datasetGuiName));
-                }
-
-                task.setFinished();
+                datasetsToRemove = confirmDatasetsRemovalDialog.getDatasetsToRemove();
             }
+            else {
+                DatasetsToRemoveModel datasetsToRemoveModel;
+                DatasetsToRemoveFilterModel datasetsToRemoveFilterModel;
+                
+                datasetsToRemoveFilterModel.setSourceModel(&datasetsToRemoveModel);
+
+                datasetsToRemoveModel.setDatasets(datasets);
+
+                datasetsToRemove = datasetsToRemoveModel.getDatasetsToRemove();
+            }
+        }
+
+        if (!datasetsToRemove.isEmpty()) {
+            auto task = ModalTask(this, "Remove dataset(s)", Task::Status::Running);
+
+            task.setSubtasks(datasetsToRemove.count());
+
+            for (const auto& datasetToRemove : datasetsToRemove) {
+                const auto datasetIndex = datasetsToRemove.indexOf(datasetToRemove);
+                const auto datasetGuiName = datasetToRemove->getGuiName();
+
+                task.setSubtaskStarted(datasetIndex, QString("Removing %1").arg(datasetGuiName));
+                {
+                    removeDataset(datasetToRemove);
+                }
+                task.setSubtaskFinished(datasetIndex, QString("Removed %1").arg(datasetGuiName));
+            }
+
+            task.setFinished();
         }
 
 #ifdef DATA_MANAGER_VERBOSE
