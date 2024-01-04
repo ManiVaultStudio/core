@@ -13,6 +13,7 @@
 #include <actions/TriggerAction.h>
 #include <actions/HorizontalGroupAction.h>
 #include <actions/TreeAction.h>
+#include <actions/LabelProxyAction.h>
 
 #include <Dataset.h>
 
@@ -61,6 +62,7 @@ protected:
     DatasetsToRemoveFilterModel     _datasetsToRemoveFilterModel;   /** Filter model for the model above */
     VerticalGroupAction             _mainGroupAction;               /** Main group action layout */
     StringAction                    _messageAction;                 /** Message action */
+    LabelProxyAction                _keepDescendantsAction;         /**  */
     HorizontalGroupAction           _modusGroupAction;              /** Group action for selecting and configuring removal modus */
     VerticalGroupAction             _selectDatasetsGroupAction;     /** Vertical group action for configuring the modus */
     TreeAction                      _selectDatasetsAction;          /** Tree action for dataset selection */

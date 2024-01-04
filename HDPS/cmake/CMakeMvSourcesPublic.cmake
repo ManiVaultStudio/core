@@ -275,6 +275,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/VersionAction.h
     src/actions/SplashScreenAction.h
     src/actions/TreeAction.h
+    src/actions/LabelProxyAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -292,6 +293,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/VersionAction.cpp
     src/actions/SplashScreenAction.cpp
     src/actions/TreeAction.cpp
+    src/actions/LabelProxyAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES

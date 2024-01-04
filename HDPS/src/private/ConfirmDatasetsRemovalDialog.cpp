@@ -21,6 +21,7 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
     _datasetsToRemoveFilterModel(),
     _mainGroupAction(this, "Main group"),
     _messageAction(this, "Message"),
+    _keepDescendantsAction(this, "Keep descendants", &settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction()),
     _modusGroupAction(this, "Modus"),
     _selectDatasetsGroupAction(this, "Select datasets to remove"),
     _selectDatasetsAction(this, "Select datasets"),
@@ -44,7 +45,7 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
     _messageAction.setString(QString("The selected dataset%1 contain%2 children, what would you like to do?").arg(_selectedDatasets.count() == 1 ? "" : "s", _selectedDatasets.count() == 1 ? "s" : ""));
 
     _modusGroupAction.setShowLabels(false);
-    _modusGroupAction.addAction(&settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction());
+    _modusGroupAction.addAction(&_keepDescendantsAction);
     //_modusGroupAction.addAction(&_configureModusGroupAction);
 
     _selectDatasetsAction.initialize(&_datasetsToRemoveModel, &_datasetsToRemoveFilterModel, "dataset");
