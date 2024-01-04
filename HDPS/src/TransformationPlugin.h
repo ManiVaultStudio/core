@@ -40,10 +40,28 @@ public:
     Datasets getInputDatasets() const;
     
     /**
+     * Get first input dataset
+     * @return First input dataset
+     */
+    template<typename DatasetType = DatasetImpl>
+    Dataset<DatasetType> getInputDataset() {
+        if (_inputDatasets.size() > 0)
+            return Dataset<DatasetType>(_inputDatasets[0].get<DatasetType>());
+        else
+            return Dataset<DatasetImpl>();
+    }
+
+    /**
      * Set input datasets
      * @inputDatasets Input datasets
      */
     void setInputDatasets(const Datasets& inputDatasets);
+
+    /**
+     * Set a single input dataset
+     * @param inputDataset Smart pointer to the input dataset
+     */
+    void setInputDataset(const Dataset<DatasetImpl>& inputDataset);
 
 private:
     Datasets    _inputDatasets;        /** One, or more, input dataset */
