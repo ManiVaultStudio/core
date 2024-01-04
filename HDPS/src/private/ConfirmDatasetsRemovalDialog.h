@@ -62,7 +62,7 @@ protected:
     VerticalGroupAction             _mainGroupAction;               /** Main group action layout */
     StringAction                    _messageAction;                 /** Message action */
     HorizontalGroupAction           _modusGroupAction;              /** Group action for selecting and configuring removal modus */
-    VerticalGroupAction             _configureModusGroupAction;     /** Vertical group action for configuring the modus */
+    VerticalGroupAction             _selectDatasetsGroupAction;     /** Vertical group action for configuring the modus */
     TreeAction                      _selectDatasetsAction;          /** Tree action for dataset selection */
     HorizontalGroupAction           _buttonsGroupAction;            /** Group action to layout out the previous buttons horizontally */
     TriggerAction                   _removeAction;                  /** Trigger action to remove the dataset (s) */

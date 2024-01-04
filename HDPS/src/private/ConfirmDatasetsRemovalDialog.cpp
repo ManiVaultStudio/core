@@ -22,7 +22,7 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
     _mainGroupAction(this, "Main group"),
     _messageAction(this, "Message"),
     _modusGroupAction(this, "Modus"),
-    _configureModusGroupAction(this, "Select datasets to remove"),
+    _selectDatasetsGroupAction(this, "Select datasets to remove"),
     _selectDatasetsAction(this, "Select datasets"),
     _buttonsGroupAction(this, "Buttons group"),
     _removeAction(this, "Remove"),
@@ -45,16 +45,16 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
 
     _modusGroupAction.setShowLabels(false);
     _modusGroupAction.addAction(&settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction());
-    _modusGroupAction.addAction(&_configureModusGroupAction);
+    //_modusGroupAction.addAction(&_configureModusGroupAction);
 
     _selectDatasetsAction.initialize(&_datasetsToRemoveModel, &_datasetsToRemoveFilterModel, "dataset");
 
-    _configureModusGroupAction.setIconByName("check-square");
-    _configureModusGroupAction.setShowLabels(false);
-    _configureModusGroupAction.setPopupSizeHint(QSize(400, 400));
-    _configureModusGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _selectDatasetsGroupAction.setIconByName("mouse-pointer");
+    _selectDatasetsGroupAction.setShowLabels(false);
+    _selectDatasetsGroupAction.setPopupSizeHint(QSize(400, 400));
+    _selectDatasetsGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
-    _configureModusGroupAction.addAction(&_selectDatasetsAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
+    _selectDatasetsGroupAction.addAction(&_selectDatasetsAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
         Q_ASSERT(hierarchyWidget != nullptr);
@@ -101,8 +101,11 @@ ConfirmDatasetsRemovalDialog::ConfirmDatasetsRemovalDialog(mv::Datasets selected
     _removeAction.setToolTip("Remove the dataset(s)");
     _cancelAction.setToolTip("Do not remove the dataset(s) and quit this dialog");
 
+    _buttonsGroupAction.setShowLabels(false);
+
     _buttonsGroupAction.addAction(&settings().getMiscellaneousSettings().getAskConfirmationBeforeRemovingDatasetsAction());
     _buttonsGroupAction.addStretch();
+    _buttonsGroupAction.addAction(&_selectDatasetsGroupAction);
     _buttonsGroupAction.addAction(&_removeAction);
     _buttonsGroupAction.addAction(&_cancelAction);
 
