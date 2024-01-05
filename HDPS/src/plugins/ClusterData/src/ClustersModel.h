@@ -8,9 +8,7 @@
 
 #include "Cluster.h"
 
-#include <actions/Actions.h>
-
-using namespace mv;
+#include <QAbstractListModel>
 
 /**
  * Clusters model class

@@ -12,8 +12,6 @@
 #include "ColorizeClustersAction.h"
 #include "PrefixClustersAction.h"
 
-#include <actions/Actions.h>
-
 #include <QItemSelectionModel>
 
 class Cluster;
