@@ -6,9 +6,12 @@
 
 #include <models/DataHierarchyModel.h>
 #include <models/DataHierarchyFilterModel.h>
+
 #include <actions/TriggerAction.h>
 #include <actions/ToggleAction.h>
+
 #include <widgets/HierarchyWidget.h>
+
 #include <DataHierarchyItem.h>
 #include <Dataset.h>
 
@@ -77,8 +80,17 @@ protected:
     /** Update the visibility of the tree view columns */
     void updateColumnsVisibility();
 
-    void updateItemExpansion(const QModelIndex& filterModelIndex = QModelIndex());
-    void initializeExpansion(QModelIndex parentFilterModelIndex = QModelIndex());
+    /**
+     * Update the expansion state in the corresponding data hierarchy item to reflect the expansion state of the model item with \p filterModelIndex
+     * @param filterModelIndex Filter model index of the model item to sync with
+     */
+    void updateDataHierarchyItemExpansion(const QModelIndex& filterModelIndex = QModelIndex());
+
+    /**
+     * Initializes the expansion state of child model items recursively
+     * @param parentFilterModelIndex The parent filter model index for which to update the child model items
+     */
+    void initializeChildModeItemsExpansion(QModelIndex parentFilterModelIndex = QModelIndex());
 
 private:
     mv::DataHierarchyModel          _model;             /** Model containing data to be displayed in the hierarchy */

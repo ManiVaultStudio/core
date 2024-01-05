@@ -235,10 +235,10 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
             _hierarchyWidget.getTreeView().openPersistentEditor(progressFilterModelIndex);
 
-            updateItemExpansion(nameFilterModelIndex);
+            updateDataHierarchyItemExpansion(nameFilterModelIndex);
 
             connect(&_model.getItem<DataHierarchyModel::Item>(persistentNameFilterModelIndex)->getDataset()->getDataHierarchyItem(), &DataHierarchyItem::expandedChanged, this, [this, persistentNameFilterModelIndex]() -> void {
-                updateItemExpansion(persistentNameFilterModelIndex);
+                updateDataHierarchyItemExpansion(persistentNameFilterModelIndex);
             });
         }
 
@@ -251,7 +251,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
         auto modelIndex = _filterModel.mapToSource(filterModelIndex);
 
-        if (!modelIndex.isValid())
+        if (modelIndex.isValid())
             _model.getItem(modelIndex)->getDataset()->getDataHierarchyItem().setExpanded(true);
     });
 
@@ -261,7 +261,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
         auto modelIndex = _filterModel.mapToSource(filterModelIndex);
 
-        if (!modelIndex.isValid())
+        if (modelIndex.isValid())
             _model.getItem(modelIndex)->getDataset()->getDataHierarchyItem().setExpanded(false);
     });
 
@@ -300,7 +300,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     });
 
     updateColumnsVisibility();
-    initializeExpansion();
+    initializeChildModeItemsExpansion();
 }
 
 QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImpl>& dataset)
@@ -328,29 +328,75 @@ void DataHierarchyWidget::updateColumnsVisibility()
     //treeView.setColumnHidden(DataHierarchyModelItem::Column::GroupIndex, !_groupingAction.isChecked());
 }
 
-void DataHierarchyWidget::updateItemExpansion(const QModelIndex& filterModelIndex /*= QModelIndex()*/)
+void DataHierarchyWidget::updateDataHierarchyItemExpansion(const QModelIndex& modelIndex /*= QModelIndex()*/)
 {
-    if (!filterModelIndex.isValid())
-        return;
+    try
+    {
+        if (!modelIndex.isValid())
+            throw std::runtime_error("Supplied model index is invalid");
 
-    const auto modelIndex   = _filterModel.mapToSource(filterModelIndex);
-    const auto isExpanded   = _model.getItem(modelIndex)->getDataset()->getDataHierarchyItem().isExpanded();
+        auto modelItem = _model.getItem(modelIndex);
 
-    auto& treeView = _hierarchyWidget.getTreeView();
+        if (modelItem == nullptr)
+            throw std::runtime_error("Unable to get model item for model index");
 
-    if (treeView.isExpanded(filterModelIndex) != isExpanded)
-        treeView.setExpanded(filterModelIndex, isExpanded);
+        const auto isExpanded       = modelItem->getDataset()->getDataHierarchyItem().isExpanded();
+        const auto filterModelIndex = _filterModel.mapFromSource(modelIndex);
+
+        auto& treeView = _hierarchyWidget.getTreeView();
+
+        if (treeView.isExpanded(filterModelIndex) != isExpanded)
+            treeView.setExpanded(filterModelIndex, isExpanded);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to update data hierarchy item expansion", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to update data hierarchy item expansion");
+    }
 }
 
-void DataHierarchyWidget::initializeExpansion(QModelIndex parentFilterModelIndex /*= QModelIndex()*/)
+void DataHierarchyWidget::initializeChildModeItemsExpansion(QModelIndex parentFilterModelIndex /*= QModelIndex()*/)
 {
-    for (int rowIndex = 0; rowIndex < _filterModel.rowCount(parentFilterModelIndex); ++rowIndex) {
-        const auto childFilterModelIndex    = _filterModel.index(rowIndex, 0, parentFilterModelIndex);
-        const auto childModelIndex          = _filterModel.mapToSource(childFilterModelIndex);
+    try
+    {
+        //if (!parentFilterModelIndex.isValid())
+        //    throw std::runtime_error("Supplied parent filter model index is invalid");
 
-        updateItemExpansion(childFilterModelIndex);
+        for (int rowIndex = 0; rowIndex < _filterModel.rowCount(parentFilterModelIndex); ++rowIndex) {
+            const auto childFilterModelIndex = _filterModel.index(rowIndex, 0, parentFilterModelIndex);
 
-        if (_model.hasChildren(childModelIndex))
-            initializeExpansion(childFilterModelIndex);
+            if (!childFilterModelIndex.isValid())
+                throw std::runtime_error("Supplied child filter model index is invalid");
+
+            const auto childModelIndex = _filterModel.mapToSource(childFilterModelIndex);
+
+            if (!childModelIndex.isValid())
+                throw std::runtime_error("Supplied child model index is invalid");
+
+            const auto persistentChildModelIndex = QPersistentModelIndex(childModelIndex);
+
+            updateDataHierarchyItemExpansion(childModelIndex);
+
+            auto childItem = _model.getItem<DataHierarchyModel::Item>(persistentChildModelIndex);
+
+            if (childItem == nullptr)
+                throw std::runtime_error("Unable to get child model item for child model index");
+
+            connect(&childItem->getDataset()->getDataHierarchyItem(), &DataHierarchyItem::expandedChanged, this, [this, persistentChildModelIndex]() -> void {
+                updateDataHierarchyItemExpansion(persistentChildModelIndex);
+            });
+
+            if (_model.hasChildren(childModelIndex))
+                initializeChildModeItemsExpansion(childFilterModelIndex);
+        }
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to initialize model item expansion", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to initialize model item expansion");
     }
 }

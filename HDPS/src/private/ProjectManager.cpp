@@ -339,8 +339,6 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject"));
 
-            //temporaryDirectory.setAutoRemove(false);
-
             setTemporaryDirPath(TemporaryDirType::Open, temporaryDirectory.path());
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
