@@ -149,6 +149,8 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "State");
     variantMapMustContain(variantMap, "ViewPluginDockWidgets");
 
+    _layoutTask.setName("Load " + name.toLower() + " layout");
+
     hide();
     {
         //qDebug() << _serializationTask->getChildTasks();
@@ -199,6 +201,8 @@ QVariantMap DockManager::toVariantMap() const
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << objectName();
 #endif
+
+    _layoutTask.setName("Save" + name.toLower() + " layout");
 
     _serializationTask->setEnabled(true);
 

@@ -77,6 +77,9 @@ protected:
     /** Update the visibility of the tree view columns */
     void updateColumnsVisibility();
 
+    void updateItemExpansion(const QModelIndex& filterModelIndex = QModelIndex());
+    void initializeExpansion(QModelIndex parentFilterModelIndex = QModelIndex());
+
 private:
     mv::DataHierarchyModel          _model;             /** Model containing data to be displayed in the hierarchy */
     mv::DataHierarchyFilterModel    _filterModel;       /** Data hierarchy filter model */
