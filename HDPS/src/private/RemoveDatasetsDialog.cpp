@@ -61,7 +61,7 @@ RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidge
     _candidateDatasets << _topLevelDatasets << _descendantDatasets;
 
     _messageAction.setDefaultWidgetFlags(StringAction::WidgetFlag::Label);
-    _messageAction.setString(QString("The selected dataset%1 contain%2 %3 children, what would you like to do with them?").arg(_selectedDatasets.count() == 1 ? "" : "s", _selectedDatasets.count() == 1 ? "s" : "", QString::number(_descendantDatasets.count())));
+    _messageAction.setString(QString("The selected dataset%1 contain%2 %3 child%4, what would you like to do with them?").arg(_selectedDatasets.count() == 1 ? "" : "s", _selectedDatasets.count() == 1 ? "s" : "", QString::number(_descendantDatasets.count()), _descendantDatasets.count() >= 2 ? "ren" : ""));
 
     _descendantsModeAction.setDefaultWidgetFlags(OptionAction::WidgetFlag::HorizontalButtons);
     _descendantsModeAction.setCurrentIndex(settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction().isChecked() ? 0 : 1);

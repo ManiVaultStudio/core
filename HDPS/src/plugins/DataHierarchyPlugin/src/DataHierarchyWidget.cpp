@@ -275,12 +275,25 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     });
 
     connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
-        DataHierarchyItems dataHierarchyItems;
+        /*
+        if (!deselected.indexes().isEmpty()) {
+            auto layer = _model.getLayerFromIndex(deselected.indexes().first());
 
-        for (const auto& index : _hierarchyWidget.getSelectedRows())
-            dataHierarchyItems << &dataHierarchy().getItem(index.siblingAtColumn(static_cast<int>(DataHierarchyModel::Column::DatasetId)).data(Qt::EditRole).toString());
+            Q_ASSERT(layer != nullptr);
 
-        dataHierarchy().selectItems(dataHierarchyItems);
+            if (layer == nullptr)
+                return;
+
+            layer->deactivate();
+        }
+
+        for (const auto& selectedFilterModelIndex : _hierarchyWidget.getSelectedRows()) {
+            const auto selectedModelIndex = _filterModel.mapToSource(selectedFilterModelIndex);
+
+            if (selectedModelIndex.isValid())
+                _model.getItem(selectedModelIndex)->getDataset()->getDataHierarchyItem();
+        }
+        */
     });
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {

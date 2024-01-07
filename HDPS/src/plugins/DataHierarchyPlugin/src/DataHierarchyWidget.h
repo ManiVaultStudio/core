@@ -81,10 +81,16 @@ protected:
     void updateColumnsVisibility();
 
     /**
-     * Update the expansion state in the corresponding data hierarchy item to reflect the expansion state of the model item with \p filterModelIndex
+     * Update the data hierarchy item to reflect the expansion state of the corresponding model item with \p filterModelIndex
      * @param filterModelIndex Filter model index of the model item to sync with
      */
     void updateDataHierarchyItemExpansion(const QModelIndex& filterModelIndex = QModelIndex());
+
+    /**
+     * Update the data hierarchy item to reflect the expansion state of the corresponding model item with \p filterModelIndex
+     * @param filterModelIndex Filter model index of the model item to sync with
+     */
+    //void updateDataHierarchyItemSelection(const QModelIndex& filterModelIndex = QModelIndex());
 
     /**
      * Initializes the expansion state of child model items recursively

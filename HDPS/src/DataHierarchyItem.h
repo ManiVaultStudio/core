@@ -286,7 +286,7 @@ signals:
 
     /**
      * Signals that the parent changed to \p parent
-     * @param parent Pointer to parent data hierarch item (might be nullptr)
+     * @param parent Pointer to parent data hierarchy item (might be nullptr)
      */
     void parentChanged(DataHierarchyItem* parent);
 
