@@ -5,10 +5,9 @@
 #include "DockManager.h"
 #include "ViewPluginDockWidget.h"
 
-#include <ViewPlugin.h>
-
-#include <CoreInterface.h>
 #include <AbstractPluginManager.h>
+#include <CoreInterface.h>
+#include <ViewPlugin.h>
 
 #include <util/Serialization.h>
 #include <widgets/InfoWidget.h>
