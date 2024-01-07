@@ -2,11 +2,12 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "DatasetPrivate.h"
-#include "CoreInterface.h"
-#include "event/Event.h"
 #include "Application.h"
+#include "CoreInterface.h"
+#include "DatasetPrivate.h"
 #include "Set.h"
+
+#include "event/Event.h"
 
 #include <QMetaMethod>
 

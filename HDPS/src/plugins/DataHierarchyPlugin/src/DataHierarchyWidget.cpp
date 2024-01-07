@@ -5,24 +5,22 @@
 #include "DataHierarchyWidget.h"
 #include "DataHierarchyWidgetContextMenu.h"
 
-#include <models/DataHierarchyModel.h>
-#include <models/DataHierarchyModelItem.h>
+#include <AbstractDataHierarchyManager.h>
 #include <Application.h>
-#include <Set.h>
 #include <Dataset.h>
 #include <PluginFactory.h>
-#include <AbstractDataHierarchyManager.h>
+#include <Set.h>
+
+#include <models/DataHierarchyModel.h>
+#include <models/DataHierarchyModelItem.h>
 #include <widgets/Divider.h>
-#include <actions/PluginTriggerAction.h>
 
 #include <QDebug>
 #include <QHeaderView>
-#include <QVBoxLayout>
-#include <QMenu>
-#include <QLabel>
+#include <QScopedPointer>
 #include <QStyledItemDelegate>
 #include <QStyleOptionViewItem>
-#include <QScopedPointer>
+#include <QVBoxLayout>
 
 #include <stdexcept>
 

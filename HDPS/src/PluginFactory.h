@@ -5,16 +5,17 @@
 #ifndef HDPS_PLUGINFACTORY_H
 #define HDPS_PLUGINFACTORY_H
 
-#include "PluginType.h"
-#include "DataType.h"
 #include "Dataset.h"
+#include "DataType.h"
+#include "PluginType.h"
+
 #include "actions/PluginTriggerAction.h"
 
-#include <QObject>
-#include <QIcon>
-#include <QVariant>
 #include <QAction>
+#include <QIcon>
+#include <QObject>
 #include <QPointer>
+#include <QVariant>
 
 namespace mv
 {
@@ -22,8 +23,6 @@ namespace mv
 
     namespace gui
     {
-        class PluginTriggerAction;
-
         using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
     }
 

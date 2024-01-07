@@ -4,17 +4,16 @@
 
 #pragma once
 
-#include <models/DataHierarchyModel.h>
-#include <models/DataHierarchyFilterModel.h>
-#include <actions/TriggerAction.h>
-#include <actions/ToggleAction.h>
-#include <widgets/HierarchyWidget.h>
 #include <DataHierarchyItem.h>
 #include <Dataset.h>
 
-#include <QWidget>
+#include <actions/ToggleAction.h>
+#include <actions/TriggerAction.h>
+#include <models/DataHierarchyFilterModel.h>
+#include <models/DataHierarchyModel.h>
+#include <widgets/HierarchyWidget.h>
 
-class DataHierarchyPlugin;
+#include <QWidget>
 
 /**
  * Widget for displaying the data hierarchy
