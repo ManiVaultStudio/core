@@ -140,6 +140,9 @@ private:
          * @param keepDescendants Whether to keep descendants or not
          */
         void setKeepDescendants(bool keepDescendants);
+
+        /** Updates the check state based on its parent item */
+        void updateCheckState();
     };
 
     /** Standard model item class for displaying the dataset identifier */
@@ -246,7 +249,7 @@ protected:
         void updateReadOnly();
 
         /**
-         * Set keep descendants to \p keepDescendants for the name item
+         * Set keep descendants to \p keepDescendants for all name items
          * @param keepDescendants Whether to keep descendants or not
          */
         void setKeepDescendants(bool keepDescendants);
@@ -309,11 +312,14 @@ private:
     void addDataset(mv::Dataset<mv::DatasetImpl> dataset, mv::Datasets selectedDatasets);
 
     /** Updates the read-only state of all name items */
-    void updateAllNameItemsReadOnly();
+    void updateReadOnlyForAllNameItems();
 
     /**
      * Set keep descendants to \p keepDescendants for all name items
      * @param keepDescendants Whether to keep descendants or not
      */
     void setKeepDescendantsForAllNameItems();
+
+    /** Updates the check states for all name items */
+    void updateCheckStatesForAllNameItems();
 };

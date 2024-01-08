@@ -395,8 +395,20 @@ void DataHierarchyWidget::initializeChildModeItemsExpansion(QModelIndex parentFi
             if (childItem == nullptr)
                 throw std::runtime_error("Unable to get child model item for child model index");
 
-            connect(&childItem->getDataset()->getDataHierarchyItem(), &DataHierarchyItem::expandedChanged, this, [this, persistentChildModelIndex]() -> void {
-                updateDataHierarchyItemExpansion(persistentChildModelIndex);
+            auto& dataset = childItem->getDataset();
+
+            if (!dataset.isValid())
+                throw std::runtime_error("Dataset is invalid");
+
+            const auto& datasetId = dataset->getId();
+
+            connect(&childItem->getDataset()->getDataHierarchyItem(), &DataHierarchyItem::expandedChanged, this, [this, datasetId]() -> void {
+                const auto matches = _model.match(_model.index(0, static_cast<int>(DataHierarchyModel::Column::DatasetId)), Qt::EditRole, datasetId, -1);
+
+                if (matches.isEmpty())
+                    return;
+
+                updateDataHierarchyItemExpansion(matches.first());
             });
 
             if (_model.hasChildren(childModelIndex))

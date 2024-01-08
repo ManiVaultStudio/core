@@ -159,6 +159,17 @@ void DatasetsToRemoveModel::NameItem::setKeepDescendants(bool keepDescendants)
     }
 }
 
+void DatasetsToRemoveModel::NameItem::updateCheckState()
+{
+    if (getDataset()->mayUnderive())
+        return;
+
+    auto parentItem = QStandardItem::parent();
+
+    if (parentItem != nullptr && parentItem->checkState() == Qt::Checked)
+        setCheckState(Qt::Checked);
+}
+
 DatasetsToRemoveModel::DatasetIdItem::DatasetIdItem(Dataset<DatasetImpl> dataset, DatasetsToRemoveModel& datasetsToRemoveModel) :
     Item(dataset, datasetsToRemoveModel)
 {
@@ -252,8 +263,18 @@ DatasetsToRemoveModel::DatasetsToRemoveModel(QObject* parent) :
 {
     setColumnCount(static_cast<int>(Column::Count));
 
-    connect(&settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction(), &ToggleAction::toggled, this, &DatasetsToRemoveModel::updateAllNameItemsReadOnly);
+    connect(&settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction(), &ToggleAction::toggled, this, &DatasetsToRemoveModel::updateReadOnlyForAllNameItems);
     connect(&settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction(), &ToggleAction::toggled, this, &DatasetsToRemoveModel::setKeepDescendantsForAllNameItems);
+
+    connect(this, &QStandardItemModel::dataChanged, this, [this](const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles) -> void {
+        if (roles.isEmpty())
+            return;
+
+        if (roles.first() == Qt::CheckStateRole) {
+            updateReadOnlyForAllNameItems();
+            updateCheckStatesForAllNameItems();
+        }
+    });
 }
 
 QVariant DatasetsToRemoveModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -320,8 +341,8 @@ void DatasetsToRemoveModel::setDatasets(mv::Datasets datasets)
 
     std::reverse(datasetsToRemove.begin(), datasetsToRemove.end());
 
-    updateAllNameItemsReadOnly();
     setKeepDescendantsForAllNameItems();
+    updateReadOnlyForAllNameItems();
 }
 
 void DatasetsToRemoveModel::addDataset(Dataset<DatasetImpl> dataset, mv::Datasets selectedDatasets)
@@ -381,7 +402,7 @@ mv::Datasets DatasetsToRemoveModel::getDatasetsToRemove() const
     return datasetsToRemove;
 }
 
-void DatasetsToRemoveModel::updateAllNameItemsReadOnly()
+void DatasetsToRemoveModel::updateReadOnlyForAllNameItems()
 {
     for (auto& row : Row::allRows)
         row.updateReadOnly();
@@ -397,4 +418,10 @@ void DatasetsToRemoveModel::checkAll()
 {
     for (auto& row : Row::allRows)
         row.getNameItem()->setCheckState(Qt::Checked);
+}
+
+void DatasetsToRemoveModel::updateCheckStatesForAllNameItems()
+{
+    for (auto& row : Row::allRows)
+        row.getNameItem()->updateCheckState();
 }
