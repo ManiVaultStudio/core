@@ -316,7 +316,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     connect(&_groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::updateColumnsVisibility);
 
     updateColumnsVisibility();
-    initializeChildModeItemsExpansion();
+    initializeChildModelItemsExpansion();
 }
 
 QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImpl>& dataset)
@@ -371,7 +371,7 @@ void DataHierarchyWidget::updateDataHierarchyItemExpansion(const QModelIndex& mo
     }
 }
 
-void DataHierarchyWidget::initializeChildModeItemsExpansion(QModelIndex parentFilterModelIndex /*= QModelIndex()*/)
+void DataHierarchyWidget::initializeChildModelItemsExpansion(QModelIndex parentFilterModelIndex /*= QModelIndex()*/)
 {
     try
     {
@@ -412,7 +412,7 @@ void DataHierarchyWidget::initializeChildModeItemsExpansion(QModelIndex parentFi
             });
 
             if (_model.hasChildren(childModelIndex))
-                initializeChildModeItemsExpansion(childFilterModelIndex);
+                initializeChildModelItemsExpansion(childFilterModelIndex);
         }
     }
     catch (std::exception& e)

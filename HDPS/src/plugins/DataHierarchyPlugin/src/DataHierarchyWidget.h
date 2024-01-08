@@ -96,7 +96,7 @@ protected:
      * Initializes the expansion state of child model items recursively
      * @param parentFilterModelIndex The parent filter model index for which to update the child model items
      */
-    void initializeChildModeItemsExpansion(QModelIndex parentFilterModelIndex = QModelIndex());
+    void initializeChildModelItemsExpansion(QModelIndex parentFilterModelIndex = QModelIndex());
 
 private:
     mv::DataHierarchyModel          _model;             /** Model containing data to be displayed in the hierarchy */
