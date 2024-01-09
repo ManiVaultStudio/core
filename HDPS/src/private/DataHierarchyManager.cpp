@@ -24,7 +24,6 @@ DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
     AbstractDataHierarchyManager(),
     _items()
 {
-    connect(&data(), &AbstractDataManager::datasetAdded, this, &DataHierarchyManager::addItem);
     connect(&data(), &AbstractDataManager::datasetAboutToBeRemoved, this, &DataHierarchyManager::removeItem);
 }
 

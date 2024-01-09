@@ -27,6 +27,7 @@ public:
      */
     DataHierarchyManager(QObject* parent = nullptr);
 
+    /** Reset the data hierarchy manager when destructed */
     ~DataHierarchyManager() override;
 
     /** Perform manager startup initialization */

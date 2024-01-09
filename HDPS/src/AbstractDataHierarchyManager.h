@@ -138,6 +138,8 @@ signals:
      * @param selectedItems Pointers to selected data hierarchy items
      */
     void selectedItemsChanged(DataHierarchyItems selectedItems);
+
+    friend class DataManager;
 };
 
 }

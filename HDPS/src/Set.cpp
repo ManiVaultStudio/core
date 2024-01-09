@@ -307,7 +307,8 @@ DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/
     _locked(false),
     _smartPointer(this),
     _task(this, ""),
-    _mayUnderive(mayUnderive)
+    _mayUnderive(mayUnderive),
+    _aboutToBeRemoved(false)
 {
     if (!id.isEmpty())
         Serializable::setId(id);

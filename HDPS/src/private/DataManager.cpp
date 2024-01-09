@@ -134,6 +134,8 @@ void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> 
 
         _datasets.push_back(std::unique_ptr<DatasetImpl>(dataset.get()));
 
+        dataHierarchy().addItem(dataset, parentDataset, visible);
+
         if (notify)
             events().notifyDatasetAdded(dataset);
 
