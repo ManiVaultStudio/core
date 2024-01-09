@@ -5,10 +5,10 @@
 #ifndef HDPS_DATASET_H
 #define HDPS_DATASET_H
 
-#include "RawData.h"
+#include "CoreInterface.h"
 #include "Dataset.h"
 #include "LinkedData.h"
-#include "CoreInterface.h"
+#include "RawData.h"
 
 #include "DatasetTask.h"
 #include "ForegroundTask.h"
@@ -18,8 +18,8 @@
 #include "util/Miscellaneous.h"
 
 #include <QString>
-#include <QVector>
 #include <QUuid>
+#include <QVector>
 
 #include <memory>
 

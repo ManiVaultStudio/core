@@ -4,17 +4,15 @@
 
 #include "Set.h"
 
+#include "AnalysisPlugin.h"
 #include "CoreInterface.h"
 #include "DataHierarchyItem.h"
-#include "AnalysisPlugin.h"
 
-#include "util/Serialization.h"
-#include "util/Icon.h"
 #include "util/Exception.h"
+#include "util/Icon.h"
+#include "util/Serialization.h"
 
 #include "Application.h"
-
-#include <QPainter>
 
 using namespace mv::gui;
 using namespace mv::util;

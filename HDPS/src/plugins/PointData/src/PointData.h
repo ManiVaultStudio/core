@@ -8,16 +8,16 @@
 
 #include "RawData.h"
 
-#include "Set.h"
-#include "PointDataRange.h"
 #include "LinkedData.h"
+#include "PointDataRange.h"
+#include "Set.h"
 
 #include "event/EventListener.h"
 
 #include <biovault_bfloat16/biovault_bfloat16.h>
 
-#include <QString>
 #include <QMap>
+#include <QString>
 #include <QVariant>
 
 #include <array>
