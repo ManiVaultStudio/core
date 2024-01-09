@@ -103,6 +103,11 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
 
 void PointData::fromVariantMap(const QVariantMap& variantMap)
 {
+
+    variantMapMustContain(variantMap, "Data");
+    variantMapMustContain(variantMap, "NumberOfPoints");
+    variantMapMustContain(variantMap, "NumberOfDimensions");
+
     const auto data                 = variantMap["Data"].toMap();
     const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
     const auto numberOfDimensions   = static_cast<size_t>(variantMap["NumberOfDimensions"].toInt());
@@ -804,7 +809,7 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
-void resolveLinkedPointData(LinkedData& linkedData, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr)
+static void resolveLinkedPointData(const LinkedData& linkedData, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr)
 {
     Dataset<Points> sourceDataset   = linkedData.getSourceDataSet();
     Dataset<Points> targetDataset   = linkedData.getTargetDataset();
@@ -965,15 +970,13 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "Full");
-    variantMapMustContain(variantMap, "NumberOfDimensions");
-
-    setAll(variantMap["Full"].toBool());
+    variantMapMustContain(variantMap, "DimensionNames");
+    variantMapMustContain(variantMap, "Selection");
 
     if (isFull())
         getRawData<PointData>().fromVariantMap(variantMap);
-
-    if (!isFull()) {
+    else
+    {
         makeSubsetOf(getFullDataset<Points>());
 
         variantMapMustContain(variantMap, "Indices");
@@ -1005,11 +1008,8 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         return dimensionNames;
     };
 
-    
-
     std::vector<QString> dimensionNames;
-
-    for (const auto dimensionName : fetchDimensionNames())
+    for (const auto& dimensionName : fetchDimensionNames())
         dimensionNames.push_back(dimensionName);
 
     setDimensionNames(dimensionNames);
@@ -1044,7 +1044,7 @@ QVariantMap Points::toVariantMap() const
     QStringList dimensionNames;
 
     if (getDimensionNames().size() != getNumPoints()) {
-        for (const auto dimensionName : getDimensionNames())
+        for (const auto& dimensionName : getDimensionNames())
             dimensionNames << dimensionName;
     }
     else {
@@ -1073,7 +1073,6 @@ QVariantMap Points::toVariantMap() const
 
     variantMap["Data"]                  = isFull() ? getRawData<PointData>().toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]        = getNumPoints();
-    variantMap["Full"]                  = isFull();
     variantMap["Indices"]               = indices;
     variantMap["Selection"]             = selection;
     variantMap["DimensionNames"]        = rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true);
