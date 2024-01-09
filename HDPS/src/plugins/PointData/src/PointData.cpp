@@ -867,7 +867,7 @@ void resolveLinkedPointData(LinkedData& linkedData, const std::vector<std::uint3
     *ignoreDatasets << targetDataset;
 
     // Recursively resolve linked point data
-    for (auto targetLd : targetDataset->getLinkedData())
+    for (const mv::LinkedData& targetLd : targetDataset->getLinkedData())
         resolveLinkedPointData(targetLd, targetSelection->indices, ignoreDatasets);
 }
 
@@ -877,7 +877,7 @@ void Points::resolveLinkedData(bool force /*= false*/)
         return;
 
     // Check for linked data in this dataset and resolve them
-    for (mv::LinkedData& linkedData : getLinkedData())
+    for (const mv::LinkedData& linkedData : getLinkedData())
         resolveLinkedPointData(linkedData, getSelection<Points>()->indices, nullptr);
 }
 

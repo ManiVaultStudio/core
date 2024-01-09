@@ -129,6 +129,8 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "Locked");
     variantMapMustContain(variantMap, "Derived");
     variantMapMustContain(variantMap, "LinkedData");
+    variantMapMustContain(variantMap, "SourceDatasetGUID");
+    variantMapMustContain(variantMap, "FullDatasetGUID");
 
     setText(variantMap["Name"].toString());
     setLocked(variantMap["Locked"].toBool());
@@ -137,10 +139,11 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     bool full   = variantMap["Full"].toBool();
 
     if (_derived)
-        _sourceDataset = getParent();
+        _sourceDataset = Application::core()->requestDataset(variantMap["SourceDatasetGUID"].toString());
 
     if (!full)
-        _fullDataset = getParent()->getFullDataset<mv::DatasetImpl>();
+    if (!_all)
+        _fullDataset = Application::core()->requestDataset(variantMap["FullDatasetGUID"].toString());
 
     setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
 
@@ -158,7 +161,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
         linkedData.fromVariantMap(linkedDataVariant.toMap());
 
-        getLinkedData().push_back(linkedData);
+        _linkedData.push_back(linkedData);
     }
 }
 
@@ -171,10 +174,10 @@ QVariantMap DatasetImpl::toVariantMap() const
     for (const auto& proxyMember : _proxyMembers)
         proxyMemberGuids << proxyMember->getId();
 
-    QVariantList linkedData;
+    QVariantList linkedDataList;
 
-    for (const auto& ld : getLinkedData())
-        linkedData.push_back(ld.toVariantMap());
+    for (const auto& ld : _linkedData)
+        linkedDataList.push_back(ld.toVariantMap());
 
     variantMap.insert({
         { "Name", QVariant::fromValue(text()) },
@@ -185,8 +188,10 @@ QVariantMap DatasetImpl::toVariantMap() const
         { "PluginKind", QVariant::fromValue(_rawData->getKind()) },
         { "PluginVersion", QVariant::fromValue(_rawData->getVersion()) },
         { "Derived", QVariant::fromValue(isDerivedData()) },
+        { "SourceDatasetGUID", isDerivedData() ? QVariant::fromValue(_sourceDataset->getId()) : "" },
+        { "FullDatasetGUID", isFull() ? "" : QVariant::fromValue(_fullDataset->getId()) },
         { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
-        { "LinkedData", linkedData }
+        { "LinkedData", linkedDataList }
     });
 
     return variantMap;
