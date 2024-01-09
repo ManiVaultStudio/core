@@ -8,26 +8,26 @@
 #endif
 
 #include "PointData.h"
-#include "InfoAction.h"
+
 #include "DimensionsPickerAction.h"
-#include "event/Event.h"
+#include "InfoAction.h"
 
-#include <QtCore>
-#include <QtDebug>
-#include <QPainter>
-
-#include <cstring>
-#include <type_traits>
-#include <queue>
-#include <set>
-
-#include "graphics/Vector2f.h"
-#include "Application.h"
+#include <Application.h>
+#include <DataHierarchyItem.h>
 
 #include <actions/GroupAction.h>
+#include <event/Event.h>
+#include <graphics/Vector2f.h>
 #include <util/Serialization.h>
 #include <util/Timer.h>
-#include <DataHierarchyItem.h>
+
+#include <QPainter>
+#include <QtCore>
+#include <QtDebug>
+
+#include <cstring>
+#include <set>
+#include <type_traits>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
 
