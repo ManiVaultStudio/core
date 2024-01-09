@@ -127,6 +127,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
     variantMapMustContain(variantMap, "Name");
     variantMapMustContain(variantMap, "Locked");
+    variantMapMustContain(variantMap, "Full");
     variantMapMustContain(variantMap, "Derived");
     variantMapMustContain(variantMap, "LinkedData");
     variantMapMustContain(variantMap, "SourceDatasetGUID");
@@ -136,12 +137,11 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     setLocked(variantMap["Locked"].toBool());
 
     _derived    = variantMap["Derived"].toBool();
-    bool full   = variantMap["Full"].toBool();
+    _all        = variantMap["Full"].toBool();
 
     if (_derived)
         _sourceDataset = Application::core()->requestDataset(variantMap["SourceDatasetGUID"].toString());
 
-    if (!full)
     if (!_all)
         _fullDataset = Application::core()->requestDataset(variantMap["FullDatasetGUID"].toString());
 
@@ -188,6 +188,7 @@ QVariantMap DatasetImpl::toVariantMap() const
         { "PluginKind", QVariant::fromValue(_rawData->getKind()) },
         { "PluginVersion", QVariant::fromValue(_rawData->getVersion()) },
         { "Derived", QVariant::fromValue(isDerivedData()) },
+        { "Full", QVariant::fromValue(isFull()) },
         { "SourceDatasetGUID", isDerivedData() ? QVariant::fromValue(_sourceDataset->getId()) : "" },
         { "FullDatasetGUID", isFull() ? "" : QVariant::fromValue(_fullDataset->getId()) },
         { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
@@ -290,7 +291,7 @@ DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/
     _storageType(StorageType::Owner),
     _rawData(nullptr),
     _rawDataName(rawDataName),
-    _all(false),
+    _all(true),
     _derived(false),
     _sourceDataset(),
     _properties(),
