@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "LinkedData.h"
+
 #include "Set.h"
 
 using namespace mv::util;
@@ -17,11 +18,10 @@ SelectionMap::SelectionMap(Type type /*= Indexed*/) :
 }
 
 SelectionMap::SelectionMap(const QSize& sourceImageSize, const QSize& targetImageSize) :
-    Serializable("SelectionMapping"),
-    _type(Type::ImagePyramid),
-    _sourceImageSize(sourceImageSize),
-    _targetImageSize(targetImageSize)
+    SelectionMap(Type::ImagePyramid)
 {
+    _sourceImageSize = sourceImageSize;
+    _targetImageSize = targetImageSize;
 }
 
 void SelectionMap::populateMappingIndices(std::uint32_t pointIndex, Indices& indices) const
@@ -97,71 +97,52 @@ bool SelectionMap::hasMappingForPointIndex(std::uint32_t pointIndex) const
 
 void SelectionMap::fromVariantMap(const QVariantMap& variantMap)
 {
+    Serializable::fromVariantMap(variantMap);
+
     variantMapMustContain(variantMap, "Type");
-    variantMapMustContain(variantMap, "Indices");
-    variantMapMustContain(variantMap, "IndicesSize");
-    variantMapMustContain(variantMap, "Ranges");
-    variantMapMustContain(variantMap, "RangesSize");
+    variantMapMustContain(variantMap, "SerializedMap");
+    variantMapMustContain(variantMap, "SerializedMapSize");
     variantMapMustContain(variantMap, "SourceImageSize");
     variantMapMustContain(variantMap, "TargetImageSize");
 
     _type = static_cast<Type>(variantMap["Type"].toInt());
 
-    switch (_type)
+    auto SourceImageSizeMap = variantMap["SourceImageSize"].toMap();
+    _sourceImageSize.setWidth(SourceImageSizeMap["Width"].toInt());
+    _sourceImageSize.setHeight(SourceImageSizeMap["Height"].toInt());
+
+    auto TargetImageSizeMap = variantMap["SourceImageSize"].toMap();
+    _targetImageSize.setWidth(TargetImageSizeMap["Width"].toInt());
+    _targetImageSize.setHeight(TargetImageSizeMap["Height"].toInt());
+
+    std::vector<std::uint32_t> serializedMap;
+    serializedMap.resize(static_cast<size_t>(variantMap["SerializedMapSize"].toInt()));
+    populateDataBufferFromVariantMap(variantMap["SerializedMap"].toMap(), (char*)serializedMap.data());
+
+    uint32_t key(0), size(0);
+    for (auto it = serializedMap.begin(); it != serializedMap.end(); )
     {
-        case Type::Indexed:
-        {
-            std::vector<std::uint32_t> indices;
-            std::vector<std::uint32_t> ranges;
-
-            indices.resize(variantMap["IndicesSize"].toInt());
-            ranges.resize(variantMap["RangesSize"].toInt());
-
-            populateDataBufferFromVariantMap(variantMap["Indices"].toMap(), (char*)indices.data());
-            populateDataBufferFromVariantMap(variantMap["Ranges"].toMap(), (char*)ranges.data());
-
-            for (int i = 0; i < ranges.size(); i += 3)
-                _map[ranges[i]] = std::vector<std::uint32_t>(indices.begin() + ranges[i + 1], indices.begin() + ranges[i + 2]);
-
-            break;
-        }
-
-        case Type::ImagePyramid:
-        {
-            _sourceImageSize.setWidth(variantMap["SourceImageSize"].toMap()["Width"].toInt());
-            _sourceImageSize.setHeight(variantMap["SourceImageSize"].toMap()["Height"].toInt());
-
-            _targetImageSize.setWidth(variantMap["TargetImageSize"].toMap()["Width"].toInt());
-            _targetImageSize.setHeight(variantMap["TargetImageSize"].toMap()["Height"].toInt());
-
-            break;
-        }
+        key = *it;
+        it++;
+        size = *it;
+        it++;
+        _map[key] = std::vector<std::uint32_t>(it, it + size);
+        it += size;
     }
 }
 
 QVariantMap SelectionMap::toVariantMap() const
 {
-    std::vector<std::uint32_t> indices;
-    std::vector<std::uint32_t> ranges;
+    QVariantMap variantMap = Serializable::toVariantMap();
 
-    switch (_type)
+    // serialize a std::map<std::uint32_t, std::vector<std::uint32_t>>;
+    std::vector<std::uint32_t> serializedMap;
+
+    for (const auto& [key, values] : _map)
     {
-        case Type::Indexed:
-        {
-            ranges.reserve(_map.size() * 3);
-
-            for (const auto& item : _map) {
-                ranges.push_back(item.first);
-                ranges.push_back(static_cast<std::uint32_t>(indices.size()));
-                indices.insert(indices.end(), item.second.begin(), item.second.end());
-                ranges.push_back(static_cast<std::uint32_t>(indices.size()));
-            }
-
-            break;
-        }
-
-        case Type::ImagePyramid:
-            break;
+        serializedMap.push_back(key);
+        serializedMap.push_back(static_cast<std::uint32_t>(values.size()));
+        serializedMap.insert(serializedMap.end(), values.begin(), values.end());
     }
 
     const QVariantMap sourceImageSize{
@@ -174,16 +155,13 @@ QVariantMap SelectionMap::toVariantMap() const
         { "Height", QVariant::fromValue(_targetImageSize.height()) }
     };
 
-    return {
-        { "Type", QVariant::fromValue(static_cast<std::int32_t>(_type)) },
-        { "NumberOfIndices", QVariant::fromValue(indices.size()) },
-        { "Indices", rawDataToVariantMap((char*)indices.data(), indices.size() * sizeof(std::uint32_t), true) },
-        { "IndicesSize", QVariant::fromValue(indices.size()) },
-        { "Ranges", rawDataToVariantMap((char*)ranges.data(), ranges.size() * sizeof(std::uint32_t), true) },
-        { "RangesSize", QVariant::fromValue(ranges.size()) },
-        { "SourceImageSize", sourceImageSize },
-        { "TargetImageSize", targetImageSize }
-    };
+    variantMap["Type"] = QVariant::fromValue(static_cast<std::int32_t>(_type));
+    variantMap["SerializedMap"] = rawDataToVariantMap((char*)serializedMap.data(), serializedMap.size() * sizeof(std::uint32_t), true);
+    variantMap["SerializedMapSize"] = QVariant::fromValue(serializedMap.size());
+    variantMap["SourceImageSize"] = QVariant::fromValue(sourceImageSize);
+    variantMap["TargetImageSize"] = QVariant::fromValue(targetImageSize);
+
+    return variantMap;
 }
 
 LinkedData::LinkedData() :
@@ -192,12 +170,13 @@ LinkedData::LinkedData() :
 }
 
 LinkedData::LinkedData(const Dataset<DatasetImpl>& sourceDataSet, const Dataset<DatasetImpl>& targetDataSet) :
-    Serializable("LinkedData"),
-    _sourceDataSet(sourceDataSet),
-    _targetDataSet(targetDataSet)
+    LinkedData()
 {
-    Q_ASSERT(_sourceDataSet.isValid());
-    Q_ASSERT(_targetDataSet.isValid());
+    Q_ASSERT(sourceDataSet.isValid());
+    Q_ASSERT(targetDataSet.isValid());
+
+    _sourceDataSet = sourceDataSet;
+    _targetDataSet = targetDataSet;
 }
 
 //LinkedData::LinkedData(const LinkedData& linkedData)
@@ -217,23 +196,28 @@ void LinkedData::setMapping(SelectionMap& mapping)
 
 void LinkedData::fromVariantMap(const QVariantMap& variantMap)
 {
+    Serializable::fromVariantMap(variantMap);
+
     variantMapMustContain(variantMap, "SourceDataset");
     variantMapMustContain(variantMap, "TargetDataset");
-    variantMapMustContain(variantMap, "Mapping");
 
     _sourceDataSet.setDatasetId(variantMap["SourceDataset"].toString());
     _targetDataSet.setDatasetId(variantMap["TargetDataset"].toString());
 
-    _mapping.fromVariantMap(variantMap["Mapping"].toMap());
+    _mapping.fromParentVariantMap(variantMap);
 }
 
 QVariantMap LinkedData::toVariantMap() const
 {
-    return {
-        { "SourceDataset", QVariant::fromValue(_sourceDataSet.getDatasetId()) },
-        { "TargetDataset", QVariant::fromValue(_targetDataSet.getDatasetId()) },
-        { "Mapping", _mapping.toVariantMap() }
-    };
+    QVariantMap variantMap = Serializable::toVariantMap();
+
+    variantMap["SourceDataset"] = QVariant::fromValue(_sourceDataSet.getDatasetId());
+    variantMap["TargetDataset"] = QVariant::fromValue(_targetDataSet.getDatasetId());
+
+    _mapping.insertIntoVariantMap(variantMap);
+
+    return variantMap;
+
 }
 
 }
