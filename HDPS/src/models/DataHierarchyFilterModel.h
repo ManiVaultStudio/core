@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "actions/ToggleAction.h"
+
 #include <QSortFilterProxyModel>
 
 namespace mv {
@@ -30,12 +32,12 @@ public:
      */
     bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
 
-    /** Get/set whether hidden datasets should be filtered or not */
-    bool getFilterHidden() const;
-    void setFilterHidden(bool filterHidden);
+public: // Action getters
+
+    gui::ToggleAction& getFilterHiddenAction() { return _filterHiddenAction; }
 
 private:
-    bool    _filterHidden;        /** Whether hidden datasets are show or not */
+    gui::ToggleAction    _filterHiddenAction;   /** For toggling whether hidden datasets are shown or not */
 };
 
 }

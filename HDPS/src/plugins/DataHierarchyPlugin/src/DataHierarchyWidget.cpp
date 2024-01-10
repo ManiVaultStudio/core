@@ -184,7 +184,9 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
     _hierarchyWidget.setNoItemsDescription(QString("Right-click > Import to load data into %1").arg(Application::getName()));
-    
+
+    _hierarchyWidget.getFilterGroupAction().addAction(&_filterModel.getFilterHiddenAction());
+
     auto& settingsGroupAction = _hierarchyWidget.getSettingsGroupAction();
 
     settingsGroupAction.setVisible(true);
@@ -200,6 +202,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeView.setColumnHidden(static_cast<int>(DataHierarchyModel::Column::DatasetId), true);
     treeView.setColumnHidden(static_cast<int>(DataHierarchyModel::Column::SourceDatasetId), true);
     treeView.setColumnHidden(static_cast<int>(DataHierarchyModel::Column::GroupIndex), true);
+    treeView.setColumnHidden(static_cast<int>(DataHierarchyModel::Column::IsVisible), true);
 
     auto treeViewHeader = treeView.header();
 
@@ -208,6 +211,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     treeViewHeader->resizeSection(DataHierarchyModel::Column::Name, 180);
     treeViewHeader->resizeSection(DataHierarchyModel::Column::GroupIndex, 60);
+    treeViewHeader->resizeSection(DataHierarchyModel::Column::IsVisible, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(DataHierarchyModel::Column::IsGroup, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(DataHierarchyModel::Column::IsLocked, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(DataHierarchyModel::Column::IsDerived, treeViewHeader->minimumSectionSize());
@@ -216,6 +220,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::DatasetId, QHeaderView::Fixed);
     treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::GroupIndex, QHeaderView::Fixed);
     treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::Progress, QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsVisible, QHeaderView::Fixed);
     treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsGroup, QHeaderView::Fixed);
     treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsLocked, QHeaderView::Fixed);
 

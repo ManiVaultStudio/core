@@ -237,6 +237,38 @@ void DataHierarchyModel::GroupIndexItem::setData(const QVariant& value, int role
     }
 }
 
+DataHierarchyModel::IsVisibleItem::IsVisibleItem(Dataset<DatasetImpl> dataset) :
+    Item(dataset)
+{
+    connect(&getDataset()->getDataHierarchyItem(), &gui::WidgetAction::visibleChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant DataHierarchyModel::IsVisibleItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        {
+            if (!getDataset().isValid())
+                break;
+
+            return getDataset()->getDataHierarchyItem().isVisible();
+        }
+
+        case Qt::DisplayRole:
+            break;
+
+        case Qt::ToolTipRole:
+            return "Dataset is a visible: " + (data(Qt::EditRole).toBool() ? "yes" : "no");
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 DataHierarchyModel::IsGroupItem::IsGroupItem(Dataset<DatasetImpl> dataset) :
     Item(dataset)
 {
@@ -257,7 +289,7 @@ QVariant DataHierarchyModel::IsGroupItem::data(int role /*= Qt::UserRole + 1*/) 
             break;
 
         case Qt::ToolTipRole:
-            return "Dataset is a group: " + data(Qt::DisplayRole).toString();
+            return "Dataset is a group: " + (data(Qt::EditRole).toBool() ? "yes" : "no");
 
         case Qt::DecorationRole:
         {
@@ -337,6 +369,7 @@ DataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
     append(new SourceDatasetIdItem(dataset));
     append(new ProgressItem(dataset));
     append(new GroupIndexItem(dataset));
+    append(new IsVisibleItem(dataset));
     append(new IsGroupItem(dataset));
     append(new IsLockedItem(dataset));
     append(new IsDerivedItem(dataset));
@@ -377,6 +410,9 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
 
         case Column::GroupIndex:
             return GroupIndexItem::headerData(orientation, role);
+
+        case Column::IsVisible:
+            return IsVisibleItem::headerData(orientation, role);
 
         case Column::IsGroup:
             return IsGroupItem::headerData(orientation, role);

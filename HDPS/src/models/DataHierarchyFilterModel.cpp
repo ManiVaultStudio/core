@@ -4,9 +4,6 @@
 
 #include "DataHierarchyModel.h"
 #include "DataHierarchyFilterModel.h"
-#include "Dataset.h"
-#include "Set.h"
-#include "DataHierarchyItem.h"
 
 #include <QDebug>
 
@@ -14,9 +11,12 @@ namespace mv {
 
 DataHierarchyFilterModel::DataHierarchyFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
-    _filterHidden(false)
+    _filterHiddenAction(this, "Filter hidden", true)
 {
+    setDynamicSortFilter(true);
     setRecursiveFilteringEnabled(true);
+
+    connect(&_filterHiddenAction, &gui::ToggleAction::toggled, this, &DataHierarchyFilterModel::invalidate);
 }
 
 bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -30,30 +30,13 @@ bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
 
     auto modelItem = static_cast<DataHierarchyModel::Item*>(sourceStandardItemModel->itemFromIndex(index));
 
-    if (_filterHidden && !modelItem->getDataset()->getDataHierarchyItem().isVisible())
+    if (_filterHiddenAction.isChecked() && !index.siblingAtColumn(static_cast<int>(DataHierarchyModel::Column::IsVisible)).data(Qt::EditRole).toBool())
         return false;
 
-    if (filterRegularExpression().isValid()) {
-        const auto key = sourceModel()->data(index, filterRole()).toString();
-        return key.contains(filterRegularExpression());
-    }
-       
+    if (filterRegularExpression().isValid())
+        return sourceModel()->data(index, filterRole()).toString().contains(filterRegularExpression());
+
     return false;
-}
-
-bool DataHierarchyFilterModel::getFilterHidden() const
-{
-	return _filterHidden;
-}
-
-void DataHierarchyFilterModel::setFilterHidden(bool filterHidden)
-{
-    if (filterHidden == _filterHidden)
-        return;
-
-    _filterHidden = filterHidden;
-
-    invalidate();
 }
 
 }

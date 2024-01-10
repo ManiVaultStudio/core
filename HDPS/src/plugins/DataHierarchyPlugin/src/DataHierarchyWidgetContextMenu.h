@@ -21,7 +21,7 @@ using namespace mv::plugin;
  * 
  * @author Thomas Kroes
  */
-class DataHierarchyWidgetContextMenu : public QMenu
+class DataHierarchyWidgetContextMenu final : public QMenu
 {
     Q_OBJECT
 
@@ -44,23 +44,36 @@ private:
     void addMenusForPluginType(plugin::Type pluginType);
 
     /**
-     * Get action for datasets grouping
-     * @return Pointer to action for datasets grouping
+     * Get action for item grouping
+     * @return Pointer to action for item grouping
      */
     QAction* getGroupAction();
 
     /**
-     * Get menu for dataset(s) locking
-     * @return Pointer to menu for dataset(s) locking
+     * Get menu for item locking
+     * @return Pointer to menu for item locking
      */
     QMenu* getLockMenu();
 
     /**
-     * Get menu for dataset(s) unlocking
-     * @return Pointer to menu for dataset(s) unlocking
+     * Get menu for item unlocking
+     * @return Pointer to menu for item unlocking
      */
     QMenu* getUnlockMenu();
 
+    /**
+     * Get menu for item hiding
+     * @return Pointer to menu for item hiding
+     */
+    QMenu* getHideMenu();
+
+    /**
+     * Get menu for item unhiding
+     * @return Pointer to menu for item unhiding
+     */
+    QMenu* getUnhideMenu();
+
 private:
+    Datasets    _allDatasets;           /** All datasets in the data hierarchy */
     Datasets    _selectedDatasets;      /** Selected datasets in the data hierarchy widget */
 };

@@ -37,6 +37,7 @@ public:
         SourceDatasetId,    /** Globally unique dataset identifier of the source dataset (if this dataset is derived) */
         Progress,           /** Task progress in percentage */
         GroupIndex,         /** Dataset group index */
+        IsVisible,          /** Whether the dataset is visible or not */
         IsGroup,            /** Whether the dataset is composed of other datasets */
         IsLocked,           /** Whether the dataset is locked */
         IsDerived,          /** Whether the dataset is derived from another dataset */
@@ -297,6 +298,44 @@ protected:
 
                 case Qt::ToolTipRole:
                     return "The dataset group index";
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying whether the dataset is visible or not */
+    class IsVisibleItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         */
+        IsVisibleItem(Dataset<DatasetImpl> dataset);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                    return "";
+
+                case Qt::EditRole:
+                    return "Is visible";
+
+                case Qt::ToolTipRole:
+                    return "Whether the dataset is visible or not";
             }
 
             return {};
