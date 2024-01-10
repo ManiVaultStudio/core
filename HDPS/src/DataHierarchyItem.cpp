@@ -167,10 +167,10 @@ void DataHierarchyItem::setSelected(bool selected, bool clear /*= true*/)
     qDebug() << __FUNCTION__ << _dataset->getGuiName() << "selected:"  << selected << "clear:" << clear;
 #endif
 
-    _selected = selected;
-
     if (clear)
         dataHierarchy().clearSelection();
+
+    _selected = selected;
 
     emit selectedChanged(_selected);
 }
@@ -280,7 +280,9 @@ void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
     setVisible(variantMap["Visible"].toBool());
 
     if (variantMap.contains("Selected"))
-        setSelected(variantMap["Selected"].toBool());
+        setSelected(variantMap["Selected"].toBool(), false);
+
+    qDebug() << __FUNCTION__ << _dataset->getGuiName() << _selected;
 }
 
 QVariantMap DataHierarchyItem::toVariantMap() const
@@ -314,6 +316,7 @@ QVariantMap DataHierarchyItem::toVariantMap() const
     variantMap["Dataset"]   = _dataset->toVariantMap();
     variantMap["Children"]  = children;
 
+    qDebug() << __FUNCTION__ << _dataset->getGuiName() << _selected;
     return variantMap;
 }
 

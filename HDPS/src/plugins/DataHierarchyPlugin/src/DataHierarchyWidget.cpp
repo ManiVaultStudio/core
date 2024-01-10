@@ -465,12 +465,12 @@ void DataHierarchyWidget::initializeSelection()
         QItemSelection itemSelection;
 
         for (auto selectedItem : dataHierarchy().getSelectedItems()) {
-            const auto matches = _model.match(_model.index(0, static_cast<int>(DataHierarchyModel::Column::DatasetId)), Qt::EditRole, selectedItem->getDataset()->getId(), -1);
+            const auto matches = _model.match(_model.index(0, static_cast<int>(DataHierarchyModel::Column::DatasetId)), Qt::EditRole, selectedItem->getDataset()->getId(), -1, Qt::MatchRecursive | Qt::MatchExactly);
 
             if (matches.isEmpty())
                 return;
 
-            itemSelection << QItemSelectionRange(matches.first());
+            itemSelection << QItemSelectionRange(_filterModel.mapFromSource(matches.first()));
         }
 
         _hierarchyWidget.getTreeView().selectionModel()->select(itemSelection, QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect);
