@@ -260,7 +260,7 @@ QVariant DataHierarchyModel::IsVisibleItem::data(int role /*= Qt::UserRole + 1*/
             break;
 
         case Qt::ToolTipRole:
-            return "Dataset is a visible: " + (data(Qt::EditRole).toBool() ? "yes" : "no");
+            return QString("Dataset is visible: %1").arg(data(Qt::EditRole).toBool() ? "yes" : "no");
 
         default:
             break;
@@ -289,7 +289,7 @@ QVariant DataHierarchyModel::IsGroupItem::data(int role /*= Qt::UserRole + 1*/) 
             break;
 
         case Qt::ToolTipRole:
-            return "Dataset is a group: " + (data(Qt::EditRole).toBool() ? "yes" : "no");
+            return QString("Dataset is a group: %1").arg(data(Qt::EditRole).toBool() ? "yes" : "no");
 
         case Qt::DecorationRole:
         {

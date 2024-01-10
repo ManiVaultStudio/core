@@ -50,7 +50,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _saveProjectAction(this, "Save Project"),
     _saveProjectAsAction(this, "Save Project As..."),
     _editProjectSettingsAction(this, "Project Settings..."),
-    _recentProjectsAction(this),
+    _recentProjectsAction(this, getSettingsPrefix() + "RecentProjects"),
     _newProjectMenu(),
     _importDataMenu(),
     _publishAction(this, "Publish"),

@@ -26,7 +26,7 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
     _openCreateProjectWidget(this, "Open & Create"),
     _recentProjectsWidget(this, "Recent"),
     _exampleProjectsWidget(this, "Examples"),
-    _recentProjectsAction(this),
+    _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects"),
     _leftAlignedIcon(),
     _leftAlignedLoggingIcon(),
     _rightAlignedIcon(),
