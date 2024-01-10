@@ -242,6 +242,10 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
             connect(&item->getDataset()->getDataHierarchyItem(), &DataHierarchyItem::expandedChanged, this, [this, persistentNameModelIndex]() -> void {
                 updateDataHierarchyItemExpansion(persistentNameModelIndex);
             });
+
+            connect(&item->getDataset()->getDataHierarchyItem(), &DataHierarchyItem::selectedChanged, this, [this, persistentNameModelIndex](bool selected) -> void {
+                _hierarchyWidget.getSelectionModel().select(_filterModel.mapFromSource(persistentNameModelIndex), selected ? QItemSelectionModel::Rows | QItemSelectionModel::Select : QItemSelectionModel::Rows | QItemSelectionModel::Deselect);
+            });
         }
 
         QCoreApplication::processEvents();
@@ -275,25 +279,55 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     });
 
     connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
-        /*
-        if (!deselected.indexes().isEmpty()) {
-            auto layer = _model.getLayerFromIndex(deselected.indexes().first());
+        try{
+            for (const auto& deselectedRange : deselected) {
+                for (int rowIndex = deselectedRange.top(); rowIndex <= deselectedRange.bottom(); rowIndex++) {
+                    const auto deselectedSourceModelIndex = _filterModel.mapToSource(_filterModel.index(rowIndex, 0, deselectedRange.parent()));
 
-            Q_ASSERT(layer != nullptr);
+                    if (!deselectedSourceModelIndex.isValid())
+                        throw std::runtime_error("Deselected source model index is not valid");
 
-            if (layer == nullptr)
-                return;
+                    auto item = _model.getItem(deselectedSourceModelIndex);
 
-            layer->deactivate();
+                    if (!item)
+                        throw std::runtime_error("Item not found in the data hierarchy model");
+
+                    item->getDataset()->getDataHierarchyItem().deselect();
+                }
+            }
         }
-
-        for (const auto& selectedFilterModelIndex : _hierarchyWidget.getSelectedRows()) {
-            const auto selectedModelIndex = _filterModel.mapToSource(selectedFilterModelIndex);
-
-            if (selectedModelIndex.isValid())
-                _model.getItem(selectedModelIndex)->getDataset()->getDataHierarchyItem();
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to deselect data hierarchy item(s)", e);
         }
-        */
+        catch (...) {
+            exceptionMessageBox("Unable to deselect data hierarchy items(s)");
+        }
+        
+        try {
+            for (const auto& selectedRange : selected) {
+                for (int rowIndex = selectedRange.top(); rowIndex <= selectedRange.bottom(); rowIndex++) {
+                    const auto selectedSourceModelIndex = _filterModel.mapToSource(_filterModel.index(rowIndex, 0, selectedRange.parent()));
+
+                    if (!selectedSourceModelIndex.isValid())
+                        throw std::runtime_error("Selected source model index is not valid");
+
+                    auto item = _model.getItem(selectedSourceModelIndex);
+
+                    if (!item)
+                        throw std::runtime_error("Item not found in the data hierarchy model");
+
+                    item->getDataset()->getDataHierarchyItem().select(false);
+                }
+            }
+        }
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Unable to select data hierarchy item(s)", e);
+        }
+        catch (...) {
+            exceptionMessageBox("Unable to select data hierarchy item(s)");
+        }
     });
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {
@@ -317,6 +351,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     updateColumnsVisibility();
     initializeChildModelItemsExpansion();
+    initializeSelection();
 }
 
 QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImpl>& dataset)
@@ -421,5 +456,30 @@ void DataHierarchyWidget::initializeChildModelItemsExpansion(QModelIndex parentF
     }
     catch (...) {
         exceptionMessageBox("Unable to initialize model item expansion");
+    }
+}
+
+void DataHierarchyWidget::initializeSelection()
+{
+    try {
+        QItemSelection itemSelection;
+
+        for (auto selectedItem : dataHierarchy().getSelectedItems()) {
+            const auto matches = _model.match(_model.index(0, static_cast<int>(DataHierarchyModel::Column::DatasetId)), Qt::EditRole, selectedItem->getDataset()->getId(), -1);
+
+            if (matches.isEmpty())
+                return;
+
+            itemSelection << QItemSelectionRange(matches.first());
+        }
+
+        _hierarchyWidget.getTreeView().selectionModel()->select(itemSelection, QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to initialize model selection", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to initialize model selection");
     }
 }

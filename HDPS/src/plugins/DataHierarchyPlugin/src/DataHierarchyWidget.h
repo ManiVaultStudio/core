@@ -87,16 +87,16 @@ protected:
     void updateDataHierarchyItemExpansion(const QModelIndex& filterModelIndex = QModelIndex());
 
     /**
-     * Update the data hierarchy item to reflect the expansion state of the corresponding model item with \p filterModelIndex
-     * @param filterModelIndex Filter model index of the model item to sync with
-     */
-    //void updateDataHierarchyItemSelection(const QModelIndex& filterModelIndex = QModelIndex());
-
-    /**
      * Initializes the expansion state of child model items recursively
      * @param parentFilterModelIndex The parent filter model index for which to update the child model items
      */
     void initializeChildModelItemsExpansion(QModelIndex parentFilterModelIndex = QModelIndex());
+
+    /**
+     * Initializes the model selection from the data hierarchy
+     * @param parentFilterModelIndex The parent filter model index for which to update the child model items
+     */
+    void initializeSelection();
 
 private:
     mv::DataHierarchyModel          _model;             /** Model containing data to be displayed in the hierarchy */

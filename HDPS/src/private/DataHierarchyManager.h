@@ -51,12 +51,10 @@ public:
     DataHierarchyItem& getItem(const QString& datasetId) override;
 
     /**
-     * Get dataset children
-     * @param dataHierarchyItem Reference to data hierarchy item
-     * @param recursive Whether to get all children in a recursive manner
-     * @return Children
+     * Get all items
+     * @return List of items
      */
-    DataHierarchyItems getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive = true) override;
+    DataHierarchyItems getItems() const override;
 
     /**
      * Get top-level items
@@ -65,10 +63,33 @@ public:
     DataHierarchyItems getTopLevelItems() override;
 
     /**
-     * Set selected data hierarchy items
-     * @param selectedItems Pointers to selected data hierarchy items
+     * Get dataset children
+     * @param dataHierarchyItem Reference to data hierarchy item
+     * @param recursive Whether to get all children in a recursive manner
+     * @return Children
      */
-    void selectItems(DataHierarchyItems& selectedItems) override;
+    DataHierarchyItems getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive = true) override;
+
+public: // Item selection
+
+    /**
+     * Select data hierarchy \p items
+     * @param items List of pointers to data hierarchy items to select
+     * @param clear Clear the current selections before selection
+     */
+    void select(DataHierarchyItems items, bool clear = true) override;
+
+    /** Select all items */
+    void selectAll() override;
+
+    /** Clear the item selection */
+    void clearSelection() override;
+
+    /**
+     * Get selected items
+     * @return List of selected items
+     */
+    DataHierarchyItems getSelectedItems() const override;
 
 protected:
 

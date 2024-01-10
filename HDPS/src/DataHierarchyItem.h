@@ -123,17 +123,24 @@ public:
 
 public: // Selection
 
-    /** Gets whether the hierarchy item is selected */
+    /**
+     * Gets whether the hierarchy item is selected
+     * @return Boolean determining whether the item is selected
+     */
     bool isSelected() const;
 
     /**
-     * Sets the item selection status
+     * Sets the selection status to \p selected and possibly \p clear the selection
      * @param selected Whether the hierarchy item is selected
+     * @param clear Whether to clear the global data hierarchy selection
      */
-    void setSelected(const bool& selected);
+    void setSelected(bool selected, bool clear = true);
 
-    /** Selects the hierarchy item */
-    void select();
+    /**
+     * Selects the data hierarchy item
+     * @param clear Whether to clear the global data hierarchy selection
+     */
+    void select(bool clear = true);
 
     /** De-selects the hierarchy item */
     void deselect();
@@ -246,10 +253,10 @@ public: // Serialization
 signals:
 
     /**
-     * Signals that the item got selected
-     * @param selected Whether the item is selected
+     * Signals that item selection changed to \p selected
+     * @param selected Whether the item is selected or not
      */
-    void selectionChanged(const bool& selected);
+    void selectedChanged(bool selected);
 
     /**
      * Signals that a widget action was added

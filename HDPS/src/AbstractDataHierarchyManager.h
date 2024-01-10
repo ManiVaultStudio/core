@@ -55,6 +55,12 @@ public:
     virtual DataHierarchyItem& getItem(const QString& datasetGuid) = 0;
 
     /**
+     * Get all items
+     * @return List of items
+     */
+    virtual DataHierarchyItems getItems() const = 0;
+
+    /**
      * Get dataset children
      * @param dataHierarchyItem Reference to data hierarchy item
      * @param recursive Whether to get all children in a recursive manner
@@ -68,11 +74,26 @@ public:
      */
     virtual DataHierarchyItems getTopLevelItems() = 0;
 
+public: // Item selection
+
     /**
-     * Set selected data hierarchy items
-     * @param selectedItems Pointers to selected data hierarchy items
+     * Select data hierarchy \p items
+     * @param items List of pointers to data hierarchy items to select
+     * @param clear Clear the current selections before selection
      */
-    virtual void selectItems(DataHierarchyItems& selectedItems) = 0;
+    virtual void select(DataHierarchyItems items, bool clear = true) = 0;
+
+    /** Select all items */
+    virtual void selectAll() = 0;
+
+    /** Clear the item selection */
+    virtual void clearSelection() = 0;
+
+    /**
+     * Get selected items
+     * @return List of selected items
+     */
+    virtual DataHierarchyItems getSelectedItems() const = 0;
 
 protected:
 

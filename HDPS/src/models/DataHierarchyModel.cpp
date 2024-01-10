@@ -351,8 +351,7 @@ DataHierarchyModel::DataHierarchyModel(QObject* parent) :
     connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAboutToBeRemoved, this, &DataHierarchyModel::removeDataHierarchyModelItem);
     connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemParentChanged, this, &DataHierarchyModel::reparentDataHierarchyModelItem);
 
-    for (const auto topLevelItem : dataHierarchy().getTopLevelItems())
-        addDataHierarchyModelItem(*topLevelItem);
+    initializeFromDataHierarchy();
 }
 
 Qt::DropActions DataHierarchyModel::supportedDragActions() const
@@ -499,6 +498,12 @@ void DataHierarchyModel::reparentDataHierarchyModelItem(DataHierarchyItem& dataH
     {
         exceptionMessageBox("Unable to re-parent data hierarchy model item");
     }
+}
+
+void DataHierarchyModel::initializeFromDataHierarchy()
+{
+    for (const auto topLevelItem : dataHierarchy().getTopLevelItems())
+        addDataHierarchyModelItem(*topLevelItem);
 }
 
 }

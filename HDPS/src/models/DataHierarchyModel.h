@@ -459,6 +459,9 @@ public:
         return dynamic_cast<ItemType*>(itemFromIndex(modelIndex));
     }
 
+    /** Populate the model from the data hierarchy manager */
+    void initializeFromDataHierarchy();
+
 private:
 
     /**

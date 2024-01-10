@@ -88,15 +88,15 @@ DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetId)
     }
 }
 
-mv::DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive /*= true*/)
+mv::DataHierarchyItems DataHierarchyManager::getItems() const
 {
-    auto children = dataHierarchyItem.getChildren();
+    DataHierarchyItems items;
 
-    if (recursive)
-        for (auto child : children)
-            children << getChildren(*child, recursive);
+    for (auto& item : _items)
+        if (!item->hasParent())
+            items << item.get();
 
-    return children;
+    return items;
 }
 
 DataHierarchyItems DataHierarchyManager::getTopLevelItems()
@@ -110,9 +110,47 @@ DataHierarchyItems DataHierarchyManager::getTopLevelItems()
     return topLevelItems;
 }
 
-void DataHierarchyManager::selectItems(DataHierarchyItems& selectedItems)
+mv::DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive /*= true*/)
 {
-    emit selectedItemsChanged(selectedItems);
+    auto children = dataHierarchyItem.getChildren();
+
+    if (recursive)
+        for (auto child : children)
+            children << getChildren(*child, recursive);
+
+    return children;
+}
+
+void DataHierarchyManager::select(DataHierarchyItems items, bool clear /*= true*/)
+{
+    if (clear)
+        clearSelection();
+
+    for (auto& item : items)
+        item->select(false);
+}
+
+void DataHierarchyManager::selectAll()
+{
+    for (auto& item : _items)
+        item->select(false);
+}
+
+void DataHierarchyManager::clearSelection()
+{
+    for (auto& item : _items)
+        item->deselect();
+}
+
+mv::DataHierarchyItems DataHierarchyManager::getSelectedItems() const
+{
+    DataHierarchyItems selectedDataHierarchyItems;
+
+    for (auto& item : _items)
+        if (item->isSelected())
+            selectedDataHierarchyItems << item.get();
+
+    return selectedDataHierarchyItems;
 }
 
 void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/)

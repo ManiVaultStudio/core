@@ -13,6 +13,10 @@
 
 #include <stdexcept>
 
+#ifdef _DEBUG
+    #define DATA_HIERARCHY_ITEM_VERBOSE
+#endif
+
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -154,24 +158,31 @@ bool DataHierarchyItem::isSelected() const
     return _selected;
 }
 
-void DataHierarchyItem::setSelected(const bool& selected)
+void DataHierarchyItem::setSelected(bool selected, bool clear /*= true*/)
 {
     if (selected == _selected)
         return;
 
+#ifdef DATA_HIERARCHY_ITEM_VERBOSE
+    qDebug() << __FUNCTION__ << _dataset->getGuiName() << "selected:"  << selected << "clear:" << clear;
+#endif
+
     _selected = selected;
 
-    emit selectionChanged(_selected);
+    if (clear)
+        dataHierarchy().clearSelection();
+
+    emit selectedChanged(_selected);
 }
 
-void DataHierarchyItem::select()
+void DataHierarchyItem::select(bool clear /*= true*/)
 {
-    setSelected(true);
+    setSelected(true, clear);
 }
 
 void DataHierarchyItem::deselect()
 {
-    setSelected(false);
+    setSelected(false, false);
 }
 
 void DataHierarchyItem::addChild(DataHierarchyItem* dataHierarchyItem)
@@ -254,16 +265,35 @@ void DataHierarchyItem::setExpanded(bool expanded)
 
 void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
 {
+    try
+    {
+        WidgetAction::fromVariantMap(variantMap);
+    }
+    catch (...)
+    {
+    }
+
     variantMapMustContain(variantMap, "Expanded");
     variantMapMustContain(variantMap, "Visible");
 
     setExpanded(variantMap["Expanded"].toBool());
     setVisible(variantMap["Visible"].toBool());
+
+    if (variantMap.contains("Selected"))
+        setSelected(variantMap["Selected"].toBool());
 }
 
 QVariantMap DataHierarchyItem::toVariantMap() const
 {
     QVariantMap variantMap, children;
+
+    try
+    {
+        variantMap = WidgetAction::toVariantMap();
+    }
+    catch (...)
+    {
+    }
 
     std::uint32_t childSortIndex = 0;
 
@@ -277,13 +307,14 @@ QVariantMap DataHierarchyItem::toVariantMap() const
         childSortIndex++;
     }
 
-    return {
-        { "Name", _dataset->text() },
-        { "Expanded", QVariant::fromValue(_expanded) },
-        { "Visible", QVariant::fromValue(isVisible()) },
-        { "Dataset", _dataset->toVariantMap() },
-        { "Children", children }
-    };
+    variantMap["Name"]      = _dataset->text();
+    variantMap["Expanded"]  = QVariant::fromValue(_expanded);
+    variantMap["Visible"]   = QVariant::fromValue(isVisible());
+    variantMap["Selected"]  = QVariant::fromValue(isSelected());
+    variantMap["Dataset"]   = _dataset->toVariantMap();
+    variantMap["Children"]  = children;
+
+    return variantMap;
 }
 
 }
