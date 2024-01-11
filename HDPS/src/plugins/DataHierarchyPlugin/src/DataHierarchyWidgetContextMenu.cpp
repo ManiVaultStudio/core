@@ -80,7 +80,7 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
 
         QString menuPath, previousMenuPath = titleSegments.first();
 
-        for (auto titleSegment : titleSegments) {
+        for (const auto& titleSegment : titleSegments) {
             if (titleSegment != titleSegments.first() && titleSegment != titleSegments.last())
                 menuPath += "/";
 
