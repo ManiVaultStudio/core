@@ -384,8 +384,6 @@ void DataHierarchyWidget::updateColumnsVisibility()
 
 void DataHierarchyWidget::updateDataHierarchyItemExpansion(const QModelIndex& modelIndex /*= QModelIndex()*/)
 {
-    qDebug() << __FUNCTION__ << modelIndex;
-
     try
     {
         if (!modelIndex.isValid())

@@ -43,16 +43,16 @@ public:
     /**
      * Get hierarchy item by \p datasetId
      * @param datasetId Dataset GUID
-     * @return Reference to data hierarchy item
+     * @return Pointer to data hierarchy item, nullptr if not found
      */
-    virtual const DataHierarchyItem& getItem(const QString& datasetId) const = 0;
+    virtual const DataHierarchyItem* getItem(const QString& datasetId) const = 0;
 
     /**
      * Get hierarchy item by \p datasetId
      * @param datasetId Dataset GUID
-     * @return Reference to data hierarchy item
+     * @return Pointer to data hierarchy item, nullptr if not found
      */
-    virtual DataHierarchyItem& getItem(const QString& datasetGuid) = 0;
+    virtual DataHierarchyItem* getItem(const QString& datasetGuid) = 0;
 
     /**
      * Get all items
@@ -132,15 +132,15 @@ signals:
 
     /**
      * Signals that \p dataHierarchyItem is added to the hierarchy manager
-     * @param dataHierarchyItem Reference to added data hierarchy item
+     * @param dataHierarchyItem Pointer to added data hierarchy item
      */
-    void itemAdded(DataHierarchyItem& dataHierarchyItem);
+    void itemAdded(DataHierarchyItem* dataHierarchyItem);
 
     /**
      * Signals that \p dataHierarchyItem is about to be removed from the hierarchy manager
-     * @param dataHierarchyItem Reference to data hierarchy item which is about to be removed
+     * @param dataHierarchyItem Pointer to data hierarchy item which is about to be removed
      */
-    void itemAboutToBeRemoved(DataHierarchyItem& dataHierarchyItem);
+    void itemAboutToBeRemoved(DataHierarchyItem* dataHierarchyItem);
 
     /**
      * Signals that hierarchy item \p datasetId is removed from the hierarchy manager
@@ -150,9 +150,9 @@ signals:
 
     /**
      * Signals that the parent of \p dataHierarchyItem changed
-     * @param dataHierarchyItem Reference to data hierarchy item of which the parent changed
+     * @param dataHierarchyItem Pointer to data hierarchy item of which the parent changed
      */
-    void itemParentChanged(DataHierarchyItem& dataHierarchyItem);
+    void itemParentChanged(DataHierarchyItem* dataHierarchyItem);
 
     /**
      * Signals that the selected items changed

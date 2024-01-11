@@ -59,12 +59,12 @@ void DataHierarchyManager::reset()
     endReset();
 }
 
-const DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetId) const
+const DataHierarchyItem* DataHierarchyManager::getItem(const QString& datasetId) const
 {
     return const_cast<DataHierarchyManager*>(this)->getItem(datasetId);
 }
 
-DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetId)
+DataHierarchyItem* DataHierarchyManager::getItem(const QString& datasetId)
 {
     try
     {
@@ -77,7 +77,7 @@ DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetId)
         if (it == _items.end())
             throw std::runtime_error(QString("Data hierarchy item with dataset ID %1 not found in database").arg(datasetId).toStdString());
 
-        return *(*it);
+        return (*it).get();
     }
     catch (std::exception& e)
     {
@@ -93,8 +93,7 @@ mv::DataHierarchyItems DataHierarchyManager::getItems() const
     DataHierarchyItems items;
 
     for (auto& item : _items)
-        if (!item->hasParent())
-            items << item.get();
+        items << item.get();
 
     return items;
 }
@@ -165,17 +164,11 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
 
         _items.push_back(std::unique_ptr<DataHierarchyItem>(dataHierarchyItem));
 
-        if (parentDataset.isValid()) {
-            parentDataset->getDataHierarchyItem().addChild(&dataset->getDataHierarchyItem());
-
-            dataHierarchyItem->setParent(&parentDataset->getDataHierarchyItem());
-        }
-
         connect(dataHierarchyItem, &DataHierarchyItem::parentChanged, this, [this, dataHierarchyItem]() -> void {
-            emit itemParentChanged(*dataHierarchyItem);
+            emit itemParentChanged(dataHierarchyItem);
         });
 
-        emit itemAdded(*dataHierarchyItem);
+        emit itemAdded(dataHierarchyItem);
     }
     catch (std::exception& e)
     {
@@ -206,7 +199,7 @@ void DataHierarchyManager::removeItem(Dataset<DatasetImpl> dataset)
         if (it == _items.end())
             throw std::runtime_error(QString("Data hierarchy item with dataset ID %1 not found in database").arg(datasetId).toStdString());
 
-        emit itemAboutToBeRemoved(*(*it));
+        emit itemAboutToBeRemoved((*it).get());
         {
             _items.erase(it);
         }

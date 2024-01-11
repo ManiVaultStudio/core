@@ -658,29 +658,6 @@ void WidgetAction::updateLocation(bool recursive /*= true*/)
             child->updateLocation(recursive);
 }
 
-QVector<WidgetAction*> WidgetAction::findChildren(const QString& searchString, bool recursive /*= true*/) const
-{
-    QVector<WidgetAction*> foundChildren;
-
-    for (auto child : children()) {
-        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-        if (!childWidgetAction)
-            continue;
-
-        if (searchString.isEmpty())
-            foundChildren << childWidgetAction;
-        else
-            if (childWidgetAction->text().contains(searchString, Qt::CaseInsensitive))
-                foundChildren << childWidgetAction;
-
-        if (recursive)
-            foundChildren << childWidgetAction->findChildren(searchString, recursive);
-    }
-
-    return foundChildren;
-}
-
 QSize WidgetAction::getPopupSizeHint() const
 {
     return _popupSizeHint;

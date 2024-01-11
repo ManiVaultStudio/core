@@ -579,14 +579,6 @@ public: // Settings
     /** Save to settings (if the settings prefix is set) */
     virtual void saveToSettings() final;
 
-    /**
-     * Find child widget action of which the GUI name contains the search string
-     * @param searchString The search string
-     * @param recursive Whether to search recursively
-     * @return Found vector of pointers to widget action(s)
-     */
-    virtual QVector<WidgetAction*> findChildren(const QString& searchString, bool recursive = true) const final;
-    
 public: // Popups
 
     /**

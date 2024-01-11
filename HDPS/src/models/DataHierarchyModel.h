@@ -498,28 +498,28 @@ public:
         return dynamic_cast<ItemType*>(itemFromIndex(modelIndex));
     }
 
-    /** Populate the model from the data hierarchy manager */
-    void initializeFromDataHierarchy();
+    /** Populate the model with data hierarchy items from the data hierarchy manager */
+    void populateFromDataHierarchyManager();
 
 private:
 
     /**
      * Add \p dataHierarchyItem to the model
-     * @param dataHierarchyItem Reference to the data hierarchy item to add
+     * @param dataHierarchyItem Pointer to the data hierarchy item to add
      */
-    void addDataHierarchyModelItem(DataHierarchyItem& dataHierarchyItem);
+    void addDataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem);
 
     /**
      * Remove \p dataHierarchyItem from the model
-     * @param dataHierarchyItem Reference to the data hierarchy item to remove
+     * @param dataHierarchyItem Pointer to the data hierarchy item to remove
      */
-     void removeDataHierarchyModelItem(DataHierarchyItem& dataHierarchyItem);
+     void removeDataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem);
 
      /**
      * Re-parent \p dataHierarchyItem
-     * @param dataHierarchyItem Reference to the data hierarchy item of which the parent changed
+     * @param dataHierarchyItem Pointer to the data hierarchy item of which the parent changed
      */
-     void reparentDataHierarchyModelItem(DataHierarchyItem& dataHierarchyItem);
+     void reparentDataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem);
 };
 
 }

@@ -12,6 +12,10 @@
 #include <QDebug>
 #include <QIcon>
 
+#ifdef _DEBUG
+    #define DATA_HIERARCHY_MODEL_VERBOSE
+#endif
+
 namespace mv {
 
 using namespace util;
@@ -384,7 +388,7 @@ DataHierarchyModel::DataHierarchyModel(QObject* parent) :
     connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemAboutToBeRemoved, this, &DataHierarchyModel::removeDataHierarchyModelItem);
     connect(&dataHierarchy(), &AbstractDataHierarchyManager::itemParentChanged, this, &DataHierarchyModel::reparentDataHierarchyModelItem);
 
-    initializeFromDataHierarchy();
+    populateFromDataHierarchyManager();
 }
 
 Qt::DropActions DataHierarchyModel::supportedDragActions() const
@@ -441,31 +445,34 @@ QMimeData* DataHierarchyModel::mimeData(const QModelIndexList& indexes) const
     return new DatasetsMimeData(datasets);
 }
 
-void DataHierarchyModel::addDataHierarchyModelItem(DataHierarchyItem& dataHierarchyItem)
+void DataHierarchyModel::addDataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem)
 {
     try {
 
-#ifdef _DEBUG
-        qDebug() << "Add dataset" << dataHierarchyItem.getDataset()->getGuiName() << "to the data hierarchy model";
-#endif
+        if (!dataHierarchyItem)
+            throw std::runtime_error("Data hierarchy item pointer is invalid");
 
-        if (!match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive).isEmpty())
+        if (!match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem->getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive).isEmpty())
             return;
 
-        if (dataHierarchyItem.hasParent()) {
-            const auto matches = match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getParent()->getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive);
+#ifdef DATA_HIERARCHY_MODEL_VERBOSE
+        qDebug() << "Add dataset" << dataHierarchyItem->getDataset()->getGuiName() << "to the data hierarchy model";
+#endif
+
+        if (dataHierarchyItem->hasParent()) {
+            const auto matches = match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem->getParent()->getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive);
 
             if (matches.isEmpty())
                 throw std::runtime_error("Parent data hierarchy item not found in model");
 
-            itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::Name)))->appendRow(Row(dataHierarchyItem.getDataset()));
+            itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::Name)))->appendRow(Row(dataHierarchyItem->getDataset()));
         }
         else {
-            appendRow(Row(dataHierarchyItem.getDataset()));
+            appendRow(Row(dataHierarchyItem->getDataset()));
         }
 
-        for (auto childDataHierarchyItem : dataHierarchyItem.getChildren(true))
-            addDataHierarchyModelItem(*childDataHierarchyItem);
+        for (auto childDataHierarchyItem : dataHierarchyItem->getChildren(true))
+            addDataHierarchyModelItem(childDataHierarchyItem);
     }
     catch (std::exception& e)
     {
@@ -477,23 +484,26 @@ void DataHierarchyModel::addDataHierarchyModelItem(DataHierarchyItem& dataHierar
     }
 }
 
-void DataHierarchyModel::removeDataHierarchyModelItem(DataHierarchyItem& dataHierarchyItem)
+void DataHierarchyModel::removeDataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem)
 {
     try {
 
-#ifdef _DEBUG
-        qDebug() << "Remove dataset" << dataHierarchyItem.getDataset()->getGuiName() << "from the data hierarchy model";
-#endif
+        if (!dataHierarchyItem)
+            throw std::runtime_error("Data hierarchy item pointer is invalid");
 
-        const auto matches = match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem.getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive);
+        const auto matches = match(index(0, static_cast<int>(Column::DatasetId), QModelIndex()), Qt::EditRole, dataHierarchyItem->getDataset()->getId(), -1, Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive);
 
         if (matches.isEmpty())
-            throw std::runtime_error(QString("%1 not found in model").arg(dataHierarchyItem.getDataset()->getGuiName()).toStdString());
+            throw std::runtime_error(QString("%1 not found in model").arg(dataHierarchyItem->getDataset()->getGuiName()).toStdString());
 
         auto item = itemFromIndex(matches.first().siblingAtColumn(static_cast<int>(Column::Name)));
 
-        if (item == nullptr)
+        if (!item)
             throw std::runtime_error("QStandardItemModel::itemFromIndex() returned nullptr");
+
+#ifdef DATA_HIERARCHY_MODEL_VERBOSE
+        qDebug() << "Remove dataset" << dataHierarchyItem->getDataset()->getGuiName() << "from the data hierarchy model";
+#endif
 
         bool removeRowsResult = false;
 
@@ -515,12 +525,15 @@ void DataHierarchyModel::removeDataHierarchyModelItem(DataHierarchyItem& dataHie
     }
 }
 
-void DataHierarchyModel::reparentDataHierarchyModelItem(DataHierarchyItem& dataHierarchyItem)
+void DataHierarchyModel::reparentDataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem)
 {
     try {
 
-#ifdef _DEBUG
-        qDebug() << "Re-parent dataset" << dataHierarchyItem.getDataset()->getGuiName();
+        if (!dataHierarchyItem)
+            throw std::runtime_error("Data hierarchy item pointer is invalid");
+
+#ifdef DATA_HIERARCHY_MODEL_VERBOSE
+        qDebug() << "Re-parent dataset" << dataHierarchyItem->getDataset()->getGuiName();
 #endif
 
         removeDataHierarchyModelItem(dataHierarchyItem);
@@ -536,10 +549,17 @@ void DataHierarchyModel::reparentDataHierarchyModelItem(DataHierarchyItem& dataH
     }
 }
 
-void DataHierarchyModel::initializeFromDataHierarchy()
+void DataHierarchyModel::populateFromDataHierarchyManager()
 {
-    for (const auto topLevelItem : dataHierarchy().getTopLevelItems())
-        addDataHierarchyModelItem(*topLevelItem);
+#ifdef DATA_HIERARCHY_MODEL_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    for (auto item : dataHierarchy().getItems())
+        qDebug() << item->getDataset()->getGuiName() << (item->hasParent() ? item->getParent()->getDataset()->getGuiName() : "No parent");
+
+    for (const auto topLevelDataHierarchyItem : dataHierarchy().getTopLevelItems())
+        addDataHierarchyModelItem(topLevelDataHierarchyItem);
 }
 
 }

@@ -51,7 +51,7 @@ const DataHierarchyItem& DatasetImpl::getDataHierarchyItem() const
 
 DataHierarchyItem& DatasetImpl::getDataHierarchyItem()
 {
-    return dataHierarchy().getItem(getId());
+    return *dataHierarchy().getItem(getId());
 }
 
 mv::Dataset<mv::DatasetImpl> DatasetImpl::getParent() const

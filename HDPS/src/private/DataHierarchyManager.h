@@ -39,16 +39,16 @@ public:
     /**
      * Get hierarchy item by \p datasetId
      * @param datasetId Dataset GUID
-     * @return Reference to data hierarchy item
+     * @return Pointer to data hierarchy item, nullptr if not found
      */
-    const DataHierarchyItem& getItem(const QString& datasetId) const override;
+    const DataHierarchyItem* getItem(const QString& datasetId) const override;
 
     /**
      * Get hierarchy item by \p datasetId
      * @param datasetId Dataset GUID
-     * @return Reference to data hierarchy item
+     * @return Pointer to data hierarchy item, nullptr if not found
      */
-    DataHierarchyItem& getItem(const QString& datasetId) override;
+    DataHierarchyItem* getItem(const QString& datasetId) override;
 
     /**
      * Get all items

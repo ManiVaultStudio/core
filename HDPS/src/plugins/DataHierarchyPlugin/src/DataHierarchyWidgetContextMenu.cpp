@@ -229,7 +229,7 @@ QMenu* DataHierarchyWidgetContextMenu::getHideMenu()
             dataset->getDataHierarchyItem();
     });
 
-    hideAllAction->setEnabled(numberOfVisibleItems < _allDatasets.size());
+    hideAllAction->setVisible(_selectedDatasets.isEmpty() && numberOfVisibleItems < _allDatasets.size());
 
     auto hideSelectedAction = new QAction("Selected");
 
@@ -279,9 +279,9 @@ QMenu* DataHierarchyWidgetContextMenu::getUnhideMenu()
 
     auto unhideAllAction = new QAction("All");
 
-    connect(unhideAllAction, &QAction::triggered, this, [this]() -> void {
-        for (auto& dataset : _allDatasets)
-            dataset->getDataHierarchyItem().setVisible(true);
+    connect(unhideAllAction, &QAction::triggered, this, [candidateDatasetsToUnhide]() -> void {
+        for (auto candidateDatasetToUnhide : candidateDatasetsToUnhide)
+            candidateDatasetToUnhide->getDataHierarchyItem().setVisible(true);
     });
 
     unhideAllAction->setEnabled(numberOfHiddenItems < _allDatasets.size());

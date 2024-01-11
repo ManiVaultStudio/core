@@ -47,10 +47,10 @@ public:
      */
     DataHierarchyItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true, const bool& selected = false);
 
-    /** Destructor */
-    ~DataHierarchyItem();
-
-    /** Returns whether the data hierarchy item has a parent */
+    /**
+     * Establish whether the data hierarchy item has a parent
+     * @return Boolean determining whether the data hierarchy item has a parent or not
+     */
     bool hasParent() const;
 
     /**
@@ -70,7 +70,7 @@ protected:
 public:
 
     /**
-     * Walks up the hierarchy of the data hierarchy item and returns all parents
+     * Walks up the hierarchy onwards from the data hierarchy item and returns all parents
      * @return Parent items
      */
     DataHierarchyItems getParents() const;
@@ -92,16 +92,16 @@ public:
     /**
      * Get children, possibly \p recursively
      * @param recursively Get all descendants
-     * @return Children
+     * @return Vector of pointers to children
      */
-    DataHierarchyItems getChildren(const bool& recursively = false) const;
+    DataHierarchyItems getChildren(bool recursively = false) const;
 
     /**
      * Get number of children, possibly \p recursively
      * @param recursively Count recursively
      * @returm Number of children
      */
-    std::uint32_t getNumberOfChildren(const bool& recursively = false) const;
+    std::uint32_t getNumberOfChildren(bool recursively = false) const;
 
     /**
      * Establishes whether the item has any children
@@ -118,8 +118,9 @@ public:
     /**
      * Set visibility
      * @param visible Whether the data hierarchy item is visible or not
+     * @param recursive Whether to set child data hierarchy items or not
      */
-    void setVisible(bool visible);
+    void setVisible(bool visible, bool recursive = true);
 
 public: // Selection
 
@@ -144,22 +145,6 @@ public: // Selection
 
     /** De-selects the hierarchy item */
     void deselect();
-
-protected:
-
-    /**
-     * Remove \p dataHierarchyItem from the children
-     * @param dataHierarchyItem Pointer to child data hierarchy item to remove
-     */
-    void removeChild(DataHierarchyItem* dataHierarchyItem);
-
-public: // Hierarchy
-
-    /**
-     * Add \p dataHierarchyItem as a child item
-     * @param dataHierarchyItem Pointer to child data hierarchy item to add
-     */
-    void addChild(DataHierarchyItem* dataHierarchyItem);
 
 public: // Miscellaneous
 
@@ -299,8 +284,6 @@ signals:
 
 protected:
     Dataset<DatasetImpl>        _dataset;       /** Smart pointer to dataset */
-    DataHierarchyItem*          _parent;        /** Pointer to parent data hierarchy item */
-    DataHierarchyItems          _children;      /** Pointers to child items (if any) */
     bool                        _selected;      /** Whether the hierarchy item is selected */
     bool                        _expanded;      /** Whether the item is expanded or not (when it has children) */
     mv::gui::WidgetActions      _actions;       /** Widget actions */
@@ -311,3 +294,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(mv::DataHierarchyItem)
+
+inline const auto dataHierarchyItemMetaTypeId = qRegisterMetaType<mv::DataHierarchyItem*>("mv::DataHierarchyItem");
