@@ -18,7 +18,7 @@ using namespace mv::gui;
 /**
  * Data properties widget class
  *
- * Widget class for viewing/editing data
+ * Widget class for viewing/editing dataset property pages
  *
  * @author Thomas Kroes
  */
@@ -36,11 +36,8 @@ public:
 
 protected:
 
-    /**
-     * Callback when is called when the selected items in the data hierarchy changes
-     * @param datasetId Globally unique identifier of the dataset
-     */
-    void selectedItemsChanged(DataHierarchyItems selectedItems);
+    /** Callback when is called when the selected items in the data hierarchy changed */
+    void dataHierarchySelectionChanged();
 
 protected:
     Dataset<DatasetImpl>    _dataset;               /** Smart point to current dataset */

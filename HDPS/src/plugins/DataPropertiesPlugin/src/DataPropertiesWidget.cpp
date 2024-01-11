@@ -32,17 +32,25 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
     _layout.addWidget(_groupsActionWidget);
 
-    connect(&mv::dataHierarchy(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::selectedItemsChanged);
+    connect(&mv::dataHierarchy(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::dataHierarchySelectionChanged);
 
     connect(&_dataset, &Dataset<DatasetImpl>::removed, this, [this]() -> void {
         _groupsAction.setGroupActions({});
     });
+
+    dataHierarchySelectionChanged();
 }
 
-void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems)
+void DataPropertiesWidget::dataHierarchySelectionChanged()
 {
+    qDebug() << __FUNCTION__ << "A";
+
     if (projects().isOpeningProject() || projects().isImportingProject())
         return;
+
+    qDebug() << __FUNCTION__ << "B";
+
+    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
 
     try
     {

@@ -183,6 +183,11 @@ Dataset<mv::DatasetImpl>& DataHierarchyItem::getDatasetReference()
     return _dataset;
 }
 
+DataType DataHierarchyItem::getDataType() const
+{
+    return _dataset->getDataType();
+}
+
 void DataHierarchyItem::addAction(WidgetAction& widgetAction)
 {
     _actions << &widgetAction;

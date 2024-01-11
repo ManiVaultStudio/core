@@ -169,6 +169,7 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
         });
 
         connect(dataHierarchyItem, &DataHierarchyItem::selectedChanged, this, [this, dataHierarchyItem]() -> void {
+            qDebug() << __FUNCTION__;
             emit selectedItemsChanged(getSelectedItems());
         });
 
