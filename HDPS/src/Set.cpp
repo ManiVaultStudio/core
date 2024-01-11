@@ -135,16 +135,27 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     setText(variantMap["Name"].toString());
     setLocked(variantMap["Locked"].toBool());
 
-    _derived    = variantMap["Derived"].toBool();
-    _all        = variantMap["Full"].toBool();
+    if (variantMap["Derived"].toBool())
+    {
+        setSourceDataSet(mv::data().getSet(variantMap["SourceDatasetGUID"].toString());
 
-    if (_derived)
-        _sourceDataset = Application::core()->requestDataset(variantMap["SourceDatasetGUID"].toString());
+        assert(_sourceDataset.isValid());
+    }
+
+    if (!variantMap["Full"].toBool())
+    {
+        makeSubsetOf(mv::data().getSet(variantMap["FullDatasetGUID"].toString()));
+
+        assert(variantMap["PluginKind"].toString() == _rawData->getKind());
+        assert(variantMap["PluginVersion"].toString() == _rawData->getVersion());
+
+        assert(_fullDataset.isValid());
+    }
+
+    assert(variantMap["DataType"].toString() == getDataType().getTypeString());
 
     if (variantMap["GroupIndex"].toInt() >= 0)
         setGroupIndex(variantMap["GroupIndex"].toInt());
-    if (!_all)
-        _fullDataset = Application::core()->requestDataset(variantMap["FullDatasetGUID"].toString());
 
     setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
 
