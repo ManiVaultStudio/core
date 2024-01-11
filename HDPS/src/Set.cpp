@@ -461,9 +461,9 @@ bool DatasetImpl::isAboutToBeRemoved() const
     return _aboutToBeRemoved;
 }
 
-QString DatasetImpl::getLocation() const
+QString DatasetImpl::getLocation(bool recompute /*= false*/) const
 {
-    return getDataHierarchyItem().getLocation();
+    return getDataHierarchyItem().getLocation(recompute);
 }
 
 QVariant DatasetImpl::getProperty(const QString& name, const QVariant& defaultValue /*= QVariant()*/) const

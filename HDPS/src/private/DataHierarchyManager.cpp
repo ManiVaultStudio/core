@@ -165,8 +165,11 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
 
         _items.push_back(std::unique_ptr<DataHierarchyItem>(dataHierarchyItem));
 
-        if (parentDataset.isValid())
+        if (parentDataset.isValid()) {
             parentDataset->getDataHierarchyItem().addChild(&dataset->getDataHierarchyItem());
+
+            dataHierarchyItem->setParent(&parentDataset->getDataHierarchyItem());
+        }
 
         connect(dataHierarchyItem, &DataHierarchyItem::parentChanged, this, [this, dataHierarchyItem]() -> void {
             emit itemParentChanged(*dataHierarchyItem);

@@ -633,8 +633,11 @@ void WidgetAction::saveToSettings()
     Application::current()->setSetting(_settingsPrefix, toVariantMap());
 }
 
-QString WidgetAction::getLocation() const
+QString WidgetAction::getLocation(bool recompute /*= false*/) const
 {
+    if (recompute)
+        const_cast<WidgetAction*>(this)->updateLocation();
+
     return _location;
 }
 

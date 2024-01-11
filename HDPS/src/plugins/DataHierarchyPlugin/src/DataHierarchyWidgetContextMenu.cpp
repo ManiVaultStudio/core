@@ -249,6 +249,20 @@ QMenu* DataHierarchyWidgetContextMenu::getHideMenu()
 
 QMenu* DataHierarchyWidgetContextMenu::getUnhideMenu()
 {
+    Datasets candidateDatasetsToUnhide;
+
+    if (_selectedDatasets.isEmpty()) {
+        for (auto& dataset : _allDatasets)
+            if (!dataset->getDataHierarchyItem().isVisible())
+                candidateDatasetsToUnhide << dataset;
+    }
+    else {
+        for (auto& selectedDataset : _selectedDatasets)
+            for (auto child : selectedDataset->getChildren())
+                if (!child->getDataHierarchyItem().isVisible())
+                    candidateDatasetsToUnhide << child;
+    }
+
     auto unhideMenu = new QMenu("Unhide");
 
     unhideMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
@@ -261,7 +275,7 @@ QMenu* DataHierarchyWidgetContextMenu::getUnhideMenu()
         return !dataset->getDataHierarchyItem().isVisible();
     });
 
-    unhideMenu->setEnabled(_selectedDatasets.empty() ? numberOfHiddenItems >= 1 : numberOfSelectedHiddenItems >= 1);
+    unhideMenu->setEnabled(candidateDatasetsToUnhide.count() >= 1);
 
     auto unhideAllAction = new QAction("All");
 
@@ -272,18 +286,25 @@ QMenu* DataHierarchyWidgetContextMenu::getUnhideMenu()
 
     unhideAllAction->setEnabled(numberOfHiddenItems < _allDatasets.size());
 
-    auto unhideSelectedAction = new QAction("Selected");
-
-    unhideSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
-    unhideSelectedAction->setEnabled(!_selectedDatasets.isEmpty());
-
-    connect(unhideSelectedAction, &QAction::triggered, this, [this]() -> void {
-        for (auto& dataset : _selectedDatasets)
-            dataset->getDataHierarchyItem().setVisible(true);
-    });
-
-    unhideMenu->addAction(unhideSelectedAction);
     unhideMenu->addAction(unhideAllAction);
+
+    if (!candidateDatasetsToUnhide.isEmpty()) {
+        unhideMenu->addSeparator();
+
+        for (auto datasetToUnhide : candidateDatasetsToUnhide) {
+            auto dataHierarchyItem = &datasetToUnhide->getDataHierarchyItem();
+
+            auto unhideDatasetAction = new QAction(dataHierarchyItem->getLocation(true));
+
+            unhideDatasetAction->setIcon(datasetToUnhide->getIcon());
+
+            connect(unhideDatasetAction, &QAction::triggered, this, [dataHierarchyItem]() -> void {
+                dataHierarchyItem->setVisible(true);
+            });
+
+            unhideMenu->addAction(unhideDatasetAction);
+        }
+    }
 
     return unhideMenu;
 }

@@ -68,6 +68,8 @@ DataHierarchyItem* DataHierarchyItem::getParent() const
 
 void DataHierarchyItem::setParent(DataHierarchyItem* parent)
 {
+    WidgetAction::setParent(parent);
+
     if (_parent != nullptr) {
         _parent->removeChild(this);
     }
@@ -149,6 +151,18 @@ void DataHierarchyItem::setVisible(bool visible)
         return;
 
     WidgetAction::setVisible(visible);
+
+    if (visible) {
+        if (hasParent())
+            getParent()->setVisible(visible);
+
+        for (auto child : getChildren())
+            child->setVisible(visible);
+    }
+    else {
+        for (auto child : getChildren())
+            child->setVisible(visible);
+    }
 
     emit visibilityChanged(isVisible());
 }

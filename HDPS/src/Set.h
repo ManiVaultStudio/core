@@ -247,7 +247,7 @@ public: // Location
      * Get location
      * @return Path relative to the top-level action
      */
-    QString getLocation() const override;
+    QString getLocation(bool recompute = false) const override;
 
 public: // Hierarchy
 

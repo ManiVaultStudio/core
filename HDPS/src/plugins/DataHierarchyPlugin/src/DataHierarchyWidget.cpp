@@ -80,7 +80,6 @@ private:
 
     /** Updates the editor widget read-only state based on the dataset task status */
     void updateEditorWidgetReadOnly() {
-        qDebug() << __FUNCTION__ << _progressItem->getDataset()->getGuiName() << _progressItem->getDataset()->isLocked();
         _progressEditorWidget->setEnabled(!_progressItem->getDataset()->isLocked());
     }
 
@@ -240,7 +239,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
             _hierarchyWidget.getTreeView().openPersistentEditor(progressFilterModelIndex);
 
-            updateDataHierarchyItemExpansion(nameFilterModelIndex);
+            updateDataHierarchyItemExpansion(nameModelIndex);
 
             auto item = _model.getItem<DataHierarchyModel::Item>(persistentNameModelIndex);
 
@@ -385,12 +384,17 @@ void DataHierarchyWidget::updateColumnsVisibility()
 
 void DataHierarchyWidget::updateDataHierarchyItemExpansion(const QModelIndex& modelIndex /*= QModelIndex()*/)
 {
+    qDebug() << __FUNCTION__ << modelIndex;
+
     try
     {
         if (!modelIndex.isValid())
             throw std::runtime_error("Supplied model index is invalid");
 
         auto modelItem = _model.getItem(modelIndex);
+
+        if (!modelItem)
+            throw std::runtime_error("Model item not found");
 
         if (modelItem != nullptr) {
             const auto isExpanded       = modelItem->getDataset()->getDataHierarchyItem().isExpanded();

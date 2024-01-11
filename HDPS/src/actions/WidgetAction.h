@@ -284,10 +284,11 @@ public: // Text
 public: // Location
 
     /**
-     * Get location
+     * Get location and possibly \p recompute it
+     * @param recompute Whether to re-compute the location
      * @return Path relative to the top-level action
      */
-    virtual QString getLocation() const;
+    virtual QString getLocation(bool recompute = false) const;
 
 private: // Location
 
