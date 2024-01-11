@@ -137,7 +137,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
     if (variantMap["Derived"].toBool())
     {
-        setSourceDataSet(mv::data().getSet(variantMap["SourceDatasetGUID"].toString());
+        setSourceDataSet(mv::data().getSet(variantMap["SourceDatasetGUID"].toString()));
 
         assert(_sourceDataset.isValid());
     }
