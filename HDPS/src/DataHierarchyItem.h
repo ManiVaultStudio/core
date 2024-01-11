@@ -169,9 +169,6 @@ public: // Miscellaneous
         return Dataset<DatasetType>(const_cast<DataHierarchyItem*>(this)->getDataset().get<DatasetType>());
     };
 
-    /** Get the dataset type */
-    //DataType getDataType() const;
-
 public: // Actions
 
     /**

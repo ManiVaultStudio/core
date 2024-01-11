@@ -32,7 +32,7 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
     _layout.addWidget(_groupsActionWidget);
 
-    connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::selectedItemsChanged);
+    connect(&mv::dataHierarchy(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::selectedItemsChanged);
 
     connect(&_dataset, &Dataset<DatasetImpl>::removed, this, [this]() -> void {
         _groupsAction.setGroupActions({});

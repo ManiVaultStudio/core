@@ -6,6 +6,8 @@
 
 #include <util/Exception.h>
 
+#include <event/Event.h>
+
 #include <Set.h>
 #include <LinkedData.h>
 
