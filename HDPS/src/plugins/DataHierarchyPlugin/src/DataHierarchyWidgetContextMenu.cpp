@@ -51,12 +51,12 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
 {
     QMap<QString, QMenu*> menus;
 
-    for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(pluginType, _datasets)) {
+    for (auto& pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(pluginType, _datasets)) {
         const auto titleSegments = pluginTriggerAction->getMenuLocation().split("/");
 
         QString menuPath, previousMenuPath = titleSegments.first();
 
-        for (auto titleSegment : titleSegments) {
+        for (const auto& titleSegment : titleSegments) {
             if (titleSegment != titleSegments.first() && titleSegment != titleSegments.last())
                 menuPath += "/";
 
@@ -118,7 +118,7 @@ QMenu* DataHierarchyWidgetContextMenu::getLockMenu()
     auto lockAllAction = new QAction("All");
 
     connect(lockAllAction, &QAction::triggered, this, [this]() -> void {
-        for (auto dataset : Application::core()->requestAllDataSets())
+        for (auto& dataset : Application::core()->requestAllDataSets())
             dataset->lock();
     });
 
@@ -126,7 +126,7 @@ QMenu* DataHierarchyWidgetContextMenu::getLockMenu()
 
     QVector<bool> locked;
 
-    for (auto dataset : Application::core()->requestAllDataSets())
+    for (const auto& dataset : Application::core()->requestAllDataSets())
         locked << dataset->isLocked();
 
     const auto numberOfLockedDatasets = std::accumulate(locked.begin(), locked.end(), 0);
@@ -139,7 +139,7 @@ QMenu* DataHierarchyWidgetContextMenu::getLockMenu()
     lockSelectedAction->setEnabled(!_datasets.isEmpty());
 
     connect(lockSelectedAction, &QAction::triggered, this, [this]() -> void {
-        for (auto dataset : _datasets)
+        for (auto& dataset : _datasets)
             dataset->lock();
     });
 
@@ -158,7 +158,7 @@ QMenu* DataHierarchyWidgetContextMenu::getUnlockMenu()
 
     QVector<bool> locked;
 
-    for (auto dataset : Application::core()->requestAllDataSets())
+    for (const auto& dataset : Application::core()->requestAllDataSets())
         locked << dataset->isLocked();
 
     const auto numberOfLockedDatasets = std::accumulate(locked.begin(), locked.end(), 0);
@@ -168,7 +168,7 @@ QMenu* DataHierarchyWidgetContextMenu::getUnlockMenu()
     auto unlockAllAction = new QAction("All");
 
     connect(unlockAllAction, &QAction::triggered, this, [this]() -> void {
-        for (auto dataset : Application::core()->requestAllDataSets())
+        for (auto& dataset : Application::core()->requestAllDataSets())
             dataset->unlock();
     });
 
@@ -178,7 +178,7 @@ QMenu* DataHierarchyWidgetContextMenu::getUnlockMenu()
     unlockSelectedAction->setEnabled(!_datasets.isEmpty());
 
     connect(unlockSelectedAction, &QAction::triggered, this, [this]() -> void {
-        for (auto dataset : _datasets)
+        for (auto& dataset : _datasets)
             dataset->unlock();
         });
 
