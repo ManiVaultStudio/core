@@ -132,6 +132,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "LinkedData");
     variantMapMustContain(variantMap, "SourceDatasetGUID");
     variantMapMustContain(variantMap, "FullDatasetGUID");
+    variantMapMustContain(variantMap, "GroupIndex");
 
     setText(variantMap["Name"].toString());
     setLocked(variantMap["Locked"].toBool());
@@ -142,6 +143,8 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     if (_derived)
         _sourceDataset = Application::core()->requestDataset(variantMap["SourceDatasetGUID"].toString());
 
+    if (variantMap["GroupIndex"].toInt() >= 0)
+        setGroupIndex(variantMap["GroupIndex"].toInt());
     if (!_all)
         _fullDataset = Application::core()->requestDataset(variantMap["FullDatasetGUID"].toString());
 
