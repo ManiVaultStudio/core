@@ -480,7 +480,10 @@ void DataHierarchyWidget::initializeSelection()
             itemSelection << QItemSelectionRange(_filterModel.mapFromSource(matches.first()));
         }
 
-        _hierarchyWidget.getTreeView().selectionModel()->select(itemSelection, QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect);
+        auto& treeView = _hierarchyWidget.getTreeView();
+
+        treeView.setFocus();
+        treeView.selectionModel()->select(itemSelection, QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect);
     }
     catch (std::exception& e)
     {

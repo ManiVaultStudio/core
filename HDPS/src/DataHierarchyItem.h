@@ -4,17 +4,14 @@
 
 #pragma once
 
-#include "DataType.h"
 #include "actions/WidgetAction.h"
-#include "event/Event.h"
 
-#include <QObject>
+#include "Dataset.h"
+
 #include <QMap>
 #include <QString>
 #include <QDebug>
 #include <QIcon>
-#include <QTimer>
-#include <QBitArray>
 #include <QVector>
 
 namespace mv
@@ -28,7 +25,7 @@ using DataHierarchyItems = QVector<DataHierarchyItem*>;
 /**
  * Data hierarchy item class
  *
- * Represents a dataset as an item in a dataset hierarchy
+ * Represents a dataset as an item in the data hierarchy, see the AbstractDataHierarchyManager
  *
  * @author Thomas Kroes
  */
@@ -39,13 +36,13 @@ class DataHierarchyItem final : public mv::gui::WidgetAction
 public:
 
     /**
-     * Constructor
+     * Construct with smart pointer to \p dataset, \p parentDataset and possible configure whether the item is \p visible and/or \p selected
      * @param dataset Smart pointer to dataset
      * @param parentDataset Smart pointer to parent dataset (if any)
      * @param visible Whether the dataset is visible
      * @param selected Whether the dataset is selected
      */
-    DataHierarchyItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true, const bool& selected = false);
+    DataHierarchyItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true, bool selected = false);
 
     /**
      * Establish whether the data hierarchy item has a parent
@@ -63,7 +60,7 @@ protected:
 
     /**
      * Set pointer to parent hierarchy item to \p parent
-     * @return Pointer to parent hierarchy item (root item if nullptr)
+     * @param parent Pointer to parent hierarchy item (root item if nullptr)
      */
     void setParent(DataHierarchyItem* parent);
 
@@ -71,20 +68,20 @@ public:
 
     /**
      * Walks up the hierarchy onwards from the data hierarchy item and returns all parents
-     * @return Parent items
+     * @return Vector of pointers to parent items
      */
     DataHierarchyItems getParents() const;
 
     /**
      * Determine whether the data hierarchy item is a child of \p dataHierarchyItem
-     * @param dataHierarchyItem Possible parent data hierarchy item
+     * @param dataHierarchyItem Reference to possible parent data hierarchy item
      * @return Boolean determining if \p dataHierarchyItem is a parent
      */
     bool isChildOf(DataHierarchyItem& dataHierarchyItem) const;
 
     /**
      * Determine whether the data hierarchy item is a child of one or more \p dataHierarchyItems
-     * @param dataHierarchyItems Possible parent data hierarchy items
+     * @param dataHierarchyItems Vector of possible parent data hierarchy items
      * @return Boolean determining if it is a child of one or more \p dataHierarchyItems
      */
     bool isChildOf(DataHierarchyItems dataHierarchyItems) const;
@@ -116,11 +113,11 @@ public:
     std::int32_t getDepth() const;
 
     /**
-     * Set visibility
+     * Set visibility to \p visible possibly \p recursively
      * @param visible Whether the data hierarchy item is visible or not
-     * @param recursive Whether to set child data hierarchy items or not
+     * @param recursively Whether to set child data hierarchy items recursively or not
      */
-    void setVisible(bool visible, bool recursive = true);
+    void setVisible(bool visible, bool recursively = true);
 
 public: // Selection
 
@@ -131,7 +128,7 @@ public: // Selection
     bool isSelected() const;
 
     /**
-     * Sets the selection status to \p selected and possibly \p clear the selection
+     * Sets the selection status to \p selected and possibly \p clear the global selection
      * @param selected Whether the hierarchy item is selected
      * @param clear Whether to clear the global data hierarchy selection
      */
@@ -151,7 +148,7 @@ public: // Miscellaneous
     /** Get the dataset */
     Dataset<DatasetImpl> getDataset();
 
-    /** Get the dataset */
+    /** Get the dataset as \p DatasetType */
     template<typename DatasetType>
     Dataset<DatasetType> getDataset() const {
         return Dataset<DatasetType>(const_cast<DataHierarchyItem*>(this)->getDataset().get<DatasetType>());
@@ -173,11 +170,14 @@ public: // Miscellaneous
     };
 
     /** Get the dataset type */
-    DataType getDataType() const;
+    //DataType getDataType() const;
 
 public: // Actions
 
-    /** Add action */
+    /**
+     * Attach \p widgetAction
+     * @param widgetAction Reference to widget action to attach
+     */
     void addAction(mv::gui::WidgetAction& widgetAction);
 
     /** Returns list of shared action widgets*/
@@ -198,16 +198,19 @@ public: // Actions
 
 public: // Locked
 
-    /** Get locked status */
+    /**
+     * Get locked status
+     * @return Boolean determining if the dataset is locked or not
+     */
     bool getLocked() const;
 
     /**
-     * Set locked status
-     * @param locked Whether the dataset is locked
+     * Set locked status to \p locked
+     * @param locked Boolean determining whether the dataset is locked or not
      */
-    void setLocked(const bool& locked);
+    void setLocked(bool locked);
 
-public: // Expanded
+public: // Expansion
 
     /**
      * Get expanded status
@@ -216,8 +219,8 @@ public: // Expanded
     bool isExpanded() const;
 
     /**
-     * Set expanded status
-     * @param expanded Whether the dataset is expanded
+     * Set expanded status to \p expanded
+     * @param expanded Boolean determining whether the dataset is expanded or not
      */
     void setExpanded(bool expanded);
 
@@ -244,8 +247,8 @@ signals:
     void selectedChanged(bool selected);
 
     /**
-     * Signals that a widget action was added
-     * @param widgetAction Widget action that was added
+     * Signals that \p widgetAction was attached to the data hierarchy item
+     * @param widgetAction Reference to the widget action that was added
      */
     void actionAdded(mv::gui::WidgetAction& widgetAction);
 
@@ -253,25 +256,25 @@ signals:
     void iconChanged();
 
     /**
-     * Signals that the dataset name changed
+     * Signals that the dataset name changed to \p datasetName
      * @param datasetName New name of the dataset
      */
     void datasetNameChanged(const QString& datasetName);
 
     /**
-     * Signals that the locked status changed
+     * Signals that the locked status changed to \p locked
      * @param locked Locked
      */
     void lockedChanged(bool locked);
 
     /**
-     * Signals that the visibility status changed
+     * Signals that the visibility changed to \p visibility
      * @param visibility Visibility
      */
     void visibilityChanged(bool visibility);
 
     /**
-     * Signals that the expansion status changed
+     * Signals that the expansion changed \p expanded
      * @param expanded Whether the item is expanded or not
      */
     void expandedChanged(bool expanded);
@@ -286,7 +289,7 @@ protected:
     Dataset<DatasetImpl>        _dataset;       /** Smart pointer to dataset */
     bool                        _selected;      /** Whether the hierarchy item is selected */
     bool                        _expanded;      /** Whether the item is expanded or not (when it has children) */
-    mv::gui::WidgetActions      _actions;       /** Widget actions */
+    mv::gui::WidgetActions      _actions;       /** Attached widget actions */
 
 protected:
     friend class DataHierarchyManager;

@@ -45,8 +45,12 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
 
 void DataPropertiesPlugin::selectedItemsChanged(DataHierarchyItems selectedItems)
 {
+    qDebug() << __FUNCTION__ << "A";
+
     if (projects().isOpeningProject() || projects().isImportingProject())
         return;
+
+    qDebug() << __FUNCTION__ << "B";
 
     if (selectedItems.isEmpty()) {
         _dataset = nullptr;

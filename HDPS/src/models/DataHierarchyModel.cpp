@@ -555,9 +555,6 @@ void DataHierarchyModel::populateFromDataHierarchyManager()
     qDebug() << __FUNCTION__;
 #endif
 
-    for (auto item : dataHierarchy().getItems())
-        qDebug() << item->getDataset()->getGuiName() << (item->hasParent() ? item->getParent()->getDataset()->getGuiName() : "No parent");
-
     for (const auto topLevelDataHierarchyItem : dataHierarchy().getTopLevelItems())
         addDataHierarchyModelItem(topLevelDataHierarchyItem);
 }

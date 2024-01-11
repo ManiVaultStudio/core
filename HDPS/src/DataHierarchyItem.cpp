@@ -23,7 +23,7 @@ using namespace mv::util;
 namespace mv
 {
 
-DataHierarchyItem::DataHierarchyItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/, const bool& selected /*= false*/) :
+DataHierarchyItem::DataHierarchyItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible /*= true*/, bool selected /*= false*/) :
     WidgetAction(nullptr, "Data Hierarchy Item"),
     _dataset(dataset),
     _selected(false),
@@ -117,7 +117,7 @@ std::int32_t DataHierarchyItem::getDepth() const
     return getParents().count();
 }
 
-void DataHierarchyItem::setVisible(bool visible, bool recursive /*= true*/)
+void DataHierarchyItem::setVisible(bool visible, bool recursively /*= true*/)
 {
     if (visible == isVisible())
         return;
@@ -128,14 +128,14 @@ void DataHierarchyItem::setVisible(bool visible, bool recursive /*= true*/)
         if (hasParent())
             getParent()->setVisible(visible, false);
 
-        if (recursive)
+        if (recursively)
             for (auto child : getChildren())
                 child->setVisible(visible);
     }
     else {
-        if (recursive)
+        if (recursively)
             for (auto child : getChildren())
-                child->setVisible(visible, recursive);
+                child->setVisible(visible, recursively);
     }
 
     emit visibilityChanged(isVisible());
@@ -183,10 +183,10 @@ Dataset<mv::DatasetImpl>& DataHierarchyItem::getDatasetReference()
     return _dataset;
 }
 
-DataType DataHierarchyItem::getDataType() const
-{
-    return _dataset->getDataType();
-}
+//DataType DataHierarchyItem::getDataType() const
+//{
+//    return _dataset->getDataType();
+//}
 
 void DataHierarchyItem::addAction(WidgetAction& widgetAction)
 {
@@ -229,7 +229,7 @@ bool DataHierarchyItem::getLocked() const
     return _dataset->isLocked();
 }
 
-void DataHierarchyItem::setLocked(const bool& locked)
+void DataHierarchyItem::setLocked(bool locked)
 {
     _dataset->setLocked(locked);
 }

@@ -139,9 +139,9 @@ void Project::updateContributors()
     QString currentUserName;
 
 #ifdef __APPLE__
-    currentUserName = getenv("USER");
+    currentUserName = qgetenv("USER");
 #else
-    currentUserName = getenv("USERNAME");
+    currentUserName = qgetenv("USERNAME");
 #endif
 
     if (!currentUserName.isEmpty() && !_projectMetaAction.getContributorsAction().getStrings().contains(currentUserName))

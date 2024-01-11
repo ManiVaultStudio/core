@@ -168,6 +168,10 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
             emit itemParentChanged(dataHierarchyItem);
         });
 
+        connect(dataHierarchyItem, &DataHierarchyItem::selectedChanged, this, [this, dataHierarchyItem]() -> void {
+            emit selectedItemsChanged(getSelectedItems());
+        });
+
         emit itemAdded(dataHierarchyItem);
     }
     catch (std::exception& e)
