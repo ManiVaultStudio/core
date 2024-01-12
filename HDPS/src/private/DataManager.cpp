@@ -39,6 +39,46 @@ DataManager::~DataManager()
     reset();
 }
 
+void DataManager::initialize()
+{
+#ifdef DATA_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    AbstractDataManager::initialize();
+
+    if (isInitialized())
+        return;
+
+    beginInitialization();
+    endInitialization();
+}
+
+void DataManager::reset()
+{
+#ifdef DATA_MANAGER_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    beginReset();
+    {
+        DataHierarchyItems dataHierarchyItems;
+
+        for (auto& dataset : _datasets)
+            dataHierarchyItems << &dataset->getDataHierarchyItem();
+
+        std::sort(dataHierarchyItems.begin(), dataHierarchyItems.end(), [](auto dataHierarchyItemA, auto dataHierarchyItemB) -> bool {
+            return dataHierarchyItemA->getDepth() < dataHierarchyItemB->getDepth();
+        });
+
+        std::reverse(dataHierarchyItems.begin(), dataHierarchyItems.end());
+
+        for (auto dataHierarchyItem : dataHierarchyItems)
+            removeDataset(dataHierarchyItem->getDataset());
+    }
+    endReset();
+}
+
 void DataManager::addRawData(plugin::RawData* rawData)
 {
     try
@@ -442,35 +482,6 @@ void DataManager::addSelection(const QString& rawDataName, Dataset<DatasetImpl> 
     emit selectionAdded(selection);
 }
 
-void DataManager::removeSelection(const QString& rawDataName)
-{
-    try
-    {
-        const auto it = std::find_if(_selections.begin(), _selections.end(), [rawDataName](const auto& selectionPtr) -> bool {
-            return rawDataName == selectionPtr->getRawDataName();
-        });
-
-        if (it == _selections.end())
-            throw std::runtime_error(QString("Selection dataset with raw data name %1 not found").arg(rawDataName).toStdString());
-
-        const auto selection    = (*it).get();
-        const auto selectionId  = selection->getId();
-
-        emit selectionAboutToBeRemoved(selection);
-        {
-            _selections.erase(it);
-        }
-        emit selectionRemoved(selectionId);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to remove selection dataset from data manager", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to remove selection dataset from data manager");
-    }
-}
-
 Dataset<DatasetImpl> DataManager::getSelection(const QString& rawDataName)
 {
     try
@@ -506,6 +517,35 @@ Datasets DataManager::getAllSelections()
         selections << dataset.get();
 
     return selections;
+}
+
+void DataManager::removeSelection(const QString& rawDataName)
+{
+    try
+    {
+        const auto it = std::find_if(_selections.begin(), _selections.end(), [rawDataName](const auto& selectionPtr) -> bool {
+            return rawDataName == selectionPtr->getRawDataName();
+        });
+
+        if (it == _selections.end())
+            throw std::runtime_error(QString("Selection dataset with raw data name %1 not found").arg(rawDataName).toStdString());
+
+        const auto selection    = (*it).get();
+        const auto selectionId  = selection->getId();
+
+        emit selectionAboutToBeRemoved(selection);
+        {
+            _selections.erase(it);
+        }
+        emit selectionRemoved(selectionId);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to remove selection dataset from data manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to remove selection dataset from data manager");
+    }
 }
 
 mv::Dataset<mv::DatasetImpl> DataManager::groupDatasets(const Datasets& datasets, const QString& guiName /*= ""*/)
@@ -575,46 +615,6 @@ QVariantMap DataManager::toVariantMap() const
         variantMap[dataset->getId()] = dataset->toVariantMap();
 
     return variantMap;
-}
-
-void DataManager::reset()
-{
-#ifdef DATA_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    beginReset();
-    {
-        DataHierarchyItems dataHierarchyItems;
-        
-        for (auto& dataset : _datasets)
-            dataHierarchyItems << &dataset->getDataHierarchyItem();
-
-        std::sort(dataHierarchyItems.begin(), dataHierarchyItems.end(), [](auto dataHierarchyItemA, auto dataHierarchyItemB) -> bool {
-            return dataHierarchyItemA->getDepth() < dataHierarchyItemB->getDepth();
-        });
-
-        std::reverse(dataHierarchyItems.begin(), dataHierarchyItems.end());
-
-        for (auto dataHierarchyItem : dataHierarchyItems)
-            removeDataset(dataHierarchyItem->getDataset());
-    }
-    endReset();
-}
-
-void DataManager::initialize()
-{
-#ifdef DATA_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    AbstractDataManager::initialize();
-
-    if (isInitialized())
-        return;
-
-    beginInitialization();
-    endInitialization();
 }
 
 }

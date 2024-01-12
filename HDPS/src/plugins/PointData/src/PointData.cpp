@@ -343,7 +343,7 @@ void Points::init()
                     return;
 
                 // Only synchronize when dataset grouping is enabled and our own group index is non-negative
-                if (!Application::core()->isDatasetGroupingEnabled() || getGroupIndex() < 0)
+                if (!mv::data().getDatasetGroupingAction().isChecked() || getGroupIndex() < 0)
                     return;
 
                 // Only synchronize of the group indexes match
@@ -480,7 +480,7 @@ Dataset<DatasetImpl> Points::copy() const
 
 Dataset<DatasetImpl> Points::createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const bool& visible /*= true*/) const
 {
-    return Application::core()->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
+    return mv::data().createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
 }
 
 Dataset<DatasetImpl> Points::createSubsetFromVisibleSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const bool& visible /*= true*/) const
@@ -520,7 +520,7 @@ Dataset<DatasetImpl> Points::createSubsetFromVisibleSelection(const QString& gui
 
     subsetSelection->indices = localSelectionIndices;
 
-    return mv::core()->createSubsetFromSelection(subsetSelection, toSmartPointer(), guiName, parentDataSet, visible);
+    return mv::data().createSubsetFromSelection(subsetSelection, toSmartPointer(), guiName, parentDataSet, visible);
 }
 
 QIcon Points::getIcon(const QColor& color /*= Qt::black*/) const

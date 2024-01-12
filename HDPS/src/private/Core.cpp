@@ -51,7 +51,7 @@ void Core::createManagers()
     _managers[static_cast<int>(ManagerType::Projects)]      = new ProjectManager();
     _managers[static_cast<int>(ManagerType::Settings)]      = new SettingsManager();
 
-    CoreInterface::setManagersCreated();
+    setManagersCreated();
 }
 
 void Core::setManagersCreated()
@@ -72,7 +72,7 @@ void Core::initialize()
     if (isInitialized())
         return;
 
-    CoreInterface::setAboutToBeInitialized();
+    setAboutToBeInitialized();
     {
         auto& loadCoreManagersTask = Application::current()->getStartupTask().getLoadCoreManagersTask();
 
@@ -96,7 +96,7 @@ void Core::initialize()
         
         loadCoreManagersTask.setFinished();
     }
-    CoreInterface::setInitialized();
+    setInitialized();
 }
 
 void Core::setAboutToBeInitialized()

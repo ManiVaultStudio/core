@@ -16,6 +16,8 @@
 
 #include <util/Serialization.h>
 
+#include <actions/PluginTriggerAction.h>
+
 #include <QDebug>
 #include <QPluginLoader>
 #include <QMessageBox>
@@ -34,6 +36,7 @@ namespace mv {
 
 using namespace util;
 using namespace plugin;
+using namespace gui;
 
 PluginManager::PluginManager() :
     AbstractPluginManager()

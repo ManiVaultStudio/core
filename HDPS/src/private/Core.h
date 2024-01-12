@@ -25,7 +25,7 @@ public:
     /** Default constructor */
     Core();
 
-    /** Default destructor */
+    /** Reset plugin managers upon destruction */
     ~Core();
 
 public:

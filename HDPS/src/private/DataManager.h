@@ -59,13 +59,13 @@ public:
 protected: // Raw data
 
     /**
-     * Add \p rawData to the data manager (plugin manager remains the owner)
+     * Add \p rawData to the manager (plugin manager remains the owner)
      * @param rawData Pointer to the raw data to add
      */
     void addRawData(plugin::RawData* rawData) override;
 
     /**
-     * Remove raw with by \p rawDataName from the data manager
+     * Remove raw data with \p rawDataName from the manager
      * @param rawDataName Name of the raw data to remove
      */
     void removeRawData(const QString& rawDataName) override;
@@ -73,7 +73,7 @@ protected: // Raw data
 public: // Raw data
 
     /**
-     * Get raw data by \p rawDataName (ownership remains with the plugin manager)
+     * Get raw data by \p rawDataName
      * @param rawDataName Name of the raw data
      * @return Pointer to raw data if found, nullptr otherwise
      */
@@ -88,7 +88,7 @@ public: // Raw data
 public: // Datasets
 
     /**
-     * Create dataset of \p kind with \p guiName to the manager and return the created dataset
+     * Creates dataset of \p kind with \p guiName to the manager and returns the created dataset
      * @param kind Kind of data plugin
      * @param guiName Name of the added dataset in the GUI
      * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will add to the root of the data hierarchy if not valid)
@@ -98,7 +98,7 @@ public: // Datasets
      */
     Dataset<DatasetImpl> createDataset(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "", bool notify = true) override;
 
-protected: // Datasets
+protected: // Dataset remove
 
     /**
      * Add \p dataset to the manager
@@ -107,6 +107,8 @@ protected: // Datasets
      * @param notify Whether to notify the core that a dataset is added
      */
     void addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool notify = true) override;
+
+public: // Dataset remove
 
     /**
      * Remove \p dataset from the manager
@@ -123,7 +125,7 @@ protected: // Datasets
 public:// Derived datasets
 
     /**
-     * Add a dataset derived from \p sourceDataset with \p guiName and returns the created derived dataset
+     * Creates derived dataset from \p sourceDataset with \p guiName and returns the created derived dataset
      * @param guiName GUI name for the new dataset from the core
      * @param sourceDataset Smart pointer to the source dataset from which this dataset will be derived
      * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to source dataset in hierarchy if not valid)
@@ -165,21 +167,11 @@ public: // Dataset access
 public: // Selections
 
     /**
-     * Add \p selection on \p rawDataName to the data manager
+     * Add \p selection on \p rawDataName to the manager
      * @param rawDataName Name of the raw data
      * @param selection Smart pointer to selection dataset
      */
     void addSelection(const QString& rawDataName, Dataset<DatasetImpl> selection) override;
-
-protected:
-
-    /**
-     * Remove \p selection from the data manager
-     * @param rawDataName Name of the selection raw data
-     */
-    void removeSelection(const QString& rawDataName) override;
-
-public:
 
     /**
      * Get selection by \p rawDataName
@@ -194,6 +186,14 @@ public:
      */
     Datasets getAllSelections() override;
 
+protected:
+
+    /**
+     * Remove \p selection from the data manager
+     * @param rawDataName Name of the selection raw data
+     */
+    void removeSelection(const QString& rawDataName) override;
+
 public: // Data grouping
 
     /**
@@ -202,8 +202,8 @@ public: // Data grouping
      * @param guiName Name of the created dataset in the GUI (if empty, the user will be prompted for a name)
      * @return Smart pointer to created group dataset
      */
-    virtual Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") = 0;
-    
+    Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") override;
+
     /**
      * Get dataset grouping toggle action
      * @return Reference to dataset grouping toggle action

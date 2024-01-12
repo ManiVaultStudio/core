@@ -55,13 +55,13 @@ public:
 protected: // Raw data
 
     /**
-     * Add \p rawData to the data manager (plugin manager remains the owner)
+     * Add \p rawData to the manager (plugin manager remains the owner)
      * @param rawData Pointer to the raw data to add
      */
     virtual void addRawData(plugin::RawData* rawData) = 0;
 
     /**
-     * Remove raw data with \p rawDataName from the data manager
+     * Remove raw data with \p rawDataName from the manager
      * @param rawDataName Name of the raw data to remove
      */
     virtual void removeRawData(const QString& rawDataName) = 0;
@@ -118,7 +118,7 @@ public: // Dataset creation
         return Dataset<DatasetType>(createDataset(kind, dataSetGuiName, parentDataset).get<DatasetType>());
     }
 
-protected: // Dataset add/remove
+protected: // Dataset add
 
     /**
      * Adds \p dataset to the manager
@@ -127,6 +127,8 @@ protected: // Dataset add/remove
      * @param notify Whether to notify the core that a dataset is added
      */
     virtual void addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool notify = true) = 0;
+
+public: // Dataset remove
 
     /**
      * Remove \p dataset from the manager
@@ -158,7 +160,7 @@ public:// Derived datasets
      * @param sourceDataset Smart pointer to the source dataset from which this dataset will be derived
      * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to source dataset in hierarchy if not valid)
      * @param notify Whether to notify the core that a dataset is added
-     * @return Smart pointer to the created derived dataset
+     * @return Smart pointer to the created derived dataset of \p DatasetType
      */
     template <typename DatasetType>
     Dataset<DatasetType> createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), bool notify = true) {
@@ -187,7 +189,7 @@ public: // Subsets
      * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to source dataset in hierarchy if not valid)
      * @param visible Whether the new dataset is visible in the data hierarchy
      * @param notify Whether to notify the core that a dataset is added
-     * @return Smart pointer to the created subset
+     * @return Smart pointer to the created subset of \p DatasetType
      */
     template <typename DatasetType>
     Dataset<DatasetType> createSubsetFromSelection(const Dataset<DatasetImpl>& selection, const Dataset<DatasetImpl>& sourceDataset, const QString& guiName, const Dataset<DatasetImpl>& parentDataset, const bool& visible = true, bool notify = true) {
@@ -223,7 +225,7 @@ public: // Dataset access
 public: // Selection
 
     /**
-     * Add \p selection on \p rawDataName to the data manager
+     * Add \p selection on \p rawDataName to the manager
      * @param rawDataName Name of the raw data
      * @param selection Smart pointer to selection dataset
      */
@@ -333,6 +335,8 @@ signals:
      * @param selectionId GUID of the removed selection dataset
      */
     void selectionRemoved(const QString& selectionId);
+
+    friend class PluginManager;
 };
 
 }

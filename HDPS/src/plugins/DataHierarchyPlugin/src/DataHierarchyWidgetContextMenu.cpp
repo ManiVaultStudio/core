@@ -127,7 +127,7 @@ QAction* DataHierarchyWidgetContextMenu::getGroupAction()
     groupDataAction->setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
 
     connect(groupDataAction, &QAction::triggered, [this]() -> void {
-        Application::core()->groupDatasets(_selectedDatasets);
+        mv::data().groupDatasets(_selectedDatasets);
     });
 
     return groupDataAction;

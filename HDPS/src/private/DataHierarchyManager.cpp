@@ -254,7 +254,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
         projectDataSerializationTask.setSubtaskStarted(datasetId, QString("Loading dataset: %1").arg(datasetName));
         
-        auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent, dataset["ID"].toString());
+        auto loadedDataset = mv::data().createDataset(pluginKind, guiName, parent, dataset["ID"].toString());
         
         loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
         loadedDataset->fromVariantMap(dataset);
