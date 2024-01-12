@@ -74,146 +74,33 @@ public:
 public:
 
     /** Default constructor */
-    CoreInterface() :
-        _initialized(false),
-        _datasetGroupingEnabled(false)
-    {
-    }
+    CoreInterface() = default;
     
     /** Creates the core managers */
     virtual void createManagers() = 0;
 
-    /** Set core about to be initialized */
-    virtual void setAboutToBeInitialized() final {
-        qDebug() << "ManiVault core about to be initialized";
-
-        emit aboutToBeInitialized();
-    };
-
-    /** Initializes the core */
-    virtual void initialize() {
-        qDebug() << "ManiVault core initializing...";
-    };
-
-    /** Flag the core as initialized */
-    virtual void setInitialized() final {
-        _initialized = true;
-
-        qDebug() << "ManiVault core initialized";
-
-        emit initialized();
-    }
-
-    /** Flag the core managers as created */
-    virtual void setManagersCreated() final {
-        qDebug() << "ManiVault core managers created";
-
-        emit managersCreated();
-    }
+    /** Flag the core managers as created and notify listeners */
+    virtual void setManagersCreated() = 0;
 
     /** Resets the entire core implementation */
     virtual void reset() = 0;
+
+public: // Initialization
+
+    /** Initializes the core */
+    virtual void initialize() = 0;
+
+    /** Notify listeners that the core is about to be initialized */
+    virtual void setAboutToBeInitialized() = 0;
+
+    /** Flag the core as initialized and notify listeners */
+    virtual void setInitialized() = 0;
 
     /**
      * Get whether the core is initialized or not
      * @return Boolean determining whether the core is initialized or not
      */
-    virtual bool isInitialized() const final {
-        return _initialized;
-    }
-
-public: // Data access
-
-    /**
-     * Requests the plugin manager to create new RawData of the given kind
-     * The manager will add the raw data to the core and return the unique name of the data set linked with the raw data
-     * @param kind Kind of plugin
-     * @param datasetGuiName Name of the added dataset in the GUI
-     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (root if not valid)
-     * @param id Globally unique dataset identifier (use only for deserialization)
-     * @return Smart pointer to the added dataset
-     */
-    virtual Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "") = 0;
-
-    /**
-     * Requests the plugin manager to create new RawData of the given kind
-     * The manager will add the raw data to the core and return the unique name of the data set linked with the raw data
-     * @param kind Kind of plugin
-     * @param datasetGuiName Name of the added dataset in the GUI
-     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (root if smart pointer is not valid)
-     * @return Smart pointer to the added dataset
-     */
-    template <class DatasetType>
-    Dataset<DatasetType> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>())\
-    {
-        return Dataset<DatasetType>(addDataset(kind, dataSetGuiName, parentDataset).get<DatasetType>());
-    }
-
-    /**
-     * Creates a dataset derived from a source dataset.
-     * @param guiName GUI name for the new dataset from the core
-     * @param sourceDataset Smart pointer to the source dataset from which this dataset will be derived
-     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to source dataset in hierarchy if not valid)
-     * @return Smart pointer to the created derived dataset
-     */
-    virtual Dataset<DatasetImpl> createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) = 0;
-
-    /**
-     * Creates a dataset derived from a source dataset.
-     * @param guiName GUI name for the new dataset from the core
-     * @param sourceDataset Smart pointer to the source dataset from which this dataset will be derived
-     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to root in hierarchy if not valid)
-     * @return Smart pointer to the created derived dataset
-     */
-    template <typename DatasetType>
-    Dataset<DatasetType> createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>())
-    {
-        return createDerivedDataset(guiName, sourceDataset, parentDataset);
-    }
-
-    /**
-     * Creates a copy of the given selection set, adds the new set to the data manager and notifies all data consumers of the new set
-     * @param selection Smart pointer to the selection set
-     * @param sourceDataset Smart pointer to the source dataset
-     * @param guiName GUI name of the subset
-     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (sourceSetName if not valid)
-     * @param visible Whether the new dataset is visible in the user interface
-     * @return Smart pointer to the created subset
-     */
-    virtual Dataset<DatasetImpl> createSubsetFromSelection(const Dataset<DatasetImpl>& selection, const Dataset<DatasetImpl>& sourceDataset, const QString& guiName, const Dataset<DatasetImpl>& parentDataset, const bool& visible = true) = 0;
-
-    /**
-     * Creates a copy of the given selection set, adds the new set to the data manager and notifies all data consumers of the new set
-     * @param selection Smart pointer to the selection set
-     * @param sourceDataset Smart pointer to the source dataset
-     * @param guiName GUI name of the subset
-     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (sourceSetName if not valid)
-     * @param visible Whether the new dataset is visible in the user interface
-     * @return Smart pointer to the created subset
-     */
-    template <typename DatasetType>
-    Dataset<DatasetType> createSubsetFromSelection(const Dataset<DatasetImpl>& selection, const Dataset<DatasetImpl>& sourceDataset, const QString& guiName, const Dataset<DatasetImpl>& parentDataset, const bool& visible = true)
-    {
-        return createSubsetFromSelection(selection, sourceDataset, guiName, parentDataset, visible);
-    }
-
-public: // Data grouping
-
-    /**
-     * Groups \p datasets into one dataset
-     * @param datasets Two or more datasets to group
-     * @param guiName Name of the created dataset in the GUI (if empty, the user will be prompted for a name)
-     * @return Smart pointer to created group dataset
-     */
-    virtual Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") = 0;
-
-public: // Dataset grouping
-
-    /** Get whether dataset grouping is enabled or not */
-    virtual bool isDatasetGroupingEnabled() const = 0;
-
-    /** Get whether dataset grouping is enabled or not */
-    virtual void setDatasetGroupingEnabled(const bool& datasetGroupingEnabled) = 0;
+    virtual bool isInitialized() const = 0;
 
 public: // Managers
 
@@ -239,10 +126,6 @@ signals:
 
     /** Invoked when the core managers have been created */
     void managersCreated();
-
-protected:
-    bool    _initialized;               /** Boolean determining whether the core is initialized or not */
-    bool    _datasetGroupingEnabled;    /** Whether datasets can be grouped or not */
 
     friend class plugin::RawData;
     friend class DatasetImpl;

@@ -67,6 +67,7 @@ set(PRIVATE_PLUGIN_MANAGER_FILES
 
 set(PRIVATE_DATA_MANAGER_HEADERS
     src/private/DataManager.h
+    src/private/GroupDataDialog.h
     src/private/RemoveDatasetsDialog.h
     src/private/DatasetsToRemoveModel.h
     src/private/DatasetsToRemoveFilterModel.h
@@ -74,6 +75,7 @@ set(PRIVATE_DATA_MANAGER_HEADERS
 
 set(PRIVATE_DATA_MANAGER_SOURCES
     src/private/DataManager.cpp
+    src/private/GroupDataDialog.cpp
     src/private/RemoveDatasetsDialog.cpp
     src/private/DatasetsToRemoveModel.cpp
     src/private/DatasetsToRemoveFilterModel.cpp
@@ -260,12 +262,10 @@ set(PRIVATE_START_PAGE_FILES
 
 set(PRIVATE_MISCELLANEOUS_HEADERS
     src/private/Archiver.h
-    src/private/GroupDataDialog.h
 )
 
 set(PRIVATE_MISCELLANEOUS_SOURCES
     src/private/Archiver.cpp
-    src/private/GroupDataDialog.cpp
 )
 
 set(PRIVATE_MISCELLANEOUS_FILES

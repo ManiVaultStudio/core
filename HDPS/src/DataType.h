@@ -39,7 +39,7 @@ namespace mv
         QString _type;
 
         friend class RawData;
-        friend class Core;
+        friend class DataManager;
         friend struct std::hash<DataType>;
     };
 

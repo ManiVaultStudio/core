@@ -3,35 +3,35 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "DataManager.h"
+
 #include "RemoveDatasetsDialog.h"
+#include "GroupDataDialog.h"
 
 #include <util/Exception.h>
 
 #include <ModalTask.h>
 #include <RawData.h>
+#include <DataType.h>
 #include <DataHierarchyItem.h>
 
-#include <cassert>
-#include <iostream>
 #include <stdexcept>
-
-#include <QMainWindow>
-
-using namespace mv::util;
 
 #ifdef _DEBUG
     #define DATA_MANAGER_VERBOSE
 #endif
+
+using namespace mv::util;
 
 namespace mv
 {
 
 using namespace plugin;
 
-DataManager::DataManager() :
-    AbstractDataManager()
+DataManager::DataManager(QObject* parent /*= nullptr*/) :
+    AbstractDataManager(parent),
+    _datasetGroupingAction(this, "Dataset grouping")
 {
-    setObjectName("Datasets");
+    _datasetGroupingAction.setSettingsPrefix(getSettingsPrefix() + "DatasetGroupingEnabled");
 }
 
 DataManager::~DataManager()
@@ -120,7 +120,37 @@ QStringList DataManager::getRawDataNames() const
     return rawDataNames;
 }
 
-void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible /*= true*/, bool notify /*= true*/)
+Dataset<DatasetImpl> DataManager::createDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/, bool notify /*= true*/)
+{
+    // Create a new plugin of the given kind
+    QString rawDataName = plugins().requestPlugin(kind)->getName();
+
+    const auto rawData = mv::data().getRawData(rawDataName);
+
+    // Create an initial full set and an empty selection belonging to the raw data
+    auto fullSet = rawData->createDataSet(id);
+    auto selection = rawData->createDataSet();
+
+    // Set the properties of the new sets
+    fullSet->setText(dataSetGuiName);
+    fullSet->setAll(true);
+
+    fullSet->getTask().setName(dataSetGuiName);
+
+    selection->getTask().setName(QString("%1_selection").arg(dataSetGuiName));
+
+    // Set pointer of full dataset to itself just to avoid having to be wary of this not being set
+    fullSet->_fullDataset = fullSet;
+
+    addDataset(fullSet, parentDataset, notify);
+    addSelection(rawDataName, selection);
+
+    fullSet->init();
+
+    return fullSet;
+}
+
+void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool notify /*= true*/)
 {
     try
     {
@@ -134,12 +164,12 @@ void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> 
 
         _datasets.push_back(std::unique_ptr<DatasetImpl>(dataset.get()));
 
-        dataHierarchy().addItem(dataset, parentDataset, visible);
+        dataHierarchy().addItem(dataset, parentDataset);
 
         if (notify)
             events().notifyDatasetAdded(dataset);
 
-        emit datasetAdded(dataset, parentDataset, visible);
+        emit datasetAdded(dataset, parentDataset, true);
     }
     catch (std::exception& e)
     {
@@ -300,6 +330,67 @@ void DataManager::removeDatasets(Datasets datasets)
     }
 }
 
+Dataset<DatasetImpl> DataManager::createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, bool notify /*= true*/)
+{
+    // Get the data type of the source dataset
+    const auto dataType = sourceDataset->getDataType();
+
+    // Create a new plugin of the given kind
+    QString pluginName = mv::plugins().requestPlugin(dataType._type)->getName();
+
+    auto rawData = mv::data().getRawData(pluginName);
+
+    // Create an initial full set, but no selection because it is shared with the source data
+    auto derivedDataset = rawData->createDataSet();
+
+    // Mark the full set as derived and set the GUI name
+    derivedDataset->setSourceDataSet(sourceDataset);
+    derivedDataset->setText(guiName);
+
+    // Set properties of the new set
+    derivedDataset->setAll(true);
+
+    addDataset(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset), notify);
+
+    derivedDataset->init();
+
+    return Dataset<DatasetImpl>(*derivedDataset);
+}
+
+Dataset<DatasetImpl> DataManager::createSubsetFromSelection(const Dataset<DatasetImpl>& selection, const Dataset<DatasetImpl>& sourceDataset, const QString& guiName, const Dataset<DatasetImpl>& parentDataset, const bool& visible /*= true*/, bool notify /*= true*/)
+{
+    try
+    {
+        // Create a subset with only the indices that were part of the selection set
+        auto subset = selection->copy();
+
+        // Assign source dataset to subset
+        *subset = *const_cast<Dataset<DatasetImpl>&>(sourceDataset);
+
+        subset->setAll(false);
+        subset->setText(guiName);
+        subset->getDataHierarchyItem().setVisible(visible);
+
+        // Set a pointer to the original full dataset, if the source is another subset, we take their pointer
+        subset->_fullDataset = sourceDataset->isFull() ? sourceDataset : sourceDataset->_fullDataset;
+
+        addDataset(subset, parentDataset, notify);
+
+        subset->init();
+
+        return subset;
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to create subset from selection", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to create subset from selection");
+    }
+
+    return {};
+}
+
 Dataset<DatasetImpl> DataManager::getDataset(const QString& datasetId)
 {
     try
@@ -415,6 +506,61 @@ Datasets DataManager::getAllSelections()
         selections << dataset.get();
 
     return selections;
+}
+
+mv::Dataset<mv::DatasetImpl> DataManager::groupDatasets(const Datasets& datasets, const QString& guiName /*= ""*/)
+{
+    try {
+        const auto createGroupDataset = [this, &datasets](const QString& guiName) -> Dataset<DatasetImpl> {
+            auto groupDataset = createDataset(datasets.first()->getRawDataKind(), guiName);
+
+            groupDataset->setProxyMembers(datasets);
+
+            return groupDataset;
+        };
+
+        if (guiName.isEmpty()) {
+            if (Application::current()->getSetting("AskForGroupName", true).toBool()) {
+                GroupDataDialog groupDataDialog(nullptr, datasets);
+
+                groupDataDialog.open();
+
+                QEventLoop eventLoop;
+                QObject::connect(&groupDataDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+                eventLoop.exec();
+
+                if (groupDataDialog.result() == QDialog::Accepted)
+                    return createGroupDataset(groupDataDialog.getGroupName());
+                else
+                    return Dataset<DatasetImpl>();
+            }
+            else {
+                QStringList datasetNames;
+
+                for (const auto& dataset : datasets)
+                    datasetNames << dataset->text();
+
+                return createGroupDataset(datasetNames.join("+"));
+            }
+        }
+        else {
+            return createGroupDataset(guiName);
+        }
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to group datasets", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to group datasets");
+    }
+
+    return Dataset<DatasetImpl>();
+}
+
+ToggleAction& DataManager::getDatasetGroupingAction()
+{
+    return _datasetGroupingAction;
 }
 
 void DataManager::fromVariantMap(const QVariantMap& variantMap)

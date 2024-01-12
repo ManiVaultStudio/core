@@ -4,26 +4,18 @@
 
 #include "Core.h"
 
-#include "MainWindow.h"
-#include "PluginManager.h"
-#include "GroupDataDialog.h"
 #include "ModalTask.h"
 #include "ForegroundTask.h"
 
-#include <LoaderPlugin.h>
-#include <WriterPlugin.h>
-#include <ViewPlugin.h>
-#include <AnalysisPlugin.h>
-#include <RawData.h>
-#include <Set.h>
-#include <PluginFactory.h>
-#include <ViewPlugin.h>
-#include <event/Event.h>
-#include <util/Exception.h>
-
-#include <algorithm>
-
-#include <QEventLoop>
+#include "ActionsManager.h"
+#include "PluginManager.h"
+#include "EventManager.h"
+#include "DataManager.h"
+#include "DataHierarchyManager.h"
+#include "TaskManager.h"
+#include "WorkspaceManager.h"
+#include "ProjectManager.h"
+#include "SettingsManager.h"
 
 //#define CORE_VERBOSE
 
@@ -35,9 +27,9 @@ using namespace mv::gui;
 namespace mv {
 
 Core::Core() :
-    CoreInterface()
+    CoreInterface(),
+    _initialized(false)
 {
-    _datasetGroupingEnabled = Application::current()->getSetting("Core/DatasetGroupingEnabled", false).toBool();
 }
 
 Core::~Core()
@@ -60,6 +52,19 @@ void Core::createManagers()
     _managers[static_cast<int>(ManagerType::Settings)]      = new SettingsManager();
 
     CoreInterface::setManagersCreated();
+}
+
+void Core::setManagersCreated()
+{
+    qDebug() << "ManiVault core managers created";
+
+    emit managersCreated();
+}
+
+void Core::reset()
+{
+    for (auto& manager : _managers)
+        manager->reset();
 }
 
 void Core::initialize()
@@ -94,100 +99,25 @@ void Core::initialize()
     CoreInterface::setInitialized();
 }
 
-void Core::reset()
+void Core::setAboutToBeInitialized()
 {
-    for (auto& manager : _managers)
-        manager->reset();
+    qDebug() << "ManiVault core about to be initialized";
+
+    emit aboutToBeInitialized();
 }
 
-Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/)
+void Core::setInitialized()
 {
-    // Create a new plugin of the given kind
-    QString rawDataName = plugins().requestPlugin(kind)->getName();
+    _initialized = true;
 
-    const auto rawData = mv::data().getRawData(rawDataName);
+    qDebug() << "ManiVault core initialized";
 
-    // Create an initial full set and an empty selection belonging to the raw data
-    auto fullSet    = rawData->createDataSet(id);
-    auto selection  = rawData->createDataSet();
-
-    // Set the properties of the new sets
-    fullSet->setText(dataSetGuiName);
-    fullSet->setAll(true);
-
-    fullSet->getTask().setName(dataSetGuiName);
-
-    selection->getTask().setName(QString("%1_selection").arg(dataSetGuiName));
-
-    // Set pointer of full dataset to itself just to avoid having to be wary of this not being set
-    fullSet->_fullDataset = fullSet;
-
-    mv::data().addDataset(fullSet, parentDataset);
-    mv::data().addSelection(rawDataName, selection);
-
-    fullSet->init();
-
-    return fullSet;
+    emit initialized();
 }
 
-Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)
+bool Core::isInitialized() const
 {
-    // Get the data type of the source dataset
-    const auto dataType = sourceDataset->getDataType();
-
-    // Create a new plugin of the given kind
-    QString pluginName = getPluginManager().requestPlugin(dataType._type)->getName();
-
-    auto rawData = mv::data().getRawData(pluginName);
-
-    // Create an initial full set, but no selection because it is shared with the source data
-    auto derivedDataset = rawData->createDataSet();
-
-    // Mark the full set as derived and set the GUI name
-    derivedDataset->setSourceDataSet(sourceDataset);
-    derivedDataset->setText(guiName);
-
-    // Set properties of the new set
-    derivedDataset->setAll(true);
-
-    mv::data().addDataset(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
-
-    derivedDataset->init();
-
-    return Dataset<DatasetImpl>(*derivedDataset);
-}
-
-Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>& selection, const Dataset<DatasetImpl>& sourceDataset, const QString& guiName, const Dataset<DatasetImpl>& parentDataset, const bool& visible /*= true*/)
-{
-    try
-    {
-        // Create a subset with only the indices that were part of the selection set
-        auto subset = selection->copy();
-
-        // Assign source dataset to subset
-        *subset = *const_cast<Dataset<DatasetImpl>&>(sourceDataset);
-
-        subset->setAll(false);
-        subset->setText(guiName);
-
-        // Set a pointer to the original full dataset, if the source is another subset, we take their pointer
-        subset->_fullDataset = sourceDataset->isFull() ? sourceDataset : sourceDataset->_fullDataset;
-
-        mv::data().addDataset(subset, parentDataset, visible);
-
-        subset->init();
-
-        return subset;
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to create subset from selection", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to create subset from selection");
-    }
-
-    return {};
+    return _initialized;
 }
 
 AbstractManager* Core::getManager(const ManagerType& managerType)
@@ -238,72 +168,6 @@ AbstractProjectManager& Core::getProjectManager()
 AbstractSettingsManager& Core::getSettingsManager()
 {
     return *static_cast<AbstractSettingsManager*>(getManager(ManagerType::Settings));
-}
-
-bool Core::isDatasetGroupingEnabled() const
-{
-    return _datasetGroupingEnabled;
-}
-
-Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString& guiName /*= ""*/)
-{
-    try {
-        const auto createGroupDataset = [this, &datasets](const QString& guiName) -> Dataset<DatasetImpl> {
-            auto groupDataset = addDataset(datasets.first()->getRawDataKind(), guiName);
-
-            groupDataset->setProxyMembers(datasets);
-
-            return groupDataset;
-        };
-
-        if (guiName.isEmpty()) {
-            if (Application::current()->getSetting("AskForGroupName", true).toBool()) {
-                GroupDataDialog groupDataDialog(nullptr, datasets);
-
-                groupDataDialog.open();
-
-                QEventLoop eventLoop;
-                QObject::connect(&groupDataDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
-                eventLoop.exec();
-
-                if (groupDataDialog.result() == QDialog::Accepted)
-                    return createGroupDataset(groupDataDialog.getGroupName());
-                else
-                    return Dataset<DatasetImpl>();
-            }
-            else {
-                QStringList datasetNames;
-
-                for (const auto& dataset : datasets)
-                    datasetNames << dataset->text();
-
-                return createGroupDataset(datasetNames.join("+"));
-            }
-        }
-        else {
-            return createGroupDataset(guiName);
-        }
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to group data", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to group data");
-    }
-        
-    return Dataset<DatasetImpl>();
-}
-
-void Core::setDatasetGroupingEnabled(const bool& datasetGroupingEnabled)
-{
-    if (datasetGroupingEnabled == _datasetGroupingEnabled)
-        return;
-
-    _datasetGroupingEnabled = datasetGroupingEnabled;
-
-    // Save the setting
-    Application::current()->setSetting("Core/DatasetGroupingEnabled", _datasetGroupingEnabled);
 }
 
 }
