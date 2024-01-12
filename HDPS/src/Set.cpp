@@ -139,14 +139,14 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
     if (variantMap["Derived"].toBool())
     {
-        setSourceDataSet(mv::data().getSet(variantMap["SourceDatasetGUID"].toString()));
+        setSourceDataSet(mv::data().getDataset(variantMap["SourceDatasetGUID"].toString()));
 
         assert(_sourceDataset.isValid());
     }
 
     if (!variantMap["Full"].toBool())
     {
-        makeSubsetOf(mv::data().getSet(variantMap["FullDatasetGUID"].toString()));
+        makeSubsetOf(mv::data().getDataset(variantMap["FullDatasetGUID"].toString()));
 
         assert(variantMap["PluginKind"].toString() == _rawData->getKind());
         assert(variantMap["PluginVersion"].toString() == _rawData->getVersion());

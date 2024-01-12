@@ -626,11 +626,11 @@ void PluginManager::fromVariantMap(const QVariantMap& variantMap)
 
             Datasets inputDatasets;
             for (const auto& inputDatasetGUID : inputDatasetsGUIDs)
-                inputDatasets << mv::data().getSet(inputDatasetGUID);
+                inputDatasets << mv::data().getDataset(inputDatasetGUID);
 
             Datasets outputDatasets;
             for (const auto& outputDatasetGUID : outputDatasetsGUIDs)
-                outputDatasets << mv::data().getSet(outputDatasetGUID);
+                outputDatasets << mv::data().getDataset(outputDatasetGUID);
 
             auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugins().requestPlugin(analysisPluginKind, inputDatasets, outputDatasets));
             if (analysisPlugin)
@@ -647,13 +647,13 @@ QVariantMap PluginManager::toVariantMap() const
     QVariantList usedPluginsList;     // kinds of used plugins
     QVariantList loadedAnalysesList;  // openend analysis plugin instances
 
-    for (const auto pluginFactory : _pluginFactories.values())
+    for (const auto& pluginFactory : _pluginFactories.values())
         if ((pluginFactory->getType() == Type::DATA || pluginFactory->getType() == Type::ANALYSIS || pluginFactory->getType() == Type::VIEW) && pluginFactory->getNumberOfInstances() > 0)
             usedPluginsList << pluginFactory->getKind();
 
-    for(const auto loadedPlugin : _plugins)
+    for(const auto& loadedPlugin : _plugins)
         if(loadedPlugin->getType() == Type::ANALYSIS )
-            loadedAnalysesList << dynamic_cast<plugin::AnalysisPlugin*>(loadedPlugin)->toVariantMap();
+            loadedAnalysesList << dynamic_cast<plugin::AnalysisPlugin*>(loadedPlugin.get())->toVariantMap();
 
     variantMap.insert({
         { "UsedPlugins", usedPluginsList },
