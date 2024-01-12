@@ -144,6 +144,8 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         assert(_sourceDataset.isValid());
     }
 
+    _mayUnderive = variantMap["MayUnderive"].toBool();
+
     if (!variantMap["Full"].toBool())
     {
         makeSubsetOf(mv::data().getDataset(variantMap["FullDatasetGUID"].toString()));
@@ -202,6 +204,7 @@ QVariantMap DatasetImpl::toVariantMap() const
         { "PluginKind", QVariant::fromValue(_rawData->getKind()) },
         { "PluginVersion", QVariant::fromValue(_rawData->getVersion()) },
         { "Derived", QVariant::fromValue(isDerivedData()) },
+        { "MayUnderive", QVariant::fromValue(mayUnderive()) },
         { "Full", QVariant::fromValue(isFull()) },
         { "SourceDatasetGUID", isDerivedData() ? QVariant::fromValue(_sourceDataset->getId()) : "" },
         { "FullDatasetGUID", isFull() ? "" : QVariant::fromValue(_fullDataset->getId()) },
