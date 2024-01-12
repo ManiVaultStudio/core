@@ -248,7 +248,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
             const auto datasetId    = dataset["ID"].toString();
 
             subtasks << datasetId;
-            datasetList.emplace_back(dataset, dataset["Derived"].toBool() || dataset["MayUnderive"].toBool());
+            datasetList.emplace_back(dataset, dataset["Derived"].toBool());
         }
     };
 
