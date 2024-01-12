@@ -463,7 +463,7 @@ public: // Linked data
      * Get flags for linked data
      * @return Flags for linked data
      */
-    std::int32_t getLinkedDataFlags();
+    std::int32_t getLinkedDataFlags() const;
 
     /**
      * Set flags for linked data
@@ -482,7 +482,7 @@ public: // Linked data
      * @param linkedDataFlag Linked data
      * @return Boolean determining  linkedDataFlag Linked data
      */
-    bool hasLinkedDataFlag(std::int32_t linkedDataFlag);
+    bool hasLinkedDataFlag(std::int32_t linkedDataFlag) const;
 
     /**
      * Resolves linked data for the dataset

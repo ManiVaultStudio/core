@@ -427,7 +427,7 @@ std::vector<mv::LinkedData>& DatasetImpl::getLinkedData()
     return _linkedData;
 }
 
-std::int32_t DatasetImpl::getLinkedDataFlags()
+std::int32_t DatasetImpl::getLinkedDataFlags() const
 {
     return _linkedDataFlags;
 }
@@ -445,7 +445,7 @@ void DatasetImpl::setLinkedDataFlag(std::int32_t linkedDataFlag, bool set /*= tr
         _linkedDataFlags &= ~linkedDataFlag;
 }
 
-bool DatasetImpl::hasLinkedDataFlag(std::int32_t linkedDataFlag)
+bool DatasetImpl::hasLinkedDataFlag(std::int32_t linkedDataFlag) const
 {
     return _linkedDataFlags & linkedDataFlag;
 }
