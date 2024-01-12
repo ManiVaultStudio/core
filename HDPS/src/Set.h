@@ -279,7 +279,7 @@ public: // Hierarchy
      * @param filterDataType Type of data to filter
      * @return Child datasets of the dataset type
      */
-    QVector<Dataset<DatasetImpl>> getChildren(const DataType& filterDataType);
+    QVector<Dataset<DatasetImpl>> getChildren(const DataType& filterDataType) const;
 
 public: // Selection
 

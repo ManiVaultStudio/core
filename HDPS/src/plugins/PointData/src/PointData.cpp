@@ -103,7 +103,6 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
 
 void PointData::fromVariantMap(const QVariantMap& variantMap)
 {
-
     variantMapMustContain(variantMap, "Data");
     variantMapMustContain(variantMap, "NumberOfPoints");
     variantMapMustContain(variantMap, "NumberOfDimensions");

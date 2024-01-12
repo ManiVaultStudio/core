@@ -10,9 +10,9 @@
 #include <RawData.h>
 #include <Set.h>
 
-#include <QString>
-#include <QSize>
 #include <QDebug>
+#include <QSize>
+#include <QString>
 
 #include <vector>
 

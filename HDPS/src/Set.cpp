@@ -70,7 +70,7 @@ QVector<Dataset<DatasetImpl>> DatasetImpl::getChildren(const QVector<DataType>& 
     return children;
 }
 
-QVector<mv::Dataset<mv::DatasetImpl>> DatasetImpl::getChildren(const DataType& filterDataType)
+QVector<mv::Dataset<mv::DatasetImpl>> DatasetImpl::getChildren(const DataType& filterDataType) const
 {
     return getChildren(QVector<DataType>({ filterDataType }));
 }
