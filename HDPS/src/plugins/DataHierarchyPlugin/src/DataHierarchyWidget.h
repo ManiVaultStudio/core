@@ -8,7 +8,6 @@
 #include <models/DataHierarchyFilterModel.h>
 
 #include <actions/TriggerAction.h>
-#include <actions/ToggleAction.h>
 
 #include <widgets/HierarchyWidget.h>
 
@@ -102,6 +101,5 @@ private:
     mv::DataHierarchyModel          _model;             /** Model containing data to be displayed in the hierarchy */
     mv::DataHierarchyFilterModel    _filterModel;       /** Data hierarchy filter model */
     mv::gui::HierarchyWidget        _hierarchyWidget;   /** Widget for displaying hierarchy */
-    mv::gui::ToggleAction           _groupingAction;    /** Data grouping action */
     mv::gui::TriggerAction          _resetAction;       /** Reset all action */
 };

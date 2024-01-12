@@ -126,7 +126,7 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
                 auto groupDataAction = new TriggerAction(groupAction, "Group data");
 
                 connect(groupDataAction, &TriggerAction::triggered, this, [datasets]() -> void {
-                    mv::Application::core()->groupDatasets(datasets);
+                    mv::data().groupDatasets(datasets);
                 });
 
                 triggerActions << groupDataAction;

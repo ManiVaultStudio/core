@@ -170,7 +170,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _model(this),
     _filterModel(this),
     _hierarchyWidget(this, "Dataset", _model, &_filterModel),
-    _groupingAction(this, "Selection grouping", Application::core()->isDatasetGroupingEnabled()),
     _resetAction(this, "Reset")
 {
     auto layout = new QVBoxLayout();
@@ -191,7 +190,9 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     settingsGroupAction.setVisible(true);
     settingsGroupAction.setShowLabels(false);
 
-    settingsGroupAction.addAction(&_groupingAction);
+    auto& groupingAction = mv::data().getDatasetGroupingAction();
+
+    settingsGroupAction.addAction(&groupingAction);
     settingsGroupAction.addAction(&_resetAction);
 
     auto& treeView = _hierarchyWidget.getTreeView();
@@ -223,10 +224,10 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsGroup, QHeaderView::Fixed);
     treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsLocked, QHeaderView::Fixed);
 
-    _groupingAction.setIconByName("object-group");
-    _groupingAction.setToolTip("Enable/disable dataset grouping");
+    groupingAction.setIconByName("object-group");
+    groupingAction.setToolTip("Enable/disable dataset grouping");
 
-    connect(&_groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::onGroupingActionToggled);
+    connect(&groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::onGroupingActionToggled);
 
     connect(&_resetAction, &TriggerAction::triggered, &Application::core()->getDataManager(), &AbstractDataManager::reset);
 
@@ -351,7 +352,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         QTimer::singleShot(10, createContextMenu);
     });
 
-    connect(&_groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::updateColumnsVisibility);
+    connect(&groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::updateColumnsVisibility);
 
     updateColumnsVisibility();
     initializeChildModelItemsExpansion();
@@ -370,8 +371,6 @@ QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImp
 
 void DataHierarchyWidget::onGroupingActionToggled(const bool& toggled)
 {
-    Application::core()->setDatasetGroupingEnabled(toggled);
-
     updateColumnsVisibility();
 }
 
@@ -379,7 +378,7 @@ void DataHierarchyWidget::updateColumnsVisibility()
 {
     auto& treeView = _hierarchyWidget.getTreeView();
 
-    treeView.setColumnHidden(DataHierarchyModel::Column::GroupIndex, !_groupingAction.isChecked());
+    treeView.setColumnHidden(DataHierarchyModel::Column::GroupIndex, !mv::data().getDatasetGroupingAction().isChecked());
 }
 
 void DataHierarchyWidget::updateDataHierarchyItemExpansion(const QModelIndex& modelIndex /*= QModelIndex()*/)
