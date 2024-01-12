@@ -3,30 +3,31 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PluginManager.h"
+
 #include "Core.h"
 
-#include <PluginFactory.h>
-#include <LoaderPlugin.h>
-#include <WriterPlugin.h>
-#include <ViewPlugin.h>
 #include <AnalysisPlugin.h>
-#include <TransformationPlugin.h>
-#include <RawData.h>
+#include <LoaderPlugin.h>
+#include <PluginFactory.h>
 #include <PluginType.h>
+#include <RawData.h>
+#include <TransformationPlugin.h>
+#include <ViewPlugin.h>
+#include <WriterPlugin.h>
 
 #include <util/Serialization.h>
 
 #include <actions/PluginTriggerAction.h>
 
 #include <QDebug>
-#include <QPluginLoader>
-#include <QMessageBox>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
-#include <QJsonArray>
+#include <QMessageBox>
+#include <QPluginLoader>
 
-#include <stdexcept>
 #include <assert.h>
+#include <stdexcept>
 
 #ifdef _DEBUG
     #define PLUGIN_MANAGER_VERBOSE
@@ -599,7 +600,6 @@ void PluginManager::fromVariantMap(const QVariantMap& variantMap)
     Serializable::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "UsedPlugins");
-    variantMapMustContain(variantMap, "LoadedAnalyses");
 
     QStringList missingPluginKinds;
 
@@ -610,33 +610,36 @@ void PluginManager::fromVariantMap(const QVariantMap& variantMap)
     if (!missingPluginKinds.isEmpty())
         throw std::runtime_error(QString("One or more plugins are not available: %1").arg(missingPluginKinds.join(", ")).toLocal8Bit());
 
-    for (const auto& loadedAnalysis : variantMap["LoadedAnalyses"].toList())
+    if (variantMap.contains("LoadedAnalyses"))
     {
-        auto analysisPluginMap = loadedAnalysis.toMap();
-
-        variantMapMustContain(analysisPluginMap, "Kind");
-        variantMapMustContain(analysisPluginMap, "InputDatasetsGUIDs");
-        variantMapMustContain(analysisPluginMap, "OutputDatasetsGUIDs");
-
-        auto analysisPluginKind = analysisPluginMap["Kind"].toString();
-        if (_pluginFactories.contains(analysisPluginKind))
+        for (const auto& loadedAnalysis : variantMap["LoadedAnalyses"].toList())
         {
-            auto inputDatasetsGUIDs = analysisPluginMap["InputDatasetsGUIDs"].toStringList();
-            auto outputDatasetsGUIDs = analysisPluginMap["OutputDatasetsGUIDs"].toStringList();
+            auto analysisPluginMap = loadedAnalysis.toMap();
 
-            Datasets inputDatasets;
-            for (const auto& inputDatasetGUID : inputDatasetsGUIDs)
-                inputDatasets << mv::data().getDataset(inputDatasetGUID);
+            variantMapMustContain(analysisPluginMap, "Kind");
+            variantMapMustContain(analysisPluginMap, "InputDatasetsGUIDs");
+            variantMapMustContain(analysisPluginMap, "OutputDatasetsGUIDs");
 
-            Datasets outputDatasets;
-            for (const auto& outputDatasetGUID : outputDatasetsGUIDs)
-                outputDatasets << mv::data().getDataset(outputDatasetGUID);
+            auto analysisPluginKind = analysisPluginMap["Kind"].toString();
+            if (_pluginFactories.contains(analysisPluginKind))
+            {
+                auto inputDatasetsGUIDs = analysisPluginMap["InputDatasetsGUIDs"].toStringList();
+                auto outputDatasetsGUIDs = analysisPluginMap["OutputDatasetsGUIDs"].toStringList();
 
-            auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugins().requestPlugin(analysisPluginKind, inputDatasets, outputDatasets));
-            if (analysisPlugin)
-                analysisPlugin->fromVariantMap(analysisPluginMap);
+                Datasets inputDatasets;
+                for (const auto& inputDatasetGUID : inputDatasetsGUIDs)
+                    inputDatasets << mv::data().getDataset(inputDatasetGUID);
+
+                Datasets outputDatasets;
+                for (const auto& outputDatasetGUID : outputDatasetsGUIDs)
+                    outputDatasets << mv::data().getDataset(outputDatasetGUID);
+
+                auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugins().requestPlugin(analysisPluginKind, inputDatasets, outputDatasets));
+                if (analysisPlugin)
+                    analysisPlugin->fromVariantMap(analysisPluginMap);
+            }
         }
-    }
+    } // if variantMap.contains("LoadedAnalyses")
 
 }
 

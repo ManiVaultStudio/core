@@ -139,7 +139,12 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
     if (variantMap["Derived"].toBool())
     {
-        setSourceDataSet(mv::data().getDataset(variantMap["SourceDatasetGUID"].toString()));
+        auto sourceDatasetGUID = variantMap["SourceDatasetGUID"].toString();
+
+        if(sourceDatasetGUID == "")
+            setSourceDataSet(getParent());
+        else
+            setSourceDataSet(mv::data().getDataset(sourceDatasetGUID));
 
         assert(_sourceDataset.isValid());
     }
@@ -147,8 +152,13 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     _mayUnderive = variantMap["MayUnderive"].toBool();
 
     if (!variantMap["Full"].toBool())
-    {
-        makeSubsetOf(mv::data().getDataset(variantMap["FullDatasetGUID"].toString()));
+    {        
+        auto fullDatasetGUID = variantMap["FullDatasetGUID"].toString();
+
+        if (fullDatasetGUID == "")
+            makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
+        else
+            makeSubsetOf(mv::data().getDataset(fullDatasetGUID));
 
         assert(variantMap["PluginKind"].toString() == _rawData->getKind());
         assert(variantMap["PluginVersion"].toString() == _rawData->getVersion());
