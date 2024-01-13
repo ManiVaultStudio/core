@@ -61,16 +61,16 @@ std::tuple<mv::Dataset<mv::DatasetImpl>, mv::Dataset<Images>> Images::addImageDa
     else if (pluginKind != "Points")
         qCritical() << "Images::addImageDataset: warning: pluginKind must be Points or Cluster - defaulting to Points. Given: " << pluginKind;
 
-    auto points = Application::core()->addDataset<ptype>(pkind, datasetGuiName, parentDataSet);
+    auto points = mv::data().createDataset<ptype>(pkind, datasetGuiName, parentDataSet);
 
-    mv::Dataset<Images> images = Application::core()->addDataset<Images>("Images", "images", Dataset<DatasetImpl>(*points));
+    mv::Dataset<Images> images = mv::data().createDataset<Images>("Images", "images", Dataset<DatasetImpl>(*points));
 
     return { points, images };
 }
 
 Dataset<DatasetImpl> Images::createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const bool& visible /*= true*/) const
 {
-    return Application::core()->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
+    return mv::data().createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
 }
 
 Dataset<DatasetImpl> Images::copy() const

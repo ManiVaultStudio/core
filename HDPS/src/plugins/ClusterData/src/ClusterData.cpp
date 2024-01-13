@@ -227,7 +227,7 @@ void Clusters::init()
             return;
 
         // Only synchronize when our own group index is non-negative
-        if (!Application::core()->isDatasetGroupingEnabled() || getGroupIndex() < 0)
+        if (!mv::data().getDatasetGroupingAction().isChecked() || getGroupIndex() < 0)
             return;
 
         if (dataEvent->getDataset()->getGroupIndex() == getGroupIndex() && dataEvent->getDataset()->getDataType() == ClusterType) {
