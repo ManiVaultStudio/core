@@ -45,12 +45,19 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
 
 void DataPropertiesPlugin::selectedItemsChanged(DataHierarchyItems selectedItems)
 {
-    qDebug() << __FUNCTION__ << "A";
-
     if (projects().isOpeningProject() || projects().isImportingProject())
         return;
 
-    qDebug() << __FUNCTION__ << "B";
+    QString windowTitle = "Data Properties";
+
+    if (!selectedItems.isEmpty()) {
+        if (selectedItems.count() == 1)
+            windowTitle += " - " + selectedItems.first()->getDataset()->getGuiName();
+        else
+            windowTitle += " - ...";
+    } else {}
+
+    getGuiNameAction().setString(windowTitle);
 
     if (selectedItems.isEmpty()) {
         _dataset = nullptr;
@@ -58,8 +65,8 @@ void DataPropertiesPlugin::selectedItemsChanged(DataHierarchyItems selectedItems
         return;
     }
 
-    // Save reference to currently selected dataset
     _dataset = selectedItems.first()->getDataset();
+
     _additionalEditorAction.setEnabled(true);
 }
 

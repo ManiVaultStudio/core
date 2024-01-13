@@ -43,12 +43,8 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
 void DataPropertiesWidget::dataHierarchySelectionChanged()
 {
-    qDebug() << __FUNCTION__ << "A";
-
     if (projects().isOpeningProject() || projects().isImportingProject())
         return;
-
-    qDebug() << __FUNCTION__ << "B";
 
     const auto selectedItems = mv::dataHierarchy().getSelectedItems();
 
@@ -59,6 +55,8 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
         }
         else {
             GroupsAction::GroupActions groupActions;
+
+            _groupsActionWidget->setEnabled(selectedItems.count() == 1);
 
             if (selectedItems.count() == 1) {
                 if (_dataset.isValid())
@@ -93,6 +91,7 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
                 _groupsActionWidget->getFilteredActionsAction().setShowLabels(true);
             }
             else {
+                /*
                 Datasets datasets;
 
                 for (const auto& selectedItem : selectedItems)
@@ -139,6 +138,7 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
                     groupActions << groupAction;
 
                 _groupsActionWidget->getFilteredActionsAction().setShowLabels(false);
+                */
             }
 
             _groupsAction.setGroupActions(groupActions);

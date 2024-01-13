@@ -106,7 +106,6 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
                         } else
                             menus[previousMenuPath]->addMenu(menus[menuPath]);
                     }
-                                
                 } else
                     addMenu(menus[titleSegments.first()]);
             }

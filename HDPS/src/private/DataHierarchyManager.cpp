@@ -24,7 +24,6 @@ DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
     AbstractDataHierarchyManager(),
     _items()
 {
-    connect(&data(), &AbstractDataManager::datasetAboutToBeRemoved, this, &DataHierarchyManager::removeItem);
 }
 
 DataHierarchyManager::~DataHierarchyManager()
@@ -44,6 +43,16 @@ void DataHierarchyManager::initialize()
         return;
 
     beginInitialization();
+    {
+        connect(&data(), &AbstractDataManager::datasetAboutToBeRemoved, this, &DataHierarchyManager::removeItem);
+
+        const auto synchronizeSelection = [this]() -> void {
+            emit selectedItemsChanged(getSelectedItems());
+        };
+
+        connect(&projects(), &AbstractProjectManager::projectOpened, this, synchronizeSelection);
+        connect(&projects(), &AbstractProjectManager::projectImported, this, synchronizeSelection);
+    }
     endInitialization();
 }
 
@@ -169,7 +178,6 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
         });
 
         connect(dataHierarchyItem, &DataHierarchyItem::selectedChanged, this, [this, dataHierarchyItem]() -> void {
-            qDebug() << __FUNCTION__;
             emit selectedItemsChanged(getSelectedItems());
         });
 
