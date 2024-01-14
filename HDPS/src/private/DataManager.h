@@ -164,7 +164,7 @@ public: // Dataset access
      */
     Datasets getAllDatasets(const std::vector<DataType>& dataTypes = std::vector<DataType>()) const override;
 
-public: // Selections
+protected: // Selection
 
     /**
      * Add \p selection on \p rawDataName to the manager
@@ -172,6 +172,8 @@ public: // Selections
      * @param selection Smart pointer to selection dataset
      */
     void addSelection(const QString& rawDataName, Dataset<DatasetImpl> selection) override;
+
+public: // Selection
 
     /**
      * Get selection by \p rawDataName

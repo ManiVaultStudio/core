@@ -222,7 +222,7 @@ public: // Dataset access
      */
     virtual Datasets getAllDatasets(const std::vector<DataType>& dataTypes = std::vector<DataType>()) const = 0;
 
-public: // Selection
+protected: // Selection
 
     /**
      * Add \p selection on \p rawDataName to the manager
@@ -230,6 +230,8 @@ public: // Selection
      * @param selection Smart pointer to selection dataset
      */
     virtual void addSelection(const QString& rawDataName, Dataset<DatasetImpl> selection) = 0;
+
+public: // Selection
 
     /**
      * Get selection dataset by \p rawDataName
