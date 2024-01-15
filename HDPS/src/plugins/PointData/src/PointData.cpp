@@ -973,7 +973,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "Selection");
 
     if (isFull())
-        getRawData<PointData>().fromVariantMap(variantMap);
+        getRawData<PointData>()->fromVariantMap(variantMap);
     else
     {
         makeSubsetOf(getFullDataset<Points>());
