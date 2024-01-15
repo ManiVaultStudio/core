@@ -6,6 +6,8 @@
 
 #include "clusterdata_export.h"
 
+#include <Dataset.h>
+
 #include "ClustersModel.h"
 #include "ClustersFilterModel.h"
 #include "ClustersActionWidget.h"
