@@ -27,7 +27,7 @@ void DatasetImpl::makeSubsetOf(Dataset<DatasetImpl> fullDataset)
     _rawDataName = fullDataset->_rawDataName;
 
     if (!_rawDataName.isEmpty())
-        _rawData = &Application::core()->requestRawData(getRawDataName());
+        _rawData = mv::data().getRawData(getRawDataName());
 
     _fullDataset = fullDataset;
 
@@ -51,21 +51,23 @@ const DataHierarchyItem& DatasetImpl::getDataHierarchyItem() const
 
 DataHierarchyItem& DatasetImpl::getDataHierarchyItem()
 {
-    return dataHierarchy().getItem(getId());
+    return *dataHierarchy().getItem(getId());
 }
 
 mv::Dataset<mv::DatasetImpl> DatasetImpl::getParent() const
 {
-    return getDataHierarchyItem().getParent().getDataset();
+    if (!getDataHierarchyItem().hasParent())
+        return {};
+
+    return getDataHierarchyItem().getParent()->getDataset();
 }
 
-QVector<Dataset<DatasetImpl>> DatasetImpl::getChildren(const QVector<DataType>& dataTypes /*= QVector<DataType>()*/) const
+QVector<Dataset<DatasetImpl>> DatasetImpl::getChildren(const QVector<DataType>& dataTypes /*= QVector<DataType>()*/, bool recursively /*= true*/) const
 {
     QVector<Dataset<DatasetImpl>> children;
 
-    for (auto dataHierarchyChild : getDataHierarchyItem().getChildren())
-        if (dataTypes.contains(dataHierarchyChild->getDataType()))
-            children << dataHierarchyChild->getDataset();
+    for (auto dataHierarchyChild : getDataHierarchyItem().getChildren(true))
+        children << dataHierarchyChild->getDataset();
 
     return children;
 }
@@ -150,7 +152,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         Datasets proxyMembers;
 
         for (const auto& proxyMemberGuid : variantMap["ProxyMembers"].toStringList())
-            proxyMembers << Application::core()->requestDataset(proxyMemberGuid);
+            proxyMembers << mv::data().getDataset(proxyMemberGuid);
 
         setProxyMembers(proxyMembers);
     }
@@ -289,9 +291,8 @@ void DatasetImpl::addLinkedData(const mv::Dataset<DatasetImpl>& targetDataSet, m
     _linkedData.back().setMapping(mapping);
 }
 
-DatasetImpl::DatasetImpl(CoreInterface* core, const QString& rawDataName, const QString& id /*= ""*/) :
+DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/, const QString& id /*= ""*/) :
     WidgetAction(nullptr, "Set"),
-    _core(core),
     _storageType(StorageType::Owner),
     _rawData(nullptr),
     _rawDataName(rawDataName),
@@ -305,7 +306,9 @@ DatasetImpl::DatasetImpl(CoreInterface* core, const QString& rawDataName, const 
     _linkedDataFlags(LinkedDataFlag::SendReceive),
     _locked(false),
     _smartPointer(this),
-    _task(this, "")
+    _task(this, ""),
+    _mayUnderive(mayUnderive),
+    _aboutToBeRemoved(false)
 {
     if (!id.isEmpty())
         Serializable::setId(id);
@@ -315,6 +318,9 @@ DatasetImpl::DatasetImpl(CoreInterface* core, const QString& rawDataName, const 
 
 DatasetImpl::~DatasetImpl()
 {
+#ifdef _DEBUG
+    qDebug() << "Removed dataset" << getGuiName();
+#endif
 }
 
 void DatasetImpl::init()
@@ -356,20 +362,25 @@ bool DatasetImpl::isDerivedData() const
     return _derived;
 }
 
+bool DatasetImpl::mayUnderive() const
+{
+    return _mayUnderive;
+}
+
 mv::DataType DatasetImpl::getDataType() const
 {
-    return Application::core()->requestRawData(getRawDataName()).getDataType();
+    return mv::data().getRawData(getRawDataName())->getDataType();
 }
 
 void DatasetImpl::setSourceDataSet(const Dataset<DatasetImpl>& dataset)
 {
     _sourceDataset = dataset;
-    _derived = true;
+    _derived = _sourceDataset.isValid();
 }
 
 mv::Dataset<mv::DatasetImpl> DatasetImpl::getSelection() const
 {
-    return Application::core()->requestSelection(getSourceDataset<DatasetImpl>()->getRawDataName());
+    return mv::data().getSelection(getSourceDataset<DatasetImpl>()->getRawDataName());
 }
 
 mv::Dataset<mv::DatasetImpl>& DatasetImpl::getSmartPointer()
@@ -440,9 +451,19 @@ DatasetTask& DatasetImpl::getTask()
     return _task;
 }
 
-QString DatasetImpl::getLocation() const
+void DatasetImpl::setAboutToBeRemoved(bool aboutToBeRemoved /*= true*/)
 {
-    return getDataHierarchyItem().getLocation();
+    _aboutToBeRemoved = aboutToBeRemoved;
+}
+
+bool DatasetImpl::isAboutToBeRemoved() const
+{
+    return _aboutToBeRemoved;
+}
+
+QString DatasetImpl::getLocation(bool recompute /*= false*/) const
+{
+    return getDataHierarchyItem().getLocation(recompute);
 }
 
 QVariant DatasetImpl::getProperty(const QString& name, const QVariant& defaultValue /*= QVariant()*/) const

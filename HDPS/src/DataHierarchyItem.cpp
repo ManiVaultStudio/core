@@ -13,20 +13,21 @@
 
 #include <stdexcept>
 
+#ifdef _DEBUG
+    #define DATA_HIERARCHY_ITEM_VERBOSE
+#endif
+
 using namespace mv::gui;
 using namespace mv::util;
 
 namespace mv
 {
 
-DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/, const bool& selected /*= false*/) :
-    WidgetAction(parent, "Data Hierarchy Item"),
+DataHierarchyItem::DataHierarchyItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible /*= true*/, bool selected /*= false*/) :
+    WidgetAction(nullptr, "Data Hierarchy Item"),
     _dataset(dataset),
-    _parent(),
-    _children(),
     _selected(false),
     _expanded(true),
-    _icon(),
     _actions()
 {
     const auto synchronizeText = [this]() -> void {
@@ -38,51 +39,72 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     connect(_dataset.get(), &DatasetImpl::textChanged, this, synchronizeText);
 
     if (parentDataset.isValid())
-        _parent = &parentDataset->getDataHierarchyItem();
+        setParent(&parentDataset->getDataHierarchyItem());
 
     setIcon(getDataset()->getIcon());
     setVisible(visible);
 }
 
-DataHierarchyItem& DataHierarchyItem::getParent() const
-{
-    return *_parent;
-}
-
-void DataHierarchyItem::getParents(DataHierarchyItem& dataHierarchyItem, DataHierarchyItems& parents)
-{
-    if (dataHierarchyItem.hasParent()) {
-
-        getParents(dataHierarchyItem.getParent(), parents);
-
-        parents << &dataHierarchyItem.getParent();
-    }
-}
-
-void DataHierarchyItem::setParent(DataHierarchyItem& parent)
-{
-    _parent = &parent;
-}
-
 bool DataHierarchyItem::hasParent() const
-{ 
-    return _parent != nullptr;
+{
+    return parent();
 }
 
-DataHierarchyItems DataHierarchyItem::getChildren(const bool& recursive /*= false*/) const
+DataHierarchyItem* DataHierarchyItem::getParent() const
 {
-    auto children = _children;
-
-    if (recursive)
-        for (auto child : _children)
-            children << child->getChildren(recursive);
-
-    return children;
+    return static_cast<DataHierarchyItem*>(parent());
 }
 
-std::uint32_t DataHierarchyItem::getNumberOfChildren() const
+void DataHierarchyItem::setParent(DataHierarchyItem* parent)
 {
-    return _children.count();
+    WidgetAction::setParent(parent);
+
+    emit parentChanged(getParent());
+}
+
+DataHierarchyItems DataHierarchyItem::getParents() const
+{
+    DataHierarchyItems parentDataHierarchyItems;
+
+    if (hasParent()) {
+        parentDataHierarchyItems << getParent();
+        parentDataHierarchyItems << getParent()->getParents();
+    }
+
+    return parentDataHierarchyItems;
+}
+
+bool DataHierarchyItem::isChildOf(DataHierarchyItem& dataHierarchyItem) const
+{
+    return getParents().contains(&dataHierarchyItem);
+}
+
+bool DataHierarchyItem::isChildOf(DataHierarchyItems dataHierarchyItems) const
+{
+    for (auto dataHierarchyItem : dataHierarchyItems)
+        if (dataHierarchyItem != this && isChildOf(*dataHierarchyItem))
+            return true;
+
+    return false;
+}
+
+DataHierarchyItems DataHierarchyItem::getChildren(bool recursively /*= false*/) const
+{
+    DataHierarchyItems childDataHierarchyItems;
+
+    for (auto childObject : findChildren<QObject*>(recursively ? Qt::FindChildrenRecursively : Qt::FindDirectChildrenOnly)) {
+        auto childDataHierarchyItem = dynamic_cast<DataHierarchyItem*>(childObject);
+
+        if (childDataHierarchyItem)
+            childDataHierarchyItems << childDataHierarchyItem;
+    }
+
+    return childDataHierarchyItems;
+}
+
+std::uint32_t DataHierarchyItem::getNumberOfChildren(bool recursively /*= false*/) const
+{
+    return getChildren(recursively).count();
 }
 
 bool DataHierarchyItem::hasChildren() const
@@ -90,12 +112,31 @@ bool DataHierarchyItem::hasChildren() const
     return getNumberOfChildren() > 0;
 }
 
-void DataHierarchyItem::setVisible(bool visible)
+std::int32_t DataHierarchyItem::getDepth() const
+{
+    return getParents().count();
+}
+
+void DataHierarchyItem::setVisible(bool visible, bool recursively /*= true*/)
 {
     if (visible == isVisible())
         return;
 
     WidgetAction::setVisible(visible);
+
+    if (visible) {
+        if (hasParent())
+            getParent()->setVisible(visible, false);
+
+        if (recursively)
+            for (auto child : getChildren())
+                child->setVisible(visible);
+    }
+    else {
+        if (recursively)
+            for (auto child : getChildren())
+                child->setVisible(visible, recursively);
+    }
 
     emit visibilityChanged(isVisible());
 }
@@ -105,29 +146,31 @@ bool DataHierarchyItem::isSelected() const
     return _selected;
 }
 
-void DataHierarchyItem::setSelected(const bool& selected)
+void DataHierarchyItem::setSelected(bool selected, bool clear /*= true*/)
 {
     if (selected == _selected)
         return;
 
+#ifdef DATA_HIERARCHY_ITEM_VERBOSE
+    qDebug() << __FUNCTION__ << _dataset->getGuiName() << "selected:"  << selected << "clear:" << clear;
+#endif
+
+    if (clear)
+        dataHierarchy().clearSelection();
+
     _selected = selected;
 
-    emit selectionChanged(_selected);
+    emit selectedChanged(_selected);
 }
 
-void DataHierarchyItem::select()
+void DataHierarchyItem::select(bool clear /*= true*/)
 {
-    setSelected(true);
+    setSelected(true, clear);
 }
 
 void DataHierarchyItem::deselect()
 {
-    setSelected(false);
-}
-
-void DataHierarchyItem::addChild(DataHierarchyItem& child)
-{
-    _children << &child;
+    setSelected(false, false);
 }
 
 Dataset<DatasetImpl> DataHierarchyItem::getDataset()
@@ -186,7 +229,7 @@ bool DataHierarchyItem::getLocked() const
     return _dataset->isLocked();
 }
 
-void DataHierarchyItem::setLocked(const bool& locked)
+void DataHierarchyItem::setLocked(bool locked)
 {
     _dataset->setLocked(locked);
 }
@@ -203,34 +246,37 @@ void DataHierarchyItem::setExpanded(bool expanded)
     emit expandedChanged(_expanded);
 }
 
-QIcon DataHierarchyItem::getIcon() const
-{
-    return _icon;
-}
-
-void DataHierarchyItem::setIcon(const QIcon& icon)
-{
-    _icon = icon;
-}
-
 void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
 {
-    emit loading();
+    try
     {
-        variantMapMustContain(variantMap, "Expanded");
-        variantMapMustContain(variantMap, "Visible");
-
-        setExpanded(variantMap["Expanded"].toBool());
-        setVisible(variantMap["Visible"].toBool());
+        WidgetAction::fromVariantMap(variantMap);
     }
-    emit loaded();
+    catch (...)
+    {
+    }
+
+    variantMapMustContain(variantMap, "Expanded");
+    variantMapMustContain(variantMap, "Visible");
+
+    setExpanded(variantMap["Expanded"].toBool());
+    setVisible(variantMap["Visible"].toBool());
+
+    if (variantMap.contains("Selected"))
+        setSelected(variantMap["Selected"].toBool(), false);
 }
 
 QVariantMap DataHierarchyItem::toVariantMap() const
 {
-    emit const_cast<DataHierarchyItem*>(this)->saving();
-
     QVariantMap variantMap, children;
+
+    try
+    {
+        variantMap = WidgetAction::toVariantMap();
+    }
+    catch (...)
+    {
+    }
 
     std::uint32_t childSortIndex = 0;
 
@@ -244,15 +290,14 @@ QVariantMap DataHierarchyItem::toVariantMap() const
         childSortIndex++;
     }
 
-    emit const_cast<DataHierarchyItem*>(this)->saved();
+    variantMap["Name"]      = _dataset->text();
+    variantMap["Expanded"]  = QVariant::fromValue(_expanded);
+    variantMap["Visible"]   = QVariant::fromValue(isVisible());
+    variantMap["Selected"]  = QVariant::fromValue(isSelected());
+    variantMap["Dataset"]   = _dataset->toVariantMap();
+    variantMap["Children"]  = children;
 
-    return {
-        { "Name", _dataset->text() },
-        { "Expanded", QVariant::fromValue(_expanded) },
-        { "Visible", QVariant::fromValue(isVisible()) },
-        { "Dataset", _dataset->toVariantMap() },
-        { "Children", children }
-    };
+    return variantMap;
 }
 
 }

@@ -2,8 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#ifndef HDPS_PLUGINFACTORY_H
-#define HDPS_PLUGINFACTORY_H
+#pragma once
 
 #include "PluginType.h"
 #include "DataType.h"
@@ -13,8 +12,6 @@
 #include <QObject>
 #include <QIcon>
 #include <QVariant>
-#include <QAction>
-#include <QPointer>
 
 namespace mv
 {
@@ -209,12 +206,8 @@ private:
     gui::TriggerAction          _triggerHelpAction;             /** Trigger action that triggers help (icon and text are already set) */
 };
 
-using PluginFactoryPtrs = std::vector<plugin::PluginFactory*>;
+}
 
-} // namespace plugin
-
-} // namespace mv
+}
 
 Q_DECLARE_INTERFACE(mv::plugin::PluginFactory, "hdps.PluginFactory")
-
-#endif // HDPS_PLUGINFACTORY_H

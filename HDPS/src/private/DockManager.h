@@ -118,8 +118,9 @@ public: // Serialization
     friend class QPointer<DockManager>;
 
 private:
-    mv::Task*     _serializationTask;     /** For reporting serialization progress */
-    mv::Task      _layoutTask;            /** For reporting layout progress */
+    QString     _name;                  /** Dock manager name */
+    mv::Task*   _serializationTask;     /** For reporting serialization progress */
+    mv::Task    _layoutTask;            /** For reporting layout progress */
 
 private:
     ViewPluginDockWidgets _orderedViewPluginDockWidgets; /* the ViewPluginDockWidgets in the order in which they were created */

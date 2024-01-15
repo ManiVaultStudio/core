@@ -8,7 +8,9 @@
 #include <CoreInterface.h>
 #include <Dataset.h>
 #include <Set.h>
+
 #include <actions/PluginTriggerAction.h>
+#include <actions/TriggerAction.h>
 
 #include <QDebug>
 #include <QMenu>
@@ -19,10 +21,12 @@
 using namespace mv;
 using namespace mv::util;
 using namespace mv::plugin;
+using namespace mv::gui;
 
-DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, Datasets datasets) :
+DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, Datasets selectedDatasets) :
     QMenu(parent),
-    _datasets(datasets)
+    _allDatasets(mv::data().getAllDatasets()),
+    _selectedDatasets(selectedDatasets)
 {
     addMenusForPluginType(plugin::Type::ANALYSIS);
     addMenusForPluginType(plugin::Type::LOADER);
@@ -32,18 +36,38 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
 
     QSet<DataType> dataTypes;
 
-    for (const auto& dataset : _datasets)
-        dataTypes.insert(dataset->getDataType());
+    for (const auto& selectedDataset : _selectedDatasets)
+        dataTypes.insert(selectedDataset->getDataType());
 
-    if (datasets.count() >= 2 && dataTypes.count() == 1) {
+    if (_selectedDatasets.count() >= 2 && dataTypes.count() == 1) {
         addSeparator();
         addAction(getGroupAction());
     }
 
-    if (!Application::core()->requestAllDataSets().isEmpty()) {
+    if (!_allDatasets.isEmpty()) {
         addSeparator();
+        
         addMenu(getLockMenu());
         addMenu(getUnlockMenu());
+
+        addSeparator();
+
+        addMenu(getHideMenu());
+        addMenu(getUnhideMenu());
+    }
+
+    if (!_selectedDatasets.isEmpty()) {
+        addSeparator();
+
+        auto removeDatasetsAction = new TriggerAction(this, QString("Remove dataset%1").arg(_selectedDatasets.count() >= 2 ? "s" : ""));
+
+        removeDatasetsAction->setIconByName("trash");
+
+        connect(removeDatasetsAction, &TriggerAction::triggered, this, [this]() -> void {
+            mv::data().removeDatasets(_selectedDatasets);
+        });
+
+        addAction(removeDatasetsAction);
     }
 }
 
@@ -51,7 +75,7 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
 {
     QMap<QString, QMenu*> menus;
 
-    for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(pluginType, _datasets)) {
+    for (auto pluginTriggerAction : Application::core()->getPluginManager().getPluginTriggerActions(pluginType, _selectedDatasets)) {
         const auto titleSegments = pluginTriggerAction->getMenuLocation().split("/");
 
         QString menuPath, previousMenuPath = titleSegments.first();
@@ -82,7 +106,6 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
                         } else
                             menus[previousMenuPath]->addMenu(menus[menuPath]);
                     }
-                                
                 } else
                     addMenu(menus[titleSegments.first()]);
             }
@@ -92,7 +115,7 @@ void DataHierarchyWidgetContextMenu::addMenusForPluginType(plugin::Type pluginTy
     }
             
     //menus["Analyze"]->setTitle(mv::plugin::getPluginTypeName(pluginType));
-    //menus["Analyze"]->setIcon(mv::plugin::getPluginTypeIcon(pluginType));
+    //menus["Import"]->setIcon(mv::plugin::getPluginTypeIcon(pluginType));
 }
 
 QAction* DataHierarchyWidgetContextMenu::getGroupAction()
@@ -103,7 +126,7 @@ QAction* DataHierarchyWidgetContextMenu::getGroupAction()
     groupDataAction->setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
 
     connect(groupDataAction, &QAction::triggered, [this]() -> void {
-        Application::core()->groupDatasets(_datasets);
+        mv::data().groupDatasets(_selectedDatasets);
     });
 
     return groupDataAction;
@@ -118,28 +141,25 @@ QMenu* DataHierarchyWidgetContextMenu::getLockMenu()
     auto lockAllAction = new QAction("All");
 
     connect(lockAllAction, &QAction::triggered, this, [this]() -> void {
-        for (auto dataset : Application::core()->requestAllDataSets())
+        for (auto& dataset : _allDatasets)
             dataset->lock();
     });
 
     lockMenu->setEnabled(false);
 
-    QVector<bool> locked;
+    const auto numberOfLockedDatasets = std::count_if(_allDatasets.begin(), _allDatasets.end(), [](auto& dataset) -> bool {
+        return dataset->isLocked();
+    });
 
-    for (auto dataset : Application::core()->requestAllDataSets())
-        locked << dataset->isLocked();
-
-    const auto numberOfLockedDatasets = std::accumulate(locked.begin(), locked.end(), 0);
-
-    lockMenu->setEnabled(numberOfLockedDatasets < Application::core()->requestAllDataSets().size());
+    lockMenu->setEnabled(numberOfLockedDatasets < _allDatasets.size());
 
     auto lockSelectedAction = new QAction("Selected");
 
     lockSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
-    lockSelectedAction->setEnabled(!_datasets.isEmpty());
+    lockSelectedAction->setEnabled(!_selectedDatasets.isEmpty());
 
     connect(lockSelectedAction, &QAction::triggered, this, [this]() -> void {
-        for (auto dataset : _datasets)
+        for (auto& dataset : _selectedDatasets)
             dataset->lock();
     });
 
@@ -156,34 +176,134 @@ QMenu* DataHierarchyWidgetContextMenu::getUnlockMenu()
     unlockMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("unlock"));
     unlockMenu->setEnabled(false);
 
-    QVector<bool> locked;
-
-    for (auto dataset : Application::core()->requestAllDataSets())
-        locked << dataset->isLocked();
-
-    const auto numberOfLockedDatasets = std::accumulate(locked.begin(), locked.end(), 0);
+    const auto numberOfLockedDatasets = std::count_if(_allDatasets.begin(), _allDatasets.end(), [](auto& dataset) -> bool {
+        return dataset->isLocked();
+    });
 
     unlockMenu->setEnabled(numberOfLockedDatasets >= 1);
 
     auto unlockAllAction = new QAction("All");
 
     connect(unlockAllAction, &QAction::triggered, this, [this]() -> void {
-        for (auto dataset : Application::core()->requestAllDataSets())
+        for (auto& dataset : _allDatasets)
             dataset->unlock();
     });
 
     auto unlockSelectedAction = new QAction("Selected");
 
     unlockSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
-    unlockSelectedAction->setEnabled(!_datasets.isEmpty());
+    unlockSelectedAction->setEnabled(!_selectedDatasets.isEmpty());
 
     connect(unlockSelectedAction, &QAction::triggered, this, [this]() -> void {
-        for (auto dataset : _datasets)
+        for (auto& dataset : _selectedDatasets)
             dataset->unlock();
-        });
+    });
 
     unlockMenu->addAction(unlockSelectedAction);
     unlockMenu->addAction(unlockAllAction);
 
     return unlockMenu;
+}
+
+QMenu* DataHierarchyWidgetContextMenu::getHideMenu()
+{
+    auto hideMenu = new QMenu("Hide");
+
+    hideMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("eye-slash"));
+
+    const auto numberOfVisibleItems = std::count_if(_allDatasets.begin(), _allDatasets.end(), [](auto& dataset) -> bool {
+        return dataset->getDataHierarchyItem().isVisible();
+    });
+
+    const auto numberOfSelectedVisibleItems = std::count_if(_selectedDatasets.begin(), _selectedDatasets.end(), [](auto& dataset) -> bool {
+        return dataset->getDataHierarchyItem().isVisible();
+    });
+
+    hideMenu->setEnabled(_selectedDatasets.empty() ? numberOfVisibleItems >= 1 : numberOfSelectedVisibleItems >= 1);
+
+    auto hideAllAction = new QAction("All");
+
+    connect(hideAllAction, &QAction::triggered, this, [this]() -> void {
+        for (auto& dataset : _allDatasets)
+            dataset->getDataHierarchyItem();
+    });
+
+    hideAllAction->setVisible(_selectedDatasets.isEmpty() && numberOfVisibleItems < _allDatasets.size());
+
+    auto hideSelectedAction = new QAction("Selected");
+
+    hideSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+    hideSelectedAction->setEnabled(!_selectedDatasets.isEmpty());
+
+    connect(hideSelectedAction, &QAction::triggered, this, [this]() -> void {
+        for (auto& dataset : _selectedDatasets)
+            dataset->getDataHierarchyItem().setVisible(false);
+    });
+
+    hideMenu->addAction(hideSelectedAction);
+    hideMenu->addAction(hideAllAction);
+
+    return hideMenu;
+}
+
+QMenu* DataHierarchyWidgetContextMenu::getUnhideMenu()
+{
+    Datasets candidateDatasetsToUnhide;
+
+    if (_selectedDatasets.isEmpty()) {
+        for (auto& dataset : _allDatasets)
+            if (!dataset->getDataHierarchyItem().isVisible())
+                candidateDatasetsToUnhide << dataset;
+    }
+    else {
+        for (auto& selectedDataset : _selectedDatasets)
+            for (auto child : selectedDataset->getChildren())
+                if (!child->getDataHierarchyItem().isVisible())
+                    candidateDatasetsToUnhide << child;
+    }
+
+    auto unhideMenu = new QMenu("Unhide");
+
+    unhideMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
+    
+    const auto numberOfHiddenItems = std::count_if(_allDatasets.begin(), _allDatasets.end(), [](auto& dataset) -> bool {
+        return !dataset->getDataHierarchyItem().isVisible();
+    });
+
+    const auto numberOfSelectedHiddenItems = std::count_if(_selectedDatasets.begin(), _selectedDatasets.end(), [](auto& dataset) -> bool {
+        return !dataset->getDataHierarchyItem().isVisible();
+    });
+
+    unhideMenu->setEnabled(candidateDatasetsToUnhide.count() >= 1);
+
+    auto unhideAllAction = new QAction("All");
+
+    connect(unhideAllAction, &QAction::triggered, this, [candidateDatasetsToUnhide]() -> void {
+        for (auto candidateDatasetToUnhide : candidateDatasetsToUnhide)
+            candidateDatasetToUnhide->getDataHierarchyItem().setVisible(true);
+    });
+
+    unhideAllAction->setEnabled(numberOfHiddenItems < _allDatasets.size());
+
+    unhideMenu->addAction(unhideAllAction);
+
+    if (!candidateDatasetsToUnhide.isEmpty()) {
+        unhideMenu->addSeparator();
+
+        for (auto datasetToUnhide : candidateDatasetsToUnhide) {
+            auto dataHierarchyItem = &datasetToUnhide->getDataHierarchyItem();
+
+            auto unhideDatasetAction = new QAction(dataHierarchyItem->getLocation(true));
+
+            unhideDatasetAction->setIcon(datasetToUnhide->getIcon());
+
+            connect(unhideDatasetAction, &QAction::triggered, this, [dataHierarchyItem]() -> void {
+                dataHierarchyItem->setVisible(true);
+            });
+
+            unhideMenu->addAction(unhideDatasetAction);
+        }
+    }
+
+    return unhideMenu;
 }

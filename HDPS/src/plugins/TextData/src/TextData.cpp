@@ -21,7 +21,7 @@ void TextData::init()
 
 Dataset<DatasetImpl> TextData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return Dataset<DatasetImpl>(new Text(_core, getName(), guid));
+    return Dataset<DatasetImpl>(new Text(getName(), true, guid));
 }
 
 QIcon TextDataFactory::getIcon(const QColor& color /*= Qt::black*/) const

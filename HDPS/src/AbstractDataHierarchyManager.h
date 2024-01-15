@@ -41,35 +41,24 @@ public:
     }
 
     /**
-     * Add a dataset to the hierarchy
-     * @param dataset Smart pointer to dataset
-     * @param parentDataset Smart pointer to parent dataset (if any)
-     * @param visible Whether the dataset is visible in the gui
+     * Get hierarchy item by \p datasetId
+     * @param datasetId Dataset GUID
+     * @return Pointer to data hierarchy item, nullptr if not found
      */
-    virtual void addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true) = 0;
+    virtual const DataHierarchyItem* getItem(const QString& datasetId) const = 0;
 
     /**
-     * Removes a data hierarchy item (and its children recursively) from the data hierarchy
-     * @param dataHierarchyItem Reference to data hierarchy item
+     * Get hierarchy item by \p datasetId
+     * @param datasetId Dataset GUID
+     * @return Pointer to data hierarchy item, nullptr if not found
      */
-    virtual void removeItem(DataHierarchyItem& dataHierarchyItem) = 0;
-
-    /** Removes all items from the data hierarchy manager in a top-down manner */
-    virtual void removeAllItems() = 0;
+    virtual DataHierarchyItem* getItem(const QString& datasetGuid) = 0;
 
     /**
-     * Get hierarchy item by dataset globally unique identifier
-     * @param datasetGuid Dataset GUID
-     * @return Reference to data hierarchy item
+     * Get all items
+     * @return List of items
      */
-    virtual const DataHierarchyItem& getItem(const QString& datasetGuid) const = 0;
-
-    /**
-     * Get hierarchy item by dataset globally unique identifier
-     * @param datasetGuid Dataset GUID
-     * @return Reference to data hierarchy item
-     */
-    virtual DataHierarchyItem& getItem(const QString& datasetGuid) = 0;
+    virtual DataHierarchyItems getItems() const = 0;
 
     /**
      * Get dataset children
@@ -85,11 +74,45 @@ public:
      */
     virtual DataHierarchyItems getTopLevelItems() = 0;
 
+public: // Item selection
+
     /**
-     * Set selected data hierarchy items
-     * @param selectedItems Pointers to selected data hierarchy items
+     * Select data hierarchy \p items
+     * @param items List of pointers to data hierarchy items to select
+     * @param clear Clear the current selections before selection
      */
-    virtual void selectItems(DataHierarchyItems& selectedItems) = 0;
+    virtual void select(DataHierarchyItems items, bool clear = true) = 0;
+
+    /** Select all items */
+    virtual void selectAll() = 0;
+
+    /** Clear the item selection */
+    virtual void clearSelection() = 0;
+
+    /**
+     * Get selected items
+     * @return List of selected items
+     */
+    virtual DataHierarchyItems getSelectedItems() const = 0;
+
+protected:
+
+    /**
+     * Add a dataset to the hierarchy
+     * @param dataset Smart pointer to dataset
+     * @param parentDataset Smart pointer to parent dataset (if any)
+     * @param visible Whether the dataset is visible in the gui
+     */
+    virtual void addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true) = 0;
+
+    /**
+     * Removes data hierarchy for \p dataset from the data hierarchy
+     * @param dataset Dataset to remove the data hierarchy item for
+     */
+    virtual void removeItem(Dataset<DatasetImpl> dataset) = 0;
+
+    /** Removes all items from the data hierarchy manager in a top-down manner */
+    virtual void removeAllItems() = 0;
 
 public: // Serialization
 
@@ -108,52 +131,36 @@ public: // Serialization
 signals:
 
     /**
-     * Signals that a hierarchy item is added to the hierarchy manager
-     * @param dataHierarchyItem Reference to added data hierarchy item
+     * Signals that \p dataHierarchyItem is added to the hierarchy manager
+     * @param dataHierarchyItem Pointer to added data hierarchy item
      */
-    void itemAdded(DataHierarchyItem& dataHierarchyItem);
+    void itemAdded(DataHierarchyItem* dataHierarchyItem);
 
     /**
-     * Signals that a hierarchy item is about to be removed from the hierarchy manager
-     * @param dataset Smart pointer to the about to be removed dataset
+     * Signals that \p dataHierarchyItem is about to be removed from the hierarchy manager
+     * @param dataHierarchyItem Pointer to data hierarchy item which is about to be removed
      */
-    void itemAboutToBeRemoved(const Dataset<DatasetImpl>& dataset);
+    void itemAboutToBeRemoved(DataHierarchyItem* dataHierarchyItem);
 
     /**
-     * Signals that a hierarchy item is removed from the hierarchy manager
-     * @param datasetGui GUID of the removed dataset
+     * Signals that hierarchy item \p datasetId is removed from the hierarchy manager
+     * @param datasetId GUID of the removed dataset
      */
-    void itemRemoved(const QString& datasetGui);
+    void itemRemoved(const QString& datasetId);
 
     /**
-     * Signals that a data hierarchy item is being loaded
-     * @param loadingItem Reference to the data hierarchy item that is being loaded
+     * Signals that the parent of \p dataHierarchyItem changed
+     * @param dataHierarchyItem Pointer to data hierarchy item of which the parent changed
      */
-    void itemLoading(DataHierarchyItem& loadingItem);
-
-    /**
-     * Signals that a data hierarchy item has been loaded
-     * @param loadedItem Reference to the data hierarchy item that has been loaded
-     */
-    void itemLoaded(DataHierarchyItem& loadedItem);
-
-    /**
-     * Signals that a data hierarchy item is being saved
-     * @param savingItem Reference to the data hierarchy item that is being saved
-     */
-    void itemSaving(DataHierarchyItem& savingItem);
-
-    /**
-     * Signals that a data hierarchy item has been saved
-     * @param loadedItem Reference to the data hierarchy item that has been saved
-     */
-    void itemSaved(DataHierarchyItem& savedItem);
+    void itemParentChanged(DataHierarchyItem* dataHierarchyItem);
 
     /**
      * Signals that the selected items changed
      * @param selectedItems Pointers to selected data hierarchy items
      */
     void selectedItemsChanged(DataHierarchyItems selectedItems);
+
+    friend class DataManager;
 };
 
 }

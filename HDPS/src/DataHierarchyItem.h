@@ -4,17 +4,14 @@
 
 #pragma once
 
-#include "DataType.h"
 #include "actions/WidgetAction.h"
-#include "event/Event.h"
 
-#include <QObject>
+#include "Dataset.h"
+
 #include <QMap>
 #include <QString>
 #include <QDebug>
 #include <QIcon>
-#include <QTimer>
-#include <QBitArray>
 #include <QVector>
 
 namespace mv
@@ -28,7 +25,7 @@ using DataHierarchyItems = QVector<DataHierarchyItem*>;
 /**
  * Data hierarchy item class
  *
- * Represents a dataset as an item in a dataset hierarchy
+ * Represents a dataset as an item in the data hierarchy, see the AbstractDataHierarchyManager
  *
  * @author Thomas Kroes
  */
@@ -39,85 +36,119 @@ class DataHierarchyItem final : public mv::gui::WidgetAction
 public:
 
     /**
-     * Constructor
-     * @param parent Pointer to parent object
+     * Construct with smart pointer to \p dataset, \p parentDataset and possible configure whether the item is \p visible and/or \p selected
      * @param dataset Smart pointer to dataset
      * @param parentDataset Smart pointer to parent dataset (if any)
      * @param visible Whether the dataset is visible
      * @param selected Whether the dataset is selected
      */
-    DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true, const bool& selected = false);
-
-    /** Destructor */
-    ~DataHierarchyItem() = default;
-
-    /** Get reference to parent hierarchy item */
-    DataHierarchyItem& getParent() const;
+    DataHierarchyItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible = true, bool selected = false);
 
     /**
-     * Walks up the hierarchy of the data hierarchy item and returns all parents
-     * @param dataHierarchyItem Item to fetch the parents for
-     * @param parents Item parents
+     * Establish whether the data hierarchy item has a parent
+     * @return Boolean determining whether the data hierarchy item has a parent or not
      */
-    static void getParents(DataHierarchyItem& dataHierarchyItem, DataHierarchyItems& parents);
-
-    /** Returns whether the data hierarchy item has a parent */
     bool hasParent() const;
 
     /**
-     * Gets the names of the children name
-     * @param recursive Recursive
+     * Get pointer to parent hierarchy item
+     * @return Pointer to parent hierarchy item if there is a parent otherwise nullptr
      */
-    DataHierarchyItems getChildren(const bool& recursive = false) const;
-
-    /** Gets the number of children */
-    std::uint32_t getNumberOfChildren() const;
-
-    /** Establishes whether the item has any children */
-    bool hasChildren() const;
-
-    /**
-     * Set visibility
-     * @param visible Whether the data hierarchy item is visible or not
-     */
-    void setVisible(bool visible);
-
-public: // Selection
-
-    /** Gets whether the hierarchy item is selected */
-    bool isSelected() const;
-
-    /**
-     * Sets the item selection status
-     * @param selected Whether the hierarchy item is selected
-     */
-    void setSelected(const bool& selected);
-
-    /** Selects the hierarchy item */
-    void select();
-
-    /** De-selects the hierarchy item */
-    void deselect();
+    DataHierarchyItem* getParent() const;
 
 protected:
 
-    /** Set reference to parent hierarchy item */
-    void setParent(DataHierarchyItem& parent);
+    /**
+     * Set pointer to parent hierarchy item to \p parent
+     * @param parent Pointer to parent hierarchy item (root item if nullptr)
+     */
+    void setParent(DataHierarchyItem* parent);
 
-public: // Hierarchy
+public:
 
     /**
-     * Add a child
-     * @param child Reference to child data hierarchy item
+     * Walks up the hierarchy onwards from the data hierarchy item and returns all parents
+     * @return Vector of pointers to parent items
      */
-    void addChild(DataHierarchyItem& child);
+    DataHierarchyItems getParents() const;
+
+    /**
+     * Determine whether the data hierarchy item is a child of \p dataHierarchyItem
+     * @param dataHierarchyItem Reference to possible parent data hierarchy item
+     * @return Boolean determining if \p dataHierarchyItem is a parent
+     */
+    bool isChildOf(DataHierarchyItem& dataHierarchyItem) const;
+
+    /**
+     * Determine whether the data hierarchy item is a child of one or more \p dataHierarchyItems
+     * @param dataHierarchyItems Vector of possible parent data hierarchy items
+     * @return Boolean determining if it is a child of one or more \p dataHierarchyItems
+     */
+    bool isChildOf(DataHierarchyItems dataHierarchyItems) const;
+
+    /**
+     * Get children, possibly \p recursively
+     * @param recursively Get all descendants
+     * @return Vector of pointers to children
+     */
+    DataHierarchyItems getChildren(bool recursively = false) const;
+
+    /**
+     * Get number of children, possibly \p recursively
+     * @param recursively Count recursively
+     * @returm Number of children
+     */
+    std::uint32_t getNumberOfChildren(bool recursively = false) const;
+
+    /**
+     * Establishes whether the item has any children
+     * @return Boolean determining whether the item has any children
+     */
+    bool hasChildren() const;
+
+    /**
+     * Get the depth of the data hierarchy item
+     * @return Item depth (root starts at zero)
+     */
+    std::int32_t getDepth() const;
+
+    /**
+     * Set visibility to \p visible possibly \p recursively
+     * @param visible Whether the data hierarchy item is visible or not
+     * @param recursively Whether to set child data hierarchy items recursively or not
+     */
+    void setVisible(bool visible, bool recursively = true);
+
+public: // Selection
+
+    /**
+     * Gets whether the hierarchy item is selected
+     * @return Boolean determining whether the item is selected
+     */
+    bool isSelected() const;
+
+    /**
+     * Sets the selection status to \p selected and possibly \p clear the global selection
+     * @param selected Whether the hierarchy item is selected
+     * @param clear Whether to clear the global data hierarchy selection
+     */
+    void setSelected(bool selected, bool clear = true);
+
+    /**
+     * Selects the data hierarchy item
+     * @param clear Whether to clear the global data hierarchy selection
+     */
+    void select(bool clear = true);
+
+    /** De-selects the hierarchy item */
+    void deselect();
 
 public: // Miscellaneous
 
     /** Get the dataset */
     Dataset<DatasetImpl> getDataset();
 
-    /** Get the dataset */
+    /** Get the dataset as \p DatasetType */
     template<typename DatasetType>
     Dataset<DatasetType> getDataset() const {
         return Dataset<DatasetType>(const_cast<DataHierarchyItem*>(this)->getDataset().get<DatasetType>());
@@ -138,12 +169,18 @@ public: // Miscellaneous
         return Dataset<DatasetType>(const_cast<DataHierarchyItem*>(this)->getDataset().get<DatasetType>());
     };
 
-    /** Get the dataset type */
+    /**
+     * Get the dataset type
+     * @return The dataset type
+     */
     DataType getDataType() const;
 
 public: // Actions
 
-    /** Add action */
+    /**
+     * Attach \p widgetAction
+     * @param widgetAction Reference to widget action to attach
+     */
     void addAction(mv::gui::WidgetAction& widgetAction);
 
     /** Returns list of shared action widgets*/
@@ -164,16 +201,19 @@ public: // Actions
 
 public: // Locked
 
-    /** Get locked status */
+    /**
+     * Get locked status
+     * @return Boolean determining if the dataset is locked or not
+     */
     bool getLocked() const;
 
     /**
-     * Set locked status
-     * @param locked Whether the dataset is locked
+     * Set locked status to \p locked
+     * @param locked Boolean determining whether the dataset is locked or not
      */
-    void setLocked(const bool& locked);
+    void setLocked(bool locked);
 
-public: // Expanded
+public: // Expansion
 
     /**
      * Get expanded status
@@ -182,21 +222,10 @@ public: // Expanded
     bool isExpanded() const;
 
     /**
-     * Set expanded status
-     * @param expanded Whether the dataset is expanded
+     * Set expanded status to \p expanded
+     * @param expanded Boolean determining whether the dataset is expanded or not
      */
     void setExpanded(bool expanded);
-
-public: // Named icons
-
-    /** Get icon */
-    QIcon getIcon() const;
-
-    /**
-     * Set icon
-     * @param icon Icon
-     */
-    void setIcon(const QIcon& icon);
 
 public: // Serialization
 
@@ -215,14 +244,14 @@ public: // Serialization
 signals:
 
     /**
-     * Signals that the item got selected
-     * @param selected Whether the item is selected
+     * Signals that item selection changed to \p selected
+     * @param selected Whether the item is selected or not
      */
-    void selectionChanged(const bool& selected);
+    void selectedChanged(bool selected);
 
     /**
-     * Signals that a widget action was added
-     * @param widgetAction Widget action that was added
+     * Signals that \p widgetAction was attached to the data hierarchy item
+     * @param widgetAction Reference to the widget action that was added
      */
     void actionAdded(mv::gui::WidgetAction& widgetAction);
 
@@ -230,59 +259,48 @@ signals:
     void iconChanged();
 
     /**
-     * Signals that the dataset name changed
+     * Signals that the dataset name changed to \p datasetName
      * @param datasetName New name of the dataset
      */
     void datasetNameChanged(const QString& datasetName);
 
     /**
-     * Signals that the locked status changed
+     * Signals that the locked status changed to \p locked
      * @param locked Locked
      */
     void lockedChanged(bool locked);
 
     /**
-     * Signals that the visibility status changed
+     * Signals that the visibility changed to \p visibility
      * @param visibility Visibility
      */
     void visibilityChanged(bool visibility);
 
     /**
-     * Signals that the expansion status changed
+     * Signals that the expansion changed \p expanded
      * @param expanded Whether the item is expanded or not
      */
     void expandedChanged(bool expanded);
 
-    /** Signals that the data hierarchy item is being loaded */
-    void loading();
-
-    /** Signals that the data hierarchy item has been loaded */
-    void loaded();
-
-    /** Signals that the data hierarchy item is being saved */
-    void saving();
-
-    /** Signals that the data hierarchy item has been saved */
-    void saved();
+    /**
+     * Signals that the parent changed to \p parent
+     * @param parent Pointer to parent data hierarchy item (might be nullptr)
+     */
+    void parentChanged(DataHierarchyItem* parent);
 
 protected:
     Dataset<DatasetImpl>        _dataset;       /** Smart pointer to dataset */
-    DataHierarchyItem*          _parent;        /** Pointer to parent data hierarchy item */
-    DataHierarchyItems          _children;      /** Pointers to child items (if any) */
     bool                        _selected;      /** Whether the hierarchy item is selected */
     bool                        _expanded;      /** Whether the item is expanded or not (when it has children) */
-    QIcon                       _icon;          /** Icon */
-    mv::gui::WidgetActions    _actions;       /** Widget actions */
+    mv::gui::WidgetActions      _actions;       /** Attached widget actions */
 
 protected:
     friend class DataHierarchyManager;
     friend class DataManager;
-
-    /** Single shot task update timer interval */
-    static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL = 100;
-
-    /** Single shot message disappear timer interval */
-    static constexpr std::uint32_t MESSAGE_DISAPPEAR_INTERVAL = 1500;
 };
 
 }
+
+Q_DECLARE_METATYPE(mv::DataHierarchyItem)
+
+inline const auto dataHierarchyItemMetaTypeId = qRegisterMetaType<mv::DataHierarchyItem*>("mv::DataHierarchyItem");

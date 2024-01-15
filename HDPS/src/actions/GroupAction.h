@@ -44,6 +44,7 @@ public:
 public:
 
     using WidgetFlagsMap = QMap<const WidgetAction*, std::int32_t>;
+    using WidgetConfigurationFunctionsMap = QMap<const WidgetAction*, WidgetConfigurationFunction>;
     using WidgetFlagsList = QList<std::int32_t>;
 
 public: // Widgets
@@ -164,8 +165,9 @@ public: // Actions management
      * Add \p action to the group
      * @param action Pointer to action to add
      * @param widgetFlags Action widget flags (default flags if -1)
+     * @param widgetConfigurationFunction When set, overrides the standard widget configuration function in the widget action
      */
-    virtual void addAction(WidgetAction* action, std::int32_t widgetFlags = -1) final;
+    virtual void addAction(WidgetAction* action, std::int32_t widgetFlags = -1, WidgetConfigurationFunction widgetConfigurationFunction = WidgetConfigurationFunction()) final;
 
     /**
      * Remove \p action from the group
@@ -189,10 +191,16 @@ public: // Actions management
     virtual ConstWidgetActions getConstActions() final;
 
     /**
-     * Get widget flags map (Maps widget action pointer to widget creation flags)
+     * Get widget flags map (maps widget action pointer to widget creation flags)
      * @return Widget flags map
      */
     WidgetFlagsMap getWidgetFlagsMap();
+
+    /**
+     * Get widget configuration functions map (maps widget action pointer to widget configuration function)
+     * @return Widget configuration functions map
+     */
+    WidgetConfigurationFunctionsMap getWidgetConfigurationFunctionsMap();
 
 public: // Label sizing for vertical layout
 
@@ -290,12 +298,13 @@ signals:
     void labelWidthFixedChanged(const std::uint32_t& labelWidthFixed);
 
 private:
-    Qt::AlignmentFlag   _alignment;         /** Item alignment */
-    bool                _expanded;          /** Whether or not the group is expanded */
-    bool                _readOnly;          /** Whether or not the group is read-only */
-    WidgetActions       _actions;           /** Vector of pointers to widget actions in the group */
-    bool                _showLabels;        /** Whether to show labels or not */
-    WidgetFlagsMap      _widgetFlagsMap;    /** Maps widget action pointer to widget creation flags */
+    Qt::AlignmentFlag                   _alignment;                         /** Item alignment */
+    bool                                _expanded;                          /** Whether or not the group is expanded */
+    bool                                _readOnly;                          /** Whether or not the group is read-only */
+    WidgetActions                       _actions;                           /** Vector of pointers to widget actions in the group */
+    bool                                _showLabels;                        /** Whether to show labels or not */
+    WidgetFlagsMap                      _widgetFlagsMap;                    /** Maps widget action pointer to widget creation flags */
+    WidgetConfigurationFunctionsMap     _widgetConfigurationFunctionsMap;   /** Maps widget action pointer to widget configuration function */
 
 private: // Specific settings for vertical layout
     LabelSizingType     _labelSizingType;           /** Type of label sizing */

@@ -128,15 +128,51 @@ bool WidgetAction::isLeaf() const
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
 {
-    if (parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent()))
-        return getWidget(parent, _defaultWidgetFlags | WidgetActionWidget::PopupLayout);
+    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
 
-    return getWidget(parent, _defaultWidgetFlags);
+    return getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    return getWidget(parent, widgetFlags);
+    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
+
+    auto widget = getWidget(parent, isInPopupMode ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
+
+    Q_ASSERT(widget != nullptr);
+
+    if (widget != nullptr && _widgetConfigurationFunction)
+        _widgetConfigurationFunction(this, widget);
+
+    return widget;
+}
+
+QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction)
+{
+    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
+
+    auto widget = getWidget(parent, isInPopupMode ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
+
+    Q_ASSERT(widget != nullptr);
+
+    if (widget != nullptr && widgetConfigurationFunction)
+        widgetConfigurationFunction(this, widget);
+
+    return widget;
+}
+
+QWidget* WidgetAction::createWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction)
+{
+    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
+
+    auto widget = getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
+
+    Q_ASSERT(widget != nullptr);
+
+    if (widget != nullptr && widgetConfigurationFunction)
+        widgetConfigurationFunction(this, widget);
+
+    return widget;
 }
 
 std::int32_t WidgetAction::getSortIndex() const
@@ -597,8 +633,11 @@ void WidgetAction::saveToSettings()
     Application::current()->setSetting(_settingsPrefix, toVariantMap());
 }
 
-QString WidgetAction::getLocation() const
+QString WidgetAction::getLocation(bool recompute /*= false*/) const
 {
+    if (recompute)
+        const_cast<WidgetAction*>(this)->updateLocation();
+
     return _location;
 }
 
@@ -617,29 +656,6 @@ void WidgetAction::updateLocation(bool recursive /*= true*/)
     if (recursive)
         for (const auto& child : getChildren())
             child->updateLocation(recursive);
-}
-
-QVector<WidgetAction*> WidgetAction::findChildren(const QString& searchString, bool recursive /*= true*/) const
-{
-    QVector<WidgetAction*> foundChildren;
-
-    for (auto child : children()) {
-        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-        if (!childWidgetAction)
-            continue;
-
-        if (searchString.isEmpty())
-            foundChildren << childWidgetAction;
-        else
-            if (childWidgetAction->text().contains(searchString, Qt::CaseInsensitive))
-                foundChildren << childWidgetAction;
-
-        if (recursive)
-            foundChildren << childWidgetAction->findChildren(searchString, recursive);
-    }
-
-    return foundChildren;
 }
 
 QSize WidgetAction::getPopupSizeHint() const
@@ -800,6 +816,13 @@ void WidgetAction::setStretch(const std::int32_t& stretch)
     _stretch = stretch;
 
     emit stretchChanged(_stretch);
+}
+
+void WidgetAction::setWidgetConfigurationFunction(const WidgetConfigurationFunction& widgetConfigurationFunction)
+{
+    _widgetConfigurationFunction = widgetConfigurationFunction;
+
+    emit widgetConfigurationFunctionChanged(_widgetConfigurationFunction);
 }
 
 void WidgetAction::cacheState(const QString& name /*= "cache"*/)

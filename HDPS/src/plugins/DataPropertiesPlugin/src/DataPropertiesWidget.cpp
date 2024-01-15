@@ -32,17 +32,21 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
     _layout.addWidget(_groupsActionWidget);
 
-    connect(&Application::core()->getDataHierarchyManager(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::selectedItemsChanged);
+    connect(&mv::dataHierarchy(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::dataHierarchySelectionChanged);
 
     connect(&_dataset, &Dataset<DatasetImpl>::removed, this, [this]() -> void {
         _groupsAction.setGroupActions({});
     });
+
+    dataHierarchySelectionChanged();
 }
 
-void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems)
+void DataPropertiesWidget::dataHierarchySelectionChanged()
 {
     if (projects().isOpeningProject() || projects().isImportingProject())
         return;
+
+    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
 
     try
     {
@@ -51,6 +55,8 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
         }
         else {
             GroupsAction::GroupActions groupActions;
+
+            _groupsActionWidget->setEnabled(selectedItems.count() == 1);
 
             if (selectedItems.count() == 1) {
                 if (_dataset.isValid())
@@ -85,6 +91,7 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                 _groupsActionWidget->getFilteredActionsAction().setShowLabels(true);
             }
             else {
+                /*
                 Datasets datasets;
 
                 for (const auto& selectedItem : selectedItems)
@@ -118,7 +125,7 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                 auto groupDataAction = new TriggerAction(groupAction, "Group data");
 
                 connect(groupDataAction, &TriggerAction::triggered, this, [datasets]() -> void {
-                    mv::Application::core()->groupDatasets(datasets);
+                    mv::data().groupDatasets(datasets);
                 });
 
                 triggerActions << groupDataAction;
@@ -131,6 +138,7 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                     groupActions << groupAction;
 
                 _groupsActionWidget->getFilteredActionsAction().setShowLabels(false);
+                */
             }
 
             _groupsAction.setGroupActions(groupActions);

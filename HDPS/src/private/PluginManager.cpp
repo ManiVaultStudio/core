@@ -16,6 +16,8 @@
 
 #include <util/Serialization.h>
 
+#include <actions/PluginTriggerAction.h>
+
 #include <QDebug>
 #include <QPluginLoader>
 #include <QMessageBox>
@@ -27,13 +29,14 @@
 #include <assert.h>
 
 #ifdef _DEBUG
-    //#define PLUGIN_MANAGER_VERBOSE
+    #define PLUGIN_MANAGER_VERBOSE
 #endif
 
 namespace mv {
 
 using namespace util;
 using namespace plugin;
+using namespace gui;
 
 PluginManager::PluginManager() :
     AbstractPluginManager()
@@ -72,16 +75,16 @@ void PluginManager::reset()
 
     beginReset();
     {
-        for (auto& pluginPtr : _plugins)
-            destroyPlugin(pluginPtr);
-
-        _plugins.clear();
     }
     endReset();
 }
 
 void PluginManager::loadPlugins()
 {
+#ifdef PLUGIN_MANAGER_VERBOSE
+    qDebug() << "Loading plugin factories";
+#endif
+
 	QDir pluginDir(qApp->applicationDirPath());
     
 #if defined(Q_OS_WIN)
@@ -103,7 +106,7 @@ void PluginManager::loadPlugins()
     const QStringList resolvedPlugins = resolveDependencies(pluginDir);
 
     // For each of the plugin files which are resolved, load them and add them in their proper menu category
-    for (const QString& fileName: resolvedPlugins)
+    for (const auto& fileName: resolvedPlugins)
     {
         // Dynamic loader of plugin shared library
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
@@ -170,6 +173,10 @@ mv::plugin::PluginFactory* PluginManager::getPluginFactory(const QString& plugin
 
 QStringList PluginManager::resolveDependencies(QDir pluginDir) const
 {
+#ifdef PLUGIN_MANAGER_VERBOSE
+    qDebug() << "Resolving plugin dependencies";
+#endif
+
     // Map keeping track of the list of plugin kinds on which a plugin is dependent
     QMap<QString, QStringList> dependencies;
     // List of plugin kinds which have had their dependencies resolved
@@ -275,8 +282,8 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets datas
         auto pluginFactory  = _pluginFactories[kind];
         auto pluginInstance = pluginFactory->produce();
 
-        if (!pluginInstance)
-            return nullptr;
+        if (pluginInstance == nullptr)
+            throw std::runtime_error(QString("Unable to produce plugin of kind %1").arg(kind).toStdString());
 
         pluginFactory->setNumberOfInstances(pluginFactory->getNumberOfInstances() + 1);
 
@@ -305,11 +312,11 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets datas
                 break;
         }
 
-        dynamic_cast<Core*>(Application::core())->addPlugin(pluginInstance);
+        addPlugin(pluginInstance);
 
-        qDebug() << "Added plugin" << pluginInstance->getKind() << "with version" << pluginInstance->getVersion();
+        qDebug() << "Added plugin" << pluginInstance->getKind() << "with version" << pluginInstance->getVersion() << "and ID" << pluginInstance->getId();
 
-        _plugins << pluginInstance;
+        _plugins.push_back(std::move(std::unique_ptr<plugin::Plugin>(pluginInstance)));
 
         emit pluginAdded(pluginInstance);
 
@@ -317,28 +324,96 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets datas
     }
     catch (std::exception& e)
     {
-        QMessageBox::warning(nullptr, "HDPS", QString("Unable to create plugin: %1").arg(e.what()));
-
-        return nullptr;
+        exceptionMessageBox("Unable to create plugin", e);
     }
+    catch (...) {
+        exceptionMessageBox("Unable to create plugin");
+    }
+
+    return {};
 }
 
-mv::plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, Datasets datasets /*= Datasets()*/)
+plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, Datasets datasets /*= Datasets()*/)
 {
-    auto viewPlugin = dynamic_cast<mv::plugin::ViewPlugin*>(requestPlugin(kind, datasets));
+    const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(requestPlugin(kind, datasets));
 
-    if (viewPlugin)
-        Application::core()->getWorkspaceManager().addViewPlugin(viewPlugin, dockToViewPlugin, dockArea);
+    if (viewPlugin != nullptr)
+        mv::workspaces().addViewPlugin(viewPlugin, dockToViewPlugin, dockArea);
 
     return viewPlugin;
+}
+
+void PluginManager::addPlugin(plugin::Plugin* plugin)
+{
+    Q_ASSERT(plugin != nullptr);
+
+    if (plugin == nullptr)
+        return;
+
+#ifdef PLUGIN_MANAGER_VERBOSE
+    qDebug() << "Add plugin to manager" << plugin->getGuiName();
+#endif
+
+    try
+    {
+        switch (plugin->getType())
+        {
+            case plugin::Type::DATA:
+            {
+                mv::data().addRawData(dynamic_cast<plugin::RawData*>(plugin));
+                break;
+            }
+
+            case plugin::Type::VIEW:
+                break;
+        }
+
+        plugin->init();
+
+        switch (plugin->getType())
+        {
+            case plugin::Type::ANALYSIS:
+            {
+                auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
+
+                if (analysisPlugin)
+                    events().notifyDatasetAdded(analysisPlugin->getOutputDataset());
+
+                break;
+            }
+
+            case plugin::Type::LOADER:
+            {
+                dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
+                break;
+            }
+
+            case plugin::Type::WRITER:
+            {
+                dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
+                break;
+            }
+
+        }
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to add plugin", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to add plugin");
+    }
 }
 
 void PluginManager::destroyPlugin(plugin::Plugin* plugin)
 {
     Q_ASSERT(plugin != nullptr);
 
+    if (plugin == nullptr)
+        return;
+
 #ifdef PLUGIN_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__ << plugin->getGuiName();
+    qDebug() << "Destroy plugin" << plugin->getGuiName();
 #endif
 
     try
@@ -347,13 +422,14 @@ void PluginManager::destroyPlugin(plugin::Plugin* plugin)
 
         emit pluginAboutToBeDestroyed(plugin);
         {
-            auto pluginFactory = _pluginFactories[plugin->getKind()];
+            const auto it = std::find_if(_plugins.begin(), _plugins.end(), [pluginId](const auto& pluginPtr) -> bool {
+                return pluginId == pluginPtr->getId();
+            });
 
-            pluginFactory->setNumberOfInstances(pluginFactory->getNumberOfInstances() - 1);
+            if (it == _plugins.end())
+                throw std::runtime_error(QString("Plugin %1 (%2) not found").arg(plugin->getGuiName(), plugin->getId()).toStdString());
 
-            _plugins.removeOne(plugin);
-
-            delete plugin;
+            _plugins.erase(it);
         }
         emit pluginDestroyed(pluginId);
     }
@@ -366,9 +442,9 @@ void PluginManager::destroyPlugin(plugin::Plugin* plugin)
     }
 }
 
-PluginFactoryPtrs PluginManager::getPluginFactoriesByType(const plugin::Type& pluginType) const
+std::vector<PluginFactory*> PluginManager::getPluginFactoriesByType(const plugin::Type& pluginType) const
 {
-    PluginFactoryPtrs pluginFactories;
+    std::vector<PluginFactory*> pluginFactories;
 
     for (auto pluginFactory : _pluginFactories)
         if (pluginFactory->getType() == pluginType)
@@ -377,11 +453,11 @@ PluginFactoryPtrs PluginManager::getPluginFactoriesByType(const plugin::Type& pl
     return pluginFactories;
 }
 
-PluginFactoryPtrs PluginManager::getPluginFactoriesByTypes(const plugin::Types& pluginTypes /*= plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }*/) const
+std::vector<PluginFactory*> PluginManager::getPluginFactoriesByTypes(const plugin::Types& pluginTypes /*= plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }*/) const
 {
-    PluginFactoryPtrs pluginFactories;
+    std::vector<PluginFactory*> pluginFactories;
 
-    for (auto pluginType : pluginTypes) {
+    for (const auto& pluginType : pluginTypes) {
         const auto pluginFactoriesForType = getPluginFactoriesByType(pluginType);
 
         pluginFactories.insert(pluginFactories.end(), pluginFactoriesForType.begin(), pluginFactoriesForType.end());
@@ -390,39 +466,39 @@ PluginFactoryPtrs PluginManager::getPluginFactoriesByTypes(const plugin::Types& 
     return pluginFactories;
 }
 
-PluginPtrs PluginManager::getPluginsByFactory(const plugin::PluginFactory* pluginFactory) const
+std::vector<plugin::Plugin*> PluginManager::getPluginsByFactory(const plugin::PluginFactory* pluginFactory) const
 {
-    PluginPtrs plugins;
+    std::vector<plugin::Plugin*> pluginsByFactory;
 
-    for (auto& plugin : getPluginsByTypes())
+    for (const auto& plugin : getPluginsByTypes())
         if (pluginFactory == plugin->getFactory())
-            plugins.push_back(plugin);
+            pluginsByFactory.push_back(plugin);
 
-    return plugins;
+    return pluginsByFactory;
 }
 
-PluginPtrs PluginManager::getPluginsByType(const plugin::Type& pluginType) const
+std::vector<plugin::Plugin*> PluginManager::getPluginsByType(const plugin::Type& pluginType) const
 {
-    PluginPtrs plugins;
+    std::vector<plugin::Plugin*> pluginsByType;
 
-    for (auto& plugin : const_cast<PluginManager*>(this)->_plugins)
+    for (const auto& plugin : const_cast<PluginManager*>(this)->_plugins)
         if (pluginType == plugin->getType())
-            plugins.push_back(plugin);
+            pluginsByType.push_back(plugin.get());
 
-    return plugins;
+    return pluginsByType;
 }
 
-PluginPtrs PluginManager::getPluginsByTypes(const plugin::Types& pluginTypes /*= plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }*/) const
+std::vector<plugin::Plugin*> PluginManager::getPluginsByTypes(const plugin::Types& pluginTypes /*= plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }*/) const
 {
-    PluginPtrs plugins;
+    std::vector<plugin::Plugin*> pluginsByType;
 
-    for (auto pluginType : pluginTypes) {
+    for (const auto& pluginType : pluginTypes) {
         const auto pluginsForType = getPluginsByType(pluginType);
 
-        plugins.insert(plugins.end(), pluginsForType.begin(), pluginsForType.end());
+        pluginsByType.insert(pluginsByType.end(), pluginsForType.begin(), pluginsForType.end());
     }
-        
-    return plugins;
+
+    return pluginsByType;
 }
 
 QStringList PluginManager::getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const

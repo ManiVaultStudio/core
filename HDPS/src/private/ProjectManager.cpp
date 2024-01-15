@@ -50,7 +50,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _saveProjectAction(this, "Save Project"),
     _saveProjectAsAction(this, "Save Project As..."),
     _editProjectSettingsAction(this, "Project Settings..."),
-    _recentProjectsAction(this),
+    _recentProjectsAction(this, getSettingsPrefix() + "RecentProjects"),
     _newProjectMenu(),
     _importDataMenu(),
     _publishAction(this, "Publish"),
@@ -339,8 +339,6 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject"));
 
-            //temporaryDirectory.setAutoRemove(false);
-
             setTemporaryDirPath(TemporaryDirType::Open, temporaryDirectory.path());
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
@@ -503,10 +501,14 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
     catch (std::exception& e)
     {
         exceptionMessageBox("Unable to load ManiVault project", e);
+
+        projects().getProjectSerializationTask().setFinished();
     }
     catch (...)
     {
         exceptionMessageBox("Unable to load ManiVault project");
+
+        projects().getProjectSerializationTask().setFinished();
     }
 }
 
@@ -710,10 +712,14 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
     catch (std::exception& e)
     {
         exceptionMessageBox("Unable to save project", e);
+
+        projects().getProjectSerializationTask().setFinished();
     }
     catch (...)
     {
         exceptionMessageBox("Unable to save project");
+
+        projects().getProjectSerializationTask().setFinished();
     }
 }
 
@@ -888,10 +894,14 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
     catch (std::exception& e)
     {
         exceptionMessageBox("Unable to publish ManiVault project", e);
+
+        projects().getProjectSerializationTask().setFinished();
     }
     catch (...)
     {
         exceptionMessageBox("Unable to publish ManiVault project");
+
+        projects().getProjectSerializationTask().setFinished();
     }
 }
 
@@ -984,6 +994,8 @@ void ProjectManager::createProject()
 {
     emit projectAboutToBeCreated();
     {
+        mv::data().reset();
+
         reset();
 
         _project.reset(new Project());

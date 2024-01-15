@@ -26,6 +26,11 @@ namespace mv::plugin
 class Plugin : public mv::gui::WidgetAction
 {
 public:
+
+    /**
+     * Construct with pointer to plugin \p factory
+     * @param factory Pointer to plugin factory
+     */
     Plugin(const PluginFactory* factory);
 
     virtual ~Plugin();
@@ -34,7 +39,7 @@ public:
      * Can be implemented to initialize the plugin to a certain state.
      * This function gets called when the plugin is first instantiated.
      */
-    virtual void init() = 0;
+    virtual void init() {};
 
     /**
      * Get the plugin factory for the plugin
@@ -161,10 +166,5 @@ protected:
 
     friend class PluginFactory;
 };
-
-using Plugins = QVector<QPointer<plugin::Plugin*>>;
-using UniquePtrPlugin = std::unique_ptr<plugin::Plugin>;
-using UniquePtrsPlugin = std::vector<UniquePtrPlugin>;
-using PluginPtrs = std::vector<plugin::Plugin*>;
 
 }

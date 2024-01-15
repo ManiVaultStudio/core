@@ -27,8 +27,8 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     _instructionVideosWidget(this, "Instruction Videos"),
     _workspaceLocationTypeAction(this, "Workspace location type"),
     _workspaceLocationTypesModel(this),
-    _recentWorkspacesAction(this),
-    _recentProjectsAction(this)
+    _recentWorkspacesAction(this, mv::workspaces().getSettingsPrefix() + "RecentWorkspaces"),
+    _recentProjectsAction(this, mv::projects().getSettingsPrefix() + "RecentProjects")
 {
     auto layout = new QVBoxLayout();
 

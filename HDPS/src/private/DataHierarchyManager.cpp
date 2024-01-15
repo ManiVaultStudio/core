@@ -43,6 +43,16 @@ void DataHierarchyManager::initialize()
         return;
 
     beginInitialization();
+    {
+        connect(&data(), &AbstractDataManager::datasetAboutToBeRemoved, this, &DataHierarchyManager::removeItem);
+
+        const auto synchronizeSelection = [this]() -> void {
+            emit selectedItemsChanged(getSelectedItems());
+        };
+
+        connect(&projects(), &AbstractProjectManager::projectOpened, this, synchronizeSelection);
+        connect(&projects(), &AbstractProjectManager::projectImported, this, synchronizeSelection);
+    }
     endInitialization();
 }
 
@@ -58,112 +68,25 @@ void DataHierarchyManager::reset()
     endReset();
 }
 
-void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/)
+const DataHierarchyItem* DataHierarchyManager::getItem(const QString& datasetId) const
 {
-    //qDebug() << "Adding" << dataset->getGuiName() << "to the data hierarchy";
-
-    try {
-
-        // Create new data hierarchy item
-        const auto newDataHierarchyItem = new DataHierarchyItem(parentDataset.isValid() ? &parentDataset->getDataHierarchyItem() : static_cast<QObject*>(this), dataset, parentDataset, visible);
-
-        // Pass-through loading signal
-        connect(newDataHierarchyItem, &DataHierarchyItem::loading, this, [this, newDataHierarchyItem]() {
-            emit itemLoading(*newDataHierarchyItem);
-        });
-
-        // Pass-through loaded signal
-        connect(newDataHierarchyItem, &DataHierarchyItem::loaded, this, [this, newDataHierarchyItem]() {
-            emit itemLoaded(*newDataHierarchyItem);
-        });
-
-        // Pass-through saving signal
-        connect(newDataHierarchyItem, &DataHierarchyItem::saving, this, [this, newDataHierarchyItem]() {
-            emit itemSaving(*newDataHierarchyItem);
-        });
-
-        // Pass-through saved signal
-        connect(newDataHierarchyItem, &DataHierarchyItem::saved, this, [this, newDataHierarchyItem]() {
-            emit itemSaved(*newDataHierarchyItem);
-        });
-
-        _items << newDataHierarchyItem;
-
-        // Add child item if the parent is valid
-        if (parentDataset.isValid())
-            parentDataset->getDataHierarchyItem().addChild(dataset->getDataHierarchyItem());
-
-        dataset->setParent(newDataHierarchyItem);
-
-        // Notify others that an item is added
-        emit itemAdded(*newDataHierarchyItem);
-
-        // Remove the data hierarchy item when the corresponding dataset is about to be removed
-        connect(&newDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this, newDataHierarchyItem]() {
-            if (newDataHierarchyItem->getDatasetReference().isValid())
-                removeItem(*newDataHierarchyItem);
-        });
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to add dataset to the data hierarchy manager", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to add dataset to the data hierarchy manager");
-    }
+    return const_cast<DataHierarchyManager*>(this)->getItem(datasetId);
 }
 
-void DataHierarchyManager::removeItem(DataHierarchyItem& dataHierarchyItem)
-{
-    try {
-        qDebug() << "Removing" << dataHierarchyItem.getDataset()->text() << "from the data hierarchy";
-
-        // Get dataset
-        auto dataset        = dataHierarchyItem.getDataset();
-        auto datasetGuid    = dataset->getId();
-
-        emit itemAboutToBeRemoved(dataset);
-        {
-            _items.removeOne(&dataHierarchyItem);
-
-            //delete &dataHierarchyItem;
-        }
-        emit itemRemoved(datasetGuid);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to remove item(s) from the data hierarchy manager", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to remove item(s) from the data hierarchy manager");
-    }
-}
-
-void DataHierarchyManager::removeAllItems()
-{
-    const auto dataHierarchyItems = _items;
-
-    for (auto dataHierarchyItem : dataHierarchyItems)
-        if (!dataHierarchyItem->hasParent())
-            removeItem(*dataHierarchyItem);
-}
-
-const DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid) const
-{
-    return const_cast<DataHierarchyManager*>(this)->getItem(datasetGuid);
-}
-
-DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid)
+DataHierarchyItem* DataHierarchyManager::getItem(const QString& datasetId)
 {
     try
     {
-        Q_ASSERT(!datasetGuid.isEmpty());
+        Q_ASSERT(!datasetId.isEmpty());
 
-        for (auto dataHierarchyItem : _items)
-            if (dataHierarchyItem->getDatasetReference().getDatasetId() == datasetGuid)
-                return *dataHierarchyItem;
+        const auto it = std::find_if(_items.begin(), _items.end(), [datasetId](auto& dataHierarchyItem) -> bool {
+            return datasetId == dataHierarchyItem->getDataset()->getId();
+        });
 
-        throw std::runtime_error(QString("Failed to find data hierarchy item with dataset ID: %1").arg(datasetGuid).toStdString());
+        if (it == _items.end())
+            throw std::runtime_error(QString("Data hierarchy item with dataset ID %1 not found in database").arg(datasetId).toStdString());
+
+        return (*it).get();
     }
     catch (std::exception& e)
     {
@@ -172,6 +95,27 @@ DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid)
     catch (...) {
         exceptionMessageBox("Unable to get item from the data hierarchy manager");
     }
+}
+
+mv::DataHierarchyItems DataHierarchyManager::getItems() const
+{
+    DataHierarchyItems items;
+
+    for (auto& item : _items)
+        items << item.get();
+
+    return items;
+}
+
+DataHierarchyItems DataHierarchyManager::getTopLevelItems()
+{
+    DataHierarchyItems topLevelItems;
+
+    for (auto& item : _items)
+        if (!item->hasParent())
+            topLevelItems << item.get();
+
+    return topLevelItems;
 }
 
 mv::DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive /*= true*/)
@@ -185,20 +129,107 @@ mv::DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem& data
     return children;
 }
 
-DataHierarchyItems DataHierarchyManager::getTopLevelItems()
+void DataHierarchyManager::select(DataHierarchyItems items, bool clear /*= true*/)
 {
-    DataHierarchyItems topLevelItems;
+    if (clear)
+        clearSelection();
 
-    for (auto item : _items)
-        if (!item->hasParent())
-            topLevelItems << item;
-
-    return topLevelItems;
+    for (auto& item : items)
+        item->select(false);
 }
 
-void DataHierarchyManager::selectItems(DataHierarchyItems& selectedItems)
+void DataHierarchyManager::selectAll()
 {
-    emit selectedItemsChanged(selectedItems);
+    for (auto& item : _items)
+        item->select(false);
+}
+
+void DataHierarchyManager::clearSelection()
+{
+    for (auto& item : _items)
+        item->deselect();
+}
+
+mv::DataHierarchyItems DataHierarchyManager::getSelectedItems() const
+{
+    DataHierarchyItems selectedDataHierarchyItems;
+
+    for (auto& item : _items)
+        if (item->isSelected())
+            selectedDataHierarchyItems << item.get();
+
+    return selectedDataHierarchyItems;
+}
+
+void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/)
+{
+    try {
+
+#ifdef _DEBUG
+        qDebug() << "Add dataset" << dataset->getGuiName() << "to the data hierarchy manager";
+#endif
+
+        const auto dataHierarchyItem = new DataHierarchyItem(dataset, parentDataset, visible);
+
+        _items.push_back(std::unique_ptr<DataHierarchyItem>(dataHierarchyItem));
+
+        connect(dataHierarchyItem, &DataHierarchyItem::parentChanged, this, [this, dataHierarchyItem]() -> void {
+            emit itemParentChanged(dataHierarchyItem);
+        });
+
+        connect(dataHierarchyItem, &DataHierarchyItem::selectedChanged, this, [this, dataHierarchyItem]() -> void {
+            emit selectedItemsChanged(getSelectedItems());
+        });
+
+        emit itemAdded(dataHierarchyItem);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to add dataset to the data hierarchy manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to add dataset to the data hierarchy manager");
+    }
+}
+
+void DataHierarchyManager::removeItem(Dataset<DatasetImpl> dataset)
+{
+    try {
+
+        if (!dataset.isValid())
+            throw std::runtime_error("Dataset smart pointer is invalid");
+
+#ifdef _DEBUG
+        qDebug() << "Remove dataset" << dataset->getGuiName() << "from the data hierarchy manager";
+#endif
+
+        const auto datasetId = dataset->getId();
+
+        const auto it = std::find_if(_items.begin(), _items.end(), [datasetId](const auto& dataHierachyItem) -> bool {
+            return datasetId == dataHierachyItem->getDataset()->getId();
+        });
+
+        if (it == _items.end())
+            throw std::runtime_error(QString("Data hierarchy item with dataset ID %1 not found in database").arg(datasetId).toStdString());
+
+        emit itemAboutToBeRemoved((*it).get());
+        {
+            _items.erase(it);
+        }
+        emit itemRemoved(datasetId);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to remove item from the data hierarchy manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to remove item from the data hierarchy manager");
+    }
+}
+
+void DataHierarchyManager::removeAllItems()
+{
+    _items.clear();
 }
 
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
@@ -231,13 +262,11 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
         projectDataSerializationTask.setSubtaskStarted(datasetId, QString("Loading dataset: %1").arg(datasetName));
         
-        auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent, dataset["ID"].toString());
+        auto loadedDataset = mv::data().createDataset(pluginKind, guiName, parent, dataset["ID"].toString());
         
         loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
         loadedDataset->fromVariantMap(dataset);
-        
-        events().notifyDatasetAdded(loadedDataset);
-        
+
         projectDataSerializationTask.setSubtaskFinished(datasetId, QString("Loading dataset: %1").arg(datasetName));
 
         QCoreApplication::processEvents();
@@ -268,12 +297,12 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap DataHierarchyManager::toVariantMap() const
 {
-    if (!_items.isEmpty()) {
+    if (!_items.empty()) {
         auto& projectDataSerializationTask = projects().getProjectSerializationTask().getDataTask();
         
         QStringList subtasks;
 
-        for (auto dataHierarchyItem : _items)
+        for (auto& dataHierarchyItem : _items)
             subtasks << dataHierarchyItem->getDataset()->getId();
 
         projectDataSerializationTask.setSubtasks(subtasks);
@@ -283,7 +312,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
         std::uint32_t sortIndex = 0;
 
-        for (auto dataHierarchyItem : _items) {
+        for (auto& dataHierarchyItem : _items) {
             if (dataHierarchyItem->hasParent())
                 continue;
 

@@ -8,27 +8,11 @@
 
 #include <AbstractDataManager.h>
 
-#include <QObject> // To support signals
-#include <QString>
-
-#include <string>
-#include <unordered_map>    // Data is stored in maps
-#include <memory>           // Data is stored in unique pointers
-#include <exception>        // Used for defining custom exceptions
-#include <functional>       // Necessary for hash function
-
-// Qt 5.14.1 has a std::hash<QString> specialization and defines the following macro.
-// Qt 5.12.4 does not! See also https://bugreports.qt.io/browse/QTBUG-33428
-#ifndef QT_SPECIALIZE_STD_HASH_TO_CALL_QHASH
-// Hash specialization for QString so we can use it as a key in the data maps
-namespace std {
-    template<> struct hash<QString> {
-        std::size_t operator()(const QString& s) const {
-            return qHash(s);
-        }
-    };
-}
-#endif
+#include <map>
+#include <unordered_map>
+#include <memory>
+#include <exception>
+#include <functional>
 
 namespace mv
 {
@@ -37,6 +21,20 @@ namespace plugin {
     class RawData;
 }
 
+/**
+ * Data manager
+ *
+ * Concrete implementation of the AbstractDataManager
+ * 
+ * Provides storage place for:
+ * - Datasets
+ * - Raw data
+ * - Selections
+ * 
+ * Main purpose is to add, remove and retrieve datasets
+ *
+ * @author Thomas Kroes and Julian Thijssen
+ */
 class DataManager final : public mv::AbstractDataManager
 {
     Q_OBJECT
@@ -44,11 +42,12 @@ class DataManager final : public mv::AbstractDataManager
 public:
 
     /**
-     * Constructor
-     * @param core Pointer to the core
+     * Construct data manager with \p parent object
+     * @param parent Pointer to parent object
      */
-    DataManager();
+    DataManager(QObject* parent = nullptr);
 
+    /** Reset the data manager upon destruction */
     ~DataManager();
 
     /** Perform manager startup initialization */
@@ -57,53 +56,161 @@ public:
     /** Resets the contents of the data manager */
     void reset() override;
 
+protected: // Raw data
+
     /**
-     * Add raw data to the data manager
-     * @param rawData Pointer to the raw data
+     * Add \p rawData to the manager (plugin manager remains the owner)
+     * @param rawData Pointer to the raw data to add
      */
     void addRawData(plugin::RawData* rawData) override;
 
     /**
-     * Add data set to the data manager
-     * @param dataset Smart pointer to the dataset
+     * Remove raw data with \p rawDataName from the manager
+     * @param rawDataName Name of the raw data to remove
      */
-    void addSet(const Dataset<DatasetImpl>& dataset) override;
+    void removeRawData(const QString& rawDataName) override;
+
+public: // Raw data
 
     /**
-     * Add selection to the data manager
-     * @param dataName Name of the raw data
-     * @param selection Smart pointer to selection dataset
+     * Get raw data by \p rawDataName
+     * @param rawDataName Name of the raw data
+     * @return Pointer to raw data if found, nullptr otherwise
      */
-    void addSelection(const QString& dataName, Dataset<DatasetImpl> selection) override;
+    plugin::RawData* getRawData(const QString& rawDataName) override;
 
     /**
-     * Removes a Dataset, other datasets derived from this dataset are converted to non-derived data (notifies listeners)
+     * Get raw data names
+     * @retun Raw data names list
+     */
+    QStringList getRawDataNames() const override;
+
+public: // Datasets
+
+    /**
+     * Creates dataset of \p kind with \p guiName to the manager and returns the created dataset
+     * @param kind Kind of data plugin
+     * @param guiName Name of the added dataset in the GUI
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will add to the root of the data hierarchy if not valid)
+     * @param id Globally unique dataset identifier (use only for deserialization)
+     * @param notify Whether to notify the core that a dataset is added
+     * @return Smart pointer to the create dataset
+     */
+    Dataset<DatasetImpl> createDataset(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "", bool notify = true) override;
+
+protected: // Dataset remove
+
+    /**
+     * Add \p dataset to the manager
+     * @param dataset Dataset to added
+     * @param parentDataset Parent dataset (if any)
+     * @param notify Whether to notify the core that a dataset is added
+     */
+    void addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool notify = true) override;
+
+public: // Dataset remove
+
+    /**
+     * Remove \p dataset from the manager
      * @param dataset Smart pointer to dataset to remove
      */
     void removeDataset(Dataset<DatasetImpl> dataset) override;
 
     /**
-     * Get raw data by name
-     * @param name Name of the raw data
+     * Remove \p datasets from the manager
+     * @param datasets Smart pointer to datasets to remove
      */
-    plugin::RawData& getRawData(const QString& name) override;
+    void removeDatasets(Datasets datasets) override;
+
+public:// Derived datasets
 
     /**
-     * Get dataset by dataset GUID
-     * @param datasetGuid GUID of the dataset
+     * Creates derived dataset from \p sourceDataset with \p guiName and returns the created derived dataset
+     * @param guiName GUI name for the new dataset from the core
+     * @param sourceDataset Smart pointer to the source dataset from which this dataset will be derived
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to source dataset in hierarchy if not valid)
+     * @param notify Whether to notify the core that a dataset is added
+     * @return Smart pointer to the created derived dataset
+     */
+    Dataset<DatasetImpl> createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), bool notify = true) override;
+
+public: // Subsets
+
+    /**
+     * Creates a copy of \p selection with the \p sourceDataset, adds it to the manager and returns the created subset
+     * @param selection Smart pointer to the selection set
+     * @param sourceDataset Smart pointer to the source dataset
+     * @param guiName GUI name of the subset
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to source dataset in hierarchy if not valid)
+     * @param visible Whether the new dataset is visible in the data hierarchy
+     * @param notify Whether to notify the core that a dataset is added
+     * @return Smart pointer to the created subset
+     */
+    Dataset<DatasetImpl> createSubsetFromSelection(const Dataset<DatasetImpl>& selection, const Dataset<DatasetImpl>& sourceDataset, const QString& guiName, const Dataset<DatasetImpl>& parentDataset, const bool& visible = true, bool notify = true) override;
+
+public: // Dataset access
+
+    /**
+     * Get dataset by \p datasetId
+     * @param datasetId Globally unique identifier of the dataset
      * @return Smart pointer to the dataset
      */
-    Dataset<DatasetImpl> getSet(const QString& datasetGuid) override;
+    Dataset<DatasetImpl> getDataset(const QString& datasetId) override;
 
     /**
-     * Get selection by data name
-     * @param dataName Name of the data
+     * Get all datasets for \p dataTypes
+     * @param dataTypes Data types filter (if empty returns all types)
+     * @return Smart pointers to datasets
+     */
+    Datasets getAllDatasets(const std::vector<DataType>& dataTypes = std::vector<DataType>()) const override;
+
+protected: // Selection
+
+    /**
+     * Add \p selection on \p rawDataName to the manager
+     * @param rawDataName Name of the raw data
+     * @param selection Smart pointer to selection dataset
+     */
+    void addSelection(const QString& rawDataName, Dataset<DatasetImpl> selection) override;
+
+public: // Selection
+
+    /**
+     * Get selection by \p rawDataName
+     * @param rawDataName Name of the raw data
      * @return Smart pointer to the selection dataset
      */
-    Dataset<DatasetImpl> getSelection(const QString& dataName) override;
+    Dataset<DatasetImpl> getSelection(const QString& rawDataName) override;
 
-    /** Get all sets from the data manager */
-    const QVector<Dataset<DatasetImpl>>& allSets() const override;
+    /**
+     * Get all selection datasets
+     * @return Smart pointers to selection datasets
+     */
+    Datasets getAllSelections() override;
+
+protected:
+
+    /**
+     * Remove \p selection from the data manager
+     * @param rawDataName Name of the selection raw data
+     */
+    void removeSelection(const QString& rawDataName) override;
+
+public: // Data grouping
+
+    /**
+     * Groups \p datasets into one dataset and returns the group dataset
+     * @param datasets Two or more datasets to group
+     * @param guiName Name of the created dataset in the GUI (if empty, the user will be prompted for a name)
+     * @return Smart pointer to created group dataset
+     */
+    Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") override;
+
+    /**
+     * Get dataset grouping toggle action
+     * @return Reference to dataset grouping toggle action
+     */
+    gui::ToggleAction& getDatasetGroupingAction() override;
 
 public: // Serialization
 
@@ -119,27 +226,11 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-signals:
-    void dataChanged();
-
 private:
-
-    /**
-     * Stores all raw data in the system. Raw data is stored by the name
-     * retrieved from their Plugin::getName() function.
-     */
-    std::unordered_map<QString, std::unique_ptr<plugin::RawData>> _rawDataMap;
-
-    /**
-     * Stores all data sets in the system
-     */
-    QVector<Dataset<DatasetImpl>> _datasets;
-
-    /**
-    * Stores selection sets on all data plug-ins
-    * NOTE: Can't be a QMap because it doesn't support move semantics of unique_ptr
-    */
-    std::unordered_map<QString, Dataset<DatasetImpl>> _selections;
+    std::unordered_map<QString, plugin::RawData*>   _rawDataMap;                /** Maps raw data name to raw data plugin shared pointer (the plugins are owned by the plugin manager) */
+    std::vector<std::unique_ptr<DatasetImpl>>       _datasets;                  /** Vector of pointers to datasets */
+    std::vector<std::unique_ptr<DatasetImpl>>       _selections;                /** Vector of pointers to selection datasets */
+    gui::ToggleAction                               _datasetGroupingAction;     /** Action for toggling whether datasets can be grouped or not */
 };
 
-} // namespace mv
+}

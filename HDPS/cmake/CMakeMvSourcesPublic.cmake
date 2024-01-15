@@ -274,6 +274,8 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/LockingAction.h
     src/actions/VersionAction.h
     src/actions/SplashScreenAction.h
+    src/actions/TreeAction.h
+    src/actions/LabelProxyAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -290,6 +292,8 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/LockingAction.cpp
     src/actions/VersionAction.cpp
     src/actions/SplashScreenAction.cpp
+    src/actions/TreeAction.cpp
+    src/actions/LabelProxyAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
@@ -638,13 +642,11 @@ set(PUBLIC_ACTIONS_MODEL_FILES
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_HEADERS
-    src/models/DataHierarchyModelItem.h
     src/models/DataHierarchyModel.h
     src/models/DataHierarchyFilterModel.h
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_SOURCES
-    src/models/DataHierarchyModelItem.cpp
     src/models/DataHierarchyModel.cpp
     src/models/DataHierarchyFilterModel.cpp
 )

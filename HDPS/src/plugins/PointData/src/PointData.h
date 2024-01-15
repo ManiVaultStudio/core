@@ -335,7 +335,7 @@ public:
      * Get amount of data occupied by the raw data
      * @return Size of the raw data in bytes
      */
-    std::uint64_t getRawDataSize() const {
+    std::uint64_t getRawDataSize() const override {
         std::uint64_t elementSize = 0u;
 
         switch (_vectorHolder.getElementTypeSpecifier())
@@ -654,7 +654,7 @@ private:
     }
 
 public:
-    Points(mv::CoreInterface* core, QString dataName, const QString& guid = "");
+    Points(QString dataName, bool mayUnderive = true, const QString& guid = "");
     ~Points() override;
 
     void init() override;
@@ -664,7 +664,7 @@ public:
     template <typename ReturnType = void, typename FunctionObject>
     ReturnType constVisitFromBeginToEnd(FunctionObject functionObject) const
     {
-        return getRawData<PointData>().constVisitFromBeginToEnd<ReturnType>(functionObject);
+        return getRawData<PointData>()->constVisitFromBeginToEnd<ReturnType>(functionObject);
     }
 
     /// Convenience member function, just calling constVisitFromBeginToEnd.
@@ -678,7 +678,7 @@ public:
     template <typename ReturnType = void, typename FunctionObject>
     ReturnType visitFromBeginToEnd(FunctionObject functionObject)
     {
-        return getRawData<PointData>().visitFromBeginToEnd<ReturnType>(functionObject);
+        return getRawData<PointData>()->visitFromBeginToEnd<ReturnType>(functionObject);
     }
 
 
@@ -723,7 +723,7 @@ public:
     template <typename T>
     void convertData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
-        getRawData<PointData>().convertData(data, numPoints, numDimensions);
+        getRawData<PointData>()->convertData(data, numPoints, numDimensions);
     }
 
 
@@ -731,13 +731,13 @@ public:
     template <typename T>
     void convertData(const T& inputDataContainer, const std::size_t numDimensions)
     {
-        getRawData<PointData>().convertData(inputDataContainer, numDimensions);
+        getRawData<PointData>()->convertData(inputDataContainer, numDimensions);
     }
 
     template <typename T>
     void setDataElementType()
     {
-        getRawData<PointData>().setElementType<T>();
+        getRawData<PointData>()->setElementType<T>();
     }
 
 
@@ -745,9 +745,9 @@ public:
     template <typename T>
     void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
-        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>().getNumDimensions();
+        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
 
-        getRawData<PointData>().setData(data, numPoints, numDimensions);
+        getRawData<PointData>()->setData(data, numPoints, numDimensions);
 
         if (notifyDimensionsChanged)
             mv::events().notifyDatasetDataDimensionsChanged(this);
@@ -760,9 +760,9 @@ public:
     template <typename T>
     void setData(const std::vector<T>& data, const std::size_t numDimensions)
     {
-        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>().getNumDimensions();
+        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
 
-        getRawData<PointData>().setData(data, numDimensions);
+        getRawData<PointData>()->setData(data, numDimensions);
 
         if (notifyDimensionsChanged)
             mv::events().notifyDatasetDataDimensionsChanged(this);
@@ -772,9 +772,9 @@ public:
     template <typename T>
     void setData(std::vector<T>&& data, const std::size_t numDimensions)
     {
-        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>().getNumDimensions();
+        const auto notifyDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
 
-        getRawData<PointData>().setData(std::move(data), numDimensions);
+        getRawData<PointData>()->setData(std::move(data), numDimensions);
 
         if (notifyDimensionsChanged)
             mv::events().notifyDatasetDataDimensionsChanged(this);
@@ -803,12 +803,12 @@ public:
 
                 proxyPointsData.resize(numberOfElements);
 
-                const auto& rawPointData = points->getRawData<PointData>();
+                const auto rawPointData = points->getRawData<PointData>();
 
                 if (points->isFull())
-                    rawPointData.populateFullDataForDimensions(proxyPointsData, dimensionIndices);
+                    rawPointData->populateFullDataForDimensions(proxyPointsData, dimensionIndices);
                 else
-                    rawPointData.populateDataForDimensions(proxyPointsData, dimensionIndices, points->indices);
+                    rawPointData->populateDataForDimensions(proxyPointsData, dimensionIndices, points->indices);
 
                 std::copy(proxyPointsData.begin(), proxyPointsData.end(), resultContainer.begin() + offset);
 
@@ -816,19 +816,19 @@ public:
             }
         }
         else {
-            const auto& rawPointData = getRawData<PointData>();
+            const auto rawPointData = getRawData<PointData>();
 
             if (isFull())
-                rawPointData.populateFullDataForDimensions(resultContainer, dimensionIndices);
+                rawPointData->populateFullDataForDimensions(resultContainer, dimensionIndices);
             else
-                rawPointData.populateDataForDimensions(resultContainer, dimensionIndices, indices);
+                rawPointData->populateDataForDimensions(resultContainer, dimensionIndices, indices);
         }
     }
 
     template <typename ResultContainer, typename DimensionIndices, typename Indices>
     void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices, const Indices& indices) const
     {
-        getRawData<PointData>().populateDataForDimensions(resultContainer, dimensionIndices, indices);
+        getRawData<PointData>()->populateDataForDimensions(resultContainer, dimensionIndices, indices);
     }
 
     unsigned int getNumRawPoints() const
@@ -837,7 +837,7 @@ public:
             return getNumPoints();
         }
         else {
-            return getRawData<PointData>().getNumPoints();
+            return getRawData<PointData>()->getNumPoints();
         }
     }
 
@@ -859,7 +859,7 @@ public:
             return numberOfPoints;
         }
         else {
-            if (isFull()) return getRawData<PointData>().getNumPoints();
+            if (isFull()) return getRawData<PointData>()->getNumPoints();
                 else return static_cast<std::uint32_t>(indices.size());
         }
     }
@@ -870,7 +870,7 @@ public:
             return mv::Dataset<Points>(getProxyMembers().first())->getNumDimensions();
         }
         else {
-            return getRawData<PointData>().getNumDimensions();
+            return getRawData<PointData>()->getNumDimensions();
         }
     }
 
@@ -886,7 +886,7 @@ public:
         if (isProxy())
             return 0;
         else
-            return getRawData<PointData>().getRawDataSize();
+            return getRawData<PointData>()->getRawDataSize();
     }
 
     // Returns the value of the element at the specified position in the current
@@ -994,7 +994,7 @@ public: // Selection
     /** Select all items */
     void selectAll() override;
 
-    /** Deselect all items */
+    /** De-select all items */
     void selectNone() override;
 
     /** Invert item selection */

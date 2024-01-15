@@ -19,6 +19,7 @@
 
 using namespace mv;
 using namespace mv::util;
+using namespace mv::gui;
 
 class NoFocusProxyStyle : public QProxyStyle {
 public:

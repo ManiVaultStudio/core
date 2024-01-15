@@ -28,7 +28,7 @@ class CoreInterface;
  *
  * @author T. Kroes
  */
-template<typename DatasetType>
+template<typename DatasetType = DatasetImpl>
 class Dataset : public DatasetPrivate
 {
 public: // Construction
@@ -153,7 +153,7 @@ public: // Pointer access
     }
 
     /** Returns smart pointer validity
-     * @return Boolean determining whether the dataset pointer is valid (if the dataset actually exists)
+     * @return Boolean determining whether the dataset pointer is valid (if the dataset actually exists and not about to be removed)
      */
     bool isValid() const
     {

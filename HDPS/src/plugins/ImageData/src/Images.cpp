@@ -19,15 +19,15 @@
 
 using namespace mv::util;
 
-Images::Images(mv::CoreInterface* core, QString dataName, const QString& guid /*= ""*/) :
-    DatasetImpl(core, dataName, guid),
+Images::Images(QString dataName, bool mayUnderive /*= false*/, const QString& guid /*= ""*/) :
+    DatasetImpl(dataName, mayUnderive, guid),
     _indices(),
     _imageData(nullptr),
     _infoAction(),
     _visibleRectangle(),
     _maskData()
 {
-    _imageData = &getRawData<ImageData>();
+    _imageData = getRawData<ImageData>();
 
     setLinkedDataFlags(0);
 }
@@ -41,8 +41,8 @@ void Images::init()
     addAction(*_infoAction.get());
 
     // parent data set must be valid and derived from either point or cluster data
-    if (!getDataHierarchyItem().getParent().getDataset<DatasetImpl>().isValid() ||
-        !(getDataHierarchyItem().getParent().getDataType() == PointType || getDataHierarchyItem().getParent().getDataType() == ClusterType))
+    if (!getDataHierarchyItem().getParent()->getDataset<DatasetImpl>().isValid() ||
+        !(getDataHierarchyItem().getParent()->getDataType() == PointType || getDataHierarchyItem().getParent()->getDataType() == ClusterType))
         qCritical() << "Images: warning: image data set must be derived from points or clusters.";
 
 }
@@ -61,23 +61,21 @@ std::tuple<mv::Dataset<mv::DatasetImpl>, mv::Dataset<Images>> Images::addImageDa
     else if (pluginKind != "Points")
         qCritical() << "Images::addImageDataset: warning: pluginKind must be Points or Cluster - defaulting to Points. Given: " << pluginKind;
 
-    auto points = Application::core()->addDataset<ptype>(pkind, datasetGuiName, parentDataSet);
-    events().notifyDatasetAdded(points);
+    auto points = mv::data().createDataset<ptype>(pkind, datasetGuiName, parentDataSet);
 
-    mv::Dataset<Images> images = Application::core()->addDataset<Images>("Images", "images", Dataset<DatasetImpl>(*points));
-    events().notifyDatasetAdded(images);
+    mv::Dataset<Images> images = mv::data().createDataset<Images>("Images", "images", Dataset<DatasetImpl>(*points));
 
     return { points, images };
 }
 
 Dataset<DatasetImpl> Images::createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const bool& visible /*= true*/) const
 {
-    return Application::core()->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
+    return mv::data().createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
 }
 
 Dataset<DatasetImpl> Images::copy() const
 {
-    auto images = new Images(Application::core(), getRawDataName());
+    auto images = new Images(getRawDataName());
 
     images->setText(text());
 
@@ -258,7 +256,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
     try
     {
         // Get smart pointer to parent dataset
-        auto parentDataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
+        auto parentDataset = getDataHierarchyItem().getParent()->getDataset<DatasetImpl>();
 
         // Generate selection data for points
         if (parentDataset->getDataType() == PointType) {
@@ -384,7 +382,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
 void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
     // Get smart pointer to parent dataset
-    auto parentDataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
+    auto parentDataset = getDataHierarchyItem().getParent()->getDataset<DatasetImpl>();
 
     if (parentDataset->getDataType() == PointType) {
 
@@ -686,13 +684,13 @@ void Images::fromVariantMap(const QVariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
 
-    auto& imageData = getRawData<ImageData>();
+    auto imageData = getRawData<ImageData>();
 
     if (variantMap.contains("TypeIndex"))
-        getRawData<ImageData>().setType(static_cast<ImageData::Type>(variantMap["TypeIndex"].toInt()));
+        getRawData<ImageData>()->setType(static_cast<ImageData::Type>(variantMap["TypeIndex"].toInt()));
 
     if (variantMap.contains("NumberOfImages"))
-        getRawData<ImageData>().setNumberImages(variantMap["NumberOfImages"].toInt());
+        getRawData<ImageData>()->setNumberImages(variantMap["NumberOfImages"].toInt());
 
     if (variantMap.contains("ImageSize")) {
         const auto imageSize = variantMap["ImageSize"].toMap();

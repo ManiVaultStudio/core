@@ -23,7 +23,7 @@ GroupAction& ToolbarAction::getGroupAction()
     return _groupAction;
 }
 
-void ToolbarAction::addAction(WidgetAction* action, const std::int32_t& autoExpandPriority /*= -1*/, std::int32_t widgetFlags /*= -1*/)
+void ToolbarAction::addAction(WidgetAction* action, const std::int32_t& autoExpandPriority /*= -1*/, std::int32_t widgetFlags /*= -1*/, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/)
 {
     Q_ASSERT(action != nullptr);
 
@@ -33,7 +33,7 @@ void ToolbarAction::addAction(WidgetAction* action, const std::int32_t& autoExpa
     if (widgetFlags == -1)
         widgetFlags = action->getDefaultWidgetFlags();
 
-    _groupAction.addAction(action, widgetFlags);
+    _groupAction.addAction(action, widgetFlags, widgetConfigurationFunction);
 
     auto actionItem = new ToolbarActionItem(this, action, widgetFlags, ToolbarActionItem::State::Collapsed, autoExpandPriority);
 
@@ -64,6 +64,15 @@ void ToolbarAction::removeAction(WidgetAction* action)
 
         emit actionWidgetsChanged(_actionItemsMap);
     }
+}
+
+StretchAction* ToolbarAction::addStretch(std::int32_t stretch /*= 1*/)
+{
+    auto stretchAction = new StretchAction(this, "Stretch", stretch);
+
+    addAction(stretchAction);
+
+    return stretchAction;
 }
 
 WidgetActions ToolbarAction::getActions()

@@ -60,12 +60,12 @@ public:
 public:
 
     /**
-     * Constructor
-     * @param core Pointer to the core
+     * Construct with \p rawDataName and possibly initialize with \p id
      * @param rawDataName Name of the raw data
-     * @param id Globally unique dataset identifier
+     * @param mayUnderive Whether the dataset may be un-derived, if not it should always co-exist with its source
+     * @param id Globally unique dataset identifier, if empty an new ID will be generated
      */
-    DatasetImpl(CoreInterface* core, const QString& rawDataName, const QString& id = "");
+    explicit DatasetImpl(const QString& rawDataName, bool mayUnderive = true, const QString& id = "");
 
     /** Destructor */
     virtual ~DatasetImpl();
@@ -110,6 +110,9 @@ public:
 
     /** Returns whether the dataset is derived */
     bool isDerivedData() const;
+
+    /** Returns whether the dataset may be un-derived, if not it should always co-exist with its source */
+    bool mayUnderive() const;
 
     /** Returns the data type of the raw data associated with this dataset */
     DataType getDataType() const;
@@ -174,7 +177,7 @@ public:
      */
     template<typename DatasetType>
     Dataset<DatasetType> getSelection() const {
-        return _core->requestSelection<DatasetType>(getSourceDataset<DatasetImpl>()->getRawDataName());
+        return mv::data().getSelection<DatasetType>(getSourceDataset<DatasetImpl>()->getRawDataName());
     }
 
     /**
@@ -244,7 +247,7 @@ public: // Location
      * Get location
      * @return Path relative to the top-level action
      */
-    QString getLocation() const override;
+    QString getLocation(bool recompute = false) const override;
 
 public: // Hierarchy
 
@@ -265,10 +268,11 @@ public: // Hierarchy
 
     /**
      * Get child datasets (if any) of the specified type(s)
-     * @param dataTypes Dataset type(s) to filter out
+     * @param dataTypes Dataset type(s) to filter out (no filtering if \p dataTypes is empty)
+     * @param recursively Whether to collect children recursively
      * @return Child datasets of the dataset type(s)
      */
-    QVector<Dataset<DatasetImpl>> getChildren(const QVector<DataType>& dataTypes = QVector<DataType>()) const;
+    QVector<Dataset<DatasetImpl>> getChildren(const QVector<DataType>& dataTypes = QVector<DataType>(), bool recursively = true) const;
 
     /**
      * Get child datasets (if any) of the specified type
@@ -499,15 +503,32 @@ public: // Task access
      */
     DatasetTask& getTask();
 
+public: // Removal
+
+    /**
+     * Set about to be removed to \p aboutToBeRemoved
+     * @param aboutToBeRemoved Boolean determining whether the set is in the process of being removed
+     */
+    void setAboutToBeRemoved(bool aboutToBeRemoved = true);
+
+    /**
+     * Get whether the set is in the process of being removed
+     * @return Boolean determining whether the set is in the process of being removed
+     */
+    bool isAboutToBeRemoved() const;
+
 protected:
 
-    /** Get raw data */
+    /**
+     * Get raw data for \p DataType 
+     * @return Pointer to raw data of \p DataType 
+     */
     template <class DataType>
-    DataType& getRawData() const {
+    DataType* getRawData() const {
         if (_rawData == nullptr)
-            _rawData = &dynamic_cast<DataType&>(_core->requestRawData(getRawDataName()));
+            _rawData = dynamic_cast<DataType*>(mv::data().getRawData(getRawDataName()));
 
-        return *static_cast<DataType*>(_rawData);
+        return static_cast<DataType*>(_rawData);
     }
 
     /**
@@ -523,9 +544,9 @@ public: // Operators
      * @param other Reference to assign from
      */
     DatasetImpl& operator=(const DatasetImpl& other) {
-        _storageType        = other._storageType;
         _rawData            = other._rawData;
         _rawDataName        = other._rawDataName;
+        _storageType        = other._storageType;
         _all                = other._all;
         _derived            = other._derived;
         _sourceDataset      = other._sourceDataset;
@@ -535,40 +556,37 @@ public: // Operators
         _proxyMembers       = other._proxyMembers;
         _linkedData         = other._linkedData;
         _linkedDataFlags    = other._linkedDataFlags;
+        _aboutToBeRemoved   = other._aboutToBeRemoved;
 
         return *this;
     }
 
-protected:
-    CoreInterface*              _core;              /** Pointer to core interface */
-
 private:
-    mutable plugin::RawData*    _rawData;           /** Pointer to the raw data referenced in this set */
-    StorageType                 _storageType;       /** Type of storage (own raw data or act as proxy for other datasets) */
-    QString                     _rawDataName;       /** Name of the raw data */
-    bool                        _all;               /** Whether this is the full dataset */
-    bool                        _derived;           /** Whether this dataset is derived from another dataset */
-    Dataset<DatasetImpl>        _sourceDataset;     /** Smart pointer to the source dataset (if any) */
-    Dataset<DatasetImpl>        _fullDataset;       /** Smart pointer to the original full dataset (if this is a subset) */
-    QMap<QString, QVariant>     _properties;        /** Properties map */
-    std::int32_t                _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
-    plugin::AnalysisPlugin*     _analysis;          /** Pointer to analysis plugin that created the set (if any) */
-    Datasets                    _proxyMembers;      /** Member datasets in case of a proxy dataset */
-    std::vector<LinkedData>     _linkedData;        /** List of linked datasets */
-    std::int32_t                _linkedDataFlags;   /** Flags for linked data */
-    bool                        _locked;            /** Whether the dataset is locked */
-    Dataset<DatasetImpl>        _smartPointer;      /** Smart pointer to own dataset */
-    DatasetTask                 _task;              /** Task for display in the data hierarchy and foreground */
+    mutable plugin::RawData*    _rawData;               /** Pointer to the raw data referenced in this set */
+    QString                     _rawDataName;           /** Name of the raw data */
+    StorageType                 _storageType;           /** Type of storage (own raw data or act as proxy for other datasets) */
+    bool                        _all;                   /** Whether this is the full dataset */
+    bool                        _derived;               /** Whether this dataset is derived from another dataset */
+    Dataset<DatasetImpl>        _sourceDataset;         /** Smart pointer to the source dataset (if any) */
+    Dataset<DatasetImpl>        _fullDataset;           /** Smart pointer to the original full dataset (if this is a subset) */
+    bool                        _mayUnderive;           /** Whether a dataset may be un-derived, if not it should always co-exist with its source */
+    QMap<QString, QVariant>     _properties;            /** Properties map */
+    std::int32_t                _groupIndex;            /** Group index (sets with identical indices can for instance share selection) */
+    plugin::AnalysisPlugin*     _analysis;              /** Pointer to analysis plugin that created the set (if any) */
+    Datasets                    _proxyMembers;          /** Member datasets in case of a proxy dataset */
+    std::vector<LinkedData>     _linkedData;            /** List of linked datasets */
+    std::int32_t                _linkedDataFlags;       /** Flags for linked data */
+    bool                        _locked;                /** Whether the dataset is locked */
+    Dataset<DatasetImpl>        _smartPointer;          /** Smart pointer to own dataset */
+    DatasetTask                 _task;                  /** Task for display in the data hierarchy and foreground */
+    bool                        _aboutToBeRemoved;      /** Boolean determining whether the set is in the process of being removed */
 
     friend class CoreInterface;
     friend class Core;
     friend class DataManager;
     friend class EventListener;
-
-    template<typename DatasetType>
-    friend class SmartDataset;
 };
 
-} // namespace mv
+}
 
 #endif

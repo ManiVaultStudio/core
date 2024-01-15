@@ -1463,7 +1463,7 @@ void Task::privateEmitProgressTextChanged()
 void Task::addToTaskManager()
 {
 #ifdef _DEBUG
-    qDebug() << "Manually adding" << getName() << "to the task manager(only do this if automatic addition fails)";
+    qDebug() << "Manually adding task" << getName() << "to the task manager (this approach is off-label)";
 #endif
 
     privateAddToTaskManager();
@@ -1476,7 +1476,7 @@ void Task::privateAddToTaskManager()
     }
     else {
 #ifdef _DEBUG
-        qDebug() << "Cannot add task" << getName() << "to the task manager because the core has not been initialized yet.";
+        qDebug() << "Cannot add task" << getName() << "to the task manager because the core has not been initialized yet";
 #endif
     }
 }

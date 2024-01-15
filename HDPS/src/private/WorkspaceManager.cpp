@@ -53,7 +53,7 @@ WorkspaceManager::WorkspaceManager() :
     _exportWorkspaceAsAction(this, "Export As..."),
     _editWorkspaceSettingsAction(this, "Workspace Settings..."),
     _importWorkspaceFromProjectAction(this, "Import from project"),
-    _recentWorkspacesAction(this),
+    _recentWorkspacesAction(this, getSettingsPrefix() + "RecentWorkspaces"),
     _icon(),
     _styleSheet()
 {

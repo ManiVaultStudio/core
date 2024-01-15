@@ -45,8 +45,8 @@ private:
 class Text : public DatasetImpl
 {
 public:
-    Text(mv::CoreInterface* core, QString dataName, const QString& guid = "") :
-        DatasetImpl(core, dataName, guid)
+    Text(QString dataName, bool mayUnderive = true, const QString& guid = "") :
+        DatasetImpl(dataName, mayUnderive, guid)
     {
     }
 
@@ -54,7 +54,7 @@ public:
 
     Dataset<DatasetImpl> copy() const override
     {
-        auto text = new Text(_core, getRawDataName());
+        auto text = new Text(getRawDataName());
 
         text->setText(this->text());
         text->indices = indices;
@@ -71,7 +71,7 @@ public:
      */
     Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const override
     {
-        return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
+        return mv::data().createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
 
     /**
@@ -110,7 +110,7 @@ public: // Selection
     /** Select all items */
     void selectAll() override;
 
-    /** Deselect all items */
+    /** De-select all items */
     void selectNone() override;
 
     /** Invert item selection */

@@ -9,6 +9,8 @@
 
 #include "util/Serialization.h"
 
+#include <stdlib.h>
+
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -137,9 +139,9 @@ void Project::updateContributors()
     QString currentUserName;
 
 #ifdef __APPLE__
-    currentUserName = getenv("USER");
+    currentUserName = qgetenv("USER");
 #else
-    currentUserName = getenv("USERNAME");
+    currentUserName = qgetenv("USERNAME");
 #endif
 
     if (!currentUserName.isEmpty() && !_projectMetaAction.getContributorsAction().getStrings().contains(currentUserName))
@@ -148,8 +150,8 @@ void Project::updateContributors()
 
 void Project::setStudioMode(bool studioMode)
 {
-    auto plugins = mv::plugins().getPluginsByTypes();  // by default gets all plugin types
-    auto& datasets = mv::data().allSets();
+    auto plugins    = mv::plugins().getPluginsByTypes();  // by default gets all plugin types
+    auto datasets   = mv::data().getAllDatasets();
 
     if (studioMode) {
         for (auto plugin : plugins)

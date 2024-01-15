@@ -4,26 +4,24 @@
 
 #pragma once
 
-#include "actions/ToggleAction.h"
-
 #include <QSortFilterProxyModel>
 
-namespace mv {
+class DatasetsToRemoveModel;
 
 /**
- * Data hierarchy filter model class
+ * Datasets to remove filter model class
  *
- * A class for filtering and sorting the data hierarchy model
+ * A class for filtering and sorting the datasets to remove model
  *
  * @author Thomas Kroes
  */
-class DataHierarchyFilterModel : public QSortFilterProxyModel {
+class DatasetsToRemoveFilterModel : public QSortFilterProxyModel {
 public:
 
     /** Constructor
      * @param parent Pointer to parent object
     */
-    DataHierarchyFilterModel(QObject* parent = nullptr);
+    DatasetsToRemoveFilterModel(QObject* parent = nullptr);
 
     /**
      * Returns whether a given row with give parent is filtered out (false) or in (true)
@@ -32,12 +30,11 @@ public:
      */
     bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
 
-public: // Action getters
-
-    gui::ToggleAction& getFilterHiddenAction() { return _filterHiddenAction; }
-
 private:
-    gui::ToggleAction    _filterHiddenAction;   /** For toggling whether hidden datasets are shown or not */
-};
 
-}
+    /**
+     * Get datasets to remove model
+     * @return Source model cast as datasets source model
+     */
+    DatasetsToRemoveModel* getDatasetsToRemoveModel() const;
+};

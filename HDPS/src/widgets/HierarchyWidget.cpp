@@ -45,6 +45,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _settingsGroupAction(this, "Settings"),
     _toolbarAction(this, "Toolbar")
 {
+    setObjectName("HierarchyWidget");
+
     if (_filterModel) {
         if (_filterModel->sourceModel() != &_model)
             _filterModel->setSourceModel(const_cast<QAbstractItemModel*>(&_model));
@@ -212,6 +214,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     _treeView.setRootIsDecorated(true);
     _treeView.setItemsExpandable(true);
     _treeView.setIconSize(QSize(14, 14));
+    _treeView.setObjectName("TreeView");
     
     auto header = _treeView.header();
 
@@ -276,8 +279,14 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     });
 
     if (_filterModel) {
-        connect(_filterModel, &QAbstractItemModel::layoutChanged, this, filterModelRowsChanged);
-        connect(_filterModel, &QAbstractItemModel::layoutChanged, this, &HierarchyWidget::updateHeaderVisibility);
+        //connect(_filterModel, &QSortFilterProxyModel::layoutChanged, this, filterModelRowsChanged);
+        //connect(_filterModel, &QSortFilterProxyModel::layoutChanged, this, &HierarchyWidget::updateHeaderVisibility);
+
+        connect(_filterModel, &QSortFilterProxyModel::rowsInserted, this, filterModelRowsChanged);
+        connect(_filterModel, &QSortFilterProxyModel::rowsRemoved, this, filterModelRowsChanged);
+
+        connect(_filterModel, &QSortFilterProxyModel::rowsInserted, this, &HierarchyWidget::updateHeaderVisibility);
+        connect(_filterModel, &QSortFilterProxyModel::rowsRemoved, this, &HierarchyWidget::updateHeaderVisibility);
     }
     else {
         connect(&_model, &QAbstractItemModel::rowsInserted, this, &HierarchyWidget::updateFilterModel);

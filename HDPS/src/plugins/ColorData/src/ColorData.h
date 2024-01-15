@@ -42,8 +42,8 @@ private:
 class Colors : public mv::DatasetImpl
 {
 public:
-    Colors(CoreInterface* core, QString dataName, const QString& guid = "") :
-        DatasetImpl(core, dataName, guid)
+    Colors(QString dataName, bool mayUnderive = true, const QString& guid = "") :
+        DatasetImpl(dataName, mayUnderive, guid)
     {
     }
 
@@ -55,7 +55,7 @@ public:
      */
     Dataset<DatasetImpl> copy() const override
     {
-        auto colors = new Colors(_core, getRawDataName());
+        auto colors = new Colors(getRawDataName());
 
         colors->setText(text());
         colors->indices = indices;
@@ -71,7 +71,7 @@ public:
      * @return Smart pointer to the created subset
      */
     Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const override {
-        return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
+        return mv::data().createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
 
     /**

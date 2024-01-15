@@ -32,9 +32,9 @@ CreateSetFromSelectionAction::CreateSetFromSelectionAction(QObject* parent, cons
             Datasets subsets;
 
             for (auto proxyMember : _points->getProxyMembers())
-                subsets << Application::core()->createSubsetFromSelection(proxyMember->getSelection(), proxyMember, "Subset", proxyMember);
+                subsets << mv::data().createSubsetFromSelection(proxyMember->getSelection(), proxyMember, "Subset", proxyMember);
 
-            Application::core()->groupDatasets(subsets, _nameAction.getString());
+            mv::data().groupDatasets(subsets, _nameAction.getString());
         }
         else {
             points->createSubsetFromSelection(_nameAction.getString());

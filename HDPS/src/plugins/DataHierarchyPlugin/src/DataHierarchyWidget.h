@@ -6,9 +6,11 @@
 
 #include <models/DataHierarchyModel.h>
 #include <models/DataHierarchyFilterModel.h>
+
 #include <actions/TriggerAction.h>
-#include <actions/ToggleAction.h>
+
 #include <widgets/HierarchyWidget.h>
+
 #include <DataHierarchyItem.h>
 #include <Dataset.h>
 
@@ -33,13 +35,31 @@ public:
      */
     DataHierarchyWidget(QWidget* parent);
 
-protected:
+    /**
+     * Get model
+     * @return Reference to the data hierarchy model
+     */
+    mv::DataHierarchyModel& getModel() {
+        return _model;
+    }
 
     /**
-     * Add a data hierarchy to the tree widget
-     * @param dataHierarchyItem Reference to the data hierarchy item
+     * Get filter model
+     * @return Reference to the data hierarchy filter model
      */
-    void addDataHierarchyItem(mv::DataHierarchyItem& dataHierarchyItem);
+    mv::DataHierarchyFilterModel& getFilterModel() {
+        return _filterModel;
+    }
+
+    /**
+     * Get hierarchy widget
+     * @return Reference to the hierarchy widget
+     */
+    mv::gui::HierarchyWidget& getHierarchyWidget() {
+        return _hierarchyWidget;
+    }
+
+protected:
 
     /**
      * Get model index of the dataset
@@ -59,10 +79,27 @@ protected:
     /** Update the visibility of the tree view columns */
     void updateColumnsVisibility();
 
+    /**
+     * Update the data hierarchy item to reflect the expansion state of the corresponding model item with \p filterModelIndex
+     * @param filterModelIndex Filter model index of the model item to sync with
+     */
+    void updateDataHierarchyItemExpansion(const QModelIndex& filterModelIndex = QModelIndex());
+
+    /**
+     * Initializes the expansion state of child model items recursively
+     * @param parentFilterModelIndex The parent filter model index for which to update the child model items
+     */
+    void initializeChildModelItemsExpansion(QModelIndex parentFilterModelIndex = QModelIndex());
+
+    /**
+     * Initializes the model selection from the data hierarchy
+     * @param parentFilterModelIndex The parent filter model index for which to update the child model items
+     */
+    void initializeSelection();
+
 private:
-    DataHierarchyModel          _model;                 /** Model containing data to be displayed in the hierarchy */
-    DataHierarchyFilterModel    _filterModel;           /** Data hierarchy filter model */
-    mv::gui::HierarchyWidget  _hierarchyWidget;       /** Widget for displaying hierarchy */
-    mv::gui::ToggleAction     _groupingAction;        /** Data grouping action */
-    mv::gui::TriggerAction    _resetAction;           /** Reset all action */
+    mv::DataHierarchyModel          _model;             /** Model containing data to be displayed in the hierarchy */
+    mv::DataHierarchyFilterModel    _filterModel;       /** Data hierarchy filter model */
+    mv::gui::HierarchyWidget        _hierarchyWidget;   /** Widget for displaying hierarchy */
+    mv::gui::TriggerAction          _resetAction;       /** Reset all action */
 };

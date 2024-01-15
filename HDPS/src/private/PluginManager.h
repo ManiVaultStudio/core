@@ -43,30 +43,28 @@ public: // Plugin creation/destruction
      * Create a plugin of \p kind with input \p datasets
      * @param kind Kind of plugin (name of the plugin)
      * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-     * @return Pointer to created plugin (nullptr if creation failed)
+     * @return Pointer to created plugin, nullptr if creation failed
      */
     plugin::Plugin* requestPlugin(const QString& kind, Datasets datasets = Datasets()) override;
-    
-    /**
-     * Create a plugin of \p kind with \p inputDatasets
-     * @param kind Kind of plugin (name of the plugin)
-     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
-     * @return Pointer to created plugin of plugin type (nullptr if creation failed)
-     */
-    template<typename PluginType>
-    PluginType* requestPlugin(const QString& kind, const Datasets& datasets)
-    {
-        return dynamic_cast<PluginType*>(requestPlugin(kind, datasets));
-    }
 
     /**
      * Create a view plugin plugin of \p kind and dock it to \p dockToViewPlugin at \p dockArea
      * @param kind Kind of plugin (name of the plugin)
      * @param dockToViewPlugin View plugin instance to dock to
      * @param dockArea Dock area to dock in
-     * @return Pointer to created view plugin (nullptr if creation failed)
+     * @return Pointer of view plugin type to created view plugin, nullptr if creation failed
      */
     plugin::ViewPlugin* requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin = nullptr, gui::DockAreaFlag dockArea = gui::DockAreaFlag::Right, Datasets datasets = Datasets()) override;
+
+private:
+
+    /**
+     * Add \p plugin to the data manager
+     * @param plugin Pointer to the plugin to add
+     */
+    void addPlugin(plugin::Plugin* plugin) override;
+
+public:
 
     /**
      * Destroy \p plugin
@@ -88,37 +86,37 @@ public: // Plugin factory
      * @param pluginType Plugin type
      * @return Vector of pointers to plugin factories
      */
-    PluginFactoryPtrs getPluginFactoriesByType(const plugin::Type& pluginType) const override;
+    std::vector<plugin::PluginFactory*> getPluginFactoriesByType(const plugin::Type& pluginType) const override;
 
     /**
      * Get plugin factories for \p pluginTypes (by default it gets all plugins factories for all types)
      * @param pluginTypes Plugin types
      * @return Vector of pointers to plugin factories of \p pluginTypes
      */
-    PluginFactoryPtrs getPluginFactoriesByTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const override;
+    std::vector<plugin::PluginFactory*> getPluginFactoriesByTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const override;
 
     /**
      * Get plugin instances for \p pluginFactory
      * @param pluginFactory Pointer to plugin factory
-     * @return Vector of pointers to plugin instances
+     * @return Vector of shared pointers to plugin instances
      */
-    PluginPtrs getPluginsByFactory(const plugin::PluginFactory* pluginFactory) const override;
+    std::vector<plugin::Plugin*> getPluginsByFactory(const plugin::PluginFactory* pluginFactory) const override;
 
 public: // Plugin getters
 
     /**
      * Get plugin instances for \p pluginType (by default it gets all plugins for all types)
      * @param pluginType Plugin type
-     * @return Vector of pointers to plugin instances
+     * @return Vector of shared pointers to plugin instances
      */
-    PluginPtrs getPluginsByType(const plugin::Type& pluginType) const override;
+    std::vector<plugin::Plugin*> getPluginsByType(const plugin::Type& pluginType) const override;
 
     /**
      * Get plugin instances for \p pluginTypes
      * @param pluginTypes Plugin types
-     * @return Vector of pointers to plugin instances of \p pluginTypes
+     * @return Vector of shared pointers to plugin instances of \p pluginTypes
      */
-    PluginPtrs getPluginsByTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const override;
+    std::vector<plugin::Plugin*> getPluginsByTypes(const plugin::Types& pluginTypes = plugin::Types{ plugin::Type::ANALYSIS, plugin::Type::DATA, plugin::Type::LOADER, plugin::Type::WRITER, plugin::Type::TRANSFORMATION, plugin::Type::VIEW }) const override;
 
     /**
      * Get plugin kinds by plugin type(s)
@@ -208,8 +206,8 @@ protected:
     QStringList resolveDependencies(QDir pluginDir) const;
 
 private:
-    QHash<QString, PluginFactory*>  _pluginFactories;   /**  */
-    QList<plugin::Plugin*>          _plugins;           /** List of plugin instances currently present in the application. Instances are stored by type. */
+    QHash<QString, PluginFactory*>                  _pluginFactories;   /** All loaded plugin factories */
+    std::vector<std::unique_ptr<plugin::Plugin>>    _plugins;           /** Vector of plugin instances */
 };
 
 }

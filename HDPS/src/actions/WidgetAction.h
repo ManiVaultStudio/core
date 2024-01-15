@@ -31,6 +31,7 @@ class WidgetAction;
 
 using WidgetActions = QVector<WidgetAction*>;
 using ConstWidgetActions = QVector<const WidgetAction*>;
+using WidgetConfigurationFunction = std::function<void(WidgetAction*, QWidget*)>;
 
 /**
  * Widget action class
@@ -149,13 +150,38 @@ public: // Hierarchy queries
     virtual bool isLeaf() const final;
 
 public: // Widgets
-     
+
     /**
-     * Create standard widget
+     * Create widget with pointer to \p parent widget
      * @param parent Parent widget
      * @return Pointer to created widget
      */
     virtual QWidget* createWidget(QWidget* parent) override final;
+
+    /**
+     * Create widget with pointer to \p parent widget and \p widgetFlags
+     * @param parent Pointer to parent widget
+     * @param widgetFlags Widget flags
+     * @return Pointer to created widget
+     */
+    virtual QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags) final;
+
+    /**
+     * Create widget with pointer to \p parent widget, \p widgetFlags and \p widgetConfigurationFunction
+     * @param parent Parent widget
+     * @param widgetFlags Widget flags
+     * @param widgetConfigurationFunction Configuration function to run after the widget is created (replaces WidgetAction#_widgetConfigurationFunction)
+     * @return Pointer to created widget
+     */
+    virtual QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction) final;
+
+    /**
+     * Create widget with pointer to \p parent widget and \p widgetConfigurationFunction
+     * @param parent Parent widget
+     * @param widgetConfigurationFunction Configuration function to run after the widget is created (replaces WidgetAction#_widgetConfigurationFunction)
+     * @return Pointer to created widget
+     */
+    virtual QWidget* createWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction) final;
 
     /**
      * Create collapsed widget
@@ -180,13 +206,6 @@ public: // Widgets
      */
     virtual QMenu* getContextMenu(QWidget* parent = nullptr);
 
-    /**
-     * Create widget for the action
-     * @param parent Pointer to parent widget
-     * @param widgetFlags Widget flags
-     */
-    QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags);
-
     /** Get the sort index */
     virtual std::int32_t getSortIndex() const final;
 
@@ -207,6 +226,12 @@ public: // Widgets
      * @param stretch Stretch factor
      */
     virtual void setStretch(const std::int32_t& stretch) final;
+
+    /**
+     * Set widget configuration function to \p widgetConfigurationFunction
+     * @param widgetConfigurationFunction This function is called right after a widget action widget is created (useful for manual manipulation of the generated widget)
+     */
+    void setWidgetConfigurationFunction(const WidgetConfigurationFunction& widgetConfigurationFunction);
 
 public: // Visibility
 
@@ -259,10 +284,11 @@ public: // Text
 public: // Location
 
     /**
-     * Get location
+     * Get location and possibly \p recompute it
+     * @param recompute Whether to re-compute the location
      * @return Path relative to the top-level action
      */
-    virtual QString getLocation() const;
+    virtual QString getLocation(bool recompute = false) const;
 
 private: // Location
 
@@ -553,14 +579,6 @@ public: // Settings
     /** Save to settings (if the settings prefix is set) */
     virtual void saveToSettings() final;
 
-    /**
-     * Find child widget action of which the GUI name contains the search string
-     * @param searchString The search string
-     * @param recursive Whether to search recursively
-     * @return Found vector of pointers to widget action(s)
-     */
-    virtual QVector<WidgetAction*> findChildren(const QString& searchString, bool recursive = true) const final;
-    
 public: // Popups
 
     /**
@@ -776,24 +794,31 @@ signals:
      */
     void locationChanged(const QString& location);
 
+    /**
+     * Signals that the widget configuration function changed to \p widgetConfigurationFunction
+     * @param widgetConfigurationFunction New widget configuration function
+     */
+    void widgetConfigurationFunctionChanged(WidgetConfigurationFunction& widgetConfigurationFunction);
+
 private:
-    std::int32_t                _defaultWidgetFlags;            /** Default widget flags which are used to configure newly created widget action widgets */
-    std::int32_t                _sortIndex;                     /** Sort index (relative position in group items) */
-    std::int32_t                _stretch;                       /** Stretch factor (in group items) */
-    bool                        _forceHidden;                   /** When set to true, this action is hidden, regardless of the visibility setting in the base QWidgetAction class */
-    bool                        _forceDisabled;                 /** When set to true, this action is read-only, regardless of the enabled setting in the base QWidgetAction class */
-    std::int32_t                _connectionPermissions;         /** Allowed connection permissions flags */
-    std::int32_t                _cachedConnectionPermissions;   /** Cached connection permissions flags */
-    Scope                       _scope;                         /** Determines whether this action is a public (shared) action or not (private) */
-    QPointer<WidgetAction>      _publicAction;                  /** Public action to which this action is connected (nullptr if not connected) */
-    QVector<WidgetAction*>      _connectedActions;              /** Pointers to widget actions that are connected to this action */
-    QString                     _settingsPrefix;                /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
-    HighlightOption             _highlighting;                  /** Highlighting state */
-    QSize                       _popupSizeHint;                 /** Size hint of the popup */
-    std::int32_t                _configuration;                 /** Configuration flags */
-    QMap<QString, QVariant>     _cachedStates;                  /** Maps cache name to state */
-    QString                     _location;                      /** The path relative to the root in string format */
-    QString                     _namedIcon;                     /** The name of a font awesome icon. When using this the widget can handle icon updates itself, instead of the containing view */
+    std::int32_t                    _defaultWidgetFlags;            /** Default widget flags which are used to configure newly created widget action widgets */
+    std::int32_t                    _sortIndex;                     /** Sort index (relative position in group items) */
+    std::int32_t                    _stretch;                       /** Stretch factor (in group items) */
+    bool                            _forceHidden;                   /** When set to true, this action is hidden, regardless of the visibility setting in the base QWidgetAction class */
+    bool                            _forceDisabled;                 /** When set to true, this action is read-only, regardless of the enabled setting in the base QWidgetAction class */
+    std::int32_t                    _connectionPermissions;         /** Allowed connection permissions flags */
+    std::int32_t                    _cachedConnectionPermissions;   /** Cached connection permissions flags */
+    Scope                           _scope;                         /** Determines whether this action is a public (shared) action or not (private) */
+    QPointer<WidgetAction>          _publicAction;                  /** Public action to which this action is connected (nullptr if not connected) */
+    QVector<WidgetAction*>          _connectedActions;              /** Pointers to widget actions that are connected to this action */
+    QString                         _settingsPrefix;                /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
+    HighlightOption                 _highlighting;                  /** Highlighting state */
+    QSize                           _popupSizeHint;                 /** Size hint of the popup */
+    std::int32_t                    _configuration;                 /** Configuration flags */
+    QMap<QString, QVariant>         _cachedStates;                  /** Maps cache name to state */
+    QString                         _location;                      /** The path relative to the root in string format */
+    QString                         _namedIcon;                     /** The name of a font awesome icon. When using this the widget can handle icon updates itself, instead of the containing view */
+    WidgetConfigurationFunction     _widgetConfigurationFunction;   /** When set, this function is called right after any widget action widget is created (useful for manual manipulation of the generated widget) */
 
 protected:
     friend class mv::AbstractActionsManager;

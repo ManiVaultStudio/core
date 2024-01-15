@@ -101,10 +101,9 @@ QIcon IconFont::getIcon(const QString& name, const QColor& foregroundColor/*= QC
         const auto iconText         = getIconCharacter(name);
         
         QColor fontColor = foregroundColor;
-        if( fontColor == QColor(0, 0, 0, 0) ) // assume that 0 opacity means we want the system default
-        {
+
+        if (fontColor == QColor(0, 0, 0, 0))
             fontColor = qApp->palette().text().color();
-        }
 
         QPainter painter(&pixmap);
 

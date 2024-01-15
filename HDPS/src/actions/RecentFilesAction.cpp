@@ -25,6 +25,8 @@ RecentFilesAction::RecentFilesAction(QObject* parent, const QString& settingsKey
     _filterModel(this),
     _editAction(this, "Edit...")
 {
+    Q_ASSERT(!settingsKey.isEmpty());
+
     initialize(settingsKey, fileType, shortcutPrefix, icon);
 
     connect(&_editAction, &TriggerAction::triggered, this, [this]() -> void {

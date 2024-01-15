@@ -6,6 +6,7 @@
 
 #include "GroupAction.h"
 #include "ToolbarActionItem.h"
+#include "StretchAction.h"
 
 namespace mv::gui {
 
@@ -58,13 +59,20 @@ public: // Actions management
      * @param autoExpandPriority Priority with which the action should be auto-expanded
      * @param widgetFlags Action widget flags (default flags if -1)
      */
-    virtual void addAction(WidgetAction* action, const std::int32_t& autoExpandPriority = -1, std::int32_t widgetFlags = -1) final;
+    virtual void addAction(WidgetAction* action, const std::int32_t& autoExpandPriority = -1, std::int32_t widgetFlags = -1, WidgetConfigurationFunction widgetConfigurationFunction = WidgetConfigurationFunction()) final;
 
     /**
      * Remove \p action from the group
      * @param action Pointer to action to add
      */
     virtual void removeAction(WidgetAction* action) final;
+
+    /**
+     * Add stretch action to the group with \p stretch factor
+     * @param stretch Stretch factor
+     * @return Pointer to stretch action (the toolbar remains the owner)
+     */
+    virtual StretchAction* addStretch(std::int32_t stretch = 1) final;
 
     /**
      * Get actions

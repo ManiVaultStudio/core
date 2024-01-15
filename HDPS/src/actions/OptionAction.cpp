@@ -483,7 +483,7 @@ OptionAction::ButtonsWidget::ButtonsWidget(QWidget* parent, OptionAction* option
             pushButton->setCheckable(true);
             pushButton->setToolTip(optionAction->text() + ": " + option);
 
-            layout->insertWidget(0, pushButton);
+            layout->addWidget(pushButton);
 
             connect(pushButton, &QPushButton::clicked, this, [optionAction, optionIndex]() {
                 optionAction->setCurrentIndex(optionIndex);

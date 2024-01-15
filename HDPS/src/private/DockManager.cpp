@@ -31,8 +31,9 @@ using namespace mv::util;
 DockManager::DockManager(const QString& name, QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
     Serializable("Dock manager"),
+    _name(name),
     _serializationTask(nullptr),
-    _layoutTask(this, "Load " + name.toLower() + " layout")
+    _layoutTask(this, "Load " + _name.toLower() + " layout")
 {
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
@@ -149,6 +150,8 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "State");
     variantMapMustContain(variantMap, "ViewPluginDockWidgets");
 
+    _layoutTask.setName("Load " + _name.toLower() + " layout");
+
     hide();
     {
         //qDebug() << _serializationTask->getChildTasks();
@@ -199,6 +202,8 @@ QVariantMap DockManager::toVariantMap() const
 #ifdef DOCK_MANAGER_VERBOSE
     qDebug() << __FUNCTION__ << objectName();
 #endif
+
+    const_cast<DockManager*>(this)->_layoutTask.setName("Save" + _name.toLower() + " layout");
 
     _serializationTask->setEnabled(true);
 

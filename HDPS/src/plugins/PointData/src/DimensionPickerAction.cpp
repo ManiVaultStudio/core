@@ -152,7 +152,7 @@ void DimensionPickerAction::fromVariantMap(const QVariantMap& variantMap)
         const auto datasetID = variantMap["DatasetID"].toString();
 
         if (!datasetID.isEmpty()) {
-            auto dataset = mv::data().getSet(datasetID);
+            auto dataset = mv::data().getDataset(datasetID);
 
             if (dataset.isValid())
                 setPointsDataset(Dataset<Points>(dataset));
