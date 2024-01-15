@@ -127,38 +127,34 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
     variantMapMustContain(variantMap, "Name");
     variantMapMustContain(variantMap, "Locked");
-    variantMapMustContain(variantMap, "Full");
+    variantMapMustContain(variantMap, "StorageType");
+    variantMapMustContain(variantMap, "DataType");
     variantMapMustContain(variantMap, "Derived");
+    variantMapMustContain(variantMap, "Full");
     variantMapMustContain(variantMap, "LinkedData");
-    variantMapMustContain(variantMap, "SourceDatasetGUID");
-    variantMapMustContain(variantMap, "FullDatasetGUID");
-    variantMapMustContain(variantMap, "GroupIndex");
 
     setText(variantMap["Name"].toString());
     setLocked(variantMap["Locked"].toBool());
+    setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
+
+    assert(variantMap["DataType"].toString() == getDataType().getTypeString());
 
     if (variantMap["Derived"].toBool())
     {
-        auto sourceDatasetGUID = variantMap["SourceDatasetGUID"].toString();
-
-        if(sourceDatasetGUID == "")
-            setSourceDataSet(getParent());
+        if (variantMap.contains("FullDatasetGUID"))
+            setSourceDataSet(mv::data().getDataset(variantMap["SourceDatasetGUID"].toString()));
         else
-            setSourceDataSet(mv::data().getDataset(sourceDatasetGUID));
+            setSourceDataSet(getParent());
 
         assert(_sourceDataset.isValid());
     }
 
-    _mayUnderive = variantMap["MayUnderive"].toBool();
-
     if (!variantMap["Full"].toBool())
     {        
-        auto fullDatasetGUID = variantMap["FullDatasetGUID"].toString();
-
-        if (fullDatasetGUID == "")
-            makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
+        if (variantMap.contains("FullDatasetGUID"))
+            makeSubsetOf(mv::data().getDataset(variantMap["FullDatasetGUID"].toString()));
         else
-            makeSubsetOf(mv::data().getDataset(fullDatasetGUID));
+            makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
 
         assert(variantMap["PluginKind"].toString() == _rawData->getKind());
         assert(variantMap["PluginVersion"].toString() == _rawData->getVersion());
@@ -166,12 +162,11 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         assert(_fullDataset.isValid());
     }
 
-    assert(variantMap["DataType"].toString() == getDataType().getTypeString());
-
-    if (variantMap["GroupIndex"].toInt() >= 0)
+    if (variantMap.contains("GroupIndex") && variantMap["GroupIndex"].toInt() >= 0)
         setGroupIndex(variantMap["GroupIndex"].toInt());
 
-    setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
+    if (variantMap.contains("MayUnderive"))
+        _mayUnderive = variantMap["MayUnderive"].toBool();
 
     if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
         Datasets proxyMembers;

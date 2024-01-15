@@ -1019,6 +1019,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
     events().notifyDatasetDataChanged(this);
 
+    // Handle saved selection after loading data
     if (isFull()) {
         const auto& selectionMap = variantMap["Selection"].toMap();
 
