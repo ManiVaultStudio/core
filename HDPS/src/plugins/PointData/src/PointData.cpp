@@ -976,8 +976,6 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         getRawData<PointData>()->fromVariantMap(variantMap);
     else
     {
-        makeSubsetOf(getFullDataset<Points>());
-
         variantMapMustContain(variantMap, "Indices");
 
         const auto& indicesMap = variantMap["Indices"].toMap();
