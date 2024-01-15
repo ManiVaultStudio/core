@@ -1041,7 +1041,7 @@ QVariantMap Points::toVariantMap() const
 
     QStringList dimensionNames;
 
-    if (getDimensionNames().size() != getNumPoints()) {
+    if (getDimensionNames().size() == getNumDimensions()) {
         for (const auto& dimensionName : getDimensionNames())
             dimensionNames << dimensionName;
     }
