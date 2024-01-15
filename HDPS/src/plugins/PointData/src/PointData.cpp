@@ -985,29 +985,19 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
     }
 
-    // Fetch dimension names from map
-    const auto fetchDimensionNames = [&variantMap]() -> QStringList {
-        QStringList dimensionNames;
-
-        // Dimension names in byte array format
-        QByteArray dimensionsByteArray;
-
-        // Copy the dimension names raw data into the byte array
-        dimensionsByteArray.resize(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
-        populateDataBufferFromVariantMap(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data());
-
-        // Open input data stream
-        QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);
-
-        // Stream the data to the dimension names
-        dimensionsDataStream >> dimensionNames;
-
-        return dimensionNames;
-    };
-
+    auto dimensionNameList = variantMap["DimensionNames"].toStringList();
     std::vector<QString> dimensionNames;
-    for (const auto& dimensionName : fetchDimensionNames())
-        dimensionNames.push_back(dimensionName);
+
+    if (dimensionNameList.size() == getNumDimensions())
+    {
+        for (const auto& dimensionName : dimensionNameList)
+            dimensionNames.push_back(dimensionName);
+    }
+    else
+    {
+        for (std::uint32_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
+            dimensionNames.emplace_back(QString("Dim %1").arg(QString::number(dimensionIndex)));
+    }
 
     setDimensionNames(dimensionNames);
 
@@ -1050,11 +1040,6 @@ QVariantMap Points::toVariantMap() const
             dimensionNames << QString("Dim %1").arg(QString::number(dimensionIndex));
     }
 
-    QByteArray dimensionsByteArray;
-    QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::WriteOnly);
-
-    dimensionsDataStream << dimensionNames;
-
     QVariantMap indices;
 
     indices["Count"]    = QVariant::fromValue(this->indices.size());
@@ -1073,7 +1058,7 @@ QVariantMap Points::toVariantMap() const
     variantMap["NumberOfPoints"]        = getNumPoints();
     variantMap["Indices"]               = indices;
     variantMap["Selection"]             = selection;
-    variantMap["DimensionNames"]        = rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true);
+    variantMap["DimensionNames"]        = dimensionNames;
     variantMap["NumberOfDimensions"]    = getNumDimensions();
     variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
     
