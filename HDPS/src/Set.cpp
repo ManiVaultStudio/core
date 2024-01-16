@@ -130,7 +130,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "StorageType");
     variantMapMustContain(variantMap, "DataType");
     variantMapMustContain(variantMap, "Derived");
-    variantMapMustContain(variantMap, "Full");
+//    variantMapMustContain(variantMap, "Full");
     variantMapMustContain(variantMap, "LinkedData");
 
     setText(variantMap["Name"].toString());
@@ -149,7 +149,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         assert(_sourceDataset.isValid());
     }
 
-    if (!variantMap["Full"].toBool())
+    if (variantMap.contains("Full") && !variantMap["Full"].toBool())
     {        
         if (variantMap.contains("FullDatasetGUID"))
             makeSubsetOf(mv::data().getDataset(variantMap["FullDatasetGUID"].toString()));
@@ -157,7 +157,6 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
             makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
 
         assert(variantMap["PluginKind"].toString() == _rawData->getKind());
-        assert(variantMap["PluginVersion"].toString() == _rawData->getVersion());
 
         assert(_fullDataset.isValid());
     }

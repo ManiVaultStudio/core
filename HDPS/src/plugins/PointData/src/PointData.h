@@ -533,6 +533,12 @@ public:
     void setValueAt(std::size_t index, float newValue);
 
     /**
+     * Returns the version number, currently mirros the ManiVault version
+     * @return Version string "Major.Minor"
+     */
+    QString getVersion() const final;
+
+    /**
      * Load point data from variant map
      * @param Variant map representation of the point data
      */

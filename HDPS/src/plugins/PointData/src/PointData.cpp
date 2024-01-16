@@ -101,6 +101,12 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
         });
 }
 
+QString PointData::getVersion() const
+{
+    const auto version = mv::Application::current()->getVersion();
+    return QStringLiteral("%1.%2").arg(version.getMajor(), version.getMinor());
+}
+
 void PointData::fromVariantMap(const QVariantMap& variantMap)
 {
     variantMapMustContain(variantMap, "Data");
@@ -972,6 +978,17 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "DimensionNames");
     variantMapMustContain(variantMap, "Selection");
 
+    // For backwards compatability
+    if (variantMap["PluginVersion"] == "No Version" && !variantMap["Full"].toBool())
+    {
+        makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
+
+        qWarning() << "[ManiVault deprecation warning]: This project was saved with an older ManiVault version (<1.0). "
+            "Please save the project again to ensure compatability with newer ManiVault versions. "
+            "Future releases may not be able to load this projects otherwise. ";
+    }
+
+    // Load raw point data
     if (isFull())
         getRawData<PointData>()->fromVariantMap(variantMap);
     else
@@ -985,6 +1002,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
     }
 
+    // Load dimension names
     auto dimensionNameList = variantMap["DimensionNames"].toStringList();
     std::vector<QString> dimensionNames;
 
@@ -1007,7 +1025,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
     events().notifyDatasetDataChanged(this);
 
-    // Handle saved selection after loading data
+    // Handle saved selection
     if (isFull()) {
         const auto& selectionMap = variantMap["Selection"].toMap();
 
