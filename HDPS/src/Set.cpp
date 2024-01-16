@@ -149,7 +149,8 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         assert(_sourceDataset.isValid());
     }
 
-    if (variantMap.contains("Full") && !variantMap["Full"].toBool())
+    // For backwards compatability, check PluginVersion
+    if (!(variantMap["PluginVersion"] == "No Version") && !variantMap["Full"].toBool())
     {        
         if (variantMap.contains("FullDatasetGUID"))
             makeSubsetOf(mv::data().getDataset(variantMap["FullDatasetGUID"].toString()));

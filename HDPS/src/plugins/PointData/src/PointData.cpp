@@ -978,7 +978,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "DimensionNames");
     variantMapMustContain(variantMap, "Selection");
 
-    // For backwards compatability
+    // For backwards compatability, check PluginVersion
     if (variantMap["PluginVersion"] == "No Version" && !variantMap["Full"].toBool())
     {
         makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
