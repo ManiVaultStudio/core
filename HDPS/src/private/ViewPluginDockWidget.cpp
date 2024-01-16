@@ -112,8 +112,7 @@ void ViewPluginDockWidget::initialize()
     _helpAction.setIconByName("question");
     _helpAction.setShortcut(tr("F1"));
     _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
 
     connect(&_helpAction, &TriggerAction::triggered, this, [this]() -> void {
         _viewPlugin->getTriggerHelpAction().trigger();

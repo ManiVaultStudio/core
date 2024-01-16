@@ -19,7 +19,6 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     _typeFilterHumanReadableAction(this, "Type"),
     _typeCompleter(this),
     _scopeFilterAction(this, "Scope", { "Private", "Public" }, { "Private", "Public" }),
-    _filterInternalUseAction(this, "Internal", { "Yes", "No" }, { "No" }),
     _filterForceHiddenAction(this, "Force hidden", { "Yes", "No" }),
     _filterForceDisabledAction(this, "Force disabled", { "Yes", "No" }),
     _filterMayPublishAction(this, "May publish", { "Yes", "No" }),
@@ -55,7 +54,6 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     //_filterMayConnectAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     //_filterMayDisconnectAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
 
-    _filterInternalUseAction.setToolTip("Hide parameters that are for internal use only");
     _filterForceHiddenAction.setToolTip("Filter parameters based whether they are force hidden");
     _filterForceDisabledAction.setToolTip("Filter parameters based whether they are force disabled");
     _filterMayPublishAction.setToolTip("Filter parameters based on whether they may publish");
@@ -64,7 +62,6 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
     _publicRootOnlyAction.setToolTip("Filter public root or not");
     _removeFiltersAction.setToolTip("Remove all filters");
 
-    connect(&_filterInternalUseAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
     connect(&_filterForceHiddenAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
     connect(&_filterForceDisabledAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
     connect(&_filterMayPublishAction, &OptionsAction::selectedOptionsChanged, this, &ActionsFilterModel::invalidate);
@@ -116,16 +113,6 @@ bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) co
 
     std::int32_t numberOfActiveFilters  = 0;
     std::int32_t numberOfMatches        = 0;
-
-    if (_filterInternalUseAction.hasSelectedOptions()) {
-        numberOfActiveFilters++;
-
-        const auto selectedOptions = _filterInternalUseAction.getSelectedOptions();
-        const auto internalUseOnly = getSourceData(index, AbstractActionsModel::Column::InternalUseOnly, Qt::CheckStateRole).toBool();
-
-        if ((selectedOptions.contains("Yes") && internalUseOnly) || (selectedOptions.contains("No") && !internalUseOnly))
-            numberOfMatches++;
-    }
 
     if (_filterForceHiddenAction.hasSelectedOptions()) {
         numberOfActiveFilters++;
