@@ -168,6 +168,8 @@ void DatasetPrivate::registerDatasetEvents()
                     reset();
 
                     emit removed(_datasetId);
+
+                    break;
                 }
 
                 case EventType::DatasetDataChanged:
@@ -224,8 +226,8 @@ void DatasetPrivate::registerDatasetEvents()
                     break;
                 }
 
-                case EventType::DatasetAdded:
-                case EventType::DatasetLocked:
+                case EventType::DatasetAdded:   [[fallthrough]];
+                case EventType::DatasetLocked:  [[fallthrough]];
                 case EventType::DatasetUnlocked:
                     break;
             }
