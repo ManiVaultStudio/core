@@ -569,25 +569,6 @@ QVariant AbstractActionsModel::IsLeafItem::data(int role /*= Qt::UserRole + 1*/)
     return Item::data(role);
 }
 
-QVariant AbstractActionsModel::InternalUseOnlyItem::data(int role /*= Qt::UserRole + 1*/) const
-{
-    switch (role) {
-        case Qt::EditRole:
-            return (getAction()->getConfiguration() & static_cast<std::int32_t>(WidgetAction::ConfigurationFlag::InternalUseOnly));
-
-        case Qt::DisplayRole:
-            return data(Qt::EditRole).toBool() ? "Yes" : "No";
-
-        case Qt::ToolTipRole:
-            return "Parameter internal use only: " + data(Qt::DisplayRole).toString();
-
-        default:
-            break;
-    }
-
-    return Item::data(role);
-}
-
 AbstractActionsModel::Row::Row(gui::WidgetAction* action) :
     QList<QStandardItem*>()
 {
@@ -609,7 +590,6 @@ AbstractActionsModel::Row::Row(gui::WidgetAction* action) :
     append(new PublicActionIdItem(action));
     append(new IsRootItem(action));
     append(new IsLeafItem(action));
-    append(new InternalUseOnlyItem(action));
 }
 
 QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> AbstractActionsModel::columnInfo = QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo>({
@@ -631,8 +611,7 @@ QMap<AbstractActionsModel::Column, AbstractActionsModel::ColumHeaderInfo> Abstra
     { AbstractActionsModel::Column::NumberOfConnectedActions, { "No. Connected Parameters", "No. Connected Parameters", "The number of connected parameters (in case the parameter is public)" } },
     { AbstractActionsModel::Column::PublicActionID, { "Public Parameter ID", "Public Parameter ID", "The identifier of the public parameter with which the parameter is connected" } },
     { AbstractActionsModel::Column::IsRoot, { "Root", "Root", "Whether the parameter is located at the root of the hierarchy" } },
-    { AbstractActionsModel::Column::IsLeaf, { "Leaf", "Leaf", "Whether the parameter is a leaf or not" } },
-    { AbstractActionsModel::Column::InternalUseOnly, { "Internal use only", "Internal use only", "Whether the parameter is for internal use only" } }
+    { AbstractActionsModel::Column::IsLeaf, { "Leaf", "Leaf", "Whether the parameter is a leaf or not" } }
 });
 
 AbstractActionsModel::AbstractActionsModel(QObject* parent /*= nullptr*/) :

@@ -205,6 +205,9 @@ QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
     auto menu = new QMenu(parent);
 
     for (auto action : _actions) {
+        if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu))
+            continue;
+
         auto contextMenu = action->getContextMenu();
 
         if (contextMenu)
@@ -217,6 +220,11 @@ QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
 void DataHierarchyItem::populateContextMenu(QMenu* contextMenu)
 {
     for (auto action : _actions) {
+        qDebug() << __FUNCTION__ << action->text();
+
+        if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu))
+            continue;
+
         auto actionContextMenu = action->getContextMenu();
 
         if (actionContextMenu)

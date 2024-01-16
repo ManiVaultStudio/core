@@ -26,14 +26,13 @@ Plugin::Plugin(const PluginFactory* factory) :
 {
     setConnectionPermissionsFlag(WidgetAction::ConnectionPermissionFlag::ForceNone);
 
-    _guiNameAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _guiNameAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _guiNameAction.setPlaceHolderString("Enter plugin name here...");
     _guiNameAction.setConnectionPermissionsToForceNone();
 
     _destroyAction.setToolTip(QString("Remove %1").arg(getGuiName()));
     _destroyAction.setIconByName("trash");
-    _destroyAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _destroyAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _destroyAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _destroyAction.setConnectionPermissionsToForceNone();
 
     connect(&_destroyAction, &TriggerAction::triggered, this, &Plugin::destroy);

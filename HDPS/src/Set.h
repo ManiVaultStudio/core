@@ -432,10 +432,16 @@ public: // Grouping
 
 public: // Actions
 
-    /** Returns list of shared action widgets*/
+    /**
+     * Add \p widgetAction to the corresponding data hierarchy item
+     * @param widgetAction Widget action to add
+     */
     void addAction(mv::gui::WidgetAction& widgetAction);
 
-    /** Returns list of shared action widgets*/
+    /**
+     * Get attached actions
+     * @return List of widget actions
+     */
     mv::gui::WidgetActions getActions() const;
 
     /**
