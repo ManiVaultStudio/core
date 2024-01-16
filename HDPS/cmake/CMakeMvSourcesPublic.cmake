@@ -357,6 +357,7 @@ set(PUBLIC_WIDGET_HEADERS
     src/widgets/ActionsWidget.h
     src/widgets/SplashScreenWidget.h
     src/widgets/ElidedLabel.h
+    src/widgets/FlowLayout.h
 )
 
 set(PUBLIC_WIDGET_SOURCES
@@ -371,6 +372,8 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/ActionsWidget.cpp
     src/widgets/SplashScreenWidget.cpp
     src/widgets/ElidedLabel.cpp
+    src/widgets/FlowLayout.h
+	
     ${ACTION_HIERARCHY_SOURCES}
 )
 
