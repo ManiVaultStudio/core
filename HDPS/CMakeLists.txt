@@ -184,6 +184,14 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 # Use avx if enabled and available
 check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
 
+target_precompile_headers(${MV_PUBLIC_LIB} PRIVATE 
+    src/actions/Actions.h
+    src/event/EventListener.h
+    src/AbstractManager.h
+    src/Task.h
+    ${PUBLIC_UTIL_HEADERS}
+)
+
 # -----------------------------------------------------------------------------
 # Target MV_PRIVATE_LIB
 # -----------------------------------------------------------------------------
@@ -209,6 +217,8 @@ target_link_libraries(${MV_PRIVATE_LIB} PRIVATE ${MV_PUBLIC_LIB})
 check_and_set_AVX(${MV_PRIVATE_LIB} ${MV_USE_AVX})
 
 add_dependencies(${MV_PRIVATE_LIB} ${MV_PUBLIC_LIB} QuaZip qt6advanceddocking)
+
+target_precompile_headers(${MV_PRIVATE_LIB} REUSE_FROM ${MV_PUBLIC_LIB})
 
 # -----------------------------------------------------------------------------
 # Target MV_EXE
