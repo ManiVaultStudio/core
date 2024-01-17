@@ -22,10 +22,6 @@ ParametersSettingsAction::ParametersSettingsAction(QObject* parent) :
     addAction(&_confirmRemoveSharedParameterAction);
     addAction(&_expertModeAction);
 
-    _askForSharedParameterNameAction.setSettingsPrefix(getSettingsPrefix() + "AskForSharedParameterName");
-    _confirmRemoveSharedParameterAction.setSettingsPrefix(getSettingsPrefix() + "ConfirmRemoveSharedParameter");
-    _expertModeAction.setSettingsPrefix(getSettingsPrefix() + "ExpertMode");
-
     const auto updateExpertModeActionTooltip = [this]() -> void {
         if (_expertModeAction.isChecked())
             _expertModeAction.setToolTip("Display all parameter connections (expert mode)");

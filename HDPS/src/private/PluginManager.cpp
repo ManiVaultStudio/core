@@ -62,7 +62,7 @@ void PluginManager::initialize()
 
     beginInitialization();
     {
-        loadPlugins();
+        loadPluginFactories();
     }
     endInitialization();
 }
@@ -79,7 +79,7 @@ void PluginManager::reset()
     endReset();
 }
 
-void PluginManager::loadPlugins()
+void PluginManager::loadPluginFactories()
 {
 #ifdef PLUGIN_MANAGER_VERBOSE
     qDebug() << "Loading plugin factories";
@@ -156,6 +156,8 @@ void PluginManager::loadPlugins()
             return;
         }
     }
+
+    emit pluginFactoriesLoaded();
 }
 
 bool PluginManager::isPluginLoaded(const QString& kind) const

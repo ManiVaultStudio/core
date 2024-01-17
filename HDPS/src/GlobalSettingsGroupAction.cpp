@@ -4,6 +4,8 @@
 
 #include "GlobalSettingsGroupAction.h"
 
+#include <QString>
+
 namespace mv
 {
 
@@ -17,6 +19,26 @@ GlobalSettingsGroupAction::GlobalSettingsGroupAction(QObject* parent, const QStr
 QString GlobalSettingsGroupAction::getSettingsPrefix() const
 {
     return QString("GlobalSettings/%1/").arg(text());
+}
+
+
+void GlobalSettingsGroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -1*/, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/)
+{
+    Q_ASSERT(action != nullptr);
+
+    if (!action)
+        return;
+
+    const auto actionName = getSettingsPrefix() + action->getSerializationName();
+
+    auto parts = actionName.split(" ");
+
+    for (int i = 0; i < parts.size(); ++i)
+        parts[i].replace(0, 1, parts[i][0].toUpper());
+
+    action->setSettingsPrefix(parts.join(""));
+
+    GroupAction::addAction(action, widgetFlags, widgetConfigurationFunction);
 }
 
 }

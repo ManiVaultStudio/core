@@ -37,6 +37,8 @@ void ColorAction::setColor(const QColor& color)
     _color = color;
 
     emit colorChanged(_color);
+
+    saveToSettings();
 }
 
 void ColorAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)

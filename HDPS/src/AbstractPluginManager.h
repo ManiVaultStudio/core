@@ -45,8 +45,8 @@ public:
     {
     }
     
-    /** Loads all plugin factories from the plugin directory and adds them as menu items */
-    virtual void loadPlugins() = 0;
+    /** Loads all plugin factories from the plugin directory */
+    virtual void loadPluginFactories() = 0;
 
     /**
      * Determine whether a plugin of \p kind is loaded
@@ -239,6 +239,9 @@ signals:
      * @param id Globally unique ID of the destroyed plugin
      */
     void pluginDestroyed(const QString& id);
+
+    /** Signals that all plugin factories have been loaded */
+    void pluginFactoriesLoaded();
 
     friend class gui::PluginTriggerAction;
 };

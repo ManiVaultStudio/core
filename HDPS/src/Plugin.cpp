@@ -117,12 +117,22 @@ QStringList Plugin::propertyNames() const
 
 QVariant Plugin::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const
 {
-    return Application::current()->getSetting(QString("%1/%2").arg(getKind(), path), defaultValue);
+    return Application::current()->getSetting(QString("%1%2").arg(getGlobalSettingsPrefix(), path), defaultValue);
 }
 
 void Plugin::setSetting(const QString& path, const QVariant& value)
 {
-    Application::current()->setSetting(QString("%1/%2").arg(getKind(), path), value);
+    Application::current()->setSetting(QString("%1%2").arg(getGlobalSettingsPrefix(), path), value);
+}
+
+QString Plugin::getGlobalSettingsPrefix() const
+{
+    return _factory->getGlobalSettingsPrefix();
+}
+
+PluginGlobalSettingsGroupAction* Plugin::getGlobalSettingsAction() const
+{
+    return _factory->getGlobalSettingsGroupAction();
 }
 
 void Plugin::fromVariantMap(const QVariantMap& variantMap)

@@ -24,6 +24,8 @@ namespace mv
         using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
     }
 
+    class PluginGlobalSettingsGroupAction;
+
 namespace plugin
 {
 
@@ -61,6 +63,26 @@ public:
 
     /** Perform post-construction initialization */
     virtual void initialize();
+
+public: // Global settings
+
+    /**
+     * Get settings prefix
+     * @return Plugin factory global settings prefix
+     */
+    virtual QString getGlobalSettingsPrefix() const final;
+
+    /**
+     * Get global settings group action
+     * @return Pointer to plugin global settings group action (maybe nullptr if plugin does not have global settings)
+     */
+    virtual PluginGlobalSettingsGroupAction* getGlobalSettingsGroupAction() const;
+
+    /**
+     * Set plugin global settings group action to \p pluginGlobalSettingsGroupAction
+     * @param pluginGlobalSettingsGroupAction Pointer to plugin global settings group action (maybe a nullptr)
+     */
+    virtual void setGlobalSettingsGroupAction(PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction) final;
 
 public: // Help
 
@@ -203,15 +225,22 @@ signals:
      */
     void numberOfInstancesChanged(std::uint32_t numberOfInstances);
 
+    /**
+     * Signals that the plugin global settings group action changed to \p pluginGlobalSettingsGroupAction
+     * @param pluginGlobalSettingsGroupAction Pointer to plugin global settings group action (maybe a nullptr)
+     */
+    void pluginGlobalSettingsGroupActionChanged(PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction);
+
 private:
-    QString                     _kind;                          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
-    Type                        _type;                          /** Type of plugin (e.g. analysis, data, loader, writer & view) */
-    QString                     _guiName;                       /** Name of the plugin in the GUI */
-    QString                     _version;                       /** Plugin version */
-    gui::PluginTriggerAction    _pluginTriggerAction;           /** Standard plugin trigger action that produces an instance of the plugin without any special behavior (respects the maximum number of allowed instances) */
-    std::uint32_t               _numberOfInstances;             /** Number of plugin instances */
-    std::uint32_t               _maximumNumberOfInstances;      /** Maximum number of plugin instances (unlimited when -1) */
-    gui::TriggerAction          _triggerHelpAction;             /** Trigger action that triggers help (icon and text are already set) */
+    QString                             _kind;                                  /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
+    Type                                _type;                                  /** Type of plugin (e.g. analysis, data, loader, writer & view) */
+    QString                             _guiName;                               /** Name of the plugin in the GUI */
+    QString                             _version;                               /** Plugin version */
+    gui::PluginTriggerAction            _pluginTriggerAction;                   /** Standard plugin trigger action that produces an instance of the plugin without any special behavior (respects the maximum number of allowed instances) */
+    std::uint32_t                       _numberOfInstances;                     /** Number of plugin instances */
+    std::uint32_t                       _maximumNumberOfInstances;              /** Maximum number of plugin instances (unlimited when -1) */
+    gui::TriggerAction                  _triggerHelpAction;                     /** Trigger action that triggers help (icon and text are already set) */
+    PluginGlobalSettingsGroupAction*    _pluginGlobalSettingsGroupAction;       /** Pointer to plugin global settings group action (maybe a nullptr) */
 };
 
 }

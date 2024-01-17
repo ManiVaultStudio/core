@@ -39,6 +39,13 @@ public: // Global settings actions
     ApplicationSettingsAction& getApplicationSettings() override { return _applicationSettingsAction; };
     TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() override { return _temporaryDirectoriesSettingsAction; };
 
+    /**
+     * Get plugin global settings for plugin \p kind
+     * @param kind Plugin kind
+     * @return Pointer to plugin global settings (if available, otherwise returns a nullptr)
+     */
+    PluginGlobalSettingsGroupAction* getPluginGlobalSettingsGroupAction(const QString& kind) override;
+
 private:
     gui::TriggerAction                  _editSettingsAction;            /** Action for triggering the settings dialog */
     ParametersSettingsAction            _parametersSettingsAction;      /** Parameters global settings */

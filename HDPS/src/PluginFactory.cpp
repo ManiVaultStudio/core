@@ -4,6 +4,7 @@
 
 #include "PluginFactory.h"
 #include "Set.h"
+
 #include "actions/PluginTriggerAction.h"
 
 namespace mv
@@ -22,7 +23,8 @@ PluginFactory::PluginFactory(Type type) :
     _numberOfInstances(0),
     _maximumNumberOfInstances(-1),
     _pluginTriggerAction(this, this, "Plugin trigger", "A plugin trigger action creates a new plugin when triggered", QIcon()),
-    _triggerHelpAction(nullptr, "Trigger plugin help")
+    _triggerHelpAction(nullptr, "Trigger plugin help"),
+    _pluginGlobalSettingsGroupAction(nullptr)
 {
 }
 
@@ -49,6 +51,26 @@ void PluginFactory::initialize()
 
     _triggerHelpAction.setText(_kind);
     _triggerHelpAction.setIcon(getIcon());
+}
+
+QString PluginFactory::getGlobalSettingsPrefix() const
+{
+    return QString("%1/").arg(getKind());
+}
+
+mv::PluginGlobalSettingsGroupAction* PluginFactory::getGlobalSettingsGroupAction() const
+{
+    return _pluginGlobalSettingsGroupAction;
+}
+
+void PluginFactory::setGlobalSettingsGroupAction(PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction)
+{
+    if (pluginGlobalSettingsGroupAction == _pluginGlobalSettingsGroupAction)
+        return;
+
+    _pluginGlobalSettingsGroupAction = pluginGlobalSettingsGroupAction;
+
+    emit pluginGlobalSettingsGroupActionChanged(_pluginGlobalSettingsGroupAction);
 }
 
 bool PluginFactory::hasHelp()

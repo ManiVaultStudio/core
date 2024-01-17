@@ -41,6 +41,13 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
 #endif
 
     _groupsAction.addGroupAction(&mv::settings().getTemporaryDirectoriesSettingsAction());
+
+    for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+        auto pluginGlobalSettingsGroupAction = pluginFactory->getGlobalSettingsGroupAction();
+
+        if (pluginGlobalSettingsGroupAction)
+            _groupsAction.addGroupAction(pluginGlobalSettingsGroupAction);
+    }
 }
 
 QSize SettingsManagerDialog::sizeHint() const

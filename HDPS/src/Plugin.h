@@ -131,6 +131,18 @@ public: // Settings
      */
     void setSetting(const QString& path, const QVariant& value);
 
+    /**
+     * Get global settings prefix (facade for the PluginFactory class)
+     * @return Plugin global settings prefix
+     */
+    QString getGlobalSettingsPrefix() const;
+
+    /**
+     * Get global settings action (facade for the PluginFactory class)
+     * @return Pointer to plugin global settings action (maybe nullptr if plugin does not have global settings)
+     */
+    PluginGlobalSettingsGroupAction* getGlobalSettingsAction() const;
+
 public: // Serialization
 
     /**

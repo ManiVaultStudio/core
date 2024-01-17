@@ -13,6 +13,7 @@
 #include "TasksSettingsAction.h"
 #include "ApplicationSettingsAction.h"
 #include "TemporaryDirectoriesSettingsAction.h"
+#include "PluginGlobalSettingsGroupAction.h"
 
 namespace mv
 {
@@ -53,6 +54,13 @@ public: // Global settings actions
     virtual TasksSettingsAction& getTasksSettingsAction() = 0;
     virtual ApplicationSettingsAction& getApplicationSettings() = 0;
     virtual TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() = 0;
+
+    /**
+     * Get plugin global settings for plugin \p kind
+     * @param kind Plugin kind
+     * @return Pointer to plugin global settings (if available, otherwise returns a nullptr)
+     */
+    virtual PluginGlobalSettingsGroupAction* getPluginGlobalSettingsGroupAction(const QString& kind) = 0;
 };
 
 }

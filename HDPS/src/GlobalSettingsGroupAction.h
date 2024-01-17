@@ -29,7 +29,17 @@ public:
     GlobalSettingsGroupAction(QObject* parent, const QString& title, bool expanded = true);
 
     /** Get settings prefix for child actions */
-    QString getSettingsPrefix() const;
+    QString getSettingsPrefix() const override;
+
+public: // Actions management
+
+    /**
+     * Add \p action to the group (facade for GroupAction that automatically sets the WidgetAction settings prefix)
+     * @param action Pointer to action to add
+     * @param widgetFlags Action widget flags (default flags if -1)
+     * @param widgetConfigurationFunction When set, overrides the standard widget configuration function in the widget action
+     */
+    void addAction(WidgetAction* action, std::int32_t widgetFlags = -1, mv::gui::WidgetConfigurationFunction widgetConfigurationFunction = mv::gui::WidgetConfigurationFunction()) override final;
 };
 
 }

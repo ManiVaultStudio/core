@@ -95,6 +95,8 @@ DataHierarchyItem* DataHierarchyManager::getItem(const QString& datasetId)
     catch (...) {
         exceptionMessageBox("Unable to get item from the data hierarchy manager");
     }
+
+    return nullptr;
 }
 
 mv::DataHierarchyItems DataHierarchyManager::getItems() const

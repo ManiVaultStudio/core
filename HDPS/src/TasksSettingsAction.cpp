@@ -15,8 +15,6 @@ TasksSettingsAction::TasksSettingsAction(QObject* parent) :
     setShowLabels(false);
 
     addAction(&_hideForegroundTasksPopupAction);
-
-    _hideForegroundTasksPopupAction.setSettingsPrefix(getSettingsPrefix() + "HideForegroundTasksPopup");
 }
 
 }

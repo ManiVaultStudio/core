@@ -33,7 +33,6 @@ ApplicationSettingsAction::ApplicationSettingsAction(QObject* parent) :
     if (themesAvailable)
     {
         _appearanceOptionAction.setDefaultWidgetFlags(gui::OptionAction::HorizontalButtons);
-        _appearanceOptionAction.setSettingsPrefix(getSettingsPrefix() + "AppearanceOption");
             
         addAction(&_appearanceOptionAction);
         
