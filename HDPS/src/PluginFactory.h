@@ -194,6 +194,14 @@ protected:
      */
     static std::uint16_t getNumberOfDatasetsForType(const Datasets& datasets, const DataType& dataType);
 
+signals:
+
+    /**
+     * Signals that the number of instances changed to \p numberOfInstances
+     * @param numberOfInstances Number of plugin instances
+     */
+    void numberOfInstancesChanged(std::uint32_t numberOfInstances);
+
 private:
     QString                     _kind;                          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
     Type                        _type;                          /** Type of plugin (e.g. analysis, data, loader, writer & view) */

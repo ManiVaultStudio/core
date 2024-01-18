@@ -23,7 +23,7 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
     _additionalEditorAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
     _additionalEditorAction.setShortcut(tr("F11"));
     _additionalEditorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _additionalEditorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _additionalEditorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _additionalEditorAction.setConnectionPermissionsToForceNone();
     _additionalEditorAction.setEnabled(false);
 

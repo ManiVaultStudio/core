@@ -62,7 +62,6 @@ void LoadSystemViewMenu::populate()
         for (auto& action : actions)
             addAction(action);
     }
-
 }
 
 bool LoadSystemViewMenu::mayProducePlugins() const
@@ -96,6 +95,11 @@ QVector<QPointer<TriggerAction>> LoadSystemViewMenu::getLoadSystemViewsActions(m
 
         action->setIcon(pluginTriggerAction->icon());
         action->setEnabled(pluginTriggerAction->isEnabled());
+
+        connect(pluginTriggerAction, &PluginTriggerAction::enabledChanged, this, [action, pluginTriggerAction](bool enabled) -> void {
+            if (enabled != action->isEnabled())
+                action->setEnabled(enabled);
+        });
 
         ViewPlugin* dockToViewPlugin = nullptr;
 

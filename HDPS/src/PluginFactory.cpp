@@ -103,9 +103,14 @@ std::uint32_t PluginFactory::getNumberOfInstances() const
 
 void PluginFactory::setNumberOfInstances(std::uint32_t numberOfInstances)
 {
+    if (numberOfInstances == _numberOfInstances)
+        return;
+
     _numberOfInstances = numberOfInstances;
 
     _pluginTriggerAction.setEnabled(mayProduce());
+
+    emit numberOfInstancesChanged(_numberOfInstances);
 }
 
 std::uint32_t PluginFactory::getMaximumNumberOfInstances() const

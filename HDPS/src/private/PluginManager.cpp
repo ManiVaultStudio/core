@@ -286,6 +286,9 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets input
         if (pluginInstance == nullptr)
             throw std::runtime_error(QString("Unable to produce plugin of kind %1").arg(kind).toStdString());
 
+        if (!pluginFactory->mayProduce())
+            throw std::runtime_error("Maximum number of plugin instances reached");
+
         pluginFactory->setNumberOfInstances(pluginFactory->getNumberOfInstances() + 1);
 
         switch (pluginFactory->getType()) {

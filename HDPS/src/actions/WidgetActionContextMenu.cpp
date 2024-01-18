@@ -301,37 +301,14 @@ WidgetActionContextMenu::EditActionsDialog::EditActionsDialog(QWidget* parent, W
 
     layout->addWidget(_actionsGroupAction.createWidget(this));
 
-    //parametersLayout->setContentsMargins(0, 0, 0, 0);
-
     for (auto action : _actions) {
         if (action->isPublic()) {
             action->cacheConnectionPermissions(true);
             action->setConnectionPermissionsToForceNone(true);
         }
-        
-        _actionsGroupAction.addAction(action);
-
-        /*
-        auto actionWidget = action->createWidget(this);
-        
-        const auto rowCount = parametersLayout->rowCount();
-
-        if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup))
-            parametersLayout->addWidget(action->createLabelWidget(this), rowCount, 0);
-
-        parametersLayout->addWidget(actionWidget, rowCount, 1);
-
-        if (actionWidget->layout() == nullptr) {
-            auto editLayout         = new QVBoxLayout();
-            auto notEditableLabel   = new QLabel("Not editable");
-
-            editLayout->setContentsMargins(0, 0, 0, 0);
-            editLayout->addWidget(notEditableLabel);
-
-            actionWidget->setLayout(editLayout);
-        }
-        */
     }
+
+    _actionsGroupAction.setShowLabels(_actions.count() >= 2);
 
     setLayout(layout);
 }

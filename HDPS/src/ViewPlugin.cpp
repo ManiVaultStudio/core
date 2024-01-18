@@ -52,36 +52,31 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _editorAction.setIconByName("cog");
     _editorAction.setShortcut(tr("F12"));
     _editorAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _editorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _editorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _editorAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _editorAction.setConnectionPermissionsToForceNone();
 
     _screenshotAction.setIconByName("camera");
     _screenshotAction.setShortcut(tr("F2"));
     _screenshotAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _screenshotAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _screenshotAction.setConnectionPermissionsToForceNone();
 
     _isolateAction.setIconByName("crosshairs");
     _isolateAction.setShortcut(tr("F3"));
     _isolateAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _isolateAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
+    _isolateAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _isolateAction.setConnectionPermissionsToForceNone();
 
     _mayCloseAction.setToolTip("Determines whether this view plugin may be closed or not");
-    _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _mayCloseAction.setConnectionPermissionsToForceNone();
 
     _mayFloatAction.setToolTip("Determines whether this view plugin may float or not");
-    _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _mayFloatAction.setConnectionPermissionsToForceNone();
 
     _mayMoveAction.setToolTip("Determines whether this view plugin may be moved or not");
-    _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _mayMoveAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _mayMoveAction.setConnectionPermissionsToForceNone();
 
     _dockingOptionsAction.setToolTip("Determines the docking options");
@@ -91,14 +86,12 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
     _visibleAction.setToolTip("Determines whether the view plugin is visible or not");
     _visibleAction.setIcon(getIcon());
-    _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu);
-    _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly);
+    _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
 
     _helpAction.setToolTip(QString("Shows %1 documentation").arg(factory->getKind()));
     _helpAction.setShortcut(tr("F1"));
     _helpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
-    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::InternalUseOnly, false);
+    _helpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
     _helpAction.setConnectionPermissionsToForceNone();
 
     connect(&_editorAction, &TriggerAction::triggered, this, [this]() -> void {
