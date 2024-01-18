@@ -80,7 +80,7 @@ mv::plugin::Type Plugin::getType() const
 
 QString Plugin::getVersion() const
 {
-    return "No Version";
+    return _factory->getVersion();
 }
 
 bool Plugin::hasHelp()

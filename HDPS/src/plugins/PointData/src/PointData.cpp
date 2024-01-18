@@ -101,12 +101,6 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
         });
 }
 
-QString PointData::getVersion() const
-{
-    const auto version = mv::Application::current()->getVersion();
-    return QStringLiteral("%1.%2").arg(version.getMajor()).arg(version.getMinor());
-}
-
 void PointData::fromVariantMap(const QVariantMap& variantMap)
 {
     variantMapMustContain(variantMap, "Data");
