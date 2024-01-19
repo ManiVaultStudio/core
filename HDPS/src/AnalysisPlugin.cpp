@@ -59,16 +59,16 @@ QVariantMap AnalysisPlugin::toVariantMap() const
 {
     auto variantMap = Plugin::toVariantMap();
 
-    QVariantList inputDatasetsGUIDs, outputDatasetsGUIDs;
+    QVariantList inputDatasetsIDs, outputDatasetsIDs;
 
     for (auto& input : _input)
-        inputDatasetsGUIDs << input->getId();
+        inputDatasetsIDs << input->getId();
 
     for (auto& output : _output)
-        outputDatasetsGUIDs << output->getId();
+        outputDatasetsIDs << output->getId();
 
-    variantMap["InputDatasetsGUIDs"] = inputDatasetsGUIDs;
-    variantMap["OutputDatasetsGUIDs"] = outputDatasetsGUIDs;
+    variantMap["InputDatasetsIDs"] = inputDatasetsIDs;
+    variantMap["OutputDatasetsIDs"] = outputDatasetsIDs;
 
     return variantMap;
 }

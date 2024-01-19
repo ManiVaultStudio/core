@@ -141,8 +141,8 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
     if (variantMap["Derived"].toBool())
     {
-        if (variantMap.contains("SourceDatasetGUID"))
-            setSourceDataSet(mv::data().getDataset(variantMap["SourceDatasetGUID"].toString()));
+        if (variantMap.contains("SourceDatasetID"))
+            setSourceDataSet(mv::data().getDataset(variantMap["SourceDatasetID"].toString()));
         else
             setSourceDataSet(getParent());
 
@@ -152,8 +152,8 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     // For backwards compatability, check PluginVersion
     if (!(variantMap["PluginVersion"] == "No Version") && !variantMap["Full"].toBool())
     {        
-        if (variantMap.contains("FullDatasetGUID"))
-            makeSubsetOf(mv::data().getDataset(variantMap["FullDatasetGUID"].toString()));
+        if (variantMap.contains("FullDatasetID"))
+            makeSubsetOf(mv::data().getDataset(variantMap["FullDatasetID"].toString()));
         else
             makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
 
@@ -214,8 +214,8 @@ QVariantMap DatasetImpl::toVariantMap() const
         { "Derived", QVariant::fromValue(isDerivedData()) },
         { "MayUnderive", QVariant::fromValue(mayUnderive()) },
         { "Full", QVariant::fromValue(isFull()) },
-        { "SourceDatasetGUID", isDerivedData() ? QVariant::fromValue(_sourceDataset->getId()) : "" },
-        { "FullDatasetGUID", isFull() ? "" : QVariant::fromValue(_fullDataset->getId()) },
+        { "SourceDatasetID", isDerivedData() ? QVariant::fromValue(_sourceDataset->getId()) : "" },
+        { "FullDatasetID", isFull() ? "" : QVariant::fromValue(_fullDataset->getId()) },
         { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
         { "LinkedData", linkedDataList },
         { "Properties", QVariant::fromValue(_properties)}

@@ -620,14 +620,14 @@ void PluginManager::fromVariantMap(const QVariantMap& variantMap)
             auto analysisPluginMap = loadedAnalysis.toMap();
 
             variantMapMustContain(analysisPluginMap, "Kind");
-            variantMapMustContain(analysisPluginMap, "InputDatasetsGUIDs");
-            variantMapMustContain(analysisPluginMap, "OutputDatasetsGUIDs");
+            variantMapMustContain(analysisPluginMap, "InputDatasetsIDs");
+            variantMapMustContain(analysisPluginMap, "OutputDatasetsIDs");
 
             auto analysisPluginKind = analysisPluginMap["Kind"].toString();
             if (_pluginFactories.contains(analysisPluginKind))
             {
-                auto inputDatasetsGUIDs = analysisPluginMap["InputDatasetsGUIDs"].toStringList();
-                auto outputDatasetsGUIDs = analysisPluginMap["OutputDatasetsGUIDs"].toStringList();
+                auto inputDatasetsGUIDs = analysisPluginMap["InputDatasetsIDs"].toStringList();
+                auto outputDatasetsGUIDs = analysisPluginMap["OutputDatasetsIDs"].toStringList();
 
                 Datasets inputDatasets;
                 for (const auto& inputDatasetGUID : inputDatasetsGUIDs)
