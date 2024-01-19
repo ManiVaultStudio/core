@@ -12,6 +12,7 @@ namespace mv::gui
 PluginGlobalSettingsGroupAction::PluginGlobalSettingsGroupAction(QObject* parent, const plugin::PluginFactory* pluginFactory) :
     GlobalSettingsGroupAction(parent, "Plugin: " + pluginFactory->getKind())
 {
+    setSerializationName(pluginFactory->getKind());
 }
 
 }

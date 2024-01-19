@@ -16,7 +16,7 @@ GlobalSettingsGroupAction::GlobalSettingsGroupAction(QObject* parent, const QStr
 
 QString GlobalSettingsGroupAction::getSettingsPrefix() const
 {
-    return QString("GlobalSettings/%1/").arg(text());
+    return QString("GlobalSettings/%1/").arg(getSerializationName());
 }
 
 
