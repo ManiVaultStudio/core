@@ -87,14 +87,14 @@ public:
 public: // Serialization
 
     /**
-     * Load view plugin from variant
-     * @param Variant representation of the view plugin
+     * Load analysis plugin from variant
+     * @param Variant representation of the analysis plugin
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-     * Save view plugin to variant
-     * @return Variant representation of the view plugin
+     * Save analysis plugin to variant
+     * @param Variant representation of the analysis plugin
      */
     QVariantMap toVariantMap() const override;
 
