@@ -7,12 +7,9 @@
 
 #include "actions/PluginTriggerAction.h"
 
-namespace mv
-{
+using namespace mv::gui;
 
-using namespace gui;
-
-namespace plugin
+namespace mv::plugin
 {
 
 PluginFactory::PluginFactory(Type type) :
@@ -58,7 +55,7 @@ QString PluginFactory::getGlobalSettingsPrefix() const
     return QString("%1/").arg(getKind());
 }
 
-mv::PluginGlobalSettingsGroupAction* PluginFactory::getGlobalSettingsGroupAction() const
+PluginGlobalSettingsGroupAction* PluginFactory::getGlobalSettingsGroupAction() const
 {
     return _pluginGlobalSettingsGroupAction;
 }
@@ -173,8 +170,6 @@ std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets
             numberOfDatasetsForType++;
 
     return numberOfDatasetsForType;
-}
-
 }
 
 }

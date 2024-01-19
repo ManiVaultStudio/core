@@ -33,26 +33,26 @@ public: // Action getters
 
 public: // Global settings actions
 
-    ParametersSettingsAction& getParametersSettings() override { return _parametersSettingsAction; };
-    MiscellaneousSettingsAction& getMiscellaneousSettings() override { return _miscellaneousSettingsAction; };
-    TasksSettingsAction& getTasksSettingsAction() override { return _tasksSettingsAction; };
-    ApplicationSettingsAction& getApplicationSettings() override { return _applicationSettingsAction; };
-    TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() override { return _temporaryDirectoriesSettingsAction; };
+    gui::ParametersSettingsAction& getParametersSettings() override { return _parametersSettingsAction; };
+    gui::MiscellaneousSettingsAction& getMiscellaneousSettings() override { return _miscellaneousSettingsAction; };
+    gui::TasksSettingsAction& getTasksSettingsAction() override { return _tasksSettingsAction; };
+    gui::ApplicationSettingsAction& getApplicationSettings() override { return _applicationSettingsAction; };
+    gui::TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() override { return _temporaryDirectoriesSettingsAction; };
 
     /**
      * Get plugin global settings for plugin \p kind
      * @param kind Plugin kind
      * @return Pointer to plugin global settings (if available, otherwise returns a nullptr)
      */
-    PluginGlobalSettingsGroupAction* getPluginGlobalSettingsGroupAction(const QString& kind) override;
+    gui::PluginGlobalSettingsGroupAction* getPluginGlobalSettingsGroupAction(const QString& kind) override;
 
 private:
-    gui::TriggerAction                  _editSettingsAction;            /** Action for triggering the settings dialog */
-    ParametersSettingsAction            _parametersSettingsAction;      /** Parameters global settings */
-    MiscellaneousSettingsAction         _miscellaneousSettingsAction;   /** Miscellaneous global settings */
-    TasksSettingsAction                 _tasksSettingsAction;           /** Tasks global settings */
-    ApplicationSettingsAction           _applicationSettingsAction;     /** Application global settings */
-    TemporaryDirectoriesSettingsAction  _temporaryDirectoriesSettingsAction;  /** Temporary files global settings */
+    gui::TriggerAction                          _editSettingsAction;                    /** Action for triggering the settings dialog */
+    gui::ParametersSettingsAction               _parametersSettingsAction;              /** Parameters global settings */
+    gui::MiscellaneousSettingsAction            _miscellaneousSettingsAction;           /** Miscellaneous global settings */
+    gui::TasksSettingsAction                    _tasksSettingsAction;                   /** Tasks global settings */
+    gui::ApplicationSettingsAction              _applicationSettingsAction;             /** Application global settings */
+    gui::TemporaryDirectoriesSettingsAction     _temporaryDirectoriesSettingsAction;    /** Temporary files global settings */
 };
 
 }

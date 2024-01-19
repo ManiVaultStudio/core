@@ -5,7 +5,7 @@
 #include "TasksSettingsAction.h"
 #include "Application.h"
 
-namespace mv
+namespace mv::gui
 {
 
 TasksSettingsAction::TasksSettingsAction(QObject* parent) :

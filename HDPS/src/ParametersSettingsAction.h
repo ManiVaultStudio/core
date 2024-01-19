@@ -8,7 +8,7 @@
 
 #include "actions/ToggleAction.h"
 
-namespace mv
+namespace mv::gui
 {
 
 /**
@@ -30,14 +30,14 @@ public:
 
 public: // Action getters
 
-    gui::ToggleAction& getAskForSharedParameterNameAction() { return _askForSharedParameterNameAction; }
-    gui::ToggleAction& getConfirmRemoveSharedParameterAction() { return _confirmRemoveSharedParameterAction; }
-    gui::ToggleAction& getExpertModeAction() { return _expertModeAction; }
+    ToggleAction& getAskForSharedParameterNameAction() { return _askForSharedParameterNameAction; }
+    ToggleAction& getConfirmRemoveSharedParameterAction() { return _confirmRemoveSharedParameterAction; }
+    ToggleAction& getExpertModeAction() { return _expertModeAction; }
 
 private:
-    gui::ToggleAction   _askForSharedParameterNameAction;       /** Toggle between asking for a name when publishing an action or not */
-    gui::ToggleAction   _confirmRemoveSharedParameterAction;    /** Toggle asking for confirmation prior to removal of public action */
-    gui::ToggleAction   _expertModeAction;                      /** In expert mode, all descendants of a root public action are displayed, otherwise they are hidden */
+    ToggleAction   _askForSharedParameterNameAction;       /** Toggle between asking for a name when publishing an action or not */
+    ToggleAction   _confirmRemoveSharedParameterAction;    /** Toggle asking for confirmation prior to removal of public action */
+    ToggleAction   _expertModeAction;                      /** In expert mode, all descendants of a root public action are displayed, otherwise they are hidden */
 };
 
 }

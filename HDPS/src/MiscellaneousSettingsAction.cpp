@@ -5,7 +5,7 @@
 #include "MiscellaneousSettingsAction.h"
 #include "Application.h"
 
-namespace mv
+namespace mv::gui
 {
 
 MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :

@@ -6,10 +6,8 @@
 
 #include <QString>
 
-namespace mv
+namespace mv::gui
 {
-
-using namespace gui;
 
 GlobalSettingsGroupAction::GlobalSettingsGroupAction(QObject* parent, const QString& title, bool expanded /*= true*/) :
     GroupAction(parent, title, expanded)

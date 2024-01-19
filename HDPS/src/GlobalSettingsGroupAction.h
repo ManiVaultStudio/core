@@ -6,7 +6,7 @@
 
 #include "actions/GroupAction.h"
 
-namespace mv
+namespace mv::gui
 {
 
 /**
@@ -16,7 +16,7 @@ namespace mv
  *
  * @author Thomas Kroes
  */
-class GlobalSettingsGroupAction : public mv::gui::GroupAction
+class GlobalSettingsGroupAction : public GroupAction
 {
 public:
 

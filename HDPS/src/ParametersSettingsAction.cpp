@@ -7,7 +7,7 @@
 
 using namespace mv::gui;
 
-namespace mv
+namespace mv::gui
 {
 
 ParametersSettingsAction::ParametersSettingsAction(QObject* parent) :

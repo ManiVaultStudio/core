@@ -141,7 +141,7 @@ public: // Settings
      * Get global settings action (facade for the PluginFactory class)
      * @return Pointer to plugin global settings action (maybe nullptr if plugin does not have global settings)
      */
-    PluginGlobalSettingsGroupAction* getGlobalSettingsAction() const;
+    gui::PluginGlobalSettingsGroupAction* getGlobalSettingsAction() const;
 
 public: // Serialization
 

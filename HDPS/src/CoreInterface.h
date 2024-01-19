@@ -45,7 +45,6 @@ namespace mv
     namespace gui
     {
         class PluginTriggerAction;
-        class GlobalSettingsAction;
 
         using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
     }

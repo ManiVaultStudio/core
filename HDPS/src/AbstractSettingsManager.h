@@ -49,18 +49,18 @@ public: // Action getters
 
 public: // Global settings actions
 
-    virtual ParametersSettingsAction& getParametersSettings() = 0;
-    virtual MiscellaneousSettingsAction& getMiscellaneousSettings() = 0;
-    virtual TasksSettingsAction& getTasksSettingsAction() = 0;
-    virtual ApplicationSettingsAction& getApplicationSettings() = 0;
-    virtual TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() = 0;
+    virtual gui::ParametersSettingsAction& getParametersSettings() = 0;
+    virtual gui::MiscellaneousSettingsAction& getMiscellaneousSettings() = 0;
+    virtual gui::TasksSettingsAction& getTasksSettingsAction() = 0;
+    virtual gui::ApplicationSettingsAction& getApplicationSettings() = 0;
+    virtual gui::TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() = 0;
 
     /**
      * Get plugin global settings for plugin \p kind
      * @param kind Plugin kind
      * @return Pointer to plugin global settings (if available, otherwise returns a nullptr)
      */
-    virtual PluginGlobalSettingsGroupAction* getPluginGlobalSettingsGroupAction(const QString& kind) = 0;
+    virtual gui::PluginGlobalSettingsGroupAction* getPluginGlobalSettingsGroupAction(const QString& kind) = 0;
 };
 
 }

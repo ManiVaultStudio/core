@@ -6,25 +6,12 @@
 
 #include "Plugin.h"
 
-namespace mv
+namespace mv::gui
 {
-
-using namespace gui;
 
 PluginGlobalSettingsGroupAction::PluginGlobalSettingsGroupAction(QObject* parent, const plugin::PluginFactory* pluginFactory) :
-    GlobalSettingsGroupAction(parent, pluginFactory->getKind()),
-    _pluginFactory(pluginFactory)
+    GlobalSettingsGroupAction(parent, "Plugin: " + pluginFactory->getKind())
 {
 }
-
-//QString PluginGlobalSettingsGroupAction::getSettingsPrefix() const
-//{
-//    Q_ASSERT(_pluginFactory != nullptr);
-//
-//    if (!_pluginFactory)
-//        return {};
-//
-//    return GlobalSettingsGroupAction::getSettingsPrefix() + _pluginFactory->getGlobalSettingsPrefix();
-//}
 
 }

@@ -5,9 +5,7 @@
 #include "TemporaryDirectoriesSettingsAction.h"
 #include "Application.h"
 
-using namespace mv::gui;
-
-namespace mv
+namespace mv::gui
 {
 
 TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* parent) :
@@ -25,7 +23,6 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     addAction(&_removeStaleTemporaryDirsAtStartupAction);
     addAction(&_staleTemporaryDirectoriesGroupAction);
 
-    _removeStaleTemporaryDirsAtStartupAction.setSettingsPrefix(getSettingsPrefix() + "RAS");
     _removeStaleTemporaryDirsAtStartupAction.setToolTip("Remove stale temporary directories when ManiVault starts up");
 
     _scanForStaleTemporaryDirectoriesAction.setToolTip("Rescan for stale temporary directories");

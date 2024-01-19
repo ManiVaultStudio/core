@@ -137,6 +137,8 @@ void OptionsAction::selectOption(const QString& option, bool unselect /*= false*
 
     if (!matches.isEmpty())
         _optionsModel.item(matches.first().row())->setData(unselect ? Qt::Unchecked : Qt::Checked, Qt::CheckStateRole);
+
+    saveToSettings();
 }
 
 void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
@@ -155,6 +157,8 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
 
     if (getSelectedOptions() != previousSelectedOptions)
         emit selectedOptionsChanged(getSelectedOptions());
+
+    saveToSettings();
 }
 
 void OptionsAction::connectToPublicAction(WidgetAction* publicAction, bool recursive /*= true*/)

@@ -6,12 +6,14 @@
 
 #include "GlobalSettingsGroupAction.h"
 
-namespace mv
-{
-
-namespace plugin {
-    class PluginFactory;
+namespace mv {
+    namespace plugin {
+        class PluginFactory;
+    }
 }
+
+namespace mv::gui
+{
 
 /**
  * Plugin global settings group action class
@@ -20,7 +22,7 @@ namespace plugin {
  *
  * @author Thomas Kroes
  */
-class PluginGlobalSettingsGroupAction : public mv::GlobalSettingsGroupAction
+class PluginGlobalSettingsGroupAction : public GlobalSettingsGroupAction
 {
 public:
 
@@ -30,15 +32,6 @@ public:
      * @param pluginFactory Pointer to plugin factory
      */
     PluginGlobalSettingsGroupAction(QObject* parent, const plugin::PluginFactory* pluginFactory);
-
-    /**
-     * Get settings prefix
-     * @return Plugin settings prefix
-     */
-    //QString getSettingsPrefix() const override;
-
-private:
-    const plugin::PluginFactory* _pluginFactory;  /** Pointer to plugin factory (for global settings prefix) */
 };
 
 }

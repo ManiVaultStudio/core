@@ -79,7 +79,7 @@ void SettingsManager::reset()
 
 void SettingsManager::edit()
 {
-    auto* settingsManagerDialog = new SettingsManagerDialog(Application::getMainWindow());
+    auto* settingsManagerDialog = new SettingsManagerDialog();
 
     connect(settingsManagerDialog, &SettingsManagerDialog::finished, settingsManagerDialog, &SettingsManagerDialog::deleteLater);
     
