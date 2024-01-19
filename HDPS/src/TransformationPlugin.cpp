@@ -28,6 +28,11 @@ void TransformationPlugin::setInputDatasets(const Datasets& inputDatasets)
     _inputDatasets = inputDatasets;
 }
 
+void TransformationPlugin::setInputDataset(const Dataset<DatasetImpl>& inputDataset)
+{
+    setInputDatasets({ inputDataset });
+}
+
 TransformationPluginFactory::TransformationPluginFactory() :
     PluginFactory(Type::TRANSFORMATION)
 {

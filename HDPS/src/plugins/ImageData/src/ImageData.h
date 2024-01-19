@@ -10,9 +10,9 @@
 #include <RawData.h>
 #include <Set.h>
 
-#include <QString>
-#include <QSize>
 #include <QDebug>
+#include <QSize>
+#include <QString>
 
 #include <vector>
 
@@ -84,9 +84,6 @@ public:
      * @param imageSize Size of the image(s)
      */
     void setImageSize(const QSize& imageSize);
-
-    /** Get the target rectangle */
-    QRect getTargetRectangle() const;
 
     /** Gets the number of components per pixel */
     std::uint32_t getNumberOfComponentsPerPixel() const;

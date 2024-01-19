@@ -3,8 +3,8 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PluginFactory.h"
+
 #include "Set.h"
-#include "actions/PluginTriggerAction.h"
 
 namespace mv
 {
@@ -127,7 +127,7 @@ QStringList PluginFactory::getDatasetTypesAsStringList(const Datasets& datasets)
 {
     QStringList datasetTypes;
 
-    for (auto dataset : datasets)
+    for (const auto& dataset : datasets)
         datasetTypes << dataset->getDataType().getTypeString();
 
     return datasetTypes;
@@ -135,7 +135,7 @@ QStringList PluginFactory::getDatasetTypesAsStringList(const Datasets& datasets)
 
 bool PluginFactory::areAllDatasetsOfTheSameType(const Datasets& datasets, const DataType& dataType)
 {
-    for (auto dataset : datasets)
+    for (const auto& dataset : datasets)
         if (dataset->getDataType() != dataType)
             return false;
 
@@ -146,7 +146,7 @@ std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets
 {
     std::uint16_t numberOfDatasetsForType = 0;
 
-    for (auto dataset : datasets)
+    for (const auto& dataset : datasets)
         if (dataset->getDataType() == dataType)
             numberOfDatasetsForType++;
 

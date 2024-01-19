@@ -5,10 +5,10 @@
 #ifndef HDPS_DATASET_H
 #define HDPS_DATASET_H
 
-#include "RawData.h"
+#include "CoreInterface.h"
 #include "Dataset.h"
 #include "LinkedData.h"
-#include "CoreInterface.h"
+#include "RawData.h"
 
 #include "DatasetTask.h"
 #include "ForegroundTask.h"
@@ -18,8 +18,8 @@
 #include "util/Miscellaneous.h"
 
 #include <QString>
-#include <QVector>
 #include <QUuid>
+#include <QVector>
 
 #include <memory>
 
@@ -279,7 +279,7 @@ public: // Hierarchy
      * @param filterDataType Type of data to filter
      * @return Child datasets of the dataset type
      */
-    QVector<Dataset<DatasetImpl>> getChildren(const DataType& filterDataType);
+    QVector<Dataset<DatasetImpl>> getChildren(const DataType& filterDataType) const;
 
 public: // Selection
 
@@ -469,7 +469,7 @@ public: // Linked data
      * Get flags for linked data
      * @return Flags for linked data
      */
-    std::int32_t getLinkedDataFlags();
+    std::int32_t getLinkedDataFlags() const;
 
     /**
      * Set flags for linked data
@@ -488,7 +488,7 @@ public: // Linked data
      * @param linkedDataFlag Linked data
      * @return Boolean determining  linkedDataFlag Linked data
      */
-    bool hasLinkedDataFlag(std::int32_t linkedDataFlag);
+    bool hasLinkedDataFlag(std::int32_t linkedDataFlag) const;
 
     /**
      * Resolves linked data for the dataset

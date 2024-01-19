@@ -5,10 +5,9 @@
 #include "DockManager.h"
 #include "ViewPluginDockWidget.h"
 
-#include <ViewPlugin.h>
-
-#include <CoreInterface.h>
 #include <AbstractPluginManager.h>
+#include <CoreInterface.h>
+#include <ViewPlugin.h>
 
 #include <util/Serialization.h>
 #include <widgets/InfoWidget.h>
@@ -158,10 +157,10 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
 
         const auto viewPluginDockWidgetsList = variantMap["ViewPluginDockWidgets"].toList();
 
-        for (auto viewPluginDockWidgetVariant : viewPluginDockWidgetsList)
+        for (const auto& viewPluginDockWidgetVariant : viewPluginDockWidgetsList)
             ViewPluginDockWidget::preRegisterSerializationTask(this, viewPluginDockWidgetVariant.toMap()["ID"].toString(), this);
 
-        for (auto viewPluginDockWidgetVariant : viewPluginDockWidgetsList) {
+        for (const auto& viewPluginDockWidgetVariant : viewPluginDockWidgetsList) {
             const auto viewPluginMap    = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap();
             const auto pluginKind       = viewPluginMap["Kind"].toString();
             const auto pluginMap        = viewPluginMap["Plugin"].toMap();
@@ -207,14 +206,14 @@ QVariantMap DockManager::toVariantMap() const
 
     _serializationTask->setEnabled(true);
 
-    for (auto viewPluginDockWidget : getViewPluginDockWidgets())
+    for (const auto& viewPluginDockWidget : getViewPluginDockWidgets())
         ViewPluginDockWidget::preRegisterSerializationTask(const_cast<DockManager*>(this), viewPluginDockWidget->getId(), const_cast<DockManager*>(this));
 
     auto variantMap = Serializable::toVariantMap();
 
     QVariantList viewPluginDockWidgetsList;
 
-    for (auto viewPluginDockWidget : getViewPluginDockWidgets())
+    for (const auto& viewPluginDockWidget : getViewPluginDockWidgets())
         viewPluginDockWidgetsList << viewPluginDockWidget->toVariantMap();
 
     const_cast<DockManager*>(this)->_layoutTask.setRunning();

@@ -4,9 +4,10 @@
 
 #pragma once
 
-#include "PluginType.h"
-#include "DataType.h"
 #include "Dataset.h"
+#include "DataType.h"
+#include "PluginType.h"
+
 #include "actions/PluginTriggerAction.h"
 
 #include <QObject>
@@ -19,8 +20,6 @@ namespace mv
 
     namespace gui
     {
-        class PluginTriggerAction;
-
         using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
     }
 

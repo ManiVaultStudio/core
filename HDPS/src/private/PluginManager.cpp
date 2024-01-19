@@ -3,30 +3,31 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PluginManager.h"
+
 #include "Core.h"
 
-#include <PluginFactory.h>
-#include <LoaderPlugin.h>
-#include <WriterPlugin.h>
-#include <ViewPlugin.h>
 #include <AnalysisPlugin.h>
-#include <TransformationPlugin.h>
-#include <RawData.h>
+#include <LoaderPlugin.h>
+#include <PluginFactory.h>
 #include <PluginType.h>
+#include <RawData.h>
+#include <TransformationPlugin.h>
+#include <ViewPlugin.h>
+#include <WriterPlugin.h>
 
 #include <util/Serialization.h>
 
 #include <actions/PluginTriggerAction.h>
 
 #include <QDebug>
-#include <QPluginLoader>
-#include <QMessageBox>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
-#include <QJsonArray>
+#include <QMessageBox>
+#include <QPluginLoader>
 
-#include <stdexcept>
 #include <assert.h>
+#include <stdexcept>
 
 #ifdef _DEBUG
     #define PLUGIN_MANAGER_VERBOSE
@@ -272,7 +273,7 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
     return resolvedOrderedPluginNames;
 }
 
-plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets datasets /*= Datasets()*/)
+plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets inputDatasets /*= Datasets()*/, Datasets outputDatasets /*= Datasets()*/)
 {
     try
     {
@@ -294,19 +295,19 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets datas
             case plugin::Type::ANALYSIS: {
                 auto analysisPlugin = dynamic_cast<AnalysisPlugin*>(pluginInstance);
 
-                for (auto dataset : datasets)
-                    dataset->setAnalysis(analysisPlugin);
+                if (!inputDatasets.isEmpty())
+                    analysisPlugin->setInputDatasets(inputDatasets);
 
-                if (!datasets.isEmpty())
-                    analysisPlugin->setInputDataset(datasets.first());
+                if (!outputDatasets.isEmpty())
+                    analysisPlugin->setOutputDatasets(outputDatasets);
 
                 break;
             }
             case plugin::Type::WRITER: {
                 auto writerPlugin = dynamic_cast<WriterPlugin*>(pluginInstance);
 
-                if (!datasets.isEmpty())
-                    writerPlugin->setInputDataset(datasets.first());
+                if (!inputDatasets.isEmpty())
+                    writerPlugin->setInputDatasets(inputDatasets);
 
                 break;
             }
@@ -611,20 +612,58 @@ void PluginManager::fromVariantMap(const QVariantMap& variantMap)
 
     if (!missingPluginKinds.isEmpty())
         throw std::runtime_error(QString("One or more plugins are not available: %1").arg(missingPluginKinds.join(", ")).toLocal8Bit());
+
+    if (variantMap.contains("LoadedAnalyses"))
+    {
+        for (const auto& loadedAnalysis : variantMap["LoadedAnalyses"].toList())
+        {
+            auto analysisPluginMap = loadedAnalysis.toMap();
+
+            variantMapMustContain(analysisPluginMap, "Kind");
+            variantMapMustContain(analysisPluginMap, "InputDatasetsIDs");
+            variantMapMustContain(analysisPluginMap, "OutputDatasetsIDs");
+
+            auto analysisPluginKind = analysisPluginMap["Kind"].toString();
+            if (_pluginFactories.contains(analysisPluginKind))
+            {
+                auto inputDatasetsGUIDs = analysisPluginMap["InputDatasetsIDs"].toStringList();
+                auto outputDatasetsGUIDs = analysisPluginMap["OutputDatasetsIDs"].toStringList();
+
+                Datasets inputDatasets;
+                for (const auto& inputDatasetGUID : inputDatasetsGUIDs)
+                    inputDatasets << mv::data().getDataset(inputDatasetGUID);
+
+                Datasets outputDatasets;
+                for (const auto& outputDatasetGUID : outputDatasetsGUIDs)
+                    outputDatasets << mv::data().getDataset(outputDatasetGUID);
+
+                auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugins().requestPlugin(analysisPluginKind, inputDatasets, outputDatasets));
+                if (analysisPlugin)
+                    analysisPlugin->fromVariantMap(analysisPluginMap);
+            }
+        }
+    } // if variantMap.contains("LoadedAnalyses")
+
 }
 
 QVariantMap PluginManager::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
 
-    QVariantList usedPluginsList;
+    QVariantList usedPluginsList;     // kinds of used plugins
+    QVariantList loadedAnalysesList;  // openend analysis plugin instances
 
-    for (auto pluginFactory : _pluginFactories.values())
+    for (const auto& pluginFactory : _pluginFactories.values())
         if ((pluginFactory->getType() == Type::DATA || pluginFactory->getType() == Type::ANALYSIS || pluginFactory->getType() == Type::VIEW) && pluginFactory->getNumberOfInstances() > 0)
             usedPluginsList << pluginFactory->getKind();
 
+    for(const auto& loadedPlugin : _plugins)
+        if(loadedPlugin->getType() == Type::ANALYSIS )
+            loadedAnalysesList << dynamic_cast<plugin::AnalysisPlugin*>(loadedPlugin.get())->toVariantMap();
+
     variantMap.insert({
-        { "UsedPlugins", usedPluginsList }
+        { "UsedPlugins", usedPluginsList },
+        { "LoadedAnalyses", loadedAnalysesList }
     });
 
     return variantMap;

@@ -74,7 +74,7 @@ void EventListener::onDataEvent(DatasetEvent* dataEvent)
         if (_dataEventHandlersByType.find(dataRemovedEvent->getDataType()) != _dataEventHandlersByType.end())
             _dataEventHandlersByType[dataRemovedEvent->getDataType()](dataEvent);
 
-        for (auto dataEventHandler : _dataEventHandlers)
+        for (const auto& dataEventHandler : _dataEventHandlers)
             dataEventHandler(dataEvent);
     }
 
@@ -87,7 +87,7 @@ void EventListener::onDataEvent(DatasetEvent* dataEvent)
     if (_dataEventHandlersByType.find(dataEvent->getDataset()->getDataType()) != _dataEventHandlersByType.end())
         _dataEventHandlersByType[dataEvent->getDataset()->getDataType()](dataEvent);
 
-    for (auto dataEventHandler : _dataEventHandlers)
+    for (const auto& dataEventHandler : _dataEventHandlers)
         dataEventHandler(dataEvent);
 }
 
