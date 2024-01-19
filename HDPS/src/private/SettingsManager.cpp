@@ -111,4 +111,29 @@ PluginGlobalSettingsGroupAction* SettingsManager::getPluginGlobalSettingsGroupAc
     return {};
 }
 
+mv::gui::PluginGlobalSettingsGroupAction* SettingsManager::getPluginGlobalSettingsGroupAction(const plugin::Plugin* plugin)
+{
+    try
+    {
+        if (!plugin)
+            throw std::runtime_error("Plugin is nullptr");
+
+        const auto pluginKind = plugin->getKind();
+
+        if (pluginKind.isEmpty())
+            throw std::runtime_error("Plugin kind is empty");
+
+        return getPluginGlobalSettingsGroupAction(pluginKind);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get plugin global settings group action", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get plugin global settings group action");
+    }
+
+    return {};
+}
+
 }

@@ -46,6 +46,13 @@ public: // Global settings actions
      */
     gui::PluginGlobalSettingsGroupAction* getPluginGlobalSettingsGroupAction(const QString& kind) override;
 
+    /**
+    * Get plugin global settings for \p plugin
+    * @param plugin Pointer to plugin
+    * @return Pointer to plugin global settings (if available, otherwise returns a nullptr)
+    */
+    gui::PluginGlobalSettingsGroupAction* getPluginGlobalSettingsGroupAction(const plugin::Plugin* plugin) override;
+
 private:
     gui::TriggerAction                          _editSettingsAction;                    /** Action for triggering the settings dialog */
     gui::ParametersSettingsAction               _parametersSettingsAction;              /** Parameters global settings */
