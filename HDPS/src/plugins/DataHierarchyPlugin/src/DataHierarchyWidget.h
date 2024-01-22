@@ -14,9 +14,13 @@
 #include <DataHierarchyItem.h>
 #include <Dataset.h>
 
-#include <QWidget>
+#include <actions/ToggleAction.h>
+#include <actions/TriggerAction.h>
+#include <models/DataHierarchyFilterModel.h>
+#include <models/DataHierarchyModel.h>
+#include <widgets/HierarchyWidget.h>
 
-class DataHierarchyPlugin;
+#include <QWidget>
 
 /**
  * Widget for displaying the data hierarchy

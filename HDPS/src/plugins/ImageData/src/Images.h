@@ -10,14 +10,13 @@
 
 #include <Set.h>
 
-#include <QString>
-#include <QImage>
 #include <QColor>
 #include <QRect>
 #include <QSize>
+#include <QString>
 
-#include <vector>
 #include <tuple>
+#include <vector>
 
 using namespace mv::plugin;
 

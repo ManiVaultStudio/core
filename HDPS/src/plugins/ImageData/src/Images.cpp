@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "Images.h"
+
 #include "ImageData.h"
 #include "InfoAction.h"
 
@@ -12,8 +13,8 @@
 #include <DataHierarchyItem.h>
 #include <Dataset.h>
 
-#include <PointData/PointData.h>
 #include <ClusterData/ClusterData.h>
+#include <PointData/PointData.h>
 
 #include <QDebug>
 

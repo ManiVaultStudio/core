@@ -4,7 +4,9 @@
 
 #pragma once
 
-#include <actions/Actions.h>
+#include <actions/TriggerAction.h>
+#include <actions/WidgetAction.h>
+#include <actions/WidgetActionWidget.h>
 
 using namespace mv;
 using namespace mv::gui;

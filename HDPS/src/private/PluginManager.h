@@ -45,8 +45,8 @@ public: // Plugin creation/destruction
      * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
      * @return Pointer to created plugin, nullptr if creation failed
      */
-    plugin::Plugin* requestPlugin(const QString& kind, Datasets datasets = Datasets()) override;
-
+    plugin::Plugin* requestPlugin(const QString& kind, Datasets inputDatasets = Datasets(), Datasets outputDatasets = Datasets()) override;
+    
     /**
      * Create a view plugin plugin of \p kind and dock it to \p dockToViewPlugin at \p dockArea
      * @param kind Kind of plugin (name of the plugin)

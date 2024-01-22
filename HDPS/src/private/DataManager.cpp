@@ -407,15 +407,14 @@ Dataset<DatasetImpl> DataManager::createSubsetFromSelection(const Dataset<Datase
         // Assign source dataset to subset
         *subset = *const_cast<Dataset<DatasetImpl>&>(sourceDataset);
 
-        subset->setAll(false);
         subset->setText(guiName);
-        subset->getDataHierarchyItem().setVisible(visible);
 
         // Set a pointer to the original full dataset, if the source is another subset, we take their pointer
-        subset->_fullDataset = sourceDataset->isFull() ? sourceDataset : sourceDataset->_fullDataset;
+        subset->makeSubsetOf(sourceDataset->isFull() ? sourceDataset : sourceDataset->_fullDataset);
 
         addDataset(subset, parentDataset, notify);
 
+        subset->getDataHierarchyItem().setVisible(visible);
         subset->init();
 
         return subset;

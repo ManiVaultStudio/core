@@ -9,6 +9,7 @@
 
 #include <QMessageBox>
 
+#include <algorithm>
 #include <stdexcept>
 
 using namespace mv::util;
@@ -239,8 +240,9 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
     auto& projectDataSerializationTask = projects().getProjectSerializationTask().getDataTask();
 
     QStringList subtasks;
+    std::vector<std::pair<QVariantMap, bool>> datasetList;
 
-    const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &subtasks](const QVariantMap& variantMap) -> void {
+    const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &subtasks, &datasetList](const QVariantMap& variantMap) -> void {
         for (const auto& variant : variantMap.values()) {
             enumerateDatasetNames(variant.toMap()["Children"].toMap());
 
@@ -248,6 +250,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
             const auto datasetId    = dataset["ID"].toString();
 
             subtasks << datasetId;
+            datasetList.emplace_back(dataset, dataset["Derived"].toBool());
         }
     };
 
@@ -256,27 +259,27 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
     projectDataSerializationTask.setSubtasks(subtasks);
     projectDataSerializationTask.setRunning();
 
-    const auto loadDataset = [&projectDataSerializationTask](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
+    const auto loadDataHierarchyItem = [&projectDataSerializationTask](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
         const auto dataset      = dataHierarchyItemMap["Dataset"].toMap();
         const auto datasetId    = dataset["ID"].toString();
         const auto datasetName  = dataset["Name"].toString();
         const auto pluginKind   = dataset["PluginKind"].toString();
 
-        projectDataSerializationTask.setSubtaskStarted(datasetId, QString("Loading dataset: %1").arg(datasetName));
+        auto subtaskName = QString("Loading dataset hierarchy item: %1").arg(datasetName);
+        projectDataSerializationTask.setSubtaskStarted(datasetId, subtaskName);
         
         auto loadedDataset = mv::data().createDataset(pluginKind, guiName, parent, dataset["ID"].toString());
         
         loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
-        loadedDataset->fromVariantMap(dataset);
 
-        projectDataSerializationTask.setSubtaskFinished(datasetId, QString("Loading dataset: %1").arg(datasetName));
+        projectDataSerializationTask.setSubtaskFinished(datasetId, subtaskName);
 
         QCoreApplication::processEvents();
 
         return loadedDataset;
     };
 
-    const std::function<void(const QVariantMap&, Dataset<DatasetImpl>)> loadDataHierarchyItem = [&loadDataHierarchyItem, loadDataset](const QVariantMap& variantMap, Dataset<DatasetImpl> parent) -> void {
+    const std::function<void(const QVariantMap&, Dataset<DatasetImpl>)> populateDataHierarchy = [&populateDataHierarchy, loadDataHierarchyItem](const QVariantMap& variantMap, Dataset<DatasetImpl> parent) -> void {
 
         if (Application::isSerializationAborted())
             return;
@@ -289,10 +292,42 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
             sortedItems[variant.toMap()["SortIndex"].toInt()] = variant.toMap();
 
         for (const auto& item : sortedItems)
-            loadDataHierarchyItem(item["Children"].toMap(), loadDataset(item, item["Name"].toString(), parent));
+            populateDataHierarchy(item["Children"].toMap(), loadDataHierarchyItem(item, item["Name"].toString(), parent));
     };
 
-    loadDataHierarchyItem(variantMap, Dataset<DatasetImpl>());
+    auto populateDatasets = [&projectDataSerializationTask, &datasetList](const QVariantMap& variantMap) -> void {
+
+        if (Application::isSerializationAborted())
+            return;
+
+        // Maintain data hierarchy item order within partitions
+        std::reverse(datasetList.begin(), datasetList.end());
+
+        // First load non-derived datasets
+        std::stable_partition(datasetList.begin(), datasetList.end(),
+            [](const std::pair<QVariantMap, bool>& element) {
+                return !element.second; 
+            });
+
+        for (const auto& [dataVariantMap, isDerived] : datasetList)
+        {
+            const auto datasetId = dataVariantMap["ID"].toString();
+            const auto datasetName = dataVariantMap["Name"].toString();
+
+            auto subtaskName = QString("Loading dataset: %1").arg(datasetName);
+            projectDataSerializationTask.setSubtaskStarted(datasetId, subtaskName);
+
+            mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
+
+            projectDataSerializationTask.setSubtaskFinished(datasetId, subtaskName);
+
+            QCoreApplication::processEvents();
+        }
+    };
+
+    populateDataHierarchy(variantMap, Dataset<DatasetImpl>());
+
+    populateDatasets(variantMap);
 
     projectDataSerializationTask.setFinished();
 }

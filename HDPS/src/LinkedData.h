@@ -8,8 +8,6 @@
 
 #include "util/Serializable.h"
 
-#include <QString>
-
 #include <map>
 #include <vector>
 
@@ -115,11 +113,6 @@ private:
     Dataset<DatasetImpl>    _sourceDataSet;
     Dataset<DatasetImpl>    _targetDataSet;
     SelectionMap            _mapping;
-};
-
-class IndexLinkedData
-{
-
 };
 
 }

@@ -4,17 +4,15 @@
 
 #include "Set.h"
 
+#include "AnalysisPlugin.h"
 #include "CoreInterface.h"
 #include "DataHierarchyItem.h"
-#include "AnalysisPlugin.h"
 
-#include "util/Serialization.h"
-#include "util/Icon.h"
 #include "util/Exception.h"
+#include "util/Icon.h"
+#include "util/Serialization.h"
 
 #include "Application.h"
-
-#include <QPainter>
 
 using namespace mv::gui;
 using namespace mv::util;
@@ -72,7 +70,7 @@ QVector<Dataset<DatasetImpl>> DatasetImpl::getChildren(const QVector<DataType>& 
     return children;
 }
 
-QVector<mv::Dataset<mv::DatasetImpl>> DatasetImpl::getChildren(const DataType& filterDataType)
+QVector<mv::Dataset<mv::DatasetImpl>> DatasetImpl::getChildren(const DataType& filterDataType) const
 {
     return getChildren(QVector<DataType>({ filterDataType }));
 }
@@ -129,24 +127,49 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
     variantMapMustContain(variantMap, "Name");
     variantMapMustContain(variantMap, "Locked");
+    variantMapMustContain(variantMap, "StorageType");
+    variantMapMustContain(variantMap, "DataType");
     variantMapMustContain(variantMap, "Derived");
-    variantMapMustContain(variantMap, "HasAnalysis");
-    variantMapMustContain(variantMap, "Analysis");
+//    variantMapMustContain(variantMap, "Full");
     variantMapMustContain(variantMap, "LinkedData");
 
     setText(variantMap["Name"].toString());
     setLocked(variantMap["Locked"].toBool());
-
-    _derived    = variantMap["Derived"].toBool();
-    bool full   = variantMap["Full"].toBool();
-
-    if (_derived)
-        _sourceDataset = getParent();
-
-    if (!full)
-        _fullDataset = getParent()->getFullDataset<mv::DatasetImpl>();
-
     setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
+
+    assert(variantMap["DataType"].toString() == getDataType().getTypeString());
+
+    if (variantMap["Derived"].toBool())
+    {
+        if (variantMap.contains("SourceDatasetID"))
+            setSourceDataSet(mv::data().getDataset(variantMap["SourceDatasetID"].toString()));
+        else
+            setSourceDataSet(getParent());
+
+        assert(_sourceDataset.isValid());
+    }
+
+    // For backwards compatability, check PluginVersion
+    if (!(variantMap["PluginVersion"] == "No Version") && !variantMap["Full"].toBool())
+    {        
+        if (variantMap.contains("FullDatasetID"))
+            makeSubsetOf(mv::data().getDataset(variantMap["FullDatasetID"].toString()));
+        else
+            makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
+
+        assert(variantMap["PluginKind"].toString() == _rawData->getKind());
+
+        assert(_fullDataset.isValid());
+    }
+
+    if (variantMap.contains("GroupIndex") && variantMap["GroupIndex"].toInt() >= 0)
+        setGroupIndex(variantMap["GroupIndex"].toInt());
+
+    if (variantMap.contains("MayUnderive"))
+        _mayUnderive = variantMap["MayUnderive"].toBool();
+
+    if (variantMap.contains("Properties"))
+        _properties = variantMap["Properties"].toMap();
 
     if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
         Datasets proxyMembers;
@@ -157,12 +180,12 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         setProxyMembers(proxyMembers);
     }
 
-    for (auto linkedDataVariant : variantMap["LinkedData"].toList()) {
+    for (const auto& linkedDataVariant : variantMap["LinkedData"].toList()) {
         LinkedData linkedData;
 
         linkedData.fromVariantMap(linkedDataVariant.toMap());
 
-        getLinkedData().push_back(linkedData);
+        _linkedData.push_back(linkedData);
     }
 }
 
@@ -170,20 +193,15 @@ QVariantMap DatasetImpl::toVariantMap() const
 {
     auto variantMap = WidgetAction::toVariantMap();
 
-    QVariantMap analysisMap;
-
-    if (_analysis)
-        analysisMap = _analysis->toVariantMap();
-
     QStringList proxyMemberGuids;
 
-    for (auto proxyMember : _proxyMembers)
+    for (const auto& proxyMember : _proxyMembers)
         proxyMemberGuids << proxyMember->getId();
 
-    QVariantList linkedData;
+    QVariantList linkedDataList;
 
-    for (const auto& ld : getLinkedData())
-        linkedData.push_back(ld.toVariantMap());
+    for (const auto& ld : _linkedData)
+        linkedDataList.push_back(ld.toVariantMap());
 
     variantMap.insert({
         { "Name", QVariant::fromValue(text()) },
@@ -194,10 +212,13 @@ QVariantMap DatasetImpl::toVariantMap() const
         { "PluginKind", QVariant::fromValue(_rawData->getKind()) },
         { "PluginVersion", QVariant::fromValue(_rawData->getVersion()) },
         { "Derived", QVariant::fromValue(isDerivedData()) },
+        { "MayUnderive", QVariant::fromValue(mayUnderive()) },
+        { "Full", QVariant::fromValue(isFull()) },
+        { "SourceDatasetID", isDerivedData() ? QVariant::fromValue(_sourceDataset->getId()) : "" },
+        { "FullDatasetID", isFull() ? "" : QVariant::fromValue(_fullDataset->getId()) },
         { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
-        { "HasAnalysis", QVariant::fromValue(_analysis != nullptr) },
-        { "Analysis", analysisMap },
-        { "LinkedData", linkedData }
+        { "LinkedData", linkedDataList },
+        { "Properties", QVariant::fromValue(_properties)}
     });
 
     return variantMap;
@@ -229,7 +250,7 @@ void DatasetImpl::setProxyMembers(const Datasets& proxyDatasets)
             throw std::runtime_error("Proxy dataset requires at least one input dataset");
         }
 
-        for (auto proxyDataset : proxyDatasets)
+        for (const auto& proxyDataset : proxyDatasets)
             if (proxyDataset->getDataType() != getDataType())
                 throw std::runtime_error("All datasets should be of the same data type");
 
@@ -251,7 +272,7 @@ void DatasetImpl::setProxyMembers(const Datasets& proxyDatasets)
 
 bool DatasetImpl::mayProxy(const Datasets& proxyDatasets) const
 {
-    for (auto proxyDataset : proxyDatasets)
+    for (const auto& proxyDataset : proxyDatasets)
         if (proxyDataset->getDataType() != getDataType())
             return false;
 
@@ -296,7 +317,7 @@ DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/
     _storageType(StorageType::Owner),
     _rawData(nullptr),
     _rawDataName(rawDataName),
-    _all(false),
+    _all(true),
     _derived(false),
     _sourceDataset(),
     _properties(),
@@ -418,7 +439,7 @@ std::vector<mv::LinkedData>& DatasetImpl::getLinkedData()
     return _linkedData;
 }
 
-std::int32_t DatasetImpl::getLinkedDataFlags()
+std::int32_t DatasetImpl::getLinkedDataFlags() const
 {
     return _linkedDataFlags;
 }
@@ -436,7 +457,7 @@ void DatasetImpl::setLinkedDataFlag(std::int32_t linkedDataFlag, bool set /*= tr
         _linkedDataFlags &= ~linkedDataFlag;
 }
 
-bool DatasetImpl::hasLinkedDataFlag(std::int32_t linkedDataFlag)
+bool DatasetImpl::hasLinkedDataFlag(std::int32_t linkedDataFlag) const
 {
     return _linkedDataFlags & linkedDataFlag;
 }

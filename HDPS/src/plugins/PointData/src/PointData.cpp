@@ -8,26 +8,26 @@
 #endif
 
 #include "PointData.h"
-#include "InfoAction.h"
+
 #include "DimensionsPickerAction.h"
-#include "event/Event.h"
+#include "InfoAction.h"
 
-#include <QtCore>
-#include <QtDebug>
-#include <QPainter>
-
-#include <cstring>
-#include <type_traits>
-#include <queue>
-#include <set>
-
-#include "graphics/Vector2f.h"
-#include "Application.h"
+#include <Application.h>
+#include <DataHierarchyItem.h>
 
 #include <actions/GroupAction.h>
+#include <event/Event.h>
+#include <graphics/Vector2f.h>
 #include <util/Serialization.h>
 #include <util/Timer.h>
-#include <DataHierarchyItem.h>
+
+#include <QPainter>
+#include <QtCore>
+#include <QtDebug>
+
+#include <cstring>
+#include <set>
+#include <type_traits>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
 
@@ -103,6 +103,10 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
 
 void PointData::fromVariantMap(const QVariantMap& variantMap)
 {
+    variantMapMustContain(variantMap, "Data");
+    variantMapMustContain(variantMap, "NumberOfPoints");
+    variantMapMustContain(variantMap, "NumberOfDimensions");
+
     const auto data                 = variantMap["Data"].toMap();
     const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
     const auto numberOfDimensions   = static_cast<size_t>(variantMap["NumberOfDimensions"].toInt());
@@ -802,7 +806,7 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>()->setValueAt(index, newValue);
 }
 
-void resolveLinkedPointData(LinkedData& linkedData, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr)
+static void resolveLinkedPointData(const LinkedData& linkedData, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr)
 {
     Dataset<Points> sourceDataset   = linkedData.getSourceDataSet();
     Dataset<Points> targetDataset   = linkedData.getTargetDataset();
@@ -865,7 +869,7 @@ void resolveLinkedPointData(LinkedData& linkedData, const std::vector<std::uint3
     *ignoreDatasets << targetDataset;
 
     // Recursively resolve linked point data
-    for (auto targetLd : targetDataset->getLinkedData())
+    for (const mv::LinkedData& targetLd : targetDataset->getLinkedData())
         resolveLinkedPointData(targetLd, targetSelection->indices, ignoreDatasets);
 }
 
@@ -875,7 +879,7 @@ void Points::resolveLinkedData(bool force /*= false*/)
         return;
 
     // Check for linked data in this dataset and resolve them
-    for (mv::LinkedData& linkedData : getLinkedData())
+    for (const mv::LinkedData& linkedData : getLinkedData())
         resolveLinkedPointData(linkedData, getSelection<Points>()->indices, nullptr);
 }
 
@@ -963,17 +967,24 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "Full");
-    variantMapMustContain(variantMap, "NumberOfDimensions");
+    variantMapMustContain(variantMap, "DimensionNames");
+    variantMapMustContain(variantMap, "Selection");
 
-    setAll(variantMap["Full"].toBool());
+    // For backwards compatability, check PluginVersion
+    if (variantMap["PluginVersion"] == "No Version" && !variantMap["Full"].toBool())
+    {
+        makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
 
+        qWarning() << "[ManiVault deprecation warning]: This project was saved with an older ManiVault version (<1.0). "
+            "Please save the project again to ensure compatability with newer ManiVault versions. "
+            "Future releases may not be able to load this projects otherwise. ";
+    }
+
+    // Load raw point data
     if (isFull())
         getRawData<PointData>()->fromVariantMap(variantMap);
-
-    if (!isFull()) {
-        makeSubsetOf(getFullDataset<Points>());
-
+    else
+    {
         variantMapMustContain(variantMap, "Indices");
 
         const auto& indicesMap = variantMap["Indices"].toMap();
@@ -982,6 +993,10 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
         populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
     }
+
+    // Load dimension names
+    QStringList dimensionNameList;
+    std::vector<QString> dimensionNames;
 
     // Fetch dimension names from map
     const auto fetchDimensionNames = [&variantMap]() -> QStringList {
@@ -1001,14 +1016,23 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         dimensionsDataStream >> dimensionNames;
 
         return dimensionNames;
-    };
+        };
 
-    
+    if (variantMap["NumberOfDimensions"].toInt() > 1000)
+        dimensionNameList = fetchDimensionNames();
+    else
+        dimensionNameList = variantMap["DimensionNames"].toStringList();
 
-    std::vector<QString> dimensionNames;
-
-    for (const auto dimensionName : fetchDimensionNames())
-        dimensionNames.push_back(dimensionName);
+    if (dimensionNameList.size() == getNumDimensions())
+    {
+        for (const auto& dimensionName : dimensionNameList)
+            dimensionNames.push_back(dimensionName);
+    }
+    else
+    {
+        for (std::uint32_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
+            dimensionNames.emplace_back(QString("Dim %1").arg(QString::number(dimensionIndex)));
+    }
 
     setDimensionNames(dimensionNames);
 
@@ -1018,6 +1042,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
     events().notifyDatasetDataChanged(this);
 
+    // Handle saved selection
     if (isFull()) {
         const auto& selectionMap = variantMap["Selection"].toMap();
 
@@ -1040,9 +1065,11 @@ QVariantMap Points::toVariantMap() const
     auto variantMap = DatasetImpl::toVariantMap();
 
     QStringList dimensionNames;
+    QByteArray dimensionsByteArray;
+    QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::WriteOnly);
 
-    if (getDimensionNames().size() != getNumPoints()) {
-        for (const auto dimensionName : getDimensionNames())
+    if (getDimensionNames().size() == getNumDimensions()) {
+        for (const auto& dimensionName : getDimensionNames())
             dimensionNames << dimensionName;
     }
     else {
@@ -1050,10 +1077,8 @@ QVariantMap Points::toVariantMap() const
             dimensionNames << QString("Dim %1").arg(QString::number(dimensionIndex));
     }
 
-    QByteArray dimensionsByteArray;
-    QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::WriteOnly);
-
-    dimensionsDataStream << dimensionNames;
+    if (dimensionNames.size() > 1000)
+        dimensionsDataStream << dimensionNames;
 
     QVariantMap indices;
 
@@ -1071,10 +1096,9 @@ QVariantMap Points::toVariantMap() const
 
     variantMap["Data"]                  = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]        = getNumPoints();
-    variantMap["Full"]                  = isFull();
     variantMap["Indices"]               = indices;
     variantMap["Selection"]             = selection;
-    variantMap["DimensionNames"]        = rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true);
+    variantMap["DimensionNames"]        = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
     variantMap["NumberOfDimensions"]    = getNumDimensions();
     variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
     
