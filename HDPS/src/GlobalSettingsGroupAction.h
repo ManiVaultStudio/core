@@ -40,6 +40,10 @@ namespace mv::gui
  * b. If a plugin already has global settings:
  *     - Add actions to the particular settings action (derived from PluginGlobalSettingsGroupAction) 
  *
+ * Procedure for retrieving global settings:
+ * Common global setting example: mv::settings().getMiscellaneousSettings().getAskConfirmationBeforeRemovingDatasetsAction()
+ * Plugin global setting example: mv::settings().getPluginGlobalSettingsGroupAction<GlobalSettingsAction>(_exampleViewGLPlugin)->getDefaultPointSizeAction().getValue()
+ * 
  * @author Thomas Kroes
  */
 class GlobalSettingsGroupAction : public GroupAction
