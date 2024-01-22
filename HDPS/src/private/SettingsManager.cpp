@@ -6,6 +6,7 @@
 #include "SettingsManagerDialog.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 
 #include <util/Exception.h>
 
@@ -34,7 +35,7 @@ SettingsManager::SettingsManager() :
 {
     _editSettingsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
-    if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS) {
+    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS) {
         _editSettingsAction.setShortcut(QKeySequence("Ctrl+,"));
         _editSettingsAction.setMenuRole(QAction::PreferencesRole);
     } else {
@@ -78,11 +79,61 @@ void SettingsManager::reset()
 
 void SettingsManager::edit()
 {
-    auto* settingsManagerDialog = new SettingsManagerDialog(Application::getMainWindow());
+    auto* settingsManagerDialog = new SettingsManagerDialog();
 
     connect(settingsManagerDialog, &SettingsManagerDialog::finished, settingsManagerDialog, &SettingsManagerDialog::deleteLater);
     
     settingsManagerDialog->open();
+}
+
+PluginGlobalSettingsGroupAction* SettingsManager::getPluginGlobalSettingsGroupAction(const QString& kind)
+{
+    try
+    {
+        if (kind.isEmpty())
+            throw std::runtime_error("Plugin kind is empty");
+
+        auto pluginFactory = mv::plugins().getPluginFactory(kind);
+
+        if (!pluginFactory)
+            throw std::runtime_error("No plugin factory loaded with kind");
+
+        return pluginFactory->getGlobalSettingsGroupAction();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get plugin global settings group action", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get plugin global settings group action");
+    }
+
+    return {};
+}
+
+mv::gui::PluginGlobalSettingsGroupAction* SettingsManager::getPluginGlobalSettingsGroupAction(const plugin::Plugin* plugin)
+{
+    try
+    {
+        if (!plugin)
+            throw std::runtime_error("Plugin is nullptr");
+
+        const auto pluginKind = plugin->getKind();
+
+        if (pluginKind.isEmpty())
+            throw std::runtime_error("Plugin kind is empty");
+
+        return getPluginGlobalSettingsGroupAction(pluginKind);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get plugin global settings group action", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get plugin global settings group action");
+    }
+
+    return {};
 }
 
 }

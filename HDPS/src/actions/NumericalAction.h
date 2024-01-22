@@ -96,6 +96,8 @@ public:
             return;
 
         _valueChanged();
+
+        saveToSettings();
     }
 
     /** Gets the minimum value */

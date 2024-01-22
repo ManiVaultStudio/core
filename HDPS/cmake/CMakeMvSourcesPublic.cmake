@@ -372,8 +372,8 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/ActionsWidget.cpp
     src/widgets/SplashScreenWidget.cpp
     src/widgets/ElidedLabel.cpp
-    src/widgets/FlowLayout.h
-	
+    src/widgets/FlowLayout.cpp
+
     ${ACTION_HIERARCHY_SOURCES}
 )
 
@@ -666,6 +666,7 @@ set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/TasksSettingsAction.h
     src/ApplicationSettingsAction.h
     src/TemporaryDirectoriesSettingsAction.h
+    src/PluginGlobalSettingsGroupAction.h
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_SOURCES
@@ -675,6 +676,7 @@ set(PUBLIC_GLOBAL_SETTINGS_SOURCES
     src/TasksSettingsAction.cpp
     src/ApplicationSettingsAction.cpp
     src/TemporaryDirectoriesSettingsAction.cpp
+    src/PluginGlobalSettingsGroupAction.cpp
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_FILES

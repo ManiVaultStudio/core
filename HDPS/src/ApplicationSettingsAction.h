@@ -9,7 +9,7 @@
 #include "actions/StringAction.h"
 #include "actions/OptionAction.h"
 
-namespace mv
+namespace mv::gui
 {
 
 /**
@@ -32,12 +32,12 @@ public:
 
 public: // Action getters
 
-    gui::StringAction& getApplicationSessionIdAction() { return _applicationSessionIdAction; }
-    gui::OptionAction& getAppearanceOptionAction() { return _appearanceOptionAction; }
+    StringAction& getApplicationSessionIdAction() { return _applicationSessionIdAction; }
+    OptionAction& getAppearanceOptionAction() { return _appearanceOptionAction; }
 
 private:
-    gui::StringAction   _applicationSessionIdAction;    /** String action for the application session ID */
-    gui::OptionAction   _appearanceOptionAction;        /** Options action for dark, light, or system appearance */
+    StringAction   _applicationSessionIdAction;    /** String action for the application session ID */
+    OptionAction   _appearanceOptionAction;        /** Options action for dark, light, or system appearance */
 };
 
 }

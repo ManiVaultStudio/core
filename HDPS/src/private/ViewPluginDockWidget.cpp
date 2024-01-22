@@ -362,10 +362,20 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
     };
 
     for (auto settingsAction : _viewPlugin->getDockingActions()) {
-        auto settingsDockWidget = new CDockWidget(settingsAction->text());
-        auto settingsWidget     = new SettingsActionWidget(this, settingsAction);
+        auto settingsDockWidget     = new CDockWidget(settingsAction->text());
+        auto settingsWidget         = new SettingsActionWidget(this, settingsAction);
+        auto containerWidget        = new QWidget();
+        auto containerWidgetLayout  = new QVBoxLayout();
 
-        settingsDockWidget->setWidget(settingsWidget, eInsertMode::ForceNoScrollArea);
+        containerWidgetLayout->setContentsMargins(0, 0, 0, 0);
+
+        containerWidgetLayout->addWidget(settingsWidget);
+        containerWidgetLayout->addStretch(1);
+
+        containerWidget->setAutoFillBackground(true);
+        containerWidget->setLayout(containerWidgetLayout);
+
+        settingsDockWidget->setWidget(containerWidget, eInsertMode::ForceNoScrollArea);
         settingsDockWidget->setAutoFillBackground(true);
         settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
         settingsDockWidget->setFeature(CDockWidget::DockWidgetPinnable, true);

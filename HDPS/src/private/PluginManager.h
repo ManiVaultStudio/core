@@ -27,8 +27,8 @@ public:
     /** Resets the contents of the plugin manager */
     void reset() override;
 
-    /** Loads all plugin factories from the plugin directory and adds them as menu items */
-    void loadPlugins();
+    /** Loads all plugin factories from the plugin directory */
+    void loadPluginFactories();
 
     /**
      * Determine whether a plugin of \p kind is loaded

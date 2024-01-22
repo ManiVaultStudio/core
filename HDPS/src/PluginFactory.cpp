@@ -6,12 +6,11 @@
 
 #include "Set.h"
 
-namespace mv
-{
+#include "actions/PluginTriggerAction.h"
 
-using namespace gui;
+using namespace mv::gui;
 
-namespace plugin
+namespace mv::plugin
 {
 
 PluginFactory::PluginFactory(Type type) :
@@ -22,7 +21,8 @@ PluginFactory::PluginFactory(Type type) :
     _numberOfInstances(0),
     _maximumNumberOfInstances(-1),
     _pluginTriggerAction(this, this, "Plugin trigger", "A plugin trigger action creates a new plugin when triggered", QIcon()),
-    _triggerHelpAction(nullptr, "Trigger plugin help")
+    _triggerHelpAction(nullptr, "Trigger plugin help"),
+    _pluginGlobalSettingsGroupAction(nullptr)
 {
 }
 
@@ -49,6 +49,26 @@ void PluginFactory::initialize()
 
     _triggerHelpAction.setText(_kind);
     _triggerHelpAction.setIcon(getIcon());
+}
+
+QString PluginFactory::getGlobalSettingsPrefix() const
+{
+    return QString("%1/").arg(getKind());
+}
+
+PluginGlobalSettingsGroupAction* PluginFactory::getGlobalSettingsGroupAction() const
+{
+    return _pluginGlobalSettingsGroupAction;
+}
+
+void PluginFactory::setGlobalSettingsGroupAction(PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction)
+{
+    if (pluginGlobalSettingsGroupAction == _pluginGlobalSettingsGroupAction)
+        return;
+
+    _pluginGlobalSettingsGroupAction = pluginGlobalSettingsGroupAction;
+
+    emit pluginGlobalSettingsGroupActionChanged(_pluginGlobalSettingsGroupAction);
 }
 
 bool PluginFactory::hasHelp()
@@ -151,8 +171,6 @@ std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets
             numberOfDatasetsForType++;
 
     return numberOfDatasetsForType;
-}
-
 }
 
 }

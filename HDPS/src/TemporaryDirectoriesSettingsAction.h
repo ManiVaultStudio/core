@@ -12,7 +12,7 @@
 #include "actions/TriggerAction.h"
 #include "actions/HorizontalGroupAction.h"
 
-namespace mv
+namespace mv::gui
 {
 
 /**
@@ -34,20 +34,20 @@ public:
 
 public: // Action getters
 
-    gui::StringAction& getApplicationTemporaryDirAction() { return _applicationTemporaryDirAction; }
-    gui::ToggleAction& getRemoveStaleTemporaryDirsAtStartupAction() { return _removeStaleTemporaryDirsAtStartupAction; }
-    gui::TriggerAction& getScanForStaleTemporaryDirectoriesAction() { return _scanForStaleTemporaryDirectoriesAction; }
-    gui::OptionsAction& getStaleTemporaryDirectoriesAction() { return _selectStaleTemporaryDirectoriesAction; }
-    gui::TriggerAction& getRemoveStaleTemporaryDirectoriesAction() { return _removeStaleTemporaryDirectoriesAction; }
-    gui::HorizontalGroupAction& getStaleTemporaryDirectoriesGroupAction() { return _staleTemporaryDirectoriesGroupAction; }
+    StringAction& getApplicationTemporaryDirAction() { return _applicationTemporaryDirAction; }
+    ToggleAction& getRemoveStaleTemporaryDirsAtStartupAction() { return _removeStaleTemporaryDirsAtStartupAction; }
+    TriggerAction& getScanForStaleTemporaryDirectoriesAction() { return _scanForStaleTemporaryDirectoriesAction; }
+    OptionsAction& getStaleTemporaryDirectoriesAction() { return _selectStaleTemporaryDirectoriesAction; }
+    TriggerAction& getRemoveStaleTemporaryDirectoriesAction() { return _removeStaleTemporaryDirectoriesAction; }
+    HorizontalGroupAction& getStaleTemporaryDirectoriesGroupAction() { return _staleTemporaryDirectoriesGroupAction; }
 
 private:
-    gui::StringAction           _applicationTemporaryDirAction;             /** String action for the application temporary dir */
-    gui::ToggleAction           _removeStaleTemporaryDirsAtStartupAction;   /** Turn on/off the automatic removal of the application temporary directories at application startup */
-    gui::TriggerAction          _scanForStaleTemporaryDirectoriesAction;    /** Action which scans for stale temporary directories */
-    gui::OptionsAction          _selectStaleTemporaryDirectoriesAction;     /** Action which lists stale temporary directories */
-    gui::TriggerAction          _removeStaleTemporaryDirectoriesAction;     /** Action which triggers the cleanup of stale temporary directories */
-    gui::HorizontalGroupAction  _staleTemporaryDirectoriesGroupAction;      /** Group action for working with stale temporary directories */
+    StringAction           _applicationTemporaryDirAction;             /** String action for the application temporary dir */
+    ToggleAction           _removeStaleTemporaryDirsAtStartupAction;   /** Turn on/off the automatic removal of the application temporary directories at application startup */
+    TriggerAction          _scanForStaleTemporaryDirectoriesAction;    /** Action which scans for stale temporary directories */
+    OptionsAction          _selectStaleTemporaryDirectoriesAction;     /** Action which lists stale temporary directories */
+    TriggerAction          _removeStaleTemporaryDirectoriesAction;     /** Action which triggers the cleanup of stale temporary directories */
+    HorizontalGroupAction  _staleTemporaryDirectoriesGroupAction;      /** Group action for working with stale temporary directories */
 };
 
 }

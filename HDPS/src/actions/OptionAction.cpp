@@ -213,6 +213,8 @@ void OptionAction::updateCurrentIndex()
         if (_currentIndex >= getModel()->rowCount())
             _currentIndex = getModel()->rowCount() - 1;
     }
+
+    saveToSettings();
 }
 
 void OptionAction::setCustomModel(QAbstractItemModel* itemModel)

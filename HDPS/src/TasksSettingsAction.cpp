@@ -5,7 +5,7 @@
 #include "TasksSettingsAction.h"
 #include "Application.h"
 
-namespace mv
+namespace mv::gui
 {
 
 TasksSettingsAction::TasksSettingsAction(QObject* parent) :
@@ -15,8 +15,6 @@ TasksSettingsAction::TasksSettingsAction(QObject* parent) :
     setShowLabels(false);
 
     addAction(&_hideForegroundTasksPopupAction);
-
-    _hideForegroundTasksPopupAction.setSettingsPrefix(getSettingsPrefix() + "HideForegroundTasksPopup");
 }
 
 }

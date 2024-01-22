@@ -13,6 +13,13 @@
 #include "TasksSettingsAction.h"
 #include "ApplicationSettingsAction.h"
 #include "TemporaryDirectoriesSettingsAction.h"
+#include "PluginGlobalSettingsGroupAction.h"
+
+namespace mv {
+    namespace plugin {
+        class Plugin;
+    }
+}
 
 namespace mv
 {
@@ -48,11 +55,45 @@ public: // Action getters
 
 public: // Global settings actions
 
-    virtual ParametersSettingsAction& getParametersSettings() = 0;
-    virtual MiscellaneousSettingsAction& getMiscellaneousSettings() = 0;
-    virtual TasksSettingsAction& getTasksSettingsAction() = 0;
-    virtual ApplicationSettingsAction& getApplicationSettings() = 0;
-    virtual TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() = 0;
+    virtual gui::ParametersSettingsAction& getParametersSettings() = 0;
+    virtual gui::MiscellaneousSettingsAction& getMiscellaneousSettings() = 0;
+    virtual gui::TasksSettingsAction& getTasksSettingsAction() = 0;
+    virtual gui::ApplicationSettingsAction& getApplicationSettings() = 0;
+    virtual gui::TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() = 0;
+
+    /**
+     * Get plugin global settings for plugin \p kind
+     * @param kind Plugin kind
+     * @return Pointer to plugin global settings (if available, otherwise returns a nullptr)
+     */
+    virtual gui::PluginGlobalSettingsGroupAction* getPluginGlobalSettingsGroupAction(const QString& kind) = 0;
+
+    /**
+     * Get plugin global settings \p ActionType for plugin \p kind
+     * @param kind Plugin kind
+     * @return Pointer to plugin global settings of \p ActionType (if available, otherwise returns a nullptr)
+     */
+    template<typename ActionType>
+    ActionType* getPluginGlobalSettingsGroupAction(const QString& kind) {
+        return dynamic_cast<ActionType*>(getPluginGlobalSettingsGroupAction(kind));
+    }
+
+    /**
+    * Get plugin global settings for \p plugin
+    * @param plugin Pointer to plugin
+    * @return Pointer to plugin global settings (if available, otherwise returns a nullptr)
+    */
+    virtual gui::PluginGlobalSettingsGroupAction* getPluginGlobalSettingsGroupAction(const plugin::Plugin* plugin) = 0;
+
+    /**
+    * Get plugin global settings of \p ActionType for \p plugin
+    * @param plugin Pointer to plugin
+    * @return Pointer to plugin global settings of \p ActionType (if available, otherwise returns a nullptr)
+    */
+    template<typename ActionType>
+    ActionType* getPluginGlobalSettingsGroupAction(const plugin::Plugin* plugin) {
+        return dynamic_cast<ActionType*>(getPluginGlobalSettingsGroupAction(plugin));
+    }
 };
 
 }

@@ -7,7 +7,7 @@
 
 using namespace mv::gui;
 
-namespace mv
+namespace mv::gui
 {
 
 ParametersSettingsAction::ParametersSettingsAction(QObject* parent) :
@@ -21,10 +21,6 @@ ParametersSettingsAction::ParametersSettingsAction(QObject* parent) :
     addAction(&_askForSharedParameterNameAction);
     addAction(&_confirmRemoveSharedParameterAction);
     addAction(&_expertModeAction);
-
-    _askForSharedParameterNameAction.setSettingsPrefix(getSettingsPrefix() + "AskForSharedParameterName");
-    _confirmRemoveSharedParameterAction.setSettingsPrefix(getSettingsPrefix() + "ConfirmRemoveSharedParameter");
-    _expertModeAction.setSettingsPrefix(getSettingsPrefix() + "ExpertMode");
 
     const auto updateExpertModeActionTooltip = [this]() -> void {
         if (_expertModeAction.isChecked())

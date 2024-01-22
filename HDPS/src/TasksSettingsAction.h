@@ -8,7 +8,7 @@
 
 #include "actions/ToggleAction.h"
 
-namespace mv
+namespace mv::gui
 {
 
 /**
@@ -30,10 +30,10 @@ public:
 
 public: // Action getters
 
-    gui::ToggleAction& getHideForegroundTasksPopupAction() { return _hideForegroundTasksPopupAction; }
+    ToggleAction& getHideForegroundTasksPopupAction() { return _hideForegroundTasksPopupAction; }
 
 private:
-    gui::ToggleAction   _hideForegroundTasksPopupAction;     /** Toggle action for hiding the foreground tasks popup window */
+    ToggleAction   _hideForegroundTasksPopupAction;     /** Toggle action for hiding the foreground tasks popup window */
 };
 
 }
