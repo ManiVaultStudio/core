@@ -12,7 +12,33 @@ namespace mv::gui
 /**
  * Global settings group action class
  *
- * Base action class which groups related settings
+ * Base action class which groups settings for
+ * - Common global settings (e.g. tasks & parameters)
+ * - Plugin global settings
+ * 
+ * This class ensures that settings are store in the correct place because it overrides the GroupAction::addAction(...)
+ * and adjusts the settings prefix of the added actions.
+ * 
+ * Settings can be found in: ManiVault/GlobalSettings/<global_settings_name>/<action_name>
+ * 
+ * Procedure(s) for adding a common global setting:
+ * a. Add an action to an existing global settings group:
+ *     - ApplicationSettingsAction::addAction(...)
+ *     - MiscellaneousSettingsAction::addAction(...)
+ *     - ParametersSettingsAction::addAction(...)
+ *     - TasksSettingsAction::addAction(...)
+ *     - TemporaryDirectoriesSettingsAction::addAction(...)
+ * b. Create a new settings action derived from GlobalSettingsGroupAction, add it to the SettingsManager
+ *    class and add actions to it: MySettingsAction::addAction(...)
+ * 
+ * Procedure for adding a plugin global setting:
+ * a. If a plugin does not have global settings yet:
+ *     1. Create a settings action (e.g. MyPluginGlobalSettingsAction) derived from PluginGlobalSettingsGroupAction
+ *     2. Add actions to MyPluginGlobalSettingsAction in its constructor (MyPluginGlobalSettingsAction::addAction(...))
+ *     3. Create an instance of MyPluginGlobalSettingsAction, and assign it to the plugin factory in the initialize()
+ *        member function of the plugin factory: setGlobalSettingsGroupAction(new MyPluginGlobalSettingsAction(this, this));
+ * b. If a plugin already has global settings:
+ *     - Add actions to the particular settings action (derived from PluginGlobalSettingsGroupAction) 
  *
  * @author Thomas Kroes
  */

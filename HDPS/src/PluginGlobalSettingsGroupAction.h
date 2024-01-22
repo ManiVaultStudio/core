@@ -19,6 +19,15 @@ namespace mv::gui
  * Plugin global settings group action class
  *
  * Global settings group action class for global plugin settings
+ * 
+ * Procedure for adding a plugin global setting:
+ * a. If a plugin does not have global settings yet:
+ *     1. Create a settings action (e.g. MyPluginGlobalSettingsAction) derived from PluginGlobalSettingsGroupAction
+ *     2. Add actions to MyPluginGlobalSettingsAction in its constructor (MyPluginGlobalSettingsAction::addAction(...))
+ *     3. Create an instance of MyPluginGlobalSettingsAction, and assign it to the plugin factory in the initialize()
+ *        member function of the plugin factory: setGlobalSettingsGroupAction(new MyPluginGlobalSettingsAction(this, this));
+ * b. If a plugin already has global settings:
+ *     - Add actions to the particular settings action (derived from PluginGlobalSettingsGroupAction)
  *
  * @author Thomas Kroes
  */
