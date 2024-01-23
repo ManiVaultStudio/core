@@ -358,6 +358,7 @@ set(PUBLIC_WIDGET_HEADERS
     src/widgets/SplashScreenWidget.h
     src/widgets/ElidedLabel.h
     src/widgets/FlowLayout.h
+    src/widgets/StyleAwareIcon.h
 )
 
 set(PUBLIC_WIDGET_SOURCES
@@ -373,6 +374,7 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/SplashScreenWidget.cpp
     src/widgets/ElidedLabel.cpp
     src/widgets/FlowLayout.cpp
+    src/widgets/StyleAwareIcon.cpp
 
     ${ACTION_HIERARCHY_SOURCES}
 )
