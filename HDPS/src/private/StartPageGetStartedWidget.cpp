@@ -24,6 +24,7 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     _startPageContentWidget(startPageContentWidget),
     _createProjectFromWorkspaceWidget(this, "Project From Workspace"),
     _createProjectFromDatasetWidget(this, "Project From Data"),
+    _loadedPluginsWidget(this, "Loaded Plugins"),
     _instructionVideosWidget(this, "Instruction Videos"),
     _workspaceLocationTypeAction(this, "Workspace location type"),
     _workspaceLocationTypesModel(this),
@@ -34,6 +35,7 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
 
     layout->addWidget(&_createProjectFromWorkspaceWidget, 3);
     layout->addWidget(&_createProjectFromDatasetWidget, 3);
+    layout->addWidget(&_loadedPluginsWidget, 3);
     layout->addWidget(&_instructionVideosWidget, 1);
 
     setLayout(layout);
@@ -72,11 +74,13 @@ StartPageGetStartedWidget::StartPageGetStartedWidget(StartPageContentWidget* sta
     const auto toggleViews = [this]() -> void {
         _createProjectFromWorkspaceWidget.setVisible(_startPageContentWidget->getToggleProjectFromWorkspaceAction().isChecked());
         _createProjectFromDatasetWidget.setVisible(_startPageContentWidget->getToggleProjectFromDataAction().isChecked());
+        _loadedPluginsWidget.setVisible(_startPageContentWidget->getToggleLoadedPluginsAction().isChecked());
         _instructionVideosWidget.setVisible(_startPageContentWidget->getToggleTutorialVideosAction().isChecked());
     };
 
     connect(&_startPageContentWidget->getToggleProjectFromWorkspaceAction(), &ToggleAction::toggled, this, toggleViews);
     connect(&_startPageContentWidget->getToggleProjectFromDataAction(), &ToggleAction::toggled, this, toggleViews);
+    connect(&_startPageContentWidget->getToggleLoadedPluginsAction(), &ToggleAction::toggled, this, toggleViews);
     connect(&_startPageContentWidget->getToggleTutorialVideosAction(), &ToggleAction::toggled, this, toggleViews);
 
     toggleViews();

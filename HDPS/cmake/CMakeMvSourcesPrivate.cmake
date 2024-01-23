@@ -237,6 +237,7 @@ set(PRIVATE_START_PAGE_HEADERS
     src/private/StartPageActionDelegate.h
     src/private/StartPageActionDelegateEditorWidget.h
     src/private/StartPageAction.h
+	src/private/StartPageLoadedPluginsWidget.h
     src/private/LogoWidget.h
 )
 
@@ -252,6 +253,7 @@ set(PRIVATE_START_PAGE_SOURCES
     src/private/StartPageActionDelegate.cpp
     src/private/StartPageActionDelegateEditorWidget.cpp
     src/private/StartPageAction.cpp
+	src/private/StartPageLoadedPluginsWidget.cpp
     src/private/LogoWidget.cpp
 )
 

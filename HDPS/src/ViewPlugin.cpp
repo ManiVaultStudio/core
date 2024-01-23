@@ -318,9 +318,14 @@ ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/)
         setMaximumNumberOfInstances(1);
 }
 
-QIcon ViewPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+QIcon ViewPluginFactory::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("eye", color);
+    return Application::getIconFont("FontAwesome").getIcon("eye");
+}
+
+QIcon ViewPluginFactory::getCategoryIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("eye");
 }
 
 bool ViewPluginFactory::producesSystemViewPlugins() const

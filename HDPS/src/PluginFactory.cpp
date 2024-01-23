@@ -101,7 +101,7 @@ void PluginFactory::setVersion(const QString& version)
     _version = version;
 }
 
-QIcon PluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+QIcon PluginFactory::getIcon() const
 {
     return QIcon();
 }

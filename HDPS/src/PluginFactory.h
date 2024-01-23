@@ -31,6 +31,11 @@ namespace mv::plugin
 
 class Plugin;
 
+/**
+ * Plugin factory class
+ *
+ * Abstract base class for producing instances of plugins
+ */
 class PluginFactory : public QObject
 {
     Q_OBJECT
@@ -124,14 +129,19 @@ public:
 
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * @return Plugin icon
      */
-    virtual QIcon getIcon(const QColor& color = Qt::black) const;
+    virtual QIcon getIcon() const;
 
     /**
-     * Produces the plugin
-     * @return Pointer to the produced plugin
+     * Get plugin category (loader/writer/transformation etc.) icon
+     * @return Icon which belongs to the plugin factory category
+     */
+    virtual QIcon getCategoryIcon() const = 0;
+
+    /**
+     * Produces an instance of a plugin
+     * @return Pointer to produced plugin
      */
     virtual Plugin* produce() = 0;
 

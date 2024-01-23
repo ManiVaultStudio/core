@@ -66,10 +66,9 @@ public:
 
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * @return Plugin icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    QIcon getIcon() const override;
     
 	/**
      * Produces the plugin

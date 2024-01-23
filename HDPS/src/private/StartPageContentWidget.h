@@ -53,6 +53,7 @@ public: // Action getters
     const mv::gui::ToggleAction& getToggleExampleProjectsAction() const { return _toggleExampleProjectsAction; }
     const mv::gui::ToggleAction& getToggleProjectFromWorkspaceAction() const { return _toggleProjectFromWorkspaceAction; }
     const mv::gui::ToggleAction& getToggleProjectFromDataAction() const { return _toggleProjectFromDataAction; }
+    const mv::gui::ToggleAction& getToggleLoadedPluginsAction() const { return _toggleLoadedPluginsAction; }
     const mv::gui::ToggleAction& getToggleTutorialVideosAction() const { return _toggleTutorialVideosAction; }
         
 private slots:
@@ -66,14 +67,15 @@ private:
     QVBoxLayout                 _mainLayout;                        /** Main layout */
     QHBoxLayout                 _collumnsLayout;                    /** Columns layout */
     QHBoxLayout                 _toolbarLayout;                     /** Toolbar layout */
-    mv::gui::ToggleAction     _compactViewAction;                 /** Toggle compact view on/off */
-    mv::gui::ToggleAction     _toggleOpenCreateProjectAction;     /** Toggle open and create project section */
-    mv::gui::ToggleAction     _toggleRecentProjectsAction;        /** Toggle recent projects section */
-    mv::gui::ToggleAction     _toggleExampleProjectsAction;       /** Toggle example projects section */
-    mv::gui::ToggleAction     _toggleProjectFromWorkspaceAction;  /** Toggle project from workspace section */
-    mv::gui::ToggleAction     _toggleProjectFromDataAction;       /** Toggle project from data section */
-    mv::gui::ToggleAction     _toggleTutorialVideosAction;        /** Toggle tutorial videos section */
-    mv::gui::GroupAction      _settingsAction;                    /** Settings action */
+    mv::gui::ToggleAction       _compactViewAction;                 /** Toggle compact view on/off */
+    mv::gui::ToggleAction       _toggleOpenCreateProjectAction;     /** Toggle open and create project section */
+    mv::gui::ToggleAction       _toggleRecentProjectsAction;        /** Toggle recent projects section */
+    mv::gui::ToggleAction       _toggleExampleProjectsAction;       /** Toggle example projects section */
+    mv::gui::ToggleAction       _toggleProjectFromWorkspaceAction;  /** Toggle project from workspace section */
+    mv::gui::ToggleAction       _toggleProjectFromDataAction;       /** Toggle project from data section */
+    mv::gui::ToggleAction       _toggleLoadedPluginsAction;         /** Toggle loaded plugins section */
+    mv::gui::ToggleAction       _toggleTutorialVideosAction;        /** Toggle tutorial videos section */
+    mv::gui::GroupAction        _settingsAction;                    /** Settings action */
     StartPageOpenProjectWidget  _openProjectWidget;                 /** Left column widget for opening existing projects */
     StartPageGetStartedWidget   _getStartedWidget;                  /** Right column widget for getting started operations */
 

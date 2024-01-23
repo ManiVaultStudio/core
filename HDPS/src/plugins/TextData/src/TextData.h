@@ -120,27 +120,30 @@ public: // Selection
     std::vector<unsigned int> indices;
 };
 
-// =============================================================================
-// Factory
-// =============================================================================
-
+/**
+ * Text data plugin factory
+ *
+ * Class which produces instances of text raw data plugins
+ * 
+ * @author Julian Thijssen and Thomas Kroes
+ */
 class TextDataFactory : public RawDataFactory
 {
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "hdps.TextData"
-                      FILE  "TextData.json")
-    
+    Q_PLUGIN_METADATA(IID "ManiVault.Plugins.Data.TextData" FILE "TextData.json")
+
 public:
-    TextDataFactory(void) {}
-    ~TextDataFactory(void) override {}
 
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * @return Plugin icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    QIcon getIcon() const override;
 
+    /**
+     * Produces an instance of the text data plugin
+     * @return Pointer to produced raw data plugin
+     */
     mv::plugin::RawData* produce() override;
 };

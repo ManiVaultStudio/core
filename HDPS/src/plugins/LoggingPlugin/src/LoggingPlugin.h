@@ -38,6 +38,8 @@ private:
 
 /**
  * Logging view plugin factory
+ * 
+ * Class which produces instances of logging plugins
  *
  * @author Thomas Kroes
  */
@@ -49,19 +51,18 @@ class LoggingPluginFactory : public ViewPluginFactory
     
 public:
 
-    /** Constructor */
+    /** Default constructor */
     LoggingPluginFactory();
 
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * @return Plugin icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    QIcon getIcon() const override;
     
-	/**
-     * Produces the plugin
-     * @return Pointer to the produced plugin
+    /**
+     * Produces an instance of the logging view plugin
+     * @return Pointer to produced view plugin
      */
     ViewPlugin* produce() override;
 };

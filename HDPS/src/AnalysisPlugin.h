@@ -11,10 +11,7 @@
 
 #include <memory>
 
-namespace mv
-{
-
-namespace plugin
+namespace mv::plugin
 {
 
 class AnalysisPlugin : public Plugin
@@ -107,33 +104,39 @@ protected:
     Datasets    _output;      /** Output datasets smart pointers */
 };
 
+/**
+ * Analysis plugin factory class
+ * 
+ * Class which produces instances of analysis plugins
+ */
 class AnalysisPluginFactory : public PluginFactory
 {
     Q_OBJECT
-    
+
 public:
+
+    /** Default constructor which sets the plugin factory type to analysis */
     AnalysisPluginFactory() :
         PluginFactory(Type::ANALYSIS)
     {
-
     }
-    ~AnalysisPluginFactory() override {};
-    
+
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * @return Plugin icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    QIcon getIcon() const override;
 
     /**
-    * Produces an instance of an analysis plugin. This function gets called by the plugin manager.
-    */
+     * Get plugin category (loader/writer/transformation etc.) icon
+     * @return Icon which belongs to the plugin factory category
+     */
+    QIcon getCategoryIcon() const override;
+
+    /** Produces an instance of an analysis plugin */
     AnalysisPlugin* produce() override = 0;
 };
 
-} // namespace plugin
-
-} // namespace mv
+}
 
 Q_DECLARE_INTERFACE(mv::plugin::AnalysisPluginFactory, "hdps.AnalysisPluginFactory")

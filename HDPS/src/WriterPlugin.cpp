@@ -6,9 +6,7 @@
 
 #include "Application.h"
 
-namespace mv
-{
-namespace plugin
+namespace mv::plugin
 {
 
 WriterPlugin::WriterPlugin(const PluginFactory* factory) :
@@ -34,11 +32,14 @@ WriterPluginFactory::WriterPluginFactory() :
 
 }
 
-QIcon WriterPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+QIcon WriterPluginFactory::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("file-export", color);
+    return Application::getIconFont("FontAwesome").getIcon("file-export");
 }
 
+QIcon WriterPluginFactory::getCategoryIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("file-export");
 }
 
 }

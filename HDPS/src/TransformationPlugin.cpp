@@ -5,10 +5,7 @@
 #include "TransformationPlugin.h"
 #include "Application.h"
 
-namespace mv
-{
-
-namespace plugin
+namespace mv::plugin
 {
 
 TransformationPlugin::TransformationPlugin(const PluginFactory* factory) :
@@ -39,10 +36,14 @@ TransformationPluginFactory::TransformationPluginFactory() :
 
 }
 
-QIcon TransformationPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+QIcon TransformationPluginFactory::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("random", color);
+    return Application::getIconFont("FontAwesome").getIcon("random");
 }
 
+QIcon TransformationPluginFactory::getCategoryIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("random");
 }
+
 }

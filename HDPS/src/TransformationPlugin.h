@@ -9,10 +9,7 @@
 #include "DataHierarchyItem.h"
 #include "Set.h"
 
-namespace mv
-{
-
-namespace plugin
+namespace mv::plugin
 {
 
 /**
@@ -70,32 +67,32 @@ private:
 /**
  * Transformation plugin factory class
  *
- * @author T. Kroes
+ * Class which produces instances of transformation plugins
  */
 class TransformationPluginFactory : public PluginFactory
 {
     Q_OBJECT
-    
+
 public:
 
-    /** Default constructor */
+    /** Default constructor which sets the plugin factory type to transformation */
     TransformationPluginFactory();
 
-    /** Destructor */
-    ~TransformationPluginFactory() = default;
-    
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * @return Plugin icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    QIcon getIcon() const override;
+
+    /**
+     * Get plugin category (loader/writer/transformation etc.) icon
+     * @return Icon which reflects to the plugin factory category
+     */
+    QIcon getCategoryIcon() const override;
 
     /** Produces an instance of a transformation plugin */
     TransformationPlugin* produce() override = 0;
 };
-
-}
 
 }
 

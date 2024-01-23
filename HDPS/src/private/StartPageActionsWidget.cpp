@@ -149,7 +149,7 @@ void StartPageActionsWidget::closePersistentEditor(int rowIndex)
 void StartPageActionsWidget::updateCustomStyle()
 {
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("search"));
-    
+
     auto styleSheet = QString(" \
         QLabel { \
             background-color: rgba(0, 0, 0, 0); \
@@ -161,7 +161,7 @@ void StartPageActionsWidget::updateCustomStyle()
             background-color: rgba(0, 0, 0, 100); \
         } \
     ");
-    
+
     auto& treeView = _hierarchyWidget.getTreeView();
     if (_restyle) {
         styleSheet += QString(" \
@@ -170,8 +170,10 @@ void StartPageActionsWidget::updateCustomStyle()
             } \
         ");
     }
-    
+
     auto color = QApplication::palette().color(QPalette::Normal, QPalette::Midlight).name();
+
     styleSheet += QString("QTreeView { background-color: %1;}").arg(color);
+
     treeView.setStyleSheet(styleSheet);
 }

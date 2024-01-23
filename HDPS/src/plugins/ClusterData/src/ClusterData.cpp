@@ -432,12 +432,13 @@ void Clusters::selectInvert()
     events().notifyDatasetDataSelectionChanged(this);
 }
 
+mv::plugin::RawData* ClusterDataFactory::produce()
+{
+    return new ClusterData(this);
+}
+
 QIcon ClusterDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
     return Application::getIconFont("FontAwesome").getIcon("th-large", color);
 }
 
-mv::plugin::RawData* ClusterDataFactory::produce()
-{
-    return new ClusterData(this);
-}

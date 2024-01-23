@@ -110,7 +110,7 @@ public: // Selection
     /** Select all items */
     void selectAll() override;
 
-    /** Deselect all items */
+    /** De-select all items */
     void selectNone() override;
 
     /** Invert item selection */
@@ -119,27 +119,30 @@ public: // Selection
     std::vector<unsigned int> indices;
 };
 
-// =============================================================================
-// Factory
-// =============================================================================
-
+/**
+ * Color data plugin factory
+ *
+ * Class which produces instances of color raw data plugins
+ * 
+ * @author Julian Thijssen and Thomas Kroes
+ */
 class ColorDataFactory : public mv::plugin::RawDataFactory
 {
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "nl.lumc.ColorData"
-                      FILE  "ColorData.json")
-    
+    Q_PLUGIN_METADATA(IID "ManiVault.Plugins.Data.ColorData" FILE "ColorData.json")
+
 public:
-    ColorDataFactory(void) {}
-    ~ColorDataFactory(void) override {}
-    
+
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * @return Plugin icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    QIcon getIcon() const override;
 
+    /**
+     * Produces an instance of the color data plugin
+     * @return Pointer to produced raw data plugin
+     */
     mv::plugin::RawData* produce() override;
 };

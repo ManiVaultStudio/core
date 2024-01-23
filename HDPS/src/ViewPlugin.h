@@ -160,6 +160,11 @@ private:
     gui::WidgetActions      _settingsActions;           /** Settings actions which are displayed as docking widgets in the interface */
 };
 
+/**
+ * Viewer plugin factory class
+ *
+ * Class which produces instances of viewer plugins
+ */
 class ViewPluginFactory : public PluginFactory
 {
     Q_OBJECT
@@ -167,20 +172,22 @@ class ViewPluginFactory : public PluginFactory
 public:
 
     /**
-     * Constructor
+     * Constructs which sets the plugin factory type to view
      * @param producesSystemViewPlugins Whether this factory generates system view plugins or not
      */
     ViewPluginFactory(bool producesSystemViewPlugins = false);
 
-    /** Destructor */
-    ~ViewPluginFactory() = default;
-
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * @return Plugin icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    QIcon getIcon() const override;
+
+    /**
+     * Get plugin category (loader/writer/transformation etc.) icon
+     * @return Icon which belongs to the plugin factory category
+     */
+    QIcon getCategoryIcon() const override;
 
     /**
      * Produces the plugin

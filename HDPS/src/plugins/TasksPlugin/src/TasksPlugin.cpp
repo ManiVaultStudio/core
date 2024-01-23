@@ -93,9 +93,9 @@ TasksPluginFactory::TasksPluginFactory() :
 {
 }
 
-QIcon TasksPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+QIcon TasksPluginFactory::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("tasks", color);
+    return Application::getIconFont("FontAwesome").getIcon("tasks");
 }
 
 ViewPlugin* TasksPluginFactory::produce()

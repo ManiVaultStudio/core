@@ -1105,13 +1105,9 @@ QVariantMap Points::toVariantMap() const
     return variantMap;
 }
 
-// =============================================================================
-// Factory
-// =============================================================================
-
-QIcon PointDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
+QIcon PointDataFactory::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("circle", color);
+    return Application::getIconFont("FontAwesome").getIcon("circle");
 }
 
 mv::plugin::RawData* PointDataFactory::produce()

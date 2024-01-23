@@ -13,9 +13,7 @@
 
 #include <exception>
 
-namespace mv {
-
-namespace plugin {
+namespace mv::plugin {
 
 struct DataLoadException : public std::exception
 {
@@ -63,40 +61,40 @@ protected:
     QString AskForFileName(const QString& fileNameFilter);
 };
 
-
+/**
+ * Loader plugin factory class
+ *
+ * Class which produces instances of loader plugins
+ */
 class LoaderPluginFactory : public PluginFactory
 {
     Q_OBJECT
-    
+
 public:
+
+    /** Default constructor which sets the plugin factory type to loader */
     LoaderPluginFactory() :
         PluginFactory(Type::LOADER)
     {
-
-    }
-    ~LoaderPluginFactory() override {};
-    
-    /**
-     * Set name of the object
-     * @param name Name of the object
-     */
-    void setObjectName(const QString& name)
-    {
-        QObject::setObjectName("Plugins/Loader/" + name);
     }
 
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * @return Plugin icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override {
-        return Application::getIconFont("FontAwesome").getIcon("file-import", color);
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("file-import");
     }
 
     /**
-    * Produces an instance of a loader plugin. This function gets called by the plugin manager.
-    */
+     * Get plugin category (loader/writer/transformation etc.) icon
+     * @return Icon which reflects to the plugin factory category
+     */
+    QIcon getCategoryIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("file-import");
+    }
+
+    /** Produces an instance of a loader plugin */
     LoaderPlugin* produce() override = 0;
 
     /**
@@ -114,9 +112,7 @@ public:
     gui::PluginTriggerActions getPluginTriggerActions(const mv::DataTypes& dataTypes) const override;
 };
 
-} // namespace plugin
-
-} // namespace mv
+}
 
 Q_DECLARE_INTERFACE(mv::plugin::LoaderPluginFactory, "hdps.LoaderPluginFactory")
 

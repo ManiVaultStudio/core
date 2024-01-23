@@ -95,9 +95,9 @@ DataPropertiesPluginFactory::DataPropertiesPluginFactory() :
 {
 }
 
-QIcon DataPropertiesPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+QIcon DataPropertiesPluginFactory::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("sliders-h", color);
+    return Application::getIconFont("FontAwesome").getIcon("sliders-h");
 }
 
 ViewPlugin* DataPropertiesPluginFactory::produce()

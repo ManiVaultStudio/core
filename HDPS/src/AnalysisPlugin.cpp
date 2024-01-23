@@ -5,10 +5,7 @@
 #include "AnalysisPlugin.h"
 #include "Application.h"
 
-namespace mv
-{
-
-namespace plugin
+namespace mv::plugin
 {
 
 AnalysisPlugin::AnalysisPlugin(const PluginFactory* factory) :
@@ -73,11 +70,14 @@ QVariantMap AnalysisPlugin::toVariantMap() const
     return variantMap;
 }
 
-QIcon AnalysisPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+QIcon AnalysisPluginFactory::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("square-root-alt", color);
+    return Application::getIconFont("FontAwesome").getIcon("square-root-alt");
 }
 
+QIcon AnalysisPluginFactory::getCategoryIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("square-root-alt");
 }
 
 }

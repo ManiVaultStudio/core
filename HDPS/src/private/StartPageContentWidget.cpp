@@ -23,6 +23,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toggleExampleProjectsAction(this, "Examples"),
     _toggleProjectFromWorkspaceAction(this, "Project From Workspace"),
     _toggleProjectFromDataAction(this, "Project From Data", true),
+    _toggleLoadedPluginsAction(this, "Loaded Plugins", true),
     _toggleTutorialVideosAction(this, "Instructional Videos"),
     _settingsAction(this, "Settings"),
     _openProjectWidget(this),
@@ -34,6 +35,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _toggleExampleProjectsAction.setSettingsPrefix("StartPage/ToggleExampleProjects");
     _toggleProjectFromWorkspaceAction.setSettingsPrefix("StartPage/ToggleProjectFromWorkspace");
     _toggleProjectFromDataAction.setSettingsPrefix("StartPage/ToggleProjectFromData");
+    _toggleLoadedPluginsAction.setSettingsPrefix("StartPage/ToggleLoadedPlugins");
     _toggleTutorialVideosAction.setSettingsPrefix("StartPage/ToggleTutorialVideos");
 
     _settingsAction.setText("Toggle Views");
@@ -45,6 +47,7 @@ StartPageContentWidget::StartPageContentWidget(QWidget* parent /*= nullptr*/) :
     _settingsAction.addAction(&_toggleExampleProjectsAction);
     _settingsAction.addAction(&_toggleProjectFromWorkspaceAction);
     _settingsAction.addAction(&_toggleProjectFromDataAction);
+    _settingsAction.addAction(&_toggleLoadedPluginsAction);
     _settingsAction.addAction(&_toggleTutorialVideosAction);
 
     _collumnsLayout.setContentsMargins(35, 35, 35, 35);

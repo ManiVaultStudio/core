@@ -24,9 +24,9 @@ Dataset<DatasetImpl> TextData::createDataSet(const QString& guid /*= ""*/) const
     return Dataset<DatasetImpl>(new Text(getName(), true, guid));
 }
 
-QIcon TextDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
+QIcon TextDataFactory::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("font", color);
+    return Application::getIconFont("FontAwesome").getIcon("font");
 }
 
 mv::plugin::RawData* TextDataFactory::produce()

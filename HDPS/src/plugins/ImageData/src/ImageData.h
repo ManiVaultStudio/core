@@ -120,22 +120,30 @@ private:
     QStringList         _dimensionNames;                /** Dimension names */
 };
 
+/**
+ * Image data plugin factory
+ *
+ * Class which produces instances of image raw data plugins
+ *
+ * @author Thomas Kroes and Julian Thijssen
+ */
 class ImageDataFactory : public mv::plugin::RawDataFactory
 {
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "nl.BioVault.ImageData" FILE "ImageData.json")
+    Q_PLUGIN_METADATA(IID "ManiVault.Plugins.Data.ImageData" FILE "ImageData.json")
 
 public:
-    ImageDataFactory() {}
-    ~ImageDataFactory() override {}
 
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * @return Plugin icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    QIcon getIcon() const override;
 
+    /**
+     * Produces an instance of the image data plugin
+     * @return Pointer to produced raw data plugin
+     */
     mv::plugin::RawData* produce() override;
 };

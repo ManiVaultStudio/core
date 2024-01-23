@@ -1027,32 +1027,35 @@ public:
     std::vector<unsigned int> indices;
 
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
-    mv::gui::GroupAction*     _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
+    mv::gui::GroupAction*       _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
     DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
-    mv::EventListener         _eventListener;                 /** Listen to HDPS events */
+    mv::EventListener           _eventListener;                 /** Listen to ManiVault events */
 };
 
-// =============================================================================
-// Factory
-// =============================================================================
-
+/**
+ * Point data plugin factory class
+ *
+ * Class which produces instances of raw data plugins
+ * 
+ * @author Julian Thijssen and Thomas Kroes
+ */
 class PointDataFactory : public RawDataFactory
 {
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
-        Q_OBJECT
-        Q_PLUGIN_METADATA(IID   "hdps.PointData"
-            FILE  "PointData.json")
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "ManiVault.Plugins.Data.PointData" FILE  "PointData.json")
 
 public:
-    PointDataFactory(void) {}
-    ~PointDataFactory(void) override {}
 
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * @return Plugin icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    QIcon getIcon() const override;
 
+    /**
+     * Produces an instance of the point data plugin
+     * @return Pointer to produced raw data plugin
+     */
     mv::plugin::RawData* produce() override;
 };

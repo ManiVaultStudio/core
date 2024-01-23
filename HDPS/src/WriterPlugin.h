@@ -17,9 +17,7 @@
 
 using namespace mv::util;
 
-namespace mv
-{
-namespace plugin
+namespace mv::plugin
 {
 
 class WriterPlugin : public Plugin
@@ -63,29 +61,37 @@ protected:
     Datasets    _input;     /** Input datasets smart pointers */
 };
 
-
+/**
+ * Writer plugin factory class
+ *
+ * Class which produces instances of writer plugins
+ */
 class WriterPluginFactory : public PluginFactory
 {
     Q_OBJECT
-    
-public:
-    WriterPluginFactory();
 
-    ~WriterPluginFactory() override {};
+public:
+
+    /** Default constructor which sets the plugin factory type to writer */
+    WriterPluginFactory();
 
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * @return Plugin icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
+    QIcon getIcon() const override;
 
+    /**
+     * Get plugin category (loader/writer/transformation etc.) icon
+     * @return Icon which belongs to the plugin factory category
+     */
+    QIcon getCategoryIcon() const override;
+
+    /** Produces an instance of an writer plugin */
     WriterPlugin* produce() override = 0;
 };
 
-} // namespace plugin
-
-} // namespace mv
+}
 
 Q_DECLARE_INTERFACE(mv::plugin::WriterPluginFactory, "hdps.WriterPluginFactory")
 

@@ -12,9 +12,7 @@
 
 using namespace mv::gui;
 
-namespace mv {
-
-namespace plugin {
+namespace mv::plugin {
 
 QString LoaderPlugin::AskForFileName(const QString& fileNameFilter)
 {
@@ -42,5 +40,4 @@ PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const DataType
     return getPluginTriggerActions(DataTypes({}));
 }
 
-}
 }

@@ -41,27 +41,30 @@ private:
     Dataset<DatasetImpl>    _dataset;                   /** Smart pointer to currently selected dataset */
 };
 
+/**
+ * Data properties plugin factory class
+ *
+ * Class which produces instances of data properties plugins
+ * 
+ * @author Thomas Kroes
+ */
 class DataPropertiesPluginFactory : public ViewPluginFactory
 {
     Q_INTERFACES(mv::plugin::ViewPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "nl.BioVault.DataPropertiesPlugin" FILE "DataPropertiesPlugin.json")
+    Q_PLUGIN_METADATA(IID "ManiVault.Plugins.View.DataPropertiesPlugin" FILE "DataPropertiesPlugin.json")
     
 public:
 
-    /** Constructor */
+    /** Default constructor */
     DataPropertiesPluginFactory();
 
     /**
      * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * @return Plugin icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
-    
-	/**
-     * Produces the plugin
-     * @return Pointer to the produced plugin
-     */
+    QIcon getIcon() const override;
+
+    /** Produces an instance of a data properties plugin */
     ViewPlugin* produce() override;
 };
