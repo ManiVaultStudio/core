@@ -18,7 +18,6 @@
 
 DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     QWidget(parent),
-    _dataset(),
     _layout(),
     _groupsAction(parent, "Groups"),
     _groupsActionWidget(nullptr)
@@ -33,10 +32,6 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     _layout.addWidget(_groupsActionWidget);
 
     connect(&mv::dataHierarchy(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::dataHierarchySelectionChanged);
-
-    connect(&_dataset, &Dataset<DatasetImpl>::removed, this, [this]() -> void {
-        _groupsAction.setGroupActions({});
-    });
 
     dataHierarchySelectionChanged();
 }
@@ -59,14 +54,14 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
             _groupsActionWidget->setEnabled(selectedItems.count() == 1);
 
             if (selectedItems.count() == 1) {
-                if (_dataset.isValid())
-                    disconnect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
+                auto dataset = selectedItems.first()->getDataset();
 
-                _dataset = selectedItems.first()->getDataset();
+                if (dataset.isValid())
+                    disconnect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
 
-                if (_dataset.isValid())
+                if (dataset.isValid())
                 {
-                    connect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
+                    connect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
                         auto groupAction = dynamic_cast<GroupAction*>(&widgetAction);
 
                         if (groupAction)
@@ -74,14 +69,14 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
                      });
                 }
 
-                if (!_dataset.isValid())
+                if (!dataset.isValid())
                     return;
 
 #ifdef _DEBUG
-                qDebug().noquote() << QString("Loading %1 into data properties").arg(_dataset->text());
+                qDebug().noquote() << QString("Loading %1 into data properties").arg(dataset->text());
 #endif
 
-                for (auto childObject : _dataset->children()) {
+                for (auto childObject : dataset->children()) {
                     auto groupAction = dynamic_cast<GroupAction*>(childObject);
 
                     if (groupAction)

@@ -40,7 +40,6 @@ protected:
     void dataHierarchySelectionChanged();
 
 protected:
-    Dataset<DatasetImpl>    _dataset;               /** Smart point to current dataset */
     QVBoxLayout             _layout;                /** Main layout */
     GroupsAction            _groupsAction;          /** Groups action */
     GroupsAction::Widget*   _groupsActionWidget;    /** Pointer to groups action widget (used to change label sizing) */
