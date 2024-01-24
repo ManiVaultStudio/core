@@ -16,6 +16,8 @@
 
 #include <QDebug>
 
+using namespace mv;
+
 DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     QWidget(parent),
     _layout(),
@@ -41,20 +43,28 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
     if (projects().isOpeningProject() || projects().isImportingProject())
         return;
 
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
+    for (auto selectedDataHierarchyItem : _selectedDataHierarchyItems)
+        disconnect(&selectedDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, nullptr);
+
+    _selectedDataHierarchyItems = mv::dataHierarchy().getSelectedItems();
+
+    for (auto selectedDataHierarchyItem : _selectedDataHierarchyItems)
+        connect(&selectedDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this]() -> void {
+            _groupsAction.setGroupActions({});
+        });
 
     try
     {
-        if (selectedItems.isEmpty()) {
+        if (_selectedDataHierarchyItems.isEmpty()) {
             _groupsAction.setGroupActions({});
         }
         else {
             GroupsAction::GroupActions groupActions;
 
-            _groupsActionWidget->setEnabled(selectedItems.count() == 1);
+            _groupsActionWidget->setEnabled(_selectedDataHierarchyItems.count() == 1);
 
-            if (selectedItems.count() == 1) {
-                auto dataset = selectedItems.first()->getDataset();
+            if (_selectedDataHierarchyItems.count() == 1) {
+                auto dataset = _selectedDataHierarchyItems.first()->getDataset();
 
                 if (dataset.isValid())
                     disconnect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);

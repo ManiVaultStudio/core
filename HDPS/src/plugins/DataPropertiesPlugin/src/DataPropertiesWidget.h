@@ -40,7 +40,8 @@ protected:
     void dataHierarchySelectionChanged();
 
 protected:
-    QVBoxLayout             _layout;                /** Main layout */
-    GroupsAction            _groupsAction;          /** Groups action */
-    GroupsAction::Widget*   _groupsActionWidget;    /** Pointer to groups action widget (used to change label sizing) */
+    QVBoxLayout             _layout;                        /** Main layout */
+    DataHierarchyItems      _selectedDataHierarchyItems;    /** Selected data hierarchy items */
+    GroupsAction            _groupsAction;                  /** Groups action */
+    GroupsAction::Widget*   _groupsActionWidget;            /** Pointer to groups action widget (used to change label sizing) */
 };
