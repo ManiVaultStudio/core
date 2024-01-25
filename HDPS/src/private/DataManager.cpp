@@ -13,6 +13,7 @@
 #include <RawData.h>
 #include <DataType.h>
 #include <DataHierarchyItem.h>
+#include <AnalysisPlugin.h>
 
 #include <stdexcept>
 
@@ -235,6 +236,11 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         const auto datasetId        = dataset->getId();
         const auto datasetType      = dataset->getDataType();
         const auto rawDatasetName   = dataset->getRawDataName();
+
+        auto analysisPlugin = dataset->getAnalysis();
+
+        if (analysisPlugin)
+            analysisPlugin->destroy();
 
         dataset->setAboutToBeRemoved();
 
