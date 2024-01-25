@@ -3,22 +3,18 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "DataPropertiesWidget.h"
+#include "DataPropertiesPlugin.h"
 
-#include <Application.h>
-#include <AbstractDataHierarchyManager.h>
-#include <AbstractProjectManager.h>
-#include <DataHierarchyItem.h>
+#include <CoreInterface.h>
 #include <Set.h>
-
-#include <actions/GroupAction.h>
-#include <actions/OptionsAction.h>
-#include <actions/PluginTriggerAction.h>
 
 #include <QDebug>
 
-DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
+using namespace mv;
+
+DataPropertiesWidget::DataPropertiesWidget(DataPropertiesPlugin* dataPropertiesPlugin, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    _dataset(),
+    _dataPropertiesPlugin(dataPropertiesPlugin),
     _layout(),
     _groupsAction(parent, "Groups"),
     _groupsActionWidget(nullptr)
@@ -34,10 +30,6 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
     connect(&mv::dataHierarchy(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::dataHierarchySelectionChanged);
 
-    connect(&_dataset, &Dataset<DatasetImpl>::removed, this, [this]() -> void {
-        _groupsAction.setGroupActions({});
-    });
-
     dataHierarchySelectionChanged();
 }
 
@@ -46,27 +38,38 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
     if (projects().isOpeningProject() || projects().isImportingProject())
         return;
 
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
+    for (auto selectedDataHierarchyItem : _selectedDataHierarchyItems)
+        disconnect(&selectedDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, nullptr);
+
+    _selectedDataHierarchyItems = mv::dataHierarchy().getSelectedItems();
+
+    _dataPropertiesPlugin->updateWindowTitle(_selectedDataHierarchyItems);
+
+    for (auto selectedDataHierarchyItem : _selectedDataHierarchyItems) {
+        connect(&selectedDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this]() -> void {
+            _groupsAction.setGroupActions({});
+        });
+    }
 
     try
     {
-        if (selectedItems.isEmpty()) {
+        if (_selectedDataHierarchyItems.isEmpty()) {
             _groupsAction.setGroupActions({});
         }
         else {
             GroupsAction::GroupActions groupActions;
 
-            _groupsActionWidget->setEnabled(selectedItems.count() == 1);
+            _groupsActionWidget->setEnabled(_selectedDataHierarchyItems.count() == 1);
 
-            if (selectedItems.count() == 1) {
-                if (_dataset.isValid())
-                    disconnect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
+            if (_selectedDataHierarchyItems.count() == 1) {
+                auto dataset = _selectedDataHierarchyItems.first()->getDataset();
 
-                _dataset = selectedItems.first()->getDataset();
+                if (dataset.isValid())
+                    disconnect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
 
-                if (_dataset.isValid())
+                if (dataset.isValid())
                 {
-                    connect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
+                    connect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
                         auto groupAction = dynamic_cast<GroupAction*>(&widgetAction);
 
                         if (groupAction)
@@ -74,14 +77,14 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
                      });
                 }
 
-                if (!_dataset.isValid())
+                if (!dataset.isValid())
                     return;
 
 #ifdef _DEBUG
-                qDebug().noquote() << QString("Loading %1 into data properties").arg(_dataset->text());
+                qDebug().noquote() << QString("Loading %1 into data properties").arg(dataset->text());
 #endif
 
-                for (auto childObject : _dataset->children()) {
+                for (auto childObject : dataset->children()) {
                     auto groupAction = dynamic_cast<GroupAction*>(childObject);
 
                     if (groupAction)

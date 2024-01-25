@@ -11,9 +11,7 @@
 
 class QWidget;
 
-namespace mv {
-
-namespace gui {
+namespace mv::gui {
 
 class GroupAction;
 class GroupSectionTreeItem;
@@ -91,9 +89,8 @@ protected:
     GroupAction*            _groupAction;               /** Pointer to group action */
     QWidget*                _containerWidget;           /** Pointer to container widget */
     QVBoxLayout*            _containerLayout;           /** Pointer to container widget layout */
-    QWidget*                _groupWidget;               /** Pointer to group widget */
+    QPointer<QWidget>       _groupWidget;               /** Pointer to group widget */
     SizeSynchronizer        _sizeSynchronizer;          /** Synchronizer for widget size */
 };
 
-}
 }

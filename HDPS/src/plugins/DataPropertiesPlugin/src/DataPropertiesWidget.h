@@ -5,7 +5,6 @@
 #pragma once
 
 #include <DataHierarchyItem.h>
-#include <Dataset.h>
 
 #include <actions/GroupsAction.h>
 
@@ -14,6 +13,8 @@
 using namespace mv;
 using namespace mv::util;
 using namespace mv::gui;
+
+class DataPropertiesPlugin;
 
 /**
  * Data properties widget class
@@ -29,10 +30,11 @@ class DataPropertiesWidget : public QWidget
 public:
 
     /**
-     * Constructor
+     * Construct with pointer to owning \p dataPropertiesPlugin and \p parent widget
+     * @param dataPropertiesPlugin Pointer to owning data properties plugin
      * @param parent Pointer to parent widget
      */
-    DataPropertiesWidget(QWidget* parent);
+    DataPropertiesWidget(DataPropertiesPlugin* dataPropertiesPlugin, QWidget* parent = nullptr);
 
 protected:
 
@@ -40,8 +42,9 @@ protected:
     void dataHierarchySelectionChanged();
 
 protected:
-    Dataset<DatasetImpl>    _dataset;               /** Smart point to current dataset */
-    QVBoxLayout             _layout;                /** Main layout */
-    GroupsAction            _groupsAction;          /** Groups action */
-    GroupsAction::Widget*   _groupsActionWidget;    /** Pointer to groups action widget (used to change label sizing) */
+    DataPropertiesPlugin*   _dataPropertiesPlugin;          /** Pointer to owning data properties plugin */
+    QVBoxLayout             _layout;                        /** Main layout */
+    DataHierarchyItems      _selectedDataHierarchyItems;    /** Selected data hierarchy items */
+    GroupsAction            _groupsAction;                  /** Groups action */
+    GroupsAction::Widget*   _groupsActionWidget;            /** Pointer to groups action widget (used to change label sizing) */
 };
