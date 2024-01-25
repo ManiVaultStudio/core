@@ -237,11 +237,6 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         const auto datasetType      = dataset->getDataType();
         const auto rawDatasetName   = dataset->getRawDataName();
 
-        auto analysisPlugin = dataset->getAnalysis();
-
-        if (analysisPlugin)
-            analysisPlugin->destroy();
-
         dataset->setAboutToBeRemoved();
 
         for (const auto& underiveDataset : _datasets) {
@@ -273,6 +268,11 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 
                 if (it == _datasets.end())
                     throw std::runtime_error(QString("Dataset with id %1 not found in database").arg(dataset->getId()).toStdString());
+
+                auto analysisPlugin = dataset->getAnalysis();
+
+                if (analysisPlugin)
+                    analysisPlugin->destroy();
 
                 _datasets.erase(it);
             }
