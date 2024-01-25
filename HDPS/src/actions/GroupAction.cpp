@@ -10,6 +10,10 @@
 #include <QDebug>
 #include <QHBoxLayout>
 
+#ifdef _DEBUG
+    //#define GROUP_ACTION_VERBOSE
+#endif
+
 using namespace mv::util;
 
 namespace mv::gui {
@@ -421,6 +425,13 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
     setLayout(layout);
 }
 
+GroupAction::VerticalWidget::~VerticalWidget()
+{
+#ifdef GROUP_ACTION_VERBOSE
+    qDebug() << __FUNCTION__ << _groupAction->text();
+#endif
+}
+
 GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, groupAction, widgetFlags),
     _groupAction(groupAction)
@@ -481,6 +492,13 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
     connect(groupAction, &GroupAction::actionsChanged, this, updateLayout);
 
     setLayout(layout);
+}
+
+GroupAction::HorizontalWidget::~HorizontalWidget()
+{
+#ifdef GROUP_ACTION_VERBOSE
+    qDebug() << __FUNCTION__ << _groupAction->text();
+#endif
 }
 
 }

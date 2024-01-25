@@ -62,6 +62,9 @@ public: // Widgets
          */
         VerticalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags);
 
+        /** Destructor */
+        ~VerticalWidget();
+
     protected:
         GroupAction*    _groupAction;   /** Pointer to group action which created the widget */
         QGridLayout     _layout;        /** Vertical layout */
@@ -81,6 +84,9 @@ public: // Widgets
          * @param widgetFlags Widget flags for the configuration of the widget (type)
          */
         HorizontalWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags);
+
+        /** Destructor */
+        ~HorizontalWidget();
 
     protected:
         GroupAction* _groupAction;   /** Pointer to group action which created the widget */
