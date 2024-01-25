@@ -7,6 +7,7 @@
 #include "DataPropertiesWidget.h"
 
 #include <ViewPlugin.h>
+
 #include <actions/TriggerAction.h>
 
 using namespace mv::plugin;
@@ -30,15 +31,16 @@ public:
 protected:
 
     /**
-     * Callback when is called when the selected items in the data hierarchy changes
-     * @param datasetId Globally unique identifier of the dataset
+     * Updates the window title based on the \p selectedDataHierarchyItems in the data hierarchy
+     * @param selectedDataHierarchyItems Items selected in the data hierarchy
      */
-    void selectedItemsChanged(DataHierarchyItems selectedItems);
+    void updateWindowTitle(DataHierarchyItems selectedDataHierarchyItems);
 
 private:
-    DataPropertiesWidget    _dataPropertiesWidget;      /** Data properties widget */
     gui::TriggerAction      _additionalEditorAction;    /** Trigger action to start the data set editor */
-    Dataset<DatasetImpl>    _dataset;                   /** Smart pointer to currently selected dataset */
+    DataPropertiesWidget    _dataPropertiesWidget;      /** Data properties widget */
+
+    friend class DataPropertiesWidget;
 };
 
 class DataPropertiesPluginFactory : public ViewPluginFactory

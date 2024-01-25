@@ -3,23 +3,18 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "DataPropertiesWidget.h"
+#include "DataPropertiesPlugin.h"
 
-#include <Application.h>
-#include <AbstractDataHierarchyManager.h>
-#include <AbstractProjectManager.h>
-#include <DataHierarchyItem.h>
+#include <CoreInterface.h>
 #include <Set.h>
-
-#include <actions/GroupAction.h>
-#include <actions/OptionsAction.h>
-#include <actions/PluginTriggerAction.h>
 
 #include <QDebug>
 
 using namespace mv;
 
-DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
+DataPropertiesWidget::DataPropertiesWidget(DataPropertiesPlugin* dataPropertiesPlugin, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
+    _dataPropertiesPlugin(dataPropertiesPlugin),
     _layout(),
     _groupsAction(parent, "Groups"),
     _groupsActionWidget(nullptr)
@@ -48,10 +43,13 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
 
     _selectedDataHierarchyItems = mv::dataHierarchy().getSelectedItems();
 
-    for (auto selectedDataHierarchyItem : _selectedDataHierarchyItems)
+    _dataPropertiesPlugin->updateWindowTitle(_selectedDataHierarchyItems);
+
+    for (auto selectedDataHierarchyItem : _selectedDataHierarchyItems) {
         connect(&selectedDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this]() -> void {
             _groupsAction.setGroupActions({});
         });
+    }
 
     try
     {
