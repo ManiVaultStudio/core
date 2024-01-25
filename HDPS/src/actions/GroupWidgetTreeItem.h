@@ -11,9 +11,7 @@
 
 class QWidget;
 
-namespace mv {
-
-namespace gui {
+namespace mv::gui {
 
 class GroupAction;
 class GroupSectionTreeItem;
@@ -95,5 +93,4 @@ protected:
     SizeSynchronizer        _sizeSynchronizer;          /** Synchronizer for widget size */
 };
 
-}
 }

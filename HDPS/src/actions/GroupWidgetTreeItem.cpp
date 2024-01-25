@@ -12,11 +12,9 @@
 #include <QScrollBar>
 #include <QCoreApplication>
 
-//#define GROUP_WIDGET_TREE_ITEM_VERBOSE
+#define GROUP_WIDGET_TREE_ITEM_VERBOSE
 
-namespace mv {
-
-namespace gui {
+namespace mv::gui {
 
 GroupWidgetTreeItem::GroupWidgetTreeItem(GroupSectionTreeItem* groupSectionTreeItem, GroupAction* groupAction) :
     QTreeWidgetItem(groupSectionTreeItem),
@@ -49,7 +47,7 @@ GroupWidgetTreeItem::GroupWidgetTreeItem(GroupSectionTreeItem* groupSectionTreeI
 GroupWidgetTreeItem::~GroupWidgetTreeItem()
 {
 #ifdef GROUP_WIDGET_TREE_ITEM_VERBOSE
-    qDebug() << QString("Destructing %1 group widget item").arg(_groupAction->getSettingsPath());
+    qDebug() << QString("Destructing %1 group widget item").arg(_groupAction->text());
 #endif
 }
 
@@ -105,5 +103,4 @@ bool GroupWidgetTreeItem::SizeSynchronizer::eventFilter(QObject* target, QEvent*
     return QObject::eventFilter(target, event);
 }
 
-}
 }

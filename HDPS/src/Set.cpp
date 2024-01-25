@@ -475,6 +475,8 @@ DatasetTask& DatasetImpl::getTask()
 void DatasetImpl::setAboutToBeRemoved(bool aboutToBeRemoved /*= true*/)
 {
     _aboutToBeRemoved = aboutToBeRemoved;
+
+    getDataHierarchyItem().deselect();
 }
 
 bool DatasetImpl::isAboutToBeRemoved() const

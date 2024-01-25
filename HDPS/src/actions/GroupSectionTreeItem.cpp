@@ -81,6 +81,7 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _overlayLayout.addStretch(1);
 
     _iconLabel.setAlignment(Qt::AlignCenter);
+
     if(isMacOS) {
         _iconLabel.setFont(fontAwesome.getFont());
     } else {
