@@ -610,14 +610,20 @@ ToggleAction& DataManager::getDatasetGroupingAction()
 
 void DataManager::fromVariantMap(const QVariantMap& variantMap)
 {
+    AbstractDataManager::fromVariantMap(variantMap);
+
+    if (variantMap.contains(_datasetGroupingAction.getSerializationName()))
+        _datasetGroupingAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap DataManager::toVariantMap() const
 {
-    QVariantMap variantMap;
+    QVariantMap variantMap = AbstractDataManager::toVariantMap();
 
     for (auto& dataset : _datasets)
         variantMap[dataset->getId()] = dataset->toVariantMap();
+
+    _datasetGroupingAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
