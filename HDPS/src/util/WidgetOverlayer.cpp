@@ -62,9 +62,4 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
     return QObject::eventFilter(target, event);
 }
 
-//mv::util::WidgetFader& WidgetOverlayer::getWidgetFader()
-//{
-//    return _widgetFader;
-//}
-
 }

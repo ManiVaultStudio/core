@@ -36,12 +36,6 @@ public:
     WidgetFader(QObject* parent, QWidget* targetWidget, float opacity = 0.0f, float minimumOpacity = 0.0f, float maximumOpacity = 1.0f, std::int32_t fadeInDuration = 150, std::int32_t fadeOutDuration = 150);
 
     /**
-     * Set enabled to \p enabled
-     * @param enabled Whether the fader is enabled or not
-     */
-    void setEnabled(bool enabled);
-
-    /**
      * Fade in the target widget
      * @param duration Only used if duration >= 0, otherwise uses _fadeInDuration 
      */
