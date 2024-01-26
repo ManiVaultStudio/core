@@ -202,7 +202,7 @@ QVariantMap DockManager::toVariantMap() const
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
-    const_cast<DockManager*>(this)->_layoutTask.setName("Save" + _name.toLower() + " layout");
+    const_cast<DockManager*>(this)->_layoutTask.setName("Save " + _name.toLower() + " layout");
 
     _serializationTask->setEnabled(true);
 
