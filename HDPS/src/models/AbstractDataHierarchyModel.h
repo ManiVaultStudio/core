@@ -15,16 +15,14 @@
 
 namespace mv {
 
-class DataHierarchyItem;
-
 /**
- * Data hierarchy model class
+ * Abstract data hierarchy model class
  *
- * Standard item model for managing the data hierarchy
+ * Abstract standard item model class for managing the data hierarchy
  *
  * @author Thomas Kroes
  */
-class DataHierarchyModel final : public QStandardItemModel
+class AbstractDataHierarchyModel : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -468,13 +466,13 @@ public:
      * Construct with \p parent object
      * @param parent Pointer to parent object
      */
-    explicit DataHierarchyModel(QObject* parent = nullptr);
+    explicit AbstractDataHierarchyModel(QObject* parent = nullptr);
 
     /** Get supported drag actions */
     Qt::DropActions supportedDragActions() const override;
 
     /**
-     * Get header data
+     * Get header data for \p section, \p orientation and display \p role
      * @param section Section
      * @param orientation Orientation
      * @param role Data role
@@ -483,8 +481,9 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     /**
-     * For the given item indices return the MIME data intended to pass information
-     * in the case of e.g. dragging or dropping data.
+     * Get MIME data for supplied \p indexes
+     * @param indexes Index list to get the MIME data for
+     * @return Pointer to MIME data
      */
     QMimeData* mimeData(const QModelIndexList& indexes) const override;
 
@@ -497,29 +496,6 @@ public:
     ItemType* getItem(const QModelIndex& modelIndex) {
         return dynamic_cast<ItemType*>(itemFromIndex(modelIndex));
     }
-
-    /** Populate the model with data hierarchy items from the data hierarchy manager */
-    void populateFromDataHierarchyManager();
-
-private:
-
-    /**
-     * Add \p dataHierarchyItem to the model
-     * @param dataHierarchyItem Pointer to the data hierarchy item to add
-     */
-    void addDataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem);
-
-    /**
-     * Remove \p dataHierarchyItem from the model
-     * @param dataHierarchyItem Pointer to the data hierarchy item to remove
-     */
-     void removeDataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem);
-
-     /**
-     * Re-parent \p dataHierarchyItem
-     * @param dataHierarchyItem Pointer to the data hierarchy item of which the parent changed
-     */
-     void reparentDataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem);
 };
 
 }

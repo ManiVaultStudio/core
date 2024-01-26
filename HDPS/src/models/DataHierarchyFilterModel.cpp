@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "DataHierarchyModel.h"
+#include "DataHierarchyTreeModel.h"
 #include "DataHierarchyFilterModel.h"
 
 #include <QDebug>
@@ -41,7 +41,7 @@ bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
     if (!index.isValid())
         return true;
 
-    auto modelItem = static_cast<DataHierarchyModel::Item*>(sourceStandardItemModel->itemFromIndex(index));
+    auto modelItem = static_cast<AbstractDataHierarchyModel::Item*>(sourceStandardItemModel->itemFromIndex(index));
 
     std::int32_t numberOfActiveFilters = 0, numberOfMatches = 0;
 
@@ -49,7 +49,7 @@ bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
         numberOfActiveFilters++;
 
         const auto selectedOptions  = _visibilityFilterAction.getSelectedOptions();
-        const auto isVisible        = index.siblingAtColumn(static_cast<int>(DataHierarchyModel::Column::IsVisible)).data(Qt::EditRole).toBool();
+        const auto isVisible        = index.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)).data(Qt::EditRole).toBool();
 
         if ((selectedOptions.contains("Visible") && isVisible) || (selectedOptions.contains("Hidden") && !isVisible))
             numberOfMatches++;
@@ -59,7 +59,7 @@ bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
         numberOfActiveFilters++;
 
         const auto selectedOptions  = _visibilityFilterAction.getSelectedOptions();
-        const auto isGroup          = index.siblingAtColumn(static_cast<int>(DataHierarchyModel::Column::IsGroup)).data(Qt::EditRole).toBool();
+        const auto isGroup          = index.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsGroup)).data(Qt::EditRole).toBool();
 
         if ((selectedOptions.contains("Yes") && isGroup) || (selectedOptions.contains("No") && !isGroup))
             numberOfMatches++;
@@ -69,7 +69,7 @@ bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
         numberOfActiveFilters++;
 
         const auto selectedOptions  = _lockedFilterAction.getSelectedOptions();
-        const auto isLocked         = index.siblingAtColumn(static_cast<int>(DataHierarchyModel::Column::IsLocked)).data(Qt::EditRole).toBool();
+        const auto isLocked         = index.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsLocked)).data(Qt::EditRole).toBool();
 
         if ((selectedOptions.contains("Yes") && isLocked) || (selectedOptions.contains("No") && !isLocked))
             numberOfMatches++;
@@ -79,7 +79,7 @@ bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
         numberOfActiveFilters++;
 
         const auto selectedOptions  = _derivedFilterAction.getSelectedOptions();
-        const auto isDerived        = index.siblingAtColumn(static_cast<int>(DataHierarchyModel::Column::IsDerived)).data(Qt::EditRole).toBool();
+        const auto isDerived        = index.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsDerived)).data(Qt::EditRole).toBool();
 
         if ((selectedOptions.contains("Yes") && isDerived) || (selectedOptions.contains("No") && !isDerived))
             numberOfMatches++;

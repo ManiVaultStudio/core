@@ -645,12 +645,16 @@ set(PUBLIC_ACTIONS_MODEL_FILES
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_HEADERS
-    src/models/DataHierarchyModel.h
+    src/models/AbstractDataHierarchyModel.h
+    src/models/DataHierarchyTreeModel.h
+    src/models/DataHierarchyListModel.h
     src/models/DataHierarchyFilterModel.h
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_SOURCES
-    src/models/DataHierarchyModel.cpp
+    src/models/AbstractDataHierarchyModel.cpp
+    src/models/DataHierarchyTreeModel.cpp
+    src/models/DataHierarchyListModel.cpp
     src/models/DataHierarchyFilterModel.cpp
 )
 
