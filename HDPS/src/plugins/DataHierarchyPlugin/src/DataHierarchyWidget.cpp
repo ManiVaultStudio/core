@@ -185,7 +185,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
 
-    filterGroupAction.setPopupSizeHint(QSize(400, 0));
+    filterGroupAction.setPopupSizeHint(QSize(300, 0));
 
     filterGroupAction.addAction(&_filterModel.getVisibilityFilterAction());
     filterGroupAction.addAction(&_filterModel.getGroupFilterAction());
