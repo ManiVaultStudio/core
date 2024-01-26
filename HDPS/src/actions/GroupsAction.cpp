@@ -16,7 +16,8 @@ namespace mv::gui {
 GroupsAction::GroupsAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
     _groupActions(),
-    _visibility()
+    _visibility(),
+    _updateTask(this, "Update " + title)
 {
     setDefaultWidgetFlags(Default);
 }
@@ -91,9 +92,23 @@ void GroupsAction::setGroupActions(const GroupActions& groupActions)
     // Remove existing group actions
     resetGroupActions();
 
-    // Iterate over all group actions and add them one-by-one
+    QStringList subtasks;
+
     for (auto groupAction : groupActions)
-        addGroupAction(groupAction);
+        subtasks << groupAction->text();
+
+    _updateTask.setSubtasks(subtasks);
+    _updateTask.setRunning();
+
+    for (auto groupAction : groupActions) {
+        _updateTask.setSubtaskStarted(groupAction->text());
+        {
+            addGroupAction(groupAction);
+        }
+        _updateTask.setSubtaskFinished(groupAction->text());
+    }
+
+    _updateTask.setFinished();
 }
 
 void GroupsAction::resetGroupActions()
@@ -218,6 +233,11 @@ bool GroupsAction::isGroupActionVisible(GroupAction* groupAction) const
 bool GroupsAction::isGroupActionHidden(GroupAction* groupAction) const
 {
     return !isGroupActionVisible(groupAction);
+}
+
+Task& GroupsAction::getUpdateTask()
+{
+    return _updateTask;
 }
 
 GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const std::int32_t& widgetFlags) :

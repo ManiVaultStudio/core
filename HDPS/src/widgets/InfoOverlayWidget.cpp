@@ -15,14 +15,14 @@ namespace mv::gui
 
 InfoOverlayWidget::InfoOverlayWidget(QWidget* parent) :
     InfoWidget(parent),
-    _widgetOverlayer(this, this, parent)
+    _widgetOverlayer(this, this, parent),
+    _widgetFader(this, this, 1.f, 0.f, 1.f, 120, 60)
 {
     setColors(Qt::black, Qt::lightGray);
 }
 
 InfoOverlayWidget::InfoOverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description /*= ""*/, const QColor foregroundColor /*= Qt::black*/, const QColor backgroundColor /*= Qt::lightGray*/) :
-    InfoWidget(parent),
-    _widgetOverlayer(this, this, parent)
+    InfoOverlayWidget(parent)
 {
     set(icon, title, description);
     setColors(foregroundColor, backgroundColor);
@@ -30,7 +30,7 @@ InfoOverlayWidget::InfoOverlayWidget(QWidget* parent, const QIcon& icon, const Q
 
 mv::util::WidgetFader& InfoOverlayWidget::getWidgetFader()
 {
-    return _widgetOverlayer.getWidgetFader();
+    return _widgetFader;
 }
 
 }

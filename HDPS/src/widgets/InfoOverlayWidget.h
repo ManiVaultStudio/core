@@ -49,7 +49,8 @@ public:
     util::WidgetFader& getWidgetFader();
 
 private:
-    mv::util::WidgetOverlayer     _widgetOverlayer;      /** Utility for layering on top of the target widget */
+    mv::util::WidgetOverlayer   _widgetOverlayer;   /** Utility for layering on top of the target widget */
+    mv::util::WidgetFader       _widgetFader;       /** Widget fader for animating the widget opacity */
 };
 
 }
