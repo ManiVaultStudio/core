@@ -456,6 +456,10 @@ std::vector<PluginFactory*> PluginManager::getPluginFactoriesByType(const plugin
         if (pluginFactory->getType() == pluginType)
             pluginFactories.push_back(pluginFactory);
 
+    std::sort(pluginFactories.begin(), pluginFactories.end(), [](auto pluginFactoryLhs, auto pluginFactoryRhs) -> bool {
+        return pluginFactoryLhs->getKind() < pluginFactoryRhs->getKind();
+    });
+
     return pluginFactories;
 }
 
@@ -464,7 +468,11 @@ std::vector<PluginFactory*> PluginManager::getPluginFactoriesByTypes(const plugi
     std::vector<PluginFactory*> pluginFactories;
 
     for (const auto& pluginType : pluginTypes) {
-        const auto pluginFactoriesForType = getPluginFactoriesByType(pluginType);
+        auto pluginFactoriesForType = getPluginFactoriesByType(pluginType);
+
+        std::sort(pluginFactoriesForType.begin(), pluginFactoriesForType.end(), [](auto pluginFactoryLhs, auto pluginFactoryRhs) -> bool {
+            return pluginFactoryLhs->getKind() < pluginFactoryRhs->getKind();
+        });
 
         pluginFactories.insert(pluginFactories.end(), pluginFactoriesForType.begin(), pluginFactoriesForType.end());
     }
@@ -480,6 +488,10 @@ std::vector<plugin::Plugin*> PluginManager::getPluginsByFactory(const plugin::Pl
         if (pluginFactory == plugin->getFactory())
             pluginsByFactory.push_back(plugin);
 
+    std::sort(pluginsByFactory.begin(), pluginsByFactory.end(), [](auto pluginLhs, auto pluginRhs) -> bool {
+        return pluginLhs->getKind() < pluginRhs->getKind();
+    });
+
     return pluginsByFactory;
 }
 
@@ -491,6 +503,10 @@ std::vector<plugin::Plugin*> PluginManager::getPluginsByType(const plugin::Type&
         if (pluginType == plugin->getType())
             pluginsByType.push_back(plugin.get());
 
+    std::sort(pluginsByType.begin(), pluginsByType.end(), [](auto pluginLhs, auto pluginRhs) -> bool {
+        return pluginLhs->getKind() < pluginRhs->getKind();
+    });
+
     return pluginsByType;
 }
 
@@ -499,7 +515,11 @@ std::vector<plugin::Plugin*> PluginManager::getPluginsByTypes(const plugin::Type
     std::vector<plugin::Plugin*> pluginsByType;
 
     for (const auto& pluginType : pluginTypes) {
-        const auto pluginsForType = getPluginsByType(pluginType);
+        auto pluginsForType = getPluginsByType(pluginType);
+        
+        std::sort(pluginsForType.begin(), pluginsForType.end(), [](auto pluginLhs, auto pluginRhs) -> bool {
+            return pluginLhs->getKind() < pluginRhs->getKind();
+        });
 
         pluginsByType.insert(pluginsByType.end(), pluginsForType.begin(), pluginsForType.end());
     }
