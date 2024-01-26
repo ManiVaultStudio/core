@@ -32,7 +32,7 @@ DataPropertiesWidget::DataPropertiesWidget(DataPropertiesPlugin* dataPropertiesP
 
     _layout.addWidget(_groupsActionWidget);
 
-    connect(&mv::dataHierarchy(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::dataHierarchySelectionChanged);
+    connect(&mv::dataHierarchy(), &AbstractDataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::dataHierarchySelectionChanged, Qt::DirectConnection);
 
     dataHierarchySelectionChanged();
 }
