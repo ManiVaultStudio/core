@@ -11,12 +11,12 @@ namespace mv {
 
 DataHierarchyFilterModel::DataHierarchyFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
-    _filterHiddenAction(this, "Filter hidden", true)
+    _visibilityFilterAction(this, "Filter visibility", { "Visible", "Hidden" }, { "Visible" })
 {
     setDynamicSortFilter(true);
     setRecursiveFilteringEnabled(true);
 
-    connect(&_filterHiddenAction, &gui::ToggleAction::toggled, this, &DataHierarchyFilterModel::invalidate);
+    connect(&_visibilityFilterAction, &gui::OptionsAction::selectedOptionsChanged, this, &DataHierarchyFilterModel::invalidate);
 }
 
 bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -30,13 +30,20 @@ bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
 
     auto modelItem = static_cast<DataHierarchyModel::Item*>(sourceStandardItemModel->itemFromIndex(index));
 
-    if (_filterHiddenAction.isChecked() && !index.siblingAtColumn(static_cast<int>(DataHierarchyModel::Column::IsVisible)).data(Qt::EditRole).toBool())
-        return false;
+    std::int32_t numberOfActiveFilters = 0;
+    std::int32_t numberOfMatches = 0;
 
-    if (filterRegularExpression().isValid())
-        return sourceModel()->data(index, filterRole()).toString().contains(filterRegularExpression());
+    if (_visibilityFilterAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
 
-    return false;
+        const auto selectedOptions  = _visibilityFilterAction.getSelectedOptions();
+        const auto isVisible        = index.siblingAtColumn(static_cast<int>(DataHierarchyModel::Column::IsVisible)).data(Qt::EditRole).toBool();
+
+        if ((selectedOptions.contains("Visible") && isVisible) || (selectedOptions.contains("Hidden") && !isVisible))
+            numberOfMatches++;
+    }
+
+    return numberOfMatches == numberOfActiveFilters;
 }
 
 }

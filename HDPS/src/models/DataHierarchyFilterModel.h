@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "actions/ToggleAction.h"
+#include "actions/OptionsAction.h"
 
 #include <QSortFilterProxyModel>
 
@@ -34,10 +34,10 @@ public:
 
 public: // Action getters
 
-    gui::ToggleAction& getFilterHiddenAction() { return _filterHiddenAction; }
+    gui::OptionsAction& getVisibilityFilterAction() { return _visibilityFilterAction; }
 
 private:
-    gui::ToggleAction    _filterHiddenAction;   /** For toggling whether hidden datasets are shown or not */
+    gui::OptionsAction    _visibilityFilterAction;   /** For selecting  whether visible and/or hidden datasets are shown or not */
 };
 
 }
