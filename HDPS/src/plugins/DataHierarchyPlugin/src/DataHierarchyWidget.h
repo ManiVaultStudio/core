@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "UnhideAction.h"
+
 #include <models/DataHierarchyTreeModel.h>
 #include <models/DataHierarchyFilterModel.h>
 
@@ -101,4 +103,5 @@ private:
     mv::DataHierarchyFilterModel    _filterModel;       /** Data hierarchy filter model */
     mv::gui::HierarchyWidget        _hierarchyWidget;   /** Widget for displaying hierarchy */
     mv::gui::TriggerAction          _resetAction;       /** Reset all action */
+    UnhideAction                    _unhideAction;      /** Action class for un-hiding hidden datasets */
 };
