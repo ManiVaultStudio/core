@@ -556,8 +556,14 @@ void ViewPluginDockWidget::ProgressOverlayWidget::setTask(Task* task)
 
     _loadTaskAction.setTask(_task);
 
-    if (_task)
-        connect(_task, &Task::statusChanged, this, &ProgressOverlayWidget::updateVisibility);
+    if (_task) {
+        connect(_task, &Task::statusChanged, this, [this](const Task::Status& previousStatus, const Task::Status& status) -> void {
+            if (status == Task::Status::Running)
+                QTimer::singleShot(100, this, &ProgressOverlayWidget::updateVisibility);
+            else
+                updateVisibility();
+        });
+    }
 
     updateVisibility();
 }
