@@ -78,7 +78,7 @@ private:
     void updateDialogVisibility();
 
 private:
-    TasksFilterModel    _tasksFilterModel;
+    TasksFilterModel    _tasksFilterModel;      /** Filter model for the tasks model */
     ModalTasksDialog    _modalTasksDialog;      /** Modal tasks dialog */
     QTimer              _minimumDurationTimer;  /** Wait for a small amount of time before showing the UI */
 };

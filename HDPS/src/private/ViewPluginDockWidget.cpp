@@ -45,7 +45,8 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
     _helpAction(this, "Help"),
     _cachedVisibility(false),
     _dockManager(this),
-    _settingsDockWidgetsMap()
+    _settingsDockWidgetsMap(),
+    _progressOverlayWidget(this)
 {
     active << this;
 
@@ -54,16 +55,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title /*= ""*/, QWidge
 }
 
 ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* viewPlugin, QWidget* parent /*= nullptr*/) :
-    DockWidget(title, parent),
-    _viewPlugin(nullptr),
-    _viewPluginKind(),
-    _viewPluginMap(),
-    _settingsMenu(),
-    _toggleMenu("Toggle"),
-    _helpAction(this, "Help"),
-    _cachedVisibility(false),
-    _dockManager(this),
-    _settingsDockWidgetsMap()
+    ViewPluginDockWidget(title, parent)
 {
     active << this;
 
@@ -73,16 +65,7 @@ ViewPluginDockWidget::ViewPluginDockWidget(const QString& title, ViewPlugin* vie
 }
 
 ViewPluginDockWidget::ViewPluginDockWidget(const QVariantMap& variantMap) :
-    DockWidget(""),
-    _viewPlugin(nullptr),
-    _viewPluginKind(),
-    _viewPluginMap(),
-    _settingsMenu(),
-    _toggleMenu("Toggle"),
-    _helpAction(this, "Help"),
-    _cachedVisibility(false),
-    _dockManager(this),
-    _settingsDockWidgetsMap()
+    ViewPluginDockWidget()
 {
     active << this;
 
@@ -496,6 +479,12 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
 
         viewPlugin->getVisibleAction().setChecked(toggled);
     });
+
+    _progressOverlayWidget.setTask(viewPlugin->getProgressTask());
+
+    connect(viewPlugin, &ViewPlugin::progressTaskChanged, this, [this](Task* progressTask) {
+        _progressOverlayWidget.setTask(progressTask);
+    });
 }
 
 ViewPluginDockWidget::SettingsActionWidget::SettingsActionWidget(QWidget* parent, mv::gui::WidgetAction* settingsAction) :
@@ -528,4 +517,62 @@ QSize ViewPluginDockWidget::SettingsActionWidget::minimumSizeHint() const
 QSize ViewPluginDockWidget::SettingsActionWidget::sizeHint() const
 {
     return minimumSizeHint();
+}
+
+ViewPluginDockWidget::ProgressOverlayWidget::ProgressOverlayWidget(QWidget* parent) :
+    OverlayWidget(parent),
+    _loadTaskAction(this, "View plugin progress"),
+    _loadTaskWidget(_loadTaskAction.createWidget(this)),
+    _task(nullptr)
+{
+    _loadTaskAction.setDefaultWidgetFlag(TaskAction::KillButton, true);
+    _loadTaskAction.getProgressAction().setTextFormat("");
+
+    _loadTaskWidget->setFixedHeight(2);
+
+    auto layout = new QVBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    layout->addWidget(_loadTaskWidget);
+    layout->addStretch(1);
+
+    setLayout(layout);
+
+    updateVisibility();
+
+    connect(qApp, &QApplication::paletteChanged, this, &ProgressOverlayWidget::updateCustomStyle);
+
+
+    updateCustomStyle();
+}
+
+void ViewPluginDockWidget::ProgressOverlayWidget::setTask(Task* task)
+{
+    if (_task)
+        disconnect(_task, &Task::statusChanged, this, nullptr);
+
+    _task = task;
+
+    _loadTaskAction.setTask(_task);
+
+    if (_task)
+        connect(_task, &Task::statusChanged, this, &ProgressOverlayWidget::updateVisibility);
+
+    updateVisibility();
+}
+
+void ViewPluginDockWidget::ProgressOverlayWidget::updateVisibility()
+{
+    if (_task)
+        setVisible(_task->isRunning());
+    else
+        setVisible(false);
+}
+
+void ViewPluginDockWidget::ProgressOverlayWidget::updateCustomStyle()
+{
+    //const auto backgroundColor = qApp->palette().color(QPalette::Disabled, QPalette::ButtonText);
+
+    //_loadTaskWidget->setStyleSheet("background-color: " + backgroundColor.name());
 }

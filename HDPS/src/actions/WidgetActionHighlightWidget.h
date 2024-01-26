@@ -49,7 +49,8 @@ private:
     void highlightingChanged(const WidgetAction::HighlightOption& highlighting);
 
 private:
-    WidgetAction*   _action;  /** Pointer to widget action to highlight */
+    WidgetAction*           _action;        /** Pointer to widget action to highlight */
+    mv::util::WidgetFader   _widgetFader;   /** Widget fader for animating the widget opacity */
 };
 
 }

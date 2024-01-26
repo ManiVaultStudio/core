@@ -8,7 +8,8 @@ namespace mv::gui {
 
 WidgetActionHighlightWidget::WidgetActionHighlightWidget(QWidget* parent, WidgetAction* action) :
     OverlayWidget(parent, 0.0f),
-    _action(action)
+    _action(action),
+    _widgetFader(this, this, 0.f, 0.f, 1.f, 120, 60)
 {
     setWindowFlag(Qt::WindowStaysOnTopHint);
     setStyleSheet(QString("background-color: %1;").arg(palette().highlight().color().name()));
@@ -39,27 +40,25 @@ void WidgetActionHighlightWidget::setAction(WidgetAction* action)
 
 void WidgetActionHighlightWidget::highlightingChanged(const WidgetAction::HighlightOption& highlighting)
 {
-    auto& widgetFader = getWidgetOverlayer().getWidgetFader();
-
     switch (highlighting)
     {
         case WidgetAction::HighlightOption::None:
         {
-            widgetFader.setOpacity(0.0f, 500);
+            _widgetFader.setOpacity(0.0f, 500);
 
             break;
         }
 
         case WidgetAction::HighlightOption::Moderate:
         {
-            widgetFader.setOpacity(0.25f, 200);
+            _widgetFader.setOpacity(0.25f, 200);
             
             break;
         }
 
         case WidgetAction::HighlightOption::Strong:
         {
-            widgetFader.setOpacity(0.6f, 200);
+            _widgetFader.setOpacity(0.6f, 200);
 
             break;
         }

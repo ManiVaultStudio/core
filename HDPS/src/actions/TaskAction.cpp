@@ -40,11 +40,6 @@ Task* TaskAction::getTask()
 
 void TaskAction::setTask(Task* task)
 {
-    Q_ASSERT(task != nullptr);
-
-    if (task == nullptr)
-        return;
-
     const auto previousTask = _task;
 
     if (_task != nullptr) {
@@ -58,38 +53,28 @@ void TaskAction::setTask(Task* task)
     _task = task;
     
     const auto updateKillTaskAction = [this]() -> void {
-        Q_ASSERT(_task != nullptr);
-
-        if (_task == nullptr)
-            return;
-
-        _killTaskAction.setToolTip(QString("Cancel %1").arg(_task->getName()));
+        if (_task)
+            _killTaskAction.setToolTip(QString("Cancel %1").arg(_task->getName()));
     };
 
-    updateKillTaskAction();
+    if (_task) {
+        updateKillTaskAction();
 
-    connect(_task, &Task::nameChanged, this, updateKillTaskAction);
+        connect(_task, &Task::nameChanged, this, updateKillTaskAction);
 
-    connect(_task, &Task::progressChanged, this, [this]() -> void {
-        updateProgressActionProgress();
-        //if (!getTimer(TimerType::ProgressChanged).isActive()) {
-        //    updateProgressActionProgress();
-        //    getTimer(TimerType::ProgressChanged).start();
-        //}
-    });
+        connect(_task, &Task::progressChanged, this, [this]() -> void {
+            updateProgressActionProgress();
+        });
 
-    connect(_task, &Task::progressTextChanged, this, [this]() -> void {
-        updateProgressActionTextFormat();
-        //if (!getTimer(TimerType::ProgressTextChanged).isActive()) {
-        //    updateProgressActionTextFormat();
-        //    getTimer(TimerType::ProgressTextChanged).start();
-        //}
-    });
+        connect(_task, &Task::progressTextChanged, this, [this]() -> void {
+            updateProgressActionTextFormat();
+        });
 
-    connect(_task, &Task::statusChanged, this, &TaskAction::updateActionsReadOnly);
-    connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionRange);
-    connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionTextFormat);
-    connect(_task, &Task::mayKillChanged, this, &TaskAction::updateKillTaskActionVisibility);
+        connect(_task, &Task::statusChanged, this, &TaskAction::updateActionsReadOnly);
+        connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionRange);
+        connect(_task, &Task::statusChanged, this, &TaskAction::updateProgressActionTextFormat);
+        connect(_task, &Task::mayKillChanged, this, &TaskAction::updateKillTaskActionVisibility);
+    }
 
     emit taskChanged(previousTask, _task);
 
@@ -108,19 +93,25 @@ void TaskAction::updateActionsReadOnly()
 
 void TaskAction::updateProgressActionProgress()
 {
-    _progressAction.setProgress(static_cast<int>(_task->getProgress() * 100.f));
+    if (_task)
+        _progressAction.setProgress(static_cast<int>(_task->getProgress() * 100.f));
+    else
+        _progressAction.setProgress(0.f);
 }
 
 void TaskAction::updateProgressActionTextFormat()
 {
-    if (_task == nullptr)
-        _progressAction.setTextFormat("No task assigned...");
+    if (_task)
+        _progressAction.setTextFormat(_task->getProgressText()); 
     else
-        _progressAction.setTextFormat(_task->getProgressText());
+        _progressAction.setTextFormat("No task assigned...");
 }
 
 void TaskAction::updateProgressActionRange()
 {
+    if (!_task)
+        return;
+
     switch (_task->getStatus())
     {
         case Task::Status::Idle:

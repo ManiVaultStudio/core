@@ -24,6 +24,10 @@ DataPropertiesWidget::DataPropertiesWidget(DataPropertiesPlugin* dataPropertiesP
 
     _layout.setContentsMargins(0, 0, 0, 0);
 
+    _groupsAction.getUpdateTask().setProgressTextFormatter([](Task& task) -> QString { return ""; });
+
+    dataPropertiesPlugin->setProgressTask(&_groupsAction.getUpdateTask());
+
     _groupsActionWidget = dynamic_cast<GroupsAction::Widget*>(_groupsAction.createWidget(this));
 
     _layout.addWidget(_groupsActionWidget);
@@ -93,58 +97,10 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
 
                 _groupsActionWidget->getFilteredActionsAction().setShowLabels(true);
             }
-            else {
-                /*
-                Datasets datasets;
-
-                for (const auto& selectedItem : selectedItems)
-                    datasets << selectedItem->getDataset();
-
-                auto groupAction = new GroupAction(nullptr, "Actions", true);
-
-                groupAction->setToolTip("Actions for the current selection");
-                groupAction->setShowLabels(false);
-
-                QVector<WidgetAction*> triggerActions;
-
-                const auto createPluginTypeActionsGroup = [datasets, &groupActions, groupAction, &triggerActions](const plugin::Type& type) -> void {
-                    for (auto pluginTriggerAction : mv::Application::core()->getPluginManager().getPluginTriggerActions(type, datasets)) {
-                        switch (type)
-                        {
-                            case plugin::Type::VIEW:        pluginTriggerAction->setText(QString("View %1").arg(pluginTriggerAction->text()));      break;
-                            case plugin::Type::ANALYSIS:    pluginTriggerAction->setText(QString("Analyze %1").arg(pluginTriggerAction->text()));   break;
-                            case plugin::Type::WRITER:      pluginTriggerAction->setText(QString("Export %1").arg(pluginTriggerAction->text()));    break;
-
-                            default:
-                                break;
-                        }
-
-                        pluginTriggerAction->setParent(groupAction);
-
-                        triggerActions << pluginTriggerAction;
-                    }
-                };
-
-                auto groupDataAction = new TriggerAction(groupAction, "Group data");
-
-                connect(groupDataAction, &TriggerAction::triggered, this, [datasets]() -> void {
-                    mv::data().groupDatasets(datasets);
-                });
-
-                triggerActions << groupDataAction;
-
-                //createPluginTypeActionsGroup(plugin::Type::VIEW);
-                //createPluginTypeActionsGroup(plugin::Type::ANALYSIS);
-                //createPluginTypeActionsGroup(plugin::Type::WRITER);
-
-                if (!triggerActions.isEmpty())
-                    groupActions << groupAction;
-
-                _groupsActionWidget->getFilteredActionsAction().setShowLabels(false);
-                */
-            }
 
             _groupsAction.setGroupActions(groupActions);
+
+            QCoreApplication::processEvents();
         }
     }
     catch (std::exception& e)

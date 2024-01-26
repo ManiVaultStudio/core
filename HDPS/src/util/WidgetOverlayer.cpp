@@ -17,7 +17,6 @@ namespace mv::util {
 
 WidgetOverlayer::WidgetOverlayer(QObject* parent, QWidget* sourceWidget, QWidget* targetWidget, float initialOpacity /*= 1.0f*/) :
     QObject(parent),
-    _widgetFader(this, sourceWidget, initialOpacity, 0.0f, 1.0f, 120, 60),
     _sourceWidget(sourceWidget),
     _targetWidget(targetWidget)
 {
@@ -63,9 +62,9 @@ bool WidgetOverlayer::eventFilter(QObject* target, QEvent* event)
     return QObject::eventFilter(target, event);
 }
 
-mv::util::WidgetFader& WidgetOverlayer::getWidgetFader()
-{
-    return _widgetFader;
-}
+//mv::util::WidgetFader& WidgetOverlayer::getWidgetFader()
+//{
+//    return _widgetFader;
+//}
 
 }

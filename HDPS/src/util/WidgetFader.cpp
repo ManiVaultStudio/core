@@ -41,6 +41,11 @@ WidgetFader::WidgetFader(QObject* parent, QWidget* targetWidget, float opacity /
     _opacityEffect.setOpacity(opacity);
 }
 
+void WidgetFader::setEnabled(bool enabled)
+{
+    _targetWidget->setGraphicsEffect(enabled ? &_opacityEffect : nullptr);
+}
+
 void WidgetFader::fadeIn(std::int32_t duration /*= -1*/)
 {
     setOpacity(_maximumOpacity, duration >= 0 ? duration : _fadeInDuration);
