@@ -7,16 +7,29 @@
 
 #include <QDebug>
 
+using namespace mv::gui;
+
 namespace mv {
 
 DataHierarchyFilterModel::DataHierarchyFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
-    _visibilityFilterAction(this, "Filter visibility", { "Visible", "Hidden" }, { "Visible" })
+    _visibilityFilterAction(this, "Filter visibility", { "Visible", "Hidden" }, { "Visible" }),
+    _groupFilterAction(this, "Filter group", { "Yes", "No" }),
+    _lockedFilterAction(this, "Filter locked", { "Yes", "No" }),
+    _derivedFilterAction(this, "Filter derived", { "Yes", "No" })
 {
     setDynamicSortFilter(true);
     setRecursiveFilteringEnabled(true);
 
+    _visibilityFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    _groupFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    _lockedFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    _derivedFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+
     connect(&_visibilityFilterAction, &gui::OptionsAction::selectedOptionsChanged, this, &DataHierarchyFilterModel::invalidate);
+    connect(&_groupFilterAction, &gui::OptionsAction::selectedOptionsChanged, this, &DataHierarchyFilterModel::invalidate);
+    connect(&_lockedFilterAction, &gui::OptionsAction::selectedOptionsChanged, this, &DataHierarchyFilterModel::invalidate);
+    connect(&_derivedFilterAction, &gui::OptionsAction::selectedOptionsChanged, this, &DataHierarchyFilterModel::invalidate);
 }
 
 bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -30,8 +43,7 @@ bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
 
     auto modelItem = static_cast<DataHierarchyModel::Item*>(sourceStandardItemModel->itemFromIndex(index));
 
-    std::int32_t numberOfActiveFilters = 0;
-    std::int32_t numberOfMatches = 0;
+    std::int32_t numberOfActiveFilters = 0, numberOfMatches = 0;
 
     if (_visibilityFilterAction.hasSelectedOptions()) {
         numberOfActiveFilters++;
@@ -40,6 +52,36 @@ bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
         const auto isVisible        = index.siblingAtColumn(static_cast<int>(DataHierarchyModel::Column::IsVisible)).data(Qt::EditRole).toBool();
 
         if ((selectedOptions.contains("Visible") && isVisible) || (selectedOptions.contains("Hidden") && !isVisible))
+            numberOfMatches++;
+    }
+
+    if (_groupFilterAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
+
+        const auto selectedOptions  = _visibilityFilterAction.getSelectedOptions();
+        const auto isGroup          = index.siblingAtColumn(static_cast<int>(DataHierarchyModel::Column::IsGroup)).data(Qt::EditRole).toBool();
+
+        if ((selectedOptions.contains("Yes") && isGroup) || (selectedOptions.contains("No") && !isGroup))
+            numberOfMatches++;
+    }
+
+    if (_lockedFilterAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
+
+        const auto selectedOptions  = _lockedFilterAction.getSelectedOptions();
+        const auto isLocked         = index.siblingAtColumn(static_cast<int>(DataHierarchyModel::Column::IsLocked)).data(Qt::EditRole).toBool();
+
+        if ((selectedOptions.contains("Yes") && isLocked) || (selectedOptions.contains("No") && !isLocked))
+            numberOfMatches++;
+    }
+
+    if (_derivedFilterAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
+
+        const auto selectedOptions  = _derivedFilterAction.getSelectedOptions();
+        const auto isDerived        = index.siblingAtColumn(static_cast<int>(DataHierarchyModel::Column::IsDerived)).data(Qt::EditRole).toBool();
+
+        if ((selectedOptions.contains("Yes") && isDerived) || (selectedOptions.contains("No") && !isDerived))
             numberOfMatches++;
     }
 

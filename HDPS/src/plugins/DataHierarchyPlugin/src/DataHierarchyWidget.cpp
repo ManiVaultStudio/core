@@ -183,7 +183,14 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
     _hierarchyWidget.setNoItemsDescription(QString("Right-click > Import to load data into %1").arg(Application::getName()));
 
-    _hierarchyWidget.getFilterGroupAction().addAction(&_filterModel.getVisibilityFilterAction());
+    auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
+
+    filterGroupAction.setPopupSizeHint(QSize(400, 0));
+
+    filterGroupAction.addAction(&_filterModel.getVisibilityFilterAction());
+    filterGroupAction.addAction(&_filterModel.getGroupFilterAction());
+    filterGroupAction.addAction(&_filterModel.getLockedFilterAction());
+    filterGroupAction.addAction(&_filterModel.getDerivedFilterAction());
 
     auto& settingsGroupAction = _hierarchyWidget.getSettingsGroupAction();
 
