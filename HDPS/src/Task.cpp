@@ -793,6 +793,8 @@ void Task::registerChildTask(Task* childTask)
 
         privateSetProgressDescription(progressDescription);
     });
+
+    updateProgress();
 }
 
 void Task::unregisterChildTask(Task* childTask)
@@ -1119,9 +1121,9 @@ void Task::privateSetStatus(const Status& status, bool recursive /*= false*/)
         default:
             break;
     }
-    
+
     updateProgress();
-    
+
     emit statusChanged(previousStatus, _status);
     emit isKillableChanged(isKillable());
 }

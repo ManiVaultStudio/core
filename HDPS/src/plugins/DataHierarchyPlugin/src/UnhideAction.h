@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
+// SPDX-License-Identifier: LGPL-3.0-or-later Group
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
@@ -6,8 +6,9 @@
 
 #include <actions/GroupAction.h>
 #include <actions/TreeAction.h>
+#include <actions/HorizontalGroupAction.h>
 
-#include <models/DataHierarchyListModel.h>
+#include <models/DataHierarchyTreeModel.h>
 #include <models/DataHierarchyFilterModel.h>
 
 /**
@@ -31,7 +32,10 @@ public:
     Q_INVOKABLE UnhideAction(QObject* parent, const QString& title);
 
 private:
-    mv::DataHierarchyListModel      _listModel;         /** Model containing data to be displayed in the list */
-    mv::DataHierarchyFilterModel    _filterModel;       /** Data hierarchy filter model */
-    mv::gui::TreeAction             _treeAction;        /** Tree action for displaying the model */
+    mv::DataHierarchyTreeModel      _treeModel;                 /** Model containing data to be displayed in the tree */
+    mv::DataHierarchyFilterModel    _filterModel;               /** Data hierarchy filter model */
+    mv::gui::TreeAction             _treeAction;                /** Tree action for displaying the model */
+    mv::gui::HorizontalGroupAction  _triggersGroupAction;       /** Group action for hiding selected/all */
+    mv::gui::TriggerAction          _selectedAction;            /** Trigger action to un-hide the selected dataset(s) */
+    mv::gui::TriggerAction          _allAction;                 /** Trigger action to un-hide all datasets */
 };

@@ -12,6 +12,8 @@
     #define ABSTRACT_DATA_HIERARCHY_MODEL_VERBOSE
 #endif
 
+using namespace mv::gui;
+
 namespace mv {
 
 using namespace util;
@@ -105,6 +107,39 @@ void AbstractDataHierarchyModel::NameItem::setData(const QVariant& value, int ro
         default:
             Item::setData(value, role);
     }
+}
+
+AbstractDataHierarchyModel::LocationItem::LocationItem(Dataset<DatasetImpl> dataset) :
+    Item(dataset, true)
+{
+    connect(getDataset().get(), &WidgetAction::locationChanged, this, [this]() -> void {
+        emitDataChanged();
+    });
+}
+
+QVariant AbstractDataHierarchyModel::LocationItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getDataset().isValid() ? getDataset()->getLocation() : "";
+
+        case Qt::ToolTipRole:
+            return QString("Dataset location: %1").arg(data(Qt::DisplayRole).toString());
+
+        case Qt::DecorationRole:
+        {
+            if (!getDataset().isValid())
+                break;
+
+            return getDataset()->getIcon();
+        }
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
 }
 
 AbstractDataHierarchyModel::DatasetIdItem::DatasetIdItem(Dataset<DatasetImpl> dataset) :
@@ -259,6 +294,9 @@ QVariant AbstractDataHierarchyModel::IsVisibleItem::data(int role /*= Qt::UserRo
         case Qt::DisplayRole:
             break;
 
+        case Qt::DecorationRole:
+            return Application::getIconFont("FontAwesome").getIcon(data(Qt::EditRole).toBool() ? "eye" : "eye-slash");
+
         case Qt::ToolTipRole:
             return QString("Dataset is visible: %1").arg(data(Qt::EditRole).toBool() ? "yes" : "no");
 
@@ -267,6 +305,22 @@ QVariant AbstractDataHierarchyModel::IsVisibleItem::data(int role /*= Qt::UserRo
     }
 
     return Item::data(role);
+}
+
+void AbstractDataHierarchyModel::IsVisibleItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
+{
+    switch (role) {
+        case Qt::EditRole:
+        {
+            if (getDataset().isValid())
+                getDataset()->getDataHierarchyItem().setVisible(value.toBool());
+
+            break;
+        }
+
+        default:
+            Item::setData(value, role);
+    }
 }
 
 AbstractDataHierarchyModel::IsGroupItem::IsGroupItem(Dataset<DatasetImpl> dataset) :
@@ -365,6 +419,7 @@ AbstractDataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
     QList<QStandardItem*>()
 {
     append(new NameItem(dataset));
+    append(new LocationItem(dataset));
     append(new DatasetIdItem(dataset));
     append(new SourceDatasetIdItem(dataset));
     append(new ProgressItem(dataset));
@@ -392,6 +447,9 @@ QVariant AbstractDataHierarchyModel::headerData(int section, Qt::Orientation ori
     {
         case Column::Name:
             return NameItem::headerData(orientation, role);
+
+        case Column::Location:
+            return LocationItem::headerData(orientation, role);
 
         case Column::DatasetId:
             return DatasetIdItem::headerData(orientation, role);

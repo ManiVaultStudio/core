@@ -31,6 +31,7 @@ public:
     /** Dataset columns */
     enum Column {
         Name,               /** Name of the dataset */
+        Location,           /** Location of the dataset */
         DatasetId,          /** Globally unique dataset identifier */
         SourceDatasetId,    /** Globally unique dataset identifier of the source dataset (if this dataset is derived) */
         Progress,           /** Task progress in percentage */
@@ -118,6 +119,42 @@ protected:
 
                 case Qt::ToolTipRole:
                     return "Name of the dataset";
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for showing the dataset location */
+    class LocationItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         */
+        LocationItem(Dataset<DatasetImpl> dataset);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Location";
+
+                case Qt::ToolTipRole:
+                    return "Location of the dataset";
             }
 
             return {};
@@ -317,6 +354,9 @@ protected:
          * @return Data for \p role in variant form
          */
         QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /** Set model data to \p value for \p role */
+        void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
 
         /**
          * Get header data for \p orientation and \p role

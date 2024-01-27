@@ -663,7 +663,6 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             auto& compressionTask           = projectSerializationTask.getCompressionTask();
 
             projectSerializationTask.startSave(filePath);
-            projectSerializationTask.setProgress(0.f);
             projectSerializationTask.setRunning();
 
             QCoreApplication::processEvents();

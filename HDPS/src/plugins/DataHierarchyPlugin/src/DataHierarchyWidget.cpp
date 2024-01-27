@@ -212,6 +212,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     treeView.setItemDelegate(new ItemDelegate(this));
 
+    treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::Location), true);
     treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::DatasetId), true);
     treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::SourceDatasetId), true);
     treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::GroupIndex), true);
