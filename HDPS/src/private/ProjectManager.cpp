@@ -663,6 +663,10 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             auto& compressionTask           = projectSerializationTask.getCompressionTask();
 
             projectSerializationTask.startSave(filePath);
+            projectSerializationTask.setProgress(0.f);
+            projectSerializationTask.setRunning();
+
+            QCoreApplication::processEvents();
 
             Archiver archiver;
 
@@ -677,7 +681,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             Application::setSerializationAborted(false);
 
             projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
-            
+
             _project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
             
             QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
