@@ -13,7 +13,7 @@ namespace mv::gui {
 WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* action) :
     WidgetActionViewWidget(parent, action),
     _layout(),
-    _toolButton()
+    _toolButton(action, this)
 {
     _layout.setContentsMargins(0, 0, 0, 0);
 
@@ -66,6 +66,12 @@ void WidgetActionCollapsedWidget::setAction(WidgetAction* action)
     connect(getAction(), &WidgetAction::visibleChanged, this, updateToolButtonVisibility);
 }
 
+WidgetActionCollapsedWidget::ToolButton::ToolButton(WidgetAction* action, QWidget* parent /*= nullptr*/) :
+    QToolButton(parent),
+    _action(action)
+{
+}
+
 void WidgetActionCollapsedWidget::ToolButton::paintEvent(QPaintEvent* paintEvent)
 {
     QToolButton::paintEvent(paintEvent);
@@ -84,6 +90,40 @@ void WidgetActionCollapsedWidget::ToolButton::paintEvent(QPaintEvent* paintEvent
     painter.setPen(QPen(QBrush(isEnabled() ? Qt::black : Qt::gray), 2.5, Qt::SolidLine, Qt::RoundCap));
     painter.setBrush(Qt::NoBrush);
     painter.drawPoint(center);
+
+    auto& badge = _action->getBadge();
+
+    if (badge.getEnabled()) {
+        const auto drawSize             = size();
+        const auto iconPixmapRectangle  = QRectF(QPoint(0, 0), drawSize);
+        const auto badgePixmap          = createNumberBadgeOverlayPixmap(badge.getNumber(), badge.getBackgroundColor(), badge.getForegroundColor());
+        const auto badgeRectangle       = QRectF(QPoint(0, 0), badgePixmap.size());
+        const auto scaledIconPixmapSize = badge.getScale() * drawSize;
+        const auto badgeAlignment       = badge.getAlignment();
+        const auto badgeScale           = badge.getScale();
+
+        QPoint origin;
+
+        if (badgeAlignment & Qt::AlignTop)
+            origin.setY(0);
+
+        if (badgeAlignment & Qt::AlignVCenter)
+            origin.setY((0.5 * drawSize.height()) - ((0.5 * badgeScale) * drawSize.height()));
+
+        if (badgeAlignment & Qt::AlignBottom)
+            origin.setY((1.0f - badgeScale) * drawSize.height());
+
+        if (badgeAlignment & Qt::AlignLeft)
+            origin.setX(0);
+
+        if (badgeAlignment & Qt::AlignHCenter)
+            origin.setX((0.5 * drawSize.width()) - ((0.5 * badgeScale) * drawSize.width()));
+
+        if (badgeAlignment & Qt::AlignRight)
+            origin.setX((1.0f - badgeScale) * drawSize.width());
+
+        painter.drawPixmap(QRectF(origin, scaledIconPixmapSize), badgePixmap, badgeRectangle);
+    }
 }
 
 }

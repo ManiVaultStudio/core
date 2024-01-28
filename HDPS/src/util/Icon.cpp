@@ -112,12 +112,10 @@ QIcon combineIconsHorizontally(const QVector<QIcon>& icons)
     return createIcon(pixmap);
 }
 
-QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, std::uint32_t iconMargin /*= 0*/, std::uint32_t badgeNumber /*= 0*/, const QColor& badgeBackgroundColor /*= Qt::red*/, const QColor& badgeForegroundColor /*= Qt::white*/, Qt::Alignment badgeAlignment /*= Qt::AlignTop | Qt::AlignRight*/, float badgeScale /*= 0.5f*/)
+QPixmap createNumberBadgeOverlayPixmap(std::uint32_t number /*= 0*/, const QColor& backgroundColor /*= Qt::red*/, const QColor& foregroundColor /*= Qt::white*/)
 {
-    const auto iconPixmapSize       = icon.availableSizes().first() + QSize(2 * iconMargin, 2 * iconMargin);
-    const auto iconPixmapRectangle  = QRectF(QPoint(0, 0), iconPixmapSize);
-    const auto badgeSize            = QSize(100, 100);
-    const auto badgeRectangle       = QRectF(QPoint(0, 0), badgeSize);
+    const auto badgeSize        = QSize(100, 100);
+    const auto badgeRectangle   = QRectF(QPoint(0, 0), badgeSize);
 
     QPixmap badgePixmap(badgeSize);
 
@@ -127,14 +125,29 @@ QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, std::uint32_t iconMarg
     {
         badgePixmapPainter.setRenderHint(QPainter::Antialiasing);
 
-        badgePixmapPainter.setPen(QPen(badgeBackgroundColor, 100, Qt::SolidLine, Qt::RoundCap));
+        badgePixmapPainter.setPen(QPen(backgroundColor, 100, Qt::SolidLine, Qt::RoundCap));
         badgePixmapPainter.drawPoint(QPoint(50, 50));
 
-        badgePixmapPainter.setPen(QPen(badgeForegroundColor));
-        badgePixmapPainter.setFont(QFont("Arial", badgeNumber >= 10 ? 36 : 60, 900));
-        badgePixmapPainter.drawText(badgeRectangle, QString::number(badgeNumber), QTextOption(Qt::AlignCenter));
+        badgePixmapPainter.setPen(QPen(foregroundColor));
+        badgePixmapPainter.setFont(QFont("Arial", number >= 10 ? 36 : 60, 900));
+        badgePixmapPainter.drawText(badgeRectangle, QString::number(number), QTextOption(Qt::AlignCenter));
     }
     badgePixmapPainter.end();
+
+    return badgePixmap;
+}
+
+QPixmap createNumberBadgeOverlayPixmap(const WidgetActionBadge& widgetActionBadge)
+{
+    return createNumberBadgeOverlayPixmap(widgetActionBadge.getNumber(), widgetActionBadge.getBackgroundColor(), widgetActionBadge.getForegroundColor());
+}
+
+QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, std::uint32_t iconMargin /*= 0*/, std::uint32_t badgeNumber /*= 0*/, const QColor& badgeBackgroundColor /*= Qt::red*/, const QColor& badgeForegroundColor /*= Qt::white*/, Qt::Alignment badgeAlignment /*= Qt::AlignTop | Qt::AlignRight*/, float badgeScale /*= 0.5f*/)
+{
+    const auto iconPixmapSize       = icon.availableSizes().first() + QSize(2 * iconMargin, 2 * iconMargin);
+    const auto iconPixmapRectangle  = QRectF(QPoint(0, 0), iconPixmapSize);
+    const auto badgePixmap          = createNumberBadgeOverlayPixmap(badgeNumber, badgeBackgroundColor, badgeForegroundColor);
+    const auto badgeRectangle       = QRectF(QPoint(0, 0), badgePixmap.size());
 
     QPixmap iconPixmap(iconPixmapSize);
 

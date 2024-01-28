@@ -959,8 +959,12 @@ void WidgetAction::refreshIcon()
 
 void WidgetAction::updateCustomStyle()
 {
-    // update custome style settings
     refreshIcon();
+}
+
+mv::gui::WidgetActionBadge& WidgetAction::getBadge()
+{
+    return _widgetActionBadge;
 }
 
 }

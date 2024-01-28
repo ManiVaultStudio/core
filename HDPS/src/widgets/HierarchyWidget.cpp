@@ -547,8 +547,6 @@ void HierarchyWidget::updateFilterModel()
     if (_filterModel == nullptr)
         return;
 
-    qDebug() << __FUNCTION__;
-
     const auto itemTypeNameLowered = _itemTypeName.toLower();
 
     _filterModel->setFilterKeyColumn(_filterColumnAction.getCurrentIndex());
