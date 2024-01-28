@@ -45,4 +45,17 @@ QIcon createPluginIcon(const QString& characters, const QColor& color);
  */
 QIcon combineIconsHorizontally(const QVector<QIcon>& icons);
 
+/**
+ * Overlays \p icon with a \p number badge in \p color and with \p alignment
+ * @param icon Icon to overlay
+ * @param iconMargin Icon margin
+ * @param number Integral to display in the badge
+ * @param badgeBackgroundColor Color of the badge background
+ * @param badgeForegroundColor Color of the badge foreground
+ * @param badgeAlignment Icon to overlay
+ * @param badgeScale Scale of the icon [0, 1]
+ * @return Icon with badge overlay
+ */
+QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, std::uint32_t iconMargin = 0, std::uint32_t badgeNumber = 0, const QColor& badgeBackgroundColor = Qt::red, const QColor& badgeForegroundColor = Qt::white, Qt::Alignment badgeAlignment = Qt::AlignTop | Qt::AlignRight, float badgeScale = 0.5f);
+
 }

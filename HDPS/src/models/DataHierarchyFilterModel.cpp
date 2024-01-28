@@ -41,7 +41,12 @@ bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
     if (!index.isValid())
         return true;
 
-    auto modelItem = static_cast<AbstractDataHierarchyModel::Item*>(sourceStandardItemModel->itemFromIndex(index));
+    if (filterRegularExpression().isValid()) {
+        const auto key = index.siblingAtColumn(static_cast<AbstractDataHierarchyModel::Column>(filterKeyColumn())).data(filterRole()).toString();
+
+        if (!key.contains(filterRegularExpression()))
+            return false;
+    }
 
     std::int32_t numberOfActiveFilters = 0, numberOfMatches = 0;
 

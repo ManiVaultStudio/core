@@ -11,6 +11,8 @@
 #include <models/DataHierarchyTreeModel.h>
 #include <models/DataHierarchyFilterModel.h>
 
+#include <QIcon>
+
 /**
  * Un-hide action class
  *
@@ -38,4 +40,5 @@ private:
     mv::gui::HorizontalGroupAction  _triggersGroupAction;       /** Group action for hiding selected/all */
     mv::gui::TriggerAction          _selectedAction;            /** Trigger action to un-hide the selected dataset(s) */
     mv::gui::TriggerAction          _allAction;                 /** Trigger action to un-hide all datasets */
+    QIcon                           _icon;                      /** Cached icon */
 };

@@ -6,6 +6,8 @@
 
 #include <Application.h>
 
+#include <util/Icon.h>
+
 #include <widgets/HierarchyWidget.h>
 
 #include <QHeaderView>
@@ -20,9 +22,9 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
     _treeAction(this, "List"),
     _triggersGroupAction(this, "Triggers"),
     _selectedAction(this, "Selected"),
-    _allAction(this, "All")
+    _allAction(this, "All"),
+    _icon(Application::getIconFont("FontAwesome").getIcon("eye"))
 {
-    setIconByName("eye-slash");
     setShowLabels(false);
     setPopupSizeHint(QSize(300, 300));
 
@@ -38,6 +40,7 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
         if (hierarchyWidget == nullptr)
             return;
 
+        hierarchyWidget->getToolbarAction().setVisible(false);
         hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
 
         auto treeView = widget->findChild<QTreeView*>("TreeView");
@@ -91,11 +94,13 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
         connect(treeView->selectionModel(), &QItemSelectionModel::selectionChanged, widget, updateTriggerActionsReadOnly);
 
         connect(&_selectedAction, &TriggerAction::triggered, widget, [this, treeView]() -> void {
-            for (auto rowIndex : treeView->selectionModel()->selectedRows()) {
-                const auto treeModelIndex = _filterModel.mapToSource(rowIndex.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)));
+            QModelIndexList persistentModelIndexes;
 
-                _treeModel.setData(treeModelIndex, true, Qt::EditRole);
-            }
+            for (auto rowIndex : treeView->selectionModel()->selectedRows())
+                persistentModelIndexes << _filterModel.mapToSource(rowIndex.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)));
+
+            for (auto persistentModelIndex : persistentModelIndexes)
+                _treeModel.setData(persistentModelIndex, true, Qt::EditRole);
         });
     });
 
@@ -105,4 +110,19 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
 
     _triggersGroupAction.addAction(&_selectedAction);
     _triggersGroupAction.addAction(&_allAction);
+
+    const auto updateReadOnlyAndIcon = [this]() -> void {
+        const auto mayUnhide    = _filterModel.rowCount() >= 1;
+        const auto color        = qApp->palette().highlight().color();
+
+        setEnabled(mayUnhide);
+        setIcon(mayUnhide ? createIconWithNumberBadgeOverlay(_icon, 0, 0, color, color) : _icon);
+    };
+
+    updateReadOnlyAndIcon();
+
+    connect(&_filterModel, &QSortFilterProxyModel::modelReset, this, updateReadOnlyAndIcon);
+    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, updateReadOnlyAndIcon);
+    connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, updateReadOnlyAndIcon);
+    connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, this, updateReadOnlyAndIcon);
 }

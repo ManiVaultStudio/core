@@ -18,7 +18,7 @@ WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, Widget
     _layout.setContentsMargins(0, 0, 0, 0);
 
     _toolButton.setPopupMode(QToolButton::InstantPopup);
-    _toolButton.setIconSize(QSize(12, 12));
+    _toolButton.setIconSize(QSize(16, 16));
     _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
 
     _layout.addWidget(&_toolButton);
@@ -41,15 +41,29 @@ void WidgetActionCollapsedWidget::setAction(WidgetAction* action)
     _toolButton.addAction(getAction());
 
     const auto updateToolButton = [this]() {
-        _toolButton.setEnabled(getAction()->isEnabled());
         _toolButton.setIcon(getAction()->icon());
         _toolButton.setToolTip(getAction()->toolTip());
-        _toolButton.setVisible(getAction()->isVisible());
     };
+
+    updateToolButton();
 
     connect(getAction(), &WidgetAction::changed, this, updateToolButton);
 
-    updateToolButton();
+    const auto updateToolButtonReadOnly = [this]() {
+        _toolButton.setEnabled(getAction()->isEnabled());
+    };
+
+    updateToolButtonReadOnly();
+
+    connect(getAction(), &WidgetAction::enabledChanged, this, updateToolButtonReadOnly);
+
+    const auto updateToolButtonVisibility = [this]() {
+        _toolButton.setVisible(getAction()->isVisible());
+    };
+
+    updateToolButtonVisibility();
+
+    connect(getAction(), &WidgetAction::visibleChanged, this, updateToolButtonVisibility);
 }
 
 void WidgetActionCollapsedWidget::ToolButton::paintEvent(QPaintEvent* paintEvent)
