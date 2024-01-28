@@ -21,8 +21,8 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
     _filterModel(this),
     _treeAction(this, "List"),
     _triggersGroupAction(this, "Triggers"),
-    _selectedAction(this, "Selected"),
-    _allAction(this, "All"),
+    _selectedAction(this, "Unhide Selected"),
+    _allAction(this, "Unhide All"),
     _icon(Application::getIconFont("FontAwesome").getIcon("eye"))
 {
     setShowLabels(false);
@@ -98,6 +98,16 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
 
             for (auto rowIndex : treeView->selectionModel()->selectedRows())
                 persistentModelIndexes << _filterModel.mapToSource(rowIndex.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)));
+
+            for (auto persistentModelIndex : persistentModelIndexes)
+                _treeModel.setData(persistentModelIndex, true, Qt::EditRole);
+        });
+
+        connect(&_allAction, &TriggerAction::triggered, widget, [this, treeView]() -> void {
+            QModelIndexList persistentModelIndexes;
+
+            for (int rowIndex = 0; rowIndex < _filterModel.rowCount(); rowIndex++)
+                persistentModelIndexes << _filterModel.mapToSource(_filterModel.index(rowIndex, static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)));
 
             for (auto persistentModelIndex : persistentModelIndexes)
                 _treeModel.setData(persistentModelIndex, true, Qt::EditRole);
