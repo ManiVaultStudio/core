@@ -18,7 +18,6 @@ WidgetActionBadge::WidgetActionBadge(QObject* parent, std::uint32_t number /*= 0
     _scale(scale),
     _customPixmap()
 {
-    //qApp->palette().highlight().color()
 }
 
 QPixmap WidgetActionBadge::getPixmap() const
