@@ -8,7 +8,8 @@
 
 namespace mv::gui {
 
-WidgetActionBadge::WidgetActionBadge(std::uint32_t number /*= 0*/, const QColor& backgroundColor /*= Qt::red*/, const QColor& foregroundColor /*= Qt::white*/, Qt::Alignment alignment /*= Qt::AlignTop | Qt::AlignRight*/, float scale /*= 0.5f*/) :
+WidgetActionBadge::WidgetActionBadge(QObject* parent, std::uint32_t number /*= 0*/, const QColor& backgroundColor /*= Qt::red*/, const QColor& foregroundColor /*= Qt::white*/, Qt::Alignment alignment /*= Qt::AlignTop | Qt::AlignRight*/, float scale /*= 0.5f*/) :
+    QObject(parent),
     _enabled(false),
     _number(number),
     _backgroundColor(backgroundColor),

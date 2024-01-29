@@ -51,7 +51,9 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _popupSizeHint(),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default)),
     _location(),
-    _namedIcon("")
+    _namedIcon(""),
+    _widgetConfigurationFunction(),
+    _badge(this)
 {
     Q_ASSERT(!title.isEmpty());
 
@@ -964,7 +966,7 @@ void WidgetAction::updateCustomStyle()
 
 mv::gui::WidgetActionBadge& WidgetAction::getBadge()
 {
-    return _widgetActionBadge;
+    return _badge;
 }
 
 }

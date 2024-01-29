@@ -827,7 +827,7 @@ private:
     QString                         _location;                      /** The path relative to the root in string format */
     QString                         _namedIcon;                     /** The name of a font awesome icon. When using this the widget can handle icon updates itself, instead of the containing view */
     WidgetConfigurationFunction     _widgetConfigurationFunction;   /** When set, this function is called right after any widget action widget is created (useful for manual manipulation of the generated widget) */
-    WidgetActionBadge               _widgetActionBadge;             /** Badge draws a circle with content in standard Qt::Alignment */
+    WidgetActionBadge               _badge;                         /** Badge configuration */
 
 protected:
     friend class mv::AbstractActionsManager;

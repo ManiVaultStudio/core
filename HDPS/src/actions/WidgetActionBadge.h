@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <QObject>
 #include <QColor>
 #include <QPixmap>
 
@@ -23,19 +24,21 @@ class WidgetAction;
  *
  * @author Thomas Kroes
  */
-class WidgetActionBadge
+class WidgetActionBadge : protected QObject
 {
+    Q_OBJECT
+
 public:
 
     /**
-     * Construct with badge \p number, \p backgroundColor, \p foregroundColor, \p alignment and \p badge scale
+     * Construct with pointer to \p parent object, badge \p number, \p backgroundColor, \p foregroundColor, \p alignment and \p badge scale
      * @param number Number displayed in the badge
      * @param backgroundColor Background color the badge
      * @param foregroundColor Foreground color the badge
      * @param alignment Alignment of the badge
      * @param scale Scale of the badge w.r.t. of its container
      */
-    WidgetActionBadge(std::uint32_t number = 0, const QColor& backgroundColor = Qt::red, const QColor& foregroundColor = Qt::white, Qt::Alignment alignment = Qt::AlignTop | Qt::AlignRight, float scale = 0.5f);
+    WidgetActionBadge(QObject* parent, std::uint32_t number = 0, const QColor& backgroundColor = Qt::red, const QColor& foregroundColor = Qt::white, Qt::Alignment alignment = Qt::AlignTop | Qt::AlignRight, float scale = 0.5f);
 
     /**
      * Get pixmap
