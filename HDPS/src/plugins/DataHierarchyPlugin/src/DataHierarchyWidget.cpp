@@ -7,6 +7,7 @@
 
 #include <Application.h>
 #include <Set.h>
+#include <Dataset.h>
 #include <PluginFactory.h>
 #include <actions/PluginTriggerAction.h>
 
@@ -40,7 +41,7 @@ public:
      * @param progressItem Pointer to progressItem
      * @param parent Pointer to parent widget
      */
-    ProgressItemDelegateEditorWidget(DataHierarchyModel::ProgressItem* progressItem, QWidget* parent) :
+    ProgressItemDelegateEditorWidget(AbstractDataHierarchyModel::ProgressItem* progressItem, QWidget* parent) :
         QWidget(parent),
         _progressItem(progressItem),
         _progressEditorWidget(nullptr)
@@ -84,8 +85,8 @@ private:
     }
 
 private:
-    DataHierarchyModel::ProgressItem*   _progressItem;              /** Reference to the progress item */
-    QWidget*                            _progressEditorWidget;      /** Pointer to created editor widget */
+    AbstractDataHierarchyModel::ProgressItem*   _progressItem;              /** Reference to the progress item */
+    QWidget*                                    _progressEditorWidget;      /** Pointer to created editor widget */
 };
 
 /**
@@ -121,11 +122,11 @@ public:
      * @return Pointer to widget if progress column, nullptr otherwise
      */
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
-        if (static_cast<DataHierarchyModel::Column>(index.column()) != DataHierarchyModel::Column::Progress)
+        if (static_cast<AbstractDataHierarchyModel::Column>(index.column()) != AbstractDataHierarchyModel::Column::Progress)
             return QStyledItemDelegate::createEditor(parent, option, index);
 
         const auto sourceModelIndex = _dataHierarchyWidget->getFilterModel().mapToSource(index);
-        const auto progressItem     = static_cast<DataHierarchyModel::ProgressItem*>(_dataHierarchyWidget->getModel().itemFromIndex(sourceModelIndex));
+        const auto progressItem     = static_cast<AbstractDataHierarchyModel::ProgressItem*>(_dataHierarchyWidget->getTreeModel().itemFromIndex(sourceModelIndex));
         
         return new ProgressItemDelegateEditorWidget(progressItem, parent);
     }
@@ -155,9 +156,9 @@ protected:
     {
         QStyledItemDelegate::initStyleOption(option, index);
 
-        auto item = static_cast<DataHierarchyModel::Item*>(_dataHierarchyWidget->getModel().itemFromIndex(_dataHierarchyWidget->getFilterModel().mapToSource(index)));
+        auto item = static_cast<AbstractDataHierarchyModel::Item*>(_dataHierarchyWidget->getTreeModel().itemFromIndex(_dataHierarchyWidget->getFilterModel().mapToSource(index)));
 
-        if (item->getDataset()->isLocked() || index.column() >= static_cast<int>(DataHierarchyModel::Column::IsGroup))
+        if (item->getDataset()->isLocked() || index.column() >= static_cast<int>(AbstractDataHierarchyModel::Column::IsGroup))
             option->state &= ~QStyle::State_Enabled;
     }
 
@@ -167,10 +168,11 @@ private:
 
 DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     QWidget(parent),
-    _model(this),
+    _treeModel(this),
     _filterModel(this),
-    _hierarchyWidget(this, "Dataset", _model, &_filterModel),
-    _resetAction(this, "Reset")
+    _hierarchyWidget(this, "Dataset", _treeModel, &_filterModel),
+    _resetAction(this, "Reset"),
+    _unhideAction(this, "Unhide")
 {
     auto layout = new QVBoxLayout();
 
@@ -183,7 +185,14 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
     _hierarchyWidget.setNoItemsDescription(QString("Right-click > Import to load data into %1").arg(Application::getName()));
 
-    _hierarchyWidget.getFilterGroupAction().addAction(&_filterModel.getFilterHiddenAction());
+    auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
+
+    filterGroupAction.setPopupSizeHint(QSize(300, 0));
+
+    filterGroupAction.addAction(&_filterModel.getVisibilityFilterAction());
+    filterGroupAction.addAction(&_filterModel.getGroupFilterAction());
+    filterGroupAction.addAction(&_filterModel.getLockedFilterAction());
+    filterGroupAction.addAction(&_filterModel.getDerivedFilterAction());
 
     auto& settingsGroupAction = _hierarchyWidget.getSettingsGroupAction();
 
@@ -195,34 +204,39 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     settingsGroupAction.addAction(&groupingAction);
     settingsGroupAction.addAction(&_resetAction);
 
+    _unhideAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+
+    _hierarchyWidget.getToolbarAction().addAction(&_unhideAction);
+
     auto& treeView = _hierarchyWidget.getTreeView();
 
     treeView.setItemDelegate(new ItemDelegate(this));
 
-    treeView.setColumnHidden(static_cast<int>(DataHierarchyModel::Column::DatasetId), true);
-    treeView.setColumnHidden(static_cast<int>(DataHierarchyModel::Column::SourceDatasetId), true);
-    treeView.setColumnHidden(static_cast<int>(DataHierarchyModel::Column::GroupIndex), true);
-    treeView.setColumnHidden(static_cast<int>(DataHierarchyModel::Column::IsVisible), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::Location), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::DatasetId), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::SourceDatasetId), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::GroupIndex), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible), true);
 
     auto treeViewHeader = treeView.header();
 
     treeViewHeader->setStretchLastSection(false);
     treeViewHeader->setMinimumSectionSize(18);
 
-    treeViewHeader->resizeSection(DataHierarchyModel::Column::Name, 180);
-    treeViewHeader->resizeSection(DataHierarchyModel::Column::GroupIndex, 60);
-    treeViewHeader->resizeSection(DataHierarchyModel::Column::IsVisible, treeViewHeader->minimumSectionSize());
-    treeViewHeader->resizeSection(DataHierarchyModel::Column::IsGroup, treeViewHeader->minimumSectionSize());
-    treeViewHeader->resizeSection(DataHierarchyModel::Column::IsLocked, treeViewHeader->minimumSectionSize());
-    treeViewHeader->resizeSection(DataHierarchyModel::Column::IsDerived, treeViewHeader->minimumSectionSize());
+    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::Name, 180);
+    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::GroupIndex, 60);
+    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsVisible, treeViewHeader->minimumSectionSize());
+    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsGroup, treeViewHeader->minimumSectionSize());
+    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsLocked, treeViewHeader->minimumSectionSize());
+    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsDerived, treeViewHeader->minimumSectionSize());
 
-    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::Name, QHeaderView::Interactive);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::DatasetId, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::GroupIndex, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::Progress, QHeaderView::Stretch);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsVisible, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsGroup, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(DataHierarchyModel::Column::IsLocked, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::Name, QHeaderView::Interactive);
+    treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::DatasetId, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::GroupIndex, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::Progress, QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::IsVisible, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::IsGroup, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::IsLocked, QHeaderView::Fixed);
 
     groupingAction.setIconByName("object-group");
     groupingAction.setToolTip("Enable/disable dataset grouping");
@@ -233,8 +247,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, [this, &treeView](const QModelIndex& parent, int first, int last) -> void {
         for (int rowIndex = first; rowIndex <= last; rowIndex++) {
-            const auto progressFilterModelIndex = _filterModel.index(rowIndex, static_cast<int>(DataHierarchyModel::Column::Progress), parent);
-            const auto nameFilterModelIndex     = _filterModel.index(rowIndex, static_cast<int>(DataHierarchyModel::Column::Name), parent);
+            const auto progressFilterModelIndex = _filterModel.index(rowIndex, static_cast<int>(AbstractDataHierarchyModel::Column::Progress), parent);
+            const auto nameFilterModelIndex     = _filterModel.index(rowIndex, static_cast<int>(AbstractDataHierarchyModel::Column::Name), parent);
             const auto nameModelIndex           = _filterModel.mapToSource(nameFilterModelIndex);
             const auto persistentNameModelIndex = QPersistentModelIndex(nameModelIndex);
 
@@ -242,7 +256,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
             updateDataHierarchyItemExpansion(nameModelIndex);
 
-            auto item = _model.getItem<DataHierarchyModel::Item>(persistentNameModelIndex);
+            auto item = _treeModel.getItem<AbstractDataHierarchyModel::Item>(persistentNameModelIndex);
 
             connect(&item->getDataset()->getDataHierarchyItem(), &DataHierarchyItem::expandedChanged, this, [this, persistentNameModelIndex]() -> void {
                 updateDataHierarchyItemExpansion(persistentNameModelIndex);
@@ -263,7 +277,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         auto modelIndex = _filterModel.mapToSource(filterModelIndex);
 
         if (modelIndex.isValid())
-            _model.getItem(modelIndex)->getDataset()->getDataHierarchyItem().setExpanded(true);
+            _treeModel.getItem(modelIndex)->getDataset()->getDataHierarchyItem().setExpanded(true);
     });
 
     connect(&treeView, &QTreeView::collapsed, this, [this](const QModelIndex& filterModelIndex) -> void {
@@ -273,12 +287,12 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         auto modelIndex = _filterModel.mapToSource(filterModelIndex);
 
         if (modelIndex.isValid())
-            _model.getItem(modelIndex)->getDataset()->getDataHierarchyItem().setExpanded(false);
+            _treeModel.getItem(modelIndex)->getDataset()->getDataHierarchyItem().setExpanded(false);
     });
 
     connect(&_filterModel, &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
         for (int rowIndex = first; rowIndex <= last; rowIndex++)
-            _hierarchyWidget.getTreeView().closePersistentEditor(_filterModel.index(rowIndex, static_cast<int>(DataHierarchyModel::Column::Progress), parent));
+            _hierarchyWidget.getTreeView().closePersistentEditor(_filterModel.index(rowIndex, static_cast<int>(AbstractDataHierarchyModel::Column::Progress), parent));
 
         QCoreApplication::processEvents();
     });
@@ -292,7 +306,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
                     if (!deselectedSourceModelIndex.isValid())
                         throw std::runtime_error("Deselected source model index is not valid");
 
-                    auto item = _model.getItem(deselectedSourceModelIndex);
+                    auto item = _treeModel.getItem(deselectedSourceModelIndex);
 
                     if (!item)
                         throw std::runtime_error("Item not found in the data hierarchy model");
@@ -317,7 +331,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
                     if (!selectedSourceModelIndex.isValid())
                         throw std::runtime_error("Selected source model index is not valid");
 
-                    auto item = _model.getItem(selectedSourceModelIndex);
+                    auto item = _treeModel.getItem(selectedSourceModelIndex);
 
                     if (!item)
                         throw std::runtime_error("Item not found in the data hierarchy model");
@@ -341,7 +355,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
             Datasets datasets;
 
             for (const auto& selectedRow : _hierarchyWidget.getSelectedRows())
-                datasets << _model.getItem(selectedRow)->getDataset();
+                datasets << _treeModel.getItem(selectedRow)->getDataset();
 
             QScopedPointer<DataHierarchyWidgetContextMenu> datasetsContextMenu(new DataHierarchyWidgetContextMenu(this, datasets));
 
@@ -361,7 +375,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
 QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImpl>& dataset)
 {
-    const auto modelIndices = _model.match(_model.index(0, 1), Qt::DisplayRole, dataset->getId(), 1, Qt::MatchFlag::MatchRecursive);
+    const auto modelIndices = _treeModel.match(_treeModel.index(0, 1), Qt::DisplayRole, dataset->getId(), 1, Qt::MatchFlag::MatchRecursive);
 
     if (modelIndices.isEmpty())
         throw new std::runtime_error(QString("'%1' not found in the data hierarchy model").arg(dataset->text()).toLatin1());
@@ -378,7 +392,7 @@ void DataHierarchyWidget::updateColumnsVisibility()
 {
     auto& treeView = _hierarchyWidget.getTreeView();
 
-    treeView.setColumnHidden(DataHierarchyModel::Column::GroupIndex, !mv::data().getDatasetGroupingAction().isChecked());
+    treeView.setColumnHidden(AbstractDataHierarchyModel::Column::GroupIndex, !mv::data().getDatasetGroupingAction().isChecked());
 }
 
 void DataHierarchyWidget::updateDataHierarchyItemExpansion(const QModelIndex& modelIndex /*= QModelIndex()*/)
@@ -388,7 +402,7 @@ void DataHierarchyWidget::updateDataHierarchyItemExpansion(const QModelIndex& mo
         if (!modelIndex.isValid())
             throw std::runtime_error("Supplied model index is invalid");
 
-        auto modelItem = _model.getItem(modelIndex);
+        auto modelItem = _treeModel.getItem(modelIndex);
 
         if (!modelItem)
             throw std::runtime_error("Model item not found");
@@ -431,7 +445,7 @@ void DataHierarchyWidget::initializeChildModelItemsExpansion(QModelIndex parentF
 
             updateDataHierarchyItemExpansion(childModelIndex);
 
-            auto childItem = _model.getItem<DataHierarchyModel::Item>(persistentChildModelIndex);
+            auto childItem = _treeModel.getItem<AbstractDataHierarchyModel::Item>(persistentChildModelIndex);
 
             if (childItem == nullptr)
                 throw std::runtime_error("Unable to get child model item for child model index");
@@ -444,7 +458,7 @@ void DataHierarchyWidget::initializeChildModelItemsExpansion(QModelIndex parentF
             const auto& datasetId = dataset->getId();
 
             connect(&childItem->getDataset()->getDataHierarchyItem(), &DataHierarchyItem::expandedChanged, this, [this, datasetId]() -> void {
-                const auto matches = _model.match(_model.index(0, static_cast<int>(DataHierarchyModel::Column::DatasetId)), Qt::EditRole, datasetId, -1);
+                const auto matches = _treeModel.match(_treeModel.index(0, static_cast<int>(AbstractDataHierarchyModel::Column::DatasetId)), Qt::EditRole, datasetId, -1);
 
                 if (matches.isEmpty())
                     return;
@@ -452,7 +466,7 @@ void DataHierarchyWidget::initializeChildModelItemsExpansion(QModelIndex parentF
                 updateDataHierarchyItemExpansion(matches.first());
             });
 
-            if (_model.hasChildren(childModelIndex))
+            if (_treeModel.hasChildren(childModelIndex))
                 initializeChildModelItemsExpansion(childFilterModelIndex);
         }
     }
@@ -471,7 +485,7 @@ void DataHierarchyWidget::initializeSelection()
         QItemSelection itemSelection;
 
         for (auto selectedItem : dataHierarchy().getSelectedItems()) {
-            const auto matches = _model.match(_model.index(0, static_cast<int>(DataHierarchyModel::Column::DatasetId)), Qt::EditRole, selectedItem->getDataset()->getId(), -1, Qt::MatchRecursive | Qt::MatchExactly);
+            const auto matches = _treeModel.match(_treeModel.index(0, static_cast<int>(AbstractDataHierarchyModel::Column::DatasetId)), Qt::EditRole, selectedItem->getDataset()->getId(), -1, Qt::MatchRecursive | Qt::MatchExactly);
 
             if (matches.isEmpty())
                 return;

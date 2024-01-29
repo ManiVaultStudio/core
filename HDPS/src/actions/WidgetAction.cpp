@@ -51,7 +51,9 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _popupSizeHint(),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default)),
     _location(),
-    _namedIcon("")
+    _namedIcon(""),
+    _widgetConfigurationFunction(),
+    _badge(this)
 {
     Q_ASSERT(!title.isEmpty());
 
@@ -67,7 +69,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
         if (projects().hasProject())
             setStudioMode(projects().getCurrentProject()->getStudioModeAction().isChecked(), false);
     }
-    
+
     connect(qApp, &QApplication::paletteChanged, this, &WidgetAction::updateCustomStyle);
 }
 
@@ -959,8 +961,12 @@ void WidgetAction::refreshIcon()
 
 void WidgetAction::updateCustomStyle()
 {
-    // update custome style settings
     refreshIcon();
+}
+
+mv::gui::WidgetActionBadge& WidgetAction::getBadge()
+{
+    return _badge;
 }
 
 }

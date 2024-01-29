@@ -120,35 +120,12 @@ bool TasksPopupWidget::eventFilter(QObject* target, QEvent* event)
 
 void TasksPopupWidget::updateIcon()
 {
-    QPixmap iconPixmap(iconPixmapSize);
-
-    iconPixmap.fill(Qt::transparent);
-
-    QPainter painter(&iconPixmap);
-
-    const auto scaledTasksIconPixmapSize = iconPixmapSize - 0.25 * iconPixmapSize;
-
-    painter.drawPixmap(QPoint(0, 0), _tasksIconPixmap.scaled(scaledTasksIconPixmapSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-
     const auto numberOfTasks = _tasksStatusBarAction.getTasksFilterModel().rowCount();
 
-    const auto badgeRadius = 43.0;
-
-    painter.setPen(QPen(QColor(numberOfTasks == 0 ? 0 : 255, 0, 0, 255), badgeRadius, Qt::SolidLine, Qt::RoundCap));
-
-    const auto center = QPoint(iconPixmapSize.width() - (badgeRadius / 2), iconPixmapSize.height() - (badgeRadius / 2));
-
-    painter.drawPoint(center);
-
-    painter.setPen(QPen(Qt::white));
-    painter.setFont(QFont("Arial", numberOfTasks >= 10 ? 18 : 24, 900));
-
-    const auto textRectangleSize = QSize(32, 32);
-    const auto textRectangle = QRectF(center - QPointF(textRectangleSize.width() / 2.f, textRectangleSize.height() / 2.f), textRectangleSize);
-
-    painter.drawText(textRectangle, QString::number(numberOfTasks), QTextOption(Qt::AlignCenter));
-
-    _tasksStatusBarAction.setIcon(createIcon(iconPixmap));
+    if (numberOfTasks >= 1)
+        _tasksStatusBarAction.setIcon(createIconWithNumberBadgeOverlay(Application::getIconFont("FontAwesome").getIcon("tasks"), 4, numberOfTasks, QColor(255, 0, 0, 255), Qt::white, Qt::AlignTop | Qt::AlignRight, 0.7f));
+    else
+        _tasksStatusBarAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
 }
 
 void TasksPopupWidget::synchronizeWithAnchorWidget()

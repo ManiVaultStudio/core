@@ -210,6 +210,7 @@ QMenu* DataHierarchyWidgetContextMenu::getHideMenu()
     auto hideMenu = new QMenu("Hide");
 
     hideMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("eye-slash"));
+    hideMenu->setEnabled(!_selectedDatasets.isEmpty());
 
     const auto numberOfVisibleItems = std::count_if(_allDatasets.begin(), _allDatasets.end(), [](auto& dataset) -> bool {
         return dataset->getDataHierarchyItem().isVisible();
@@ -225,10 +226,10 @@ QMenu* DataHierarchyWidgetContextMenu::getHideMenu()
 
     connect(hideAllAction, &QAction::triggered, this, [this]() -> void {
         for (auto& dataset : _allDatasets)
-            dataset->getDataHierarchyItem();
+            dataset->getDataHierarchyItem().setVisible(false);
     });
 
-    hideAllAction->setVisible(_selectedDatasets.isEmpty() && numberOfVisibleItems < _allDatasets.size());
+    hideAllAction->setEnabled(_selectedDatasets.isEmpty() && (numberOfVisibleItems >= 1));
 
     auto hideSelectedAction = new QAction("Selected");
 
@@ -283,7 +284,7 @@ QMenu* DataHierarchyWidgetContextMenu::getUnhideMenu()
             candidateDatasetToUnhide->getDataHierarchyItem().setVisible(true);
     });
 
-    unhideAllAction->setEnabled(numberOfHiddenItems < _allDatasets.size());
+    unhideAllAction->setEnabled(numberOfHiddenItems >= 1);
 
     unhideMenu->addAction(unhideAllAction);
 

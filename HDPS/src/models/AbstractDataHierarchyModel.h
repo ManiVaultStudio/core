@@ -15,16 +15,14 @@
 
 namespace mv {
 
-class DataHierarchyItem;
-
 /**
- * Data hierarchy model class
+ * Abstract data hierarchy model class
  *
- * Standard item model for managing the data hierarchy
+ * Abstract standard item model class for managing the data hierarchy
  *
  * @author Thomas Kroes
  */
-class DataHierarchyModel final : public QStandardItemModel
+class AbstractDataHierarchyModel : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -33,6 +31,7 @@ public:
     /** Dataset columns */
     enum Column {
         Name,               /** Name of the dataset */
+        Location,           /** Location of the dataset */
         DatasetId,          /** Globally unique dataset identifier */
         SourceDatasetId,    /** Globally unique dataset identifier of the source dataset (if this dataset is derived) */
         Progress,           /** Task progress in percentage */
@@ -120,6 +119,42 @@ protected:
 
                 case Qt::ToolTipRole:
                     return "Name of the dataset";
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for showing the dataset location */
+    class LocationItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         */
+        LocationItem(Dataset<DatasetImpl> dataset);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Location";
+
+                case Qt::ToolTipRole:
+                    return "Location of the dataset";
             }
 
             return {};
@@ -320,6 +355,9 @@ protected:
          */
         QVariant data(int role = Qt::UserRole + 1) const override;
 
+        /** Set model data to \p value for \p role */
+        void setData(const QVariant& value, int role /* = Qt::UserRole + 1 */) override;
+
         /**
          * Get header data for \p orientation and \p role
          * @param orientation Horizontal/vertical
@@ -468,13 +506,13 @@ public:
      * Construct with \p parent object
      * @param parent Pointer to parent object
      */
-    explicit DataHierarchyModel(QObject* parent = nullptr);
+    explicit AbstractDataHierarchyModel(QObject* parent = nullptr);
 
     /** Get supported drag actions */
     Qt::DropActions supportedDragActions() const override;
 
     /**
-     * Get header data
+     * Get header data for \p section, \p orientation and display \p role
      * @param section Section
      * @param orientation Orientation
      * @param role Data role
@@ -483,8 +521,9 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     /**
-     * For the given item indices return the MIME data intended to pass information
-     * in the case of e.g. dragging or dropping data.
+     * Get MIME data for supplied \p indexes
+     * @param indexes Index list to get the MIME data for
+     * @return Pointer to MIME data
      */
     QMimeData* mimeData(const QModelIndexList& indexes) const override;
 
@@ -498,28 +537,17 @@ public:
         return dynamic_cast<ItemType*>(itemFromIndex(modelIndex));
     }
 
-    /** Populate the model with data hierarchy items from the data hierarchy manager */
-    void populateFromDataHierarchyManager();
-
-private:
+    /**
+     * Hides item with \p index and its descendants
+     * @param index Index of the item to hide (column index must be zero)
+     */
+    void hideItem(const QModelIndex& index);
 
     /**
-     * Add \p dataHierarchyItem to the model
-     * @param dataHierarchyItem Pointer to the data hierarchy item to add
+     * Un-hides item with \p index
+     * @param index Index of the item to un-hide (column index must be zero)
      */
-    void addDataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem);
-
-    /**
-     * Remove \p dataHierarchyItem from the model
-     * @param dataHierarchyItem Pointer to the data hierarchy item to remove
-     */
-     void removeDataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem);
-
-     /**
-     * Re-parent \p dataHierarchyItem
-     * @param dataHierarchyItem Pointer to the data hierarchy item of which the parent changed
-     */
-     void reparentDataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem);
+    void unhideItem(const QModelIndex& index);
 };
 
 }

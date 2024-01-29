@@ -5,6 +5,7 @@
 #pragma once
 
 #include "WidgetActionWidget.h"
+#include "WidgetActionBadge.h"
 
 #include "util/Serializable.h"
 
@@ -694,6 +695,14 @@ private:
     /** refresh the icon when a icon font is used */
     void updateCustomStyle();
     
+public: // Badge
+
+    /**
+     * Get badge
+     * @return Reference to the widget action badge
+     */
+    WidgetActionBadge& getBadge();
+
 signals:
 
     /**
@@ -818,6 +827,7 @@ private:
     QString                         _location;                      /** The path relative to the root in string format */
     QString                         _namedIcon;                     /** The name of a font awesome icon. When using this the widget can handle icon updates itself, instead of the containing view */
     WidgetConfigurationFunction     _widgetConfigurationFunction;   /** When set, this function is called right after any widget action widget is created (useful for manual manipulation of the generated widget) */
+    WidgetActionBadge               _badge;                         /** Badge configuration */
 
 protected:
     friend class mv::AbstractActionsManager;

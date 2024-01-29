@@ -31,6 +31,11 @@ set(PLUGIN_MOC_HEADERS
     src/DataHierarchyPlugin.h
 )
 
+set(ACTIONS
+    src/UnhideAction.h
+    src/UnhideAction.cpp
+)
+
 set(WIDGETS
     src/DataHierarchyWidget.h
     src/DataHierarchyWidget.cpp
@@ -44,11 +49,13 @@ set(AUX
 
 set(DATAHIERARCHY_SOURCES
     ${PLUGIN}
+    ${ACTIONS}
     ${WIDGETS}
     ${AUX}
 )
 
 source_group(Plugin FILES ${PLUGIN})
+source_group(Actions FILES ${ACTIONS})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
 

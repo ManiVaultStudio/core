@@ -120,8 +120,9 @@ RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidge
         connect(&_filterModel, &QAbstractItemModel::rowsRemoved, widget, resizeSections);
         connect(&_filterModel, &QAbstractItemModel::layoutChanged, widget, resizeSections);
     });
+
     _selectDatasetsGroupAction.addAction(&_selectAllDatasetsAction);
-    
+
     _bottomHorizontalGroupAction.setShowLabels(false);
 
     _bottomHorizontalGroupAction.addAction(&_showAgainAction);

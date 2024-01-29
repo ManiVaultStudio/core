@@ -497,10 +497,11 @@ void HierarchyWidget::updateOverlayWidget()
     else {
         if (_model.rowCount() >= 1) {
             if (_filterModel->rowCount() == 0) {
-                _infoOverlayWidget->set(windowIcon(), QString("No %1s found").arg(_itemTypeName.toLower()), "Try changing the filter parameters...");
+                _infoOverlayWidget->set(windowIcon(), QString("No %1s found").arg(_itemTypeName.toLower()), (_toolbarAction.isVisible() ? "Try changing the filter parameters..." : ""));
                 widgetFader.fadeIn();
             }
             else {
+                _infoOverlayWidget->set(windowIcon(), QString("No %1s found").arg(_itemTypeName.toLower()), "");
                 widgetFader.fadeOut();
             }
         }

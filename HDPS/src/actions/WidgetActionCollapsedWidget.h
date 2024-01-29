@@ -29,10 +29,20 @@ protected:
     public:
 
         /**
+         * Create with pointer to owning \p action and \p parent widget
+         * @param action Pointer to owning action
+         * @param parent Pointer to parent widget
+         */
+        ToolButton(WidgetAction* action, QWidget* parent = nullptr);
+
+        /**
          * Paint event
          * @param paintEvent Pointer to paint event
          */
         void paintEvent(QPaintEvent* paintEvent);
+
+    private:
+        WidgetAction*   _action;    /** Pointer to owning action */
     };
 
 public:
