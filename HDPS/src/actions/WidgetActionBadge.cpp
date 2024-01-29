@@ -21,6 +21,14 @@ WidgetActionBadge::WidgetActionBadge(QObject* parent, std::uint32_t number /*= 0
     //qApp->palette().highlight().color()
 }
 
+QPixmap WidgetActionBadge::getPixmap() const
+{
+    if (!_customPixmap.isNull())
+        return _customPixmap;
+
+    return createNumberBadgeOverlayPixmap(_number, _backgroundColor, _foregroundColor);
+}
+
 bool WidgetActionBadge::getEnabled() const
 {
     return _enabled;
@@ -115,11 +123,6 @@ void WidgetActionBadge::setScale(float scale)
 
     emit scaleChanged(_scale);
     emit changed();
-}
-
-QPixmap WidgetActionBadge::getPixmap() const
-{
-    return createNumberBadgeOverlayPixmap(_number, _backgroundColor, _foregroundColor);
 }
 
 QPixmap WidgetActionBadge::getCustomPixmap() const
