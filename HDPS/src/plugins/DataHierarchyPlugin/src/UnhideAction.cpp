@@ -27,7 +27,7 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
 {
     setIcon(_icon);
     setShowLabels(false);
-    setPopupSizeHint(QSize(400, 600));
+    setPopupSizeHint(QSize(500, 300));
     getBadge().setScale(0.4f);
 
     _treeAction.initialize(&_listModel, &_listFilterModel, "Hidden dataset");
