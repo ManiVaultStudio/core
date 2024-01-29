@@ -536,6 +536,18 @@ public:
     ItemType* getItem(const QModelIndex& modelIndex) {
         return dynamic_cast<ItemType*>(itemFromIndex(modelIndex));
     }
+
+    /**
+     * Hides item with \p index and its descendants
+     * @param index Index of the item to hide (column index must be zero)
+     */
+    void hideItem(const QModelIndex& index);
+
+    /**
+     * Un-hides item with \p index
+     * @param index Index of the item to un-hide (column index must be zero)
+     */
+    void unhideItem(const QModelIndex& index);
 };
 
 }

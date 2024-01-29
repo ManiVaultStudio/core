@@ -122,7 +122,7 @@ QVariant AbstractDataHierarchyModel::LocationItem::data(int role /*= Qt::UserRol
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
-            return getDataset().isValid() ? getDataset()->getLocation() : "";
+            return getDataset().isValid() ? getDataset()->getDataHierarchyItem().getLocation(true) : "";
 
         case Qt::ToolTipRole:
             return QString("Dataset location: %1").arg(data(Qt::DisplayRole).toString());
@@ -491,6 +491,22 @@ QMimeData* AbstractDataHierarchyModel::mimeData(const QModelIndexList& indexes) 
             datasets << static_cast<Item*>(itemFromIndex(index))->getDataset();
 
     return new DatasetsMimeData(datasets);
+}
+
+void AbstractDataHierarchyModel::hideItem(const QModelIndex& index)
+{
+    setData(index.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)), false, Qt::EditRole);
+
+    for (int rowIndex = 0; rowIndex < rowCount(index.parent().siblingAtColumn(0)); rowIndex++)
+        hideItem(this->index(rowIndex, 0, index.parent()));
+}
+
+void AbstractDataHierarchyModel::unhideItem(const QModelIndex& index)
+{
+    setData(index.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)), true, Qt::EditRole);
+
+    if (index.parent().isValid())
+        unhideItem(index.parent());
 }
 
 }

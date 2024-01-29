@@ -10,8 +10,6 @@
 
 namespace mv::gui {
 
-class WidgetAction;
-
 /**
  * Widget action badge class
  * 
@@ -24,7 +22,7 @@ class WidgetAction;
  *
  * @author Thomas Kroes
  */
-class WidgetActionBadge : protected QObject
+class WidgetActionBadge : public QObject
 {
     Q_OBJECT
 

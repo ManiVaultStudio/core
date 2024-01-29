@@ -69,7 +69,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
         if (projects().hasProject())
             setStudioMode(projects().getCurrentProject()->getStudioModeAction().isChecked(), false);
     }
-    
+
     connect(qApp, &QApplication::paletteChanged, this, &WidgetAction::updateCustomStyle);
 }
 

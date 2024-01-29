@@ -9,6 +9,7 @@
 #include <actions/HorizontalGroupAction.h>
 
 #include <models/DataHierarchyTreeModel.h>
+#include <models/DataHierarchyListModel.h>
 #include <models/DataHierarchyFilterModel.h>
 
 #include <QIcon>
@@ -34,9 +35,9 @@ public:
     Q_INVOKABLE UnhideAction(QObject* parent, const QString& title);
 
 private:
-    mv::DataHierarchyTreeModel      _treeModel;                 /** Model containing data to be displayed in the tree */
-    mv::DataHierarchyFilterModel    _filterModel;               /** Data hierarchy filter model */
     mv::gui::TreeAction             _treeAction;                /** Tree action for displaying the model */
+    mv::DataHierarchyListModel      _listModel;                 /** List model of the data hierarchy */
+    mv::DataHierarchyFilterModel    _listFilterModel;           /** Data hierarchy list filter model */
     mv::gui::HorizontalGroupAction  _triggersGroupAction;       /** Group action for hiding selected/all */
     mv::gui::TriggerAction          _selectedAction;            /** Trigger action to un-hide the selected dataset(s) */
     mv::gui::TriggerAction          _allAction;                 /** Trigger action to un-hide all datasets */

@@ -122,17 +122,25 @@ QPixmap createNumberBadgeOverlayPixmap(std::uint32_t number /*= 0*/, const QColo
     badgePixmap.fill(Qt::transparent);
 
     QPainter badgePixmapPainter(&badgePixmap);
-    {
-        badgePixmapPainter.setRenderHint(QPainter::Antialiasing);
 
-        badgePixmapPainter.setPen(QPen(backgroundColor, 100, Qt::SolidLine, Qt::RoundCap));
-        badgePixmapPainter.drawPoint(QPoint(50, 50));
+    badgePixmapPainter.setRenderHint(QPainter::Antialiasing);
 
-        badgePixmapPainter.setPen(QPen(foregroundColor));
-        badgePixmapPainter.setFont(QFont("Arial", number >= 10 ? 36 : 60, 900));
+    badgePixmapPainter.setPen(QPen(backgroundColor, 100, Qt::SolidLine, Qt::RoundCap));
+    badgePixmapPainter.drawPoint(QPoint(50, 50));
+
+    badgePixmapPainter.setPen(QPen(foregroundColor));
+
+    if (number < 10) {
+        badgePixmapPainter.setFont(QFont("Arial", 56, 900));
         badgePixmapPainter.drawText(badgeRectangle, QString::number(number), QTextOption(Qt::AlignCenter));
     }
-    badgePixmapPainter.end();
+    else {
+        badgePixmapPainter.setPen(QPen(foregroundColor, 15, Qt::SolidLine, Qt::RoundCap));
+
+        badgePixmapPainter.drawPoint(QPoint(25, 50));
+        badgePixmapPainter.drawPoint(QPoint(50, 50));
+        badgePixmapPainter.drawPoint(QPoint(75, 50));
+    }
 
     return badgePixmap;
 }

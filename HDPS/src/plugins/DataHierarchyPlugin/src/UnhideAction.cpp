@@ -17,22 +17,23 @@ using namespace mv::gui;
 
 UnhideAction::UnhideAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),
-    _treeModel(this),
-    _filterModel(this),
     _treeAction(this, "List"),
+    _listModel(this),
+    _listFilterModel(this),
     _triggersGroupAction(this, "Triggers"),
     _selectedAction(this, "Unhide Selected"),
     _allAction(this, "Unhide All"),
-    _icon(Application::getIconFont("FontAwesome").getIcon("eye"))
+    _icon(Application::getIconFont("FontAwesome").getIcon("eye-slash"))
 {
+    setIcon(_icon);
     setShowLabels(false);
     setPopupSizeHint(QSize(300, 300));
+    getBadge().setScale(0.4f);
 
-    getBadge().setEnabled(true);
+    _treeAction.initialize(&_listModel, &_listFilterModel, "Hidden dataset");
 
-    _filterModel.getVisibilityFilterAction().setSelectedOptions({ "Hidden" });
-
-    _treeAction.initialize(&_treeModel, &_filterModel, "Hidden dataset");
+    _listFilterModel.setSourceModel(&_listModel);
+    _listFilterModel.getVisibilityFilterAction().setSelectedOptions({ "Hidden" });
 
     addAction(&_treeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
@@ -55,7 +56,7 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
         treeView->setRootIsDecorated(false);
         treeView->expandAll();
 
-        treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::Location), true);
+        treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::Name), true);
         treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::DatasetId), true);
         treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::SourceDatasetId), true);
         treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::Progress), true);
@@ -68,30 +69,30 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
 
         treeViewHeader->setStretchLastSection(false);
 
-        treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractDataHierarchyModel::Column::Name), QHeaderView::Stretch);
+        treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractDataHierarchyModel::Column::Location), QHeaderView::Stretch);
         treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible), QHeaderView::ResizeToContents);
 
         const auto resizeSections = [this, treeViewHeader]() -> void {
-            if (_filterModel.rowCount() >= 1)
+            if (_listFilterModel.rowCount() >= 1)
                 treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
         };
 
         resizeSections();
 
-        connect(&_filterModel, &QAbstractItemModel::rowsInserted, widget, resizeSections);
-        connect(&_filterModel, &QAbstractItemModel::rowsRemoved, widget, resizeSections);
-        connect(&_filterModel, &QAbstractItemModel::layoutChanged, widget, resizeSections);
+        connect(&_listFilterModel, &QAbstractItemModel::rowsInserted, widget, resizeSections);
+        connect(&_listFilterModel, &QAbstractItemModel::rowsRemoved, widget, resizeSections);
+        connect(&_listFilterModel, &QAbstractItemModel::layoutChanged, widget, resizeSections);
 
         const auto updateTriggerActionsReadOnly = [this, treeView]() -> void {
             _selectedAction.setEnabled(!treeView->selectionModel()->selectedRows().isEmpty());
-            _allAction.setEnabled(_filterModel.rowCount() >= 1);
+            _allAction.setEnabled(_listFilterModel.rowCount() >= 1);
         };
 
         updateTriggerActionsReadOnly();
 
-        connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, treeView, updateTriggerActionsReadOnly);
-        connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, treeView, updateTriggerActionsReadOnly);
-        connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, treeView, updateTriggerActionsReadOnly);
+        connect(&_listFilterModel, &QSortFilterProxyModel::rowsInserted, treeView, updateTriggerActionsReadOnly);
+        connect(&_listFilterModel, &QSortFilterProxyModel::rowsRemoved, treeView, updateTriggerActionsReadOnly);
+        connect(&_listFilterModel, &QSortFilterProxyModel::layoutChanged, treeView, updateTriggerActionsReadOnly);
 
         connect(treeView->selectionModel(), &QItemSelectionModel::selectionChanged, widget, updateTriggerActionsReadOnly);
 
@@ -99,20 +100,20 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
             QModelIndexList persistentModelIndexes;
 
             for (auto rowIndex : treeView->selectionModel()->selectedRows())
-                persistentModelIndexes << _filterModel.mapToSource(rowIndex.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)));
+                persistentModelIndexes << _listFilterModel.mapToSource(rowIndex.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)));
 
             for (auto persistentModelIndex : persistentModelIndexes)
-                _treeModel.setData(persistentModelIndex, true, Qt::EditRole);
+                _listModel.unhideItem(persistentModelIndex);
         });
 
         connect(&_allAction, &TriggerAction::triggered, widget, [this, treeView]() -> void {
             QModelIndexList persistentModelIndexes;
 
-            for (int rowIndex = 0; rowIndex < _filterModel.rowCount(); rowIndex++)
-                persistentModelIndexes << _filterModel.mapToSource(_filterModel.index(rowIndex, static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)));
+            for (int rowIndex = 0; rowIndex < _listFilterModel.rowCount(); rowIndex++)
+                persistentModelIndexes << _listFilterModel.mapToSource(_listFilterModel.index(rowIndex, static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)));
 
             for (auto persistentModelIndex : persistentModelIndexes)
-                _treeModel.setData(persistentModelIndex, true, Qt::EditRole);
+                _listModel.unhideItem(persistentModelIndex);
         });
     });
 
@@ -124,17 +125,24 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
     _triggersGroupAction.addAction(&_allAction);
 
     const auto updateReadOnlyAndIcon = [this]() -> void {
-        const auto mayUnhide    = _filterModel.rowCount() >= 1;
-        const auto color        = qApp->palette().highlight().color();
+        const auto numberOfHiddenDatasets   = _listFilterModel.rowCount();
+        const auto mayUnhide                = numberOfHiddenDatasets >= 1;
 
         setEnabled(mayUnhide);
-        setIcon(mayUnhide ? createIconWithNumberBadgeOverlay(_icon, 0, 0, color, color) : _icon);
+
+        auto& badge = getBadge();
+
+        badge.setEnabled(mayUnhide);
+        badge.setNumber(numberOfHiddenDatasets);
+        badge.setBackgroundColor(qApp->palette().highlight().color());
     };
 
     updateReadOnlyAndIcon();
 
-    connect(&_filterModel, &QSortFilterProxyModel::modelReset, this, updateReadOnlyAndIcon);
-    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, updateReadOnlyAndIcon);
-    connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, updateReadOnlyAndIcon);
-    connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, this, updateReadOnlyAndIcon);
+    connect(qApp, &QApplication::paletteChanged, this, updateReadOnlyAndIcon);
+
+    connect(&_listFilterModel, &QSortFilterProxyModel::modelReset, this, updateReadOnlyAndIcon);
+    connect(&_listFilterModel, &QSortFilterProxyModel::rowsInserted, this, updateReadOnlyAndIcon);
+    connect(&_listFilterModel, &QSortFilterProxyModel::rowsRemoved, this, updateReadOnlyAndIcon);
+    connect(&_listFilterModel, &QSortFilterProxyModel::layoutChanged, this, updateReadOnlyAndIcon);
 }
