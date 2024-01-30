@@ -21,6 +21,13 @@ The best starting point is the [example plugins](https://github.com/ManiVaultStu
 The three projects above have all been built using ManiVault ([Vieth et al. 2022](https://doi.org/10.1109/PacificVis53943.2022.00010): [plugin](https://github.com/ManiVaultStudio/SpidrPlugin), [Popa et al. 2022](https://doi.org/10.2312/gch.20221233): [plugin](https://github.com/ManiVaultStudio/SpectralViewPlugin), [Li et al. 2023](https://doi.org/10.1101/2023.03.20.532934): [plugin](https://github.com/ManiVaultStudio/SpaceWalker)).
 
 ## Installation & Building
+### Automated using DevBundle
+The preferred approach to building ManiVault is by using our [DevBundle](https://github.com/ManiVaultStudio/DevBundle) tool. This tool creates self-contained and cross-platform development environments using build configurations in JSON format. The [DevBundle](https://github.com/ManiVaultStudio/DevBundle) will remove much of the configuration overhead by:
+- Cloning repositories from the build configuration
+- Downloading related binary dependencies from our Artifactory server
+- Setting up an umbrella CMakeLists.txt which consists of all projects from the build configuration
+
+### Manual
 The [install guide](https://github.com/ManiVaultStudio/core/wiki/Installation) gives a complete overview of ManiVault's dependencies and setup.
 
 Before building ManiVault, be sure to set up its requirements (mainly Qt6 and zlib), then copy this repo:
