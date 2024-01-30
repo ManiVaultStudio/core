@@ -7,10 +7,10 @@
 
 ManiVault is a flexible and extensible visual analytics framework for high-dimensional data.
 
-The system allows for creating custom visualization applications tailored to your specific field, data and preferences. Applications are composed of a number of modular plugins, that can be combined to fit your needs. The plugins are fully self-encapsulated, but can communicate through ManiVault's core.
+The system allows for creating custom visualization applications tailored to your specific field, data, and preferences. Applications are composed of several modular plugins, that can be combined to fit your needs. The plugins are fully self-encapsulated but can communicate through ManiVault's core.
 For more information on the system, see our [wiki](https://github.com/ManiVaultStudio/PublicWiki/wiki).
 
-The best starting point are the [example plugins](https://github.com/ManiVaultStudio/ExamplePlugins) which showcase each possible plugin type.
+The best starting point is the [example plugins](https://github.com/ManiVaultStudio/ExamplePlugins) which showcases each possible plugin type.
 
 <p align="middle">
   <img align="top" src="https://github.com/ManiVaultStudio/core/assets/58806453/701ed1e3-ec5b-42ff-93f0-a9de0d60538f" width="32%" />
@@ -23,7 +23,7 @@ The three projects above have all been built using ManiVault ([Vieth et al. 2022
 ## Installation & Building
 The [install guide](https://github.com/ManiVaultStudio/core/wiki/Installation) gives a complete overview of ManiVault's dependencies and setup.
 
-Before building ManiVault, be sure to set up it's requirements (mainly Qt6 and zlib), then copy this repo:
+Before building ManiVault, be sure to set up its requirements (mainly Qt6 and zlib), then copy this repo:
 ```
 git clone --recurse-submodule git@github.com:ManiVaultStudio/core.git
 ```
