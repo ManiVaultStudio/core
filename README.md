@@ -23,7 +23,7 @@ The three projects above have all been built using ManiVault ([Vieth et al. 2022
 ## Installation & Building
 <details open>
    
-<summary>Automated using DevBundle</summary>
+<summary>Automated using DevBundle (available for BioVault team members)</summary>
 
 The preferred approach to building the example plugins is by using our [DevBundle](https://github.com/ManiVaultStudio/DevBundle) tool. This cross-platform tool creates self-contained development environments using build configurations in JSON format. Since the build environments are self-contained, multiple build environments can exist side-by-side. The major advantage of using DevBundle is that it will remove much of the configuration overhead by:
 - Cloning repositories from the build configuration (with the branch specified in the build configuration)
