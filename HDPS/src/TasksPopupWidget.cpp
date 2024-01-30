@@ -27,10 +27,11 @@ TasksPopupWidget::TasksPopupWidget(gui::TasksStatusBarAction& tasksStatusBarActi
     _anchorWidget(anchorWidget),
     _tasksIconPixmap(tasksStatusBarAction.icon().pixmap(iconPixmapSize)),
     _widgetsMap(),
-    _minimumDurationTimer()
+    _minimumDurationTimer(),
+    _tasksIcon(Application::getIconFont("FontAwesome").getIcon("tasks"))
 {
     setObjectName("TasksPopupWidget");
-    
+
     setWindowFlag(Qt::FramelessWindowHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
     setWindowFlag(Qt::SubWindow);
@@ -122,10 +123,13 @@ void TasksPopupWidget::updateIcon()
 {
     const auto numberOfTasks = _tasksStatusBarAction.getTasksFilterModel().rowCount();
 
-    if (numberOfTasks >= 1)
-        _tasksStatusBarAction.setIcon(createIconWithNumberBadgeOverlay(Application::getIconFont("FontAwesome").getIcon("tasks"), 4, numberOfTasks, QColor(255, 0, 0, 255), Qt::white, Qt::AlignTop | Qt::AlignRight, 0.7f));
-    else
-        _tasksStatusBarAction.setIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
+    auto& badge = _tasksStatusBarAction.getBadge();
+
+    badge.setEnabled(numberOfTasks >= 1);
+    badge.setNumber(numberOfTasks);
+    badge.setBackgroundColor(qApp->palette().highlight().color());
+
+    _tasksStatusBarAction.setIcon(createIconWithNumberBadgeOverlay(_tasksIcon, _tasksStatusBarAction.getBadge(), 4));
 }
 
 void TasksPopupWidget::synchronizeWithAnchorWidget()

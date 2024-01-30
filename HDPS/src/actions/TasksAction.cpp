@@ -35,7 +35,9 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
     _tasksFilterModel.setSourceModel(tasks().getTreeModel());
     _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
 
-    connect(&_tasksFilterModel, &QAbstractItemModel::layoutChanged, this, &TasksAction::filterModelChanged);
+    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &TasksAction::filterModelChanged);
+    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &TasksAction::filterModelChanged);
+    connect(&_tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, &TasksAction::filterModelChanged);
 }
 
 TasksFilterModel& TasksAction::getTasksFilterModel()
@@ -46,8 +48,14 @@ TasksFilterModel& TasksAction::getTasksFilterModel()
 void TasksAction::filterModelChanged()
 {
     const auto numberOfTasks = _tasksFilterModel.rowCount();
+    qDebug() << __FUNCTION__ << numberOfTasks;
 
-    setIcon(createIconWithNumberBadgeOverlay(Application::getIconFont("FontAwesome").getIcon("tasks"), 0, numberOfTasks, QColor(numberOfTasks == 0 ? 0 : 255, 0, 0, 255), Qt::white));
+    auto& badge = getBadge();
+
+    badge.setEnabled(numberOfTasks >= 1);
+    badge.setNumber(numberOfTasks);
+    badge.setBackgroundColor(qApp->palette().highlight().color());
+
     setToolTip(QString("Tasks: %1").arg(QString::number(numberOfTasks)));
 }
 

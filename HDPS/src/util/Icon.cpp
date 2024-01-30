@@ -150,11 +150,11 @@ QPixmap createNumberBadgeOverlayPixmap(const WidgetActionBadge& widgetActionBadg
     return createNumberBadgeOverlayPixmap(widgetActionBadge.getNumber(), widgetActionBadge.getBackgroundColor(), widgetActionBadge.getForegroundColor());
 }
 
-QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, std::uint32_t iconMargin /*= 0*/, std::uint32_t badgeNumber /*= 0*/, const QColor& badgeBackgroundColor /*= Qt::red*/, const QColor& badgeForegroundColor /*= Qt::white*/, Qt::Alignment badgeAlignment /*= Qt::AlignTop | Qt::AlignRight*/, float badgeScale /*= 0.5f*/)
+QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, const WidgetActionBadge& widgetActionBadge, std::uint32_t iconMargin /*= 0*/)
 {
     const auto iconPixmapSize       = icon.availableSizes().first() + QSize(2 * iconMargin, 2 * iconMargin);
     const auto iconPixmapRectangle  = QRectF(QPoint(0, 0), iconPixmapSize);
-    const auto badgePixmap          = createNumberBadgeOverlayPixmap(badgeNumber, badgeBackgroundColor, badgeForegroundColor);
+    const auto badgePixmap          = widgetActionBadge.getPixmap();
     const auto badgeRectangle       = QRectF(QPoint(0, 0), badgePixmap.size());
 
     QPixmap iconPixmap(iconPixmapSize);
@@ -162,11 +162,14 @@ QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, std::uint32_t iconMarg
     iconPixmap.fill(Qt::transparent);
 
     QPainter iconPixmapPainter(&iconPixmap);
-    {
-        iconPixmapPainter.setRenderHint(QPainter::Antialiasing);
-        iconPixmapPainter.drawPixmap(QRectF(QPoint(iconMargin, iconMargin), iconPixmapSize), icon.pixmap(iconPixmapSize), iconPixmapRectangle);
 
+    iconPixmapPainter.setRenderHint(QPainter::Antialiasing);
+    iconPixmapPainter.drawPixmap(QRectF(QPoint(iconMargin, iconMargin), iconPixmapSize), icon.pixmap(iconPixmapSize), iconPixmapRectangle);
+
+    if (widgetActionBadge.getEnabled()) {
+        const auto badgeScale           = widgetActionBadge.getScale();
         const auto scaledIconPixmapSize = badgeScale * iconPixmapSize;
+        const auto badgeAlignment       = widgetActionBadge.getAlignment();
 
         QPoint origin;
 
@@ -190,7 +193,6 @@ QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, std::uint32_t iconMarg
 
         iconPixmapPainter.drawPixmap(QRectF(origin, scaledIconPixmapSize), badgePixmap, badgeRectangle);
     }
-    iconPixmapPainter.end();
 
     return createIcon(iconPixmap);
 }
