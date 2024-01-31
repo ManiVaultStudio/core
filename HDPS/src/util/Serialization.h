@@ -34,9 +34,9 @@ void loadRawDataFromBinaryFile(const char* bytes, const std::uint64_t& numberOfB
  * @param bytes Pointer to input buffer
  * @param numberOfBytes Number of input bytes 
  * @param saveToDisk Whether to save the raw data to disk or inline in the variant
- * @param maxBlockSize Maximum size per block (DEFAULT_MAX_BLOCK_SIZE when maxBlockSize == -1)
+ * @param maxBlockSize Maximum size per block (defaults to DEFAULT_MAX_BLOCK_SIZE)
  */
-QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk = false, std::uint64_t maxBlockSize = -1);
+QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk = false, std::uint64_t maxBlockSize = DEFAULT_MAX_BLOCK_SIZE);
 
 /**
  * Convert variant map to raw data

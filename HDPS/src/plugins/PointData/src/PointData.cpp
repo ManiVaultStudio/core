@@ -52,14 +52,19 @@ mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) 
     return mv::Dataset<DatasetImpl>(new Points(getName(), true, guid));
 }
 
-unsigned int PointData::getNumPoints() const
+std::uint32_t PointData::getNumPoints() const
 {
     return static_cast<unsigned int>(_vectorHolder.size() / _numDimensions);
 }
 
-unsigned int PointData::getNumDimensions() const
+std::uint32_t PointData::getNumDimensions() const
 {
     return _numDimensions;
+}
+
+std::uint64_t PointData::getNumberOfElements() const
+{
+    return _vectorHolder.size();
 }
 
 const std::vector<QString>& PointData::getDimensionNames() const
@@ -195,7 +200,7 @@ QVariantMap PointData::toVariantMap() const
     const auto typeSpecifier        = _vectorHolder.getElementTypeSpecifier();
     const auto typeSpecifierName    = _vectorHolder.getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
     const auto typeIndex            = static_cast<std::int32_t>(typeSpecifier);
-    const auto numberOfElements     = static_cast<std::uint64_t>(getNumPoints() * getNumDimensions());
+    const auto numberOfElements     = getNumberOfElements();
 
     switch (typeSpecifier)
     {
