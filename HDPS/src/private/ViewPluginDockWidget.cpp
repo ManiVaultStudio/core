@@ -353,7 +353,6 @@ void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)
         containerWidgetLayout->setContentsMargins(0, 0, 0, 0);
 
         containerWidgetLayout->addWidget(settingsWidget);
-        containerWidgetLayout->addStretch(1);
 
         containerWidget->setAutoFillBackground(true);
         containerWidget->setLayout(containerWidgetLayout);
