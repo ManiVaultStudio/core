@@ -532,17 +532,19 @@ void DataManager::removeSelection(const QString& rawDataName)
             return rawDataName == selectionPtr->getRawDataName();
         });
 
-        if (it == _selections.end())
-            throw std::runtime_error(QString("Selection dataset with raw data name %1 not found").arg(rawDataName).toStdString());
+        if (it != _selections.end()) {
+            const auto selection    = (*it).get();
+            const auto selectionId  = selection->getId();
 
-        const auto selection    = (*it).get();
-        const auto selectionId  = selection->getId();
-
-        emit selectionAboutToBeRemoved(selection);
-        {
-            _selections.erase(it);
+            emit selectionAboutToBeRemoved(selection);
+            {
+                _selections.erase(it);
+            }
+            emit selectionRemoved(selectionId);
         }
-        emit selectionRemoved(selectionId);
+        else {
+            qDebug() << QString("Selection dataset with raw data name %1 not found").arg(rawDataName);
+        }
     }
     catch (std::exception& e)
     {
