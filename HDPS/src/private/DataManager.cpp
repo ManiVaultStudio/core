@@ -106,6 +106,10 @@ void DataManager::removeRawData(const QString& rawDataName)
 {
     try
     {
+#ifdef DATA_MANAGER_VERBOSE
+        qDebug() << "Remove raw data" << rawDataName << "from the data manager";
+#endif
+
         const auto it = _rawDataMap.find(rawDataName);
 
         if (it == _rawDataMap.end())
@@ -199,7 +203,7 @@ void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> 
     {
 
 #ifdef DATA_MANAGER_VERBOSE
-        qDebug() << "Add dataset" << dataset->getGuiName() << "to the data manager";
+        qDebug() << "Add dataset" << dataset->getGuiName() << dataset->getId() << "to the data manager";
 #endif
 
         if (!dataset.isValid())
@@ -297,7 +301,7 @@ void DataManager::removeDatasets(Datasets datasets)
 {
     try {
 #ifdef DATA_MANAGER_VERBOSE
-        qDebug() << "Remove datasets from the data manager";
+        qDebug() << "Remove" << datasets.size() << "datasets from the data manager";
 #endif
 
         if (datasets.isEmpty())
@@ -483,6 +487,10 @@ Datasets DataManager::getAllDatasets(const std::vector<DataType>& dataTypes /*= 
 
 void DataManager::addSelection(const QString& rawDataName, Dataset<DatasetImpl> selection)
 {
+#ifdef DATA_MANAGER_VERBOSE
+    qDebug() << "Add selection dataset for raw data" << rawDataName << "to the data manager";
+#endif
+
     _selections.push_back(std::unique_ptr<DatasetImpl>(selection.get()));
 
     emit selectionAdded(selection);
@@ -554,6 +562,10 @@ void DataManager::removeSelections(const QString& rawDataName)
 
             if (it != selectionsToRemove.end()) {
                 const auto selectionId = selectionToRemove->getId();
+
+#ifdef DATA_MANAGER_VERBOSE
+                qDebug() << "Remove selection dataset" << selectionId;
+#endif
 
                 emit selectionAboutToBeRemoved(Dataset<DatasetImpl>(selectionToRemove.get()));
                 {
