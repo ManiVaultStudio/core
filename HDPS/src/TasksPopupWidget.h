@@ -71,6 +71,7 @@ private:
     QPixmap                         _tasksIconPixmap;           /** Tasks icon pixmap underlay (count badge will be drawn on top) */
     QMap<Task*, QVector<QWidget*>>  _widgetsMap;                /** Maps task to allocated widget */
     QTimer                          _minimumDurationTimer;      /** Wait for a small amount of time before showing the UI */
+    QIcon                           _tasksIcon;                 /** Cached tasks icon */
 
     static const QSize iconPixmapSize;
 

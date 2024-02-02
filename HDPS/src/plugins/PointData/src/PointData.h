@@ -327,9 +327,11 @@ public:
 
     mv::Dataset<mv::DatasetImpl> createDataSet(const QString& guid = "") const override;
 
-    unsigned int getNumPoints() const;
+    std::uint32_t getNumPoints() const;
 
-    unsigned int getNumDimensions() const;
+    std::uint32_t getNumDimensions() const;
+
+    std::uint64_t getNumberOfElements() const;
 
     /**
      * Get amount of data occupied by the raw data

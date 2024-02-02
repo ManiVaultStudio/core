@@ -9,6 +9,10 @@
 #include <ViewPlugin.h>
 #include <Task.h>
 
+#include <actions/TaskAction.h>
+
+#include <widgets/OverlayWidget.h>
+
 #include <DockManager.h>
 
 #include <QMenu>
@@ -29,7 +33,7 @@ class ViewPluginDockWidget final : public DockWidget
 
 private:
 
-    /** Widget which contains a settings action widget (purpose is to provide a size hint)*/
+    /** Widget which contains a settings action widget (purpose is to provide a size hint) */
     class SettingsActionWidget : public QWidget {
     public:
 
@@ -48,6 +52,36 @@ private:
 
     private:
         mv::gui::WidgetAction*    _settingsAction;    /** Pointer to settings action to set the size hint for */
+    };
+
+    /** Overlay widget which shows a very thin view progress bar */
+    class ProgressOverlayWidget : public mv::gui::OverlayWidget {
+    public:
+
+        /**
+         * Construct with pointer to \p parent widget
+         * @param parent Pointer to parent widget
+         */
+        ProgressOverlayWidget(QWidget* parent);
+
+        /**
+         * Set task to \p task
+         * @param task Pointer to task (maybe nullptr)
+         */
+        void setTask(mv::Task* task);
+
+    private:
+
+        /** Update the overlay visibility based on whether there is a task and, if yes, whether it is running or not */
+        void updateVisibility();
+
+        /** Respond to changes in application palette */
+        void updateCustomStyle();
+
+    private:
+        mv::gui::TaskAction     _loadTaskAction;    /** Action for reporting loading progress */
+        QWidget*                _loadTaskWidget;    /** Pointer to task widget created by ProgressOverlayWidget#_loadTaskAction */
+        mv::Task*               _task;              /** Pointer to task */
     };
 
 public:
@@ -158,15 +192,16 @@ private:
     void setViewPlugin(mv::plugin::ViewPlugin* viewPlugin);
 
 private:
-    mv::plugin::ViewPlugin*       _viewPlugin;                /** Pointer to view plugin */
+    mv::plugin::ViewPlugin*         _viewPlugin;                /** Pointer to view plugin */
     QString                         _viewPluginKind;            /** Kind of (view) plugin */
     QVariantMap                     _viewPluginMap;             /** View plugin cached map for deferred loading */
     QMenu                           _settingsMenu;              /** Menu for view plugin settings */
     QMenu                           _toggleMenu;                /** Menu for toggling view plugin dock widgets */
-    mv::gui::TriggerAction        _helpAction;                /** Action for triggering help */
+    mv::gui::TriggerAction          _helpAction;                /** Action for triggering help */
     bool                            _cachedVisibility;          /** Cached visibility for view plugin isolation */
     ads::CDockManager               _dockManager;               /** Dock manager for internal docking */
     QMap<QString, CDockWidget*>     _settingsDockWidgetsMap;    /** Created dock widgets for settings actions */
+    ProgressOverlayWidget           _progressOverlayWidget;     /** Overlay widget which shows a very thin view progress bar */
 
 protected:
     static QList<ViewPluginDockWidget*> active;  /** Loaded view plugin dock widgets */

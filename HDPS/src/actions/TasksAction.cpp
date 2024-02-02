@@ -35,9 +35,9 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
     _tasksFilterModel.setSourceModel(tasks().getTreeModel());
     _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
 
-    _tasksIconPixmap = Application::getIconFont("FontAwesome").getIcon("tasks").pixmap(tasksIconPixmapSize);
-
-    connect(&_tasksFilterModel, &QAbstractItemModel::layoutChanged, this, &TasksAction::filterModelChanged);
+    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &TasksAction::filterModelChanged);
+    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &TasksAction::filterModelChanged);
+    connect(&_tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, &TasksAction::filterModelChanged);
 }
 
 TasksFilterModel& TasksAction::getTasksFilterModel()
@@ -47,35 +47,15 @@ TasksFilterModel& TasksAction::getTasksFilterModel()
 
 void TasksAction::filterModelChanged()
 {
-    QPixmap iconPixmap(tasksIconPixmapSize);
-
-    iconPixmap.fill(Qt::transparent);
-
-    QPainter painter(&iconPixmap);
-
-    const auto scaledTasksIconPixmapSize = tasksIconPixmapSize - 0.25 * tasksIconPixmapSize;
-
-    painter.drawPixmap(QPoint(0, 0), _tasksIconPixmap.scaled(scaledTasksIconPixmapSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-
     const auto numberOfTasks = _tasksFilterModel.rowCount();
+    qDebug() << __FUNCTION__ << numberOfTasks;
 
-    const auto badgeRadius = 43.0;
+    auto& badge = getBadge();
 
-    painter.setPen(QPen(QColor(numberOfTasks == 0 ? 0 : 255, 0, 0, 255), badgeRadius, Qt::SolidLine, Qt::RoundCap));
+    badge.setEnabled(numberOfTasks >= 1);
+    badge.setNumber(numberOfTasks);
+    badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    const auto center = QPoint(tasksIconPixmapSize.width() - (badgeRadius / 2), tasksIconPixmapSize.height() - (badgeRadius / 2));
-
-    painter.drawPoint(center);
-
-    painter.setPen(QPen(Qt::white));
-    painter.setFont(QFont("Arial", numberOfTasks >= 10 ? 18 : 24, 900));
-
-    const auto textRectangleSize = QSize(32, 32);
-    const auto textRectangle = QRectF(center - QPointF(textRectangleSize.width() / 2.f, textRectangleSize.height() / 2.f), textRectangleSize);
-
-    painter.drawText(textRectangle, QString::number(numberOfTasks), QTextOption(Qt::AlignCenter));
-
-    setIcon(createIcon(iconPixmap));
     setToolTip(QString("Tasks: %1").arg(QString::number(numberOfTasks)));
 }
 

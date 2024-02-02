@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "actions/WidgetActionBadge.h" 
+
 #include <QString>
 #include <QFont>
 #include <QIcon>
@@ -44,5 +46,30 @@ QIcon createPluginIcon(const QString& characters, const QColor& color);
  * @return Combined icon
  */
 QIcon combineIconsHorizontally(const QVector<QIcon>& icons);
+
+/**
+ * Creates a pixmap with a number badge from \p number, \p badgeBackgroundColor and \p foregroundColor
+ * @param number Integral to display in the badge
+ * @param backgroundColor Color of the badge background
+ * @param foregroundColor Color of the badge foreground (text)
+ * @return Number badge pixmap
+ */
+QPixmap createNumberBadgeOverlayPixmap(std::uint32_t number /*= 0*/, const QColor& backgroundColor /*= Qt::red*/, const QColor& foregroundColor /*= Qt::white*/);
+
+/**
+ * Creates a pixmap with a number badge from \p widgetActionBadge
+ * @param widgetActionBadge Widget action badge configuration
+ * @return Number badge pixmap
+ */
+QPixmap createNumberBadgeOverlayPixmap(const WidgetActionBadge& widgetActionBadge);
+
+/**
+ * Overlays \p icon with a \p number badge in \p color and with \p alignment
+ * @param icon Icon to overlay
+ * @param widgetActionBadge Widget action badge configuration
+ * @param iconMargin Icon margin
+ * @return Icon with badge overlay
+ */
+QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, const WidgetActionBadge& widgetActionBadge, std::uint32_t iconMargin = 0);
 
 }

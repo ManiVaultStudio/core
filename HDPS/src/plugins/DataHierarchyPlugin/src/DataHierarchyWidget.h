@@ -4,21 +4,18 @@
 
 #pragma once
 
-#include <models/DataHierarchyModel.h>
+#include "UnhideAction.h"
+
+#include <models/DataHierarchyTreeModel.h>
 #include <models/DataHierarchyFilterModel.h>
 
+#include <actions/ToggleAction.h>
 #include <actions/TriggerAction.h>
 
 #include <widgets/HierarchyWidget.h>
 
 #include <DataHierarchyItem.h>
 #include <Dataset.h>
-
-#include <actions/ToggleAction.h>
-#include <actions/TriggerAction.h>
-#include <models/DataHierarchyFilterModel.h>
-#include <models/DataHierarchyModel.h>
-#include <widgets/HierarchyWidget.h>
 
 #include <QWidget>
 
@@ -40,11 +37,11 @@ public:
     DataHierarchyWidget(QWidget* parent);
 
     /**
-     * Get model
-     * @return Reference to the data hierarchy model
+     * Get tree model
+     * @return Reference to the data hierarchy tree model
      */
-    mv::DataHierarchyModel& getModel() {
-        return _model;
+    mv::DataHierarchyTreeModel& getTreeModel() {
+        return _treeModel;
     }
 
     /**
@@ -102,8 +99,9 @@ protected:
     void initializeSelection();
 
 private:
-    mv::DataHierarchyModel          _model;             /** Model containing data to be displayed in the hierarchy */
+    mv::DataHierarchyTreeModel      _treeModel;         /** Model containing data to be displayed in the hierarchy */
     mv::DataHierarchyFilterModel    _filterModel;       /** Data hierarchy filter model */
     mv::gui::HierarchyWidget        _hierarchyWidget;   /** Widget for displaying hierarchy */
     mv::gui::TriggerAction          _resetAction;       /** Reset all action */
+    UnhideAction                    _unhideAction;      /** Action class for un-hiding hidden datasets */
 };

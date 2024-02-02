@@ -689,14 +689,14 @@ QStandardItem* AbstractActionsModel::getActionItem(const gui::WidgetAction* acti
     return itemFromIndex(actionIndex);
 }
 
-Qt::DropActions AbstractActionsModel::supportedDropActions() const
-{
-    return Qt::MoveAction;
-}
-
 Qt::DropActions AbstractActionsModel::supportedDragActions() const
 {
     return Qt::CopyAction;
+}
+
+Qt::DropActions AbstractActionsModel::supportedDropActions() const
+{
+    return Qt::MoveAction;
 }
 
 QStringList AbstractActionsModel::mimeTypes() const

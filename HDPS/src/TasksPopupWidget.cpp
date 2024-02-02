@@ -27,10 +27,11 @@ TasksPopupWidget::TasksPopupWidget(gui::TasksStatusBarAction& tasksStatusBarActi
     _anchorWidget(anchorWidget),
     _tasksIconPixmap(tasksStatusBarAction.icon().pixmap(iconPixmapSize)),
     _widgetsMap(),
-    _minimumDurationTimer()
+    _minimumDurationTimer(),
+    _tasksIcon(Application::getIconFont("FontAwesome").getIcon("tasks"))
 {
     setObjectName("TasksPopupWidget");
-    
+
     setWindowFlag(Qt::FramelessWindowHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
     setWindowFlag(Qt::SubWindow);
@@ -120,35 +121,15 @@ bool TasksPopupWidget::eventFilter(QObject* target, QEvent* event)
 
 void TasksPopupWidget::updateIcon()
 {
-    QPixmap iconPixmap(iconPixmapSize);
-
-    iconPixmap.fill(Qt::transparent);
-
-    QPainter painter(&iconPixmap);
-
-    const auto scaledTasksIconPixmapSize = iconPixmapSize - 0.25 * iconPixmapSize;
-
-    painter.drawPixmap(QPoint(0, 0), _tasksIconPixmap.scaled(scaledTasksIconPixmapSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-
     const auto numberOfTasks = _tasksStatusBarAction.getTasksFilterModel().rowCount();
 
-    const auto badgeRadius = 43.0;
+    auto& badge = _tasksStatusBarAction.getBadge();
 
-    painter.setPen(QPen(QColor(numberOfTasks == 0 ? 0 : 255, 0, 0, 255), badgeRadius, Qt::SolidLine, Qt::RoundCap));
+    badge.setEnabled(numberOfTasks >= 1);
+    badge.setNumber(numberOfTasks);
+    badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    const auto center = QPoint(iconPixmapSize.width() - (badgeRadius / 2), iconPixmapSize.height() - (badgeRadius / 2));
-
-    painter.drawPoint(center);
-
-    painter.setPen(QPen(Qt::white));
-    painter.setFont(QFont("Arial", numberOfTasks >= 10 ? 18 : 24, 900));
-
-    const auto textRectangleSize = QSize(32, 32);
-    const auto textRectangle = QRectF(center - QPointF(textRectangleSize.width() / 2.f, textRectangleSize.height() / 2.f), textRectangleSize);
-
-    painter.drawText(textRectangle, QString::number(numberOfTasks), QTextOption(Qt::AlignCenter));
-
-    _tasksStatusBarAction.setIcon(createIcon(iconPixmap));
+    _tasksStatusBarAction.setIcon(createIconWithNumberBadgeOverlay(_tasksIcon, _tasksStatusBarAction.getBadge(), 4));
 }
 
 void TasksPopupWidget::synchronizeWithAnchorWidget()

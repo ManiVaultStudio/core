@@ -8,6 +8,8 @@
 #include "StringAction.h"
 #include "TriggerAction.h"
 
+#include "Task.h"
+
 #include <QStyledItemDelegate>
 #include <QTreeWidget>
 
@@ -283,6 +285,14 @@ public: // Visibility
      */
     bool isGroupActionHidden(GroupAction* groupAction) const;
 
+public: // Miscellaneous
+
+    /**
+     * Get update task
+     * @return Task for reporting update progress
+     */
+    Task& getUpdateTask();
+
 signals:
 
     /**
@@ -324,6 +334,7 @@ signals:
 protected:
     GroupActions                _groupActions;      /** Pointers to group actions */
     QMap<GroupAction*, bool>    _visibility;        /** Group action visibility */
+    Task                        _updateTask;        /** Task for reporting update progress */
 };
 
 }

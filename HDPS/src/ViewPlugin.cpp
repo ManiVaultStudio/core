@@ -38,7 +38,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _presetsAction(this, this, QString("%1/Presets").arg(getKind()), getKind(), factory->getIcon()),
     _triggerShortcut(),
     _titleBarMenuActions(),
-    _settingsActions()
+    _settingsActions(),
+    _progressTask(nullptr)
 {
     setText(getGuiName());
 
@@ -176,10 +177,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     });
 }
 
-ViewPlugin::~ViewPlugin()
-{
-}
-
 void ViewPlugin::init()
 {
 }
@@ -307,6 +304,21 @@ void ViewPlugin::addDockingAction(WidgetAction* dockingAction, WidgetAction* doc
 mv::gui::WidgetActions ViewPlugin::getDockingActions() const
 {
     return _settingsActions;
+}
+
+mv::Task* ViewPlugin::getProgressTask()
+{
+    return _progressTask;
+}
+
+void ViewPlugin::setProgressTask(Task* progressTask)
+{
+    if (progressTask == _progressTask)
+        return;
+
+    _progressTask = progressTask;
+
+    emit progressTaskChanged(_progressTask);
 }
 
 ViewPluginFactory::ViewPluginFactory(bool producesSystemViewPlugins /*= false*/) :

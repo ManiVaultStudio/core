@@ -107,31 +107,69 @@ public:
      */
     TasksStatusBarAction(AbstractTasksModel& tasksModel, QObject* parent, const QString& title, const QIcon& icon = QIcon(), const PopupMode& popupMode = PopupMode::Click, const Task::GuiScope& taskScope = Task::GuiScope::Foreground);
 
+    /**
+     * Get the popup mode
+     * @return Popup mode
+     */
     PopupMode getPopupMode() const;
 
+    /**
+     * Set popup mode to \p popupMode
+     * @param popupMode Popup mode
+     */
     void setPopupMode(const PopupMode& popupMode);
 
+    /**
+     * Get task scope
+     * @return Task scope
+     */
     Task::GuiScope getTaskScope() const;
 
+    /**
+     * Get popup menu
+     * @return Reference to popup menu
+     */
     QMenu& getMenu();
 
+    /**
+     * Get popup force hidden
+     * @return Boolean determining whether popup force hidden is on or not
+     */
     bool getPopupForceHidden() const;
+
+    /**
+     * Set popup force hidden to \p popupForceHidden
+     * @param popupForceHidden Boolean determining whether popup force hidden is on or not
+     */
     void setPopupForceHidden(bool popupForceHidden);
 
+    /**
+     * Get tasks model
+     * @return Reference to tasks model
+     */
     AbstractTasksModel& getTasksModel();
+
+    /**
+     * Get tasks filter model
+     * @return Reference to tasks filter model
+     */
     TasksFilterModel& getTasksFilterModel();
 
 signals:
 
+    /**
+     * Signals that popup force hidden to \p popupForceHidden
+     * @param popupForceHidden Boolean determining whether popup force hidden is on or not
+     */
     void popupForceHiddenChanged(bool popupForceHidden);
 
 private:
-    AbstractTasksModel& _tasksModel;
-    TasksFilterModel    _tasksFilterModel;
-    PopupMode           _popupMode;
-    Task::GuiScope      _taskGuiScope;
-    QMenu               _menu;
-    bool                _popupForceHidden;
+    AbstractTasksModel& _tasksModel;            /** Tasks model */
+    TasksFilterModel    _tasksFilterModel;      /** Filter model of the tasks model */
+    PopupMode           _popupMode;             /** Popup mode */
+    Task::GuiScope      _taskGuiScope;          /** Tasks GUI scope filter */
+    QMenu               _menu;                  /** Popup menu */
+    bool                _popupForceHidden;      /** Boolean determining whether popup force hidden is on or not */
 };
 
 }

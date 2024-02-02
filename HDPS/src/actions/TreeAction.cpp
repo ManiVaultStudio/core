@@ -32,6 +32,9 @@ void TreeAction::initialize(QAbstractItemModel* model, QSortFilterProxyModel* fi
     _model          = model;
     _filterModel    = filterModel;
     _itemTypeName   = itemTypeName;
+
+    if (_filterModel)
+        _filterModel->setSourceModel(_model);
 }
 
 TreeAction::Widget::Widget(QWidget* parent, TreeAction* treeAction, const std::int32_t& widgetFlags) :

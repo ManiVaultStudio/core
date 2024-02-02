@@ -442,14 +442,14 @@ public:
      * @return Pointer to standard item (nullptr if not found)
      */
     virtual QStandardItem* getActionItem(const gui::WidgetAction* action) const final;
-    
-protected: // Drag-and-drop behavior
 
-    /** Get the supported drop actions */
-    Qt::DropActions supportedDropActions() const override;
+protected: // Drag-and-drop behavior
 
     /** Get the supported drag actions */
     Qt::DropActions supportedDragActions() const override;
+
+    /** Get the supported drop actions */
+    Qt::DropActions supportedDropActions() const override;
 
     /**
      * Get mime types

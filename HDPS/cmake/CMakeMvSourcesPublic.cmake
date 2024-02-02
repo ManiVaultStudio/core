@@ -327,6 +327,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WidgetActionViewWidget.h
     src/actions/WidgetActionMimeData.h
     src/actions/WidgetActionHighlightWidget.h
+    src/actions/WidgetActionBadge.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -338,6 +339,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/WidgetActionViewWidget.cpp
     src/actions/WidgetActionMimeData.cpp
     src/actions/WidgetActionHighlightWidget.cpp
+    src/actions/WidgetActionBadge.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -645,12 +647,16 @@ set(PUBLIC_ACTIONS_MODEL_FILES
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_HEADERS
-    src/models/DataHierarchyModel.h
+    src/models/AbstractDataHierarchyModel.h
+    src/models/DataHierarchyTreeModel.h
+    src/models/DataHierarchyListModel.h
     src/models/DataHierarchyFilterModel.h
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_SOURCES
-    src/models/DataHierarchyModel.cpp
+    src/models/AbstractDataHierarchyModel.cpp
+    src/models/DataHierarchyTreeModel.cpp
+    src/models/DataHierarchyListModel.cpp
     src/models/DataHierarchyFilterModel.cpp
 )
 

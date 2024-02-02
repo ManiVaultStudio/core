@@ -27,7 +27,7 @@ namespace mv::plugin
 class ViewPlugin : public Plugin
 {
     Q_OBJECT
-    
+
 public:
 
     /**
@@ -35,9 +35,6 @@ public:
      * @param factory Pointer to plugin factory
      */
     ViewPlugin(const PluginFactory* factory);
-
-    /** Destructor */
-    ~ViewPlugin();
 
     /** Perform startup initialization */
     void init() override;
@@ -114,6 +111,20 @@ public: // Settings actions
     /** Get vector of pointers to docking actions */
     gui::WidgetActions getDockingActions() const;
 
+public:
+
+    /**
+     * Get progress task
+     * @return Pointer to progress task (maybe nullptr)
+     */
+    Task* getProgressTask();
+
+    /**
+     * Set progress task to \p progressTask
+     * @param progressTask Pointer to progress task (maybe nullptr)
+     */
+    void setProgressTask(Task* progressTask);
+
 public: // Serialization
 
     /**
@@ -142,6 +153,14 @@ public: // Action getters
     gui::TriggerAction& getHelpAction() { return _helpAction; }
     gui::PresetsAction& getPresetsAction() { return _presetsAction; }
 
+signals:
+
+    /**
+     * Signals that the progress task changed to \p progressTask
+     * @param progressTask Pointer to progress task (maybe nullptr)
+     */
+    void progressTaskChanged(Task* progressTask);
+
 private:
     QWidget                 _widget;                    /** Widget representation of the plugin */
     gui::TriggerAction      _editorAction;              /** Trigger action to start the view plugin editor */
@@ -158,6 +177,7 @@ private:
     QKeySequence            _triggerShortcut;           /** Shortcut for triggering the plugin */
     gui::WidgetActions      _titleBarMenuActions;       /** Additional actions which are added to the end of the settings menu of the view plugin title bar */
     gui::WidgetActions      _settingsActions;           /** Settings actions which are displayed as docking widgets in the interface */
+    Task*                   _progressTask;              /** When set and running, a thin progress bar will be displayed on top of the view plugin dock widget */
 };
 
 class ViewPluginFactory : public PluginFactory

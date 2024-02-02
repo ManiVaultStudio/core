@@ -73,7 +73,7 @@ void loadRawDataFromBinaryFile(const char* bytes, const std::uint64_t& numberOfB
     memcpy((void*)bytes, (void*)rawData.data(), numberOfBytes);
 }
 
-QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, std::uint64_t maxBlockSize /*= -1*/)
+QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, std::uint64_t maxBlockSize /*= DEFAULT_MAX_BLOCK_SIZE*/)
 {
     Q_ASSERT(maxBlockSize != 0);
 
