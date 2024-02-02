@@ -632,11 +632,16 @@ void PluginManager::fromVariantMap(const QVariantMap& variantMap)
         if (!_pluginFactories.contains(usedPlugin.toString()))
             missingPluginKinds << usedPlugin.toString();
 
-    if (!missingPluginKinds.isEmpty())
-        throw std::runtime_error(QString("One or more plugins are not available: %1").arg(missingPluginKinds.join(", ")).toLocal8Bit());
-
     if (variantMap.contains("LoadedAnalyses"))
     {
+        for (const auto& loadedAnalysis : variantMap["LoadedAnalyses"].toList())
+            missingPluginKinds.removeAll(loadedAnalysis.toMap()["Kind"].toString());
+
+        missingPluginKinds.squeeze();
+
+        if (!missingPluginKinds.isEmpty())
+            throw std::runtime_error(QString("One or more plugins are not available: %1").arg(missingPluginKinds.join(", ")).toLocal8Bit());
+
         for (const auto& loadedAnalysis : variantMap["LoadedAnalyses"].toList())
         {
             auto analysisPluginMap = loadedAnalysis.toMap();
@@ -680,7 +685,7 @@ QVariantMap PluginManager::toVariantMap() const
             usedPluginsList << pluginFactory->getKind();
 
     for(const auto& loadedPlugin : _plugins)
-        if(loadedPlugin->getType() == Type::ANALYSIS )
+        if(loadedPlugin->getType() == Type::ANALYSIS && dynamic_cast<plugin::AnalysisPlugin*>(loadedPlugin.get())->implementsSerialization())
             loadedAnalysesList << dynamic_cast<plugin::AnalysisPlugin*>(loadedPlugin.get())->toVariantMap();
 
     variantMap.insert({
