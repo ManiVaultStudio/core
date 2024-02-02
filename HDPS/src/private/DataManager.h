@@ -191,10 +191,10 @@ public: // Selection
 protected:
 
     /**
-     * Remove \p selection from the data manager
+     * Removes all selection of which the raw data name matches \p rawDataName
      * @param rawDataName Name of the selection raw data
      */
-    void removeSelection(const QString& rawDataName) override;
+    void removeSelections(const QString& rawDataName) override;
 
 public: // Data grouping
 

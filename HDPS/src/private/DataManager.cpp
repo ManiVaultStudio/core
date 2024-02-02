@@ -111,6 +111,8 @@ void DataManager::removeRawData(const QString& rawDataName)
         if (it == _rawDataMap.end())
             throw std::runtime_error(QString("Raw data with name %1 not found").arg(rawDataName).toStdString());
 
+        removeSelections(rawDataName);
+
         emit rawDataAboutToBeRemoved(_rawDataMap[rawDataName]);
         {
             plugins().destroyPlugin(_rawDataMap[rawDataName]);
@@ -281,7 +283,6 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         events().notifyDatasetRemoved(datasetId, datasetType);
 
         removeRawData(rawDatasetName);
-        removeSelection(rawDatasetName);
     }
     catch (std::exception& e)
     {
@@ -524,25 +525,43 @@ Datasets DataManager::getAllSelections()
     return selections;
 }
 
-void DataManager::removeSelection(const QString& rawDataName)
+void DataManager::removeSelections(const QString& rawDataName)
 {
     try
     {
-        const auto it = std::find_if(_selections.begin(), _selections.end(), [rawDataName](const auto& selectionPtr) -> bool {
-            return rawDataName == selectionPtr->getRawDataName();
+
+#ifdef DATA_MANAGER_VERBOSE
+        qDebug() << "Remove selection datasets for raw data" << rawDataName << "from the data manager";
+#endif
+
+        std::vector<std::unique_ptr<DatasetImpl>> selectionsToRemove;
+
+        std::copy_if(std::make_move_iterator(_selections.begin()), std::make_move_iterator(_selections.end()), std::back_inserter(selectionsToRemove), [rawDataName](const auto& selection) -> bool {
+            return rawDataName == selection->getRawDataName();
         });
 
-        if (it == _selections.end())
-            throw std::runtime_error(QString("Selection dataset with raw data name %1 not found").arg(rawDataName).toStdString());
+        if (selectionsToRemove.empty())
+            return;
 
-        const auto selection    = (*it).get();
-        const auto selectionId  = selection->getId();
+        _selections.erase(std::remove_if(_selections.begin(), _selections.end(), [rawDataName](auto& selection) -> bool {
+            return !selection;
+        }));
 
-        emit selectionAboutToBeRemoved(selection);
-        {
-            _selections.erase(it);
+        for (auto& selectionToRemove : selectionsToRemove) {
+            auto it = std::find_if(selectionsToRemove.begin(), selectionsToRemove.end(), [&selectionToRemove](const auto& selection) -> bool {
+                return selection->getId() == selectionToRemove->getId();
+            });
+
+            if (it != selectionsToRemove.end()) {
+                const auto selectionId = selectionToRemove->getId();
+
+                emit selectionAboutToBeRemoved(Dataset<DatasetImpl>(selectionToRemove.get()));
+                {
+                    selectionsToRemove.erase(it);
+                }
+                emit selectionRemoved(selectionId);
+            }
         }
-        emit selectionRemoved(selectionId);
     }
     catch (std::exception& e)
     {
