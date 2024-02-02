@@ -142,7 +142,7 @@ plugin::RawData* DataManager::getRawData(const QString& rawDataName)
             throw std::runtime_error("Raw data name is invalid");
 
         if (_rawDataMap.find(rawDataName) == _rawDataMap.end())
-            throw std::runtime_error("Raw data not found");
+            throw std::runtime_error(QString("%1 not found").arg(rawDataName).toStdString());
 
         return _rawDataMap[rawDataName];
     }
@@ -244,6 +244,8 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         const auto rawDatasetName   = dataset->getRawDataName();
 
         dataset->setAboutToBeRemoved();
+
+        removeSelections(rawDatasetName);
 
         for (const auto& underiveDataset : _datasets) {
             if (underiveDataset->isDerivedData() && underiveDataset->getNextSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {

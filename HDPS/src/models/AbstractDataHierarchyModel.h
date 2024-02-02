@@ -33,8 +33,8 @@ public:
         Name,               /** Name of the dataset */
         Location,           /** Location of the dataset */
         DatasetId,          /** Globally unique dataset identifier */
-        SourceDatasetId,    /** Globally unique dataset identifier of the source dataset (if this dataset is derived) */
         RawDataId,          /** Globally unique identifier of the associated raw data */
+        SourceDatasetId,    /** Globally unique dataset identifier of the source dataset (if this dataset is derived) */
         Progress,           /** Task progress in percentage */
         GroupIndex,         /** Dataset group index */
         IsVisible,          /** Whether the dataset is visible or not */
@@ -56,7 +56,7 @@ public:
          * @param dataset Pointer to dataset to display item for
          * @param editable Whether the model item is editable or not
          */
-        Item(Dataset<DatasetImpl> DataHierarchyItem, bool editable = false);
+        Item(Dataset<DatasetImpl> dataset, bool editable = false);
 
         /**
          * Get model data for \p role
