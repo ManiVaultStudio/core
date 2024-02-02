@@ -167,6 +167,23 @@ QVariant AbstractDataHierarchyModel::DatasetIdItem::data(int role /*= Qt::UserRo
     return Item::data(role);
 }
 
+QVariant AbstractDataHierarchyModel::RawDataIdItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getDataset().isValid() ? getDataset()->getRawDataName() : "";
+
+        case Qt::ToolTipRole:
+            return "Raw data identifier: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 QVariant AbstractDataHierarchyModel::SourceDatasetIdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     const auto sourceDataset = getDataset()->getSourceDataset<DatasetImpl>();
@@ -421,6 +438,7 @@ AbstractDataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
     append(new NameItem(dataset));
     append(new LocationItem(dataset));
     append(new DatasetIdItem(dataset));
+    append(new RawDataIdItem(dataset));
     append(new SourceDatasetIdItem(dataset));
     append(new ProgressItem(dataset));
     append(new GroupIndexItem(dataset));
@@ -453,6 +471,9 @@ QVariant AbstractDataHierarchyModel::headerData(int section, Qt::Orientation ori
 
         case Column::DatasetId:
             return DatasetIdItem::headerData(orientation, role);
+
+        case Column::RawDataId:
+            return RawDataIdItem::headerData(orientation, role);
 
         case Column::SourceDatasetId:
             return SourceDatasetIdItem::headerData(orientation, role);
