@@ -98,9 +98,6 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-    /** Whether the analysis plugin implements serialization */
-    virtual bool implementsSerialization() const { return false; }
-
 protected:
     /** Returns whether any output dataset is given */
     bool outputDataInit() const { return _output.size() > 0; }
