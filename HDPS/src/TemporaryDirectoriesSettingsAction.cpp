@@ -11,7 +11,7 @@ namespace mv::gui
 TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Temporary"),
     _applicationTemporaryDirAction(this, "Application temporary directory", Application::current()->getTemporaryDir().path()),
-    _removeStaleTemporaryDirsAtStartupAction(this, "Remove stale temporary directories at startup"),
+    _removeStaleTemporaryDirsAtStartupAction(this, "Remove stale temporary directories at startup",true),
     _scanForStaleTemporaryDirectoriesAction(this, "Refresh"),
     _selectStaleTemporaryDirectoriesAction(this, "Stale temporary directories"),
     _removeStaleTemporaryDirectoriesAction(this, "Remove all stale"),
