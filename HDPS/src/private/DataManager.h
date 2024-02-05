@@ -65,7 +65,7 @@ protected: // Raw data
     void addRawData(plugin::RawData* rawData) override;
 
     /**
-     * Remove raw data with \p rawDataName from the manager
+     * Remove raw data with \p rawDataName from the manager if there are no more (selection) datasets referencing it
      * @param rawDataName Name of the raw data to remove
      */
     void removeRawData(const QString& rawDataName) override;

@@ -106,6 +106,16 @@ void DataManager::removeRawData(const QString& rawDataName)
 {
     try
     {
+        auto numberOfConnectedDatasets      = std::count_if(_datasets.begin(), _datasets.end(), [rawDataName](const auto& dataset) -> int { return dataset->getRawDataName() == rawDataName; });
+        auto numberOfConnectedSelections    = std::count_if(_selections.begin(), _selections.end(), [rawDataName](const auto& dataset) -> int { return dataset->getRawDataName() == rawDataName; });
+
+        const auto numberOfConnected = numberOfConnectedDatasets + numberOfConnectedSelections;
+
+        qDebug() << "**************" << numberOfConnected;
+
+        if (numberOfConnected > 0)
+            return;
+
 #ifdef DATA_MANAGER_VERBOSE
         qDebug() << "Remove raw data" << rawDataName << "from the data manager";
 #endif
@@ -527,7 +537,7 @@ Dataset<DatasetImpl> DataManager::getSelection(const QString& rawDataName)
 
 Datasets DataManager::getAllSelections()
 {
-    QVector<Dataset<DatasetImpl>> selections;
+    Datasets selections;
 
     for (const auto& dataset : _selections)
         selections << dataset.get();
