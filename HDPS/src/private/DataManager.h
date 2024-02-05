@@ -191,8 +191,8 @@ public: // Selection
 protected:
 
     /**
-     * Removes all selection of which the raw data name matches \p rawDataName
-     * @param rawDataName Name of the selection raw data
+     * Removes all selections of which the raw data name matches \p rawDataName
+     * @param rawDataName Name of the raw data
      */
     void removeSelections(const QString& rawDataName) override;
 
