@@ -54,7 +54,7 @@ mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) 
 
 std::uint32_t PointData::getNumPoints() const
 {
-    return static_cast<unsigned int>(_vectorHolder.size() / _numDimensions);
+    return static_cast<unsigned int>(getSizeOfVector() / _numDimensions);
 }
 
 std::uint32_t PointData::getNumDimensions() const
@@ -74,7 +74,7 @@ const std::vector<QString>& PointData::getDimensionNames() const
 
 void PointData::setData(const std::nullptr_t, const std::size_t numPoints, const std::size_t numDimensions)
 {
-    _vectorHolder.resize(numPoints * numDimensions);
+    resizeVector(numPoints * numDimensions);
     _numDimensions = static_cast<unsigned int>(numDimensions);
 }
 
@@ -91,19 +91,21 @@ void PointData::setDimensionNames(const std::vector<QString>& dimNames)
 
 float PointData::getValueAt(const std::size_t index) const
 {
-    return _vectorHolder.constVisit<float>([index](const auto& vec)
+    return std::visit([index](const auto& vec)
         {
-            return vec[index];
-        });
+            return static_cast<float>(vec[index]);
+        },
+        _variantOfVectors);
 }
 
 void PointData::setValueAt(const std::size_t index, const float newValue)
 {
-    _vectorHolder.visit([index, newValue](auto& vec)
+    std::visit([index, newValue](auto& vec)
         {
             using value_type = typename std::remove_reference_t<decltype(vec)>::value_type;
             vec[index] = static_cast<value_type>(newValue);
-        });
+        },
+        _variantOfVectors);
 }
 
 void PointData::fromVariantMap(const QVariantMap& variantMap)
@@ -197,35 +199,35 @@ QVariantMap PointData::toVariantMap() const
 {
     QVariantMap rawData;
 
-    const auto typeSpecifier        = _vectorHolder.getElementTypeSpecifier();
-    const auto typeSpecifierName    = _vectorHolder.getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
+    const auto typeSpecifier        = getElementTypeSpecifier();
+    const auto typeSpecifierName    = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
     const auto typeIndex            = static_cast<std::int32_t>(typeSpecifier);
     const auto numberOfElements     = getNumberOfElements();
 
     switch (typeSpecifier)
     {
         case ElementTypeSpecifier::float32:
-            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<float>().data(), numberOfElements * sizeof(float), true);
+            rawData = rawDataToVariantMap((char*)getConstVector<float>().data(), numberOfElements * sizeof(float), true);
             break;
 
         case ElementTypeSpecifier::bfloat16:
-            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<biovault::bfloat16_t>().data(), numberOfElements * sizeof(biovault::bfloat16_t), true);
+            rawData = rawDataToVariantMap((char*)getConstVector<biovault::bfloat16_t>().data(), numberOfElements * sizeof(biovault::bfloat16_t), true);
             break;
 
         case ElementTypeSpecifier::int16:
-            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::int16_t>().data(), numberOfElements * sizeof(std::int16_t), true);
+            rawData = rawDataToVariantMap((char*)getConstVector<std::int16_t>().data(), numberOfElements * sizeof(std::int16_t), true);
             break;
 
         case ElementTypeSpecifier::uint16:
-            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::uint16_t>().data(), numberOfElements * sizeof(std::uint16_t), true);
+            rawData = rawDataToVariantMap((char*)getConstVector<std::uint16_t>().data(), numberOfElements * sizeof(std::uint16_t), true);
             break;
 
         case ElementTypeSpecifier::int8:
-            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::int8_t>().data(), numberOfElements * sizeof(std::int8_t), true);
+            rawData = rawDataToVariantMap((char*)getConstVector<std::int8_t>().data(), numberOfElements * sizeof(std::int8_t), true);
             break;
 
         case ElementTypeSpecifier::uint8:
-            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::uint8_t>().data(), numberOfElements * sizeof(std::uint8_t), true);
+            rawData = rawDataToVariantMap((char*)getConstVector<std::uint8_t>().data(), numberOfElements * sizeof(std::uint8_t), true);
             break;
 
         default:
@@ -246,7 +248,7 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
 
     result.resize(getNumPoints());
 
-    _vectorHolder.constVisit(
+    std::visit(
         [&result, this, dimensionIndex](const auto& vec)
         {
             const auto resultSize = result.size();
@@ -255,7 +257,8 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
             {
                 result[i] = vec[i * _numDimensions + dimensionIndex];
             }
-        });
+        },
+        _variantOfVectors);
 }
 
 
@@ -266,7 +269,7 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
 
     result.resize(getNumPoints());
 
-    _vectorHolder.constVisit(
+    std::visit(
         [&result, this, dimensionIndex1, dimensionIndex2](const auto& vec)
         {
             const auto resultSize = result.size();
@@ -276,7 +279,8 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
                 const auto n = i * _numDimensions;
                 result[i].set(vec[n + dimensionIndex1], vec[n + dimensionIndex2]);
             }
-        });
+        },
+        _variantOfVectors);
 }
 
 
@@ -287,7 +291,7 @@ void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, cons
 
     result.resize(indices.size());
 
-    _vectorHolder.constVisit(
+    std::visit(
         [&result, this, dimensionIndex1, dimensionIndex2, indices](const auto& vec)
         {
             const auto resultSize = result.size();
@@ -297,7 +301,8 @@ void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, cons
                 const auto n = std::size_t{ indices[i] } *_numDimensions;
                 result[i].set(vec[n + dimensionIndex1], vec[n + dimensionIndex2]);
             }
-        });
+        },
+        _variantOfVectors);
 }
 
 Points::Points(QString dataName, bool mayUnderive /*= true*/, const QString& guid /*= ""*/) :

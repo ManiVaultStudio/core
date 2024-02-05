@@ -22,7 +22,8 @@
 
 #include <array>
 #include <cassert>
-#include <utility> // For tuple.
+#include <utility>
+#include <variant>
 #include <vector>
 
 using namespace mv::plugin;
@@ -53,247 +54,129 @@ class ClusterAction;
 
 class POINTDATA_EXPORT PointData : public mv::plugin::RawData
 {
-private:
-
-    class VectorHolder
+public:
+    enum class ElementTypeSpecifier
     {
-    private:
-        using TupleOfVectors = std::tuple <
-            std::vector<float>,
-            std::vector<biovault::bfloat16_t>,
-            std::vector<std::int16_t>,
-            std::vector<std::uint16_t>,
-            std::vector<std::int8_t>,
-            std::vector<std::uint8_t> >;
-    public:
-        enum class ElementTypeSpecifier
-        {
-            float32,
-            bfloat16,
-            int16,
-            uint16,
-            int8,
-            uint8
-        };
-
-        static constexpr std::array<const char*, std::tuple_size<TupleOfVectors>::value> getElementTypeNames()
-        {
-            return
-            {{
-                "float32",
-                "bfloat16",
-                "int16",
-                "uint16",
-                "int8",
-                "uint8"
-            }};
-        }
-
-    private:
-         // Tuple of vectors. Only the vector whose value_type corresponds to _elementTypeSpecifier
-        // is selected. (The other vector is ignored, and could be cleared.) The vector stores the
-        // point data in dimension-major order
-        // Note: Instead of std::tuple, std::variant (from C++17) might be more appropriate, but at
-        // the moment of writing, C++17 may not yet be enabled system wide.
-        TupleOfVectors _tupleOfVectors;
-
-        // Specifies which vector is selected, based on its value_type.
-        ElementTypeSpecifier _elementTypeSpecifier{};
-
-        // Tries to find the element type specifier that corresponds to ElementType.
-        template <typename ElementType, typename Head, typename... Tail>
-        constexpr static ElementTypeSpecifier recursiveFindElementTypeSpecifier(
-            const std::tuple<Head, Tail...>*,
-            const int temp = 0)
-        {
-            using HeadValueType = typename Head::value_type;
-
-            if (std::is_same<ElementType, HeadValueType>::value)
-            {
-                return static_cast<ElementTypeSpecifier>(temp);
-            }
-            else
-            {
-                constexpr const std::tuple<Tail...>* tailNullptr{ nullptr };
-                return recursiveFindElementTypeSpecifier<ElementType>(tailNullptr, temp + 1);
-            }
-        }
-
-
-        template <typename ElementType>
-        constexpr static ElementTypeSpecifier recursiveFindElementTypeSpecifier(const std::tuple<>*, const int)
-        {
-            return ElementTypeSpecifier{}; // Should not occur!
-        }
-
-        template <typename ReturnType, typename VectorHolderType, typename FunctionObject, typename Head, typename... Tail>
-        static ReturnType recursiveVisit(VectorHolderType& vectorHolder, FunctionObject functionObject, const std::tuple<Head, Tail...>*)
-        {
-            using HeadValueType = typename Head::value_type;
-
-            if (vectorHolder.template isSameElementType<HeadValueType>())
-            {
-                return functionObject(vectorHolder.template getVector<HeadValueType>());
-            }
-            else
-            {
-                constexpr const std::tuple<Tail...>* tailNullptr{nullptr};
-                return recursiveVisit<ReturnType>(vectorHolder, functionObject, tailNullptr);
-            }
-        }
-
-        template <typename ReturnType, typename VectorHolderType, typename FunctionObject>
-        static ReturnType recursiveVisit(VectorHolderType&, FunctionObject&, const std::tuple<>*)
-        {
-            struct VisitException : std::exception
-            {
-                const char* what() const noexcept override
-                {
-                    return "visit error!";
-                }
-            };
-            throw VisitException{};
-        }
-
-    public:
-
-        /// Yields the n-th supported element type.
-        template <std::size_t N>
-        using ElementTypeAt = typename std::tuple_element_t<N, TupleOfVectors>::value_type;
-
-        /// Defaulted default-constructor. Ensures that the element type
-        /// specifier is default-initialized (to "float32").
-        VectorHolder() = default;
-
-        /// Explicit constructor that copies the specified vector into the
-        /// internal data structure. Ensures that the element type specifier
-        /// matches the value type of the vector.
-        template <typename T>
-        explicit VectorHolder(const std::vector<T>& vec)
-            :
-            _elementTypeSpecifier{ getElementTypeSpecifier<T>() }
-        {
-            std::get<std::vector<T>>(_tupleOfVectors) = vec;
-        }
-
-
-        /// Explicit constructor that efficiently "moves" the specified vector
-        /// into the internal data structure. Ensures that the element type
-        /// specifier matches the value type of the vector.
-        template <typename T>
-        explicit VectorHolder(std::vector<T>&& vec)
-            :
-            _elementTypeSpecifier{ getElementTypeSpecifier<T>() }
-        {
-            std::get<std::vector<T>>(_tupleOfVectors) = std::move(vec);
-        }
-
-
-        // Similar to C++17 std::visit.
-        template <typename ReturnType = void, typename FunctionObject>
-        ReturnType constVisit(FunctionObject functionObject) const
-        {
-            constexpr const TupleOfVectors* const tupleNullptr{nullptr};
-            return recursiveVisit<ReturnType>(*this, functionObject, tupleNullptr);
-        }
-
-
-        // Similar to C++17 std::visit.
-        template <typename ReturnType = void, typename FunctionObject>
-        ReturnType visit(FunctionObject functionObject)
-        {
-            constexpr const TupleOfVectors* const tupleNullptr{nullptr};
-            return recursiveVisit<ReturnType>(*this, functionObject, tupleNullptr);
-        }
-
-        template <typename T>
-        static constexpr ElementTypeSpecifier getElementTypeSpecifier()
-        {
-            constexpr const TupleOfVectors* const tupleNullptr{ nullptr };
-            return recursiveFindElementTypeSpecifier<T>(tupleNullptr);
-        }
-
-        template <typename T>
-        bool isSameElementType() const
-        {
-            constexpr auto elementTypeSpecifier = getElementTypeSpecifier<T>();
-            return elementTypeSpecifier == _elementTypeSpecifier;
-        }
-
-        template <typename T>
-        const std::vector<T>& getConstVector() const
-        {
-            // This function should only be used to access the currently selected vector.
-            assert(isSameElementType<T>());
-            return std::get<std::vector<T>>(_tupleOfVectors);
-        }
-
-        template <typename T>
-        const std::vector<T>& getVector() const
-        {
-            return getConstVector<T>();
-        }
-
-        template <typename T>
-        std::vector<T>& getVector()
-        {
-            return const_cast<std::vector<T>&>(getConstVector<T>());
-        }
-
-        /// Just forwarding to the corresponding member function of the currently selected std::vector.
-        std::size_t size() const
-        {
-            return constVisit<std::size_t>([] (const auto& vec){ return vec.size(); });
-        }
-
-        /// Just forwarding to the corresponding member function of the currently selected std::vector.
-        void resize(const std::size_t newSize)
-        {
-            visit([newSize](auto& vec) { vec.resize(newSize); });
-        }
- 
-        /// Just forwarding to the corresponding member function of the currently selected std::vector.
-        void clear()
-        {
-            visit([](auto& vec) { return vec.clear(); });
-        }
-
-        /// Just forwarding to the corresponding member function of the currently selected std::vector.
-        void shrink_to_fit()
-        {
-            visit([](auto& vec) { return vec.shrink_to_fit(); });
-        }
-
-        void setElementTypeSpecifier(const ElementTypeSpecifier elementTypeSpecifier)
-        {
-            _elementTypeSpecifier = elementTypeSpecifier;
-        }
- 
-        ElementTypeSpecifier getElementTypeSpecifier() const
-        {
-            return _elementTypeSpecifier;
-        }
-
-
-        /// Resizes the currently active internal data vector to the specified
-        /// number of elements, and converts the elements of the specified data
-        /// to the internal data element type, by static_cast. 
-        template <typename T>
-        void convertData(const T* const data, const std::size_t numberOfElements)
-        {
-            resize(numberOfElements);
-
-            visit([data](auto& vec)
-            {
-                std::size_t i{};
-                for (auto& elem: vec)
-                {
-                    elem = static_cast<std::remove_reference_t<decltype(elem)>>(data[i]);
-                    ++i;
-                }
-            });
-        }
+        float32,
+        bfloat16,
+        int16,
+        uint16,
+        int8,
+        uint8
     };
+
+private:
+    using VariantOfVectors = std::variant <
+        std::vector<float>,
+        std::vector<biovault::bfloat16_t>,
+        std::vector<std::int16_t>,
+        std::vector<std::uint16_t>,
+        std::vector<std::int8_t>,
+        std::vector<std::uint8_t> >;
+
+    // Sets the index of the specified variant. If the new index is different from the previous one, the value will be reset. 
+    // Inspired by `expand_type` from kmbeutel at
+    // https://www.reddit.com/r/cpp/comments/f8cbzs/creating_stdvariant_based_on_index_at_runtime/?rdt=52905
+    template <typename... Alternatives>
+    static void setIndexOfVariant(std::variant<Alternatives...> var, std::size_t index)
+    {
+        if (index != var.index())
+        {
+            assert(index < sizeof...(Alternatives));
+            const std::variant<Alternatives...> variants[] = { Alternatives{ }... };
+            var = variants[index];
+        }
+    }
+
+
+    // Returns the index of the specified alternative: the position of the alternative type withing the variant.
+    // Inspired by `variant_index` from Bargor at
+    // https://stackoverflow.com/questions/52303316/get-index-by-type-in-stdvariant
+    template<typename Variant, typename Alternative, std::size_t index = 0>
+    static constexpr std::size_t getIndexOfVariantAlternative()
+    {
+        static_assert(index < std::variant_size_v<Variant>);
+
+        if constexpr (std::is_same_v<std::variant_alternative_t<index, Variant>, Alternative>)
+        {
+            return index;
+        }
+        else
+        {
+            return getIndexOfVariantAlternative<Variant, Alternative, index + 1>();
+        }
+    }
+
+
+    template <typename T>
+    static constexpr ElementTypeSpecifier getElementTypeSpecifier()
+    {
+        constexpr auto index = getIndexOfVariantAlternative<VariantOfVectors, std::vector<T>>();
+        return static_cast<ElementTypeSpecifier>(index);
+    }
+
+    template <typename T>
+    const std::vector<T>& getConstVector() const
+    {
+        // This function should only be used to access the currently selected vector.
+        assert(std::holds_alternative<std::vector<T>>(_variantOfVectors));
+        return std::get<std::vector<T>>(_variantOfVectors);
+    }
+
+    template <typename T>
+    const std::vector<T>& getVector() const
+    {
+        return getConstVector<T>();
+    }
+
+    template <typename T>
+    std::vector<T>& getVector()
+    {
+        return const_cast<std::vector<T>&>(getConstVector<T>());
+    }
+
+    /// Returns the size of the std::vector currently held by _variantOfVectors.
+    std::size_t getSizeOfVector() const
+    {
+        return std::visit([](const auto& vec) { return vec.size(); }, _variantOfVectors);
+    }
+
+    /// Resizes the std::vector currently held by _variantOfVectors.
+    void resizeVector(const std::size_t newSize)
+    {
+        std::visit([newSize](auto& vec) { vec.resize(newSize); }, _variantOfVectors);
+    }
+
+    void setElementTypeSpecifier(const ElementTypeSpecifier elementTypeSpecifier)
+    {
+        setIndexOfVariant(_variantOfVectors, static_cast<std::size_t>(elementTypeSpecifier));
+    }
+
+    ElementTypeSpecifier getElementTypeSpecifier() const
+    {
+        return static_cast<ElementTypeSpecifier>(_variantOfVectors.index());
+    }
+
+
+    /// Resizes the currently held data vector to the specified
+    /// number of elements, and converts the elements of the specified data
+    /// to the internal data element type, by static_cast. 
+    template <typename T>
+    void convertData(const T* const data, const std::size_t numberOfElements)
+    {
+        std::visit([data, numberOfElements](auto& vec)
+        {
+            vec.resize(numberOfElements);
+
+            std::size_t i{};
+            for (auto& elem: vec)
+            {
+                elem = static_cast<std::remove_reference_t<decltype(elem)>>(data[i]);
+                ++i;
+            }
+        },
+        _variantOfVectors);
+    }
 
 
     template <typename DimensionIndex>
@@ -313,12 +196,10 @@ private:
     }
 
 public:
-    using ElementTypeSpecifier = VectorHolder::ElementTypeSpecifier;
-
     /// Yields the n-th supported element type. Corresponds to the n-th entry
     /// in the array of type names, returned by getElementTypeNames().
     template <std::size_t N>
-    using ElementTypeAt = VectorHolder::ElementTypeAt<N>;
+    using ElementTypeAt = typename std::variant_alternative_t<N, VariantOfVectors>::value_type;
 
     PointData(PluginFactory* factory) : RawData(factory, PointType) { }
     ~PointData(void) override;
@@ -340,7 +221,7 @@ public:
     std::uint64_t getRawDataSize() const override {
         std::uint64_t elementSize = 0u;
 
-        switch (_vectorHolder.getElementTypeSpecifier())
+        switch (getElementTypeSpecifier())
         {
             case ElementTypeSpecifier::float32:
                 elementSize = 4u;
@@ -364,24 +245,39 @@ public:
         return elementSize * getNumPoints() * getNumDimensions();
     }
 
+    static constexpr std::array<const char*, std::variant_size_v<VariantOfVectors>> getElementTypeNames()
+    {
+        return
+        { {
+            "float32",
+            "bfloat16",
+            "int16",
+            "uint16",
+            "int8",
+            "uint8"
+        } };
+    }
+
     // Similar to C++17 std::visit.
     template <typename ReturnType = void, typename FunctionObject>
     ReturnType constVisitFromBeginToEnd(FunctionObject functionObject) const
     {
-        return _vectorHolder.constVisit<ReturnType>([functionObject](const auto& vec)
+        return std::visit([functionObject](const auto& vec) -> ReturnType
             {
                 return functionObject(std::cbegin(vec), std::cend(vec));
-            });
+            },
+            _variantOfVectors);
     }
 
     // Similar to C++17 std::visit.
     template <typename ReturnType = void, typename FunctionObject>
     ReturnType visitFromBeginToEnd(FunctionObject functionObject)
     {
-        return _vectorHolder.visit<ReturnType>([functionObject](auto& vec)
+        return std::visit([functionObject](auto& vec) -> ReturnType
             {
                 return functionObject(std::begin(vec), std::end(vec));
-            });
+            },
+            _variantOfVectors);
     }
 
     void extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
@@ -392,7 +288,7 @@ public:
     void populateFullDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
     {
         CheckDimensionIndices(dimensionIndices);
-        _vectorHolder.constVisit([&resultContainer, this, &dimensionIndices](const auto& vec)
+        std::visit([&resultContainer, this, &dimensionIndices](const auto& vec)
             {
                 const std::ptrdiff_t numPoints{ getNumPoints() };
                 std::ptrdiff_t resultIndex{};
@@ -407,7 +303,8 @@ public:
                         ++resultIndex;
                     }
                 }
-            });
+            },
+            _variantOfVectors);
     }
 
     template <typename ResultContainer, typename DimensionIndices, typename Indices>
@@ -415,7 +312,7 @@ public:
     {
         CheckDimensionIndices(dimensionIndices);
 
-        _vectorHolder.constVisit([&resultContainer, this, &dimensionIndices, &indices](const auto& vec)
+        std::visit([&resultContainer, this, &dimensionIndices, &indices](const auto& vec)
             {
                 const std::ptrdiff_t numPoints{ static_cast<std::uint32_t>(indices.size()) };
                 std::ptrdiff_t resultIndex{};
@@ -430,36 +327,27 @@ public:
                         ++resultIndex;
                     }
                 }
-            });
+            },
+            _variantOfVectors);
     }
 
     const std::vector<QString>& getDimensionNames() const;
 
-    static constexpr auto getElementTypeNames()
-    {
-        return VectorHolder::getElementTypeNames();
-    }
-
     /// Returns the number of types, supported as element type of the internal data storage. 
     static constexpr auto getNumberOfSupportedElementTypes()
     {
-        return VectorHolder::getElementTypeNames().size();
+        return getElementTypeNames().size();
     }
 
     void setElementType(const ElementTypeSpecifier elementTypSpecifier)
     {
-        if (_vectorHolder.getElementTypeSpecifier() != elementTypSpecifier)
-        {
-            _vectorHolder.clear();
-            _vectorHolder.shrink_to_fit();
-            _vectorHolder.setElementTypeSpecifier(elementTypSpecifier);
-        }
+        setElementTypeSpecifier(elementTypSpecifier);
     }
 
     template <typename T>
     void setElementType()
     {
-        constexpr auto elementTypSpecifier = VectorHolder::getElementTypeSpecifier<T>();
+        constexpr auto elementTypSpecifier = getElementTypeSpecifier<T>();
         setElementType(elementTypSpecifier);
     }
 
@@ -471,7 +359,7 @@ public:
     template <typename T>
     void convertData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
-        _vectorHolder.convertData(data, numPoints * numDimensions);
+        convertData(data, numPoints * numDimensions);
         _numDimensions = static_cast<std::uint32_t>(numDimensions);
     }
 
@@ -481,7 +369,7 @@ public:
     template <typename T>
     void convertData(const T& inputDataContainer, const std::size_t numDimensions)
     {
-        _vectorHolder.convertData(inputDataContainer.data(), inputDataContainer.size());
+        convertData(inputDataContainer.data(), inputDataContainer.size());
         _numDimensions = static_cast<std::uint32_t>(numDimensions);
     }
 
@@ -491,7 +379,7 @@ public:
     template <typename T>
     void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
-         _vectorHolder = VectorHolder( std::vector<T>(data, data + numPoints * numDimensions) );
+         _variantOfVectors = VariantOfVectors( std::vector<T>(data, data + numPoints * numDimensions) );
          _numDimensions = static_cast<std::uint32_t>(numDimensions);
     }
 
@@ -506,7 +394,7 @@ public:
     template <typename T>
     void setData(const std::vector<T>& data, const std::size_t numDimensions)
     {
-        _vectorHolder = VectorHolder(data);
+        _variantOfVectors = VariantOfVectors(data);
         _numDimensions = static_cast<unsigned int>(numDimensions);
     }
 
@@ -516,7 +404,7 @@ public:
     template <typename T>
     void setData(std::vector<T>&& data, const std::size_t numDimensions)
     {
-        _vectorHolder = VectorHolder(std::move(data));
+        _variantOfVectors = VariantOfVectors(std::move(data));
         _numDimensions = static_cast<unsigned int>(numDimensions);
     }
 
@@ -547,7 +435,7 @@ public:
     virtual QVariantMap toVariantMap() const final;
 
 private:
-    VectorHolder _vectorHolder;
+    VariantOfVectors _variantOfVectors;
 
     /** Number of features of each data point */
     unsigned int _numDimensions = 1;
