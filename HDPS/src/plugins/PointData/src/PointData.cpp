@@ -64,7 +64,7 @@ std::uint32_t PointData::getNumDimensions() const
 
 std::uint64_t PointData::getNumberOfElements() const
 {
-    return _vectorHolder.size();
+    return getSizeOfVector();
 }
 
 const std::vector<QString>& PointData::getDimensionNames() const
