@@ -247,7 +247,7 @@ QWidget* AbstractDataHierarchyModel::ProgressItem::createDelegateEditorWidget(QW
 }
 
 AbstractDataHierarchyModel::GroupIndexItem::GroupIndexItem(Dataset<DatasetImpl> dataset) :
-    Item(dataset)
+    Item(dataset, true)
 {
 }
 
