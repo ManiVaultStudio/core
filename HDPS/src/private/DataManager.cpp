@@ -237,13 +237,27 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         if (!dataset.isValid())
             throw std::runtime_error("Dataset smart pointer is invalid");
 
+        if (dataset->isLocked()) {
+
+#ifdef DATA_MANAGER_VERBOSE
+            qDebug() << "Dataset is locked and will be removed as soon as it is un-locked";
+#endif
+
+            connect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, [this, dataset](bool locked) -> void {
+                disconnect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, nullptr);
+
+                if (!locked)
+                    removeDataset(dataset);
+            });
+        }
+
         const auto datasetId    = dataset->getId();
         const auto datasetType  = dataset->getDataType();
         const auto rawDataName  = dataset->getRawDataName();
 
         dataset->setAboutToBeRemoved();
 
-        removeSelections(rawDataName);
+        removeSelections(getSelection(rawDataName)->getRawDataName());
 
         for (const auto& underiveDataset : _datasets) {
             if (underiveDataset->isDerivedData() && underiveDataset->getNextSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {

@@ -42,6 +42,11 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
     if (projects().isOpeningProject() || projects().isImportingProject())
         return;
 
+    const auto lockSelectedDataHierarchyItems = [this](bool locked) -> void {
+        for (auto selectedDataHierarchyItem : _selectedDataHierarchyItems)
+            selectedDataHierarchyItem->setLocked(locked);
+    };
+
     for (auto selectedDataHierarchyItem : _selectedDataHierarchyItems)
         disconnect(&selectedDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, nullptr);
 
@@ -55,59 +60,63 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
         });
     }
 
-    try
+    lockSelectedDataHierarchyItems(true);
     {
-        if (_selectedDataHierarchyItems.isEmpty()) {
-            _groupsAction.setGroupActions({});
-        }
-        else {
-            GroupsAction::GroupActions groupActions;
+        try
+        {
+            if (_selectedDataHierarchyItems.isEmpty()) {
+                _groupsAction.setGroupActions({});
+            }
+            else {
+                GroupsAction::GroupActions groupActions;
 
-            _groupsActionWidget->setEnabled(_selectedDataHierarchyItems.count() == 1);
+                _groupsActionWidget->setEnabled(_selectedDataHierarchyItems.count() == 1);
 
-            if (_selectedDataHierarchyItems.count() == 1) {
-                auto dataset = _selectedDataHierarchyItems.first()->getDataset();
+                if (_selectedDataHierarchyItems.count() == 1) {
+                    auto dataset = _selectedDataHierarchyItems.first()->getDataset();
 
-                if (dataset.isValid())
-                    disconnect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
+                    if (dataset.isValid())
+                        disconnect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
 
-                if (dataset.isValid())
-                {
-                    connect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
-                        auto groupAction = dynamic_cast<GroupAction*>(&widgetAction);
+                    if (dataset.isValid())
+                    {
+                        connect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
+                            auto groupAction = dynamic_cast<GroupAction*>(&widgetAction);
 
-                        if (groupAction)
-                            _groupsAction.addGroupAction(groupAction);
-                     });
-                }
+                            if (groupAction)
+                                _groupsAction.addGroupAction(groupAction);
+                        });
+                    }
 
-                if (!dataset.isValid())
-                    return;
+                    if (!dataset.isValid())
+                        return;
 
 #ifdef _DEBUG
-                qDebug().noquote() << QString("Loading %1 into data properties").arg(dataset->text());
+                    qDebug().noquote() << QString("Loading %1 into data properties").arg(dataset->text());
 #endif
 
-                for (auto childObject : dataset->children()) {
-                    auto groupAction = dynamic_cast<GroupAction*>(childObject);
+                    for (auto childObject : dataset->children()) {
+                        auto groupAction = dynamic_cast<GroupAction*>(childObject);
 
-                    if (groupAction)
-                        groupActions << groupAction;
+                        if (groupAction)
+                            groupActions << groupAction;
+                    }
+
+                    _groupsActionWidget->getFilteredActionsAction().setShowLabels(true);
                 }
 
-                _groupsActionWidget->getFilteredActionsAction().setShowLabels(true);
+                _groupsAction.setGroupActions(groupActions);
+
+                QCoreApplication::processEvents();
             }
-
-            _groupsAction.setGroupActions(groupActions);
-
-            QCoreApplication::processEvents();
+        }
+        catch (std::exception& e)
+        {
+            exceptionMessageBox("Cannot update data properties", e);
+        }
+        catch (...) {
+            exceptionMessageBox("Cannot update data properties");
         }
     }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Cannot update data properties", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Cannot update data properties");
-    }
+    lockSelectedDataHierarchyItems(false);
 }
