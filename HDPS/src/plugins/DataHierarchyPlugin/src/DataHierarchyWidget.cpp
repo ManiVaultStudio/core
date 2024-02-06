@@ -199,7 +199,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     settingsGroupAction.setVisible(true);
     settingsGroupAction.setShowLabels(false);
 
-    auto& groupingAction = mv::data().getDatasetGroupingAction();
+    auto& groupingAction = mv::data().getSelectionGroupingAction();
 
     settingsGroupAction.addAction(&groupingAction);
     settingsGroupAction.addAction(&_resetAction);
@@ -216,7 +216,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::DatasetId), true);
     treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::RawDataId), true);
     treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::SourceDatasetId), true);
-    treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::GroupIndex), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::SelectionGroupIndex), true);
     treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible), true);
 
     auto treeViewHeader = treeView.header();
@@ -225,7 +225,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeViewHeader->setMinimumSectionSize(18);
 
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::Name, 180);
-    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::GroupIndex, 60);
+    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::SelectionGroupIndex, 60);
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsVisible, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsGroup, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsLocked, treeViewHeader->minimumSectionSize());
@@ -234,7 +234,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::Name, QHeaderView::Interactive);
     treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::DatasetId, QHeaderView::Interactive);
     treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::RawDataId, QHeaderView::Interactive);
-    treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::GroupIndex, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::SelectionGroupIndex, QHeaderView::Fixed);
     treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::Progress, QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::IsVisible, QHeaderView::Fixed);
     treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::IsGroup, QHeaderView::Fixed);
@@ -396,7 +396,7 @@ void DataHierarchyWidget::updateColumnsVisibility()
 {
     auto& treeView = _hierarchyWidget.getTreeView();
 
-    treeView.setColumnHidden(AbstractDataHierarchyModel::Column::GroupIndex, !mv::data().getDatasetGroupingAction().isChecked());
+    treeView.setColumnHidden(AbstractDataHierarchyModel::Column::SelectionGroupIndex, !mv::data().getSelectionGroupingAction().isChecked());
 }
 
 void DataHierarchyWidget::updateDataHierarchyItemExpansion(const QModelIndex& modelIndex /*= QModelIndex()*/)

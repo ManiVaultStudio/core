@@ -355,7 +355,7 @@ void Points::init()
                     return;
 
                 // Only synchronize when dataset grouping is enabled and our own group index is non-negative
-                if (!mv::data().getDatasetGroupingAction().isChecked() || getGroupIndex() < 0)
+                if (!mv::data().getSelectionGroupingAction().isChecked() || getGroupIndex() < 0)
                     return;
 
                 // Only synchronize of the group indexes match

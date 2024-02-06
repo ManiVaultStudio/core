@@ -257,7 +257,7 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 
         dataset->setAboutToBeRemoved();
 
-        removeSelections(getSelection(rawDataName)->getRawDataName());
+        //removeSelections(getSelection(rawDataName)->getRawDataName());
 
         for (const auto& underiveDataset : _datasets) {
             if (underiveDataset->isDerivedData() && underiveDataset->getNextSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
