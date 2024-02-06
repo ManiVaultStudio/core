@@ -514,6 +514,16 @@ QMimeData* AbstractDataHierarchyModel::mimeData(const QModelIndexList& indexes) 
     return new DatasetsMimeData(datasets);
 }
 
+QModelIndex AbstractDataHierarchyModel::getModelIndex(const QString& datasetId, Column column /*= Column::Name*/) const
+{
+    const auto matches = match(index(0, static_cast<int>(AbstractDataHierarchyModel::Column::Name)), Qt::EditRole, datasetId, 1, Qt::MatchRecursive | Qt::MatchExactly);
+
+    if (matches.isEmpty())
+        return {};
+
+    return matches.first().siblingAtColumn(static_cast<int>(column));
+}
+
 void AbstractDataHierarchyModel::hideItem(const QModelIndex& index)
 {
     setData(index.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)), false, Qt::EditRole);

@@ -122,6 +122,12 @@ public: // Dataset remove
      */
     void removeDatasets(Datasets datasets) override;
 
+    /**
+     * Remove datasets that reference \p rawDataName from the manager
+     * @param @param rawDataName Name of the raw data
+     */
+    void removeDatasets(const QString& rawDataName) override;
+
 public:// Derived datasets
 
     /**

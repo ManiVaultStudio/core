@@ -142,6 +142,12 @@ public: // Dataset remove
      */
     virtual void removeDatasets(Datasets datasets) = 0;
 
+    /**
+     * Remove datasets that reference \p rawDataName from the manager
+     * @param @param rawDataName Name of the raw data
+     */
+    virtual void removeDatasets(const QString& rawDataName) = 0;
+
 public:// Derived datasets
 
     /**

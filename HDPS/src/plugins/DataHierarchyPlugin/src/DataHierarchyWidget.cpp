@@ -260,8 +260,10 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
             auto item = _treeModel.getItem<AbstractDataHierarchyModel::Item>(persistentNameModelIndex);
 
-            connect(&item->getDataset()->getDataHierarchyItem(), &DataHierarchyItem::expandedChanged, this, [this, persistentNameModelIndex]() -> void {
-                updateDataHierarchyItemExpansion(persistentNameModelIndex);
+            const auto datasetId = item->getDataset()->getId();
+
+            connect(&item->getDataset()->getDataHierarchyItem(), &DataHierarchyItem::expandedChanged, this, [this, datasetId]() -> void {
+                updateDataHierarchyItemExpansion(_treeModel.getModelIndex(datasetId));
             });
 
             connect(&item->getDataset()->getDataHierarchyItem(), &DataHierarchyItem::selectedChanged, this, [this, persistentNameModelIndex](bool selected) -> void {
@@ -402,7 +404,7 @@ void DataHierarchyWidget::updateDataHierarchyItemExpansion(const QModelIndex& mo
     try
     {
         if (!modelIndex.isValid())
-            throw std::runtime_error("Supplied model index is invalid");
+            return;
 
         auto modelItem = _treeModel.getItem(modelIndex);
 

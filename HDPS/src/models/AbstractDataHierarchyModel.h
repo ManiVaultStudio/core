@@ -572,6 +572,14 @@ public:
     }
 
     /**
+     * Get model index for \p datasetId and \p column
+     * @param datasetId Globally unique identifier to search for
+     * @param column Model index column
+     * return Model index (invalid if not found)
+     */
+    QModelIndex getModelIndex(const QString& datasetId, Column column = Column::Name) const;
+
+    /**
      * Hides item with \p index and its descendants
      * @param index Index of the item to hide (column index must be zero)
      */

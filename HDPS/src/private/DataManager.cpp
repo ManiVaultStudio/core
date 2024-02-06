@@ -106,12 +106,6 @@ void DataManager::removeRawData(const QString& rawDataName)
 {
     try
     {
-        auto numberOfConnectedDatasets      = std::count_if(_datasets.begin(), _datasets.end(), [rawDataName](const auto& dataset) -> int { return dataset->getRawDataName() == rawDataName; });
-        auto numberOfConnectedSelections    = std::count_if(_selections.begin(), _selections.end(), [rawDataName](const auto& dataset) -> int { return dataset->getRawDataName() == rawDataName; });
-
-        if ((numberOfConnectedDatasets + numberOfConnectedSelections) > 0)
-            return;
-
 #ifdef DATA_MANAGER_VERBOSE
         qDebug() << "Remove raw data" << rawDataName << "from the data manager";
 #endif
@@ -120,8 +114,6 @@ void DataManager::removeRawData(const QString& rawDataName)
 
         if (it == _rawDataMap.end())
             throw std::runtime_error(QString("Raw data with name %1 not found").arg(rawDataName).toStdString());
-
-        removeSelections(rawDataName);
 
         emit rawDataAboutToBeRemoved(_rawDataMap[rawDataName]);
         {
@@ -245,13 +237,13 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         if (!dataset.isValid())
             throw std::runtime_error("Dataset smart pointer is invalid");
 
-        const auto datasetId        = dataset->getId();
-        const auto datasetType      = dataset->getDataType();
-        const auto rawDatasetName   = dataset->getRawDataName();
+        const auto datasetId    = dataset->getId();
+        const auto datasetType  = dataset->getDataType();
+        const auto rawDataName  = dataset->getRawDataName();
 
         dataset->setAboutToBeRemoved();
 
-        removeSelections(rawDatasetName);
+        removeSelections(rawDataName);
 
         for (const auto& underiveDataset : _datasets) {
             if (underiveDataset->isDerivedData() && underiveDataset->getNextSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
@@ -294,7 +286,11 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         }
         events().notifyDatasetRemoved(datasetId, datasetType);
 
-        removeRawData(rawDatasetName);
+        auto numberOfConnectedDatasets      = std::count_if(_datasets.begin(), _datasets.end(), [rawDataName](const auto& dataset) -> int { return dataset->getRawDataName() == rawDataName; });
+        auto numberOfConnectedSelections    = std::count_if(_selections.begin(), _selections.end(), [rawDataName](const auto& dataset) -> int { return dataset->getRawDataName() == rawDataName; });
+
+        if ((numberOfConnectedDatasets + numberOfConnectedSelections) == 0)
+            removeRawData(rawDataName);
     }
     catch (std::exception& e)
     {
@@ -387,6 +383,15 @@ void DataManager::removeDatasets(Datasets datasets)
     catch (...) {
         exceptionMessageBox("Unable to remove dataset supervised");
     }
+}
+
+void DataManager::removeDatasets(const QString& rawDataName)
+{
+    Datasets datasetsToRemove;
+
+    for (const auto& dataset : _datasets)
+        if (dataset->getRawDataName() == rawDataName)
+            removeDataset(dataset.get());
 }
 
 Dataset<DatasetImpl> DataManager::createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, bool notify /*= true*/)
