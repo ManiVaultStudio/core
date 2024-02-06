@@ -30,9 +30,9 @@ using namespace plugin;
 
 DataManager::DataManager(QObject* parent /*= nullptr*/) :
     AbstractDataManager(parent),
-    _datasetGroupingAction(this, "Dataset grouping")
+    _selectionGroupingAction(this, "Selection grouping")
 {
-    _datasetGroupingAction.setSettingsPrefix(getSettingsPrefix() + "DatasetGroupingEnabled");
+    _selectionGroupingAction.setSettingsPrefix(getSettingsPrefix() + "DatasetGroupingEnabled");
 }
 
 DataManager::~DataManager()
@@ -661,17 +661,17 @@ mv::Dataset<mv::DatasetImpl> DataManager::groupDatasets(const Datasets& datasets
     return Dataset<DatasetImpl>();
 }
 
-ToggleAction& DataManager::getDatasetGroupingAction()
+ToggleAction& DataManager::getSelectionGroupingAction()
 {
-    return _datasetGroupingAction;
+    return _selectionGroupingAction;
 }
 
 void DataManager::fromVariantMap(const QVariantMap& variantMap)
 {
     AbstractDataManager::fromVariantMap(variantMap);
 
-    if (variantMap.contains(_datasetGroupingAction.getSerializationName()))
-        _datasetGroupingAction.fromParentVariantMap(variantMap);
+    if (variantMap.contains(_selectionGroupingAction.getSerializationName()))
+        _selectionGroupingAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap DataManager::toVariantMap() const
@@ -681,7 +681,7 @@ QVariantMap DataManager::toVariantMap() const
     for (auto& dataset : _datasets)
         variantMap[dataset->getId()] = dataset->toVariantMap();
 
-    _datasetGroupingAction.insertIntoVariantMap(variantMap);
+    _selectionGroupingAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

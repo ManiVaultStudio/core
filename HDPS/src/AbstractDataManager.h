@@ -270,7 +270,7 @@ protected: // Selection
      */
     virtual void removeSelections(const QString& rawDataName) = 0;
 
-public: // Data grouping
+public: // Dataset and selection grouping
 
     /**
      * Groups \p datasets into one dataset and returns the group dataset
@@ -281,10 +281,10 @@ public: // Data grouping
     virtual Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") = 0;
 
     /**
-     * Get dataset grouping toggle action
-     * @return Reference to dataset grouping toggle action
+     * Get selection grouping toggle action
+     * @return Reference to selection grouping toggle action
      */
-    virtual gui::ToggleAction& getDatasetGroupingAction() = 0;
+    virtual gui::ToggleAction& getSelectionGroupingAction() = 0;
 
 signals:
 

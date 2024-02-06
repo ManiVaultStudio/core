@@ -246,12 +246,12 @@ QWidget* AbstractDataHierarchyModel::ProgressItem::createDelegateEditorWidget(QW
     return _taskAction.getProgressAction().createWidget(parent);
 }
 
-AbstractDataHierarchyModel::GroupIndexItem::GroupIndexItem(Dataset<DatasetImpl> dataset) :
+AbstractDataHierarchyModel::SelectionGroupIndexItem::SelectionGroupIndexItem(Dataset<DatasetImpl> dataset) :
     Item(dataset, true)
 {
 }
 
-QVariant AbstractDataHierarchyModel::GroupIndexItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractDataHierarchyModel::SelectionGroupIndexItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -261,7 +261,7 @@ QVariant AbstractDataHierarchyModel::GroupIndexItem::data(int role /*= Qt::UserR
             return QString::number(data(Qt::EditRole).toInt());
 
         case Qt::ToolTipRole:
-            return "Dataset group index: " + data(Qt::DisplayRole).toString();
+            return "Selection group index: " + data(Qt::DisplayRole).toString();
 
         case Qt::TextAlignmentRole:
             return static_cast<std::int32_t>(Qt::AlignVCenter | Qt::AlignRight);
@@ -273,7 +273,7 @@ QVariant AbstractDataHierarchyModel::GroupIndexItem::data(int role /*= Qt::UserR
     return Item::data(role);
 }
 
-void AbstractDataHierarchyModel::GroupIndexItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
+void AbstractDataHierarchyModel::SelectionGroupIndexItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
 {
     switch (role) {
         case Qt::EditRole:
@@ -441,7 +441,7 @@ AbstractDataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
     append(new RawDataIdItem(dataset));
     append(new SourceDatasetIdItem(dataset));
     append(new ProgressItem(dataset));
-    append(new GroupIndexItem(dataset));
+    append(new SelectionGroupIndexItem(dataset));
     append(new IsVisibleItem(dataset));
     append(new IsGroupItem(dataset));
     append(new IsLockedItem(dataset));
@@ -481,8 +481,8 @@ QVariant AbstractDataHierarchyModel::headerData(int section, Qt::Orientation ori
         case Column::Progress:
             return ProgressItem::headerData(orientation, role);
 
-        case Column::GroupIndex:
-            return GroupIndexItem::headerData(orientation, role);
+        case Column::SelectionGroupIndex:
+            return SelectionGroupIndexItem::headerData(orientation, role);
 
         case Column::IsVisible:
             return IsVisibleItem::headerData(orientation, role);

@@ -202,7 +202,7 @@ protected:
      */
     void removeSelections(const QString& rawDataName) override;
 
-public: // Data grouping
+public: // Dataset and selection grouping
 
     /**
      * Groups \p datasets into one dataset and returns the group dataset
@@ -213,10 +213,10 @@ public: // Data grouping
     Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") override;
 
     /**
-     * Get dataset grouping toggle action
-     * @return Reference to dataset grouping toggle action
+     * Get selection grouping toggle action
+     * @return Reference to selection grouping toggle action
      */
-    gui::ToggleAction& getDatasetGroupingAction() override;
+    gui::ToggleAction& getSelectionGroupingAction() override;
 
 public: // Serialization
 
@@ -236,7 +236,7 @@ private:
     std::unordered_map<QString, plugin::RawData*>   _rawDataMap;                /** Maps raw data name to raw data plugin shared pointer (the plugins are owned by the plugin manager) */
     std::vector<std::unique_ptr<DatasetImpl>>       _datasets;                  /** Vector of pointers to datasets */
     std::vector<std::unique_ptr<DatasetImpl>>       _selections;                /** Vector of pointers to selection datasets */
-    gui::ToggleAction                               _datasetGroupingAction;     /** Action for toggling whether datasets can be grouped or not */
+    gui::ToggleAction                               _selectionGroupingAction;   /** Action for toggling whether dataset selection groupin is enabled or not */
 };
 
 }

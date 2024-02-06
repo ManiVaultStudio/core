@@ -30,17 +30,17 @@ public:
 
     /** Dataset columns */
     enum Column {
-        Name,               /** Name of the dataset */
-        Location,           /** Location of the dataset */
-        DatasetId,          /** Globally unique dataset identifier */
-        RawDataId,          /** Globally unique identifier of the associated raw data */
-        SourceDatasetId,    /** Globally unique dataset identifier of the source dataset (if this dataset is derived) */
-        Progress,           /** Task progress in percentage */
-        GroupIndex,         /** Dataset group index */
-        IsVisible,          /** Whether the dataset is visible or not */
-        IsGroup,            /** Whether the dataset is composed of other datasets */
-        IsLocked,           /** Whether the dataset is locked */
-        IsDerived,          /** Whether the dataset is derived from another dataset */
+        Name,                   /** Name of the dataset */
+        Location,               /** Location of the dataset */
+        DatasetId,              /** Globally unique dataset identifier */
+        RawDataId,              /** Globally unique identifier of the associated raw data */
+        SourceDatasetId,        /** Globally unique dataset identifier of the source dataset (if this dataset is derived) */
+        Progress,               /** Task progress in percentage */
+        SelectionGroupIndex,    /** Dataset selection group index */
+        IsVisible,              /** Whether the dataset is visible or not */
+        IsGroup,                /** Whether the dataset is composed of other datasets */
+        IsLocked,               /** Whether the dataset is locked */
+        IsDerived,              /** Whether the dataset is derived from another dataset */
 
         Count
     };
@@ -332,15 +332,15 @@ public:
 
 protected:
 
-    /** Standard model item class for displaying the dataset group index */
-    class GroupIndexItem final : public Item {
+    /** Standard model item class for displaying the selection group index */
+    class SelectionGroupIndexItem final : public Item {
     public:
 
         /**
          * Construct with \p dataset
          * @param dataset Pointer to dataset to display item for
          */
-        GroupIndexItem(Dataset<DatasetImpl> dataset);
+        SelectionGroupIndexItem(Dataset<DatasetImpl> dataset);
 
         /**
          * Get model data for \p role
@@ -363,10 +363,10 @@ protected:
                     return "";
 
                 case Qt::EditRole:
-                    return "Group index";
+                    return "Selection group index";
 
                 case Qt::ToolTipRole:
-                    return "The dataset group index";
+                    return "The selection group index";
             }
 
             return {};
