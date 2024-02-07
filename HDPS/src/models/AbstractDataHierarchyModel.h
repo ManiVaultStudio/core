@@ -41,6 +41,7 @@ public:
         IsGroup,                /** Whether the dataset is composed of other datasets */
         IsLocked,               /** Whether the dataset is locked */
         IsDerived,              /** Whether the dataset is derived from another dataset */
+        IsSubset,               /** Whether the dataset is a subset or not */
 
         Count
     };
@@ -520,6 +521,58 @@ protected:
 
             return {};
         }
+    };
+
+    /** Standard model item class for displaying whether the dataset is a subset of another dataset */
+    class IsSubsetItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         */
+        IsSubsetItem(Dataset<DatasetImpl> dataset);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                    return "";
+
+                case Qt::EditRole:
+                    return "Is a subset";
+
+                case Qt::ToolTipRole:
+                    return "Whether the dataset is a subset of another dataset";
+            }
+
+            return {};
+        }
+
+    private:
+        void createFullIcon();
+        void createSubsetIcon();
+
+        /**
+         * Draw extents in \p painter
+         * @param painter Reference to painter to draw in
+         */
+        void drawExtents(QPainter& painter);
+
+    private:
+        QIcon   _fullIcon;      /** Represents a full dataset */
+        QIcon   _subsetIcon;    /** Represents a subset */
     };
 
     /** Convenience class for combining dataset items in a row */

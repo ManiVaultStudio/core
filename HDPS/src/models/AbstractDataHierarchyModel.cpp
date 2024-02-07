@@ -5,8 +5,12 @@
 #include "AbstractDataHierarchyModel.h"
 #include "DatasetsMimeData.h"
 
+#include "util/Icon.h"
+
 #include <QDebug>
 #include <QIcon>
+#include <QPainter>
+#include <QPainterPath>
 
 #ifdef _DEBUG
     #define ABSTRACT_DATA_HIERARCHY_MODEL_VERBOSE
@@ -432,6 +436,94 @@ QVariant AbstractDataHierarchyModel::IsDerivedItem::data(int role /*= Qt::UserRo
     return Item::data(role);
 }
 
+AbstractDataHierarchyModel::IsSubsetItem::IsSubsetItem(Dataset<DatasetImpl> dataset) :
+    Item(dataset)
+{
+    createFullIcon();
+    createSubsetIcon();
+}
+
+QVariant AbstractDataHierarchyModel::IsSubsetItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        {
+            if (!getDataset().isValid())
+                break;
+
+            return !getDataset()->isFull();
+        }
+
+        case Qt::DisplayRole:
+            break;
+
+        case Qt::ToolTipRole:
+            return QString("Dataset %1 a subset").arg(data(Qt::EditRole).toBool() ? "is" : "not");
+
+        case Qt::DecorationRole:
+            return data(Qt::EditRole).toBool() ? _subsetIcon : _fullIcon;
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+void AbstractDataHierarchyModel::IsSubsetItem::createFullIcon()
+{
+    QPixmap pixmap(QSize(100, 100));
+
+    pixmap.fill(Qt::transparent);
+
+    QPainter painter(&pixmap);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+
+    drawExtents(painter);
+
+    painter.setPen(QPen(Qt::black, 75.f, Qt::SolidLine, Qt::RoundCap));
+    painter.drawPoint(QPointF(50.f, 50.f));
+
+    _fullIcon = createIcon(pixmap);
+}
+
+void AbstractDataHierarchyModel::IsSubsetItem::createSubsetIcon()
+{
+    QPixmap pixmap(QSize(100, 100));
+
+    pixmap.fill(Qt::transparent);
+
+    QPainter painter(&pixmap);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+
+    drawExtents(painter);
+
+    painter.setBrush(Qt::black);
+    painter.drawPie(QRectF(10.f, 10.f, 80.f, 80.f), 90 * 16, 270 * 16);
+
+    _subsetIcon = createIcon(pixmap);
+}
+
+void AbstractDataHierarchyModel::IsSubsetItem::drawExtents(QPainter& painter)
+{
+    painter.setPen(QPen(Qt::black, 20.0, Qt::SolidLine, Qt::FlatCap));
+
+    const auto extents  = std::vector<float>({ 0.f, 100.f });
+    const auto length   = 30.f;
+
+    for (const auto& e : extents) {
+        painter.drawLine(0.f, e, length, e);
+        painter.drawLine(100.f - length, e, 100.f, e);
+
+        painter.drawLine(e, 0, e, length);
+        painter.drawLine(e, 100.f - length, e, 100.f);
+    }
+}
+
 AbstractDataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
     QList<QStandardItem*>()
 {
@@ -446,6 +538,7 @@ AbstractDataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
     append(new IsGroupItem(dataset));
     append(new IsLockedItem(dataset));
     append(new IsDerivedItem(dataset));
+    append(new IsSubsetItem(dataset));
 }
 
 AbstractDataHierarchyModel::AbstractDataHierarchyModel(QObject* parent) :
@@ -495,6 +588,9 @@ QVariant AbstractDataHierarchyModel::headerData(int section, Qt::Orientation ori
 
         case Column::IsDerived:
             return IsDerivedItem::headerData(orientation, role);
+
+        case Column::IsSubset:
+            return IsSubsetItem::headerData(orientation, role);
 
         default:
             break;

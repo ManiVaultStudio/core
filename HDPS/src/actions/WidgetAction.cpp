@@ -948,12 +948,13 @@ void WidgetAction::setStudioMode(bool studioMode, bool recursive /*= true*/)
 void WidgetAction::setIconByName(QString namedIcon)
 {
     _namedIcon = namedIcon;
+
     refreshIcon();
 }
 
 void WidgetAction::refreshIcon()
 {
-    if(_namedIcon != "")
+    if (_namedIcon != "")
     {
         setIcon(Application::getIconFont("FontAwesome").getIcon(_namedIcon));
     }

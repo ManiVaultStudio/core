@@ -65,6 +65,7 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
         treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::IsGroup), true);
         treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::IsLocked), true);
         treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::IsDerived), true);
+        treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::IsSubset), true);
 
         auto treeViewHeader = treeView->header();
 
