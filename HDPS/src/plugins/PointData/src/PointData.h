@@ -65,7 +65,6 @@ public:
         uint8
     };
 
-private:
     using VariantOfVectors = std::variant <
         std::vector<float>,
         std::vector<biovault::bfloat16_t>,
@@ -74,6 +73,7 @@ private:
         std::vector<std::int8_t>,
         std::vector<std::uint8_t> >;
 
+private:
     // Sets the index of the specified variant. If the new index is different from the previous one, the value will be reset. 
     // Inspired by `expand_type` from kmbeutel at
     // https://www.reddit.com/r/cpp/comments/f8cbzs/creating_stdvariant_based_on_index_at_runtime/?rdt=52905
@@ -395,6 +395,15 @@ public:
     void setData(const std::vector<T>& data, const std::size_t numDimensions)
     {
         _variantOfVectors = VariantOfVectors(data);
+        _numDimensions = static_cast<unsigned int>(numDimensions);
+    }
+
+    /// Copies (or "moves") the data from the specified variant into the internal data and sets the number of dimensions as specified.
+    /// Note that the `data` parameter is passed by-value (non-const), in order to avoid expensive copying (using C++ move semantics).
+    template <typename T>
+    void setData(VariantOfVectors data, const std::size_t numDimensions)
+    {
+        _variantOfVectors = std::move(data);
         _numDimensions = static_cast<unsigned int>(numDimensions);
     }
 
