@@ -78,7 +78,7 @@ private:
     // Inspired by `expand_type` from kmbeutel at
     // https://www.reddit.com/r/cpp/comments/f8cbzs/creating_stdvariant_based_on_index_at_runtime/?rdt=52905
     template <typename... Alternatives>
-    static void setIndexOfVariant(std::variant<Alternatives...> var, std::size_t index)
+    static void setIndexOfVariant(std::variant<Alternatives...>& var, std::size_t index)
     {
         if (index != var.index())
         {
