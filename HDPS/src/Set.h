@@ -313,7 +313,7 @@ public: // Selection
     /** Select all items */
     virtual void selectAll() = 0;
 
-    /** Deselect all items */
+    /** De-select all items */
     virtual void selectNone() = 0;
 
     /** Invert item selection */
@@ -321,23 +321,34 @@ public: // Selection
 
 public: // Lock
 
-    /** Lock the dataset */
-    void lock();
+    /**
+     * Lock the dataset and possibly \p cache the current lock state
+     * @param cache Whether to cache the current lock state
+     */
+    void lock(bool cache = false);
 
-    /** Unlock the dataset */
-    void unlock();
+    /**
+     * Unlock the dataset and possibly \p cache the current lock state
+     * @param cache Whether to cache the current lock state
+     */
+    void unlock(bool cache = false);
 
     /**
      * Get whether the dataset is locked
      * @return Boolean indicating whether the dataset is locked
+* 
      */
     bool isLocked() const;
 
     /**
-     * Set whether the dataset is locked
-     * @parem locked Boolean indicating whether the dataset is locked
+     * Set whether the dataset is \p locked and possibly \p cache the current lock state
+     * @param locked Boolean indicating whether the dataset is locked
+     * @param cache Whether to cache the current lock state
      */
-    void setLocked(bool locked);
+    void setLocked(bool locked, bool cache = false);
+
+    /** Restore the lock status to the cached value */
+    void restoreLockedFromCache();
 
 public: // Properties
 
@@ -583,6 +594,7 @@ private:
     std::vector<LinkedData>     _linkedData;            /** List of linked datasets */
     std::int32_t                _linkedDataFlags;       /** Flags for linked data */
     bool                        _locked;                /** Whether the dataset is locked */
+    bool                        _lockedCache;           /** Cached locked state */
     Dataset<DatasetImpl>        _smartPointer;          /** Smart pointer to own dataset */
     DatasetTask                 _task;                  /** Task for display in the data hierarchy and foreground */
     bool                        _aboutToBeRemoved;      /** Boolean determining whether the set is in the process of being removed */

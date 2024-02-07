@@ -382,6 +382,9 @@ void DataManager::removeDatasets(Datasets datasets)
 
         Datasets datasetsToRemove;
 
+        for (auto datasetToRemove : datasetsToRemove)
+            datasetToRemove->lock();
+
         if (descendantDataHierarchyItems.isEmpty()) {
             datasetsToRemove = topLevelDatasets;
         }

@@ -80,8 +80,11 @@ std::int32_t DatasetImpl::getSelectionSize() const
     return static_cast<std::int32_t>(const_cast<DatasetImpl*>(this)->getSelectionIndices().size());
 }
 
-void DatasetImpl::lock()
+void DatasetImpl::lock(bool cache /*= false*/)
 {
+    if (cache)
+        _lockedCache = _locked;
+
     _locked = true;
 
     events().notifyDatasetLocked(toSmartPointer());
@@ -89,8 +92,11 @@ void DatasetImpl::lock()
     emit getDataHierarchyItem().lockedChanged(_locked);
 }
 
-void DatasetImpl::unlock()
+void DatasetImpl::unlock(bool cache /*= false*/)
 {
+    if (cache)
+        _lockedCache = _locked;
+
     _locked = false;
 
     events().notifyDatasetUnlocked(toSmartPointer());
@@ -103,12 +109,20 @@ bool DatasetImpl::isLocked() const
     return _locked;
 }
 
-void DatasetImpl::setLocked(bool locked)
+void DatasetImpl::setLocked(bool locked, bool cache /*= false*/)
 {
+    if (cache)
+        _lockedCache = _locked;
+
     if (locked)
         lock();
     else
         unlock();
+}
+
+void DatasetImpl::restoreLockedFromCache()
+{
+    setLocked(_lockedCache);
 }
 
 void DatasetImpl::setAnalysis(plugin::AnalysisPlugin* analysis)
@@ -326,6 +340,7 @@ DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/
     _linkedData(),
     _linkedDataFlags(LinkedDataFlag::SendReceive),
     _locked(false),
+    _lockedCache(false),
     _smartPointer(this),
     _task(this, ""),
     _mayUnderive(mayUnderive),
