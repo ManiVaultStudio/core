@@ -189,11 +189,18 @@ Dataset<Points> DimensionsPickerAction::getPointsDataset() const
 
 void DimensionsPickerAction::setPointsDataset(const Dataset<Points>& points)
 {
+    disconnect(&_points, &Dataset<Points>::dataDimensionsChanged, this, nullptr);   // disconnect possible previous connection
+
     _points = points;
 
     if (_points.isValid()) {
         setDimensions(_points->getNumDimensions(), _points->getDimensionNames());
         setObjectName(QString("%1/Selection").arg(_points->text()));
+
+        connect(&_points, &Dataset<Points>::dataDimensionsChanged, this, [this]() {
+            setDimensions(_points->getNumDimensions(), _points->getDimensionNames());
+            });
+
     } else
         setDimensions(0, {});
 }
