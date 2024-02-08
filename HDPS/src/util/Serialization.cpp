@@ -27,22 +27,16 @@ void saveRawDataToBinaryFile(const char* bytes, const std::uint64_t& numberOfByt
     if (!QFileInfo(filePath).dir().exists())
         throw std::runtime_error(QString("Unable to save data in %1, the directory does not exist").arg(outputDirectory.dirName()).toLatin1());
 
-    // Raw bytes
-    QByteArray rawData(bytes, numberOfBytes);
-
-    // Copy the block to the raw data byte array
-    memcpy((void*)rawData.data(), bytes, numberOfBytes);
-
     // Create binary file
     QFile binaryFile(filePath);
 
     // And save it do disk
     binaryFile.open(QIODevice::WriteOnly);
-    binaryFile.write(rawData);
+    binaryFile.write(QByteArray::fromRawData(bytes, numberOfBytes)); // usng QByteArray::fromRawData(const char *data, qsizetype size) so that the bytes are not copied.
     binaryFile.close();
 }
 
-void loadRawDataFromBinaryFile(const char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath)
+void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath)
 {
     // Exit prematurely if the serialization process was aborted
     if (Application::isSerializationAborted())
@@ -59,18 +53,12 @@ void loadRawDataFromBinaryFile(const char* bytes, const std::uint64_t& numberOfB
     if (!binaryFile.open(QIODevice::ReadOnly))
         throw std::runtime_error("Unable to load binary file, cannot open file");
 
-    // Read the raw data from the file
-    QByteArray rawData = binaryFile.readAll();
-
-    // Determine number of bytes in file
-    const auto numberOfBytesInFile = rawData.size();
+    // Read the raw data from the file directly into bytes
+    const auto numberOfBytesRead = binaryFile.read(bytes, numberOfBytes);
 
     // Except if the number of bytes in the file deviates from the number of requested bytes
-    if (numberOfBytesInFile != numberOfBytes)
+    if (numberOfBytesRead != numberOfBytes)
         throw std::runtime_error("Unable to load binary file, number of requested bytes is not the same as in the file");
-
-    // Copy the block to the raw data byte array
-    memcpy((void*)bytes, (void*)rawData.data(), numberOfBytes);
 }
 
 QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, std::uint64_t maxBlockSize /*= DEFAULT_MAX_BLOCK_SIZE*/)
@@ -135,7 +123,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
     return rawData;
 }
 
-void populateDataBufferFromVariantMap(const QVariantMap& variantMap, const char* bytes)
+void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes)
 {
     variantMapMustContain(variantMap, "BlockSize");
     variantMapMustContain(variantMap, "Blocks");

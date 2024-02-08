@@ -107,7 +107,6 @@ private:
         }
     }
 
-
     template <typename T>
     static constexpr ElementTypeSpecifier getElementTypeSpecifier()
     {
@@ -218,32 +217,14 @@ public:
      * Get amount of data occupied by the raw data
      * @return Size of the raw data in bytes
      */
-    std::uint64_t getRawDataSize() const override {
-        std::uint64_t elementSize = 0u;
+    std::uint64_t getRawDataSize() const override;
 
-        switch (getElementTypeSpecifier())
-        {
-            case ElementTypeSpecifier::float32:
-                elementSize = 4u;
-                break;
 
-            case ElementTypeSpecifier::bfloat16:
-            case ElementTypeSpecifier::int16:
-            case ElementTypeSpecifier::uint16:
-                elementSize = 2u;
-                break;
-
-            case ElementTypeSpecifier::int8:
-            case ElementTypeSpecifier::uint8:
-                elementSize = 1u;
-                break;
-
-            default:
-                break;
-        }
-
-        return elementSize * getNumPoints() * getNumDimensions();
-    }
+    /**
+     *Returns void pointer to the underlying array serving as element storage.
+     */
+    void* getDataVoidPtr();
+    const void* getDataConstVoidPtr() const;
 
     static constexpr std::array<const char*, std::variant_size_v<VariantOfVectors>> getElementTypeNames()
     {
