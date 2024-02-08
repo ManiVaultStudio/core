@@ -133,6 +133,8 @@ void DataHierarchyItem::setVisible(bool visible, bool recursively /*= true*/)
                 child->setVisible(visible);
     }
     else {
+        deselect();
+
         if (recursively)
             for (auto child : getChildren())
                 child->setVisible(visible, recursively);

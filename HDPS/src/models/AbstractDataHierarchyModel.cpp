@@ -296,7 +296,7 @@ void AbstractDataHierarchyModel::SelectionGroupIndexItem::setData(const QVariant
 AbstractDataHierarchyModel::IsVisibleItem::IsVisibleItem(Dataset<DatasetImpl> dataset) :
     Item(dataset)
 {
-    connect(&getDataset()->getDataHierarchyItem(), &gui::WidgetAction::visibleChanged, this, [this]() -> void {
+    connect(&getDataset()->getDataHierarchyItem(), &DataHierarchyItem::visibilityChanged, this, [this](bool visibility) -> void {
         emitDataChanged();
     });
 }
