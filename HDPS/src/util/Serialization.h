@@ -27,7 +27,7 @@ void saveRawDataToBinaryFile(const char* bytes, const std::uint64_t& numberOfByt
  * @param numberOfBytes Number of input bytes
  * @param filePath Path of the file on disk
  */
-void loadRawDataFromBinaryFile(const char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath);
+void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath);
 
 /**
  * Convert raw data buffer to variant map (divide up in blocks when the total number of bytes exceeds maxBlockSize)
@@ -43,7 +43,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
  * @param variantMap Variant map containing the data blocks
  * @param bytes Output buffer to which the data is copied
  */
-void populateDataBufferFromVariantMap(const QVariantMap& variantMap, const char* bytes);
+void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes);
 
 /**
  * Raises an exception if an item with key is not found in a variant map
