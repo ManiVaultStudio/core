@@ -382,33 +382,6 @@ QVariant AbstractDataHierarchyModel::IsGroupItem::data(int role /*= Qt::UserRole
     return Item::data(role);
 }
 
-QVariant AbstractDataHierarchyModel::IsLockedItem::data(int role /*= Qt::UserRole + 1*/) const
-{
-    switch (role) {
-        case Qt::EditRole:
-        {
-            if (!getDataset().isValid())
-                break;
-
-            return getDataset()->isLocked();
-        }
-
-        case Qt::DisplayRole:
-            break;
-
-        case Qt::ToolTipRole:
-            return "Dataset is a locked: " + data(Qt::DisplayRole).toString();
-
-        case Qt::DecorationRole:
-            return data(Qt::EditRole).toBool() ? Application::getIconFont("FontAwesome").getIcon("lock") : QIcon();
-
-        default:
-            break;
-    }
-
-    return Item::data(role);
-}
-
 QVariant AbstractDataHierarchyModel::IsDerivedItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
@@ -424,7 +397,7 @@ QVariant AbstractDataHierarchyModel::IsDerivedItem::data(int role /*= Qt::UserRo
             break;
 
         case Qt::ToolTipRole:
-            return QString("Dataset derived: %1").arg(data(Qt::EditRole).toBool() ? "yes" : "no");
+            return QString("Dataset %1 derived").arg(data(Qt::EditRole).toBool() ? "is" : "is not");
 
         case Qt::DecorationRole:
             return data(Qt::EditRole).toBool() ? Application::getIconFont("FontAwesome").getIcon("square-root-alt") : QIcon();
@@ -460,7 +433,7 @@ QVariant AbstractDataHierarchyModel::IsSubsetItem::data(int role /*= Qt::UserRol
             break;
 
         case Qt::ToolTipRole:
-            return data(Qt::EditRole).toBool() ? "Full dataset" : "Subset";
+            return data(Qt::EditRole).toBool() ? "Subset" : "Full dataset";
 
         case Qt::DecorationRole:
             return data(Qt::EditRole).toBool() ? _subsetIcon : _fullIcon;
@@ -529,6 +502,33 @@ void AbstractDataHierarchyModel::IsSubsetItem::drawExtents(QPainter& painter)
     }
 }
 
+QVariant AbstractDataHierarchyModel::IsLockedItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        {
+            if (!getDataset().isValid())
+                break;
+
+            return getDataset()->isLocked();
+        }
+
+        case Qt::DisplayRole:
+            break;
+
+        case Qt::ToolTipRole:
+            return QString("Dataset is %1").arg(data(Qt::EditRole).toBool() ? "locked" : "not locked");
+
+        case Qt::DecorationRole:
+            return data(Qt::EditRole).toBool() ? Application::getIconFont("FontAwesome").getIcon("lock") : Application::getIconFont("FontAwesome").getIcon("lock-open");
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 AbstractDataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
     QList<QStandardItem*>()
 {
@@ -541,9 +541,9 @@ AbstractDataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
     append(new SelectionGroupIndexItem(dataset));
     append(new IsVisibleItem(dataset));
     append(new IsGroupItem(dataset));
-    append(new IsLockedItem(dataset));
     append(new IsDerivedItem(dataset));
     append(new IsSubsetItem(dataset));
+    append(new IsLockedItem(dataset));
 }
 
 AbstractDataHierarchyModel::AbstractDataHierarchyModel(QObject* parent) :
@@ -588,14 +588,14 @@ QVariant AbstractDataHierarchyModel::headerData(int section, Qt::Orientation ori
         case Column::IsGroup:
             return IsGroupItem::headerData(orientation, role);
 
-        case Column::IsLocked:
-            return IsLockedItem::headerData(orientation, role);
-
         case Column::IsDerived:
             return IsDerivedItem::headerData(orientation, role);
 
         case Column::IsSubset:
             return IsSubsetItem::headerData(orientation, role);
+
+        case Column::IsLocked:
+            return IsLockedItem::headerData(orientation, role);
 
         default:
             break;

@@ -227,12 +227,11 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::Name, 150);
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::SelectionGroupIndex, treeViewHeader->minimumSectionSize());
-    //treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::Progress, 50);
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsVisible, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsGroup, treeViewHeader->minimumSectionSize());
-    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsLocked, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsDerived, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsSubset, treeViewHeader->minimumSectionSize());
+    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsLocked, treeViewHeader->minimumSectionSize());
 
     treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::Name, QHeaderView::Interactive);
     treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::DatasetId, QHeaderView::Stretch);
@@ -241,8 +240,9 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::Progress, QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::IsVisible, QHeaderView::Fixed);
     treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::IsGroup, QHeaderView::Fixed);
-    treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::IsLocked, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::IsDerived, QHeaderView::Fixed);
     treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::IsSubset, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(AbstractDataHierarchyModel::Column::IsLocked, QHeaderView::Fixed);
 
     groupingAction.setIconByName("object-group");
     groupingAction.setToolTip("Enable/disable dataset grouping");
