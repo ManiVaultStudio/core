@@ -439,8 +439,10 @@ QVariant AbstractDataHierarchyModel::IsDerivedItem::data(int role /*= Qt::UserRo
 AbstractDataHierarchyModel::IsSubsetItem::IsSubsetItem(Dataset<DatasetImpl> dataset) :
     Item(dataset)
 {
-    createFullIcon();
-    createSubsetIcon();
+    const auto pieRadius = 40.f;
+
+    createFullIcon(pieRadius);
+    createSubsetIcon(pieRadius);
 }
 
 QVariant AbstractDataHierarchyModel::IsSubsetItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -458,7 +460,7 @@ QVariant AbstractDataHierarchyModel::IsSubsetItem::data(int role /*= Qt::UserRol
             break;
 
         case Qt::ToolTipRole:
-            return QString("Dataset %1 a subset").arg(data(Qt::EditRole).toBool() ? "is" : "not");
+            return data(Qt::EditRole).toBool() ? "Full dataset" : "Subset";
 
         case Qt::DecorationRole:
             return data(Qt::EditRole).toBool() ? _subsetIcon : _fullIcon;
@@ -470,7 +472,7 @@ QVariant AbstractDataHierarchyModel::IsSubsetItem::data(int role /*= Qt::UserRol
     return Item::data(role);
 }
 
-void AbstractDataHierarchyModel::IsSubsetItem::createFullIcon()
+void AbstractDataHierarchyModel::IsSubsetItem::createFullIcon(float pieRadius /*= 35.f*/)
 {
     QPixmap pixmap(QSize(100, 100));
 
@@ -481,15 +483,15 @@ void AbstractDataHierarchyModel::IsSubsetItem::createFullIcon()
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    drawExtents(painter);
+    //drawExtents(painter);
 
-    painter.setPen(QPen(Qt::black, 75.f, Qt::SolidLine, Qt::RoundCap));
+    painter.setPen(QPen(Qt::black, 2.f * pieRadius, Qt::SolidLine, Qt::RoundCap));
     painter.drawPoint(QPointF(50.f, 50.f));
 
     _fullIcon = createIcon(pixmap);
 }
 
-void AbstractDataHierarchyModel::IsSubsetItem::createSubsetIcon()
+void AbstractDataHierarchyModel::IsSubsetItem::createSubsetIcon(float pieRadius /*= 35.f*/)
 {
     QPixmap pixmap(QSize(100, 100));
 
@@ -500,20 +502,23 @@ void AbstractDataHierarchyModel::IsSubsetItem::createSubsetIcon()
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    drawExtents(painter);
+    //drawExtents(painter);
 
+    const auto margin = 50.f - pieRadius;
+
+    painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::black);
-    painter.drawPie(QRectF(10.f, 10.f, 80.f, 80.f), 90 * 16, 270 * 16);
+    painter.drawPie(QRectF(margin, margin, 100.f - (2.f * margin), 100.f - (2.f * margin)), 90 * 16, 270 * 16);
 
     _subsetIcon = createIcon(pixmap);
 }
 
 void AbstractDataHierarchyModel::IsSubsetItem::drawExtents(QPainter& painter)
 {
-    painter.setPen(QPen(Qt::black, 20.0, Qt::SolidLine, Qt::FlatCap));
+    painter.setPen(QPen(Qt::black, 15.0, Qt::SolidLine, Qt::FlatCap));
 
     const auto extents  = std::vector<float>({ 0.f, 100.f });
-    const auto length   = 30.f;
+    const auto length   = 15.f;
 
     for (const auto& e : extents) {
         painter.drawLine(0.f, e, length, e);

@@ -158,7 +158,7 @@ protected:
 
         auto item = static_cast<AbstractDataHierarchyModel::Item*>(_dataHierarchyWidget->getTreeModel().itemFromIndex(_dataHierarchyWidget->getFilterModel().mapToSource(index)));
 
-        if (item->getDataset()->isLocked() || index.column() >= static_cast<int>(AbstractDataHierarchyModel::Column::IsGroup))
+        if (item->getDataset()->isLocked())// || index.column() >= static_cast<int>(AbstractDataHierarchyModel::Column::IsGroup))
             option->state &= ~QStyle::State_Enabled;
     }
 
@@ -218,14 +218,16 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::SourceDatasetId), true);
     treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::SelectionGroupIndex), true);
     treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::IsGroup), true);
 
     auto treeViewHeader = treeView.header();
 
     treeViewHeader->setStretchLastSection(false);
     treeViewHeader->setMinimumSectionSize(18);
 
-    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::Name, 180);
-    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::SelectionGroupIndex, 60);
+    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::Name, 150);
+    treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::SelectionGroupIndex, treeViewHeader->minimumSectionSize());
+    //treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::Progress, 50);
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsVisible, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsGroup, treeViewHeader->minimumSectionSize());
     treeViewHeader->resizeSection(AbstractDataHierarchyModel::Column::IsLocked, treeViewHeader->minimumSectionSize());

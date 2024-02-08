@@ -561,8 +561,18 @@ protected:
         }
 
     private:
-        void createFullIcon();
-        void createSubsetIcon();
+
+        /**
+         * Create icon which represents a full dataset
+         * @param pieRadius Pie radius
+         */
+        void createFullIcon(float pieRadius = 35.f);
+
+        /**
+         * Create icon which represents a subset
+         * @param pieRadius Pie radius
+         */
+        void createSubsetIcon(float pieRadius = 35.f);
 
         /**
          * Draw extents in \p painter
