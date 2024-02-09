@@ -67,6 +67,23 @@ std::uint64_t PointData::getNumberOfElements() const
     return getSizeOfVector();
 }
 
+
+std::uint64_t  PointData::getRawDataSize() const
+{
+    std::uint64_t elementSize = std::visit([](auto& vec) { return vec.empty() ? 0u : sizeof(vec[0]); }, _variantOfVectors);
+    return elementSize * getNumberOfElements();
+}
+
+void* PointData::getDataVoidPtr()
+{
+    return std::visit([](auto& vec) { return (void*)vec.data(); }, _variantOfVectors);
+}
+
+const void* PointData::getDataConstVoidPtr() const
+{
+    return std::visit([](const auto& vec) { return (const void*)vec.data(); }, _variantOfVectors);
+}
+
 const std::vector<QString>& PointData::getDimensionNames() const
 {
     return _dimNames;
@@ -121,118 +138,22 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
     const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
     const auto rawData              = data["Raw"].toMap();
 
-    switch (elementTypeIndex)
-    {
-        case PointData::ElementTypeSpecifier::float32:
-        {
-            std::vector<float> pointData;
 
-            pointData.resize(numberOfElements);
-
-            populateDataBufferFromVariantMap(rawData, (char*)pointData.data());
-            setData(pointData, numberOfDimensions);
-            break;
-        }
-
-        case PointData::ElementTypeSpecifier::bfloat16:
-        {
-            std::vector<biovault::bfloat16_t> pointData;
-
-            pointData.resize(numberOfElements);
-
-            populateDataBufferFromVariantMap(rawData, (char*)pointData.data());
-            setData(pointData, numberOfDimensions);
-
-            break;
-        }
-
-        case PointData::ElementTypeSpecifier::int16:
-        {
-            std::vector<std::int16_t> pointData;
-
-            pointData.resize(numberOfElements);
-
-            populateDataBufferFromVariantMap(rawData, (char*)pointData.data());
-            setData(pointData, numberOfDimensions);
-            break;
-        }
-
-        case PointData::ElementTypeSpecifier::uint16:
-        {
-            std::vector<std::uint16_t> pointData;
-
-            pointData.resize(numberOfElements);
-
-            populateDataBufferFromVariantMap(rawData, (char*)pointData.data());
-            setData(pointData, numberOfDimensions);
-            break;
-        }
-
-        case PointData::ElementTypeSpecifier::int8:
-        {
-            std::vector<std::uint16_t> pointData;
-
-            pointData.resize(numberOfElements);
-
-            populateDataBufferFromVariantMap(rawData, (char*)pointData.data());
-            setData(pointData, numberOfDimensions);
-            break;
-        }
-
-        case PointData::ElementTypeSpecifier::uint8:
-        {
-            std::vector<std::uint8_t> pointData;
-
-            pointData.resize(numberOfElements);
-
-            populateDataBufferFromVariantMap(rawData, (char*)pointData.data());
-            setData(pointData, numberOfDimensions);
-            break;
-        }
-
-        default:
-            break;
-    }
+    setElementTypeSpecifier(elementTypeIndex);
+    resizeVector(numberOfElements);
+    populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr());
+    _numDimensions = numberOfDimensions;
+   
 }
 
 QVariantMap PointData::toVariantMap() const
 {
-    QVariantMap rawData;
-
     const auto typeSpecifier        = getElementTypeSpecifier();
     const auto typeSpecifierName    = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
     const auto typeIndex            = static_cast<std::int32_t>(typeSpecifier);
     const auto numberOfElements     = getNumberOfElements();
 
-    switch (typeSpecifier)
-    {
-        case ElementTypeSpecifier::float32:
-            rawData = rawDataToVariantMap((char*)getConstVector<float>().data(), numberOfElements * sizeof(float), true);
-            break;
-
-        case ElementTypeSpecifier::bfloat16:
-            rawData = rawDataToVariantMap((char*)getConstVector<biovault::bfloat16_t>().data(), numberOfElements * sizeof(biovault::bfloat16_t), true);
-            break;
-
-        case ElementTypeSpecifier::int16:
-            rawData = rawDataToVariantMap((char*)getConstVector<std::int16_t>().data(), numberOfElements * sizeof(std::int16_t), true);
-            break;
-
-        case ElementTypeSpecifier::uint16:
-            rawData = rawDataToVariantMap((char*)getConstVector<std::uint16_t>().data(), numberOfElements * sizeof(std::uint16_t), true);
-            break;
-
-        case ElementTypeSpecifier::int8:
-            rawData = rawDataToVariantMap((char*)getConstVector<std::int8_t>().data(), numberOfElements * sizeof(std::int8_t), true);
-            break;
-
-        case ElementTypeSpecifier::uint8:
-            rawData = rawDataToVariantMap((char*)getConstVector<std::uint8_t>().data(), numberOfElements * sizeof(std::uint8_t), true);
-            break;
-
-        default:
-            break;
-    }
+    QVariantMap rawData = rawDataToVariantMap((const char*)getDataConstVoidPtr(), getRawDataSize(), true);
 
     return {
         { "TypeIndex", QVariant::fromValue(typeIndex) },
