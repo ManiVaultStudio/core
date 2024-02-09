@@ -85,6 +85,13 @@ public: // Raw data
      */
     QStringList getRawDataNames() const override;
 
+    /**
+     * Get raw data size by \p rawDataName
+     * @param rawDataName Name of the raw data
+     * @return Size of the raw data in bytes
+     */
+    std::uint64_t getRawDataSize(const QString& rawDataName) const override;
+
 public: // Datasets
 
     /**

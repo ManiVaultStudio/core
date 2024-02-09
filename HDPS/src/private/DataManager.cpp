@@ -170,6 +170,29 @@ QStringList DataManager::getRawDataNames() const
     return rawDataNames;
 }
 
+std::uint64_t DataManager::getRawDataSize(const QString& rawDataName) const
+{
+    try
+    {
+        if (rawDataName.isEmpty())
+            throw std::runtime_error("Raw data name is invalid");
+
+        if (_rawDataMap.find(rawDataName) == _rawDataMap.end())
+            throw std::runtime_error(QString("%1 not found").arg(rawDataName).toStdString());
+
+        return const_cast<DataManager*>(this)->_rawDataMap[rawDataName]->getRawDataSize();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox(QString("Unable to get raw data size for %1").arg(rawDataName), e);
+    }
+    catch (...) {
+        exceptionMessageBox(QString("Unable to get raw data size for %1").arg(rawDataName));
+    }
+
+    return {};
+}
+
 Dataset<DatasetImpl> DataManager::createDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/, bool notify /*= true*/)
 {
 #ifdef DATA_MANAGER_VERBOSE

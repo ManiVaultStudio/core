@@ -5,6 +5,7 @@
 #pragma once
 
 #include "UnhideAction.h"
+#include "StatisticsAction.h"
 
 #include <models/DataHierarchyTreeModel.h>
 #include <models/DataHierarchyFilterModel.h>
@@ -99,9 +100,10 @@ protected:
     void initializeSelection();
 
 private:
-    mv::DataHierarchyTreeModel      _treeModel;         /** Model containing data to be displayed in the hierarchy */
-    mv::DataHierarchyFilterModel    _filterModel;       /** Data hierarchy filter model */
-    mv::gui::HierarchyWidget        _hierarchyWidget;   /** Widget for displaying hierarchy */
-    mv::gui::TriggerAction          _resetAction;       /** Reset all action */
-    UnhideAction                    _unhideAction;      /** Action class for un-hiding hidden datasets */
+    mv::DataHierarchyTreeModel      _treeModel;             /** Model containing data to be displayed in the hierarchy */
+    mv::DataHierarchyFilterModel    _filterModel;           /** Data hierarchy filter model */
+    mv::gui::HierarchyWidget        _hierarchyWidget;       /** Widget for displaying hierarchy */
+    mv::gui::TriggerAction          _resetAction;           /** Reset all action */
+    UnhideAction                    _unhideAction;          /** Action class for un-hiding hidden datasets */
+    StatisticsAction                _statisticsAction;      /** Action class for showing data manager statistics */
 };

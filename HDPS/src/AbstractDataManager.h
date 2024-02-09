@@ -91,6 +91,26 @@ public: // Raw data
      */
     virtual QStringList getRawDataNames() const = 0;
 
+    /**
+     * Get raw data size by \p rawDataName
+     * @param rawDataName Name of the raw data
+     * @return Size of the raw data in bytes
+     */
+    virtual std::uint64_t getRawDataSize(const QString& rawDataName) const = 0;
+
+    /**
+     * Get overall raw data size
+     * @return Overall raw data size in bytes
+     */
+    std::uint64_t getOverallRawDataSize() const {
+        std::uint64_t overallRawDataSize = 0;
+
+        for (const auto& rawDataName : getRawDataNames())
+            overallRawDataSize += getRawDataSize(rawDataName);
+
+        return overallRawDataSize;
+    };
+
 public: // Dataset creation
 
     /**

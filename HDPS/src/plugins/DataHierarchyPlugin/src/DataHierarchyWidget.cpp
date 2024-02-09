@@ -172,7 +172,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _filterModel(this),
     _hierarchyWidget(this, "Dataset", _treeModel, &_filterModel),
     _resetAction(this, "Reset"),
-    _unhideAction(this, "Unhide")
+    _unhideAction(this, "Unhide"),
+    _statisticsAction(this, "Statistics")
 {
     auto layout = new QVBoxLayout();
 
@@ -204,9 +205,10 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     settingsGroupAction.addAction(&groupingAction);
     settingsGroupAction.addAction(&_resetAction);
 
-    _unhideAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    auto& toolbarAction = _hierarchyWidget.getToolbarAction();
 
-    _hierarchyWidget.getToolbarAction().addAction(&_unhideAction);
+    toolbarAction.addAction(&_unhideAction);
+    toolbarAction.addAction(&_statisticsAction);
 
     auto& treeView = _hierarchyWidget.getTreeView();
 

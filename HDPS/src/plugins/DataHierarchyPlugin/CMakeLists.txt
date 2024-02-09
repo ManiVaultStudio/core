@@ -34,6 +34,8 @@ set(PLUGIN_MOC_HEADERS
 set(ACTIONS
     src/UnhideAction.h
     src/UnhideAction.cpp
+    src/StatisticsAction.h
+    src/StatisticsAction.cpp
 )
 
 set(WIDGETS
