@@ -125,6 +125,17 @@ public: // Dataset creation
     virtual Dataset<DatasetImpl> createDataset(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "", bool notify = true) = 0;
 
     /**
+     * Creates dataset without selection of \p kind with \p guiName to the manager and returns the created dataset (this is only used fore serialization purposes)
+     * @param kind Kind of data plugin
+     * @param guiName Name of the added dataset in the GUI
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will add to the root of the data hierarchy if not valid)
+     * @param id Globally unique dataset identifier (use only for deserialization)
+     * @param notify Whether to notify the core that a dataset is added
+     * @return Smart pointer to the create dataset
+     */
+    virtual Dataset<DatasetImpl> createDatasetWithoutSelection(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "", bool notify = true) = 0;
+
+    /**
      * Creates dataset of \p kind with \p guiName to the manager and returns the created dataset as \p DatasetType
      * @param kind Kind of data plugin
      * @param guiName Name of the added dataset in the GUI
@@ -168,10 +179,10 @@ public: // Dataset remove
      */
     virtual void removeDatasets(const QString& rawDataName) = 0;
 
-public:// Derived datasets
+public: // Derived datasets
 
     /**
-     * Creates derived dataset from \p sourceDataset with \p guiName and returns the created derived dataset
+     * Creates derived dataset from \666p sourceDataset with \p guiName and returns the created derived dataset
      * @param guiName GUI name for the new dataset from the core
      * @param sourceDataset Smart pointer to the source dataset from which this dataset will be derived
      * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to source dataset in hierarchy if not valid)
@@ -285,10 +296,10 @@ public: // Selection
 protected: // Selection
 
     /**
-     * Removes all selections of which the raw data name matches \p rawDataName
+     * Removes selection of which the raw data name matches \p rawDataName
      * @param rawDataName Name of the raw data
      */
-    virtual void removeSelections(const QString& rawDataName) = 0;
+    virtual void removeSelection(const QString& rawDataName) = 0;
 
 public: // Dataset and selection grouping
 

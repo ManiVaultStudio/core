@@ -152,14 +152,20 @@ AbstractDataHierarchyModel::DatasetIdItem::DatasetIdItem(Dataset<DatasetImpl> da
     connect(getDataset().get(), &gui::WidgetAction::idChanged, this, [this](const QString& id) -> void {
         emitDataChanged();
     });
+
+    connect(&mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction(), &gui::ToggleAction::toggled, this, [this](bool toggled) -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant AbstractDataHierarchyModel::DatasetIdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
-        case Qt::DisplayRole:
             return getDataset().isValid() ? getDataset()->getId() : "";
+
+        case Qt::DisplayRole:
+            return getDataset().isValid() ? getDataset()->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked()) : "";
 
         case Qt::ToolTipRole:
             return "Dataset identifier: " + data(Qt::DisplayRole).toString();
@@ -171,21 +177,12 @@ QVariant AbstractDataHierarchyModel::DatasetIdItem::data(int role /*= Qt::UserRo
     return Item::data(role);
 }
 
-QVariant AbstractDataHierarchyModel::RawDataIdItem::data(int role /*= Qt::UserRole + 1*/) const
+AbstractDataHierarchyModel::SourceDatasetIdItem::SourceDatasetIdItem(Dataset<DatasetImpl> dataset) :
+    Item(dataset)
 {
-    switch (role) {
-        case Qt::EditRole:
-        case Qt::DisplayRole:
-            return getDataset().isValid() ? getDataset()->getRawDataName() : "";
-
-        case Qt::ToolTipRole:
-            return "Raw data identifier: " + data(Qt::DisplayRole).toString();
-
-        default:
-            break;
-    }
-
-    return Item::data(role);
+    connect(&mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction(), &gui::ToggleAction::toggled, this, [this](bool toggled) -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant AbstractDataHierarchyModel::SourceDatasetIdItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -194,11 +191,30 @@ QVariant AbstractDataHierarchyModel::SourceDatasetIdItem::data(int role /*= Qt::
 
     switch (role) {
         case Qt::EditRole:
-        case Qt::DisplayRole:
             return getDataset()->isDerivedData() ? sourceDataset->getId() : "";
+
+        case Qt::DisplayRole:
+            return getDataset()->isDerivedData() ? sourceDataset->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked()) : "";
 
         case Qt::ToolTipRole:
             return "Source dataset identifier: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractDataHierarchyModel::RawDataNameItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getDataset().isValid() ? getDataset()->getRawDataName() : "";
+
+        case Qt::ToolTipRole:
+            return "Raw data identifier: " + data(Qt::DisplayRole).toString();
 
         default:
             break;
@@ -535,7 +551,7 @@ AbstractDataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
     append(new NameItem(dataset));
     append(new LocationItem(dataset));
     append(new DatasetIdItem(dataset));
-    append(new RawDataIdItem(dataset));
+    append(new RawDataNameItem(dataset));
     append(new SourceDatasetIdItem(dataset));
     append(new ProgressItem(dataset));
     append(new SelectionGroupIndexItem(dataset));
@@ -571,7 +587,7 @@ QVariant AbstractDataHierarchyModel::headerData(int section, Qt::Orientation ori
             return DatasetIdItem::headerData(orientation, role);
 
         case Column::RawDataId:
-            return RawDataIdItem::headerData(orientation, role);
+            return RawDataNameItem::headerData(orientation, role);
 
         case Column::SourceDatasetId:
             return SourceDatasetIdItem::headerData(orientation, role);

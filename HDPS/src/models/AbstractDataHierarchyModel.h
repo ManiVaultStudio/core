@@ -203,8 +203,11 @@ protected:
     class SourceDatasetIdItem final : public Item {
     public:
 
-        /** Use base item constructor */
-        using Item::Item;
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         */
+        SourceDatasetIdItem(Dataset<DatasetImpl> dataset);
 
         /**
          * Get model data for \p role
@@ -232,8 +235,8 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying the raw data identifier */
-    class RawDataIdItem final : public Item {
+    /** Standard model item class for displaying the raw data name */
+    class RawDataNameItem final : public Item {
     public:
 
         /** Use base item constructor */
@@ -255,10 +258,10 @@ protected:
             switch (role) {
                 case Qt::DisplayRole:
                 case Qt::EditRole:
-                    return "Raw Data ID";
+                    return "Raw Data Name";
 
                 case Qt::ToolTipRole:
-                    return "The globally unique identifier of the raw data";
+                    return "The name of the raw data";
             }
 
             return {};

@@ -93,6 +93,9 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
                     auto contextMenu = getAction()->getContextMenu(this);
 
+                    if (!contextMenu)
+                        break;
+
                     if (contextMenu->actions().isEmpty())
                         return QWidget::eventFilter(target, event);
 

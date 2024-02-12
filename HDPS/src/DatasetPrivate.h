@@ -149,7 +149,9 @@ signals:
 private:
     QString         _datasetId;         /** Globally unique identifier of the dataset */
     DatasetImpl*    _dataset;           /** Pointer to the dataset (if any) */
-    EventListener   _eventListener;     /** Listen to HDPS events */
+    EventListener   _eventListener;     /** Listen to ManiVault events */
+
+    friend class DatasetImpl;
 };
 
 /**

@@ -105,6 +105,17 @@ public: // Datasets
      */
     Dataset<DatasetImpl> createDataset(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "", bool notify = true) override;
 
+    /**
+     * Creates dataset without selection of \p kind with \p guiName to the manager and returns the created dataset (this is only used fore serialization purposes)
+     * @param kind Kind of data plugin
+     * @param guiName Name of the added dataset in the GUI
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will add to the root of the data hierarchy if not valid)
+     * @param id Globally unique dataset identifier (use only for deserialization)
+     * @param notify Whether to notify the core that a dataset is added
+     * @return Smart pointer to the create dataset
+     */
+    Dataset<DatasetImpl> createDatasetWithoutSelection(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "", bool notify = true) override;
+
 protected: // Dataset remove
 
     /**
@@ -204,10 +215,10 @@ public: // Selection
 protected:
 
     /**
-     * Removes all selections of which the raw data name matches \p rawDataName
+     * Removes selection of which the raw data name matches \p rawDataName
      * @param rawDataName Name of the raw data
      */
-    void removeSelections(const QString& rawDataName) override;
+    void removeSelection(const QString& rawDataName) override;
 
 public: // Dataset and selection grouping
 

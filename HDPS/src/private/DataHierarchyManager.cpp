@@ -272,14 +272,10 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
         Dataset<DatasetImpl> loadedDataset;
 
-        if (derived) {
-            auto sourceDataset = mv::data().getDataset(sourceDatasetID);
+        loadedDataset = derived ? mv::data().createDatasetWithoutSelection(pluginKind, guiName, parent, datasetId) : mv::data().createDataset(pluginKind, guiName, parent, datasetId);
 
-            loadedDataset = mv::data().createDerivedDataset(guiName, sourceDataset, parent);
-        }
-        else {
-            loadedDataset = mv::data().createDataset(pluginKind, guiName, parent, dataset["ID"].toString());
-        }
+        if (derived)
+            loadedDataset->setSourceDataset(sourceDatasetID);
 
         loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
 

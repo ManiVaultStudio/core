@@ -156,9 +156,9 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap["Derived"].toBool())
     {
         if (variantMap.contains("SourceDatasetID"))
-            setSourceDataSet(mv::data().getDataset(variantMap["SourceDatasetID"].toString()));
+            setSourceDataset(mv::data().getDataset(variantMap["SourceDatasetID"].toString()));
         else
-            setSourceDataSet(getParent());
+            setSourceDataset(getParent());
 
         assert(_sourceDataset.isValid());
     }
@@ -408,10 +408,16 @@ mv::DataType DatasetImpl::getDataType() const
     return mv::data().getRawData(getRawDataName())->getDataType();
 }
 
-void DatasetImpl::setSourceDataSet(const Dataset<DatasetImpl>& dataset)
+void DatasetImpl::setSourceDataset(Dataset<DatasetImpl> dataset)
 {
     _sourceDataset = dataset;
     _derived = _sourceDataset.isValid();
+}
+
+void DatasetImpl::setSourceDataset(const QString& datasetId)
+{
+    _sourceDataset._datasetId = datasetId;
+    _derived = true;
 }
 
 mv::Dataset<mv::DatasetImpl> DatasetImpl::getSelection() const

@@ -651,34 +651,37 @@ void PluginManager::fromVariantMap(const QVariantMap& variantMap)
             variantMapMustContain(analysisPluginMap, "OutputDatasetsIDs");
 
             auto analysisPluginKind = analysisPluginMap["Kind"].toString();
+
             if (_pluginFactories.contains(analysisPluginKind))
             {
                 auto inputDatasetsGUIDs = analysisPluginMap["InputDatasetsIDs"].toStringList();
                 auto outputDatasetsGUIDs = analysisPluginMap["OutputDatasetsIDs"].toStringList();
 
                 Datasets inputDatasets;
+
                 for (const auto& inputDatasetGUID : inputDatasetsGUIDs)
                     inputDatasets << mv::data().getDataset(inputDatasetGUID);
 
                 Datasets outputDatasets;
+
                 for (const auto& outputDatasetGUID : outputDatasetsGUIDs)
                     outputDatasets << mv::data().getDataset(outputDatasetGUID);
 
                 auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugins().requestPlugin(analysisPluginKind, inputDatasets, outputDatasets));
+
                 if (analysisPlugin)
                     analysisPlugin->fromVariantMap(analysisPluginMap);
             }
         }
-    } // if variantMap.contains("LoadedAnalyses")
-
+    }
 }
 
 QVariantMap PluginManager::toVariantMap() const
 {
     auto variantMap = Serializable::toVariantMap();
 
-    QVariantList usedPluginsList;     // kinds of used plugins
-    QVariantList loadedAnalysesList;  // openend analysis plugin instances
+    QVariantList usedPluginsList;     // Kinds of used plugins
+    QVariantList loadedAnalysesList;  // Opened analysis plugin instances
 
     for (const auto& pluginFactory : _pluginFactories.values())
         if ((pluginFactory->getType() == Type::DATA || pluginFactory->getType() == Type::ANALYSIS || pluginFactory->getType() == Type::VIEW) && pluginFactory->getNumberOfInstances() > 0)
@@ -687,7 +690,7 @@ QVariantMap PluginManager::toVariantMap() const
     for (const auto& loadedPlugin : _plugins)
         if (loadedPlugin->getType() == Type::ANALYSIS)
         {
-            // make sure the analysisPlugin overloads toVariantMap() and fromVariantMap(QVariantMap) before saving it in the project
+            // Make sure the analysisPlugin overloads toVariantMap() and fromVariantMap(QVariantMap) before saving it in the project
             auto analysisPlugin         = dynamic_cast<plugin::AnalysisPlugin*>(loadedPlugin.get());
             const QMetaObject* metaObj  = analysisPlugin->metaObject();
 

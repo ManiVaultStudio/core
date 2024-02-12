@@ -23,6 +23,7 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     _rawDataModel(),
     _datasetsModel(),
     _selectionsModel(),
+    _showIdsAction(this, "Show identifiers"),
     _rawDataTreeAction(this, "Raw data"),
     _rawDataGroupAction(this, "Raw data group"),
     _overallRawDataSizeAction(this, "Overall raw data size"),
@@ -32,7 +33,7 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
 {
     setIconByName("chart-bar");
     //setShowLabels(false);
-    setPopupSizeHint(QSize(550, 600));
+    setPopupSizeHint(QSize(300, 600));
     setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
@@ -52,6 +53,8 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     _rawDataTreeAction.initialize(&_rawDataModel, nullptr, "Raw data");
     _datasetsTreeAction.initialize(&_datasetsModel, nullptr, "Dataset");
     _selectionsTreeAction.initialize(&_selectionsModel, nullptr, "Selection set");
+
+    addAction(&_showIdsAction);
 
     addAction(&_rawDataTreeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
@@ -125,6 +128,17 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
         connect(&_datasetsModel, &QAbstractItemModel::rowsInserted, widget, resizeSections);
         connect(&_datasetsModel, &QAbstractItemModel::rowsRemoved, widget, resizeSections);
         connect(&_datasetsModel, &QAbstractItemModel::layoutChanged, widget, resizeSections);
+
+        const auto updateColumnVisibility = [this, treeView]() -> void {
+            const auto columnHidden = !_showIdsAction.isChecked();
+
+            for (int columnIndex = 1; columnIndex < _selectionsModel.rowCount(); ++columnIndex)
+                treeView->setColumnHidden(columnIndex, columnHidden);
+        };
+
+        updateColumnVisibility();
+
+        connect(&_showIdsAction, &ToggleAction::toggled, treeView, updateColumnVisibility);
     });
 
     addAction(&_selectionsTreeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
@@ -145,7 +159,6 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
             return;
 
         treeView->setRootIsDecorated(false);
-
         auto treeViewHeader = treeView->header();
 
         treeViewHeader->setStretchLastSection(true);
@@ -164,6 +177,17 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
         connect(&_selectionsModel, &QAbstractItemModel::rowsInserted, widget, resizeSections);
         connect(&_selectionsModel, &QAbstractItemModel::rowsRemoved, widget, resizeSections);
         connect(&_selectionsModel, &QAbstractItemModel::layoutChanged, widget, resizeSections);
+
+        const auto updateColumnVisibility = [this, treeView]() -> void {
+            const auto columnHidden = !_showIdsAction.isChecked();
+
+            for (int columnIndex = 1; columnIndex < _selectionsModel.rowCount(); ++columnIndex)
+                treeView->setColumnHidden(columnIndex, columnHidden);
+        };
+
+        updateColumnVisibility();
+
+        connect(&_showIdsAction, &ToggleAction::toggled, treeView, updateColumnVisibility);
     });
 
     connect(&mv::data(), &AbstractDataManager::rawDataAdded, this, &StatisticsAction::refreshRawData);

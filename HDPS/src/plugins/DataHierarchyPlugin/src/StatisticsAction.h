@@ -5,6 +5,7 @@
 #pragma once
 
 #include <actions/GroupAction.h>
+#include <actions/ToggleAction.h>
 #include <actions/TreeAction.h>
 #include <actions/HorizontalGroupAction.h>
 #include <actions/StringAction.h>
@@ -47,6 +48,7 @@ private:
     QStandardItemModel              _rawDataModel;              /** Standard model for storing the raw data */
     QStandardItemModel              _datasetsModel;             /** Standard model for storing the dataset */
     QStandardItemModel              _selectionsModel;           /** Standard model for storing the selections */
+    mv::gui::ToggleAction           _showIdsAction;             /** Toggle action to turn coilumns with identifietrs on/off */
     mv::gui::TreeAction             _rawDataTreeAction;         /** Tree action for displaying the raw data */
     mv::gui::HorizontalGroupAction  _rawDataGroupAction;        /** Raw data group action */
     mv::gui::StringAction           _overallRawDataSizeAction;  /** String action for displaying the overall raw data size */

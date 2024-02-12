@@ -38,10 +38,11 @@ public:
     Serializable(const QString& serializationName = "");
 
     /**
-     * Get id
+     * Get globally unique identifier, possibly \p truncated
+     * @param truncated Whether to only return the first six characters of the ID
      * @return Globally unique identifier of the serializable object
      */
-    virtual QString getId() const final;
+    virtual QString getId(bool truncated = false) const final;
 
     /**
      * Set globally unique identifier (only use this function when strictly necessary and when the ramifications are understood, undefined behaviour might happen otherwise)

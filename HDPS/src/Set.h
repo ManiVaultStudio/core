@@ -142,10 +142,17 @@ public:
     }
 
     /**
-     * Marks this dataset as derived and sets the source dataset globally unique identifier
+     * Marks this dataset as derived and sets the source dataset to \p dataset
      * @param dataset Smart pointer to the source dataset
      */
-    void setSourceDataSet(const Dataset<DatasetImpl>& dataset);
+    void setSourceDataset(Dataset<DatasetImpl> dataset);
+
+    /**
+     * Marks this dataset as derived and sets the source dataset globally unique identifier to \p datasetId
+     * Note: use this when the source dataset itself is not physically available but can be lazily obtained later
+     * @param datasetId Globally unique identifier of the source dataset
+     */
+    void setSourceDataset(const QString& datasetId);
 
     /**
      * Returns the original full dataset this subset was created from
