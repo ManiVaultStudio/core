@@ -71,6 +71,12 @@ public:
     /** Get reference to the tool button */
     ToolButton& getToolButton() { return _toolButton; }
 
+    /**
+     * Get widget configuration function
+     * @return Function that is called right after a widget action widget is created
+     */
+    WidgetConfigurationFunction getWidgetConfigurationFunction();
+
 private:
 
     /**
@@ -82,7 +88,7 @@ private:
 private:
     QHBoxLayout                     _layout;                        /** Layout */
     ToolButton                      _toolButton;                    /** Tool button for the popup */
-    WidgetConfigurationFunction     _widgetConfigurationFunction;   /** When set, this function is called right after any widget action widget is created (useful for manual manipulation of the generated widget) */
+    WidgetConfigurationFunction     _widgetConfigurationFunction;   /** Function that is called right after a widget action widget is created */
 
     friend class WidgetAction;
 };

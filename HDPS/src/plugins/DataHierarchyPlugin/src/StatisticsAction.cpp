@@ -58,11 +58,9 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     _datasetsTreeAction.initialize(&_datasetsModel, &_datasetsFilterModel, "Dataset");
     _selectionsTreeAction.initialize(&_selectionsModel, &_selectionsFilterModel, "Selection");
 
-    const auto treeActionPopupSizeHint = QSize(400, 200);
-
-    _rawDataTreeAction.setPopupSizeHint(treeActionPopupSizeHint);
-    _datasetsTreeAction.setPopupSizeHint(treeActionPopupSizeHint);
-    _selectionsTreeAction.setPopupSizeHint(treeActionPopupSizeHint);
+    _rawDataTreeAction.setPopupSizeHint(QSize(400, 400));
+    _datasetsTreeAction.setPopupSizeHint(QSize(250, 400));
+    _selectionsTreeAction.setPopupSizeHint(QSize(250, 400));
 
     _rawDataGroupAction.setShowLabels(false);
     _datasetsGroupAction.setShowLabels(false);
@@ -80,12 +78,7 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
 
     _rawDataGroupAction.addAction(&_overallRawDataSizeAction);
     _rawDataGroupAction.addAction(&_refreshRawDataAction);
-
-    auto rawDatGroupAction = new GroupAction(this, "RDG");
-
-    _rawDataGroupAction.addAction(rawDatGroupAction);
-
-    rawDatGroupAction->addAction(&_rawDataTreeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
+    _rawDataGroupAction.addAction(&_rawDataTreeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
         Q_ASSERT(hierarchyWidget != nullptr);
@@ -105,6 +98,12 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
         auto treeViewHeader = treeView->header();
 
         treeViewHeader->setStretchLastSection(true);
+
+        treeViewHeader->setSectionResizeMode(static_cast<int>(RawDataModel::Column::Name), QHeaderView::ResizeToContents);
+        treeViewHeader->setSectionResizeMode(static_cast<int>(RawDataModel::Column::Type), QHeaderView::ResizeToContents);
+        treeViewHeader->setSectionResizeMode(static_cast<int>(RawDataModel::Column::Size), QHeaderView::ResizeToContents);
+
+        treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
     });
 
     _datasetsGroupAction.addAction(&_datasetsModel.getCountAction());
@@ -125,13 +124,18 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
 
         treeView->setRootIsDecorated(false);
 
+        treeView->setColumnHidden(static_cast<int>(DatasetsModel::Column::DatasetId), true);
+        treeView->setColumnHidden(static_cast<int>(DatasetsModel::Column::RawDataName), true);
+        treeView->setColumnHidden(static_cast<int>(DatasetsModel::Column::SourceDatasetId), true);
+
         auto treeViewHeader = treeView->header();
 
         treeViewHeader->setStretchLastSection(true);
 
-        treeViewHeader->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-        treeViewHeader->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-        treeViewHeader->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+        treeViewHeader->setSectionResizeMode(static_cast<int>(DatasetsModel::Column::Name), QHeaderView::ResizeToContents);
+        treeViewHeader->setSectionResizeMode(static_cast<int>(DatasetsModel::Column::DatasetId), QHeaderView::ResizeToContents);
+        treeViewHeader->setSectionResizeMode(static_cast<int>(DatasetsModel::Column::RawDataName), QHeaderView::ResizeToContents);
+        treeViewHeader->setSectionResizeMode(static_cast<int>(DatasetsModel::Column::SourceDatasetId), QHeaderView::ResizeToContents);
 
         treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
     });
@@ -154,13 +158,13 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
 
         treeView->setRootIsDecorated(false);
 
+        treeView->setColumnHidden(static_cast<int>(SelectionsModel::Column::Name), true);
+
         auto treeViewHeader = treeView->header();
 
         treeViewHeader->setStretchLastSection(true);
 
-        treeViewHeader->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-        treeViewHeader->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-        treeViewHeader->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+        treeViewHeader->setSectionResizeMode(static_cast<int>(SelectionsModel::Column::Name), QHeaderView::ResizeToContents);
 
         treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
     });

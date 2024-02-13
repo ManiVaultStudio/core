@@ -132,14 +132,24 @@ QWidget* WidgetAction::createWidget(QWidget* parent)
 {
     const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
 
+    auto widget = getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
+
     if (isInPopupMode) {
         auto collapsedWidget = dynamic_cast<WidgetActionCollapsedWidget*>(parent->parent()->parent());
 
-        if (collapsedWidget)
-            qDebug() << "Found a collapsed widget!!!!!!!!";
+        if (collapsedWidget) {
+            auto widgetConfigurationFunction = collapsedWidget->getWidgetConfigurationFunction();
+
+            if (widgetConfigurationFunction)
+                widgetConfigurationFunction(this, widget);
+        }
+    }
+    else {
+        if (_widgetConfigurationFunction)
+            _widgetConfigurationFunction(this, widget);
     }
 
-    return getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
+    return widget;
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags)

@@ -65,6 +65,11 @@ void WidgetActionCollapsedWidget::setAction(WidgetAction* action)
     connect(getAction(), &WidgetAction::visibleChanged, this, updateToolButtonVisibility);
 }
 
+WidgetConfigurationFunction WidgetActionCollapsedWidget::getWidgetConfigurationFunction()
+{
+    return _widgetConfigurationFunction;
+}
+
 void WidgetActionCollapsedWidget::initialize(WidgetAction* action)
 {
     _layout.setContentsMargins(0, 0, 0, 0);
