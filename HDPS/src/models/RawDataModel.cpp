@@ -4,9 +4,9 @@
 
 #include "RawDataModel.h"
 
-#include <models/AbstractDataHierarchyModel.h>
+#include "models/AbstractDataHierarchyModel.h"
 
-#include <util/Exception.h>
+#include "util/Exception.h"
 
 #include <QDebug>
 
@@ -14,8 +14,9 @@
     #define RAW_DATA_MODEL_VERBOSE
 #endif
 
-using namespace mv;
-using namespace mv::util;
+namespace mv {
+
+using namespace util;
 
 RawDataModel::RawDataItem::RawDataItem(const QString& rawDataName) :
     QStandardItem(),
@@ -24,7 +25,7 @@ RawDataModel::RawDataItem::RawDataItem(const QString& rawDataName) :
     Q_ASSERT(!_rawDataName.isEmpty());
 }
 
-QString RawDataModel::RawDataItem::getRawDataName()
+QString RawDataModel::RawDataItem::getRawDataName() const
 {
     return _rawDataName;
 }
@@ -37,7 +38,24 @@ QVariant RawDataModel::RawDataNameItem::data(int role /*= Qt::UserRole + 1*/) co
             return getRawDataName();
 
         case Qt::ToolTipRole:
-            return "Raw data name: " + data(Qt::DisplayRole).toString();
+            return "Name: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return {};
+}
+
+QVariant RawDataModel::RawDataTypeItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return mv::data().getRawDataType(getRawDataName());
+
+        case Qt::ToolTipRole:
+            return "Type: " + data(Qt::DisplayRole).toString();
 
         default:
             break;
@@ -56,26 +74,7 @@ QVariant RawDataModel::RawDataSizeItem::data(int role /*= Qt::UserRole + 1*/) co
             return util::getNoBytesHumanReadable(data(Qt::DisplayRole).toLongLong());
 
         case Qt::ToolTipRole:
-            return "Raw data size: " + data(Qt::DisplayRole).toString();
-
-        default:
-            break;
-    }
-
-    return {};
-}
-
-QVariant RawDataModel::RawDataTypeItem::data(int role /*= Qt::UserRole + 1*/) const
-{
-    switch (role) {
-        case Qt::EditRole:
-            return mv::data().getRawDataSize(getRawDataName());
-
-        case Qt::DisplayRole:
-            return util::getNoBytesHumanReadable(data(Qt::DisplayRole).toLongLong());
-
-        case Qt::ToolTipRole:
-            return "Raw data size: " + data(Qt::DisplayRole).toString();
+            return "Size: " + data(Qt::DisplayRole).toString();
 
         default:
             break;
@@ -88,7 +87,8 @@ RawDataModel::Row::Row(const QString& rawDataName) :
     QList<QStandardItem*>()
 {
     append(new RawDataNameItem(rawDataName));
-    append(new RawDataSizeItem(rawDataName));
+    //append(new RawDataTypeItem(rawDataName));
+    //append(new RawDataSizeItem(rawDataName));
 }
 
 RawDataModel::RawDataModel(QObject* parent) :
@@ -113,6 +113,9 @@ QVariant RawDataModel::headerData(int section, Qt::Orientation orientation, int 
         case Column::Name:
             return RawDataNameItem::headerData(orientation, role);
 
+        case Column::Type:
+            return RawDataTypeItem::headerData(orientation, role);
+
         case Column::Size:
             return RawDataSizeItem::headerData(orientation, role);
 
@@ -131,11 +134,13 @@ void RawDataModel::populateFromDataManager()
 
     setRowCount(0);
 
-    for (const auto& dataset : mv::data().getRawDataNames())
-        appendRow(Row(dataset));
+    //for (const auto& dataset : mv::data().getRawDataNames())
+    //    appendRow(Row(dataset));
 
     if (rowCount() == 1)
         _countAction.setString(QString("%1 raw data").arg(rowCount()));
     else
         _countAction.setString(QString("%1 raw data").arg(rowCount()));
+}
+
 }

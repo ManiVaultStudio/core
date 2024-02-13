@@ -2,19 +2,21 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "DatasetsFilterModel.h"
-#include "DatasetsModel.h"
+#include "RawDataFilterModel.h"
+#include "RawDataModel.h"
 
 #include <QDebug>
 
-DatasetsFilterModel::DatasetsFilterModel(QObject* parent /*= nullptr*/) :
+namespace mv {
+
+RawDataFilterModel::RawDataFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent)
 {
     setDynamicSortFilter(true);
     setRecursiveFilteringEnabled(true);
 }
 
-bool DatasetsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
+bool RawDataFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
     auto sourceStandardItemModel = static_cast<QStandardItemModel*>(sourceModel());
 
@@ -24,11 +26,13 @@ bool DatasetsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) c
         return true;
 
     if (filterRegularExpression().isValid()) {
-        const auto key = index.siblingAtColumn(static_cast<DatasetsModel::Column>(filterKeyColumn())).data(filterRole()).toString();
+        const auto key = index.siblingAtColumn(static_cast<RawDataModel::Column>(filterKeyColumn())).data(filterRole()).toString();
 
         if (!key.contains(filterRegularExpression()))
             return false;
     }
 
     return true;
+}
+
 }

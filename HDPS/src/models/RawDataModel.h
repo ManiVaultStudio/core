@@ -4,17 +4,19 @@
 
 #pragma once
 
-#include <Dataset.h>
-#include <Set.h>
+#include "Dataset.h"
+#include "Set.h"
 
-#include <actions/StringAction.h>
+#include "actions/StringAction.h"
 
 #include <QStandardItemModel>
+
+namespace mv {
 
 /**
  * Raw data model class
  *
- * Standard item model for storing raw data
+ * Standard item model for listing raw data
  *
  * @author Thomas Kroes
  */
@@ -22,11 +24,11 @@ class RawDataModel final : public QStandardItemModel
 {
 public:
 
-    /** Dataset columns */
+    /** Raw data columns */
     enum Column {
         Name,       /** Name of the raw data */
-        Size,       /** Size of the raw data */
         Type,       /** Data type of the raw data */
+        Size,       /** Size of the raw data */
 
         Count
     };
@@ -47,7 +49,7 @@ private:
          * Get raw data name
          * return Name of the raw data
          */
-        QString getRawDataName();
+        QString getRawDataName() const;
 
     private:
         QString _rawDataName;   /** Name of the raw data */
@@ -76,7 +78,7 @@ private:
             switch (role) {
                 case Qt::DisplayRole:
                 case Qt::EditRole:
-                    return "Raw data Name";
+                    return "Name";
 
                 case Qt::ToolTipRole:
                     return "The name of the raw data";
@@ -109,10 +111,10 @@ private:
             switch (role) {
                 case Qt::DisplayRole:
                 case Qt::EditRole:
-                    return "Raw data size";
+                    return "Type";
 
                 case Qt::ToolTipRole:
-                    return "The size of the raw data";
+                    return "The type of the raw data";
             }
 
             return {};
@@ -142,7 +144,7 @@ private:
             switch (role) {
                 case Qt::DisplayRole:
                 case Qt::EditRole:
-                    return "Raw data size";
+                    return "Size";
 
                 case Qt::ToolTipRole:
                     return "The size of the raw data";
@@ -171,7 +173,7 @@ public:
 
 protected:
 
-    /** Convenience class for combining dataset items in a row */
+    /** Convenience class for combining raw data items in a row */
     class Row final : public QList<QStandardItem*>
     {
     public:
@@ -197,13 +199,15 @@ protected: // Drag-and-drop behavior
 
 public:
 
-    /** Populate the model with datasets from the data manager */
+    /** Populate the model with raw data from the data manager */
     void populateFromDataManager();
 
 public: // Action getters
 
-    mv::gui::StringAction& getCountAction() { return _countAction; }
+    gui::StringAction& getCountAction() { return _countAction; }
 
 private:
-    mv::gui::StringAction   _countAction;    /** String action for displaying the number of datasets */
+    gui::StringAction   _countAction;    /** String action for displaying the number of raw data */
 };
+
+}

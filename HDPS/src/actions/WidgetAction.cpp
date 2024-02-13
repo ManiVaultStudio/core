@@ -132,6 +132,13 @@ QWidget* WidgetAction::createWidget(QWidget* parent)
 {
     const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
 
+    if (isInPopupMode) {
+        auto collapsedWidget = dynamic_cast<WidgetActionCollapsedWidget*>(parent->parent()->parent());
+
+        if (collapsedWidget)
+            qDebug() << "Found a collapsed widget!!!!!!!!";
+    }
+
     return getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
 }
 
@@ -195,6 +202,11 @@ void WidgetAction::setSortIndex(const std::int32_t& sortIndex)
 QWidget* WidgetAction::createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags /*= 0*/) const
 {
     return new WidgetActionCollapsedWidget(parent, const_cast<WidgetAction*>(this));
+}
+
+QWidget* WidgetAction::createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction) const
+{
+    return new WidgetActionCollapsedWidget(parent, const_cast<WidgetAction*>(this), widgetConfigurationFunction);
 }
 
 QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags /*= 0x00001*/) const

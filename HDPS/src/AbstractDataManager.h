@@ -113,6 +113,13 @@ public: // Raw data
         return overallRawDataSize;
     };
 
+    /**
+     * Get raw data type string by \p rawDataName
+     * @param rawDataName Name of the raw data
+     * @return Raw data type string
+     */
+    virtual QString getRawDataType(const QString& rawDataName) const = 0;
+
 public: // Dataset creation
 
     /**
@@ -378,6 +385,7 @@ signals:
     void selectionRemoved(const QString& selectionId);
 
     friend class PluginManager;
+    friend class DatasetImpl;
     friend class RawDataModel;
 };
 

@@ -193,6 +193,29 @@ std::uint64_t DataManager::getRawDataSize(const QString& rawDataName) const
     return {};
 }
 
+QString DataManager::getRawDataType(const QString& rawDataName) const
+{
+    try
+    {
+        if (rawDataName.isEmpty())
+            throw std::runtime_error("Raw data name is invalid");
+
+        if (_rawDataMap.find(rawDataName) == _rawDataMap.end())
+            throw std::runtime_error(QString("%1 not found").arg(rawDataName).toStdString());
+
+        return _rawDataMap.at(rawDataName)->getTypeString();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get raw data type from the data manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get raw data type from the data manager");
+    }
+
+    return "Undefined";
+}
+
 Dataset<DatasetImpl> DataManager::createDataset(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/, bool notify /*= true*/)
 {
 #ifdef DATA_MANAGER_VERBOSE
@@ -200,7 +223,7 @@ Dataset<DatasetImpl> DataManager::createDataset(const QString& kind, const QStri
 #endif
 
     const auto rawDataName  = plugins().requestPlugin(kind)->getName();
-    const auto rawData      = mv::data().getRawData(rawDataName);
+    const auto rawData      = getRawData(rawDataName);
 
     // Create an initial full set and an empty selection belonging to the raw data
     auto fullSet = rawData->createDataSet(id);
@@ -232,7 +255,7 @@ Dataset<DatasetImpl> DataManager::createDatasetWithoutSelection(const QString& k
 #endif
 
     const auto rawDataName  = plugins().requestPlugin(kind)->getName();
-    const auto rawData      = mv::data().getRawData(rawDataName);
+    const auto rawData      = getRawData(rawDataName);
 
     auto fullSet = rawData->createDataSet(id);
 
@@ -488,7 +511,7 @@ Dataset<DatasetImpl> DataManager::createDerivedDataset(const QString& guiName, c
     // Create a new plugin of the given kind
     QString pluginName = mv::plugins().requestPlugin(dataType._type)->getName();
 
-    auto rawData = mv::data().getRawData(pluginName);
+    auto rawData = getRawData(pluginName);
 
     // Create an initial full set, but no selection because it is shared with the source data
     auto derivedDataset = rawData->createDataSet();

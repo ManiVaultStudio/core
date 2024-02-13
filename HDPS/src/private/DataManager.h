@@ -92,6 +92,13 @@ public: // Raw data
      */
     std::uint64_t getRawDataSize(const QString& rawDataName) const override;
 
+    /**
+     * Get raw data type string by \p rawDataName
+     * @param rawDataName Name of the raw data
+     * @return Raw data type string
+     */
+    QString getRawDataType(const QString& rawDataName) const override;
+
 public: // Datasets
 
     /**

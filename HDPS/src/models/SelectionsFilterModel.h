@@ -6,20 +6,22 @@
 
 #include <QSortFilterProxyModel>
 
+namespace mv {
+
 /**
- * Datasets filter model class
+ * Selections filter model class
  *
- * A class for filtering and sorting the datasets model
+ * A class for filtering and sorting the selection model
  *
  * @author Thomas Kroes
  */
-class DatasetsFilterModel : public QSortFilterProxyModel {
+class SelectionsFilterModel : public QSortFilterProxyModel {
 public:
 
     /** Constructor
      * @param parent Pointer to parent object
     */
-    DatasetsFilterModel(QObject* parent = nullptr);
+    SelectionsFilterModel(QObject* parent = nullptr);
 
     /**
      * Returns whether a given row with give parent is filtered out (false) or in (true)
@@ -28,3 +30,5 @@ public:
      */
     bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
 };
+
+}

@@ -6,6 +6,8 @@
 
 #include <QSortFilterProxyModel>
 
+namespace mv {
+
 /**
  * Raw data filter model class
  *
@@ -28,3 +30,5 @@ public:
      */
     bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
 };
+
+}

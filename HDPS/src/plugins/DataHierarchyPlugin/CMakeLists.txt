@@ -50,14 +50,6 @@ set(MODELS
     src/DatasetsModel.cpp
     src/DatasetsFilterModel.h
     src/DatasetsFilterModel.cpp
-    src/SelectionsModel.h
-    src/SelectionsModel.cpp
-    src/SelectionsFilterModel.h
-    src/SelectionsFilterModel.cpp
-    src/RawDataModel.h
-    src/RawDataModel.cpp
-    src/RawDataFilterModel.h
-    src/RawDataFilterModel.cpp
 )
 
 set(AUX

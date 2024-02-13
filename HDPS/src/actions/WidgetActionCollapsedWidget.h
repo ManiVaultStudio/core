@@ -48,11 +48,19 @@ protected:
 public:
 
     /**
-     * Constructor
+     * Construct with pointer to \parent widget and pointer to owning \p action
      * @param parent Parent widget
      * @param action Pointer to the widget action that will be displayed in a popup
      */
     WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* action);
+
+    /**
+     * Construct with pointer to \parent widget and pointer to owning \p action
+     * @param parent Parent widget
+     * @param action Pointer to the widget action that will be displayed in a popup
+     * @param widgetConfigurationFunction This function is called right after the action widget is created
+     */
+    WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* action, WidgetConfigurationFunction widgetConfigurationFunction);
 
     /**
      * Set the source action
@@ -64,8 +72,17 @@ public:
     ToolButton& getToolButton() { return _toolButton; }
 
 private:
-    QHBoxLayout     _layout;            /** Layout */
-    ToolButton      _toolButton;        /** Tool button for the popup */
+
+    /**
+     * Startup initialization
+     * @param action Action to display as a popup widget of a tool button
+     */
+    void initialize(WidgetAction* action);
+
+private:
+    QHBoxLayout                     _layout;                        /** Layout */
+    ToolButton                      _toolButton;                    /** Tool button for the popup */
+    WidgetConfigurationFunction     _widgetConfigurationFunction;   /** When set, this function is called right after any widget action widget is created (useful for manual manipulation of the generated widget) */
 
     friend class WidgetAction;
 };

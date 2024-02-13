@@ -21,9 +21,11 @@ using namespace mv::gui;
 StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),
     _rawDataModel(),
+    _rawDataFilterModel(),
     _datasetsModel(),
     _datasetsFilterModel(),
     _selectionsModel(),
+    _selectionsFilterModel(),
     _rawDataGroupAction(this, "Raw data group"),
     _overallRawDataSizeAction(this, "Overall raw data size"),
     _refreshRawDataAction(this, "Refresh raw data"),
@@ -39,9 +41,6 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     setLabelSizingType(GroupAction::LabelSizingType::Auto);
     setShowLabels(false);
 
-    _rawDataModel.setHorizontalHeaderLabels({ "Name", "Size" });
-    _selectionsModel.setHorizontalHeaderLabels({ "Name", "ID", "Raw data name" });
-
     _overallRawDataSizeAction.setEnabled(false);
 
     _refreshRawDataAction.setIconByName("sync");
@@ -55,9 +54,9 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     _datasetsTreeAction.setIconByName("list-ul");
     _selectionsTreeAction.setIconByName("list-ul");
 
-    _rawDataTreeAction.initialize(&_rawDataModel, nullptr, "Raw data");
+    _rawDataTreeAction.initialize(&_rawDataModel, &_rawDataFilterModel, "Raw data");
     _datasetsTreeAction.initialize(&_datasetsModel, &_datasetsFilterModel, "Dataset");
-    _selectionsTreeAction.initialize(&_selectionsModel, nullptr, "Selection");
+    _selectionsTreeAction.initialize(&_selectionsModel, &_selectionsFilterModel, "Selection");
 
     const auto treeActionPopupSizeHint = QSize(400, 200);
 
@@ -81,7 +80,12 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
 
     _rawDataGroupAction.addAction(&_overallRawDataSizeAction);
     _rawDataGroupAction.addAction(&_refreshRawDataAction);
-    _rawDataGroupAction.addAction(&_rawDataTreeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
+
+    auto rawDatGroupAction = new GroupAction(this, "RDG");
+
+    _rawDataGroupAction.addAction(rawDatGroupAction);
+
+    rawDatGroupAction->addAction(&_rawDataTreeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
         Q_ASSERT(hierarchyWidget != nullptr);

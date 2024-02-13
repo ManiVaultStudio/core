@@ -11,10 +11,14 @@
 #include <actions/StringAction.h>
 #include <actions/TriggerAction.h>
 
+#include <models/RawDataModel.h>
+#include <models/RawDataFilterModel.h>
+
 #include "DatasetsModel.h"
 #include "DatasetsFilterModel.h"
 
-#include "SelectionsModel.h"
+#include <models/SelectionsModel.h>
+#include <models/SelectionsFilterModel.h>
 
 #include <QStandardItemModel>
 
@@ -48,10 +52,12 @@ private:
     void refreshOverallRawDataSize();
 
 private:
-    QStandardItemModel                  _rawDataModel;              /** Standard model for storing the raw data */
+    mv::RawDataModel                    _rawDataModel;              /** Standard model for storing the raw data */
+    mv::RawDataFilterModel              _rawDataFilterModel;        /** Sort/filter model for the raw data model */
     DatasetsModel                       _datasetsModel;             /** Standard model for storing the dataset */
     DatasetsFilterModel                 _datasetsFilterModel;       /** Sort/filter model for the datasets model */
-    SelectionsModel                     _selectionsModel;           /** Standard model for storing the selections */
+    mv::SelectionsModel                 _selectionsModel;           /** Standard model for storing the selections */
+    mv::SelectionsFilterModel           _selectionsFilterModel;     /** Sort/filter model for the selections model */
     mv::gui::HorizontalGroupAction      _rawDataGroupAction;        /** Raw data group action */
     mv::gui::StringAction               _overallRawDataSizeAction;  /** String action for displaying the overall raw data size */
     mv::gui::TriggerAction              _refreshRawDataAction;      /** Triggers refresh of the raw data */
