@@ -11,6 +11,11 @@
 #include <actions/StringAction.h>
 #include <actions/TriggerAction.h>
 
+#include "DatasetsModel.h"
+#include "DatasetsFilterModel.h"
+
+#include "SelectionsModel.h"
+
 #include <QStandardItemModel>
 
 /**
@@ -41,18 +46,18 @@ private:
 
     void refreshRawData();
     void refreshOverallRawDataSize();
-    void refreshDatasets();
-    void refreshSelections();
 
 private:
-    QStandardItemModel              _rawDataModel;              /** Standard model for storing the raw data */
-    QStandardItemModel              _datasetsModel;             /** Standard model for storing the dataset */
-    QStandardItemModel              _selectionsModel;           /** Standard model for storing the selections */
-    mv::gui::ToggleAction           _showIdsAction;             /** Toggle action to turn coilumns with identifietrs on/off */
-    mv::gui::TreeAction             _rawDataTreeAction;         /** Tree action for displaying the raw data */
-    mv::gui::HorizontalGroupAction  _rawDataGroupAction;        /** Raw data group action */
-    mv::gui::StringAction           _overallRawDataSizeAction;  /** String action for displaying the overall raw data size */
-    mv::gui::TriggerAction          _refreshRawDataAction;      /** Triggers refresh of the raw data */
-    mv::gui::TreeAction             _datasetsTreeAction;        /** Tree action for displaying the datasets */
-    mv::gui::TreeAction             _selectionsTreeAction;      /** Tree action for displaying the selections */
+    QStandardItemModel                  _rawDataModel;              /** Standard model for storing the raw data */
+    DatasetsModel                       _datasetsModel;             /** Standard model for storing the dataset */
+    DatasetsFilterModel                 _datasetsFilterModel;       /** Sort/filter model for the datasets model */
+    SelectionsModel                     _selectionsModel;           /** Standard model for storing the selections */
+    mv::gui::HorizontalGroupAction      _rawDataGroupAction;        /** Raw data group action */
+    mv::gui::StringAction               _overallRawDataSizeAction;  /** String action for displaying the overall raw data size */
+    mv::gui::TriggerAction              _refreshRawDataAction;      /** Triggers refresh of the raw data */
+    mv::gui::TreeAction                 _rawDataTreeAction;         /** Tree action for displaying the raw data */
+    mv::gui::HorizontalGroupAction      _datasetsGroupAction;       /** Datasets group action */
+    mv::gui::TreeAction                 _datasetsTreeAction;        /** Tree action for displaying the datasets */
+    mv::gui::HorizontalGroupAction      _selectionsGroupAction;     /** Selections group action */
+    mv::gui::TreeAction                 _selectionsTreeAction;      /** Tree action for displaying the selections */
 };

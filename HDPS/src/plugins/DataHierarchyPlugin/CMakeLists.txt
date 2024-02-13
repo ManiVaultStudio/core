@@ -45,6 +45,21 @@ set(WIDGETS
     src/DataHierarchyWidgetContextMenu.cpp
 )
 
+set(MODELS
+    src/DatasetsModel.h
+    src/DatasetsModel.cpp
+    src/DatasetsFilterModel.h
+    src/DatasetsFilterModel.cpp
+    src/SelectionsModel.h
+    src/SelectionsModel.cpp
+    src/SelectionsFilterModel.h
+    src/SelectionsFilterModel.cpp
+    src/RawDataModel.h
+    src/RawDataModel.cpp
+    src/RawDataFilterModel.h
+    src/RawDataFilterModel.cpp
+)
+
 set(AUX
     src/DataHierarchyPlugin.json
 )
@@ -53,12 +68,14 @@ set(DATAHIERARCHY_SOURCES
     ${PLUGIN}
     ${ACTIONS}
     ${WIDGETS}
+    ${MODELS}
     ${AUX}
 )
 
 source_group(Plugin FILES ${PLUGIN})
 source_group(Actions FILES ${ACTIONS})
 source_group(Widgets FILES ${WIDGETS})
+source_group(Models FILES ${MODELS})
 source_group(Aux FILES ${AUX})
 
 add_library(${DATAHIERARCHYPLUGIN} SHARED ${DATAHIERARCHY_SOURCES})

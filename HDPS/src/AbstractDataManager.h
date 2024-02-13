@@ -66,7 +66,7 @@ protected: // Raw data
      */
     virtual void removeRawData(const QString& rawDataName) = 0;
 
-public: // Raw data
+protected: // Raw data
 
     /**
      * Get raw data by \p rawDataName
@@ -84,6 +84,8 @@ public: // Raw data
     RawDataType* getRawData(const QString& rawDataName) {
         return dynamic_cast<RawDataType*>(getRawData(rawDataName));
     }
+
+public: // Raw data
 
     /**
      * Get raw data names
@@ -376,6 +378,7 @@ signals:
     void selectionRemoved(const QString& selectionId);
 
     friend class PluginManager;
+    friend class RawDataModel;
 };
 
 }

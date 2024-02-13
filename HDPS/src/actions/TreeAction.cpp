@@ -62,13 +62,8 @@ TreeAction::Widget::Widget(QWidget* parent, TreeAction* treeAction, const std::i
 
 QWidget* TreeAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    if (dynamic_cast<QMenu*>(parent))
-        return QWidgetAction::createWidget(parent);
-
-    auto widget = new WidgetActionWidget(parent, this);
+    auto widget = new WidgetActionWidget(parent, this, widgetFlags);
     auto layout = new QVBoxLayout();
-
-    layout->setContentsMargins(0, 0, 0, 0);
 
     layout->addWidget(new TreeAction::Widget(parent, this, widgetFlags));
 
