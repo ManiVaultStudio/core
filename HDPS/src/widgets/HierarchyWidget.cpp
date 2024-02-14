@@ -221,7 +221,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     header->setMinimumSectionSize(18);
     header->setIconSize(QSize(4, 10));
 
-    connect(header, &QHeaderView::sectionCountChanged, this, [this](int oldCount, int newCount) -> void {
+    connect(header, &QHeaderView::sectionResized, this, [this](int logicalIndex, int oldSize, int newSize) -> void {
         for (int columnIndex = 0; columnIndex < _model.columnCount(); ++columnIndex)
             _columnsGroupAction.getActions()[columnIndex]->setChecked(!_treeView.header()->isSectionHidden(columnIndex));
     });
