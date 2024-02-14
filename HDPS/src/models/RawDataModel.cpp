@@ -18,14 +18,14 @@ namespace mv {
 
 using namespace util;
 
-RawDataModel::RawDataItem::RawDataItem(const QString& rawDataName) :
+RawDataModel::Item::Item(const QString& rawDataName) :
     QStandardItem(),
     _rawDataName(rawDataName)
 {
     Q_ASSERT(!_rawDataName.isEmpty());
 }
 
-QString RawDataModel::RawDataItem::getRawDataName() const
+QString RawDataModel::Item::getRawDataName() const
 {
     return _rawDataName;
 }
@@ -71,7 +71,7 @@ QVariant RawDataModel::RawDataSizeItem::data(int role /*= Qt::UserRole + 1*/) co
             return mv::data().getRawDataSize(getRawDataName());
 
         case Qt::DisplayRole:
-            return util::getNoBytesHumanReadable(data(Qt::DisplayRole).toLongLong());
+            return util::getNoBytesHumanReadable(data(Qt::EditRole).toLongLong());
 
         case Qt::ToolTipRole:
             return "Size: " + data(Qt::DisplayRole).toString();
@@ -87,18 +87,21 @@ RawDataModel::Row::Row(const QString& rawDataName) :
     QList<QStandardItem*>()
 {
     append(new RawDataNameItem(rawDataName));
-    //append(new RawDataTypeItem(rawDataName));
-    //append(new RawDataSizeItem(rawDataName));
+    append(new RawDataTypeItem(rawDataName));
+    append(new RawDataSizeItem(rawDataName));
 }
 
 RawDataModel::RawDataModel(QObject* parent) :
     QStandardItemModel(parent),
-    _countAction(this, "Number of raw data")
+    _countAction(this, "Number of raw data"),
+    _overallSizeAction(this, "Overall size")
 {
     setColumnCount(static_cast<int>(Column::Count));
 
     _countAction.setToolTip("Number of raw data items");
     _countAction.setEnabled(false);
+
+    _overallSizeAction.setEnabled(false);
 
     connect(&mv::data(), &AbstractDataManager::rawDataAdded, this, &RawDataModel::populateFromDataManager);
     connect(&mv::data(), &AbstractDataManager::rawDataRemoved, this, &RawDataModel::populateFromDataManager);
@@ -134,13 +137,11 @@ void RawDataModel::populateFromDataManager()
 
     setRowCount(0);
 
-    //for (const auto& dataset : mv::data().getRawDataNames())
-    //    appendRow(Row(dataset));
+    for (const auto& rawDataName : mv::data().getRawDataNames())
+        appendRow(Row(rawDataName));
 
-    if (rowCount() == 1)
-        _countAction.setString(QString("%1 raw data").arg(rowCount()));
-    else
-        _countAction.setString(QString("%1 raw data").arg(rowCount()));
+    _countAction.setString(QString("Count: %1").arg(QString::number(rowCount())));
+    _overallSizeAction.setString(QString("Overall size: %1").arg(util::getNoBytesHumanReadable(mv::data().getOverallRawDataSize())));
 }
 
 }

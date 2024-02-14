@@ -36,14 +36,14 @@ public:
 private:
 
     /** Base standard model item class for raw data */
-    class RawDataItem : public QStandardItem {
+    class Item : public QStandardItem {
     public:
 
         /**
          * Construct with \p rawDataName
          * @param rawDataName Name of the raw data
          */
-        RawDataItem(const QString& rawDataName);
+        Item(const QString& rawDataName);
 
         /**
          * Get raw data name
@@ -56,11 +56,11 @@ private:
     };
 
     /** Standard model item class for raw data */
-    class RawDataNameItem : public RawDataItem {
+    class RawDataNameItem : public Item {
     public:
 
         /** Use base item constructor */
-        using RawDataItem::RawDataItem;
+        using Item::Item;
 
         /**
          * Get model data for \p role
@@ -81,7 +81,7 @@ private:
                     return "Name";
 
                 case Qt::ToolTipRole:
-                    return "The name of the raw data";
+                    return "Name of the raw data";
             }
 
             return {};
@@ -89,11 +89,11 @@ private:
     };
 
     /** Standard model item class for displaying the raw data type */
-    class RawDataTypeItem final : public RawDataItem {
+    class RawDataTypeItem final : public Item {
     public:
 
         /** Use base item constructor */
-        using RawDataItem::RawDataItem;
+        using Item::Item;
 
         /**
          * Get model data for \p role
@@ -122,11 +122,11 @@ private:
     };
 
     /** Standard model item class for displaying the raw data size */
-    class RawDataSizeItem final : public RawDataItem {
+    class RawDataSizeItem final : public Item {
     public:
 
         /** Use base item constructor */
-        using RawDataItem::RawDataItem;
+        using Item::Item;
 
         /**
          * Get model data for \p role
@@ -205,9 +205,11 @@ public:
 public: // Action getters
 
     gui::StringAction& getCountAction() { return _countAction; }
+    gui::StringAction& getOverallSizeAction() { return _overallSizeAction; }
 
 private:
-    gui::StringAction   _countAction;    /** String action for displaying the number of raw data */
+    gui::StringAction   _countAction;           /** String action for displaying the number of raw data */
+    gui::StringAction   _overallSizeAction;     /** String action for displaying the overall raw data size */
 };
 
 }

@@ -26,25 +26,18 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     _datasetsFilterModel(),
     _selectionsModel(),
     _selectionsFilterModel(),
-    _rawDataGroupAction(this, "Raw data group"),
-    _overallRawDataSizeAction(this, "Overall raw data size"),
-    _refreshRawDataAction(this, "Refresh raw data"),
-    _rawDataTreeAction(this, "Raw data"),
-    _datasetsGroupAction(this, "Datasets group"),
-    _datasetsTreeAction(this, "Datasets"),
-    _selectionsGroupAction(this, "Selections group"),
+    _rawDataGroupAction(this, "Raw data"),
+    _rawDataTreeAction(this, "Raw data overview"),
+    _datasetsGroupAction(this, "Datasets"),
+    _datasetsTreeAction(this, "Datasets overview"),
+    _selectionsGroupAction(this, "Selections"),
     _selectionsTreeAction(this, "Selections")
 {
     setIconByName("chart-bar");
-    setPopupSizeHint(QSize(200, 0));
+    setPopupSizeHint(QSize(0, 0));
     setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     setLabelSizingType(GroupAction::LabelSizingType::Auto);
-    setShowLabels(false);
-
-    _overallRawDataSizeAction.setEnabled(false);
-
-    _refreshRawDataAction.setIconByName("sync");
-    _refreshRawDataAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
+    //setShowLabels(false);
 
     _rawDataTreeAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _datasetsTreeAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
@@ -54,13 +47,13 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     _datasetsTreeAction.setIconByName("list-ul");
     _selectionsTreeAction.setIconByName("list-ul");
 
-    _rawDataTreeAction.initialize(&_rawDataModel, &_rawDataFilterModel, "Raw data");
+    _rawDataTreeAction.initialize(&_rawDataModel, &_rawDataFilterModel, "Raw data set");
     _datasetsTreeAction.initialize(&_datasetsModel, &_datasetsFilterModel, "Dataset");
     _selectionsTreeAction.initialize(&_selectionsModel, &_selectionsFilterModel, "Selection");
 
-    _rawDataTreeAction.setPopupSizeHint(QSize(400, 400));
-    _datasetsTreeAction.setPopupSizeHint(QSize(250, 400));
-    _selectionsTreeAction.setPopupSizeHint(QSize(250, 400));
+    _rawDataTreeAction.setPopupSizeHint(QSize(450, 400));
+    _datasetsTreeAction.setPopupSizeHint(QSize(200, 400));
+    _selectionsTreeAction.setPopupSizeHint(QSize(350, 400));
 
     _rawDataGroupAction.setShowLabels(false);
     _datasetsGroupAction.setShowLabels(false);
@@ -70,14 +63,12 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     addAction(&_datasetsGroupAction);
     addAction(&_selectionsGroupAction);
 
-    refreshOverallRawDataSize();
+    _rawDataGroupAction.addAction(&_rawDataModel.getCountAction(), -1, [this](WidgetAction* action, QWidget* widget) -> void { 
+        widget->setMinimumWidth(0);
+        widget->setFixedWidth(50);
+    });
 
-    connect(&_datasetsModel, &QAbstractItemModel::rowsInserted, this, &StatisticsAction::refreshOverallRawDataSize);
-    connect(&_datasetsModel, &QAbstractItemModel::rowsRemoved, this, &StatisticsAction::refreshOverallRawDataSize);
-    connect(&_datasetsModel, &QAbstractItemModel::layoutChanged, this, &StatisticsAction::refreshOverallRawDataSize);
-
-    _rawDataGroupAction.addAction(&_overallRawDataSizeAction);
-    _rawDataGroupAction.addAction(&_refreshRawDataAction);
+    _rawDataGroupAction.addAction(&_rawDataModel.getOverallSizeAction());
     _rawDataGroupAction.addAction(&_rawDataTreeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
@@ -99,9 +90,8 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
 
         treeViewHeader->setStretchLastSection(true);
 
-        treeViewHeader->setSectionResizeMode(static_cast<int>(RawDataModel::Column::Name), QHeaderView::ResizeToContents);
-        treeViewHeader->setSectionResizeMode(static_cast<int>(RawDataModel::Column::Type), QHeaderView::ResizeToContents);
-        treeViewHeader->setSectionResizeMode(static_cast<int>(RawDataModel::Column::Size), QHeaderView::ResizeToContents);
+        for (int columnIndex = 0; columnIndex < _rawDataModel.columnCount(); ++columnIndex)
+            treeViewHeader->setSectionResizeMode(columnIndex, QHeaderView::ResizeToContents);
 
         treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
     });
@@ -132,10 +122,8 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
 
         treeViewHeader->setStretchLastSection(true);
 
-        treeViewHeader->setSectionResizeMode(static_cast<int>(DatasetsModel::Column::Name), QHeaderView::ResizeToContents);
-        treeViewHeader->setSectionResizeMode(static_cast<int>(DatasetsModel::Column::DatasetId), QHeaderView::ResizeToContents);
-        treeViewHeader->setSectionResizeMode(static_cast<int>(DatasetsModel::Column::RawDataName), QHeaderView::ResizeToContents);
-        treeViewHeader->setSectionResizeMode(static_cast<int>(DatasetsModel::Column::SourceDatasetId), QHeaderView::ResizeToContents);
+        for (int columnIndex = 0; columnIndex < _datasetsModel.columnCount(); ++columnIndex)
+            treeViewHeader->setSectionResizeMode(columnIndex, QHeaderView::ResizeToContents);
 
         treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
     });
@@ -158,36 +146,16 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
 
         treeView->setRootIsDecorated(false);
 
-        treeView->setColumnHidden(static_cast<int>(SelectionsModel::Column::Name), true);
+        treeView->setColumnHidden(static_cast<int>(SelectionsModel::Column::ID), true);
+        treeView->setColumnHidden(static_cast<int>(SelectionsModel::Column::RawDataType), true);
 
         auto treeViewHeader = treeView->header();
 
         treeViewHeader->setStretchLastSection(true);
 
-        treeViewHeader->setSectionResizeMode(static_cast<int>(SelectionsModel::Column::Name), QHeaderView::ResizeToContents);
+        for (int columnIndex = 0; columnIndex < _selectionsModel.columnCount(); ++columnIndex)
+            treeViewHeader->setSectionResizeMode(columnIndex, QHeaderView::ResizeToContents);
 
         treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
     });
-
-    connect(&mv::data(), &AbstractDataManager::rawDataAdded, this, &StatisticsAction::refreshRawData);
-    connect(&mv::data(), &AbstractDataManager::rawDataRemoved, this, &StatisticsAction::refreshRawData);
-
-    connect(&_refreshRawDataAction, &TriggerAction::triggered, this, &StatisticsAction::refreshRawData);
-
-    refreshRawData();
-}
-
-void StatisticsAction::refreshRawData()
-{
-    _rawDataModel.setRowCount(0);
-
-    for (const auto& rawDataName : mv::data().getRawDataNames())
-        _rawDataModel.appendRow({ new QStandardItem(rawDataName), new QStandardItem(util::getNoBytesHumanReadable(mv::data().getRawDataSize(rawDataName))) });
-
-    refreshOverallRawDataSize();
-}
-
-void StatisticsAction::refreshOverallRawDataSize()
-{
-    _overallRawDataSizeAction.setString(util::getNoBytesHumanReadable(mv::data().getOverallRawDataSize()));
 }

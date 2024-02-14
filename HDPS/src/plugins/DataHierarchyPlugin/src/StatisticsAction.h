@@ -5,11 +5,8 @@
 #pragma once
 
 #include <actions/GroupAction.h>
-#include <actions/ToggleAction.h>
 #include <actions/TreeAction.h>
 #include <actions/HorizontalGroupAction.h>
-#include <actions/StringAction.h>
-#include <actions/TriggerAction.h>
 
 #include <models/RawDataModel.h>
 #include <models/RawDataFilterModel.h>
@@ -47,11 +44,6 @@ public:
     Q_INVOKABLE StatisticsAction(QObject* parent, const QString& title);
 
 private:
-
-    void refreshRawData();
-    void refreshOverallRawDataSize();
-
-private:
     mv::RawDataModel                    _rawDataModel;              /** Standard model for storing the raw data */
     mv::RawDataFilterModel              _rawDataFilterModel;        /** Sort/filter model for the raw data model */
     DatasetsModel                       _datasetsModel;             /** Standard model for storing the dataset */
@@ -59,8 +51,6 @@ private:
     mv::SelectionsModel                 _selectionsModel;           /** Standard model for storing the selections */
     mv::SelectionsFilterModel           _selectionsFilterModel;     /** Sort/filter model for the selections model */
     mv::gui::HorizontalGroupAction      _rawDataGroupAction;        /** Raw data group action */
-    mv::gui::StringAction               _overallRawDataSizeAction;  /** String action for displaying the overall raw data size */
-    mv::gui::TriggerAction              _refreshRawDataAction;      /** Triggers refresh of the raw data */
     mv::gui::TreeAction                 _rawDataTreeAction;         /** Tree action for displaying the raw data */
     mv::gui::HorizontalGroupAction      _datasetsGroupAction;       /** Datasets group action */
     mv::gui::TreeAction                 _datasetsTreeAction;        /** Tree action for displaying the datasets */

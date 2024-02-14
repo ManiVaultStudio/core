@@ -26,7 +26,10 @@ public:
 
     /** Selection columns */
     enum Column {
-        Name,       /** Name of the selection dataset */
+        Name,           /** Name of the selection dataset */
+        ID,             /** Globally unique identifier of the selection dataset */
+        RawDataName,    /** Name of the raw dataset on which the selection set is based */
+        RawDataType,    /** Type of the raw dataset on which the selection set is based */
 
         Count
     };
@@ -34,14 +37,14 @@ public:
 private:
 
     /** Base standard model item class for selection datasets */
-    class SelectionItem : public QStandardItem {
+    class Item : public QStandardItem {
     public:
 
         /**
          * Construct with \p selection
          * @param selection Selection dataset
          */
-        SelectionItem(Dataset<DatasetImpl> selection);
+        Item(Dataset<DatasetImpl> selection);
 
         /**
          * Get selection
@@ -54,11 +57,11 @@ private:
     };
 
     /** Standard model item class for selection dataset name */
-    class SelectionNameItem : public SelectionItem {
+    class NameItem : public Item {
     public:
 
         /** Use base item constructor */
-        using SelectionItem::SelectionItem;
+        using Item::Item;
 
         /**
          * Get model data for \p role
@@ -80,6 +83,105 @@ private:
 
                 case Qt::ToolTipRole:
                     return "The name of the selection dataset";
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for selection dataset identifier */
+    class IdItem : public Item {
+    public:
+
+        /** Use base item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "ID";
+
+                case Qt::ToolTipRole:
+                    return "Globally unique identifier of the selection dataset";
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for selection dataset raw data name */
+    class RawDataNameItem : public Item {
+    public:
+
+        /** Use base item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Raw data name";
+
+                case Qt::ToolTipRole:
+                    return "Name of the raw dataset on which the selection set is based";
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for selection dataset raw data type */
+    class RawDataTypeItem : public Item {
+    public:
+
+        /** Use base item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Raw data type";
+
+                case Qt::ToolTipRole:
+                    return "Type of the raw dataset on which the selection set is based";
             }
 
             return {};

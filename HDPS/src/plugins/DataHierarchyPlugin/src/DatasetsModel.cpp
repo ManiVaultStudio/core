@@ -75,8 +75,5 @@ void DatasetsModel::populateFromDataManager()
     for (const auto& dataset : mv::data().getAllDatasets())
         appendRow(Row(dataset));
 
-    if (rowCount() == 1)
-        _countAction.setString(QString("%1 dataset").arg(rowCount()));
-    else
-        _countAction.setString(QString("%1 datasets").arg(rowCount()));
+    _countAction.setString(QString("Count: %1").arg(QString::number(rowCount())));
 }

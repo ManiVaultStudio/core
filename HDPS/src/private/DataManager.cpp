@@ -203,7 +203,7 @@ QString DataManager::getRawDataType(const QString& rawDataName) const
         if (_rawDataMap.find(rawDataName) == _rawDataMap.end())
             throw std::runtime_error(QString("%1 not found").arg(rawDataName).toStdString());
 
-        return _rawDataMap.at(rawDataName)->getTypeString();
+        return _rawDataMap.at(rawDataName)->getDataType().getTypeString();
     }
     catch (std::exception& e)
     {

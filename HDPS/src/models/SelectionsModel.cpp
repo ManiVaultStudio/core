@@ -18,19 +18,19 @@ namespace mv {
 
 using namespace util;
 
-SelectionsModel::SelectionItem::SelectionItem(Dataset<DatasetImpl> selection) :
+SelectionsModel::Item::Item(Dataset<DatasetImpl> selection) :
     QStandardItem(),
     _selection(selection)
 {
     Q_ASSERT(_selection.isValid());
 }
 
-Dataset<DatasetImpl> SelectionsModel::SelectionItem::getSelection() const
+Dataset<DatasetImpl> SelectionsModel::Item::getSelection() const
 {
     return _selection;
 }
 
-QVariant SelectionsModel::SelectionNameItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant SelectionsModel::NameItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -38,7 +38,58 @@ QVariant SelectionsModel::SelectionNameItem::data(int role /*= Qt::UserRole + 1*
             return getSelection()->getGuiName();
 
         case Qt::ToolTipRole:
-            return "Selection dataset name: " + data(Qt::DisplayRole).toString();
+            return "Name: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return {};
+}
+
+QVariant SelectionsModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getSelection()->getId();
+
+        case Qt::ToolTipRole:
+            return "ID: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return {};
+}
+
+QVariant SelectionsModel::RawDataNameItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getSelection()->getRawDataName();
+
+        case Qt::ToolTipRole:
+            return "Raw data name: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return {};
+}
+
+QVariant SelectionsModel::RawDataTypeItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return mv::data().getRawDataType(getSelection()->getRawDataName());
+
+        case Qt::ToolTipRole:
+            return "Type: " + data(Qt::DisplayRole).toString();
 
         default:
             break;
@@ -50,14 +101,17 @@ QVariant SelectionsModel::SelectionNameItem::data(int role /*= Qt::UserRole + 1*
 SelectionsModel::Row::Row(Dataset<DatasetImpl> selection) :
     QList<QStandardItem*>()
 {
-    append(new SelectionsModel::SelectionNameItem(selection));
+    append(new NameItem(selection));
+    append(new IdItem(selection));
+    append(new RawDataNameItem(selection));
+    append(new RawDataTypeItem(selection));
 }
 
 SelectionsModel::SelectionsModel(QObject* parent) :
     QStandardItemModel(parent),
     _countAction(this, "Number of selections")
 {
-    setHorizontalHeaderLabels({ "Name", "ID", "Raw data name" });
+    setColumnCount(static_cast<int>(Column::Count));
 
     _countAction.setToolTip("Number of selections");
     _countAction.setEnabled(false);
@@ -73,7 +127,16 @@ QVariant SelectionsModel::headerData(int section, Qt::Orientation orientation, i
     switch (static_cast<Column>(section))
     {
         case Column::Name:
-            return SelectionsModel::SelectionNameItem::headerData(orientation, role);
+            return NameItem::headerData(orientation, role);
+
+        case Column::ID:
+            return IdItem::headerData(orientation, role);
+
+        case Column::RawDataName:
+            return RawDataNameItem::headerData(orientation, role);
+
+        case Column::RawDataType:
+            return RawDataTypeItem::headerData(orientation, role);
 
         default:
             break;
@@ -93,10 +156,7 @@ void SelectionsModel::populateFromDataManager()
     for (const auto& selection : mv::data().getAllSelections())
         appendRow(Row(selection));
 
-    if (rowCount() == 1)
-        _countAction.setString(QString("%1 selection").arg(rowCount()));
-    else
-        _countAction.setString(QString("%1 selections").arg(rowCount()));
+    _countAction.setString(QString("Count: %1").arg(QString::number(rowCount())));
 }
 
 }
