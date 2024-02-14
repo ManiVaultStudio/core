@@ -38,7 +38,6 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     setPopupSizeHint(QSize(0, 0));
     setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     setLabelSizingType(GroupAction::LabelSizingType::Auto);
-    //setShowLabels(false);
 
     _rawDataTreeAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _datasetsTreeAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
