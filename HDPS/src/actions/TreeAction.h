@@ -34,7 +34,7 @@ public:
 public:
 
     /** Widget class for tree action */
-    class Widget : public QWidget {
+    class Widget : public WidgetActionWidget {
     protected:
 
         /**
@@ -58,7 +58,9 @@ protected:
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this, widgetFlags);
+    }
 
 public:
 

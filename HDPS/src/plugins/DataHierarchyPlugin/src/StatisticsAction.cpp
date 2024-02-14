@@ -27,6 +27,7 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     _selectionsModel(),
     _selectionsFilterModel(),
     _rawDataGroupAction(this, "Raw data"),
+    _rawDataCountGroupAction(this, "Raw data count"),
     _rawDataTreeAction(this, "Raw data overview"),
     _datasetsGroupAction(this, "Datasets"),
     _datasetsTreeAction(this, "Datasets overview"),
@@ -43,9 +44,9 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     _datasetsTreeAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _selectionsTreeAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
 
-    _rawDataTreeAction.setIconByName("list-ul");
-    _datasetsTreeAction.setIconByName("list-ul");
-    _selectionsTreeAction.setIconByName("list-ul");
+    _rawDataTreeAction.setIconByName("bars");
+    _datasetsTreeAction.setIconByName("bars");
+    _selectionsTreeAction.setIconByName("bars");
 
     _rawDataTreeAction.initialize(&_rawDataModel, &_rawDataFilterModel, "Raw data set");
     _datasetsTreeAction.initialize(&_datasetsModel, &_datasetsFilterModel, "Dataset");
@@ -63,13 +64,10 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
     addAction(&_datasetsGroupAction);
     addAction(&_selectionsGroupAction);
 
-    _rawDataGroupAction.addAction(&_rawDataModel.getCountAction(), -1, [this](WidgetAction* action, QWidget* widget) -> void { 
-        widget->setMinimumWidth(0);
-        widget->setFixedWidth(50);
-    });
+    _rawDataCountGroupAction.setShowLabels(false);
 
-    _rawDataGroupAction.addAction(&_rawDataModel.getOverallSizeAction());
-    _rawDataGroupAction.addAction(&_rawDataTreeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
+    _rawDataCountGroupAction.addAction(&_rawDataModel.getCountAction());
+    _rawDataCountGroupAction.addAction(&_rawDataTreeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
         Q_ASSERT(hierarchyWidget != nullptr);
@@ -95,6 +93,12 @@ StatisticsAction::StatisticsAction(QObject* parent, const QString& title) :
 
         treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
     });
+
+    _rawDataGroupAction.setDefaultWidgetFlag(GroupAction::WidgetFlag::NoMargins);
+    _rawDataGroupAction.setShowLabels(false);
+
+    _rawDataGroupAction.addAction(&_rawDataCountGroupAction);
+    _rawDataGroupAction.addAction(&_rawDataModel.getOverallSizeAction());
 
     _datasetsGroupAction.addAction(&_datasetsModel.getCountAction());
     _datasetsGroupAction.addAction(&_datasetsTreeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {

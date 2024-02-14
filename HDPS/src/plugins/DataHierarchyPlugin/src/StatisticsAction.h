@@ -6,6 +6,7 @@
 
 #include <actions/GroupAction.h>
 #include <actions/TreeAction.h>
+#include <actions/VerticalGroupAction.h>
 #include <actions/HorizontalGroupAction.h>
 
 #include <models/RawDataModel.h>
@@ -50,7 +51,8 @@ private:
     DatasetsFilterModel                 _datasetsFilterModel;       /** Sort/filter model for the datasets model */
     mv::SelectionsModel                 _selectionsModel;           /** Standard model for storing the selections */
     mv::SelectionsFilterModel           _selectionsFilterModel;     /** Sort/filter model for the selections model */
-    mv::gui::HorizontalGroupAction      _rawDataGroupAction;        /** Raw data group action */
+    mv::gui::VerticalGroupAction        _rawDataGroupAction;        /** Raw data group action */
+    mv::gui::HorizontalGroupAction      _rawDataCountGroupAction;   /** Raw data count group action */
     mv::gui::TreeAction                 _rawDataTreeAction;         /** Tree action for displaying the raw data */
     mv::gui::HorizontalGroupAction      _datasetsGroupAction;       /** Datasets group action */
     mv::gui::TreeAction                 _datasetsTreeAction;        /** Tree action for displaying the datasets */
