@@ -649,7 +649,7 @@ QMimeData* AbstractDataHierarchyModel::mimeData(const QModelIndexList& indexes) 
 {
     Datasets datasets;
 
-    for (const auto index : indexes)
+    for (const auto& index : indexes)
         if (index.column() == 0)
             datasets << static_cast<Item*>(itemFromIndex(index))->getDataset();
 

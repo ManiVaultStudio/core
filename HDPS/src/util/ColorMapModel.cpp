@@ -35,7 +35,7 @@ QVariant ColorMapModel::data(const QModelIndex& index, int role /* = Qt::Display
     if (!index.isValid())
         return QVariant();
 
-    const auto colorMap = _colorMaps.at(index.row());
+    const auto& colorMap = _colorMaps.at(index.row());
 
     auto icon = [](const QImage& image, const QSize& size) -> QPixmap {
         auto pixmap = QPixmap::fromImage(image).scaled(size);
