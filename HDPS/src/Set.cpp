@@ -20,6 +20,43 @@ using namespace mv::util;
 namespace mv
 {
 
+DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/, const QString& id /*= ""*/) :
+    WidgetAction(nullptr, "Set"),
+    _storageType(StorageType::Owner),
+    _rawData(nullptr),
+    _rawDataName(rawDataName),
+    _all(true),
+    _derived(false),
+    _sourceDataset(),
+    _properties(),
+    _metaData(nullptr),
+    _groupIndex(-1),
+    _analysis(nullptr),
+    _linkedData(),
+    _linkedDataFlags(LinkedDataFlag::SendReceive),
+    _locked(false),
+    _smartPointer(this),
+    _task(this, ""),
+    _mayUnderive(mayUnderive),
+    _aboutToBeRemoved(false)
+{
+    if (!id.isEmpty())
+        Serializable::setId(id);
+
+    _task.setDataset(this);
+}
+
+DatasetImpl::~DatasetImpl()
+{
+#ifdef _DEBUG
+        qDebug() << "Removed dataset" << getGuiName();
+#endif
+}
+
+void DatasetImpl::init()
+{
+}
+
 void DatasetImpl::makeSubsetOf(Dataset<DatasetImpl> fullDataset)
 {
     _rawDataName = fullDataset->_rawDataName;
@@ -187,6 +224,9 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
         _linkedData.push_back(linkedData);
     }
+
+    if (hasMetaData() && variantMap.contains(getMetaData()->getSerializationName()))
+        getMetaData()->fromParentVariantMap(variantMap);
 }
 
 QVariantMap DatasetImpl::toVariantMap() const
@@ -220,6 +260,9 @@ QVariantMap DatasetImpl::toVariantMap() const
         { "LinkedData", linkedDataList },
         { "Properties", QVariant::fromValue(_properties)}
     });
+
+    if (hasMetaData())
+        const_cast<DatasetImpl*>(this)->getMetaData()->insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
@@ -310,42 +353,6 @@ void DatasetImpl::addLinkedData(const mv::Dataset<DatasetImpl>& targetDataSet, m
 {
     _linkedData.emplace_back(toSmartPointer(), targetDataSet);
     _linkedData.back().setMapping(mapping);
-}
-
-DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/, const QString& id /*= ""*/) :
-    WidgetAction(nullptr, "Set"),
-    _storageType(StorageType::Owner),
-    _rawData(nullptr),
-    _rawDataName(rawDataName),
-    _all(true),
-    _derived(false),
-    _sourceDataset(),
-    _properties(),
-    _groupIndex(-1),
-    _analysis(nullptr),
-    _linkedData(),
-    _linkedDataFlags(LinkedDataFlag::SendReceive),
-    _locked(false),
-    _smartPointer(this),
-    _task(this, ""),
-    _mayUnderive(mayUnderive),
-    _aboutToBeRemoved(false)
-{
-    if (!id.isEmpty())
-        Serializable::setId(id);
-
-    _task.setDataset(this);
-}
-
-DatasetImpl::~DatasetImpl()
-{
-#ifdef _DEBUG
-    qDebug() << "Removed dataset" << getGuiName();
-#endif
-}
-
-void DatasetImpl::init()
-{
 }
 
 mv::DatasetImpl::StorageType DatasetImpl::getStorageType() const
@@ -512,9 +519,19 @@ QStringList DatasetImpl::propertyNames() const
     return _properties.keys();
 }
 
-QVariantMap& DatasetImpl::getMetaData()
+DatasetMetaData* DatasetImpl::getMetaData()
 {
     return _metaData;
+}
+
+bool DatasetImpl::hasMetaData() const
+{
+    return _metaData != nullptr;
+}
+
+void DatasetImpl::setMetaData(DatasetMetaData* metaData)
+{
+    _metaData = metaData;
 }
 
 QString DatasetImpl::getRawDataName() const

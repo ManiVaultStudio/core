@@ -12,6 +12,8 @@
 #include "PointDataRange.h"
 #include "Set.h"
 
+#include "PointsMetaData.h"
+
 #include "event/EventListener.h"
 
 #include <biovault_bfloat16/biovault_bfloat16.h>
@@ -622,6 +624,8 @@ public:
 
         if (notifyDimensionsChanged)
             mv::events().notifyDatasetDataDimensionsChanged(this);
+
+        getMetaData<PointsMetaData>()->resize(getNumPoints(), getNumDimensions());
     }
 
     /// Just calls the corresponding member function of its PointData.
@@ -637,6 +641,8 @@ public:
 
         if (notifyDimensionsChanged)
             mv::events().notifyDatasetDataDimensionsChanged(this);
+
+        getMetaData<PointsMetaData>()->resize(getNumPoints(), getNumDimensions());
     }
 
     /// Just calls the corresponding member function of its PointData.
@@ -649,6 +655,8 @@ public:
 
         if (notifyDimensionsChanged)
             mv::events().notifyDatasetDataDimensionsChanged(this);
+
+        getMetaData<PointsMetaData>()->resize(getNumPoints(), getNumDimensions());
     }
 
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
@@ -895,12 +903,12 @@ public: // Linked data
 
 public:
 
-    std::vector<unsigned int> indices;
+    std::vector<unsigned int>   indices;
 
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
-    mv::gui::GroupAction*     _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
+    mv::gui::GroupAction*       _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
     DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
-    mv::EventListener         _eventListener;                 /** Listen to HDPS events */
+    mv::EventListener           _eventListener;                 /** Listen to ManiVault events */
 };
 
 // =============================================================================

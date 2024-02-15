@@ -9,6 +9,7 @@
 #include "Dataset.h"
 #include "LinkedData.h"
 #include "RawData.h"
+#include "DatasetMetaData.h"
 
 #include "DatasetTask.h"
 #include "ForegroundTask.h"
@@ -370,10 +371,33 @@ protected: // Meta data
 
     /**
      * Get meta data
-     * @return Meta data variant map
+     * @return Pointer to dataset meta data object (may return nullptr)
      */
-    QVariantMap& getMetaData();
-    
+    DatasetMetaData* getMetaData();
+
+    /**
+     * Get meta data of \p DatasetMetaDataType
+     * @return Pointer to dataset meta data object of \p DatasetMetaDataType (may return nullptr)
+     */
+    template<typename DatasetMetaDataType>
+    DatasetMetaDataType* getMetaData() {
+        return dynamic_cast<DatasetMetaDataType*>(getMetaData());
+    }
+
+    /**
+     * Get whether the dataset has meta data or not
+     * @return Boolean determining whether the dataset has meta data or not
+     */
+    bool hasMetaData() const;
+
+protected: // Meta data
+
+    /**
+     * Set meta data to \p metaData
+     * @param metaData Pointer to meta data object (maybe nullptr)
+     */
+    void setMetaData(DatasetMetaData* metaData);
+
 public: // Analysis
 
     /**
@@ -585,7 +609,7 @@ private:
     Dataset<DatasetImpl>        _fullDataset;           /** Smart pointer to the original full dataset (if this is a subset) */
     bool                        _mayUnderive;           /** Whether a dataset may be un-derived, if not it should always co-exist with its source */
     QMap<QString, QVariant>     _properties;            /** Properties map */
-    QVariantMap                 _metaData;              /** Storage of dataset meta data */
+    DatasetMetaData*            _metaData;              /** Pointer to dataset meta data object (maybe nullptr) */
     std::int32_t                _groupIndex;            /** Group index (sets with identical indices can for instance share selection) */
     plugin::AnalysisPlugin*     _analysis;              /** Pointer to analysis plugin that created the set (if any) */
     Datasets                    _proxyMembers;          /** Member datasets in case of a proxy dataset */

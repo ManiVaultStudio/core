@@ -4,22 +4,75 @@
 
 #include "PointsMetaData.h"
 
+#include <QVariantMap>
+
 using namespace mv;
 
-PointsMetaData::PointsMetaData(const QString& serializationName /*= "PointsMetaData"*/) :
-    DatasetMetaData(serializationName),
-    _metaData()
+PointsMetaData::PointsMetaData(QObject* parent, const QString& serializationName /*= "PointsMetaData"*/) :
+    DatasetMetaData(parent, serializationName)
 {
+    auto& metaData = getMetaData();
+
+    metaData["Rows"] = QVariantMap({
+        { "Names", QStringList() },
+        { "Meta", QVariantList() },
+    });
+
+    metaData["Columns"] = QVariantMap({
+        { "Names", QStringList() },
+        { "Meta", QVariantList() },
+    });
+
+    metaData["Overall"] = QVariantMap();
 }
 
-void PointsMetaData::fromVariantMap(const QVariantMap& variantMap)
+void PointsMetaData::resize(int numberOfPoints, int numberOfDimensions)
 {
-    DatasetMetaData::fromVariantMap(variantMap);
+    setNumberOfPoints(numberOfPoints);
+    setNumberOfDimensions(numberOfDimensions);
 }
 
-QVariantMap PointsMetaData::toVariantMap() const
+QStringList& PointsMetaData::getRowNames()
 {
-    auto variantMap = DatasetMetaData::toVariantMap();
+    return *static_cast<QStringList*>(getRowsVariantMap()["Names"].data());
+}
 
-    return variantMap;
+QStringList& PointsMetaData::getColumnNames()
+{
+    return *static_cast<QStringList*>(getColumnsVariantMap()["Names"].data());
+}
+
+QVariantMap& PointsMetaData::getOverall()
+{
+    return *static_cast<QVariantMap*>(getMetaData()["Overall"].data());
+}
+
+void PointsMetaData::setNumberOfPoints(int numberOfPoints)
+{
+    auto& rowNames = getRowNames();
+
+    rowNames.resize(numberOfPoints);
+
+    for (int pointIndex = 0; pointIndex < numberOfPoints; ++pointIndex)
+        rowNames[pointIndex] = QString::number(pointIndex);
+}
+
+void PointsMetaData::setNumberOfDimensions(int numberOfDimensions)
+{
+    auto& columnNames = getColumnNames();
+
+    columnNames.resize(numberOfDimensions);
+
+    for (int columnIndex = 0; columnIndex < numberOfDimensions; ++columnIndex)
+        columnNames[columnIndex] = QString("Dim %1").arg(QString::number(columnIndex));
+}
+
+QVariantMap& PointsMetaData::getRowsVariantMap()
+{
+    return *static_cast<QVariantMap*>(getMetaData()["Rows"].data());
+}
+
+QVariantMap& PointsMetaData::getColumnsVariantMap()
+{
+    return *static_cast<QVariantMap*>(getMetaData()["Columns"].data());
 }

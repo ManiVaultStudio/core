@@ -6,30 +6,64 @@
 
 #include <DatasetMetaData.h>
 
+/**
+ * Points meta data class
+ *
+ * Class for storing and retrieving points meta data
+ *
+ * @author Thomas Kroes
+ */
 class PointsMetaData : public mv::DatasetMetaData
 {
 public:
 
     /**
-     * Construct with \p serialization name
-     * @param serializationName Serialization to possibly override
+     * Construct with pointer to \p parent object and \p title
+     * @param parent Pointer to parent object
+     * @param title Title to possibly override
      */
-    PointsMetaData(const QString& serializationName = "PointsMetaData");
-
-public: // Serialization
-
-    /**
-     * Load from variant map
-     * @param variantMap Variant map
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    PointsMetaData(QObject* parent, const QString& serializationName = "PointsMetaData");
 
     /**
-     * Save to variant map
-     * @return Variant map
+     * Resize to \p numberOfPoints and \p numberOfDimensions
+     * @param numberOfPoints Number of points
+     * @param numberOfDimensions Number of dimensions
      */
-    QVariantMap toVariantMap() const override;
+    void resize(int numberOfPoints, int numberOfDimensions);
+
+    /**
+     *
+     */
+    QStringList& getRowNames();
+
+    /**
+     * 
+     */
+    QStringList& getColumnNames();
+
+    /**
+     * Get overall meta data
+     * @return Variant map for overall data
+     */
+    QVariantMap& getOverall();
 
 private:
-    QVariantMap     _metaData;      /** Meta data storage in variant map */
+
+    /**
+     * Set number of points to \p numberOfPoints
+     * @param numberOfPoints Number of points
+     */
+    void setNumberOfPoints(int numberOfPoints);
+
+    /**
+     * Set number of points to \p numberOfDimensions
+     * @param numberOfDimensions Number of dimensions
+     */
+    void setNumberOfDimensions(int numberOfDimensions);
+
+    QVariantMap& getRowsVariantMap();
+    QVariantMap& getColumnsVariantMap();
+
+private:
+    QVariantMap     _metaData;  /** Meta data storage in variant map */
 };

@@ -9,10 +9,15 @@ using namespace mv::util;
 namespace mv
 {
 
-DatasetMetaData::DatasetMetaData(const QString& serializationName /*= "DatasetMetaData"*/) :
-    Serializable(serializationName),
+DatasetMetaData::DatasetMetaData(QObject* parent, const QString& title /*= "DatasetMetaData"*/) :
+    WidgetAction(parent, title),
     _metaData()
 {
+}
+
+QVariantMap& DatasetMetaData::getMetaData()
+{
+    return _metaData;
 }
 
 void DatasetMetaData::fromVariantMap(const QVariantMap& variantMap)

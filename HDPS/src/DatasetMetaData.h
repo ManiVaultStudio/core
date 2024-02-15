@@ -4,20 +4,42 @@
 
 #pragma once
 
-#include "util/Serializable.h"
+#include "actions/WidgetAction.h"
 
 namespace mv
 {
 
-class DatasetMetaData : public util::Serializable
+/**
+ * Dataset meta data class
+ * 
+ * Class for storing and retrieving dataset meta data
+ * 
+ * @author Thomas Kroes
+ */
+class DatasetMetaData : public gui::WidgetAction
 {
 public:
 
     /**
-     * Construct with \p serialization name
-     * @param serializationName Serialization to possibly override
+     * Construct with pointer to \p parent object and \p title
+     * @param parent Pointer to parent object
+     * @param title Title to possibly override
      */
-    DatasetMetaData(const QString& serializationName = "DatasetMetaData");
+    DatasetMetaData(QObject* parent, const QString& title = "DatasetMetaData");
+
+protected:
+
+    /**
+     * Get meta data
+     * @return Variant map of all meta data
+     */
+    QVariantMap& getMetaData();
+
+    /**
+     * Get meta data
+     * @return Variant map of all meta data
+     */
+    const QVariantMap& getMetaData() const;
 
 public: // Serialization
 

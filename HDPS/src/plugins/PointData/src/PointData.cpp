@@ -232,6 +232,7 @@ Points::Points(QString dataName, bool mayUnderive /*= true*/, const QString& gui
     _dimensionsPickerGroupAction(nullptr),
     _dimensionsPickerAction(nullptr)
 {
+    setMetaData(new PointsMetaData(this));
 }
 
 Points::~Points()
@@ -322,6 +323,8 @@ void Points::setData(std::nullptr_t, const std::size_t numPoints, const std::siz
 
     if (notifyDimensionsChanged)
         events().notifyDatasetDataDimensionsChanged(this);
+
+    getMetaData<PointsMetaData>()->resize(getNumPoints(), getNumDimensions());
 }
 
 void Points::extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const
