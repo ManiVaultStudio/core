@@ -90,7 +90,10 @@ namespace
     }
 }
 
-ShaderProgram::ShaderProgram() {
+ShaderProgram::ShaderProgram() : 
+    _handle(),
+    _locationMap()
+{
     
 }
 

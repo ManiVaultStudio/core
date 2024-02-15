@@ -19,7 +19,7 @@ namespace mv
 class MeanShift : protected QOpenGLFunctions_3_3_Core
 {
 public:
-    MeanShift() : _sigma(0.15f), _needsDensityMapUpdate(true) { }
+    MeanShift() : _sigma(0.15f), _needsDensityMapUpdate(true), _quad(0) { }
     void init();
     void cleanup();
 

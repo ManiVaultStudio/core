@@ -19,7 +19,11 @@ namespace mv
 namespace gui
 {
 
-WebWidget::WebWidget()
+WebWidget::WebWidget() :
+    _webView(nullptr),
+    _communicationChannel(nullptr),
+    _js(nullptr),
+    _css()
 {
 
 }
