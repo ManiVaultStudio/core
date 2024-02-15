@@ -227,7 +227,7 @@ QVariant AbstractDataHierarchyModel::RawDataSizeItem::data(int role /*= Qt::User
 {
     switch (role) {
         case Qt::EditRole:
-            return getDataset().isValid() ? getDataset()->getRawDataSize() : 0;
+            return getDataset().isValid() ? QVariant::fromValue(getDataset()->getRawDataSize()) : 0;
 
         case Qt::DisplayRole:
             return getDataset().isValid() ? getDataset()->getRawDataSizeHumanReadable() : "";
