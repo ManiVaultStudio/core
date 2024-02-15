@@ -68,7 +68,7 @@ QVariant RawDataModel::RawDataSizeItem::data(int role /*= Qt::UserRole + 1*/) co
 {
     switch (role) {
         case Qt::EditRole:
-            return mv::data().getRawDataSize(getRawDataName());
+            return QVariant::fromValue(mv::data().getRawDataSize(getRawDataName()));
 
         case Qt::DisplayRole:
             return util::getNoBytesHumanReadable(data(Qt::EditRole).toLongLong());
