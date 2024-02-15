@@ -366,6 +366,14 @@ public: // Properties
     /** Returns a list of available property names */
     QStringList propertyNames() const;
 
+protected: // Meta data
+
+    /**
+     * Get meta data
+     * @return Meta data variant map
+     */
+    QVariantMap& getMetaData();
+    
 public: // Analysis
 
     /**
@@ -577,6 +585,7 @@ private:
     Dataset<DatasetImpl>        _fullDataset;           /** Smart pointer to the original full dataset (if this is a subset) */
     bool                        _mayUnderive;           /** Whether a dataset may be un-derived, if not it should always co-exist with its source */
     QMap<QString, QVariant>     _properties;            /** Properties map */
+    QVariantMap                 _metaData;              /** Storage of dataset meta data */
     std::int32_t                _groupIndex;            /** Group index (sets with identical indices can for instance share selection) */
     plugin::AnalysisPlugin*     _analysis;              /** Pointer to analysis plugin that created the set (if any) */
     Datasets                    _proxyMembers;          /** Member datasets in case of a proxy dataset */

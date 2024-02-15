@@ -29,6 +29,7 @@ set(POINTS_SOURCES
     src/PointDataIterator.h
     src/PointDataRange.h
     src/PointView.h
+    src/PointsMetaData.cpp
     src/RandomAccessRange.h
 )
 
@@ -37,6 +38,7 @@ set(POINTS_HEADERS
     src/PointDataIterator.h
     src/PointDataRange.h
     src/PointView.h
+    src/PointsMetaData.h
     src/RandomAccessRange.h
     src/InfoAction.h
     src/SelectedIndicesAction.h

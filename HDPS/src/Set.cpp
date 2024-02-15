@@ -512,6 +512,11 @@ QStringList DatasetImpl::propertyNames() const
     return _properties.keys();
 }
 
+QVariantMap& DatasetImpl::getMetaData()
+{
+    return _metaData;
+}
+
 QString DatasetImpl::getRawDataName() const
 {
     return _rawDataName;
