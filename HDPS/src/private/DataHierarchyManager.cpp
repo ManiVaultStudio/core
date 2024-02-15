@@ -264,7 +264,8 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         const auto datasetId        = dataset["ID"].toString();
         const auto datasetName      = dataset["Name"].toString();
         const auto pluginKind       = dataset["PluginKind"].toString();
-        const auto derived          = dataset["Derived"].toBool();
+        const auto isDerived        = dataset["Derived"].toBool();
+        const auto isFull           = dataset["Full"].toBool();
         const auto sourceDatasetID  = dataset["SourceDatasetID"].toString();
 
         auto subtaskName = QString("Loading dataset hierarchy item: %1").arg(datasetName);
@@ -272,9 +273,9 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
         Dataset<DatasetImpl> loadedDataset;
 
-        loadedDataset = derived ? mv::data().createDatasetWithoutSelection(pluginKind, guiName, parent, datasetId) : mv::data().createDataset(pluginKind, guiName, parent, datasetId);
+        loadedDataset = (isDerived || !isFull) ? mv::data().createDatasetWithoutSelection(pluginKind, guiName, parent, datasetId) : mv::data().createDataset(pluginKind, guiName, parent, datasetId);
 
-        if (derived)
+        if (isDerived)
             loadedDataset->setSourceDataset(sourceDatasetID);
 
         loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);

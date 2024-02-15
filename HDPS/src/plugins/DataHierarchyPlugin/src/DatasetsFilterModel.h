@@ -20,11 +20,4 @@ public:
      * @param parent Pointer to parent object
     */
     DatasetsFilterModel(QObject* parent = nullptr);
-
-    /**
-     * Returns whether a given row with give parent is filtered out (false) or in (true)
-     * @param row Row index
-     * @param parent Parent index
-     */
-    bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
 };

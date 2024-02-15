@@ -16,23 +16,4 @@ SelectionsFilterModel::SelectionsFilterModel(QObject* parent /*= nullptr*/) :
     setRecursiveFilteringEnabled(true);
 }
 
-bool SelectionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
-{
-    auto sourceStandardItemModel = static_cast<QStandardItemModel*>(sourceModel());
-
-    const auto index = sourceModel()->index(row, 0, parent);
-
-    if (!index.isValid())
-        return true;
-
-    if (filterRegularExpression().isValid()) {
-        const auto key = index.siblingAtColumn(static_cast<SelectionsModel::Column>(filterKeyColumn())).data(filterRole()).toString();
-
-        if (!key.contains(filterRegularExpression()))
-            return false;
-    }
-
-    return true;
-}
-
 }
