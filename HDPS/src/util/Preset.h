@@ -57,12 +57,6 @@ public:
     QString getName() const;
 
     /**
-     * Get preset title
-     * @return Preset title
-     */
-    QString getTitle() const;
-
-    /**
      * Get preset description
      * @return Preset description
      */
