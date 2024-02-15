@@ -408,6 +408,8 @@ QVariant AbstractDataHierarchyModel::IsGroupItem::data(int role /*= Qt::UserRole
 
             if (getDataset()->isProxy())
                 return Application::getIconFont("FontAwesome").getIcon("object-group");
+
+            break;
         }
 
         default:

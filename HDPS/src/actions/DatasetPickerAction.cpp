@@ -296,6 +296,7 @@ QVariant DatasetPickerAction::DatasetsModel::data(const QModelIndex& index, int 
                 default:
                     break;
             }
+            break;
         }
 
         default:
