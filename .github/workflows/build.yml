@@ -55,13 +55,22 @@ jobs:
           #  build-xcode-version: 10.3
           #  build-libcxx: libc++
 
-          - name: Macos_xcode12.4
-            os: macos-11
+          #- name: Macos_xcode12.4
+          #  os: macos-11
+          #  build-compiler: apple-clang
+          #  build-cversion: "12.0"
+          #  build-config: Release
+          #  build-os: Macos
+          #  build-xcode-version: 12.4
+          #  build-libcxx: libc++
+
+          - name: Macos_xcode13.4
+            os: macos-12
             build-compiler: apple-clang
-            build-cversion: "12.0"
+            build-cversion: "13.1"
             build-config: Release
             build-os: Macos
-            build-xcode-version: 12.4
+            build-xcode-version: 13.4
             build-libcxx: libc++
 
     steps:
