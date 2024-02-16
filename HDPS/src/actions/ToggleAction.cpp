@@ -170,7 +170,7 @@ bool ToggleAction::CheckBoxWidget::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::MouseButtonPress:
         {
-            _toggleAction->toggle();
+            _toggleAction->setChecked(!_toggleAction->isChecked());
             return true;
             break;
         }
