@@ -178,6 +178,24 @@ private:
     }
 
 
+    /// Converts the internal data if the specified `Index` has the same numerical value as the specified `elementTypeSpecifier`.
+    template<std::size_t Index>
+    void convertInternalDataIfIndexEqualsElementTypeSpecifier(const ElementTypeSpecifier elementTypeSpecifier)
+    {
+        if (static_cast<ElementTypeSpecifier>(Index) == elementTypeSpecifier)
+        {
+            convertInternalData<typename std::variant_alternative_t<Index, VariantOfVectors>::value_type>();
+        }
+    }
+
+    /// Converts the internal data as specified by the `elementTypeSpecifier`, using an `std::index_sequence`.
+    template<std::size_t... Indices>
+    void convertInternalDataUsingIndexSequence(const std::index_sequence<Indices...>, const ElementTypeSpecifier elementTypeSpecifier)
+    {
+        (convertInternalDataIfIndexEqualsElementTypeSpecifier<Indices>(elementTypeSpecifier), ...);
+    }
+
+
     template <typename DimensionIndex>
     void CheckDimensionIndex(const DimensionIndex& dimensionIndex) const
     {
@@ -353,6 +371,34 @@ public:
         convertData(inputDataContainer.data(), inputDataContainer.size());
         _numDimensions = static_cast<std::uint32_t>(numDimensions);
     }
+
+    /// Converts the internal data to the specified element data element type, by static_cast. 
+    template <typename T>
+    void convertInternalData()
+    {
+        if (!std::holds_alternative<std::vector<T>>(_variantOfVectors))
+        {
+            std::vector<T> convertedData(getSizeOfVector());
+
+            std::visit([&convertedData](const auto& vec)
+                {
+                    std::transform(vec.cbegin(), vec.cend(), convertedData.begin(), [](const auto elem)
+                        {
+                            return static_cast<T>(elem);
+                        });
+                },
+                _variantOfVectors);
+
+            _variantOfVectors = std::move(convertedData);
+        }
+    }
+
+
+    void convertInternalData(const ElementTypeSpecifier elementTypeSpecifier)
+    {
+        convertInternalDataUsingIndexSequence(std::make_index_sequence<std::variant_size_v<VariantOfVectors>>{}, elementTypeSpecifier);
+    }
+
 
     /// Copies the specified data into the internal data, sets the number of
     /// dimensions as specified, and sets the selected internal data type
