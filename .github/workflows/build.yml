@@ -64,6 +64,15 @@ jobs:
             build-xcode-version: 12.4
             build-libcxx: libc++
 
+          - name: Macos_xcode13.4
+            os: macos-12
+            build-compiler: apple-clang
+            build-cversion: "13.1"
+            build-config: Release
+            build-os: Macos
+            build-xcode-version: 13.4
+            build-libcxx: libc++
+
     steps:
       - name: Checkout the source
         if: ${{ github.event_name != 'pull_request'}}
@@ -88,7 +97,7 @@ jobs:
       - name: Setup python version
         uses: actions/setup-python@v1
         with:
-          python-version: "3.7"
+          python-version: "3.11"
 
       # windows-2016 need the SSHAgentFeature added
       #- name: Start ssh key agent
