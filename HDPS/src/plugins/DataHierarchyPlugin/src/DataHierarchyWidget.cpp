@@ -383,11 +383,21 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     updateColumnsVisibility();
     initializeChildModelItemsExpansion();
     initializeSelection();
+
+    for (auto dataHierarchyItem : mv::dataHierarchy().getItems()) {
+        connect(dataHierarchyItem, &DataHierarchyItem::selectedChanged, this, [this, dataHierarchyItem](bool selected) -> void {
+            const auto nameModelIndex = getModelIndexByDataset(dataHierarchyItem->getDataset());
+
+            if (nameModelIndex.isValid())
+                _hierarchyWidget.getSelectionModel().select(_filterModel.mapFromSource(nameModelIndex), selected ? QItemSelectionModel::Rows | QItemSelectionModel::Select : QItemSelectionModel::Rows | QItemSelectionModel::Deselect);
+        });
+    }
+
 }
 
 QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImpl>& dataset)
 {
-    const auto modelIndices = _treeModel.match(_treeModel.index(0, 1), Qt::DisplayRole, dataset->getId(), 1, Qt::MatchFlag::MatchRecursive);
+    const auto modelIndices = _treeModel.match(_treeModel.index(0, static_cast<int>(AbstractDataHierarchyModel::Column::DatasetId)), Qt::DisplayRole, dataset->getId(), 1, Qt::MatchFlag::MatchRecursive);
 
     if (modelIndices.isEmpty())
         throw new std::runtime_error(QString("'%1' not found in the data hierarchy model").arg(dataset->text()).toLatin1());

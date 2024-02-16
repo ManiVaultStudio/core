@@ -174,7 +174,7 @@ bool ToggleAction::CheckBoxWidget::eventFilter(QObject* target, QEvent* event)
             auto mouseEvent = static_cast<QMouseEvent*>(event);
 
             if (mouseEvent->button() == Qt::LeftButton)
-                _toggleAction->toggle();
+                _toggleAction->setChecked(!_toggleAction->isChecked());
             
             return true;
         }
