@@ -10,6 +10,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QEvent>
+#include <QMouseEvent>
 
 using namespace mv::util;
 
@@ -170,9 +171,12 @@ bool ToggleAction::CheckBoxWidget::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::MouseButtonPress:
         {
-            _toggleAction->setChecked(!_toggleAction->isChecked());
+            auto mouseEvent = static_cast<QMouseEvent*>(event);
+
+            if (mouseEvent->button() == Qt::LeftButton)
+                _toggleAction->setChecked(!_toggleAction->isChecked());
+            
             return true;
-            break;
         }
 
         default:

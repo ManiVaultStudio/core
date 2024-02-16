@@ -65,7 +65,7 @@ protected: // Raw data
     void addRawData(plugin::RawData* rawData) override;
 
     /**
-     * Remove raw data with \p rawDataName from the manager
+     * Remove raw data with \p rawDataName from the manager if there are no more (selection) datasets referencing it
      * @param rawDataName Name of the raw data to remove
      */
     void removeRawData(const QString& rawDataName) override;
@@ -85,6 +85,20 @@ public: // Raw data
      */
     QStringList getRawDataNames() const override;
 
+    /**
+     * Get raw data size by \p rawDataName
+     * @param rawDataName Name of the raw data
+     * @return Size of the raw data in bytes
+     */
+    std::uint64_t getRawDataSize(const QString& rawDataName) const override;
+
+    /**
+     * Get raw data type string by \p rawDataName
+     * @param rawDataName Name of the raw data
+     * @return Raw data type string
+     */
+    QString getRawDataType(const QString& rawDataName) const override;
+
 public: // Datasets
 
     /**
@@ -97,6 +111,17 @@ public: // Datasets
      * @return Smart pointer to the create dataset
      */
     Dataset<DatasetImpl> createDataset(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "", bool notify = true) override;
+
+    /**
+     * Creates dataset without selection of \p kind with \p guiName to the manager and returns the created dataset (this is only used fore serialization purposes)
+     * @param kind Kind of data plugin
+     * @param guiName Name of the added dataset in the GUI
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will add to the root of the data hierarchy if not valid)
+     * @param id Globally unique dataset identifier (use only for deserialization)
+     * @param notify Whether to notify the core that a dataset is added
+     * @return Smart pointer to the create dataset
+     */
+    Dataset<DatasetImpl> createDatasetWithoutSelection(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "", bool notify = true) override;
 
 protected: // Dataset remove
 
@@ -121,6 +146,12 @@ public: // Dataset remove
      * @param datasets Smart pointer to datasets to remove
      */
     void removeDatasets(Datasets datasets) override;
+
+    /**
+     * Remove datasets that reference \p rawDataName from the manager
+     * @param @param rawDataName Name of the raw data
+     */
+    void removeDatasets(const QString& rawDataName) override;
 
 public:// Derived datasets
 
@@ -191,12 +222,12 @@ public: // Selection
 protected:
 
     /**
-     * Remove \p selection from the data manager
-     * @param rawDataName Name of the selection raw data
+     * Removes selection of which the raw data name matches \p rawDataName
+     * @param rawDataName Name of the raw data
      */
     void removeSelection(const QString& rawDataName) override;
 
-public: // Data grouping
+public: // Dataset and selection grouping
 
     /**
      * Groups \p datasets into one dataset and returns the group dataset
@@ -207,10 +238,10 @@ public: // Data grouping
     Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") override;
 
     /**
-     * Get dataset grouping toggle action
-     * @return Reference to dataset grouping toggle action
+     * Get selection grouping toggle action
+     * @return Reference to selection grouping toggle action
      */
-    gui::ToggleAction& getDatasetGroupingAction() override;
+    gui::ToggleAction& getSelectionGroupingAction() override;
 
 public: // Serialization
 
@@ -230,7 +261,7 @@ private:
     std::unordered_map<QString, plugin::RawData*>   _rawDataMap;                /** Maps raw data name to raw data plugin shared pointer (the plugins are owned by the plugin manager) */
     std::vector<std::unique_ptr<DatasetImpl>>       _datasets;                  /** Vector of pointers to datasets */
     std::vector<std::unique_ptr<DatasetImpl>>       _selections;                /** Vector of pointers to selection datasets */
-    gui::ToggleAction                               _datasetGroupingAction;     /** Action for toggling whether datasets can be grouped or not */
+    gui::ToggleAction                               _selectionGroupingAction;   /** Action for toggling whether dataset selection groupin is enabled or not */
 };
 
 }

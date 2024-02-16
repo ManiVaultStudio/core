@@ -43,6 +43,9 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
         return;
 
     for (auto selectedDataHierarchyItem : _selectedDataHierarchyItems)
+        selectedDataHierarchyItem->restoreLockedFromCache();
+
+    for (auto selectedDataHierarchyItem : _selectedDataHierarchyItems)
         disconnect(&selectedDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, nullptr);
 
     _selectedDataHierarchyItems = mv::dataHierarchy().getSelectedItems();
@@ -57,6 +60,9 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
 
     try
     {
+        for (auto selectedDataHierarchyItem : _selectedDataHierarchyItems)
+            selectedDataHierarchyItem->lock(true);
+
         if (_selectedDataHierarchyItems.isEmpty()) {
             _groupsAction.setGroupActions({});
         }
@@ -78,7 +84,7 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
 
                         if (groupAction)
                             _groupsAction.addGroupAction(groupAction);
-                     });
+                    });
                 }
 
                 if (!dataset.isValid())
@@ -102,6 +108,9 @@ void DataPropertiesWidget::dataHierarchySelectionChanged()
 
             QCoreApplication::processEvents();
         }
+
+        for (auto selectedDataHierarchyItem : _selectedDataHierarchyItems)
+            selectedDataHierarchyItem->restoreLockedFromCache();
     }
     catch (std::exception& e)
     {

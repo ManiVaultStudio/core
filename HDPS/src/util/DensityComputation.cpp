@@ -74,7 +74,8 @@ DensityComputation::DensityComputation()
     _initialized(false),
     _needsDensityMapUpdate(true),
     _ctx(nullptr),
-    _points(nullptr)
+    _points(nullptr),
+    _vao(0)
 {
 
 }

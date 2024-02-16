@@ -7,7 +7,8 @@
 namespace mv
 {
 
-BufferObject::BufferObject()
+BufferObject::BufferObject() :
+    _object(0)
 {
 
 }

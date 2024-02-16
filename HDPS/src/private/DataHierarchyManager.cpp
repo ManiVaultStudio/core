@@ -260,16 +260,24 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
     projectDataSerializationTask.setRunning();
 
     const auto loadDataHierarchyItem = [&projectDataSerializationTask](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
-        const auto dataset      = dataHierarchyItemMap["Dataset"].toMap();
-        const auto datasetId    = dataset["ID"].toString();
-        const auto datasetName  = dataset["Name"].toString();
-        const auto pluginKind   = dataset["PluginKind"].toString();
+        const auto dataset          = dataHierarchyItemMap["Dataset"].toMap();
+        const auto datasetId        = dataset["ID"].toString();
+        const auto datasetName      = dataset["Name"].toString();
+        const auto pluginKind       = dataset["PluginKind"].toString();
+        const auto isDerived        = dataset["Derived"].toBool();
+        const auto isFull           = dataset["Full"].toBool();
+        const auto sourceDatasetID  = dataset["SourceDatasetID"].toString();
 
         auto subtaskName = QString("Loading dataset hierarchy item: %1").arg(datasetName);
         projectDataSerializationTask.setSubtaskStarted(datasetId, subtaskName);
-        
-        auto loadedDataset = mv::data().createDataset(pluginKind, guiName, parent, dataset["ID"].toString());
-        
+
+        Dataset<DatasetImpl> loadedDataset;
+
+        loadedDataset = (isDerived || !isFull) ? mv::data().createDatasetWithoutSelection(pluginKind, guiName, parent, datasetId) : mv::data().createDataset(pluginKind, guiName, parent, datasetId);
+
+        if (isDerived)
+            loadedDataset->setSourceDataset(sourceDatasetID);
+
         loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
 
         projectDataSerializationTask.setSubtaskFinished(datasetId, subtaskName);

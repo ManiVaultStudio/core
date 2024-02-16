@@ -41,10 +41,10 @@ DockWidget::DockWidget(const QString& title, QWidget* parent /*= nullptr*/) :
     _settingsToolButton->setPopupMode(QToolButton::InstantPopup);
     _settingsToolButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
     _settingsToolButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    
+
     updateStyle();
     connect(qApp, &QApplication::paletteChanged, this, &DockWidget::updateStyle);
-    
+
     dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertSpacing(1, 5);
     dynamic_cast<QBoxLayout*>(tabWidget()->layout())->insertWidget(2, _settingsToolButton, Qt::AlignCenter);
 }

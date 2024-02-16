@@ -199,19 +199,36 @@ public: // Actions
      */
     void populateContextMenu(QMenu* contextMenu);;
 
-public: // Locked
+public: // Locked (facade for dataset)
 
     /**
-     * Get locked status
-     * @return Boolean determining if the dataset is locked or not
+     * Lock the dataset and possibly \p cache the current lock state
+     * @param cache Whether to cache the current lock state
      */
-    bool getLocked() const;
+    void lock(bool cache = false);
 
     /**
-     * Set locked status to \p locked
-     * @param locked Boolean determining whether the dataset is locked or not
+     * Unlock the dataset and possibly \p cache the current lock state
+     * @param cache Whether to cache the current lock state
      */
-    void setLocked(bool locked);
+    void unlock(bool cache = false);
+
+    /**
+     * Get whether the dataset is locked
+     * @return Boolean indicating whether the dataset is locked
+*
+     */
+    bool isLocked() const;
+
+    /**
+     * Set whether the dataset is \p locked and possibly \p cache the current lock state
+     * @param locked Boolean indicating whether the dataset is locked
+     * @param cache Whether to cache the current lock state
+     */
+    void setLocked(bool locked, bool cache = false);
+
+    /** Restore the lock status to the cached value */
+    void restoreLockedFromCache();
 
 public: // Expansion
 

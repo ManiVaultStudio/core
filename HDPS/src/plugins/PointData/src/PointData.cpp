@@ -133,7 +133,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
     const auto data                 = variantMap["Data"].toMap();
     const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
-    const auto numberOfDimensions   = static_cast<size_t>(variantMap["NumberOfDimensions"].toInt());
+    const auto numberOfDimensions   =variantMap["NumberOfDimensions"].toUInt();
     const auto numberOfElements     = numberOfPoints * numberOfDimensions;
     const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
     const auto rawData              = data["Raw"].toMap();
@@ -276,7 +276,7 @@ void Points::init()
                     return;
 
                 // Only synchronize when dataset grouping is enabled and our own group index is non-negative
-                if (!mv::data().getDatasetGroupingAction().isChecked() || getGroupIndex() < 0)
+                if (!mv::data().getSelectionGroupingAction().isChecked() || getGroupIndex() < 0)
                     return;
 
                 // Only synchronize of the group indexes match

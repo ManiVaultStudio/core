@@ -170,7 +170,7 @@ public: // Widgets
      * Create widget with pointer to \p parent widget, \p widgetFlags and \p widgetConfigurationFunction
      * @param parent Parent widget
      * @param widgetFlags Widget flags
-     * @param widgetConfigurationFunction Configuration function to run after the widget is created (replaces WidgetAction#_widgetConfigurationFunction)
+     * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
      * @return Pointer to created widget
      */
     virtual QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction) final;
@@ -178,7 +178,7 @@ public: // Widgets
     /**
      * Create widget with pointer to \p parent widget and \p widgetConfigurationFunction
      * @param parent Parent widget
-     * @param widgetConfigurationFunction Configuration function to run after the widget is created (replaces WidgetAction#_widgetConfigurationFunction)
+     * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
      * @return Pointer to created widget
      */
     virtual QWidget* createWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction) final;
@@ -187,9 +187,19 @@ public: // Widgets
      * Create collapsed widget
      * @param parent Parent widget
      * @param widgetFlags Collapsed widget configuration flags
+     * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
      * @return Pointer to collapsed widget
      */
     virtual QWidget* createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags = 0) const final;
+
+    /**
+     * Create collapsed widget
+     * @param parent Parent widget
+     * @param widgetFlags Collapsed widget configuration flags
+     * @param widgetConfigurationFunction Configuration function to run after the widget is created (overrides WidgetAction#_widgetConfigurationFunction)
+     * @return Pointer to collapsed widget
+     */
+    virtual QWidget* createCollapsedWidget(QWidget* parent, std::int32_t widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction) const final;
 
     /**
      * Create label widget

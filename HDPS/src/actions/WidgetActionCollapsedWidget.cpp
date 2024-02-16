@@ -13,19 +13,18 @@ namespace mv::gui {
 WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* action) :
     WidgetActionViewWidget(parent, action),
     _layout(),
-    _toolButton(action, this)
+    _toolButton(action, this),
+    _widgetConfigurationFunction()
 {
-    _layout.setContentsMargins(0, 0, 0, 0);
+    initialize(action);
+}
 
-    _toolButton.setPopupMode(QToolButton::InstantPopup);
-    _toolButton.setIconSize(QSize(16, 16));
-    _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
+WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* action, WidgetConfigurationFunction widgetConfigurationFunction) :
+    WidgetActionCollapsedWidget(parent, action)
+{
+    _widgetConfigurationFunction = widgetConfigurationFunction;
 
-    _layout.addWidget(&_toolButton);
-
-    setLayout(&_layout);
-    
-    setAction(action);
+    initialize(action);
 }
 
 void WidgetActionCollapsedWidget::setAction(WidgetAction* action)
@@ -64,6 +63,26 @@ void WidgetActionCollapsedWidget::setAction(WidgetAction* action)
     updateToolButtonVisibility();
 
     connect(getAction(), &WidgetAction::visibleChanged, this, updateToolButtonVisibility);
+}
+
+WidgetConfigurationFunction WidgetActionCollapsedWidget::getWidgetConfigurationFunction()
+{
+    return _widgetConfigurationFunction;
+}
+
+void WidgetActionCollapsedWidget::initialize(WidgetAction* action)
+{
+    _layout.setContentsMargins(0, 0, 0, 0);
+
+    _toolButton.setPopupMode(QToolButton::InstantPopup);
+    _toolButton.setIconSize(QSize(16, 16));
+    _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
+
+    _layout.addWidget(&_toolButton);
+
+    setLayout(&_layout);
+
+    setAction(action);
 }
 
 WidgetActionCollapsedWidget::ToolButton::ToolButton(WidgetAction* action, QWidget* parent /*= nullptr*/) :

@@ -61,6 +61,9 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
 
         auto removeDatasetsAction = new TriggerAction(this, QString("Remove dataset%1").arg(_selectedDatasets.count() >= 2 ? "s" : ""));
 
+        const auto numberOfLockedDatasets = std::count_if(_selectedDatasets.begin(), _selectedDatasets.end(), [](auto selectedDataset) -> bool { return selectedDataset->isLocked(); });
+
+        removeDatasetsAction->setEnabled(numberOfLockedDatasets == 0);
         removeDatasetsAction->setIconByName("trash");
 
         connect(removeDatasetsAction, &TriggerAction::triggered, this, [this]() -> void {

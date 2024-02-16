@@ -75,7 +75,7 @@ namespace mv
 
             RenderMode _renderMode;
 
-            GLuint _quad;
+            GLuint _quad = 0;
         };
 
     } // namespace gui

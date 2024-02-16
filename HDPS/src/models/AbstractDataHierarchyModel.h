@@ -30,16 +30,19 @@ public:
 
     /** Dataset columns */
     enum Column {
-        Name,               /** Name of the dataset */
-        Location,           /** Location of the dataset */
-        DatasetId,          /** Globally unique dataset identifier */
-        SourceDatasetId,    /** Globally unique dataset identifier of the source dataset (if this dataset is derived) */
-        Progress,           /** Task progress in percentage */
-        GroupIndex,         /** Dataset group index */
-        IsVisible,          /** Whether the dataset is visible or not */
-        IsGroup,            /** Whether the dataset is composed of other datasets */
-        IsLocked,           /** Whether the dataset is locked */
-        IsDerived,          /** Whether the dataset is derived from another dataset */
+        Name,                   /** Name of the dataset */
+        Location,               /** Location of the dataset */
+        DatasetId,              /** Globally unique dataset identifier */
+        RawDataName,            /** Name of the raw data */
+        RawDataSize,            /** Size of the raw data */
+        SourceDatasetId,        /** Globally unique dataset identifier of the source dataset (if this dataset is derived) */
+        Progress,               /** Task progress in percentage */
+        SelectionGroupIndex,    /** Dataset selection group index */
+        IsVisible,              /** Whether the dataset is visible or not */
+        IsGroup,                /** Whether the dataset is composed of other datasets */
+        IsDerived,              /** Whether the dataset is derived from another dataset */
+        IsSubset,               /** Whether the dataset is a subset or not */
+        IsLocked,               /** Whether the dataset is locked */
 
         Count
     };
@@ -55,7 +58,7 @@ public:
          * @param dataset Pointer to dataset to display item for
          * @param editable Whether the model item is editable or not
          */
-        Item(Dataset<DatasetImpl> DataHierarchyItem, bool editable = false);
+        Item(Dataset<DatasetImpl> dataset, bool editable = false);
 
         /**
          * Get model data for \p role
@@ -83,8 +86,6 @@ public:
     private:
         Dataset<DatasetImpl>    _dataset;   /** Pointer to dataset to display item for */
     };
-
-protected:
 
     /** Standard model item class for interacting with the dataset name */
     class NameItem final : public Item {
@@ -201,8 +202,11 @@ protected:
     class SourceDatasetIdItem final : public Item {
     public:
 
-        /** Use base item constructor */
-        using Item::Item;
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         */
+        SourceDatasetIdItem(Dataset<DatasetImpl> dataset);
 
         /**
          * Get model data for \p role
@@ -230,7 +234,71 @@ protected:
         }
     };
 
-public:
+    /** Standard model item class for displaying the raw data name */
+    class RawDataNameItem final : public Item {
+    public:
+
+        /** Use base item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Raw Data Name";
+
+                case Qt::ToolTipRole:
+                    return "The name of the raw data";
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying the raw data size */
+    class RawDataSizeItem final : public Item {
+    public:
+
+        /** Use base item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Raw data size";
+
+                case Qt::ToolTipRole:
+                    return "The size of the raw data";
+            }
+
+            return {};
+        }
+    };
 
     /** Standard model item class for displaying the dataset task progress */
     class ProgressItem final : public Item {
@@ -296,17 +364,15 @@ public:
         gui::TaskAction     _taskAction;    /** Task action for use in item delegate (uses its built-in progress action) */
     };
 
-protected:
-
-    /** Standard model item class for displaying the dataset group index */
-    class GroupIndexItem final : public Item {
+    /** Standard model item class for displaying the selection group index */
+    class SelectionGroupIndexItem final : public Item {
     public:
 
         /**
          * Construct with \p dataset
          * @param dataset Pointer to dataset to display item for
          */
-        GroupIndexItem(Dataset<DatasetImpl> dataset);
+        SelectionGroupIndexItem(Dataset<DatasetImpl> dataset);
 
         /**
          * Get model data for \p role
@@ -329,10 +395,10 @@ protected:
                     return "";
 
                 case Qt::EditRole:
-                    return "Group index";
+                    return "Selection group index";
 
                 case Qt::ToolTipRole:
-                    return "The dataset group index";
+                    return "The selection group index";
             }
 
             return {};
@@ -418,41 +484,6 @@ protected:
         }
     };
 
-    /** Standard model item class for displaying whether the dataset is locked */
-    class IsLockedItem final : public Item {
-    public:
-
-        /** Use base item constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-                case Qt::DisplayRole:
-                    return "";
-
-                case Qt::EditRole:
-                    return "Is locked";
-
-                case Qt::ToolTipRole:
-                    return "Whether the dataset is locked";
-            }
-
-            return {};
-        }
-    };
-
     /** Standard model item class for displaying whether the dataset is derived from another dataset */
     class IsDerivedItem final : public Item {
     public:
@@ -482,6 +513,103 @@ protected:
 
                 case Qt::ToolTipRole:
                     return "Whether the dataset is derived from another dataset";
+            }
+
+            return {};
+        }
+    };
+
+    /** Standard model item class for displaying whether the dataset is a subset of another dataset */
+    class IsSubsetItem final : public Item {
+    public:
+
+        /**
+         * Construct with \p dataset
+         * @param dataset Pointer to dataset to display item for
+         */
+        IsSubsetItem(Dataset<DatasetImpl> dataset);
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                    return "";
+
+                case Qt::EditRole:
+                    return "Is a subset";
+
+                case Qt::ToolTipRole:
+                    return "Whether the dataset is a subset of another dataset";
+            }
+
+            return {};
+        }
+
+    private:
+
+        /**
+         * Create icon which represents a full dataset
+         * @param pieRadius Pie radius
+         */
+        void createFullIcon(float pieRadius = 35.f);
+
+        /**
+         * Create icon which represents a subset
+         * @param pieRadius Pie radius
+         */
+        void createSubsetIcon(float pieRadius = 35.f);
+
+        /**
+         * Draw extents in \p painter
+         * @param painter Reference to painter to draw in
+         */
+        void drawExtents(QPainter& painter);
+
+    private:
+        QIcon   _fullIcon;      /** Represents a full dataset */
+        QIcon   _subsetIcon;    /** Represents a subset */
+    };
+
+    /** Standard model item class for displaying whether the dataset is locked */
+    class IsLockedItem final : public Item {
+    public:
+
+        /** Use base item constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                    return "";
+
+                case Qt::EditRole:
+                    return "Is locked";
+
+                case Qt::ToolTipRole:
+                    return "Whether the dataset is locked";
             }
 
             return {};
@@ -536,6 +664,14 @@ public:
     ItemType* getItem(const QModelIndex& modelIndex) {
         return dynamic_cast<ItemType*>(itemFromIndex(modelIndex));
     }
+
+    /**
+     * Get model index for \p datasetId and \p column
+     * @param datasetId Globally unique identifier to search for
+     * @param column Model index column
+     * return Model index (invalid if not found)
+     */
+    QModelIndex getModelIndex(const QString& datasetId, Column column = Column::Name) const;
 
     /**
      * Hides item with \p index and its descendants

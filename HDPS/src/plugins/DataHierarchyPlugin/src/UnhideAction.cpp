@@ -28,6 +28,8 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
     setIcon(_icon);
     setShowLabels(false);
     setPopupSizeHint(QSize(500, 300));
+    setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+
     getBadge().setScale(0.4f);
 
     _treeAction.initialize(&_listModel, &_listFilterModel, "Hidden dataset");
@@ -58,12 +60,15 @@ UnhideAction::UnhideAction(QObject* parent, const QString& title) :
 
         treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::Name), true);
         treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::DatasetId), true);
+        treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::RawDataName), true);
+        treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::RawDataSize), true);
         treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::SourceDatasetId), true);
         treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::Progress), true);
-        treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::GroupIndex), true);
+        treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::SelectionGroupIndex), true);
         treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::IsGroup), true);
         treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::IsLocked), true);
         treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::IsDerived), true);
+        treeView->setColumnHidden(static_cast<int>(AbstractDataHierarchyModel::Column::IsSubset), true);
 
         auto treeViewHeader = treeView->header();
 

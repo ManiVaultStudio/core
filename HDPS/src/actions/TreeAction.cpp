@@ -38,7 +38,7 @@ void TreeAction::initialize(QAbstractItemModel* model, QSortFilterProxyModel* fi
 }
 
 TreeAction::Widget::Widget(QWidget* parent, TreeAction* treeAction, const std::int32_t& widgetFlags) :
-    QWidget(parent),
+    WidgetActionWidget(parent, treeAction, widgetFlags),
     _treeAction(treeAction)
 {
     Q_ASSERT(treeAction != nullptr);
@@ -53,28 +53,9 @@ TreeAction::Widget::Widget(QWidget* parent, TreeAction* treeAction, const std::i
 
     auto layout = new QVBoxLayout();
 
-    layout->setContentsMargins(0, 0, 0, 0);
-
     layout->addWidget(new HierarchyWidget(this, _treeAction->getItemTypeName(), *_treeAction->getModel(), _treeAction->getFilterModel()));
 
     setLayout(layout);
-}
-
-QWidget* TreeAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
-{
-    if (dynamic_cast<QMenu*>(parent))
-        return QWidgetAction::createWidget(parent);
-
-    auto widget = new WidgetActionWidget(parent, this);
-    auto layout = new QVBoxLayout();
-
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    layout->addWidget(new TreeAction::Widget(parent, this, widgetFlags));
-
-    widget->setLayout(layout);
-
-    return widget;
 }
 
 }

@@ -134,7 +134,7 @@ void DataHierarchyItem::setVisible(bool visible, bool recursively /*= true*/)
     }
     else {
         deselect();
-        
+
         if (recursively)
             for (auto child : getChildren())
                 child->setVisible(visible, recursively);
@@ -232,14 +232,29 @@ void DataHierarchyItem::populateContextMenu(QMenu* contextMenu)
     }
 }
 
-bool DataHierarchyItem::getLocked() const
+void DataHierarchyItem::lock(bool cache /*= false*/)
+{
+    _dataset->lock(cache);
+}
+
+void DataHierarchyItem::unlock(bool cache /*= false*/)
+{
+    _dataset->unlock(cache);
+}
+
+bool DataHierarchyItem::isLocked() const
 {
     return _dataset->isLocked();
 }
 
-void DataHierarchyItem::setLocked(bool locked)
+void DataHierarchyItem::setLocked(bool locked, bool cache /*= false*/)
 {
-    _dataset->setLocked(locked);
+    _dataset->setLocked(locked, cache);
+}
+
+void DataHierarchyItem::restoreLockedFromCache()
+{
+    _dataset->restoreLockedFromCache();
 }
 
 bool DataHierarchyItem::isExpanded() const

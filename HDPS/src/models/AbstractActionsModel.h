@@ -297,8 +297,11 @@ protected:
     class ParentActionIdItem final : public Item {
     public:
 
-        /** Use base action item constructor */
-        using Item::Item;
+        /**
+         * Construct with \p action
+         * @param action Pointer to action to display item for
+         */
+        ParentActionIdItem(gui::WidgetAction* action);
 
         /**
          * Get model data for \p role
@@ -340,8 +343,11 @@ protected:
     class PublicActionIdItem final : public Item {
     public:
 
-        /** Use base action item constructor */
-        using Item::Item;
+        /**
+         * Construct with \p action
+         * @param action Pointer to action to display item for
+         */
+        PublicActionIdItem(gui::WidgetAction* action);
 
         /**
          * Get model data for \p role

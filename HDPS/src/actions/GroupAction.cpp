@@ -463,11 +463,12 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
             if (groupAction->getShowLabels() && !action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup))
                 layout->addWidget(action->createLabelWidget(this));
 
-            if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup))
-                layout->addWidget(const_cast<WidgetAction*>(action)->createCollapsedWidget(this));
-            else {
-                const auto widgetFlags = groupAction->getWidgetFlagsMap()[action];
+            const auto widgetFlags                  = groupAction->getWidgetFlagsMap()[action];
+            const auto widgetConfigurationFunction  = groupAction->getWidgetConfigurationFunctionsMap()[action];
 
+            if (action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup)) {
+                layout->addWidget(const_cast<WidgetAction*>(action)->createCollapsedWidget(this, 0, widgetConfigurationFunction));
+            } else {
                 if (action->getStretch() >= 1) {
                     if (widgetFlags >= 0)
                         layout->addWidget(const_cast<WidgetAction*>(action)->createWidget(this, widgetFlags), action->getStretch());

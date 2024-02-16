@@ -5,8 +5,12 @@
 #include "AbstractDataHierarchyModel.h"
 #include "DatasetsMimeData.h"
 
+#include "util/Icon.h"
+
 #include <QDebug>
 #include <QIcon>
+#include <QPainter>
+#include <QPainterPath>
 
 #ifdef _DEBUG
     #define ABSTRACT_DATA_HIERARCHY_MODEL_VERBOSE
@@ -148,14 +152,20 @@ AbstractDataHierarchyModel::DatasetIdItem::DatasetIdItem(Dataset<DatasetImpl> da
     connect(getDataset().get(), &gui::WidgetAction::idChanged, this, [this](const QString& id) -> void {
         emitDataChanged();
     });
+
+    connect(&mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction(), &gui::ToggleAction::toggled, this, [this](bool toggled) -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant AbstractDataHierarchyModel::DatasetIdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
-        case Qt::DisplayRole:
             return getDataset().isValid() ? getDataset()->getId() : "";
+
+        case Qt::DisplayRole:
+            return getDataset().isValid() ? getDataset()->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked()) : "";
 
         case Qt::ToolTipRole:
             return "Dataset identifier: " + data(Qt::DisplayRole).toString();
@@ -167,17 +177,63 @@ QVariant AbstractDataHierarchyModel::DatasetIdItem::data(int role /*= Qt::UserRo
     return Item::data(role);
 }
 
+AbstractDataHierarchyModel::SourceDatasetIdItem::SourceDatasetIdItem(Dataset<DatasetImpl> dataset) :
+    Item(dataset)
+{
+    connect(&mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction(), &gui::ToggleAction::toggled, this, [this](bool toggled) -> void {
+        emitDataChanged();
+    });
+}
+
 QVariant AbstractDataHierarchyModel::SourceDatasetIdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     const auto sourceDataset = getDataset()->getSourceDataset<DatasetImpl>();
 
     switch (role) {
         case Qt::EditRole:
-        case Qt::DisplayRole:
             return getDataset()->isDerivedData() ? sourceDataset->getId() : "";
+
+        case Qt::DisplayRole:
+            return getDataset()->isDerivedData() ? sourceDataset->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked()) : "";
 
         case Qt::ToolTipRole:
             return "Source dataset identifier: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractDataHierarchyModel::RawDataNameItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getDataset().isValid() ? getDataset()->getRawDataName() : "";
+
+        case Qt::ToolTipRole:
+            return "Raw data identifier: " + data(Qt::DisplayRole).toString();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractDataHierarchyModel::RawDataSizeItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+            return getDataset().isValid() ? QVariant::fromValue(getDataset()->getRawDataSize()) : 0;
+
+        case Qt::DisplayRole:
+            return getDataset().isValid() ? getDataset()->getRawDataSizeHumanReadable() : "";
+
+        case Qt::ToolTipRole:
+            return "Raw data identifier: " + data(Qt::DisplayRole).toString();
 
         default:
             break;
@@ -229,12 +285,12 @@ QWidget* AbstractDataHierarchyModel::ProgressItem::createDelegateEditorWidget(QW
     return _taskAction.getProgressAction().createWidget(parent);
 }
 
-AbstractDataHierarchyModel::GroupIndexItem::GroupIndexItem(Dataset<DatasetImpl> dataset) :
+AbstractDataHierarchyModel::SelectionGroupIndexItem::SelectionGroupIndexItem(Dataset<DatasetImpl> dataset) :
     Item(dataset, true)
 {
 }
 
-QVariant AbstractDataHierarchyModel::GroupIndexItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractDataHierarchyModel::SelectionGroupIndexItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
@@ -244,7 +300,7 @@ QVariant AbstractDataHierarchyModel::GroupIndexItem::data(int role /*= Qt::UserR
             return QString::number(data(Qt::EditRole).toInt());
 
         case Qt::ToolTipRole:
-            return "Dataset group index: " + data(Qt::DisplayRole).toString();
+            return "Selection group index: " + data(Qt::DisplayRole).toString();
 
         case Qt::TextAlignmentRole:
             return static_cast<std::int32_t>(Qt::AlignVCenter | Qt::AlignRight);
@@ -256,7 +312,7 @@ QVariant AbstractDataHierarchyModel::GroupIndexItem::data(int role /*= Qt::UserR
     return Item::data(role);
 }
 
-void AbstractDataHierarchyModel::GroupIndexItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
+void AbstractDataHierarchyModel::SelectionGroupIndexItem::setData(const QVariant& value, int role /* = Qt::UserRole + 1 */)
 {
     switch (role) {
         case Qt::EditRole:
@@ -275,7 +331,7 @@ void AbstractDataHierarchyModel::GroupIndexItem::setData(const QVariant& value, 
 AbstractDataHierarchyModel::IsVisibleItem::IsVisibleItem(Dataset<DatasetImpl> dataset) :
     Item(dataset)
 {
-    connect(&getDataset()->getDataHierarchyItem(), &gui::WidgetAction::visibleChanged, this, [this]() -> void {
+    connect(&getDataset()->getDataHierarchyItem(), &DataHierarchyItem::visibilityChanged, this, [this](bool visibility) -> void {
         emitDataChanged();
     });
 }
@@ -352,34 +408,9 @@ QVariant AbstractDataHierarchyModel::IsGroupItem::data(int role /*= Qt::UserRole
 
             if (getDataset()->isProxy())
                 return Application::getIconFont("FontAwesome").getIcon("object-group");
-        }
 
-        default:
             break;
-    }
-
-    return Item::data(role);
-}
-
-QVariant AbstractDataHierarchyModel::IsLockedItem::data(int role /*= Qt::UserRole + 1*/) const
-{
-    switch (role) {
-        case Qt::EditRole:
-        {
-            if (!getDataset().isValid())
-                break;
-
-            return getDataset()->isLocked();
         }
-
-        case Qt::DisplayRole:
-            break;
-
-        case Qt::ToolTipRole:
-            return "Dataset is a locked: " + data(Qt::DisplayRole).toString();
-
-        case Qt::DecorationRole:
-            return data(Qt::EditRole).toBool() ? Application::getIconFont("FontAwesome").getIcon("lock") : QIcon();
 
         default:
             break;
@@ -403,10 +434,130 @@ QVariant AbstractDataHierarchyModel::IsDerivedItem::data(int role /*= Qt::UserRo
             break;
 
         case Qt::ToolTipRole:
-            return QString("Dataset derived: %1").arg(data(Qt::EditRole).toBool() ? "yes" : "no");
+            return QString("Dataset %1 derived").arg(data(Qt::EditRole).toBool() ? "is" : "is not");
 
         case Qt::DecorationRole:
             return data(Qt::EditRole).toBool() ? Application::getIconFont("FontAwesome").getIcon("square-root-alt") : QIcon();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+AbstractDataHierarchyModel::IsSubsetItem::IsSubsetItem(Dataset<DatasetImpl> dataset) :
+    Item(dataset)
+{
+    const auto pieRadius = 40.f;
+
+    createFullIcon(pieRadius);
+    createSubsetIcon(pieRadius);
+}
+
+QVariant AbstractDataHierarchyModel::IsSubsetItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        {
+            if (!getDataset().isValid())
+                break;
+
+            return !getDataset()->isFull();
+        }
+
+        case Qt::DisplayRole:
+            break;
+
+        case Qt::ToolTipRole:
+            return data(Qt::EditRole).toBool() ? "Subset" : "Full dataset";
+
+        case Qt::DecorationRole:
+            return data(Qt::EditRole).toBool() ? _subsetIcon : _fullIcon;
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
+void AbstractDataHierarchyModel::IsSubsetItem::createFullIcon(float pieRadius /*= 35.f*/)
+{
+    QPixmap pixmap(QSize(100, 100));
+
+    pixmap.fill(Qt::transparent);
+
+    QPainter painter(&pixmap);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+
+    //drawExtents(painter);
+
+    painter.setPen(QPen(Qt::black, 2.f * pieRadius, Qt::SolidLine, Qt::RoundCap));
+    painter.drawPoint(QPointF(50.f, 50.f));
+
+    _fullIcon = createIcon(pixmap);
+}
+
+void AbstractDataHierarchyModel::IsSubsetItem::createSubsetIcon(float pieRadius /*= 35.f*/)
+{
+    QPixmap pixmap(QSize(100, 100));
+
+    pixmap.fill(Qt::transparent);
+
+    QPainter painter(&pixmap);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+
+    //drawExtents(painter);
+
+    const auto margin = 50.f - pieRadius;
+
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(Qt::black);
+    painter.drawPie(QRectF(margin, margin, 100.f - (2.f * margin), 100.f - (2.f * margin)), 90 * 16, 270 * 16);
+
+    _subsetIcon = createIcon(pixmap);
+}
+
+void AbstractDataHierarchyModel::IsSubsetItem::drawExtents(QPainter& painter)
+{
+    painter.setPen(QPen(Qt::black, 15.0, Qt::SolidLine, Qt::FlatCap));
+
+    const auto extents  = std::vector<float>({ 0.f, 100.f });
+    const auto length   = 15.f;
+
+    for (const auto& e : extents) {
+        painter.drawLine(0.f, e, length, e);
+        painter.drawLine(100.f - length, e, 100.f, e);
+
+        painter.drawLine(e, 0, e, length);
+        painter.drawLine(e, 100.f - length, e, 100.f);
+    }
+}
+
+QVariant AbstractDataHierarchyModel::IsLockedItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        {
+            if (!getDataset().isValid())
+                break;
+
+            return getDataset()->isLocked();
+        }
+
+        case Qt::DisplayRole:
+            break;
+
+        case Qt::ToolTipRole:
+            return QString("Dataset is %1").arg(data(Qt::EditRole).toBool() ? "locked" : "not locked");
+
+        case Qt::DecorationRole:
+            return data(Qt::EditRole).toBool() ? Application::getIconFont("FontAwesome").getIcon("lock") : Application::getIconFont("FontAwesome").getIcon("lock-open");
 
         default:
             break;
@@ -421,13 +572,16 @@ AbstractDataHierarchyModel::Row::Row(Dataset<DatasetImpl> dataset) :
     append(new NameItem(dataset));
     append(new LocationItem(dataset));
     append(new DatasetIdItem(dataset));
+    append(new RawDataNameItem(dataset));
+    append(new RawDataSizeItem(dataset));
     append(new SourceDatasetIdItem(dataset));
     append(new ProgressItem(dataset));
-    append(new GroupIndexItem(dataset));
+    append(new SelectionGroupIndexItem(dataset));
     append(new IsVisibleItem(dataset));
     append(new IsGroupItem(dataset));
-    append(new IsLockedItem(dataset));
     append(new IsDerivedItem(dataset));
+    append(new IsSubsetItem(dataset));
+    append(new IsLockedItem(dataset));
 }
 
 AbstractDataHierarchyModel::AbstractDataHierarchyModel(QObject* parent) :
@@ -454,14 +608,20 @@ QVariant AbstractDataHierarchyModel::headerData(int section, Qt::Orientation ori
         case Column::DatasetId:
             return DatasetIdItem::headerData(orientation, role);
 
+        case Column::RawDataName:
+            return RawDataNameItem::headerData(orientation, role);
+
+        case Column::RawDataSize:
+            return RawDataSizeItem::headerData(orientation, role);
+
         case Column::SourceDatasetId:
             return SourceDatasetIdItem::headerData(orientation, role);
 
         case Column::Progress:
             return ProgressItem::headerData(orientation, role);
 
-        case Column::GroupIndex:
-            return GroupIndexItem::headerData(orientation, role);
+        case Column::SelectionGroupIndex:
+            return SelectionGroupIndexItem::headerData(orientation, role);
 
         case Column::IsVisible:
             return IsVisibleItem::headerData(orientation, role);
@@ -469,11 +629,14 @@ QVariant AbstractDataHierarchyModel::headerData(int section, Qt::Orientation ori
         case Column::IsGroup:
             return IsGroupItem::headerData(orientation, role);
 
-        case Column::IsLocked:
-            return IsLockedItem::headerData(orientation, role);
-
         case Column::IsDerived:
             return IsDerivedItem::headerData(orientation, role);
+
+        case Column::IsSubset:
+            return IsSubsetItem::headerData(orientation, role);
+
+        case Column::IsLocked:
+            return IsLockedItem::headerData(orientation, role);
 
         default:
             break;
@@ -486,11 +649,21 @@ QMimeData* AbstractDataHierarchyModel::mimeData(const QModelIndexList& indexes) 
 {
     Datasets datasets;
 
-    for (const auto index : indexes)
+    for (const auto& index : indexes)
         if (index.column() == 0)
             datasets << static_cast<Item*>(itemFromIndex(index))->getDataset();
 
     return new DatasetsMimeData(datasets);
+}
+
+QModelIndex AbstractDataHierarchyModel::getModelIndex(const QString& datasetId, Column column /*= Column::Name*/) const
+{
+    const auto matches = match(index(0, static_cast<int>(AbstractDataHierarchyModel::Column::Name)), Qt::EditRole, datasetId, 1, Qt::MatchRecursive | Qt::MatchExactly);
+
+    if (matches.isEmpty())
+        return {};
+
+    return matches.first().siblingAtColumn(static_cast<int>(column));
 }
 
 void AbstractDataHierarchyModel::hideItem(const QModelIndex& index)

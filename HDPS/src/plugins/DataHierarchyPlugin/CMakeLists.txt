@@ -34,6 +34,8 @@ set(PLUGIN_MOC_HEADERS
 set(ACTIONS
     src/UnhideAction.h
     src/UnhideAction.cpp
+    src/StatisticsAction.h
+    src/StatisticsAction.cpp
 )
 
 set(WIDGETS
@@ -41,6 +43,13 @@ set(WIDGETS
     src/DataHierarchyWidget.cpp
     src/DataHierarchyWidgetContextMenu.h
     src/DataHierarchyWidgetContextMenu.cpp
+)
+
+set(MODELS
+    src/DatasetsModel.h
+    src/DatasetsModel.cpp
+    src/DatasetsFilterModel.h
+    src/DatasetsFilterModel.cpp
 )
 
 set(AUX
@@ -51,12 +60,14 @@ set(DATAHIERARCHY_SOURCES
     ${PLUGIN}
     ${ACTIONS}
     ${WIDGETS}
+    ${MODELS}
     ${AUX}
 )
 
 source_group(Plugin FILES ${PLUGIN})
 source_group(Actions FILES ${ACTIONS})
 source_group(Widgets FILES ${WIDGETS})
+source_group(Models FILES ${MODELS})
 source_group(Aux FILES ${AUX})
 
 add_library(${DATAHIERARCHYPLUGIN} SHARED ${DATAHIERARCHY_SOURCES})

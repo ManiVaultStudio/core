@@ -126,7 +126,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
                 break;
             }
         }
-                
+
         selectAllCollumns->setEnabled(!readOnly);
     };
 
@@ -220,6 +220,11 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
 
     header->setMinimumSectionSize(18);
     header->setIconSize(QSize(4, 10));
+
+    connect(header, &QHeaderView::sectionResized, this, [this](int logicalIndex, int oldSize, int newSize) -> void {
+        for (int columnIndex = 0; columnIndex < _model.columnCount(); ++columnIndex)
+            _columnsGroupAction.getActions()[columnIndex]->setChecked(!_treeView.header()->isSectionHidden(columnIndex));
+    });
 
     const auto filterModelRowsChanged = [this]() -> void {
         const auto hasItems = _filterModel != nullptr ? _filterModel->rowCount() >= 1 : _model.rowCount() >= 1;

@@ -11,7 +11,8 @@ namespace util {
 Preset::Preset(const QString& name, const QString& description, const PresetType& presetType /*= PresetType::Normal*/) :
     _name(name),
     _description(description),
-    _presetType(presetType)
+    _presetType(presetType),
+    _isDivergent(false)
 {
 }
 

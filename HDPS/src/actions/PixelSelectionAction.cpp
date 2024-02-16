@@ -15,6 +15,7 @@ namespace mv::gui {
 
 PixelSelectionAction::PixelSelectionAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),
+    _initialized(false),
     _targetWidget(nullptr),
     _pixelSelectionTool(nullptr),
     _pixelSelectionTypes(),
@@ -209,6 +210,7 @@ void PixelSelectionAction::initialize(QWidget* targetWidget, util::PixelSelectio
     setShortcutsEnabled(true);
 
     _targetWidget->installEventFilter(this);
+    _initialized = true;
 }
 
 QWidget* PixelSelectionAction::getTargetWidget()

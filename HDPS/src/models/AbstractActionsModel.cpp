@@ -140,14 +140,20 @@ AbstractActionsModel::IdItem::IdItem(gui::WidgetAction* action) :
     connect(getAction(), &WidgetAction::idChanged, this, [this](const QString& id) -> void {
         emitDataChanged();
     });
+
+    connect(&mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction(), &gui::ToggleAction::toggled, this, [this](bool toggled) -> void {
+        emitDataChanged();
+    });
 }
 
 QVariant AbstractActionsModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
-        case Qt::DisplayRole:
             return getAction()->getId();
+
+        case Qt::DisplayRole:
+            return getAction()->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked());
 
         case Qt::ToolTipRole:
             return "Parameter globally unique identifier: " + data(Qt::DisplayRole).toString();
@@ -450,12 +456,22 @@ void AbstractActionsModel::StretchItem::setData(const QVariant& value, int role 
         Item::setData(value, role);
 }
 
+AbstractActionsModel::ParentActionIdItem::ParentActionIdItem(gui::WidgetAction* action) :
+    Item(action)
+{
+    connect(&mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction(), &gui::ToggleAction::toggled, this, [this](bool toggled) -> void {
+        emitDataChanged();
+    });
+}
+
 QVariant AbstractActionsModel::ParentActionIdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
-        case Qt::DisplayRole:
             return getAction()->getParentAction() ? getAction()->getParentAction()->getId() : "";
+
+        case Qt::DisplayRole:
+            return getAction()->getParentAction() ? getAction()->getParentAction()->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked()) : "";
 
         case Qt::ToolTipRole:
             return QString("Parent parameter globally unique identifier: %1").arg(data(Qt::DisplayRole).toString());
@@ -511,6 +527,14 @@ QVariant AbstractActionsModel::NumberOfConnectedActionsItem::data(int role /*= Q
     return Item::data(role);
 }
 
+AbstractActionsModel::PublicActionIdItem::PublicActionIdItem(gui::WidgetAction* action) :
+    Item(action)
+{
+    connect(&mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction(), &gui::ToggleAction::toggled, this, [this](bool toggled) -> void {
+        emitDataChanged();
+    });
+}
+
 QVariant AbstractActionsModel::PublicActionIdItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     if (getAction()->isPublic())
@@ -518,8 +542,10 @@ QVariant AbstractActionsModel::PublicActionIdItem::data(int role /*= Qt::UserRol
 
     switch (role) {
         case Qt::EditRole:
-        case Qt::DisplayRole:
             return getAction()->isConnected() ? getAction()->getPublicAction()->getId() : "";
+
+        case Qt::DisplayRole:
+            return getAction()->isConnected() ? getAction()->getPublicAction()->getId(mv::settings().getMiscellaneousSettings().getShowSimplifiedGuidsAction().isChecked()) : "";
 
         case Qt::ToolTipRole:
             return "Public parameter globally unique identifier: " + data(Qt::DisplayRole).toString();

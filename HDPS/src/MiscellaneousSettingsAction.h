@@ -34,11 +34,13 @@ public: // Action getters
     ToggleAction& getIgnoreLoadingErrorsAction() { return _ignoreLoadingErrorsAction; }
     ToggleAction& getAskConfirmationBeforeRemovingDatasetsAction() { return _askConfirmationBeforeRemovingDatasetsAction; }
     ToggleAction& getKeepDescendantsAfterRemovalAction() { return _keepDescendantsAfterRemovalAction; }
+    ToggleAction& getShowSimplifiedGuidsAction() { return _showSimplifiedGuidsAction; }
 
 private:
     ToggleAction   _ignoreLoadingErrorsAction;                     /** Toggle between asking for ignoring loading errors or not */
     ToggleAction   _askConfirmationBeforeRemovingDatasetsAction;   /** Toggle between asking permission before removing datasets or not */
     ToggleAction   _keepDescendantsAfterRemovalAction;             /** Toggle between asking permission before removing datasets or not */
+    ToggleAction   _showSimplifiedGuidsAction;                      /** Toggle between asking permission before removing datasets or not */
 };
 
 }

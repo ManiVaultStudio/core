@@ -61,12 +61,12 @@ protected: // Raw data
     virtual void addRawData(plugin::RawData* rawData) = 0;
 
     /**
-     * Remove raw data with \p rawDataName from the manager
+     * Remove raw data with \p rawDataName from the manager if there are no more (selection) datasets referencing it
      * @param rawDataName Name of the raw data to remove
      */
     virtual void removeRawData(const QString& rawDataName) = 0;
 
-public: // Raw data
+protected: // Raw data
 
     /**
      * Get raw data by \p rawDataName
@@ -85,11 +85,40 @@ public: // Raw data
         return dynamic_cast<RawDataType*>(getRawData(rawDataName));
     }
 
+public: // Raw data
+
     /**
      * Get raw data names
      * @retun Raw data names list
      */
     virtual QStringList getRawDataNames() const = 0;
+
+    /**
+     * Get raw data size by \p rawDataName
+     * @param rawDataName Name of the raw data
+     * @return Size of the raw data in bytes
+     */
+    virtual std::uint64_t getRawDataSize(const QString& rawDataName) const = 0;
+
+    /**
+     * Get overall raw data size
+     * @return Overall raw data size in bytes
+     */
+    std::uint64_t getOverallRawDataSize() const {
+        std::uint64_t overallRawDataSize = 0;
+
+        for (const auto& rawDataName : getRawDataNames())
+            overallRawDataSize += getRawDataSize(rawDataName);
+
+        return overallRawDataSize;
+    };
+
+    /**
+     * Get raw data type string by \p rawDataName
+     * @param rawDataName Name of the raw data
+     * @return Raw data type string
+     */
+    virtual QString getRawDataType(const QString& rawDataName) const = 0;
 
 public: // Dataset creation
 
@@ -103,6 +132,17 @@ public: // Dataset creation
      * @return Smart pointer to the create dataset
      */
     virtual Dataset<DatasetImpl> createDataset(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "", bool notify = true) = 0;
+
+    /**
+     * Creates dataset without selection of \p kind with \p guiName to the manager and returns the created dataset (this is only used fore serialization purposes)
+     * @param kind Kind of data plugin
+     * @param guiName Name of the added dataset in the GUI
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will add to the root of the data hierarchy if not valid)
+     * @param id Globally unique dataset identifier (use only for deserialization)
+     * @param notify Whether to notify the core that a dataset is added
+     * @return Smart pointer to the create dataset
+     */
+    virtual Dataset<DatasetImpl> createDatasetWithoutSelection(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& id = "", bool notify = true) = 0;
 
     /**
      * Creates dataset of \p kind with \p guiName to the manager and returns the created dataset as \p DatasetType
@@ -142,10 +182,16 @@ public: // Dataset remove
      */
     virtual void removeDatasets(Datasets datasets) = 0;
 
-public:// Derived datasets
+    /**
+     * Remove datasets that reference \p rawDataName from the manager
+     * @param @param rawDataName Name of the raw data
+     */
+    virtual void removeDatasets(const QString& rawDataName) = 0;
+
+public: // Derived datasets
 
     /**
-     * Creates derived dataset from \p sourceDataset with \p guiName and returns the created derived dataset
+     * Creates derived dataset from \666p sourceDataset with \p guiName and returns the created derived dataset
      * @param guiName GUI name for the new dataset from the core
      * @param sourceDataset Smart pointer to the source dataset from which this dataset will be derived
      * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to source dataset in hierarchy if not valid)
@@ -259,12 +305,12 @@ public: // Selection
 protected: // Selection
 
     /**
-     * Remove \p selection from the data manager
-     * @param rawDataName Name of the selection raw data
+     * Removes selection of which the raw data name matches \p rawDataName
+     * @param rawDataName Name of the raw data
      */
     virtual void removeSelection(const QString& rawDataName) = 0;
 
-public: // Data grouping
+public: // Dataset and selection grouping
 
     /**
      * Groups \p datasets into one dataset and returns the group dataset
@@ -275,10 +321,10 @@ public: // Data grouping
     virtual Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") = 0;
 
     /**
-     * Get dataset grouping toggle action
-     * @return Reference to dataset grouping toggle action
+     * Get selection grouping toggle action
+     * @return Reference to selection grouping toggle action
      */
-    virtual gui::ToggleAction& getDatasetGroupingAction() = 0;
+    virtual gui::ToggleAction& getSelectionGroupingAction() = 0;
 
 signals:
 
@@ -339,6 +385,8 @@ signals:
     void selectionRemoved(const QString& selectionId);
 
     friend class PluginManager;
+    friend class DatasetImpl;
+    friend class RawDataModel;
 };
 
 }

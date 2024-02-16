@@ -30,9 +30,9 @@ using namespace plugin;
 
 DataManager::DataManager(QObject* parent /*= nullptr*/) :
     AbstractDataManager(parent),
-    _datasetGroupingAction(this, "Dataset grouping")
+    _selectionGroupingAction(this, "Selection grouping")
 {
-    _datasetGroupingAction.setSettingsPrefix(getSettingsPrefix() + "DatasetGroupingEnabled");
+    _selectionGroupingAction.setSettingsPrefix(getSettingsPrefix() + "DatasetGroupingEnabled");
 }
 
 DataManager::~DataManager()
@@ -106,6 +106,15 @@ void DataManager::removeRawData(const QString& rawDataName)
 {
     try
     {
+#ifdef DATA_MANAGER_VERBOSE
+        qDebug() << "Remove raw data" << rawDataName << "from the data manager";
+#endif
+
+        if (rawDataName.isEmpty())
+            throw std::runtime_error("Invalid raw data name");
+
+        removeSelection(rawDataName);
+
         const auto it = _rawDataMap.find(rawDataName);
 
         if (it == _rawDataMap.end())
@@ -136,7 +145,7 @@ plugin::RawData* DataManager::getRawData(const QString& rawDataName)
             throw std::runtime_error("Raw data name is invalid");
 
         if (_rawDataMap.find(rawDataName) == _rawDataMap.end())
-            throw std::runtime_error("Raw data not found");
+            throw std::runtime_error(QString("%1 not found").arg(rawDataName).toStdString());
 
         return _rawDataMap[rawDataName];
     }
@@ -161,24 +170,72 @@ QStringList DataManager::getRawDataNames() const
     return rawDataNames;
 }
 
-Dataset<DatasetImpl> DataManager::createDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/, bool notify /*= true*/)
+std::uint64_t DataManager::getRawDataSize(const QString& rawDataName) const
 {
-    // Create a new plugin of the given kind
-    QString rawDataName = plugins().requestPlugin(kind)->getName();
+    try
+    {
+        if (rawDataName.isEmpty())
+            throw std::runtime_error("Raw data name is invalid");
 
-    const auto rawData = mv::data().getRawData(rawDataName);
+        if (_rawDataMap.find(rawDataName) == _rawDataMap.end())
+            throw std::runtime_error(QString("%1 not found").arg(rawDataName).toStdString());
+
+        return const_cast<DataManager*>(this)->_rawDataMap[rawDataName]->getRawDataSize();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox(QString("Unable to get raw data size for %1").arg(rawDataName), e);
+    }
+    catch (...) {
+        exceptionMessageBox(QString("Unable to get raw data size for %1").arg(rawDataName));
+    }
+
+    return {};
+}
+
+QString DataManager::getRawDataType(const QString& rawDataName) const
+{
+    try
+    {
+        if (rawDataName.isEmpty())
+            throw std::runtime_error("Raw data name is invalid");
+
+        if (_rawDataMap.find(rawDataName) == _rawDataMap.end())
+            throw std::runtime_error(QString("%1 not found").arg(rawDataName).toStdString());
+
+        return _rawDataMap.at(rawDataName)->getDataType().getTypeString();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get raw data type from the data manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get raw data type from the data manager");
+    }
+
+    return "Undefined";
+}
+
+Dataset<DatasetImpl> DataManager::createDataset(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/, bool notify /*= true*/)
+{
+#ifdef DATA_MANAGER_VERBOSE
+    qDebug() << "Create dataset" << kind << guiName;
+#endif
+
+    const auto rawDataName  = plugins().requestPlugin(kind)->getName();
+    const auto rawData      = getRawData(rawDataName);
 
     // Create an initial full set and an empty selection belonging to the raw data
     auto fullSet = rawData->createDataSet(id);
     auto selection = rawData->createDataSet();
 
     // Set the properties of the new sets
-    fullSet->setText(dataSetGuiName);
+    fullSet->setText(guiName);
     fullSet->setAll(true);
 
-    fullSet->getTask().setName(dataSetGuiName);
+    fullSet->getTask().setName(guiName);
 
-    selection->getTask().setName(QString("%1_selection").arg(dataSetGuiName));
+    selection->getTask().setName(QString("%1_selection").arg(guiName));
 
     // Set pointer of full dataset to itself just to avoid having to be wary of this not being set
     fullSet->_fullDataset = fullSet;
@@ -191,13 +248,38 @@ Dataset<DatasetImpl> DataManager::createDataset(const QString& kind, const QStri
     return fullSet;
 }
 
+Dataset<DatasetImpl> DataManager::createDatasetWithoutSelection(const QString& kind, const QString& guiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& id /*= ""*/, bool notify /*= true*/)
+{
+#ifdef DATA_MANAGER_VERBOSE
+    qDebug() << "Create dataset without selection" << kind << guiName;
+#endif
+
+    const auto rawDataName  = plugins().requestPlugin(kind)->getName();
+    const auto rawData      = getRawData(rawDataName);
+
+    auto fullSet = rawData->createDataSet(id);
+
+    fullSet->setText(guiName);
+    fullSet->setAll(true);
+
+    fullSet->getTask().setName(guiName);
+
+    fullSet->_fullDataset = fullSet;
+
+    addDataset(fullSet, parentDataset, notify);
+
+    fullSet->init();
+
+    return fullSet;
+}
+
 void DataManager::addDataset(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool notify /*= true*/)
 {
     try
     {
 
 #ifdef DATA_MANAGER_VERBOSE
-        qDebug() << "Add dataset" << dataset->getGuiName() << "to the data manager";
+        qDebug() << "Add dataset" << dataset->getGuiName() << dataset->getId() << "to the data manager";
 #endif
 
         if (!dataset.isValid())
@@ -233,9 +315,23 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
         if (!dataset.isValid())
             throw std::runtime_error("Dataset smart pointer is invalid");
 
-        const auto datasetId        = dataset->getId();
-        const auto datasetType      = dataset->getDataType();
-        const auto rawDatasetName   = dataset->getRawDataName();
+        if (dataset->isLocked()) {
+
+#ifdef DATA_MANAGER_VERBOSE
+            qDebug() << "Dataset is locked and will be removed as soon as it is un-locked";
+#endif
+
+            connect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, [this, dataset](bool locked) -> void {
+                disconnect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::lockedChanged, this, nullptr);
+
+                if (!locked)
+                    removeDataset(dataset);
+            });
+        }
+
+        const auto datasetId    = dataset->getId();
+        const auto datasetType  = dataset->getDataType();
+        const auto rawDataName  = dataset->getRawDataName();
 
         dataset->setAboutToBeRemoved();
 
@@ -243,7 +339,7 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
             if (underiveDataset->isDerivedData() && underiveDataset->getNextSourceDataset<DatasetImpl>()->getId() == dataset->getId()) {
                 if (underiveDataset->mayUnderive()) {
                     underiveDataset->_derived = false;
-                    underiveDataset->setSourceDataSet(Dataset<DatasetImpl>());
+                    underiveDataset->setSourceDataset(Dataset<DatasetImpl>());
                 }
                 else {
                     removeDataset(underiveDataset.get());
@@ -257,6 +353,8 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
             else
                 dataHierarchyItem->setParent(nullptr);
         }
+
+        dataset->setLocked(true);
 
         events().notifyDatasetAboutToBeRemoved(dataset);
         {
@@ -274,14 +372,33 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
                 if (analysisPlugin)
                     analysisPlugin->destroy();
 
+                const auto shouldRemoveRawData = dataset->isFull();
+
                 _datasets.erase(it);
+
+                if (shouldRemoveRawData)
+                    removeRawData(rawDataName);
             }
             emit datasetRemoved(datasetId);
         }
         events().notifyDatasetRemoved(datasetId, datasetType);
 
-        removeRawData(rawDatasetName);
-        removeSelection(rawDatasetName);
+#ifdef DATA_MANAGER_VERBOSE
+        qDebug() << "Raw data" << QString("(%1)").arg(_rawDataMap.size());
+
+        for (const auto& pair : _rawDataMap)
+            qDebug() << "\t" << pair.first;
+
+        qDebug() << "Datasets" << QString("(%1)").arg(_datasets.size());
+
+        for (auto& dataset : _datasets)
+            qDebug() << "\t" << dataset->getGuiName() << dataset->getRawDataName();
+
+        qDebug() << "Selection" << QString("(%1)").arg(_selections.size());
+
+        for (auto& selection : _selections)
+            qDebug() << "\t" << selection->getGuiName() << selection->getRawDataName();
+#endif
     }
     catch (std::exception& e)
     {
@@ -296,7 +413,7 @@ void DataManager::removeDatasets(Datasets datasets)
 {
     try {
 #ifdef DATA_MANAGER_VERBOSE
-        qDebug() << "Remove datasets from the data manager";
+        qDebug() << "Remove" << datasets.size() << "datasets from the data manager";
 #endif
 
         if (datasets.isEmpty())
@@ -319,6 +436,9 @@ void DataManager::removeDatasets(Datasets datasets)
             descendantDataHierarchyItems << topLevelDataset->getDataHierarchyItem().getChildren(true);
 
         Datasets datasetsToRemove;
+
+        for (auto datasetToRemove : datasetsToRemove)
+            datasetToRemove->lock();
 
         if (descendantDataHierarchyItems.isEmpty()) {
             datasetsToRemove = topLevelDatasets;
@@ -360,12 +480,6 @@ void DataManager::removeDatasets(Datasets datasets)
 
             task.setFinished();
         }
-
-#ifdef DATA_MANAGER_VERBOSE
-        qDebug() << "Raw data count:" << _rawDataMap.size();
-        qDebug() << "Datasets count:" << _datasets.size();
-        qDebug() << "Selection count:" << _selections.size();
-#endif
     }
     catch (std::exception& e)
     {
@@ -376,21 +490,34 @@ void DataManager::removeDatasets(Datasets datasets)
     }
 }
 
+void DataManager::removeDatasets(const QString& rawDataName)
+{
+    Datasets datasetsToRemove;
+
+    for (const auto& dataset : _datasets)
+        if (dataset->getRawDataName() == rawDataName)
+            removeDataset(dataset.get());
+}
+
 Dataset<DatasetImpl> DataManager::createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, bool notify /*= true*/)
 {
+#ifdef DATA_MANAGER_VERBOSE
+    qDebug() << "Create derived dataset" << guiName << sourceDataset->getGuiName();
+#endif
+
     // Get the data type of the source dataset
     const auto dataType = sourceDataset->getDataType();
 
     // Create a new plugin of the given kind
     QString pluginName = mv::plugins().requestPlugin(dataType._type)->getName();
 
-    auto rawData = mv::data().getRawData(pluginName);
+    auto rawData = getRawData(pluginName);
 
     // Create an initial full set, but no selection because it is shared with the source data
     auto derivedDataset = rawData->createDataSet();
 
     // Mark the full set as derived and set the GUI name
-    derivedDataset->setSourceDataSet(sourceDataset);
+    derivedDataset->setSourceDataset(sourceDataset);
     derivedDataset->setText(guiName);
 
     // Set properties of the new set
@@ -407,6 +534,11 @@ Dataset<DatasetImpl> DataManager::createSubsetFromSelection(const Dataset<Datase
 {
     try
     {
+
+#ifdef DATA_MANAGER_VERBOSE
+        qDebug() << "Create subset from selection" << guiName << sourceDataset->getGuiName();
+#endif
+
         // Create a subset with only the indices that were part of the selection set
         auto subset = selection->copy();
 
@@ -482,6 +614,10 @@ Datasets DataManager::getAllDatasets(const std::vector<DataType>& dataTypes /*= 
 
 void DataManager::addSelection(const QString& rawDataName, Dataset<DatasetImpl> selection)
 {
+#ifdef DATA_MANAGER_VERBOSE
+    qDebug() << "Add selection dataset for raw data" << rawDataName << "to the data manager";
+#endif
+
     _selections.push_back(std::unique_ptr<DatasetImpl>(selection.get()));
 
     emit selectionAdded(selection);
@@ -516,7 +652,7 @@ Dataset<DatasetImpl> DataManager::getSelection(const QString& rawDataName)
 
 Datasets DataManager::getAllSelections()
 {
-    QVector<Dataset<DatasetImpl>> selections;
+    Datasets selections;
 
     for (const auto& dataset : _selections)
         selections << dataset.get();
@@ -528,22 +664,28 @@ void DataManager::removeSelection(const QString& rawDataName)
 {
     try
     {
-        const auto it = std::find_if(_selections.begin(), _selections.end(), [rawDataName](const auto& selectionPtr) -> bool {
-            return rawDataName == selectionPtr->getRawDataName();
+
+#ifdef DATA_MANAGER_VERBOSE
+        qDebug() << "Remove selection dataset for raw data" << rawDataName << "from the data manager";
+#endif
+
+        auto it = std::find_if(_selections.begin(), _selections.end(), [rawDataName](const auto& selection) -> bool {
+            return selection->getRawDataName() == rawDataName;
         });
 
         if (it != _selections.end()) {
             const auto selection    = (*it).get();
             const auto selectionId  = selection->getId();
 
-            emit selectionAboutToBeRemoved(selection);
+#ifdef DATA_MANAGER_VERBOSE
+            qDebug() << "Remove selection dataset" << selectionId;
+#endif
+
+            emit selectionAboutToBeRemoved(Dataset<DatasetImpl>(selection));
             {
                 _selections.erase(it);
             }
             emit selectionRemoved(selectionId);
-        }
-        else {
-            qDebug() << QString("Selection dataset with raw data name %1 not found").arg(rawDataName);
         }
     }
     catch (std::exception& e)
@@ -605,17 +747,17 @@ mv::Dataset<mv::DatasetImpl> DataManager::groupDatasets(const Datasets& datasets
     return Dataset<DatasetImpl>();
 }
 
-ToggleAction& DataManager::getDatasetGroupingAction()
+ToggleAction& DataManager::getSelectionGroupingAction()
 {
-    return _datasetGroupingAction;
+    return _selectionGroupingAction;
 }
 
 void DataManager::fromVariantMap(const QVariantMap& variantMap)
 {
     AbstractDataManager::fromVariantMap(variantMap);
 
-    if (variantMap.contains(_datasetGroupingAction.getSerializationName()))
-        _datasetGroupingAction.fromParentVariantMap(variantMap);
+    if (variantMap.contains(_selectionGroupingAction.getSerializationName()))
+        _selectionGroupingAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap DataManager::toVariantMap() const
@@ -625,7 +767,7 @@ QVariantMap DataManager::toVariantMap() const
     for (auto& dataset : _datasets)
         variantMap[dataset->getId()] = dataset->toVariantMap();
 
-    _datasetGroupingAction.insertIntoVariantMap(variantMap);
+    _selectionGroupingAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
