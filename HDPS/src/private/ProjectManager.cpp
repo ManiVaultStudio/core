@@ -43,19 +43,19 @@ using namespace mv::gui;
 ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     AbstractProjectManager(parent),
     _project(),
-    _newBlankProjectAction(this, "Blank"),
-    _newProjectFromWorkspaceAction(this, "From Workspace..."),
-    _openProjectAction(this, "Open Project"),
-    _importProjectAction(this, "Import Project"),
-    _saveProjectAction(this, "Save Project"),
-    _saveProjectAsAction(this, "Save Project As..."),
-    _editProjectSettingsAction(this, "Project Settings..."),
-    _recentProjectsAction(this, getSettingsPrefix() + "RecentProjects"),
+    _newBlankProjectAction(nullptr, "Blank"),
+    _newProjectFromWorkspaceAction(nullptr, "From Workspace..."),
+    _openProjectAction(nullptr, "Open Project"),
+    _importProjectAction(nullptr, "Import Project"),
+    _saveProjectAction(nullptr, "Save Project"),
+    _saveProjectAsAction(nullptr, "Save Project As..."),
+    _editProjectSettingsAction(nullptr, "Project Settings..."),
+    _recentProjectsAction(nullptr, getSettingsPrefix() + "RecentProjects"),
     _newProjectMenu(),
     _importDataMenu(),
-    _publishAction(this, "Publish"),
-    _pluginManagerAction(this, "Plugin Browser..."),
-    _showStartPageAction(this, "Start Page...", true)
+    _publishAction(nullptr, "Publish"),
+    _pluginManagerAction(nullptr, "Plugin Browser..."),
+    _showStartPageAction(nullptr, "Start Page...", true)
 {
     //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -65,7 +65,7 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     //_newProjectFromWorkspaceAction.setShortcut(QKeySequence("Ctrl+N"));
     //_newProjectFromWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
     _newProjectFromWorkspaceAction.setIcon(workspaces().getIcon());
-    _newProjectFromWorkspaceAction.setToolTip("Create new project with workspace");
+    _newProjectFromWorkspaceAction.setToolTip("Create new project from workspace");
 
     //_openProjectAction.setShortcut(QKeySequence("Ctrl+O"));
     //_openProjectAction.setShortcutContext(Qt::ApplicationShortcut);
