@@ -210,6 +210,7 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
     const auto viewPluginDockWidgetId   = variantMap["ID"].toString();
     const auto viewPluginMap            = variantMap["ViewPlugin"].toMap();
     const auto guiName                  = viewPluginMap["GuiName"].toMap()["Value"].toString();
+    const auto viewPluginId             = viewPluginMap["ID"].toString();
 
     auto serializationTask = ViewPluginDockWidget::getSerializationTask(viewPluginDockWidgetId);
 
@@ -226,6 +227,8 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
 
     loadViewPlugin();
 
+    _viewPlugin->setId(viewPluginId);
+
     QCoreApplication::processEvents();
 
     if (variantMap.contains("DockManagerState"))
@@ -234,6 +237,8 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
     QCoreApplication::processEvents();
 
     serializationTask->setFinished();
+
+    setProperty("ViewPluginId", _viewPlugin->getId());
 }
 
 QVariantMap ViewPluginDockWidget::toVariantMap() const
