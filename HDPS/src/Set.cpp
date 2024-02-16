@@ -64,8 +64,15 @@ QVector<Dataset<DatasetImpl>> DatasetImpl::getChildren(const QVector<DataType>& 
 {
     QVector<Dataset<DatasetImpl>> children;
 
-    for (auto dataHierarchyChild : getDataHierarchyItem().getChildren(recursively))
-        children << dataHierarchyChild->getDataset();
+    for (auto dataHierarchyChild : getDataHierarchyItem().getChildren(recursively)) {
+        if (dataTypes.isEmpty()) {
+            children << dataHierarchyChild->getDataset();
+        }
+        else {
+            if (dataTypes.contains(dataHierarchyChild->getDataset()->getDataType()))
+                children << dataHierarchyChild->getDataset();
+        }
+    }
 
     return children;
 }
