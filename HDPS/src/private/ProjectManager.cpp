@@ -57,62 +57,62 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
     _pluginManagerAction(this, "Plugin Browser..."),
     _showStartPageAction(this, "Start Page...", true)
 {
-    _newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
-    _newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
+    //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
+    //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
     _newBlankProjectAction.setIconByName("file");
     _newBlankProjectAction.setToolTip("Create project without view plugins and data");
 
-    _newProjectFromWorkspaceAction.setShortcut(QKeySequence("Ctrl+N"));
-    _newProjectFromWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
+    //_newProjectFromWorkspaceAction.setShortcut(QKeySequence("Ctrl+N"));
+    //_newProjectFromWorkspaceAction.setShortcutContext(Qt::ApplicationShortcut);
     _newProjectFromWorkspaceAction.setIcon(workspaces().getIcon());
     _newProjectFromWorkspaceAction.setToolTip("Create new project with workspace");
 
-    _openProjectAction.setShortcut(QKeySequence("Ctrl+O"));
-    _openProjectAction.setShortcutContext(Qt::ApplicationShortcut);
+    //_openProjectAction.setShortcut(QKeySequence("Ctrl+O"));
+    //_openProjectAction.setShortcutContext(Qt::ApplicationShortcut);
     _openProjectAction.setIconByName("folder-open");
     _openProjectAction.setToolTip("Open project from disk");
 
-    _importProjectAction.setShortcut(QKeySequence("Ctrl+I"));
-    _importProjectAction.setShortcutContext(Qt::ApplicationShortcut);
+    //_importProjectAction.setShortcut(QKeySequence("Ctrl+I"));
+    //_importProjectAction.setShortcutContext(Qt::ApplicationShortcut);
     _importProjectAction.setIconByName("file-import");
     _importProjectAction.setToolTip("Import project from disk");
 
-    _saveProjectAction.setShortcut(QKeySequence("Ctrl+S"));
-    _saveProjectAction.setShortcutContext(Qt::ApplicationShortcut);
+    //_saveProjectAction.setShortcut(QKeySequence("Ctrl+S"));
+    //_saveProjectAction.setShortcutContext(Qt::ApplicationShortcut);
     _saveProjectAction.setIconByName("save");
     _saveProjectAction.setToolTip("Save project to disk");
 
-    _saveProjectAsAction.setShortcut(QKeySequence("Ctrl+Shift+S"));
-    _saveProjectAsAction.setShortcutContext(Qt::ApplicationShortcut);
+    //_saveProjectAsAction.setShortcut(QKeySequence("Ctrl+Shift+S"));
+    //_saveProjectAsAction.setShortcutContext(Qt::ApplicationShortcut);
     _saveProjectAsAction.setIconByName("save");
     _saveProjectAsAction.setToolTip("Save project to disk in a chosen location");
 
-    _editProjectSettingsAction.setShortcut(QKeySequence("Ctrl+Shift+P"));
-    _editProjectSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
+    //_editProjectSettingsAction.setShortcut(QKeySequence("Ctrl+Shift+P"));
+    //_editProjectSettingsAction.setShortcutContext(Qt::ApplicationShortcut);
     _editProjectSettingsAction.setIconByName("cog");
 
     _newProjectMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
     _newProjectMenu.setTitle("New Project");
     _newProjectMenu.setToolTip("Create new project");
     _newProjectMenu.addAction(&_newBlankProjectAction);
-    _newProjectMenu.addAction(&_newProjectFromWorkspaceAction);
+    //_newProjectMenu.addAction(&_newProjectFromWorkspaceAction);
 
     _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
     _importDataMenu.setTitle("Import data...");
     _importDataMenu.setToolTip("Import data into HDPS");
 
-    _publishAction.setShortcut(QKeySequence("Ctrl+P"));
-    _publishAction.setShortcutContext(Qt::ApplicationShortcut);
+    //_publishAction.setShortcut(QKeySequence("Ctrl+P"));
+    //_publishAction.setShortcutContext(Qt::ApplicationShortcut);
     _publishAction.setIconByName("cloud-upload-alt");
     _publishAction.setToolTip("Publish the HDPS application");
 
-    _pluginManagerAction.setShortcut(QKeySequence("Ctrl+M"));
-    _pluginManagerAction.setShortcutContext(Qt::ApplicationShortcut);
+    //_pluginManagerAction.setShortcut(QKeySequence("Ctrl+M"));
+    //_pluginManagerAction.setShortcutContext(Qt::ApplicationShortcut);
     _pluginManagerAction.setIconByName("plug");
     _pluginManagerAction.setToolTip("View loaded plugins");
 
-    _showStartPageAction.setShortcut(QKeySequence("Alt+W"));
-    _showStartPageAction.setShortcutContext(Qt::ApplicationShortcut);
+    //_showStartPageAction.setShortcut(QKeySequence("Alt+W"));
+    //_showStartPageAction.setShortcutContext(Qt::ApplicationShortcut);
     _showStartPageAction.setIconByName("door-open");
     _showStartPageAction.setToolTip("Show the HDPS start page");
     //_showStartPageAction.setChecked(!Application::current()->shouldOpenProjectAtStartup());

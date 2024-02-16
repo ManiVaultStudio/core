@@ -41,7 +41,7 @@ FileMenu::FileMenu(QWidget* parent /*= nullptr*/) :
 void FileMenu::populate()
 {
     clear();
-    
+
     addMenu(&projects().getNewProjectMenu());
     addAction(&projects().getOpenProjectAction());
     //addAction(&projects().getImportProjectAction());
