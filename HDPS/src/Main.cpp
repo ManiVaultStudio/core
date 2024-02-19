@@ -9,6 +9,7 @@
 #include <Application.h>
 #include <ProjectMetaAction.h>
 #include <BackgroundTask.h>
+#include <ManiVaultVersion.h>
 
 #include <QSurfaceFormat>
 #include <QStyleFactory>
@@ -16,6 +17,8 @@
 #include <QQuickWindow>
 #include <QCommandLineParser>
 #include <QTemporaryDir>
+
+#include <iostream>
 
 using namespace mv;
 using namespace mv::util;
@@ -70,9 +73,33 @@ ProjectMetaAction* getStartupProjectMetaAction(const QString& startupProjectFile
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setOrganizationName("BioVault");
-    QCoreApplication::setOrganizationDomain("LUMC (LKEB) & TU Delft (CGV)");
-    QCoreApplication::setApplicationName("ManiVault");
+    // Create a temporary core application to be able to read command line arguments without implicit interfacing with settings
+    auto coreApplication = QSharedPointer<QCoreApplication>(new QCoreApplication(argc, argv));
+
+    QCommandLineParser commandLineParser;
+
+    commandLineParser.setApplicationDescription("Application for viewing and analyzing high-dimensional data");
+    commandLineParser.addHelpOption();
+    commandLineParser.addVersionOption();
+
+    QCommandLineOption projectOption({ "p", "project" }, "File path of the project to load upon startup", "project");
+    QCommandLineOption organizationNameOption({ "org_name", "organization_name" }, "Name of the organization", "organization_name", "BioVault");
+    QCommandLineOption organizationDomainOption({ "org_dom", "organization_domain" }, "Domain of the organization", "organization_domain", "LUMC (LKEB) & TU Delft (CGV)");
+    QCommandLineOption applicationNameOption({ "app_name", "application_name" }, "Name of the application", "application_name", "ManiVault");
+
+    commandLineParser.addOption(projectOption);
+    commandLineParser.addOption(organizationNameOption);
+    commandLineParser.addOption(organizationDomainOption);
+    commandLineParser.addOption(applicationNameOption);
+
+    commandLineParser.process(QCoreApplication::arguments());
+
+    // Remove the temporary application
+    coreApplication.reset();
+
+    QCoreApplication::setOrganizationName(commandLineParser.value("organization_name"));
+    QCoreApplication::setOrganizationDomain(commandLineParser.value("organization_domain"));
+    QCoreApplication::setApplicationName(commandLineParser.value("application_name"));
     
     // Necessary to instantiate QWebEngine from a plugin
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
@@ -89,6 +116,8 @@ int main(int argc, char *argv[])
 
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 
+    qDebug() << "Starting ManiVault" << QString("%1.%2").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR));
+
     Application application(argc, argv);
 
     Core core;
@@ -97,17 +126,6 @@ int main(int argc, char *argv[])
 
     core.createManagers();
 
-    QCommandLineParser commandLineParser;
-
-    commandLineParser.setApplicationDescription("Application for viewing and analyzing high-dimensional data");
-    commandLineParser.addHelpOption();
-    commandLineParser.addVersionOption();
-
-    QCommandLineOption projectOption({ "p", "project" }, "File path of the project to load upon startup", "project");
-
-    commandLineParser.addOption(projectOption);
-    commandLineParser.process(QCoreApplication::arguments());
-    
     SplashScreenAction splashScreenAction(&application, false);
 
     if (commandLineParser.isSet("project")) {
