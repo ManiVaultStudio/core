@@ -397,7 +397,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
 QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImpl>& dataset)
 {
-    const auto modelIndices = _treeModel.match(_treeModel.index(0, static_cast<int>(AbstractDataHierarchyModel::Column::DatasetId)), Qt::DisplayRole, dataset->getId(), 1, Qt::MatchFlag::MatchRecursive);
+    const auto modelIndices = _treeModel.match(_treeModel.index(0, static_cast<int>(AbstractDataHierarchyModel::Column::DatasetId), QModelIndex()), Qt::EditRole, dataset->getId(), 1, Qt::MatchFlag::MatchRecursive);
 
     if (modelIndices.isEmpty())
         throw new std::runtime_error(QString("'%1' not found in the data hierarchy model").arg(dataset->text()).toLatin1());
