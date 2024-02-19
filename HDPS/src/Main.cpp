@@ -83,9 +83,9 @@ int main(int argc, char *argv[])
     commandLineParser.addVersionOption();
 
     QCommandLineOption projectOption({ "p", "project" }, "File path of the project to load upon startup", "project");
-    QCommandLineOption organizationNameOption({ "org_name", "organization_name" }, "Name of the organization", "organization_name");
-    QCommandLineOption organizationDomainOption({ "org_dom", "organization_domain" }, "Domain of the organization", "organization_domain");
-    QCommandLineOption applicationNameOption({ "app_name", "application_name" }, "Name of the application", "application_name");
+    QCommandLineOption organizationNameOption({ "org_name", "organization_name" }, "Name of the organization", "organization_name", "BioVault");
+    QCommandLineOption organizationDomainOption({ "org_dom", "organization_domain" }, "Domain of the organization", "organization_domain", "LUMC (LKEB) & TU Delft (CGV)");
+    QCommandLineOption applicationNameOption({ "app_name", "application_name" }, "Name of the application", "application_name", "ManiVault");
 
     commandLineParser.addOption(projectOption);
     commandLineParser.addOption(organizationNameOption);
@@ -97,9 +97,9 @@ int main(int argc, char *argv[])
     // Remove the temporary application
     coreApplication.reset();
 
-    QCoreApplication::setOrganizationName(commandLineParser.isSet("organization_name") ? commandLineParser.value("organization_name") : "BioVault");
-    QCoreApplication::setOrganizationDomain(commandLineParser.isSet("organization_domain") ? commandLineParser.value("organization_domain") : "LUMC (LKEB) & TU Delft (CGV)");
-    QCoreApplication::setApplicationName(commandLineParser.isSet("application_name") ? commandLineParser.value("application_name") : "ManiVault");
+    QCoreApplication::setOrganizationName(commandLineParser.value("organization_name"));
+    QCoreApplication::setOrganizationDomain(commandLineParser.value("organization_domain"));
+    QCoreApplication::setApplicationName(commandLineParser.value("application_name"));
     
     // Necessary to instantiate QWebEngine from a plugin
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
