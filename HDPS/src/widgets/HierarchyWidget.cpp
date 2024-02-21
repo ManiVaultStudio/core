@@ -156,7 +156,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, c
     }
 
     _filterColumnAction.setOptions(columnNames);
-    _filterColumnAction.setCurrentIndex(0);
+    _filterColumnAction.setCurrentIndex(_filterModel ? _filterModel->filterKeyColumn() : 0);
 
     _columnsGroupAction.addAction(selectAllCollumns);
 

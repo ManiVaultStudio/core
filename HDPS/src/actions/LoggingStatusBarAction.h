@@ -7,6 +7,7 @@
 #include "actions/HorizontalGroupAction.h"
 #include "actions/StringAction.h"
 #include "actions/TreeAction.h"
+#include "actions/TriggerAction.h"
 
 #include "models/LoggingModel.h"
 #include "models/LoggingFilterModel.h"
@@ -60,6 +61,7 @@ private:
     LoggingFilterModel  _filterModel;           /** Filter model of the logging model */
     StringAction        _lastMessageAction;     /** String action displays the last record message from the model (if any) */
     TreeAction          _recordsAction;         /** Tree action which displays the filtered records from the filter model */
+    TriggerAction       _loadPluginAction;      /** Triggers loading the logging plugin */
 };
 
 }

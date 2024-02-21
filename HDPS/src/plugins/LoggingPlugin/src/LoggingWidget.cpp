@@ -72,7 +72,7 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
     treeViewHeader->setSectionResizeMode(static_cast<int>(LoggingModel::Column::Number), QHeaderView::Fixed);
     treeViewHeader->setSectionResizeMode(static_cast<int>(LoggingModel::Column::Type), QHeaderView::Fixed);
 
-    connect(&treeView, &QTreeView::customContextMenuRequested, [this, &treeView](const QPoint& point)
+    connect(&treeView, &QTreeView::customContextMenuRequested, &treeView, [this, &treeView](const QPoint& point)
     {
         const auto selectedRows = treeView.selectionModel()->selectedRows();
 

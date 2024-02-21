@@ -10,6 +10,7 @@
 
 #include <QGuiApplication>
 #include <QClipBoard>
+#include <QHeaderView>
 
 namespace mv::gui {
 
@@ -18,12 +19,18 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _model(),
     _filterModel(this),
     _lastMessageAction(this, "Last message"),
-    _recordsAction(this, "Records")
+    _recordsAction(this, "Records"),
+    _loadPluginAction(this, "Plugin")
 {
     setShowLabels(false);
 
     addAction(&_lastMessageAction);
     addAction(&_recordsAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
+        auto toolButton = dynamic_cast<QToolButton*>(widget);
+
+        if (toolButton)
+            qDebug() << "toolButton";
+
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
         Q_ASSERT(hierarchyWidget != nullptr);
@@ -31,10 +38,13 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
         if (hierarchyWidget == nullptr)
             return;
 
-        hierarchyWidget->setHeaderHidden(true);
+        //hierarchyWidget->setHeaderHidden(true);
 
         hierarchyWidget->getFilterGroupAction().setVisible(false);
         hierarchyWidget->getFilterColumnAction().setVisible(false);
+
+        hierarchyWidget->getToolbarAction().addAction(&_loadPluginAction);
+        hierarchyWidget->getFilterColumnAction().addAction(&_loadPluginAction);
 
         auto treeView = widget->findChild<QTreeView*>("TreeView");
 
@@ -51,7 +61,7 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
         treeView->setColumnHidden(static_cast<int>(LoggingModel::Column::Function), true);
         treeView->setColumnHidden(static_cast<int>(LoggingModel::Column::Category), true);
 
-        connect(treeView, &QTreeView::customContextMenuRequested, [this, treeView](const QPoint& point)
+        connect(treeView, &QTreeView::customContextMenuRequested, treeView, [this, treeView](const QPoint& point)
         {
             const auto selectedRows = treeView->selectionModel()->selectedRows();
 
@@ -77,6 +87,19 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
 
             contextMenu.exec(QCursor::pos());
         });
+
+        auto treeViewHeader = treeView->header();
+
+        treeViewHeader->setStretchLastSection(true);
+
+        for (int columnIndex = 0; columnIndex < _model.columnCount(); ++columnIndex)
+            treeViewHeader->setSectionResizeMode(columnIndex, QHeaderView::ResizeToContents);
+
+        treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+
+        connect(treeViewHeader, &QHeaderView::sectionResized, treeView, [treeViewHeader](int logicalIndex, int oldSize, int newSize) -> void {
+            treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+        });
     });
 
     _filterModel.setSourceModel(&_model);
@@ -90,10 +113,17 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _recordsAction.setDefaultWidgetFlag(WidgetActionViewWidget::NoGroupBoxInPopupLayout);
     _recordsAction.setPopupSizeHint(QSize(600, 400));
 
+    _loadPluginAction.setEnabled(mv::plugins().getPluginFactory("Logging")->getNumberOfInstances() == 0);
+    _loadPluginAction.setIconByName("plug");
+    _loadPluginAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
+    _loadPluginAction.setToolTip("Load logging plugin");
+
     connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int start, int end) -> void {
         _lastMessageAction.setString(_filterModel.index(end, static_cast<int>(LoggingModel::Column::Message), parent).data(Qt::EditRole).toString());
+    });
 
-        QCoreApplication::processEvents();
+    connect(&_loadPluginAction, &TriggerAction::triggered, this, [this]() -> void {
+        mv::plugins().requestViewPlugin("Logging", nullptr, DockAreaFlag::Bottom);
     });
 }
 
