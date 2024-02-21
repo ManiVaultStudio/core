@@ -36,31 +36,12 @@ public:
      */
     LoggingStatusBarAction(QObject* parent, const QString& title);
 
-    /**
-     * Get tasks model
-     * @return Reference to tasks model
-     */
-    //AbstractTasksModel& getTasksModel();
-
-    /**
-     * Get tasks filter model
-     * @return Reference to tasks filter model
-     */
-    //TasksFilterModel& getTasksFilterModel();
-
-signals:
-
-    /**
-     * Signals that popup force hidden to \p popupForceHidden
-     * @param popupForceHidden Boolean determining whether popup force hidden is on or not
-     */
-    //void popupForceHiddenChanged(bool popupForceHidden);
-
 private:
     LoggingModel        _model;                 /** Model of the tasks model */
     LoggingFilterModel  _filterModel;           /** Filter model of the logging model */
     StringAction        _lastMessageAction;     /** String action displays the last record message from the model (if any) */
     TreeAction          _recordsAction;         /** Tree action which displays the filtered records from the filter model */
+    TriggerAction       _clearRecordsAction;    /** Clears the model records when triggered */
     TriggerAction       _loadPluginAction;      /** Triggers loading the logging plugin */
 };
 

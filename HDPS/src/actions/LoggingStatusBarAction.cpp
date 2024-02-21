@@ -20,16 +20,23 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _filterModel(this),
     _lastMessageAction(this, "Last message"),
     _recordsAction(this, "Records"),
+    _clearRecordsAction(this, "Clear"),
     _loadPluginAction(this, "Plugin")
 {
     setShowLabels(false);
 
     addAction(&_lastMessageAction);
     addAction(&_recordsAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
-        auto toolButton = dynamic_cast<QToolButton*>(widget);
+        _loadPluginAction.setEnabled(mv::plugins().getPluginFactory("Logging")->getNumberOfInstances() == 0);
+        _clearRecordsAction.setEnabled(_filterModel.rowCount() > 0);
 
-        if (toolButton)
-            qDebug() << "toolButton";
+        auto toolButton = widget->findChild<QToolButton*>("ToolButton");
+
+        Q_ASSERT(toolButton != nullptr);
+
+        if (toolButton) {
+            toolButton->setAutoRaise(true);
+        }
 
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
@@ -38,13 +45,12 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
         if (hierarchyWidget == nullptr)
             return;
 
-        //hierarchyWidget->setHeaderHidden(true);
+        hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("scroll"));
 
-        hierarchyWidget->getFilterGroupAction().setVisible(false);
-        hierarchyWidget->getFilterColumnAction().setVisible(false);
+        auto& toolbarAction = hierarchyWidget->getToolbarAction();
 
-        hierarchyWidget->getToolbarAction().addAction(&_loadPluginAction);
-        hierarchyWidget->getFilterColumnAction().addAction(&_loadPluginAction);
+        toolbarAction.addAction(&_clearRecordsAction);
+        toolbarAction.addAction(&_loadPluginAction);
 
         auto treeView = widget->findChild<QTreeView*>("TreeView");
 
@@ -113,6 +119,24 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _recordsAction.setDefaultWidgetFlag(WidgetActionViewWidget::NoGroupBoxInPopupLayout);
     _recordsAction.setPopupSizeHint(QSize(600, 400));
 
+    auto& badge = _recordsAction.getBadge();
+
+    badge.setScale(0.5f);
+
+    const auto updateBadgeNumber = [this, &badge]() -> void {
+        const auto numberOfRecords = _filterModel.rowCount();
+
+        badge.setEnabled(numberOfRecords > 0);
+        badge.setNumber(numberOfRecords);
+    };
+
+    updateBadgeNumber();
+
+    _clearRecordsAction.setEnabled(_filterModel.rowCount() > 0);
+    _clearRecordsAction.setIconByName("trash");
+    _clearRecordsAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
+    _clearRecordsAction.setToolTip("Clear all records");
+
     _loadPluginAction.setEnabled(mv::plugins().getPluginFactory("Logging")->getNumberOfInstances() == 0);
     _loadPluginAction.setIconByName("plug");
     _loadPluginAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
@@ -122,8 +146,18 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
         _lastMessageAction.setString(_filterModel.index(end, static_cast<int>(LoggingModel::Column::Message), parent).data(Qt::EditRole).toString());
     });
 
+    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, updateBadgeNumber);
+    connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, updateBadgeNumber);
+    connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, this, updateBadgeNumber);
+
+    connect(&_clearRecordsAction, &TriggerAction::triggered, this, [this]() -> void {
+        _model.setRowCount(0);
+    });
+
     connect(&_loadPluginAction, &TriggerAction::triggered, this, [this]() -> void {
         mv::plugins().requestViewPlugin("Logging", nullptr, DockAreaFlag::Bottom);
+
+        _loadPluginAction.setEnabled(false);
     });
 }
 
