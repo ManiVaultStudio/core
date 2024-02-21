@@ -13,7 +13,6 @@
 #include <QMenu>
 #include <QGuiApplication>
 #include <QClipboard>
-#include <QAbstractEventDispatcher>
 #include <QMessageBox>
 
 using namespace mv;
@@ -24,7 +23,6 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
     _model(),
     _filterModel(nullptr),
     _hierarchyWidget(this, "Log record", _model, &_filterModel),
-    _idleUpdateConnection(),
     _findLogFileAction(this, "Find log file")
 {
     setAutoFillBackground(true);
@@ -60,8 +58,6 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
-    _idleUpdateConnection = connect(QAbstractEventDispatcher::instance(), &QAbstractEventDispatcher::awake, &_model, &LoggingModel::synchronizeLogRecords);
-
     treeView.setSortingEnabled(true);
     treeView.setRootIsDecorated(false);
     treeView.setColumnHidden(static_cast<int>(LoggingModel::Column::Category), true);
@@ -85,18 +81,20 @@ LoggingWidget::LoggingWidget(QWidget* parent) :
 
         QMenu contextMenu;
 
-        auto* const copyAction = contextMenu.addAction(tr("&Copy"), [this, selectedRows] {
+        auto* copyAction = contextMenu.addAction(tr("&Copy"), [this, selectedRows] {
             QStringList messageRecordsString;
 
             for (const auto& selectedRow : selectedRows) {
-                const auto index            = _filterModel.mapToSource(selectedRows.first());
-                const auto messageRecord    = static_cast<MessageRecord*>(index.internalPointer());
+                const auto index = _filterModel.mapToSource(selectedRow);
+                const auto messageRecord = static_cast<LoggingModel::Item*>(_model.itemFromIndex(index))->getMessageRecord();
 
-                messageRecordsString << messageRecord->toString();
+                messageRecordsString << messageRecord.toString();
             }
-            
+
             QGuiApplication::clipboard()->setText(messageRecordsString.join("\n"));
         });
+
+        copyAction->setIcon(Application::getIconFont("FontAwesome").getIcon("copy"));
         
         contextMenu.exec(QCursor::pos());
     });

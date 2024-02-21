@@ -276,6 +276,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/SplashScreenAction.h
     src/actions/TreeAction.h
     src/actions/LabelProxyAction.h
+    src/actions/LoggingStatusBarAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -294,6 +295,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/SplashScreenAction.cpp
     src/actions/TreeAction.cpp
     src/actions/LabelProxyAction.cpp
+    src/actions/LoggingStatusBarAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES

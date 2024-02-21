@@ -8,6 +8,8 @@
 
 #include <QSortFilterProxyModel>
 
+namespace mv {
+
 /**
  * Logging filter model
  *
@@ -45,3 +47,5 @@ public:
 private:
     mv::gui::OptionsAction    _filterTypeAction;          /** Options action for filtering log record item type */
 };
+
+}

@@ -52,7 +52,7 @@ public:
     static QString getMessageTypeName(QtMsgType);
     static QString GetFilePathName();
     static QString ExceptionToText(const std::exception& stdException);
-        
+
     void initialize();
     MessageRecords& getMessageRecords();
     void updateMessageRecords(MessageRecordPointers& messageRecordPointers);

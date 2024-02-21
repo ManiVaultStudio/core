@@ -47,14 +47,15 @@ public:
 public:
 
     /** Base standard model item class for message record */
-    class Item : public QStandardItem {
+    class Item : public QStandardItem, public QObject {
     public:
 
         /**
          * Construct with \p messageRecord
-         * @param MessageRecord Reference to message record
+         * @param loggingModel Reference to owning logging model
+         * @param messageRecord Reference to message record
          */
-        Item(const util::MessageRecord& messageRecord);
+        Item(LoggingModel& loggingModel, const util::MessageRecord& messageRecord);
 
         /**
          * Get model data for \p role
@@ -63,19 +64,26 @@ public:
         QVariant data(int role = Qt::UserRole + 1) const override;
 
         /**
-         * Get message record
-         * return Reference to message record to display item for
+         * Get logging model
+         * @return Reference to owning logging model
          */
-        util::MessageRecord& getMessageRecord();
+        LoggingModel& getLoggingModel();
+
+        /**
+         * Get logging model
+         * @return Reference to owning logging model
+         */
+        const LoggingModel& getLoggingModel() const;
 
         /**
          * Get message record
-         * return Reference to message record to display item for
+         * @return Reference to message record to display item for
          */
         const util::MessageRecord& getMessageRecord() const;
 
     private:
-        util::MessageRecord&    _messageRecord;   /** Reference to message record to display item for */
+        LoggingModel&                   _loggingModel;      /** Reference to owning logging model */
+        const util::MessageRecord&      _messageRecord;     /** Reference to message record to display item for */
     };
 
     /** Standard model item class for interacting with the message number */
@@ -148,8 +156,12 @@ public:
     class MessageItem final : public Item {
     public:
 
-        /** No need to override base constructor */
-        using Item::Item;
+        /**
+         * Construct with \p messageRecord
+         * @param loggingModel Reference to owning logging model
+         * @param messageRecord Reference to message record
+         */
+        MessageItem(LoggingModel& loggingModel, const util::MessageRecord& messageRecord);
 
         /**
          * Get model data for \p role
@@ -282,10 +294,11 @@ public:
     public:
 
         /**
-         * Construct with \p messageRecord
+         * Construct with reference to owning \p loggingModel and \p messageRecord
+         * @param loggingModel Reference to owning logging model
          * @param MessageRecord Reference to message record
          */
-        Row(const util::MessageRecord& messageRecord);
+        Row(LoggingModel& loggingModel, const util::MessageRecord& messageRecord);
     };
 
 public:
@@ -316,7 +329,9 @@ public:
 
 public: // Action getters
 
-    mv::gui::ToggleAction& getWordWrapAction() { return _wordWrapAction; }
+    gui::ToggleAction& getWordWrapAction() { return _wordWrapAction; }
+    
+    const gui::ToggleAction& getWordWrapAction() const { return _wordWrapAction; }
 
 private:
 
@@ -324,8 +339,9 @@ private:
     void populateFromLogger();
 
 private:
-    std::deque<const mv::util::MessageRecord*>    _messageRecords;    /** Logged message records */
-    mv::gui::ToggleAction                         _wordWrapAction;    /** Action for toggling word wrap */
+    std::deque<const mv::util::MessageRecord*>  _messageRecords;            /** Logged message records */
+    mv::gui::ToggleAction                       _wordWrapAction;            /** Action for toggling word wrap */
+    QMetaObject::Connection                     _idleUpdateConnection;      /** Update the logging widget when idle */
 };
 
 }

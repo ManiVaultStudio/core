@@ -13,6 +13,7 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QStringList>
+#include <QAbstractEventDispatcher>
 
 #include <algorithm>
 #include <cassert>
@@ -26,12 +27,26 @@ namespace mv {
 using namespace util;
 using namespace gui;
 
-mv::util::MessageRecord& LoggingModel::Item::getMessageRecord()
+LoggingModel::Item::Item(LoggingModel& loggingModel, const MessageRecord& messageRecord) :
+    QStandardItem(),
+    QObject(),
+    _loggingModel(loggingModel),
+    _messageRecord(messageRecord)
 {
-    return _messageRecord;
+    setEditable(false);
 }
 
-const mv::util::MessageRecord& LoggingModel::Item::getMessageRecord() const
+LoggingModel& LoggingModel::Item::getLoggingModel()
+{
+    return _loggingModel;
+}
+
+const LoggingModel& LoggingModel::Item::getLoggingModel() const
+{
+    return _loggingModel;
+}
+
+const MessageRecord& LoggingModel::Item::getMessageRecord() const
 {
     return _messageRecord;
 }
@@ -60,7 +75,7 @@ QVariant LoggingModel::Item::data(int role /*= Qt::UserRole + 1*/) const
             break;
     }
 
-    return Item::data(role);
+    return {};
 }
 
 QVariant LoggingModel::NumberItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -101,12 +116,27 @@ QVariant LoggingModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
+LoggingModel::MessageItem::MessageItem(LoggingModel& loggingModel, const util::MessageRecord& messageRecord) :
+    Item(loggingModel, messageRecord)
+{
+    connect(&getLoggingModel().getWordWrapAction(), &ToggleAction::toggled, this, [this](bool toggled) -> void {
+        emitDataChanged();
+    });
+}
+
 QVariant LoggingModel::MessageItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
-        case Qt::DisplayRole:
             return getMessageRecord().message;
+
+        case Qt::DisplayRole:
+        {
+            if (getLoggingModel().getWordWrapAction().isChecked())
+                return QVariant::fromValue(QString(getMessageRecord().message).split("\n").first());
+            else
+                return QVariant::fromValue(QString(getMessageRecord().message));
+        }
 
         case Qt::ToolTipRole:
             return QString("Message: %1").arg(data(Qt::DisplayRole).toString());
@@ -169,32 +199,27 @@ QVariant LoggingModel::CategoryItem::data(int role /*= Qt::UserRole + 1*/) const
     return Item::data(role);
 }
 
-LoggingModel::Row::Row(const util::MessageRecord& messageRecord)
+LoggingModel::Row::Row(LoggingModel& loggingModel, const util::MessageRecord& messageRecord)
 {
-    append(new NumberItem(messageRecord));
-    append(new TypeItem(messageRecord));
-    append(new MessageItem(messageRecord));
-    append(new FileAndLineItem(messageRecord));
-    append(new FunctionItem(messageRecord));
-    append(new CategoryItem(messageRecord));
+    append(new NumberItem(loggingModel, messageRecord));
+    append(new TypeItem(loggingModel, messageRecord));
+    append(new MessageItem(loggingModel, messageRecord));
+    append(new FileAndLineItem(loggingModel, messageRecord));
+    append(new FunctionItem(loggingModel, messageRecord));
+    append(new CategoryItem(loggingModel, messageRecord));
 }
 
 LoggingModel::LoggingModel(QObject* parent /*= nullptr*/) :
     QStandardItemModel(parent),
     _messageRecords(),
-    _wordWrapAction(this, "Word wrap", true)
+    _wordWrapAction(this, "Word wrap", true),
+    _idleUpdateConnection()
 {
     _wordWrapAction.setToolTip("Enables/disables word wrapping");
 
+    _idleUpdateConnection = connect(QAbstractEventDispatcher::instance(), &QAbstractEventDispatcher::awake, this, &LoggingModel::populateFromLogger);
+
     populateFromLogger();
-
-    /*
-    synchronizeLogRecords();
-
-    connect(&_wordWrapAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
-        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
-    });
-    */
 }
 
 QVariant LoggingModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
@@ -237,7 +262,7 @@ void LoggingModel::populateFromLogger()
         logger.updateMessageRecords(_messageRecords);
 
         for (size_t recordIndex = previousNumberOfMessages; recordIndex < (previousNumberOfMessages + numberOfAddedMessages); ++recordIndex)
-            appendRow(Row(*_messageRecords[recordIndex]));
+            appendRow(Row(*this, *_messageRecords[recordIndex]));
     }
 }
 
