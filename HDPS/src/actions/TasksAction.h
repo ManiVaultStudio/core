@@ -21,6 +21,8 @@ namespace mv::gui {
  *
  * Action class for managing tasks
  *
+ * Note: This action is primarily developed for internal use (not meant to be used in third-party plugins)
+ * 
  * @author Thomas Kroes
  */
 class TasksAction : public GroupAction
@@ -56,33 +58,6 @@ public:
      * @param mayLoadTasksPlugin When set to true, adds a trigger action to the toolbar for loading the tasks plugin
      */
     void initialize(AbstractTasksModel* model, TasksFilterModel* filterModel, const QString& itemTypeName, bool mayLoadTasksPlugin = true);
-
-    /**
-     * Set row height to \p rowHeight
-     * @param rowHeight Row height in pixels
-     */
-    //void setRowHeight(std::int32_t rowHeight);
-
-    /** Get row height */
-    //std::int32_t getRowHeight() const;
-
-    /**
-     * Set progress column margin to \p progressColumnMargin
-     * @param progressColumnMargin Progress column margin
-     */
-    //void setProgressColumnMargin(std::int32_t progressColumnMargin);
-
-    /** Get progress column margin */
-    //std::int32_t getProgressColumnMargin() const;
-
-    /**
-     * Set auto hide kill column to \p autoHideKillColumn
-     * @param autoHideKillColumn Boolean determining whether the kill column is automatically hidden when there are no killable tasks
-     */
-    //void setAutoHideKillCollumn(bool autoHideKillColumn);
-
-    /** Get auto hide kill column */
-    //bool getAutoHideKillCollumn() const;
 
 private:
 

@@ -15,6 +15,8 @@ namespace mv::gui {
  *
  * Base status bar action class with popup functionality
  *
+ * Note: This action is primarily developed for internal use (not meant to be used in plugins)
+ * 
  * @author Thomas Kroes
  */
 class StatusBarAction : public WidgetAction

@@ -72,20 +72,10 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     _filterModel.setFilterKeyColumn(static_cast<int>(AbstractTasksModel::Column::Name));
 
     _tasksAction.initialize(&_model, &_filterModel, "Background task");
-    _tasksAction.setPopupSizeHint(QSize(600, 0));
+    _tasksAction.setPopupSizeHint(QSize(1600, 0));
 
-    auto& badge = getBadge();
-
-    badge.setScale(0.5f);
-    badge.setBackgroundColor(qApp->palette().highlight().color());
-
-    const auto numberOfBackgroundTasksChanged = [this, &badge]() -> void {
-        const auto numberOfRecords = _filterModel.rowCount();
-
-        badge.setEnabled(numberOfRecords > 0);
-        badge.setNumber(numberOfRecords);
-
-        setPopupAction(numberOfRecords > 0 ? &_tasksAction : nullptr);
+    const auto numberOfBackgroundTasksChanged = [this]() -> void {
+        setPopupAction(_filterModel.rowCount() > 0 ? &_tasksAction : nullptr);
     };
 
     numberOfBackgroundTasksChanged();

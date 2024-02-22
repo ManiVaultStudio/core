@@ -19,6 +19,8 @@ namespace mv::gui {
  *
  * Horizontal group action class for display of and interaction with background tasks
  *
+ * Note: This action is primarily developed for internal use (not meant to be used in third-party plugins)
+ * 
  * @author Thomas Kroes
  */
 class BackgroundTasksStatusBarAction : public StatusBarAction

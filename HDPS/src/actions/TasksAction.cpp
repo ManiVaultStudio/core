@@ -179,6 +179,7 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
         treeView.setTextElideMode(Qt::ElideMiddle);
         treeView.setItemsExpandable(true);
 
+
         treeViewHeader->setStretchLastSection(false);
 
         treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::Name), QHeaderView::ResizeToContents);
@@ -215,7 +216,15 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
             }
         });
 
-        //connect(tasksAction->getFilterModel(), &QAbstractItemModel::layoutChanged, this, &TasksAction::TreeWidget::updateTreeView);
+        const auto updateTreeView = [this, &treeView]() -> void {
+            treeView.setRootIsDecorated(hasAgregateTasks());
+        };
+
+        updateTreeView();
+
+        connect(_filterModel, &QAbstractItemModel::rowsInserted, widget, updateTreeView);
+        connect(_filterModel, &QAbstractItemModel::rowsRemoved, widget, updateTreeView);
+        connect(_filterModel, &QAbstractItemModel::layoutChanged, widget, updateTreeView);
 
         openPersistentProgressEditorsRecursively(treeView);
     });
@@ -256,40 +265,6 @@ void TasksAction::initialize(AbstractTasksModel* model, TasksFilterModel* filter
     _treeAction.initialize(_model, _filterModel, itemTypeName);
 }
 
-//void TasksAction::setRowHeight(std::int32_t rowHeight)
-//{
-//    _rowHeight = rowHeight;
-//}
-//
-//std::int32_t TasksAction::getRowHeight() const
-//{
-//    return _rowHeight;
-//}
-//
-//void TasksAction::setProgressColumnMargin(std::int32_t progressColumnMargin)
-//{
-//    _progressColumnMargin = progressColumnMargin;
-//}
-//
-//std::int32_t TasksAction::getProgressColumnMargin() const
-//{
-//    return _progressColumnMargin;
-//}
-//
-//void TasksAction::setAutoHideKillCollumn(bool autoHideKillColumn)
-//{
-//    if (autoHideKillColumn == _autoHideKillCollumn)
-//        return;
-//
-//    _autoHideKillCollumn = autoHideKillColumn;
-//
-//    emit autoHideKillCollumnChanged(_autoHideKillCollumn);
-//}
-//
-//bool TasksAction::getAutoHideKillCollumn() const
-//{
-//    return _autoHideKillCollumn;
-//}
 
 void TasksAction::openPersistentProgressEditorsRecursively(QAbstractItemView& itemView, const QModelIndex& parent /*= QModelIndex()*/)
 {
@@ -342,104 +317,4 @@ bool TasksAction::hasAgregateTasks() const
     return !matches.isEmpty();
 }
 
-/*
-
-void TasksAction::TreeWidget::updateTreeView()
-{
-    /*
-    auto& treeView = _tasksWidget.getTreeView();
-
-    //treeView.setRootIsDecorated(_tasksAction->hasAgregateTasks());
-    //treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::ExpandCollapse), !_tasksAction->hasAgregateTasks());
-
-    auto treeViewHeader = treeView.header();
-
-    treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
-
-    if (_tasksAction->getAutoHideKillCollumn())
-        treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Kill), _tasksAction->getTasksFilterModel().match(_tasksAction->getTasksFilterModel().index(0, static_cast<int>(AbstractTasksModel::Column::MayKill)), Qt::EditRole, true).isEmpty());
-    */
 }
-
-
-//TasksAction::PopupWidget::PopupWidget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags) :
-//    WidgetActionWidget(parent, tasksAction, widgetFlags),
-//    _tasksAction(tasksAction)
-//{
-//    setLayout(new QGridLayout());
-//
-//    auto& tasksFilterModel = _tasksAction->getTasksFilterModel();
-//
-//    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &PopupWidget::updateLayout);
-//    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &PopupWidget::updateLayout);
-//
-//    updateLayout();
-//}
-//
-//void TasksAction::PopupWidget::cleanLayout()
-//{
-//    QLayoutItem* item;
-//
-//    while ((item = this->layout()->takeAt(0)) != 0)
-//        delete item;
-//}
-//
-//void TasksAction::PopupWidget::updateLayout()
-//{
-//    auto& tasksFilterModel  = _tasksAction->getTasksFilterModel();
-//    auto& tasksModel        = *dynamic_cast<QStandardItemModel*>(tasksFilterModel.sourceModel());
-//
-//    const auto numberOfTasks = tasksFilterModel.rowCount();
-//
-//    cleanLayout();
-//
-//    QVector<Task*> currentTasks;
-//
-//    auto gridLayout = static_cast<QGridLayout*>(layout());
-//
-//    gridLayout->setColumnStretch(1, 1);
-//
-//    for (int rowIndex = 0; rowIndex < numberOfTasks; ++rowIndex) {
-//        const auto nameSourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name)));
-//        const auto progressSourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Progress)));
-//
-//        if (!nameSourceModelIndex.isValid() || !progressSourceModelIndex.isValid())
-//            continue;
-//
-//        auto nameItem = dynamic_cast<AbstractTasksModel::NameItem*>(tasksModel.itemFromIndex(nameSourceModelIndex));
-//        auto progressItem = dynamic_cast<AbstractTasksModel::ProgressItem*>(tasksModel.itemFromIndex(progressSourceModelIndex));
-//
-//        Q_ASSERT(nameItem != nullptr);
-//        Q_ASSERT(progressItem != nullptr);
-//
-//        if (nameItem == nullptr || progressItem == nullptr)
-//            continue;
-//
-//        currentTasks << progressItem->getTask();
-//
-//        if (!_widgetsMap.contains(progressItem->getTask())) {
-//            auto labelWidget = nameItem->getStringAction().createWidget(this, StringAction::Label);
-//            auto progressWidget = progressItem->getTaskAction().createWidget(this);
-//
-//            progressWidget->setFixedHeight(18);
-//
-//            _widgetsMap[progressItem->getTask()] = { labelWidget, progressWidget };
-//        }
-//
-//        const auto rowCount = gridLayout->rowCount();
-//
-//        gridLayout->addWidget(_widgetsMap[progressItem->getTask()][0], rowCount, 0);
-//        gridLayout->addWidget(_widgetsMap[progressItem->getTask()][1], rowCount, 1);
-//    }
-//
-//    for (auto task : _widgetsMap.keys()) {
-//        if (currentTasks.contains(task))
-//            continue;
-//
-//        for (auto widget : _widgetsMap[task])
-//            delete widget;
-//
-//        _widgetsMap.remove(task);
-//    }
-//}
-//*/

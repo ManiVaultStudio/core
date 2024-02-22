@@ -15,6 +15,8 @@ namespace mv::gui {
  *
  * Action class for reporting status
  *
+ * Note: This action is a WIP
+ * 
  * @author Thomas Kroes
  */
 class StatusAction : public WidgetAction

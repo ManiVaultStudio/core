@@ -19,6 +19,8 @@ namespace mv::gui {
  *
  * Logging action class for display and interaction with logging records
  *
+ * Note: This action is primarily developed for internal use (not meant to be used in third-party plugins)
+ * 
  * @author Thomas Kroes
  */
 class LoggingStatusBarAction : public HorizontalGroupAction
