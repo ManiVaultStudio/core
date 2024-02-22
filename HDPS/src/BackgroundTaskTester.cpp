@@ -69,7 +69,7 @@ BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name)
             "Import file 8",
             "Import file 9",
             "Import file 10"
-            }, 502);
+            }, 3202);
 
         auto childTaskB = addChildTask("Updating ManiVault", {
             "Downloading update 1",
@@ -82,7 +82,7 @@ BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name)
             "Downloading update 8",
             "Downloading update 9",
             "Downloading update 10"
-            }, 850);
+            }, 3850);
 
         eventLoop.exec();
     });

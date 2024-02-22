@@ -15,19 +15,21 @@ namespace mv::gui {
 ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title),
     _barGroupAction(this, "Bar group"),
-    _tasksActions(this, "Tasks")
+    _tasksAction(this, "Tasks")
 {
     setBarAction(&_barGroupAction);
-    setPopupAction(&_tasksActions);
+    setPopupAction(&_tasksAction);
 
     _barGroupAction.setShowLabels(false);
-    _barGroupAction.addAction(&_tasksActions);
+    _barGroupAction.addAction(&_tasksAction);
 
-    auto& tasksFilterModel = _tasksActions.getTasksFilterModel();
+    auto& tasksFilterModel = _tasksAction.getTasksFilterModel();
 
     tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
     tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
     tasksFilterModel.getTopLevelTasksOnlyAction().setChecked(true);
+
+    _tasksAction.setDefaultWidgetFlags(TasksAction::Popup);
 
     /*
     _tasksStatusBarAction.setPopupMode(TasksStatusBarAction::PopupMode::Automatic);

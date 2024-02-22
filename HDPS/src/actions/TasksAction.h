@@ -29,14 +29,14 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        Toolbar     = 0x00001,  /** The widget includes a toolbar for filtering etc. */
-        Overlay     = 0x00002   /** The widget includes a toolbar for filtering etc. */
+        Tree    = 0x00001,      /** Includes a widget that show tasks in a tree */
+        Popup   = 0x00002       /** Includes a widget that is optimized for display in a popup */
     };
 
 public:
 
-    /** Tasks action widget */
-    class Widget : public WidgetActionWidget
+    /** Tasks action tree widget */
+    class TreeWidget : public WidgetActionWidget
     {
     protected:
 
@@ -46,7 +46,7 @@ public:
          * @param tasksAction Pointer to tasks action
          * @param widgetFlags Widget flags for the configuration of the widget (type)
          */
-        Widget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags);
+        TreeWidget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags);
 
     private:
 
@@ -60,6 +60,31 @@ public:
         friend class TasksAction;
     };
 
+    /** Tasks action popup widget */
+    class PopupWidget : public WidgetActionWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param tasksAction Pointer to tasks action
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        PopupWidget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags);
+
+    private:
+
+        void cleanLayout();
+        void updateLayout();
+
+    private:
+        TasksAction*                    _tasksAction;   /** Pointer to owning tasks action */
+        QMap<Task*, QVector<QWidget*>>  _widgetsMap;    /** Maps task to allocated widget */
+
+        friend class TasksAction;
+    };
+
 protected:
 
     /**
@@ -67,9 +92,7 @@ protected:
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new Widget(parent, this, widgetFlags);
-    }
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 
@@ -114,9 +137,6 @@ public:
     bool getAutoHideKillCollumn() const;
 
 private:
-
-    /** Invoked when the filter model layout changes */
-    void filterModelChanged();
 
     /**
      * Open any progress editor which has not been opened yet in the filtered tasks view recursively

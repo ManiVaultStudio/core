@@ -18,13 +18,13 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     StatusBarAction(parent, title),
     _barGroupAction(this, "Bar group"),
     _overallBackgroundTaskAction(this, "Overall background task"),
-    _tasksActions(this, "Background tasks")
+    _tasksAction(this, "Background tasks")
 {
     setBarAction(&_barGroupAction);
-    setPopupAction(&_tasksActions);
 
     _barGroupAction.setShowLabels(false);
     _barGroupAction.addAction(&_overallBackgroundTaskAction);
+    //_barGroupAction.addAction(&_tasksActions);
 
     auto& overallBackgroundTask = BackgroundTask::getGlobalHandler()->getOverallBackgroundTask();
 
@@ -38,11 +38,11 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
         {
             case Task::Status::Undefined:
             case Task::Status::Idle:
-                return "No tasks running in the background";
+                return "No background tasks";
 
             case Task::Status::Running:
             case Task::Status::RunningIndeterminate:
-                return QString("%1 task%2 %3 running in the background %4%").arg(QString::number(numberOfChildTasks), numberOfChildTasks == 1 ? "" : "s", numberOfChildTasks == 1 ? "is" : "are", QString::number(task.getProgress() * 100.f, 'f', 1));
+                return QString("%1 background task%2 %3 %4%").arg(QString::number(numberOfChildTasks), numberOfChildTasks == 1 ? "" : "s", numberOfChildTasks == 1 ? "is" : "are", QString::number(task.getProgress() * 100.f, 'f', 1));
 
             case Task::Status::Finished:
                 return QString("All background tasks have finished");
@@ -63,7 +63,9 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
 
     _overallBackgroundTaskAction.setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
 
-    auto& tasksFilterModel = _tasksActions.getTasksFilterModel();
+    _tasksAction.setDefaultWidgetFlags(TasksAction::Popup);
+
+    auto& tasksFilterModel = _tasksAction.getTasksFilterModel();
 
     tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Background" });
     tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
@@ -73,6 +75,29 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     _tasksStatusBarAction.setPopupMode(TasksStatusBarAction::PopupMode::Hover);
     _tasksStatusBarAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
     */
+
+    auto& filterModel   = _tasksAction.getTasksFilterModel();
+    auto& badge         = getBadge();
+
+    badge.setScale(0.5f);
+    badge.setBackgroundColor(qApp->palette().highlight().color());
+
+    const auto numberOfBackgroundTasksChanged = [this, &filterModel , &badge]() -> void {
+        const auto numberOfRecords = filterModel.rowCount();
+
+        badge.setEnabled(numberOfRecords > 0);
+        badge.setNumber(numberOfRecords);
+
+        setPopupAction(numberOfRecords > 0 ? &_tasksAction : nullptr);
+
+        qDebug() << "===numberOfBackgroundTasksChanged";
+    };
+
+    numberOfBackgroundTasksChanged();
+
+    connect(&filterModel, &QSortFilterProxyModel::rowsInserted, this, numberOfBackgroundTasksChanged);
+    connect(&filterModel, &QSortFilterProxyModel::rowsRemoved, this, numberOfBackgroundTasksChanged);
+    connect(&filterModel, &QSortFilterProxyModel::layoutChanged, this, numberOfBackgroundTasksChanged);
 }
 
 }

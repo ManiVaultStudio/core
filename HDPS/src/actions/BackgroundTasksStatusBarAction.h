@@ -34,12 +34,12 @@ public:
 public: // Action getters
 
     TaskAction& getOverallBackgroundTaskAction() { return _overallBackgroundTaskAction; }
-    TasksAction& getTasksActions() { return _tasksActions; }
+    TasksAction& getTasksActions() { return _tasksAction; }
 
 private:
     HorizontalGroupAction   _barGroupAction;
     TaskAction              _overallBackgroundTaskAction;   /** For showing a task progress action in the status bar */
-    TasksAction             _tasksActions;
+    TasksAction             _tasksAction;
 };
 
 }

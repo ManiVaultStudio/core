@@ -32,7 +32,7 @@ void TasksPlugin::init()
 
     layout->setContentsMargins(6, 6, 6, 6);
 
-    auto tasksWidget = _tasksAction.createWidget(&getWidget(), TasksAction::Toolbar | TasksAction::Overlay);
+    auto tasksWidget = _tasksAction.createWidget(&getWidget());
 
     tasksWidget->layout()->setContentsMargins(0, 0, 0, 0);
 

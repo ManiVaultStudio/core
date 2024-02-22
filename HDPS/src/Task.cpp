@@ -724,6 +724,7 @@ void Task::updateProgress()
     {
         case Status::Undefined:
         case Status::Idle:
+            _progress = 0.f;
             break;
 
         case Status::Running:

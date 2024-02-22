@@ -6,6 +6,8 @@
 
 #include "actions/WidgetAction.h"
 
+#include "widgets/OverlayWidget.h"
+
 namespace mv::gui {
 
 /**
@@ -33,6 +35,20 @@ public:
             StatusBarAction* _statusBarAction;      /** Pointer to owning status bar action */
         };
 
+        class BadgeOverlay : public OverlayWidget {
+        public:
+            BadgeOverlay(QWidget* parent, StatusBarAction* statusBarAction);
+
+            /**
+             * Paint event to override default paint
+             * @param paintEvent Pointer to paint event
+             */
+            void paintEvent(QPaintEvent* paintEvent) override;
+
+        private:
+            StatusBarAction* _statusBarAction;      /** Pointer to owning status bar action */
+        };
+
     protected:
 
         /**
@@ -43,16 +59,11 @@ public:
          */
         Widget(QWidget* parent, StatusBarAction* statusBarAction, const std::int32_t& widgetFlags);
 
-        /**
-         * Paint event to override default paint
-         * @param paintEvent Pointer to paint event
-         */
-        //void paintEvent(QPaintEvent* paintEvent) override;
-
     protected:
         StatusBarAction*    _statusBarAction;      /** Pointer to owning status bar action */
         ToolButton          _toolButton;            
-
+        BadgeOverlay        _badgeOverlay;          
+        
         friend class StatusBarAction;
     };
 
@@ -81,6 +92,15 @@ protected:
 
     WidgetAction* getBarAction();
     WidgetAction* getPopupAction();
+
+signals:
+
+    /**
+     * Signals that the popup action changed from \p previousPopupAction to \p popupAction
+     * @param previousPopupAction Pointer to previous action (maybe nullptr)
+     * @param popupAction Pointer to current action (maybe nullptr)
+     */
+    void popupActionChanged(WidgetAction* previousPopupAction, WidgetAction* popupAction);
 
 private:
     WidgetAction* _barAction;

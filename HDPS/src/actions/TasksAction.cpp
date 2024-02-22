@@ -32,31 +32,16 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
     _progressColumnMargin(0),
     _autoHideKillCollumn(true)
 {
+    setDefaultWidgetFlags(WidgetFlag::Tree);
+    setPopupSizeHint(QSize(600, 0));
+
     _tasksFilterModel.setSourceModel(tasks().getTreeModel());
     _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
-
-    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &TasksAction::filterModelChanged);
-    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &TasksAction::filterModelChanged);
-    connect(&_tasksFilterModel, &QSortFilterProxyModel::layoutChanged, this, &TasksAction::filterModelChanged);
 }
 
 TasksFilterModel& TasksAction::getTasksFilterModel()
 {
     return _tasksFilterModel;
-}
-
-void TasksAction::filterModelChanged()
-{
-    const auto numberOfTasks = _tasksFilterModel.rowCount();
-    qDebug() << __FUNCTION__ << numberOfTasks;
-
-    auto& badge = getBadge();
-
-    badge.setEnabled(numberOfTasks >= 1);
-    badge.setNumber(numberOfTasks);
-    badge.setBackgroundColor(qApp->palette().highlight().color());
-
-    setToolTip(QString("Tasks: %1").arg(QString::number(numberOfTasks)));
 }
 
 void TasksAction::setRowHeight(std::int32_t rowHeight)
@@ -137,6 +122,24 @@ bool TasksAction::hasAgregateTasks() const
     const auto matches = _tasksFilterModel.match(_tasksFilterModel.index(0, static_cast<int>(AbstractTasksModel::Column::ProgressMode)), Qt::EditRole, static_cast<int>(Task::ProgressMode::Aggregate), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
     return !matches.isEmpty();
+}
+
+QWidget* TasksAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+{
+    auto widget = new WidgetActionWidget(parent, this, widgetFlags);
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    if (widgetFlags & WidgetFlag::Tree)
+        layout->addWidget(new TasksAction::TreeWidget(parent, this, widgetFlags));
+
+    if (widgetFlags & WidgetFlag::Popup)
+        layout->addWidget(new TasksAction::PopupWidget(parent, this, widgetFlags));
+
+    widget->setLayout(layout);
+
+    return widget;
 }
 
 /** Tree view item delegate class for showing custom task progress user interface */
@@ -233,10 +236,10 @@ private:
     TasksAction* _tasksAction;
 };
 
-TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags) :
+TasksAction::TreeWidget::TreeWidget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, tasksAction, widgetFlags),
     _tasksAction(tasksAction),
-    _tasksWidget(this, "Task", *tasks().getTreeModel(), &tasksAction->getTasksFilterModel(), widgetFlags & Toolbar, widgetFlags & Overlay)
+    _tasksWidget(this, "Task", *tasks().getTreeModel(), &tasksAction->getTasksFilterModel(), widgetFlags)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));
 
@@ -311,7 +314,7 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
         }
     });
 
-    connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::layoutChanged, this, &TasksAction::Widget::updateTreeView);
+    connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::layoutChanged, this, &TasksAction::TreeWidget::updateTreeView);
 
     updateTreeView();
 
@@ -324,11 +327,11 @@ TasksAction::Widget::Widget(QWidget* parent, TasksAction* tasksAction, const std
     _tasksAction->openPersistentProgressEditorsRecursively(treeView);
 }
 
-void TasksAction::Widget::updateTreeView()
+void TasksAction::TreeWidget::updateTreeView()
 {
     auto& treeView = _tasksWidget.getTreeView();
 
-    treeView.setRootIsDecorated(_tasksAction->hasAgregateTasks());
+    //treeView.setRootIsDecorated(_tasksAction->hasAgregateTasks());
     //treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::ExpandCollapse), !_tasksAction->hasAgregateTasks());
 
     auto treeViewHeader = treeView.header();
@@ -337,6 +340,87 @@ void TasksAction::Widget::updateTreeView()
 
     if (_tasksAction->getAutoHideKillCollumn())
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Kill), _tasksAction->getTasksFilterModel().match(_tasksAction->getTasksFilterModel().index(0, static_cast<int>(AbstractTasksModel::Column::MayKill)), Qt::EditRole, true).isEmpty());
+}
+
+TasksAction::PopupWidget::PopupWidget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, tasksAction, widgetFlags),
+    _tasksAction(tasksAction)
+{
+    setLayout(new QGridLayout());
+
+    auto& tasksFilterModel = _tasksAction->getTasksFilterModel();
+
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &PopupWidget::updateLayout);
+    connect(&tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &PopupWidget::updateLayout);
+
+    updateLayout();
+}
+
+void TasksAction::PopupWidget::cleanLayout()
+{
+    QLayoutItem* item;
+
+    while ((item = this->layout()->takeAt(0)) != 0)
+        delete item;
+}
+
+void TasksAction::PopupWidget::updateLayout()
+{
+    auto& tasksFilterModel  = _tasksAction->getTasksFilterModel();
+    auto& tasksModel        = *dynamic_cast<QStandardItemModel*>(tasksFilterModel.sourceModel());
+
+    const auto numberOfTasks = tasksFilterModel.rowCount();
+
+    cleanLayout();
+
+    QVector<Task*> currentTasks;
+
+    auto gridLayout = static_cast<QGridLayout*>(layout());
+
+    gridLayout->setColumnStretch(1, 1);
+
+    for (int rowIndex = 0; rowIndex < numberOfTasks; ++rowIndex) {
+        const auto nameSourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Name)));
+        const auto progressSourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Progress)));
+
+        if (!nameSourceModelIndex.isValid() || !progressSourceModelIndex.isValid())
+            continue;
+
+        auto nameItem = dynamic_cast<AbstractTasksModel::NameItem*>(tasksModel.itemFromIndex(nameSourceModelIndex));
+        auto progressItem = dynamic_cast<AbstractTasksModel::ProgressItem*>(tasksModel.itemFromIndex(progressSourceModelIndex));
+
+        Q_ASSERT(nameItem != nullptr);
+        Q_ASSERT(progressItem != nullptr);
+
+        if (nameItem == nullptr || progressItem == nullptr)
+            continue;
+
+        currentTasks << progressItem->getTask();
+
+        if (!_widgetsMap.contains(progressItem->getTask())) {
+            auto labelWidget = nameItem->getStringAction().createWidget(this, StringAction::Label);
+            auto progressWidget = progressItem->getTaskAction().createWidget(this);
+
+            progressWidget->setFixedHeight(18);
+
+            _widgetsMap[progressItem->getTask()] = { labelWidget, progressWidget };
+        }
+
+        const auto rowCount = gridLayout->rowCount();
+
+        gridLayout->addWidget(_widgetsMap[progressItem->getTask()][0], rowCount, 0);
+        gridLayout->addWidget(_widgetsMap[progressItem->getTask()][1], rowCount, 1);
+    }
+
+    for (auto task : _widgetsMap.keys()) {
+        if (currentTasks.contains(task))
+            continue;
+
+        for (auto widget : _widgetsMap[task])
+            delete widget;
+
+        _widgetsMap.remove(task);
+    }
 }
 
 }

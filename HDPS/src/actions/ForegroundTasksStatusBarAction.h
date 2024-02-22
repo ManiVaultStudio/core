@@ -31,7 +31,7 @@ public:
 
 private:
     HorizontalGroupAction   _barGroupAction;
-    TasksAction             _tasksActions;
+    TasksAction             _tasksAction;
 };
 
 }
