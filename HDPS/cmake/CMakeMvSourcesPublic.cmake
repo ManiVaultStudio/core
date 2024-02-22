@@ -731,6 +731,25 @@ set(PUBLIC_LOGGING_MODEL_FILES
     ${PUBLIC_LOGGING_MODEL_SOURCES}
 )
 
+set(PUBLIC_TASKS_MODEL_HEADERS
+    src/models/AbstractTasksModel.h
+    src/models/TasksTreeModel.h
+    src/models/TasksListModel.h
+    src/models/TasksFilterModel.h
+)
+
+set(PUBLIC_TASKS_MODEL_SOURCES
+    src/models/AbstractTasksModel.cpp
+    src/models/TasksTreeModel.cpp
+    src/models/TasksListModel.cpp
+    src/models/TasksFilterModel.cpp
+)
+
+set(PUBLIC_TASKS_MODEL_FILES
+    ${PUBLIC_TASKS_MODEL_HEADERS}
+    ${PUBLIC_TASKS_MODEL_SOURCES}
+)
+
 set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/GlobalSettingsGroupAction.h
     src/ParametersSettingsAction.h
@@ -772,11 +791,6 @@ set(PUBLIC_TASK_HEADERS
 	src/ForegroundTaskHandler.h
     src/DatasetTask.h
     src/DatasetTaskHandler.h
-    src/AbstractTasksModel.h
-    src/TasksTreeModel.h
-    src/TasksListModel.h
-    src/TasksFilterModel.h
-    src/TasksPopupWidget.h
 )
 
 set(PUBLIC_TASK_SOURCES
@@ -795,11 +809,6 @@ set(PUBLIC_TASK_SOURCES
 	src/ForegroundTaskHandler.cpp
     src/DatasetTask.cpp
 	src/DatasetTaskHandler.cpp
-    src/AbstractTasksModel.cpp
-    src/TasksTreeModel.cpp
-    src/TasksListModel.cpp
-    src/TasksFilterModel.cpp
-    src/TasksPopupWidget.cpp
 )
 
 set(PUBLIC_TASK_FILES
@@ -840,6 +849,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_RAW_DATA_MODEL_HEADERS}
 	${PUBLIC_SELECTIONS_MODEL_HEADERS}
 	${PUBLIC_LOGGING_MODEL_HEADERS}
+	${PUBLIC_TASKS_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
 )
@@ -876,6 +886,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_RAW_DATA_MODEL_SOURCES}
 	${PUBLIC_SELECTIONS_MODEL_SOURCES}
 	${PUBLIC_LOGGING_MODEL_SOURCES}
+	${PUBLIC_TASKS_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
     ${PUBLIC_HEADERS}
@@ -914,5 +925,6 @@ source_group(Model\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_MODEL_FILES})
 source_group(Model\\RawData FILES ${PUBLIC_RAW_DATA_MODEL_FILES})
 source_group(Model\\Selections FILES ${PUBLIC_SELECTIONS_MODEL_FILES})
 source_group(Model\\Logging FILES ${PUBLIC_LOGGING_MODEL_FILES})
+source_group(Model\\Tasks FILES ${PUBLIC_TASKS_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})
