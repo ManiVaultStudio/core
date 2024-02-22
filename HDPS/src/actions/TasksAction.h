@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include <actions/WidgetAction.h>
+#include "actions/WidgetAction.h"
 
-#include "TasksFilterModel.h"
+#include "models/TasksFilterModel.h"
 
-#include <widgets/HierarchyWidget.h>
+#include "widgets/HierarchyWidget.h"
 
 #include <QPixmap>
 

@@ -5,9 +5,10 @@
 #pragma once
 
 #include "AbstractManager.h"
-#include "TasksTreeModel.h"
-#include "TasksListModel.h"
 #include "Task.h"
+
+#include "models/TasksTreeModel.h"
+#include "models/TasksListModel.h"
 
 #ifdef _DEBUG
     #define ABSTRACT_TASK_MANAGER_VERBOSE

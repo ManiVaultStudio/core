@@ -5,7 +5,8 @@
 #pragma once
 
 #include "AbstractTaskHandler.h"
-#include "TasksFilterModel.h"
+
+#include "models/TasksFilterModel.h"
 
 #include "actions/TasksAction.h"
 

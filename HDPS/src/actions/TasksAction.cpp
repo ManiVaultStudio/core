@@ -3,16 +3,17 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "TasksAction.h"
-#include "TasksTreeModel.h"
 
-#include <CoreInterface.h>
-#include <AbstractTaskManager.h>
+#include "CoreInterface.h"
+#include "AbstractTaskManager.h"
 
-#include <actions/TaskAction.h>
-#include <actions/ProgressAction.h>
-#include <actions/TriggerAction.h>
+#include "actions/TaskAction.h"
+#include "actions/ProgressAction.h"
+#include "actions/TriggerAction.h"
 
-#include <util/Icon.h>
+#include "models/TasksTreeModel.h"
+
+#include "util/Icon.h"
 
 #include <QStyledItemDelegate>
 #include <QStyleOptionButton>

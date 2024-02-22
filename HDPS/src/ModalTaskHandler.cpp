@@ -3,11 +3,11 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ModalTaskHandler.h"
-#include "TasksTreeModel.h"
 #include "ModalTask.h"
 #include "Application.h"
-
 #include "CoreInterface.h"
+
+#include "models/TasksTreeModel.h"
 
 #include <QMainWindow>
 

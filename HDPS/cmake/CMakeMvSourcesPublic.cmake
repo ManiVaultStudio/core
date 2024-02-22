@@ -306,7 +306,6 @@ set(PUBLIC_STATUS_BAR_ACTIONS_HEADERS
     src/actions/LoggingStatusBarAction.h
     src/actions/BackgroundTasksStatusBarAction.h
     src/actions/ForegroundTasksStatusBarAction.h
-    src/actions/TasksStatusBarAction.h
 )
 
 set(PUBLIC_STATUS_BAR_ACTIONS_SOURCES
@@ -314,7 +313,6 @@ set(PUBLIC_STATUS_BAR_ACTIONS_SOURCES
     src/actions/LoggingStatusBarAction.cpp
     src/actions/BackgroundTasksStatusBarAction.cpp
     src/actions/ForegroundTasksStatusBarAction.cpp
-    src/actions/TasksStatusBarAction.cpp
 )
 
 set(PUBLIC_STATUS_BAR_ACTIONS_FILES
