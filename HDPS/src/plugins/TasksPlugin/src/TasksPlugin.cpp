@@ -19,8 +19,14 @@ using namespace mv::util;
 
 TasksPlugin::TasksPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
+    _model(),
+    _filterModel(),
     _tasksAction(this, "Tasks")
 {
+    _filterModel.setSourceModel(&_model);
+
+    _tasksAction.initialize(&_model, &_filterModel);
+
     AbstractTaskTester::registerTester("mv::ModalTaskTester");
     AbstractTaskTester::registerTester("mv::BackgroundTaskTester");
     AbstractTaskTester::registerTester("mv::ForegroundTaskTester");

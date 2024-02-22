@@ -4,7 +4,9 @@
 
 #pragma once
 
-#include "actions/WidgetAction.h"
+#include "actions/GroupAction.h"
+#include "actions/TreeAction.h"
+#include "actions/TriggerAction.h"
 
 #include "models/TasksFilterModel.h"
 
@@ -21,78 +23,9 @@ namespace mv::gui {
  *
  * @author Thomas Kroes
  */
-class TasksAction : public WidgetAction
+class TasksAction : public GroupAction
 {
     Q_OBJECT
-
-public:
-
-    /** Describes the widget flags */
-    enum WidgetFlag {
-        Tree    = 0x00001,      /** Includes a widget that show tasks in a tree */
-        Popup   = 0x00002       /** Includes a widget that is optimized for display in a popup */
-    };
-
-public:
-
-    /** Tasks action tree widget */
-    class TreeWidget : public WidgetActionWidget
-    {
-    protected:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         * @param tasksAction Pointer to tasks action
-         * @param widgetFlags Widget flags for the configuration of the widget (type)
-         */
-        TreeWidget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags);
-
-    private:
-
-        /** Updates the tree view in response to changes in the tasks filter model */
-        void updateTreeView();
-
-    private:
-        TasksAction*        _tasksAction;   /** Pointer to owning tasks action */
-        HierarchyWidget     _tasksWidget;   /** Show the tasks in a hierarchy widget */
-
-        friend class TasksAction;
-    };
-
-    /** Tasks action popup widget */
-    //class PopupWidget : public WidgetActionWidget
-    //{
-    //protected:
-
-    //    /**
-    //     * Constructor
-    //     * @param parent Pointer to parent widget
-    //     * @param tasksAction Pointer to tasks action
-    //     * @param widgetFlags Widget flags for the configuration of the widget (type)
-    //     */
-    //    PopupWidget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags);
-
-    //private:
-
-    //    void cleanLayout();
-    //    void updateLayout();
-
-    //private:
-    //    TasksAction*                    _tasksAction;   /** Pointer to owning tasks action */
-    //    QMap<Task*, QVector<QWidget*>>  _widgetsMap;    /** Maps task to allocated widget */
-
-    //    friend class TasksAction;
-    //};
-
-protected:
-
-    /**
-     * Get widget representation of the color action
-     * @param parent Pointer to parent widget
-     * @param widgetFlags Widget flags for the configuration of the widget (type)
-     */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 
@@ -180,14 +113,10 @@ signals:
     void autoHideKillCollumnChanged(bool autoHideKillCollumn);
 
 private:
-    AbstractTasksModel*     _model;         /** Tasks model */
-    TasksFilterModel*       _filterModel;   /** Filter model for tasks model */
-    //QPixmap             _tasksIconPixmap;       /** Tasks icon pixmap underlay (count badge will be drawn on top) */
-    //std::int32_t        _rowHeight;             /** Row height in pixels */
-    //std::int32_t        _progressColumnMargin;  /** Progress column margin */
-    //bool                _autoHideKillCollumn;   /** When true, the kill column is automatically hidden when there are no killable tasks */
-
-    static const QSize tasksIconPixmapSize;
+    AbstractTasksModel*     _model;                     /** Tasks model */
+    TasksFilterModel*       _filterModel;               /** Filter model for tasks model */
+    TreeAction              _treeAction;                /** Action to displays the tasks */
+    TriggerAction           _loadTasksPluginAction;     /** Triggers loading the tasks plugin */
 };
 
 }

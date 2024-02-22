@@ -39,16 +39,12 @@ public:
      * @param parent Pointer to parent object
      */
     AbstractTaskManager(QObject* parent = nullptr) :
-        AbstractManager(parent, "Tasks"),
-        _tasksTreeModel(nullptr),
-        _tasksListModel(nullptr)
+        AbstractManager(parent, "Tasks")
     {
     }
 
     /** Perform manager startup initialization */
     void initialize() override {
-        _tasksTreeModel = new TasksTreeModel(this);
-        _tasksListModel = new TasksListModel(this);
     }
 
     /**
@@ -71,30 +67,6 @@ public:
         });
 
         return tasks;
-    }
-
-public: // Model getters
-
-    /**
-     * Get tasks tree model
-     * @return Reference to tasks tree model instance
-     */
-    TasksTreeModel* getTreeModel() {
-        if (_tasksTreeModel == nullptr)
-            throw std::runtime_error("Tasks tree model not initialized");
-
-        return _tasksTreeModel;
-    }
-
-    /**
-     * Get tasks list model
-     * @return Pointer to tasks list model instance
-     */
-    TasksListModel* getListModel() {
-        if (_tasksListModel == nullptr)
-            throw std::runtime_error("Tasks list model not initialized");
-
-        return _tasksListModel;
     }
 
 protected:
@@ -130,10 +102,6 @@ signals:
      * @param taskId Globally unique identifier of the task which is removed
      */
     void taskRemoved(const QString& taskId);
-
-private:
-    TasksTreeModel* _tasksTreeModel;    /** Tasks tree model instance */
-    TasksListModel* _tasksListModel;    /** Tasks list model instance */
 
     friend class Task;
 };

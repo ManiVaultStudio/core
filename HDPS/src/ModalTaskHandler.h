@@ -6,6 +6,7 @@
 
 #include "AbstractTaskHandler.h"
 
+#include "models/TasksListModel.h"
 #include "models/TasksFilterModel.h"
 
 #include "actions/TasksAction.h"
@@ -66,12 +67,18 @@ public:
      * @return Pointer to status bar widget action
      */
     gui::WidgetAction* getStatusBarAction() override { return nullptr; }
-    
+
     /**
-     * Get tasks filter model
-     * @return Reference to the tasks filter model which filters the tasks tree model instance
+     * Get the tasks model
+     * @return Reference to the tasks model
      */
-    TasksFilterModel& getTasksFilterModel();
+    TasksListModel& getModel();
+
+    /**
+     * Get the tasks filter model
+     * @return Reference to the tasks filter model
+     */
+    TasksFilterModel& getFilterModel();
 
 private:
 
@@ -79,7 +86,8 @@ private:
     void updateDialogVisibility();
 
 private:
-    TasksFilterModel    _tasksFilterModel;      /** Filter model for the tasks model */
+    TasksListModel      _model;                 /** Tasks model */
+    TasksFilterModel    _filterModel;           /** Filter model for the tasks model */
     ModalTasksDialog    _modalTasksDialog;      /** Modal tasks dialog */
     QTimer              _minimumDurationTimer;  /** Wait for a small amount of time before showing the UI */
 };

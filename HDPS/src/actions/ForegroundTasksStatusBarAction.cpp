@@ -30,7 +30,6 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     _filterModel.getTopLevelTasksOnlyAction().setChecked(true);
 
     _tasksAction.initialize(&_model, &_filterModel);
-    _tasksAction.setDefaultWidgetFlags(TasksAction::Popup);
 
     /*
     _tasksStatusBarAction.setPopupMode(TasksStatusBarAction::PopupMode::Automatic);

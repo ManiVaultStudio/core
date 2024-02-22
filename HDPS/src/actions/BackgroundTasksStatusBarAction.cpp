@@ -26,7 +26,6 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
 
     _barGroupAction.setShowLabels(false);
     _barGroupAction.addAction(&_overallBackgroundTaskAction);
-    //_barGroupAction.addAction(&_tasksActions);
 
     auto& overallBackgroundTask = BackgroundTask::getGlobalHandler()->getOverallBackgroundTask();
 
@@ -65,14 +64,15 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
 
     _overallBackgroundTaskAction.setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
 
-    _filterModel.setSourceModel(tasks().getTreeModel());
+    _filterModel.setSourceModel(&_model);
 
     _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Background" });
-    _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
+    _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Aborting" });
     _filterModel.getParentTaskFilterAction().setString(overallBackgroundTask.getId());
+    _filterModel.setFilterKeyColumn(static_cast<int>(AbstractTasksModel::Column::Name));
 
     _tasksAction.initialize(&_model, &_filterModel);
-    _tasksAction.setDefaultWidgetFlags(TasksAction::Popup);
+    _tasksAction.setPopupSizeHint(QSize(600, 0));
 
     auto& badge = getBadge();
 

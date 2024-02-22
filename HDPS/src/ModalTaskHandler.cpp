@@ -21,13 +21,14 @@ using namespace gui;
 
 ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),
-    _tasksFilterModel(),
+    _model(),
+    _filterModel(),
     _modalTasksDialog(this)
 {
     setMinimumDuration(0);
     setEnabled(false);
 
-    _tasksFilterModel.setSourceModel(tasks().getTreeModel());
+    _filterModel.setSourceModel(&_model);
 
     _minimumDurationTimer.setSingleShot(true);
     
@@ -39,8 +40,8 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
     connect(this, &AbstractTaskHandler::minimumDurationChanged, this, updateMinimumDurationTimer);
 
-    _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished", "Aborting" });
-    _tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Modal" });
+    _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished", "Aborting" });
+    _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Modal" });
 
     const auto updateVisibilityDeferred = [this]() -> void {
         if (_modalTasksDialog.isHidden()) {
@@ -54,12 +55,12 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
     connect(&_minimumDurationTimer, &QTimer::timeout, this, &ModalTaskHandler::updateDialogVisibility);
 
-    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this, updateVisibilityDeferred](const QModelIndex& parent, int first, int last) -> void {
+    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, [this, updateVisibilityDeferred](const QModelIndex& parent, int first, int last) -> void {
         if (parent == QModelIndex())
             updateVisibilityDeferred();
     });
 
-    connect(&_tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, [this, updateVisibilityDeferred](const QModelIndex& parent, int first, int last) -> void {
+    connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, [this, updateVisibilityDeferred](const QModelIndex& parent, int first, int last) -> void {
         if (parent == QModelIndex())
             updateVisibilityDeferred();
     });
@@ -70,7 +71,7 @@ void ModalTaskHandler::updateDialogVisibility()
     if (!getEnabled())
         return;
 
-    const auto numberOfModalTasks = getTasksFilterModel().rowCount();
+    const auto numberOfModalTasks = getFilterModel().rowCount();
 
 #ifdef MODAL_TASK_HANDLER_VERBOSE
     qDebug() << __FUNCTION__ << numberOfModalTasks;
@@ -89,9 +90,14 @@ void ModalTaskHandler::updateDialogVisibility()
     QCoreApplication::processEvents();
 }
 
-TasksFilterModel& ModalTaskHandler::getTasksFilterModel()
+TasksListModel& ModalTaskHandler::getModel()
 {
-    return _tasksFilterModel;
+    return _model;
+}
+
+TasksFilterModel& ModalTaskHandler::getFilterModel()
+{
+    return _filterModel;
 }
 
 ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTaskHandler, QWidget* parent /*= nullptr*/) :
@@ -111,7 +117,7 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
 
     setLayout(new QGridLayout());
     
-    auto& tasksFilterModel = _modalTaskHandler->getTasksFilterModel();
+    auto& tasksFilterModel = _modalTaskHandler->getFilterModel();
 
     connect(&tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) -> void {
         if (parent == QModelIndex())
@@ -131,7 +137,7 @@ void ModalTaskHandler::ModalTasksDialog::updateLayout()
 {
     updateWindowTitleAndIcon();
 
-    auto& tasksFilterModel = _modalTaskHandler->getTasksFilterModel();
+    auto& tasksFilterModel = _modalTaskHandler->getFilterModel();
 
     const auto numberOfModalTasks = tasksFilterModel.rowCount();
 
@@ -145,7 +151,7 @@ void ModalTaskHandler::ModalTasksDialog::updateLayout()
         if (!sourceModelIndex.isValid())
             continue;
 
-        auto progressItem = dynamic_cast<AbstractTasksModel::ProgressItem*>(tasks().getTreeModel()->itemFromIndex(sourceModelIndex));
+        auto progressItem = dynamic_cast<AbstractTasksModel::ProgressItem*>(_modalTaskHandler->getModel().itemFromIndex(sourceModelIndex));
 
         Q_ASSERT(progressItem != nullptr);
 
@@ -198,7 +204,7 @@ void ModalTaskHandler::ModalTasksDialog::cleanLayout()
 
 void ModalTaskHandler::ModalTasksDialog::updateWindowTitleAndIcon()
 {
-    auto& tasksFilterModel = _modalTaskHandler->getTasksFilterModel();
+    auto& tasksFilterModel = _modalTaskHandler->getFilterModel();
 
     const auto numberOfModalTasks = tasksFilterModel.rowCount();
 
@@ -206,7 +212,7 @@ void ModalTaskHandler::ModalTasksDialog::updateWindowTitleAndIcon()
 
     if (numberOfModalTasks == 1) {
         const auto sourceModelIndex = tasksFilterModel.mapToSource(tasksFilterModel.index(0, 0));
-        const auto item             = dynamic_cast<AbstractTasksModel::Item*>(tasks().getTreeModel()->itemFromIndex(sourceModelIndex));
+        const auto item             = dynamic_cast<AbstractTasksModel::Item*>(_modalTaskHandler->getModel().itemFromIndex(sourceModelIndex));
         const auto task             = item->getTask();
         const auto taskName         = task->getName();
         const auto taskIcon         = task->getIcon();
