@@ -5,11 +5,12 @@
 #pragma once
 
 #include "AbstractTaskHandler.h"
-#include "TasksStatusBarAction.h"
-
-#include "actions/HorizontalGroupAction.h"
 
 namespace mv {
+
+namespace gui {
+    class ForegroundTasksStatusBarAction;
+}
 
 /**
  * Foreground task handler class
@@ -32,15 +33,10 @@ public:
      * Get status bar action
      * @return Pointer to status bar widget action
      */
-    gui::WidgetAction* getStatusBarAction() override { return &_statusBarAction; }
-
-public: // Action getters
-
-    gui::TasksStatusBarAction& getTasksStatusBarAction() { return _tasksStatusBarAction; }
+    gui::WidgetAction* getStatusBarAction() override;
 
 private:
-    gui::TasksStatusBarAction   _tasksStatusBarAction;
-    gui::HorizontalGroupAction  _statusBarAction;
+    gui::ForegroundTasksStatusBarAction*     _statusBarAction;   /** Lazily initialized status bar action for the foreground tasks */
 };
 
 }

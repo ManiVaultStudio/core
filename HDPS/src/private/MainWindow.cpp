@@ -20,6 +20,8 @@
 
 #include <actions/ToggleAction.h>
 #include <actions/LoggingStatusBarAction.h>
+#include <actions/BackgroundTasksStatusBarAction.h>
+#include <actions/ForegroundTasksStatusBarAction.h>
 
 #include <QDebug>
 #include <QMessageBox>
@@ -92,9 +94,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         statusBar()->setSizeGripEnabled(false);
 
-        statusBar()->insertPermanentWidget(0, new QWidget(this), 3);
-
-        auto loggingStatusBarAction = new LoggingStatusBarAction(this, "Logging");
+        auto loggingStatusBarAction         = new LoggingStatusBarAction(this, "Logging");
 
         statusBar()->insertPermanentWidget(0, loggingStatusBarAction->createWidget(this), 3);
         statusBar()->insertPermanentWidget(1, BackgroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this), 2);

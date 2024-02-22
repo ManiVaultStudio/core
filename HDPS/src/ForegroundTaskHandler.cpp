@@ -3,41 +3,25 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ForegroundTaskHandler.h"
-#include "TasksTreeModel.h"
-#include "Application.h"
-#include "CoreInterface.h"
 
-using namespace mv::gui;
+#include "actions/ForegroundTasksStatusBarAction.h"
 
 namespace mv {
 
+using namespace gui;
+
 ForegroundTaskHandler::ForegroundTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),
-    _tasksStatusBarAction(*tasks().getTreeModel(), this, "Foreground Tasks", Application::getIconFont("FontAwesome").getIcon("tasks"), TasksStatusBarAction::PopupMode::Automatic, Task::GuiScope::Foreground),
-    _statusBarAction(this, "Status Bar Group")
+    _statusBarAction(nullptr)
 {
-    _tasksStatusBarAction.setPopupMode(TasksStatusBarAction::PopupMode::Automatic);
-    _tasksStatusBarAction.getMenu().addAction(&settings().getTasksSettingsAction().getHideForegroundTasksPopupAction());
+}
 
-    _statusBarAction.addAction(&_tasksStatusBarAction);
-    _statusBarAction.setShowLabels(false);
+mv::gui::WidgetAction* ForegroundTaskHandler::getStatusBarAction()
+{
+    if (!_statusBarAction)
+        _statusBarAction = new ForegroundTasksStatusBarAction(this, "Status bar");
 
-    auto& tasksFilterModel = _tasksStatusBarAction.getTasksFilterModel();
-
-    tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
-    tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
-    tasksFilterModel.getTopLevelTasksOnlyAction().setChecked(true);
-
-    const auto hideForegroundTasksPopupChanged = [this]() -> void {
-        const auto hideForegroundTasksPopup = settings().getTasksSettingsAction().getHideForegroundTasksPopupAction().isChecked();
-
-        _tasksStatusBarAction.setPopupMode(hideForegroundTasksPopup ? TasksStatusBarAction::PopupMode::Hover : TasksStatusBarAction::PopupMode::Automatic);
-        _tasksStatusBarAction.setPopupForceHidden(hideForegroundTasksPopup);
-    };
-
-    hideForegroundTasksPopupChanged();
-
-    connect(&settings().getTasksSettingsAction().getHideForegroundTasksPopupAction(), &ToggleAction::toggled, this, hideForegroundTasksPopupChanged);
+    return _statusBarAction;
 }
 
 }

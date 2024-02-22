@@ -30,14 +30,6 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
         _loadPluginAction.setEnabled(mv::plugins().getPluginFactory("Logging")->getNumberOfInstances() == 0);
         _clearRecordsAction.setEnabled(_filterModel.rowCount() > 0);
 
-        auto toolButton = widget->findChild<QToolButton*>("ToolButton");
-
-        Q_ASSERT(toolButton != nullptr);
-
-        if (toolButton) {
-            toolButton->setAutoRaise(true);
-        }
-
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
         Q_ASSERT(hierarchyWidget != nullptr);
@@ -117,11 +109,13 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _recordsAction.initialize(&_model, &_filterModel, "Log record");
     _recordsAction.setDefaultWidgetFlag(WidgetActionViewWidget::NoGroupBoxInPopupLayout);
+    _recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
     _recordsAction.setPopupSizeHint(QSize(600, 400));
 
     auto& badge = _recordsAction.getBadge();
 
     badge.setScale(0.5f);
+    badge.setBackgroundColor(qApp->palette().highlight().color());
 
     const auto updateBadgeNumber = [this, &badge]() -> void {
         const auto numberOfRecords = _filterModel.rowCount();
@@ -138,7 +132,7 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _clearRecordsAction.setToolTip("Clear all records");
 
     _loadPluginAction.setEnabled(mv::plugins().getPluginFactory("Logging")->getNumberOfInstances() == 0);
-    _loadPluginAction.setIconByName("plug");
+    _loadPluginAction.setIconByName("window-maximize");
     _loadPluginAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
     _loadPluginAction.setToolTip("Load logging plugin");
 
@@ -152,6 +146,7 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
 
     connect(&_clearRecordsAction, &TriggerAction::triggered, this, [this]() -> void {
         _model.setRowCount(0);
+        _lastMessageAction.setString("");
     });
 
     connect(&_loadPluginAction, &TriggerAction::triggered, this, [this]() -> void {

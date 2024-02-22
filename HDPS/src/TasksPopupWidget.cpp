@@ -3,11 +3,12 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "TasksPopupWidget.h"
-#include "TasksStatusBarAction.h"
 #include "Application.h"
 #include "CoreInterface.h"
 
 #include "util/Icon.h"
+
+#include "actions/TasksStatusBarAction.h"
 
 #include <QPainter>
 #include <QMainWindow>
