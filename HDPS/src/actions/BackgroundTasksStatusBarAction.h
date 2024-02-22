@@ -9,6 +9,9 @@
 #include "actions/TaskAction.h"
 #include "actions/TasksAction.h"
 
+#include "models/TasksListModel.h"
+#include "models/TasksFilterModel.h"
+
 namespace mv::gui {
 
 /**
@@ -39,6 +42,8 @@ public: // Action getters
 private:
     HorizontalGroupAction   _barGroupAction;
     TaskAction              _overallBackgroundTaskAction;   /** For showing a task progress action in the status bar */
+    TasksListModel          _model;
+    TasksFilterModel        _filterModel;
     TasksAction             _tasksAction;
 };
 

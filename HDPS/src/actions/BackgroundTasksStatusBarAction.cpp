@@ -18,6 +18,8 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     StatusBarAction(parent, title),
     _barGroupAction(this, "Bar group"),
     _overallBackgroundTaskAction(this, "Overall background task"),
+    _model(),
+    _filterModel(),
     _tasksAction(this, "Background tasks")
 {
     setBarAction(&_barGroupAction);
@@ -63,41 +65,34 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
 
     _overallBackgroundTaskAction.setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
 
+    _filterModel.setSourceModel(tasks().getTreeModel());
+
+    _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Background" });
+    _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
+    _filterModel.getParentTaskFilterAction().setString(overallBackgroundTask.getId());
+
+    _tasksAction.initialize(&_model, &_filterModel);
     _tasksAction.setDefaultWidgetFlags(TasksAction::Popup);
 
-    auto& tasksFilterModel = _tasksAction.getTasksFilterModel();
-
-    tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Background" });
-    tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
-    tasksFilterModel.getParentTaskFilterAction().setString(overallBackgroundTask.getId());
-
-    /*
-    _tasksStatusBarAction.setPopupMode(TasksStatusBarAction::PopupMode::Hover);
-    _tasksStatusBarAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
-    */
-
-    auto& filterModel   = _tasksAction.getTasksFilterModel();
-    auto& badge         = getBadge();
+    auto& badge = getBadge();
 
     badge.setScale(0.5f);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    const auto numberOfBackgroundTasksChanged = [this, &filterModel , &badge]() -> void {
-        const auto numberOfRecords = filterModel.rowCount();
+    const auto numberOfBackgroundTasksChanged = [this, &badge]() -> void {
+        const auto numberOfRecords = _filterModel.rowCount();
 
         badge.setEnabled(numberOfRecords > 0);
         badge.setNumber(numberOfRecords);
 
         setPopupAction(numberOfRecords > 0 ? &_tasksAction : nullptr);
-
-        qDebug() << "===numberOfBackgroundTasksChanged";
     };
 
     numberOfBackgroundTasksChanged();
 
-    connect(&filterModel, &QSortFilterProxyModel::rowsInserted, this, numberOfBackgroundTasksChanged);
-    connect(&filterModel, &QSortFilterProxyModel::rowsRemoved, this, numberOfBackgroundTasksChanged);
-    connect(&filterModel, &QSortFilterProxyModel::layoutChanged, this, numberOfBackgroundTasksChanged);
+    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, numberOfBackgroundTasksChanged);
+    connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, numberOfBackgroundTasksChanged);
+    connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, this, numberOfBackgroundTasksChanged);
 }
 
 }

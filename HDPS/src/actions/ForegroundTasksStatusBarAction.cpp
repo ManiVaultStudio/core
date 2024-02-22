@@ -15,6 +15,8 @@ namespace mv::gui {
 ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title),
     _barGroupAction(this, "Bar group"),
+    _model(),
+    _filterModel(),
     _tasksAction(this, "Tasks")
 {
     setBarAction(&_barGroupAction);
@@ -23,12 +25,11 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     _barGroupAction.setShowLabels(false);
     _barGroupAction.addAction(&_tasksAction);
 
-    auto& tasksFilterModel = _tasksAction.getTasksFilterModel();
+    _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
+    _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
+    _filterModel.getTopLevelTasksOnlyAction().setChecked(true);
 
-    tasksFilterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
-    tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
-    tasksFilterModel.getTopLevelTasksOnlyAction().setChecked(true);
-
+    _tasksAction.initialize(&_model, &_filterModel);
     _tasksAction.setDefaultWidgetFlags(TasksAction::Popup);
 
     /*
@@ -37,9 +38,7 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
 
     _statusBarAction.addAction(&_tasksStatusBarAction);
     _statusBarAction.setShowLabels(false);
-    */
 
-    /*
     const auto hideForegroundTasksPopupChanged = [this]() -> void {
         const auto hideForegroundTasksPopup = settings().getTasksSettingsAction().getHideForegroundTasksPopupAction().isChecked();
 

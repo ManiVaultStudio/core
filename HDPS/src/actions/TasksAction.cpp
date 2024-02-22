@@ -27,63 +27,80 @@ const QSize TasksAction::tasksIconPixmapSize = QSize(64, 64);
 
 TasksAction::TasksAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
-    _tasksFilterModel(this),
-    _tasksIconPixmap(),
-    _rowHeight(20),
-    _progressColumnMargin(0),
-    _autoHideKillCollumn(true)
+    _model(nullptr),
+    _filterModel(nullptr)//,
+    //_tasksIconPixmap(),
+    //_rowHeight(20),
+    //_progressColumnMargin(0),
+    //_autoHideKillCollumn(true)
 {
     setDefaultWidgetFlags(WidgetFlag::Tree);
     setPopupSizeHint(QSize(600, 0));
-
-    _tasksFilterModel.setSourceModel(tasks().getTreeModel());
-    _tasksFilterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished" });
 }
 
-TasksFilterModel& TasksAction::getTasksFilterModel()
+AbstractTasksModel* TasksAction::getModel()
 {
-    return _tasksFilterModel;
+    return _model;
 }
 
-void TasksAction::setRowHeight(std::int32_t rowHeight)
+TasksFilterModel* TasksAction::getFilterModel()
 {
-    _rowHeight = rowHeight;
+    return _filterModel;
 }
 
-std::int32_t TasksAction::getRowHeight() const
+void TasksAction::initialize(AbstractTasksModel* model, TasksFilterModel* filterModel)
 {
-    return _rowHeight;
-}
+    Q_ASSERT(model);
+    Q_ASSERT(filterModel);
 
-void TasksAction::setProgressColumnMargin(std::int32_t progressColumnMargin)
-{
-    _progressColumnMargin = progressColumnMargin;
-}
-
-std::int32_t TasksAction::getProgressColumnMargin() const
-{
-    return _progressColumnMargin;
-}
-
-void TasksAction::setAutoHideKillCollumn(bool autoHideKillColumn)
-{
-    if (autoHideKillColumn == _autoHideKillCollumn)
+    if (!model || !filterModel)
         return;
 
-    _autoHideKillCollumn = autoHideKillColumn;
-
-    emit autoHideKillCollumnChanged(_autoHideKillCollumn);
+    _model          = _model;
+    _filterModel    = filterModel;
 }
 
-bool TasksAction::getAutoHideKillCollumn() const
-{
-    return _autoHideKillCollumn;
-}
+//void TasksAction::setRowHeight(std::int32_t rowHeight)
+//{
+//    _rowHeight = rowHeight;
+//}
+//
+//std::int32_t TasksAction::getRowHeight() const
+//{
+//    return _rowHeight;
+//}
+//
+//void TasksAction::setProgressColumnMargin(std::int32_t progressColumnMargin)
+//{
+//    _progressColumnMargin = progressColumnMargin;
+//}
+//
+//std::int32_t TasksAction::getProgressColumnMargin() const
+//{
+//    return _progressColumnMargin;
+//}
+//
+//void TasksAction::setAutoHideKillCollumn(bool autoHideKillColumn)
+//{
+//    if (autoHideKillColumn == _autoHideKillCollumn)
+//        return;
+//
+//    _autoHideKillCollumn = autoHideKillColumn;
+//
+//    emit autoHideKillCollumnChanged(_autoHideKillCollumn);
+//}
+//
+//bool TasksAction::getAutoHideKillCollumn() const
+//{
+//    return _autoHideKillCollumn;
+//}
 
 void TasksAction::openPersistentProgressEditorsRecursively(QAbstractItemView& itemView, const QModelIndex& parent /*= QModelIndex()*/)
 {
-    for (int rowIndex = 0; rowIndex < _tasksFilterModel.rowCount(parent); ++rowIndex) {
-        const auto index = _tasksFilterModel.index(rowIndex, 0, parent);
+    Q_ASSERT(_filterModel);
+
+    for (int rowIndex = 0; rowIndex < _filterModel->rowCount(parent); ++rowIndex) {
+        const auto index = _filterModel->index(rowIndex, 0, parent);
 
         const auto persistentEditorsIndexes = QModelIndexList({
             index.siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)),
@@ -94,15 +111,17 @@ void TasksAction::openPersistentProgressEditorsRecursively(QAbstractItemView& it
             if (!itemView.isPersistentEditorOpen(persistentEditorIndex))
                 itemView.openPersistentEditor(persistentEditorIndex);
 
-        if (_tasksFilterModel.hasChildren(index))
+        if (_filterModel->hasChildren(index))
             openPersistentProgressEditorsRecursively(itemView, index);
     }
 }
 
 void TasksAction::closePersistentProgressEditorsRecursively(QAbstractItemView& itemView, const QModelIndex& parent /*= QModelIndex()*/)
 {
-    for (int rowIndex = 0; rowIndex < _tasksFilterModel.rowCount(parent); ++rowIndex) {
-        const auto index = _tasksFilterModel.index(rowIndex, 0, parent);
+    Q_ASSERT(_filterModel);
+
+    for (int rowIndex = 0; rowIndex < _filterModel->rowCount(parent); ++rowIndex) {
+        const auto index = _filterModel->index(rowIndex, 0, parent);
 
         const auto persistentEditorsIndexes = QModelIndexList({
             index.siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)),
@@ -113,14 +132,16 @@ void TasksAction::closePersistentProgressEditorsRecursively(QAbstractItemView& i
             if (itemView.isPersistentEditorOpen(persistentEditorIndex))
                 itemView.closePersistentEditor(persistentEditorIndex);
 
-        if (_tasksFilterModel.hasChildren(index))
+        if (_filterModel->hasChildren(index))
             closePersistentProgressEditorsRecursively(itemView, index);
     }
 }
 
 bool TasksAction::hasAgregateTasks() const
 {
-    const auto matches = _tasksFilterModel.match(_tasksFilterModel.index(0, static_cast<int>(AbstractTasksModel::Column::ProgressMode)), Qt::EditRole, static_cast<int>(Task::ProgressMode::Aggregate), -1, Qt::MatchExactly | Qt::MatchRecursive);
+    Q_ASSERT(_filterModel);
+
+    const auto matches = _filterModel->match(_filterModel->index(0, static_cast<int>(AbstractTasksModel::Column::ProgressMode)), Qt::EditRole, static_cast<int>(Task::ProgressMode::Aggregate), -1, Qt::MatchExactly | Qt::MatchRecursive);
 
     return !matches.isEmpty();
 }
@@ -135,8 +156,8 @@ QWidget* TasksAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
     if (widgetFlags & WidgetFlag::Tree)
         layout->addWidget(new TasksAction::TreeWidget(parent, this, widgetFlags));
 
-    if (widgetFlags & WidgetFlag::Popup)
-        layout->addWidget(new TasksAction::PopupWidget(parent, this, widgetFlags));
+    //if (widgetFlags & WidgetFlag::Popup)
+    //    layout->addWidget(new TasksAction::PopupWidget(parent, this, widgetFlags));
 
     widget->setLayout(layout);
 
@@ -178,7 +199,7 @@ private:
      * @return Pointer to progress action
      */
     ProgressAction* getProgressAction(const QModelIndex& index) const {
-        auto item = tasks().getTreeModel()->itemFromIndex(_tasksAction->getTasksFilterModel().mapToSource(index).siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)));
+        auto item = tasks().getTreeModel()->itemFromIndex(_tasksAction->getFilterModel()->mapToSource(index).siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)));
 
         if (item == nullptr)
             return nullptr;
@@ -225,7 +246,7 @@ private:
      * @return Pointer to task killer action
      */
     TriggerAction* getKillTaskAction(const QModelIndex& index) const {
-        auto item = tasks().getTreeModel()->itemFromIndex(_tasksAction->getTasksFilterModel().mapToSource(index).siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)));
+        auto item = tasks().getTreeModel()->itemFromIndex(_tasksAction->getFilterModel()->mapToSource(index).siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)));
 
         if (item == nullptr)
             return nullptr;
@@ -240,18 +261,21 @@ private:
 TasksAction::TreeWidget::TreeWidget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, tasksAction, widgetFlags),
     _tasksAction(tasksAction),
-    _tasksWidget(this, "Task", *tasks().getTreeModel(), &tasksAction->getTasksFilterModel(), widgetFlags)
+    _tasksWidget(this, "Task", *tasksAction->getModel(), tasksAction->getFilterModel(), widgetFlags)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("check"));
 
     _tasksWidget.setObjectName("HierarchyWidget");
     _tasksWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("tasks"));
-    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskTypeFilterAction());
-    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskScopeFilterAction());
-    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTaskStatusFilterAction());
-    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getTopLevelTasksOnlyAction());
-    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getHideDisabledTasksFilterAction());
-    _tasksWidget.getFilterGroupAction().addAction(&tasksAction->getTasksFilterModel().getHideHiddenTasksFilterAction());
+
+    auto filterModel = tasksAction->getFilterModel();
+
+    _tasksWidget.getFilterGroupAction().addAction(&filterModel->getTaskTypeFilterAction());
+    _tasksWidget.getFilterGroupAction().addAction(&filterModel->getTaskScopeFilterAction());
+    _tasksWidget.getFilterGroupAction().addAction(&filterModel->getTaskStatusFilterAction());
+    _tasksWidget.getFilterGroupAction().addAction(&filterModel->getTopLevelTasksOnlyAction());
+    _tasksWidget.getFilterGroupAction().addAction(&filterModel->getHideDisabledTasksFilterAction());
+    _tasksWidget.getFilterGroupAction().addAction(&filterModel->getHideHiddenTasksFilterAction());
     _tasksWidget.setHeaderHidden(false);
 
     _tasksWidget.getFilterColumnAction().setCurrentText("Name");
@@ -294,15 +318,15 @@ TasksAction::TreeWidget::TreeWidget(QWidget* parent, TasksAction* tasksAction, c
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::MayKill), QHeaderView::ResizeToContents);
     treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractTasksModel::Column::Kill), QHeaderView::ResizeToContents);
 
-    connect(&tasksAction->getTasksFilterModel(), &QSortFilterProxyModel::rowsInserted, this, [this]() -> void {
+    connect(tasksAction->getFilterModel(), &QSortFilterProxyModel::rowsInserted, this, [this]() -> void {
         _tasksAction->openPersistentProgressEditorsRecursively(_tasksWidget.getTreeView());
 
         QCoreApplication::processEvents();
     });
 
-    connect(&tasksAction->getTasksFilterModel(), &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
+    connect(tasksAction->getFilterModel(), &QSortFilterProxyModel::rowsAboutToBeRemoved, this, [this](const QModelIndex& parent, int first, int last) -> void {
         for (int rowIndex = first; rowIndex <= last; rowIndex++) {
-            const auto index = _tasksAction->getTasksFilterModel().index(rowIndex, 0, parent);
+            const auto index = _tasksAction->getFilterModel()->index(rowIndex, 0, parent);
 
             const auto persistentEditorsIndexes = QModelIndexList({
                 index.siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)),
@@ -315,7 +339,7 @@ TasksAction::TreeWidget::TreeWidget(QWidget* parent, TasksAction* tasksAction, c
         }
     });
 
-    connect(&tasksAction->getTasksFilterModel(), &QAbstractItemModel::layoutChanged, this, &TasksAction::TreeWidget::updateTreeView);
+    connect(tasksAction->getFilterModel(), &QAbstractItemModel::layoutChanged, this, &TasksAction::TreeWidget::updateTreeView);
 
     updateTreeView();
 
@@ -330,6 +354,7 @@ TasksAction::TreeWidget::TreeWidget(QWidget* parent, TasksAction* tasksAction, c
 
 void TasksAction::TreeWidget::updateTreeView()
 {
+    /*
     auto& treeView = _tasksWidget.getTreeView();
 
     //treeView.setRootIsDecorated(_tasksAction->hasAgregateTasks());
@@ -341,8 +366,10 @@ void TasksAction::TreeWidget::updateTreeView()
 
     if (_tasksAction->getAutoHideKillCollumn())
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Kill), _tasksAction->getTasksFilterModel().match(_tasksAction->getTasksFilterModel().index(0, static_cast<int>(AbstractTasksModel::Column::MayKill)), Qt::EditRole, true).isEmpty());
+    */
 }
 
+/*
 TasksAction::PopupWidget::PopupWidget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, tasksAction, widgetFlags),
     _tasksAction(tasksAction)
@@ -423,5 +450,6 @@ void TasksAction::PopupWidget::updateLayout()
         _widgetsMap.remove(task);
     }
 }
+*/
 
 }

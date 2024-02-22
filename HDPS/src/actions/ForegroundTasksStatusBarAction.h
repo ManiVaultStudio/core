@@ -7,6 +7,9 @@
 #include "actions/StatusBarAction.h"
 #include "actions/TasksAction.h"
 
+#include "models/TasksListModel.h"
+#include "models/TasksFilterModel.h"
+
 namespace mv::gui {
 
 /**
@@ -31,6 +34,8 @@ public:
 
 private:
     HorizontalGroupAction   _barGroupAction;
+    TasksListModel          _model;
+    TasksFilterModel        _filterModel;
     TasksAction             _tasksAction;
 };
 

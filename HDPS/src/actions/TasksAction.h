@@ -61,29 +61,29 @@ public:
     };
 
     /** Tasks action popup widget */
-    class PopupWidget : public WidgetActionWidget
-    {
-    protected:
+    //class PopupWidget : public WidgetActionWidget
+    //{
+    //protected:
 
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         * @param tasksAction Pointer to tasks action
-         * @param widgetFlags Widget flags for the configuration of the widget (type)
-         */
-        PopupWidget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags);
+    //    /**
+    //     * Constructor
+    //     * @param parent Pointer to parent widget
+    //     * @param tasksAction Pointer to tasks action
+    //     * @param widgetFlags Widget flags for the configuration of the widget (type)
+    //     */
+    //    PopupWidget(QWidget* parent, TasksAction* tasksAction, const std::int32_t& widgetFlags);
 
-    private:
+    //private:
 
-        void cleanLayout();
-        void updateLayout();
+    //    void cleanLayout();
+    //    void updateLayout();
 
-    private:
-        TasksAction*                    _tasksAction;   /** Pointer to owning tasks action */
-        QMap<Task*, QVector<QWidget*>>  _widgetsMap;    /** Maps task to allocated widget */
+    //private:
+    //    TasksAction*                    _tasksAction;   /** Pointer to owning tasks action */
+    //    QMap<Task*, QVector<QWidget*>>  _widgetsMap;    /** Maps task to allocated widget */
 
-        friend class TasksAction;
-    };
+    //    friend class TasksAction;
+    //};
 
 protected:
 
@@ -104,37 +104,50 @@ public:
     Q_INVOKABLE TasksAction(QObject* parent, const QString& title);
 
     /**
-     * Get tasks filter model
-     * @return Reference to the task filter model
+     * Get tasks model
+     * @return Pointer to the tasks model
      */
-    TasksFilterModel& getTasksFilterModel();
+    AbstractTasksModel* getModel();
+
+    /**
+     * Get tasks filter model
+     * @return Pointer to the tasks filter model
+     */
+    TasksFilterModel* getFilterModel();
+
+    /**
+     * Initialize the action with pointers to tasks \p model and \p filterModel
+     * @param model Pointer to the tasks model
+     * @param filterModel Pointer to the tasks filter model
+     */
+    void initialize(AbstractTasksModel* model, TasksFilterModel* filterModel);
 
     /**
      * Set row height to \p rowHeight
      * @param rowHeight Row height in pixels
      */
-    void setRowHeight(std::int32_t rowHeight);
+    //void setRowHeight(std::int32_t rowHeight);
 
     /** Get row height */
-    std::int32_t getRowHeight() const;
+    //std::int32_t getRowHeight() const;
 
     /**
      * Set progress column margin to \p progressColumnMargin
      * @param progressColumnMargin Progress column margin
      */
-    void setProgressColumnMargin(std::int32_t progressColumnMargin);
+    //void setProgressColumnMargin(std::int32_t progressColumnMargin);
 
     /** Get progress column margin */
-    std::int32_t getProgressColumnMargin() const;
+    //std::int32_t getProgressColumnMargin() const;
 
     /**
      * Set auto hide kill column to \p autoHideKillColumn
      * @param autoHideKillColumn Boolean determining whether the kill column is automatically hidden when there are no killable tasks
      */
-    void setAutoHideKillCollumn(bool autoHideKillColumn);
+    //void setAutoHideKillCollumn(bool autoHideKillColumn);
 
     /** Get auto hide kill column */
-    bool getAutoHideKillCollumn() const;
+    //bool getAutoHideKillCollumn() const;
 
 private:
 
@@ -167,11 +180,12 @@ signals:
     void autoHideKillCollumnChanged(bool autoHideKillCollumn);
 
 private:
-    TasksFilterModel    _tasksFilterModel;      /** Filter model for tasks */
-    QPixmap             _tasksIconPixmap;       /** Tasks icon pixmap underlay (count badge will be drawn on top) */
-    std::int32_t        _rowHeight;             /** Row height in pixels */
-    std::int32_t        _progressColumnMargin;  /** Progress column margin */
-    bool                _autoHideKillCollumn;   /** When true, the kill column is automatically hidden when there are no killable tasks */
+    AbstractTasksModel*     _model;         /** Tasks model */
+    TasksFilterModel*       _filterModel;   /** Filter model for tasks model */
+    //QPixmap             _tasksIconPixmap;       /** Tasks icon pixmap underlay (count badge will be drawn on top) */
+    //std::int32_t        _rowHeight;             /** Row height in pixels */
+    //std::int32_t        _progressColumnMargin;  /** Progress column margin */
+    //bool                _autoHideKillCollumn;   /** When true, the kill column is automatically hidden when there are no killable tasks */
 
     static const QSize tasksIconPixmapSize;
 };
