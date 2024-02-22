@@ -25,7 +25,7 @@ TasksPlugin::TasksPlugin(const PluginFactory* factory) :
 {
     _filterModel.setSourceModel(&_model);
 
-    _tasksAction.initialize(&_model, &_filterModel);
+    _tasksAction.initialize(&_model, &_filterModel, "Task", false);
 
     AbstractTaskTester::registerTester("mv::ModalTaskTester");
     AbstractTaskTester::registerTester("mv::BackgroundTaskTester");

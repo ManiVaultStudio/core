@@ -121,12 +121,24 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
     _model(nullptr),
     _filterModel(nullptr),
     _treeAction(this, "Tasks"),
+    _mayLoadTasksPlugin(true),
     _loadTasksPluginAction(this, "Plugin")
 {
+    setShowLabels(false);
+
     addAction(&_treeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
+        Q_ASSERT(widget);
+
+        if (!widget)
+            return;
+
+        widget->layout()->setContentsMargins(0, 0, 0, 0);
+
+        _loadTasksPluginAction.setEnabled(mv::plugins().getPluginFactory("Tasks")->getNumberOfInstances() == 0);
+
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
-        Q_ASSERT(hierarchyWidget != nullptr);
+        Q_ASSERT(hierarchyWidget);
 
         if (hierarchyWidget == nullptr)
             return;
@@ -141,7 +153,9 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
         hierarchyWidget->getFilterGroupAction().addAction(&_filterModel->getHideHiddenTasksFilterAction());
 
         hierarchyWidget->setHeaderHidden(false);
-        hierarchyWidget->getToolbarAction().addAction(&_loadTasksPluginAction);
+
+        if (_mayLoadTasksPlugin)
+            hierarchyWidget->getToolbarAction().addAction(&_loadTasksPluginAction);
 
         auto& treeView = hierarchyWidget->getTreeView();
 
@@ -206,10 +220,15 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
         openPersistentProgressEditorsRecursively(treeView);
     });
 
-    _loadTasksPluginAction.setEnabled(mv::plugins().getPluginFactory("Tasks")->getNumberOfInstances() == 0);
     _loadTasksPluginAction.setIconByName("window-maximize");
     _loadTasksPluginAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
     _loadTasksPluginAction.setToolTip("Load tasks plugin");
+
+    connect(&_loadTasksPluginAction, &TriggerAction::triggered, this, [this]() -> void {
+        mv::plugins().requestViewPlugin("Tasks", nullptr, DockAreaFlag::Bottom);
+
+        _loadTasksPluginAction.setEnabled(false);
+    });
 }
 
 AbstractTasksModel* TasksAction::getModel()
@@ -222,7 +241,7 @@ TasksFilterModel* TasksAction::getFilterModel()
     return _filterModel;
 }
 
-void TasksAction::initialize(AbstractTasksModel* model, TasksFilterModel* filterModel)
+void TasksAction::initialize(AbstractTasksModel* model, TasksFilterModel* filterModel, const QString& itemTypeName, bool mayLoadTasksPlugin /*= true*/)
 {
     Q_ASSERT(model);
     Q_ASSERT(filterModel);
@@ -230,8 +249,11 @@ void TasksAction::initialize(AbstractTasksModel* model, TasksFilterModel* filter
     if (!model || !filterModel)
         return;
 
-    _model          = model;
-    _filterModel    = filterModel;
+    _model              = model;
+    _filterModel        = filterModel;
+    _mayLoadTasksPlugin = mayLoadTasksPlugin;
+
+    _treeAction.initialize(_model, _filterModel, itemTypeName);
 }
 
 //void TasksAction::setRowHeight(std::int32_t rowHeight)

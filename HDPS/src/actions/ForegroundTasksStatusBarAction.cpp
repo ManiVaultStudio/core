@@ -29,7 +29,7 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
     _filterModel.getTopLevelTasksOnlyAction().setChecked(true);
 
-    _tasksAction.initialize(&_model, &_filterModel);
+    _tasksAction.initialize(&_model, &_filterModel, "Foreground");
 
     /*
     _tasksStatusBarAction.setPopupMode(TasksStatusBarAction::PopupMode::Automatic);

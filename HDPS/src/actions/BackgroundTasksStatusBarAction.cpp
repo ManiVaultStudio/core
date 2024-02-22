@@ -71,7 +71,7 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     _filterModel.getParentTaskFilterAction().setString(overallBackgroundTask.getId());
     _filterModel.setFilterKeyColumn(static_cast<int>(AbstractTasksModel::Column::Name));
 
-    _tasksAction.initialize(&_model, &_filterModel);
+    _tasksAction.initialize(&_model, &_filterModel, "Background task");
     _tasksAction.setPopupSizeHint(QSize(600, 0));
 
     auto& badge = getBadge();

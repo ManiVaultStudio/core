@@ -52,8 +52,10 @@ public:
      * Initialize the action with pointers to tasks \p model and \p filterModel
      * @param model Pointer to the tasks model
      * @param filterModel Pointer to the tasks filter model
+     * @param itemTypeName Item type name string
+     * @param mayLoadTasksPlugin When set to true, adds a trigger action to the toolbar for loading the tasks plugin
      */
-    void initialize(AbstractTasksModel* model, TasksFilterModel* filterModel);
+    void initialize(AbstractTasksModel* model, TasksFilterModel* filterModel, const QString& itemTypeName, bool mayLoadTasksPlugin = true);
 
     /**
      * Set row height to \p rowHeight
@@ -116,6 +118,7 @@ private:
     AbstractTasksModel*     _model;                     /** Tasks model */
     TasksFilterModel*       _filterModel;               /** Filter model for tasks model */
     TreeAction              _treeAction;                /** Action to displays the tasks */
+    bool                    _mayLoadTasksPlugin;        /** When set to true, adds a trigger action to the toolbar for loading the tasks plugin */
     TriggerAction           _loadTasksPluginAction;     /** Triggers loading the tasks plugin */
 };
 
