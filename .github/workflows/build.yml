@@ -44,13 +44,13 @@ jobs:
             build-os: Linux
             build-libcxx: libstdc++
 
-          - name: Macos_xcode14.2
-            os: macos-13
+          - name: Macos_xcode13.4
+            os: macos-12
             build-compiler: apple-clang
-            build-cversion: "13.1"
+            build-cversion: 13
             build-config: Release
             build-os: Macos
-            build-xcode-version: 14.2
+            build-xcode-version: 13.4
             build-libcxx: libc++
 
     steps:
