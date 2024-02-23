@@ -8,6 +8,8 @@
 
 #include "widgets/OverlayWidget.h"
 
+#include <QToolButton>
+
 namespace mv::gui {
 
 /**

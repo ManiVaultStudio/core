@@ -260,6 +260,7 @@ set(PUBLIC_TOOLBAR_ACTIONS_FILES
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
+	src/actions/Actions.h
     src/actions/DatasetPickerAction.h
     src/actions/ImageAction.h
     src/actions/PixelSelectionAction.h
