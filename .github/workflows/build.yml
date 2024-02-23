@@ -34,7 +34,7 @@ jobs:
             build-runtime: MD
             build-config: Release
 
-          - name: Linux_gcc10
+          - name: Linux_gcc11
             os: ubuntu-22.04
             build-cc: gcc
             build-cxx: g++
