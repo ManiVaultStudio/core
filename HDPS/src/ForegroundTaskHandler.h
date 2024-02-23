@@ -8,10 +8,6 @@
 
 namespace mv {
 
-namespace gui {
-    class ForegroundTasksStatusBarAction;
-}
-
 /**
  * Foreground task handler class
  *
@@ -28,15 +24,6 @@ public:
     * @param parent Pointer to parent object
     */
     ForegroundTaskHandler(QObject* parent);
-
-    /**
-     * Get status bar action
-     * @return Pointer to status bar widget action
-     */
-    gui::WidgetAction* getStatusBarAction() override;
-
-private:
-    gui::ForegroundTasksStatusBarAction*     _statusBarAction;   /** Lazily initialized status bar action for the foreground tasks */
 };
 
 }

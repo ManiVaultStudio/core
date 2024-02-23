@@ -19,11 +19,12 @@
 #include <BackgroundTaskHandler.h>
 
 #include <actions/ToggleAction.h>
-#include <actions/ManiVaultVersionStatusBarAction.h>
-#include <actions/PluginsStatusBarAction.h>
-#include <actions/LoggingStatusBarAction.h>
-#include <actions/BackgroundTasksStatusBarAction.h>
-#include <actions/ForegroundTasksStatusBarAction.h>
+
+#include "ManiVaultVersionStatusBarAction.h"
+#include "PluginsStatusBarAction.h"
+#include "LoggingStatusBarAction.h"
+#include "BackgroundTasksStatusBarAction.h"
+#include "ForegroundTasksStatusBarAction.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -99,12 +100,14 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         auto versionStatusBarAction         = new ManiVaultVersionStatusBarAction(this, "Version");
         auto pluginsStatusBarAction         = new PluginsStatusBarAction(this, "Plugins");
         auto loggingStatusBarAction         = new LoggingStatusBarAction(this, "Logging");
+        auto backgroundTasksStatusBarAction = new BackgroundTasksStatusBarAction(this, "Background Tasks");
+        auto foregroundTasksStatusBarAction = new ForegroundTasksStatusBarAction(this, "Background Tasks");
 
         statusBar()->insertPermanentWidget(0, versionStatusBarAction->createWidget(this));
         statusBar()->insertPermanentWidget(1, pluginsStatusBarAction->createWidget(this));
-        statusBar()->insertPermanentWidget(2, loggingStatusBarAction->createWidget(this), 3);
-        statusBar()->insertPermanentWidget(3, BackgroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this), 2);
-        statusBar()->insertPermanentWidget(4, ForegroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this));
+        statusBar()->insertPermanentWidget(2, loggingStatusBarAction->createWidget(this), 4);
+        statusBar()->insertPermanentWidget(3, backgroundTasksStatusBarAction->createWidget(this), 2);
+        statusBar()->insertPermanentWidget(4, foregroundTasksStatusBarAction->createWidget(this));
 
         const auto projectChanged = [this]() -> void {
             if (!projects().hasProject()) {

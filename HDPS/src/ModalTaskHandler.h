@@ -63,12 +63,6 @@ public:
     ModalTaskHandler(QObject* parent);
 
     /**
-     * Get status bar action
-     * @return Pointer to status bar widget action
-     */
-    gui::WidgetAction* getStatusBarAction() override { return nullptr; }
-
-    /**
      * Get the tasks model
      * @return Reference to the tasks model
      */

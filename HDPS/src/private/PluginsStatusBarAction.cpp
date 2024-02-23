@@ -5,10 +5,10 @@
 #include "PluginsStatusBarAction.h"
 
 #ifdef _DEBUG
-    #define LOGGING_STATUS_BAR_ACTION_VERBOSE
+    #define PLUGINS_STATUS_BAR_ACTION_VERBOSE
 #endif
 
-namespace mv::gui {
+using namespace mv::gui;
 
 PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title),
@@ -150,6 +150,4 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
 
     //    _loadPluginAction.setEnabled(false);
     //});
-}
-
 }

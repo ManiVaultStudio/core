@@ -312,12 +312,6 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WidgetActionMimeData.h
     src/actions/WidgetActionHighlightWidget.h
     src/actions/WidgetActionBadge.h
-	src/actions/StatusBarAction.h
-    src/actions/LoggingStatusBarAction.h
-    src/actions/BackgroundTasksStatusBarAction.h
-    src/actions/ForegroundTasksStatusBarAction.h
-    src/actions/PluginsStatusBarAction.h
-    src/actions/ManiVaultVersionStatusBarAction.h
 	src/actions/TasksAction.h
 	src/actions/SplashScreenAction.h
 	src/actions/RecentFilesAction.h
@@ -338,12 +332,6 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/WidgetActionMimeData.cpp
     src/actions/WidgetActionHighlightWidget.cpp
     src/actions/WidgetActionBadge.cpp
-	src/actions/StatusBarAction.cpp
-    src/actions/LoggingStatusBarAction.cpp
-    src/actions/BackgroundTasksStatusBarAction.cpp
-    src/actions/ForegroundTasksStatusBarAction.cpp
-    src/actions/PluginsStatusBarAction.cpp
-    src/actions/ManiVaultVersionStatusBarAction.cpp
 	src/actions/TasksAction.cpp
 	src/actions/SplashScreenAction.cpp
 	src/actions/RecentFilesAction.cpp

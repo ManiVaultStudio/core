@@ -4,24 +4,11 @@
 
 #include "ForegroundTaskHandler.h"
 
-#include "actions/ForegroundTasksStatusBarAction.h"
-
 namespace mv {
 
-using namespace gui;
-
 ForegroundTaskHandler::ForegroundTaskHandler(QObject* parent) :
-    AbstractTaskHandler(parent, nullptr),
-    _statusBarAction(nullptr)
+    AbstractTaskHandler(parent, nullptr)
 {
-}
-
-mv::gui::WidgetAction* ForegroundTaskHandler::getStatusBarAction()
-{
-    if (!_statusBarAction)
-        _statusBarAction = new ForegroundTasksStatusBarAction(this, "Status bar");
-
-    return _statusBarAction;
 }
 
 }

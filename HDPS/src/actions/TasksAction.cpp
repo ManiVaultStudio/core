@@ -127,6 +127,7 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
 {
     setShowLabels(false);
     setIconByName("tasks");
+    setDefaultWidgetFlag(NoMargins);
 
     addAction(&_treeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
         Q_ASSERT(widget);

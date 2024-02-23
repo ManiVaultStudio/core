@@ -4,25 +4,12 @@
 
 #include "BackgroundTaskHandler.h"
 
-#include "actions/BackgroundTasksStatusBarAction.h"
-
 namespace mv {
-
-using namespace gui;
 
 BackgroundTaskHandler::BackgroundTaskHandler(QObject* parent) :
     AbstractTaskHandler(parent, nullptr),
-    _overallBackgroundTask(this, "Background tasks", false),
-    _statusBarAction(nullptr)
+    _overallBackgroundTask(this, "Background tasks", false)
 {
-}
-
-mv::gui::WidgetAction* BackgroundTaskHandler::getStatusBarAction()
-{
-    if (!_statusBarAction)
-        _statusBarAction = new BackgroundTasksStatusBarAction(this, "Status bar");
-
-    return _statusBarAction;
 }
 
 mv::BackgroundTask& BackgroundTaskHandler::getOverallBackgroundTask()

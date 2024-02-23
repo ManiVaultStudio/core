@@ -9,10 +9,6 @@
 
 namespace mv {
 
-namespace gui {
-    class BackgroundTasksStatusBarAction;
-}
-
 /**
  * Background task handler class
  *
@@ -31,20 +27,13 @@ public:
     BackgroundTaskHandler(QObject* parent);
 
     /**
-     * Get status bar action
-     * @return Pointer to status bar widget action
-     */
-    gui::WidgetAction* getStatusBarAction() override;
-
-    /**
      * Get overall background task
      * @return Aggregate background task to which all other background tasks are (in)directly parented
      */
     BackgroundTask& getOverallBackgroundTask();
 
 private:
-    BackgroundTask                          _overallBackgroundTask;     /** Aggregate background task to which all other background tasks are (in)directly parented */
-    gui::BackgroundTasksStatusBarAction*    _statusBarAction;           /** Lazily initialized status bar action for the background tasks */
+    BackgroundTask      _overallBackgroundTask;     /** Aggregate background task to which all other background tasks are (in)directly parented */
 };
 
 }

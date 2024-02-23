@@ -12,26 +12,32 @@
 
 #include <QDebug>
 
-namespace mv::gui {
+using namespace mv;
+using namespace mv::gui;
 
 BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title),
-    _barGroupAction(this, "Bar group"),
-    _overallBackgroundTaskAction(this, "Overall background task"),
     _model(),
     _filterModel(),
+    _barGroupAction(this, "Bar group"),
+    _overallBackgroundTaskAction(this, "Overall background task"),
     _tasksAction(this, "Background tasks")
 {
     setBarAction(&_barGroupAction);
 
+    auto& overallBackgroundTask = BackgroundTask::getGlobalHandler()->getOverallBackgroundTask();
+
+    _filterModel.setSourceModel(&_model);
+    _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Background" });
+    _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Aborting" });
+    _filterModel.getParentTaskFilterAction().setString(overallBackgroundTask.getId());
+    _filterModel.setFilterKeyColumn(static_cast<int>(AbstractTasksModel::Column::Name));
+
     _barGroupAction.setShowLabels(false);
     _barGroupAction.addAction(&_overallBackgroundTaskAction);
 
-    auto& overallBackgroundTask = BackgroundTask::getGlobalHandler()->getOverallBackgroundTask();
-
     _overallBackgroundTaskAction.setStretch(1);
     _overallBackgroundTaskAction.setTask(&overallBackgroundTask);
-    _overallBackgroundTaskAction.setDefaultWidgetFlag(WidgetActionViewWidget::NoGroupBoxInPopupLayout);
 
     const auto overallBackgroundTaskTextFormatter = [this](Task& task) -> QString {
         const auto numberOfChildTasks = task.getChildTasksForGuiScopesAndStatuses(false, true, { Task::GuiScope::Background }, { Task::Status::Running, Task::Status::RunningIndeterminate }).count();
@@ -63,24 +69,19 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
 
     overallBackgroundTask.setProgressTextFormatter(overallBackgroundTaskTextFormatter);
 
-    _filterModel.setSourceModel(&_model);
-    _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Background" });
-    _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Aborting" });
-    _filterModel.getParentTaskFilterAction().setString(overallBackgroundTask.getId());
-    _filterModel.setFilterKeyColumn(static_cast<int>(AbstractTasksModel::Column::Name));
-
+    _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _tasksAction.setDefaultWidgetFlag(WidgetActionViewWidget::NoGroupBoxInPopupLayout);
+    _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
+    _tasksAction.setPopupSizeHint(QSize(800, 0));
     _tasksAction.initialize(&_model, &_filterModel, "Background task");
-    _tasksAction.setPopupSizeHint(QSize(1600, 0));
 
-    const auto numberOfBackgroundTasksChanged = [this]() -> void {
-        setPopupAction(_filterModel.rowCount() > 0 ? &_tasksAction : nullptr);
-    };
+        const auto numberOfBackgroundTasksChanged = [this]() -> void {
+            setPopupAction(_filterModel.rowCount() > 0 ? &_tasksAction : nullptr);
+        };
 
-    numberOfBackgroundTasksChanged();
+        numberOfBackgroundTasksChanged();
 
     connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, numberOfBackgroundTasksChanged);
     connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, numberOfBackgroundTasksChanged);
     connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, this, numberOfBackgroundTasksChanged);
-}
-
 }

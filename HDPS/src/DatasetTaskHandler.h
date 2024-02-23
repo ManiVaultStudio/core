@@ -28,12 +28,6 @@ public:
     */
     DatasetTaskHandler(QObject* parent, DatasetTask* datasetTask);
 
-    /**
-     * Get status bar action
-     * @return Pointer to status bar widget action
-     */
-    gui::WidgetAction* getStatusBarAction() override { return nullptr; }
-
 private:
 
     /** Get pointer to dataset task */

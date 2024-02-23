@@ -4,21 +4,18 @@
 
 #pragma once
 
-#include "actions/StatusBarAction.h"
-#include "actions/TasksAction.h"
+#include "StatusBarAction.h"
 
-#include "models/TasksListModel.h"
-#include "models/TasksFilterModel.h"
+#include <actions/TasksAction.h>
 
-namespace mv::gui {
+#include <models/TasksListModel.h>
+#include <models/TasksFilterModel.h>
 
 /**
  * Foreground tasks status bar action class
  *
  * Horizontal group action class for display of and interaction with foreground tasks
  *
- * Note: This action is primarily developed for internal use (not meant to be used in third-party plugins)
- * 
  * @author Thomas Kroes
  */
 class ForegroundTasksStatusBarAction : public StatusBarAction
@@ -35,10 +32,8 @@ public:
     ForegroundTasksStatusBarAction(QObject* parent, const QString& title);
 
 private:
-    HorizontalGroupAction   _barGroupAction;
-    TasksListModel          _model;
-    TasksFilterModel        _filterModel;
-    TasksAction             _tasksAction;
+    mv::TasksListModel              _model;             /** Tasks list model */
+    mv::TasksFilterModel            _filterModel;       /** Filter model for the tasks model */
+    mv::gui::HorizontalGroupAction  _barGroupAction;    /** Bar group action */
+    mv::gui::TasksAction            _tasksAction;       /** Tasks action for displaying the tasks */
 };
-
-}

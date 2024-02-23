@@ -28,6 +28,18 @@ using namespace mv::util;
 
 namespace mv::gui {
 
+bool isInPopupMode(QWidget* parent) {
+    if (!parent)
+        return false;
+
+    auto toolButton = dynamic_cast<QToolButton*>(parent->parent());
+
+    if (!toolButton)
+        return false;
+
+    return toolButton->objectName() != "StatusBarToolButton";
+}
+
 QMap<WidgetAction::Scope, QString> WidgetAction::scopeNames {
     { WidgetAction::Scope::Private, "Private" },
     { WidgetAction::Scope::Public, "Public" }
@@ -130,11 +142,9 @@ bool WidgetAction::isLeaf() const
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
 {
-    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
+    auto widget = getWidget(parent, isInPopupMode(parent) ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
 
-    auto widget = getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
-
-    if (isInPopupMode) {
+    if (isInPopupMode(parent)) {
         auto collapsedWidget = dynamic_cast<WidgetActionCollapsedWidget*>(parent->parent()->parent());
 
         if (collapsedWidget) {
@@ -158,9 +168,7 @@ QWidget* WidgetAction::createWidget(QWidget* parent)
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
-
-    auto widget = getWidget(parent, isInPopupMode ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
+    auto widget = getWidget(parent, isInPopupMode(parent) ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
 
     Q_ASSERT(widget != nullptr);
 
@@ -172,9 +180,7 @@ QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetF
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction)
 {
-    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
-
-    auto widget = getWidget(parent, isInPopupMode ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
+    auto widget = getWidget(parent, isInPopupMode(parent) ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
 
     Q_ASSERT(widget != nullptr);
 
@@ -186,9 +192,7 @@ QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetF
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction)
 {
-    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
-
-    auto widget = getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
+    auto widget = getWidget(parent, isInPopupMode(parent) ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
 
     Q_ASSERT(widget != nullptr);
 

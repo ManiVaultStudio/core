@@ -12,7 +12,8 @@
 #include <QClipBoard>
 #include <QHeaderView>
 
-namespace mv::gui {
+using namespace mv;
+using namespace mv::gui;
 
 LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title),
@@ -158,6 +159,4 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
 
         _loadPluginAction.setEnabled(false);
     });
-}
-
 }

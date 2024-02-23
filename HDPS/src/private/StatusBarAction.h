@@ -4,50 +4,33 @@
 
 #pragma once
 
-#include "actions/WidgetAction.h"
+#include <actions/WidgetAction.h>
 
-#include "widgets/OverlayWidget.h"
+#include <widgets/OverlayWidget.h>
 
 #include <QToolButton>
-
-namespace mv::gui {
+#include <QMenu>
 
 /**
  * Status bar action class
  *
  * Base status bar action class with popup functionality
  *
- * Note: This action is primarily developed for internal use (not meant to be used in plugins)
- * 
  * @author Thomas Kroes
  */
-class StatusBarAction : public WidgetAction
+class StatusBarAction : public mv::gui::WidgetAction
 {
     Q_OBJECT
 
 public:
 
     /** Widget class for display of a status bar action */
-    class Widget : public WidgetActionWidget {
+    class Widget : public mv::gui::WidgetActionWidget {
     private:
 
         class ToolButton : public QToolButton {
         public:
             ToolButton(QWidget* parent, StatusBarAction* statusBarAction);
-
-        private:
-            StatusBarAction* _statusBarAction;      /** Pointer to owning status bar action */
-        };
-
-        class BadgeOverlay : public OverlayWidget {
-        public:
-            BadgeOverlay(QWidget* parent, StatusBarAction* statusBarAction);
-
-            /**
-             * Paint event to override default paint
-             * @param paintEvent Pointer to paint event
-             */
-            void paintEvent(QPaintEvent* paintEvent) override;
 
         private:
             StatusBarAction* _statusBarAction;      /** Pointer to owning status bar action */
@@ -64,10 +47,10 @@ public:
         Widget(QWidget* parent, StatusBarAction* statusBarAction, const std::int32_t& widgetFlags);
 
     protected:
-        StatusBarAction*    _statusBarAction;      /** Pointer to owning status bar action */
-        ToolButton          _toolButton;            
-        BadgeOverlay        _badgeOverlay;          
-        
+        StatusBarAction*    _statusBarAction;   /** Pointer to owning status bar action */
+        ToolButton          _toolButton;        /** Customized tool button */
+        QMenu               _toolButtonMenu;    /** Tool button menu */
+
         friend class StatusBarAction;
     };
 
@@ -91,10 +74,28 @@ public:
 
 protected:
 
+    /**
+     * Set bar action to \p barAction
+     * @param barAction Pointer to bar action
+     */
     void setBarAction(WidgetAction* barAction);
+
+    /**
+     * Set popup action to \p popupAction
+     * @param popupAction Pointer to popup action
+     */
     void setPopupAction(WidgetAction* popupAction);
 
+    /**
+     * Get bar action
+     * @return Pointer to bar action
+     */
     WidgetAction* getBarAction();
+
+    /**
+     * Get popup action
+     * @return Pointer to popup action (maybe nullptr)
+     */
     WidgetAction* getPopupAction();
 
 signals:
@@ -107,8 +108,6 @@ signals:
     void popupActionChanged(WidgetAction* previousPopupAction, WidgetAction* popupAction);
 
 private:
-    WidgetAction* _barAction;
-    WidgetAction* _popupAction;
+    WidgetAction*   _barAction;       /** Pointer to bar action */
+    WidgetAction*   _popupAction;     /** Pointer to popup action (maybe nullptr) */
 };
-
-}

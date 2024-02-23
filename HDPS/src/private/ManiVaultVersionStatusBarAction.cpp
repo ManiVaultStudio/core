@@ -9,7 +9,7 @@
     #define MANIVAULT_VERSION_STATUS_BAR_ACTION_VERBOSE
 #endif
 
-namespace mv::gui {
+using namespace mv::gui;
 
 ManiVaultVersionStatusBarAction::ManiVaultVersionStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title),
@@ -26,7 +26,6 @@ ManiVaultVersionStatusBarAction::ManiVaultVersionStatusBarAction(QObject* parent
     });
 
     _infoAction.setEnabled(false);
-    //_infoAction.setDefaultWidgetFlags(StringAction::WidgetFlag::Label);
     _infoAction.setString(QString("ManiVault v%1.%2").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR)));
 
     //setPopupAction(&_recordsAction);
@@ -158,6 +157,4 @@ ManiVaultVersionStatusBarAction::ManiVaultVersionStatusBarAction(QObject* parent
 
     //    _loadPluginAction.setEnabled(false);
     //});
-}
-
 }

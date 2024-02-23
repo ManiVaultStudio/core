@@ -10,13 +10,13 @@
 
 #include <QDebug>
 
-namespace mv::gui {
+using namespace mv::gui;
 
 ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title),
-    _barGroupAction(this, "Bar group"),
     _model(),
     _filterModel(),
+    _barGroupAction(this, "Bar group"),
     _tasksAction(this, "Tasks")
 {
     setBarAction(&_barGroupAction);
@@ -70,6 +70,4 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
 
     connect(&settings().getTasksSettingsAction().getHideForegroundTasksPopupAction(), &ToggleAction::toggled, this, hideForegroundTasksPopupChanged);
     */
-}
-
 }

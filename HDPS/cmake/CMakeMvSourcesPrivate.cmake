@@ -13,6 +13,29 @@ set(PRIVATE_CORE_FILES
     ${PRIVATE_CORE_SOURCES}
 )
 
+set(PRIVATE_ACTIONS_HEADERS
+	src/private/StatusBarAction.h
+	src/private/ManiVaultVersionStatusBarAction.h
+	src/private/PluginsStatusBarAction.h
+    src/private/LoggingStatusBarAction.h
+    src/private/BackgroundTasksStatusBarAction.h
+    src/private/ForegroundTasksStatusBarAction.h
+)
+
+set(PRIVATE_ACTIONS_SOURCES
+	src/private/StatusBarAction.cpp
+	src/private/PluginsStatusBarAction.cpp
+	src/private/ManiVaultVersionStatusBarAction.cpp
+    src/private/LoggingStatusBarAction.cpp
+    src/private/BackgroundTasksStatusBarAction.cpp
+    src/private/ForegroundTasksStatusBarAction.cpp
+)
+
+set(PRIVATE_ACTIONS_FILES
+    ${PRIVATE_ACTIONS_HEADERS}    
+    ${PRIVATE_ACTIONS_SOURCES}
+)
+
 set(PRIVATE_WORKSPACE_MANAGER_HEADERS
     src/private/WorkspaceManager.h
     src/private/DockManager.h
@@ -293,6 +316,7 @@ set(PRIVATE_SOURCES
 )
 
 source_group(Core FILES ${PRIVATE_CORE_FILES})
+source_group(Actions FILES ${PRIVATE_ACTION_FILES})
 source_group(Application FILES ${PRIVATE_APPLICATION_FILES})
 source_group(Managers\\Layout FILES ${PRIVATE_LAYOUT_MANAGER_FILES})
 source_group(Managers\\Plugin FILES ${PRIVATE_PLUGIN_MANAGER_FILES})
