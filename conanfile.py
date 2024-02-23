@@ -12,8 +12,6 @@ from rules_support import CoreBranchInfo
 import subprocess
 import traceback
 
-required_conan_version = "==1.54.0"
-
 class HdpsCoreConan(ConanFile):
     """Class to package hdps-core using conan
 
@@ -52,7 +50,7 @@ class HdpsCoreConan(ConanFile):
     install_dir = None
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
-    requires = ("qt/6.3.2@lkeb/stable", "zlib/1.2.11@lkeb/_")
+    requires = ("qt/6.3.2@lkeb/stable", "zlib/1.3.1")
 
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 
