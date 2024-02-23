@@ -130,7 +130,7 @@ bool WidgetAction::isLeaf() const
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
 {
-    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
+    const auto isInPopupMode = parent != nullptr && dynamic_cast<QToolButton*>(parent->parent());
 
     auto widget = getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
 
@@ -142,6 +142,10 @@ QWidget* WidgetAction::createWidget(QWidget* parent)
 
             if (widgetConfigurationFunction)
                 widgetConfigurationFunction(this, widget);
+        }
+        else {
+            if (_widgetConfigurationFunction)
+                _widgetConfigurationFunction(this, widget);
         }
     }
     else {

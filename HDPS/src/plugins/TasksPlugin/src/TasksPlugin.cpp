@@ -25,7 +25,8 @@ TasksPlugin::TasksPlugin(const PluginFactory* factory) :
 {
     _filterModel.setSourceModel(&_model);
 
-    _tasksAction.initialize(&_model, &_filterModel, "Task", false);
+    _tasksAction.initialize(&_model, &_filterModel, "Task", [this](WidgetAction* action, QWidget* widget) -> void {
+    }, false);
 
     AbstractTaskTester::registerTester("mv::ModalTaskTester");
     AbstractTaskTester::registerTester("mv::BackgroundTaskTester");

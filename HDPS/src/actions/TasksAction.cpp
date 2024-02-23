@@ -121,6 +121,7 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
     _model(nullptr),
     _filterModel(nullptr),
     _treeAction(this, "Tasks"),
+    _widgetConfigurationFunction(),
     _mayLoadTasksPlugin(true),
     _loadTasksPluginAction(this, "Plugin")
 {
@@ -228,6 +229,9 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
         connect(_filterModel, &QAbstractItemModel::layoutChanged, widget, updateTreeView);
 
         openPersistentProgressEditorsRecursively(treeView);
+
+        if (_widgetConfigurationFunction)
+            _widgetConfigurationFunction(action, widget);
     });
 
     _loadTasksPluginAction.setIconByName("window-maximize");
@@ -251,7 +255,7 @@ TasksFilterModel* TasksAction::getFilterModel()
     return _filterModel;
 }
 
-void TasksAction::initialize(AbstractTasksModel* model, TasksFilterModel* filterModel, const QString& itemTypeName, bool mayLoadTasksPlugin /*= true*/)
+void TasksAction::initialize(AbstractTasksModel* model, TasksFilterModel* filterModel, const QString& itemTypeName, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/, bool mayLoadTasksPlugin /*= true*/)
 {
     Q_ASSERT(model);
     Q_ASSERT(filterModel);
@@ -259,9 +263,10 @@ void TasksAction::initialize(AbstractTasksModel* model, TasksFilterModel* filter
     if (!model || !filterModel)
         return;
 
-    _model              = model;
-    _filterModel        = filterModel;
-    _mayLoadTasksPlugin = mayLoadTasksPlugin;
+    _model                          = model;
+    _filterModel                    = filterModel;
+    _widgetConfigurationFunction    = widgetConfigurationFunction;
+    _mayLoadTasksPlugin             = mayLoadTasksPlugin;
 
     _treeAction.initialize(_model, _filterModel, itemTypeName);
 }

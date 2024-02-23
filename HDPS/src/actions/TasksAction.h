@@ -55,9 +55,10 @@ public:
      * @param model Pointer to the tasks model
      * @param filterModel Pointer to the tasks filter model
      * @param itemTypeName Item type name string
+     * @param widgetConfigurationFunction Configuration function to call after the widget has been configured by the tasks action
      * @param mayLoadTasksPlugin When set to true, adds a trigger action to the toolbar for loading the tasks plugin
      */
-    void initialize(AbstractTasksModel* model, TasksFilterModel* filterModel, const QString& itemTypeName, bool mayLoadTasksPlugin = true);
+    void initialize(AbstractTasksModel* model, TasksFilterModel* filterModel, const QString& itemTypeName, WidgetConfigurationFunction widgetConfigurationFunction = WidgetConfigurationFunction(), bool mayLoadTasksPlugin = true);
 
 private:
 
@@ -90,11 +91,12 @@ signals:
     void autoHideKillCollumnChanged(bool autoHideKillCollumn);
 
 private:
-    AbstractTasksModel*     _model;                     /** Tasks model */
-    TasksFilterModel*       _filterModel;               /** Filter model for tasks model */
-    TreeAction              _treeAction;                /** Action to displays the tasks */
-    bool                    _mayLoadTasksPlugin;        /** When set to true, adds a trigger action to the toolbar for loading the tasks plugin */
-    TriggerAction           _loadTasksPluginAction;     /** Triggers loading the tasks plugin */
+    AbstractTasksModel*             _model;                         /** Tasks model */
+    TasksFilterModel*               _filterModel;                   /** Filter model for tasks model */
+    TreeAction                      _treeAction;                    /** Action to displays the tasks */
+    WidgetConfigurationFunction     _widgetConfigurationFunction;   /** Configuration function to call after the widget has been configured by the tasks action */
+    bool                            _mayLoadTasksPlugin;            /** When set to true, adds a trigger action to the toolbar for loading the tasks plugin */
+    TriggerAction                   _loadTasksPluginAction;         /** Triggers loading the tasks plugin */
 };
 
 }

@@ -20,7 +20,7 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _filterModel(this),
     _barGroupAction(this, "Bar group"),
     _lastMessageAction(this, "Last message"),
-    _treeAction(this, "Records"),
+    _recordsAction(this, "Records"),
     _clearRecordsAction(this, "Clear"),
     _loadPluginAction(this, "Plugin")
 {
@@ -29,10 +29,15 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _barGroupAction.setShowLabels(false);
     _barGroupAction.addAction(&_lastMessageAction);
 
-    setPopupAction(&_treeAction);
+    setPopupAction(&_recordsAction);
 
-    /*
-    addAction(&_treeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
+    _recordsAction.setIconByName("scroll");
+    _recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _recordsAction.setDefaultWidgetFlag(WidgetActionViewWidget::NoGroupBoxInPopupLayout);
+    _recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
+    _recordsAction.setPopupSizeHint(QSize(800, 300));
+    _recordsAction.initialize(&_model, &_filterModel, "Log record");
+    _recordsAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
         _loadPluginAction.setEnabled(mv::plugins().getPluginFactory("Logging")->getNumberOfInstances() == 0);
         _clearRecordsAction.setEnabled(_filterModel.rowCount() > 0);
 
@@ -105,21 +110,13 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
             treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
         });
     });
-    */
 
     _filterModel.setSourceModel(&_model);
     _filterModel.setFilterKeyColumn(static_cast<int>(LoggingModel::Column::Message));
 
     _lastMessageAction.setEnabled(false);
 
-    _treeAction.setIconByName("scroll");
-    _treeAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _treeAction.initialize(&_model, &_filterModel, "Log record");
-    _treeAction.setDefaultWidgetFlag(WidgetActionViewWidget::NoGroupBoxInPopupLayout);
-    _treeAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
-    _treeAction.setPopupSizeHint(QSize(600, 400));
-
-    auto& badge = _treeAction.getBadge();
+    auto& badge = _recordsAction.getBadge();
 
     badge.setScale(0.5f);
     badge.setBackgroundColor(qApp->palette().highlight().color());

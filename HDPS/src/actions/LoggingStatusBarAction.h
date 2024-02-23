@@ -44,7 +44,7 @@ private:
     LoggingFilterModel      _filterModel;           /** Filter model of the logging model */
     HorizontalGroupAction   _barGroupAction;
     StringAction            _lastMessageAction;     /** String action displays the last record message from the model (if any) */
-    TreeAction              _treeAction;         /** Tree action which displays the filtered records from the filter model */
+    TreeAction              _recordsAction;         /** Tree action which displays the filtered records from the filter model */
     TriggerAction           _clearRecordsAction;    /** Clears the model records when triggered */
     TriggerAction           _loadPluginAction;      /** Triggers loading the logging plugin */
 };
