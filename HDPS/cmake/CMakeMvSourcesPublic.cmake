@@ -260,40 +260,25 @@ set(PUBLIC_TOOLBAR_ACTIONS_FILES
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
-    src/actions/Actions.h
     src/actions/DatasetPickerAction.h
     src/actions/ImageAction.h
     src/actions/PixelSelectionAction.h
-    src/actions/PluginTriggerPickerAction.h
-    src/actions/PluginTriggerAction.h
     src/actions/WindowLevelAction.h
     src/actions/VariantAction.h
     src/actions/StatusAction.h
-    src/actions/RecentFilesAction.h
-    src/actions/PresetsAction.h
-    src/actions/LockingAction.h
     src/actions/VersionAction.h
-    src/actions/SplashScreenAction.h
     src/actions/TreeAction.h
-    src/actions/LabelProxyAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/DatasetPickerAction.cpp
     src/actions/ImageAction.cpp
     src/actions/PixelSelectionAction.cpp
-    src/actions/PluginTriggerPickerAction.cpp
-    src/actions/PluginTriggerAction.cpp
     src/actions/WindowLevelAction.cpp
     src/actions/VariantAction.cpp
     src/actions/StatusAction.cpp
-    src/actions/RecentFilesAction.cpp
-    src/actions/PresetsAction.cpp
-    src/actions/LockingAction.cpp
     src/actions/VersionAction.cpp
-    src/actions/SplashScreenAction.cpp
     src/actions/TreeAction.cpp
-    src/actions/LabelProxyAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
@@ -301,35 +286,14 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
     ${PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES}
 )
 
-set(PUBLIC_STATUS_BAR_ACTIONS_HEADERS
-    src/actions/StatusBarAction.h
-    src/actions/LoggingStatusBarAction.h
-    src/actions/BackgroundTasksStatusBarAction.h
-    src/actions/ForegroundTasksStatusBarAction.h
-)
-
-set(PUBLIC_STATUS_BAR_ACTIONS_SOURCES
-    src/actions/StatusBarAction.cpp
-    src/actions/LoggingStatusBarAction.cpp
-    src/actions/BackgroundTasksStatusBarAction.cpp
-    src/actions/ForegroundTasksStatusBarAction.cpp
-)
-
-set(PUBLIC_STATUS_BAR_ACTIONS_FILES
-    ${PUBLIC_STATUS_BAR_ACTIONS_HEADERS}    
-    ${PUBLIC_STATUS_BAR_ACTIONS_SOURCES}
-)
-
 set(PUBLIC_TASK_ACTIONS_HEADERS
     src/actions/ProgressAction.h
     src/actions/TaskAction.h
-    src/actions/TasksAction.h
 )
 
 set(PUBLIC_TASK_ACTIONS_SOURCES
     src/actions/ProgressAction.cpp
-    src/actions/TaskAction.cpp
-    src/actions/TasksAction.cpp
+    src/actions/TaskAction.cpp   
 )
 
 set(PUBLIC_TASK_ACTIONS_FILES
@@ -347,6 +311,18 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WidgetActionMimeData.h
     src/actions/WidgetActionHighlightWidget.h
     src/actions/WidgetActionBadge.h
+	src/actions/StatusBarAction.h
+    src/actions/LoggingStatusBarAction.h
+    src/actions/BackgroundTasksStatusBarAction.h
+    src/actions/ForegroundTasksStatusBarAction.h
+	src/actions/TasksAction.h
+	src/actions/SplashScreenAction.h
+	src/actions/RecentFilesAction.h
+    src/actions/PresetsAction.h
+    src/actions/LockingAction.h
+	src/actions/PluginTriggerPickerAction.h
+    src/actions/PluginTriggerAction.h
+	src/actions/LabelProxyAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -359,6 +335,18 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/WidgetActionMimeData.cpp
     src/actions/WidgetActionHighlightWidget.cpp
     src/actions/WidgetActionBadge.cpp
+	src/actions/StatusBarAction.cpp
+    src/actions/LoggingStatusBarAction.cpp
+    src/actions/BackgroundTasksStatusBarAction.cpp
+    src/actions/ForegroundTasksStatusBarAction.cpp
+	src/actions/TasksAction.cpp
+	src/actions/SplashScreenAction.cpp
+	src/actions/RecentFilesAction.cpp
+    src/actions/PresetsAction.cpp
+    src/actions/LockingAction.cpp
+	src/actions/PluginTriggerPickerAction.cpp
+    src/actions/PluginTriggerAction.cpp
+	src/actions/LabelProxyAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -829,7 +817,6 @@ set(PUBLIC_HEADERS
     ${PUBLIC_FILE_ACTIONS_HEADERS}
     ${PUBLIC_TOOLBAR_ACTIONS_HEADERS}
     ${PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS}
-    ${PUBLIC_STATUS_BAR_ACTIONS_HEADERS}
     ${PUBLIC_TASK_ACTIONS_HEADERS}
     ${PUBLIC_ACTIONS_INTERNAL_HEADERS}
     ${PUBLIC_WIDGET_HEADERS}
@@ -866,7 +853,6 @@ set(PUBLIC_SOURCES
     ${PUBLIC_FILE_ACTIONS_SOURCES}
     ${PUBLIC_TOOLBAR_ACTIONS_SOURCES}
     ${PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES}
-    ${PUBLIC_STATUS_BAR_ACTIONS_SOURCES}
     ${PUBLIC_TASK_ACTIONS_SOURCES}
     ${PUBLIC_ACTIONS_INTERNAL_SOURCES}
     ${PUBLIC_WIDGET_SOURCES}
@@ -904,7 +890,6 @@ source_group(Actions\\Toggle FILES ${PUBLIC_TOGGLE_ACTIONS_FILES})
 source_group(Actions\\File FILES ${PUBLIC_FILE_ACTIONS_FILES})
 source_group(Actions\\Toolbar FILES ${PUBLIC_TOOLBAR_ACTIONS_FILES})
 source_group(Actions\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_ACTIONS_FILES})
-source_group(Actions\\StatusBar FILES ${PUBLIC_STATUS_BAR_ACTIONS_FILES})
 source_group(Actions\\Task FILES ${PUBLIC_TASK_ACTIONS_FILES})
 source_group(Actions\\Internal FILES ${PUBLIC_ACTIONS_INTERNAL_FILES})
 source_group(Widgets FILES ${PUBLIC_WIDGET_FILES})

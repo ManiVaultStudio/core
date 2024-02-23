@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "actions/StatusBarAction.h"
 #include "actions/HorizontalGroupAction.h"
 #include "actions/StringAction.h"
 #include "actions/TreeAction.h"
@@ -23,7 +24,7 @@ namespace mv::gui {
  * 
  * @author Thomas Kroes
  */
-class LoggingStatusBarAction : public HorizontalGroupAction
+class LoggingStatusBarAction : public StatusBarAction
 {
     Q_OBJECT
 
@@ -39,12 +40,13 @@ public:
     LoggingStatusBarAction(QObject* parent, const QString& title);
 
 private:
-    LoggingModel        _model;                 /** Model of the tasks model */
-    LoggingFilterModel  _filterModel;           /** Filter model of the logging model */
-    StringAction        _lastMessageAction;     /** String action displays the last record message from the model (if any) */
-    TreeAction          _recordsAction;         /** Tree action which displays the filtered records from the filter model */
-    TriggerAction       _clearRecordsAction;    /** Clears the model records when triggered */
-    TriggerAction       _loadPluginAction;      /** Triggers loading the logging plugin */
+    LoggingModel            _model;                 /** Model of the tasks model */
+    LoggingFilterModel      _filterModel;           /** Filter model of the logging model */
+    HorizontalGroupAction   _barGroupAction;
+    StringAction            _lastMessageAction;     /** String action displays the last record message from the model (if any) */
+    TreeAction              _treeAction;         /** Tree action which displays the filtered records from the filter model */
+    TriggerAction           _clearRecordsAction;    /** Clears the model records when triggered */
+    TriggerAction           _loadPluginAction;      /** Triggers loading the logging plugin */
 };
 
 }

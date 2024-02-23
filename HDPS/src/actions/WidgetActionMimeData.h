@@ -18,6 +18,8 @@ namespace mv::gui {
  * 
  * Class for drag-and-drop of a widget action
  * 
+ * Note: This class is developed for internal use (not meant to be used explicitly in third-party plugins)
+ * 
  * @author Thomas Kroes
  */
 class WidgetActionMimeData final : public QMimeData

@@ -15,18 +15,24 @@
 namespace mv::gui {
 
 LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& title) :
-    HorizontalGroupAction(parent, title),
+    StatusBarAction(parent, title),
     _model(),
     _filterModel(this),
+    _barGroupAction(this, "Bar group"),
     _lastMessageAction(this, "Last message"),
-    _recordsAction(this, "Records"),
+    _treeAction(this, "Records"),
     _clearRecordsAction(this, "Clear"),
     _loadPluginAction(this, "Plugin")
 {
-    setShowLabels(false);
+    setBarAction(&_barGroupAction);
 
-    addAction(&_lastMessageAction);
-    addAction(&_recordsAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
+    _barGroupAction.setShowLabels(false);
+    _barGroupAction.addAction(&_lastMessageAction);
+
+    setPopupAction(&_treeAction);
+
+    /*
+    addAction(&_treeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
         _loadPluginAction.setEnabled(mv::plugins().getPluginFactory("Logging")->getNumberOfInstances() == 0);
         _clearRecordsAction.setEnabled(_filterModel.rowCount() > 0);
 
@@ -99,20 +105,21 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
             treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
         });
     });
+    */
 
     _filterModel.setSourceModel(&_model);
     _filterModel.setFilterKeyColumn(static_cast<int>(LoggingModel::Column::Message));
 
     _lastMessageAction.setEnabled(false);
 
-    _recordsAction.setIconByName("scroll");
-    _recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _recordsAction.initialize(&_model, &_filterModel, "Log record");
-    _recordsAction.setDefaultWidgetFlag(WidgetActionViewWidget::NoGroupBoxInPopupLayout);
-    _recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
-    _recordsAction.setPopupSizeHint(QSize(600, 400));
+    _treeAction.setIconByName("scroll");
+    _treeAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _treeAction.initialize(&_model, &_filterModel, "Log record");
+    _treeAction.setDefaultWidgetFlag(WidgetActionViewWidget::NoGroupBoxInPopupLayout);
+    _treeAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
+    _treeAction.setPopupSizeHint(QSize(600, 400));
 
-    auto& badge = _recordsAction.getBadge();
+    auto& badge = _treeAction.getBadge();
 
     badge.setScale(0.5f);
     badge.setBackgroundColor(qApp->palette().highlight().color());

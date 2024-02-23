@@ -30,6 +30,27 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     _filterModel.getTopLevelTasksOnlyAction().setChecked(true);
 
     _tasksAction.initialize(&_model, &_filterModel, "Foreground");
+    _tasksAction.setDefaultWidgetFlag(WidgetActionWidget::NoGroupBoxInPopupLayout);
+    _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
+
+    auto& badge = _tasksAction.getBadge();
+
+    badge.setScale(0.5f);
+    badge.setBackgroundColor(qApp->palette().highlight().color());
+
+    const auto updateBadgeNumber = [this, &badge]() -> void {
+        const auto numberOfRecords = _filterModel.rowCount();
+
+        badge.setEnabled(numberOfRecords > 0);
+        badge.setNumber(numberOfRecords);
+    };
+
+    updateBadgeNumber();
+
+    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, updateBadgeNumber);
+    connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, updateBadgeNumber);
+    connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, this, updateBadgeNumber);
 
     /*
     _tasksStatusBarAction.setPopupMode(TasksStatusBarAction::PopupMode::Automatic);

@@ -28,6 +28,8 @@ class WidgetAction;
  *   - Connect to a shared action
  *   - Disconnect from a shared action
  * 
+ * Note: This widget class is developed for internal use (not meant to be used explicitly in third-party plugins)
+ * 
  * @author Thomas Kroes
  */
 class WidgetActionLabel : public WidgetActionViewWidget

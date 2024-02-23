@@ -15,6 +15,8 @@ namespace mv::gui {
  *
  * Overlay widget class for highlighting a widget action
  *
+ * Note: This widget class is primarily developed for internal use (not meant to be used explicitly in third-party plugins)
+ * 
  * @author Thomas Kroes
  */
 class WidgetActionHighlightWidget final : public OverlayWidget

@@ -78,7 +78,7 @@ void WidgetActionCollapsedWidget::initialize(WidgetAction* action)
     _toolButton.setPopupMode(QToolButton::InstantPopup);
     _toolButton.setIconSize(QSize(16, 16));
     _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
-    _toolButton.setAutoRaise(action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise));
+    _toolButton.setAutoRaise(action ? action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise) : false);
 
     _layout.addWidget(&_toolButton);
 

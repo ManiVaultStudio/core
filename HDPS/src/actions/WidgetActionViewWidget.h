@@ -16,6 +16,8 @@ class WidgetActionHighlightWidget;
  *
  * Base class for widgets that provide a view on an action.
  * 
+ * Note: This widget class is developed for internal use (not meant to be used explicitly in third-party plugins)
+ * 
  * @author Thomas Kroes
  */
 class WidgetActionViewWidget : public QWidget

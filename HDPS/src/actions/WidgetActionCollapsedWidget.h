@@ -18,6 +18,8 @@ class WidgetAction;
  * 
  * Displays a tool button that shows the widget in a popup
  *
+ * Note: This action is primarily developed for internal use (not meant to be used explicitly in third-party plugins)
+ * 
  * @author Thomas Kroes
  */
 class WidgetActionCollapsedWidget : public WidgetActionViewWidget

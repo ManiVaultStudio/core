@@ -125,6 +125,7 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
     _loadTasksPluginAction(this, "Plugin")
 {
     setShowLabels(false);
+    setIconByName("tasks");
 
     addAction(&_treeAction, -1, [this](WidgetAction* action, QWidget* widget) -> void {
         Q_ASSERT(widget);

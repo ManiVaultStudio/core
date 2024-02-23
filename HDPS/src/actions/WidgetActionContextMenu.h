@@ -20,6 +20,8 @@ class WidgetAction;
  * 
  * Context menu for one (or more) widget actions
  *
+ * Note: This menu is developed for internal use (not meant to be used explicitly in third-party plugins)
+ * 
  * @author Thomas Kroes
  */
 class WidgetActionContextMenu : public QMenu

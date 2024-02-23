@@ -18,7 +18,7 @@ namespace mv::gui {
  * Draws a circle with a number with any Qt::Alignment flag and foreground (text)
  * and background color. Currently used by the collapsed widget only.
  * 
- * Note: By default the badge is disabled, use WidgetActionBadge::setEnabled(...) to enable it.
+ * Note: By default the badge is disabled, use WidgetActionBadge::setEnabled(...) to enable it
  *
  * @author Thomas Kroes
  */
