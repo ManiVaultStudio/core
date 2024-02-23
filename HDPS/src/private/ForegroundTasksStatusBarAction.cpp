@@ -10,6 +10,7 @@
 
 #include <QDebug>
 
+using namespace mv;
 using namespace mv::gui;
 
 ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, const QString& title) :
@@ -29,10 +30,27 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
     _filterModel.getTopLevelTasksOnlyAction().setChecked(true);
 
-    _tasksAction.initialize(&_model, &_filterModel, "Foreground");
     _tasksAction.setDefaultWidgetFlag(WidgetActionWidget::NoGroupBoxInPopupLayout);
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
+    _tasksAction.setPopupSizeHint(QSize(600, 150));
+    _tasksAction.initialize(&_model, &_filterModel, "Foreground");
+    _tasksAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
+        auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
+
+        Q_ASSERT(hierarchyWidget);
+
+        if (hierarchyWidget == nullptr)
+            return;
+
+        hierarchyWidget->getToolbarAction().setVisible(false);
+        hierarchyWidget->setHeaderHidden(true);
+
+        auto& treeView = hierarchyWidget->getTreeView();
+
+        treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Status), true);
+        treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Type), true);
+    });
 
     auto& badge = _tasksAction.getBadge();
 

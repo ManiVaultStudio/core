@@ -72,14 +72,29 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _tasksAction.setDefaultWidgetFlag(WidgetActionViewWidget::NoGroupBoxInPopupLayout);
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
-    _tasksAction.setPopupSizeHint(QSize(800, 0));
+    _tasksAction.setPopupSizeHint(QSize(600, 150));
     _tasksAction.initialize(&_model, &_filterModel, "Background task");
+    _tasksAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
+        auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
-        const auto numberOfBackgroundTasksChanged = [this]() -> void {
-            setPopupAction(_filterModel.rowCount() > 0 ? &_tasksAction : nullptr);
-        };
+        Q_ASSERT(hierarchyWidget);
 
-        numberOfBackgroundTasksChanged();
+        if (hierarchyWidget == nullptr)
+            return;
+
+        hierarchyWidget->setHeaderHidden(true);
+
+        auto& treeView = hierarchyWidget->getTreeView();
+
+        treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Status), true);
+        treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Type), true);
+    });
+
+    const auto numberOfBackgroundTasksChanged = [this]() -> void {
+        setPopupAction(_filterModel.rowCount() > 0 ? &_tasksAction : nullptr);
+    };
+
+    numberOfBackgroundTasksChanged();
 
     connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, numberOfBackgroundTasksChanged);
     connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, numberOfBackgroundTasksChanged);
