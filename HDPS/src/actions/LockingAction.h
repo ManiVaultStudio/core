@@ -15,6 +15,8 @@ namespace mv::gui {
  *
  * Action class for locking status (internal use only).
  *
+ * Note: This action is developed for internal use (not meant to be used in third-party plugins)
+ * 
  * @author Thomas Kroes
  */
 class LockingAction final : public GroupAction
