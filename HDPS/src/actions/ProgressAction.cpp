@@ -259,7 +259,7 @@ QWidget* ProgressAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
     if (dynamic_cast<QMenu*>(parent))
         return QWidgetAction::createWidget(parent);
 
-    auto widget = new WidgetActionWidget(parent, this);
+    auto widget = new WidgetActionWidget(parent, this, widgetFlags);
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);

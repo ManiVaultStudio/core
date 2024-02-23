@@ -31,6 +31,7 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
 
     _overallBackgroundTaskAction.setStretch(1);
     _overallBackgroundTaskAction.setTask(&overallBackgroundTask);
+    _overallBackgroundTaskAction.setDefaultWidgetFlag(WidgetActionViewWidget::NoGroupBoxInPopupLayout);
 
     const auto overallBackgroundTaskTextFormatter = [this](Task& task) -> QString {
         const auto numberOfChildTasks = task.getChildTasksForGuiScopesAndStatuses(false, true, { Task::GuiScope::Background }, { Task::Status::Running, Task::Status::RunningIndeterminate }).count();
@@ -62,10 +63,7 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
 
     overallBackgroundTask.setProgressTextFormatter(overallBackgroundTaskTextFormatter);
 
-    _overallBackgroundTaskAction.setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
-
     _filterModel.setSourceModel(&_model);
-
     _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Background" });
     _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Aborting" });
     _filterModel.getParentTaskFilterAction().setString(overallBackgroundTask.getId());

@@ -19,6 +19,8 @@
 #include <BackgroundTaskHandler.h>
 
 #include <actions/ToggleAction.h>
+#include <actions/ManiVaultVersionStatusBarAction.h>
+#include <actions/PluginsStatusBarAction.h>
 #include <actions/LoggingStatusBarAction.h>
 #include <actions/BackgroundTasksStatusBarAction.h>
 #include <actions/ForegroundTasksStatusBarAction.h>
@@ -94,11 +96,15 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         statusBar()->setSizeGripEnabled(false);
 
+        auto versionStatusBarAction         = new ManiVaultVersionStatusBarAction(this, "Version");
+        auto pluginsStatusBarAction         = new PluginsStatusBarAction(this, "Plugins");
         auto loggingStatusBarAction         = new LoggingStatusBarAction(this, "Logging");
 
-        statusBar()->insertPermanentWidget(0, loggingStatusBarAction->createWidget(this), 3);
-        statusBar()->insertPermanentWidget(1, BackgroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this), 2);
-        statusBar()->insertPermanentWidget(2, ForegroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this));
+        statusBar()->insertPermanentWidget(0, versionStatusBarAction->createWidget(this));
+        statusBar()->insertPermanentWidget(1, pluginsStatusBarAction->createWidget(this));
+        statusBar()->insertPermanentWidget(2, loggingStatusBarAction->createWidget(this), 3);
+        statusBar()->insertPermanentWidget(3, BackgroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this), 2);
+        statusBar()->insertPermanentWidget(4, ForegroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this));
 
         const auto projectChanged = [this]() -> void {
             if (!projects().hasProject()) {

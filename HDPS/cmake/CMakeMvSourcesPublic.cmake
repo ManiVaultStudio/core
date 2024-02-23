@@ -316,6 +316,8 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/LoggingStatusBarAction.h
     src/actions/BackgroundTasksStatusBarAction.h
     src/actions/ForegroundTasksStatusBarAction.h
+    src/actions/PluginsStatusBarAction.h
+    src/actions/ManiVaultVersionStatusBarAction.h
 	src/actions/TasksAction.h
 	src/actions/SplashScreenAction.h
 	src/actions/RecentFilesAction.h
@@ -340,6 +342,8 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/LoggingStatusBarAction.cpp
     src/actions/BackgroundTasksStatusBarAction.cpp
     src/actions/ForegroundTasksStatusBarAction.cpp
+    src/actions/PluginsStatusBarAction.cpp
+    src/actions/ManiVaultVersionStatusBarAction.cpp
 	src/actions/TasksAction.cpp
 	src/actions/SplashScreenAction.cpp
 	src/actions/RecentFilesAction.cpp

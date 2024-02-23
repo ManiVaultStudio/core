@@ -66,7 +66,7 @@ StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarActio
 
     setLayout(layout);
 
-    _toolButton.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    _toolButton.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
     _toolButton.setObjectName("ToolButton");
     _toolButton.setPopupMode(QToolButton::InstantPopup);
     _toolButton.setIconSize(QSize(16, 16));
@@ -86,6 +86,9 @@ StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarActio
 
     _badgeOverlay.raise();
     _badgeOverlay.show();
+
+    _toolButton.updateGeometry();
+    _toolButton.layout()->invalidate();
 }
 
 StatusBarAction::Widget::ToolButton::ToolButton(QWidget* parent, StatusBarAction* statusBarAction) :
@@ -94,8 +97,14 @@ StatusBarAction::Widget::ToolButton::ToolButton(QWidget* parent, StatusBarAction
 {
     auto layout = new QVBoxLayout();
 
+    layout->setSizeConstraint(QLayout::SetMinimumSize);
     layout->setContentsMargins(2, 2, 2, 2);
-    layout->addWidget(statusBarAction->getBarAction()->createWidget(this));
+
+    auto barWidget = statusBarAction->getBarAction()->createWidget(this);
+
+    barWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+
+    layout->addWidget(barWidget);
 
     setLayout(layout);
 }
