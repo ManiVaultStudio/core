@@ -137,6 +137,15 @@ QString Application::getName()
     return "ManiVault";
 }
 
+QString Application::getAbout()
+{
+    return QString("<p>%3 is a flexible and extensible visual analytics framework for high-dimensional data.<br>"
+        "For more information, please visit: <a href=\"http://%2/\">%2</a> </p>"
+        "This software is licensed under the GNU Lesser General Public License v3.0.<br>"
+        "Copyright (C) %1 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)"
+    ).arg(QStringLiteral("2023"), QStringLiteral("github.com/ManiVaultStudio"), getName());
+}
+
 QString Application::getStartupProjectFilePath() const
 {
     return _startupProjectFilePath;
