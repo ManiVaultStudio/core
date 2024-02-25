@@ -33,7 +33,7 @@ public:
 
 private:
     mv::gui::HorizontalGroupAction  _barGroupAction;        /** Bar group action */
-    mv::gui::StringAction           _iconAction;            /** Widget action for showing a plugin icon */
+    mv::gui::StringAction           _iconAction;            /** String action for showing a plugin icon with FontAwesome */
     mv::gui::StringAction           _loadedPluginsAction;   /** String action displays the last record message from the model (if any) */
     mv::gui::TriggerAction          _loadPluginAction;      /** Triggers loading the logging plugin */
     mv::gui::HorizontalGroupAction  _popupGroupAction;      /** Popup group action */

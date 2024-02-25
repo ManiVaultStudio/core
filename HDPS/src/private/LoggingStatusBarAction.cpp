@@ -20,6 +20,7 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _model(),
     _filterModel(this),
     _barGroupAction(this, "Bar group"),
+    _iconAction(this, "Icon"),
     _lastMessageAction(this, "Last message"),
     _recordsAction(this, "Records"),
     _clearRecordsAction(this, "Clear"),
@@ -28,7 +29,25 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     setBarAction(&_barGroupAction);
 
     _barGroupAction.setShowLabels(false);
+
+    _barGroupAction.addAction(&_iconAction);
     _barGroupAction.addAction(&_lastMessageAction);
+
+    _lastMessageAction.setStretch(1);
+
+    _iconAction.setEnabled(false);
+    _iconAction.setDefaultWidgetFlags(StringAction::Label);
+    _iconAction.setString(Application::getIconFont("FontAwesome").getIconCharacter("scroll"));
+    _iconAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
+        auto labelWidget = widget->findChild<QLabel*>("Label");
+
+        Q_ASSERT(labelWidget != nullptr);
+
+        if (labelWidget == nullptr)
+            return;
+
+        labelWidget->setFont(Application::getIconFont("FontAwesome").getFont());
+    });
 
     setPopupAction(&_recordsAction);
 

@@ -24,18 +24,8 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
     setPopupAction(&_popupGroupAction);
 
     _barGroupAction.setShowLabels(false);
-    _barGroupAction.addAction(&_iconAction, -1, [](WidgetAction* action, QWidget* widget) -> void {
-        auto labelWidget = widget->findChild<QLabel*>("Label");
 
-        Q_ASSERT(labelWidget != nullptr);
-
-        if (labelWidget == nullptr)
-            return;
-
-        labelWidget->setFixedWidth(100);
-        labelWidget->setPixmap(Application::getIconFont("FontAwesome").getIcon("plug").pixmap(QSize(32, 32)));
-    });
-
+    _barGroupAction.addAction(&_iconAction);
     _barGroupAction.addAction(&_loadedPluginsAction, -1, [](WidgetAction* action, QWidget* widget) -> void {
         auto labelWidget = widget->findChild<QLabel*>("Label");
     });
