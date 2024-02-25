@@ -30,7 +30,7 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
     _filterModel.getTopLevelTasksOnlyAction().setChecked(true);
 
-    _tasksAction.setDefaultWidgetFlag(WidgetActionWidget::NoGroupBoxInPopupLayout);
+    _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
     _tasksAction.setPopupSizeHint(QSize(600, 150));

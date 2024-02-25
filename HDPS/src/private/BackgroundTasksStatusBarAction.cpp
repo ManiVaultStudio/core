@@ -70,7 +70,7 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     overallBackgroundTask.setProgressTextFormatter(overallBackgroundTaskTextFormatter);
 
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _tasksAction.setDefaultWidgetFlag(WidgetActionViewWidget::NoGroupBoxInPopupLayout);
+    _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
     _tasksAction.setPopupSizeHint(QSize(600, 150));
     _tasksAction.initialize(&_model, &_filterModel, "Background task");

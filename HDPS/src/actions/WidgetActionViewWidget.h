@@ -26,8 +26,7 @@ public:
 
     /** Reserved widget view flags */
     enum WidgetFlag {
-        PopupLayout                 = 0x10000,      /** Widget with popup layout */
-        NoGroupBoxInPopupLayout     = 0x20000       /** Prevent groupbox in popup layout */
+        PopupLayout     = 0x10000   /** Widget with popup layout */
     };
 
 public:

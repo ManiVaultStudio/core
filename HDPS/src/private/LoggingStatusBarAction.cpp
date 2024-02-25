@@ -34,7 +34,7 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
 
     _recordsAction.setIconByName("scroll");
     _recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _recordsAction.setDefaultWidgetFlag(WidgetActionViewWidget::NoGroupBoxInPopupLayout);
+    _recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
     _recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
     _recordsAction.setPopupSizeHint(QSize(800, 300));
     _recordsAction.initialize(&_model, &_filterModel, "Log record");

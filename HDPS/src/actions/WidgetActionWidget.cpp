@@ -46,7 +46,7 @@ void WidgetActionWidget::setPopupLayout(QLayout* popupLayout)
 
     WidgetActionViewWidget::setLayout(mainLayout);
 
-    if (getWidgetFlags() & WidgetActionViewWidget::NoGroupBoxInPopupLayout) {
+    if (getAction()->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout)) {
         mainLayout->addLayout(popupLayout);
     }
     else {

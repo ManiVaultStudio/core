@@ -70,6 +70,7 @@ public:
         ForceCollapsedInGroup       = 0x00008,      /** Action will be collapsed in a horizontal group (or toolbar), no matter the circumstances */
         ForceExpandedInGroup        = 0x00010,      /** Action will be expanded in a horizontal group (or toolbar), no matter the circumstances */
         ToolButtonAutoRaise         = 0x00020,      /** Sets auto-raise to true when a widget action is collapsed and a tool button is used for the popup functionality */
+        NoGroupBoxInPopupLayout     = 0x00040,      /** Prevent group box in popup layout */
 
         User                        = 0x00100,      /** And beyond for custom configuration flags */
 

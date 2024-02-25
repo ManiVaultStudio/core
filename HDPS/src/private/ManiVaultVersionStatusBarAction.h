@@ -8,12 +8,12 @@
 
 #include <actions/HorizontalGroupAction.h>
 #include <actions/StringAction.h>
-#include <actions/TriggerAction.h>
 
 /**
- * Plugins status bar action class
+ * ManiVault version status bar action class
  *
- * Status bar action class for displaying loaded plugins
+ * Status bar action class for displaying the ManiVault version on the status bar
+ * and additional ManiVault info in a popup
  *
  * @author Thomas Kroes
  */
@@ -32,5 +32,7 @@ public:
 
 private:
     mv::gui::HorizontalGroupAction  _barGroupAction;    /** Bar group action */
-    mv::gui::StringAction           _infoAction;        /** String action displays the last record message from the model (if any) */
+    mv::gui::StringAction           _barAction;         /** String action that displays the ManiVault version on the status bar */
+    mv::gui::HorizontalGroupAction  _popupGroupAction;  /** Popup group action */
+    mv::gui::StringAction           _popupAction;       /** Popup string action for ManiVault info */
 };
