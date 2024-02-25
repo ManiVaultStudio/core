@@ -6,6 +6,7 @@
 #include "ProjectMetaAction.h"
 #include "CoreInterface.h"
 #include "Application.h"
+#include "ManiVaultVersion.h"
 
 #include "actions/SplashScreenAction.h"
 
@@ -317,7 +318,7 @@ void SplashScreenWidget::createBody()
         projectLogoLabel->setToolTip(SplashScreenWidget::getCopyrightNoticeTooltip());
 
         const auto applicationVersion   = Application::current()->getVersion();
-        const auto versionString        = QString("%1.%2").arg(QString::number(applicationVersion.getMajor()), QString::number(applicationVersion.getMinor()));
+        const auto versionString        = QString("%1.%2%3").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), MV_VERSION_SUFFIX);
 
         htmlLabel->setText(QString(" \
             <div> \

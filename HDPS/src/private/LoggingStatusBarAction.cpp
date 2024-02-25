@@ -116,6 +116,7 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _filterModel.setFilterKeyColumn(static_cast<int>(LoggingModel::Column::Message));
 
     _lastMessageAction.setEnabled(false);
+    _lastMessageAction.setDefaultWidgetFlags(StringAction::Label);
 
     auto& badge = _recordsAction.getBadge();
 

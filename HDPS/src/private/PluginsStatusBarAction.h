@@ -9,6 +9,7 @@
 #include <actions/HorizontalGroupAction.h>
 #include <actions/StringAction.h>
 #include <actions/TriggerAction.h>
+#include <actions/TreeAction.h>
 
 /**
  * Plugins status bar action class
@@ -32,6 +33,9 @@ public:
 
 private:
     mv::gui::HorizontalGroupAction  _barGroupAction;        /** Bar group action */
-    mv::gui::StringAction           _lastMessageAction;     /** String action displays the last record message from the model (if any) */
+    mv::gui::StringAction           _iconAction;            /** Widget action for showing a plugin icon */
+    mv::gui::StringAction           _loadedPluginsAction;   /** String action displays the last record message from the model (if any) */
     mv::gui::TriggerAction          _loadPluginAction;      /** Triggers loading the logging plugin */
+    mv::gui::HorizontalGroupAction  _popupGroupAction;      /** Popup group action */
+    mv::gui::TreeAction             _pluginsAction;         /** Tree action plugins listing in popup group action */
 };

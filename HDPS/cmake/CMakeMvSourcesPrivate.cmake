@@ -71,15 +71,11 @@ set(PRIVATE_WORKSPACE_MANAGER_FILES
 
 set(PRIVATE_PLUGIN_MANAGER_HEADERS
     src/private/PluginManager.h
-    src/private/PluginManagerModel.h
-    src/private/PluginManagerFilterModel.h
     src/private/PluginManagerDialog.h
 )
 
 set(PRIVATE_PLUGIN_MANAGER_SOURCES
     src/private/PluginManager.cpp
-    src/private/PluginManagerModel.cpp
-    src/private/PluginManagerFilterModel.cpp
     src/private/PluginManagerDialog.cpp
 )
 

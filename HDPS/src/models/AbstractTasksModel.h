@@ -102,8 +102,6 @@ public:
         Task*   _task;      /** Pointer to task to display item for */
     };
 
-public:
-
     /** Standard model item class for displaying the task name */
     class NameItem final : public Item {
     public:

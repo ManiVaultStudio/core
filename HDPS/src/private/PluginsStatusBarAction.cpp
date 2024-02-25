@@ -8,146 +8,58 @@
     #define PLUGINS_STATUS_BAR_ACTION_VERBOSE
 #endif
 
+using namespace mv;
 using namespace mv::gui;
 
 PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title),
     _barGroupAction(this, "Bar group"),
-    _lastMessageAction(this, "Last message"),
-    _loadPluginAction(this, "Plugin")
+    _iconAction(this, "Icon"),
+    _loadedPluginsAction(this, "Loaded Plugins"),
+    _loadPluginAction(this, "Plugin"),
+    _popupGroupAction(this, "Popup Group"),
+    _pluginsAction(this, "Plugins")
 {
     setBarAction(&_barGroupAction);
+    setPopupAction(&_popupGroupAction);
 
     _barGroupAction.setShowLabels(false);
-    _barGroupAction.addAction(&_lastMessageAction);
+    _barGroupAction.addAction(&_iconAction, -1, [](WidgetAction* action, QWidget* widget) -> void {
+        auto labelWidget = widget->findChild<QLabel*>("Label");
 
-    //setPopupAction(&_recordsAction);
+        Q_ASSERT(labelWidget != nullptr);
 
-    //_recordsAction.setIconByName("scroll");
-    //_recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    //_recordsAction.setDefaultWidgetFlag(WidgetActionViewWidget::NoGroupBoxInPopupLayout);
-    //_recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
-    //_recordsAction.setPopupSizeHint(QSize(800, 300));
-    //_recordsAction.initialize(&_model, &_filterModel, "Log record");
-    //_recordsAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
-    //    _loadPluginAction.setEnabled(mv::plugins().getPluginFactory("Logging")->getNumberOfInstances() == 0);
-    //    _clearRecordsAction.setEnabled(_filterModel.rowCount() > 0);
+        if (labelWidget == nullptr)
+            return;
 
-    //    auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
+        labelWidget->setFixedWidth(100);
+        labelWidget->setPixmap(Application::getIconFont("FontAwesome").getIcon("plug").pixmap(QSize(32, 32)));
+    });
 
-    //    Q_ASSERT(hierarchyWidget != nullptr);
+    _barGroupAction.addAction(&_loadedPluginsAction, -1, [](WidgetAction* action, QWidget* widget) -> void {
+        auto labelWidget = widget->findChild<QLabel*>("Label");
+    });
 
-    //    if (hierarchyWidget == nullptr)
-    //        return;
+    _iconAction.setEnabled(false);
+    _iconAction.setDefaultWidgetFlags(StringAction::Label);
+    _iconAction.setString(Application::getIconFont("FontAwesome").getIconCharacter("plug"));
+    _iconAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
+        auto labelWidget = widget->findChild<QLabel*>("Label");
 
-    //    hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("scroll"));
+        Q_ASSERT(labelWidget != nullptr);
 
-    //    auto& toolbarAction = hierarchyWidget->getToolbarAction();
+        if (labelWidget == nullptr)
+            return;
 
-    //    toolbarAction.addAction(&_clearRecordsAction);
-    //    toolbarAction.addAction(&_loadPluginAction);
+        labelWidget->setFont(Application::getIconFont("FontAwesome").getFont());
+    });
 
-    //    auto treeView = widget->findChild<QTreeView*>("TreeView");
+    _loadedPluginsAction.setEnabled(false);
+    _loadedPluginsAction.setDefaultWidgetFlags(StringAction::Label);
+    _loadedPluginsAction.setString(QString("%1 plugins loaded").arg(QString::number(mv::plugins().getPluginFactoriesByTypes().size())));
 
-    //    Q_ASSERT(treeView != nullptr);
+    _popupGroupAction.setShowLabels(false);
+    _popupGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
+    _popupGroupAction.addAction(&_pluginsAction);
 
-    //    if (treeView == nullptr)
-    //        return;
-
-    //    treeView->setRootIsDecorated(false);
-
-    //    treeView->setColumnHidden(static_cast<int>(LoggingModel::Column::Number), true);
-    //    treeView->setColumnHidden(static_cast<int>(LoggingModel::Column::Type), true);
-    //    treeView->setColumnHidden(static_cast<int>(LoggingModel::Column::FileAndLine), true);
-    //    treeView->setColumnHidden(static_cast<int>(LoggingModel::Column::Function), true);
-    //    treeView->setColumnHidden(static_cast<int>(LoggingModel::Column::Category), true);
-
-    //    connect(treeView, &QTreeView::customContextMenuRequested, treeView, [this, treeView](const QPoint& point)
-    //    {
-    //        const auto selectedRows = treeView->selectionModel()->selectedRows();
-
-    //        if (selectedRows.isEmpty())
-    //            return;
-
-    //        QMenu contextMenu;
-
-    //        auto* copyAction = contextMenu.addAction(tr("&Copy"), [this, selectedRows] {
-    //            QStringList messageRecordsString;
-
-    //            for (const auto& selectedRow : selectedRows) {
-    //                const auto index            = _filterModel.mapToSource(selectedRow);
-    //                const auto messageRecord    = static_cast<LoggingModel::Item*>(_model.itemFromIndex(index))->getMessageRecord();
-
-    //                messageRecordsString << messageRecord.toString();
-    //            }
-
-    //            QGuiApplication::clipboard()->setText(messageRecordsString.join("\n"));
-    //        });
-
-    //        copyAction->setIcon(Application::getIconFont("FontAwesome").getIcon("copy"));
-
-    //        contextMenu.exec(QCursor::pos());
-    //    });
-
-    //    auto treeViewHeader = treeView->header();
-
-    //    treeViewHeader->setStretchLastSection(true);
-
-    //    for (int columnIndex = 0; columnIndex < _model.columnCount(); ++columnIndex)
-    //        treeViewHeader->setSectionResizeMode(columnIndex, QHeaderView::ResizeToContents);
-
-    //    treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
-
-    //    connect(treeViewHeader, &QHeaderView::sectionResized, treeView, [treeViewHeader](int logicalIndex, int oldSize, int newSize) -> void {
-    //        treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
-    //    });
-    //});
-
-    //_filterModel.setSourceModel(&_model);
-    //_filterModel.setFilterKeyColumn(static_cast<int>(LoggingModel::Column::Message));
-
-    //_lastMessageAction.setEnabled(false);
-
-    //auto& badge = _recordsAction.getBadge();
-
-    //badge.setScale(0.5f);
-    //badge.setBackgroundColor(qApp->palette().highlight().color());
-
-    //const auto updateBadgeNumber = [this, &badge]() -> void {
-    //    const auto numberOfRecords = _filterModel.rowCount();
-
-    //    badge.setEnabled(numberOfRecords > 0);
-    //    badge.setNumber(numberOfRecords);
-    //};
-
-    //updateBadgeNumber();
-
-    //_clearRecordsAction.setEnabled(_filterModel.rowCount() > 0);
-    //_clearRecordsAction.setIconByName("trash");
-    //_clearRecordsAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
-    //_clearRecordsAction.setToolTip("Clear all records");
-
-    //_loadPluginAction.setEnabled(mv::plugins().getPluginFactory("Logging")->getNumberOfInstances() == 0);
-    //_loadPluginAction.setIconByName("window-maximize");
-    //_loadPluginAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
-    //_loadPluginAction.setToolTip("Load logging plugin");
-
-    //connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int start, int end) -> void {
-    //    _lastMessageAction.setString(_filterModel.index(end, static_cast<int>(LoggingModel::Column::Message), parent).data(Qt::EditRole).toString());
-    //});
-
-    //connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, updateBadgeNumber);
-    //connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, updateBadgeNumber);
-    //connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, this, updateBadgeNumber);
-
-    //connect(&_clearRecordsAction, &TriggerAction::triggered, this, [this]() -> void {
-    //    _model.setRowCount(0);
-    //    _lastMessageAction.setString("");
-    //});
-
-    //connect(&_loadPluginAction, &TriggerAction::triggered, this, [this]() -> void {
-    //    mv::plugins().requestViewPlugin("Logging", nullptr, DockAreaFlag::Bottom);
-
-    //    _loadPluginAction.setEnabled(false);
-    //});
 }
