@@ -25,8 +25,8 @@ public:
 
     /** Model columns */
     enum class Column {
-        Kind,               /** Kind of plugin */
         Type,               /** Type of plugin */
+        Kind,               /** Kind of plugin */
         Version,            /** Plugin version */
         NumberOfInstances,  /** Number of current instances */
 
@@ -51,39 +51,6 @@ public:
 
     private:
         plugin::PluginFactory*  _pluginFactory;     /** Pointer to plugin factory */
-    };
-
-    /** Item class for displaying the plugin factory kind */
-    class KindItem final : public Item {
-    public:
-
-        /** No need for specialized constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-                case Qt::DisplayRole:
-                case Qt::EditRole:
-                    return "Kind";
-
-                case Qt::ToolTipRole:
-                    return "Plugin kind";
-            }
-
-            return {};
-        }
     };
 
     /** Item class for displaying the plugin factory type */
@@ -113,6 +80,39 @@ public:
 
                 case Qt::ToolTipRole:
                     return "Plugin type";
+            }
+
+            return {};
+        }
+    };
+
+    /** Item class for displaying the plugin factory kind */
+    class KindItem final : public Item {
+    public:
+
+        /** No need for specialized constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Kind";
+
+                case Qt::ToolTipRole:
+                    return "Plugin kind";
             }
 
             return {};
@@ -204,6 +204,15 @@ public:
      * @param parent Pointer to parent object
      */
     AbstractPluginFactoriesModel(QObject* parent = nullptr);
+
+    /**
+     * Get header data for \p section, \p orientation and display \p role
+     * @param section Section
+     * @param orientation Orientation
+     * @param role Data role
+     * @return Header
+     */
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 };
 
 }

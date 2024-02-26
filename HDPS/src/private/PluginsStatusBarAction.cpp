@@ -8,6 +8,8 @@
     #define PLUGINS_STATUS_BAR_ACTION_VERBOSE
 #endif
 
+#include <QHeaderView>
+
 using namespace mv;
 using namespace mv::gui;
 
@@ -51,13 +53,14 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
     _loadedPluginsAction.setString(QString("%1 plugins loaded").arg(QString::number(mv::plugins().getPluginFactoriesByTypes().size())));
 
     _popupGroupAction.setShowLabels(false);
+    _popupGroupAction.setDefaultWidgetFlag(GroupAction::NoMargins);
     _popupGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
+    _popupGroupAction.setPopupSizeHint(QSize(300, 400));
+
     _popupGroupAction.addAction(&_pluginsAction);
 
     _pluginsAction.initialize(&_model, &_filterModel, "Plugin");
     _pluginsAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
-        //_loadPluginAction.setEnabled(mv::plugins().getPluginFactory("Logging")->getNumberOfInstances() == 0);
-
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
         Q_ASSERT(hierarchyWidget != nullptr);
@@ -66,6 +69,30 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
             return;
 
         hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+
+        auto& toolbarAction = hierarchyWidget->getToolbarAction();
+
+        toolbarAction.addAction(&_loadPluginAction);
+
+        auto treeView = widget->findChild<QTreeView*>("TreeView");
+
+        Q_ASSERT(treeView != nullptr);
+
+        if (treeView == nullptr)
+            return;
+
+        treeView->setRootIsDecorated(false);
+
+        treeView->setColumnHidden(static_cast<int>(AbstractPluginFactoriesModel::Column::NumberOfInstances), true);
+
+        auto treeViewHeader = treeView->header();
+
+        treeViewHeader->setStretchLastSection(true);
+
+        for (int columnIndex = 0; columnIndex < _model.columnCount(); ++columnIndex)
+            treeViewHeader->setSectionResizeMode(columnIndex, QHeaderView::ResizeToContents);
+
+        treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
     });
 
 }

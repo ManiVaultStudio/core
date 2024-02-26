@@ -25,6 +25,20 @@ PluginFactory* AbstractPluginFactoriesModel::Item::getPluginFactory() const
     return _pluginFactory;
 }
 
+QVariant AbstractPluginFactoriesModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getPluginFactory()->getType();
+
+        default:
+            break;
+    }
+
+    return Item::data(role);
+}
+
 QVariant AbstractPluginFactoriesModel::KindItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
@@ -37,20 +51,6 @@ QVariant AbstractPluginFactoriesModel::KindItem::data(int role /*= Qt::UserRole 
 
         case Qt::DecorationRole:
             return getPluginFactory()->getIcon();
-
-        default:
-            break;
-    }
-
-    return Item::data(role);
-}
-
-QVariant AbstractPluginFactoriesModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
-{
-    switch (role) {
-        case Qt::EditRole:
-        case Qt::DisplayRole:
-            return getPluginFactory()->getKind();
 
         default:
             break;
@@ -91,8 +91,8 @@ QVariant AbstractPluginFactoriesModel::NumberOfInstancesItem::data(int role /*= 
 
 AbstractPluginFactoriesModel::Row::Row(plugin::PluginFactory* pluginFactory)
 {
-    append(new KindItem(pluginFactory));
     append(new TypeItem(pluginFactory));
+    append(new KindItem(pluginFactory));
     append(new VersionItem(pluginFactory));
     append(new NumberOfInstancesItem(pluginFactory));
 }
@@ -101,6 +101,29 @@ AbstractPluginFactoriesModel::AbstractPluginFactoriesModel(QObject* parent /*= n
     QStandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
+}
+
+QVariant AbstractPluginFactoriesModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+{
+    switch (static_cast<Column>(section))
+    {
+        case Column::Type:
+            return TypeItem::headerData(orientation, role);
+
+        case Column::Kind:
+            return KindItem::headerData(orientation, role);
+
+        case Column::Version:
+            return VersionItem::headerData(orientation, role);
+
+        case Column::NumberOfInstances:
+            return NumberOfInstancesItem::headerData(orientation, role);
+
+        default:
+            break;
+    }
+
+    return {};
 }
 
 }

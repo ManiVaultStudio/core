@@ -749,11 +749,13 @@ set(PUBLIC_PLUGINS_MODEL_FILES
 set(PUBLIC_PLUGIN_FACTORIES_MODEL_HEADERS
     src/models/AbstractPluginFactoriesModel.h
     src/models/PluginFactoriesListModel.h
+    src/models/PluginFactoriesFilterModel.h
 )
 
 set(PUBLIC_PLUGIN_FACTORIES_MODEL_SOURCES
     src/models/AbstractPluginFactoriesModel.cpp
     src/models/PluginFactoriesListModel.cpp
+    src/models/PluginFactoriesFilterModel.cpp
 )
 
 set(PUBLIC_PLUGIN_FACTORIES_MODEL_FILES

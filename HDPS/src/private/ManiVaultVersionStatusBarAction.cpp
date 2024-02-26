@@ -44,7 +44,7 @@ ManiVaultVersionStatusBarAction::ManiVaultVersionStatusBarAction(QObject* parent
 
     _versionAction.setEnabled(false);
     _versionAction.setDefaultWidgetFlags(StringAction::Label);
-    _versionAction.setString(QString("ManiVault <b>%1.%2%3</b>").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), MV_VERSION_SUFFIX));
+    _versionAction.setString(QString("ManiVault <b>%1.%2%3</b>").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), "rc"));
 
     _popupAction.setDefaultWidgetFlags(StringAction::Label);
     _popupAction.setPopupSizeHint(QSize(200, 0));
