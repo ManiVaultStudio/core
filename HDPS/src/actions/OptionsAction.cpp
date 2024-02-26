@@ -75,8 +75,11 @@ void OptionsAction::setOptions(const QStringList& options, bool clearSelection /
 
     _optionsModel.clear();
 
+    //since adding a lot of options can become really slow we first add them to a list and then set the list using appendColumn.
+    QList<QStandardItem*> items;
+    items.reserve(options.size());
+
     for (const auto& option : options) {
-        const auto row = _optionsModel.rowCount();
 
         auto item = new QStandardItem();
 
@@ -84,8 +87,9 @@ void OptionsAction::setOptions(const QStringList& options, bool clearSelection /
         item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
         item->setData(clearSelection ? Qt::Unchecked : (selectedOptions.contains(option) ? Qt::Checked : Qt::Unchecked), Qt::CheckStateRole);
 
-        _optionsModel.setItem(row, 0, item);
+        items.append(item);
     }
+    _optionsModel.appendColumn(items);
 
     emit optionsChanged(getOptions());
 }
