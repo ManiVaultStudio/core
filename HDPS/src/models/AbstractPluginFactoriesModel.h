@@ -8,166 +8,202 @@
 
 namespace mv {
 
-//namespace plugin {
-//    class PluginFactory;
-//}
-//
-///**
-// * Abstract plugin manager model class
-// *
-// * Base standard item model for plugins
-// *
-// * @author Thomas Kroes
-// */
-//class AbstractPluginsModel : public QStandardItemModel
-//{
-//public:
-//
-//    /** Model columns */
-//    enum class Column {
-//        Name,       /** Item name (plugin type, factory name or plugin name) */
-//        Category,   /** Item category (type, factory or instance) */
-//        ID          /** Globally unique plugin instance identifier */
-//    };
-//
-//    /** Base standard model item class for task */
-//    class Item : public QStandardItem {
-//    public:
-//
-//        /**
-//         * Construct with pointer to \p pluginFactory
-//         * @param pluginFactory Pointer to plugin factory
-//         */
-//        Item(plugin::PluginFactory* pluginFactory);
-//
-//        /**
-//         * Get plugin factory
-//         * return Pointer to plugin factory
-//         */
-//        plugin::PluginFactory* getPluginFactory() const;
-//
-//    private:
-//        plugin::PluginFactory*  _pluginFactory;     /** Pointer to plugin factory */
-//    };
-//
-//    /** Standard model item class for displaying the item name */
-//    class NameItem final : public Item {
-//    public:
-//
-//        /** No need for specialized constructor */
-//        using Item::Item;
-//
-//        /**
-//         * Get model data for \p role
-//         * @return Data for \p role in variant form
-//         */
-//        QVariant data(int role = Qt::UserRole + 1) const override;
-//
-//        /**
-//         * Get header data for \p orientation and \p role
-//         * @param orientation Horizontal/vertical
-//         * @param role Data role
-//         * @return Header data
-//         */
-//        static QVariant headerData(Qt::Orientation orientation, int role) {
-//            switch (role) {
-//                case Qt::DisplayRole:
-//                case Qt::EditRole:
-//                    return "Name";
-//
-//                case Qt::ToolTipRole:
-//                    return "Name of the item";
-//            }
-//
-//            return {};
-//        }
-//    };
-//
-//    /** Standard model item class for displaying the item category */
-//    class CategoryItem final : public Item {
-//    public:
-//
-//        /** No need for specialized constructor */
-//        using Item::Item;
-//
-//        /**
-//         * Get model data for \p role
-//         * @return Data for \p role in variant form
-//         */
-//        QVariant data(int role = Qt::UserRole + 1) const override;
-//
-//        /**
-//         * Get header data for \p orientation and \p role
-//         * @param orientation Horizontal/vertical
-//         * @param role Data role
-//         * @return Header data
-//         */
-//        static QVariant headerData(Qt::Orientation orientation, int role) {
-//            switch (role) {
-//                case Qt::DisplayRole:
-//                case Qt::EditRole:
-//                    return "Category";
-//
-//                case Qt::ToolTipRole:
-//                    return "Item category";
-//            }
-//
-//            return {};
-//        }
-//    };
-//
-//    /** Standard model item class for displaying the plugin ID */
-//    class IdItem final : public Item {
-//    public:
-//
-//        /** No need for specialized constructor */
-//        using Item::Item;
-//
-//        /**
-//         * Get model data for \p role
-//         * @return Data for \p role in variant form
-//         */
-//        QVariant data(int role = Qt::UserRole + 1) const override;
-//
-//        /**
-//         * Get header data for \p orientation and \p role
-//         * @param orientation Horizontal/vertical
-//         * @param role Data role
-//         * @return Header data
-//         */
-//        static QVariant headerData(Qt::Orientation orientation, int role) {
-//            switch (role) {
-//                case Qt::DisplayRole:
-//                case Qt::EditRole:
-//                    return "ID";
-//
-//                case Qt::ToolTipRole:
-//                    return "Globally unique identifier of the plugin";
-//            }
-//
-//            return {};
-//        }
-//    };
-//
-//    /** Convenience class for combining items in a row */
-//    class Row final : public QList<QStandardItem*>
-//    {
-//    public:
-//
-//        /**
-//         * Construct with pointer to \p pluginFactory
-//         * @param pluginFactory Pointer to plugin factory
-//         */
-//        Row(plugin::PluginFactory* pluginFactory);
-//    };
-//
-//public:
-//
-//    /**
-//     * Construct plugin manager model with \p parent
-//     * @param parent Pointer to parent object
-//     */
-//    AbstractPluginsModel(QObject* parent = nullptr);
-//};
+namespace plugin {
+    class PluginFactory;
+}
+
+/**
+ * Plugin factories model class
+ *
+ * Base standard item model for plugin factories
+ *
+ * @author Thomas Kroes
+ */
+class AbstractPluginFactoriesModel : public QStandardItemModel
+{
+public:
+
+    /** Model columns */
+    enum class Column {
+        Kind,               /** Kind of plugin */
+        Type,               /** Type of plugin */
+        Version,            /** Plugin version */
+        NumberOfInstances,  /** Number of current instances */
+
+        Count
+    };
+
+    /** Base standard model item class for plugin factory item */
+    class Item : public QStandardItem {
+    public:
+
+        /**
+         * Construct with pointer to \p pluginFactory
+         * @param pluginFactory Pointer to plugin factory
+         */
+        Item(plugin::PluginFactory* pluginFactory);
+
+        /**
+         * Get plugin factory
+         * return Pointer to plugin factory
+         */
+        plugin::PluginFactory* getPluginFactory() const;
+
+    private:
+        plugin::PluginFactory*  _pluginFactory;     /** Pointer to plugin factory */
+    };
+
+    /** Item class for displaying the plugin factory kind */
+    class KindItem final : public Item {
+    public:
+
+        /** No need for specialized constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Kind";
+
+                case Qt::ToolTipRole:
+                    return "Plugin kind";
+            }
+
+            return {};
+        }
+    };
+
+    /** Item class for displaying the plugin factory type */
+    class TypeItem final : public Item {
+    public:
+
+        /** No need for specialized constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Type";
+
+                case Qt::ToolTipRole:
+                    return "Plugin type";
+            }
+
+            return {};
+        }
+    };
+
+    /** Item class for displaying the plugin factory version */
+    class VersionItem final : public Item {
+    public:
+
+        /** No need for specialized constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Version";
+
+                case Qt::ToolTipRole:
+                    return "Plugin version";
+            }
+
+            return {};
+        }
+    };
+
+    /** Item class for displaying the number of current plugin instances */
+    class NumberOfInstancesItem final : public Item {
+    public:
+
+        /** No need for specialized constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+                case Qt::DisplayRole:
+                case Qt::EditRole:
+                    return "Number of instances";
+
+                case Qt::ToolTipRole:
+                    return "Number of plugin instances";
+            }
+
+            return {};
+        }
+    };
+
+    /** Convenience class for combining items in a row */
+    class Row final : public QList<QStandardItem*>
+    {
+    public:
+
+        /**
+         * Construct with pointer to \p pluginFactory
+         * @param pluginFactory Pointer to plugin factory
+         */
+        Row(plugin::PluginFactory* pluginFactory);
+    };
+
+public:
+
+    /**
+     * Construct with pointer to \p parent object
+     * @param parent Pointer to parent object
+     */
+    AbstractPluginFactoriesModel(QObject* parent = nullptr);
+};
 
 }

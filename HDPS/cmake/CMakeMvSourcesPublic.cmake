@@ -748,10 +748,12 @@ set(PUBLIC_PLUGINS_MODEL_FILES
 
 set(PUBLIC_PLUGIN_FACTORIES_MODEL_HEADERS
     src/models/AbstractPluginFactoriesModel.h
+    src/models/PluginFactoriesListModel.h
 )
 
 set(PUBLIC_PLUGIN_FACTORIES_MODEL_SOURCES
     src/models/AbstractPluginFactoriesModel.cpp
+    src/models/PluginFactoriesListModel.cpp
 )
 
 set(PUBLIC_PLUGIN_FACTORIES_MODEL_FILES
