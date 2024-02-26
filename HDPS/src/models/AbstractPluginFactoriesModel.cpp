@@ -14,10 +14,16 @@ using namespace mv::plugin;
 
 namespace mv {
 
-AbstractPluginFactoriesModel::Item::Item(plugin::PluginFactory* pluginFactory) :
+AbstractPluginFactoriesModel::Item::Item(const QString& type, plugin::PluginFactory* pluginFactory) :
     QStandardItem(),
+    _type(type),
     _pluginFactory(pluginFactory)
 {
+}
+
+QString AbstractPluginFactoriesModel::Item::getType() const
+{
+    return _type;
 }
 
 PluginFactory* AbstractPluginFactoriesModel::Item::getPluginFactory() const
@@ -25,32 +31,18 @@ PluginFactory* AbstractPluginFactoriesModel::Item::getPluginFactory() const
     return _pluginFactory;
 }
 
-QVariant AbstractPluginFactoriesModel::TypeItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractPluginFactoriesModel::NameItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
-            return getPluginFactory()->getType();
-
-        default:
-            break;
-    }
-
-    return Item::data(role);
-}
-
-QVariant AbstractPluginFactoriesModel::KindItem::data(int role /*= Qt::UserRole + 1*/) const
-{
-    switch (role) {
-        case Qt::EditRole:
-        case Qt::DisplayRole:
-            return getPluginFactory()->getKind();
+            return getPluginFactory() ? getPluginFactory()->getKind() : getType();
 
         case Qt::ToolTipRole:
             return QString("%1").arg(data(Qt::DisplayRole).toString());
 
         case Qt::DecorationRole:
-            return getPluginFactory()->getIcon();
+            return getPluginFactory() ? getPluginFactory()->getIcon() : QIcon();
 
         default:
             break;
@@ -64,7 +56,7 @@ QVariant AbstractPluginFactoriesModel::VersionItem::data(int role /*= Qt::UserRo
     switch (role) {
         case Qt::EditRole:
         case Qt::DisplayRole:
-            return getPluginFactory()->getKind();
+            return getPluginFactory() ? QString("v%1").arg(getPluginFactory()->getVersion()) : "";
 
         default:
             break;
@@ -77,10 +69,10 @@ QVariant AbstractPluginFactoriesModel::NumberOfInstancesItem::data(int role /*= 
 {
     switch (role) {
         case Qt::EditRole:
-            return getPluginFactory()->getNumberOfInstances();
+            return getPluginFactory() ? getPluginFactory()->getNumberOfInstances() : 0;
 
         case Qt::DisplayRole:
-            return QString::number(data(Qt::EditRole).toInt());
+            return getPluginFactory() ? QString::number(data(Qt::EditRole).toInt()) : "";
 
         default:
             break;
@@ -89,12 +81,21 @@ QVariant AbstractPluginFactoriesModel::NumberOfInstancesItem::data(int role /*= 
     return Item::data(role);
 }
 
-AbstractPluginFactoriesModel::Row::Row(plugin::PluginFactory* pluginFactory)
+AbstractPluginFactoriesModel::Row::Row(const QString& type, plugin::PluginFactory* pluginFactory)
 {
-    append(new TypeItem(pluginFactory));
-    append(new KindItem(pluginFactory));
-    append(new VersionItem(pluginFactory));
-    append(new NumberOfInstancesItem(pluginFactory));
+    append(new NameItem(type, pluginFactory));
+    append(new VersionItem(type, pluginFactory));
+    append(new NumberOfInstancesItem(type, pluginFactory));
+}
+
+AbstractPluginFactoriesModel::Row::Row(const QString& type) :
+    Row(type, nullptr)
+{
+}
+
+AbstractPluginFactoriesModel::Row::Row(plugin::PluginFactory* pluginFactory) :
+    Row("", pluginFactory)
+{
 }
 
 AbstractPluginFactoriesModel::AbstractPluginFactoriesModel(QObject* parent /*= nullptr*/) :
@@ -107,11 +108,8 @@ QVariant AbstractPluginFactoriesModel::headerData(int section, Qt::Orientation o
 {
     switch (static_cast<Column>(section))
     {
-        case Column::Type:
-            return TypeItem::headerData(orientation, role);
-
-        case Column::Kind:
-            return KindItem::headerData(orientation, role);
+        case Column::Name:
+            return NameItem::headerData(orientation, role);
 
         case Column::Version:
             return VersionItem::headerData(orientation, role);

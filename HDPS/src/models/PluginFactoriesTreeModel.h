@@ -4,28 +4,26 @@
 
 #pragma once
 
-#include "actions/OptionsAction.h"
-
-#include <QSortFilterProxyModel>
+#include "AbstractPluginFactoriesModel.h"
 
 namespace mv {
 
 /**
- * Plugin factories filter model class
+ * Plugin factories tree model class
  *
- * Sorting and filtering model for plugin factories
+ * tree model for loaded plugin factories
  *
  * @author Thomas Kroes
  */
-class PluginFactoriesFilterModel : public QSortFilterProxyModel
+class PluginFactoriesTreeModel : public AbstractPluginFactoriesModel
 {
 public:
 
-    /** 
-     * Construct the filter model with \p parent
+    /**
+     * Construct with pointer to \p parent object
      * @param parent Pointer to parent object
-    */
-    PluginFactoriesFilterModel(QObject* parent = nullptr);
+     */
+    PluginFactoriesTreeModel(QObject* parent = nullptr);
 };
 
 }

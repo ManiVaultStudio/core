@@ -13,6 +13,8 @@
 
 namespace mv {
 
+using namespace gui;
+
 PluginFactoriesFilterModel::PluginFactoriesFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent)
 {

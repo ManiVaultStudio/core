@@ -18,14 +18,14 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
     _barGroupAction(this, "Bar group"),
     _iconAction(this, "Icon"),
     _loadedPluginsAction(this, "Loaded Plugins"),
-    _loadPluginAction(this, "Plugin"),
+    _loadPluginBrowserAction(this, "Plugin"),
     _popupGroupAction(this, "Popup Group"),
     _model(),
     _filterModel(),
     _pluginsAction(this, "Plugins")
 {
     setBarAction(&_barGroupAction);
-    setPopupAction(&_popupGroupAction);
+    setPopupAction(&_pluginsAction);
 
     _barGroupAction.setShowLabels(false);
 
@@ -50,12 +50,12 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
 
     _loadedPluginsAction.setEnabled(false);
     _loadedPluginsAction.setDefaultWidgetFlags(StringAction::Label);
-    _loadedPluginsAction.setString(QString("%1 plugins loaded").arg(QString::number(mv::plugins().getPluginFactoriesByTypes().size())));
+    _loadedPluginsAction.setString(QString("%1 plugins").arg(QString::number(mv::plugins().getPluginFactoriesByTypes().size())));
 
     _popupGroupAction.setShowLabels(false);
     _popupGroupAction.setDefaultWidgetFlag(GroupAction::NoMargins);
-    _popupGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
-    _popupGroupAction.setPopupSizeHint(QSize(300, 400));
+    _pluginsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
+    _pluginsAction.setPopupSizeHint(QSize(500, 400));
 
     _popupGroupAction.addAction(&_pluginsAction);
 
@@ -68,11 +68,15 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
         if (hierarchyWidget == nullptr)
             return;
 
+        hierarchyWidget->setHeaderHidden(true);
         hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+        
+        hierarchyWidget->getFilterGroupAction().setVisible(false);
+        hierarchyWidget->getColumnsGroupAction().setVisible(false);
 
         auto& toolbarAction = hierarchyWidget->getToolbarAction();
 
-        toolbarAction.addAction(&_loadPluginAction);
+        toolbarAction.addAction(&_loadPluginBrowserAction);
 
         auto treeView = widget->findChild<QTreeView*>("TreeView");
 
@@ -81,18 +85,25 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
         if (treeView == nullptr)
             return;
 
-        treeView->setRootIsDecorated(false);
+        //treeView->setRootIsDecorated(false);
 
         treeView->setColumnHidden(static_cast<int>(AbstractPluginFactoriesModel::Column::NumberOfInstances), true);
 
         auto treeViewHeader = treeView->header();
 
-        treeViewHeader->setStretchLastSection(true);
+        treeViewHeader->setStretchLastSection(false);
 
-        for (int columnIndex = 0; columnIndex < _model.columnCount(); ++columnIndex)
-            treeViewHeader->setSectionResizeMode(columnIndex, QHeaderView::ResizeToContents);
+        treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractPluginFactoriesModel::Column::Name), QHeaderView::Stretch);
+        treeViewHeader->setSectionResizeMode(static_cast<int>(AbstractPluginFactoriesModel::Column::Version), QHeaderView::ResizeToContents);
 
-        treeViewHeader->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+        treeViewHeader->resizeSections(QHeaderView::ResizeToContents);
     });
 
+    _loadPluginBrowserAction.setIconByName("window-maximize");
+    _loadPluginBrowserAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
+    _loadPluginBrowserAction.setToolTip("Load plugin browser");
+
+    connect(&_loadPluginBrowserAction, &TriggerAction::triggered, this, [this]() -> void {
+        projects().getPluginManagerAction().trigger();
+    });
 }

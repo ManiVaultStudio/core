@@ -25,8 +25,7 @@ public:
 
     /** Model columns */
     enum class Column {
-        Type,               /** Type of plugin */
-        Kind,               /** Kind of plugin */
+        Name,               /** Item name */
         Version,            /** Plugin version */
         NumberOfInstances,  /** Number of current instances */
 
@@ -38,10 +37,17 @@ public:
     public:
 
         /**
-         * Construct with pointer to \p pluginFactory
+         * Construct with \p type and pointer to \p pluginFactory
+         * @param type View type
          * @param pluginFactory Pointer to plugin factory
          */
-        Item(plugin::PluginFactory* pluginFactory);
+        Item(const QString& type, plugin::PluginFactory* pluginFactory);
+
+        /**
+         * Get type
+         * return Plugin type string
+         */
+        QString getType() const;
 
         /**
          * Get plugin factory
@@ -50,44 +56,12 @@ public:
         plugin::PluginFactory* getPluginFactory() const;
 
     private:
+        const QString           _type;              /** Plugin type */
         plugin::PluginFactory*  _pluginFactory;     /** Pointer to plugin factory */
     };
 
-    /** Item class for displaying the plugin factory type */
-    class TypeItem final : public Item {
-    public:
-
-        /** No need for specialized constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-                case Qt::DisplayRole:
-                case Qt::EditRole:
-                    return "Type";
-
-                case Qt::ToolTipRole:
-                    return "Plugin type";
-            }
-
-            return {};
-        }
-    };
-
     /** Item class for displaying the plugin factory kind */
-    class KindItem final : public Item {
+    class NameItem final : public Item {
     public:
 
         /** No need for specialized constructor */
@@ -109,10 +83,10 @@ public:
             switch (role) {
                 case Qt::DisplayRole:
                 case Qt::EditRole:
-                    return "Kind";
+                    return "Name";
 
                 case Qt::ToolTipRole:
-                    return "Plugin kind";
+                    return "Item name";
             }
 
             return {};
@@ -189,6 +163,19 @@ public:
     class Row final : public QList<QStandardItem*>
     {
     public:
+
+        /**
+         * Construct with \p type and pointer to \p pluginFactory
+         * @param type View type
+         * @param pluginFactory Pointer to plugin factory
+         */
+        Row(const QString& type, plugin::PluginFactory* pluginFactory);
+
+        /**
+         * Construct with \p type
+         * @param type View type
+         */
+        Row(const QString& type);
 
         /**
          * Construct with pointer to \p pluginFactory
