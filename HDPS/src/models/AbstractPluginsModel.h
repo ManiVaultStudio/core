@@ -23,7 +23,9 @@ public:
     enum class Column {
         Name,       /** Item name (plugin type, factory name or plugin name) */
         Category,   /** Item category (type, factory or instance) */
-        ID          /** Globally unique plugin instance identifier */
+        ID,         /** Globally unique plugin instance identifier */
+
+        Count
     };
 
     /** Standard model item class for displaying the item name */

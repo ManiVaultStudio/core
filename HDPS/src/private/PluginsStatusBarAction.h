@@ -11,6 +11,9 @@
 #include <actions/TriggerAction.h>
 #include <actions/TreeAction.h>
 
+#include <models/PluginsTreeModel.h>
+#include <models/PluginsFilterModel.h>
+
 /**
  * Plugins status bar action class
  *
@@ -37,5 +40,7 @@ private:
     mv::gui::StringAction           _loadedPluginsAction;   /** String action displays the last record message from the model (if any) */
     mv::gui::TriggerAction          _loadPluginAction;      /** Triggers loading the logging plugin */
     mv::gui::HorizontalGroupAction  _popupGroupAction;      /** Popup group action */
+    mv::PluginsTreeModel            _model;                 /** Plugins model */
+    mv::PluginsFilterModel          _filterModel;           /** Filter model for the plugins model */
     mv::gui::TreeAction             _pluginsAction;         /** Tree action plugins listing in popup group action */
 };

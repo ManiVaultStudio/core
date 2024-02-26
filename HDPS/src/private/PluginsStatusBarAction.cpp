@@ -18,6 +18,8 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
     _loadedPluginsAction(this, "Loaded Plugins"),
     _loadPluginAction(this, "Plugin"),
     _popupGroupAction(this, "Popup Group"),
+    _model(),
+    _filterModel(),
     _pluginsAction(this, "Plugins")
 {
     setBarAction(&_barGroupAction);
@@ -51,5 +53,19 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
     _popupGroupAction.setShowLabels(false);
     _popupGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
     _popupGroupAction.addAction(&_pluginsAction);
+
+    _pluginsAction.initialize(&_model, &_filterModel, "Plugin");
+    _pluginsAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
+        //_loadPluginAction.setEnabled(mv::plugins().getPluginFactory("Logging")->getNumberOfInstances() == 0);
+
+        auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
+
+        Q_ASSERT(hierarchyWidget != nullptr);
+
+        if (hierarchyWidget == nullptr)
+            return;
+
+        hierarchyWidget->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+    });
 
 }

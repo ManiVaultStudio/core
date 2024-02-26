@@ -19,6 +19,8 @@ namespace mv {
 PluginsTreeModel::PluginsTreeModel(QObject* parent /*= nullptr*/) :
     AbstractPluginsModel(parent)
 {
+    setColumnCount(static_cast<int>(AbstractPluginsModel::Column::Count));
+
     const auto pluginTypes = plugin::Types{
         plugin::Type::ANALYSIS,
         plugin::Type::DATA,
