@@ -50,6 +50,12 @@ public:
      */
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
 
+    /**
+     * Determines whether one (or more) tasks are killable
+     * @return Boolean determining whether there are any killable tasks
+     */
+    bool hasKillableTasks() const;
+
 private:
 
     /**
@@ -68,16 +74,6 @@ private:
      * @param last Index of the last row
      */
     void addTaskTypesForRows(const QModelIndex& parent, int first, int last);
-
-signals:
-    
-    /**
-     * Signals that the number of rows changed from \p previousRowCount to \p currentRowCount
-     * @param parent Parent row index of which the number of rows changed
-     * @param previousRowCount Previous number of rows
-     * @param currentRowCount Current number of rows
-     */
-    void rowCountChanged(const QModelIndex& parent, std::int32_t previousRowCount, std::int32_t currentRowCount);
 
 public: // Action getters
 

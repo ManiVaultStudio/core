@@ -33,6 +33,8 @@ PluginFactoriesTreeModel::PluginFactoriesTreeModel(QObject* parent /*= nullptr*/
 
         for (auto pluginFactory : plugins().getPluginFactoriesByType(pluginType))
             pluginTypeRow.first()->appendRow(Row(pluginFactory));
+
+        pluginTypeRow.first()->setEnabled(pluginTypeRow.first()->hasChildren());
     }
 }
 

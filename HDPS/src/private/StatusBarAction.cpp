@@ -82,6 +82,8 @@ StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarActio
         if (popupAction)
             _toolButton.addAction(popupAction);
     });
+
+    connect(&_toolButton, &ToolButton::clicked, statusBarAction, &StatusBarAction::toolButtonClicked);
 }
 
 StatusBarAction::Widget::ToolButton::ToolButton(QWidget* parent, StatusBarAction* statusBarAction) :

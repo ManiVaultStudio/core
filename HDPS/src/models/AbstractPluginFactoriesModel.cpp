@@ -19,6 +19,7 @@ AbstractPluginFactoriesModel::Item::Item(const QString& type, plugin::PluginFact
     _type(type),
     _pluginFactory(pluginFactory)
 {
+    setEditable(false);
 }
 
 QString AbstractPluginFactoriesModel::Item::getType() const

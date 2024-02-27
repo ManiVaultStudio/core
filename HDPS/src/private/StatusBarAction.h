@@ -107,6 +107,9 @@ signals:
      */
     void popupActionChanged(WidgetAction* previousPopupAction, WidgetAction* popupAction);
 
+    /** Signals that the tool button was clicked */
+    void toolButtonClicked();
+
 private:
     WidgetAction*   _barAction;       /** Pointer to bar action */
     WidgetAction*   _popupAction;     /** Pointer to popup action (maybe nullptr) */

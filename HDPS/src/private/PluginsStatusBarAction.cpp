@@ -19,7 +19,6 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
     _iconAction(this, "Icon"),
     _loadedPluginsAction(this, "Loaded Plugins"),
     _loadPluginBrowserAction(this, "Plugin"),
-    _popupGroupAction(this, "Popup Group"),
     _model(),
     _filterModel(),
     _pluginsAction(this, "Plugins")
@@ -52,12 +51,8 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
     _loadedPluginsAction.setDefaultWidgetFlags(StringAction::Label);
     _loadedPluginsAction.setString(QString("%1 plugins").arg(QString::number(mv::plugins().getPluginFactoriesByTypes().size())));
 
-    _popupGroupAction.setShowLabels(false);
-    _popupGroupAction.setDefaultWidgetFlag(GroupAction::NoMargins);
     _pluginsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
     _pluginsAction.setPopupSizeHint(QSize(500, 400));
-
-    _popupGroupAction.addAction(&_pluginsAction);
 
     _pluginsAction.initialize(&_model, &_filterModel, "Plugin");
     _pluginsAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
@@ -84,8 +79,6 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
 
         if (treeView == nullptr)
             return;
-
-        //treeView->setRootIsDecorated(false);
 
         treeView->setColumnHidden(static_cast<int>(AbstractPluginFactoriesModel::Column::NumberOfInstances), true);
 

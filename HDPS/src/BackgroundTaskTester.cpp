@@ -20,8 +20,10 @@ BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name)
 
         QMap<QString, QTimer*> timers;
 
-        const auto addChildTask = [this, &timers](const QString& name, QStringList tasks, int interval) -> Task* {
+        const auto addChildTask = [this, &timers](const QString& name, QStringList tasks, int interval, bool mayKill = false) -> Task* {
             auto childTask = new BackgroundTask(nullptr, name);
+
+            childTask->setMayKill(mayKill);
 
             if (!tasks.isEmpty()) {
                 childTask->setSubtasks(tasks);
@@ -33,7 +35,10 @@ BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name)
 
                 timer->setInterval(interval);
 
-                connect(childTask, &BackgroundTask::requestAbort, timer, &QTimer::stop);
+                connect(childTask, &BackgroundTask::requestAbort, childTask, [childTask, timer]() -> void {
+                    childTask->setAborted();
+                    timer->stop();
+                });
 
                 connect(timer, &QTimer::timeout, [timer, childTask, &tasks]() -> void {
                     if (!tasks.isEmpty()) {
@@ -69,7 +74,7 @@ BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name)
             "Import file 8",
             "Import file 9",
             "Import file 10"
-            }, 3202);
+            }, 2502, true);
 
         auto childTaskB = addChildTask("Updating ManiVault", {
             "Downloading update 1",
@@ -82,7 +87,7 @@ BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name)
             "Downloading update 8",
             "Downloading update 9",
             "Downloading update 10"
-            }, 3850);
+            }, 4650);
 
         eventLoop.exec();
     });

@@ -24,7 +24,7 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     setPopupAction(&_tasksAction);
 
     _barGroupAction.setShowLabels(false);
-    _barGroupAction.addAction(&_tasksAction);
+    //_barGroupAction.addAction(&_tasksAction);
 
     _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
     _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
@@ -32,9 +32,9 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
 
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
+    //_tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
     _tasksAction.setPopupSizeHint(QSize(600, 150));
-    _tasksAction.initialize(&_model, &_filterModel, "Foreground");
+    _tasksAction.initialize(&_model, &_filterModel, "Foreground Task");
     _tasksAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
@@ -47,6 +47,16 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
         hierarchyWidget->setHeaderHidden(true);
 
         auto& treeView = hierarchyWidget->getTreeView();
+
+        auto palette = treeView.palette();
+
+        palette.setColor(QPalette::Base, QApplication::palette().color(QPalette::Normal, QPalette::Window));
+
+        treeView.setAutoFillBackground(true);
+        treeView.setFrameShape(QFrame::NoFrame);
+        treeView.setPalette(palette);
+        treeView.viewport()->setPalette(palette);
+        treeView.setRootIsDecorated(false);
 
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Status), true);
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Type), true);

@@ -39,7 +39,6 @@ private:
     mv::gui::StringAction               _iconAction;                /** String action for showing a plugin icon with FontAwesome */
     mv::gui::StringAction               _loadedPluginsAction;       /** String action displays the last record message from the model (if any) */
     mv::gui::TriggerAction              _loadPluginBrowserAction;   /** Triggers loading the logging plugin */
-    mv::gui::HorizontalGroupAction      _popupGroupAction;          /** Popup group action */
     mv::PluginFactoriesTreeModel        _model;                     /** Plugins model */
     mv::PluginFactoriesFilterModel      _filterModel;               /** Filter model for the plugins model */
     mv::gui::TreeAction                 _pluginsAction;             /** Tree action plugins listing in popup group action */

@@ -148,4 +148,13 @@ void TasksFilterModel::addTaskTypesForRows(const QModelIndex& parent, int first,
     _taskTypeFilterAction.setSelectedOptions(selectedTaskTypes);
 }
 
+bool TasksFilterModel::hasKillableTasks() const
+{
+    for (int rowIndex = 0; rowIndex < rowCount(); ++rowIndex)
+        if (index(rowIndex, static_cast<int>(AbstractTasksModel::Column::MayKill), QModelIndex()).data(Qt::EditRole).toBool())
+            return true;
+
+    return false;
+}
+
 }

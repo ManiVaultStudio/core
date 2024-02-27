@@ -37,6 +37,7 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     _barGroupAction.addAction(&_overallBackgroundTaskAction);
 
     _overallBackgroundTaskAction.setStretch(1);
+    _overallBackgroundTaskAction.setVisible(false);
     _overallBackgroundTaskAction.setTask(&overallBackgroundTask);
 
     const auto overallBackgroundTaskTextFormatter = [this](Task& task) -> QString {
@@ -50,7 +51,7 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
 
             case Task::Status::Running:
             case Task::Status::RunningIndeterminate:
-                return QString("%1 background task%2 %3 %4%").arg(QString::number(numberOfChildTasks), numberOfChildTasks == 1 ? "" : "s", numberOfChildTasks == 1 ? "is" : "are", QString::number(task.getProgress() * 100.f, 'f', 1));
+                return QString("%1 background task%2 %3%").arg(QString::number(numberOfChildTasks), numberOfChildTasks == 1 ? "" : "s", QString::number(task.getProgress() * 100.f, 'f', 1));
 
             case Task::Status::Finished:
                 return QString("All background tasks have finished");
@@ -72,9 +73,12 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
-    _tasksAction.setPopupSizeHint(QSize(600, 150));
+    _tasksAction.setPopupSizeHint(QSize(600, 0));
     _tasksAction.initialize(&_model, &_filterModel, "Background task");
     _tasksAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
+        widget->setMinimumHeight(5);
+        widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
         Q_ASSERT(hierarchyWidget);
@@ -82,12 +86,45 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
         if (hierarchyWidget == nullptr)
             return;
 
+        hierarchyWidget->getToolbarAction().setVisible(false);
         hierarchyWidget->setHeaderHidden(true);
+        hierarchyWidget->setStyleSheet("background-color: red;");
 
         auto& treeView = hierarchyWidget->getTreeView();
 
+        auto palette = treeView.palette();
+
+        palette.setColor(QPalette::Base, QApplication::palette().color(QPalette::Normal, QPalette::Window));
+
+        treeView.setAutoFillBackground(true);
+        treeView.setFrameShape(QFrame::NoFrame);
+        treeView.setPalette(palette);
+        treeView.viewport()->setPalette(palette);
+        treeView.setRootIsDecorated(false);
+
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Status), true);
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Type), true);
+
+        const auto numberOfBackgroundTasksChanged = [this, &treeView, hierarchyWidget, widget]() -> void {
+            std::int32_t height = 0;
+
+            for (int rowIndex = 0; rowIndex < _filterModel.rowCount(); ++rowIndex)
+                height += treeView.sizeHintForRow(rowIndex);
+
+            hierarchyWidget->setFixedHeight(height);
+
+            qDebug() << "===FIXED_HEIGHT===" << height << "_filterModel.hasKillableTasks()" << _filterModel.hasKillableTasks();
+
+            //hierarchyWidget->adjustSize();
+            widget->updateGeometry();
+
+            treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Kill), !_filterModel.hasKillableTasks());
+        };
+
+        numberOfBackgroundTasksChanged();
+
+        connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, &treeView, numberOfBackgroundTasksChanged);
+        connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, &treeView, numberOfBackgroundTasksChanged);
     });
 
     const auto numberOfBackgroundTasksChanged = [this]() -> void {

@@ -83,6 +83,7 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
             return;
 
         treeView->setRootIsDecorated(false);
+        treeView->setAlternatingRowColors(true);
 
         treeView->setColumnHidden(static_cast<int>(LoggingModel::Column::Number), true);
         treeView->setColumnHidden(static_cast<int>(LoggingModel::Column::Type), true);
