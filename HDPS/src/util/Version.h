@@ -6,12 +6,12 @@
 
 #include "Serializable.h"
 
-#include <QPair>
+#include <string>
 
 namespace mv::util {
 
-/** Class for representing version with major- and minor version number */
-class Version final : public QPair<std::int32_t, std::int32_t>, public Serializable {
+/** Class for representing version with major-, minor- and patch version number plus an optional suffic */
+class Version final : public Serializable {
 public:
 
     /**
@@ -19,7 +19,25 @@ public:
      * @param major Major version number
      * @param minor Minor version number
      */
-    Version(std::int32_t major, std::int32_t minor);
+    Version(std::int32_t major, std::int32_t minor, std::int32_t patch, const std::string& suffix = "");
+
+    /**
+     * Get expanded version number, e.g. 40316 for 4.3.16
+     * @return Expanded version number
+     */
+    std::int32_t getVersionNumber() const;
+
+    /**
+     * Get full version as string, including suffix: Major.Minor.PatchSuffix
+     * @return version string
+     */
+    std::string getVersionString() const;
+
+    /**
+     * Get short version as string: Major.Minor
+     * @return version string
+     */
+    std::string getShortVersionString() const;
 
     /**
      * Get major version number
@@ -45,6 +63,30 @@ public:
      */
     void setMinor(std::int32_t minor);
 
+    /**
+     * Get patch version number
+     * @return Patch version number
+     */
+    std::int32_t getPatch() const;
+
+    /**
+     * Set patch version number to \p minor
+     * @param patch Patch version number
+     */
+    void setPatch(std::int32_t patch);
+
+    /**
+     * Get minor version number
+     * @return Minor version number
+     */
+    std::string getSuffix() const;
+
+    /**
+     * Set minor version number to \p minor
+     * @param minor Minor version number
+     */
+    void setSuffix(const std::string& suffix);
+
 public: // Serialization
 
     /**
@@ -58,6 +100,12 @@ public: // Serialization
      * @return Variant map representation of the version
      */
     QVariantMap toVariantMap() const override;
+
+private:
+    std::int32_t _major;
+    std::int32_t _minor;
+    std::int32_t _patch;
+    std::string  _suffix;
 };
 
 }

@@ -8,7 +8,10 @@ set(MV_CORE "mv-core")
 set(MV_VERSION_MAJOR 0)
 set(MV_VERSION_MINOR 9)
 set(MV_VERSION_PATCH 0)
-set(MV_VERSION "${MV_VERSION_MAJOR}.${MV_VERSION_MINOR}.${MV_VERSION_PATCH}")
+set(MV_VERSION_SUFFIX "") # e.g. for release candidates rc1
+
+include(cmake/Utils.cmake)
+mv_set_version()
 
 project(${MV_CORE} VERSION ${MV_VERSION})
 
@@ -23,7 +26,7 @@ if(MSVC)
     set(LINK_TYPE STATIC)
 endif(MSVC)
 
-message(STATUS "ManiVault version ${MV_VERSION}")
+message(STATUS "ManiVault version ${MV_VERSION_FULL}")
 message(STATUS "ManiVault Install dir: ${MV_INSTALL_DIR}")
 
 # -----------------------------------------------------------------------------
