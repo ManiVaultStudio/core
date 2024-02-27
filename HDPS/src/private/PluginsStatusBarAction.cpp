@@ -15,26 +15,18 @@ using namespace mv::gui;
 
 PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title, "plug"),
-    _loadedPluginsAction(this, "Loaded Plugins"),
     _loadPluginBrowserAction(this, "Plugin"),
-    _model(),
+    _treeModel(),
+    _listModel(),
     _filterModel(),
     _pluginsAction(this, "Plugins")
 {
     setPopupAction(&_pluginsAction);
 
-    getBarGroupAction().addAction(&_loadedPluginsAction, -1, [](WidgetAction* action, QWidget* widget) -> void {
-        auto labelWidget = widget->findChild<QLabel*>("Label");
-    });
-
-    _loadedPluginsAction.setEnabled(false);
-    _loadedPluginsAction.setDefaultWidgetFlags(StringAction::Label);
-    _loadedPluginsAction.setString(QString("%1 plugins").arg(QString::number(mv::plugins().getPluginFactoriesByTypes().size())));
-
     _pluginsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
     _pluginsAction.setPopupSizeHint(QSize(500, 400));
 
-    _pluginsAction.initialize(&_model, &_filterModel, "Plugin");
+    _pluginsAction.initialize(&_treeModel, &_filterModel, "Plugin");
     _pluginsAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
@@ -79,4 +71,21 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
     connect(&_loadPluginBrowserAction, &TriggerAction::triggered, this, [this]() -> void {
         projects().getPluginManagerAction().trigger();
     });
+
+    auto& badge = getBarIconStringAction().getBadge();
+
+    badge.setScale(0.55f);
+    badge.setBackgroundColor(qApp->palette().highlight().color());
+
+    const auto updateBadge = [this, &badge]() -> void {
+        const auto numberPluginsLoaded = _listModel.rowCount();
+
+        badge.setEnabled(numberPluginsLoaded > 0);
+        badge.setNumber(numberPluginsLoaded);
+    };
+
+    updateBadge();
+
+    connect(&_listModel, &QSortFilterProxyModel::rowsInserted, this, updateBadge);
+    connect(&_listModel, &QSortFilterProxyModel::rowsRemoved, this, updateBadge);
 }

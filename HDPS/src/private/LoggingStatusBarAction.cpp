@@ -116,20 +116,6 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _filterModel.setSourceModel(&_model);
     _filterModel.setFilterKeyColumn(static_cast<int>(LoggingModel::Column::Message));
 
-    auto& badge = _lastMessageAction.getBadge();
-
-    badge.setScale(0.5f);
-    badge.setBackgroundColor(qApp->palette().highlight().color());
-
-    const auto updateBadgeNumber = [this, &badge]() -> void {
-        const auto numberOfRecords = _filterModel.rowCount();
-
-        badge.setEnabled(numberOfRecords > 0);
-        badge.setNumber(numberOfRecords);
-    };
-
-    updateBadgeNumber();
-
     _clearRecordsAction.setEnabled(_filterModel.rowCount() > 0);
     _clearRecordsAction.setIconByName("trash");
     _clearRecordsAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
@@ -143,10 +129,6 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, [this](const QModelIndex& parent, int start, int end) -> void {
         _lastMessageAction.setString(_filterModel.index(end, static_cast<int>(LoggingModel::Column::Message), parent).data(Qt::EditRole).toString());
     });
-
-    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, updateBadgeNumber);
-    connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, updateBadgeNumber);
-    connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, this, updateBadgeNumber);
 
     connect(&_clearRecordsAction, &TriggerAction::triggered, this, [this]() -> void {
         _model.setRowCount(0);

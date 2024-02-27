@@ -30,7 +30,7 @@ StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QS
 
         auto horizontalLayout = horizontalWidget->layout();
 
-        horizontalLayout->setContentsMargins(1, 0, 1, 0);
+        horizontalLayout->setContentsMargins(2, 0, 2, 0);
         horizontalLayout->setSpacing(4);
     });
 
@@ -40,8 +40,6 @@ StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QS
         _iconAction.setEnabled(false);
         _iconAction.setDefaultWidgetFlags(StringAction::Label);
         _iconAction.setString(icon);
-        //_iconAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-        //_iconAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
         _iconAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
             auto labelWidget = widget->findChild<QLabel*>("Label");
 
