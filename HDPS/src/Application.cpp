@@ -32,7 +32,7 @@ Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
     _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _core(nullptr),
-    _version({ MV_VERSION_MAJOR, MV_VERSION_MINOR }),
+    _version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::to_string(MV_VERSION_SUFFIX)),
     _iconFonts(),
     _settings(),
     _serializationTemporaryDirectory(),
