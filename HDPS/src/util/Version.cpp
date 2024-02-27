@@ -26,9 +26,9 @@ std::int32_t Version::getVersionNumber() const
 std::string Version::getVersionString() const 
 {
     if(_suffix == " ")
-        return std::to_string(_major) + std::to_string(_minor) + std::to_string(_patch);
+        return std::to_string(_major) + "." + std::to_string(_minor) + "." + std::to_string(_patch);
     else
-        return std::to_string(_major) + std::to_string(_minor) + std::to_string(_patch) + _suffix;
+        return std::to_string(_major) + "." + std::to_string(_minor) + "." + std::to_string(_patch) + _suffix;
 }
 
 std::int32_t Version::getMajor() const
