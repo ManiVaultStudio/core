@@ -14,17 +14,12 @@ using namespace mv;
 using namespace mv::gui;
 
 ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, const QString& title) :
-    StatusBarAction(parent, title),
+    StatusBarAction(parent, title, "tasks"),
     _model(),
     _filterModel(),
-    _barGroupAction(this, "Bar group"),
     _tasksAction(this, "Tasks")
 {
-    setBarAction(&_barGroupAction);
     setPopupAction(&_tasksAction);
-
-    _barGroupAction.setShowLabels(false);
-    //_barGroupAction.addAction(&_tasksAction);
 
     _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
     _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
@@ -32,7 +27,6 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
 
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    //_tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
     _tasksAction.setPopupSizeHint(QSize(600, 150));
     _tasksAction.initialize(&_model, &_filterModel, "Foreground Task");
     _tasksAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
@@ -60,18 +54,36 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
 
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Status), true);
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Type), true);
+
+        const auto numberOfForegroundTasksChanged = [this, &treeView, hierarchyWidget, widget]() -> void {
+            std::int32_t height = 0;
+
+            for (int rowIndex = 0; rowIndex < _filterModel.rowCount(); ++rowIndex)
+                height += treeView.sizeHintForRow(rowIndex);
+
+            hierarchyWidget->setFixedHeight(height);
+
+            treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Kill), !_filterModel.hasKillableTasks());
+        };
+
+        numberOfForegroundTasksChanged();
+
+        connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, &treeView, numberOfForegroundTasksChanged);
+        connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, &treeView, numberOfForegroundTasksChanged);
     });
 
-    auto& badge = _tasksAction.getBadge();
+    auto& badge = getBarIconStringAction().getBadge();
 
     badge.setScale(0.5f);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
     const auto updateBadgeNumber = [this, &badge]() -> void {
-        const auto numberOfRecords = _filterModel.rowCount();
+        const auto numberOfTasks = _filterModel.rowCount();
 
-        badge.setEnabled(numberOfRecords > 0);
-        badge.setNumber(numberOfRecords);
+        qDebug() << "numberOfTasks" << numberOfTasks;
+
+        badge.setEnabled(numberOfTasks > 0);
+        badge.setNumber(numberOfTasks);
     };
 
     updateBadgeNumber();
@@ -79,23 +91,4 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, updateBadgeNumber);
     connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, updateBadgeNumber);
     connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, this, updateBadgeNumber);
-
-    /*
-    _tasksStatusBarAction.setPopupMode(TasksStatusBarAction::PopupMode::Automatic);
-    _tasksStatusBarAction.getMenu().addAction(&settings().getTasksSettingsAction().getHideForegroundTasksPopupAction());
-
-    _statusBarAction.addAction(&_tasksStatusBarAction);
-    _statusBarAction.setShowLabels(false);
-
-    const auto hideForegroundTasksPopupChanged = [this]() -> void {
-        const auto hideForegroundTasksPopup = settings().getTasksSettingsAction().getHideForegroundTasksPopupAction().isChecked();
-
-        _tasksStatusBarAction.setPopupMode(hideForegroundTasksPopup ? TasksStatusBarAction::PopupMode::Hover : TasksStatusBarAction::PopupMode::Automatic);
-        _tasksStatusBarAction.setPopupForceHidden(hideForegroundTasksPopup);
-    };
-
-    hideForegroundTasksPopupChanged();
-
-    connect(&settings().getTasksSettingsAction().getHideForegroundTasksPopupAction(), &ToggleAction::toggled, this, hideForegroundTasksPopupChanged);
-    */
 }

@@ -10,6 +10,7 @@ namespace mv::gui {
 
 class WidgetAction;
 class WidgetActionHighlightWidget;
+class WidgetActionBadgeOverlayWidget;
 
 /**
  * Widget action view widget class
@@ -78,10 +79,11 @@ protected: // Drag-and-drop events
     void dropEvent(QDropEvent* dropEvent) override;
 
 private:
-    WidgetAction*                   _action;                /** Pointer to action that will be displayed */
-    std::int32_t                    _widgetFlags;           /** Widget creation flags */
-    WidgetActionHighlightWidget*    _highlightWidget;       /** Pointer to highlight widget */
-    std::int32_t                    _cachedHighlighting;    /** Cached highlighting */
+    WidgetAction*                       _action;                /** Pointer to action that will be displayed */
+    std::int32_t                        _widgetFlags;           /** Widget creation flags */
+    WidgetActionHighlightWidget*        _highlightWidget;       /** Pointer to highlight widget */
+    WidgetActionBadgeOverlayWidget*     _badgeOverlayWidget;    /** Pointer to badge overlay widget */
+    std::int32_t                        _cachedHighlighting;    /** Cached highlighting */
 };
 
 }

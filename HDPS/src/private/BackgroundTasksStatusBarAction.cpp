@@ -19,12 +19,9 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     StatusBarAction(parent, title),
     _model(),
     _filterModel(),
-    _barGroupAction(this, "Bar group"),
     _overallBackgroundTaskAction(this, "Overall background task"),
     _tasksAction(this, "Background tasks")
 {
-    setBarAction(&_barGroupAction);
-
     auto& overallBackgroundTask = BackgroundTask::getGlobalHandler()->getOverallBackgroundTask();
 
     _filterModel.setSourceModel(&_model);
@@ -33,8 +30,7 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     _filterModel.getParentTaskFilterAction().setString(overallBackgroundTask.getId());
     _filterModel.setFilterKeyColumn(static_cast<int>(AbstractTasksModel::Column::Name));
 
-    _barGroupAction.setShowLabels(false);
-    _barGroupAction.addAction(&_overallBackgroundTaskAction);
+    getBarGroupAction().addAction(&_overallBackgroundTaskAction);
 
     _overallBackgroundTaskAction.setStretch(1);
     _overallBackgroundTaskAction.setVisible(false);
@@ -112,11 +108,6 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
                 height += treeView.sizeHintForRow(rowIndex);
 
             hierarchyWidget->setFixedHeight(height);
-
-            qDebug() << "===FIXED_HEIGHT===" << height << "_filterModel.hasKillableTasks()" << _filterModel.hasKillableTasks();
-
-            //hierarchyWidget->adjustSize();
-            widget->updateGeometry();
 
             treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Kill), !_filterModel.hasKillableTasks());
         };

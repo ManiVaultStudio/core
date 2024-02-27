@@ -9,7 +9,6 @@
 namespace mv::gui {
 
 class WidgetAction;
-class OverlayWidget;
 
 /**
  * Widget action widget class

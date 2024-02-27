@@ -13,34 +13,14 @@ using namespace mv;
 using namespace mv::gui;
 
 ManiVaultVersionStatusBarAction::ManiVaultVersionStatusBarAction(QObject* parent, const QString& title) :
-    StatusBarAction(parent, title),
-    _barGroupAction(this, "Bar Group"),
-    _iconAction(this, "Icon"),
+    StatusBarAction(parent, title, "home"),
     _versionAction(this, "Version"),
     _popupGroupAction(this, "Popup Group"),
     _popupAction(this, "Info")
 {
-    setBarAction(&_barGroupAction);
     setPopupAction(&_popupGroupAction);
 
-    _barGroupAction.setShowLabels(false);
-
-    _barGroupAction.addAction(&_iconAction);
-    _barGroupAction.addAction(&_versionAction);
-
-    _iconAction.setEnabled(false);
-    _iconAction.setDefaultWidgetFlags(StringAction::Label);
-    _iconAction.setString(Application::getIconFont("FontAwesome").getIconCharacter("home"));
-    _iconAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
-        auto labelWidget = widget->findChild<QLabel*>("Label");
-
-        Q_ASSERT(labelWidget != nullptr);
-
-        if (labelWidget == nullptr)
-            return;
-
-        labelWidget->setFont(Application::getIconFont("FontAwesome").getFont());
-    });
+    getBarGroupAction().addAction(&_versionAction);
 
     _versionAction.setEnabled(false);
     _versionAction.setDefaultWidgetFlags(StringAction::Label);

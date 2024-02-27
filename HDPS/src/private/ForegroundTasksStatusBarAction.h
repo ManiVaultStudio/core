@@ -32,8 +32,7 @@ public:
     ForegroundTasksStatusBarAction(QObject* parent, const QString& title);
 
 private:
-    mv::TasksListModel              _model;             /** Tasks list model */
-    mv::TasksFilterModel            _filterModel;       /** Filter model for the tasks model */
-    mv::gui::HorizontalGroupAction  _barGroupAction;    /** Bar group action */
-    mv::gui::TasksAction            _tasksAction;       /** Tasks action for displaying the tasks */
+    mv::TasksListModel      _model;             /** Tasks list model */
+    mv::TasksFilterModel    _filterModel;       /** Filter model for the tasks model */
+    mv::gui::TasksAction    _tasksAction;       /** Tasks action for displaying the tasks */
 };

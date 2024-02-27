@@ -43,8 +43,46 @@ protected:
          */
         void paintEvent(QPaintEvent* paintEvent);
 
+        /**
+         * Get show indicator
+         * @return Boolean determining whether to show the indicator or not
+         */
+        bool getShowIndicator() const {
+            return _showIndicator;
+        }
+
+        /**
+         * Set show indicator to \p showIndicator
+         * @param showIndicator Boolean determining whether to show the indicator or not
+         */
+        void setShowIndicator(bool showIndicator) {
+            _showIndicator = showIndicator;
+
+            update();
+        }
+
+        /**
+         * Get alignment of the indicator
+         * @return Alignment of the indicator
+         */
+        Qt::Alignment getIndicatorAlignment() const {
+            return _indicatorAlignment;
+        }
+
+        /**
+         * Set alignment of the indicator to \p indicatorAlignment
+         * @param indicatorAlignment Alignment of the indicator
+         */
+        void setIndicatorAlignment(Qt::Alignment indicatorAlignment) {
+            _indicatorAlignment = indicatorAlignment;
+
+            update();
+        }
+
     private:
-        WidgetAction*   _action;    /** Pointer to owning action */
+        WidgetAction*   _action;                /** Pointer to owning action */
+        bool            _showIndicator;         /** Whether to show the indicator or not */
+        Qt::Alignment   _indicatorAlignment;    /** Alignment of the indicator */
     };
 
 public:

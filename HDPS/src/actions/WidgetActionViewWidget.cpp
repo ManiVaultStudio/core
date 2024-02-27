@@ -4,6 +4,7 @@
 
 #include "WidgetActionViewWidget.h"
 #include "WidgetActionHighlightWidget.h"
+#include "WidgetActionBadgeOverlayWidget.h"
 #include "WidgetActionMimeData.h"
 #include "WidgetAction.h"
 #include "CoreInterface.h"
@@ -19,9 +20,12 @@ WidgetActionViewWidget::WidgetActionViewWidget(QWidget* parent, WidgetAction* ac
     _action(nullptr),
     _widgetFlags(widgetFlags),
     _highlightWidget(new WidgetActionHighlightWidget(this, action)),
+    _badgeOverlayWidget(new WidgetActionBadgeOverlayWidget(this, action)),
     _cachedHighlighting(0)
 {
     setAcceptDrops(true);
+
+    _badgeOverlayWidget->show();
 }
 
 WidgetAction* WidgetActionViewWidget::getAction()
@@ -42,14 +46,28 @@ void WidgetActionViewWidget::setAction(WidgetAction* action)
         return;
 
     const auto update = [this]() -> void {
-        setEnabled(_action->isEnabled());
         setToolTip(_action->toolTip());
-        setVisible(_action->isVisible());
     };
 
     connect(_action, &WidgetAction::changed, this, update);
 
     update();
+
+    const auto enabledChanged = [this]() -> void {
+        setEnabled(_action->isEnabled());
+    };
+
+    enabledChanged();
+
+    connect(_action, &WidgetAction::enabledChanged, this, enabledChanged);
+
+    const auto visibleChanged = [this]() -> void {
+        setVisible(_action->isVisible());
+    };
+
+    visibleChanged();
+
+    connect(_action, &WidgetAction::visibleChanged, this, visibleChanged);
 }
 
 std::int32_t WidgetActionViewWidget::getWidgetFlags() const

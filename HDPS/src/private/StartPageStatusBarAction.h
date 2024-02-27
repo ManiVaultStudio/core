@@ -6,9 +6,6 @@
 
 #include "StatusBarAction.h"
 
-#include <actions/HorizontalGroupAction.h>
-#include <actions/StringAction.h>
-
 /**
  * Start page status bar action class
  *
@@ -28,8 +25,4 @@ public:
      * @param title Title of the action
      */
     StartPageStatusBarAction(QObject* parent, const QString& title);
-
-private:
-    mv::gui::HorizontalGroupAction  _barGroupAction;    /** Bar group action */
-    mv::gui::StringAction           _iconAction;        /** String action for showing the start page icon with FontAwesome */
 };

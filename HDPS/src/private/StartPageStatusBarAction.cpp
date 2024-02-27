@@ -12,31 +12,8 @@ using namespace mv;
 using namespace mv::gui;
 
 StartPageStatusBarAction::StartPageStatusBarAction(QObject* parent, const QString& title) :
-    StatusBarAction(parent, title),
-    _barGroupAction(this, "Bar Group"),
-    _iconAction(this, "Icon")
+    StatusBarAction(parent, title, "door-open")
 {
-    setBarAction(&_barGroupAction);
-
-    _barGroupAction.setShowLabels(false);
-
-    _barGroupAction.addAction(&_iconAction);
-
-    _iconAction.setEnabled(false);
-    _iconAction.setDefaultWidgetFlags(StringAction::Label);
-    _iconAction.setString(Application::getIconFont("FontAwesome").getIconCharacter("door-open"));
-    _iconAction.setToolTip("Toggle the start page");
-    _iconAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
-        auto labelWidget = widget->findChild<QLabel*>("Label");
-
-        Q_ASSERT(labelWidget != nullptr);
-
-        if (labelWidget == nullptr)
-            return;
-
-        labelWidget->setFont(Application::getIconFont("FontAwesome").getFont());
-    });
-    
     connect(this, &StatusBarAction::toolButtonClicked, this, []() -> void {
         projects().getShowStartPageAction().toggle();
     });

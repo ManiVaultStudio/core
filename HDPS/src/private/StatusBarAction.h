@@ -66,37 +66,38 @@ protected:
 public:
 
     /**
-     * Construct with \p parent object and \p title
+     * Construct with \p parent object, \p title and possibly a FontAwesome \p icon
      * @param parent Pointer to parent object
      * @param title Title of the action
+     * @param icon FontAwesome icon name
      */
-    StatusBarAction(QObject* parent, const QString& title);
+    StatusBarAction(QObject* parent, const QString& title, const QString& icon = "");
 
 protected:
 
     /**
-     * Set bar action to \p barAction
-     * @param barAction Pointer to bar action
+     * Get bar group action
+     * @return Reference to bar group action
      */
-    void setBarAction(WidgetAction* barAction);
+    mv::gui::HorizontalGroupAction& getBarGroupAction();
 
     /**
-     * Set popup action to \p popupAction
-     * @param popupAction Pointer to popup action
+     * Get bar icon string action
+     * @return Reference to bar icon string action
      */
-    void setPopupAction(WidgetAction* popupAction);
-
-    /**
-     * Get bar action
-     * @return Pointer to bar action
-     */
-    WidgetAction* getBarAction();
+    mv::gui::StringAction& getBarIconStringAction();
 
     /**
      * Get popup action
      * @return Pointer to popup action (maybe nullptr)
      */
     WidgetAction* getPopupAction();
+
+    /**
+     * Set popup action to \p popupAction
+     * @param popupAction Pointer to popup action
+     */
+    void setPopupAction(WidgetAction* popupAction);
 
 signals:
 
@@ -111,6 +112,7 @@ signals:
     void toolButtonClicked();
 
 private:
-    WidgetAction*   _barAction;       /** Pointer to bar action */
-    WidgetAction*   _popupAction;     /** Pointer to popup action (maybe nullptr) */
+    mv::gui::HorizontalGroupAction  _barGroupAction;    /** Bar group action */
+    mv::gui::StringAction           _iconAction;        /** String action for showing a home icon with FontAwesome */
+    WidgetAction*                   _popupAction;       /** Pointer to popup action (maybe nullptr) */
 };

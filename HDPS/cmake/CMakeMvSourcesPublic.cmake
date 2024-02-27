@@ -320,6 +320,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
 	src/actions/PluginTriggerPickerAction.h
     src/actions/PluginTriggerAction.h
 	src/actions/LabelProxyAction.h
+	src/actions/WidgetActionBadgeOverlayWidget.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -340,6 +341,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
 	src/actions/PluginTriggerPickerAction.cpp
     src/actions/PluginTriggerAction.cpp
 	src/actions/LabelProxyAction.cpp
+	src/actions/WidgetActionBadgeOverlayWidget.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES

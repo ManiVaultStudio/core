@@ -10,13 +10,49 @@
 
 #include <QDebug>
 
+using namespace mv;
 using namespace mv::gui;
 
-StatusBarAction::StatusBarAction(QObject* parent, const QString& title) :
+StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QString& icon /*= ""*/) :
     WidgetAction(parent, title),
-    _barAction(nullptr),
+    _barGroupAction(this, "Bar Group"),
+    _iconAction(this, "Icon"),
     _popupAction(nullptr)
 {
+    _barGroupAction.setShowLabels(false);
+    _barGroupAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
+        auto horizontalWidget = widget->findChild<QWidget*>("HorizontalWidget");
+
+        Q_ASSERT(horizontalWidget != nullptr);
+
+        if (horizontalWidget == nullptr)
+            return;
+
+        auto horizontalLayout = horizontalWidget->layout();
+
+        horizontalLayout->setContentsMargins(1, 0, 1, 0);
+        horizontalLayout->setSpacing(4);
+    });
+
+    if (!icon.isEmpty()) {
+        _barGroupAction.addAction(&_iconAction);
+
+        _iconAction.setEnabled(false);
+        _iconAction.setDefaultWidgetFlags(StringAction::Label);
+        _iconAction.setString(icon);
+        //_iconAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+        //_iconAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
+        _iconAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
+            auto labelWidget = widget->findChild<QLabel*>("Label");
+
+            Q_ASSERT(labelWidget != nullptr);
+
+            if (labelWidget == nullptr)
+                return;
+
+            labelWidget->setFont(Application::getIconFont("FontAwesome").getFont(10));
+        });
+    }
 }
 
 QWidget* StatusBarAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -24,14 +60,19 @@ QWidget* StatusBarAction::getWidget(QWidget* parent, const std::int32_t& widgetF
     return new Widget(parent, this, widgetFlags);
 }
 
-void StatusBarAction::setBarAction(WidgetAction* barAction)
+HorizontalGroupAction& StatusBarAction::getBarGroupAction()
 {
-    Q_ASSERT(barAction != nullptr);
+    return _barGroupAction;
+}
 
-    if (!barAction)
-        return;
+StringAction& StatusBarAction::getBarIconStringAction()
+{
+    return _iconAction;
+}
 
-    _barAction = barAction;
+mv::gui::WidgetAction* StatusBarAction::getPopupAction()
+{
+    return _popupAction;
 }
 
 void StatusBarAction::setPopupAction(WidgetAction* popupAction)
@@ -41,16 +82,6 @@ void StatusBarAction::setPopupAction(WidgetAction* popupAction)
     _popupAction = popupAction;
 
     popupActionChanged(previousPopupAction, _popupAction);
-}
-
-mv::gui::WidgetAction* StatusBarAction::getPopupAction()
-{
-    return _popupAction;
-}
-
-mv::gui::WidgetAction* StatusBarAction::getBarAction()
-{
-    return _barAction;
 }
 
 StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarAction, const std::int32_t& widgetFlags) :
@@ -96,7 +127,7 @@ StatusBarAction::Widget::ToolButton::ToolButton(QWidget* parent, StatusBarAction
 
     layout->setSizeConstraint(QLayout::SetMinimumSize);
     layout->setContentsMargins(2, 2, 2, 2);
-    layout->addWidget(statusBarAction->getBarAction()->createWidget(this));
+    layout->addWidget(statusBarAction->getBarGroupAction().createWidget(this));
 
     setLayout(layout);
 }

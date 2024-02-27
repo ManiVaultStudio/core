@@ -16,38 +16,19 @@ using namespace mv;
 using namespace mv::gui;
 
 LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& title) :
-    StatusBarAction(parent, title),
+    StatusBarAction(parent, title, "scroll"),
     _model(),
     _filterModel(this),
-    _barGroupAction(this, "Bar group"),
-    _iconAction(this, "Icon"),
     _lastMessageAction(this, "Last message"),
     _recordsAction(this, "Records"),
     _clearRecordsAction(this, "Clear"),
     _loadPluginAction(this, "Plugin")
 {
-    setBarAction(&_barGroupAction);
+    getBarGroupAction().addAction(&_lastMessageAction);
 
-    _barGroupAction.setShowLabels(false);
-
-    _barGroupAction.addAction(&_iconAction);
-    _barGroupAction.addAction(&_lastMessageAction);
-
+    _lastMessageAction.setEnabled(false);
+    _lastMessageAction.setDefaultWidgetFlags(StringAction::Label);
     _lastMessageAction.setStretch(1);
-
-    _iconAction.setEnabled(false);
-    _iconAction.setDefaultWidgetFlags(StringAction::Label);
-    _iconAction.setString(Application::getIconFont("FontAwesome").getIconCharacter("scroll"));
-    _iconAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
-        auto labelWidget = widget->findChild<QLabel*>("Label");
-
-        Q_ASSERT(labelWidget != nullptr);
-
-        if (labelWidget == nullptr)
-            return;
-
-        labelWidget->setFont(Application::getIconFont("FontAwesome").getFont());
-    });
 
     setPopupAction(&_recordsAction);
 
@@ -135,10 +116,7 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _filterModel.setSourceModel(&_model);
     _filterModel.setFilterKeyColumn(static_cast<int>(LoggingModel::Column::Message));
 
-    _lastMessageAction.setEnabled(false);
-    _lastMessageAction.setDefaultWidgetFlags(StringAction::Label);
-
-    auto& badge = _recordsAction.getBadge();
+    auto& badge = _lastMessageAction.getBadge();
 
     badge.setScale(0.5f);
     badge.setBackgroundColor(qApp->palette().highlight().color());

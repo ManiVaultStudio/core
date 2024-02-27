@@ -12,31 +12,8 @@ using namespace mv;
 using namespace mv::gui;
 
 SettingsStatusBarAction::SettingsStatusBarAction(QObject* parent, const QString& title) :
-    StatusBarAction(parent, title),
-    _barGroupAction(this, "Bar Group"),
-    _iconAction(this, "Icon")
+    StatusBarAction(parent, title, "cog")
 {
-    setBarAction(&_barGroupAction);
-
-    _barGroupAction.setShowLabels(false);
-
-    _barGroupAction.addAction(&_iconAction);
-
-    _iconAction.setEnabled(false);
-    _iconAction.setDefaultWidgetFlags(StringAction::Label);
-    _iconAction.setToolTip("Edit global settings");
-    _iconAction.setString(Application::getIconFont("FontAwesome").getIconCharacter("cog"));
-    _iconAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
-        auto labelWidget = widget->findChild<QLabel*>("Label");
-
-        Q_ASSERT(labelWidget != nullptr);
-
-        if (labelWidget == nullptr)
-            return;
-
-        labelWidget->setFont(Application::getIconFont("FontAwesome").getFont());
-    });
-
     connect(this, &StatusBarAction::toolButtonClicked, this, []() -> void {
         settings().getEditSettingsAction().trigger();
     });

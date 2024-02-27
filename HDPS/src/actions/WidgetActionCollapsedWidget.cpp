@@ -89,10 +89,10 @@ void WidgetActionCollapsedWidget::initialize(WidgetAction* action)
 
 WidgetActionCollapsedWidget::ToolButton::ToolButton(WidgetAction* action, QWidget* parent /*= nullptr*/) :
     QToolButton(parent),
-    _action(action)
+    _action(action),
+    _showIndicator(true),
+    _indicatorAlignment(Qt::AlignBottom | Qt::AlignRight)
 {
-    if (_action)
-        connect(&action->getBadge(), &WidgetActionBadge::changed, this, [this]() -> void { update(); });
 }
 
 void WidgetActionCollapsedWidget::ToolButton::paintEvent(QPaintEvent* paintEvent)
@@ -104,48 +104,32 @@ void WidgetActionCollapsedWidget::ToolButton::paintEvent(QPaintEvent* paintEvent
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    const auto margin = 5.0f;
+    if (getShowIndicator()) {
+        const auto margin = 5.0f;
 
-    QPointF center;
+        QPointF center;
 
-    center.setY(height() - margin);
-    center.setX(width() - margin);
+        if (_indicatorAlignment & Qt::AlignTop)
+            center.setY(margin);
 
-    painter.setPen(QPen(QBrush(isEnabled() ? Qt::black : Qt::gray), 2.5, Qt::SolidLine, Qt::RoundCap));
-    painter.setBrush(Qt::NoBrush);
-    painter.drawPoint(center);
+        if (_indicatorAlignment & Qt::AlignVCenter)
+            center.setY(0.5f * height());
 
-    if (_action && _action->getBadge().getEnabled()) {
-        const auto& badge               = _action->getBadge();
-        const auto drawSize             = size();
-        const auto iconPixmapRectangle  = QRectF(QPoint(0, 0), drawSize);
-        const auto badgePixmap          = createNumberBadgeOverlayPixmap(badge.getNumber(), badge.getBackgroundColor(), badge.getForegroundColor()).scaled(badge.getScale() * drawSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        const auto badgeRectangle       = QRectF(QPoint(0, 0), badgePixmap.size());
-        const auto scaledIconPixmapSize = badge.getScale() * drawSize;
-        const auto badgeAlignment       = badge.getAlignment();
-        const auto badgeScale           = badge.getScale();
+        if (_indicatorAlignment & Qt::AlignBottom)
+            center.setY(height() - margin);
 
-        QPoint origin;
+        if (_indicatorAlignment & Qt::AlignLeft)
+            center.setX(margin);
 
-        if (badgeAlignment & Qt::AlignTop)
-            origin.setY(0);
+        if (_indicatorAlignment & Qt::AlignHCenter)
+            center.setX(0.5f * width());
 
-        if (badgeAlignment & Qt::AlignVCenter)
-            origin.setY((0.5 * drawSize.height()) - ((0.5 * badgeScale) * drawSize.height()));
+        if (_indicatorAlignment & Qt::AlignRight)
+            center.setX(width() - margin);
 
-        if (badgeAlignment & Qt::AlignBottom)
-            origin.setY((1.0f - badgeScale) * drawSize.height());
-
-        if (badgeAlignment & Qt::AlignLeft)
-            origin.setX(0);
-
-        if (badgeAlignment & Qt::AlignHCenter)
-            origin.setX((0.5 * drawSize.width()) - ((0.5 * badgeScale) * drawSize.width()));
-
-        if (badgeAlignment & Qt::AlignRight)
-            origin.setX((1.0f - badgeScale) * drawSize.width());
-
-        painter.drawPixmap(origin, badgePixmap);
+        painter.setPen(QPen(QBrush(isEnabled() ? Qt::black : Qt::gray), 2.5, Qt::SolidLine, Qt::RoundCap));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawPoint(center);
     }
 }
 

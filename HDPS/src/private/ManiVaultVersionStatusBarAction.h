@@ -31,8 +31,6 @@ public:
     ManiVaultVersionStatusBarAction(QObject* parent, const QString& title);
 
 private:
-    mv::gui::HorizontalGroupAction  _barGroupAction;    /** Bar group action */
-    mv::gui::StringAction           _iconAction;        /** String action for showing a home icon with FontAwesome */
     mv::gui::StringAction           _versionAction;     /** String action that displays the ManiVault version on the status bar */
     mv::gui::HorizontalGroupAction  _popupGroupAction;  /** Popup group action */
     mv::gui::StringAction           _popupAction;       /** Popup string action for ManiVault info */

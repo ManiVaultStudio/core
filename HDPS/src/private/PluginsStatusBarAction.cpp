@@ -14,37 +14,17 @@ using namespace mv;
 using namespace mv::gui;
 
 PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& title) :
-    StatusBarAction(parent, title),
-    _barGroupAction(this, "Bar group"),
-    _iconAction(this, "Icon"),
+    StatusBarAction(parent, title, "plug"),
     _loadedPluginsAction(this, "Loaded Plugins"),
     _loadPluginBrowserAction(this, "Plugin"),
     _model(),
     _filterModel(),
     _pluginsAction(this, "Plugins")
 {
-    setBarAction(&_barGroupAction);
     setPopupAction(&_pluginsAction);
 
-    _barGroupAction.setShowLabels(false);
-
-    _barGroupAction.addAction(&_iconAction);
-    _barGroupAction.addAction(&_loadedPluginsAction, -1, [](WidgetAction* action, QWidget* widget) -> void {
+    getBarGroupAction().addAction(&_loadedPluginsAction, -1, [](WidgetAction* action, QWidget* widget) -> void {
         auto labelWidget = widget->findChild<QLabel*>("Label");
-    });
-
-    _iconAction.setEnabled(false);
-    _iconAction.setDefaultWidgetFlags(StringAction::Label);
-    _iconAction.setString(Application::getIconFont("FontAwesome").getIconCharacter("plug"));
-    _iconAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
-        auto labelWidget = widget->findChild<QLabel*>("Label");
-
-        Q_ASSERT(labelWidget != nullptr);
-
-        if (labelWidget == nullptr)
-            return;
-
-        labelWidget->setFont(Application::getIconFont("FontAwesome").getFont());
     });
 
     _loadedPluginsAction.setEnabled(false);
