@@ -5,6 +5,7 @@ Doxygen/
 .idea
 .vscode
 install/
+*.bak
 
 .DS_Store
 
