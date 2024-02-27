@@ -28,10 +28,16 @@ public:
     std::int32_t getVersionNumber() const;
 
     /**
-     * Get full version as string, including suffix
+     * Get full version as string, including suffix: Major.Minor.PatchSuffix
      * @return version string
      */
     std::string getVersionString() const;
+
+    /**
+     * Get short version as string: Major.Minor
+     * @return version string
+     */
+    std::string getShortVersionString() const;
 
     /**
      * Get major version number

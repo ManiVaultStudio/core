@@ -31,6 +31,11 @@ std::string Version::getVersionString() const
         return std::to_string(_major) + "." + std::to_string(_minor) + "." + std::to_string(_patch) + _suffix;
 }
 
+std::string Version::getShortVersionString() const
+{
+    return std::to_string(_major) + "." + std::to_string(_minor);
+}
+
 std::int32_t Version::getMajor() const
 {
     return _major;
