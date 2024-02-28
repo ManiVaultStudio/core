@@ -19,12 +19,14 @@ ManiVaultVersionStatusBarAction::ManiVaultVersionStatusBarAction(QObject* parent
     _popupAction(this, "Info")
 {
     setPopupAction(&_popupGroupAction);
+    setToolTip("Show ManiVault info");
 
     getBarGroupAction().addAction(&_versionAction);
 
     _versionAction.setEnabled(false);
     _versionAction.setDefaultWidgetFlags(StringAction::Label);
     _versionAction.setString(QString("ManiVault <b>%1.%2%3</b>").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), "rc"));
+    _versionAction.setToolTip(toolTip());
 
     _popupAction.setDefaultWidgetFlags(StringAction::Label);
     _popupAction.setPopupSizeHint(QSize(200, 0));

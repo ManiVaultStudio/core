@@ -49,7 +49,7 @@ public:
     protected:
         StatusBarAction*    _statusBarAction;   /** Pointer to owning status bar action */
         ToolButton          _toolButton;        /** Customized tool button */
-        QMenu               _toolButtonMenu;    /** Tool button menu */
+        QMenu               _toolButtonMenu;    /** Popup menu which contains the action that will be displayed */
 
         friend class StatusBarAction;
     };
@@ -99,6 +99,12 @@ protected:
      */
     void setPopupAction(WidgetAction* popupAction);
 
+    /** Show the popup */
+    void showPopup();
+
+    /** Hide the popup */
+    void hidePopup();
+
 signals:
 
     /**
@@ -110,6 +116,12 @@ signals:
 
     /** Signals that the tool button was clicked */
     void toolButtonClicked();
+
+    /** Signals that a popup should be displayed */
+    void requirePopupShow();
+
+    /** Signals that a popup should be hidden */
+    void requirePopupHide();
 
 private:
     mv::gui::HorizontalGroupAction  _barGroupAction;    /** Bar group action */

@@ -32,7 +32,9 @@ public:
     ForegroundTasksStatusBarAction(QObject* parent, const QString& title);
 
 private:
-    mv::TasksListModel      _model;             /** Tasks list model */
-    mv::TasksFilterModel    _filterModel;       /** Filter model for the tasks model */
-    mv::gui::TasksAction    _tasksAction;       /** Tasks action for displaying the tasks */
+    mv::TasksListModel      _model;                 /** Tasks list model */
+    mv::TasksFilterModel    _filterModel;           /** Filter model for the tasks model */
+    mv::gui::TasksAction    _tasksAction;           /** Tasks action for displaying the tasks */
+    std::uint32_t           _numberOfTasks;         /** Last recorded number of tasks */
+    QTimer                  _numberOfTasksTimer;    /** For periodically checking if the number of tasks changed (this avoids timing issues with rowsInserted(...) and rowsRemoved(...)) signals */
 };

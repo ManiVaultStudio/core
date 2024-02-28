@@ -14,6 +14,8 @@ using namespace mv::gui;
 SettingsStatusBarAction::SettingsStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title, "cog")
 {
+    setToolTip("Edit global settings");
+
     connect(this, &StatusBarAction::toolButtonClicked, this, []() -> void {
         settings().getEditSettingsAction().trigger();
     });

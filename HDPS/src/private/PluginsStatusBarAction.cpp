@@ -22,9 +22,10 @@ PluginsStatusBarAction::PluginsStatusBarAction(QObject* parent, const QString& t
     _pluginsAction(this, "Plugins")
 {
     setPopupAction(&_pluginsAction);
+    setToolTip("Explore loaded plugins");
 
     _pluginsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
-    _pluginsAction.setPopupSizeHint(QSize(500, 400));
+    _pluginsAction.setPopupSizeHint(QSize(300, 200));
 
     _pluginsAction.initialize(&_treeModel, &_filterModel, "Plugin");
     _pluginsAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {

@@ -190,7 +190,7 @@ QVariant AbstractTasksModel::ProgressItem::data(int role /*= Qt::UserRole + 1*/)
             return getTask()->getProgress();
 
         case Qt::DisplayRole:
-            return QString::number(data(Qt::EditRole).toFloat(), 'f', 2);
+            break;
 
         case Qt::ToolTipRole:
             return "Task progress: " + data(Qt::DisplayRole).toString();

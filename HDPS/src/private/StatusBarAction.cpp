@@ -48,9 +48,18 @@ StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QS
             if (labelWidget == nullptr)
                 return;
 
-            labelWidget->setFont(Application::getIconFont("FontAwesome").getFont(10));
+            labelWidget->setFont(Application::getIconFont("FontAwesome").getFont(9));
         });
     }
+
+    const auto tooltipChanged = [this]() -> void {
+        _barGroupAction.setToolTip(toolTip());
+        _iconAction.setToolTip(toolTip());
+    };
+
+    tooltipChanged();
+
+    connect(this, &WidgetAction::changed, this, tooltipChanged);
 }
 
 QWidget* StatusBarAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -82,10 +91,21 @@ void StatusBarAction::setPopupAction(WidgetAction* popupAction)
     popupActionChanged(previousPopupAction, _popupAction);
 }
 
+void StatusBarAction::showPopup()
+{
+    emit requirePopupShow();
+}
+
+void StatusBarAction::hidePopup()
+{
+    emit requirePopupHide();
+}
+
 StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, statusBarAction, widgetFlags),
     _statusBarAction(statusBarAction),
-    _toolButton(this, statusBarAction)
+    _toolButton(this, statusBarAction),
+    _toolButtonMenu()
 {
     auto layout = new QVBoxLayout();
 
@@ -100,19 +120,30 @@ StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarActio
     _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
     _toolButton.setAutoRaise(true);
     _toolButton.setObjectName("ToolButton");
+    _toolButton.setMenu(&_toolButtonMenu);
 
-    if (_statusBarAction->getPopupAction())
-        _toolButton.addAction(_statusBarAction->getPopupAction());
+    auto popupAction = _statusBarAction->getPopupAction();
+
+    if (popupAction)
+        _toolButtonMenu.addAction(popupAction);
 
     connect(_statusBarAction, &StatusBarAction::popupActionChanged, this, [this](WidgetAction* previousPopupAction, WidgetAction* popupAction) -> void {
         if (previousPopupAction)
-            _toolButton.removeAction(previousPopupAction);
+            _toolButtonMenu.removeAction(previousPopupAction);
 
         if (popupAction)
-            _toolButton.addAction(popupAction);
+            _toolButtonMenu.addAction(popupAction);
     });
 
     connect(&_toolButton, &ToolButton::clicked, statusBarAction, &StatusBarAction::toolButtonClicked);
+
+    connect(_statusBarAction, &StatusBarAction::requirePopupShow, this, [this]() -> void {
+        _toolButton.showMenu();
+    });
+
+    connect(_statusBarAction, &StatusBarAction::requirePopupHide, this, [this]() -> void {
+        _toolButtonMenu.hide();
+    });
 }
 
 StatusBarAction::Widget::ToolButton::ToolButton(QWidget* parent, StatusBarAction* statusBarAction) :

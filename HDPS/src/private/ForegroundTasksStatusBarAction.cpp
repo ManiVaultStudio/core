@@ -17,9 +17,11 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     StatusBarAction(parent, title, "tasks"),
     _model(),
     _filterModel(),
-    _tasksAction(this, "Tasks")
+    _tasksAction(this, "Tasks"),
+    _numberOfTasks(0),
+    _numberOfTasksTimer()
 {
-    setPopupAction(&_tasksAction);
+    setToolTip("Foreground tasks");
 
     _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
     _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
@@ -53,9 +55,12 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
         treeView.setRootIsDecorated(false);
 
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Status), true);
+        treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::ParentID), true);
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Type), true);
 
         const auto numberOfForegroundTasksChanged = [this, &treeView, hierarchyWidget, widget]() -> void {
+            const auto numberOfTasks = _filterModel.rowCount();
+
             std::int32_t height = 0;
 
             for (int rowIndex = 0; rowIndex < _filterModel.rowCount(); ++rowIndex)
@@ -77,18 +82,27 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     badge.setScale(0.5f);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    const auto updateBadgeNumber = [this, &badge]() -> void {
+    const auto numberOfBackgroundTasksChanged = [this, &badge]() -> void {
         const auto numberOfTasks = _filterModel.rowCount();
 
-        qDebug() << "numberOfTasks" << numberOfTasks;
+        if (numberOfTasks == _numberOfTasks)
+            return;
 
         badge.setEnabled(numberOfTasks > 0);
         badge.setNumber(numberOfTasks);
+
+        if (_numberOfTasks == 0 && numberOfTasks >= 1)
+            setPopupAction(&_tasksAction);
+
+        if (_numberOfTasks >= 1 && numberOfTasks == 0)
+            setPopupAction(nullptr);
+
+        _numberOfTasks = numberOfTasks;
     };
 
-    updateBadgeNumber();
+    numberOfBackgroundTasksChanged();
 
-    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, updateBadgeNumber);
-    connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, updateBadgeNumber);
-    connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, this, updateBadgeNumber);
+    _numberOfTasksTimer.setInterval(100);
+    _numberOfTasksTimer.callOnTimeout(this, numberOfBackgroundTasksChanged);
+    _numberOfTasksTimer.start();
 }

@@ -15,10 +15,7 @@ StartPageStatusBarAction::StartPageStatusBarAction(QObject* parent, const QStrin
     StatusBarAction(parent, title, "door-open")
 {
     const auto updateTooltip = [this]() -> void {
-        if (projects().getShowStartPageAction().isChecked())
-            getBarIconStringAction().setToolTip("Click to go back to the project");
-        else
-            getBarIconStringAction().setToolTip("Click to show the start page");
+        setToolTip(projects().getShowStartPageAction().isChecked() ? "Go back to the project" : "Show the start page");
     };
 
     updateTooltip();

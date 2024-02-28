@@ -16,12 +16,16 @@ using namespace mv;
 using namespace mv::gui;
 
 BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, const QString& title) :
-    StatusBarAction(parent, title),
+    StatusBarAction(parent, title, "globe"),
     _model(),
     _filterModel(),
     _overallBackgroundTaskAction(this, "Overall background task"),
-    _tasksAction(this, "Background tasks")
+    _tasksAction(this, "Background tasks"),
+    _numberOfTasks(0),
+    _numberOfTasksTimer()
 {
+    setToolTip("Background tasks");
+
     auto& overallBackgroundTask = BackgroundTask::getGlobalHandler()->getOverallBackgroundTask();
 
     _filterModel.setSourceModel(&_model);
@@ -32,9 +36,11 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
 
     getBarGroupAction().addAction(&_overallBackgroundTaskAction);
 
+    _overallBackgroundTaskAction.setEnabled(false);
     _overallBackgroundTaskAction.setStretch(1);
-    _overallBackgroundTaskAction.setVisible(false);
     _overallBackgroundTaskAction.setTask(&overallBackgroundTask);
+    _overallBackgroundTaskAction.setToolTip(toolTip());
+    _overallBackgroundTaskAction.getProgressAction().setDefaultWidgetFlags(ProgressAction::Label);
 
     const auto overallBackgroundTaskTextFormatter = [this](Task& task) -> QString {
         const auto numberOfChildTasks = task.getChildTasksForGuiScopesAndStatuses(false, true, { Task::GuiScope::Background }, { Task::Status::Running, Task::Status::RunningIndeterminate }).count();
@@ -47,7 +53,7 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
 
             case Task::Status::Running:
             case Task::Status::RunningIndeterminate:
-                return QString("%1 background task%2 %3%").arg(QString::number(numberOfChildTasks), numberOfChildTasks == 1 ? "" : "s", QString::number(task.getProgress() * 100.f, 'f', 1));
+                return QString("%1 background task%2: %3%").arg(QString::number(numberOfChildTasks), numberOfChildTasks == 1 ? "" : "s", QString::number(task.getProgress() * 100.f, 'f', 1));
 
             case Task::Status::Finished:
                 return QString("All background tasks have finished");
@@ -72,9 +78,6 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     _tasksAction.setPopupSizeHint(QSize(600, 0));
     _tasksAction.initialize(&_model, &_filterModel, "Background task");
     _tasksAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
-        widget->setMinimumHeight(5);
-        widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
-
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
         Q_ASSERT(hierarchyWidget);
@@ -84,7 +87,6 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
 
         hierarchyWidget->getToolbarAction().setVisible(false);
         hierarchyWidget->setHeaderHidden(true);
-        hierarchyWidget->setStyleSheet("background-color: red;");
 
         auto& treeView = hierarchyWidget->getTreeView();
 
@@ -119,12 +121,23 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     });
 
     const auto numberOfBackgroundTasksChanged = [this]() -> void {
-        setPopupAction(_filterModel.rowCount() > 0 ? &_tasksAction : nullptr);
+        const auto numberOfTasks = _filterModel.rowCount();
+
+        if (numberOfTasks == _numberOfTasks)
+            return;
+
+        if (_numberOfTasks == 0 && numberOfTasks >= 1)
+            setPopupAction(&_tasksAction);
+
+        if (_numberOfTasks >= 1 && numberOfTasks == 0)
+            setPopupAction(nullptr);
+
+        _numberOfTasks = numberOfTasks;
     };
 
     numberOfBackgroundTasksChanged();
 
-    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, numberOfBackgroundTasksChanged);
-    connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, numberOfBackgroundTasksChanged);
-    connect(&_filterModel, &QSortFilterProxyModel::layoutChanged, this, numberOfBackgroundTasksChanged);
+    _numberOfTasksTimer.setInterval(100);
+    _numberOfTasksTimer.callOnTimeout(this, numberOfBackgroundTasksChanged);
+    _numberOfTasksTimer.start();
 }

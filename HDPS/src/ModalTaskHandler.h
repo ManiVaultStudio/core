@@ -40,18 +40,12 @@ protected:
 
     private:
 
-        /** Invoked when the number of modal tasks changes */
-        void updateLayout();
-
-        /** Removes all existing task widget layout items */
-        void cleanLayout();
-
         /** Update the window title and icon */
         void updateWindowTitleAndIcon();
 
     private:
-        ModalTaskHandler*               _modalTaskHandler;  /** Pointer to owning modal task handler */
-        QMap<Task*, QVector<QWidget*>>  _widgetsMap;        /** Maps task to allocated widget */
+        ModalTaskHandler*   _modalTaskHandler;  /** Pointer to owning modal task handler */
+        gui::TasksAction    _tasksAction;       /** Tree action for displaying the task(s) */
     };
 
 public:
@@ -64,7 +58,7 @@ public:
 
     /**
      * Get the tasks model
-     * @return Reference to the tasks model
+     * @return Reference to the tasks tree model
      */
     TasksListModel& getModel();
 
@@ -80,7 +74,7 @@ private:
     void updateDialogVisibility();
 
 private:
-    TasksListModel      _model;                 /** Tasks model */
+    TasksListModel      _model;                 /** Tasks tree model */
     TasksFilterModel    _filterModel;           /** Filter model for the tasks model */
     ModalTasksDialog    _modalTasksDialog;      /** Modal tasks dialog */
     QTimer              _minimumDurationTimer;  /** Wait for a small amount of time before showing the UI */

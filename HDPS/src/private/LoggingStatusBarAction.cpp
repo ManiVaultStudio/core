@@ -24,11 +24,14 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _clearRecordsAction(this, "Clear"),
     _loadPluginAction(this, "Plugin")
 {
+    setToolTip("Inspect log messages");
+
     getBarGroupAction().addAction(&_lastMessageAction);
 
     _lastMessageAction.setEnabled(false);
     _lastMessageAction.setDefaultWidgetFlags(StringAction::Label);
     _lastMessageAction.setStretch(1);
+    _lastMessageAction.setToolTip(toolTip());
 
     setPopupAction(&_recordsAction);
 

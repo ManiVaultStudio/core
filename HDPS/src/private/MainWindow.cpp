@@ -111,7 +111,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         statusBar()->insertPermanentWidget(1, versionStatusBarAction->createWidget(this));
         statusBar()->insertPermanentWidget(2, pluginsStatusBarAction->createWidget(this));
         statusBar()->insertPermanentWidget(3, loggingStatusBarAction->createWidget(this), 4);
-        statusBar()->insertPermanentWidget(4, backgroundTasksStatusBarAction->createWidget(this), 2);
+        statusBar()->insertPermanentWidget(4, backgroundTasksStatusBarAction->createWidget(this), 1);
         statusBar()->insertPermanentWidget(5, foregroundTasksStatusBarAction->createWidget(this));
         statusBar()->insertPermanentWidget(6, settingsTasksStatusBarAction->createWidget(this));
 
