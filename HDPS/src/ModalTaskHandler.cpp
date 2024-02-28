@@ -168,6 +168,9 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
     setLayout(layout);
     
     updateWindowTitleAndIcon();
+
+    connect(&_modalTaskHandler->getFilterModel(), &QSortFilterProxyModel::rowsInserted, this, &ModalTasksDialog::updateWindowTitleAndIcon);
+    connect(&_modalTaskHandler->getFilterModel(), &QSortFilterProxyModel::rowsRemoved, this, &ModalTasksDialog::updateWindowTitleAndIcon);
 }
 
 void ModalTaskHandler::ModalTasksDialog::updateWindowTitleAndIcon()
