@@ -149,9 +149,11 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
             for (int rowIndex = 0; rowIndex < numberOfTasks; ++rowIndex)
                 height += treeView.sizeHintForRow(rowIndex);
 
-            //hierarchyWidget->setFixedHeight(height);
+            hierarchyWidget->setFixedHeight(height);
 
             treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Kill), !_modalTaskHandler->getFilterModel().hasKillableTasks());
+
+            Application::processEvents();
         };
 
         numberOfModalTasksChanged();

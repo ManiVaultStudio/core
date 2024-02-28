@@ -32,6 +32,9 @@ bool isInPopupMode(QWidget* parent) {
     if (!parent)
         return false;
 
+    if (dynamic_cast<QMenu*>(parent->parent()))
+        return true;
+
     auto toolButton = dynamic_cast<QToolButton*>(parent->parent());
 
     if (!toolButton)
@@ -142,9 +145,11 @@ bool WidgetAction::isLeaf() const
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
 {
-    auto widget = getWidget(parent, isInPopupMode(parent) ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
+    const auto popupMode = isInPopupMode(parent);
+    
+    auto widget = getWidget(parent, popupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
 
-    if (isInPopupMode(parent)) {
+    if (popupMode) {
         auto collapsedWidget = dynamic_cast<WidgetActionCollapsedWidget*>(parent->parent()->parent());
 
         if (collapsedWidget) {
@@ -168,7 +173,9 @@ QWidget* WidgetAction::createWidget(QWidget* parent)
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    auto widget = getWidget(parent, isInPopupMode(parent) ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
+    const auto popupMode = isInPopupMode(parent);
+
+    auto widget = getWidget(parent, popupMode ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
 
     Q_ASSERT(widget != nullptr);
 
@@ -180,7 +187,9 @@ QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetF
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction)
 {
-    auto widget = getWidget(parent, isInPopupMode(parent) ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
+    const auto popupMode = isInPopupMode(parent);
+
+    auto widget = getWidget(parent, popupMode ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
 
     Q_ASSERT(widget != nullptr);
 
@@ -192,7 +201,9 @@ QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetF
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction)
 {
-    auto widget = getWidget(parent, isInPopupMode(parent) ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
+    const auto popupMode = isInPopupMode(parent);
+
+    auto widget = getWidget(parent, popupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
 
     Q_ASSERT(widget != nullptr);
 
