@@ -502,6 +502,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
     DatasetImpl::setProxyMembers(proxyMembers);
 
     getTask().setName("Creating proxy");
+    getTask().setVisible(!(projects().isOpeningProject() || projects().isImportingProject()));
     getTask().setRunning();
 
     auto pointIndexOffset = 0u;
@@ -810,7 +811,7 @@ void Points::resolveLinkedData(bool force /*= false*/)
         return;
 
     // Check for linked data in this dataset and resolve them
-    for (const mv::LinkedData& linkedData : getLinkedData())
+    for (const mv::LinkedData& linkedData : getSourceDataset<Points>()->getLinkedData())
         resolveLinkedPointData(linkedData, getSelection<Points>()->indices, nullptr);
 }
 
@@ -826,6 +827,8 @@ void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
     selection->indices = indices;
 
     resolveLinkedData();
+
+    //events().notifyDatasetDataSelectionChanged(this);
 }
 
 bool Points::canSelect() const
@@ -850,46 +853,44 @@ bool Points::canSelectInvert() const
 
 void Points::selectAll()
 {
-    auto& selectionIndices = getSelection<Points>()->indices;
+    std::vector<unsigned int> selectionIndices;
 
-    selectionIndices.clear();
     selectionIndices.resize(getNumPoints());
 
-    if (isFull()) {
+    if (isFull())
         std::iota(selectionIndices.begin(), selectionIndices.end(), 0);
-    }
-    else {
-        for (const auto& index : indices)
-            selectionIndices.push_back(index);
-    }
+    else
+        selectionIndices = indices;
+
+    setSelectionIndices(selectionIndices);
 
     events().notifyDatasetDataSelectionChanged(this);
 }
 
 void Points::selectNone()
 {
-    auto& selectionIndices = getSelection<Points>()->indices;
-
-    selectionIndices.clear();
+    setSelectionIndices({});
 
     events().notifyDatasetDataSelectionChanged(this);
 }
 
 void Points::selectInvert()
 {
-    auto& selectionIndices = getSelection<Points>()->indices;
+    std::vector<unsigned int> selectionIndices;
 
-    std::set<std::uint32_t> selectionSet(selectionIndices.begin(), selectionIndices.end());
+    auto selection = getSelection<Points>();
 
-    const auto noPixels = getNumPoints();
+    std::set<std::uint32_t> selectionSet(selection->indices.begin(), selection->indices.end());
 
-    selectionIndices.clear();
-    selectionIndices.reserve(noPixels - selectionSet.size());
+    const auto numberOfPoints = getNumPoints();
 
-    for (std::uint32_t i = 0; i < noPixels; i++) {
+    selectionIndices.reserve(numberOfPoints - selectionSet.size());
+
+    for (std::uint32_t i = 0; i < numberOfPoints; i++)
         if (selectionSet.find(i) == selectionSet.end())
             selectionIndices.push_back(i);
-    }
+
+    setSelectionIndices(selectionIndices);
 
     events().notifyDatasetDataSelectionChanged(this);
 }
@@ -901,13 +902,13 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "DimensionNames");
     variantMapMustContain(variantMap, "Selection");
 
-    // For backwards compatability, check PluginVersion
+    // For backwards compatibility, check PluginVersion
     if (variantMap["PluginVersion"] == "No Version" && !variantMap["Full"].toBool())
     {
         makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
 
         qWarning() << "[ManiVault deprecation warning]: This project was saved with an older ManiVault version (<1.0). "
-            "Please save the project again to ensure compatability with newer ManiVault versions. "
+            "Please save the project again to ensure compatibility with newer ManiVault versions. "
             "Future releases may not be able to load this projects otherwise. ";
     }
 
@@ -917,11 +918,11 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     else
     {
         variantMapMustContain(variantMap, "Indices");
-
+    
         const auto& indicesMap = variantMap["Indices"].toMap();
-
+    
         indices.resize(indicesMap["Count"].toInt());
-
+    
         populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
     }
 
