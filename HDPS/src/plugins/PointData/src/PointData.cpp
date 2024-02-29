@@ -810,7 +810,7 @@ void Points::resolveLinkedData(bool force /*= false*/)
         return;
 
     // Check for linked data in this dataset and resolve them
-    for (const mv::LinkedData& linkedData : getLinkedData())
+    for (const mv::LinkedData& linkedData : getSourceDataset<Points>()->getLinkedData())
         resolveLinkedPointData(linkedData, getSelection<Points>()->indices, nullptr);
 }
 
@@ -826,6 +826,8 @@ void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
     selection->indices = indices;
 
     resolveLinkedData();
+
+    //events().notifyDatasetDataSelectionChanged(this);
 }
 
 bool Points::canSelect() const
@@ -896,6 +898,8 @@ void Points::selectInvert()
 
 void Points::fromVariantMap(const QVariantMap& variantMap)
 {
+    qDebug() << __FUNCTION__ << getGuiName();
+
     DatasetImpl::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "DimensionNames");
@@ -912,17 +916,19 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     }
 
     // Load raw point data
-    if (isFull())
-        getRawData<PointData>()->fromVariantMap(variantMap);
-    else
-    {
-        variantMapMustContain(variantMap, "Indices");
+    if (!isProxy()) {
+        if (isFull())
+            getRawData<PointData>()->fromVariantMap(variantMap);
+        else
+        {
+            variantMapMustContain(variantMap, "Indices");
 
-        const auto& indicesMap = variantMap["Indices"].toMap();
+            const auto& indicesMap = variantMap["Indices"].toMap();
 
-        indices.resize(indicesMap["Count"].toInt());
+            indices.resize(indicesMap["Count"].toInt());
 
-        populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
+            populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
+        }
     }
 
     // Load dimension names

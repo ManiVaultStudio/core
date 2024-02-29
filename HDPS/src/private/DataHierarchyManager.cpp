@@ -250,7 +250,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
             const auto datasetId    = dataset["ID"].toString();
 
             subtasks << datasetId;
-            datasetList.emplace_back(dataset, dataset["Derived"].toBool());
+            datasetList.emplace_back(dataset, dataset["Derived"].toBool() || !dataset["ProxyMembers"].toStringList().isEmpty());
         }
     };
 
