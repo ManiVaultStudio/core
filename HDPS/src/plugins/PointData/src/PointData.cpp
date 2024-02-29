@@ -853,18 +853,16 @@ bool Points::canSelectInvert() const
 
 void Points::selectAll()
 {
-    auto& selectionIndices = getSelection<Points>()->indices;
+    std::vector<unsigned int> selectionIndices;
 
-    selectionIndices.clear();
     selectionIndices.resize(getNumPoints());
 
-    if (isFull()) {
+    if (isFull())
         std::iota(selectionIndices.begin(), selectionIndices.end(), 0);
-    }
-    else {
-        for (const auto& index : indices)
-            selectionIndices.push_back(index);
-    }
+    else
+        selectionIndices = indices;
+
+    setSelectionIndices(selectionIndices);
 
     events().notifyDatasetDataSelectionChanged(this);
 }
