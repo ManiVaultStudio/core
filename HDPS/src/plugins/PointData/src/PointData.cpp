@@ -869,9 +869,7 @@ void Points::selectAll()
 
 void Points::selectNone()
 {
-    auto& selectionIndices = getSelection<Points>()->indices;
-
-    selectionIndices.clear();
+    setSelectionIndices({});
 
     events().notifyDatasetDataSelectionChanged(this);
 }
@@ -880,7 +878,9 @@ void Points::selectInvert()
 {
     std::vector<unsigned int> selectionIndices;
 
-    std::set<std::uint32_t> selectionSet(getSelection<Points>()->indices.begin(), getSelection<Points>()->indices.end());
+    auto selection = getSelection<Points>();
+
+    std::set<std::uint32_t> selectionSet(selection->indices.begin(), selection->indices.end());
 
     const auto numberOfPoints = getNumPoints();
 
@@ -897,20 +897,18 @@ void Points::selectInvert()
 
 void Points::fromVariantMap(const QVariantMap& variantMap)
 {
-    qDebug() << __FUNCTION__ << getGuiName();
-
     DatasetImpl::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "DimensionNames");
     variantMapMustContain(variantMap, "Selection");
 
-    // For backwards compatability, check PluginVersion
+    // For backwards compatibility, check PluginVersion
     if (variantMap["PluginVersion"] == "No Version" && !variantMap["Full"].toBool())
     {
         makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
 
         qWarning() << "[ManiVault deprecation warning]: This project was saved with an older ManiVault version (<1.0). "
-            "Please save the project again to ensure compatability with newer ManiVault versions. "
+            "Please save the project again to ensure compatibility with newer ManiVault versions. "
             "Future releases may not be able to load this projects otherwise. ";
     }
 
