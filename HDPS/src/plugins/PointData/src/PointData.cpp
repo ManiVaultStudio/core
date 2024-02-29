@@ -502,6 +502,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
     DatasetImpl::setProxyMembers(proxyMembers);
 
     getTask().setName("Creating proxy");
+    getTask().setVisible(!(projects().isOpeningProject() || projects().isImportingProject()));
     getTask().setRunning();
 
     auto pointIndexOffset = 0u;
