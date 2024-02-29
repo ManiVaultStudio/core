@@ -103,6 +103,9 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Status), true);
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Type), true);
 
+        treeView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        treeView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
         const auto numberOfBackgroundTasksChanged = [this, &treeView, hierarchyWidget, widget]() -> void {
             std::int32_t height = 0;
 

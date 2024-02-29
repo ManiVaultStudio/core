@@ -58,6 +58,9 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::ParentID), true);
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Type), true);
 
+        treeView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        treeView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
         const auto numberOfForegroundTasksChanged = [this, &treeView, hierarchyWidget, widget]() -> void {
             const auto numberOfTasks = _filterModel.rowCount();
 

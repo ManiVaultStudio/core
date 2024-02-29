@@ -141,6 +141,9 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Status), true);
         treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Type), true);
 
+        treeView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        treeView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
         const auto numberOfModalTasksChanged = [this, &treeView, hierarchyWidget, widget]() -> void {
             const auto numberOfTasks = _modalTaskHandler->getFilterModel().rowCount();
 
@@ -152,6 +155,8 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
             hierarchyWidget->setFixedHeight(height);
 
             treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Kill), !_modalTaskHandler->getFilterModel().hasKillableTasks());
+
+            adjustSize();
 
             Application::processEvents();
         };
