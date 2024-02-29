@@ -913,19 +913,17 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     }
 
     // Load raw point data
-    if (!isProxy()) {
-        if (isFull())
-            getRawData<PointData>()->fromVariantMap(variantMap);
-        else
-        {
-            variantMapMustContain(variantMap, "Indices");
-
-            const auto& indicesMap = variantMap["Indices"].toMap();
-
-            indices.resize(indicesMap["Count"].toInt());
-
-            populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
-        }
+    if (isFull())
+        getRawData<PointData>()->fromVariantMap(variantMap);
+    else
+    {
+        variantMapMustContain(variantMap, "Indices");
+    
+        const auto& indicesMap = variantMap["Indices"].toMap();
+    
+        indices.resize(indicesMap["Count"].toInt());
+    
+        populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
     }
 
     // Load dimension names
