@@ -12,7 +12,6 @@ from rules_support import CoreBranchInfo
 import subprocess
 import traceback
 
-
 class HdpsCoreConan(ConanFile):
     """Class to package hdps-core using conan
 
@@ -33,7 +32,7 @@ class HdpsCoreConan(ConanFile):
     branch = "develop"  # should come from profile
     author = "B. van Lew <b.van_lew@lumc.nl>"
     license = (
-        "MIT"  # Indicates license: use SPDX Identifiers https://spdx.org/licenses/
+        "LGPL-3.0-or-later"  # Indicates license: use SPDX Identifiers https://spdx.org/licenses/
     )
     short_paths = True
     generators = "CMakeDeps"
@@ -51,7 +50,7 @@ class HdpsCoreConan(ConanFile):
     install_dir = None
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
-    requires = ("qt/6.3.2@lkeb/stable", "bzip2/1.0.8@", "zlib/1.2.8@")
+    requires = ("qt/6.3.2@lkeb/stable", "zlib/1.3")
 
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 

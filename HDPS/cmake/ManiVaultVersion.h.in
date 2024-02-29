@@ -1,12 +1,11 @@
-#ifndef MANIVAULTVERSION_H_IN_H
-#define MANIVAULTVERSION_H_IN_H
+#pragma once
 
 #include <cstdint>
 
-// Set ManiVault versions as defined in core/HDPS/CMakeList.txt
+// ManiVault versions is defined in core/HDPS/CMakeList.txt
+// Do not modify this file, but update new version numbers there
 
-constexpr std::int32_t MV_VERSION_MAJOR = @PROJECT_VERSION_MAJOR@;
-constexpr std::int32_t MV_VERSION_MINOR = @PROJECT_VERSION_MINOR@;
-constexpr std::int32_t MV_VERSION_PATCH = @PROJECT_VERSION_PATCH@;
-
-#endif //MANIVAULTVERSION_H_IN_H
+constexpr std::int32_t MV_VERSION_MAJOR  = @PROJECT_VERSION_MAJOR@;
+constexpr std::int32_t MV_VERSION_MINOR  = @PROJECT_VERSION_MINOR@;
+constexpr std::int32_t MV_VERSION_PATCH  = @PROJECT_VERSION_PATCH@;
+constexpr char         MV_VERSION_SUFFIX = static_cast<char>('@PROJECT_VERSION_SUFFIX@');
