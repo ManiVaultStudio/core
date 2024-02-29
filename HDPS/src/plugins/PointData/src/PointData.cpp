@@ -878,19 +878,19 @@ void Points::selectNone()
 
 void Points::selectInvert()
 {
-    auto& selectionIndices = getSelection<Points>()->indices;
+    std::vector<unsigned int> selectionIndices;
 
-    std::set<std::uint32_t> selectionSet(selectionIndices.begin(), selectionIndices.end());
+    std::set<std::uint32_t> selectionSet(getSelection<Points>()->indices.begin(), getSelection<Points>()->indices.end());
 
-    const auto noPixels = getNumPoints();
+    const auto numberOfPoints = getNumPoints();
 
-    selectionIndices.clear();
-    selectionIndices.reserve(noPixels - selectionSet.size());
+    selectionIndices.reserve(numberOfPoints - selectionSet.size());
 
-    for (std::uint32_t i = 0; i < noPixels; i++) {
+    for (std::uint32_t i = 0; i < numberOfPoints; i++)
         if (selectionSet.find(i) == selectionSet.end())
             selectionIndices.push_back(i);
-    }
+
+    setSelectionIndices(selectionIndices);
 
     events().notifyDatasetDataSelectionChanged(this);
 }
