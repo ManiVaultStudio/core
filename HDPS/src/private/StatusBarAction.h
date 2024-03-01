@@ -5,6 +5,7 @@
 #pragma once
 
 #include <actions/WidgetAction.h>
+#include <actions/WidgetActionToolButton.h>
 
 #include <widgets/OverlayWidget.h>
 
@@ -28,7 +29,7 @@ public:
     class Widget : public mv::gui::WidgetActionWidget {
     private:
 
-        class ToolButton : public QToolButton {
+        class ToolButton : public mv::gui::WidgetActionToolButton {
         public:
             ToolButton(QWidget* parent, StatusBarAction* statusBarAction);
 
@@ -49,7 +50,6 @@ public:
     protected:
         StatusBarAction*    _statusBarAction;   /** Pointer to owning status bar action */
         ToolButton          _toolButton;        /** Customized tool button */
-        QMenu               _toolButtonMenu;    /** Popup menu which contains the action that will be displayed */
 
         friend class StatusBarAction;
     };

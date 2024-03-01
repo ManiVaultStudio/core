@@ -321,6 +321,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/PluginTriggerAction.h
 	src/actions/LabelProxyAction.h
 	src/actions/WidgetActionBadgeOverlayWidget.h
+	src/actions/WidgetActionToolButton.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -342,6 +343,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/PluginTriggerAction.cpp
 	src/actions/LabelProxyAction.cpp
 	src/actions/WidgetActionBadgeOverlayWidget.cpp
+	src/actions/WidgetActionToolButton.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -349,10 +351,26 @@ set(PUBLIC_ACTIONS_INTERNAL_FILES
     ${PUBLIC_ACTIONS_INTERNAL_SOURCES}
 )
 
-set(PUBLIC_WIDGET_HEADERS
+set(PUBLIC_WIDGETS_HEADERS
     src/widgets/WebWidget.h
     src/widgets/DropWidget.h
     src/widgets/Divider.h
+    src/widgets/ElidedLabel.h
+)
+
+set(PUBLIC_WIDGETS_SOURCES
+    src/widgets/WebWidget.cpp
+    src/widgets/DropWidget.cpp
+    src/widgets/Divider.cpp
+    src/widgets/ElidedLabel.cpp
+)
+
+set(PUBLIC_WIDGETS_FILES
+    ${PUBLIC_WIDGETS_HEADERS}
+    ${PUBLIC_WIDGETS_SOURCES}
+)
+
+set(PUBLIC_WIDGETS_INTERNAL_HEADERS
     src/widgets/HierarchyWidget.h
     src/widgets/InfoOverlayWidget.h
     src/widgets/OverlayWidget.h
@@ -360,14 +378,10 @@ set(PUBLIC_WIDGET_HEADERS
     src/widgets/ViewPluginEditorDialog.h
     src/widgets/ActionsWidget.h
     src/widgets/SplashScreenWidget.h
-    src/widgets/ElidedLabel.h
     src/widgets/FlowLayout.h
 )
 
-set(PUBLIC_WIDGET_SOURCES
-    src/widgets/WebWidget.cpp
-    src/widgets/DropWidget.cpp
-    src/widgets/Divider.cpp
+set(PUBLIC_WIDGETS_INTERNAL_SOURCES
     src/widgets/HierarchyWidget.cpp
     src/widgets/InfoOverlayWidget.cpp
     src/widgets/OverlayWidget.cpp
@@ -375,15 +389,12 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/ViewPluginEditorDialog.cpp
     src/widgets/ActionsWidget.cpp
     src/widgets/SplashScreenWidget.cpp
-    src/widgets/ElidedLabel.cpp
     src/widgets/FlowLayout.cpp
-
-    ${ACTION_HIERARCHY_SOURCES}
 )
 
-set(PUBLIC_WIDGET_FILES
-    ${PUBLIC_WIDGET_HEADERS}
-    ${PUBLIC_WIDGET_SOURCES}
+set(PUBLIC_WIDGETS_INTERNAL_FILES
+    ${PUBLIC_WIDGETS_INTERNAL_HEADERS}
+    ${PUBLIC_WIDGETS_INTERNAL_SOURCES}
 )
 
 set(PUBLIC_RENDERERS_HEADERS
@@ -850,7 +861,8 @@ set(PUBLIC_HEADERS
     ${PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS}
     ${PUBLIC_TASK_ACTIONS_HEADERS}
     ${PUBLIC_ACTIONS_INTERNAL_HEADERS}
-    ${PUBLIC_WIDGET_HEADERS}
+    ${PUBLIC_WIDGETS_HEADERS}
+    ${PUBLIC_WIDGETS_INTERNAL_HEADERS}
     ${PUBLIC_RENDERERS_HEADERS}
     ${PUBLIC_GRAPHICS_HEADERS}
     ${PUBLIC_UTIL_HEADERS}
@@ -888,7 +900,8 @@ set(PUBLIC_SOURCES
     ${PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES}
     ${PUBLIC_TASK_ACTIONS_SOURCES}
     ${PUBLIC_ACTIONS_INTERNAL_SOURCES}
-    ${PUBLIC_WIDGET_SOURCES}
+	${PUBLIC_WIDGETS_SOURCES}
+    ${PUBLIC_WIDGETS_INTERNAL_SOURCES}
     ${PUBLIC_RENDERERS_SOURCES}
     ${PUBLIC_GRAPHICS_SOURCES}
     ${PUBLIC_UTIL_SOURCES}
@@ -927,7 +940,8 @@ source_group(Actions\\Toolbar FILES ${PUBLIC_TOOLBAR_ACTIONS_FILES})
 source_group(Actions\\Miscellaneous FILES ${PUBLIC_MISCELLANEOUS_ACTIONS_FILES})
 source_group(Actions\\Task FILES ${PUBLIC_TASK_ACTIONS_FILES})
 source_group(Actions\\Internal FILES ${PUBLIC_ACTIONS_INTERNAL_FILES})
-source_group(Widgets FILES ${PUBLIC_WIDGET_FILES})
+source_group(Widgets FILES ${PUBLIC_WIDGETS_FILES})
+source_group(Widgets\\Internal FILES ${PUBLIC_WIDGETS_INTERNAL_FILES})
 source_group(Renderers FILES ${PUBLIC_RENDERERS_FILES})
 source_group(Graphics FILES ${PUBLIC_GRAPHICS_FILES})
 source_group(Util FILES ${PUBLIC_UTIL_FILES})

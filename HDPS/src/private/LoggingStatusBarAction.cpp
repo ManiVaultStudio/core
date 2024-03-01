@@ -35,7 +35,6 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
 
     setPopupAction(&_recordsAction);
 
-    _recordsAction.setIconByName("scroll");
     _recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
     _recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);

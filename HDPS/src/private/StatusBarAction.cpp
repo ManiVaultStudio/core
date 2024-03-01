@@ -19,6 +19,8 @@ StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QS
     _iconAction(this, "Icon"),
     _popupAction(nullptr)
 {
+    setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
+
     _barGroupAction.setShowLabels(false);
     _barGroupAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
         auto horizontalWidget = widget->findChild<QWidget*>("HorizontalWidget");
@@ -77,7 +79,7 @@ StringAction& StatusBarAction::getBarIconStringAction()
     return _iconAction;
 }
 
-mv::gui::WidgetAction* StatusBarAction::getPopupAction()
+WidgetAction* StatusBarAction::getPopupAction()
 {
     return _popupAction;
 }
@@ -87,6 +89,8 @@ void StatusBarAction::setPopupAction(WidgetAction* popupAction)
     auto previousPopupAction = _popupAction;
 
     _popupAction = popupAction;
+
+    _popupAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
 
     popupActionChanged(previousPopupAction, _popupAction);
 }
@@ -104,8 +108,7 @@ void StatusBarAction::hidePopup()
 StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, statusBarAction, widgetFlags),
     _statusBarAction(statusBarAction),
-    _toolButton(this, statusBarAction),
-    _toolButtonMenu()
+    _toolButton(this, statusBarAction)
 {
     auto layout = new QVBoxLayout();
 
@@ -115,24 +118,12 @@ StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarActio
     setLayout(layout);
 
     _toolButton.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-    _toolButton.setPopupMode(QToolButton::InstantPopup);
-    _toolButton.setIconSize(QSize(16, 16));
-    _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
+    _toolButton.setAction(_statusBarAction->getPopupAction());
     _toolButton.setAutoRaise(true);
-    _toolButton.setObjectName("ToolButton");
-    _toolButton.setMenu(&_toolButtonMenu);
-
-    auto popupAction = _statusBarAction->getPopupAction();
-
-    if (popupAction)
-        _toolButtonMenu.addAction(popupAction);
+    _toolButton.setShowIndicator(false);
 
     connect(_statusBarAction, &StatusBarAction::popupActionChanged, this, [this](WidgetAction* previousPopupAction, WidgetAction* popupAction) -> void {
-        if (previousPopupAction)
-            _toolButtonMenu.removeAction(previousPopupAction);
-
-        if (popupAction)
-            _toolButtonMenu.addAction(popupAction);
+        _toolButton.setAction(popupAction);
     });
 
     connect(&_toolButton, &ToolButton::clicked, statusBarAction, &StatusBarAction::toolButtonClicked);
@@ -142,16 +133,22 @@ StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarActio
     });
 
     connect(_statusBarAction, &StatusBarAction::requirePopupHide, this, [this]() -> void {
-        _toolButtonMenu.hide();
+        //_toolButton.hide();
     });
+
+    const auto statusBarEnabledChanged = [this]() -> void {
+        _toolButton.setEnabled(_statusBarAction->isEnabled());
+    };
+
+    statusBarEnabledChanged();
+
+    connect(statusBarAction, &WidgetAction::enabledChanged, this, statusBarEnabledChanged);
 }
 
 StatusBarAction::Widget::ToolButton::ToolButton(QWidget* parent, StatusBarAction* statusBarAction) :
-    QToolButton(parent),
+    WidgetActionToolButton(parent, statusBarAction->getPopupAction()),
     _statusBarAction(statusBarAction)
 {
-    setObjectName("StatusBarToolButton");
-
     auto layout = new QVBoxLayout();
 
     layout->setSizeConstraint(QLayout::SetMinimumSize);

@@ -240,6 +240,12 @@ public: // Widgets
     virtual void setStretch(const std::int32_t& stretch) final;
 
     /**
+     * Get widget configuration function
+     * @return Function that is called right after a widget action widget is created (useful for manual manipulation of the generated widget)
+     */
+    WidgetConfigurationFunction getWidgetConfigurationFunction();
+
+    /**
      * Set widget configuration function to \p widgetConfigurationFunction
      * @param widgetConfigurationFunction This function is called right after a widget action widget is created (useful for manual manipulation of the generated widget)
      */

@@ -22,6 +22,7 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     _numberOfTasksTimer()
 {
     setToolTip("Foreground tasks");
+    setEnabled(false);
 
     _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
     _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running Indeterminate", "Running", "Finished", "Aborting" });
@@ -94,11 +95,15 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
         badge.setEnabled(numberOfTasks > 0);
         badge.setNumber(numberOfTasks);
 
-        if (_numberOfTasks == 0 && numberOfTasks >= 1)
+        if (_numberOfTasks == 0 && numberOfTasks >= 1) {
+            setEnabled(true);
             setPopupAction(&_tasksAction);
+        }
 
-        if (_numberOfTasks >= 1 && numberOfTasks == 0)
+        if (_numberOfTasks >= 1 && numberOfTasks == 0) {
+            setEnabled(false);
             setPopupAction(nullptr);
+        }
 
         _numberOfTasks = numberOfTasks;
     };

@@ -25,6 +25,7 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     _numberOfTasksTimer()
 {
     setToolTip("Background tasks");
+    setEnabled(false);
 
     auto& overallBackgroundTask = BackgroundTask::getGlobalHandler()->getOverallBackgroundTask();
 
@@ -76,6 +77,7 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
     _tasksAction.setPopupSizeHint(QSize(600, 0));
+    _tasksAction.setIcon(QIcon());
     _tasksAction.initialize(&_model, &_filterModel, "Background task");
     _tasksAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
@@ -129,11 +131,15 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
         if (numberOfTasks == _numberOfTasks)
             return;
 
-        if (_numberOfTasks == 0 && numberOfTasks >= 1)
+        if (_numberOfTasks == 0 && numberOfTasks >= 1) {
+            setEnabled(true);
             setPopupAction(&_tasksAction);
+        }
 
-        if (_numberOfTasks >= 1 && numberOfTasks == 0)
+        if (_numberOfTasks >= 1 && numberOfTasks == 0) {
+            setEnabled(false);
             setPopupAction(nullptr);
+        }
 
         _numberOfTasks = numberOfTasks;
     };
