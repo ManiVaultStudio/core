@@ -50,6 +50,11 @@ include(CMakeCheckSetAVX)
 # create a file that defines MV_VERSION_MAJOR, etc
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManiVaultVersion.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h" @ONLY)
 
+# when building on CI, use unity builds
+if(DEFINED ENV{CI} AND "$ENV{CI}" STREQUAL "true")
+    set(MV_UNITY_BUILD ON)
+endif()
+
 # -----------------------------------------------------------------------------
 # Apple settings
 # -----------------------------------------------------------------------------
@@ -125,6 +130,10 @@ message(STATUS "Using Qt Advanced Docking System version ${ADS_VERSION}")
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external/advanced_docking)
 
+if(MV_UNITY_BUILD)
+    set_target_properties(qt6advanceddocking PROPERTIES UNITY_BUILD ON)
+endif()
+
 # File compression: ZLib, a dependency for QuaZip
 if(APPLE)
     message(STATUS "********Using brew zlib for QUAZIP *********")
@@ -154,7 +163,7 @@ add_subdirectory(external/quazip)
 set(CMAKE_MESSAGE_LOG_LEVEL "STATUS")
 get_target_property(QuaZip_VERSION QuaZip VERSION)
 message(STATUS "Using QuaZip version ${QuaZip_VERSION}")
- 
+
 # -----------------------------------------------------------------------------
 # Source files
 # -----------------------------------------------------------------------------
@@ -195,6 +204,10 @@ target_precompile_headers(${MV_PUBLIC_LIB} PRIVATE
     ${PUBLIC_UTIL_HEADERS}
 )
 
+if(MV_UNITY_BUILD)
+    set_target_properties(${MV_PUBLIC_LIB} PROPERTIES UNITY_BUILD ON)
+endif()
+
 # -----------------------------------------------------------------------------
 # Target MV_PRIVATE_LIB
 # -----------------------------------------------------------------------------
@@ -222,6 +235,10 @@ check_and_set_AVX(${MV_PRIVATE_LIB} ${MV_USE_AVX})
 add_dependencies(${MV_PRIVATE_LIB} ${MV_PUBLIC_LIB} QuaZip qt6advanceddocking)
 
 target_precompile_headers(${MV_PRIVATE_LIB} REUSE_FROM ${MV_PUBLIC_LIB})
+
+if(MV_UNITY_BUILD)
+    set_target_properties(${MV_PRIVATE_LIB} PROPERTIES UNITY_BUILD ON)
+endif()
 
 # -----------------------------------------------------------------------------
 # Target MV_EXE
