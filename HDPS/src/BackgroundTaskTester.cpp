@@ -35,7 +35,7 @@ BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name)
 
                 timer->setInterval(interval);
 
-                connect(childTask, &BackgroundTask::requestAbort, childTask, [childTask, timer]() -> void {
+                connect(childTask, &BackgroundTask::requestAbort, this, [childTask, timer]() -> void {
                     childTask->setAborted();
                     timer->stop();
                 });

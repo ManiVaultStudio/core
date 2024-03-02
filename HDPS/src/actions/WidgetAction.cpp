@@ -135,6 +135,9 @@ QWidget* WidgetAction::createWidget(QWidget* parent)
 
     auto widget = getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
 
+    if (widget)
+        widget->setProperty("Popup", isInPopupMode);
+
     if (_widgetConfigurationFunction)
         _widgetConfigurationFunction(this, widget);
 
@@ -149,7 +152,10 @@ QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetF
 
     Q_ASSERT(widget);
 
-    if (widget != nullptr && _widgetConfigurationFunction)
+    if (widget)
+        widget->setProperty("Popup", isInPopupMode);
+
+    if (widget && _widgetConfigurationFunction)
         _widgetConfigurationFunction(this, widget);
 
     return widget;
@@ -163,7 +169,10 @@ QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetF
 
     Q_ASSERT(widget);
 
-    if (widget != nullptr && widgetConfigurationFunction)
+    if (widget)
+        widget->setProperty("Popup", isInPopupMode);
+
+    if (widget && widgetConfigurationFunction)
         widgetConfigurationFunction(this, widget);
 
     return widget;
@@ -177,7 +186,10 @@ QWidget* WidgetAction::createWidget(QWidget* parent, const WidgetConfigurationFu
 
     Q_ASSERT(widget);
 
-    if (widget != nullptr && widgetConfigurationFunction)
+    if (widget)
+        widget->setProperty("Popup", isInPopupMode);
+
+    if (widget && widgetConfigurationFunction)
         widgetConfigurationFunction(this, widget);
 
     return widget;

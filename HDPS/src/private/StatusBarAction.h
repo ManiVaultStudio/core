@@ -50,6 +50,7 @@ public:
     protected:
         StatusBarAction*    _statusBarAction;   /** Pointer to owning status bar action */
         ToolButton          _toolButton;        /** Customized tool button */
+        QWidget*            _popupWidget;       /** Current popup widget (maybe nullptr) */
 
         friend class StatusBarAction;
     };

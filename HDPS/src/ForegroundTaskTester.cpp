@@ -42,14 +42,19 @@ void ForegroundTaskTester::testRunningIndeterminate()
 
         QTimer timer;
 
-        timer.setInterval(1000);
+        timer.setInterval(100);
 
-        connect(indeterminateTask.get(), &ModalTask::requestAbort, this, [this, &timer, &indeterminateTask]() -> void {
-            timer.stop();
-            indeterminateTask->setAborted();
-        });
+        //connect(indeterminateTask.get(), &ModalTask::requestAbort, this, [this, &timer, &indeterminateTask]() -> void {
+        //    timer.stop();
+        //    indeterminateTask->setAborted();
+        //});
 
         connect(&timer, &QTimer::timeout, [&]() -> void {
+            //if (indeterminateTask->isAborting()) {
+            //    timer.stop();
+            //    //indeterminateTask->setFinished();
+            //}
+
             if (!subtasks.isEmpty()) {
                 const auto subtaskName = subtasks.first();
 
@@ -78,7 +83,7 @@ void ForegroundTaskTester::testPerformance()
 
         performanceTask->setMayKill(true);
 
-        const auto numberOfSubTasks = 10000;
+        const auto numberOfSubTasks = 1000;
 
         QStringList subtasks;
 
@@ -93,12 +98,17 @@ void ForegroundTaskTester::testPerformance()
 
         timer.setInterval(100);
 
-        connect(performanceTask.get(), &ModalTask::requestAbort, this, [this, &timer, &performanceTask]() -> void {
-            timer.stop();
-            performanceTask->setAborted();
-        });
+        //connect(performanceTask.get(), &ModalTask::requestAbort, this, [this, &timer, &performanceTask]() -> void {
+        //    timer.stop();
+        //    performanceTask->setAborted();
+        //});
 
         connect(&timer, &QTimer::timeout, [&]() -> void {
+            if (performanceTask->isAborting()) {
+                timer.stop();
+                performanceTask->setAborted();
+            }
+
             if (!subtasks.isEmpty()) {
                 const auto subtaskName = subtasks.first();
 

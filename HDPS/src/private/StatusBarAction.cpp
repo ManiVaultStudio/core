@@ -90,25 +90,35 @@ void StatusBarAction::setPopupAction(WidgetAction* popupAction)
 
     _popupAction = popupAction;
 
-    _popupAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
+    if (_popupAction)
+        _popupAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
 
-    popupActionChanged(previousPopupAction, _popupAction);
+    emit popupActionChanged(previousPopupAction, _popupAction);
 }
 
 void StatusBarAction::showPopup()
 {
+#ifdef STATUS_BAR_ACTION_VERBOSE
+    qDebug() << __FUNCTION__ << text();
+#endif
+
     emit requirePopupShow();
 }
 
 void StatusBarAction::hidePopup()
 {
+#ifdef STATUS_BAR_ACTION_VERBOSE
+    qDebug() << __FUNCTION__ << text();
+#endif
+
     emit requirePopupHide();
 }
 
 StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, statusBarAction, widgetFlags),
     _statusBarAction(statusBarAction),
-    _toolButton(this, statusBarAction)
+    _toolButton(this, statusBarAction),
+    _popupWidget(nullptr)
 {
     auto layout = new QVBoxLayout();
 
@@ -129,10 +139,27 @@ StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarActio
     connect(&_toolButton, &ToolButton::clicked, statusBarAction, &StatusBarAction::toolButtonClicked);
 
     connect(_statusBarAction, &StatusBarAction::requirePopupShow, this, [this]() -> void {
-        _toolButton.showMenu();
+        //_toolButton.click();
+
+        auto popupWidget = _toolButton.getAction()->requestWidget(&_toolButton);
+
+        popupWidget->show();
+        popupWidget->raise();
+
+        //Application::processEvents();
+
+        for (auto childWidget : _toolButton.findChildren<QObject*>()) { // Qt::FindDirectChildrenOnly
+            if (childWidget->property("Popup").isValid() && childWidget->property("Popup").toBool()) {
+                //_popupWidget = childWidget;
+                break;
+            }
+        }
     });
 
     connect(_statusBarAction, &StatusBarAction::requirePopupHide, this, [this]() -> void {
+        if (_toolButton.menu())
+            qDebug() << "---HAS_MENU---";
+
         //_toolButton.hide();
     });
 

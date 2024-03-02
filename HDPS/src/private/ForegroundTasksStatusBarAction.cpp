@@ -30,9 +30,15 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
 
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);
     _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    _tasksAction.setPopupSizeHint(QSize(600, 150));
+    _tasksAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
+    _tasksAction.setPopupSizeHint(QSize(600, 0));
+    _tasksAction.setIcon(QIcon());
     _tasksAction.initialize(&_model, &_filterModel, "Foreground Task");
     _tasksAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
+        //widget->setStyleSheet("background-color: yellow;");
+
+        widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
 
         Q_ASSERT(hierarchyWidget);
@@ -72,6 +78,12 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
 
             hierarchyWidget->setFixedHeight(height);
 
+            Application::processEvents();
+
+            widget->adjustSize();
+
+            Application::processEvents();
+
             treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Kill), !_filterModel.hasKillableTasks());
         };
 
@@ -86,7 +98,7 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     badge.setScale(0.5f);
     badge.setBackgroundColor(qApp->palette().highlight().color());
 
-    const auto numberOfBackgroundTasksChanged = [this, &badge]() -> void {
+    const auto numberOfTasksChanged = [this, &badge]() -> void {
         const auto numberOfTasks = _filterModel.rowCount();
 
         if (numberOfTasks == _numberOfTasks)
@@ -98,19 +110,21 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
         if (_numberOfTasks == 0 && numberOfTasks >= 1) {
             setEnabled(true);
             setPopupAction(&_tasksAction);
+            showPopup();
         }
 
         if (_numberOfTasks >= 1 && numberOfTasks == 0) {
             setEnabled(false);
             setPopupAction(nullptr);
+            hidePopup();
         }
 
         _numberOfTasks = numberOfTasks;
     };
 
-    numberOfBackgroundTasksChanged();
+    numberOfTasksChanged();
 
     _numberOfTasksTimer.setInterval(100);
-    _numberOfTasksTimer.callOnTimeout(this, numberOfBackgroundTasksChanged);
+    _numberOfTasksTimer.callOnTimeout(this, numberOfTasksChanged);
     _numberOfTasksTimer.start();
 }

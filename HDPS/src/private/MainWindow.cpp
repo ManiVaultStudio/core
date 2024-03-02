@@ -104,7 +104,7 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         auto pluginsStatusBarAction         = new PluginsStatusBarAction(this, "Plugins");
         auto loggingStatusBarAction         = new LoggingStatusBarAction(this, "Logging");
         auto backgroundTasksStatusBarAction = new BackgroundTasksStatusBarAction(this, "Background Tasks");
-        auto foregroundTasksStatusBarAction = new ForegroundTasksStatusBarAction(this, "Background Tasks");
+        auto foregroundTasksStatusBarAction = new ForegroundTasksStatusBarAction(this, "Foreground Tasks");
         auto settingsTasksStatusBarAction   = new SettingsStatusBarAction(this, "Settings");
 
         statusBar()->insertPermanentWidget(0, startPageStatusBarAction->createWidget(this));

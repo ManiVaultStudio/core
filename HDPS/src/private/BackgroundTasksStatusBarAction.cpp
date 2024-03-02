@@ -125,7 +125,7 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
         connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, &treeView, numberOfBackgroundTasksChanged);
     });
 
-    const auto numberOfBackgroundTasksChanged = [this]() -> void {
+    const auto numberOfTasksChanged = [this]() -> void {
         const auto numberOfTasks = _filterModel.rowCount();
 
         if (numberOfTasks == _numberOfTasks)
@@ -144,9 +144,9 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
         _numberOfTasks = numberOfTasks;
     };
 
-    numberOfBackgroundTasksChanged();
+    numberOfTasksChanged();
 
     _numberOfTasksTimer.setInterval(100);
-    _numberOfTasksTimer.callOnTimeout(this, numberOfBackgroundTasksChanged);
+    _numberOfTasksTimer.callOnTimeout(this, numberOfTasksChanged);
     _numberOfTasksTimer.start();
 }
