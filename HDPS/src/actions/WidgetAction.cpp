@@ -29,6 +29,10 @@ using namespace mv::util;
 
 namespace mv::gui {
 
+bool isInPopupMode(QWidget* parent) {
+    return parent->property("Popup").isValid() ? parent->property("Popup").toBool() : false;
+}
+
 QMap<WidgetAction::Scope, QString> WidgetAction::scopeNames {
     { WidgetAction::Scope::Private, "Private" },
     { WidgetAction::Scope::Public, "Public" }
@@ -131,12 +135,7 @@ bool WidgetAction::isLeaf() const
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
 {
-    const auto isInPopupMode = this->property("Popup").isValid() ? this->property("Popup").toBool() : false;
-
-    auto widget = getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
-
-    if (widget)
-        widget->setProperty("Popup", isInPopupMode);
+    auto widget = getWidget(parent, isInPopupMode(parent) ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
 
     if (_widgetConfigurationFunction)
         _widgetConfigurationFunction(this, widget);
@@ -146,14 +145,9 @@ QWidget* WidgetAction::createWidget(QWidget* parent)
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    const auto isInPopupMode = this->property("Popup").isValid() ? this->property("Popup").toBool() : false;
-
-    auto widget = getWidget(parent, isInPopupMode ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
+    auto widget = getWidget(parent, isInPopupMode(parent) ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
 
     Q_ASSERT(widget);
-
-    if (widget)
-        widget->setProperty("Popup", isInPopupMode);
 
     if (widget && _widgetConfigurationFunction)
         _widgetConfigurationFunction(this, widget);
@@ -163,14 +157,9 @@ QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetF
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction)
 {
-    const auto isInPopupMode = this->property("Popup").isValid() ? this->property("Popup").toBool() : false;
-
-    auto widget = getWidget(parent, isInPopupMode ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
+    auto widget = getWidget(parent, isInPopupMode(parent) ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
 
     Q_ASSERT(widget);
-
-    if (widget)
-        widget->setProperty("Popup", isInPopupMode);
 
     if (widget && widgetConfigurationFunction)
         widgetConfigurationFunction(this, widget);
@@ -180,14 +169,9 @@ QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetF
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction)
 {
-    const auto isInPopupMode = this->property("Popup").isValid() ? this->property("Popup").toBool() : false;
-
-    auto widget = getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
+    auto widget = getWidget(parent, isInPopupMode(parent) ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
 
     Q_ASSERT(widget);
-
-    if (widget)
-        widget->setProperty("Popup", isInPopupMode);
 
     if (widget && widgetConfigurationFunction)
         widgetConfigurationFunction(this, widget);

@@ -75,6 +75,8 @@ void WidgetActionToolButtonMenu::DeferredLoadWidgetAction::ActionWidget::initial
         if (!_widget) {
             _widget = currentAction->createWidget(this);
 
+            _widget->setProperty("Popup", true);
+
             layout()->addWidget(_widget);
         }
     }
