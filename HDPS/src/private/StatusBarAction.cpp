@@ -141,12 +141,7 @@ StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarActio
     connect(_statusBarAction, &StatusBarAction::requirePopupShow, this, [this]() -> void {
         //_toolButton.click();
 
-        auto popupWidget = _toolButton.getAction()->requestWidget(&_toolButton);
-
-        popupWidget->show();
-        popupWidget->raise();
-
-        //Application::processEvents();
+        _toolButton.click();
 
         for (auto childWidget : _toolButton.findChildren<QObject*>()) { // Qt::FindDirectChildrenOnly
             if (childWidget->property("Popup").isValid() && childWidget->property("Popup").toBool()) {

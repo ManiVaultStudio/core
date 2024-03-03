@@ -15,21 +15,16 @@ WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* ac
     _action(nullptr),
     _widgetConfigurationFunction(),
     _showIndicator(true),
-    _indicatorAlignment(Qt::AlignBottom | Qt::AlignRight)
+    _indicatorAlignment(Qt::AlignBottom | Qt::AlignRight),
+    _menu(*this)
 {
     initialize(action);
 }
 
 WidgetActionToolButton::WidgetActionToolButton(QWidget* parent, WidgetAction* action, WidgetConfigurationFunction widgetConfigurationFunction) :
-    QToolButton(parent),
-    _action(nullptr),
-    _widgetConfigurationFunction(),
-    _showIndicator(true),
-    _indicatorAlignment(Qt::AlignBottom | Qt::AlignRight)
+    WidgetActionToolButton(parent, action)
 {
     _widgetConfigurationFunction = widgetConfigurationFunction;
-
-    initialize(action);
 }
 
 void WidgetActionToolButton::paintEvent(QPaintEvent* paintEvent)
@@ -77,21 +72,19 @@ WidgetAction* WidgetActionToolButton::getAction()
 
 void WidgetActionToolButton::setAction(WidgetAction* action)
 {
-    if (_action) {
-        removeAction(_action);
+    auto previousAction = _action;
 
+    if (_action) {
         disconnect(_action, &WidgetAction::changed, this, nullptr);
         disconnect(_action, &WidgetAction::enabledChanged, this, nullptr);
         disconnect(_action, &WidgetAction::visibleChanged, this, nullptr);
 
-        _action->setProperty("Popup", true);
+        //_action->setProperty("Popup", true);
     }
 
     _action = action;
 
     if (_action) {
-        addAction(_action);
-
         const auto actionChanged = [this]() {
             setIcon(_action->icon());
             setToolTip(_action->toolTip());
@@ -113,10 +106,12 @@ void WidgetActionToolButton::setAction(WidgetAction* action)
         connect(_action, &WidgetAction::enabledChanged, this, actionEnabledChanged);
         connect(_action, &WidgetAction::visibleChanged, this, actionVisibilityChanged);
 
-        _action->setProperty("Popup", true);
+        //_action->setProperty("Popup", true);
     }
-
+    
     setAutoRaise(_action ? _action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise) : false);
+
+    emit actionChanged(previousAction, _action);
 }
 
 WidgetConfigurationFunction WidgetActionToolButton::getWidgetConfigurationFunction()
@@ -131,6 +126,7 @@ void WidgetActionToolButton::initialize(WidgetAction* action)
     setIconSize(QSize(16, 16));
     setStyleSheet("QToolButton::menu-indicator { image: none; }");
     setAction(action);
+    setMenu(&_menu);
 }
 
 }

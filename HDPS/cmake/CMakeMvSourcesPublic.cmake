@@ -322,6 +322,7 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
 	src/actions/LabelProxyAction.h
 	src/actions/WidgetActionBadgeOverlayWidget.h
 	src/actions/WidgetActionToolButton.h
+	src/actions/WidgetActionToolButtonMenu.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -344,6 +345,7 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
 	src/actions/LabelProxyAction.cpp
 	src/actions/WidgetActionBadgeOverlayWidget.cpp
 	src/actions/WidgetActionToolButton.cpp
+	src/actions/WidgetActionToolButtonMenu.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES

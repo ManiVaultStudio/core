@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "WidgetActionToolButtonMenu.h"
+
 #include <QToolButton>
 
 namespace mv::gui {
@@ -19,7 +21,10 @@ class WidgetAction;
  *
  * @author Thomas Kroes
  */
-class WidgetActionToolButton : public QToolButton {
+class WidgetActionToolButton : public QToolButton
+{
+    Q_OBJECT
+
 public:
 
     /**
@@ -97,6 +102,10 @@ public:
         update();
     }
 
+    WidgetActionToolButtonMenu& getMenu() {
+        return _menu;
+    }
+
 private:
 
     /**
@@ -105,11 +114,21 @@ private:
      */
     void initialize(WidgetAction* action);
 
+signals:
+
+    /**
+     * Signals that the current action changed from \p previousAction to \p currentAction
+     * @param previousAction Pointer to previous action (maybe nullptr)
+     * @param currentAction Pointer to current action (maybe nullptr)
+     */
+    void actionChanged(WidgetAction* previousAction, WidgetAction* currentAction);
+
 private:
     WidgetAction*                   _action;                        /** Pointer to owning action */
     WidgetConfigurationFunction     _widgetConfigurationFunction;   /** Function that is called right after a widget action widget is created */
     bool                            _showIndicator;                 /** Whether to show the indicator or not */
     Qt::Alignment                   _indicatorAlignment;            /** Alignment of the indicator */
+    WidgetActionToolButtonMenu      _menu;                          /** Menu with custom action content */
 };
 
 }
