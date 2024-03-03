@@ -611,6 +611,20 @@ public: // Popups
      */
     virtual void setPopupSizeHint(const QSize& popupSizeHint) final;
 
+    /**
+     * Get override size hint
+     * @return Override size hint
+     */
+    [[deprecated("This method is a placeholder and not operational yet")]]
+    virtual QSize getOverrideSizeHint() const final;
+
+    /**
+     * Set override size hint
+     * @param overrideSizeHint Override size hint
+     */
+    [[deprecated("This method is a placeholder and not operational yet")]]
+    virtual void setOverrideSizeHint(const QSize& overrideSizeHint) final;
+
 public: // Configuration flags
 
     /**
@@ -840,6 +854,7 @@ private:
     QString                         _settingsPrefix;                /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
     HighlightOption                 _highlighting;                  /** Highlighting state */
     QSize                           _popupSizeHint;                 /** Size hint of the popup */
+    QSize                           _overrideSizeHint;              /** Override size hint (use with caution) */
     std::int32_t                    _configuration;                 /** Configuration flags */
     QMap<QString, QVariant>         _cachedStates;                  /** Maps cache name to state */
     QString                         _location;                      /** The path relative to the root in string format */

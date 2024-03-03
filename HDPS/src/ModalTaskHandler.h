@@ -6,7 +6,7 @@
 
 #include "AbstractTaskHandler.h"
 
-#include "models/TasksListModel.h"
+#include "models/TasksTreeModel.h"
 #include "models/TasksFilterModel.h"
 
 #include "actions/TasksAction.h"
@@ -44,8 +44,9 @@ protected:
         void updateWindowTitleAndIcon();
 
     private:
-        ModalTaskHandler*   _modalTaskHandler;  /** Pointer to owning modal task handler */
-        gui::TasksAction    _tasksAction;       /** Tree action for displaying the task(s) */
+        ModalTaskHandler*   _modalTaskHandler;      /** Pointer to owning modal task handler */
+        gui::TasksAction    _tasksAction;           /** Tree action for displaying the task(s) */
+        QWidget*            _tasksWidget;           /** Tasks widget created by the tasks action */
     };
 
 public:
@@ -60,7 +61,7 @@ public:
      * Get the tasks model
      * @return Reference to the tasks tree model
      */
-    TasksListModel& getModel();
+    TasksTreeModel& getModel();
 
     /**
      * Get the tasks filter model
@@ -74,7 +75,7 @@ private:
     void updateDialogVisibility();
 
 private:
-    TasksListModel      _model;                 /** Tasks tree model */
+    TasksTreeModel      _model;                 /** Tasks tree model */
     TasksFilterModel    _filterModel;           /** Filter model for the tasks model */
     ModalTasksDialog    _modalTasksDialog;      /** Modal tasks dialog */
     QTimer              _minimumDurationTimer;  /** Wait for a small amount of time before showing the UI */

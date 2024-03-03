@@ -54,6 +54,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _settingsPrefix(),
     _highlighting(HighlightOption::None),
     _popupSizeHint(),
+    _overrideSizeHint(),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default)),
     _location(),
     _namedIcon(""),
@@ -980,6 +981,16 @@ void WidgetAction::updateCustomStyle()
 WidgetActionBadge& WidgetAction::getBadge()
 {
     return _badge;
+}
+
+void WidgetAction::setOverrideSizeHint(const QSize& sizeHint)
+{
+    _overrideSizeHint = sizeHint;
+}
+
+QSize WidgetAction::getOverrideSizeHint() const
+{
+    return _overrideSizeHint;
 }
 
 }

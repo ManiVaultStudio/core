@@ -83,7 +83,7 @@ void ForegroundTaskTester::testPerformance()
 
         performanceTask->setMayKill(true);
 
-        const auto numberOfSubTasks = 1000;
+        const auto numberOfSubTasks = 100;
 
         QStringList subtasks;
 

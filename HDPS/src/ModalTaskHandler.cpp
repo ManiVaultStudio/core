@@ -89,7 +89,7 @@ void ModalTaskHandler::updateDialogVisibility()
     QCoreApplication::processEvents();
 }
 
-TasksListModel& ModalTaskHandler::getModel()
+TasksTreeModel& ModalTaskHandler::getModel()
 {
     return _model;
 }
@@ -102,18 +102,14 @@ TasksFilterModel& ModalTaskHandler::getFilterModel()
 ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTaskHandler, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _modalTaskHandler(modalTaskHandler),
-    _tasksAction(this, "Modal Tasks")
+    _tasksAction(this, "Modal Tasks"),
+    _tasksWidget(nullptr)
 {
     setWindowModality(Qt::ApplicationModal);
-
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
-    setFixedWidth(1000);
-
     setWindowFlag(Qt::Dialog);
     setWindowFlag(Qt::WindowCloseButtonHint, false);
     setWindowFlag(Qt::WindowTitleHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
-    //setWindowFlag(Qt::SubWindow);
 
     _tasksAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
@@ -144,10 +140,10 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
         treeView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         treeView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-        const auto numberOfModalTasksChanged = [this, &treeView, hierarchyWidget, widget]() -> void {
+        const auto numberOfTasksChanged = [this, &treeView, hierarchyWidget, widget]() -> void {
             const auto numberOfTasks = _modalTaskHandler->getFilterModel().rowCount();
 
-            std::int32_t height = 0;
+            std::int32_t height = 2;
 
             for (int rowIndex = 0; rowIndex < numberOfTasks; ++rowIndex)
                 height += treeView.sizeHintForRow(rowIndex);
@@ -155,22 +151,23 @@ ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTask
             hierarchyWidget->setFixedHeight(height);
 
             treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Kill), !_modalTaskHandler->getFilterModel().hasKillableTasks());
-
-            adjustSize();
-
-            Application::processEvents();
         };
 
-        numberOfModalTasksChanged();
+        numberOfTasksChanged();
 
-        connect(&_modalTaskHandler->getFilterModel(), &QSortFilterProxyModel::rowsInserted, &treeView, numberOfModalTasksChanged);
-        connect(&_modalTaskHandler->getFilterModel(), &QSortFilterProxyModel::rowsRemoved, &treeView, numberOfModalTasksChanged);
+        connect(&_modalTaskHandler->getFilterModel(), &QSortFilterProxyModel::rowsInserted, &treeView, numberOfTasksChanged);
+        connect(&_modalTaskHandler->getFilterModel(), &QSortFilterProxyModel::rowsRemoved, &treeView, numberOfTasksChanged);
     });
     _tasksAction.initialize(&modalTaskHandler->getModel(), &modalTaskHandler->getFilterModel(), "Modal Task");
 
+    _tasksWidget = _tasksAction.createWidget(this);
+
+    _tasksWidget->setFixedWidth(1000);
+
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(_tasksAction.createWidget(this));
+    layout->setSizeConstraint(QLayout::SetFixedSize);
+    layout->addWidget(_tasksWidget);
 
     setLayout(layout);
     

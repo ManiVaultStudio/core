@@ -20,12 +20,17 @@ WidgetActionWidget::WidgetActionWidget(QWidget* parent, WidgetAction* action,  s
 
 QSize WidgetActionWidget::sizeHint() const
 {
+    auto action = const_cast<WidgetActionWidget*>(this)->getAction();
+
     if (getWidgetFlags() & WidgetFlag::PopupLayout) {
-        auto popupSizeHint = const_cast<WidgetActionWidget*>(this)->getAction()->getPopupSizeHint();
+        auto popupSizeHint = action->getPopupSizeHint();
 
         if (!popupSizeHint.isNull())
             return popupSizeHint;
     }
+
+    //if (!action->getOverrideSizeHint().isNull())
+    //    return action->getOverrideSizeHint();
 
     return QWidget::sizeHint();
 }

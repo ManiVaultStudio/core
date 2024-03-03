@@ -139,23 +139,11 @@ StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarActio
     connect(&_toolButton, &ToolButton::clicked, statusBarAction, &StatusBarAction::toolButtonClicked);
 
     connect(_statusBarAction, &StatusBarAction::requirePopupShow, this, [this]() -> void {
-        //_toolButton.click();
-
-        _toolButton.click();
-
-        for (auto childWidget : _toolButton.findChildren<QObject*>()) { // Qt::FindDirectChildrenOnly
-            if (childWidget->property("Popup").isValid() && childWidget->property("Popup").toBool()) {
-                //_popupWidget = childWidget;
-                break;
-            }
-        }
+        _toolButton.showMenu();
     });
 
     connect(_statusBarAction, &StatusBarAction::requirePopupHide, this, [this]() -> void {
-        if (_toolButton.menu())
-            qDebug() << "---HAS_MENU---";
-
-        //_toolButton.hide();
+        _toolButton.getMenu().hide();
     });
 
     const auto statusBarEnabledChanged = [this]() -> void {

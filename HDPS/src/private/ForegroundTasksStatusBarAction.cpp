@@ -35,8 +35,6 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     _tasksAction.setIcon(QIcon());
     _tasksAction.initialize(&_model, &_filterModel, "Foreground Task");
     _tasksAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
-        //widget->setStyleSheet("background-color: yellow;");
-
         widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
 
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
@@ -71,7 +69,7 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
         const auto numberOfForegroundTasksChanged = [this, &treeView, hierarchyWidget, widget]() -> void {
             const auto numberOfTasks = _filterModel.rowCount();
 
-            std::int32_t height = 0;
+            std::int32_t height = 2;
 
             for (int rowIndex = 0; rowIndex < _filterModel.rowCount(); ++rowIndex)
                 height += treeView.sizeHintForRow(rowIndex);

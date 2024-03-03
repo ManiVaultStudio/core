@@ -78,8 +78,6 @@ void WidgetActionToolButton::setAction(WidgetAction* action)
         disconnect(_action, &WidgetAction::changed, this, nullptr);
         disconnect(_action, &WidgetAction::enabledChanged, this, nullptr);
         disconnect(_action, &WidgetAction::visibleChanged, this, nullptr);
-
-        //_action->setProperty("Popup", true);
     }
 
     _action = action;
@@ -105,8 +103,6 @@ void WidgetActionToolButton::setAction(WidgetAction* action)
         connect(_action, &WidgetAction::changed, this, actionChanged);
         connect(_action, &WidgetAction::enabledChanged, this, actionEnabledChanged);
         connect(_action, &WidgetAction::visibleChanged, this, actionVisibilityChanged);
-
-        //_action->setProperty("Popup", true);
     }
     
     setAutoRaise(_action ? _action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise) : false);
