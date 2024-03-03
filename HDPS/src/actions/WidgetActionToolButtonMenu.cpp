@@ -53,33 +53,19 @@ WidgetActionToolButtonMenu::DeferredWidgetAction::ActionWidget::ActionWidget(QWi
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    //layout->addWidget(currentAction->createWidget(this));
 
     setLayout(layout);
-
-    //setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-    //layout->setSizeConstraint(QLayout::SetFixedSize);
-
-    //connect(&_widgetActionToolButton, &WidgetActionToolButton::actionChanged, this, [this, layout](WidgetAction* previousAction, WidgetAction* currentAction)-> void {
-    //    if (!currentAction)
-    //        return;
-
-    //    auto widget = currentAction->createWidget(this);
-
-    //    widget->setVisible(false);
-
-    //    layout->addWidget(widget);
-    //});
-
-    
 }
 
 QSize WidgetActionToolButtonMenu::DeferredWidgetAction::ActionWidget::sizeHint() const
 {
+    if (auto currentAction = _widgetActionToolButton.getAction())
+        return currentAction->getPopupSizeHint();
+
     if (_widget)
         return _widget->sizeHint();
 
-    return QSize(0, 0);
+    return {};
 }
 
 void WidgetActionToolButtonMenu::DeferredWidgetAction::ActionWidget::initialize()

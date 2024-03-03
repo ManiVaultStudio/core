@@ -39,8 +39,12 @@ private:
              */
             ActionWidget(QWidget* parent, WidgetActionToolButton& widgetActionToolButton);
 
+            /** Populate the widget with the current action widget */
             void initialize();
+
+
             QSize sizeHint() const override;
+
         private:
             WidgetActionToolButton&     _widgetActionToolButton;        /** ----TODO---- */
             QWidget*                    _widget;
