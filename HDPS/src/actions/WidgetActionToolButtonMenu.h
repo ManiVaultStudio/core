@@ -24,7 +24,8 @@ class WidgetActionToolButtonMenu : public QMenu
 {
 private:
 
-    class DeferredWidgetAction : public QWidgetAction
+    /** Customized widget action class which defers layout population until the popup menu is about to be shown */
+    class DeferredLoadWidgetAction : public QWidgetAction
     {
     private:
 
@@ -37,17 +38,20 @@ private:
              * Create with reference to \p widgetActionToolButton
              * @param widgetActionToolButton Reference to widget action tool button
              */
-            ActionWidget(QWidget* parent, WidgetActionToolButton& widgetActionToolButton);
+            ActionWidget(WidgetActionToolButton& widgetActionToolButton);
 
             /** Populate the widget with the current action widget */
             void initialize();
 
-
+            /**
+             * Get size hint
+             * @return Size hint
+             */
             QSize sizeHint() const override;
 
         private:
-            WidgetActionToolButton&     _widgetActionToolButton;        /** ----TODO---- */
-            QWidget*                    _widget;
+            WidgetActionToolButton&     _widgetActionToolButton;    /** Reference to the widget action tool button */
+            QWidget*                    _widget;                    /** Pointer to the create widget */
         };
 
     public:
@@ -56,7 +60,7 @@ private:
          * Create with reference to \p widgetActionToolButton
          * @param widgetActionToolButton Reference to widget action tool button
          */
-        DeferredWidgetAction(WidgetActionToolButton& widgetActionToolButton);
+        DeferredLoadWidgetAction(WidgetActionToolButton& widgetActionToolButton);
 
         /**
          * Create widget with pointer to \p parent widget
@@ -65,19 +69,31 @@ private:
          */
         QWidget* createWidget(QWidget* parent) override;
 
-        ActionWidget& getActionWidget() { return _actionWidget; }
+        /**
+         * Get action widget
+         * @return Reference to action widget
+         */
+        ActionWidget& getActionWidget() {
+            return _actionWidget;
+        }
 
-        WidgetActionToolButton& getWidgetActionToolButton() { return _widgetActionToolButton; }
+        /**
+         * Get widget action tool button
+         * @return Reference to owning widget action tool button
+         */
+        WidgetActionToolButton& getWidgetActionToolButton() {
+            return _widgetActionToolButton;
+        }
 
     private:
-        WidgetActionToolButton&     _widgetActionToolButton;        /** ----TODO---- */
-        ActionWidget                _actionWidget;
+        WidgetActionToolButton&     _widgetActionToolButton;    /** Reference to owning widget action tool button */
+        ActionWidget                _actionWidget;              /** Action widget */
     };
 
 public:
 
     /**
-     * Create with reference to owning \p widgetActionToolButton and pointer to \p action
+     * Create with reference to owning \p widgetActionToolButton
      * @param widgetActionToolButton Reference to owning widget action tool button
      */
     WidgetActionToolButtonMenu(WidgetActionToolButton& widgetActionToolButton);
@@ -88,21 +104,17 @@ public:
      */
     WidgetConfigurationFunction getWidgetConfigurationFunction();
 
-    QWidget* getWidget() { return _widget; }
-
-    DeferredWidgetAction& getDeferredWidgetAction() { return _widgetAction; }
-private:
-
     /**
-     * Startup initialization
-     * @param action Action to display as a popup widget of a tool button
+     * Get deferred load widget action
+     * @return Reference to deferred load widget action
      */
-    void initialize(WidgetAction* action);
+    DeferredLoadWidgetAction& getDeferredLoadWidgetAction() {
+        return _deferredLoadWidgetAction;
+    }
 
 private:
-    WidgetActionToolButton&         _widgetActionToolButton;        /** ----TODO---- */
-    DeferredWidgetAction            _widgetAction;                  /** ----TODO---- */
-    QWidget* _widget;
+    WidgetActionToolButton&         _widgetActionToolButton;        /** Reference to owning widget action tool button */
+    DeferredLoadWidgetAction        _deferredLoadWidgetAction;      /** Widget class which initializes with an empty vertical box layout and populates when the menu is about to be shown */
     WidgetConfigurationFunction     _widgetConfigurationFunction;   /** Function that is called right after a widget action widget is created */
 };
 

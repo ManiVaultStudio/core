@@ -15,16 +15,15 @@ namespace mv::gui {
 WidgetActionToolButtonMenu::WidgetActionToolButtonMenu(WidgetActionToolButton& widgetActionToolButton) :
     QMenu(&widgetActionToolButton),
     _widgetActionToolButton(widgetActionToolButton),
-    _widgetAction(widgetActionToolButton),
-    _widgetConfigurationFunction(),
-    _widget(nullptr)
+    _deferredLoadWidgetAction(widgetActionToolButton),
+    _widgetConfigurationFunction()
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-    addAction(&_widgetAction);
+    addAction(&_deferredLoadWidgetAction);
 
     connect(this, &QMenu::aboutToShow, this, [this]() -> void {
         if (auto currentAction = _widgetActionToolButton.getAction())
-            _widgetAction.getActionWidget().initialize();
+            _deferredLoadWidgetAction.getActionWidget().initialize();
     });
 }
 
@@ -33,23 +32,25 @@ WidgetConfigurationFunction WidgetActionToolButtonMenu::getWidgetConfigurationFu
     return _widgetConfigurationFunction;
 }
 
-WidgetActionToolButtonMenu::DeferredWidgetAction::DeferredWidgetAction(WidgetActionToolButton& widgetActionToolButton) :
+WidgetActionToolButtonMenu::DeferredLoadWidgetAction::DeferredLoadWidgetAction(WidgetActionToolButton& widgetActionToolButton) :
     QWidgetAction(&widgetActionToolButton),
     _widgetActionToolButton(widgetActionToolButton),
-    _actionWidget(&_widgetActionToolButton.getMenu(), _widgetActionToolButton)
+    _actionWidget(_widgetActionToolButton)
 {
 }
 
-QWidget* WidgetActionToolButtonMenu::DeferredWidgetAction::createWidget(QWidget* parent)
+QWidget* WidgetActionToolButtonMenu::DeferredLoadWidgetAction::createWidget(QWidget* parent)
 {
     return &_actionWidget;
 }
 
-WidgetActionToolButtonMenu::DeferredWidgetAction::ActionWidget::ActionWidget(QWidget* parent, WidgetActionToolButton& widgetActionToolButton) :
-    QWidget(parent),
+WidgetActionToolButtonMenu::DeferredLoadWidgetAction::ActionWidget::ActionWidget(WidgetActionToolButton& widgetActionToolButton) :
+    QWidget(&widgetActionToolButton.getMenu()),
     _widgetActionToolButton(widgetActionToolButton),
     _widget(nullptr)
 {
+    setProperty("Popup", true);
+
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
@@ -57,7 +58,7 @@ WidgetActionToolButtonMenu::DeferredWidgetAction::ActionWidget::ActionWidget(QWi
     setLayout(layout);
 }
 
-QSize WidgetActionToolButtonMenu::DeferredWidgetAction::ActionWidget::sizeHint() const
+QSize WidgetActionToolButtonMenu::DeferredLoadWidgetAction::ActionWidget::sizeHint() const
 {
     if (auto currentAction = _widgetActionToolButton.getAction())
         return currentAction->getPopupSizeHint();
@@ -68,7 +69,7 @@ QSize WidgetActionToolButtonMenu::DeferredWidgetAction::ActionWidget::sizeHint()
     return {};
 }
 
-void WidgetActionToolButtonMenu::DeferredWidgetAction::ActionWidget::initialize()
+void WidgetActionToolButtonMenu::DeferredLoadWidgetAction::ActionWidget::initialize()
 {
     if (auto currentAction = _widgetActionToolButton.getAction()) {
         if (!_widget) {
