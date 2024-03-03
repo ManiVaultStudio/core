@@ -21,19 +21,10 @@ WidgetActionToolButtonMenu::WidgetActionToolButtonMenu(WidgetActionToolButton& w
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     addAction(&_widgetAction);
-    //addAction(new QAction("asdasd"));
 
     connect(this, &QMenu::aboutToShow, this, [this]() -> void {
         if (auto currentAction = _widgetActionToolButton.getAction())
-            _widgetAction.getWidget()->layout()->addWidget(currentAction->createWidget(this));
-
-
-        //_widget->setFixedSize(QSize(400, 400));
-
-        //_widget->show();
-
-        //QResizeEvent re(QSize(1000, 1000), size());
-        //qApp->sendEvent(this, &re);
+            _widgetAction.getActionWidget().initialize();
     });
 }
 
@@ -42,43 +33,19 @@ WidgetConfigurationFunction WidgetActionToolButtonMenu::getWidgetConfigurationFu
     return _widgetConfigurationFunction;
 }
 
-void WidgetActionToolButtonMenu::showEvent(QShowEvent* showEvent)
-{
-    //updateGeometry();
-    //adjustSize();
-
-    QWidget::showEvent(showEvent);
-
-    //QResizeEvent re(QSize(10, 10), size());
-    //qApp->sendEvent(this, &re);
-
-    //
-    
-    //QActionEvent e(QEvent::ActionChanged, &_widgetAction);
-
-    //qApp->sendEvent(this, &e);
-}
-
 WidgetActionToolButtonMenu::DeferredWidgetAction::DeferredWidgetAction(WidgetActionToolButton& widgetActionToolButton) :
     QWidgetAction(&widgetActionToolButton),
     _widgetActionToolButton(widgetActionToolButton),
-    _widget(nullptr)
+    _actionWidget(&_widgetActionToolButton.getMenu(), _widgetActionToolButton)
 {
-    /*
-    connect(&_widgetActionToolButton, &WidgetActionToolButton::actionChanged, this, [this](WidgetAction* previousAction, WidgetAction* currentAction)-> void {
-        _action = currentAction;
-    });
-    */
 }
 
 QWidget* WidgetActionToolButtonMenu::DeferredWidgetAction::createWidget(QWidget* parent)
 {
-    //_widgetActionToolButton.getMenu().getWidget()->setParent(parent);
-    _widget = new DeferredWidget(parent, _widgetActionToolButton);
-    return _widget;
+    return &_actionWidget;
 }
 
-WidgetActionToolButtonMenu::DeferredWidgetAction::DeferredWidget::DeferredWidget(QWidget* parent, WidgetActionToolButton& widgetActionToolButton) :
+WidgetActionToolButtonMenu::DeferredWidgetAction::ActionWidget::ActionWidget(QWidget* parent, WidgetActionToolButton& widgetActionToolButton) :
     QWidget(parent),
     _widgetActionToolButton(widgetActionToolButton),
     _widget(nullptr)
@@ -107,84 +74,7 @@ WidgetActionToolButtonMenu::DeferredWidgetAction::DeferredWidget::DeferredWidget
     
 }
 
-void WidgetActionToolButtonMenu::DeferredWidgetAction::DeferredWidget::showEvent(QShowEvent* showEvent)
-{
-    
-    QWidget::showEvent(showEvent);
-
-    //layout()->addWidget(_widgetActionToolButton.getMenu().getWidget());
-    /*
-
-    //setFixedSize(QSize(600, 400));
-    if (auto action = _widgetActionToolButton.getAction()) {
-        if (!_widget) {
-                _widget = action->createWidget(this);
-                
-                _widget->installEventFilter(this);
-
-                layout()->addWidget(_widget);
-
-                
-
-                _widget->updateGeometry();
-                _widget->adjustSize();
-
-                //QActionEvent e(QEvent::ActionChanged, this);
-                //qApp->sendEvent(&_widgetActionToolButton.getMenu(), &e);
-
-                //QResizeEvent re(QSize(10000, 10), _widgetActionToolButton.size());
-                //qApp->sendEvent(&_widgetActionToolButton.getMenu(), &re);
-                //_widget->updateGeometry();
-                //_widget->adjustSize();
-            
-        }
-    }
-
-    //_widgetActionToolButton.getMenu().setFixedSize(QSize(600, 200));// _widget->size());
-
-    _widgetActionToolButton.getMenu().updateGeometry();
-    _widgetActionToolButton.getMenu().adjustSize();
-    //
-    */
-    
-    
-    
-
-    
-    //QResizeEvent resize_event(QSize(), _widgetActionToolButton.size());
-
-    //parentWidget()->adjustSize();
-    //qApp->sendEvent(&_widgetActionToolButton.getMenu(), &resize_event);
-    
-
-    //_widgetActionToolButton.getMenu().adjustSize();
-
-    //Application::processEvents();
-
-    //QResizeEvent resize_event(QSize(), parentWidget()->size());
-
-    //parentWidget()->adjustSize();
-    //qApp->sendEvent(parentWidget(), &resize_event);
-
-    //auto size = _widget->size();
-    //adjustSize();
-
-    //update();
-
-    //QWidget::showEvent(showEvent);
-
-    //parentWidget()->updateGeometry();
-    //parentWidget()->adjustSize();
-    //
-
-    ////adjustSize();
-
-    
-    //QActionEvent e(QEvent::ActionChanged, &_widgetActionToolButton.getMenu().getDeferredWidgetAction());
-    //qApp->sendEvent(&_widgetActionToolButton.getMenu(), &e);
-}
-
-QSize WidgetActionToolButtonMenu::DeferredWidgetAction::DeferredWidget::sizeHint() const
+QSize WidgetActionToolButtonMenu::DeferredWidgetAction::ActionWidget::sizeHint() const
 {
     if (_widget)
         return _widget->sizeHint();
@@ -192,15 +82,15 @@ QSize WidgetActionToolButtonMenu::DeferredWidgetAction::DeferredWidget::sizeHint
     return QSize(0, 0);
 }
 
-bool WidgetActionToolButtonMenu::DeferredWidgetAction::DeferredWidget::eventFilter(QObject* watched, QEvent* event)
+void WidgetActionToolButtonMenu::DeferredWidgetAction::ActionWidget::initialize()
 {
-    if (event->type() == QEvent::Resize) {
-        // Force QMenu to recalculate the geometry of this item
-        QActionEvent e(QEvent::ActionChanged, &_widgetActionToolButton.getMenu().getDeferredWidgetAction());
-        qApp->sendEvent(&_widgetActionToolButton.getMenu(), &e);
-    }
+    if (auto currentAction = _widgetActionToolButton.getAction()) {
+        if (!_widget) {
+            _widget = currentAction->createWidget(this);
 
-    return QWidget::eventFilter(watched, event);
+            layout()->addWidget(_widget);
+        }
+    }
 }
 
 }

@@ -27,7 +27,9 @@ private:
     class DeferredWidgetAction : public QWidgetAction
     {
     private:
-        class DeferredWidget : public QWidget
+
+        /** Widget class which initializes with an empty vertical box layout and populates when the menu is about to be shown */
+        class ActionWidget : public QWidget
         {
         public:
 
@@ -35,14 +37,13 @@ private:
              * Create with reference to \p widgetActionToolButton
              * @param widgetActionToolButton Reference to widget action tool button
              */
-            DeferredWidget(QWidget* parent, WidgetActionToolButton& widgetActionToolButton);
+            ActionWidget(QWidget* parent, WidgetActionToolButton& widgetActionToolButton);
 
-            void showEvent(QShowEvent* showEvent) override;
-            bool eventFilter(QObject* watched, QEvent* event);
+            void initialize();
             QSize sizeHint() const override;
         private:
-            WidgetActionToolButton& _widgetActionToolButton;        /** ----TODO---- */
-            QWidget* _widget;
+            WidgetActionToolButton&     _widgetActionToolButton;        /** ----TODO---- */
+            QWidget*                    _widget;
         };
 
     public:
@@ -59,13 +60,14 @@ private:
          * @return Pointer to created widget
          */
         QWidget* createWidget(QWidget* parent) override;
-        
-        QWidget* getWidget() { return _widget; }
+
+        ActionWidget& getActionWidget() { return _actionWidget; }
+
         WidgetActionToolButton& getWidgetActionToolButton() { return _widgetActionToolButton; }
 
     private:
         WidgetActionToolButton&     _widgetActionToolButton;        /** ----TODO---- */
-        QWidget* _widget;
+        ActionWidget                _actionWidget;
     };
 
 public:
@@ -81,8 +83,6 @@ public:
      * @return Function that is called right after a widget action widget is created
      */
     WidgetConfigurationFunction getWidgetConfigurationFunction();
-
-    void showEvent(QShowEvent* showEvent) override;
 
     QWidget* getWidget() { return _widget; }
 
