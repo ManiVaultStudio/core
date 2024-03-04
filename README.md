@@ -1,7 +1,7 @@
 # ![AppIcon32](https://github.com/ManiVaultStudio/core/assets/58806453/5968d5a1-ff7c-4a95-84d8-aade5aff6409) ManiVault Core
 
 [![License: LGPL v3.0](https://img.shields.io/badge/License-LGPL%20v3.0-blue.svg)](LICENSE)
-![Build Status](https://github.com/ManiVaultStudio/core/actions/workflows/build.yml/badge.svg)
+![Build Status](https://github.com/ManiVaultStudio/core/actions/workflows/build.yml/badge.svg?branch=master)
 [![GitHub contributors](https://img.shields.io/github/contributors/ManiVaultStudio/core?color=ffdf00)](https://github.com/ManiVaultStudio/core/graphs/contributors)
 [![Webpage](https://img.shields.io/badge/webpage-manivault.stuio-blue)](https://www.manivault.studio)
 
