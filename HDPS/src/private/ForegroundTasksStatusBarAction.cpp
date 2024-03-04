@@ -18,8 +18,7 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     _model(),
     _filterModel(),
     _tasksAction(this, "Tasks"),
-    _numberOfTasks(0),
-    _numberOfTasksTimer()
+    _numberOfTasks(0)
 {
     setToolTip("Foreground tasks");
     setEnabled(false);
@@ -35,6 +34,13 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
     _tasksAction.setPopupSizeHint(QSize(600, 0));
     _tasksAction.setIcon(QIcon());
     _tasksAction.initialize(&_model, &_filterModel, "Foreground Task");
+    _tasksAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
+        Q_ASSERT(widget);
+
+        auto toolButtonMenu = dynamic_cast<WidgetActionToolButtonMenu*>(widget->parentWidget()->parentWidget());
+
+        toolButtonMenu->setIgnoreCloseEvent(true);
+    });
 
     auto& badge = getBarIconStringAction().getBadge();
 
@@ -67,7 +73,6 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
 
     numberOfTasksChanged();
 
-    _numberOfTasksTimer.setInterval(100);
-    _numberOfTasksTimer.callOnTimeout(this, numberOfTasksChanged);
-    _numberOfTasksTimer.start();
+    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, numberOfTasksChanged, Qt::DirectConnection);
+    connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, numberOfTasksChanged, Qt::DirectConnection);
 }

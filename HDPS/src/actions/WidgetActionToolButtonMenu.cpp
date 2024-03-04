@@ -16,7 +16,8 @@ WidgetActionToolButtonMenu::WidgetActionToolButtonMenu(WidgetActionToolButton& w
     QMenu(&widgetActionToolButton),
     _widgetActionToolButton(widgetActionToolButton),
     _deferredLoadWidgetAction(widgetActionToolButton),
-    _widgetConfigurationFunction()
+    _widgetConfigurationFunction(),
+    _ignoreCloseEvent(false)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     addAction(&_deferredLoadWidgetAction);
@@ -30,6 +31,22 @@ WidgetActionToolButtonMenu::WidgetActionToolButtonMenu(WidgetActionToolButton& w
 WidgetConfigurationFunction WidgetActionToolButtonMenu::getWidgetConfigurationFunction()
 {
     return _widgetConfigurationFunction;
+}
+
+void WidgetActionToolButtonMenu::closeEvent(QCloseEvent* event)
+{
+    if (_ignoreCloseEvent)
+        event->ignore();
+}
+
+bool WidgetActionToolButtonMenu::getIgnoreCloseEvent() const
+{
+    return _ignoreCloseEvent;
+}
+
+void WidgetActionToolButtonMenu::setIgnoreCloseEvent(bool ignoreCloseEvent)
+{
+    _ignoreCloseEvent = ignoreCloseEvent;
 }
 
 WidgetActionToolButtonMenu::DeferredLoadWidgetAction::DeferredLoadWidgetAction(WidgetActionToolButton& widgetActionToolButton) :

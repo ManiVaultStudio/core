@@ -112,10 +112,29 @@ public:
         return _deferredLoadWidgetAction;
     }
 
+    /**
+     * Get ignore close event
+     * @return Boolean determining whether to ignore the close event
+     */
+    bool getIgnoreCloseEvent() const;
+
+    /**
+     * Set ignore close event to \p ignoreCloseEvent
+     * @param ignoreCloseEvent Boolean determining whether to ignore the close event
+     */
+    void setIgnoreCloseEvent(bool ignoreCloseEvent);
+
+    /**
+     * Invoked when the menu is required to be closed
+     * @param event Pointer to close event
+     */
+    void closeEvent(QCloseEvent* event) override;
+
 private:
     WidgetActionToolButton&         _widgetActionToolButton;        /** Reference to owning widget action tool button */
     DeferredLoadWidgetAction        _deferredLoadWidgetAction;      /** Widget class which initializes with an empty vertical box layout and populates when the menu is about to be shown */
     WidgetConfigurationFunction     _widgetConfigurationFunction;   /** Function that is called right after a widget action widget is created */
+    bool                            _ignoreCloseEvent;              /** Boolean determining whether to ignore the close event */
 };
 
 }

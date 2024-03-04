@@ -139,6 +139,8 @@ void TasksListAction::Widget::updateLayout()
         _widgetsMap.remove(task);
     }
 
+    Application::processEvents();
+
     updateGeometry();
     adjustSize();
 }
