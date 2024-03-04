@@ -52,6 +52,9 @@ class HdpsCoreConan(ConanFile):
 
     requires = ("qt/6.3.2@lkeb/stable", "zlib/1.3.1")
 
+    if self.settings.os == "Macos":
+        options["zlib/*"].fPIC = False
+    
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 
     def __get_git_path(self):
