@@ -52,9 +52,6 @@ class HdpsCoreConan(ConanFile):
 
     requires = ("qt/6.3.2@lkeb/stable", "zlib/1.3.1")
 
-    if self.settings.os == "Macos":
-        options["zlib/*"].fPIC = False
-    
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 
     def __get_git_path(self):
@@ -120,7 +117,9 @@ class HdpsCoreConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
+        if self.settings.os == "Macos":
+            del self.options.fPIC
+    
     def generate(self):
         # This prevents overlap between the hdps/core (source folder)
         # and the HDPS (build) folder. This happens in the Macos build
