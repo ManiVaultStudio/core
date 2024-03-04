@@ -118,7 +118,8 @@ class HdpsCoreConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.os == "Macos":
-            del self.options.fPIC
+            del self.options["fPIC"] = False
+            del self.options["shared"] = True
     
     def generate(self):
         # This prevents overlap between the hdps/core (source folder)
