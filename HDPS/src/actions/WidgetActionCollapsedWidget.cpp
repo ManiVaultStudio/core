@@ -3,7 +3,8 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "WidgetActionCollapsedWidget.h"
-#include "WidgetAction.h"
+
+#include "util/Icon.h"
 
 #include <QDebug>
 #include <QPainter>
