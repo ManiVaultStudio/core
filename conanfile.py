@@ -157,7 +157,7 @@ class HdpsCoreConan(ConanFile):
         tc.variables["ZLIB_ROOT"] = zlibpath
 
         # Set some build options
-        tc.variables["MV_PRECOMPILE_HEADERS"] = "OFF"
+        tc.variables["MV_PRECOMPILE_HEADERS"] = "ON"
         tc.variables["MV_UNITY_BUILD"] = "ON"
 
         # OS specific settings 
