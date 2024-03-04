@@ -8,6 +8,8 @@
 
 #include "models/TasksFilterModel.h"
 
+#include <QGridLayout>
+
 namespace mv::gui {
 
 /**
@@ -22,6 +24,51 @@ namespace mv::gui {
 class TasksListAction : public GroupAction
 {
     Q_OBJECT
+
+public:
+
+    /** Widget action for listing the tasks vertically */
+    class Widget : public WidgetActionWidget
+    {
+    private:
+        using WidgetsMap = QMap<Task*, QVector<QWidget*>>;
+
+    protected:
+
+        /**
+         * Construct with pointer to \p parent widget, owning \p tasksListAction and \p widgetFlags
+         * @param parent Pointer to parent widget
+         * @param tasksListAction Pointer to owning tasks list action
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        Widget(QWidget* parent, TasksListAction* tasksListAction, const std::int32_t& widgetFlags);
+
+    private:
+
+        /** Invoked when the number of tasks changes */
+        void updateLayout();
+
+        /** Cleans the tasks layout */
+        void cleanLayout();
+
+    protected:
+        TasksListAction*    _tasksListAction;   /** Pointer to owning tasks list action */
+        QGridLayout         _layout;            /** Tasks layout */
+        WidgetsMap          _widgetsMap;        /** Maps task to allocated widget */
+
+        friend class TasksListAction;
+    };
+
+protected:
+
+    /**
+     * Get widget representation of the color action
+     * @param parent Pointer to parent widget
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
+     */
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this, widgetFlags);
+    }
 
 public:
 

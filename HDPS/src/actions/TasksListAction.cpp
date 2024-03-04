@@ -67,4 +67,88 @@ void TasksListAction::initialize(AbstractTasksModel* model, TasksFilterModel* fi
     _mayLoadTasksPlugin             = mayLoadTasksPlugin;
 }
 
+TasksListAction::Widget::Widget(QWidget* parent, TasksListAction* tasksListAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, tasksListAction, widgetFlags),
+    _tasksListAction(tasksListAction),
+    _layout(),
+    _widgetsMap()
+{
+    setLayout(&_layout);
+
+    auto tasksFilterModel = _tasksListAction->getFilterModel();
+
+    Q_ASSERT(tasksFilterModel);
+
+    connect(tasksFilterModel, &QSortFilterProxyModel::rowsInserted, this, &Widget::updateLayout);
+    connect(tasksFilterModel, &QSortFilterProxyModel::rowsRemoved, this, &Widget::updateLayout);
+
+    updateLayout();
+}
+
+void TasksListAction::Widget::updateLayout()
+{
+    auto tasksModel         = _tasksListAction->getModel();
+    auto tasksFilterModel   = _tasksListAction->getFilterModel();
+
+    Q_ASSERT(tasksModel);
+    Q_ASSERT(tasksFilterModel);
+
+    const auto numberOfTasks = tasksFilterModel->rowCount();
+
+    cleanLayout();
+
+    QVector<Task*> currentTasks;
+
+    for (int rowIndex = 0; rowIndex < numberOfTasks; ++rowIndex) {
+        const auto sourceModelIndex = tasksFilterModel->mapToSource(tasksFilterModel->index(rowIndex, static_cast<int>(AbstractTasksModel::Column::Progress)));
+
+        if (!sourceModelIndex.isValid())
+            continue;
+
+        auto progressItem = dynamic_cast<AbstractTasksModel::ProgressItem*>(tasksModel->itemFromIndex(sourceModelIndex));
+
+        Q_ASSERT(progressItem != nullptr);
+
+        if (progressItem == nullptr)
+            continue;
+
+        currentTasks << progressItem->getTask();
+
+        if (!_widgetsMap.contains(progressItem->getTask())) {
+            auto labelWidget = new QLabel(progressItem->getTask()->getName() + ":");
+            auto progressWidget = progressItem->getTaskAction().createWidget(this);
+
+            progressWidget->setFixedHeight(25);
+
+            _widgetsMap[progressItem->getTask()] = { labelWidget, progressWidget };
+        }
+
+        const auto rowCount = _layout.rowCount();
+
+        _layout.addWidget(_widgetsMap[progressItem->getTask()][0], rowCount, 0);
+        _layout.addWidget(_widgetsMap[progressItem->getTask()][1], rowCount, 1);
+    }
+
+    for (auto task : _widgetsMap.keys()) {
+        if (currentTasks.contains(task))
+            continue;
+
+        for (auto widget : _widgetsMap[task])
+            delete widget;
+
+        _widgetsMap.remove(task);
+    }
+
+    updateGeometry();
+    adjustSize();
+}
+
+void TasksListAction::Widget::cleanLayout()
+{
+    QLayoutItem* item;
+
+    while ((item = _layout.takeAt(0)) != 0)
+        delete item;
+}
+
 }

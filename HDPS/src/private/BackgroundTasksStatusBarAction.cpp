@@ -79,51 +79,6 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
     _tasksAction.setPopupSizeHint(QSize(600, 0));
     _tasksAction.setIcon(QIcon());
     _tasksAction.initialize(&_model, &_filterModel, "Background task");
-    _tasksAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
-        auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
-
-        Q_ASSERT(hierarchyWidget);
-
-        if (hierarchyWidget == nullptr)
-            return;
-
-        hierarchyWidget->getToolbarAction().setVisible(false);
-        hierarchyWidget->setHeaderHidden(true);
-
-        auto& treeView = hierarchyWidget->getTreeView();
-
-        auto palette = treeView.palette();
-
-        palette.setColor(QPalette::Base, QApplication::palette().color(QPalette::Normal, QPalette::Window));
-
-        treeView.setAutoFillBackground(true);
-        treeView.setFrameShape(QFrame::NoFrame);
-        treeView.setPalette(palette);
-        treeView.viewport()->setPalette(palette);
-        treeView.setRootIsDecorated(false);
-
-        treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Status), true);
-        treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Type), true);
-
-        treeView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        treeView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-        const auto numberOfBackgroundTasksChanged = [this, &treeView, hierarchyWidget, widget]() -> void {
-            std::int32_t height = 0;
-
-            for (int rowIndex = 0; rowIndex < _filterModel.rowCount(); ++rowIndex)
-                height += treeView.sizeHintForRow(rowIndex);
-
-            hierarchyWidget->setFixedHeight(height);
-
-            treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Kill), !_filterModel.hasKillableTasks());
-        };
-
-        numberOfBackgroundTasksChanged();
-
-        connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, &treeView, numberOfBackgroundTasksChanged);
-        connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, &treeView, numberOfBackgroundTasksChanged);
-    });
 
     const auto numberOfTasksChanged = [this]() -> void {
         const auto numberOfTasks = _filterModel.rowCount();

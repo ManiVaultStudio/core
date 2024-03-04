@@ -27,10 +27,12 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     setEnabled(false);
 
     _filterModel.setSourceModel(&_model);
+    _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Modal" });
+    _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished", "Aborting" });
     _filterModel.getTopLevelTasksOnlyAction().setChecked(true);
 
     _minimumDurationTimer.setSingleShot(true);
-    
+
     const auto updateMinimumDurationTimer = [this]() -> void {
         _minimumDurationTimer.setInterval(getMinimumDuration());
     };
@@ -38,9 +40,6 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
     updateMinimumDurationTimer();
 
     connect(this, &AbstractTaskHandler::minimumDurationChanged, this, updateMinimumDurationTimer);
-
-    _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished", "Aborting" });
-    _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Modal" });
 
     const auto updateVisibilityDeferred = [this]() -> void {
         if (_modalTasksDialog.isHidden()) {
@@ -54,15 +53,8 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
     connect(&_minimumDurationTimer, &QTimer::timeout, this, &ModalTaskHandler::updateDialogVisibility);
 
-    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, [this, updateVisibilityDeferred](const QModelIndex& parent, int first, int last) -> void {
-        if (parent == QModelIndex())
-            updateVisibilityDeferred();
-    });
-
-    connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, [this, updateVisibilityDeferred](const QModelIndex& parent, int first, int last) -> void {
-        if (parent == QModelIndex())
-            updateVisibilityDeferred();
-    });
+    connect(&_filterModel, &QSortFilterProxyModel::rowsInserted, this, updateVisibilityDeferred);
+    connect(&_filterModel, &QSortFilterProxyModel::rowsRemoved, this, updateVisibilityDeferred);
 }
 
 void ModalTaskHandler::updateDialogVisibility()
@@ -102,75 +94,24 @@ TasksFilterModel& ModalTaskHandler::getFilterModel()
 ModalTaskHandler::ModalTasksDialog::ModalTasksDialog(ModalTaskHandler* modalTaskHandler, QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _modalTaskHandler(modalTaskHandler),
-    _tasksAction(this, "Modal Tasks"),
-    _tasksWidget(nullptr)
+    _tasksAction(this, "Modal Tasks")
 {
+    setFixedWidth(1000);
+
     setWindowModality(Qt::ApplicationModal);
     setWindowFlag(Qt::Dialog);
     setWindowFlag(Qt::WindowCloseButtonHint, false);
     setWindowFlag(Qt::WindowTitleHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
 
-    _tasksAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
-        auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
-
-        Q_ASSERT(hierarchyWidget);
-
-        if (hierarchyWidget == nullptr)
-            return;
-
-        hierarchyWidget->getToolbarAction().setVisible(false);
-        hierarchyWidget->setHeaderHidden(true);
-
-        auto& treeView = hierarchyWidget->getTreeView();
-
-        auto palette = treeView.palette();
-
-        palette.setColor(QPalette::Base, QApplication::palette().color(QPalette::Normal, QPalette::Window));
-
-        treeView.setAutoFillBackground(true);
-        treeView.setFrameShape(QFrame::NoFrame);
-        treeView.setPalette(palette);
-        treeView.viewport()->setPalette(palette);
-        treeView.setRootIsDecorated(false);
-
-        treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Status), true);
-        treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Type), true);
-
-        treeView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        treeView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-        const auto numberOfTasksChanged = [this, &treeView, hierarchyWidget, widget]() -> void {
-            const auto numberOfTasks = _modalTaskHandler->getFilterModel().rowCount();
-
-            std::int32_t height = 2;
-
-            for (int rowIndex = 0; rowIndex < numberOfTasks; ++rowIndex)
-                height += treeView.sizeHintForRow(rowIndex);
-
-            hierarchyWidget->setFixedHeight(height);
-
-            treeView.setColumnHidden(static_cast<int>(AbstractTasksModel::Column::Kill), !_modalTaskHandler->getFilterModel().hasKillableTasks());
-        };
-
-        numberOfTasksChanged();
-
-        connect(&_modalTaskHandler->getFilterModel(), &QSortFilterProxyModel::rowsInserted, &treeView, numberOfTasksChanged);
-        connect(&_modalTaskHandler->getFilterModel(), &QSortFilterProxyModel::rowsRemoved, &treeView, numberOfTasksChanged);
-    });
     _tasksAction.initialize(&modalTaskHandler->getModel(), &modalTaskHandler->getFilterModel(), "Modal Task");
-
-    _tasksWidget = _tasksAction.createWidget(this);
-
-    _tasksWidget->setFixedWidth(1000);
 
     auto layout = new QVBoxLayout();
 
-    layout->setSizeConstraint(QLayout::SetFixedSize);
-    layout->addWidget(_tasksWidget);
+    layout->addWidget(_tasksAction.createWidget(this));
 
     setLayout(layout);
-    
+
     updateWindowTitleAndIcon();
 
     connect(&_modalTaskHandler->getFilterModel(), &QSortFilterProxyModel::rowsInserted, this, &ModalTasksDialog::updateWindowTitleAndIcon);

@@ -46,7 +46,6 @@ protected:
     private:
         ModalTaskHandler*       _modalTaskHandler;      /** Pointer to owning modal task handler */
         gui::TasksListAction    _tasksAction;           /** Action action for displaying the task(s) in a list */
-        QWidget*                _tasksWidget;           /** Tasks widget created by the tasks action */
     };
 
 public:
