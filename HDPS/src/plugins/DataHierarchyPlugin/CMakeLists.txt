@@ -86,6 +86,12 @@ target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 # Use avx if enabled and available
 check_and_set_AVX(${DATAHIERARCHYPLUGIN} ${MV_USE_AVX})
 
+if(MV_UNITY_BUILD)
+    set_target_properties(${DATAHIERARCHYPLUGIN} PROPERTIES UNITY_BUILD ON)
+    set_source_files_properties(${DATAHIERARCHY_MOC} PROPERTIES
+                            SKIP_UNITY_BUILD_INCLUSION TRUE)
+endif()
+
 install(TARGETS ${DATAHIERARCHYPLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
     LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
