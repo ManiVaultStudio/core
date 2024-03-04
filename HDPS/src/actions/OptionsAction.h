@@ -9,6 +9,7 @@
 
 #include <QStandardItemModel>
 #include <QComboBox>
+#include <QCompleter>
 
 namespace mv::gui {
 
@@ -54,7 +55,8 @@ public: // Widgets
         void paintEvent(QPaintEvent* paintEvent) override;
 
     protected:
-        OptionsAction*   _optionsAction;  /** Pointer to owning options action */
+        OptionsAction*  _optionsAction;     /** Pointer to owning options action */
+        QCompleter      _completer;         /** Completer for searching and filtering */
 
         friend class OptionsAction;
     };
@@ -216,6 +218,16 @@ public:
      */
     const QStandardItemModel& getOptionsModel() const;
 
+protected:
+
+    /**
+     * Get options model
+     * @return Options model
+     */
+    QStandardItemModel& getOptionsModel();
+
+public:
+
     /**
      * Get the number of options
      * @return Number of options
@@ -334,7 +346,7 @@ protected:
     FileAction              _fileAction;        /** File action */
 
     friend class AbstractActionsManager;
-
+    friend class ComboBoxWidget;
 };
 
 }   

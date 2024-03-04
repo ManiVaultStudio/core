@@ -54,6 +54,11 @@ const QStandardItemModel& OptionsAction::getOptionsModel() const
     return _optionsModel;
 }
 
+QStandardItemModel& OptionsAction::getOptionsModel()
+{
+    return _optionsModel;
+}
+
 std::uint32_t OptionsAction::getNumberOfOptions() const
 {
     return _optionsModel.rowCount();
@@ -279,13 +284,22 @@ QVariantMap OptionsAction::toVariantMap() const
 
 OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* optionsAction) :
     QComboBox(parent),
-    _optionsAction(optionsAction)
+    _optionsAction(optionsAction),
+    _completer()
 {
     setObjectName("ComboBox");
+    setEditable(true);
+    setCompleter(&_completer);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     setSizeAdjustPolicy(QComboBox::AdjustToContents);
     setModel(&const_cast<QStandardItemModel&>(optionsAction->getOptionsModel()));
     
+    _completer.setCaseSensitivity(Qt::CaseInsensitive);
+    _completer.setFilterMode(Qt::MatchContains);
+    _completer.setCompletionColumn(0);
+    _completer.setCompletionMode(QCompleter::PopupCompletion);
+    _completer.setModel(&optionsAction->getOptionsModel());
+
     const auto onSelectedOptionsChanged = [this, optionsAction]() -> void {
         setToolTip("Selected: " + optionsAction->getSelectedOptions().join(", "));
         update();
