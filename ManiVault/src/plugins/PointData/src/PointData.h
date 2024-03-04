@@ -11,6 +11,7 @@
 #include "LinkedData.h"
 #include "PointDataRange.h"
 #include "Set.h"
+#include "SparseMatrix.h"
 
 #include "event/EventListener.h"
 
@@ -399,7 +400,29 @@ public:
         _numDimensions = static_cast<unsigned int>(numDimensions);
     }
 
+    template <typename ColIndexType, typename ValueType>
+    void setSparseData(size_t numRows, size_t numCols, std::vector<size_t> rowPointers, std::vector<ColIndexType> colIndices, std::vector<ValueType> values)
+    {
+        _numRows = numRows;
+        _numDimensions = numCols;
+        _sparseData.setData(numRows, numCols, rowPointers, colIndices, values);
+
+        _isDense = false;
+    }
+
+    bool isDense() const
+    {
+        return _isDense;
+    }
+
+    size_t getNumNonZeroElements()
+    {
+        return _sparseData.getNumNonZeros();
+    }
+
     void setDimensionNames(const std::vector<QString>& dimNames);
+
+    std::vector<float> row(size_t rowIndex) const;
 
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
@@ -432,6 +455,12 @@ private:
     unsigned int _numDimensions = 1;
 
     std::vector<QString> _dimNames;
+
+    // Sparse data
+    unsigned int _numRows = 0;
+    SparseMatrix<uint16_t, uint16_t> _sparseData;
+
+    bool _isDense = true;
 };
 
 // =============================================================================
@@ -661,6 +690,12 @@ public:
             mv::events().notifyDatasetDataDimensionsChanged(this);
     }
 
+    template <typename ColIndexType, typename ValueType>
+    void setSparseData(size_t numRows, size_t numCols, std::vector<size_t> rowPointers, std::vector<ColIndexType> colIndices, std::vector<ValueType> values)
+    {
+        getRawData<PointData>()->setSparseData(numRows, numCols, rowPointers, colIndices, values);
+    }
+
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
 
     void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
@@ -766,9 +801,12 @@ public:
     std::uint64_t getRawDataSize() const override {
         if (isProxy())
             return 0;
-        else
+        else {
             return getRawData<PointData>()->getRawDataSize();
+        }
     }
+
+    std::vector<float> row(size_t rowIndex) const;
 
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
