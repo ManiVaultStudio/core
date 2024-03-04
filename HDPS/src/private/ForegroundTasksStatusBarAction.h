@@ -6,7 +6,7 @@
 
 #include "StatusBarAction.h"
 
-#include <actions/TasksAction.h>
+#include <actions/TasksListAction.h>
 
 #include <models/TasksListModel.h>
 #include <models/TasksFilterModel.h>
@@ -32,9 +32,9 @@ public:
     ForegroundTasksStatusBarAction(QObject* parent, const QString& title);
 
 private:
-    mv::TasksListModel      _model;                 /** Tasks list model */
-    mv::TasksFilterModel    _filterModel;           /** Filter model for the tasks model */
-    mv::gui::TasksAction    _tasksAction;           /** Tasks action for displaying the tasks */
-    std::uint32_t           _numberOfTasks;         /** Last recorded number of tasks */
-    QTimer                  _numberOfTasksTimer;    /** For periodically checking if the number of tasks changed (this avoids timing issues with rowsInserted(...) and rowsRemoved(...)) signals */
+    mv::TasksListModel          _model;                 /** Tasks list model */
+    mv::TasksFilterModel        _filterModel;           /** Filter model for the tasks model */
+    mv::gui::TasksListAction    _tasksAction;           /** Tasks action for displaying the tasks */
+    std::uint32_t               _numberOfTasks;         /** Last recorded number of tasks */
+    QTimer                      _numberOfTasksTimer;    /** For periodically checking if the number of tasks changed (this avoids timing issues with rowsInserted(...) and rowsRemoved(...)) signals */
 };

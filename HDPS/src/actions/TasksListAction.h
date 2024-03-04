@@ -5,38 +5,32 @@
 #pragma once
 
 #include "actions/GroupAction.h"
-#include "actions/TreeAction.h"
-#include "actions/TriggerAction.h"
 
 #include "models/TasksFilterModel.h"
-
-#include "widgets/HierarchyWidget.h"
-
-#include <QPixmap>
 
 namespace mv::gui {
 
 /**
- * Tasks action class
+ * Tasks list action class
  *
  * Action class for managing tasks
  *
- * Note: This action is primarily developed for internal use (not meant to be used in third-party plugins)
+ * Note: This action is developed for internal use (not meant to be used in third-party plugins)
  * 
  * @author Thomas Kroes
  */
-class TasksAction : public GroupAction
+class TasksListAction : public GroupAction
 {
     Q_OBJECT
 
 public:
 
     /**
-     * Constructor
+     * Construct with pointer to \p parent object and \p title
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    Q_INVOKABLE TasksAction(QObject* parent, const QString& title);
+    Q_INVOKABLE TasksListAction(QObject* parent, const QString& title);
 
     /**
      * Get tasks model
@@ -61,39 +55,8 @@ public:
     void initialize(AbstractTasksModel* model, TasksFilterModel* filterModel, const QString& itemTypeName, WidgetConfigurationFunction widgetConfigurationFunction = WidgetConfigurationFunction(), bool mayLoadTasksPlugin = true);
 
 private:
-
-    /**
-     * Open any progress editor which has not been opened yet in the filtered tasks view recursively
-     * @param itemView Item view to set the persistent editors for
-     * @param parent Parent model index
-     */
-    void openPersistentProgressEditorsRecursively(QAbstractItemView& itemView, const QModelIndex& parent = QModelIndex());
-
-    /**
-     * Close any progress editor in the filtered tasks view recursively
-     * @param itemView Item view to set the persistent editors for
-     * @param parent Parent model index
-     */
-    void closePersistentProgressEditorsRecursively(QAbstractItemView& itemView, const QModelIndex& parent = QModelIndex());
-
-    /**
-     * get whether any aggregate tasks are displayed
-     * @return Boolean determining whether there are any aggregate tasks are displayed
-     */
-    bool hasAgregateTasks() const;
-
-signals:
-
-    /**
-     * Signals that auto hide kill column changed to 
-     * @param autoHideKillCollumn Boolean determining whether the kill column is automatically hidden when there are no killable tasks
-     */
-    void autoHideKillCollumnChanged(bool autoHideKillCollumn);
-
-private:
     AbstractTasksModel*             _model;                         /** Tasks model */
     TasksFilterModel*               _filterModel;                   /** Filter model for tasks model */
-    TreeAction                      _treeAction;                    /** Action to displays the tasks */
     WidgetConfigurationFunction     _widgetConfigurationFunction;   /** Configuration function to call after the widget has been configured by the tasks action */
     bool                            _mayLoadTasksPlugin;            /** When set to true, adds a trigger action to the toolbar for loading the tasks plugin */
     TriggerAction                   _loadTasksPluginAction;         /** Triggers loading the tasks plugin */
@@ -101,6 +64,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(mv::gui::TasksAction)
+Q_DECLARE_METATYPE(mv::gui::TasksListAction)
 
-inline const auto tasksActionMetaTypeId = qRegisterMetaType<mv::gui::TasksAction*>("mv::gui::TasksAction");
+inline const auto tasksListActionMetaTypeId = qRegisterMetaType<mv::gui::TasksListAction*>("mv::gui::TasksListAction");

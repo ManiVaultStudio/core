@@ -2,7 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "TasksAction.h"
+#include "TasksTreeAction.h"
 
 #include "CoreInterface.h"
 #include "AbstractTaskManager.h"
@@ -27,12 +27,12 @@ class ProgressItemDelegate : public QStyledItemDelegate {
 public:
 
     /**
-     * Construct with \p parent object
-     * @param parent Pointer to parent object
+     * Construct with pointer to \p tasksTreeAction
+     * @param tasksTreeAction Pointer to tasks tree action
      */
-    explicit ProgressItemDelegate(TasksAction* tasksAction) :
-        QStyledItemDelegate(tasksAction),
-        _tasksAction(tasksAction)
+    explicit ProgressItemDelegate(TasksTreeAction* tasksTreeAction) :
+        QStyledItemDelegate(tasksTreeAction),
+        _tasksTreeAction(tasksTreeAction)
     {
     }
 
@@ -57,7 +57,7 @@ private:
      * @return Pointer to progress action
      */
     ProgressAction* getProgressAction(const QModelIndex& index) const {
-        auto item = _tasksAction->getModel()->itemFromIndex(_tasksAction->getFilterModel()->mapToSource(index).siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)));
+        auto item = _tasksTreeAction->getModel()->itemFromIndex(_tasksTreeAction->getFilterModel()->mapToSource(index).siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)));
 
         if (item == nullptr)
             return nullptr;
@@ -66,7 +66,7 @@ private:
     }
 
 private:
-    TasksAction* _tasksAction;
+    TasksTreeAction* _tasksTreeAction;
 };
 
 /** Tree view item delegate class for showing custom task kill user interface */
@@ -74,12 +74,12 @@ class KillTaskItemDelegate : public QStyledItemDelegate {
 public:
 
     /**
-     * Construct with \p parent object
-     * @param parent Pointer to parent object
+     * Construct with pointer to \p tasksTreeAction
+     * @param tasksTreeAction Pointer to tasks tree action
      */
-    explicit KillTaskItemDelegate(TasksAction* tasksAction) :
-        QStyledItemDelegate(tasksAction),
-        _tasksAction(tasksAction)
+    explicit KillTaskItemDelegate(TasksTreeAction* tasksTreeAction) :
+        QStyledItemDelegate(tasksTreeAction),
+        _tasksTreeAction(tasksTreeAction)
     {
     }
 
@@ -104,7 +104,7 @@ private:
      * @return Pointer to task killer action
      */
     TriggerAction* getKillTaskAction(const QModelIndex& index) const {
-        auto item = _tasksAction->getModel()->itemFromIndex(_tasksAction->getFilterModel()->mapToSource(index).siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)));
+        auto item = _tasksTreeAction->getModel()->itemFromIndex(_tasksTreeAction->getFilterModel()->mapToSource(index).siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)));
 
         if (item == nullptr)
             return nullptr;
@@ -113,10 +113,10 @@ private:
     }
 
 private:
-    TasksAction* _tasksAction;
+    TasksTreeAction* _tasksTreeAction;
 };
 
-TasksAction::TasksAction(QObject* parent, const QString& title) :
+TasksTreeAction::TasksTreeAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),
     _model(nullptr),
     _filterModel(nullptr),
@@ -211,7 +211,7 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
                 const auto persistentEditorsIndexes = QModelIndexList({
                     index.siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)),
                     index.siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Kill))
-                });
+                    });
 
                 for (const auto& persistentEditorIndex : persistentEditorsIndexes)
                     if (treeView.isPersistentEditorOpen(persistentEditorIndex))
@@ -246,17 +246,17 @@ TasksAction::TasksAction(QObject* parent, const QString& title) :
     });
 }
 
-AbstractTasksModel* TasksAction::getModel()
+AbstractTasksModel* TasksTreeAction::getModel()
 {
     return _model;
 }
 
-TasksFilterModel* TasksAction::getFilterModel()
+TasksFilterModel* TasksTreeAction::getFilterModel()
 {
     return _filterModel;
 }
 
-void TasksAction::initialize(AbstractTasksModel* model, TasksFilterModel* filterModel, const QString& itemTypeName, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/, bool mayLoadTasksPlugin /*= true*/)
+void TasksTreeAction::initialize(AbstractTasksModel* model, TasksFilterModel* filterModel, const QString& itemTypeName, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/, bool mayLoadTasksPlugin /*= true*/)
 {
     Q_ASSERT(model);
     Q_ASSERT(filterModel);
@@ -264,16 +264,16 @@ void TasksAction::initialize(AbstractTasksModel* model, TasksFilterModel* filter
     if (!model || !filterModel)
         return;
 
-    _model                          = model;
-    _filterModel                    = filterModel;
-    _widgetConfigurationFunction    = widgetConfigurationFunction;
-    _mayLoadTasksPlugin             = mayLoadTasksPlugin;
+    _model = model;
+    _filterModel = filterModel;
+    _widgetConfigurationFunction = widgetConfigurationFunction;
+    _mayLoadTasksPlugin = mayLoadTasksPlugin;
 
     _treeAction.initialize(_model, _filterModel, itemTypeName);
 }
 
 
-void TasksAction::openPersistentProgressEditorsRecursively(QAbstractItemView& itemView, const QModelIndex& parent /*= QModelIndex()*/)
+void TasksTreeAction::openPersistentProgressEditorsRecursively(QAbstractItemView& itemView, const QModelIndex& parent /*= QModelIndex()*/)
 {
     Q_ASSERT(_filterModel);
 
@@ -283,7 +283,7 @@ void TasksAction::openPersistentProgressEditorsRecursively(QAbstractItemView& it
         const auto persistentEditorsIndexes = QModelIndexList({
             index.siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)),
             index.siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Kill))
-        });
+            });
 
         for (const auto& persistentEditorIndex : persistentEditorsIndexes)
             if (!itemView.isPersistentEditorOpen(persistentEditorIndex))
@@ -294,7 +294,7 @@ void TasksAction::openPersistentProgressEditorsRecursively(QAbstractItemView& it
     }
 }
 
-void TasksAction::closePersistentProgressEditorsRecursively(QAbstractItemView& itemView, const QModelIndex& parent /*= QModelIndex()*/)
+void TasksTreeAction::closePersistentProgressEditorsRecursively(QAbstractItemView& itemView, const QModelIndex& parent /*= QModelIndex()*/)
 {
     Q_ASSERT(_filterModel);
 
@@ -304,7 +304,7 @@ void TasksAction::closePersistentProgressEditorsRecursively(QAbstractItemView& i
         const auto persistentEditorsIndexes = QModelIndexList({
             index.siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Progress)),
             index.siblingAtColumn(static_cast<int>(AbstractTasksModel::Column::Kill))
-        });
+            });
 
         for (const auto& persistentEditorIndex : persistentEditorsIndexes)
             if (itemView.isPersistentEditorOpen(persistentEditorIndex))
@@ -315,7 +315,7 @@ void TasksAction::closePersistentProgressEditorsRecursively(QAbstractItemView& i
     }
 }
 
-bool TasksAction::hasAgregateTasks() const
+bool TasksTreeAction::hasAgregateTasks() const
 {
     Q_ASSERT(_filterModel);
 

@@ -9,7 +9,7 @@
 #include "models/TasksTreeModel.h"
 #include "models/TasksFilterModel.h"
 
-#include "actions/TasksAction.h"
+#include "actions/TasksListAction.h"
 
 #include <QDialog>
 #include <QTimer>
@@ -44,9 +44,9 @@ protected:
         void updateWindowTitleAndIcon();
 
     private:
-        ModalTaskHandler*   _modalTaskHandler;      /** Pointer to owning modal task handler */
-        gui::TasksAction    _tasksAction;           /** Tree action for displaying the task(s) */
-        QWidget*            _tasksWidget;           /** Tasks widget created by the tasks action */
+        ModalTaskHandler*       _modalTaskHandler;      /** Pointer to owning modal task handler */
+        gui::TasksListAction    _tasksAction;           /** Action action for displaying the task(s) in a list */
+        QWidget*                _tasksWidget;           /** Tasks widget created by the tasks action */
     };
 
 public:

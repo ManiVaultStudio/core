@@ -6,7 +6,7 @@
 
 #include <ViewPlugin.h>
 
-#include <actions/TasksAction.h>
+#include <actions/TasksTreeAction.h>
 
 #include <models/TasksTreeModel.h>
 #include <models/TasksFilterModel.h>
@@ -53,7 +53,7 @@ private:
 private:
     TasksTreeModel      _model;         /** Tasks tree model */
     TasksFilterModel    _filterModel;   /** Filter model for the tasks model */
-    TasksAction         _tasksAction;   /** Tasks action for displaying and interacting with the tasks in the system */
+    TasksTreeAction     _tasksAction;   /** Tasks action for displaying and interacting with the tasks in the system */
 };
 
 class TasksPluginFactory : public ViewPluginFactory
