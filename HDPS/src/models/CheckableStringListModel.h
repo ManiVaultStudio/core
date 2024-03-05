@@ -18,6 +18,11 @@ namespace mv {
 class CheckableStringListModel : public QStringListModel {
 public:
 
+    using StringIndicesSet = QSet<std::int32_t>;
+    using StringIndicesList = QList<std::int32_t>;
+
+public:
+
     /** No need for a custom constructor */
     using QStringListModel::QStringListModel;
 
@@ -45,8 +50,26 @@ public:
      */
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
+    /**
+     * Get checked strings
+     * @return String list of checked items
+     */
+    QStringList getCheckedStrings() const;
+
+    /**
+     * Get checked indices set
+     * @return Set of checked indices
+     */
+    StringIndicesSet getCheckedIndicesSet() const;
+
+    /**
+     * Get checked indices list
+     * @return List of checked indices
+     */
+    StringIndicesList getCheckedIndicesList() const;
+
 private:
-    QSet<int>   _checkedItems;  /** Keeps track of the selected items */
+    StringIndicesSet   _checkedItems;  /** Keeps track of the selected items */
 };
 
 }

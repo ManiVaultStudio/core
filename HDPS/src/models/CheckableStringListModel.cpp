@@ -48,4 +48,26 @@ bool CheckableStringListModel::setData(const QModelIndex& index, const QVariant&
     return QStringListModel::setData(index, value, role);
 }
 
+QStringList CheckableStringListModel::getCheckedStrings() const
+{
+    QStringList checkedStrings;
+
+    checkedStrings.reserve(_checkedItems.count());
+
+    for (const auto& checkedItem : _checkedItems)
+        checkedStrings.push_back(data(index(checkedItem, 0), Qt::EditRole).toString());
+
+    return checkedStrings;
+}
+
+CheckableStringListModel::StringIndicesSet CheckableStringListModel::getCheckedIndicesSet() const
+{
+    return _checkedItems;
+}
+
+mv::CheckableStringListModel::StringIndicesList CheckableStringListModel::getCheckedIndicesList() const
+{
+    return StringIndicesList(_checkedItems.begin(), _checkedItems.end());
+}
+
 }

@@ -7,11 +7,14 @@
 #include "WidgetAction.h"
 #include "TriggerAction.h"
 
-#include <QStringListModel>
+#include "models/CheckableStringListModel.h"
+
 #include <QSet>
 #include <QPersistentModelIndex>
 #include <QComboBox>
+#include <QLineEdit>
 #include <QCompleter>
+#include <QListView>
 
 namespace mv::gui {
 
@@ -26,20 +29,20 @@ class OptionsAction : public WidgetAction
 {
     Q_OBJECT
 
-public:
+private:
 
-    class OptionsStringListModel : public QStringListModel {
+    /** Extends the standard list view to support checking items in the checkable string list model */
+    class CheckableItemView : public QListView {
     public:
-        OptionsStringListModel(const QStringList& strings, QObject* parent = nullptr);
 
-        Qt::ItemFlags flags(const QModelIndex& index) const override;
+        /** No need for a custom constructor */
+        using QListView::QListView;
 
-        QVariant data(const QModelIndex& index, int role) const override;
-
-        bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-
-    private:
-        QSet<int> checkedItems;
+        /**
+         * Invoked when the user presses somewhere in the list view
+         * @param event Mouse event that occurred
+         */
+        void mousePressEvent(QMouseEvent* event) override;
     };
 
 public:
@@ -47,8 +50,8 @@ public:
     /** Describes the widget flags */
     enum WidgetFlag {
         ComboBox        = 0x00001,      /** The widget includes a combobox widget */
-        Selection       = 0x00004,      /** The widget includes a selection control */
-        File            = 0x00008,      /** The widget includes a file control */
+        Selection       = 0x00002,      /** The widget includes a selection control */
+        File            = 0x00004,      /** The widget includes a file control */
 
         Default = ComboBox
     };
@@ -60,21 +63,28 @@ public: // Widgets
     protected:
 
         /**
-         * Constructor
+         * Construct with pointer to \p parent widget, \p optionsAction and \p completer
          * @param parent Pointer to parent widget
          * @param optionsAction Pointer to options action
+         * @param completer Pointer to completer
          */
-        ComboBoxWidget(QWidget* parent, OptionsAction* optionsAction);
-
-        /**
-         * Paint event (overridden to show placeholder text)
-         * @param paintEvent Pointer to paint event
-         */
-        void paintEvent(QPaintEvent* paintEvent) override;
+        ComboBoxWidget(QWidget* parent, OptionsAction* optionsAction, QCompleter* completer);
 
     protected:
-        OptionsAction*  _optionsAction;     /** Pointer to owning options action */
-        QCompleter      _completer;         /** Completer for searching and filtering */
+
+        /**
+         * Respond to \p target events
+         * @param target Object of which an event occurred
+         * @param event The event that took place
+         */
+        bool eventFilter(QObject* target, QEvent* event);
+
+        /** Updates the line edit text to the joined selected strings */
+        void updateCurrentText();
+
+    protected:
+        OptionsAction*      _optionsAction;     /** Pointer to owning options action */
+        CheckableItemView   _view;              /** View for checking items */
 
         friend class OptionsAction;
     };
@@ -232,17 +242,17 @@ public:
 
     /**
      * Get options model
-     * @return Options model
+     * @return Checkable string list model
      */
-    const OptionsStringListModel& getOptionsModel() const;
+    const CheckableStringListModel& getOptionsModel() const;
 
 protected:
 
     /**
      * Get options model
-     * @return Options model
+     * @return Checkable string list model
      */
-    OptionsStringListModel& getOptionsModel();
+    CheckableStringListModel& getOptionsModel();
 
 public:
 
@@ -359,12 +369,12 @@ signals:
     void selectedOptionsChanged(const QStringList& selectedOptions);
 
 protected:
-    OptionsStringListModel  _optionsModel;      /** Options model */
-    SelectionAction         _selectionAction;   /** Selection action */
-    FileAction              _fileAction;        /** File action */
+    CheckableStringListModel    _optionsModel;      /** Options model */
+    SelectionAction             _selectionAction;   /** Selection action */
+    FileAction                  _fileAction;        /** File action */
 
     friend class AbstractActionsManager;
-    friend class ComboBoxWidget;
+    friend class ComboBox;
 };
 
 }   

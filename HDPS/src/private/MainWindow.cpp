@@ -30,6 +30,7 @@
 #include <QStackedWidget>
 #include <QStatusBar>
 #include <QListView>
+#include <QRandomGenerator>
 
 #ifdef _DEBUG
     #define MAIN_WINDOW_VERBOSE
@@ -66,47 +67,15 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     restoreWindowGeometryFromSettings();
 }
 
-class CustomCompleter : public QCompleter {
-public:
-    using QCompleter::QCompleter;
+QStringList generateUniqueWords(int count) {
 
-protected:
-    QStringList splitPath(const QString& path) const override {
-        QStringList result = QCompleter::splitPath(path);
-        if (completionModel() && completionModel()->inherits("OptionsStringListModel2")) {
-            for (int i = 0; i < result.size(); ++i) {
-                const auto index = completionModel()->index(result.indexOf(result.at(i)), 0);
-                if (index.isValid() && !index.data(Qt::CheckStateRole).isValid())
-                    result.removeAt(i--);
-            }
-        }
-        return result;
-    }
-};
+    QStringList result;
 
-class CheckableItemView : public QListView {
-public:
-    CheckableItemView(QWidget* parent = nullptr) : QListView(parent) {}
+    while (result.size() < count)
+        result << QUuid::createUuid().toString(QUuid::WithoutBraces).first(4);
 
-    void mousePressEvent(QMouseEvent* event) override {
-        if (event->button() == Qt::LeftButton) {
-            QModelIndex index = indexAt(event->pos());
-            if (index.isValid()) {
-                QAbstractItemModel* model = this->model();
-                if (model) {
-                    QVariant value = model->data(index, Qt::CheckStateRole);
-                    if (value.isValid()) {
-                        Qt::CheckState state = static_cast<Qt::CheckState>(value.toInt());
-                        model->setData(index, (state == Qt::Unchecked) ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
-                        event->accept();
-                        return;
-                    }
-                }
-            }
-        }
-        QAbstractItemView::mousePressEvent(event);
-    }
-};
+    return result;
+}
 
 void MainWindow::showEvent(QShowEvent* showEvent)
 {
@@ -138,46 +107,12 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         statusBar()->insertPermanentWidget(1, BackgroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this), 2);
         statusBar()->insertPermanentWidget(2, ForegroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this));
 
-        QStringList strings = {
-        "Lorem", "ipsum", "dolor", "sit", "amet,", "consectetur",
-        "adipiscing", "elit,", "sed", "do", "eiusmod", "tempor",
-        "incididunt", "ut", "labore", "et", "dolore", "magna", "aliqua.",
-        "Ut", "enim", "ad", "minim", "veniam,", "quis", "nostrud",
-        "exercitation", "ullamco", "laboris", "nisi", "ut", "aliquip",
-        "ex", "ea", "commodo", "consequat.", "Duis", "aute", "irure",
-        "dolor", "in", "reprehenderit", "in", "voluptate", "velit",
-        "esse", "cillum", "dolore", "eu", "fugiat", "nulla", "pariatur.",
-        "Excepteur", "sint", "occaecat", "cupidatat", "non", "proident,",
-        "sunt", "in", "culpa", "qui", "officia", "deserunt", "mollit",
-        "anim", "id", "est", "laborum."
-        };
+        auto optionsAction = new OptionsAction(this, "Options");
 
-        auto comboBox   = new QComboBox(this);
-        auto model      = new OptionsStringListModel2(strings);
+        optionsAction->setOptions(generateUniqueWords(10000));
+        optionsAction->setDefaultWidgetFlag(OptionsAction::Filterable);
 
-        model->setData(model->index(0, 0), Qt::Checked, Qt::CheckStateRole);
-
-        comboBox->setEditable(true);
-        comboBox->setModel(model);
-
-        auto completer = new QCompleter(strings, comboBox);
-
-        completer->setModel(model);
-        completer->setCaseSensitivity(Qt::CaseInsensitive);
-        completer->setPopup(new CheckableItemView(this));
-        
-        comboBox->setCompleter(completer);
-
-        auto view = new CheckableItemView(this);
-
-        view->setSelectionMode(QAbstractItemView::ExtendedSelection);
-        //view->setSelectionBehavior(QAbstractItemView::SelectionBehavior::ExtendedSelection);
-
-        comboBox->setView(view);
-
-        
-
-        statusBar()->insertPermanentWidget(3, comboBox, 2);
+        statusBar()->insertPermanentWidget(3, optionsAction->createWidget(this), 2);
 
         const auto projectChanged = [this]() -> void {
             if (!projects().hasProject()) {
