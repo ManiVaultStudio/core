@@ -66,45 +66,6 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     restoreWindowGeometryFromSettings();
 }
 
-class OptionsStringListModel2 : public QStringListModel {
-public:
-    OptionsStringListModel2(const QStringList& strings, QObject* parent = nullptr) :
-        QStringListModel(strings, parent)
-    {
-    }
-
-    Qt::ItemFlags flags(const QModelIndex& index) const override {
-        Qt::ItemFlags flags = QStringListModel::flags(index);
-
-        if (index.isValid())
-            flags |= Qt::ItemIsUserCheckable;
-
-        return flags;
-    }
-
-    QVariant data(const QModelIndex& index, int role) const override {
-        if (role == Qt::CheckStateRole && index.isValid())
-            return (checkedItems.contains(index.row())) ? Qt::Checked : Qt::Unchecked;
-
-        return QStringListModel::data(index, role);
-    }
-
-    bool setData(const QModelIndex& index, const QVariant& value, int role) override {
-        if (role == Qt::CheckStateRole && index.isValid()) {
-            if (value == Qt::Checked)
-                checkedItems.insert(index.row());
-            else
-                checkedItems.remove(index.row());
-            emit dataChanged(index, index);
-            return true;
-        }
-        return QStringListModel::setData(index, value, role);
-    }
-
-private:
-    QSet<int> checkedItems;
-};
-
 class CustomCompleter : public QCompleter {
 public:
     using QCompleter::QCompleter;
