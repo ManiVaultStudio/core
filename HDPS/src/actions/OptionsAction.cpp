@@ -347,6 +347,7 @@ QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
 
     completer->setModel(&_optionsModel);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
+    completer->setFilterMode(Qt::MatchContains);
     completer->setPopup(new CheckableItemView(widget));
 
     if (!widget->isPopup())
