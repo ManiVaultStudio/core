@@ -29,6 +29,7 @@
 #include <QMessageBox>
 #include <QStackedWidget>
 #include <QStatusBar>
+#include <QListView>
 
 #ifdef _DEBUG
     #define MAIN_WINDOW_VERBOSE
@@ -65,6 +66,87 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     restoreWindowGeometryFromSettings();
 }
 
+class OptionsStringListModel2 : public QStringListModel {
+public:
+    OptionsStringListModel2(const QStringList& strings, QObject* parent = nullptr) :
+        QStringListModel(strings, parent)
+    {
+    }
+
+    Qt::ItemFlags flags(const QModelIndex& index) const override {
+        Qt::ItemFlags flags = QStringListModel::flags(index);
+
+        if (index.isValid())
+            flags |= Qt::ItemIsUserCheckable;
+
+        return flags;
+    }
+
+    QVariant data(const QModelIndex& index, int role) const override {
+        if (role == Qt::CheckStateRole && index.isValid())
+            return (checkedItems.contains(index.row())) ? Qt::Checked : Qt::Unchecked;
+
+        return QStringListModel::data(index, role);
+    }
+
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override {
+        if (role == Qt::CheckStateRole && index.isValid()) {
+            if (value == Qt::Checked)
+                checkedItems.insert(index.row());
+            else
+                checkedItems.remove(index.row());
+            emit dataChanged(index, index);
+            return true;
+        }
+        return QStringListModel::setData(index, value, role);
+    }
+
+private:
+    QSet<int> checkedItems;
+};
+
+class CustomCompleter : public QCompleter {
+public:
+    using QCompleter::QCompleter;
+
+protected:
+    QStringList splitPath(const QString& path) const override {
+        QStringList result = QCompleter::splitPath(path);
+        if (completionModel() && completionModel()->inherits("OptionsStringListModel2")) {
+            for (int i = 0; i < result.size(); ++i) {
+                const auto index = completionModel()->index(result.indexOf(result.at(i)), 0);
+                if (index.isValid() && !index.data(Qt::CheckStateRole).isValid())
+                    result.removeAt(i--);
+            }
+        }
+        return result;
+    }
+};
+
+class CheckableItemView : public QListView {
+public:
+    CheckableItemView(QWidget* parent = nullptr) : QListView(parent) {}
+
+    void mousePressEvent(QMouseEvent* event) override {
+        if (event->button() == Qt::LeftButton) {
+            QModelIndex index = indexAt(event->pos());
+            if (index.isValid()) {
+                QAbstractItemModel* model = this->model();
+                if (model) {
+                    QVariant value = model->data(index, Qt::CheckStateRole);
+                    if (value.isValid()) {
+                        Qt::CheckState state = static_cast<Qt::CheckState>(value.toInt());
+                        model->setData(index, (state == Qt::Unchecked) ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
+                        event->accept();
+                        return;
+                    }
+                }
+            }
+        }
+        QAbstractItemView::mousePressEvent(event);
+    }
+};
+
 void MainWindow::showEvent(QShowEvent* showEvent)
 {
     QMainWindow::showEvent(showEvent);
@@ -94,6 +176,47 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         statusBar()->insertPermanentWidget(0, new QWidget(this), 3);
         statusBar()->insertPermanentWidget(1, BackgroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this), 2);
         statusBar()->insertPermanentWidget(2, ForegroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this));
+
+        QStringList strings = {
+        "Lorem", "ipsum", "dolor", "sit", "amet,", "consectetur",
+        "adipiscing", "elit,", "sed", "do", "eiusmod", "tempor",
+        "incididunt", "ut", "labore", "et", "dolore", "magna", "aliqua.",
+        "Ut", "enim", "ad", "minim", "veniam,", "quis", "nostrud",
+        "exercitation", "ullamco", "laboris", "nisi", "ut", "aliquip",
+        "ex", "ea", "commodo", "consequat.", "Duis", "aute", "irure",
+        "dolor", "in", "reprehenderit", "in", "voluptate", "velit",
+        "esse", "cillum", "dolore", "eu", "fugiat", "nulla", "pariatur.",
+        "Excepteur", "sint", "occaecat", "cupidatat", "non", "proident,",
+        "sunt", "in", "culpa", "qui", "officia", "deserunt", "mollit",
+        "anim", "id", "est", "laborum."
+        };
+
+        auto comboBox   = new QComboBox(this);
+        auto model      = new OptionsStringListModel2(strings);
+
+        model->setData(model->index(0, 0), Qt::Checked, Qt::CheckStateRole);
+
+        comboBox->setEditable(true);
+        comboBox->setModel(model);
+
+        auto completer = new QCompleter(strings, comboBox);
+
+        completer->setModel(model);
+        completer->setCaseSensitivity(Qt::CaseInsensitive);
+        completer->setPopup(new CheckableItemView(this));
+        
+        comboBox->setCompleter(completer);
+
+        auto view = new CheckableItemView(this);
+
+        view->setSelectionMode(QAbstractItemView::ExtendedSelection);
+        //view->setSelectionBehavior(QAbstractItemView::SelectionBehavior::ExtendedSelection);
+
+        comboBox->setView(view);
+
+        
+
+        statusBar()->insertPermanentWidget(3, comboBox, 2);
 
         const auto projectChanged = [this]() -> void {
             if (!projects().hasProject()) {

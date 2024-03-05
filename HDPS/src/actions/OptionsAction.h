@@ -7,7 +7,9 @@
 #include "WidgetAction.h"
 #include "TriggerAction.h"
 
-#include <QStandardItemModel>
+#include <QStringListModel>
+#include <QSet>
+#include <QPersistentModelIndex>
 #include <QComboBox>
 #include <QCompleter>
 
@@ -23,6 +25,22 @@ namespace mv::gui {
 class OptionsAction : public WidgetAction
 {
     Q_OBJECT
+
+public:
+
+    class OptionsStringListModel : public QStringListModel {
+    public:
+        OptionsStringListModel(const QStringList& strings, QObject* parent = nullptr);
+
+        Qt::ItemFlags flags(const QModelIndex& index) const override;
+
+        QVariant data(const QModelIndex& index, int role) const override;
+
+        bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+
+    private:
+        QSet<int> checkedItems;
+    };
 
 public:
 
@@ -216,7 +234,7 @@ public:
      * Get options model
      * @return Options model
      */
-    const QStandardItemModel& getOptionsModel() const;
+    const OptionsStringListModel& getOptionsModel() const;
 
 protected:
 
@@ -224,7 +242,7 @@ protected:
      * Get options model
      * @return Options model
      */
-    QStandardItemModel& getOptionsModel();
+    OptionsStringListModel& getOptionsModel();
 
 public:
 
@@ -264,7 +282,7 @@ public:
      * Get selected option indices
      * @return Selected options indices
      */
-    QList<int> getSelectedOptionIndices() const;
+    QList<std::int32_t> getSelectedOptionIndices() const;
 
     /**
      * Get whether a specific option is selected
@@ -341,7 +359,7 @@ signals:
     void selectedOptionsChanged(const QStringList& selectedOptions);
 
 protected:
-    QStandardItemModel      _optionsModel;      /** Options model */
+    OptionsStringListModel  _optionsModel;      /** Options model */
     SelectionAction         _selectionAction;   /** Selection action */
     FileAction              _fileAction;        /** File action */
 

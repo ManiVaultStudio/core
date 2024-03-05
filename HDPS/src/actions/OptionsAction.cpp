@@ -13,6 +13,9 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QAbstractItemView>
+#include <QMouseEvent>
+#include <QListView>
+#include <QAbstractItemView>
 
 using namespace mv::util;
 
@@ -20,7 +23,7 @@ namespace mv::gui {
 
 OptionsAction::OptionsAction(QObject* parent, const QString& title, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/) :
     WidgetAction(parent, title),
-    _optionsModel(),
+    _optionsModel({}),
     _selectionAction(*this),
     _fileAction(*this)
 {
@@ -29,7 +32,7 @@ OptionsAction::OptionsAction(QObject* parent, const QString& title, const QStrin
     initialize(options, selectedOptions);
 
     connect(&_optionsModel, &QStandardItemModel::dataChanged, this, [this]() -> void {
-        selectedOptionsChanged(getSelectedOptions());
+        //selectedOptionsChanged(getSelectedOptions());
     });
 }
 
@@ -41,20 +44,15 @@ void OptionsAction::initialize(const QStringList& options /*= QStringList()*/, c
 
 QStringList OptionsAction::getOptions() const
 {
-    QStringList options;
-
-    for (int i = 0; i < _optionsModel.rowCount(); i++)
-        options << _optionsModel.item(i, 0)->text();
-
-    return options;
+    return _optionsModel.stringList();
 }
 
-const QStandardItemModel& OptionsAction::getOptionsModel() const
+const OptionsAction::OptionsStringListModel& OptionsAction::getOptionsModel() const
 {
     return _optionsModel;
 }
 
-QStandardItemModel& OptionsAction::getOptionsModel()
+OptionsAction::OptionsStringListModel& OptionsAction::getOptionsModel()
 {
     return _optionsModel;
 }
@@ -78,23 +76,14 @@ void OptionsAction::setOptions(const QStringList& options, bool clearSelection /
 {
     const auto selectedOptions = getSelectedOptions();
 
-    _optionsModel.clear();
+    _optionsModel.setStringList(options);
 
-    //since adding a lot of options can become really slow we first add them to a list and then set the list using appendColumn.
-    QList<QStandardItem*> items;
-    items.reserve(options.size());
+    for (std::int32_t rowIndex = 0; rowIndex < options.count(); ++rowIndex) {
 
-    for (const auto& option : options) {
+        auto index = _optionsModel.index(rowIndex, 0, QModelIndex());
 
-        auto item = new QStandardItem();
-
-        item->setText(option);
-        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-        item->setData(clearSelection ? Qt::Unchecked : (selectedOptions.contains(option) ? Qt::Checked : Qt::Unchecked), Qt::CheckStateRole);
-
-        items.append(item);
+        _optionsModel.setData(index, clearSelection ? Qt::Unchecked : (selectedOptions.contains(options.at(rowIndex)) ? Qt::Checked : Qt::Unchecked), Qt::CheckStateRole);
     }
-    _optionsModel.appendColumn(items);
 
     emit optionsChanged(getOptions());
 }
@@ -103,20 +92,23 @@ QStringList OptionsAction::getSelectedOptions() const
 {
     QStringList selectedOptions;
 
-    for (int i = 0; i < _optionsModel.rowCount(); i++)
-        if (_optionsModel.item(i, 0)->checkState() == Qt::Checked)
-            selectedOptions << _optionsModel.item(i, 0)->text();
+    for (std::int32_t optionIndex = 0; optionIndex < _optionsModel.rowCount(); optionIndex++) {
+        const auto index = _optionsModel.index(optionIndex, 0);
+
+        if (index.data(Qt::CheckStateRole).toInt() == Qt::Checked)
+            selectedOptions << index.data(Qt::EditRole).toString();
+    }
 
     return selectedOptions;
 }
 
-QList<int> OptionsAction::getSelectedOptionIndices() const
+QList<std::int32_t> OptionsAction::getSelectedOptionIndices() const
 {
-    QList<int> selectedOptionIndices;
+    QList<std::int32_t> selectedOptionIndices;
 
-    for (int i = 0; i < _optionsModel.rowCount(); i++)
-        if (_optionsModel.item(i, 0)->checkState() == Qt::Checked)
-            selectedOptionIndices << i;
+    for (std::int32_t optionIndex = 0; optionIndex < _optionsModel.rowCount(); optionIndex++)
+        if (_optionsModel.index(optionIndex, 0).data(Qt::CheckStateRole).toInt() == Qt::Checked)
+            selectedOptionIndices << optionIndex;
 
     return selectedOptionIndices;
 }
@@ -128,13 +120,13 @@ bool OptionsAction::isOptionSelected(const QString& option) const
     if (matches.isEmpty())
         return false;
 
-    return _optionsModel.item(matches.first().row())->data(Qt::CheckStateRole).toBool();
+    return matches.first().data(Qt::CheckStateRole).toInt() == Qt::Checked;
 }
 
 bool OptionsAction::hasSelectedOptions() const
 {
-    for (int i = 0; i < _optionsModel.rowCount(); i++)
-        if (_optionsModel.item(i, 0)->checkState() == Qt::Checked)
+    for (std::int32_t optionIndex = 0; optionIndex < _optionsModel.rowCount(); optionIndex++)
+        if (_optionsModel.index(optionIndex, 0).data(Qt::CheckStateRole).toInt() == Qt::Checked)
             return true;
 
     return false;
@@ -145,7 +137,7 @@ void OptionsAction::selectOption(const QString& option, bool unselect /*= false*
     const auto matches = _optionsModel.match(_optionsModel.index(0, 0), Qt::DisplayRole, option);
 
     if (!matches.isEmpty())
-        _optionsModel.item(matches.first().row())->setData(unselect ? Qt::Unchecked : Qt::Checked, Qt::CheckStateRole);
+        _optionsModel.setData(matches.first(), unselect ? Qt::Unchecked : Qt::Checked, Qt::CheckStateRole);
 
     saveToSettings();
 }
@@ -161,8 +153,8 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
 
     auto selectionChanged = false;
 
-    for (int i = 0; i < _optionsModel.rowCount(); i++)
-        _optionsModel.item(i, 0)->setData(selectedOptions.contains(_optionsModel.item(i, 0)->text()) ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
+    for (std::int32_t optionIndex = 0; optionIndex < _optionsModel.rowCount(); optionIndex++)
+        _optionsModel.setData(_optionsModel.index(optionIndex, 0), selectedOptions.contains(_optionsModel.index(optionIndex, 0).data(Qt::EditRole).toString()) ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
 
     if (getSelectedOptions() != previousSelectedOptions)
         emit selectedOptionsChanged(getSelectedOptions());
@@ -282,23 +274,155 @@ QVariantMap OptionsAction::toVariantMap() const
     return variantMap;
 }
 
+class CheckableItemView : public QAbstractItemView {
+public:
+    CheckableItemView(QWidget* parent = nullptr) : QAbstractItemView(parent) {}
+
+protected:
+    QModelIndex indexAt(const QPoint& point) const override {
+        Q_UNUSED(point)
+            return QModelIndex();
+    }
+
+    void scrollTo(const QModelIndex& index, ScrollHint hint = EnsureVisible) override {
+        Q_UNUSED(index)
+            Q_UNUSED(hint)
+    }
+
+    QRect visualRect(const QModelIndex& index) const override {
+        Q_UNUSED(index)
+            return QRect();
+    }
+
+    QModelIndex moveCursor(QAbstractItemView::CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override {
+        Q_UNUSED(cursorAction)
+            Q_UNUSED(modifiers)
+            return QModelIndex();
+    }
+
+    int horizontalOffset() const override {
+        return 0;
+    }
+
+    int verticalOffset() const override {
+        return 0;
+    }
+
+    bool isIndexHidden(const QModelIndex& index) const override {
+        Q_UNUSED(index)
+            return false;
+    }
+
+    void setSelection(const QRect& rect, QItemSelectionModel::SelectionFlags flags) override {
+        Q_UNUSED(rect)
+            Q_UNUSED(flags)
+    }
+
+    QRegion visualRegionForSelection(const QItemSelection& selection) const override {
+        Q_UNUSED(selection)
+            return QRegion();
+    }
+
+    void mousePressEvent(QMouseEvent* event) override {
+        if (event->button() == Qt::LeftButton) {
+            QModelIndex index = indexAt(event->pos());
+            if (index.isValid()) {
+                QAbstractItemModel* model = this->model();
+                if (model) {
+                    QVariant value = model->data(index, Qt::CheckStateRole);
+                    if (value.isValid()) {
+                        Qt::CheckState state = static_cast<Qt::CheckState>(value.toInt());
+                        model->setData(index, (state == Qt::Unchecked) ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
+                        event->accept();
+                        return;
+                    }
+                }
+            }
+        }
+        QAbstractItemView::mousePressEvent(event);
+    }
+};
+
+class CheckableCompleter : public QCompleter {
+public:
+    CheckableCompleter(QObject* parent = nullptr) : QCompleter(parent) {}
+
+    bool event(QEvent* event) override {
+        if (event->type() == QEvent::MouseButtonPress) {
+            QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+            if (mouseEvent->button() == Qt::LeftButton) {
+                QModelIndex index = popup()->indexAt(mouseEvent->pos());
+                if (index.isValid()) {
+                    QVariant value = completionModel()->data(index, Qt::CheckStateRole);
+                    if (value.isValid()) {
+                        Qt::CheckState state = static_cast<Qt::CheckState>(value.toInt());
+                        completionModel()->setData(index, (state == Qt::Unchecked) ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
+                        return true;
+                    }
+                }
+            }
+        }
+        return QCompleter::event(event);
+    }
+};
+
+class CustomCompleter : public QCompleter {
+public:
+    using QCompleter::QCompleter;
+
+protected:
+    QAbstractItemView* popup() {
+        auto listView = new QListView();
+
+        listView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        listView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        listView->setSelectionBehavior(QAbstractItemView::SelectRows);
+        listView->setSelectionMode(QAbstractItemView::MultiSelection);
+        listView->setAlternatingRowColors(true);
+
+        return listView;
+    }
+};
+
 OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* optionsAction) :
     QComboBox(parent),
     _optionsAction(optionsAction),
     _completer()
 {
+    auto completer = new CustomCompleter();
+
     setObjectName("ComboBox");
     setEditable(true);
-    setCompleter(&_completer);
+    setCompleter(completer);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    setModel(&const_cast<QStandardItemModel&>(optionsAction->getOptionsModel()));
-    
-    _completer.setCaseSensitivity(Qt::CaseInsensitive);
-    _completer.setFilterMode(Qt::MatchContains);
-    _completer.setCompletionColumn(0);
-    _completer.setCompletionMode(QCompleter::PopupCompletion);
-    _completer.setModel(&optionsAction->getOptionsModel());
+    setModel(&optionsAction->getOptionsModel());
+    setModelColumn(0);
+    setInsertPolicy(QComboBox::NoInsert);
+
+    //auto listView = new QListView();
+
+    //listView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    //listView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    //listView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    //listView->setSelectionMode(QAbstractItemView::MultiSelection);
+    //listView->setAlternatingRowColors(true);
+
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    completer->setFilterMode(Qt::MatchContains);
+    completer->setCompletionColumn(0);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+
+    auto listView = new QListView();
+
+    listView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    listView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    listView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    listView->setSelectionMode(QAbstractItemView::MultiSelection);
+    listView->setAlternatingRowColors(true);
+
+    completer->setPopup(listView);
+    completer->setModel(&optionsAction->getOptionsModel());
 
     const auto onSelectedOptionsChanged = [this, optionsAction]() -> void {
         setToolTip("Selected: " + optionsAction->getSelectedOptions().join(", "));
@@ -312,6 +436,8 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
 
 void OptionsAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
 {
+    QComboBox::paintEvent(paintEvent);
+    return;
     auto painter = QSharedPointer<QStylePainter>::create(this);
 
     painter->setPen(palette().color(QPalette::Text));
@@ -501,6 +627,42 @@ OptionsAction::FileAction::Widget::Widget(QWidget* parent, FileAction* fileActio
     layout->addWidget(fileAction->getSaveSelectionAction().createWidget(this));
 
     setLayout(layout);
+}
+
+bool OptionsAction::OptionsStringListModel::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+    if (role == Qt::CheckStateRole && index.isValid()) {
+        if (value == Qt::Checked)
+            checkedItems.insert(index.row());
+        else
+            checkedItems.remove(index.row());
+        emit dataChanged(index, index);
+        return true;
+    }
+    return QStringListModel::setData(index, value, role);
+}
+
+QVariant OptionsAction::OptionsStringListModel::data(const QModelIndex& index, int role) const
+{
+    if (role == Qt::CheckStateRole && index.isValid())
+        return (checkedItems.contains(index.row())) ? Qt::Checked : Qt::Unchecked;
+
+    return QStringListModel::data(index, role);
+}
+
+Qt::ItemFlags OptionsAction::OptionsStringListModel::flags(const QModelIndex& index) const
+{
+    Qt::ItemFlags flags = QStringListModel::flags(index) | Qt::ItemIsEditable;
+
+    if (index.isValid())
+        flags |= Qt::ItemIsUserCheckable;
+
+    return flags;
+}
+
+OptionsAction::OptionsStringListModel::OptionsStringListModel(const QStringList& strings, QObject* parent /*= nullptr*/) :
+    QStringListModel(strings, parent)
+{
 }
 
 }
