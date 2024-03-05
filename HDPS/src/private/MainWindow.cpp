@@ -67,16 +67,6 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     restoreWindowGeometryFromSettings();
 }
 
-QStringList generateUniqueWords(int count) {
-
-    QStringList result;
-
-    while (result.size() < count)
-        result << QUuid::createUuid().toString(QUuid::WithoutBraces).first(4);
-
-    return result;
-}
-
 void MainWindow::showEvent(QShowEvent* showEvent)
 {
     QMainWindow::showEvent(showEvent);
@@ -106,13 +96,6 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         statusBar()->insertPermanentWidget(0, new QWidget(this), 3);
         statusBar()->insertPermanentWidget(1, BackgroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this), 2);
         statusBar()->insertPermanentWidget(2, ForegroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this));
-
-        auto optionsAction = new OptionsAction(this, "Options");
-
-        optionsAction->setOptions(generateUniqueWords(10000));
-        optionsAction->setDefaultWidgetFlag(OptionsAction::Filterable);
-
-        statusBar()->insertPermanentWidget(3, optionsAction->createWidget(this), 2);
 
         const auto projectChanged = [this]() -> void {
             if (!projects().hasProject()) {
