@@ -7,8 +7,6 @@
 #include <QStringList>
 #include <QAction>
 
-using namespace std;
-
 namespace mv::util
 {
 

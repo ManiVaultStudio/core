@@ -469,6 +469,9 @@ set(PUBLIC_UTIL_HEADERS
 	${PUBLIC_UTIL_HEADERS}
     src/util/MacThemeHelper.h
 )
+    set_source_files_properties(src/ApplicationSettingsAction.cpp src/util/MacThemeHelper.mm PROPERTIES
+      SKIP_UNITY_BUILD_INCLUSION ON
+    )
 endif()
 
 set(PUBLIC_UTIL_SOURCES

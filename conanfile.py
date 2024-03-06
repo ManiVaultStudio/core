@@ -156,6 +156,11 @@ class HdpsCoreConan(ConanFile):
         zlibpath = pathlib.Path(self.deps_cpp_info["zlib"].rootpath).as_posix()
         tc.variables["ZLIB_ROOT"] = zlibpath
 
+        # Set some build options
+        tc.variables["MV_PRECOMPILE_HEADERS"] = "ON"
+        tc.variables["MV_UNITY_BUILD"] = "ON"
+
+        # OS specific settings 
         if self.settings.os == "Linux":
             tc.variables["CMAKE_CONFIGURATION_TYPES"] = "Debug;Release"
         try:

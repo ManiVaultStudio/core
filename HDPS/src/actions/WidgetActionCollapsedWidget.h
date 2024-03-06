@@ -6,6 +6,8 @@
 
 #include "WidgetActionViewWidget.h"
 
+#include "WidgetAction.h"
+
 #include <QHBoxLayout>
 #include <QToolButton>
 

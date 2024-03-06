@@ -4,6 +4,8 @@
 
 #include "WidgetActionBadge.h"
 
+#include "util/Icon.h"
+
 #include <QDebug>
 
 namespace mv::gui {
