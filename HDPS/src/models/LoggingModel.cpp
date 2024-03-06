@@ -82,7 +82,7 @@ QVariant LoggingModel::NumberItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
         case Qt::EditRole:
-            return getMessageRecord().number;
+            return QVariant::fromValue(getMessageRecord().number);
 
         case Qt::DisplayRole:
             return QString::number(data(Qt::EditRole).toInt());

@@ -270,6 +270,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/VersionAction.h
     src/actions/TreeAction.h
     src/actions/StatusBarAction.h
+    src/actions/PluginStatusBarAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -282,6 +283,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/VersionAction.cpp
     src/actions/TreeAction.cpp
     src/actions/StatusBarAction.cpp
+    src/actions/PluginStatusBarAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES

@@ -72,12 +72,12 @@ void PluginFactory::setGlobalSettingsGroupAction(PluginGlobalSettingsGroupAction
     emit pluginGlobalSettingsGroupActionChanged(_pluginGlobalSettingsGroupAction);
 }
 
-StatusBarAction* PluginFactory::getStatusBarAction() const
+PluginStatusBarAction* PluginFactory::getStatusBarAction() const
 {
     return _statusBarAction;
 }
 
-void PluginFactory::setStatusBarAction(gui::StatusBarAction* statusBarAction)
+void PluginFactory::setStatusBarAction(PluginStatusBarAction* statusBarAction)
 {
     if (statusBarAction == _statusBarAction)
         return;

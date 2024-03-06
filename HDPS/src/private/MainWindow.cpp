@@ -19,6 +19,7 @@
 #include <BackgroundTaskHandler.h>
 
 #include <actions/ToggleAction.h>
+#include <actions/PluginStatusBarAction.h>
 
 #include "StartPageStatusBarAction.h"
 #include "ManiVaultVersionStatusBarAction.h"

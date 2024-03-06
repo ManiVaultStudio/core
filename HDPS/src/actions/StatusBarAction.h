@@ -69,6 +69,14 @@ protected:
 public:
 
     /**
+     * Construct with \p parent object, \p title and possibly an \p icon
+     * @param parent Pointer to parent object
+     * @param title Title of the action
+     * @param icon Icon
+     */
+    StatusBarAction(QObject* parent, const QString& title, const QIcon& icon = QIcon());
+
+    /**
      * Construct with \p parent object, \p title and possibly a FontAwesome \p icon
      * @param parent Pointer to parent object
      * @param title Title of the action
@@ -141,6 +149,14 @@ public: // Positioning
      * @param index Position index
      */
     void setIndex(std::int32_t index);
+
+private:
+
+    /**
+     * Initialize the status bar action and applies the \p icon
+     * @param icon Icon to use
+     */
+    void initialize(const QIcon& icon);
 
 signals:
 

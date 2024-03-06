@@ -12,7 +12,7 @@
 
 namespace mv::gui {
 
-StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QString& icon /*= ""*/) :
+StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QIcon& icon /*= QIcon()*/) :
     WidgetAction(parent, title),
     _barGroupAction(this, "Bar Group"),
     _iconAction(this, "Icon"),
@@ -20,49 +20,12 @@ StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QS
     _menuActions(),
     _index(-1)
 {
-    setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
+    initialize(icon);
+}
 
-    _barGroupAction.setShowLabels(false);
-    _barGroupAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
-        auto horizontalWidget = widget->findChild<QWidget*>("HorizontalWidget");
-
-        Q_ASSERT(horizontalWidget != nullptr);
-
-        if (horizontalWidget == nullptr)
-            return;
-
-        auto horizontalLayout = horizontalWidget->layout();
-
-        horizontalLayout->setContentsMargins(2, 0, 2, 0);
-        horizontalLayout->setSpacing(4);
-    });
-
-    if (!icon.isEmpty()) {
-        _barGroupAction.addAction(&_iconAction);
-
-        _iconAction.setEnabled(false);
-        _iconAction.setDefaultWidgetFlags(StringAction::Label);
-        _iconAction.setString(icon);
-        _iconAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
-            auto labelWidget = widget->findChild<QLabel*>("Label");
-
-            Q_ASSERT(labelWidget != nullptr);
-
-            if (labelWidget == nullptr)
-                return;
-
-            labelWidget->setFont(Application::getIconFont("FontAwesome").getFont(9));
-        });
-    }
-
-    const auto tooltipChanged = [this]() -> void {
-        _barGroupAction.setToolTip(toolTip());
-        _iconAction.setToolTip(toolTip());
-    };
-
-    tooltipChanged();
-
-    connect(this, &WidgetAction::changed, this, tooltipChanged);
+StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QString& icon /*= ""*/) :
+    StatusBarAction(parent, title, icon.isEmpty() ? QIcon() : Application::getIconFont("FontAwesome").getIcon(icon))
+{
 }
 
 QWidget* StatusBarAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -157,6 +120,52 @@ void StatusBarAction::setIndex(std::int32_t index)
     _index = index;
 
     emit indexChanged(_index);
+}
+
+void StatusBarAction::initialize(const QIcon& icon)
+{
+    setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
+
+    _barGroupAction.setShowLabels(false);
+    _barGroupAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
+        auto horizontalWidget = widget->findChild<QWidget*>("HorizontalWidget");
+
+        Q_ASSERT(horizontalWidget != nullptr);
+
+        if (horizontalWidget == nullptr)
+            return;
+
+        auto horizontalLayout = horizontalWidget->layout();
+
+        horizontalLayout->setContentsMargins(2, 0, 2, 0);
+        horizontalLayout->setSpacing(4);
+    });
+
+    if (!icon.isNull()) {
+        _barGroupAction.addAction(&_iconAction);
+
+        _iconAction.setEnabled(false);
+        _iconAction.setDefaultWidgetFlags(StringAction::Label);
+        _iconAction.setWidgetConfigurationFunction([this, icon](WidgetAction* action, QWidget* widget) -> void {
+            auto labelWidget = widget->findChild<QLabel*>("Label");
+
+            Q_ASSERT(labelWidget != nullptr);
+
+            if (labelWidget == nullptr)
+                return;
+
+            labelWidget->setPixmap(icon.pixmap(QSize(12, 12)));
+        });
+    }
+
+    const auto tooltipChanged = [this]() -> void {
+        _barGroupAction.setToolTip(toolTip());
+        _iconAction.setToolTip(toolTip());
+    };
+
+    tooltipChanged();
+
+    connect(this, &WidgetAction::changed, this, tooltipChanged);
 }
 
 StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarAction, const std::int32_t& widgetFlags) :
