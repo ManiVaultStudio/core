@@ -14,15 +14,7 @@ using namespace mv::gui;
 StartPageStatusBarAction::StartPageStatusBarAction(QObject* parent, const QString& title) :
     StatusBarAction(parent, title, "door-open")
 {
-    const auto updateTooltip = [this]() -> void {
-        setToolTip(projects().getShowStartPageAction().isChecked() ? "Go back to the project" : "Show the start page");
-    };
+    setToolTip("Start Page");
 
-    updateTooltip();
-
-    connect(&projects().getShowStartPageAction(), &ToggleAction::toggled, this, updateTooltip);
-
-    connect(this, &StatusBarAction::toolButtonClicked, this, []() -> void {
-        projects().getShowStartPageAction().toggle();
-    });
+    addMenuAction(&projects().getShowStartPageAction());
 }

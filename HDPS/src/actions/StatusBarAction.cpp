@@ -182,22 +182,22 @@ StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarActio
     setLayout(layout);
 
     _toolButton.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-    _toolButton.setAction(_statusBarAction->getPopupAction());
     _toolButton.setAutoRaise(true);
     _toolButton.setShowIndicator(false);
+
+    if (auto popupAction = _statusBarAction->getPopupAction())
+        _toolButton.setAction(popupAction);
 
     connect(_statusBarAction, &StatusBarAction::popupActionChanged, this, [this](WidgetAction* previousPopupAction, WidgetAction* popupAction) -> void {
         _toolButton.setAction(popupAction);
     });
 
-    connect(&_toolButton, &ToolButton::clicked, statusBarAction, &StatusBarAction::toolButtonClicked);
-
     connect(_statusBarAction, &StatusBarAction::requirePopupShow, this, [this]() -> void {
-        _toolButton.showMenu();
+        //_toolButton.getMenu().popup(_toolButton.mapToGlobal(_toolButton.pos()));// .show();
     });
 
     connect(_statusBarAction, &StatusBarAction::requirePopupHide, this, [this]() -> void {
-        _toolButton.getMenu().hide();
+        //_toolButton.getMenu().hide();
     });
 
     const auto statusBarEnabledChanged = [this]() -> void {

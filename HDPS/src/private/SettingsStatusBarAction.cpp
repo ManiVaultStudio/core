@@ -12,11 +12,9 @@ using namespace mv;
 using namespace mv::gui;
 
 SettingsStatusBarAction::SettingsStatusBarAction(QObject* parent, const QString& title) :
-    StatusBarAction(parent, title, "cog")
+    StatusBarAction(parent, title, "cogs")
 {
-    setToolTip("Edit global settings");
+    setToolTip("Settings");
 
-    connect(this, &StatusBarAction::toolButtonClicked, this, []() -> void {
-        settings().getEditSettingsAction().trigger();
-    });
+    addMenuAction(&settings().getEditSettingsAction());
 }

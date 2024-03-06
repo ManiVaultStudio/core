@@ -194,9 +194,6 @@ signals:
      */
     void menuActionAboutToBeRemoved(WidgetAction* menuAction);
 
-    /** Signals that the tool button was clicked */
-    void toolButtonClicked();
-
     /** Signals that a popup should be displayed */
     void requirePopupShow();
 

@@ -32,6 +32,16 @@ ManiVaultVersionStatusBarAction::ManiVaultVersionStatusBarAction(QObject* parent
     _popupAction.setPopupSizeHint(QSize(200, 0));
     _popupAction.setString(Application::getAbout());
     _popupAction.setToolTip(_versionAction.getString());
+    _popupAction.setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
+        auto label = widget->findChild<QLabel*>("Label");
+
+        Q_ASSERT(label != nullptr);
+
+        if (label == nullptr)
+            return;
+
+        label->setOpenExternalLinks(true);
+    });
 
     _popupGroupAction.setShowLabels(false);
     _popupGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoGroupBoxInPopupLayout);

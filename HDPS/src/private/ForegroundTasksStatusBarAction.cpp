@@ -22,6 +22,7 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
 {
     setToolTip("Foreground tasks");
     setEnabled(false);
+    setPopupAction(&_tasksAction);
 
     _filterModel.setSourceModel(&_model);
     _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Foreground" });
@@ -39,7 +40,7 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
 
         auto toolButtonMenu = dynamic_cast<WidgetActionToolButtonMenu*>(widget->parentWidget()->parentWidget());
 
-        toolButtonMenu->setIgnoreCloseEvent(true);
+        //toolButtonMenu->setIgnoreCloseEvent(true);
     });
 
     auto& badge = getBarIconStringAction().getBadge();
@@ -58,13 +59,11 @@ ForegroundTasksStatusBarAction::ForegroundTasksStatusBarAction(QObject* parent, 
 
         if (_numberOfTasks == 0 && numberOfTasks >= 1) {
             setEnabled(true);
-            setPopupAction(&_tasksAction);
             showPopup();
         }
 
         if (_numberOfTasks >= 1 && numberOfTasks == 0) {
             setEnabled(false);
-            setPopupAction(nullptr);
             hidePopup();
         }
 
