@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "StatusBarAction.h"
+#include <actions/StatusBarAction.h>
 
 /**
  * Settings status bar action class
@@ -13,7 +13,7 @@
  *
  * @author Thomas Kroes
  */
-class SettingsStatusBarAction : public StatusBarAction
+class SettingsStatusBarAction : public mv::gui::StatusBarAction
 {
     Q_OBJECT
 

@@ -22,7 +22,8 @@ PluginFactory::PluginFactory(Type type) :
     _maximumNumberOfInstances(-1),
     _pluginTriggerAction(this, this, "Plugin trigger", "A plugin trigger action creates a new plugin when triggered", QIcon()),
     _triggerHelpAction(nullptr, "Trigger plugin help"),
-    _pluginGlobalSettingsGroupAction(nullptr)
+    _pluginGlobalSettingsGroupAction(nullptr),
+    _statusBarAction(nullptr)
 {
 }
 
@@ -69,6 +70,21 @@ void PluginFactory::setGlobalSettingsGroupAction(PluginGlobalSettingsGroupAction
     _pluginGlobalSettingsGroupAction = pluginGlobalSettingsGroupAction;
 
     emit pluginGlobalSettingsGroupActionChanged(_pluginGlobalSettingsGroupAction);
+}
+
+StatusBarAction* PluginFactory::getStatusBarAction() const
+{
+    return _statusBarAction;
+}
+
+void PluginFactory::setStatusBarAction(gui::StatusBarAction* statusBarAction)
+{
+    if (statusBarAction == _statusBarAction)
+        return;
+
+    _statusBarAction = statusBarAction;
+
+    emit statusBarActionChanged(_statusBarAction);
 }
 
 bool PluginFactory::hasHelp()

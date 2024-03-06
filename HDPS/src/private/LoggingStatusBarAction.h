@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "StatusBarAction.h"
-
+#include <actions/StatusBarAction.h>
 #include <actions/StringAction.h>
 #include <actions/TreeAction.h>
 #include <actions/TriggerAction.h>
@@ -20,7 +19,7 @@
  *
  * @author Thomas Kroes
  */
-class LoggingStatusBarAction : public StatusBarAction
+class LoggingStatusBarAction : public mv::gui::StatusBarAction
 {
     Q_OBJECT
 

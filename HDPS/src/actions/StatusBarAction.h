@@ -12,6 +12,8 @@
 #include <QToolButton>
 #include <QMenu>
 
+namespace mv::gui {
+
 /**
  * Status bar action class
  *
@@ -19,7 +21,7 @@
  *
  * @author Thomas Kroes
  */
-class StatusBarAction : public mv::gui::WidgetAction
+class StatusBarAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -74,19 +76,19 @@ public:
      */
     StatusBarAction(QObject* parent, const QString& title, const QString& icon = "");
 
-protected:
+public:
 
     /**
      * Get bar group action
      * @return Reference to bar group action
      */
-    mv::gui::HorizontalGroupAction& getBarGroupAction();
+    HorizontalGroupAction& getBarGroupAction();
 
     /**
      * Get bar icon string action
      * @return Reference to bar icon string action
      */
-    mv::gui::StringAction& getBarIconStringAction();
+    StringAction& getBarIconStringAction();
 
     /**
      * Get popup action
@@ -100,11 +102,45 @@ protected:
      */
     void setPopupAction(WidgetAction* popupAction);
 
+    /**
+     * Add \p menuAction
+     * @param menuAction Pointer to menu action
+     */
+    void addMenuAction(WidgetAction* menuAction);
+
+    /**
+     * Remove \p menuAction
+     * @param menuAction Pointer to menu action to remove
+     */
+    void removeMenuAction(WidgetAction* menuAction);
+
+    /**
+     * Get menu actions
+     * @return Pointers to menu actions
+     */
+    WidgetActions getMenuActions();
+
+protected: // Show/hide
+
     /** Show the popup */
     void showPopup();
 
     /** Hide the popup */
     void hidePopup();
+
+public: // Positioning
+
+    /**
+     * Get index (must be called prior to main window showing, otherwise it will not have an effect)
+     * @return Position index
+     */
+    std::int32_t getIndex();
+
+    /**
+     * Set index to \p index
+     * @param index Position index
+     */
+    void setIndex(std::int32_t index);
 
 signals:
 
@@ -114,6 +150,24 @@ signals:
      * @param popupAction Pointer to current action (maybe nullptr)
      */
     void popupActionChanged(WidgetAction* previousPopupAction, WidgetAction* popupAction);
+
+    /**
+     * Signals that the position \p index changed
+     * @param index Position index
+     */
+    void indexChanged(std::int32_t index);
+
+    /**
+     * Signals that \p menuAction was added
+     * @param menuAction Pointer to menu action that was added
+     */
+    void menuActionAdded(WidgetAction* menuAction);
+
+    /**
+     * Signals that \p menuAction is about to be removed
+     * @param menuAction Pointer to menu action is about to be removed
+     */
+    void menuActionAboutToBeRemoved(WidgetAction* menuAction);
 
     /** Signals that the tool button was clicked */
     void toolButtonClicked();
@@ -125,7 +179,13 @@ signals:
     void requirePopupHide();
 
 private:
-    mv::gui::HorizontalGroupAction  _barGroupAction;    /** Bar group action */
-    mv::gui::StringAction           _iconAction;        /** String action for showing a home icon with FontAwesome */
-    WidgetAction*                   _popupAction;       /** Pointer to popup action (maybe nullptr) */
+    HorizontalGroupAction   _barGroupAction;    /** Bar group action */
+    StringAction            _iconAction;        /** String action for showing a home icon with FontAwesome */
+    WidgetAction*           _popupAction;       /** Pointer to popup action (maybe nullptr) */
+    WidgetActions           _menuActions;       /** Menu actions for the popup */
+    std::int32_t            _index;             /** Position in the status bar where the action is inserted (zero: append, negative; right-to-left, positive: left-to-right) */
+
+    friend class WidgetActionToolButton;
 };
+
+}

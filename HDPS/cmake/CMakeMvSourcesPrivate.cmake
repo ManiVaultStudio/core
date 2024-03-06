@@ -14,7 +14,6 @@ set(PRIVATE_CORE_FILES
 )
 
 set(PRIVATE_ACTIONS_HEADERS
-	src/private/StatusBarAction.h
 	src/private/ManiVaultVersionStatusBarAction.h
 	src/private/PluginsStatusBarAction.h
     src/private/LoggingStatusBarAction.h
@@ -25,7 +24,6 @@ set(PRIVATE_ACTIONS_HEADERS
 )
 
 set(PRIVATE_ACTIONS_SOURCES
-	src/private/StatusBarAction.cpp
 	src/private/PluginsStatusBarAction.cpp
 	src/private/ManiVaultVersionStatusBarAction.cpp
     src/private/LoggingStatusBarAction.cpp

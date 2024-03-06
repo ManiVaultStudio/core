@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "WidgetActionToolButton.h"
+#include "StatusBarAction.h"
 #include "WidgetAction.h"
 
 #include <QDebug>

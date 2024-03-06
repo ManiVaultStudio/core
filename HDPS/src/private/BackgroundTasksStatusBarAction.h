@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "StatusBarAction.h"
-
+#include <actions/StatusBarAction.h>
 #include <actions/TaskAction.h>
 #include <actions/TasksListAction.h>
 
@@ -21,7 +20,7 @@
  *
  * @author Thomas Kroes
  */
-class BackgroundTasksStatusBarAction : public StatusBarAction
+class BackgroundTasksStatusBarAction : public mv::gui::StatusBarAction
 {
     Q_OBJECT
 

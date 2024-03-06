@@ -196,7 +196,7 @@ void StartPageOpenProjectWidget::updateRecentActions()
             recentProjectStartPageAction.setComments(projectMetaAction->getCommentsAction().getString());
             recentProjectStartPageAction.setTags(projectMetaAction->getTagsAction().getStrings());
             recentProjectStartPageAction.setMetaData(recentFile.getDateTime().toString("dd/MM/yyyy hh:mm"));
-            //recentProjectStartPageAction.setPreviewImage(projects().getWorkspacePreview(recentFilePath));
+            recentProjectStartPageAction.setPreviewImage(projects().getWorkspacePreview(recentFilePath));
             recentProjectStartPageAction.setContributors(projectMetaAction->getContributorsAction().getStrings());
 
             _recentProjectsWidget.getModel().add(recentProjectStartPageAction);
@@ -235,7 +235,7 @@ void StartPageOpenProjectWidget::updateExamplesActions()
 
             exampleProjectStartPageAction.setComments(projectMetaAction->getCommentsAction().getString());
             exampleProjectStartPageAction.setTags(projectMetaAction->getTagsAction().getStrings());
-            //exampleProjectStartPageAction.setPreviewImage(projects().getWorkspacePreview(exampleProjectFilePath));
+            exampleProjectStartPageAction.setPreviewImage(projects().getWorkspacePreview(exampleProjectFilePath));
             exampleProjectStartPageAction.setContributors(projectMetaAction->getContributorsAction().getStrings());
 
             _exampleProjectsWidget.getModel().add(exampleProjectStartPageAction);

@@ -115,6 +115,25 @@ void MainWindow::showEvent(QShowEvent* showEvent)
         statusBar()->insertPermanentWidget(5, foregroundTasksStatusBarAction->createWidget(this));
         statusBar()->insertPermanentWidget(6, settingsTasksStatusBarAction->createWidget(this));
 
+        const auto getNumberOfPermanentWidgets = [this]() -> std::int32_t {
+            return statusBar()->findChildren<QWidget*>(Qt::FindDirectChildrenOnly).count();
+        };
+
+        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+            if (auto statusBarAction = pluginFactory->getStatusBarAction()) {
+                const auto index = statusBarAction->getIndex();
+
+                if (index == 0)
+                    statusBar()->addPermanentWidget(statusBarAction->createWidget(this), statusBarAction->getStretch());
+
+                if (index <= -1)
+                    statusBar()->insertPermanentWidget(std::max(0, getNumberOfPermanentWidgets() + index), statusBarAction->createWidget(this), statusBarAction->getStretch());
+
+                if (index >= 1)
+                    statusBar()->insertPermanentWidget(index - 1, statusBarAction->createWidget(this), statusBarAction->getStretch());
+            }
+        }
+
         const auto projectChanged = [this]() -> void {
             if (!projects().hasProject()) {
                 setWindowTitle("ManiVault");

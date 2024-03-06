@@ -62,7 +62,7 @@ NewProjectDialog::NewProjectDialog(QWidget* parent /*= nullptr*/) :
         fromWorkspaceStartPageAction.setComments(workspace.getCommentsAction().getString());
         fromWorkspaceStartPageAction.setTags(workspace.getTagsAction().getStrings());
         fromWorkspaceStartPageAction.setMetaData(workspaceLocation.getTypeName());
-        //fromWorkspaceStartPageAction.setPreviewImage(projects().getWorkspacePreview(workspaceLocation.getFilePath()));
+        fromWorkspaceStartPageAction.setPreviewImage(projects().getWorkspacePreview(workspaceLocation.getFilePath()));
 
         _workspacesWidget.getModel().add(fromWorkspaceStartPageAction);
     }

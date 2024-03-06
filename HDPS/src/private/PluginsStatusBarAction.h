@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "StatusBarAction.h"
-
+#include <actions/StatusBarAction.h>
 #include <actions/TriggerAction.h>
 #include <actions/TreeAction.h>
 
@@ -20,7 +19,7 @@
  *
  * @author Thomas Kroes
  */
-class PluginsStatusBarAction : public StatusBarAction
+class PluginsStatusBarAction : public mv::gui::StatusBarAction
 {
     Q_OBJECT
 

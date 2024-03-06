@@ -10,14 +10,15 @@
 
 #include <QDebug>
 
-using namespace mv;
-using namespace mv::gui;
+namespace mv::gui {
 
 StatusBarAction::StatusBarAction(QObject* parent, const QString& title, const QString& icon /*= ""*/) :
     WidgetAction(parent, title),
     _barGroupAction(this, "Bar Group"),
     _iconAction(this, "Icon"),
-    _popupAction(nullptr)
+    _popupAction(nullptr),
+    _menuActions(),
+    _index(-1)
 {
     setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
 
@@ -114,6 +115,50 @@ void StatusBarAction::hidePopup()
     emit requirePopupHide();
 }
 
+void StatusBarAction::addMenuAction(WidgetAction* menuAction)
+{
+    Q_ASSERT(menuAction);
+
+    if (!menuAction)
+        return;
+
+    _menuActions << menuAction;
+
+    emit menuActionAdded(menuAction);
+}
+
+void StatusBarAction::removeMenuAction(WidgetAction* menuAction)
+{
+    Q_ASSERT(menuAction);
+
+    if (!menuAction)
+        return;
+
+    emit menuActionAboutToBeRemoved(menuAction);
+
+    _menuActions.removeOne(menuAction);
+}
+
+WidgetActions StatusBarAction::getMenuActions()
+{
+    return _menuActions;
+}
+
+std::int32_t StatusBarAction::getIndex()
+{
+    return _index;
+}
+
+void StatusBarAction::setIndex(std::int32_t index)
+{
+    if (index == _index)
+        return;
+
+    _index = index;
+
+    emit indexChanged(_index);
+}
+
 StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, statusBarAction, widgetFlags),
     _statusBarAction(statusBarAction),
@@ -153,6 +198,17 @@ StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarActio
     statusBarEnabledChanged();
 
     connect(statusBarAction, &WidgetAction::enabledChanged, this, statusBarEnabledChanged);
+
+    for (auto menuAction : _statusBarAction->getMenuActions())
+        _toolButton.getMenu().addAction(menuAction);
+
+    connect(_statusBarAction, &StatusBarAction::menuActionAdded, this, [this](WidgetAction* menuAction) -> void {
+        _toolButton.getMenu().addAction(menuAction);
+    });
+
+    connect(_statusBarAction, &StatusBarAction::menuActionAboutToBeRemoved, this, [this](WidgetAction* menuAction) -> void {
+        _toolButton.getMenu().removeAction(menuAction);
+    });
 }
 
 StatusBarAction::Widget::ToolButton::ToolButton(QWidget* parent, StatusBarAction* statusBarAction) :
@@ -166,4 +222,6 @@ StatusBarAction::Widget::ToolButton::ToolButton(QWidget* parent, StatusBarAction
     layout->addWidget(statusBarAction->getBarGroupAction().createWidget(this));
 
     setLayout(layout);
+}
+
 }

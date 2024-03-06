@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "StatusBarAction.h"
-
+#include <actions/StatusBarAction.h>
 #include <actions/HorizontalGroupAction.h>
 #include <actions/StringAction.h>
 
@@ -17,7 +16,7 @@
  *
  * @author Thomas Kroes
  */
-class ManiVaultVersionStatusBarAction : public StatusBarAction
+class ManiVaultVersionStatusBarAction : public mv::gui::StatusBarAction
 {
     Q_OBJECT
 

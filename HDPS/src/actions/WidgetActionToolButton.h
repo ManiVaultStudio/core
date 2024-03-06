@@ -124,7 +124,7 @@ signals:
     void actionChanged(WidgetAction* previousAction, WidgetAction* currentAction);
 
 private:
-    WidgetAction*                   _action;                        /** Pointer to owning action */
+    WidgetAction*                   _action;                        /** Pointer to action */
     WidgetConfigurationFunction     _widgetConfigurationFunction;   /** Function that is called right after a widget action widget is created */
     bool                            _showIndicator;                 /** Whether to show the indicator or not */
     Qt::Alignment                   _indicatorAlignment;            /** Alignment of the indicator */
