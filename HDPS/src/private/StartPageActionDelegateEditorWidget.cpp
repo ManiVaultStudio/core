@@ -186,8 +186,6 @@ StartPageActionDelegateEditorWidget::StartPageActionDelegateEditorWidget(QWidget
         return getTooltipHtml(tagsHtml);
     });
 
-    
-
     setLayout(&_mainLayout);
 
     _subtitleLabel.installEventFilter(this);

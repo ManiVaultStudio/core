@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "PluginManagerModel.h"
-#include "PluginManagerFilterModel.h"
+#include <models/PluginsTreeModel.h>
+#include <models/PluginsFilterModel.h>
 
 #include <widgets/HierarchyWidget.h>
 
@@ -51,8 +51,8 @@ public:
     static void create();
 
 private:
-    PluginManagerModel          _model;                 /** Plugin manager model (interfaces with a plugin manager) */
-    PluginManagerFilterModel    _filterModel;           /** Sorting and filtering model for the plugin manager model */
-    mv::gui::HierarchyWidget  _hierarchyWidget;       /** Widget for displaying the loaded plugins */
-    mv::gui::TriggerAction    _okAction;              /** Action for exiting the dialog */
+    mv::PluginsTreeModel        _model;                 /** Plugins tree model (interfaces with a plugin manager) */
+    mv::PluginsFilterModel      _filterModel;           /** Sorting and filtering model for the plugin manager model */
+    mv::gui::HierarchyWidget    _hierarchyWidget;       /** Widget for displaying the loaded plugins */
+    mv::gui::TriggerAction      _okAction;              /** Action for exiting the dialog */
 };

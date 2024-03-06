@@ -57,16 +57,16 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
-    treeView.setColumnHidden(static_cast<int>(PluginManagerModel::Column::Category), true);
-    treeView.setColumnHidden(static_cast<int>(PluginManagerModel::Column::ID), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractPluginsModel::Column::Category), true);
+    treeView.setColumnHidden(static_cast<int>(AbstractPluginsModel::Column::ID), true);
 
     auto treeViewHeader = treeView.header();
 
     treeViewHeader->setStretchLastSection(false);
 
-    treeViewHeader->resizeSection(static_cast<int>(PluginManagerModel::Column::Name), 300);
-    treeViewHeader->resizeSection(static_cast<int>(PluginManagerModel::Column::Category), 70);
-    treeViewHeader->resizeSection(static_cast<int>(PluginManagerModel::Column::ID), 240);
+    treeViewHeader->resizeSection(static_cast<int>(AbstractPluginsModel::Column::Name), 300);
+    treeViewHeader->resizeSection(static_cast<int>(AbstractPluginsModel::Column::Category), 70);
+    treeViewHeader->resizeSection(static_cast<int>(AbstractPluginsModel::Column::ID), 240);
 
     treeViewHeader->setSectionResizeMode(0, QHeaderView::Stretch);
     treeViewHeader->setSectionResizeMode(1, QHeaderView::Fixed);
@@ -105,7 +105,7 @@ PluginManagerDialog::PluginManagerDialog(QWidget* parent /*= nullptr*/) :
     });
 
     connect(&plugins(), &AbstractPluginManager::pluginAboutToBeDestroyed, this, [this](plugin::Plugin* plugin) -> void {
-        const auto matches = _model.findItems(plugin->getId(), Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive, static_cast<int>(PluginManagerModel::Column::ID));
+        const auto matches = _model.findItems(plugin->getId(), Qt::MatchFlag::MatchExactly | Qt::MatchFlag::MatchRecursive, static_cast<int>(AbstractPluginsModel::Column::ID));
 
         if (matches.isEmpty())
             return;

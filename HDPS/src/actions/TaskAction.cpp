@@ -9,7 +9,7 @@ namespace mv::gui {
 
 TaskAction::TaskAction(QObject* parent, const QString& title) :
     GroupAction(parent, title),
-    _progressAction(this, "Progress"),
+    _progressAction(this, "Progress Bar"),
     _killTaskAction(this, "Cancel"),
     _task(nullptr)
 {
@@ -18,6 +18,8 @@ TaskAction::TaskAction(QObject* parent, const QString& title) :
     setConnectionPermissionsToForceNone(true);
 
     _progressAction.setStretch(1);
+
+    _killTaskAction.setToolTip("Kill the task");
 
     addAction(&_progressAction);
     addAction(&_killTaskAction);
@@ -31,6 +33,14 @@ TaskAction::TaskAction(QObject* parent, const QString& title) :
 
         _task->kill();
     });
+
+    const auto tooltipChanged = [this]() -> void {
+        _progressAction.setToolTip(toolTip());
+    };
+
+    tooltipChanged();
+
+    connect(this, &WidgetAction::changed, this, tooltipChanged);
 }
 
 Task* TaskAction::getTask()
@@ -102,7 +112,7 @@ void TaskAction::updateProgressActionProgress()
 void TaskAction::updateProgressActionTextFormat()
 {
     if (_task)
-        _progressAction.setTextFormat(_task->getProgressText()); 
+        _progressAction.setTextFormat(_task->getProgressText());
     else
         _progressAction.setTextFormat("No task assigned...");
 }

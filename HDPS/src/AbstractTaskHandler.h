@@ -64,12 +64,6 @@ public:
      */
     void setEnabled(bool enabled);
 
-    /**
-     * Get status bar action
-     * @return Pointer to status bar widget action
-     */
-    virtual gui::WidgetAction* getStatusBarAction() = 0;
-
 protected:
 
     /**

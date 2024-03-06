@@ -5,9 +5,6 @@
 #pragma once
 
 #include "AbstractTaskHandler.h"
-#include "TasksStatusBarAction.h"
-
-#include "actions/HorizontalGroupAction.h"
 
 namespace mv {
 
@@ -27,20 +24,6 @@ public:
     * @param parent Pointer to parent object
     */
     ForegroundTaskHandler(QObject* parent);
-
-    /**
-     * Get status bar action
-     * @return Pointer to status bar widget action
-     */
-    gui::WidgetAction* getStatusBarAction() override { return &_statusBarAction; }
-
-public: // Action getters
-
-    gui::TasksStatusBarAction& getTasksStatusBarAction() { return _tasksStatusBarAction; }
-
-private:
-    gui::TasksStatusBarAction   _tasksStatusBarAction;
-    gui::HorizontalGroupAction  _statusBarAction;
 };
 
 }

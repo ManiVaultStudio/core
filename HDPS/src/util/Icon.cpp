@@ -130,8 +130,8 @@ QPixmap createNumberBadgeOverlayPixmap(std::uint32_t number /*= 0*/, const QColo
 
     badgePixmapPainter.setPen(QPen(foregroundColor));
 
-    if (number < 10) {
-        badgePixmapPainter.setFont(QFont("Arial", 56, 900));
+    if (number < 100) {
+        badgePixmapPainter.setFont(QFont("Arial", number < 10 ? 52 : 40, 900));
         badgePixmapPainter.drawText(badgeRectangle, QString::number(number), QTextOption(Qt::AlignCenter));
     }
     else {

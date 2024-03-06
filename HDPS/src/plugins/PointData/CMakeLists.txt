@@ -131,6 +131,12 @@ if(UNIX AND NOT APPLE)
    target_link_libraries(${POINTDATA} PRIVATE TBB::tbb)
 endif()
 
+if(MV_UNITY_BUILD)
+    set_target_properties(${POINTDATA} PROPERTIES UNITY_BUILD ON)
+    set_source_files_properties(${POINTDATA_MOC} PROPERTIES
+                        SKIP_UNITY_BUILD_INCLUSION TRUE)
+endif()
+
 set_target_properties(${POINTDATA} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
 
 install(TARGETS ${POINTDATA}

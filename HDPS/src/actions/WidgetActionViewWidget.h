@@ -10,11 +10,14 @@ namespace mv::gui {
 
 class WidgetAction;
 class WidgetActionHighlightWidget;
+class WidgetActionBadgeOverlayWidget;
 
 /**
  * Widget action view widget class
  *
  * Base class for widgets that provide a view on an action.
+ * 
+ * Note: This widget class is developed for internal use (not meant to be used explicitly in third-party plugins)
  * 
  * @author Thomas Kroes
  */
@@ -24,8 +27,7 @@ public:
 
     /** Reserved widget view flags */
     enum WidgetFlag {
-        PopupLayout                 = 0x10000,      /** Widget with popup layout */
-        NoGroupBoxInPopupLayout     = 0x20000       /** Prevent groupbox in popup layout */
+        PopupLayout     = 0x10000   /** Widget with popup layout */
     };
 
 public:
@@ -77,10 +79,11 @@ protected: // Drag-and-drop events
     void dropEvent(QDropEvent* dropEvent) override;
 
 private:
-    WidgetAction*                   _action;                /** Pointer to action that will be displayed */
-    std::int32_t                    _widgetFlags;           /** Widget creation flags */
-    WidgetActionHighlightWidget*    _highlightWidget;       /** Pointer to highlight widget */
-    std::int32_t                    _cachedHighlighting;    /** Cached highlighting */
+    WidgetAction*                       _action;                /** Pointer to action that will be displayed */
+    std::int32_t                        _widgetFlags;           /** Widget creation flags */
+    WidgetActionHighlightWidget*        _highlightWidget;       /** Pointer to highlight widget */
+    WidgetActionBadgeOverlayWidget*     _badgeOverlayWidget;    /** Pointer to badge overlay widget */
+    std::int32_t                        _cachedHighlighting;    /** Cached highlighting */
 };
 
 }

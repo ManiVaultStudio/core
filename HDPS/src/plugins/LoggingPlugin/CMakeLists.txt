@@ -31,13 +31,6 @@ set(PLUGIN_MOC_HEADERS
     src/LoggingPlugin.h
 )
 
-set(MODEL
-    src/LoggingModel.h
-    src/LoggingModel.cpp
-    src/LoggingFilterModel.h
-    src/LoggingFilterModel.cpp
-)
-
 set(WIDGETS
     src/LoggingWidget.h
     src/LoggingWidget.cpp
@@ -49,13 +42,11 @@ set(AUX
 
 set(LOGGING_SOURCES
     ${PLUGIN}
-    ${MODEL}
     ${WIDGETS}
     ${AUX}
 )
 
 source_group(Plugin FILES ${PLUGIN})
-source_group(Model FILES ${MODEL})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
 

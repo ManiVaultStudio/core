@@ -30,6 +30,8 @@ namespace mv::gui {
  * - Import widget action state from preset file
  * - Manage presets for the widget action (remove presets etc.)
  *
+ * Note: This action is primarily developed for internal use (not meant to be used in third-party plugins)
+ * 
  * @author Thomas Kroes
  */
 class PresetsAction final : public WidgetAction

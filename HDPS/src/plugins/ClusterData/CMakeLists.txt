@@ -120,6 +120,13 @@ target_link_libraries(${CLUSTERDATA} PRIVATE PointData)
 # Use avx if enabled and available
 check_and_set_AVX(${CLUSTERDATA} ${MV_USE_AVX})
 
+if(MV_UNITY_BUILD)
+    set_target_properties(${CLUSTERDATA} PROPERTIES UNITY_BUILD ON)
+    set_source_files_properties(${CLUSTERDATA_MOC} PROPERTIES
+                    SKIP_UNITY_BUILD_INCLUSION TRUE)
+
+endif()
+
 set_target_properties(${CLUSTERDATA} PROPERTIES PUBLIC_HEADER "${CLUSTER_HEADERS}")
 
 install(TARGETS ${CLUSTERDATA}

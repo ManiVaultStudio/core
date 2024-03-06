@@ -67,6 +67,12 @@ target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 # Use avx if enabled and available
 check_and_set_AVX(${DATAPROPERTIESPLUGIN} ${MV_USE_AVX})
 
+if(MV_UNITY_BUILD)
+    set_target_properties(${DATAPROPERTIESPLUGIN} PROPERTIES UNITY_BUILD ON)
+    set_source_files_properties(${DATAPROPERTIES_MOC} PROPERTIES
+                        SKIP_UNITY_BUILD_INCLUSION TRUE)
+endif()
+
 install(TARGETS ${DATAPROPERTIESPLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
     LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so

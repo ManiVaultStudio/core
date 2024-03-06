@@ -78,6 +78,12 @@ target_link_libraries(${IMAGEDATA} PRIVATE ClusterData)
 
 set_target_properties(${IMAGEDATA} PROPERTIES PUBLIC_HEADER "${IMAGE_DATA_HEADERS}")
 
+if(MV_UNITY_BUILD)
+    set_target_properties(${IMAGEDATA} PROPERTIES UNITY_BUILD ON)
+    set_source_files_properties(${IMAGEDATA_MOC} PROPERTIES
+                        SKIP_UNITY_BUILD_INCLUSION TRUE)
+endif()
+
 install(TARGETS ${IMAGEDATA}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
     LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
