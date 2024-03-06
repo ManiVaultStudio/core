@@ -19,6 +19,15 @@ namespace mv::gui {
  *
  * Base status bar action class with popup functionality
  *
+ * There are two methods to add content to the status bar popup:
+ * 1. By setting a popup action: setPopupAction(...)
+ * 2. By adding menu actions: addMenuAction(...)
+ *
+ * The index controls the location w.r.t. the other status bar items:
+ * - When negative, the item is inserted in between existing items(right-to-left)
+ * - Wen zero, the item is appended to the existing items at the right
+ * - Wen positive, the item is inserted in between existing items(left-to-right)
+ *
  * @author Thomas Kroes
  */
 class StatusBarAction : public WidgetAction

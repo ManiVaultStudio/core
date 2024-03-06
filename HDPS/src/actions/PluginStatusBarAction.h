@@ -26,7 +26,7 @@ public:
      * Construct with \p parent object, \p title and possibly a FontAwesome \p icon
      * @param parent Pointer to parent object
      * @param title Title of the action
-     * @param pluginKind Plugin kind to use (icon will be )
+     * @param pluginKind Plugin kind to use (icon will be retrieved from the plugin factory when the plugin kind is valid)
      */
     PluginStatusBarAction(QObject* parent, const QString& title, const QString& pluginKind = "");
 

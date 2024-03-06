@@ -9,7 +9,7 @@
 #endif
 
 #include <QGuiApplication>
-#include <QClipBoard>
+#include <QClipboard>
 #include <QHeaderView>
 
 using namespace mv;
