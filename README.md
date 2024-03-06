@@ -3,7 +3,7 @@
 [![License: LGPL v3.0](https://img.shields.io/badge/License-LGPL%20v3.0-blue.svg)](LICENSE)
 ![Build Status](https://github.com/ManiVaultStudio/core/actions/workflows/build.yml/badge.svg?branch=master)
 [![GitHub contributors](https://img.shields.io/github/contributors/ManiVaultStudio/core?color=ffdf00)](https://github.com/ManiVaultStudio/core/graphs/contributors)
-[![Webpage](https://img.shields.io/badge/webpage-manivault.stuio-blue)](https://www.manivault.studio)
+[![Webpage](https://img.shields.io/badge/webpage-manivault.studio-blue)](https://www.manivault.studio)
 
 ManiVault is a flexible and extensible visual analytics framework for high-dimensional data.
 
