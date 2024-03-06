@@ -38,6 +38,8 @@
 #include <QMessageBox>
 #include <QStackedWidget>
 #include <QStatusBar>
+#include <QListView>
+#include <QRandomGenerator>
 
 #ifdef _DEBUG
     #define MAIN_WINDOW_VERBOSE
