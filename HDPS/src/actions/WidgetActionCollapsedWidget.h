@@ -5,11 +5,11 @@
 #pragma once
 
 #include "WidgetActionViewWidget.h"
+#include "WidgetActionToolButton.h"
 
 #include "WidgetAction.h"
 
 #include <QHBoxLayout>
-#include <QToolButton>
 
 namespace mv::gui {
 
@@ -20,33 +20,12 @@ class WidgetAction;
  * 
  * Displays a tool button that shows the widget in a popup
  *
+ * Note: This action is developed for internal use (not meant to be used explicitly in third-party plugins)
+ * 
  * @author Thomas Kroes
  */
 class WidgetActionCollapsedWidget : public WidgetActionViewWidget
 {
-protected:
-
-    /** Tool button class with custom paint behavior */
-    class ToolButton : public QToolButton {
-    public:
-
-        /**
-         * Create with pointer to owning \p action and \p parent widget
-         * @param action Pointer to owning action
-         * @param parent Pointer to parent widget
-         */
-        ToolButton(WidgetAction* action, QWidget* parent = nullptr);
-
-        /**
-         * Paint event
-         * @param paintEvent Pointer to paint event
-         */
-        void paintEvent(QPaintEvent* paintEvent);
-
-    private:
-        WidgetAction*   _action;    /** Pointer to owning action */
-    };
-
 public:
 
     /**
@@ -57,27 +36,26 @@ public:
     WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* action);
 
     /**
-     * Construct with pointer to \parent widget and pointer to owning \p action
+     * Construct with pointer to \parent widget, pointer to owning \p action and \p widgetConfigurationFunction
      * @param parent Parent widget
      * @param action Pointer to the widget action that will be displayed in a popup
-     * @param widgetConfigurationFunction This function is called right after the action widget is created
+     * @param widgetConfigurationFunction This function is called right after the popup action widget is created
      */
     WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* action, WidgetConfigurationFunction widgetConfigurationFunction);
 
     /**
-     * Set the source action
-     * @param widgetAction Pointer to source action
+     * Set the action to \p action
+     * @param widgetAction Pointer to action
      */
     void setAction(WidgetAction* action) override;
 
-    /** Get reference to the tool button */
-    ToolButton& getToolButton() { return _toolButton; }
-
     /**
-     * Get widget configuration function
-     * @return Function that is called right after a widget action widget is created
+     * Get tool button
+     * @return Get reference to the tool button
      */
-    WidgetConfigurationFunction getWidgetConfigurationFunction();
+    WidgetActionToolButton& getToolButton() {
+        return _toolButton;
+    }
 
 private:
 
@@ -88,9 +66,8 @@ private:
     void initialize(WidgetAction* action);
 
 private:
-    QHBoxLayout                     _layout;                        /** Layout */
-    ToolButton                      _toolButton;                    /** Tool button for the popup */
-    WidgetConfigurationFunction     _widgetConfigurationFunction;   /** Function that is called right after a widget action widget is created */
+    QHBoxLayout             _layout;        /** Layout */
+    WidgetActionToolButton  _toolButton;    /** Tool button for the popup */
 
     friend class WidgetAction;
 };

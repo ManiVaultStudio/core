@@ -39,7 +39,7 @@ SettingsManager::SettingsManager() :
         _editSettingsAction.setShortcut(QKeySequence("Ctrl+,"));
         _editSettingsAction.setMenuRole(QAction::PreferencesRole);
     } else {
-        _editSettingsAction.setShortcut(QKeySequence("Ctrl+G"));
+        //_editSettingsAction.setShortcut(QKeySequence("Ctrl+G"));
         _editSettingsAction.setIconByName("cogs");
     }
         

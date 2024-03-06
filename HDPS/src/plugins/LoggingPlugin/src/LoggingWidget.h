@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "LoggingModel.h"
-#include "LoggingFilterModel.h"
+#include <models/LoggingModel.h>
+#include <models/LoggingFilterModel.h>
 
 #include <widgets/HierarchyWidget.h>
 #include <actions/TriggerAction.h>
@@ -38,9 +38,8 @@ public:
     QSize sizeHint() const override;
 
 private:
-    LoggingModel                _model;                     /** Logging model for keeping track of log records */
-    LoggingFilterModel          _filterModel;               /** Filter model for logging (source is the logging model) */
-    mv::gui::HierarchyWidget  _hierarchyWidget;           /** Widget for displaying hierarchy */
-    QMetaObject::Connection     _idleUpdateConnection;      /** Update the logging widget when idle */
-    mv::gui::TriggerAction    _findLogFileAction;         /** Action for finding the log file */
+    mv::LoggingModel            _model;                     /** Logging model for keeping track of log records */
+    mv::LoggingFilterModel      _filterModel;               /** Filter model for logging (source is the logging model) */
+    mv::gui::HierarchyWidget    _hierarchyWidget;           /** Widget for displaying hierarchy */
+    mv::gui::TriggerAction      _findLogFileAction;         /** Action for finding the log file */
 };

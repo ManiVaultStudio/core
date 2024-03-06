@@ -233,7 +233,7 @@ StringAction::LabelWidget::LabelWidget(QWidget* parent, StringAction* stringActi
     setObjectName("Label");
 
     const auto updateToolTip = [this, stringAction]() -> void {
-        setToolTip(stringAction->getString());
+        setToolTip(stringAction->toolTip());
     };
 
     updateToolTip();

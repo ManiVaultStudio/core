@@ -13,6 +13,8 @@ namespace mv::gui {
  *
  * Sole purpose is to override the label text of the source action
  *
+ * Note: This action is a WIP
+ * 
  * @author Thomas Kroes
  */
 class LabelProxyAction : public WidgetAction

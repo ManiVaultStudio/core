@@ -319,7 +319,11 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
     WidgetActionWidget(parent, groupAction, widgetFlags),
     _groupAction(groupAction)
 {
+    setObjectName("VerticalWidget");
+
     auto layout = new QGridLayout();
+
+    layout->setObjectName("VerticalLayout");
 
     if (widgetFlags & NoMargins)
         layout->setContentsMargins(0, 0, 0, 0);
@@ -436,9 +440,13 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
     WidgetActionWidget(parent, groupAction, widgetFlags),
     _groupAction(groupAction)
 {
+    setObjectName("HorizontalWidget");
+
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 
     auto layout = new QHBoxLayout();
+
+    layout->setObjectName("HorizontalLayout");
 
     if (!(widgetFlags & WithMargins))
         layout->setContentsMargins(0, 0, 0, 0);

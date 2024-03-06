@@ -5,12 +5,14 @@
 #include "LoggingFilterModel.h"
 #include "LoggingModel.h"
 
-#include <util/Logger.h>
+#include "util/Logger.h"
 
 #include <QDebug>
 
-using namespace mv::util;
-using namespace mv::gui;
+namespace mv {
+
+using namespace util;
+using namespace gui;
 
 LoggingFilterModel::LoggingFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
@@ -124,4 +126,6 @@ bool LoggingFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs
     }
 
     return false;
+}
+
 }

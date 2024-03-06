@@ -19,6 +19,15 @@
 #include <BackgroundTaskHandler.h>
 
 #include <actions/ToggleAction.h>
+#include <actions/PluginStatusBarAction.h>
+
+#include "StartPageStatusBarAction.h"
+#include "ManiVaultVersionStatusBarAction.h"
+#include "PluginsStatusBarAction.h"
+#include "LoggingStatusBarAction.h"
+#include "BackgroundTasksStatusBarAction.h"
+#include "ForegroundTasksStatusBarAction.h"
+#include "SettingsStatusBarAction.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -93,9 +102,40 @@ void MainWindow::showEvent(QShowEvent* showEvent)
 
         statusBar()->setSizeGripEnabled(false);
 
-        statusBar()->insertPermanentWidget(0, new QWidget(this), 3);
-        statusBar()->insertPermanentWidget(1, BackgroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this), 2);
-        statusBar()->insertPermanentWidget(2, ForegroundTask::getGlobalHandler()->getStatusBarAction()->createWidget(this));
+        auto startPageStatusBarAction       = new StartPageStatusBarAction(this, "Start Page");
+        auto versionStatusBarAction         = new ManiVaultVersionStatusBarAction(this, "Version");
+        auto pluginsStatusBarAction         = new PluginsStatusBarAction(this, "Plugins");
+        auto loggingStatusBarAction         = new LoggingStatusBarAction(this, "Logging");
+        auto backgroundTasksStatusBarAction = new BackgroundTasksStatusBarAction(this, "Background Tasks");
+        auto foregroundTasksStatusBarAction = new ForegroundTasksStatusBarAction(this, "Foreground Tasks");
+        auto settingsTasksStatusBarAction   = new SettingsStatusBarAction(this, "Settings");
+
+        statusBar()->insertPermanentWidget(0, startPageStatusBarAction->createWidget(this));
+        statusBar()->insertPermanentWidget(1, versionStatusBarAction->createWidget(this));
+        statusBar()->insertPermanentWidget(2, pluginsStatusBarAction->createWidget(this));
+        statusBar()->insertPermanentWidget(3, loggingStatusBarAction->createWidget(this), 4);
+        statusBar()->insertPermanentWidget(4, backgroundTasksStatusBarAction->createWidget(this), 1);
+        statusBar()->insertPermanentWidget(5, foregroundTasksStatusBarAction->createWidget(this));
+        statusBar()->insertPermanentWidget(6, settingsTasksStatusBarAction->createWidget(this));
+
+        const auto getNumberOfPermanentWidgets = [this]() -> std::int32_t {
+            return statusBar()->findChildren<QWidget*>(Qt::FindDirectChildrenOnly).count();
+        };
+
+        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
+            if (auto statusBarAction = pluginFactory->getStatusBarAction()) {
+                const auto index = statusBarAction->getIndex();
+
+                if (index == 0)
+                    statusBar()->addPermanentWidget(statusBarAction->createWidget(this), statusBarAction->getStretch());
+
+                if (index <= -1)
+                    statusBar()->insertPermanentWidget(std::max(0, getNumberOfPermanentWidgets() + index), statusBarAction->createWidget(this), statusBarAction->getStretch());
+
+                if (index >= 1)
+                    statusBar()->insertPermanentWidget(index - 1, statusBarAction->createWidget(this), statusBarAction->getStretch());
+            }
+        }
 
         const auto projectChanged = [this]() -> void {
             if (!projects().hasProject()) {

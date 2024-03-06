@@ -21,6 +21,7 @@ namespace mv {
     {
         class PluginTriggerAction;
         class PluginGlobalSettingsGroupAction;
+        class PluginStatusBarAction;
 
         using PluginTriggerActions = QVector<QPointer<PluginTriggerAction>>;
     }
@@ -83,6 +84,20 @@ public: // Global settings
      * @param pluginGlobalSettingsGroupAction Pointer to plugin global settings group action (maybe a nullptr)
      */
     virtual void setGlobalSettingsGroupAction(gui::PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction) final;
+
+public: // Status bar
+
+    /**
+     * Get plugin status bar action
+     * @return Pointer to plugin status bar action (maybe nullptr)
+     */
+    virtual gui::PluginStatusBarAction* getStatusBarAction() const final;
+
+    /**
+     * Set plugin status bar action to \p statusBarAction
+     * @param statusBarAction Pointer to plugin status bar action (maybe a nullptr)
+     */
+    virtual void setStatusBarAction(gui::PluginStatusBarAction* statusBarAction) final;
 
 public: // Help
 
@@ -231,6 +246,12 @@ signals:
      */
     void pluginGlobalSettingsGroupActionChanged(gui::PluginGlobalSettingsGroupAction* pluginGlobalSettingsGroupAction);
 
+    /**
+     * Signals that the plugin status bar action changed to \p statusBarAction
+     * @param statusBarAction Pointer to plugin status bar action (maybe a nullptr)
+     */
+    void statusBarActionChanged(gui::PluginStatusBarAction* statusBarAction);
+
 private:
     QString                                 _kind;                                  /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
     Type                                    _type;                                  /** Type of plugin (e.g. analysis, data, loader, writer & view) */
@@ -241,6 +262,7 @@ private:
     std::uint32_t                           _maximumNumberOfInstances;              /** Maximum number of plugin instances (unlimited when -1) */
     gui::TriggerAction                      _triggerHelpAction;                     /** Trigger action that triggers help (icon and text are already set) */
     gui::PluginGlobalSettingsGroupAction*   _pluginGlobalSettingsGroupAction;       /** Pointer to plugin global settings group action (maybe a nullptr) */
+    gui::PluginStatusBarAction*             _statusBarAction;                       /** Pointer to plugin status bar action (maybe a nullptr) */
 };
 
 }

@@ -5,11 +5,7 @@
 #pragma once
 
 #include "AbstractTaskHandler.h"
-#include "TasksStatusBarAction.h"
 #include "BackgroundTask.h"
-
-#include "actions/TaskAction.h"
-#include "actions/HorizontalGroupAction.h"
 
 namespace mv {
 
@@ -31,27 +27,13 @@ public:
     BackgroundTaskHandler(QObject* parent);
 
     /**
-     * Get status bar action
-     * @return Pointer to status bar widget action
-     */
-    gui::WidgetAction* getStatusBarAction() override { return &_statusBarAction; }
-
-    /**
      * Get overall background task
      * @return Aggregate background task to which all other background tasks are (in)directly parented
      */
     BackgroundTask& getOverallBackgroundTask();
 
-public: // Action getters
-
-    gui::TaskAction& getOverallBackgroundTaskAction() { return _overallBackgroundTaskAction; }
-    gui::TasksStatusBarAction& getTasksStatusBarAction() { return _tasksStatusBarAction; }
-
 private:
-    BackgroundTask              _overallBackgroundTask;         /** Aggregate background task to which all other background tasks are (in)directly parented */
-    gui::TaskAction             _overallBackgroundTaskAction;   /** For showing a task progress action in the status bar */
-    gui::TasksStatusBarAction   _tasksStatusBarAction;          /** Status bar action which show the number of background tasks */
-    gui::HorizontalGroupAction  _statusBarAction;               /** Combines the overall background task action and the tasks status bar action */
+    BackgroundTask      _overallBackgroundTask;     /** Aggregate background task to which all other background tasks are (in)directly parented */
 };
 
 }

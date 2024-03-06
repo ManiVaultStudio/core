@@ -64,7 +64,7 @@ public:
      * Get kill task action
      * @return Reference to built-in trigger action for killing the task
      */
-    gui::TriggerAction& getKillTaskAction();
+    TriggerAction& getKillTaskAction();
 
 private:
 
@@ -92,9 +92,9 @@ signals:
     void taskChanged(Task* previousTask, Task* task);
 
 private:
-    ProgressAction      _progressAction;    /** Progress action */
-    gui::TriggerAction  _killTaskAction;    /** Kill task action */
-    Task*               _task;              /** Pointer to task to keep track of */
+    ProgressAction  _progressAction;    /** Progress action */
+    TriggerAction   _killTaskAction;    /** Kill task action */
+    Task*           _task;              /** Pointer to task to keep track of */
     
     friend class AbstractActionsManager;
 };

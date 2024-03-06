@@ -2,18 +2,20 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "PluginManagerFilterModel.h"
-#include "PluginManagerModel.h"
+#include "PluginsFilterModel.h"
+#include "AbstractPluginsModel.h"
 
 #include <QDebug>
 
 #ifdef _DEBUG
-    //#define PLUGIN_MANAGER_FILTER_MODEL_VERBOSE
+    #define PLUGINS_FILTER_MODEL_VERBOSE
 #endif
 
-using namespace mv::gui;
+namespace mv {
 
-PluginManagerFilterModel::PluginManagerFilterModel(QObject* parent /*= nullptr*/) :
+using namespace gui;
+
+PluginsFilterModel::PluginsFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
     _instantiatedPluginsOnlyAction(this, "Show only instantiated plugins", true)
 {
@@ -22,10 +24,10 @@ PluginManagerFilterModel::PluginManagerFilterModel(QObject* parent /*= nullptr*/
 
     setRecursiveFilteringEnabled(true);
 
-    connect(&_instantiatedPluginsOnlyAction, &ToggleAction::toggled, this, &PluginManagerFilterModel::invalidate);
+    connect(&_instantiatedPluginsOnlyAction, &ToggleAction::toggled, this, &PluginsFilterModel::invalidate);
 }
 
-bool PluginManagerFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
+bool PluginsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
     const auto index = sourceModel()->index(row, 0, parent);
 
@@ -54,16 +56,16 @@ bool PluginManagerFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
     return true;
 }
 
-bool PluginManagerFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
+bool PluginsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
 {
     return lhs.data().toString() < rhs.data().toString();
 }
 
-bool PluginManagerFilterModel::hasPluginInstances(const QModelIndex& index, int level /*= 0*/) const
+bool PluginsFilterModel::hasPluginInstances(const QModelIndex& index, int level /*= 0*/) const
 {
     const auto numberOfRows = sourceModel()->rowCount(index);
 
-#ifdef PLUGIN_MANAGER_FILTER_MODEL_VERBOSE
+#ifdef PLUGINS_FILTER_MODEL_VERBOSE
     qDebug() << __FUNCTION__ << index.data().toString() << "level" << level << "number of children" << numberOfRows;
 #endif
 
@@ -76,4 +78,6 @@ bool PluginManagerFilterModel::hasPluginInstances(const QModelIndex& index, int 
     }
 
     return false;
+}
+
 }

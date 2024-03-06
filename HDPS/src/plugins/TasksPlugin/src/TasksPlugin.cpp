@@ -19,8 +19,15 @@ using namespace mv::util;
 
 TasksPlugin::TasksPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),
+    _model(),
+    _filterModel(),
     _tasksAction(this, "Tasks")
 {
+    _filterModel.setSourceModel(&_model);
+
+    _tasksAction.initialize(&_model, &_filterModel, "Task", [this](WidgetAction* action, QWidget* widget) -> void {
+    }, false);
+
     AbstractTaskTester::registerTester("mv::ModalTaskTester");
     AbstractTaskTester::registerTester("mv::BackgroundTaskTester");
     AbstractTaskTester::registerTester("mv::ForegroundTaskTester");
@@ -32,7 +39,7 @@ void TasksPlugin::init()
 
     layout->setContentsMargins(6, 6, 6, 6);
 
-    auto tasksWidget = _tasksAction.createWidget(&getWidget(), TasksAction::Toolbar | TasksAction::Overlay);
+    auto tasksWidget = _tasksAction.createWidget(&getWidget());
 
     tasksWidget->layout()->setContentsMargins(0, 0, 0, 0);
 

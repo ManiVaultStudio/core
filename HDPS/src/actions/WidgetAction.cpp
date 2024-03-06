@@ -5,6 +5,7 @@
 #include "WidgetAction.h"
 #include "WidgetActionLabel.h"
 #include "WidgetActionCollapsedWidget.h"
+#include "WidgetActionToolButton.h"
 #include "WidgetActionContextMenu.h"
 #include "WidgetActionMimeData.h"
 #include "Application.h"
@@ -28,6 +29,10 @@ using namespace mv::util;
 
 namespace mv::gui {
 
+bool isInPopupMode(QWidget* parent) {
+    return parent->property("Popup").isValid() ? parent->property("Popup").toBool() : false;
+}
+
 QMap<WidgetAction::Scope, QString> WidgetAction::scopeNames {
     { WidgetAction::Scope::Private, "Private" },
     { WidgetAction::Scope::Public, "Public" }
@@ -49,6 +54,7 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
     _settingsPrefix(),
     _highlighting(HighlightOption::None),
     _popupSizeHint(),
+    _overrideSizeHint(),
     _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default)),
     _location(),
     _namedIcon(""),
@@ -130,37 +136,21 @@ bool WidgetAction::isLeaf() const
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
 {
-    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
+    auto widget = getWidget(parent, isInPopupMode(parent) ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
 
-    auto widget = getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
-
-    if (isInPopupMode) {
-        auto collapsedWidget = dynamic_cast<WidgetActionCollapsedWidget*>(parent->parent()->parent());
-
-        if (collapsedWidget) {
-            auto widgetConfigurationFunction = collapsedWidget->getWidgetConfigurationFunction();
-
-            if (widgetConfigurationFunction)
-                widgetConfigurationFunction(this, widget);
-        }
-    }
-    else {
-        if (_widgetConfigurationFunction)
-            _widgetConfigurationFunction(this, widget);
-    }
+    if (_widgetConfigurationFunction)
+        _widgetConfigurationFunction(this, widget);
 
     return widget;
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
+    auto widget = getWidget(parent, isInPopupMode(parent) ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
 
-    auto widget = getWidget(parent, isInPopupMode ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
+    Q_ASSERT(widget);
 
-    Q_ASSERT(widget != nullptr);
-
-    if (widget != nullptr && _widgetConfigurationFunction)
+    if (widget && _widgetConfigurationFunction)
         _widgetConfigurationFunction(this, widget);
 
     return widget;
@@ -168,13 +158,11 @@ QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetF
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetConfigurationFunction& widgetConfigurationFunction)
 {
-    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
+    auto widget = getWidget(parent, isInPopupMode(parent) ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
 
-    auto widget = getWidget(parent, isInPopupMode ? widgetFlags | WidgetActionWidget::PopupLayout : widgetFlags);
+    Q_ASSERT(widget);
 
-    Q_ASSERT(widget != nullptr);
-
-    if (widget != nullptr && widgetConfigurationFunction)
+    if (widget && widgetConfigurationFunction)
         widgetConfigurationFunction(this, widget);
 
     return widget;
@@ -182,13 +170,11 @@ QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetF
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const WidgetConfigurationFunction& widgetConfigurationFunction)
 {
-    const auto isInPopupMode = parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent());
+    auto widget = getWidget(parent, isInPopupMode(parent) ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
 
-    auto widget = getWidget(parent, isInPopupMode ? _defaultWidgetFlags | WidgetActionWidget::PopupLayout : _defaultWidgetFlags);
+    Q_ASSERT(widget);
 
-    Q_ASSERT(widget != nullptr);
-
-    if (widget != nullptr && widgetConfigurationFunction)
+    if (widget && widgetConfigurationFunction)
         widgetConfigurationFunction(this, widget);
 
     return widget;
@@ -842,6 +828,11 @@ void WidgetAction::setStretch(const std::int32_t& stretch)
     emit stretchChanged(_stretch);
 }
 
+WidgetConfigurationFunction WidgetAction::getWidgetConfigurationFunction()
+{
+    return _widgetConfigurationFunction;
+}
+
 void WidgetAction::setWidgetConfigurationFunction(const WidgetConfigurationFunction& widgetConfigurationFunction)
 {
     _widgetConfigurationFunction = widgetConfigurationFunction;
@@ -987,9 +978,19 @@ void WidgetAction::updateCustomStyle()
     refreshIcon();
 }
 
-mv::gui::WidgetActionBadge& WidgetAction::getBadge()
+WidgetActionBadge& WidgetAction::getBadge()
 {
     return _badge;
+}
+
+void WidgetAction::setOverrideSizeHint(const QSize& sizeHint)
+{
+    _overrideSizeHint = sizeHint;
+}
+
+QSize WidgetAction::getOverrideSizeHint() const
+{
+    return _overrideSizeHint;
 }
 
 }

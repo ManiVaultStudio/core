@@ -4,18 +4,20 @@
 
 #pragma once
 
-#include <actions/ToggleAction.h>
+#include "actions/ToggleAction.h"
 
 #include <QSortFilterProxyModel>
 
+namespace mv {
+
 /**
- * Plugin manager filter model class
+ * Plugin filter model class
  *
- * Sorting and filtering model for the plugin manager model
+ * Sorting and filtering model for plugins models
  *
  * @author Thomas Kroes
  */
-class PluginManagerFilterModel : public QSortFilterProxyModel
+class PluginsFilterModel : public QSortFilterProxyModel
 {
 public:
 
@@ -23,7 +25,7 @@ public:
      * Construct the filter model with \p parent
      * @param parent Pointer to parent object
     */
-    PluginManagerFilterModel(QObject* parent = nullptr);
+    PluginsFilterModel(QObject* parent = nullptr);
 
     /**
      * Returns whether \p row with \p parent is filtered out (false) or in (true)
@@ -49,3 +51,5 @@ private:
 private:
     mv::gui::ToggleAction     _instantiatedPluginsOnlyAction;      /** Show only instantiated plugins */
 };
+
+}

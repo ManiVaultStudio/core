@@ -109,7 +109,7 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
                 fromWorkspaceStartPageAction.setComments(workspace.getCommentsAction().getString());
                 fromWorkspaceStartPageAction.setTags(workspace.getTagsAction().getStrings());
                 fromWorkspaceStartPageAction.setMetaData(workspaceLocation.getTypeName());
-                //fromWorkspaceStartPageAction.setPreviewImage(projects().getWorkspacePreview(workspaceLocation.getFilePath()));
+                fromWorkspaceStartPageAction.setPreviewImage(projects().getWorkspacePreview(workspaceLocation.getFilePath()));
 
                 _createProjectFromWorkspaceWidget.getModel().add(fromWorkspaceStartPageAction);
             }

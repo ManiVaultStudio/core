@@ -5,9 +5,11 @@
 #pragma once
 
 #include "AbstractTaskHandler.h"
-#include "TasksFilterModel.h"
 
-#include "actions/TasksAction.h"
+#include "models/TasksTreeModel.h"
+#include "models/TasksFilterModel.h"
+
+#include "actions/TasksListAction.h"
 
 #include <QDialog>
 #include <QTimer>
@@ -38,18 +40,12 @@ protected:
 
     private:
 
-        /** Invoked when the number of modal tasks changes */
-        void updateLayout();
-
-        /** Removes all existing task widget layout items */
-        void cleanLayout();
-
         /** Update the window title and icon */
         void updateWindowTitleAndIcon();
 
     private:
-        ModalTaskHandler*               _modalTaskHandler;  /** Pointer to owning modal task handler */
-        QMap<Task*, QVector<QWidget*>>  _widgetsMap;        /** Maps task to allocated widget */
+        ModalTaskHandler*       _modalTaskHandler;      /** Pointer to owning modal task handler */
+        gui::TasksListAction    _tasksAction;           /** Action action for displaying the task(s) in a list */
     };
 
 public:
@@ -61,16 +57,16 @@ public:
     ModalTaskHandler(QObject* parent);
 
     /**
-     * Get status bar action
-     * @return Pointer to status bar widget action
+     * Get the tasks model
+     * @return Reference to the tasks tree model
      */
-    gui::WidgetAction* getStatusBarAction() override { return nullptr; }
-    
+    TasksTreeModel& getModel();
+
     /**
-     * Get tasks filter model
-     * @return Reference to the tasks filter model which filters the tasks tree model instance
+     * Get the tasks filter model
+     * @return Reference to the tasks filter model
      */
-    TasksFilterModel& getTasksFilterModel();
+    TasksFilterModel& getFilterModel();
 
 private:
 
@@ -78,7 +74,8 @@ private:
     void updateDialogVisibility();
 
 private:
-    TasksFilterModel    _tasksFilterModel;      /** Filter model for the tasks model */
+    TasksTreeModel      _model;                 /** Tasks tree model */
+    TasksFilterModel    _filterModel;           /** Filter model for the tasks model */
     ModalTasksDialog    _modalTasksDialog;      /** Modal tasks dialog */
     QTimer              _minimumDurationTimer;  /** Wait for a small amount of time before showing the UI */
 };

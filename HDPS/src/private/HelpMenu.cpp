@@ -110,14 +110,7 @@ void HelpMenu::populate()
 
 void HelpMenu::about()
 {
-    QMessageBox::about(this->parentWidget(), tr("About ManiVault"),
-        tr("<p>ManiVault is a flexible and extensible visual analytics framework for high-dimensional data.<br>"
-            "For more information, please visit: <a href=\"http://%2/\">%2</a> </p>"
-            "This software is licensed under the GNU Lesser General Public License v3.0.<br>"
-            "Copyright (C) %1 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)"
-        ).arg(QStringLiteral("2023"),
-              QStringLiteral("github.com/ManiVaultStudio"))
-    );
+    QMessageBox::about(this->parentWidget(), tr("About ManiVault"), Application::getAbout());
 }
 
 void HelpMenu::aboutThirdParties()

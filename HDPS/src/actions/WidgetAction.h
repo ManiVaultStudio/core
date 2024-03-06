@@ -69,6 +69,8 @@ public:
         NoLabelInGroup              = 0x00002,      /** Action will not have a label when it is displayed in a group */
         ForceCollapsedInGroup       = 0x00008,      /** Action will be collapsed in a horizontal group (or toolbar), no matter the circumstances */
         ForceExpandedInGroup        = 0x00010,      /** Action will be expanded in a horizontal group (or toolbar), no matter the circumstances */
+        ToolButtonAutoRaise         = 0x00020,      /** Sets auto-raise to true when a widget action is collapsed and a tool button is used for the popup functionality */
+        NoGroupBoxInPopupLayout     = 0x00040,      /** Prevent group box in popup layout */
 
         User                        = 0x00100,      /** And beyond for custom configuration flags */
 
@@ -236,6 +238,12 @@ public: // Widgets
      * @param stretch Stretch factor
      */
     virtual void setStretch(const std::int32_t& stretch) final;
+
+    /**
+     * Get widget configuration function
+     * @return Function that is called right after a widget action widget is created (useful for manual manipulation of the generated widget)
+     */
+    WidgetConfigurationFunction getWidgetConfigurationFunction();
 
     /**
      * Set widget configuration function to \p widgetConfigurationFunction
@@ -603,6 +611,20 @@ public: // Popups
      */
     virtual void setPopupSizeHint(const QSize& popupSizeHint) final;
 
+    /**
+     * Get override size hint
+     * @return Override size hint
+     */
+    [[deprecated("This method is a placeholder and not operational yet")]]
+    virtual QSize getOverrideSizeHint() const final;
+
+    /**
+     * Set override size hint
+     * @param overrideSizeHint Override size hint
+     */
+    [[deprecated("This method is a placeholder and not operational yet")]]
+    virtual void setOverrideSizeHint(const QSize& overrideSizeHint) final;
+
 public: // Configuration flags
 
     /**
@@ -832,6 +854,7 @@ private:
     QString                         _settingsPrefix;                /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
     HighlightOption                 _highlighting;                  /** Highlighting state */
     QSize                           _popupSizeHint;                 /** Size hint of the popup */
+    QSize                           _overrideSizeHint;              /** Override size hint (use with caution) */
     std::int32_t                    _configuration;                 /** Configuration flags */
     QMap<QString, QVariant>         _cachedStates;                  /** Maps cache name to state */
     QString                         _location;                      /** The path relative to the root in string format */
