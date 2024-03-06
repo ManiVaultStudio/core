@@ -5,10 +5,10 @@ cmake_minimum_required(VERSION 3.17)
 # -----------------------------------------------------------------------------
 set(MV_CORE "mv-core")
 
-set(MV_VERSION_MAJOR 0)
-set(MV_VERSION_MINOR 9)
+set(MV_VERSION_MAJOR 1)
+set(MV_VERSION_MINOR 0)
 set(MV_VERSION_PATCH 0)
-set(MV_VERSION_SUFFIX "") # e.g. for release candidates rc1
+set(MV_VERSION_SUFFIX "rc") # e.g. for release candidates rc1
 
 include(cmake/Utils.cmake)
 mv_set_version()
