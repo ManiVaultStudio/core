@@ -48,15 +48,18 @@ git clone --recurse-submodule git@github.com:ManiVaultStudio/core.git
 </details>
 
 ## References
-ManiVault was first presented at [IEEE VIS 2023](https://ieeevis.org/year/2023/info/papers-sessions) in the paper **ManiVault: A Flexible and Extensible Visual Analytics Framework for High-Dimensional Data** (2023). A preprint is available on [arXiv](https://arxiv.org/abs/2308.01751), other supplemental material are available [here](https://graphics.tudelft.nl/Publications-new/2024/VKTLEBEVHL24/) or on [OSF](https://osf.io/9k6jw/).
+ManiVault was first presented at [IEEE VIS 2023](https://ieeevis.org/year/2023/info/papers-sessions) in the paper **[ManiVault: A Flexible and Extensible Visual Analytics Framework for High-Dimensional Data](https://doi.org/10.1109/TVCG.2023.3326582)** (2023). A preprint is available on [arXiv](https://arxiv.org/abs/2308.01751), other supplemental material are available [here](https://graphics.tudelft.nl/Publications-new/2024/VKTLEBEVHL24/) or on [OSF](https://osf.io/9k6jw/).
 
 ```
-@misc{vkt2023manivault,
-  title        = {ManiVault: A Flexible and Extensible Visual Analytics Framework for High-Dimensional Data},
-  author       = {Alexander Vieth and Thomas Kroes and Julian Thijssen and Baldur van Lew and Jeroen Eggermont and Soumyadeep Basu and Elmar Eisemann and Anna Vilanova and Thomas Höllt and Boudewijn Lelieveldt},
-  year         = 2023,
-  doi          = {10.48550/arXiv.2308.01751},
-  note         = {arXiv preprint}
+@article{vkt2023manivault,
+	title        = {ManiVault: A Flexible and Extensible Visual Analytics Framework for High-Dimensional Data},
+	author       = {Vieth, Alexander and Kroes, Thomas and Thijssen, Julian and van Lew, Baldur and Eggermont, Jeroen and Basu, Soumyadeep and Eisemann, Elmar and Vilanova, Anna and Höllt, Thomas and Lelieveldt, Boudewijn},
+	year         = 2024,
+	journal      = {IEEE Transactions on Visualization and Computer Graphics},
+	volume       = 30,
+	number       = 1,
+	pages        = {175--185},
+	doi          = {10.1109/TVCG.2023.3326582}
 }
 ```
 
@@ -64,4 +67,4 @@ ManiVault was first presented at [IEEE VIS 2023](https://ieeevis.org/year/2023/i
 
 ManiVault is licensed under LGPL v3.0, refer to the [LICENSE file](https://github.com/ManiVaultStudio/core/blob/master/LICENSE) in the top level directory.
 
-Copyright © 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
+Copyright © 2024 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
