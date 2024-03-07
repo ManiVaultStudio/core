@@ -157,6 +157,7 @@ add_custom_command(TARGET ${POINTDATA} POST_BUILD
         --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
 )
 
-if (HDPS_USE_GTEST)
-    add_subdirectory(gtest)
-endif()
+# Currentlt, no tests are available
+#if (MV_USE_GTEST)
+#    add_subdirectory(gtest)
+#endif()
