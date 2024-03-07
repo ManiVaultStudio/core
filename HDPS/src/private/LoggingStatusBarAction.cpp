@@ -40,8 +40,18 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _recordsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
     _recordsAction.setPopupSizeHint(QSize(800, 300));
     _recordsAction.initialize(&_model, &_filterModel, "Log record");
-    _recordsAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
-        _loadPluginAction.setEnabled(mv::plugins().getPluginFactory("Logging")->getNumberOfInstances() == 0);
+
+    auto checkLoggingPluginAvailable = []() -> bool {
+        auto loggingPlugin = mv::plugins().getPluginFactory("Logging");
+
+        if (loggingPlugin)
+            return loggingPlugin->getNumberOfInstances() == 0;
+
+        return false;
+    };
+
+    _recordsAction.setWidgetConfigurationFunction([this, checkLoggingPluginAvailable](WidgetAction* action, QWidget* widget) -> void {
+        _loadPluginAction.setEnabled(checkLoggingPluginAvailable());
         _clearRecordsAction.setEnabled(_filterModel.rowCount() > 0);
 
         auto hierarchyWidget = widget->findChild<HierarchyWidget*>("HierarchyWidget");
@@ -123,7 +133,7 @@ LoggingStatusBarAction::LoggingStatusBarAction(QObject* parent, const QString& t
     _clearRecordsAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
     _clearRecordsAction.setToolTip("Clear all records");
 
-    _loadPluginAction.setEnabled(mv::plugins().getPluginFactory("Logging")->getNumberOfInstances() == 0);
+    _loadPluginAction.setEnabled(checkLoggingPluginAvailable());
     _loadPluginAction.setIconByName("window-maximize");
     _loadPluginAction.setDefaultWidgetFlags(TriggerAction::WidgetFlag::Icon);
     _loadPluginAction.setToolTip("Load logging plugin");
