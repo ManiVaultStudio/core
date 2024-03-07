@@ -6,7 +6,6 @@
 # On some linux systems, cmake links automatically against libquazip1-qt6.so.1.4.0 instead of libquazip1-qt6.so.1.4 though
 # Here, we create a symbolic link from the full version name to the shared library
 macro(create_quazip_symlink)
-message(STATUS "Set instruction sets for ${target}, useavx is ${useavx}")
 
 get_target_property(quazip_name QuaZip OUTPUT_NAME)
 get_target_property(quazip_ver QuaZip SOVERSION)
