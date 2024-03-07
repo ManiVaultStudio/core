@@ -1,4 +1,7 @@
-# source files for target MV_PRIVATE_LIB
+# -----------------------------------------------------------------------------
+# Source files for target MV_PRIVATE_LIB
+# -----------------------------------------------------------------------------
+# defines PRIVATE_SOURCES and PRIVATE_HEADERS
 
 set(PRIVATE_CORE_HEADERS
     src/private/Core.h
@@ -14,18 +17,18 @@ set(PRIVATE_CORE_FILES
 )
 
 set(PRIVATE_ACTIONS_HEADERS
-	src/private/ManiVaultVersionStatusBarAction.h
-	src/private/PluginsStatusBarAction.h
+    src/private/ManiVaultVersionStatusBarAction.h
+    src/private/PluginsStatusBarAction.h
     src/private/LoggingStatusBarAction.h
     src/private/BackgroundTasksStatusBarAction.h
     src/private/ForegroundTasksStatusBarAction.h
-	src/private/StartPageStatusBarAction.h
+    src/private/StartPageStatusBarAction.h
     src/private/SettingsStatusBarAction.h
 )
 
 set(PRIVATE_ACTIONS_SOURCES
-	src/private/PluginsStatusBarAction.cpp
-	src/private/ManiVaultVersionStatusBarAction.cpp
+    src/private/PluginsStatusBarAction.cpp
+    src/private/ManiVaultVersionStatusBarAction.cpp
     src/private/LoggingStatusBarAction.cpp
     src/private/BackgroundTasksStatusBarAction.cpp
     src/private/ForegroundTasksStatusBarAction.cpp

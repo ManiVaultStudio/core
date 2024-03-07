@@ -184,10 +184,10 @@ add_library(${MV_PUBLIC_LIB} ${LINK_TYPE}
     ${PUBLIC_SOURCES}
 )
 
-# Set the project name in VS different to the target name
-set_target_properties(${MV_PUBLIC_LIB} PROPERTIES PROJECT_LABEL "MV_Public")
-# Set the library output name different to the target name
-set_target_properties(${MV_PUBLIC_LIB} PROPERTIES OUTPUT_NAME "MV_Public")
+set_target_properties(${MV_PUBLIC_LIB} PROPERTIES
+                      PROJECT_LABEL "MV_Public"       # Set the project name in VS different to the target name
+                      OUTPUT_NAME "MV_Public"         # Set the library output name different to the target name
+)
 
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -253,7 +253,6 @@ endif()
 add_executable(${MV_EXE} MACOSX_BUNDLE WIN32
     src/.editorconfig
     ${MAIN_SOURCES}
-    ${UI_HEADERS}
     ${RESOURCE_FILES}
 )
 
@@ -371,6 +370,8 @@ install(TARGETS ${MV_PUBLIC_LIB}
     INCLUDES DESTINATION include
 )
 
+# TODO: Create a ManiVaultCore package to support the find_package command
+
 # Generate a .cmake file that can be imported from the install
 # to enable plugin building
 # Plugin building requires MV_Public.lib and the include headers
@@ -382,13 +383,11 @@ install(EXPORT ManiVaultPublicExport
         COMPONENT MVPUBLIC_TARGET
 )
 
-# ***Create a HdpsCore package to support the find_package command**
-
 # Generate the version file for use with find_package
 write_basic_package_version_file(
   "${CMAKE_CURRENT_BINARY_DIR}/ManiVaultConfigVersion.cmake"
   VERSION "${version}"
-  # When the hdps core is stable - version 1.0 or greater -
+  # When the ManiVault core is stable - version 1.0 or greater -
   # compatibility can change to
   # AnyNewerVersion or SameMajorVersion
   # until then employ ExactVersion
@@ -448,7 +447,7 @@ add_custom_command(TARGET ${MV_PUBLIC_LIB} POST_BUILD
         # --component MVPUBLIC_TARGET
         # --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
         # --verbose
-    # If no plugin directory exsists, ManiVault might try to import 
+    # If no plugin directory exists, ManiVault might try to import 
     # any library in the executable directory as a plugin
     COMMAND ${CMAKE_COMMAND}
         -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/Plugins

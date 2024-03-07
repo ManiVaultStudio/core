@@ -1,4 +1,7 @@
-# resource files for target MV_EXE
+# -----------------------------------------------------------------------------
+# Resource files MV_EXE
+# -----------------------------------------------------------------------------
+# defines RESOURCE_FILES
 
 set(QRESOURCES
     res/ResourcesCore.qrc

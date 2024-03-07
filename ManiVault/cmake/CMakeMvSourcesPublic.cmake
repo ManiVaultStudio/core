@@ -1,4 +1,7 @@
-# source files for target MV_PUBLIC_LIB
+# -----------------------------------------------------------------------------
+# Source files for target MV_PUBLIC_LIB
+# -----------------------------------------------------------------------------
+# defines PUBLIC_SOURCES and PUBLIC_HEADERS
 
 set(PUBLIC_CORE_INTERFACE_HEADERS
     src/CoreInterface.h
@@ -157,9 +160,9 @@ set(PUBLIC_GROUPING_ACTIONS_SOURCES
     src/actions/GroupsAction.cpp
     src/actions/GroupSectionTreeItem.cpp
     src/actions/GroupWidgetTreeItem.cpp
-	src/actions/ToolbarAction.cpp
-	src/actions/HorizontalToolbarAction.cpp
-	src/actions/VerticalToolbarAction.cpp
+    src/actions/ToolbarAction.cpp
+    src/actions/HorizontalToolbarAction.cpp
+    src/actions/VerticalToolbarAction.cpp
     src/actions/ToolbarActionItem.cpp
     src/actions/ToolbarActionItemWidget.cpp
 )
@@ -260,7 +263,7 @@ set(PUBLIC_TOOLBAR_ACTIONS_FILES
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
-	src/actions/Actions.h
+    src/actions/Actions.h
     src/actions/DatasetPickerAction.h
     src/actions/ImageAction.h
     src/actions/PixelSelectionAction.h
@@ -316,18 +319,18 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/WidgetActionMimeData.h
     src/actions/WidgetActionHighlightWidget.h
     src/actions/WidgetActionBadge.h
-	src/actions/TasksTreeAction.h
-	src/actions/TasksListAction.h
-	src/actions/SplashScreenAction.h
-	src/actions/RecentFilesAction.h
+    src/actions/TasksTreeAction.h
+    src/actions/TasksListAction.h
+    src/actions/SplashScreenAction.h
+    src/actions/RecentFilesAction.h
     src/actions/PresetsAction.h
     src/actions/LockingAction.h
-	src/actions/PluginTriggerPickerAction.h
+    src/actions/PluginTriggerPickerAction.h
     src/actions/PluginTriggerAction.h
-	src/actions/LabelProxyAction.h
-	src/actions/WidgetActionBadgeOverlayWidget.h
-	src/actions/WidgetActionToolButton.h
-	src/actions/WidgetActionToolButtonMenu.h
+    src/actions/LabelProxyAction.h
+    src/actions/WidgetActionBadgeOverlayWidget.h
+    src/actions/WidgetActionToolButton.h
+    src/actions/WidgetActionToolButtonMenu.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -340,18 +343,18 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/WidgetActionMimeData.cpp
     src/actions/WidgetActionHighlightWidget.cpp
     src/actions/WidgetActionBadge.cpp
-	src/actions/TasksTreeAction.cpp
-	src/actions/TasksListAction.cpp
-	src/actions/SplashScreenAction.cpp
-	src/actions/RecentFilesAction.cpp
+    src/actions/TasksTreeAction.cpp
+    src/actions/TasksListAction.cpp
+    src/actions/SplashScreenAction.cpp
+    src/actions/RecentFilesAction.cpp
     src/actions/PresetsAction.cpp
     src/actions/LockingAction.cpp
-	src/actions/PluginTriggerPickerAction.cpp
+    src/actions/PluginTriggerPickerAction.cpp
     src/actions/PluginTriggerAction.cpp
-	src/actions/LabelProxyAction.cpp
-	src/actions/WidgetActionBadgeOverlayWidget.cpp
-	src/actions/WidgetActionToolButton.cpp
-	src/actions/WidgetActionToolButtonMenu.cpp
+    src/actions/LabelProxyAction.cpp
+    src/actions/WidgetActionBadgeOverlayWidget.cpp
+    src/actions/WidgetActionToolButton.cpp
+    src/actions/WidgetActionToolButtonMenu.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -487,7 +490,7 @@ set(PUBLIC_UTIL_HEADERS
 
 if(APPLE)
 set(PUBLIC_UTIL_HEADERS
-	${PUBLIC_UTIL_HEADERS}
+    ${PUBLIC_UTIL_HEADERS}
     src/util/MacThemeHelper.h
 )
     set_source_files_properties(src/ApplicationSettingsAction.cpp src/util/MacThemeHelper.mm PROPERTIES
@@ -531,7 +534,7 @@ set(PUBLIC_UTIL_SOURCES
 
 if(APPLE)
 set(PUBLIC_UTIL_SOURCES
-	${PUBLIC_UTIL_SOURCES}
+    ${PUBLIC_UTIL_SOURCES}
     src/util/MacThemeHelper.mm
 )
 endif()
@@ -661,7 +664,7 @@ set(PUBLIC_ACTIONS_MODEL_HEADERS
 set(PUBLIC_ACTIONS_MODEL_SOURCES
     src/models/AbstractActionsModel.cpp
     src/models/ActionsListModel.cpp
-	src/models/ActionsHierarchyModel.cpp
+    src/models/ActionsHierarchyModel.cpp
     src/models/ActionsFilterModel.cpp
 )
 
@@ -725,7 +728,7 @@ set(PUBLIC_LOGGING_MODEL_HEADERS
 )
 
 set(PUBLIC_LOGGING_MODEL_SOURCES
-	src/models/LoggingModel.cpp
+    src/models/LoggingModel.cpp
     src/models/LoggingFilterModel.cpp
 )
 
@@ -814,7 +817,7 @@ set(PUBLIC_GLOBAL_SETTINGS_HEADERS
 
 set(PUBLIC_GLOBAL_SETTINGS_SOURCES
     src/GlobalSettingsGroupAction.cpp
-	src/ParametersSettingsAction.cpp
+    src/ParametersSettingsAction.cpp
     src/MiscellaneousSettingsAction.cpp
     src/TasksSettingsAction.cpp
     src/ApplicationSettingsAction.cpp
@@ -830,17 +833,17 @@ set(PUBLIC_GLOBAL_SETTINGS_FILES
 set(PUBLIC_TASK_HEADERS
     src/Task.h
     src/TaskTesterRunner.h
-	src/AbstractTaskHandler.h
-	src/AbstractTaskTester.h
+    src/AbstractTaskHandler.h
+    src/AbstractTaskTester.h
     src/ModalTask.h
     src/ModalTaskTester.h
-	src/ModalTaskHandler.h
+    src/ModalTaskHandler.h
     src/BackgroundTask.h
     src/BackgroundTaskTester.h
-	src/BackgroundTaskHandler.h
-	src/ForegroundTask.h
+    src/BackgroundTaskHandler.h
+    src/ForegroundTask.h
     src/ForegroundTaskTester.h
-	src/ForegroundTaskHandler.h
+    src/ForegroundTaskHandler.h
     src/DatasetTask.h
     src/DatasetTaskHandler.h
 )
@@ -848,19 +851,19 @@ set(PUBLIC_TASK_HEADERS
 set(PUBLIC_TASK_SOURCES
     src/Task.cpp
     src/TaskTesterRunner.cpp
-	src/AbstractTaskHandler.cpp
+    src/AbstractTaskHandler.cpp
     src/AbstractTaskTester.cpp
     src/ModalTask.cpp
-	src/ModalTaskTester.cpp
-	src/ModalTaskHandler.cpp
+    src/ModalTaskTester.cpp
+    src/ModalTaskHandler.cpp
     src/BackgroundTask.cpp
     src/BackgroundTaskTester.cpp
-	src/BackgroundTaskHandler.cpp
-	src/ForegroundTask.cpp
+    src/BackgroundTaskHandler.cpp
+    src/ForegroundTask.cpp
     src/ForegroundTaskTester.cpp
-	src/ForegroundTaskHandler.cpp
+    src/ForegroundTaskHandler.cpp
     src/DatasetTask.cpp
-	src/DatasetTaskHandler.cpp
+    src/DatasetTaskHandler.cpp
 )
 
 set(PUBLIC_TASK_FILES
@@ -891,20 +894,20 @@ set(PUBLIC_HEADERS
     ${PUBLIC_GRAPHICS_HEADERS}
     ${PUBLIC_UTIL_HEADERS}
     ${PUBLIC_APPLICATION_HEADERS}
-	${PUBLIC_PROJECT_HEADERS}
-	${PUBLIC_WORKSPACE_HEADERS}
+    ${PUBLIC_PROJECT_HEADERS}
+    ${PUBLIC_WORKSPACE_HEADERS}
     ${PUBLIC_DATASET_HEADERS}
     ${PUBLIC_PLUGIN_HEADERS}
     ${PUBLIC_DATA_HIERARCHY_HEADERS}
     ${PUBLIC_ACTIONS_MODEL_HEADERS}
     ${PUBLIC_DATA_HIERARCHY_MODEL_HEADERS}
     ${PUBLIC_RAW_DATA_MODEL_HEADERS}
-	${PUBLIC_SELECTIONS_MODEL_HEADERS}
-	${PUBLIC_LOGGING_MODEL_HEADERS}
-	${PUBLIC_TASKS_MODEL_HEADERS}
-	${PUBLIC_PLUGINS_MODEL_HEADERS}
-	${PUBLIC_PLUGIN_FACTORIES_MODEL_HEADERS}
-	${PUBLIC_MISCELLANEOUS_MODEL_HEADERS}
+    ${PUBLIC_SELECTIONS_MODEL_HEADERS}
+    ${PUBLIC_LOGGING_MODEL_HEADERS}
+    ${PUBLIC_TASKS_MODEL_HEADERS}
+    ${PUBLIC_PLUGINS_MODEL_HEADERS}
+    ${PUBLIC_PLUGIN_FACTORIES_MODEL_HEADERS}
+    ${PUBLIC_MISCELLANEOUS_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
 )
@@ -925,7 +928,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES}
     ${PUBLIC_TASK_ACTIONS_SOURCES}
     ${PUBLIC_ACTIONS_INTERNAL_SOURCES}
-	${PUBLIC_WIDGETS_SOURCES}
+    ${PUBLIC_WIDGETS_SOURCES}
     ${PUBLIC_WIDGETS_INTERNAL_SOURCES}
     ${PUBLIC_RENDERERS_SOURCES}
     ${PUBLIC_GRAPHICS_SOURCES}
@@ -939,12 +942,12 @@ set(PUBLIC_SOURCES
     ${PUBLIC_ACTIONS_MODEL_SOURCES}
     ${PUBLIC_DATA_HIERARCHY_MODEL_SOURCES}
     ${PUBLIC_RAW_DATA_MODEL_SOURCES}
-	${PUBLIC_SELECTIONS_MODEL_SOURCES}
-	${PUBLIC_LOGGING_MODEL_SOURCES}
-	${PUBLIC_TASKS_MODEL_SOURCES}
-	${PUBLIC_PLUGINS_MODEL_SOURCES}
-	${PUBLIC_PLUGIN_FACTORIES_MODEL_SOURCES}
-	${PUBLIC_MISCELLANEOUS_MODEL_SOURCES}
+    ${PUBLIC_SELECTIONS_MODEL_SOURCES}
+    ${PUBLIC_LOGGING_MODEL_SOURCES}
+    ${PUBLIC_TASKS_MODEL_SOURCES}
+    ${PUBLIC_PLUGINS_MODEL_SOURCES}
+    ${PUBLIC_PLUGIN_FACTORIES_MODEL_SOURCES}
+    ${PUBLIC_MISCELLANEOUS_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
     ${PUBLIC_HEADERS}
