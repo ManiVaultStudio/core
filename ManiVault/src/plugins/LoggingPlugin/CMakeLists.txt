@@ -20,7 +20,7 @@ if(NOT DEFINED MV_INSTALL_DIR)
 endif()
 file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 
-find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
+find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 set(PLUGIN
     src/LoggingPlugin.h
