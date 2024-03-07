@@ -15,4 +15,3 @@ QT6_ADD_RESOURCES(RESOURCE_FILES ${QRESOURCES})
 
 source_group(Resources FILES ${QRESOURCES})
 source_group(Resources FILES res/ResourcesWinIco.rc)
-source_group(Resources\\generated FILES ${UI_HEADERS})
