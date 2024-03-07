@@ -65,7 +65,7 @@ target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
-# Use avx if enabled and available
+# Use AVX if enabled and available
 check_and_set_AVX(${SHARED_PARAMETERS_PLUGIN} ${MV_USE_AVX})
 
 install(TARGETS ${SHARED_PARAMETERS_PLUGIN}

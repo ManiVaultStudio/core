@@ -58,7 +58,7 @@ target_link_libraries(${TASKS_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${TASKS_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${TASKS_PLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
-# Use avx if enabled and available
+# Use AVX if enabled and available
 check_and_set_AVX(${TASKS_PLUGIN} ${MV_USE_AVX})
 
 install(TARGETS ${TASKS_PLUGIN}

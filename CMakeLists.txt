@@ -20,6 +20,18 @@ option(MV_USE_AVX "Use AVX if available - by default OFF" OFF)
 option(MV_PRECOMPILE_HEADERS "Precompile several headers for faster compilation" ON)
 option(MV_UNITY_BUILD "Combine target source files into batches for faster compilation" OFF)
 
+if(MV_PRECOMPILE_HEADERS)
+    message(STATUS "Using precompiled headers: ON")
+endif()
+
+if(MV_UNITY_BUILD)
+    message(STATUS "Using unity build: ON")
+endif()
+
+if(MV_USE_AVX)
+    message(STATUS "Using AVX: ON")
+endif()
+
 # -----------------------------------------------------------------------------
 # Tests
 # -----------------------------------------------------------------------------

@@ -117,7 +117,7 @@ target_link_libraries(${CLUSTERDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${CLUSTERDATA} PRIVATE ${MV_PUBLIC_LIB})
 target_link_libraries(${CLUSTERDATA} PRIVATE PointData)
 
-# Use avx if enabled and available
+# Use AVX if enabled and available
 check_and_set_AVX(${CLUSTERDATA} ${MV_USE_AVX})
 
 if(MV_UNITY_BUILD)

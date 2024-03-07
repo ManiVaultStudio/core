@@ -50,14 +50,6 @@ include(CMakeCheckSetAVX)
 # create a file that defines MV_VERSION_MAJOR, etc
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManiVaultVersion.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h" @ONLY)
 
-if(MV_PRECOMPILE_HEADERS)
-    message(STATUS "Using precompiled headers: ON")
-endif()
-
-if(MV_UNITY_BUILD)
-    message(STATUS "Using unity build: ON")
-endif()
-
 # -----------------------------------------------------------------------------
 # Apple settings
 # -----------------------------------------------------------------------------
