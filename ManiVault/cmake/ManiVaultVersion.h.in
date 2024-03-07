@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-// ManiVault versions is defined in core/HDPS/CMakeList.txt
+// ManiVault versions is defined in core/ManiVault/CMakeList.txt
 // Do not modify this file, but update new version numbers there
 
 constexpr std::int32_t MV_VERSION_MAJOR  = @PROJECT_VERSION_MAJOR@;

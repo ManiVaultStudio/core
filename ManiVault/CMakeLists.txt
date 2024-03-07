@@ -196,7 +196,7 @@ target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_17)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
 
-# Use avx if enabled and available
+# Use AVX if enabled and available
 check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
 
 if(MV_PRECOMPILE_HEADERS)
@@ -277,7 +277,7 @@ target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PRIVATE_LIB})
 
-# Use avx if enabled and available
+# Use AVX if enabled and available
 check_and_set_AVX(${MV_EXE} ${MV_USE_AVX})
 
 add_dependencies(${MV_EXE} ${MV_PUBLIC_LIB} ${MV_PRIVATE_LIB} QuaZip qt6advanceddocking)

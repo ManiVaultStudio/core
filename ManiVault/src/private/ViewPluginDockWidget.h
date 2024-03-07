@@ -23,7 +23,7 @@ class DockManager;
 /**
  * View plugin dock widget class
  *
- * Dock widget which shows the contents of an HDPS view plugin.
+ * Dock widget which shows the contents of an ManiVault view plugin.
  *
  * @author Thomas Kroes
  */

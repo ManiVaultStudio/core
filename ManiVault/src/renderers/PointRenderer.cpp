@@ -237,7 +237,7 @@ namespace mv
             }
 
             // Before calling glDrawArraysInstanced, check if _positions is non-empty, to
-            // prevent a crash on some (older) computers, see HDPS core pull request #42,
+            // prevent a crash on some (older) computers, see ManiVault core pull request #42,
             // "Fix issue #34: Crash when opening scatterplot plugin", March 2020.
             if (!_positions.empty())
             {

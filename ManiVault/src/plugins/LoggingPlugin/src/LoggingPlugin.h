@@ -13,7 +13,7 @@ using namespace mv::plugin;
 /**
  * Logging view plugin
  *
- * This plugin provides a user interface for inspecting HDPS logs
+ * This plugin provides a user interface for inspecting ManiVault logs
  *
  * @author Thomas Kroes
  */

@@ -23,7 +23,7 @@ class SplashScreenAction;
  * This widget can either serve as:
  *  - an application splash screen widget (shown when no project is loaded at startup)
  *  - a project splash screen widget
- *    This only works when: a) the project is loaded from the command line i.e. HDPS.exe -p c:\project.mv
+ *    This only works when: a) the project is loaded from the command line i.e. "ManiVault Studio".exe -p c:\project.mv
  *    b) the associated splash screen is enabled and c) SplashScreenAction#_projectMetaAction is valid.
  *
  * @author Thomas Kroes

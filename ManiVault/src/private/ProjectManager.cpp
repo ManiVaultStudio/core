@@ -99,12 +99,12 @@ ProjectManager::ProjectManager(QObject* parent /*= nullptr*/) :
 
     _importDataMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
     _importDataMenu.setTitle("Import data...");
-    _importDataMenu.setToolTip("Import data into HDPS");
+    _importDataMenu.setToolTip("Import data into ManiVault");
 
     //_publishAction.setShortcut(QKeySequence("Ctrl+P"));
     //_publishAction.setShortcutContext(Qt::ApplicationShortcut);
     _publishAction.setIconByName("cloud-upload-alt");
-    _publishAction.setToolTip("Publish the HDPS application");
+    _publishAction.setToolTip("Publish the ManiVault application");
 
     //_pluginManagerAction.setShortcut(QKeySequence("Ctrl+M"));
     //_pluginManagerAction.setShortcutContext(Qt::ApplicationShortcut);

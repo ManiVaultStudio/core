@@ -72,7 +72,7 @@ void HelpMenu::populate()
     if (!actions.isEmpty()) {
         auto pluginHelpMenu = new QMenu("Plugin");
 
-        pluginHelpMenu->setToolTip("HDPS plugin documentation");
+        pluginHelpMenu->setToolTip("ManiVault plugin documentation");
         pluginHelpMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
 
         for (auto action : actions)

@@ -247,12 +247,12 @@ void MainWindow::checkGraphicsCapabilities()
     gl.glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
     gl.glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
 
-    QString warningMessage = "HDPS requires a graphics card with support for OpenGL 3.3 or newer. "
+    QString warningMessage = "ManiVault requires a graphics card with support for OpenGL 3.3 or newer. "
                              "The currently used card supports version " + QString::number(majorVersion) + 
                              "." + QString::number(minorVersion) + ". Make sure the application uses your "
                              "dedicated graphics card and update your drivers. "
-                             "Please visit https://github.com/hdps/PublicWiki/wiki/Graphics-card-issues to "
-                             "learn more about this issue.";
+                             "Please visit https://github.com/ManiVaultStudio/PublicWiki/wiki/FAQ#manivault-launches-with-a-warning-my-graphics-card-does-not-support-opengl-33 "
+                             "to learn more about this issue.";
 
     if (majorVersion < 3 || (majorVersion == 3 && minorVersion < 3))
     {
