@@ -1,9 +1,11 @@
-# CMakeLists to generate a project that has all subprojects of the plugin system in one.
-
 cmake_minimum_required(VERSION 3.17)
 
 set(MV_MAIN "mv-main")
 PROJECT(${MV_MAIN})
+
+# -----------------------------------------------------------------------------
+# User options
+# -----------------------------------------------------------------------------
 
 # Ask the user to set a ManiVault installation directory
 if(NOT DEFINED MV_INSTALL_DIR)
@@ -13,14 +15,36 @@ endif()
 file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 
 # Other user-facing options
-option(HDPS_USE_GTEST "Use GoogleTest" OFF)
+option(MV_USE_GTEST "Use GoogleTest" OFF)
 option(MV_USE_AVX "Use AVX if available - by default OFF" OFF)
 option(MV_PRECOMPILE_HEADERS "Precompile several headers for faster compilation" ON)
 option(MV_UNITY_BUILD "Combine target source files into batches for faster compilation" OFF)
 
-if (HDPS_USE_GTEST)
-    enable_testing()
-    add_subdirectory(external/googletest)
+if(MV_PRECOMPILE_HEADERS)
+    message(STATUS "Using precompiled headers: ON")
 endif()
 
-add_subdirectory(HDPS)
+if(MV_UNITY_BUILD)
+    message(STATUS "Using unity build: ON")
+endif()
+
+if(MV_USE_AVX)
+    message(STATUS "Using AVX: ON")
+endif()
+
+# -----------------------------------------------------------------------------
+# Tests
+# -----------------------------------------------------------------------------
+
+if (MV_USE_GTEST)
+    message(WARNING "MV_USE_GTEST: currently no test are available")
+    #enable_testing()
+    #add_subdirectory(external/googletest)
+endif()
+
+# -----------------------------------------------------------------------------
+# Main project
+# -----------------------------------------------------------------------------
+
+# ManiVault core system
+add_subdirectory(ManiVault)
