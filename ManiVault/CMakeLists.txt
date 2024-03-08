@@ -17,9 +17,8 @@ project(${MV_CORE} VERSION ${MV_VERSION})
 
 # These three targets defined in this CMakeLists.txt
 set(MV_APPLICATION_NAME "ManiVault Studio")  # Name of the executable
-set(MV_EXE MV_Application)                   # The executable target
+set(MV_EXE MV_Application)                   # The ManiVault executable target
 set(MV_PUBLIC_LIB Core)                      # A public shared library used by plugin builders and the ManiVault executable
-set(MV_PRIVATE_LIB MV_Private)               # A private shared library contain code for the ManiVault executable
 
 set(LINK_TYPE SHARED)
 if(MSVC)
@@ -162,9 +161,8 @@ message(STATUS "Using QuaZip version ${QuaZip_VERSION}")
 # -----------------------------------------------------------------------------
 # Source files
 # -----------------------------------------------------------------------------
-include(CMakeMvSourcesMain)           # defines MAIN_SOURCES
+include(CMakeMvSourcesApplication)    # defines MAIN_SOURCES, PRIVATE_SOURCES and PRIVATE_HEADERS
 include(CMakeMvSourcesPublic)         # defines PUBLIC_SOURCES and PUBLIC_HEADERS
-include(CMakeMvSourcesPrivate)        # defines PRIVATE_SOURCES and PRIVATE_HEADERS
 include(CMakeMvSourcesResources)      # defines RESOURCE_FILES and UI_HEADERS
 
 
@@ -206,45 +204,12 @@ if(MV_UNITY_BUILD)
 endif()
 
 # -----------------------------------------------------------------------------
-# Target MV_PRIVATE_LIB
-# -----------------------------------------------------------------------------
-add_library(${MV_PRIVATE_LIB} ${LINK_TYPE}
-    src/.editorconfig
-    ${PRIVATE_SOURCES}
-    ${RESOURCE_FILES}
-)
-
-target_include_directories(${MV_PRIVATE_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
-target_compile_features(${MV_PRIVATE_LIB} PRIVATE cxx_std_17)
-
-target_link_libraries(${MV_PRIVATE_LIB} PRIVATE Qt6::Widgets)
-target_link_libraries(${MV_PRIVATE_LIB} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${MV_PRIVATE_LIB} PRIVATE Qt6::OpenGL)
-target_link_libraries(${MV_PRIVATE_LIB} PRIVATE Qt6::OpenGLWidgets)
-target_link_libraries(${MV_PRIVATE_LIB} PRIVATE qt6advanceddocking)
-target_link_libraries(${MV_PRIVATE_LIB} PRIVATE QuaZip)
-target_link_libraries(${MV_PRIVATE_LIB} PRIVATE ${MV_PUBLIC_LIB})
-
-# Use avx if enabled and available
-check_and_set_AVX(${MV_PRIVATE_LIB} ${MV_USE_AVX})
-
-add_dependencies(${MV_PRIVATE_LIB} ${MV_PUBLIC_LIB} QuaZip qt6advanceddocking)
-
-if(MV_PRECOMPILE_HEADERS)
-    target_precompile_headers(${MV_PRIVATE_LIB} REUSE_FROM ${MV_PUBLIC_LIB})
-endif()
-
-if(MV_UNITY_BUILD)
-    set_target_properties(${MV_PRIVATE_LIB} PROPERTIES UNITY_BUILD ON)
-endif()
-
-# -----------------------------------------------------------------------------
 # Target MV_EXE
 # -----------------------------------------------------------------------------
 add_executable(${MV_EXE} MACOSX_BUNDLE WIN32
     src/.editorconfig
     ${MAIN_SOURCES}
+    ${PRIVATE_SOURCES}
     ${RESOURCE_FILES}
 )
 
@@ -267,12 +232,18 @@ target_link_libraries(${MV_EXE} PRIVATE qt6advanceddocking)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
-target_link_libraries(${MV_EXE} PRIVATE ${MV_PRIVATE_LIB})
 
 # Use AVX if enabled and available
 check_and_set_AVX(${MV_EXE} ${MV_USE_AVX})
 
-add_dependencies(${MV_EXE} ${MV_PUBLIC_LIB} ${MV_PRIVATE_LIB} QuaZip qt6advanceddocking)
+if(MV_PRECOMPILE_HEADERS)
+    target_precompile_headers(${MV_EXE} REUSE_FROM ${MV_PUBLIC_LIB})
+endif()
+
+if(MV_UNITY_BUILD)
+    set_target_properties(${MV_EXE} PROPERTIES UNITY_BUILD ON)
+endif()
+
 
 if(MSVC)
     set_target_properties(${MV_EXE} PROPERTIES
@@ -310,9 +281,6 @@ if(APPLE)
             COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                     \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    \"$<TARGET_FILE:${MV_PRIVATE_LIB}>\" 
-                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
         )
         
         #if(NOT retval EQUAL 0)
@@ -326,19 +294,10 @@ if(APPLE)
         )"
         COMPONENT MACOS_BUNDLE
     )
-elseif(UNIX)
-    install(TARGETS ${MV_EXE}
-        RUNTIME DESTINATION . COMPONENT MV_EXECUTABLE
-    )
-    
-    install(TARGETS ${MV_PRIVATE_LIB}
-        LIBRARY DESTINATION lib COMPONENT MVPRIVATE_LINKLIB # Linux .so for linking
-    )
 else()
     install(TARGETS ${MV_EXE}
         RUNTIME DESTINATION . COMPONENT MV_EXECUTABLE
     )
-    # On MSVC, MV_PRIVATE_LIB is statically linked to MV_EXE and does not need to be installed
 endif()
 
 # Install public headers
@@ -454,16 +413,6 @@ if(APPLE)
             --config $<CONFIGURATION>
             --component MACOS_BUNDLE
             --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>/
-    )
-elseif(UNIX)
-    add_custom_command(TARGET ${MV_PRIVATE_LIB} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault private link library"
-        COMMAND ${CMAKE_COMMAND}
-            --install ${CMAKE_BINARY_DIR}
-            --config $<CONFIGURATION>
-            --component MVPRIVATE_LINKLIB
-            --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
-            --verbose
     )
 endif()
 
