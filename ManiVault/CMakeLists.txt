@@ -238,6 +238,7 @@ check_and_set_AVX(${MV_EXE} ${MV_USE_AVX})
 
 if(MV_PRECOMPILE_HEADERS)
     target_precompile_headers(${MV_EXE} REUSE_FROM ${MV_PUBLIC_LIB})
+    target_compile_definitions(${MV_EXE} PRIVATE "${MV_PUBLIC_LIB}_EXPORTS")
 endif()
 
 if(MV_UNITY_BUILD)
