@@ -8,7 +8,7 @@
 
 #include <QVBoxLayout>
 
-Q_PLUGIN_METADATA(IID "nl.BioVault.LoggingPlugin")
+Q_PLUGIN_METADATA(IID "studio.manivault.LoggingPlugin")
 
 using namespace mv;
 using namespace mv::gui;

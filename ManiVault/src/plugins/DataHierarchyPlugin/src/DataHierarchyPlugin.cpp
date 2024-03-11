@@ -6,7 +6,7 @@
 
 #include <Application.h>
 
-Q_PLUGIN_METADATA(IID "nl.BioVault.DataHierarchyPlugin")
+Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")
 
 using namespace mv;
 using namespace mv::gui;

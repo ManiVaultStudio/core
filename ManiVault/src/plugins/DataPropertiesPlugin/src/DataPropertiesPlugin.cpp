@@ -10,7 +10,7 @@
 
 #include <widgets/ViewPluginEditorDialog.h>
 
-Q_PLUGIN_METADATA(IID "nl.BioVault.DataPropertiesPlugin")
+Q_PLUGIN_METADATA(IID "studio.manivault.DataPropertiesPlugin")
 
 using namespace mv;
 

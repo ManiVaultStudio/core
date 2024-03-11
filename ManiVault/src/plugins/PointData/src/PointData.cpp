@@ -24,7 +24,7 @@
 #include <set>
 #include <type_traits>
 
-Q_PLUGIN_METADATA(IID "nl.BioVault.PointData")
+Q_PLUGIN_METADATA(IID "studio.manivault.PointData")
 
 // =============================================================================
 // PointData
