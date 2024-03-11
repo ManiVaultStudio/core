@@ -2,8 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#ifndef HDPS_POINTDATARANGE_H
-#define HDPS_POINTDATARANGE_H
+#pragma once
 
 #include "PointDataIterator.h"
 #include "RandomAccessRange.h"
@@ -61,6 +60,3 @@ namespace mv
 
 
 }
-
-
-#endif // HDPS_POINTDATARANGE_H

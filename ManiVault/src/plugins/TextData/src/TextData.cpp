@@ -9,7 +9,7 @@
 #include <QtCore>
 #include <QtDebug>
 
-Q_PLUGIN_METADATA(IID "hdps.TextData")
+Q_PLUGIN_METADATA(IID "studio.manivault.TextData")
 
 TextData::~TextData(void)
 {

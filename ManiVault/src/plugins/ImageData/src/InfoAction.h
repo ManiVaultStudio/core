@@ -40,5 +40,5 @@ protected:
     StringAction            _imageResolutionAction;             /** Image resolution action */
     StringAction            _numberOfPixelsAction;              /** Number of pixels per image action */
     StringAction            _numberComponentsPerPixelAction;    /** Number of components action */
-    mv::EventListener     _eventListener;                     /** Listen to HDPS events */
+    mv::EventListener       _eventListener;                     /** Listen to ManiniVault events */
 };

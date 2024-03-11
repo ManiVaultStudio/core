@@ -147,14 +147,14 @@ void StartPageGetStartedWidget::updateCreateProjectFromWorkspaceActions()
                 const auto projectMeta = Project::getProjectMetaActionFromProjectFilePath(recentFilePath);
                 
                 if (projectMeta.isNull()) {
-                    StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.hdps in new project").arg(QFileInfo(recentFilePath).baseName()), recentFilePath, "", [recentFilePath]() -> void {
+                    StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.mv in new project").arg(QFileInfo(recentFilePath).baseName()), recentFilePath, "", [recentFilePath]() -> void {
                         projects().newBlankProject();
                         workspaces().importWorkspaceFromProjectFile(recentFilePath);
                     });
                 
                     _createProjectFromWorkspaceWidget.getModel().add(recentProjectStartPageAction);
                 } else {
-                    StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.hdps in new project").arg(QFileInfo(recentFilePath).baseName()), projectMeta->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
+                    StartPageAction recentProjectStartPageAction(fontAwesome.getIcon("clock"), QFileInfo(recentFilePath).baseName(), QString("Replicate workspace from %1.mv in new project").arg(QFileInfo(recentFilePath).baseName()), projectMeta->getDescriptionAction().getString(), "", [recentFilePath]() -> void {
                         projects().newBlankProject();
                         workspaces().importWorkspaceFromProjectFile(recentFilePath);
                     });

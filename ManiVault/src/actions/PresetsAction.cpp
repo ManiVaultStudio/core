@@ -286,8 +286,8 @@ void PresetsAction::importPreset()
     fileDialog->setWindowTitle("Import Preset");
     fileDialog->setAcceptMode(QFileDialog::AcceptOpen);
     fileDialog->setFileMode(QFileDialog::ExistingFile);
-    fileDialog->setNameFilters({ "HDPS View Preset (*.hvp)" });
-    fileDialog->setDefaultSuffix(".hvp");
+    fileDialog->setNameFilters({ "ManiVault View Preset (*.mvp)" });
+    fileDialog->setDefaultSuffix(".mvp");
     fileDialog->setOption(QFileDialog::DontUseNativeDialog, true);
 
     connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
@@ -318,8 +318,8 @@ void PresetsAction::exportPreset()
     fileDialog->setWindowIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
     fileDialog->setWindowTitle("Export Preset");
     fileDialog->setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog->setNameFilters({ "HDPS View Preset (*.hvp)" });
-    fileDialog->setDefaultSuffix(".hvp");
+    fileDialog->setNameFilters({ "ManiVault View Preset (*.mvp)" });
+    fileDialog->setDefaultSuffix(".mvp");
     fileDialog->setOption(QFileDialog::DontUseNativeDialog, true);
 
     connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {

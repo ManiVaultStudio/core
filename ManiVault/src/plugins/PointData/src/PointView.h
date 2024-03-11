@@ -2,8 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#ifndef HDPS_POINTVIEW_H
-#define HDPS_POINTVIEW_H
+#pragma once
 
 #include <cstddef> // For size_t
 #include <cassert>
@@ -79,6 +78,3 @@ namespace mv
         unsigned _index{};
     };
 }
-
-
-#endif // HDPS_POINTVIEW_H

@@ -39,7 +39,8 @@ class SharedParametersPluginFactory : public ViewPluginFactory
 {
     Q_INTERFACES(mv::plugin::ViewPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "NL.ManiVault.SharedParametersPlugin" FILE "SharedParametersPlugin.json")
+    Q_PLUGIN_METADATA(IID   "studio.manivault.SharedParametersPlugin"
+                      FILE  "SharedParametersPlugin.json")
     
 public:
 

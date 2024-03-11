@@ -2,11 +2,6 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#ifndef HDPS_ASSUME_FLOAT32_POINT_DATA
-// Avoid warnings about calls to deprecated PointData member functions.
-#define HDPS_ASSUME_FLOAT32_POINT_DATA
-#endif
-
 #include "PointData.h"
 
 #include "DimensionsPickerAction.h"
@@ -29,7 +24,7 @@
 #include <set>
 #include <type_traits>
 
-Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
+Q_PLUGIN_METADATA(IID "studio.manivault.PointData")
 
 // =============================================================================
 // PointData

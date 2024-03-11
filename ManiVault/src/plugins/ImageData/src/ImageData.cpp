@@ -15,7 +15,7 @@
 
 #include <stdexcept>
 
-Q_PLUGIN_METADATA(IID "nl.BioVault.ImageData")
+Q_PLUGIN_METADATA(IID "studio.manivault.ImageData")
 
 using namespace mv;
 using namespace mv::util;

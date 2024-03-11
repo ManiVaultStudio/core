@@ -2,8 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#ifndef HDPS_RANDOMACCESSRANGE_H
-#define HDPS_RANDOMACCESSRANGE_H
+#pragma once
 
 #include <cstddef> // For size_t
 #include <cassert>
@@ -67,6 +66,3 @@ namespace mv
     };
 
 }
-
-
-#endif // HDPS_RANDOMACCESSRANGE_H

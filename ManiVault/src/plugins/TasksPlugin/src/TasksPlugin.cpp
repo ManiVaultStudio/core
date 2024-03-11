@@ -12,7 +12,7 @@
 #include <actions/OptionAction.h>
 #include <actions/TriggerAction.h>
 
-Q_PLUGIN_METADATA(IID "NL.ManiVault.TasksPlugin")
+Q_PLUGIN_METADATA(IID "studio.manivault.TasksPlugin")
 
 using namespace mv;
 using namespace mv::util;

@@ -8,7 +8,7 @@
 #include <QtCore>
 #include <QtDebug>
 
-Q_PLUGIN_METADATA(IID "nl.lumc.ColorData")
+Q_PLUGIN_METADATA(IID "studio.manivault.ColorData")
 
 using namespace mv;
 

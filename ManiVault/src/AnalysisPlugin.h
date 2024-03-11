@@ -136,4 +136,4 @@ public:
 
 } // namespace mv
 
-Q_DECLARE_INTERFACE(mv::plugin::AnalysisPluginFactory, "hdps.AnalysisPluginFactory")
+Q_DECLARE_INTERFACE(mv::plugin::AnalysisPluginFactory, "ManiVault.AnalysisPluginFactory")

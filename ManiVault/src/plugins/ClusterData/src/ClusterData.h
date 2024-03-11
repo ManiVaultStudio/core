@@ -242,7 +242,7 @@ class ClusterDataFactory : public mv::plugin::RawDataFactory
 {
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "hdps.ClusterData"
+    Q_PLUGIN_METADATA(IID   "studio.manivault.ClusterData"
                       FILE  "ClusterData.json")
     
 public:

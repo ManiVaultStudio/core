@@ -2,8 +2,8 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#ifndef HDPS_WRITERPLUGIN_H
-#define HDPS_WRITERPLUGIN_H
+#pragma once
+
 /**
 * Writer.h
 *
@@ -87,6 +87,4 @@ public:
 
 } // namespace mv
 
-Q_DECLARE_INTERFACE(mv::plugin::WriterPluginFactory, "hdps.WriterPluginFactory")
-
-#endif // HDPS_WRITERPLUGIN_H
+Q_DECLARE_INTERFACE(mv::plugin::WriterPluginFactory, "ManiVault.WriterPluginFactory")
