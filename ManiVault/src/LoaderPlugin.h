@@ -2,8 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#ifndef HDPS_LOADERPLUGIN_H
-#define HDPS_LOADERPLUGIN_H
+#pragma once
 
 #include "Plugin.h"
 #include "DataHierarchyItem.h"
@@ -119,5 +118,3 @@ public:
 } // namespace mv
 
 Q_DECLARE_INTERFACE(mv::plugin::LoaderPluginFactory, "ManiVault.LoaderPluginFactory")
-
-#endif // HDPS_LOADERPLUGIN_H

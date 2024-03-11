@@ -2,8 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#ifndef HDPS_DATATYPE_H
-#define HDPS_DATATYPE_H
+#pragma once
 
 #include <QString>
 #include <QList>
@@ -57,5 +56,3 @@ namespace std {
         }
     };
 }
-
-#endif // HDPS_DATATYPE_H

@@ -2,8 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#ifndef HDPS_POINTDATAITERATOR_H
-#define HDPS_POINTDATAITERATOR_H
+#pragma once
 
 #include <iterator>
 
@@ -220,6 +219,3 @@ namespace mv
     };
 
 }
-
-
-#endif // HDPS_POINTDATAITERATOR_H

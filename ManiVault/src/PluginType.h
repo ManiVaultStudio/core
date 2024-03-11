@@ -2,8 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#ifndef HDPS_PLUGINTYPE_H
-#define HDPS_PLUGINTYPE_H
+#pragma once
 
 #include <QVector>
 #include <QMap>
@@ -44,5 +43,3 @@ namespace plugin
 } // namespace plugin
 
 } // namespace mv
-
-#endif // HDPS_PLUGINTYPE_H

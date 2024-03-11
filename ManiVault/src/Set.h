@@ -2,8 +2,7 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#ifndef HDPS_DATASET_H
-#define HDPS_DATASET_H
+#pragma once
 
 #include "CoreInterface.h"
 #include "Dataset.h"
@@ -614,4 +613,3 @@ private:
 
 }
 
-#endif
