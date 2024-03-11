@@ -124,7 +124,8 @@ class ImageDataFactory : public mv::plugin::RawDataFactory
 {
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "nl.BioVault.ImageData" FILE "ImageData.json")
+    Q_PLUGIN_METADATA(IID   "nl.BioVault.ImageData"
+                      FILE  "ImageData.json")
 
 public:
     ImageDataFactory() {}

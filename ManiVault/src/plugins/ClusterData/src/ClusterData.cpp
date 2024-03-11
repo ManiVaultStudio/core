@@ -19,7 +19,7 @@
 
 #include <set>
 
-Q_PLUGIN_METADATA(IID "hdps.ClusterData")
+Q_PLUGIN_METADATA(IID "nl.BioVault.ClusterData")
 
 using namespace mv::util;
 

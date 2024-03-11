@@ -6,7 +6,7 @@
 
 #include <Application.h>
 
-Q_PLUGIN_METADATA(IID "NL.ManiVault.SharedParametersPlugin")
+Q_PLUGIN_METADATA(IID "nl.BioVault.SharedParametersPlugin")
 
 using namespace mv;
 

@@ -29,7 +29,7 @@
 #include <set>
 #include <type_traits>
 
-Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
+Q_PLUGIN_METADATA(IID "nl.BioVault.PointData")
 
 // =============================================================================
 // PointData

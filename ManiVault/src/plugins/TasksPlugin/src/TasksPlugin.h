@@ -60,7 +60,8 @@ class TasksPluginFactory : public ViewPluginFactory
 {
     Q_INTERFACES(mv::plugin::ViewPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "NL.ManiVault.TasksPlugin" FILE "TasksPlugin.json")
+    Q_PLUGIN_METADATA(IID   "nl.BioVault.TasksPlugin"
+                      FILE  "TasksPlugin.json")
     
 public:
 

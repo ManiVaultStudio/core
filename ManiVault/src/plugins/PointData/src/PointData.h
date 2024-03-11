@@ -911,8 +911,8 @@ class PointDataFactory : public RawDataFactory
 {
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
         Q_OBJECT
-        Q_PLUGIN_METADATA(IID   "hdps.PointData"
-            FILE  "PointData.json")
+        Q_PLUGIN_METADATA(IID   "nl.BioVault.PointData"
+                          FILE  "PointData.json")
 
 public:
     PointDataFactory(void) {}
