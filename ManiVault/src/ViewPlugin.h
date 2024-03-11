@@ -235,4 +235,4 @@ private:
 
 }
 
-Q_DECLARE_INTERFACE(mv::plugin::ViewPluginFactory, "hdps.ViewPluginFactory")
+Q_DECLARE_INTERFACE(mv::plugin::ViewPluginFactory, "ManiVault.ViewPluginFactory")

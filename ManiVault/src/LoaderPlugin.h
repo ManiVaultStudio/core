@@ -118,6 +118,6 @@ public:
 
 } // namespace mv
 
-Q_DECLARE_INTERFACE(mv::plugin::LoaderPluginFactory, "hdps.LoaderPluginFactory")
+Q_DECLARE_INTERFACE(mv::plugin::LoaderPluginFactory, "ManiVault.LoaderPluginFactory")
 
 #endif // HDPS_LOADERPLUGIN_H

@@ -99,4 +99,4 @@ public:
 
 }
 
-Q_DECLARE_INTERFACE(mv::plugin::TransformationPluginFactory, "hdps.TransformationPluginFactory")
+Q_DECLARE_INTERFACE(mv::plugin::TransformationPluginFactory, "ManiVault.TransformationPluginFactory")

@@ -87,6 +87,6 @@ public:
 
 } // namespace mv
 
-Q_DECLARE_INTERFACE(mv::plugin::WriterPluginFactory, "hdps.WriterPluginFactory")
+Q_DECLARE_INTERFACE(mv::plugin::WriterPluginFactory, "ManiVault.WriterPluginFactory")
 
 #endif // HDPS_WRITERPLUGIN_H
