@@ -47,5 +47,5 @@ protected:
     Dataset<Clusters>       _clusters;                  /** Clusters dataset smart pointer */
     StringAction            _numberOfClustersAction;    /** Number of points action */
     ClustersAction          _clustersAction;            /** Clusters action */
-    mv::EventListener     _eventListener;             /** Listen to HDPS events */
+    mv::EventListener       _eventListener;             /** Listen to ManiniVault events */
 };

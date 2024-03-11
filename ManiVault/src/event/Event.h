@@ -36,10 +36,10 @@ enum class EventType
     DatasetUnlocked
 };
 
-class HdpsEvent
+class ManiVaultEvent
 {
 public:
-    HdpsEvent(EventType type) :
+    ManiVaultEvent(EventType type) :
         _type(type)
     {
 
@@ -58,7 +58,7 @@ private:
  * Dataset event class
  * Event container class for datasets
  */
-class DatasetEvent : public HdpsEvent
+class DatasetEvent : public ManiVaultEvent
 {
 public:
 
@@ -68,7 +68,7 @@ public:
      * @param dataset Smart pointer to the dataset
      */
     DatasetEvent(const EventType& eventType, const Dataset<DatasetImpl>& dataset) :
-        HdpsEvent(eventType),
+        ManiVaultEvent(eventType),
         _dataset(dataset)
     {
         setDataset(dataset);
@@ -353,7 +353,7 @@ public:
  * Dataset grouping event class
  * Event container class for datasets grouping events
  */
-class DatasetGroupingEvent : public HdpsEvent
+class DatasetGroupingEvent : public ManiVaultEvent
 {
 public:
 
@@ -363,7 +363,7 @@ public:
      * @param datasetGroupingEnabled Whether datasets can be grouped or not
      */
     DatasetGroupingEvent(const EventType& eventType, const bool& datasetGroupingEnabled) :
-        HdpsEvent(eventType),
+        ManiVaultEvent(eventType),
         _datasetGroupingEnabled(datasetGroupingEnabled)
     {
     }
