@@ -67,4 +67,4 @@ private:
 
 }
 
-#define HDPS_LOG_EXCEPTION(stdException) qCritical().noquote() << ::mv::Logger::ExceptionToText(stdException)
+#define MV_LOG_EXCEPTION(stdException) qCritical().noquote() << ::mv::Logger::ExceptionToText(stdException)
