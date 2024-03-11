@@ -256,7 +256,7 @@ void MainWindow::checkGraphicsCapabilities()
 
     if (majorVersion < 3 || (majorVersion == 3 && minorVersion < 3))
     {
-        int ret = QMessageBox::warning(this, tr("HDPS"),
+        int ret = QMessageBox::warning(this, tr("ManiVault"),
             tr(warningMessage.toStdString().c_str()));
 
         QApplication::exit(33);

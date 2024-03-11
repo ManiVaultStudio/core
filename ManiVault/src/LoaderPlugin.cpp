@@ -18,7 +18,7 @@ namespace plugin {
 
 QString LoaderPlugin::AskForFileName(const QString& fileNameFilter)
 {
-    QSettings settings(QLatin1String{"HDPS"}, QLatin1String{"Plugins/"} + getKind());
+    QSettings settings(QLatin1String{"ManiVault"}, QLatin1String{"Plugins/"} + getKind());
     const QLatin1String directoryPathKey("directoryPath");
     const auto directoryPath = settings.value(directoryPathKey).toString();
     const auto fileName = QFileDialog::getOpenFileName(
