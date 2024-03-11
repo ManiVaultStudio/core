@@ -57,7 +57,7 @@ WorkspaceManager::WorkspaceManager() :
     _icon(),
     _styleSheet()
 {
-    // Temporary solution for https://github.com/hdps/core/issues/274
+    // Temporary solution for https://github.com/ManiVaultStudio/core/issues/274
     new QOpenGLWidget();
 
     //CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
