@@ -1,7 +1,20 @@
 # -----------------------------------------------------------------------------
-# Source files for target MV_PRIVATE_LIB
+# Source files for target MV_EXE
 # -----------------------------------------------------------------------------
-# defines PRIVATE_SOURCES and PRIVATE_HEADERS
+# defines MAIN_SOURCES, PRIVATE_SOURCES and PRIVATE_HEADERS
+
+set(MAIN_SOURCES
+    src/Main.cpp
+    res/styles/default.qss
+)
+
+if(WIN32)
+    set(MAIN_SOURCES ${MAIN_SOURCES} res/ResourcesWinIco.rc)
+endif(WIN32)
+
+if(APPLE)
+    set(MAIN_SOURCES ${MAIN_SOURCES} res/icons/AppIcon.icns)
+endif(APPLE)
 
 set(PRIVATE_CORE_HEADERS
     src/private/Core.h
