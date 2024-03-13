@@ -59,6 +59,8 @@ public:
     {
         float32,
         bfloat16,
+        int32,
+        uint32,
         int16,
         uint16,
         int8,
@@ -69,6 +71,8 @@ private:
     using VariantOfVectors = std::variant <
         std::vector<float>,
         std::vector<biovault::bfloat16_t>,
+        std::vector<std::int32_t>,
+        std::vector<std::uint32_t>,
         std::vector<std::int16_t>,
         std::vector<std::uint16_t>,
         std::vector<std::int8_t>,
@@ -232,6 +236,8 @@ public:
         { {
             "float32",
             "bfloat16",
+            "int32",
+            "uint32",
             "int16",
             "uint16",
             "int8",
