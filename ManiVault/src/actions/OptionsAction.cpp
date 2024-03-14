@@ -74,7 +74,7 @@ void OptionsAction::setOptions(const QStringList& options, bool clearSelection /
 {
     const auto selectedOptions = getSelectedOptions();
 
-    _optionsModel.setStringList(options);
+    _optionsModel.setStrings(options);
 
     for (std::int32_t rowIndex = 0; rowIndex < options.count(); ++rowIndex) {
 
@@ -133,8 +133,6 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
     auto previousSelectedOptions = getSelectedOptions();
 
     QSignalBlocker optionsModelBlocker(&_optionsModel);
-
-    auto selectionChanged = false;
 
     for (std::int32_t optionIndex = 0; optionIndex < _optionsModel.rowCount(); optionIndex++)
         _optionsModel.setData(_optionsModel.index(optionIndex, 0), selectedOptions.contains(_optionsModel.index(optionIndex, 0).data(Qt::EditRole).toString()) ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);

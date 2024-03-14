@@ -48,6 +48,13 @@ bool CheckableStringListModel::setData(const QModelIndex& index, const QVariant&
     return QStringListModel::setData(index, value, role);
 }
 
+void CheckableStringListModel::setStrings(const QStringList& strings)
+{
+    QStringListModel::setStringList(strings);
+
+    _checkedItems.clear();
+}
+
 QStringList CheckableStringListModel::getCheckedStrings() const
 {
     QStringList checkedStrings;
