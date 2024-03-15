@@ -215,6 +215,29 @@ public: // Hierarchy queries
     }
 
     /**
+     * Find child of \p WidgetActionType by \p path
+     * @return Pointer to child action of \p WidgetActionType, otherwise nullptr
+     */
+    template<typename WidgetActionType = WidgetAction>
+    WidgetActionType* findChildBypath(const QString& path) const {
+        auto segments = path.split("/");
+
+        if (segments.isEmpty())
+            return nullptr;
+
+        const auto firstSegment = segments.first();
+
+        segments.removeAt(0);
+
+        for (auto action : getChildren())
+            if (action->text() == firstSegment)
+                if (auto childByPath = findChildBypath(segments.join("/")))
+                    return childByPath;
+
+        return nullptr;
+    }
+
+    /**
      * Determine whether this action is a child of \p action of \p WidgetActionType
      * @param action Action to check for
      * @return Boolean determining whether \p action is an ancestor or not
