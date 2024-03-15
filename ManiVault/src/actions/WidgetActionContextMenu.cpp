@@ -299,6 +299,7 @@ WidgetActionContextMenu::EditActionsDialog::EditActionsDialog(QWidget* parent, W
 
     auto layout = new QGridLayout();
 
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(_actionsGroupAction.createWidget(this));
 
     for (auto action : _actions) {
@@ -306,6 +307,8 @@ WidgetActionContextMenu::EditActionsDialog::EditActionsDialog(QWidget* parent, W
             action->cacheConnectionPermissions(true);
             action->setConnectionPermissionsToForceNone(true);
         }
+
+        _actionsGroupAction.addAction(action);
     }
 
     _actionsGroupAction.setShowLabels(_actions.count() >= 2);

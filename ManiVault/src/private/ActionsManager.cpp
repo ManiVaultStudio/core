@@ -119,7 +119,7 @@ QVariantMap ActionsManager::toVariantMap() const
     QVariantList publicActions;
 
     for (auto publicAction : getPublicActions()) {
-        auto parentPublicAction = dynamic_cast<WidgetAction*>(publicAction->getParentAction());
+        auto parentPublicAction = dynamic_cast<WidgetAction*>(publicAction->getParent());
 
         if (parentPublicAction)
             continue;
